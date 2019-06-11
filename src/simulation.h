@@ -20,7 +20,7 @@ class PxSimulation {
   PxFoundation *mFoundation = nullptr;
   PxCooking *mCooking = nullptr;
   PxScene *mScene = nullptr;
-  PxReal mTimestep = 1.0f / 600.0f;
+  PxReal mTimestep = 1.0f / 60.0f;
   IRenderer *mRenderer = nullptr;
 
   PxMaterial *mDefaultMaterial = nullptr;

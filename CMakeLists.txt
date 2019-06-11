@@ -23,5 +23,5 @@ file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_executable(run ${PROJECT_SRC})
 target_link_libraries(run libphysxrepack.a pthread dl GL GLU GLEW glfw optifuser)
 
-add_executable(test "src/test.cpp")
+add_executable(test "test/test.cpp")
 target_link_libraries(test libphysxrepack.a pthread dl GL GLU GLEW glfw optifuser)
