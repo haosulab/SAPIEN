@@ -1,20 +1,23 @@
 #pragma once
 #include "render_interface.h"
-#include <optifuser.h>
 #include <memory>
+#include <optifuser.h>
 
 class OptifuserRenderer : public IRenderer {
+public:
   std::map<uint64_t, std::vector<std::shared_ptr<Optifuser::Object>>> mObjectRegistry;
   std::shared_ptr<Optifuser::Scene> mScene;
   Optifuser::GLFWRenderContext *mContext = nullptr;
 
- public :
+public:
   virtual void addRigidbody(uint64_t uniqueId, const std::string &meshFile) override;
+  virtual void addRigidbody(uint64_t uniqueId, physx::PxGeometryType::Enum type,
+                            physx::PxVec3 scale) override;
   virtual void removeRigidbody(uint64_t uniqueId) override;
   virtual void updateRigidbody(uint64_t uniqueId, const physx::PxTransform &transform) override;
 
- public:
-  void init(); 
+public:
+  void init();
   void destroy();
   void render();
 };

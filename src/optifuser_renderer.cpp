@@ -6,25 +6,64 @@ constexpr int WINDOW_WIDTH = 1024, WINDOW_HEIGHT = 768;
 void OptifuserRenderer::addRigidbody(uint64_t uniqueId,
                                      const std::string &objFile) {
   if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
-    throw "Object already added";
+    std::cerr << "Object already added" << std::endl;
+    exit(1);
   }
   auto objects = Optifuser::LoadObj(objFile);
   mObjectRegistry[uniqueId] = objects;
   for (auto obj : objects) {
     mScene->addObject(obj);
   }
+
+#ifdef _DEBUG
+  printf("Adding Object %ld from %s\n", uniqueId, objFile.c_str());
+#endif
+}
+
+void OptifuserRenderer::addRigidbody(uint64_t uniqueId,
+                                     physx::PxGeometryType::Enum type,
+                                     physx::PxVec3 scale) {
+  if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
+    std::cerr << "Object already added" << std::endl;
+    exit(1);
+  }
+
+  switch (type) {
+  case physx::PxGeometryType::eBOX: {
+    auto obj = Optifuser::NewCube();
+    obj->scale = {scale.x, scale.y, scale.z};
+    obj->material.kd = {1, 1, 1};
+    mScene->addObject(obj);
+    mObjectRegistry[uniqueId] = {obj};
+    break;
+  }
+  case physx::PxGeometryType::ePLANE: {
+    auto obj = Optifuser::NewYZPlane();
+    obj->scale = {scale.x, scale.y, scale.z};
+    obj->material.kd = {1, 1, 1};
+    mScene->addObject(obj);
+    mObjectRegistry[uniqueId] = {obj};
+    break;
+  }
+  default:
+    std::cerr << "This shape is Not Implemented" << std::endl;
+    break;
+  }
 }
 
 void OptifuserRenderer::removeRigidbody(uint64_t uniqueId) {
   if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
-    throw "Object does not exist";
+    std::cerr << "Object does not exist" << std::endl;
+    exit(1);
   }
   mObjectRegistry.erase(uniqueId);
 }
 
-void OptifuserRenderer::updateRigidbody(uint64_t uniqueId, const physx::PxTransform &transform) {
+void OptifuserRenderer::updateRigidbody(uint64_t uniqueId,
+                                        const physx::PxTransform &transform) {
   if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
-    throw "Object does not exist";
+    std::cerr << "Object does not exist" << std::endl;
+    exit(1);
   }
   for (auto obj : mObjectRegistry[uniqueId]) {
     obj->position = {transform.p.x, transform.p.y, transform.p.z};
@@ -54,9 +93,9 @@ void OptifuserRenderer::init() {
                             "../assets/ame_desert/desertsky_rt.tga");
 
   mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
-                                    "../glsl_shader/gbuffer.fsh");
+                                      "../glsl_shader/gbuffer.fsh");
   mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
-                                     "../glsl_shader/deferred.fsh");
+                                       "../glsl_shader/deferred.fsh");
 }
 
 void OptifuserRenderer::destroy() {
