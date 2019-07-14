@@ -10,9 +10,10 @@ public:
   Optifuser::GLFWRenderContext *mContext = nullptr;
 
 public:
-  virtual void addRigidbody(uint64_t uniqueId, const std::string &meshFile) override;
+  virtual void addRigidbody(uint64_t uniqueId, const std::string &meshFile,
+                            const physx::PxVec3 &scale) override;
   virtual void addRigidbody(uint64_t uniqueId, physx::PxGeometryType::Enum type,
-                            physx::PxVec3 scale) override;
+                            const physx::PxVec3 &scale) override;
   virtual void removeRigidbody(uint64_t uniqueId) override;
   virtual void updateRigidbody(uint64_t uniqueId, const physx::PxTransform &transform) override;
 

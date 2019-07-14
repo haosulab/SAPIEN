@@ -8,7 +8,7 @@
 
 using namespace physx;
 
-class PxActorBuilder : public std::enable_shared_from_this<PxActorBuilder> {
+class PxActorBuilder {
   PxSimulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
   PxCooking *mCooking = nullptr;

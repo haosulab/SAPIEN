@@ -4,6 +4,6 @@
 #include <sstream>
 
 int main() {
-  URDFUtil::URDFLoader loader;
+  URDFLoader loader(nullptr);
   loader.load("../assets/urdf/test.urdf");
 }

@@ -3,8 +3,8 @@
 
 constexpr int WINDOW_WIDTH = 1024, WINDOW_HEIGHT = 768;
 
-void OptifuserRenderer::addRigidbody(uint64_t uniqueId,
-                                     const std::string &objFile) {
+void OptifuserRenderer::addRigidbody(uint64_t uniqueId, const std::string &objFile,
+                                     const physx::PxVec3 &scale) {
   if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
     std::cerr << "Object already added" << std::endl;
     exit(1);
@@ -12,6 +12,7 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId,
   auto objects = Optifuser::LoadObj(objFile);
   mObjectRegistry[uniqueId] = objects;
   for (auto obj : objects) {
+    obj->scale = {scale.x, scale.y, scale.z};
     mScene->addObject(obj);
   }
 
@@ -20,9 +21,8 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId,
 #endif
 }
 
-void OptifuserRenderer::addRigidbody(uint64_t uniqueId,
-                                     physx::PxGeometryType::Enum type,
-                                     physx::PxVec3 scale) {
+void OptifuserRenderer::addRigidbody(uint64_t uniqueId, physx::PxGeometryType::Enum type,
+                                     const physx::PxVec3 &scale) {
   if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
     std::cerr << "Object already added" << std::endl;
     exit(1);
@@ -59,16 +59,14 @@ void OptifuserRenderer::removeRigidbody(uint64_t uniqueId) {
   mObjectRegistry.erase(uniqueId);
 }
 
-void OptifuserRenderer::updateRigidbody(uint64_t uniqueId,
-                                        const physx::PxTransform &transform) {
+void OptifuserRenderer::updateRigidbody(uint64_t uniqueId, const physx::PxTransform &transform) {
   if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
     std::cerr << "Object does not exist" << std::endl;
     exit(1);
   }
   for (auto obj : mObjectRegistry[uniqueId]) {
     obj->position = {transform.p.x, transform.p.y, transform.p.z};
-    obj->rotation = {transform.q.w, transform.q.x, transform.q.y,
-                     transform.q.z};
+    obj->rotation = {transform.q.w, transform.q.x, transform.q.y, transform.q.z};
   }
 }
 
@@ -85,15 +83,12 @@ void OptifuserRenderer::init() {
   mScene->addDirectionalLight({{0, -1, -1}, {1, 1, 1}});
   mScene->setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
-  mScene->setEnvironmentMap("../assets/ame_desert/desertsky_ft.tga",
-                            "../assets/ame_desert/desertsky_bk.tga",
-                            "../assets/ame_desert/desertsky_up.tga",
-                            "../assets/ame_desert/desertsky_dn.tga",
-                            "../assets/ame_desert/desertsky_lf.tga",
-                            "../assets/ame_desert/desertsky_rt.tga");
+  mScene->setEnvironmentMap(
+      "../assets/ame_desert/desertsky_ft.tga", "../assets/ame_desert/desertsky_bk.tga",
+      "../assets/ame_desert/desertsky_up.tga", "../assets/ame_desert/desertsky_dn.tga",
+      "../assets/ame_desert/desertsky_lf.tga", "../assets/ame_desert/desertsky_rt.tga");
 
-  mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
-                                      "../glsl_shader/gbuffer.fsh");
+  mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh", "../glsl_shader/gbuffer.fsh");
   mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
                                        "../glsl_shader/deferred.fsh");
 }
@@ -117,8 +112,7 @@ void OptifuserRenderer::render() {
       mScene->getMainCamera()->move(0, dt, 0);
     }
 
-    if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) ==
-        GLFW_PRESS) {
+    if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
       double dx, dy;
       Optifuser::getInput().getCursor(dx, dy);
       mScene->getMainCamera()->rotateYaw(-dx / 1000.f);

@@ -30,7 +30,9 @@ class PxSimulation {
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
   PxMaterial *mDefaultMaterial = nullptr;
 
-  std::map<PxRigidActor *, std::vector<physx_id_t>> mActor2Ids;
+  // std::map<PxRigidActor *, std::vector<physx_id_t>> mActor2Ids;
+  std::map<physx_id_t, PxTransform> mRenderId2InitialPose;
+  std::map<physx_id_t, PxRigidActor*> mRenderId2Parent;
 
 public:
   PxSimulation();
@@ -42,17 +44,8 @@ public:
   inline void setRenderer(IRenderer *renderer) { mRenderer = renderer; }
   inline IRenderer *getRenderer() { return mRenderer; }
 
-  // Helper for add Obj
-  // TODO: obj file caching
-  // PxConvexMesh *loadObjMesh(const std::string &filename) const;
-
-  // TODO: density, mass, etc
-  /* Add obj file to scene, sync with renderer */
-  // PxActor *addObj(const std::string &filename, bool isKinematic = false,
-  //                 PxVec3 p = PxVec3(0.f, 0.f, 0.f), PxQuat q = PxIdentity);
-  // PxActor *addGroundPlane();
-
   std::unique_ptr<class PxActorBuilder> createActorBuilder();
+  std::unique_ptr<class PxArticulationBuilder> createArticulationBuilder();
 
   /* advance physics by mTimestep */
   void step();

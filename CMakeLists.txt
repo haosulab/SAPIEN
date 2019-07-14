@@ -16,12 +16,18 @@ include_directories("/home/fx/source/PhysX/physx/include" "/home/fx/source/PhysX
 link_directories("/home/fx/source/PhysX/physx/bin/linux.clang/debug" "/home/fx/optifuser/build/lib")
 
 add_definitions(-D_DEBUG)
+add_definitions(-D_VERBOSE)
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 
 add_library(mylib ${PROJECT_SRC})
-target_link_libraries(mylib libphysxrepack.a pthread ${OPENGL_LIBRARY} glfw ${GLEW_LIBRARY}
-  ${ASSIMP_LIBRARIES} dl optifuser stdc++fs tinyxml2)
+target_link_libraries(mylib -Wl,--start-group
+  libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
+  libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
+  libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a libPhysX_static_64.a
+  libPhysXVehicle_static_64.a libSnippetRender_static_64.a
+  libSnippetUtils_static_64.a -Wl,--end-group pthread ${OPENGL_LIBRARY} glfw
+  ${GLEW_LIBRARY} ${ASSIMP_LIBRARIES} dl optifuser stdc++fs tinyxml2)
 
 add_executable(run "test/main.cpp")
 target_link_libraries(run mylib)
