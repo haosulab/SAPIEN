@@ -9,7 +9,7 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId, const std::string &objFi
     std::cerr << "Object already added" << std::endl;
     exit(1);
   }
-  auto objects = Optifuser::LoadObj(objFile, {0, 1, 0}, {0, 0, -1});
+  auto objects = Optifuser::LoadObj(objFile);
   for (auto &obj : objects) {
     mObjectRegistry[uniqueId].push_back(obj.get());
     obj->scale = {scale.x, scale.y, scale.z};
@@ -99,6 +99,9 @@ void OptifuserRenderer::init() {
   mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh", "../glsl_shader/gbuffer.fsh");
   mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
                                        "../glsl_shader/deferred.fsh");
+
+  mContext->renderer.worldAxesScale = 3.f;
+  mContext->renderer.objectAxesScale = 0.4f;
 }
 
 void OptifuserRenderer::destroy() {

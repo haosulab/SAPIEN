@@ -114,7 +114,6 @@ void test3() {
   sim.setTimestep(1.f / 60.f);
 
   auto loader = URDFLoader(sim);
-  // loader.load("../assets/urdf/movo_base/movo_base.urdf");
   auto articulationInfo = loader.load("../assets/robot/arm_without_gazabo.urdf");
   auto articulation = articulationInfo.articulation;
   auto cache = articulationInfo.cache;
