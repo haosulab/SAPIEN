@@ -1,21 +1,35 @@
 #include "urdf/urdf_loader.h"
-#include "articulation_builder.h"
 #include "mesh_registry.h"
 #include "simulation.h"
+#include "articulation_builder.h"
 #include <eigen3/Eigen/Eigenvalues>
+#include <experimental/filesystem>
 #include <map>
 #include <tinyxml2.h>
 
 using namespace tinyxml2;
 using namespace physx;
 using namespace MeshUtil;
+namespace fs = std::experimental::filesystem;
 
 PxTransform poseFromOrigin(const Origin &origin) {
   // TODO: Check this conversion!
-  PxQuat q = PxQuat(origin.rpy.x, {1, 0, 0}) * PxQuat(origin.rpy.y, {0, 1, 0}) *
-             PxQuat(origin.rpy.z, {0, 0, 1});
+  PxQuat q = PxQuat(origin.rpy.z, {0, 0, 1}) * PxQuat(origin.rpy.y, {0, 1, 0}) *
+             PxQuat(origin.rpy.x, {1, 0, 0});
 
   return PxTransform(origin.xyz, q);
+}
+
+std::string getAbsPath(const std::string &urdfPath, const std::string &filePath) {
+  if (filePath.length() == 0) {
+    fprintf(stderr, "Empty file path in URDF\n");
+    exit(1);
+  }
+  if (filePath[0] == '/') {
+    return filePath;
+  }
+  auto path = fs::path(urdfPath);
+  return path.remove_filename().string() + filePath;
 }
 
 URDFLoader::URDFLoader(PxSimulation &simulation) : mSimulation(simulation) {}
@@ -24,11 +38,10 @@ struct LinkTreeNode {
   Link *link;
   Joint *joint;
   LinkTreeNode *parent;
-  PxTransform worldPose;
   std::vector<LinkTreeNode *> children;
 };
 
-void URDFLoader::load(const std::string &filename) {
+PxArticulationInterface URDFLoader::load(const std::string &filename) {
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;
@@ -54,7 +67,6 @@ void URDFLoader::load(const std::string &filename) {
     treeNode->link = link.get();
     treeNode->joint = nullptr;
     treeNode->parent = nullptr;
-    treeNode->worldPose = {{0, 0, 0}, PxIdentity};
     treeNode->children = std::vector<LinkTreeNode *>();
     linkName2treeNode[name] = treeNode.get();
     treeNodes.push_back(std::move(treeNode));
@@ -116,14 +128,21 @@ void URDFLoader::load(const std::string &filename) {
     LinkTreeNode *current = stack.back();
     stack.pop_back();
 
+    const PxTransform tJoint2Parent =
+        current->joint ? poseFromOrigin(*current->joint->origin) : PxTransform(PxIdentity);
+
     // create link and set its parent
-    physx::PxArticulationLink *pLink = current->parent ? treeNode2pLink[current->parent] : nullptr;
-    treeNode2pLink[current] = builder.addLink(pLink);
+    treeNode2pLink[current] =
+        builder.addLink(current->parent ? treeNode2pLink[current->parent] : nullptr,
+                        tJoint2Parent);
+    treeNode2pLink[current]->setName(current->link->name.c_str());
+
+    PxArticulationLink &currentPxLink = *treeNode2pLink[current];
 
     // inertial
     const Inertial &currentInertial = *current->link->inertial;
-    const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin);
 
+    const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin);
     const Inertia &currentInertia = *currentInertial.inertia;
 
     Eigen::Matrix3f inertia;
@@ -140,68 +159,135 @@ void URDFLoader::load(const std::string &filename) {
     Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> es;
     es.compute(inertia);
     auto eigs = es.eigenvalues();
-    auto quat = Eigen::Quaternionf(es.eigenvectors());
+    Eigen::Matrix3f m;
 
-    const PxTransform tInertia2Inertial =
-        PxTransform(PxVec3(0), PxQuat(quat.x(), quat.y(), quat.z(), quat.w()));
+    auto eig_vecs = es.eigenvectors();
+    PxVec3 col0 = {eig_vecs(0, 0), eig_vecs(1, 0), eig_vecs(2, 0)};
+    PxVec3 col1 = {eig_vecs(0, 1), eig_vecs(1, 1), eig_vecs(2, 1)};
+    PxVec3 col2 = {eig_vecs(0, 2), eig_vecs(1, 2), eig_vecs(2, 2)};
+    PxMat33 mat = PxMat33(col0, col1, col2);
+
+    const PxTransform tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
+
+    if (!tInertia2Inertial.isSane()) {
+      printf("Wrong!\n");
+      exit(1);
+    }
 
     const PxTransform tInertia2Link = tInertial2Link * tInertia2Inertial;
 
-    treeNode2pLink[current]->setCMassLocalPose(tInertia2Link);
-    treeNode2pLink[current]->setMassSpaceInertiaTensor({eigs.x(), eigs.y(), eigs.z()});
-    treeNode2pLink[current]->setMass(currentInertial.mass->value);
+    if (!tInertia2Link.isSane()) {
+      printf("Wrong!\n");
+      exit(1);
+    }
+
+    currentPxLink.setCMassLocalPose(tInertia2Link);
+    currentPxLink.setMassSpaceInertiaTensor({eigs.x(), eigs.y(), eigs.z()});
+    currentPxLink.setMass(currentInertial.mass->value);
 
     // visual
     for (const auto &visual : current->link->visual_array) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
-      // TODO: register the initial position of this visual and ...
       switch (visual->geometry->type) {
       case Geometry::BOX:
+        builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size);
         break;
       case Geometry::CYLINDER:
+        builder.addCylinderVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
+                                        visual->geometry->length);
         break;
       case Geometry::SPHERE:
+        builder.addSphereVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius);
         break;
       case Geometry::MESH:
+        builder.addObjVisualToLink(currentPxLink, getAbsPath(filename, visual->geometry->filename),
+                                   tVisual2Link, visual->geometry->scale);
         break;
-        // TODO: finish
       }
-      // TODO: material
     }
 
     // collision
     for (const auto &collision : current->link->collision_array) {
       const PxTransform tCollision2Link = poseFromOrigin(*collision->origin);
-      PxShape *shape;
-      // TODO: add physical material support
-      PxMaterial *material = mSimulation.mDefaultMaterial;
+      // TODO: add physical material support (may require URDF extension)
       switch (collision->geometry->type) {
       case Geometry::BOX:
-        shape = mSimulation.mPhysicsSDK->createShape(PxBoxGeometry(collision->geometry->size),
-                                                     *material);
+        builder.addBoxShapeToLink(currentPxLink, tCollision2Link, collision->geometry->size);
         break;
       case Geometry::CYLINDER:
-        shape = mSimulation.mPhysicsSDK->createShape(
-            PxCapsuleGeometry(collision->geometry->radius, collision->geometry->length),
-            *material);
-        // TODO: insert warning here
+        builder.addCylinderShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius,
+                                       collision->geometry->length);
         break;
       case Geometry::SPHERE:
-        shape = mSimulation.mPhysicsSDK->createShape(PxSphereGeometry(collision->geometry->radius),
-                                                     *material);
+        builder.addSphereShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius);
         break;
       case Geometry::MESH:
-        PxConvexMesh *mesh = loadObjMesh(filename, mSimulation.mPhysicsSDK, mSimulation.mCooking);
-        PxConvexMeshGeometry(mesh, PxMeshScale(collision->geometry->scale));
-        shape = mSimulation.mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh), *material);
+        builder.addConvexObjShapeToLink(
+            currentPxLink, getAbsPath(filename, collision->geometry->filename), tCollision2Link);
         break;
       }
-      shape->setLocalPose(tCollision2Link);
-      treeNode2pLink[current]->attachShape(*shape);
+    }
+
+    bool hasAxis = false;
+    // joint
+    if (current->joint) {
+      auto joint = (PxArticulationJointReducedCoordinate *)currentPxLink.getInboundJoint();
+#ifdef _VERBOSE
+      printf("Joint: %s between %s and %s\n", current->joint->type.c_str(),
+             current->parent->link->name.c_str(), current->link->name.c_str());
+#endif
+      if (current->joint->type == "revolute") {
+        joint->setJointType(PxArticulationJointType::eREVOLUTE);
+        joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eLIMITED);
+        joint->setLimit(PxArticulationAxis::eTWIST, current->joint->limit->lower,
+                        current->joint->limit->upper);
+        hasAxis = true;
+      } else if (current->joint->type == "continuous") {
+        joint->setJointType(PxArticulationJointType::eREVOLUTE);
+        joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eFREE);
+        hasAxis = true;
+      } else if (current->joint->type == "prismatic") {
+        joint->setJointType(PxArticulationJointType::ePRISMATIC);
+        joint->setMotion(PxArticulationAxis::eX, PxArticulationMotion::eLIMITED);
+        joint->setLimit(PxArticulationAxis::eX, current->joint->limit->lower,
+                        current->joint->limit->upper);
+        hasAxis = true;
+      } else if (current->joint->type == "fixed") {
+        joint->setJointType(PxArticulationJointType::eFIX);
+      } else if (current->joint->type == "floating") {
+        std::cerr << "Currently not supported: " + current->joint->type << std::endl;
+        exit(1);
+      } else if (current->joint->type == "planar") {
+        std::cerr << "Currently not supported type: " + current->joint->type << std::endl;
+        exit(1);
+      } else {
+        std::cerr << "Unreconized joint type: " + current->joint->type << std::endl;
+        exit(1);
+      }
+
+      PxVec3 axis1 = current->joint->axis->xyz.getNormalized();
+
+      PxVec3 axis2;
+      if (axis1.dot({1, 0, 0}) > 0.9) {
+        axis2 = axis1.cross({0, 0, 1}).getNormalized();
+      } else {
+        axis2 = axis1.cross({1, 0, 0}).getNormalized();
+      }
+      PxVec3 axis3 = axis1.cross(axis2);
+      const PxTransform tAxis2Joint = {PxVec3(0), PxQuat(PxMat33(axis1, axis2, axis3))};
+      if (!tAxis2Joint.isSane()) {
+        printf("WRONG!\n");
+        exit(1);
+      }
+      const PxTransform tAxis2Parent = tJoint2Parent * tAxis2Joint;
+      joint->setParentPose(tAxis2Parent);
+      // Joint frame === Child frame
+      joint->setChildPose(tAxis2Joint);
     }
 
     for (auto c : current->children) {
       stack.push_back(c);
     }
   }
+  return builder.build(true);
 }

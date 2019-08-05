@@ -30,6 +30,11 @@ class PxSimulation {
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
   PxMaterial *mDefaultMaterial = nullptr;
 
+  #ifdef _PVD
+  PxPvd *mPvd = nullptr;
+  PxPvdTransport *mTransport = nullptr;
+  #endif
+
   // std::map<PxRigidActor *, std::vector<physx_id_t>> mActor2Ids;
   std::map<physx_id_t, PxTransform> mRenderId2InitialPose;
   std::map<physx_id_t, PxRigidActor*> mRenderId2Parent;

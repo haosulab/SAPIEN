@@ -2,6 +2,7 @@
 #include "articulation_builder.h"
 #include "optifuser_renderer.h"
 #include "simulation.h"
+#include "urdf/urdf_loader.h"
 #include <PxPhysicsAPI.h>
 #include <experimental/filesystem>
 #include <extensions/PxDefaultAllocator.h>
@@ -35,15 +36,7 @@ void test1() {
        fs::directory_iterator("/home/fx/mobility_mesh/resources/46437-4/objs")) {
     builder->addConvexShapeFromObj(entry.path(), entry.path());
   }
-  builder->build()->setGlobalPose(PxTransform({0, 1, 0}, PxIdentity));
-  builder = sim.createActorBuilder();
-  builder->addPrimitiveShape(physx::PxGeometryType::ePLANE);
-  builder->build(true)->setGlobalPose(
-      PxTransform({0, 0, 0}, PxQuat(PxHalfPi, PxVec3(0.0f, 0.0f, 1.0f))));
-
-  auto mesh = Optifuser::NewMeshGrid();
-  mesh->position = {0, 0.001, 0};
-  renderer.mScene->addObject(mesh);
+  builder->build(true)->setGlobalPose(PxTransform({0, 1, 0}, PxIdentity));
 
   while (true) {
     sim.step();
@@ -65,12 +58,12 @@ void test2() {
 
   auto builder = sim.createArticulationBuilder();
   auto link1 = builder->addLink(nullptr);
-  builder->addPrimitiveShapeToLink(*link1, PxGeometryType::eBOX);
+  builder->addBoxShapeToLink(*link1);
   builder->addBoxVisualToLink(*link1);
   builder->updateLinkMassAndInertia(*link1);
 
   auto link2 = builder->addLink(link1);
-  builder->addPrimitiveShapeToLink(*link2, PxGeometryType::eBOX);
+  builder->addBoxShapeToLink(*link2);
   builder->addBoxVisualToLink(*link2);
   builder->updateLinkMassAndInertia(*link2);
 
@@ -78,7 +71,7 @@ void test2() {
   joint->setJointType(PxArticulationJointType::eREVOLUTE);
   joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eFREE);
   joint->setParentPose({{0, 0, 0}, PxIdentity});
-  joint->setChildPose({{0, 0, -3}, PxIdentity});
+  joint->setChildPose({{0, 3, 0}, PxIdentity});
 
   auto articulationInfo = builder->build(true);
   auto articulation = articulationInfo.articulation;
@@ -86,8 +79,9 @@ void test2() {
 
   auto mesh = Optifuser::NewMeshGrid();
   mesh->position = {0, 0.001, 0};
-  renderer.mScene->addObject(mesh);
+  renderer.mScene->addObject(std::move(mesh));
 
+  sim.step();
   while (true) {
     sim.step();
     sim.updateRenderer();
@@ -100,4 +94,44 @@ void test2() {
   }
 }
 
-int main(int argc, char **argv) { test2(); }
+void reset(PxArticulationInterface &info) {
+  info.articulation->copyInternalStateToCache(*info.cache, PxArticulationCache::eALL);
+  for (size_t i = 0; i < info.articulation->getDofs(); ++i) {
+    info.cache->jointPosition[i] = 0;
+  }
+  info.articulation->applyCache(*info.cache, PxArticulationCache::eALL);
+}
+
+void test3() {
+  OptifuserRenderer renderer;
+  renderer.init();
+  renderer.cam.position = {0, -2, 0.5};
+  renderer.cam.forward = {0, 1, 0};
+  renderer.cam.up = {0, 0, 1};
+
+  PxSimulation sim;
+  sim.setRenderer(&renderer);
+  sim.setTimestep(1.f / 60.f);
+
+  auto loader = URDFLoader(sim);
+  // loader.load("../assets/urdf/movo_base/movo_base.urdf");
+  auto articulationInfo = loader.load("../assets/robot/arm_without_gazabo.urdf");
+  auto articulation = articulationInfo.articulation;
+  auto cache = articulationInfo.cache;
+
+  reset(articulationInfo);
+  sim.step();
+  while (true) {
+    // sim.step();
+    sim.updateRenderer();
+
+    articulation->copyInternalStateToCache(*cache, PxArticulationCache::eALL);
+    std::cout << cache->jointPosition[0] << std::endl;
+    renderer.render();
+    if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
+      break;
+    }
+  }
+}
+
+int main(int argc, char **argv) { test3(); }

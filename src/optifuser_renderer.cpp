@@ -9,11 +9,11 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId, const std::string &objFi
     std::cerr << "Object already added" << std::endl;
     exit(1);
   }
-  auto objects = Optifuser::LoadObj(objFile);
-  mObjectRegistry[uniqueId] = objects;
-  for (auto obj : objects) {
+  auto objects = Optifuser::LoadObj(objFile, {0, 1, 0}, {0, 0, -1});
+  for (auto &obj : objects) {
+    mObjectRegistry[uniqueId].push_back(obj.get());
     obj->scale = {scale.x, scale.y, scale.z};
-    mScene->addObject(obj);
+    mScene->addObject(std::move(obj));
   }
 
 #ifdef _DEBUG
@@ -33,20 +33,28 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId, physx::PxGeometryType::E
     auto obj = Optifuser::NewCube();
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {1, 1, 1};
-    mScene->addObject(obj);
-    mObjectRegistry[uniqueId] = {obj};
+    mObjectRegistry[uniqueId] = {obj.get()};
+    mScene->addObject(std::move(obj));
+    break;
+  }
+  case physx::PxGeometryType::eSPHERE: {
+    auto obj = Optifuser::NewSphere();
+    obj->scale = {scale.x, scale.y, scale.z};
+    obj->material.kd = {1, 1, 1};
+    mObjectRegistry[uniqueId] = {obj.get()};
+    mScene->addObject(std::move(obj));
     break;
   }
   case physx::PxGeometryType::ePLANE: {
     auto obj = Optifuser::NewYZPlane();
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {1, 1, 1};
-    mScene->addObject(obj);
-    mObjectRegistry[uniqueId] = {obj};
+    mObjectRegistry[uniqueId] = {obj.get()};
+    mScene->addObject(std::move(obj));
     break;
   }
   default:
-    std::cerr << "This shape is Not Implemented" << std::endl;
+    std::cerr << "This shape is not Implemented" << std::endl;
     break;
   }
 }
@@ -73,13 +81,13 @@ void OptifuserRenderer::updateRigidbody(uint64_t uniqueId, const physx::PxTransf
 void OptifuserRenderer::init() {
   mContext = &Optifuser::GLFWRenderContext::Get(WINDOW_WIDTH, WINDOW_HEIGHT);
   mScene = std::make_shared<Optifuser::Scene>();
-  auto cam = Optifuser::NewObject<Optifuser::Camera>();
-  cam->position = {0, 4, 8};
-  cam->rotatePitch(-0.3);
-  cam->fovy = glm::radians(45.f);
-  cam->aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
-  mScene->addObject(cam);
-  mScene->setMainCamera(cam);
+
+  cam.up = {0, 0, 1};
+  cam.forward = {0, 1, 0};
+  cam.position = {-8, 0, 4};
+  cam.rotateYawPitch(0, -0.15);
+  cam.fovy = glm::radians(45.f);
+  cam.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
   mScene->addDirectionalLight({{0, -1, -1}, {1, 1, 1}});
   mScene->setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
@@ -100,25 +108,20 @@ void OptifuserRenderer::render() {
   mContext->processEvents();
 
   float dt = 0.05f;
-  if (mScene->getMainCamera()) {
-    if (Optifuser::getInput().getKeyState(GLFW_KEY_W)) {
-      mScene->getMainCamera()->move(0, 0, 2 * dt);
-    } else if (Optifuser::getInput().getKeyState(GLFW_KEY_S)) {
-      mScene->getMainCamera()->move(0, 0, -dt);
-    }
-    if (Optifuser::getInput().getKeyState(GLFW_KEY_A)) {
-      mScene->getMainCamera()->move(0, -dt, 0);
-    } else if (Optifuser::getInput().getKeyState(GLFW_KEY_D)) {
-      mScene->getMainCamera()->move(0, dt, 0);
-    }
-
-    if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-      double dx, dy;
-      Optifuser::getInput().getCursor(dx, dy);
-      mScene->getMainCamera()->rotateYaw(-dx / 1000.f);
-      mScene->getMainCamera()->rotatePitch(-dy / 1000.f);
-    }
+  if (Optifuser::getInput().getKeyState(GLFW_KEY_W)) {
+    cam.moveForwardRight(dt, 0);
+  } else if (Optifuser::getInput().getKeyState(GLFW_KEY_S)) {
+    cam.moveForwardRight(-dt, 0);
+  } else if (Optifuser::getInput().getKeyState(GLFW_KEY_A)) {
+    cam.moveForwardRight(0, -dt);
+  } else if (Optifuser::getInput().getKeyState(GLFW_KEY_D)) {
+    cam.moveForwardRight(0, dt);
+  }
+  if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+    double dx, dy;
+    Optifuser::getInput().getCursor(dx, dy);
+    cam.rotateYawPitch(-dx / 1000.f, -dy / 1000.f);
   }
 
-  mContext->render(mScene);
+  mContext->render(mScene, cam);
 }

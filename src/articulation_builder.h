@@ -90,13 +90,21 @@ public:
   /**
    *  TODO: support scaling and different primitives
    */
-  void addPrimitiveShapeToLink(PxArticulationLink &link, PxGeometryType::Enum type,
-                               const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                               PxMaterial *material = nullptr);
+  void addBoxShapeToLink(PxArticulationLink &link,
+                         const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                         const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr);
+
+  void addCylinderShapeToLink(PxArticulationLink &link,
+                              const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                              PxReal length = 1, PxMaterial *material = nullptr);
+
+  void addSphereShapeToLink(PxArticulationLink &link,
+                            const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                            PxMaterial *material = nullptr);
 
   void addConvexObjShapeToLink(PxArticulationLink &link, const std::string &filename,
                                const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                               PxMaterial *material = nullptr);
+                               const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr);
 
   /**
    *  explicitly set the mass and inertia of a link

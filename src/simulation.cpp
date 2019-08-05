@@ -4,6 +4,8 @@
 #include <fstream>
 #include <sstream>
 
+#define PVD_HOST "10.0.0.123"
+
 static PxDefaultErrorCallback gDefaultErrorCallback;
 static PxDefaultAllocator gDefaultAllocatorCallback;
 static PxSimulationFilterShader gDefaultFilterShader = PxDefaultSimulationFilterShader;
@@ -12,7 +14,22 @@ PxSimulation::PxSimulation() {
   mFoundation =
       PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
   // TODO: figure out the what "track allocation" means
+  
+#ifdef _PVD
+  std::cerr << "Connecting to PVD..." << std::endl;
+  mTransport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 100);
+  mPvd = PxCreatePvd(*mFoundation);
+  mPvd->connect(*mTransport, PxPvdInstrumentationFlag::eDEBUG);
+  if (!mPvd->isConnected()) {
+    std::cerr << "PVD connection failed." << std::endl;
+  } else {
+    mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true);
+  }
+  mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), false, mPvd);
+  // PxInitExtensions(*mPhysicsSDK, mPvd);
+#else
   mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true);
+#endif
 
   if (mPhysicsSDK == NULL) {
     std::cerr << "Error creating PhysX3 device." << std::endl;
@@ -36,7 +53,7 @@ PxSimulation::PxSimulation() {
 
   // create scene
   PxSceneDesc sceneDesc(mPhysicsSDK->getTolerancesScale());
-  sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+  sceneDesc.gravity = PxVec3(0.0f, 0.0f, -9.81f);
 
   // create dispatcher
   // TODO: check how GPU works here
@@ -59,6 +76,8 @@ PxSimulation::PxSimulation() {
     std::cerr << "Exiting..." << std::endl;
     exit(1);
   }
+  mScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.f);
+  mScene->setVisualizationParameter(PxVisualizationParameter::eACTOR_AXES, 2.f);
 
   mDefaultMaterial = mPhysicsSDK->createMaterial(0.5, 0.5, 0.5);
 }
@@ -76,6 +95,13 @@ PxSimulation::~PxSimulation() {
   mScene->release();
   mCooking->release();
   mPhysicsSDK->release();
+#ifdef _PVD
+  if (mPvd && mTransport) {
+    mTransport->disconnect();
+    mTransport->release();
+    mPvd->release();
+  }
+#endif
   mFoundation->release();
 }
 
@@ -88,24 +114,11 @@ void PxSimulation::step() {
 
 void PxSimulation::updateRenderer() {
   for (auto idParent : mRenderId2Parent) {
+    auto pose = idParent.second->getGlobalPose() * mRenderId2InitialPose[idParent.first];
+
     mRenderer->updateRigidbody(idParent.first, idParent.second->getGlobalPose() *
                                mRenderId2InitialPose[idParent.first]);
   }
-  // for (auto actorIds : mActor2Ids) {
-  // PxU32 n = actorIds.first->getNbShapes();
-  // #ifdef _DEBUG
-  // if (actorIds.second.size() != n) {
-  //   std::cerr << actorIds.second.size() << " " << n << std::endl;
-  //   throw "Invalid shape size";
-  // }
-  // #endif
-  // PxShape* buffer[n];
-  // actorIds.first->getShapes(buffer, n);
-  // for (PxU32 i = 0; i < n; ++i) {
-  //   PxTransform pose = PxShapeExt::getGlobalPose(*buffer[i], *actorIds.first);
-  //   mRenderer->updateRigidbody(actorIds.second[i], pose);
-  // }
-  // }
 }
 
 std::unique_ptr<PxActorBuilder> PxSimulation::createActorBuilder() {

@@ -1,4 +1,7 @@
 #include "articulation_builder.h"
+#include "mesh_registry.h"
+
+using namespace MeshUtil;
 
 PxArticulationBuilder::PxArticulationBuilder(PxSimulation *simulation)
     : mSimulation(simulation), mPhysicsSDK(simulation->mPhysicsSDK),
@@ -20,28 +23,44 @@ PxArticulationLink *PxArticulationBuilder::addLink(PxArticulationLink *parent,
   return newLink;
 }
 
-void PxArticulationBuilder::addPrimitiveShapeToLink(PxArticulationLink &link,
-                                                    PxGeometryType::Enum type,
-                                                    const PxTransform &pose,
+void PxArticulationBuilder::addBoxShapeToLink(PxArticulationLink &link, const PxTransform &pose,
+                                              const PxVec3 &size, PxMaterial *material) {
+  material = material ? material : mSimulation->mDefaultMaterial;
+  PxShape *shape = mPhysicsSDK->createShape(PxBoxGeometry(size), *material);
+  shape->setLocalPose(pose);
+  link.attachShape(*shape);
+}
+
+void PxArticulationBuilder::addCylinderShapeToLink(PxArticulationLink &link,
+                                                   const PxTransform &pose, PxReal radius,
+                                                   PxReal length, PxMaterial *material) {
+  material = material ? material : mSimulation->mDefaultMaterial;
+  std::cerr
+      << "Warning: PhysX only supports capsule primitive, converting cylinder into capsule..."
+      << std::endl;
+  PxShape *shape = mPhysicsSDK->createShape(PxCapsuleGeometry(radius, length), *material);
+  shape->setLocalPose(pose);
+  link.attachShape(*shape);
+}
+
+void PxArticulationBuilder::addSphereShapeToLink(PxArticulationLink &link, const PxTransform &pose,
+                                                 PxReal radius, PxMaterial *material) {
+  material = material ? material : mSimulation->mDefaultMaterial;
+  PxShape *shape = mPhysicsSDK->createShape(PxSphereGeometry(radius), *material);
+  shape->setLocalPose(pose);
+  link.attachShape(*shape);
+}
+
+void PxArticulationBuilder::addConvexObjShapeToLink(PxArticulationLink &link,
+                                                    const std::string &filename,
+                                                    const PxTransform &pose, const PxVec3 &scale,
                                                     PxMaterial *material) {
-  if (!material) {
-    material = mSimulation->mDefaultMaterial;
-  }
-  switch (type) {
-  case PxGeometryType::eBOX: {
-    PxShape *shape = mPhysicsSDK->createShape(PxBoxGeometry(PxVec3(1, 1, 1)), *material);
-    if (!shape) {
-      std::cerr << "create shape failed!" << std::endl;
-      exit(1);
-    }
-    shape->setLocalPose(pose);
-    break;
-  }
-  default: {
-    std::cerr << "Only Box gemoetry is currently implemented" << std::endl;
-    exit(1);
-  }
-  }
+  material = material ? material : mSimulation->mDefaultMaterial;
+  PxConvexMesh *mesh = loadObjMesh(filename, mPhysicsSDK, mCooking);
+  PxShape *shape =
+      mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh, PxMeshScale(scale)), *material);
+  shape->setLocalPose(pose);
+  link.attachShape(*shape);
 }
 
 void PxArticulationBuilder::setLinkMassAndInertia(PxArticulationLink &link, PxReal mass,
@@ -87,9 +106,7 @@ void PxArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link,
 
 void PxArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
                                                const std::string &filename,
-                                               const PxTransform &pose,
-                                               const PxVec3 &scale
-                                               ) {
+                                               const PxTransform &pose, const PxVec3 &scale) {
   // generate new render id
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderer->addRigidbody(newId, filename, scale);
@@ -124,7 +141,7 @@ PxArticulationInterface PxArticulationBuilder::build(bool fixBase) {
   for (PxU32 i = 1; i < nLinks; ++i) {
     PxU32 llIndex = links[i]->getLinkIndex();
     PxU32 dofs = links[i]->getInboundJointDof();
-    printf("%ld %d %d\n", nLinks, llIndex, dofs);
+    // printf("%ld %d %d\n", nLinks, llIndex, dofs);
 
     interface.dofStarts[llIndex] = dofs;
   }
