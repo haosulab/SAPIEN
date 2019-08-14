@@ -153,5 +153,8 @@ PxArticulationInterface PxArticulationBuilder::build(bool fixBase) {
     count += dofs;
   }
 
+  // initialize the interface
+  interface.articulation->copyInternalStateToCache(*interface.cache, PxArticulationCache::eALL);
+
   return interface;
 }

@@ -111,15 +111,23 @@ void test3() {
 
   PxSimulation sim;
   sim.setRenderer(&renderer);
-  sim.setTimestep(1.f / 60.f);
+  sim.setTimestep(1.f / 200.f);
 
   auto loader = URDFLoader(sim);
   auto articulationInfo = loader.load("../assets/robot/arm_without_gazabo.urdf");
   auto articulation = articulationInfo.articulation;
   auto cache = articulationInfo.cache;
+  std::cout << "DOF: " << articulation->getDofs() << std::endl;
+  // articulation->getDofs()
 
-  reset(articulationInfo);
   sim.step();
+  reset(articulationInfo);
+  articulationInfo.set_qpos_unchecked({-1.93475823254, -1.53188487338, 0.951243371548,
+                                       -2.24179359416, 0.344180286477, 0.649430580507,
+                                       -1.41300076449});
+
+  articulationInfo.updateArticulation();
+
   while (true) {
     // sim.step();
     sim.updateRenderer();

@@ -6,6 +6,17 @@
 #include <memory>
 #include <vector>
 
+#define APP_ASSERT_FATAL(exp, msg)                                                                \
+  if (!(exp)) {                                                                                   \
+    std::cerr << msg << std::endl;                                                                \
+    exit(1);                                                                                      \
+  }
+
+#define APP_ASSERT_WAN(exp, msg)                                                                  \
+  if (!(exp)) {                                                                                   \
+    std::cerr << msg << std::endl;                                                                \
+  }
+
 using namespace physx;
 
 // TODO: proof read and test this struct
@@ -19,6 +30,8 @@ struct PxArticulationInterface {
 
   void updateCache() { articulation->copyInternalStateToCache(*cache, PxArticulationCache::eALL); }
 
+  void updateArticulation() { articulation->applyCache(*cache, PxArticulationCache::eALL); }
+
   std::vector<PxReal> qpos(PxU32 index) {
     PxU32 dof = links[index]->getInboundJointDof();
     return std::vector<PxReal>(&cache->jointPosition[dofStarts[index]],
@@ -28,6 +41,26 @@ struct PxArticulationInterface {
   std::vector<PxReal> qpos(const std::string &name) {
     return qpos(namedLinks[name]->getLinkIndex());
   }
+
+  void set_qpos(PxU32 index, const std::vector<PxReal> &v) {
+    PxU32 dof = links[index]->getInboundJointDof();
+
+    APP_ASSERT_FATAL(dof == v.size(), "vector size does not match dof");
+    for (PxU32 i = 0; i < dof; ++i) {
+      cache->jointPosition[dofStarts[index] + i] = v[i];
+    }
+  }
+
+  void set_qpos_unchecked(const std::vector<PxReal> &v) {
+    for (PxU32 i = 0; i < v.size(); ++i) {
+      cache->jointPosition[i] = v[i];
+    }
+  }
+
+  void set_qpos(const std::string &name, const std::vector<PxReal> &v) {
+    set_qpos(namedLinks[name]->getLinkIndex(), v);
+  }
+  // TODO: setter for all
 
   std::vector<PxReal> qvel(PxU32 index) {
     PxU32 dof = links[index]->getInboundJointDof();
