@@ -20,6 +20,14 @@ link_directories("/home/fx/source/PhysX/physx/bin/linux.clang/debug"
   "3rd_party/optifuser/build/lib"
   )
 
+
+include_directories("3rd_party/optifuser/3rd_party/imgui" "3rd_party/optifuser/3rd_party/imgui/examples")
+
+file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
+  "3rd_party/imgui/examples/imgui_impl_glfw.cpp"
+  "3rd_party/imgui/examples/imgui_impl_opengl3.cpp" )
+
+
 add_definitions(-D_DEBUG)
 add_definitions(-D_VERBOSE)
 add_definitions(-D_PVD)
@@ -38,11 +46,5 @@ target_link_libraries(mylib -Wl,--start-group
   libSnippetUtils_static_64.a -Wl,--end-group pthread ${OPENGL_LIBRARY} glfw
   ${GLEW_LIBRARY} ${ASSIMP_LIBRARIES} dl optifuser stdc++fs tinyxml2)
 
-add_executable(sample "test/sample.cpp")
-target_link_libraries(sample mylib glut)
-
 add_executable(run "test/main.cpp")
 target_link_libraries(run mylib)
-
-add_executable(test "test/test.cpp")
-target_link_libraries(test mylib)

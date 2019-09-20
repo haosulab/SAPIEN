@@ -1,7 +1,14 @@
 #include "optifuser_renderer.h"
 #include <objectLoader.h>
 
-constexpr int WINDOW_WIDTH = 1024, WINDOW_HEIGHT = 768;
+#define IMGUI_IMPL_OPENGL_LOADER_GLEW
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION };
+
+constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
 void OptifuserRenderer::addRigidbody(uint64_t uniqueId, const std::string &objFile,
                                      const physx::PxVec3 &scale) {
@@ -80,6 +87,7 @@ void OptifuserRenderer::updateRigidbody(uint64_t uniqueId, const physx::PxTransf
 
 void OptifuserRenderer::init() {
   mContext = &Optifuser::GLFWRenderContext::Get(WINDOW_WIDTH, WINDOW_HEIGHT);
+  mContext->initGui();
   mScene = std::make_shared<Optifuser::Scene>();
 
   cam.up = {0, 0, 1};
@@ -109,6 +117,7 @@ void OptifuserRenderer::init() {
 void OptifuserRenderer::destroy() {
   // TODO: check if scene needs special destroy handling
 }
+
 void OptifuserRenderer::render() {
   mContext->processEvents();
 
@@ -122,6 +131,7 @@ void OptifuserRenderer::render() {
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_D)) {
     cam.moveForwardRight(0, dt);
   }
+  static bool renderGui = true;
   if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
     double dx, dy;
     Optifuser::getInput().getCursorDelta(dx, dy);
@@ -130,5 +140,53 @@ void OptifuserRenderer::render() {
 
   mContext->renderer.renderScene(*mScene, cam);
   mContext->renderer.displayLighting(0);
+
+  static int renderMode = 0;
+  if (renderGui) {
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Render Options");
+    {
+      if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
+        if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {
+          mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
+                                               "../glsl_shader/deferred.fsh");
+        };
+        if (ImGui::RadioButton("Albedo", &renderMode, RenderMode::ALBEDO)) {
+          mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
+                                               "../glsl_shader/deferred_albedo.fsh");
+        }
+        if (ImGui::RadioButton("Normal", &renderMode, RenderMode::NORMAL)) {
+          mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
+                                               "../glsl_shader/deferred_normal.fsh");
+        }
+        if (ImGui::RadioButton("Depth", &renderMode, RenderMode::DEPTH)) {
+          mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
+                                               "../glsl_shader/deferred_depth.fsh");
+        }
+        ImGui::RadioButton("Segmentation", &renderMode, RenderMode::SEGMENTATION);
+      }
+
+      if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Text("Position");
+        ImGui::Text("%-4.3f %-4.3f %-4.3f", cam.position.x, cam.position.y, cam.position.z);
+        ImGui::Text("Forward");
+        auto forward = cam.rotation * glm::vec3(0, 0, -1);
+        ImGui::Text("%-4.3f %-4.3f %-4.3f", forward.x, forward.y, forward.z);
+      }
+
+      if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Text("Frame Time: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                    ImGui::GetIO().Framerate);
+      }
+    }
+
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  }
   mContext->swapBuffers();
 }
