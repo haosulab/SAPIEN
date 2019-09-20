@@ -1,0 +1,3 @@
+[submodule "3rd_party/optifuser"]
+	path = 3rd_party/optifuser
+	url = git@github.com:fbxiang/optifuser.git
