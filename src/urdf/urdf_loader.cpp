@@ -6,6 +6,7 @@
 #include <experimental/filesystem>
 #include <map>
 #include <tinyxml2.h>
+#include "articulation_wrapper.h"
 
 using namespace tinyxml2;
 using namespace physx;
@@ -13,7 +14,6 @@ using namespace MeshUtil;
 namespace fs = std::experimental::filesystem;
 
 PxTransform poseFromOrigin(const Origin &origin) {
-  // TODO: Check this conversion!
   PxQuat q = PxQuat(origin.rpy.z, {0, 0, 1}) * PxQuat(origin.rpy.y, {0, 1, 0}) *
              PxQuat(origin.rpy.x, {1, 0, 0});
 
@@ -41,7 +41,7 @@ struct LinkTreeNode {
   std::vector<LinkTreeNode *> children;
 };
 
-PxArticulationInterface URDFLoader::load(const std::string &filename) {
+PxArticulationWrapper URDFLoader::load(const std::string &filename) {
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;
@@ -228,10 +228,10 @@ PxArticulationInterface URDFLoader::load(const std::string &filename) {
       }
     }
 
-    bool hasAxis = false;
     // joint
     if (current->joint) {
       auto joint = (PxArticulationJointReducedCoordinate *)currentPxLink.getInboundJoint();
+
 #ifdef _VERBOSE
       printf("Joint: %s between %s and %s\n", current->joint->type.c_str(),
              current->parent->link->name.c_str(), current->link->name.c_str());
@@ -241,17 +241,14 @@ PxArticulationInterface URDFLoader::load(const std::string &filename) {
         joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eLIMITED);
         joint->setLimit(PxArticulationAxis::eTWIST, current->joint->limit->lower,
                         current->joint->limit->upper);
-        hasAxis = true;
       } else if (current->joint->type == "continuous") {
         joint->setJointType(PxArticulationJointType::eREVOLUTE);
         joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eFREE);
-        hasAxis = true;
       } else if (current->joint->type == "prismatic") {
         joint->setJointType(PxArticulationJointType::ePRISMATIC);
         joint->setMotion(PxArticulationAxis::eX, PxArticulationMotion::eLIMITED);
         joint->setLimit(PxArticulationAxis::eX, current->joint->limit->lower,
                         current->joint->limit->upper);
-        hasAxis = true;
       } else if (current->joint->type == "fixed") {
         joint->setJointType(PxArticulationJointType::eFIX);
       } else if (current->joint->type == "floating") {

@@ -94,12 +94,17 @@ void test2() {
   }
 }
 
-void reset(PxArticulationInterface &info) {
+void reset(PxArticulationWrapper &info) {
   info.articulation->copyInternalStateToCache(*info.cache, PxArticulationCache::eALL);
   for (size_t i = 0; i < info.articulation->getDofs(); ++i) {
     info.cache->jointPosition[i] = 0;
   }
   info.articulation->applyCache(*info.cache, PxArticulationCache::eALL);
+}
+
+float rand_float() {
+  float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+  return 2 * r - 1;
 }
 
 void test3() {
@@ -111,29 +116,32 @@ void test3() {
 
   PxSimulation sim;
   sim.setRenderer(&renderer);
-  sim.setTimestep(1.f / 200.f);
+  sim.setTimestep(1.f / 500.f);
 
   auto loader = URDFLoader(sim);
-  auto articulationInfo = loader.load("../assets/robot/arm_without_gazabo.urdf");
+  auto articulationInfo = loader.load("../assets/robot/all_robot.urdf");
   auto articulation = articulationInfo.articulation;
+
   auto cache = articulationInfo.cache;
-  std::cout << "DOF: " << articulation->getDofs() << std::endl;
-  // articulation->getDofs()
+  printf("dof: %d\n", articulation->getDofs());
 
   sim.step();
   reset(articulationInfo);
-  articulationInfo.set_qpos_unchecked({-1.93475823254, -1.53188487338, 0.951243371548,
-                                       -2.24179359416, 0.344180286477, 0.649430580507,
-                                       -1.41300076449});
+  articulationInfo.set_qpos_unchecked({0.472});
+  // articulationInfo.set_qpos_unchecked({0,0,0,-1.93475823254, -1.53188487338, 0.951243371548,
+  //                                      -2.24179359416, 0.344180286477, 0.649430580507,
+  //                                      -1.41300076449});
 
+  articulationInfo.set_qpos_unchecked({0,0,0,0,0,0,0,0,0,0,0,0,0});
+  articulationInfo.set_qvel_unchecked({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+  std::cout << articulationInfo.summary() << std::endl;
   articulationInfo.updateArticulation();
 
+  printf("Simulation start\n");
   while (true) {
-    // sim.step();
+    sim.step();
     sim.updateRenderer();
-
-    articulation->copyInternalStateToCache(*cache, PxArticulationCache::eALL);
-    std::cout << cache->jointPosition[0] << std::endl;
+    articulationInfo.updateCache();
     renderer.render();
     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
       break;

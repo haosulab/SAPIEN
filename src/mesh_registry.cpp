@@ -55,8 +55,7 @@ void exportMeshToFile(PxConvexMesh *pxMesh, const std::string &filename) {
   scene.mMeshes[0]->mVertices = new aiVector3D[nbvertices];
   const PxVec3 *vertices = pxMesh->getVertices();
   for (uint32_t i = 0; i < nbvertices; ++i) {
-    // scene.mMeshes[0]->mVertices[i] = aiVector3D(vertices[i].x, vertices[i].z, -vertices[i].y);
-    scene.mMeshes[0]->mVertices[i] = aiVector3D(vertices[i].x, vertices[i].y, -vertices[i].z);
+    scene.mMeshes[0]->mVertices[i] = aiVector3D(vertices[i].x, vertices[i].y, vertices[i].z);
   }
 
   uint32_t nbfaces = pxMesh->getNbPolygons();
@@ -173,6 +172,7 @@ PxConvexMesh *MeshLoader::loadMesh(const std::string &filename, PxPhysics *physi
 
   return convexMesh;
 }
+
 
 PxConvexMesh *loadObjMesh(const std::string &filename, PxPhysics *physics, PxCooking *cooking,
                           bool useCache, bool createCacahe) {

@@ -96,9 +96,11 @@ void OptifuserRenderer::init() {
       "../assets/ame_desert/desertsky_up.tga", "../assets/ame_desert/desertsky_dn.tga",
       "../assets/ame_desert/desertsky_lf.tga", "../assets/ame_desert/desertsky_rt.tga");
 
+  mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
   mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh", "../glsl_shader/gbuffer.fsh");
   mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
                                        "../glsl_shader/deferred.fsh");
+  mContext->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
 
   mContext->renderer.worldAxesScale = 3.f;
   mContext->renderer.objectAxesScale = 0.4f;
@@ -122,9 +124,11 @@ void OptifuserRenderer::render() {
   }
   if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
     double dx, dy;
-    Optifuser::getInput().getCursor(dx, dy);
+    Optifuser::getInput().getCursorDelta(dx, dy);
     cam.rotateYawPitch(-dx / 1000.f, -dy / 1000.f);
   }
 
-  mContext->render(mScene, cam);
+  mContext->renderer.renderScene(*mScene, cam);
+  mContext->renderer.displayLighting(0);
+  mContext->swapBuffers();
 }

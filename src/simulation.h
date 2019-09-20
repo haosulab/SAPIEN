@@ -14,6 +14,7 @@
 #include <vector>
 #include <memory>
 #include "id_generator.h"
+#include "filter_shader.h"
 
 
 using namespace physx;
@@ -29,11 +30,12 @@ class PxSimulation {
   IRenderer *mRenderer = nullptr;
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
   PxMaterial *mDefaultMaterial = nullptr;
+  CollisionGroupManager collisionManager;
 
-  #ifdef _PVD
+#ifdef _PVD
   PxPvd *mPvd = nullptr;
   PxPvdTransport *mTransport = nullptr;
-  #endif
+#endif
 
   // std::map<PxRigidActor *, std::vector<physx_id_t>> mActor2Ids;
   std::map<physx_id_t, PxTransform> mRenderId2InitialPose;

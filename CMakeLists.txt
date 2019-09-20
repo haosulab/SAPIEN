@@ -17,12 +17,12 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM3 REQUIRED gtkmm-3.0)
 
 include_directories("/home/fx/source/PhysX/physx/include"
-  "/home/fx/source/PhysX/pxshared/include" "/home/fx/optifuser/include" "src"
+  "/home/fx/source/PhysX/pxshared/include" "/home/fx/source/optifuser/include" "src"
   ${GTKMM3_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/3rd_party/v-hacd/src/VHACD_Lib/inc
   )
 link_directories("/home/fx/source/PhysX/physx/bin/linux.clang/debug"
-  "/home/fx/optifuser/build/lib" ${GTKMM3_LIBRARY_DIRS}
+  "/home/fx/source/optifuser/build/lib" ${GTKMM3_LIBRARY_DIRS}
   ${CMAKE_SOURCE_DIR}/3rd_party/v-hacd/src/VHACD_Lib/inc
   ${CMAKE_SOURCE_DIR}/3rd_party/v-hacd/build/linux/VHACD_Lib
   )
@@ -30,6 +30,7 @@ link_directories("/home/fx/source/PhysX/physx/bin/linux.clang/debug"
 add_definitions(-D_DEBUG)
 add_definitions(-D_VERBOSE)
 add_definitions(-D_PVD)
+add_definitions(-DPVD_HOST="192.168.0.110")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 
@@ -41,6 +42,9 @@ target_link_libraries(mylib -Wl,--start-group
   libPhysXVehicle_static_64.a libSnippetRender_static_64.a
   libSnippetUtils_static_64.a -Wl,--end-group pthread ${OPENGL_LIBRARY} glfw
   libvhacd.a ${GLEW_LIBRARY} ${ASSIMP_LIBRARIES} dl optifuser stdc++fs tinyxml2)
+
+add_executable(sample "test/sample.cpp")
+target_link_libraries(sample mylib glut)
 
 add_executable(run "test/main.cpp")
 target_link_libraries(run mylib)

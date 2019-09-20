@@ -5,91 +5,9 @@
 #include <PxPhysicsAPI.h>
 #include <memory>
 #include <vector>
-
-#define APP_ASSERT_FATAL(exp, msg)                                                                \
-  if (!(exp)) {                                                                                   \
-    std::cerr << msg << std::endl;                                                                \
-    exit(1);                                                                                      \
-  }
-
-#define APP_ASSERT_WAN(exp, msg)                                                                  \
-  if (!(exp)) {                                                                                   \
-    std::cerr << msg << std::endl;                                                                \
-  }
+#include "articulation_wrapper.h"
 
 using namespace physx;
-
-// TODO: proof read and test this struct
-struct PxArticulationInterface {
-  PxArticulationReducedCoordinate *articulation = nullptr;
-  PxArticulationCache *cache = nullptr;
-  std::vector<PxArticulationLink *> links;
-  std::map<std::string, PxArticulationLink *> namedLinks;
-
-  std::vector<PxU32> dofStarts;
-
-  void updateCache() { articulation->copyInternalStateToCache(*cache, PxArticulationCache::eALL); }
-
-  void updateArticulation() { articulation->applyCache(*cache, PxArticulationCache::eALL); }
-
-  std::vector<PxReal> qpos(PxU32 index) {
-    PxU32 dof = links[index]->getInboundJointDof();
-    return std::vector<PxReal>(&cache->jointPosition[dofStarts[index]],
-                               &cache->jointPosition[dofStarts[index + dof]]);
-  }
-
-  std::vector<PxReal> qpos(const std::string &name) {
-    return qpos(namedLinks[name]->getLinkIndex());
-  }
-
-  void set_qpos(PxU32 index, const std::vector<PxReal> &v) {
-    PxU32 dof = links[index]->getInboundJointDof();
-
-    APP_ASSERT_FATAL(dof == v.size(), "vector size does not match dof");
-    for (PxU32 i = 0; i < dof; ++i) {
-      cache->jointPosition[dofStarts[index] + i] = v[i];
-    }
-  }
-
-  void set_qpos_unchecked(const std::vector<PxReal> &v) {
-    for (PxU32 i = 0; i < v.size(); ++i) {
-      cache->jointPosition[i] = v[i];
-    }
-  }
-
-  void set_qpos(const std::string &name, const std::vector<PxReal> &v) {
-    set_qpos(namedLinks[name]->getLinkIndex(), v);
-  }
-  // TODO: setter for all
-
-  std::vector<PxReal> qvel(PxU32 index) {
-    PxU32 dof = links[index]->getInboundJointDof();
-    return std::vector<PxReal>(&cache->jointVelocity[dofStarts[index]],
-                               &cache->jointVelocity[dofStarts[index + dof]]);
-  }
-
-  std::vector<PxReal> qvel(const std::string &name) {
-    return qvel(namedLinks[name]->getLinkIndex());
-  }
-
-  std::vector<PxReal> qacc(PxU32 index) {
-    PxU32 dof = links[index]->getInboundJointDof();
-    return std::vector<PxReal>(&cache->jointAcceleration[dofStarts[index]],
-                               &cache->jointAcceleration[dofStarts[index + dof]]);
-  }
-
-  std::vector<PxReal> qacc(const std::string &name) {
-    return qacc(namedLinks[name]->getLinkIndex());
-  }
-
-  std::vector<PxReal> qf(PxU32 index) {
-    PxU32 dof = links[index]->getInboundJointDof();
-    return std::vector<PxReal>(&cache->jointForce[dofStarts[index]],
-                               &cache->jointForce[dofStarts[index + dof]]);
-  }
-
-  std::vector<PxReal> qf(const std::string &name) { return qf(namedLinks[name]->getLinkIndex()); }
-};
 
 class PxArticulationBuilder {
   PxSimulation *mSimulation = nullptr;
@@ -166,5 +84,5 @@ public:
                           const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                           const PxVec3 &scale = {1, 1, 1});
 
-  PxArticulationInterface build(bool fixBase = true);
+  PxArticulationWrapper build(bool fixBase = true);
 };

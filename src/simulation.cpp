@@ -4,8 +4,6 @@
 #include <fstream>
 #include <sstream>
 
-#define PVD_HOST "10.0.0.123"
-
 static PxDefaultErrorCallback gDefaultErrorCallback;
 static PxDefaultAllocator gDefaultAllocatorCallback;
 static PxSimulationFilterShader gDefaultFilterShader = PxDefaultSimulationFilterShader;
@@ -17,16 +15,16 @@ PxSimulation::PxSimulation() {
   
 #ifdef _PVD
   std::cerr << "Connecting to PVD..." << std::endl;
-  mTransport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 100);
+  mTransport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 1000);
   mPvd = PxCreatePvd(*mFoundation);
   mPvd->connect(*mTransport, PxPvdInstrumentationFlag::eDEBUG);
   if (!mPvd->isConnected()) {
     std::cerr << "PVD connection failed." << std::endl;
-  } else {
     mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true);
+  } else {
+    std::cout << "PVD connected." << std::endl;
+    mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true, mPvd);
   }
-  mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), false, mPvd);
-  // PxInitExtensions(*mPhysicsSDK, mPvd);
 #else
   mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true);
 #endif
@@ -54,6 +52,7 @@ PxSimulation::PxSimulation() {
   // create scene
   PxSceneDesc sceneDesc(mPhysicsSDK->getTolerancesScale());
   sceneDesc.gravity = PxVec3(0.0f, 0.0f, -9.81f);
+  sceneDesc.filterShader = StandardFilterShader;
 
   // create dispatcher
   // TODO: check how GPU works here
@@ -107,7 +106,7 @@ PxSimulation::~PxSimulation() {
 
 void PxSimulation::step() {
   mScene->simulate(mTimestep);
-  while (!mScene->fetchResults()) {
+  while (!mScene->fetchResults(true)) {
     // TODO: do useful stuff here
   }
 }
@@ -116,8 +115,7 @@ void PxSimulation::updateRenderer() {
   for (auto idParent : mRenderId2Parent) {
     auto pose = idParent.second->getGlobalPose() * mRenderId2InitialPose[idParent.first];
 
-    mRenderer->updateRigidbody(idParent.first, idParent.second->getGlobalPose() *
-                               mRenderId2InitialPose[idParent.first]);
+    mRenderer->updateRigidbody(idParent.first, pose);
   }
 }
 

@@ -129,10 +129,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <geometry>
         <mesh filename="movo_description/meshes/movo_components/visual/movo_moving_payload.dae"/>
       </geometry>
+      <geometry>
+        <mesh filename="movo_description/meshes/movo_body/movo_upper_body.dae"/>
+      </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="movo_description/meshes/movo_components/collision/movo_upper_body_collision.stl"/>
+        <mesh filename="movo_description/meshes/movo_components/collision/movo_upper_body_collision_1.stl"/>
+      </geometry>
+      <geometry>
+        <mesh filename="movo_description/meshes/movo_components/collision/movo_upper_body_collision_2.stl"/>
+      </geometry>
+      <geometry>
+        <mesh filename="movo_description/meshes/movo_components/collision/movo_upper_body_collision_3.stl"/>
       </geometry>
     </collision>
     <inertial>

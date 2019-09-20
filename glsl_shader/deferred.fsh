@@ -2,6 +2,12 @@
 
 in vec2 texcoord;
 
+uniform sampler2D shadowtex;
+uniform mat4 cameraToShadowMatrix;
+uniform mat4 shadowProjectionMatrix;
+uniform vec3 shadowLightDirection;
+uniform vec3 shadowLightEmission;
+
 uniform sampler2D colortex0;  // albedo
 uniform sampler2D colortex1;  // 
 uniform sampler2D colortex2;  // normal
@@ -52,10 +58,18 @@ vec4 getCameraSpacePosition(vec2 texcoord) {
   return tex2camera(vec4(texcoord, depth, 1.f));
 }
 
+const float eps = 0.001;
+
 void main() {
   vec3 albedo = texture(colortex0, texcoord).xyz;
   vec3 normal = texture(colortex2, texcoord).xyz;
   vec4 csPosition = getCameraSpacePosition(texcoord);
+
+  vec4 ssPosition = cameraToShadowMatrix * csPosition;
+  vec4 shadowMapCoord = shadowProjectionMatrix * ssPosition;
+  shadowMapCoord /= shadowMapCoord.w;
+  shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
+  float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, eps);
 
   vec3 camDir = -normalize(csPosition.xyz);
 
@@ -70,11 +84,13 @@ void main() {
     color += albedo * pointLights[i].emission * max(0, dot(lightDir, normal)) / d / d;
   }
 
-  for (int i = 0; i < N_DIRECTION_LIGHTS; i++) {
-    // TODO: need use inverse transpose?
-    vec3 lightDir = -normalize((gbufferViewMatrix * vec4(directionalLights[i].direction, 0)).xyz);
-    color += albedo * directionalLights[i].emission * max(0, dot(lightDir, normal));
-  }
+  vec3 lightDir = -normalize((gbufferViewMatrix * vec4(shadowLightDirection, 0)).xyz);
+  color += albedo * shadowLightEmission * max(0, dot(lightDir, normal)) * visibility;
+
+  // for (int i = 0; i < N_DIRECTION_LIGHTS; i++) {
+  //   vec3 lightDir = -normalize((gbufferViewMatrix * vec4(directionalLights[i].direction, 0)).xyz);
+  //   color += albedo * directionalLights[i].emission * max(0, dot(lightDir, normal));
+  // }
 
   color += ambientLight * albedo;
 
@@ -84,4 +100,7 @@ void main() {
   } else {
     FragColor = vec4(color, 1.f);
   }
+  FragColor.r = pow(FragColor.r, 1.f / 2.2f);
+  FragColor.g = pow(FragColor.g, 1.f / 2.2f);
+  FragColor.b = pow(FragColor.b, 1.f / 2.2f);
 }

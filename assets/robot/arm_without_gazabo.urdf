@@ -219,11 +219,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <mesh filename="movo_description/meshes/manipulation/jaco/visual/kinova_actuator_gearing.dae"/>
       </geometry>
     </visual>
-    <collision>
-      <geometry>
-        <mesh filename="movo_description/meshes/manipulation/jaco/collision/kinova_actuator_gearing.stl"/>
-      </geometry>
-    </collision>
+    <!-- <collision> -->
+      <!-- <geometry> -->
+      <!--   <mesh filename="movo_description/meshes/manipulation/jaco/collision/kinova_actuator_gearing.stl"/> -->
+      <!-- </geometry> -->
+    <!-- </collision> -->
     <inertial>
       <mass value="0.190782"/>
       <origin xyz="-0.00082 0.000048 -0.216121"/>
