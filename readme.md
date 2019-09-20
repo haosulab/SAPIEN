@@ -6,7 +6,7 @@ propose a memorable name for it!
 I currently do not have a detailed set up steps, but you need to do roughly the same steps.
 
 1. Download source code of PhysX.
-2. Read my `CMakeLists` to figure out what 3rd party libraries you need and modify the path accordingly. (Ask a CMake expert like Yuzhe if you are stuck)
+2. Read my `CMakeLists` to figure out what 3rd party libraries you need and modify the path accordingly.
 3. For the `optifuser` library (created by fbxiang), you can find it at https://github.com/fbxiang/optifuser. Follow the compilation instructions, and install without OptiX support.
 
 ## Coding style guide
