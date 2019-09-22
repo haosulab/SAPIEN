@@ -114,10 +114,10 @@ void PxArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
   mSimulation->mRenderId2Parent[newId] = &link;
 }
 
-PxArticulationWrapper PxArticulationBuilder::build(bool fixBase) {
+PxArticulationWrapper &PxArticulationBuilder::build(bool fixBase) {
   mArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, fixBase);
+  PxArticulationWrapper &interface = mSimulation->mArticulation2Wrapper[mArticulation] = {};
 
-  PxArticulationWrapper interface;
   // add articulation
   interface.articulation = mArticulation;
 
@@ -127,6 +127,8 @@ PxArticulationWrapper PxArticulationBuilder::build(bool fixBase) {
   size_t nLinks = mArticulation->getNbLinks();
   PxArticulationLink *links[nLinks];
   mArticulation->getLinks(links, nLinks);
+  std::sort(links, links + nLinks,
+            [](const auto &a, const auto &b) { return a->getLinkIndex() < b->getLinkIndex(); });
 
   // ignore collision between parent and child
   for (size_t i = 0; i < nLinks; ++i) {
@@ -158,6 +160,40 @@ PxArticulationWrapper PxArticulationBuilder::build(bool fixBase) {
         PxFilterData data = buf2[i]->getSimulationFilterData();
         CollisionGroupManager::addGroupToData(data, colGroup);
         buf2[i]->setSimulationFilterData(data);
+      }
+    }
+  }
+
+  
+  // cache basic joint info
+  for (size_t i = 0; i < nLinks; ++i) {
+    if (auto *joint =
+        static_cast<PxArticulationJointReducedCoordinate*>(links[i]->getInboundJoint())) {
+
+      ArticulationJointSingleDof jointInfo;
+      jointInfo.name = joint->getChildArticulationLink().getName();
+      jointInfo.type = joint->getJointType();
+
+      switch (jointInfo.type) {
+        case physx::PxArticulationJointType::eREVOLUTE:
+          jointInfo.motion = joint->getMotion(PxArticulationAxis::eTWIST);
+          if (jointInfo.motion == PxArticulationMotion::eLIMITED) {
+            joint->getLimit(PxArticulationAxis::eTWIST, jointInfo.limitLow, jointInfo.limitHigh);
+          }
+          interface.jointSummary.push_back(jointInfo);
+          break;
+        case physx::PxArticulationJointType::ePRISMATIC:
+          jointInfo.motion = joint->getMotion(PxArticulationAxis::eX);
+          if (jointInfo.motion == PxArticulationMotion::eLIMITED) {
+            joint->getLimit(PxArticulationAxis::eX, jointInfo.limitLow, jointInfo.limitHigh);
+          }
+          interface.jointSummary.push_back(jointInfo);
+          break;
+        case physx::PxArticulationJointType::eFIX:
+          break;
+        default:
+          std::cerr << "Unsupported joint\n" << std::endl;
+          exit(1);
       }
     }
   }

@@ -40,6 +40,7 @@ class PxSimulation {
   // std::map<PxRigidActor *, std::vector<physx_id_t>> mActor2Ids;
   std::map<physx_id_t, PxTransform> mRenderId2InitialPose;
   std::map<physx_id_t, PxRigidActor*> mRenderId2Parent;
+  std::map<PxArticulationBase*, struct PxArticulationWrapper> mArticulation2Wrapper;
 
 public:
   PxSimulation();
@@ -48,7 +49,7 @@ public:
   inline void setTimestep(PxReal step) { mTimestep = step; };
   inline PxReal getTimestep() const { return mTimestep; };
 
-  inline void setRenderer(IRenderer *renderer) { mRenderer = renderer; }
+  void setRenderer(IRenderer *renderer);
   inline IRenderer *getRenderer() { return mRenderer; }
 
   std::unique_ptr<class PxActorBuilder> createActorBuilder();

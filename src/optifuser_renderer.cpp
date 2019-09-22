@@ -10,7 +10,7 @@ enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION };
 
 constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
-void OptifuserRenderer::addRigidbody(uint64_t uniqueId, const std::string &objFile,
+void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFile,
                                      const physx::PxVec3 &scale) {
   if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
     std::cerr << "Object already added" << std::endl;
@@ -18,17 +18,18 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId, const std::string &objFi
   }
   auto objects = Optifuser::LoadObj(objFile);
   for (auto &obj : objects) {
+    obj->setSegmentId(uniqueId);
     mObjectRegistry[uniqueId].push_back(obj.get());
     obj->scale = {scale.x, scale.y, scale.z};
     mScene->addObject(std::move(obj));
   }
 
 #ifdef _DEBUG
-  printf("Adding Object %ld from %s\n", uniqueId, objFile.c_str());
+  printf("Adding Object %d from %s\n", uniqueId, objFile.c_str());
 #endif
 }
 
-void OptifuserRenderer::addRigidbody(uint64_t uniqueId, physx::PxGeometryType::Enum type,
+void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
                                      const physx::PxVec3 &scale) {
   if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
     std::cerr << "Object already added" << std::endl;
@@ -38,6 +39,7 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId, physx::PxGeometryType::E
   switch (type) {
   case physx::PxGeometryType::eBOX: {
     auto obj = Optifuser::NewCube();
+    obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {1, 1, 1};
     mObjectRegistry[uniqueId] = {obj.get()};
@@ -46,6 +48,7 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId, physx::PxGeometryType::E
   }
   case physx::PxGeometryType::eSPHERE: {
     auto obj = Optifuser::NewSphere();
+    obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {1, 1, 1};
     mObjectRegistry[uniqueId] = {obj.get()};
@@ -54,6 +57,7 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId, physx::PxGeometryType::E
   }
   case physx::PxGeometryType::ePLANE: {
     auto obj = Optifuser::NewYZPlane();
+    obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {1, 1, 1};
     mObjectRegistry[uniqueId] = {obj.get()};
@@ -66,7 +70,7 @@ void OptifuserRenderer::addRigidbody(uint64_t uniqueId, physx::PxGeometryType::E
   }
 }
 
-void OptifuserRenderer::removeRigidbody(uint64_t uniqueId) {
+void OptifuserRenderer::removeRigidbody(uint32_t uniqueId) {
   if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
     std::cerr << "Object does not exist" << std::endl;
     exit(1);
@@ -74,7 +78,7 @@ void OptifuserRenderer::removeRigidbody(uint64_t uniqueId) {
   mObjectRegistry.erase(uniqueId);
 }
 
-void OptifuserRenderer::updateRigidbody(uint64_t uniqueId, const physx::PxTransform &transform) {
+void OptifuserRenderer::updateRigidbody(uint32_t uniqueId, const physx::PxTransform &transform) {
   if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
     std::cerr << "Object does not exist" << std::endl;
     exit(1);
@@ -105,10 +109,12 @@ void OptifuserRenderer::init() {
       "../assets/ame_desert/desertsky_lf.tga", "../assets/ame_desert/desertsky_rt.tga");
 
   mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
-  mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh", "../glsl_shader/gbuffer.fsh");
+  mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh", "../glsl_shader/gbuffer_segmentation.fsh");
   mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
                                        "../glsl_shader/deferred.fsh");
   mContext->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
+  mContext->renderer.renderSegmentation(true);
+  mContext->renderer.enablePicking();
 
   mContext->renderer.worldAxesScale = 3.f;
   mContext->renderer.objectAxesScale = 0.4f;
@@ -131,21 +137,48 @@ void OptifuserRenderer::render() {
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_D)) {
     cam.moveForwardRight(0, dt);
   }
+  cam.aspect = static_cast<float>(mContext->getWidth()) / static_cast<float>(mContext->getHeight());
+
   static bool renderGui = true;
+  if (Optifuser::getInput().getKeyDown(GLFW_KEY_E)) {
+    renderGui = !renderGui;
+  }
   if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
     double dx, dy;
     Optifuser::getInput().getCursorDelta(dx, dy);
     cam.rotateYawPitch(-dx / 1000.f, -dy / 1000.f);
   }
 
-  mContext->renderer.renderScene(*mScene, cam);
-  mContext->renderer.displayLighting(0);
-
   static int renderMode = 0;
+  mContext->renderer.renderScene(*mScene, cam);
+  if (renderMode != SEGMENTATION) {
+    mContext->renderer.displayLighting();
+  } else {
+    mContext->renderer.displaySegmentation();
+  }
+
+  static int pickedId = 0;
+  static GuiInfo pickedInfo;
+  if (Optifuser::getInput().getMouseDown(GLFW_MOUSE_BUTTON_LEFT)) {
+    int x, y;
+    Optifuser::getInput().getCursor(x, y);
+    pickedId = mContext->renderer.pickSegmentationId(x, y);
+  }
+  if (pickedId) {
+    pickedInfo = queryCallback(pickedId);
+    auto &pos = pickedInfo.linkInfo.transform.p;
+    auto &quat = pickedInfo.linkInfo.transform.q;
+    mScene->clearAxes();
+    mScene->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
+  }
+
   if (renderGui) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+
+    ImGui::SetNextWindowPos(ImVec2(20, 20));
+    ImGui::SetNextWindowSize(ImVec2(300, mContext->getHeight() - 40));
 
     ImGui::Begin("Render Options");
     {
@@ -166,7 +199,10 @@ void OptifuserRenderer::render() {
           mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
                                                "../glsl_shader/deferred_depth.fsh");
         }
-        ImGui::RadioButton("Segmentation", &renderMode, RenderMode::SEGMENTATION);
+        if (ImGui::RadioButton("Segmentation", &renderMode, RenderMode::SEGMENTATION)) {
+          mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
+                                              "../glsl_shader/gbuffer_segmentation.fsh");
+        }
       }
 
       if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -175,6 +211,11 @@ void OptifuserRenderer::render() {
         ImGui::Text("Forward");
         auto forward = cam.rotation * glm::vec3(0, 0, -1);
         ImGui::Text("%-4.3f %-4.3f %-4.3f", forward.x, forward.y, forward.z);
+        ImGui::Text("Fov");
+        ImGui::SliderAngle("##fov(y)", &cam.fovy, 1.f, 90.f);
+        ImGui::Text("Width: %d", mContext->getWidth()); ImGui::SameLine();
+        ImGui::Text("Height: %d", mContext->getHeight()); ImGui::SameLine();
+        ImGui::Text("Aspect: %.2f", cam.aspect);
       }
 
       if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -182,11 +223,42 @@ void OptifuserRenderer::render() {
                     ImGui::GetIO().Framerate);
       }
     }
-
     ImGui::End();
 
+    ImGui::SetNextWindowPos(ImVec2(mContext->getWidth() - 320, 20));
+    ImGui::SetNextWindowSize(ImVec2(300, mContext->getHeight() - 40));
+    if (pickedId) {
+      ImGui::Begin("Selected Object");
+      {
+        if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
+          ImGui::Text("name: %s", pickedInfo.linkInfo.name.c_str());
+        }
+        if (ImGui::CollapsingHeader("Articulation", ImGuiTreeNodeFlags_DefaultOpen)) {
+          ImGui::Text("name: %s", pickedInfo.articulationInfo.name.c_str());
+          ImGui::Text(" dof: %ld", pickedInfo.articulationInfo.jointInfo.size());
+          int i = 0;
+          for (auto &jointInfo : pickedInfo.articulationInfo.jointInfo) {
+            ImGui::Text("%s", jointInfo.name.c_str());
+            if (ImGui::SliderFloat(("##" + std::to_string(++i)).c_str(),
+                               &jointInfo.value, jointInfo.limits[0],
+                                    jointInfo.limits[1])) {
+              syncCallback(pickedId, pickedInfo);
+            }
+          }
+        }
+      }
+      ImGui::End();
+    }
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   }
   mContext->swapBuffers();
+}
+
+void OptifuserRenderer::bindQueryCallback(std::function<GuiInfo(uint32_t)> callback) {
+  queryCallback = callback;
+}
+
+void OptifuserRenderer::bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)> callback) {
+  syncCallback = callback;
 }

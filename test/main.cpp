@@ -119,10 +119,10 @@ void test3() {
   sim.setTimestep(1.f / 500.f);
 
   auto loader = URDFLoader(sim);
-  auto articulationInfo = loader.load("../assets/robot/all_robot.urdf");
+  auto &articulationInfo = loader.load("../assets/robot/all_robot.urdf");
   auto articulation = articulationInfo.articulation;
 
-  auto cache = articulationInfo.cache;
+  // auto cache = articulationInfo.cache;
   printf("dof: %d\n", articulation->getDofs());
 
   sim.step();

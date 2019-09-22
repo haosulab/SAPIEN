@@ -489,5 +489,5 @@ class URDFLoader {
 
 public:
   URDFLoader(class PxSimulation &simulation);
-  struct PxArticulationWrapper load(const std::string &filename);
+  struct PxArticulationWrapper &load(const std::string &filename);
 };

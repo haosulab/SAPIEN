@@ -126,3 +126,72 @@ std::unique_ptr<PxActorBuilder> PxSimulation::createActorBuilder() {
 std::unique_ptr<PxArticulationBuilder> PxSimulation::createArticulationBuilder() {
   return std::make_unique<PxArticulationBuilder>(this);
 }
+
+void PxSimulation::setRenderer(IRenderer *renderer) {
+  mRenderer = renderer;
+  mRenderer->bindQueryCallback(
+      [this](uint32_t unique_id) {
+        GuiInfo info = {};
+        if (this->mRenderId2Parent.find(unique_id) == this->mRenderId2Parent.end()) {
+          std::cerr << "queried id not found!" << std::endl;
+          return info;
+        }
+        auto actor = this->mRenderId2Parent[unique_id];
+        info.linkInfo.name = actor->getName();
+        info.linkInfo.transform = actor->getGlobalPose();
+
+        if (actor->getType() != PxActorType::eARTICULATION_LINK) {
+          return info;
+        }
+        auto link = static_cast<PxArticulationLink *>(actor);
+        // TODO: handle other types of articulation
+        if (link) {
+          auto it = mArticulation2Wrapper.find(&link->getArticulation());
+          if (it == mArticulation2Wrapper.end()) {
+            return info;
+          }
+          auto & wrapper = it->second;
+          info.articulationInfo.name = wrapper.articulation->getName();
+          wrapper.updateCache();
+          for (uint32_t i = 0; i < wrapper.jointSummary.size(); ++i) {
+            JointGuiInfo jointInfo;
+            jointInfo.name = wrapper.jointSummary[i].name;
+            jointInfo.limits = { wrapper.jointSummary[i].limitLow, wrapper.jointSummary[i].limitHigh };
+            jointInfo.value = wrapper.cache->jointPosition[i];
+            info.articulationInfo.jointInfo.push_back(jointInfo);
+          }
+        }
+        return info;
+      });
+  mRenderer->bindSyncCallback(
+      [this](uint32_t unique_id, const GuiInfo &info) {
+        if (this->mRenderId2Parent.find(unique_id) == this->mRenderId2Parent.end()) {
+          std::cerr << "queried id not found!" << std::endl;
+          return;
+        }
+
+        auto actor = this->mRenderId2Parent[unique_id];
+        if (actor->getType() != PxActorType::eARTICULATION_LINK) {
+          return;
+        }
+        auto link = static_cast<PxArticulationLink *>(actor);
+        // TODO: handle other types of articulation
+        if (link) {
+          auto it = mArticulation2Wrapper.find(&link->getArticulation());
+          if (it == mArticulation2Wrapper.end()) {
+            return;
+          }
+          auto &wrapper = it->second;
+          if (wrapper.dof() != info.articulationInfo.jointInfo.size()) {
+            std::cerr << "synced dof does not match articulation dof, something is wrong!" << std::endl;
+            return;
+          }
+          std::vector<float> jointValues;
+          for (auto &info : info.articulationInfo.jointInfo) {
+            jointValues.push_back(info.value);
+          }
+          wrapper.set_qpos_unchecked(jointValues);
+          wrapper.updateArticulation();
+        }
+  });
+}

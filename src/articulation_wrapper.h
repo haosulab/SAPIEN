@@ -16,6 +16,15 @@
   }
 
 using namespace physx;
+
+struct ArticulationJointSingleDof {
+  std::string name;
+  PxArticulationJointType::Enum type;
+  PxArticulationMotion::Enum motion;
+  PxReal limitLow;
+  PxReal limitHigh;
+};
+
 // TODO: proof read and test this struct
 struct PxArticulationWrapper {
   PxArticulationReducedCoordinate *articulation = nullptr;
@@ -24,6 +33,8 @@ struct PxArticulationWrapper {
   std::map<std::string, PxArticulationLink *> namedLinks;
 
   std::vector<PxU32> dofStarts;
+
+  std::vector<ArticulationJointSingleDof> jointSummary;
 
   /* dof in articulation */
   uint32_t dof() const;

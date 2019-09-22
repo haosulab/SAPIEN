@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-using physx_id_t = uint64_t;
+using physx_id_t = uint32_t;
 
 class IDGenerator {
 public:

@@ -6,18 +6,23 @@
 
 class OptifuserRenderer : public IRenderer {
 public:
-  std::map<uint64_t, std::vector<Optifuser::Object*>> mObjectRegistry;
+  std::map<uint32_t, std::vector<Optifuser::Object*>> mObjectRegistry;
   std::shared_ptr<Optifuser::Scene> mScene;
   Optifuser::GLFWRenderContext *mContext = nullptr;
   Optifuser::FPSCameraSpec cam;
+  std::function<GuiInfo(uint32_t)> queryCallback = {};
+  std::function<void(uint32_t, const GuiInfo &info)> syncCallback = {};
 
 public:
-  virtual void addRigidbody(uint64_t uniqueId, const std::string &meshFile,
+  virtual void addRigidbody(uint32_t uniqueId, const std::string &meshFile,
                             const physx::PxVec3 &scale) override;
-  virtual void addRigidbody(uint64_t uniqueId, physx::PxGeometryType::Enum type,
+  virtual void addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
                             const physx::PxVec3 &scale) override;
-  virtual void removeRigidbody(uint64_t uniqueId) override;
-  virtual void updateRigidbody(uint64_t uniqueId, const physx::PxTransform &transform) override;
+  virtual void removeRigidbody(uint32_t uniqueId) override;
+  virtual void updateRigidbody(uint32_t uniqueId, const physx::PxTransform &transform) override;
+
+  virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) override;
+  virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) override;
 
 public:
   void init();
