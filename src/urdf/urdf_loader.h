@@ -6,6 +6,8 @@
 #include <string>
 #include <tinyxml2.h>
 #include <vector>
+#include "kinematic_articulation.h"
+#include "px_object.h"
 
 using namespace tinyxml2;
 
@@ -472,10 +474,8 @@ struct Joint : DomBase {
 
 struct Robot : DomBase {
   DECLARE_CONSTRUCTOR(Robot)
-
   DECLARE_CHILD(Link, link)
   DECLARE_CHILD(Joint, joint)
-
   LOAD_CHILD_BEGIN()
   LOAD_CHILD(Link, link);
   LOAD_CHILD(Joint, joint);
@@ -486,6 +486,9 @@ class URDFLoader {
   std::unique_ptr<Robot> robot;
   physx::PxArticulationReducedCoordinate *articulation;
   class PxSimulation &mSimulation;
+
+public:
+    std::string mUrdfString;
 
 public:
   URDFLoader(class PxSimulation &simulation);

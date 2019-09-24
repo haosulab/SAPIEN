@@ -3,10 +3,48 @@
 #include "articulation_builder.h"
 #include <fstream>
 #include <sstream>
+#include "my_filter_shader.h"
 
 static PxDefaultErrorCallback gDefaultErrorCallback;
 static PxDefaultAllocator gDefaultAllocatorCallback;
 static PxSimulationFilterShader gDefaultFilterShader = PxDefaultSimulationFilterShader;
+
+//class MyContactModification : public PxContactModifyCallback
+//{
+//public:
+//    MyContactModification()
+//            :PxContactModifyCallback() {
+//
+//    }
+//    void onContactModify(PxContactModifyPair* const pairs, PxU32 count) {
+//        // std::cout << "callback" << std::endl;
+//        for (PxU32 i = 0; i < count; i++) {
+//            // std::cout << "pair " << i << std::endl;
+//            const PxRigidActor** actor = pairs[i].actor;
+//            const PxShape** shapes = pairs[i].shape;
+//            auto contacts = pairs[i].contacts;
+//            for (PxU32 j = 0; j < contacts.size(); j++) {
+//                // std::cout << contacts.getSeparation(j) << std::endl;
+//            }
+//        }
+//    }
+//};
+//
+//class MyContactCallback : public PxSimulationEventCallback {
+//public:
+//    MyContactCallback()
+//            :PxSimulationEventCallback() {}
+//    void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count)	{ PX_UNUSED(constraints); PX_UNUSED(count); }
+//    void onWake(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
+//    void onSleep(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
+//    void onTrigger(PxTriggerPair* pairs, PxU32 count)					{ PX_UNUSED(pairs); PX_UNUSED(count); }
+//    void onAdvance(const PxRigidBody*const*, const PxTransform*, const PxU32) {}
+//    void onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 nbPairs) {
+//        std::cerr << "force limit exceeded" << std::endl;
+//    }
+//};
+//MyContactModification myCM;
+//MyContactCallback myCC;
 
 PxSimulation::PxSimulation() {
   mFoundation =
@@ -194,4 +232,18 @@ void PxSimulation::setRenderer(IRenderer *renderer) {
           wrapper.updateArticulation();
         }
   });
+}
+
+PxRigidStatic *PxSimulation::addGround(PxReal altitude, bool render, PxMaterial *material) {
+    material = material ? material : mDefaultMaterial;
+    auto ground = PxCreatePlane(*mPhysicsSDK, PxPlane(0.f,0.f,1.f, -altitude), *material);
+    mScene->addActor(*ground);
+
+    if (render) {
+        physx_id_t newId = IDGenerator::instance()->next();
+        mRenderer->addRigidbody(newId, PxGeometryType::ePLANE, {10,10,10});
+        mRenderId2InitialPose[newId] = PxTransform({0,0,altitude}, PxIdentity);
+        mRenderId2Parent[newId] = ground;
+    }
+    return ground;
 }

@@ -7,25 +7,49 @@
 
 using namespace MeshUtil;
 
-void PxActorBuilder::addConvexShapeFromObj(const std::string &filename,
-                                           const std::string &renderFilename,
-                                           physx::PxTransform pose, PxMaterial *material,
-                                           PxReal density) {
-  if (!material) {
-    material = mSimulation->mDefaultMaterial;
-  }
-
+void PxActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTransform &pose,
+                                           const PxVec3 &scale, PxMaterial *material, PxReal density) {
+  material = material ? material : mSimulation->mDefaultMaterial;
   PxConvexMesh *mesh = loadObjMesh(filename, mPhysicsSDK, mCooking);
-  PxShape *shape = mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh), *material);
+  PxShape *shape =
+      mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh, PxMeshScale(scale)), *material, true);
   if (!shape) {
     std::cerr << "create shape failed!" << std::endl;
     exit(1);
   }
   shape->setLocalPose(pose);
-  physx_id_t newId = IDGenerator::instance()->next();
-  mRenderer->addRigidbody(newId, renderFilename, {1, 1, 1});
+  mShapes.push_back(shape);
+  mDensities.push_back(density);
+  mCount++;
+}
 
-  mRenderIds.push_back(newId);
+void PxActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size,
+                                 PxMaterial *material, PxReal density) {
+  material = material ? material : mSimulation->mDefaultMaterial;
+  PxShape *shape = mPhysicsSDK->createShape(PxBoxGeometry(size), *material, true);
+  shape->setLocalPose(pose);
+  mShapes.push_back(shape);
+  mDensities.push_back(density);
+  mCount++;
+}
+
+void PxActorBuilder::addCylinderShape(const PxTransform &pose, PxReal radius, PxReal length,
+                                      PxMaterial *material, PxReal density) {
+  material = material ? material : mSimulation->mDefaultMaterial;
+  std::cerr
+      << "Warning: PhysX only supports capsule primitive, converting cylinder into capsule..."
+      << std::endl;
+  PxShape *shape = mPhysicsSDK->createShape(PxCapsuleGeometry(radius, length), *material, true);
+  shape->setLocalPose(pose);
+  mShapes.push_back(shape);
+  mDensities.push_back(density);
+  mCount++;
+}
+
+void PxActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMaterial *material, PxReal density) {
+  material = material ? material : mSimulation->mDefaultMaterial;
+  PxShape *shape = mPhysicsSDK->createShape(PxSphereGeometry(radius), *material, true);
+  shape->setLocalPose(pose);
   mShapes.push_back(shape);
   mDensities.push_back(density);
   mCount++;
@@ -60,9 +84,39 @@ void PxActorBuilder::addPrimitiveShape(physx::PxGeometryType::Enum type, physx::
   }
 }
 
-PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic) {
+void PxActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size) {
+  physx_id_t newId = IDGenerator::instance()->next();
+  mRenderIds.push_back(newId);
+  mRenderer->addRigidbody(newId, PxGeometryType::eBOX,
+                          size); // TODO: check if default box size is 1 or 2
+  mSimulation->mRenderId2InitialPose[newId] = pose;
+}
+
+void PxActorBuilder::addCylinderVisual(const PxTransform &pose, PxReal radius, PxReal length) {
+  physx_id_t newId = IDGenerator::instance()->next();
+  mRenderIds.push_back(newId);
+  mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE,
+                          {length, radius, radius}); // TODO: check default orientation
+  mSimulation->mRenderId2InitialPose[newId] = pose;
+}
+
+void PxActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius) {
+  physx_id_t newId = IDGenerator::instance()->next();
+  mRenderIds.push_back(newId);
+  mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius});
+  mSimulation->mRenderId2InitialPose[newId] = pose;
+}
+
+void PxActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
+                                  const PxVec3 &scale) {
+  physx_id_t newId = IDGenerator::instance()->next();
+  mRenderIds.push_back(newId);
+  mRenderer->addRigidbody(newId, filename, scale);
+  mSimulation->mRenderId2InitialPose[newId] = pose;
+}
+PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToScene) {
 #ifdef _DEBUG
-  if (mRenderIds.size() != mCount || mShapes.size() != mCount || mDensities.size() != mCount) {
+  if (mRenderIds.size() != mCount || mShapes.size() != mCount) {
     std::cerr << "Invalid size!" << std::endl;
   }
 #endif
@@ -72,7 +126,6 @@ PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic) {
     actor = mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
     for (size_t i = 0; i < mShapes.size(); ++i) {
       actor->attachShape(*mShapes[i]);
-      mSimulation->mRenderId2InitialPose[mRenderIds[i]] = mShapes[i]->getLocalPose();
       mSimulation->mRenderId2Parent[mRenderIds[i]] = actor;
     }
   } else {
@@ -81,13 +134,10 @@ PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic) {
     actor = dActor;
     for (size_t i = 0; i < mShapes.size(); ++i) {
       actor->attachShape(*mShapes[i]);
-      mSimulation->mRenderId2InitialPose[mRenderIds[i]] = mShapes[i]->getLocalPose();
       mSimulation->mRenderId2Parent[mRenderIds[i]] = actor;
     }
     PxRigidBodyExt::updateMassAndInertia(*dActor, mDensities.data(), mCount);
   }
-
-  mSimulation->mScene->addActor(*actor);
-
+  if (addToScene) {mSimulation->mScene->addActor(*actor);}
   return actor;
 }

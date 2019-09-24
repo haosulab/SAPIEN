@@ -60,4 +60,5 @@ public:
 
   /* Sync with renderer by calling UpdateRigidbody */
   void updateRenderer();
+  PxRigidStatic *addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr);
 };
