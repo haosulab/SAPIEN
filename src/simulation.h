@@ -1,4 +1,6 @@
 #pragma once
+#include "filter_shader.h"
+#include "id_generator.h"
 #include "render_interface.h"
 #include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
@@ -11,16 +13,13 @@
 #include <foundation/PxMat33.h>
 #include <iostream>
 #include <map>
-#include <vector>
 #include <memory>
-#include "id_generator.h"
-#include "filter_shader.h"
-
+#include <vector>
 
 using namespace physx;
 
 class PxSimulation {
- public:
+public:
   std::vector<PxRigidActor *> mRigidActors;
   PxPhysics *mPhysicsSDK = nullptr;
   PxFoundation *mFoundation = nullptr;

@@ -237,6 +237,7 @@ void PxSimulation::setRenderer(IRenderer *renderer) {
 PxRigidStatic *PxSimulation::addGround(PxReal altitude, bool render, PxMaterial *material) {
     material = material ? material : mDefaultMaterial;
     auto ground = PxCreatePlane(*mPhysicsSDK, PxPlane(0.f,0.f,1.f, -altitude), *material);
+    ground->setName("Ground");
     mScene->addActor(*ground);
 
     if (render) {

@@ -486,11 +486,11 @@ class URDFLoader {
   std::unique_ptr<Robot> robot;
   physx::PxArticulationReducedCoordinate *articulation;
   class PxSimulation &mSimulation;
-
-public:
-    std::string mUrdfString;
+  std::string mUrdfString;
 
 public:
   URDFLoader(class PxSimulation &simulation);
   struct PxArticulationWrapper &load(const std::string &filename);
+  class KinematicArticulation loadKinematic(const std::string &filename);
+  class PxObject loadObject(const std::string &filename);
 };

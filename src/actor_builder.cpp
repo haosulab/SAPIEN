@@ -138,6 +138,7 @@ PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToS
     }
     PxRigidBodyExt::updateMassAndInertia(*dActor, mDensities.data(), mCount);
   }
+  actor->setName("");
   if (addToScene) {mSimulation->mScene->addActor(*actor);}
   return actor;
 }
