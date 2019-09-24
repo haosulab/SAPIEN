@@ -114,6 +114,8 @@ void test3() {
   renderer.cam.forward = {0, 1, 0};
   renderer.cam.up = {0, 0, 1};
 
+  renderer.addOffscreenContext(800, 600);
+
   PxSimulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
@@ -127,13 +129,6 @@ void test3() {
 
   sim.step();
   reset(articulationInfo);
-  articulationInfo.set_qpos_unchecked({0.472});
-  // articulationInfo.set_qpos_unchecked({0,0,0,-1.93475823254, -1.53188487338, 0.951243371548,
-  //                                      -2.24179359416, 0.344180286477, 0.649430580507,
-  //                                      -1.41300076449});
-
-  articulationInfo.set_qpos_unchecked({0,0,0,0,0,0,0,0,0,0,0,0,0});
-  articulationInfo.set_qvel_unchecked({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
   std::cout << articulationInfo.summary() << std::endl;
   articulationInfo.updateArticulation();
 
@@ -146,6 +141,11 @@ void test3() {
     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
       break;
     }
+    // auto &context  = renderer.getOffscreenContext(0);
+    // context.renderer.renderScene(*renderer.mScene, renderer.cam);
+    // context.renderer.saveLighting("lighting_offscreen.raw");
+    // context.renderer.saveDepth("depth_offscreen.raw");
+    // context.renderer.saveNormal("normal_offscreen.raw");
   }
 }
 

@@ -115,9 +115,6 @@ void OptifuserRenderer::init() {
   mContext->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
   mContext->renderer.renderSegmentation(true);
   mContext->renderer.enablePicking();
-
-  mContext->renderer.worldAxesScale = 3.f;
-  mContext->renderer.objectAxesScale = 0.4f;
 }
 
 void OptifuserRenderer::destroy() {
@@ -262,3 +259,24 @@ void OptifuserRenderer::bindQueryCallback(std::function<GuiInfo(uint32_t)> callb
 void OptifuserRenderer::bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)> callback) {
   syncCallback = callback;
 }
+
+void OptifuserRenderer::addOffscreenContext(int width, int height) {
+  mOffscreenContexts.push_back(Optifuser::OffscreenRenderContext::Create(width, height));
+  auto & context = mOffscreenContexts[mOffscreenContexts.size()-1];
+  context->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
+  context->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
+                                      "../glsl_shader/gbuffer_segmentation.fsh");
+  context->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
+                                       "../glsl_shader/deferred.fsh");
+  context->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
+  context->renderer.renderSegmentation(true);
+}
+
+Optifuser::OffscreenRenderContext &OptifuserRenderer::getOffscreenContext(int i) {
+  if (i < 0 || static_cast<size_t>(i) >= mOffscreenContexts.size()) {
+    std::cerr << "Getting non existing render context" << std::endl;
+    exit(1);
+  }
+  return *mOffscreenContexts[i];
+}
+
