@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-enum EArticulationType { DynamicArticulation, KinematicArticulation, ObjectArticulation };
+enum EArticulationType { DYNAMIC_ARTICULATION, KINEMATIC_ARTICULATION, OBJECT_ARTICULATION };
 
 struct IArticulationBase {
   virtual EArticulationType get_articualtion_type() const = 0;

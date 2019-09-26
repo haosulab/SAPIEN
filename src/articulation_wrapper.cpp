@@ -12,7 +12,7 @@ void PxArticulationWrapper::updateArticulation() {
 }
 
 EArticulationType PxArticulationWrapper::get_articualtion_type() const {
-  return DynamicArticulation;
+  return DYNAMIC_ARTICULATION;
 }
 
 uint32_t PxArticulationWrapper::dof() const { return articulation->getDofs(); }

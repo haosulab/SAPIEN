@@ -8,6 +8,7 @@
 #include <experimental/filesystem>
 #include <map>
 #include <tinyxml2.h>
+#include "kinematic_articulation.h"
 
 using namespace tinyxml2;
 using namespace physx;

@@ -34,7 +34,8 @@ void test1() {
   auto builder = sim.createActorBuilder();
   for (const auto entry :
        fs::directory_iterator("/home/fx/mobility_mesh/resources/46437-4/objs")) {
-    builder->addConvexShapeFromObj(entry.path(), entry.path());
+    builder->addConvexShapeFromObj(entry.path());
+    builder->addObjVisual(entry.path());
   }
   builder->build(true)->setGlobalPose(PxTransform({0, 1, 0}, PxIdentity));
 
