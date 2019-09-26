@@ -73,9 +73,9 @@ void test2() {
   joint->setParentPose({{0, 0, 0}, PxIdentity});
   joint->setChildPose({{0, 3, 0}, PxIdentity});
 
-  auto articulationInfo = builder->build(true);
-  auto articulation = articulationInfo.articulation;
-  auto cache = articulationInfo.cache;
+  PxArticulationWrapper *articulationWrapper = builder->build(true);
+  auto articulation = articulationWrapper->articulation;
+  auto cache = articulationWrapper->cache;
 
   auto mesh = Optifuser::NewMeshGrid();
   mesh->position = {0, 0.001, 0};
@@ -94,12 +94,12 @@ void test2() {
   }
 }
 
-void reset(PxArticulationWrapper &info) {
-  info.articulation->copyInternalStateToCache(*info.cache, PxArticulationCache::eALL);
-  for (size_t i = 0; i < info.articulation->getDofs(); ++i) {
-    info.cache->jointPosition[i] = 0;
+void reset(PxArticulationWrapper *wrapper) {
+  wrapper->articulation->copyInternalStateToCache(*wrapper->cache, PxArticulationCache::eALL);
+  for (size_t i = 0; i < wrapper->articulation->getDofs(); ++i) {
+    wrapper->cache->jointPosition[i] = 0;
   }
-  info.articulation->applyCache(*info.cache, PxArticulationCache::eALL);
+  wrapper->articulation->applyCache(*wrapper->cache, PxArticulationCache::eALL);
 }
 
 float rand_float() {
@@ -121,22 +121,20 @@ void test3() {
   sim.setTimestep(1.f / 500.f);
 
   auto loader = URDFLoader(sim);
-  auto &articulationInfo = loader.load("../assets/robot/all_robot.urdf");
-  auto articulation = articulationInfo.articulation;
+  auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+  auto articulation = articulationWrapper->articulation;
 
   // auto cache = articulationInfo.cache;
   printf("dof: %d\n", articulation->getDofs());
 
   sim.step();
-  reset(articulationInfo);
-  std::cout << articulationInfo.summary() << std::endl;
-  articulationInfo.updateArticulation();
+  reset(articulationWrapper);
+  articulationWrapper->updateArticulation();
 
   printf("Simulation start\n");
   while (true) {
     sim.step();
     sim.updateRenderer();
-    articulationInfo.updateCache();
     renderer.render();
     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
       break;

@@ -42,7 +42,7 @@ struct LinkTreeNode {
   std::vector<LinkTreeNode *> children;
 };
 
-PxArticulationWrapper &URDFLoader::load(const std::string &filename) {
+PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;

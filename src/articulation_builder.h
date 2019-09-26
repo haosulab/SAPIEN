@@ -22,7 +22,6 @@ class PxArticulationBuilder {
   std::vector<PxShape *> mShapes;
   std::vector<PxReal> mDensities;
   std::map<std::string, PxArticulationLink *> namedLinks;
-  uint32_t mCount = 0;
 
 public:
   PxArticulationBuilder(PxSimulation *simulation);
@@ -84,5 +83,5 @@ public:
                           const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                           const PxVec3 &scale = {1, 1, 1});
 
-  PxArticulationWrapper &build(bool fixBase = true);
+  PxArticulationWrapper *build(bool fixBase = true);
 };

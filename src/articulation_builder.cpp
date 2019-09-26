@@ -82,6 +82,7 @@ void PxArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link, const P
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eBOX,
                           size); // TODO: check if default box size is 1 or 2
+  mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Parent[newId] = &link;
 }
@@ -92,6 +93,7 @@ void PxArticulationBuilder::addCylinderVisualToLink(PxArticulationLink &link,
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE,
                           {length, radius, radius}); // TODO: check default orientation
+  mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Parent[newId] = &link;
 }
@@ -100,6 +102,7 @@ void PxArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link,
                                                   const PxTransform &pose, PxReal radius) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius});
+  mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Parent[newId] = &link;
 }
@@ -110,16 +113,21 @@ void PxArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
   // generate new render id
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderer->addRigidbody(newId, filename, scale);
+  mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Parent[newId] = &link;
 }
 
-PxArticulationWrapper &PxArticulationBuilder::build(bool fixBase) {
+PxArticulationWrapper *PxArticulationBuilder::build(bool fixBase) {
   mArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, fixBase);
-  PxArticulationWrapper &interface = mSimulation->mArticulation2Wrapper[mArticulation] = {};
+  // PxArticulationWrapper &interface = mSimulation->mArticulation2Wrapper[mArticulation] = {};
+  auto wrapper = std::make_unique<PxArticulationWrapper>();
+  for (auto id : mRenderIds) {
+    mSimulation->mRenderId2Articulation[id] = wrapper.get();
+  }
 
   // add articulation
-  interface.articulation = mArticulation;
+  wrapper->articulation = mArticulation;
 
   // add it to scene first
   mSimulation->mScene->addArticulation(*mArticulation);
@@ -164,70 +172,52 @@ PxArticulationWrapper &PxArticulationBuilder::build(bool fixBase) {
     }
   }
 
-  
   // cache basic joint info
   for (size_t i = 0; i < nLinks; ++i) {
-    if (auto *joint =
-        static_cast<PxArticulationJointReducedCoordinate*>(links[i]->getInboundJoint())) {
+    auto *joint = static_cast<PxArticulationJointReducedCoordinate *>(links[i]->getInboundJoint());
+    if (joint) {
+      // use link name as joint name
+      wrapper->jointNames.push_back(links[i]->getName());
+      wrapper->jointDofs.push_back(links[i]->getInboundJointDof());
 
-      ArticulationJointSingleDof jointInfo;
-      jointInfo.name = joint->getChildArticulationLink().getName();
-      jointInfo.type = joint->getJointType();
-
-      switch (jointInfo.type) {
-        case physx::PxArticulationJointType::eREVOLUTE:
-          jointInfo.motion = joint->getMotion(PxArticulationAxis::eTWIST);
-          if (jointInfo.motion == PxArticulationMotion::eLIMITED) {
-            joint->getLimit(PxArticulationAxis::eTWIST, jointInfo.limitLow, jointInfo.limitHigh);
-          }
-          interface.jointSummary.push_back(jointInfo);
-          break;
-        case physx::PxArticulationJointType::ePRISMATIC:
-          jointInfo.motion = joint->getMotion(PxArticulationAxis::eX);
-          if (jointInfo.motion == PxArticulationMotion::eLIMITED) {
-            joint->getLimit(PxArticulationAxis::eX, jointInfo.limitLow, jointInfo.limitHigh);
-          }
-          interface.jointSummary.push_back(jointInfo);
-          break;
-        case physx::PxArticulationJointType::eFIX:
-          break;
-        default:
-          std::cerr << "Unsupported joint\n" << std::endl;
-          exit(1);
+      switch (joint->getJointType()) {
+      case physx::PxArticulationJointType::eREVOLUTE: {
+        auto motion = joint->getMotion(PxArticulationAxis::eTWIST);
+        if (motion == PxArticulationMotion::eFREE) {
+          wrapper->jointLimits.push_back({-FP_INFINITE, FP_INFINITE});
+        } else {
+          PxReal low, high;
+          joint->getLimit(PxArticulationAxis::eTWIST, low, high);
+          wrapper->jointLimits.push_back({low, high});
+        }
+        break;
+      }
+      case physx::PxArticulationJointType::ePRISMATIC: {
+        auto motion = joint->getMotion(PxArticulationAxis::eX);
+        if (motion == PxArticulationMotion::eFREE) {
+          wrapper->jointLimits.push_back({-FP_INFINITE, FP_INFINITE});
+        } else {
+          PxReal low, high;
+          joint->getLimit(PxArticulationAxis::eX, low, high);
+          wrapper->jointLimits.push_back({low, high});
+        }
+        break;
+      }
+      case physx::PxArticulationJointType::eFIX:
+        break;
+      default:
+        throw std::runtime_error("Unsupported joint\n");
       }
     }
   }
 
   // reference cache after adding to scene
-  interface.cache = mArticulation->createCache();
+  wrapper->cache = mArticulation->createCache();
+  wrapper->articulation->copyInternalStateToCache(*wrapper->cache, PxArticulationCache::eALL);
+  wrapper->articulation->setName("articulation");
 
-  // reference links
-  interface.links = std::vector<PxArticulationLink *>(links, links + nLinks);
-
-  // reference named links
-  interface.namedLinks = namedLinks;
-
-  interface.dofStarts = std::vector<PxU32>(nLinks);
-
-  for (PxU32 i = 1; i < nLinks; ++i) {
-    PxU32 llIndex = links[i]->getLinkIndex();
-    PxU32 dofs = links[i]->getInboundJointDof();
-    // printf("%ld %d %d\n", nLinks, llIndex, dofs);
-
-    interface.dofStarts[llIndex] = dofs;
-  }
-
-  PxU32 count = 0;
-  for (PxU32 i = 1; i < nLinks; ++i) {
-    PxU32 dofs = interface.dofStarts[i];
-    interface.dofStarts[i] = count;
-    count += dofs;
-  }
-
-  // initialize the interface
-  interface.articulation->copyInternalStateToCache(*interface.cache, PxArticulationCache::eALL);
-
-  interface.articulation->setName("articulation");
-
-  return interface;
+  PxArticulationWrapper* wrapperPtr = wrapper.get();
+  mSimulation->mDynamicArticulationWrappers.push_back(std::move(wrapper));
+  return wrapperPtr;
+  
 }
