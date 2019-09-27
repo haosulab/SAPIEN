@@ -48,3 +48,35 @@ target_link_libraries(mylib -Wl,--start-group
 
 add_executable(run "test/main.cpp")
 target_link_libraries(run mylib)
+
+
+find_package(Boost REQUIRED thread)
+find_package(catkin REQUIRED COMPONENTS
+        roslaunch
+        moveit_core
+        moveit_ros_planning
+        pluginlib
+        roscpp)
+
+include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+#catkin_package(
+#        LIBRARIES
+#        INCLUDE_DIRS
+#        CATKIN_DEPENDS
+#        moveit_core
+#        moveit_ros_planning
+#)
+
+#add_library(robot_interface
+#        src/robot/joint_pub_node.cpp
+#        src/robot/physx_robot_interface.cpp)
+#target_link_libraries(robot_interface ${catkin_LIBRARIES} ${Boost_LIBRARIES} mylib)
+
+add_library(robot_interface
+        src/robot/kinematics_joint.cpp
+        src/robot/kinematics_articulation_interface.cpp)
+target_link_libraries(robot_interface ${catkin_LIBRARIES} mylib)
+
+add_executable(robot
+        test/robot.cpp)
+target_link_libraries(robot robot_intetface)

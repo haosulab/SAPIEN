@@ -1,4 +1,6 @@
 #pragma once
+#include "kinematic_articulation.h"
+#include "px_object.h"
 #include <PxPhysicsAPI.h>
 #include <iostream>
 #include <memory>
@@ -6,8 +8,6 @@
 #include <string>
 #include <tinyxml2.h>
 #include <vector>
-#include "kinematic_articulation.h"
-#include "px_object.h"
 
 using namespace tinyxml2;
 
@@ -350,22 +350,22 @@ struct Link : DomBase {
   LOAD_ATTR_BEGIN()
   LOAD_ATTR(std::string, name)
   CHECK_CHILD_UNIQUE_SET_DEFAULT(inertial, {
-      inertial = std::make_unique<Inertial>();
-      inertial->mass = std::make_unique<Mass>();
-      inertial->mass->value = 1;
+    inertial = std::make_unique<Inertial>();
+    inertial->mass = std::make_unique<Mass>();
+    inertial->mass->value = 1;
 
-      inertial->origin = std::make_unique<Origin>();
-      inertial->origin->xyz = {0, 0, 0};
-      inertial->origin->rpy = {0, 0, 0};
+    inertial->origin = std::make_unique<Origin>();
+    inertial->origin->xyz = {0, 0, 0};
+    inertial->origin->rpy = {0, 0, 0};
 
-      inertial->inertia = std::make_unique<Inertia>();
-      inertial->inertia->ixx = 1;
-      inertial->inertia->iyy = 1;
-      inertial->inertia->izz = 1;
-      inertial->inertia->ixy = 0;
-      inertial->inertia->ixz = 0;
-      inertial->inertia->iyz = 0;
-    })
+    inertial->inertia = std::make_unique<Inertia>();
+    inertial->inertia->ixx = 1;
+    inertial->inertia->iyy = 1;
+    inertial->inertia->izz = 1;
+    inertial->inertia->ixy = 0;
+    inertial->inertia->ixz = 0;
+    inertial->inertia->iyz = 0;
+  })
   LOAD_ATTR_END()
 
   // no need to check child
@@ -481,6 +481,12 @@ struct Robot : DomBase {
   LOAD_CHILD(Joint, joint);
   LOAD_CHILD_END()
 };
+struct LinkTreeNode {
+  Link *link;
+  Joint *joint;
+  LinkTreeNode *parent;
+  std::vector<LinkTreeNode *> children;
+};
 
 class URDFLoader {
   std::unique_ptr<Robot> robot;
@@ -490,6 +496,7 @@ class URDFLoader {
 
 public:
   URDFLoader(class PxSimulation &simulation);
+  LinkTreeNode *loadURDF2TreeNode(const std::string &filename);
   struct PxArticulationWrapper *load(const std::string &filename);
   KinematicArticulation loadKinematic(const std::string &filename);
   PxObject loadObject(const std::string &filename);
