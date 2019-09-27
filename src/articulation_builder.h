@@ -13,7 +13,7 @@ class PxArticulationBuilder {
   PxSimulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
   PxCooking *mCooking = nullptr;
-  IRenderer *mRenderer = nullptr;
+  IPhysxRenderer *mRenderer = nullptr;
   PxArticulationReducedCoordinate *mArticulation = nullptr;
 
   std::vector<PxArticulationLink *> mLinks;

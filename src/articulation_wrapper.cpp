@@ -11,7 +11,7 @@ void PxArticulationWrapper::updateArticulation() {
   articulation->applyCache(*cache, PxArticulationCache::eALL);
 }
 
-EArticulationType PxArticulationWrapper::get_articualtion_type() const {
+EArticulationType PxArticulationWrapper::get_articulation_type() const {
   return DYNAMIC_ARTICULATION;
 }
 

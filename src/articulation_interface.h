@@ -6,7 +6,7 @@
 enum EArticulationType { DYNAMIC_ARTICULATION, KINEMATIC_ARTICULATION, OBJECT_ARTICULATION };
 
 struct IArticulationBase {
-  virtual EArticulationType get_articualtion_type() const = 0;
+  virtual EArticulationType get_articulation_type() const = 0;
   virtual uint32_t dof() const = 0;
 
   virtual std::vector<std::string> get_joint_names() const = 0;
@@ -27,6 +27,6 @@ struct IArticulationBase {
   virtual void set_qf(const std::vector<physx::PxReal> &v) = 0;
 };
 
-struct IArticulationDrivable : public IArticulationBase {
+class IArticulationDrivable : public IArticulationBase {
   virtual void set_drive_target(const std::vector<physx::PxReal> &v) = 0;
 };

@@ -15,6 +15,7 @@ find_package(assimp REQUIRED)
 
 include_directories("/home/yikuan/source/PhysX/physx/include"
   "/home/yikuan/source/PhysX/pxshared/include" "3rd_party/optifuser/include" "src"
+  "src/renderer"
   )
 link_directories("/home/yikuan/source/PhysX/physx/bin/linux.clang/checked"
   "3rd_party/optifuser/build/lib"
@@ -48,3 +49,4 @@ target_link_libraries(mylib -Wl,--start-group
 
 add_executable(run "test/main.cpp")
 target_link_libraries(run mylib)
+

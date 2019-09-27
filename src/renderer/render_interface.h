@@ -1,10 +1,10 @@
 #pragma once
 #include <PxPhysicsAPI.h>
+#include <array>
 #include <foundation/PxTransform.h>
+#include <functional>
 #include <string>
 #include <vector>
-#include <array>
-#include <functional>
 
 struct JointGuiInfo {
   std::string name;
@@ -27,7 +27,7 @@ struct GuiInfo {
   LinkGuiInfo linkInfo;
 };
 
-class IRenderer {
+class IPhysxRenderer {
 public:
   /* This function is called when a rigid body is added to a scene */
   virtual void addRigidbody(uint32_t uniqueId, const std::string &meshFile,
@@ -43,4 +43,35 @@ public:
 
   virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) = 0;
   virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) = 0;
+};
+
+struct SensorPose {
+  std::array<float, 3> positionXYZ;
+  std::array<float, 4> rotationWXYZ;
+};
+
+class ISensor {
+public:
+  virtual SensorPose getSensorPose() const = 0;
+  virtual void setSensorPose(const SensorPose &pose) = 0;
+};
+
+class ICamera : public ISensor {
+public:
+  virtual const std::string &getName() const = 0;
+  virtual uint32_t getWidth() const = 0;
+  virtual uint32_t getHeight() const = 0;
+  virtual float getFovy() const = 0;
+
+  virtual void takePicture() = 0;
+  virtual std::vector<float> getColorRGBA() = 0;
+  virtual std::vector<float> getAlbedoRGBA() = 0;
+  virtual std::vector<float> getNormalRGBA() = 0;
+  virtual std::vector<float> getDepth() = 0;
+  virtual std::vector<int> getSegmentation() = 0;
+};
+
+class ICameraManager {
+  virtual std::vector<ICamera *> getCameras() = 0;
+  virtual void addCamera(std::string const &name, uint32_t width, uint32_t height, float fovy) = 0;
 };

@@ -176,9 +176,8 @@ std::unique_ptr<PxArticulationBuilder> PxSimulation::createArticulationBuilder()
   return std::make_unique<PxArticulationBuilder>(this);
 }
 
-void PxSimulation::setRenderer(IRenderer *renderer) {
+void PxSimulation::setRenderer(IPhysxRenderer *renderer) {
   mRenderer = renderer;
-
   mRenderer->bindQueryCallback([this](uint32_t unique_id) {
     GuiInfo info = {};
 
@@ -231,7 +230,6 @@ void PxSimulation::setRenderer(IRenderer *renderer) {
       jointValues.push_back(info.value);
     }
     articulation->set_qpos(jointValues);
-    
   });
 }
 

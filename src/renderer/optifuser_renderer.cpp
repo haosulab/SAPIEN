@@ -109,11 +109,11 @@ void OptifuserRenderer::init() {
       "../assets/ame_desert/desertsky_lf.tga", "../assets/ame_desert/desertsky_rt.tga");
 
   mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
-  mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh", "../glsl_shader/gbuffer_segmentation.fsh");
+  mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
+                                      "../glsl_shader/gbuffer_segmentation.fsh");
   mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
                                        "../glsl_shader/deferred.fsh");
   mContext->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
-  mContext->renderer.renderSegmentation(true);
   mContext->renderer.enablePicking();
 }
 
@@ -134,7 +134,8 @@ void OptifuserRenderer::render() {
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_D)) {
     cam.moveForwardRight(0, dt);
   }
-  cam.aspect = static_cast<float>(mContext->getWidth()) / static_cast<float>(mContext->getHeight());
+  cam.aspect =
+      static_cast<float>(mContext->getWidth()) / static_cast<float>(mContext->getHeight());
 
   static bool renderGui = true;
   if (Optifuser::getInput().getKeyDown(GLFW_KEY_E)) {
@@ -169,6 +170,7 @@ void OptifuserRenderer::render() {
     mScene->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
   }
 
+  static int camIndex = -1;
   if (renderGui) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -202,7 +204,7 @@ void OptifuserRenderer::render() {
         }
       }
 
-      if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+      if (ImGui::CollapsingHeader("Main Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Text("Position");
         ImGui::Text("%-4.3f %-4.3f %-4.3f", cam.position.x, cam.position.y, cam.position.z);
         ImGui::Text("Forward");
@@ -210,9 +212,19 @@ void OptifuserRenderer::render() {
         ImGui::Text("%-4.3f %-4.3f %-4.3f", forward.x, forward.y, forward.z);
         ImGui::Text("Fov");
         ImGui::SliderAngle("##fov(y)", &cam.fovy, 1.f, 90.f);
-        ImGui::Text("Width: %d", mContext->getWidth()); ImGui::SameLine();
-        ImGui::Text("Height: %d", mContext->getHeight()); ImGui::SameLine();
+        ImGui::Text("Width: %d", mContext->getWidth());
+        ImGui::SameLine();
+        ImGui::Text("Height: %d", mContext->getHeight());
+        ImGui::SameLine();
         ImGui::Text("Aspect: %.2f", cam.aspect);
+      }
+
+      if (ImGui::CollapsingHeader("Mounted Cameras")) {
+        ImGui::RadioButton("None##camera", &camIndex, -1);
+        for (size_t i = 0; i < mMountedCameras.size(); ++i) {
+          ImGui::RadioButton((mMountedCameras[i]->name + "##camera" + std::to_string(i)).c_str(),
+                             &camIndex, i);
+        }
       }
 
       if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -222,9 +234,9 @@ void OptifuserRenderer::render() {
     }
     ImGui::End();
 
-    ImGui::SetNextWindowPos(ImVec2(mContext->getWidth() - 320, 20));
-    ImGui::SetNextWindowSize(ImVec2(300, mContext->getHeight() - 40));
     if (pickedId) {
+      ImGui::SetNextWindowPos(ImVec2(mContext->getWidth() - 320, 20));
+      ImGui::SetNextWindowSize(ImVec2(300, mContext->getHeight() - 40));
       ImGui::Begin("Selected Object");
       {
         if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -236,9 +248,8 @@ void OptifuserRenderer::render() {
           int i = 0;
           for (auto &jointInfo : pickedInfo.articulationInfo.jointInfo) {
             ImGui::Text("%s", jointInfo.name.c_str());
-            if (ImGui::SliderFloat(("##" + std::to_string(++i)).c_str(),
-                               &jointInfo.value, jointInfo.limits[0],
-                                    jointInfo.limits[1])) {
+            if (ImGui::SliderFloat(("##" + std::to_string(++i)).c_str(), &jointInfo.value,
+                                   jointInfo.limits[0], jointInfo.limits[1])) {
               syncCallback(pickedId, pickedInfo);
             }
           }
@@ -246,6 +257,19 @@ void OptifuserRenderer::render() {
       }
       ImGui::End();
     }
+    if (camIndex >= 0) {
+      uint32_t width = mMountedCameras[camIndex]->getWidth();
+      uint32_t height = mMountedCameras[camIndex]->getHeight();
+      mMountedCameras[camIndex]->takePicture();
+      ImGui::SetNextWindowPosCenter();
+      ImGui::SetNextWindowSize(ImVec2(width, height));
+      ImGui::Begin("Camera");
+      ImGui::Image(reinterpret_cast<ImTextureID>(
+                       mMountedCameras[camIndex]->mRenderContext->renderer.outputtex),
+                   ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
+      ImGui::End();
+    }
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   }
@@ -256,27 +280,21 @@ void OptifuserRenderer::bindQueryCallback(std::function<GuiInfo(uint32_t)> callb
   queryCallback = callback;
 }
 
-void OptifuserRenderer::bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)> callback) {
+void OptifuserRenderer::bindSyncCallback(
+    std::function<void(uint32_t, const GuiInfo &info)> callback) {
   syncCallback = callback;
 }
 
-void OptifuserRenderer::addOffscreenContext(int width, int height) {
-  mOffscreenContexts.push_back(Optifuser::OffscreenRenderContext::Create(width, height));
-  auto & context = mOffscreenContexts[mOffscreenContexts.size()-1];
-  context->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
-  context->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
-                                      "../glsl_shader/gbuffer_segmentation.fsh");
-  context->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
-                                       "../glsl_shader/deferred.fsh");
-  context->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
-  context->renderer.renderSegmentation(true);
-}
-
-Optifuser::OffscreenRenderContext &OptifuserRenderer::getOffscreenContext(int i) {
-  if (i < 0 || static_cast<size_t>(i) >= mOffscreenContexts.size()) {
-    std::cerr << "Getting non existing render context" << std::endl;
-    exit(1);
+std::vector<ICamera *> OptifuserRenderer::getCameras() {
+  std::vector<ICamera *> output;
+  for (auto &cam : mMountedCameras) {
+    output.push_back(cam.get());
   }
-  return *mOffscreenContexts[i];
+  return output;
 }
 
+void OptifuserRenderer::addCamera(std::string const &name, uint32_t width, uint32_t height,
+                                  float fovy) {
+  mMountedCameras.push_back(
+      std::make_unique<MountedCamera>(name, width, height, fovy, mScene.get()));
+}

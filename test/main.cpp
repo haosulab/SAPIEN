@@ -115,7 +115,7 @@ void test3() {
   renderer.cam.forward = {0, 1, 0};
   renderer.cam.up = {0, 0, 1};
 
-  renderer.addOffscreenContext(800, 600);
+  renderer.addCamera("Cam1", 800, 800, glm::radians(35.f));
 
   PxSimulation sim;
   sim.setRenderer(&renderer);
