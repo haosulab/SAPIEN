@@ -33,7 +33,7 @@ struct PxArticulationWrapper : public IArticulationBase {
   /* call to apply cache into articulation */
   void updateArticulation();
 
-  virtual EArticulationType get_articualtion_type() const override;
+  virtual EArticulationType get_articulation_type() const override;
   virtual uint32_t dof() const override;
 
   virtual std::vector<std::string> get_joint_names() const override;
