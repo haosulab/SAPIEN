@@ -12,7 +12,7 @@ class PxActorBuilder {
   PxSimulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
   PxCooking *mCooking = nullptr;
-  IRenderer *mRenderer = nullptr;
+  IPhysxRenderer *mRenderer = nullptr;
 
   std::vector<physx_id_t> mRenderIds;
   std::vector<physx::PxShape *> mShapes;

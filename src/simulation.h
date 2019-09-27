@@ -29,7 +29,7 @@ public:
   PxCooking *mCooking = nullptr;
   PxScene *mScene = nullptr;
   PxReal mTimestep = 1.0f / 60.0f;
-  IRenderer *mRenderer = nullptr;
+  IPhysxRenderer *mRenderer = nullptr;
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
   PxMaterial *mDefaultMaterial = nullptr;
   CollisionGroupManager collisionManager;
@@ -39,14 +39,11 @@ public:
   PxPvdTransport *mTransport = nullptr;
 #endif
 
-  // std::map<PxRigidActor *, std::vector<physx_id_t>> mActor2Ids;
   std::map<physx_id_t, PxTransform> mRenderId2InitialPose;
   std::map<physx_id_t, PxRigidActor*> mRenderId2Parent;
   std::map<physx_id_t, IArticulationBase*> mRenderId2Articulation;
 
   std::vector<std::unique_ptr<struct PxArticulationWrapper>> mDynamicArticulationWrappers;
-
-  // std::map<PxArticulationBase*, struct PxArticulationWrapper> mArticulation2Wrapper;
 
 public:
   PxSimulation();
@@ -55,8 +52,8 @@ public:
   inline void setTimestep(PxReal step) { mTimestep = step; };
   inline PxReal getTimestep() const { return mTimestep; };
 
-  void setRenderer(IRenderer *renderer);
-  inline IRenderer *getRenderer() { return mRenderer; }
+  void setRenderer(IPhysxRenderer *renderer);
+  inline IPhysxRenderer *getRenderer() { return mRenderer; }
 
   std::unique_ptr<class PxActorBuilder> createActorBuilder();
   std::unique_ptr<class PxArticulationBuilder> createArticulationBuilder();

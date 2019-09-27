@@ -15,6 +15,7 @@ find_package(assimp REQUIRED)
 
 include_directories("/home/fx/source/PhysX/physx/include"
   "/home/fx/source/PhysX/pxshared/include" "3rd_party/optifuser/include" "src"
+  "src/renderer"
   )
 link_directories("/home/fx/source/PhysX/physx/bin/linux.clang/debug"
   "3rd_party/optifuser/build/lib"

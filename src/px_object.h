@@ -18,7 +18,7 @@ class PxObject {
   PxSimulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
   PxCooking *mCooking = nullptr;
-  IRenderer *mRenderer = nullptr;
+  IPhysxRenderer *mRenderer = nullptr;
   PxClientID objectId;
 
 public:
