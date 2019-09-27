@@ -13,10 +13,10 @@ find_package(GLEW REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 
-include_directories("/home/fx/source/PhysX/physx/include"
-  "/home/fx/source/PhysX/pxshared/include" "3rd_party/optifuser/include" "src"
+include_directories("/home/yikuan/source/PhysX/physx/include"
+  "/home/yikuan/source/PhysX/pxshared/include" "3rd_party/optifuser/include" "src"
   )
-link_directories("/home/fx/source/PhysX/physx/bin/linux.clang/debug"
+link_directories("/home/yikuan/source/PhysX/physx/bin/linux.clang/checked"
   "3rd_party/optifuser/build/lib"
   )
 

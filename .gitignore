@@ -1,2 +1,4 @@
 build
 compile_commands.json
+CMakeList.txt
+3rd_party
