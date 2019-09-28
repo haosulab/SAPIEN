@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+namespace Renderer {
+
 struct JointGuiInfo {
   std::string name;
   std::array<float, 2> limits;
@@ -25,24 +27,6 @@ struct LinkGuiInfo {
 struct GuiInfo {
   ArticulationGuiInfo articulationInfo;
   LinkGuiInfo linkInfo;
-};
-
-class IPhysxRenderer {
-public:
-  /* This function is called when a rigid body is added to a scene */
-  virtual void addRigidbody(uint32_t uniqueId, const std::string &meshFile,
-                            const physx::PxVec3 &scale) = 0;
-  virtual void addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
-                            const physx::PxVec3 &scale) = 0;
-
-  /* This function is called when a rigid body is removed from a scene */
-  virtual void removeRigidbody(uint32_t uniqueId) = 0;
-
-  /* This function is called when a rigid body is updated */
-  virtual void updateRigidbody(uint32_t uniqueId, const physx::PxTransform &transform) = 0;
-
-  virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) = 0;
-  virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) = 0;
 };
 
 struct SensorPose {
@@ -72,6 +56,29 @@ public:
 };
 
 class ICameraManager {
+ public:
   virtual std::vector<ICamera *> getCameras() = 0;
-  virtual void addCamera(std::string const &name, uint32_t width, uint32_t height, float fovy) = 0;
+  virtual void addCamera(uint32_t uniqueId, std::string const &name, uint32_t width,
+                         uint32_t height, float fovx, float fovy, float near, float far) = 0;
+  virtual void updateCamera(uint32_t uniqueId, physx::PxTransform const &transform) = 0;
 };
+
+class IPhysxRenderer : public ICameraManager {
+public:
+  /* This function is called when a rigid body is added to a scene */
+  virtual void addRigidbody(uint32_t uniqueId, const std::string &meshFile,
+                            const physx::PxVec3 &scale) = 0;
+  virtual void addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
+                            const physx::PxVec3 &scale) = 0;
+
+  /* This function is called when a rigid body is removed from a scene */
+  virtual void removeRigidbody(uint32_t uniqueId) = 0;
+
+  /* This function is called when a rigid body is updated */
+  virtual void updateRigidbody(uint32_t uniqueId, const physx::PxTransform &transform) = 0;
+
+  virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) = 0;
+  virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) = 0;
+};
+
+} // namespace Renderer

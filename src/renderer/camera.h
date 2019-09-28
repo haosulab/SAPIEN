@@ -4,15 +4,16 @@
 #include <memory>
 #include <optifuser.h>
 
-
+namespace Renderer {
 class MountedCamera : public Optifuser::CameraSpec, public ICamera {
- public:
+public:
   uint32_t mWidth, mHeight;
   std::unique_ptr<Optifuser::OffscreenRenderContext> mRenderContext;
   Optifuser::Scene *mScene;
 
 public:
-  MountedCamera(std::string const &name, uint32_t width, uint32_t height, float fovy, Optifuser::Scene *scene);
+  MountedCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
+                Optifuser::Scene *scene);
 
   // ICamera
   virtual const std::string &getName() const override;
@@ -30,3 +31,4 @@ public:
   virtual SensorPose getSensorPose() const override;
   virtual void setSensorPose(const SensorPose &pose) override;
 };
+} // namespace Renderer

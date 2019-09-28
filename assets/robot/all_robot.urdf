@@ -419,7 +419,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <child link="kinect2_color_optical_frame"/>
     <origin rpy="-1.570795 0 -1.570795" xyz="0 0 0"/>
   </joint>
-  <gazebo reference="kinect2_ir_link">
+  <gazebo reference="kinect2_ir_frame">
     <sensor name="kinect2_ir_sensor" type="depth">
       <always_on>true</always_on>
       <update_rate>30.0</update_rate>

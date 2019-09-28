@@ -24,7 +24,7 @@ using namespace physx;
 namespace fs = std::experimental::filesystem;
 
 void test1() {
-  OptifuserRenderer renderer;
+  Renderer::OptifuserRenderer renderer;
   renderer.init();
 
   PxSimulation sim;
@@ -50,7 +50,7 @@ void test1() {
 }
 
 void test2() {
-  OptifuserRenderer renderer;
+  Renderer::OptifuserRenderer renderer;
   renderer.init();
 
   PxSimulation sim;
@@ -109,19 +109,17 @@ float rand_float() {
 }
 
 void test3() {
-  OptifuserRenderer renderer;
+  Renderer::OptifuserRenderer renderer;
   renderer.init();
   renderer.cam.position = {0, -2, 0.5};
-  renderer.cam.forward = {0, 1, 0};
-  renderer.cam.up = {0, 0, 1};
-
-  renderer.addCamera("Cam1", 800, 800, glm::radians(35.f));
+  renderer.cam.setForward({0, 1, 0});
+  renderer.cam.setUp({0, 0, 1});
 
   PxSimulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 
-  auto loader = URDFLoader(sim);
+  auto loader = URDF::URDFLoader(sim);
   auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
   auto articulation = articulationWrapper->articulation;
 
@@ -140,11 +138,6 @@ void test3() {
     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
       break;
     }
-    // auto &context  = renderer.getOffscreenContext(0);
-    // context.renderer.renderScene(*renderer.mScene, renderer.cam);
-    // context.renderer.saveLighting("lighting_offscreen.raw");
-    // context.renderer.saveDepth("depth_offscreen.raw");
-    // context.renderer.saveNormal("normal_offscreen.raw");
   }
 }
 

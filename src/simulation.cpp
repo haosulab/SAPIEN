@@ -2,18 +2,18 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "articulation_interface.h"
+#include "my_filter_shader.h"
 #include <cassert>
 #include <fstream>
 #include <sstream>
-#include "my_filter_shader.h"
 
-    static PxDefaultErrorCallback gDefaultErrorCallback;
+static PxDefaultErrorCallback gDefaultErrorCallback;
 static PxDefaultAllocator gDefaultAllocatorCallback;
 static PxSimulationFilterShader gDefaultFilterShader = PxDefaultSimulationFilterShader;
 
-//class MyContactModification : public PxContactModifyCallback
+// class MyContactModification : public PxContactModifyCallback
 //{
-//public:
+// public:
 //    MyContactModification()
 //            :PxContactModifyCallback() {
 //
@@ -32,21 +32,23 @@ static PxSimulationFilterShader gDefaultFilterShader = PxDefaultSimulationFilter
 //    }
 //};
 //
-//class MyContactCallback : public PxSimulationEventCallback {
-//public:
+// class MyContactCallback : public PxSimulationEventCallback {
+// public:
 //    MyContactCallback()
 //            :PxSimulationEventCallback() {}
-//    void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count)	{ PX_UNUSED(constraints); PX_UNUSED(count); }
-//    void onWake(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
-//    void onSleep(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors); PX_UNUSED(count); }
-//    void onTrigger(PxTriggerPair* pairs, PxU32 count)					{ PX_UNUSED(pairs); PX_UNUSED(count); }
-//    void onAdvance(const PxRigidBody*const*, const PxTransform*, const PxU32) {}
-//    void onContact(const PxContactPairHeader& pairHeader, const PxContactPair* pairs, PxU32 nbPairs) {
+//    void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count)	{ PX_UNUSED(constraints);
+//    PX_UNUSED(count); } void onWake(PxActor** actors, PxU32 count)
+//    { PX_UNUSED(actors); PX_UNUSED(count); }
+//    void onSleep(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors);
+//    PX_UNUSED(count); } void onTrigger(PxTriggerPair* pairs, PxU32 count)
+//    { PX_UNUSED(pairs); PX_UNUSED(count); } void onAdvance(const PxRigidBody*const*, const
+//    PxTransform*, const PxU32) {} void onContact(const PxContactPairHeader& pairHeader, const
+//    PxContactPair* pairs, PxU32 nbPairs) {
 //        std::cerr << "force limit exceeded" << std::endl;
 //    }
 //};
-//MyContactModification myCM;
-//MyContactCallback myCC;
+// MyContactModification myCM;
+// MyContactCallback myCC;
 
 PxSimulation::PxSimulation() {
   mFoundation =
@@ -155,7 +157,7 @@ void PxSimulation::step() {
   while (!mScene->fetchResults(true)) {
     // TODO: do useful stuff here
   }
-  for (auto & wrapper : mDynamicArticulationWrappers) {
+  for (auto &wrapper : mDynamicArticulationWrappers) {
     wrapper->updateCache();
   }
 }
@@ -165,6 +167,9 @@ void PxSimulation::updateRenderer() {
     auto pose = idParent.second->getGlobalPose() * mRenderId2InitialPose[idParent.first];
 
     mRenderer->updateRigidbody(idParent.first, pose);
+  }
+  for (auto &[id, pose] : mCameraId2InitialPose) {
+    mRenderer->updateCamera(id, mMountedCamera2MountedActor[id]->getGlobalPose() * pose);
   }
 }
 
@@ -176,10 +181,10 @@ std::unique_ptr<PxArticulationBuilder> PxSimulation::createArticulationBuilder()
   return std::make_unique<PxArticulationBuilder>(this);
 }
 
-void PxSimulation::setRenderer(IPhysxRenderer *renderer) {
+void PxSimulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
   mRenderer = renderer;
   mRenderer->bindQueryCallback([this](uint32_t unique_id) {
-    GuiInfo info = {};
+    Renderer::GuiInfo info = {};
 
     if (mRenderId2Parent.find(unique_id) == mRenderId2Parent.end()) {
       return info;
@@ -206,7 +211,7 @@ void PxSimulation::setRenderer(IPhysxRenderer *renderer) {
 
     assert(singleDofName.size() == totalDofs);
     for (uint32_t i = 0; i < totalDofs; ++i) {
-      JointGuiInfo jointInfo;
+      Renderer::JointGuiInfo jointInfo;
       jointInfo.name = singleDofName[i];
       auto [l1, l2] = limits[i];
       jointInfo.limits = {l1, l2};
@@ -215,8 +220,8 @@ void PxSimulation::setRenderer(IPhysxRenderer *renderer) {
     }
     return info;
   });
-  
-  mRenderer->bindSyncCallback([this](uint32_t unique_id, const GuiInfo &info) {
+
+  mRenderer->bindSyncCallback([this](uint32_t unique_id, const Renderer::GuiInfo &info) {
     if (this->mRenderId2Parent.find(unique_id) == this->mRenderId2Parent.end()) {
       throw std::runtime_error("queried id is not an actor!");
     }
@@ -226,7 +231,7 @@ void PxSimulation::setRenderer(IPhysxRenderer *renderer) {
     auto articulation = mRenderId2Articulation[unique_id];
 
     std::vector<float> jointValues;
-    for (auto& info : info.articulationInfo.jointInfo) {
+    for (auto &info : info.articulationInfo.jointInfo) {
       jointValues.push_back(info.value);
     }
     articulation->set_qpos(jointValues);
@@ -234,16 +239,16 @@ void PxSimulation::setRenderer(IPhysxRenderer *renderer) {
 }
 
 PxRigidStatic *PxSimulation::addGround(PxReal altitude, bool render, PxMaterial *material) {
-    material = material ? material : mDefaultMaterial;
-    auto ground = PxCreatePlane(*mPhysicsSDK, PxPlane(0.f,0.f,1.f, -altitude), *material);
-    ground->setName("Ground");
-    mScene->addActor(*ground);
+  material = material ? material : mDefaultMaterial;
+  auto ground = PxCreatePlane(*mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude), *material);
+  ground->setName("Ground");
+  mScene->addActor(*ground);
 
-    if (render) {
-        physx_id_t newId = IDGenerator::instance()->next();
-        mRenderer->addRigidbody(newId, PxGeometryType::ePLANE, {10,10,10});
-        mRenderId2InitialPose[newId] = PxTransform({0,0,altitude}, PxIdentity);
-        mRenderId2Parent[newId] = ground;
-    }
-    return ground;
+  if (render) {
+    physx_id_t newId = IDGenerator::instance()->next();
+    mRenderer->addRigidbody(newId, PxGeometryType::ePLANE, {10, 10, 10});
+    mRenderId2InitialPose[newId] = PxTransform({0, 0, altitude}, PxIdentity);
+    mRenderId2Parent[newId] = ground;
+  }
+  return ground;
 }

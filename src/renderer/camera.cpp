@@ -1,6 +1,8 @@
 #include "camera.h"
 #include <optifuser.h>
 
+namespace Renderer {
+
 MountedCamera::MountedCamera(std::string const &name_, uint32_t width, uint32_t height,
                              float fovy_, Optifuser::Scene *scene)
     : mWidth(width), mHeight(height), mScene(scene) {
@@ -49,3 +51,5 @@ void MountedCamera::setSensorPose(const SensorPose &pose) {
   }
 }
 const std::string &MountedCamera::getName() const { return name; }
+
+} // namespace Renderer

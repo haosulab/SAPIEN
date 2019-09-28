@@ -58,6 +58,19 @@ vec4 getCameraSpacePosition(vec2 texcoord) {
   return tex2camera(vec4(texcoord, depth, 1.f));
 }
 
+vec3 getBackgroundColor(vec3 texcoord) {
+  float r = sqrt(texcoord.x * texcoord.x + texcoord.y * texcoord.y);
+  float angle = atan(texcoord.z / r) * 57.3;
+
+  vec3 horizonColor = vec3(0.9, 0.9, 0.9);
+  vec3 zenithColor = vec3(0.522, 0.757, 0.914);
+  vec3 groundColor = vec3(0.5, 0.410, 0.271);
+  
+  return mix(mix(zenithColor, horizonColor, smoothstep(15.f, 5.f, angle)),
+             groundColor,
+             smoothstep(-5.f, -15.f, angle));
+}
+
 const float eps = 0.001;
 
 void main() {
@@ -96,7 +109,8 @@ void main() {
 
   float depth = texture(depthtex0, texcoord).x;
   if (depth == 1) {
-    FragColor = texture(skybox, (environmentViewMatrixInverse * csPosition).xyz);
+    // FragColor = texture(skybox, (environmentViewMatrixInverse * csPosition).xyz);
+    FragColor = vec4(getBackgroundColor((gbufferViewMatrixInverse * csPosition).xyz), 1.f);
   } else {
     FragColor = vec4(color, 1.f);
   }

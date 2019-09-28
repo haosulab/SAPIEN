@@ -216,8 +216,8 @@ PxArticulationWrapper *PxArticulationBuilder::build(bool fixBase) {
   wrapper->articulation->copyInternalStateToCache(*wrapper->cache, PxArticulationCache::eALL);
   wrapper->articulation->setName("articulation");
 
-  PxArticulationWrapper* wrapperPtr = wrapper.get();
+  PxArticulationWrapper *wrapperPtr = wrapper.get();
   mSimulation->mDynamicArticulationWrappers.push_back(std::move(wrapper));
+
   return wrapperPtr;
-  
 }

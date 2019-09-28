@@ -1,10 +1,11 @@
 #include "optifuser_renderer.h"
 #include <objectLoader.h>
-
 #define IMGUI_IMPL_OPENGL_LOADER_GLEW
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+
+namespace Renderer {
 
 enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION };
 
@@ -24,7 +25,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFi
     mScene->addObject(std::move(obj));
   }
 
-#ifdef _DEBUG
+#ifdef _VERBOSE
   printf("Adding Object %d from %s\n", uniqueId, objFile.c_str());
 #endif
 }
@@ -94,8 +95,8 @@ void OptifuserRenderer::init() {
   mContext->initGui();
   mScene = std::make_shared<Optifuser::Scene>();
 
-  cam.up = {0, 0, 1};
-  cam.forward = {0, 1, 0};
+  cam.setUp({0, 0, 1});
+  cam.setForward({0, 1, 0});
   cam.position = {-8, 0, 4};
   cam.rotateYawPitch(0, -0.15);
   cam.fovy = glm::radians(45.f);
@@ -103,12 +104,13 @@ void OptifuserRenderer::init() {
   mScene->addDirectionalLight({{0, -1, -1}, {1, 1, 1}});
   mScene->setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
-  mScene->setEnvironmentMap(
-      "../assets/ame_desert/desertsky_ft.tga", "../assets/ame_desert/desertsky_bk.tga",
-      "../assets/ame_desert/desertsky_up.tga", "../assets/ame_desert/desertsky_dn.tga",
-      "../assets/ame_desert/desertsky_lf.tga", "../assets/ame_desert/desertsky_rt.tga");
+  // mScene->setEnvironmentMap(
+  //     "../assets/ame_desert/desertsky_ft.tga", "../assets/ame_desert/desertsky_bk.tga",
+  //     "../assets/ame_desert/desertsky_up.tga", "../assets/ame_desert/desertsky_dn.tga",
+  //     "../assets/ame_desert/desertsky_lf.tga", "../assets/ame_desert/desertsky_rt.tga");
 
-  mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
+  mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh",
+                                     "../glsl_shader/shadow.fsh");
   mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
                                       "../glsl_shader/gbuffer_segmentation.fsh");
   mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
@@ -221,9 +223,10 @@ void OptifuserRenderer::render() {
 
       if (ImGui::CollapsingHeader("Mounted Cameras")) {
         ImGui::RadioButton("None##camera", &camIndex, -1);
-        for (size_t i = 0; i < mMountedCameras.size(); ++i) {
-          ImGui::RadioButton((mMountedCameras[i]->name + "##camera" + std::to_string(i)).c_str(),
-                             &camIndex, i);
+        for (auto &[id, cam] : mMountedCameras) {
+          ImGui::RadioButton(
+              (mMountedCameras[id]->getName() + "##camera" + std::to_string(id)).c_str(),
+              &camIndex, id);
         }
       }
 
@@ -287,14 +290,28 @@ void OptifuserRenderer::bindSyncCallback(
 
 std::vector<ICamera *> OptifuserRenderer::getCameras() {
   std::vector<ICamera *> output;
-  for (auto &cam : mMountedCameras) {
+  for (auto &[_, cam] : mMountedCameras) {
     output.push_back(cam.get());
   }
   return output;
 }
 
-void OptifuserRenderer::addCamera(std::string const &name, uint32_t width, uint32_t height,
-                                  float fovy) {
-  mMountedCameras.push_back(
-      std::make_unique<MountedCamera>(name, width, height, fovy, mScene.get()));
+void OptifuserRenderer::addCamera(uint32_t uniqueId, std::string const &name, uint32_t width,
+                                  uint32_t height, float fovx, float fovy, float near, float far) {
+  std::cout
+      << "Note: current camera implementation does not support non-square pixels, and fovy will "
+         "take precedence."
+      << std::endl;
+  mMountedCameras[uniqueId] =
+      std::make_unique<MountedCamera>(name, width, height, fovy, mScene.get());
+  mMountedCameras[uniqueId]->near = near;
+  mMountedCameras[uniqueId]->far = far;
 }
+
+void OptifuserRenderer::updateCamera(uint32_t uniqueId, physx::PxTransform const &transform) {
+  assert(mMountedCameras.find(uniqueId) != mMountedCameras.end());
+  mMountedCameras[uniqueId]->position = {transform.p.x, transform.p.y, transform.p.z};
+  mMountedCameras[uniqueId]->rotation = {transform.q.w, transform.q.x, transform.q.y,
+                                         transform.q.z};
+}
+} // namespace Renderer

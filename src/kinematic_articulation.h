@@ -146,7 +146,7 @@ class KinematicArticulation {
   PxSimulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
   PxCooking *mCooking = nullptr;
-  IPhysxRenderer *mRenderer = nullptr;
+  Renderer::IPhysxRenderer *mRenderer = nullptr;
 
 public:
   KinematicArticulation(PxSimulation *simulation);

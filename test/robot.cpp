@@ -14,8 +14,8 @@ void test1() {
   OptifuserRenderer renderer;
   renderer.init();
   renderer.cam.position = {0.5, -4, 0.5};
-  renderer.cam.forward = {0, 1, 0};
-  renderer.cam.up = {0, 0, 1};
+  renderer.cam.setForward({0, 1, 0});
+  renderer.cam.setUp({0, 0, 1});
 
   PxSimulation sim;
   sim.setRenderer(&renderer);
@@ -33,7 +33,7 @@ void test1() {
 
   sim.addGround(-0.3f);
 
-  auto loader = URDFLoader(sim);
+  auto loader = URDF::URDFLoader(sim);
   auto articulation = loader.loadKinematic("../assets/robot/arm_without_gazabo.urdf");
   // articulation->getDofs()
   articulation.setAllPos({-1.93475823254, -1.53188487338, 0.951243371548, -2.24179359416,

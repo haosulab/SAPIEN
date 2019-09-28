@@ -1,4 +1,6 @@
 #pragma once
+#include "kinematic_articulation.h"
+#include "px_object.h"
 #include <PxPhysicsAPI.h>
 #include <iostream>
 #include <memory>
@@ -6,8 +8,8 @@
 #include <string>
 #include <tinyxml2.h>
 #include <vector>
-#include "kinematic_articulation.h"
-#include "px_object.h"
+
+namespace URDF {
 
 using namespace tinyxml2;
 
@@ -350,22 +352,22 @@ struct Link : DomBase {
   LOAD_ATTR_BEGIN()
   LOAD_ATTR(std::string, name)
   CHECK_CHILD_UNIQUE_SET_DEFAULT(inertial, {
-      inertial = std::make_unique<Inertial>();
-      inertial->mass = std::make_unique<Mass>();
-      inertial->mass->value = 1;
+    inertial = std::make_unique<Inertial>();
+    inertial->mass = std::make_unique<Mass>();
+    inertial->mass->value = 1;
 
-      inertial->origin = std::make_unique<Origin>();
-      inertial->origin->xyz = {0, 0, 0};
-      inertial->origin->rpy = {0, 0, 0};
+    inertial->origin = std::make_unique<Origin>();
+    inertial->origin->xyz = {0, 0, 0};
+    inertial->origin->rpy = {0, 0, 0};
 
-      inertial->inertia = std::make_unique<Inertia>();
-      inertial->inertia->ixx = 1;
-      inertial->inertia->iyy = 1;
-      inertial->inertia->izz = 1;
-      inertial->inertia->ixy = 0;
-      inertial->inertia->ixz = 0;
-      inertial->inertia->iyz = 0;
-    })
+    inertial->inertia = std::make_unique<Inertia>();
+    inertial->inertia->ixx = 1;
+    inertial->inertia->iyy = 1;
+    inertial->inertia->izz = 1;
+    inertial->inertia->ixy = 0;
+    inertial->inertia->ixz = 0;
+    inertial->inertia->iyz = 0;
+  })
   LOAD_ATTR_END()
 
   // no need to check child
@@ -472,13 +474,145 @@ struct Joint : DomBase {
   CHECK_CHILD_END()
 };
 
+struct Camera {
+  float near;
+  float far;
+  float width;
+  float height;
+  float fovx;
+  float fovy;
+};
+
+struct Sensor : DomBase {
+  enum Type { CAMERA, DEPTH, RAY } type;
+  std::string name;
+  std::unique_ptr<Origin> origin;
+  std::unique_ptr<Camera> camera;
+
+  Sensor() {}
+  Sensor(const XMLElement &elem) {
+    const char *name_ = elem.Attribute("name");
+    if (!name_) {
+      name_ = "";
+    }
+    name = name_;
+
+    const char *type_ = elem.Attribute("type");
+    if (!type_) {
+      std::cerr << "Type is required for a sensor" << std::endl;
+      exit(1);
+    }
+    std::string type_string = type_;
+    if (type_string == "") {
+      type = CAMERA;
+    } else if (type_string == "depth") {
+      type = DEPTH;
+    } else if (type_string == "ray") {
+      type = RAY;
+    } else {
+      std::cerr << "Unknown sensor type " << type_string << std::endl;
+      exit(1);
+    }
+    auto pose = elem.FirstChildElement("pose");
+    origin = std::make_unique<Origin>();
+    if (!pose) {
+      origin->xyz = {0, 0, 0};
+      origin->rpy = {0, 0, 0};
+    } else {
+      float x, y, z, roll, pitch, yaw;
+      std::istringstream iss(pose->GetText());
+      iss >> x >> y >> z >> roll >> pitch >> yaw;
+      origin->xyz = {x, y, z};
+      origin->rpy = {roll, pitch, yaw};
+    }
+    if (type == CAMERA || type == DEPTH) {
+      loadCamera(elem);
+    }
+  }
+
+  void loadCamera(const XMLElement &elem) {
+    this->camera = std::make_unique<Camera>();
+    auto camera = elem.FirstChildElement("camera");
+    if (!camera) {
+      std::cerr << "color or depth camera is missing a camera child" << std::endl;
+      exit(1);
+    }
+    auto fovx = camera->FirstChildElement("horizontal_fov");
+    auto fovy = camera->FirstChildElement("vertical_fov");
+    if (!fovx && !fovy) {
+      std::cerr << "One of horizontal_fov and vertical_fov needs to be specified" << std::endl;
+      exit(1);
+    }
+    auto clip = camera->FirstChildElement("clip");
+    auto image = camera->FirstChildElement("image");
+    if (!clip || !image) {
+      std::cerr << "camera element requires a clip and an image child" << std::endl;
+      exit(1);
+    }
+    auto near = clip->FirstChildElement("near");
+    auto far = clip->FirstChildElement("far");
+    if (!near || !far) {
+      std::cerr << "clip element requires a near and a far child" << std::endl;
+      exit(1);
+    }
+    float nearValue = std::atof(near->GetText());
+    float farValue = std::atof(far->GetText());
+
+    if (image->FirstChildElement("format")) {
+      std::cerr << "image format will be ignored." << std::endl;
+    }
+    auto width = image->FirstChildElement("width");
+    auto height = image->FirstChildElement("height");
+    if (!width || !height) {
+      std::cerr << "image element requires a width and a height child" << std::endl;
+      exit(1);
+    }
+    float widthValue = std::atoi(width->GetText());
+    float heightValue = std::atoi(height->GetText());
+    float fovxValue, fovyValue;
+    if (fovx && fovy) {
+      fovxValue = std::atof(fovx->GetText());
+      fovyValue = std::atof(fovy->GetText());
+    } else if (fovx) {
+      fovxValue = std::atof(fovx->GetText());
+      fovyValue = std::atan(std::tan(fovxValue / 2) / widthValue * heightValue) * 2;
+    } else { // fovy
+      fovyValue = std::atof(fovy->GetText());
+      fovxValue = std::atan(std::tan(fovyValue / 2) / heightValue * widthValue) * 2;
+    }
+    this->camera->fovx = fovxValue;
+    this->camera->fovy = fovyValue;
+    this->camera->near = nearValue;
+    this->camera->far = farValue;
+    this->camera->width = widthValue;
+    this->camera->height = heightValue;
+    printf("Camera loaded!\n");
+  }
+};
+
+struct Gazebo : DomBase {
+  DECLARE_CONSTRUCTOR(Gazebo)
+  DECLARE_ATTR(std::string, reference)
+  DECLARE_CHILD(Sensor, sensor);
+
+  LOAD_ATTR_BEGIN()
+  LOAD_ATTR_OPTIONAL(std::string, reference, "")
+  LOAD_ATTR_END()
+
+  LOAD_CHILD_BEGIN()
+  LOAD_CHILD(Sensor, sensor);
+  LOAD_CHILD_END()
+};
+
 struct Robot : DomBase {
   DECLARE_CONSTRUCTOR(Robot)
   DECLARE_CHILD(Link, link)
   DECLARE_CHILD(Joint, joint)
+  DECLARE_CHILD(Gazebo, gazebo)
   LOAD_CHILD_BEGIN()
   LOAD_CHILD(Link, link);
   LOAD_CHILD(Joint, joint);
+  LOAD_CHILD(Gazebo, gazebo)
   LOAD_CHILD_END()
 };
 
@@ -494,3 +628,5 @@ public:
   KinematicArticulation loadKinematic(const std::string &filename);
   PxObject loadObject(const std::string &filename);
 };
+
+} // namespace URDF

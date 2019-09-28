@@ -30,7 +30,7 @@ file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
 
 
 add_definitions(-D_DEBUG)
-add_definitions(-D_VERBOSE)
+# add_definitions(-D_VERBOSE)
 add_definitions(-D_PVD)
 add_definitions(-DPVD_HOST="192.168.0.110")
 

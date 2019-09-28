@@ -1,11 +1,13 @@
 #pragma once
+#include "camera.h"
 #include "render_interface.h"
 #include <camera_spec.h>
 #include <memory>
 #include <optifuser.h>
-#include "camera.h"
 
-class OptifuserRenderer : public IPhysxRenderer, ICameraManager {
+namespace Renderer {
+
+class OptifuserRenderer : public IPhysxRenderer {
 public:
   std::map<uint32_t, std::vector<Optifuser::Object *>> mObjectRegistry;
   std::shared_ptr<Optifuser::Scene> mScene;
@@ -31,10 +33,13 @@ public:
   void render();
 
 private:
-  std::vector<std::unique_ptr<MountedCamera>> mMountedCameras;
+  std::map<uint32_t, std::unique_ptr<MountedCamera>> mMountedCameras;
 
 public:
   // ICameraManager
   virtual std::vector<ICamera *> getCameras() override;
-  virtual void addCamera(std::string const &name, uint32_t width, uint32_t height, float fovy) override;
+  virtual void addCamera(uint32_t uniqueId, std::string const &name, uint32_t width,
+                         uint32_t height, float fovx, float fovy, float near, float far) override;
+  virtual void updateCamera(uint32_t uniqueId, physx::PxTransform const &transform) override;
 };
+} // namespace Renderer

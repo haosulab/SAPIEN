@@ -1,11 +1,11 @@
 #pragma once
+#include "articulation_wrapper.h"
 #include "id_generator.h"
 #include "render_interface.h"
 #include "simulation.h"
 #include <PxPhysicsAPI.h>
 #include <memory>
 #include <vector>
-#include "articulation_wrapper.h"
 
 using namespace physx;
 
@@ -13,7 +13,7 @@ class PxArticulationBuilder {
   PxSimulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
   PxCooking *mCooking = nullptr;
-  IPhysxRenderer *mRenderer = nullptr;
+  Renderer::IPhysxRenderer *mRenderer = nullptr;
   PxArticulationReducedCoordinate *mArticulation = nullptr;
 
   std::vector<PxArticulationLink *> mLinks;
@@ -22,7 +22,6 @@ class PxArticulationBuilder {
   std::vector<PxShape *> mShapes;
   std::vector<PxReal> mDensities;
   std::map<std::string, PxArticulationLink *> namedLinks;
-
 public:
   PxArticulationBuilder(PxSimulation *simulation);
 

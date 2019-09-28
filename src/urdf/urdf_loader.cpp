@@ -2,13 +2,15 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "articulation_wrapper.h"
+#include "kinematic_articulation.h"
 #include "mesh_registry.h"
 #include "simulation.h"
 #include <eigen3/Eigen/Eigenvalues>
 #include <experimental/filesystem>
 #include <map>
 #include <tinyxml2.h>
-#include "kinematic_articulation.h"
+
+namespace URDF {
 
 using namespace tinyxml2;
 using namespace physx;
@@ -287,7 +289,49 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
       stack.push_back(c);
     }
   }
-  return builder.build(true);
+
+  PxArticulationWrapper *wrapper = builder.build(true);
+
+  for (auto &gazebo : robot->gazebo_array) {
+    for (auto &sensor : gazebo->sensor_array) {
+      switch (sensor->type) {
+      case Sensor::Type::RAY:
+        std::cerr << "Ray Sensor not supported yet" << std::endl;
+        break;
+      case Sensor::Type::CAMERA:
+      case Sensor::Type::DEPTH:
+        PxU32 nbLinks = wrapper->articulation->getNbLinks();
+        std::vector<PxArticulationLink *> links(nbLinks);
+        wrapper->articulation->getLinks(links.data(), nbLinks);
+        uint32_t idx =
+            std::find_if(links.begin(), links.end(),
+                         [&](auto const &link) { return link->getName() == gazebo->reference; }) -
+            links.begin();
+        if (idx == nbLinks) {
+          std::cerr << "Failed to find the link to mount camera: " << gazebo->reference
+                    << std::endl;
+          continue;
+        }
+
+        // TODO: mount the camera
+        physx_id_t cameraId = IDGenerator::instance()->next();
+
+        const PxVec3 up = {0, 0, 1};
+        const PxVec3 forward = {1, 0, 0};
+        const PxMat33 rot(forward.cross(up), up, -forward);
+
+        mSimulation.mMountedCamera2MountedActor[cameraId] = links[idx];
+        mSimulation.mCameraId2InitialPose[cameraId] =
+            poseFromOrigin(*sensor->origin) * PxTransform(PxVec3(0), PxQuat(rot));
+
+        mSimulation.mRenderer->addCamera(
+            cameraId, sensor->name, sensor->camera->width, sensor->camera->height,
+            sensor->camera->fovx, sensor->camera->fovy, sensor->camera->near, sensor->camera->far);
+
+      }
+    }
+  }
+  return wrapper;
 }
 
 PxObject URDFLoader::loadObject(const std::string &filename) {
@@ -662,7 +706,8 @@ KinematicArticulation URDFLoader::loadKinematic(const std::string &filename) {
         break;
       case Geometry::MESH:
         visual->geometry->filename = getAbsPath(filename, visual->geometry->filename);
-        actorBuilder.addObjVisual(visual->geometry->filename, tVisual2Link, visual->geometry->scale);
+        actorBuilder.addObjVisual(visual->geometry->filename, tVisual2Link,
+                                  visual->geometry->scale);
         break;
       }
     }
@@ -752,10 +797,9 @@ KinematicArticulation URDFLoader::loadKinematic(const std::string &filename) {
     if (current->joint) {
       KJoint *joint = nullptr;
 
-  // Save urdf string, robot interface will use it
-  doc.Accept( &printer );
-  mUrdfString = std::string(printer.CStr());
-
+      // Save urdf string, robot interface will use it
+      doc.Accept(&printer);
+      mUrdfString = std::string(printer.CStr());
 
 #ifdef _VERBOSE
       printf("Joint: %s between %s and %s\n", current->joint->type.c_str(),
@@ -818,3 +862,5 @@ KinematicArticulation URDFLoader::loadKinematic(const std::string &filename) {
   }
   return kArticulation;
 }
+
+} // namespace URDF
