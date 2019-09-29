@@ -6,6 +6,7 @@
 #include <cassert>
 #include <fstream>
 #include <sstream>
+#include "kinematics_articulation_interface.h"
 
 static PxDefaultErrorCallback gDefaultErrorCallback;
 static PxDefaultAllocator gDefaultAllocatorCallback;
@@ -159,6 +160,9 @@ void PxSimulation::step() {
   }
   for (auto &wrapper : mDynamicArticulationWrappers) {
     wrapper->updateCache();
+  }
+  for (auto & wrapper : mKinematicArticulationWrappers){
+    wrapper->update(mTimestep);
   }
 }
 

@@ -1,8 +1,8 @@
 #pragma once
-#include "kinematic_articulation.h"
 #include "px_object.h"
 #include <PxPhysicsAPI.h>
 #include <iostream>
+#include <kinematics_articulation_interface.h>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -625,8 +625,7 @@ class URDFLoader {
 public:
   URDFLoader(class PxSimulation &simulation);
   struct PxArticulationWrapper *load(const std::string &filename);
-  KinematicArticulation loadKinematic(const std::string &filename);
-  PxObject loadObject(const std::string &filename);
+  std::unique_ptr<PxKinematicsArticulationWrapper> loadKinematic(const std::string &filename);
 };
 
 } // namespace URDF

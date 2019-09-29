@@ -8,7 +8,8 @@
 using namespace MeshUtil;
 
 void PxActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTransform &pose,
-                                           const PxVec3 &scale, PxMaterial *material, PxReal density) {
+                                           const PxVec3 &scale, PxMaterial *material,
+                                           PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxConvexMesh *mesh = loadObjMesh(filename, mPhysicsSDK, mCooking);
   PxShape *shape =
@@ -23,8 +24,8 @@ void PxActorBuilder::addConvexShapeFromObj(const std::string &filename, const Px
   mCount++;
 }
 
-void PxActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size,
-                                 PxMaterial *material, PxReal density) {
+void PxActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMaterial *material,
+                                 PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxShape *shape = mPhysicsSDK->createShape(PxBoxGeometry(size), *material, true);
   shape->setLocalPose(pose);
@@ -46,7 +47,8 @@ void PxActorBuilder::addCylinderShape(const PxTransform &pose, PxReal radius, Px
   mCount++;
 }
 
-void PxActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMaterial *material, PxReal density) {
+void PxActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMaterial *material,
+                                    PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxShape *shape = mPhysicsSDK->createShape(PxSphereGeometry(radius), *material, true);
   shape->setLocalPose(pose);
@@ -139,6 +141,8 @@ PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToS
     PxRigidBodyExt::updateMassAndInertia(*dActor, mDensities.data(), mCount);
   }
   actor->setName("");
-  if (addToScene) {mSimulation->mScene->addActor(*actor);}
+  if (addToScene) {
+    mSimulation->mScene->addActor(*actor);
+  }
   return actor;
 }
