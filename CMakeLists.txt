@@ -14,7 +14,7 @@ find_package(glfw3 REQUIRED)
 find_package(assimp REQUIRED)
 
 include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
-        "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include" "src"
+        "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
         "src/renderer"
         )
 link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
@@ -24,11 +24,8 @@ link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
 include_directories(
         "3rd_party/optifuser/include"
         "src"
+        "src/urdf"
 )
-link_directories(
-        "3rd_party/optifuser/build/lib"
-)
-
 
 include_directories("3rd_party/optifuser/3rd_party/imgui" "3rd_party/optifuser/3rd_party/imgui/examples")
 
