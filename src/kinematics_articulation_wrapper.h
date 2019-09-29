@@ -48,6 +48,7 @@ class PxKinematicsArticulationWrapper : public IArticulationDrivable {
   std::vector<std::tuple<PxReal, PxReal>> jointLimit;
 
   bool updateQpos = false;
+  bool updateVelocityDrive = false;
   std::vector<PxReal> driveQpos;
   std::vector<PxReal> driveQvel;
 

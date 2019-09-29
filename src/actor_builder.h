@@ -46,15 +46,15 @@ public:
                          physx::PxVec3 scale = {1, 1, 1}, PxMaterial *material = nullptr,
                          PxReal density = 1.f);
 
-  void addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+  physx_id_t addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                     const PxVec3 &size = {1, 1, 1});
 
-  void addCylinderVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+  physx_id_t addCylinderVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
                          PxReal length = 1);
 
-  void addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1);
+  physx_id_t addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1);
 
-  void addObjVisual(const std::string &filename,
+  physx_id_t addObjVisual(const std::string &filename,
                     const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                     const PxVec3 &scale = {1, 1, 1});
 

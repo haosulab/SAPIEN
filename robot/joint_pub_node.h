@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include "kinematics_articulation_interface.h"
+#include "kinematics_articulation_wrapper.h"
 #include <ros/publisher.h>
 #include <ros/rate.h>
 #include <ros/ros.h>

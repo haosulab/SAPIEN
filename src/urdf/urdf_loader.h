@@ -2,7 +2,7 @@
 #include "px_object.h"
 #include <PxPhysicsAPI.h>
 #include <iostream>
-#include <kinematics_articulation_interface.h>
+#include <kinematics_articulation_wrapper.h>
 #include <memory>
 #include <sstream>
 #include <string>

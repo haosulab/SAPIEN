@@ -86,35 +86,39 @@ void PxActorBuilder::addPrimitiveShape(physx::PxGeometryType::Enum type, physx::
   }
 }
 
-void PxActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size) {
+physx_id_t PxActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eBOX,
                           size); // TODO: check if default box size is 1 or 2
   mSimulation->mRenderId2InitialPose[newId] = pose;
+  return newId;
 }
 
-void PxActorBuilder::addCylinderVisual(const PxTransform &pose, PxReal radius, PxReal length) {
+physx_id_t PxActorBuilder::addCylinderVisual(const PxTransform &pose, PxReal radius, PxReal length) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE,
                           {length, radius, radius}); // TODO: check default orientation
   mSimulation->mRenderId2InitialPose[newId] = pose;
+  return newId;
 }
 
-void PxActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius) {
+physx_id_t PxActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius});
   mSimulation->mRenderId2InitialPose[newId] = pose;
+  return newId;
 }
 
-void PxActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
+physx_id_t PxActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
                                   const PxVec3 &scale) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, filename, scale);
   mSimulation->mRenderId2InitialPose[newId] = pose;
+  return newId;
 }
 PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToScene) {
 #ifdef _DEBUG

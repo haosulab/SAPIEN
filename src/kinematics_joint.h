@@ -29,7 +29,8 @@ public:
 public:
   KJoint(PxRigidDynamic *childLink, KJoint *parentJoint, const PxTransform &toChild,
          const PxTransform &fromParent);
-  PxTransform passThrough(const PxTransform &T);
+  PxTransform passThroughKinematicsDrive(const PxTransform &T);
+  PxTransform passThroughGlobalPose(const PxTransform &T);
   virtual std::vector<std::tuple<PxReal, PxReal>> getLimits() const = 0;
   virtual uint32_t getDof() const = 0;
   virtual PxReal getQpos() const = 0;

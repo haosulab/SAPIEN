@@ -2,7 +2,7 @@
 // Created by sim on 9/26/19.
 //
 
-#include "kinematics_articulation_interface.h"
+#include "kinematics_articulation_wrapper.h"
 #include <assert.h>
 #include <iostream>
 #include <limits>
@@ -104,32 +104,34 @@ std::vector<physx::PxReal> PxKinematicsArticulationWrapper::get_qf() const {
 }
 void PxKinematicsArticulationWrapper::set_qpos(const std::vector<PxReal> &v) {
   assert(v.size() == DOF);
-  size_t d = 0, j = 0;
+  size_t j = 0;
   while (j < jointNum) {
     auto start = v.begin() + jointStartIndex[j];
     auto end = v.begin() + jointStartIndex[j + 1];
     std::vector<PxReal> jointQpos(start, end);
     jointPtr[j]->setQpos(jointQpos);
-    d += jointPtr[j]->getDof();
     j += 1;
   }
   qpos = v;
+  //  driveQpos = v;
+
+  updateVelocityDrive = false;
 }
 void PxKinematicsArticulationWrapper::set_qvel(const std::vector<PxReal> &v) {
   assert(v.size() == dof());
+  updateVelocityDrive = true;
   driveQvel = v;
 }
 void PxKinematicsArticulationWrapper::set_qacc(const std::vector<PxReal> &v) {}
 void PxKinematicsArticulationWrapper::set_qf(const std::vector<PxReal> &v) {}
 void PxKinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal> &v) {
   assert(v.size() == DOF);
-  size_t d = 0, j = 0;
+  size_t j = 0;
   while (j < jointNum) {
     auto start = v.begin() + jointStartIndex[j];
     auto end = v.begin() + jointStartIndex[j + 1];
     std::vector<PxReal> jointQpos(start, end);
     jointPtr[j]->driveQpos(jointQpos);
-    d += jointPtr[j]->getDof();
     j += 1;
   }
   updateQpos = true;
@@ -148,7 +150,9 @@ void PxKinematicsArticulationWrapper::update(PxReal timestep) {
         driveQpos[controllerIndex[j]] = queue[j];
       }
     }
-  } else {
+    set_drive_target(driveQpos);
+    updateVelocityDrive = false;
+  } else if (updateVelocityDrive) {
     for (std::size_t i = 0; i < dof(); ++i) {
       // Update drive of next step based on the drive velocity
       PxReal newQ = driveQpos[i] + driveQvel[i] * timestep;
@@ -156,14 +160,17 @@ void PxKinematicsArticulationWrapper::update(PxReal timestep) {
       newQ = newQ > upperLimit ? upperLimit : newQ;
       driveQpos[i] = newQ < lowerLimit ? lowerLimit : newQ;
     }
+    set_drive_target(driveQpos);
   }
-  set_drive_target(driveQpos);
+//    set_drive_target(driveQpos);
 
   // Update velocity based on time interval
   for (size_t i = 0; i < dof(); ++i) {
     qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
   }
-  qpos = driveQpos;
+  if (updateQpos) {
+    qpos = driveQpos;
+  }
   updateQpos = false;
 
   // Update ROS related communication buffer

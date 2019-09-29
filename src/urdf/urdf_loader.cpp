@@ -1,4 +1,4 @@
-#include "urdf/urdf_loader.h"
+#include "urdf_loader.h"
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "articulation_wrapper.h"
@@ -9,7 +9,7 @@
 #include <map>
 #include <tinyxml2.h>
 
-#include "kinematics_articulation_interface.h"
+#include "kinematics_articulation_wrapper.h"
 
 namespace URDF {
 
@@ -337,6 +337,8 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
 
 std::unique_ptr<PxKinematicsArticulationWrapper>
 URDFLoader::loadKinematic(const std::string &filename) {
+  std::unique_ptr<PxKinematicsArticulationWrapper> wrapper = std::make_unique<PxKinematicsArticulationWrapper>();
+
   const std::map<std::string, JointType> typeString2JointType = {
       {"revolute", JointType::REVOLUTE},
       {"continuous", JointType::CONTINUOUS},
@@ -422,8 +424,6 @@ URDFLoader::loadKinematic(const std::string &filename) {
   }
 
   std::map<LinkTreeNode *, KJoint *> treeNode2KJoint;
-  std::unique_ptr<PxKinematicsArticulationWrapper> wrapper =
-      std::make_unique<PxKinematicsArticulationWrapper>();
   stack = {root};
   while (!stack.empty()) {
     LinkTreeNode *current = stack.back();
@@ -433,23 +433,25 @@ URDFLoader::loadKinematic(const std::string &filename) {
     // visual
     for (auto &visual : current->link->visual_array) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
+      physx_id_t visualId;
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        actorBuilder.addBoxVisual(tVisual2Link, visual->geometry->size);
+        visualId = actorBuilder.addBoxVisual(tVisual2Link, visual->geometry->size);
         break;
       case Geometry::CYLINDER:
-        actorBuilder.addCylinderVisual(tVisual2Link, visual->geometry->radius,
+        visualId = actorBuilder.addCylinderVisual(tVisual2Link, visual->geometry->radius,
                                        visual->geometry->length);
         break;
       case Geometry::SPHERE:
-        actorBuilder.addSphereVisual(tVisual2Link, visual->geometry->radius);
+        visualId = actorBuilder.addSphereVisual(tVisual2Link, visual->geometry->radius);
         break;
       case Geometry::MESH:
         visual->geometry->filename = getAbsPath(filename, visual->geometry->filename);
-        actorBuilder.addObjVisual(visual->geometry->filename, tVisual2Link,
+        visualId = actorBuilder.addObjVisual(visual->geometry->filename, tVisual2Link,
                                   visual->geometry->scale);
         break;
       }
+      mSimulation.mRenderId2Articulation[visualId] = wrapper.get();
     }
 
     // collision

@@ -126,7 +126,7 @@ void OptifuserRenderer::destroy() {
 void OptifuserRenderer::render() {
   mContext->processEvents();
 
-  float dt = 0.05f;
+  float dt = 0.005f;
   if (Optifuser::getInput().getKeyState(GLFW_KEY_W)) {
     cam.moveForwardRight(dt, 0);
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_S)) {

@@ -2,11 +2,11 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "articulation_interface.h"
+#include "kinematics_articulation_wrapper.h"
 #include "my_filter_shader.h"
 #include <cassert>
 #include <fstream>
 #include <sstream>
-#include "kinematics_articulation_interface.h"
 
 static PxDefaultErrorCallback gDefaultErrorCallback;
 static PxDefaultAllocator gDefaultAllocatorCallback;
