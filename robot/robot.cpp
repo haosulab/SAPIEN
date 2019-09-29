@@ -40,7 +40,7 @@ void test1() {
   builder->addBoxShape(boxPose, boxSize, nullptr, 1.f);
   builder->addBoxVisual(boxPose, boxSize);
   auto box = builder->build();
-  sim.addGround(-0.3f);
+//  sim.addGround(-0.3f);
 
   auto loader = URDF::URDFLoader(sim);
   std::unique_ptr<PxKinematicsArticulationWrapper> unique_wrapper =
