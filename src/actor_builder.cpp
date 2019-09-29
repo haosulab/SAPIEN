@@ -138,6 +138,8 @@ PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToS
     actor = dActor;
     for (size_t i = 0; i < mShapes.size(); ++i) {
       actor->attachShape(*mShapes[i]);
+    }
+    for (size_t i = 0; i < mRenderIds.size(); ++i) {
       mSimulation->mRenderId2Parent[mRenderIds[i]] = actor;
     }
     PxRigidBodyExt::updateMassAndInertia(*dActor, mDensities.data(), mCount);
