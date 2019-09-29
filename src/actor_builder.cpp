@@ -121,12 +121,6 @@ physx_id_t PxActorBuilder::addObjVisual(const std::string &filename, const PxTra
   return newId;
 }
 PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToScene) {
-#ifdef _DEBUG
-  if (mRenderIds.size() != mCount || mShapes.size() != mCount) {
-    std::cerr << "Invalid size!" << std::endl;
-  }
-#endif
-
   PxRigidActor *actor;
   if (isStatic) {
     actor = mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
