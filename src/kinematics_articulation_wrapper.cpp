@@ -141,41 +141,41 @@ std::vector<std::string> PxKinematicsArticulationWrapper::get_drive_joint_name()
   return jointNameDOF;
 }
 void PxKinematicsArticulationWrapper::update(PxReal timestep) {
-  // Update drive target based on controllers
-  if (hasActuator) {
-    for (size_t i = 0; i < controllerQueueList.size(); ++i) {
-      auto controllerIndex = controllerIndexList[i];
-      auto queue = controllerQueueList[i]->pop();
-      for (size_t j = 0; j < controllerIndex.size(); ++j) {
-        driveQpos[controllerIndex[j]] = queue[j];
-      }
-    }
-    set_drive_target(driveQpos);
-    updateVelocityDrive = false;
-  } else if (updateVelocityDrive) {
-    for (std::size_t i = 0; i < dof(); ++i) {
-      // Update drive of next step based on the drive velocity
-      PxReal newQ = driveQpos[i] + driveQvel[i] * timestep;
-      auto [upperLimit, lowerLimit] = jointLimit[i];
-      newQ = newQ > upperLimit ? upperLimit : newQ;
-      driveQpos[i] = newQ < lowerLimit ? lowerLimit : newQ;
-    }
-    set_drive_target(driveQpos);
-  }
+//  // Update drive target based on controllers
+//  if (hasActuator) {
+//    for (size_t i = 0; i < controllerQueueList.size(); ++i) {
+//      auto controllerIndex = controllerIndexList[i];
+//      auto queue = controllerQueueList[i]->pop();
+//      for (size_t j = 0; j < controllerIndex.size(); ++j) {
+//        driveQpos[controllerIndex[j]] = queue[j];
+//      }
+//    }
 //    set_drive_target(driveQpos);
-
-  // Update velocity based on time interval
-  for (size_t i = 0; i < dof(); ++i) {
-    qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
-  }
-  if (updateQpos) {
-    qpos = driveQpos;
-  }
-  updateQpos = false;
-
-  // Update ROS related communication buffer
-  // In the future, the cast between PxReal and float should be make explicitly
-  jointStateQueue.push(qpos);
+//    updateVelocityDrive = false;
+//  } else if (updateVelocityDrive) {
+//    for (std::size_t i = 0; i < dof(); ++i) {
+//      // Update drive of next step based on the drive velocity
+//      PxReal newQ = driveQpos[i] + driveQvel[i] * timestep;
+//      auto [upperLimit, lowerLimit] = jointLimit[i];
+//      newQ = newQ > upperLimit ? upperLimit : newQ;
+//      driveQpos[i] = newQ < lowerLimit ? lowerLimit : newQ;
+//    }
+//    set_drive_target(driveQpos);
+//  }
+////    set_drive_target(driveQpos);
+//
+//  // Update velocity based on time interval
+//  for (size_t i = 0; i < dof(); ++i) {
+//    qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
+//  }
+//  if (updateQpos) {
+//    qpos = driveQpos;
+//  }
+//  updateQpos = false;
+//
+//  // Update ROS related communication buffer
+//  // In the future, the cast between PxReal and float should be make explicitly
+//  jointStateQueue.push(qpos);
 }
 
 // Thread Safe Queue

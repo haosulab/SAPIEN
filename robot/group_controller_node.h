@@ -8,7 +8,7 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <control_msgs/FollowJointTrajectoryFeedback.h>
 #include <control_msgs/FollowJointTrajectoryResult.h>
-#include <kinematics_articulation_interface.h>
+#include <kinematics_articulation_wrapper.h>
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectory.h>

@@ -49,7 +49,7 @@ void RevoluteKJoint::setQpos(const std::vector<PxReal> &q) {
   //  }
   targetQpos = targetQpos > upperLimit ? upperLimit : targetQpos;
   targetQpos = targetQpos < lowerLimit ? lowerLimit : targetQpos;
-  PxTransform targetPose = passThroughKinematicsDrive(PxTransform({targetQpos, {1, 0, 0}}));
+  PxTransform targetPose = passThroughGlobalPose(PxTransform({targetQpos, {1, 0, 0}}));
   childLink->setGlobalPose(targetPose);
   qpos = targetQpos;
 }
@@ -74,7 +74,7 @@ ContinuousKJoint::ContinuousKJoint(PxRigidDynamic *childLink, KJoint *parentJoin
 }
 void ContinuousKJoint::setQpos(const std::vector<PxReal> &q) {
   qpos = q[0];
-  PxTransform targetPose = passThroughKinematicsDrive(PxTransform({qpos, {1, 0, 0}}));
+  PxTransform targetPose = passThroughGlobalPose(PxTransform({qpos, {1, 0, 0}}));
   childLink->setGlobalPose(targetPose);
 }
 void ContinuousKJoint::driveQpos(const std::vector<PxReal> &qpos) {
@@ -96,7 +96,7 @@ void PrismaticKJoint::setQpos(const std::vector<PxReal> &q) {
   if (q[0] > upperLimit || q[0] < lowerLimit) {
     std::cerr << "Trying to set revelute joint angle out of the limit" << std::endl;
   }
-  PxTransform targetPose = passThroughKinematicsDrive(PxTransform(PxVec3(qpos, 0, 0)));
+  PxTransform targetPose = passThroughGlobalPose(PxTransform(PxVec3(qpos, 0, 0)));
   childLink->setGlobalPose(targetPose);
 }
 void PrismaticKJoint::driveQpos(const std::vector<PxReal> &qpos) {
@@ -113,7 +113,7 @@ FixedKJoint::FixedKJoint(PxRigidDynamic *childLink, KJoint *parentJoint,
     : KJoint(childLink, parentJoint, toChild, fromParent) {}
 void FixedKJoint::setQpos(const std::vector<PxReal> &qpos) {
   assert(qpos.size() == 0);
-  PxTransform targetPose = passThroughKinematicsDrive(PxTransform(PxIdentity));
+  PxTransform targetPose = passThroughGlobalPose(PxTransform(PxIdentity));
   childLink->setGlobalPose(targetPose);
 }
 std::vector<std::tuple<PxReal, PxReal>> FixedKJoint::getLimits() const { return {}; }
