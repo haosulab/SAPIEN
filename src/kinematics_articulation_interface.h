@@ -23,7 +23,7 @@ public:
 
   void push(const std::vector<float> &vec);
   void pushValue(const std::vector<float> vec);
-  std::vector<float> &pop();
+  std::vector<float> pop();
   bool empty();
   void clear();
 };
@@ -53,9 +53,9 @@ class PxKinematicsArticulationWrapper : public IArticulationDrivable {
 
   // ROS related buffer
   ThreadSafeQueue jointStateQueue = ThreadSafeQueue();
-  std::vector<ThreadSafeQueue*> controllerQueueList={};
-  std::vector<std::vector<uint32_t >> controllerIndexList = {};
-  bool hasActuator=false;
+  std::vector<ThreadSafeQueue *> controllerQueueList = {};
+  std::vector<std::vector<uint32_t>> controllerIndexList = {};
+  bool hasActuator = false;
 
 public:
   EArticulationType get_articulation_type() const override {

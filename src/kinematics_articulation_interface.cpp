@@ -160,7 +160,7 @@ void PxKinematicsArticulationWrapper::update(PxReal timestep) {
   set_drive_target(driveQpos);
 
   // Update velocity based on time interval
-  for (size_t i = 0; i < jointNum; ++i) {
+  for (size_t i = 0; i < dof(); ++i) {
     qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
   }
   qpos = driveQpos;
@@ -193,9 +193,9 @@ void ThreadSafeQueue::push(const std::vector<float> &vec) {
   std::lock_guard<std::mutex> guard(mLock);
   mQueue.push(vec);
 }
-std::vector<float> &ThreadSafeQueue::pop() {
+std::vector<float> ThreadSafeQueue::pop() {
   std::lock_guard<std::mutex> guard(mLock);
-  std::vector<float> &vec = mQueue.back();
+  std::vector<float> vec = mQueue.back();
   mQueue.pop();
   return vec;
 }

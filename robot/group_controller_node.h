@@ -41,7 +41,7 @@ private:
   std::unique_ptr<ThreadSafeQueue> queue;
 
 public:
-  GroupControllerNode(ThreadSafeQueue *queue, const std::vector<std::string> &jointName,
+  GroupControllerNode(const std::vector<std::string> &jointName,
                       const std::string &nameSpace, std::shared_ptr<ros::NodeHandle> nh);
 
   void spin();

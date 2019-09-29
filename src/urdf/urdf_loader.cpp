@@ -18,11 +18,6 @@ using namespace physx;
 using namespace MeshUtil;
 namespace fs = std::experimental::filesystem;
 // TODO: to function
-static const std::map<std::string, JointType> typeString2JointType = {
-    {"revolute", JointType::REVOLUTE},
-    {"continuous", JointType::CONTINUOUS},
-    {"fixed", JointType::FIXED},
-    {"prismatic", JointType::PRISMATIC}};
 
 PxTransform poseFromOrigin(const Origin &origin) {
   PxQuat q = PxQuat(origin.rpy.z, {0, 0, 1}) * PxQuat(origin.rpy.y, {0, 1, 0}) *
@@ -342,6 +337,11 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
 
 std::unique_ptr<PxKinematicsArticulationWrapper>
 URDFLoader::loadKinematic(const std::string &filename) {
+  const std::map<std::string, JointType> typeString2JointType = {
+      {"revolute", JointType::REVOLUTE},
+      {"continuous", JointType::CONTINUOUS},
+      {"fixed", JointType::FIXED},
+      {"prismatic", JointType::PRISMATIC}};
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;

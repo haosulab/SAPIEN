@@ -97,14 +97,15 @@ void robot_interface::GroupControllerNode::cancleCB(
   }
 }
 robot_interface::GroupControllerNode::GroupControllerNode(
-    ThreadSafeQueue *queue, const std::vector<std::string> &jointName,
-    const std::string &nameSpace, std::shared_ptr<ros::NodeHandle> nh)
+    const std::vector<std::string> &jointName, const std::string &nameSpace,
+    std::shared_ptr<ros::NodeHandle> nh)
     : mNodeHandle(nh), has_active_goal_(false),
       mServer(*nh, nameSpace + "/joint_trajectory_action",
               boost::bind(&robot_interface::GroupControllerNode::executeCB, this, _1),
               boost::bind(&robot_interface::GroupControllerNode::cancleCB, this, _1), false) {
   // Gets all of the joints
   mJointName = jointName;
+  queue = std::make_unique<ThreadSafeQueue>();
 }
 void robot_interface::GroupControllerNode::spin() {
   ros::Time started_waiting_for_controller = ros::Time::now();
