@@ -31,7 +31,7 @@ public:
 class PxKinematicsArticulationWrapper : public IArticulationDrivable {
   KJoint *mRoot;
   std::map<std::string, std::unique_ptr<KJoint>> jointName2JointPtr = {};
-  std::vector<KJoint *> jointPtr;
+  std::vector<KJoint *> jointListPtr;
   uint32_t undefinedNameGeneratorId = 0;
 
   bool cached = false;
@@ -47,6 +47,10 @@ class PxKinematicsArticulationWrapper : public IArticulationDrivable {
   std::vector<PxReal> qf;
   std::vector<std::tuple<PxReal, PxReal>> jointLimit;
 
+  // Link related field
+  std::vector<PxRigidDynamic *> linkListPtr;
+
+  // Update related field
   bool updateQpos = false;
   bool updateVelocityDrive = false;
   std::vector<PxReal> driveQpos;
@@ -85,6 +89,9 @@ public:
 
   void set_drive_target(const std::vector<PxReal> &v) override;
   std::vector<std::string> get_drive_joint_name() const;
+
+  // Customer function
+  std::vector<PxRigidDynamic *> get_links();
 
   // This function should be called after one simulation step
   void update(PxReal timestep);

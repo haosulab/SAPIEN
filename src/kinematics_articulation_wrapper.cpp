@@ -68,6 +68,11 @@ void PxKinematicsArticulationWrapper::buildCache() {
     for (auto const &joint : currentJoint->children) {
       stack.push_back(joint);
     }
+
+    // Add link to buffer
+    linkListPtr.push_back(currentJoint->childLink);
+
+    // Cache DOF specific information
     uint32_t qDOF = currentJoint->getDof();
     jointStartIndex.push_back(DOF);
     DOF += qDOF;
@@ -78,7 +83,7 @@ void PxKinematicsArticulationWrapper::buildCache() {
     }
     jointDOF.push_back(qDOF);
     jointName.push_back(name);
-    jointPtr.push_back(jointName2JointPtr[name].get());
+    jointListPtr.push_back(jointName2JointPtr[name].get());
   }
   jointNum = jointName2JointPtr.size();
   jointStartIndex.push_back(DOF);
@@ -109,7 +114,7 @@ void PxKinematicsArticulationWrapper::set_qpos(const std::vector<PxReal> &v) {
     auto start = v.begin() + jointStartIndex[j];
     auto end = v.begin() + jointStartIndex[j + 1];
     std::vector<PxReal> jointQpos(start, end);
-    jointPtr[j]->setQpos(jointQpos);
+    jointListPtr[j]->setQpos(jointQpos);
     j += 1;
   }
   qpos = v;
@@ -131,7 +136,7 @@ void PxKinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal>
     auto start = v.begin() + jointStartIndex[j];
     auto end = v.begin() + jointStartIndex[j + 1];
     std::vector<PxReal> jointQpos(start, end);
-    jointPtr[j]->driveQpos(jointQpos);
+    jointListPtr[j]->driveQpos(jointQpos);
     j += 1;
   }
   updateQpos = true;
@@ -140,42 +145,47 @@ void PxKinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal>
 std::vector<std::string> PxKinematicsArticulationWrapper::get_drive_joint_name() const {
   return jointNameDOF;
 }
+
+// Custom function
+std::vector<PxRigidDynamic *> PxKinematicsArticulationWrapper::get_links() { return linkListPtr; }
+
+// Update function should be called in the simulation loop
 void PxKinematicsArticulationWrapper::update(PxReal timestep) {
-//  // Update drive target based on controllers
-//  if (hasActuator) {
-//    for (size_t i = 0; i < controllerQueueList.size(); ++i) {
-//      auto controllerIndex = controllerIndexList[i];
-//      auto queue = controllerQueueList[i]->pop();
-//      for (size_t j = 0; j < controllerIndex.size(); ++j) {
-//        driveQpos[controllerIndex[j]] = queue[j];
-//      }
-//    }
-//    set_drive_target(driveQpos);
-//    updateVelocityDrive = false;
-//  } else if (updateVelocityDrive) {
-//    for (std::size_t i = 0; i < dof(); ++i) {
-//      // Update drive of next step based on the drive velocity
-//      PxReal newQ = driveQpos[i] + driveQvel[i] * timestep;
-//      auto [upperLimit, lowerLimit] = jointLimit[i];
-//      newQ = newQ > upperLimit ? upperLimit : newQ;
-//      driveQpos[i] = newQ < lowerLimit ? lowerLimit : newQ;
-//    }
-//    set_drive_target(driveQpos);
-//  }
-////    set_drive_target(driveQpos);
-//
-//  // Update velocity based on time interval
-//  for (size_t i = 0; i < dof(); ++i) {
-//    qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
-//  }
-//  if (updateQpos) {
-//    qpos = driveQpos;
-//  }
-//  updateQpos = false;
-//
-//  // Update ROS related communication buffer
-//  // In the future, the cast between PxReal and float should be make explicitly
-//  jointStateQueue.push(qpos);
+  //  // Update drive target based on controllers
+  //  if (hasActuator) {
+  //    for (size_t i = 0; i < controllerQueueList.size(); ++i) {
+  //      auto controllerIndex = controllerIndexList[i];
+  //      auto queue = controllerQueueList[i]->pop();
+  //      for (size_t j = 0; j < controllerIndex.size(); ++j) {
+  //        driveQpos[controllerIndex[j]] = queue[j];
+  //      }
+  //    }
+  //    set_drive_target(driveQpos);
+  //    updateVelocityDrive = false;
+  //  } else if (updateVelocityDrive) {
+  //    for (std::size_t i = 0; i < dof(); ++i) {
+  //      // Update drive of next step based on the drive velocity
+  //      PxReal newQ = driveQpos[i] + driveQvel[i] * timestep;
+  //      auto [upperLimit, lowerLimit] = jointLimit[i];
+  //      newQ = newQ > upperLimit ? upperLimit : newQ;
+  //      driveQpos[i] = newQ < lowerLimit ? lowerLimit : newQ;
+  //    }
+  //    set_drive_target(driveQpos);
+  //  }
+  ////    set_drive_target(driveQpos);
+  //
+  //  // Update velocity based on time interval
+  //  for (size_t i = 0; i < dof(); ++i) {
+  //    qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
+  //  }
+  //  if (updateQpos) {
+  //    qpos = driveQpos;
+  //  }
+  //  updateQpos = false;
+  //
+  //  // Update ROS related communication buffer
+  //  // In the future, the cast between PxReal and float should be make explicitly
+  //  jointStateQueue.push(qpos);
 }
 
 // Thread Safe Queue

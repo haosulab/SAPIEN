@@ -315,7 +315,6 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
           continue;
         }
 
-        // TODO: mount the camera
         physx_id_t cameraId = IDGenerator::instance()->next();
 
         const PxVec3 up = {0, 0, 1};
@@ -337,7 +336,8 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
 
 std::unique_ptr<PxKinematicsArticulationWrapper>
 URDFLoader::loadKinematic(const std::string &filename) {
-  std::unique_ptr<PxKinematicsArticulationWrapper> wrapper = std::make_unique<PxKinematicsArticulationWrapper>();
+  std::unique_ptr<PxKinematicsArticulationWrapper> wrapper =
+      std::make_unique<PxKinematicsArticulationWrapper>();
 
   const std::map<std::string, JointType> typeString2JointType = {
       {"revolute", JointType::REVOLUTE},
@@ -440,7 +440,7 @@ URDFLoader::loadKinematic(const std::string &filename) {
         break;
       case Geometry::CYLINDER:
         visualId = actorBuilder.addCylinderVisual(tVisual2Link, visual->geometry->radius,
-                                       visual->geometry->length);
+                                                  visual->geometry->length);
         break;
       case Geometry::SPHERE:
         visualId = actorBuilder.addSphereVisual(tVisual2Link, visual->geometry->radius);
@@ -448,7 +448,7 @@ URDFLoader::loadKinematic(const std::string &filename) {
       case Geometry::MESH:
         visual->geometry->filename = getAbsPath(filename, visual->geometry->filename);
         visualId = actorBuilder.addObjVisual(visual->geometry->filename, tVisual2Link,
-                                  visual->geometry->scale);
+                                             visual->geometry->scale);
         break;
       }
       mSimulation.mRenderId2Articulation[visualId] = wrapper.get();
@@ -477,6 +477,7 @@ URDFLoader::loadKinematic(const std::string &filename) {
     }
 
     PxRigidDynamic *currentLink = static_cast<PxRigidDynamic *>(actorBuilder.build(false, true));
+    currentLink->setName(current->link->name.c_str());
 
     // inertial
     const Inertial &currentInertial = *current->link->inertial;
@@ -585,6 +586,43 @@ URDFLoader::loadKinematic(const std::string &filename) {
     }
   }
   wrapper->buildCache();
+  for (auto &gazebo : robot->gazebo_array) {
+    for (auto &sensor : gazebo->sensor_array) {
+      switch (sensor->type) {
+      case Sensor::Type::RAY:
+        std::cerr << "Ray Sensor not supported yet" << std::endl;
+        break;
+      case Sensor::Type::CAMERA:
+      case Sensor::Type::DEPTH:
+        std::vector<PxRigidDynamic *> links = wrapper->get_links();
+        uint32_t nbLinks = links.size();
+
+        uint32_t idx =
+            std::find_if(links.begin(), links.end(),
+                         [&](auto const &link) { return link->getName() == gazebo->reference; }) -
+            links.begin();
+        if (idx == nbLinks) {
+          std::cerr << "Failed to find the link to mount camera: " << gazebo->reference
+                    << std::endl;
+          continue;
+        }
+
+        physx_id_t cameraId = IDGenerator::instance()->next();
+
+        const PxVec3 up = {0, 0, 1};
+        const PxVec3 forward = {1, 0, 0};
+        const PxMat33 rot(forward.cross(up), up, -forward);
+
+        mSimulation.mMountedCamera2MountedActor[cameraId] = links[idx];
+        mSimulation.mCameraId2InitialPose[cameraId] =
+            poseFromOrigin(*sensor->origin) * PxTransform(PxVec3(0), PxQuat(rot));
+
+        mSimulation.mRenderer->addCamera(
+            cameraId, sensor->name, sensor->camera->width, sensor->camera->height,
+            sensor->camera->fovx, sensor->camera->fovy, sensor->camera->near, sensor->camera->far);
+      }
+    }
+  }
   return wrapper;
 }
 } // namespace URDF

@@ -16,8 +16,6 @@ enum JointType { UNDEFINED = 0, REVOLUTE = 1, CONTINUOUS = 2, FIXED = 3, PRISMAT
 
 class KJoint {
 protected:
-  PxRigidDynamic *childLink;
-  PxRigidDynamic *parentLink;
   PxTransform poseToChild;
   PxTransform poseFromParent;
   KJoint *parent;
@@ -25,6 +23,8 @@ protected:
 
 public:
   std::string name;
+  PxRigidDynamic *childLink;
+  PxRigidDynamic *parentLink;
 
 public:
   KJoint(PxRigidDynamic *childLink, KJoint *parentJoint, const PxTransform &toChild,
