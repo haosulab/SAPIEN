@@ -17,6 +17,7 @@
 #include <object.h>
 #include <optifuser.h>
 #include <vector>
+#include "object_articulation_wrapper.h"
 
 #include <random>
 
@@ -148,4 +149,42 @@ void test3() {
   }
 }
 
-int main(int argc, char **argv) { test3(); }
+void test4() {
+  OptifuserRenderer renderer;
+  renderer.init();
+  renderer.cam.position = {0, -2, 0.5};
+  renderer.cam.forward = {0, 1, 0};
+  renderer.cam.up = {0, 0, 1};
+
+  renderer.addCamera("Cam1", 800, 800, glm::radians(35.f));
+
+  PxSimulation sim;
+  sim.setRenderer(&renderer);
+  sim.setTimestep(1.f / 500.f);
+
+  // sim.addGround(-0.3);
+
+  auto loader = URDFLoader(sim);
+  auto *objectWrapper = loader.loadObject("../assets/robot/all_robot.urdf");
+
+  // auto cache = articulationInfo.cache;
+  
+
+  sim.step();
+
+  printf("Simulation start\n");
+  while (true) {
+    sim.step();
+    sim.updateRenderer();
+    renderer.render();
+    if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
+      break;
+    }
+    // auto &context  = renderer.getOffscreenContext(0);
+    // context.renderer.renderScene(*renderer.mScene, renderer.cam);
+    // context.renderer.saveLighting("lighting_offscreen.raw");
+    // context.renderer.saveDepth("depth_offscreen.raw");
+    // context.renderer.saveNormal("normal_offscreen.raw");
+  }
+}
+int main(int argc, char **argv) { test4(); }

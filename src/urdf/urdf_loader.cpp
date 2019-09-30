@@ -2,6 +2,7 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "articulation_wrapper.h"
+#include "object_articulation_wrapper.h"
 #include "mesh_registry.h"
 #include "simulation.h"
 #include <eigen3/Eigen/Eigenvalues>
@@ -290,7 +291,7 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
   return builder.build(true);
 }
 
-PxObject URDFLoader::loadObject(const std::string &filename) {
+PxObjectWrapper *URDFLoader::loadObject(const std::string &filename) {
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;
@@ -370,8 +371,11 @@ PxObject URDFLoader::loadObject(const std::string &filename) {
     }
   }
 
-  std::map<LinkTreeNode *, physx::PxRigidActor *> treeNode2pLink;
-  PxObject newObject(&mSimulation);
+  // std::map<LinkTreeNode *, physx::PxRigidActor *> treeNode2pLink;
+  std::map<LinkTreeNode *, PxActorBuilder *> treeNode2Builder;
+  std::map<LinkTreeNode *, PxTransform> treeNode2Pose;
+  std::map<LinkTreeNode *, PxTransform> treeNode2ActorPose;
+  auto newObject = new PxObject(&mSimulation);
   stack = {root};
   while (!stack.empty()) {
     LinkTreeNode *current = stack.back();
@@ -382,23 +386,39 @@ PxObject URDFLoader::loadObject(const std::string &filename) {
     // std::cout << current->joint == null << std::endl;
     // std::cout << current->link->name << std::endl;
 
-    PxActorBuilder actorBuilder(&mSimulation);
+
+    const PxTransform tJoint2Parent =
+      current->joint ? poseFromOrigin(*current->joint->origin) : PxTransform(PxIdentity);
+    treeNode2Pose[current] = current->parent ? treeNode2Pose[current->parent] * tJoint2Parent
+                                               : tJoint2Parent;
+
+    
+    if (current->joint && current->joint->type == "fixed") {
+      treeNode2Builder[current] = treeNode2Builder[current->parent];
+      treeNode2ActorPose[current] = treeNode2ActorPose[current->parent] * tJoint2Parent;
+    } else {
+      treeNode2Builder[current] = new PxActorBuilder(&mSimulation);
+      treeNode2ActorPose[current] = PxTransform(PxIdentity);
+    }
+
+    auto actorBuilder = treeNode2Builder[current];
+    PxTransform interPose = treeNode2ActorPose[current];
     // visual
     for (const auto &visual : current->link->visual_array) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        actorBuilder.addBoxVisual(tVisual2Link, visual->geometry->size);
+        actorBuilder->addBoxVisual(interPose*tVisual2Link, visual->geometry->size);
         break;
       case Geometry::CYLINDER:
-        actorBuilder.addCylinderVisual(tVisual2Link, visual->geometry->radius,
+        actorBuilder->addCylinderVisual(interPose*tVisual2Link, visual->geometry->radius,
                                        visual->geometry->length);
         break;
       case Geometry::SPHERE:
-        actorBuilder.addSphereVisual(tVisual2Link, visual->geometry->radius);
+        actorBuilder->addSphereVisual(interPose*tVisual2Link, visual->geometry->radius);
         break;
       case Geometry::MESH:
-        actorBuilder.addObjVisual(getAbsPath(filename, visual->geometry->filename), tVisual2Link,
+        actorBuilder->addObjVisual(getAbsPath(filename, visual->geometry->filename), interPose*tVisual2Link,
                                   visual->geometry->scale);
         break;
       }
@@ -410,24 +430,21 @@ PxObject URDFLoader::loadObject(const std::string &filename) {
       // TODO: add physical material support (may require URDF extension)
       switch (collision->geometry->type) {
       case Geometry::BOX:
-        actorBuilder.addBoxShape(tCollision2Link, collision->geometry->size);
+        actorBuilder->addBoxShape(interPose*tCollision2Link, collision->geometry->size);
         break;
       case Geometry::CYLINDER:
-        actorBuilder.addCylinderShape(tCollision2Link, collision->geometry->radius,
+        actorBuilder->addCylinderShape(interPose*tCollision2Link, collision->geometry->radius,
                                       collision->geometry->length);
         break;
       case Geometry::SPHERE:
-        actorBuilder.addSphereShape(tCollision2Link, collision->geometry->radius);
+        actorBuilder->addSphereShape(interPose*tCollision2Link, collision->geometry->radius);
         break;
       case Geometry::MESH:
-        actorBuilder.addConvexShapeFromObj(getAbsPath(filename, collision->geometry->filename),
-                                           tCollision2Link);
+        actorBuilder->addConvexShapeFromObj(getAbsPath(filename, collision->geometry->filename),
+                                           interPose*tCollision2Link);
         break;
       }
     }
-
-    PxRigidDynamic *currentLink =
-        static_cast<PxRigidDynamic *>(actorBuilder.build(false, false, false));
 
     // inertial
     const Inertial &currentInertial = *current->link->inertial;
@@ -471,17 +488,17 @@ PxObject URDFLoader::loadObject(const std::string &filename) {
       exit(1);
     }
 
-    currentLink->setCMassLocalPose(tInertia2Link);
-    currentLink->setMassSpaceInertiaTensor({eigs.x(), eigs.y(), eigs.z()});
-    currentLink->setMass(currentInertial.mass->value);
+    // currentLink->setCMassLocalPose(tInertia2Link);
+    // currentLink->setMassSpaceInertiaTensor({eigs.x(), eigs.y(), eigs.z()});
+    // currentLink->setMass(currentInertial.mass->value);
 
-    newObject.addLink(currentLink, current->link->name);
-    treeNode2pLink[current] = currentLink;
-    const PxTransform tJoint2Parent =
-        current->joint ? poseFromOrigin(*current->joint->origin) : PxTransform(PxIdentity);
-    currentLink->setGlobalPose(current->parent ? treeNode2pLink[current->parent]->getGlobalPose() *
-                                                     tJoint2Parent
-                                               : tJoint2Parent);
+    // newObject->addLink(currentLink, current->link->name);
+    // treeNode2pLink[current] = currentLink;
+    // const PxTransform tJoint2Parent =
+    //     current->joint ? poseFromOrigin(*current->joint->origin) : PxTransform(PxIdentity);
+    // currentLink->setGlobalPose(current->parent ? treeNode2pLink[current->parent]->getGlobalPose() *
+    //                                                  tJoint2Parent
+    //                                            : tJoint2Parent);
 
     // // create link and set its parent
     // treeNode2pActor[current] = builder.addLink(
@@ -490,72 +507,148 @@ PxObject URDFLoader::loadObject(const std::string &filename) {
 
     // PxArticulationLink &currentPxLink = *treeNode2pActor[current];
 
-    bool hasAxis = false;
-    // joint
-    //     if (current->joint) {
-    //       PxJoint *newJoint = nullptr;
-    // #ifdef _VERBOSE
-    //       printf("Joint: %s between %s and %s\n", current->joint->type.c_str(),
-    //              current->parent->link->name.c_str(), current->link->name.c_str());
-    // #endif
+//     bool hasAxis = false;
+//     if (current->joint) {
+//       PxJoint *newJoint = nullptr;
+// #ifdef _VERBOSE
+//       printf("Joint: %s between %s and %s\n", current->joint->type.c_str(),
+//              current->parent->link->name.c_str(), current->link->name.c_str());
+// #endif
 
-    //       PxRigidActor *parentLink = current->parent ? treeNode2pLink[current->parent] :
-    //       nullptr;
+//       PxRigidActor *parentLink = current->parent ? treeNode2pLink[current->parent] :
+//       nullptr;
 
-    //       PxVec3 axis1 = current->joint->axis->xyz.getNormalized();
-    //       PxVec3 axis2;
-    //       if (axis1.dot({1, 0, 0}) > 0.9) {
-    //         axis2 = axis1.cross({0, 0, 1}).getNormalized();
-    //       } else {
-    //         axis2 = axis1.cross({1, 0, 0}).getNormalized();
-    //       }
-    //       PxVec3 axis3 = axis1.cross(axis2);
-    //       const PxTransform tAxis2Joint = {PxVec3(0), PxQuat(PxMat33(axis1, axis2, axis3))};
-    //       if (!tAxis2Joint.isSane()) {
-    //         printf("WRONG!\n");
-    //         exit(1);
-    //       }
-    //       const PxTransform tAxis2Parent = tJoint2Parent * tAxis2Joint;
+//       PxVec3 axis1 = current->joint->axis->xyz.getNormalized();
+//       PxVec3 axis2;
+//       if (axis1.dot({1, 0, 0}) > 0.9) {
+//         axis2 = axis1.cross({0, 0, 1}).getNormalized();
+//       } else {
+//         axis2 = axis1.cross({1, 0, 0}).getNormalized();
+//       }
+//       PxVec3 axis3 = axis1.cross(axis2);
+//       const PxTransform tAxis2Joint = {PxVec3(0), PxQuat(PxMat33(axis1, axis2, axis3))};
+//       if (!tAxis2Joint.isSane()) {
+//         printf("WRONG!\n");
+//         exit(1);
+//       }
+//       const PxTransform tAxis2Parent = tJoint2Parent * tAxis2Joint;
 
-    //       if (current->joint->type == "revolute") {
-    //         auto newRJoint = PxRevoluteJointCreate(*mSimulation.mPhysicsSDK, parentLink,
-    //         tAxis2Parent, currentLink, tAxis2Joint);
-    //         newRJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eLIMIT_ENABLED, true);
-    //         newRJoint->setLimit(PxJointAngularLimitPair(current->joint->limit->lower,
-    //         current->joint->limit->upper)); newRJoint->setBreakForce(100000,100000); newJoint =
-    //         newRJoint;
-    //       } else if (current->joint->type == "continuous") {
-    //         auto newCJoint = PxRevoluteJointCreate(*mSimulation.mPhysicsSDK, parentLink,
-    //         tAxis2Parent, currentLink, tAxis2Joint); newJoint = newCJoint;
-    //       } else if (current->joint->type == "prismatic") {
-    //         auto newPJoint = PxPrismaticJointCreate(*mSimulation.mPhysicsSDK, parentLink,
-    //         tAxis2Parent, currentLink, tAxis2Joint);
-    //         newPJoint->setPrismaticJointFlag(PxPrismaticJointFlag::eLIMIT_ENABLED, true);
-    //         newPJoint->setLimit(PxJointLinearLimitPair(mSimulation.mPhysicsSDK->getTolerancesScale(),
-    //         current->joint->limit->lower, current->joint->limit->upper)); newJoint = newPJoint;
-    //       } else if (current->joint->type == "fixed") {
-    //         auto newFJoint = PxFixedJointCreate(*mSimulation.mPhysicsSDK, parentLink,
-    //         tAxis2Parent, currentLink, tAxis2Joint); newJoint = newFJoint;
-    //       } else if (current->joint->type == "floating") {
-    //         std::cerr << "Currently not supported: " + current->joint->type << std::endl;
-    //         exit(1);
-    //       } else if (current->joint->type == "planar") {
-    //         std::cerr << "Currently not supported type: " + current->joint->type << std::endl;
-    //         exit(1);
-    //       } else {
-    //         std::cerr << "Unreconized joint type: " + current->joint->type << std::endl;
-    //         exit(1);
-    //       }
-    //       newObject.addJoint(newJoint, current->joint->name);
-    //     }
+//       if (current->joint->type == "revolute") {
+//         auto newRJoint = PxRevoluteJointCreate(*mSimulation.mPhysicsSDK, parentLink,
+//         tAxis2Parent, currentLink, tAxis2Joint);
+//         newRJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eLIMIT_ENABLED, true);
+//         newRJoint->setLimit(PxJointAngularLimitPair(current->joint->limit->lower,
+//         current->joint->limit->upper)); 
+//         newJoint = newRJoint;
+//       } else if (current->joint->type == "continuous") {
+//         auto newCJoint = PxRevoluteJointCreate(*mSimulation.mPhysicsSDK, parentLink,
+//         tAxis2Parent, currentLink, tAxis2Joint); 
+//         newJoint = newCJoint;
+//       } else if (current->joint->type == "prismatic") {
+//         auto newPJoint = PxPrismaticJointCreate(*mSimulation.mPhysicsSDK, parentLink,
+//         tAxis2Parent, currentLink, tAxis2Joint);
+//         newPJoint->setPrismaticJointFlag(PxPrismaticJointFlag::eLIMIT_ENABLED, true);
+//         newPJoint->setLimit(PxJointLinearLimitPair(mSimulation.mPhysicsSDK->getTolerancesScale(),
+//         current->joint->limit->lower, current->joint->limit->upper)); 
+//         newJoint = newPJoint;
+//       } else if (current->joint->type == "fixed") {
+//         auto newFJoint = PxFixedJointCreate(*mSimulation.mPhysicsSDK, parentLink,
+//         tAxis2Parent, currentLink, tAxis2Joint); 
+//         newJoint = newFJoint;
+//       } else if (current->joint->type == "floating") {
+//         std::cerr << "Currently not supported: " + current->joint->type << std::endl;
+//         exit(1);
+//       } else if (current->joint->type == "planar") {
+//         std::cerr << "Currently not supported type: " + current->joint->type << std::endl;
+//         exit(1);
+//       } else {
+//         std::cerr << "Unreconized joint type: " + current->joint->type << std::endl;
+//         exit(1);
+//       }
+//       newObject->addJoint(newJoint, current->joint->name);
+//     }
     for (auto c : current->children) {
       stack.push_back(c);
     }
   }
-  for (PxU32 i = 0; i < newObject.getNbLink(); i++) {
-    mSimulation.mScene->addActor(*newObject.getLink(i));
+  std::map<LinkTreeNode *, physx::PxRigidActor *> treeNode2pLink;
+  stack = {root};
+  while (!stack.empty()) {
+    auto current = stack.back();
+    stack.pop_back();
+    for (auto c : current->children) {
+      stack.push_back(c);
+    }
+    if (current->joint && current->joint->type == "fixed") {
+      treeNode2pLink[current] = treeNode2pLink[current->parent];
+      continue;
+    }
+    PxRigidActor *currentLink = current->parent ? treeNode2Builder[current]->build(false, false, false) 
+                                  : treeNode2Builder[current]->build(false, true, false);
+    treeNode2pLink[current] = currentLink;
+    currentLink->setGlobalPose(treeNode2Pose[current]);
+    newObject->addLink(currentLink, current->link->name);
+    bool hasAxis = false;
+    if (current->joint && current->joint->type != "fixed") {
+      PxJoint *newJoint = nullptr;
+#ifdef _VERBOSE
+      printf("Joint: %s between %s and %s\n", current->joint->type.c_str(),
+             current->parent->link->name.c_str(), current->link->name.c_str());
+#endif
+
+      PxRigidActor *parentLink = current->parent ? treeNode2pLink[current->parent] :
+      nullptr;
+
+      PxVec3 axis1 = current->joint->axis->xyz.getNormalized();
+      PxVec3 axis2;
+      if (axis1.dot({1, 0, 0}) > 0.9) {
+        axis2 = axis1.cross({0, 0, 1}).getNormalized();
+      } else {
+        axis2 = axis1.cross({1, 0, 0}).getNormalized();
+      }
+      PxVec3 axis3 = axis1.cross(axis2);
+      const PxTransform tAxis2Joint = {PxVec3(0), PxQuat(PxMat33(axis1, axis2, axis3))};
+      if (!tAxis2Joint.isSane()) {
+        printf("WRONG!\n");
+        exit(1);
+      }
+      const PxTransform tJoint2Parent = current->joint ? poseFromOrigin(*current->joint->origin) : PxTransform(PxIdentity);
+      const PxTransform tAxis2Parent = treeNode2ActorPose[current->parent] * tJoint2Parent * tAxis2Joint;
+
+      if (current->joint->type == "revolute") {
+        auto newRJoint = PxRevoluteJointCreate(*mSimulation.mPhysicsSDK, parentLink,
+        tAxis2Parent, currentLink, tAxis2Joint);
+        newRJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eLIMIT_ENABLED, true);
+        newRJoint->setLimit(PxJointAngularLimitPair(current->joint->limit->lower,
+        current->joint->limit->upper)); 
+        newJoint = newRJoint;
+      } else if (current->joint->type == "continuous") {
+        auto newCJoint = PxRevoluteJointCreate(*mSimulation.mPhysicsSDK, parentLink,
+        tAxis2Parent, currentLink, tAxis2Joint); 
+        newJoint = newCJoint;
+      } else if (current->joint->type == "prismatic") {
+        auto newPJoint = PxPrismaticJointCreate(*mSimulation.mPhysicsSDK, parentLink,
+        tAxis2Parent, currentLink, tAxis2Joint);
+        newPJoint->setPrismaticJointFlag(PxPrismaticJointFlag::eLIMIT_ENABLED, true);
+        newPJoint->setLimit(PxJointLinearLimitPair(mSimulation.mPhysicsSDK->getTolerancesScale(),
+        current->joint->limit->lower, current->joint->limit->upper)); 
+        newJoint = newPJoint;
+      } else if (current->joint->type == "floating") {
+        std::cerr << "Currently not supported: " + current->joint->type << std::endl;
+        exit(1);
+      } else if (current->joint->type == "planar") {
+        std::cerr << "Currently not supported type: " + current->joint->type << std::endl;
+        exit(1);
+      } else {
+        std::cerr << "Unreconized joint type: " + current->joint->type << std::endl;
+        exit(1);
+      }
+      newObject->addJoint(newJoint, current->joint->name);
+    }
   }
-  return newObject;
+  newObject->build();
+  auto obj_wrapper = std::make_unique<PxObjectWrapper>();
+  return obj_wrapper.get();
 }
 
 KinematicArticulation URDFLoader::loadKinematic(const std::string &filename) {

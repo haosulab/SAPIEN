@@ -492,5 +492,5 @@ public:
   URDFLoader(class PxSimulation &simulation);
   struct PxArticulationWrapper *load(const std::string &filename);
   KinematicArticulation loadKinematic(const std::string &filename);
-  PxObject loadObject(const std::string &filename);
+  struct PxObjectWrapper *loadObject(const std::string &filename);
 };

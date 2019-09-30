@@ -115,17 +115,13 @@ void PxActorBuilder::addObjVisual(const std::string &filename, const PxTransform
   mSimulation->mRenderId2InitialPose[newId] = pose;
 }
 PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToScene) {
-#ifdef _DEBUG
-  if (mRenderIds.size() != mCount || mShapes.size() != mCount) {
-    std::cerr << "Invalid size!" << std::endl;
-  }
-#endif
-
   PxRigidActor *actor;
   if (isStatic) {
     actor = mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
     for (size_t i = 0; i < mShapes.size(); ++i) {
       actor->attachShape(*mShapes[i]);
+    }
+    for (size_t i = 0; i < mRenderIds.size(); ++i) {
       mSimulation->mRenderId2Parent[mRenderIds[i]] = actor;
     }
   } else {
@@ -134,11 +130,20 @@ PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToS
     actor = dActor;
     for (size_t i = 0; i < mShapes.size(); ++i) {
       actor->attachShape(*mShapes[i]);
+    }
+    for (size_t i = 0; i < mRenderIds.size(); ++i) {
       mSimulation->mRenderId2Parent[mRenderIds[i]] = actor;
     }
     PxRigidBodyExt::updateMassAndInertia(*dActor, mDensities.data(), mCount);
   }
   actor->setName("");
-  if (addToScene) {mSimulation->mScene->addActor(*actor);}
+  if (addToScene) {
+    mSimulation->mScene->addActor(*actor);
+  }
+  hasBuilt = true;
   return actor;
+}
+
+bool PxActorBuilder::built() {
+  return hasBuilt;
 }

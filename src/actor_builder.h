@@ -18,6 +18,7 @@ class PxActorBuilder {
   std::vector<physx::PxShape *> mShapes;
   std::vector<physx::PxReal> mDensities;
   uint32_t mCount = 0;
+  bool hasBuilt = false;
 
 public:
   explicit PxActorBuilder(PxSimulation *simulation)
@@ -59,4 +60,6 @@ public:
                     const PxVec3 &scale = {1, 1, 1});
 
   PxRigidActor *build(bool isStatic = false, bool isKinematic = false, bool addToScene = true);
+
+  bool built();
 };

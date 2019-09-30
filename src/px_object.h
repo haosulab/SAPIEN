@@ -14,12 +14,13 @@ class PxObject {
   std::map<std::string, PxJoint *> namedJoints;
   std::vector<PxRigidActor *> links;
   std::map<std::string, PxRigidActor *>namedLinks;
+  std::vector<std::string> jointNames;
+  std::vector<PxU32> jointDofs;
 
   PxSimulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
   PxCooking *mCooking = nullptr;
   IPhysxRenderer *mRenderer = nullptr;
-  PxClientID objectId;
 
 public:
   PxObject(PxSimulation *simulation);
@@ -40,4 +41,18 @@ public:
   PxJoint *getJoint(const std::string &name);
 
   PxU32 getNbJoint();
+
+  PxU32 getDofs();
+
+  std::vector<PxU32> getJointDofs();
+
+  std::vector<std::string> getJointNames();
+
+  std::vector<std::tuple<physx::PxReal, physx::PxReal>> getJointLimits();
+
+  std::vector<PxReal> getJointPositions();
+
+  std::vector<PxReal> getJointVelocities();
+
+  void build();
 };
