@@ -65,19 +65,16 @@ find_package(catkin COMPONENTS
         roscpp)
 
 include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} "robot")
-#catkin_package(
-#        LIBRARIES
-#        INCLUDE_DIRS
-#        CATKIN_DEPENDS
-#        moveit_core
-#        moveit_ros_planning
-#)
 
-#add_library(robot_interface
-#        src/robot/joint_pub_node.cpp
-#        src/robot/physx_robot_interface.cpp)
-#target_link_libraries(robot_interface ${catkin_LIBRARIES} ${Boost_LIBRARIES} mylib)
-
+if (${catkin_INCLUDE_DIRS})
+  catkin_package(
+    LIBRARIES
+    INCLUDE_DIRS
+    CATKIN_DEPENDS
+    moveit_core
+    moveit_ros_planning
+    )
+endif()
 
 add_executable(robot
         robot/group_controller_node.cpp
@@ -85,3 +82,5 @@ add_executable(robot
         robot/robot.cpp)
 target_link_libraries(robot mylib ${catkin_LIBRARIES})
 
+add_executable(ps3 test/ps3.cpp)
+target_link_libraries(ps3 mylib)

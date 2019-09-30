@@ -114,6 +114,7 @@ class PS3Input {
 
 public:
   PS3Input() {
+    shouldExit = false;
     std::string deviceName = findPS3Controller();
     if (deviceName.empty()) {
       throw std::runtime_error("No PS3 Controller found!");
