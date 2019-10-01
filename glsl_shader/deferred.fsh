@@ -71,18 +71,18 @@ vec3 getBackgroundColor(vec3 texcoord) {
              smoothstep(-5.f, -15.f, angle));
 }
 
-const float eps = 0.001;
+const float eps = 0.01;
 
 void main() {
   vec3 albedo = texture(colortex0, texcoord).xyz;
   vec3 normal = texture(colortex2, texcoord).xyz;
   vec4 csPosition = getCameraSpacePosition(texcoord);
 
-  vec4 ssPosition = cameraToShadowMatrix * csPosition;
+  vec4 ssPosition = cameraToShadowMatrix * vec4((csPosition.xyz + normal * eps), 1);
   vec4 shadowMapCoord = shadowProjectionMatrix * ssPosition;
   shadowMapCoord /= shadowMapCoord.w;
   shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
-  float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, eps);
+  float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, 0);
 
   vec3 camDir = -normalize(csPosition.xyz);
 
