@@ -165,7 +165,7 @@ void test4() {
   // sim.addGround(-0.3);
 
   auto loader = URDFLoader(sim);
-  auto *objectWrapper = loader.loadObject("../assets/robot/all_robot.urdf");
+  auto objectWrapper = loader.loadObject("../assets/robot/all_robot.urdf");
 
   // auto cache = articulationInfo.cache;
   

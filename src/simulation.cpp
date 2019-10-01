@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include "my_filter_shader.h"
+#include "object_articulation_wrapper.h"
 
     static PxDefaultErrorCallback gDefaultErrorCallback;
 static PxDefaultAllocator gDefaultAllocatorCallback;

@@ -44,6 +44,7 @@ public:
   std::map<physx_id_t, IArticulationBase*> mRenderId2Articulation;
 
   std::vector<std::unique_ptr<struct PxArticulationWrapper>> mDynamicArticulationWrappers;
+  std::vector<std::unique_ptr<struct PxObjectWrapper>> mObjectArticulationWrappers;
 
 public:
   PxSimulation();

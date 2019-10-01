@@ -54,5 +54,5 @@ public:
 
   std::vector<PxReal> getJointVelocities();
 
-  void build();
+  struct PxObjectWrapper *build();
 };

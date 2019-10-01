@@ -375,6 +375,7 @@ PxObjectWrapper *URDFLoader::loadObject(const std::string &filename) {
   std::map<LinkTreeNode *, PxActorBuilder *> treeNode2Builder;
   std::map<LinkTreeNode *, PxTransform> treeNode2Pose;
   std::map<LinkTreeNode *, PxTransform> treeNode2ActorPose;
+  std::vector<physx_id_t> renderIds;
   auto newObject = new PxObject(&mSimulation);
   stack = {root};
   while (!stack.empty()) {
@@ -406,22 +407,24 @@ PxObjectWrapper *URDFLoader::loadObject(const std::string &filename) {
     // visual
     for (const auto &visual : current->link->visual_array) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
+      physx_id_t renderId = 0;
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        actorBuilder->addBoxVisual(interPose*tVisual2Link, visual->geometry->size);
+        renderId = actorBuilder->addBoxVisual(interPose*tVisual2Link, visual->geometry->size);
         break;
       case Geometry::CYLINDER:
-        actorBuilder->addCylinderVisual(interPose*tVisual2Link, visual->geometry->radius,
+        renderId = actorBuilder->addCylinderVisual(interPose*tVisual2Link, visual->geometry->radius,
                                        visual->geometry->length);
         break;
       case Geometry::SPHERE:
-        actorBuilder->addSphereVisual(interPose*tVisual2Link, visual->geometry->radius);
+        renderId = actorBuilder->addSphereVisual(interPose*tVisual2Link, visual->geometry->radius);
         break;
       case Geometry::MESH:
-        actorBuilder->addObjVisual(getAbsPath(filename, visual->geometry->filename), interPose*tVisual2Link,
+        renderId = actorBuilder->addObjVisual(getAbsPath(filename, visual->geometry->filename), interPose*tVisual2Link,
                                   visual->geometry->scale);
         break;
       }
+      renderIds.push_back(renderId);
     }
 
     // collision
@@ -646,9 +649,11 @@ PxObjectWrapper *URDFLoader::loadObject(const std::string &filename) {
       newObject->addJoint(newJoint, current->joint->name);
     }
   }
-  newObject->build();
-  auto obj_wrapper = std::make_unique<PxObjectWrapper>();
-  return obj_wrapper.get();
+  auto obj_wrapper = newObject->build();
+  for (auto id : renderIds) {
+    mSimulation.mRenderId2Articulation[id] = obj_wrapper;
+  }
+  return obj_wrapper;
 }
 
 KinematicArticulation URDFLoader::loadKinematic(const std::string &filename) {

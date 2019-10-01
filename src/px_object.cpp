@@ -1,4 +1,5 @@
 #include "px_object.h"
+#include "object_articulation_wrapper.h"
 
 PxObject::PxObject(PxSimulation *simulation)
     : mSimulation(simulation), mPhysicsSDK(simulation->mPhysicsSDK),
@@ -136,11 +137,16 @@ std::vector<PxReal> PxObject::getJointVelocities() {
   return velocities;
 }
 
-void PxObject::build() {
+PxObjectWrapper *PxObject::build() {
   for (auto joint : joints) {
     joint->setConstraintFlag(PxConstraintFlag::eCOLLISION_ENABLED, false);
   }
   for (auto link : links) {
     mSimulation->mScene->addActor(*link);
   }
+  auto obj_wrapper = std::make_unique<PxObjectWrapper>();
+  obj_wrapper->obj = this;
+  auto wrapper = obj_wrapper.get();
+  mSimulation->mObjectArticulationWrappers.push_back(std::move(obj_wrapper));
+  return wrapper;
 }
