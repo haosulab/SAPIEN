@@ -138,9 +138,9 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
         current->joint ? poseFromOrigin(*current->joint->origin) : PxTransform(PxIdentity);
 
     // create link and set its parent
-    treeNode2pLink[current] = builder.addLink(
-        current->parent ? treeNode2pLink[current->parent] : nullptr, tJoint2Parent);
-    treeNode2pLink[current]->setName(current->link->name.c_str());
+    treeNode2pLink[current] =
+        builder.addLink(current->parent ? treeNode2pLink[current->parent] : nullptr, tJoint2Parent,
+                        current->link->name, current->joint ? current->joint->name : "");
 
     PxArticulationLink &currentPxLink = *treeNode2pLink[current];
 
@@ -307,7 +307,7 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
         wrapper->articulation->getLinks(links.data(), nbLinks);
         uint32_t idx =
             std::find_if(links.begin(), links.end(),
-                         [&](auto const &link) { return link->getName() == gazebo->reference; }) -
+                         [&](auto const &link) { return std::string(link->getName()) == gazebo->reference; }) -
             links.begin();
         if (idx == nbLinks) {
           std::cerr << "Failed to find the link to mount camera: " << gazebo->reference
@@ -599,7 +599,7 @@ URDFLoader::loadKinematic(const std::string &filename) {
 
         uint32_t idx =
             std::find_if(links.begin(), links.end(),
-                         [&](auto const &link) { return link->getName() == gazebo->reference; }) -
+                         [&](auto const &link) { return std::string(link->getName()) == gazebo->reference; }) -
             links.begin();
         if (idx == nbLinks) {
           std::cerr << "Failed to find the link to mount camera: " << gazebo->reference

@@ -403,8 +403,9 @@ struct Limit : DomBase {
   LOAD_ATTR_BEGIN()
   LOAD_ATTR_OPTIONAL(physx::PxReal, lower, 0)
   LOAD_ATTR_OPTIONAL(physx::PxReal, upper, 0)
-  LOAD_ATTR(physx::PxReal, effort)
-  LOAD_ATTR(physx::PxReal, velocity)
+  // TODO: check effort and velocity default value
+  LOAD_ATTR_OPTIONAL(physx::PxReal, effort, 0)
+  LOAD_ATTR_OPTIONAL(physx::PxReal, velocity, 0)
   LOAD_ATTR_END()
 };
 
