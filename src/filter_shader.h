@@ -21,7 +21,7 @@ inline PxFilterFlags StandardFilterShader(PxFilterObjectAttributes attributes0,
     return PxFilterFlag::eDEFAULT;
   }
 
-  pairFlags = PxPairFlag::eCONTACT_DEFAULT;
+  pairFlags = PxPairFlag::eCONTACT_DEFAULT | PxPairFlag::eNOTIFY_TOUCH_PERSISTS | PxPairFlag::eNOTIFY_CONTACT_POINTS;
   if ((filterData0.word0 & filterData1.word0) || (filterData0.word1 & filterData1.word1) ||
       (filterData0.word2 & filterData1.word2) || (filterData0.word3 & filterData1.word3)) {
     // printf(" killed\n");

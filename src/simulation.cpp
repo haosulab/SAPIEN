@@ -3,7 +3,6 @@
 #include "articulation_builder.h"
 #include "articulation_interface.h"
 #include "kinematics_articulation_wrapper.h"
-#include "my_filter_shader.h"
 #include <cassert>
 #include <fstream>
 #include <sstream>
@@ -33,23 +32,53 @@ static PxSimulationFilterShader gDefaultFilterShader = PxDefaultSimulationFilter
 //    }
 //};
 //
-// class MyContactCallback : public PxSimulationEventCallback {
-// public:
-//    MyContactCallback()
-//            :PxSimulationEventCallback() {}
-//    void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count)	{ PX_UNUSED(constraints);
-//    PX_UNUSED(count); } void onWake(PxActor** actors, PxU32 count)
-//    { PX_UNUSED(actors); PX_UNUSED(count); }
-//    void onSleep(PxActor** actors, PxU32 count)							{ PX_UNUSED(actors);
-//    PX_UNUSED(count); } void onTrigger(PxTriggerPair* pairs, PxU32 count)
-//    { PX_UNUSED(pairs); PX_UNUSED(count); } void onAdvance(const PxRigidBody*const*, const
-//    PxTransform*, const PxU32) {} void onContact(const PxContactPairHeader& pairHeader, const
-//    PxContactPair* pairs, PxU32 nbPairs) {
-//        std::cerr << "force limit exceeded" << std::endl;
-//    }
-//};
+class MyContactCallback : public PxSimulationEventCallback {
+public:
+  MyContactCallback() : PxSimulationEventCallback() {}
+  void onConstraintBreak(PxConstraintInfo *constraints, PxU32 count) {
+    PX_UNUSED(constraints);
+    PX_UNUSED(count);
+  }
+  void onWake(PxActor **actors, PxU32 count) {
+    PX_UNUSED(actors);
+    PX_UNUSED(count);
+  }
+  void onSleep(PxActor **actors, PxU32 count) {
+    PX_UNUSED(actors);
+    PX_UNUSED(count);
+  }
+  void onTrigger(PxTriggerPair *pairs, PxU32 count) {
+    PX_UNUSED(pairs);
+    PX_UNUSED(count);
+  }
+  void onAdvance(const PxRigidBody *const *, const PxTransform *, const PxU32) {}
+  void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs,
+                 PxU32 nbPairs) {
+    if (std::string(pairHeader.actors[0]->getName()) != "Ground" &&
+        std::string(pairHeader.actors[1]->getName()) != "Ground") {
+      return;
+    }
+    std::cout << "Names " << pairHeader.actors[0]->getName() << " "
+              << pairHeader.actors[1]->getName() << std::endl;
+
+    for (PxU32 i = 0; i < nbPairs; i++) {
+      const PxContactPair &cp = pairs[i];
+
+      const PxU32 bufferSize = 64;// cp.requiredBufferSize;
+      PxContactPairPoint contacts[bufferSize];
+      PxU32 nbContacts = pairs[i].extractContacts(contacts, bufferSize);
+      for (PxU32 j = 0; j < nbContacts; j++) {
+        PxVec3 point = contacts[j].position;
+        PxVec3 impulse = contacts[j].impulse;
+        PxU32 internalFaceIndex0 = contacts[j].internalFaceIndex0;
+        PxU32 internalFaceIndex1 = contacts[j].internalFaceIndex1;
+        printf("Impulse %f %f %f\n", impulse.x, impulse.y, impulse.z);
+      }
+    }
+  }
+};
 // MyContactModification myCM;
-// MyContactCallback myCC;
+MyContactCallback myCC;
 
 PxSimulation::PxSimulation() {
   mFoundation =
@@ -121,6 +150,7 @@ PxSimulation::PxSimulation() {
   }
   mScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.f);
   mScene->setVisualizationParameter(PxVisualizationParameter::eACTOR_AXES, 2.f);
+  mScene->setSimulationEventCallback(&myCC);
 
   mDefaultMaterial = mPhysicsSDK->createMaterial(0.5, 0.5, 0.5);
 }
@@ -161,7 +191,7 @@ void PxSimulation::step() {
   for (auto &wrapper : mDynamicArticulationWrappers) {
     wrapper->updateCache();
   }
-  for (auto & wrapper : mKinematicArticulationWrappers){
+  for (auto &wrapper : mKinematicArticulationWrappers) {
     wrapper->update(mTimestep);
   }
 }
@@ -218,6 +248,8 @@ void PxSimulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
       Renderer::JointGuiInfo jointInfo;
       jointInfo.name = singleDofName[i];
       auto [l1, l2] = limits[i];
+      l1 = std::max(l1, -10.f);
+      l2 = std::min(l2, 10.f);
       jointInfo.limits = {l1, l2};
       jointInfo.value = values[i];
       info.articulationInfo.jointInfo.push_back(jointInfo);

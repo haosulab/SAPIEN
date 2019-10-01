@@ -119,8 +119,11 @@ void test3() {
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 
+
   auto loader = URDF::URDFLoader(sim);
   auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+  // auto *articulationWrapper = loader.load("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
+  // auto *articulationWrapper = loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
   auto articulation = articulationWrapper->articulation;
 
   // auto cache = articulationInfo.cache;

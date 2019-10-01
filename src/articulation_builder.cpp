@@ -1,5 +1,6 @@
 #include "articulation_builder.h"
 #include "mesh_registry.h"
+#include <numeric>
 
 using namespace MeshUtil;
 
@@ -11,15 +12,17 @@ PxArticulationBuilder::PxArticulationBuilder(PxSimulation *simulation)
 
 PxArticulationLink *PxArticulationBuilder::addLink(PxArticulationLink *parent,
                                                    const PxTransform &pose,
-                                                   const std::string &name) {
+                                                   const std::string &name,
+                                                   const std::string &jointName) {
   PxArticulationLink *newLink = mArticulation->createLink(parent, pose);
+  newLink->setName(name.c_str());
   if (!name.empty()) {
     if (namedLinks.find(name) != namedLinks.end()) {
-      std::cerr << "Duplicated link name" << std::endl;
-      exit(1);
+      throw std::runtime_error("Duplicate link names are not allowed in an articulation.");
     }
     namedLinks[name] = newLink;
   }
+  link2JointName[newLink] = jointName;
   return newLink;
 }
 
@@ -177,14 +180,16 @@ PxArticulationWrapper *PxArticulationBuilder::build(bool fixBase) {
     auto *joint = static_cast<PxArticulationJointReducedCoordinate *>(links[i]->getInboundJoint());
     if (joint) {
       // use link name as joint name
-      wrapper->jointNames.push_back(links[i]->getName());
+      // wrapper->jointNames.push_back(links[i]->getName());
+      wrapper->jointNames.push_back(link2JointName[links[i]]);
       wrapper->jointDofs.push_back(links[i]->getInboundJointDof());
 
       switch (joint->getJointType()) {
       case physx::PxArticulationJointType::eREVOLUTE: {
         auto motion = joint->getMotion(PxArticulationAxis::eTWIST);
         if (motion == PxArticulationMotion::eFREE) {
-          wrapper->jointLimits.push_back({-FP_INFINITE, FP_INFINITE});
+          wrapper->jointLimits.push_back(
+              {-std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()});
         } else {
           PxReal low, high;
           joint->getLimit(PxArticulationAxis::eTWIST, low, high);
@@ -195,7 +200,8 @@ PxArticulationWrapper *PxArticulationBuilder::build(bool fixBase) {
       case physx::PxArticulationJointType::ePRISMATIC: {
         auto motion = joint->getMotion(PxArticulationAxis::eX);
         if (motion == PxArticulationMotion::eFREE) {
-          wrapper->jointLimits.push_back({-FP_INFINITE, FP_INFINITE});
+          wrapper->jointLimits.push_back(
+              {-std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()});
         } else {
           PxReal low, high;
           joint->getLimit(PxArticulationAxis::eX, low, high);

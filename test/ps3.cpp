@@ -39,7 +39,7 @@ float rand_float() {
 }
 
 void test() {
-  PS3Input ps3;
+  // PS3Input ps3;
 
   Renderer::OptifuserRenderer renderer;
   renderer.init();
@@ -50,6 +50,15 @@ void test() {
   PxSimulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
+
+  sim.addGround(0);
+
+  auto builder = sim.createActorBuilder();
+  builder->addBoxShape({{0, 0, 0}, PxIdentity}, {0.3, 0.3, 0.3});
+  builder->addBoxVisual({{0, 0, 0}, PxIdentity}, {0.3, 0.3, 0.3});
+  auto actor = builder->build(false, false, false);
+  actor->setGlobalPose({{2, 2, 1}, PxIdentity});
+  sim.mScene->addActor(*actor);
 
   auto loader = URDF::URDFLoader(sim);
   auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
@@ -67,21 +76,21 @@ void test() {
 
   printf("Simulation start\n");
   while (true) {
-    if (ps3.getKey(BUTTON_UP)) {
-      pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * 0.01;
-    } else if (ps3.getKey(BUTTON_DOWN)) {
-      pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * 0.01;
-    }
-    if (ps3.getKey(BUTTON_LEFT)) {
-      pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * 0.01;
-    } else if (ps3.getKey(BUTTON_RIGHT)) {
-      pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * 0.01;
-    }
-    if (ps3.getKey(BUTTON_L2)) {
-      angle += 0.01;
-    } else if (ps3.getKey(BUTTON_R2)) {
-      angle -= 0.01;
-    }
+    // if (ps3.getKey(BUTTON_UP)) {
+    //   pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * 0.01;
+    // } else if (ps3.getKey(BUTTON_DOWN)) {
+    //   pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * 0.01;
+    // }
+    // if (ps3.getKey(BUTTON_LEFT)) {
+    //   pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * 0.01;
+    // } else if (ps3.getKey(BUTTON_RIGHT)) {
+    //   pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * 0.01;
+    // }
+    // if (ps3.getKey(BUTTON_L2)) {
+    //   angle += 0.01;
+    // } else if (ps3.getKey(BUTTON_R2)) {
+    //   angle -= 0.01;
+    // }
 
     sim.step();
     articulation->teleportRootLink({pos, PxQuat(angle, {0, 0, 1})}, true);
@@ -92,9 +101,9 @@ void test() {
     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
       break;
     }
-    if (ps3.getKey(BUTTON_X)) {
-      break;
-    }
+    // if (ps3.getKey(BUTTON_X)) {
+    //   break;
+    // }
   }
 }
 
