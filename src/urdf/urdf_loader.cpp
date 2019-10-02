@@ -449,127 +449,53 @@ PxObjectWrapper *URDFLoader::loadObject(const std::string &filename) {
       }
     }
 
-    // inertial
-    const Inertial &currentInertial = *current->link->inertial;
+    // // inertial
+    // const Inertial &currentInertial = *current->link->inertial;
 
-    const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin);
-    const Inertia &currentInertia = *currentInertial.inertia;
+    // const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin);
+    // const Inertia &currentInertia = *currentInertial.inertia;
 
-    Eigen::Matrix3f inertia;
-    inertia(0, 0) = currentInertia.ixx;
-    inertia(1, 1) = currentInertia.iyy;
-    inertia(2, 2) = currentInertia.izz;
-    inertia(0, 1) = currentInertia.ixy;
-    inertia(1, 0) = currentInertia.ixy;
-    inertia(0, 2) = currentInertia.ixz;
-    inertia(2, 0) = currentInertia.ixz;
-    inertia(1, 2) = currentInertia.iyz;
-    inertia(2, 1) = currentInertia.iyz;
+    // Eigen::Matrix3f inertia;
+    // inertia(0, 0) = currentInertia.ixx;
+    // inertia(1, 1) = currentInertia.iyy;
+    // inertia(2, 2) = currentInertia.izz;
+    // inertia(0, 1) = currentInertia.ixy;
+    // inertia(1, 0) = currentInertia.ixy;
+    // inertia(0, 2) = currentInertia.ixz;
+    // inertia(2, 0) = currentInertia.ixz;
+    // inertia(1, 2) = currentInertia.iyz;
+    // inertia(2, 1) = currentInertia.iyz;
 
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> es;
-    es.compute(inertia);
-    auto eigs = es.eigenvalues();
-    Eigen::Matrix3f m;
+    // Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> es;
+    // es.compute(inertia);
+    // auto eigs = es.eigenvalues();
+    // Eigen::Matrix3f m;
 
-    auto eig_vecs = es.eigenvectors();
-    PxVec3 col0 = {eig_vecs(0, 0), eig_vecs(1, 0), eig_vecs(2, 0)};
-    PxVec3 col1 = {eig_vecs(0, 1), eig_vecs(1, 1), eig_vecs(2, 1)};
-    PxVec3 col2 = {eig_vecs(0, 2), eig_vecs(1, 2), eig_vecs(2, 2)};
-    PxMat33 mat = PxMat33(col0, col1, col2);
+    // auto eig_vecs = es.eigenvectors();
+    // PxVec3 col0 = {eig_vecs(0, 0), eig_vecs(1, 0), eig_vecs(2, 0)};
+    // PxVec3 col1 = {eig_vecs(0, 1), eig_vecs(1, 1), eig_vecs(2, 1)};
+    // PxVec3 col2 = {eig_vecs(0, 2), eig_vecs(1, 2), eig_vecs(2, 2)};
+    // PxMat33 mat = PxMat33(col0, col1, col2);
 
-    const PxTransform tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
+    // const PxTransform tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
 
-    if (!tInertia2Inertial.isSane()) {
-      printf("Wrong!\n");
-      exit(1);
-    }
+    // if (!tInertia2Inertial.isSane()) {
+    //   printf("Wrong!\n");
+    //   exit(1);
+    // }
 
-    const PxTransform tInertia2Link = tInertial2Link * tInertia2Inertial;
+    // const PxTransform tInertia2Link = tInertial2Link * tInertia2Inertial;
 
-    if (!tInertia2Link.isSane()) {
-      printf("Wrong!\n");
-      exit(1);
-    }
+    // if (!tInertia2Link.isSane()) {
+    //   printf("Wrong!\n");
+    //   exit(1);
+    // }
 
     // currentLink->setCMassLocalPose(tInertia2Link);
     // currentLink->setMassSpaceInertiaTensor({eigs.x(), eigs.y(), eigs.z()});
     // currentLink->setMass(currentInertial.mass->value);
 
-    // newObject->addLink(currentLink, current->link->name);
-    // treeNode2pLink[current] = currentLink;
-    // const PxTransform tJoint2Parent =
-    //     current->joint ? poseFromOrigin(*current->joint->origin) : PxTransform(PxIdentity);
-    // currentLink->setGlobalPose(current->parent ? treeNode2pLink[current->parent]->getGlobalPose() *
-    //                                                  tJoint2Parent
-    //                                            : tJoint2Parent);
 
-    // // create link and set its parent
-    // treeNode2pActor[current] = builder.addLink(
-    //     current->parent ? treeNode2pActor[current->parent] : nullptr, tJoint2Parent);
-    // treeNode2pActor[current]->setName(current->link->name.c_str());
-
-    // PxArticulationLink &currentPxLink = *treeNode2pActor[current];
-
-//     bool hasAxis = false;
-//     if (current->joint) {
-//       PxJoint *newJoint = nullptr;
-// #ifdef _VERBOSE
-//       printf("Joint: %s between %s and %s\n", current->joint->type.c_str(),
-//              current->parent->link->name.c_str(), current->link->name.c_str());
-// #endif
-
-//       PxRigidActor *parentLink = current->parent ? treeNode2pLink[current->parent] :
-//       nullptr;
-
-//       PxVec3 axis1 = current->joint->axis->xyz.getNormalized();
-//       PxVec3 axis2;
-//       if (axis1.dot({1, 0, 0}) > 0.9) {
-//         axis2 = axis1.cross({0, 0, 1}).getNormalized();
-//       } else {
-//         axis2 = axis1.cross({1, 0, 0}).getNormalized();
-//       }
-//       PxVec3 axis3 = axis1.cross(axis2);
-//       const PxTransform tAxis2Joint = {PxVec3(0), PxQuat(PxMat33(axis1, axis2, axis3))};
-//       if (!tAxis2Joint.isSane()) {
-//         printf("WRONG!\n");
-//         exit(1);
-//       }
-//       const PxTransform tAxis2Parent = tJoint2Parent * tAxis2Joint;
-
-//       if (current->joint->type == "revolute") {
-//         auto newRJoint = PxRevoluteJointCreate(*mSimulation.mPhysicsSDK, parentLink,
-//         tAxis2Parent, currentLink, tAxis2Joint);
-//         newRJoint->setRevoluteJointFlag(PxRevoluteJointFlag::eLIMIT_ENABLED, true);
-//         newRJoint->setLimit(PxJointAngularLimitPair(current->joint->limit->lower,
-//         current->joint->limit->upper)); 
-//         newJoint = newRJoint;
-//       } else if (current->joint->type == "continuous") {
-//         auto newCJoint = PxRevoluteJointCreate(*mSimulation.mPhysicsSDK, parentLink,
-//         tAxis2Parent, currentLink, tAxis2Joint); 
-//         newJoint = newCJoint;
-//       } else if (current->joint->type == "prismatic") {
-//         auto newPJoint = PxPrismaticJointCreate(*mSimulation.mPhysicsSDK, parentLink,
-//         tAxis2Parent, currentLink, tAxis2Joint);
-//         newPJoint->setPrismaticJointFlag(PxPrismaticJointFlag::eLIMIT_ENABLED, true);
-//         newPJoint->setLimit(PxJointLinearLimitPair(mSimulation.mPhysicsSDK->getTolerancesScale(),
-//         current->joint->limit->lower, current->joint->limit->upper)); 
-//         newJoint = newPJoint;
-//       } else if (current->joint->type == "fixed") {
-//         auto newFJoint = PxFixedJointCreate(*mSimulation.mPhysicsSDK, parentLink,
-//         tAxis2Parent, currentLink, tAxis2Joint); 
-//         newJoint = newFJoint;
-//       } else if (current->joint->type == "floating") {
-//         std::cerr << "Currently not supported: " + current->joint->type << std::endl;
-//         exit(1);
-//       } else if (current->joint->type == "planar") {
-//         std::cerr << "Currently not supported type: " + current->joint->type << std::endl;
-//         exit(1);
-//       } else {
-//         std::cerr << "Unreconized joint type: " + current->joint->type << std::endl;
-//         exit(1);
-//       }
-//       newObject->addJoint(newJoint, current->joint->name);
-//     }
     for (auto c : current->children) {
       stack.push_back(c);
     }

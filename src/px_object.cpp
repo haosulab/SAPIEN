@@ -18,6 +18,7 @@ void PxObject::addLink(PxRigidActor *newLink, const std::string &name) {
     }
     links.push_back(newLink);
     namedLinks[name] = newLink;
+    newLink->setName(name.c_str());
   }
 }
 
@@ -46,6 +47,7 @@ void PxObject::addJoint(PxJoint *newJoint, const std::string &name) {
     joints.push_back(newJoint);
     jointNames.push_back(name);
     namedJoints[name] = newJoint;
+    newJoint->setName(name.c_str());
   }
 }
 
