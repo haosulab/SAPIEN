@@ -35,24 +35,23 @@ void test1() {
   builder->addBoxShape(boxPose, boxSize, nullptr, 1.f);
   builder->addBoxVisual(boxPose, boxSize);
   auto box = builder->build();
-  sim.addGround(-0.3f);
+  sim.addGround(0);
 
   auto loader = URDF::URDFLoader(sim);
   std::unique_ptr<PxKinematicsArticulationWrapper> unique_wrapper =
-      loader.loadKinematic("../assets/robot/arm_without_gazebo.urdf");
+      loader.loadKinematic("../assets/robot/all_robot.urdf");
   auto wrapper = unique_wrapper.get();
   sim.mKinematicArticulationWrappers.push_back(std::move(unique_wrapper));
   auto timestep = sim.getTimestep();
 
   // ROS
   auto nh = std::make_shared<ros::NodeHandle>();
-  robot_interface::JointPubNode node(wrapper->get_queue(), wrapper->get_drive_joint_name(), 30,
+  robot_interface::JointPubNode node(wrapper->get_queue(), wrapper->get_drive_joint_name(), 60,
                                      1000, "/joint_states", nh);
   std::thread th1(&robot_interface::JointPubNode::spin, &node);
 
-  robot_interface::GroupControllerNode controller(wrapper->get_drive_joint_name(), "right_arm",
-                                                  "physx", timestep, nh);
-  wrapper->addJointController(wrapper->get_drive_joint_name(), controller.getQueue());
+  robot_interface::GroupControllerNode controller("right_arm", timestep, nh);
+  wrapper->addJointController(controller.getJointNames(), controller.getQueue());
   std::thread th2(&robot_interface::GroupControllerNode::spin, &controller);
 
   //  auto queue = controller.getQueue();
@@ -66,7 +65,7 @@ void test1() {
   //                                  0,
   //                                  0,
   //                                  0};
-  std::vector<PxReal> initQpos = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<PxReal> initQpos(13, 0);
   wrapper->set_qpos(initQpos);
   //    wrapper->set_drive_target(initQpos);
   //  wrapper->set_qvel({0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0, 0, 0});

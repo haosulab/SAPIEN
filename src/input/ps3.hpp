@@ -107,10 +107,19 @@ std::string findPS3Controller() {
 
 class PS3Input {
   std::ifstream device;
-  std::mutex readMutex;
   std::thread worker;
   std::atomic<bool> shouldExit;
   std::array<std::atomic<int>, PS3_BUTTON_COUNT> buttonStates;
+  void runThread() {
+    js_event_t event;
+    while (!shouldExit) {
+      device.read(reinterpret_cast<char *>(&event), sizeof(js_event_t));
+      if (event.type == 1) {
+        assert(event.id >= 0 && event.id < PS3_BUTTON_COUNT);
+        buttonStates[event.id] = event.action;
+      }
+    }
+  }
 
 public:
   PS3Input() {
@@ -124,17 +133,6 @@ public:
       state = 0;
     }
     worker = std::thread(&PS3Input::runThread, this);
-  }
-
-  void runThread() {
-    js_event_t event;
-    while (!shouldExit) {
-      device.read(reinterpret_cast<char *>(&event), sizeof(js_event_t));
-      if (event.type == 1) {
-        assert(event.id >= 0 && event.id < PS3_BUTTON_COUNT);
-        buttonStates[event.id] = event.action;
-      }
-    }
   }
 
   bool getKey(ButtonId id) {

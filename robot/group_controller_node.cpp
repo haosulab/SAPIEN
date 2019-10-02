@@ -3,6 +3,7 @@
 //
 
 #include <boost/bind.hpp>
+#include <trajectory_msgs/JointTrajectory.h>
 
 #include "group_controller_node.h"
 bool robot_interface::GroupControllerNode::setsEqual(
@@ -15,9 +16,10 @@ bool robot_interface::GroupControllerNode::setsEqual(
   return true;
 }
 void robot_interface::GroupControllerNode::clearGoal() { queue->clear(); }
-void robot_interface::GroupControllerNode::executeGoal(std::vector<uint32_t> indexGoal2Controller) {
+void robot_interface::GroupControllerNode::executeGoal(
+    std::vector<uint32_t> indexGoal2Controller) {
   auto numPoints = current_trajectory_.points.size();
-  if(numPoints < 2){
+  if (numPoints < 2) {
     ROS_ERROR("Invalid trajectory, number of points should be greater than or equal to 2");
     return;
   }
@@ -32,7 +34,7 @@ void robot_interface::GroupControllerNode::executeGoal(std::vector<uint32_t> ind
   currentPosition.assign(current->positions.begin(), current->positions.end());
   std::vector<float> step(jointNum, 0);
 
-  float bug=0;
+  float bug = 0;
 
   while (now < end && next != current_trajectory_.points.end()) {
     auto percentage = timestep / (next->time_from_start - current->time_from_start).toSec();
@@ -42,7 +44,7 @@ void robot_interface::GroupControllerNode::executeGoal(std::vector<uint32_t> ind
     while (now < next->time_from_start) {
       // Transform the controller index from goal order to controller order
       std::vector<float> tempPosition(jointNum, 0);
-      for(size_t i=0;i < indexGoal2Controller.size();++i){
+      for (size_t i = 0; i < indexGoal2Controller.size(); ++i) {
         tempPosition[indexGoal2Controller[i]] = currentPosition[i];
       }
       queue->pushValue(tempPosition);
@@ -56,6 +58,7 @@ void robot_interface::GroupControllerNode::executeGoal(std::vector<uint32_t> ind
     next += 1;
   }
   ROS_INFO("Controller: %f", bug);
+  has_active_goal_ = false;
 }
 void robot_interface::GroupControllerNode::executeCB(GoalHandle gh) {
   ROS_INFO("Receive joint trajectory goal");
@@ -69,17 +72,17 @@ void robot_interface::GroupControllerNode::executeCB(GoalHandle gh) {
     return;
   }
 
-  // Cancels the currently active goal.
-//  if (has_active_goal_) {
-//    // Stops the controller.
-//    trajectory_msgs::JointTrajectory empty;
-//    empty.joint_names = mJointName;
-//    clearGoal();
-//
-//    // Marks the current goal as canceled.
-//    active_goal_.setCanceled();
-//    has_active_goal_ = false;
-//  }
+  //   Cancels the currently active goal.
+  if (has_active_goal_) {
+    // Stops the controller.
+    trajectory_msgs::JointTrajectory empty;
+    empty.joint_names = mJointName;
+    clearGoal();
+
+    // Marks the current goal as canceled.
+    active_goal_.setCanceled();
+    has_active_goal_ = false;
+  }
 
   std::vector<uint32_t> indexGoal2Controller = {};
   indexGoal2Controller.resize(goalJoints.size());
@@ -113,21 +116,70 @@ void robot_interface::GroupControllerNode::cancleCB(
     has_active_goal_ = false;
   }
 }
-robot_interface::GroupControllerNode::GroupControllerNode(
-    const std::vector<std::string> &jointName, const std::string &group,
-    const std::string &nameSpace, float timestep, std::shared_ptr<ros::NodeHandle> nh)
-    : mNodeHandle(nh), has_active_goal_(false), groupName(group), timestep(timestep),
-      mServer(*nh, "physx/" + group + "/follow_joint_trajectory",
-              boost::bind(&robot_interface::GroupControllerNode::executeCB, this, _1),
-              boost::bind(&robot_interface::GroupControllerNode::cancleCB, this, _1), false) {
+robot_interface::GroupControllerNode::GroupControllerNode(const std::string &groupName,
+                                                          float timestep,
+                                                          std::shared_ptr<ros::NodeHandle> nh,
+                                                          const std::string &nameSpace,
+                                                          std::string controllerName)
+    : mNodeHandle(nh), has_active_goal_(false), groupName(groupName), timestep(timestep) {
   // Gets all of the joints
-  mJointName = jointName;
-  jointNum = jointName.size();
   queue = std::make_unique<ThreadSafeQueue>();
+  if (controllerName.empty()) {
+    controllerName = nameSpace + "/" + groupName + "_controller";
+  }
+  mServer = std::make_unique<JTAS>(
+      *nh, controllerName + "/follow_joint_trajectory",
+      boost::bind(&robot_interface::GroupControllerNode::executeCB, this, _1),
+      boost::bind(&robot_interface::GroupControllerNode::cancleCB, this, _1), false);
+
+  // Fetch value from parameters servers: the yaml file
+  // Gets all of the joints
+  XmlRpc::XmlRpcValue controllerList;
+  if (!mNodeHandle->getParam("/move_group/controller_list", controllerList)) {
+    ROS_FATAL("No controller list given. (namespace: %s)", mNodeHandle->getNamespace().c_str());
+    exit(1);
+  }
+  if (controllerList.getType() != XmlRpc::XmlRpcValue::TypeArray) {
+    ROS_FATAL("Malformed controller specification.  (namespace: %s)",
+              mNodeHandle->getNamespace().c_str());
+    exit(1);
+  }
+  bool found = false;
+  for (size_t i = 0; i < controllerList.size(); ++i) {
+    std::string tempControllerName = static_cast<std::string>(controllerList[i]["name"]);
+    if (tempControllerName != controllerName) {
+      continue;
+    } else {
+      found = true;
+      if (static_cast<std::string>(controllerList[i]["type"]) != "FollowJointTrajectory") {
+        ROS_FATAL("Only FollowJointTrajectory is supported for this controller, use other "
+                  "controller for other types");
+        exit(1);
+      }
+      XmlRpc::XmlRpcValue &joints = controllerList[i]["joints"];
+      for (size_t k = 0; k < joints.size(); ++k) {
+        if (joints[k].getType() != XmlRpc::XmlRpcValue::TypeString) {
+          ROS_FATAL("Array of joint names should contain all strings.  (namespace: %s)",
+                    mNodeHandle->getNamespace().c_str());
+          exit(1);
+        }
+        mJointName.push_back(static_cast<std::string>(joints[k]));
+      }
+    }
+  }
+  if (!found) {
+    ROS_FATAL_STREAM("Controller list param found, but no controller named "
+                     << controllerName << "found! Do you use the same as the one in yaml?");
+  }
+
+  jointNum = mJointName.size();
 }
 void robot_interface::GroupControllerNode::spin() {
-//  ROS_INFO("Controller start with group name: %s", groupName.c_str());
-  mServer.start();
+  //  ROS_INFO("Controller start with group name: %s", groupName.c_str());
+  mServer->start();
   ros::spin();
 }
 ThreadSafeQueue *robot_interface::GroupControllerNode::getQueue() { return queue.get(); }
+const std::vector<std::string> robot_interface::GroupControllerNode::getJointNames() {
+  return mJointName;
+}
