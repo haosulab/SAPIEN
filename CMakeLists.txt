@@ -66,7 +66,7 @@ find_package(catkin COMPONENTS
 
 include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} "robot")
 
-if (${catkin_INCLUDE_DIRS})
+if (catkin_INCLUDE_DIRS)
   catkin_package(
     LIBRARIES
     INCLUDE_DIRS

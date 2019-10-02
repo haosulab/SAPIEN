@@ -119,19 +119,29 @@ void test3() {
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 
-
   auto loader = URDF::URDFLoader(sim);
-  auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
-  // auto *articulationWrapper = loader.load("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
-  // auto *articulationWrapper = loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
-  auto articulation = articulationWrapper->articulation;
+  // auto *articulationWrapper =
+  // loader.load("/home/fx/source/partnet-mobility-scripts/179/test.urdf"); auto
+  // *articulationWrapper =
+  // loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
+
+  int row = 2;
+  for (int i = 0; i < 4; ++i) {
+    int x = i / row * 2;
+    int y = i % row * 2;
+    auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+    auto articulation = articulationWrapper->articulation;
+    articulation->teleportRootLink({{(float)x, (float)y, 0}, PxQuat(rand_float()*3, {0, 0, 1})}, true);
+    articulationWrapper->updateCache();
+  }
+
 
   // auto cache = articulationInfo.cache;
-  printf("dof: %d\n", articulation->getDofs());
+  // printf("dof: %d\n", articulation->getDofs());
 
-  sim.step();
-  reset(articulationWrapper);
-  articulationWrapper->updateArticulation();
+  // sim.step();
+  // reset(articulationWrapper);
+  // articulationWrapper->updateArticulation();
 
   printf("Simulation start\n");
   while (true) {
