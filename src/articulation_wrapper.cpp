@@ -35,6 +35,7 @@ void PxArticulationWrapper::set_qpos(const std::vector<physx::PxReal> &v) {
   for (size_t i = 0; i < v.size(); ++i) {
     cache->jointPosition[i] = v[i];
   }
+  articulation->applyCache(*cache, PxArticulationCache::ePOSITION);
 }
 
 std::vector<physx::PxReal> PxArticulationWrapper::get_qvel() const {
@@ -46,6 +47,7 @@ void PxArticulationWrapper::set_qvel(const std::vector<physx::PxReal> &v) {
   for (size_t i = 0; i < v.size(); ++i) {
     cache->jointVelocity[i] = v[i];
   }
+  articulation->applyCache(*cache, PxArticulationCache::eVELOCITY);
 }
 
 std::vector<physx::PxReal> PxArticulationWrapper::get_qacc() const {
@@ -56,6 +58,7 @@ void PxArticulationWrapper::set_qacc(const std::vector<physx::PxReal> &v) {
   for (size_t i = 0; i < v.size(); ++i) {
     cache->jointAcceleration[i] = v[i];
   }
+  articulation->applyCache(*cache, PxArticulationCache::eACCELERATION);
 }
 
 std::vector<physx::PxReal> PxArticulationWrapper::get_qf() const {
@@ -66,4 +69,5 @@ void PxArticulationWrapper::set_qf(const std::vector<physx::PxReal> &v) {
   for (size_t i = 0; i < v.size(); ++i) {
     cache->jointForce[i] = v[i];
   }
+  articulation->applyCache(*cache, PxArticulationCache::eFORCE);
 }

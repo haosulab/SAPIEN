@@ -123,7 +123,6 @@ void PxArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
 
 PxArticulationWrapper *PxArticulationBuilder::build(bool fixBase) {
   mArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, fixBase);
-  // PxArticulationWrapper &interface = mSimulation->mArticulation2Wrapper[mArticulation] = {};
   auto wrapper = std::make_unique<PxArticulationWrapper>();
   for (auto id : mRenderIds) {
     mSimulation->mRenderId2Articulation[id] = wrapper.get();
@@ -179,8 +178,6 @@ PxArticulationWrapper *PxArticulationBuilder::build(bool fixBase) {
   for (size_t i = 0; i < nLinks; ++i) {
     auto *joint = static_cast<PxArticulationJointReducedCoordinate *>(links[i]->getInboundJoint());
     if (joint) {
-      // use link name as joint name
-      // wrapper->jointNames.push_back(links[i]->getName());
       wrapper->jointNames.push_back(link2JointName[links[i]]);
       wrapper->jointDofs.push_back(links[i]->getInboundJointDof());
 

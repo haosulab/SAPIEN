@@ -179,20 +179,15 @@ PxSimulation::~PxSimulation() {
 }
 
 void PxSimulation::step() {
-  // TODO: find a better way to sync data
-  for (auto &wrapper : mDynamicArticulationWrappers) {
-    wrapper->updateArticulation();
+  for (auto &wrapper : mKinematicArticulationWrappers) {
+    wrapper->update(mTimestep);
   }
   mScene->simulate(mTimestep);
-  // TODO: find a better way to sync data
   while (!mScene->fetchResults(true)) {
     // TODO: do useful stuff here
   }
   for (auto &wrapper : mDynamicArticulationWrappers) {
     wrapper->updateCache();
-  }
-  for (auto &wrapper : mKinematicArticulationWrappers) {
-    wrapper->update(mTimestep);
   }
 }
 
