@@ -5,6 +5,7 @@
 #pragma once
 
 #include <actionlib/server/action_server.h>
+#include <actionlib/server/simple_action_server.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <control_msgs/FollowJointTrajectoryFeedback.h>
 #include <control_msgs/FollowJointTrajectoryResult.h>
@@ -19,13 +20,14 @@ private:
   // Define convenient type
   typedef actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction> JTAS;
   typedef JTAS::GoalHandle GoalHandle;
+  std::string groupName;
 
   // Controlling constant
   float timestep;
   uint32_t jointNum;
 
   // Action monitoring
-  actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction> mServer;
+  JTAS mServer;
   std::vector<std::string> mJointName;
   std::shared_ptr<ros::NodeHandle> mNodeHandle = nullptr;
   control_msgs::FollowJointTrajectoryGoal mGoal;
@@ -41,19 +43,20 @@ private:
   std::unique_ptr<ThreadSafeQueue> queue;
 
 public:
-  GroupControllerNode(const std::vector<std::string> &jointName,
-                      const std::string &nameSpace, std::shared_ptr<ros::NodeHandle> nh);
+  GroupControllerNode(const std::vector<std::string> &jointName, const std::string &group,
+                      const std::string &nameSpace, float timestep, std::shared_ptr<ros::NodeHandle> nh);
 
   void spin();
+  ThreadSafeQueue* getQueue();
 
 private:
   void executeCB(GoalHandle gh);
   void cancleCB(GoalHandle gh);
-  static bool setsEqual(const std::vector<std::string> &a, const std::vector<std::string> &b);
+  static bool setsEqual(const std::vector<std::string> &controllerJoints, const std::vector<std::string> &goal);
 
   // Control internal buffer
   void clearGoal();
-  void executeGoal();
+  void executeGoal(std::vector<uint32_t> indexGoal2Controller);
   void advance(const std::vector<float> &step, std::vector<float> &currentPosition);
 
   // Buffer from interface

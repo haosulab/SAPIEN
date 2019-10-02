@@ -16,14 +16,14 @@ JointPubNode::JointPubNode(ThreadSafeQueue *queue,
     : jointName(jointName), queue(queue), mNodeHandle(std::move(nh)), pubInterval(1 / pubFrequency),
       updateInterval(1 / updateFrequency) {
 
-  mPub = mNodeHandle->advertise<sensor_msgs::JointState>(topicName, 10);
+  mPub = mNodeHandle->advertise<sensor_msgs::JointState>(topicName, 1);
   mStates.position.resize(jointName.size());
   mStates.name.assign(jointName.begin(), jointName.end());
 }
 void JointPubNode::spin() {
   ros::Time lastUpdate = ros::Time::now();
   ros::Time lastPub = ros::Time::now();
-  ros::WallRate rate(100);
+  ros::WallRate rate(1000);
   while (!ros::isShuttingDown()) {
     rate.sleep();
     ros::Time current = ros::Time::now();

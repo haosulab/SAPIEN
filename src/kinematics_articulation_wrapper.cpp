@@ -151,44 +151,47 @@ std::vector<PxRigidDynamic *> PxKinematicsArticulationWrapper::get_links() { ret
 
 // Update function should be called in the simulation loop
 void PxKinematicsArticulationWrapper::update(PxReal timestep) {
-  //  // Update drive target based on controllers
-  //  if (hasActuator) {
-  //    for (size_t i = 0; i < controllerQueueList.size(); ++i) {
-  //      auto controllerIndex = controllerIndexList[i];
-  //      auto queue = controllerQueueList[i]->pop();
-  //      for (size_t j = 0; j < controllerIndex.size(); ++j) {
-  //        driveQpos[controllerIndex[j]] = queue[j];
-  //      }
-  //    }
-  //    set_drive_target(driveQpos);
-  //    updateVelocityDrive = false;
-  //  } else if (updateVelocityDrive) {
-  //    for (std::size_t i = 0; i < dof(); ++i) {
-  //      // Update drive of next step based on the drive velocity
-  //      PxReal newQ = driveQpos[i] + driveQvel[i] * timestep;
-  //      auto [upperLimit, lowerLimit] = jointLimit[i];
-  //      newQ = newQ > upperLimit ? upperLimit : newQ;
-  //      driveQpos[i] = newQ < lowerLimit ? lowerLimit : newQ;
-  //    }
-  //    set_drive_target(driveQpos);
-  //  }
-  ////    set_drive_target(driveQpos);
-  //
-  //  // Update velocity based on time interval
-  //  for (size_t i = 0; i < dof(); ++i) {
-  //    qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
-  //  }
-  //  if (updateQpos) {
-  //    qpos = driveQpos;
-  //  }
-  //  updateQpos = false;
-  //
-  //  // Update ROS related communication buffer
-  //  // In the future, the cast between PxReal and float should be make explicitly
-  //  jointStateQueue.push(qpos);
+  // Update drive target based on controllers
+  if (hasActuator) {
+    for (size_t i = 0; i < controllerQueueList.size(); ++i) {
+      // If no controller give the signal, continue for next one
+      if (controllerQueueList[i]->empty()) {
+        continue;
+      }
+      auto controllerIndex = controllerIndexList[i];
+      auto queue = controllerQueueList[i]->pop();
+      std::cout << "Wrapper: " << queue[0] << std::endl;
+      for (size_t j = 0; j < controllerIndex.size(); ++j) {
+        driveQpos[controllerIndex[j]] = queue[j];
+      }
+      set_drive_target(driveQpos);
+    }
+  } else if (updateVelocityDrive) {
+    for (std::size_t i = 0; i < dof(); ++i) {
+      // Update drive of next step based on the drive velocity
+      PxReal newQ = driveQpos[i] + driveQvel[i] * timestep;
+      auto [upperLimit, lowerLimit] = jointLimit[i];
+      newQ = newQ > upperLimit ? upperLimit : newQ;
+      driveQpos[i] = newQ < lowerLimit ? lowerLimit : newQ;
+    }
+    set_drive_target(driveQpos);
+  }
+
+  // Update velocity based on time interval if the set_drive_target function is called once in this
+  // simulation step
+  if (updateQpos) {
+    qpos = driveQpos;
+    for (size_t i = 0; i < dof(); ++i) {
+      qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
+    }
+  }
+  updateQpos = false;
+
+  // Update ROS related communication buffer
+  // In the future, the cast between PxReal and float should be make explicitly
+  jointStateQueue.push(qpos);
 }
 
-// Thread Safe Queue
 ThreadSafeQueue *PxKinematicsArticulationWrapper::get_queue() { return &jointStateQueue; }
 void PxKinematicsArticulationWrapper::addJointController(const std::vector<std::string> &name,
                                                          ThreadSafeQueue *queue) {
@@ -204,7 +207,9 @@ void PxKinematicsArticulationWrapper::addJointController(const std::vector<std::
   assert(controllerIndex.size() == name.size());
   controllerIndexList.push_back(controllerIndex);
   controllerQueueList.push_back(queue);
+  hasActuator = true;
 }
+// Thread Safe Queue
 ThreadSafeQueue::ThreadSafeQueue() { mQueue = std::queue<std::vector<float>>(); }
 void ThreadSafeQueue::push(const std::vector<float> &vec) {
   std::lock_guard<std::mutex> guard(mLock);
@@ -212,7 +217,7 @@ void ThreadSafeQueue::push(const std::vector<float> &vec) {
 }
 std::vector<float> ThreadSafeQueue::pop() {
   std::lock_guard<std::mutex> guard(mLock);
-  std::vector<float> vec = mQueue.back();
+  std::vector<float> vec = mQueue.front();
   mQueue.pop();
   return vec;
 }

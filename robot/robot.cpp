@@ -35,22 +35,27 @@ void test1() {
   builder->addBoxShape(boxPose, boxSize, nullptr, 1.f);
   builder->addBoxVisual(boxPose, boxSize);
   auto box = builder->build();
-  //  sim.addGround(-0.3f);
+  sim.addGround(-0.3f);
 
   auto loader = URDF::URDFLoader(sim);
   std::unique_ptr<PxKinematicsArticulationWrapper> unique_wrapper =
-      loader.loadKinematic("../assets/robot/all_robot.urdf");
+      loader.loadKinematic("../assets/robot/arm_without_gazebo.urdf");
   auto wrapper = unique_wrapper.get();
   sim.mKinematicArticulationWrappers.push_back(std::move(unique_wrapper));
+  auto timestep = sim.getTimestep();
 
   // ROS
   auto nh = std::make_shared<ros::NodeHandle>();
   robot_interface::JointPubNode node(wrapper->get_queue(), wrapper->get_drive_joint_name(), 30,
                                      1000, "/joint_states", nh);
   std::thread th1(&robot_interface::JointPubNode::spin, &node);
-  //  robot_interface::GroupControllerNode controller(wrapper->get_drive_joint_name(), "physx",
-  //  nh); std::thread th2(&robot_interface::GroupControllerNode::spin, &node);
 
+  robot_interface::GroupControllerNode controller(wrapper->get_drive_joint_name(), "right_arm",
+                                                  "physx", timestep, nh);
+  wrapper->addJointController(wrapper->get_drive_joint_name(), controller.getQueue());
+  std::thread th2(&robot_interface::GroupControllerNode::spin, &controller);
+
+  //  auto queue = controller.getQueue();
   //  std::vector<PxReal> initQpos = {-1.93475823254,
   //                                  -1.53188487338,
   //                                  0.951243371548,
@@ -61,12 +66,12 @@ void test1() {
   //                                  0,
   //                                  0,
   //                                  0};
-  std::vector<PxReal> initQpos = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  std::vector<PxReal> initQpos = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
   wrapper->set_qpos(initQpos);
   //    wrapper->set_drive_target(initQpos);
   //  wrapper->set_qvel({0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0, 0, 0});
   //  wrapper->set_qvel({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
-  bool simulating = false;
+  bool simulating = true;
   sim.step();
   sim.updateRenderer();
   sim.step();
@@ -78,14 +83,13 @@ void test1() {
     if (simulating) {
       sim.step();
       sim.updateRenderer();
+      usleep(1000);
+      //      queue->pushValue(std::vector<float> {1,1,1,1,1,1,1,1,1,1});
     }
     renderer.render();
     auto input = Optifuser::getInput();
     if (input.getKeyState(GLFW_KEY_Q)) {
       break;
-    }
-    if (input.getKeyState(GLFW_KEY_SPACE)) {
-      simulating = !simulating;
     }
   }
 }
