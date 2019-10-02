@@ -46,6 +46,7 @@ public:
   std::vector<std::unique_ptr<struct PxArticulationWrapper>> mDynamicArticulationWrappers;
   std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>>
       mKinematicArticulationWrappers;
+  std::vector<std::unique_ptr<struct PxObjectWrapper>> mObjectArticulationWrappers;
 
 public:
   PxSimulation();

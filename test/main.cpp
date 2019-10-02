@@ -17,6 +17,7 @@
 #include <object.h>
 #include <optifuser.h>
 #include <vector>
+#include "object_articulation_wrapper.h"
 
 #include <random>
 
@@ -154,4 +155,40 @@ void test3() {
   }
 }
 
-int main(int argc, char **argv) { test3(); }
+void test4() {
+  Renderer::OptifuserRenderer renderer;
+  renderer.init();
+  renderer.cam.position = {0, -2, 0.5};
+  renderer.cam.setForward({0, 1, 0});
+  renderer.cam.setUp({0, 0, 1});
+
+  PxSimulation sim;
+  sim.setRenderer(&renderer);
+  sim.setTimestep(1.f / 500.f);
+
+  // sim.addGround(-0.3);
+
+  auto loader = URDF::URDFLoader(sim);
+  auto objectWrapper = loader.loadObject("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
+
+  // auto cache = articulationInfo.cache;
+  
+
+  sim.step();
+
+  printf("Simulation start\n");
+  while (true) {
+    sim.step();
+    sim.updateRenderer();
+    renderer.render();
+    if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
+      break;
+    }
+    // auto &context  = renderer.getOffscreenContext(0);
+    // context.renderer.renderScene(*renderer.mScene, renderer.cam);
+    // context.renderer.saveLighting("lighting_offscreen.raw");
+    // context.renderer.saveDepth("depth_offscreen.raw");
+    // context.renderer.saveNormal("normal_offscreen.raw");
+  }
+}
+int main(int argc, char **argv) { test4(); }
