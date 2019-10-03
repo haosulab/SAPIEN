@@ -22,11 +22,12 @@ private:
 
   // Buffer from interface
   ThreadSafeQueue *queue;
+  std::thread worker;
 
 public:
-  JointPubNode(ThreadSafeQueue *queue, const std::vector<std::string> &jointName,
-                      double pubFrequency, double updateFrequency, const std::string &topicName,
-                      std::shared_ptr<ros::NodeHandle> nh);
+  JointPubNode(PxKinematicsArticulationWrapper *wrapper, double pubFrequency,
+               double updateFrequency, const std::string &topicName,
+               std::shared_ptr<ros::NodeHandle> nh);
 
   void spin();
 

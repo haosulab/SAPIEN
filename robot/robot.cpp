@@ -4,11 +4,12 @@
 
 #include "actor_builder.h"
 #include "articulation_builder.h"
-#include "group_controller_node.h"
 #include "joint_pub_node.h"
+#include "joint_trajectory_controller.h"
 #include "optifuser_renderer.h"
 #include "simulation.h"
 #include "urdf/urdf_loader.h"
+#include "velocity_control_service.h"
 #include <extensions/PxDefaultCpuDispatcher.h>
 #include <extensions/PxSimpleFactory.h>
 #include <foundation/PxMat33.h>
@@ -35,7 +36,7 @@ void test1() {
   builder->addBoxShape(boxPose, boxSize, nullptr, 1.f);
   builder->addBoxVisual(boxPose, boxSize);
   auto box = builder->build();
-  sim.addGround(0);
+  sim.addGround(0.0);
 
   auto loader = URDF::URDFLoader(sim);
   std::unique_ptr<PxKinematicsArticulationWrapper> unique_wrapper =
@@ -46,13 +47,18 @@ void test1() {
 
   // ROS
   auto nh = std::make_shared<ros::NodeHandle>();
-  robot_interface::JointPubNode node(wrapper->get_queue(), wrapper->get_drive_joint_name(), 60,
-                                     1000, "/joint_states", nh);
-  std::thread th1(&robot_interface::JointPubNode::spin, &node);
 
-  robot_interface::GroupControllerNode controller("right_arm", timestep, nh);
-  wrapper->addJointController(controller.getJointNames(), controller.getQueue());
-  std::thread th2(&robot_interface::GroupControllerNode::spin, &controller);
+  robot_interface::JointPubNode node(wrapper, 60, 1000, "/joint_states", nh);
+
+  robot_interface::GroupControllerNode controller(wrapper, "right_arm", timestep, nh);
+
+  //  std::vector<std::string> serviceJoints = {
+  //      "right_gripper_finger1_joint", "right_gripper_finger2_joint",
+  //      "right_gripper_finger3_joint"};
+  //  robot_interface::VelocityControllerServer service(wrapper, serviceJoints, timestep,
+  //  "gripper", nh); wrapper->add_velocity_controller(service.getJointNames(),
+  //  service.getQueue()); std::thread th3(&robot_interface::VelocityControllerServer::spin,
+  //  &service);
 
   //  auto queue = controller.getQueue();
   //  std::vector<PxReal> initQpos = {-1.93475823254,

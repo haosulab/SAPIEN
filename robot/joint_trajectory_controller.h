@@ -9,7 +9,6 @@
 #include <control_msgs/FollowJointTrajectoryFeedback.h>
 #include <control_msgs/FollowJointTrajectoryResult.h>
 #include <kinematics_articulation_wrapper.h>
-#include <ros/ros.h>
 
 namespace robot_interface {
 class GroupControllerNode {
@@ -18,6 +17,7 @@ private:
   typedef actionlib::ActionServer<control_msgs::FollowJointTrajectoryAction> JTAS;
   typedef JTAS::GoalHandle GoalHandle;
   std::string groupName;
+  std::thread worker;
 
   // Controlling constant
   float timestep;
@@ -40,13 +40,13 @@ private:
   std::unique_ptr<ThreadSafeQueue> queue;
 
 public:
-  GroupControllerNode(const std::string &groupName, float timestep,
+  GroupControllerNode(PxKinematicsArticulationWrapper* wrapper, const std::string &groupName, float timestep,
                       std::shared_ptr<ros::NodeHandle> nh, const std::string &nameSpace = "physx",
                       std::string controllerName = "");
 
   void spin();
   ThreadSafeQueue *getQueue();
-  const std::vector<std::string> getJointNames();
+  const std::vector<std::string> &getJointNames();
 
 private:
   void executeCB(GoalHandle gh);

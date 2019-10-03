@@ -3,9 +3,10 @@
 //
 
 #include <boost/bind.hpp>
+#include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectory.h>
 
-#include "group_controller_node.h"
+#include "joint_trajectory_controller.h"
 bool robot_interface::GroupControllerNode::setsEqual(
     const std::vector<std::string> &controllerJoints, const std::vector<std::string> &goal) {
   for (const auto &i : goal) {
@@ -116,7 +117,7 @@ void robot_interface::GroupControllerNode::cancleCB(
     has_active_goal_ = false;
   }
 }
-robot_interface::GroupControllerNode::GroupControllerNode(const std::string &groupName,
+robot_interface::GroupControllerNode::GroupControllerNode(PxKinematicsArticulationWrapper* wrapper, const std::string &groupName,
                                                           float timestep,
                                                           std::shared_ptr<ros::NodeHandle> nh,
                                                           const std::string &nameSpace,
@@ -173,6 +174,9 @@ robot_interface::GroupControllerNode::GroupControllerNode(const std::string &gro
   }
 
   jointNum = mJointName.size();
+  // Multi-thread Spin
+  wrapper->add_position_controller(mJointName, queue.get());
+  worker = std::thread(&GroupControllerNode::spin, this);
 }
 void robot_interface::GroupControllerNode::spin() {
   //  ROS_INFO("Controller start with group name: %s", groupName.c_str());
@@ -180,6 +184,6 @@ void robot_interface::GroupControllerNode::spin() {
   ros::spin();
 }
 ThreadSafeQueue *robot_interface::GroupControllerNode::getQueue() { return queue.get(); }
-const std::vector<std::string> robot_interface::GroupControllerNode::getJointNames() {
+const std::vector<std::string> &robot_interface::GroupControllerNode::getJointNames() {
   return mJointName;
 }

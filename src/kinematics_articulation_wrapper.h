@@ -58,8 +58,10 @@ class PxKinematicsArticulationWrapper : public IArticulationDrivable {
 
   // ROS related buffer
   ThreadSafeQueue jointStateQueue = ThreadSafeQueue();
-  std::vector<ThreadSafeQueue *> controllerQueueList = {};
-  std::vector<std::vector<uint32_t>> controllerIndexList = {};
+  std::vector<ThreadSafeQueue *> positionControllerQueueList = {};
+  std::vector<std::vector<uint32_t>> positionControllerIndexList = {};
+  std::vector<ThreadSafeQueue *> velocityControllerQueueList = {};
+  std::vector<std::vector<uint32_t>> velocityControllerIndexList = {};
   bool hasActuator = false;
 
 public:
@@ -98,5 +100,6 @@ public:
 
   // ROS related function
   ThreadSafeQueue *get_queue();
-  void addJointController(const std::vector<std::string> &name, ThreadSafeQueue *queue);
+  void add_position_controller(const std::vector<std::string> &name, ThreadSafeQueue *queue);
+  void add_velocity_controller(const std::vector<std::string> &name, ThreadSafeQueue *queue);
 };
