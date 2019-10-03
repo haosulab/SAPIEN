@@ -135,7 +135,6 @@ void test3() {
   // }
 
   auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
-  auto articulation = articulationWrapper->articulation;
 
   reset(articulationWrapper);
   articulationWrapper->updateArticulation();
@@ -168,7 +167,7 @@ void test4() {
   // sim.addGround(-0.3);
 
   auto loader = URDF::URDFLoader(sim);
-  auto objectWrapper = loader.loadObject("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
+  loader.loadObject("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
 
   // auto cache = articulationInfo.cache;
   

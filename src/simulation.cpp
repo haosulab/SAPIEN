@@ -62,16 +62,11 @@ public:
               << pairHeader.actors[1]->getName() << std::endl;
 
     for (PxU32 i = 0; i < nbPairs; i++) {
-      const PxContactPair &cp = pairs[i];
-
-      const PxU32 bufferSize = 64;// cp.requiredBufferSize;
+      const PxU32 bufferSize = 64;
       PxContactPairPoint contacts[bufferSize];
       PxU32 nbContacts = pairs[i].extractContacts(contacts, bufferSize);
       for (PxU32 j = 0; j < nbContacts; j++) {
-        PxVec3 point = contacts[j].position;
         PxVec3 impulse = contacts[j].impulse;
-        PxU32 internalFaceIndex0 = contacts[j].internalFaceIndex0;
-        PxU32 internalFaceIndex1 = contacts[j].internalFaceIndex1;
         printf("Impulse %f %f %f\n", impulse.x, impulse.y, impulse.z);
       }
     }

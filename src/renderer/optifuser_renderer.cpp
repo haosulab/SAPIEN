@@ -223,10 +223,10 @@ void OptifuserRenderer::render() {
 
       if (ImGui::CollapsingHeader("Mounted Cameras")) {
         ImGui::RadioButton("None##camera", &camIndex, -1);
-        for (auto &[id, cam] : mMountedCameras) {
+        for (auto &cam : mMountedCameras) {
           ImGui::RadioButton(
-              (mMountedCameras[id]->getName() + "##camera" + std::to_string(id)).c_str(),
-              &camIndex, id);
+              (mMountedCameras[cam.first]->getName() + "##camera" + std::to_string(cam.first)).c_str(),
+              &camIndex, cam.first);
         }
       }
 
@@ -290,8 +290,8 @@ void OptifuserRenderer::bindSyncCallback(
 
 std::vector<ICamera *> OptifuserRenderer::getCameras() {
   std::vector<ICamera *> output;
-  for (auto &[_, cam] : mMountedCameras) {
-    output.push_back(cam.get());
+  for (auto &cam : mMountedCameras) {
+    output.push_back(cam.second.get());
   }
   return output;
 }
