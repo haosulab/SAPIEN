@@ -8,17 +8,20 @@
 
 namespace robot_interface {
 
-JointPubNode::JointPubNode(ThreadSafeQueue *queue,
-                                         const std::vector<std::string> &jointName,
-                                         double pubFrequency, double updateFrequency,
-                                         const std::string &topicName,
-                                         std::shared_ptr<ros::NodeHandle> nh)
-    : jointName(jointName), queue(queue), mNodeHandle(std::move(nh)), pubInterval(1 / pubFrequency),
+JointPubNode::JointPubNode(PxKinematicsArticulationWrapper *wrapper, double pubFrequency,
+                           double updateFrequency, const std::string &topicName,
+                           std::shared_ptr<ros::NodeHandle> nh)
+    : jointName(wrapper->get_drive_joint_name()), queue(wrapper->get_queue()),
+      mNodeHandle(std::move(nh)), pubInterval(1 / pubFrequency),
       updateInterval(1 / updateFrequency) {
 
   mPub = mNodeHandle->advertise<sensor_msgs::JointState>(topicName, 1);
   mStates.position.resize(jointName.size());
   mStates.name.assign(jointName.begin(), jointName.end());
+
+  // Multi-thread spin
+  worker = std::thread(&JointPubNode::spin, this);
+
 }
 void JointPubNode::spin() {
   ros::Time lastUpdate = ros::Time::now();

@@ -1,6 +1,8 @@
 #include "urdf_loader.h"
 #include "actor_builder.h"
 #include "articulation_builder.h"
+#include "articulation_wrapper.h"
+#include "kinematics_articulation_wrapper.h"
 #include "mesh_registry.h"
 #include "simulation.h"
 #include <eigen3/Eigen/Eigenvalues>
@@ -9,8 +11,6 @@
 #include <tinyxml2.h>
 #include "joint_system.h"
 #include "articulation_wrapper.h"
-
-#include "kinematics_articulation_wrapper.h"
 
 namespace URDF {
 
@@ -335,16 +335,10 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
   return wrapper;
 }
 
-std::unique_ptr<PxKinematicsArticulationWrapper>
-URDFLoader::loadKinematic(const std::string &filename) {
+PxKinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &filename) {
   std::unique_ptr<PxKinematicsArticulationWrapper> wrapper =
       std::make_unique<PxKinematicsArticulationWrapper>();
 
-  const std::map<std::string, JointType> typeString2JointType = {
-      {"revolute", JointType::REVOLUTE},
-      {"continuous", JointType::CONTINUOUS},
-      {"fixed", JointType::FIXED},
-      {"prismatic", JointType::PRISMATIC}};
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;
@@ -558,12 +552,7 @@ URDFLoader::loadKinematic(const std::string &filename) {
       }
       const PxTransform tAxis2Parent = tJoint2Parent * tAxis2Joint;
 
-      JointType jointType;
-      if (typeString2JointType.find(current->joint->type) != typeString2JointType.end()) {
-        jointType = typeString2JointType.find(current->joint->type)->second;
-      } else {
-        jointType = JointType::UNDEFINED;
-      }
+      auto jointType = typeString2JointType(current->joint->type);
       PxReal lower = current->joint->limit ? current->joint->limit->lower : 0;
       PxReal upper = current->joint->limit ? current->joint->limit->upper : 0;
       joint = wrapper->createJoint(jointType, parentJoint, currentLink, tAxis2Parent, tAxis2Joint,
@@ -617,7 +606,9 @@ URDFLoader::loadKinematic(const std::string &filename) {
       }
     }
   }
-  return wrapper;
+  auto wrapperPtr = wrapper.get();
+  mSimulation.mKinematicArticulationWrappers.push_back(std::move(wrapper));
+  return wrapperPtr;
 }
 
 PxJointSystem *URDFLoader::loadObject(const std::string &filename) {
@@ -867,6 +858,20 @@ PxJointSystem *URDFLoader::loadObject(const std::string &filename) {
   }
   mSimulation.mObjectArticulationWrappers.push_back(std::move(newObject));
   return mSimulation.mObjectArticulationWrappers.back().get();
+}
+JointType URDFLoader::typeString2JointType(const std::string &type) {
+  if (type == "revolute") {
+    return JointType::REVOLUTE;
+  } else if (type == "continuous") {
+    return JointType::CONTINUOUS;
+  } else if (type == "fixed") {
+    return JointType::FIXED;
+  } else if (type == "prismatic") {
+    return JointType::PRISMATIC;
+  } else {
+    std::cerr << "Unknwon joint type: " << type << std::endl;
+    exit(1);
+  }
 }
 
 } // namespace URDF

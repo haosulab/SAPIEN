@@ -190,4 +190,4 @@ void test4() {
     // context.renderer.saveNormal("normal_offscreen.raw");
   }
 }
-int main(int argc, char **argv) { test4(); }
+int main(int argc, char **argv) { test3(); }

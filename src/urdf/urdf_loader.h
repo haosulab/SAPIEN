@@ -627,9 +627,11 @@ class URDFLoader {
 public:
   URDFLoader(class PxSimulation &simulation);
   PxArticulationWrapper *load(const std::string &filename);
-  // TODO: remove unique use *
-  std::unique_ptr<PxKinematicsArticulationWrapper> loadKinematic(const std::string &filename);
+  class PxKinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class PxJointSystem *loadObject(const std::string &filename);
+
+private:
+  static JointType typeString2JointType(const std::string &type);
 };
 
 } // namespace URDF

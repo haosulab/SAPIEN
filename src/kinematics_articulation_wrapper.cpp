@@ -3,7 +3,7 @@
 //
 
 #include "kinematics_articulation_wrapper.h"
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <limits>
 
@@ -118,7 +118,7 @@ void PxKinematicsArticulationWrapper::set_qpos(const std::vector<PxReal> &v) {
     j += 1;
   }
   qpos = v;
-  //  driveQpos = v;
+  driveQpos = v;
 
   updateVelocityDrive = false;
 }
@@ -153,14 +153,29 @@ std::vector<PxRigidDynamic *> PxKinematicsArticulationWrapper::get_links() { ret
 void PxKinematicsArticulationWrapper::update(PxReal timestep) {
   // Update drive target based on controllers
   if (hasActuator) {
-    for (size_t i = 0; i < controllerQueueList.size(); ++i) {
+    // Update by velocity controller
+    for (size_t i = 0; i < velocityControllerQueueList.size(); ++i) {
       // If no controller give the signal, continue for next one
-      if (controllerQueueList[i]->empty()) {
+      if (velocityControllerQueueList[i]->empty()) {
         continue;
       }
-      auto controllerIndex = controllerIndexList[i];
-      auto queue = controllerQueueList[i]->pop();
+      auto controllerIndex = velocityControllerIndexList[i];
+      auto queue = velocityControllerQueueList[i]->pop();
       std::cout << "Wrapper: " << queue[0] << std::endl;
+      for (size_t j = 0; j < controllerIndex.size(); ++j) {
+        driveQpos[controllerIndex[j]] += queue[j] * timestep;
+      }
+      set_drive_target(driveQpos);
+    }
+
+    // Update by position controller
+    for (size_t i = 0; i < positionControllerQueueList.size(); ++i) {
+      // If no controller give the signal, continue for next one
+      if (positionControllerQueueList[i]->empty()) {
+        continue;
+      }
+      auto controllerIndex = positionControllerIndexList[i];
+      auto queue = positionControllerQueueList[i]->pop();
       for (size_t j = 0; j < controllerIndex.size(); ++j) {
         driveQpos[controllerIndex[j]] = queue[j];
       }
@@ -193,8 +208,8 @@ void PxKinematicsArticulationWrapper::update(PxReal timestep) {
 }
 
 ThreadSafeQueue *PxKinematicsArticulationWrapper::get_queue() { return &jointStateQueue; }
-void PxKinematicsArticulationWrapper::addJointController(const std::vector<std::string> &name,
-                                                         ThreadSafeQueue *queue) {
+void PxKinematicsArticulationWrapper::add_position_controller(const std::vector<std::string> &name,
+                                                            ThreadSafeQueue *queue) {
   std::vector<uint32_t> controllerIndex = {};
   for (const auto &qName : name) {
     for (size_t j = 0; j < jointNameDOF.size(); ++j) {
@@ -205,8 +220,25 @@ void PxKinematicsArticulationWrapper::addJointController(const std::vector<std::
     }
   }
   assert(controllerIndex.size() == name.size());
-  controllerIndexList.push_back(controllerIndex);
-  controllerQueueList.push_back(queue);
+  positionControllerIndexList.push_back(controllerIndex);
+  positionControllerQueueList.push_back(queue);
+  hasActuator = true;
+}
+void PxKinematicsArticulationWrapper::add_velocity_controller(const std::vector<std::string> &name,
+                                                            ThreadSafeQueue *queue) {
+  std::vector<uint32_t> controllerIndex = {};
+  for (const auto &qName : name) {
+    for (size_t j = 0; j < jointNameDOF.size(); ++j) {
+      if (qName == jointNameDOF[j]) {
+        controllerIndex.push_back(j);
+        break;
+      }
+    }
+  }
+
+  assert(controllerIndex.size() == name.size());
+  velocityControllerIndexList.push_back(controllerIndex);
+  velocityControllerQueueList.push_back(queue);
   hasActuator = true;
 }
 // Thread Safe Queue

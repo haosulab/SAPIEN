@@ -58,26 +58,40 @@ target_link_libraries(run mylib)
 
 find_package(catkin COMPONENTS
         roslaunch
+        std_msgs
+        message_generation
         moveit_core
         moveit_ros_planning
         actionlib
         actionlib_msgs
         roscpp)
 
+
+#add_service_files(
+#        DIRECTORY
+#        robot/srv
+#        FILES
+#        VelocityControlService.srv
+#)
+#
+#generate_messages(
+#        DEPENDENCIES
+#        std_msgs
+#)
+
 include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} "robot")
 
-if (catkin_INCLUDE_DIRS)
-  catkin_package(
-    LIBRARIES
-    INCLUDE_DIRS
-    CATKIN_DEPENDS
-    moveit_core
-    moveit_ros_planning
-    )
-endif()
+#if (catkin_INCLUDE_DIRS)
+#  catkin_package(
+#    LIBRARIES
+#    INCLUDE_DIRS
+#    CATKIN_DEPENDS
+#    )
+#endif ()
 
 add_executable(robot
-        robot/group_controller_node.cpp
+        robot/joint_trajectory_controller.cpp
+        robot/velocity_control_service.cpp
         robot/joint_pub_node.cpp
         robot/robot.cpp)
 target_link_libraries(robot mylib ${catkin_LIBRARIES})

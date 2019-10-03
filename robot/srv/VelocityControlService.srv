@@ -1,0 +1,7 @@
+string[] joint_name
+float32[] joint_velocity
+duration duration
+
+---
+
+bool success
