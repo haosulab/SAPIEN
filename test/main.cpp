@@ -167,7 +167,7 @@ void test4() {
   // sim.addGround(-0.3);
 
   auto loader = URDF::URDFLoader(sim);
-  loader.loadObject("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
+  loader.loadJointSystem("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
 
   // auto cache = articulationInfo.cache;
   

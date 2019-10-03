@@ -624,7 +624,7 @@ PxKinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &fi
   return wrapperPtr;
 }
 
-PxJointSystem *URDFLoader::loadObject(const std::string &filename) {
+PxJointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;
