@@ -97,3 +97,6 @@ target_link_libraries(robot mylib ${catkin_LIBRARIES})
 
 add_executable(ps3 test/ps3.cpp)
 target_link_libraries(ps3 mylib)
+
+add_executable(ant test/ant.cpp)
+target_link_libraries(ant mylib)
