@@ -362,9 +362,9 @@ struct Link : DomBase {
     inertial->origin->rpy = {0, 0, 0};
 
     inertial->inertia = std::make_unique<Inertia>();
-    inertial->inertia->ixx = 1;
-    inertial->inertia->iyy = 1;
-    inertial->inertia->izz = 1;
+    inertial->inertia->ixx = 0;
+    inertial->inertia->iyy = 0;
+    inertial->inertia->izz = 0;
     inertial->inertia->ixy = 0;
     inertial->inertia->ixz = 0;
     inertial->inertia->iyz = 0;
@@ -625,6 +625,7 @@ class URDFLoader {
   std::string mUrdfString;
 
 public:
+  bool fixLoadedObject;
   URDFLoader(class PxSimulation &simulation);
   PxArticulationWrapper *load(const std::string &filename);
   class PxKinematicsArticulationWrapper *loadKinematic(const std::string &filename);

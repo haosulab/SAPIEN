@@ -120,6 +120,7 @@ void test3() {
   sim.setTimestep(1.f / 500.f);
 
   auto loader = URDF::URDFLoader(sim);
+  loader.fixLoadedObject = false;
   // auto *articulationWrapper =
   // loader.load("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
   // auto *articulationWrapper = loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
@@ -134,17 +135,24 @@ void test3() {
   //   articulationWrapper->updateCache();
   // }
 
-  auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+  auto chair = loader.load("../assets/179/test.urdf");
+  chair->articulation->teleportRootLink({{1,0,0}, PxIdentity}, true);
 
-  reset(articulationWrapper);
-  articulationWrapper->updateArticulation();
+  // auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
 
-      printf("Simulation start\n");
+  sim.addGround(-1);
+
+  // reset(articulationWrapper);
+  // articulationWrapper->updateArticulation();
+
+  PxArticulationLink *chairLink;
+  chair->articulation->getLinks(&chairLink, 1);
+
+  printf("Simulation start\n");
   while (true) {
-    articulationWrapper->set_qf({1000,0,0,0,0,0,0,0,0,0,0.2,0.2,0.2});
+    chairLink ->addForce({100, 0, 0});
 
     sim.step();
-
     sim.updateRenderer();
     renderer.render();
     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
@@ -164,9 +172,10 @@ void test4() {
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 
-  // sim.addGround(-0.3);
+  sim.addGround(-2);
 
   auto loader = URDF::URDFLoader(sim);
+  loader.fixLoadedObject = false;
   loader.loadJointSystem("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
 
   // auto cache = articulationInfo.cache;

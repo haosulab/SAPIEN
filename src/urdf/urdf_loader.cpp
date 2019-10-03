@@ -51,7 +51,8 @@ static std::string getAbsPath(const std::string &urdfPath, const std::string &fi
   return fs::absolute(path).remove_filename().string() + filePath;
 }
 
-URDFLoader::URDFLoader(PxSimulation &simulation) : mSimulation(simulation) {}
+URDFLoader::URDFLoader(PxSimulation &simulation)
+    : mSimulation(simulation), fixLoadedObject(true) {}
 
 struct LinkTreeNode {
   Link *link;
@@ -157,70 +158,76 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
 
     PxArticulationLink &currentPxLink = *treeNode2pLink[current];
 
+    bool shouldComputeInertia = false;
     // inertial
     const Inertial &currentInertial = *current->link->inertial;
-
-    const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin);
     const Inertia &currentInertia = *currentInertial.inertia;
+    if (currentInertia.ixx == 0 && currentInertia.iyy == 0 && currentInertia.izz == 0 &&
+        currentInertia.ixy == 0 && currentInertia.ixz == 0 && currentInertia.iyz == 0) {
+      // in this case inertia is not correctly specified
+      shouldComputeInertia = true;
+    } else {
+      // mass is specified
+      const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin);
 
-    Eigen::Matrix3f inertia;
-    inertia(0, 0) = currentInertia.ixx;
-    inertia(1, 1) = currentInertia.iyy;
-    inertia(2, 2) = currentInertia.izz;
-    inertia(0, 1) = currentInertia.ixy;
-    inertia(1, 0) = currentInertia.ixy;
-    inertia(0, 2) = currentInertia.ixz;
-    inertia(2, 0) = currentInertia.ixz;
-    inertia(1, 2) = currentInertia.iyz;
-    inertia(2, 1) = currentInertia.iyz;
+      Eigen::Matrix3f inertia;
+      inertia(0, 0) = currentInertia.ixx;
+      inertia(1, 1) = currentInertia.iyy;
+      inertia(2, 2) = currentInertia.izz;
+      inertia(0, 1) = currentInertia.ixy;
+      inertia(1, 0) = currentInertia.ixy;
+      inertia(0, 2) = currentInertia.ixz;
+      inertia(2, 0) = currentInertia.ixz;
+      inertia(1, 2) = currentInertia.iyz;
+      inertia(2, 1) = currentInertia.iyz;
 
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> es;
-    es.compute(inertia);
-    auto eigs = es.eigenvalues();
-    Eigen::Matrix3f m;
+      Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> es;
+      es.compute(inertia);
+      auto eigs = es.eigenvalues();
+      Eigen::Matrix3f m;
 
-    auto eig_vecs = es.eigenvectors();
-    PxVec3 col0 = {eig_vecs(0, 0), eig_vecs(1, 0), eig_vecs(2, 0)};
-    PxVec3 col1 = {eig_vecs(0, 1), eig_vecs(1, 1), eig_vecs(2, 1)};
-    PxVec3 col2 = {eig_vecs(0, 2), eig_vecs(1, 2), eig_vecs(2, 2)};
-    PxMat33 mat = PxMat33(col0, col1, col2);
+      auto eig_vecs = es.eigenvectors();
+      PxVec3 col0 = {eig_vecs(0, 0), eig_vecs(1, 0), eig_vecs(2, 0)};
+      PxVec3 col1 = {eig_vecs(0, 1), eig_vecs(1, 1), eig_vecs(2, 1)};
+      PxVec3 col2 = {eig_vecs(0, 2), eig_vecs(1, 2), eig_vecs(2, 2)};
+      PxMat33 mat = PxMat33(col0, col1, col2);
 
-    const PxTransform tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
+      const PxTransform tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
 
-    if (!tInertia2Inertial.isSane()) {
-      printf("Wrong!\n");
-      exit(1);
+      if (!tInertia2Inertial.isSane()) {
+        printf("Wrong!\n");
+        exit(1);
+      }
+
+      const PxTransform tInertia2Link = tInertial2Link * tInertia2Inertial;
+
+      if (!tInertia2Link.isSane()) {
+        printf("Wrong!\n");
+        exit(1);
+      }
+
+      currentPxLink.setCMassLocalPose(tInertia2Link);
+      currentPxLink.setMassSpaceInertiaTensor({eigs.x(), eigs.y(), eigs.z()});
+      currentPxLink.setMass(currentInertial.mass->value);
     }
-
-    const PxTransform tInertia2Link = tInertial2Link * tInertia2Inertial;
-
-    if (!tInertia2Link.isSane()) {
-      printf("Wrong!\n");
-      exit(1);
-    }
-
-    currentPxLink.setCMassLocalPose(tInertia2Link);
-    currentPxLink.setMassSpaceInertiaTensor({eigs.x(), eigs.y(), eigs.z()});
-    currentPxLink.setMass(currentInertial.mass->value);
-
     // visual
     for (const auto &visual : current->link->visual_array) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
       switch (visual->geometry->type) {
-      case Geometry::BOX:
-        builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size);
-        break;
-      case Geometry::CYLINDER:
-        builder.addCylinderVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
-                                        visual->geometry->length);
-        break;
-      case Geometry::SPHERE:
-        builder.addSphereVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius);
-        break;
-      case Geometry::MESH:
-        builder.addObjVisualToLink(currentPxLink, getAbsPath(filename, visual->geometry->filename),
-                                   tVisual2Link, visual->geometry->scale);
-        break;
+        case Geometry::BOX:
+          builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size);
+          break;
+        case Geometry::CYLINDER:
+          builder.addCylinderVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
+                                          visual->geometry->length);
+          break;
+        case Geometry::SPHERE:
+          builder.addSphereVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius);
+          break;
+        case Geometry::MESH:
+          builder.addObjVisualToLink(currentPxLink, getAbsPath(filename, visual->geometry->filename),
+                                     tVisual2Link, visual->geometry->scale);
+          break;
       }
     }
 
@@ -229,21 +236,25 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
       const PxTransform tCollision2Link = poseFromOrigin(*collision->origin);
       // TODO: add physical material support (may require URDF extension)
       switch (collision->geometry->type) {
-      case Geometry::BOX:
-        builder.addBoxShapeToLink(currentPxLink, tCollision2Link, collision->geometry->size);
-        break;
-      case Geometry::CYLINDER:
-        builder.addCylinderShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius,
-                                       collision->geometry->length);
-        break;
-      case Geometry::SPHERE:
-        builder.addSphereShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius);
-        break;
-      case Geometry::MESH:
-        builder.addConvexObjShapeToLink(
-            currentPxLink, getAbsPath(filename, collision->geometry->filename), tCollision2Link);
-        break;
+        case Geometry::BOX:
+          builder.addBoxShapeToLink(currentPxLink, tCollision2Link, collision->geometry->size);
+          break;
+        case Geometry::CYLINDER:
+          builder.addCylinderShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius,
+                                         collision->geometry->length);
+          break;
+        case Geometry::SPHERE:
+          builder.addSphereShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius);
+          break;
+        case Geometry::MESH:
+          builder.addConvexObjShapeToLink(
+              currentPxLink, getAbsPath(filename, collision->geometry->filename), tCollision2Link);
+          break;
       }
+    }
+    if (shouldComputeInertia) {
+      // TODO: check density
+      PxRigidBodyExt::updateMassAndInertia(currentPxLink, 1000);
     }
 
     // joint
@@ -305,7 +316,7 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
     }
   }
 
-  PxArticulationWrapper *wrapper = builder.build(true);
+  PxArticulationWrapper *wrapper = builder.build(fixLoadedObject);
 
   for (auto &gazebo : robot->gazebo_array) {
     for (auto &sensor : gazebo->sensor_array) {
@@ -800,9 +811,9 @@ PxJointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
       treeNode2pLink[current] = treeNode2pLink[current->parent];
       continue;
     }
-    PxRigidActor *currentLink = current->parent
-                                    ? treeNode2Builder[current]->build(false, false, false)
-                                    : treeNode2Builder[current]->build(false, true, false);
+    PxRigidActor *currentLink =
+        current->parent ? treeNode2Builder[current]->build(false, false, false)
+                        : treeNode2Builder[current]->build(false, fixLoadedObject, false);
     treeNode2pLink[current] = currentLink;
     currentLink->setGlobalPose(treeNode2Pose[current]);
     newObject->addLink(currentLink, current->link->name);
