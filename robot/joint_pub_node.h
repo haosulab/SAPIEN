@@ -16,25 +16,28 @@ private:
   sensor_msgs::JointState mStates;
   std::vector<std::string> jointName;
 
-  // Buffer from interface
+  // communication and multi-thread related variable
   ThreadSafeQueue *queue;
-  std::thread worker;
+  std::thread pubWorker;
+  std::thread updateWorker;
+  bool isCancel = false;
 
   uint32_t jointNum;
   std::shared_ptr<ros::NodeHandle> mNodeHandle = nullptr;
   ros::Publisher mPub;
-  double pubInterval;
-  double updateInterval;
+  double pubFrequency;
+  double updateFrenquency;
 
 public:
   JointPubNode(PxKinematicsArticulationWrapper *wrapper, double pubFrequency,
                double updateFrequency, const std::string &topicName,
                std::shared_ptr<ros::NodeHandle> nh);
 
-  void spin();
+  void cancel();
 
 private:
   void updateJointStates();
+  void spin();
 };
 
 } // namespace robot_interface

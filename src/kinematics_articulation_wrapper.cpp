@@ -245,28 +245,3 @@ void PxKinematicsArticulationWrapper::add_velocity_controller(const std::vector<
   velocityControllerQueueList.push_back(queue);
   hasActuator = true;
 }
-// Thread Safe Queue
-ThreadSafeQueue::ThreadSafeQueue() { mQueue = std::queue<std::vector<float>>(); }
-void ThreadSafeQueue::push(const std::vector<float> &vec) {
-  std::lock_guard<std::mutex> guard(mLock);
-  mQueue.push(vec);
-}
-std::vector<float> ThreadSafeQueue::pop() {
-  std::lock_guard<std::mutex> guard(mLock);
-  std::vector<float> vec = mQueue.front();
-  mQueue.pop();
-  return vec;
-}
-bool ThreadSafeQueue::empty() {
-  std::lock_guard<std::mutex> guard(mLock);
-  return mQueue.empty();
-}
-void ThreadSafeQueue::clear() {
-  std::lock_guard<std::mutex> guard(mLock);
-  std::queue<std::vector<float>> empty;
-  std::swap(mQueue, empty);
-}
-void ThreadSafeQueue::pushValue(const std::vector<float> vec) {
-  std::lock_guard<std::mutex> guard(mLock);
-  mQueue.push(vec);
-}

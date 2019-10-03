@@ -5,28 +5,14 @@
 
 #include "kinematics_joint.h"
 #include <articulation_interface.h>
+#include <controllable_articulation.h>
 #include <iostream>
 #include <map>
-#include <memory>
-#include <mutex>
-#include <queue>
 #include <thread>
 
 using namespace physx;
 
-class ThreadSafeQueue {
-  std::mutex mLock;
-  std::queue<std::vector<float>> mQueue;
 
-public:
-  ThreadSafeQueue();
-
-  void push(const std::vector<float> &vec);
-  void pushValue(const std::vector<float> vec);
-  std::vector<float> pop();
-  bool empty();
-  void clear();
-};
 
 class PxKinematicsArticulationWrapper : public IArticulationDrivable {
   KJoint *mRoot;

@@ -30,19 +30,15 @@ void test1() {
 
   auto builder = sim.createActorBuilder();
   PxReal boxLength = 0.5f;
-  // PxVec3 boxSize = {0.3, 0.3, 0.3};
-  PxVec3 boxSize = {boxLength, boxLength, boxLength};
   PxTransform boxPose({0.5f + boxLength, 0.f, -0.5f + boxLength + 1.f}, PxIdentity);
-  builder->addBoxShape(boxPose, boxSize, nullptr, 1.f);
-  builder->addBoxVisual(boxPose, boxSize);
-  auto box = builder->build();
   sim.addGround(0.0);
 
   auto loader = URDF::URDFLoader(sim);
-  std::unique_ptr<PxKinematicsArticulationWrapper> unique_wrapper =
+  loader.load("../assets/179/test.urdf")
+      ->articulation->teleportRootLink({{1.2, 0, 0.8}, PxIdentity}, true);
+
+  auto wrapper =
       loader.loadKinematic("../assets/robot/all_robot.urdf");
-  auto wrapper = unique_wrapper.get();
-  sim.mKinematicArticulationWrappers.push_back(std::move(unique_wrapper));
   auto timestep = sim.getTimestep();
 
   // ROS

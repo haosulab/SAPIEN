@@ -175,7 +175,7 @@ robot_interface::GroupControllerNode::GroupControllerNode(
   worker = std::thread(&GroupControllerNode::spin, this);
 }
 void robot_interface::GroupControllerNode::spin() {
-  //  ROS_INFO("Controller start with group name: %s", groupName.c_str());
+  ROS_INFO("Controller start with group name: %s", groupName.c_str());
   mServer->start();
   ros::spin();
 }

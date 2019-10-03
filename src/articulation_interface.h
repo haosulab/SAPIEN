@@ -28,5 +28,6 @@ struct IArticulationBase {
 };
 
 class IArticulationDrivable : public IArticulationBase {
+public:
   virtual void set_drive_target(const std::vector<physx::PxReal> &v) = 0;
 };
