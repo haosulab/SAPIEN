@@ -109,8 +109,7 @@ void OptifuserRenderer::init() {
   //     "../assets/ame_desert/desertsky_up.tga", "../assets/ame_desert/desertsky_dn.tga",
   //     "../assets/ame_desert/desertsky_lf.tga", "../assets/ame_desert/desertsky_rt.tga");
 
-  mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh",
-                                     "../glsl_shader/shadow.fsh");
+  mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
   mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
                                       "../glsl_shader/gbuffer_segmentation.fsh");
   mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
@@ -172,14 +171,15 @@ void OptifuserRenderer::render() {
     mScene->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
   }
 
+  static const uint32_t imguiWindowSize = 300;
   static int camIndex = -1;
   if (renderGui) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::SetNextWindowPos(ImVec2(20, 20));
-    ImGui::SetNextWindowSize(ImVec2(300, mContext->getHeight() - 40));
+    ImGui::SetNextWindowPos(ImVec2(0,0));
+    ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mContext->getHeight()));
 
     ImGui::Begin("Render Options");
     {
@@ -225,8 +225,20 @@ void OptifuserRenderer::render() {
         ImGui::RadioButton("None##camera", &camIndex, -1);
         for (auto &cam : mMountedCameras) {
           ImGui::RadioButton(
-              (mMountedCameras[cam.first]->getName() + "##camera" + std::to_string(cam.first)).c_str(),
+              (mMountedCameras[cam.first]->getName() + "##camera" + std::to_string(cam.first))
+                  .c_str(),
               &camIndex, cam.first);
+        }
+
+        if (camIndex >= 0) {
+          uint32_t width = mMountedCameras[camIndex]->getWidth();
+          uint32_t height = mMountedCameras[camIndex]->getHeight();
+          mMountedCameras[camIndex]->takePicture();
+          ImGui::Image(
+              reinterpret_cast<ImTextureID>(
+                  mMountedCameras[camIndex]->mRenderContext->renderer.outputtex),
+              ImVec2(imguiWindowSize, imguiWindowSize / static_cast<float>(width) * height),
+              ImVec2(0, 1), ImVec2(1, 0));
         }
       }
 
@@ -238,8 +250,8 @@ void OptifuserRenderer::render() {
     ImGui::End();
 
     if (pickedId) {
-      ImGui::SetNextWindowPos(ImVec2(mContext->getWidth() - 320, 20));
-      ImGui::SetNextWindowSize(ImVec2(300, mContext->getHeight() - 40));
+      ImGui::SetNextWindowPos(ImVec2(mContext->getWidth() - imguiWindowSize, 0));
+      ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mContext->getHeight()));
       ImGui::Begin("Selected Object");
       {
         if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -258,18 +270,6 @@ void OptifuserRenderer::render() {
           }
         }
       }
-      ImGui::End();
-    }
-    if (camIndex >= 0) {
-      uint32_t width = mMountedCameras[camIndex]->getWidth();
-      uint32_t height = mMountedCameras[camIndex]->getHeight();
-      mMountedCameras[camIndex]->takePicture();
-      ImGui::SetNextWindowPosCenter();
-      ImGui::SetNextWindowSize(ImVec2(width, height));
-      ImGui::Begin("Camera");
-      ImGui::Image(reinterpret_cast<ImTextureID>(
-                       mMountedCameras[camIndex]->mRenderContext->renderer.outputtex),
-                   ImVec2(width, height), ImVec2(0, 1), ImVec2(1, 0));
       ImGui::End();
     }
 

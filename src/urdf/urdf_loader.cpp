@@ -214,20 +214,20 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
     for (const auto &visual : current->link->visual_array) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
       switch (visual->geometry->type) {
-        case Geometry::BOX:
-          builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size);
-          break;
-        case Geometry::CYLINDER:
-          builder.addCylinderVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
-                                          visual->geometry->length);
-          break;
-        case Geometry::SPHERE:
-          builder.addSphereVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius);
-          break;
-        case Geometry::MESH:
-          builder.addObjVisualToLink(currentPxLink, getAbsPath(filename, visual->geometry->filename),
-                                     tVisual2Link, visual->geometry->scale);
-          break;
+      case Geometry::BOX:
+        builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size);
+        break;
+      case Geometry::CYLINDER:
+        builder.addCylinderVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
+                                        visual->geometry->length);
+        break;
+      case Geometry::SPHERE:
+        builder.addSphereVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius);
+        break;
+      case Geometry::MESH:
+        builder.addObjVisualToLink(currentPxLink, getAbsPath(filename, visual->geometry->filename),
+                                   tVisual2Link, visual->geometry->scale);
+        break;
       }
     }
 
@@ -236,20 +236,20 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
       const PxTransform tCollision2Link = poseFromOrigin(*collision->origin);
       // TODO: add physical material support (may require URDF extension)
       switch (collision->geometry->type) {
-        case Geometry::BOX:
-          builder.addBoxShapeToLink(currentPxLink, tCollision2Link, collision->geometry->size);
-          break;
-        case Geometry::CYLINDER:
-          builder.addCylinderShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius,
-                                         collision->geometry->length);
-          break;
-        case Geometry::SPHERE:
-          builder.addSphereShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius);
-          break;
-        case Geometry::MESH:
-          builder.addConvexObjShapeToLink(
-              currentPxLink, getAbsPath(filename, collision->geometry->filename), tCollision2Link);
-          break;
+      case Geometry::BOX:
+        builder.addBoxShapeToLink(currentPxLink, tCollision2Link, collision->geometry->size);
+        break;
+      case Geometry::CYLINDER:
+        builder.addCylinderShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius,
+                                       collision->geometry->length);
+        break;
+      case Geometry::SPHERE:
+        builder.addSphereShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius);
+        break;
+      case Geometry::MESH:
+        builder.addConvexObjShapeToLink(
+            currentPxLink, getAbsPath(filename, collision->geometry->filename), tCollision2Link);
+        break;
       }
     }
     if (shouldComputeInertia) {
@@ -340,19 +340,9 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
           continue;
         }
 
-        physx_id_t cameraId = IDGenerator::instance()->next();
-
-        const PxVec3 up = {0, 0, 1};
-        const PxVec3 forward = {1, 0, 0};
-        const PxMat33 rot(forward.cross(up), up, -forward);
-
-        mSimulation.mMountedCamera2MountedActor[cameraId] = links[idx];
-        mSimulation.mCameraId2InitialPose[cameraId] =
-            poseFromOrigin(*sensor->origin) * PxTransform(PxVec3(0), PxQuat(rot));
-
-        mSimulation.mRenderer->addCamera(
-            cameraId, sensor->name, sensor->camera->width, sensor->camera->height,
-            sensor->camera->fovx, sensor->camera->fovy, sensor->camera->near, sensor->camera->far);
+        mSimulation.addMountedCamera(sensor->name, links[idx], poseFromOrigin(*sensor->origin),
+                                     sensor->camera->width, sensor->camera->height,
+                                     sensor->camera->fovx, sensor->camera->fovy);
       }
     }
   }
@@ -614,19 +604,9 @@ PxKinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &fi
           continue;
         }
 
-        physx_id_t cameraId = IDGenerator::instance()->next();
-
-        const PxVec3 up = {0, 0, 1};
-        const PxVec3 forward = {1, 0, 0};
-        const PxMat33 rot(forward.cross(up), up, -forward);
-
-        mSimulation.mMountedCamera2MountedActor[cameraId] = links[idx];
-        mSimulation.mCameraId2InitialPose[cameraId] =
-            poseFromOrigin(*sensor->origin) * PxTransform(PxVec3(0), PxQuat(rot));
-
-        mSimulation.mRenderer->addCamera(
-            cameraId, sensor->name, sensor->camera->width, sensor->camera->height,
-            sensor->camera->fovx, sensor->camera->fovy, sensor->camera->near, sensor->camera->far);
+        mSimulation.addMountedCamera(sensor->name, links[idx], poseFromOrigin(*sensor->origin),
+                                     sensor->camera->width, sensor->camera->height,
+                                     sensor->camera->fovx, sensor->camera->fovy);
       }
     }
   }

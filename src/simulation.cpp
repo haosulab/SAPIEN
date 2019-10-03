@@ -54,22 +54,22 @@ public:
   void onAdvance(const PxRigidBody *const *, const PxTransform *, const PxU32) {}
   void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs,
                  PxU32 nbPairs) {
-    if (std::string(pairHeader.actors[0]->getName()) != "Ground" &&
-        std::string(pairHeader.actors[1]->getName()) != "Ground") {
-      return;
-    }
-    std::cout << "Names " << pairHeader.actors[0]->getName() << " "
-              << pairHeader.actors[1]->getName() << std::endl;
+    // if (std::string(pairHeader.actors[0]->getName()) != "Ground" &&
+    //     std::string(pairHeader.actors[1]->getName()) != "Ground") {
+    //   return;
+    // }
+    // std::cout << "Names " << pairHeader.actors[0]->getName() << " "
+    //           << pairHeader.actors[1]->getName() << std::endl;
 
-    for (PxU32 i = 0; i < nbPairs; i++) {
-      const PxU32 bufferSize = 64;
-      PxContactPairPoint contacts[bufferSize];
-      PxU32 nbContacts = pairs[i].extractContacts(contacts, bufferSize);
-      for (PxU32 j = 0; j < nbContacts; j++) {
-        PxVec3 impulse = contacts[j].impulse;
-        printf("Impulse %f %f %f\n", impulse.x, impulse.y, impulse.z);
-      }
-    }
+    // for (PxU32 i = 0; i < nbPairs; i++) {
+    //   const PxU32 bufferSize = 64;
+    //   PxContactPairPoint contacts[bufferSize];
+    //   PxU32 nbContacts = pairs[i].extractContacts(contacts, bufferSize);
+    //   for (PxU32 j = 0; j < nbContacts; j++) {
+    //     PxVec3 impulse = contacts[j].impulse;
+    //     printf("Impulse %f %f %f\n", impulse.x, impulse.y, impulse.z);
+    //   }
+    // }
   }
 };
 // MyContactModification myCM;
@@ -277,4 +277,20 @@ PxRigidStatic *PxSimulation::addGround(PxReal altitude, bool render, PxMaterial 
     mRenderId2Parent[newId] = ground;
   }
   return ground;
+}
+
+physx_id_t PxSimulation::addMountedCamera(std::string const &name, PxRigidActor *actor,
+                                          PxTransform const &pose, uint32_t width, uint32_t height,
+                                          float fovx, float fovy, float near, float far) {
+  physx_id_t cameraId = IDGenerator::instance()->next();
+  const PxVec3 up = {0, 0, 1};
+  const PxVec3 forward = {1, 0, 0};
+  const PxMat33 rot(forward.cross(up), up, -forward);
+
+  mMountedCamera2MountedActor[cameraId] = actor;
+  mCameraId2InitialPose[cameraId] = pose * PxTransform(PxVec3(0), PxQuat(rot));
+
+  mRenderer->addCamera(cameraId, name, width, height, fovx, fovy, near, far);
+
+  return cameraId;
 }

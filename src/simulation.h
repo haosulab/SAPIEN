@@ -2,6 +2,7 @@
 #include "articulation_interface.h"
 #include "filter_shader.h"
 #include "id_generator.h"
+#include "joint_system.h"
 #include "render_interface.h"
 #include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
@@ -16,7 +17,6 @@
 #include <map>
 #include <memory>
 #include <vector>
-#include "joint_system.h"
 
 using namespace physx;
 
@@ -61,6 +61,10 @@ public:
 
   std::unique_ptr<class PxActorBuilder> createActorBuilder();
   std::unique_ptr<class PxArticulationBuilder> createArticulationBuilder();
+
+  physx_id_t addMountedCamera(std::string const &name, PxRigidActor *actor,
+                              PxTransform const &pose, uint32_t width, uint32_t height, float fovx,
+                              float fovy, float near = 0.1, float far = 1000);
 
   /* advance physics by mTimestep */
   void step();

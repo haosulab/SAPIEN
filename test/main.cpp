@@ -138,7 +138,7 @@ void test3() {
   auto chair = loader.load("../assets/179/test.urdf");
   chair->articulation->teleportRootLink({{1,0,0}, PxIdentity}, true);
 
-  // auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+  auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
 
   sim.addGround(-1);
 
