@@ -2,6 +2,7 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "articulation_wrapper.h"
+#include "joint_system.h"
 #include "kinematics_articulation_wrapper.h"
 #include "mesh_registry.h"
 #include "simulation.h"
@@ -9,8 +10,6 @@
 #include <experimental/filesystem>
 #include <map>
 #include <tinyxml2.h>
-#include "joint_system.h"
-#include "articulation_wrapper.h"
 
 namespace URDF {
 
@@ -19,14 +18,28 @@ using namespace physx;
 using namespace MeshUtil;
 namespace fs = std::experimental::filesystem;
 
-PxTransform poseFromOrigin(const Origin &origin) {
+static PxTransform poseFromOrigin(const Origin &origin) {
   PxQuat q = PxQuat(origin.rpy.z, {0, 0, 1}) * PxQuat(origin.rpy.y, {0, 1, 0}) *
              PxQuat(origin.rpy.x, {1, 0, 0});
 
   return PxTransform(origin.xyz, q);
 }
+static JointType typeString2JointType(const std::string &type) {
+  if (type == "revolute") {
+    return JointType::REVOLUTE;
+  } else if (type == "continuous") {
+    return JointType::CONTINUOUS;
+  } else if (type == "fixed") {
+    return JointType::FIXED;
+  } else if (type == "prismatic") {
+    return JointType::PRISMATIC;
+  } else {
+    std::cerr << "Unknwon joint type: " << type << std::endl;
+    exit(1);
+  }
+}
 
-std::string getAbsPath(const std::string &urdfPath, const std::string &filePath) {
+static std::string getAbsPath(const std::string &urdfPath, const std::string &filePath) {
   if (filePath.length() == 0) {
     fprintf(stderr, "Empty file path in URDF\n");
     exit(1);
@@ -858,20 +871,6 @@ PxJointSystem *URDFLoader::loadObject(const std::string &filename) {
   }
   mSimulation.mObjectArticulationWrappers.push_back(std::move(newObject));
   return mSimulation.mObjectArticulationWrappers.back().get();
-}
-JointType URDFLoader::typeString2JointType(const std::string &type) {
-  if (type == "revolute") {
-    return JointType::REVOLUTE;
-  } else if (type == "continuous") {
-    return JointType::CONTINUOUS;
-  } else if (type == "fixed") {
-    return JointType::FIXED;
-  } else if (type == "prismatic") {
-    return JointType::PRISMATIC;
-  } else {
-    std::cerr << "Unknwon joint type: " << type << std::endl;
-    exit(1);
-  }
 }
 
 } // namespace URDF

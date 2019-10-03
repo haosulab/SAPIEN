@@ -18,6 +18,7 @@ JointPubNode::JointPubNode(PxKinematicsArticulationWrapper *wrapper, double pubF
   mPub = mNodeHandle->advertise<sensor_msgs::JointState>(topicName, 1);
   mStates.position.resize(jointName.size());
   mStates.name.assign(jointName.begin(), jointName.end());
+  jointNum = jointName.size();
 
   // Multi-thread spin
   worker = std::thread(&JointPubNode::spin, this);
@@ -49,6 +50,7 @@ void JointPubNode::updateJointStates() {
     return;
   }
   std::vector<float> newJointAngles = queue->pop();
-  mStates.position.assign(newJointAngles.begin(), newJointAngles.end());
+  mStates.position.assign(newJointAngles.begin(), newJointAngles.begin()+jointNum);
+  mStates.velocity.assign(newJointAngles.begin()+jointNum, newJointAngles.end());
 }
 } // namespace robot_interface

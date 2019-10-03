@@ -629,9 +629,6 @@ public:
   PxArticulationWrapper *load(const std::string &filename);
   class PxKinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class PxJointSystem *loadObject(const std::string &filename);
-
-private:
-  static JointType typeString2JointType(const std::string &type);
 };
 
 } // namespace URDF

@@ -67,28 +67,27 @@ find_package(catkin COMPONENTS
         roscpp)
 
 
-#add_service_files(
-#        DIRECTORY
-#        robot/srv
-#        FILES
-#        VelocityControlService.srv
-#)
-#
-#generate_messages(
-#        DEPENDENCIES
-#        std_msgs
-#)
-
 include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} "robot")
 
-#if (catkin_INCLUDE_DIRS)
-#  catkin_package(
-#    LIBRARIES
-#    INCLUDE_DIRS
-#    CATKIN_DEPENDS
-#    )
-#endif ()
+if (catkin_INCLUDE_DIRS)
+    add_service_files(
+            DIRECTORY
+            robot/srv
+            FILES
+            VelocityControlService.srv
+    )
 
+    generate_messages(
+            DEPENDENCIES
+            std_msgs
+    )
+    #    catkin_package(
+    #            LIBRARIES
+    #            INCLUDE_DIRS
+    #            CATKIN_DEPENDS
+    #    )
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug)
+endif ()
 add_executable(robot
         robot/joint_trajectory_controller.cpp
         robot/velocity_control_service.cpp

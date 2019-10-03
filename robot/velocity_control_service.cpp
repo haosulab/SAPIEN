@@ -38,6 +38,7 @@ bool robot_interface::VelocityControllerServer::executeCB(
   for (size_t i = 0; i < step; ++i) {
     mQueue->pushValue(jointVelocity);
   }
+  return true;
 }
 const std::vector<std::string> &robot_interface::VelocityControllerServer::getJointNames() {
   return mJointName;

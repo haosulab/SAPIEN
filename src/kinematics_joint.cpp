@@ -10,7 +10,7 @@ using namespace physx;
 // KJoint
 KJoint::KJoint(PxRigidDynamic *childLink, KJoint *parentJoint, const PxTransform &toChild,
                const PxTransform &fromParent)
-    : childLink(childLink), poseFromParent(fromParent), poseToChild(toChild), parent(parentJoint) {
+    : childLink(childLink), parent(parentJoint), poseFromParent(fromParent), poseToChild(toChild) {
   parentLink = parentJoint ? parentJoint->childLink : nullptr;
   if (parentJoint) {
     parentJoint->children.push_back(this);
@@ -103,7 +103,8 @@ void PrismaticKJoint::driveQpos(const std::vector<PxReal> &qpos) {
   PxReal targetQpos = qpos[0];
   targetQpos = targetQpos > upperLimit ? upperLimit : targetQpos;
   targetQpos = targetQpos < lowerLimit ? lowerLimit : targetQpos;
-  PxTransform targetPose = passThroughKinematicsDrive(PxTransform(PxVec3(targetQpos, 0, 0), PxIdentity));
+  PxTransform targetPose =
+      passThroughKinematicsDrive(PxTransform(PxVec3(targetQpos, 0, 0), PxIdentity));
   childLink->setKinematicTarget(targetPose);
 }
 

@@ -63,8 +63,6 @@ void robot_interface::GroupControllerNode::executeGoal(
 }
 void robot_interface::GroupControllerNode::executeCB(GoalHandle gh) {
   ROS_INFO("Receive joint trajectory goal");
-  bool success = true;
-
   // Ensures that the joints in the goal match the joints we are commanding.
   std::vector<std::string> goalJoints = gh.getGoal()->trajectory.joint_names;
   if (!setsEqual(mJointName, goalJoints)) {
@@ -117,12 +115,10 @@ void robot_interface::GroupControllerNode::cancleCB(
     has_active_goal_ = false;
   }
 }
-robot_interface::GroupControllerNode::GroupControllerNode(PxKinematicsArticulationWrapper* wrapper, const std::string &groupName,
-                                                          float timestep,
-                                                          std::shared_ptr<ros::NodeHandle> nh,
-                                                          const std::string &nameSpace,
-                                                          std::string controllerName)
-    : mNodeHandle(nh), has_active_goal_(false), groupName(groupName), timestep(timestep) {
+robot_interface::GroupControllerNode::GroupControllerNode(
+    PxKinematicsArticulationWrapper *wrapper, const std::string &groupName, float timestep,
+    std::shared_ptr<ros::NodeHandle> nh, const std::string &nameSpace, std::string controllerName)
+    : groupName(groupName), timestep(timestep), mNodeHandle(nh), has_active_goal_(false) {
   // Gets all of the joints
   queue = std::make_unique<ThreadSafeQueue>();
   if (controllerName.empty()) {
@@ -146,7 +142,7 @@ robot_interface::GroupControllerNode::GroupControllerNode(PxKinematicsArticulati
     exit(1);
   }
   bool found = false;
-  for (size_t i = 0; i < controllerList.size(); ++i) {
+  for (int i = 0; i < controllerList.size(); ++i) {
     std::string tempControllerName = static_cast<std::string>(controllerList[i]["name"]);
     if (tempControllerName != controllerName) {
       continue;
@@ -158,7 +154,7 @@ robot_interface::GroupControllerNode::GroupControllerNode(PxKinematicsArticulati
         exit(1);
       }
       XmlRpc::XmlRpcValue &joints = controllerList[i]["joints"];
-      for (size_t k = 0; k < joints.size(); ++k) {
+      for (int k = 0; k < joints.size(); ++k) {
         if (joints[k].getType() != XmlRpc::XmlRpcValue::TypeString) {
           ROS_FATAL("Array of joint names should contain all strings.  (namespace: %s)",
                     mNodeHandle->getNamespace().c_str());

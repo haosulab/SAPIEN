@@ -15,16 +15,16 @@ using namespace physx;
 enum JointType { UNDEFINED = 0, REVOLUTE = 1, CONTINUOUS = 2, FIXED = 3, PRISMATIC = 4 };
 
 class KJoint {
-protected:
-  PxTransform poseToChild;
-  PxTransform poseFromParent;
-  KJoint *parent;
-  JointType type = UNDEFINED;
-
 public:
   std::string name;
   PxRigidDynamic *childLink;
   PxRigidDynamic *parentLink;
+
+protected:
+    KJoint *parent;
+  PxTransform poseFromParent;
+    PxTransform poseToChild;
+  JointType type = UNDEFINED;
 
 public:
   KJoint(PxRigidDynamic *childLink, KJoint *parentJoint, const PxTransform &toChild,

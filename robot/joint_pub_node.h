@@ -15,14 +15,16 @@ class JointPubNode {
 private:
   sensor_msgs::JointState mStates;
   std::vector<std::string> jointName;
-  std::shared_ptr<ros::NodeHandle> mNodeHandle = nullptr;
-  ros::Publisher mPub;
-  double pubInterval;
-  double updateInterval;
 
   // Buffer from interface
   ThreadSafeQueue *queue;
   std::thread worker;
+
+  uint32_t jointNum;
+  std::shared_ptr<ros::NodeHandle> mNodeHandle = nullptr;
+  ros::Publisher mPub;
+  double pubInterval;
+  double updateInterval;
 
 public:
   JointPubNode(PxKinematicsArticulationWrapper *wrapper, double pubFrequency,

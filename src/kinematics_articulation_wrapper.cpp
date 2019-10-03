@@ -194,22 +194,26 @@ void PxKinematicsArticulationWrapper::update(PxReal timestep) {
 
   // Update velocity based on time interval if the set_drive_target function is called once in this
   // simulation step
-  if (updateQpos) {
-    qpos = driveQpos;
+  if (!updateVelocityDrive) {
     for (size_t i = 0; i < dof(); ++i) {
       qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
     }
   }
+  if (updateQpos) {
+    qpos = driveQpos;
+  }
   updateQpos = false;
 
-  // Update ROS related communication buffer
+  // Update ROS related joint publisher buffer
   // In the future, the cast between PxReal and float should be make explicitly
-  jointStateQueue.push(qpos);
+  std::vector<PxReal> jointState = qpos;
+  jointState.insert(jointState.end(), qvel.begin(), qvel.end());
+  jointStateQueue.push(jointState);
 }
 
 ThreadSafeQueue *PxKinematicsArticulationWrapper::get_queue() { return &jointStateQueue; }
 void PxKinematicsArticulationWrapper::add_position_controller(const std::vector<std::string> &name,
-                                                            ThreadSafeQueue *queue) {
+                                                              ThreadSafeQueue *queue) {
   std::vector<uint32_t> controllerIndex = {};
   for (const auto &qName : name) {
     for (size_t j = 0; j < jointNameDOF.size(); ++j) {
@@ -225,7 +229,7 @@ void PxKinematicsArticulationWrapper::add_position_controller(const std::vector<
   hasActuator = true;
 }
 void PxKinematicsArticulationWrapper::add_velocity_controller(const std::vector<std::string> &name,
-                                                            ThreadSafeQueue *queue) {
+                                                              ThreadSafeQueue *queue) {
   std::vector<uint32_t> controllerIndex = {};
   for (const auto &qName : name) {
     for (size_t j = 0; j < jointNameDOF.size(); ++j) {
