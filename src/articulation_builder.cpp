@@ -1,5 +1,6 @@
 #include "articulation_builder.h"
 #include "mesh_registry.h"
+#include <cassert>
 #include <numeric>
 
 using namespace MeshUtil;
@@ -10,10 +11,12 @@ PxArticulationBuilder::PxArticulationBuilder(PxSimulation *simulation)
   mArticulation = mPhysicsSDK->createArticulationReducedCoordinate();
 }
 
-PxArticulationLink *PxArticulationBuilder::addLink(PxArticulationLink *parent,
-                                                   const PxTransform &pose,
-                                                   const std::string &name,
-                                                   const std::string &jointName) {
+PxArticulationLink *
+PxArticulationBuilder::addLink(PxArticulationLink *parent, const PxTransform &pose,
+                               const std::string &name, const std::string &jointName,
+                               PxArticulationJointType::Enum jointType,
+                               std::vector<std::array<float, 2>> const &limits,
+                               PxTransform const &parentPose, PxTransform const &childPose) {
   PxArticulationLink *newLink = mArticulation->createLink(parent, pose);
   newLink->setName(name.c_str());
   if (!name.empty()) {
@@ -23,6 +26,37 @@ PxArticulationLink *PxArticulationBuilder::addLink(PxArticulationLink *parent,
     namedLinks[name] = newLink;
   }
   link2JointName[newLink] = jointName;
+  if (parent && jointType != PxArticulationJointType::eUNDEFINED) {
+    auto joint = static_cast<PxArticulationJointReducedCoordinate *>(newLink->getInboundJoint());
+    joint->setJointType(jointType);
+    switch (jointType) {
+    case physx::PxArticulationJointType::eFIX:
+      break;
+    case physx::PxArticulationJointType::eREVOLUTE:
+      assert(limits.size() == 1);
+      if (limits[0][0] == -std::numeric_limits<float>::infinity() &&
+          limits[0][1] == std::numeric_limits<float>::infinity()) {
+        joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eFREE);
+      } else {
+        joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eLIMITED);
+        joint->setLimit(PxArticulationAxis::eTWIST, limits[0][0], limits[0][1]);
+      }
+      break;
+    case physx::PxArticulationJointType::ePRISMATIC:
+      if (limits[0][0] == -std::numeric_limits<float>::infinity() &&
+          limits[0][1] == std::numeric_limits<float>::infinity()) {
+        joint->setMotion(PxArticulationAxis::eX, PxArticulationMotion::eFREE);
+      } else {
+        joint->setMotion(PxArticulationAxis::eX, PxArticulationMotion::eLIMITED);
+        joint->setLimit(PxArticulationAxis::eX, limits[0][0], limits[0][1]);
+      }
+      break;
+    default:
+      std::cerr << "Unsupported joint provided, fall back to fixed joint" << std::endl;
+    }
+    joint->setParentPose(parentPose);
+    joint->setChildPose(childPose);
+  }
   return newLink;
 }
 

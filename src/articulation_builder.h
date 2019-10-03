@@ -37,9 +37,13 @@ public:
    * node)
    *  @return The added new link
    */
-  PxArticulationLink *addLink(PxArticulationLink *parent,
-                              const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                              const std::string &name = "", const std::string &jointName = "");
+  PxArticulationLink *
+  addLink(PxArticulationLink *parent, const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
+          const std::string &name = "", const std::string &jointName = "",
+          PxArticulationJointType::Enum jointType = PxArticulationJointType::eUNDEFINED,
+          std::vector<std::array<float, 2>> const &limits = {},
+          PxTransform const &parentPose = {{0, 0, 0}, PxIdentity},
+          PxTransform const &childPose = {{0, 0, 0}, PxIdentity});
 
   /**
    *  TODO: support scaling and different primitives
