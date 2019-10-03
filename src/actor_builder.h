@@ -20,6 +20,9 @@ class PxActorBuilder {
   uint32_t mCount = 0;
 
 public:
+  PxActorBuilder(PxActorBuilder const &other) = delete;
+  const PxActorBuilder &operator=(PxActorBuilder const &other) = delete;
+
   explicit PxActorBuilder(PxSimulation *simulation)
       : mSimulation(simulation), mPhysicsSDK(simulation->mPhysicsSDK),
         mCooking(simulation->mCooking), mRenderer(simulation->mRenderer) {}
@@ -47,16 +50,16 @@ public:
                          PxReal density = 1.f);
 
   physx_id_t addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                    const PxVec3 &size = {1, 1, 1});
+                          const PxVec3 &size = {1, 1, 1});
 
-  physx_id_t addCylinderVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                         PxReal length = 1);
+  physx_id_t addCylinderVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                               PxReal radius = 1, PxReal length = 1);
 
   physx_id_t addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1);
 
   physx_id_t addObjVisual(const std::string &filename,
-                    const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                    const PxVec3 &scale = {1, 1, 1});
+                          const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
+                          const PxVec3 &scale = {1, 1, 1});
 
   PxRigidActor *build(bool isStatic = false, bool isKinematic = false, bool addToScene = true);
 };

@@ -16,6 +16,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include "joint_system.h"
 
 using namespace physx;
 
@@ -46,7 +47,7 @@ public:
   std::vector<std::unique_ptr<struct PxArticulationWrapper>> mDynamicArticulationWrappers;
   std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>>
       mKinematicArticulationWrappers;
-  std::vector<std::unique_ptr<struct PxObjectWrapper>> mObjectArticulationWrappers;
+  std::vector<std::unique_ptr<class PxJointSystem>> mObjectArticulationWrappers;
 
 public:
   PxSimulation();

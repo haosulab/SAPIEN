@@ -17,7 +17,6 @@
 #include <object.h>
 #include <optifuser.h>
 #include <vector>
-#include "object_articulation_wrapper.h"
 
 #include <random>
 

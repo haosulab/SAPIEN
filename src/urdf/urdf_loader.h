@@ -1,5 +1,5 @@
 #pragma once
-#include "px_object.h"
+#include "joint_system.h"
 #include <PxPhysicsAPI.h>
 #include <iostream>
 #include <kinematics_articulation_wrapper.h>
@@ -9,9 +9,10 @@
 #include <tinyxml2.h>
 #include <vector>
 
+struct PxArticulationWrapper;
 namespace URDF {
 
-using namespace tinyxml2;
+  using namespace tinyxml2;
 
 #define DECLARE_ATTR(type, name) type name;
 
@@ -625,9 +626,10 @@ class URDFLoader {
 
 public:
   URDFLoader(class PxSimulation &simulation);
-  struct PxArticulationWrapper *load(const std::string &filename);
+  PxArticulationWrapper *load(const std::string &filename);
+  // TODO: remove unique use *
   std::unique_ptr<PxKinematicsArticulationWrapper> loadKinematic(const std::string &filename);
-  struct PxObjectWrapper *loadObject(const std::string &filename);
+  class PxJointSystem *loadObject(const std::string &filename);
 };
 
 } // namespace URDF

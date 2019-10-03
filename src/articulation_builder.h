@@ -22,8 +22,12 @@ class PxArticulationBuilder {
   std::vector<PxShape *> mShapes;
   std::vector<PxReal> mDensities;
   std::map<std::string, PxArticulationLink *> namedLinks;
-  std::map<PxArticulationLink*, std::string> link2JointName;
+  std::map<PxArticulationLink *, std::string> link2JointName;
+
 public:
+  PxArticulationBuilder(PxArticulationBuilder const &other) = delete;
+  const PxArticulationBuilder &operator=(PxArticulationBuilder const &other) = delete;
+
   PxArticulationBuilder(PxSimulation *simulation);
 
   /**
@@ -35,8 +39,7 @@ public:
    */
   PxArticulationLink *addLink(PxArticulationLink *parent,
                               const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                              const std::string &name = "",
-                              const std::string &jointName = "");
+                              const std::string &name = "", const std::string &jointName = "");
 
   /**
    *  TODO: support scaling and different primitives
