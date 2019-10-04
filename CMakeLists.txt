@@ -105,5 +105,5 @@ target_link_libraries(ps3 mylib)
 add_executable(ant test/ant.cpp)
 target_link_libraries(ant mylib)
 
-pybind11_add_module(pybind "python/pybind.cpp")
-target_link_libraries(pybind PRIVATE mylib)
+pybind11_add_module(sapyen "python/pybind.cpp")
+target_link_libraries(sapyen PRIVATE mylib)
