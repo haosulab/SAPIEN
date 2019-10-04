@@ -23,9 +23,9 @@ public:
   PxRigidDynamic *parentLink;
 
 protected:
-    KJoint *parent;
+  KJoint *parent;
   PxTransform poseFromParent;
-    PxTransform poseToChild;
+  PxTransform poseToChild;
   JointType type = UNDEFINED;
 
 public:

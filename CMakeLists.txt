@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(physxtest LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall")
+set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation")
+set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation")
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
 
@@ -40,6 +40,8 @@ add_definitions(-D_PVD)
 add_definitions(-DPVD_HOST="192.168.0.110")
 
 add_subdirectory("3rd_party/optifuser")
+add_subdirectory("3rd_party/pybind11")
+include_directories("3rd_party/pybind11/include")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 
@@ -51,6 +53,8 @@ target_link_libraries(mylib -Wl,--start-group
         libPhysXVehicle_static_64.a libSnippetRender_static_64.a
         libSnippetUtils_static_64.a -Wl,--end-group pthread ${OPENGL_LIBRARY} glfw
         GLEW ${ASSIMP_LIBRARIES} dl optifuser stdc++fs tinyxml2)
+
+set_target_properties(mylib PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 add_executable(run "test/main.cpp")
 target_link_libraries(run mylib)
@@ -100,3 +104,6 @@ target_link_libraries(ps3 mylib)
 
 add_executable(ant test/ant.cpp)
 target_link_libraries(ant mylib)
+
+pybind11_add_module(pybind "python/pybind.cpp")
+target_link_libraries(pybind PRIVATE mylib)
