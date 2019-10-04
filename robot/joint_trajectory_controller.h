@@ -40,13 +40,11 @@ private:
   std::unique_ptr<ThreadSafeQueue> queue;
 
 public:
-  GroupControllerNode(PxKinematicsArticulationWrapper* wrapper, const std::string &groupName, float timestep,
+  GroupControllerNode(ControllableArticulationWrapper* wrapper, const std::string &groupName, float timestep,
                       std::shared_ptr<ros::NodeHandle> nh, const std::string &nameSpace = "physx",
                       std::string controllerName = "");
 
-  void spin();
-  ThreadSafeQueue *getQueue();
-  const std::vector<std::string> &getJointNames();
+
 
 private:
   void executeCB(GoalHandle gh);

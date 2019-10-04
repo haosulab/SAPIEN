@@ -2,9 +2,9 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "articulation_interface.h"
+#include "controllable_articulation_wrapper.h"
 #include "kinematics_articulation_wrapper.h"
 #include <cassert>
-#include <fstream>
 #include <sstream>
 
 static PxDefaultErrorCallback gDefaultErrorCallback;
@@ -183,6 +183,9 @@ void PxSimulation::step() {
   }
   for (auto &wrapper : mDynamicArticulationWrappers) {
     wrapper->updateCache();
+  }
+  for (auto &wrapper : mControllableArticulationWrapper) {
+    wrapper->update(mTimestep);
   }
 }
 

@@ -87,9 +87,9 @@ void PxKinematicsArticulationWrapper::buildCache() {
   }
   jointNum = jointName2JointPtr.size();
   jointStartIndex.push_back(DOF);
-  driveQpos.resize(DOF, 0);
   driveQvel.resize(DOF, 0);
   qpos.resize(DOF, 0);
+  lastStepQpos.resize(DOF, 0);
   qvel.resize(DOF, 0);
   qacc.resize(DOF, 0);
   qf.resize(DOF, 0);
@@ -118,13 +118,11 @@ void PxKinematicsArticulationWrapper::set_qpos(const std::vector<PxReal> &v) {
     j += 1;
   }
   qpos = v;
-  driveQpos = v;
-
-  updateVelocityDrive = false;
+  hasMagicVelocity = false;
 }
 void PxKinematicsArticulationWrapper::set_qvel(const std::vector<PxReal> &v) {
   assert(v.size() == dof());
-  updateVelocityDrive = true;
+  hasMagicVelocity = true;
   driveQvel = v;
 }
 void PxKinematicsArticulationWrapper::set_qacc(const std::vector<PxReal> &v) {}
@@ -139,8 +137,7 @@ void PxKinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal>
     jointListPtr[j]->driveQpos(jointQpos);
     j += 1;
   }
-  updateQpos = true;
-  driveQpos = v;
+  qpos = v;
 }
 std::vector<std::string> PxKinematicsArticulationWrapper::get_drive_joint_name() const {
   return jointNameDOF;
@@ -152,96 +149,22 @@ std::vector<PxRigidDynamic *> PxKinematicsArticulationWrapper::get_links() { ret
 // Update function should be called in the simulation loop
 void PxKinematicsArticulationWrapper::update(PxReal timestep) {
   // Update drive target based on controllers
-  if (hasActuator) {
-    // Update by velocity controller
-    for (size_t i = 0; i < velocityControllerQueueList.size(); ++i) {
-      // If no controller give the signal, continue for next one
-      if (velocityControllerQueueList[i]->empty()) {
-        continue;
-      }
-      auto controllerIndex = velocityControllerIndexList[i];
-      auto queue = velocityControllerQueueList[i]->pop();
-      std::cout << "Wrapper: " << queue[0] << std::endl;
-      for (size_t j = 0; j < controllerIndex.size(); ++j) {
-        driveQpos[controllerIndex[j]] += queue[j] * timestep;
-      }
-      set_drive_target(driveQpos);
-    }
-
-    // Update by position controller
-    for (size_t i = 0; i < positionControllerQueueList.size(); ++i) {
-      // If no controller give the signal, continue for next one
-      if (positionControllerQueueList[i]->empty()) {
-        continue;
-      }
-      auto controllerIndex = positionControllerIndexList[i];
-      auto queue = positionControllerQueueList[i]->pop();
-      for (size_t j = 0; j < controllerIndex.size(); ++j) {
-        driveQpos[controllerIndex[j]] = queue[j];
-      }
-      set_drive_target(driveQpos);
-    }
-  } else if (updateVelocityDrive) {
+  if (hasMagicVelocity) {
+    std::vector<PxReal> driveQpos = qpos;
     for (std::size_t i = 0; i < dof(); ++i) {
       // Update drive of next step based on the drive velocity
-      PxReal newQ = driveQpos[i] + driveQvel[i] * timestep;
+      PxReal newQ = qpos[i] + driveQvel[i] * timestep;
       auto [upperLimit, lowerLimit] = jointLimit[i];
       newQ = newQ > upperLimit ? upperLimit : newQ;
       driveQpos[i] = newQ < lowerLimit ? lowerLimit : newQ;
     }
     set_drive_target(driveQpos);
-  }
-
-  // Update velocity based on time interval if the set_drive_target function is called once in this
-  // simulation step
-  if (!updateVelocityDrive) {
-    for (size_t i = 0; i < dof(); ++i) {
-      qvel[i] = (driveQpos[i] - qpos[i]) / timestep;
-    }
-  }
-  if (updateQpos) {
     qpos = driveQpos;
   }
-  updateQpos = false;
 
-  // Update ROS related joint publisher buffer
-  // In the future, the cast between PxReal and float should be make explicitly
-  std::vector<PxReal> jointState = qpos;
-  jointState.insert(jointState.end(), qvel.begin(), qvel.end());
-  jointStateQueue.push(jointState);
-}
-
-ThreadSafeQueue *PxKinematicsArticulationWrapper::get_queue() { return &jointStateQueue; }
-void PxKinematicsArticulationWrapper::add_position_controller(const std::vector<std::string> &name,
-                                                              ThreadSafeQueue *queue) {
-  std::vector<uint32_t> controllerIndex = {};
-  for (const auto &qName : name) {
-    for (size_t j = 0; j < jointNameDOF.size(); ++j) {
-      if (qName == jointNameDOF[j]) {
-        controllerIndex.push_back(j);
-        break;
-      }
+  // Update velocity based on time interval if the set_drive_target function
+    for (size_t i = 0; i < dof(); ++i) {
+      qvel[i] = (qpos[i] - lastStepQpos[i]) / timestep;
     }
-  }
-  assert(controllerIndex.size() == name.size());
-  positionControllerIndexList.push_back(controllerIndex);
-  positionControllerQueueList.push_back(queue);
-  hasActuator = true;
-}
-void PxKinematicsArticulationWrapper::add_velocity_controller(const std::vector<std::string> &name,
-                                                              ThreadSafeQueue *queue) {
-  std::vector<uint32_t> controllerIndex = {};
-  for (const auto &qName : name) {
-    for (size_t j = 0; j < jointNameDOF.size(); ++j) {
-      if (qName == jointNameDOF[j]) {
-        controllerIndex.push_back(j);
-        break;
-      }
-    }
-  }
-
-  assert(controllerIndex.size() == name.size());
-  velocityControllerIndexList.push_back(controllerIndex);
-  velocityControllerQueueList.push_back(queue);
-  hasActuator = true;
+    lastStepQpos = qpos;
 }

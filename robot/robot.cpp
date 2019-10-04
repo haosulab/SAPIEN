@@ -4,6 +4,7 @@
 
 #include "actor_builder.h"
 #include "articulation_builder.h"
+#include "controllable_articulation_wrapper.h"
 #include "joint_pub_node.h"
 #include "joint_trajectory_controller.h"
 #include "optifuser_renderer.h"
@@ -37,25 +38,27 @@ void test1() {
   loader.load("../assets/179/test.urdf")
       ->articulation->teleportRootLink({{1.2, 0, 0.8}, PxIdentity}, true);
 
-  auto wrapper =
-      loader.loadKinematic("../assets/robot/all_robot.urdf");
+  auto wrapper = loader.loadKinematic("../assets/robot/all_robot.urdf");
   auto timestep = sim.getTimestep();
+  auto uniqueWrapper = std::make_unique<ControllableArticulationWrapper>(wrapper);
+  ControllableArticulationWrapper *controllableWrapper = uniqueWrapper.get();
+  sim.mControllableArticulationWrapper.push_back(std::move(uniqueWrapper));
 
   // ROS
   auto nh = std::make_shared<ros::NodeHandle>();
 
-  robot_interface::JointPubNode node(wrapper, 60, 1000, "/joint_states", nh);
+  robot_interface::JointPubNode node(controllableWrapper, 60, 1000, "/joint_states", nh);
 
-  robot_interface::GroupControllerNode controller(wrapper, "right_arm", timestep, nh);
+  robot_interface::GroupControllerNode controller(controllableWrapper, "right_arm", timestep, nh);
 
-  //  std::vector<std::string> serviceJoints = {
-  //      "right_gripper_finger1_joint", "right_gripper_finger2_joint",
-  //      "right_gripper_finger3_joint"};
-  //  robot_interface::VelocityControllerServer service(wrapper, serviceJoints, timestep,
-  //  "gripper", nh); wrapper->add_velocity_controller(service.getJointNames(),
-  //  service.getQueue()); std::thread th3(&robot_interface::VelocityControllerServer::spin,
-  //  &service);
+    std::vector<std::string> serviceJoints = {
+        "right_gripper_finger1_joint", "right_gripper_finger2_joint",
+        "right_gripper_finger3_joint"};
+    robot_interface::VelocityControllerServer service(controllableWrapper, serviceJoints, timestep,
+    "gripper", nh);
 
+  ros::AsyncSpinner spinner(4);
+  spinner.start();
   //  auto queue = controller.getQueue();
   //  std::vector<PxReal> initQpos = {-1.93475823254,
   //                                  -1.53188487338,

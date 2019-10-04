@@ -23,7 +23,7 @@ public:
 
 class ControllableArticulationWrapper {
 private:
-  std::shared_ptr<ThreadSafeQueue> jointStateQueue = std::make_unique<ThreadSafeQueue>();
+  std::unique_ptr<ThreadSafeQueue> jointStateQueue = std::make_unique<ThreadSafeQueue>();
   std::vector<ThreadSafeQueue *> positionControllerQueueList = {};
   std::vector<std::vector<uint32_t>> positionControllerIndexList = {};
   std::vector<ThreadSafeQueue *> velocityControllerQueueList = {};
@@ -39,17 +39,18 @@ public:
   IArticulationDrivable *articulation;
 
 private:
-  void update(physx::PxReal timestep);
   void updateJointState();
   void driveFromPositionController();
   void driveFromVelocityController(physx::PxReal timestep);
-  ThreadSafeQueue *getJointStateQueue();
 
 public:
   explicit ControllableArticulationWrapper(IArticulationDrivable *articulation);
-  bool add_position_controller(const std::vector<std::string> &jointName, ThreadSafeQueue *queue);
-  bool add_velocity_controller(const std::vector<std::string> &jointName, ThreadSafeQueue *queue);
+  bool add_position_controller(const std::vector<std::string> &controllerJointNames,
+                               ThreadSafeQueue *queue);
+  bool add_velocity_controller(const std::vector<std::string> &controllerJointNames,
+                               ThreadSafeQueue *queue);
 
-  // This function should be called every simulation step
-  void update();
+  ThreadSafeQueue *get_joint_state_queue();
+  std::vector<std::string> get_drive_joint_name();
+  void update(physx::PxReal timestep);
 };

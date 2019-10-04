@@ -29,7 +29,7 @@ private:
   double updateFrenquency;
 
 public:
-  JointPubNode(PxKinematicsArticulationWrapper *wrapper, double pubFrequency,
+  JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
                double updateFrequency, const std::string &topicName,
                std::shared_ptr<ros::NodeHandle> nh);
 

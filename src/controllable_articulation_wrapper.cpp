@@ -2,58 +2,30 @@
 // Created by sim on 10/2/19.
 //
 
-#include "controllable_articulation.h"
+#include "controllable_articulation_wrapper.h"
+#include <algorithm>
 #include <iostream>
-
-// Thread Safe Queue
-ThreadSafeQueue::ThreadSafeQueue() { mQueue = std::queue<std::vector<float>>(); }
-void ThreadSafeQueue::push(const std::vector<float> &vec) {
-  std::lock_guard<std::mutex> guard(mLock);
-  mQueue.push(vec);
-}
-std::vector<float> ThreadSafeQueue::pop() {
-  std::lock_guard<std::mutex> guard(mLock);
-  std::vector<float> vec = mQueue.front();
-  mQueue.pop();
-  return vec;
-}
-bool ThreadSafeQueue::empty() {
-  std::lock_guard<std::mutex> guard(mLock);
-  return mQueue.empty();
-}
-void ThreadSafeQueue::clear() {
-  std::lock_guard<std::mutex> guard(mLock);
-  std::queue<std::vector<float>> empty;
-  std::swap(mQueue, empty);
-}
-void ThreadSafeQueue::pushValue(const std::vector<float> vec) {
-  std::lock_guard<std::mutex> guard(mLock);
-  mQueue.push(vec);
-}
 
 // Controllable articulation wrapper
 ControllableArticulationWrapper::ControllableArticulationWrapper(
     IArticulationDrivable *articulation)
     : articulation(articulation) {
-  jointNames = articulation->get_joint_names();
+  jointNames = articulation->get_drive_joint_name();
+  driveQpos.resize(jointNames.size(), 0);
 }
 bool ControllableArticulationWrapper::add_position_controller(
-    const std::vector<std::string> &jointName, ThreadSafeQueue *queue) {
+    const std::vector<std::string> &controllerJointNames, ThreadSafeQueue *queue) {
   // Get joint index mapping from controller to articulation
   std::vector<uint32_t> controllerIndex = {};
-  for (const auto &qName : jointName) {
-    bool found = false;
-    for (size_t j = 0; j < jointNames.size(); ++j) {
-      if (qName == jointNames[j]) {
-        controllerIndex.push_back(j);
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      std::cerr << "Joint name not found: " << qName << std::endl;
+  for (const auto &qName : controllerJointNames) {
+    auto iterator = std::find(jointNames.begin(), jointNames.end(), qName);
+    if (iterator == jointNames.end()) {
+      std::cerr << "Joint name given controller not found in the articulation: " << qName
+                << std::endl;
       return false;
     }
+    auto index = iterator - jointNames.begin();
+    controllerIndex.push_back(index);
   }
   // Add position based controller based queue
   positionControllerIndexList.push_back(controllerIndex);
@@ -61,23 +33,18 @@ bool ControllableArticulationWrapper::add_position_controller(
   return true;
 }
 bool ControllableArticulationWrapper::add_velocity_controller(
-    const std::vector<std::string> &jointName, ThreadSafeQueue *queue) {
+    const std::vector<std::string> &controllerJointNames, ThreadSafeQueue *queue) {
   // Get joint index mapping from controller to articulation
   std::vector<uint32_t> controllerIndex = {};
-  auto articulationJointNames = articulation->get_joint_names();
-  for (const auto &qName : jointName) {
-    bool found = false;
-    for (size_t j = 0; j < articulationJointNames.size(); ++j) {
-      if (qName == articulationJointNames[j]) {
-        controllerIndex.push_back(j);
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      std::cerr << "Joint name not found: " << qName << std::endl;
+  for (const auto &qName : controllerJointNames) {
+    auto iterator = std::find(jointNames.begin(), jointNames.end(), qName);
+    if (iterator == jointNames.end()) {
+      std::cerr << "Joint name given controller not found in the articulation: " << qName
+                << std::endl;
       return false;
     }
+    auto index = iterator - jointNames.begin();
+    controllerIndex.push_back(index);
   }
   // Add position based controller based queue
   velocityControllerIndexList.push_back(controllerIndex);
@@ -119,15 +86,45 @@ void ControllableArticulationWrapper::driveFromVelocityController(physx::PxReal 
     controllerActive = true;
   }
 }
-ThreadSafeQueue *ControllableArticulationWrapper::getJointStateQueue() {
+ThreadSafeQueue *ControllableArticulationWrapper::get_joint_state_queue() {
   return jointStateQueue.get();
 }
 void ControllableArticulationWrapper::update(physx::PxReal timestep) {
+  driveQpos = articulation->get_qpos();
   driveFromVelocityController(timestep);
   driveFromPositionController();
   if (controllerActive) {
     articulation->set_drive_target(driveQpos);
+    controllerActive = false;
   }
 
   updateJointState();
+}
+std::vector<std::string> ControllableArticulationWrapper::get_drive_joint_name() {
+  return articulation->get_drive_joint_name();
+}
+// Thread Safe Queue
+ThreadSafeQueue::ThreadSafeQueue() { mQueue = std::queue<std::vector<float>>(); }
+void ThreadSafeQueue::push(const std::vector<float> &vec) {
+  std::lock_guard<std::mutex> guard(mLock);
+  mQueue.push(vec);
+}
+std::vector<float> ThreadSafeQueue::pop() {
+  std::lock_guard<std::mutex> guard(mLock);
+  std::vector<float> vec = mQueue.front();
+  mQueue.pop();
+  return vec;
+}
+bool ThreadSafeQueue::empty() {
+  std::lock_guard<std::mutex> guard(mLock);
+  return mQueue.empty();
+}
+void ThreadSafeQueue::clear() {
+  std::lock_guard<std::mutex> guard(mLock);
+  std::queue<std::vector<float>> empty;
+  std::swap(mQueue, empty);
+}
+void ThreadSafeQueue::pushValue(const std::vector<float> vec) {
+  std::lock_guard<std::mutex> guard(mLock);
+  mQueue.push(vec);
 }

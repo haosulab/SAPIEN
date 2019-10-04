@@ -48,6 +48,7 @@ public:
   std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>>
       mKinematicArticulationWrappers;
   std::vector<std::unique_ptr<class PxJointSystem>> mObjectArticulationWrappers;
+  std::vector<std::unique_ptr<class ControllableArticulationWrapper>> mControllableArticulationWrapper;
 
 public:
   PxSimulation();

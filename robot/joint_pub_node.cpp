@@ -8,10 +8,10 @@
 
 namespace robot_interface {
 
-JointPubNode::JointPubNode(PxKinematicsArticulationWrapper *wrapper, double pubFrequency,
+JointPubNode::JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
                            double updateFrequency, const std::string &topicName,
                            std::shared_ptr<ros::NodeHandle> nh)
-    : jointName(wrapper->get_drive_joint_name()), queue(wrapper->get_queue()),
+    : jointName(wrapper->get_drive_joint_name()), queue(wrapper->get_joint_state_queue()),
       mNodeHandle(std::move(nh)), pubFrequency(pubFrequency), updateFrenquency(updateFrequency) {
 
   mPub = mNodeHandle->advertise<sensor_msgs::JointState>(topicName, 1);
