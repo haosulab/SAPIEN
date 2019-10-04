@@ -1,42 +1,52 @@
-#include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
 
-#include "render_interface.h"
-#include "optifuser_renderer.h"
-#include "simulation.h"
-#include "articulation_wrapper.h"
-#include "kinematics_articulation_wrapper.h"
 #include "actor_builder.h"
 #include "articulation_builder.h"
+#include "articulation_wrapper.h"
+#include "kinematics_articulation_wrapper.h"
+#include "optifuser_renderer.h"
+#include "render_interface.h"
+#include "simulation.h"
 #include <vector>
 
 namespace py = pybind11;
 
-class PyISensor: public Renderer::ISensor{
- public:
+class PyISensor : public Renderer::ISensor {
+public:
   using Renderer::ISensor::ISensor;
-  Renderer::SensorPose getSensorPose() const override {PYBIND11_OVERLOAD_PURE(Renderer::SensorPose, Renderer::ISensor, getSensorPose);}
-  void setSensorPose(const Renderer::SensorPose &pose) override {PYBIND11_OVERLOAD_PURE(void, Renderer::ISensor, setSensorPose, pose);}
+  Renderer::SensorPose getSensorPose() const override {
+    PYBIND11_OVERLOAD_PURE(Renderer::SensorPose, Renderer::ISensor, getSensorPose);
+  }
+  void setSensorPose(const Renderer::SensorPose &pose) override {
+    PYBIND11_OVERLOAD_PURE(void, Renderer::ISensor, setSensorPose, pose);
+  }
 };
 
-class PyICamera: public Renderer::ICamera{
- public:
+class PyICamera : public Renderer::ICamera {
+public:
   using Renderer::ICamera::ICamera;
-  Renderer::SensorPose getSensorPose() const override {PYBIND11_OVERLOAD_PURE(Renderer::SensorPose, Renderer::ICamera, getSensorPose);}
-  void setSensorPose(const Renderer::SensorPose &pose) override {PYBIND11_OVERLOAD_PURE(void, Renderer::ICamera, setSensorPose, pose);}
-  const std::string &getName() const override {PYBIND11_OVERLOAD_PURE(const std::string &, Renderer::ICamera, getName);}
-  uint32_t getWidth() const override {PYBIND11_OVERLOAD_PURE(uint32_t, Renderer::ICamera, getWidth);}
-  uint32_t getHeight() const override {PYBIND11_OVERLOAD_PURE(uint32_t, Renderer::ICamera, getHeight);}
-  float getFovy() const override {PYBIND11_OVERLOAD_PURE(float, Renderer::ICamera, getFovy);}
-  void takePicture() override {PYBIND11_OVERLOAD_PURE(void, Renderer::ICamera, takePicture);}
-
+  Renderer::SensorPose getSensorPose() const override {
+    PYBIND11_OVERLOAD_PURE(Renderer::SensorPose, Renderer::ICamera, getSensorPose);
+  }
+  void setSensorPose(const Renderer::SensorPose &pose) override {
+    PYBIND11_OVERLOAD_PURE(void, Renderer::ICamera, setSensorPose, pose);
+  }
+  const std::string &getName() const override {
+    PYBIND11_OVERLOAD_PURE(const std::string &, Renderer::ICamera, getName);
+  }
+  uint32_t getWidth() const override {
+    PYBIND11_OVERLOAD_PURE(uint32_t, Renderer::ICamera, getWidth);
+  }
+  uint32_t getHeight() const override {
+    PYBIND11_OVERLOAD_PURE(uint32_t, Renderer::ICamera, getHeight);
+  }
+  float getFovy() const override { PYBIND11_OVERLOAD_PURE(float, Renderer::ICamera, getFovy); }
+  void takePicture() override { PYBIND11_OVERLOAD_PURE(void, Renderer::ICamera, takePicture); }
 };
 
-
-
-
-//class PyAnimal : public Animal {
-//public:
+// class PyAnimal : public Animal {
+// public:
 /* Inherit the constructors */
 //    using Animal::Animal;
 
@@ -50,10 +60,9 @@ class PyICamera: public Renderer::ICamera{
 //        );
 //    }
 //};
-PxArticulationWrapper a;
 
 class Animal {
- public:
+public:
   std::vector<int> Q;
   std::vector<PxRigidActor *> mRigidActors;
   PxPhysics *mPhysicsSDK = nullptr;
@@ -67,16 +76,16 @@ class Animal {
   CollisionGroupManager collisionManager;
 
   std::map<physx_id_t, PxTransform> mCameraId2InitialPose;
-  std::map<physx_id_t, PxRigidActor*> mMountedCamera2MountedActor;
+  std::map<physx_id_t, PxRigidActor *> mMountedCamera2MountedActor;
 
   std::map<physx_id_t, PxTransform> mRenderId2InitialPose;
-  std::map<physx_id_t, PxRigidActor*> mRenderId2Parent;
-  std::map<physx_id_t, IArticulationBase*> mRenderId2Articulation;
+  std::map<physx_id_t, PxRigidActor *> mRenderId2Parent;
+  std::map<physx_id_t, IArticulationBase *> mRenderId2Articulation;
 
-  //struct PxArticulationWrapper wrapper;
+  // struct PxArticulationWrapper wrapper;
 
-  std::vector<std::unique_ptr<struct PxArticulationWrapper>> mDynamicArticulationWrappers;
-  std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>> mKinematicArticulationWrappers;
+  std::vector<std::unique_ptr<PxArticulationWrapper>> mDynamicArticulationWrappers;
+  std::vector<std::unique_ptr<PxKinematicsArticulationWrapper>> mKinematicArticulationWrappers;
 };
 
 PYBIND11_MODULE(pybind, m) {
@@ -92,7 +101,7 @@ PYBIND11_MODULE(pybind, m) {
       .def("step", &PxSimulation::step)
       .def("updateRenderer", &PxSimulation::updateRenderer)
       .def("addGround", &PxSimulation::addGround);
-    
+
   // py::class_<Renderer::ISensor> (m, "ISensor")
   //     .def("getSensorPose", &Renderer::ISensor::getSensorPose)
   //     .def("setSensorPose", &Renderer::ISensor::setSensorPose);
@@ -131,18 +140,17 @@ PYBIND11_MODULE(pybind, m) {
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
       .def(py::init<>())
       .def_readwrite("name", &Optifuser::CameraSpec::name)
-      .def_property("position", 
-                    [](Optifuser::CameraSpec &c) {
-                      return py::array_t<float>(3, (float *)(&c.position));
-                    }, 
-                    [](Optifuser::CameraSpec &c, py::array_t<float> arr) {
-                      c.position = {arr.at(0), arr.at(1), arr.at(2)};
-                    })
+      .def_property(
+          "position",
+          [](Optifuser::CameraSpec &c) { return py::array_t<float>(3, (float *)(&c.position)); },
+          [](Optifuser::CameraSpec &c, py::array_t<float> arr) {
+            c.position = {arr.at(0), arr.at(1), arr.at(2)};
+          })
       // TODO: fields of quaternion not wrapped yet
-      .def_property("rotation", 
+      .def_property("rotation",
                     [](Optifuser::CameraSpec &c) {
                       std::cerr << "rotation getter not wrapped yet" << std::endl;
-                    }, 
+                    },
                     [](Optifuser::CameraSpec &c) {
                       std::cerr << "rotation setter not wrapped yet" << std::endl;
                     })
@@ -150,35 +158,39 @@ PYBIND11_MODULE(pybind, m) {
       .def_readwrite("far", &Optifuser::CameraSpec::far)
       .def_readwrite("fovy", &Optifuser::CameraSpec::fovy)
       .def_readwrite("aspect", &Optifuser::CameraSpec::aspect)
-      .def("lookAt", [](Optifuser::CameraSpec &c, py::array_t<float> dir, py::array_t<float> up) {
-                       c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
-                     })
+      .def("lookAt",
+           [](Optifuser::CameraSpec &c, py::array_t<float> dir, py::array_t<float> up) {
+             c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
+           })
       // TODO: function involving matrix not wrapped yet
-      .def("getModelMat", [](Optifuser::CameraSpec &c){ 
-                            std::cerr << "getModelMat not wrapped yet" << std::endl;
-                          })
-      .def("getProjectionMat", [](Optifuser::CameraSpec &c){ 
-                                 std::cerr << "getProjectionMat not wrapped yet" << std::endl;
-                               })
-      .def("perspective", [](Optifuser::CameraSpec &c){ 
-                            std::cerr << "perspective not wrapped yet" << std::endl;
-                          });
-
+      .def("getModelMat",
+           [](Optifuser::CameraSpec &c) {
+             std::cerr << "getModelMat not wrapped yet" << std::endl;
+           })
+      .def("getProjectionMat",
+           [](Optifuser::CameraSpec &c) {
+             std::cerr << "getProjectionMat not wrapped yet" << std::endl;
+           })
+      .def("perspective", [](Optifuser::CameraSpec &c) {
+        std::cerr << "perspective not wrapped yet" << std::endl;
+      });
 
   py::class_<Optifuser::FPSCameraSpec, Optifuser::CameraSpec>(m, "FPSCameraSpec")
       .def(py::init<>())
       .def("update", &Optifuser::FPSCameraSpec::update)
       .def("isSane", &Optifuser::FPSCameraSpec::isSane)
-      .def("setForward", [](Optifuser::FPSCameraSpec &c, py::array_t<float> dir) {
-                           c.setForward({dir.at(0), dir.at(1), dir.at(2)});
-                         })
-      .def("setUp", [](Optifuser::FPSCameraSpec &c, py::array_t<float> dir) {
-                      c.setUp({dir.at(0), dir.at(1), dir.at(2)});
-                    })
+      .def("setForward",
+           [](Optifuser::FPSCameraSpec &c, py::array_t<float> dir) {
+             c.setForward({dir.at(0), dir.at(1), dir.at(2)});
+           })
+      .def("setUp",
+           [](Optifuser::FPSCameraSpec &c, py::array_t<float> dir) {
+             c.setUp({dir.at(0), dir.at(1), dir.at(2)});
+           })
       .def("rotateYawPitch", &Optifuser::FPSCameraSpec::rotateYawPitch)
       .def("moveForwardRight", &Optifuser::FPSCameraSpec::moveForwardRight)
       // TODO: function involving quarternion not wrapped yet
       .def("getRotation0", [](Optifuser::FPSCameraSpec &c) {
-                             std::cerr << "getRotation0 not wrapped yet" << std::endl;
-                           });
+        std::cerr << "getRotation0 not wrapped yet" << std::endl;
+      });
 }
