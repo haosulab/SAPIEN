@@ -404,7 +404,7 @@ struct Limit : DomBase {
   LOAD_ATTR_BEGIN()
   LOAD_ATTR_OPTIONAL(physx::PxReal, lower, 0)
   LOAD_ATTR_OPTIONAL(physx::PxReal, upper, 0)
-  // TODO: check effort and velocity default value
+  // TODO: check effort and stepSize default value
   LOAD_ATTR_OPTIONAL(physx::PxReal, effort, 0)
   LOAD_ATTR_OPTIONAL(physx::PxReal, velocity, 0)
   LOAD_ATTR_END()

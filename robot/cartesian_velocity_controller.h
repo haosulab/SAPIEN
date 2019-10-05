@@ -43,14 +43,17 @@ private:
   std::vector<uint32_t> jointIndex2Topic = {};
   std::vector<double> jointValue;
   std::vector<float> jointValueFloat;
+
+  // Communication
+  std::unique_ptr<ThreadSafeQueue> mQueue;
+  bool jointJumpCheck;
   float timestep;
   float transStepSize;
   float rotStepSize;
   std::vector<Eigen::Isometry3d> cartesianMatrix =
       std::vector<Eigen::Isometry3d>(12, Eigen::Isometry3d::Identity());
-
-  // Communication
-  std::unique_ptr<ThreadSafeQueue> mQueue;
+  static bool testJointSpaceJump(const std::vector<double> &q1, const std::vector<double> &q2,
+                          double threshold);
 
 private:
   void updateCurrentPose();
@@ -67,5 +70,6 @@ public:
   void setVelocity(float v);
   float getAngularVelocity() const;
   void setAngularVelocity(float v);
+  void toggleJumpTest(bool enable);
 };
 } // namespace robot_interface

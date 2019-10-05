@@ -67,12 +67,22 @@ void CartesianVelocityController::moveRelative(CartesianCommand type, bool conti
     updateCurrentPose();
     currentPose = state->getGlobalLinkTransform(eeName);
   }
-  currentPose = cartesianMatrix[type] * currentPose;
-  bool found_ik = state->setFromIK(jointModelGroup, currentPose, 0.01);
+  auto newPose = cartesianMatrix[type] * currentPose;
+  bool found_ik = state->setFromIK(jointModelGroup, newPose, 0.01);
   if (!found_ik) {
     ROS_WARN("Ik not found without timeout");
+    return;
+  }
+  if (jointJumpCheck) {
+    std::vector<double> currentJointValue;
+    state->copyJointGroupPositions(jointModelGroup, currentJointValue);
+    if (testJointSpaceJump(currentJointValue, jointValue, 0.2)) {
+      ROS_WARN("Joint space jump! Not execute");
+      return;
+    }
   }
   state->copyJointGroupPositions(jointModelGroup, jointValue);
+  currentPose = newPose;
 
   // Control the physx via controllable wrapper
   jointValueFloat.assign(jointValue.begin(), jointValue.end());
@@ -111,5 +121,15 @@ void CartesianVelocityController::buildCartesianAngularVelocityCache() {
       sin(-rotStepSize), 0, cos(-rotStepSize), 0, 0, 0, 0, 1;
   cartesianMatrix[11].matrix() << cos(-rotStepSize), sin(-rotStepSize), 0, 0, -sin(-rotStepSize),
       cos(-rotStepSize), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1;
+}
+void CartesianVelocityController::toggleJumpTest(bool enable) { jointJumpCheck = enable; }
+bool CartesianVelocityController::testJointSpaceJump(const std::vector<double> &q1,
+                                                     const std::vector<double> &q2,
+                                                     double threshold) {
+  double distance = 0;
+  for (size_t i = 0; i < q1.size(); ++i) {
+    distance += abs(q1[i] - q2[i]);
+  }
+  return distance / q1.size() > threshold;
 }
 } // namespace robot_interface
