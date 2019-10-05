@@ -8,6 +8,8 @@
 #include "optifuser_renderer.h"
 #include "render_interface.h"
 #include "simulation.h"
+#include "urdf_loader.h"
+#include "joint_system.h"
 #include <vector>
 
 namespace py = pybind11;
@@ -44,51 +46,57 @@ public:
   float getFovy() const override { PYBIND11_OVERLOAD_PURE(float, Renderer::ICamera, getFovy); }
   void takePicture() override { PYBIND11_OVERLOAD_PURE(void, Renderer::ICamera, takePicture); }
 };
-
-// class PyAnimal : public Animal {
-// public:
-/* Inherit the constructors */
-//    using Animal::Animal;
-
-/* Trampoline (need one for each virtual function) */
-//    std::string go(int n_times) override {
-//        PYBIND11_OVERLOAD_PURE(
-//            std::string, /* Return type */
-//            Animal,      /* Parent class */
-//            go,          /* Name of function in C++ (must match Python name) */
-//            n_times      /* Argument(s) */
-//        );
-//    }
-//};
-
-class Animal {
+class PyIArticulationBase : public IArticulationBase {
 public:
-  std::vector<int> Q;
-  std::vector<PxRigidActor *> mRigidActors;
-  PxPhysics *mPhysicsSDK = nullptr;
-  PxFoundation *mFoundation = nullptr;
-  PxCooking *mCooking = nullptr;
-  PxScene *mScene = nullptr;
-  PxReal mTimestep = 1.0f / 60.0f;
-  Renderer::IPhysxRenderer *mRenderer = nullptr;
-  PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
-  PxMaterial *mDefaultMaterial = nullptr;
-  CollisionGroupManager collisionManager;
+  EArticulationType get_articulation_type() const override {
+    PYBIND11_OVERLOAD_PURE(EArticulationType, IArticulationBase, get_articulation_type);
+  }
+  uint32_t dof() const override {
+    PYBIND11_OVERLOAD_PURE(uint32_t, IArticulationBase, dof);
+  }
 
-  std::map<physx_id_t, PxTransform> mCameraId2InitialPose;
-  std::map<physx_id_t, PxRigidActor *> mMountedCamera2MountedActor;
+  std::vector<std::string> get_joint_names() const override {
+    PYBIND11_OVERLOAD_PURE(std::vector<std::string>, IArticulationBase, get_joint_names);
+  }
+  std::vector<uint32_t> get_joint_dofs() const override {
+    PYBIND11_OVERLOAD_PURE(std::vector<uint32_t>, IArticulationBase, get_joint_dofs);
+  }
 
-  std::map<physx_id_t, PxTransform> mRenderId2InitialPose;
-  std::map<physx_id_t, PxRigidActor *> mRenderId2Parent;
-  std::map<physx_id_t, IArticulationBase *> mRenderId2Articulation;
+  std::vector<std::tuple<physx::PxReal, physx::PxReal>> get_joint_limits() const override {
+    PYBIND11_OVERLOAD_PURE_NAME(PYBIND11_TYPE(std::vector<std::tuple<physx::PxReal, physx::PxReal>>), PYBIND11_TYPE(IArticulationBase), "get_joint_limits", get_joint_limits);
+  }
 
-  // struct PxArticulationWrapper wrapper;
+  std::vector<physx::PxReal> get_qpos() const override {
+    PYBIND11_OVERLOAD_PURE(std::vector<physx::PxReal>, IArticulationBase, get_qpos);
+  }
+  void set_qpos(const std::vector<physx::PxReal> &v) override {
+    PYBIND11_OVERLOAD_PURE(void, IArticulationBase, set_qpos, v);
+  }
 
-  std::vector<std::unique_ptr<PxArticulationWrapper>> mDynamicArticulationWrappers;
-  std::vector<std::unique_ptr<PxKinematicsArticulationWrapper>> mKinematicArticulationWrappers;
+  std::vector<physx::PxReal> get_qvel() const override {
+    PYBIND11_OVERLOAD_PURE(std::vector<physx::PxReal>, IArticulationBase, get_qvel);
+  }
+  void set_qvel(const std::vector<physx::PxReal> &v) override {
+    PYBIND11_OVERLOAD_PURE(void, IArticulationBase, set_qvel, v);
+  }
+
+  std::vector<physx::PxReal> get_qacc() const override {
+    PYBIND11_OVERLOAD_PURE(std::vector<physx::PxReal>, IArticulationBase, get_qacc);
+  }
+  void set_qacc(const std::vector<physx::PxReal> &v) override {
+    PYBIND11_OVERLOAD_PURE(void, IArticulationBase, set_qacc, v);
+  }
+
+  std::vector<physx::PxReal> get_qf() const override {
+    PYBIND11_OVERLOAD_PURE(std::vector<physx::PxReal>, IArticulationBase, get_qf);
+  }
+  void set_qf(const std::vector<physx::PxReal> &v) override {
+    PYBIND11_OVERLOAD_PURE(void, IArticulationBase, set_qf, v);
+  }
 };
 
-PYBIND11_MODULE(pybind, m) {
+
+PYBIND11_MODULE(sapyen, m) {
 
   py::class_<PxSimulation>(m, "PxSimulation")
       .def(py::init<>())
@@ -100,7 +108,14 @@ PYBIND11_MODULE(pybind, m) {
       .def("createArticulationBuilder", &PxSimulation::createArticulationBuilder)
       .def("step", &PxSimulation::step)
       .def("updateRenderer", &PxSimulation::updateRenderer)
-      .def("addGround", &PxSimulation::addGround);
+      .def("addGround", &PxSimulation::addGround, py::arg("altitude"), py::arg("render") = true, py::arg("material") = nullptr);
+
+  py::class_<PxRigidActor, std::unique_ptr<PxRigidActor, py::nodelete>>(m, "PxRigidActor");
+  py::class_<PxRigidStatic, PxRigidActor, std::unique_ptr<PxRigidStatic, py::nodelete>>(m, "PxRigidStatic");
+  py::class_<PxRigidBody, PxRigidActor, std::unique_ptr<PxRigidBody, py::nodelete>>(m, "PxRigidBody");
+  py::class_<PxRigidDynamic, PxRigidBody, std::unique_ptr<PxRigidDynamic, py::nodelete>>(m, "PxRigidDynamic");
+
+  py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial");
 
   // py::class_<Renderer::ISensor> (m, "ISensor")
   //     .def("getSensorPose", &Renderer::ISensor::getSensorPose)
@@ -118,7 +133,11 @@ PYBIND11_MODULE(pybind, m) {
   //     .def("getDepth", &Renderer::ICamera::getDepth)
   //     .def("getSegmentation", &Renderer::ICamera::getSegmentation);
 
-  py::class_<Renderer::OptifuserRenderer>(m, "OptifuserRenderer")
+  py::class_<Renderer::ICameraManager>(m, "ICameraManager");
+
+  py::class_<Renderer::IPhysxRenderer, Renderer::ICameraManager>(m, "IPhysxRenderer");
+
+  py::class_<Renderer::OptifuserRenderer, Renderer::IPhysxRenderer>(m, "OptifuserRenderer")
       .def(py::init<>())
       .def("init", &Renderer::OptifuserRenderer::init)
       .def("render", &Renderer::OptifuserRenderer::render)
@@ -193,4 +212,67 @@ PYBIND11_MODULE(pybind, m) {
       .def("getRotation0", [](Optifuser::FPSCameraSpec &c) {
         std::cerr << "getRotation0 not wrapped yet" << std::endl;
       });
+
+  py::class_<IArticulationBase, PyIArticulationBase> articulationBase(m, "IArticulationBase");
+  articulationBase.def(py::init<>())
+    .def("get_articulation_type", &IArticulationBase::get_articulation_type)
+    .def("dof", &IArticulationBase::dof)
+    .def("get_joint_names", &IArticulationBase::get_joint_names)
+    .def("get_joint_dofs", [](IArticulationBase& a) {
+      auto dofs = a.get_joint_dofs();
+      return py::array_t<uint32_t> (dofs.size(), dofs.data());
+    })
+    .def("get_joint_limits", [](IArticulationBase& a) {
+      auto limits = a.get_joint_limits();
+      return py::array_t<PxReal> ({(int)limits.size(), 2}, {sizeof(std::tuple<PxReal, PxReal>), sizeof(PxReal)}, (PxReal *)limits.data());
+    })
+    .def("get_qpos", [](IArticulationBase& a) {
+      auto qpos = a.get_qpos();
+      return py::array_t<PxReal> (qpos.size(), qpos.data());
+    })
+    .def("set_qpos", [](IArticulationBase& a, py::array_t<float> arr) {
+      a.set_qpos(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+    })
+    .def("get_qvel", [](IArticulationBase& a) {
+      auto qvel = a.get_qvel();
+      return py::array_t<PxReal> (qvel.size(), qvel.data());
+    })
+    .def("set_qvel", [](IArticulationBase& a, py::array_t<float> arr) {
+      a.set_qvel(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+    })
+    .def("get_qacc", [](IArticulationBase& a) {
+      auto qacc = a.get_qacc();
+      return py::array_t<PxReal> (qacc.size(), qacc.data());
+    })
+    .def("set_qacc", [](IArticulationBase& a, py::array_t<float> arr) {
+      a.set_qacc(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+    })
+    .def("get_qf", [](IArticulationBase& a) {
+      auto qf = a.get_qf();
+      return py::array_t<PxReal> (qf.size(), qf.data());
+    })
+    .def("set_qf", [](IArticulationBase& a, py::array_t<float> arr) {
+      a.set_qf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+    });
+
+  py::class_<IArticulationDrivable, IArticulationBase>(m, "IArticulationDrivable");
+  py::enum_<EArticulationType>(articulationBase, "ArticulationType")
+      .value("DYNAMIC_ARTICULATION", EArticulationType::DYNAMIC_ARTICULATION)
+      .value("KINEMATIC_ARTICULATION", EArticulationType::KINEMATIC_ARTICULATION)
+      .value("OBJECT_ARTICULATION", EArticulationType::OBJECT_ARTICULATION);
+  py::class_<PxArticulationWrapper, IArticulationBase>(m, "PxArticulationWrapper")
+    .def(py::init<>())
+    .def("updateCache", &PxArticulationWrapper::updateCache)
+    .def("updateArticulation", &PxArticulationWrapper::updateArticulation);
+
+  py::class_<PxJointSystem, IArticulationBase>(m, "PxArticulationWrapper")
+    .def(py::init<>())
+
+  py::class_<URDF::URDFLoader>(m, "URDFLoader")
+    .def(py::init<PxSimulation &>())
+    .def_readwrite("fixLoadedObject", &URDF::URDFLoader::fixLoadedObject)
+    .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference);
+
+
 }
+
