@@ -43,9 +43,7 @@ class PxKinematicsArticulationWrapper : public IArticulationDrivable {
   std::vector<PxReal> driveQvel;
 
 public:
-  EArticulationType get_articulation_type() const override {
-    return EArticulationType::KINEMATIC_ARTICULATION;
-  }
+  EArticulationType get_articulation_type() const override;
   void buildCache();
 
   KJoint *createJoint(const JointType &type, KJoint *parent, PxRigidDynamic *link,

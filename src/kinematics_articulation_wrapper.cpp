@@ -152,7 +152,7 @@ void PxKinematicsArticulationWrapper::update(PxReal timestep) {
   if (hasMagicVelocity) {
     std::vector<PxReal> driveQpos = qpos;
     for (std::size_t i = 0; i < dof(); ++i) {
-      // Update drive of next step based on the drive velocity
+      // Update drive of next step based on the drive stepSize
       PxReal newQ = qpos[i] + driveQvel[i] * timestep;
       auto [upperLimit, lowerLimit] = jointLimit[i];
       newQ = newQ > upperLimit ? upperLimit : newQ;
@@ -162,9 +162,12 @@ void PxKinematicsArticulationWrapper::update(PxReal timestep) {
     qpos = driveQpos;
   }
 
-  // Update velocity based on time interval if the set_drive_target function
+  // Update stepSize based on time interval if the set_drive_target function
     for (size_t i = 0; i < dof(); ++i) {
       qvel[i] = (qpos[i] - lastStepQpos[i]) / timestep;
     }
     lastStepQpos = qpos;
+}
+EArticulationType PxKinematicsArticulationWrapper::get_articulation_type() const {
+  return EArticulationType::KINEMATIC_ARTICULATION;
 }

@@ -30,7 +30,7 @@ bool robot_interface::VelocityControllerServer::executeCB(
     }
   }
 
-  // Generate joint velocity with right order
+  // Generate joint stepSize with right order
   std::vector<float> jointVelocity(mJointName.size(), 0);
   for (size_t i = 0; i < serviceJointName.size(); ++i) {
     uint32_t index =
@@ -38,7 +38,7 @@ bool robot_interface::VelocityControllerServer::executeCB(
     jointVelocity[index] = req.joint_velocity[i];
   }
 
-  // Push velocity to the queue
+  // Push stepSize to the queue
   uint32_t step = req.duration.toSec() / mTimestep;
   for (size_t i = 0; i < step; ++i) {
     mQueue->pushValue(jointVelocity);
