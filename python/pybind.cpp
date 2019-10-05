@@ -261,19 +261,16 @@ PYBIND11_MODULE(sapyen, m) {
       .value("DYNAMIC_ARTICULATION", EArticulationType::DYNAMIC_ARTICULATION)
       .value("KINEMATIC_ARTICULATION", EArticulationType::KINEMATIC_ARTICULATION)
       .value("OBJECT_ARTICULATION", EArticulationType::OBJECT_ARTICULATION);
-  py::class_<PxArticulationWrapper, IArticulationBase>(m, "PxArticulationWrapper")
+  py::class_<ArticulationWrapper, IArticulationBase>(m, "ArticulationWrapper")
     .def(py::init<>())
-    .def("updateCache", &PxArticulationWrapper::updateCache)
-    .def("updateArticulation", &PxArticulationWrapper::updateArticulation);
+    .def("updateCache", &ArticulationWrapper::updateCache)
+    .def("updateArticulation", &ArticulationWrapper::updateArticulation);
 
-  py::class_<PxJointSystem, IArticulationBase>(m, "PxArticulationWrapper")
-      .def(py::init<>());
+  py::class_<PxJointSystem, IArticulationBase>(m, "JointSystem");
 
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
     .def(py::init<Simulation &>())
     .def_readwrite("fixLoadedObject", &URDF::URDFLoader::fixLoadedObject)
     .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference);
-
-
 }
 
