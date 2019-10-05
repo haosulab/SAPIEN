@@ -10,6 +10,7 @@
 #include <thread>
 #include <vector>
 
+namespace sapien {
 namespace PS3 {
 
 struct js_event_t {
@@ -148,3 +149,5 @@ public:
 };
 
 } // namespace PS3
+
+}

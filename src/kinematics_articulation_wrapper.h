@@ -10,6 +10,7 @@
 #include <map>
 #include <thread>
 
+namespace sapien {
 using namespace physx;
 
 
@@ -74,3 +75,5 @@ public:
   // This function should be called after one simulation step
   void update(PxReal timestep);
 };
+
+}

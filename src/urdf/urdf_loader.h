@@ -9,6 +9,7 @@
 #include <tinyxml2.h>
 #include <vector>
 
+namespace sapien {
 struct PxArticulationWrapper;
 namespace URDF {
 
@@ -620,16 +621,17 @@ struct Robot : DomBase {
 
 class URDFLoader {
   std::unique_ptr<Robot> robot;
-  physx::PxArticulationReducedCoordinate *articulation;
-  class PxSimulation &mSimulation;
+  class Simulation &mSimulation;
   std::string mUrdfString;
 
 public:
   bool fixLoadedObject;
-  URDFLoader(class PxSimulation &simulation);
+  URDFLoader(class Simulation &simulation);
   PxArticulationWrapper *load(const std::string &filename);
   class PxKinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class PxJointSystem *loadJointSystem(const std::string &filename);
 };
 
 } // namespace URDF
+
+}

@@ -10,12 +10,14 @@
 #include <tuple>
 #include <vector>
 
+namespace sapien {
 using namespace physx;
 
 enum JointType { UNDEFINED = 0, REVOLUTE = 1, CONTINUOUS = 2, FIXED = 3, PRISMATIC = 4 };
 
 class KJoint {
 public:
+  virtual ~KJoint() {}
   std::string name;
   PxRigidDynamic *childLink;
   PxRigidDynamic *parentLink;
@@ -96,3 +98,5 @@ public:
   std::vector<std::tuple<PxReal, PxReal>> getLimits() const override;
   PxReal getQpos() const override { return 0; }
 };
+
+}

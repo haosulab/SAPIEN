@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cassert>
 
+namespace sapien {
 void PxArticulationWrapper::updateCache() {
   articulation->copyInternalStateToCache(*cache, PxArticulationCache::eALL);
 }
@@ -70,4 +71,6 @@ void PxArticulationWrapper::set_qf(const std::vector<physx::PxReal> &v) {
     cache->jointForce[i] = v[i];
   }
   articulation->applyCache(*cache, PxArticulationCache::eFORCE);
+}
+
 }

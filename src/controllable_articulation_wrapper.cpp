@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iostream>
 
+namespace sapien {
 // Controllable articulation wrapper
 ControllableArticulationWrapper::ControllableArticulationWrapper(
     IArticulationDrivable *articulation)
@@ -127,4 +128,6 @@ void ThreadSafeQueue::clear() {
 void ThreadSafeQueue::pushValue(const std::vector<float> vec) {
   std::lock_guard<std::mutex> guard(mLock);
   mQueue.push(vec);
+}
+
 }

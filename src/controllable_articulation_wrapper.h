@@ -7,6 +7,7 @@
 #include <mutex>
 #include <queue>
 
+namespace sapien {
 class ThreadSafeQueue {
   std::mutex mLock;
   std::queue<std::vector<float>> mQueue;
@@ -54,3 +55,5 @@ public:
   std::vector<std::string> get_drive_joint_name();
   void update(physx::PxReal timestep);
 };
+
+}

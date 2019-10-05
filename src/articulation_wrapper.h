@@ -5,6 +5,7 @@
 #include <string>
 #include "articulation_interface.h"
 
+namespace sapien {
 #define APP_ASSERT_FATAL(exp, msg)                                                                \
   if (!(exp)) {                                                                                   \
     std::cerr << msg << std::endl;                                                                \
@@ -53,3 +54,5 @@ struct PxArticulationWrapper : public IArticulationBase {
   virtual std::vector<physx::PxReal> get_qf() const override;
   virtual void set_qf(const std::vector<physx::PxReal> &v) override;
 };
+
+}

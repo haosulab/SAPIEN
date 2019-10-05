@@ -20,6 +20,7 @@
 
 #include <random>
 
+using namespace sapien;
 using namespace physx;
 
 int main() {
@@ -31,7 +32,7 @@ int main() {
   renderer.cam.setUp({0, 0, 1});
   renderer.cam.rotateYawPitch(0, -0.3);
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 200.f);
   auto builder = sim.createArticulationBuilder();

@@ -5,6 +5,7 @@
 #include <memory>
 #include <optifuser.h>
 
+namespace sapien {
 namespace Renderer {
 
 class OptifuserRenderer : public IPhysxRenderer {
@@ -43,3 +44,5 @@ public:
   virtual void updateCamera(uint32_t uniqueId, physx::PxTransform const &transform) override;
 };
 } // namespace Renderer
+
+}

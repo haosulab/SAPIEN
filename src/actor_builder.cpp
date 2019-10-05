@@ -5,9 +5,10 @@
 #include <sstream>
 #include <vector>
 
+namespace sapien {
 using namespace MeshUtil;
 
-void PxActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTransform &pose,
+void ActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTransform &pose,
                                            const PxVec3 &scale, PxMaterial *material,
                                            PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
@@ -24,7 +25,7 @@ void PxActorBuilder::addConvexShapeFromObj(const std::string &filename, const Px
   mCount++;
 }
 
-void PxActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMaterial *material,
+void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMaterial *material,
                                  PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxShape *shape = mPhysicsSDK->createShape(PxBoxGeometry(size), *material, true);
@@ -34,7 +35,7 @@ void PxActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, Px
   mCount++;
 }
 
-void PxActorBuilder::addCylinderShape(const PxTransform &pose, PxReal radius, PxReal length,
+void ActorBuilder::addCylinderShape(const PxTransform &pose, PxReal radius, PxReal length,
                                       PxMaterial *material, PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
   std::cerr
@@ -47,7 +48,7 @@ void PxActorBuilder::addCylinderShape(const PxTransform &pose, PxReal radius, Px
   mCount++;
 }
 
-void PxActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMaterial *material,
+void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMaterial *material,
                                     PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxShape *shape = mPhysicsSDK->createShape(PxSphereGeometry(radius), *material, true);
@@ -57,7 +58,7 @@ void PxActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMa
   mCount++;
 }
 
-void PxActorBuilder::addPrimitiveShape(physx::PxGeometryType::Enum type, physx::PxTransform pose,
+void ActorBuilder::addPrimitiveShape(physx::PxGeometryType::Enum type, physx::PxTransform pose,
                                        physx::PxVec3 scale, PxMaterial *material, PxReal density) {
   if (!material) {
     material = mSimulation->mDefaultMaterial;
@@ -86,7 +87,7 @@ void PxActorBuilder::addPrimitiveShape(physx::PxGeometryType::Enum type, physx::
   }
 }
 
-physx_id_t PxActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size) {
+physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eBOX,
@@ -95,7 +96,7 @@ physx_id_t PxActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &s
   return newId;
 }
 
-physx_id_t PxActorBuilder::addCylinderVisual(const PxTransform &pose, PxReal radius, PxReal length) {
+physx_id_t ActorBuilder::addCylinderVisual(const PxTransform &pose, PxReal radius, PxReal length) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE,
@@ -104,7 +105,7 @@ physx_id_t PxActorBuilder::addCylinderVisual(const PxTransform &pose, PxReal rad
   return newId;
 }
 
-physx_id_t PxActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius) {
+physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius});
@@ -112,7 +113,7 @@ physx_id_t PxActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radiu
   return newId;
 }
 
-physx_id_t PxActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
+physx_id_t ActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
                                   const PxVec3 &scale) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
@@ -120,7 +121,7 @@ physx_id_t PxActorBuilder::addObjVisual(const std::string &filename, const PxTra
   mSimulation->mRenderId2InitialPose[newId] = pose;
   return newId;
 }
-PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToScene) {
+PxRigidActor *ActorBuilder::build(bool isStatic, bool isKinematic, bool addToScene) {
   PxRigidActor *actor;
   if (isStatic) {
     actor = mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
@@ -148,3 +149,4 @@ PxRigidActor *PxActorBuilder::build(bool isStatic, bool isKinematic, bool addToS
   }
   return actor;
 }
+} // namespace sapien

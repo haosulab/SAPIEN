@@ -23,11 +23,13 @@
 using namespace physx;
 namespace fs = std::experimental::filesystem;
 
+using namespace sapien;
+
 void test1() {
   Renderer::OptifuserRenderer renderer;
   renderer.init();
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 60.f);
 
@@ -53,7 +55,7 @@ void test2() {
   Renderer::OptifuserRenderer renderer;
   renderer.init();
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 60.f);
 
@@ -115,7 +117,7 @@ void test3() {
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 
@@ -168,7 +170,7 @@ void test4() {
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 

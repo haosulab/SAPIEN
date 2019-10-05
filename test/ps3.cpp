@@ -21,6 +21,7 @@
 #include "input/ps3.hpp"
 #include <random>
 
+using namespace sapien;
 using namespace PS3;
 using namespace physx;
 namespace fs = std::experimental::filesystem;
@@ -47,7 +48,7 @@ void test() {
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 

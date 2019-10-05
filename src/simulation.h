@@ -18,9 +18,10 @@
 #include <memory>
 #include <vector>
 
+namespace sapien {
 using namespace physx;
 
-class PxSimulation {
+class Simulation {
 public:
   std::vector<PxRigidActor *> mRigidActors;
   PxPhysics *mPhysicsSDK = nullptr;
@@ -51,8 +52,8 @@ public:
   std::vector<std::unique_ptr<class ControllableArticulationWrapper>> mControllableArticulationWrapper;
 
 public:
-  PxSimulation();
-  ~PxSimulation();
+  Simulation();
+  ~Simulation();
 
   inline void setTimestep(PxReal step) { mTimestep = step; };
   inline PxReal getTimestep() const { return mTimestep; };
@@ -60,8 +61,8 @@ public:
   void setRenderer(Renderer::IPhysxRenderer *renderer);
   inline Renderer::IPhysxRenderer *getRenderer() { return mRenderer; }
 
-  std::unique_ptr<class PxActorBuilder> createActorBuilder();
-  std::unique_ptr<class PxArticulationBuilder> createArticulationBuilder();
+  std::unique_ptr<class ActorBuilder> createActorBuilder();
+  std::unique_ptr<class ArticulationBuilder> createArticulationBuilder();
 
   physx_id_t addMountedCamera(std::string const &name, PxRigidActor *actor,
                               PxTransform const &pose, uint32_t width, uint32_t height, float fovx,
@@ -74,3 +75,5 @@ public:
   void updateRenderer();
   PxRigidStatic *addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr);
 };
+
+}

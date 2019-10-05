@@ -1,7 +1,8 @@
 #include "joint_system.h"
 #include "simulation.h"
 
-PxJointSystem::PxJointSystem(PxSimulation *simulation) : mSimulation(simulation) {}
+namespace sapien {
+PxJointSystem::PxJointSystem(Simulation *simulation) : mSimulation(simulation) {}
 
 void PxJointSystem::addLink(PxRigidActor *newLink, const std::string &name, bool addToScene) {
   if (!name.empty()) {
@@ -152,4 +153,6 @@ std::vector<physx::PxReal> PxJointSystem::get_qf() const {
 
 void PxJointSystem::set_qf(const std::vector<physx::PxReal> &v) {
   std::cerr << "Setting qf to Joint System is not supported" << std::endl;
+}
+
 }

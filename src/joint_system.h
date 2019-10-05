@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+namespace sapien {
 using namespace physx;
 
 class PxJointSystem : public IArticulationBase {
@@ -18,10 +19,10 @@ class PxJointSystem : public IArticulationBase {
   std::vector<std::string> jointNames;
   std::vector<PxU32> jointDofs;
 
-  class PxSimulation *mSimulation = nullptr;
+  class Simulation *mSimulation = nullptr;
 
 public:
-  PxJointSystem(PxSimulation *simulation);
+  PxJointSystem(Simulation *simulation);
 
   void addLink(PxRigidActor *newLink, const std::string &name = "", bool addToLink = true);
   
@@ -60,3 +61,5 @@ public:
   virtual std::vector<physx::PxReal> get_qf() const override;
   virtual void set_qf(const std::vector<physx::PxReal> &v) override;
 };
+
+}

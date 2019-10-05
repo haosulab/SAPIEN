@@ -4,6 +4,7 @@
 #include <memory>
 #include <optifuser.h>
 
+namespace sapien {
 namespace Renderer {
 class MountedCamera : public Optifuser::CameraSpec, public ICamera {
 public:
@@ -32,3 +33,5 @@ public:
   virtual void setSensorPose(const SensorPose &pose) override;
 };
 } // namespace Renderer
+
+}

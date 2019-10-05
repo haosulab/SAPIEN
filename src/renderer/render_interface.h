@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+namespace sapien {
 namespace Renderer {
 
 struct JointGuiInfo {
@@ -38,6 +39,7 @@ class ISensor {
 public:
   virtual SensorPose getSensorPose() const = 0;
   virtual void setSensorPose(const SensorPose &pose) = 0;
+  virtual ~ISensor() {}
 };
 
 class ICamera : public ISensor {
@@ -56,11 +58,12 @@ public:
 };
 
 class ICameraManager {
- public:
+public:
   virtual std::vector<ICamera *> getCameras() = 0;
   virtual void addCamera(uint32_t uniqueId, std::string const &name, uint32_t width,
                          uint32_t height, float fovx, float fovy, float near, float far) = 0;
   virtual void updateCamera(uint32_t uniqueId, physx::PxTransform const &transform) = 0;
+  virtual ~ICameraManager() {}
 };
 
 class IPhysxRenderer : public ICameraManager {
@@ -82,3 +85,5 @@ public:
 };
 
 } // namespace Renderer
+
+} // namespace sapien

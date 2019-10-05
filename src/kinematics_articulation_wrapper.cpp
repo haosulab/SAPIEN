@@ -7,6 +7,7 @@
 #include <iostream>
 #include <limits>
 
+namespace sapien {
 // Kinematics Articulation Wrapper
 KJoint *PxKinematicsArticulationWrapper::createJoint(const JointType &type, KJoint *parent,
                                                      PxRigidDynamic *link,
@@ -170,4 +171,6 @@ void PxKinematicsArticulationWrapper::update(PxReal timestep) {
 }
 EArticulationType PxKinematicsArticulationWrapper::get_articulation_type() const {
   return EArticulationType::KINEMATIC_ARTICULATION;
+}
+
 }

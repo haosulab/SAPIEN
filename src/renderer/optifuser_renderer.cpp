@@ -5,6 +5,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+namespace sapien {
 namespace Renderer {
 
 enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION };
@@ -315,3 +316,5 @@ void OptifuserRenderer::updateCamera(uint32_t uniqueId, physx::PxTransform const
                                          transform.q.z};
 }
 } // namespace Renderer
+
+}

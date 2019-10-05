@@ -5,6 +5,9 @@
 #include "kinematics_joint.h"
 #include <assert.h>
 #include <iostream>
+
+
+namespace sapien {
 using namespace physx;
 
 // KJoint
@@ -124,4 +127,6 @@ void FixedKJoint::driveQpos(const std::vector<PxReal> &qpos) {
   }
   PxTransform targetPose = passThroughKinematicsDrive(PxTransform(PxIdentity));
   childLink->setKinematicTarget(targetPose);
+}
+
 }

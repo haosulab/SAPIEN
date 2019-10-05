@@ -11,6 +11,7 @@
 #include <map>
 #include <tinyxml2.h>
 
+namespace sapien {
 namespace URDF {
 
 using namespace tinyxml2;
@@ -51,7 +52,7 @@ static std::string getAbsPath(const std::string &urdfPath, const std::string &fi
   return fs::absolute(path).remove_filename().string() + filePath;
 }
 
-URDFLoader::URDFLoader(PxSimulation &simulation)
+URDFLoader::URDFLoader(Simulation &simulation)
     : mSimulation(simulation), fixLoadedObject(true) {}
 
 struct LinkTreeNode {
@@ -142,7 +143,7 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
   }
 
   std::map<LinkTreeNode *, physx::PxArticulationLink *> treeNode2pLink;
-  PxArticulationBuilder builder(&mSimulation);
+  ArticulationBuilder builder(&mSimulation);
   stack = {root};
   while (!stack.empty()) {
     LinkTreeNode *current = stack.back();
@@ -438,7 +439,7 @@ PxKinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &fi
     LinkTreeNode *current = stack.back();
     stack.pop_back();
 
-    PxActorBuilder actorBuilder(&mSimulation);
+    ActorBuilder actorBuilder(&mSimulation);
     // visual
     for (auto &visual : current->link->visual_array) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
@@ -698,8 +699,8 @@ PxJointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
   // std::map<LinkTreeNode *, physx::PxRigidActor *> treeNode2pLink;
   // TODO: fix
 
-  std::vector<std::unique_ptr<PxActorBuilder>> builders;
-  std::map<LinkTreeNode *, PxActorBuilder *> treeNode2Builder;
+  std::vector<std::unique_ptr<ActorBuilder>> builders;
+  std::map<LinkTreeNode *, ActorBuilder *> treeNode2Builder;
   std::map<LinkTreeNode *, PxTransform> treeNode2Pose;
   std::map<LinkTreeNode *, PxTransform> treeNode2ActorPose;
   std::vector<physx_id_t> renderIds;
@@ -865,3 +866,5 @@ PxJointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
 }
 
 } // namespace URDF
+
+}
