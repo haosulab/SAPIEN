@@ -66,6 +66,15 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     mScene->addObject(std::move(obj));
     break;
   }
+  case physx::PxGeometryType::eCAPSULE: {
+    auto obj = Optifuser::NewCapsule(scale.x, scale.y);
+    obj->setSegmentId(uniqueId);
+    obj->scale = {1, 1, 1};
+    obj->material.kd = {1, 1, 1};
+    mObjectRegistry[uniqueId] = {obj.get()};
+    mScene->addObject(std::move(obj));
+    break;
+  }
   default:
     std::cerr << "This shape is not Implemented" << std::endl;
     break;
@@ -179,7 +188,7 @@ void OptifuserRenderer::render() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    ImGui::SetNextWindowPos(ImVec2(0,0));
+    ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mContext->getHeight()));
 
     ImGui::Begin("Render Options");
@@ -317,4 +326,4 @@ void OptifuserRenderer::updateCamera(uint32_t uniqueId, physx::PxTransform const
 }
 } // namespace Renderer
 
-}
+} // namespace sapien
