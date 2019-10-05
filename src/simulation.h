@@ -48,7 +48,7 @@ public:
   std::vector<std::unique_ptr<struct ArticulationWrapper>> mDynamicArticulationWrappers;
   std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>>
       mKinematicArticulationWrappers;
-  std::vector<std::unique_ptr<class PxJointSystem>> mObjectArticulationWrappers;
+  std::vector<std::unique_ptr<class JointSystem>> mObjectArticulationWrappers;
   std::vector<std::unique_ptr<class ControllableArticulationWrapper>> mControllableArticulationWrapper;
 
 public:

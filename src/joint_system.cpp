@@ -2,9 +2,9 @@
 #include "simulation.h"
 
 namespace sapien {
-PxJointSystem::PxJointSystem(Simulation *simulation) : mSimulation(simulation) {}
+JointSystem::JointSystem(Simulation *simulation) : mSimulation(simulation) {}
 
-void PxJointSystem::addLink(PxRigidActor *newLink, const std::string &name, bool addToScene) {
+void JointSystem::addLink(PxRigidActor *newLink, const std::string &name, bool addToScene) {
   if (!name.empty()) {
     if (namedLinks.find(name) != namedLinks.end()) {
       std::cerr << "Duplicated link name" << std::endl;
@@ -19,7 +19,7 @@ void PxJointSystem::addLink(PxRigidActor *newLink, const std::string &name, bool
   }
 }
 
-void PxJointSystem::addJoint(PxJoint *newJoint, const std::string &name, bool enableCollision) {
+void JointSystem::addJoint(PxJoint *newJoint, const std::string &name, bool enableCollision) {
   PxRigidActor *actor0;
   PxRigidActor *actor1;
   newJoint->setConstraintFlag(PxConstraintFlag::eCOLLISION_ENABLED, enableCollision);
@@ -48,21 +48,21 @@ void PxJointSystem::addJoint(PxJoint *newJoint, const std::string &name, bool en
   }
 }
 
-PxRigidActor *PxJointSystem::getLink(PxU32 index) { return links[index]; }
+PxRigidActor *JointSystem::getLink(PxU32 index) { return links[index]; }
 
-PxRigidActor *PxJointSystem::getLink(const std::string &name) { return namedLinks[name]; }
+PxRigidActor *JointSystem::getLink(const std::string &name) { return namedLinks[name]; }
 
-PxU32 PxJointSystem::getNbLinks() { return links.size(); }
+PxU32 JointSystem::getNbLinks() { return links.size(); }
 
-PxJoint *PxJointSystem::getJoint(PxU32 index) { return joints[index]; }
+PxJoint *JointSystem::getJoint(PxU32 index) { return joints[index]; }
 
-PxJoint *PxJointSystem::getJoint(const std::string &name) { return namedJoints[name]; }
+PxJoint *JointSystem::getJoint(const std::string &name) { return namedJoints[name]; }
 
-PxU32 PxJointSystem::getNbJoints() { return joints.size(); }
+PxU32 JointSystem::getNbJoints() { return joints.size(); }
 
-EArticulationType PxJointSystem::get_articulation_type() const { return OBJECT_ARTICULATION; }
+EArticulationType JointSystem::get_articulation_type() const { return OBJECT_ARTICULATION; }
 
-uint32_t PxJointSystem::dof() const {
+uint32_t JointSystem::dof() const {
   PxU32 dof = 0;
   for (auto each : jointDofs) {
     dof += each;
@@ -70,11 +70,11 @@ uint32_t PxJointSystem::dof() const {
   return dof;
 }
 
-std::vector<std::string> PxJointSystem::get_joint_names() const { return jointNames; }
+std::vector<std::string> JointSystem::get_joint_names() const { return jointNames; }
 
-std::vector<uint32_t> PxJointSystem::get_joint_dofs() const { return jointDofs; }
+std::vector<uint32_t> JointSystem::get_joint_dofs() const { return jointDofs; }
 
-std::vector<std::tuple<physx::PxReal, physx::PxReal>> PxJointSystem::get_joint_limits() const {
+std::vector<std::tuple<physx::PxReal, physx::PxReal>> JointSystem::get_joint_limits() const {
   std::vector<std::tuple<physx::PxReal, physx::PxReal>> limits;
   for (auto joint : joints) {
     switch (joint->getConcreteType()) {
@@ -94,7 +94,7 @@ std::vector<std::tuple<physx::PxReal, physx::PxReal>> PxJointSystem::get_joint_l
   return limits;
 }
 
-std::vector<physx::PxReal> PxJointSystem::get_qpos() const {
+std::vector<physx::PxReal> JointSystem::get_qpos() const {
   std::vector<PxReal> positions;
   for (auto joint : joints) {
     switch (joint->getConcreteType()) {
@@ -111,11 +111,11 @@ std::vector<physx::PxReal> PxJointSystem::get_qpos() const {
   }
   return positions;
 }
-void PxJointSystem::set_qpos(const std::vector<physx::PxReal> &v) {
+void JointSystem::set_qpos(const std::vector<physx::PxReal> &v) {
   std::cerr << "Setting qpos to object joint is not supported" << std::endl;
 }
 
-std::vector<physx::PxReal> PxJointSystem::get_qvel() const {
+std::vector<physx::PxReal> JointSystem::get_qvel() const {
   std::vector<PxReal> velocities;
   for (auto joint : joints) {
     switch (joint->getConcreteType()) {
@@ -133,25 +133,25 @@ std::vector<physx::PxReal> PxJointSystem::get_qvel() const {
   return velocities;
 }
 
-void PxJointSystem::set_qvel(const std::vector<physx::PxReal> &v) {
+void JointSystem::set_qvel(const std::vector<physx::PxReal> &v) {
   std::cerr << "Setting qvel to Joint System is not supported" << std::endl;
 }
 
-std::vector<physx::PxReal> PxJointSystem::get_qacc() const {
+std::vector<physx::PxReal> JointSystem::get_qacc() const {
   std::cerr << "Getting qacc of Joint System is not supported" << std::endl;
   return std::vector<physx::PxReal>(dof(), 0.f);
 }
 
-void PxJointSystem::set_qacc(const std::vector<physx::PxReal> &v) {
+void JointSystem::set_qacc(const std::vector<physx::PxReal> &v) {
   std::cerr << "Setting qacc to Joint System is not supported" << std::endl;
 }
 
-std::vector<physx::PxReal> PxJointSystem::get_qf() const {
+std::vector<physx::PxReal> JointSystem::get_qf() const {
   std::cerr << "Setting qacc to Joint System is not supported" << std::endl;
   return std::vector<physx::PxReal>(dof(), 0.f);
 }
 
-void PxJointSystem::set_qf(const std::vector<physx::PxReal> &v) {
+void JointSystem::set_qf(const std::vector<physx::PxReal> &v) {
   std::cerr << "Setting qf to Joint System is not supported" << std::endl;
 }
 

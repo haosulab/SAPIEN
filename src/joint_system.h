@@ -11,7 +11,7 @@
 namespace sapien {
 using namespace physx;
 
-class PxJointSystem : public IArticulationBase {
+class JointSystem : public IArticulationBase {
   std::vector<PxJoint *> joints;
   std::map<std::string, PxJoint *> namedJoints;
   std::vector<PxRigidActor *> links;
@@ -22,7 +22,7 @@ class PxJointSystem : public IArticulationBase {
   class Simulation *mSimulation = nullptr;
 
 public:
-  PxJointSystem(Simulation *simulation);
+  JointSystem(Simulation *simulation);
 
   void addLink(PxRigidActor *newLink, const std::string &name = "", bool addToLink = true);
   

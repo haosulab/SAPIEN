@@ -616,7 +616,7 @@ PxKinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &fi
   return wrapperPtr;
 }
 
-PxJointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
+JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;
@@ -704,7 +704,7 @@ PxJointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
   std::map<LinkTreeNode *, PxTransform> treeNode2Pose;
   std::map<LinkTreeNode *, PxTransform> treeNode2ActorPose;
   std::vector<physx_id_t> renderIds;
-  auto newObject = std::make_unique<PxJointSystem>(&mSimulation);
+  auto newObject = std::make_unique<JointSystem>(&mSimulation);
 
   stack = {root};
   while (!stack.empty()) {
