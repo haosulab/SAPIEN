@@ -4,16 +4,23 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "articulation_wrapper.h"
+#include "joint_system.h"
 #include "kinematics_articulation_wrapper.h"
 #include "optifuser_renderer.h"
 #include "render_interface.h"
 #include "simulation.h"
 #include "urdf_loader.h"
-#include "joint_system.h"
 #include <vector>
 
 using namespace sapien;
 namespace py = pybind11;
+
+py::array_t<float> mat42array(glm::mat4 const &mat) {
+  float arr[] = {mat[0][0], mat[1][0], mat[2][0], mat[3][0], mat[0][1], mat[1][1],
+                 mat[2][1], mat[3][1], mat[0][2], mat[1][2], mat[2][2], mat[3][2],
+                 mat[0][3], mat[1][3], mat[2][3], mat[3][3]};
+  return py::array_t<float>({4, 4}, arr);
+}
 
 class PyISensor : public Renderer::ISensor {
 public:
@@ -52,9 +59,7 @@ public:
   EArticulationType get_articulation_type() const override {
     PYBIND11_OVERLOAD_PURE(EArticulationType, IArticulationBase, get_articulation_type);
   }
-  uint32_t dof() const override {
-    PYBIND11_OVERLOAD_PURE(uint32_t, IArticulationBase, dof);
-  }
+  uint32_t dof() const override { PYBIND11_OVERLOAD_PURE(uint32_t, IArticulationBase, dof); }
 
   std::vector<std::string> get_joint_names() const override {
     PYBIND11_OVERLOAD_PURE(std::vector<std::string>, IArticulationBase, get_joint_names);
@@ -64,7 +69,9 @@ public:
   }
 
   std::vector<std::tuple<physx::PxReal, physx::PxReal>> get_joint_limits() const override {
-    PYBIND11_OVERLOAD_PURE_NAME(PYBIND11_TYPE(std::vector<std::tuple<physx::PxReal, physx::PxReal>>), PYBIND11_TYPE(IArticulationBase), "get_joint_limits", get_joint_limits);
+    PYBIND11_OVERLOAD_PURE_NAME(
+        PYBIND11_TYPE(std::vector<std::tuple<physx::PxReal, physx::PxReal>>),
+        PYBIND11_TYPE(IArticulationBase), "get_joint_limits", get_joint_limits);
   }
 
   std::vector<physx::PxReal> get_qpos() const override {
@@ -96,7 +103,6 @@ public:
   }
 };
 
-
 PYBIND11_MODULE(sapyen, m) {
 
   py::class_<Simulation>(m, "Simulation")
@@ -109,12 +115,16 @@ PYBIND11_MODULE(sapyen, m) {
       .def("createArticulationBuilder", &Simulation::createArticulationBuilder)
       .def("step", &Simulation::step)
       .def("updateRenderer", &Simulation::updateRenderer)
-      .def("addGround", &Simulation::addGround, py::arg("altitude"), py::arg("render") = true, py::arg("material") = nullptr);
+      .def("addGround", &Simulation::addGround, py::arg("altitude"), py::arg("render") = true,
+           py::arg("material") = nullptr);
 
   py::class_<PxRigidActor, std::unique_ptr<PxRigidActor, py::nodelete>>(m, "PxRigidActor");
-  py::class_<PxRigidStatic, PxRigidActor, std::unique_ptr<PxRigidStatic, py::nodelete>>(m, "PxRigidStatic");
-  py::class_<PxRigidBody, PxRigidActor, std::unique_ptr<PxRigidBody, py::nodelete>>(m, "PxRigidBody");
-  py::class_<PxRigidDynamic, PxRigidBody, std::unique_ptr<PxRigidDynamic, py::nodelete>>(m, "PxRigidDynamic");
+  py::class_<PxRigidStatic, PxRigidActor, std::unique_ptr<PxRigidStatic, py::nodelete>>(
+      m, "PxRigidStatic");
+  py::class_<PxRigidBody, PxRigidActor, std::unique_ptr<PxRigidBody, py::nodelete>>(m,
+                                                                                    "PxRigidBody");
+  py::class_<PxRigidDynamic, PxRigidBody, std::unique_ptr<PxRigidDynamic, py::nodelete>>(
+      m, "PxRigidDynamic");
 
   py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial");
 
@@ -144,36 +154,25 @@ PYBIND11_MODULE(sapyen, m) {
       .def("render", &Renderer::OptifuserRenderer::render)
       .def("destroy", &Renderer::OptifuserRenderer::destroy)
       .def_readwrite("cam", &Renderer::OptifuserRenderer::cam);
-  // py::class_<glm::vec3>(m, "vec3", py::buffer_protocol())
-  //     .def_buffer([](glm::vec3 &v) -> py::array {
-  //         auto buffer = py::buffer_info (
-  //             &v,
-  //             sizeof(float),
-  //             py::format_descriptor<float>::format(),
-  //             1,
-  //             {3},
-  //             {sizeof(float)}
-  //         );
-  //         auto toReturn = py::array(buffer);
-  //         return toReturn;
-  //     });
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
-      .def(py::init<>())
+      .def(py::init([]() { return new Optifuser::CameraSpec(); }))
       .def_readwrite("name", &Optifuser::CameraSpec::name)
-      .def_property(
+      .def("set_position",
+           [](Optifuser::CameraSpec &c, py::array_t<float> arr) {
+             c.position = {arr.at(0), arr.at(1), arr.at(2)};
+           })
+      .def("set_rotation",
+           [](Optifuser::CameraSpec &c, py::array_t<float> arr) {
+             c.rotation = {arr.at(0), arr.at(1), arr.at(2), arr.at(3)};
+           })
+      .def_property_readonly(
           "position",
-          [](Optifuser::CameraSpec &c) { return py::array_t<float>(3, (float *)(&c.position)); },
-          [](Optifuser::CameraSpec &c, py::array_t<float> arr) {
-            c.position = {arr.at(0), arr.at(1), arr.at(2)};
+          [](Optifuser::CameraSpec &c) { return py::array_t<float>(3, (float *)(&c.position)); })
+      .def_property_readonly(
+          "rotation",
+          [](Optifuser::CameraSpec &c) {
+            return py::array_t<float>({c.rotation.w, c.rotation.x, c.rotation.y, c.rotation.z});
           })
-      // TODO: fields of quaternion not wrapped yet
-      .def_property("rotation",
-                    [](Optifuser::CameraSpec &c) {
-                      std::cerr << "rotation getter not wrapped yet" << std::endl;
-                    },
-                    [](Optifuser::CameraSpec &c) {
-                      std::cerr << "rotation setter not wrapped yet" << std::endl;
-                    })
       .def_readwrite("near", &Optifuser::CameraSpec::near)
       .def_readwrite("far", &Optifuser::CameraSpec::far)
       .def_readwrite("fovy", &Optifuser::CameraSpec::fovy)
@@ -182,18 +181,9 @@ PYBIND11_MODULE(sapyen, m) {
            [](Optifuser::CameraSpec &c, py::array_t<float> dir, py::array_t<float> up) {
              c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
            })
-      // TODO: function involving matrix not wrapped yet
-      .def("getModelMat",
-           [](Optifuser::CameraSpec &c) {
-             std::cerr << "getModelMat not wrapped yet" << std::endl;
-           })
+      .def("getModelMat", [](Optifuser::CameraSpec &c) { return mat42array(c.getModelMat()); })
       .def("getProjectionMat",
-           [](Optifuser::CameraSpec &c) {
-             std::cerr << "getProjectionMat not wrapped yet" << std::endl;
-           })
-      .def("perspective", [](Optifuser::CameraSpec &c) {
-        std::cerr << "perspective not wrapped yet" << std::endl;
-      });
+           [](Optifuser::CameraSpec &c) { return mat42array(c.getProjectionMat()); });
 
   py::class_<Optifuser::FPSCameraSpec, Optifuser::CameraSpec>(m, "FPSCameraSpec")
       .def(py::init<>())
@@ -209,52 +199,65 @@ PYBIND11_MODULE(sapyen, m) {
            })
       .def("rotateYawPitch", &Optifuser::FPSCameraSpec::rotateYawPitch)
       .def("moveForwardRight", &Optifuser::FPSCameraSpec::moveForwardRight)
-      // TODO: function involving quarternion not wrapped yet
       .def("getRotation0", [](Optifuser::FPSCameraSpec &c) {
-        std::cerr << "getRotation0 not wrapped yet" << std::endl;
+        glm::quat q = c.getRotation0();
+        return py::array_t<float>({q.w, q.x, q.y, q.z});
       });
 
   py::class_<IArticulationBase, PyIArticulationBase> articulationBase(m, "IArticulationBase");
-  articulationBase.def(py::init<>())
-    .def("get_articulation_type", &IArticulationBase::get_articulation_type)
-    .def("dof", &IArticulationBase::dof)
-    .def("get_joint_names", &IArticulationBase::get_joint_names)
-    .def("get_joint_dofs", [](IArticulationBase& a) {
-      auto dofs = a.get_joint_dofs();
-      return py::array_t<uint32_t> (dofs.size(), dofs.data());
-    })
-    .def("get_joint_limits", [](IArticulationBase& a) {
-      auto limits = a.get_joint_limits();
-      return py::array_t<PxReal> ({(int)limits.size(), 2}, {sizeof(std::tuple<PxReal, PxReal>), sizeof(PxReal)}, (PxReal *)limits.data());
-    })
-    .def("get_qpos", [](IArticulationBase& a) {
-      auto qpos = a.get_qpos();
-      return py::array_t<PxReal> (qpos.size(), qpos.data());
-    })
-    .def("set_qpos", [](IArticulationBase& a, py::array_t<float> arr) {
-      a.set_qpos(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-    })
-    .def("get_qvel", [](IArticulationBase& a) {
-      auto qvel = a.get_qvel();
-      return py::array_t<PxReal> (qvel.size(), qvel.data());
-    })
-    .def("set_qvel", [](IArticulationBase& a, py::array_t<float> arr) {
-      a.set_qvel(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-    })
-    .def("get_qacc", [](IArticulationBase& a) {
-      auto qacc = a.get_qacc();
-      return py::array_t<PxReal> (qacc.size(), qacc.data());
-    })
-    .def("set_qacc", [](IArticulationBase& a, py::array_t<float> arr) {
-      a.set_qacc(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-    })
-    .def("get_qf", [](IArticulationBase& a) {
-      auto qf = a.get_qf();
-      return py::array_t<PxReal> (qf.size(), qf.data());
-    })
-    .def("set_qf", [](IArticulationBase& a, py::array_t<float> arr) {
-      a.set_qf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-    });
+  articulationBase
+      // NOTE: do not expose constructor
+      // .def(py::init<>())
+      .def("get_articulation_type", &IArticulationBase::get_articulation_type)
+      .def("dof", &IArticulationBase::dof)
+      .def("get_joint_names", &IArticulationBase::get_joint_names)
+      .def("get_joint_dofs",
+           [](IArticulationBase &a) {
+             auto dofs = a.get_joint_dofs();
+             return py::array_t<uint32_t>(dofs.size(), dofs.data());
+           })
+      .def("get_joint_limits",
+           [](IArticulationBase &a) {
+             auto limits = a.get_joint_limits();
+             return py::array_t<PxReal>({(int)limits.size(), 2},
+                                        {sizeof(std::tuple<PxReal, PxReal>), sizeof(PxReal)},
+                                        (PxReal *)limits.data());
+           })
+      .def("get_qpos",
+           [](IArticulationBase &a) {
+             auto qpos = a.get_qpos();
+             return py::array_t<PxReal>(qpos.size(), qpos.data());
+           })
+      .def("set_qpos",
+           [](IArticulationBase &a, py::array_t<float> arr) {
+             a.set_qpos(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           })
+      .def("get_qvel",
+           [](IArticulationBase &a) {
+             auto qvel = a.get_qvel();
+             return py::array_t<PxReal>(qvel.size(), qvel.data());
+           })
+      .def("set_qvel",
+           [](IArticulationBase &a, py::array_t<float> arr) {
+             a.set_qvel(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           })
+      .def("get_qacc",
+           [](IArticulationBase &a) {
+             auto qacc = a.get_qacc();
+             return py::array_t<PxReal>(qacc.size(), qacc.data());
+           })
+      .def("set_qacc",
+           [](IArticulationBase &a, py::array_t<float> arr) {
+             a.set_qacc(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           })
+      .def("get_qf",
+           [](IArticulationBase &a) {
+             auto qf = a.get_qf();
+             return py::array_t<PxReal>(qf.size(), qf.data());
+           })
+      .def("set_qf", [](IArticulationBase &a, py::array_t<float> arr) {
+        a.set_qf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+      });
 
   py::class_<IArticulationDrivable, IArticulationBase>(m, "IArticulationDrivable");
   py::enum_<EArticulationType>(articulationBase, "ArticulationType")
@@ -262,15 +265,34 @@ PYBIND11_MODULE(sapyen, m) {
       .value("KINEMATIC_ARTICULATION", EArticulationType::KINEMATIC_ARTICULATION)
       .value("OBJECT_ARTICULATION", EArticulationType::OBJECT_ARTICULATION);
   py::class_<ArticulationWrapper, IArticulationBase>(m, "ArticulationWrapper")
-    .def(py::init<>())
-    .def("updateCache", &ArticulationWrapper::updateCache)
-    .def("updateArticulation", &ArticulationWrapper::updateArticulation);
+      // NOTE: do not expose constructor
+      // .def(py::init<>())
+      .def("updateCache", &ArticulationWrapper::updateCache)
+      .def("updateArticulation", &ArticulationWrapper::updateArticulation);
 
-  py::class_<PxJointSystem, IArticulationBase>(m, "JointSystem");
+  py::class_<JointSystem, IArticulationBase>(m, "JointSystem");
 
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
-    .def(py::init<Simulation &>())
-    .def_readwrite("fixLoadedObject", &URDF::URDFLoader::fixLoadedObject)
-    .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference);
-}
+      // NOTE: do not expose constructor
+      // .def(py::init<Simulation &>())
+      .def_readwrite("fixLoadedObject", &URDF::URDFLoader::fixLoadedObject)
+      .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference);
 
+  py::class_<PxTransform>(m, "PxTransform")
+      .def(py::init([]() {
+        return new PxTransform({0, 0, 0}, {0, 0, 0, 1});
+      }))
+      .def_property_readonly(
+          "p", [](PxTransform &t) { return py::array_t<PxReal>(3, (PxReal *)(&t.p)); })
+      .def_property_readonly("q",
+                             [](PxTransform &t) {
+                               return py::array_t<PxReal>({t.q.w, t.q.x, t.q.y, t.q.z});
+                             })
+      .def("set_p",
+           [](PxTransform &t, py::array_t<PxReal> arr) {
+             t.p = {arr.at(0), arr.at(1), arr.at(2)};
+           })
+      .def("set_q", [](PxTransform &t, py::array_t<PxReal> arr) {
+        t.q = {arr.at(1), arr.at(2), arr.at(3), arr.at(0)}; // NOTE: wxyz to xyzw
+      });
+}
