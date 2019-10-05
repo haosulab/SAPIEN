@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 
+namespace sapien {
 namespace MeshUtil {
 namespace fs = std::experimental::filesystem;
 
@@ -244,3 +245,5 @@ PxConvexMesh *loadObjMesh(const std::string &filename, PxPhysics *physics, PxCoo
 }
 
 } // namespace MeshUtil
+
+}

@@ -12,7 +12,10 @@
 #include <optifuser.h>
 #include <vector>
 
+namespace sapien {
 using namespace physx;
 
 class Senario {
 };
+
+}

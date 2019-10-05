@@ -8,12 +8,11 @@
 
 namespace robot_interface {
 
-JointPubNode::JointPubNode(PxKinematicsArticulationWrapper *wrapper, double pubFrequency,
+JointPubNode::JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
                            double updateFrequency, const std::string &topicName,
                            std::shared_ptr<ros::NodeHandle> nh)
-    : jointName(wrapper->get_drive_joint_name()), queue(wrapper->get_queue()),
-      mNodeHandle(std::move(nh)), pubInterval(1 / pubFrequency),
-      updateInterval(1 / updateFrequency) {
+    : jointName(wrapper->get_drive_joint_name()), queue(wrapper->get_joint_state_queue()),
+      mNodeHandle(std::move(nh)), pubFrequency(pubFrequency), updateFrenquency(updateFrequency) {
 
   mPub = mNodeHandle->advertise<sensor_msgs::JointState>(topicName, 1);
   mStates.position.resize(jointName.size());
@@ -21,36 +20,34 @@ JointPubNode::JointPubNode(PxKinematicsArticulationWrapper *wrapper, double pubF
   jointNum = jointName.size();
 
   // Multi-thread spin
-  worker = std::thread(&JointPubNode::spin, this);
-
+  updateWorker = std::thread(&JointPubNode::updateJointStates, this);
+  pubWorker = std::thread(&JointPubNode::spin, this);
 }
 void JointPubNode::spin() {
-  ros::Time lastUpdate = ros::Time::now();
-  ros::Time lastPub = ros::Time::now();
-  ros::WallRate rate(1000);
-  while (!ros::isShuttingDown()) {
+  ros::WallRate rate(pubFrequency);
+
+  while (ros::ok() && !isCancel) {
+    mPub.publish(mStates);
     rate.sleep();
-    ros::Time current = ros::Time::now();
-    if (current.toSec() - lastUpdate.toSec() > updateInterval) {
-      // Update Buffer
-      updateJointStates();
-      lastUpdate = current;
-    }
-    if (current.toSec() - lastPub.toSec() > pubInterval) {
-      // Publish Topic
-      mStates.header.stamp = lastUpdate;
-      mPub.publish(mStates);
-      lastPub = current;
-    }
   }
 }
 void JointPubNode::updateJointStates() {
-  // TODO: deal with velocity and acceleration
-  if (queue->empty()) {
-    return;
+
+  ros::WallRate rate(updateFrenquency);
+  while (ros::ok() && !isCancel) {
+    if (!queue->empty()) {
+      std::vector<float> newJointAngles = queue->pop();
+      mStates.header.stamp = ros::Time::now();
+      mStates.position.assign(newJointAngles.begin(), newJointAngles.begin() + jointNum);
+      mStates.velocity.assign(newJointAngles.begin() + jointNum, newJointAngles.end());
+    }
+    rate.sleep();
   }
-  std::vector<float> newJointAngles = queue->pop();
-  mStates.position.assign(newJointAngles.begin(), newJointAngles.begin()+jointNum);
-  mStates.velocity.assign(newJointAngles.begin()+jointNum, newJointAngles.end());
+}
+void JointPubNode::cancel() {
+  isCancel = false;
+  pubWorker.join();
+  updateWorker.join();
+  ROS_INFO("Joint state publisher with topic %s canceled.", mPub.getTopic().c_str());
 }
 } // namespace robot_interface

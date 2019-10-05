@@ -23,11 +23,13 @@
 using namespace physx;
 namespace fs = std::experimental::filesystem;
 
+using namespace sapien;
+
 void test1() {
   Renderer::OptifuserRenderer renderer;
   renderer.init();
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 60.f);
 
@@ -53,7 +55,7 @@ void test2() {
   Renderer::OptifuserRenderer renderer;
   renderer.init();
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 60.f);
 
@@ -74,7 +76,7 @@ void test2() {
   joint->setParentPose({{0, 0, 0}, PxIdentity});
   joint->setChildPose({{0, 3, 0}, PxIdentity});
 
-  PxArticulationWrapper *articulationWrapper = builder->build(true);
+  ArticulationWrapper *articulationWrapper = builder->build(true);
   auto articulation = articulationWrapper->articulation;
   auto cache = articulationWrapper->cache;
 
@@ -95,7 +97,7 @@ void test2() {
   }
 }
 
-void reset(PxArticulationWrapper *wrapper) {
+void reset(ArticulationWrapper *wrapper) {
   wrapper->articulation->copyInternalStateToCache(*wrapper->cache, PxArticulationCache::eALL);
   for (size_t i = 0; i < wrapper->articulation->getDofs(); ++i) {
     wrapper->cache->jointPosition[i] = 0;
@@ -115,7 +117,7 @@ void test3() {
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 
@@ -168,7 +170,7 @@ void test4() {
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 

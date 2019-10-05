@@ -116,7 +116,7 @@ void robot_interface::GroupControllerNode::cancleCB(
   }
 }
 robot_interface::GroupControllerNode::GroupControllerNode(
-    PxKinematicsArticulationWrapper *wrapper, const std::string &groupName, float timestep,
+    ControllableArticulationWrapper *wrapper, const std::string &groupName, float timestep,
     std::shared_ptr<ros::NodeHandle> nh, const std::string &nameSpace, std::string controllerName)
     : groupName(groupName), timestep(timestep), mNodeHandle(nh), has_active_goal_(false) {
   // Gets all of the joints
@@ -170,16 +170,9 @@ robot_interface::GroupControllerNode::GroupControllerNode(
   }
 
   jointNum = mJointName.size();
-  // Multi-thread Spin
+
+  // Register position controller to the wrapper
   wrapper->add_position_controller(mJointName, queue.get());
-  worker = std::thread(&GroupControllerNode::spin, this);
-}
-void robot_interface::GroupControllerNode::spin() {
-  //  ROS_INFO("Controller start with group name: %s", groupName.c_str());
+  ROS_INFO("Controller start with group name: %s", groupName.c_str());
   mServer->start();
-  ros::spin();
-}
-ThreadSafeQueue *robot_interface::GroupControllerNode::getQueue() { return queue.get(); }
-const std::vector<std::string> &robot_interface::GroupControllerNode::getJointNames() {
-  return mJointName;
 }

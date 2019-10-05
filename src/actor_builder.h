@@ -6,10 +6,11 @@
 #include <memory>
 #include <vector>
 
+namespace sapien {
 using namespace physx;
 
-class PxActorBuilder {
-  PxSimulation *mSimulation = nullptr;
+class ActorBuilder {
+  Simulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
   PxCooking *mCooking = nullptr;
   Renderer::IPhysxRenderer *mRenderer = nullptr;
@@ -20,10 +21,10 @@ class PxActorBuilder {
   uint32_t mCount = 0;
 
 public:
-  PxActorBuilder(PxActorBuilder const &other) = delete;
-  const PxActorBuilder &operator=(PxActorBuilder const &other) = delete;
+  ActorBuilder(ActorBuilder const &other) = delete;
+  const ActorBuilder &operator=(ActorBuilder const &other) = delete;
 
-  explicit PxActorBuilder(PxSimulation *simulation)
+  explicit ActorBuilder(Simulation *simulation)
       : mSimulation(simulation), mPhysicsSDK(simulation->mPhysicsSDK),
         mCooking(simulation->mCooking), mRenderer(simulation->mRenderer) {}
 
@@ -63,3 +64,5 @@ public:
 
   PxRigidActor *build(bool isStatic = false, bool isKinematic = false, bool addToScene = true);
 };
+
+}

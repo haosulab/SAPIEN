@@ -1,5 +1,6 @@
 #include "filter_shader.h"
 
+namespace sapien {
 constexpr int max_groups = 128;
 
 int CollisionGroupManager::NewExclusiveGroup() {
@@ -53,4 +54,6 @@ void CollisionGroupManager::addGroupToData(PxFilterData &data, int group) {
       return;
   }
   return;
+}
+
 }

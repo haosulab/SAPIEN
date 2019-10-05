@@ -9,7 +9,8 @@
 #include <tinyxml2.h>
 #include <vector>
 
-struct PxArticulationWrapper;
+namespace sapien {
+struct ArticulationWrapper;
 namespace URDF {
 
   using namespace tinyxml2;
@@ -404,7 +405,7 @@ struct Limit : DomBase {
   LOAD_ATTR_BEGIN()
   LOAD_ATTR_OPTIONAL(physx::PxReal, lower, 0)
   LOAD_ATTR_OPTIONAL(physx::PxReal, upper, 0)
-  // TODO: check effort and velocity default value
+  // TODO: check effort and stepSize default value
   LOAD_ATTR_OPTIONAL(physx::PxReal, effort, 0)
   LOAD_ATTR_OPTIONAL(physx::PxReal, velocity, 0)
   LOAD_ATTR_END()
@@ -620,16 +621,17 @@ struct Robot : DomBase {
 
 class URDFLoader {
   std::unique_ptr<Robot> robot;
-  physx::PxArticulationReducedCoordinate *articulation;
-  class PxSimulation &mSimulation;
+  class Simulation &mSimulation;
   std::string mUrdfString;
 
 public:
   bool fixLoadedObject;
-  URDFLoader(class PxSimulation &simulation);
-  PxArticulationWrapper *load(const std::string &filename);
+  URDFLoader(class Simulation &simulation);
+  ArticulationWrapper *load(const std::string &filename);
   class PxKinematicsArticulationWrapper *loadKinematic(const std::string &filename);
-  class PxJointSystem *loadJointSystem(const std::string &filename);
+  class JointSystem *loadJointSystem(const std::string &filename);
 };
 
 } // namespace URDF
+
+}

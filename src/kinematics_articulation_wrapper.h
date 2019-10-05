@@ -5,28 +5,15 @@
 
 #include "kinematics_joint.h"
 #include <articulation_interface.h>
+#include <controllable_articulation_wrapper.h>
 #include <iostream>
 #include <map>
-#include <memory>
-#include <mutex>
-#include <queue>
 #include <thread>
 
+namespace sapien {
 using namespace physx;
 
-class ThreadSafeQueue {
-  std::mutex mLock;
-  std::queue<std::vector<float>> mQueue;
 
-public:
-  ThreadSafeQueue();
-
-  void push(const std::vector<float> &vec);
-  void pushValue(const std::vector<float> vec);
-  std::vector<float> pop();
-  bool empty();
-  void clear();
-};
 
 class PxKinematicsArticulationWrapper : public IArticulationDrivable {
   KJoint *mRoot;
@@ -34,6 +21,7 @@ class PxKinematicsArticulationWrapper : public IArticulationDrivable {
   std::vector<KJoint *> jointListPtr;
   uint32_t undefinedNameGeneratorId = 0;
 
+  // Cache
   bool cached = false;
   uint32_t DOF;
   uint32_t jointNum;
@@ -51,23 +39,12 @@ class PxKinematicsArticulationWrapper : public IArticulationDrivable {
   std::vector<PxRigidDynamic *> linkListPtr;
 
   // Update related field
-  bool updateQpos = false;
-  bool updateVelocityDrive = false;
-  std::vector<PxReal> driveQpos;
+  bool hasMagicVelocity = false;
+  std::vector<PxReal> lastStepQpos;
   std::vector<PxReal> driveQvel;
 
-  // ROS related buffer
-  ThreadSafeQueue jointStateQueue = ThreadSafeQueue();
-  std::vector<ThreadSafeQueue *> positionControllerQueueList = {};
-  std::vector<std::vector<uint32_t>> positionControllerIndexList = {};
-  std::vector<ThreadSafeQueue *> velocityControllerQueueList = {};
-  std::vector<std::vector<uint32_t>> velocityControllerIndexList = {};
-  bool hasActuator = false;
-
 public:
-  EArticulationType get_articulation_type() const override {
-    return EArticulationType::KINEMATIC_ARTICULATION;
-  }
+  EArticulationType get_articulation_type() const override;
   void buildCache();
 
   KJoint *createJoint(const JointType &type, KJoint *parent, PxRigidDynamic *link,
@@ -90,16 +67,13 @@ public:
   void set_qf(const std::vector<PxReal> &v) override;
 
   void set_drive_target(const std::vector<PxReal> &v) override;
-  std::vector<std::string> get_drive_joint_name() const;
+  std::vector<std::string> get_drive_joint_name() const override;
 
   // Customer function
   std::vector<PxRigidDynamic *> get_links();
 
   // This function should be called after one simulation step
   void update(PxReal timestep);
-
-  // ROS related function
-  ThreadSafeQueue *get_queue();
-  void add_position_controller(const std::vector<std::string> &name, ThreadSafeQueue *queue);
-  void add_velocity_controller(const std::vector<std::string> &name, ThreadSafeQueue *queue);
 };
+
+}

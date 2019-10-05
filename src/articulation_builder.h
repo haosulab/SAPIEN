@@ -7,10 +7,11 @@
 #include <memory>
 #include <vector>
 
+namespace sapien {
 using namespace physx;
 
-class PxArticulationBuilder {
-  PxSimulation *mSimulation = nullptr;
+class ArticulationBuilder {
+  Simulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
   PxCooking *mCooking = nullptr;
   Renderer::IPhysxRenderer *mRenderer = nullptr;
@@ -25,10 +26,10 @@ class PxArticulationBuilder {
   std::map<PxArticulationLink *, std::string> link2JointName;
 
 public:
-  PxArticulationBuilder(PxArticulationBuilder const &other) = delete;
-  const PxArticulationBuilder &operator=(PxArticulationBuilder const &other) = delete;
+  ArticulationBuilder(ArticulationBuilder const &other) = delete;
+  const ArticulationBuilder &operator=(ArticulationBuilder const &other) = delete;
 
-  PxArticulationBuilder(PxSimulation *simulation);
+  ArticulationBuilder(Simulation *simulation);
 
   /**
    *  add a link to the internal articulation, return the added link
@@ -91,5 +92,7 @@ public:
                           const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                           const PxVec3 &scale = {1, 1, 1});
 
-  PxArticulationWrapper *build(bool fixBase = true);
+  ArticulationWrapper *build(bool fixBase = true);
 };
+
+}

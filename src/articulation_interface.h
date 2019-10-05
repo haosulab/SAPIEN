@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 
+namespace sapien {
 enum EArticulationType { DYNAMIC_ARTICULATION, KINEMATIC_ARTICULATION, OBJECT_ARTICULATION };
 
 struct IArticulationBase {
@@ -25,8 +26,14 @@ struct IArticulationBase {
 
   virtual std::vector<physx::PxReal> get_qf() const = 0;
   virtual void set_qf(const std::vector<physx::PxReal> &v) = 0;
+
+  virtual ~IArticulationBase() {};
 };
 
 class IArticulationDrivable : public IArticulationBase {
+public:
   virtual void set_drive_target(const std::vector<physx::PxReal> &v) = 0;
+  virtual std::vector<std::string> get_drive_joint_name() const = 0;
 };
+
+}

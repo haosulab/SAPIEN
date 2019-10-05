@@ -6,6 +6,7 @@
 #include <map>
 #include <set>
 
+namespace sapien {
 using namespace physx;
 
 inline PxFilterFlags StandardFilterShader(PxFilterObjectAttributes attributes0,
@@ -43,3 +44,5 @@ public:
   int NewReusableGroup(int id);
   static void addGroupToData(PxFilterData &data, int group);
 };
+
+}

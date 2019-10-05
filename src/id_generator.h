@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 
+namespace sapien {
 using physx_id_t = uint32_t;
 
 class IDGenerator {
@@ -12,3 +13,5 @@ private:
   IDGenerator() : _id(1) {}
   physx_id_t _id;
 };
+
+}

@@ -4,6 +4,8 @@
 
 #include "actor_builder.h"
 #include "articulation_builder.h"
+#include "cartesian_velocity_controller.h"
+#include "controllable_articulation_wrapper.h"
 #include "joint_pub_node.h"
 #include "joint_trajectory_controller.h"
 #include "optifuser_renderer.h"
@@ -12,7 +14,7 @@
 #include "velocity_control_service.h"
 #include <extensions/PxDefaultCpuDispatcher.h>
 #include <extensions/PxSimpleFactory.h>
-#include <foundation/PxMat33.h>
+#include <input/ps3.hpp>
 #include <optifuser.h>
 #include <thread>
 #include <vector>
@@ -30,36 +32,38 @@ void test1() {
 
   auto builder = sim.createActorBuilder();
   PxReal boxLength = 0.5f;
-  // PxVec3 boxSize = {0.3, 0.3, 0.3};
-  PxVec3 boxSize = {boxLength, boxLength, boxLength};
   PxTransform boxPose({0.5f + boxLength, 0.f, -0.5f + boxLength + 1.f}, PxIdentity);
-  builder->addBoxShape(boxPose, boxSize, nullptr, 1.f);
-  builder->addBoxVisual(boxPose, boxSize);
-  auto box = builder->build();
   sim.addGround(0.0);
 
+  PS3::PS3Input input;
+
   auto loader = URDF::URDFLoader(sim);
-  std::unique_ptr<PxKinematicsArticulationWrapper> unique_wrapper =
-      loader.loadKinematic("../assets/robot/all_robot.urdf");
-  auto wrapper = unique_wrapper.get();
-  sim.mKinematicArticulationWrappers.push_back(std::move(unique_wrapper));
+  //  loader.load("../assets/46627/test.urdf")
+  //      ->articulation->teleportRootLink({{1.2, 0.2, 0.4}, PxIdentity}, true);
+
+  auto wrapper = loader.loadKinematic("../assets/robot/all_robot.urdf");
   auto timestep = sim.getTimestep();
+  auto uniqueWrapper = std::make_unique<ControllableArticulationWrapper>(wrapper);
+  ControllableArticulationWrapper *controllableWrapper = uniqueWrapper.get();
+  sim.mControllableArticulationWrapper.push_back(std::move(uniqueWrapper));
 
   // ROS
   auto nh = std::make_shared<ros::NodeHandle>();
 
-  robot_interface::JointPubNode node(wrapper, 60, 1000, "/joint_states", nh);
+  robot_interface::JointPubNode node(controllableWrapper, 60, 1000, "/joint_states", nh);
 
-  robot_interface::GroupControllerNode controller(wrapper, "right_arm", timestep, nh);
+  robot_interface::GroupControllerNode controller(controllableWrapper, "right_arm", timestep, nh);
 
-  //  std::vector<std::string> serviceJoints = {
-  //      "right_gripper_finger1_joint", "right_gripper_finger2_joint",
-  //      "right_gripper_finger3_joint"};
-  //  robot_interface::VelocityControllerServer service(wrapper, serviceJoints, timestep,
-  //  "gripper", nh); wrapper->add_velocity_controller(service.getJointNames(),
-  //  service.getQueue()); std::thread th3(&robot_interface::VelocityControllerServer::spin,
-  //  &service);
+  std::vector<std::string> serviceJoints = {
+      "right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint"};
+  robot_interface::VelocityControllerServer service(controllableWrapper, serviceJoints, timestep,
+                                                    "gripper", nh);
 
+  robot_interface::CartesianVelocityController IKController(controllableWrapper, "right_arm",
+                                                            timestep, nh);
+
+  ros::AsyncSpinner spinner(4);
+  spinner.start();
   //  auto queue = controller.getQueue();
   //  std::vector<PxReal> initQpos = {-1.93475823254,
   //                                  -1.53188487338,
@@ -81,19 +85,36 @@ void test1() {
   sim.updateRenderer();
   sim.step();
   sim.updateRenderer();
-  //  wrapper->set_drive_target({0,0,0,0,0,0,0,0,0,0});
-  //  wrapper->set_qvel({0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.02,0.02,0.02});
+  IKController.setVelocity(0.1);
+  IKController.setAngularVelocity(0.2);
+  auto past = ros::Time::now();
 
   while (true) {
-    if (simulating) {
-      sim.step();
-      sim.updateRenderer();
-      usleep(1000);
-      //      queue->pushValue(std::vector<float> {1,1,1,1,1,1,1,1,1,1});
+    if (input.getKey(PS3::BUTTON_UP)) {
+      IKController.moveRelative(robot_interface::CartesianCommand::X_F, true);
+    } else if (input.getKey(PS3::BUTTON_DOWN)) {
+      IKController.moveRelative(robot_interface::CartesianCommand::X_B, true);
+    } else if (input.getKey(PS3::BUTTON_LEFT)) {
+      IKController.moveRelative(robot_interface::CartesianCommand::Y_F, true);
+    } else if (input.getKey(PS3::BUTTON_RIGHT)) {
+      IKController.moveRelative(robot_interface::CartesianCommand::Y_B, true);
+    } else if (input.getKey(PS3::BUTTON_L1)) {
+      IKController.moveRelative(robot_interface::CartesianCommand::Z_F, true);
+    } else if (input.getKey(PS3::BUTTON_L2)) {
+      IKController.moveRelative(robot_interface::CartesianCommand::Z_B, true);
     }
+    sim.step();
+    sim.updateRenderer();
+    usleep(1000);
+    auto current = ros::Time::now();
+    std::cout << (current - past).toSec() << std::endl;
+    past = current;
     renderer.render();
-    auto input = Optifuser::getInput();
-    if (input.getKeyState(GLFW_KEY_Q)) {
+    auto gl_input = Optifuser::getInput();
+    if (gl_input.getKeyState(GLFW_KEY_Q)) {
+      break;
+    }
+    if (input.getKey(PS3::BUTTON_X)) {
       break;
     }
   }

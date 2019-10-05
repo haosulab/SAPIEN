@@ -2,11 +2,12 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "articulation_interface.h"
+#include "controllable_articulation_wrapper.h"
 #include "kinematics_articulation_wrapper.h"
 #include <cassert>
-#include <fstream>
 #include <sstream>
 
+namespace sapien {
 static PxDefaultErrorCallback gDefaultErrorCallback;
 static PxDefaultAllocator gDefaultAllocatorCallback;
 static PxSimulationFilterShader gDefaultFilterShader = PxDefaultSimulationFilterShader;
@@ -75,7 +76,7 @@ public:
 // MyContactModification myCM;
 MyContactCallback myCC;
 
-PxSimulation::PxSimulation() {
+Simulation::Simulation() {
   mFoundation =
       PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
   // TODO: figure out the what "track allocation" means
@@ -150,7 +151,7 @@ PxSimulation::PxSimulation() {
   mDefaultMaterial = mPhysicsSDK->createMaterial(0.5, 0.5, 0.5);
 }
 
-PxSimulation::~PxSimulation() {
+Simulation::~Simulation() {
   for (size_t i = 0; i < mRigidActors.size(); ++i) {
     mScene->removeActor(*mRigidActors[i]);
     mRigidActors[i]->release();
@@ -173,7 +174,7 @@ PxSimulation::~PxSimulation() {
   mFoundation->release();
 }
 
-void PxSimulation::step() {
+void Simulation::step() {
   for (auto &wrapper : mKinematicArticulationWrappers) {
     wrapper->update(mTimestep);
   }
@@ -184,9 +185,12 @@ void PxSimulation::step() {
   for (auto &wrapper : mDynamicArticulationWrappers) {
     wrapper->updateCache();
   }
+  for (auto &wrapper : mControllableArticulationWrapper) {
+    wrapper->update(mTimestep);
+  }
 }
 
-void PxSimulation::updateRenderer() {
+void Simulation::updateRenderer() {
   for (auto idParent : mRenderId2Parent) {
     auto pose = idParent.second->getGlobalPose() * mRenderId2InitialPose[idParent.first];
 
@@ -197,15 +201,15 @@ void PxSimulation::updateRenderer() {
   }
 }
 
-std::unique_ptr<PxActorBuilder> PxSimulation::createActorBuilder() {
-  return std::make_unique<PxActorBuilder>(this);
+std::unique_ptr<ActorBuilder> Simulation::createActorBuilder() {
+  return std::make_unique<ActorBuilder>(this);
 }
 
-std::unique_ptr<PxArticulationBuilder> PxSimulation::createArticulationBuilder() {
-  return std::make_unique<PxArticulationBuilder>(this);
+std::unique_ptr<ArticulationBuilder> Simulation::createArticulationBuilder() {
+  return std::make_unique<ArticulationBuilder>(this);
 }
 
-void PxSimulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
+void Simulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
   mRenderer = renderer;
   mRenderer->bindQueryCallback([this](uint32_t unique_id) {
     Renderer::GuiInfo info = {};
@@ -264,7 +268,7 @@ void PxSimulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
   });
 }
 
-PxRigidStatic *PxSimulation::addGround(PxReal altitude, bool render, PxMaterial *material) {
+PxRigidStatic *Simulation::addGround(PxReal altitude, bool render, PxMaterial *material) {
   material = material ? material : mDefaultMaterial;
   auto ground = PxCreatePlane(*mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude), *material);
   ground->setName("Ground");
@@ -279,7 +283,7 @@ PxRigidStatic *PxSimulation::addGround(PxReal altitude, bool render, PxMaterial 
   return ground;
 }
 
-physx_id_t PxSimulation::addMountedCamera(std::string const &name, PxRigidActor *actor,
+physx_id_t Simulation::addMountedCamera(std::string const &name, PxRigidActor *actor,
                                           PxTransform const &pose, uint32_t width, uint32_t height,
                                           float fovx, float fovy, float near, float far) {
   physx_id_t cameraId = IDGenerator::instance()->next();
@@ -293,4 +297,6 @@ physx_id_t PxSimulation::addMountedCamera(std::string const &name, PxRigidActor 
   mRenderer->addCamera(cameraId, name, width, height, fovx, fovy, near, far);
 
   return cameraId;
+}
+
 }
