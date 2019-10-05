@@ -38,11 +38,11 @@ int main() {
   auto builder = sim.createArticulationBuilder();
   auto link = builder->addLink(nullptr, {{0, 0, 0}, PxIdentity}, "body");
   // builder->addSphereShapeToLink(*link);
-  builder->addCylinderShapeToLink(*link, {{0, 0, 0}, PxIdentity}, 0.1, 0.5);
+  builder->addCapsuleShapeToLink(*link, {{0, 0, 0}, PxIdentity}, 0.1, 0.5);
   builder->updateLinkMassAndInertia(*link, 1000.f);
 
   // builder->addSphereVisualToLink(*link);
-  builder->addCylinderVisualToLink(*link, {{0,0,0}, PxIdentity}, 0.1, 0.5);
+  builder->addCapsuleVisualToLink(*link, {{0,0,0}, PxIdentity}, 0.1, 0.5);
   builder->build(false);
 
   sim.addGround(-2);

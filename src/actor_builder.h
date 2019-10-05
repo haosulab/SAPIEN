@@ -38,7 +38,7 @@ public:
                    const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr,
                    PxReal density = 1.f);
 
-  void addCylinderShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+  void addCapsuleShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
                         PxReal length = 1, PxMaterial *material = nullptr, PxReal density = 1.f);
 
   void addSphereShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
@@ -53,7 +53,7 @@ public:
   physx_id_t addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                           const PxVec3 &size = {1, 1, 1});
 
-  physx_id_t addCylinderVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+  physx_id_t addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                PxReal radius = 1, PxReal length = 1);
 
   physx_id_t addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1);
