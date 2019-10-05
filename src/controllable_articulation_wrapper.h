@@ -56,4 +56,4 @@ public:
   void update(physx::PxReal timestep);
 };
 
-}
+} // namespace sapien

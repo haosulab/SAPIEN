@@ -90,6 +90,7 @@ if (catkin_INCLUDE_DIRS)
 endif ()
 add_executable(robot
         robot/joint_trajectory_controller.cpp
+        robot/cartesian_velocity_controller.cpp
         robot/velocity_control_service.cpp
         robot/joint_pub_node.cpp
         robot/robot.cpp)

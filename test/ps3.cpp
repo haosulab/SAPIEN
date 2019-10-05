@@ -40,7 +40,7 @@ float rand_float() {
 }
 
 void test() {
-  // PS3Input ps3;
+  PS3Input ps3;
 
   Renderer::OptifuserRenderer renderer;
   renderer.init();
@@ -66,7 +66,7 @@ void test() {
   auto articulation = articulationWrapper->articulation;
 
   // auto cache = articulationInfo.cache;
-  printf("dof: %d\n", articulation->getDofs());
+  //  printf("dof: %d\n", articulation->getDofs());
 
   sim.step();
   reset(articulationWrapper);
@@ -77,21 +77,21 @@ void test() {
 
   printf("Simulation start\n");
   while (true) {
-    // if (ps3.getKey(BUTTON_UP)) {
-    //   pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * 0.01;
-    // } else if (ps3.getKey(BUTTON_DOWN)) {
-    //   pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * 0.01;
-    // }
-    // if (ps3.getKey(BUTTON_LEFT)) {
-    //   pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * 0.01;
-    // } else if (ps3.getKey(BUTTON_RIGHT)) {
-    //   pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * 0.01;
-    // }
-    // if (ps3.getKey(BUTTON_L2)) {
-    //   angle += 0.01;
-    // } else if (ps3.getKey(BUTTON_R2)) {
-    //   angle -= 0.01;
-    // }
+    if (ps3.getKey(BUTTON_UP)) {
+      pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * 0.01;
+    } else if (ps3.getKey(BUTTON_DOWN)) {
+      pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * 0.01;
+    }
+    if (ps3.getKey(BUTTON_LEFT)) {
+      pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * 0.01;
+    } else if (ps3.getKey(BUTTON_RIGHT)) {
+      pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * 0.01;
+    }
+    if (ps3.getKey(BUTTON_L2)) {
+      angle += 0.01;
+    } else if (ps3.getKey(BUTTON_R2)) {
+      angle -= 0.01;
+    }
 
     sim.step();
     articulation->teleportRootLink({pos, PxQuat(angle, {0, 0, 1})}, true);
@@ -102,9 +102,9 @@ void test() {
     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
       break;
     }
-    // if (ps3.getKey(BUTTON_X)) {
-    //   break;
-    // }
+    if (ps3.getKey(BUTTON_X)) {
+      break;
+    }
   }
 }
 

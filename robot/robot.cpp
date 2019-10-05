@@ -19,6 +19,8 @@
 #include <thread>
 #include <vector>
 
+using namespace sapien;
+
 void test1() {
   Renderer::OptifuserRenderer renderer;
   renderer.init();
@@ -26,7 +28,7 @@ void test1() {
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
 
-  PxSimulation sim;
+  Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 60.f);
 
@@ -50,7 +52,7 @@ void test1() {
   // ROS
   auto nh = std::make_shared<ros::NodeHandle>();
 
-  robot_interface::JointPubNode node(controllableWrapper, 60, 1000, "/joint_states", nh);
+  robot_interface::JointPubNode node(controllableWrapper, 200, 1000, "/joint_states", nh);
 
   robot_interface::GroupControllerNode controller(controllableWrapper, "right_arm", timestep, nh);
 
@@ -88,20 +90,25 @@ void test1() {
   IKController.setVelocity(0.1);
   IKController.setAngularVelocity(0.2);
   auto past = ros::Time::now();
+  bool continuous = false;
 
   while (true) {
     if (input.getKey(PS3::BUTTON_UP)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::X_F, true);
+      IKController.moveRelative(robot_interface::CartesianCommand::X_F, continuous);
     } else if (input.getKey(PS3::BUTTON_DOWN)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::X_B, true);
+      IKController.moveRelative(robot_interface::CartesianCommand::X_B, continuous);
     } else if (input.getKey(PS3::BUTTON_LEFT)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::Y_F, true);
+      IKController.moveRelative(robot_interface::CartesianCommand::Y_F, continuous);
     } else if (input.getKey(PS3::BUTTON_RIGHT)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::Y_B, true);
+      IKController.moveRelative(robot_interface::CartesianCommand::Y_B, continuous);
     } else if (input.getKey(PS3::BUTTON_L1)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::Z_F, true);
+      IKController.moveRelative(robot_interface::CartesianCommand::Z_F, continuous);
     } else if (input.getKey(PS3::BUTTON_L2)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::Z_B, true);
+      IKController.moveRelative(robot_interface::CartesianCommand::Z_B, continuous);
+    } else if (input.getKey(PS3::BUTTON_CIRCLE)) {
+      IKController.toggleJumpTest(true);
+    } else if (input.getKey(PS3::BUTTON_SQUARE)) {
+      IKController.toggleJumpTest(false);
     }
     sim.step();
     sim.updateRenderer();
