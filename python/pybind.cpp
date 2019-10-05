@@ -12,6 +12,7 @@
 #include "joint_system.h"
 #include <vector>
 
+using namespace sapien;
 namespace py = pybind11;
 
 class PyISensor : public Renderer::ISensor {
@@ -98,17 +99,17 @@ public:
 
 PYBIND11_MODULE(sapyen, m) {
 
-  py::class_<PxSimulation>(m, "PxSimulation")
+  py::class_<Simulation>(m, "Simulation")
       .def(py::init<>())
-      .def("setTimestep", &PxSimulation::setTimestep)
-      .def("getTimestep", &PxSimulation::getTimestep)
-      .def("setRenderer", &PxSimulation::setRenderer)
-      .def("getRenderer", &PxSimulation::getRenderer)
-      .def("createActorBuilder", &PxSimulation::createActorBuilder)
-      .def("createArticulationBuilder", &PxSimulation::createArticulationBuilder)
-      .def("step", &PxSimulation::step)
-      .def("updateRenderer", &PxSimulation::updateRenderer)
-      .def("addGround", &PxSimulation::addGround, py::arg("altitude"), py::arg("render") = true, py::arg("material") = nullptr);
+      .def("setTimestep", &Simulation::setTimestep)
+      .def("getTimestep", &Simulation::getTimestep)
+      .def("setRenderer", &Simulation::setRenderer)
+      .def("getRenderer", &Simulation::getRenderer)
+      .def("createActorBuilder", &Simulation::createActorBuilder)
+      .def("createArticulationBuilder", &Simulation::createArticulationBuilder)
+      .def("step", &Simulation::step)
+      .def("updateRenderer", &Simulation::updateRenderer)
+      .def("addGround", &Simulation::addGround, py::arg("altitude"), py::arg("render") = true, py::arg("material") = nullptr);
 
   py::class_<PxRigidActor, std::unique_ptr<PxRigidActor, py::nodelete>>(m, "PxRigidActor");
   py::class_<PxRigidStatic, PxRigidActor, std::unique_ptr<PxRigidStatic, py::nodelete>>(m, "PxRigidStatic");
@@ -266,10 +267,10 @@ PYBIND11_MODULE(sapyen, m) {
     .def("updateArticulation", &PxArticulationWrapper::updateArticulation);
 
   py::class_<PxJointSystem, IArticulationBase>(m, "PxArticulationWrapper")
-    .def(py::init<>())
+      .def(py::init<>());
 
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
-    .def(py::init<PxSimulation &>())
+    .def(py::init<Simulation &>())
     .def_readwrite("fixLoadedObject", &URDF::URDFLoader::fixLoadedObject)
     .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference);
 
