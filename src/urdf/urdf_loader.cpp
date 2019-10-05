@@ -62,7 +62,7 @@ struct LinkTreeNode {
   std::vector<LinkTreeNode *> children;
 };
 
-PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
+ArticulationWrapper *URDFLoader::load(const std::string &filename) {
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;
@@ -317,7 +317,7 @@ PxArticulationWrapper *URDFLoader::load(const std::string &filename) {
     }
   }
 
-  PxArticulationWrapper *wrapper = builder.build(fixLoadedObject);
+  ArticulationWrapper *wrapper = builder.build(fixLoadedObject);
 
   for (auto &gazebo : robot->gazebo_array) {
     for (auto &sensor : gazebo->sensor_array) {

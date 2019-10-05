@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace sapien {
-struct PxArticulationWrapper;
+struct ArticulationWrapper;
 namespace URDF {
 
   using namespace tinyxml2;
@@ -627,7 +627,7 @@ class URDFLoader {
 public:
   bool fixLoadedObject;
   URDFLoader(class Simulation &simulation);
-  PxArticulationWrapper *load(const std::string &filename);
+  ArticulationWrapper *load(const std::string &filename);
   class PxKinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class PxJointSystem *loadJointSystem(const std::string &filename);
 };

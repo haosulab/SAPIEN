@@ -20,7 +20,7 @@ namespace sapien {
 using namespace physx;
 
 // TODO: proof read and test this struct
-struct PxArticulationWrapper : public IArticulationBase {
+struct ArticulationWrapper : public IArticulationBase {
   PxArticulationReducedCoordinate *articulation = nullptr;
   PxArticulationCache *cache = nullptr;
 

@@ -76,7 +76,7 @@ void test2() {
   joint->setParentPose({{0, 0, 0}, PxIdentity});
   joint->setChildPose({{0, 3, 0}, PxIdentity});
 
-  PxArticulationWrapper *articulationWrapper = builder->build(true);
+  ArticulationWrapper *articulationWrapper = builder->build(true);
   auto articulation = articulationWrapper->articulation;
   auto cache = articulationWrapper->cache;
 
@@ -97,7 +97,7 @@ void test2() {
   }
 }
 
-void reset(PxArticulationWrapper *wrapper) {
+void reset(ArticulationWrapper *wrapper) {
   wrapper->articulation->copyInternalStateToCache(*wrapper->cache, PxArticulationCache::eALL);
   for (size_t i = 0; i < wrapper->articulation->getDofs(); ++i) {
     wrapper->cache->jointPosition[i] = 0;

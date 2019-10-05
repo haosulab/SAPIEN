@@ -156,9 +156,9 @@ void ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
   mSimulation->mRenderId2Parent[newId] = &link;
 }
 
-PxArticulationWrapper *ArticulationBuilder::build(bool fixBase) {
+ArticulationWrapper *ArticulationBuilder::build(bool fixBase) {
   mArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, fixBase);
-  auto wrapper = std::make_unique<PxArticulationWrapper>();
+  auto wrapper = std::make_unique<ArticulationWrapper>();
   for (auto id : mRenderIds) {
     mSimulation->mRenderId2Articulation[id] = wrapper.get();
   }
@@ -254,7 +254,7 @@ PxArticulationWrapper *ArticulationBuilder::build(bool fixBase) {
   wrapper->articulation->copyInternalStateToCache(*wrapper->cache, PxArticulationCache::eALL);
   wrapper->articulation->setName("articulation");
 
-  PxArticulationWrapper *wrapperPtr = wrapper.get();
+  ArticulationWrapper *wrapperPtr = wrapper.get();
   mSimulation->mDynamicArticulationWrappers.push_back(std::move(wrapper));
 
   return wrapperPtr;

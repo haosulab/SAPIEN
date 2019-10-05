@@ -45,7 +45,7 @@ public:
   std::map<physx_id_t, PxRigidActor *> mRenderId2Parent;
   std::map<physx_id_t, IArticulationBase *> mRenderId2Articulation;
 
-  std::vector<std::unique_ptr<struct PxArticulationWrapper>> mDynamicArticulationWrappers;
+  std::vector<std::unique_ptr<struct ArticulationWrapper>> mDynamicArticulationWrappers;
   std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>>
       mKinematicArticulationWrappers;
   std::vector<std::unique_ptr<class PxJointSystem>> mObjectArticulationWrappers;
