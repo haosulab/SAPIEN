@@ -10,7 +10,7 @@
 #include <control_msgs/FollowJointTrajectoryResult.h>
 #include <kinematics_articulation_wrapper.h>
 
-namespace robot_interface {
+namespace sapien::robot {
 class GroupControllerNode {
 private:
   // Define convenient type
@@ -20,13 +20,12 @@ private:
   std::thread worker;
 
   // Controlling constant
-  float timestep;
   uint32_t jointNum;
 
   // Action monitoring
   std::unique_ptr<JTAS> mServer;
   std::vector<std::string> mJointName;
-  std::shared_ptr<ros::NodeHandle> mNodeHandle = nullptr;
+  ros::NodeHandle *mNodeHandle = nullptr;
   control_msgs::FollowJointTrajectoryGoal mGoal;
   control_msgs::FollowJointTrajectoryFeedback mFeedback;
   control_msgs::FollowJointTrajectoryResult mResult;
@@ -40,11 +39,11 @@ private:
   std::unique_ptr<ThreadSafeQueue> queue;
 
 public:
-  GroupControllerNode(ControllableArticulationWrapper* wrapper, const std::string &groupName, float timestep,
-                      std::shared_ptr<ros::NodeHandle> nh, const std::string &nameSpace = "physx",
-                      std::string controllerName = "");
+  float timestep;
 
-
+public:
+  GroupControllerNode(ControllableArticulationWrapper *wrapper, const std::string &groupName,
+                      float timestep, ros::NodeHandle *nh, const std::string &robotName);
 
 private:
   void executeCB(GoalHandle gh);
@@ -59,4 +58,4 @@ private:
 
   // Buffer from interface
 };
-} // namespace robot_interface
+} // namespace sapien::robot

@@ -6,6 +6,7 @@
 #include "articulation_builder.h"
 #include "cartesian_velocity_controller.h"
 #include "controllable_articulation_wrapper.h"
+#include "controller_manger.h"
 #include "joint_pub_node.h"
 #include "joint_trajectory_controller.h"
 #include "optifuser_renderer.h"
@@ -48,24 +49,18 @@ void test1() {
   auto uniqueWrapper = std::make_unique<ControllableArticulationWrapper>(wrapper);
   ControllableArticulationWrapper *controllableWrapper = uniqueWrapper.get();
   sim.mControllableArticulationWrapper.push_back(std::move(uniqueWrapper));
+  controllableWrapper->updateTimeStep(timestep);
 
   // ROS
-  auto nh = std::make_shared<ros::NodeHandle>();
-
-  robot_interface::JointPubNode node(controllableWrapper, 200, 1000, "/joint_states", nh);
-
-  robot_interface::GroupControllerNode controller(controllableWrapper, "right_arm", timestep, nh);
-
   std::vector<std::string> serviceJoints = {
       "right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint"};
-  robot_interface::VelocityControllerServer service(controllableWrapper, serviceJoints, timestep,
-                                                    "gripper", nh);
+  robot::ControllerManger manger("movo", controllableWrapper);
+  manger.createJointPubNode(100, 500);
+//  manger.createCartesianVelocityController("right_arm");
+//  manger.createJointVelocityController(serviceJoints, "right_gripper");
+  manger.createGroupTrajectoryController("right_arm");
+  manger.start();
 
-  robot_interface::CartesianVelocityController IKController(controllableWrapper, "right_arm",
-                                                            timestep, nh);
-
-  ros::AsyncSpinner spinner(4);
-  spinner.start();
   //  auto queue = controller.getQueue();
   //  std::vector<PxReal> initQpos = {-1.93475823254,
   //                                  -1.53188487338,
@@ -82,39 +77,36 @@ void test1() {
   //    wrapper->set_drive_target(initQpos);
   //  wrapper->set_qvel({0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0, 0, 0});
   //  wrapper->set_qvel({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
-  bool simulating = true;
   sim.step();
   sim.updateRenderer();
   sim.step();
   sim.updateRenderer();
-  IKController.setVelocity(0.1);
-  IKController.setAngularVelocity(0.2);
   auto past = ros::Time::now();
   bool continuous = false;
 
   while (true) {
-    if (input.getKey(PS3::BUTTON_UP)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::X_F, continuous);
-    } else if (input.getKey(PS3::BUTTON_DOWN)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::X_B, continuous);
-    } else if (input.getKey(PS3::BUTTON_LEFT)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::Y_F, continuous);
-    } else if (input.getKey(PS3::BUTTON_RIGHT)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::Y_B, continuous);
-    } else if (input.getKey(PS3::BUTTON_L1)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::Z_F, continuous);
-    } else if (input.getKey(PS3::BUTTON_L2)) {
-      IKController.moveRelative(robot_interface::CartesianCommand::Z_B, continuous);
-    } else if (input.getKey(PS3::BUTTON_CIRCLE)) {
-      IKController.toggleJumpTest(true);
-    } else if (input.getKey(PS3::BUTTON_SQUARE)) {
-      IKController.toggleJumpTest(false);
-    }
+    //    if (input.getKey(PS3::BUTTON_UP)) {
+    //      IKController.moveRelative(robot::CartesianCommand::X_F, continuous);
+    //    } else if (input.getKey(PS3::BUTTON_DOWN)) {
+    //      IKController.moveRelative(robot::CartesianCommand::X_B, continuous);
+    //    } else if (input.getKey(PS3::BUTTON_LEFT)) {
+    //      IKController.moveRelative(robot::CartesianCommand::Y_F, continuous);
+    //    } else if (input.getKey(PS3::BUTTON_RIGHT)) {
+    //      IKController.moveRelative(robot::CartesianCommand::Y_B, continuous);
+    //    } else if (input.getKey(PS3::BUTTON_L1)) {
+    //      IKController.moveRelative(robot::CartesianCommand::Z_F, continuous);
+    //    } else if (input.getKey(PS3::BUTTON_L2)) {
+    //      IKController.moveRelative(robot::CartesianCommand::Z_B, continuous);
+    //    } else if (input.getKey(PS3::BUTTON_CIRCLE)) {
+    //      IKController.toggleJumpTest(true);
+    //    } else if (input.getKey(PS3::BUTTON_SQUARE)) {
+    //      IKController.toggleJumpTest(false);
+    //    }
     sim.step();
     sim.updateRenderer();
     usleep(1000);
     auto current = ros::Time::now();
-    std::cout << (current - past).toSec() << std::endl;
+//    std::cout << (current - past).toSec() << std::endl;
     past = current;
     renderer.render();
     auto gl_input = Optifuser::getInput();

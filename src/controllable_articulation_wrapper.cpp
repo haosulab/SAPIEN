@@ -104,6 +104,14 @@ void ControllableArticulationWrapper::update(physx::PxReal timestep) {
 std::vector<std::string> ControllableArticulationWrapper::get_drive_joint_name() {
   return articulation->get_drive_joint_name();
 }
+void ControllableArticulationWrapper::updateTimeStep(float newTimestep) {
+  timestep = newTimestep;
+  needUpdateTimeStep = true;
+}
+float ControllableArticulationWrapper::informMangerTimestepChange() {
+  needUpdateTimeStep = false;
+  return timestep;
+}
 // Thread Safe Queue
 ThreadSafeQueue::ThreadSafeQueue() { mQueue = std::queue<std::vector<float>>(); }
 void ThreadSafeQueue::push(const std::vector<float> &vec) {
@@ -130,4 +138,4 @@ void ThreadSafeQueue::pushValue(const std::vector<float> vec) {
   mQueue.push(vec);
 }
 
-}
+} // namespace sapien

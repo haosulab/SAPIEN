@@ -35,9 +35,11 @@ private:
 
   // Cache
   std::vector<std::string> jointNames;
+  float timestep=0.01;
 
 public:
   IArticulationDrivable *articulation;
+  bool needUpdateTimeStep = false;
 
 private:
   void updateJointState();
@@ -54,6 +56,8 @@ public:
   ThreadSafeQueue *get_joint_state_queue();
   std::vector<std::string> get_drive_joint_name();
   void update(physx::PxReal timestep);
+  void updateTimeStep(float timestep);
+  float informMangerTimestepChange();
 };
 
 } // namespace sapien

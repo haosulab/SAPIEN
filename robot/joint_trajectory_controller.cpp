@@ -2,13 +2,13 @@
 // Created by sim on 9/28/19.
 //
 
+#include "joint_trajectory_controller.h"
 #include <boost/bind.hpp>
 #include <ros/ros.h>
 #include <trajectory_msgs/JointTrajectory.h>
-
-#include "joint_trajectory_controller.h"
-bool robot_interface::GroupControllerNode::setsEqual(
-    const std::vector<std::string> &controllerJoints, const std::vector<std::string> &goal) {
+namespace sapien::robot {
+bool robot::GroupControllerNode::setsEqual(const std::vector<std::string> &controllerJoints,
+                                           const std::vector<std::string> &goal) {
   for (const auto &i : goal) {
     if (count(controllerJoints.begin(), controllerJoints.end(), i) != 1)
       return false;
@@ -16,9 +16,8 @@ bool robot_interface::GroupControllerNode::setsEqual(
 
   return true;
 }
-void robot_interface::GroupControllerNode::clearGoal() { queue->clear(); }
-void robot_interface::GroupControllerNode::executeGoal(
-    std::vector<uint32_t> indexGoal2Controller) {
+void robot::GroupControllerNode::clearGoal() { queue->clear(); }
+void robot::GroupControllerNode::executeGoal(std::vector<uint32_t> indexGoal2Controller) {
   auto numPoints = current_trajectory_.points.size();
   if (numPoints < 2) {
     ROS_ERROR("Invalid trajectory, number of points should be greater than or equal to 2");
@@ -61,7 +60,7 @@ void robot_interface::GroupControllerNode::executeGoal(
   ROS_INFO("Controller: %f", bug);
   has_active_goal_ = false;
 }
-void robot_interface::GroupControllerNode::executeCB(GoalHandle gh) {
+void robot::GroupControllerNode::executeCB(GoalHandle gh) {
   ROS_INFO("Receive joint trajectory goal");
   // Ensures that the joints in the goal match the joints we are commanding.
   std::vector<std::string> goalJoints = gh.getGoal()->trajectory.joint_names;
@@ -100,14 +99,13 @@ void robot_interface::GroupControllerNode::executeCB(GoalHandle gh) {
   mResult.error_string = "";
   gh.setSucceeded(mResult);
 }
-void robot_interface::GroupControllerNode::advance(const std::vector<float> &step,
-                                                   std::vector<float> &currentPosition) {
+void robot::GroupControllerNode::advance(const std::vector<float> &step,
+                                         std::vector<float> &currentPosition) {
   for (std::size_t i = 0; i < jointNum; i++) {
     currentPosition[i] += step[i];
   }
 }
-void robot_interface::GroupControllerNode::cancleCB(
-    robot_interface::GroupControllerNode::GoalHandle gh) {
+void robot::GroupControllerNode::cancleCB(robot::GroupControllerNode::GoalHandle gh) {
   if (active_goal_ == gh) {
     // Marks the current goal as canceled.
     clearGoal();
@@ -115,19 +113,17 @@ void robot_interface::GroupControllerNode::cancleCB(
     has_active_goal_ = false;
   }
 }
-robot_interface::GroupControllerNode::GroupControllerNode(
-    ControllableArticulationWrapper *wrapper, const std::string &groupName, float timestep,
-    std::shared_ptr<ros::NodeHandle> nh, const std::string &nameSpace, std::string controllerName)
-    : groupName(groupName), timestep(timestep), mNodeHandle(nh), has_active_goal_(false) {
+robot::GroupControllerNode::GroupControllerNode(ControllableArticulationWrapper *wrapper,
+                                                const std::string &groupName, float timestep,
+                                                ros::NodeHandle *nh, const std::string &robotName)
+    : groupName(groupName), mNodeHandle(nh), has_active_goal_(false), timestep(timestep) {
   // Gets all of the joints
   queue = std::make_unique<ThreadSafeQueue>();
-  if (controllerName.empty()) {
-    controllerName = nameSpace + "/" + groupName + "_controller";
-  }
-  mServer = std::make_unique<JTAS>(
-      *nh, controllerName + "/follow_joint_trajectory",
-      boost::bind(&robot_interface::GroupControllerNode::executeCB, this, _1),
-      boost::bind(&robot_interface::GroupControllerNode::cancleCB, this, _1), false);
+  std::string controllerName = "sapien/" + robotName + "/" + groupName + "_controller";
+  mServer =
+      std::make_unique<JTAS>(*nh, controllerName + "/follow_joint_trajectory",
+                             boost::bind(&robot::GroupControllerNode::executeCB, this, _1),
+                             boost::bind(&robot::GroupControllerNode::cancleCB, this, _1), false);
 
   // Fetch value from parameters servers: the yaml file
   // Gets all of the joints
@@ -176,3 +172,4 @@ robot_interface::GroupControllerNode::GroupControllerNode(
   ROS_INFO("Controller start with group name: %s", groupName.c_str());
   mServer->start();
 }
+} // namespace sapien::robot

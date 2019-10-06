@@ -3,18 +3,18 @@
 //
 
 #include "joint_pub_node.h"
-
 #include <utility>
 
-namespace robot_interface {
+namespace sapien::robot {
 
 JointPubNode::JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
-                           double updateFrequency, const std::string &topicName,
-                           std::shared_ptr<ros::NodeHandle> nh)
+                           double updateFrequency, const std::string &robotName,
+                           ros::NodeHandle *nh)
     : jointName(wrapper->get_drive_joint_name()), queue(wrapper->get_joint_state_queue()),
-      mNodeHandle(std::move(nh)), pubFrequency(pubFrequency), updateFrenquency(updateFrequency) {
+      mNodeHandle(nh), pubFrequency(pubFrequency), updateFrenquency(updateFrequency) {
 
-  mPub = mNodeHandle->advertise<sensor_msgs::JointState>(topicName, 1);
+  mPub = std::make_unique<ros::Publisher>(
+      mNodeHandle->advertise<sensor_msgs::JointState>("/sapien/" + robotName + "/joint_states", 1));
   mStates.position.resize(jointName.size());
   mStates.name.assign(jointName.begin(), jointName.end());
   jointNum = jointName.size();
@@ -27,7 +27,7 @@ void JointPubNode::spin() {
   ros::WallRate rate(pubFrequency);
 
   while (ros::ok() && !isCancel) {
-    mPub.publish(mStates);
+    mPub->publish(mStates);
     rate.sleep();
   }
 }
@@ -48,6 +48,6 @@ void JointPubNode::cancel() {
   isCancel = false;
   pubWorker.join();
   updateWorker.join();
-  ROS_INFO("Joint state publisher with topic %s canceled.", mPub.getTopic().c_str());
+  ROS_INFO("Joint state publisher with topic %s canceled.", mPub->getTopic().c_str());
 }
-} // namespace robot_interface
+} // namespace sapien::robot

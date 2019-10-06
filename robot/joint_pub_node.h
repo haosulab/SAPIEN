@@ -9,7 +9,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 
-namespace robot_interface {
+namespace sapien::robot {
 
 class JointPubNode {
 private:
@@ -23,15 +23,15 @@ private:
   bool isCancel = false;
 
   uint32_t jointNum;
-  std::shared_ptr<ros::NodeHandle> mNodeHandle = nullptr;
-  ros::Publisher mPub;
+  ros::NodeHandle* mNodeHandle = nullptr;
+  std::unique_ptr<ros::Publisher> mPub;
   double pubFrequency;
   double updateFrenquency;
 
 public:
   JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
-               double updateFrequency, const std::string &topicName,
-               std::shared_ptr<ros::NodeHandle> nh);
+               double updateFrequency, const std::string &robotName,
+               ros::NodeHandle* nh);
 
   void cancel();
 
@@ -40,4 +40,4 @@ private:
   void spin();
 };
 
-} // namespace robot_interface
+} // namespace robot

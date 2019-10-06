@@ -3,22 +3,24 @@
 //
 
 #include "velocity_control_service.h"
-robot_interface::VelocityControllerServer::VelocityControllerServer(
-    ControllableArticulationWrapper *wrapper, const std::vector<std::string> &jointName,
-    float timestep, const std::string &serviceName, std::shared_ptr<ros::NodeHandle> nh,
-    const std::string &nameSpace)
+namespace sapien::robot {
+
+VelocityControllerServer::VelocityControllerServer(ControllableArticulationWrapper *wrapper,
+                                                   const std::vector<std::string> &jointName,
+                                                   const std::string &serviceName, float timestep,
+                                                   ros::NodeHandle *nh,
+                                                   const std::string &robotName)
     : mJointName(jointName), mNodeHandle(std::move(nh)), mTimestep(timestep),
-      mServerName(nameSpace + "/" + serviceName) {
-  mServer = mNodeHandle->advertiseService(
-      mServerName, &robot_interface::VelocityControllerServer::executeCB, this);
+      mServerName("/sapien/" + robotName + "/" + serviceName + "/joint_velocity") {
+  mServer = mNodeHandle->advertiseService(mServerName, &robot::VelocityControllerServer::executeCB,
+                                          this);
   mQueue = std::make_unique<ThreadSafeQueue>();
 
   // Register queue to controllable wrapper
   wrapper->add_velocity_controller(mJointName, mQueue.get());
 }
-bool robot_interface::VelocityControllerServer::executeCB(
-    physxtest::VelocityControlService::Request &req,
-    physxtest::VelocityControlService::Response &res) {
+bool VelocityControllerServer::executeCB(sapien_ros_utils::JointVelocityControl::Request &req,
+                                         sapien_ros_utils::JointVelocityControl::Response &res) {
   // Check joint name
   auto serviceJointName = req.joint_name;
   for (const auto &name : serviceJointName) {
@@ -46,3 +48,4 @@ bool robot_interface::VelocityControllerServer::executeCB(
   res.success = true;
   return true;
 }
+} // namespace sapien::robot

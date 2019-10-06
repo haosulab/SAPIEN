@@ -13,7 +13,7 @@ namespace sapien {
 struct ArticulationWrapper;
 namespace URDF {
 
-  using namespace tinyxml2;
+using namespace tinyxml2;
 
 #define DECLARE_ATTR(type, name) type name;
 
@@ -634,4 +634,4 @@ public:
 
 } // namespace URDF
 
-}
+} // namespace sapien

@@ -7,12 +7,11 @@
 
 #include <memory>
 #include <utility>
-namespace robot_interface {
+namespace sapien::robot {
 
 CartesianVelocityController::CartesianVelocityController(ControllableArticulationWrapper *wrapper,
                                                          const std::string &groupName,
-                                                         float timestep,
-                                                         std::shared_ptr<ros::NodeHandle> nh,
+                                                         float timestep, ros::NodeHandle *nh,
                                                          const std::string &robotName)
     : mNodeHandle(std::move(nh)), timestep(timestep) {
   // TODO robot description name
@@ -29,8 +28,7 @@ CartesianVelocityController::CartesianVelocityController(ControllableArticulatio
 
   eeName = jointModelGroup->getOnlyOneEndEffectorTip()->getName();
   currentPose = state->getGlobalLinkTransform(eeName);
-  // TODO: fake joint topic name
-  jointStateTopicName = "" + robotName + "/joint_states";
+  jointStateTopicName = "/" + robotName + "/joint_states";
 
   // Build relative transformation matrix cache
   transStepSize = timestep * 1;
@@ -61,6 +59,7 @@ void CartesianVelocityController::updateCurrentPose() {
     jointValue[i] = jointStatePtr->position[jointIndex2Topic[i]];
   }
   state->setJointGroupPositions(jointModelGroup, jointValue);
+  currentPose = state->getGlobalLinkTransform(eeName);
 }
 void CartesianVelocityController::moveRelative(CartesianCommand type, bool continuous) {
   if (!continuous) {
@@ -132,4 +131,4 @@ bool CartesianVelocityController::testJointSpaceJump(const std::vector<double> &
   }
   return distance / q1.size() > threshold;
 }
-} // namespace robot_interface
+} // namespace sapien::robot

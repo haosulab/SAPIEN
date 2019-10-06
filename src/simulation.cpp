@@ -284,8 +284,8 @@ PxRigidStatic *Simulation::addGround(PxReal altitude, bool render, PxMaterial *m
 }
 
 physx_id_t Simulation::addMountedCamera(std::string const &name, PxRigidActor *actor,
-                                          PxTransform const &pose, uint32_t width, uint32_t height,
-                                          float fovx, float fovy, float near, float far) {
+                                        PxTransform const &pose, uint32_t width, uint32_t height,
+                                        float fovx, float fovy, float near, float far) {
   physx_id_t cameraId = IDGenerator::instance()->next();
   const PxVec3 up = {0, 0, 1};
   const PxVec3 forward = {1, 0, 0};
@@ -298,5 +298,9 @@ physx_id_t Simulation::addMountedCamera(std::string const &name, PxRigidActor *a
 
   return cameraId;
 }
-
+std::unique_ptr<URDF::URDFLoader> Simulation::createURDFLoader() {
+  auto loader = std::make_unique<URDF::URDFLoader>(*this);
+  return loader;
 }
+
+} // namespace sapien

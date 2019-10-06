@@ -9,7 +9,7 @@
 #include <moveit/robot_state/robot_state.h>
 #include <ros/ros.h>
 
-namespace robot_interface {
+namespace sapien::robot {
 
 enum CartesianCommand {
   X_F = 0,
@@ -33,7 +33,7 @@ private:
   std::unique_ptr<robot_state::RobotState> state;
   const robot_state::JointModelGroup *jointModelGroup;
   ros::Subscriber sub;
-  std::shared_ptr<ros::NodeHandle> mNodeHandle;
+  ros::NodeHandle *mNodeHandle;
 
   // Cache
   std::vector<std::string> jointName;
@@ -46,14 +46,16 @@ private:
 
   // Communication
   std::unique_ptr<ThreadSafeQueue> mQueue;
-  bool jointJumpCheck;
-  float timestep;
+  bool jointJumpCheck = false;
   float transStepSize;
   float rotStepSize;
   std::vector<Eigen::Isometry3d> cartesianMatrix =
       std::vector<Eigen::Isometry3d>(12, Eigen::Isometry3d::Identity());
   static bool testJointSpaceJump(const std::vector<double> &q1, const std::vector<double> &q2,
-                          double threshold);
+                                 double threshold);
+
+public:
+  float timestep;
 
 private:
   void updateCurrentPose();
@@ -62,8 +64,7 @@ private:
 
 public:
   CartesianVelocityController(ControllableArticulationWrapper *wrapper,
-                              const std::string &groupName, float timestep,
-                              std::shared_ptr<ros::NodeHandle> nh,
+                              const std::string &groupName, float timestep, ros::NodeHandle *nh,
                               const std::string &robotName = "");
   void moveRelative(CartesianCommand type, bool continuous = false);
   float getVelocity() const;
@@ -72,4 +73,4 @@ public:
   void setAngularVelocity(float v);
   void toggleJumpTest(bool enable);
 };
-} // namespace robot_interface
+} // namespace sapien::robot

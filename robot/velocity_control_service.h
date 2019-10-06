@@ -4,30 +4,30 @@
 #pragma once
 
 #include "controllable_articulation_wrapper.h"
-#include "include/VelocityControlService.h"
+#include "sapien_ros_utils/JointVelocityControl.h"
 #include <ros/ros.h>
 
-namespace robot_interface {
+namespace sapien::robot {
 class VelocityControllerServer {
 private:
   std::vector<std::string> mJointName;
-  std::shared_ptr<ros::NodeHandle> mNodeHandle = nullptr;
+  ros::NodeHandle *mNodeHandle = nullptr;
   ros::ServiceServer mServer;
-  float mTimestep;
   std::string mServerName;
 
   // Interface to physx
   std::unique_ptr<ThreadSafeQueue> mQueue;
 
 public:
+  float mTimestep;
+
+public:
   VelocityControllerServer(ControllableArticulationWrapper *wrapper,
-                           const std::vector<std::string> &jointName, float timestep,
-                           const std::string &serviceName, std::shared_ptr<ros::NodeHandle> nh,
-                           const std::string &nameSpace = "physx");
+                           const std::vector<std::string> &jointName,
+                           const std::string &serviceName, float timestep, ros::NodeHandle *nh,
+                           const std::string &robotName);
 
-  void spin();
-
-  bool executeCB(physxtest::VelocityControlService::Request &req,
-                 physxtest::VelocityControlService::Response &res);
+  bool executeCB(sapien_ros_utils::JointVelocityControl::Request &req,
+                 sapien_ros_utils::JointVelocityControl::Response &res);
 };
-} // namespace robot_interface
+} // namespace sapien::robot

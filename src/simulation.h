@@ -4,6 +4,7 @@
 #include "id_generator.h"
 #include "joint_system.h"
 #include "render_interface.h"
+#include "urdf/urdf_loader.h"
 #include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
 #include <extensions/PxDefaultCpuDispatcher.h>
@@ -49,7 +50,8 @@ public:
   std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>>
       mKinematicArticulationWrappers;
   std::vector<std::unique_ptr<class JointSystem>> mObjectArticulationWrappers;
-  std::vector<std::unique_ptr<class ControllableArticulationWrapper>> mControllableArticulationWrapper;
+  std::vector<std::unique_ptr<class ControllableArticulationWrapper>>
+      mControllableArticulationWrapper;
 
 public:
   Simulation();
@@ -74,6 +76,9 @@ public:
   /* Sync with renderer by calling UpdateRigidbody */
   void updateRenderer();
   PxRigidStatic *addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr);
+
+  /* Create URDF loader from simulation */
+  std::unique_ptr<URDF::URDFLoader> createURDFLoader();
 };
 
-}
+} // namespace sapien
