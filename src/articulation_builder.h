@@ -53,7 +53,7 @@ public:
                          const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                          const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr);
 
-  void addCylinderShapeToLink(PxArticulationLink &link,
+  void addCapsuleShapeToLink(PxArticulationLink &link,
                               const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
                               PxReal length = 1, PxMaterial *material = nullptr);
 
@@ -81,7 +81,7 @@ public:
                           const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                           const PxVec3 &size = {1, 1, 1});
 
-  void addCylinderVisualToLink(PxArticulationLink &link,
+  void addCapsuleVisualToLink(PxArticulationLink &link,
                                const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                PxReal radius = 1, PxReal length = 1);
 

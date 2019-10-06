@@ -35,7 +35,7 @@ void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMa
   mCount++;
 }
 
-void ActorBuilder::addCylinderShape(const PxTransform &pose, PxReal radius, PxReal length,
+void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxReal length,
                                       PxMaterial *material, PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
   std::cerr
@@ -96,7 +96,7 @@ physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &siz
   return newId;
 }
 
-physx_id_t ActorBuilder::addCylinderVisual(const PxTransform &pose, PxReal radius, PxReal length) {
+physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal length) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE,

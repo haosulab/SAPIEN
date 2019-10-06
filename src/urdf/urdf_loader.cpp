@@ -219,7 +219,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
         builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size);
         break;
       case Geometry::CYLINDER:
-        builder.addCylinderVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
+        builder.addCapsuleVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
                                         visual->geometry->length);
         break;
       case Geometry::SPHERE:
@@ -241,7 +241,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
         builder.addBoxShapeToLink(currentPxLink, tCollision2Link, collision->geometry->size);
         break;
       case Geometry::CYLINDER:
-        builder.addCylinderShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius,
+        builder.addCapsuleShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius,
                                        collision->geometry->length);
         break;
       case Geometry::SPHERE:
@@ -449,7 +449,7 @@ PxKinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &fi
         visualId = actorBuilder.addBoxVisual(tVisual2Link, visual->geometry->size);
         break;
       case Geometry::CYLINDER:
-        visualId = actorBuilder.addCylinderVisual(tVisual2Link, visual->geometry->radius,
+        visualId = actorBuilder.addCapsuleVisual(tVisual2Link, visual->geometry->radius,
                                                   visual->geometry->length);
         break;
       case Geometry::SPHERE:
@@ -473,7 +473,7 @@ PxKinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &fi
         actorBuilder.addBoxShape(tCollision2Link, collision->geometry->size);
         break;
       case Geometry::CYLINDER:
-        actorBuilder.addCylinderShape(tCollision2Link, collision->geometry->radius,
+        actorBuilder.addCapsuleShape(tCollision2Link, collision->geometry->radius,
                                       collision->geometry->length);
         break;
       case Geometry::SPHERE:
@@ -736,7 +736,7 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
         renderId = actorBuilder->addBoxVisual(interPose * tVisual2Link, visual->geometry->size);
         break;
       case Geometry::CYLINDER:
-        renderId = actorBuilder->addCylinderVisual(
+        renderId = actorBuilder->addCapsuleVisual(
             interPose * tVisual2Link, visual->geometry->radius, visual->geometry->length);
         break;
       case Geometry::SPHERE:
@@ -760,7 +760,7 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
         actorBuilder->addBoxShape(interPose * tCollision2Link, collision->geometry->size);
         break;
       case Geometry::CYLINDER:
-        actorBuilder->addCylinderShape(interPose * tCollision2Link, collision->geometry->radius,
+        actorBuilder->addCapsuleShape(interPose * tCollision2Link, collision->geometry->radius,
                                        collision->geometry->length);
         break;
       case Geometry::SPHERE:

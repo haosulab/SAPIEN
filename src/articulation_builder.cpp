@@ -69,13 +69,10 @@ void ArticulationBuilder::addBoxShapeToLink(PxArticulationLink &link, const PxTr
   link.attachShape(*shape);
 }
 
-void ArticulationBuilder::addCylinderShapeToLink(PxArticulationLink &link,
+void ArticulationBuilder::addCapsuleShapeToLink(PxArticulationLink &link,
                                                    const PxTransform &pose, PxReal radius,
                                                    PxReal length, PxMaterial *material) {
   material = material ? material : mSimulation->mDefaultMaterial;
-  std::cerr
-      << "Warning: PhysX only supports capsule primitive, converting cylinder into capsule..."
-      << std::endl;
   PxShape *shape = mPhysicsSDK->createShape(PxCapsuleGeometry(radius, length), *material, true);
   shape->setLocalPose(pose);
   link.attachShape(*shape);
@@ -125,7 +122,7 @@ void ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link, const PxT
   mSimulation->mRenderId2Parent[newId] = &link;
 }
 
-void ArticulationBuilder::addCylinderVisualToLink(PxArticulationLink &link,
+void ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link,
                                                     const PxTransform &pose, PxReal radius,
                                                     PxReal length) {
   physx_id_t newId = IDGenerator::instance()->next();

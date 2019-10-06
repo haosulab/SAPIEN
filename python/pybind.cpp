@@ -1,5 +1,6 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "actor_builder.h"
 #include "articulation_builder.h"
@@ -130,21 +131,26 @@ PYBIND11_MODULE(sapyen, m) {
 
   py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial");
 
-  // py::class_<Renderer::ISensor> (m, "ISensor")
-  //     .def("getSensorPose", &Renderer::ISensor::getSensorPose)
-  //     .def("setSensorPose", &Renderer::ISensor::setSensorPose);
+  py::class_<Renderer::ISensor, PyISensor>(m, "ISensor")
+      .def("getSensorPose", &Renderer::ISensor::getSensorPose)
+      .def("setSensorPose", &Renderer::ISensor::setSensorPose);
 
-  // py::class_<Renderer::ICamera, Renderer::ISensor> (m, "ICamera")
-  //     .def("getName", &Renderer::ICamera::getName)
-  //     .def("getWidth", &Renderer::ICamera::getWidth)
-  //     .def("getHeight", &Renderer::ICamera::getHeight)
-  //     .def("getHovy", &Renderer::ICamera::getHovy)
-  //     .def("takePicture", &Renderer::ICamera::takePicture)
-  //     .def("getColorRGBA", &Renderer::ICamera::getColorRGBA)
-  //     .def("getAlbedoRGBA", &Renderer::ICamera::getAlbedoRGBA)
-  //     .def("getNormalRGBA", &Renderer::ICamera::getNormalRGBA)
-  //     .def("getDepth", &Renderer::ICamera::getDepth)
-  //     .def("getSegmentation", &Renderer::ICamera::getSegmentation);
+  py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera")
+      .def("getName", &Renderer::ICamera::getName)
+      .def("getWidth", &Renderer::ICamera::getWidth)
+      .def("getHeight", &Renderer::ICamera::getHeight)
+      .def("getHovy", &Renderer::ICamera::getFovy)
+      .def("takePicture", &Renderer::ICamera::takePicture)
+      .def("getColorRGBA",
+           [](Renderer::ICamera &cam) {
+             return py::array_t<float>(
+                 {static_cast<int>(cam.getWidth()), static_cast<int>(cam.getHeight()), 4},
+                 cam.getColorRGBA().data());
+           })
+      .def("getAlbedoRGBA", &Renderer::ICamera::getAlbedoRGBA)
+      .def("getNormalRGBA", &Renderer::ICamera::getNormalRGBA)
+      .def("getDepth", &Renderer::ICamera::getDepth)
+      .def("getSegmentation", &Renderer::ICamera::getSegmentation);
 
   py::class_<Renderer::ICameraManager>(m, "ICameraManager");
 
@@ -155,7 +161,8 @@ PYBIND11_MODULE(sapyen, m) {
       .def("init", &Renderer::OptifuserRenderer::init)
       .def("render", &Renderer::OptifuserRenderer::render)
       .def("destroy", &Renderer::OptifuserRenderer::destroy)
-      .def_readwrite("cam", &Renderer::OptifuserRenderer::cam);
+      .def_readonly("cam", &Renderer::OptifuserRenderer::cam)
+      .def("get_cameras", &Renderer::OptifuserRenderer::getCameras);
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
       .def(py::init([]() { return new Optifuser::CameraSpec(); }))
       .def_readwrite("name", &Optifuser::CameraSpec::name)
