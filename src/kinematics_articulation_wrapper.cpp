@@ -9,7 +9,7 @@
 
 namespace sapien {
 // Kinematics Articulation Wrapper
-KJoint *PxKinematicsArticulationWrapper::createJoint(const JointType &type, KJoint *parent,
+KJoint *KinematicsArticulationWrapper::createJoint(const JointType &type, KJoint *parent,
                                                      PxRigidDynamic *link,
                                                      const PxTransform &poseFromParent,
                                                      const PxTransform &poseFromChild,
@@ -55,8 +55,8 @@ KJoint *PxKinematicsArticulationWrapper::createJoint(const JointType &type, KJoi
   jointName2JointPtr[qName] = std::move(newJoint);
   return tempJoint;
 }
-uint32_t PxKinematicsArticulationWrapper::dof() const { return DOF; }
-void PxKinematicsArticulationWrapper::buildCache() {
+uint32_t KinematicsArticulationWrapper::dof() const { return DOF; }
+void KinematicsArticulationWrapper::buildCache() {
   if (cached) {
     std::cerr << "KinematicsWrapper has already been cached" << std::endl;
     return;
@@ -95,20 +95,20 @@ void PxKinematicsArticulationWrapper::buildCache() {
   qacc.resize(DOF, 0);
   qf.resize(DOF, 0);
 }
-std::vector<std::tuple<PxReal, PxReal>> PxKinematicsArticulationWrapper::get_joint_limits() const {
+std::vector<std::tuple<PxReal, PxReal>> KinematicsArticulationWrapper::get_joint_limits() const {
   return jointLimit;
 }
-std::vector<uint32_t> PxKinematicsArticulationWrapper::get_joint_dofs() const { return jointDOF; }
-std::vector<std::string> PxKinematicsArticulationWrapper::get_joint_names() const {
+std::vector<uint32_t> KinematicsArticulationWrapper::get_joint_dofs() const { return jointDOF; }
+std::vector<std::string> KinematicsArticulationWrapper::get_joint_names() const {
   return jointName;
 }
-std::vector<PxReal> PxKinematicsArticulationWrapper::get_qpos() const { return qpos; }
-std::vector<physx::PxReal> PxKinematicsArticulationWrapper::get_qvel() const { return qvel; }
-std::vector<physx::PxReal> PxKinematicsArticulationWrapper::get_qacc() const { return qacc; }
-std::vector<physx::PxReal> PxKinematicsArticulationWrapper::get_qf() const {
+std::vector<PxReal> KinematicsArticulationWrapper::get_qpos() const { return qpos; }
+std::vector<physx::PxReal> KinematicsArticulationWrapper::get_qvel() const { return qvel; }
+std::vector<physx::PxReal> KinematicsArticulationWrapper::get_qacc() const { return qacc; }
+std::vector<physx::PxReal> KinematicsArticulationWrapper::get_qf() const {
   return std::vector<physx::PxReal>();
 }
-void PxKinematicsArticulationWrapper::set_qpos(const std::vector<PxReal> &v) {
+void KinematicsArticulationWrapper::set_qpos(const std::vector<PxReal> &v) {
   assert(v.size() == DOF);
   size_t j = 0;
   while (j < jointNum) {
@@ -121,14 +121,14 @@ void PxKinematicsArticulationWrapper::set_qpos(const std::vector<PxReal> &v) {
   qpos = v;
   hasMagicVelocity = false;
 }
-void PxKinematicsArticulationWrapper::set_qvel(const std::vector<PxReal> &v) {
+void KinematicsArticulationWrapper::set_qvel(const std::vector<PxReal> &v) {
   assert(v.size() == dof());
   hasMagicVelocity = true;
   driveQvel = v;
 }
-void PxKinematicsArticulationWrapper::set_qacc(const std::vector<PxReal> &v) {}
-void PxKinematicsArticulationWrapper::set_qf(const std::vector<PxReal> &v) {}
-void PxKinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal> &v) {
+void KinematicsArticulationWrapper::set_qacc(const std::vector<PxReal> &v) {}
+void KinematicsArticulationWrapper::set_qf(const std::vector<PxReal> &v) {}
+void KinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal> &v) {
   assert(v.size() == DOF);
   size_t j = 0;
   while (j < jointNum) {
@@ -140,15 +140,15 @@ void PxKinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal>
   }
   qpos = v;
 }
-std::vector<std::string> PxKinematicsArticulationWrapper::get_drive_joint_name() const {
+std::vector<std::string> KinematicsArticulationWrapper::get_drive_joint_name() const {
   return jointNameDOF;
 }
 
 // Custom function
-std::vector<PxRigidDynamic *> PxKinematicsArticulationWrapper::get_links() { return linkListPtr; }
+std::vector<PxRigidDynamic *> KinematicsArticulationWrapper::get_links() { return linkListPtr; }
 
 // Update function should be called in the simulation loop
-void PxKinematicsArticulationWrapper::update(PxReal timestep) {
+void KinematicsArticulationWrapper::update(PxReal timestep) {
   // Update drive target based on controllers
   if (hasMagicVelocity) {
     std::vector<PxReal> driveQpos = qpos;
@@ -169,7 +169,7 @@ void PxKinematicsArticulationWrapper::update(PxReal timestep) {
     }
     lastStepQpos = qpos;
 }
-EArticulationType PxKinematicsArticulationWrapper::get_articulation_type() const {
+EArticulationType KinematicsArticulationWrapper::get_articulation_type() const {
   return EArticulationType::KINEMATIC_ARTICULATION;
 }
 

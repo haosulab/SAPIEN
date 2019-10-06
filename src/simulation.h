@@ -49,14 +49,11 @@ public:
   std::vector<std::unique_ptr<struct ArticulationWrapper>> mDynamicArticulationWrappers;
 
   // wrapping kinematic objects
-  std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>>
+  std::vector<std::unique_ptr<class KinematicsArticulationWrapper>>
       mKinematicArticulationWrappers;
 
   // wrapping object-joint systems
   std::vector<std::unique_ptr<class JointSystem>> mJointSystemWrappers;
-
-  // wrapping free actors (not part of any object-joint system)
-  std::vector<PxRigidActor *> mFreeActors;
 
   std::vector<std::unique_ptr<class ControllableArticulationWrapper>>
       mControllableArticulationWrapper;

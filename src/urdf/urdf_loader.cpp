@@ -350,9 +350,9 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
   return wrapper;
 }
 
-PxKinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &filename) {
-  std::unique_ptr<PxKinematicsArticulationWrapper> wrapper =
-      std::make_unique<PxKinematicsArticulationWrapper>();
+KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &filename) {
+  std::unique_ptr<KinematicsArticulationWrapper> wrapper =
+      std::make_unique<KinematicsArticulationWrapper>();
 
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
