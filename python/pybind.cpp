@@ -343,7 +343,7 @@ PYBIND11_MODULE(sapyen, m) {
           py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
           py::arg("arr") = py::array_t<float>({1, 1, 1}),
           py::arg("material") = nullptr)
-        .def("addCylinderShapeToLink", &ArticulationBuilder::addCylinderShapeToLink, 
+        .def("addCapsuleShapeToLink", &ArticulationBuilder::addCapsuleShapeToLink, 
           py::arg("link"),
           py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
           py::arg("radius") = 1,
@@ -382,7 +382,7 @@ PYBIND11_MODULE(sapyen, m) {
           py::arg("link"),
           py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
           py::arg("arr") = py::array_t<float>({1, 1, 1}))
-        .def("addCylinderVisualToLink", &ArticulationBuilder::addCylinderVisualToLink,
+        .def("addCapsuleVisualToLink", &ArticulationBuilder::addCapsuleVisualToLink,
           py::arg("link"),
           py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
           py::arg("radius") = 1, 
