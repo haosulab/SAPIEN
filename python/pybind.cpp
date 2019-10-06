@@ -11,6 +11,7 @@
 #include "simulation.h"
 #include "urdf_loader.h"
 #include "joint_system.h"
+#include "PxArticulation.h"
 #include <vector>
 
 using namespace sapien;
@@ -276,7 +277,8 @@ PYBIND11_MODULE(sapyen, m) {
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
       .def(py::init<Simulation &>())
       .def_readwrite("fixLoadedObject", &URDF::URDFLoader::fixLoadedObject)
-      .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference);
+      .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference)
+      .def("loadJointSystem", &URDF::URDFLoader::loadJointSystem, py::return_value_policy::reference);
       
   py::class_<PxTransform>(m, "PxTransform")
       .def(py::init([]() {
@@ -295,4 +297,106 @@ PYBIND11_MODULE(sapyen, m) {
       .def("set_q", [](PxTransform &t, py::array_t<PxReal> arr) {
         t.q = {arr.at(1), arr.at(2), arr.at(3), arr.at(0)}; // NOTE: wxyz to xyzw
       });
+
+    //py::class_<PxArticulationLink, PxRigidBody>(m, "PxArticulationLink");
+
+    py::class_<PxArticulationJointType> jointtype(m, "PxArticulationJointType");
+
+    py::enum_<PxArticulationJointType::Enum>(jointtype, "PxArticulationJointType")
+      .value("ePRISMATIC", PxArticulationJointType::ePRISMATIC)
+      .value("eREVOLUTE", PxArticulationJointType::eREVOLUTE)
+      .value("eSPHERICAL", PxArticulationJointType::eSPHERICAL)
+      .value("eFIX", PxArticulationJointType::eFIX)
+      .value("eUNDEFINED", PxArticulationJointType::eUNDEFINED);
+
+    py::class_<ArticulationBuilder>(m, "ArticulationBuilder")
+      .def(py::init<Simulation *>())
+      .def("addLink", 
+        [](ArticulationBuilder &a, PxArticulationLink *parent, const PxTransform &pose, const std::string &name, const std::string &jointName,  
+        PxArticulationJointType::Enum jointType, py::array arr, PxTransform const &parentPose, PxTransform const &childPose){
+          std::vector<std::array<float, 2>> const limits;
+          // TODO: arr to limits
+          return a.addLink(parent, pose, name, jointName, jointType, limits, parentPose, childPose);
+        }, py::return_value_policy::reference,
+          py::arg("parent"),
+          py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity),
+          py::arg("name") = "",
+          py::arg("jointName") = "",
+          py::arg("jointType") = PxArticulationJointType::eUNDEFINED,
+          py::arg("arr") = py::array_t<float>({}),
+          py::arg("parentPose") = PxTransform({0, 0, 0}, PxIdentity),
+          py::arg("childPose") = PxTransform({0, 0, 0}, PxIdentity))
+        .def("addBoxShapeToLink", 
+          [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
+                         const py::array_t<float> arr, PxMaterial *material) {
+                           PxVec3 size = {arr.at(0), arr.at(1), arr.at(2)};
+                           a.addBoxShapeToLink(link, pose, size, material);
+                         },
+          py::arg("link"),
+          py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+          py::arg("arr") = py::array_t<float>({1, 1, 1}),
+          py::arg("material") = nullptr)
+        .def("addCylinderShapeToLink", &ArticulationBuilder::addCylinderShapeToLink, 
+          py::arg("link"),
+          py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+          py::arg("radius") = 1,
+          py::arg("length") = 1,
+          py::arg("material") = nullptr)
+        .def("addSphereShapeToLink", &ArticulationBuilder::addSphereShapeToLink, 
+          py::arg("link"),
+          py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+          py::arg("radius") = 1,
+          py::arg("material") = nullptr)
+        .def("addConvexObjShapeToLink",
+        [](ArticulationBuilder &a, PxArticulationLink &link, const std::string &filename,
+                               const PxTransform &pose, const py::array_t<float> arr, PxMaterial *material) {
+                           PxVec3 scale = {arr.at(0), arr.at(1), arr.at(2)};
+                           a.addConvexObjShapeToLink(link, filename, pose, scale, material);
+                         }, 
+          py::arg("link"),
+          py::arg("filename"),
+          py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+          py::arg("arr") = py::array_t<float>({1, 1, 1}),
+          py::arg("material") = nullptr)
+        .def("setLinkMassAndInertia", 
+        [](ArticulationBuilder &a, PxArticulationLink &link, PxReal mass, const PxTransform &cMassPose,
+                           const py::array_t<float> arr) {
+                           PxVec3 inertia = {arr.at(0), arr.at(1), arr.at(2)};
+                           a.setLinkMassAndInertia(link, mass, cMassPose, inertia);
+                         })
+        .def("updateLinkMassAndInertia", &ArticulationBuilder::updateLinkMassAndInertia,
+          py::arg("link"),
+          py::arg("density") = 1.f)
+        .def("addBoxVisualToLink", 
+        [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose, const py::array_t<float> arr) {
+                           PxVec3 size = {arr.at(0), arr.at(1), arr.at(2)};
+                           a.addBoxVisualToLink(link, pose, size);
+                         }, 
+          py::arg("link"),
+          py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+          py::arg("arr") = py::array_t<float>({1, 1, 1}))
+        .def("addCylinderVisualToLink", &ArticulationBuilder::addCylinderVisualToLink,
+          py::arg("link"),
+          py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+          py::arg("radius") = 1, 
+          py::arg("length") = 1)
+        .def("addSphereVisualToLink", &ArticulationBuilder::addSphereVisualToLink,
+          py::arg("link"),
+          py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+          py::arg("radius") = 1)
+        .def("addObjVisualToLink", 
+          [](ArticulationBuilder &a, PxArticulationLink &link, const std::string &filename,
+                          const PxTransform &pose, const py::array_t<float> arr){
+                            PxVec3 scale = {arr.at(0), arr.at(1), arr.at(2)}; 
+                            a.addObjVisualToLink(link, filename, pose, scale);
+                          },
+          py::arg("link"),
+          py::arg("filename"),
+          py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity),
+          py::arg("arr") = py::array_t<float>({1, 1, 1})
+        )
+        .def("build", &ArticulationBuilder::build,
+          py::arg("fixBase") = true,
+          py::return_value_policy::reference
+          );
 }
