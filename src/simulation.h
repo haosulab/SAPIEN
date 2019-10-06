@@ -45,11 +45,21 @@ public:
   std::map<physx_id_t, PxRigidActor *> mRenderId2Parent;
   std::map<physx_id_t, IArticulationBase *> mRenderId2Articulation;
 
+  // wrapping physx articulations
   std::vector<std::unique_ptr<struct ArticulationWrapper>> mDynamicArticulationWrappers;
+
+  // wrapping kinematic objects
   std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>>
       mKinematicArticulationWrappers;
-  std::vector<std::unique_ptr<class JointSystem>> mObjectArticulationWrappers;
-  std::vector<std::unique_ptr<class ControllableArticulationWrapper>> mControllableArticulationWrapper;
+
+  // wrapping object-joint systems
+  std::vector<std::unique_ptr<class JointSystem>> mJointSystemWrappers;
+
+  // wrapping free actors (not part of any object-joint system)
+  std::vector<PxRigidActor *> mFreeActors;
+
+  std::vector<std::unique_ptr<class ControllableArticulationWrapper>>
+      mControllableArticulationWrapper;
 
 public:
   Simulation();
@@ -76,4 +86,4 @@ public:
   PxRigidStatic *addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr);
 };
 
-}
+} // namespace sapien

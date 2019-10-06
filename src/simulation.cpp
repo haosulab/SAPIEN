@@ -280,6 +280,7 @@ PxRigidStatic *Simulation::addGround(PxReal altitude, bool render, PxMaterial *m
     mRenderId2InitialPose[newId] = PxTransform({0, 0, altitude}, PxIdentity);
     mRenderId2Parent[newId] = ground;
   }
+  mFreeActors.push_back(ground);
   return ground;
 }
 

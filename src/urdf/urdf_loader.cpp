@@ -861,8 +861,8 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
   for (auto id : renderIds) {
     mSimulation.mRenderId2Articulation[id] = newObject.get();
   }
-  mSimulation.mObjectArticulationWrappers.push_back(std::move(newObject));
-  return mSimulation.mObjectArticulationWrappers.back().get();
+  mSimulation.mJointSystemWrappers.push_back(std::move(newObject));
+  return mSimulation.mJointSystemWrappers.back().get();
 }
 
 } // namespace URDF
