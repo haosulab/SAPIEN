@@ -129,8 +129,16 @@ PYBIND11_MODULE(sapyen, m) {
   py::class_<PxRigidDynamic, PxRigidBody, std::unique_ptr<PxRigidDynamic, py::nodelete>>(
       m, "PxRigidDynamic");
 
-  py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial");
+  py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial")
+    .def("getStaticFriction", &PxMaterial::getStaticFriction)
+    .def("getDynamicFriction", &PxMaterial::getDynamicFriction)
+    .def("getRestitution", &PxMaterial::getRestitution)
+    .def("setStaticFriction", &PxMaterial::setStaticFriction)
+    .def("setDynamicFriction", &PxMaterial::setDynamicFriction)
+    .def("setRestitution", &PxMaterial::setRestitution);
 
+  m.def("createMaterial", &PxPhysics::createMaterial);
+  
   py::class_<Renderer::ISensor, PyISensor>(m, "ISensor")
       .def("getSensorPose", &Renderer::ISensor::getSensorPose)
       .def("setSensorPose", &Renderer::ISensor::setSensorPose);
