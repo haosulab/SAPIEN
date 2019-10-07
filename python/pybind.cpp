@@ -127,13 +127,19 @@ PYBIND11_MODULE(sapyen, m) {
 
   py::class_<PxRigidBody, PxRigidActor, std::unique_ptr<PxRigidBody, py::nodelete>>(m,
                                                                                     "PxRigidBody")
-      .def("getGlobalPose", &PxRigidBody::getGlobalPose);
+      .def("getGlobalPose", &PxRigidBody::getGlobalPose)
+      .def("getLinearVelocity", &PxRigidBody::getLinearVelocity)
+      .def("getAngularVelocity", &PxRigidBody::getAngularVelocity);
   py::class_<PxRigidDynamic, PxRigidBody, std::unique_ptr<PxRigidDynamic, py::nodelete>>(
       m, "PxRigidDynamic")
-      .def("getGlobalPose", &PxRigidDynamic::getGlobalPose);
+      .def("getGlobalPose", &PxRigidDynamic::getGlobalPose)
+      .def("getLinearVelocity", &PxRigidDynamic::getLinearVelocity)
+      .def("getAngularVelocity", &PxRigidDynamic::getAngularVelocity);
   py::class_<PxArticulationLink, PxRigidBody, std::unique_ptr<PxArticulationLink, py::nodelete>>(
       m, "PxArticulationLink")
-      .def("getGlobalPose", &PxArticulationLink::getGlobalPose);
+      .def("getGlobalPose", &PxArticulationLink::getGlobalPose)
+      .def("getLinearVelocity", &PxArticulationLink::getLinearVelocity)
+      .def("getAngularVelocity", &PxArticulationLink::getAngularVelocity);
 
   py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial")
     .def("getStaticFriction", &PxMaterial::getStaticFriction)
