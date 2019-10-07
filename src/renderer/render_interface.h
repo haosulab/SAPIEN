@@ -72,7 +72,7 @@ public:
   virtual void addRigidbody(uint32_t uniqueId, const std::string &meshFile,
                             const physx::PxVec3 &scale) = 0;
   virtual void addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
-                            const physx::PxVec3 &scale) = 0;
+                            const physx::PxVec3 &scale, const physx::PxVec3 &color) = 0;
 
   /* This function is called when a rigid body is removed from a scene */
   virtual void removeRigidbody(uint32_t uniqueId) = 0;

@@ -628,7 +628,7 @@ public:
   bool fixLoadedObject;
   URDFLoader(class Simulation &simulation);
   ArticulationWrapper *load(const std::string &filename);
-  class PxKinematicsArticulationWrapper *loadKinematic(const std::string &filename);
+  class KinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class JointSystem *loadJointSystem(const std::string &filename);
 };
 

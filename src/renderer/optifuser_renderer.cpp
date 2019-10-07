@@ -32,7 +32,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFi
 }
 
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
-                                     const physx::PxVec3 &scale) {
+                                     const physx::PxVec3 &scale, const physx::PxVec3 &color) {
   if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
     std::cerr << "Object already added" << std::endl;
     exit(1);
@@ -43,7 +43,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     auto obj = Optifuser::NewCube();
     obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
-    obj->material.kd = {1, 1, 1};
+    obj->material.kd = {color.x, color.y, color.z};
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
@@ -52,7 +52,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     auto obj = Optifuser::NewSphere();
     obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
-    obj->material.kd = {1, 1, 1};
+    obj->material.kd = {color.x, color.y, color.z};
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
@@ -61,7 +61,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     auto obj = Optifuser::NewYZPlane();
     obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
-    obj->material.kd = {1, 1, 1};
+    obj->material.kd = {color.x, color.y, color.z};
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;

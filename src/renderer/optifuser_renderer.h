@@ -21,7 +21,7 @@ public:
   virtual void addRigidbody(uint32_t uniqueId, const std::string &meshFile,
                             const physx::PxVec3 &scale) override;
   virtual void addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
-                            const physx::PxVec3 &scale) override;
+                            const physx::PxVec3 &scale, const physx::PxVec3 &color) override;
   virtual void removeRigidbody(uint32_t uniqueId) override;
   virtual void updateRigidbody(uint32_t uniqueId, const physx::PxTransform &transform) override;
 
