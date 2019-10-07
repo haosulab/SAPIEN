@@ -113,10 +113,10 @@ void ArticulationBuilder::updateLinkMassAndInertia(PxArticulationLink &link, PxR
 //===== Visual Functions =====//
 
 void ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link, const PxTransform &pose,
-                                               const PxVec3 &size) {
+                                               const PxVec3 &size, const PxVec3 &color) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eBOX,
-                          size); // TODO: check if default box size is 1 or 2
+                          size, color); // TODO: check if default box size is 1 or 2
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Parent[newId] = &link;
@@ -124,19 +124,19 @@ void ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link, const PxT
 
 void ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link,
                                                     const PxTransform &pose, PxReal radius,
-                                                    PxReal length) {
+                                                    PxReal length, const PxVec3 &color) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE,
-                          {length, radius, radius}); // TODO: check default orientation
+                          {length, radius, radius}, color); // TODO: check default orientation
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Parent[newId] = &link;
 }
 
 void ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link,
-                                                  const PxTransform &pose, PxReal radius) {
+                                                  const PxTransform &pose, PxReal radius, const PxVec3 &color) {
   physx_id_t newId = IDGenerator::instance()->next();
-  mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius});
+  mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Parent[newId] = &link;
