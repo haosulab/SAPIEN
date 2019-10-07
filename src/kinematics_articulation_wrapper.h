@@ -14,8 +14,7 @@ namespace sapien {
 using namespace physx;
 
 
-
-class PxKinematicsArticulationWrapper : public IArticulationDrivable {
+class KinematicsArticulationWrapper : public IArticulationDrivable {
   KJoint *mRoot;
   std::map<std::string, std::unique_ptr<KJoint>> jointName2JointPtr = {};
   std::vector<KJoint *> jointListPtr;
