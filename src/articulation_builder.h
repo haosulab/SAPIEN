@@ -46,16 +46,13 @@ public:
           PxTransform const &parentPose = {{0, 0, 0}, PxIdentity},
           PxTransform const &childPose = {{0, 0, 0}, PxIdentity});
 
-  /**
-   *  TODO: support scaling and different primitives
-   */
   void addBoxShapeToLink(PxArticulationLink &link,
                          const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                          const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr);
 
   void addCapsuleShapeToLink(PxArticulationLink &link,
-                              const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                              PxReal length = 1, PxMaterial *material = nullptr);
+                             const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                             PxReal length = 1, PxMaterial *material = nullptr);
 
   void addSphereShapeToLink(PxArticulationLink &link,
                             const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
@@ -79,14 +76,15 @@ public:
 
   void addBoxVisualToLink(PxArticulationLink &link,
                           const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                          const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1,1,1});
+                          const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1});
 
   void addCapsuleVisualToLink(PxArticulationLink &link,
-                               const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                               PxReal radius = 1, PxReal length = 1, const PxVec3 &color = {1,1,1});
+                              const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                              PxReal length = 1, const PxVec3 &color = {1, 1, 1});
 
   void addSphereVisualToLink(PxArticulationLink &link,
-                             const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1, const PxVec3 &color = {1,1,1});
+                             const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                             const PxVec3 &color = {1, 1, 1});
 
   void addObjVisualToLink(PxArticulationLink &link, const std::string &filename,
                           const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
@@ -95,4 +93,4 @@ public:
   ArticulationWrapper *build(bool fixBase = true);
 };
 
-}
+} // namespace sapien

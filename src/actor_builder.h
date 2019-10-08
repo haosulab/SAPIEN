@@ -39,7 +39,7 @@ public:
                    PxReal density = 1.f);
 
   void addCapsuleShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                        PxReal length = 1, PxMaterial *material = nullptr, PxReal density = 1.f);
+                       PxReal length = 1, PxMaterial *material = nullptr, PxReal density = 1.f);
 
   void addSphereShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
                       PxMaterial *material = nullptr, PxReal density = 1.f);
@@ -47,16 +47,18 @@ public:
   physx_id_t addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                           const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1});
 
-  physx_id_t addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                               PxReal radius = 1, PxReal length = 1, const PxVec3 &color = {1, 1, 1});
+  physx_id_t addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                              PxReal length = 1, const PxVec3 &color = {1, 1, 1});
 
-  physx_id_t addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1, const PxVec3 &color = {1, 1, 1});
+  physx_id_t addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                             const PxVec3 &color = {1, 1, 1});
 
   physx_id_t addObjVisual(const std::string &filename,
                           const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                           const PxVec3 &scale = {1, 1, 1});
 
-  PxRigidActor *build(bool isStatic = false, bool isKinematic = false, bool addToScene = true);
+  PxRigidActor *build(bool isStatic = false, bool isKinematic = false,
+                      std::string const &name = "", bool addToScene = true);
 };
 
-}
+} // namespace sapien

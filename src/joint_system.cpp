@@ -1,4 +1,5 @@
 #include "joint_system.h"
+#include "common.h"
 #include "simulation.h"
 
 namespace sapien {
@@ -12,7 +13,8 @@ void JointSystem::addLink(PxRigidActor *newLink, const std::string &name, bool a
     }
     links.push_back(newLink);
     namedLinks[name] = newLink;
-    newLink->setName(name.c_str());
+    delete newLink->getName();
+    newLink->setName(newNameFromString(name));
   }
   if (addToScene) {
     mSimulation->mScene->addActor(*newLink);
@@ -44,7 +46,8 @@ void JointSystem::addJoint(PxJoint *newJoint, const std::string &name, bool enab
     joints.push_back(newJoint);
     jointNames.push_back(name);
     namedJoints[name] = newJoint;
-    newJoint->setName(name.c_str());
+    delete newJoint->getName();
+    newJoint->setName(newNameFromString(name));
   }
 }
 

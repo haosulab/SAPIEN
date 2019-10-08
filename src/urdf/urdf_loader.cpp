@@ -1,5 +1,6 @@
 #include "urdf_loader.h"
 #include "actor_builder.h"
+#include "common.h"
 #include "articulation_builder.h"
 #include "articulation_wrapper.h"
 #include "joint_system.h"
@@ -52,8 +53,7 @@ static std::string getAbsPath(const std::string &urdfPath, const std::string &fi
   return fs::absolute(path).remove_filename().string() + filePath;
 }
 
-URDFLoader::URDFLoader(Simulation &simulation)
-    : mSimulation(simulation), fixLoadedObject(true) {}
+URDFLoader::URDFLoader(Simulation &simulation) : mSimulation(simulation), fixLoadedObject(true) {}
 
 struct LinkTreeNode {
   Link *link;
@@ -220,7 +220,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
         break;
       case Geometry::CYLINDER:
         builder.addCapsuleVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
-                                        visual->geometry->length);
+                                       visual->geometry->length);
         break;
       case Geometry::SPHERE:
         builder.addSphereVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius);
@@ -242,7 +242,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
         break;
       case Geometry::CYLINDER:
         builder.addCapsuleShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius,
-                                       collision->geometry->length);
+                                      collision->geometry->length);
         break;
       case Geometry::SPHERE:
         builder.addSphereShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius);
@@ -450,7 +450,7 @@ KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &file
         break;
       case Geometry::CYLINDER:
         visualId = actorBuilder.addCapsuleVisual(tVisual2Link, visual->geometry->radius,
-                                                  visual->geometry->length);
+                                                 visual->geometry->length);
         break;
       case Geometry::SPHERE:
         visualId = actorBuilder.addSphereVisual(tVisual2Link, visual->geometry->radius);
@@ -474,7 +474,7 @@ KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &file
         break;
       case Geometry::CYLINDER:
         actorBuilder.addCapsuleShape(tCollision2Link, collision->geometry->radius,
-                                      collision->geometry->length);
+                                     collision->geometry->length);
         break;
       case Geometry::SPHERE:
         actorBuilder.addSphereShape(tCollision2Link, collision->geometry->radius);
@@ -486,8 +486,8 @@ KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &file
       }
     }
 
-    PxRigidDynamic *currentLink = static_cast<PxRigidDynamic *>(actorBuilder.build(false, true));
-    currentLink->setName(current->link->name.c_str());
+    PxRigidDynamic *currentLink =
+        static_cast<PxRigidDynamic *>(actorBuilder.build(false, true, current->link->name));
 
     // inertial
     const Inertial &currentInertial = *current->link->inertial;
@@ -761,7 +761,7 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
         break;
       case Geometry::CYLINDER:
         actorBuilder->addCapsuleShape(interPose * tCollision2Link, collision->geometry->radius,
-                                       collision->geometry->length);
+                                      collision->geometry->length);
         break;
       case Geometry::SPHERE:
         actorBuilder->addSphereShape(interPose * tCollision2Link, collision->geometry->radius);
@@ -793,11 +793,11 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
       continue;
     }
     PxRigidActor *currentLink =
-        current->parent ? treeNode2Builder[current]->build(false, false, false)
-                        : treeNode2Builder[current]->build(false, fixLoadedObject, false);
+        current->parent ? treeNode2Builder[current]->build(false, false, "", false)
+                        : treeNode2Builder[current]->build(false, fixLoadedObject, "", false);
     treeNode2pLink[current] = currentLink;
     currentLink->setGlobalPose(treeNode2Pose[current]);
-    newObject->addLink(currentLink, current->link->name);
+    newObject->addLink(currentLink);
     if (current->joint && current->joint->type != "fixed") {
       PxJoint *newJoint = nullptr;
 #ifdef _VERBOSE
@@ -832,10 +832,12 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
         newRJoint->setLimit(
             PxJointAngularLimitPair(current->joint->limit->lower, current->joint->limit->upper));
         newJoint = newRJoint;
+        newJoint->setName(newNameFromString(""));
       } else if (current->joint->type == "continuous") {
         auto newCJoint = PxRevoluteJointCreate(*mSimulation.mPhysicsSDK, parentLink, tAxis2Parent,
                                                currentLink, tAxis2Joint);
         newJoint = newCJoint;
+        newJoint->setName(newNameFromString(""));
       } else if (current->joint->type == "prismatic") {
         auto newPJoint = PxPrismaticJointCreate(*mSimulation.mPhysicsSDK, parentLink, tAxis2Parent,
                                                 currentLink, tAxis2Joint);
@@ -844,6 +846,7 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
                                                    current->joint->limit->lower,
                                                    current->joint->limit->upper));
         newJoint = newPJoint;
+        newJoint->setName(newNameFromString(""));
       } else if (current->joint->type == "floating") {
         std::cerr << "Currently not supported: " + current->joint->type << std::endl;
         exit(1);
@@ -867,4 +870,4 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
 
 } // namespace URDF
 
-}
+} // namespace sapien

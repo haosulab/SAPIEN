@@ -313,9 +313,12 @@ PYBIND11_MODULE(sapyen, m) {
            py::return_value_policy::reference);
 
   py::class_<PxTransform>(m, "PxTransform")
-      .def(py::init([]() {
-        return new PxTransform({0, 0, 0}, {0, 0, 0, 1});
-      }))
+      .def(py::init([](py::array_t<float> p, py::array_t<float> q) {
+             return new PxTransform({p.at(0), p.at(1), p.at(2)},
+                                    {q.at(1), q.at(2), q.at(3), q.at(0)});
+           }),
+           py::return_value_policy::automatic, py::arg("p") = py::array_t<float>({0, 0, 0}),
+           py::arg("q") = py::array_t<float>({1, 0, 0, 0}))
       .def_property_readonly(
           "p", [](PxTransform &t) { return py::array_t<PxReal>(3, (PxReal *)(&t.p)); })
       .def_property_readonly("q",

@@ -1,4 +1,5 @@
 #include "articulation_builder.h"
+#include "common.h"
 #include "mesh_registry.h"
 #include <cassert>
 #include <numeric>
@@ -12,14 +13,15 @@ ArticulationBuilder::ArticulationBuilder(Simulation *simulation)
   mArticulation = mPhysicsSDK->createArticulationReducedCoordinate();
 }
 
-PxArticulationLink *
-ArticulationBuilder::addLink(PxArticulationLink *parent, const PxTransform &pose,
-                               const std::string &name, const std::string &jointName,
-                               PxArticulationJointType::Enum jointType,
-                               std::vector<std::array<float, 2>> const &limits,
-                               PxTransform const &parentPose, PxTransform const &childPose) {
+PxArticulationLink *ArticulationBuilder::addLink(PxArticulationLink *parent,
+                                                 const PxTransform &pose, const std::string &name,
+                                                 const std::string &jointName,
+                                                 PxArticulationJointType::Enum jointType,
+                                                 std::vector<std::array<float, 2>> const &limits,
+                                                 PxTransform const &parentPose,
+                                                 PxTransform const &childPose) {
   PxArticulationLink *newLink = mArticulation->createLink(parent, pose);
-  newLink->setName(name.c_str());
+  newLink->setName(newNameFromString(name));
   if (!name.empty()) {
     if (namedLinks.find(name) != namedLinks.end()) {
       throw std::runtime_error("Duplicate link names are not allowed in an articulation.");
@@ -62,16 +64,16 @@ ArticulationBuilder::addLink(PxArticulationLink *parent, const PxTransform &pose
 }
 
 void ArticulationBuilder::addBoxShapeToLink(PxArticulationLink &link, const PxTransform &pose,
-                                              const PxVec3 &size, PxMaterial *material) {
+                                            const PxVec3 &size, PxMaterial *material) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxShape *shape = mPhysicsSDK->createShape(PxBoxGeometry(size), *material, true);
   shape->setLocalPose(pose);
   link.attachShape(*shape);
 }
 
-void ArticulationBuilder::addCapsuleShapeToLink(PxArticulationLink &link,
-                                                   const PxTransform &pose, PxReal radius,
-                                                   PxReal length, PxMaterial *material) {
+void ArticulationBuilder::addCapsuleShapeToLink(PxArticulationLink &link, const PxTransform &pose,
+                                                PxReal radius, PxReal length,
+                                                PxMaterial *material) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxShape *shape = mPhysicsSDK->createShape(PxCapsuleGeometry(radius, length), *material, true);
   shape->setLocalPose(pose);
@@ -79,7 +81,7 @@ void ArticulationBuilder::addCapsuleShapeToLink(PxArticulationLink &link,
 }
 
 void ArticulationBuilder::addSphereShapeToLink(PxArticulationLink &link, const PxTransform &pose,
-                                                 PxReal radius, PxMaterial *material) {
+                                               PxReal radius, PxMaterial *material) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxShape *shape = mPhysicsSDK->createShape(PxSphereGeometry(radius), *material, true);
   shape->setLocalPose(pose);
@@ -87,9 +89,9 @@ void ArticulationBuilder::addSphereShapeToLink(PxArticulationLink &link, const P
 }
 
 void ArticulationBuilder::addConvexObjShapeToLink(PxArticulationLink &link,
-                                                    const std::string &filename,
-                                                    const PxTransform &pose, const PxVec3 &scale,
-                                                    PxMaterial *material) {
+                                                  const std::string &filename,
+                                                  const PxTransform &pose, const PxVec3 &scale,
+                                                  PxMaterial *material) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxConvexMesh *mesh = loadObjMesh(filename, mPhysicsSDK, mCooking);
   PxShape *shape =
@@ -99,8 +101,8 @@ void ArticulationBuilder::addConvexObjShapeToLink(PxArticulationLink &link,
 }
 
 void ArticulationBuilder::setLinkMassAndInertia(PxArticulationLink &link, PxReal mass,
-                                                  const PxTransform &cMassPose,
-                                                  const PxVec3 &inertia) {
+                                                const PxTransform &cMassPose,
+                                                const PxVec3 &inertia) {
   link.setMass(mass);
   link.setCMassLocalPose(cMassPose);
   link.setMassSpaceInertiaTensor(inertia);
@@ -113,28 +115,26 @@ void ArticulationBuilder::updateLinkMassAndInertia(PxArticulationLink &link, PxR
 //===== Visual Functions =====//
 
 void ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link, const PxTransform &pose,
-                                               const PxVec3 &size, const PxVec3 &color) {
+                                             const PxVec3 &size, const PxVec3 &color) {
   physx_id_t newId = IDGenerator::instance()->next();
-  mRenderer->addRigidbody(newId, PxGeometryType::eBOX,
-                          size, color); // TODO: check if default box size is 1 or 2
+  mRenderer->addRigidbody(newId, PxGeometryType::eBOX, size, color);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Parent[newId] = &link;
 }
 
-void ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link,
-                                                    const PxTransform &pose, PxReal radius,
-                                                    PxReal length, const PxVec3 &color) {
+void ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link, const PxTransform &pose,
+                                                 PxReal radius, PxReal length,
+                                                 const PxVec3 &color) {
   physx_id_t newId = IDGenerator::instance()->next();
-  mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE,
-                          {length, radius, radius}, color); // TODO: check default orientation
+  mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE, {length, radius, radius}, color);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Parent[newId] = &link;
 }
 
-void ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link,
-                                                  const PxTransform &pose, PxReal radius, const PxVec3 &color) {
+void ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link, const PxTransform &pose,
+                                                PxReal radius, const PxVec3 &color) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
   mRenderIds.push_back(newId);
@@ -142,9 +142,8 @@ void ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link,
   mSimulation->mRenderId2Parent[newId] = &link;
 }
 
-void ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
-                                               const std::string &filename,
-                                               const PxTransform &pose, const PxVec3 &scale) {
+void ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link, const std::string &filename,
+                                             const PxTransform &pose, const PxVec3 &scale) {
   // generate new render id
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderer->addRigidbody(newId, filename, scale);
@@ -257,4 +256,4 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase) {
   return wrapperPtr;
 }
 
-}
+} // namespace sapien
