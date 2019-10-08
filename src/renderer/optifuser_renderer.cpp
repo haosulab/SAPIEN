@@ -40,7 +40,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
 
   switch (type) {
   case physx::PxGeometryType::eBOX: {
-    auto obj = Optifuser::NewCube();
+    auto obj = Optifuser::NewFlatCube();
     obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {1, 1, 1};
@@ -133,9 +133,10 @@ void OptifuserRenderer::destroy() {
 }
 
 void OptifuserRenderer::render() {
+  static float moveSpeed = 1.f;
   mContext->processEvents();
 
-  float dt = 0.005f;
+  float dt = 0.005f * moveSpeed;
   if (Optifuser::getInput().getKeyState(GLFW_KEY_W)) {
     cam.moveForwardRight(dt, 0);
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_S)) {
@@ -224,6 +225,8 @@ void OptifuserRenderer::render() {
         ImGui::Text("%-4.3f %-4.3f %-4.3f", forward.x, forward.y, forward.z);
         ImGui::Text("Fov");
         ImGui::SliderAngle("##fov(y)", &cam.fovy, 1.f, 90.f);
+        ImGui::Text("Move speed");
+        ImGui::SliderFloat("##speed", &moveSpeed, 1.f, 100.f);
         ImGui::Text("Width: %d", mContext->getWidth());
         ImGui::SameLine();
         ImGui::Text("Height: %d", mContext->getHeight());

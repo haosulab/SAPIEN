@@ -1,4 +1,5 @@
 #include "articulation_builder.h"
+#include "common.h"
 #include "mesh_registry.h"
 #include <cassert>
 #include <numeric>
@@ -19,7 +20,7 @@ ArticulationBuilder::addLink(PxArticulationLink *parent, const PxTransform &pose
                                std::vector<std::array<float, 2>> const &limits,
                                PxTransform const &parentPose, PxTransform const &childPose) {
   PxArticulationLink *newLink = mArticulation->createLink(parent, pose);
-  newLink->setName(name.c_str());
+  newLink->setName(newNameFromString(name));
   if (!name.empty()) {
     if (namedLinks.find(name) != namedLinks.end()) {
       throw std::runtime_error("Duplicate link names are not allowed in an articulation.");
