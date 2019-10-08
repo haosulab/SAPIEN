@@ -59,57 +59,29 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMate
   mCount++;
 }
 
-void ActorBuilder::addPrimitiveShape(physx::PxGeometryType::Enum type, physx::PxTransform pose,
-                                     physx::PxVec3 scale, PxMaterial *material, PxReal density) {
-  if (!material) {
-    material = mSimulation->mDefaultMaterial;
-  }
-
-  switch (type) {
-  case physx::PxGeometryType::ePLANE: {
-    PxShape *shape = mPhysicsSDK->createShape(PxPlaneGeometry(), *material);
-    if (!shape) {
-      std::cerr << "create shape failed!" << std::endl;
-      exit(1);
-    }
-    shape->setLocalPose(pose);
-    physx_id_t newId = IDGenerator::instance()->next();
-    mRenderer->addRigidbody(newId, type, scale);
-
-    mRenderIds.push_back(newId);
-    mShapes.push_back(shape);
-    mDensities.push_back(density);
-    mCount++;
-    break;
-  }
-  default:
-    std::cerr << "create shape failed: Unsupported primitive type" << std::endl;
-    break;
-  }
-}
-
-physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size) {
+physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size,
+                                      const PxVec3 &color) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
-  mRenderer->addRigidbody(newId, PxGeometryType::eBOX,
-                          size); // TODO: check if default box size is 1 or 2
+  mRenderer->addRigidbody(newId, PxGeometryType::eBOX, size, color);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   return newId;
 }
 
-physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal length) {
+physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal length,
+                                          const PxVec3 &color) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
-  mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE,
-                          {length, radius, radius}); // TODO: check default orientation
+  mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE, {length, radius, radius}, color);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   return newId;
 }
 
-physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius) {
+physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius,
+                                         const PxVec3 &color) {
   physx_id_t newId = IDGenerator::instance()->next();
   mRenderIds.push_back(newId);
-  mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius});
+  mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   return newId;
 }
