@@ -42,7 +42,9 @@ public:
   virtual void addCamera(uint32_t uniqueId, std::string const &name, uint32_t width,
                          uint32_t height, float fovx, float fovy, float near, float far) override;
   virtual void updateCamera(uint32_t uniqueId, physx::PxTransform const &transform) override;
+
+  void showWindow();
+  void hideWindow();
 };
 } // namespace Renderer
-
-}
+} // namespace sapien

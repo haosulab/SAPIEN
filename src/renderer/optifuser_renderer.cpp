@@ -114,11 +114,6 @@ void OptifuserRenderer::init() {
   mScene->addDirectionalLight({{0, -1, -1}, {1, 1, 1}});
   mScene->setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
-  // mScene->setEnvironmentMap(
-  //     "../assets/ame_desert/desertsky_ft.tga", "../assets/ame_desert/desertsky_bk.tga",
-  //     "../assets/ame_desert/desertsky_up.tga", "../assets/ame_desert/desertsky_dn.tga",
-  //     "../assets/ame_desert/desertsky_lf.tga", "../assets/ame_desert/desertsky_rt.tga");
-
   mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
   mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
                                       "../glsl_shader/gbuffer_segmentation.fsh");
@@ -126,6 +121,7 @@ void OptifuserRenderer::init() {
                                        "../glsl_shader/deferred.fsh");
   mContext->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
   mContext->renderer.enablePicking();
+  mContext->renderer.enableAxisPass();
 }
 
 void OptifuserRenderer::destroy() {
@@ -327,6 +323,10 @@ void OptifuserRenderer::updateCamera(uint32_t uniqueId, physx::PxTransform const
   mMountedCameras[uniqueId]->rotation = {transform.q.w, transform.q.x, transform.q.y,
                                          transform.q.z};
 }
-} // namespace Renderer
 
+void OptifuserRenderer::showWindow() { mContext->showWindow(); }
+
+void OptifuserRenderer::hideWindow() { mContext->hideWindow(); }
+
+} // namespace Renderer
 } // namespace sapien

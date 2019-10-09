@@ -125,7 +125,8 @@ void test3() {
   loader.fixLoadedObject = true;
   // auto *articulationWrapper =
   // loader.load("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
-  // auto *articulationWrapper = loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
+  // auto *articulationWrapper =
+  // loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
 
   // int row = 2;
   // for (int i = 0; i < 4; ++i) {
@@ -133,8 +134,8 @@ void test3() {
   //   int y = i % row * 2;
   //   auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
   //   auto articulation = articulationWrapper->articulation;
-  //   articulation->teleportRootLink({{(float)x, (float)y, 0}, PxQuat(rand_float()*3, {0, 0, 1})}, true);
-  //   articulationWrapper->updateCache();
+  //   articulation->teleportRootLink({{(float)x, (float)y, 0}, PxQuat(rand_float()*3, {0, 0, 1})},
+  //   true); articulationWrapper->updateCache();
   // }
 
   // auto chair = loader.load("../assets/179/test.urdf");
@@ -148,15 +149,16 @@ void test3() {
   sim.addGround(-1);
 
   reset(articulationWrapper);
-  articulationWrapper->set_qpos({0.1,0,0,0,0,0,0,0,0,0,0,0,0});
+  articulationWrapper->set_qpos({0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
 
   // PxArticulationLink *chairLink;
   // chair->articulation->getLinks(&chairLink, 1);
 
   auto actorBuider = sim.createActorBuilder();
   auto actor = actorBuider->build(false, true, "Camera Mount");
-  sim.addMountedCamera("Floating Camera", actor, {{0,0,0}, PxIdentity}, 32, 32, 45, 4);
-  actor->setGlobalPose({{0, 0, 1}, {0, 0.071068, 0, 0.7071068}});
+  sim.addMountedCamera("Floating Camera", actor, {{0, 0, 0}, PxIdentity}, 256, 256, 0.9, 0.9);
+  actor->setGlobalPose({{-10, 0, 1}, {0,0,0,1}});
+  actor->setGlobalPose({{-2, 0, 2}, {0, 0.3826834, 0, 0.9238795}});
 
   printf("Simulation start\n");
   while (true) {
@@ -171,6 +173,7 @@ void test3() {
     sim.step();
     sim.updateRenderer();
     renderer.render();
+
     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
       break;
     }
@@ -195,8 +198,6 @@ void test4() {
   loader.loadJointSystem("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
 
   // auto cache = articulationInfo.cache;
-
-
 
   sim.step();
 
