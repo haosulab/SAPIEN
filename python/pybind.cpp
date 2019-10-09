@@ -187,6 +187,8 @@ PYBIND11_MODULE(sapyen, m) {
       .def("init", &Renderer::OptifuserRenderer::init)
       .def("render", &Renderer::OptifuserRenderer::render)
       .def("destroy", &Renderer::OptifuserRenderer::destroy)
+      .def("show_window", &Renderer::OptifuserRenderer::showWindow)
+      .def("hide_window", &Renderer::OptifuserRenderer::hideWindow)
       .def_readonly("cam", &Renderer::OptifuserRenderer::cam)
       .def("get_cameras", &Renderer::OptifuserRenderer::getCameras);
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
