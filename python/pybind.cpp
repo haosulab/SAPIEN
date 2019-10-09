@@ -24,9 +24,11 @@ py::array_t<float> mat42array(glm::mat4 const &mat) {
   return py::array_t<float>({4, 4}, arr);
 }
 
-PxVec3 array2vec3(const py::array_t<float> &arr) {
-  return {arr.at(0), arr.at(1), arr.at(2)};
+template <typename T> py::array_t<T> make_array(std::vector<T> const &values) {
+  return py::array_t(values.size(), values.data());
 }
+
+PxVec3 array2vec3(const py::array_t<float> &arr) { return {arr.at(0), arr.at(1), arr.at(2)}; }
 
 class PyISensor : public Renderer::ISensor {
 public:
@@ -146,15 +148,15 @@ PYBIND11_MODULE(sapyen, m) {
       .def("getAngularVelocity", &PxArticulationLink::getAngularVelocity);
 
   py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial")
-    .def("getStaticFriction", &PxMaterial::getStaticFriction)
-    .def("getDynamicFriction", &PxMaterial::getDynamicFriction)
-    .def("getRestitution", &PxMaterial::getRestitution)
-    .def("setStaticFriction", &PxMaterial::setStaticFriction)
-    .def("setDynamicFriction", &PxMaterial::setDynamicFriction)
-    .def("setRestitution", &PxMaterial::setRestitution);
+      .def("getStaticFriction", &PxMaterial::getStaticFriction)
+      .def("getDynamicFriction", &PxMaterial::getDynamicFriction)
+      .def("getRestitution", &PxMaterial::getRestitution)
+      .def("setStaticFriction", &PxMaterial::setStaticFriction)
+      .def("setDynamicFriction", &PxMaterial::setDynamicFriction)
+      .def("setRestitution", &PxMaterial::setRestitution);
 
   m.def("createMaterial", &PxPhysics::createMaterial);
-  
+
   py::class_<Renderer::ISensor, PyISensor>(m, "ISensor")
       .def("getSensorPose", &Renderer::ISensor::getSensorPose)
       .def("setSensorPose", &Renderer::ISensor::setSensorPose);
@@ -204,14 +206,15 @@ PYBIND11_MODULE(sapyen, m) {
       .def_property_readonly(
           "rotation",
           [](Optifuser::CameraSpec &c) {
-            return py::array_t<float>({c.rotation.w, c.rotation.x, c.rotation.y, c.rotation.z});
+            return make_array<float>({c.rotation.w, c.rotation.x, c.rotation.y, c.rotation.z});
           })
       .def_readwrite("near", &Optifuser::CameraSpec::near)
       .def_readwrite("far", &Optifuser::CameraSpec::far)
       .def_readwrite("fovy", &Optifuser::CameraSpec::fovy)
       .def_readwrite("aspect", &Optifuser::CameraSpec::aspect)
       .def("lookAt",
-           [](Optifuser::CameraSpec &c, const py::array_t<float> &dir, const py::array_t<float> &up) {
+           [](Optifuser::CameraSpec &c, const py::array_t<float> &dir,
+              const py::array_t<float> &up) {
              c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
            })
       .def("getModelMat", [](Optifuser::CameraSpec &c) { return mat42array(c.getModelMat()); })
@@ -234,7 +237,7 @@ PYBIND11_MODULE(sapyen, m) {
       .def("moveForwardRight", &Optifuser::FPSCameraSpec::moveForwardRight)
       .def("getRotation0", [](Optifuser::FPSCameraSpec &c) {
         glm::quat q = c.getRotation0();
-        return py::array_t<float>({q.w, q.x, q.y, q.z});
+        return make_array<float>({q.w, q.x, q.y, q.z});
       });
 
   py::class_<IArticulationBase, PyIArticulationBase> articulationBase(m, "IArticulationBase");
@@ -317,18 +320,15 @@ PYBIND11_MODULE(sapyen, m) {
              return new PxTransform({p.at(0), p.at(1), p.at(2)},
                                     {q.at(1), q.at(2), q.at(3), q.at(0)});
            }),
-           py::return_value_policy::automatic, py::arg("p") = py::array_t<float>({0, 0, 0}),
-           py::arg("q") = py::array_t<float>({1, 0, 0, 0}))
+           py::return_value_policy::automatic, py::arg("p") = make_array<float>({0, 0, 0}),
+           py::arg("q") = make_array<float>({1, 0, 0, 0}))
       .def_property_readonly(
           "p", [](PxTransform &t) { return py::array_t<PxReal>(3, (PxReal *)(&t.p)); })
       .def_property_readonly("q",
                              [](PxTransform &t) {
-                               return py::array_t<PxReal>({t.q.w, t.q.x, t.q.y, t.q.z});
+                               return make_array<float>({t.q.w, t.q.x, t.q.y, t.q.z});
                              })
-      .def("set_p",
-           [](PxTransform &t, const py::array_t<PxReal> &arr) {
-             t.p = array2vec3(arr);
-           })
+      .def("set_p", [](PxTransform &t, const py::array_t<PxReal> &arr) { t.p = array2vec3(arr); })
       .def("set_q", [](PxTransform &t, const py::array_t<PxReal> &arr) {
         t.q = {arr.at(1), arr.at(2), arr.at(3), arr.at(0)}; // NOTE: wxyz to xyzw
       });
@@ -361,7 +361,7 @@ PYBIND11_MODULE(sapyen, m) {
            py::return_value_policy::reference, py::arg("parent") = (PxArticulationLink *)nullptr,
            py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity), py::arg("name") = "",
            py::arg("jointName") = "", py::arg("jointType") = PxArticulationJointType::eUNDEFINED,
-           py::arg("limits") = py::array_t<float>({}),
+           py::arg("limits") = py::array_t<float>(),
            py::arg("parentPose") = PxTransform({0, 0, 0}, PxIdentity),
            py::arg("childPose") = PxTransform({0, 0, 0}, PxIdentity))
       .def("addBoxShapeToLink",
@@ -370,7 +370,7 @@ PYBIND11_MODULE(sapyen, m) {
              a.addBoxShapeToLink(link, pose, array2vec3(arr), material);
            },
            py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-           py::arg("scale") = py::array_t<float>({1, 1, 1}), py::arg("material") = nullptr)
+           py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr)
       .def("addCapsuleShapeToLink", &ArticulationBuilder::addCapsuleShapeToLink, py::arg("link"),
            py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity}, py::arg("radius") = 1,
            py::arg("length") = 1, py::arg("material") = nullptr)
@@ -384,7 +384,7 @@ PYBIND11_MODULE(sapyen, m) {
            },
            py::arg("link"), py::arg("filename"),
            py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-           py::arg("scale") = py::array_t<float>({1, 1, 1}), py::arg("material") = nullptr)
+           py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr)
       .def("setLinkMassAndInertia",
            [](ArticulationBuilder &a, PxArticulationLink &link, PxReal mass,
               const PxTransform &cMassPose, const py::array_t<float> &arr) {
@@ -398,21 +398,23 @@ PYBIND11_MODULE(sapyen, m) {
              a.addBoxVisualToLink(link, pose, array2vec3(scale), array2vec3(color));
            },
            py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-           py::arg("scale") = py::array_t<float>({1, 1, 1}), py::arg("color") = py::array_t<float>({1, 1, 1}))
-      .def("addCapsuleVisualToLink", 
-           [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose, 
-           PxReal radius, PxReal length, const py::array_t<PxReal> &color) {
+           py::arg("scale") = make_array<float>({1, 1, 1}),
+           py::arg("color") = make_array<float>({1, 1, 1}))
+      .def("addCapsuleVisualToLink",
+           [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
+              PxReal radius, PxReal length, const py::array_t<PxReal> &color) {
              a.addCapsuleVisualToLink(link, pose, radius, length, array2vec3(color));
-           }, 
-           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity}, py::arg("radius") = 1,
-           py::arg("length") = 1, py::arg("color") = py::array_t<float>({1, 1, 1}))
-      .def("addSphereVisualToLink", 
-           [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose, 
-           PxReal radius, const py::array_t<PxReal> &color) {
+           },
+           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+           py::arg("radius") = 1, py::arg("length") = 1,
+           py::arg("color") = make_array<float>({1, 1, 1}))
+      .def("addSphereVisualToLink",
+           [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
+              PxReal radius, const py::array_t<PxReal> &color) {
              a.addSphereVisualToLink(link, pose, radius, array2vec3(color));
-           }, 
-           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity}, py::arg("radius") = 1,
-           py::arg("color") = py::array_t<float>({1, 1, 1}))
+           },
+           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+           py::arg("radius") = 1, py::arg("color") = make_array<float>({1, 1, 1}))
       .def("addObjVisualToLink",
            [](ArticulationBuilder &a, PxArticulationLink &link, const std::string &filename,
               const PxTransform &pose, const py::array_t<float> &scale) {
@@ -420,7 +422,7 @@ PYBIND11_MODULE(sapyen, m) {
            },
            py::arg("link"), py::arg("filename"),
            py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity),
-           py::arg("scale") = py::array_t<float>({1, 1, 1}))
+           py::arg("scale") = make_array<float>({1, 1, 1}))
       .def("build", &ArticulationBuilder::build, py::arg("fixBase") = true,
            py::return_value_policy::reference);
 }
