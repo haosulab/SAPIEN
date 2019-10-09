@@ -66,7 +66,7 @@ public:
   void set_qf(const std::vector<PxReal> &v) override;
 
   void set_drive_target(const std::vector<PxReal> &v) override;
-  std::vector<std::string> get_drive_joint_name() const override;
+  std::vector<std::string> get_drive_joint_names() const override;
 
   // Customer function
   std::vector<PxRigidDynamic *> get_links();

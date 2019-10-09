@@ -152,12 +152,15 @@ void ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link, const std
   mSimulation->mRenderId2Parent[newId] = &link;
 }
 
-ArticulationWrapper *ArticulationBuilder::build(bool fixBase) {
+ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce) {
   mArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, fixBase);
   auto wrapper = std::make_unique<ArticulationWrapper>();
   for (auto id : mRenderIds) {
     mSimulation->mRenderId2Articulation[id] = wrapper.get();
   }
+
+  // Balance force for robot articulation, for ant or other articulation, balanceForce should be false (default)
+  wrapper->set_force_balance(balanceForce);
 
   // add articulation
   wrapper->articulation = mArticulation;
@@ -211,28 +214,36 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase) {
     if (joint) {
       wrapper->jointNames.push_back(link2JointName[links[i]]);
       wrapper->jointDofs.push_back(links[i]->getInboundJointDof());
+      for (size_t k = 0; k < wrapper->jointDofs.back(); ++k) {
+        wrapper->jointNamesDOF.push_back(wrapper->jointNames.back());
+        wrapper->joints.push_back(joint);
+      }
 
       switch (joint->getJointType()) {
       case physx::PxArticulationJointType::eREVOLUTE: {
         auto motion = joint->getMotion(PxArticulationAxis::eTWIST);
+        wrapper->jointAxises.push_back(PxArticulationAxis::eTWIST);
         if (motion == PxArticulationMotion::eFREE) {
           wrapper->jointLimits.push_back(
               {-std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()});
         } else {
           PxReal low, high;
           joint->getLimit(PxArticulationAxis::eTWIST, low, high);
+          joint->setFrictionCoefficient(0);
           wrapper->jointLimits.push_back({low, high});
         }
         break;
       }
       case physx::PxArticulationJointType::ePRISMATIC: {
         auto motion = joint->getMotion(PxArticulationAxis::eX);
+        wrapper->jointAxises.push_back(PxArticulationAxis::eX);
         if (motion == PxArticulationMotion::eFREE) {
           wrapper->jointLimits.push_back(
               {-std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()});
         } else {
           PxReal low, high;
           joint->getLimit(PxArticulationAxis::eX, low, high);
+          joint->setFrictionCoefficient(0);
           wrapper->jointLimits.push_back({low, high});
         }
         break;

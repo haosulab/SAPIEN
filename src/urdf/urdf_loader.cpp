@@ -1,8 +1,8 @@
 #include "urdf_loader.h"
 #include "actor_builder.h"
-#include "common.h"
 #include "articulation_builder.h"
 #include "articulation_wrapper.h"
+#include "common.h"
 #include "joint_system.h"
 #include "kinematics_articulation_wrapper.h"
 #include "mesh_registry.h"
@@ -53,7 +53,7 @@ static std::string getAbsPath(const std::string &urdfPath, const std::string &fi
   return fs::absolute(path).remove_filename().string() + filePath;
 }
 
-URDFLoader::URDFLoader(Simulation &simulation) : mSimulation(simulation), fixLoadedObject(true) {}
+URDFLoader::URDFLoader(Simulation &simulation) : mSimulation(simulation){}
 
 struct LinkTreeNode {
   Link *link;
@@ -317,7 +317,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
     }
   }
 
-  ArticulationWrapper *wrapper = builder.build(fixLoadedObject);
+  ArticulationWrapper *wrapper = builder.build(fixLoadedObject, balancePassiveForce);
 
   for (auto &gazebo : robot->gazebo_array) {
     for (auto &sensor : gazebo->sensor_array) {

@@ -145,7 +145,7 @@
 		<parent link="2:seat 1"/>
 		<child link="1:back 1"/>
 		<origin xyz="-4.991888999938965e-07 0.030485495924949646 0.2143460065126419" rpy="0 0 0"/>
-		<limit lower="-0.32986722862692824" upper="0.1413716694115407" effort="10" velocity="3"/>
+		<limit lower="-0.32986722862692824" upper="0.1413716694115407" effort="10" stepSize="3"/>
 		<axis xyz="-1.0 0.0 0.0"/>
 	</joint>
 
@@ -154,7 +154,7 @@
 		<parent link="0:virtual"/>
 		<child link="2:seat 1"/>
 		<origin xyz="0.0 0.4177574962377548 -0.002097010612487793" rpy="0 0 0"/>
-		<limit lower="-0.0502704772949219" upper="0.0347295227050781" effort="10" velocity="3"/>
+		<limit lower="-0.0502704772949219" upper="0.0347295227050781" effort="10" stepSize="3"/>
 		<axis xyz="0.0 1.0 0.0"/>
 	</joint>
 
@@ -163,7 +163,7 @@
 		<parent link="12:caster 4"/>
 		<child link="3:wheel 1"/>
 		<origin xyz="-5.029141902923584e-08 -0.014643446630850487 0.0" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="-1.0 0.0 0.0"/>
 	</joint>
 
@@ -172,7 +172,7 @@
 		<parent link="9:caster 1"/>
 		<child link="4:wheel 2"/>
 		<origin xyz="-7.450580596923828e-09 -0.014643401186322486 -3.7325662560760975e-09" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="1.0 0.0 0.0"/>
 	</joint>
 
@@ -181,7 +181,7 @@
 		<parent link="10:caster 2"/>
 		<child link="5:wheel 3"/>
 		<origin xyz="-4.842877388000488e-08 -0.014643405998366443 0.0" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="-1.0 0.0 0.0"/>
 	</joint>
 
@@ -190,7 +190,7 @@
 		<parent link="13:caster 5"/>
 		<child link="6:wheel 4"/>
 		<origin xyz="-7.450580596923828e-09 -0.014643448513815605 -7.450580596923828e-09" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="1.0 0.0 0.0"/>
 	</joint>
 
@@ -199,7 +199,7 @@
 		<parent link="11:caster 3"/>
 		<child link="7:wheel 5"/>
 		<origin xyz="-7.450580596923828e-09 -0.014643404219986556 5.587935447692871e-08" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="1.0 0.0 0.0"/>
 	</joint>
 
@@ -208,7 +208,7 @@
 		<parent link="0:virtual"/>
 		<child link="8:gas lift piece 1"/>
 		<origin xyz="-4.0625215164125095e-08 0.29204249382019043 0.02732014417349355" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="0.0 1.0 0.0"/>
 	</joint>
 
@@ -217,7 +217,7 @@
 		<parent link="8:gas lift piece 1"/>
 		<child link="9:caster 1"/>
 		<origin xyz="0.2346125427829033 -0.2531113438308239 0.0025355397453741754" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="0.0 1.0 0.0"/>
 	</joint>
 
@@ -226,7 +226,7 @@
 		<parent link="8:gas lift piece 1"/>
 		<child link="10:caster 2"/>
 		<origin xyz="0.07187673973012029 -0.2531113438308239 -0.21763664245306508" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="0.0 1.0 0.0"/>
 	</joint>
 
@@ -235,7 +235,7 @@
 		<parent link="8:gas lift piece 1"/>
 		<child link="11:caster 3"/>
 		<origin xyz="-0.19296845456492842 -0.2531113438308239 -0.13626884802876965" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="0.0 1.0 0.0"/>
 	</joint>
 
@@ -244,7 +244,7 @@
 		<parent link="8:gas lift piece 1"/>
 		<child link="12:caster 4"/>
 		<origin xyz="0.06868574174213468 -0.25311129353940487 0.22430335969031795" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="0.0 1.0 0.0"/>
 	</joint>
 
@@ -253,7 +253,7 @@
 		<parent link="8:gas lift piece 1"/>
 		<child link="13:caster 5"/>
 		<origin xyz="-0.19296845456492842 -0.25311129353940487 0.13814886153043254" rpy="0 0 0"/>
-		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" velocity="3"/>
+		<limit lower="-3.141592653589793" upper="3.141592653589793" effort="10" stepSize="3"/>
 		<axis xyz="0.0 1.0 0.0"/>
 	</joint>
 

@@ -11,7 +11,7 @@ namespace sapien {
 ControllableArticulationWrapper::ControllableArticulationWrapper(
     IArticulationDrivable *articulation)
     : articulation(articulation) {
-  jointNames = articulation->get_drive_joint_name();
+  jointNames = articulation->get_drive_joint_names();
   driveQpos.resize(jointNames.size(), 0);
 }
 bool ControllableArticulationWrapper::add_position_controller(
@@ -72,6 +72,9 @@ void ControllableArticulationWrapper::driveFromPositionController() {
     }
     controllerActive = true;
   }
+  if (!controllerActive) {
+    driveQpos = articulation->get_qpos();
+  }
 }
 void ControllableArticulationWrapper::driveFromVelocityController(physx::PxReal timestep) {
   for (size_t i = 0; i < velocityControllerQueueList.size(); ++i) {
@@ -91,7 +94,6 @@ ThreadSafeQueue *ControllableArticulationWrapper::get_joint_state_queue() {
   return jointStateQueue.get();
 }
 void ControllableArticulationWrapper::update(physx::PxReal timestep) {
-  driveQpos = articulation->get_qpos();
   driveFromVelocityController(timestep);
   driveFromPositionController();
   if (controllerActive) {
@@ -102,7 +104,7 @@ void ControllableArticulationWrapper::update(physx::PxReal timestep) {
   updateJointState();
 }
 std::vector<std::string> ControllableArticulationWrapper::get_drive_joint_name() {
-  return articulation->get_drive_joint_name();
+  return articulation->get_drive_joint_names();
 }
 void ControllableArticulationWrapper::updateTimeStep(float newTimestep) {
   timestep = newTimestep;

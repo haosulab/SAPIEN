@@ -47,9 +47,9 @@ public:
   std::map<physx_id_t, IArticulationBase *> mRenderId2Articulation;
 
   std::vector<std::unique_ptr<struct ArticulationWrapper>> mDynamicArticulationWrappers;
-  std::vector<std::unique_ptr<class PxKinematicsArticulationWrapper>>
+  std::vector<std::unique_ptr<class KinematicsArticulationWrapper>>
       mKinematicArticulationWrappers;
-  std::vector<std::unique_ptr<class JointSystem>> mObjectArticulationWrappers;
+  std::vector<std::unique_ptr<class JointSystem>> mJointSystemWrappers;
   std::vector<std::unique_ptr<class ControllableArticulationWrapper>>
       mControllableArticulationWrapper;
 

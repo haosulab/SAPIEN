@@ -10,11 +10,11 @@
 namespace sapien {
 // Kinematics Articulation Wrapper
 KJoint *KinematicsArticulationWrapper::createJoint(const JointType &type, KJoint *parent,
-                                                     PxRigidDynamic *link,
-                                                     const PxTransform &poseFromParent,
-                                                     const PxTransform &poseFromChild,
-                                                     PxReal upperLimit, PxReal lowerLimit,
-                                                     const std::string &name) {
+                                                   PxRigidDynamic *link,
+                                                   const PxTransform &poseFromParent,
+                                                   const PxTransform &poseFromChild,
+                                                   PxReal upperLimit, PxReal lowerLimit,
+                                                   const std::string &name) {
   std::string qName = name;
   if (!name.empty()) {
     if (jointName2JointPtr.find(name) != jointName2JointPtr.end()) {
@@ -140,7 +140,7 @@ void KinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal> &
   }
   qpos = v;
 }
-std::vector<std::string> KinematicsArticulationWrapper::get_drive_joint_name() const {
+std::vector<std::string> KinematicsArticulationWrapper::get_drive_joint_names() const {
   return jointNameDOF;
 }
 
@@ -164,13 +164,13 @@ void KinematicsArticulationWrapper::update(PxReal timestep) {
   }
 
   // Update stepSize based on time interval if the set_drive_target function
-    for (size_t i = 0; i < dof(); ++i) {
-      qvel[i] = (qpos[i] - lastStepQpos[i]) / timestep;
-    }
-    lastStepQpos = qpos;
+  for (size_t i = 0; i < dof(); ++i) {
+    qvel[i] = (qpos[i] - lastStepQpos[i]) / timestep;
+  }
+  lastStepQpos = qpos;
 }
 EArticulationType KinematicsArticulationWrapper::get_articulation_type() const {
   return EArticulationType::KINEMATIC_ARTICULATION;
 }
 
-}
+} // namespace sapien

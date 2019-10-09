@@ -625,7 +625,8 @@ class URDFLoader {
   std::string mUrdfString;
 
 public:
-  bool fixLoadedObject;
+  bool fixLoadedObject = true;
+  bool balancePassiveForce = false;
   URDFLoader(class Simulation &simulation);
   ArticulationWrapper *load(const std::string &filename);
   class KinematicsArticulationWrapper *loadKinematic(const std::string &filename);

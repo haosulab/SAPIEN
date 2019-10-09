@@ -90,7 +90,7 @@ public:
                           const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                           const PxVec3 &scale = {1, 1, 1});
 
-  ArticulationWrapper *build(bool fixBase = true);
+  ArticulationWrapper *build(bool fixBase = true, bool balanceForce = false);
 };
 
 } // namespace sapien

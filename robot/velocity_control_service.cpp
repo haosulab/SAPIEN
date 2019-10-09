@@ -5,22 +5,21 @@
 #include "velocity_control_service.h"
 namespace sapien::robot {
 
-VelocityControllerServer::VelocityControllerServer(ControllableArticulationWrapper *wrapper,
-                                                   const std::vector<std::string> &jointName,
-                                                   const std::string &serviceName, float timestep,
-                                                   ros::NodeHandle *nh,
-                                                   const std::string &robotName)
+JointVelocityController::JointVelocityController(ControllableArticulationWrapper *wrapper,
+                                                 const std::vector<std::string> &jointName,
+                                                 const std::string &serviceName, float timestep,
+                                                 ros::NodeHandle *nh, const std::string &robotName)
     : mJointName(jointName), mNodeHandle(std::move(nh)), mTimestep(timestep),
       mServerName("/sapien/" + robotName + "/" + serviceName + "/joint_velocity") {
-  mServer = mNodeHandle->advertiseService(mServerName, &robot::VelocityControllerServer::executeCB,
-                                          this);
+  mServer =
+      mNodeHandle->advertiseService(mServerName, &robot::JointVelocityController::executeCB, this);
   mQueue = std::make_unique<ThreadSafeQueue>();
 
   // Register queue to controllable wrapper
   wrapper->add_velocity_controller(mJointName, mQueue.get());
 }
-bool VelocityControllerServer::executeCB(sapien_ros_utils::JointVelocityControl::Request &req,
-                                         sapien_ros_utils::JointVelocityControl::Response &res) {
+bool JointVelocityController::executeCB(sapien_ros_utils::JointVelocityControl::Request &req,
+                                        sapien_ros_utils::JointVelocityControl::Response &res) {
   // Check joint name
   auto serviceJointName = req.joint_name;
   for (const auto &name : serviceJointName) {
@@ -47,5 +46,19 @@ bool VelocityControllerServer::executeCB(sapien_ros_utils::JointVelocityControl:
   }
   res.success = true;
   return true;
+}
+void JointVelocityController::moveJoint(const std::vector<std::string> &jointName,
+                                        float velocity) {
+  // Check joint name
+  std::vector<float> jointVelocity(mJointName.size(), 0);
+  for (const auto & i : jointName) {
+    uint32_t index =
+        std::find(mJointName.begin(), mJointName.end(), i) - mJointName.begin();
+    if (index == mJointName.size()) {
+      ROS_ERROR("Joint name not found in joint velocity controller: %s", i.c_str());
+    }
+    jointVelocity[index] = velocity;
+  }
+  mQueue->push(jointVelocity);
 }
 } // namespace sapien::robot

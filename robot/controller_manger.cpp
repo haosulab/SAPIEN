@@ -3,11 +3,14 @@
 //
 
 #include "controller_manger.h"
+namespace sapien::robot {
+
 sapien::robot::ControllerManger::ControllerManger(const std::string &robotName,
                                                   sapien::ControllableArticulationWrapper *wrapper)
     : wrapper(wrapper), robotName(robotName), timestep(wrapper->informMangerTimestepChange()),
       spinner(4) {
   nh = std::make_unique<ros::NodeHandle>();
+  jointName = wrapper->get_drive_joint_name();
 }
 void sapien::robot::ControllerManger::createJointPubNode(double pubFrequency,
                                                          double updateFrequency) {
@@ -18,24 +21,35 @@ void sapien::robot::ControllerManger::createJointPubNode(double pubFrequency,
   jointPubNode =
       std::make_unique<JointPubNode>(wrapper, pubFrequency, updateFrequency, robotName, nh.get());
 }
-void sapien::robot::ControllerManger::createCartesianVelocityController(
-    const std::string &groupName) {
+CartesianVelocityController *
+sapien::robot::ControllerManger::createCartesianVelocityController(const std::string &groupName) {
   if (name2CartesianVelocityController.find(groupName) != name2CartesianVelocityController.end()) {
     ROS_WARN("Cartesian Velocity Controller has already existed for the same group name: %s",
              groupName.c_str());
-    return;
+    return nullptr;
   }
   auto controller = std::make_unique<CartesianVelocityController>(wrapper, groupName, timestep,
                                                                   nh.get(), robotName);
-  name2CartesianVelocityController[groupName] = std::move(controller);
-}
-void sapien::robot::ControllerManger::createJointVelocityController(
-    const std::vector<std::string> &jointNames, const std::string &serviceName) {
-  std::unique_ptr<VelocityControllerServer> controller =
-      std::make_unique<VelocityControllerServer>(wrapper, jointNames, serviceName, timestep,
-                                                 nh.get(), robotName);
 
+  auto controllerPtr = controller.get();
+  name2CartesianVelocityController[groupName] = std::move(controller);
+  return controllerPtr;
+}
+JointVelocityController *sapien::robot::ControllerManger::createJointVelocityController(
+    const std::vector<std::string> &jointNames, const std::string &serviceName) {
+  for (const auto &name : jointNames) {
+    if (std::count(jointName.begin(), jointName.end(), name) != 1) {
+      ROS_WARN("Joint name not found in robot %s: %s", robotName.c_str(), name.c_str());
+      return nullptr;
+    }
+  }
+
+  std::unique_ptr<JointVelocityController> controller = std::make_unique<JointVelocityController>(
+      wrapper, jointNames, serviceName, timestep, nh.get(), robotName);
+
+  auto controllerPtr = controller.get();
   name2JointVelocityController[serviceName] = std::move(controller);
+  return controllerPtr;
 }
 void sapien::robot::ControllerManger::createGroupTrajectoryController(
     const std::string &groupName) {
@@ -51,7 +65,7 @@ void sapien::robot::ControllerManger::createGroupTrajectoryController(
 
 ros::NodeHandle *sapien::robot::ControllerManger::getHandle() const { return nh.get(); }
 std::string sapien::robot::ControllerManger::getRobotName() const { return robotName; }
-void sapien::robot::ControllerManger::start() {
-  spinner.start(); }
+void sapien::robot::ControllerManger::start() { spinner.start(); }
 void sapien::robot::ControllerManger::stop() { spinner.stop(); }
 void sapien::robot::ControllerManger::removeController(const std::string &) {}
+} // namespace sapien::robot

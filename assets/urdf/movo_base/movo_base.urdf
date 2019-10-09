@@ -88,7 +88,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <child link="linear_actuator_link"/>
   <origin xyz="0.0771402 0 0.3938763" rpy="0 0 0"/>
   <axis xyz="0 0 1"/>
-  <limit lower="0.0" upper="0.472" effort="1000" velocity="0.20"/>
+  <limit lower="0.0" upper="0.472" effort="1000" stepSize="0.20"/>
   <dynamics damping="0.0" friction="0.0"/>
 </joint>
 

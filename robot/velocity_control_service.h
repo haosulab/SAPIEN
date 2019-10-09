@@ -8,7 +8,7 @@
 #include <ros/ros.h>
 
 namespace sapien::robot {
-class VelocityControllerServer {
+class JointVelocityController {
 private:
   std::vector<std::string> mJointName;
   ros::NodeHandle *mNodeHandle = nullptr;
@@ -22,12 +22,13 @@ public:
   float mTimestep;
 
 public:
-  VelocityControllerServer(ControllableArticulationWrapper *wrapper,
+  JointVelocityController(ControllableArticulationWrapper *wrapper,
                            const std::vector<std::string> &jointName,
                            const std::string &serviceName, float timestep, ros::NodeHandle *nh,
                            const std::string &robotName);
 
   bool executeCB(sapien_ros_utils::JointVelocityControl::Request &req,
                  sapien_ros_utils::JointVelocityControl::Response &res);
+  void moveJoint(const std::vector<std::string> &jointName, float velocity);
 };
 } // namespace sapien::robot

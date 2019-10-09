@@ -17,10 +17,11 @@ private:
   std::unique_ptr<JointPubNode> jointPubNode = nullptr;
   std::map<std::string, std::unique_ptr<CartesianVelocityController>>
       name2CartesianVelocityController;
-  std::map<std::string, std::unique_ptr<VelocityControllerServer>> name2JointVelocityController;
+  std::map<std::string, std::unique_ptr<JointVelocityController>> name2JointVelocityController;
   std::map<std::string, std::unique_ptr<GroupControllerNode>> name2GroupTrajectoryController;
 
   std::string robotName;
+  std::vector<std::string> jointName;
   std::unique_ptr<ros::NodeHandle> nh;
   float timestep;
 
@@ -32,8 +33,8 @@ public:
 
   // Function for add controllers
   void createJointPubNode(double pubFrequency, double updateFrequency);
-  void createCartesianVelocityController(const std::string &groupName);
-  void createJointVelocityController(const std::vector<std::string> &jointNames,
+  CartesianVelocityController* createCartesianVelocityController(const std::string &groupName);
+  JointVelocityController* createJointVelocityController(const std::vector<std::string> &jointNames,
                                      const std::string &serviceName);
   void createGroupTrajectoryController(const std::string &groupName);
 

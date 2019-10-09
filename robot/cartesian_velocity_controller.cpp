@@ -28,7 +28,7 @@ CartesianVelocityController::CartesianVelocityController(ControllableArticulatio
 
   eeName = jointModelGroup->getOnlyOneEndEffectorTip()->getName();
   currentPose = state->getGlobalLinkTransform(eeName);
-  jointStateTopicName = "/" + robotName + "/joint_states";
+  jointStateTopicName = "/sapien/" + robotName + "/joint_states";
 
   // Build relative transformation matrix cache
   transStepSize = timestep * 1;
@@ -64,10 +64,15 @@ void CartesianVelocityController::updateCurrentPose() {
 void CartesianVelocityController::moveRelative(CartesianCommand type, bool continuous) {
   if (!continuous) {
     updateCurrentPose();
-    currentPose = state->getGlobalLinkTransform(eeName);
   }
-  auto newPose = cartesianMatrix[type] * currentPose;
-  bool found_ik = state->setFromIK(jointModelGroup, newPose, 0.01);
+  Eigen::Isometry3d newPose;
+  if(type<3 || (type<9&&type>=6)){
+    newPose = cartesianMatrix[type] * currentPose;
+  }
+  else{
+    newPose = currentPose * cartesianMatrix[type];
+  }
+  bool found_ik = state->setFromIK(jointModelGroup, newPose, 0.05);
   if (!found_ik) {
     ROS_WARN("Ik not found without timeout");
     return;

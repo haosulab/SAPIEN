@@ -183,7 +183,7 @@ void Simulation::step() {
     // TODO: do useful stuff here
   }
   for (auto &wrapper : mDynamicArticulationWrappers) {
-    wrapper->updateCache();
+    wrapper->update();
   }
   for (auto &wrapper : mControllableArticulationWrapper) {
     wrapper->update(mTimestep);

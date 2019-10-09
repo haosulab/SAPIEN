@@ -126,13 +126,13 @@ public:
   PS3Input() {
     shouldExit = false;
     std::string deviceName = findPS3Controller();
+    for (auto &state : buttonStates) {
+      state = 0;
+    }
     if (deviceName.empty()) {
       std::cerr << "No PS3 Controller Found!";
     } else {
       device = std::ifstream("/dev/input/" + deviceName, std::ios::in | std::ios::binary);
-      for (auto &state : buttonStates) {
-        state = 0;
-      }
       worker = std::thread(&PS3Input::runThread, this);
     }
   }
