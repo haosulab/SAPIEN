@@ -122,7 +122,7 @@ void test3() {
   sim.setTimestep(1.f / 500.f);
 
   auto loader = URDF::URDFLoader(sim);
-  loader.fixLoadedObject = false;
+  loader.fixLoadedObject = true;
   // auto *articulationWrapper =
   // loader.load("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
   // auto *articulationWrapper = loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
@@ -137,22 +137,36 @@ void test3() {
   //   articulationWrapper->updateCache();
   // }
 
-  auto chair = loader.load("../assets/179/test.urdf");
-  chair->articulation->teleportRootLink({{1,0,0}, PxIdentity}, true);
+  // auto chair = loader.load("../assets/179/test.urdf");
+  // chair->articulation->teleportRootLink({{1,0,0}, PxIdentity}, true);
 
   auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
 
+  auto *articulation = articulationWrapper->articulation;
+  auto *cache = articulationWrapper->cache;
+
   sim.addGround(-1);
 
-  // reset(articulationWrapper);
-  // articulationWrapper->updateArticulation();
+  reset(articulationWrapper);
+  articulationWrapper->set_qpos({0.1,0,0,0,0,0,0,0,0,0,0,0,0});
 
-  PxArticulationLink *chairLink;
-  chair->articulation->getLinks(&chairLink, 1);
+  // PxArticulationLink *chairLink;
+  // chair->articulation->getLinks(&chairLink, 1);
+
+  auto actorBuider = sim.createActorBuilder();
+  auto actor = actorBuider->build(false, true, "Camera Mount");
+  sim.addMountedCamera("Floating Camera", actor, {{0,0,0}, PxIdentity}, 32, 32, 45, 4);
+  actor->setGlobalPose({{0, 0, 1}, {0, 0.071068, 0, 0.7071068}});
 
   printf("Simulation start\n");
   while (true) {
-    chairLink ->addForce({100, 0, 0});
+    articulation->commonInit();
+    for (uint32_t i = 0; i < 13; ++i) {
+      cache->jointAcceleration[i] = 1;
+    }
+
+    articulation->computeJointForce(*cache);
+    articulation->applyCache(*cache, PxArticulationCache::eFORCE);
 
     sim.step();
     sim.updateRenderer();
@@ -181,7 +195,8 @@ void test4() {
   loader.loadJointSystem("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
 
   // auto cache = articulationInfo.cache;
-  
+
+
 
   sim.step();
 

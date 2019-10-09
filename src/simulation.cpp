@@ -276,7 +276,7 @@ PxRigidStatic *Simulation::addGround(PxReal altitude, bool render, PxMaterial *m
 
   if (render) {
     physx_id_t newId = IDGenerator::instance()->next();
-    mRenderer->addRigidbody(newId, PxGeometryType::ePLANE, {10, 10, 10}, {1,1,1});
+    mRenderer->addRigidbody(newId, PxGeometryType::ePLANE, {10, 10, 10}, {1, 1, 1});
     mRenderId2InitialPose[newId] = PxTransform({0, 0, altitude}, PxIdentity);
     mRenderId2Parent[newId] = ground;
   }
@@ -284,8 +284,8 @@ PxRigidStatic *Simulation::addGround(PxReal altitude, bool render, PxMaterial *m
 }
 
 physx_id_t Simulation::addMountedCamera(std::string const &name, PxRigidActor *actor,
-                                          PxTransform const &pose, uint32_t width, uint32_t height,
-                                          float fovx, float fovy, float near, float far) {
+                                        PxTransform const &pose, uint32_t width, uint32_t height,
+                                        float fovx, float fovy, float near, float far) {
   physx_id_t cameraId = IDGenerator::instance()->next();
   const PxVec3 up = {0, 0, 1};
   const PxVec3 forward = {1, 0, 0};
@@ -299,4 +299,8 @@ physx_id_t Simulation::addMountedCamera(std::string const &name, PxRigidActor *a
   return cameraId;
 }
 
+PxMaterial *Simulation::createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction,
+                                               PxReal restitution) const {
+  return mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
 }
+} // namespace sapien
