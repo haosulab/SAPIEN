@@ -70,7 +70,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     auto obj = Optifuser::NewCapsule(scale.x, scale.y);
     obj->setSegmentId(uniqueId);
     obj->scale = {1, 1, 1};
-    obj->material.kd = {1, 1, 1};
+    obj->material.kd = {color.x, color.y, color.z};
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;

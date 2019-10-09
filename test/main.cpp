@@ -173,6 +173,7 @@ void test3() {
     sim.step();
     sim.updateRenderer();
     renderer.render();
+    renderer.showWindow();
 
     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
       break;
