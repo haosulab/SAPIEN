@@ -345,12 +345,13 @@ PYBIND11_MODULE(sapyen, m) {
 
   py::class_<PxArticulationJointType> jointtype(m, "PxArticulationJointType");
 
-  py::enum_<PxArticulationJointType::Enum>(jointtype, "PxArticulationJointType")
+  py::enum_<PxArticulationJointType::Enum>(jointtype, "ArticulationJointType")
       .value("ePRISMATIC", PxArticulationJointType::ePRISMATIC)
       .value("eREVOLUTE", PxArticulationJointType::eREVOLUTE)
       .value("eSPHERICAL", PxArticulationJointType::eSPHERICAL)
       .value("eFIX", PxArticulationJointType::eFIX)
-      .value("eUNDEFINED", PxArticulationJointType::eUNDEFINED);
+      .value("eUNDEFINED", PxArticulationJointType::eUNDEFINED)
+      .export_values();
 
   py::class_<ArticulationBuilder>(m, "ArticulationBuilder")
       .def(py::init<Simulation *>())
@@ -362,7 +363,7 @@ PYBIND11_MODULE(sapyen, m) {
              std::vector<std::array<float, 2>> limits;
              if (jointType == PxArticulationJointType::eREVOLUTE ||
                  jointType == PxArticulationJointType::ePRISMATIC) {
-               std::vector<std::array<float, 2>> limits = {{arr.at(0, 0), arr.at(0, 1)}};
+                 limits = {{arr.at(0, 0), arr.at(0, 1)}};
              }
              // TODO: arr to limits
              return a.addLink(parent, pose, name, jointName, jointType, limits, parentPose,
