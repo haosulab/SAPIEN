@@ -65,6 +65,8 @@ public:
 
   std::unique_ptr<class ActorBuilder> createActorBuilder();
   std::unique_ptr<class ArticulationBuilder> createArticulationBuilder();
+  PxMaterial *createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction,
+                                     PxReal restitution) const;
 
   physx_id_t addMountedCamera(std::string const &name, PxRigidActor *actor,
                               PxTransform const &pose, uint32_t width, uint32_t height, float fovx,
