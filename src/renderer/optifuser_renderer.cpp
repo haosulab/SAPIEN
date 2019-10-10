@@ -8,7 +8,7 @@
 namespace sapien {
 namespace Renderer {
 
-enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION };
+enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION, CUSTOM };
 
 constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
@@ -157,10 +157,12 @@ void OptifuserRenderer::render() {
 
   static int renderMode = 0;
   mContext->renderer.renderScene(*mScene, cam);
-  if (renderMode != SEGMENTATION) {
-    mContext->renderer.displayLighting();
-  } else {
+  if (renderMode == SEGMENTATION) {
     mContext->renderer.displaySegmentation();
+  } else if (renderMode == CUSTOM) {
+    mContext->renderer.displayUserTexture();
+  } else {
+    mContext->renderer.displayLighting();
   }
 
   static int pickedId = 0;
@@ -208,6 +210,10 @@ void OptifuserRenderer::render() {
                                                "../glsl_shader/deferred_depth.fsh");
         }
         if (ImGui::RadioButton("Segmentation", &renderMode, RenderMode::SEGMENTATION)) {
+          mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
+                                              "../glsl_shader/gbuffer_segmentation.fsh");
+        }
+        if (ImGui::RadioButton("Custom", &renderMode, RenderMode::CUSTOM)) {
           mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
                                               "../glsl_shader/gbuffer_segmentation.fsh");
         }

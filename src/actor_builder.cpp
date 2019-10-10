@@ -115,7 +115,9 @@ PxRigidActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string c
     for (size_t i = 0; i < mRenderIds.size(); ++i) {
       mSimulation->mRenderId2Parent[mRenderIds[i]] = actor;
     }
-    PxRigidBodyExt::updateMassAndInertia(*dActor, mDensities.data(), mCount);
+    if (mCount) {
+      PxRigidBodyExt::updateMassAndInertia(*dActor, mDensities.data(), mCount);
+    }
   }
   actor->setName(newNameFromString(name));
   if (addToScene) {
