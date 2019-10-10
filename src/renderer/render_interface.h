@@ -73,6 +73,9 @@ public:
                             const physx::PxVec3 &scale) = 0;
   virtual void addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
                             const physx::PxVec3 &scale, const physx::PxVec3 &color) = 0;
+  virtual void updateCustomData(uint32_t uniqueId,
+                                std::vector<float> const &customData = {1, 0, 0, 0, 0, 1, 0, 0, 0,
+                                                                        0, 1, 0, 0, 0, 0, 1}) = 0;
 
   /* This function is called when a rigid body is removed from a scene */
   virtual void removeRigidbody(uint32_t uniqueId) = 0;

@@ -140,6 +140,7 @@ int main() {
     actor_builder->build(true)->setGlobalPose({{x-1, y-1, 0}, PxIdentity});
   }
 
+  renderer.showWindow();
   while (true) {
     // wrapper->set_qf({rand_float(), rand_float(), rand_float(), rand_float(), rand_float(),
     //                  rand_float(), rand_float(), rand_float()});

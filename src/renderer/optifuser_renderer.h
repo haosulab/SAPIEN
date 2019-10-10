@@ -22,6 +22,9 @@ public:
                             const physx::PxVec3 &scale) override;
   virtual void addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
                             const physx::PxVec3 &scale, const physx::PxVec3 &color) override;
+  virtual void updateCustomData(uint32_t uniqueId,
+                                std::vector<float> const &customData = {1, 0, 0, 0, 0, 1, 0, 0, 0,
+                                                                        0, 1, 0, 0, 0, 0, 1}) override;
   virtual void removeRigidbody(uint32_t uniqueId) override;
   virtual void updateRigidbody(uint32_t uniqueId, const physx::PxTransform &transform) override;
 

@@ -14,10 +14,10 @@ constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFile,
                                      const physx::PxVec3 &scale) {
-  if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
-    std::cerr << "Object already added" << std::endl;
-    exit(1);
-  }
+  // if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
+  //   std::cerr << "Object already added" << std::endl;
+  //   exit(1);
+  // }
   auto objects = Optifuser::LoadObj(objFile);
   for (auto &obj : objects) {
     obj->setSegmentId(uniqueId);
@@ -33,10 +33,10 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFi
 
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
                                      const physx::PxVec3 &scale, const physx::PxVec3 &color) {
-  if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
-    std::cerr << "Object already added" << std::endl;
-    exit(1);
-  }
+  // if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
+  //   std::cerr << "Object already added" << std::endl;
+  //   exit(1);
+  // }
 
   switch (type) {
   case physx::PxGeometryType::eBOX: {
@@ -78,6 +78,12 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   default:
     std::cerr << "This shape is not Implemented" << std::endl;
     break;
+  }
+}
+
+void OptifuserRenderer::updateCustomData(uint32_t uniqueId, std::vector<float> const &customData) {
+  for (auto &obj : mObjectRegistry[uniqueId]) {
+    obj->setUserData(customData);
   }
 }
 
