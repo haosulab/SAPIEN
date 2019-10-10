@@ -301,9 +301,10 @@ physx_id_t Simulation::addMountedCamera(std::string const &name, PxRigidActor *a
 std::unique_ptr<URDF::URDFLoader> Simulation::createURDFLoader() {
   auto loader = std::make_unique<URDF::URDFLoader>(*this);
   return loader;
+}
 
 PxMaterial *Simulation::createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction,
                                                PxReal restitution) const {
   return mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
+}
 } // namespace sapien
-

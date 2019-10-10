@@ -295,7 +295,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
       PxVec3 axis1 = current->joint->axis->xyz.getNormalized();
 
       PxVec3 axis2;
-      if (axis1.dot({1, 0, 0}) > 0.9) {
+      if (std::abs(axis1.dot({1, 0, 0})) > 0.9) {
         axis2 = axis1.cross({0, 0, 1}).getNormalized();
       } else {
         axis2 = axis1.cross({1, 0, 0}).getNormalized();

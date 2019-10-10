@@ -216,7 +216,7 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
       wrapper->jointDofs.push_back(links[i]->getInboundJointDof());
       for (size_t k = 0; k < wrapper->jointDofs.back(); ++k) {
         wrapper->jointNamesDOF.push_back(wrapper->jointNames.back());
-        wrapper->joints.push_back(joint);
+        wrapper->activeJoints.push_back(joint);
       }
 
       switch (joint->getJointType()) {
@@ -260,6 +260,14 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
   wrapper->cache = mArticulation->createCache();
   wrapper->articulation->copyInternalStateToCache(*wrapper->cache, PxArticulationCache::eALL);
   wrapper->articulation->setName("articulation");
+
+  // Add named links to the wrapper
+  wrapper->linkName2Link = namedLinks;
+  for(const auto& val: namedLinks){
+    wrapper->links.push_back(val.second);
+    wrapper->linkMasses.push_back(val.second->getMass());
+    wrapper->linkInertial.push_back(val.second->getMassSpaceInertiaTensor());
+  }
 
   ArticulationWrapper *wrapperPtr = wrapper.get();
   mSimulation->mDynamicArticulationWrappers.push_back(std::move(wrapper));

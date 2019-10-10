@@ -31,12 +31,22 @@ void test1() {
   sim.setTimestep(1.f / 500.f);
   sim.addGround(0.0);
 
+  auto builder = sim.createActorBuilder();
+//  builder->addBoxShape({{0, 0, 0}, PxIdentity}, {0.3, 1.5, 0.1});
+//  builder->addBoxVisual({{0, 0, 0}, PxIdentity}, {0.3, 1.5, 0.1});
+//  auto actor = builder->build(false, false, "test", true);
+//  actor->setGlobalPose({{1.0, 0.3, 1}, PxIdentity});
+
+  builder->addObjVisual("../assets/object/029_plate/google_16k/textured.dae");
+  builder->addConvexShapeFromObj("../assets/object/029_plate/google_16k/textured.obj");
+  auto plate = builder->build(false, false, "plate", true);
+  plate->setGlobalPose({{1.0, 0.3, 1.2}, PxIdentity});
+
   PS3::PS3Input input;
   auto loader = sim.createURDFLoader();
   loader->balancePassiveForce = true;
-    loader->load("../assets/46627/test.urdf")
-        ->articulation->teleportRootLink({{1.3, 0.3, 0.4}, PxIdentity}, true);
-
+  loader->load("../assets/46627/test.urdf")
+      ->articulation->teleportRootLink({{1.0, 0.3, 0.4}, PxIdentity}, true);
   auto wrapper = loader->load("../assets/robot/all_robot.urdf");
   wrapper->set_drive_property(2000, 500);
 
@@ -52,22 +62,25 @@ void test1() {
   robot::ControllerManger manger("movo", controllableWrapper);
   manger.createJointPubNode(100, 500);
   auto IKController = manger.createCartesianVelocityController("right_arm");
-  IKController->setAngularVelocity(0.3);
-  IKController->setVelocity(0.3);
+  IKController->setAngularVelocity(0.2);
+  IKController->setVelocity(0.2);
   auto jointController = manger.createJointVelocityController(serviceJoints, "right_gripper");
   manger.createGroupTrajectoryController("right_arm");
   manger.start();
+  auto bodyController = manger.createJointVelocityController({"linear_joint"}, "body");
 
-  wrapper->set_qpos({0.2, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});
-//  wrapper->set_drive_target({0.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+  wrapper->set_qpos({0.47, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});
+  wrapper->set_drive_target({0.2, 0, 0.0, 0, -0.9, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0});
   sim.step();
-  
+
+//  wrapper->set_qf({10,10,10,10,10,10,10,10,10,10,10,10,10});
+
   sim.updateRenderer();
   bool continuous = true;
-  std::vector<std::string> gripperJoint = {
-      "right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint"};
-  float gripperVelocity = 2;
+  float gripperVelocity = 5;
+  float bodyVelocity = 0.1;
 
+  static size_t globalTimeStep = 0;
   while (true) {
     if (input.getKey(PS3::BUTTON_UP)) {
       IKController->moveRelative(robot::CartesianCommand::X_F, continuous);
@@ -82,23 +95,27 @@ void test1() {
     } else if (input.getKey(PS3::BUTTON_L2)) {
       IKController->moveRelative(robot::CartesianCommand::Z_B, continuous);
     } else if (input.getKey(PS3::BUTTON_CIRCLE)) {
-      jointController->moveJoint(gripperJoint, gripperVelocity);
+      jointController->moveJoint(serviceJoints, gripperVelocity);
     } else if (input.getKey(PS3::BUTTON_SQUARE)) {
-      jointController->moveJoint(gripperJoint, -gripperVelocity);
+      jointController->moveJoint(serviceJoints, -gripperVelocity);
     } else if (input.getKey(PS3::BUTTON_R1)) {
       IKController->moveRelative(robot::CartesianCommand::ROLL_F, continuous);
     } else if (input.getKey(PS3::BUTTON_R2)) {
       IKController->moveRelative(robot::CartesianCommand::ROLL_B, continuous);
+    } else if (input.getKey(PS3::BUTTON_X)) {
+      bodyController->moveJoint({"linear_joint"}, -bodyVelocity);
+    } else if (input.getKey(PS3::BUTTON_TRIANGLE)) {
+      bodyController->moveJoint({"linear_joint"}, bodyVelocity);
     }
     sim.step();
+    globalTimeStep++;
     sim.updateRenderer();
-    usleep(1000);
-    renderer.render();
+    //    usleep(1000);
+    if (globalTimeStep % 3 == 0) {
+      renderer.render();
+    }
     auto gl_input = Optifuser::getInput();
     if (gl_input.getKeyState(GLFW_KEY_Q)) {
-      break;
-    }
-    if (input.getKey(PS3::BUTTON_X)) {
       break;
     }
   }

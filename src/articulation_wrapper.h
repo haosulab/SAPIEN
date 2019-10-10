@@ -1,6 +1,7 @@
 #pragma once
 #include "articulation_interface.h"
 #include <PxPhysicsAPI.h>
+#include <array>
 #include <map>
 #include <string>
 #include <vector>
@@ -30,10 +31,22 @@ struct ArticulationWrapper : public IArticulationDrivable {
   std::vector<uint32_t> jointDofs;
   std::vector<std::tuple<physx::PxReal, physx::PxReal>> jointLimits;
 
-  // Drive specified cache
+  // Drive cache
   bool balanceForce;
-  std::vector<PxArticulationJointReducedCoordinate *> joints;
+  std::vector<PxArticulationJointReducedCoordinate *> activeJoints;
   std::vector<PxArticulationAxis::Enum> jointAxises;
+
+  // Actuator cache
+  // TODO: support multi-dof joint
+  std::vector<std::string> forceActuatorName;
+  std::vector<uint32_t> forceActuatorIndex;
+  std::vector<std::array<PxReal, 2>> forceActuatorLimit;
+
+  // Link cache
+  std::map<std::string, PxArticulationLink *> linkName2Link;
+  std::vector<PxArticulationLink *> links;
+  std::vector<PxReal> linkMasses;
+  std::vector<PxVec3> linkInertial;
 
   /* call to update cache with current articulation */
   void updateCache();
@@ -65,10 +78,18 @@ struct ArticulationWrapper : public IArticulationDrivable {
   // Drive specific member function
   std::vector<std::string> get_drive_joint_names() const override;
   void set_drive_target(const std::vector<physx::PxReal> &v) override;
-  void set_drive_property(PxReal stiffness, PxReal damping, PxReal forceLimit=PX_MAX_F32,
+  void set_drive_property(PxReal stiffness, PxReal damping, PxReal forceLimit = PX_MAX_F32,
                           const std::vector<uint32_t> &jointIndex = {});
   void set_force_balance(bool balanceForce);
 
+  // Mimic the Mujoco actuator modeling functions
+  void addForceActuator(const std::string &jointName, PxReal lowerLimit, PxReal upperLimit);
+  std::vector<std::array<PxReal, 2>> const &getForceActuatorRanges() const;
+  std::vector<std::string> const &getForceActuatorNames() const;
+  void applyActuatorForce(const std::vector<physx::PxReal> &v);
+
+  // Mimic the Mujoco body modeling functions
+  std::vector<std::array<PxReal, 6>> get_cfrc_ext();
 };
 
 } // namespace sapien

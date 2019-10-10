@@ -80,7 +80,7 @@ void CartesianVelocityController::moveRelative(CartesianCommand type, bool conti
   if (jointJumpCheck) {
     std::vector<double> currentJointValue;
     state->copyJointGroupPositions(jointModelGroup, currentJointValue);
-    if (testJointSpaceJump(currentJointValue, jointValue, 0.2)) {
+    if (testJointSpaceJump(currentJointValue, jointValue, 0.9)) {
       ROS_WARN("Joint space jump! Not execute");
       return;
     }

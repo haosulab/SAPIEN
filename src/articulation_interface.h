@@ -27,7 +27,7 @@ struct IArticulationBase {
   virtual std::vector<physx::PxReal> get_qf() const = 0;
   virtual void set_qf(const std::vector<physx::PxReal> &v) = 0;
 
-//  virtual ~IArticulationBase() {};
+  virtual ~IArticulationBase() = default;;
 };
 
 class IArticulationDrivable : public IArticulationBase {

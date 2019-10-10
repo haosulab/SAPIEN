@@ -1,4 +1,5 @@
 #include "articulation_wrapper.h"
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <numeric>
@@ -79,7 +80,7 @@ std::vector<std::string> ArticulationWrapper::get_drive_joint_names() const {
 void ArticulationWrapper::set_drive_target(const std::vector<physx::PxReal> &v) {
   assert(v.size() == dof());
   for (size_t i = 0; i < v.size(); ++i) {
-    joints[i]->setDriveTarget(jointAxises[i], v[i]);
+    activeJoints[i]->setDriveTarget(jointAxises[i], v[i]);
   }
 }
 void ArticulationWrapper::set_drive_property(PxReal stiffness, PxReal damping, PxReal forceLimit,
@@ -87,14 +88,14 @@ void ArticulationWrapper::set_drive_property(PxReal stiffness, PxReal damping, P
   // If no index is given, then set for all joint
   std::vector<uint32_t> index;
   if (jointIndex.empty()) {
-    index.resize(joints.size());
+    index.resize(activeJoints.size());
     std::iota(std::begin(index), std::end(index), 0);
   } else {
     index = jointIndex;
   }
 
   for (unsigned int i : index) {
-    auto joint = joints[i];
+    auto joint = activeJoints[i];
     joint->setDrive(jointAxises[i], stiffness, damping, forceLimit);
   }
 }
@@ -114,6 +115,52 @@ void ArticulationWrapper::update() {
     }
     articulation->applyCache(*cache, PxArticulationCache::eFORCE);
   }
+}
+
+// Force actuator
+void ArticulationWrapper::addForceActuator(const std::string &name, PxReal lowerLimit,
+                                           PxReal upperLimit) {
+  if(balanceForce){
+    std::cerr<< "Could not add actuator to a balanced force articulation! This tag should only be used for robot" << std::endl;
+    return;
+  }
+  auto index = std::find(jointNamesDOF.begin(), jointNamesDOF.end(), name) - jointNamesDOF.begin();
+  if (index == jointNamesDOF.size()) {
+    std::cerr << "Could not find joint name in movable joints: " << name.c_str()
+              << "\nMay be you add actuator on a fixed joint?" << std::endl;
+    return;
+  }
+  forceActuatorName.push_back(name);
+  forceActuatorLimit.push_back({lowerLimit, upperLimit});
+  forceActuatorIndex.push_back(index);
+}
+std::vector<std::array<PxReal, 2>> const &ArticulationWrapper::getForceActuatorRanges() const {
+  return forceActuatorLimit;
+}
+std::vector<std::string> const &ArticulationWrapper::getForceActuatorNames() const {
+  return forceActuatorName;
+}
+void ArticulationWrapper::applyActuatorForce(const std::vector<physx::PxReal> &v) {
+  assert(v.size() == forceActuatorName.size());
+  for (size_t i = 0; i < v.size(); ++i) {
+    auto [lowerLimit, upperLimit] = forceActuatorLimit[i];
+    auto force = v[i];
+    force = force > upperLimit ? upperLimit : force;
+    force = force < lowerLimit ? lowerLimit : force;
+    cache->jointForce[forceActuatorIndex[i]] = force;
+  }
+  articulation->applyCache(*cache, PxArticulationCache::eFORCE);
+}
+std::vector<std::array<PxReal, 6>> ArticulationWrapper::get_cfrc_ext() {
+  std::vector<std::array<PxReal, 6>> xf(links.size());
+  for (size_t i = 0; i < links.size(); ++i) {
+    auto v = cache->linkAcceleration[i].linear;
+    auto w = cache->linkAcceleration[i].angular;
+    auto mass = linkMasses[i];
+    auto inertial = linkInertial[i];
+    xf[i] = {v[0]*mass, v[1] * mass, v[2] * mass, inertial[0] * w[0], inertial[1] * w[1], inertial[2] * w[2]};
+  }
+  return xf;
 }
 
 } // namespace sapien

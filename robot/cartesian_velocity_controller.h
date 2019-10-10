@@ -46,7 +46,7 @@ private:
 
   // Communication
   std::unique_ptr<ThreadSafeQueue> mQueue;
-  bool jointJumpCheck = false;
+  bool jointJumpCheck = true;
   float transStepSize;
   float rotStepSize;
   std::vector<Eigen::Isometry3d> cartesianMatrix =
