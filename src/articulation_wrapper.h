@@ -88,8 +88,9 @@ struct ArticulationWrapper : public IArticulationDrivable {
   std::vector<std::string> const &getForceActuatorNames() const;
   void applyActuatorForce(const std::vector<physx::PxReal> &v);
 
-  // Mimic the Mujoco body modeling functions
+  // Link based function
   std::vector<std::array<PxReal, 6>> get_cfrc_ext();
+
 };
 
 } // namespace sapien

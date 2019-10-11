@@ -49,8 +49,7 @@ public:
   std::map<physx_id_t, IArticulationBase *> mLinkId2Articulation;
 
   std::vector<std::unique_ptr<struct ArticulationWrapper>> mDynamicArticulationWrappers;
-  std::vector<std::unique_ptr<class KinematicsArticulationWrapper>>
-      mKinematicArticulationWrappers;
+  std::vector<std::unique_ptr<class KinematicsArticulationWrapper>> mKinematicArticulationWrappers;
   std::vector<std::unique_ptr<class JointSystem>> mJointSystemWrappers;
   std::vector<std::unique_ptr<class ControllableArticulationWrapper>>
       mControllableArticulationWrapper;
@@ -83,6 +82,10 @@ public:
 
   /* Create URDF loader from simulation */
   std::unique_ptr<URDF::URDFLoader> createURDFLoader();
+
+  /* Create Controllable wrapper and register update function */
+  class ControllableArticulationWrapper *
+  createControllableArticulationWrapper(class IArticulationDrivable * baseWrapper);
 };
 
 } // namespace sapien

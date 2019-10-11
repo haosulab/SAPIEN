@@ -307,4 +307,11 @@ PxMaterial *Simulation::createPhysicalMaterial(PxReal staticFriction, PxReal dyn
                                                PxReal restitution) const {
   return mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
 }
+class ControllableArticulationWrapper *
+Simulation::createControllableArticulationWrapper(class IArticulationDrivable *baseWrapper) {
+  auto wrapper = std::make_unique<ControllableArticulationWrapper>(baseWrapper);
+  wrapper->updateTimeStep(mTimestep);
+  auto wrapperPtr = wrapper.get();
+  return wrapperPtr;
+}
 } // namespace sapien

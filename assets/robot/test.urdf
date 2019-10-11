@@ -28,7 +28,7 @@
     <child link="right_shoulder_link"/>
     <origin rpy="0 3.14159265 0" xyz="0 0 0.0625"/>
     <axis xyz="0 0 1"/>
-    <limit effort="18000.0" lower="-3.14159265" upper="3.14159265" velocity="0.691150384"/>
+    <limit effort="18000.0" lower="-3.14159265" upper="3.14159265" stepSize="0.691150384"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
   <link name="right_shoulder_link">
@@ -53,7 +53,7 @@
     <child link="right_arm_half_1_link"/>
     <origin rpy="1.570796325 0 0" xyz="0 0 -0.11875"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30000.5" lower="-2.238" upper="2.238" velocity="0.691150384"/>
+    <limit effort="30000.5" lower="-2.238" upper="2.238" stepSize="0.691150384"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
   <link name="right_arm_half_1_link">
@@ -78,7 +78,7 @@
     <child link="right_arm_half_2_link"/>
     <origin rpy="-1.570796325 0 0" xyz="0 -0.205 0"/>
     <axis xyz="0 0 1"/>
-    <limit effort="30000.5" lower="-3.14159265" upper="3.14159265" velocity="0.691150384"/>
+    <limit effort="30000.5" lower="-3.14159265" upper="3.14159265" stepSize="0.691150384"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
   <link name="right_arm_half_2_link">
@@ -103,7 +103,7 @@
     <child link="right_forearm_link"/>
     <origin rpy="-1.570796325 0 0" xyz="0 0 -0.205"/>
     <axis xyz="0 0 1"/>
-    <limit effort="18000.0" lower="-2.809" upper="2.809" velocity="0.691150384"/>
+    <limit effort="18000.0" lower="-2.809" upper="2.809" stepSize="0.691150384"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
   <link name="right_forearm_link">
@@ -129,7 +129,7 @@
     <!--  <origin xyz="0 0.20725 0 " rpy="${wrist_spherical_1_joint_rpy}" /> -->
     <origin rpy="1.570796325 3.14159265 0" xyz="0 0.2073 -0.0114"/>
     <axis xyz="0 0 1"/>
-    <limit effort="60000.8" lower="-3.14159265" upper="3.14159265" velocity="0.921533845"/>
+    <limit effort="60000.8" lower="-3.14159265" upper="3.14159265" stepSize="0.921533845"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
   <link name="right_wrist_spherical_1_link">
@@ -154,7 +154,7 @@
     <child link="right_wrist_spherical_2_link"/>
     <origin rpy="-1.570796325 0 0" xyz="0 0 -0.10375 "/>
     <axis xyz="0 0 1"/>
-    <limit effort="60000.8" lower="-2.78" upper="2.78" velocity="0.921533845"/>
+    <limit effort="60000.8" lower="-2.78" upper="2.78" stepSize="0.921533845"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
   <link name="right_wrist_spherical_2_link">
@@ -179,7 +179,7 @@
     <child link="right_wrist_3_link"/>
     <origin rpy="1.570796325 3.14159265 0" xyz="0 0.10375 0"/>
     <axis xyz="0 0 1"/>
-    <limit effort="60000.8" lower="-3.14159265" upper="3.14159265" velocity="0.921533845"/>
+    <limit effort="60000.8" lower="-3.14159265" upper="3.14159265" stepSize="0.921533845"/>
     <dynamics damping="0.01" friction="0.0"/>
   </joint>
   <link name="right_wrist_3_link">
@@ -232,7 +232,7 @@
     <child link="right_gripper_finger1_knuckle_link"/>
     <axis xyz="0 0 1"/>
     <origin rpy="1.4676 -0.0092813 -1.7501" xyz="-0.0027954 0.031318 -0.11464"/>
-    <limit damping="0.005" effort="3.0" friction="0.005" lower="0.0" upper="0.986111027" velocity="1.0"/>
+    <limit damping="0.005" effort="3.0" friction="0.005" lower="0.0" upper="0.986111027" stepSize="1.0"/>
   </joint>
   <link name="right_gripper_finger1_knuckle_link">
     <visual>
@@ -256,7 +256,7 @@
     <child link="right_gripper_finger2_knuckle_link"/>
     <axis xyz="0 0 1"/>
     <origin rpy="1.570796325 0 1.7555" xyz="0.022289 -0.027253 -0.11471"/>
-    <limit damping="0.005" effort="3.0" friction="0.005" lower="0.0" upper="0.986111027" velocity="1.0"/>
+    <limit damping="0.005" effort="3.0" friction="0.005" lower="0.0" upper="0.986111027" stepSize="1.0"/>
     <mimic joint="right_gripper_finger1_joint"/>
   </joint>
   <link name="right_gripper_finger2_knuckle_link">
@@ -281,7 +281,7 @@
     <child link="right_gripper_finger3_knuckle_link"/>
     <axis xyz="0 0 1"/>
     <origin rpy="1.570796325 0 1.3861" xyz="-0.022284 -0.027223 -0.11473"/>
-    <limit damping="0.005" effort="3.0" friction="0.005" lower="0.0" upper="0.986111027" velocity="1.0"/>
+    <limit damping="0.005" effort="3.0" friction="0.005" lower="0.0" upper="0.986111027" stepSize="1.0"/>
     <mimic joint="right_gripper_finger1_joint"/>
   </joint>
   <link name="right_gripper_finger3_knuckle_link">
