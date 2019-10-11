@@ -316,13 +316,35 @@ PYBIND11_MODULE(sapyen, m) {
                                         (PxReal *)ar.data());
            })
       .def("get_force_actuator_name", &ArticulationWrapper::getForceActuatorNames)
-      .def("apply_actuator", &ArticulationWrapper::applyActuatorForce)
-      .def("get_cfrc_ext", [](ArticulationWrapper &a) {
-        const auto cfrc = a.get_cfrc_ext();
-        return py::array_t<PxReal>({(int)cfrc.size(), 6},
-                                   {sizeof(std::array<PxReal, 6>), sizeof(PxReal)},
-                                   (PxReal *)cfrc.data());
-      });
+      .def("apply_actuator",
+           [](ArticulationWrapper &a, py::array_t<float> arr) {
+             a.applyActuatorForce(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           })
+      .def("get_cfrc_ext",
+           [](ArticulationWrapper &a) {
+             const auto cfrc = a.get_cfrc_ext();
+             return py::array_t<PxReal>({(int)cfrc.size(), 6},
+                                        {sizeof(std::array<PxReal, 6>), sizeof(PxReal)},
+                                        (PxReal *)cfrc.data());
+           })
+      .def(
+          "set_root_pose",
+          [](ArticulationWrapper &a, const py::array_t<float> &position,
+             const py::array_t<float> &quaternion) {
+            a.articulation->teleportRootLink(
+                {{position.at(0), position.at(1), position.at(2)},
+                 {quaternion.at(1), quaternion.at(2), quaternion.at(3), quaternion.at(0)}},
+                true);
+          },
+          py::arg("position") = make_array<float>({0, 0, 0}),
+          py::arg("quaternion") = make_array<float>({1, 0, 0, 0}))
+      .def("set_drive_qpos",
+           [](ArticulationWrapper &a, py::array_t<float> qpos) {
+             a.set_drive_target(std::vector<PxReal>(qpos.data(), qpos.data() + qpos.size()));
+           })
+      .def("set_PD", &ArticulationWrapper::set_drive_property, py::arg("jointIndex") = py::list())
+      .def("get_drivable_joint_name", &ArticulationWrapper::get_drive_joint_names)
+      .def("balance_passive_force", &ArticulationWrapper::set_force_balance);
 
   py::class_<JointSystem, IArticulationBase>(m, "JointSystem");
 

@@ -61,8 +61,8 @@ target_link_libraries(run mylib)
 
 
 find_package(catkin COMPONENTS
+        sapien_ros_utils
         roslaunch
-        std_msgs
         message_generation
         moveit_core
         moveit_ros_planning
@@ -74,17 +74,6 @@ find_package(catkin COMPONENTS
 include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} "robot")
 
 if (catkin_INCLUDE_DIRS)
-    add_service_files(
-            DIRECTORY
-            robot/srv
-            FILES
-            VelocityControlService.srv
-    )
-
-    generate_messages(
-            DEPENDENCIES
-            std_msgs
-    )
     #    catkin_package(
     #            LIBRARIES
     #            INCLUDE_DIRS
@@ -92,13 +81,19 @@ if (catkin_INCLUDE_DIRS)
     #    )
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug)
 endif ()
-add_executable(robot
+
+add_library(robot_lib
         robot/joint_trajectory_controller.cpp
         robot/cartesian_velocity_controller.cpp
         robot/velocity_control_service.cpp
         robot/joint_pub_node.cpp
-        robot/robot.cpp)
-target_link_libraries(robot mylib ${catkin_LIBRARIES})
+        robot/controller_manger.cpp
+        )
+target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
+add_executable(robot robot/test/robot.cpp)
+target_link_libraries(robot robot_lib)
+add_executable(grasp robot/test/grasp.cpp)
+target_link_libraries(grasp robot_lib)
 
 add_executable(ps3 test/ps3.cpp)
 target_link_libraries(ps3 mylib)
