@@ -43,8 +43,10 @@ public:
   std::map<physx_id_t, PxRigidActor *> mMountedCamera2MountedActor;
 
   std::map<physx_id_t, PxTransform> mRenderId2InitialPose;
-  std::map<physx_id_t, PxRigidActor *> mRenderId2Parent;
-  std::map<physx_id_t, IArticulationBase *> mRenderId2Articulation;
+  std::map<physx_id_t, PxRigidActor *> mRenderId2Actor;
+
+  std::map<physx_id_t, PxRigidActor *> mLinkId2Actor;
+  std::map<physx_id_t, IArticulationBase *> mLinkId2Articulation;
 
   std::vector<std::unique_ptr<struct ArticulationWrapper>> mDynamicArticulationWrappers;
   std::vector<std::unique_ptr<class KinematicsArticulationWrapper>>

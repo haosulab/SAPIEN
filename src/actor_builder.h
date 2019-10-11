@@ -20,6 +20,8 @@ class ActorBuilder {
   std::vector<physx::PxReal> mDensities;
   uint32_t mCount = 0;
 
+  physx_id_t mLinkId = 0;
+
 public:
   ActorBuilder(ActorBuilder const &other) = delete;
   const ActorBuilder &operator=(ActorBuilder const &other) = delete;
