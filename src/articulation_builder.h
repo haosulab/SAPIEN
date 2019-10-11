@@ -22,8 +22,9 @@ class ArticulationBuilder {
   std::vector<physx_id_t> mRenderIds;
   std::vector<PxShape *> mShapes;
   std::vector<PxReal> mDensities;
-  std::map<std::string, PxArticulationLink *> namedLinks;
-  std::map<PxArticulationLink *, std::string> link2JointName;
+  std::map<std::string, PxArticulationLink *> mNamedLinks;
+  std::map<PxArticulationLink *, std::string> mLink2JointName;
+  std::map<PxArticulationLink *, physx_id_t> mLink2LinkId;
 
 public:
   ArticulationBuilder(ArticulationBuilder const &other) = delete;

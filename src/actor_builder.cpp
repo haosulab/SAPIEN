@@ -61,39 +61,56 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMate
 
 physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size,
                                       const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  if (!mLinkId) {
+    mLinkId = IDGenerator::LinkId()->next();
+  }
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eBOX, size, color);
+  mRenderer->setSegmentationId(newId, mLinkId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  return newId;
+  return mLinkId;
 }
 
 physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal length,
                                           const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  if (!mLinkId) {
+    mLinkId = IDGenerator::LinkId()->next();
+  }
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE, {length, radius, radius}, color);
+  mRenderer->setSegmentationId(newId, mLinkId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  return newId;
+  return mLinkId;
 }
 
 physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius,
                                          const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  if (!mLinkId) {
+    mLinkId = IDGenerator::LinkId()->next();
+  }
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
+  mRenderer->setSegmentationId(newId, mLinkId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  return newId;
+  return mLinkId;
 }
 
 physx_id_t ActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
                                       const PxVec3 &scale) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  if (!mLinkId) {
+    mLinkId = IDGenerator::LinkId()->next();
+  }
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, filename, scale);
+  mRenderer->setSegmentationId(newId, mLinkId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  return newId;
+  return mLinkId;
 }
+
 PxRigidActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string const &name,
                                   bool addToScene) {
   PxRigidActor *actor;
@@ -103,8 +120,9 @@ PxRigidActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string c
       actor->attachShape(*mShapes[i]);
     }
     for (size_t i = 0; i < mRenderIds.size(); ++i) {
-      mSimulation->mRenderId2Parent[mRenderIds[i]] = actor;
+      mSimulation->mRenderId2Actor[mRenderIds[i]] = actor;
     }
+    mSimulation->mLinkId2Actor[mLinkId] = actor;
   } else {
     PxRigidDynamic *dActor = mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
     dActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, isKinematic);
@@ -113,8 +131,9 @@ PxRigidActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string c
       actor->attachShape(*mShapes[i]);
     }
     for (size_t i = 0; i < mRenderIds.size(); ++i) {
-      mSimulation->mRenderId2Parent[mRenderIds[i]] = actor;
+      mSimulation->mRenderId2Actor[mRenderIds[i]] = actor;
     }
+    mSimulation->mLinkId2Actor[mLinkId] = actor;
     if (mCount) {
       PxRigidBodyExt::updateMassAndInertia(*dActor, mDensities.data(), mCount);
     }

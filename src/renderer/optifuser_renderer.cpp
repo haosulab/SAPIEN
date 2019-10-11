@@ -20,7 +20,6 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFi
   // }
   auto objects = Optifuser::LoadObj(objFile);
   for (auto &obj : objects) {
-    obj->setSegmentId(uniqueId);
     mObjectRegistry[uniqueId].push_back(obj.get());
     obj->scale = {scale.x, scale.y, scale.z};
     mScene->addObject(std::move(obj));
@@ -41,7 +40,6 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   switch (type) {
   case physx::PxGeometryType::eBOX: {
     auto obj = Optifuser::NewFlatCube();
-    obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z};
     mObjectRegistry[uniqueId] = {obj.get()};
@@ -50,7 +48,6 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   }
   case physx::PxGeometryType::eSPHERE: {
     auto obj = Optifuser::NewSphere();
-    obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z};
     mObjectRegistry[uniqueId] = {obj.get()};
@@ -59,7 +56,6 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   }
   case physx::PxGeometryType::ePLANE: {
     auto obj = Optifuser::NewYZPlane();
-    obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z};
     mObjectRegistry[uniqueId] = {obj.get()};
@@ -68,7 +64,6 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   }
   case physx::PxGeometryType::eCAPSULE: {
     auto obj = Optifuser::NewCapsule(scale.x, scale.y);
-    obj->setSegmentId(uniqueId);
     obj->scale = {1, 1, 1};
     obj->material.kd = {color.x, color.y, color.z};
     mObjectRegistry[uniqueId] = {obj.get()};
@@ -81,9 +76,25 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   }
 }
 
-void OptifuserRenderer::updateCustomData(uint32_t uniqueId, std::vector<float> const &customData) {
-  for (auto &obj : mObjectRegistry[uniqueId]) {
-    obj->setUserData(customData);
+void OptifuserRenderer::setSegmentationId(uint32_t uniqueId, uint32_t segmentationId) {
+  if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
+    throw std::runtime_error("Invalid render id specified when setting segmentation id.");
+  }
+  for (auto & obj : mObjectRegistry[uniqueId]) {
+    obj->setSegmentId(segmentationId);
+  }
+  mSegId2RenderId[segmentationId].push_back(uniqueId);
+}
+
+void OptifuserRenderer::setSegmentationCustomData(uint32_t segmentationId,
+                               std::vector<float> const &customData) {
+  if (mSegId2RenderId.find(segmentationId) == mSegId2RenderId.end()) {
+    throw std::runtime_error("Invalid segmentation id.");
+  }
+  for (uint32_t renderId : mSegId2RenderId[segmentationId]) {
+    for (auto obj : mObjectRegistry[renderId]) {
+      obj->setUserData(customData);
+    }
   }
 }
 
@@ -240,6 +251,7 @@ void OptifuserRenderer::render() {
         ImGui::Text("Height: %d", mContext->getHeight());
         ImGui::SameLine();
         ImGui::Text("Aspect: %.2f", cam.aspect);
+        ImGui::Text("Picked id: %d", pickedId);
       }
 
       if (ImGui::CollapsingHeader("Mounted Cameras")) {
