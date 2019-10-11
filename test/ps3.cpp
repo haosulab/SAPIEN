@@ -57,7 +57,7 @@ void test() {
   auto builder = sim.createActorBuilder();
   builder->addBoxShape({{0, 0, 0}, PxIdentity}, {0.3, 0.3, 0.3});
   builder->addBoxVisual({{0, 0, 0}, PxIdentity}, {0.3, 0.3, 0.3});
-  auto actor = builder->build(false, false, false);
+  auto actor = builder->build(false, false, "", false);
   actor->setGlobalPose({{2, 2, 1}, PxIdentity});
   sim.mScene->addActor(*actor);
 
