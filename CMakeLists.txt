@@ -62,6 +62,9 @@ target_link_libraries(run mylib)
 add_executable(ps3 test/ps3.cpp)
 target_link_libraries(ps3 mylib)
 
+add_executable(ant test/ant.cpp)
+target_link_libraries(ant mylib)
+
 pybind11_add_module(sapyen "python/pybind.cpp")
 target_link_libraries(sapyen PRIVATE mylib)
 
@@ -80,7 +83,6 @@ if (_index GREATER -1)
             actionlib_msgs
             roscpp)
 
-
     include_directories(${catkin_INCLUDE_DIRS} "robot")
 
     add_library(robot_lib
@@ -95,8 +97,8 @@ if (_index GREATER -1)
     target_link_libraries(robot robot_lib)
     add_executable(grasp robot/test/grasp.cpp)
     target_link_libraries(grasp robot_lib)
-    add_executable(ant test/ant.cpp)
-    target_link_libraries(ant mylib)
+    add_executable(movo_ps3 robot/example/movo_ps3.cpp)
+    target_link_libraries(movo_ps3 robot_lib)
 elseif($ENV{ROS_DISTRO} IN_LIST OLD_ROS_VERSION)
     message("Your ROS version not supported. Please update to kinetic or above.")
 endif ()
