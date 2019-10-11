@@ -61,7 +61,7 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMate
 
 physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size,
                                       const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eBOX, size, color);
   mSimulation->mRenderId2InitialPose[newId] = pose;
@@ -70,7 +70,7 @@ physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &siz
 
 physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal length,
                                           const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE, {length, radius, radius}, color);
   mSimulation->mRenderId2InitialPose[newId] = pose;
@@ -79,7 +79,7 @@ physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius
 
 physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius,
                                          const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
   mSimulation->mRenderId2InitialPose[newId] = pose;
@@ -88,7 +88,7 @@ physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius,
 
 physx_id_t ActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
                                       const PxVec3 &scale) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderIds.push_back(newId);
   mRenderer->addRigidbody(newId, filename, scale);
   mSimulation->mRenderId2InitialPose[newId] = pose;

@@ -92,8 +92,8 @@ add_library(robot_lib
 target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
 add_executable(robot robot/test/robot.cpp)
 target_link_libraries(robot robot_lib)
-add_executable(grasp robot/test/grasp.cpp)
-target_link_libraries(grasp robot_lib)
+# add_executable(grasp robot/test/grasp.cpp)
+# target_link_libraries(grasp robot_lib)
 
 add_executable(ps3 test/ps3.cpp)
 target_link_libraries(ps3 mylib)

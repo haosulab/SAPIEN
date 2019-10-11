@@ -116,7 +116,7 @@ void ArticulationBuilder::updateLinkMassAndInertia(PxArticulationLink &link, PxR
 
 void ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link, const PxTransform &pose,
                                              const PxVec3 &size, const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eBOX, size, color);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
@@ -126,7 +126,7 @@ void ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link, const PxT
 void ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link, const PxTransform &pose,
                                                  PxReal radius, PxReal length,
                                                  const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE, {length, radius, radius}, color);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
@@ -135,7 +135,7 @@ void ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link, const
 
 void ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link, const PxTransform &pose,
                                                 PxReal radius, const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
@@ -145,7 +145,7 @@ void ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link, const 
 void ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link, const std::string &filename,
                                              const PxTransform &pose, const PxVec3 &scale) {
   // generate new render id
-  physx_id_t newId = IDGenerator::instance()->next();
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderer->addRigidbody(newId, filename, scale);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
