@@ -59,47 +59,52 @@ set_target_properties(mylib PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 add_executable(run "test/main.cpp")
 target_link_libraries(run mylib)
 
-
-find_package(catkin COMPONENTS
-        sapien_ros_utils
-        roslaunch
-        message_generation
-        moveit_core
-        moveit_ros_planning
-        actionlib
-        actionlib_msgs
-        roscpp)
-
-
-include_directories(${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} "robot")
-
-if (catkin_INCLUDE_DIRS)
-    #    catkin_package(
-    #            LIBRARIES
-    #            INCLUDE_DIRS
-    #            CATKIN_DEPENDS
-    #    )
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug)
-endif ()
-
-add_library(robot_lib
-        robot/joint_trajectory_controller.cpp
-        robot/cartesian_velocity_controller.cpp
-        robot/velocity_control_service.cpp
-        robot/joint_pub_node.cpp
-        robot/controller_manger.cpp
-        )
-target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
-add_executable(robot robot/test/robot.cpp)
-target_link_libraries(robot robot_lib)
-add_executable(grasp robot/test/grasp.cpp)
-target_link_libraries(grasp robot_lib)
-
 add_executable(ps3 test/ps3.cpp)
 target_link_libraries(ps3 mylib)
 
-add_executable(ant test/ant.cpp)
-target_link_libraries(ant mylib)
-
 pybind11_add_module(sapyen "python/pybind.cpp")
 target_link_libraries(sapyen PRIVATE mylib)
+
+# Below are the ROS specified content
+set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")
+set(OLD_ROS_VERSION "indigo" "jade" "hydro")
+list(FIND SUPPORTED_ROS_VERSION $ENV{ROS_DISTRO} _index)
+if (_index GREATER -1)
+    message("Your ROS Distribution is $ENV{ROS_DISTRO}")
+    find_package(catkin REQUIRED COMPONENTS
+            sapien_ros_utils
+            roslaunch
+            moveit_core
+            moveit_ros_planning
+            actionlib
+            actionlib_msgs
+            roscpp)
+
+
+    include_directories(${catkin_INCLUDE_DIRS} "robot")
+
+    add_library(robot_lib
+            robot/joint_trajectory_controller.cpp
+            robot/cartesian_velocity_controller.cpp
+            robot/velocity_control_service.cpp
+            robot/joint_pub_node.cpp
+            robot/controller_manger.cpp
+            )
+    target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
+    add_executable(robot robot/test/robot.cpp)
+    target_link_libraries(robot robot_lib)
+    add_executable(grasp robot/test/grasp.cpp)
+    target_link_libraries(grasp robot_lib)
+    add_executable(ant test/ant.cpp)
+    target_link_libraries(ant mylib)
+elseif($ENV{ROS_DISTRO} IN_LIST OLD_ROS_VERSION)
+    message("Your ROS version not supported. Please update to kinetic or above.")
+endif ()
+
+
+
+
+
+
+
+
