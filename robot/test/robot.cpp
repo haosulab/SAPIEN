@@ -79,6 +79,7 @@ void test1() {
   bool continuous = true;
   float gripperVelocity = 5;
   float bodyVelocity = 0.1;
+  renderer.showWindow();
 
   static size_t globalTimeStep = 0;
   while (true) {
