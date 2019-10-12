@@ -1,13 +1,14 @@
-# PhysX Robotics simulation environment
-4127 Robotics simulation environment based on PhysX. Anyone reading this, please
-propose a memorable name for it!
+# SimulAted Physical Interactive ENvironment
+A physical simulation and robotics engine based on PhysX.
 
 ## Set up
 I currently do not have a detailed set up steps, but you need to do roughly the same steps.
 
-1. Download source code of PhysX.
-2. Read my `CMakeLists` to figure out what 3rd party libraries you need and modify the path accordingly.
-3. For the `optifuser` library (created by fbxiang), you can find it at https://github.com/fbxiang/optifuser. Follow the compilation instructions, and install without OptiX support.
+1. Clone this repository recursively into submodules.
+2. Download source code of PhysX.
+3. Read my `CMakeLists` to figure out what 3rd party libraries you need.
+4. Build the project following standard steps for a cmake project.
+4. Avoid building the ROS dependencies if you are not sure what to do.
 
 ## Coding style guide
 This is only a general guideline
