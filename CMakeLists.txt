@@ -72,9 +72,7 @@ set(ROS $ENV{ROS_DISTRO})
 if (ROS)
     list(FIND SUPPORTED_ROS_VERSION ${ROS} _index)
     if (_index GREATER -1)
-        message("Your ROS Distribution is ROS")
-        add_subdirectory(sapien_ros_utils)
-        add_subdirectory(moveit_config)
+        message("Your ROS Distribution is ${ROS}")
         find_package(catkin REQUIRED COMPONENTS
                 sapien_ros_utils
                 roslaunch
@@ -95,6 +93,7 @@ if (ROS)
                 robot/device/joystick_ps3.cpp
                 robot/device/InputDevice.cpp
                 )
+
         target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
         add_executable(robot robot/test/robot.cpp)
         target_link_libraries(robot robot_lib)
