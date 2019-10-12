@@ -73,8 +73,43 @@ vec3 getBackgroundColor(vec3 texcoord) {
 
 const float eps = 0.01;
 
+
+// The Oren-Nayar shading model
+float orenNayar(vec3 l, vec3 v, vec3 n, float r) {
+  float a = r * r;
+  float NoL = clamp(dot(n, l), 0, 1);
+  float NoV = clamp(dot(n, v), 0, 1);
+  float LoV = clamp(dot(l, v), 0, 1);
+  float NLNV = NoL * NoV;
+
+  if (NoL < 0 || NoV <0) return 0;
+
+  float A = 1 - 0.5 * (a / (a + 0.33));
+  float B = 0.45 * (a / (a + 0.09));
+  float C = max(0, LoV - NLNV) / max(NoL, NoV);
+
+  return min(max(0, NoL) * (A + B * C), 1);
+}
+
+float ggx (vec3 L, vec3 V, vec3 N, float roughness, float F0) {
+  float alpha = roughness*roughness;
+  vec3 H = normalize(L + V);
+  float dotLH = max(0.0, dot(L,H));
+  float dotNH = max(0.0, dot(N,H));
+  float dotNL = max(0.0, dot(N,L));
+  float alphaSqr = alpha * alpha;
+  float denom = dotNH * dotNH * (alphaSqr - 1.0) + 1.0;
+  float D = alphaSqr / (3.141592653589793 * denom * denom);
+  float F = F0 + (1.0 - F0) * pow(1.0 - dotLH, 5.0);
+  float k = 0.5 * alpha;
+  float k2 = k * k;
+  return dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2);
+}
+
 void main() {
   vec3 albedo = texture(colortex0, texcoord).xyz;
+  vec4 specular = texture(colortex1, texcoord);
+  float roughness = 2 / (2 + specular.a);
   vec3 normal = texture(colortex2, texcoord).xyz;
   vec4 csPosition = getCameraSpacePosition(texcoord);
 
@@ -87,18 +122,22 @@ void main() {
   vec3 camDir = -normalize(csPosition.xyz);
 
   vec3 color = vec3(0.f);
+  // for (int i = 0; i < N_POINT_LIGHTS; i++) {
+  //   vec3 pos = world2camera(vec4(pointLights[i].position, 0.f)).xyz;
+  //   vec3 l = pos - csPosition.xyz;
+  //   float d = length(l);
+  //   vec3 lightDir = normalize(l);
 
-  for (int i = 0; i < N_POINT_LIGHTS; i++) {
-    vec3 pos = world2camera(vec4(pointLights[i].position, 1.f)).xyz;
-    vec3 l = pos - csPosition.xyz;
-    float d = length(l);
-    vec3 lightDir = normalize(l);
-
-    color += albedo * pointLights[i].emission * max(0, dot(lightDir, normal)) / d / d;
-  }
+  //   // point light diffuse
+  //   color += albedo * pointLights[i].emission * orenNayar(lightDir, camDir, normal, 0.3f) / d / d;
+  //   color += specular.rgb * pointLights[i].emission
+  //            * ggx(lightDir, camDir, normal, roughness, 0.05) / d / d;
+  // }
 
   vec3 lightDir = -normalize((gbufferViewMatrix * vec4(shadowLightDirection, 0)).xyz);
-  color += albedo * shadowLightEmission * max(0, dot(lightDir, normal)) * visibility;
+  // color += albedo * shadowLightEmission * max(0, dot(lightDir, normal)) * visibility;
+  color += albedo * shadowLightEmission * orenNayar(lightDir, camDir, normal, 0.3f) * visibility;
+  color += specular.rgb * shadowLightEmission * ggx(lightDir, camDir, normal, roughness, 0.05) * visibility;
 
   // for (int i = 0; i < N_DIRECTION_LIGHTS; i++) {
   //   vec3 lightDir = -normalize((gbufferViewMatrix * vec4(directionalLights[i].direction, 0)).xyz);
