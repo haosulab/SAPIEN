@@ -3,8 +3,8 @@
     <name>physxtest</name>
     <version>1.0.0</version>
     <description>Physx simulation project ros binding</description>
-    <maintainer email="sim@ucsd.edu"></maintainer>
-    <author>Yuzhe</author>
+    <maintainer email="sapien@ucsd.edu"></maintainer>
+    <author>sapien</author>
     <license>BSD</license>
     <buildtool_depend>catkin</buildtool_depend>
     <build_depend>roslaunch</build_depend>

@@ -74,6 +74,7 @@ if (ROS)
     if (_index GREATER -1)
         message("Your ROS Distribution is ROS")
         add_subdirectory(sapien_ros_utils)
+        add_subdirectory(moveit_config)
         find_package(catkin REQUIRED COMPONENTS
                 sapien_ros_utils
                 roslaunch
@@ -82,7 +83,6 @@ if (ROS)
                 actionlib
                 actionlib_msgs
                 roscpp)
-
 
         include_directories(${catkin_INCLUDE_DIRS} "robot")
 
@@ -102,7 +102,6 @@ if (ROS)
         target_link_libraries(grasp robot_lib)
         add_executable(ant test/ant.cpp)
         target_link_libraries(ant mylib)
-        message("ROS not installed")
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)
         message("Your ROS version not supported. Please update to kinetic or above.")
     endif ()

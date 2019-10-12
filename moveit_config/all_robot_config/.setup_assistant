@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: movo_description
+    relative_path: urdf/all_robot.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/movo.srdf
+  CONFIG:
+    author_name: Yuzhe
+    author_email: y1qin@ucsd.edu
+    generated_timestamp: 1570666481
