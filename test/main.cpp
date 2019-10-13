@@ -125,8 +125,34 @@ void test3() {
   loader.fixLoadedObject = true;
   // auto *articulationWrapper =
   // loader.load("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
-  // auto *articulationWrapper =
-  // loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
+  auto wrapper = loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
+  auto linkIds = wrapper->get_link_ids();
+  auto links = wrapper->get_links();
+  auto names = wrapper->get_link_names();
+
+  std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
+  std::string line;
+  while (std::getline(s, line)) {
+    if (line.length() == 0 || line[0] == ' ')
+      continue;
+    std::istringstream is(line);
+    std::string name;
+    std::vector<float> mat(16);
+    is >> name;
+    std::cout << name << std::endl;
+    is >> mat[0] >> mat[4] >> mat[8] >> mat[12] >> mat[1] >> mat[5] >> mat[9] >> mat[13] >>
+        mat[2] >> mat[6] >> mat[10] >> mat[14] >> mat[3] >> mat[7] >> mat[11] >> mat[15];
+    size_t idx = std::find(names.begin(), names.end(), name) - names.begin();
+    std::cout << idx << std::endl;
+    if (idx < names.size()) {
+      renderer.setSegmentationCustomData(linkIds[idx], mat);
+    }
+  }
+
+  // for (auto n : names) {
+  //   std::cout  <<  n << " ";
+  // }
+  // std::cout << std::endl;
 
   // int row = 2;
   // for (int i = 0; i < 4; ++i) {
@@ -141,15 +167,15 @@ void test3() {
   // auto chair = loader.load("../assets/179/test.urdf");
   // chair->articulation->teleportRootLink({{1,0,0}, PxIdentity}, true);
 
-  auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+  // auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
 
-  auto *articulation = articulationWrapper->articulation;
-  auto *cache = articulationWrapper->cache;
+  // auto *articulation = articulationWrapper->articulation;
+  // auto *cache = articulationWrapper->cache;
 
-  sim.addGround(-1);
+  // sim.addGround(-1);
 
-  reset(articulationWrapper);
-  articulationWrapper->set_qpos({0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+  // reset(articulationWrapper);
+  // articulationWrapper->set_qpos({0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
 
   // PxArticulationLink *chairLink;
   // chair->articulation->getLinks(&chairLink, 1);
@@ -157,18 +183,18 @@ void test3() {
   auto actorBuider = sim.createActorBuilder();
   auto actor = actorBuider->build(false, true, "Camera Mount");
   sim.addMountedCamera("Floating Camera", actor, {{0, 0, 0}, PxIdentity}, 256, 256, 0.9, 0.9);
-  actor->setGlobalPose({{-10, 0, 1}, {0,0,0,1}});
+  actor->setGlobalPose({{-10, 0, 1}, {0, 0, 0, 1}});
   actor->setGlobalPose({{-2, 0, 2}, {0, 0.3826834, 0, 0.9238795}});
 
   printf("Simulation start\n");
   while (true) {
-    articulation->commonInit();
-    for (uint32_t i = 0; i < 13; ++i) {
-      cache->jointAcceleration[i] = 1;
-    }
+    // articulation->commonInit();
+    // for (uint32_t i = 0; i < 13; ++i) {
+    //   cache->jointAcceleration[i] = 1;
+    // }
 
-    articulation->computeJointForce(*cache);
-    articulation->applyCache(*cache, PxArticulationCache::eFORCE);
+    // articulation->computeJointForce(*cache);
+    // articulation->applyCache(*cache, PxArticulationCache::eFORCE);
 
     sim.step();
     sim.updateRenderer();

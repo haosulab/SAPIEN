@@ -44,6 +44,7 @@ public:
 
   std::map<physx_id_t, PxTransform> mRenderId2InitialPose;
   std::map<physx_id_t, PxRigidActor *> mRenderId2Actor;
+  std::map<physx_id_t, std::string> mRenderId2VisualName;
 
   std::map<physx_id_t, PxRigidActor *> mLinkId2Actor;
   std::map<physx_id_t, IArticulationBase *> mLinkId2Articulation;

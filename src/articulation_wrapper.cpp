@@ -163,4 +163,20 @@ std::vector<std::array<PxReal, 6>> ArticulationWrapper::get_cfrc_ext() {
   return xf;
 }
 
+std::vector<PxArticulationLink *> ArticulationWrapper::get_links() const {
+  return links;
+}
+
+std::vector<std::string> ArticulationWrapper::get_link_names() const {
+  std::vector<std::string> names;
+  for (auto link: links) {
+    names.push_back(link->getName());
+  }
+  return names;
+}
+
+std::vector<physx_id_t> ArticulationWrapper::get_link_ids() const {
+  return linkSegmentationIds;
+}
+
 } // namespace sapien

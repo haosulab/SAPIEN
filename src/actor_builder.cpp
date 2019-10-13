@@ -60,7 +60,7 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMate
 }
 
 physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size,
-                                      const PxVec3 &color) {
+                                      const PxVec3 &color, std::string const &name) {
   if (!mLinkId) {
     mLinkId = IDGenerator::LinkId()->next();
   }
@@ -69,11 +69,12 @@ physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &siz
   mRenderer->addRigidbody(newId, PxGeometryType::eBOX, size, color);
   mRenderer->setSegmentationId(newId, mLinkId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  return mLinkId;
+  mSimulation->mRenderId2VisualName[newId] = name;
+  return newId;
 }
 
 physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal length,
-                                          const PxVec3 &color) {
+                                          const PxVec3 &color, std::string const &name) {
   if (!mLinkId) {
     mLinkId = IDGenerator::LinkId()->next();
   }
@@ -82,11 +83,12 @@ physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE, {length, radius, radius}, color);
   mRenderer->setSegmentationId(newId, mLinkId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  return mLinkId;
+  mSimulation->mRenderId2VisualName[newId] = name;
+  return newId;
 }
 
 physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius,
-                                         const PxVec3 &color) {
+                                         const PxVec3 &color, std::string const &name) {
   if (!mLinkId) {
     mLinkId = IDGenerator::LinkId()->next();
   }
@@ -95,11 +97,12 @@ physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius,
   mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
   mRenderer->setSegmentationId(newId, mLinkId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  return mLinkId;
+  mSimulation->mRenderId2VisualName[newId] = name;
+  return newId;
 }
 
 physx_id_t ActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
-                                      const PxVec3 &scale) {
+                                      const PxVec3 &scale, std::string const &name) {
   if (!mLinkId) {
     mLinkId = IDGenerator::LinkId()->next();
   }
@@ -108,7 +111,8 @@ physx_id_t ActorBuilder::addObjVisual(const std::string &filename, const PxTrans
   mRenderer->addRigidbody(newId, filename, scale);
   mRenderer->setSegmentationId(newId, mLinkId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  return mLinkId;
+  mSimulation->mRenderId2VisualName[newId] = name;
+  return newId;
 }
 
 PxRigidActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string const &name,

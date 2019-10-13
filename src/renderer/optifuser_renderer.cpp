@@ -22,6 +22,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFi
   for (auto &obj : objects) {
     mObjectRegistry[uniqueId].push_back(obj.get());
     obj->scale = {scale.x, scale.y, scale.z};
+    obj->setObjId(uniqueId);
     mScene->addObject(std::move(obj));
   }
 
@@ -42,6 +43,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     auto obj = Optifuser::NewFlatCube();
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z};
+    obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
@@ -50,6 +52,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     auto obj = Optifuser::NewSphere();
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z};
+    obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
@@ -58,6 +61,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     auto obj = Optifuser::NewYZPlane();
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z};
+    obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
@@ -66,6 +70,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     auto obj = Optifuser::NewCapsule(scale.x, scale.y);
     obj->scale = {1, 1, 1};
     obj->material.kd = {color.x, color.y, color.z};
+    obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
@@ -182,12 +187,17 @@ void OptifuserRenderer::render() {
     mContext->renderer.displayLighting();
   }
 
-  static int pickedId = 0;
+  static int pickedId = 0, pickedRenderId = 0;
   static GuiInfo pickedInfo;
   if (Optifuser::getInput().getMouseDown(GLFW_MOUSE_BUTTON_LEFT)) {
     int x, y;
     Optifuser::getInput().getCursor(x, y);
     pickedId = mContext->renderer.pickSegmentationId(x, y);
+    if (pickedId) {
+      pickedRenderId = mContext->renderer.pickObjectId(x, y);
+    } else {
+      pickedRenderId = 0;
+    }
   }
   if (pickedId) {
     pickedInfo = queryCallback(pickedId);
@@ -251,7 +261,8 @@ void OptifuserRenderer::render() {
         ImGui::Text("Height: %d", mContext->getHeight());
         ImGui::SameLine();
         ImGui::Text("Aspect: %.2f", cam.aspect);
-        ImGui::Text("Picked id: %d", pickedId);
+        ImGui::Text("Picked link id: %d", pickedId);
+        ImGui::Text("Picked render id: %d", pickedRenderId);
       }
 
       if (ImGui::CollapsingHeader("Mounted Cameras")) {
