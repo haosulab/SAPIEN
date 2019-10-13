@@ -446,6 +446,6 @@ PYBIND11_MODULE(sapyen, m) {
           py::arg("link"), py::arg("filename"),
           py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity),
           py::arg("scale") = make_array<float>({1, 1, 1}))
-      .def("build", &ArticulationBuilder::build, py::arg("fixBase") = true,
+      .def("build", &ArticulationBuilder::build, py::arg("fixBase") = true,  py::arg("balanceForce") = false,
            py::return_value_policy::reference);
 }
