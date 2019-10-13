@@ -93,7 +93,6 @@ if (ROS)
                 robot/device/joystick_ps3.cpp
                 robot/device/InputDevice.cpp
                 )
-
         target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
         add_executable(robot robot/test/robot.cpp)
         target_link_libraries(robot robot_lib)
