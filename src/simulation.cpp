@@ -191,7 +191,7 @@ void Simulation::step() {
 }
 
 void Simulation::updateRenderer() {
-  for (auto idParent : mRenderId2Parent) {
+  for (auto idParent : mRenderId2Actor) {
     auto pose = idParent.second->getGlobalPose() * mRenderId2InitialPose[idParent.first];
 
     mRenderer->updateRigidbody(idParent.first, pose);
@@ -211,19 +211,19 @@ std::unique_ptr<ArticulationBuilder> Simulation::createArticulationBuilder() {
 
 void Simulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
   mRenderer = renderer;
-  mRenderer->bindQueryCallback([this](uint32_t unique_id) {
+  mRenderer->bindQueryCallback([this](uint32_t seg_id) {
     Renderer::GuiInfo info = {};
 
-    if (mRenderId2Parent.find(unique_id) == mRenderId2Parent.end()) {
+    if (mLinkId2Actor.find(seg_id) == mLinkId2Actor.end()) {
       return info;
     }
-    auto actor = this->mRenderId2Parent[unique_id];
+    auto actor = this->mLinkId2Actor[seg_id];
     info.linkInfo.name = actor->getName();
     info.linkInfo.transform = actor->getGlobalPose();
-    if (mRenderId2Articulation.find(unique_id) == mRenderId2Articulation.end()) {
+    if (mLinkId2Articulation.find(seg_id) == mLinkId2Articulation.end()) {
       return info;
     }
-    IArticulationBase *articulation = mRenderId2Articulation[unique_id];
+    IArticulationBase *articulation = mLinkId2Articulation[seg_id];
 
     std::vector<std::string> singleDofName;
     auto totalDofs = articulation->dof();
@@ -251,14 +251,14 @@ void Simulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
     return info;
   });
 
-  mRenderer->bindSyncCallback([this](uint32_t unique_id, const Renderer::GuiInfo &info) {
-    if (this->mRenderId2Parent.find(unique_id) == this->mRenderId2Parent.end()) {
+  mRenderer->bindSyncCallback([this](uint32_t seg_id, const Renderer::GuiInfo &info) {
+    if (this->mLinkId2Actor.find(seg_id) == this->mLinkId2Actor.end()) {
       throw std::runtime_error("queried id is not an actor!");
     }
-    if (this->mRenderId2Articulation.find(unique_id) == this->mRenderId2Articulation.end()) {
+    if (this->mLinkId2Articulation.find(seg_id) == this->mLinkId2Articulation.end()) {
       throw std::runtime_error("queried id is not an articulation!");
     }
-    auto articulation = mRenderId2Articulation[unique_id];
+    auto articulation = mLinkId2Articulation[seg_id];
 
     std::vector<float> jointValues;
     for (auto &info : info.articulationInfo.jointInfo) {
@@ -275,10 +275,10 @@ PxRigidStatic *Simulation::addGround(PxReal altitude, bool render, PxMaterial *m
   mScene->addActor(*ground);
 
   if (render) {
-    physx_id_t newId = IDGenerator::instance()->next();
+    physx_id_t newId = IDGenerator::RenderId()->next();
     mRenderer->addRigidbody(newId, PxGeometryType::ePLANE, {10, 10, 10}, {1, 1, 1});
     mRenderId2InitialPose[newId] = PxTransform({0, 0, altitude}, PxIdentity);
-    mRenderId2Parent[newId] = ground;
+    mRenderId2Actor[newId] = ground;
   }
   return ground;
 }
@@ -286,7 +286,7 @@ PxRigidStatic *Simulation::addGround(PxReal altitude, bool render, PxMaterial *m
 physx_id_t Simulation::addMountedCamera(std::string const &name, PxRigidActor *actor,
                                         PxTransform const &pose, uint32_t width, uint32_t height,
                                         float fovx, float fovy, float near, float far) {
-  physx_id_t cameraId = IDGenerator::instance()->next();
+  physx_id_t cameraId = IDGenerator::RenderId()->next();
   const PxVec3 up = {0, 0, 1};
   const PxVec3 forward = {1, 0, 0};
   const PxMat33 rot(forward.cross(up), up, -forward);
@@ -306,5 +306,12 @@ std::unique_ptr<URDF::URDFLoader> Simulation::createURDFLoader() {
 PxMaterial *Simulation::createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction,
                                                PxReal restitution) const {
   return mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
+}
+class ControllableArticulationWrapper *
+Simulation::createControllableArticulationWrapper(class IArticulationDrivable *baseWrapper) {
+  auto wrapper = std::make_unique<ControllableArticulationWrapper>(baseWrapper);
+  wrapper->updateTimeStep(mTimestep);
+  auto wrapperPtr = wrapper.get();
+  return wrapperPtr;
 }
 } // namespace sapien

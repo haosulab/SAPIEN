@@ -18,17 +18,21 @@ uniform struct Material {
 } material;
 
 uniform int segmentation;
+uniform int segmentation2;
 uniform vec3 segmentation_color;
 
 layout (location=0) out vec4 GCOLOR;
 layout (location=1) out vec4 GSPECULAR;
 layout (location=2) out vec4 GNORMAL;
 layout (location=3) out int GSEGMENTATION;
-layout (location=4) out vec4 GSEGMENTATIONCOLOR;
+layout (location=4) out int GSEGMENTATION2;
+layout (location=5) out vec4 GSEGMENTATIONCOLOR;
+layout (location=6) out vec4 GUSER;
 
 in vec2 texcoord;
 in mat3 tbn;
 in vec4 cameraSpacePosition;
+in vec4 nox;
 
 void main() {
   if (material.has_kd_map) {
@@ -46,7 +50,9 @@ void main() {
   }
 
   GSEGMENTATION = segmentation;
+  GSEGMENTATION2 = segmentation2;
   GSEGMENTATIONCOLOR = vec4(segmentation_color, 1);
+  GUSER = nox;
 
   if (material.has_height_map) {
     const vec2 size = vec2(2.0,0.0);

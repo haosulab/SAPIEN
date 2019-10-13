@@ -22,8 +22,12 @@ class ArticulationBuilder {
   std::vector<physx_id_t> mRenderIds;
   std::vector<PxShape *> mShapes;
   std::vector<PxReal> mDensities;
-  std::map<std::string, PxArticulationLink *> namedLinks;
-  std::map<PxArticulationLink *, std::string> link2JointName;
+  std::map<std::string, PxArticulationLink *> mNamedLinks;
+  std::map<PxArticulationLink *, std::string> mLink2JointName;
+  std::map<PxArticulationLink *, physx_id_t> mLink2LinkId;
+
+  std::map<std::string, std::vector<physx_id_t>> mVisualName2RenderId;
+  std::map<PxArticulationLink *, std::vector<physx_id_t>> mLink2RenderId;
 
 public:
   ArticulationBuilder(ArticulationBuilder const &other) = delete;
@@ -74,21 +78,24 @@ public:
    */
   void updateLinkMassAndInertia(PxArticulationLink &link, PxReal density = 1.f);
 
-  void addBoxVisualToLink(PxArticulationLink &link,
-                          const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                          const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1});
+  physx_id_t addBoxVisualToLink(PxArticulationLink &link,
+                                const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
+                                const std::string &name = "");
 
-  void addCapsuleVisualToLink(PxArticulationLink &link,
-                              const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                              PxReal length = 1, const PxVec3 &color = {1, 1, 1});
+  physx_id_t addCapsuleVisualToLink(PxArticulationLink &link,
+                                    const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                    PxReal radius = 1, PxReal length = 1,
+                                    const PxVec3 &color = {1, 1, 1}, const std::string &name = "");
 
-  void addSphereVisualToLink(PxArticulationLink &link,
-                             const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                             const PxVec3 &color = {1, 1, 1});
+  physx_id_t addSphereVisualToLink(PxArticulationLink &link,
+                                   const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                   PxReal radius = 1, const PxVec3 &color = {1, 1, 1},
+                                   const std::string &name = "");
 
-  void addObjVisualToLink(PxArticulationLink &link, const std::string &filename,
-                          const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                          const PxVec3 &scale = {1, 1, 1});
+  physx_id_t addObjVisualToLink(PxArticulationLink &link, const std::string &filename,
+                                const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
+                                const PxVec3 &scale = {1, 1, 1}, const std::string &name = "");
 
   ArticulationWrapper *build(bool fixBase = true, bool balanceForce = false);
 };

@@ -6,7 +6,8 @@ using physx_id_t = uint32_t;
 
 class IDGenerator {
 public:
-  static IDGenerator *instance();
+  static IDGenerator *RenderId();
+  static IDGenerator *LinkId();
   physx_id_t next() { return _id++; }
 
 private:

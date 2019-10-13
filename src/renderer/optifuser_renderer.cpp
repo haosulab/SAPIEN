@@ -8,21 +8,21 @@
 namespace sapien {
 namespace Renderer {
 
-enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION };
+enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION, CUSTOM };
 
 constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFile,
                                      const physx::PxVec3 &scale) {
-  if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
-    std::cerr << "Object already added" << std::endl;
-    exit(1);
-  }
+  // if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
+  //   std::cerr << "Object already added" << std::endl;
+  //   exit(1);
+  // }
   auto objects = Optifuser::LoadObj(objFile);
   for (auto &obj : objects) {
-    obj->setSegmentId(uniqueId);
     mObjectRegistry[uniqueId].push_back(obj.get());
     obj->scale = {scale.x, scale.y, scale.z};
+    obj->setObjId(uniqueId);
     mScene->addObject(std::move(obj));
   }
 
@@ -33,44 +33,44 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFi
 
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
                                      const physx::PxVec3 &scale, const physx::PxVec3 &color) {
-  if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
-    std::cerr << "Object already added" << std::endl;
-    exit(1);
-  }
+  // if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
+  //   std::cerr << "Object already added" << std::endl;
+  //   exit(1);
+  // }
 
   switch (type) {
   case physx::PxGeometryType::eBOX: {
     auto obj = Optifuser::NewFlatCube();
-    obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z};
+    obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
   }
   case physx::PxGeometryType::eSPHERE: {
     auto obj = Optifuser::NewSphere();
-    obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z};
+    obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
   }
   case physx::PxGeometryType::ePLANE: {
     auto obj = Optifuser::NewYZPlane();
-    obj->setSegmentId(uniqueId);
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z};
+    obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
   }
   case physx::PxGeometryType::eCAPSULE: {
     auto obj = Optifuser::NewCapsule(scale.x, scale.y);
-    obj->setSegmentId(uniqueId);
     obj->scale = {1, 1, 1};
-    obj->material.kd = {1, 1, 1};
+    obj->material.kd = {color.x, color.y, color.z};
+    obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
     break;
@@ -78,6 +78,28 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   default:
     std::cerr << "This shape is not Implemented" << std::endl;
     break;
+  }
+}
+
+void OptifuserRenderer::setSegmentationId(uint32_t uniqueId, uint32_t segmentationId) {
+  if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
+    throw std::runtime_error("Invalid render id specified when setting segmentation id.");
+  }
+  for (auto & obj : mObjectRegistry[uniqueId]) {
+    obj->setSegmentId(segmentationId);
+  }
+  mSegId2RenderId[segmentationId].push_back(uniqueId);
+}
+
+void OptifuserRenderer::setSegmentationCustomData(uint32_t segmentationId,
+                               std::vector<float> const &customData) {
+  if (mSegId2RenderId.find(segmentationId) == mSegId2RenderId.end()) {
+    throw std::runtime_error("Invalid segmentation id.");
+  }
+  for (uint32_t renderId : mSegId2RenderId[segmentationId]) {
+    for (auto obj : mObjectRegistry[renderId]) {
+      obj->setUserData(customData);
+    }
   }
 }
 
@@ -114,11 +136,6 @@ void OptifuserRenderer::init() {
   mScene->addDirectionalLight({{0, -1, -1}, {1, 1, 1}});
   mScene->setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
-  // mScene->setEnvironmentMap(
-  //     "../assets/ame_desert/desertsky_ft.tga", "../assets/ame_desert/desertsky_bk.tga",
-  //     "../assets/ame_desert/desertsky_up.tga", "../assets/ame_desert/desertsky_dn.tga",
-  //     "../assets/ame_desert/desertsky_lf.tga", "../assets/ame_desert/desertsky_rt.tga");
-
   mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
   mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
                                       "../glsl_shader/gbuffer_segmentation.fsh");
@@ -126,6 +143,7 @@ void OptifuserRenderer::init() {
                                        "../glsl_shader/deferred.fsh");
   mContext->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
   mContext->renderer.enablePicking();
+  mContext->renderer.enableAxisPass();
 }
 
 void OptifuserRenderer::destroy() {
@@ -161,18 +179,25 @@ void OptifuserRenderer::render() {
 
   static int renderMode = 0;
   mContext->renderer.renderScene(*mScene, cam);
-  if (renderMode != SEGMENTATION) {
-    mContext->renderer.displayLighting();
-  } else {
+  if (renderMode == SEGMENTATION) {
     mContext->renderer.displaySegmentation();
+  } else if (renderMode == CUSTOM) {
+    mContext->renderer.displayUserTexture();
+  } else {
+    mContext->renderer.displayLighting();
   }
 
-  static int pickedId = 0;
+  static int pickedId = 0, pickedRenderId = 0;
   static GuiInfo pickedInfo;
   if (Optifuser::getInput().getMouseDown(GLFW_MOUSE_BUTTON_LEFT)) {
     int x, y;
     Optifuser::getInput().getCursor(x, y);
     pickedId = mContext->renderer.pickSegmentationId(x, y);
+    if (pickedId) {
+      pickedRenderId = mContext->renderer.pickObjectId(x, y);
+    } else {
+      pickedRenderId = 0;
+    }
   }
   if (pickedId) {
     pickedInfo = queryCallback(pickedId);
@@ -215,6 +240,10 @@ void OptifuserRenderer::render() {
           mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
                                               "../glsl_shader/gbuffer_segmentation.fsh");
         }
+        if (ImGui::RadioButton("Custom", &renderMode, RenderMode::CUSTOM)) {
+          mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
+                                              "../glsl_shader/gbuffer_segmentation.fsh");
+        }
       }
 
       if (ImGui::CollapsingHeader("Main Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -232,6 +261,8 @@ void OptifuserRenderer::render() {
         ImGui::Text("Height: %d", mContext->getHeight());
         ImGui::SameLine();
         ImGui::Text("Aspect: %.2f", cam.aspect);
+        ImGui::Text("Picked link id: %d", pickedId);
+        ImGui::Text("Picked render id: %d", pickedRenderId);
       }
 
       if (ImGui::CollapsingHeader("Mounted Cameras")) {
@@ -327,6 +358,10 @@ void OptifuserRenderer::updateCamera(uint32_t uniqueId, physx::PxTransform const
   mMountedCameras[uniqueId]->rotation = {transform.q.w, transform.q.x, transform.q.y,
                                          transform.q.z};
 }
-} // namespace Renderer
 
+void OptifuserRenderer::showWindow() { mContext->showWindow(); }
+
+void OptifuserRenderer::hideWindow() { mContext->hideWindow(); }
+
+} // namespace Renderer
 } // namespace sapien

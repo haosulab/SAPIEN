@@ -1,4 +1,5 @@
 #pragma once
+#include "id_generator.h"
 #include "articulation_interface.h"
 #include <PxPhysicsAPI.h>
 #include <array>
@@ -47,6 +48,7 @@ struct ArticulationWrapper : public IArticulationDrivable {
   std::vector<PxArticulationLink *> links;
   std::vector<PxReal> linkMasses;
   std::vector<PxVec3> linkInertial;
+  std::vector<physx_id_t> linkSegmentationIds;
 
   /* call to update cache with current articulation */
   void updateCache();
@@ -55,29 +57,35 @@ struct ArticulationWrapper : public IArticulationDrivable {
   /* Call to update each simulation step */
   void update();
 
-  EArticulationType get_articulation_type() const override;
-  uint32_t dof() const override;
+  // TODO: Planed interface
+  virtual std::vector<PxArticulationLink*> get_links() const;
+  virtual std::vector<std::string> get_link_names() const;
+  virtual std::vector<physx_id_t> get_link_ids() const;
 
-  std::vector<std::string> get_joint_names() const override;
-  std::vector<uint32_t> get_joint_dofs() const override;
+  // IArticulationBase
+  virtual EArticulationType get_articulation_type() const override;
+  virtual uint32_t dof() const override;
 
-  std::vector<std::tuple<physx::PxReal, physx::PxReal>> get_joint_limits() const override;
+  virtual std::vector<std::string> get_joint_names() const override;
+  virtual std::vector<uint32_t> get_joint_dofs() const override;
 
-  std::vector<physx::PxReal> get_qpos() const override;
-  void set_qpos(const std::vector<physx::PxReal> &v) override;
+  virtual std::vector<std::tuple<physx::PxReal, physx::PxReal>> get_joint_limits() const override;
 
-  std::vector<physx::PxReal> get_qvel() const override;
-  void set_qvel(const std::vector<physx::PxReal> &v) override;
+  virtual std::vector<physx::PxReal> get_qpos() const override;
+  virtual void set_qpos(const std::vector<physx::PxReal> &v) override;
 
-  std::vector<physx::PxReal> get_qacc() const override;
-  void set_qacc(const std::vector<physx::PxReal> &v) override;
+  virtual std::vector<physx::PxReal> get_qvel() const override;
+  virtual void set_qvel(const std::vector<physx::PxReal> &v) override;
 
-  std::vector<physx::PxReal> get_qf() const override;
-  void set_qf(const std::vector<physx::PxReal> &v) override;
+  virtual std::vector<physx::PxReal> get_qacc() const override;
+  virtual void set_qacc(const std::vector<physx::PxReal> &v) override;
+
+  virtual std::vector<physx::PxReal> get_qf() const override;
+  virtual void set_qf(const std::vector<physx::PxReal> &v) override;
 
   // Drive specific member function
-  std::vector<std::string> get_drive_joint_names() const override;
-  void set_drive_target(const std::vector<physx::PxReal> &v) override;
+  virtual std::vector<std::string> get_drive_joint_names() const override;
+  virtual void set_drive_target(const std::vector<physx::PxReal> &v) override;
   void set_drive_property(PxReal stiffness, PxReal damping, PxReal forceLimit = PX_MAX_F32,
                           const std::vector<uint32_t> &jointIndex = {});
   void set_force_balance(bool balanceForce);
@@ -88,8 +96,9 @@ struct ArticulationWrapper : public IArticulationDrivable {
   std::vector<std::string> const &getForceActuatorNames() const;
   void applyActuatorForce(const std::vector<physx::PxReal> &v);
 
-  // Mimic the Mujoco body modeling functions
+  // Link based function
   std::vector<std::array<PxReal, 6>> get_cfrc_ext();
+
 };
 
 } // namespace sapien

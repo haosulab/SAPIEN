@@ -23,12 +23,12 @@ PxArticulationLink *ArticulationBuilder::addLink(PxArticulationLink *parent,
   PxArticulationLink *newLink = mArticulation->createLink(parent, pose);
   newLink->setName(newNameFromString(name));
   if (!name.empty()) {
-    if (namedLinks.find(name) != namedLinks.end()) {
+    if (mNamedLinks.find(name) != mNamedLinks.end()) {
       throw std::runtime_error("Duplicate link names are not allowed in an articulation.");
     }
-    namedLinks[name] = newLink;
+    mNamedLinks[name] = newLink;
   }
-  link2JointName[newLink] = jointName;
+  mLink2JointName[newLink] = jointName;
   if (parent && jointType != PxArticulationJointType::eUNDEFINED) {
     auto joint = static_cast<PxArticulationJointReducedCoordinate *>(newLink->getInboundJoint());
     joint->setJointType(jointType);
@@ -114,52 +114,95 @@ void ArticulationBuilder::updateLinkMassAndInertia(PxArticulationLink &link, PxR
 
 //===== Visual Functions =====//
 
-void ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link, const PxTransform &pose,
-                                             const PxVec3 &size, const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+physx_id_t ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link,
+                                                   const PxTransform &pose, const PxVec3 &size,
+                                                   const PxVec3 &color,
+                                                   const std::string &name) {
+  if (mLink2LinkId.find(&link) == mLink2LinkId.end()) {
+    mLink2LinkId[&link] = IDGenerator::LinkId()->next();
+  }
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eBOX, size, color);
+  mRenderer->setSegmentationId(newId, mLink2LinkId[&link]);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  mSimulation->mRenderId2Parent[newId] = &link;
+  mSimulation->mRenderId2Actor[newId] = &link;
+  mSimulation->mRenderId2VisualName[newId] = name;
+  mSimulation->mLinkId2Actor[mLink2LinkId[&link]] = &link;
+  mVisualName2RenderId[name].push_back(newId);
+  mLink2RenderId[&link].push_back(newId);
+  return newId;
 }
 
-void ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link, const PxTransform &pose,
-                                                 PxReal radius, PxReal length,
-                                                 const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+physx_id_t ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link,
+                                                       const PxTransform &pose, PxReal radius,
+                                                       PxReal length, const PxVec3 &color,
+                                                       const std::string &name) {
+  if (mLink2LinkId.find(&link) == mLink2LinkId.end()) {
+    mLink2LinkId[&link] = IDGenerator::LinkId()->next();
+  }
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE, {length, radius, radius}, color);
+  mRenderer->setSegmentationId(newId, mLink2LinkId[&link]);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  mSimulation->mRenderId2Parent[newId] = &link;
+  mSimulation->mRenderId2Actor[newId] = &link;
+  mSimulation->mLinkId2Actor[mLink2LinkId[&link]] = &link;
+  mSimulation->mRenderId2VisualName[newId] = name;
+  mVisualName2RenderId[name].push_back(newId);
+  mLink2RenderId[&link].push_back(newId);
+  return newId;
 }
 
-void ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link, const PxTransform &pose,
-                                                PxReal radius, const PxVec3 &color) {
-  physx_id_t newId = IDGenerator::instance()->next();
+physx_id_t ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link,
+                                                      const PxTransform &pose, PxReal radius,
+                                                      const PxVec3 &color,
+                                                      const std::string &name) {
+  if (mLink2LinkId.find(&link) == mLink2LinkId.end()) {
+    mLink2LinkId[&link] = IDGenerator::LinkId()->next();
+  }
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
+  mRenderer->setSegmentationId(newId, mLink2LinkId[&link]);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  mSimulation->mRenderId2Parent[newId] = &link;
+  mSimulation->mRenderId2Actor[newId] = &link;
+  mSimulation->mLinkId2Actor[mLink2LinkId[&link]] = &link;
+  mSimulation->mRenderId2VisualName[newId] = name;
+  mVisualName2RenderId[name].push_back(newId);
+  mLink2RenderId[&link].push_back(newId);
+  return newId;
 }
 
-void ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link, const std::string &filename,
-                                             const PxTransform &pose, const PxVec3 &scale) {
-  // generate new render id
-  physx_id_t newId = IDGenerator::instance()->next();
+physx_id_t ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
+                                                   const std::string &filename,
+                                                   const PxTransform &pose, const PxVec3 &scale,
+                                                   const std::string &name) {
+  if (mLink2LinkId.find(&link) == mLink2LinkId.end()) {
+    mLink2LinkId[&link] = IDGenerator::LinkId()->next();
+  }
+  physx_id_t newId = IDGenerator::RenderId()->next();
   mRenderer->addRigidbody(newId, filename, scale);
+  mRenderer->setSegmentationId(newId, mLink2LinkId[&link]);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
-  mSimulation->mRenderId2Parent[newId] = &link;
+  mSimulation->mRenderId2Actor[newId] = &link;
+  mSimulation->mLinkId2Actor[mLink2LinkId[&link]] = &link;
+  mSimulation->mRenderId2VisualName[newId] = name;
+  mVisualName2RenderId[name].push_back(newId);
+  mLink2RenderId[&link].push_back(newId);
+  return newId;
 }
 
 ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce) {
   mArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, fixBase);
   auto wrapper = std::make_unique<ArticulationWrapper>();
-  for (auto id : mRenderIds) {
-    mSimulation->mRenderId2Articulation[id] = wrapper.get();
+  for (auto &p : mLink2LinkId) {
+    mSimulation->mLinkId2Articulation[p.second] = wrapper.get();
   }
 
-  // Balance force for robot articulation, for ant or other articulation, balanceForce should be false (default)
+  // Balance force for robot articulation, for ant or other articulation, balanceForce should be
+  // false (default)
   wrapper->set_force_balance(balanceForce);
 
   // add articulation
@@ -169,9 +212,10 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
   mSimulation->mScene->addArticulation(*mArticulation);
 
   size_t nLinks = mArticulation->getNbLinks();
-  PxArticulationLink *links[nLinks];
-  mArticulation->getLinks(links, nLinks);
-  std::sort(links, links + nLinks,
+  // PxArticulationLink *links[nLinks];
+  std::vector<PxArticulationLink *> links(nLinks);
+  mArticulation->getLinks(links.data(), nLinks);
+  std::sort(links.begin(), links.end(),
             [](const auto &a, const auto &b) { return a->getLinkIndex() < b->getLinkIndex(); });
 
   // ignore collision between parent and child
@@ -212,7 +256,7 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
   for (size_t i = 0; i < nLinks; ++i) {
     auto *joint = static_cast<PxArticulationJointReducedCoordinate *>(links[i]->getInboundJoint());
     if (joint) {
-      wrapper->jointNames.push_back(link2JointName[links[i]]);
+      wrapper->jointNames.push_back(mLink2JointName[links[i]]);
       wrapper->jointDofs.push_back(links[i]->getInboundJointDof());
       for (size_t k = 0; k < wrapper->jointDofs.back(); ++k) {
         wrapper->jointNamesDOF.push_back(wrapper->jointNames.back());
@@ -261,12 +305,17 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
   wrapper->articulation->copyInternalStateToCache(*wrapper->cache, PxArticulationCache::eALL);
   wrapper->articulation->setName("articulation");
 
-  // Add named links to the wrapper
-  wrapper->linkName2Link = namedLinks;
-  for(const auto& val: namedLinks){
-    wrapper->links.push_back(val.second);
-    wrapper->linkMasses.push_back(val.second->getMass());
-    wrapper->linkInertial.push_back(val.second->getMassSpaceInertiaTensor());
+  // Add links to the wrapper
+  wrapper->linkName2Link = mNamedLinks;
+  for (const auto link : links) {
+    wrapper->links.push_back(link);
+    wrapper->linkMasses.push_back(link->getMass());
+    wrapper->linkInertial.push_back(link->getMassSpaceInertiaTensor());
+    if (mLink2LinkId.find(link) != mLink2LinkId.end()) {
+      wrapper->linkSegmentationIds.push_back(mLink2LinkId[link]);
+    } else {
+      wrapper->linkSegmentationIds.push_back(0);
+    }
   }
 
   ArticulationWrapper *wrapperPtr = wrapper.get();

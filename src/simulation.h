@@ -43,12 +43,14 @@ public:
   std::map<physx_id_t, PxRigidActor *> mMountedCamera2MountedActor;
 
   std::map<physx_id_t, PxTransform> mRenderId2InitialPose;
-  std::map<physx_id_t, PxRigidActor *> mRenderId2Parent;
-  std::map<physx_id_t, IArticulationBase *> mRenderId2Articulation;
+  std::map<physx_id_t, PxRigidActor *> mRenderId2Actor;
+  std::map<physx_id_t, std::string> mRenderId2VisualName;
+
+  std::map<physx_id_t, PxRigidActor *> mLinkId2Actor;
+  std::map<physx_id_t, IArticulationBase *> mLinkId2Articulation;
 
   std::vector<std::unique_ptr<struct ArticulationWrapper>> mDynamicArticulationWrappers;
-  std::vector<std::unique_ptr<class KinematicsArticulationWrapper>>
-      mKinematicArticulationWrappers;
+  std::vector<std::unique_ptr<class KinematicsArticulationWrapper>> mKinematicArticulationWrappers;
   std::vector<std::unique_ptr<class JointSystem>> mJointSystemWrappers;
   std::vector<std::unique_ptr<class ControllableArticulationWrapper>>
       mControllableArticulationWrapper;
@@ -81,6 +83,10 @@ public:
 
   /* Create URDF loader from simulation */
   std::unique_ptr<URDF::URDFLoader> createURDFLoader();
+
+  /* Create Controllable wrapper and register update function */
+  class ControllableArticulationWrapper *
+  createControllableArticulationWrapper(class IArticulationDrivable * baseWrapper);
 };
 
 } // namespace sapien

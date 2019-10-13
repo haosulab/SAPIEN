@@ -37,16 +37,11 @@ void test1() {
 //  auto actor = builder->build(false, false, "test", true);
 //  actor->setGlobalPose({{1.0, 0.3, 1}, PxIdentity});
 
-  builder->addObjVisual("../assets/object/029_plate/google_16k/textured.dae");
-  builder->addConvexShapeFromObj("../assets/object/029_plate/google_16k/textured.obj");
-  auto plate = builder->build(false, false, "plate", true);
-  plate->setGlobalPose({{1.0, 0.3, 1.2}, PxIdentity});
-
   PS3::PS3Input input;
   auto loader = sim.createURDFLoader();
   loader->balancePassiveForce = true;
-  loader->load("../assets/46627/test.urdf")
-      ->articulation->teleportRootLink({{1.0, 0.3, 0.4}, PxIdentity}, true);
+  // loader->load("../assets/46627/test.urdf")
+  //     ->articulation->teleportRootLink({{1.0, 0.3, 0.4}, PxIdentity}, true);
   auto wrapper = loader->load("../assets/robot/all_robot.urdf");
   wrapper->set_drive_property(2000, 500);
 
@@ -79,6 +74,7 @@ void test1() {
   bool continuous = true;
   float gripperVelocity = 5;
   float bodyVelocity = 0.1;
+  renderer.showWindow();
 
   static size_t globalTimeStep = 0;
   while (true) {

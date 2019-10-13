@@ -53,7 +53,7 @@ static std::string getAbsPath(const std::string &urdfPath, const std::string &fi
   return fs::absolute(path).remove_filename().string() + filePath;
 }
 
-URDFLoader::URDFLoader(Simulation &simulation) : mSimulation(simulation){}
+URDFLoader::URDFLoader(Simulation &simulation) : mSimulation(simulation) {}
 
 struct LinkTreeNode {
   Link *link;
@@ -216,18 +216,20 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size);
+        builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size, {1, 1, 1},
+                                   visual->name);
         break;
       case Geometry::CYLINDER:
         builder.addCapsuleVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
-                                       visual->geometry->length);
+                                       visual->geometry->length, {1, 1, 1}, visual->name);
         break;
       case Geometry::SPHERE:
-        builder.addSphereVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius);
+        builder.addSphereVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
+                                      {1, 1, 1}, visual->name);
         break;
       case Geometry::MESH:
         builder.addObjVisualToLink(currentPxLink, getAbsPath(filename, visual->geometry->filename),
-                                   tVisual2Link, visual->geometry->scale);
+                                   tVisual2Link, visual->geometry->scale, visual->name);
         break;
       }
     }
@@ -443,25 +445,25 @@ KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &file
     // visual
     for (auto &visual : current->link->visual_array) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
-      physx_id_t visualId;
+      physx_id_t linkId;
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        visualId = actorBuilder.addBoxVisual(tVisual2Link, visual->geometry->size);
+        linkId = actorBuilder.addBoxVisual(tVisual2Link, visual->geometry->size);
         break;
       case Geometry::CYLINDER:
-        visualId = actorBuilder.addCapsuleVisual(tVisual2Link, visual->geometry->radius,
-                                                 visual->geometry->length);
+        linkId = actorBuilder.addCapsuleVisual(tVisual2Link, visual->geometry->radius,
+                                               visual->geometry->length);
         break;
       case Geometry::SPHERE:
-        visualId = actorBuilder.addSphereVisual(tVisual2Link, visual->geometry->radius);
+        linkId = actorBuilder.addSphereVisual(tVisual2Link, visual->geometry->radius);
         break;
       case Geometry::MESH:
         visual->geometry->filename = getAbsPath(filename, visual->geometry->filename);
-        visualId = actorBuilder.addObjVisual(visual->geometry->filename, tVisual2Link,
-                                             visual->geometry->scale);
+        linkId = actorBuilder.addObjVisual(visual->geometry->filename, tVisual2Link,
+                                           visual->geometry->scale);
         break;
       }
-      mSimulation.mRenderId2Articulation[visualId] = wrapper.get();
+      mSimulation.mLinkId2Articulation[linkId] = wrapper.get();
     }
 
     // collision
@@ -703,7 +705,7 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
   std::map<LinkTreeNode *, ActorBuilder *> treeNode2Builder;
   std::map<LinkTreeNode *, PxTransform> treeNode2Pose;
   std::map<LinkTreeNode *, PxTransform> treeNode2ActorPose;
-  std::vector<physx_id_t> renderIds;
+  std::vector<physx_id_t> linkIds;
   auto newObject = std::make_unique<JointSystem>(&mSimulation);
 
   stack = {root};
@@ -730,25 +732,24 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
     // visual
     for (const auto &visual : current->link->visual_array) {
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
-      physx_id_t renderId = 0;
+      physx_id_t linkId = 0;
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        renderId = actorBuilder->addBoxVisual(interPose * tVisual2Link, visual->geometry->size);
+        linkId = actorBuilder->addBoxVisual(interPose * tVisual2Link, visual->geometry->size);
         break;
       case Geometry::CYLINDER:
-        renderId = actorBuilder->addCapsuleVisual(
-            interPose * tVisual2Link, visual->geometry->radius, visual->geometry->length);
+        linkId = actorBuilder->addCapsuleVisual(interPose * tVisual2Link, visual->geometry->radius,
+                                                visual->geometry->length);
         break;
       case Geometry::SPHERE:
-        renderId =
-            actorBuilder->addSphereVisual(interPose * tVisual2Link, visual->geometry->radius);
+        linkId = actorBuilder->addSphereVisual(interPose * tVisual2Link, visual->geometry->radius);
         break;
       case Geometry::MESH:
-        renderId = actorBuilder->addObjVisual(getAbsPath(filename, visual->geometry->filename),
-                                              interPose * tVisual2Link, visual->geometry->scale);
+        linkId = actorBuilder->addObjVisual(getAbsPath(filename, visual->geometry->filename),
+                                            interPose * tVisual2Link, visual->geometry->scale);
         break;
       }
-      renderIds.push_back(renderId);
+      linkIds.push_back(linkId);
     }
 
     // collision
@@ -861,8 +862,8 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
     }
   }
 
-  for (auto id : renderIds) {
-    mSimulation.mRenderId2Articulation[id] = newObject.get();
+  for (auto id : linkIds) {
+    mSimulation.mLinkId2Articulation[id] = newObject.get();
   }
   mSimulation.mJointSystemWrappers.push_back(std::move(newObject));
   return mSimulation.mJointSystemWrappers.back().get();

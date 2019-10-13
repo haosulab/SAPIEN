@@ -1,0 +1,13 @@
+controller_list:
+  - name: fake_right_arm_controller
+    joints:
+      - right_shoulder_pan_joint
+      - right_shoulder_lift_joint
+      - right_arm_half_joint
+      - right_elbow_joint
+      - right_wrist_spherical_1_joint
+      - right_wrist_spherical_2_joint
+      - right_wrist_3_joint
+  - name: fake_right_ee_controller
+    joints:
+      - right_gripper_finger1_joint
