@@ -76,7 +76,7 @@ public:
    *  compute the mass and inertia of a link by a constant density
    *  TODO: support different densities for different shapes
    */
-  void updateLinkMassAndInertia(PxArticulationLink &link, PxReal density = 1.f);
+  void updateLinkMassAndInertia(PxArticulationLink &link, PxReal density = 1000.f);
 
   physx_id_t addBoxVisualToLink(PxArticulationLink &link,
                                 const PxTransform &pose = {{0, 0, 0}, PxIdentity},

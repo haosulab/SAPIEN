@@ -34,17 +34,17 @@ public:
   void addConvexShapeFromObj(const std::string &filename,
                              const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                              const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
-                             PxReal density = 1.f);
+                             PxReal density = 1000.f);
 
   void addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                    const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr,
-                   PxReal density = 1.f);
+                   PxReal density = 1000.f);
 
   void addCapsuleShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                       PxReal length = 1, PxMaterial *material = nullptr, PxReal density = 1.f);
+                       PxReal length = 1, PxMaterial *material = nullptr, PxReal density = 1000.f);
 
   void addSphereShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                      PxMaterial *material = nullptr, PxReal density = 1.f);
+                      PxMaterial *material = nullptr, PxReal density = 1000.f);
 
   physx_id_t addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                           const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
