@@ -433,45 +433,6 @@ PYBIND11_MODULE(sapyen, m) {
            })
       .def("updateLinkMassAndInertia", &ArticulationBuilder::updateLinkMassAndInertia,
            py::arg("link"), py::arg("density") = 1.f)
-<<<<<<< HEAD
-      .def(
-          "addBoxVisualToLink",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-             const py::array_t<float> &scale, const py::array_t<float> &color) {
-            a.addBoxVisualToLink(link, pose, array2vec3(scale), array2vec3(color));
-          },
-          py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-          py::arg("scale") = make_array<float>({1, 1, 1}),
-          py::arg("color") = make_array<float>({1, 1, 1}))
-      .def(
-          "addCapsuleVisualToLink",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-             PxReal radius, PxReal length, const py::array_t<PxReal> &color) {
-            a.addCapsuleVisualToLink(link, pose, radius, length, array2vec3(color));
-          },
-          py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-          py::arg("radius") = 1, py::arg("length") = 1,
-          py::arg("color") = make_array<float>({1, 1, 1}))
-      .def(
-          "addSphereVisualToLink",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-             PxReal radius, const py::array_t<PxReal> &color) {
-            a.addSphereVisualToLink(link, pose, radius, array2vec3(color));
-          },
-          py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-          py::arg("radius") = 1, py::arg("color") = make_array<float>({1, 1, 1}))
-      .def(
-          "addObjVisualToLink",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const std::string &filename,
-             const PxTransform &pose, const py::array_t<float> &scale) {
-            a.addObjVisualToLink(link, filename, pose, array2vec3(scale));
-          },
-          py::arg("link"), py::arg("filename"),
-          py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity),
-          py::arg("scale") = make_array<float>({1, 1, 1}))
-      .def("build", &ArticulationBuilder::build, py::arg("fixBase") = true,  py::arg("balanceForce") = false,
-           py::return_value_policy::reference);
-=======
       .def("addBoxVisualToLink",
            [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
               const py::array_t<float> &scale, const py::array_t<float> &color) {
@@ -505,5 +466,4 @@ PYBIND11_MODULE(sapyen, m) {
            py::arg("scale") = make_array<float>({1, 1, 1}))
       .def("build", &ArticulationBuilder::build, py::arg("fixBase") = true,
            py::arg("balanceForce") = false, py::return_value_policy::reference);
->>>>>>> 8e6c1cc7f2f31e03d484b8ea31f1bbb5f940347f
 }
