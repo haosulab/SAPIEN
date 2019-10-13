@@ -116,8 +116,9 @@ void ArticulationBuilder::updateLinkMassAndInertia(PxArticulationLink &link, PxR
 
 physx_id_t ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link,
                                                    const PxTransform &pose, const PxVec3 &size,
-                                                   const PxVec3 &color,
-                                                   const std::string &name) {
+                                                   const PxVec3 &color, const std::string &name) {
+  if (!mRenderer)
+    return 0;
   if (mLink2LinkId.find(&link) == mLink2LinkId.end()) {
     mLink2LinkId[&link] = IDGenerator::LinkId()->next();
   }
@@ -138,6 +139,8 @@ physx_id_t ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link,
                                                        const PxTransform &pose, PxReal radius,
                                                        PxReal length, const PxVec3 &color,
                                                        const std::string &name) {
+  if (!mRenderer)
+    return 0;
   if (mLink2LinkId.find(&link) == mLink2LinkId.end()) {
     mLink2LinkId[&link] = IDGenerator::LinkId()->next();
   }
@@ -158,6 +161,8 @@ physx_id_t ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link,
                                                       const PxTransform &pose, PxReal radius,
                                                       const PxVec3 &color,
                                                       const std::string &name) {
+  if (!mRenderer)
+    return 0;
   if (mLink2LinkId.find(&link) == mLink2LinkId.end()) {
     mLink2LinkId[&link] = IDGenerator::LinkId()->next();
   }
@@ -178,6 +183,8 @@ physx_id_t ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
                                                    const std::string &filename,
                                                    const PxTransform &pose, const PxVec3 &scale,
                                                    const std::string &name) {
+  if (!mRenderer)
+    return 0;
   if (mLink2LinkId.find(&link) == mLink2LinkId.end()) {
     mLink2LinkId[&link] = IDGenerator::LinkId()->next();
   }

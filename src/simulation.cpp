@@ -191,6 +191,8 @@ void Simulation::step() {
 }
 
 void Simulation::updateRenderer() {
+  if (!mRenderer)
+    return;
   for (auto idParent : mRenderId2Actor) {
     auto pose = idParent.second->getGlobalPose() * mRenderId2InitialPose[idParent.first];
 
@@ -274,7 +276,7 @@ PxRigidStatic *Simulation::addGround(PxReal altitude, bool render, PxMaterial *m
   ground->setName("Ground");
   mScene->addActor(*ground);
 
-  if (render) {
+  if (render && mRenderer) {
     physx_id_t newId = IDGenerator::RenderId()->next();
     mRenderer->addRigidbody(newId, PxGeometryType::ePLANE, {10, 10, 10}, {1, 1, 1});
     mRenderId2InitialPose[newId] = PxTransform({0, 0, altitude}, PxIdentity);

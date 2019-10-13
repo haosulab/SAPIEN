@@ -61,6 +61,8 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMate
 
 physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size,
                                       const PxVec3 &color, std::string const &name) {
+  if (!mRenderer)
+    return 0;
   if (!mLinkId) {
     mLinkId = IDGenerator::LinkId()->next();
   }
@@ -75,6 +77,8 @@ physx_id_t ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &siz
 
 physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal length,
                                           const PxVec3 &color, std::string const &name) {
+  if (!mRenderer)
+    return 0;
   if (!mLinkId) {
     mLinkId = IDGenerator::LinkId()->next();
   }
@@ -89,6 +93,8 @@ physx_id_t ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius
 
 physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius,
                                          const PxVec3 &color, std::string const &name) {
+  if (!mRenderer)
+    return 0;
   if (!mLinkId) {
     mLinkId = IDGenerator::LinkId()->next();
   }
@@ -103,6 +109,8 @@ physx_id_t ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius,
 
 physx_id_t ActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
                                       const PxVec3 &scale, std::string const &name) {
+  if (!mRenderer)
+    return 0;
   if (!mLinkId) {
     mLinkId = IDGenerator::LinkId()->next();
   }
