@@ -128,6 +128,10 @@ class SapyenEnv(gym.Env):
 
     def state_vector(self):
         return np.concatenate([
+            self.body_link.getGlobalPose().p,
+            self.body_link.getGlobalPose().q,
             self.wrapper.get_qpos().flat,
+            self.body_link.getLinearVelocity(),
+            self.body_link.getAngularVelocity(),
             self.wrapper.get_qvel().flat
         ])

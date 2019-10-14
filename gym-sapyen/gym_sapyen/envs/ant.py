@@ -114,8 +114,8 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         builder.addCapsuleVisualToLink(f4,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
         builder.updateLinkMassAndInertia(f4, density)
         wrapper = builder.build(False)
-        lower_bound = -10
-        upper_bound = 10
+        lower_bound = -15
+        upper_bound = 15
         wrapper.add_force_actuator("j1", lower_bound, upper_bound)
         wrapper.add_force_actuator("j2", lower_bound, upper_bound)
         wrapper.add_force_actuator("j3", lower_bound, upper_bound)
@@ -124,6 +124,7 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         wrapper.add_force_actuator("j21", lower_bound, upper_bound)
         wrapper.add_force_actuator("j31", lower_bound, upper_bound)
         wrapper.add_force_actuator("j41", lower_bound, upper_bound)
+        wrapper.set_root_pose(np.array([0, 0, 0.55]))
         ground = self.sim.addGround(-1)
         return wrapper, body_link
 
@@ -138,8 +139,8 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         survive_reward = 1.0
         reward = forward_reward - ctrl_cost - contact_cost + survive_reward
         state = self.state_vector()
-        notdone = np.isfinite(state).all() #\
-        #    and state[2] >= 0.2 and state[2] <= 1.0 # z ??
+        notdone = np.isfinite(state).all() \
+            and state[2] >= 0.2 and state[2] <= 1.0 
         done = not notdone
         ob = self._get_obs()
         return ob, reward, done, dict(
@@ -150,9 +151,13 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
 
     def _get_obs(self):
         return np.concatenate([
-            self.wrapper.get_qpos().flat[2:],
+            self.body_link.getGlobalPose().p[2:],
+            self.body_link.getGlobalPose().q,
+            self.wrapper.get_qpos().flat,
+            self.body_link.getLinearVelocity(),
+            self.body_link.getAngularVelocity(),
             self.wrapper.get_qvel().flat,
-            np.clip(self.wrapper.get_cfrc_ext(), -1, 1).flat, 
+            np.clip(self.wrapper.get_cfrc_ext(), -1, 1).flat, # 54->84 ??
         ])
 
     def reset_model(self):

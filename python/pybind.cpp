@@ -134,18 +134,18 @@ PYBIND11_MODULE(sapyen, m) {
   py::class_<PxRigidBody, PxRigidActor, std::unique_ptr<PxRigidBody, py::nodelete>>(m,
                                                                                     "PxRigidBody")
       .def("getGlobalPose", &PxRigidBody::getGlobalPose)
-      .def("getLinearVelocity", &PxRigidBody::getLinearVelocity)
-      .def("getAngularVelocity", &PxRigidBody::getAngularVelocity);
+      .def("getLinearVelocity", [](PxRigidBody &a) {physx::PxVec3 vel = a.getLinearVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); })
+      .def("getAngularVelocity", [](PxRigidBody &a) {physx::PxVec3 vel = a.getAngularVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); });
   py::class_<PxRigidDynamic, PxRigidBody, std::unique_ptr<PxRigidDynamic, py::nodelete>>(
       m, "PxRigidDynamic")
       .def("getGlobalPose", &PxRigidDynamic::getGlobalPose)
-      .def("getLinearVelocity", &PxRigidDynamic::getLinearVelocity)
-      .def("getAngularVelocity", &PxRigidDynamic::getAngularVelocity);
+      .def("getLinearVelocity", [](PxRigidDynamic &a) {physx::PxVec3 vel = a.getLinearVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); })
+      .def("getAngularVelocity", [](PxRigidDynamic &a) {physx::PxVec3 vel = a.getAngularVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); });
   py::class_<PxArticulationLink, PxRigidBody, std::unique_ptr<PxArticulationLink, py::nodelete>>(
       m, "PxArticulationLink")
       .def("getGlobalPose", &PxArticulationLink::getGlobalPose)
-      .def("getLinearVelocity", &PxArticulationLink::getLinearVelocity)
-      .def("getAngularVelocity", &PxArticulationLink::getAngularVelocity);
+      .def("getLinearVelocity", [](PxArticulationLink &a) {physx::PxVec3 vel = a.getLinearVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); })
+      .def("getAngularVelocity", [](PxArticulationLink &a) {physx::PxVec3 vel = a.getAngularVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); });
 
   py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial")
       .def("getStaticFriction", &PxMaterial::getStaticFriction)
