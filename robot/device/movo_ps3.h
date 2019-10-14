@@ -15,7 +15,7 @@ class MOVOPS3 {
   ControllerManger *manger;
   std::unique_ptr<PS3> input;
   bool reset = true;
-  bool continuous = false;
+  bool continuous = true;
   ControlMode mode = ControlMode::BODY;
 
   const std::vector<std::string> gripperJoints = {
@@ -33,12 +33,12 @@ public:
   JointVelocityController *body;
   JointVelocityController *head;
 
-  float gripper_velocity = 5;
+  float gripper_velocity = 3;
   float wheel_velocity = 1;
   float body_velocity = 0.1;
   float head_velocity = 1;
   float arm_cartesian_velocity = 0.2;
-  float arm_cartesian_angular_velocity = 0.4;
+  float arm_cartesian_angular_velocity = 0.5;
 
 public:
   explicit MOVOPS3(ControllerManger *manger);

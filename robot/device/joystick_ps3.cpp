@@ -35,5 +35,6 @@ void PS3::shutdown() {
   worker.join();
 }
 bool PS3::getKey(ButtonId id) { return buttonStates[id]; }
-int16_t PS3::getAxis(AxisId id) { return axisStates[id]; }
+bool PS3::getAxis(AxisId id) { return axisStates[id]; }
+float PS3::getAxisValue(AxisId id) { return static_cast<float>(axisStates[id]) / AXIS_CONST; }
 } // namespace sapien::robot

@@ -4,11 +4,8 @@
 #include "device/movo_ps3.h"
 #include "optifuser_renderer.h"
 #include "simulation.h"
-#include <extensions/PxDefaultCpuDispatcher.h>
-#include <extensions/PxSimpleFactory.h>
 #include <optifuser.h>
 #include <thread>
-#include <vector>
 
 using namespace sapien;
 void run() {
@@ -22,10 +19,18 @@ void run() {
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 300.f);
   sim.addGround(0.0);
-
+  auto builder = sim.createActorBuilder();
   auto loader = sim.createURDFLoader();
   loader->fixLoadedObject = true;
   loader->balancePassiveForce = true;
+
+  builder->addBoxShape({{0, 0, 0}, PxIdentity}, {0.5, 1.5, 0.3});
+  builder->addBoxVisual({{0, 0, 0}, PxIdentity}, {0.5, 1.5, 0.5});
+  auto actor = builder->build(false, false, "test", true);
+  actor->setGlobalPose({{2.0, 0.3, 0.5}, PxIdentity});
+  loader->load("../assets/46627/test.urdf")
+      ->articulation->teleportRootLink({{1.0, 0.3, 0.4}, PxIdentity}, true);
+
   auto wrapper = loader->load("../assets/robot/all_robot.urdf");
   wrapper->set_drive_property(2000, 500);
 
@@ -37,7 +42,6 @@ void run() {
   renderer.showWindow();
   wrapper->set_qpos({0.47, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});
   wrapper->set_drive_target({0.2, 0, 0.0, 0, -0.9, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0});
-  sim.step();
 
   while (true) {
     sim.step();

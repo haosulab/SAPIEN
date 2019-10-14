@@ -26,7 +26,7 @@ enum CartesianCommand {
   YAW_B = 11
 };
 
-enum MoveType { WorldTranslate, WorldRotate, TargetTranslate, TargetRotate };
+enum MoveType { WorldTranslate, WorldRotate, LocalTranslate, LocalRotate };
 
 class CartesianVelocityController {
 private:

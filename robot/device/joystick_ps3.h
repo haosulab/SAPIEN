@@ -4,12 +4,12 @@
 #pragma once
 
 #include "InputDevice.h"
+#include <atomic>
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
 #include <unistd.h>
 #include <vector>
-#include <atomic>
 
 namespace sapien::robot {
 
@@ -56,11 +56,13 @@ protected:
   std::array<std::atomic<int>, PS3_BUTTON_COUNT> buttonStates;
   std::array<std::atomic<int16_t>, PS3_AXIS_COUNT> axisStates;
   void runThread();
+  const float AXIS_CONST = 32768;
 
 public:
   PS3();
   void shutdown();
   bool getKey(ButtonId id);
-  int16_t getAxis(AxisId id);
+  bool getAxis(AxisId id);
+  float getAxisValue(AxisId id);
 };
 } // namespace sapien::robot

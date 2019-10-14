@@ -152,27 +152,27 @@ void CartesianVelocityController::moveRelative(const std::array<float, 3> &T, Mo
     Eigen::Vector3d vec(T[0], T[1], T[2]);
     vec *= rotStepSize;
     Eigen::Matrix3d rot;
-    rot = Eigen::AngleAxisd(vec[2] * rotStepSize, Eigen::Vector3d::UnitZ()) *
-          Eigen::AngleAxisd(vec[1] * rotStepSize, Eigen::Vector3d::UnitY()) *
-          Eigen::AngleAxisd(vec[0] * rotStepSize, Eigen::Vector3d::UnitX());
+    rot = Eigen::AngleAxisd(vec[2], Eigen::Vector3d::UnitZ()) *
+          Eigen::AngleAxisd(vec[1], Eigen::Vector3d::UnitY()) *
+          Eigen::AngleAxisd(vec[0], Eigen::Vector3d::UnitX());
     trans.matrix().block<3, 3>(0, 0) = rot;
     newPose = trans * currentPose;
     break;
   }
-  case TargetTranslate: {
+  case LocalTranslate: {
     Eigen::Vector3d vec(T[0], T[1], T[2]);
     vec *= transStepSize;
     trans.matrix().block<3, 1>(0, 3) = vec;
     newPose = currentPose * trans;
     break;
   }
-  case TargetRotate: {
+  case LocalRotate: {
     Eigen::Vector3d vec(T[0], T[1], T[2]);
     vec *= rotStepSize;
     Eigen::Matrix3d rot;
-    rot = Eigen::AngleAxisd(vec[2] * rotStepSize, Eigen::Vector3d::UnitZ()) *
-          Eigen::AngleAxisd(vec[1] * rotStepSize, Eigen::Vector3d::UnitY()) *
-          Eigen::AngleAxisd(vec[0] * rotStepSize, Eigen::Vector3d::UnitX());
+    rot = Eigen::AngleAxisd(vec[2], Eigen::Vector3d::UnitZ()) *
+          Eigen::AngleAxisd(vec[1], Eigen::Vector3d::UnitY()) *
+          Eigen::AngleAxisd(vec[0], Eigen::Vector3d::UnitX());
     trans.matrix().block<3, 3>(0, 0) = rot;
     newPose = currentPose * trans;
     break;
