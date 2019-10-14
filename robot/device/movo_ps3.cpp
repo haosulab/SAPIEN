@@ -10,6 +10,7 @@ sapien::robot::MOVOPS3::MOVOPS3(ControllerManger *manger) : manger(manger) {
   head = manger->createJointVelocityController(headJoints, "head");
   right_arm_cartesian = manger->createCartesianVelocityController("right_arm");
   timestep = manger->timestep;
+  manger->start();
 }
 void sapien::robot::MOVOPS3::set_arm_velocity(float v) { right_arm_cartesian->setVelocity(v); }
 void sapien::robot::MOVOPS3::set_arm_angular_velocity(float v) {
@@ -38,12 +39,12 @@ void sapien::robot::MOVOPS3::step() {
       pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * timestep * wheel_velocity;
       manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (input->getAxis(AXIS_LEFT_X)) {
-      float dir = input->getAxis(AXIS_LEFT_X) > 0 ? 1 : -1;
+      float dir = input->getAxis(AXIS_LEFT_X) > 0 ? -1 : 1;
       angle += timestep * wheel_velocity * dir;
       manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (input->getKey(BUTTON_L1)) {
       right_gripper->moveJoint(gripperJoints, gripper_velocity);
-    } else if (input->getKey(BUTTON_L2)) {
+    } else if (input->getKey(BUTTON_R1)) {
       right_gripper->moveJoint(gripperJoints, -gripper_velocity);
     } else if (input->getKey(BUTTON_TRIANGLE)) {
       head->moveJoint({"tilt_joint"}, -head_velocity);
@@ -54,10 +55,11 @@ void sapien::robot::MOVOPS3::step() {
     } else if (input->getKey(BUTTON_CIRCLE)) {
       head->moveJoint({"pan_joint"}, head_velocity);
     } else if (input->getAxis(AXiS_RIGHT_Y)) {
-      float dir = input->getAxis(AXiS_RIGHT_Y) > 0 ? 1 : -1;
+      float dir = input->getAxis(AXiS_RIGHT_Y) > 0 ? -1 : 1;
       body->moveJoint(bodyJoints, body_velocity * dir);
     }
   }
   }
 }
 void sapien::robot::MOVOPS3::set_wheel_velocity(float v) { wheel_velocity = v; }
+void sapien::robot::MOVOPS3::close() { input->shutdown(); }

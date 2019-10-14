@@ -78,31 +78,31 @@ void test1() {
 
   static size_t globalTimeStep = 0;
   while (true) {
-//    if (input.getKey(PS3::BUTTON_UP)) {
-//      IKController->moveRelative(robot::CartesianCommand::X_F, continuous);
-//    } else if (input.getKey(PS3::BUTTON_DOWN)) {
-//      IKController->moveRelative(robot::CartesianCommand::X_B, continuous);
-//    } else if (input.getKey(PS3::BUTTON_LEFT)) {
-//      IKController->moveRelative(robot::CartesianCommand::Y_F, continuous);
-//    } else if (input.getKey(PS3::BUTTON_RIGHT)) {
-//      IKController->moveRelative(robot::CartesianCommand::Y_B, continuous);
-//    } else if (input.getKey(PS3::BUTTON_L1)) {
-//      IKController->moveRelative(robot::CartesianCommand::Z_F, continuous);
-//    } else if (input.getKey(PS3::BUTTON_L2)) {
-//      IKController->moveRelative(robot::CartesianCommand::Z_B, continuous);
-//    } else if (input.getKey(PS3::BUTTON_CIRCLE)) {
-//      jointController->moveJoint(serviceJoints, gripperVelocity);
-//    } else if (input.getKey(PS3::BUTTON_SQUARE)) {
-//      jointController->moveJoint(serviceJoints, -gripperVelocity);
-//    } else if (input.getKey(PS3::BUTTON_R1)) {
-//      IKController->moveRelative(robot::CartesianCommand::ROLL_F, continuous);
-//    } else if (input.getKey(PS3::BUTTON_R2)) {
-//      IKController->moveRelative(robot::CartesianCommand::ROLL_B, continuous);
-//    } else if (input.getKey(PS3::BUTTON_X)) {
-//      bodyController->moveJoint({"linear_joint"}, -bodyVelocity);
-//    } else if (input.getKey(PS3::BUTTON_TRIANGLE)) {
-//      bodyController->moveJoint({"linear_joint"}, bodyVelocity);
-//    }
+    if (input.getKey(PS3::BUTTON_UP)) {
+      IKController->moveRelative(robot::CartesianCommand::X_F, continuous);
+    } else if (input.getKey(PS3::BUTTON_DOWN)) {
+      IKController->moveRelative(robot::CartesianCommand::X_B, continuous);
+    } else if (input.getKey(PS3::BUTTON_LEFT)) {
+      IKController->moveRelative(robot::CartesianCommand::Y_F, continuous);
+    } else if (input.getKey(PS3::BUTTON_RIGHT)) {
+      IKController->moveRelative(robot::CartesianCommand::Y_B, continuous);
+    } else if (input.getKey(PS3::BUTTON_L1)) {
+      IKController->moveRelative(robot::CartesianCommand::Z_F, continuous);
+    } else if (input.getKey(PS3::BUTTON_L2)) {
+      IKController->moveRelative(robot::CartesianCommand::Z_B, continuous);
+    } else if (input.getKey(PS3::BUTTON_CIRCLE)) {
+      jointController->moveJoint(serviceJoints, gripperVelocity);
+    } else if (input.getKey(PS3::BUTTON_SQUARE)) {
+      jointController->moveJoint(serviceJoints, -gripperVelocity);
+    } else if (input.getKey(PS3::BUTTON_R1)) {
+      IKController->moveRelative(robot::CartesianCommand::ROLL_F, continuous);
+    } else if (input.getKey(PS3::BUTTON_R2)) {
+      IKController->moveRelative(robot::CartesianCommand::ROLL_B, continuous);
+    } else if (input.getKey(PS3::BUTTON_X)) {
+      bodyController->moveJoint({"linear_joint"}, -bodyVelocity);
+    } else if (input.getKey(PS3::BUTTON_TRIANGLE)) {
+      bodyController->moveJoint({"linear_joint"}, bodyVelocity);
+    }
     sim.step();
     globalTimeStep++;
     sim.updateRenderer();

@@ -24,10 +24,7 @@ void PS3::runThread() {
     if (event.type == 1) {
       assert(event.id >= 0 && event.id < PS3_BUTTON_COUNT);
       buttonStates[event.id] = event.action;
-      //      std::cout << (int)event.type << "   " << (int)event.id << "    " << event.action << "
-      //      "
-      //                << event.time << std::endl;
-    } else if (event.id == 2) {
+    } else if (event.type == 2) {
       assert(event.id >= 0 && event.id < PS3_AXIS_COUNT);
       axisStates[event.id] = event.action;
     }
@@ -38,5 +35,5 @@ void PS3::shutdown() {
   worker.join();
 }
 bool PS3::getKey(ButtonId id) { return buttonStates[id]; }
-uint16_t PS3::getAxis(AxisId id) { return axisStates[id]; }
+int16_t PS3::getAxis(AxisId id) { return axisStates[id]; }
 } // namespace sapien::robot

@@ -312,7 +312,7 @@ Simulation::createControllableArticulationWrapper(class IArticulationDrivable *b
   auto wrapper = std::make_unique<ControllableArticulationWrapper>(baseWrapper);
   wrapper->updateTimeStep(mTimestep);
   auto wrapperPtr = wrapper.get();
-  mControllableArticulationWrapper.push_back(wrapper);
+  mControllableArticulationWrapper.push_back(std::move(wrapper));
   return wrapperPtr;
 }
 } // namespace sapien

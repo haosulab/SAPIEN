@@ -61,6 +61,6 @@ public:
   PS3();
   void shutdown();
   bool getKey(ButtonId id);
-  uint16_t getAxis(AxisId id);
+  int16_t getAxis(AxisId id);
 };
 } // namespace sapien::robot

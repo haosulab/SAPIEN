@@ -1,7 +1,6 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "controller/controller_manger.h"
-#include "device/joystick_ps3.h"
 #include "device/movo_ps3.h"
 #include "optifuser_renderer.h"
 #include "simulation.h"
@@ -28,6 +27,7 @@ void run() {
   loader->fixLoadedObject = true;
   loader->balancePassiveForce = true;
   auto wrapper = loader->load("../assets/robot/all_robot.urdf");
+  wrapper->set_drive_property(2000, 500);
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("movo", controllableWrapper);
@@ -35,9 +35,15 @@ void run() {
   robot::MOVOPS3 ps3(manger.get());
 
   renderer.showWindow();
+  wrapper->set_qpos({0.47, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});
+  wrapper->set_drive_target({0.2, 0, 0.0, 0, -0.9, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0});
+  sim.step();
+
   while (true) {
     sim.step();
     sim.updateRenderer();
+    renderer.render();
+    ps3.step();
 
     auto gl_input = Optifuser::getInput();
     if (gl_input.getKeyState(GLFW_KEY_Q)) {
