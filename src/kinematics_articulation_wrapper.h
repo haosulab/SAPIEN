@@ -73,6 +73,7 @@ public:
 
   // This function should be called after one simulation step
   void update(PxReal timestep);
+  void move_base(const PxTransform &T) override;
 };
 
 }

@@ -1,6 +1,6 @@
 #pragma once
-#include "id_generator.h"
 #include "articulation_interface.h"
+#include "id_generator.h"
 #include <PxPhysicsAPI.h>
 #include <array>
 #include <map>
@@ -58,7 +58,7 @@ struct ArticulationWrapper : public IArticulationDrivable {
   void update();
 
   // TODO: Planed interface
-  virtual std::vector<PxArticulationLink*> get_links() const;
+  virtual std::vector<PxArticulationLink *> get_links() const;
   virtual std::vector<std::string> get_link_names() const;
   virtual std::vector<physx_id_t> get_link_ids() const;
 
@@ -89,6 +89,7 @@ struct ArticulationWrapper : public IArticulationDrivable {
   void set_drive_property(PxReal stiffness, PxReal damping, PxReal forceLimit = PX_MAX_F32,
                           const std::vector<uint32_t> &jointIndex = {});
   void set_force_balance(bool balanceForce);
+  void move_base(const PxTransform &newT) override;
 
   // Mimic the Mujoco actuator modeling functions
   void addForceActuator(const std::string &jointName, PxReal lowerLimit, PxReal upperLimit);
@@ -98,7 +99,6 @@ struct ArticulationWrapper : public IArticulationDrivable {
 
   // Link based function
   std::vector<std::array<PxReal, 6>> get_cfrc_ext();
-
 };
 
 } // namespace sapien

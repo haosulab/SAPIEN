@@ -65,6 +65,9 @@ target_link_libraries(ps3 mylib)
 pybind11_add_module(sapyen "python/pybind.cpp")
 target_link_libraries(sapyen PRIVATE mylib)
 
+add_executable(ant test/ant.cpp)
+target_link_libraries(ant mylib)
+
 # Below are the ROS specified content
 set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")
 set(OLD_ROS_VERSION "indigo" "jade" "hydro")
@@ -85,21 +88,22 @@ if (ROS)
         include_directories(${catkin_INCLUDE_DIRS} "robot")
 
         add_library(robot_lib
-                robot/joint_trajectory_controller.cpp
-                robot/cartesian_velocity_controller.cpp
-                robot/velocity_control_service.cpp
-                robot/joint_pub_node.cpp
-                robot/controller_manger.cpp
+                robot/controller/joint_trajectory_controller.cpp
+                robot/controller/cartesian_velocity_controller.cpp
+                robot/controller/velocity_control_service.cpp
+                robot/controller/joint_pub_node.cpp
+                robot/controller/controller_manger.cpp
                 robot/device/joystick_ps3.cpp
                 robot/device/InputDevice.cpp
+                robot/device/movo_ps3.cpp
                 )
         target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
         add_executable(robot robot/test/robot.cpp)
         target_link_libraries(robot robot_lib)
         add_executable(grasp robot/test/grasp.cpp)
         target_link_libraries(grasp robot_lib)
-        add_executable(ant test/ant.cpp)
-        target_link_libraries(ant mylib)
+        add_executable(ps3_control robot/example/ps3_controller.cpp)
+        target_link_libraries(ps3_control robot_lib)
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)
         message("Your ROS version not supported. Please update to kinetic or above.")
     endif ()

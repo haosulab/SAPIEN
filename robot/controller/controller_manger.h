@@ -23,19 +23,20 @@ private:
   std::string robotName;
   std::vector<std::string> jointName;
   std::unique_ptr<ros::NodeHandle> nh;
-  float timestep;
 
   // Spinner and callback management
   ros::AsyncSpinner spinner;
 
 public:
+  float timestep;
   ControllerManger(const std::string &robotName, ControllableArticulationWrapper *wrapper);
 
   // Function for add controllers
   void createJointPubNode(double pubFrequency, double updateFrequency);
-  CartesianVelocityController* createCartesianVelocityController(const std::string &groupName);
-  JointVelocityController* createJointVelocityController(const std::vector<std::string> &jointNames,
-                                     const std::string &serviceName);
+  CartesianVelocityController *createCartesianVelocityController(const std::string &groupName);
+  JointVelocityController *
+  createJointVelocityController(const std::vector<std::string> &jointNames,
+                                const std::string &serviceName);
   void createGroupTrajectoryController(const std::string &groupName);
 
   // Manage controller manager handle
@@ -44,6 +45,7 @@ public:
   void start();
   void stop();
   void removeController(const std::string &);
+  void movoBase(const PxTransform &T);
 };
 } // namespace sapien::robot
 

@@ -26,6 +26,8 @@ enum CartesianCommand {
   YAW_B = 11
 };
 
+enum MoveType { WorldTranslate, WorldRotate, TargetTranslate, TargetRotate };
+
 class CartesianVelocityController {
 private:
   robot_model_loader::RobotModelLoader loader;
@@ -67,10 +69,13 @@ public:
                               const std::string &groupName, float timestep, ros::NodeHandle *nh,
                               const std::string &robotName = "");
   void moveRelative(CartesianCommand type, bool continuous = false);
+  void moveRelative(const std::array<float, 3> &T, MoveType type, bool continuous);
   float getVelocity() const;
   void setVelocity(float v);
   float getAngularVelocity() const;
   void setAngularVelocity(float v);
   void toggleJumpTest(bool enable);
+
+  // Used for input device
 };
 } // namespace sapien::robot

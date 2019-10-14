@@ -172,5 +172,9 @@ void KinematicsArticulationWrapper::update(PxReal timestep) {
 EArticulationType KinematicsArticulationWrapper::get_articulation_type() const {
   return EArticulationType::KINEMATIC_ARTICULATION;
 }
+void KinematicsArticulationWrapper::move_base(const PxTransform &T) {
+  mRoot->parentLink->setGlobalPose(T, true);
+  set_drive_target(qpos);
+}
 
 } // namespace sapien

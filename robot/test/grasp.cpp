@@ -1,14 +1,14 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
-#include "cartesian_velocity_controller.h"
 #include "controllable_articulation_wrapper.h"
-#include "controller_manger.h"
+#include "controller/cartesian_velocity_controller.h"
+#include "controller/controller_manger.h"
+#include "controller/velocity_control_service.h"
+#include "device/joystick_ps3.h"
 #include "optifuser_renderer.h"
 #include "simulation.h"
-#include "velocity_control_service.h"
 #include <extensions/PxDefaultCpuDispatcher.h>
 #include <extensions/PxSimpleFactory.h>
-#include <input/ps3.hpp>
 #include <optifuser.h>
 #include <thread>
 #include <vector>
@@ -27,70 +27,14 @@ void test1() {
   sim.setTimestep(1.f / 500.f);
   sim.addGround(0.0);
 
-  PS3::PS3Input input;
-  auto loader = sim.createURDFLoader();
-  loader->balancePassiveForce = true;
-  loader->load("../assets/46627/test.urdf")
-      ->articulation->teleportRootLink({{1.3, 0.3, 0.4}, PxIdentity}, true);
-
-  auto wrapper = loader->load("../assets/robot/xarm6.urdf");
-  wrapper->set_drive_property(2000, 500);
-
-  auto timestep = sim.getTimestep();
-  auto uniqueWrapper = std::make_unique<ControllableArticulationWrapper>(wrapper);
-  ControllableArticulationWrapper *controllableWrapper = uniqueWrapper.get();
-  sim.mControllableArticulationWrapper.push_back(std::move(uniqueWrapper));
-  controllableWrapper->updateTimeStep(timestep);
-
-  //   ROS
-  std::vector<std::string> serviceJoints = {
-      "right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint"};
-  robot::ControllerManger manger("movo", controllableWrapper);
-//  manger.createJointPubNode(100, 500);
-//  auto IKController = manger.createCartesianVelocityController("xarm6");
-//  IKController->setAngularVelocity(0.3);
-//  IKController->setVelocity(0.3);
-//  auto jointController = manger.createJointVelocityController(serviceJoints, "right_gripper");
-//  manger.createGroupTrajectoryController("xarm6");
-//  manger.start();
-
-  wrapper->set_qpos({0,0,0,0,0,0,0,0,0,0,0,0});
-  sim.step();
-  sim.updateRenderer();
-  bool continuous = true;
-  float gripperVelocity = 2;
-
+  PS3 input;
   while (true) {
-//    if (input.getKey(PS3::BUTTON_UP)) {
-//      IKController->moveRelative(robot::CartesianCommand::X_F, continuous);
-//    } else if (input.getKey(PS3::BUTTON_DOWN)) {
-//      IKController->moveRelative(robot::CartesianCommand::X_B, continuous);
-//    } else if (input.getKey(PS3::BUTTON_LEFT)) {
-//      IKController->moveRelative(robot::CartesianCommand::Y_F, continuous);
-//    } else if (input.getKey(PS3::BUTTON_RIGHT)) {
-//      IKController->moveRelative(robot::CartesianCommand::Y_B, continuous);
-//    } else if (input.getKey(PS3::BUTTON_L1)) {
-//      IKController->moveRelative(robot::CartesianCommand::Z_F, continuous);
-//    } else if (input.getKey(PS3::BUTTON_L2)) {
-//      IKController->moveRelative(robot::CartesianCommand::Z_B, continuous);
-//    } else if (input.getKey(PS3::BUTTON_CIRCLE)) {
-//      jointController->moveJoint(gripperJoint, gripperVelocity);
-//    } else if (input.getKey(PS3::BUTTON_SQUARE)) {
-//      jointController->moveJoint(gripperJoint, -gripperVelocity);
-//    } else if (input.getKey(PS3::BUTTON_R1)) {
-//      IKController->moveRelative(robot::CartesianCommand::ROLL_F, continuous);
-//    } else if (input.getKey(PS3::BUTTON_R2)) {
-//      IKController->moveRelative(robot::CartesianCommand::ROLL_B, continuous);
-//    }
+    usleep(10000);
     sim.step();
     sim.updateRenderer();
-    usleep(1000);
     renderer.render();
     auto gl_input = Optifuser::getInput();
     if (gl_input.getKeyState(GLFW_KEY_Q)) {
-      break;
-    }
-    if (input.getKey(PS3::BUTTON_X)) {
       break;
     }
   }

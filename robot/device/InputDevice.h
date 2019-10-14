@@ -16,10 +16,12 @@ struct Device {
 bool readDeviceProperty(std::string const &line, Device &device);
 std::vector<Device> getDevices();
 class InputDevice {
+protected:
   std::ifstream device;
   bool shouldExit = false;
+  bool shouldStart = false;
 
 public:
-  void init(const std::string &deviceName);
+  explicit InputDevice(const std::string &deviceName);
   static std::string findDevice(const std::string &deviceName);
 };

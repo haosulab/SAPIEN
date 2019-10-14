@@ -1,20 +1,18 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
-#include "controller_manger.h"
-#include "input/ps3.hpp"
+#include "controller/controller_manger.h"
+#include "device/joystick_ps3.h"
+#include "device/movo_ps3.h"
 #include "optifuser_renderer.h"
 #include "simulation.h"
 #include <extensions/PxDefaultCpuDispatcher.h>
 #include <extensions/PxSimpleFactory.h>
-#include <input/ps3.hpp>
 #include <optifuser.h>
 #include <thread>
 #include <vector>
 
 using namespace sapien;
 void run() {
-  PS3::PS3Input ps3;
-
   Renderer::OptifuserRenderer renderer;
   renderer.init();
   renderer.cam.position = {0.5, -4, 0.5};
@@ -32,7 +30,18 @@ void run() {
   auto wrapper = loader->load("../../assets/robot/all_robot.urdf");
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
-  robot::ControllerManger manger("movo", controllableWrapper);
-  manger.createJointPubNode(60, 500);
-  manger.createGroupTrajectoryController("right_arm");
+  auto manger = std::make_unique<robot::ControllerManger>("movo", controllableWrapper);
+
+  robot::MOVOPS3 ps3(manger.get());
+
+  renderer.showWindow();
+  while (true) {
+    sim.step();
+    sim.updateRenderer();
+
+    auto gl_input = Optifuser::getInput();
+    if (gl_input.getKeyState(GLFW_KEY_Q)) {
+      break;
+    }
+  }
 }

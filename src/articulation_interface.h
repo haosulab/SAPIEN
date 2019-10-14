@@ -27,13 +27,15 @@ struct IArticulationBase {
   virtual std::vector<physx::PxReal> get_qf() const = 0;
   virtual void set_qf(const std::vector<physx::PxReal> &v) = 0;
 
-  virtual ~IArticulationBase() = default;;
+  virtual ~IArticulationBase() = default;
+  ;
 };
 
 class IArticulationDrivable : public IArticulationBase {
 public:
   virtual void set_drive_target(const std::vector<physx::PxReal> &v) = 0;
   virtual std::vector<std::string> get_drive_joint_names() const = 0;
+  virtual void move_base(const physx::PxTransform &T) = 0;
 };
 
-}
+} // namespace sapien

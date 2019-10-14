@@ -4,16 +4,14 @@
 
 #include "cartesian_velocity_controller.h"
 #include <sensor_msgs/JointState.h>
-
 #include <memory>
-#include <utility>
 namespace sapien::robot {
 
 CartesianVelocityController::CartesianVelocityController(ControllableArticulationWrapper *wrapper,
                                                          const std::string &groupName,
                                                          float timestep, ros::NodeHandle *nh,
                                                          const std::string &robotName)
-    : mNodeHandle(std::move(nh)), timestep(timestep) {
+    : mNodeHandle(nh), timestep(timestep) {
   // TODO robot description name
   loader = robot_model_loader::RobotModelLoader("robot_description");
   kinematicModel = loader.getModel();
@@ -66,10 +64,9 @@ void CartesianVelocityController::moveRelative(CartesianCommand type, bool conti
     updateCurrentPose();
   }
   Eigen::Isometry3d newPose;
-  if(type<3 || (type<9&&type>=6)){
+  if (type < 3 || (type < 9 && type >= 6)) {
     newPose = cartesianMatrix[type] * currentPose;
-  }
-  else{
+  } else {
     newPose = currentPose * cartesianMatrix[type];
   }
   bool found_ik = state->setFromIK(jointModelGroup, newPose, 0.05);
@@ -135,5 +132,70 @@ bool CartesianVelocityController::testJointSpaceJump(const std::vector<double> &
     distance += abs(q1[i] - q2[i]);
   }
   return distance / q1.size() > threshold;
+}
+void CartesianVelocityController::moveRelative(const std::array<float, 3> &T, MoveType type,
+                                               bool continuous) {
+  if (!continuous) {
+    updateCurrentPose();
+  }
+  Eigen::Isometry3d trans = Eigen::Isometry3d::Identity();
+  Eigen::Isometry3d newPose;
+  switch (type) {
+  case WorldTranslate: {
+    Eigen::Vector2d vec(T[0], T[1], T[2]);
+    vec *= transStepSize;
+    trans.matrix().block<3, 1>(0, 3) = vec;
+    newPose = trans * currentPose;
+    break;
+  }
+  case WorldRotate: {
+    Eigen::Vector2d vec(T[0], T[1], T[2]);
+    vec *= rotStepSize;
+    Eigen::Matrix3d rot;
+    rot = Eigen::AngleAxisd(vec[2] * rotStepSize, Eigen::Vector3d::UnitZ()) *
+          Eigen::AngleAxisd(vec[1] * rotStepSize, Eigen::Vector3d::UnitY()) *
+          Eigen::AngleAxisd(vec[0] * rotStepSize, Eigen::Vector3d::UnitX());
+    trans.matrix().block<3, 3>(0, 0) = rot;
+    newPose = trans * currentPose;
+    break;
+  }
+  case TargetTranslate: {
+    Eigen::Vector2d vec(T[0], T[1], T[2]);
+    vec *= transStepSize;
+    trans.matrix().block<3, 1>(0, 3) = vec;
+    newPose = currentPose * trans;
+    break;
+  }
+  case TargetRotate: {
+    Eigen::Vector2d vec(T[0], T[1], T[2]);
+    vec *= rotStepSize;
+    Eigen::Matrix3d rot;
+    rot = Eigen::AngleAxisd(vec[2] * rotStepSize, Eigen::Vector3d::UnitZ()) *
+          Eigen::AngleAxisd(vec[1] * rotStepSize, Eigen::Vector3d::UnitY()) *
+          Eigen::AngleAxisd(vec[0] * rotStepSize, Eigen::Vector3d::UnitX());
+    trans.matrix().block<3, 3>(0, 0) = rot;
+    newPose = currentPose * trans;
+    break;
+  }
+  }
+  bool found_ik = state->setFromIK(jointModelGroup, newPose, 0.05);
+  if (!found_ik) {
+    ROS_WARN("Ik not found without timeout");
+    return;
+  }
+  if (jointJumpCheck) {
+    std::vector<double> currentJointValue;
+    state->copyJointGroupPositions(jointModelGroup, currentJointValue);
+    if (testJointSpaceJump(currentJointValue, jointValue, 0.9)) {
+      ROS_WARN("Joint space jump! Not execute");
+      return;
+    }
+  }
+  state->copyJointGroupPositions(jointModelGroup, jointValue);
+  currentPose = newPose;
+
+  // Control the physx via controllable wrapper
+  jointValueFloat.assign(jointValue.begin(), jointValue.end());
+  mQueue->pushValue(jointValueFloat);
 }
 } // namespace sapien::robot

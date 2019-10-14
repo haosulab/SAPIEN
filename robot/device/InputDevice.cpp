@@ -43,9 +43,13 @@ bool readDeviceProperty(std::string const &line, Device &device) {
   }
   return true;
 }
-void InputDevice::init(const std::string &deviceName) {
+InputDevice::InputDevice(const std::string &deviceName) {
   std::string filename = findDevice(deviceName);
+  if (filename.empty()) {
+    std::cerr << "No " << deviceName << " found!" << std::endl;
+  }
   device = std::ifstream("/dev/input/" + filename, std::ios::in | std::ios::binary);
+  shouldStart = true;
 }
 std::string InputDevice::findDevice(const std::string &deviceName) {
   for (const auto &d : getDevices()) {

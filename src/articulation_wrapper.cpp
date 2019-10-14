@@ -178,5 +178,8 @@ std::vector<std::string> ArticulationWrapper::get_link_names() const {
 std::vector<physx_id_t> ArticulationWrapper::get_link_ids() const {
   return linkSegmentationIds;
 }
+void ArticulationWrapper::move_base(const PxTransform &newT) {
+  articulation->teleportRootLink(newT, true);
+}
 
 } // namespace sapien
