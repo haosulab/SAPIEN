@@ -19,17 +19,24 @@ void run() {
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 300.f);
   sim.addGround(0.0);
-  auto builder = sim.createActorBuilder();
   auto loader = sim.createURDFLoader();
   loader->fixLoadedObject = true;
   loader->balancePassiveForce = true;
 
+  auto builder = sim.createActorBuilder();
   builder->addBoxShape({{0, 0, 0}, PxIdentity}, {0.5, 1.5, 0.3});
-  builder->addBoxVisual({{0, 0, 0}, PxIdentity}, {0.5, 1.5, 0.5});
+  builder->addBoxVisual({{0, 0, 0}, PxIdentity}, {0.5, 1.5, 0.3});
   auto actor = builder->build(false, false, "test", true);
-  actor->setGlobalPose({{2.0, 0.3, 0.5}, PxIdentity});
+  actor->setGlobalPose({{2.0, 0.3, 0.3}, PxIdentity});
+
+  auto builder1 = sim.createActorBuilder();
+  builder1->addObjVisual("../assets/object/029_plate/google_16k/textured.dae");
+  builder1->addConvexShapeFromObj("../assets/object/029_plate/google_16k/textured.obj");
+  auto plate = builder1->build(false, false, "plate", true);
+  plate->setGlobalPose({{2.0, 0.3, 2}, PxIdentity});
+
   loader->load("../assets/46627/test.urdf")
-      ->articulation->teleportRootLink({{1.0, 0.3, 0.4}, PxIdentity}, true);
+      ->articulation->teleportRootLink({{2.0, 5.3, 0.4}, PxIdentity}, true);
 
   auto wrapper = loader->load("../assets/robot/all_robot.urdf");
   wrapper->set_drive_property(2000, 500);
