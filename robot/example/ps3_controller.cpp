@@ -27,7 +27,7 @@ void run() {
   auto loader = sim.createURDFLoader();
   loader->fixLoadedObject = true;
   loader->balancePassiveForce = true;
-  auto wrapper = loader->load("../../assets/robot/all_robot.urdf");
+  auto wrapper = loader->load("../assets/robot/all_robot.urdf");
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("movo", controllableWrapper);
@@ -44,4 +44,10 @@ void run() {
       break;
     }
   }
+}
+
+int main(int argc, char **argv) {
+  ros::init(argc, argv, "ps3_movo");
+  run();
+  return 0;
 }

@@ -3,8 +3,8 @@
 //
 
 #include "cartesian_velocity_controller.h"
-#include <sensor_msgs/JointState.h>
 #include <memory>
+#include <sensor_msgs/JointState.h>
 namespace sapien::robot {
 
 CartesianVelocityController::CartesianVelocityController(ControllableArticulationWrapper *wrapper,
@@ -142,14 +142,14 @@ void CartesianVelocityController::moveRelative(const std::array<float, 3> &T, Mo
   Eigen::Isometry3d newPose;
   switch (type) {
   case WorldTranslate: {
-    Eigen::Vector2d vec(T[0], T[1], T[2]);
+    Eigen::Vector3d vec(T[0], T[1], T[2]);
     vec *= transStepSize;
     trans.matrix().block<3, 1>(0, 3) = vec;
     newPose = trans * currentPose;
     break;
   }
   case WorldRotate: {
-    Eigen::Vector2d vec(T[0], T[1], T[2]);
+    Eigen::Vector3d vec(T[0], T[1], T[2]);
     vec *= rotStepSize;
     Eigen::Matrix3d rot;
     rot = Eigen::AngleAxisd(vec[2] * rotStepSize, Eigen::Vector3d::UnitZ()) *
@@ -160,14 +160,14 @@ void CartesianVelocityController::moveRelative(const std::array<float, 3> &T, Mo
     break;
   }
   case TargetTranslate: {
-    Eigen::Vector2d vec(T[0], T[1], T[2]);
+    Eigen::Vector3d vec(T[0], T[1], T[2]);
     vec *= transStepSize;
     trans.matrix().block<3, 1>(0, 3) = vec;
     newPose = currentPose * trans;
     break;
   }
   case TargetRotate: {
-    Eigen::Vector2d vec(T[0], T[1], T[2]);
+    Eigen::Vector3d vec(T[0], T[1], T[2]);
     vec *= rotStepSize;
     Eigen::Matrix3d rot;
     rot = Eigen::AngleAxisd(vec[2] * rotStepSize, Eigen::Vector3d::UnitZ()) *

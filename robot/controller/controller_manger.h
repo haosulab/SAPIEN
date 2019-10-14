@@ -1,6 +1,7 @@
 //
 // Created by sim on 10/5/19.
 //
+#pragma once
 
 #include "cartesian_velocity_controller.h"
 #include "controllable_articulation_wrapper.h"
