@@ -23,7 +23,7 @@
 using namespace sapien;
 using namespace physx;
 
-float rand_float(float min = -6000, float max = 6000) {
+float rand_float(float min = -2000, float max = 2000) {
   float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
   return (max - min) * r + min;
 }
@@ -33,13 +33,12 @@ int main() {
   renderer.init();
 
   renderer.cam.position = {0, 1, 10};
-  renderer.cam.setForward({0, 1, 0});
-  renderer.cam.setUp({0, 0, 1});
   renderer.cam.rotateYawPitch(0, -1.5);
 
   Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 200.f);
+
   auto builder = sim.createArticulationBuilder();
   auto body_link = builder->addLink(nullptr, {{0, 0, 0}, PxIdentity}, "body");
 
@@ -133,17 +132,17 @@ int main() {
   std::vector<std::array<float, 2>> coords = {{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {0, 4},
                                               {1, 4}, {2, 4}, {3, 4}, {4, 4}, {0, 1}, {0, 2},
                                               {0, 3}, {4, 1}, {4, 2}, {4, 3}};
-  for (auto &[x, y] : coords) {
-    auto actor_builder = sim.createActorBuilder();
-    actor_builder->addBoxShape({{0, 0, 0}, PxIdentity}, {0.5, 0.5, 1});
-    actor_builder->addBoxVisual({{0, 0, 0}, PxIdentity}, {0.5, 0.5, 1});
-    actor_builder->build(true)->setGlobalPose({{x-1, y-1, 0}, PxIdentity});
-  }
+  // for (auto &[x, y] : coords) {
+  //   auto actor_builder = sim.createActorBuilder();
+  //   actor_builder->addBoxShape({{0, 0, 0}, PxIdentity}, {0.5, 0.5, 1});
+  //   actor_builder->addBoxVisual({{0, 0, 0}, PxIdentity}, {0.5, 0.5, 1});
+  //   actor_builder->build(true)->setGlobalPose({{x-1, y-1, 0}, PxIdentity});
+  // }
 
   renderer.showWindow();
   while (true) {
-    // wrapper->set_qf({rand_float(), rand_float(), rand_float(), rand_float(), rand_float(),
-    //                  rand_float(), rand_float(), rand_float()});
+    wrapper->set_qf({rand_float(), rand_float(), rand_float(), rand_float(), rand_float(),
+                     rand_float(), rand_float(), rand_float()});
     for (int i = 0; i < 10; ++i) {
       sim.step();
     }

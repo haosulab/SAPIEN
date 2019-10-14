@@ -68,6 +68,9 @@ target_link_libraries(sapyen PRIVATE mylib)
 add_executable(ant test/ant.cpp)
 target_link_libraries(ant mylib)
 
+add_executable(cheetah test/cheetah.cpp)
+target_link_libraries(cheetah mylib)
+
 # Below are the ROS specified content
 set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")
 set(OLD_ROS_VERSION "indigo" "jade" "hydro")
