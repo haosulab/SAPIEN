@@ -5,16 +5,12 @@
 #pragma once
 
 #include "device/movo_device_control.h"
-#include "device/joystick_ps3.h"
+#include "optifuser.h"
 namespace sapien::robot {
 
-
-class MOVOPS3 : public MOVO{
-  std::unique_ptr<PS3> input;
-
+class MOVOKeyboard : public MOVO {
 public:
-  explicit MOVOPS3(ControllerManger *manger);
-  ~MOVOPS3();
+  explicit MOVOKeyboard(ControllerManger *manger);
   void step() override;
 };
 } // namespace sapien::robot

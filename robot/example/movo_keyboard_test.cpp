@@ -1,12 +1,12 @@
+#include <thread>
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "controller/controller_manger.h"
-#include "device/movo_ps3.h"
+#include "device/movo_keyboard.h"
 #include "optifuser_renderer.h"
 #include "simulation.h"
 #include <optifuser.h>
 #include <thread>
-
 using namespace sapien;
 void run() {
   Renderer::OptifuserRenderer renderer;
@@ -37,14 +37,12 @@ void run() {
 
   loader->load("../assets/46627/test.urdf")
       ->articulation->teleportRootLink({{2.0, 5.3, 0.4}, PxIdentity}, true);
-
   auto wrapper = loader->load("../assets/robot/all_robot.urdf");
   wrapper->set_drive_property(2000, 500);
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("movo", controllableWrapper);
-
-  robot::MOVOPS3 ps3(manger.get());
+  robot::MOVOKeyboard keyboard(manger.get());
 
   renderer.showWindow();
   wrapper->set_qpos({0.47, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});
@@ -54,7 +52,7 @@ void run() {
     sim.step();
     sim.updateRenderer();
     renderer.render();
-    ps3.step();
+    keyboard.step();
 
     auto gl_input = Optifuser::getInput();
     if (gl_input.getKeyState(GLFW_KEY_Q)) {

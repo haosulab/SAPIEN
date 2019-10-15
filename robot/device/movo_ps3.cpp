@@ -3,27 +3,8 @@
 //
 #include "movo_ps3.h"
 
-sapien::robot::MOVOPS3::MOVOPS3(ControllerManger *manger) : manger(manger) {
+sapien::robot::MOVOPS3::MOVOPS3(ControllerManger *manger) : MOVO(manger) {
   input = std::make_unique<PS3>();
-  manger->createJointPubNode(100, 500);
-  right_gripper = manger->createJointVelocityController(gripperJoints, "right_gripper");
-  body = manger->createJointVelocityController(bodyJoints, "body");
-  head = manger->createJointVelocityController(headJoints, "head");
-  right_arm_cartesian = manger->createCartesianVelocityController("right_arm");
-  timestep = manger->timestep;
-  right_arm_cartesian->setVelocity(arm_cartesian_velocity);
-  right_arm_cartesian->setAngularVelocity(arm_cartesian_angular_velocity);
-  right_arm_cartesian->toggleJumpTest(true);
-
-  manger->start();
-}
-void sapien::robot::MOVOPS3::set_arm_velocity(float v) {
-  right_arm_cartesian->setVelocity(v);
-  arm_cartesian_velocity = v;
-}
-void sapien::robot::MOVOPS3::set_arm_angular_velocity(float v) {
-  right_arm_cartesian->setAngularVelocity(v);
-  arm_cartesian_angular_velocity = v;
 }
 void sapien::robot::MOVOPS3::step() {
   if (input->getKey(BUTTON_SELECT)) {
@@ -127,5 +108,4 @@ void sapien::robot::MOVOPS3::step() {
   }
   continuous = activated;
 }
-void sapien::robot::MOVOPS3::set_wheel_velocity(float v) { wheel_velocity = v; }
-void sapien::robot::MOVOPS3::close() { input->shutdown(); }
+sapien::robot::MOVOPS3::~MOVOPS3() { input->shutdown(); }
