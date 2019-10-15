@@ -20,6 +20,8 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         self.wrapper, self.body_link = self._build_ant()
         self.init_qpos = self.wrapper.get_qpos().ravel().copy()
         self.init_qvel = self.wrapper.get_qvel().ravel().copy()
+        self.init_root_pose_p = self.body_link.getGlobalPose().p
+        self.init_root_pose_q = self.body_link.getGlobalPose().q
         observation, _reward, done, _info = self.step(np.zeros(8))
         assert not done
         self.obs_dim = observation.size
@@ -43,7 +45,7 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
 
     def _build_ant(self):
         builder = self.sim.createArticulationBuilder()
-        PxIdentity = np.array([0, 0, 0, 1])
+        PxIdentity = np.array([1, 0, 0, 0])
         density = 5
         body_link = builder.addLink(None, PxTransform(np.array([0, 0, 0]), PxIdentity), "body")
         builder.addSphereShapeToLink(body_link, PxTransform(np.array([0, 0, 0]), PxIdentity), 0.25)
@@ -114,8 +116,8 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         builder.addCapsuleVisualToLink(f4,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
         builder.updateLinkMassAndInertia(f4, density)
         wrapper = builder.build(False)
-        lower_bound = -15
-        upper_bound = 15
+        lower_bound = -10
+        upper_bound = 10
         wrapper.add_force_actuator("j1", lower_bound, upper_bound)
         wrapper.add_force_actuator("j2", lower_bound, upper_bound)
         wrapper.add_force_actuator("j3", lower_bound, upper_bound)
@@ -165,6 +167,10 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         qvel = self.init_qvel + self.np_random.randn(8) * .1
         self.wrapper.set_qpos(qpos)
         self.wrapper.set_qvel(qvel)
+        root_pose_p = self.init_root_pose_p #+ self.np_random.uniform(size=3, low=-.1, high=.1)
+        root_pose_q = self.init_root_pose_q #+ self.np_random.uniform(size=4, low=-.1, high=.1)
+        self.wrapper.set_root_pose(root_pose_p, root_pose_q)
+        # TODO: reset root_velocity
         return self._get_obs()
 
     def viewer_setup(self):
