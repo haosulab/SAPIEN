@@ -71,6 +71,8 @@ target_link_libraries(ant mylib)
 add_executable(cheetah test/cheetah.cpp)
 target_link_libraries(cheetah mylib)
 
+add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_BINARY_DIR})
+
 # Below are the ROS specified content
 set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")
 set(OLD_ROS_VERSION "indigo" "jade" "hydro")
@@ -96,17 +98,27 @@ if (ROS)
                 robot/controller/velocity_control_service.cpp
                 robot/controller/joint_pub_node.cpp
                 robot/controller/controller_manger.cpp
+                )
+        target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
+        add_library(robot_device_lib
                 robot/device/joystick_ps3.cpp
                 robot/device/InputDevice.cpp
                 robot/device/movo_ps3.cpp
-                )
-        target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
+                robot/device/movo_keyboard.cpp
+                robot/device/movo_device_control.cpp robot/device/movo_device_control.h)
+        target_link_libraries(robot_device_lib robot_lib)
+
         add_executable(robot robot/test/robot.cpp)
         target_link_libraries(robot robot_lib)
         add_executable(grasp robot/test/grasp.cpp)
         target_link_libraries(grasp robot_lib)
-        add_executable(ps3_control robot/example/ps3_controller.cpp)
-        target_link_libraries(ps3_control robot_lib)
+        add_executable(movo_ps3 robot/example/movo_ps3_test.cpp)
+        target_link_libraries(movo_ps3 robot_device_lib)
+        add_executable(movo_keyboard robot/example/movo_keyboard_test.cpp)
+        target_link_libraries(movo_keyboard robot_device_lib)
+        pybind11_add_module(sapyen_robot "python/pybind-robot.cpp")
+        target_link_libraries(sapyen_robot PRIVATE mylib)
+
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)
         message("Your ROS version not supported. Please update to kinetic or above.")
     endif ()

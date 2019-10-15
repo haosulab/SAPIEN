@@ -21,7 +21,7 @@ using namespace sapien;
 
 void test1() {
   Renderer::OptifuserRenderer renderer;
-  renderer.init();
+  
   renderer.cam.position = {0.5, -4, 0.5};
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
