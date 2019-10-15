@@ -27,7 +27,7 @@ using namespace sapien;
 
 void test1() {
   Renderer::OptifuserRenderer renderer;
-  renderer.init();
+   
 
   Simulation sim;
   sim.setRenderer(&renderer);
@@ -53,7 +53,7 @@ void test1() {
 
 void test2() {
   Renderer::OptifuserRenderer renderer;
-  renderer.init();
+  
 
   Simulation sim;
   sim.setRenderer(&renderer);
@@ -112,7 +112,7 @@ float rand_float() {
 
 void test3() {
   Renderer::OptifuserRenderer renderer;
-  renderer.init();
+ 
   renderer.cam.position = {0, -2, 0.5};
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
@@ -209,7 +209,7 @@ void test3() {
 
 void test4() {
   Renderer::OptifuserRenderer renderer;
-  renderer.init();
+ 
   renderer.cam.position = {0, -2, 0.5};
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});

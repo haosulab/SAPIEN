@@ -35,7 +35,7 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
 
     def _set_renderer(self):
         self.renderer = sapyen.OptifuserRenderer()
-        self.renderer.init()
+        
         self.renderer.cam.set_position(np.array([0, 1, 10]))
         self.renderer.cam.setForward(np.array([0, 1, 0]))
         self.renderer.cam.setUp(np.array([0, 0, 1]))

@@ -10,6 +10,8 @@ namespace Renderer {
 
 class OptifuserRenderer : public IPhysxRenderer {
 public:
+  OptifuserRenderer();
+
   std::map<uint32_t, std::vector<Optifuser::Object *>> mObjectRegistry;
   std::map<uint32_t, std::vector<uint32_t>> mSegId2RenderId;
   std::shared_ptr<Optifuser::Scene> mScene;
@@ -32,9 +34,11 @@ public:
   virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) override;
   virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) override;
 
-public:
+private:
   void init();
   void destroy();
+
+public:
   void render();
 
 private:

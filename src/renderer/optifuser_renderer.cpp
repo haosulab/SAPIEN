@@ -12,6 +12,10 @@ enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION, CUSTOM };
 
 constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
+OptifuserRenderer::OptifuserRenderer() {
+  init();
+}
+
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFile,
                                      const physx::PxVec3 &scale) {
   // if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {

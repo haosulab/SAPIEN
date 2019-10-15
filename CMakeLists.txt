@@ -71,6 +71,8 @@ target_link_libraries(ant mylib)
 add_executable(cheetah test/cheetah.cpp)
 target_link_libraries(cheetah mylib)
 
+add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_BINARY_DIR})
+
 # Below are the ROS specified content
 set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")
 set(OLD_ROS_VERSION "indigo" "jade" "hydro")

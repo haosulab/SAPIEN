@@ -30,7 +30,7 @@ float rand_float(float min = -100, float max = 100) {
 
 int main() {
   Renderer::OptifuserRenderer renderer;
-  renderer.init();
+  
 
   renderer.cam.position = {0, -1, 1};
   renderer.cam.rotateYawPitch(0, -0.5);
