@@ -23,6 +23,10 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFi
   //   exit(1);
   // }
   auto objects = Optifuser::LoadObj(objFile);
+  mObjectRegistry[uniqueId] = {};
+  if (objects.empty()) {
+    std::cerr << "Damaged file detected: " << objFile << std::endl;
+  }
   for (auto &obj : objects) {
     mObjectRegistry[uniqueId].push_back(obj.get());
     obj->scale = {scale.x, scale.y, scale.z};
@@ -137,7 +141,7 @@ void OptifuserRenderer::init() {
   cam.rotateYawPitch(0, -0.15);
   cam.fovy = glm::radians(45.f);
   cam.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
-  mScene->addDirectionalLight({{0, -1, -1}, {1, 1, 1}});
+  mScene->addDirectionalLight({{1, -1, -1}, {1, 1, 1}});
   mScene->setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
 
   mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");

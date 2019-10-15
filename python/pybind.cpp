@@ -120,13 +120,19 @@ PYBIND11_MODULE(sapyen, m) {
       .def("get_renderer", &Simulation::getRenderer)
       .def("create_actor_builder", &Simulation::createActorBuilder)
       .def("create_articulation_builder", &Simulation::createArticulationBuilder)
+      .def("create_urdf_loader", [](Simulation &s) { return new URDF::URDFLoader(s); })
       .def("step", &Simulation::step)
       .def("update_renderer", &Simulation::updateRenderer)
       .def("add_ground", &Simulation::addGround, py::arg("altitude"), py::arg("render") = true,
-           py::arg("material") = nullptr);
+           py::arg("material") = nullptr)
+      .def("add_mounted_camera", &Simulation::addMountedCamera);
+  
 
   py::class_<PxRigidActor, std::unique_ptr<PxRigidActor, py::nodelete>>(m, "PxRigidActor")
-      .def("get_global_pose", &PxRigidActor::getGlobalPose);
+      .def("get_global_pose", &PxRigidActor::getGlobalPose)
+      .def("set_global_pose", &PxRigidActor::setGlobalPose,
+           py::arg("pose"),
+           py::arg("autoawake") = true);
   py::class_<PxRigidStatic, PxRigidActor, std::unique_ptr<PxRigidStatic, py::nodelete>>(
       m, "PxRigidStatic")
       .def("get_global_pose", &PxRigidStatic::getGlobalPose);
@@ -134,18 +140,39 @@ PYBIND11_MODULE(sapyen, m) {
   py::class_<PxRigidBody, PxRigidActor, std::unique_ptr<PxRigidBody, py::nodelete>>(m,
                                                                                     "PxRigidBody")
       .def("get_global_pose", &PxRigidBody::getGlobalPose)
-      .def("get_linear_velocity", [](PxRigidBody &a) {physx::PxVec3 vel = a.getLinearVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); })
-      .def("get_angular_velocity", [](PxRigidBody &a) {physx::PxVec3 vel = a.getAngularVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); });
+      .def("get_linear_velocity",
+           [](PxRigidBody &a) {
+             physx::PxVec3 vel = a.getLinearVelocity();
+             return py::array_t<PxReal>(3, (PxReal *)(&vel));
+           })
+      .def("get_angular_velocity", [](PxRigidBody &a) {
+        physx::PxVec3 vel = a.getAngularVelocity();
+        return py::array_t<PxReal>(3, (PxReal *)(&vel));
+      });
   py::class_<PxRigidDynamic, PxRigidBody, std::unique_ptr<PxRigidDynamic, py::nodelete>>(
       m, "PxRigidDynamic")
       .def("get_global_pose", &PxRigidDynamic::getGlobalPose)
-      .def("get_linear_velocity", [](PxRigidDynamic &a) {physx::PxVec3 vel = a.getLinearVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); })
-      .def("get_angular_velocity", [](PxRigidDynamic &a) {physx::PxVec3 vel = a.getAngularVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); });
+      .def("get_linear_velocity",
+           [](PxRigidDynamic &a) {
+             physx::PxVec3 vel = a.getLinearVelocity();
+             return py::array_t<PxReal>(3, (PxReal *)(&vel));
+           })
+      .def("get_angular_velocity", [](PxRigidDynamic &a) {
+        physx::PxVec3 vel = a.getAngularVelocity();
+        return py::array_t<PxReal>(3, (PxReal *)(&vel));
+      });
   py::class_<PxArticulationLink, PxRigidBody, std::unique_ptr<PxArticulationLink, py::nodelete>>(
       m, "PxArticulationLink")
       .def("get_global_pose", &PxArticulationLink::getGlobalPose)
-      .def("get_linear_velocity", [](PxArticulationLink &a) {physx::PxVec3 vel = a.getLinearVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); })
-      .def("get_angular_velocity", [](PxArticulationLink &a) {physx::PxVec3 vel = a.getAngularVelocity(); return py::array_t<PxReal>(3, (PxReal *)(&vel)); });
+      .def("get_linear_velocity",
+           [](PxArticulationLink &a) {
+             physx::PxVec3 vel = a.getLinearVelocity();
+             return py::array_t<PxReal>(3, (PxReal *)(&vel));
+           })
+      .def("get_angular_velocity", [](PxArticulationLink &a) {
+        physx::PxVec3 vel = a.getAngularVelocity();
+        return py::array_t<PxReal>(3, (PxReal *)(&vel));
+      });
 
   py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial")
       .def("get_static_friction", &PxMaterial::getStaticFriction)
@@ -173,11 +200,29 @@ PYBIND11_MODULE(sapyen, m) {
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.getColorRGBA().data());
            })
-      // TODO
-      .def("get_albedo_rgba", &Renderer::ICamera::getAlbedoRGBA)
-      .def("get_normal_rgba", &Renderer::ICamera::getNormalRGBA)
-      .def("get_depth", &Renderer::ICamera::getDepth)
-      .def("get_segmentation", &Renderer::ICamera::getSegmentation);
+      .def("get_albedo_rgba",
+           [](Renderer::ICamera &cam) {
+             return py::array_t<float>(
+                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+                 cam.getAlbedoRGBA().data());
+           })
+      .def("get_normal_rgba",
+           [](Renderer::ICamera &cam) {
+             return py::array_t<float>(
+                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+                 cam.getNormalRGBA().data());
+           })
+      .def("get_depth",
+           [](Renderer::ICamera &cam) {
+             return py::array_t<float>(
+                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
+                 cam.getDepth().data());
+           })
+      .def("get_segmentation", [](Renderer::ICamera &cam) {
+        return py::array_t<int>(
+            {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
+            cam.getSegmentation().data());
+      });
 
   py::class_<Renderer::ICameraManager>(m, "ICameraManager");
 
@@ -411,9 +456,9 @@ PYBIND11_MODULE(sapyen, m) {
            },
            py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
            py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr)
-      .def("add_capsule_shape_to_link", &ArticulationBuilder::addCapsuleShapeToLink, py::arg("link"),
-           py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity}, py::arg("radius") = 1,
-           py::arg("length") = 1, py::arg("material") = nullptr)
+      .def("add_capsule_shape_to_link", &ArticulationBuilder::addCapsuleShapeToLink,
+           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+           py::arg("radius") = 1, py::arg("length") = 1, py::arg("material") = nullptr)
       .def("add_sphere_shape_to_link", &ArticulationBuilder::addSphereShapeToLink, py::arg("link"),
            py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity}, py::arg("radius") = 1,
            py::arg("material") = nullptr)
@@ -465,4 +510,23 @@ PYBIND11_MODULE(sapyen, m) {
            py::arg("scale") = make_array<float>({1, 1, 1}))
       .def("build", &ArticulationBuilder::build, py::arg("fix_base") = true,
            py::arg("balanceForce") = false, py::return_value_policy::reference);
+
+  py::class_<ActorBuilder>(m, "ActorBuilder")
+      .def("add_box_shape",
+           [](ActorBuilder &a, PxTransform const &pose, py::array_t<float> const &size,
+              PxMaterial *material, PxReal density) {
+             a.addBoxShape(pose, {size.at(0), size.at(1), size.at(2)}, material, density);
+           },
+           py::arg("pose") = PxTransform({0, 0, 0}, {0, 0, 0, 1}),
+           py::arg("size") = make_array<float>({1, 1, 1}),
+           py::arg("material") = nullptr,
+           py::arg("density") = 1000.f)
+      .def("build", &ActorBuilder::build,
+           py::arg("is_static") = false,
+           py::arg("is_kinematic") = false,
+           py::arg("name") = "",
+           py::arg("add_to_scene") = true);
+  // .def("add_sphere_shape", &ActorBuilder::addSphereShape)
+  //     .def("add__shape", &ActorBuilder::addBoxShape)
+  //     .def("add_box_shape", &ActorBuilder::addBoxShape)
 }

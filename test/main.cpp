@@ -125,29 +125,30 @@ void test3() {
   loader.fixLoadedObject = true;
   // auto *articulationWrapper =
   // loader.load("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
-  auto wrapper = loader.load("/home/fx/source/partnet-mobility-scripts/46627/test.urdf");
+  auto wrapper = loader.load(
+      "/home/fx/source/partnet-mobility-scripts/mobility_verified/12129/mobility.urdf");
   auto linkIds = wrapper->get_link_ids();
   auto links = wrapper->get_links();
   auto names = wrapper->get_link_names();
 
-  std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
-  std::string line;
-  while (std::getline(s, line)) {
-    if (line.length() == 0 || line[0] == ' ')
-      continue;
-    std::istringstream is(line);
-    std::string name;
-    std::vector<float> mat(16);
-    is >> name;
-    std::cout << name << std::endl;
-    is >> mat[0] >> mat[4] >> mat[8] >> mat[12] >> mat[1] >> mat[5] >> mat[9] >> mat[13] >>
-        mat[2] >> mat[6] >> mat[10] >> mat[14] >> mat[3] >> mat[7] >> mat[11] >> mat[15];
-    size_t idx = std::find(names.begin(), names.end(), name) - names.begin();
-    std::cout << idx << std::endl;
-    if (idx < names.size()) {
-      renderer.setSegmentationCustomData(linkIds[idx], mat);
-    }
-  }
+  // std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
+  // std::string line;
+  // while (std::getline(s, line)) {
+  //   if (line.length() == 0 || line[0] == ' ')
+  //     continue;
+  //   std::istringstream is(line);
+  //   std::string name;
+  //   std::vector<float> mat(16);
+  //   is >> name;
+  //   std::cout << name << std::endl;
+  //   is >> mat[0] >> mat[4] >> mat[8] >> mat[12] >> mat[1] >> mat[5] >> mat[9] >> mat[13] >>
+  //       mat[2] >> mat[6] >> mat[10] >> mat[14] >> mat[3] >> mat[7] >> mat[11] >> mat[15];
+  //   size_t idx = std::find(names.begin(), names.end(), name) - names.begin();
+  //   std::cout << idx << std::endl;
+  //   if (idx < names.size()) {
+  //     renderer.setSegmentationCustomData(linkIds[idx], mat);
+  //   }
+  // }
 
   // for (auto n : names) {
   //   std::cout  <<  n << " ";
