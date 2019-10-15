@@ -99,7 +99,7 @@ class SapyenEnv(gym.Env):
             return data[::-1, :]
         elif mode == 'human':
             self._get_viewer(mode).render()'''
-        self.sim.updateRenderer()
+        self.sim.update_renderer()
         self.renderer.render()
 
     def close(self):
@@ -128,10 +128,10 @@ class SapyenEnv(gym.Env):
 
     def state_vector(self):
         return np.concatenate([
-            self.body_link.getGlobalPose().p,
-            self.body_link.getGlobalPose().q,
+            self.body_link.get_global_pose().p,
+            self.body_link.get_global_pose().q,
             self.wrapper.get_qpos().flat,
-            self.body_link.getLinearVelocity(),
-            self.body_link.getAngularVelocity(),
+            self.body_link.get_linear_velocity(),
+            self.body_link.get_angular_velocity(),
             self.wrapper.get_qvel().flat
         ])
