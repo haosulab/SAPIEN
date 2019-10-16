@@ -1,6 +1,7 @@
 import sapyen
 import numpy as np
 from sapyen import Pose
+import time
 
 renderer = sapyen.OptifuserRenderer()
 
@@ -108,15 +109,11 @@ builder.update_link_mass_and_inertia(f4, 1000)
 wrapper = builder.build(False)
 ground = sim.add_ground(-1)
 
-renderer.show_window()
+# renderer.show_window()
 
 while True:
-    wrapper.set_qf(np.random.rand(8) * 4000 - 2000)
-    for i in range(10):
+    start = time.time()
+    for i in range(10000):
+        wrapper.set_qf(np.random.rand(8) * 4000 - 2000)
         sim.step()
-    sim.update_renderer()
-    renderer.render()
-    qpos = wrapper.get_qpos()
-    qvel = wrapper.get_qvel()
-    print(qpos)
-    print(qvel)
+    print(time.time() - start, 's for 10000 steps')

@@ -4,6 +4,7 @@
 #include "simulation.h"
 #include "urdf/urdf_loader.h"
 #include <PxPhysicsAPI.h>
+#include <chrono>
 #include <experimental/filesystem>
 #include <extensions/PxDefaultAllocator.h>
 #include <extensions/PxDefaultCpuDispatcher.h>
@@ -16,9 +17,8 @@
 #include <iostream>
 #include <object.h>
 #include <optifuser.h>
-#include <vector>
-
 #include <random>
+#include <vector>
 
 using namespace sapien;
 using namespace physx;
@@ -139,17 +139,20 @@ int main() {
   //   actor_builder->build(true)->setGlobalPose({{x-1, y-1, 0}, PxIdentity});
   // }
 
-  renderer.showWindow();
+  // renderer.showWindow();
   while (true) {
-    wrapper->set_qf({rand_float(), rand_float(), rand_float(), rand_float(), rand_float(),
-                     rand_float(), rand_float(), rand_float()});
-    for (int i = 0; i < 10; ++i) {
+    auto start = std::chrono::system_clock::now();
+    for (int i = 0; i < 10000; ++i) {
+      wrapper->set_qf({rand_float(), rand_float(), rand_float(), rand_float(), rand_float(),
+                       rand_float(), rand_float(), rand_float()});
       sim.step();
     }
-    sim.updateRenderer();
-    renderer.render();
-    if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
-      break;
-    }
+    std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
+    std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
+    // sim.updateRenderer();
+    // renderer.render();
+    // if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
+    //   break;
+    // }
   }
 }

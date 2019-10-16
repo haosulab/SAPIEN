@@ -4,7 +4,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation")
 
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
+set(CMAKE_BUILD_TYPE "Debug")
+set(OpenGL_GL_PREFERENCE "LEGACY")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  message("-- DEBUG Build")
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
+else()
+  message("-- RELEASE Build")
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
+endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -15,11 +24,15 @@ find_package(assimp REQUIRED)
 
 include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
         "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
-        "src/renderer"
-        )
-link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
-        "3rd_party/optifuser/build/lib"
-        )
+        "src/renderer")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
+    "3rd_party/optifuser/build/lib")
+else()
+  link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release"
+    "3rd_party/optifuser/build/lib")
+endif()
 
 include_directories(
         "3rd_party/optifuser/include"
@@ -33,11 +46,13 @@ file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
         "3rd_party/imgui/examples/imgui_impl_glfw.cpp"
         "3rd_party/imgui/examples/imgui_impl_opengl3.cpp")
 
-
-add_definitions(-D_DEBUG)
-# add_definitions(-D_VERBOSE)
-add_definitions(-D_PVD)
-add_definitions(-DPVD_HOST="192.168.0.110")
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+  add_definitions(-D_DEBUG)
+  add_definitions(-D_PVD)
+  add_definitions(-DPVD_HOST="192.168.0.110")
+else()
+  add_definitions(-DNDEBUG)
+endif()
 
 add_subdirectory("3rd_party/optifuser")
 add_subdirectory("3rd_party/pybind11")
