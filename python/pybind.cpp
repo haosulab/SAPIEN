@@ -126,12 +126,10 @@ PYBIND11_MODULE(sapyen, m) {
       .def("add_ground", &Simulation::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr)
       .def("add_mounted_camera", &Simulation::addMountedCamera);
-  
 
   py::class_<PxRigidActor, std::unique_ptr<PxRigidActor, py::nodelete>>(m, "PxRigidActor")
       .def("get_global_pose", &PxRigidActor::getGlobalPose)
-      .def("set_global_pose", &PxRigidActor::setGlobalPose,
-           py::arg("pose"),
+      .def("set_global_pose", &PxRigidActor::setGlobalPose, py::arg("pose"),
            py::arg("autoawake") = true);
   py::class_<PxRigidStatic, PxRigidActor, std::unique_ptr<PxRigidStatic, py::nodelete>>(
       m, "PxRigidStatic")
@@ -234,7 +232,11 @@ PYBIND11_MODULE(sapyen, m) {
       .def("show_window", &Renderer::OptifuserRenderer::showWindow)
       .def("hide_window", &Renderer::OptifuserRenderer::hideWindow)
       .def_readonly("cam", &Renderer::OptifuserRenderer::cam)
-      .def("get_cameras", &Renderer::OptifuserRenderer::getCameras);
+      .def("get_camera_count",
+           [](Renderer::OptifuserRenderer &r) { return r.getCameras().size(); })
+      .def("get_camera",
+           [](Renderer::OptifuserRenderer &r, int i) { return r.getCameras().at(i); },
+           py::return_value_policy::reference);
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
       .def(py::init([]() { return new Optifuser::CameraSpec(); }))
       .def_readwrite("name", &Optifuser::CameraSpec::name)
@@ -518,14 +520,10 @@ PYBIND11_MODULE(sapyen, m) {
              a.addBoxShape(pose, {size.at(0), size.at(1), size.at(2)}, material, density);
            },
            py::arg("pose") = PxTransform({0, 0, 0}, {0, 0, 0, 1}),
-           py::arg("size") = make_array<float>({1, 1, 1}),
-           py::arg("material") = nullptr,
+           py::arg("size") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr,
            py::arg("density") = 1000.f)
-      .def("build", &ActorBuilder::build,
-           py::arg("is_static") = false,
-           py::arg("is_kinematic") = false,
-           py::arg("name") = "",
-           py::arg("add_to_scene") = true);
+      .def("build", &ActorBuilder::build, py::arg("is_static") = false,
+           py::arg("is_kinematic") = false, py::arg("name") = "", py::arg("add_to_scene") = true);
   // .def("add_sphere_shape", &ActorBuilder::addSphereShape)
   //     .def("add__shape", &ActorBuilder::addBoxShape)
   //     .def("add_box_shape", &ActorBuilder::addBoxShape)

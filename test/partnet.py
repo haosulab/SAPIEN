@@ -32,14 +32,10 @@ wrapper.set_qvel(zeros)
 wrapper.set_qf(zeros)
 
 sim.update_renderer()
-cam0 = renderer.get_cameras()[0]
+cam0 = renderer.get_camera(0)
 cam0.take_picture()
 color = cam0.get_color_rgba()
-plt.imshow(color)
+depth = cam0.get_depth()
+seg = cam0.get_segmentation()
+plt.imshow(depth)
 plt.show()
-
-# renderer.show_window()
-# while True:
-#     sim.step()
-#     sim.update_renderer()
-#     renderer.render()
