@@ -1,8 +1,7 @@
 import sapyen
-from sapyen import PxTransform
+from sapyen import Pose
 import numpy as np
 import os
-import matplotlib.pyplot as plt
 
 DIR = '/home/fx/source/partnet-mobility-scripts/mobility_verified'
 files = os.listdir(DIR)
@@ -22,9 +21,9 @@ wrapper = loader.load(urdf)
 
 builder = sim.create_actor_builder()
 actor = builder.build(False, True, "Camera Mount")
-cam = sim.add_mounted_camera("Floating Camera", actor, PxTransform([0, 0, 0], [1, 0, 0, 0]), 512, 512, 0.9,
-                             0.9, 0.1, 1000)
-actor.set_global_pose(PxTransform([-2, 0, 2], [0.9238795, 0, 0.3826834, 0]))
+cam = sim.add_mounted_camera("Floating Camera", actor, Pose([0, 0, 0], [1, 0, 0, 0]), 512, 424,
+                             1.22172944444, 1.0509561565825727, 0.01, 100)
+actor.set_global_pose(Pose([-2, 0, 2], [0.9238795, 0, 0.3826834, 0]))
 
 zeros = np.zeros(wrapper.dof())
 wrapper.set_qpos(zeros)
@@ -32,10 +31,14 @@ wrapper.set_qvel(zeros)
 wrapper.set_qf(zeros)
 
 sim.update_renderer()
-cam0 = renderer.get_camera(0)
-cam0.take_picture()
-color = cam0.get_color_rgba()
-depth = cam0.get_depth()
-seg = cam0.get_segmentation()
-plt.imshow(depth)
-plt.show()
+# cam0 = renderer.get_camera(0)
+# cam0.take_picture()
+# color = cam0.get_color_rgba()
+# depth = cam0.get_depth()
+# seg = cam0.get_segmentation()
+
+renderer.show_window()
+while True:
+    sim.step()
+    sim.update_renderer()
+    renderer.render()

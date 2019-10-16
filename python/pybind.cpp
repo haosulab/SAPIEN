@@ -401,7 +401,7 @@ PYBIND11_MODULE(sapyen, m) {
       .def("load_joint_system", &URDF::URDFLoader::loadJointSystem,
            py::return_value_policy::reference);
 
-  py::class_<PxTransform>(m, "PxTransform")
+  py::class_<PxTransform>(m, "Pose")
       .def(py::init([](py::array_t<float> p, py::array_t<float> q) {
              return new PxTransform({p.at(0), p.at(1), p.at(2)},
                                     {q.at(1), q.at(2), q.at(3), q.at(0)});
