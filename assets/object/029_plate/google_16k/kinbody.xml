@@ -1,0 +1,8 @@
+<KinBody name="plate">
+  <Body type="static" name="plate">
+    <Geom type="trimesh">
+      <Render>textured.dae</Render>
+      <Data>textured.dae</Data>
+    </Geom>
+  </Body>
+</KinBody>
