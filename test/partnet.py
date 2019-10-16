@@ -6,6 +6,7 @@ import os
 DIR = '/home/fx/source/partnet-mobility-scripts/mobility_verified'
 files = os.listdir(DIR)
 urdf = os.path.join(DIR, np.random.choice(files), 'mobility.urdf')
+urdf = os.path.join(DIR, '22301', 'mobility.urdf')
 print(urdf)
 
 renderer = sapyen.OptifuserRenderer()
@@ -29,6 +30,9 @@ zeros = np.zeros(wrapper.dof())
 wrapper.set_qpos(zeros)
 wrapper.set_qvel(zeros)
 wrapper.set_qf(zeros)
+
+limits = wrapper.get_joint_limits()
+print(limits)
 
 sim.update_renderer()
 # cam0 = renderer.get_camera(0)

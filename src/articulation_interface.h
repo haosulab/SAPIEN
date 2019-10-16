@@ -2,6 +2,7 @@
 #include <PxPhysicsAPI.h>
 #include <string>
 #include <vector>
+#include <array>
 
 namespace sapien {
 enum EArticulationType { DYNAMIC_ARTICULATION, KINEMATIC_ARTICULATION, OBJECT_ARTICULATION };
@@ -13,7 +14,7 @@ struct IArticulationBase {
   virtual std::vector<std::string> get_joint_names() const = 0;
   virtual std::vector<uint32_t> get_joint_dofs() const = 0;
 
-  virtual std::vector<std::tuple<physx::PxReal, physx::PxReal>> get_joint_limits() const = 0;
+  virtual std::vector<std::array<physx::PxReal, 2>> get_joint_limits() const = 0;
 
   virtual std::vector<physx::PxReal> get_qpos() const = 0;
   virtual void set_qpos(const std::vector<physx::PxReal> &v) = 0;

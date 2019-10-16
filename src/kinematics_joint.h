@@ -7,7 +7,6 @@
 #include <PxPhysicsAPI.h>
 #include <map>
 #include <string>
-#include <tuple>
 #include <vector>
 
 namespace sapien {
@@ -33,7 +32,7 @@ public:
          const PxTransform &fromParent);
   PxTransform passThroughKinematicsDrive(const PxTransform &T);
   PxTransform passThroughGlobalPose(const PxTransform &T);
-  virtual std::vector<std::tuple<PxReal, PxReal>> getLimits() const = 0;
+  virtual std::vector<std::array<PxReal, 2>> getLimits() const = 0;
   virtual uint32_t getDof() const = 0;
   virtual PxReal getQpos() const = 0;
   virtual void setQpos(const std::vector<PxReal> &qpos) = 0;
@@ -55,7 +54,7 @@ public:
       : KJoint(childLink, parentJoint, toChild, fromParent){};
 
   uint32_t getDof() const override { return 1; }
-  std::vector<std::tuple<PxReal, PxReal>> getLimits() const override;
+  std::vector<std::array<PxReal, 2>> getLimits() const override;
   PxReal getQpos() const override { return qpos; }
 };
 
@@ -95,7 +94,7 @@ public:
   uint32_t getDof() const override { return 0; }
   void setQpos(const std::vector<PxReal> &qpos) override;
   void driveQpos(const std::vector<PxReal> &qpos) override;
-  std::vector<std::tuple<PxReal, PxReal>> getLimits() const override;
+  std::vector<std::array<PxReal, 2>> getLimits() const override;
   PxReal getQpos() const override { return 0; }
 };
 

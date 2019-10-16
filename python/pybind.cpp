@@ -76,9 +76,9 @@ public:
     PYBIND11_OVERLOAD_PURE(std::vector<uint32_t>, IArticulationBase, get_joint_dofs);
   }
 
-  std::vector<std::tuple<physx::PxReal, physx::PxReal>> get_joint_limits() const override {
+  std::vector<std::array<physx::PxReal, 2>> get_joint_limits() const override {
     PYBIND11_OVERLOAD_PURE_NAME(
-        PYBIND11_TYPE(std::vector<std::tuple<physx::PxReal, physx::PxReal>>),
+        PYBIND11_TYPE(std::vector<std::array<physx::PxReal, 2>>),
         PYBIND11_TYPE(IArticulationBase), "get_joint_limits", get_joint_limits);
   }
 
@@ -304,7 +304,7 @@ PYBIND11_MODULE(sapyen, m) {
            [](IArticulationBase &a) {
              auto limits = a.get_joint_limits();
              return py::array_t<PxReal>({(int)limits.size(), 2},
-                                        {sizeof(std::tuple<PxReal, PxReal>), sizeof(PxReal)},
+                                        {sizeof(std::array<PxReal, 2>), sizeof(PxReal)},
                                         (PxReal *)limits.data());
            })
       .def("get_qpos",

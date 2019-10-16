@@ -32,7 +32,7 @@ class KinematicsArticulationWrapper : public IArticulationDrivable {
   std::vector<PxReal> qvel;
   std::vector<PxReal> qacc;
   std::vector<PxReal> qf;
-  std::vector<std::tuple<PxReal, PxReal>> jointLimit;
+  std::vector<std::array<PxReal, 2>> jointLimit;
 
   // Link related field
   std::vector<PxRigidDynamic *> linkListPtr;
@@ -53,7 +53,7 @@ public:
   uint32_t dof() const override;
   std::vector<std::string> get_joint_names() const override;
   std::vector<uint32_t> get_joint_dofs() const override;
-  std::vector<std::tuple<PxReal, PxReal>> get_joint_limits() const override;
+  std::vector<std::array<PxReal, 2>> get_joint_limits() const override;
 
   std::vector<physx::PxReal> get_qpos() const override;
   std::vector<physx::PxReal> get_qvel() const override;

@@ -47,7 +47,7 @@ public:
   virtual std::vector<std::string> get_joint_names() const override;
   virtual std::vector<uint32_t> get_joint_dofs() const override;
 
-  virtual std::vector<std::tuple<physx::PxReal, physx::PxReal>> get_joint_limits() const override;
+  virtual std::vector<std::array<physx::PxReal, 2>> get_joint_limits() const override;
 
   virtual std::vector<physx::PxReal> get_qpos() const override;
   virtual void set_qpos(const std::vector<physx::PxReal> &v) override;
