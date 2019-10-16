@@ -37,4 +37,12 @@ void PS3::shutdown() {
 bool PS3::getKey(ButtonId id) { return buttonStates[id]; }
 bool PS3::getAxis(AxisId id) { return axisStates[id]; }
 float PS3::getAxisValue(AxisId id) { return static_cast<float>(axisStates[id]) / AXIS_CONST; }
+std::vector<int> PS3::exportButtonStates() {
+  std::vector<int> result(buttonStates.begin(), buttonStates.end());
+  return result;
+}
+std::vector<int> PS3::exportAxisStates() {
+  std::vector<int> result(axisStates.begin(), axisStates.end());
+  return result;
+}
 } // namespace sapien::robot

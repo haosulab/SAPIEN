@@ -40,6 +40,7 @@ public:
 
 public:
   explicit MOVO(ControllerManger *manger);
+  virtual ~MOVO() = default;
   void set_arm_velocity(float v);
   void set_arm_angular_velocity(float v);
   void set_wheel_velocity(float v);

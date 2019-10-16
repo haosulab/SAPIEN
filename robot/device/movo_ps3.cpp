@@ -106,6 +106,10 @@ void sapien::robot::MOVOPS3::step() {
     break;
   }
   }
+  if (input->getKey(BUTTON_LEFT) || input->getKey(BUTTON_CIRCLE)) {
+
+    exit(0);
+  }
   continuous = activated;
 }
 sapien::robot::MOVOPS3::~MOVOPS3() { input->shutdown(); }

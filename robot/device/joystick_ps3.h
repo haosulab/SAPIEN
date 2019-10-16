@@ -44,6 +44,8 @@ enum AxisId {
 };
 #define PS3_AXIS_COUNT 6
 
+enum PS3Mode { NORMAL, DEMONSTRATION, REPLAY };
+
 struct js_event_t {
   uint32_t time;
   int16_t action;
@@ -53,16 +55,20 @@ struct js_event_t {
 class PS3 : public InputDevice {
 protected:
   std::thread worker;
-  std::array<std::atomic<int>, PS3_BUTTON_COUNT> buttonStates;
-  std::array<std::atomic<int16_t>, PS3_AXIS_COUNT> axisStates;
+  std::array<std::atomic<int>, PS3_BUTTON_COUNT> buttonStates{};
+  std::array<std::atomic<int>, PS3_AXIS_COUNT> axisStates{};
+  PS3Mode mode = PS3Mode::NORMAL;
   void runThread();
   const float AXIS_CONST = 32768;
 
 public:
   PS3();
+  void setMode(PS3);
   void shutdown();
   bool getKey(ButtonId id);
   bool getAxis(AxisId id);
   float getAxisValue(AxisId id);
+  std::vector<int> exportButtonStates();
+  std::vector<int> exportAxisStates();
 };
 } // namespace sapien::robot

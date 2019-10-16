@@ -30,7 +30,7 @@ private:
 
 public:
   float timestep;
-  ControllerManger(const std::string &robotName, ControllableArticulationWrapper *wrapper);
+  ControllerManger(std::string robotName, ControllableArticulationWrapper *wrapper);
 
   // Function for add controllers
   void createJointPubNode(double pubFrequency, double updateFrequency);

@@ -110,6 +110,18 @@ public:
     PYBIND11_OVERLOAD_PURE(void, IArticulationBase, set_qf, v);
   }
 };
+//class PyIArticulationDrivable : public IArticulationDrivable, PyIArticulationBase {
+//public:
+//  void set_drive_target(const std::vector<PxReal> &v) override {
+//    PYBIND11_OVERLOAD_PURE(void, IArticulationDrivable, set_drive_target);
+//  }
+//  void move_base(const PxTransform &T) override {
+//    PYBIND11_OVERLOAD_PURE(void, IArticulationDrivable, move_base);
+//  }
+//  std::vector<std::string> get_drive_joint_names() const override {
+//    PYBIND11_OVERLOAD_PURE(std::vector<std::string>, IArticulationDrivable, get_drive_joint_names);
+//  }
+//};
 
 PYBIND11_MODULE(sapyen, m) {
   py::class_<Simulation>(m, "Simulation")
@@ -121,6 +133,8 @@ PYBIND11_MODULE(sapyen, m) {
       .def("create_actor_builder", &Simulation::createActorBuilder)
       .def("create_articulation_builder", &Simulation::createArticulationBuilder)
       .def("create_urdf_loader", [](Simulation &s) { return new URDF::URDFLoader(s); })
+      .def("create_controllable_articulation", &Simulation::createControllableArticulationWrapper,
+           py::return_value_policy::reference)
       .def("step", &Simulation::step)
       .def("update_renderer", &Simulation::updateRenderer)
       .def("add_ground", &Simulation::addGround, py::arg("altitude"), py::arg("render") = true,
@@ -234,9 +248,9 @@ PYBIND11_MODULE(sapyen, m) {
       .def_readonly("cam", &Renderer::OptifuserRenderer::cam)
       .def("get_camera_count",
            [](Renderer::OptifuserRenderer &r) { return r.getCameras().size(); })
-      .def("get_camera",
-           [](Renderer::OptifuserRenderer &r, int i) { return r.getCameras().at(i); },
-           py::return_value_policy::reference);
+      .def(
+          "get_camera", [](Renderer::OptifuserRenderer &r, int i) { return r.getCameras().at(i); },
+          py::return_value_policy::reference);
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
       .def(py::init([]() { return new Optifuser::CameraSpec(); }))
       .def_readwrite("name", &Optifuser::CameraSpec::name)
@@ -348,9 +362,7 @@ PYBIND11_MODULE(sapyen, m) {
       .value("DYNAMIC_ARTICULATION", EArticulationType::DYNAMIC_ARTICULATION)
       .value("KINEMATIC_ARTICULATION", EArticulationType::KINEMATIC_ARTICULATION)
       .value("OBJECT_ARTICULATION", EArticulationType::OBJECT_ARTICULATION);
-  py::class_<ArticulationWrapper, IArticulationBase>(m, "ArticulationWrapper")
-      // NOTE: do not expose constructor
-      // .def(py::init<>())
+  py::class_<ArticulationWrapper, IArticulationDrivable>(m, "ArticulationWrapper")
       .def("update_cache", &ArticulationWrapper::updateCache)
       .def("update_articulation", &ArticulationWrapper::updateArticulation)
       .def("add_force_actuator", &ArticulationWrapper::addForceActuator)
@@ -373,16 +385,17 @@ PYBIND11_MODULE(sapyen, m) {
                                         {sizeof(std::array<PxReal, 6>), sizeof(PxReal)},
                                         (PxReal *)cfrc.data());
            })
-      .def("set_root_pose",
-           [](ArticulationWrapper &a, const py::array_t<float> &position,
-              const py::array_t<float> &quaternion) {
-             a.articulation->teleportRootLink(
-                 {{position.at(0), position.at(1), position.at(2)},
-                  {quaternion.at(1), quaternion.at(2), quaternion.at(3), quaternion.at(0)}},
-                 true);
-           },
-           py::arg("position") = make_array<float>({0, 0, 0}),
-           py::arg("quaternion") = make_array<float>({0, 0, 0, 1}))
+      .def(
+          "set_root_pose",
+          [](ArticulationWrapper &a, const py::array_t<float> &position,
+             const py::array_t<float> &quaternion) {
+            a.articulation->teleportRootLink(
+                {{position.at(0), position.at(1), position.at(2)},
+                 {quaternion.at(1), quaternion.at(2), quaternion.at(3), quaternion.at(0)}},
+                true);
+          },
+          py::arg("position") = make_array<float>({0, 0, 0}),
+          py::arg("quaternion") = make_array<float>({0, 0, 0, 1}))
       .def("set_drive_qpos",
            [](ArticulationWrapper &a, py::array_t<float> qpos) {
              a.set_drive_target(std::vector<PxReal>(qpos.data(), qpos.data() + qpos.size()));
@@ -394,9 +407,12 @@ PYBIND11_MODULE(sapyen, m) {
 
   py::class_<JointSystem, IArticulationBase>(m, "JointSystem");
 
+  py::class_<ControllableArticulationWrapper>(m, "ControllableArticulation");
+
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
       .def(py::init<Simulation &>())
       .def_readwrite("fix_loaded_object", &URDF::URDFLoader::fixLoadedObject)
+      .def_readwrite("balance_passive_force", &URDF::URDFLoader::balancePassiveForce)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference)
       .def("load_joint_system", &URDF::URDFLoader::loadJointSystem,
            py::return_value_policy::reference);
@@ -431,33 +447,34 @@ PYBIND11_MODULE(sapyen, m) {
 
   py::class_<ArticulationBuilder>(m, "ArticulationBuilder")
       .def(py::init<Simulation *>())
-      .def("add_link",
-           [](ArticulationBuilder &a, PxArticulationLink *parent, const PxTransform &pose,
-              const std::string &name, const std::string &jointName,
-              PxArticulationJointType::Enum jointType, const py::array_t<float> &arr,
-              PxTransform const &parentPose, PxTransform const &childPose) {
-             std::vector<std::array<float, 2>> limits;
-             if (jointType == PxArticulationJointType::eREVOLUTE ||
-                 jointType == PxArticulationJointType::ePRISMATIC) {
-               limits = {{arr.at(0, 0), arr.at(0, 1)}};
-             }
-             // TODO: arr to limits
-             return a.addLink(parent, pose, name, jointName, jointType, limits, parentPose,
-                              childPose);
-           },
-           py::return_value_policy::reference, py::arg("parent") = (PxArticulationLink *)nullptr,
-           py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity), py::arg("name") = "",
-           py::arg("joint_name") = "", py::arg("joint_type") = PxArticulationJointType::eUNDEFINED,
-           py::arg("limits") = py::array_t<float>(),
-           py::arg("parent_pose") = PxTransform({0, 0, 0}, PxIdentity),
-           py::arg("child_pose") = PxTransform({0, 0, 0}, PxIdentity))
-      .def("add_box_shape_to_link",
-           [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-              const py::array_t<float> &arr, PxMaterial *material) {
-             a.addBoxShapeToLink(link, pose, array2vec3(arr), material);
-           },
-           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-           py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr)
+      .def(
+          "add_link",
+          [](ArticulationBuilder &a, PxArticulationLink *parent, const PxTransform &pose,
+             const std::string &name, const std::string &jointName,
+             PxArticulationJointType::Enum jointType, const py::array_t<float> &arr,
+             PxTransform const &parentPose, PxTransform const &childPose) {
+            std::vector<std::array<float, 2>> limits;
+            if (jointType == PxArticulationJointType::eREVOLUTE ||
+                jointType == PxArticulationJointType::ePRISMATIC) {
+              limits = {{arr.at(0, 0), arr.at(0, 1)}};
+            }
+            // TODO: arr to limits
+            return a.addLink(parent, pose, name, jointName, jointType, limits, parentPose,
+                             childPose);
+          },
+          py::return_value_policy::reference, py::arg("parent") = (PxArticulationLink *)nullptr,
+          py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity), py::arg("name") = "",
+          py::arg("joint_name") = "", py::arg("joint_type") = PxArticulationJointType::eUNDEFINED,
+          py::arg("limits") = py::array_t<float>(),
+          py::arg("parent_pose") = PxTransform({0, 0, 0}, PxIdentity),
+          py::arg("child_pose") = PxTransform({0, 0, 0}, PxIdentity))
+      .def(
+          "add_box_shape_to_link",
+          [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
+             const py::array_t<float> &arr,
+             PxMaterial *material) { a.addBoxShapeToLink(link, pose, array2vec3(arr), material); },
+          py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+          py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr)
       .def("add_capsule_shape_to_link", &ArticulationBuilder::addCapsuleShapeToLink,
            py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
            py::arg("radius") = 1, py::arg("length") = 1, py::arg("material") = nullptr)
