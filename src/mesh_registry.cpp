@@ -151,7 +151,7 @@ PxConvexMesh *MeshLoader::loadMesh(const std::string &filename, PxPhysics *physi
   PxDefaultMemoryOutputStream buf;
   PxConvexMeshCookingResult::Enum result;
   if (!cooking->cookConvexMesh(convexDesc, buf, &result)) {
-    std::cerr << "Unable to cook convex mesh." << std::endl;
+    std::cerr << "Unable to cook convex mesh: " << filename << std::endl;
     std::cerr << "Exiting..." << std::endl;
     exit(1);
   }
@@ -221,9 +221,9 @@ PxConvexMesh *loadObjMesh(const std::string &filename, PxPhysics *physics, PxCoo
   PxDefaultMemoryOutputStream buf;
   PxConvexMeshCookingResult::Enum result;
   if (!cooking->cookConvexMesh(convexDesc, buf, &result)) {
-    std::cerr << "Unable to cook convex mesh." << std::endl;
+    std::cerr << "Unable to cook convex mesh: " << filename << std::endl;
     std::cerr << "Exiting..." << std::endl;
-    exit(1);
+    return nullptr;
   }
   PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
   PxConvexMesh *convexMesh = physics->createConvexMesh(input);

@@ -95,7 +95,7 @@ void KinematicsArticulationWrapper::buildCache() {
   qacc.resize(DOF, 0);
   qf.resize(DOF, 0);
 }
-std::vector<std::tuple<PxReal, PxReal>> KinematicsArticulationWrapper::get_joint_limits() const {
+std::vector<std::array<PxReal, 2>> KinematicsArticulationWrapper::get_joint_limits() const {
   return jointLimit;
 }
 std::vector<uint32_t> KinematicsArticulationWrapper::get_joint_dofs() const { return jointDOF; }

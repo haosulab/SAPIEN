@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
 <robot name="partnet_6f36520144753550f91663a74ccd2338">
-	<gazabo description="Hi! I am Gazabo"/>
 	<link name="base"/>
 	<link name="link_0">
 		<visual>

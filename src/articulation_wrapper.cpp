@@ -24,8 +24,7 @@ std::vector<std::string> ArticulationWrapper::get_joint_names() const { return j
 
 std::vector<uint32_t> ArticulationWrapper::get_joint_dofs() const { return jointDofs; }
 
-std::vector<std::tuple<physx::PxReal, physx::PxReal>>
-ArticulationWrapper::get_joint_limits() const {
+std::vector<std::array<physx::PxReal, 2>> ArticulationWrapper::get_joint_limits() const {
   return jointLimits;
 }
 
@@ -120,8 +119,10 @@ void ArticulationWrapper::update() {
 // Force actuator
 void ArticulationWrapper::addForceActuator(const std::string &name, PxReal lowerLimit,
                                            PxReal upperLimit) {
-  if(balanceForce){
-    std::cerr<< "Could not add actuator to a balanced force articulation! This tag should only be used for robot" << std::endl;
+  if (balanceForce) {
+    std::cerr << "Could not add actuator to a balanced force articulation! This tag should only "
+                 "be used for robot"
+              << std::endl;
     return;
   }
   auto index = std::find(jointNamesDOF.begin(), jointNamesDOF.end(), name) - jointNamesDOF.begin();
@@ -158,26 +159,23 @@ std::vector<std::array<PxReal, 6>> ArticulationWrapper::get_cfrc_ext() {
     auto w = cache->linkAcceleration[i].angular;
     auto mass = linkMasses[i];
     auto inertial = linkInertial[i];
-    xf[i] = {v[0]*mass, v[1] * mass, v[2] * mass, inertial[0] * w[0], inertial[1] * w[1], inertial[2] * w[2]};
+    xf[i] = {v[0] * mass,        v[1] * mass,        v[2] * mass,
+             inertial[0] * w[0], inertial[1] * w[1], inertial[2] * w[2]};
   }
   return xf;
 }
 
-std::vector<PxArticulationLink *> ArticulationWrapper::get_links() const {
-  return links;
-}
+std::vector<PxArticulationLink *> ArticulationWrapper::get_links() const { return links; }
 
 std::vector<std::string> ArticulationWrapper::get_link_names() const {
   std::vector<std::string> names;
-  for (auto link: links) {
+  for (auto link : links) {
     names.push_back(link->getName());
   }
   return names;
 }
 
-std::vector<physx_id_t> ArticulationWrapper::get_link_ids() const {
-  return linkSegmentationIds;
-}
+std::vector<physx_id_t> ArticulationWrapper::get_link_ids() const { return linkSegmentationIds; }
 void ArticulationWrapper::move_base(const PxTransform &newT) {
   articulation->teleportRootLink(newT, true);
 }

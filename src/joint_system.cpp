@@ -77,18 +77,18 @@ std::vector<std::string> JointSystem::get_joint_names() const { return jointName
 
 std::vector<uint32_t> JointSystem::get_joint_dofs() const { return jointDofs; }
 
-std::vector<std::tuple<physx::PxReal, physx::PxReal>> JointSystem::get_joint_limits() const {
-  std::vector<std::tuple<physx::PxReal, physx::PxReal>> limits;
+std::vector<std::array<physx::PxReal, 2>> JointSystem::get_joint_limits() const {
+  std::vector<std::array<physx::PxReal, 2>> limits;
   for (auto joint : joints) {
     switch (joint->getConcreteType()) {
     case PxJointConcreteType::eREVOLUTE: {
       auto limitPair = static_cast<PxRevoluteJoint *>(joint)->getLimit();
-      limits.push_back(std::make_tuple(limitPair.lower, limitPair.upper));
+      limits.push_back({limitPair.lower, limitPair.upper});
       break;
     }
     case PxJointConcreteType::ePRISMATIC: {
       auto limitPair = static_cast<PxRevoluteJoint *>(joint)->getLimit();
-      limits.push_back(std::make_tuple(limitPair.lower, limitPair.upper));
+      limits.push_back({limitPair.lower, limitPair.upper});
       break;
     }
     default: {}

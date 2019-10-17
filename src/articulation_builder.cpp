@@ -94,10 +94,12 @@ void ArticulationBuilder::addConvexObjShapeToLink(PxArticulationLink &link,
                                                   PxMaterial *material) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxConvexMesh *mesh = loadObjMesh(filename, mPhysicsSDK, mCooking);
-  PxShape *shape =
-      mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh, PxMeshScale(scale)), *material, true);
-  shape->setLocalPose(pose);
-  link.attachShape(*shape);
+  if (mesh) {
+    PxShape *shape =
+        mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh, PxMeshScale(scale)), *material, true);
+    shape->setLocalPose(pose);
+    link.attachShape(*shape);
+  }
 }
 
 void ArticulationBuilder::setLinkMassAndInertia(PxArticulationLink &link, PxReal mass,

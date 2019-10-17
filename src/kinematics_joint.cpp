@@ -3,9 +3,8 @@
 //
 
 #include "kinematics_joint.h"
-#include <assert.h>
+#include <cassert>
 #include <iostream>
-
 
 namespace sapien {
 using namespace physx;
@@ -63,9 +62,9 @@ void RevoluteKJoint::driveQpos(const std::vector<PxReal> &qpos) {
   PxTransform targetPose = passThroughKinematicsDrive(PxTransform({targetQpos, {1, 0, 0}}));
   childLink->setKinematicTarget(targetPose);
 }
-std::vector<std::tuple<PxReal, PxReal>> SingleDOFKJoint::getLimits() const {
-  std::tuple<PxReal, PxReal> limits = {lowerLimit, upperLimit};
-  return {limits};
+
+std::vector<std::array<PxReal, 2>> SingleDOFKJoint::getLimits() const {
+  return {{lowerLimit, upperLimit}};
 }
 
 // Continuous KJoint
@@ -120,7 +119,7 @@ void FixedKJoint::setQpos(const std::vector<PxReal> &qpos) {
   PxTransform targetPose = passThroughGlobalPose(PxTransform(PxIdentity));
   childLink->setGlobalPose(targetPose);
 }
-std::vector<std::tuple<PxReal, PxReal>> FixedKJoint::getLimits() const { return {}; }
+std::vector<std::array<PxReal, 2>> FixedKJoint::getLimits() const { return {}; }
 void FixedKJoint::driveQpos(const std::vector<PxReal> &qpos) {
   if (!qpos.empty()) {
     throw std::runtime_error("Fixed joint can not be drove by real qpos");
@@ -129,4 +128,4 @@ void FixedKJoint::driveQpos(const std::vector<PxReal> &qpos) {
   childLink->setKinematicTarget(targetPose);
 }
 
-}
+} // namespace sapien
