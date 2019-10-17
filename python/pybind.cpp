@@ -434,35 +434,35 @@ PYBIND11_MODULE(sapyen, m) {
            py::arg("link"), py::arg("density") = 1.f)
       .def("add_box_visual_to_link",
            [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-              const py::array_t<float> &scale, const py::array_t<float> &color) {
-             a.addBoxVisualToLink(link, pose, array2vec3(scale), array2vec3(color));
+              const py::array_t<float> &scale, const py::array_t<float> &color, const std::string &name) {
+             a.addBoxVisualToLink(link, pose, array2vec3(scale), array2vec3(color), name);
            },
            py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
            py::arg("scale") = make_array<float>({1, 1, 1}),
-           py::arg("color") = make_array<float>({1, 1, 1}))
+           py::arg("color") = make_array<float>({1, 1, 1}), py::arg("name") = "")
       .def("add_capsule_visual_to_link",
            [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-              PxReal radius, PxReal length, const py::array_t<PxReal> &color) {
-             a.addCapsuleVisualToLink(link, pose, radius, length, array2vec3(color));
+              PxReal radius, PxReal length, const py::array_t<PxReal> &color, const std::string &name) {
+             a.addCapsuleVisualToLink(link, pose, radius, length, array2vec3(color), name);
            },
            py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
            py::arg("radius") = 1, py::arg("length") = 1,
-           py::arg("color") = make_array<float>({1, 1, 1}))
+           py::arg("color") = make_array<float>({1, 1, 1}), py::arg("name") = "")
       .def("add_sphere_visual_to_link",
            [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-              PxReal radius, const py::array_t<PxReal> &color) {
-             a.addSphereVisualToLink(link, pose, radius, array2vec3(color));
+              PxReal radius, const py::array_t<PxReal> &color, const std::string &name) {
+             a.addSphereVisualToLink(link, pose, radius, array2vec3(color), name);
            },
            py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-           py::arg("radius") = 1, py::arg("color") = make_array<float>({1, 1, 1}))
+           py::arg("radius") = 1, py::arg("color") = make_array<float>({1, 1, 1}), py::arg("name") = "")
       .def("add_obj_visual_to_link",
            [](ArticulationBuilder &a, PxArticulationLink &link, const std::string &filename,
-              const PxTransform &pose, const py::array_t<float> &scale) {
-             a.addObjVisualToLink(link, filename, pose, array2vec3(scale));
+              const PxTransform &pose, const py::array_t<float> &scale, const std::string &name) {
+             a.addObjVisualToLink(link, filename, pose, array2vec3(scale), name);
            },
            py::arg("link"), py::arg("filename"),
            py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity),
-           py::arg("scale") = make_array<float>({1, 1, 1}))
+           py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("name") = "")
       .def("build", &ArticulationBuilder::build, py::arg("fix_base") = true,
            py::arg("balanceForce") = false, py::return_value_policy::reference);
 }
