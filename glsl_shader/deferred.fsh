@@ -33,7 +33,7 @@ struct DirectionalLight
   vec3 emission;
 };
 
-#define N_POINT_LIGHTS 5
+#define N_POINT_LIGHTS 3
 struct PointLight
 {
   vec3 position;
@@ -117,22 +117,23 @@ void main() {
   vec4 shadowMapCoord = shadowProjectionMatrix * ssPosition;
   shadowMapCoord /= shadowMapCoord.w;
   shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
-  float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, 0);
+  // float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, 0);
+  float visibility = 0;
 
   vec3 camDir = -normalize(csPosition.xyz);
 
   vec3 color = vec3(0.f);
-  // for (int i = 0; i < N_POINT_LIGHTS; i++) {
-  //   vec3 pos = world2camera(vec4(pointLights[i].position, 0.f)).xyz;
-  //   vec3 l = pos - csPosition.xyz;
-  //   float d = length(l);
-  //   vec3 lightDir = normalize(l);
+  for (int i = 0; i < N_POINT_LIGHTS; i++) {
+    vec3 pos = world2camera(vec4(pointLights[i].position, 0.f)).xyz;
+    vec3 l = pos - csPosition.xyz;
+    float d = length(l);
+    vec3 lightDir = normalize(l);
 
-  //   // point light diffuse
-  //   color += albedo * pointLights[i].emission * orenNayar(lightDir, camDir, normal, 0.3f) / d / d;
-  //   color += specular.rgb * pointLights[i].emission
-  //            * ggx(lightDir, camDir, normal, roughness, 0.05) / d / d;
-  // }
+    // point light diffuse
+    color += albedo * pointLights[i].emission * orenNayar(lightDir, camDir, normal, 0.3f) / d / d;
+    color += specular.rgb * pointLights[i].emission
+             * ggx(lightDir, camDir, normal, roughness, 0.05) / d / d;
+  }
 
   vec3 lightDir = -normalize((gbufferViewMatrix * vec4(shadowLightDirection, 0)).xyz);
   // color += albedo * shadowLightEmission * max(0, dot(lightDir, normal)) * visibility;
@@ -149,7 +150,8 @@ void main() {
   float depth = texture(depthtex0, texcoord).x;
   if (depth == 1) {
     // FragColor = texture(skybox, (environmentViewMatrixInverse * csPosition).xyz);
-    FragColor = vec4(getBackgroundColor((gbufferViewMatrixInverse * csPosition).xyz), 1.f);
+    // FragColor = vec4(getBackgroundColor((gbufferViewMatrixInverse * csPosition).xyz), 1.f);
+    FragColor = vec4(1,1,1,0);
   } else {
     FragColor = vec4(color, 1.f);
   }

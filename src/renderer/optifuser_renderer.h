@@ -34,6 +34,11 @@ public:
   virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) override;
   virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) override;
 
+  // lighting
+  void setAmbientLight(std::array<float, 3> color);
+  void setShadowLight(std::array<float, 3> direction, std::array<float, 3> color);
+  void addPointLight(std::array<float, 3> position, std::array<float, 3> color);
+
 private:
   void init();
   void destroy();

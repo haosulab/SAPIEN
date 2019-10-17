@@ -124,12 +124,8 @@ void test3() {
   auto loader = URDF::URDFLoader(sim);
   loader.fixLoadedObject = true;
   // auto *articulationWrapper =
-  // loader.load("/home/fx/source/partnet-mobility-scripts/179/test.urdf");
   auto wrapper = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_verified/12129/mobility.urdf");
-  auto linkIds = wrapper->get_link_ids();
-  auto links = wrapper->get_links();
-  auto names = wrapper->get_link_names();
+      "/home/fx/source/partnet-mobility-scripts/mobility_verified/20043/mobility.urdf");
 
   // std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
   // std::string line;
@@ -159,7 +155,8 @@ void test3() {
   // for (int i = 0; i < 4; ++i) {
   //   int x = i / row * 2;
   //   int y = i % row * 2;
-  //   auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+  auto articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+  articulationWrapper->articulation->teleportRootLink({{-1,0,-.5}, PxIdentity}, true);
   //   auto articulation = articulationWrapper->articulation;
   //   articulation->teleportRootLink({{(float)x, (float)y, 0}, PxQuat(rand_float()*3, {0, 0, 1})},
   //   true); articulationWrapper->updateCache();
