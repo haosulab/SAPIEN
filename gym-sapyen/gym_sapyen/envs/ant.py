@@ -6,7 +6,7 @@ try:
     import sys
     sys.path.append("/home/yikuan/source/physx_simulation/build")
     import sapyen
-    from sapyen import PxTransform
+    from sapyen import Pose
 except ImportError as e:
     raise error.DependencyNotInstalled("{}. (HINT: you need to install sapyen.)".format(e))
 
@@ -47,73 +47,73 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         builder = self.sim.create_articulation_builder()
         PxIdentity = np.array([1, 0, 0, 0])
         density = 5
-        body_link = builder.add_link(None, PxTransform(np.array([0, 0, 0]), PxIdentity), "body")
-        builder.add_sphere_shape_to_link(body_link, PxTransform(np.array([0, 0, 0]), PxIdentity), 0.25)
-        builder.add_sphere_visual_to_link(body_link, PxTransform(np.array([0, 0, 0]), PxIdentity), 0.25)
-        builder.add_capsule_shape_to_link(body_link,  PxTransform(np.array([0.141, 0, 0]), PxIdentity), 0.08, 0.141)
-        builder.add_capsule_visual_to_link(body_link, PxTransform(np.array([0.141, 0, 0]), PxIdentity), 0.08, 0.141)
-        builder.add_capsule_shape_to_link(body_link,  PxTransform(np.array([-0.141, 0, 0]), PxIdentity), 0.08, 0.141)
-        builder.add_capsule_visual_to_link(body_link, PxTransform(np.array([-0.141, 0, 0]), PxIdentity), 0.08, 0.141)
-        builder.add_capsule_shape_to_link(body_link, PxTransform(np.array([0, 0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08, 0.141)
-        builder.add_capsule_visual_to_link(body_link, PxTransform(np.array([0, 0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08, 0.141)
-        builder.add_capsule_shape_to_link(body_link, PxTransform(np.array([0, -0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08, 0.141)
-        builder.add_capsule_visual_to_link(body_link, PxTransform(np.array([0, -0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08, 0.141)
+        body_link = builder.add_link(None, Pose(np.array([0, 0, 0]), PxIdentity), "body")
+        builder.add_sphere_shape_to_link(body_link, Pose(np.array([0, 0, 0]), PxIdentity), 0.25)
+        builder.add_sphere_visual_to_link(body_link, Pose(np.array([0, 0, 0]), PxIdentity), 0.25)
+        builder.add_capsule_shape_to_link(body_link,  Pose(np.array([0.141, 0, 0]), PxIdentity), 0.08, 0.141)
+        builder.add_capsule_visual_to_link(body_link, Pose(np.array([0.141, 0, 0]), PxIdentity), 0.08, 0.141)
+        builder.add_capsule_shape_to_link(body_link,  Pose(np.array([-0.141, 0, 0]), PxIdentity), 0.08, 0.141)
+        builder.add_capsule_visual_to_link(body_link, Pose(np.array([-0.141, 0, 0]), PxIdentity), 0.08, 0.141)
+        builder.add_capsule_shape_to_link(body_link, Pose(np.array([0, 0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08, 0.141)
+        builder.add_capsule_visual_to_link(body_link, Pose(np.array([0, 0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08, 0.141)
+        builder.add_capsule_shape_to_link(body_link, Pose(np.array([0, -0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08, 0.141)
+        builder.add_capsule_visual_to_link(body_link, Pose(np.array([0, -0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08, 0.141)
         builder.update_link_mass_and_inertia(body_link, density)
-        l1 = builder.add_link(body_link,  PxTransform(np.array([0, 0, 0]), PxIdentity), "l1", "j1",
+        l1 = builder.add_link(body_link,  Pose(np.array([0, 0, 0]), PxIdentity), "l1", "j1",
                                     sapyen.PxArticulationJointType.REVOLUTE, np.array([[-0.5236, 0.5236]]),
-                                    PxTransform(np.array([0.282, 0, 0]), np.array([0.7071068, 0, 0.7071068, 0])),
-                                    PxTransform(np.array([0.141, 0, 0]), np.array([0.7071068, 0, -0.7071068, 0])))
-        builder.add_capsule_shape_to_link(l1,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
-        builder.add_capsule_visual_to_link(l1,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
+                                    Pose(np.array([0.282, 0, 0]), np.array([0.7071068, 0, 0.7071068, 0])),
+                                    Pose(np.array([0.141, 0, 0]), np.array([0.7071068, 0, -0.7071068, 0])))
+        builder.add_capsule_shape_to_link(l1,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
+        builder.add_capsule_visual_to_link(l1,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
         builder.update_link_mass_and_inertia(l1, density)
-        l2 = builder.add_link(body_link,  PxTransform(np.array([0, 0, 0]), PxIdentity), "l2", "j2",
+        l2 = builder.add_link(body_link,  Pose(np.array([0, 0, 0]), PxIdentity), "l2", "j2",
                                     sapyen.PxArticulationJointType.REVOLUTE, np.array([[-0.5236, 0.5236]]),
-                                    PxTransform(np.array([-0.282, 0, 0]), np.array([0, 0.7071068, 0, -0.7071068])),
-                                    PxTransform(np.array([0.141, 0, 0]), np.array([0.7071068, 0, -0.7071068, 0])))
-        builder.add_capsule_shape_to_link(l2,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
-        builder.add_capsule_visual_to_link(l2,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
+                                    Pose(np.array([-0.282, 0, 0]), np.array([0, 0.7071068, 0, -0.7071068])),
+                                    Pose(np.array([0.141, 0, 0]), np.array([0.7071068, 0, -0.7071068, 0])))
+        builder.add_capsule_shape_to_link(l2,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
+        builder.add_capsule_visual_to_link(l2,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
         builder.update_link_mass_and_inertia(l2, density)
-        l3 = builder.add_link(body_link,  PxTransform(np.array([0, 0, 0]), PxIdentity), "l3", "j3",
+        l3 = builder.add_link(body_link,  Pose(np.array([0, 0, 0]), PxIdentity), "l3", "j3",
                                     sapyen.PxArticulationJointType.REVOLUTE, np.array([[-0.5236, 0.5236]]),
-                                    PxTransform(np.array([0, 0.282, 0]), np.array([0.5, -0.5, 0.5, 0.5])),
-                                    PxTransform(np.array([0.141, 0, 0]), np.array([0.7071068, 0, -0.7071068, 0])))
-        builder.add_capsule_shape_to_link(l3,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
-        builder.add_capsule_visual_to_link(l3,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
+                                    Pose(np.array([0, 0.282, 0]), np.array([0.5, -0.5, 0.5, 0.5])),
+                                    Pose(np.array([0.141, 0, 0]), np.array([0.7071068, 0, -0.7071068, 0])))
+        builder.add_capsule_shape_to_link(l3,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
+        builder.add_capsule_visual_to_link(l3,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
         builder.update_link_mass_and_inertia(l3, density)
-        l4 = builder.add_link(body_link,  PxTransform(np.array([0, 0, 0]), PxIdentity), "l4", "j4",
+        l4 = builder.add_link(body_link,  Pose(np.array([0, 0, 0]), PxIdentity), "l4", "j4",
                                     sapyen.PxArticulationJointType.REVOLUTE, np.array([[-0.5236, 0.5236]]),
-                                    PxTransform(np.array([0, -0.282, 0]), np.array([0.5, 0.5, 0.5, -0.5])),
-                                    PxTransform(np.array([0.141, 0, 0]), np.array([ 0.7071068, 0, -0.7071068, 0])))
-        builder.add_capsule_shape_to_link(l4,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
-        builder.add_capsule_visual_to_link(l4,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
+                                    Pose(np.array([0, -0.282, 0]), np.array([0.5, 0.5, 0.5, -0.5])),
+                                    Pose(np.array([0.141, 0, 0]), np.array([ 0.7071068, 0, -0.7071068, 0])))
+        builder.add_capsule_shape_to_link(l4,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
+        builder.add_capsule_visual_to_link(l4,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.141)
         builder.update_link_mass_and_inertia(l4, density)
-        f1 = builder.add_link(l1,  PxTransform(np.array([0, 0, 0]), PxIdentity), "f1", "j11",
+        f1 = builder.add_link(l1,  Pose(np.array([0, 0, 0]), PxIdentity), "f1", "j11",
                                     sapyen.PxArticulationJointType.REVOLUTE, np.array([[0.5236, 1.222]]),
-                                    PxTransform(np.array([-0.141, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])),
-                                    PxTransform(np.array([0.282, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])))
-        builder.add_capsule_shape_to_link(f1,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
-        builder.add_capsule_visual_to_link(f1,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
+                                    Pose(np.array([-0.141, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])),
+                                    Pose(np.array([0.282, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])))
+        builder.add_capsule_shape_to_link(f1,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
+        builder.add_capsule_visual_to_link(f1,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
         builder.update_link_mass_and_inertia(f1, density)
-        f2 = builder.add_link(l2,  PxTransform(np.array([0, 0, 0]), PxIdentity), "f2", "j21",
+        f2 = builder.add_link(l2,  Pose(np.array([0, 0, 0]), PxIdentity), "f2", "j21",
                                     sapyen.PxArticulationJointType.REVOLUTE, np.array([[0.5236, 1.222]]),
-                                    PxTransform(np.array([-0.141, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])),
-                                    PxTransform(np.array([0.282, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])))
-        builder.add_capsule_shape_to_link(f2,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
-        builder.add_capsule_visual_to_link(f2,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
+                                    Pose(np.array([-0.141, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])),
+                                    Pose(np.array([0.282, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])))
+        builder.add_capsule_shape_to_link(f2,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
+        builder.add_capsule_visual_to_link(f2,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
         builder.update_link_mass_and_inertia(f2, density)
-        f3 = builder.add_link(l3,  PxTransform(np.array([0, 0, 0]), PxIdentity), "f3", "j31",
+        f3 = builder.add_link(l3,  Pose(np.array([0, 0, 0]), PxIdentity), "f3", "j31",
                                     sapyen.PxArticulationJointType.REVOLUTE, np.array([[0.5236, 1.222]]),
-                                    PxTransform(np.array([-0.141, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])),
-                                    PxTransform(np.array([0.282, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])))
-        builder.add_capsule_shape_to_link(f3,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
-        builder.add_capsule_visual_to_link(f3,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
+                                    Pose(np.array([-0.141, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])),
+                                    Pose(np.array([0.282, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])))
+        builder.add_capsule_shape_to_link(f3,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
+        builder.add_capsule_visual_to_link(f3,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
         builder.update_link_mass_and_inertia(f3, density)
-        f4 = builder.add_link(l4,  PxTransform(np.array([0, 0, 0]), PxIdentity), "f4", "j41",
+        f4 = builder.add_link(l4,  Pose(np.array([0, 0, 0]), PxIdentity), "f4", "j41",
                                     sapyen.PxArticulationJointType.REVOLUTE, np.array([[0.5236, 1.222]]),
-                                    PxTransform(np.array([-0.141, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])),
-                                    PxTransform(np.array([0.282, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])))
-        builder.add_capsule_shape_to_link(f4,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
-        builder.add_capsule_visual_to_link(f4,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
+                                    Pose(np.array([-0.141, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])),
+                                    Pose(np.array([0.282, 0, 0]), np.array([0, 0.7071068, 0.7071068, 0])))
+        builder.add_capsule_shape_to_link(f4,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
+        builder.add_capsule_visual_to_link(f4,  Pose(np.array([0, 0, 0]), PxIdentity), 0.08, 0.282)
         builder.update_link_mass_and_inertia(f4, density)
         wrapper = builder.build(False)
         lower_bound = -10

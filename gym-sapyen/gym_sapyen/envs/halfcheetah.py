@@ -6,7 +6,7 @@ try:
     import sys
     sys.path.append("/home/yikuan/source/physx_simulation/build")
     import sapyen
-    from sapyen import PxTransform
+    from sapyen import Pose
 except ImportError as e:
     raise error.DependencyNotInstalled("{}. (HINT: you need to install sapyen.)".format(e))
 
@@ -50,84 +50,84 @@ class HalfCheetahEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         x2y = np.array([0.7071068, 0, 0, 0.7071068])
         #density = 5
 
-        root1 = builder.add_link(None,  PxTransform(np.array([0, 0, 0]), PxIdentity), "root1")
-        root2 = builder.add_link(root1, PxTransform(np.array([0, 0, 0]), PxIdentity), "root2", "fake1",
+        root1 = builder.add_link(None,  Pose(np.array([0, 0, 0]), PxIdentity), "root1")
+        root2 = builder.add_link(root1, Pose(np.array([0, 0, 0]), PxIdentity), "root2", "fake1",
                                 sapyen.PxArticulationJointType.PRISMATIC, np.array([[-np.inf, np.inf]]),
-                                PxTransform(np.array([0, 0, 0]), x2z), PxTransform(np.array([0, 0, 0]), x2z))
-        root3 = builder.add_link(root2, PxTransform(np.array([0, 0, 0]), PxIdentity), "root3", "fake2",
+                                Pose(np.array([0, 0, 0]), x2z), Pose(np.array([0, 0, 0]), x2z))
+        root3 = builder.add_link(root2, Pose(np.array([0, 0, 0]), PxIdentity), "root3", "fake2",
                                 sapyen.PxArticulationJointType.PRISMATIC, np.array([[-np.inf, np.inf]]))
-        torso = builder.add_link(root3, PxTransform(np.array([0, 0, 0]), PxIdentity), "torso", "torso",
+        torso = builder.add_link(root3, Pose(np.array([0, 0, 0]), PxIdentity), "torso", "torso",
                                 sapyen.PxArticulationJointType.REVOLUTE, np.array([[-np.inf, np.inf]]),
-                                PxTransform(np.array([0, 0, 0]), x2y), PxTransform(np.array([0, 0, 0]), x2y))                     
+                                Pose(np.array([0, 0, 0]), x2y), Pose(np.array([0, 0, 0]), x2y))                     
 
-        builder.add_capsule_shape_to_link(torso,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.046, 0.5)
-        builder.add_capsule_visual_to_link(torso,  PxTransform(np.array([0, 0, 0]), PxIdentity), 0.046, 0.5, 
+        builder.add_capsule_shape_to_link(torso,  Pose(np.array([0, 0, 0]), PxIdentity), 0.046, 0.5)
+        builder.add_capsule_visual_to_link(torso,  Pose(np.array([0, 0, 0]), PxIdentity), 0.046, 0.5, 
                                           np.array([1, 1, 1]), "torso")
         
-        builder.add_capsule_shape_to_link(torso,  PxTransform(np.array([0.6, 0, 0.1]), 
+        builder.add_capsule_shape_to_link(torso,  Pose(np.array([0.6, 0, 0.1]), 
                                         np.array([0.939236, 0.000000, -0.343272, 0.000000])), 0.046, 0.15)
-        builder.add_capsule_visual_to_link(torso,  PxTransform(np.array([0.6, 0, 0.1]), 
+        builder.add_capsule_visual_to_link(torso,  Pose(np.array([0.6, 0, 0.1]), 
                                         np.array([0.939236, 0.000000, -0.343272, 0.000000])), 0.046, 0.15, 
                                           np.array([1, 1, 1]), "head")
 
-        bthigh = builder.add_link(torso, PxTransform(np.array([0, 0, 0]), PxIdentity), "bthigh", "bthigh",
+        bthigh = builder.add_link(torso, Pose(np.array([0, 0, 0]), PxIdentity), "bthigh", "bthigh",
                                  sapyen.PxArticulationJointType.REVOLUTE, np.array([[-0.52, 1.05]]),
-                                 PxTransform(np.array([-0.5, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068])),
-                                 PxTransform(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
-        builder.add_capsule_shape_to_link(bthigh,  PxTransform(np.array([0.1, 0, -0.13]), 
+                                 Pose(np.array([-0.5, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068])),
+                                 Pose(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
+        builder.add_capsule_shape_to_link(bthigh,  Pose(np.array([0.1, 0, -0.13]), 
                                         np.array([-0.897736,-0.000000,-0.440535,0.000000])), 0.046, 0.145)
-        builder.add_capsule_visual_to_link(bthigh,  PxTransform(np.array([0.1, 0, -0.13]), 
+        builder.add_capsule_visual_to_link(bthigh,  Pose(np.array([0.1, 0, -0.13]), 
                                             np.array([-0.897736,-0.000000,-0.440535,0.000000])), 0.046, 0.145,
                                             np.array([1, 1, 1]), "bthigh")
 
-        bshin = builder.add_link(bthigh, PxTransform(np.array([0, 0, 0]), PxIdentity), "bshin", "bshin",
+        bshin = builder.add_link(bthigh, Pose(np.array([0, 0, 0]), PxIdentity), "bshin", "bshin",
                                  sapyen.PxArticulationJointType.REVOLUTE, np.array([[-0.785, 0.785]]),
-                                 PxTransform(np.array([0.16, 0, -.25]), np.array([ 0.7071068, 0, 0, 0.7071068])),
-                                 PxTransform(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
-        builder.add_capsule_shape_to_link(bshin,  PxTransform(np.array([-0.14, 0, -0.07]), 
+                                 Pose(np.array([0.16, 0, -.25]), np.array([ 0.7071068, 0, 0, 0.7071068])),
+                                 Pose(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
+        builder.add_capsule_shape_to_link(bshin,  Pose(np.array([-0.14, 0, -0.07]), 
                                         np.array([-0.227590, 0.000000, -0.973757, 0.000000])), 0.046, 0.15)
-        builder.add_capsule_visual_to_link(bshin,  PxTransform(np.array([-0.14, 0, -0.07]), 
+        builder.add_capsule_visual_to_link(bshin,  Pose(np.array([-0.14, 0, -0.07]), 
                                         np.array([-0.227590, 0.000000, -0.973757, 0.000000])), 0.046, 0.15,
                                             np.array([0.9, 0.6, 0.6]), "bshin")
 
-        bfoot = builder.add_link(bshin, PxTransform(np.array([0, 0, 0]), PxIdentity), "bfoot", "bfoot",
+        bfoot = builder.add_link(bshin, Pose(np.array([0, 0, 0]), PxIdentity), "bfoot", "bfoot",
                                  sapyen.PxArticulationJointType.REVOLUTE, np.array([[-0.4, 0.785]]),
-                                 PxTransform(np.array([-0.28, 0, -.14]), np.array([ 0.7071068, 0, 0, 0.7071068])),
-                                 PxTransform(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
-        builder.add_capsule_shape_to_link(bfoot,  PxTransform(np.array([0.03, 0, -0.097]), 
+                                 Pose(np.array([-0.28, 0, -.14]), np.array([ 0.7071068, 0, 0, 0.7071068])),
+                                 Pose(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
+        builder.add_capsule_shape_to_link(bfoot,  Pose(np.array([0.03, 0, -0.097]), 
                                         np.array([0.605503, 0.000000, -0.795843, 0.000000])), 0.046, 0.094)
-        builder.add_capsule_visual_to_link(bfoot,  PxTransform(np.array([0.03, 0, -0.097]), 
+        builder.add_capsule_visual_to_link(bfoot,  Pose(np.array([0.03, 0, -0.097]), 
                                         np.array([0.605503, 0.000000, -0.795843, 0.000000])), 0.046, 0.094,
                                             np.array([0.9, 0.6, 0.6]), "bfoot")
 
 
-        fthigh = builder.add_link(torso, PxTransform(np.array([0, 0, 0]), PxIdentity), "fthigh", "fthigh",
+        fthigh = builder.add_link(torso, Pose(np.array([0, 0, 0]), PxIdentity), "fthigh", "fthigh",
                                  sapyen.PxArticulationJointType.REVOLUTE, np.array([[-1, 0.7]]),
-                                 PxTransform(np.array([0.5, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068])),
-                                 PxTransform(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
-        builder.add_capsule_shape_to_link(fthigh,  PxTransform(np.array([-0.07, 0, -0.12]), 
+                                 Pose(np.array([0.5, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068])),
+                                 Pose(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
+        builder.add_capsule_shape_to_link(fthigh,  Pose(np.array([-0.07, 0, -0.12]), 
                                         np.array([0.865124, 0.000000, -0.501557, 0.000000])), 0.046, 0.133)
-        builder.add_capsule_visual_to_link(fthigh,  PxTransform(np.array([-0.07, 0, -0.12]), 
+        builder.add_capsule_visual_to_link(fthigh,  Pose(np.array([-0.07, 0, -0.12]), 
                                             np.array([0.865124, 0.000000, -0.501557, 0.000000])), 0.046, 0.133,
                                             np.array([1, 1, 1]), "fthigh")
 
-        fshin = builder.add_link(fthigh, PxTransform(np.array([0, 0, 0]), PxIdentity), "fshin", "fshin",
+        fshin = builder.add_link(fthigh, Pose(np.array([0, 0, 0]), PxIdentity), "fshin", "fshin",
                                  sapyen.PxArticulationJointType.REVOLUTE, np.array([[-1.2, .87]]),
-                                 PxTransform(np.array([-.14, 0, -.24]), np.array([ 0.7071068, 0, 0, 0.7071068])),
-                                 PxTransform(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
-        builder.add_capsule_shape_to_link(fshin,  PxTransform(np.array([.065, 0, -.09]), 
+                                 Pose(np.array([-.14, 0, -.24]), np.array([ 0.7071068, 0, 0, 0.7071068])),
+                                 Pose(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
+        builder.add_capsule_shape_to_link(fshin,  Pose(np.array([.065, 0, -.09]), 
                                         np.array([0.466561, 0.000000, -0.884489, 0.000000])), 0.046, 0.106)
-        builder.add_capsule_visual_to_link(fshin,  PxTransform(np.array([.065, 0, -.09]), 
+        builder.add_capsule_visual_to_link(fshin,  Pose(np.array([.065, 0, -.09]), 
                                         np.array([0.466561, 0.000000, -0.884489, 0.000000])), 0.046, 0.106,
                                             np.array([0.9, 0.6, 0.6]), "fshin")
 
-        ffoot = builder.add_link(fshin, PxTransform(np.array([0, 0, 0]), PxIdentity), "ffoot", "ffoot",
+        ffoot = builder.add_link(fshin, Pose(np.array([0, 0, 0]), PxIdentity), "ffoot", "ffoot",
                                  sapyen.PxArticulationJointType.REVOLUTE, np.array([[-0.5, 0.5]]),
-                                 PxTransform(np.array([0.13, 0, -.18]), np.array([ 0.7071068, 0, 0, 0.7071068])),
-                                 PxTransform(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
-        builder.add_capsule_shape_to_link(ffoot,  PxTransform(np.array([0.045, 0, -0.07]), 
+                                 Pose(np.array([0.13, 0, -.18]), np.array([ 0.7071068, 0, 0, 0.7071068])),
+                                 Pose(np.array([0, 0, 0]), np.array([0.7071068, 0, 0, 0.7071068]))) 
+        builder.add_capsule_shape_to_link(ffoot,  Pose(np.array([0.045, 0, -0.07]), 
                                         np.array([0.466561, 0.000000, -0.884489, 0.000000])), 0.046, 0.07)
-        builder.add_capsule_visual_to_link(ffoot,  PxTransform(np.array([0.045, 0, -0.07]), 
+        builder.add_capsule_visual_to_link(ffoot,  Pose(np.array([0.045, 0, -0.07]), 
                                         np.array([0.466561, 0.000000, -0.884489, 0.000000])), 0.046, 0.07,
                                             np.array([0.9, 0.6, 0.6]), "ffoot")
 
