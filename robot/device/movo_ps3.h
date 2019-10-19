@@ -15,5 +15,8 @@ public:
   explicit MOVOPS3(ControllerManger *manger);
   ~MOVOPS3() override;
   void step() override;
+  inline void set_mode(PS3Mode option) { input->setMode(option); };
+  void set_cache(const std::vector<int> &cache);
+  std::vector<int> get_cache();
 };
 } // namespace sapien::robot

@@ -3,7 +3,7 @@ from sapyen import Pose
 import numpy as np
 import os
 
-DIR = '/home/fx/source/partnet-mobility-scripts/mobility_verified'
+DIR = '/home/sim/project/mobility_verified'
 files = os.listdir(DIR)
 urdf = os.path.join(DIR, np.random.choice(files), 'mobility.urdf')
 urdf = os.path.join(DIR, '22301', 'mobility.urdf')
@@ -35,8 +35,8 @@ limits = wrapper.get_joint_limits()
 print(limits)
 
 sim.update_renderer()
-# cam0 = renderer.get_camera(0)
-# cam0.take_picture()
+cam0 = renderer.get_camera(0)
+cam0.take_picture()
 # color = cam0.get_color_rgba()
 # depth = cam0.get_depth()
 # seg = cam0.get_segmentation()
@@ -46,3 +46,7 @@ while True:
     sim.step()
     sim.update_renderer()
     renderer.render()
+    depth = cam0.get_depth()
+    print("min: {}, max: {}".format(np.min(depth), np.max(depth)))
+
+

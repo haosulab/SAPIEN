@@ -46,7 +46,7 @@ public:
   void start();
   void stop();
   void removeController(const std::string &);
-  void movoBase(const PxTransform &T);
+  void moveBase(const PxTransform &T);
 };
 } // namespace sapien::robot
 

@@ -31,11 +31,11 @@ public:
   JointVelocityController *body;
   JointVelocityController *head;
 
-  float gripper_velocity = 3;
+  float gripper_velocity = 5;
   float wheel_velocity = 2;
-  float body_velocity = 0.2;
+  float body_velocity = 0.4;
   float head_velocity = 2;
-  float arm_cartesian_velocity = 0.3;
+  float arm_cartesian_velocity = 0.4;
   float arm_cartesian_angular_velocity = 0.8;
 
 public:

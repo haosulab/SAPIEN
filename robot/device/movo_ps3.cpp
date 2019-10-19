@@ -7,6 +7,14 @@ sapien::robot::MOVOPS3::MOVOPS3(ControllerManger *manger) : MOVO(manger) {
   input = std::make_unique<PS3>();
 }
 void sapien::robot::MOVOPS3::step() {
+  switch (input->mode) {
+  default:
+    input->saveCache();
+    break;
+  case REPLAY:
+    break;
+  }
+
   if (input->getKey(BUTTON_SELECT)) {
     mode = ControlMode::ARM_WORLD;
   } else if (input->getKey(BUTTON_START)) {
@@ -19,20 +27,20 @@ void sapien::robot::MOVOPS3::step() {
   case BODY: {
     if (input->getKey(BUTTON_UP)) {
       pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * timestep * wheel_velocity;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (input->getKey(BUTTON_DOWN)) {
       pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * timestep * wheel_velocity;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (input->getKey(BUTTON_LEFT)) {
       pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * timestep * wheel_velocity;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (input->getKey(BUTTON_RIGHT)) {
       pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * timestep * wheel_velocity;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (input->getAxis(AXIS_LEFT_X)) {
       float dir = input->getAxisValue(AXIS_LEFT_X) > 0 ? -1 : 1;
       angle += timestep * wheel_velocity * dir;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (input->getKey(BUTTON_L1)) {
       right_gripper->moveJoint(gripperJoints, gripper_velocity);
     } else if (input->getKey(BUTTON_R1)) {
@@ -106,10 +114,20 @@ void sapien::robot::MOVOPS3::step() {
     break;
   }
   }
-  if (input->getKey(BUTTON_LEFT) || input->getKey(BUTTON_CIRCLE)) {
-
-    exit(0);
+  if (input->getKey(BUTTON_LEFT) && input->getKey(BUTTON_CIRCLE)) {
+    throw std::runtime_error("PS3 user interrupt.");
   }
   continuous = activated;
 }
 sapien::robot::MOVOPS3::~MOVOPS3() { input->shutdown(); }
+std::vector<int> sapien::robot::MOVOPS3::get_cache() {
+  auto dest = input->exportButtonStates();
+  auto src = input->exportAxisStates();
+  dest.insert(dest.end(), std::make_move_iterator(src.begin()),
+              std::make_move_iterator(src.end()));
+  return dest;
+}
+void sapien::robot::MOVOPS3::set_cache(const std::vector<int> &cache) {
+  input->setCache(std::vector<int>(cache.begin(), cache.begin() + PS3_BUTTON_COUNT),
+                  std::vector<int>(cache.begin() + PS3_BUTTON_COUNT, cache.end()));
+}
