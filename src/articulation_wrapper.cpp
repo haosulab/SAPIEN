@@ -170,7 +170,7 @@ std::vector<PxArticulationLink *> ArticulationWrapper::get_links() const { retur
 std::vector<std::string> ArticulationWrapper::get_link_names() const {
   std::vector<std::string> names;
   for (auto link : links) {
-    names.push_back(link->getName());
+    names.emplace_back(link->getName());
   }
   return names;
 }

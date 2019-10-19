@@ -137,6 +137,10 @@ PYBIND11_MODULE(sapyen, m) {
       .def("create_controllable_articulation", &Simulation::createControllableArticulationWrapper,
            py::return_value_policy::reference)
       .def("step", &Simulation::step)
+      .def("dump", &Simulation::dump)
+      .def("pack", [](Simulation &a, const py::array_t<float> &arr){
+        a.pack(std::vector<PxReal>(arr.data(), arr.data()+arr.size()));
+      })
       .def("update_renderer", &Simulation::updateRenderer)
       .def("add_ground", &Simulation::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr)
