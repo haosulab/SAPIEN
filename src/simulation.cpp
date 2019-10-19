@@ -317,4 +317,29 @@ Simulation::createControllableArticulationWrapper(class IArticulationDrivable *b
   mControllableArticulationWrapper.push_back(std::move(wrapper));
   return wrapperPtr;
 }
+std::vector<PxReal> Simulation::dump() {
+  std::vector<PxReal> data;
+  size_t size=0;
+  for(auto const &w:mDynamicArticulationWrappers){
+    std::vector<PxReal> qpos(w->get_qpos());
+    auto dof = w->dof();
+    size += dof;
+    data.reserve(size);
+    data.insert(data.end(),qpos.begin(), qpos.end());
+  }
+  return data;
+}
+void Simulation::pack(const std::vector<PxReal> &data) {
+  auto begin = data.begin();
+  auto end = data.begin();
+  size_t size = 0;
+  for(auto const &w:mDynamicArticulationWrappers){
+    auto dof = w->dof();
+    end += dof;
+    w->set_qpos(std::vector<PxReal>(begin, end));
+    begin += dof;
+    size += dof;
+  }
+  assert(size == data.size());
+}
 } // namespace sapien

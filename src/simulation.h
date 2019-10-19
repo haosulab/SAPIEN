@@ -72,10 +72,12 @@ public:
 
   physx_id_t addMountedCamera(std::string const &name, PxRigidActor *actor,
                               PxTransform const &pose, uint32_t width, uint32_t height, float fovx,
-                              float fovy, float near = 0.1, float far = 1000);
+                              float fovy, float near = 0.1, float far = 100);
 
   /* advance physics by mTimestep */
   void step();
+  std::vector<PxReal> dump();
+  void pack(const std::vector<PxReal> &data);
 
   /* Sync with renderer by calling UpdateRigidbody */
   void updateRenderer();

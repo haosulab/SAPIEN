@@ -37,5 +37,18 @@ PYBIND11_MODULE(sapyen_robot, m) {
 
   py::class_<MOVOPS3>(m, "MOVOPS3")
       .def(py::init<ControllerManger *>())
-      .def("step", &MOVOPS3::step);
+      .def("step", &MOVOPS3::step)
+      .def("apply_cache",
+           [](MOVOPS3 &a, const py::array_t<int> &arr) {
+             a.set_cache(
+                 std::vector<int>(arr.data(), arr.data() + PS3_AXIS_COUNT + PS3_BUTTON_COUNT));
+           })
+      .def("get_cache",
+           [](MOVOPS3 &a) {
+             auto cache = a.get_cache();
+             return py::array_t<int>(cache.size(), cache.data());
+           })
+      .def("set_normal_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::NORMAL); })
+      .def("set_demonstration_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::DEMONSTRATION); })
+      .def("set_replay_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::REPLAY); });
 }

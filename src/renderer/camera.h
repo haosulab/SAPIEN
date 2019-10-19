@@ -31,6 +31,9 @@ public:
   // ISensor
   virtual SensorPose getSensorPose() const override;
   virtual void setSensorPose(const SensorPose &pose) override;
+
+  // Camera intrinsic
+  glm::mat4 getCameraMatrix();
 };
 } // namespace Renderer
 
