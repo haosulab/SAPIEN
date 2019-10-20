@@ -62,7 +62,7 @@ void KinematicsArticulationWrapper::buildCache() {
     return;
   }
   DOF = 0;
-  std::vector<KJoint *> stack = {mRoot};
+  std::vector<KJoint *> stack = {mRoot->children[0]};
   while (!stack.empty()) {
     auto currentJoint = stack.back();
     stack.pop_back();
@@ -86,7 +86,7 @@ void KinematicsArticulationWrapper::buildCache() {
     jointName.push_back(name);
     jointListPtr.push_back(jointName2JointPtr[name].get());
   }
-  jointNum = jointName2JointPtr.size();
+  jointNum = jointName2JointPtr.size() - 1;
   jointStartIndex.push_back(DOF);
   driveQvel.resize(DOF, 0);
   qpos.resize(DOF, 0);
@@ -129,6 +129,7 @@ void KinematicsArticulationWrapper::set_qvel(const std::vector<PxReal> &v) {
 void KinematicsArticulationWrapper::set_qacc(const std::vector<PxReal> &v) {}
 void KinematicsArticulationWrapper::set_qf(const std::vector<PxReal> &v) {}
 void KinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal> &v) {
+  mRoot->childLink->setKinematicTarget(rootPose);
   assert(v.size() == DOF);
   size_t j = 0;
   while (j < jointNum) {
@@ -173,7 +174,7 @@ EArticulationType KinematicsArticulationWrapper::get_articulation_type() const {
   return EArticulationType::KINEMATIC_ARTICULATION;
 }
 void KinematicsArticulationWrapper::move_base(const PxTransform &T) {
-  mRoot->parentLink->setGlobalPose(T, true);
+  rootPose = T;
   set_drive_target(qpos);
 }
 

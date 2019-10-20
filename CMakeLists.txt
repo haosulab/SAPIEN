@@ -116,11 +116,11 @@ if (ROS)
                 )
         target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
         add_library(robot_device_lib
-                robot/device/joystick_ps3.cpp
-                robot/device/InputDevice.cpp
-                robot/device/movo_ps3.cpp
-                robot/device/movo_keyboard.cpp
-                robot/device/movo_device_control.cpp robot/device/movo_device_control.h)
+                robot/demonstration/joystick_ps3.cpp
+                robot/demonstration/InputDevice.cpp
+                robot/demonstration/movo_ps3.cpp
+                robot/demonstration/movo_keyboard.cpp
+                robot/demonstration/movo_device_control.cpp robot/demonstration/movo_device_control.h robot/demonstration/demonstration_render.cpp robot/demonstration/demonstration_render.h)
         target_link_libraries(robot_device_lib robot_lib)
 
         add_executable(robot robot/test/robot.cpp)
