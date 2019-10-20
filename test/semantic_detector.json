@@ -1,0 +1,89 @@
+{
+    "Bed": {
+        "drawer": ["slider", "drawer"]
+    },
+    "Bottle": {
+        "rotation_lid": ["hinge", "lid", "cap", "mouth"],
+        "translation_lid": ["slider", "lid", "cap"]
+    },
+    "Chair": {
+        "wheel": ["hinge", "wheel"]
+    },
+    "Clock": {
+        "hand": ["hinge", "hand"],
+        "pendulum": ["hinge", "pendulum"]
+    },
+    "Dishwasher": {
+        "button": ["slider", "button"],
+        "drawer": ["slider", "drawer"],
+        "door": ["hinge", "door"]
+    },
+    "Display": {
+        "rotation_screen": ["hinge", "screen"],
+        "button": ["slider", "button"]
+    },
+    "Door": {
+        "rotation_door": ["hinge", "door", "board", "fixed_part", "movable_part"],
+        "translation_door": ["slide", "door", "board", "frame"],
+        "handle": ["hinge", "handle"]
+    },
+    "Faucet": {
+        "switch": ["hinge", "switch"],
+        "spout": ["hinge", "spout", "head", "tube"]
+    },
+    "Keyboard": {
+        "key": ["translation", "key"]
+    },
+    "Knife": {
+        "rotation_blade": ["hinge", "blade"],
+        "translation_blade": ["slider", "blade"]
+    },
+    "Laptop": {
+        "screen": ["hinge", "screen"]
+    },
+    "Lamp": {
+        "translation_switch": ["slider", "switch"],
+        "rotation_switch": ["hinge", "switch"],
+        "rigid_joint": ["hinge", "bar", "pole", "neck", "joint"]
+    },
+    "Microwave": {
+        "button": ["slider", "switch", "button"],
+        "door": ["hinge", "door", "handle"],
+        "tray": ["hinge", "tray"]
+    },
+    "Mug": {
+        "rotation_lid": ["hinge", "lid", "cap", "mouth"],
+        "translation_lid": ["slider", "lid", "cap"]
+    },
+    "Refrigerator": {
+        "door": ["hinge", "door"],
+        "drawer": ["slider", "drawer"]
+    },
+    "Scissors": {
+        "leg": ["hinge", "leg", "handle"]
+    },
+    "StorageFurniture": {
+        "drawer": ["slider", "drawer"],
+        "rotation_door": ["hinge", "door"],
+        "translation_door": ["slider", "door", "frame"],
+        "wheel": ["hinge", "wheel"],
+        "caster_stem": ["hinge", "caster"]
+    },
+    "Table": {
+        "drawer": ["slider", "drawer"],
+        "door": ["hinge", "door"],
+        "wheel": ["hinge", "wheel"],
+        "caster_stem": ["hinge", "caster"]
+    },
+    "TrashCan": {
+        "drawer": ["slider", "drawer"],
+        "door": ["hinge", "door"],
+        "wheel": ["hinge", "wheel"],
+        "caster_stem": ["hinge", "caster"],
+        "lid": ["hinge", "lid"]
+    },
+    "Vase": {
+        "rotation_lid": ["hinge", "lid", "cap", "mouth"],
+        "translation_lid": ["slider", "lid", "cap"]
+    }
+}

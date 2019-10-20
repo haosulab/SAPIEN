@@ -118,7 +118,7 @@ void main() {
   shadowMapCoord /= shadowMapCoord.w;
   shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
   // float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, 0);
-  float visibility = 0;
+  float visibility = 1;
 
   vec3 camDir = -normalize(csPosition.xyz);
 
@@ -151,7 +151,7 @@ void main() {
   if (depth == 1) {
     // FragColor = texture(skybox, (environmentViewMatrixInverse * csPosition).xyz);
     // FragColor = vec4(getBackgroundColor((gbufferViewMatrixInverse * csPosition).xyz), 1.f);
-    FragColor = vec4(1,1,1,0);
+    FragColor = vec4(0,0,0,0);
   } else {
     FragColor = vec4(color, 1.f);
   }

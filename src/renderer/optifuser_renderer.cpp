@@ -139,11 +139,11 @@ void OptifuserRenderer::init() {
   cam.rotateYawPitch(0, -0.15);
   cam.fovy = glm::radians(45.f);
   cam.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
-  mScene->addDirectionalLight({{1, -1, -1}, {.5, .5, .5}});
-  mScene->addPointLight({{2, 2, 2}, {2, 2, 2}});
-  mScene->addPointLight({{2, -2, 2}, {2, 2, 2}});
-  mScene->addPointLight({{-2, 0, 2}, {2, 2, 2}});
-  mScene->setAmbientLight(glm::vec3(0.4, 0.4, 0.4));
+  // mScene->addDirectionalLight({{1, -1, -1}, {.5, .5, .5}});
+  // mScene->addPointLight({{2, 2, 2}, {2, 2, 2}});
+  // mScene->addPointLight({{2, -2, 2}, {2, 2, 2}});
+  // mScene->addPointLight({{-2, 0, 2}, {2, 2, 2}});
+  // mScene->setAmbientLight(glm::vec3(0.4, 0.4, 0.4));
 
   mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
   mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
