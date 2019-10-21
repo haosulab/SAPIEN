@@ -145,9 +145,6 @@ std::vector<std::string> KinematicsArticulationWrapper::get_drive_joint_names() 
   return jointNameDOF;
 }
 
-// Custom function
-std::vector<PxRigidDynamic *> KinematicsArticulationWrapper::get_links() { return linkListPtr; }
-
 // Update function should be called in the simulation loop
 void KinematicsArticulationWrapper::update(PxReal timestep) {
   // Update drive target based on controllers
@@ -176,6 +173,13 @@ EArticulationType KinematicsArticulationWrapper::get_articulation_type() const {
 void KinematicsArticulationWrapper::move_base(const PxTransform &T) {
   rootPose = T;
   set_drive_target(qpos);
+}
+std::vector<std::string> KinematicsArticulationWrapper::get_link_names() const {
+
+  return IArticulationBase::get_link_names();
+}
+std::vector<physx_id_t> KinematicsArticulationWrapper::get_link_ids() const {
+  return IArticulationBase::get_link_ids();
 }
 
 } // namespace sapien

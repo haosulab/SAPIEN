@@ -165,7 +165,9 @@ std::vector<std::array<PxReal, 6>> ArticulationWrapper::get_cfrc_ext() {
   return xf;
 }
 
-std::vector<PxArticulationLink *> ArticulationWrapper::get_links() const { return links; }
+std::vector<physx::PxRigidBody *> ArticulationWrapper::get_links() const {
+  return std::vector<physx::PxRigidBody *>(links.begin(), links.end());
+}
 
 std::vector<std::string> ArticulationWrapper::get_link_names() const {
   std::vector<std::string> names;

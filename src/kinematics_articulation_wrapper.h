@@ -13,7 +13,6 @@
 namespace sapien {
 using namespace physx;
 
-
 class KinematicsArticulationWrapper : public IArticulationDrivable {
   KJoint *mRoot;
   std::map<std::string, std::unique_ptr<KJoint>> jointName2JointPtr = {};
@@ -36,6 +35,8 @@ class KinematicsArticulationWrapper : public IArticulationDrivable {
 
   // Link related field
   std::vector<PxRigidDynamic *> linkListPtr;
+  std::vector<std::string> linkNames;
+  std::vector<physx_id_t> linkIds;
 
   // Update related field
   PxTransform rootPose = PxTransform(PxIdentity);
@@ -70,11 +71,15 @@ public:
   std::vector<std::string> get_drive_joint_names() const override;
 
   // Customer function
-  std::vector<PxRigidDynamic *> get_links();
+  inline std::vector<PxRigidBody *> get_links() const override {
+    return std::vector<PxRigidBody *>(linkListPtr.begin(), linkListPtr.end());
+  };
+  std::vector<std::string> get_link_names() const override;
+  std::vector<physx_id_t> get_link_ids() const override;
 
   // This function should be called after one simulation step
   void update(PxReal timestep);
   void move_base(const PxTransform &T) override;
 };
 
-}
+} // namespace sapien
