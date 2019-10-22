@@ -31,15 +31,16 @@ public:
   JointVelocityController *body;
   JointVelocityController *head;
 
-  float gripper_velocity = 3;
+  float gripper_velocity = 5;
   float wheel_velocity = 2;
-  float body_velocity = 0.2;
+  float body_velocity = 0.4;
   float head_velocity = 2;
-  float arm_cartesian_velocity = 0.3;
+  float arm_cartesian_velocity = 0.4;
   float arm_cartesian_angular_velocity = 0.8;
 
 public:
   explicit MOVO(ControllerManger *manger);
+  virtual ~MOVO() = default;
   void set_arm_velocity(float v);
   void set_arm_angular_velocity(float v);
   void set_wheel_velocity(float v);

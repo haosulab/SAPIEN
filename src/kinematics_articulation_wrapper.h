@@ -38,6 +38,7 @@ class KinematicsArticulationWrapper : public IArticulationDrivable {
   std::vector<PxRigidDynamic *> linkListPtr;
 
   // Update related field
+  PxTransform rootPose = PxTransform(PxIdentity);
   bool hasMagicVelocity = false;
   std::vector<PxReal> lastStepQpos;
   std::vector<PxReal> driveQvel;

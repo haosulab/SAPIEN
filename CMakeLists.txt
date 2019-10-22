@@ -116,11 +116,11 @@ if (ROS)
                 )
         target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
         add_library(robot_device_lib
-                robot/device/joystick_ps3.cpp
-                robot/device/InputDevice.cpp
-                robot/device/movo_ps3.cpp
-                robot/device/movo_keyboard.cpp
-                robot/device/movo_device_control.cpp robot/device/movo_device_control.h)
+                robot/demonstration/joystick_ps3.cpp
+                robot/demonstration/InputDevice.cpp
+                robot/demonstration/movo_ps3.cpp
+                robot/demonstration/movo_keyboard.cpp
+                robot/demonstration/movo_device_control.cpp robot/demonstration/movo_device_control.h robot/demonstration/demonstration_render.cpp robot/demonstration/demonstration_render.h)
         target_link_libraries(robot_device_lib robot_lib)
 
         add_executable(robot robot/test/robot.cpp)
@@ -132,7 +132,7 @@ if (ROS)
         add_executable(movo_keyboard robot/example/movo_keyboard_test.cpp)
         target_link_libraries(movo_keyboard robot_device_lib)
         pybind11_add_module(sapyen_robot "python/pybind-robot.cpp")
-        target_link_libraries(sapyen_robot PRIVATE mylib)
+        target_link_libraries(sapyen_robot PRIVATE robot_device_lib)
 
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)
         message("Your ROS version not supported. Please update to kinetic or above.")

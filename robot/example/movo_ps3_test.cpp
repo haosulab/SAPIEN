@@ -8,9 +8,10 @@
 #include <thread>
 
 using namespace sapien;
+
 void run() {
   Renderer::OptifuserRenderer renderer;
-  
+
   renderer.cam.position = {0.5, -4, 0.5};
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
@@ -35,8 +36,8 @@ void run() {
   auto plate = builder1->build(false, false, "plate", true);
   plate->setGlobalPose({{2.0, 0.3, 2}, PxIdentity});
 
-  loader->load("../assets/46627/test.urdf")
-      ->articulation->teleportRootLink({{2.0, 5.3, 0.4}, PxIdentity}, true);
+  //  loader->load("../assets/46627/test.urdf")
+  //      ->articulation->teleportRootLink({{2.0, 5.3, 0.4}, PxIdentity}, true);
   auto wrapper = loader->load("../assets/robot/all_robot.urdf");
   wrapper->set_drive_property(2000, 500);
 
@@ -44,15 +45,17 @@ void run() {
   auto manger = std::make_unique<robot::ControllerManger>("movo", controllableWrapper);
   robot::MOVOPS3 ps3(manger.get());
 
-  renderer.showWindow();
   wrapper->set_qpos({0.47, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});
   wrapper->set_drive_target({0.2, 0, 0.0, 0, -0.9, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0});
 
+  renderer.showWindow();
+  std::vector<std::vector<PxReal>> temp;
   while (true) {
     sim.step();
     sim.updateRenderer();
     renderer.render();
     ps3.step();
+    temp.push_back(sim.dump());
 
     auto gl_input = Optifuser::getInput();
     if (gl_input.getKeyState(GLFW_KEY_Q)) {

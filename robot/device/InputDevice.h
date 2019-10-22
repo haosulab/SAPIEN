@@ -23,5 +23,6 @@ protected:
 
 public:
   explicit InputDevice(const std::string &deviceName);
+  virtual ~InputDevice() = default;
   static std::string findDevice(const std::string &deviceName);
 };

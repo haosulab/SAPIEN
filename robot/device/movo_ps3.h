@@ -4,17 +4,19 @@
 
 #pragma once
 
-#include "device/movo_device_control.h"
 #include "device/joystick_ps3.h"
+#include "device/movo_device_control.h"
 namespace sapien::robot {
 
-
-class MOVOPS3 : public MOVO{
-  std::unique_ptr<PS3> input;
+class MOVOPS3 : public MOVO {
 
 public:
+  std::unique_ptr<PS3> input;
   explicit MOVOPS3(ControllerManger *manger);
-  ~MOVOPS3();
+  ~MOVOPS3() override;
   void step() override;
+  inline void set_mode(PS3Mode option) { input->setMode(option); };
+  void set_cache(const std::vector<int> &cache);
+  std::vector<int> get_cache();
 };
 } // namespace sapien::robot

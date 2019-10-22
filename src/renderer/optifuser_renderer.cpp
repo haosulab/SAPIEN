@@ -12,9 +12,7 @@ enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION, CUSTOM };
 
 constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
-OptifuserRenderer::OptifuserRenderer() {
-  init();
-}
+OptifuserRenderer::OptifuserRenderer() { init(); }
 
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFile,
                                      const physx::PxVec3 &scale) {
@@ -93,14 +91,14 @@ void OptifuserRenderer::setSegmentationId(uint32_t uniqueId, uint32_t segmentati
   if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
     throw std::runtime_error("Invalid render id specified when setting segmentation id.");
   }
-  for (auto & obj : mObjectRegistry[uniqueId]) {
+  for (auto &obj : mObjectRegistry[uniqueId]) {
     obj->setSegmentId(segmentationId);
   }
   mSegId2RenderId[segmentationId].push_back(uniqueId);
 }
 
 void OptifuserRenderer::setSegmentationCustomData(uint32_t segmentationId,
-                               std::vector<float> const &customData) {
+                                                  std::vector<float> const &customData) {
   if (mSegId2RenderId.find(segmentationId) == mSegId2RenderId.end()) {
     throw std::runtime_error("Invalid segmentation id.");
   }
@@ -141,8 +139,11 @@ void OptifuserRenderer::init() {
   cam.rotateYawPitch(0, -0.15);
   cam.fovy = glm::radians(45.f);
   cam.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
-  mScene->addDirectionalLight({{1, -1, -1}, {1, 1, 1}});
-  mScene->setAmbientLight(glm::vec3(0.1, 0.1, 0.1));
+  // mScene->addDirectionalLight({{1, -1, -1}, {.5, .5, .5}});
+  // mScene->addPointLight({{2, 2, 2}, {2, 2, 2}});
+  // mScene->addPointLight({{2, -2, 2}, {2, 2, 2}});
+  // mScene->addPointLight({{-2, 0, 2}, {2, 2, 2}});
+  // mScene->setAmbientLight(glm::vec3(0.4, 0.4, 0.4));
 
   mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
   mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
@@ -365,6 +366,20 @@ void OptifuserRenderer::updateCamera(uint32_t uniqueId, physx::PxTransform const
   mMountedCameras[uniqueId]->position = {transform.p.x, transform.p.y, transform.p.z};
   mMountedCameras[uniqueId]->rotation = {transform.q.w, transform.q.x, transform.q.y,
                                          transform.q.z};
+}
+
+void OptifuserRenderer::setAmbientLight(std::array<float, 3> color) {
+  mScene->setAmbientLight({color[0], color[1], color[2]});
+}
+
+void OptifuserRenderer::setShadowLight(std::array<float, 3> direction,
+                                       std::array<float, 3> color) {
+  mScene->setShadowLight(
+      {{direction[0], direction[1], direction[2]}, {color[0], color[1], color[2]}});
+}
+void OptifuserRenderer::addPointLight(std::array<float, 3> position, std::array<float, 3> color) {
+
+  mScene->addPointLight({{position[0], position[1], position[2]}, {color[0], color[1], color[2]}});
 }
 
 void OptifuserRenderer::showWindow() { mContext->showWindow(); }

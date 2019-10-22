@@ -3,12 +3,16 @@
 //
 
 #include "controller_manger.h"
+
+#include <utility>
 namespace sapien::robot {
 
-sapien::robot::ControllerManger::ControllerManger(const std::string &robotName,
+sapien::robot::ControllerManger::ControllerManger(std::string robotName,
                                                   sapien::ControllableArticulationWrapper *wrapper)
-    : wrapper(wrapper), robotName(robotName), spinner(4),
+    : wrapper(wrapper), robotName(std::move(robotName)), spinner(4),
       timestep(wrapper->informMangerTimestepChange()) {
+  if (!ros::isInitialized()) {
+  }
   nh = std::make_unique<ros::NodeHandle>();
   jointName = wrapper->get_drive_joint_name();
 }
@@ -68,5 +72,5 @@ std::string sapien::robot::ControllerManger::getRobotName() const { return robot
 void sapien::robot::ControllerManger::start() { spinner.start(); }
 void sapien::robot::ControllerManger::stop() { spinner.stop(); }
 void sapien::robot::ControllerManger::removeController(const std::string &) {}
-void ControllerManger::movoBase(const PxTransform &T) { wrapper->articulation->move_base(T); }
+void ControllerManger::moveBase(const PxTransform &T) { wrapper->articulation->move_base(T); }
 } // namespace sapien::robot

@@ -40,22 +40,22 @@ void sapien::robot::MOVOKeyboard::step() {
   case BODY: {
     if (gl_input.getKeyState(BUTTON_UP)) {
       pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * timestep * wheel_velocity;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (gl_input.getKeyState(BUTTON_DOWN)) {
       pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * timestep * wheel_velocity;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (gl_input.getKeyState(BUTTON_LEFT)) {
       pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * timestep * wheel_velocity;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (gl_input.getKeyState(BUTTON_RIGHT)) {
       pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * timestep * wheel_velocity;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (gl_input.getKeyState(AXIS_LEFT_X_POSITIVE) ||
                gl_input.getKeyState(AXIS_LEFT_X_NEGATIVE)) {
       float dir = gl_input.getKeyState(AXIS_LEFT_X_POSITIVE) ? 1 : 0;
       dir = gl_input.getKeyState(AXIS_LEFT_X_NEGATIVE) ? -1 : dir;
       angle += timestep * wheel_velocity * dir;
-      manger->movoBase({pos, PxQuat(angle, {0, 0, 1})});
+      manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
     } else if (gl_input.getKeyState(BUTTON_L1)) {
       right_gripper->moveJoint(gripperJoints, gripper_velocity);
     } else if (gl_input.getKeyState(BUTTON_R1)) {

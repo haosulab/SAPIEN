@@ -1,8 +1,9 @@
 #pragma once
+#include "id_generator.h"
 #include <PxPhysicsAPI.h>
+#include <array>
 #include <string>
 #include <vector>
-#include <array>
 
 namespace sapien {
 enum EArticulationType { DYNAMIC_ARTICULATION, KINEMATIC_ARTICULATION, OBJECT_ARTICULATION };
@@ -27,6 +28,10 @@ struct IArticulationBase {
 
   virtual std::vector<physx::PxReal> get_qf() const = 0;
   virtual void set_qf(const std::vector<physx::PxReal> &v) = 0;
+
+  virtual std::vector<physx::PxArticulationLink *> get_links() const { return {}; }
+  virtual std::vector<std::string> get_link_names() const { return {}; }
+  virtual std::vector<physx_id_t> get_link_ids() const { return {}; }
 
   virtual ~IArticulationBase() = default;
   ;

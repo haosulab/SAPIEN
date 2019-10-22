@@ -317,4 +317,42 @@ Simulation::createControllableArticulationWrapper(class IArticulationDrivable *b
   mControllableArticulationWrapper.push_back(std::move(wrapper));
   return wrapperPtr;
 }
+std::vector<PxReal> Simulation::dump() {
+  std::vector<PxReal> data;
+  size_t size = 0;
+  for (auto const &w : mDynamicArticulationWrappers) {
+    auto pose = w->links[0]->getGlobalPose();
+    std::vector<PxReal> poseVec = {pose.p.x, pose.p.y, pose.p.z, pose.q.w,
+                                   pose.q.x, pose.q.y, pose.q.z};
+    std::vector<PxReal> qpos(w->get_qpos());
+    std::vector<PxReal> qvel(w->get_qvel());
+    std::vector<PxReal> qacc(w->get_qacc());
+    std::vector<PxReal> qf(w->get_qf());
+    auto dof = w->dof();
+    size += 4 * dof + 7;
+    data.reserve(size);
+    data.insert(data.end(), qpos.begin(), qpos.end());
+    data.insert(data.end(), qpos.begin(), qpos.end());
+    data.insert(data.end(), qvel.begin(), qvel.end());
+    data.insert(data.end(), qacc.begin(), qacc.end());
+    data.insert(data.end(), qf.begin(), qf.end());
+  }
+  return data;
+}
+void Simulation::pack(const std::vector<PxReal> &data) {
+  auto begin = data.begin();
+  for (auto const &w : mDynamicArticulationWrappers) {
+    auto dof = w->dof();
+    auto poseVec = std::vector<PxReal>(begin, begin + 7);
+    PxTransform pose({poseVec[0], poseVec[1], poseVec[2]},
+                     {poseVec[4], poseVec[5], poseVec[6], poseVec[3]});
+    w->articulation->teleportRootLink(pose, true);
+    w->set_qpos(std::vector<PxReal>(begin, begin + dof + 7));
+    w->set_qvel(std::vector<PxReal>(begin, begin + 2 * dof + 7));
+    w->set_qacc(std::vector<PxReal>(begin, begin + 3 * dof + 7));
+    w->set_qf(std::vector<PxReal>(begin, begin + 4 * dof + 7));
+    begin += 4 * dof + 7;
+  }
+  assert(begin == data.end());
+}
 } // namespace sapien

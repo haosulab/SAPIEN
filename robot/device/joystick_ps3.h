@@ -8,6 +8,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
+#include <mutex>
 #include <unistd.h>
 #include <vector>
 
@@ -44,6 +45,8 @@ enum AxisId {
 };
 #define PS3_AXIS_COUNT 6
 
+enum PS3Mode { NORMAL, DEMONSTRATION, REPLAY };
+
 struct js_event_t {
   uint32_t time;
   int16_t action;
@@ -53,16 +56,27 @@ struct js_event_t {
 class PS3 : public InputDevice {
 protected:
   std::thread worker;
-  std::array<std::atomic<int>, PS3_BUTTON_COUNT> buttonStates;
-  std::array<std::atomic<int16_t>, PS3_AXIS_COUNT> axisStates;
+  std::array<int, PS3_BUTTON_COUNT> buttonStates{};
+  std::array<int, PS3_AXIS_COUNT> axisStates{};
+  std::mutex lock;
   void runThread();
   const float AXIS_CONST = 32768;
 
+  // This cache is only used in demonstration mode to allow exact reproducible result
+  std::vector<int> buttonCache;
+  std::vector<int> axisCache;
+
 public:
+  PS3Mode mode = PS3Mode::NORMAL;
   PS3();
+  void setMode(PS3Mode);
   void shutdown();
   bool getKey(ButtonId id);
   bool getAxis(AxisId id);
   float getAxisValue(AxisId id);
+  inline std::vector<int> exportButtonStates() { return buttonCache; };
+  inline std::vector<int> exportAxisStates() { return axisCache; };
+  void saveCache();
+  void setCache(const std::vector<int> &button, const std::vector<int> &axis);
 };
 } // namespace sapien::robot

@@ -58,9 +58,9 @@ struct ArticulationWrapper : public IArticulationDrivable {
   void update();
 
   // TODO: Planed interface
-  virtual std::vector<PxArticulationLink *> get_links() const;
-  virtual std::vector<std::string> get_link_names() const;
-  virtual std::vector<physx_id_t> get_link_ids() const;
+  virtual std::vector<PxArticulationLink *> get_links() const override;
+  virtual std::vector<std::string> get_link_names() const override;
+  virtual std::vector<physx_id_t> get_link_ids() const override;
 
   // IArticulationBase
   virtual EArticulationType get_articulation_type() const override;

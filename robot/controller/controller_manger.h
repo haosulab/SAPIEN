@@ -30,7 +30,7 @@ private:
 
 public:
   float timestep;
-  ControllerManger(const std::string &robotName, ControllableArticulationWrapper *wrapper);
+  ControllerManger(std::string robotName, ControllableArticulationWrapper *wrapper);
 
   // Function for add controllers
   void createJointPubNode(double pubFrequency, double updateFrequency);
@@ -46,7 +46,7 @@ public:
   void start();
   void stop();
   void removeController(const std::string &);
-  void movoBase(const PxTransform &T);
+  void moveBase(const PxTransform &T);
 };
 } // namespace sapien::robot
 

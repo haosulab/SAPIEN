@@ -52,7 +52,16 @@ void MountedCamera::setSensorPose(const SensorPose &pose) {
   }
 }
 const std::string &MountedCamera::getName() const { return name; }
+glm::mat4 MountedCamera::getCameraMatrix() {
+  float f = static_cast<float>(mHeight) / std::tan(fovy / 2) / 2;
+  auto matrix = glm::mat3(1.0);
+  matrix[0][0] = f;
+  matrix[2][0] = static_cast<float>(mWidth) / 2;
+  matrix[1][1] = f;
+  matrix[2][1] = static_cast<float>(mHeight) / 2;
+  return matrix;
+}
 
 } // namespace Renderer
 
-}
+} // namespace sapien

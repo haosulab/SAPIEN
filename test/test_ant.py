@@ -16,10 +16,10 @@ sim.set_time_step(1.0 / 200.0)
 
 builder = sim.create_articulation_builder()
 
-PxIdentity = np.array([0, 0, 0, 1])
+PxIdentity = np.array([1, 0, 0, 0])
 body_link = builder.add_link(None, Pose(np.array([0, 0, 0]), PxIdentity), "body")
 builder.add_sphere_shape_to_link(body_link, Pose(np.array([0, 0, 0]), PxIdentity), 0.25)
-builder.add_sphere_visual_to_link(body_link, Pose(np.array([0, 0, 0]), PxIdentity), 0.25)
+builder.add_sphere_visual_to_link(body_link, Pose(np.array([0, 0, 0]), PxIdentity), 0.25, [1, 1, 1], "")
 
 builder.add_capsule_shape_to_link(body_link, Pose(np.array([0.141, 0, 0]), PxIdentity), 0.08, 0.141)
 builder.add_capsule_visual_to_link(body_link, Pose(np.array([0.141, 0, 0]), PxIdentity), 0.08, 0.141)
@@ -28,17 +28,18 @@ builder.add_capsule_shape_to_link(body_link, Pose(np.array([-0.141, 0, 0]), PxId
 builder.add_capsule_visual_to_link(body_link, Pose(np.array([-0.141, 0, 0]), PxIdentity), 0.08, 0.141)
 
 builder.add_capsule_shape_to_link(body_link,
-                                  Pose(np.array([0, 0.141, 0]), np.array([0.707107, 0, 0, 0.707107])),
-                                  0.08, 0.141)
+                                  Pose(np.array([0, 0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08,
+                                  0.141)
 builder.add_capsule_visual_to_link(body_link,
-                                   Pose(np.array([0, 0.141, 0]), np.array([0.707107, 0, 0, 0.707107])),
-                                   0.08, 0.141)
+                                   Pose(np.array([0, 0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08,
+                                   0.141)
 
 builder.add_capsule_shape_to_link(body_link,
-                                  Pose(np.array([0, -0.141, 0]), np.array([0.707107, 0, 0, 0.707107])),
-                                  0.08, 0.141)
-builder.add_capsule_visual_to_link(
-    body_link, Pose(np.array([0, -0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08, 0.141)
+                                  Pose(np.array([0, -0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08,
+                                  0.141)
+builder.add_capsule_visual_to_link(body_link,
+                                   Pose(np.array([0, -0.141, 0]), np.array([0.707107, 0, 0, 0.707107])), 0.08,
+                                   0.141)
 
 builder.update_link_mass_and_inertia(body_link, 1000)
 
