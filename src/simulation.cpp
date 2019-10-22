@@ -331,7 +331,7 @@ std::vector<PxReal> Simulation::dump() {
     auto dof = w->dof();
     size += 4 * dof + 7;
     data.reserve(size);
-    data.insert(data.end(), qpos.begin(), qpos.end());
+    data.insert(data.end(), poseVec.begin(), poseVec.end());
     data.insert(data.end(), qpos.begin(), qpos.end());
     data.insert(data.end(), qvel.begin(), qvel.end());
     data.insert(data.end(), qacc.begin(), qacc.end());
@@ -347,11 +347,15 @@ void Simulation::pack(const std::vector<PxReal> &data) {
     PxTransform pose({poseVec[0], poseVec[1], poseVec[2]},
                      {poseVec[4], poseVec[5], poseVec[6], poseVec[3]});
     w->articulation->teleportRootLink(pose, true);
-    w->set_qpos(std::vector<PxReal>(begin, begin + dof + 7));
-    w->set_qvel(std::vector<PxReal>(begin, begin + 2 * dof + 7));
-    w->set_qacc(std::vector<PxReal>(begin, begin + 3 * dof + 7));
-    w->set_qf(std::vector<PxReal>(begin, begin + 4 * dof + 7));
-    begin += 4 * dof + 7;
+    begin += 7;
+    w->set_qpos(std::vector<PxReal>(begin, begin + dof));
+    begin += dof;
+    w->set_qvel(std::vector<PxReal>(begin, begin + dof));
+    begin += dof;
+    w->set_qacc(std::vector<PxReal>(begin, begin + dof));
+    begin += dof;
+    w->set_qf(std::vector<PxReal>(begin, begin + dof));
+    begin += dof;
   }
   assert(begin == data.end());
 }

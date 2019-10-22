@@ -5,14 +5,15 @@
 #include "kinematics_joint.h"
 #include <cassert>
 #include <iostream>
+#include <utility>
 
 namespace sapien {
 using namespace physx;
 
 // KJoint
-KJoint::KJoint(PxRigidDynamic *childLink, KJoint *parentJoint, const PxTransform &toChild,
-               const PxTransform &fromParent)
-    : childLink(childLink), parent(parentJoint), poseFromParent(fromParent), poseToChild(toChild) {
+KJoint::KJoint(PxRigidDynamic *childLink, KJoint *parentJoint, PxTransform toChild,
+               PxTransform fromParent)
+    : childLink(childLink), parent(parentJoint), poseFromParent(std::move(fromParent)), poseToChild(std::move(toChild)) {
   parentLink = parentJoint ? parentJoint->childLink : nullptr;
   if (parentJoint) {
     parentJoint->children.push_back(this);
