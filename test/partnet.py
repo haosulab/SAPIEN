@@ -30,7 +30,7 @@ def rand_qpos(low, high):
     return np.random.rand() * (high - low) + low
 
 
-DIR = '/home/sim/project/mobility_verified'
+DIR = '/home/fx/source/partnet-mobility-scripts/mobility_verified'
 files = os.listdir(DIR)
 rand_file = np.random.choice(files)
 urdf = os.path.join(DIR, rand_file, 'mobility.urdf')
@@ -100,6 +100,3 @@ while True:
     sim.update_renderer()
     renderer.render()
     depth = cam0.get_depth()
-    print("min: {}, max: {}".format(np.min(depth), np.max(depth)))
-
-

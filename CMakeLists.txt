@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
-project(physxtest LANGUAGES CXX)
+project(sapien LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation")
 
+set(CMAKE_DEBUG_POSTFIX "")
 set(CMAKE_BUILD_TYPE "Debug")
 set(OpenGL_GL_PREFERENCE "LEGACY")
 
@@ -19,8 +20,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(glfw3 REQUIRED)
-find_package(assimp REQUIRED)
 
 include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
         "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
@@ -60,33 +59,33 @@ include_directories("3rd_party/pybind11/include")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 
-add_library(mylib ${PROJECT_SRC})
-target_link_libraries(mylib -Wl,--start-group
+add_library(sapien ${PROJECT_SRC})
+target_link_libraries(sapien -Wl,--start-group
         libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
         libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
         libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a libPhysX_static_64.a
         libPhysXVehicle_static_64.a libSnippetRender_static_64.a
         libSnippetUtils_static_64.a -Wl,--end-group pthread ${OPENGL_LIBRARY} glfw
-        GLEW ${ASSIMP_LIBRARIES} dl optifuser stdc++fs tinyxml2)
+        GLEW assimp dl optifuser stdc++fs tinyxml2)
 
-set_target_properties(mylib PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 add_executable(run "test/main.cpp")
-target_link_libraries(run mylib)
+target_link_libraries(run sapien)
 
 add_executable(ps3 test/ps3.cpp)
-target_link_libraries(ps3 mylib)
+target_link_libraries(ps3 sapien)
 
 pybind11_add_module(sapyen "python/pybind.cpp")
-target_link_libraries(sapyen PRIVATE mylib)
+target_link_libraries(sapyen PRIVATE sapien)
 
 add_executable(ant test/ant.cpp)
-target_link_libraries(ant mylib)
+target_link_libraries(ant sapien)
 
 add_executable(cheetah test/cheetah.cpp)
-target_link_libraries(cheetah mylib)
+target_link_libraries(cheetah sapien)
 
-add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_BINARY_DIR})
+add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 
 # Below are the ROS specified content
 set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")
@@ -114,7 +113,7 @@ if (ROS)
                 robot/controller/joint_pub_node.cpp
                 robot/controller/controller_manger.cpp
                 )
-        target_link_libraries(robot_lib mylib ${catkin_LIBRARIES})
+        target_link_libraries(robot_lib sapien ${catkin_LIBRARIES})
         add_library(robot_device_lib
                 robot/demonstration/joystick_ps3.cpp
                 robot/demonstration/InputDevice.cpp
