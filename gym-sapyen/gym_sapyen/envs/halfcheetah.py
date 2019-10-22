@@ -131,7 +131,7 @@ class HalfCheetahEnv(sapyen_env.SapyenEnv, utils.EzPickle):
                                         np.array([0.466561, 0.000000, -0.884489, 0.000000])), 0.046, 0.07,
                                             np.array([0.9, 0.6, 0.6]), "ffoot")
 
-        wrapper = builder.build(False)
+        wrapper = builder.build(True)
         wrapper.add_force_actuator("bthigh", -120, 120)
         wrapper.add_force_actuator("bshin", -90, 90)
         wrapper.add_force_actuator("bfoot", -60, 60)
@@ -146,34 +146,18 @@ class HalfCheetahEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         self.do_simulation(a, self.frame_skip)
         xposafter = self.root_link.get_global_pose().p[0]
         forward_reward = (xposafter - xposbefore)/self.dt
-
-        #print(xposbefore, xposafter, forward_reward)
-        ctrl_cost = -.1 * np.square(a).sum()
-        #contact_cost = 0.5 * 1e-3 * np.sum(
-        #    np.square(np.clip(self.wrapper.get_cfrc_ext(), -1, 1)))
-        #survive_reward = 1.0
-        reward = forward_reward + ctrl_cost #- contact_cost + survive_reward
-        #state = self.state_vector()
-        #notdone = np.isfinite(state).all() \
-        #    and state[2] >= 0.2 and state[2] <= 1.0 
-        #done = not notdone
+        ctrl_cost = -.1 * np.square(a /  np.array([120, 90, 60, 120, 60, 30])).sum()
+        reward = forward_reward + ctrl_cost 
         ob = self._get_obs()
         done = False
         return ob, reward, done, dict(
             reward_run=forward_reward,
             reward_ctrl=-ctrl_cost)
-            #reward_contact=-contact_cost,
-            #reward_survive=survive_reward)
 
     def _get_obs(self):
         return np.concatenate([
-            self.root_link.get_global_pose().p[1:],
-            self.root_link.get_global_pose().q,
-            self.wrapper.get_qpos().flat,
-            self.root_link.get_linear_velocity(),
-            self.root_link.get_angular_velocity(),
+            self.wrapper.get_qpos().flat[1:],
             self.wrapper.get_qvel().flat,
-            #np.clip(self.wrapper.get_cfrc_ext(), -1, 1).flat, # 54->84 ??
         ])
 
     def reset_model(self):

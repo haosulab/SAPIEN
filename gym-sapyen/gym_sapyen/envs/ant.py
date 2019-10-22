@@ -25,7 +25,6 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         observation, _reward, done, _info = self.step(np.zeros(8))
         assert not done
         self.obs_dim = observation.size
-
         bounds = self.wrapper.get_force_actuator_range()
         low = bounds[:, 0] 
         high = bounds[:, 1]
@@ -144,7 +143,7 @@ class AntEnv(sapyen_env.SapyenEnv, utils.EzPickle):
         notdone = np.isfinite(state).all() \
             and state[2] >= 0.2 and state[2] <= 1.0 
         done = not notdone
-        ob = self._get_obs()
+        ob = state[2:]#self._get_obs()
         return ob, reward, done, dict(
             reward_forward=forward_reward,
             reward_ctrl=-ctrl_cost,

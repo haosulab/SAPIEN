@@ -133,5 +133,6 @@ class SapyenEnv(gym.Env):
             self.wrapper.get_qpos().flat,
             self.body_link.get_linear_velocity(),
             self.body_link.get_angular_velocity(),
-            self.wrapper.get_qvel().flat
+            self.wrapper.get_qvel().flat,
+            np.clip(self.wrapper.get_cfrc_ext(), -1, 1).flat
         ])
