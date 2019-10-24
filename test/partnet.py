@@ -1,12 +1,17 @@
 import sapyen
+from tifffile import imwrite
 from sapyen import Pose
 import numpy as np
 import os
 import transforms3d
+from PIL import Image
+import sys
+
+print(sys.argv[1], file=sys.stderr)
 
 
-def rand_cam_pose(rlow, rhigh, plow, phigh):
-    yaw = np.random.rand() * np.pi * 2
+def rand_cam_pose(rlow, rhigh, plow, phigh, ylow=0, yhigh=2 * np.pi):
+    yaw = np.random.rand() * (yhigh - ylow) + ylow
     pitch = np.random.rand() * (phigh - plow) + plow
     r = np.random.rand() * (rhigh - rlow) + rlow
 
@@ -30,14 +35,16 @@ def rand_qpos(low, high):
     return np.random.rand() * (high - low) + low
 
 
-DIR = '/home/fx/source/partnet-mobility-scripts/mobility_verified'
+DIR = '/home/fx/source/partnet-mobility-scripts/mobility-v0-prealpha3/mobility_verified'
 files = os.listdir(DIR)
 rand_file = np.random.choice(files)
-urdf = os.path.join(DIR, rand_file, 'mobility.urdf')
-cues = os.path.join(DIR, rand_file, 'cues.txt')
-with open(cues, 'r') as f:
-    cues = f.readlines()
+urdf = os.path.join(DIR, sys.argv[1], 'mobility.urdf')
 print(urdf)
+
+semantics = os.path.join(DIR, sys.argv[1], 'semantics.txt')
+with open(semantics, 'r') as f:
+    semantics=  dict((line.strip().split()) for line in f if line.strip())
+
 
 renderer = sapyen.OptifuserRenderer()
 renderer.cam.set_position(np.array([0, -2, 1]))
@@ -55,9 +62,6 @@ sim.set_time_step(1.0 / 200.0)
 
 loader = sim.create_urdf_loader()
 wrapper = loader.load(urdf)
-print(wrapper.get_link_names())
-print(wrapper.get_link_ids())
-print(cues)
 
 builder = sim.create_actor_builder()
 mount = builder.build(False, True, "Camera Mount")
@@ -73,30 +77,36 @@ limits = wrapper.get_joint_limits()
 limits = [[max(-100, l), min(100, h)] for l, h in limits]
 cam0 = renderer.get_camera(0)
 
-pics = []
-for i in range(20):
-    mount.set_global_pose(rand_cam_pose(2, 4, 20 * np.pi / 180, 60 * np.pi / 180))
-    p = [rand_qpos(l, h) for l, h in limits]
-    wrapper.set_qpos(p)
-    sim.step()
-    sim.step()
-    sim.update_renderer()
-    cam0.take_picture()
-    pics.append(cam0.get_color_rgba())
+id2name = dict(zip(wrapper.get_link_ids(), wrapper.get_link_names()))
+id2semantic = [[i, semantics[id2name[i]]] for i in id2name if id2name[i] in semantics]
 
-# import matplotlib.pyplot as plt
-# for i, p in enumerate(pics):
-#     plt.figure()
-#     plt.imshow(p)
-#     plt.savefig('{}.png'.format(i))
+# pics = []
+# for i in range(20):
+#     mount.set_global_pose(rand_cam_pose(2, 4, 20 * np.pi / 180, 60 * np.pi / 180))
+#     p = [rand_qpos(l, h) for l, h in limits]
+#     wrapper.set_qpos(p)
+#     sim.step()
+#     sim.step()
+#     sim.update_renderer()
+#     cam0.take_picture()
+#     pics.append(cam0.get_color_rgba())
 
+mount.set_global_pose(
+    rand_cam_pose(3, 3, 30 * np.pi / 180, 30 * np.pi / 180, 220 * np.pi / 180, 220 * np.pi / 180))
 sim.update_renderer()
 cam0 = renderer.get_camera(0)
 cam0.take_picture()
+Image.fromarray((cam0.get_color_rgba() * 255).astype(np.uint8)).save(f'images/{sys.argv[1]}_rgba.png')
+Image.fromarray((cam0.get_normal_rgba() * 255).astype(np.uint8)).save(f'images/{sys.argv[1]}_normal.png')
+depth = cam0.get_depth() 
+imwrite(f'images/{sys.argv[1]}_depth.tif', depth, compress=6, photometric='minisblack')
+seg = cam0.get_segmentation()
+imwrite(f'images/{sys.argv[1]}_segmentation.tif', seg, compress=6, photometric='minisblack')
 
-renderer.show_window()
-while True:
-    sim.step()
-    sim.update_renderer()
-    renderer.render()
-    depth = cam0.get_depth()
+
+# renderer.show_window()
+# while True:
+#     sim.step()
+#     sim.update_renderer()
+#     renderer.render()
+#     depth = cam0.get_depth()

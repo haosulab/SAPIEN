@@ -4,3 +4,6 @@
 [submodule "3rd_party/pybind11"]
 	path = 3rd_party/pybind11
 	url = git@github.com:pybind/pybind11.git
+[submodule "3rd_party/tinyxml2"]
+	path = 3rd_party/tinyxml2
+	url = git@github.com:leethomason/tinyxml2.git

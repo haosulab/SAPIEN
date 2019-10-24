@@ -151,7 +151,7 @@ void main() {
   if (depth == 1) {
     // FragColor = texture(skybox, (environmentViewMatrixInverse * csPosition).xyz);
     // FragColor = vec4(getBackgroundColor((gbufferViewMatrixInverse * csPosition).xyz), 1.f);
-    FragColor = vec4(0,0,0,0);
+    FragColor = vec4(1,1,1,0);
   } else {
     FragColor = vec4(color, 1.f);
   }

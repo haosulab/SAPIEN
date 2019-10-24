@@ -47,7 +47,7 @@ file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-D_DEBUG)
-  add_definitions(-D_PVD)
+  # add_definitions(-D_PVD)
   add_definitions(-DPVD_HOST="192.168.0.110")
 else()
   add_definitions(-DNDEBUG)
@@ -55,6 +55,7 @@ endif()
 
 add_subdirectory("3rd_party/optifuser")
 add_subdirectory("3rd_party/pybind11")
+add_subdirectory("3rd_party/tinyxml2")
 include_directories("3rd_party/pybind11/include")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")

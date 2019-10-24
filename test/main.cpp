@@ -125,7 +125,7 @@ void test3() {
   loader.fixLoadedObject = true;
   // auto *articulationWrapper =
   auto wrapper = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_verified/20043/mobility.urdf");
+      "/home/fx/source/partnet-mobility-scripts/mobility-v0-prealpha2/mobility_verified/11260/mobility.urdf");
 
   // std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
   // std::string line;

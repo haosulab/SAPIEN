@@ -83,7 +83,10 @@ void exportMeshToFile(PxConvexMesh *pxMesh, const std::string &filename) {
 std::vector<PxVec3> verticesFromMeshFile(const std::string &filename) {
   std::vector<PxVec3> vertices;
   Assimp::Importer importer;
-  const aiScene *scene = importer.ReadFile(filename, aiProcess_PreTransformVertices);
+  uint32_t flags = aiProcess_Triangulate;
+
+  const aiScene *scene = importer.ReadFile(filename, flags);
+
   if (!scene) {
     fprintf(stderr, "%s\n", importer.GetErrorString());
     exit(1);
@@ -152,8 +155,8 @@ PxConvexMesh *MeshLoader::loadMesh(const std::string &filename, PxPhysics *physi
   PxConvexMeshCookingResult::Enum result;
   if (!cooking->cookConvexMesh(convexDesc, buf, &result)) {
     std::cerr << "Unable to cook convex mesh: " << filename << std::endl;
-    std::cerr << "Exiting..." << std::endl;
-    exit(1);
+    std::cerr << "Ignored..." << std::endl;
+    return nullptr;
   }
   PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
   PxConvexMesh *convexMesh = physics->createConvexMesh(input);
@@ -174,9 +177,12 @@ PxConvexMesh *MeshLoader::loadMesh(const std::string &filename, PxPhysics *physi
   return convexMesh;
 }
 
-
 PxConvexMesh *loadObjMesh(const std::string &filename, PxPhysics *physics, PxCooking *cooking,
                           bool useCache, bool createCacahe) {
+  if (!fs::exists(filename)) {
+    std::cerr << "No mesh file found: " << filename << std::endl;
+    return nullptr;
+  }
 
   if (meshCache.find(filename) != meshCache.end()) {
 #ifdef _VERBOSE
@@ -222,7 +228,7 @@ PxConvexMesh *loadObjMesh(const std::string &filename, PxPhysics *physics, PxCoo
   PxConvexMeshCookingResult::Enum result;
   if (!cooking->cookConvexMesh(convexDesc, buf, &result)) {
     std::cerr << "Unable to cook convex mesh: " << filename << std::endl;
-    std::cerr << "Exiting..." << std::endl;
+    std::cerr << "Ignored..." << std::endl;
     return nullptr;
   }
   PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
@@ -246,4 +252,4 @@ PxConvexMesh *loadObjMesh(const std::string &filename, PxPhysics *physics, PxCoo
 
 } // namespace MeshUtil
 
-}
+} // namespace sapien
