@@ -46,24 +46,24 @@ class ReplayerRos(ParentModule):
     def init_camera_ros(self):
         for i in range(len(self.mount_actor_list)):
             self.camera_frame_id.append("/kinect2_color_optical_frame")
-            self.camera_pose.append(np.eye(4))
+            self.camera_pose.append(np.eye(4, dtype=np.float32))
             self.pub_list.append(
                 rospy.Publisher(self.__POINT_CLOUD_NAMESPACE + "movo_camera{}".format(i), PointCloud2, queue_size=1))
 
     def add_camera(self, name, camera_pose: np.ndarray, width: int, height: int, fov=1.1, near=0.01, far=100):
         super().add_camera(name, camera_pose, width, height, fov, near, far)
         self.camera_frame_id.append("/base_link")
-        self.camera_pose.append(camera_pose @ CAMERA_TO_LINK)
+        self.camera_pose.append((camera_pose @ CAMERA_TO_LINK).astype(np.float32))
         self.pub_list.append(rospy.Publisher(self.__POINT_CLOUD_NAMESPACE + name, PointCloud2, queue_size=1))
 
-    def render_point_cloud(self, cam_id, rgb=True, use_open3d=False):
-        cloud_array, valid, open3d_cloud = super().render_point_cloud(cam_id, rgb, use_open3d)
-        self.publish_point_cloud(cloud_array[valid], rgb, cam_id)
+    def render_point_cloud(self, cam_id, rgba=True, use_open3d=False):
+        cloud_array, valid, open3d_cloud = super().render_point_cloud(cam_id, rgba, use_open3d)
+        self.publish_point_cloud(cloud_array[valid], rgba, cam_id)
         return cloud_array, valid, open3d_cloud
 
     def publish_point_cloud(self, cloud: np.ndarray, rgb, cam_id):
-        homo_cloud = np.concatenate([cloud[:, 0:3].T, np.ones([1, cloud.shape[0]])], axis=0)
-        homo_cloud = self.camera_pose[cam_id] @ homo_cloud
+        padding_cloud = np.concatenate([cloud[:, 0:3].T, np.ones([1, cloud.shape[0]], dtype=np.float32)], axis=0)
+        homo_cloud = self.camera_pose[cam_id] @ padding_cloud
         if rgb:
             rgb_array = np.array(cloud[:, 3:7].copy() * 256, dtype=np.uint32)
             cloud_array = np.zeros(cloud.shape[0],
@@ -113,10 +113,13 @@ class ReplayerRos(ParentModule):
 
     def step(self):
         if self.mode == "state":
-            super().step()
+            if self.simulation_steps % 5 == 0:
+                super().step()
+            else:
+                self.simulation_steps += 1
         elif self.mode == "control":
             self.sim.step()
             self.sim.update_renderer()
-            self.ps3.apply_cache(self.data['conotrol'][self.simulation_steps, :])
+            self.ps3.apply_cache(self.data['control'][self.simulation_steps, :])
             self.ps3.step()
             self.simulation_steps += 1

@@ -5,7 +5,7 @@ import sapyen
 import open3d
 import transforms3d
 import os
-from robot.python.demonstration.recorder import PARTNET_DIR
+from robot.python.demonstration.recorder_ros import PARTNET_DIR
 
 RGBD_CAMERA_THRESHOLD = 10
 
@@ -85,7 +85,7 @@ class Replayer:
         x, y = np.meshgrid(x, y)
         cor = np.stack([x.flatten(), y.flatten(), np.ones([x.size])], axis=0)
         mapping = np.linalg.inv(camera_matrix[:3, :3]) @ cor
-        self.mapping_list.append(np.reshape(mapping.T, [height, width, 3]))
+        self.mapping_list.append(np.reshape(mapping.T, [height, width, 3]).astype(np.float32))
 
     @property
     def mounted_camera(self):
@@ -97,14 +97,14 @@ class Replayer:
         else:
             warnings.warn("Camera name {} not found, valid camera names: {}".format(name, self.camera_name_list))
 
-    def render_point_cloud(self, cam_id, rgb=True, use_open3d=False):
+    def render_point_cloud(self, cam_id, rgba=True, use_open3d=False):
         camera = self.cam_list[cam_id]
         camera.take_picture()
-        depth = self.depth_lambda_list[cam_id](camera.get_depth())[:, :, np.newaxis]
+        depth = self.depth_lambda_list[cam_id](camera.get_depth())[:, :, np.newaxis].astype(np.float32)
         result = self.mapping_list[cam_id] * depth
         valid = result[:, :, 2] < RGBD_CAMERA_THRESHOLD
 
-        if rgb:
+        if rgba:
             color = camera.get_color_rgba()
             result = np.concatenate([result, color], axis=2)
 
@@ -114,7 +114,7 @@ class Replayer:
         else:
             pc = open3d.geometry.PointCloud()
             pc.points = open3d.utility.Vector3dVector(np.reshape(result[valid, :3], [-1, 3]))
-            if rgb:
+            if rgba:
                 pc.colors = open3d.utility.Vector3dVector(np.reshape(color[:, :, :3][valid], [-1, 3]))
             return result, valid, pc
 
