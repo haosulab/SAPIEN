@@ -493,7 +493,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <maxVel>100.0</maxVel>
     <minDepth>0.001</minDepth>
   </gazebo>
-  <joint name="right_shoulder_pan_joint" type="revolute">
+  <joint name="right_shoulder_pan_joint" type="continuous">
     <parent link="right_base_link"/>
     <child link="right_shoulder_link"/>
     <origin rpy="0 3.14159265 0" xyz="0 0 0.0625"/>
@@ -527,7 +527,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <maxVel>100.0</maxVel>
     <minDepth>0.001</minDepth>
   </gazebo>
-  <joint name="right_shoulder_lift_joint" type="revolute">
+  <joint name="right_shoulder_lift_joint" type="continuous">
     <parent link="right_shoulder_link"/>
     <child link="right_arm_half_1_link"/>
     <origin rpy="1.570796325 0 0" xyz="0 0 -0.11875"/>
@@ -561,7 +561,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <maxVel>100.0</maxVel>
     <minDepth>0.001</minDepth>
   </gazebo>
-  <joint name="right_arm_half_joint" type="revolute">
+  <joint name="right_arm_half_joint" type="continuous">
     <parent link="right_arm_half_1_link"/>
     <child link="right_arm_half_2_link"/>
     <origin rpy="-1.570796325 0 0" xyz="0 -0.205 0"/>
@@ -595,7 +595,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <maxVel>100.0</maxVel>
     <minDepth>0.001</minDepth>
   </gazebo>
-  <joint name="right_elbow_joint" type="revolute">
+  <joint name="right_elbow_joint" type="continuous">
     <parent link="right_arm_half_2_link"/>
     <child link="right_forearm_link"/>
     <origin rpy="-1.570796325 0 0" xyz="0 0 -0.205"/>
@@ -620,7 +620,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <inertia ixx="0.005453" ixy="0.000003" ixz="0.000000" iyx="0.000003" iyy="0.000305" iyz="0.000087" izx="0.000000" izy="0.000087" izz="0.005578"/>
     </inertial>
   </link>
-  <joint name="right_wrist_spherical_1_joint" type="revolute">
+  <joint name="right_wrist_spherical_1_joint" type="continuous">
     <parent link="right_forearm_link"/>
     <child link="right_wrist_spherical_1_link"/>
     <!--  <origin xyz="0 0.20725 0 " rpy="${wrist_spherical_1_joint_rpy}" /> -->
@@ -655,7 +655,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <maxVel>100.0</maxVel>
     <minDepth>0.001</minDepth>
   </gazebo>
-  <joint name="right_wrist_spherical_2_joint" type="revolute">
+  <joint name="right_wrist_spherical_2_joint" type="continuous">
     <parent link="right_wrist_spherical_1_link"/>
     <child link="right_wrist_spherical_2_link"/>
     <origin rpy="-1.570796325 0 0" xyz="0 0 -0.10375 "/>
@@ -689,7 +689,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <maxVel>100.0</maxVel>
     <minDepth>0.001</minDepth>
   </gazebo>
-  <joint name="right_wrist_3_joint" type="revolute">
+  <joint name="right_wrist_3_joint" type="continuous">
     <parent link="right_wrist_spherical_2_link"/>
     <child link="right_wrist_3_link"/>
     <origin rpy="1.570796325 3.14159265 0" xyz="0 0.10375 0"/>

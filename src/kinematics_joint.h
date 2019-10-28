@@ -28,8 +28,8 @@ protected:
   JointType type = UNDEFINED;
 
 public:
-  KJoint(PxRigidDynamic *childLink, KJoint *parentJoint, const PxTransform & toChild,
-         const PxTransform & fromParent);
+  KJoint(PxRigidDynamic *childLink, KJoint *parentJoint, PxTransform toChild,
+         PxTransform fromParent);
   PxTransform passThroughKinematicsDrive(const PxTransform &T);
   PxTransform passThroughGlobalPose(const PxTransform &T);
   virtual std::vector<std::array<PxReal, 2>> getLimits() const = 0;

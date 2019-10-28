@@ -80,8 +80,8 @@ target_link_libraries(ps3 sapien)
 pybind11_add_module(sapyen "python/pybind.cpp")
 target_link_libraries(sapyen PRIVATE sapien)
 
-add_executable(ant test/ant.cpp)
-target_link_libraries(ant sapien)
+add_executable(xarm test/xarm.cpp)
+target_link_libraries(xarm sapien)
 
 add_executable(cheetah test/cheetah.cpp)
 target_link_libraries(cheetah sapien)
@@ -116,17 +116,19 @@ if (ROS)
                 )
         target_link_libraries(robot_lib sapien ${catkin_LIBRARIES})
         add_library(robot_device_lib
-                robot/demonstration/joystick_ps3.cpp
-                robot/demonstration/InputDevice.cpp
-                robot/demonstration/movo_ps3.cpp
-                robot/demonstration/movo_keyboard.cpp
-                robot/demonstration/movo_device_control.cpp robot/demonstration/movo_device_control.h robot/demonstration/demonstration_render.cpp robot/demonstration/demonstration_render.h)
+                robot/device/joystick_ps3.cpp
+                robot/device/InputDevice.cpp
+                robot/device/movo_ps3.cpp
+                robot/device/demonstration_gui.cpp
+                robot/device/demonstration_simulation.cpp
+                robot/device/movo_keyboard.cpp
+                robot/device/movo_device_control.cpp robot/device/movo_device_control.h)
         target_link_libraries(robot_device_lib robot_lib)
 
         add_executable(robot robot/test/robot.cpp)
         target_link_libraries(robot robot_lib)
-        add_executable(grasp robot/test/grasp.cpp)
-        target_link_libraries(grasp robot_lib)
+        add_executable(demonstration robot/example/movo_demonstration.cpp)
+        target_link_libraries(demonstration robot_device_lib)
         add_executable(movo_ps3 robot/example/movo_ps3_test.cpp)
         target_link_libraries(movo_ps3 robot_device_lib)
         add_executable(movo_keyboard robot/example/movo_keyboard_test.cpp)

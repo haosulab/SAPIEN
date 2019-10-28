@@ -109,8 +109,11 @@ void ArticulationWrapper::update() {
     std::vector<PxReal> gravityCache(cache->jointForce, cache->jointForce + dof());
     articulation->copyInternalStateToCache(*cache, PxArticulationCache::eVELOCITY);
     articulation->computeCoriolisAndCentrifugalForce(*cache);
+    std::vector<PxReal> otherCache(cache->jointForce, cache->jointForce + dof());
+    articulation->computeGeneralizedExternalForce(*cache);
     for (size_t i = 0; i < dof(); ++i) {
       cache->jointForce[i] += gravityCache[i];
+      cache->jointForce[i] += otherCache[i];
     }
     articulation->applyCache(*cache, PxArticulationCache::eFORCE);
   }
