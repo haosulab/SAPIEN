@@ -263,6 +263,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
     // joint
     if (current->joint) {
       auto joint = (PxArticulationJointReducedCoordinate *)currentPxLink.getInboundJoint();
+      joint->setFrictionCoefficient(0);
 
 #ifdef _VERBOSE
       printf("Joint: %s between %s and %s\n", current->joint->type.c_str(),
@@ -593,7 +594,7 @@ KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &file
         break;
       case Sensor::Type::CAMERA:
       case Sensor::Type::DEPTH:
-        std::vector<PxRigidDynamic *> links = wrapper->get_links();
+        std::vector<PxRigidBody *> links = wrapper->get_links();
         uint32_t nbLinks = links.size();
 
         uint32_t idx = std::find_if(links.begin(), links.end(),
