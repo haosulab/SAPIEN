@@ -32,7 +32,7 @@ void sapien::robot::ControllerManger::createJointPubNode(double pubFrequency,
   }
   jointPubNode =
       std::make_unique<JointPubNode>(wrapper, pubFrequency, updateFrequency, robotName, nh.get());
-  mStates = jointPubNode->mStates.get();
+  jointState = jointPubNode->mStates.get();
 }
 CartesianVelocityController *
 sapien::robot::ControllerManger::createCartesianVelocityController(const std::string &groupName) {
@@ -41,8 +41,8 @@ sapien::robot::ControllerManger::createCartesianVelocityController(const std::st
              groupName.c_str());
     return nullptr;
   }
-  auto controller = std::make_unique<CartesianVelocityController>(wrapper, robotState.get(), groupName, time_step,
-                                                                  nh.get(), robotName);
+  auto controller = std::make_unique<CartesianVelocityController>(
+      wrapper, jointState, robotState.get(), groupName, time_step, nh.get(), robotName);
 
   auto controllerPtr = controller.get();
   name2CartesianVelocityController[groupName] = std::move(controller);

@@ -27,11 +27,11 @@ private:
   std::vector<std::string> jointName;
   std::unique_ptr<ros::NodeHandle> nh;
 
-  // Robot and joint state manage
+  // Robot and joint state
   robot_model_loader::RobotModelLoader loader;
   robot_model::RobotModelPtr kinematicModel;
   std::unique_ptr<robot_state::RobotState> robotState;
-  sensor_msgs::JointState *mStates = nullptr;
+  sensor_msgs::JointState *jointState = nullptr;
 
   // Spinner and callback management
   ros::AsyncSpinner spinner;

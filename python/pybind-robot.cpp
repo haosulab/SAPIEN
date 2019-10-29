@@ -33,7 +33,21 @@ PYBIND11_MODULE(sapyen_robot, m) {
       py::arg("args"), py::arg("name"), py::arg("options") = 0);
 
   py::class_<ControllerManger>(m, "ControllerManger")
-      .def(py::init<std::string, sapien::ControllableArticulationWrapper *>());
+      .def(py::init<std::string, sapien::ControllableArticulationWrapper *>())
+      .def("move_base", &ControllerManger::moveBase)
+      .def("add_joint_state_publisher", &ControllerManger::createJointPubNode)
+      .def("create_joint_velocity_controller", &ControllerManger::createJointVelocityController,
+           py::return_value_policy::reference)
+      .def("create_cartesian_velocity_controller",
+           &ControllerManger::createCartesianVelocityController,
+           py::return_value_policy::reference)
+      .def("add_group_trajectory_controller", &ControllerManger::createGroupTrajectoryController);
+  
+  py::class_<JointVelocityController>(m, "JointVelocityController")
+      .def("move_joint", &JointVelocityController::moveJoint);
+  
+  py::class_<CartesianVelocityController>(m, "CartesianVelocityController")
+      .def("get_velocity", &CartesianVelocityController::getVelocity);
 
   py::class_<MOVOPS3>(m, "MOVOPS3")
       .def(py::init<ControllerManger *>())

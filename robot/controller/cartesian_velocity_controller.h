@@ -30,9 +30,9 @@ enum MoveType { WorldTranslate, WorldRotate, LocalTranslate, LocalRotate };
 
 class CartesianVelocityController {
 private:
+  sensor_msgs::JointState *jointStatePtr = nullptr;
   robot_state::RobotState *state = nullptr;
   const robot_state::JointModelGroup *jointModelGroup;
-  ros::Subscriber sub;
   ros::NodeHandle *mNodeHandle;
 
   // Cache
@@ -63,15 +63,15 @@ private:
   void buildCartesianAngularVelocityCache();
 
 public:
-  CartesianVelocityController(ControllableArticulationWrapper *wrapper,
+  CartesianVelocityController(ControllableArticulationWrapper *wrapper, sensor_msgs::JointState *jointState,
                               robot_state::RobotState *state, const std::string &groupName,
                               float timestep, ros::NodeHandle *nh,
                               const std::string &robotName = "");
   void moveRelative(CartesianCommand type, bool continuous = false);
   void moveRelative(const std::array<float, 3> &T, MoveType type, bool continuous);
-  float getVelocity() const;
+  [[nodiscard]] float getVelocity() const;
   void setVelocity(float v);
-  float getAngularVelocity() const;
+  [[nodiscard]] float getAngularVelocity() const;
   void setAngularVelocity(float v);
   void toggleJumpTest(bool enable);
 

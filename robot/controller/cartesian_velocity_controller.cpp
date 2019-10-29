@@ -8,11 +8,12 @@
 namespace sapien::robot {
 
 CartesianVelocityController::CartesianVelocityController(ControllableArticulationWrapper *wrapper,
+                                                         sensor_msgs::JointState *jointState,
                                                          robot_state::RobotState *robotState,
                                                          const std::string &groupName,
                                                          float timestep, ros::NodeHandle *nh,
                                                          const std::string &robotName)
-    : state(robotState), mNodeHandle(nh), time_step(timestep) {
+    : jointStatePtr(jointState), state(robotState), mNodeHandle(nh), time_step(timestep) {
   jointModelGroup = state->getJointModelGroup(groupName);
   jointName = jointModelGroup->getVariableNames();
   jointValue.resize(jointName.size(), 0);
@@ -31,22 +32,20 @@ CartesianVelocityController::CartesianVelocityController(ControllableArticulatio
   // Register queue
   mQueue = std::make_unique<ThreadSafeQueue>();
   wrapper->add_position_controller(jointName, mQueue.get());
+
+  // Create joint state related cache
+  std::vector<std::string> topicJointNames = jointStatePtr->name;
+  for (auto &i : jointName) {
+    auto index = std::find(topicJointNames.begin(), topicJointNames.end(), i);
+    if (index == topicJointNames.end()) {
+      ROS_ERROR("Joint name in controller not found in joint topic: %s", i.c_str());
+    } else {
+      jointIndex2Topic.push_back(index - topicJointNames.begin());
+    }
+  }
 }
 void CartesianVelocityController::updateCurrentPose() {
   // Check if the joint index has already been cached
-  auto jointStatePtr =
-      ros::topic::waitForMessage<sensor_msgs::JointState>(jointStateTopicName, ros::Duration(10));
-  if (jointIndex2Topic.empty()) {
-    std::vector<std::string> topicJointNames = jointStatePtr->name;
-    for (auto &i : jointName) {
-      auto index = std::find(topicJointNames.begin(), topicJointNames.end(), i);
-      if (index == topicJointNames.end()) {
-        ROS_ERROR("Joint name in controller not found in joint topic: %s", i.c_str());
-      } else {
-        jointIndex2Topic.push_back(index - topicJointNames.begin());
-      }
-    }
-  }
   for (size_t i = 0; i < jointValue.size(); i++) {
     jointValue[i] = jointStatePtr->position[jointIndex2Topic[i]];
   }
