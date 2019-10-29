@@ -2,14 +2,14 @@
 // Created by sim on 10/14/19.
 //
 
-#include "movo_device_control.h"
+#include "movo.h"
 sapien::robot::MOVO::MOVO(ControllerManger *manger) : manger(manger) {
   manger->createJointPubNode(100, 500);
   right_gripper = manger->createJointVelocityController(gripperJoints, "right_gripper");
   body = manger->createJointVelocityController(bodyJoints, "body");
   head = manger->createJointVelocityController(headJoints, "head");
   right_arm_cartesian = manger->createCartesianVelocityController("right_arm");
-  timestep = manger->timestep;
+  timestep = manger->time_step;
   right_arm_cartesian->setVelocity(arm_cartesian_velocity);
   right_arm_cartesian->setAngularVelocity(arm_cartesian_angular_velocity);
   right_arm_cartesian->toggleJumpTest(true);

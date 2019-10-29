@@ -12,8 +12,10 @@
 namespace sapien::robot {
 
 class JointPubNode {
+public:
+  std::unique_ptr<sensor_msgs::JointState> mStates = nullptr;
+
 private:
-  sensor_msgs::JointState mStates;
   std::vector<std::string> jointName;
 
   // communication and multi-thread related variable
@@ -23,15 +25,14 @@ private:
   bool isCancel = false;
 
   uint32_t jointNum;
-  ros::NodeHandle* mNodeHandle = nullptr;
+  ros::NodeHandle *mNodeHandle = nullptr;
   std::unique_ptr<ros::Publisher> mPub;
   double pubFrequency;
-  double updateFrenquency;
+  double updateFrequency;
 
 public:
   JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
-               double updateFrequency, const std::string &robotName,
-               ros::NodeHandle* nh);
+               double updateFrequency, const std::string &robotName, ros::NodeHandle *nh);
 
   void cancel();
 
@@ -40,4 +41,4 @@ private:
   void spin();
 };
 
-} // namespace robot
+} // namespace sapien::robot

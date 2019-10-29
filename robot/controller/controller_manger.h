@@ -14,6 +14,7 @@ namespace sapien::robot {
 
 class ControllerManger {
 private:
+  // Hold all the controller related to a manager
   ControllableArticulationWrapper *wrapper;
   std::unique_ptr<JointPubNode> jointPubNode = nullptr;
   std::map<std::string, std::unique_ptr<CartesianVelocityController>>
@@ -21,15 +22,20 @@ private:
   std::map<std::string, std::unique_ptr<JointVelocityController>> name2JointVelocityController;
   std::map<std::string, std::unique_ptr<GroupControllerNode>> name2GroupTrajectoryController;
 
+  // Name and handle
   std::string robotName;
   std::vector<std::string> jointName;
   std::unique_ptr<ros::NodeHandle> nh;
+
+  // Robot and joint state manage
+  std::unique_ptr<robot_state::RobotState> state;
+  sensor_msgs::JointState *mStates = nullptr;
 
   // Spinner and callback management
   ros::AsyncSpinner spinner;
 
 public:
-  float timestep;
+  float time_step;
   ControllerManger(std::string robotName, ControllableArticulationWrapper *wrapper);
 
   // Function for add controllers
