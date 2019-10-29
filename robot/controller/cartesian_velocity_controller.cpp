@@ -8,17 +8,11 @@
 namespace sapien::robot {
 
 CartesianVelocityController::CartesianVelocityController(ControllableArticulationWrapper *wrapper,
+                                                         robot_state::RobotState *robotState,
                                                          const std::string &groupName,
                                                          float timestep, ros::NodeHandle *nh,
                                                          const std::string &robotName)
-    : mNodeHandle(nh), timestep(timestep) {
-  // TODO robot description name
-  loader = robot_model_loader::RobotModelLoader("robot_description");
-  kinematicModel = loader.getModel();
-  ROS_INFO("Model frame: %s", kinematicModel->getModelFrame().c_str());
-
-  state = std::make_unique<robot_state::RobotState>(kinematicModel);
-  state->setToDefaultValues();
+    : state(robotState), mNodeHandle(nh), time_step(timestep) {
   jointModelGroup = state->getJointModelGroup(groupName);
   jointName = jointModelGroup->getVariableNames();
   jointValue.resize(jointName.size(), 0);
@@ -89,14 +83,14 @@ void CartesianVelocityController::moveRelative(CartesianCommand type, bool conti
   jointValueFloat.assign(jointValue.begin(), jointValue.end());
   mQueue->pushValue(jointValueFloat);
 }
-float CartesianVelocityController::getVelocity() const { return transStepSize / timestep; }
+float CartesianVelocityController::getVelocity() const { return transStepSize / time_step; }
 void CartesianVelocityController::setVelocity(float v) {
-  transStepSize = v * timestep;
+  transStepSize = v * time_step;
   buildCartesianVelocityCache();
 }
-float CartesianVelocityController::getAngularVelocity() const { return rotStepSize / timestep; }
+float CartesianVelocityController::getAngularVelocity() const { return rotStepSize / time_step; }
 void CartesianVelocityController::setAngularVelocity(float v) {
-  rotStepSize = timestep * v;
+  rotStepSize = time_step * v;
   buildCartesianAngularVelocityCache();
 }
 

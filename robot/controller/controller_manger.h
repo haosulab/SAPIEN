@@ -28,7 +28,9 @@ private:
   std::unique_ptr<ros::NodeHandle> nh;
 
   // Robot and joint state manage
-  std::unique_ptr<robot_state::RobotState> state;
+  robot_model_loader::RobotModelLoader loader;
+  robot_model::RobotModelPtr kinematicModel;
+  std::unique_ptr<robot_state::RobotState> robotState;
   sensor_msgs::JointState *mStates = nullptr;
 
   // Spinner and callback management

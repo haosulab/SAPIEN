@@ -30,9 +30,7 @@ enum MoveType { WorldTranslate, WorldRotate, LocalTranslate, LocalRotate };
 
 class CartesianVelocityController {
 private:
-  robot_model_loader::RobotModelLoader loader;
-  robot_model::RobotModelPtr kinematicModel;
-  std::unique_ptr<robot_state::RobotState> state;
+  robot_state::RobotState *state = nullptr;
   const robot_state::JointModelGroup *jointModelGroup;
   ros::Subscriber sub;
   ros::NodeHandle *mNodeHandle;
@@ -57,7 +55,7 @@ private:
                                  double threshold);
 
 public:
-  float timestep;
+  float time_step;
 
 private:
   void updateCurrentPose();
@@ -66,7 +64,8 @@ private:
 
 public:
   CartesianVelocityController(ControllableArticulationWrapper *wrapper,
-                              const std::string &groupName, float timestep, ros::NodeHandle *nh,
+                              robot_state::RobotState *state, const std::string &groupName,
+                              float timestep, ros::NodeHandle *nh,
                               const std::string &robotName = "");
   void moveRelative(CartesianCommand type, bool continuous = false);
   void moveRelative(const std::array<float, 3> &T, MoveType type, bool continuous);

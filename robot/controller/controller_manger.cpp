@@ -15,6 +15,13 @@ sapien::robot::ControllerManger::ControllerManger(std::string robotName,
   }
   nh = std::make_unique<ros::NodeHandle>();
   jointName = wrapper->get_drive_joint_name();
+
+  // Create robot states and load robot models
+  loader = robot_model_loader::RobotModelLoader("robot_description");
+  kinematicModel = loader.getModel();
+  ROS_INFO("Model frame: %s", kinematicModel->getModelFrame().c_str());
+  robotState = std::make_unique<robot_state::RobotState>(kinematicModel);
+  robotState->setToDefaultValues();
 }
 void sapien::robot::ControllerManger::createJointPubNode(double pubFrequency,
                                                          double updateFrequency) {
@@ -34,7 +41,7 @@ sapien::robot::ControllerManger::createCartesianVelocityController(const std::st
              groupName.c_str());
     return nullptr;
   }
-  auto controller = std::make_unique<CartesianVelocityController>(wrapper, groupName, time_step,
+  auto controller = std::make_unique<CartesianVelocityController>(wrapper, robotState.get(), groupName, time_step,
                                                                   nh.get(), robotName);
 
   auto controllerPtr = controller.get();
