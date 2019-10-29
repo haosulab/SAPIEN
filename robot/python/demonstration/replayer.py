@@ -5,10 +5,10 @@ import sapyen
 import open3d
 import transforms3d
 import os
-from robot.python.demonstration.recorder_ros import PARTNET_DIR
+#from robot.python.demonstration.recorder_ros import PARTNET_DIR
+PARTNET_DIR = '/home/fangchen/sim/mobility/mobility_verified'
 
 RGBD_CAMERA_THRESHOLD = 10
-
 
 class Replayer:
     def __init__(self, partnet_id: str):
@@ -49,6 +49,7 @@ class Replayer:
 
         self.simulation_steps = 0
         self.data = np.load("data/{}_v0.p".format(partnet_id), allow_pickle=True)
+        self.total_steps = self.data['state'].shape[0]
         self.init_camera()
 
     def init_camera(self):

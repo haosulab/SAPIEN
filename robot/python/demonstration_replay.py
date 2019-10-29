@@ -1,10 +1,9 @@
 from robot.python.demonstration.replayer import Replayer
 import numpy as np
 import sys
+import sapyen
 import pickle
-import sapyen_robot
 import transforms3d
-
 
 def main():
     partnet_id: str = "44826"
@@ -12,21 +11,25 @@ def main():
 
     data = {}
 
-    # recorder.renderer.show_window()
+    recorder.renderer.show_window()
     add_arena_camera(recorder)
     camera_name = recorder.camera_name_list
     cloud_list = [[] for _ in range(len(camera_name))]
     try:
-        while 1:
+        for step in range(recorder.total_steps):
             recorder.step()
-            # recorder.renderer.render()
-            if recorder.simulation_steps % 30 == 0:
+            if step % 5 == 0:
+                recorder.renderer.render()
+
+            if recorder.simulation_steps % 300 == 0:
                 for i in range(len(camera_name)):
                     cloud_array, valid_index, _ = recorder.render_point_cloud(cam_id=i, rgba=True, use_open3d=False)
-                    # cloud_list[i].append(cloud_array[valid_index, :])
+                    cloud_list[i].append(cloud_array[valid_index, :])
+
     finally:
         save_file = "data/{}_v0_point_cloud.p".format(partnet_id)
         for i in range(len(camera_name)):
+            print(cloud_list)
             data.update({"{}_cloud_array".format(camera_name[i]): np.stack(cloud_list, axis=0)})
         with open(save_file, 'wb') as f:
             pickle.dump(data, f)
