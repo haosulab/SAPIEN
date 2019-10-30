@@ -74,7 +74,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </inertial>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/vector_base_collision.stl"/>
+        <mesh filename="package://movo_description/meshes/movo_components/collision/vector_base_collision.stl.convex.stl"/>
       </geometry>
     </collision>
     <visual>
@@ -103,7 +103,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </inertial>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_fixed_body_collision.stl"/>
+        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_fixed_body_collision.stl.convex.stl"/>
       </geometry>
     </collision>
     <visual>
@@ -137,17 +137,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_1.stl"/>
+        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_1.stl.convex.stl"/>
       </geometry>
     </collision>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_2.stl"/>
+        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_2.stl.convex.stl"/>
       </geometry>
     </collision>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_3.stl"/>
+        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_3.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -297,7 +297,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/pan_tilt/collision/pan_tilt_base.stl"/>
+        <mesh filename="package://movo_description/meshes/pan_tilt/collision/pan_tilt_base.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -331,7 +331,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://movo_description/meshes/pan_tilt/collision/pan_link.stl"/>
+        <mesh filename="package://movo_description/meshes/pan_tilt/collision/pan_link.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -364,7 +364,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/pan_tilt/collision/tilt_link.stl"/>
+        <mesh filename="package://movo_description/meshes/pan_tilt/collision/tilt_link.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -391,7 +391,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/sensors/collision/kinect_one_collision.stl"/>
+        <mesh filename="package://movo_description/meshes/sensors/collision/kinect_one_collision.stl.convex.stl"/>
       </geometry>
     </collision>
   </link>
@@ -475,7 +475,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/base.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/base.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -509,7 +509,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/shoulder_7dof.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/shoulder_7dof.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -543,7 +543,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/arm_half_1.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/arm_half_1.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -577,7 +577,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/arm_half_2.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/arm_half_2.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -611,7 +611,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/forearm_7dof.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/forearm_7dof.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -637,7 +637,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/wrist_spherical_1.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/wrist_spherical_1.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -671,7 +671,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/wrist_spherical_2.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/wrist_spherical_2.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -705,7 +705,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/kinova_actuator_gearing.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/kinova_actuator_gearing.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -805,7 +805,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/kg3_base_link.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/kg3_base_link.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -838,7 +838,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -872,7 +872,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -906,7 +906,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -937,7 +937,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -968,7 +968,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
@@ -999,7 +999,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl"/>
+        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
