@@ -5,6 +5,7 @@ import sapyen
 import pickle
 import transforms3d
 
+
 def main():
     partnet_id: str = "44826"
     recorder = Replayer(partnet_id)
@@ -23,7 +24,8 @@ def main():
 
             if recorder.simulation_steps % 300 == 0:
                 for i in range(len(camera_name)):
-                    cloud_array, valid_index, _ = recorder.render_point_cloud(cam_id=i, rgba=True, use_open3d=False)
+                    cloud_array, valid_index, _ = recorder.render_point_cloud(cam_id=i, rgba=True, segmentation=True,
+                                                                              use_open3d=False)
                     cloud_list[i].append(cloud_array[valid_index, :])
 
     finally:

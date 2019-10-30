@@ -3,7 +3,7 @@ import sapyen_robot
 import sys
 import os
 
-PARTNET_DIR = '/home/sim/project/mobility_verified'
+PARTNET_DIR = '/home/sim/project/mobility-v0-prealpha3/mobility_verified'
 
 
 class Recorder:

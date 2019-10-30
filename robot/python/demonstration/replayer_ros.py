@@ -56,12 +56,13 @@ class ReplayerRos(ParentModule):
         self.camera_pose.append((camera_pose @ CAMERA_TO_LINK).astype(np.float32))
         self.pub_list.append(rospy.Publisher(self.__POINT_CLOUD_NAMESPACE + name, PointCloud2, queue_size=1))
 
-    def render_point_cloud(self, cam_id, rgba=True, use_open3d=False):
+    def render_point_cloud(self, cam_id, rgba=True, segmentation=False, use_open3d=False):
         cloud_array, valid, open3d_cloud = super().render_point_cloud(cam_id, rgba, use_open3d)
         self.publish_point_cloud(cloud_array[valid], rgba, cam_id)
         return cloud_array, valid, open3d_cloud
 
     def publish_point_cloud(self, cloud: np.ndarray, rgb, cam_id):
+        # TODO: add segmentation
         padding_cloud = np.concatenate([cloud[:, 0:3].T, np.ones([1, cloud.shape[0]], dtype=np.float32)], axis=0)
         homo_cloud = self.camera_pose[cam_id] @ padding_cloud
         if rgb:
@@ -77,7 +78,7 @@ class ReplayerRos(ParentModule):
             cloud_msg.data = cloud_array[:, np.newaxis].tostring()
         else:
             cloud_msg = copy.copy(self.cloud)
-            cloud_msg.data = np.asarray(cloud[:, np.newaxis, :], np.float32).tostring()
+            cloud_msg.data = np.asarray(cloud[:, np.newaxis, 0:3], np.float32).tostring()
 
         cloud_msg.header.stamp = rospy.Time.now()
         cloud_msg.width = cloud.shape[0]

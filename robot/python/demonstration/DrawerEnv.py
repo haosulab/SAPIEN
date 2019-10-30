@@ -1,22 +1,18 @@
-import numpy as np
-import copy
-import warnings
 import sapyen
-import open3d
-import transforms3d
+import sapyen_robot
 import os
-import socket
+import transforms3d
+import numpy as np
+import warnings
 
-if socket.gethostname().startswith("robot"):
-    from robot.python.demonstration.recorder_ros import PARTNET_DIR
-else:
-    PARTNET_DIR = '/home/fangchen/sim/mobility/mobility_verified'
-
+PARTNET_DIR = '/home/sim/project/mobility-v0-prealpha3/mobility_verified'
 RGBD_CAMERA_THRESHOLD = 10
+CAMERA_TO_LINK = np.zeros([4, 4])
+CAMERA_TO_LINK[[0, 1, 2, 3], [2, 0, 1, 3]] = [1, -1, -1, 1]
 
 
-class Replayer:
-    def __init__(self, partnet_id: str):
+class DrawerEnv:
+    def __init__(self, partnet_id: str, root_pose=((3, 0, 0.5), (1, 0, 0, 0))):
         # Rendering
         self.renderer = sapyen.OptifuserRenderer()
         self.renderer.set_ambient_light([.4, .4, .4])
@@ -31,35 +27,91 @@ class Replayer:
         # Simulation
         self.sim = sapyen.Simulation()
         self.sim.set_renderer(self.renderer)
-        self.sim.set_time_step(1.0 / 200)
         self.sim.add_ground(0, material=None)
-        self.builder = self.sim.create_actor_builder()
+        self.simulation_hz = 200
+        self.sim.set_time_step(1 / self.simulation_hz)
 
         # Partnet Object
         urdf = os.path.join(PARTNET_DIR, partnet_id, "mobility.urdf")
         self.loader = self.sim.create_urdf_loader()
         self.obj = self.loader.load(urdf)
-        self.obj.set_root_pose([3, 0, 0.5], [1, 0, 0, 0])
+        self.obj.set_root_pose(root_pose[0], root_pose[1])
 
         # Robot Model and controller manger
         self.loader.fix_loaded_object = True
         self.loader.balance_passive_force = True
         self.robot = self.loader.load('../assets/robot/all_robot.urdf')
+        controllable_wrapper = self.sim.create_controllable_articulation(self.robot)
+        self.manger = sapyen_robot.ControllerManger("movo", controllable_wrapper)
 
+        # Init
+        self.renderer.show_window()
+        self.mapping = self.build_semantic_mapping(os.path.join(PARTNET_DIR, partnet_id))
+        self.dump_data = []
+        self.object_force_array = []
+        self.robot_force_array = []
+
+        # Camera
+        self.builder = self.sim.create_actor_builder()
+        self.camera_frame_id = []
+        self.camera_pose = []
         self.camera_name_list = []
         self.cam_list = []
         self.mount_actor_list = []
         self.mapping_list = []
         self.depth_lambda_list = []
-
-        self.simulation_steps = 0
-        self.data = np.load("data/{}_v0.p".format(partnet_id), allow_pickle=True)
-        self.total_steps = self.data['state'].shape[0]
         self.init_camera()
 
-        # Build semantic mapping
-        self.header = {"id2link": {}, "id2semantic": {}, "id2motion": {}}
-        self.build_semantic_mapping(os.path.join(PARTNET_DIR, partnet_id))
+        # Init robot pose and controller
+        self.robot.set_pd(5000, 1500, 50000)
+        self.init_qpos = [0.25, -1.9347, 0, -1.5318, 0, 0.9512, -2.24, 0.34, 0.64, -1.413, 0, 0, 0]
+        self.robot.set_drive_qpos(self.init_qpos)
+        self.robot.set_qpos(self.init_qpos)
+        self.step()
+
+    def step(self):
+        self.sim.step()
+        self.sim.update_renderer()
+        self.renderer.render()
+
+        # Cache
+        # self.dump_data.append(self.sim.dump())
+        # self.object_force_array.append(self.obj.get_cfrc_ext())
+        # self.robot_force_array.append(self.robot.get_cfrc_ext())
+
+    def generate_header(self):
+        header = {}
+        header.update({"robot_joint_name": self.robot.get_joint_names()})
+        header.update({"robot_link_name": self.robot.get_link_names()})
+        header.update({"object_joint_name": self.obj.get_joint_names()})
+        header.update({"object_link_name": self.obj.get_link_names()})
+        return header
+
+    def build_semantic_mapping(self, part_dir: str):
+        header = {'id2link': {}, 'id2semantic': {}, 'id2motion': {}}
+        semantics = os.path.join(part_dir, 'semantics.txt')
+        link2semantics = {}
+        link2motion = {}
+        semantics2link = {}
+        with open(semantics, 'r') as f:
+            for line in f:
+                if line.strip():
+                    link, motion, semantics = line.split()
+                    link2semantics[link] = semantics
+                    semantics2link[semantics] = link
+                    link2motion[link] = motion
+
+        for wrapper in [self.robot, self.obj]:
+            header['id2link'].update(dict(zip(wrapper.get_link_ids(), wrapper.get_link_names())))
+            id2name = header['id2link']
+            header['id2semantic'].update(
+                {i: link2semantics[id2name[i]] for i in id2name if id2name[i] in link2semantics})
+            header['id2motion'].update(
+                {i: link2motion[id2name[i]] for i in id2name if id2name[i] in link2motion})
+
+        header.update({"link2semantic": link2semantics})
+        header.update({"semantic2link": semantics2link})
+        return header
 
     def init_camera(self):
         num = self.renderer.get_camera_count()
@@ -88,6 +140,8 @@ class Replayer:
         self.cam_list.append(camera)
         self.build_camera_mapping(height, width, camera.get_camera_matrix())
         self.depth_lambda_list.append(lambda depth: 1 / (depth * (1 / far - 1 / near) + 1 / near))
+        self.camera_frame_id.append("/base_link")
+        self.camera_pose.append((camera_pose @ CAMERA_TO_LINK).astype(np.float32))
 
     def build_camera_mapping(self, height: int, width: int, camera_matrix: np.ndarray):
         x = np.linspace(0.5, width - 0.5, width)
@@ -107,26 +161,7 @@ class Replayer:
         else:
             warnings.warn("Camera name {} not found, valid camera names: {}".format(name, self.camera_name_list))
 
-    def build_semantic_mapping(self, part_dir: str):
-        semantics = os.path.join(part_dir, 'semantics.txt')
-        link2semantics = {}
-        link2motion = {}
-        with open(semantics, 'r') as f:
-            for line in f:
-                if line.strip():
-                    link, motion, semantics = line.split()
-                    link2semantics[link] = semantics
-                    link2motion[link] = motion
-
-        for wrapper in [self.robot, self.obj]:
-            self.header['id2link'].update(dict(zip(wrapper.get_link_ids(), wrapper.get_link_names())))
-            id2name = self.header['id2link']
-            self.header['id2semantic'].update(
-                {i: link2semantics[id2name[i]] for i in id2name if id2name[i] in link2semantics})
-            self.header['id2motion'].update(
-                {i: link2motion[id2name[i]] for i in id2name if id2name[i] in link2motion})
-
-    def render_point_cloud(self, cam_id, rgba=True, segmentation=False, use_open3d=False):
+    def render_point_cloud(self, cam_id, rgba=True, segmentation=False):
         camera = self.cam_list[cam_id]
         camera.take_picture()
         depth = self.depth_lambda_list[cam_id](camera.get_depth())[:, :, np.newaxis].astype(np.float32)
@@ -141,18 +176,4 @@ class Replayer:
             seg = camera.get_segmentation()
             result = np.concatenate([result, seg[:, :, np.newaxis]], axis=2)
 
-        if not use_open3d:
-            return result, valid, None
-
-        else:
-            pc = open3d.geometry.PointCloud()
-            pc.points = open3d.utility.Vector3dVector(np.reshape(result[valid, :3], [-1, 3]))
-            if rgba:
-                pc.colors = open3d.utility.Vector3dVector(np.reshape(color[:, :, :3][valid], [-1, 3]))
-            return result, valid, pc
-
-    def step(self):
-        self.sim.step()
-        self.sim.update_renderer()
-        self.sim.pack(self.data['state'][self.simulation_steps, :])
-        self.simulation_steps += 1
+        return result, valid
