@@ -11,6 +11,18 @@ CAMERA_TO_LINK = np.zeros([4, 4])
 CAMERA_TO_LINK[[0, 1, 2, 3], [2, 0, 1, 3]] = [1, -1, -1, 1]
 
 
+def transform2mat(trans: sapyen.Pose):
+    mat = np.eye(4)
+    mat[:3, :3] = transforms3d.quaternions.quat2mat(trans.q)
+    mat[:3, 3] = trans.p
+    return mat
+
+
+def mat2transform(mat: np.ndarray):
+    pose = sapyen.Pose(mat[: 3, 3], transforms3d.quaternions.mat2quat(mat[:3, :3]))
+    return pose
+
+
 class DrawerEnv:
     def __init__(self, partnet_id: str, root_pose=((3, 0, 0.5), (1, 0, 0, 0))):
         # Rendering
@@ -47,9 +59,8 @@ class DrawerEnv:
         # Init
         self.renderer.show_window()
         self.mapping = self.build_semantic_mapping(os.path.join(PARTNET_DIR, partnet_id))
-        self.dump_data = []
-        self.object_force_array = []
-        self.robot_force_array = []
+        self.root_theta = 0
+        self.root_pos = np.array([0, 0], dtype=np.float)
 
         # Camera
         self.builder = self.sim.create_actor_builder()
@@ -73,11 +84,6 @@ class DrawerEnv:
         self.sim.step()
         self.sim.update_renderer()
         self.renderer.render()
-
-        # Cache
-        # self.dump_data.append(self.sim.dump())
-        # self.object_force_array.append(self.obj.get_cfrc_ext())
-        # self.robot_force_array.append(self.robot.get_cfrc_ext())
 
     def generate_header(self):
         header = {}
@@ -177,3 +183,52 @@ class DrawerEnv:
             result = np.concatenate([result, seg[:, :, np.newaxis]], axis=2)
 
         return result, valid
+
+    def get_robot_link_pose(self, name: str):
+        links = self.robot.get_links()
+        link_names = self.robot.get_link_names()
+        link_index = link_names.index(name)
+        return transform2mat(links[link_index].get_global_pose())
+
+    def move_robot_to_target_place(self, target_pose):
+        end_pose = np.eye(4)
+        end_pose[0:2, 3] = target_pose[0:2, 3]
+        end_pose[0:2, 0:2] = target_pose[0:2, 0:2]
+        current_pose = np.eye(4)
+        current_pose[0:2, 3] = self.root_pos
+        new_theta = transforms3d.euler.mat2euler(end_pose)[2]
+        x_axis = end_pose[0:3, 3] - current_pose[0:3, 3]
+        x_axis /= np.linalg.norm(x_axis)
+        z_axis = np.array([0, 0, 1])
+        y_axis = np.cross(z_axis, x_axis)
+        forward_pose = np.stack([x_axis, y_axis, z_axis], axis=1)
+        relative_pose = np.linalg.inv(current_pose[0:3, 0:3]) @ forward_pose
+        move_direction_theta = transforms3d.euler.mat2euler(relative_pose)[2]
+        angular_velocity = 0.6
+        velocity = 0.4
+        for _ in range(
+                np.ceil(np.abs(move_direction_theta - self.root_theta) / angular_velocity * self.simulation_hz).astype(
+                        np.int)):
+            self.root_theta += angular_velocity / self.simulation_hz
+            current_pose[0:2, 0:2] = np.array([[np.cos(self.root_theta), -np.sin(self.root_theta)],
+                                               [np.sin(self.root_theta), np.cos(self.root_theta)]])
+            self.manger.move_base(mat2transform(current_pose))
+            self.step()
+
+        move_direction = end_pose[0:2, 3] - self.root_pos
+        move_distance = np.linalg.norm(move_direction)
+        move_direction /= move_distance
+
+        for _ in range(np.ceil(move_distance / velocity * self.simulation_hz).astype(np.int)):
+            self.root_pos += move_direction * velocity / self.simulation_hz
+            current_pose[0:2, 3] = self.root_pos
+            self.manger.move_base(mat2transform(current_pose))
+            self.step()
+
+        for _ in range(
+                np.ceil(np.abs(new_theta - self.root_theta) / angular_velocity * self.simulation_hz).astype(np.int)):
+            self.root_theta += angular_velocity / self.simulation_hz
+            current_pose[0:2, 0:2] = np.array([[np.cos(self.root_theta), -np.sin(self.root_theta)],
+                                               [np.sin(self.root_theta), np.cos(self.root_theta)]])
+            self.manger.move_base(mat2transform(current_pose))
+            self.step()
