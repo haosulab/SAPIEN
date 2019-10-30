@@ -84,4 +84,15 @@ void sapien::robot::ControllerManger::start() { spinner.start(); }
 void sapien::robot::ControllerManger::stop() { spinner.stop(); }
 void sapien::robot::ControllerManger::removeController(const std::string &) {}
 void ControllerManger::moveBase(const PxTransform &T) { wrapper->articulation->move_base(T); }
+MoveGroupPlanner *ControllerManger::createGroupPlanner(const std::string &groupName) {
+  if (name2MoveGroupPlanner.find(groupName) != name2MoveGroupPlanner.end()) {
+    ROS_WARN("Move Group Planner has already existed for the same group name: %s",
+             groupName.c_str());
+    return nullptr;
+  }
+  auto planner = std::make_unique<MoveGroupPlanner>(groupName);
+  auto plannerPtr = planner.get();
+  name2MoveGroupPlanner[groupName] = std::move(planner);
+  return plannerPtr;
+}
 } // namespace sapien::robot

@@ -1,8 +1,8 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 
-//#include "pybind.cpp"
 #include "controllable_articulation_wrapper.h"
 #include "controller/cartesian_velocity_controller.h"
 #include "controller/controller_manger.h"
@@ -49,6 +49,9 @@ PYBIND11_MODULE(sapyen_robot, m) {
   py::class_<CartesianVelocityController>(m, "CartesianVelocityController")
       .def("get_velocity", &CartesianVelocityController::getVelocity);
 
+  py::class_<MoveGroupPlanner>(m, "MoveGroupPlanner")
+      .def("go", &MoveGroupPlanner::go);
+
   py::class_<MOVOPS3>(m, "MOVOPS3")
       .def(py::init<ControllerManger *>())
       .def("step", &MOVOPS3::step)
@@ -65,4 +68,7 @@ PYBIND11_MODULE(sapyen_robot, m) {
       .def("set_normal_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::NORMAL); })
       .def("set_demonstration_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::DEMONSTRATION); })
       .def("set_replay_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::REPLAY); });
+
+  py::module m2 = m.def_submodule("moveit", "Pybinding of original moveit functionality");
+  py::class_<moveit::planning_interface::MoveGroupInterface>(m2, "MoveGroupCommander");
 }

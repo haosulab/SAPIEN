@@ -8,7 +8,10 @@
 #include "joint_pub_node.h"
 #include "joint_trajectory_controller.h"
 #include "velocity_control_service.h"
+#include "group_planner.h"
 #include <map>
+#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
 
 namespace sapien::robot {
 
@@ -21,6 +24,7 @@ private:
       name2CartesianVelocityController;
   std::map<std::string, std::unique_ptr<JointVelocityController>> name2JointVelocityController;
   std::map<std::string, std::unique_ptr<GroupControllerNode>> name2GroupTrajectoryController;
+  std::map<std::string, std::unique_ptr<MoveGroupPlanner>> name2MoveGroupPlanner;
 
   // Name and handle
   std::string robotName;
@@ -40,13 +44,16 @@ public:
   float time_step;
   ControllerManger(std::string robotName, ControllableArticulationWrapper *wrapper);
 
-  // Function for add controllers
+  // Function to add controllers
   void createJointPubNode(double pubFrequency, double updateFrequency);
   CartesianVelocityController *createCartesianVelocityController(const std::string &groupName);
   JointVelocityController *
   createJointVelocityController(const std::vector<std::string> &jointNames,
                                 const std::string &serviceName);
   void createGroupTrajectoryController(const std::string &groupName);
+
+  // Function to add planner and some basic function to control the robot
+  MoveGroupPlanner *createGroupPlanner(const std::string &groupName);
 
   // Manage controller manager handle
   ros::NodeHandle *getHandle() const;
