@@ -14,13 +14,13 @@ MountedCamera::MountedCamera(std::string const &name_, uint32_t width, uint32_t 
 
   // initialize render context
   mRenderContext = Optifuser::OffscreenRenderContext::Create(width, height);
-  mRenderContext->renderer.setShadowShader("../glsl_shader/shadow.vsh",
-                                           "../glsl_shader/shadow.fsh");
-  mRenderContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
-                                            "../glsl_shader/gbuffer_segmentation.fsh");
-  mRenderContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
-                                             "../glsl_shader/deferred.fsh");
-  mRenderContext->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
+  mRenderContext->renderer.setShadowShader("glsl_shader/shadow.vsh",
+                                           "glsl_shader/shadow.fsh");
+  mRenderContext->renderer.setGBufferShader("glsl_shader/gbuffer.vsh",
+                                            "glsl_shader/gbuffer_segmentation.fsh");
+  mRenderContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
+                                             "glsl_shader/deferred.fsh");
+  mRenderContext->renderer.setAxisShader("glsl_shader/axes.vsh", "glsl_shader/axes.fsh");
 }
 
 uint32_t MountedCamera::getWidth() const { return mWidth; }

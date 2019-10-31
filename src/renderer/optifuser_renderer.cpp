@@ -145,12 +145,12 @@ void OptifuserRenderer::init() {
   // mScene->addPointLight({{-2, 0, 2}, {2, 2, 2}});
   // mScene->setAmbientLight(glm::vec3(0.4, 0.4, 0.4));
 
-  mContext->renderer.setShadowShader("../glsl_shader/shadow.vsh", "../glsl_shader/shadow.fsh");
-  mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
-                                      "../glsl_shader/gbuffer_segmentation.fsh");
-  mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
-                                       "../glsl_shader/deferred.fsh");
-  mContext->renderer.setAxisShader("../glsl_shader/axes.vsh", "../glsl_shader/axes.fsh");
+  mContext->renderer.setShadowShader("glsl_shader/shadow.vsh", "glsl_shader/shadow.fsh");
+  mContext->renderer.setGBufferShader("glsl_shader/gbuffer.vsh",
+                                      "glsl_shader/gbuffer_segmentation.fsh");
+  mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
+                                       "glsl_shader/deferred.fsh");
+  mContext->renderer.setAxisShader("glsl_shader/axes.vsh", "glsl_shader/axes.fsh");
   mContext->renderer.enablePicking();
   mContext->renderer.enableAxisPass();
 }

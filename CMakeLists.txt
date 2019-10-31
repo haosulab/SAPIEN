@@ -59,8 +59,10 @@ add_subdirectory("3rd_party/tinyxml2")
 include_directories("3rd_party/pybind11/include")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
-
+add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})
 add_library(sapien ${PROJECT_SRC})
+add_dependencies(sapien shader)
+
 target_link_libraries(sapien -Wl,--start-group
         libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
         libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
@@ -134,6 +136,9 @@ if (ROS)
         target_link_libraries(sapyen_robot PRIVATE robot_device_lib)
         add_executable(xarm robot/example/xarm.cpp)
         target_link_libraries(xarm robot_device_lib)
+
+        set_target_properties(sapien_robot PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+        set_target_properties(robot_device_lib PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)
