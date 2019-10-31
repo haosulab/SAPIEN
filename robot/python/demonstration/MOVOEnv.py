@@ -87,6 +87,10 @@ class MOVOEnv:
         self.robot.set_qpos(self.init_qpos)
         self.step()
 
+        # Note that you should always start the manger before use any ROS utility
+        # other wise the spinner will not going to process the thread callback
+        self.manger.start()
+
     def step(self):
         self.sim.step()
         self.render()
@@ -94,14 +98,6 @@ class MOVOEnv:
     def render(self):
         self.sim.update_renderer()
         self.renderer.render()
-
-    def generate_header(self):
-        header = {}
-        header.update({"robot_joint_name": self.robot.get_joint_names()})
-        header.update({"robot_link_name": self.robot.get_link_names()})
-        header.update({"object_joint_name": self.obj.get_joint_names()})
-        header.update({"object_link_name": self.obj.get_link_names()})
-        return header
 
     def init_camera(self):
         num = self.renderer.get_camera_count()
@@ -226,4 +222,4 @@ class MOVOEnv:
         ee_pose = self.get_robot_link_relative_pose("right_ee_link")
         ee_pose.set_p(np.array(ee_pose.p) + translation)
         result = self.arm_planner.go(ee_pose, "base_link")
-        print(ee_pose)
+        return result

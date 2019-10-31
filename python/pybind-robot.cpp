@@ -34,6 +34,7 @@ PYBIND11_MODULE(sapyen_robot, m) {
 
   py::class_<ControllerManger>(m, "ControllerManger")
       .def(py::init<std::string, sapien::ControllableArticulationWrapper *>())
+      .def("start", &ControllerManger::start)
       .def("move_base", &ControllerManger::moveBase)
       .def("add_joint_state_publisher", &ControllerManger::createJointPubNode)
       .def("create_joint_velocity_controller", &ControllerManger::createJointVelocityController,

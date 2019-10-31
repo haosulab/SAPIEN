@@ -1,14 +1,4 @@
-import sapyen
-import sapyen_robot
-import os
-import transforms3d
-import numpy as np
-import warnings
-
-PARTNET_DIR = '/home/sim/project/mobility-v0-prealpha3/mobility_verified'
-RGBD_CAMERA_THRESHOLD = 10
-CAMERA_TO_LINK = np.zeros([4, 4])
-CAMERA_TO_LINK[[0, 1, 2, 3], [2, 0, 1, 3]] = [1, -1, -1, 1]
+from .MOVOSapienEnv import MOVOSapienEnv
 
 
 class DrawerEnv(MOVOSapienEnv):

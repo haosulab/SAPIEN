@@ -6,10 +6,12 @@
 #include <geometry_msgs/PoseStamped.h>
 namespace sapien::robot {
 
-MoveGroupPlanner::MoveGroupPlanner(const std::string &groupName, GroupControllerNode *controller)
-    : moveGroup(groupName), controller(controller) {}
+MoveGroupPlanner::MoveGroupPlanner(const std::string &groupName, GroupControllerNode *controller,
+                                   ros::NodeHandle *handle)
+    : nh(handle), controller(controller), moveGroup(groupName) {
+}
 bool MoveGroupPlanner::go(const physx::PxTransform &pose, const std::string &frame) {
-  std::cout<< "Receive cartesian go command!" << std::endl;
+  std::cout << "Receive cartesian go command!" << std::endl;
   geometry_msgs::PoseStamped target_pose;
   auto quat = pose.q;
   auto pos = pose.p;
@@ -22,16 +24,14 @@ bool MoveGroupPlanner::go(const physx::PxTransform &pose, const std::string &fra
   target_pose.pose.position.z = pos[2];
   target_pose.header.frame_id = frame;
   moveGroup.setPoseTarget(target_pose);
-  std::cout<< "Plan executed!" << std::endl;
 
-  bool success = (moveGroup.plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-  std::cout<< "Plan executed!" << std::endl;
+    auto result = moveGroup.plan(plan);
+  bool success = result == moveit::planning_interface::MoveItErrorCode::SUCCESS;
   if (not success) {
     ROS_WARN("Motion planning fail for a pose target!");
     return success;
   }
   success = controller->execute(plan);
-  std::cout<< "Go command executed!" << std::endl;
   return success;
 }
 } // namespace sapien::robot

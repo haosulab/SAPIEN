@@ -60,3 +60,11 @@ class MOVOSapienEnv(MOVOEnv):
         for _ in range(self.simulation_hz):
             self.head_controller.move_joint(["tilt_joint"], -0.5)
             self.step()
+
+    def generate_header(self):
+        header = {}
+        header.update({"robot_joint_name": self.robot.get_joint_names()})
+        header.update({"robot_link_name": self.robot.get_link_names()})
+        header.update({"object_joint_name": self.obj.get_joint_names()})
+        header.update({"object_link_name": self.obj.get_link_names()})
+        return header

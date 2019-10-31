@@ -95,7 +95,7 @@ MoveGroupPlanner *ControllerManger::createGroupPlanner(const std::string &groupN
     addGroupTrajectoryController(groupName);
   }
   auto planner =
-      std::make_unique<MoveGroupPlanner>(groupName, name2GroupTrajectoryController[groupName].get());
+      std::make_unique<MoveGroupPlanner>(groupName, name2GroupTrajectoryController[groupName].get(), nh.get());
   auto plannerPtr = planner.get();
   name2MoveGroupPlanner[groupName] = std::move(planner);
   return plannerPtr;
