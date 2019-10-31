@@ -80,9 +80,6 @@ target_link_libraries(ps3 sapien)
 pybind11_add_module(sapyen "python/pybind.cpp")
 target_link_libraries(sapyen PRIVATE sapien)
 
-add_executable(xarm test/xarm.cpp)
-target_link_libraries(xarm sapien)
-
 add_executable(cheetah test/cheetah.cpp)
 target_link_libraries(cheetah sapien)
 
@@ -101,32 +98,32 @@ if (ROS)
                 roslaunch
                 moveit_core
                 moveit_ros_planning
+                moveit_ros_planning_interface
                 actionlib
                 actionlib_msgs
                 roscpp)
 
         include_directories(${catkin_INCLUDE_DIRS} "robot")
 
-        add_library(robot_lib
+        add_library(sapien_robot
                 robot/controller/joint_trajectory_controller.cpp
                 robot/controller/cartesian_velocity_controller.cpp
                 robot/controller/velocity_control_service.cpp
                 robot/controller/joint_pub_node.cpp
                 robot/controller/controller_manger.cpp
+                robot/controller/group_planner.cpp
                 )
-        target_link_libraries(robot_lib sapien ${catkin_LIBRARIES})
+        target_link_libraries(sapien_robot sapien ${catkin_LIBRARIES})
         add_library(robot_device_lib
                 robot/device/joystick_ps3.cpp
                 robot/device/InputDevice.cpp
                 robot/device/movo_ps3.cpp
-                robot/device/demonstration_gui.cpp
-                robot/device/demonstration_simulation.cpp
                 robot/device/movo_keyboard.cpp
-                robot/device/movo_device_control.cpp robot/device/movo_device_control.h)
-        target_link_libraries(robot_device_lib robot_lib)
+                robot/device/movo.cpp)
+        target_link_libraries(robot_device_lib sapien_robot)
 
         add_executable(robot robot/test/robot.cpp)
-        target_link_libraries(robot robot_lib)
+        target_link_libraries(robot sapien_robot)
         add_executable(demonstration robot/example/movo_demonstration.cpp)
         target_link_libraries(demonstration robot_device_lib)
         add_executable(movo_ps3 robot/example/movo_ps3_test.cpp)
@@ -135,6 +132,9 @@ if (ROS)
         target_link_libraries(movo_keyboard robot_device_lib)
         pybind11_add_module(sapyen_robot "python/pybind-robot.cpp")
         target_link_libraries(sapyen_robot PRIVATE robot_device_lib)
+        add_executable(xarm robot/example/xarm.cpp)
+        target_link_libraries(xarm robot_device_lib)
+
 
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)
         message("Your ROS version not supported. Please update to kinetic or above.")
