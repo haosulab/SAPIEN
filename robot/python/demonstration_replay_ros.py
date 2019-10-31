@@ -13,14 +13,14 @@ def main():
 
     data = {}
 
-    # recorder.renderer.show_window()
+    recorder.renderer.show_window()
     add_arena_camera(recorder)
     camera_name = recorder.camera_name_list
     cloud_list = [[] for _ in range(len(camera_name))]
     try:
         while 1:
             recorder.step()
-            # recorder.renderer.render()
+            recorder.renderer.render()
             if recorder.simulation_steps % 30 == 0:
                 for i in range(len(camera_name)):
                     cloud_array, valid_index, _ = recorder.render_point_cloud(cam_id=i, rgba=True, use_open3d=False)

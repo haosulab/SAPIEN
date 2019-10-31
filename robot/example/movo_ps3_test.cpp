@@ -55,7 +55,7 @@ void run() {
     sim.updateRenderer();
     renderer.render();
     ps3.step();
-    temp.push_back(sim.dump());
+//    temp.push_back(sim.dump());
 
     auto gl_input = Optifuser::getInput();
     if (gl_input.getKeyState(GLFW_KEY_Q)) {

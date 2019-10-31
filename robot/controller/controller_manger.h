@@ -50,7 +50,7 @@ public:
   JointVelocityController *
   createJointVelocityController(const std::vector<std::string> &jointNames,
                                 const std::string &serviceName);
-  void createGroupTrajectoryController(const std::string &groupName);
+  void addGroupTrajectoryController(const std::string &groupName);
 
   // Function to add planner and some basic function to control the robot
   MoveGroupPlanner *createGroupPlanner(const std::string &groupName);

@@ -21,7 +21,7 @@ using namespace sapien;
 
 void test1() {
   Renderer::OptifuserRenderer renderer;
-  
+
   renderer.cam.position = {0.5, -4, 0.5};
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
@@ -60,12 +60,16 @@ void test1() {
   IKController->setAngularVelocity(0.2);
   IKController->setVelocity(0.2);
   auto jointController = manger.createJointVelocityController(serviceJoints, "right_gripper");
-  manger.createGroupTrajectoryController("right_arm");
+  manger.addGroupTrajectoryController("right_arm");
   manger.start();
   auto bodyController = manger.createJointVelocityController({"linear_joint"}, "body");
+  auto planner = manger.createGroupPlanner("right_arm");
 
   wrapper->set_qpos({0.47, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});
-  wrapper->set_drive_target({0.2, 0, 0.0, 0, -0.9, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0});
+//  wrapper->set_drive_target({0.2, 0, 0.0, 0, -0.9, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0});
+  for (int j = 0; j < 10000; ++j) {
+    sim.step();
+  }
   sim.step();
 
   //  wrapper->set_qf({10,10,10,10,10,10,10,10,10,10,10,10,10});
@@ -75,6 +79,10 @@ void test1() {
   float gripperVelocity = 5;
   float bodyVelocity = 0.1;
   renderer.showWindow();
+
+  auto pose = wrapper->linkName2Link["right_ee_link"]->getGlobalPose();
+  pose.p.x -= 0.2;
+  planner->go(pose, "base_link");
 
   static size_t globalTimeStep = 0;
   while (true) {

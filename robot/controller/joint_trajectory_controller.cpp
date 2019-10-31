@@ -62,6 +62,7 @@ void robot::GroupControllerNode::executeGoal(std::vector<uint32_t> indexGoal2Con
 }
 void robot::GroupControllerNode::executeCB(GoalHandle gh) {
   ROS_INFO("Receive joint trajectory goal");
+  std::cout << "Joint Trajectory Goal Received!" << std::endl;
   // Ensures that the joints in the goal match the joints we are commanding.
   std::vector<std::string> goalJoints = gh.getGoal()->trajectory.joint_names;
   if (!setsEqual(mJointName, goalJoints)) {
@@ -171,5 +172,38 @@ robot::GroupControllerNode::GroupControllerNode(ControllableArticulationWrapper 
   wrapper->add_position_controller(mJointName, queue.get());
   ROS_INFO("Controller start with group name: %s", groupName.c_str());
   mServer->start();
+}
+bool GroupControllerNode::execute(
+    const moveit::planning_interface::MoveGroupInterface::Plan &plan) {
+  std::vector<std::string> goalJoints = plan.trajectory_.joint_trajectory.joint_names;
+  // Ensures that the joints in the goal match the joints we are commanding.
+  if (!setsEqual(mJointName, goalJoints)) {
+    ROS_ERROR("Joints on incoming goal don't match our joints");
+    return false;
+  }
+
+  //   Cancels the currently active goal.
+  if (has_active_goal_) {
+    // Stops the controller.
+    clearGoal();
+
+    // Marks the current goal as canceled.
+    if (active_goal_.isValid()) {
+      active_goal_.setCanceled();
+    }
+    has_active_goal_ = false;
+  }
+
+  std::vector<uint32_t> indexGoal2Controller = {};
+  indexGoal2Controller.resize(goalJoints.size());
+  for (size_t i = 0; i < goalJoints.size(); ++i) {
+    auto index = std::find(mJointName.begin(), mJointName.end(), goalJoints[i]);
+    indexGoal2Controller[i] = index - mJointName.begin();
+  }
+  has_active_goal_ = true;
+
+  current_trajectory_ = plan.trajectory_.joint_trajectory;
+  executeGoal(indexGoal2Controller);
+  return true;
 }
 } // namespace sapien::robot

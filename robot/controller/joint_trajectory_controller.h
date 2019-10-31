@@ -9,6 +9,7 @@
 #include <control_msgs/FollowJointTrajectoryFeedback.h>
 #include <control_msgs/FollowJointTrajectoryResult.h>
 #include <kinematics_articulation_wrapper.h>
+#include <moveit/move_group_interface/move_group_interface.h>
 
 namespace sapien::robot {
 class GroupControllerNode {
@@ -44,6 +45,7 @@ public:
 public:
   GroupControllerNode(ControllableArticulationWrapper *wrapper, const std::string &groupName,
                       float timestep, ros::NodeHandle *nh, const std::string &robotName);
+  bool execute(const moveit::planning_interface::MoveGroupInterface::Plan &plan);
 
 private:
   void executeCB(GoalHandle gh);

@@ -65,8 +65,7 @@ JointVelocityController *sapien::robot::ControllerManger::createJointVelocityCon
   name2JointVelocityController[serviceName] = std::move(controller);
   return controllerPtr;
 }
-void sapien::robot::ControllerManger::createGroupTrajectoryController(
-    const std::string &groupName) {
+void sapien::robot::ControllerManger::addGroupTrajectoryController(const std::string &groupName) {
   assert(jointPubNode);
   if (name2GroupTrajectoryController.find(groupName) != name2GroupTrajectoryController.end()) {
     ROS_WARN("Cartesian Velocity Controller has already existed for the same group name: %s",
@@ -90,7 +89,13 @@ MoveGroupPlanner *ControllerManger::createGroupPlanner(const std::string &groupN
              groupName.c_str());
     return nullptr;
   }
-  auto planner = std::make_unique<MoveGroupPlanner>(groupName);
+  if (name2GroupTrajectoryController.find(groupName) == name2GroupTrajectoryController.end()) {
+    ROS_WARN(
+        "Move Group Planner require a controller with the same name. Will create one this time.");
+    addGroupTrajectoryController(groupName);
+  }
+  auto planner =
+      std::make_unique<MoveGroupPlanner>(groupName, name2GroupTrajectoryController[groupName].get());
   auto plannerPtr = planner.get();
   name2MoveGroupPlanner[groupName] = std::move(planner);
   return plannerPtr;
