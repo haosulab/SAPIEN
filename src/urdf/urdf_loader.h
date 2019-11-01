@@ -628,7 +628,7 @@ public:
   bool fixLoadedObject = true;
   bool balancePassiveForce = false;
   URDFLoader(class Simulation &simulation);
-  ArticulationWrapper *load(const std::string &filename);
+  ArticulationWrapper *load(const std::string &filename, PxMaterial *material= nullptr);
   class KinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class JointSystem *loadJointSystem(const std::string &filename);
 };

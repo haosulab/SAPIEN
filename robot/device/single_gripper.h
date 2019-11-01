@@ -20,7 +20,7 @@ protected:
                                                       "z_axis_joint"};
   const std::vector<std::string> rotationJoints = {"r_rotation_joint", "p_rotation_joint",
                                                    "y_rotation_joint"};
-
+  bool grasped;
   float timestep;
 
 public:
@@ -28,7 +28,7 @@ public:
   JointVelocityController *translation;
   JointVelocityController *rotation;
 
-  float gripper_velocity = 5;
+  float gripper_velocity = 1;
   float translation_velocity = 0.5;
   float rotation_velocity = 1;
 

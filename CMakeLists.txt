@@ -47,7 +47,7 @@ file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-D_DEBUG)
-  # add_definitions(-D_PVD)
+   add_definitions(-D_PVD)
   add_definitions(-DPVD_HOST="192.168.0.110")
 else()
   add_definitions(-DNDEBUG)
@@ -127,8 +127,6 @@ if (ROS)
 
         add_executable(robot robot/test/robot.cpp)
         target_link_libraries(robot sapien_robot)
-        add_executable(demonstration robot/example/movo_demonstration.cpp)
-        target_link_libraries(demonstration robot_device_lib)
         add_executable(movo_ps3 robot/example/movo_ps3_test.cpp)
         target_link_libraries(movo_ps3 robot_device_lib)
         add_executable(gripper_ps3 robot/example/single_gripper_ps3_test.cpp)

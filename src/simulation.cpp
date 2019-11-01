@@ -148,7 +148,7 @@ Simulation::Simulation() {
   mScene->setVisualizationParameter(PxVisualizationParameter::eACTOR_AXES, 2.f);
   mScene->setSimulationEventCallback(&myCC);
 
-  mDefaultMaterial = mPhysicsSDK->createMaterial(0.5, 0.49, 0.01);
+  mDefaultMaterial = mPhysicsSDK->createMaterial(50, 60, 0.01);
 }
 
 Simulation::~Simulation() {

@@ -31,19 +31,22 @@ void run() {
   sim.addGround(0.0);
   auto loader = sim.createURDFLoader();
   loader->fixLoadedObject = true;
-  std::string partFile =
-      "/home/sim/project/mobility-v0-prealpha3/mobility_verified/44826/mobility.urdf";
-  loader->load(partFile)->articulation->teleportRootLink({{3.0, 0.3, 0.8}, PxIdentity}, true);
+  std::string partFile = "/home/sim/project/mobility_convex/45091/mobility.urdf";
+  loader->load(partFile)->articulation->teleportRootLink({{1.0, 0.3, 0.8}, PxIdentity}, true);
 
   loader->balancePassiveForce = true;
-  auto wrapper = loader->load("../assets/robot/single_hand.urdf");
-  wrapper->set_drive_property(200, 50);
+  auto gripperMaterial = sim.mPhysicsSDK->createMaterial(5, 6, 0.01);
+  auto wrapper = loader->load("../assets/robot/single_hand.urdf", gripperMaterial);
+  wrapper->set_drive_property(200, 40, 20, {0, 1, 2, 3, 4, 5});
+  wrapper->set_drive_property(1, 0.05, 1, {6, 7, 8});
   wrapper->set_qpos({0, 0, 1, 0, 0, 0, 0, 0, 0});
-  wrapper->set_drive_target({0, 0, 1, 0, 0, 0, 0, 0, 0});
+  wrapper->set_drive_target({0.641, 0.789, 0.218, -1.8, 0.08, 0, 0, 0, 0});
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("kg3", controllableWrapper);
   robot::KinovaGripperPS3 ps3(manger.get());
+  ps3.set_translation_velocity(0.15);
+  ps3.set_gripper_velocity(1);
 
   renderer.showWindow();
   std::vector<std::vector<PxReal>> temp;

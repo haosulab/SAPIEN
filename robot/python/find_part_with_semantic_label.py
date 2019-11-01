@@ -1,7 +1,7 @@
 import os
 import re
 
-PARTNET_DIR = '/home/sim/project/mobility_verified'
+PARTNET_DIR = '/home/sim/project/mobility-v0-prealpha3/mobility_verified'
 FILENAME = 'cues.txt'
 
 

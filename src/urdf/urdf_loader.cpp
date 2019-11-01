@@ -62,7 +62,7 @@ struct LinkTreeNode {
   std::vector<LinkTreeNode *> children;
 };
 
-ArticulationWrapper *URDFLoader::load(const std::string &filename) {
+ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *material) {
   XMLDocument doc;
   doc.LoadFile(filename.c_str());
   XMLPrinter printer;
@@ -250,8 +250,9 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
         builder.addSphereShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius);
         break;
       case Geometry::MESH:
-        builder.addConvexObjShapeToLink(
-            currentPxLink, getAbsPath(filename, collision->geometry->filename), tCollision2Link);
+        builder.addConvexObjShapeToLink(currentPxLink,
+                                        getAbsPath(filename, collision->geometry->filename),
+                                        tCollision2Link, {1, 1, 1}, material);
         break;
       }
     }
@@ -264,7 +265,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
     if (current->joint) {
       auto joint = (PxArticulationJointReducedCoordinate *)currentPxLink.getInboundJoint();
       // Load joint dynamics
-      if(current->joint->dynamics){
+      if (current->joint->dynamics) {
         joint->setFrictionCoefficient(current->joint->dynamics->friction);
       }
 
