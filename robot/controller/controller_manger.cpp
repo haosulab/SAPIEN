@@ -19,8 +19,8 @@ sapien::robot::ControllerManger::ControllerManger(std::string robotName,
 
   // Create robot states and load robot models
   if (nh->hasParam("robot_description")) {
-    auto loader = robot_model_loader::RobotModelLoader("robot_description");
-    kinematicModel = loader.getModel();
+    loader = std::make_unique<robot_model_loader::RobotModelLoader>("robot_description");
+    kinematicModel = loader->getModel();
     ROS_INFO("Model frame: %s", kinematicModel->getModelFrame().c_str());
     robotState = std::make_unique<robot_state::RobotState>(kinematicModel);
     robotState->setToDefaultValues();
@@ -109,7 +109,7 @@ MoveGroupPlanner *ControllerManger::createGroupPlanner(const std::string &groupN
     std::cerr << "Robot has not be loaded, does parameter exist?" << std::endl;
     std::cerr << "Creating cartesian velocity controller fail due to empty robot model"
               << std::endl;
-    return nullptr;
+    throw std::runtime_error("Try to create planner before robot model is loaded");
   }
   if (name2MoveGroupPlanner.find(groupName) != name2MoveGroupPlanner.end()) {
     ROS_WARN("Move Group Planner has already existed for the same group name: %s",

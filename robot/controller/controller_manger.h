@@ -32,6 +32,7 @@ private:
   std::unique_ptr<ros::NodeHandle> nh;
 
   // Robot and joint state
+  std::unique_ptr<robot_model_loader::RobotModelLoader> loader=nullptr;
   robot_model::RobotModelPtr kinematicModel;
   std::unique_ptr<robot_state::RobotState> robotState;
   sensor_msgs::JointState *jointState = nullptr;
