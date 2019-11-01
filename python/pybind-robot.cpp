@@ -6,10 +6,9 @@
 #include "controllable_articulation_wrapper.h"
 #include "controller/cartesian_velocity_controller.h"
 #include "controller/controller_manger.h"
-#include "controller/joint_pub_node.h"
-#include "controller/joint_trajectory_controller.h"
 #include "controller/velocity_control_service.h"
 #include "device/movo_ps3.h"
+#include "device/single_gripper_ps3.h"
 
 using namespace sapien::robot;
 namespace py = pybind11;
@@ -17,9 +16,6 @@ namespace py = pybind11;
 PYBIND11_MODULE(sapyen_robot, m) {
   py::module m1 = m.def_submodule("ros", "Pybinding of original ROS functionality");
   // ROS Pre-requisite
-  py::class_<ros::Publisher>(m1, "ROSPublisher");
-  py::class_<ros::Subscriber>(m1, "ROSSubscriber");
-  py::class_<ros::NodeHandle>(m1, "ROSNodeHandle");
   m1.def(
       "init",
       [](const std::vector<std::string> &args, const std::string &name, uint32_t options) {
@@ -69,7 +65,4 @@ PYBIND11_MODULE(sapyen_robot, m) {
       .def("set_normal_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::NORMAL); })
       .def("set_demonstration_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::DEMONSTRATION); })
       .def("set_replay_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::REPLAY); });
-
-  py::module m2 = m.def_submodule("moveit", "Pybinding of original moveit functionality");
-  py::class_<moveit::planning_interface::MoveGroupInterface>(m2, "MoveGroupCommander");
 }
