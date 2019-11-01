@@ -2,4 +2,4 @@ build
 compile_commands.json
 .vscode
 .pyc
-/cmake-build-debug/
+cmake-build-debug
