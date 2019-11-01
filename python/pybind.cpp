@@ -449,7 +449,8 @@ PYBIND11_MODULE(sapyen, m) {
       .def(py::init<Simulation &>())
       .def_readwrite("fix_loaded_object", &URDF::URDFLoader::fixLoadedObject)
       .def_readwrite("balance_passive_force", &URDF::URDFLoader::balancePassiveForce)
-      .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference)
+      .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
+           py::arg("filename"), py::arg("material") = nullptr)
       .def("load_joint_system", &URDF::URDFLoader::loadJointSystem,
            py::return_value_policy::reference);
 
@@ -467,7 +468,7 @@ PYBIND11_MODULE(sapyen, m) {
                                return make_array<float>({t.q.w, t.q.x, t.q.y, t.q.z});
                              })
       .def("inv", &PxTransform::getInverse)
-      .def("transform", [](PxTransform &t, PxTransform &src){return t.transform(src);})
+      .def("transform", [](PxTransform &t, PxTransform &src) { return t.transform(src); })
       .def("set_p", [](PxTransform &t, const py::array_t<PxReal> &arr) { t.p = array2vec3(arr); })
       .def("set_q", [](PxTransform &t, const py::array_t<PxReal> &arr) {
         t.q = {arr.at(1), arr.at(2), arr.at(3), arr.at(0)}; // NOTE: wxyz to xyzw
