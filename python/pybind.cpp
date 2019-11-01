@@ -145,6 +145,7 @@ PYBIND11_MODULE(sapyen, m) {
       .def("update_renderer", &Simulation::updateRenderer)
       .def("add_ground", &Simulation::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr)
+      .def("create_material", &Simulation::createPhysicalMaterial)
       .def("add_mounted_camera", &Simulation::addMountedCamera);
 
   py::class_<PxRigidActor, std::unique_ptr<PxRigidActor, py::nodelete>>(m, "PxRigidActor")
@@ -158,6 +159,17 @@ PYBIND11_MODULE(sapyen, m) {
   py::class_<PxRigidBody, PxRigidActor, std::unique_ptr<PxRigidBody, py::nodelete>>(m,
                                                                                     "PxRigidBody")
       .def("get_global_pose", &PxRigidBody::getGlobalPose)
+      .def("get_local_mass_center", &PxRigidBody::getCMassLocalPose)
+      .def("add_force", [](PxRigidBody &a, const py::array_t<float> &arr){
+        a.addForce(PxVec3(arr.at(0), arr.at(1), arr.at(2)));
+        a.addTorque(PxVec3(arr.at(3), arr.at(4), arr.at(5)));
+      })
+      .def("get_global_mass_center",
+           [](PxRigidBody &a) {
+             auto globalPose = a.getGlobalPose();
+             auto globalMassCenter = globalPose.transform(a.getCMassLocalPose());
+             return globalMassCenter;
+           })
       .def("get_linear_velocity",
            [](PxRigidBody &a) {
              physx::PxVec3 vel = a.getLinearVelocity();
@@ -199,8 +211,6 @@ PYBIND11_MODULE(sapyen, m) {
       .def("set_static_friction", &PxMaterial::setStaticFriction)
       .def("set_dynamic_friction", &PxMaterial::setDynamicFriction)
       .def("set_restitution", &PxMaterial::setRestitution);
-
-  m.def("create_material", &PxPhysics::createMaterial);
 
   py::class_<Renderer::ISensor, PyISensor>(m, "ISensor")
       .def("get_sensor_pose", &Renderer::ISensor::getSensorPose)
@@ -393,7 +403,22 @@ PYBIND11_MODULE(sapyen, m) {
         a.set_qf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
       });
 
-  py::class_<IArticulationDrivable, IArticulationBase>(m, "IArticulationDrivable");
+  py::class_<IArticulationDrivable, IArticulationBase>(m, "IArticulationDrivable")
+      .def("get_drive_joint_names", &IArticulationDrivable::get_drive_joint_names)
+      .def(
+          "set_root_pose",
+          [](IArticulationDrivable &a, const py::array_t<float> &position,
+             const py::array_t<float> &quaternion) {
+            a.move_base(
+                {{position.at(0), position.at(1), position.at(2)},
+                 {quaternion.at(1), quaternion.at(2), quaternion.at(3), quaternion.at(0)}});
+          },
+          py::arg("position") = make_array<float>({0, 0, 0}),
+          py::arg("quaternion") = make_array<float>({0, 0, 0, 1}))
+      .def("set_drive_qpos", [](ArticulationWrapper &a, py::array_t<float> qpos) {
+        a.set_drive_target(std::vector<PxReal>(qpos.data(), qpos.data() + qpos.size()));
+      });
+
   py::enum_<EArticulationType>(articulationBase, "ArticulationType")
       .value("DYNAMIC_ARTICULATION", EArticulationType::DYNAMIC_ARTICULATION)
       .value("KINEMATIC_ARTICULATION", EArticulationType::KINEMATIC_ARTICULATION)
@@ -420,21 +445,6 @@ PYBIND11_MODULE(sapyen, m) {
              return py::array_t<PxReal>({(int)cfrc.size(), 6},
                                         {sizeof(std::array<PxReal, 6>), sizeof(PxReal)},
                                         (PxReal *)cfrc.data());
-           })
-      .def(
-          "set_root_pose",
-          [](ArticulationWrapper &a, const py::array_t<float> &position,
-             const py::array_t<float> &quaternion) {
-            a.articulation->teleportRootLink(
-                {{position.at(0), position.at(1), position.at(2)},
-                 {quaternion.at(1), quaternion.at(2), quaternion.at(3), quaternion.at(0)}},
-                true);
-          },
-          py::arg("position") = make_array<float>({0, 0, 0}),
-          py::arg("quaternion") = make_array<float>({0, 0, 0, 1}))
-      .def("set_drive_qpos",
-           [](ArticulationWrapper &a, py::array_t<float> qpos) {
-             a.set_drive_target(std::vector<PxReal>(qpos.data(), qpos.data() + qpos.size()));
            })
       .def("set_pd", &ArticulationWrapper::set_drive_property, py::arg("p"), py::arg("d"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("joint_index") = py::list())

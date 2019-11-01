@@ -1,49 +1,19 @@
 import sapyen
 import sapyen_robot
-import os
+from .base_env import SapienEnv
+from .physx_utils import mat2transform, transform2mat
 import transforms3d
 import numpy as np
-import warnings
 
 RGBD_CAMERA_THRESHOLD = 10
 CAMERA_TO_LINK = np.zeros([4, 4])
 CAMERA_TO_LINK[[0, 1, 2, 3], [2, 0, 1, 3]] = [1, -1, -1, 1]
 
 
-def transform2mat(trans: sapyen.Pose):
-    mat = np.eye(4)
-    mat[:3, :3] = transforms3d.quaternions.quat2mat(trans.q)
-    mat[:3, 3] = trans.p
-    return mat
-
-
-def mat2transform(mat: np.ndarray):
-    pose = sapyen.Pose(mat[: 3, 3], transforms3d.quaternions.mat2quat(mat[:3, :3]))
-    return pose
-
-
-class MOVOEnv:
-    def __init__(self):
-        # Rendering
-        self.renderer = sapyen.OptifuserRenderer()
-        self.renderer.set_ambient_light([.4, .4, .4])
-        self.renderer.set_shadow_light([1, -1, -1], [.5, .5, .5])
-        self.renderer.add_point_light([2, 2, 2], [1, 1, 1])
-        self.renderer.add_point_light([2, -2, 2], [1, 1, 1])
-        self.renderer.add_point_light([-2, 0, 2], [1, 1, 1])
-        self.renderer.cam.set_position([0.5, -4, 0.5])
-        self.renderer.cam.set_forward([0, 1, 0])
-        self.renderer.cam.set_up([0, 0, 1])
-
-        # Simulation
-        self.sim = sapyen.Simulation()
-        self.sim.set_renderer(self.renderer)
-        self.sim.add_ground(0, material=None)
-        self.simulation_hz = 200
-        self.sim.set_time_step(1 / self.simulation_hz)
-
+class MOVOEnv(SapienEnv):
+    def __init__(self, partnet_dir, partnet_id):
+        super(MOVOEnv, self).__init__(partnet_dir, partnet_id)
         # Robot Model
-        self.loader = self.sim.create_urdf_loader()
         self.loader.fix_loaded_object = True
         self.loader.balance_passive_force = True
         self.robot = self.loader.load('../assets/robot/all_robot.urdf')
@@ -53,6 +23,10 @@ class MOVOEnv:
         links = self.robot.get_links()
         link_names = self.robot.get_link_names()
         self.name2link = {link_names[i]: links[i] for i in range(len(link_names))}
+
+        # Joint mapping
+        joint_names = self.robot.get_drive_joint_names()
+        self.name2joint_id = {joint_names[i]: i for i in range(len(joint_names))}
 
         # Controllers
         self.head_joint = ["pan_joint", "tilt_joint"]
@@ -67,16 +41,11 @@ class MOVOEnv:
         self.manger.add_group_trajectory_controller("right_arm")
         self.arm_planner = self.manger.create_group_planner("right_arm")
 
-        # Camera
-        self.builder = self.sim.create_actor_builder()
-        self.camera_frame_id = []
-        self.camera_pose = []
-        self.camera_name_list = []
-        self.cam_list = []
-        self.mount_actor_list = []
-        self.mapping_list = []
-        self.depth_lambda_list = []
-        self.init_camera()
+        # Cache controller specific information
+        joint_limit = self.robot.get_joint_limits()
+        self.gripper_limit = np.zeros(2)
+        joint_id = self.name2joint_id[self.gripper_joint[0]]
+        self.gripper_limit = joint_limit[joint_id, :]
 
         # Init robot pose and controller
         self.root_theta = 0
@@ -91,82 +60,13 @@ class MOVOEnv:
         # other wise the spinner will not going to process the thread callback
         self.manger.start()
 
-    def step(self):
-        self.sim.step()
-        self.render()
-
-    def render(self):
-        self.sim.update_renderer()
-        self.renderer.render()
-
-    def init_camera(self):
-        num = self.renderer.get_camera_count()
-        for i in range(num):
-            camera = self.renderer.get_camera(i)
-            height, width = camera.get_height(), camera.get_width()
-            self.mount_actor_list.append(None)
-            self.camera_name_list.append(camera.get_name())
-            self.cam_list.append(camera)
-            self.build_camera_mapping(height, width, camera.get_camera_matrix())
-            self.depth_lambda_list.append(
-                lambda depth: 1 / (depth * (1 / camera.far - 1 / camera.near) + 1 / camera.near))
-
-    def add_camera(self, name, camera_pose: np.ndarray, width: int, height: int, fov=1.1, near=0.01, far=100):
-        actor = self.builder.build(False, True, "{}".format(name), True)
-        self.mount_actor_list.append(actor)
-        self.camera_name_list.append(name)
-
-        pose = sapyen.Pose(camera_pose[:3, 3])
-        pose.set_q(transforms3d.quaternions.mat2quat(camera_pose[:3, :3]))
-        self.sim.add_mounted_camera(name, actor, sapyen.Pose([0, 0, 0], [1, 0, 0, 0]), width, height, fov, fov,
-                                    near, far)
-        actor.set_global_pose(pose)
-
-        camera = self.renderer.get_camera(len(self.cam_list))
-        self.cam_list.append(camera)
-        self.build_camera_mapping(height, width, camera.get_camera_matrix())
-        self.depth_lambda_list.append(lambda depth: 1 / (depth * (1 / far - 1 / near) + 1 / near))
-        self.camera_frame_id.append("/base_link")
-        self.camera_pose.append((camera_pose @ CAMERA_TO_LINK).astype(np.float32))
-
-    def build_camera_mapping(self, height: int, width: int, camera_matrix: np.ndarray):
-        x = np.linspace(0.5, width - 0.5, width)
-        y = np.linspace(0.5, height - 0.5, height)
-        x, y = np.meshgrid(x, y)
-        cor = np.stack([x.flatten(), y.flatten(), np.ones([x.size])], axis=0)
-        mapping = np.linalg.inv(camera_matrix[:3, :3]) @ cor
-        self.mapping_list.append(np.reshape(mapping.T, [height, width, 3]).astype(np.float32))
-
-    @property
-    def mounted_camera(self):
-        return self.camera_name_list.copy()
-
-    def get_camera_id(self, name: str):
-        if name in self.camera_name_list:
-            return self.camera_name_list.index(name)
-        else:
-            warnings.warn("Camera name {} not found, valid camera names: {}".format(name, self.camera_name_list))
-
-    def render_point_cloud(self, cam_id, rgba=True, segmentation=False):
-        camera = self.cam_list[cam_id]
-        camera.take_picture()
-        depth = self.depth_lambda_list[cam_id](camera.get_depth())[:, :, np.newaxis].astype(np.float32)
-        result = self.mapping_list[cam_id] * depth
-        valid = result[:, :, 2] < RGBD_CAMERA_THRESHOLD
-
-        if rgba:
-            color = camera.get_color_rgba()
-            result = np.concatenate([result, color], axis=2)
-
-        if segmentation:
-            seg = camera.get_segmentation()
-            result = np.concatenate([result, seg[:, :, np.newaxis]], axis=2)
-
-        return result, valid
-
     def get_robot_link_global_pose(self, name: str):
         link = self.name2link[name]
         return transform2mat(link.get_global_pose())
+
+    def get_joint_angle(self, name: str):
+        id = self.name2joint_id
+        return self.robot.get_qpos()[id]
 
     def get_robot_link_relative_pose(self, name: str):
         root_pose = self.name2link["base_link"].get_global_pose()
@@ -190,10 +90,12 @@ class MOVOEnv:
         move_direction_theta = transforms3d.euler.mat2euler(relative_pose)[2]
         angular_velocity = 0.6
         velocity = 0.4
+
+        sign = np.sign(move_direction_theta - self.root_theta)
         for _ in range(
                 np.ceil(np.abs(move_direction_theta - self.root_theta) / angular_velocity * self.simulation_hz).astype(
                     np.int)):
-            self.root_theta += angular_velocity / self.simulation_hz
+            self.root_theta += angular_velocity / self.simulation_hz * sign
             current_pose[0:2, 0:2] = np.array([[np.cos(self.root_theta), -np.sin(self.root_theta)],
                                                [np.sin(self.root_theta), np.cos(self.root_theta)]])
             self.manger.move_base(mat2transform(current_pose))
@@ -209,9 +111,10 @@ class MOVOEnv:
             self.manger.move_base(mat2transform(current_pose))
             self.step()
 
+        sign = np.sign(new_theta - self.root_theta)
         for _ in range(
                 np.ceil(np.abs(new_theta - self.root_theta) / angular_velocity * self.simulation_hz).astype(np.int)):
-            self.root_theta += angular_velocity / self.simulation_hz
+            self.root_theta += angular_velocity / self.simulation_hz * sign
             current_pose[0:2, 0:2] = np.array([[np.cos(self.root_theta), -np.sin(self.root_theta)],
                                                [np.sin(self.root_theta), np.cos(self.root_theta)]])
             self.manger.move_base(mat2transform(current_pose))
@@ -223,3 +126,37 @@ class MOVOEnv:
         ee_pose.set_p(np.array(ee_pose.p) + translation)
         result = self.arm_planner.go(ee_pose, "base_link")
         return result
+
+    def move_camera_toward_semantic(self, semantic_name):
+        links = self.obj.get_links()
+        semantic_link = self.semantic_mapping['semantic2link']
+        name = semantic_link[semantic_name]
+        link_names = self.obj.get_link_names()
+        link_index = link_names.index(name)
+
+        # Move robot to the right place
+        link_pose = transform2mat(links[link_index].get_global_mass_center())
+        camera_pose = self.get_robot_link_global_pose("kinect2_color_optical_frame")
+        robot_target_pose = np.eye(4)
+        robot_target_pose[0:3, 3] = link_pose[0:3, 3]
+        robot_target_pose[0, 3] -= 1.5
+        self.move_robot_to_target_place(robot_target_pose)
+
+        # Get camera pan and tilt target
+        relative_pose = link_pose[:3, 3] - camera_pose[:3, 3]
+        tilt_angle = np.arctan(relative_pose[2] / np.linalg.norm(relative_pose[0:2]))
+
+        # Move camera to the right place
+        for _ in range(self.simulation_hz):
+            self.head_controller.move_joint(["tilt_joint"], tilt_angle)
+            self.step()
+
+    def close_gripper(self, velocity):
+        time_step = self.gripper_limit[1] / velocity * self.simulation_hz
+        for _ in range(time_step.astype(np.int)):
+            self.gripper_controller.move_joint(self.gripper_joint, velocity)
+
+    def open_gripper(self, velocity):
+        time_step = self.gripper_limit[1] / velocity * self.simulation_hz
+        for _ in range(time_step.astype(np.int)):
+            self.gripper_controller.move_joint(self.gripper_joint, -velocity)

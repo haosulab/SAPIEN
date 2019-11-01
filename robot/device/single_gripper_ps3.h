@@ -15,6 +15,7 @@ public:
   explicit KinovaGripperPS3(ControllerManger *manger);
   ~KinovaGripperPS3() override;
   void step();
+  inline void set_mode(PS3Mode option) { input->setMode(option); };
   void set_cache(const std::vector<int> &cache);
   std::vector<int> get_cache();
 };

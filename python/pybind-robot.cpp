@@ -56,6 +56,9 @@ PYBIND11_MODULE(sapyen_robot, m) {
       .def("set_translation_velocity", &KinovaGripperPS3::set_translation_velocity)
       .def("set_rotation_velocity", &KinovaGripperPS3::set_rotation_velocity)
       .def("step", &KinovaGripperPS3::step)
+      .def("set_normal_mode", [](KinovaGripperPS3 &a) { a.set_mode(PS3Mode::NORMAL); })
+      .def("set_demonstration_mode", [](KinovaGripperPS3 &a) { a.set_mode(PS3Mode::DEMONSTRATION); })
+      .def("set_replay_mode", [](KinovaGripperPS3 &a) { a.set_mode(PS3Mode::REPLAY); })
       .def("apply_cache",
            [](KinovaGripperPS3 &a, const py::array_t<int> &arr) {
              a.set_cache(
