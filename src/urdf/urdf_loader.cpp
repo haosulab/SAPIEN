@@ -64,7 +64,10 @@ struct LinkTreeNode {
 
 ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *material) {
   XMLDocument doc;
-  doc.LoadFile(filename.c_str());
+  if (doc.LoadFile(filename.c_str())) {
+    std::cerr << "Error loading " << filename << std::endl;
+    return nullptr;
+  }
   XMLPrinter printer;
   if (strcmp("robot", doc.RootElement()->Name()) == 0) {
     robot = std::make_unique<Robot>(*doc.RootElement());
@@ -76,6 +79,11 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
   std::vector<std::unique_ptr<LinkTreeNode>> treeNodes;
   std::map<std::string, LinkTreeNode *> linkName2treeNode;
   std::map<std::string, LinkTreeNode *> jointName2treeNode;
+
+  if (robot->link_array.size() >= 64) {
+    std::cerr << "cannot build articulation with more than 64 links: " << filename << std::endl;
+    return nullptr;
+  }
 
   // process link
   for (const auto &link : robot->link_array) {

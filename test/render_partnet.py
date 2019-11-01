@@ -10,7 +10,7 @@ from PIL import Image
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('annoid', type=str)
+parser.add_argument('folder', type=str)
 parser.add_argument('--minyaw', type=float, default=0)
 parser.add_argument('--maxyaw', type=float, default=360)
 parser.add_argument('--minpitch', type=float, default=20)
@@ -18,6 +18,7 @@ parser.add_argument('--maxpitch', type=float, default=40)
 parser.add_argument('--yawcount', type=int, default=10)
 parser.add_argument('--pitchcount', type=int, default=2)
 args = parser.parse_args()
+annoid = os.path.basename(args.folder)
 
 
 def rand_cam_pose(rlow, rhigh, plow, phigh, ylow=0, yhigh=360):
@@ -65,13 +66,10 @@ for i in range(args.yawcount):
                 args.minyaw + (i + 1) * dyaw,
             ))
 
-DIR = '/home/fx/source/partnet-mobility-scripts/mobility-v0-prealpha3/mobility_verified'
-files = os.listdir(DIR)
-rand_file = np.random.choice(files)
-urdf = os.path.join(DIR, args.annoid, 'mobility.urdf')
+urdf = os.path.join(args.folder, 'mobility.urdf')
 print(urdf, file=sys.stderr)
 
-semantics = os.path.join(DIR, args.annoid, 'semantics.txt')
+semantics = os.path.join(args.folder, 'semantics.txt')
 link2semantics = {}
 link2motion = {}
 with open(semantics, 'r') as f:
@@ -97,6 +95,8 @@ sim.set_time_step(1.0 / 200.0)
 
 loader = sim.create_urdf_loader()
 wrapper = loader.load(urdf)
+if wrapper is None:
+    exit()
 
 builder = sim.create_actor_builder()
 mount = builder.build(False, True, "Camera Mount")
@@ -117,7 +117,7 @@ id2name = dict(zip(wrapper.get_link_ids(), wrapper.get_link_names()))
 id2semantic = [[i, link2motion[id2name[i]], link2semantics[id2name[i]]] for i in id2name
                if id2name[i] in link2semantics]
 
-with open(f'images/{args.annoid}_semantics.txt', 'w') as f:
+with open(f'images/{annoid}_semantics.txt', 'w') as f:
     for item in id2semantic:
         f.write(' '.join([str(i) for i in item]))
         f.write('\n')
@@ -145,13 +145,13 @@ for idx, pose in enumerate(poses):
     cam0 = renderer.get_camera(0)
     cam0.take_picture()
     Image.fromarray(
-        (cam0.get_color_rgba() * 255).astype(np.uint8)).save(f'images/{args.annoid}_{idx}_rgba.png')
+        (cam0.get_color_rgba() * 255).astype(np.uint8)).save(f'images/{annoid}_{idx}_rgba.png')
     Image.fromarray(
-        (cam0.get_normal_rgba() * 255).astype(np.uint8)).save(f'images/{args.annoid}_{idx}_normal.png')
+        (cam0.get_normal_rgba() * 255).astype(np.uint8)).save(f'images/{annoid}_{idx}_normal.png')
     depth = cam0.get_depth()
-    imwrite(f'images/{args.annoid}_{idx}_depth.tif', depth, compress=6, photometric='minisblack')
+    imwrite(f'images/{annoid}_{idx}_depth.tif', depth, compress=6, photometric='minisblack')
     seg = cam0.get_segmentation()
-    imwrite(f'images/{args.annoid}_{idx}_segmentation.tif', seg, compress=6, photometric='minisblack')
+    imwrite(f'images/{annoid}_{idx}_segmentation.tif', seg, compress=6, photometric='minisblack')
 
     config = {
         "camera": {
@@ -172,7 +172,7 @@ for idx, pose in enumerate(poses):
             "qpos": [link2qidx[l]] if l in link2qidx else None
         }
 
-    with open(f'images/{args.annoid}_{idx}_config.json', 'w') as f:
+    with open(f'images/{annoid}_{idx}_config.json', 'w') as f:
         json.dump(config, f)
 
 # renderer.show_window()

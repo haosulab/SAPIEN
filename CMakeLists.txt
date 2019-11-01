@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation")
 
 set(CMAKE_DEBUG_POSTFIX "")
-set(CMAKE_BUILD_TYPE "Debug")
+# set(CMAKE_BUILD_TYPE "Debug")
 set(OpenGL_GL_PREFERENCE "LEGACY")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -75,6 +75,9 @@ set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 add_executable(run "test/main.cpp")
 target_link_libraries(run sapien)
+
+add_executable(test_kinematic "test/test_kinematic.cpp")
+target_link_libraries(test_kinematic sapien)
 
 add_executable(ps3 test/ps3.cpp)
 target_link_libraries(ps3 sapien)

@@ -116,6 +116,11 @@ void test3() {
   renderer.cam.position = {0, -2, 0.5};
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
+  renderer.setAmbientLight({ .4, .4, .4 });
+  renderer.setShadowLight({ 1, -1, -1 }, { .5, .5, .5 });
+  renderer.addPointLight({ 2, 2, 2 }, { 1, 1, 1 });
+  renderer.addPointLight({ 2, -2, 2 }, { 1, 1, 1 });
+  renderer.addPointLight({ -2, 0, 2 }, { 1, 1, 1 });
 
   Simulation sim;
   sim.setRenderer(&renderer);
@@ -125,7 +130,7 @@ void test3() {
   loader.fixLoadedObject = true;
   // auto *articulationWrapper =
   auto wrapper = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility-v0-prealpha2/mobility_verified/11260/mobility.urdf");
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha1/6843/mobility.urdf");
 
   // std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
   // std::string line;
@@ -155,8 +160,8 @@ void test3() {
   // for (int i = 0; i < 4; ++i) {
   //   int x = i / row * 2;
   //   int y = i % row * 2;
-  auto articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
-  articulationWrapper->articulation->teleportRootLink({{-1,0,-.5}, PxIdentity}, true);
+  // auto articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+  // articulationWrapper->articulation->teleportRootLink({{-1,0,-.5}, PxIdentity}, true);
   //   auto articulation = articulationWrapper->articulation;
   //   articulation->teleportRootLink({{(float)x, (float)y, 0}, PxQuat(rand_float()*3, {0, 0, 1})},
   //   true); articulationWrapper->updateCache();
