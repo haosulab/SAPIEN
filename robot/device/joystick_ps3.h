@@ -37,7 +37,7 @@ enum ButtonId {
 
 enum AxisId {
   AXIS_LEFT_X,
-  AXiS_LEFT_Y,
+  AXIS_LEFT_Y,
   AXIS_LEFT_L2,
   AXIS_RIGHT_X,
   AXiS_RIGHT_Y,

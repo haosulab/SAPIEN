@@ -263,7 +263,10 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename) {
     // joint
     if (current->joint) {
       auto joint = (PxArticulationJointReducedCoordinate *)currentPxLink.getInboundJoint();
-      joint->setFrictionCoefficient(0);
+      // Load joint dynamics
+      if(current->joint->dynamics){
+        joint->setFrictionCoefficient(current->joint->dynamics->friction);
+      }
 
 #ifdef _VERBOSE
       printf("Joint: %s between %s and %s\n", current->joint->type.c_str(),
@@ -808,7 +811,6 @@ JointSystem *URDFLoader::loadJointSystem(const std::string &filename) {
 #endif
 
       PxRigidActor *parentLink = current->parent ? treeNode2pLink[current->parent] : nullptr;
-
       PxVec3 axis1 = current->joint->axis->xyz.getNormalized();
       PxVec3 axis2;
       if (axis1.dot({1, 0, 0}) > 0.9) {

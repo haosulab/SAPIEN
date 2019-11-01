@@ -35,22 +35,53 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <link name="root1"/>
   <link name="root2"/>
   <link name="root3"/>
+  <link name="root4"/>
+  <link name="root5"/>
+  <link name="root6"/>
   <joint name="x_axis_joint" type="prismatic">
     <parent link="root"/>
     <child link="root1"/>
-    <origin axis="1 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-10" upper="10" velocity="0.50"/>
+    <dynamics damping="10.0" friction="1000"/>
   </joint>
   <joint name="y_axis_joint" type="prismatic">
-    <parent link="roo1t"/>
+    <parent link="root1"/>
     <child link="root2"/>
-    <origin axis="0 1 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-10" upper="10" velocity="0.50"/>
+    <dynamics damping="10.0" friction="1000"/>
   </joint>
   <joint name="z_axis_joint" type="prismatic">
     <parent link="root2"/>
     <child link="root3"/>
-    <origin axis="0 0 1"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-10" upper="10" velocity="0.50"/>
+    <dynamics damping="10.0" friction="1000"/>
   </joint>
-  <link name="right_ee_link" type="prismatic"/>
+  <joint name="r_rotation_joint" type="continuous">
+    <parent link="root3"/>
+    <child link="root4"/>
+    <axis xyz="1 0 0"/>
+    <dynamics damping="10.0" friction="1"/>
+  </joint>
+  <joint name="p_rotation_joint" type="continuous">
+    <parent link="root4"/>
+    <child link="root5"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="10.0" friction="1"/>
+  </joint>
+  <joint name="y_rotation_joint" type="continuous">
+    <parent link="root5"/>
+    <child link="root6"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="10.0" friction="1"/>
+  </joint>
+  <joint name="right_ee_fixed_joint" type="fixed">
+    <parent link="root6"/>
+    <child link="right_ee_link"/>
+  </joint>
+  <link name="right_ee_link"/>
   <joint name="right_gripper_base_joint" type="fixed">
     <parent link="right_ee_link"/>
     <child link="right_gripper_base_link"/>

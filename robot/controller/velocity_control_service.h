@@ -10,7 +10,7 @@
 namespace sapien::robot {
 class JointVelocityController {
 private:
-  std::vector<std::string> mJointName;
+  std::vector<std::string> mJointName={};
   ros::NodeHandle *mNodeHandle = nullptr;
   ros::ServiceServer mServer;
   std::string mServerName;

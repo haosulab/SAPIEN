@@ -12,16 +12,22 @@ sapien::robot::ControllerManger::ControllerManger(std::string robotName,
     : wrapper(wrapper), robotName(std::move(robotName)), spinner(4),
       time_step(wrapper->informMangerTimestepChange()) {
   if (!ros::isInitialized()) {
+    throw std::runtime_error("ROS not init");
   }
   nh = std::make_unique<ros::NodeHandle>();
   jointName = wrapper->get_drive_joint_name();
 
   // Create robot states and load robot models
-  loader = robot_model_loader::RobotModelLoader("robot_description");
-  kinematicModel = loader.getModel();
-  ROS_INFO("Model frame: %s", kinematicModel->getModelFrame().c_str());
-  robotState = std::make_unique<robot_state::RobotState>(kinematicModel);
-  robotState->setToDefaultValues();
+  if (nh->hasParam("robot_description")) {
+    auto loader = robot_model_loader::RobotModelLoader("robot_description");
+    kinematicModel = loader.getModel();
+    ROS_INFO("Model frame: %s", kinematicModel->getModelFrame().c_str());
+    robotState = std::make_unique<robot_state::RobotState>(kinematicModel);
+    robotState->setToDefaultValues();
+  } else {
+    std::cerr << "No robot description found! \n"
+              << "Inverse kinematics and motion planning  will be disabled. \n";
+  }
 }
 void sapien::robot::ControllerManger::createJointPubNode(double pubFrequency,
                                                          double updateFrequency) {
@@ -41,6 +47,12 @@ sapien::robot::ControllerManger::createCartesianVelocityController(const std::st
              groupName.c_str());
     return nullptr;
   }
+  if (!kinematicModel) {
+    std::cerr << "Robot has not be loaded, does parameter exist?" << std::endl;
+    std::cerr << "Creating cartesian velocity controller fail due to empty robot model"
+              << std::endl;
+    return nullptr;
+  }
   auto controller = std::make_unique<CartesianVelocityController>(
       wrapper, jointState, robotState.get(), groupName, time_step, nh.get(), robotName);
 
@@ -50,7 +62,6 @@ sapien::robot::ControllerManger::createCartesianVelocityController(const std::st
 }
 JointVelocityController *sapien::robot::ControllerManger::createJointVelocityController(
     const std::vector<std::string> &jointNames, const std::string &serviceName) {
-  assert(jointPubNode);
   for (const auto &name : jointNames) {
     if (std::count(jointName.begin(), jointName.end(), name) != 1) {
       ROS_WARN("Joint name not found in robot %s: %s", robotName.c_str(), name.c_str());
@@ -67,6 +78,12 @@ JointVelocityController *sapien::robot::ControllerManger::createJointVelocityCon
 }
 void sapien::robot::ControllerManger::addGroupTrajectoryController(const std::string &groupName) {
   assert(jointPubNode);
+  if (!kinematicModel) {
+    std::cerr << "Robot has not be loaded, does parameter exist?" << std::endl;
+    std::cerr << "Creating cartesian velocity controller fail due to empty robot model"
+              << std::endl;
+    return;
+  }
   if (name2GroupTrajectoryController.find(groupName) != name2GroupTrajectoryController.end()) {
     ROS_WARN("Cartesian Velocity Controller has already existed for the same group name: %s",
              groupName.c_str());
@@ -79,11 +96,21 @@ void sapien::robot::ControllerManger::addGroupTrajectoryController(const std::st
 
 ros::NodeHandle *sapien::robot::ControllerManger::getHandle() const { return nh.get(); }
 std::string sapien::robot::ControllerManger::getRobotName() const { return robotName; }
-void sapien::robot::ControllerManger::start() { spinner.start(); }
+void sapien::robot::ControllerManger::start() {
+  if (spinner.canStart()) {
+    spinner.start();
+  };
+}
 void sapien::robot::ControllerManger::stop() { spinner.stop(); }
 void sapien::robot::ControllerManger::removeController(const std::string &) {}
 void ControllerManger::moveBase(const PxTransform &T) { wrapper->articulation->move_base(T); }
 MoveGroupPlanner *ControllerManger::createGroupPlanner(const std::string &groupName) {
+  if (!kinematicModel) {
+    std::cerr << "Robot has not be loaded, does parameter exist?" << std::endl;
+    std::cerr << "Creating cartesian velocity controller fail due to empty robot model"
+              << std::endl;
+    return nullptr;
+  }
   if (name2MoveGroupPlanner.find(groupName) != name2MoveGroupPlanner.end()) {
     ROS_WARN("Move Group Planner has already existed for the same group name: %s",
              groupName.c_str());
@@ -94,8 +121,8 @@ MoveGroupPlanner *ControllerManger::createGroupPlanner(const std::string &groupN
         "Move Group Planner require a controller with the same name. Will create one this time.");
     addGroupTrajectoryController(groupName);
   }
-  auto planner =
-      std::make_unique<MoveGroupPlanner>(groupName, name2GroupTrajectoryController[groupName].get(), nh.get());
+  auto planner = std::make_unique<MoveGroupPlanner>(
+      groupName, name2GroupTrajectoryController[groupName].get(), nh.get());
   auto plannerPtr = planner.get();
   name2MoveGroupPlanner[groupName] = std::move(planner);
   return plannerPtr;

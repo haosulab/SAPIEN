@@ -117,11 +117,12 @@ if (ROS)
                 )
         target_link_libraries(sapien_robot sapien ${catkin_LIBRARIES})
         add_library(robot_device_lib
+                robot/device/single_gripper.cpp
                 robot/device/joystick_ps3.cpp
                 robot/device/InputDevice.cpp
                 robot/device/movo_ps3.cpp
                 robot/device/movo_keyboard.cpp
-                robot/device/movo.cpp)
+                robot/device/movo.cpp robot/device/single_gripper_ps3.cpp robot/device/single_gripper_ps3.h)
         target_link_libraries(robot_device_lib sapien_robot)
 
         add_executable(robot robot/test/robot.cpp)
@@ -130,6 +131,8 @@ if (ROS)
         target_link_libraries(demonstration robot_device_lib)
         add_executable(movo_ps3 robot/example/movo_ps3_test.cpp)
         target_link_libraries(movo_ps3 robot_device_lib)
+        add_executable(gripper_ps3 robot/example/single_gripper_ps3_test.cpp)
+        target_link_libraries(gripper_ps3 robot_device_lib)
         add_executable(movo_keyboard robot/example/movo_keyboard_test.cpp)
         target_link_libraries(movo_keyboard robot_device_lib)
         pybind11_add_module(sapyen_robot "python/pybind-robot.cpp")

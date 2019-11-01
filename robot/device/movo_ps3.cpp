@@ -62,11 +62,11 @@ void sapien::robot::MOVOPS3::step() {
     break;
   }
   case ARM_WORLD: {
-    if (input->getAxis(AXIS_LEFT_X) || input->getAxis(AXiS_LEFT_Y) || input->getKey(BUTTON_UP) ||
+    if (input->getAxis(AXIS_LEFT_X) || input->getAxis(AXIS_LEFT_Y) || input->getKey(BUTTON_UP) ||
         input->getKey(BUTTON_DOWN)) {
       std::array<float, 3> vec = {0, 0, 0};
       vec[1] = -input->getAxisValue(AXIS_LEFT_X);
-      vec[0] = -input->getAxisValue(AXiS_LEFT_Y);
+      vec[0] = -input->getAxisValue(AXIS_LEFT_Y);
       vec[2] = input->getKey(BUTTON_UP) ? 1 : 0;
       vec[2] = input->getKey(BUTTON_DOWN) ? -1 : vec[2];
       right_arm_cartesian->moveRelative(vec, WorldTranslate, continuous);
@@ -88,11 +88,11 @@ void sapien::robot::MOVOPS3::step() {
     break;
   }
   case ARM_LOCAL: {
-    if (input->getAxis(AXIS_LEFT_X) || input->getAxis(AXiS_LEFT_Y) || input->getKey(BUTTON_UP) ||
+    if (input->getAxis(AXIS_LEFT_X) || input->getAxis(AXIS_LEFT_Y) || input->getKey(BUTTON_UP) ||
         input->getKey(BUTTON_DOWN)) {
       std::array<float, 3> vec = {0, 0, 0};
       vec[1] = -input->getAxisValue(AXIS_LEFT_X);
-      vec[2] = -input->getAxisValue(AXiS_LEFT_Y);
+      vec[2] = -input->getAxisValue(AXIS_LEFT_Y);
       vec[0] = input->getKey(BUTTON_UP) ? 1 : 0;
       vec[0] = input->getKey(BUTTON_DOWN) ? -1 : vec[0];
       right_arm_cartesian->moveRelative(vec, LocalTranslate, continuous);

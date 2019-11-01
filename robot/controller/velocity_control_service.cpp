@@ -9,7 +9,7 @@ JointVelocityController::JointVelocityController(ControllableArticulationWrapper
                                                  const std::vector<std::string> &jointName,
                                                  const std::string &serviceName, float timestep,
                                                  ros::NodeHandle *nh, const std::string &robotName)
-    : mJointName(jointName), mNodeHandle(std::move(nh)),
+    : mJointName(jointName), mNodeHandle(nh),
       mServerName("/sapien/" + robotName + "/" + serviceName + "/joint_velocity"),
       mTimestep(timestep) {
   mServer =
@@ -56,6 +56,7 @@ void JointVelocityController::moveJoint(const std::vector<std::string> &jointNam
     uint32_t index = std::find(mJointName.begin(), mJointName.end(), i) - mJointName.begin();
     if (index == mJointName.size()) {
       ROS_ERROR("Joint name not found in joint velocity controller: %s", i.c_str());
+      return;
     }
     jointVelocity[index] = velocity;
   }

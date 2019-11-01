@@ -32,7 +32,6 @@ private:
   std::unique_ptr<ros::NodeHandle> nh;
 
   // Robot and joint state
-  robot_model_loader::RobotModelLoader loader;
   robot_model::RobotModelPtr kinematicModel;
   std::unique_ptr<robot_state::RobotState> robotState;
   sensor_msgs::JointState *jointState = nullptr;
@@ -56,8 +55,8 @@ public:
   MoveGroupPlanner *createGroupPlanner(const std::string &groupName);
 
   // Manage controller manager handle
-  ros::NodeHandle *getHandle() const;
-  std::string getRobotName() const;
+  [[nodiscard]] ros::NodeHandle *getHandle() const;
+  [[nodiscard]] std::string getRobotName() const;
   void start();
   void stop();
   void removeController(const std::string &);
