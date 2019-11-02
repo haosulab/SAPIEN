@@ -25,10 +25,12 @@ class SingleGripperRecorder(SingleGripperEnv, SapienEnv):
         self.ps3.step()
 
         # Cache
-        self.control_signal.append(self.ps3.get_cache())
-        self.dump_data.append(self.sim.dump())
-        self.object_force_array.append(self.obj.get_cfrc_ext())
-        self.robot_force_array.append(self.robot.get_cfrc_ext())
+        if self.ps3.start_record():
+            print("Recording")
+            self.control_signal.append(self.ps3.get_cache())
+            self.dump_data.append(self.sim.dump())
+            self.object_force_array.append(self.obj.get_cfrc_ext())
+            self.robot_force_array.append(self.robot.get_cfrc_ext())
 
     def generate_header(self):
         header = {}

@@ -43,13 +43,9 @@ void PS3::shutdown() {
 }
 bool PS3::getKey(ButtonId id) { return buttonCache[id]; }
 bool PS3::getAxis(AxisId id) { return axisCache[id]; }
-float PS3::getAxisValue(AxisId id) { return static_cast<float>(axisStates[id]) / AXIS_CONST; }
+float PS3::getAxisValue(AxisId id) { return static_cast<float>(axisCache[id]) / AXIS_CONST; }
 void PS3::setMode(PS3Mode option) {
   mode = option;
-  //  if (mode == REPLAY) {
-  //    shouldExit = true;
-  //    worker.join();
-  //  }
 }
 void PS3::saveCache() {
   std::lock_guard<std::mutex> guard(lock);

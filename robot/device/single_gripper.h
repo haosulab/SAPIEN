@@ -32,6 +32,8 @@ public:
   float translation_velocity = 0.5;
   float rotation_velocity = 1;
 
+  bool startRecord = false;
+
 public:
   explicit SingleKinovaGripper(ControllerManger *manger);
   virtual ~SingleKinovaGripper() = default;

@@ -43,21 +43,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <child link="root1"/>
     <axis xyz="1 0 0"/>
     <limit lower="-10" upper="10" velocity="0.50"/>
-    <dynamics damping="10.0" friction="1000"/>
+    <dynamics damping="10.0" friction="10"/>
   </joint>
   <joint name="y_axis_joint" type="prismatic">
     <parent link="root1"/>
     <child link="root2"/>
     <axis xyz="0 1 0"/>
     <limit lower="-10" upper="10" velocity="0.50"/>
-    <dynamics damping="10.0" friction="1000"/>
+    <dynamics damping="10.0" friction="10"/>
   </joint>
   <joint name="z_axis_joint" type="prismatic">
     <parent link="root2"/>
     <child link="root3"/>
     <axis xyz="0 0 1"/>
     <limit lower="-10" upper="10" velocity="0.50"/>
-    <dynamics damping="10.0" friction="1000"/>
+    <dynamics damping="10.0" friction="10"/>
   </joint>
   <joint name="r_rotation_joint" type="continuous">
     <parent link="root3"/>

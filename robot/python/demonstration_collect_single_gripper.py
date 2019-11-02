@@ -40,12 +40,15 @@ def main():
     pose = np.eye(4)
     pose[0:3, 3] = [0, 0, 1]
     pose[:3, :3] = transforms3d.euler.euler2mat(0, 0.5, 0)
-    recorder.add_camera("back_view", pose, 640, 480)
     data = {}
+
+    # Set control velocity
+    recorder.ps3.set_gripper_velocity(3)
+    recorder.ps3.set_rotation_velocity(1.5)
+    recorder.ps3.set_translation_velocity(0.4)
     try:
         while 1:
             recorder.step()
-            normal = recorder.render_normal(0)
     finally:
         data.update({"control": np.stack(recorder.control_signal)})
         data.update({"state": np.stack(recorder.dump_data)})

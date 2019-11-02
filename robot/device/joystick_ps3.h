@@ -40,7 +40,7 @@ enum AxisId {
   AXIS_LEFT_Y,
   AXIS_LEFT_L2,
   AXIS_RIGHT_X,
-  AXiS_RIGHT_Y,
+  AXIS_RIGHT_Y,
   AXIS_RIGHT_L2,
 };
 #define PS3_AXIS_COUNT 6

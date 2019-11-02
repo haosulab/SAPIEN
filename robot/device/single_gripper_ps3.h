@@ -18,5 +18,6 @@ public:
   inline void set_mode(PS3Mode option) { input->setMode(option); };
   void set_cache(const std::vector<int> &cache);
   std::vector<int> get_cache();
+  inline bool start_record() { return startRecord; };
 };
 } // namespace sapien::robot

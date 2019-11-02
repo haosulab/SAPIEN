@@ -53,8 +53,8 @@ void sapien::robot::MOVOPS3::step() {
       head->moveJoint({"pan_joint"}, -head_velocity);
     } else if (input->getKey(BUTTON_CIRCLE)) {
       head->moveJoint({"pan_joint"}, head_velocity);
-    } else if (input->getAxis(AXiS_RIGHT_Y)) {
-      float dir = input->getAxisValue(AXiS_RIGHT_Y) > 0 ? -1 : 1;
+    } else if (input->getAxis(AXIS_RIGHT_Y)) {
+      float dir = input->getAxisValue(AXIS_RIGHT_Y) > 0 ? -1 : 1;
       body->moveJoint(bodyJoints, body_velocity * dir);
     } else {
       activated = false;
@@ -70,11 +70,11 @@ void sapien::robot::MOVOPS3::step() {
       vec[2] = input->getKey(BUTTON_UP) ? 1 : 0;
       vec[2] = input->getKey(BUTTON_DOWN) ? -1 : vec[2];
       right_arm_cartesian->moveRelative(vec, WorldTranslate, continuous);
-    } else if (input->getAxis(AXIS_RIGHT_X) || input->getAxis(AXiS_RIGHT_Y) ||
+    } else if (input->getAxis(AXIS_RIGHT_X) || input->getAxis(AXIS_RIGHT_Y) ||
                input->getKey(BUTTON_TRIANGLE) || input->getKey(BUTTON_X)) {
       std::array<float, 3> vec = {0, 0, 0};
       vec[0] = input->getAxisValue(AXIS_RIGHT_X);
-      vec[1] = input->getAxisValue(AXiS_RIGHT_Y);
+      vec[1] = input->getAxisValue(AXIS_RIGHT_Y);
       vec[2] = input->getKey(BUTTON_TRIANGLE) ? 1 : 0;
       vec[2] = input->getKey(BUTTON_X) ? -1 : vec[2];
       right_arm_cartesian->moveRelative(vec, WorldRotate, continuous);
@@ -96,11 +96,11 @@ void sapien::robot::MOVOPS3::step() {
       vec[0] = input->getKey(BUTTON_UP) ? 1 : 0;
       vec[0] = input->getKey(BUTTON_DOWN) ? -1 : vec[0];
       right_arm_cartesian->moveRelative(vec, LocalTranslate, continuous);
-    } else if (input->getAxis(AXIS_RIGHT_X) || input->getAxis(AXiS_RIGHT_Y) ||
+    } else if (input->getAxis(AXIS_RIGHT_X) || input->getAxis(AXIS_RIGHT_Y) ||
                input->getKey(BUTTON_TRIANGLE) || input->getKey(BUTTON_X)) {
       std::array<float, 3> vec = {0, 0, 0};
       vec[1] = input->getAxisValue(AXIS_RIGHT_X);
-      vec[2] = input->getAxisValue(AXiS_RIGHT_Y);
+      vec[2] = input->getAxisValue(AXIS_RIGHT_Y);
       vec[0] = input->getKey(BUTTON_TRIANGLE) ? 1 : 0;
       vec[0] = input->getKey(BUTTON_X) ? -1 : vec[0];
       right_arm_cartesian->moveRelative(vec, LocalRotate, continuous);

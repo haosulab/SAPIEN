@@ -33,10 +33,11 @@ void sapien::robot::KinovaGripperPS3::step() {
     translation->moveJoint({"z_axis_joint"}, translation_velocity);
   } else if (input->getKey(BUTTON_DOWN)) {
     translation->moveJoint({"z_axis_joint"}, -translation_velocity);
-  } else if (input->getAxis(AXIS_LEFT_X) || input->getAxis(AXIS_LEFT_Y)) {
-    float dir_x = input->getAxisValue(AXIS_LEFT_X) > 0 ? -1 : 1;
+  } else if (input->getAxis(AXIS_LEFT_X)) {
+    float dir_x = -input->getAxisValue(AXIS_LEFT_X);
     translation->moveJoint({"y_axis_joint"}, translation_velocity * dir_x);
-    float dir_y = input->getAxisValue(AXIS_LEFT_Y) > 0 ? -1 : 1;
+  } else if (input->getAxis(AXIS_LEFT_Y)) {
+    float dir_y = -input->getAxisValue(AXIS_LEFT_Y);
     translation->moveJoint({"x_axis_joint"}, translation_velocity * dir_y);
   } else if (input->getKey(BUTTON_L1)) {
     gripper->moveJoint(gripperJoints, gripper_velocity);
@@ -47,21 +48,25 @@ void sapien::robot::KinovaGripperPS3::step() {
     rotation->moveJoint({"r_rotation_joint"}, rotation_velocity);
   } else if (input->getKey(BUTTON_X)) {
     rotation->moveJoint({"r_rotation_joint"}, -rotation_velocity);
-  } else if (input->getAxis(AXiS_RIGHT_Y) || input->getAxis(AXIS_RIGHT_X)) {
-    float dir_y = input->getAxisValue(AXiS_RIGHT_Y) > 0 ? -1 : 1;
-    float dir_x = input->getAxisValue(AXIS_RIGHT_X) > 0 ? -1 : 1;
-    rotation->moveJoint({"p_rotation_joint"}, rotation_velocity * dir_x);
+  } else if (input->getAxis(AXIS_RIGHT_Y)) {
+    float dir_y = input->getAxisValue(AXIS_RIGHT_Y);
     rotation->moveJoint({"y_rotation_joint"}, rotation_velocity * dir_y);
-  } else if (input->getAxis(AXIS_LEFT_L2)) {
+  } else if (input->getAxis(AXIS_RIGHT_X)) {
+    float dir_x = input->getAxisValue(AXIS_RIGHT_X);
+    rotation->moveJoint({"p_rotation_joint"}, rotation_velocity * dir_x);
+  } else if (input->getKey(BUTTON_L2)) {
     grasped = true;
   } else {
     activated = false;
   }
-  if(grasped){
+  if (grasped) {
     gripper->moveJoint(gripperJoints, gripper_velocity);
   }
   if (input->getKey(BUTTON_LEFT) && input->getKey(BUTTON_CIRCLE)) {
     throw std::runtime_error("PS3 user interrupt.");
+  }
+  if (input->getKey(BUTTON_R2) && input->getKey(BUTTON_L2)) {
+    startRecord = true;
   }
   continuous = activated;
 }
