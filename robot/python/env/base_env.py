@@ -111,9 +111,9 @@ class BaseEnv:
     def __build_camera_mapping(self, height: int, width: int, camera_matrix: np.ndarray):
         """
         Build camera mapping matrix which maps depth to xyz point cloud
-        :param height:
-        :param width:
-        :param camera_matrix:
+        :param height: Height of camera
+        :param width: Width of camera
+        :param camera_matrix: Camera intrinsic matrix
         :return:
         """
         x = np.linspace(0.5, width - 0.5, width)
@@ -191,9 +191,9 @@ class SapienSingleObjectEnv(BaseEnv):
         # By default, objects except robot will not balance passive force automatically, e.g. gravity
         self.loader.fix_loaded_object = True
         self.loader.balance_passive_force = False
-        self.__urdf_file = urdf
         self.object = self.loader.load(urdf)
         self.object.set_root_pose([0, 0, 0], [1, 0, 0, 0])
+        self.__urdf_file = urdf
 
         # Get the mapping for link_name, link_id, semantic_name
         self.__build_object_semantic_mapping(part_dir=part_dir)
@@ -231,6 +231,9 @@ class SapienSingleObjectEnv(BaseEnv):
     def object_segmentation_id2semantics(self, segmentation_id: int) -> str:
         return self.__object_segmentation_id2semantics[segmentation_id]
 
+    def object_segmentation_id2link(self, segmentation_id: int) -> sapyen.PxRigidBody:
+        return self.__object_segmentation_id2links[segmentation_id]
+
     def __build_object_semantic_mapping(self, part_dir: str):
         """
         Build internally stored cache for objects
@@ -255,13 +258,49 @@ class SapienSingleObjectEnv(BaseEnv):
         self.__object_name2link = {link_names[i]: links[i] for i in range(len(link_names))}
         self.__object_segmentation_id2semantics = {i: link2semantics[id2link_name[i]] for i in
                                                    self.object_link_segmentation_ids}
+        self.__object_segmentation_id2links = {i: self.__object_name2link[id2link_name[i]] for i in
+                                               self.object_link_segmentation_ids}
 
     def apply_general_force_torque(self, link_index: int, force_array: np.ndarray):
         """
-        Apply force and torque to a object link
+        Apply force and torque to a object link, this function can not be used to actuate robot
         :param link_index: Index of object link
-        :param force_array: 6d array for force and torque, xyz convention
+        :param force_array: 6d array for force and torque, xyz convention and defined in global coordinate
         """
         assert len(force_array) == 6
         link = self.object_links[link_index]
         link.add_force(force_array)
+
+    @staticmethod
+    def __apply_force_to_link_at_position(link: sapyen.PxRigidBody, position: np.ndarray, direction: np.ndarray):
+        """
+        Apply a magic force to a global position, where the link should be specified to avoid ambiguity
+        :param link: Link handle of the target
+        :param position: Position where the force is applied
+        :param direction: Direction in global coordinate, where its norm is the magnitude
+        """
+        link_mass_center = link.get_global_mass_center()
+        point_to_center = position - link_mass_center.p
+        torque = np.cross(point_to_center, direction)
+        link.add_force(np.concatenate([direction, torque]))
+
+    def apply_force_to_object_at_rendering_position(self, cam_id: int, pos: np.ndarray, direction: np.ndarray):
+        """
+        Apply a magic force to a position in the camera rendering layer, to avoid ambiguity
+        :param cam_id: ID of camera
+        :param pos: 2d index in the camera pixel or point cloud index, it should be a 2d int vector
+        :param direction: Direction in global coordinate, where its norm is the magnitude
+        """
+        camera = self.cam_list[cam_id]
+
+        # Get segmentation id
+        seg = camera.get_segmentation()
+        segmentation_id = seg[pos]
+        if segmentation_id not in self.object_link_segmentation_ids:
+            warnings.warn("The place you apply force is not a valid object, e.g. robot or ground")
+            warnings.warn("No force will be apply")
+
+        depth = self.depth_lambda_list[cam_id](camera.get_depth())[:, :, np.newaxis].astype(np.float32)
+        position = depth[pos, :] * self.mapping_list[cam_id][pos, :]
+        link = self.object_segmentation_id2link(segmentation_id)
+        self.__apply_force_to_link_at_position(link, position, direction)

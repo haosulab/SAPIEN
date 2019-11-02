@@ -160,10 +160,11 @@ PYBIND11_MODULE(sapyen, m) {
                                                                                     "PxRigidBody")
       .def("get_global_pose", &PxRigidBody::getGlobalPose)
       .def("get_local_mass_center", &PxRigidBody::getCMassLocalPose)
-      .def("add_force", [](PxRigidBody &a, const py::array_t<float> &arr){
-        a.addForce(PxVec3(arr.at(0), arr.at(1), arr.at(2)));
-        a.addTorque(PxVec3(arr.at(3), arr.at(4), arr.at(5)));
-      })
+      .def("add_force",
+           [](PxRigidBody &a, const py::array_t<float> &arr) {
+             a.addForce(PxVec3(arr.at(0), arr.at(1), arr.at(2)));
+             a.addTorque(PxVec3(arr.at(3), arr.at(4), arr.at(5)));
+           })
       .def("get_global_mass_center",
            [](PxRigidBody &a) {
              auto globalPose = a.getGlobalPose();
@@ -482,6 +483,16 @@ PYBIND11_MODULE(sapyen, m) {
                                return make_array<float>({t.q.w, t.q.x, t.q.y, t.q.z});
                              })
       .def("inv", &PxTransform::getInverse)
+      .def("__repr__",
+           [](const PxTransform &pose) {
+             std::ostringstream oss;
+             oss << "Position: x: " << pose.p.x << ", y: " << pose.p.y << ", z: " << pose.p.z
+                 << "\n";
+             oss << "Quaternion: w: " << pose.q.w << ", x: " << pose.q.x << ", y: " << pose.q.y
+                 << ", z: " << pose.q.z << "\n";
+             std::string repr = oss.str();
+             return repr;
+           })
       .def("transform", [](PxTransform &t, PxTransform &src) { return t.transform(src); })
       .def("set_p", [](PxTransform &t, const py::array_t<PxReal> &arr) { t.p = array2vec3(arr); })
       .def("set_q", [](PxTransform &t, const py::array_t<PxReal> &arr) {
