@@ -399,9 +399,11 @@ PYBIND11_MODULE(sapyen, m) {
              auto qf = a.get_qf();
              return py::array_t<PxReal>(qf.size(), qf.data());
            })
-      .def("set_qf", [](IArticulationBase &a, const py::array_t<float> &arr) {
-        a.set_qf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-      });
+      .def("set_qf",
+           [](IArticulationBase &a, const py::array_t<float> &arr) {
+             a.set_qf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           })
+      .def("get_link_joint_pose", &IArticulationBase::get_link_joint_pose);
 
   py::class_<IArticulationDrivable, IArticulationBase>(m, "IArticulationDrivable")
       .def("get_drive_joint_names", &IArticulationDrivable::get_drive_joint_names)
@@ -452,6 +454,7 @@ PYBIND11_MODULE(sapyen, m) {
       .def("balance_passive_force", &ArticulationWrapper::set_force_balance);
 
   py::class_<JointSystem, IArticulationBase>(m, "JointSystem");
+  py::class_<KinematicsArticulationWrapper, IArticulationDrivable>(m, "KinematicsArticulationWrapper");
 
   py::class_<ControllableArticulationWrapper>(m, "ControllableArticulation");
 
@@ -461,6 +464,7 @@ PYBIND11_MODULE(sapyen, m) {
       .def_readwrite("balance_passive_force", &URDF::URDFLoader::balancePassiveForce)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
            py::arg("filename"), py::arg("material") = nullptr)
+      .def("load_kinematic", &URDF::URDFLoader::loadKinematic, py::return_value_policy::reference)
       .def("load_joint_system", &URDF::URDFLoader::loadJointSystem,
            py::return_value_policy::reference);
 

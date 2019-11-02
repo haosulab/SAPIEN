@@ -135,6 +135,7 @@ PxRigidActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string c
       mSimulation->mRenderId2Actor[mRenderIds[i]] = actor;
     }
     mSimulation->mLinkId2Actor[mLinkId] = actor;
+    mSimulation->mActor2LinkId[actor] = mLinkId;
   } else {
     PxRigidDynamic *dActor = mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
     dActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, isKinematic);
@@ -146,6 +147,7 @@ PxRigidActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string c
       mSimulation->mRenderId2Actor[mRenderIds[i]] = actor;
     }
     mSimulation->mLinkId2Actor[mLinkId] = actor;
+    mSimulation->mActor2LinkId[actor] = mLinkId;
     if (mCount) {
       PxRigidBodyExt::updateMassAndInertia(*dActor, mDensities.data(), mCount);
     }

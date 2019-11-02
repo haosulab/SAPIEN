@@ -60,6 +60,8 @@ public:
 
   virtual std::vector<physx::PxReal> get_qf() const override;
   virtual void set_qf(const std::vector<physx::PxReal> &v) override;
+
+  virtual physx::PxTransform get_link_joint_pose(uint32_t idx) const override;
 };
 
 }

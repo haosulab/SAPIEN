@@ -158,4 +158,9 @@ void JointSystem::set_qf(const std::vector<physx::PxReal> &v) {
   std::cerr << "Setting qf to Joint System is not supported" << std::endl;
 }
 
+PxTransform JointSystem::get_link_joint_pose(uint32_t idx) const {
+  std::cerr << "Getting Joint pose is not supported" << std::endl;
+  return PxTransform(PxIdentity);
+}
+
 }

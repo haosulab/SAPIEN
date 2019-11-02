@@ -34,7 +34,7 @@ struct IArticulationBase {
   virtual std::vector<physx_id_t> get_link_ids() const { return {}; }
 
   virtual ~IArticulationBase() = default;
-  ;
+  virtual physx::PxTransform get_link_joint_pose(uint32_t idx) const = 0;
 };
 
 class IArticulationDrivable : public IArticulationBase {

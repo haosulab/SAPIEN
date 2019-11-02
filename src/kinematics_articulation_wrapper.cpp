@@ -6,9 +6,15 @@
 #include <cassert>
 #include <iostream>
 #include <limits>
+#include "simulation.h"
 
 namespace sapien {
 // Kinematics Articulation Wrapper
+
+KinematicsArticulationWrapper::KinematicsArticulationWrapper(sapien::Simulation &sim) {
+  mSimulation = &sim;
+}
+
 KJoint *KinematicsArticulationWrapper::createJoint(const JointType &type, KJoint *parent,
                                                    PxRigidDynamic *link,
                                                    const PxTransform &poseFromParent,
@@ -25,23 +31,23 @@ KJoint *KinematicsArticulationWrapper::createJoint(const JointType &type, KJoint
     qName = "undefined_name" + std::to_string(undefinedNameGeneratorId++);
   }
 
-  std::unique_ptr<KJoint> newJoint;
+  std::shared_ptr<KJoint> newJoint;
   switch (type) {
   case JointType::REVOLUTE:
-    newJoint = std::make_unique<RevoluteKJoint>(link, parent, poseFromChild.getInverse(),
+    newJoint = std::make_shared<RevoluteKJoint>(link, parent, poseFromChild.getInverse(),
                                                 poseFromParent, upperLimit, lowerLimit);
     break;
   case JointType::CONTINUOUS:
-    newJoint = std::make_unique<ContinuousKJoint>(link, parent, poseFromChild.getInverse(),
+    newJoint = std::make_shared<ContinuousKJoint>(link, parent, poseFromChild.getInverse(),
                                                   poseFromParent);
     break;
   case JointType::PRISMATIC:
-    newJoint = std::make_unique<PrismaticKJoint>(link, parent, poseFromChild.getInverse(),
+    newJoint = std::make_shared<PrismaticKJoint>(link, parent, poseFromChild.getInverse(),
                                                  poseFromParent, upperLimit, lowerLimit);
     break;
   case JointType::FIXED:
     newJoint =
-        std::make_unique<FixedKJoint>(link, parent, poseFromChild.getInverse(), poseFromParent);
+        std::make_shared<FixedKJoint>(link, parent, poseFromChild.getInverse(), poseFromParent);
     break;
   case JointType::UNDEFINED:
     std::cerr << "Joint type not support for " << type << std::endl;
@@ -51,9 +57,8 @@ KJoint *KinematicsArticulationWrapper::createJoint(const JointType &type, KJoint
     mRoot = newJoint.get();
   }
   newJoint->setName(qName);
-  KJoint *tempJoint = newJoint.get();
-  jointName2JointPtr[qName] = std::move(newJoint);
-  return tempJoint;
+  jointName2JointPtr[qName] = newJoint;
+  return newJoint.get();
 }
 uint32_t KinematicsArticulationWrapper::dof() const { return DOF; }
 void KinematicsArticulationWrapper::buildCache() {
@@ -102,7 +107,7 @@ std::vector<uint32_t> KinematicsArticulationWrapper::get_joint_dofs() const { re
 std::vector<std::string> KinematicsArticulationWrapper::get_joint_names() const {
   return jointName;
 }
-std::vector<PxReal> KinematicsArticulationWrapper::get_qpos() const { return qpos; }
+std::vector<PxReal> KinematicsArticulationWrapper::get_qpos() const {return qpos; }
 std::vector<physx::PxReal> KinematicsArticulationWrapper::get_qvel() const { return qvel; }
 std::vector<physx::PxReal> KinematicsArticulationWrapper::get_qacc() const { return qacc; }
 std::vector<physx::PxReal> KinematicsArticulationWrapper::get_qf() const {
@@ -175,11 +180,24 @@ void KinematicsArticulationWrapper::move_base(const PxTransform &T) {
   set_drive_target(qpos);
 }
 std::vector<std::string> KinematicsArticulationWrapper::get_link_names() const {
-
-  return IArticulationBase::get_link_names();
+  std::vector<std::string> names;
+  for (auto l : linkListPtr) {
+    names.push_back(l->getName());
+  }
+  return names;
 }
+
 std::vector<physx_id_t> KinematicsArticulationWrapper::get_link_ids() const {
-  return IArticulationBase::get_link_ids();
+  std::vector<physx_id_t> segmentation_ids;
+  for (auto l : linkListPtr) {
+    segmentation_ids.push_back(mSimulation->mActor2LinkId[l]);
+  }
+  return segmentation_ids;
+}
+
+physx::PxTransform KinematicsArticulationWrapper::get_link_joint_pose(uint32_t idx) const {
+  assert(idx < linkListPtr.size());
+  return linkListPtr[idx]->getGlobalPose() * jointListPtr[idx]->getPoseToChild().getInverse();
 }
 
 } // namespace sapien

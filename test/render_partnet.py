@@ -11,12 +11,15 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('folder', type=str)
+parser.add_argument('--output', type=str, required=True)
 parser.add_argument('--minyaw', type=float, default=0)
 parser.add_argument('--maxyaw', type=float, default=360)
 parser.add_argument('--minpitch', type=float, default=20)
 parser.add_argument('--maxpitch', type=float, default=40)
 parser.add_argument('--yawcount', type=int, default=10)
 parser.add_argument('--pitchcount', type=int, default=2)
+parser.add_argument('--width', type=int, default=256)
+parser.add_argument('--height', type=int, default=256)
 args = parser.parse_args()
 annoid = os.path.basename(args.folder)
 
@@ -96,17 +99,18 @@ sim.set_time_step(1.0 / 200.0)
 loader = sim.create_urdf_loader()
 wrapper = loader.load(urdf)
 if wrapper is None:
-    exit()
+    print('fall back to kinematic articulation')
+    wrapper = loader.load_kinematic(urdf)
 
 builder = sim.create_actor_builder()
 mount = builder.build(False, True, "Camera Mount")
-cam = sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), 256, 256, 1.22172944444,
-                             1.22172944444, 0.01, 100)
+cam = sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), args.width, args.height,
+                             1.22172944444, 1.22172944444, 0.01, 100)
 
 zeros = np.zeros(wrapper.dof())
-wrapper.set_qpos(zeros)
 wrapper.set_qvel(zeros)
-wrapper.set_qf(zeros)
+wrapper.set_qpos(zeros)
+# wrapper.set_qf(zeros)
 
 limits = wrapper.get_joint_limits()
 limits = [[max(-100, l), min(100, h)] for l, h in limits]
@@ -117,7 +121,7 @@ id2name = dict(zip(wrapper.get_link_ids(), wrapper.get_link_names()))
 id2semantic = [[i, link2motion[id2name[i]], link2semantics[id2name[i]]] for i in id2name
                if id2name[i] in link2semantics]
 
-with open(f'images/{annoid}_semantics.txt', 'w') as f:
+with open(f'{args.output}/{annoid}_semantics.txt', 'w') as f:
     for item in id2semantic:
         f.write(' '.join([str(i) for i in item]))
         f.write('\n')
@@ -132,12 +136,14 @@ for dof, jname in zip(wrapper.get_joint_dofs(), joint_names):
         link2qidx['link_' + jname.split('_')[1]] = idx
         idx += 1
 
+link2lidx = dict((l, i) for i, l in enumerate(wrapper.get_link_names()))
+
 for idx, pose in enumerate(poses):
 
     mount.set_global_pose(pose)
     p = [rand_qpos(l, h) for l, h in limits]
-    wrapper.set_qpos(p)
     wrapper.set_qvel(zeros)
+    wrapper.set_qpos(p)
     sim.step()
     sim.step()
 
@@ -145,13 +151,12 @@ for idx, pose in enumerate(poses):
     cam0 = renderer.get_camera(0)
     cam0.take_picture()
     Image.fromarray(
-        (cam0.get_color_rgba() * 255).astype(np.uint8)).save(f'images/{annoid}_{idx}_rgba.png')
-    Image.fromarray(
-        (cam0.get_normal_rgba() * 255).astype(np.uint8)).save(f'images/{annoid}_{idx}_normal.png')
+        (cam0.get_color_rgba() * 255).astype(np.uint8)).save(f'{args.output}/{annoid}_{idx}_rgba.png')
+    imwrite(f'{args.output}/{annoid}_{idx}_normal.tif', cam0.get_normal_rgba(), compress=6)
     depth = cam0.get_depth()
-    imwrite(f'images/{annoid}_{idx}_depth.tif', depth, compress=6, photometric='minisblack')
+    imwrite(f'{args.output}/{annoid}_{idx}_depth.tif', depth, compress=6, photometric='minisblack')
     seg = cam0.get_segmentation()
-    imwrite(f'images/{annoid}_{idx}_segmentation.tif', seg, compress=6, photometric='minisblack')
+    imwrite(f'{args.output}/{annoid}_{idx}_segmentation.tif', seg, compress=6, photometric='minisblack')
 
     config = {
         "camera": {
@@ -164,20 +169,27 @@ for idx, pose in enumerate(poses):
     qpos = wrapper.get_qpos()
     config["links"] = {}
     for l in link2semantics:
+        if l in link2lidx:
+            pose = wrapper.get_link_joint_pose(link2lidx[l])
+            direction = transforms3d.quaternions.quat2mat(pose.q) @ np.array([1, 0, 0])
+            origin = pose.p
+
         config['links'][l] = {
             "id": link2id[l],
             "semantic": link2semantics[l],
             "motion": link2motion[l],
             "limit": list(true_limits[link2qidx[l]].astype(float)) if l in link2qidx else None,
-            "qpos": [link2qidx[l]] if l in link2qidx else None
+            "origin": list(origin.astype(float)) if l in link2lidx else None,
+            "direction": list(direction.astype(float)) if l in link2lidx else None,
+            "qpos": float(qpos[link2qidx[l]]) if l in link2qidx else None
         }
 
-    with open(f'images/{annoid}_{idx}_config.json', 'w') as f:
+    with open(f'{args.output}/{annoid}_{idx}_config.json', 'w') as f:
         json.dump(config, f)
 
-# renderer.show_window()
-# while True:
-#     sim.step()
-#     sim.update_renderer()
-#     renderer.render()
-#     depth = cam0.get_depth()
+renderer.show_window()
+while True:
+    sim.step()
+    sim.update_renderer()
+    renderer.render()
+    depth = cam0.get_depth()

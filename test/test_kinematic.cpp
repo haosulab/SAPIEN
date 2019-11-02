@@ -55,13 +55,44 @@ void test() {
 
   auto loader = URDF::URDFLoader(sim);
   loader.fixLoadedObject = true;
-  auto wrapper = loader.loadKinematic("../assets/7619/mobility.urdf");
+  auto wrapper = loader.loadKinematic("../assets/45940/mobility.urdf");
 
   auto actorBuider = sim.createActorBuilder();
   auto actor = actorBuider->build(false, true, "Camera Mount");
   sim.addMountedCamera("Floating Camera", actor, {{0, 0, 0}, PxIdentity}, 256, 256, 0.9, 0.9);
   actor->setGlobalPose({{-10, 0, 1}, {0, 0, 0, 1}});
   actor->setGlobalPose({{-2, 0, 2}, {0, 0.3826834, 0, 0.9238795}});
+
+  auto links = wrapper->get_links();
+  auto jointNames = wrapper->get_joint_names();
+
+  std::vector<float> ps(wrapper->dof(), 0.01);
+  physx::PxVec3 vec = {1, 0, 0};
+  wrapper->set_qpos(ps);
+
+  auto pose = wrapper->get_link_joint_pose(0);
+  auto newvec = pose.transform(physx::PxVec3{0, 0, 0});
+  std::cout << jointNames[0] << " " << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+  newvec = pose.rotate(vec);
+  std::cout << jointNames[0] << " " << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+
+  pose = wrapper->get_link_joint_pose(1);
+  newvec = pose.transform(physx::PxVec3{0, 0, 0});
+  std::cout << jointNames[1] << " " << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+  newvec = pose.rotate(vec);
+  std::cout << jointNames[1] << " " << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+
+  pose = wrapper->get_link_joint_pose(2);
+  newvec = pose.transform(physx::PxVec3{0, 0, 0});
+  std::cout << jointNames[2] << " " << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+  newvec = pose.rotate(vec);
+  std::cout << jointNames[2] << " " << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+
+  pose = wrapper->get_link_joint_pose(3);
+  newvec = pose.transform(physx::PxVec3{0, 0, 0});
+  std::cout << jointNames[3] << " " << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+  newvec = pose.rotate(vec);
+  std::cout << jointNames[3] << " " << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
 
   printf("Simulation start\n");
   while (true) {

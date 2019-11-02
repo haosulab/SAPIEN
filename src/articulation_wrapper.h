@@ -86,6 +86,9 @@ struct ArticulationWrapper : public IArticulationDrivable {
   // Drive specific member function
   virtual std::vector<std::string> get_drive_joint_names() const override;
   virtual void set_drive_target(const std::vector<physx::PxReal> &v) override;
+
+  virtual PxTransform get_link_joint_pose(uint32_t idx) const override;
+
   void set_drive_property(PxReal stiffness, PxReal damping, PxReal forceLimit = PX_MAX_F32,
                           const std::vector<uint32_t> &jointIndex = {});
   void set_force_balance(bool balanceForce);

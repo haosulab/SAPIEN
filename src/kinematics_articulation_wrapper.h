@@ -11,11 +11,12 @@
 #include <thread>
 
 namespace sapien {
+class Simulation;
 using namespace physx;
 
 class KinematicsArticulationWrapper : public IArticulationDrivable {
   KJoint *mRoot;
-  std::map<std::string, std::unique_ptr<KJoint>> jointName2JointPtr = {};
+  std::map<std::string, std::shared_ptr<KJoint>> jointName2JointPtr = {};
   std::vector<KJoint *> jointListPtr;
   uint32_t undefinedNameGeneratorId = 0;
 
@@ -44,7 +45,10 @@ class KinematicsArticulationWrapper : public IArticulationDrivable {
   std::vector<PxReal> lastStepQpos;
   std::vector<PxReal> driveQvel;
 
+  Simulation *mSimulation;
+
 public:
+  KinematicsArticulationWrapper(Simulation &sim);
   EArticulationType get_articulation_type() const override;
   void buildCache();
 
@@ -70,10 +74,13 @@ public:
   void set_drive_target(const std::vector<PxReal> &v) override;
   std::vector<std::string> get_drive_joint_names() const override;
 
+  physx::PxTransform get_link_joint_pose(uint32_t idx) const override;
+
   // Customer function
   inline std::vector<PxRigidBody *> get_links() const override {
     return std::vector<PxRigidBody *>(linkListPtr.begin(), linkListPtr.end());
   };
+
   std::vector<std::string> get_link_names() const override;
   std::vector<physx_id_t> get_link_ids() const override;
 

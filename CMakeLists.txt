@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation")
 
 set(CMAKE_DEBUG_POSTFIX "")
-# set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_BUILD_TYPE "Debug")
 set(OpenGL_GL_PREFERENCE "LEGACY")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

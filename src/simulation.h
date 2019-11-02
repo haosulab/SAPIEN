@@ -47,6 +47,7 @@ public:
   std::map<physx_id_t, std::string> mRenderId2VisualName;
 
   std::map<physx_id_t, PxRigidActor *> mLinkId2Actor;
+  std::map<PxRigidActor *, physx_id_t> mActor2LinkId;
   std::map<physx_id_t, IArticulationBase *> mLinkId2Articulation;
 
   std::vector<std::unique_ptr<struct ArticulationWrapper>> mDynamicArticulationWrappers;

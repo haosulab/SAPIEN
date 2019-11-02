@@ -367,7 +367,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
 
 KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &filename) {
   std::unique_ptr<KinematicsArticulationWrapper> wrapper =
-      std::make_unique<KinematicsArticulationWrapper>();
+      std::make_unique<KinematicsArticulationWrapper>(mSimulation);
 
   XMLDocument doc;
   doc.LoadFile(filename.c_str());

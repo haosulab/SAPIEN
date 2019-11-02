@@ -129,8 +129,7 @@ void test3() {
   auto loader = URDF::URDFLoader(sim);
   loader.fixLoadedObject = true;
   // auto *articulationWrapper =
-  auto wrapper = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha1/6843/mobility.urdf");
+  auto wrapper = loader.load("../assets/45940/mobility.urdf");
 
   // std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
   // std::string line;
@@ -188,6 +187,27 @@ void test3() {
   sim.addMountedCamera("Floating Camera", actor, {{0, 0, 0}, PxIdentity}, 256, 256, 0.9, 0.9);
   actor->setGlobalPose({{-10, 0, 1}, {0, 0, 0, 1}});
   actor->setGlobalPose({{-2, 0, 2}, {0, 0.3826834, 0, 0.9238795}});
+
+  auto names = wrapper->get_link_names();
+
+  std::vector<float> ps(wrapper->dof());
+  physx::PxVec3 vec = {1, 0, 0};
+  wrapper->set_qpos(ps);
+  auto pose = wrapper->get_link_joint_pose(1);
+  physx::PxVec3 newvec = pose.rotate(vec);
+  std::cout << names[1] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+
+  pose = wrapper->get_link_joint_pose(2);
+  newvec = pose.rotate(vec);
+  std::cout << names[2] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+
+  pose = wrapper->get_link_joint_pose(3);
+  newvec = pose.rotate(vec);
+  std::cout << names[3] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+
+  pose = wrapper->get_link_joint_pose(4);
+  newvec = pose.rotate(vec);
+  std::cout << names[4] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
 
   printf("Simulation start\n");
   while (true) {

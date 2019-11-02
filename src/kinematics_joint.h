@@ -39,6 +39,8 @@ public:
   virtual void driveQpos(const std::vector<PxReal> &qpos) = 0;
   std::vector<KJoint *> children;
   void setName(const std::string &n) { name = n; }
+  inline const PxTransform &getPoseToChild() { return poseToChild; }
+  inline const PxTransform &getPoseFromParent() { return poseFromParent; }
 };
 
 class SingleDOFKJoint : public KJoint {
@@ -98,4 +100,4 @@ public:
   PxReal getQpos() const override { return 0; }
 };
 
-}
+} // namespace sapien

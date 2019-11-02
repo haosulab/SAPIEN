@@ -132,6 +132,7 @@ physx_id_t ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link,
   mSimulation->mRenderId2Actor[newId] = &link;
   mSimulation->mRenderId2VisualName[newId] = name;
   mSimulation->mLinkId2Actor[mLink2LinkId[&link]] = &link;
+  mSimulation->mActor2LinkId[&link] = mLink2LinkId[&link];
   mVisualName2RenderId[name].push_back(newId);
   mLink2RenderId[&link].push_back(newId);
   return newId;
@@ -153,6 +154,7 @@ physx_id_t ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link,
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Actor[newId] = &link;
   mSimulation->mLinkId2Actor[mLink2LinkId[&link]] = &link;
+  mSimulation->mActor2LinkId[&link] = mLink2LinkId[&link];
   mSimulation->mRenderId2VisualName[newId] = name;
   mVisualName2RenderId[name].push_back(newId);
   mLink2RenderId[&link].push_back(newId);
@@ -175,6 +177,7 @@ physx_id_t ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link,
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Actor[newId] = &link;
   mSimulation->mLinkId2Actor[mLink2LinkId[&link]] = &link;
+  mSimulation->mActor2LinkId[&link] = mLink2LinkId[&link];
   mSimulation->mRenderId2VisualName[newId] = name;
   mVisualName2RenderId[name].push_back(newId);
   mLink2RenderId[&link].push_back(newId);
@@ -197,6 +200,7 @@ physx_id_t ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Actor[newId] = &link;
   mSimulation->mLinkId2Actor[mLink2LinkId[&link]] = &link;
+  mSimulation->mActor2LinkId[&link] = mLink2LinkId[&link];
   mSimulation->mRenderId2VisualName[newId] = name;
   mVisualName2RenderId[name].push_back(newId);
   mLink2RenderId[&link].push_back(newId);

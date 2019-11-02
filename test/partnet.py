@@ -32,6 +32,7 @@ def rand_cam_pose(rlow, rhigh, plow, phigh, ylow=0, yhigh=2 * np.pi):
 def rand_qpos(low, high):
     return np.random.rand() * (high - low) + low
 
+
 def test_urdf(folder):
     report = open('report.txt', 'w+')
     print('testing', os.path.basename(folder))
@@ -69,6 +70,7 @@ def test_urdf(folder):
     #     sim.step()
     #     sim.update_renderer()
     #     renderer.render()
+
 
 import sys
 test_urdf(sys.argv[1])

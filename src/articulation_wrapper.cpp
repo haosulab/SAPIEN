@@ -185,4 +185,14 @@ void ArticulationWrapper::move_base(const PxTransform &newT) {
   articulation->teleportRootLink(newT, true);
 }
 
+PxTransform ArticulationWrapper::get_link_joint_pose(uint32_t idx) const {
+  assert(idx < links.size());
+  auto link = links[idx];
+  auto joint = static_cast<PxArticulationJointReducedCoordinate*>(link->getInboundJoint());
+  if (!joint) {
+    return PxTransform(PxIdentity);
+  }
+  return link->getGlobalPose() * joint->getChildPose();
+}
+
 } // namespace sapien
