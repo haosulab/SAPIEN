@@ -11,10 +11,8 @@ class BaseRobotEnv(BaseEnv):
     It will not load any specific controllers
     """
 
-    def __init__(self, urdf_path: str, material: sapyen.PxMaterial):
-        super(BaseRobotEnv, self).__init__(False)
-        self._load_robot(urdf_path, material)
-        raise NotImplementedError
+    def __init__(self):
+        super(BaseRobotEnv, self).__init__(True)
 
     def robot_name2link(self, name: str) -> sapyen.PxRigidBody:
         return self.__robot_name2link[name]
@@ -26,21 +24,40 @@ class BaseRobotEnv(BaseEnv):
         self.manger = sapyen_robot.ControllerManger("virtual", None)
         raise NotImplementedError
 
-    def _load_robot(self, urdf_path: str, material: sapyen.PxMaterial):
-
+    def _load_robot(self, urdf_path: str, material: sapyen.PxMaterial) -> None:
         # By default, the robot will loaded with balanced passive force
         self.loader.fix_loaded_object = True
         self.loader.balance_passive_force = True
-        self.robot = self.loader.load(urdf_path, material)
+        self.robot: sapyen.ArticulationWrapper = self.loader.load(urdf_path, material)
         self.robot.set_root_pose([0, 0, 0], [1, 0, 0, 0])
 
-        # Link mapping
-        links = self.robot.get_links()
-        link_names = self.robot.get_link_names()
+        # Link mapping, remember to set the self._base_link_name if your robot base is not that name
+        links: List[sapyen.PxRigidBody] = self.robot.get_links()
+        link_names: List[str] = self.robot.get_link_names()
         self.__robot_name2link = dict(zip(link_names, links))
+        self._base_link_name = "base_link"
 
         # Load controllers, should be implemented with specific robot
         self._load_controller()
+
+        # Set mapping and other staff for the camera loaded with robot urdf
+        self._init_camera_cache()
+
+    def get_robot_link_global_pose_by_name(self, name: str) -> sapyen.Pose:
+        """
+        :param name: link_name
+        :return: Link global pose
+        """
+        return self.__robot_name2link[name].get_global_pose()
+
+    def get_robot_link_local_pose_by_name(self, name: str) -> sapyen.Pose:
+        """
+        :param name: link_name
+        :return: Link local pose
+        """
+        robot_pose: sapyen.Pose = self.__robot_name2link[self._base_link_name].get_global_pose()
+        link_pose = self.__robot_name2link[name].get_global_pose()
+        return robot_pose.inv().transform(link_pose)
 
     @property
     def robot_joint_names(self) -> List[str]:

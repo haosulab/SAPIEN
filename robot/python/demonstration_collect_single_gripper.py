@@ -4,6 +4,7 @@ import sys
 import pickle
 import numpy as np
 import transforms3d
+from robot.python.env.path_utils import *
 
 CONVEX_PARTNET_DIR = "/home/sim/project/mobility_convex"
 
@@ -41,6 +42,10 @@ def main():
     pose[0:3, 3] = [0, 0, 1]
     pose[:3, :3] = transforms3d.euler.euler2mat(0, 0.5, 0)
     data = {}
+    get_project_root()
+    get_robot_python_root()
+    get_robot_root()
+
 
     # Set control velocity
     recorder.ps3.set_gripper_velocity(3)

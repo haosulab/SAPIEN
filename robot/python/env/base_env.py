@@ -36,7 +36,6 @@ class BaseEnv:
         # Simulation
         self.sim = sapyen.Simulation()
         self.sim.set_renderer(self.renderer)
-        self.sim.add_ground(0, material=None)
         self.simulation_hz = 200
         self.sim.set_time_step(1 / self.simulation_hz)
 
@@ -52,7 +51,6 @@ class BaseEnv:
         self.mount_actor_list = []
         self.mapping_list = []
         self.depth_lambda_list = []
-        self.__init_camera_cache()
 
     def __step(self):
         """
@@ -62,7 +60,7 @@ class BaseEnv:
         self.sim.update_renderer()
         self.renderer.render()
 
-    def __init_camera_cache(self):
+    def _init_camera_cache(self):
         """
         Init camera mapping for camera define in urdf file, like camera on robot's head.
         Camera added by user after the class instantiate will not be handle by this function
@@ -194,7 +192,7 @@ class SapienSingleObjectEnv(BaseEnv):
         # By default, objects except robot will not balance passive force automatically, e.g. gravity
         self.loader.fix_loaded_object = True
         self.loader.balance_passive_force = False
-        self.object = self.loader.load(urdf)
+        self.object: sapyen.ArticulationWrapper = self.loader.load(urdf)
         # self.object.set_root_pose([3, 0, 0], [1, 0, 0, 0])
         self.__urdf_file = urdf
 
@@ -236,6 +234,12 @@ class SapienSingleObjectEnv(BaseEnv):
 
     def object_segmentation_id2link(self, segmentation_id: int) -> sapyen.PxRigidBody:
         return self.__object_segmentation_id2links[segmentation_id]
+
+    def get_object_link_center_global_pose_by_name(self, name: str) -> sapyen.Pose:
+        return self.object_name2link(name).get_global_mass_center()
+
+    def get_object_link_center_local_pose_by_name(self, name: str) -> sapyen.Pose:
+        return self.object_name2link(name).get_local_mass_center()
 
     def __build_object_semantic_mapping(self, part_dir: str):
         """

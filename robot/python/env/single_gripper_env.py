@@ -2,21 +2,31 @@ import sapyen_robot
 import sapyen
 from .base_robot_env import BaseRobotEnv
 import numpy as np
+import os
+from .path_utils import get_assets_path
 
 
 class SingleGripperBaseEnv(BaseRobotEnv):
     def __init__(self):
         """
-        Sapien single gripper base virtual class. It should never to be initiated.
+        Sapien single gripper base class.
+        If you want to use it with sapien object environment, do not use __init__ but _init_robot
+            e.g. single_hand_recorder
+        If you just want to load the robot only, you should consider use __init__ but not _init_robot
         """
-        BaseRobotEnv.__init__(self, "", sapyen.PxMaterial())
-        raise NotImplementedError
+        gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
+        BaseRobotEnv.__init__(self)
+        self._load_robot('../assets/robot/single_gripper.urdf', gripper_material)
+        print("Initiate Single Gripper Environment in stand alone version")
 
     def _init_robot(self) -> None:
+        """
+        Load the robot and controllers
+        """
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
         self._load_robot('../assets/robot/single_gripper.urdf', gripper_material)
 
-    def _load_controller(self):
+    def _load_controller(self) -> None:
         """
         Create controllers, set pd and force limit to each joint with fine tuned value
         """
@@ -40,6 +50,9 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         self.robot.set_drive_qpos(self.init_qpos)
         self.robot.set_qpos(self.init_qpos)
         self.sim.step()
+
+        # Change the base link name
+        self._base_link_name = "right_ee_link"
 
         # Cache gripper limit for execute high level action
         joint_limit = self.robot.get_joint_limits()

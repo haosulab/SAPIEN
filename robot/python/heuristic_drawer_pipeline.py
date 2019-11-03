@@ -1,8 +1,6 @@
-import sapyen
 import sapyen_robot
 import numpy as np
-from robot.python.demonstration.movo_env import MOVOEnv
-import transforms3d
+from robot.python.env.movo_env import MOVOEnv
 
 PARTNET_DIR = "/home/sim/project/mobility_convex"
 
