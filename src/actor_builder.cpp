@@ -14,6 +14,9 @@ void ActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTr
                                          PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
   PxConvexMesh *mesh = loadObjMesh(filename, mPhysicsSDK, mCooking);
+  if (!mesh) {
+    return;
+  }
   PxShape *shape =
       mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh, PxMeshScale(scale)), *material, true);
   if (!shape) {
