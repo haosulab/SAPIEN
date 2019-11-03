@@ -1,5 +1,5 @@
 import sapyen
-from .physx_utils import transform2mat, mat2transform
+from typing import List, Union
 import transforms3d
 import numpy as np
 import warnings
@@ -11,10 +11,10 @@ CAMERA_TO_LINK[[0, 1, 2, 3], [2, 0, 1, 3]] = [1, -1, -1, 1]
 
 
 class BaseEnv:
-    def __init__(self, on_screen_rendering: bool = True):
+    def __init__(self, on_screening_rendering: bool):
         """
         Base class of a environment of
-        :param on_screen_rendering: Whether to use rendering visualization or not
+        :param on_screening_rendering: Whether to use rendering visualization or not
         """
         # Rendering
         self.renderer = sapyen.OptifuserRenderer()
@@ -27,8 +27,9 @@ class BaseEnv:
         self.renderer.cam.rotate_yaw_pitch(0.5, -0.5)
 
         # Use rendering step with render if visualization is enable
-        if on_screen_rendering:
+        if on_screening_rendering:
             self.step = self.__step
+            self.renderer.show_window()
         else:
             self.step = lambda: self.sim.step()
 
@@ -78,7 +79,8 @@ class BaseEnv:
             self.depth_lambda_list.append(
                 lambda depth: 1 / (depth * (1 / camera.far - 1 / camera.near) + 1 / camera.near))
 
-    def add_camera(self, name: str, camera_pose_mat: np.ndarray, width: int, height: int, fov=1.1, near=0.01, far=100):
+    def add_camera(self, name: str, camera_pose_mat: np.ndarray, width: int, height: int, fov=1.1, near=0.01,
+                   far=100) -> None:
         """
         Add custom mounted camera to the scene. These camera have same property as the urdf-defined camera
         :param name: Name of the camera, used for get camera name and may be used for namespace of topic if ROS enabled
@@ -124,7 +126,7 @@ class BaseEnv:
         self.mapping_list.append(np.reshape(mapping.T, [height, width, 3]).astype(np.float32))
 
     @property
-    def mounted_camera_names(self):
+    def mounted_camera_names(self) -> List[str]:
         """
         Names of all existing camera in order
         """
@@ -178,13 +180,14 @@ class BaseEnv:
 
 
 class SapienSingleObjectEnv(BaseEnv):
-    def __init__(self, dataset_dir: str, data_id: int, on_screening_rendering: bool = True):
+    def __init__(self, dataset_dir: str, data_id: Union[int, str], on_screening_rendering: bool):
         """
         Sapien environment with single sapien object
         :param dataset_dir: Path of dataset directory
         :param data_id: Data ID of the sapien object
+        :param on_screening_rendering: Whether to use rendering visualization or not
         """
-        super(SapienSingleObjectEnv, self).__init__(on_screening_rendering)
+        BaseEnv.__init__(self, on_screening_rendering)
         part_dir = os.path.join(dataset_dir, str(data_id))
         urdf = os.path.join(part_dir, "mobility.urdf")
 
@@ -192,7 +195,7 @@ class SapienSingleObjectEnv(BaseEnv):
         self.loader.fix_loaded_object = True
         self.loader.balance_passive_force = False
         self.object = self.loader.load(urdf)
-        self.object.set_root_pose([0, 0, 0], [1, 0, 0, 0])
+        # self.object.set_root_pose([3, 0, 0], [1, 0, 0, 0])
         self.__urdf_file = urdf
 
         # Get the mapping for link_name, link_id, semantic_name
@@ -202,27 +205,27 @@ class SapienSingleObjectEnv(BaseEnv):
         return f"Sapien Single Object Environment with object loaded from {self.__urdf_file}"
 
     @property
-    def object_joint_names(self):
+    def object_joint_names(self) -> List[str]:
         return self.object.get_joint_names()
 
     @property
-    def object_link_names(self):
+    def object_link_names(self) -> List[str]:
         return self.object.get_link_names()
 
     @property
-    def object_links(self):
+    def object_links(self) -> List[sapyen.PxRigidBody]:
         return self.object.get_links()
 
     @property
-    def object_link_segmentation_ids(self):
+    def object_link_segmentation_ids(self) -> List[int]:
         return self.object.get_link_ids()
 
     @property
-    def object_link_motions(self):
+    def object_link_motions(self) -> List[str]:
         return self.__object_link_motion
 
     @property
-    def object_link_semantics(self):
+    def object_link_semantics(self) -> List[str]:
         return self.__object_link_semantics
 
     def object_name2link(self, name: str) -> sapyen.PxRigidBody:
@@ -241,8 +244,8 @@ class SapienSingleObjectEnv(BaseEnv):
         :return:
         """
         semantics = os.path.join(part_dir, 'semantics.txt')
-        link2semantics = {}
-        link2motion = {}
+        link2semantics = {'base': 'root'}
+        link2motion = {'base': 'fixed'}
         id2link_name = dict(zip(self.object.get_link_ids(), self.object.get_link_names()))
         with open(semantics, 'r') as f:
             for line in f:
@@ -261,7 +264,7 @@ class SapienSingleObjectEnv(BaseEnv):
         self.__object_segmentation_id2links = {i: self.__object_name2link[id2link_name[i]] for i in
                                                self.object_link_segmentation_ids}
 
-    def apply_general_force_torque(self, link_index: int, force_array: np.ndarray):
+    def apply_general_force_torque(self, link_index: int, force_array: Union[np.ndarray, List]) -> None:
         """
         Apply force and torque to a object link, this function can not be used to actuate robot
         :param link_index: Index of object link
@@ -284,7 +287,7 @@ class SapienSingleObjectEnv(BaseEnv):
         torque = np.cross(point_to_center, direction)
         link.add_force(np.concatenate([direction, torque]))
 
-    def apply_force_to_object_at_rendering_position(self, cam_id: int, pos: np.ndarray, direction: np.ndarray):
+    def apply_force_to_object_at_rendering_position(self, cam_id: int, pos: np.ndarray, direction: np.ndarray) -> None:
         """
         Apply a magic force to a position in the camera rendering layer, to avoid ambiguity
         :param cam_id: ID of camera

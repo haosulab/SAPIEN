@@ -36,7 +36,7 @@ void run() {
 
   loader->balancePassiveForce = true;
   auto gripperMaterial = sim.mPhysicsSDK->createMaterial(3, 2, 0.01);
-  auto wrapper = loader->load("../assets/robot/single_hand.urdf", gripperMaterial);
+  auto wrapper = loader->load("../assets/robot/single_gripper.urdf", gripperMaterial);
   wrapper->set_drive_property(300, 50, 40, {0, 1, 2, 3, 4, 5});
   wrapper->set_drive_property(1, 0.05, 1, {6, 7, 8});
   wrapper->set_qpos({0, 0, 1, 0, 0, 0, 0, 0, 0});

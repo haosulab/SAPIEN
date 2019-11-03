@@ -43,7 +43,7 @@ void test1() {
       "/home/sim/project/mobility-v0-prealpha3/mobility_verified/44826/mobility.urdf";
   loader->fixLoadedObject = true;
   loader->load(partFile)->articulation->teleportRootLink({{3.0, 0.3, 0.8}, PxIdentity}, true);
-  auto wrapper = loader->load("../assets/robot/single_hand.urdf");
+  auto wrapper = loader->load("../assets/robot/single_gripper.urdf");
     for(auto &actor: wrapper->get_links()){
       actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
     }

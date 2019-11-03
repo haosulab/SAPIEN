@@ -10,10 +10,10 @@ PARTNET_DIR = "/home/sim/project/mobility_convex"
 class DrawerTraditionalPipeline:
     def __init__(self, partnet_id: str):
         self.env = MOVOEnv(PARTNET_DIR, partnet_id)
-        self.env.obj.set_root_pose([2, 0, 0.5], [1, 0, 0, 0])
+        self.env.object.set_root_pose([2, 0, 0.5], [1, 0, 0, 0])
         self.mapping = self.env.semantic_mapping
         self.robot = self.env.robot
-        self.obj = self.env.obj
+        self.obj = self.env.object
         self.manger = self.env.manger
 
         # Bind base function

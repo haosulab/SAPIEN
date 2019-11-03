@@ -1,6 +1,5 @@
-import sapyen
 import sapyen_robot
-from .base_env import SapienEnv
+from robot.python.env.base_env import SapienSingleObjectEnv
 from .physx_utils import mat2transform, transform2mat
 import transforms3d
 import numpy as np
@@ -10,9 +9,9 @@ CAMERA_TO_LINK = np.zeros([4, 4])
 CAMERA_TO_LINK[[0, 1, 2, 3], [2, 0, 1, 3]] = [1, -1, -1, 1]
 
 
-class MOVOEnv(SapienEnv):
-    def __init__(self, partnet_dir, partnet_id):
-        super(MOVOEnv, self).__init__(partnet_dir, partnet_id)
+class MOVOEnv(SapienSingleObjectEnv):
+    def __init__(self, dataset_dir, data_id):
+        super(MOVOEnv, self).__init__(dataset_dir, data_id)
         # Robot Model
         self.loader.fix_loaded_object = True
         self.loader.balance_passive_force = True
@@ -128,10 +127,10 @@ class MOVOEnv(SapienEnv):
         return result
 
     def move_camera_toward_semantic(self, semantic_name):
-        links = self.obj.get_links()
+        links = self.object.get_links()
         semantic_link = self.semantic_mapping['semantic2link']
         name = semantic_link[semantic_name]
-        link_names = self.obj.get_link_names()
+        link_names = self.object.get_link_names()
         link_index = link_names.index(name)
 
         # Move robot to the right place

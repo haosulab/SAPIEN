@@ -1,4 +1,3 @@
-import sapyen
 import sapyen_robot
 from .base_env import BaseEnv
 
@@ -13,7 +12,7 @@ class SingleGripperEnv(BaseEnv):
         self.loader.fix_loaded_object = True
         self.loader.balance_passive_force = True
         gripper_material = self.sim.create_material(3.1, 2.1, 0.01)
-        self.robot = self.loader.load('../assets/robot/single_hand.urdf', gripper_material)
+        self.robot = self.loader.load('../assets/robot/single_gripper.urdf', gripper_material)
 
         # Link mapping
         links = self.robot.get_links()
