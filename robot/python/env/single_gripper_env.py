@@ -1,19 +1,18 @@
 import sapyen_robot
 import sapyen
-from .base_env import SapienSingleObjectEnv
 from .base_robot_env import BaseRobotEnv
 import numpy as np
 
 
-class SingleGripperEnv(SapienSingleObjectEnv, BaseRobotEnv):
-    def __init__(self, dataset_dir: str, data_id: int, on_screening_rendering: bool = True):
+class SingleGripperBaseEnv(BaseRobotEnv):
+    def __init__(self):
         """
-        Sapien environment with single sapien object
-        :param dataset_dir: Path of dataset directory
-        :param data_id: Data ID of the sapien object
-        :param on_screening_rendering: Whether to use rendering visualization or not
+        Sapien single gripper base virtual class. It should never to be initiated.
         """
-        SapienSingleObjectEnv.__init__(self, dataset_dir, data_id, on_screening_rendering)
+        BaseRobotEnv.__init__(self, "", sapyen.PxMaterial())
+        raise NotImplementedError
+
+    def _init_robot(self) -> None:
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
         self._load_robot('../assets/robot/single_gripper.urdf', gripper_material)
 

@@ -1,4 +1,4 @@
-from robot.python.env.single_gripper_env import SingleGripperEnv
+from robot.python.env.single_gripper_env import SingleGripperBaseEnv
 import sapyen_robot
 import sys
 
@@ -6,7 +6,7 @@ import sys
 def main():
     CONVEX_PARTNET_DIR = "/home/sim/project/mobility_convex"
     obj_id = 35059
-    env = SingleGripperEnv(CONVEX_PARTNET_DIR, obj_id, True)
+    env = SingleGripperBaseEnv(CONVEX_PARTNET_DIR, obj_id, True)
 
     for _ in range(1000):
         env.step()

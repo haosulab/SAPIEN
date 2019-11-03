@@ -28,10 +28,10 @@ class BaseEnv:
 
         # Use rendering step with render if visualization is enable
         if on_screening_rendering:
-            self.step = self.__step
+            self._step = self.__step
             self.renderer.show_window()
         else:
-            self.step = lambda: self.sim.step()
+            self._step = lambda: self.sim.step()
 
         # Simulation
         self.sim = sapyen.Simulation()

@@ -1,17 +1,16 @@
-from .single_gripper_env import SingleGripperEnv
-from robot.python.env.base_env import SapienSingleObjectEnv
+from .single_gripper_env import SingleGripperBaseEnv
+from .base_env import SapienSingleObjectEnv
 import sapyen_robot
+from typing import List, Union
 
 
-class SingleGripperRecorder(SingleGripperEnv, SapienSingleObjectEnv):
-    def __init__(self, dataset_dir, data_id):
-        SapienSingleObjectEnv.__init__(self, dataset_dir, data_id)
-        self._load_robot()
-        self._prepare_controller()
-        self.ps3 = sapyen_robot.SingleKinovaGripper(self.manger)
+class SingleGripperRecorder(SingleGripperBaseEnv, SapienSingleObjectEnv):
+    def __init__(self, dataset_dir: str, data_id: Union[str, int], on_screening_rendering: bool):
+        SapienSingleObjectEnv.__init__(self, dataset_dir, data_id, on_screening_rendering)
+        self._init_robot()
 
         # Init
-        self.renderer.show_window()
+        self.ps3 = sapyen_robot.SingleKinovaGripper(self.manger)
         self.ps3.set_demonstration_mode()
         self.dump_data = []
         self.control_signal = []
@@ -19,9 +18,7 @@ class SingleGripperRecorder(SingleGripperEnv, SapienSingleObjectEnv):
         self.robot_force_array = []
 
     def step(self):
-        self.sim.step()
-        self.sim.update_renderer()
-        self.renderer.render()
+        self._step()
         self.ps3.step()
 
         # Cache

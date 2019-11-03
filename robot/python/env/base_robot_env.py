@@ -11,8 +11,8 @@ class BaseRobotEnv(BaseEnv):
     It will not load any specific controllers
     """
 
-    def __init__(self, urdf_path: str, material: sapyen.PxMaterial, visualization: bool):
-        super(BaseRobotEnv, self).__init__(visualization)
+    def __init__(self, urdf_path: str, material: sapyen.PxMaterial):
+        super(BaseRobotEnv, self).__init__(False)
         self._load_robot(urdf_path, material)
         raise NotImplementedError
 
