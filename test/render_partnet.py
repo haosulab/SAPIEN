@@ -9,6 +9,8 @@ import transforms3d
 from PIL import Image
 import argparse
 
+np.random.seed(0)
+
 parser = argparse.ArgumentParser()
 parser.add_argument('folder', type=str)
 parser.add_argument('--output', type=str, required=True)
@@ -187,9 +189,9 @@ for idx, pose in enumerate(poses):
     with open(f'{args.output}/{annoid}_{idx}_config.json', 'w') as f:
         json.dump(config, f)
 
-renderer.show_window()
-while True:
-    sim.step()
-    sim.update_renderer()
-    renderer.render()
-    depth = cam0.get_depth()
+# renderer.show_window()
+# while True:
+#     sim.step()
+#     sim.update_renderer()
+#     renderer.render()
+#     depth = cam0.get_depth()
