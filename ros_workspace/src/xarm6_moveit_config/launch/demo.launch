@@ -1,0 +1,13 @@
+<launch>
+  <arg name="ns" default="" />
+
+  <remap from="$(arg ns)/source_list" to="/source_list" />
+  <include file="$(find xarm6_moveit_config)/launch/moveit_rviz_common.launch">
+    <!-- option to launch move_group node or not -->
+    <arg name="load_move_group" value="true" />
+    <!-- whether to use fake_execution controller to drive the motion -->
+    <arg name="fake_execution" value="false" />
+    
+  </include>
+
+</launch>

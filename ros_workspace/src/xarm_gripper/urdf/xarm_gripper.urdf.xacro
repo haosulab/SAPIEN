@@ -1,0 +1,401 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="xarm_gripper">
+<!--
+  Author: Jason Peng <jason@ufactory.cc>
+-->
+  <xacro:macro name="xarm_gripper_urdf" params="prefix:='' attach_to:='' rpy:='0 0 0' xyz:='0 0 0' ">
+  <xacro:unless value="${attach_to == ''}">
+    <joint name="${prefix}gripper_fix" type="fixed">
+      <parent link="${attach_to}"/>
+      <child link="${prefix}xarm_gripper_base_link"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+  </xacro:unless>
+  <link
+    name="${prefix}xarm_gripper_base_link">
+    <inertial>
+      <origin
+        xyz="-0.00065489 -0.0018497 0.048028"
+        rpy="0 0 0" />
+      <mass
+        value="0.54156" />
+      <inertia
+        ixx="0.00047106"
+        ixy="3.9292E-07"
+        ixz="2.6537E-06"
+        iyy="0.00033072"
+        iyz="-1.0975E-05"
+        izz="0.00025642" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/base_link.STL" />
+      </geometry>
+      <!-- <material
+        name="">
+        <color
+          rgba="0.89804 0.91765 0.92941 1" />
+      </material> -->
+      <material name="White">
+        <color rgba="1.0 1.0 1.0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="${prefix}left_outer_knuckle">
+    <inertial>
+      <origin
+        xyz="2.9948E-14 0.021559 0.015181"
+        rpy="0 0 0" />
+      <mass
+        value="0.033618" />
+      <inertia
+        ixx="1.9111E-05"
+        ixy="-1.8803E-17"
+        ixz="-1.1002E-17"
+        iyy="6.6256E-06"
+        iyz="-7.3008E-06"
+        izz="1.3185E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/left_outer_knuckle.STL" />
+      </geometry>
+      <material name="Silver">
+        <color rgba="0.753 0.753 0.753 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/left_outer_knuckle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="${prefix}drive_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.035 0.059098"
+      rpy="0 0 0" />
+    <parent
+      link="${prefix}xarm_gripper_base_link" />
+    <child
+      link="${prefix}left_outer_knuckle" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="0.85"
+      effort="50"
+      velocity="2" />
+  </joint>
+  <link
+    name="${prefix}left_finger">
+    <inertial>
+      <origin
+        xyz="-2.4536E-14 -0.016413 0.029258"
+        rpy="0 0 0" />
+      <mass
+        value="0.048304" />
+      <inertia
+        ixx="1.7493E-05"
+        ixy="-4.2156E-19"
+        ixz="6.9164E-18"
+        iyy="1.7225E-05"
+        iyz="4.6433E-06"
+        izz="5.1466E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/left_finger.STL" />
+      </geometry>
+      <material name="Silver">
+        <color rgba="0.753 0.753 0.753 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/left_finger.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="${prefix}left_finger_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.035465 0.042039"
+      rpy="0 0 0" />
+    <parent
+      link="${prefix}left_outer_knuckle" />
+    <child
+      link="${prefix}left_finger" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="0"
+      upper="0.85"
+      effort="50"
+      velocity="2" />
+    <mimic joint="${prefix}drive_joint" multiplier="1" offset="0" />
+  </joint>
+  <link
+    name="${prefix}left_inner_knuckle">
+    <inertial>
+      <origin
+        xyz="1.86600784687907E-06 0.0220467847633621 0.0261334672830885"
+        rpy="0 0 0" />
+      <mass
+        value="0.0230125781256706" />
+      <inertia
+        ixx="6.09490024271906E-06"
+        ixy="6.06651326160071E-11"
+        ixz="7.19102670500635E-11"
+        iyy="6.01955084375188E-06"
+        iyz="-2.75316812991721E-06"
+        izz="5.07862004479903E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/left_inner_knuckle.STL" />
+      </geometry>
+      <material name="Silver">
+        <color rgba="0.753 0.753 0.753 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/left_inner_knuckle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="${prefix}left_inner_knuckle_joint"
+    type="revolute">
+    <origin
+      xyz="0 0.02 0.074098"
+      rpy="0 0 0" />
+    <parent
+      link="${prefix}xarm_gripper_base_link" />
+    <child
+      link="${prefix}left_inner_knuckle" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="0.85"
+      effort="50"
+      velocity="2" />
+    <mimic joint="${prefix}drive_joint" multiplier="1" offset="0" />
+  </joint>
+  <link
+    name="${prefix}right_outer_knuckle">
+    <inertial>
+      <origin
+        xyz="-3.1669E-14 -0.021559 0.015181"
+        rpy="0 0 0" />
+      <mass
+        value="0.033618" />
+      <inertia
+        ixx="1.9111E-05"
+        ixy="-1.8789E-17"
+        ixz="1.0986E-17"
+        iyy="6.6256E-06"
+        iyz="7.3008E-06"
+        izz="1.3185E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/right_outer_knuckle.STL" />
+      </geometry>
+      <material name="Silver">
+        <color rgba="0.753 0.753 0.753 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/right_outer_knuckle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="${prefix}right_outer_knuckle_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.035 0.059098"
+      rpy="0 0 0" />
+    <parent
+      link="${prefix}xarm_gripper_base_link" />
+    <child
+      link="${prefix}right_outer_knuckle" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="0"
+      upper="0.85"
+      effort="50"
+      velocity="2" />
+    <mimic joint="drive_joint" multiplier="1" offset="0" />
+  </joint>
+  <link
+    name="${prefix}right_finger">
+    <inertial>
+      <origin
+        xyz="2.5618E-14 0.016413 0.029258"
+        rpy="0 0 0" />
+      <mass
+        value="0.048304" />
+      <inertia
+        ixx="1.7493E-05"
+        ixy="-5.0014E-19"
+        ixz="-7.5079E-18"
+        iyy="1.7225E-05"
+        iyz="-4.6435E-06"
+        izz="5.1466E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/right_finger.STL" />
+      </geometry>
+      <material name="Silver">
+        <color rgba="0.753 0.753 0.753 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/right_finger.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="${prefix}right_finger_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.035465 0.042039"
+      rpy="0 0 0" />
+    <parent
+      link="${prefix}right_outer_knuckle" />
+    <child
+      link="${prefix}right_finger" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="0.85"
+      effort="50"
+      velocity="2" />
+    <mimic joint="${prefix}drive_joint" multiplier="1" offset="0" />
+  </joint>
+  <link
+    name="${prefix}right_inner_knuckle">
+    <inertial>
+      <origin
+        xyz="1.866E-06 -0.022047 0.026133"
+        rpy="0 0 0" />
+      <mass
+        value="0.023013" />
+      <inertia
+        ixx="6.0949E-06"
+        ixy="-6.0665E-11"
+        ixz="7.191E-11"
+        iyy="6.0197E-06"
+        iyz="2.7531E-06"
+        izz="5.0784E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/right_inner_knuckle.STL" />
+      </geometry>
+      <material name="Silver">
+        <color rgba="0.753 0.753 0.753 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://xarm_gripper/meshes/right_inner_knuckle.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="${prefix}right_inner_knuckle_joint"
+    type="revolute">
+    <origin
+      xyz="0 -0.02 0.074098"
+      rpy="0 0 0" />
+    <parent
+      link="${prefix}xarm_gripper_base_link" />
+    <child
+      link="${prefix}right_inner_knuckle" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="0"
+      upper="0.85"
+      effort="50"
+      velocity="2" />
+    <mimic joint="${prefix}drive_joint" multiplier="1" offset="0" />
+  </joint>
+
+  </xacro:macro>
+
+</robot>

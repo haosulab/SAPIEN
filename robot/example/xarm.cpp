@@ -4,7 +4,6 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "controller/controller_manger.h"
-#include "device/movo_ps3.h"
 #include "optifuser_renderer.h"
 #include "simulation.h"
 #include "urdf/urdf_loader.h"
@@ -34,7 +33,7 @@ void test3() {
   loader.fixLoadedObject = true;
   renderer.showWindow();
 
-  auto xarm = loader.load("../assets/xarm/xarm6.urdf");
+  auto xarm = loader.load("../assets/robot/xarm6.urdf");
   xarm->set_drive_property(2000, 500);
   sim.addGround(-0.5);
   auto controllableWrapper = sim.createControllableArticulationWrapper(xarm);

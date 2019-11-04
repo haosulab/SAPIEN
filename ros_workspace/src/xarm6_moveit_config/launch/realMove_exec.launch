@@ -1,0 +1,40 @@
+<launch>
+
+  <arg name="robot_ip" />
+  <!-- load the default move_group planner (not xarm_simple_planner) -->
+  <arg name="show_rviz" default="true" />
+  <!-- NO_GUI_CTRL means that Rviz configuration is just for display purpose, no (Moveit) control panel loaded -->
+  <arg name="no_gui_plan" default="false" />
+  <arg name="ns" default="" />
+
+  <!-- common: bring up node to enable real xArm control -->
+  <include file="$(find xarm_bringup)/launch/xarm6_server.launch">
+    <arg name="robot_ip" value="$(arg robot_ip)" />
+    <arg name="use_moveit" value="true" />
+    <arg name="ns" value="$(arg ns)" />
+  </include>
+
+  <!-- load the joint trajectory controller specified in yaml -->
+  <rosparam file="$(find xarm_controller)/config/xarm6_traj_controller.yaml" command="load"/>
+  <node
+    name="traj_controller_spawner"
+    pkg="controller_manager"
+    type="spawner"
+    respawn="false"
+    output="screen"
+    ns="xarm"
+    args="xarm6_traj_controller"/>
+
+  <remap from="/follow_joint_trajectory" to="xarm/xarm6_traj_controller/follow_joint_trajectory"/>
+
+  <!-- common part -->
+  <remap from="/tf" to="$(arg ns)/tf" />
+  <remap from="/tf_static" to="$(arg ns)/tf_static" />
+  <remap from="$(arg ns)/source_list" to="/source_list" />
+  <include file="$(find xarm6_moveit_config)/launch/moveit_rviz_common.launch">
+    <arg name="jnt_stat_source" value="[xarm/joint_states]" />
+    <arg name="show_rviz" value="$(arg show_rviz)" />
+    <arg name="NO_GUI_CTRL" value="$(arg no_gui_plan)"/>
+  </include>
+
+</launch>

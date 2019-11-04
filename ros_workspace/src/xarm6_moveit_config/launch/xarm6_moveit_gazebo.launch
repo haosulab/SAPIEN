@@ -1,0 +1,14 @@
+<launch>
+
+  <!-- Remap the name space so it can send command to gazebo loaded controller -->
+  <!-- this remap must appear BEFORE move_group launch -->
+  <remap from="/follow_joint_trajectory" to="/xarm/xarm6_traj_controller/follow_joint_trajectory"/>
+
+  <include file="$(find xarm6_moveit_config)/launch/moveit_rviz_common.launch">
+    <arg name="jnt_stat_source" value="[/xarm/joint_states]" />
+    <arg name="load_move_group" value="true" />
+    <arg name="pub_tf" value="false" />
+  </include>
+
+  
+</launch>

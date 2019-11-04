@@ -46,7 +46,6 @@ def main():
     get_robot_python_root()
     get_robot_root()
 
-
     # Set control velocity
     recorder.ps3.set_gripper_velocity(3)
     recorder.ps3.set_rotation_velocity(1.5)

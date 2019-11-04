@@ -4,11 +4,11 @@ from .base_robot_env import BaseRobotEnv
 from .physx_utils import mat2transform, rpy2transform
 import numpy as np
 from typing import Union
-import os
 from .path_utils import get_assets_path
+import os
 
 
-class MOVOEnv(BaseRobotEnv):
+class XArmEnv(BaseRobotEnv):
     def __init__(self):
         """
         Sapien Kinova MOVO base class.
@@ -17,7 +17,8 @@ class MOVOEnv(BaseRobotEnv):
         """
         BaseRobotEnv.__init__(self)
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
-        self._load_robot(os.path.join(get_assets_path(), "robot/all_robot.urdf"), gripper_material)
+        self._load_robot(os.path.join(get_assets_path(), "robot/xarm6.urdf"), gripper_material)
+        self.__ee_link_name = "link6"
         print("Initiate MOVO Environment in stand alone version")
 
     def _init_robot(self) -> None:
@@ -25,28 +26,28 @@ class MOVOEnv(BaseRobotEnv):
         Load the robot and controllers
         """
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
-        self._load_robot(os.path.join(get_assets_path(), "robot/all_robot.urdf"), gripper_material)
+        self._load_robot('../assets/robot/xarm6.urdf', gripper_material)
+        self.__ee_link_name = "link6"
 
     def _load_controller(self) -> None:
         """
         Create controllers, set pd and force limit to each joint with fine tuned value
         """
         controllable_wrapper = self.sim.create_controllable_articulation(self.robot)
-        self._head_joint = ["pan_joint", "tilt_joint"]
-        self._gripper_joint = ["right_gripper_finger1_joint", "right_gripper_finger2_joint",
-                               "right_gripper_finger3_joint"]
-        self._body_joint = ["linear_joint"]
-        self.manger = sapyen_robot.ControllerManger("movo", controllable_wrapper)
-
-        self.head_controller = self.manger.create_joint_velocity_controller(self._head_joint, "head")
+        self._gripper_joint = ["drive_joint",
+                               "left_finger_joint",
+                               "left_inner_knuckle_joint",
+                               "right_outer_knuckle_joint",
+                               "right_finger_joint",
+                               "right_inner_knuckle_joint"]
+        self.manger = sapyen_robot.ControllerManger("xarm6", controllable_wrapper)
         self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
-        self.body_controller = self.manger.create_joint_velocity_controller(self._body_joint, "body")
 
         # Add joint state publisher to keep in synchronization with ROS
         # You must use it if you want to do cartesian control
         self.manger.add_joint_state_publisher(60, 400)
-        self.manger.add_group_trajectory_controller("right_arm")
-        self.__arm_planner = self.manger.create_group_planner("right_arm")
+        self.manger.add_group_trajectory_controller("xarm6")
+        self.__arm_planner = self.manger.create_group_planner("xarm6")
 
         # Cache gripper limit for execute high level action
         joint_limit = self.robot.get_joint_limits()
@@ -56,13 +57,11 @@ class MOVOEnv(BaseRobotEnv):
         # Cache robot pose
         self.root_theta = 0
         self.root_pos = np.array([0, 0], dtype=np.float)
-        self.init_qpos = [0, 0, 0, 0.25, -1.9347, 0, -1.5318, 0, 0.9512, -2.24, 0.34, 0.64, -1.413, 0, 0, 0]
+        self.init_qpos = np.zeros(12)
 
         # Tune PD controller
-        self.robot.set_pd(20000, 3000, 2000, np.arange(4))
-        self.robot.set_pd(2000, 300, 300, [4, 6, 8, 9, 10, 11, 12])
-        self.robot.set_pd(500, 100, 300, [5, 7])
-        self.robot.set_pd(200, 40, 20, np.arange(13, 16))
+        self.robot.set_pd(2000, 300, 300, np.arange(6))
+        self.robot.set_pd(500, 100, 300, np.arange(6, 12))
         self.robot.set_drive_qpos(self.init_qpos)
         self.robot.set_qpos(self.init_qpos)
         self.sim.step()
@@ -91,7 +90,7 @@ class MOVOEnv(BaseRobotEnv):
         :param translation: 3d vector of xyz in robot frame
         """
         assert translation.shape == (3,), "Translation should be a 3d vector"
-        ee_pose = self.get_robot_link_local_pose_by_name("right_ee_link")
+        ee_pose = self.get_robot_link_local_pose_by_name(self.__ee_link_name)
         ee_pose.set_p(np.array(ee_pose.p) + translation)
         result = self.__arm_planner.go(ee_pose, "base_link")
         return result
@@ -101,7 +100,7 @@ class MOVOEnv(BaseRobotEnv):
         Move end effector in robot frame with relative rotation
         :param rpy: 3d vector of row, yaw, pitch in robot frame
         """
-        ee_pose = self.get_robot_link_local_pose_by_name("right_ee_link")
+        ee_pose = self.get_robot_link_local_pose_by_name(self.__ee_link_name)
         rotation_pose = rpy2transform(rpy)
         ee_pose = ee_pose.transform(rotation_pose)
         result = self.__arm_planner.go(ee_pose, "base_link")
@@ -114,7 +113,7 @@ class MOVOEnv(BaseRobotEnv):
         """
         if type(pose) == np.ndarray:
             pose = mat2transform(pose)
-        ee_pose = self.get_robot_link_local_pose_by_name("right_ee_link")
+        ee_pose = self.get_robot_link_local_pose_by_name(self.__ee_link_name)
         new_pose = pose.transform(ee_pose)
         self.__arm_planner.go(new_pose, "base_link")
 

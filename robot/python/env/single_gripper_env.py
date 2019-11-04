@@ -16,7 +16,7 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         """
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
         BaseRobotEnv.__init__(self)
-        self._load_robot('../assets/robot/single_gripper.urdf', gripper_material)
+        self._load_robot(os.path.join(get_assets_path(), "robot/single_gripper.urdf"), gripper_material)
         print("Initiate Single Gripper Environment in stand alone version")
 
     def _init_robot(self) -> None:
@@ -24,7 +24,7 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         Load the robot and controllers
         """
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
-        self._load_robot('../assets/robot/single_gripper.urdf', gripper_material)
+        self._load_robot(os.path.join(get_assets_path(), "robot/single_gripper.urdf"), gripper_material)
 
     def _load_controller(self) -> None:
         """
