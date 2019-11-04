@@ -56,6 +56,15 @@ def rand_qpos(low, high):
     return np.random.rand() * (high - low) + low
 
 
+def build_camera_mapping(height: int, width: int, camera_matrix: np.ndarray):
+    x = np.linspace(0.5, width - 0.5, width)
+    y = np.linspace(0.5, height - 0.5, height)
+    x, y = np.meshgrid(x, y)
+    cor = np.stack([x.flatten(), y.flatten(), np.ones([x.size])], axis=0)
+    mapping = np.linalg.inv(camera_matrix[:3, :3]) @ cor
+    return mapping
+
+
 poses = []
 dyaw = (args.maxyaw - args.minyaw) / args.yawcount
 for i in range(args.yawcount):
@@ -106,8 +115,21 @@ if wrapper is None:
 
 builder = sim.create_actor_builder()
 mount = builder.build(False, True, "Camera Mount")
-cam = sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), args.width, args.height,
-                             1.22172944444, 1.22172944444, 0.01, 100)
+
+# Extract variable for simplicity
+fov = 1.22172944444
+near = 0.01
+far = 100
+width = args.width
+height = args.height
+cam = sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), width, height,
+                             fov, fov, near, far)
+
+# Save point cloud related meta data
+depth_lambda_list = []
+depth_lambda_list.append(lambda depth: 1 / (depth * (1 / far - 1 / near) + 1 / near))
+mapping = build_camera_mapping(height, width, cam.get_camera_matrix())
+camera_mapping = np.reshape(mapping.T, [height, width, 3]).astype(np.float32)
 
 zeros = np.zeros(wrapper.dof())
 wrapper.set_qvel(zeros)
@@ -152,13 +174,18 @@ for idx, pose in enumerate(poses):
     sim.update_renderer()
     cam0 = renderer.get_camera(0)
     cam0.take_picture()
+    rgba = cam0.get_color_rgba()
     Image.fromarray(
-        (cam0.get_color_rgba() * 255).astype(np.uint8)).save(f'{args.output}/{annoid}_{idx}_rgba.png')
+        (rgba * 255).astype(np.uint8)).save(f'{args.output}/{annoid}_{idx}_rgba.png')
     imwrite(f'{args.output}/{annoid}_{idx}_normal.tif', cam0.get_normal_rgba(), compress=6)
     depth = cam0.get_depth()
     imwrite(f'{args.output}/{annoid}_{idx}_depth.tif', depth, compress=6, photometric='minisblack')
     seg = cam0.get_segmentation()
     imwrite(f'{args.output}/{annoid}_{idx}_segmentation.tif', seg, compress=6, photometric='minisblack')
+
+    # Point cloud
+    xyz_point_cloud = camera_mapping * depth_lambda_list[0](depth)
+    point_cloud = np.concatenate([xyz_point_cloud, rgba, seg[:, :, None]], axis=2).astype(np.float32)
 
     config = {
         "camera": {
