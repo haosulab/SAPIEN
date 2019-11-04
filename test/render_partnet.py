@@ -83,6 +83,9 @@ for i in range(args.yawcount):
 urdf = os.path.join(args.folder, 'mobility.urdf')
 print(urdf, file=sys.stderr)
 
+with open(os.path.join(args.folder, 'meta.json'), 'r') as f:
+    model_category = json.load(f)['model_cat']
+
 semantics = os.path.join(args.folder, 'semantics.txt')
 link2semantics = {}
 link2motion = {}
@@ -186,13 +189,14 @@ for idx, pose in enumerate(poses):
     # Point cloud
     xyz_point_cloud = camera_mapping * depth_lambda_list[0](depth)[:, :, None]
     point_cloud = np.concatenate([xyz_point_cloud, rgba, seg[:, :, None]], axis=2).astype(np.float32)
-    np.save(f'{args.output}/{annoid}_{idx}_pointcloud.npy', point_cloud)
+    np.savez_compressed(f'{args.output}/{annoid}_{idx}_pointcloud', pc=point_cloud)
 
     config = {
         "camera": {
             "intrinsic": list(cam0.get_camera_matrix().reshape(-1).astype(float)),
             "extrinsic": list(cam0.get_model_mat().reshape(-1).astype(float))
         },
+        "category": model_category
     }
 
     true_limits = wrapper.get_joint_limits()
