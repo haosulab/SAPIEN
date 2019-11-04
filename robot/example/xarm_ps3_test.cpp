@@ -44,7 +44,8 @@ void run() {
   //  loader->load("../assets/46627/test.urdf")
   //      ->articulation->teleportRootLink({{2.0, 5.3, 0.4}, PxIdentity}, true);
   auto wrapper = loader->load("../assets/robot/xarm6.urdf");
-  wrapper->set_drive_property(2000, 500);
+  wrapper->set_drive_property(1000, 300, 300, {0, 1, 2, 3, 4, 5});
+  wrapper->set_drive_property(500, 100, 20, {6, 7, 8, 9, 10, 11});
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("xarm6", controllableWrapper);

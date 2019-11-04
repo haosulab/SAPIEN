@@ -17,6 +17,7 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
         BaseRobotEnv.__init__(self)
         self._load_robot(os.path.join(get_assets_path(), "robot/single_gripper.urdf"), gripper_material)
+        self._load_ros_controller()
         print("Initiate Single Gripper Environment in stand alone version")
 
     def _init_robot(self) -> None:
@@ -26,23 +27,7 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
         self._load_robot(os.path.join(get_assets_path(), "robot/single_gripper.urdf"), gripper_material)
 
-    def _load_controller(self) -> None:
-        """
-        Create controllers, set pd and force limit to each joint with fine tuned value
-        """
-        controllable_wrapper = self.sim.create_controllable_articulation(self.robot)
-        self.gripper_joint = ["right_gripper_finger1_joint", "right_gripper_finger2_joint",
-                              "right_gripper_finger3_joint"]
-        self.translation_joint = ["x_axis_joint", "y_axis_joint",
-                                  "z_axis_joint"]
-        self.rotation_joint = ["r_rotation_joint", "p_rotation_joint",
-                               "y_rotation_joint"]
-        self.manger = sapyen_robot.ControllerManger("movo", controllable_wrapper)
-        self.gripper_controller = self.manger.create_joint_velocity_controller(self.gripper_joint, "gripper")
-        self.translation_controller = self.manger.create_joint_velocity_controller(self.translation_joint,
-                                                                                   "translation")
-        self.rotation_controller = self.manger.create_joint_velocity_controller(self.rotation_joint, "rotation")
-
+    def _load_controller_parameters(self):
         # Init robot pose and controller
         self.robot.set_pd(200, 40, 20, [0, 1, 2, 3, 4, 5])
         self.robot.set_pd(1, 0.05, 1, [6, 7, 8])
@@ -53,6 +38,25 @@ class SingleGripperBaseEnv(BaseRobotEnv):
 
         # Change the base link name
         self._base_link_name = "right_ee_link"
+
+        # Load manger
+        controllable_wrapper = self.sim.create_controllable_articulation(self.robot)
+        self.manger = sapyen_robot.ControllerManger("movo", controllable_wrapper)
+
+    def _load_ros_controller(self) -> None:
+        """
+        Create controllers, set pd and force limit to each joint with fine tuned value
+        """
+        self.gripper_joint = ["right_gripper_finger1_joint", "right_gripper_finger2_joint",
+                              "right_gripper_finger3_joint"]
+        self.translation_joint = ["x_axis_joint", "y_axis_joint",
+                                  "z_axis_joint"]
+        self.rotation_joint = ["r_rotation_joint", "p_rotation_joint",
+                               "y_rotation_joint"]
+        self.gripper_controller = self.manger.create_joint_velocity_controller(self.gripper_joint, "gripper")
+        self.translation_controller = self.manger.create_joint_velocity_controller(self.translation_joint,
+                                                                                   "translation")
+        self.rotation_controller = self.manger.create_joint_velocity_controller(self.rotation_joint, "rotation")
 
         # Cache gripper limit for execute high level action
         joint_limit = self.robot.get_joint_limits()

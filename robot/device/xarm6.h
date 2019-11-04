@@ -26,8 +26,11 @@ protected:
 public:
   JointVelocityController *gripper;
   CartesianVelocityController *arm_cartesian;
+  ControlMode mode = ControlMode::ARM_WORLD;
 
   float gripper_velocity = 1;
+  float arm_cartesian_velocity = 0.10;
+  float arm_cartesian_angular_velocity = 0.3;
 
   bool startRecord = false;
 

@@ -7,7 +7,6 @@
 #include <memory>
 namespace sapien::robot {
 
-enum ControlMode { ARM_WORLD, ARM_LOCAL, BODY };
 
 class MOVO {
 protected:

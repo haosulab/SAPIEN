@@ -17,11 +17,15 @@ class BaseRobotEnv(BaseEnv):
     def robot_name2link(self, name: str) -> sapyen.PxRigidBody:
         return self.__robot_name2link[name]
 
-    def _load_controller(self):
+    def _load_ros_controller(self):
         """
         Pure virtual function for loading controllers. It should always be overloaded by child class
         """
         self.manger = sapyen_robot.ControllerManger("virtual", None)
+        raise NotImplementedError
+
+    def _load_controller_parameters(self):
+        self.robot.set_drive_qpos(None)
         raise NotImplementedError
 
     def _load_robot(self, urdf_path: str, material: sapyen.PxMaterial) -> None:
@@ -37,8 +41,8 @@ class BaseRobotEnv(BaseEnv):
         self.__robot_name2link = dict(zip(link_names, links))
         self._base_link_name = "base_link"
 
-        # Load controllers, should be implemented with specific robot
-        self._load_controller()
+        # Load controller parameters but not init all controllers. Since recorder may have already these.
+        self._load_controller_parameters()
 
         # Set mapping and other staff for the camera loaded with robot urdf
         self._init_camera_cache()
@@ -77,7 +81,7 @@ class BaseRobotEnv(BaseEnv):
         Get robot root pose in the global coordinate
         :return: Robot root pose
         """
-        return self.robot_name2link("right_ee_link").get_global_pose()
+        return self.robot_name2link(self._base_link_name).get_global_pose()
 
     def set_robot_base_pose(self, pose: Union[np.ndarray, List]) -> None:
         assert len(pose) == 7, "Pose should be in Position: x y z, Quaternion: w x y z format"

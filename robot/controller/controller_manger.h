@@ -5,15 +5,16 @@
 
 #include "cartesian_velocity_controller.h"
 #include "controllable_articulation_wrapper.h"
+#include "group_planner.h"
 #include "joint_pub_node.h"
 #include "joint_trajectory_controller.h"
 #include "velocity_control_service.h"
-#include "group_planner.h"
 #include <map>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
 namespace sapien::robot {
+enum ControlMode { ARM_WORLD, ARM_LOCAL, BODY };
 
 class ControllerManger {
 private:
@@ -32,7 +33,7 @@ private:
   std::unique_ptr<ros::NodeHandle> nh;
 
   // Robot and joint state
-  std::unique_ptr<robot_model_loader::RobotModelLoader> loader=nullptr;
+  std::unique_ptr<robot_model_loader::RobotModelLoader> loader = nullptr;
   robot_model::RobotModelPtr kinematicModel;
   std::unique_ptr<robot_state::RobotState> robotState;
   sensor_msgs::JointState *jointState = nullptr;

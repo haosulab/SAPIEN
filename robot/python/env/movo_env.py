@@ -18,6 +18,7 @@ class MOVOEnv(BaseRobotEnv):
         BaseRobotEnv.__init__(self)
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
         self._load_robot(os.path.join(get_assets_path(), "robot/all_robot.urdf"), gripper_material)
+        self._load_ros_controller()
         print("Initiate MOVO Environment in stand alone version")
 
     def _init_robot(self) -> None:
@@ -27,16 +28,33 @@ class MOVOEnv(BaseRobotEnv):
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
         self._load_robot(os.path.join(get_assets_path(), "robot/all_robot.urdf"), gripper_material)
 
-    def _load_controller(self) -> None:
+    def _load_controller_parameters(self):
+        # Cache robot pose
+        self.root_theta = 0
+        self.root_pos = np.array([0, 0], dtype=np.float)
+        self.init_qpos = [0, 0, 0, 0.25, -1.9347, 0, -1.5318, 0, 0.9512, -2.24, 0.34, 0.64, -1.413, 0, 0, 0]
+
+        # Tune PD controller
+        self.robot.set_pd(20000, 3000, 2000, np.arange(4))
+        self.robot.set_pd(2000, 300, 300, [4, 6, 8, 9, 10, 11, 12])
+        self.robot.set_pd(500, 100, 300, [5, 7])
+        self.robot.set_pd(200, 40, 20, np.arange(13, 16))
+        self.robot.set_drive_qpos(self.init_qpos)
+        self.robot.set_qpos(self.init_qpos)
+        self.sim.step()
+
+        # Create manger
+        controllable_wrapper = self.sim.create_controllable_articulation(self.robot)
+        self.manger = sapyen_robot.ControllerManger("movo", controllable_wrapper)
+
+    def _load_ros_controller(self) -> None:
         """
         Create controllers, set pd and force limit to each joint with fine tuned value
         """
-        controllable_wrapper = self.sim.create_controllable_articulation(self.robot)
         self._head_joint = ["pan_joint", "tilt_joint"]
         self._gripper_joint = ["right_gripper_finger1_joint", "right_gripper_finger2_joint",
                                "right_gripper_finger3_joint"]
         self._body_joint = ["linear_joint"]
-        self.manger = sapyen_robot.ControllerManger("movo", controllable_wrapper)
 
         self.head_controller = self.manger.create_joint_velocity_controller(self._head_joint, "head")
         self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
@@ -52,20 +70,6 @@ class MOVOEnv(BaseRobotEnv):
         joint_limit = self.robot.get_joint_limits()
         gripper_index = self.robot_joint_names.index(self._gripper_joint[0])
         self.__gripper_limit = joint_limit[gripper_index, :]
-
-        # Cache robot pose
-        self.root_theta = 0
-        self.root_pos = np.array([0, 0], dtype=np.float)
-        self.init_qpos = [0, 0, 0, 0.25, -1.9347, 0, -1.5318, 0, 0.9512, -2.24, 0.34, 0.64, -1.413, 0, 0, 0]
-
-        # Tune PD controller
-        self.robot.set_pd(20000, 3000, 2000, np.arange(4))
-        self.robot.set_pd(2000, 300, 300, [4, 6, 8, 9, 10, 11, 12])
-        self.robot.set_pd(500, 100, 300, [5, 7])
-        self.robot.set_pd(200, 40, 20, np.arange(13, 16))
-        self.robot.set_drive_qpos(self.init_qpos)
-        self.robot.set_qpos(self.init_qpos)
-        self.sim.step()
 
     def close_gripper(self, velocity: float = 2) -> None:
         """

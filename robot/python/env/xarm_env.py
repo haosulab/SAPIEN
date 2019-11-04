@@ -18,7 +18,6 @@ class XArmEnv(BaseRobotEnv):
         BaseRobotEnv.__init__(self)
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
         self._load_robot(os.path.join(get_assets_path(), "robot/xarm6.urdf"), gripper_material)
-        self.__ee_link_name = "link6"
         print("Initiate MOVO Environment in stand alone version")
 
     def _init_robot(self) -> None:
@@ -27,20 +26,34 @@ class XArmEnv(BaseRobotEnv):
         """
         gripper_material = self.sim.create_material(3.0, 2.0, 0.01)
         self._load_robot('../assets/robot/xarm6.urdf', gripper_material)
-        self.__ee_link_name = "link6"
 
-    def _load_controller(self) -> None:
+    def _load_controller_parameters(self):
+        self.__ee_link_name = "link6"
+        self.root_theta = 0
+        self.root_pos = np.array([0, 0], dtype=np.float)
+        self.init_qpos = np.zeros(12)
+
+        # Tune PD controller
+        self.robot.set_pd(2000, 300, 300, np.arange(6))
+        self.robot.set_pd(500, 100, 300, np.arange(6, 12))
+        self.robot.set_drive_qpos(self.init_qpos)
+        self.robot.set_qpos(self.init_qpos)
+        self.sim.step()
+
+        # Create manger
+        controllable_wrapper = self.sim.create_controllable_articulation(self.robot)  # Cache robot pose
+        self.manger = sapyen_robot.ControllerManger("xarm6", controllable_wrapper)
+
+    def _load_ros_controller(self) -> None:
         """
         Create controllers, set pd and force limit to each joint with fine tuned value
         """
-        controllable_wrapper = self.sim.create_controllable_articulation(self.robot)
         self._gripper_joint = ["drive_joint",
                                "left_finger_joint",
                                "left_inner_knuckle_joint",
                                "right_outer_knuckle_joint",
                                "right_finger_joint",
                                "right_inner_knuckle_joint"]
-        self.manger = sapyen_robot.ControllerManger("xarm6", controllable_wrapper)
         self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
 
         # Add joint state publisher to keep in synchronization with ROS
@@ -53,18 +66,6 @@ class XArmEnv(BaseRobotEnv):
         joint_limit = self.robot.get_joint_limits()
         gripper_index = self.robot_joint_names.index(self._gripper_joint[0])
         self.__gripper_limit = joint_limit[gripper_index, :]
-
-        # Cache robot pose
-        self.root_theta = 0
-        self.root_pos = np.array([0, 0], dtype=np.float)
-        self.init_qpos = np.zeros(12)
-
-        # Tune PD controller
-        self.robot.set_pd(2000, 300, 300, np.arange(6))
-        self.robot.set_pd(500, 100, 300, np.arange(6, 12))
-        self.robot.set_drive_qpos(self.init_qpos)
-        self.robot.set_qpos(self.init_qpos)
-        self.sim.step()
 
     def close_gripper(self, velocity: float = 2) -> None:
         """

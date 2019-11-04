@@ -335,7 +335,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="xarm_gripper/meshes/link_base.STL"/>
+        <mesh filename="xarm_gripper/meshes/base_link.STL"/>
       </geometry>
     </collision>
   </link>
