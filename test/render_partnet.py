@@ -122,13 +122,15 @@ near = 0.01
 far = 100
 width = args.width
 height = args.height
-cam = sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), width, height,
-                             fov, fov, near, far)
+cam = sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), width, height, fov, fov,
+                             near, far)
+
+cam0 = renderer.get_camera(0)
 
 # Save point cloud related meta data
 depth_lambda_list = []
 depth_lambda_list.append(lambda depth: 1 / (depth * (1 / far - 1 / near) + 1 / near))
-mapping = build_camera_mapping(height, width, cam.get_camera_matrix())
+mapping = build_camera_mapping(height, width, cam0.get_camera_matrix())
 camera_mapping = np.reshape(mapping.T, [height, width, 3]).astype(np.float32)
 
 zeros = np.zeros(wrapper.dof())
@@ -138,7 +140,6 @@ wrapper.set_qpos(zeros)
 
 limits = wrapper.get_joint_limits()
 limits = [[max(-100, l), min(100, h)] for l, h in limits]
-cam0 = renderer.get_camera(0)
 
 link2id = dict(zip(wrapper.get_link_names(), wrapper.get_link_ids()))
 id2name = dict(zip(wrapper.get_link_ids(), wrapper.get_link_names()))
@@ -175,8 +176,7 @@ for idx, pose in enumerate(poses):
     cam0 = renderer.get_camera(0)
     cam0.take_picture()
     rgba = cam0.get_color_rgba()
-    Image.fromarray(
-        (rgba * 255).astype(np.uint8)).save(f'{args.output}/{annoid}_{idx}_rgba.png')
+    Image.fromarray((rgba * 255).astype(np.uint8)).save(f'{args.output}/{annoid}_{idx}_rgba.png')
     imwrite(f'{args.output}/{annoid}_{idx}_normal.tif', cam0.get_normal_rgba(), compress=6)
     depth = cam0.get_depth()
     imwrite(f'{args.output}/{annoid}_{idx}_depth.tif', depth, compress=6, photometric='minisblack')
@@ -184,8 +184,9 @@ for idx, pose in enumerate(poses):
     imwrite(f'{args.output}/{annoid}_{idx}_segmentation.tif', seg, compress=6, photometric='minisblack')
 
     # Point cloud
-    xyz_point_cloud = camera_mapping * depth_lambda_list[0](depth)
+    xyz_point_cloud = camera_mapping * depth_lambda_list[0](depth)[:, :, None]
     point_cloud = np.concatenate([xyz_point_cloud, rgba, seg[:, :, None]], axis=2).astype(np.float32)
+    np.save(f'{args.output}/{annoid}_{idx}_pointcloud.npy', point_cloud)
 
     config = {
         "camera": {
