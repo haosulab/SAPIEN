@@ -16,10 +16,6 @@ OptifuserRenderer::OptifuserRenderer() { init(); }
 
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFile,
                                      const physx::PxVec3 &scale) {
-  // if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
-  //   std::cerr << "Object already added" << std::endl;
-  //   exit(1);
-  // }
   auto objects = Optifuser::LoadObj(objFile);
   mObjectRegistry[uniqueId] = {};
   if (objects.empty()) {
@@ -39,11 +35,6 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFi
 
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
                                      const physx::PxVec3 &scale, const physx::PxVec3 &color) {
-  // if (mObjectRegistry.find(uniqueId) != mObjectRegistry.end()) {
-  //   std::cerr << "Object already added" << std::endl;
-  //   exit(1);
-  // }
-
   switch (type) {
   case physx::PxGeometryType::eBOX: {
     auto obj = Optifuser::NewFlatCube();
@@ -139,11 +130,6 @@ void OptifuserRenderer::init() {
   cam.rotateYawPitch(0, -0.15);
   cam.fovy = glm::radians(45.f);
   cam.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
-  // mScene->addDirectionalLight({{1, -1, -1}, {.5, .5, .5}});
-  // mScene->addPointLight({{2, 2, 2}, {2, 2, 2}});
-  // mScene->addPointLight({{2, -2, 2}, {2, 2, 2}});
-  // mScene->addPointLight({{-2, 0, 2}, {2, 2, 2}});
-  // mScene->setAmbientLight(glm::vec3(0.4, 0.4, 0.4));
 
   mContext->renderer.setShadowShader("glsl_shader/shadow.vsh", "glsl_shader/shadow.fsh");
   mContext->renderer.setGBufferShader("glsl_shader/gbuffer.vsh",

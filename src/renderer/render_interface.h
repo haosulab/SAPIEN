@@ -55,6 +55,7 @@ public:
   virtual std::vector<float> getNormalRGBA() = 0;
   virtual std::vector<float> getDepth() = 0;
   virtual std::vector<int> getSegmentation() = 0;
+  virtual std::vector<int> getObjSegmentation() = 0;
 };
 
 class ICameraManager {

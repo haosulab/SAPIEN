@@ -146,7 +146,9 @@ PYBIND11_MODULE(sapyen, m) {
       .def("add_ground", &Simulation::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr)
       .def("create_material", &Simulation::createPhysicalMaterial)
-      .def("add_mounted_camera", &Simulation::addMountedCamera);
+      .def("add_mounted_camera", &Simulation::addMountedCamera)
+      .def("get_render_name_dict", [](Simulation &sim) { return sim.mRenderId2VisualName; },
+           py::return_value_policy::copy);
 
   py::class_<PxRigidActor, std::unique_ptr<PxRigidActor, py::nodelete>>(m, "PxRigidActor")
       .def("get_global_pose", &PxRigidActor::getGlobalPose)
@@ -247,10 +249,16 @@ PYBIND11_MODULE(sapyen, m) {
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
                  cam.getDepth().data());
            })
-      .def("get_segmentation", [](Renderer::ICamera &cam) {
+      .def("get_segmentation",
+           [](Renderer::ICamera &cam) {
+             return py::array_t<int>(
+                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
+                 cam.getSegmentation().data());
+           })
+      .def("get_obj_segmentation", [](Renderer::ICamera &cam) {
         return py::array_t<int>(
             {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
-            cam.getSegmentation().data());
+            cam.getObjSegmentation().data());
       });
 
   py::class_<Renderer::ICameraManager>(m, "ICameraManager");
@@ -265,31 +273,28 @@ PYBIND11_MODULE(sapyen, m) {
       .def_readonly("cam", &Renderer::OptifuserRenderer::cam)
       .def("get_camera_count",
            [](Renderer::OptifuserRenderer &r) { return r.getCameras().size(); })
-      .def(
-          "get_camera", [](Renderer::OptifuserRenderer &r, int i) { return r.getCameras().at(i); },
-          py::return_value_policy::reference)
-      .def(
-          "add_point_light",
-          [](Renderer::OptifuserRenderer &r, py::array_t<float> const &position,
-             py::array_t<float> const &color) {
-            r.addPointLight({position.at(0), position.at(1), position.at(2)},
-                            {color.at(0), color.at(1), color.at(2)});
-          },
-          py::arg("position"), py::arg("color"))
-      .def(
-          "set_ambient_light",
-          [](Renderer::OptifuserRenderer &r, py::array_t<float> const &color) {
-            r.setAmbientLight({color.at(0), color.at(1), color.at(2)});
-          },
-          py::arg("color"))
-      .def(
-          "set_shadow_light",
-          [](Renderer::OptifuserRenderer &r, py::array_t<float> const &direction,
-             py::array_t<float> const &color) {
-            r.setShadowLight({direction.at(0), direction.at(1), direction.at(2)},
+      .def("get_camera",
+           [](Renderer::OptifuserRenderer &r, int i) { return r.getCameras().at(i); },
+           py::return_value_policy::reference)
+      .def("add_point_light",
+           [](Renderer::OptifuserRenderer &r, py::array_t<float> const &position,
+              py::array_t<float> const &color) {
+             r.addPointLight({position.at(0), position.at(1), position.at(2)},
                              {color.at(0), color.at(1), color.at(2)});
-          },
-          py::arg("direction"), py::arg("color"));
+           },
+           py::arg("position"), py::arg("color"))
+      .def("set_ambient_light",
+           [](Renderer::OptifuserRenderer &r, py::array_t<float> const &color) {
+             r.setAmbientLight({color.at(0), color.at(1), color.at(2)});
+           },
+           py::arg("color"))
+      .def("set_shadow_light",
+           [](Renderer::OptifuserRenderer &r, py::array_t<float> const &direction,
+              py::array_t<float> const &color) {
+             r.setShadowLight({direction.at(0), direction.at(1), direction.at(2)},
+                              {color.at(0), color.at(1), color.at(2)});
+           },
+           py::arg("direction"), py::arg("color"));
 
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
       .def(py::init([]() { return new Optifuser::CameraSpec(); }))
@@ -408,16 +413,15 @@ PYBIND11_MODULE(sapyen, m) {
 
   py::class_<IArticulationDrivable, IArticulationBase>(m, "IArticulationDrivable")
       .def("get_drive_joint_names", &IArticulationDrivable::get_drive_joint_names)
-      .def(
-          "set_root_pose",
-          [](IArticulationDrivable &a, const py::array_t<float> &position,
-             const py::array_t<float> &quaternion) {
-            a.move_base(
-                {{position.at(0), position.at(1), position.at(2)},
-                 {quaternion.at(1), quaternion.at(2), quaternion.at(3), quaternion.at(0)}});
-          },
-          py::arg("position") = make_array<float>({0, 0, 0}),
-          py::arg("quaternion") = make_array<float>({0, 0, 0, 1}))
+      .def("set_root_pose",
+           [](IArticulationDrivable &a, const py::array_t<float> &position,
+              const py::array_t<float> &quaternion) {
+             a.move_base(
+                 {{position.at(0), position.at(1), position.at(2)},
+                  {quaternion.at(1), quaternion.at(2), quaternion.at(3), quaternion.at(0)}});
+           },
+           py::arg("position") = make_array<float>({0, 0, 0}),
+           py::arg("quaternion") = make_array<float>({0, 0, 0, 1}))
       .def("set_drive_qpos", [](ArticulationWrapper &a, py::array_t<float> qpos) {
         a.set_drive_target(std::vector<PxReal>(qpos.data(), qpos.data() + qpos.size()));
       });
@@ -455,7 +459,8 @@ PYBIND11_MODULE(sapyen, m) {
       .def("balance_passive_force", &ArticulationWrapper::set_force_balance);
 
   py::class_<JointSystem, IArticulationBase>(m, "JointSystem");
-  py::class_<KinematicsArticulationWrapper, IArticulationDrivable>(m, "KinematicsArticulationWrapper");
+  py::class_<KinematicsArticulationWrapper, IArticulationDrivable>(
+      m, "KinematicsArticulationWrapper");
 
   py::class_<ControllableArticulationWrapper>(m, "ControllableArticulation");
 
@@ -511,49 +516,47 @@ PYBIND11_MODULE(sapyen, m) {
 
   py::class_<ArticulationBuilder>(m, "ArticulationBuilder")
       .def(py::init<Simulation *>())
-      .def(
-          "add_link",
-          [](ArticulationBuilder &a, PxArticulationLink *parent, const PxTransform &pose,
-             const std::string &name, const std::string &jointName,
-             PxArticulationJointType::Enum jointType, const py::array_t<float> &arr,
-             PxTransform const &parentPose, PxTransform const &childPose) {
-            std::vector<std::array<float, 2>> limits;
-            if (jointType == PxArticulationJointType::eREVOLUTE ||
-                jointType == PxArticulationJointType::ePRISMATIC) {
-              limits = {{arr.at(0, 0), arr.at(0, 1)}};
-            }
-            // TODO: arr to limits
-            return a.addLink(parent, pose, name, jointName, jointType, limits, parentPose,
-                             childPose);
-          },
-          py::return_value_policy::reference, py::arg("parent") = (PxArticulationLink *)nullptr,
-          py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity), py::arg("name") = "",
-          py::arg("joint_name") = "", py::arg("joint_type") = PxArticulationJointType::eUNDEFINED,
-          py::arg("limits") = py::array_t<float>(),
-          py::arg("parent_pose") = PxTransform({0, 0, 0}, PxIdentity),
-          py::arg("child_pose") = PxTransform({0, 0, 0}, PxIdentity))
-      .def(
-          "add_box_shape_to_link",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-             const py::array_t<float> &arr,
-             PxMaterial *material) { a.addBoxShapeToLink(link, pose, array2vec3(arr), material); },
-          py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-          py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr)
+      .def("add_link",
+           [](ArticulationBuilder &a, PxArticulationLink *parent, const PxTransform &pose,
+              const std::string &name, const std::string &jointName,
+              PxArticulationJointType::Enum jointType, const py::array_t<float> &arr,
+              PxTransform const &parentPose, PxTransform const &childPose) {
+             std::vector<std::array<float, 2>> limits;
+             if (jointType == PxArticulationJointType::eREVOLUTE ||
+                 jointType == PxArticulationJointType::ePRISMATIC) {
+               limits = {{arr.at(0, 0), arr.at(0, 1)}};
+             }
+             // TODO: arr to limits
+             return a.addLink(parent, pose, name, jointName, jointType, limits, parentPose,
+                              childPose);
+           },
+           py::return_value_policy::reference, py::arg("parent") = (PxArticulationLink *)nullptr,
+           py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity), py::arg("name") = "",
+           py::arg("joint_name") = "", py::arg("joint_type") = PxArticulationJointType::eUNDEFINED,
+           py::arg("limits") = py::array_t<float>(),
+           py::arg("parent_pose") = PxTransform({0, 0, 0}, PxIdentity),
+           py::arg("child_pose") = PxTransform({0, 0, 0}, PxIdentity))
+      .def("add_box_shape_to_link",
+           [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
+              const py::array_t<float> &arr, PxMaterial *material) {
+             a.addBoxShapeToLink(link, pose, array2vec3(arr), material);
+           },
+           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+           py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr)
       .def("add_capsule_shape_to_link", &ArticulationBuilder::addCapsuleShapeToLink,
            py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
            py::arg("radius") = 1, py::arg("length") = 1, py::arg("material") = nullptr)
       .def("add_sphere_shape_to_link", &ArticulationBuilder::addSphereShapeToLink, py::arg("link"),
            py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity}, py::arg("radius") = 1,
            py::arg("material") = nullptr)
-      .def(
-          "add_convex_obj_shape_to_link",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const std::string &filename,
-             const PxTransform &pose, const py::array_t<float> &arr, PxMaterial *material) {
-            a.addConvexObjShapeToLink(link, filename, pose, array2vec3(arr), material);
-          },
-          py::arg("link"), py::arg("filename"),
-          py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-          py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr)
+      .def("add_convex_obj_shape_to_link",
+           [](ArticulationBuilder &a, PxArticulationLink &link, const std::string &filename,
+              const PxTransform &pose, const py::array_t<float> &arr, PxMaterial *material) {
+             a.addConvexObjShapeToLink(link, filename, pose, array2vec3(arr), material);
+           },
+           py::arg("link"), py::arg("filename"),
+           py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+           py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr)
       .def("set_link_mass_and_inertia",
            [](ArticulationBuilder &a, PxArticulationLink &link, PxReal mass,
               const PxTransform &cMassPose, const py::array_t<float> &arr) {
@@ -561,57 +564,52 @@ PYBIND11_MODULE(sapyen, m) {
            })
       .def("update_link_mass_and_inertia", &ArticulationBuilder::updateLinkMassAndInertia,
            py::arg("link"), py::arg("density") = 1.f)
-      .def(
-          "add_box_visual_to_link",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-             const py::array_t<float> &scale, const py::array_t<float> &color,
-             const std::string &name) {
-            a.addBoxVisualToLink(link, pose, array2vec3(scale), array2vec3(color), name);
-          },
-          py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-          py::arg("scale") = make_array<float>({1, 1, 1}),
-          py::arg("color") = make_array<float>({1, 1, 1}), py::arg("name") = "")
-      .def(
-          "add_capsule_visual_to_link",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-             PxReal radius, PxReal length, const py::array_t<PxReal> &color,
-             const std::string &name) {
-            a.addCapsuleVisualToLink(link, pose, radius, length, array2vec3(color), name);
-          },
-          py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-          py::arg("radius") = 1, py::arg("length") = 1,
-          py::arg("color") = make_array<float>({1, 1, 1}), py::arg("name") = "")
-      .def(
-          "add_sphere_visual_to_link",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
-             PxReal radius, const py::array_t<PxReal> &color, const std::string &name) {
-            a.addSphereVisualToLink(link, pose, radius, array2vec3(color), name);
-          },
-          py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
-          py::arg("radius") = 1, py::arg("color") = make_array<float>({1, 1, 1}),
-          py::arg("name") = "")
-      .def(
-          "add_obj_visual_to_link",
-          [](ArticulationBuilder &a, PxArticulationLink &link, const std::string &filename,
-             const PxTransform &pose, const py::array_t<float> &scale, const std::string &name) {
-            a.addObjVisualToLink(link, filename, pose, array2vec3(scale), name);
-          },
-          py::arg("link"), py::arg("filename"),
-          py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity),
-          py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("name") = "")
+      .def("add_box_visual_to_link",
+           [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
+              const py::array_t<float> &scale, const py::array_t<float> &color,
+              const std::string &name) {
+             a.addBoxVisualToLink(link, pose, array2vec3(scale), array2vec3(color), name);
+           },
+           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+           py::arg("scale") = make_array<float>({1, 1, 1}),
+           py::arg("color") = make_array<float>({1, 1, 1}), py::arg("name") = "")
+      .def("add_capsule_visual_to_link",
+           [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
+              PxReal radius, PxReal length, const py::array_t<PxReal> &color,
+              const std::string &name) {
+             a.addCapsuleVisualToLink(link, pose, radius, length, array2vec3(color), name);
+           },
+           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+           py::arg("radius") = 1, py::arg("length") = 1,
+           py::arg("color") = make_array<float>({1, 1, 1}), py::arg("name") = "")
+      .def("add_sphere_visual_to_link",
+           [](ArticulationBuilder &a, PxArticulationLink &link, const PxTransform &pose,
+              PxReal radius, const py::array_t<PxReal> &color, const std::string &name) {
+             a.addSphereVisualToLink(link, pose, radius, array2vec3(color), name);
+           },
+           py::arg("link"), py::arg("pose") = PxTransform{{0, 0, 0}, PxIdentity},
+           py::arg("radius") = 1, py::arg("color") = make_array<float>({1, 1, 1}),
+           py::arg("name") = "")
+      .def("add_obj_visual_to_link",
+           [](ArticulationBuilder &a, PxArticulationLink &link, const std::string &filename,
+              const PxTransform &pose, const py::array_t<float> &scale, const std::string &name) {
+             a.addObjVisualToLink(link, filename, pose, array2vec3(scale), name);
+           },
+           py::arg("link"), py::arg("filename"),
+           py::arg("pose") = PxTransform({0, 0, 0}, PxIdentity),
+           py::arg("scale") = make_array<float>({1, 1, 1}), py::arg("name") = "")
       .def("build", &ArticulationBuilder::build, py::arg("fix_base") = true,
            py::arg("balanceForce") = false, py::return_value_policy::reference);
 
   py::class_<ActorBuilder>(m, "ActorBuilder")
-      .def(
-          "add_box_shape",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<float> const &size,
-             PxMaterial *material, PxReal density) {
-            a.addBoxShape(pose, {size.at(0), size.at(1), size.at(2)}, material, density);
-          },
-          py::arg("pose") = PxTransform({0, 0, 0}, {0, 0, 0, 1}),
-          py::arg("size") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr,
-          py::arg("density") = 1000.f)
+      .def("add_box_shape",
+           [](ActorBuilder &a, PxTransform const &pose, py::array_t<float> const &size,
+              PxMaterial *material, PxReal density) {
+             a.addBoxShape(pose, {size.at(0), size.at(1), size.at(2)}, material, density);
+           },
+           py::arg("pose") = PxTransform({0, 0, 0}, {0, 0, 0, 1}),
+           py::arg("size") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr,
+           py::arg("density") = 1000.f)
       .def("build", &ActorBuilder::build, py::arg("is_static") = false,
            py::arg("is_kinematic") = false, py::arg("name") = "", py::arg("add_to_scene") = true);
   // .def("add_sphere_shape", &ActorBuilder::addSphereShape)

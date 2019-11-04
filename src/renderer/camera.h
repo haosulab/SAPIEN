@@ -27,6 +27,7 @@ public:
   virtual std::vector<float> getNormalRGBA() override;
   virtual std::vector<float> getDepth() override;
   virtual std::vector<int> getSegmentation() override;
+  virtual std::vector<int> getObjSegmentation() override;
 
   // ISensor
   virtual SensorPose getSensorPose() const override;

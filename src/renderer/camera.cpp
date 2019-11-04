@@ -14,8 +14,7 @@ MountedCamera::MountedCamera(std::string const &name_, uint32_t width, uint32_t 
 
   // initialize render context
   mRenderContext = Optifuser::OffscreenRenderContext::Create(width, height);
-  mRenderContext->renderer.setShadowShader("glsl_shader/shadow.vsh",
-                                           "glsl_shader/shadow.fsh");
+  mRenderContext->renderer.setShadowShader("glsl_shader/shadow.vsh", "glsl_shader/shadow.fsh");
   mRenderContext->renderer.setGBufferShader("glsl_shader/gbuffer.vsh",
                                             "glsl_shader/gbuffer_segmentation.fsh");
   mRenderContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
@@ -35,6 +34,9 @@ std::vector<float> MountedCamera::getNormalRGBA() { return mRenderContext->rende
 std::vector<float> MountedCamera::getDepth() { return mRenderContext->renderer.getDepth(); }
 std::vector<int> MountedCamera::getSegmentation() {
   return mRenderContext->renderer.getSegmentation();
+}
+std::vector<int> MountedCamera::getObjSegmentation() {
+  return mRenderContext->renderer.getSegmentation2();
 }
 
 SensorPose MountedCamera::getSensorPose() const {
