@@ -17,15 +17,9 @@ namespace sapien::robot {
 enum ControlMode { ARM_WORLD, ARM_LOCAL, BODY };
 
 class ControllerManger {
-private:
+protected:
   // Hold all the controller related to a manager
   ControllableArticulationWrapper *wrapper;
-  std::unique_ptr<JointPubNode> jointPubNode = nullptr;
-  std::map<std::string, std::unique_ptr<CartesianVelocityController>>
-      name2CartesianVelocityController;
-  std::map<std::string, std::unique_ptr<JointVelocityController>> name2JointVelocityController;
-  std::map<std::string, std::unique_ptr<GroupControllerNode>> name2GroupTrajectoryController;
-  std::map<std::string, std::unique_ptr<MoveGroupPlanner>> name2MoveGroupPlanner;
 
   // Name and handle
   std::string robotName;
@@ -40,6 +34,15 @@ private:
 
   // Spinner and callback management
   ros::AsyncSpinner spinner;
+
+public:
+  // Controllers
+  std::unique_ptr<JointPubNode> jointPubNode = nullptr;
+  std::map<std::string, std::unique_ptr<CartesianVelocityController>>
+      name2CartesianVelocityController;
+  std::map<std::string, std::unique_ptr<JointVelocityController>> name2JointVelocityController;
+  std::map<std::string, std::unique_ptr<GroupControllerNode>> name2GroupTrajectoryController;
+  std::map<std::string, std::unique_ptr<MoveGroupPlanner>> name2MoveGroupPlanner;
 
 public:
   float time_step;

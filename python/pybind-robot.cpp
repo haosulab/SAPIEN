@@ -8,7 +8,7 @@
 #include "controller/controller_manger.h"
 #include "controller/velocity_control_service.h"
 #include "device/movo_ps3.h"
-#include "device/single_gripper_ps3.h"
+#include "device/single_gripper_ps3.hpp"
 #include "device/xarm6_ps3.h"
 
 using namespace sapien::robot;

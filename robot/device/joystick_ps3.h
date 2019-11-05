@@ -5,6 +5,7 @@
 
 #include "InputDevice.h"
 #include <atomic>
+#include <controller/controller_manger.h>
 #include <cstring>
 #include <fcntl.h>
 #include <iostream>
@@ -79,4 +80,64 @@ public:
   void saveCache();
   void setCache(const std::vector<int> &button, const std::vector<int> &axis);
 };
+
+class PS3RobotControl {
+protected:
+  ControllerManger *manger;
+  std::unique_ptr<PS3> input;
+
+  bool reset = true;
+  bool continuous = true;
+  bool activated = false;
+  bool startRecord = true;
+  ControlMode mode = ControlMode::BODY;
+
+  std::vector<std::string> gripperJoints = {};
+  JointVelocityController *gripper = nullptr;
+  CartesianVelocityController *arm_cartesian = nullptr;
+  JointVelocityController *translation = nullptr;
+  JointVelocityController *rotation = nullptr;
+
+  float gripper_velocity = 0;
+  bool grasped = false;
+  float arm_velocity = 0;
+  float arm_angular_velocity = 0;
+
+  PxVec3 pos = {0, 0, 0};
+  PxReal angle = 0;
+  float translation_velocity = 0;
+  float rotation_velocity = 0;
+  float time_step;
+
+protected:
+  void parseRootJointControlSignal();
+  void parseArmWorldControlSignal();
+  void parseArmLocalControlSignal();
+  void parseGripperControlSignal();
+  void parseEndingSignal();
+
+public:
+  explicit PS3RobotControl(ControllerManger *m);
+  ~PS3RobotControl() { input->shutdown(); }
+  virtual void step();
+  std::vector<int> get_cache();
+  void set_cache(const std::vector<int> &cache);
+  inline bool start_record() { return startRecord; };
+  inline void set_gripper_velocity(float v) { gripper_velocity = v; }
+  inline void set_arm_velocity(float v) {
+    arm_cartesian->setVelocity(v);
+    arm_velocity = v;
+  }
+  inline void set_arm_angular_velocity(float v) {
+    arm_cartesian->setAngularVelocity(v);
+    arm_angular_velocity = v;
+  }
+  inline float get_gripper_velocity() { return gripper_velocity; }
+  inline float get_arm_velocity() { return arm_velocity; }
+  inline float get_arm_angular_velocity() { return arm_angular_velocity; }
+  inline void set_mode(PS3Mode option) { input->setMode(option); };
+  void set_translation_velocity(float v){};
+  void set_rotation_velocity(float v);
+};
+
 } // namespace sapien::robot

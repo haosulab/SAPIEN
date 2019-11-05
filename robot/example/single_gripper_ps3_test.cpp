@@ -4,7 +4,7 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "controller/controller_manger.h"
-#include "device/single_gripper_ps3.h"
+#include "device/single_gripper_ps3.hpp"
 #include "optifuser_renderer.h"
 #include "simulation.h"
 #include <optifuser.h>
@@ -40,13 +40,23 @@ void run() {
   wrapper->set_drive_property(300, 50, 40, {0, 1, 2, 3, 4, 5});
   wrapper->set_drive_property(1, 0.05, 1, {6, 7, 8});
   wrapper->set_qpos({0, 0, 1, 0, 0, 0, 0, 0, 0});
-  wrapper->set_drive_target({0, 0, 1.5, -1.8, 0.08, 0, 0, 0, 0});
+  wrapper->set_drive_target({0, 0, 1.5, -1.8, 0.08, 0, 0.9, 0.9, 0.9});
+
+  const std::vector<std::string> gripperJoints = {
+      "right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint"};
+
+  const std::vector<std::string> translationJoints = {"x_axis_joint", "y_axis_joint",
+                                                      "z_axis_joint"};
+  const std::vector<std::string> rotationJoints = {"r_rotation_joint", "p_rotation_joint",
+                                                   "y_rotation_joint"};
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("kg3", controllableWrapper);
+  manger->createJointPubNode(100, 600);
+  manger->createJointVelocityController(gripperJoints, "right_gripper");
+  manger->createJointVelocityController(translationJoints, "root_translation");
+  manger->createJointVelocityController(rotationJoints, "root_rotation");
   robot::KinovaGripperPS3 ps3(manger.get());
-  ps3.set_translation_velocity(0.15);
-  ps3.set_gripper_velocity(1);
 
   renderer.showWindow();
   std::vector<std::vector<PxReal>> temp;
