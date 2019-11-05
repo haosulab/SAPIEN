@@ -13,6 +13,7 @@ public:
   explicit XArm6PS3(ControllerManger *manger) : PS3RobotControl(manger) {
     gripper = manger->name2JointVelocityController.at("gripper").get();
     arm_cartesian = manger->name2CartesianVelocityController.at("xarm6").get();
+    gripper->forceEqual = true;
 
     gripperJoints = {"drive_joint",
                      "left_finger_joint",

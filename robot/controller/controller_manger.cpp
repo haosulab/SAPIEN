@@ -21,7 +21,7 @@ sapien::robot::ControllerManger::ControllerManger(std::string robotName,
   if (nh->hasParam("robot_description")) {
     loader = std::make_unique<robot_model_loader::RobotModelLoader>("robot_description");
     kinematicModel = loader->getModel();
-    ROS_INFO("Model frame: %s", kinematicModel->getModelFrame().c_str());
+    ROS_INFO("Model base frame: %s", kinematicModel->getModelFrame().c_str());
     robotState = std::make_unique<robot_state::RobotState>(kinematicModel);
     robotState->setToDefaultValues();
   } else {
@@ -70,7 +70,7 @@ JointVelocityController *sapien::robot::ControllerManger::createJointVelocityCon
   }
 
   std::unique_ptr<JointVelocityController> controller = std::make_unique<JointVelocityController>(
-      wrapper, jointNames, serviceName, time_step, nh.get(), robotName);
+      wrapper, jointNames, jointState, serviceName, time_step, nh.get(), robotName);
 
   auto controllerPtr = controller.get();
   name2JointVelocityController[serviceName] = std::move(controller);
