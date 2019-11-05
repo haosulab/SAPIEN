@@ -31,11 +31,11 @@ class XArmEnv(BaseRobotEnv):
         self.__ee_link_name = "link6"
         self.root_theta = 0
         self.root_pos = np.array([0, 0], dtype=np.float)
-        self.init_qpos = np.zeros(12)
+        self.init_qpos = np.array([0.121, -0.889, -0.467, 3.897, 0.216, -3.85, 0, 0, 0, 0, 0, 0])
 
         # Tune PD controller
         self.robot.set_pd(2000, 300, 300, np.arange(6))
-        self.robot.set_pd(500, 100, 300, np.arange(6, 12))
+        self.robot.set_pd(5000, 800, 20000, np.arange(6, 12))
         self.robot.set_drive_qpos(self.init_qpos)
         self.robot.set_qpos(self.init_qpos)
         self.sim.step()
@@ -60,6 +60,7 @@ class XArmEnv(BaseRobotEnv):
         # You must use it if you want to do cartesian control
         self.manger.add_joint_state_publisher(60, 400)
         self.manger.add_group_trajectory_controller("xarm6")
+        self._arm_velocity_controller = self.manger.create_cartesian_velocity_controller("xarm6")
         self.__arm_planner = self.manger.create_group_planner("xarm6")
 
         # Cache gripper limit for execute high level action

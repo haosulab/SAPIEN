@@ -26,21 +26,9 @@ class XArmRecorder(XArmEnv, SapienSingleObjectEnv):
         self._init_robot()
 
         wrapper = self.sim.create_controllable_articulation(self.robot)
-        self.manger = sapyen_robot.ControllerManger("xarm6", wrapper)
         self.ps3 = sapyen_robot.XArm6PS3(self.manger)
         self.ps3.set_demonstration_mode()
 
-        # Cache robot pose
-        self.root_theta = 0
-        self.root_pos = np.array([0, 0], dtype=np.float)
-        self.init_qpos = np.zeros(12)
-
-        # Tune PD controller
-        self.robot.set_pd(2000, 300, 300, np.arange(6))
-        self.robot.set_pd(500, 100, 300, np.arange(6, 12))
-        self.robot.set_drive_qpos(self.init_qpos)
-        self.robot.set_qpos(self.init_qpos)
-        self.sim.step()
         # Init
         self.dump_data = []
         self.control_signal = []

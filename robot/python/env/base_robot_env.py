@@ -41,8 +41,9 @@ class BaseRobotEnv(BaseEnv):
         self.__robot_name2link = dict(zip(link_names, links))
         self._base_link_name = "base_link"
 
-        # Load controller parameters but not init all controllers. Since recorder may have already these.
+        # Load controller parameters and ROS controllers
         self._load_controller_parameters()
+        self._load_ros_controller()
 
         # Set mapping and other staff for the camera loaded with robot urdf
         self._init_camera_cache()
@@ -85,4 +86,4 @@ class BaseRobotEnv(BaseEnv):
 
     def set_robot_base_pose(self, pose: Union[np.ndarray, List]) -> None:
         assert len(pose) == 7, "Pose should be in Position: x y z, Quaternion: w x y z format"
-        self.manger.move_base(pose[0:3], pose[3:7])
+        self.manger.move_base(sapyen.Pose(pose[:3], pose[3:]))

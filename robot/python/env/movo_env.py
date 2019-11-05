@@ -57,7 +57,7 @@ class MOVOEnv(BaseRobotEnv):
         self._body_joint = ["linear_joint"]
 
         self.head_controller = self.manger.create_joint_velocity_controller(self._head_joint, "head")
-        self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
+        self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "right_gripper")
         self.body_controller = self.manger.create_joint_velocity_controller(self._body_joint, "body")
 
         # Add joint state publisher to keep in synchronization with ROS
