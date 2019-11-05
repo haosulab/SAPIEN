@@ -140,10 +140,19 @@ void PS3RobotControl::step() {
   }
   activated = true;
   if (input->getKey(BUTTON_SELECT)) {
+    if (mode != ARM_WORLD) {
+      std::cout << "Using mode ARM WORLD" << std::endl;
+    }
     mode = ControlMode::ARM_WORLD;
   } else if (input->getKey(BUTTON_START)) {
+    if (mode != ARM_LOCAL) {
+      std::cout << "Using mode ARM LOCAL" << std::endl;
+    }
     mode = ControlMode::ARM_LOCAL;
   } else if (input->getKey(BUTTON_PS3)) {
+    if (mode != BODY) {
+      std::cout << "Using mode BODY" << std::endl;
+    }
     mode = ControlMode::BODY;
   }
 }

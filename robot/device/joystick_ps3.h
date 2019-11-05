@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include "InputDevice.h"
+#include "input_device.h"
 #include <atomic>
 #include <controller/controller_manger.h>
 #include <cstring>
@@ -89,7 +89,7 @@ protected:
   bool reset = true;
   bool continuous = true;
   bool activated = false;
-  bool startRecord = true;
+  bool startRecord = false;
   ControlMode mode = ControlMode::BODY;
 
   std::vector<std::string> gripperJoints = {};
@@ -122,6 +122,8 @@ public:
   virtual void step();
   std::vector<int> get_cache();
   void set_cache(const std::vector<int> &cache);
+
+  // Inline functions
   inline bool start_record() { return startRecord; };
   inline void set_gripper_velocity(float v) { gripper_velocity = v; }
   inline void set_arm_velocity(float v) {
@@ -136,8 +138,8 @@ public:
   inline float get_arm_velocity() { return arm_velocity; }
   inline float get_arm_angular_velocity() { return arm_angular_velocity; }
   inline void set_mode(PS3Mode option) { input->setMode(option); };
-  void set_translation_velocity(float v){};
-  void set_rotation_velocity(float v);
+  inline void set_translation_velocity(float v) { translation_velocity = v; };
+  inline void set_rotation_velocity(float v) { rotation_velocity = v; };
 };
 
 } // namespace sapien::robot

@@ -20,6 +20,7 @@ public:
     gripper_velocity = 1;
     translation_velocity = 0.15;
     rotation_velocity = 0.5;
+    std::cout << "Mode toggle function will not make influence for Single Gripper." << std::endl;
   };
   void step() override {
     PS3RobotControl::step();

@@ -22,6 +22,8 @@ public:
     gripper_velocity = 1;
     arm_velocity = 0.10;
     arm_angular_velocity = 0.3;
+    mode = ControlMode::ARM_WORLD;
+    std::cout << "Using control mode ARM WORLD" << std::endl;
 
     arm_cartesian->setAngularVelocity(arm_angular_velocity);
     arm_cartesian->setVelocity(arm_velocity);

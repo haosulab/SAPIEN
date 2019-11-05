@@ -117,30 +117,26 @@ if (ROS)
                 robot/controller/joint_pub_node.cpp
                 robot/controller/controller_manger.cpp
                 robot/controller/group_planner.cpp
+                robot/device/input_device.cpp
+                robot/device/joystick_ps3.cpp
                 )
         target_link_libraries(sapien_robot sapien ${catkin_LIBRARIES})
-        add_library(robot_device_lib
-                robot/device/joystick_ps3.cpp
-                robot/device/InputDevice.cpp)
-        target_link_libraries(robot_device_lib sapien_robot)
 
         add_executable(robot robot/test/robot.cpp)
         target_link_libraries(robot sapien_robot)
-#        add_executable(movo_ps3 robot/example/movo_ps3_test.cpp)
-#        target_link_libraries(movo_ps3 robot_device_lib)
+        add_executable(movo_ps3 robot/example/movo_ps3_test.cpp)
+        target_link_libraries(movo_ps3 sapien_robot)
         add_executable(gripper_ps3 robot/example/single_gripper_ps3_test.cpp)
-        target_link_libraries(gripper_ps3 robot_device_lib)
+        target_link_libraries(gripper_ps3 sapien_robot)
 #        add_executable(movo_keyboard robot/example/movo_keyboard_test.cpp)
-#        target_link_libraries(movo_keyboard robot_device_lib)
+#        target_link_libraries(movo_keyboard sapien_robot)
         pybind11_add_module(sapyen_robot "python/pybind-robot.cpp")
-        target_link_libraries(sapyen_robot PRIVATE robot_device_lib)
-        add_executable(xarm robot/example/xarm.cpp)
-        target_link_libraries(xarm robot_device_lib)
-#        add_executable(xarm_ps3 robot/example/xarm_ps3_test.cpp)
-#        target_link_libraries(xarm_ps3 robot_device_lib)
+        target_link_libraries(sapyen_robot PRIVATE sapien_robot)
+        add_executable(xarm_ps3 robot/example/xarm_ps3_test.cpp)
+        target_link_libraries(xarm_ps3 sapien_robot)
 
         set_target_properties(sapien_robot PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-        set_target_properties(robot_device_lib PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+        set_target_properties(sapien_robot PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)

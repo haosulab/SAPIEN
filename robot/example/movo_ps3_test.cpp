@@ -1,7 +1,7 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "controller/controller_manger.h"
-#include "device/movo_ps3.h"
+#include "device/movo_ps3.hpp"
 #include "optifuser_renderer.h"
 #include "simulation.h"
 #include <optifuser.h>
@@ -36,13 +36,22 @@ void run() {
   auto plate = builder1->build(false, false, "plate", true);
   plate->setGlobalPose({{2.0, 0.3, 2}, PxIdentity});
 
-  //  loader->load("../assets/46627/test.urdf")
-  //      ->articulation->teleportRootLink({{2.0, 5.3, 0.4}, PxIdentity}, true);
   auto wrapper = loader->load("../assets/robot/all_robot.urdf");
   wrapper->set_drive_property(2000, 500);
 
+  const std::vector<std::string> gripperJoints = {
+      "right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint"};
+
+  const std::vector<std::string> headJoints = {"pan_joint", "tilt_joint"};
+  const std::vector<std::string> bodyJoints = {"linear_joint"};
+
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("movo", controllableWrapper);
+  manger->createJointPubNode(100, 500);
+  manger->createJointVelocityController(gripperJoints, "right_gripper");
+  manger->createCartesianVelocityController("right_arm");
+  manger->createJointVelocityController(headJoints, "head");
+  manger->createJointVelocityController(bodyJoints, "body");
   robot::MOVOPS3 ps3(manger.get());
 
   wrapper->set_qpos({0.47, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});
@@ -55,7 +64,6 @@ void run() {
     sim.updateRenderer();
     renderer.render();
     ps3.step();
-//    temp.push_back(sim.dump());
 
     auto gl_input = Optifuser::getInput();
     if (gl_input.getKeyState(GLFW_KEY_Q)) {

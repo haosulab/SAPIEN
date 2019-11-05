@@ -4,10 +4,10 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "controller/controller_manger.h"
-#include "device/movo_ps3.h"
+#include "device/demonstration_gui.h"
+#include "device/movo_ps3.hpp"
 #include "optifuser_renderer.h"
 #include "simulation.h"
-#include "device/demonstration_gui.h"
 #include <thread>
 
 using namespace sapien;

@@ -2,7 +2,7 @@
 // Created by sim on 10/11/19.
 //
 
-#include "InputDevice.h"
+#include "input_device.h"
 #include <sstream>
 
 std::vector<Device> getDevices() {
