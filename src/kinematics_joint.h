@@ -25,7 +25,6 @@ protected:
   KJoint *parent;
   PxTransform poseFromParent;
   PxTransform poseToChild;
-  JointType type = UNDEFINED;
 
 public:
   KJoint(PxRigidDynamic *childLink, KJoint *parentJoint, PxTransform toChild,
@@ -37,10 +36,13 @@ public:
   virtual PxReal getQpos() const = 0;
   virtual void setQpos(const std::vector<PxReal> &qpos) = 0;
   virtual void driveQpos(const std::vector<PxReal> &qpos) = 0;
-  std::vector<KJoint *> children;
   void setName(const std::string &n) { name = n; }
   inline const PxTransform &getPoseToChild() { return poseToChild; }
   inline const PxTransform &getPoseFromParent() { return poseFromParent; }
+
+public:
+  JointType type = UNDEFINED;
+  std::vector<KJoint *> children;
 };
 
 class SingleDOFKJoint : public KJoint {

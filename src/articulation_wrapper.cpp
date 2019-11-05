@@ -24,7 +24,7 @@ std::vector<std::string> ArticulationWrapper::get_joint_names() const { return j
 
 std::vector<uint32_t> ArticulationWrapper::get_joint_dofs() const { return jointDofs; }
 
-std::vector<std::array<physx::PxReal, 2>> ArticulationWrapper::get_joint_limits() const {
+std::vector<std::array<physx::PxReal, 2>> ArticulationWrapper::get_qlimits() const {
   return jointLimits;
 }
 
@@ -38,6 +38,7 @@ void ArticulationWrapper::set_qpos(const std::vector<physx::PxReal> &v) {
     cache->jointPosition[i] = v[i];
   }
   articulation->applyCache(*cache, PxArticulationCache::ePOSITION);
+  links[0]->getLinkIndex();
 }
 
 std::vector<physx::PxReal> ArticulationWrapper::get_qvel() const {
@@ -73,9 +74,7 @@ void ArticulationWrapper::set_qf(const std::vector<physx::PxReal> &v) {
   }
   articulation->applyCache(*cache, PxArticulationCache::eFORCE);
 }
-std::vector<std::string> ArticulationWrapper::get_drive_joint_names() const {
-  return jointNamesDOF;
-}
+std::vector<std::string> ArticulationWrapper::get_qnames() const { return jointNamesDOF; }
 void ArticulationWrapper::set_drive_target(const std::vector<physx::PxReal> &v) {
   assert(v.size() == dof());
   for (size_t i = 0; i < v.size(); ++i) {
@@ -185,18 +184,17 @@ void ArticulationWrapper::move_base(const PxTransform &newT) {
   articulation->teleportRootLink(newT, true);
 }
 
-std::vector<int> ArticulationWrapper::get_link_joint_indices() const {
-  return link2JointIndices;
-}
+std::vector<int> ArticulationWrapper::get_link_joint_indices() const { return link2JointIndices; }
 
 PxTransform ArticulationWrapper::get_link_joint_pose(uint32_t idx) const {
   assert(idx < links.size());
   auto link = links[idx];
-  auto joint = static_cast<PxArticulationJointReducedCoordinate*>(link->getInboundJoint());
+  auto joint = static_cast<PxArticulationJointReducedCoordinate *>(link->getInboundJoint());
   if (!joint) {
     return PxTransform(PxIdentity);
   }
   return link->getGlobalPose() * joint->getChildPose();
 }
+std::vector<std::string> ArticulationWrapper::get_joint_types() const { return jointTypes; }
 
 } // namespace sapien

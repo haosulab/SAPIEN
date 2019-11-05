@@ -15,6 +15,26 @@ KinematicsArticulationWrapper::KinematicsArticulationWrapper(sapien::Simulation 
   mSimulation = &sim;
 }
 
+static std::string jointType2jointTypeString(JointType type) {
+  switch (type) {
+  case JointType::PRISMATIC: {
+    return "prismatic";
+  }
+  case JointType::REVOLUTE: {
+    return "revolute";
+  }
+  case JointType::FIXED: {
+    return "fixed";
+  }
+  case JointType::CONTINUOUS: {
+    return "revolute";
+  }
+  case JointType::UNDEFINED: {
+    return "undefined";
+  }
+  }
+}
+
 KJoint *KinematicsArticulationWrapper::createJoint(const JointType &type, KJoint *parent,
                                                    PxRigidDynamic *link,
                                                    const PxTransform &poseFromParent,
@@ -89,6 +109,7 @@ void KinematicsArticulationWrapper::buildCache() {
     }
     jointDOF.push_back(qDOF);
     jointName.push_back(name);
+    jointTypes.push_back(jointType2jointTypeString(currentJoint->type));
     jointListPtr.push_back(jointName2JointPtr[name].get());
   }
   jointNum = jointName2JointPtr.size() - 1;
@@ -100,7 +121,7 @@ void KinematicsArticulationWrapper::buildCache() {
   qacc.resize(DOF, 0);
   qf.resize(DOF, 0);
 }
-std::vector<std::array<PxReal, 2>> KinematicsArticulationWrapper::get_joint_limits() const {
+std::vector<std::array<PxReal, 2>> KinematicsArticulationWrapper::get_qlimits() const {
   return jointLimit;
 }
 std::vector<uint32_t> KinematicsArticulationWrapper::get_joint_dofs() const { return jointDOF; }
@@ -146,9 +167,7 @@ void KinematicsArticulationWrapper::set_drive_target(const std::vector<PxReal> &
   }
   qpos = v;
 }
-std::vector<std::string> KinematicsArticulationWrapper::get_drive_joint_names() const {
-  return jointNameDOF;
-}
+std::vector<std::string> KinematicsArticulationWrapper::get_qnames() const { return jointNameDOF; }
 
 // Update function should be called in the simulation loop
 void KinematicsArticulationWrapper::update(PxReal timestep) {
@@ -206,6 +225,9 @@ std::vector<int> KinematicsArticulationWrapper::get_link_joint_indices() const {
 physx::PxTransform KinematicsArticulationWrapper::get_link_joint_pose(uint32_t idx) const {
   assert(idx < linkListPtr.size());
   return linkListPtr[idx]->getGlobalPose() * jointListPtr[idx]->getPoseToChild().getInverse();
+}
+std::vector<std::string> KinematicsArticulationWrapper::get_joint_types() const {
+  return jointTypes;
 }
 
 } // namespace sapien

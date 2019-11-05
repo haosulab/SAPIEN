@@ -14,9 +14,12 @@ struct IArticulationBase {
 
   virtual std::vector<std::string> get_joint_names() const = 0;
   virtual std::vector<uint32_t> get_joint_dofs() const = 0;
+  virtual std::vector<std::string> get_joint_types() const =0;
 
-  virtual std::vector<std::array<physx::PxReal, 2>> get_joint_limits() const = 0;
+  virtual std::vector<std::string> get_qnames() const = 0;
+  virtual std::vector<std::array<physx::PxReal, 2>> get_qlimits() const = 0;
 
+  // Get joint type
   virtual std::vector<physx::PxReal> get_qpos() const = 0;
   virtual void set_qpos(const std::vector<physx::PxReal> &v) = 0;
 
@@ -41,7 +44,6 @@ struct IArticulationBase {
 class IArticulationDrivable : public IArticulationBase {
 public:
   virtual void set_drive_target(const std::vector<physx::PxReal> &v) = 0;
-  virtual std::vector<std::string> get_drive_joint_names() const = 0;
   virtual void move_base(const physx::PxTransform &T) = 0;
 };
 

@@ -40,9 +40,10 @@ PxTransform KJoint::passThroughGlobalPose(const PxTransform &T) {
 RevoluteKJoint::RevoluteKJoint(PxRigidDynamic *childLink, KJoint *parentJoint,
                                const PxTransform &toChild, const PxTransform &fromParent,
                                PxReal upperLimit, PxReal lowerLimit)
-    : SingleDOFKJoint(childLink, parentJoint, toChild, fromParent) {
+    : SingleDOFKJoint(childLink, parentJoint, toChild, fromParent){
   this->upperLimit = upperLimit;
   this->lowerLimit = lowerLimit;
+  type = JointType::REVOLUTE;
 }
 
 void RevoluteKJoint::setQpos(const std::vector<PxReal> &q) {
@@ -74,6 +75,7 @@ ContinuousKJoint::ContinuousKJoint(PxRigidDynamic *childLink, KJoint *parentJoin
     : SingleDOFKJoint(childLink, parentJoint, toChild, fromParent) {
   upperLimit = std::numeric_limits<PxReal>::max();
   lowerLimit = std::numeric_limits<PxReal>::min();
+  type = JointType::CONTINUOUS;
 }
 void ContinuousKJoint::setQpos(const std::vector<PxReal> &q) {
   qpos = q[0];
@@ -93,6 +95,7 @@ PrismaticKJoint::PrismaticKJoint(PxRigidDynamic *childLink, KJoint *parentJoint,
     : SingleDOFKJoint(childLink, parentJoint, toChild, fromParent) {
   this->upperLimit = upperLimit;
   this->lowerLimit = lowerLimit;
+  type = JointType::PRISMATIC;
 }
 void PrismaticKJoint::setQpos(const std::vector<PxReal> &q) {
   qpos = q[0];
@@ -114,7 +117,9 @@ void PrismaticKJoint::driveQpos(const std::vector<PxReal> &qpos) {
 // Fixed Joint
 FixedKJoint::FixedKJoint(PxRigidDynamic *childLink, KJoint *parentJoint,
                          const PxTransform &toChild, const PxTransform &fromParent)
-    : KJoint(childLink, parentJoint, toChild, fromParent) {}
+    : KJoint(childLink, parentJoint, toChild, fromParent) {
+  type = JointType::FIXED;
+}
 void FixedKJoint::setQpos(const std::vector<PxReal> &qpos) {
   assert(qpos.size() == 0);
   PxTransform targetPose = passThroughGlobalPose(PxTransform(PxIdentity));

@@ -29,14 +29,19 @@ void JointSystem::addJoint(PxJoint *newJoint, const std::string &name, bool enab
   switch (newJoint->getConcreteType()) {
   case PxJointConcreteType::eREVOLUTE: {
     jointDofs.push_back(1);
+    jointTypes.emplace_back("revolute");
+    qNames.push_back(name);
     break;
   }
   case PxJointConcreteType::ePRISMATIC: {
     jointDofs.push_back(1);
+    jointTypes.emplace_back("prismatic");
+    qNames.push_back(name);
     break;
   }
   default:
     jointDofs.push_back(0);
+    jointTypes.emplace_back("fixed");
   }
   if (!name.empty()) {
     if (namedJoints.find(name) != namedJoints.end()) {
@@ -77,7 +82,7 @@ std::vector<std::string> JointSystem::get_joint_names() const { return jointName
 
 std::vector<uint32_t> JointSystem::get_joint_dofs() const { return jointDofs; }
 
-std::vector<std::array<physx::PxReal, 2>> JointSystem::get_joint_limits() const {
+std::vector<std::array<physx::PxReal, 2>> JointSystem::get_qlimits() const {
   std::vector<std::array<physx::PxReal, 2>> limits;
   for (auto joint : joints) {
     switch (joint->getConcreteType()) {
@@ -91,7 +96,8 @@ std::vector<std::array<physx::PxReal, 2>> JointSystem::get_joint_limits() const 
       limits.push_back({limitPair.lower, limitPair.upper});
       break;
     }
-    default: {}
+    default: {
+    }
     }
   }
   return limits;
@@ -109,7 +115,8 @@ std::vector<physx::PxReal> JointSystem::get_qpos() const {
       positions.push_back(static_cast<PxPrismaticJoint *>(joint)->getPosition());
       break;
     }
-    default: {}
+    default: {
+    }
     }
   }
   return positions;
@@ -130,7 +137,8 @@ std::vector<physx::PxReal> JointSystem::get_qvel() const {
       velocities.push_back(static_cast<PxPrismaticJoint *>(joint)->getVelocity());
       break;
     }
-    default: {}
+    default: {
+    }
     }
   }
   return velocities;
@@ -167,4 +175,6 @@ std::vector<int> JointSystem::get_link_joint_indices() const {
   std::cerr << "Getting joint indices from link is not supported" << std::endl;
   return {};
 }
-}
+std::vector<std::string> JointSystem::get_qnames() const { return qNames; }
+std::vector<std::string> JointSystem::get_joint_types() const { return jointTypes; }
+} // namespace sapien

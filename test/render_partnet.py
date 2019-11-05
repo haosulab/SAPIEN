@@ -141,7 +141,7 @@ wrapper.set_qvel(zeros)
 wrapper.set_qpos(zeros)
 # wrapper.set_qf(zeros)
 
-limits = wrapper.get_joint_limits()
+limits = wrapper.get_qlimits()
 limits = [[max(-100, l), min(100, h)] for l, h in limits]
 
 link2id = dict(zip(wrapper.get_link_names(), wrapper.get_link_ids()))
@@ -199,7 +199,7 @@ for idx, pose in enumerate(poses):
         "category": model_category
     }
 
-    true_limits = wrapper.get_joint_limits()
+    true_limits = wrapper.get_qlimits()
     qpos = wrapper.get_qpos()
     config["links"] = {}
     for l in link2semantics:

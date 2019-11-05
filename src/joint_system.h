@@ -18,6 +18,9 @@ class JointSystem : public IArticulationBase {
   std::map<std::string, PxRigidActor *>namedLinks;
   std::vector<std::string> jointNames;
   std::vector<PxU32> jointDofs;
+  std::vector<std::string> qNames;
+  std::vector<std::string> jointTypes;
+
 
   class Simulation *mSimulation = nullptr;
 
@@ -47,7 +50,9 @@ public:
   virtual std::vector<std::string> get_joint_names() const override;
   virtual std::vector<uint32_t> get_joint_dofs() const override;
 
-  virtual std::vector<std::array<physx::PxReal, 2>> get_joint_limits() const override;
+  virtual std::vector<std::array<physx::PxReal, 2>> get_qlimits() const override;
+  virtual std::vector<std::string> get_qnames() const override;
+  virtual std::vector<std::string> get_joint_types() const override;
 
   virtual std::vector<physx::PxReal> get_qpos() const override;
   virtual void set_qpos(const std::vector<physx::PxReal> &v) override;

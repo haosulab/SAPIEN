@@ -66,7 +66,7 @@ class BaseRobotEnv(BaseEnv):
 
     @property
     def robot_joint_names(self) -> List[str]:
-        return self.robot.get_drive_joint_names()
+        return self.robot.get_qnames()
 
     @property
     def robot_link_names(self) -> List[str]:

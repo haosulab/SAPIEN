@@ -3,6 +3,7 @@
 //
 
 #include "controllable_articulation_wrapper.h"
+#include "articulation_interface.h"
 #include <algorithm>
 #include <iostream>
 
@@ -11,7 +12,7 @@ namespace sapien {
 ControllableArticulationWrapper::ControllableArticulationWrapper(
     IArticulationDrivable *articulation)
     : articulation(articulation) {
-  jointNames = articulation->get_drive_joint_names();
+  jointNames = articulation->get_qnames();
   driveQpos.resize(jointNames.size(), 0);
 }
 bool ControllableArticulationWrapper::add_position_controller(
@@ -104,7 +105,7 @@ void ControllableArticulationWrapper::update(physx::PxReal timestep) {
   updateJointState();
 }
 std::vector<std::string> ControllableArticulationWrapper::get_drive_joint_name() {
-  return articulation->get_drive_joint_names();
+  return articulation->get_qnames();
 }
 void ControllableArticulationWrapper::updateTimeStep(float newTimestep) {
   timestep = newTimestep;

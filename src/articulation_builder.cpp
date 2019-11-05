@@ -13,6 +13,26 @@ ArticulationBuilder::ArticulationBuilder(Simulation *simulation)
   mArticulation = mPhysicsSDK->createArticulationReducedCoordinate();
 }
 
+static std::string jointType2jointTypeString(PxArticulationJointType::Enum type) {
+  switch (type) {
+  case PxArticulationJointType::Enum::ePRISMATIC: {
+    return "prismatic";
+  }
+  case PxArticulationJointType::Enum::eREVOLUTE: {
+    return "revolute";
+  }
+  case PxArticulationJointType::Enum::eSPHERICAL: {
+    return "spherical";
+  }
+  case PxArticulationJointType::Enum::eFIX: {
+    return "fixed";
+  }
+  case PxArticulationJointType::Enum::eUNDEFINED: {
+    return "undefined";
+  }
+  }
+}
+
 PxArticulationLink *ArticulationBuilder::addLink(PxArticulationLink *parent,
                                                  const PxTransform &pose, const std::string &name,
                                                  const std::string &jointName,
@@ -274,6 +294,7 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
       jointIndices.push_back(jointIdx++);
       wrapper->jointNames.push_back(mLink2JointName[links[i]]);
       wrapper->jointDofs.push_back(links[i]->getInboundJointDof());
+      wrapper->jointTypes.push_back(jointType2jointTypeString(joint->getJointType()));
       for (size_t k = 0; k < wrapper->jointDofs.back(); ++k) {
         wrapper->jointNamesDOF.push_back(wrapper->jointNames.back());
         wrapper->activeJoints.push_back(joint);

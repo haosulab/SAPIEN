@@ -59,7 +59,7 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         self.rotation_controller = self.manger.create_joint_velocity_controller(self.rotation_joint, "rotation")
 
         # Cache gripper limit for execute high level action
-        joint_limit = self.robot.get_joint_limits()
+        joint_limit = self.robot.get_qlimits()
         gripper_index = self.robot_joint_names.index(self.gripper_joint[0])
         self.__gripper_limit = joint_limit[gripper_index, :]
 

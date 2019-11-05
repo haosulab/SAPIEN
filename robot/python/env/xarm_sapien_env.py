@@ -25,7 +25,6 @@ class XArmRecorder(XArmEnv, SapienSingleObjectEnv):
         SapienSingleObjectEnv.__init__(self, dataset_dir, data_id, on_screening_rendering)
         self._init_robot()
 
-        wrapper = self.sim.create_controllable_articulation(self.robot)
         self.ps3 = sapyen_robot.XArm6PS3(self.manger)
         self.ps3.set_demonstration_mode()
 

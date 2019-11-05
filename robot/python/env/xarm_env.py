@@ -54,17 +54,17 @@ class XArmEnv(BaseRobotEnv):
                                "right_outer_knuckle_joint",
                                "right_finger_joint",
                                "right_inner_knuckle_joint"]
-        self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
 
         # Add joint state publisher to keep in synchronization with ROS
-        # You must use it if you want to do cartesian control
+        # You must use it if you want to do cartesian control and joint velocity control
         self.manger.add_joint_state_publisher(60, 400)
         self.manger.add_group_trajectory_controller("xarm6")
+        self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
         self._arm_velocity_controller = self.manger.create_cartesian_velocity_controller("xarm6")
         self.__arm_planner = self.manger.create_group_planner("xarm6")
 
         # Cache gripper limit for execute high level action
-        joint_limit = self.robot.get_joint_limits()
+        joint_limit = self.robot.get_qlimits()
         gripper_index = self.robot_joint_names.index(self._gripper_joint[0])
         self.__gripper_limit = joint_limit[gripper_index, :]
 

@@ -28,6 +28,7 @@ class KinematicsArticulationWrapper : public IArticulationDrivable {
   std::vector<std::string> jointName;
   std::vector<std::string> jointNameDOF;
   std::vector<std::size_t> jointStartIndex;
+  std::vector<std::string> jointTypes;
   std::vector<PxReal> qpos;
   std::vector<PxReal> qvel;
   std::vector<PxReal> qacc;
@@ -59,8 +60,9 @@ public:
   uint32_t dof() const override;
   std::vector<std::string> get_joint_names() const override;
   std::vector<uint32_t> get_joint_dofs() const override;
-  std::vector<std::array<PxReal, 2>> get_joint_limits() const override;
+  std::vector<std::string> get_joint_types() const override;
 
+  std::vector<std::array<PxReal, 2>> get_qlimits() const override;
   std::vector<physx::PxReal> get_qpos() const override;
   std::vector<physx::PxReal> get_qvel() const override;
   std::vector<physx::PxReal> get_qacc() const override;
@@ -72,7 +74,7 @@ public:
   void set_qf(const std::vector<PxReal> &v) override;
 
   void set_drive_target(const std::vector<PxReal> &v) override;
-  std::vector<std::string> get_drive_joint_names() const override;
+  std::vector<std::string> get_qnames() const override;
 
   physx::PxTransform get_link_joint_pose(uint32_t idx) const override;
 

@@ -231,7 +231,7 @@ void Simulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
     auto totalDofs = articulation->dof();
     auto dofs = articulation->get_joint_dofs();
     auto names = articulation->get_joint_names();
-    auto limits = articulation->get_joint_limits();
+    auto limits = articulation->get_qlimits();
     auto values = articulation->get_qpos();
     for (uint32_t i = 0; i < dofs.size(); ++i) {
       for (uint32_t j = 0; j < dofs[i]; ++j) {

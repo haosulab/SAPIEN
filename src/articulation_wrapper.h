@@ -36,6 +36,7 @@ struct ArticulationWrapper : public IArticulationDrivable {
   bool balanceForce;
   std::vector<PxArticulationJointReducedCoordinate *> activeJoints;
   std::vector<PxArticulationAxis::Enum> jointAxises;
+  std::vector<std::string> jointTypes;
 
   // Actuator cache
   // TODO: support multi-dof joint
@@ -70,8 +71,9 @@ struct ArticulationWrapper : public IArticulationDrivable {
 
   virtual std::vector<std::string> get_joint_names() const override;
   virtual std::vector<uint32_t> get_joint_dofs() const override;
+  virtual std::vector<std::string> get_joint_types() const override;
 
-  virtual std::vector<std::array<physx::PxReal, 2>> get_joint_limits() const override;
+  virtual std::vector<std::array<physx::PxReal, 2>> get_qlimits() const override;
 
   virtual std::vector<physx::PxReal> get_qpos() const override;
   virtual void set_qpos(const std::vector<physx::PxReal> &v) override;
@@ -86,7 +88,7 @@ struct ArticulationWrapper : public IArticulationDrivable {
   virtual void set_qf(const std::vector<physx::PxReal> &v) override;
 
   // Drive specific member function
-  virtual std::vector<std::string> get_drive_joint_names() const override;
+  virtual std::vector<std::string> get_qnames() const override;
   virtual void set_drive_target(const std::vector<physx::PxReal> &v) override;
 
   virtual PxTransform get_link_joint_pose(uint32_t idx) const override;

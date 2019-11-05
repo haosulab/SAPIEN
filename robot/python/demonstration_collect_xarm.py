@@ -34,7 +34,7 @@ door_with_handle = ['35059', '40147', '40417', '41003', '41004', '41083', '41085
 
 
 def main():
-    partnet_id = door_with_handle[29]
+    partnet_id = door_with_handle[31]
     print("*" * 10, "Partnet ID: {}".format(partnet_id), "*" * 10)
     recorder = XArmRecorder(dataset_dir=CONVEX_PARTNET_DIR, data_id=partnet_id, on_screening_rendering=True)
     recorder.set_robot_base_pose([-1, 0, -0.5, 1, 0, 0, 0])
@@ -77,5 +77,5 @@ def replay():
 
 if __name__ == '__main__':
     sapyen_robot.ros.init(sys.argv, "recorder")
-    # main()
-    replay()
+    main()
+    # replay()
