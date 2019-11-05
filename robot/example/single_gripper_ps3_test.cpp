@@ -4,7 +4,7 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "controller/controller_manger.h"
-#include "device/single_gripper_ps3.hpp"
+#include "device/single_gripper.hpp"
 #include "optifuser_renderer.h"
 #include "simulation.h"
 #include <optifuser.h>
@@ -56,6 +56,7 @@ void run() {
   manger->createJointVelocityController(gripperJoints, "right_gripper");
   manger->createJointVelocityController(translationJoints, "root_translation");
   manger->createJointVelocityController(rotationJoints, "root_rotation");
+  manger->start();
   robot::KinovaGripperPS3 ps3(manger.get());
 
   renderer.showWindow();

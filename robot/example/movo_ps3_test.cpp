@@ -1,7 +1,7 @@
 #include "actor_builder.h"
 #include "articulation_builder.h"
 #include "controller/controller_manger.h"
-#include "device/movo_ps3.hpp"
+#include "device/movo.hpp"
 #include "optifuser_renderer.h"
 #include "simulation.h"
 #include <optifuser.h>
@@ -52,6 +52,7 @@ void run() {
   manger->createCartesianVelocityController("right_arm");
   manger->createJointVelocityController(headJoints, "head");
   manger->createJointVelocityController(bodyJoints, "body");
+  manger->start();
   robot::MOVOPS3 ps3(manger.get());
 
   wrapper->set_qpos({0.47, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});

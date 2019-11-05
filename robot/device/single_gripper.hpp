@@ -11,9 +11,9 @@ class KinovaGripperPS3 : public PS3RobotControl {
 
 public:
   explicit KinovaGripperPS3(ControllerManger *manger) : PS3RobotControl(manger) {
-    gripper = manger->name2JointVelocityController["right_gripper"].get();
-    translation = manger->name2JointVelocityController["root_translation"].get();
-    rotation = manger->name2JointVelocityController["root_rotation"].get();
+    gripper = manger->name2JointVelocityController.at("right_gripper").get();
+    translation = manger->name2JointVelocityController.at("root_translation").get();
+    rotation = manger->name2JointVelocityController.at("root_rotation").get();
 
     gripperJoints = {"right_gripper_finger1_joint", "right_gripper_finger2_joint",
                      "right_gripper_finger3_joint"};
@@ -28,5 +28,6 @@ public:
     PS3RobotControl::parseGripperControlSignal();
     PS3RobotControl::parseEndingSignal();
   };
+  ~KinovaGripperPS3() override { input->shutdown(); };
 };
 } // namespace sapien::robot

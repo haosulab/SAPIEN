@@ -36,11 +36,11 @@ void run() {
   actor->setGlobalPose({{2.0, 0.3, 0.3}, PxIdentity});
 
   std::vector<std::string> gripperJoints = {"drive_joint",
-                   "left_finger_joint",
-                   "left_inner_knuckle_joint",
-                   "right_outer_knuckle_joint",
-                   "right_finger_joint",
-                   "right_inner_knuckle_joint"};
+                                            "left_finger_joint",
+                                            "left_inner_knuckle_joint",
+                                            "right_outer_knuckle_joint",
+                                            "right_finger_joint",
+                                            "right_inner_knuckle_joint"};
 
   auto wrapper = loader->load("../assets/robot/xarm6.urdf");
   wrapper->set_drive_property(1000, 300, 300, {0, 1, 2, 3, 4, 5});
@@ -51,8 +51,8 @@ void run() {
   manger->createJointPubNode(100, 1000);
   manger->createJointVelocityController(gripperJoints, "gripper");
   manger->createCartesianVelocityController("xarm6");
+  manger->start();
   auto ps3 = robot::XArm6PS3(manger.get());
-
 
   wrapper->set_qpos({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
   wrapper->set_drive_target({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});

@@ -118,7 +118,7 @@ protected:
 
 public:
   explicit PS3RobotControl(ControllerManger *m);
-  ~PS3RobotControl() { input->shutdown(); }
+  virtual ~PS3RobotControl() { input->shutdown(); }
   virtual void step();
   std::vector<int> get_cache();
   void set_cache(const std::vector<int> &cache);
@@ -140,6 +140,8 @@ public:
   inline void set_mode(PS3Mode option) { input->setMode(option); };
   inline void set_translation_velocity(float v) { translation_velocity = v; };
   inline void set_rotation_velocity(float v) { rotation_velocity = v; };
+  inline float get_translation_velocity() { return translation_velocity; }
+  inline float get_rotation_velocity() { return rotation_velocity; }
 };
 
 } // namespace sapien::robot

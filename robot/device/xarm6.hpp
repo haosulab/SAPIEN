@@ -9,9 +9,10 @@ namespace sapien::robot {
 class XArm6PS3 : public PS3RobotControl {
 
 public:
+  ~XArm6PS3() { input->shutdown(); }
   explicit XArm6PS3(ControllerManger *manger) : PS3RobotControl(manger) {
-    gripper = manger->name2JointVelocityController["gripper"].get();
-    arm_cartesian = manger->name2CartesianVelocityController["xarm6"].get();
+    gripper = manger->name2JointVelocityController.at("gripper").get();
+    arm_cartesian = manger->name2CartesianVelocityController.at("xarm6").get();
 
     gripperJoints = {"drive_joint",
                      "left_finger_joint",
@@ -28,7 +29,7 @@ public:
     arm_cartesian->setAngularVelocity(arm_angular_velocity);
     arm_cartesian->setVelocity(arm_velocity);
     arm_cartesian->toggleJumpTest(true);
-    manger->start();
+    std::cout << "Loading XArm finished!" << std::endl;
   };
   void step() override {
     PS3RobotControl::step();

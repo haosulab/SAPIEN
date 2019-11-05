@@ -24,14 +24,14 @@ public:
   inline void set_wheel_velocity(float v) { wheel_velocity = v; }
   inline void set_body_velocity(float v) { body_velocity = v; }
   inline void set_head_velocity(float v) { head_velocity = v; }
+  ~MOVOPS3() override { input->shutdown(); };
 
 public:
   explicit MOVOPS3(ControllerManger *m) : PS3RobotControl(m) {
-    gripper = manger->name2JointVelocityController["right_gripper"].get();
-    body = manger->name2JointVelocityController["body"].get();
-    head = manger->name2JointVelocityController["head"].get();
-    arm_cartesian = manger->name2CartesianVelocityController["right_arm"].get();
-    assert(gripper && body && head && arm_cartesian);
+    gripper = manger->name2JointVelocityController.at("right_gripper").get();
+    body = manger->name2JointVelocityController.at("body").get();
+    head = manger->name2JointVelocityController.at("head").get();
+    arm_cartesian = manger->name2CartesianVelocityController.at("right_arm").get();
 
     gripperJoints = {"right_gripper_finger1_joint", "right_gripper_finger2_joint",
                      "right_gripper_finger3_joint"};
@@ -44,7 +44,6 @@ public:
     arm_cartesian->setAngularVelocity(arm_angular_velocity);
     arm_cartesian->setVelocity(arm_velocity);
     arm_cartesian->toggleJumpTest(true);
-    manger->start();
   }
   void step() override {
     PS3RobotControl::step();

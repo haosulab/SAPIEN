@@ -7,9 +7,9 @@
 #include "controller/cartesian_velocity_controller.h"
 #include "controller/controller_manger.h"
 #include "controller/velocity_control_service.h"
-#include "device/movo_ps3.h"
-#include "device/single_gripper_ps3.hpp"
-#include "device/xarm6_ps3.h"
+#include "device/movo.hpp"
+#include "device/single_gripper.hpp"
+#include "device/xarm6.hpp"
 
 using namespace sapien::robot;
 namespace py = pybind11;
@@ -51,58 +51,49 @@ PYBIND11_MODULE(sapyen_robot, m) {
 
   py::class_<MoveGroupPlanner>(m, "MoveGroupPlanner").def("go", &MoveGroupPlanner::go);
 
-  py::class_<KinovaGripperPS3>(m, "SingleKinovaGripper")
+  py::class_<PS3RobotControl>(m, "PS3RobotControl")
       .def(py::init<ControllerManger *>())
-      .def("set_gripper_velocity", &KinovaGripperPS3::set_gripper_velocity)
-      .def("set_translation_velocity", &KinovaGripperPS3::set_translation_velocity)
-      .def("set_rotation_velocity", &KinovaGripperPS3::set_rotation_velocity)
-      .def("step", &KinovaGripperPS3::step)
-      .def("start_record", &KinovaGripperPS3::start_record)
-      .def("set_normal_mode", [](KinovaGripperPS3 &a) { a.set_mode(PS3Mode::NORMAL); })
+      .def("set_gripper_velocity", &PS3RobotControl::set_gripper_velocity)
+      .def("set_translation_velocity", &PS3RobotControl::set_translation_velocity)
+      .def("set_rotation_velocity", &PS3RobotControl::set_rotation_velocity)
+      .def("set_arm_velocity", &PS3RobotControl::set_arm_velocity)
+      .def("set_arm_angular_velocity", &PS3RobotControl::set_arm_angular_velocity)
+      .def("get_gripper_velocity", &PS3RobotControl::get_gripper_velocity)
+      .def("get_translation_velocity", &PS3RobotControl::get_translation_velocity)
+      .def("get_rotation_velocity", &PS3RobotControl::get_rotation_velocity)
+      .def("get_arm_velocity", &PS3RobotControl::get_arm_velocity)
+      .def("get_arm_angular_velocity", &PS3RobotControl::get_arm_angular_velocity)
+      .def("set_normal_mode", [](PS3RobotControl &a) { a.set_mode(PS3Mode::NORMAL); })
       .def("set_demonstration_mode",
-           [](KinovaGripperPS3 &a) { a.set_mode(PS3Mode::DEMONSTRATION); })
-      .def("set_replay_mode", [](KinovaGripperPS3 &a) { a.set_mode(PS3Mode::REPLAY); })
+           [](PS3RobotControl &a) { a.set_mode(PS3Mode::DEMONSTRATION); })
+      .def("set_replay_mode", [](PS3RobotControl &a) { a.set_mode(PS3Mode::REPLAY); })
+      .def("step", &PS3RobotControl::step)
+      .def("start_record", &PS3RobotControl::start_record)
       .def("apply_cache",
-           [](KinovaGripperPS3 &a, const py::array_t<int> &arr) {
+           [](PS3RobotControl &a, const py::array_t<int> &arr) {
              a.set_cache(
                  std::vector<int>(arr.data(), arr.data() + PS3_AXIS_COUNT + PS3_BUTTON_COUNT));
            })
-      .def("get_cache", [](KinovaGripperPS3 &a) {
+      .def("get_cache", [](PS3RobotControl &a) {
         auto cache = a.get_cache();
         return py::array_t<int>(cache.size(), cache.data());
       });
 
-  py::class_<MOVOPS3>(m, "MOVOPS3")
+  py::class_<KinovaGripperPS3, PS3RobotControl>(m, "SingleKinovaGripper")
       .def(py::init<ControllerManger *>())
-      .def("step", &MOVOPS3::step)
-      .def("apply_cache",
-           [](MOVOPS3 &a, const py::array_t<int> &arr) {
-             a.set_cache(
-                 std::vector<int>(arr.data(), arr.data() + PS3_AXIS_COUNT + PS3_BUTTON_COUNT));
-           })
-      .def("get_cache",
-           [](MOVOPS3 &a) {
-             auto cache = a.get_cache();
-             return py::array_t<int>(cache.size(), cache.data());
-           })
-      .def("set_normal_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::NORMAL); })
-      .def("set_demonstration_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::DEMONSTRATION); })
-      .def("set_replay_mode", [](MOVOPS3 &a) { a.set_mode(PS3Mode::REPLAY); });
-  py::class_<XArm6PS3>(m, "XArm6PS3")
+      .def("step", &KinovaGripperPS3::step);
+
+  py::class_<MOVOPS3, PS3RobotControl>(m, "MOVOPS3")
       .def(py::init<ControllerManger *>())
-      .def("step", &XArm6PS3::step)
-      .def("start_record", &XArm6PS3::start_record)
-      .def("apply_cache",
-           [](XArm6PS3 &a, const py::array_t<int> &arr) {
-             a.set_cache(
-                 std::vector<int>(arr.data(), arr.data() + PS3_AXIS_COUNT + PS3_BUTTON_COUNT));
-           })
-      .def("get_cache",
-           [](XArm6PS3 &a) {
-             auto cache = a.get_cache();
-             return py::array_t<int>(cache.size(), cache.data());
-           })
-      .def("set_normal_mode", [](XArm6PS3 &a) { a.set_mode(PS3Mode::NORMAL); })
-      .def("set_demonstration_mode", [](XArm6PS3 &a) { a.set_mode(PS3Mode::DEMONSTRATION); })
-      .def("set_replay_mode", [](XArm6PS3 &a) { a.set_mode(PS3Mode::REPLAY); });
+      .def("get_wheel_velocity", &MOVOPS3::get_wheel_velocity)
+      .def("get_head_velocity", &MOVOPS3::get_head_velocity)
+      .def("get_body_velocity", &MOVOPS3::get_body_velocity)
+      .def("set_wheel_velocity", &MOVOPS3::set_wheel_velocity)
+      .def("set_head_velocity", &MOVOPS3::set_head_velocity)
+      .def("set_body_velocity", &MOVOPS3::set_body_velocity)
+      .def("step", &MOVOPS3::step);
+
+  py::class_<XArm6PS3, PS3RobotControl>(m, "XArm6PS3")
+      .def(py::init<ControllerManger *>())
+      .def("step", &XArm6PS3::step);
 }
