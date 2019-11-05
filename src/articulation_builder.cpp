@@ -265,10 +265,13 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
     }
   }
 
+  uint32_t jointIdx = 0;
+  std::vector<int> jointIndices;
   // cache basic joint info
   for (size_t i = 0; i < nLinks; ++i) {
     auto *joint = static_cast<PxArticulationJointReducedCoordinate *>(links[i]->getInboundJoint());
     if (joint) {
+      jointIndices.push_back(jointIdx++);
       wrapper->jointNames.push_back(mLink2JointName[links[i]]);
       wrapper->jointDofs.push_back(links[i]->getInboundJointDof());
       for (size_t k = 0; k < wrapper->jointDofs.back(); ++k) {
@@ -310,6 +313,8 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
       default:
         throw std::runtime_error("Unsupported joint\n");
       }
+    } else {
+      jointIndices.push_back(-1);
     }
   }
 
@@ -330,6 +335,7 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
       wrapper->linkSegmentationIds.push_back(0);
     }
   }
+  wrapper->link2JointIndices = jointIndices;
 
   ArticulationWrapper *wrapperPtr = wrapper.get();
   mSimulation->mDynamicArticulationWrappers.push_back(std::move(wrapper));

@@ -185,6 +185,10 @@ void ArticulationWrapper::move_base(const PxTransform &newT) {
   articulation->teleportRootLink(newT, true);
 }
 
+std::vector<int> ArticulationWrapper::get_link_joint_indices() const {
+  return link2JointIndices;
+}
+
 PxTransform ArticulationWrapper::get_link_joint_pose(uint32_t idx) const {
   assert(idx < links.size());
   auto link = links[idx];

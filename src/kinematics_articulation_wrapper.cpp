@@ -3,10 +3,10 @@
 //
 
 #include "kinematics_articulation_wrapper.h"
+#include "simulation.h"
 #include <cassert>
 #include <iostream>
 #include <limits>
-#include "simulation.h"
 
 namespace sapien {
 // Kinematics Articulation Wrapper
@@ -107,7 +107,7 @@ std::vector<uint32_t> KinematicsArticulationWrapper::get_joint_dofs() const { re
 std::vector<std::string> KinematicsArticulationWrapper::get_joint_names() const {
   return jointName;
 }
-std::vector<PxReal> KinematicsArticulationWrapper::get_qpos() const {return qpos; }
+std::vector<PxReal> KinematicsArticulationWrapper::get_qpos() const { return qpos; }
 std::vector<physx::PxReal> KinematicsArticulationWrapper::get_qvel() const { return qvel; }
 std::vector<physx::PxReal> KinematicsArticulationWrapper::get_qacc() const { return qacc; }
 std::vector<physx::PxReal> KinematicsArticulationWrapper::get_qf() const {
@@ -193,6 +193,14 @@ std::vector<physx_id_t> KinematicsArticulationWrapper::get_link_ids() const {
     segmentation_ids.push_back(mSimulation->mActor2LinkId[l]);
   }
   return segmentation_ids;
+}
+
+std::vector<int> KinematicsArticulationWrapper::get_link_joint_indices() const {
+  std::vector<int> jointIndices;
+  for (uint32_t i = 0; i < linkListPtr.size(); ++i) {
+    jointIndices.push_back(i);
+  }
+  return jointIndices;
 }
 
 physx::PxTransform KinematicsArticulationWrapper::get_link_joint_pose(uint32_t idx) const {

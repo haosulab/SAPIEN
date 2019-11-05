@@ -163,4 +163,8 @@ PxTransform JointSystem::get_link_joint_pose(uint32_t idx) const {
   return PxTransform(PxIdentity);
 }
 
+std::vector<int> JointSystem::get_link_joint_indices() const {
+  std::cerr << "Getting joint indices from link is not supported" << std::endl;
+  return {};
+}
 }

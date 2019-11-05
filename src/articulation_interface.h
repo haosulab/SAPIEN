@@ -32,6 +32,7 @@ struct IArticulationBase {
   virtual std::vector<physx::PxRigidBody *> get_links() const { return {}; }
   virtual std::vector<std::string> get_link_names() const { return {}; }
   virtual std::vector<physx_id_t> get_link_ids() const { return {}; }
+  virtual std::vector<int> get_link_joint_indices() const = 0;
 
   virtual ~IArticulationBase() = default;
   virtual physx::PxTransform get_link_joint_pose(uint32_t idx) const = 0;

@@ -360,6 +360,7 @@ PYBIND11_MODULE(sapyen, m) {
       .def("get_joint_names", &IArticulationBase::get_joint_names)
       .def("get_link_names", &IArticulationBase::get_link_names)
       .def("get_link_ids", &IArticulationBase::get_link_ids)
+      .def("get_link_joint_indices", &IArticulationBase::get_link_joint_indices)
       .def("get_links", &IArticulationBase::get_links, py::return_value_policy::reference)
       .def("get_joint_dofs",
            [](IArticulationBase &a) {

@@ -83,6 +83,7 @@ public:
 
   std::vector<std::string> get_link_names() const override;
   std::vector<physx_id_t> get_link_ids() const override;
+  std::vector<int> get_link_joint_indices() const override;
 
   // This function should be called after one simulation step
   void update(PxReal timestep);

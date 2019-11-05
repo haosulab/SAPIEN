@@ -49,6 +49,7 @@ struct ArticulationWrapper : public IArticulationDrivable {
   std::vector<PxReal> linkMasses;
   std::vector<PxVec3> linkInertial;
   std::vector<physx_id_t> linkSegmentationIds;
+  std::vector<int> link2JointIndices;
 
   /* call to update cache with current articulation */
   void updateCache();
@@ -61,6 +62,7 @@ struct ArticulationWrapper : public IArticulationDrivable {
   virtual std::vector<physx::PxRigidBody *> get_links() const override;
   virtual std::vector<std::string> get_link_names() const override;
   virtual std::vector<physx_id_t> get_link_ids() const override;
+  virtual std::vector<int> get_link_joint_indices() const override;
 
   // IArticulationBase
   virtual EArticulationType get_articulation_type() const override;
