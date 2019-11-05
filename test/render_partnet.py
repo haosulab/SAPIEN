@@ -8,6 +8,7 @@ import os
 import transforms3d
 from PIL import Image
 import argparse
+import xml.etree.ElementTree as ET
 
 np.random.seed(0)
 
@@ -85,6 +86,17 @@ print(urdf, file=sys.stderr)
 
 with open(os.path.join(args.folder, 'meta.json'), 'r') as f:
     model_category = json.load(f)['model_cat']
+
+link2parent = {}
+xml = ET.parse(urdf)
+root = xml.getroot()
+for joint in root.findall('joint'):
+    pname = joint.find('parent').attrib['link']
+    cname = joint.find('child').attrib['link']
+    link2parent[cname] = pname
+for cname in link2parent:
+    if 'helper' in link2parent[cname]:
+        link2parent[cname] = link2parent[link2parent[cname]]
 
 semantics = os.path.join(args.folder, 'semantics.txt')
 link2semantics = {}
@@ -215,15 +227,9 @@ for idx, pose in enumerate(poses):
             "limit": list(true_limits[link2qidx[l]].astype(float)) if l in link2qidx else None,
             "origin": list(origin.astype(float)) if l in link2lidx else None,
             "direction": list(direction.astype(float)) if l in link2lidx else None,
-            "qpos": float(qpos[link2qidx[l]]) if l in link2qidx else None
+            "qpos": float(qpos[link2qidx[l]]) if l in link2qidx else None,
+            "parent": link2parent[l] if l in link2parent else None
         }
 
     with open(f'{args.output}/{annoid}_{idx}_config.json', 'w') as f:
         json.dump(config, f)
-
-# renderer.show_window()
-# while True:
-#     sim.step()
-#     sim.update_renderer()
-#     renderer.render()
-#     depth = cam0.get_depth()
