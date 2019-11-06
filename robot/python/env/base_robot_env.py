@@ -84,6 +84,9 @@ class BaseRobotEnv(BaseEnv):
         """
         return self.robot_name2link(self._base_link_name).get_global_pose()
 
-    def set_robot_base_pose(self, pose: Union[np.ndarray, List]) -> None:
-        assert len(pose) == 7, "Pose should be in Position: x y z, Quaternion: w x y z format"
-        self.manger.move_base(sapyen.Pose(pose[:3], pose[3:]))
+    def set_robot_base_pose(self, pose: Union[np.ndarray, List, sapyen.Pose]) -> None:
+        if isinstance(pose, sapyen.Pose):
+            self.manger.move_base(pose)
+        else:
+            assert len(pose) == 7, "Pose should be in Position: x y z, Quaternion: w x y z format"
+            self.manger.move_base(sapyen.Pose(pose[:3], pose[3:]))

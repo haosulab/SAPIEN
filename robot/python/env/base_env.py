@@ -311,3 +311,42 @@ class SapienSingleObjectEnv(BaseEnv):
         position = depth[pos, :] * self.mapping_list[cam_id][pos, :]
         link = self.object_segmentation_id2link(segmentation_id)
         self.__apply_force_to_link_at_position(link, position, direction)
+
+    def calculate_pose_in_front_of_semantics(self, semantic_name: str, category: str = "StorageFurniture",
+                                             horizontal_offset: float = 0.6,
+                                             vertical_offset: float = -0.3) -> sapyen.Pose:
+        """
+        Get a heuristic pose which locate in front of the semantic part
+        :param semantic_name: Semantic name
+        :param category: Category of the object
+        :param horizontal_offset: How far does the target pose be in front of the semantic part
+        :param vertical_offset: How far does the target pose be in above the semantic part
+        :return: Target pose
+        """
+        object_pose: sapyen.Pose = self.object_links[0].get_global_pose()
+        semantic_id = self.object_link_semantics.index(semantic_name)
+        semantic_local_pose: sapyen.Pose = object_pose.inv().transform(
+            self.object_links[semantic_id].get_global_mass_center())
+        if semantic_local_pose.p[0] > 0:
+            target_x = semantic_local_pose.p[0] + horizontal_offset
+        else:
+            target_x = semantic_local_pose.p[0] - horizontal_offset
+
+        target_pos = semantic_local_pose.p
+        target_pos[0] = target_x
+        target_pos[2] += vertical_offset
+        target_pose = sapyen.Pose(target_pos, [1, 0, 0, 0])
+        return object_pose.transform(target_pose)
+
+    def get_global_point_cloud_with_semantics(self, cam: [int, str], seg_id: int) -> np.ndarray:
+        if isinstance(cam, str):
+            cam = self.camera_name2id(cam)
+
+        pc = self.render_point_cloud(cam, xyz=True, rgba=False, normal=False, segmentation=True)
+        found_bool = pc[:, :, 3] == seg_id
+        if np.sum(found_bool) == 0:
+            warnings.warn(f"Object with segmentation ID:{seg_id} not found.")
+            return np.zeros([0, 3])
+        else:
+            result = pc[found_bool, 0:3]
+            return result
