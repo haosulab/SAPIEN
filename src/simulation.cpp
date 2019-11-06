@@ -359,4 +359,9 @@ void Simulation::pack(const std::vector<PxReal> &data) {
   }
   assert(begin == data.end());
 }
+void Simulation::clearCache() {
+  for (auto & i : mControllableArticulationWrapper) {
+    i->clearCache();
+  }
+}
 } // namespace sapien

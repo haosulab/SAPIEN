@@ -57,7 +57,8 @@ public:
   std::vector<std::string> get_drive_joint_name();
   void update(physx::PxReal timestep);
   void updateTimeStep(float timestep);
-  float informMangerTimestepChange();
+  float informMangerTimeStepChange();
+  void clearCache();
 };
 
 } // namespace sapien

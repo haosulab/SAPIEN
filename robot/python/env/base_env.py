@@ -1,5 +1,6 @@
 import sapyen
-from typing import List, Union
+from typing import List, Union, Optional
+from .physx_utils import transform2mat, mat2transform
 import transforms3d
 import numpy as np
 import warnings
@@ -47,8 +48,8 @@ class BaseEnv:
         self.camera_frame_id = []
         self.camera_pose = []
         self.camera_name_list = []
-        self.cam_list = []
-        self.mount_actor_list = []
+        self.cam_list: List[sapyen.mounted_camera] = []
+        self.mount_actor_list: List[sapyen.PxRigidActor] = []
         self.mapping_list = []
         self.depth_lambda_list = []
 
@@ -59,6 +60,9 @@ class BaseEnv:
         self.sim.step()
         self.sim.update_renderer()
         self.renderer.render()
+
+    def seg_id2name(self, seg_id: int) -> str:
+        return self.sim.get_render_name_dict()[seg_id]
 
     def _init_camera_cache(self):
         """
@@ -77,12 +81,12 @@ class BaseEnv:
             self.depth_lambda_list.append(
                 lambda depth: 1 / (depth * (1 / camera.far - 1 / camera.near) + 1 / camera.near))
 
-    def add_camera(self, name: str, camera_pose_mat: np.ndarray, width: int, height: int, fov=1.1, near=0.01,
-                   far=100) -> None:
+    def add_camera(self, name: str, camera_pose: Union[np.ndarray, sapyen.Pose], width: int, height: int, fov=1.1,
+                   near=0.01, far=100) -> None:
         """
         Add custom mounted camera to the scene. These camera have same property as the urdf-defined camera
         :param name: Name of the camera, used for get camera name and may be used for namespace of topic if ROS enabled
-        :param camera_pose_mat: (4, 4) transformation matrix to define the pose of camera. Camera point forward along
+        :param camera_pose: (4, 4) transformation matrix to define the pose of camera. Camera point forward along
             positive x-axis, the y-axis and z-axis accounts for the width and height of the image captured by camera
         :param width: The width of the camera, e.g. 1920 in the (1920, 1080) hd image
         :param height: The height of the camera, e.g. 1080 in the (1920, 1080) hd image
@@ -95,8 +99,15 @@ class BaseEnv:
         self.mount_actor_list.append(actor)
         self.camera_name_list.append(name)
 
-        pose = sapyen.Pose(camera_pose_mat[:3, 3])
-        pose.set_q(transforms3d.quaternions.mat2quat(camera_pose_mat[:3, :3]))
+        if isinstance(camera_pose, np.ndarray):
+            assert camera_pose.shape == (4, 4), "Camera pose matrix must be (4, 4)"
+            pose = mat2transform(camera_pose)
+        elif isinstance(camera_pose, sapyen.Pose):
+            pose = camera_pose
+            camera_pose = transform2mat(pose)
+        else:
+            raise RuntimeError("Unknown format of camera pose: {}".format(type(camera_pose)))
+
         self.sim.add_mounted_camera(name, actor, sapyen.Pose([0, 0, 0], [1, 0, 0, 0]), width, height, fov, fov,
                                     near, far)
         actor.set_global_pose(pose)
@@ -106,7 +117,7 @@ class BaseEnv:
         self.__build_camera_mapping(height, width, camera.get_camera_matrix())
         self.depth_lambda_list.append(lambda depth: 1 / (depth * (1 / far - 1 / near) + 1 / near))
         self.camera_frame_id.append("/base_link")
-        self.camera_pose.append((camera_pose_mat @ CAMERA_TO_LINK).astype(np.float32))
+        self.camera_pose.append((camera_pose @ CAMERA_TO_LINK).astype(np.float32))
 
     def __build_camera_mapping(self, height: int, width: int, camera_matrix: np.ndarray):
         """
@@ -323,22 +334,36 @@ class SapienSingleObjectEnv(BaseEnv):
         :param vertical_offset: How far does the target pose be in above the semantic part
         :return: Target pose
         """
+        link_index = self.object_link_semantics.index(semantic_name)
+        return self.calculate_pose_in_front_of_object_link(link_index, category, horizontal_offset, vertical_offset)
+
+    def calculate_pose_in_front_of_object_link(self, link_index: int, category: Optional[str], horizontal_offset: float,
+                                               vertical_offset: float) -> sapyen.Pose:
+        """
+        Get a heuristic pose which locate in front of a object link
+        :param link_index: Index of a link in the object link list
+        :param category: Category of the object
+        :param horizontal_offset: How far does the target pose be in front of the semantic part
+        :param vertical_offset: How far does the target pose be in above the semantic part
+        :return: Target pose
+        """
         object_pose: sapyen.Pose = self.object_links[0].get_global_pose()
-        semantic_id = self.object_link_semantics.index(semantic_name)
         semantic_local_pose: sapyen.Pose = object_pose.inv().transform(
-            self.object_links[semantic_id].get_global_mass_center())
+            self.object_links[link_index].get_global_mass_center())
         if semantic_local_pose.p[0] > 0:
             target_x = semantic_local_pose.p[0] + horizontal_offset
+            target_direction_quaternion = [0, 0, 0, 1]
         else:
             target_x = semantic_local_pose.p[0] - horizontal_offset
+            target_direction_quaternion = [1, 0, 0, 0]
 
         target_pos = semantic_local_pose.p
         target_pos[0] = target_x
         target_pos[2] += vertical_offset
-        target_pose = sapyen.Pose(target_pos, [1, 0, 0, 0])
+        target_pose = sapyen.Pose(target_pos, target_direction_quaternion)
         return object_pose.transform(target_pose)
 
-    def get_global_point_cloud_with_semantics(self, cam: [int, str], seg_id: int) -> np.ndarray:
+    def get_global_point_cloud_with_seg_id(self, cam: [int, str], seg_id: int) -> np.ndarray:
         if isinstance(cam, str):
             cam = self.camera_name2id(cam)
 

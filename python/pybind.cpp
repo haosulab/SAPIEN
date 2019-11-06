@@ -136,6 +136,7 @@ PYBIND11_MODULE(sapyen, m) {
       .def("create_urdf_loader", [](Simulation &s) { return new URDF::URDFLoader(s); })
       .def("create_controllable_articulation", &Simulation::createControllableArticulationWrapper,
            py::return_value_policy::reference)
+      .def("clear", &Simulation::clearCache)
       .def("step", &Simulation::step)
       .def("dump", &Simulation::dump)
       .def("pack",
@@ -474,7 +475,8 @@ PYBIND11_MODULE(sapyen, m) {
   py::class_<KinematicsArticulationWrapper, IArticulationDrivable>(
       m, "KinematicsArticulationWrapper");
 
-  py::class_<ControllableArticulationWrapper>(m, "ControllableArticulation");
+  py::class_<ControllableArticulationWrapper>(m, "ControllableArticulation")
+      .def("clear", &ControllableArticulationWrapper::clearCache);
 
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
       .def(py::init<Simulation &>())

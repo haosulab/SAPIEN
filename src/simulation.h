@@ -89,7 +89,8 @@ public:
 
   /* Create Controllable wrapper and register update function */
   class ControllableArticulationWrapper *
-  createControllableArticulationWrapper(class IArticulationDrivable * baseWrapper);
+  createControllableArticulationWrapper(class IArticulationDrivable *baseWrapper);
+  void clearCache();
 };
 
 } // namespace sapien

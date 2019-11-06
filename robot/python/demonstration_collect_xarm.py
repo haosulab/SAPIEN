@@ -6,7 +6,7 @@ import numpy as np
 import transforms3d
 from robot.python.env.path_utils import *
 
-CONVEX_PARTNET_DIR = "/home/sim/project/mobility_convex"
+CONVEX_PARTNET_DIR = "/home/sim/mobility_dataset/mobility_v1_alpha5"
 door_with_handle = ['35059', '40147', '40417', '41003', '41004', '41083', '41085', '41086', '41452', '41510',
                     '41529', '44781', '44826', '45001', '45007', '45087', '45091', '45130', '45134', '45146',
                     '45159', '45162', '45164', '45166', '45168', '45173', '45176', '45177', '45189', '45194',
@@ -32,12 +32,18 @@ door_with_handle = ['35059', '40147', '40417', '41003', '41004', '41083', '41085
                     '48452', '48467', '48490', '48513', '48519', '48623', '48700', '48721', '48797', '48859',
                     '48878', '49025', '49038', '49042', '49062', '49132', '49133', '49188']
 
+vertical_door_handle_index = [1, 3, 6, 9, 11, 14, 15, 16, 19, 20, 21, 24, 26, 27, 28, 29, 32, 35, 36, 38, 40, 42, 43,
+                              44, 45, 46, 47, 50, 52, 54]
+duplicated = [(3, 6)]
+
 
 def main():
-    partnet_id = door_with_handle[31]
+    print(len(vertical_door_handle_index))
+    partnet_id = door_with_handle[54]
     print("*" * 10, "Partnet ID: {}".format(partnet_id), "*" * 10)
     recorder = XArmRecorder(dataset_dir=CONVEX_PARTNET_DIR, data_id=partnet_id, on_screening_rendering=True)
-    recorder.set_robot_base_pose([-1, 0, -0.5, 1, 0, 0, 0])
+    target_pose = recorder.calculate_pose_in_front_of_semantics("rotation_door")
+    recorder.set_robot_base_pose(target_pose)
     data = {}
 
     try:

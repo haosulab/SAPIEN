@@ -10,7 +10,7 @@ namespace sapien::robot {
 sapien::robot::ControllerManger::ControllerManger(std::string robotName,
                                                   sapien::ControllableArticulationWrapper *wrapper)
     : wrapper(wrapper), robotName(std::move(robotName)), spinner(4),
-      time_step(wrapper->informMangerTimestepChange()) {
+      time_step(wrapper->informMangerTimeStepChange()) {
   if (!ros::isInitialized()) {
     throw std::runtime_error("ROS not init");
   }

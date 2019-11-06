@@ -111,9 +111,17 @@ void ControllableArticulationWrapper::updateTimeStep(float newTimestep) {
   timestep = newTimestep;
   needUpdateTimeStep = true;
 }
-float ControllableArticulationWrapper::informMangerTimestepChange() {
+float ControllableArticulationWrapper::informMangerTimeStepChange() {
   needUpdateTimeStep = false;
   return timestep;
+}
+void ControllableArticulationWrapper::clearCache() {
+  for (auto &i : velocityControllerQueueList) {
+    i->clear();
+  }
+  for (auto &i : positionControllerQueueList) {
+    i->clear();
+  }
 }
 // Thread Safe Queue
 ThreadSafeQueue::ThreadSafeQueue() { mQueue = std::queue<std::vector<float>>(); }
