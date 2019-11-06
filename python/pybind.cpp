@@ -179,6 +179,11 @@ PYBIND11_MODULE(sapyen, m) {
              physx::PxVec3 vel = a.getLinearVelocity();
              return py::array_t<PxReal>(3, (PxReal *)(&vel));
            })
+      .def("get_inertia",
+           [](PxRigidBody &a) {
+             auto vec = a.getMassSpaceInertiaTensor();
+             return py::array_t<PxReal>(3, (PxReal *)(&vec));
+           })
       .def("get_angular_velocity", [](PxRigidBody &a) {
         physx::PxVec3 vel = a.getAngularVelocity();
         return py::array_t<PxReal>(3, (PxReal *)(&vel));

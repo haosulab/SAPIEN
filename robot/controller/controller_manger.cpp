@@ -53,6 +53,11 @@ sapien::robot::ControllerManger::createCartesianVelocityController(const std::st
               << std::endl;
     return nullptr;
   }
+  if (!jointPubNode) {
+    ROS_WARN("Joint Pub Node has not been created for this robot controller manager");
+    ROS_WARN("Try create it first before create any controller");
+    return nullptr;
+  }
   auto controller = std::make_unique<CartesianVelocityController>(
       wrapper, jointState, robotState.get(), groupName, time_step, nh.get(), robotName);
 
@@ -62,6 +67,11 @@ sapien::robot::ControllerManger::createCartesianVelocityController(const std::st
 }
 JointVelocityController *sapien::robot::ControllerManger::createJointVelocityController(
     const std::vector<std::string> &jointNames, const std::string &serviceName) {
+  if (!jointPubNode) {
+    ROS_WARN("Joint Pub Node has not been created for this robot controller manager");
+    ROS_WARN("Try create it first before create any controller");
+    return nullptr;
+  }
   for (const auto &name : jointNames) {
     if (std::count(jointName.begin(), jointName.end(), name) != 1) {
       ROS_WARN("Joint name not found in robot %s: %s", robotName.c_str(), name.c_str());
@@ -77,7 +87,11 @@ JointVelocityController *sapien::robot::ControllerManger::createJointVelocityCon
   return controllerPtr;
 }
 void sapien::robot::ControllerManger::addGroupTrajectoryController(const std::string &groupName) {
-  assert(jointPubNode);
+  if (!jointPubNode) {
+    ROS_WARN("Joint Pub Node has not been created for this robot controller manager");
+    ROS_WARN("Try create it first before create any controller");
+    return;
+  }
   if (!kinematicModel) {
     std::cerr << "Robot has not be loaded, does parameter exist?" << std::endl;
     std::cerr << "Creating cartesian velocity controller fail due to empty robot model"
