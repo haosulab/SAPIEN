@@ -5,6 +5,7 @@
 #include "controllable_articulation_wrapper.h"
 #include "articulation_interface.h"
 #include <algorithm>
+#include <assert.h>
 #include <iostream>
 
 namespace sapien {
@@ -118,10 +119,13 @@ float ControllableArticulationWrapper::informMangerTimeStepChange() {
 void ControllableArticulationWrapper::clearCache() {
   for (auto &i : velocityControllerQueueList) {
     i->clear();
+    assert(i->empty());
   }
   for (auto &i : positionControllerQueueList) {
     i->clear();
+    assert(i->empty());
   }
+  driveQpos = articulation->get_qpos();
 }
 // Thread Safe Queue
 ThreadSafeQueue::ThreadSafeQueue() { mQueue = std::queue<std::vector<float>>(); }
