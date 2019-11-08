@@ -315,7 +315,7 @@ PYBIND11_MODULE(sapyen, m) {
            })
       .def("set_rotation",
            [](Optifuser::CameraSpec &c, const py::array_t<float> &arr) {
-             c.rotation = {arr.at(0), arr.at(1), arr.at(2), arr.at(3)};
+             c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
            })
       .def_property_readonly(
           "position",
@@ -323,7 +323,8 @@ PYBIND11_MODULE(sapyen, m) {
       .def_property_readonly(
           "rotation",
           [](Optifuser::CameraSpec &c) {
-            return make_array<float>({c.rotation.w, c.rotation.x, c.rotation.y, c.rotation.z});
+            auto rot = c.getRotation();
+            return make_array<float>({rot.w, rot.x, rot.y, rot.z});
           })
       .def_readwrite("near", &Optifuser::CameraSpec::near)
       .def_readwrite("far", &Optifuser::CameraSpec::far)

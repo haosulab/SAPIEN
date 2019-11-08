@@ -65,11 +65,11 @@ def test_urdf(folder):
     # cam = sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), 512, 512,
     #                              1.22172944444, 1.22172944444, 0.01, 100)
 
-    # renderer.show_window()
-    # while True:
-    #     sim.step()
-    #     sim.update_renderer()
-    #     renderer.render()
+    renderer.show_window()
+    while True:
+        sim.step()
+        sim.update_renderer()
+        renderer.render()
 
 
 import sys

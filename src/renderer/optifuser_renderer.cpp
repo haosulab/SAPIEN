@@ -115,7 +115,7 @@ void OptifuserRenderer::updateRigidbody(uint32_t uniqueId, const physx::PxTransf
   }
   for (auto obj : mObjectRegistry[uniqueId]) {
     obj->position = {transform.p.x, transform.p.y, transform.p.z};
-    obj->rotation = {transform.q.w, transform.q.x, transform.q.y, transform.q.z};
+    obj->setRotation({transform.q.w, transform.q.x, transform.q.y, transform.q.z});
   }
 }
 
@@ -134,8 +134,7 @@ void OptifuserRenderer::init() {
   mContext->renderer.setShadowShader("glsl_shader/shadow.vsh", "glsl_shader/shadow.fsh");
   mContext->renderer.setGBufferShader("glsl_shader/gbuffer.vsh",
                                       "glsl_shader/gbuffer_segmentation.fsh");
-  mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
-                                       "glsl_shader/deferred.fsh");
+  mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh", "glsl_shader/deferred.fsh");
   mContext->renderer.setAxisShader("glsl_shader/axes.vsh", "glsl_shader/axes.fsh");
   mContext->renderer.enablePicking();
   mContext->renderer.enableAxisPass();
@@ -245,7 +244,7 @@ void OptifuserRenderer::render() {
         ImGui::Text("Position");
         ImGui::Text("%-4.3f %-4.3f %-4.3f", cam.position.x, cam.position.y, cam.position.z);
         ImGui::Text("Forward");
-        auto forward = cam.rotation * glm::vec3(0, 0, -1);
+        auto forward = cam.getRotation() * glm::vec3(0, 0, -1);
         ImGui::Text("%-4.3f %-4.3f %-4.3f", forward.x, forward.y, forward.z);
         ImGui::Text("Fov");
         ImGui::SliderAngle("##fov(y)", &cam.fovy, 1.f, 90.f);
@@ -350,8 +349,8 @@ void OptifuserRenderer::addCamera(uint32_t uniqueId, std::string const &name, ui
 void OptifuserRenderer::updateCamera(uint32_t uniqueId, physx::PxTransform const &transform) {
   assert(mMountedCameras.find(uniqueId) != mMountedCameras.end());
   mMountedCameras[uniqueId]->position = {transform.p.x, transform.p.y, transform.p.z};
-  mMountedCameras[uniqueId]->rotation = {transform.q.w, transform.q.x, transform.q.y,
-                                         transform.q.z};
+  mMountedCameras[uniqueId]->setRotation(
+      {transform.q.w, transform.q.x, transform.q.y, transform.q.z});
 }
 
 void OptifuserRenderer::setAmbientLight(std::array<float, 3> color) {
