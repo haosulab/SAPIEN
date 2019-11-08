@@ -1,11 +1,11 @@
 moveit_setup_assistant_config:
   URDF:
     package: xarm_description
-    relative_path: urdf/xarm6_robot.urdf.xacro
-    xacro_args: "--inorder "
+    relative_path: urdf/xarm6.urdf
+    xacro_args: ""
   SRDF:
     relative_path: config/xarm6.srdf
   CONFIG:
-    author_name: Jason Peng
-    author_email: jason@ufactory.cc
-    generated_timestamp: 1545822419
+    author_name: sapien
+    author_email: sapien@ucsd.edu
+    generated_timestamp: 1573094299

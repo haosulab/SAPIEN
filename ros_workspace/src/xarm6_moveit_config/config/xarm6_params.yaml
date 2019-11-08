@@ -1,3 +1,0 @@
-xarm:
-  DOF: 6
-  joint_names: ['joint1', 'joint2', 'joint3', 'joint4', 'joint5', 'joint6']

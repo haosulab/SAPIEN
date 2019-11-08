@@ -5,8 +5,8 @@
   <description>
      An automatically generated package with all the configuration and launch files for using the xarm6 with the MoveIt! Motion Planning Framework
   </description>
-  <author email="jason@ufactory.cc">Jason Peng</author>
-  <maintainer email="jason@ufactory.cc">Jason Peng</maintainer>
+  <author email="sapien@ucsd.edu">sapien</author>
+  <maintainer email="sapien@ucsd.edu">sapien</maintainer>
 
   <license>BSD</license>
 
@@ -24,6 +24,7 @@
   <run_depend>moveit_setup_assistant</run_depend>
   <run_depend>joint_state_publisher</run_depend>
   <run_depend>robot_state_publisher</run_depend>
+  <run_depend>tf2_ros</run_depend>
   <run_depend>xacro</run_depend>
   <!-- This package is referenced in the warehouse launch files, but does not build out of the box at the moment. Commented the dependency until this works. -->
   <!-- <run_depend>warehouse_ros_mongo</run_depend> -->

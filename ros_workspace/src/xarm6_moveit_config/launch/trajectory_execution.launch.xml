@@ -15,6 +15,6 @@
 
   <!-- Load the robot specific controller manager; this sets the moveit_controller_manager ROS parameter -->
   <arg name="moveit_controller_manager" default="xarm6" />
-  <include file="$(find xarm6_moveit_config)/launch/$(arg moveit_controller_manager)_moveit_controller_manager.launch.xml" />
+  <include file="$(find xarm6_moveit_config)/launch/xarm6_moveit_controller_manager.launch.xml" />
 
 </launch>

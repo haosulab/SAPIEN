@@ -3,7 +3,7 @@
   <!-- This file makes it easy to include the settings for sensor managers -->
 
   <!-- Params for 3D sensors config -->
-  <!-- <rosparam command="load" file="$(find xarm6_moveit_config)/config/sensors_3d.yaml" /> -->
+  <rosparam command="load" file="$(find xarm6_moveit_config)/config/sensors_3d.yaml" />
 
   <!-- Params for the octomap monitor -->
   <!--  <param name="octomap_frame" type="string" value="some frame in which the robot moves" /> -->

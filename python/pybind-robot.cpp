@@ -47,6 +47,38 @@ PYBIND11_MODULE(sapyen_robot, m) {
       .def("move_joint", &JointVelocityController::moveJoint);
 
   py::class_<CartesianVelocityController>(m, "CartesianVelocityController")
+      .def("move_local_translate",
+           [](CartesianVelocityController &a, const py::array_t<float> &arr, bool continuous) {
+             std::array<float, 3> array{};
+             for (int j = 0; j < 3; ++j) {
+               array[j] = arr.at(j);
+             }
+             a.moveRelative(array, MoveType::LocalTranslate, continuous);
+           })
+      .def("move_world_translate",
+           [](CartesianVelocityController &a, const py::array_t<float> &arr, bool continuous) {
+             std::array<float, 3> array{};
+             for (int j = 0; j < 3; ++j) {
+               array[j] = arr.at(j);
+             }
+             a.moveRelative(array, MoveType::WorldTranslate, continuous);
+           })
+      .def("move_local_rotate",
+           [](CartesianVelocityController &a, const py::array_t<float> &arr, bool continuous) {
+             std::array<float, 3> array{};
+             for (int j = 0; j < 3; ++j) {
+               array[j] = arr.at(j);
+             }
+             a.moveRelative(array, MoveType::LocalRotate, continuous);
+           })
+      .def("move_world_rotate",
+           [](CartesianVelocityController &a, const py::array_t<float> &arr, bool continuous) {
+             std::array<float, 3> array{};
+             for (int j = 0; j < 3; ++j) {
+               array[j] = arr.at(j);
+             }
+             a.moveRelative(array, MoveType::WorldRotate, continuous);
+           })
       .def("get_velocity", &CartesianVelocityController::getVelocity);
 
   py::class_<MoveGroupPlanner>(m, "MoveGroupPlanner").def("go", &MoveGroupPlanner::go);

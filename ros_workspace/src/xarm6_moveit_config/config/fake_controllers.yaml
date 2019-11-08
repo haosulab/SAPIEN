@@ -7,3 +7,6 @@ controller_list:
       - joint4
       - joint5
       - joint6
+  - name: fake_ee_controller
+    joints:
+      - drive_joint

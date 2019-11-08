@@ -28,6 +28,7 @@ CartesianVelocityController::CartesianVelocityController(ControllableArticulatio
   rotStepSize = timestep * 1;
   buildCartesianAngularVelocityCache();
   buildCartesianVelocityCache();
+  toggleJumpTest(true);
 
   // Register queue
   mQueue = std::make_unique<ThreadSafeQueue>();
