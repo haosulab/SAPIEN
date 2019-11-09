@@ -59,17 +59,11 @@ void run() {
 
   renderer.showWindow();
   std::vector<std::vector<PxReal>> temp;
-  int i = 0;
   while (true) {
     sim.step();
     sim.updateRenderer();
     renderer.render();
     ps3.step();
-    i++;
-    if (i > 5000) {
-      sim.clearCache();
-      std::cout << "clear" << std::endl;
-    }
     //    temp.push_back(sim.dump());
 
     auto gl_input = Optifuser::getInput();

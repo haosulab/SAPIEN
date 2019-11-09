@@ -134,12 +134,14 @@ void CartesianVelocityController::moveRelative(const std::array<float, 3> &T, Mo
   }
   Eigen::Isometry3d trans = Eigen::Isometry3d::Identity();
   Eigen::Isometry3d newPose;
+  bool found_ik = false;
   switch (type) {
   case WorldTranslate: {
     Eigen::Vector3d vec(T[0], T[1], T[2]);
     vec *= transStepSize;
     trans.matrix().block<3, 1>(0, 3) = vec;
     newPose = trans * currentPose;
+    found_ik = state->setFromIK(jointModelGroup, newPose, 0.05);
     break;
   }
   case WorldRotate: {
@@ -151,6 +153,7 @@ void CartesianVelocityController::moveRelative(const std::array<float, 3> &T, Mo
           Eigen::AngleAxisd(vec[0], Eigen::Vector3d::UnitX());
     trans.matrix().block<3, 3>(0, 0) = rot;
     newPose = trans * currentPose;
+    found_ik = state->setFromIK(jointModelGroup, newPose, 0.05);
     break;
   }
   case LocalTranslate: {
@@ -158,6 +161,9 @@ void CartesianVelocityController::moveRelative(const std::array<float, 3> &T, Mo
     vec *= transStepSize;
     trans.matrix().block<3, 1>(0, 3) = vec;
     newPose = currentPose * trans;
+    Eigen::VectorXd v(6);
+    v << T[0], T[1], T[2], 0, 0, 0;
+    found_ik = state->setFromDiffIK(jointModelGroup, v, eeName, transStepSize);
     break;
   }
   case LocalRotate: {
@@ -169,10 +175,12 @@ void CartesianVelocityController::moveRelative(const std::array<float, 3> &T, Mo
           Eigen::AngleAxisd(vec[0], Eigen::Vector3d::UnitX());
     trans.matrix().block<3, 3>(0, 0) = rot;
     newPose = currentPose * trans;
+    Eigen::VectorXd v(6);
+    v << 0, 0, 0, T[0], T[1], T[2];
+    found_ik = state->setFromDiffIK(jointModelGroup, v, eeName, rotStepSize);
     break;
   }
   }
-  bool found_ik = state->setFromIK(jointModelGroup, newPose, 0.05);
   if (!found_ik) {
     ROS_WARN("Ik not found without timeout");
     return;
