@@ -194,7 +194,7 @@ void CartesianVelocityController::moveRelative(const std::array<float, 3> &T, Mo
     }
   }
   state->copyJointGroupPositions(jointModelGroup, jointValue);
-  currentPose = newPose;
+  currentPose = state->getGlobalLinkTransform(eeName);
 
   // Control the physx via controllable wrapper
   jointValueFloat.assign(jointValue.begin(), jointValue.end());

@@ -77,7 +77,7 @@ class BaseRobotEnv(BaseEnv):
         return self.robot.get_links()
 
     @property
-    def robot2global(self) -> sapyen.Pose:
+    def robot_global_pose(self) -> sapyen.Pose:
         """
         Get robot root pose in the global coordinate
         :return: Robot root pose

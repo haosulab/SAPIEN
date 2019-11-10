@@ -1,3 +1,4 @@
+import re
 import sapyen
 from typing import List, Union, Optional
 from .physx_utils import transform2mat, mat2transform
@@ -9,6 +10,34 @@ import os
 RGBD_CAMERA_THRESHOLD = 10
 CAMERA_TO_LINK = np.zeros([4, 4])
 CAMERA_TO_LINK[[0, 1, 2, 3], [2, 0, 1, 3]] = [1, -1, -1, 1]
+
+
+def point_cloud_from_depth(depth, color, proj, model):
+    W, H = depth.shape
+
+    WS = np.repeat(np.linspace(1 / (2 * W), 1 - 1 / (2 * W), W).reshape([1, -1]), H, axis=0)
+    HS = np.repeat(np.linspace(1 / (2 * H), 1 - 1 / (2 * H), H)[::-1].reshape([-1, 1]), W, axis=1)
+    points = np.stack([WS, HS, depth, np.ones_like(depth)], 2)
+
+    color = color[depth < 1]
+    points = points[depth < 1]
+    points = points * 2 - 1
+    cam_points = np.linalg.inv(proj) @ points.T
+    cam_points /= cam_points[3]
+
+    world_points = model @ cam_points
+    world_points = world_points.T
+    print(model)
+
+    return world_points[:, :3], color[:, :3]
+
+
+def get_pc(cam):
+    cam.take_picture()
+    depth = cam.get_depth()
+    color = cam.get_color_rgba()
+
+    xyz, rgb = point_cloud_from_depth(depth, color, cam.get_projection_mat(), cam.get_model_mat())
 
 
 class BaseEnv:
@@ -52,6 +81,8 @@ class BaseEnv:
         self.mount_actor_list: List[sapyen.PxRigidActor] = []
         self.mapping_list = []
         self.depth_lambda_list = []
+        self.__gl_camera_mapping = []
+        self._gl_projection_inv = []
 
     def __step(self):
         """
@@ -61,8 +92,8 @@ class BaseEnv:
         self.sim.update_renderer()
         self.renderer.render()
 
-    def seg_id2name(self, seg_id: int) -> str:
-        return self.sim.get_render_name_dict()[seg_id]
+    def obj_id2name(self, obj_id: int) -> str:
+        return self.sim.get_render_name_dict()[obj_id]
 
     def _init_camera_cache(self):
         """
@@ -80,6 +111,18 @@ class BaseEnv:
             self.__build_camera_mapping(height, width, camera.get_camera_matrix())
             self.depth_lambda_list.append(
                 lambda depth: 1 / (depth * (1 / camera.far - 1 / camera.near) + 1 / camera.near))
+
+            # Build OpenGL camera mapping
+            width_points = np.repeat(np.linspace(1 / (2 * width), 1 - 1 / (2 * width), width).reshape([1, -1]), height,
+                                     axis=0)
+            height_points = np.repeat(
+                np.linspace(1 / (2 * height), 1 - 1 / (2 * height), height)[::-1].reshape([-1, 1]),
+                width, axis=1)
+
+            points = np.stack([width_points, height_points], 2) * 2 - 1
+            homo_padding = np.ones_like(width_points) * 2 - 1
+            self.__gl_camera_mapping.append((points, homo_padding[:, :, np.newaxis]))
+            self._gl_projection_inv.append(np.linalg.inv(camera.get_projection_mat()))
 
     def add_camera(self, name: str, camera_pose: Union[np.ndarray, sapyen.Pose], width: int, height: int, fov=1.1,
                    near=0.01, far=100) -> None:
@@ -119,6 +162,17 @@ class BaseEnv:
         self.camera_frame_id.append("/base_link")
         self.camera_pose.append((camera_pose @ CAMERA_TO_LINK).astype(np.float32))
 
+        # Build OpenGL camera mapping
+        width_points = np.repeat(np.linspace(1 / (2 * width), 1 - 1 / (2 * width), width).reshape([1, -1]), height,
+                                 axis=0)
+        height_points = np.repeat(np.linspace(1 / (2 * height), 1 - 1 / (2 * height), height)[::-1].reshape([-1, 1]),
+                                  width, axis=1)
+
+        points = np.stack([width_points, height_points], 2) * 2 - 1
+        homo_padding = np.ones_like(width_points) * 2 - 1
+        self.__gl_camera_mapping.append((points, homo_padding[:, :, np.newaxis]))
+        self._gl_projection_inv.append(np.linalg.inv(camera.get_projection_mat()))
+
     def __build_camera_mapping(self, height: int, width: int, camera_matrix: np.ndarray):
         """
         Build camera mapping matrix which maps depth to xyz point cloud
@@ -154,7 +208,7 @@ class BaseEnv:
             return -1
 
     def render_point_cloud(self, cam_id: int, xyz: bool = True, rgba: bool = True, normal: bool = True,
-                           segmentation: bool = True) -> np.ndarray:
+                           segmentation: bool = True, world_coordinate: bool = True) -> np.ndarray:
         """
         Render all the thins expect depth map for the channel enabled
         :param cam_id: Camera id
@@ -162,6 +216,7 @@ class BaseEnv:
         :param rgba: Whether to render rgba
         :param normal: Whether to render normal
         :param segmentation: Whether to render segmentation mask
+        :param world_coordinate: Whether to use world coordinate
         :return: array of all the enabled channels with shape (width, height, channels)
         """
         assert (xyz or rgba or normal or segmentation), "You can not call rendering function with nothing to output"
@@ -169,9 +224,38 @@ class BaseEnv:
         camera.take_picture()
         result = []
 
+        # W, H = depth.shape
+        #
+        # WS = np.repeat(np.linspace(1 / (2 * W), 1 - 1 / (2 * W), W).reshape([1, -1]), H, axis=0)
+        # HS = np.repeat(np.linspace(1 / (2 * H), 1 - 1 / (2 * H), H)[::-1].reshape([-1, 1]), W, axis=1)
+        # points = np.stack([WS, HS, depth, np.ones_like(depth)], 2)
+        #
+        # color = color[depth < 1]
+        # points = points[depth < 1]
+        # points = points * 2 - 1
+        # cam_points = np.linalg.inv(proj) @ points.T
+        # cam_points /= cam_points[3]
+        #
+        # world_points = model @ cam_points
+        # world_points = world_points.T
+        # print(model)
+        #
+        # return world_points[:, :3], color[:, :3]
+
         if xyz:
-            depth = self.depth_lambda_list[cam_id](camera.get_depth())[:, :, np.newaxis].astype(np.float32)
-            result.append(self.mapping_list[cam_id] * depth)
+            depth = camera.get_depth()[:, :, np.newaxis] * 2 - 1
+            points = np.concatenate([self.__gl_camera_mapping[cam_id][0], depth, self.__gl_camera_mapping[cam_id][1]],
+                                    axis=2).astype(np.float32)
+            cam_points = self._gl_projection_inv[cam_id] @ (points.transpose([2, 0, 1]).reshape(4, -1))
+            cam_points /= cam_points[3]
+
+            if world_coordinate:
+                cam_points = camera.get_model_mat() @ cam_points
+            result.append(
+                cam_points.reshape([4, camera.get_height(), camera.get_width()]).transpose([1, 2, 0])[:, :, :3])
+
+            # depth = self.depth_lambda_list[cam_id](camera.get_depth())[:, :, np.newaxis].astype(np.float32)
+            # result.append(self.mapping_list[cam_id] * depth)
 
         if rgba:
             color = camera.get_color_rgba()
@@ -363,15 +447,50 @@ class SapienSingleObjectEnv(BaseEnv):
         target_pose = sapyen.Pose(target_pos, target_direction_quaternion)
         return object_pose.transform(target_pose)
 
-    def get_global_point_cloud_with_seg_id(self, cam: [int, str], seg_id: int) -> np.ndarray:
+    def get_global_part_point_cloud_with_seg_id(self, cam: [int, str], part_name: str, seg_id: int) -> np.ndarray:
         if isinstance(cam, str):
             cam = self.camera_name2id(cam)
 
-        pc = self.render_point_cloud(cam, xyz=True, rgba=False, normal=False, segmentation=True)
-        found_bool = pc[:, :, 3] == seg_id
-        if np.sum(found_bool) == 0:
+        pc = self.render_point_cloud(cam, xyz=True, rgba=False, normal=False, segmentation=True, world_coordinate=True)
+        segmentation = pc[:, :, 3]
+        found_link_bool = segmentation == seg_id
+        if np.sum(found_link_bool) == 0:
             warnings.warn(f"Object with segmentation ID:{seg_id} not found.")
             return np.zeros([0, 3])
-        else:
-            result = pc[found_bool, 0:3]
-            return result
+
+        obj_segmentation = self.cam_list[cam].get_obj_segmentation()
+        obj_ids = obj_segmentation[found_link_bool]
+        obj_ids_set = np.unique(obj_ids)
+        part_id_set = [obj_id for obj_id in obj_ids_set if re.search(part_name, self.obj_id2name(obj_id))]
+
+        if len(part_id_set) == 0:
+            warnings.warn(f"Part with obj name :{part_name} not found")
+            return np.zeros([0, 3])
+
+        found_obj_index = []
+        for obj_id in part_id_set:
+            found_obj_index.append(np.nonzero(obj_id == obj_segmentation[found_link_bool])[0])
+        all_obj_index = np.concatenate(found_obj_index)
+
+        part_pc = pc[:, :, :3][found_link_bool][all_obj_index]
+        return part_pc
+
+    def _calculate_force_to_joint_given_acceleration(self, acceleration: float,
+                                                     joint_index: List[int] = None) -> np.ndarray:
+        # TODO: parallel axis theorem
+        if not joint_index:
+            dof = self.object.dof()
+            joint_index = list(range(dof))
+
+        link_joint_index = self.object.get_link_joint_indices()
+        force_array = np.zeros(len(joint_index))
+        for i in joint_index:
+            link_index = link_joint_index.index(i)
+            link = self.object_links[link_index]
+            link_inertia = link.get_inertia()
+            link_mass_pose = transform2mat(link.get_global_mass_center())[0:3, 0:3]
+            joint_pose = transform2mat(self.object.get_link_joint_pose(link_index))[0:3, 1:2]
+            inertia_frac = np.abs(link_mass_pose @ joint_pose)  # (3,1)
+            inertia = np.squeeze(link_inertia[np.newaxis, :] @ inertia_frac)
+            force_array[i] = inertia * acceleration
+        return -force_array
