@@ -94,9 +94,10 @@ float orenNayar(vec3 l, vec3 v, vec3 n, float r) {
 float ggx (vec3 L, vec3 V, vec3 N, float roughness, float F0) {
   float alpha = roughness*roughness;
   vec3 H = normalize(L + V);
-  float dotLH = max(0.0, dot(L,H));
-  float dotNH = max(0.0, dot(N,H));
-  float dotNL = max(0.0, dot(N,L));
+  float dotLH = clamp(dot(L,H), 0, 1);
+  float dotNH = clamp(dot(N,H), 0, 1);
+  float dotNL = clamp(dot(N,L), 0, 1);
+
   float alphaSqr = alpha * alpha;
   float denom = dotNH * dotNH * (alphaSqr - 1.0) + 1.0;
   float D = alphaSqr / (3.141592653589793 * denom * denom);
@@ -126,7 +127,7 @@ void main() {
   for (int i = 0; i < N_POINT_LIGHTS; i++) {
     vec3 pos = world2camera(vec4(pointLights[i].position, 0.f)).xyz;
     vec3 l = pos - csPosition.xyz;
-    float d = length(l);
+    float d = max(length(l), 0.01);
     vec3 lightDir = normalize(l);
 
     // point light diffuse
