@@ -215,28 +215,28 @@ void OptifuserRenderer::render() {
     {
       if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {
-          mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
-                                               "../glsl_shader/deferred.fsh");
+          mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
+                                               "glsl_shader/deferred.fsh");
         };
         if (ImGui::RadioButton("Albedo", &renderMode, RenderMode::ALBEDO)) {
-          mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
-                                               "../glsl_shader/deferred_albedo.fsh");
+          mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
+                                               "glsl_shader/deferred_albedo.fsh");
         }
         if (ImGui::RadioButton("Normal", &renderMode, RenderMode::NORMAL)) {
-          mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
-                                               "../glsl_shader/deferred_normal.fsh");
+          mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
+                                               "glsl_shader/deferred_normal.fsh");
         }
         if (ImGui::RadioButton("Depth", &renderMode, RenderMode::DEPTH)) {
-          mContext->renderer.setDeferredShader("../glsl_shader/deferred.vsh",
-                                               "../glsl_shader/deferred_depth.fsh");
+          mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
+                                               "glsl_shader/deferred_depth.fsh");
         }
         if (ImGui::RadioButton("Segmentation", &renderMode, RenderMode::SEGMENTATION)) {
-          mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
-                                              "../glsl_shader/gbuffer_segmentation.fsh");
+          mContext->renderer.setGBufferShader("glsl_shader/gbuffer.vsh",
+                                              "glsl_shader/gbuffer_segmentation.fsh");
         }
         if (ImGui::RadioButton("Custom", &renderMode, RenderMode::CUSTOM)) {
-          mContext->renderer.setGBufferShader("../glsl_shader/gbuffer.vsh",
-                                              "../glsl_shader/gbuffer_segmentation.fsh");
+          mContext->renderer.setGBufferShader("glsl_shader/gbuffer.vsh",
+                                              "glsl_shader/gbuffer_segmentation.fsh");
         }
       }
 
