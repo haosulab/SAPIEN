@@ -52,6 +52,7 @@ def test_urdf(folder):
     sim.set_time_step(1.0 / 200.0)
 
     loader = sim.create_urdf_loader()
+    loader.scale = 1
     wrapper = loader.load(urdf)
 
     if wrapper is None:

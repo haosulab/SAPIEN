@@ -20,12 +20,13 @@ using namespace physx;
 using namespace MeshUtil;
 namespace fs = std::experimental::filesystem;
 
-static PxTransform poseFromOrigin(const Origin &origin) {
+static PxTransform poseFromOrigin(const Origin &origin, float scale = 1.f) {
   PxQuat q = PxQuat(origin.rpy.z, {0, 0, 1}) * PxQuat(origin.rpy.y, {0, 1, 0}) *
              PxQuat(origin.rpy.x, {1, 0, 0});
 
-  return PxTransform(origin.xyz, q);
+  return PxTransform(origin.xyz * scale, q);
 }
+
 static JointType typeString2JointType(const std::string &type) {
   if (type == "revolute") {
     return JointType::REVOLUTE;
@@ -63,6 +64,10 @@ struct LinkTreeNode {
 };
 
 ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *material) {
+  if (scale <= 0.f) {
+    throw std::runtime_error("Invalid URDF scale, valid scale should >= 0");
+  }
+
   XMLDocument doc;
   if (doc.LoadFile(filename.c_str())) {
     std::cerr << "Error loading " << filename << std::endl;
@@ -158,7 +163,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
     stack.pop_back();
 
     const PxTransform tJoint2Parent =
-        current->joint ? poseFromOrigin(*current->joint->origin) : PxTransform(PxIdentity);
+        current->joint ? poseFromOrigin(*current->joint->origin, scale) : PxTransform(PxIdentity);
 
     // create link and set its parent
     treeNode2pLink[current] =
@@ -177,7 +182,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
       shouldComputeInertia = true;
     } else {
       // mass is specified
-      const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin);
+      const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin, scale);
 
       Eigen::Matrix3f inertia;
       inertia(0, 0) = currentInertia.ixx;
@@ -204,63 +209,70 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
       const PxTransform tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
 
       if (!tInertia2Inertial.isSane()) {
-        printf("Wrong!\n");
+        printf("Got insane inertia-inertial pose!\n");
         exit(1);
       }
 
       const PxTransform tInertia2Link = tInertial2Link * tInertia2Inertial;
 
       if (!tInertia2Link.isSane()) {
-        printf("Wrong!\n");
+        printf("Got insane inertial-link pose!\n");
         exit(1);
       }
 
+      float scale3 = scale * scale * scale;
       currentPxLink.setCMassLocalPose(tInertia2Link);
-      currentPxLink.setMassSpaceInertiaTensor({eigs.x(), eigs.y(), eigs.z()});
-      currentPxLink.setMass(currentInertial.mass->value);
+      currentPxLink.setMassSpaceInertiaTensor(
+          {scale3 * eigs.x(), scale3 * eigs.y(), scale * eigs.z()});
+      currentPxLink.setMass(currentInertial.mass->value * scale3);
     }
+
     // visual
     for (const auto &visual : current->link->visual_array) {
-      const PxTransform tVisual2Link = poseFromOrigin(*visual->origin);
+      const PxTransform tVisual2Link = poseFromOrigin(*visual->origin, scale);
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size, {1, 1, 1},
-                                   visual->name);
+        builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size * scale,
+                                   {1, 1, 1}, visual->name);
         break;
       case Geometry::CYLINDER:
-        builder.addCapsuleVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
-                                       visual->geometry->length, {1, 1, 1}, visual->name);
+        builder.addCapsuleVisualToLink(currentPxLink, tVisual2Link,
+                                       visual->geometry->radius * scale,
+                                       visual->geometry->length * scale, {1, 1, 1}, visual->name);
         break;
       case Geometry::SPHERE:
-        builder.addSphereVisualToLink(currentPxLink, tVisual2Link, visual->geometry->radius,
-                                      {1, 1, 1}, visual->name);
+        builder.addSphereVisualToLink(currentPxLink, tVisual2Link,
+                                      visual->geometry->radius * scale, {1, 1, 1}, visual->name);
         break;
       case Geometry::MESH:
         builder.addObjVisualToLink(currentPxLink, getAbsPath(filename, visual->geometry->filename),
-                                   tVisual2Link, visual->geometry->scale, visual->name);
+                                   tVisual2Link, visual->geometry->scale * scale, visual->name);
         break;
       }
     }
 
     // collision
     for (const auto &collision : current->link->collision_array) {
-      const PxTransform tCollision2Link = poseFromOrigin(*collision->origin);
+      const PxTransform tCollision2Link = poseFromOrigin(*collision->origin, scale);
       // TODO: add physical material support (may require URDF extension)
       switch (collision->geometry->type) {
       case Geometry::BOX:
-        builder.addBoxShapeToLink(currentPxLink, tCollision2Link, collision->geometry->size);
+        builder.addBoxShapeToLink(currentPxLink, tCollision2Link,
+                                  collision->geometry->size * scale);
         break;
       case Geometry::CYLINDER:
-        builder.addCapsuleShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius,
-                                      collision->geometry->length);
+        builder.addCapsuleShapeToLink(currentPxLink, tCollision2Link,
+                                      collision->geometry->radius * scale,
+                                      collision->geometry->length * scale);
         break;
       case Geometry::SPHERE:
-        builder.addSphereShapeToLink(currentPxLink, tCollision2Link, collision->geometry->radius);
+        builder.addSphereShapeToLink(currentPxLink, tCollision2Link,
+                                     collision->geometry->radius * scale);
         break;
       case Geometry::MESH:
         builder.addConvexObjShapeToLink(currentPxLink,
                                         getAbsPath(filename, collision->geometry->filename),
-                                        tCollision2Link, {1, 1, 1}, material);
+                                        tCollision2Link, PxVec3(1, 1, 1) * scale, material);
         break;
       }
     }
@@ -292,8 +304,8 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
       } else if (current->joint->type == "prismatic") {
         joint->setJointType(PxArticulationJointType::ePRISMATIC);
         joint->setMotion(PxArticulationAxis::eX, PxArticulationMotion::eLIMITED);
-        joint->setLimit(PxArticulationAxis::eX, current->joint->limit->lower,
-                        current->joint->limit->upper);
+        joint->setLimit(PxArticulationAxis::eX, current->joint->limit->lower * scale,
+                        current->joint->limit->upper * scale);
       } else if (current->joint->type == "fixed") {
         joint->setJointType(PxArticulationJointType::eFIX);
       } else if (current->joint->type == "floating") {
@@ -356,7 +368,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
           continue;
         }
 
-        mSimulation.addMountedCamera(sensor->name, links[idx], poseFromOrigin(*sensor->origin),
+        mSimulation.addMountedCamera(sensor->name, links[idx], poseFromOrigin(*sensor->origin, scale),
                                      sensor->camera->width, sensor->camera->height,
                                      sensor->camera->fovx, sensor->camera->fovy);
       }
@@ -366,6 +378,12 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
 }
 
 KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &filename) {
+  if (scale != 1.f) {
+    std::cerr
+        << "Scaling is not yet supported for Kinematic Articulation Loader. Using scale=1 instead."
+        << std::endl;
+  }
+
   std::unique_ptr<KinematicsArticulationWrapper> wrapper =
       std::make_unique<KinematicsArticulationWrapper>(mSimulation);
 

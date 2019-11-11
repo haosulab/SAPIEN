@@ -627,6 +627,7 @@ class URDFLoader {
 public:
   bool fixLoadedObject = true;
   bool balancePassiveForce = false;
+  float scale = 1.f;
   URDFLoader(class Simulation &simulation);
   ArticulationWrapper *load(const std::string &filename, PxMaterial *material= nullptr);
   class KinematicsArticulationWrapper *loadKinematic(const std::string &filename);

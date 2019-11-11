@@ -483,6 +483,7 @@ PYBIND11_MODULE(sapyen, m) {
       .def(py::init<Simulation &>())
       .def_readwrite("fix_loaded_object", &URDF::URDFLoader::fixLoadedObject)
       .def_readwrite("balance_passive_force", &URDF::URDFLoader::balancePassiveForce)
+      .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
            py::arg("filename"), py::arg("material") = nullptr)
       .def("load_kinematic", &URDF::URDFLoader::loadKinematic, py::return_value_policy::reference)

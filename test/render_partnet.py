@@ -205,7 +205,7 @@ for idx, pose in enumerate(poses):
 
     config = {
         "camera": {
-            "intrinsic": list(cam0.get_camera_matrix().reshape(-1).astype(float)),
+            "intrinsic": list(cam0.get_projection_mat().reshape(-1).astype(float)),
             "extrinsic": list(cam0.get_model_mat().reshape(-1).astype(float))
         },
         "category": model_category
