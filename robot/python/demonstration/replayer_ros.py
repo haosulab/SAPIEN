@@ -7,6 +7,37 @@ import copy
 
 CAMERA_TO_LINK = np.zeros([4, 4])
 CAMERA_TO_LINK[[0, 1, 2, 3], [2, 0, 1, 3]] = [1, -1, -1, 1]
+CAMERA_TO_MODEL = np.eye(4)
+CAMERA_TO_MODEL[[1, 2], [1, 2]] = [-1, -1]
+
+
+def point_cloud_from_depth(depth, color, proj, model):
+    H, W = depth.shape
+
+    WS = np.repeat(np.linspace(1 / (2 * W), 1 - 1 / (2 * W), W).reshape([1, -1]), H, axis=0)
+    HS = np.repeat(np.linspace(1 / (2 * H), 1 - 1 / (2 * H), H)[::-1].reshape([-1, 1]), W, axis=1)
+    points = np.stack([WS, HS, depth, np.ones_like(depth)], 2)
+
+    color = color[depth < 10]
+    points = points[depth < 10]
+    points = points * 2 - 1
+    cam_points = np.linalg.inv(proj) @ points.T
+    cam_points /= cam_points[3]
+
+    world_points = model @ cam_points
+    world_points = world_points.T
+    print(model)
+
+    return cam_points, color[:, :3]
+
+
+def get_pc(cam):
+    cam.take_picture()
+    depth = cam.get_depth()
+    color = cam.get_color_rgba()
+
+    xyz, rgb = point_cloud_from_depth(depth, color, cam.get_projection_mat(), cam.get_model_mat())
+    return xyz, rgb
 
 
 class ReplayerRos(ParentModule):
@@ -64,7 +95,10 @@ class ReplayerRos(ParentModule):
     def publish_point_cloud(self, cloud: np.ndarray, rgb, cam_id):
         # TODO: add segmentation
         padding_cloud = np.concatenate([cloud[:, 0:3].T, np.ones([1, cloud.shape[0]], dtype=np.float32)], axis=0)
-        homo_cloud = self.camera_pose[cam_id] @ padding_cloud
+        homo_cloud = self.cam_list[cam_id].get_model_mat() @ CAMERA_TO_MODEL @ padding_cloud
+        if cam_id >= 1:
+            print(np.allclose(self.cam_list[cam_id].get_model_mat() @ CAMERA_TO_MODEL, self.camera_pose[cam_id]),
+                  cam_id)
         if rgb:
             rgb_array = np.array(cloud[:, 3:7].copy() * 256, dtype=np.uint32)
             cloud_array = np.zeros(cloud.shape[0],

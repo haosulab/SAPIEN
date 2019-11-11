@@ -90,12 +90,17 @@ class Replayer:
         self.depth_lambda_list.append(lambda depth: 1 / (depth * (1 / far - 1 / near) + 1 / near))
 
     def build_camera_mapping(self, height: int, width: int, camera_matrix: np.ndarray):
-        x = np.linspace(0.5, width - 0.5, width)
-        y = np.linspace(0.5, height - 0.5, height)
-        x, y = np.meshgrid(x, y)
-        cor = np.stack([x.flatten(), y.flatten(), np.ones([x.size])], axis=0)
+        y = np.linspace(0.5, width - 0.5, width)
+        x = np.linspace(0.5, height - 0.5, height)
+        y, x = np.meshgrid(y, x)
+        cor = np.stack([y.flatten(), x.flatten(), np.ones([x.size])], axis=0)
         mapping = np.linalg.inv(camera_matrix[:3, :3]) @ cor
-        self.mapping_list.append(np.reshape(mapping.T, [height, width, 3]).astype(np.float32))
+        temp_mapping = np.ones_like(mapping)
+        temp_mapping[0, :] = mapping[1,:]
+        temp_mapping[1, :] = mapping[0,:]
+
+        final_mapping = np.reshape(temp_mapping.T, [width, height, 3]).astype(np.float32).transpose([1, 0, 2])
+        self.mapping_list.append(final_mapping)
 
     @property
     def mounted_camera(self):
@@ -136,6 +141,10 @@ class Replayer:
         if rgba:
             color = camera.get_color_rgba()
             result = np.concatenate([result, color], axis=2)
+            # if cam_id == 5:
+            #     from matplotlib import pyplot as plt
+            #     plt.imshow(color)
+            #     plt.show()
 
         if segmentation:
             seg = camera.get_segmentation()

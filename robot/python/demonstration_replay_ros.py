@@ -23,7 +23,7 @@ def main():
             recorder.renderer.render()
             if recorder.simulation_steps % 30 == 0:
                 for i in range(len(camera_name)):
-                    cloud_array, valid_index, _ = recorder.render_point_cloud(cam_id=i, rgba=True, use_open3d=False)
+                    recorder.render_point_cloud(cam_id=i, rgba=True, use_open3d=False)
                     # cloud_list[i].append(cloud_array[valid_index, :])
     finally:
         save_file = "data/{}_v0_point_cloud.p".format(partnet_id)

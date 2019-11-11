@@ -60,7 +60,7 @@ class XArmEnv(BaseRobotEnv):
         self.manger.add_joint_state_publisher(60, 600)
         self.manger.add_group_trajectory_controller("xarm6")
         self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
-        self._arm_velocity_controller: sapyen_robot.CartesianVelocityController = self.manger.create_cartesian_velocity_controller(
+        self.arm_velocity_controller: sapyen_robot.CartesianVelocityController = self.manger.create_cartesian_velocity_controller(
             "xarm6")
         self.__arm_planner = self.manger.create_group_planner("xarm6")
 

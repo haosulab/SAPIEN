@@ -35,5 +35,7 @@ public:
   bool executeCB(sapien_ros_utils::JointVelocityControl::Request &req,
                  sapien_ros_utils::JointVelocityControl::Response &res);
   void moveJoint(const std::vector<std::string> &jointName, float velocity);
+  void moveJoint(const std::vector<std::string> &jointName, const std::vector<float> &velocity);
+  void moveJoint(const std::vector<float> &velocity);
 };
 } // namespace sapien::robot

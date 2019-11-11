@@ -1,4 +1,4 @@
-from robot.python.env.open_door_env import XArmOpenDoorEnv
+from robot.python.env.xarm_door_env import XArmOpenDoorEnv
 import sapyen_robot
 import sapyen
 import numpy as np

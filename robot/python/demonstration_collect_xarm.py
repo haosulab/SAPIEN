@@ -38,8 +38,8 @@ duplicated = [(3, 6)]
 
 
 def main():
-    print(len(vertical_door_handle_index))
-    partnet_id = door_with_handle[54]
+    print(len(VALID_DOOR_INDEX))
+    partnet_id = DOOR_WITH_HANDLE_LIST[54]
     print("*" * 10, "Partnet ID: {}".format(partnet_id), "*" * 10)
     recorder = XArmRecorder(dataset_dir=CONVEX_PARTNET_DIR, data_id=partnet_id, on_screening_rendering=True)
     target_pose = recorder.calculate_pose_in_front_of_semantics("rotation_door")
@@ -61,7 +61,7 @@ def main():
 
 
 def replay():
-    partnet_id: str = door_with_handle[29]
+    partnet_id: str = DOOR_WITH_HANDLE_LIST[29]
     all_data = np.load(f"data/{partnet_id}_gripper_v1.p", allow_pickle=True)
     data = all_data['state']
     recorder = XArmRecorder(dataset_dir=CONVEX_PARTNET_DIR, data_id=partnet_id, on_screening_rendering=True)

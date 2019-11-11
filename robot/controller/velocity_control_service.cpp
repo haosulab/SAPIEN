@@ -87,4 +87,33 @@ void JointVelocityController::moveJoint(const std::vector<std::string> &jointNam
   }
   mQueue->push(jointVelocity);
 }
+void JointVelocityController::moveJoint(const std::vector<std::string> &jointName,
+                                        const std::vector<float> &velocity) {
+  std::vector<float> jointVelocity(mJointName.size(), 0);
+  if (jointName.size() != velocity.size()) {
+    ROS_ERROR("Joint name size and velocity size not match");
+    return;
+  }
+  for (size_t j = 0; j < jointName.size(); ++j) {
+    uint32_t index =
+        std::find(mJointName.begin(), mJointName.end(), jointName[j]) - mJointName.begin();
+    if (index == mJointName.size()) {
+      ROS_ERROR("Joint name not found in joint velocity controller: %s", jointName[j].c_str());
+      return;
+    }
+    jointVelocity[index] = velocity[j];
+  }
+  mQueue->push(jointVelocity);
+}
+void JointVelocityController::moveJoint(const std::vector<float> &velocity) {
+  std::vector<float> jointVelocity(mJointName.size(), 0);
+  if (mJointName.size() != velocity.size()) {
+    ROS_ERROR("Joint name size and velocity size not match");
+    return;
+  }
+  for (size_t j = 0; j < mJointName.size(); ++j) {
+    jointVelocity[j] = velocity[j];
+  }
+  mQueue->push(jointVelocity);
+}
 } // namespace sapien::robot

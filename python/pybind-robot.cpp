@@ -44,7 +44,13 @@ PYBIND11_MODULE(sapyen_robot, m) {
       .def("add_group_trajectory_controller", &ControllerManger::addGroupTrajectoryController);
 
   py::class_<JointVelocityController>(m, "JointVelocityController")
-      .def("move_joint", &JointVelocityController::moveJoint);
+      .def("move_joint", [](JointVelocityController &a, const std::vector<std::string> &jointNames,
+                            float velocity) { a.moveJoint(jointNames, velocity); })
+      .def("move_joint", [](JointVelocityController &a, const std::vector<std::string> &jointNames,
+                            const std::vector<float> &velocity) { a.moveJoint(jointNames, velocity); })
+      .def("move_joint", [](JointVelocityController &a, const std::vector<float> &velocity) {
+        a.moveJoint(velocity);
+      });
 
   py::class_<CartesianVelocityController>(m, "CartesianVelocityController")
       .def("move_local_translate",
