@@ -6,6 +6,7 @@ from gym import utils, spaces
 
 from typing import List, Union
 import numpy as np
+import transforms3d
 import os
 from .path_utils import get_assets_path
 
@@ -13,40 +14,53 @@ class DoorEnv(SingleGripperBaseEnv, SapienSingleObjectEnv):
     def __init__(self, dataset_dir: str, data_id: Union[int, str], on_screening_rendering: bool, initial_state: np.array):
         SapienSingleObjectEnv.__init__(self, dataset_dir, data_id, on_screening_rendering)
         self._init_robot()
-        print('here!!!!!!', self.object, self.robot)
         self.initial_state = initial_state
-        low = np.array([-1., -1., -1., -3.14, -3.14, -3.14])
-        high = -1 * low
-        self.action_space = spaces.Box(low=low, high=high, dtype=np.float32)
-        #print('action space', self.action_space.low, self.action_space.high)
-        print('here!!!!!!', self.object, self.robot)
-        self.reset()
-        self.frame_skip = 5
+        action_low = np.array([-2., -2., -2., -3.14, -3.14, -3.14])
+        action_high = -1 * action_low
+        high = np.array([
+            np.finfo(np.float32).max,
+            np.finfo(np.float32).max])
+        self.observation_space = spaces.Box()
+        self.action_space = spaces.Box(low=action_low, high=action_high, dtype=np.float32)
+        self.frame_skip = 20
         self.simulation_count = 0
+        self._max_episode_steps = 150
+        self.reset()
+
+        pose = np.eye(4)
+        pose[0:3, 3] = [3, -3, 2.5]
+        pose[:3, :3] = transforms3d.euler.euler2mat(0, 5, 1.507)
+        self.add_camera("right_view", pose, 640, 480)
 
     def reset(self):
         self.simulation_count = 0
-        self.object.set_qf(np.ones(self.object.dof()) * -1)
         self.sim.pack(self.initial_state)
+        self.sim.clear()
+        #print('reset before', self.robot.get_qpos())
+        self.robot.set_drive_qpos(self.robot.get_qpos())
+
         # frame skip
         for i in range(self.frame_skip):
-            self.sim.step()
+            self.object.set_qf(np.ones(self.object.dof()) * -1)
+            self.gripper_controller.move_joint(self._gripper_joint, 5)
+            self._step()
+        #print('reset after', self.robot.get_qpos())
         return self._get_obs()
 
     def _get_obs(self):
+        self.object.get_link_joint_pose()
         return np.concatenate([self.robot.get_qpos().flat,
                                self.robot.get_qvel().flat,
                                self.object.get_qpos().flat,
                                self.object.get_qvel().flat])
 
     def judge_close(self):
-        qlimits = self.robot.get_qlimits()[-3:]
-        print('qlimits for gripper', qlimits)
+        qlimits = self.robot.get_qlimits()[-3:, 1]
         current_pos = self.robot.get_qpos()[-3:]
         relative_pos = np.array([current_pos[0]-current_pos[1], current_pos[1]-current_pos[2],
                                  current_pos[2]-current_pos[0]])
         relative_pos_norm = np.linalg.norm(relative_pos)
-        if relative_pos_norm < 0.5 and np.linalg.norm(qlimits-current_pos) < 1:
+        if relative_pos_norm < 0.1 and np.linalg.norm(qlimits-current_pos) < 0.1:
             return True
         else:
             return False
@@ -54,28 +68,36 @@ class DoorEnv(SingleGripperBaseEnv, SapienSingleObjectEnv):
 
     def step(self, action):
         self.simulation_count += 1
-        self.object.set_qf(np.ones(self.object.dof()) * -1)
-        self.close_gripper(3)
+        #print('action', action)
         joint_before = self.object.get_qpos()
         pos_before = self.robot.get_qpos()
         pos_after = pos_before.copy()
         pos_after[:6] = pos_before[:6] + action
-        print('pos before, pos after', pos_before, pos_after, action)
+        #print('pos before, pos after', pos_before, pos_after, action, self.simulation_count)
 
-        self.robot.set_drive_qpos(pos_after)
+
         for i in range(self.frame_skip):
-            self.sim.step()
+            self.object.set_qf(np.ones(self.object.dof()) * -1)
+            self.translation_controller.move_joint(self._translation_joint[0:1], action[0])
+            self.translation_controller.move_joint(self._translation_joint[1:2], action[1])
+            self.translation_controller.move_joint(self._translation_joint[2:3], action[2])
+            self.rotation_controller.move_joint(self._rotation_joint[3:4], action[3])
+            self.rotation_controller.move_joint(self._rotation_joint[4:5], action[4])
+            self.rotation_controller.move_joint(self._rotation_joint[5:6], action[5])
+            self.gripper_controller.move_joint(self._gripper_joint, 5)
+            self._step()
 
         next_state = self._get_obs()
         joint_after = self.object.get_qpos()
         off_object = self.judge_close()
+        #print('in step', off_object)
         done = off_object
         if off_object:
-            reward = -10
+            reward = -2
         else:
-            reward = (joint_after-joint_before).sum()
+            reward = 100*(joint_after-joint_before).sum()
 
-        if self.simulation_count == 500:
+        if self.simulation_count == self._max_episode_steps:
             done = True
         return next_state, reward, done, None
 
