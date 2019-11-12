@@ -6,12 +6,12 @@ import numpy as np
 import sapyen
 import open3d
 import transforms3d
-from .path_utils import CONVEX_PARTNET_DIR, DOOR_WITH_HANDLE_LIST, VALID_DOOR_INDEX
+from .path_utils import PARTNET_DIR, DOOR_WITH_HANDLE_LIST, VALID_DOOR_INDEX
 
 
 class XArmOpenDoorEnv(XArmEnv, SapienSingleObjectEnv):
     def __init__(self, valid_id: int, on_screening_rendering: bool):
-        SapienSingleObjectEnv.__init__(self, CONVEX_PARTNET_DIR, DOOR_WITH_HANDLE_LIST[VALID_DOOR_INDEX[valid_id]],
+        SapienSingleObjectEnv.__init__(self, PARTNET_DIR, DOOR_WITH_HANDLE_LIST[VALID_DOOR_INDEX[valid_id]],
                                        on_screening_rendering)
         self._init_robot()
         self._continuous = False
@@ -76,13 +76,14 @@ class XArmOpenDoorEnv(XArmEnv, SapienSingleObjectEnv):
         self.arm_velocity_controller.move_local_translate([0, 0, -0.005], False)
 
         self.hold_and_step()
+        target_seg_id = self.object_link_segmentation_ids[self.target_link_index]
         for i in range(5000):
             self.arm_velocity_controller.move_local_translate([0, 0, -0.02], True)
             self.hold_and_step()
             if np.mean(np.abs(self.object.get_qpos())) < 0.01 and i > 1000:
                 break
             if i % 50 == 9:
-                cos = self.move_ee_against_link(0, self.object_link_segmentation_ids[self.target_link_index])
+                cos = self.move_ee_against_link(0, self.object_link_segmentation_ids[target_seg_id])
                 self.arm_velocity_controller.move_local_translate([0, -cos * 0.006, 0], True)
                 self.arm_velocity_controller.move_local_rotate([-cos * 0.025, 0, 0], True)
                 self.hold_and_step()

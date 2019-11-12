@@ -5,6 +5,7 @@ import numpy as np
 import os
 from .path_utils import get_assets_path
 import transforms3d
+import open3d
 
 
 class SingleGripperBaseEnv(BaseRobotEnv):
@@ -59,8 +60,8 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         self.translation_controller = self.manger.create_joint_velocity_controller(self._translation_joint,
                                                                                    "translation")
         self.rotation_controller = self.manger.create_joint_velocity_controller(self._rotation_joint, "rotation")
-        self._translation_velocity = 0.2
-        self._rotation_velocity = 0.7
+        self._translation_velocity = 0.3
+        self._rotation_velocity = 1
 
         # Cache gripper limit for execute high level action
         joint_limit = self.robot.get_qlimits()
@@ -79,6 +80,7 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         time_step = self.__gripper_limit[1] / velocity * self.simulation_hz
         for _ in range(time_step.astype(np.int)):
             self.gripper_controller.move_joint(self._gripper_joint, velocity)
+            self._step()
 
     def open_gripper(self, velocity: float = 2) -> None:
         """
@@ -88,12 +90,13 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         time_step = self.__gripper_limit[1] / velocity * self.simulation_hz
         for _ in range(time_step.astype(np.int)):
             self.gripper_controller.move_joint(self._gripper_joint, -velocity)
+            self._step()
 
     def force_gripper(self) -> None:
         """
         Give a force constantly on the gripper to close
         """
-        self.gripper_controller.move_joint(self._gripper_joint, 2)
+        self.gripper_controller.move_joint([2, 2, 2])
 
     def arrive_pose_with_closed_loop(self, target_pose: sapyen.Pose, loop_step=5) -> None:
         step = 0
@@ -110,7 +113,7 @@ class SingleGripperBaseEnv(BaseRobotEnv):
                 if rotation_distance < 0.01:
                     break
 
-            self.rotation_controller.move_joint(rotation_direction* self._rotation_velocity)
+            self.rotation_controller.move_joint(rotation_direction * self._rotation_velocity)
             self._step()
             step += 1
 
@@ -123,10 +126,35 @@ class SingleGripperBaseEnv(BaseRobotEnv):
                 translation = target_position - current_position
                 translation_distance = np.linalg.norm(translation)
                 translation_direction = translation / translation_distance
-                print(translation_direction)
                 if translation_distance < 0.005:
                     break
 
             self.translation_controller.move_joint(translation_direction * self._translation_velocity)
             self._step()
             step += 1
+
+    @staticmethod
+    def calculate_grasp_pose_from_handle_cloud(point_cloud: np.ndarray) -> sapyen.Pose:
+        # Calculate center and generic pose of gripper
+        assert point_cloud.shape[1] == 3, "Point Cloud must be in (n, 3) shape"
+        pc = open3d.geometry.PointCloud()
+        pc.points = open3d.utility.Vector3dVector(point_cloud)
+        bounding_box: open3d.geometry.AxisAlignedBoundingBox = pc.get_axis_aligned_bounding_box()
+        center = bounding_box.get_center()
+        box_min = bounding_box.get_min_bound()
+        box_max = bounding_box.get_max_bound()
+        scale = box_max - box_min
+        gripper_pose = sapyen.Pose(center)
+        z_euler = 1.57 * np.sign(center[0]) + 1.57
+        if scale[1] > scale[2]:
+            print("Horizontal Handle Detected")
+            gripper_pose.set_q(transforms3d.euler.euler2quat(1.57, 0, z_euler, "rxyz"))
+        else:
+            print("Vertical Handle Detected")
+            gripper_pose.set_q(transforms3d.euler.euler2quat(0, 0, z_euler, "rxyz"))
+
+        # Add offset for Gripper
+        position = gripper_pose.p
+        position[0] -= 0.06
+        gripper_pose.set_p(position)
+        return gripper_pose

@@ -37,7 +37,7 @@ def main():
 
     partnet_id = "35059"
     print("*" * 10, "Partnet ID: {}".format(partnet_id), "*" * 10)
-    recorder = SingleGripperRecorder(dataset_dir=CONVEX_PARTNET_DIR, data_id=partnet_id, on_screening_rendering=True)
+    recorder = SingleGripperRecorder(dataset_dir=PARTNET_DIR, data_id=partnet_id, on_screening_rendering=True)
     pose = np.eye(4)
     pose[0:3, 3] = [0, 0, 1]
     pose[:3, :3] = transforms3d.euler.euler2mat(0, 0.5, 0)

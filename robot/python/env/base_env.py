@@ -262,7 +262,11 @@ class BaseEnv:
             result.append(color)
 
         if normal:
-            normal = camera.get_normal_rgba()
+            normal = camera.get_normal_rgba()[:,:,:3]
+            if world_coordinate:
+                shape = normal.shape
+                normal = camera.get_model_mat()[:3, :3] @ normal.reshape(-1, 3).T
+                normal = normal.T.reshape(shape[0], shape[1], 3)
             result.append(normal[:, :, :3])
 
         if segmentation:
@@ -474,6 +478,17 @@ class SapienSingleObjectEnv(BaseEnv):
 
         part_pc = pc[:, :, :3][found_link_bool][all_obj_index]
         return part_pc
+
+    def get_mean_normal_with_seg_id(self, cam_id: int, seg_id: int):
+        point_cloud = self.render_point_cloud(cam_id, xyz=False, rgba=False, segmentation=True, normal=True,
+                                              world_coordinate=True)
+        normal = point_cloud[:, :, 0:3]
+        segmentation = point_cloud[:, :, 3]
+
+        valid_bool = seg_id == segmentation
+        mean_normal = np.mean(normal[valid_bool], axis=0)
+        mean_normal /= np.linalg.norm(mean_normal)
+        return mean_normal
 
     def _calculate_force_to_joint_given_acceleration(self, acceleration: float,
                                                      joint_index: List[int] = None) -> np.ndarray:
