@@ -27,7 +27,6 @@ using namespace sapien;
 
 void test1() {
   Renderer::OptifuserRenderer renderer;
-   
 
   Simulation sim;
   sim.setRenderer(&renderer);
@@ -53,7 +52,6 @@ void test1() {
 
 void test2() {
   Renderer::OptifuserRenderer renderer;
-  
 
   Simulation sim;
   sim.setRenderer(&renderer);
@@ -112,25 +110,66 @@ float rand_float() {
 
 void test3() {
   Renderer::OptifuserRenderer renderer;
- 
-  renderer.cam.position = {0, -2, 0.5};
+
+  renderer.cam.position = {0, -2, 3};
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});
-  renderer.setAmbientLight({ .4, .4, .4 });
-  renderer.setShadowLight({ 1, -1, -1 }, { .5, .5, .5 });
-  renderer.addPointLight({ 2, 2, 2 }, { 1, 1, 1 });
-  renderer.addPointLight({ 2, -2, 2 }, { 1, 1, 1 });
-  renderer.addPointLight({ -2, 0, 2 }, { 1, 1, 1 });
+  renderer.cam.rotateYawPitch(0, -0.5);
+
+  std::array<float, 3> color = {1 * 4, 0.773 * 4, 0.561 * 4};
+  renderer.addPointLight({0, 0, 4}, color);
+  renderer.addPointLight({0, -4, 4}, color);
+  renderer.addPointLight({0, -2, 4}, color);
 
   Simulation sim;
   sim.setRenderer(&renderer);
   sim.setTimestep(1.f / 500.f);
 
+  auto ab = sim.createActorBuilder();
+  ab->addMultipleConvexShapesFromObj("/home/fx/blender-data/paper_scene.obj");
+  ab->addObjVisual("/home/fx/blender-data/paper_scene.obj");
+  ab->build(true, false, "Scene");
+
   auto loader = URDF::URDFLoader(sim);
   loader.fixLoadedObject = true;
-  // auto *articulationWrapper =
-  auto wrapper = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha3/45908/mobility.urdf");
+  auto obj1 = loader.load(
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/102044/mobility.urdf");
+  obj1->articulation->teleportRootLink({1.221, 1.244, 0.614}, true);
+
+  loader.scale = 1.4;
+  auto obj2 = loader.load(
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/10905/mobility.urdf");
+  obj2->articulation->teleportRootLink({0.900, -0.954, 0.622}, true);
+
+  loader.scale = 0.8;
+  auto obj3 = loader.load(
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/12065/mobility.urdf");
+  obj3->articulation->teleportRootLink({1.12, 0.109, 0.582}, true);
+
+  loader.scale = 1;
+  auto obj4 = loader.load(
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/23511/mobility.urdf");
+  obj4->articulation->teleportRootLink({{-2.246, -3.518, 0.910}, PxQuat(3.14159, {0, 0, 1})}, true);
+
+  loader.scale = 1;
+  auto obj5 = loader.load(
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/45594/mobility.urdf");
+  obj5->articulation->teleportRootLink({1.271, 2.393, 0.946}, true);
+
+  loader.scale = 1;
+  auto obj6 = loader.load(
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/46037/mobility.urdf");
+  obj6->articulation->teleportRootLink({{0.597, -3.789, 0.774}, PxQuat(-1.5708, {0, 0, 1})}, true);
+
+  loader.scale = 0.4;
+  auto obj7 = loader.load(
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/7310/mobility.urdf");
+  obj7->articulation->teleportRootLink({{1.195, 0.847, 1.259}, PxQuat(-0.1, {0, 0, 1})}, true);
+
+  loader.scale = 1.5;
+  auto obj8 = loader.load(
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/8867/mobility.urdf");
+  obj8->articulation->teleportRootLink({-3.127, 2.281, 1.481}, true);
 
   // std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
   // std::string line;
@@ -163,8 +202,8 @@ void test3() {
   // auto articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
   // articulationWrapper->articulation->teleportRootLink({{-1,0,-.5}, PxIdentity}, true);
   //   auto articulation = articulationWrapper->articulation;
-  //   articulation->teleportRootLink({{(float)x, (float)y, 0}, PxQuat(rand_float()*3, {0, 0, 1})},
-  //   true); articulationWrapper->updateCache();
+  //   articulation->teleportRootLink({{(float)x, (float)y, 0}, PxQuat(rand_float()*3, {0, 0,
+  //   1})}, true); articulationWrapper->updateCache();
   // }
 
   // auto chair = loader.load("../assets/179/test.urdf");
@@ -185,9 +224,9 @@ void test3() {
 
   // auto actorBuider = sim.createActorBuilder();
   // auto actor = actorBuider->build(false, true, "Camera Mount");
-  // sim.addMountedCamera("Floating Camera", actor, {{0, 0, 0}, PxIdentity}, 256, 256, 0.9, 0.9);
-  // actor->setGlobalPose({{-10, 0, 1}, {0, 0, 0, 1}});
-  // actor->setGlobalPose({{-2, 0, 2}, {0, 0.3826834, 0, 0.9238795}});
+  // sim.addMountedCamera("Floating Camera", actor, {{0, 0, 0}, PxIdentity}, 256, 256, 0.9,
+  // 0.9); actor->setGlobalPose({{-10, 0, 1}, {0, 0, 0, 1}}); actor->setGlobalPose({{-2, 0, 2},
+  // {0, 0.3826834, 0, 0.9238795}});
 
   // auto names = wrapper->get_link_names();
 
@@ -233,7 +272,7 @@ void test3() {
 
 void test4() {
   Renderer::OptifuserRenderer renderer;
- 
+
   renderer.cam.position = {0, -2, 0.5};
   renderer.cam.setForward({0, 1, 0});
   renderer.cam.setUp({0, 0, 1});

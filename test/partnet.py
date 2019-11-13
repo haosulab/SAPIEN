@@ -61,10 +61,16 @@ def test_urdf(folder):
         report.write(f'Success: {folder}\n')
     report.close()
 
-    # builder = sim.create_actor_builder()
-    # mount = builder.build(False, True, "Camera Mount")
-    # cam = sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), 512, 512,
-    #                              1.22172944444, 1.22172944444, 0.01, 100)
+    builder = sim.create_actor_builder()
+    mount = builder.build(False, True, "Camera Mount")
+    sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), 512, 512,
+                           1.22172944444, 1.22172944444, 0.01, 100)
+    cam0 = renderer.get_camera(0)
+
+    sim.step()
+    sim.update_renderer()
+    cam0.take_picture()
+    print(np.unique(cam0.get_obj_segmentation()))
 
     renderer.show_window()
     while True:

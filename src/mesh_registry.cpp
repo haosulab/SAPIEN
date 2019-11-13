@@ -250,6 +250,60 @@ PxConvexMesh *loadObjMesh(const std::string &filename, PxPhysics *physics, PxCoo
   return convexMesh;
 }
 
+std::vector<PxConvexMesh *> loadMultipleObjMesh(const std::string &filename, PxPhysics *physics,
+                                                PxCooking *cooking) {
+  std::vector<PxConvexMesh *> meshes;
+
+  if (!fs::exists(filename)) {
+    std::cerr << "No mesh file found: " << filename << std::endl;
+    return meshes;
+  }
+
+  std::string fullPath = fs::absolute(filename);
+
+  // import obj using assimp
+  Assimp::Importer importer;
+  uint32_t flags = aiProcess_Triangulate;
+  const aiScene *scene = importer.ReadFile(filename, flags);
+  if (!scene) {
+    fprintf(stderr, "%s\n", importer.GetErrorString());
+    return meshes;
+  }
+
+  for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
+    std::vector<PxVec3> vertices;
+    auto mesh = scene->mMeshes[i];
+    for (uint32_t v = 0; v < mesh->mNumVertices; ++v) {
+      auto vertex = mesh->mVertices[v];
+      vertices.push_back({vertex.x, vertex.y, vertex.z});
+    }
+#ifdef _VERBOSE
+    std::cout << "Starting convex mesh cooking: " << vertices.size() << " vertices." << std::endl;
+#endif
+    PxConvexMeshDesc convexDesc;
+    convexDesc.points.count = vertices.size();
+    convexDesc.points.stride = sizeof(PxVec3);
+    convexDesc.points.data = vertices.data();
+    convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // | PxConvexFlag::eSHIFT_VERTICES;
+    convexDesc.vertexLimit = 256;
+
+    PxDefaultMemoryOutputStream buf;
+    PxConvexMeshCookingResult::Enum result;
+    if (!cooking->cookConvexMesh(convexDesc, buf, &result)) {
+      std::cerr << "Unable to cook a part of " << filename << std::endl;
+      std::cerr << "Ignored..." << std::endl;
+    }
+    PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+    PxConvexMesh *convexMesh = physics->createConvexMesh(input);
+#ifdef _VERBOSE
+    std::cout << "Convex mesh generated: " << convexMesh->getNbVertices() << " vertices."
+              << std::endl;
+#endif
+    meshes.push_back(convexMesh);
+  }
+  return meshes;
+}
+
 } // namespace MeshUtil
 
 } // namespace sapien

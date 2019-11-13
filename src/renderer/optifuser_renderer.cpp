@@ -8,7 +8,18 @@
 namespace sapien {
 namespace Renderer {
 
-enum RenderMode { LIGHTING, ALBEDO, NORMAL, DEPTH, SEGMENTATION, CUSTOM };
+enum RenderMode {
+  LIGHTING,
+  ALBEDO,
+  NORMAL,
+  DEPTH,
+  SEGMENTATION,
+  CUSTOM
+#ifdef _USE_OPTIX
+  ,
+  PATHTRACER
+#endif
+};
 
 constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
@@ -126,8 +137,8 @@ void OptifuserRenderer::init() {
 
   cam.setUp({0, 0, 1});
   cam.setForward({0, 1, 0});
-  cam.position = {-8, 0, 4};
-  cam.rotateYawPitch(0, -0.15);
+  cam.position = {0, 0, 1};
+  cam.rotateYawPitch(0, 0);
   cam.fovy = glm::radians(45.f);
   cam.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
 
@@ -145,19 +156,45 @@ void OptifuserRenderer::destroy() {
 }
 
 void OptifuserRenderer::render() {
+#ifdef _USE_OPTIX
+  static Optifuser::OptixRenderer *pathTracer = nullptr;
+#endif
+
+  static int renderMode = 0;
   static float moveSpeed = 1.f;
   mContext->processEvents();
 
   float dt = 0.005f * moveSpeed;
   if (Optifuser::getInput().getKeyState(GLFW_KEY_W)) {
     cam.moveForwardRight(dt, 0);
+#ifdef _USE_OPTIX
+    if (renderMode == PATHTRACER) {
+      pathTracer->invalidateCamera();
+    }
+#endif
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_S)) {
     cam.moveForwardRight(-dt, 0);
+#ifdef _USE_OPTIX
+    if (renderMode == PATHTRACER) {
+      pathTracer->invalidateCamera();
+    }
+#endif
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_A)) {
     cam.moveForwardRight(0, -dt);
+#ifdef _USE_OPTIX
+    if (renderMode == PATHTRACER) {
+      pathTracer->invalidateCamera();
+    }
+#endif
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_D)) {
     cam.moveForwardRight(0, dt);
+#ifdef _USE_OPTIX
+    if (renderMode == PATHTRACER) {
+      pathTracer->invalidateCamera();
+    }
+#endif
   }
+
   cam.aspect =
       static_cast<float>(mContext->getWidth()) / static_cast<float>(mContext->getHeight());
 
@@ -169,14 +206,25 @@ void OptifuserRenderer::render() {
     double dx, dy;
     Optifuser::getInput().getCursorDelta(dx, dy);
     cam.rotateYawPitch(-dx / 1000.f, -dy / 1000.f);
+#ifdef _USE_OPTIX
+    if (renderMode == PATHTRACER) {
+      pathTracer->invalidateCamera();
+    }
+#endif
   }
-
-  static int renderMode = 0;
   mContext->renderer.renderScene(*mScene, cam);
   if (renderMode == SEGMENTATION) {
     mContext->renderer.displaySegmentation();
   } else if (renderMode == CUSTOM) {
     mContext->renderer.displayUserTexture();
+#ifdef _USE_OPTIX
+  } else if (renderMode == PATHTRACER) {
+    // path tracer
+    std::cout << "Rendering with path tracer" << std::endl;
+    pathTracer->numRays = 4;
+    pathTracer->max_iterations = 100000;
+    pathTracer->renderScene(*mScene, cam);
+#endif
   } else {
     mContext->renderer.displayLighting();
   }
@@ -213,6 +261,13 @@ void OptifuserRenderer::render() {
 
     ImGui::Begin("Render Options");
     {
+      // if (renderMode == PATHTRACER) {
+      //   ImGui::Image(
+      //       reinterpret_cast<ImTextureID>(pathTracer->outputTex),
+      //       ImVec2(imguiWindowSize, imguiWindowSize / static_cast<float>(mContext->getWidth()) *
+      //                                   mContext->getHeight()),
+      //       ImVec2(0, 1), ImVec2(1, 0));
+      // }
       if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {
           mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
@@ -238,6 +293,18 @@ void OptifuserRenderer::render() {
           mContext->renderer.setGBufferShader("glsl_shader/gbuffer.vsh",
                                               "glsl_shader/gbuffer_segmentation.fsh");
         }
+#ifdef _USE_OPTIX
+        if (ImGui::RadioButton("PathTracer", &renderMode, RenderMode::PATHTRACER)) {
+          if (pathTracer) {
+            delete pathTracer;
+          }
+          glEnable(GL_FRAMEBUFFER_SRGB_EXT);
+          pathTracer = new Optifuser::OptixRenderer();
+          pathTracer->init(mContext->getWidth(), mContext->getHeight());
+        } else {
+          glDisable(GL_FRAMEBUFFER_SRGB_EXT);
+        }
+#endif
       }
 
       if (ImGui::CollapsingHeader("Main Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -362,6 +429,13 @@ void OptifuserRenderer::setShadowLight(std::array<float, 3> direction,
   mScene->setShadowLight(
       {{direction[0], direction[1], direction[2]}, {color[0], color[1], color[2]}});
 }
+
+void OptifuserRenderer::addDirectionalLight(std::array<float, 3> direction,
+                                            std::array<float, 3> color) {
+  mScene->addDirectionalLight(
+      {{direction[0], direction[1], direction[2]}, {color[0], color[1], color[2]}});
+}
+
 void OptifuserRenderer::addPointLight(std::array<float, 3> position, std::array<float, 3> color) {
 
   mScene->addPointLight({{position[0], position[1], position[2]}, {color[0], color[1], color[2]}});

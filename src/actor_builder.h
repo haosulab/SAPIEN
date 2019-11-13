@@ -36,6 +36,11 @@ public:
                              const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
                              PxReal density = 1000.f);
 
+  void addMultipleConvexShapesFromObj(const std::string &filename,
+                                      const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                      const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
+                                      PxReal density = 1000.f);
+
   void addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                    const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr,
                    PxReal density = 1000.f);

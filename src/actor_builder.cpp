@@ -29,6 +29,26 @@ void ActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTr
   mCount++;
 }
 
+void ActorBuilder::addMultipleConvexShapesFromObj(const std::string &filename,
+                                                  const PxTransform &pose, const PxVec3 &scale,
+                                                  PxMaterial *material, PxReal density) {
+  material = material ? material : mSimulation->mDefaultMaterial;
+  auto meshes = loadMultipleObjMesh(filename, mPhysicsSDK, mCooking);
+  std::cout << meshes.size() << " meshes loaded." << std::endl;
+  for (auto mesh : meshes) {
+    PxShape *shape =
+        mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh, PxMeshScale(scale)), *material, true);
+    if (!shape) {
+      std::cerr << "create shape failed!" << std::endl;
+      exit(1);
+    }
+    shape->setLocalPose(pose);
+    mShapes.push_back(shape);
+    mDensities.push_back(density);
+    mCount++;
+  }
+}
+
 void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMaterial *material,
                                PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;

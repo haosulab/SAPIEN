@@ -34,10 +34,17 @@ public:
   virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) override;
   virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) override;
 
-  // lighting
+  /* For OpenGL only */
   void setAmbientLight(std::array<float, 3> color);
+
+  /* For OpenGL only */
   void setShadowLight(std::array<float, 3> direction, std::array<float, 3> color);
+
+  /* For both OpenGL and OptiX */
   void addPointLight(std::array<float, 3> position, std::array<float, 3> color);
+
+  /* For OptiX Only */
+  void addDirectionalLight(std::array<float, 3> position, std::array<float, 3> color);
 
 private:
   void init();

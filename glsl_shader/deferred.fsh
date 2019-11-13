@@ -118,16 +118,15 @@ void main() {
   vec4 shadowMapCoord = shadowProjectionMatrix * ssPosition;
   shadowMapCoord /= shadowMapCoord.w;
   shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
-  // float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, 0);
-  float visibility = 1;
+  float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, 0);
 
   vec3 camDir = -normalize(csPosition.xyz);
 
   vec3 color = vec3(0.f);
   for (int i = 0; i < N_POINT_LIGHTS; i++) {
-    vec3 pos = world2camera(vec4(pointLights[i].position, 0.f)).xyz;
+    vec3 pos = world2camera(vec4(pointLights[i].position, 1.f)).xyz;
     vec3 l = pos - csPosition.xyz;
-    float d = max(length(l), 0.01);
+    float d = max(length(l), 0.0001);
     vec3 lightDir = normalize(l);
 
     // point light diffuse
@@ -137,7 +136,6 @@ void main() {
   }
 
   vec3 lightDir = -normalize((gbufferViewMatrix * vec4(shadowLightDirection, 0)).xyz);
-  // color += albedo * shadowLightEmission * max(0, dot(lightDir, normal)) * visibility;
   color += albedo * shadowLightEmission * orenNayar(lightDir, camDir, normal, 0.3f) * visibility;
   color += specular.rgb * shadowLightEmission * ggx(lightDir, camDir, normal, roughness, 0.05) * visibility;
 

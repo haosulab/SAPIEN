@@ -45,6 +45,14 @@ file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
         "3rd_party/imgui/examples/imgui_impl_glfw.cpp"
         "3rd_party/imgui/examples/imgui_impl_opengl3.cpp")
 
+set(OPTIX_HOME "NOT FOUND" CACHE FILEPATH "Home to OptiX")
+if (EXISTS ${OPTIX_HOME})
+  include_directories("${OPTIX_HOME}/include")
+  link_directories("${OPTIX_HOME}/lib64")
+  set(OPTIX_LIBRARY optix)
+  add_definitions(-D_USE_OPTIX)
+endif()
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-D_DEBUG)
    add_definitions(-D_PVD)
@@ -63,13 +71,17 @@ add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader $
 add_library(sapien ${PROJECT_SRC})
 add_dependencies(sapien shader)
 
+if (EXISTS ${OPTIX_HOME})
+  add_dependencies(sapien ptx_dir)
+endif()
+
 target_link_libraries(sapien -Wl,--start-group
         libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
         libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
         libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a libPhysX_static_64.a
         libPhysXVehicle_static_64.a libSnippetRender_static_64.a
         libSnippetUtils_static_64.a -Wl,--end-group pthread ${OPENGL_LIBRARY} glfw
-        GLEW assimp dl optifuser stdc++fs tinyxml2)
+        GLEW assimp dl optifuser stdc++fs tinyxml2 ${OPTIX_LIBRARY})
 
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 

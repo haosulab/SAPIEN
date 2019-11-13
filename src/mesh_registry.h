@@ -17,6 +17,9 @@ class MeshLoader {
 PxConvexMesh *loadObjMesh(const std::string &filename, PxPhysics *physics, PxCooking *cooking,
                           bool useCache = true, bool createCache = true);
 
+std::vector<PxConvexMesh *> loadMultipleObjMesh(const std::string &filename, PxPhysics *physics,
+                                                PxCooking *cooking);
+
 } // namespace MeshUtil
 
-}
+} // namespace sapien
