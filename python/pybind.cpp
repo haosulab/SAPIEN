@@ -450,7 +450,7 @@ PYBIND11_MODULE(sapyen, m) {
                   {quaternion.at(1), quaternion.at(2), quaternion.at(3), quaternion.at(0)}});
            },
            py::arg("position") = make_array<float>({0, 0, 0}),
-           py::arg("quaternion") = make_array<float>({0, 0, 0, 1}))
+           py::arg("quaternion") = make_array<float>({1,0,0,0}))
       .def("set_drive_qpos", [](ArticulationWrapper &a, py::array_t<float> qpos) {
         a.set_drive_target(std::vector<PxReal>(qpos.data(), qpos.data() + qpos.size()));
       });

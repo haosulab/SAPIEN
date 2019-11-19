@@ -47,13 +47,12 @@ void test1() {
   auto timestep = sim.getTimestep();
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   controllableWrapper->updateTimeStep(timestep);
-  robot::ControllerManger manger("vga", controllableWrapper);
+  robot::ControllerManger manger("movo", controllableWrapper);
   manger.createJointPubNode(100);
-  //  velocity_controller =
-  auto velocity_controller = manger.createJointVelocityController(
-      {"summit_xl_back_right_wheel_joint", "summit_xl_back_left_wheel_joint",
-       "summit_xl_front_right_wheel_joint", "summit_xl_front_left_wheel_joint"},
-      "wheel_control");
+  std::vector<std::string> wheel_joint = {"summit_xl_back_right_wheel_joint", "summit_xl_back_left_wheel_joint"};
+  auto velocity_controller  = manger.createJointVelocityController(wheel_joint, "hhh");
+//       "summit_xl_front_right_wheel_joint", "summit_xl_front_left_wheel_joint"},
+
 
   //   ROS
   //  std::vector<std::string> serviceJoints = {
@@ -78,7 +77,7 @@ void test1() {
 
   static size_t globalTimeStep = 0;
   while (true) {
-    velocity_controller->moveJoint({0.5, 0.5, 0.5, 0.5});
+    velocity_controller->moveJoint({0,0.2});
     sim.step();
     globalTimeStep++;
     sim.updateRenderer();

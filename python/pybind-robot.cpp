@@ -118,7 +118,7 @@ PYBIND11_MODULE(sapyen_robot, m) {
         return py::array_t<int>(cache.size(), cache.data());
       });
 
-  py::class_<KinovaGripperPS3, PS3RobotControl>(m, "SingleKinovaGripper")
+  py::class_<KinovaGripperPS3, PS3RobotControl>(m, "SingleGripperPS3")
       .def(py::init<ControllerManger *>())
       .def("step", &KinovaGripperPS3::step);
 

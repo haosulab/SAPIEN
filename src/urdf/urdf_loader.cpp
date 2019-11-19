@@ -278,7 +278,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
     }
     if (shouldComputeInertia) {
       // TODO: check density
-      PxRigidBodyExt::updateMassAndInertia(currentPxLink, 1000);
+      PxRigidBodyExt::updateMassAndInertia(currentPxLink, 100);
     }
 
     // joint
