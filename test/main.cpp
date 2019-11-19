@@ -131,45 +131,46 @@ void test3() {
   ab->build(true, false, "Scene");
 
   auto loader = URDF::URDFLoader(sim);
-  loader.fixLoadedObject = true;
-  auto obj1 = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/102044/mobility.urdf");
-  obj1->articulation->teleportRootLink({1.221, 1.244, 0.614}, true);
+  loader.fixLoadedObject = false;
+  // auto obj1 = loader.loadKinematic(
+  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/102044/mobility.urdf");
+  // obj1->articulation->teleportRootLink({1.221, 1.244, 0.614}, true);
 
-  loader.scale = 1.4;
+  loader.scale = 0.5;
   auto obj2 = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/10905/mobility.urdf");
+      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/102611/mobility.urdf");
   obj2->articulation->teleportRootLink({0.900, -0.954, 0.622}, true);
 
-  loader.scale = 0.8;
-  auto obj3 = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/12065/mobility.urdf");
-  obj3->articulation->teleportRootLink({1.12, 0.109, 0.582}, true);
+  // loader.scale = 0.8;
+  // auto obj3 = loader.load(
+  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/12065/mobility.urdf");
+  // obj3->articulation->teleportRootLink({1.12, 0.109, 0.582}, true);
 
-  loader.scale = 1;
-  auto obj4 = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/23511/mobility.urdf");
-  obj4->articulation->teleportRootLink({{-2.246, -3.518, 0.910}, PxQuat(3.14159, {0, 0, 1})}, true);
+  // loader.scale = 1;
+  // auto obj4 = loader.load(
+  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/23511/mobility.urdf");
+  // obj4->articulation->teleportRootLink({{-2.246, -3.518, 0.910}, PxQuat(3.14159, {0, 0, 1})}, true);
 
-  loader.scale = 1;
-  auto obj5 = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/45594/mobility.urdf");
-  obj5->articulation->teleportRootLink({1.271, 2.393, 0.946}, true);
+  // loader.scale = 1;
+  // auto obj5 = loader.load(
+  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/45594/mobility.urdf");
+  // obj5->articulation->teleportRootLink({1.271, 2.393, 0.946}, true);
 
-  loader.scale = 1;
-  auto obj6 = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/46037/mobility.urdf");
-  obj6->articulation->teleportRootLink({{0.597, -3.789, 0.774}, PxQuat(-1.5708, {0, 0, 1})}, true);
+  // loader.scale = 1;
+  // auto obj6 = loader.load(
+  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/46037/mobility.urdf");
+  // obj6->articulation->teleportRootLink({{0.597, -3.789, 0.774}, PxQuat(-1.5708, {0, 0, 1})}, true);
 
-  loader.scale = 0.4;
-  auto obj7 = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/7310/mobility.urdf");
-  obj7->articulation->teleportRootLink({{1.195, 0.847, 1.259}, PxQuat(-0.1, {0, 0, 1})}, true);
+  // loader.scale = 0.4;
+  // auto obj7 = loader.load(
+  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/7310/mobility.urdf");
+  // obj7->articulation->teleportRootLink({{1.195, 0.847, 1.259}, PxQuat(-0.1, {0, 0, 1})}, true);
 
-  loader.scale = 1.5;
-  auto obj8 = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/8867/mobility.urdf");
-  obj8->articulation->teleportRootLink({-3.127, 2.281, 1.481}, true);
+  // loader.scale = 1.5;
+  // auto obj8 = loader.load(
+  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/8867/mobility.urdf");
+  // obj8->articulation->teleportRootLink({-3.127, 2.281, 1.481}, true);
+
 
   // std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
   // std::string line;

@@ -63,20 +63,32 @@ def test_urdf(folder):
 
     builder = sim.create_actor_builder()
     mount = builder.build(False, True, "Camera Mount")
-    sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), 512, 512,
-                           1.22172944444, 1.22172944444, 0.01, 100)
+    sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), 512, 512, 1.22172944444,
+                           1.22172944444, 0.01, 100)
     cam0 = renderer.get_camera(0)
+    mount.set_global_pose(Pose([-2, 0, 0], [1, 0, 0, 0]))
 
     sim.step()
+    sim.step()
+    sim.step()
     sim.update_renderer()
-    cam0.take_picture()
-    print(np.unique(cam0.get_obj_segmentation()))
+    renderer.render()
 
-    renderer.show_window()
-    while True:
-        sim.step()
-        sim.update_renderer()
-        renderer.render()
+    # cam0.take_picture()
+    import time
+    t1 = time.time()
+    pic = cam0.take_raytraced_picture(100, 4)
+    t2 = time.time()
+    print(t2 - t1)
+    import matplotlib.pyplot as plt
+    plt.imshow(pic)
+    plt.show()
+
+    # renderer.show_window()
+    # while True:
+    #     sim.step()
+    #     sim.update_renderer()
+    #     renderer.render()
 
 
 import sys
