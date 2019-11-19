@@ -57,7 +57,7 @@ class XArmEnv(BaseRobotEnv):
 
         # Add joint state publisher to keep in synchronization with ROS
         # You must use it if you want to do cartesian control and joint velocity control
-        self.manger.add_joint_state_publisher(60, 600)
+        self.manger.add_joint_state_publisher(60)
         self.manger.add_group_trajectory_controller("xarm6")
         self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
         self.arm_velocity_controller: sapyen_robot.CartesianVelocityController = self.manger.create_cartesian_velocity_controller(

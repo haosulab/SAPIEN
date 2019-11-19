@@ -31,7 +31,7 @@ class SingleGripperBaseEnv(BaseRobotEnv):
 
     def _load_controller_parameters(self):
         # Init robot pose and controller
-        self.robot.set_pd(200, 40, 20, [0, 1, 2, 3, 4, 5])
+        self.robot.set_pd(200, 60, 20, [0, 1, 2, 3, 4, 5])
         self.robot.set_pd(1, 0.05, 1, [6, 7, 8])
         self.init_qpos = [0, 0, 2, 0, 0, 0, 0, 0, 0]
         self.robot.set_drive_qpos(self.init_qpos)
@@ -55,13 +55,13 @@ class SingleGripperBaseEnv(BaseRobotEnv):
                                    "z_axis_joint"]
         self._rotation_joint = ["r_rotation_joint", "p_rotation_joint",
                                 "y_rotation_joint"]
-        self.manger.add_joint_state_publisher(100, 600)
+        self.manger.add_joint_state_publisher(100)
         self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
         self.translation_controller = self.manger.create_joint_velocity_controller(self._translation_joint,
                                                                                    "translation")
         self.rotation_controller = self.manger.create_joint_velocity_controller(self._rotation_joint, "rotation")
-        self._translation_velocity = 0.3
-        self._rotation_velocity = 1
+        self._translation_velocity = 0.25
+        self._rotation_velocity = 0.7
 
         # Cache gripper limit for execute high level action
         joint_limit = self.robot.get_qlimits()
@@ -98,7 +98,7 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         """
         self.gripper_controller.move_joint([2, 2, 2])
 
-    def arrive_pose_with_closed_loop(self, target_pose: sapyen.Pose, loop_step=5) -> None:
+    def arrive_pose_with_closed_loop(self, target_pose: sapyen.Pose, loop_step=5, velocity_factor=0.5) -> None:
         step = 0
         target_quat = target_pose.q
         target_rotation = transforms3d.quaternions.quat2mat(target_quat)
@@ -110,10 +110,11 @@ class SingleGripperBaseEnv(BaseRobotEnv):
                 euler_rotation = transforms3d.euler.mat2euler(rotation, "rxyz")
                 rotation_distance = np.linalg.norm(euler_rotation)
                 rotation_direction = euler_rotation / rotation_distance
-                if rotation_distance < 0.01:
+                if abs(transforms3d.axangles.mat2axangle(rotation)[1]) < 0.1 or step > self.simulation_hz * 5:
                     break
 
-            self.rotation_controller.move_joint(rotation_direction * self._rotation_velocity)
+            self.rotation_controller.move_joint(
+                rotation_direction * self._rotation_velocity / 2)
             self._step()
             step += 1
 
@@ -126,10 +127,11 @@ class SingleGripperBaseEnv(BaseRobotEnv):
                 translation = target_position - current_position
                 translation_distance = np.linalg.norm(translation)
                 translation_direction = translation / translation_distance
-                if translation_distance < 0.005:
+                if translation_distance < 0.01:
                     break
 
-            self.translation_controller.move_joint(translation_direction * self._translation_velocity)
+            self.translation_controller.move_joint(
+                translation_direction * self._translation_velocity * np.maximum(translation_distance, velocity_factor))
             self._step()
             step += 1
 
@@ -155,6 +157,6 @@ class SingleGripperBaseEnv(BaseRobotEnv):
 
         # Add offset for Gripper
         position = gripper_pose.p
-        position[0] -= 0.06
+        position[0] -= 0.05
         gripper_pose.set_p(position)
         return gripper_pose

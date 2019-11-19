@@ -32,13 +32,14 @@ class MOVOEnv(BaseRobotEnv):
         # Cache robot pose
         self.root_theta = 0
         self.root_pos = np.array([0, 0], dtype=np.float)
-        self.init_qpos = [0, 0, 0, 0.25, -1.9347, 0, -1.5318, 0, 0.9512, -2.24, 0.34, 0.64, -1.413, 0, 0, 0]
+        self.robot.set_root_pose([-1, 2, 0.06])
+        self.init_qpos = [0.25, -1.381, 0, 0.05, 0.9512, 0.387, 0.608, 2.486, 1.05, -1.16, 0, 0, 0]
 
         # Tune PD controller
-        self.robot.set_pd(20000, 3000, 2000, np.arange(4))
-        self.robot.set_pd(2000, 300, 300, [4, 6, 8, 9, 10, 11, 12])
-        self.robot.set_pd(500, 100, 300, [5, 7])
-        self.robot.set_pd(200, 40, 20, np.arange(13, 16))
+        self.robot.set_pd(20000, 3000, 2000, np.arange(1))
+        self.robot.set_pd(2000, 300, 300, [1, 3, 5, 6, 7, 8, 9])
+        self.robot.set_pd(500, 100, 300, [2, 4])
+        self.robot.set_pd(200, 40, 20, np.arange(10, 13))
         self.robot.set_drive_qpos(self.init_qpos)
         self.robot.set_qpos(self.init_qpos)
         self.sim.step()
@@ -56,13 +57,14 @@ class MOVOEnv(BaseRobotEnv):
                                "right_gripper_finger3_joint"]
         self._body_joint = ["linear_joint"]
 
+        self.manger.add_joint_state_publisher(60)
         self.head_controller = self.manger.create_joint_velocity_controller(self._head_joint, "head")
         self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "right_gripper")
         self.body_controller = self.manger.create_joint_velocity_controller(self._body_joint, "body")
 
         # Add joint state publisher to keep in synchronization with ROS
         # You must use it if you want to do cartesian control
-        self.manger.add_joint_state_publisher(60, 400)
+        self.__arm_velocity_controller = self.manger.create_cartesian_velocity_controller("right_arm")
         self.manger.add_group_trajectory_controller("right_arm")
         self.__arm_planner = self.manger.create_group_planner("right_arm")
 
@@ -70,6 +72,7 @@ class MOVOEnv(BaseRobotEnv):
         joint_limit = self.robot.get_qlimits()
         gripper_index = self.robot_joint_names.index(self._gripper_joint[0])
         self.__gripper_limit = joint_limit[gripper_index, :]
+        self.manger.start()
 
     def close_gripper(self, velocity: float = 2) -> None:
         """

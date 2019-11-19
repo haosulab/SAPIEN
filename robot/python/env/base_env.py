@@ -262,7 +262,7 @@ class BaseEnv:
             result.append(color)
 
         if normal:
-            normal = camera.get_normal_rgba()[:,:,:3]
+            normal = camera.get_normal_rgba()[:, :, :3]
             if world_coordinate:
                 shape = normal.shape
                 normal = camera.get_model_mat()[:3, :3] @ normal.reshape(-1, 3).T
@@ -509,3 +509,9 @@ class SapienSingleObjectEnv(BaseEnv):
             inertia = np.squeeze(link_inertia[np.newaxis, :] @ inertia_frac)
             force_array[i] = inertia * acceleration
         return -force_array
+
+    def _capture_image(self, cam_id: int, filename: str):
+        from PIL import Image
+        self.cam_list[cam_id].take_picture()
+        rgb = self.cam_list[cam_id].get_color_rgba()[:, :, :3]
+        Image.fromarray((rgb * 255).astype(np.uint8)).save(f"data/{filename}.png")

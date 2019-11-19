@@ -47,7 +47,7 @@ class MOVOEnv(BaseRobotEnv):
 
         # Add joint state publisher to keep in synchronization with ROS
         # You must use it if you want to do cartesian control
-        self.manger.add_joint_state_publisher(60, 400)
+        self.manger.add_joint_state_publisher(60)
         self.manger.add_group_trajectory_controller("right_arm")
         self.arm_planner = self.manger.create_group_planner("right_arm")
 
