@@ -33,6 +33,10 @@ public:
   virtual SensorPose getSensorPose() const override;
   virtual void setSensorPose(const SensorPose &pose) override;
 
+  #ifdef _USE_OPTIX
+  std::vector<float> takeRaytracedPicture(uint32_t samplesPerPixel = 65536, uint32_t reflectionCount = 4);
+  #endif
+
   // Camera intrinsic
   glm::mat4 getCameraMatrix();
 };

@@ -73,7 +73,6 @@ vec3 getBackgroundColor(vec3 texcoord) {
 
 const float eps = 0.01;
 
-
 // The Oren-Nayar shading model
 float orenNayar(vec3 l, vec3 v, vec3 n, float r) {
   float a = r * r;

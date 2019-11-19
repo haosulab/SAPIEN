@@ -64,6 +64,24 @@ glm::mat4 MountedCamera::getCameraMatrix() {
   return matrix;
 }
 
-} // namespace Renderer
+#ifdef _USE_OPTIX
 
+std::vector<float> MountedCamera::takeRaytracedPicture(uint32_t samplesPerPixel,
+                                                       uint32_t reflectionCount) {
+  auto pathTracer = new Optifuser::OptixRenderer();
+  pathTracer->init(mWidth, mHeight);
+  pathTracer->numRays = reflectionCount;
+  pathTracer->max_iterations = samplesPerPixel;
+  pathTracer->invalidateCamera();
+
+  for (uint32_t i = 0; i < samplesPerPixel; ++i) {
+    pathTracer->renderScene(*mScene, *this);
+  }
+  auto result = pathTracer->getResult();
+  delete pathTracer;
+  return result;
+}
+#endif
+
+} // namespace Renderer
 } // namespace sapien

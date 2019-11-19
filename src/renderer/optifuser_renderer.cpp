@@ -224,6 +224,7 @@ void OptifuserRenderer::render() {
     pathTracer->numRays = 4;
     pathTracer->max_iterations = 100000;
     pathTracer->renderScene(*mScene, cam);
+    pathTracer->display();
 #endif
   } else {
     mContext->renderer.displayLighting();
