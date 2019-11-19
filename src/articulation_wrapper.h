@@ -90,6 +90,8 @@ struct ArticulationWrapper : public IArticulationDrivable {
   // Drive specific member function
   virtual std::vector<std::string> get_qnames() const override;
   virtual void set_drive_target(const std::vector<physx::PxReal> &v) override;
+  void set_drive_velocity_target(const std::vector<physx::PxReal> &v,
+                                 const std::vector<uint32_t> &index);
 
   virtual PxTransform get_link_joint_pose(uint32_t idx) const override;
 

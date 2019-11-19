@@ -3,19 +3,28 @@
 //
 
 #include "controller_manger.h"
+#include "simulation.h"
 
 #include <utility>
 namespace sapien::robot {
 
 sapien::robot::ControllerManger::ControllerManger(std::string robotName,
                                                   sapien::ControllableArticulationWrapper *wrapper)
-    : wrapper(wrapper), robotName(std::move(robotName)), spinner(4),
-      time_step(wrapper->informMangerTimeStepChange()) {
+    : robotName(std::move(robotName)), spinner(4), wrapper(wrapper),
+      timeStep(wrapper->informMangerTimeStepChange()) {
   if (!ros::isInitialized()) {
     throw std::runtime_error("ROS not init");
   }
   nh = std::make_unique<ros::NodeHandle>();
   jointName = wrapper->get_drive_joint_name();
+
+  // Bind simulation step call back functions
+  wrapper->sim->bindStepCallBack([this](const Simulation &sim){
+    this->timeStep = sim.getTimestep();
+    if(this->jointPubNode){
+      this->jointPubNode->updateJointStates();
+    }
+  });
 
   // Create robot states and load robot models
   if (nh->hasParam("robot_description")) {
@@ -29,15 +38,14 @@ sapien::robot::ControllerManger::ControllerManger(std::string robotName,
               << "Inverse kinematics and motion planning  will be disabled. \n";
   }
 }
-void sapien::robot::ControllerManger::createJointPubNode(double pubFrequency,
-                                                         double updateFrequency) {
+void sapien::robot::ControllerManger::createJointPubNode(double pubFrequency) {
   if (jointPubNode) {
     ROS_WARN("Joint Pub Node has already been created for this robot controller manager");
     ROS_WARN("Will use the original joint state pub node");
     return;
   }
   jointPubNode =
-      std::make_unique<JointPubNode>(wrapper, pubFrequency, updateFrequency, robotName, nh.get());
+      std::make_unique<JointPubNode>(wrapper, pubFrequency, robotName, nh.get());
   jointState = jointPubNode->mStates.get();
 }
 CartesianVelocityController *
@@ -59,7 +67,7 @@ sapien::robot::ControllerManger::createCartesianVelocityController(const std::st
     return nullptr;
   }
   auto controller = std::make_unique<CartesianVelocityController>(
-      wrapper, jointState, robotState.get(), groupName, time_step, nh.get(), robotName);
+      wrapper, jointState, robotState.get(), groupName, timeStep, nh.get(), robotName);
 
   auto controllerPtr = controller.get();
   name2CartesianVelocityController[groupName] = std::move(controller);
@@ -80,7 +88,7 @@ JointVelocityController *sapien::robot::ControllerManger::createJointVelocityCon
   }
 
   std::unique_ptr<JointVelocityController> controller = std::make_unique<JointVelocityController>(
-      wrapper, jointNames, jointState, serviceName, time_step, nh.get(), robotName);
+      wrapper, jointNames, jointState, serviceName, timeStep, nh.get(), robotName);
 
   auto controllerPtr = controller.get();
   name2JointVelocityController[serviceName] = std::move(controller);
@@ -104,7 +112,7 @@ void sapien::robot::ControllerManger::addGroupTrajectoryController(const std::st
     return;
   }
   auto controller =
-      std::make_unique<GroupControllerNode>(wrapper, groupName, time_step, nh.get(), robotName);
+      std::make_unique<GroupControllerNode>(wrapper, groupName, timeStep, nh.get(), robotName);
   name2GroupTrajectoryController[groupName] = std::move(controller);
 }
 

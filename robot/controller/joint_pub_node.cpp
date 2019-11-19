@@ -8,10 +8,9 @@
 namespace sapien::robot {
 
 JointPubNode::JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
-                           double updateFrequency, const std::string &robotName,
-                           ros::NodeHandle *nh)
+                           const std::string &robotName, ros::NodeHandle *nh)
     : jointName(wrapper->get_drive_joint_name()), queue(wrapper->get_joint_state_queue()),
-      mNodeHandle(nh), pubFrequency(pubFrequency), updateFrequency(updateFrequency) {
+      mNodeHandle(nh), pubFrequency(pubFrequency){
 
   mPub = std::make_unique<ros::Publisher>(mNodeHandle->advertise<sensor_msgs::JointState>(
       "/sapien/" + robotName + "/joint_states", 1));
@@ -21,7 +20,6 @@ JointPubNode::JointPubNode(ControllableArticulationWrapper *wrapper, double pubF
   jointNum = jointName.size();
 
   // Multi-thread spin
-  updateWorker = std::thread(&JointPubNode::updateJointStates, this);
   pubWorker = std::thread(&JointPubNode::spin, this);
 }
 void JointPubNode::spin() {
@@ -33,22 +31,17 @@ void JointPubNode::spin() {
   }
 }
 void JointPubNode::updateJointStates() {
-
-  ros::WallRate rate(updateFrequency);
-  while (ros::ok() && !isCancel) {
-    if (!queue->empty()) {
-      std::vector<float> newJointAngles = queue->pop();
-      mStates->header.stamp = ros::Time::now();
-      mStates->position.assign(newJointAngles.begin(), newJointAngles.begin() + jointNum);
-      mStates->velocity.assign(newJointAngles.begin() + jointNum, newJointAngles.end());
-    }
-    rate.sleep();
+  if (!queue->empty()) {
+    std::vector<float> newJointAngles = queue->pop();
+    mStates->header.stamp = ros::Time::now(); // TODO: change it to simulation time
+    mStates->position.assign(newJointAngles.begin(), newJointAngles.begin() + jointNum);
+    mStates->velocity.assign(newJointAngles.begin() + jointNum, newJointAngles.end());
+    std::cout << "Update joint states" << std::endl;
   }
 }
 void JointPubNode::cancel() {
   isCancel = false;
   pubWorker.join();
-  updateWorker.join();
   ROS_INFO("Joint state publisher with topic %s canceled.", mPub->getTopic().c_str());
 }
 } // namespace sapien::robot

@@ -5,14 +5,15 @@
 #include "controllable_articulation_wrapper.h"
 #include "articulation_interface.h"
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
+#include "simulation.h"
 
 namespace sapien {
 // Controllable articulation wrapper
 ControllableArticulationWrapper::ControllableArticulationWrapper(
-    IArticulationDrivable *articulation)
-    : articulation(articulation) {
+    IArticulationDrivable *articulation, Simulation *simulation)
+    : articulation(articulation) , sim(simulation){
   jointNames = articulation->get_qnames();
   driveQpos.resize(jointNames.size(), 0);
 }
@@ -109,12 +110,12 @@ std::vector<std::string> ControllableArticulationWrapper::get_drive_joint_name()
   return articulation->get_qnames();
 }
 void ControllableArticulationWrapper::updateTimeStep(float newTimestep) {
-  timestep = newTimestep;
+  timeStep = newTimestep;
   needUpdateTimeStep = true;
 }
 float ControllableArticulationWrapper::informMangerTimeStepChange() {
   needUpdateTimeStep = false;
-  return timestep;
+  return timeStep;
 }
 void ControllableArticulationWrapper::clearCache() {
   for (auto &i : velocityControllerQueueList) {

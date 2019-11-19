@@ -35,10 +35,11 @@ private:
 
   // Cache
   std::vector<std::string> jointNames;
-  float timestep=0.01;
+  float timeStep =0.01;
 
 public:
   IArticulationDrivable *articulation;
+  class Simulation *sim;
   bool needUpdateTimeStep = false;
 
 private:
@@ -47,7 +48,8 @@ private:
   void driveFromVelocityController(physx::PxReal timestep);
 
 public:
-  explicit ControllableArticulationWrapper(IArticulationDrivable *articulation);
+  explicit ControllableArticulationWrapper(IArticulationDrivable *articulation,
+                                           class Simulation *simulation);
   bool add_position_controller(const std::vector<std::string> &controllerJointNames,
                                ThreadSafeQueue *queue);
   bool add_velocity_controller(const std::vector<std::string> &controllerJointNames,

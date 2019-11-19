@@ -190,6 +190,9 @@ void Simulation::step() {
   for (auto &wrapper : mControllableArticulationWrapper) {
     wrapper->update(mTimestep);
   }
+  for (auto &callBack: mStepCallBacks){
+    callBack(*this);
+  }
 }
 
 void Simulation::updateRenderer() {
@@ -313,7 +316,7 @@ PxMaterial *Simulation::createPhysicalMaterial(PxReal staticFriction, PxReal dyn
 }
 class ControllableArticulationWrapper *
 Simulation::createControllableArticulationWrapper(class IArticulationDrivable *baseWrapper) {
-  auto wrapper = std::make_unique<ControllableArticulationWrapper>(baseWrapper);
+  auto wrapper = std::make_unique<ControllableArticulationWrapper>(baseWrapper, this);
   wrapper->updateTimeStep(mTimestep);
   auto wrapperPtr = wrapper.get();
   mControllableArticulationWrapper.push_back(std::move(wrapper));

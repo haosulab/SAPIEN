@@ -52,7 +52,7 @@ void run() {
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("kg3", controllableWrapper);
-  manger->createJointPubNode(100, 600);
+  manger->createJointPubNode(100);
   manger->createJointVelocityController(gripperJoints, "right_gripper");
   manger->createJointVelocityController(translationJoints, "root_translation");
   manger->createJointVelocityController(rotationJoints, "root_rotation");

@@ -21,23 +21,21 @@ private:
   // communication and multi-thread related variable
   ThreadSafeQueue *queue;
   std::thread pubWorker;
-  std::thread updateWorker;
   bool isCancel = false;
 
   uint32_t jointNum;
   ros::NodeHandle *mNodeHandle = nullptr;
   std::unique_ptr<ros::Publisher> mPub;
   double pubFrequency;
-  double updateFrequency;
 
 public:
   JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
-               double updateFrequency, const std::string &robotName, ros::NodeHandle *nh);
+               const std::string &robotName, ros::NodeHandle *nh);
 
+  void updateJointStates();
   void cancel();
 
 private:
-  void updateJointStates();
   void spin();
 };
 

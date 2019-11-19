@@ -39,25 +39,26 @@ void test1() {
   auto builder = sim.createActorBuilder();
   auto loader = sim.createURDFLoader();
   loader->balancePassiveForce = true;
-  std::string partFile =
-      "/home/sim/project/mobility-v0-prealpha3/mobility_verified/44826/mobility.urdf";
-  loader->fixLoadedObject = true;
-  loader->load(partFile)->articulation->teleportRootLink({{3.0, 0.3, 0.8}, PxIdentity}, true);
-  auto wrapper = loader->load("../assets/robot/single_gripper.urdf");
-    for(auto &actor: wrapper->get_links()){
-      actor->setActorFlag(PxActorFlag::eDISABLE_GRAVITY, true);
-    }
-  wrapper->set_drive_property(200, 55);
+  loader->fixLoadedObject = false;
+  auto wrapper = loader->load("../assets/robot/summit_xl.urdf");
+  wrapper->set_drive_property(200, 10, 200);
+  wrapper->articulation->teleportRootLink({{0, 0, 0.4}, PxIdentity}, true);
 
   auto timestep = sim.getTimestep();
-  auto uniqueWrapper = std::make_unique<ControllableArticulationWrapper>(wrapper);
-  ControllableArticulationWrapper *controllableWrapper = uniqueWrapper.get();
-  sim.mControllableArticulationWrapper.push_back(std::move(uniqueWrapper));
+  auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   controllableWrapper->updateTimeStep(timestep);
+  robot::ControllerManger manger("vga", controllableWrapper);
+  manger.createJointPubNode(100);
+  //  velocity_controller =
+  auto velocity_controller = manger.createJointVelocityController(
+      {"summit_xl_back_right_wheel_joint", "summit_xl_back_left_wheel_joint",
+       "summit_xl_front_right_wheel_joint", "summit_xl_front_left_wheel_joint"},
+      "wheel_control");
 
   //   ROS
-  std::vector<std::string> serviceJoints = {
-      "right_gripper_finger1_joint", "right_gripper_finger2_joint", "right_gripper_finger3_joint"};
+  //  std::vector<std::string> serviceJoints = {
+  //      "right_gripper_finger1_joint", "right_gripper_finger2_joint",
+  //      "right_gripper_finger3_joint"};
   //  robot::ControllerManger manger("movo", controllableWrapper);
   //  manger.createJointPubNode(100, 500);
   //  auto IKController = manger.createCartesianVelocityController("right_arm");
@@ -69,25 +70,15 @@ void test1() {
   //  auto bodyController = manger.createJointVelocityController({"linear_joint"}, "body");
   //  auto planner = manger.createGroupPlanner("right_arm");
 
-  wrapper->set_qpos({0.47, 0.47, 0.47, 1, 1, 1,0,0,0});
-  wrapper->articulation->teleportRootLink({{0, 0, 1}, PxIdentity}, true);
+  //  wrapper->set_qpos({0.47, 0.47, 0.47, 1, 1, 1,0,0,0});
   //  wrapper->set_drive_target({0.2, 0, 0.0, 0, -0.9, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0});
-  for (int j = 0; j < 100; ++j) {
-    sim.step();
-  }
   sim.step();
-
-  //  wrapper->set_qf({10,10,10,10,10,10,10,10,10,10,10,10,10});
-
   sim.updateRenderer();
   renderer.showWindow();
 
-  //  auto pose = wrapper->linkName2Link["right_ee_link"]->getGlobalPose();
-  //  pose.p.x -= 0.2;
-  //  planner->go(pose, "base_link");
-
   static size_t globalTimeStep = 0;
   while (true) {
+    velocity_controller->moveJoint({0.5, 0.5, 0.5, 0.5});
     sim.step();
     globalTimeStep++;
     sim.updateRenderer();

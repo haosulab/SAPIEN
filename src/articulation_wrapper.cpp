@@ -39,6 +39,7 @@ void ArticulationWrapper::set_qpos(const std::vector<physx::PxReal> &v) {
   }
   articulation->applyCache(*cache, PxArticulationCache::ePOSITION);
   links[0]->getLinkIndex();
+  set_drive_target(v);
 }
 
 std::vector<physx::PxReal> ArticulationWrapper::get_qvel() const {
@@ -196,5 +197,12 @@ PxTransform ArticulationWrapper::get_link_joint_pose(uint32_t idx) const {
   return link->getGlobalPose() * joint->getChildPose();
 }
 std::vector<std::string> ArticulationWrapper::get_joint_types() const { return jointTypes; }
+void ArticulationWrapper::set_drive_velocity_target(const std::vector<physx::PxReal> &v,
+                                                    const std::vector<uint32_t> &index) {
+  for (size_t i = 0; i < v.size(); ++i) {
+    assert(index[i] < dof());
+    activeJoints[index[i]]->setDriveVelocity(jointAxises[index[i]], v[i]);
+  }
+}
 
 } // namespace sapien

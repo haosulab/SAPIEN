@@ -19,7 +19,6 @@ enum ControlMode { ARM_WORLD, ARM_LOCAL, BODY };
 class ControllerManger {
 protected:
   // Hold all the controller related to a manager
-  ControllableArticulationWrapper *wrapper;
 
   // Name and handle
   std::string robotName;
@@ -43,13 +42,14 @@ public:
   std::map<std::string, std::unique_ptr<JointVelocityController>> name2JointVelocityController;
   std::map<std::string, std::unique_ptr<GroupControllerNode>> name2GroupTrajectoryController;
   std::map<std::string, std::unique_ptr<MoveGroupPlanner>> name2MoveGroupPlanner;
+  ControllableArticulationWrapper *wrapper;
 
 public:
-  float time_step;
+  float timeStep;
   ControllerManger(std::string robotName, ControllableArticulationWrapper *wrapper);
 
   // Function to add controllers
-  void createJointPubNode(double pubFrequency, double updateFrequency);
+  void createJointPubNode(double pubFrequency);
   CartesianVelocityController *createCartesianVelocityController(const std::string &groupName);
   JointVelocityController *
   createJointVelocityController(const std::vector<std::string> &jointNames,

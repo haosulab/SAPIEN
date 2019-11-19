@@ -48,7 +48,7 @@ void run() {
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("xarm6", controllableWrapper);
-  manger->createJointPubNode(100, 1000);
+  manger->createJointPubNode(100);
   manger->createJointVelocityController(gripperJoints, "gripper");
   manger->createCartesianVelocityController("xarm6");
   manger->start();

@@ -56,6 +56,9 @@ public:
   std::vector<std::unique_ptr<class ControllableArticulationWrapper>>
       mControllableArticulationWrapper;
 
+private:
+  std::vector<std::function<void(Simulation &)>> mStepCallBacks;
+
 public:
   Simulation();
   ~Simulation();
@@ -75,10 +78,12 @@ public:
                               PxTransform const &pose, uint32_t width, uint32_t height, float fovx,
                               float fovy, float near = 0.1, float far = 100);
 
-  /* advance physics by mTimestep */
+  /* Functions related to simulation steps */
   void step();
   std::vector<PxReal> dump();
   void pack(const std::vector<PxReal> &data);
+  inline void bindStepCallBack(const std::function<void(Simulation const &)>& callBack){
+    mStepCallBacks.emplace_back(callBack);};
 
   /* Sync with renderer by calling UpdateRigidbody */
   void updateRenderer();

@@ -47,13 +47,15 @@ void run() {
 
   auto controllableWrapper = sim.createControllableArticulationWrapper(wrapper);
   auto manger = std::make_unique<robot::ControllerManger>("movo", controllableWrapper);
-  manger->createJointPubNode(100, 500);
+  manger->createJointPubNode(100);
   manger->createJointVelocityController(gripperJoints, "right_gripper");
   manger->createCartesianVelocityController("right_arm");
   manger->createJointVelocityController(headJoints, "head");
   manger->createJointVelocityController(bodyJoints, "body");
   manger->start();
   robot::MOVOPS3 ps3(manger.get());
+  ps3.set_arm_velocity(0.2);
+  ps3.set_arm_angular_velocity(0.5);
 
   wrapper->set_qpos({0.47, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5});
   wrapper->set_drive_target({0.2, 0, 0.0, 0, -0.9, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0});
