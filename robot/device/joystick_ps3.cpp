@@ -194,22 +194,28 @@ void PS3RobotControl::parseGripperControlSignal() {
 void PS3RobotControl::parseRootJointControlSignal() {
   if (input->getKey(BUTTON_UP)) {
     translation->moveJoint({"z_axis_joint"}, translation_velocity);
-  } else if (input->getKey(BUTTON_DOWN)) {
+  }
+  if (input->getKey(BUTTON_DOWN)) {
     translation->moveJoint({"z_axis_joint"}, -translation_velocity);
-  } else if (input->getAxis(AXIS_LEFT_X)) {
+  }
+  if (input->getAxis(AXIS_LEFT_X)) {
     float dir_x = -input->getAxisValue(AXIS_LEFT_X);
     translation->moveJoint({"y_axis_joint"}, translation_velocity * dir_x);
   } else if (input->getAxis(AXIS_LEFT_Y)) {
     float dir_y = -input->getAxisValue(AXIS_LEFT_Y);
     translation->moveJoint({"x_axis_joint"}, translation_velocity * dir_y);
-  } else if (input->getKey(BUTTON_TRIANGLE)) {
+  }
+  if (input->getKey(BUTTON_TRIANGLE)) {
     rotation->moveJoint({"r_rotation_joint"}, rotation_velocity);
-  } else if (input->getKey(BUTTON_X)) {
+  }
+  if (input->getKey(BUTTON_X)) {
     rotation->moveJoint({"r_rotation_joint"}, -rotation_velocity);
-  } else if (input->getAxis(AXIS_RIGHT_Y)) {
+  }
+  if (input->getAxis(AXIS_RIGHT_Y)) {
     float dir_y = input->getAxisValue(AXIS_RIGHT_Y);
     rotation->moveJoint({"y_rotation_joint"}, rotation_velocity * dir_y);
-  } else if (input->getAxis(AXIS_RIGHT_X)) {
+  }
+  if (input->getAxis(AXIS_RIGHT_X)) {
     float dir_x = input->getAxisValue(AXIS_RIGHT_X);
     rotation->moveJoint({"p_rotation_joint"}, rotation_velocity * dir_x);
   }

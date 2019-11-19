@@ -36,7 +36,6 @@ void JointPubNode::updateJointStates() {
     mStates->header.stamp = ros::Time::now(); // TODO: change it to simulation time
     mStates->position.assign(newJointAngles.begin(), newJointAngles.begin() + jointNum);
     mStates->velocity.assign(newJointAngles.begin() + jointNum, newJointAngles.end());
-    std::cout << "Update joint states" << std::endl;
   }
 }
 void JointPubNode::cancel() {

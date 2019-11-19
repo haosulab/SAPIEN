@@ -32,31 +32,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 <robot name="movo" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Included URDF/XACRO Files -->
-  <gazebo>
-    <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
-      <robotNamespace>/</robotNamespace>
-    </plugin>
-    <plugin filename="libgazebo_ros_force_based_move.so" name="object_controller">
-      <robotNamespace>/</robotNamespace>
-      <commandTopic>/movo/cmd_vel</commandTopic>
-      <odometryTopic>/movo/odometry/wheel_odometry</odometryTopic>
-      <odometryFrame>odom</odometryFrame>
-      <odometryRate>100.0</odometryRate>
-      <cmdVelTimeOut>0.2</cmdVelTimeOut>
-      <robotBaseFrame>base_link</robotBaseFrame>
-      <publishOdometryTf>0</publishOdometryTf>
-      <yaw_velocity_p_gain>500.0</yaw_velocity_p_gain>
-      <x_velocity_p_gain>10000.0</x_velocity_p_gain>
-      <y_velocity_p_gain>10000.0</y_velocity_p_gain>
-    </plugin>
-    <plugin filename="libgazebo_ros_p3d.so" name="gazebo_ros_p3d">
-      <bodyName>base_link</bodyName>
-      <topicName>ground_truth_odom</topicName>
-      <alwaysOn>true</alwaysOn>
-      <updateRate>100.0</updateRate>
-    </plugin>
-  </gazebo>
-  <!-- Base link is the center of the robot's chassis between the motors projected on the ground -->
   <link name="base_link"/>
   <gazebo reference="base_link">
     <mu1>0.0</mu1>
@@ -77,16 +52,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <mesh filename="movo_description/meshes/movo_components/collision/vector_base_collision.stl"/>
       </geometry>
     </collision>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
-      <geometry>
-        <mesh filename="movo_description/meshes/movo_components/visual/vector_base.dae"/>
-      </geometry>
-    </visual>
+<!--    <visual>-->
+<!--      <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--      <geometry>-->
+<!--        <mesh filename="movo_description/meshes/movo_components/visual/vector_base.dae"/>-->
+<!--      </geometry>-->
+<!--    </visual>-->
   </link>
-  <gazebo reference="base_chassis_link">
-    <laserRetro>0</laserRetro>
-  </gazebo>
   <gazebo reference="base_chassis_link">
     <mu1>0.0</mu1>
   </gazebo>
@@ -113,9 +85,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       </geometry>
     </visual>
   </link>
-  <gazebo reference="linear_actuator_fixed_link">
-    <laserRetro>0</laserRetro>
-  </gazebo>
   <joint name="linear_joint" type="prismatic">
     <parent link="linear_actuator_fixed_link"/>
     <child link="linear_actuator_link"/>
@@ -156,9 +125,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <inertia ixx="0.300410" ixy="-0.010043" ixz="-0.054146" iyx="-0.010043" iyy="0.296460" iyz="-0.024977" izx="-0.054146" izy="-0.024977" izz="0.294778"/>
     </inertial>
   </link>
-  <gazebo reference="linear_actuator_link">
-    <laserRetro>0</laserRetro>
-  </gazebo>
   <transmission name="linear_trans">
     <type>transmission_interface/SimpleTransmission</type>
     <joint name="linear_joint">
@@ -187,102 +153,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <headingDrift>0.00005</headingDrift>
       <headingGaussianNoise>0.00005</headingGaussianNoise>
     </plugin>
-  </gazebo>
-  <joint name="front_laser_joint" type="fixed">
-    <origin rpy="3.14159 0 0" xyz="0.3375 0 0.1439106"/>
-    <parent link="base_chassis_link"/>
-    <child link="front_laser_link"/>
-  </joint>
-  <link name="front_laser_link">
-    <visual>
-      <geometry>
-        <mesh filename="movo_description/meshes/sensors/visual/sick_tim.dae"/>
-      </geometry>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.1 0.1 0.1"/>
-      </geometry>
-    </collision>
-  </link>
-  <gazebo reference="front_laser_link">
-    <sensor name="front_laser" type="ray">
-      <pose>0 0 0 0 0 0</pose>
-      <visualize>false</visualize>
-      <update_rate>15</update_rate>
-      <ray>
-        <scan>
-          <horizontal>
-            <samples>720</samples>
-            <resolution>1</resolution>
-            <min_angle>-2.0</min_angle>
-            <max_angle>2.0</max_angle>
-          </horizontal>
-        </scan>
-        <range>
-          <min>0.1</min>
-          <max>25.0</max>
-          <resolution>0.01</resolution>
-        </range>
-        <noise>
-          <type>gaussian</type>
-          <mean>0.0</mean>
-          <stddev>0.01</stddev>
-        </noise>
-      </ray>
-      <plugin filename="libgazebo_ros_laser.so" name="front_laser_node">
-        <topicName>/movo/front_scan</topicName>
-        <frameName>front_laser_link</frameName>
-      </plugin>
-    </sensor>
-  </gazebo>
-  <joint name="rear_laser_joint" type="fixed">
-    <origin rpy="3.14159 0 3.14159" xyz="-0.3375 0 0.1439106"/>
-    <parent link="base_chassis_link"/>
-    <child link="rear_laser_link"/>
-  </joint>
-  <link name="rear_laser_link">
-    <visual>
-      <geometry>
-        <mesh filename="movo_description/meshes/sensors/visual/sick_tim.dae"/>
-      </geometry>
-    </visual>
-    <collision>
-      <geometry>
-        <box size="0.1 0.1 0.1"/>
-      </geometry>
-    </collision>
-  </link>
-  <gazebo reference="rear_laser_link">
-    <sensor name="rear_laser" type="ray">
-      <pose>0 0 0 0 0 0</pose>
-      <visualize>false</visualize>
-      <update_rate>15</update_rate>
-      <ray>
-        <scan>
-          <horizontal>
-            <samples>720</samples>
-            <resolution>1</resolution>
-            <min_angle>-2.0</min_angle>
-            <max_angle>2.0</max_angle>
-          </horizontal>
-        </scan>
-        <range>
-          <min>0.1</min>
-          <max>25.0</max>
-          <resolution>0.01</resolution>
-        </range>
-        <noise>
-          <type>gaussian</type>
-          <mean>0.0</mean>
-          <stddev>0.01</stddev>
-        </noise>
-      </ray>
-      <plugin filename="libgazebo_ros_laser.so" name="rear_laser_node">
-        <topicName>/movo/rear_scan</topicName>
-        <frameName>rear_laser_link</frameName>
-      </plugin>
-    </sensor>
   </gazebo>
   <joint name="pan_base_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.19735 0 0.3449888"/>
@@ -483,6 +353,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <origin xyz="-0.000146 0.0 0.031039"/>
       <inertia ixx="0.000652" ixy="-0.000000" ixz="0.000001" iyx="0.000000" iyy="0.000646" iyz="0.000000" izx="0.000001" izy="0.000000" izz="0.000480"/>
     </inertial>
+  </link>
+  <joint name="lower_body_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_chassis_link"/>
+    <child link="lower_body_link"/>
+  </joint>
+  <link name="lower_body_link">
+    <inertial>
+      <mass value="7.753378"/>
+      <origin xyz="0.000143 0.000727 0.188079"/>
+      <inertia ixx="0.339365" ixy="0.000325" ixz="0.000146" iyx="0.000325" iyy="0.590290" iyz="-0.001078" izx="0.000146" izy="-0.001078" izz="0.588946"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="movo_description/meshes/movo_body/movo_lower_body.dae"/>
+      </geometry>
+    </visual>
   </link>
   <gazebo reference="right_base_link">
     <implicitSpringDamper>1</implicitSpringDamper>
