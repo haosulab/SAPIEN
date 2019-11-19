@@ -83,13 +83,14 @@ public:
 
 class PS3RobotControl {
 protected:
-  ControllerManger *manger;
   std::unique_ptr<PS3> input;
 
   bool reset = true;
   bool continuous = true;
   bool activated = false;
   bool startRecord = false;
+  bool recordCurrentStep = false;
+  bool recordLastStep = false;
   ControlMode mode = ControlMode::BODY;
 
   std::vector<std::string> gripperJoints = {};
@@ -105,6 +106,7 @@ protected:
 
   PxVec3 pos = {0, 0, 0};
   PxReal angle = 0;
+  PxTransform currentPose;
   float translation_velocity = 0;
   float rotation_velocity = 0;
   float time_step;
@@ -117,6 +119,7 @@ protected:
   void parseEndingSignal();
 
 public:
+  ControllerManger *manger;
   explicit PS3RobotControl(ControllerManger *m);
   virtual ~PS3RobotControl() { input->shutdown(); }
   virtual void step();
@@ -125,6 +128,7 @@ public:
 
   // Inline functions
   inline bool start_record() { return startRecord; };
+  inline bool record_single_step() { return recordCurrentStep; }
   inline void set_gripper_velocity(float v) { gripper_velocity = v; }
   inline void set_arm_velocity(float v) {
     arm_cartesian->setVelocity(v);

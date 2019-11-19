@@ -279,28 +279,39 @@ PYBIND11_MODULE(sapyen, m) {
       .def_readonly("cam", &Renderer::OptifuserRenderer::cam)
       .def("get_camera_count",
            [](Renderer::OptifuserRenderer &r) { return r.getCameras().size(); })
-      .def("get_camera",
-           [](Renderer::OptifuserRenderer &r, int i) { return r.getCameras().at(i); },
-           py::return_value_policy::reference)
-      .def("add_point_light",
-           [](Renderer::OptifuserRenderer &r, py::array_t<float> const &position,
-              py::array_t<float> const &color) {
-             r.addPointLight({position.at(0), position.at(1), position.at(2)},
+      .def(
+          "get_camera", [](Renderer::OptifuserRenderer &r, int i) { return r.getCameras().at(i); },
+          py::return_value_policy::reference)
+      .def(
+          "add_point_light",
+          [](Renderer::OptifuserRenderer &r, py::array_t<float> const &position,
+             py::array_t<float> const &color) {
+            r.addPointLight({position.at(0), position.at(1), position.at(2)},
+                            {color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("position"), py::arg("color"))
+      .def(
+          "set_ambient_light",
+          [](Renderer::OptifuserRenderer &r, py::array_t<float> const &color) {
+            r.setAmbientLight({color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("color"))
+      .def(
+          "add_directional_light",
+          [](Renderer::OptifuserRenderer &r, py::array_t<float> const &direction,
+             py::array_t<float> const &color) {
+            r.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
+                                  {color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("direction"), py::arg("color"))
+      .def(
+          "set_shadow_light",
+          [](Renderer::OptifuserRenderer &r, py::array_t<float> const &direction,
+             py::array_t<float> const &color) {
+            r.setShadowLight({direction.at(0), direction.at(1), direction.at(2)},
                              {color.at(0), color.at(1), color.at(2)});
-           },
-           py::arg("position"), py::arg("color"))
-      .def("set_ambient_light",
-           [](Renderer::OptifuserRenderer &r, py::array_t<float> const &color) {
-             r.setAmbientLight({color.at(0), color.at(1), color.at(2)});
-           },
-           py::arg("color"))
-      .def("set_shadow_light",
-           [](Renderer::OptifuserRenderer &r, py::array_t<float> const &direction,
-              py::array_t<float> const &color) {
-             r.setShadowLight({direction.at(0), direction.at(1), direction.at(2)},
-                              {color.at(0), color.at(1), color.at(2)});
-           },
-           py::arg("direction"), py::arg("color"));
+          },
+          py::arg("direction"), py::arg("color"));
 
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
       .def(py::init([]() { return new Optifuser::CameraSpec(); }))
@@ -622,14 +633,31 @@ PYBIND11_MODULE(sapyen, m) {
            py::arg("balanceForce") = false, py::return_value_policy::reference);
 
   py::class_<ActorBuilder>(m, "ActorBuilder")
-      .def("add_box_shape",
-           [](ActorBuilder &a, PxTransform const &pose, py::array_t<float> const &size,
-              PxMaterial *material, PxReal density) {
-             a.addBoxShape(pose, {size.at(0), size.at(1), size.at(2)}, material, density);
-           },
-           py::arg("pose") = PxTransform({0, 0, 0}, {0, 0, 0, 1}),
-           py::arg("size") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr,
-           py::arg("density") = 1000.f)
+      .def(
+          "add_box_shape",
+          [](ActorBuilder &a, PxTransform const &pose, py::array_t<float> const &size,
+             PxMaterial *material, PxReal density) {
+            a.addBoxShape(pose, {size.at(0), size.at(1), size.at(2)}, material, density);
+          },
+          py::arg("pose") = PxTransform({0, 0, 0}, {0, 0, 0, 1}),
+          py::arg("size") = make_array<float>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("density") = 1000.f)
+      .def(
+          "add_obj_visual",
+          [](ActorBuilder &a, const std::string &filename, const PxTransform &pose,
+             const py::array_t<float> &T,
+             const std::string name) { a.addObjVisual(filename, pose, array2vec3(T), name); },
+          py::arg("filename"), py::arg("pose") = PxTransform({{0, 0, 0}, PxIdentity}),
+          py::arg("scale") = std::vector<float>{0, 0, 0}, py::arg("name") = "")
+      .def(
+          "add_multiple_shapes",
+          [](ActorBuilder &a, const std::string &filename, const PxTransform &pose,
+             const py::array_t<float> &T, PxMaterial *material, PxReal density) {
+            a.addMultipleConvexShapesFromObj(filename, pose, array2vec3(T), material, density);
+          },
+          py::arg("filename"), py::arg("pose") = PxTransform({{0, 0, 0}, PxIdentity}),
+          py::arg("scale") = std::vector<float>{0, 0, 0}, py::arg("material") = nullptr,
+          py::arg("density") = 1000.f)
       .def("build", &ActorBuilder::build, py::arg("is_static") = false,
            py::arg("is_kinematic") = false, py::arg("name") = "", py::arg("add_to_scene") = true);
   // .def("add_sphere_shape", &ActorBuilder::addSphereShape)

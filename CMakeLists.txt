@@ -9,12 +9,12 @@ set(CMAKE_BUILD_TYPE "Debug")
 set(OpenGL_GL_PREFERENCE "LEGACY")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  message("-- DEBUG Build")
-  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
-else()
-  message("-- RELEASE Build")
-  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
-endif()
+    message("-- DEBUG Build")
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
+else ()
+    message("-- RELEASE Build")
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
+endif ()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -26,12 +26,12 @@ include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
         "src/renderer")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
-    "3rd_party/optifuser/build/lib")
-else()
-  link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release"
-    "3rd_party/optifuser/build/lib")
-endif()
+    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
+            "3rd_party/optifuser/build/lib")
+else ()
+    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release"
+            "3rd_party/optifuser/build/lib")
+endif ()
 
 include_directories(
         "3rd_party/optifuser/include"
@@ -47,19 +47,19 @@ file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
 
 set(OPTIX_HOME "NOT FOUND" CACHE FILEPATH "Home to OptiX")
 if (EXISTS ${OPTIX_HOME})
-  include_directories("${OPTIX_HOME}/include")
-  link_directories("${OPTIX_HOME}/lib64")
-  set(OPTIX_LIBRARY optix)
-  add_definitions(-D_USE_OPTIX)
-endif()
+    include_directories("${OPTIX_HOME}/include")
+    link_directories("${OPTIX_HOME}/lib64")
+    set(OPTIX_LIBRARY optix)
+    add_definitions(-D_USE_OPTIX)
+endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-  add_definitions(-D_DEBUG)
-   add_definitions(-D_PVD)
-  add_definitions(-DPVD_HOST="192.168.0.110")
-else()
-  add_definitions(-DNDEBUG)
-endif()
+    add_definitions(-D_DEBUG)
+    add_definitions(-D_PVD)
+    add_definitions(-DPVD_HOST="192.168.0.110")
+else ()
+    add_definitions(-DNDEBUG)
+endif ()
 
 add_subdirectory("3rd_party/optifuser")
 add_subdirectory("3rd_party/pybind11")
@@ -72,8 +72,8 @@ add_library(sapien ${PROJECT_SRC})
 add_dependencies(sapien shader)
 
 if (EXISTS ${OPTIX_HOME})
-  add_dependencies(sapien ptx_dir)
-endif()
+    add_dependencies(sapien ptx_dir)
+endif ()
 
 target_link_libraries(sapien -Wl,--start-group
         libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -140,12 +140,14 @@ if (ROS)
         target_link_libraries(movo_ps3 sapien_robot)
         add_executable(gripper_ps3 robot/example/single_gripper_ps3_test.cpp)
         target_link_libraries(gripper_ps3 sapien_robot)
-#        add_executable(movo_keyboard robot/example/movo_keyboard_test.cpp)
-#        target_link_libraries(movo_keyboard sapien_robot)
+        #        add_executable(movo_keyboard robot/example/movo_keyboard_test.cpp)
+        #        target_link_libraries(movo_keyboard sapien_robot)
         pybind11_add_module(sapyen_robot "python/pybind-robot.cpp")
         target_link_libraries(sapyen_robot PRIVATE sapien_robot)
         add_executable(xarm_ps3 robot/example/xarm_ps3_test.cpp)
         target_link_libraries(xarm_ps3 sapien_robot)
+        add_executable(paper_demo robot/example/paper_demo.cpp)
+        target_link_libraries(paper_demo sapien_robot)
 
         set_target_properties(sapien_robot PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
         set_target_properties(sapien_robot PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

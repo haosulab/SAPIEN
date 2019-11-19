@@ -51,20 +51,20 @@ public:
     case BODY: {
       if (input->getKey(BUTTON_UP)) {
         pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * time_step * wheel_velocity;
-        manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
+        manger->moveBase(currentPose.transform({pos, PxQuat(angle, {0, 0, 1})}));
       } else if (input->getKey(BUTTON_DOWN)) {
         pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(1, 0, 0)) * time_step * wheel_velocity;
-        manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
+        manger->moveBase(currentPose.transform({pos, PxQuat(angle, {0, 0, 1})}));
       } else if (input->getKey(BUTTON_LEFT)) {
         pos += PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * time_step * wheel_velocity;
-        manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
+        manger->moveBase(currentPose.transform({pos, PxQuat(angle, {0, 0, 1})}));
       } else if (input->getKey(BUTTON_RIGHT)) {
         pos -= PxQuat(angle, {0, 0, 1}).rotate(PxVec3(0, 1, 0)) * time_step * wheel_velocity;
-        manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
+        manger->moveBase(currentPose.transform({pos, PxQuat(angle, {0, 0, 1})}));
       } else if (input->getAxis(AXIS_LEFT_X)) {
         float dir = input->getAxisValue(AXIS_LEFT_X) > 0 ? -1 : 1;
         angle += time_step * wheel_velocity * dir;
-        manger->moveBase({pos, PxQuat(angle, {0, 0, 1})});
+        manger->moveBase(currentPose.transform({pos, PxQuat(angle, {0, 0, 1})}));
       } else if (input->getKey(BUTTON_TRIANGLE)) {
         head->moveJoint({"tilt_joint"}, -head_velocity);
       } else if (input->getKey(BUTTON_X)) {

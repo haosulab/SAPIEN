@@ -107,6 +107,7 @@ PYBIND11_MODULE(sapyen_robot, m) {
       .def("set_replay_mode", [](PS3RobotControl &a) { a.set_mode(PS3Mode::REPLAY); })
       .def("step", &PS3RobotControl::step)
       .def("start_record", &PS3RobotControl::start_record)
+      .def("record_current_step", &PS3RobotControl::record_single_step)
       .def("apply_cache",
            [](PS3RobotControl &a, const py::array_t<int> &arr) {
              a.set_cache(
