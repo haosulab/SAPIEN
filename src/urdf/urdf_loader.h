@@ -506,15 +506,14 @@ struct Sensor : DomBase {
       exit(1);
     }
     std::string type_string = type_;
-    if (type_string == "") {
+    if (type_string == "camera") {
       type = CAMERA;
     } else if (type_string == "depth") {
       type = DEPTH;
     } else if (type_string == "ray") {
       type = RAY;
     } else {
-      std::cerr << "Unknown sensor type " << type_string << std::endl;
-      exit(1);
+      throw std::runtime_error("Unknown sensor type!");
     }
     auto pose = elem.FirstChildElement("pose");
     origin = std::make_unique<Origin>();
@@ -628,8 +627,8 @@ public:
   bool fixLoadedObject = true;
   bool balancePassiveForce = false;
   float scale = 1.f;
-  URDFLoader(class Simulation &simulation);
-  ArticulationWrapper *load(const std::string &filename, PxMaterial *material= nullptr);
+  explicit URDFLoader(class Simulation &simulation);
+  ArticulationWrapper *load(const std::string &filename, PxMaterial *material = nullptr);
   class KinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class JointSystem *loadJointSystem(const std::string &filename);
 };
