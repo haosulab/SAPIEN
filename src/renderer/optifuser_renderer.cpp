@@ -299,13 +299,17 @@ void OptifuserRenderer::render() {
           if (pathTracer) {
             delete pathTracer;
           }
-          glEnable(GL_FRAMEBUFFER_SRGB_EXT);
           pathTracer = new Optifuser::OptixRenderer();
           pathTracer->init(mContext->getWidth(), mContext->getHeight());
         } else {
-          glDisable(GL_FRAMEBUFFER_SRGB_EXT);
         }
 #endif
+      }
+
+      if (renderMode == PATHTRACER) {
+        glEnable(GL_FRAMEBUFFER_SRGB);
+      } else {
+        glDisable(GL_FRAMEBUFFER_SRGB);
       }
 
       if (ImGui::CollapsingHeader("Main Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
