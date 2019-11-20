@@ -8,6 +8,7 @@
 #include "controller/controller_manger.h"
 #include "controller/velocity_control_service.h"
 #include "device/movo.hpp"
+#include "device/movo_free_base.hpp"
 #include "device/single_gripper.hpp"
 #include "device/xarm6.hpp"
 
@@ -46,8 +47,9 @@ PYBIND11_MODULE(sapyen_robot, m) {
   py::class_<JointVelocityController>(m, "JointVelocityController")
       .def("move_joint", [](JointVelocityController &a, const std::vector<std::string> &jointNames,
                             float velocity) { a.moveJoint(jointNames, velocity); })
-      .def("move_joint", [](JointVelocityController &a, const std::vector<std::string> &jointNames,
-                            const std::vector<float> &velocity) { a.moveJoint(jointNames, velocity); })
+      .def("move_joint",
+           [](JointVelocityController &a, const std::vector<std::string> &jointNames,
+              const std::vector<float> &velocity) { a.moveJoint(jointNames, velocity); })
       .def("move_joint", [](JointVelocityController &a, const std::vector<float> &velocity) {
         a.moveJoint(velocity);
       });
@@ -135,4 +137,14 @@ PYBIND11_MODULE(sapyen_robot, m) {
   py::class_<XArm6PS3, PS3RobotControl>(m, "XArm6PS3")
       .def(py::init<ControllerManger *>())
       .def("step", &XArm6PS3::step);
+
+  py::class_<MOVOFreeBasePS3, PS3RobotControl>(m, "MOVOFreeBasePS3")
+      .def(py::init<ControllerManger *>())
+      .def("get_wheel_velocity", &MOVOFreeBasePS3::get_wheel_velocity)
+      .def("get_head_velocity", &MOVOFreeBasePS3::get_head_velocity)
+      .def("get_body_velocity", &MOVOFreeBasePS3::get_body_velocity)
+      .def("set_wheel_velocity", &MOVOFreeBasePS3::set_wheel_velocity)
+      .def("set_head_velocity", &MOVOFreeBasePS3::set_head_velocity)
+      .def("set_body_velocity", &MOVOFreeBasePS3::set_body_velocity)
+      .def("step", &MOVOFreeBasePS3::step);
 }

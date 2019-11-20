@@ -94,6 +94,7 @@ void ArticulationWrapper::set_drive_property(PxReal stiffness, PxReal damping, P
   }
 
   for (unsigned int i : index) {
+    assert(i < dof());
     auto joint = activeJoints[i];
     joint->setDrive(jointAxises[i], stiffness, damping, forceLimit);
   }
