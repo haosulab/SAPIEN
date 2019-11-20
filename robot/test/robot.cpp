@@ -36,7 +36,6 @@ void test1() {
   sim.setTimestep(1.f / 500.f);
   sim.addGround(0.0);
 
-  auto builder = sim.createActorBuilder();
   auto loader = sim.createURDFLoader();
   loader->balancePassiveForce = true;
   loader->fixLoadedObject = false;
@@ -52,6 +51,11 @@ void test1() {
   std::vector<std::string> wheel_joint = {"summit_xl_back_right_wheel_joint", "summit_xl_back_left_wheel_joint"};
   auto velocity_controller  = manger.createJointVelocityController(wheel_joint, "hhh");
 //       "summit_xl_front_right_wheel_joint", "summit_xl_front_left_wheel_joint"},
+
+  auto builder = sim.createActorBuilder();
+  builder->addMultipleConvexShapesFromObj("/home/sim/mobility_dataset/hotdog.obj");
+  builder->addObjVisual("/home/sim/mobility_dataset/hotdog.obj");
+  builder->build();
 
 
   //   ROS

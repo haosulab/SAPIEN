@@ -9,6 +9,7 @@ MountedCamera::MountedCamera(std::string const &name_, uint32_t width, uint32_t 
     : mWidth(width), mHeight(height), mScene(scene) {
   name = name_;
   fovy = fovy_;
+  aspect = static_cast<float>(width) / height;
   position = glm::vec3(0, 0, 0);
   rotation = glm::quat(1, 0, 0, 0);
 

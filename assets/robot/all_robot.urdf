@@ -52,12 +52,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <mesh filename="movo_description/meshes/movo_components/collision/vector_base_collision.stl"/>
       </geometry>
     </collision>
-<!--    <visual>-->
-<!--      <origin rpy="0 0 0" xyz="0 0 0"/>-->
-<!--      <geometry>-->
-<!--        <mesh filename="movo_description/meshes/movo_components/visual/vector_base.dae"/>-->
-<!--      </geometry>-->
-<!--    </visual>-->
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <mesh filename="movo_description/meshes/movo_components/visual/vector_base.dae"/>
+      </geometry>
+    </visual>
   </link>
   <gazebo reference="base_chassis_link">
     <mu1>0.0</mu1>

@@ -12,10 +12,8 @@
   <gazebo>
     <plugin filename="libgazebo_ros_control.so" name="gazebo_ros_control">
       <robotNamespace>/xarm</robotNamespace>
-      <!-- <controlPeriod>0.0001</controlPeriod> -->
       <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
       <legacyModeNS>true</legacyModeNS>
-      <!-- <preserveWorldVelocity>true</preserveWorldVelocity> -->
     </plugin>
   </gazebo>
   <link name="base_link"/>
@@ -305,8 +303,6 @@
   <gazebo reference="link6">
     <selfCollide>true</selfCollide>
   </gazebo>
-  <!-- gazebo plugin -->
-  <!-- <xacro:gazebo_ros_control_plugin namespace="${ns}"/> -->
   <joint name="gripper_fix" type="fixed">
     <parent link="link6"/>
     <child link="xarm_gripper_link_base"/>
@@ -323,11 +319,6 @@
       <geometry>
         <mesh filename="xarm_gripper/meshes/base_link.STL"/>
       </geometry>
-      <!-- <material
-        name="">
-        <color
-          rgba="0.89804 0.91765 0.92941 1" />
-      </material> -->
       <material name="White">
         <color rgba="1.0 1.0 1.0 1.0"/>
       </material>
@@ -494,36 +485,5 @@
     <limit effort="50" lower="0" upper="0.85" velocity="2"/>
     <mimic joint="drive_joint" multiplier="1" offset="0"/>
   </joint>
-  <transmission name="drive_joint_trans">
-    <type>transmission_interface/SimpleTransmission</type>
-    <joint name="drive_joint">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-    </joint>
-    <actuator name="drive_joint_motor">
-      <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-      <mechanicalReduction>1</mechanicalReduction>
-    </actuator>
-  </transmission>
-  <gazebo reference="xarm_gripper_link_base">
-    <selfCollide>true</selfCollide>
-  </gazebo>
-  <gazebo reference="left_outer_knuckle">
-    <selfCollide>true</selfCollide>
-  </gazebo>
-  <gazebo reference="left_finger">
-    <selfCollide>true</selfCollide>
-  </gazebo>
-  <gazebo reference="left_inner_knuckle">
-    <selfCollide>true</selfCollide>
-  </gazebo>
-  <gazebo reference="right_outer_knuckle">
-    <selfCollide>true</selfCollide>
-  </gazebo>
-  <gazebo reference="right_finger">
-    <selfCollide>true</selfCollide>
-  </gazebo>
-  <gazebo reference="right_inner_knuckle">
-    <selfCollide>true</selfCollide>
-  </gazebo>
 </robot>
 

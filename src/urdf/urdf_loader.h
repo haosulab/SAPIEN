@@ -135,8 +135,8 @@ template <> inline int DomBase::_read_attr<int>(const std::string &str) {
 
 namespace SRDF {
 
-struct DisableCollision : DomBase {
-  DECLARE_CONSTRUCTOR(DisableCollision)
+struct DisableCollisions : DomBase {
+  DECLARE_CONSTRUCTOR(DisableCollisions)
 
   DECLARE_ATTR(std::string, link1)
   DECLARE_ATTR(std::string, link2)
@@ -152,10 +152,10 @@ struct DisableCollision : DomBase {
 struct Robot : DomBase {
   DECLARE_CONSTRUCTOR(Robot)
 
-  DECLARE_CHILD(DisableCollision, disable_collision);
+  DECLARE_CHILD(DisableCollisions, disable_collisions);
 
   LOAD_CHILD_BEGIN()
-  LOAD_CHILD(DisableCollision, disable_collision);
+  LOAD_CHILD(DisableCollisions, disable_collisions);
   LOAD_CHILD_END()
 };
 

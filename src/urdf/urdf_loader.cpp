@@ -312,7 +312,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
     }
     if (shouldComputeInertia) {
       // TODO: check density
-      PxRigidBodyExt::updateMassAndInertia(currentPxLink, 100);
+      PxRigidBodyExt::updateMassAndInertia(currentPxLink, 1000);
     }
 
     // joint
@@ -379,7 +379,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
   }
   // collision
   if (srdf) {
-    for (auto &dc : srdf->disable_collision_array) {
+    for (auto &dc : srdf->disable_collisions_array) {
       if (dc->reason == std::string("default")) {
         if (linkName2treeNode.find(dc->link1) == linkName2treeNode.end()) {
           throw std::runtime_error("SRDF link name not found: " + dc->link1);
