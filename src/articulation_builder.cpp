@@ -227,6 +227,11 @@ physx_id_t ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
   return newId;
 }
 
+//======== Collision funcions =======//
+void ArticulationBuilder::disableCollision(PxArticulationLink &link1, PxArticulationLink &link2) {
+  disableCollisionPair.push_back({&link1, &link2});
+}
+
 ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce) {
   mArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, fixBase);
   auto wrapper = std::make_unique<ArticulationWrapper>();
@@ -251,39 +256,71 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
   std::sort(links.begin(), links.end(),
             [](const auto &a, const auto &b) { return a->getLinkIndex() < b->getLinkIndex(); });
 
-  // ignore collision between parent and child
-  for (size_t i = 0; i < nLinks; ++i) {
-    if (PxArticulationJointBase *joint = links[i]->getInboundJoint()) {
-      PxArticulationLink &parentLink = joint->getParentArticulationLink();
-      PxArticulationLink &currentLink = *links[i];
+  // disable collision
+  for (auto &cp : disableCollisionPair) {
+    PxArticulationLink *l1 = cp[0];
+    PxArticulationLink *l2 = cp[1];
+    int n1 = l1->getNbShapes();
+    int n2 = l2->getNbShapes();
 
-      int n1 = currentLink.getNbShapes();
-      int n2 = parentLink.getNbShapes();
+    // no shape to collide
+    if (n1 == 0 || n2 == 0) {
+      continue;
+    }
 
-      // no collision shape
-      if (n1 == 0 || n2 == 0) {
-        continue;
-      }
+    // TODO: decide inclusive or exclusive
+    int colGroup = mSimulation->collisionManager.NewExclusiveGroup();
 
-      int colGroup = mSimulation->collisionManager.NewExclusiveGroup();
+    std::vector<PxShape *> buf1(n1);
+    l1->getShapes(buf1.data(), n1);
+    for (int i = 0; i < n1; ++i) {
+      PxFilterData data = buf1[i]->getSimulationFilterData();
+      CollisionGroupManager::addGroupToData(data, colGroup);
+      buf1[i]->setSimulationFilterData(data);
+    }
 
-      PxShape *buf1[n1];
-      currentLink.getShapes(buf1, n1);
-      for (int i = 0; i < n1; ++i) {
-        PxFilterData data = buf1[i]->getSimulationFilterData();
-        CollisionGroupManager::addGroupToData(data, colGroup);
-        buf1[i]->setSimulationFilterData(data);
-      }
-
-      PxShape *buf2[n2];
-      parentLink.getShapes(buf2, n2);
-      for (int i = 0; i < n2; ++i) {
-        PxFilterData data = buf2[i]->getSimulationFilterData();
-        CollisionGroupManager::addGroupToData(data, colGroup);
-        buf2[i]->setSimulationFilterData(data);
-      }
+    std::vector<PxShape *> buf2(n2);
+    l2->getShapes(buf2.data(), n2);
+    for (int i = 0; i < n2; ++i) {
+      PxFilterData data = buf2[i]->getSimulationFilterData();
+      CollisionGroupManager::addGroupToData(data, colGroup);
+      buf2[i]->setSimulationFilterData(data);
     }
   }
+
+
+  // for (size_t i = 0; i < nLinks; ++i) {
+  //   if (PxArticulationJointBase *joint = links[i]->getInboundJoint()) {
+  //     PxArticulationLink &parentLink = joint->getParentArticulationLink();
+  //     PxArticulationLink &currentLink = *links[i];
+
+  //     int n1 = currentLink.getNbShapes();
+  //     int n2 = parentLink.getNbShapes();
+
+  //     // no collision shape
+  //     if (n1 == 0 || n2 == 0) {
+  //       continue;
+  //     }
+
+  //     int colGroup = mSimulation->collisionManager.NewExclusiveGroup();
+
+  //     PxShape *buf1[n1];
+  //     currentLink.getShapes(buf1, n1);
+  //     for (int i = 0; i < n1; ++i) {
+  //       PxFilterData data = buf1[i]->getSimulationFilterData();
+  //       CollisionGroupManager::addGroupToData(data, colGroup);
+  //       buf1[i]->setSimulationFilterData(data);
+  //     }
+
+  //     PxShape *buf2[n2];
+  //     parentLink.getShapes(buf2, n2);
+  //     for (int i = 0; i < n2; ++i) {
+  //       PxFilterData data = buf2[i]->getSimulationFilterData();
+  //       CollisionGroupManager::addGroupToData(data, colGroup);
+  //       buf2[i]->setSimulationFilterData(data);
+  //     }
+  //   }
+  // }
 
   uint32_t jointIdx = 0;
   std::vector<int> jointIndices;

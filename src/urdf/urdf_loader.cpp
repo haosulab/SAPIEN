@@ -54,6 +54,14 @@ static std::string getAbsPath(const std::string &urdfPath, const std::string &fi
   return fs::absolute(path).remove_filename().string() + filePath;
 }
 
+std::optional<std::string> findSRDF(const std::string &urdfName) {
+  std::string srdfName = urdfName.substr(0, urdfName.length() - 4) + "srdf";
+  if (fs::is_regular_file(srdfName)) {
+    return srdfName;
+  }
+  return {};
+}
+
 URDFLoader::URDFLoader(Simulation &simulation) : mSimulation(simulation) {}
 
 struct LinkTreeNode {
@@ -63,7 +71,30 @@ struct LinkTreeNode {
   std::vector<LinkTreeNode *> children;
 };
 
+std::unique_ptr<SRDF::Robot> URDFLoader::loadSRDF(const std::string &filename) {
+  XMLDocument doc;
+  if (doc.LoadFile(filename.c_str())) {
+    std::cerr << "Error loading " << filename << std::endl;
+    return nullptr;
+  }
+  XMLPrinter printer;
+  if (strcmp("robot", doc.RootElement()->Name()) == 0) {
+    return std::make_unique<SRDF::Robot>(*doc.RootElement());
+  } else {
+    throw std::runtime_error("SRDF root is not <robot/> in " + filename);
+  }
+}
+
 ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *material) {
+  if (filename.substr(filename.length() - 4) != std::string("urdf")) {
+    throw std::invalid_argument("None URDF file passed to URDF loader");
+  }
+  auto srdfName = findSRDF(filename);
+  std::unique_ptr<SRDF::Robot> srdf = srdfName ? loadSRDF(srdfName.value()) : nullptr;
+  if (srdf) {
+    std::cout << "SRDF found " << srdfName.value() << std::endl;
+  }
+
   if (scale <= 0.f) {
     throw std::runtime_error("Invalid URDF scale, valid scale should >= 0");
   }
@@ -155,7 +186,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
     }
   }
 
-  std::map<LinkTreeNode *, physx::PxArticulationLink *> treeNode2pLink;
+  std::map<LinkTreeNode *, physx::PxArticulationLink *> treeNode2pxLink;
   ArticulationBuilder builder(&mSimulation);
   stack = {root};
   while (!stack.empty()) {
@@ -164,13 +195,14 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
 
     const PxTransform tJoint2Parent =
         current->joint ? poseFromOrigin(*current->joint->origin, scale) : PxTransform(PxIdentity);
-
+    
+    std::cout << "registering " << current->link->name << std::endl;
     // create link and set its parent
-    treeNode2pLink[current] =
-        builder.addLink(current->parent ? treeNode2pLink[current->parent] : nullptr, tJoint2Parent,
+    treeNode2pxLink[current] =
+        builder.addLink(current->parent ? treeNode2pxLink[current->parent] : nullptr, tJoint2Parent,
                         current->link->name, current->joint ? current->joint->name : "");
 
-    PxArticulationLink &currentPxLink = *treeNode2pLink[current];
+    PxArticulationLink &currentPxLink = *treeNode2pxLink[current];
 
     bool shouldComputeInertia = false;
     // inertial
@@ -343,6 +375,24 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
       stack.push_back(c);
     }
   }
+  // collision
+  if (srdf) {
+    for (auto &dc : srdf->disable_collision_array) {
+      if (dc->reason == std::string("default")) {
+        if (linkName2treeNode.find(dc->link1) == linkName2treeNode.end()) {
+          throw std::runtime_error("SRDF link name not found: " + dc->link1);
+        }
+        if (linkName2treeNode.find(dc->link2) == linkName2treeNode.end()) {
+          throw std::runtime_error("SRDF link name not found: " + dc->link2);
+        }
+        auto l1 = linkName2treeNode[dc->link1];
+        auto l2 = linkName2treeNode[dc->link2];
+        auto link1 = treeNode2pxLink[l1];
+        auto link2 = treeNode2pxLink[l2];
+        builder.disableCollision(*link1, *link2);
+      }
+    }
+  }
 
   ArticulationWrapper *wrapper = builder.build(fixLoadedObject, balancePassiveForce);
 
@@ -368,9 +418,10 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
           continue;
         }
 
-        mSimulation.addMountedCamera(sensor->name, links[idx], poseFromOrigin(*sensor->origin, scale),
-                                     sensor->camera->width, sensor->camera->height,
-                                     sensor->camera->fovx, sensor->camera->fovy);
+        mSimulation.addMountedCamera(sensor->name, links[idx],
+                                     poseFromOrigin(*sensor->origin, scale), sensor->camera->width,
+                                     sensor->camera->height, sensor->camera->fovx,
+                                     sensor->camera->fovy);
       }
     }
   }

@@ -132,125 +132,131 @@ void test3() {
 
   auto loader = URDF::URDFLoader(sim);
   loader.fixLoadedObject = false;
-  // auto obj1 = loader.loadKinematic(
-  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/102044/mobility.urdf");
-  // obj1->articulation->teleportRootLink({1.221, 1.244, 0.614}, true);
 
-  loader.scale = 0.5;
-  auto obj2 = loader.load(
-      "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/102611/mobility.urdf");
-  obj2->articulation->teleportRootLink({0.900, -0.954, 0.622}, true);
+  auto obj = loader.load("../assets/179/mobility.urdf");
+  obj->articulation->teleportRootLink({0, 0, 1}, true);
 
-  // loader.scale = 0.8;
-  // auto obj3 = loader.load(
-  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/12065/mobility.urdf");
-  // obj3->articulation->teleportRootLink({1.12, 0.109, 0.582}, true);
+      // auto obj1 = loader.loadKinematic(
+      //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/102044/mobility.urdf");
+      // obj1->articulation->teleportRootLink({1.221, 1.244, 0.614}, true);
 
-  // loader.scale = 1;
-  // auto obj4 = loader.load(
-  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/23511/mobility.urdf");
-  // obj4->articulation->teleportRootLink({{-2.246, -3.518, 0.910}, PxQuat(3.14159, {0, 0, 1})}, true);
+      // loader.scale = 0.5;
+      // auto obj2 = loader.load(
+      //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/102611/mobility.urdf");
+      // obj2->articulation->teleportRootLink({0.900, -0.954, 0.622}, true);
 
-  // loader.scale = 1;
-  // auto obj5 = loader.load(
-  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/45594/mobility.urdf");
-  // obj5->articulation->teleportRootLink({1.271, 2.393, 0.946}, true);
+      // loader.scale = 0.8;
+      // auto obj3 = loader.load(
+      //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/12065/mobility.urdf");
+      // obj3->articulation->teleportRootLink({1.12, 0.109, 0.582}, true);
 
-  // loader.scale = 1;
-  // auto obj6 = loader.load(
-  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/46037/mobility.urdf");
-  // obj6->articulation->teleportRootLink({{0.597, -3.789, 0.774}, PxQuat(-1.5708, {0, 0, 1})}, true);
+      // loader.scale = 1;
+      // auto obj4 = loader.load(
+      //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/23511/mobility.urdf");
+      // obj4->articulation->teleportRootLink({{-2.246, -3.518, 0.910}, PxQuat(3.14159, {0, 0,
+      // 1})}, true);
 
-  // loader.scale = 0.4;
-  // auto obj7 = loader.load(
-  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/7310/mobility.urdf");
-  // obj7->articulation->teleportRootLink({{1.195, 0.847, 1.259}, PxQuat(-0.1, {0, 0, 1})}, true);
+      // loader.scale = 1;
+      // auto obj5 = loader.load(
+      //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/45594/mobility.urdf");
+      // obj5->articulation->teleportRootLink({1.271, 2.393, 0.946}, true);
 
-  // loader.scale = 1.5;
-  // auto obj8 = loader.load(
-  //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/8867/mobility.urdf");
-  // obj8->articulation->teleportRootLink({-3.127, 2.281, 1.481}, true);
+      // loader.scale = 1;
+      // auto obj6 = loader.load(
+      //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/46037/mobility.urdf");
+      // obj6->articulation->teleportRootLink({{0.597, -3.789, 0.774}, PxQuat(-1.5708, {0, 0, 1})},
+      // true);
 
+      // loader.scale = 0.4;
+      // auto obj7 = loader.load(
+      //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/7310/mobility.urdf");
+      // obj7->articulation->teleportRootLink({{1.195, 0.847, 1.259}, PxQuat(-0.1, {0, 0, 1})},
+      // true);
 
-  // std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
-  // std::string line;
-  // while (std::getline(s, line)) {
-  //   if (line.length() == 0 || line[0] == ' ')
-  //     continue;
-  //   std::istringstream is(line);
-  //   std::string name;
-  //   std::vector<float> mat(16);
-  //   is >> name;
-  //   std::cout << name << std::endl;
-  //   is >> mat[0] >> mat[4] >> mat[8] >> mat[12] >> mat[1] >> mat[5] >> mat[9] >> mat[13] >>
-  //       mat[2] >> mat[6] >> mat[10] >> mat[14] >> mat[3] >> mat[7] >> mat[11] >> mat[15];
-  //   size_t idx = std::find(names.begin(), names.end(), name) - names.begin();
-  //   std::cout << idx << std::endl;
-  //   if (idx < names.size()) {
-  //     renderer.setSegmentationCustomData(linkIds[idx], mat);
-  //   }
-  // }
+      // loader.scale = 1.5;
+      // auto obj8 = loader.load(
+      //     "/home/fx/source/partnet-mobility-scripts/mobility_v1_alpha5/8867/mobility.urdf");
+      // obj8->articulation->teleportRootLink({-3.127, 2.281, 1.481}, true);
 
-  // for (auto n : names) {
-  //   std::cout  <<  n << " ";
-  // }
-  // std::cout << std::endl;
+      // std::ifstream s("/home/fx/source/partnet-mobility-scripts/46627/nocs.txt");
+      // std::string line;
+      // while (std::getline(s, line)) {
+      //   if (line.length() == 0 || line[0] == ' ')
+      //     continue;
+      //   std::istringstream is(line);
+      //   std::string name;
+      //   std::vector<float> mat(16);
+      //   is >> name;
+      //   std::cout << name << std::endl;
+      //   is >> mat[0] >> mat[4] >> mat[8] >> mat[12] >> mat[1] >> mat[5] >> mat[9] >> mat[13] >>
+      //       mat[2] >> mat[6] >> mat[10] >> mat[14] >> mat[3] >> mat[7] >> mat[11] >> mat[15];
+      //   size_t idx = std::find(names.begin(), names.end(), name) - names.begin();
+      //   std::cout << idx << std::endl;
+      //   if (idx < names.size()) {
+      //     renderer.setSegmentationCustomData(linkIds[idx], mat);
+      //   }
+      // }
 
-  // int row = 2;
-  // for (int i = 0; i < 4; ++i) {
-  //   int x = i / row * 2;
-  //   int y = i % row * 2;
-  // auto articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
-  // articulationWrapper->articulation->teleportRootLink({{-1,0,-.5}, PxIdentity}, true);
-  //   auto articulation = articulationWrapper->articulation;
-  //   articulation->teleportRootLink({{(float)x, (float)y, 0}, PxQuat(rand_float()*3, {0, 0,
-  //   1})}, true); articulationWrapper->updateCache();
-  // }
+      // for (auto n : names) {
+      //   std::cout  <<  n << " ";
+      // }
+      // std::cout << std::endl;
 
-  // auto chair = loader.load("../assets/179/test.urdf");
-  // chair->articulation->teleportRootLink({{1,0,0}, PxIdentity}, true);
+      // int row = 2;
+      // for (int i = 0; i < 4; ++i) {
+      //   int x = i / row * 2;
+      //   int y = i % row * 2;
+      // auto articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+      // articulationWrapper->articulation->teleportRootLink({{-1,0,-.5}, PxIdentity}, true);
+      //   auto articulation = articulationWrapper->articulation;
+      //   articulation->teleportRootLink({{(float)x, (float)y, 0}, PxQuat(rand_float()*3, {0, 0,
+      //   1})}, true); articulationWrapper->updateCache();
+      // }
 
-  // auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
+      // auto chair = loader.load("../assets/179/test.urdf");
+      // chair->articulation->teleportRootLink({{1,0,0}, PxIdentity}, true);
 
-  // auto *articulation = articulationWrapper->articulation;
-  // auto *cache = articulationWrapper->cache;
+      // auto *articulationWrapper = loader.load("../assets/robot/all_robot.urdf");
 
-  // sim.addGround(-1);
+      // auto *articulation = articulationWrapper->articulation;
+      // auto *cache = articulationWrapper->cache;
 
-  // reset(articulationWrapper);
-  // articulationWrapper->set_qpos({0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+      // sim.addGround(-1);
 
-  // PxArticulationLink *chairLink;
-  // chair->articulation->getLinks(&chairLink, 1);
+      // reset(articulationWrapper);
+      // articulationWrapper->set_qpos({0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
 
-  // auto actorBuider = sim.createActorBuilder();
-  // auto actor = actorBuider->build(false, true, "Camera Mount");
-  // sim.addMountedCamera("Floating Camera", actor, {{0, 0, 0}, PxIdentity}, 256, 256, 0.9,
-  // 0.9); actor->setGlobalPose({{-10, 0, 1}, {0, 0, 0, 1}}); actor->setGlobalPose({{-2, 0, 2},
-  // {0, 0.3826834, 0, 0.9238795}});
+      // PxArticulationLink *chairLink;
+      // chair->articulation->getLinks(&chairLink, 1);
 
-  // auto names = wrapper->get_link_names();
+      // auto actorBuider = sim.createActorBuilder();
+      // auto actor = actorBuider->build(false, true, "Camera Mount");
+      // sim.addMountedCamera("Floating Camera", actor, {{0, 0, 0}, PxIdentity}, 256, 256, 0.9,
+      // 0.9); actor->setGlobalPose({{-10, 0, 1}, {0, 0, 0, 1}}); actor->setGlobalPose({{-2, 0, 2},
+      // {0, 0.3826834, 0, 0.9238795}});
 
-  // std::vector<float> ps(wrapper->dof());
-  // physx::PxVec3 vec = {1, 0, 0};
-  // wrapper->set_qpos(ps);
-  // auto pose = wrapper->get_link_joint_pose(1);
-  // physx::PxVec3 newvec = pose.rotate(vec);
-  // std::cout << names[1] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+      // auto names = wrapper->get_link_names();
 
-  // pose = wrapper->get_link_joint_pose(2);
-  // newvec = pose.rotate(vec);
-  // std::cout << names[2] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+      // std::vector<float> ps(wrapper->dof());
+      // physx::PxVec3 vec = {1, 0, 0};
+      // wrapper->set_qpos(ps);
+      // auto pose = wrapper->get_link_joint_pose(1);
+      // physx::PxVec3 newvec = pose.rotate(vec);
+      // std::cout << names[1] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
 
-  // pose = wrapper->get_link_joint_pose(3);
-  // newvec = pose.rotate(vec);
-  // std::cout << names[3] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+      // pose = wrapper->get_link_joint_pose(2);
+      // newvec = pose.rotate(vec);
+      // std::cout << names[2] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
 
-  // pose = wrapper->get_link_joint_pose(4);
-  // newvec = pose.rotate(vec);
-  // std::cout << names[4] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+      // pose = wrapper->get_link_joint_pose(3);
+      // newvec = pose.rotate(vec);
+      // std::cout << names[3] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
 
-  printf("Simulation start\n");
+      // pose = wrapper->get_link_joint_pose(4);
+      // newvec = pose.rotate(vec);
+      // std::cout << names[4] << newvec.x << " " << newvec.y << " " << newvec.z << std::endl;
+
+      printf("Simulation start\n");
   while (true) {
     // articulation->commonInit();
     // for (uint32_t i = 0; i < 13; ++i) {

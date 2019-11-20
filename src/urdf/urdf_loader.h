@@ -11,6 +11,7 @@
 
 namespace sapien {
 struct ArticulationWrapper;
+
 namespace URDF {
 
 using namespace tinyxml2;
@@ -131,6 +132,34 @@ template <> inline physx::PxReal DomBase::_read_attr<physx::PxReal>(const std::s
 template <> inline int DomBase::_read_attr<int>(const std::string &str) {
   return std::atoi(str.c_str());
 }
+
+namespace SRDF {
+
+struct DisableCollision : DomBase {
+  DECLARE_CONSTRUCTOR(DisableCollision)
+
+  DECLARE_ATTR(std::string, link1)
+  DECLARE_ATTR(std::string, link2)
+  DECLARE_ATTR(std::string, reason)
+
+  LOAD_ATTR_BEGIN()
+  LOAD_ATTR(std::string, link1)
+  LOAD_ATTR(std::string, link2)
+  LOAD_ATTR(std::string, reason)
+  LOAD_ATTR_END()
+};
+
+struct Robot : DomBase {
+  DECLARE_CONSTRUCTOR(Robot)
+
+  DECLARE_CHILD(DisableCollision, disable_collision);
+
+  LOAD_CHILD_BEGIN()
+  LOAD_CHILD(DisableCollision, disable_collision);
+  LOAD_CHILD_END()
+};
+
+}; // namespace SRDF
 
 struct Origin : DomBase {
   DECLARE_CONSTRUCTOR(Origin)
@@ -631,8 +660,10 @@ public:
   ArticulationWrapper *load(const std::string &filename, PxMaterial *material = nullptr);
   class KinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class JointSystem *loadJointSystem(const std::string &filename);
+
+private:
+  std::unique_ptr<SRDF::Robot> loadSRDF(const std::string &filename);
 };
 
 } // namespace URDF
-
 } // namespace sapien

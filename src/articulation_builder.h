@@ -25,9 +25,10 @@ class ArticulationBuilder {
   std::map<std::string, PxArticulationLink *> mNamedLinks;
   std::map<PxArticulationLink *, std::string> mLink2JointName;
   std::map<PxArticulationLink *, physx_id_t> mLink2LinkId;
-
   std::map<std::string, std::vector<physx_id_t>> mVisualName2RenderId;
   std::map<PxArticulationLink *, std::vector<physx_id_t>> mLink2RenderId;
+
+  std::vector<std::array<PxArticulationLink*, 2>> disableCollisionPair;
 
 public:
   ArticulationBuilder(ArticulationBuilder const &other) = delete;
@@ -96,6 +97,8 @@ public:
   physx_id_t addObjVisualToLink(PxArticulationLink &link, const std::string &filename,
                                 const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                                 const PxVec3 &scale = {1, 1, 1}, const std::string &name = "");
+
+  void disableCollision(PxArticulationLink &link1, PxArticulationLink &link2);
 
   ArticulationWrapper *build(bool fixBase = true, bool balanceForce = false);
 };
