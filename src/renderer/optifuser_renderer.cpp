@@ -50,7 +50,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   case physx::PxGeometryType::eBOX: {
     auto obj = Optifuser::NewFlatCube();
     obj->scale = {scale.x, scale.y, scale.z};
-    obj->material.kd = {color.x, color.y, color.z};
+    obj->material.kd = {color.x, color.y, color.z, 1};
     obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
@@ -59,7 +59,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   case physx::PxGeometryType::eSPHERE: {
     auto obj = Optifuser::NewSphere();
     obj->scale = {scale.x, scale.y, scale.z};
-    obj->material.kd = {color.x, color.y, color.z};
+    obj->material.kd = {color.x, color.y, color.z, 1};
     obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
@@ -68,7 +68,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   case physx::PxGeometryType::ePLANE: {
     auto obj = Optifuser::NewYZPlane();
     obj->scale = {scale.x, scale.y, scale.z};
-    obj->material.kd = {color.x, color.y, color.z};
+    obj->material.kd = {color.x, color.y, color.z, 1};
     obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));
@@ -77,7 +77,7 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   case physx::PxGeometryType::eCAPSULE: {
     auto obj = Optifuser::NewCapsule(scale.x, scale.y);
     obj->scale = {1, 1, 1};
-    obj->material.kd = {color.x, color.y, color.z};
+    obj->material.kd = {color.x, color.y, color.z, 1};
     obj->setObjId(uniqueId);
     mObjectRegistry[uniqueId] = {obj.get()};
     mScene->addObject(std::move(obj));

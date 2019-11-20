@@ -1,7 +1,7 @@
 #version 450
 
 uniform struct Material {
-  vec3 kd;
+  vec4 kd;
   vec3 ks;
   vec3 ka;
   float ke;
@@ -41,7 +41,7 @@ void main() {
       discard;
     }
   } else {
-    GCOLOR = vec4(material.kd, 1);
+    GCOLOR = vec4(material.kd.rgb, 1);
   }
   if (material.has_ks_map) {
     GSPECULAR = texture(material.ks_map, texcoord);
