@@ -122,7 +122,7 @@ class XArmOpenDoorEnv(XArmEnv, SapienSingleObjectEnv):
         robot_target_pose.set_p(target_position)
         self.set_robot_base_pose(robot_target_pose)
         self.object.set_qpos(np.ones(self.object.dof()) * 0.01)
-        self.sim.step()
+        self.sim._step()
 
         # Add offset for XArm
         gripper_target = self.robot_global_pose.inv().transform(gripper_pose)

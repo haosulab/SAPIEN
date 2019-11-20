@@ -61,12 +61,12 @@ class BaseEnv:
             self._step = self.__step
             self.renderer.show_window()
         else:
-            self._step = lambda: self.sim.step()
+            self._step = self.__headless_step
 
         # Simulation
         self.sim = sapyen.Simulation()
         self.sim.set_renderer(self.renderer)
-        self.simulation_hz = 200
+        self.simulation_hz = 240
         self.sim.set_time_step(1 / self.simulation_hz)
 
         # Articulation loader for both robot and object, articulation builder for simple object without joint
@@ -91,6 +91,21 @@ class BaseEnv:
         self.sim.step()
         self.sim.update_renderer()
         self.renderer.render()
+        self.after_step()
+
+    def __headless_step(self):
+        """
+        Headless step without on screen rendering
+        """
+        self.sim.step()
+        self.sim.update_renderer()
+        self.after_step()
+
+    def after_step(self):
+        """
+        By default, this function is empty, you can overload this function to add custom step, e.g. video recording
+        """
+        pass
 
     def obj_id2name(self, obj_id: int) -> str:
         return self.sim.get_render_name_dict()[obj_id]

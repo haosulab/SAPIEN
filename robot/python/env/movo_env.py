@@ -33,7 +33,7 @@ class MOVOEnv(BaseRobotEnv):
         self.root_theta = 0
         self.root_pos = np.array([0, 0], dtype=np.float)
         self.robot.set_root_pose([-1, 2, 0.06])
-        self.init_qpos = [0.25, -1.381, 0, 0.05, 0.9512, 0.387, 0.608, 2.486, 1.05, -1.16, 0, 0, 0]
+        self.init_qpos = [0.25, -1.381, 0, 0.05, -0.9512, 0.387, 0.608, 2.486, 1.05, -1.16, 0, 0, 0]
 
         # Tune PD controller
         self.robot.set_pd(20000, 3000, 2000, np.arange(1))

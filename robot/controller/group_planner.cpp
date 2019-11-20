@@ -8,7 +8,8 @@ namespace sapien::robot {
 
 MoveGroupPlanner::MoveGroupPlanner(const std::string &groupName, GroupControllerNode *controller,
                                    ros::NodeHandle *handle)
-    : nh(handle), controller(controller), moveGroup(groupName) {}
+    : nh(handle), controller(controller),
+      moveGroup(groupName, std::shared_ptr<tf2_ros::Buffer>(), ros::WallDuration(3)) {}
 bool MoveGroupPlanner::go(const physx::PxTransform &pose, const std::string &frame) {
   std::cout << "Receive cartesian go command!" << std::endl;
   geometry_msgs::PoseStamped target_pose;

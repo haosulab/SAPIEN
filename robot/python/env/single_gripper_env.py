@@ -56,10 +56,10 @@ class SingleGripperBaseEnv(BaseRobotEnv):
         self._rotation_joint = ["r_rotation_joint", "p_rotation_joint",
                                 "y_rotation_joint"]
         self.manger.add_joint_state_publisher(100)
-        self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "gripper")
+        self.gripper_controller = self.manger.create_joint_velocity_controller(self._gripper_joint, "right_gripper")
         self.translation_controller = self.manger.create_joint_velocity_controller(self._translation_joint,
-                                                                                   "translation")
-        self.rotation_controller = self.manger.create_joint_velocity_controller(self._rotation_joint, "rotation")
+                                                                                   "root_translation")
+        self.rotation_controller = self.manger.create_joint_velocity_controller(self._rotation_joint, "root_rotation")
         self._translation_velocity = 0.25
         self._rotation_velocity = 0.7
 

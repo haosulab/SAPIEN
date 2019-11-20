@@ -1,4 +1,6 @@
 from .single_gripper_env import SingleGripperBaseEnv
+import os
+from PIL import Image
 from .base_env import SapienSingleObjectEnv
 from .physx_utils import mat2transform, transform2mat
 import numpy as np
@@ -12,14 +14,24 @@ class SingleGripperOpenDoorEnv(SingleGripperBaseEnv, SapienSingleObjectEnv):
     def __init__(self, valid_id: int, on_screening_rendering: bool):
         SapienSingleObjectEnv.__init__(self, PARTNET_DIR, DOOR_WITH_HANDLE_LIST[valid_id],
                                        on_screening_rendering)
+        # Video
+        index = DOOR_WITH_HANDLE_LIST[valid_id]
+        self.left_name = f"data/{index}_left"
+        self.right_name = f"data/{index}_right"
+        os.makedirs(self.left_name, exist_ok=True)
+        os.makedirs(self.right_name, exist_ok=True)
+
+        # Init robot
         self._init_robot()
         self.object.set_pd(0, 2)
         self._continuous = False
         self.sim.step()
 
+        self.step_num = 0
+
         # Get a magic force opposite to the direction of door opening
         self.target_link_index = self.object_link_semantics.index("rotation_door")
-        self.__close_object_qf = -0.00 * np.ones(self.object.dof())
+        # self.__close_object_qf = -0.00 * np.ones(self.object.dof())
 
         self.__init_arena_camera()
         self._step()
@@ -33,19 +45,28 @@ class SingleGripperOpenDoorEnv(SingleGripperBaseEnv, SapienSingleObjectEnv):
         self.gripper_target = gripper_target
         self.object.set_qvel(np.zeros(self.object.dof()))
 
-    def step(self):
-        self.object.set_qf(self.__close_object_qf)
-        self._step()
+    def after_step(self):
+        if self.step_num % 60 == 0:
+            self.take_photo(self.step_num // 60)
+        self.step_num += 1
+
+    def take_photo(self, num: int):
+        self.cam_list[1].take_picture()
+        Image.fromarray((self.cam_list[1].get_color_rgba()[:, :, :3] * 255).astype(np.uint8)).save(
+            os.path.join(self.left_name, f"{num:05}.png"))
+        self.cam_list[2].take_picture()
+        Image.fromarray((self.cam_list[1].get_color_rgba()[:, :, :3] * 255).astype(np.uint8)).save(
+            os.path.join(self.right_name, f"{num:05}.png"))
 
     def hold_and_step(self):
         self.force_gripper()
-        self.step()
+        self._step()
 
     def __init_arena_camera(self):
         # Set a camera and rendering a semantics part
         camera_target_pose = self.calculate_pose_in_front_of_object_link(self.target_link_index, category=None,
                                                                          horizontal_offset=2.5, vertical_offset=0)
-        self.add_camera("front_view", camera_target_pose, width=1080, height=1080)
+        self.add_camera("front_view", camera_target_pose, width=1080, height=720)
         object_pose = self.object_links[self.target_link_index].get_global_mass_center()
         object_pose.set_q([1, 0, 0, 0])
         camera_relative_pose = object_pose.inv().transform(camera_target_pose)
@@ -54,8 +75,8 @@ class SingleGripperOpenDoorEnv(SingleGripperBaseEnv, SapienSingleObjectEnv):
         camera_right_pose = object_pose.transform(camera_relative_pose)
         object_pose.set_q(transforms3d.euler.euler2quat(0, 0, -1.0))
         camera_left_pose = object_pose.transform(camera_relative_pose)
-        self.add_camera("right_view", camera_right_pose, width=1080, height=1080)
-        self.add_camera("left_view", camera_left_pose, width=1080, height=1080)
+        self.add_camera("right_view", camera_right_pose, width=1920, height=1080)
+        self.add_camera("left_view", camera_left_pose, width=1920, height=1080)
 
     def calculate_edge_grasp_pose(self, return_size_info=False):
         obj_segmentation_list = []
@@ -135,24 +156,24 @@ class SingleGripperOpenDoorEnv(SingleGripperBaseEnv, SapienSingleObjectEnv):
 
         # Clear the buffer
         for _ in range(self.simulation_hz // 1):
-            self.step()
+            self._step()
 
         # First try open with a small angle
         for _ in range(self.simulation_hz):
-            self.translation_controller.move_joint(backward_direction * self._translation_velocity / 2)
+            self.translation_controller.move_joint(backward_direction * self._translation_velocity)
             self.hold_and_step()
         for _ in range(self.simulation_hz * 2):
             self.translation_controller.move_joint(backward_direction * self._translation_velocity / 2)
             self.gripper_controller.move_joint([-5, -5, -5])
-            self.step()
-        for _ in range(self.simulation_hz // 2):
-            self.translation_controller.move_joint(backward_direction * self._translation_velocity)
-            self.step()
+            self._step()
+        # for _ in range(self.simulation_hz // 2):
+        #     self.translation_controller.move_joint(backward_direction * self._translation_velocity)
+        #     self.step()
 
         if np.abs(self.object.get_qpos()[target_joint_index]) < 0.1:
             return False
         for _ in range(self.simulation_hz * 2):
-            self.step()
+            self._step()
 
         # Grasp the door edge
         new_target_pose, forward_direction, door_length, edge_center = self.calculate_edge_grasp_pose(
@@ -202,17 +223,28 @@ class SingleGripperOpenDrawer(SingleGripperBaseEnv, SapienSingleObjectEnv):
         SapienSingleObjectEnv.__init__(self, PARTNET_DIR, DRAWER_WITH_HANDLE_LIST[valid_id],
                                        on_screening_rendering)
         self._init_robot()
+        index = DRAWER_WITH_HANDLE_LIST[valid_id]
+        self.left_name = f"data/{index}_left"
+        self.right_name = f"data/{index}_right"
+        os.makedirs(self.left_name, exist_ok=True)
+        os.makedirs(self.right_name, exist_ok=True)
+        self.step_num = 0
+        self.object.set_qvel(np.zeros(self.object.dof()))
+        self.object.set_qacc(np.zeros(self.object.dof()))
         self._continuous = False
         self.sim.step()
+        self.object.set_qvel(np.zeros(self.object.dof()))
 
         # Get a magic force opposite to the direction of door opening
         self.target_link_index = self.object_link_semantics.index("drawer")
-        self.__close_object_qf = -0.03 * np.ones(self.object.dof())
 
         # Set a camera and rendering a semantics part
         self.__init_arena_camera()
+        self.object.set_qvel(np.zeros(self.object.dof()))
+        self.object.set_qpos(np.zeros(self.object.dof()))
         self._step()
-        self.sim.update_renderer()
+        self.object.set_qvel(np.zeros(self.object.dof()))
+        self.object.set_qpos(np.zeros(self.object.dof()))
         part_point_cloud = self.get_global_part_point_cloud_with_seg_id(0, "handle", self.target_link_index)
         if part_point_cloud.size == 0:
             raise RuntimeError("No pullable part detected.")
@@ -221,11 +253,12 @@ class SingleGripperOpenDrawer(SingleGripperBaseEnv, SapienSingleObjectEnv):
         gripper_target = self.calculate_grasp_pose_from_handle_cloud(part_point_cloud)
         self.gripper_target = gripper_target
         self.object.set_qvel(np.zeros(self.object.dof()))
+        self.object.set_qacc(np.zeros(self.object.dof()))
 
     def __init_arena_camera(self):
         # Set a camera and rendering a semantics part
         camera_target_pose = self.calculate_pose_in_front_of_object_link(self.target_link_index, category=None,
-                                                                         horizontal_offset=2.5, vertical_offset=-0.4)
+                                                                         horizontal_offset=2.5, vertical_offset=-0.3)
         self.add_camera("front_view", camera_target_pose, width=1080, height=1080)
         object_pose = self.object_links[self.target_link_index].get_global_mass_center()
         object_pose.set_q([1, 0, 0, 0])
@@ -235,12 +268,24 @@ class SingleGripperOpenDrawer(SingleGripperBaseEnv, SapienSingleObjectEnv):
         camera_right_pose = object_pose.transform(camera_relative_pose)
         object_pose.set_q(transforms3d.euler.euler2quat(0, 0, -1.0))
         camera_left_pose = object_pose.transform(camera_relative_pose)
-        self.add_camera("right_view", camera_right_pose, width=1080, height=1080)
-        self.add_camera("left_view", camera_left_pose, width=1080, height=1080)
+        self.add_camera("right_view", camera_right_pose, width=1920, height=1080)
+        self.add_camera("left_view", camera_left_pose, width=1920, height=1080)
 
     def step(self):
-        self.object.set_qf(self.__close_object_qf)
         self._step()
+
+    def after_step(self):
+        if self.step_num % 60 == 0:
+            self.take_photo(self.step_num // 60)
+        self.step_num += 1
+
+    def take_photo(self, num: int):
+        self.cam_list[1].take_picture()
+        Image.fromarray((self.cam_list[1].get_color_rgba()[:, :, :3] * 255).astype(np.uint8)).save(
+            os.path.join(self.left_name, f"{num:05}.png"))
+        self.cam_list[2].take_picture()
+        Image.fromarray((self.cam_list[1].get_color_rgba()[:, :, :3] * 255).astype(np.uint8)).save(
+            os.path.join(self.right_name, f"{num:05}.png"))
 
     def hold_and_step(self):
         self.force_gripper()
