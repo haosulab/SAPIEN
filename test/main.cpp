@@ -126,8 +126,8 @@ void test3() {
   sim.setTimestep(1.f / 500.f);
 
   auto ab = sim.createActorBuilder();
-  ab->addMultipleConvexShapesFromObj("/home/fx/blender-data/paper_scene.obj");
-  ab->addObjVisual("/home/fx/blender-data/paper_scene.obj");
+  ab->addMultipleConvexShapesFromObj("../assets/object/walls/wall_scene.obj");
+  ab->addObjVisual("../assets/object/walls/wall_scene.obj");
   ab->build(true, false, "Scene");
 
   auto loader = URDF::URDFLoader(sim);
