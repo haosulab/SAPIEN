@@ -91,9 +91,11 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
   }
   auto srdfName = findSRDF(filename);
   std::unique_ptr<SRDF::Robot> srdf = srdfName ? loadSRDF(srdfName.value()) : nullptr;
+#ifdef _VERBOSE
   if (srdf) {
     std::cout << "SRDF found " << srdfName.value() << std::endl;
   }
+#endif
 
   if (scale <= 0.f) {
     throw std::runtime_error("Invalid URDF scale, valid scale should >= 0");
@@ -195,12 +197,11 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
 
     const PxTransform tJoint2Parent =
         current->joint ? poseFromOrigin(*current->joint->origin, scale) : PxTransform(PxIdentity);
-    
-    std::cout << "registering " << current->link->name << std::endl;
+
     // create link and set its parent
-    treeNode2pxLink[current] =
-        builder.addLink(current->parent ? treeNode2pxLink[current->parent] : nullptr, tJoint2Parent,
-                        current->link->name, current->joint ? current->joint->name : "");
+    treeNode2pxLink[current] = builder.addLink(
+        current->parent ? treeNode2pxLink[current->parent] : nullptr, tJoint2Parent,
+        current->link->name, current->joint ? current->joint->name : "");
 
     PxArticulationLink &currentPxLink = *treeNode2pxLink[current];
 
@@ -268,9 +269,10 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
                                    {1, 1, 1}, visual->name);
         break;
       case Geometry::CYLINDER:
-        builder.addCapsuleVisualToLink(currentPxLink, tVisual2Link * PxTransform({{0,0,0}, PxQuat(1.57, {0,1,0})}),
-                                       visual->geometry->radius * scale,
-                                       visual->geometry->length * scale / 2.f, {1, 1, 1}, visual->name);
+        builder.addCapsuleVisualToLink(
+            currentPxLink, tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
+            visual->geometry->radius * scale, visual->geometry->length * scale / 2.f, {1, 1, 1},
+            visual->name);
         break;
       case Geometry::SPHERE:
         builder.addSphereVisualToLink(currentPxLink, tVisual2Link,
@@ -293,9 +295,9 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
                                   collision->geometry->size * scale);
         break;
       case Geometry::CYLINDER:
-        builder.addCapsuleShapeToLink(currentPxLink, tCollision2Link * PxTransform({{0,0,0}, PxQuat(1.57, {0,1,0})}),
-                                      collision->geometry->radius * scale,
-                                      collision->geometry->length * scale / 2.0f);
+        builder.addCapsuleShapeToLink(
+            currentPxLink, tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
+            collision->geometry->radius * scale, collision->geometry->length * scale / 2.0f);
         break;
       case Geometry::SPHERE:
         builder.addSphereShapeToLink(currentPxLink, tCollision2Link,
@@ -534,8 +536,9 @@ KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &file
         break;
         // TODO: Cylinder parameter is wrong now
       case Geometry::CYLINDER:
-        linkId = actorBuilder.addCapsuleVisual(tVisual2Link * PxTransform({{0,0,0}, PxQuat(1.57, {0,1,0})}), visual->geometry->radius,
-                                               visual->geometry->length / 2.f);
+        linkId = actorBuilder.addCapsuleVisual(
+            tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
+            visual->geometry->radius, visual->geometry->length / 2.f);
         break;
       case Geometry::SPHERE:
         linkId = actorBuilder.addSphereVisual(tVisual2Link, visual->geometry->radius);
@@ -558,8 +561,9 @@ KinematicsArticulationWrapper *URDFLoader::loadKinematic(const std::string &file
         actorBuilder.addBoxShape(tCollision2Link, collision->geometry->size);
         break;
       case Geometry::CYLINDER:
-        actorBuilder.addCapsuleShape(tCollision2Link * PxTransform({{0,0,0}, PxQuat(1.57, {0,1,0})}), collision->geometry->radius,
-                                     collision->geometry->length / 2.f);
+        actorBuilder.addCapsuleShape(
+            tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
+            collision->geometry->radius, collision->geometry->length / 2.f);
         break;
       case Geometry::SPHERE:
         actorBuilder.addSphereShape(tCollision2Link, collision->geometry->radius);
