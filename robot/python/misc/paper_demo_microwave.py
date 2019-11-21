@@ -160,7 +160,7 @@ def replay():
     for single_step in whole_trajectory:
         recorder.sim.pack(single_step)
         recorder._step()
-        if step_num % 30 == 0 and step_num > 1000:
+        if step_num % 30 == 0:
             tic = time()
             name_size = step_num // 30
             for j in range(len(recorder.cam_list)):
@@ -186,6 +186,6 @@ def load_camera(recorder: BaseEnv):
 if __name__ == '__main__':
     import sys
 
-    sapyen_robot.ros.init(sys.argv, "paper_demo")
+    # sapyen_robot.ros.init(sys.argv, "paper_demo")
     # main()
     replay()
