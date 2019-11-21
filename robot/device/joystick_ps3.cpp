@@ -116,7 +116,7 @@ void PS3RobotControl::parseEndingSignal() {
   if (input->getKey(BUTTON_LEFT) && input->getKey(BUTTON_CIRCLE)) {
     throw std::runtime_error("PS3 user interrupt.");
   }
-  if (input->getKey(BUTTON_L1) and input->getKey(BUTTON_R1)) {
+  if (input->getKey(BUTTON_R2) && input->getKey(BUTTON_CIRCLE)) {
     if (!recordLastStep) {
       recordCurrentStep = true;
       std::cout << "Record this step" << std::endl;
@@ -128,12 +128,14 @@ void PS3RobotControl::parseEndingSignal() {
     recordCurrentStep = false;
     recordLastStep = false;
   }
-  if (input->getKey(BUTTON_R2)) {
-    if (!startRecord) {
-      std::cout << "Start recording now" << std::endl;
-    }
-    startRecord = true;
-  } else if (input->getKey(BUTTON_L2)) {
+  if (input->getKey(BUTTON_R2) && input->getKey(BUTTON_X)) {
+    stopRecord = !stopLastStep;
+    stopLastStep = true;
+  } else {
+    stopLastStep = false;
+    stopRecord = false;
+  }
+  if (input->getKey(BUTTON_L2)) {
     grasped = true;
   }
   continuous = activated;

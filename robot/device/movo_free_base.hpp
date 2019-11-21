@@ -74,7 +74,7 @@ public:
         head->moveJoint({"tilt_joint"}, head_velocity);
       } else if (input->getKey(BUTTON_SQUARE)) {
         head->moveJoint({"pan_joint"}, -head_velocity);
-      } else if (input->getKey(BUTTON_CIRCLE)) {
+      } else if (input->getKey(BUTTON_CIRCLE) && !input->getKey(BUTTON_R2)) {
         head->moveJoint({"pan_joint"}, head_velocity);
       } else if (input->getAxis(AXIS_RIGHT_Y)) {
         float dir = input->getAxisValue(AXIS_RIGHT_Y) > 0 ? -1 : 1;

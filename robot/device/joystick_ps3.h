@@ -88,7 +88,8 @@ protected:
   bool reset = true;
   bool continuous = true;
   bool activated = false;
-  bool startRecord = false;
+  bool stopRecord = false;
+  bool stopLastStep = false;
   bool recordCurrentStep = false;
   bool recordLastStep = false;
   ControlMode mode = ControlMode::BODY;
@@ -127,7 +128,7 @@ public:
   void set_cache(const std::vector<int> &cache);
 
   // Inline functions
-  inline bool start_record() { return startRecord; };
+  inline bool start_record() { return stopRecord; };
   inline bool record_single_step() { return recordCurrentStep; }
   inline void set_gripper_velocity(float v) { gripper_velocity = v; }
   inline void set_arm_velocity(float v) {
