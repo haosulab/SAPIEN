@@ -145,7 +145,7 @@ class MOVOFreeBaseEnv(MOVOEnv):
         If you just want to load the robot only, you should consider use __init__ but not _init_robot
         """
         BaseRobotEnv.__init__(self)
-        movo_material = self.sim.create_material(3.0, 2.0, 0.01)
+        movo_material = self.sim.create_material(8.0, 7.0, 0.)
         self._load_robot(os.path.join(get_assets_path(), "robot/movo_free_base.urdf"), movo_material)
         self._load_ros_controller()
         print("Initiate MOVO Environment in stand alone version")
@@ -154,7 +154,7 @@ class MOVOFreeBaseEnv(MOVOEnv):
         """
         Load the robot and controllers
         """
-        movo_material = self.sim.create_material(3.0, 2.0, 0.01)
+        movo_material = self.sim.create_material(8.0, 7.0, 0.)
         self._load_robot(os.path.join(get_assets_path(), "robot/movo_free_base.urdf"), movo_material)
 
     def _load_controller_parameters(self):

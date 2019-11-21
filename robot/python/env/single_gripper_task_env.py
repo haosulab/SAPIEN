@@ -284,7 +284,7 @@ class SingleGripperOpenDrawer(SingleGripperBaseEnv, SapienSingleObjectEnv):
         Image.fromarray((self.cam_list[1].get_color_rgba()[:, :, :3] * 255).astype(np.uint8)).save(
             os.path.join(self.left_name, f"{num:05}.png"))
         self.cam_list[2].take_picture()
-        Image.fromarray((self.cam_list[1].get_color_rgba()[:, :, :3] * 255).astype(np.uint8)).save(
+        Image.fromarray((self.cam_list[2].get_color_rgba()[:, :, :3] * 255).astype(np.uint8)).save(
             os.path.join(self.right_name, f"{num:05}.png"))
 
     def hold_and_step(self):

@@ -3,8 +3,8 @@ import re
 import shutil
 import glob
 
-PARTNET_DIR = '/home/sim/project/mobility-v0-prealpha3/mobility_verified'
-MINGHUA_DIR = '/home/sim/project/storage_furniture'
+PARTNET_DIR = "/home/sim/mobility_dataset/mobility_v1_alpha5"
+MINGHUA_DIR = '/home/sim/minghua_single'
 FILENAME = 'cues.txt'
 
 
@@ -78,5 +78,8 @@ def merge_with_minghua(output_dir, ids):
 
 
 if __name__ == '__main__':
-    ids = get_partnet_id()
-    merge_with_minghua("/home/sim/project/mobility_convex", ids)
+    data_paths = os.listdir(os.path.join(MINGHUA_DIR, "urdfs"))
+    ids = [data_path.split(".")[0] for data_path in data_paths]
+    print(ids)
+
+    merge_with_minghua("/home/sim/minghua_single_convex", ids)

@@ -1,14 +1,14 @@
 import os
 import re
 
-PARTNET_DIR = '/home/sim/project/mobility-v0-prealpha3/mobility_verified'
+PARTNET_DIR = '/home/sim/mobility_dataset/mobility_v1_alpha5'
 FILENAME = 'cues.txt'
 
 
 def main():
     shape_dirs = os.listdir(PARTNET_DIR)
-    joint_key = "hinge"
-    part_key = ["door", "handle"]
+    joint_key = "slider"
+    part_key = ["drawer", "handle"]
     meta = "StorageFurniture"
     id_list = []
     for shape_dir in shape_dirs:

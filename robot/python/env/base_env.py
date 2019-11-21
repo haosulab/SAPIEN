@@ -70,7 +70,7 @@ class BaseEnv:
         self.sim.set_time_step(1 / self.simulation_hz)
 
         # Articulation loader for both robot and object, articulation builder for simple object without joint
-        self.loader = self.sim.create_urdf_loader()
+        self.loader: sapyen.URDFLoader = self.sim.create_urdf_loader()
         self.builder = self.sim.create_actor_builder()
 
         # Camera
