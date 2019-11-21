@@ -393,6 +393,9 @@ void Simulation::pack(const std::vector<PxReal> &data) {
     begin += dof;
     w->set_qf(std::vector<PxReal>(begin, begin + dof));
     begin += dof;
+    for (auto &body:w->links){
+      body->setForceAndTorque({0,0,0},{0,0,0});
+    }
   }
   assert(begin == data.end());
   clearCache();

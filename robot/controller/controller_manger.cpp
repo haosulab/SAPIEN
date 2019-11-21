@@ -45,7 +45,7 @@ void sapien::robot::ControllerManger::createJointPubNode(double pubFrequency) {
     return;
   }
   jointPubNode =
-      std::make_unique<JointPubNode>(wrapper, pubFrequency, robotName, nh.get());
+      std::make_unique<JointPubNode>(wrapper, pubFrequency, robotName, nh.get(), robotState.get());
   jointState = jointPubNode->mStates.get();
 }
 CartesianVelocityController *

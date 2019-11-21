@@ -116,6 +116,8 @@ public:
   inline void loadSave(uint32_t index) {
     if (index < simulationSaves.size()) {
       pack(simulationSaves[index].data);
+      step();
+      pack(simulationSaves[index].data);
     }
   }
 };

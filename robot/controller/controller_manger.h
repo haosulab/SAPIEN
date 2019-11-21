@@ -28,7 +28,7 @@ protected:
   // Robot and joint state
   std::unique_ptr<robot_model_loader::RobotModelLoader> loader = nullptr;
   robot_model::RobotModelPtr kinematicModel;
-  std::unique_ptr<robot_state::RobotState> robotState;
+  std::unique_ptr<robot_state::RobotState> robotState=nullptr;
   sensor_msgs::JointState *jointState = nullptr;
 
   // Spinner and callback management

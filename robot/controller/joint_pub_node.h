@@ -4,6 +4,7 @@
 #pragma once
 
 #include "kinematics_articulation_wrapper.h"
+#include <moveit/robot_model/robot_model.h>
 #include <ros/publisher.h>
 #include <ros/rate.h>
 #include <ros/ros.h>
@@ -30,7 +31,7 @@ private:
 
 public:
   JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
-               const std::string &robotName, ros::NodeHandle *nh);
+               const std::string &robotName, ros::NodeHandle *nh, robot_state::RobotState *state);
 
   void updateJointStates();
   void cancel();

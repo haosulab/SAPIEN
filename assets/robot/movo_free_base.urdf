@@ -46,14 +46,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <parent link="root"/>
     <child link="root1"/>
     <axis xyz="1 0 0"/>
-    <limit lower="-10" upper="10" velocity="0.50"/>
+    <limit lower="-10" upper="10" velocity="0.50" effort="10000"/>
     <dynamics damping="10.0" friction="10"/>
   </joint>
   <joint name="y_axis_joint" type="prismatic">
     <parent link="root1"/>
     <child link="root2"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-10" upper="10" velocity="0.50"/>
+    <limit lower="-10" upper="10" velocity="0.50" effort="10000"/>
     <dynamics damping="10.0" friction="10"/>
   </joint>
   <joint name="base_chassis_joint" type="fixed">
@@ -289,7 +289,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <joint name="kinect2_ir_joint" type="fixed">
     <parent link="kinect2_link"/>
     <child link="kinect2_ir_frame"/>
-    <origin rpy="0 0 0" xyz="0.0245 -0.03325  0.04201"/>
+    <origin rpy="0 0 0" xyz="0.0345 -0.03325  0.05201"/>
   </joint>
   <link name="kinect2_ir_optical_frame"/>
   <joint name="kinect2_ir_optical_frame_joint" type="fixed">
@@ -317,8 +317,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <horizontal_fov>1.22172944444</horizontal_fov>
         <image>
           <format>L8</format>
-          <width>512</width>
-          <height>424</height>
+          <width>960</width>
+          <height>540</height>
         </image>
         <clip>
           <near>0.01</near>

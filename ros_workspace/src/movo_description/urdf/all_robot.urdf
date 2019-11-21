@@ -58,6 +58,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   </gazebo>
   <!-- Base link is the center of the robot's chassis between the motors projected on the ground -->
   <link name="base_link"/>
+  <link name="root"/>
+  <link name="root1"/>
+  <link name="root2"/>
+  <joint name="y_rotation_joint" type="continuous">
+    <parent link="root2"/>
+    <child link="base_link"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="10.0" friction="1"/>
+  </joint>
+  <joint name="x_axis_joint" type="prismatic">
+    <parent link="root"/>
+    <child link="root1"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-10" upper="10" velocity="0.50" effort="10000"/>
+    <dynamics damping="10.0" friction="10"/>
+  </joint>
+  <joint name="y_axis_joint" type="prismatic">
+    <parent link="root1"/>
+    <child link="root2"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-10" upper="10" velocity="0.50" effort="10000"/>
+    <dynamics damping="10.0" friction="10"/>
+  </joint>
   <gazebo reference="base_link">
     <mu1>0.0</mu1>
   </gazebo>
@@ -74,7 +97,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </inertial>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/vector_base_collision.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/movo_components/collision/vector_base_collision.stl.convex.stl"/>
       </geometry>
     </collision>
     <visual>
@@ -99,11 +123,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="15.877331"/>
       <origin xyz="0.013724 0.000002 0.509500"/>
-      <inertia ixx="0.962473" ixy="0.000047" ixz="0.053722" iyx="0.000047" iyy="0.968691" iyz="-0.000058" izx="0.053722" izy="-0.000058" izz="0.098853"/>
+      <inertia ixx="0.962473" ixy="0.000047" ixz="0.053722" iyx="0.000047" iyy="0.968691" iyz="-0.000058" izx="0.053722"
+               izy="-0.000058" izz="0.098853"/>
     </inertial>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_fixed_body_collision.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/movo_components/collision/movo_fixed_body_collision.stl.convex.stl"/>
       </geometry>
     </collision>
     <visual>
@@ -137,23 +163,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_1.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_1.stl.convex.stl"/>
       </geometry>
     </collision>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_2.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_2.stl.convex.stl"/>
       </geometry>
     </collision>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_3.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/movo_components/collision/movo_upper_body_collision_3.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="12.926242"/>
       <origin xyz="-0.075467 -0.004693 0.397754"/>
-      <inertia ixx="0.300410" ixy="-0.010043" ixz="-0.054146" iyx="-0.010043" iyy="0.296460" iyz="-0.024977" izx="-0.054146" izy="-0.024977" izz="0.294778"/>
+      <inertia ixx="0.300410" ixy="-0.010043" ixz="-0.054146" iyx="-0.010043" iyy="0.296460" iyz="-0.024977"
+               izx="-0.054146" izy="-0.024977" izz="0.294778"/>
     </inertial>
   </link>
   <gazebo reference="linear_actuator_link">
@@ -183,7 +213,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       <accelDrift>0.0005 0.0005 0.0005</accelDrift>
       <accelGaussianNoise>0.0005 0.0005 0.0005</accelGaussianNoise>
       <rateDrift>0.0005 0.0005 0.0005</rateDrift>
-      <rateGaussianNoise>0.00005 0.00005 0.00005 </rateGaussianNoise>
+      <rateGaussianNoise>0.00005 0.00005 0.00005</rateGaussianNoise>
       <headingDrift>0.00005</headingDrift>
       <headingGaussianNoise>0.00005</headingGaussianNoise>
     </plugin>
@@ -303,7 +333,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="0.271282"/>
       <origin xyz="0.000098 -0.000007 0.034804"/>
-      <inertia ixx="0.000158" ixy="0.000000" ixz="-0.000001" iyx="0.000000" iyy="0.000151" iyz="0.000000" izx="-0.000001" izy="0.000000" izz="0.000150"/>
+      <inertia ixx="0.000158" ixy="0.000000" ixz="-0.000001" iyx="0.000000" iyy="0.000151" iyz="0.000000"
+               izx="-0.000001" izy="0.000000" izz="0.000150"/>
     </inertial>
   </link>
   <joint name="pan_joint" type="revolute">
@@ -337,7 +368,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="0.470548"/>
       <origin xyz="-0.000036 0.021015 -0.052191"/>
-      <inertia ixx="0.000957" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000805" iyz="-0.000328" izx="0.000000" izy="-0.000328" izz="0.000353"/>
+      <inertia ixx="0.000957" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000805" iyz="-0.000328" izx="0.000000"
+               izy="-0.000328" izz="0.000353"/>
     </inertial>
   </link>
   <joint name="tilt_joint" type="revolute">
@@ -370,7 +402,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="0.434513"/>
       <origin xyz="0.037380 0.005753 -0.019367"/>
-      <inertia ixx="0.000418" ixy="0.000123" ixz="-0.000065" iyx="0.000123" iyy="0.001134" iyz="-0.000003" izx="-0.000065" izy="-0.000003" izz="0.000967"/>
+      <inertia ixx="0.000418" ixy="0.000123" ixz="-0.000065" iyx="0.000123" iyy="0.001134" iyz="-0.000003"
+               izx="-0.000065" izy="-0.000003" izz="0.000967"/>
     </inertial>
   </link>
   <joint name="kinect2_joint" type="fixed">
@@ -382,7 +415,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="1.4"/>
       <origin xyz="-0.000036 0.021015 -0.052191"/>
-      <inertia ixx="0.0006835" ixy="-0.000042" ixz="0.000010" iyx="-0.000042" iyy="0.001197" iyz="0.000006" izx="0.000010" izy="0.000006" izz="0.007020"/>
+      <inertia ixx="0.0006835" ixy="-0.000042" ixz="0.000010" iyx="-0.000042" iyy="0.001197" iyz="0.000006"
+               izx="0.000010" izy="0.000006" izz="0.007020"/>
     </inertial>
     <visual>
       <geometry>
@@ -481,7 +515,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="0.649618"/>
       <origin xyz="-0.000146 0.0 0.031039"/>
-      <inertia ixx="0.000652" ixy="-0.000000" ixz="0.000001" iyx="0.000000" iyy="0.000646" iyz="0.000000" izx="0.000001" izy="0.000000" izz="0.000480"/>
+      <inertia ixx="0.000652" ixy="-0.000000" ixz="0.000001" iyx="0.000000" iyy="0.000646" iyz="0.000000" izx="0.000001"
+               izy="0.000000" izz="0.000480"/>
     </inertial>
   </link>
   <gazebo reference="right_base_link">
@@ -515,7 +550,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="0.824524"/>
       <origin xyz="0.000018 -0.004667 -0.060609"/>
-      <inertia ixx="0.002561" ixy="0.000000" ixz="0.000001" iyx="0.000000" iyy="0.002653" iyz="0.000212" izx="0.000001" izy="0.000212" izz="0.000524"/>
+      <inertia ixx="0.002561" ixy="0.000000" ixz="0.000001" iyx="0.000000" iyy="0.002653" iyz="0.000212" izx="0.000001"
+               izy="0.000212" izz="0.000524"/>
     </inertial>
   </link>
   <gazebo reference="right_shoulder_link">
@@ -549,7 +585,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="0.8447"/>
       <origin xyz="0 -0.103563213 0"/>
-      <inertia ixx="0.000435" ixy="0.000002" ixz="0.000231" iyx="0.000002" iyy="0.034947" iyz="0.000000" izx="0.000231" izy="0.000000" izz="0.035198"/>
+      <inertia ixx="0.000435" ixy="0.000002" ixz="0.000231" iyx="0.000002" iyy="0.034947" iyz="0.000000" izx="0.000231"
+               izy="0.000000" izz="0.035198"/>
     </inertial>
   </link>
   <gazebo reference="right_arm_half_1_link">
@@ -583,7 +620,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="0.8447"/>
       <origin xyz="0 0 -0.1022447445"/>
-      <inertia ixx="0.000435" ixy="0.000002" ixz="0.000231" iyx="0.000002" iyy="0.034947" iyz="0.000000" izx="0.000231" izy="0.000000" izz="0.035198"/>
+      <inertia ixx="0.000435" ixy="0.000002" ixz="0.000231" iyx="0.000002" iyy="0.034947" iyz="0.000000" izx="0.000231"
+               izy="0.000000" izz="0.035198"/>
     </inertial>
   </link>
   <gazebo reference="right_arm_half_2_link">
@@ -617,7 +655,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <inertial>
       <mass value="0.674254"/>
       <origin xyz="0 0.081 -0.0086"/>
-      <inertia ixx="0.005453" ixy="0.000003" ixz="0.000000" iyx="0.000003" iyy="0.000305" iyz="0.000087" izx="0.000000" izy="0.000087" izz="0.005578"/>
+      <inertia ixx="0.005453" ixy="0.000003" ixz="0.000000" iyx="0.000003" iyy="0.000305" iyz="0.000087" izx="0.000000"
+               izy="0.000087" izz="0.005578"/>
     </inertial>
   </link>
   <joint name="right_wrist_spherical_1_joint" type="revolute">
@@ -637,13 +676,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/wrist_spherical_1.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/jaco/collision/wrist_spherical_1.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.463"/>
       <origin xyz="0 0.0028848942 -0.0541932613"/>
-      <inertia ixx="0.000392" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000347" iyz="0.000101" izx="0.000000" izy="0.000101" izz="0.000233"/>
+      <inertia ixx="0.000392" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000347" iyz="0.000101" izx="0.000000"
+               izy="0.000101" izz="0.000233"/>
     </inertial>
   </link>
   <gazebo reference="right_wrist_spherical_1_link">
@@ -671,13 +712,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/wrist_spherical_2.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/jaco/collision/wrist_spherical_2.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.463"/>
       <origin xyz="0 0.0497208855 -0.0028562765"/>
-      <inertia ixx="0.000392" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000347" iyz="0.000101" izx="0.000000" izy="0.000101" izz="0.000233"/>
+      <inertia ixx="0.000392" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000347" iyz="0.000101" izx="0.000000"
+               izy="0.000101" izz="0.000233"/>
     </inertial>
   </link>
   <gazebo reference="right_wrist_spherical_2_link">
@@ -705,13 +748,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/jaco/collision/kinova_actuator_gearing.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/jaco/collision/kinova_actuator_gearing.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.190782"/>
       <origin xyz="-0.00082 0.000048 -0.216121"/>
-      <inertia ixx="0.000048" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000049" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000072"/>
+      <inertia ixx="0.000048" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000049" iyz="0.000000" izx="0.000000"
+               izy="0.000000" izz="0.000072"/>
     </inertial>
   </link>
   <gazebo reference="right_wrist_3_link">
@@ -805,13 +850,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/kg3_base_link.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/kg3_base_link.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.799312"/>
       <origin xyz="0.000007 -0.005175 -0.067280"/>
-      <inertia ixx="0.000790" ixy="0.000000" ixz="0.000004" iyx="0.000000" iyy="0.000650" iyz="0.000003" izx="0.000004" izy="0.000003" izz="0.000823"/>
+      <inertia ixx="0.000790" ixy="0.000000" ixz="0.000004" iyx="0.000000" iyy="0.000650" iyz="0.000003" izx="0.000004"
+               izy="0.000003" izz="0.000823"/>
     </inertial>
   </link>
   <gazebo reference="right_gripper_base_link">
@@ -838,13 +885,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.009127"/>
       <origin xyz="-0.016752 -0.013874 0.0"/>
-      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000"
+               izy="0.000000" izz="0.000002"/>
     </inertial>
   </link>
   <gazebo reference="right_gripper_finger1_knuckle_link">
@@ -872,13 +921,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.009127"/>
       <origin xyz="-0.016752 -0.013874 0.0"/>
-      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000"
+               izy="0.000000" izz="0.000002"/>
     </inertial>
   </link>
   <gazebo reference="right_gripper_finger2_knuckle_link">
@@ -906,13 +957,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_knuckle.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.009127"/>
       <origin xyz="-0.016752 -0.013874 0.0"/>
-      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000"
+               izy="0.000000" izz="0.000002"/>
     </inertial>
   </link>
   <gazebo reference="right_gripper_finger3_knuckle_link">
@@ -937,13 +990,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.012690"/>
       <origin xyz="-0.011926 -0.009701 0.0"/>
-      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000"
+               izy="0.000000" izz="0.000002"/>
     </inertial>
   </link>
   <gazebo reference="right_gripper_finger1_finger_tip_link">
@@ -968,13 +1023,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.012690"/>
       <origin xyz="-0.011926 -0.009701 0.0"/>
-      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000"
+               izy="0.000000" izz="0.000002"/>
     </inertial>
   </link>
   <gazebo reference="right_gripper_finger2_finger_tip_link">
@@ -999,13 +1056,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl.convex.stl"/>
+        <mesh
+            filename="package://movo_description/meshes/manipulation/kinova_grippers/collision/finger_tip.stl.convex.stl"/>
       </geometry>
     </collision>
     <inertial>
       <mass value="0.012690"/>
       <origin xyz="-0.011926 -0.009701 0.0"/>
-      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000"
+               izy="0.000000" izz="0.000002"/>
     </inertial>
   </link>
   <gazebo reference="right_gripper_finger3_finger_tip_link">

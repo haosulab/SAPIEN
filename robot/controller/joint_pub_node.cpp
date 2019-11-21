@@ -8,7 +8,7 @@
 namespace sapien::robot {
 
 JointPubNode::JointPubNode(ControllableArticulationWrapper *wrapper, double pubFrequency,
-                           const std::string &robotName, ros::NodeHandle *nh)
+                           const std::string &robotName, ros::NodeHandle *nh, robot_state::RobotState *state)
     : jointName(wrapper->get_drive_joint_name()), queue(wrapper->get_joint_state_queue()),
       mNodeHandle(nh), pubFrequency(pubFrequency){
 

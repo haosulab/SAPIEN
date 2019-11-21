@@ -163,6 +163,8 @@ PYBIND11_MODULE(sapyen, m) {
                                                                                     "PxRigidBody")
       .def("get_global_pose", &PxRigidBody::getGlobalPose)
       .def("get_local_mass_center", &PxRigidBody::getCMassLocalPose)
+      .def("set_angular_damping", &PxRigidBody::setAngularDamping)
+      .def("set_linear_damping", &PxRigidBody::setLinearDamping)
       .def("add_force",
            [](PxRigidBody &a, const py::array_t<float> &arr) {
              a.addForce(PxVec3(arr.at(0), arr.at(1), arr.at(2)));
