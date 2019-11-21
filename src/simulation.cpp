@@ -5,8 +5,8 @@
 #include "controllable_articulation_wrapper.h"
 #include "kinematics_articulation_wrapper.h"
 #include <cassert>
-#include <sstream>
 #include <fstream>
+#include <sstream>
 
 namespace sapien {
 static PxDefaultErrorCallback gDefaultErrorCallback;
@@ -274,6 +274,37 @@ void Simulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
     }
     articulation->set_qpos(jointValues);
   });
+
+  mRenderer->bindSaveActionCallback([this](uint32_t index, uint32_t action) {
+    switch (action) {
+    case 0:
+      loadSave(index);
+      break;
+    case 1:
+      deleteSave(index);
+    default:
+      break;
+    }
+    
+    std::vector<std::string> names;
+    for (auto &s : simulationSaves) {
+      names.push_back(s.name);
+    }
+    mRenderer->setSaveNames(names);
+  });
+
+  mRenderer->bindSaveCallback([this](uint32_t index, const std::string &name) {
+    if (index < simulationSaves.size()) {
+      simulationSaves[index].name = name;
+    } else {
+      appendSaves(name);
+    }
+    std::vector<std::string> names;
+    for (auto &s : simulationSaves) {
+      names.push_back(s.name);
+    }
+    mRenderer->setSaveNames(names);
+  });
 }
 
 PxRigidStatic *Simulation::addGround(PxReal altitude, bool render, PxMaterial *material) {
@@ -364,22 +395,61 @@ void Simulation::pack(const std::vector<PxReal> &data) {
     begin += dof;
   }
   assert(begin == data.end());
+  clearCache();
 }
 void Simulation::clearCache() {
   for (auto &i : mControllableArticulationWrapper) {
     i->clearCache();
   }
 }
-bool SimulationCache::save(const std::string &filename) {
-  std::ofstream output_file("students.data", std::ios::binary);
-  auto header = CacheHeader(sim);
-}
-CacheHeader::CacheHeader(Simulation &sim) {
-  numArticulation = sim.mDynamicArticulationWrappers.size();
-  for (auto const &w : sim.mDynamicArticulationWrappers) {
-    totalDOF += w->dof();
-    jointNames.push_back(w->get_qnames());
-    dimension += w->dof() * 4 + 7;
+
+void Simulation::writeSavesToDisk(const std::string &filename) {
+  auto of = std::ofstream(filename, std::ios::out | std::ios::binary);
+  int size = static_cast<int>(simulationSaves.size());
+  of << size;
+
+  for (auto &cache : simulationSaves) {
+    {
+      int nameLength = static_cast<int>(cache.name.length());
+      of << nameLength;
+      char buf[nameLength];
+      memcpy(buf, cache.name.data(), nameLength);
+      for (int i = 0; i < nameLength; ++i) {
+        of << buf[i];
+      }
+    }
+    {
+      int vecSize = static_cast<int>(cache.name.length());
+      of << vecSize;
+      for (int i = 0; i < cache.data.size(); ++i) {
+        of << static_cast<float>(cache.data[i]);
+      }
+    }
   }
 }
+
+void Simulation::loadSavesFromDisk(const std::string &filename) {
+  auto inf = std::ifstream(filename, std::ios::in | std::ios::binary);
+  int size;
+  inf >> size;
+  simulationSaves.resize(size);
+
+  for (auto &cache : simulationSaves) {
+    {
+      int nameLength;
+      inf >> nameLength;
+      char buf[nameLength];
+      inf.read(buf, nameLength);
+      cache.name = std::string(buf, buf + nameLength);
+    }
+    {
+      int vecSize;
+      inf >> vecSize;
+      float buf[vecSize];
+      inf.read(reinterpret_cast<char *>(buf), vecSize * sizeof(float));
+      cache.data = std::vector<float>(buf, buf + vecSize);
+    }
+  }
+}
+
 } // namespace sapien

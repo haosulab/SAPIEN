@@ -17,8 +17,12 @@ public:
   std::shared_ptr<Optifuser::Scene> mScene;
   Optifuser::GLFWRenderContext *mContext = nullptr;
   Optifuser::FPSCameraSpec cam;
+
   std::function<GuiInfo(uint32_t)> queryCallback = {};
   std::function<void(uint32_t, const GuiInfo &info)> syncCallback = {};
+
+  std::function<void(uint32_t index, uint32_t action)> saveActionCallback = {};
+  std::function<void(uint32_t index, std::string const & name)> saveCallback = {};
 
   // IPhysxRenderer
   virtual void addRigidbody(uint32_t uniqueId, const std::string &meshFile,
@@ -65,6 +69,13 @@ public:
 
   void showWindow();
   void hideWindow();
+
+  // save and load
+  virtual void setSaveNames(std::vector<std::string> const &names) override;
+  virtual void
+  bindSaveActionCallback(std::function<void(uint32_t index, uint32_t action)>) override;
+  virtual void
+  bindSaveCallback(std::function<void(uint32_t index, std::string const &name)>) override;
 };
 } // namespace Renderer
 } // namespace sapien

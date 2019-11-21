@@ -22,6 +22,11 @@
 namespace sapien {
 using namespace physx;
 
+struct SimulationSave {
+  std::string name;
+  std::vector<PxReal> data;
+};
+
 class Simulation {
 public:
   std::vector<PxRigidActor *> mRigidActors;
@@ -97,37 +102,22 @@ public:
   class ControllableArticulationWrapper *
   createControllableArticulationWrapper(class IArticulationDrivable *baseWrapper);
   void clearCache();
-};
 
-struct SimulationCache {
-  std::vector<std::vector<PxReal>> cache;
-  std::vector<std::string> frameNames;
-  Simulation sim;
-  SimulationCache(Simulation &sim) : sim(sim){};
-  inline void pack(size_t i) {
-    assert(i < cache.size());
-    sim.pack(cache[i]);
+  // For internal use only for now
+  std::vector<SimulationSave> simulationSaves;
+  void writeSavesToDisk(const std::string &filename);
+  void loadSavesFromDisk(const std::string &filename);
+  inline void appendSaves(std::string const &name) { simulationSaves.push_back({name, dump()}); }
+  inline void deleteSave(uint32_t index) {
+    if (index < simulationSaves.size()) {
+      simulationSaves.erase(simulationSaves.begin() + index);
+    }
   }
-  inline void pack(const std::string &name) {
-    size_t i = std::find(frameNames.begin(), frameNames.end(), name) - frameNames.begin();
-    assert(i < cache.size());
-    sim.pack(cache[i]);
+  inline void loadSave(uint32_t index) {
+    if (index < simulationSaves.size()) {
+      pack(simulationSaves[index].data);
+    }
   }
-  inline void dump(const std::string &name = "") {
-    std::string frameName = name.empty() ? std::to_string(cache.size()) : name;
-    cache.push_back(sim.dump());
-  }
-  bool save(const std::string &filename);
-  bool load(const std::string &filename);
-};
-
-struct CacheHeader {
-  uint32_t numArticulation = 0;
-  uint32_t totalDOF = 0;
-  uint32_t dimension;
-  std::vector<std::vector<std::string>> jointNames;
-  explicit CacheHeader(Simulation &sim);
-  void save()
 };
 
 } // namespace sapien

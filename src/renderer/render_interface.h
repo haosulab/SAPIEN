@@ -86,6 +86,12 @@ public:
 
   virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) = 0;
   virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) = 0;
+
+  /* Save and load */
+  virtual void setSaveNames(std::vector<std::string> const &names) = 0;
+  virtual void bindSaveActionCallback(std::function<void(uint32_t index, uint32_t action)>) = 0;
+  virtual void
+  bindSaveCallback(std::function<void(uint32_t index, std::string const &name)>) = 0;
 };
 
 } // namespace Renderer

@@ -8,6 +8,8 @@
 namespace sapien {
 namespace Renderer {
 
+static std::vector<std::string> saveNames = {};
+
 enum RenderMode {
   LIGHTING,
   ALBEDO,
@@ -257,18 +259,37 @@ void OptifuserRenderer::render() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
+    ImGui::Begin("Save##window");
+    {
+      if (ImGui::CollapsingHeader("Save")) {
+        static char buf[1000];
+        ImGui::InputText("##input_buffer", buf, 1000);
+        if (ImGui::Button("Save##button")) {
+          std::cout << "save called" << std::endl;
+          saveCallback(saveNames.size(), std::string(buf));
+        }
+      }
+      if (ImGui::CollapsingHeader("Load")) {
+        for (uint32_t i = 0; i < saveNames.size(); ++i) {
+          ImGui::Text("%s", saveNames[i].c_str());
+          ImGui::SameLine(100);
+          if (ImGui::Button(("load##" + std::to_string(i)).c_str())) {
+            saveActionCallback(i, 0);
+          }
+          ImGui::SameLine(150);
+          if (ImGui::Button(("delete##" + std::to_string(i)).c_str())) {
+            saveActionCallback(i, 1);
+          }
+        }
+      }
+    }
+    ImGui::End();
+
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mContext->getHeight()));
 
     ImGui::Begin("Render Options");
     {
-      // if (renderMode == PATHTRACER) {
-      //   ImGui::Image(
-      //       reinterpret_cast<ImTextureID>(pathTracer->outputTex),
-      //       ImVec2(imguiWindowSize, imguiWindowSize / static_cast<float>(mContext->getWidth()) *
-      //                                   mContext->getHeight()),
-      //       ImVec2(0, 1), ImVec2(1, 0));
-      // }
       if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {
           mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh",
@@ -449,6 +470,17 @@ void OptifuserRenderer::addPointLight(std::array<float, 3> position, std::array<
 void OptifuserRenderer::showWindow() { mContext->showWindow(); }
 
 void OptifuserRenderer::hideWindow() { mContext->hideWindow(); }
+
+void OptifuserRenderer::setSaveNames(std::vector<std::string> const &names) { saveNames = names; }
+
+void OptifuserRenderer::bindSaveActionCallback(
+    std::function<void(uint32_t index, uint32_t action)> func) {
+  saveActionCallback = func;
+}
+void OptifuserRenderer::bindSaveCallback(
+    std::function<void(uint32_t index, std::string const &name)> func) {
+  saveCallback = func;
+}
 
 } // namespace Renderer
 } // namespace sapien
