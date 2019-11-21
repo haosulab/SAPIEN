@@ -6,6 +6,7 @@
 #include "kinematics_articulation_wrapper.h"
 #include <cassert>
 #include <sstream>
+#include <fstream>
 
 namespace sapien {
 static PxDefaultErrorCallback gDefaultErrorCallback;
@@ -150,7 +151,7 @@ Simulation::Simulation() {
   mScene->setVisualizationParameter(PxVisualizationParameter::eACTOR_AXES, 2.f);
   mScene->setSimulationEventCallback(&myCC);
 
-  mDefaultMaterial = mPhysicsSDK->createMaterial(2, 2, 0.01);
+  mDefaultMaterial = mPhysicsSDK->createMaterial(5, 5, 0.01);
 }
 
 Simulation::~Simulation() {
@@ -190,7 +191,7 @@ void Simulation::step() {
   for (auto &wrapper : mControllableArticulationWrapper) {
     wrapper->update(mTimestep);
   }
-  for (auto &callBack: mStepCallBacks){
+  for (auto &callBack : mStepCallBacks) {
     callBack(*this);
   }
 }
@@ -365,8 +366,20 @@ void Simulation::pack(const std::vector<PxReal> &data) {
   assert(begin == data.end());
 }
 void Simulation::clearCache() {
-  for (auto & i : mControllableArticulationWrapper) {
+  for (auto &i : mControllableArticulationWrapper) {
     i->clearCache();
+  }
+}
+bool SimulationCache::save(const std::string &filename) {
+  std::ofstream output_file("students.data", std::ios::binary);
+  auto header = CacheHeader(sim);
+}
+CacheHeader::CacheHeader(Simulation &sim) {
+  numArticulation = sim.mDynamicArticulationWrappers.size();
+  for (auto const &w : sim.mDynamicArticulationWrappers) {
+    totalDOF += w->dof();
+    jointNames.push_back(w->get_qnames());
+    dimension += w->dof() * 4 + 7;
   }
 }
 } // namespace sapien

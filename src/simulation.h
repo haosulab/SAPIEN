@@ -82,8 +82,9 @@ public:
   void step();
   std::vector<PxReal> dump();
   void pack(const std::vector<PxReal> &data);
-  inline void bindStepCallBack(const std::function<void(Simulation const &)>& callBack){
-    mStepCallBacks.emplace_back(callBack);};
+  inline void bindStepCallBack(const std::function<void(Simulation const &)> &callBack) {
+    mStepCallBacks.emplace_back(callBack);
+  };
 
   /* Sync with renderer by calling UpdateRigidbody */
   void updateRenderer();
@@ -96,6 +97,37 @@ public:
   class ControllableArticulationWrapper *
   createControllableArticulationWrapper(class IArticulationDrivable *baseWrapper);
   void clearCache();
+};
+
+struct SimulationCache {
+  std::vector<std::vector<PxReal>> cache;
+  std::vector<std::string> frameNames;
+  Simulation sim;
+  SimulationCache(Simulation &sim) : sim(sim){};
+  inline void pack(size_t i) {
+    assert(i < cache.size());
+    sim.pack(cache[i]);
+  }
+  inline void pack(const std::string &name) {
+    size_t i = std::find(frameNames.begin(), frameNames.end(), name) - frameNames.begin();
+    assert(i < cache.size());
+    sim.pack(cache[i]);
+  }
+  inline void dump(const std::string &name = "") {
+    std::string frameName = name.empty() ? std::to_string(cache.size()) : name;
+    cache.push_back(sim.dump());
+  }
+  bool save(const std::string &filename);
+  bool load(const std::string &filename);
+};
+
+struct CacheHeader {
+  uint32_t numArticulation = 0;
+  uint32_t totalDOF = 0;
+  uint32_t dimension;
+  std::vector<std::vector<std::string>> jointNames;
+  explicit CacheHeader(Simulation &sim);
+  void save()
 };
 
 } // namespace sapien
