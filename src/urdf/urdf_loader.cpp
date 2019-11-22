@@ -85,7 +85,7 @@ std::unique_ptr<SRDF::Robot> URDFLoader::loadSRDF(const std::string &filename) {
   }
 }
 
-ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *material) {
+ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *material, PxReal density) {
   if (filename.substr(filename.length() - 4) != std::string("urdf")) {
     throw std::invalid_argument("None URDF file passed to URDF loader");
   }
@@ -312,6 +312,7 @@ ArticulationWrapper *URDFLoader::load(const std::string &filename, PxMaterial *m
     }
     if (shouldComputeInertia) {
       // TODO: check density
+      PxRigidBodyExt::updateMassAndInertia(currentPxLink, density);
       PxRigidBodyExt::updateMassAndInertia(currentPxLink, defaultDensity);
     }
 

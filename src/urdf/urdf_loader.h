@@ -670,7 +670,7 @@ public:
   float defaultDensity = 1000.f;
 
   explicit URDFLoader(class Simulation &simulation);
-  ArticulationWrapper *load(const std::string &filename, PxMaterial *material = nullptr);
+  ArticulationWrapper *load(const std::string &filename, PxMaterial *material = nullptr, PxReal density=1000);
   class KinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class JointSystem *loadJointSystem(const std::string &filename);
 

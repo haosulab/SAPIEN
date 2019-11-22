@@ -502,7 +502,7 @@ PYBIND11_MODULE(sapyen, m) {
       .def_readwrite("balance_passive_force", &URDF::URDFLoader::balancePassiveForce)
       .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
-           py::arg("filename"), py::arg("material") = nullptr)
+           py::arg("filename"), py::arg("material") = nullptr, py::arg("density") = 1000)
       .def("load_kinematic", &URDF::URDFLoader::loadKinematic, py::return_value_policy::reference)
       .def("load_joint_system", &URDF::URDFLoader::loadJointSystem,
            py::return_value_policy::reference);
