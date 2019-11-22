@@ -653,9 +653,22 @@ class URDFLoader {
   std::string mUrdfString;
 
 public:
+  /* The base of the loaded articulation will be fixed */
   bool fixLoadedObject = true;
+
+  /* The loaded articulation will use inverse dynamics to balance passive forces,
+   * it will act as if there is no gravity, etc.
+   */
   bool balancePassiveForce = false;
+
+  /* Load the articulation at a different scale.
+   * It will scale mass and inertia accordingly
+   */
   float scale = 1.f;
+
+  /* density used if the inertia is not specified for a link */
+  float defaultDensity = 1000.f;
+
   explicit URDFLoader(class Simulation &simulation);
   ArticulationWrapper *load(const std::string &filename, PxMaterial *material = nullptr);
   class KinematicsArticulationWrapper *loadKinematic(const std::string &filename);

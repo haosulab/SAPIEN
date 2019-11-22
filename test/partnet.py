@@ -66,7 +66,7 @@ def test_urdf(folder):
     sim.add_mounted_camera("Floating Camera", mount, Pose([0, 0, 0], [1, 0, 0, 0]), 512, 512, 1.22172944444,
                            1.22172944444, 0.01, 100)
     cam0 = renderer.get_camera(0)
-    mount.set_global_pose(Pose([-2, 0, 0], [1, 0, 0, 0]))
+    mount.set_global_pose(Pose([-2, 0, 1], [1, 0, 0, 0]))
 
     sim.step()
     sim.step()
@@ -81,6 +81,9 @@ def test_urdf(folder):
     t2 = time.time()
     print(t2 - t1)
     import matplotlib.pyplot as plt
+    from PIL import Image
+    Image.fromarray((np.clip(pic[:, :, :3], 0, 1) * 255).astype(np.uint8)).save('test.png')
+
     plt.imshow(pic)
     plt.show()
 
