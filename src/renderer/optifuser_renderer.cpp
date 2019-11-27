@@ -327,11 +327,13 @@ void OptifuserRenderer::render() {
 #endif
       }
 
+#ifdef _USE_OPTIX
       if (renderMode == PATHTRACER) {
         glEnable(GL_FRAMEBUFFER_SRGB);
       } else {
         glDisable(GL_FRAMEBUFFER_SRGB);
       }
+#endif
 
       if (ImGui::CollapsingHeader("Main Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Text("Position");
