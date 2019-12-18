@@ -138,22 +138,18 @@ int main() {
   wrapper->set_qvel({0, 0, 0, 0, 0, 0, 0, 0, 0});
   wrapper->set_qf({0, 0, 0, 0, 0, 0, 0, 0, 0});
 
-  // renderer.showWindow();
-  auto start = std::chrono::system_clock::now();
-  for (int _ = 0; _ < 10000; ++_) {
-    // wrapper->set_qf({0, 0, 0, rand_float(), rand_float(), rand_float(), rand_float(),
-    //                  rand_float(), rand_float()});
-    for (int i = 0; i < 5; ++i) {
-      wrapper->set_qf({0, 0, 0, rand_float(), rand_float(), rand_float(), rand_float(),
-                       rand_float(), rand_float()});
-      sim.step();
+  std::array<float, 3> color = {1 * 4, 0.773 * 4, 0.561 * 4};
+  renderer.addPointLight({0, 0, 4}, color);
+  renderer.addPointLight({0, -4, 4}, color);
+  renderer.addPointLight({0, -2, 4}, color);
+
+  renderer.showWindow();
+  while (1) {
+    sim.step();
+    sim.updateRenderer();
+    renderer.render();
+    if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
+      break;
     }
-    // sim.updateRenderer();
-    // renderer.render();
-    // if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
-    //   break;
-    // }
   }
-  std::chrono::duration<double> elapsed_seconds = std::chrono::system_clock::now() - start;
-  std::cout << "elapsed time: " << elapsed_seconds.count() << "s\n";
-}
+

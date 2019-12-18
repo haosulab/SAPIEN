@@ -100,6 +100,9 @@ target_link_libraries(sapyen PRIVATE sapien)
 add_executable(cheetah test/cheetah.cpp)
 target_link_libraries(cheetah sapien)
 
+add_executable(ant test/ant.cpp)
+target_link_libraries(ant sapien)
+
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 
 # Below are the ROS specified content
