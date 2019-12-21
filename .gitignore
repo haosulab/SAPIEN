@@ -5,3 +5,4 @@ compile_commands.json
 cmake-build-debug
 /cmake-build-debug/
 /.ccls-cache/
+/.dir-locals.el
