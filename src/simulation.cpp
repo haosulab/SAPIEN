@@ -166,6 +166,7 @@ Simulation::~Simulation() {
   mRigidActors.clear();
   mScene->release();
   mCooking->release();
+  PxCloseExtensions();
   mPhysicsSDK->release();
 #ifdef _PVD
   if (mPvd && mTransport) {

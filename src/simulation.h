@@ -34,6 +34,9 @@ public:
   PxFoundation *mFoundation = nullptr;
   PxCooking *mCooking = nullptr;
   PxScene *mScene = nullptr;
+
+  std::vector<PxScene*> mScenes;
+
   PxReal mTimestep = 1.0f / 60.0f;
   Renderer::IPhysxRenderer *mRenderer = nullptr;
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;

@@ -20,10 +20,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
+find_package(ASSIMP REQUIRED)
+find_package(spdlog REQUIRED)
 
 include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
         "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
-        "src/renderer")
+        "src/renderer"
+        )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
@@ -37,6 +40,7 @@ include_directories(
         "3rd_party/optifuser/include"
         "src"
         "src/urdf"
+        "unittest"
 )
 
 include_directories("3rd_party/optifuser/3rd_party/imgui" "3rd_party/optifuser/3rd_party/imgui/examples")
@@ -64,6 +68,7 @@ endif ()
 add_subdirectory("3rd_party/optifuser")
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
+
 include_directories("3rd_party/pybind11/include")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
@@ -78,11 +83,13 @@ endif ()
 target_link_libraries(sapien -Wl,--start-group
         libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
         libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
-        libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a libPhysX_static_64.a
-        libPhysXVehicle_static_64.a libSnippetRender_static_64.a
-        libSnippetUtils_static_64.a -Wl,--end-group pthread ${OPENGL_LIBRARY} glfw
-        GLEW assimp dl optifuser stdc++fs tinyxml2 ${OPTIX_LIBRARY})
+        libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
+        libPhysX_static_64.a libPhysXVehicle_static_64.a
+        libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
+        pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
+        stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} )
 
+set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 add_executable(run "test/main.cpp")
@@ -102,6 +109,9 @@ target_link_libraries(cheetah sapien)
 
 add_executable(ant test/ant.cpp)
 target_link_libraries(ant sapien)
+
+add_executable(creation unittest/creation.cpp)
+target_link_libraries(creation sapien)
 
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 
