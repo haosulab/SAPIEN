@@ -4,6 +4,7 @@
 #include <iostream>
 #include <kinematics_articulation_wrapper.h>
 #include <memory>
+#include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
 #include <tinyxml2.h>
@@ -40,7 +41,7 @@ using namespace tinyxml2;
     const char *tag = child.Name();
 
 #define LOAD_CHILD_END()                                                                          \
-  std::cerr << "Unknown child type \"" << tag << "\". Ignored" << std::endl;                      \
+  spdlog::warn("Ignored URDF type <{}>.", tag);                                                   \
   }
 
 #define LOAD_CHILD_UNIQUE(type, name)                                                             \
@@ -70,15 +71,15 @@ using namespace tinyxml2;
 /* Error if a unique child is not set */
 #define CHECK_CHILD_UNIQUE(name)                                                                  \
   if (!name) {                                                                                    \
-    std::cerr << "Missing required child " << #name << std::endl;                                 \
-    exit(1);                                                                                      \
+    spdlog::critical("Missing required child <{}>", #name);                                       \
+    throw std::runtime_error("Missing required child");                                           \
   }
 
 /* Error if a child array is empty */
 #define CHECK_CHILD(name)                                                                         \
   if (name##_array.empty()) {                                                                     \
-    std::cerr << "Missing required children " << #name << std::endl;                              \
-    exit(1);                                                                                      \
+    spdlog::critical("Missing required children <{}>", #name);                                    \
+    throw std::runtime_error("Missing required child");                                           \
   }
 
 /* If a unique child is not set, run code */
@@ -276,12 +277,12 @@ struct Geometry : DomBase {
   Geometry(const XMLElement &elem) {
     const XMLElement *child = elem.FirstChildElement();
     if (!child) {
-      std::cerr << "gemoetry elements contains no child" << std::endl;
-      exit(1);
+      spdlog::critical("<geometry> contains no child");
+      throw std::runtime_error("<geometry> contains no child");
     }
     if (child->NextSibling()) {
-      std::cerr << "gemoetry elements contains more than 1 child" << std::endl;
-      exit(1);
+      spdlog::critical("<geometry> contains more than 1 child");
+      throw std::runtime_error("<geometry> contains more than 1 child");
     }
     const char *childTag = child->Name();
     if (strcmp(childTag, "box") == 0) {
@@ -498,8 +499,8 @@ struct Joint : DomBase {
   {
     if (type == "revolute" || type == "prismatic") {
       if (!limit) {
-        std::cerr << "Limit is required for " << type << std::endl;
-        exit(1);
+        spdlog::critical("Missing required attribute [limit] on <{}>", type);
+        throw std::runtime_error("Missing required attribute");
       }
     }
   }
@@ -531,8 +532,8 @@ struct Sensor : DomBase {
 
     const char *type_ = elem.Attribute("type");
     if (!type_) {
-      std::cerr << "Type is required for a sensor" << std::endl;
-      exit(1);
+      spdlog::critical("Missing attribute [type] on <sensor>");
+      throw std::runtime_error("Missing attribute [type] on <sensor>");
     }
     std::string type_string = type_;
     if (type_string == "camera") {
@@ -565,38 +566,38 @@ struct Sensor : DomBase {
     this->camera = std::make_unique<Camera>();
     auto camera = elem.FirstChildElement("camera");
     if (!camera) {
-      std::cerr << "color or depth camera is missing a camera child" << std::endl;
-      exit(1);
+      spdlog::critical("Missing <camera> child on color or depth camera sensor");
+      throw std::runtime_error("Missing <camera> child on color or depth camera sensor");
     }
     auto fovx = camera->FirstChildElement("horizontal_fov");
     auto fovy = camera->FirstChildElement("vertical_fov");
     if (!fovx && !fovy) {
-      std::cerr << "One of horizontal_fov and vertical_fov needs to be specified" << std::endl;
-      exit(1);
+      spdlog::critical("Missing horizontal_fov/vertical_fov on camera");
+      throw std::runtime_error("Missing horizontal_fov/vertical_fov on camera");
     }
     auto clip = camera->FirstChildElement("clip");
     auto image = camera->FirstChildElement("image");
     if (!clip || !image) {
-      std::cerr << "camera element requires a clip and an image child" << std::endl;
-      exit(1);
+      spdlog::critical("Missing <clip> or <image> on camera");
+      throw std::runtime_error("Missing <clip> or <image> on camera");
     }
     auto near = clip->FirstChildElement("near");
     auto far = clip->FirstChildElement("far");
     if (!near || !far) {
-      std::cerr << "clip element requires a near and a far child" << std::endl;
-      exit(1);
+      spdlog::critical("Missing near/far on clip");
+      throw std::runtime_error("Missing near/far on clip");
     }
     float nearValue = std::atof(near->GetText());
     float farValue = std::atof(far->GetText());
 
     if (image->FirstChildElement("format")) {
-      std::cerr << "image format will be ignored." << std::endl;
+      spdlog::warn("Ignored <format> on camera");
     }
     auto width = image->FirstChildElement("width");
     auto height = image->FirstChildElement("height");
     if (!width || !height) {
-      std::cerr << "image element requires a width and a height child" << std::endl;
-      exit(1);
+      spdlog::critical("Missing <width> or <height> on image");
+      throw std::runtime_error("Missing <width> or <height> on image");
     }
     float widthValue = std::atoi(width->GetText());
     float heightValue = std::atoi(height->GetText());
@@ -670,7 +671,8 @@ public:
   float defaultDensity = 1000.f;
 
   explicit URDFLoader(class Simulation &simulation);
-  ArticulationWrapper *load(const std::string &filename, PxMaterial *material = nullptr, PxReal density=1000);
+  ArticulationWrapper *load(const std::string &filename, PxMaterial *material = nullptr,
+                            PxReal density = 1000);
   class KinematicsArticulationWrapper *loadKinematic(const std::string &filename);
   class JointSystem *loadJointSystem(const std::string &filename);
 

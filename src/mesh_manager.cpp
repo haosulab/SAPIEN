@@ -88,7 +88,7 @@ static std::vector<PxVec3> getVerticesFromMeshFile(const std::string &filename) 
   const aiScene *scene = importer.ReadFile(filename, flags);
 
   if (!scene) {
-    SPDLOG_ERROR(importer.GetErrorString());
+    spdlog::error(importer.GetErrorString());
     return {};
   }
 
@@ -117,14 +117,14 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
                                            bool saveCache) {
 
   if (!fs::is_regular_file(filename)) {
-    SPDLOG_ERROR("File not found: " + filename);
+    spdlog::error("File not found: {}", filename);
     return nullptr;
   }
 
   std::string fullPath = fs::absolute(filename);
   auto it = mMeshRegistry.find(fullPath);
   if (it != mMeshRegistry.end()) {
-    SPDLOG_INFO("Using loaded mesh: " + filename);
+    spdlog::info("Using loaded mesh: {}", filename);
     return it->second.mesh;
   }
 
@@ -150,19 +150,19 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
   PxDefaultMemoryOutputStream buf;
   PxConvexMeshCookingResult::Enum result;
   if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
-    SPDLOG_ERROR("Failed to cook mesh: " + filename);
+    spdlog::error("Failed to cook mesh: {}", filename);
     return nullptr;
   }
   PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
   PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);
 
-  SPDLOG_INFO("Created " +
-              std::to_string(convexMesh->getNbVertices()) + " vertices from: " + filename);
+  spdlog::info("Created {} vertices from: {}", std::to_string(convexMesh->getNbVertices()),
+               filename);
 
   if (saveCache) {
     std::string cachedFilename = getCachedFilename(filename);
     exportMeshToFile(convexMesh, cachedFilename);
-    SPDLOG_INFO("Saved cache file: " + cachedFilename);
+    spdlog::info("Saved cache file: {}", cachedFilename);
   }
 
   mMeshRegistry[fullPath] = {/* cached */ cacheDidLoad || saveCache, /* filename */ fullPath,

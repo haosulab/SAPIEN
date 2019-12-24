@@ -1,5 +1,6 @@
 #include "optifuser_renderer.h"
 #include <objectLoader.h>
+#include <spdlog/spdlog.h>
 #define IMGUI_IMPL_OPENGL_LOADER_GLEW
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -432,10 +433,9 @@ std::vector<ICamera *> OptifuserRenderer::getCameras() {
 
 void OptifuserRenderer::addCamera(uint32_t uniqueId, std::string const &name, uint32_t width,
                                   uint32_t height, float fovx, float fovy, float near, float far) {
-  std::cout
-      << "Note: current camera implementation does not support non-square pixels, and fovy will "
-         "take precedence."
-      << std::endl;
+  spdlog::warn("Note: current camera implementation does not support non-square pixels, and fovy "
+               "will take precedence.");
+
   mMountedCameras[uniqueId] =
       std::make_unique<MountedCamera>(name, width, height, fovy, mScene.get());
   mMountedCameras[uniqueId]->near = near;
