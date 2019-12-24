@@ -321,7 +321,7 @@ void OptifuserRenderer::render() {
             delete pathTracer;
           }
           pathTracer = new Optifuser::OptixRenderer();
-          pathTracer->setBlackBackground();
+//          pathTracer->setBlackBackground();
           pathTracer->init(mContext->getWidth(), mContext->getHeight());
         } else {
         }

@@ -11,6 +11,7 @@
 #include "device/movo_free_base.hpp"
 #include "device/single_gripper.hpp"
 #include "device/xarm6.hpp"
+#include "device/panda.hpp"
 
 using namespace sapien::robot;
 namespace py = pybind11;
@@ -137,6 +138,10 @@ PYBIND11_MODULE(sapyen_robot, m) {
   py::class_<XArm6PS3, PS3RobotControl>(m, "XArm6PS3")
       .def(py::init<ControllerManger *>())
       .def("step", &XArm6PS3::step);
+
+  py::class_<PandaPS3, PS3RobotControl>(m, "PandaPS3")
+      .def(py::init<ControllerManger *>())
+      .def("step", &PandaPS3::step);
 
   py::class_<MOVOFreeBasePS3, PS3RobotControl>(m, "MOVOFreeBasePS3")
       .def(py::init<ControllerManger *>())
