@@ -9,8 +9,10 @@ namespace sapien {
 namespace Renderer {
 
 class OptifuserRenderer : public IPhysxRenderer {
+  const std::string glslVersion = "450";
+
 public:
-  OptifuserRenderer();
+  OptifuserRenderer(const std::string &version = "450");
 
   std::map<uint32_t, std::vector<Optifuser::Object *>> mObjectRegistry;
   std::map<uint32_t, std::vector<uint32_t>> mSegId2RenderId;
@@ -22,7 +24,7 @@ public:
   std::function<void(uint32_t, const GuiInfo &info)> syncCallback = {};
 
   std::function<void(uint32_t index, uint32_t action)> saveActionCallback = {};
-  std::function<void(uint32_t index, std::string const & name)> saveCallback = {};
+  std::function<void(uint32_t index, std::string const &name)> saveCallback = {};
 
   // IPhysxRenderer
   virtual void addRigidbody(uint32_t uniqueId, const std::string &meshFile,

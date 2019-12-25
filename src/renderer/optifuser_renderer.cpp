@@ -26,7 +26,7 @@ enum RenderMode {
 
 constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
-OptifuserRenderer::OptifuserRenderer() { init(); }
+OptifuserRenderer::OptifuserRenderer(const std::string &version) : glslVersion(version) { init(); }
 
 void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFile,
                                      const physx::PxVec3 &scale) {
@@ -135,7 +135,7 @@ void OptifuserRenderer::updateRigidbody(uint32_t uniqueId, const physx::PxTransf
 
 void OptifuserRenderer::init() {
   mContext = &Optifuser::GLFWRenderContext::Get(WINDOW_WIDTH, WINDOW_HEIGHT);
-  mContext->initGui();
+  mContext->initGui(glslVersion);
   mScene = std::make_shared<Optifuser::Scene>();
 
   cam.setUp({0, 0, 1});
@@ -145,11 +145,14 @@ void OptifuserRenderer::init() {
   cam.fovy = glm::radians(45.f);
   cam.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
 
-  mContext->renderer.setShadowShader("glsl_shader/shadow.vsh", "glsl_shader/shadow.fsh");
-  mContext->renderer.setGBufferShader("glsl_shader/gbuffer.vsh",
-                                      "glsl_shader/gbuffer_segmentation.fsh");
-  mContext->renderer.setDeferredShader("glsl_shader/deferred.vsh", "glsl_shader/deferred.fsh");
-  mContext->renderer.setAxisShader("glsl_shader/axes.vsh", "glsl_shader/axes.fsh");
+  mContext->renderer.setShadowShader("glsl_shader/" + glslVersion + "/shadow.vsh",
+                                     "glsl_shader/" + glslVersion + "/shadow.fsh");
+  mContext->renderer.setGBufferShader("glsl_shader/" + glslVersion + "/gbuffer.vsh",
+                                      "glsl_shader/" + glslVersion + "/gbuffer_segmentation.fsh");
+  mContext->renderer.setDeferredShader("glsl_shader/" + glslVersion + "/deferred.vsh",
+                                       "glsl_shader/" + glslVersion + "/deferred.fsh");
+  mContext->renderer.setAxisShader("glsl_shader/" + glslVersion + "/axes.vsh",
+                                   "glsl_shader/" + glslVersion + "/axes.fsh");
   mContext->renderer.enablePicking();
   mContext->renderer.enableAxisPass();
 }
@@ -322,7 +325,7 @@ void OptifuserRenderer::render() {
             delete pathTracer;
           }
           pathTracer = new Optifuser::OptixRenderer();
-//          pathTracer->setBlackBackground();
+          //          pathTracer->setBlackBackground();
           pathTracer->init(mContext->getWidth(), mContext->getHeight());
         } else {
         }

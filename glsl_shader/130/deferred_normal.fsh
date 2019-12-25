@@ -1,4 +1,5 @@
-#version 450
+#version 130
+#extension ARB_explicit_attrib_location : enable
 
 in vec2 texcoord;
 
@@ -72,5 +73,6 @@ void main() {
     color += albedo * directionalLights[i].emission * max(0, dot(lightDir, normal));
   }
 
-  FragColor = vec4(-csPosition.zzz / 10.f, 1.f);
+  FragColor = vec4(normal, 1.f);
+  // FragColor = vec4(-csPosition.zzz / 10.f, 1.f);
 }
