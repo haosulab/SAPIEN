@@ -1,3 +1,4 @@
+#pragma once
 #include <PxPhysicsAPI.h>
 #include <map>
 #include <memory>
@@ -12,18 +13,26 @@ struct MeshRecord {
   physx::PxConvexMesh *mesh;
 };
 
+struct MeshGroupRecord {
+  std::string filename;
+  std::vector<physx::PxConvexMesh *> meshes;
+};
+
 class MeshManager {
 private:
   std::string mCacheSuffix = ".convex.stl";
 
   Simulation *mSimulation;
   std::map<std::string, MeshRecord> mMeshRegistry;
+  std::map<std::string, MeshGroupRecord> mMeshGroupRegistry;
 
 public:
   MeshManager(Simulation *simulation);
 
   physx::PxConvexMesh *loadMesh(const std::string &filename, bool useCache = true,
                                 bool saveCache = true);
+
+  std::vector<physx::PxConvexMesh *> loadMeshGroup(const std::string &filename);
 
 public:
   // cache config

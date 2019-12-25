@@ -6,6 +6,7 @@
 #include "kinematics_articulation_wrapper.h"
 #include <cassert>
 #include <fstream>
+#include <spdlog/spdlog.h>
 #include <sstream>
 
 namespace sapien {
@@ -77,21 +78,21 @@ public:
 // MyContactModification myCM;
 MyContactCallback myCC;
 
-Simulation::Simulation() {
+Simulation::Simulation() : mMeshManager(this) {
   mFoundation =
       PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, gDefaultErrorCallback);
   // TODO: figure out the what "track allocation" means
 
 #ifdef _PVD
-  std::cerr << "Connecting to PVD..." << std::endl;
+  spdlog::info("Connecting to PVD...");
   mTransport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 1000);
   mPvd = PxCreatePvd(*mFoundation);
   mPvd->connect(*mTransport, PxPvdInstrumentationFlag::eDEBUG);
   if (!mPvd->isConnected()) {
-    std::cerr << "PVD connection failed." << std::endl;
+    spdlog::warn("Cannot connect to PVD");
     mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true);
   } else {
-    std::cout << "PVD connected." << std::endl;
+    spdlog::info("PVD connected");
     mPhysicsSDK =
         PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true, mPvd);
   }
@@ -100,23 +101,20 @@ Simulation::Simulation() {
 #endif
 
   if (mPhysicsSDK == NULL) {
-    std::cerr << "Error creating PhysX device." << std::endl;
-    std::cerr << "Exiting..." << std::endl;
-    exit(1);
+    spdlog::critical("Failed to create PhysX device");
+    throw std::runtime_error("Simulation Creation Failed");
   }
 
   mCooking =
       PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, PxCookingParams(PxTolerancesScale()));
   if (!mCooking) {
-    std::cerr << "Error creating cooking." << std::endl;
-    std::cerr << "Exiting..." << std::endl;
-    exit(1);
+    spdlog::critical("Failed to create PhysX Cooking");
+    throw std::runtime_error("Simulation Creation Failed");
   }
 
   if (!PxInitExtensions(*mPhysicsSDK, nullptr)) {
-    std::cerr << "PxInitExtensions failed!" << std::endl;
-    std::cerr << "Exiting..." << std::endl;
-    exit(1);
+    spdlog::critical("Failed to initialize PhysX Extensions");
+    throw std::runtime_error("Simulation Creation Failed");
   }
 
   // create scene
@@ -131,9 +129,8 @@ Simulation::Simulation() {
   if (!sceneDesc.cpuDispatcher) {
     mCpuDispatcher = PxDefaultCpuDispatcherCreate(1);
     if (!mCpuDispatcher) {
-      std::cerr << "PxDefaultCpuDispatcherCreate failed!" << std::endl;
-      std::cerr << "Exiting..." << std::endl;
-      exit(1);
+      spdlog::critical("Failed to create PhysX CPU dispatcher");
+      throw std::runtime_error("Scene Creation Failed");
     }
     sceneDesc.cpuDispatcher = mCpuDispatcher;
   }
@@ -143,9 +140,8 @@ Simulation::Simulation() {
 
   mScene = mPhysicsSDK->createScene(sceneDesc);
   if (!mScene) {
-    std::cerr << "createScene failed!" << std::endl;
-    std::cerr << "Exiting..." << std::endl;
-    exit(1);
+    spdlog::critical("Failed to create PhysX Scene");
+    throw std::runtime_error("Scene Creation Failed");
   }
   mScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.f);
   mScene->setVisualizationParameter(PxVisualizationParameter::eACTOR_AXES, 2.f);
@@ -286,7 +282,7 @@ void Simulation::setRenderer(Renderer::IPhysxRenderer *renderer) {
     default:
       break;
     }
-    
+
     std::vector<std::string> names;
     for (auto &s : simulationSaves) {
       names.push_back(s.name);
@@ -394,8 +390,8 @@ void Simulation::pack(const std::vector<PxReal> &data) {
     begin += dof;
     w->set_qf(std::vector<PxReal>(begin, begin + dof));
     begin += dof;
-    for (auto &body:w->links){
-      body->setForceAndTorque({0,0,0},{0,0,0});
+    for (auto &body : w->links) {
+      body->setForceAndTorque({0, 0, 0}, {0, 0, 0});
     }
   }
   assert(begin == data.end());

@@ -1,11 +1,10 @@
 #include "articulation_builder.h"
 #include "common.h"
-#include "mesh_registry.h"
+// #include "mesh_registry.h"
 #include <cassert>
 #include <numeric>
 
 namespace sapien {
-using namespace MeshUtil;
 
 ArticulationBuilder::ArticulationBuilder(Simulation *simulation)
     : mSimulation(simulation), mPhysicsSDK(simulation->mPhysicsSDK),
@@ -113,7 +112,7 @@ void ArticulationBuilder::addConvexObjShapeToLink(PxArticulationLink &link,
                                                   const PxTransform &pose, const PxVec3 &scale,
                                                   PxMaterial *material) {
   material = material ? material : mSimulation->mDefaultMaterial;
-  PxConvexMesh *mesh = loadObjMesh(filename, mPhysicsSDK, mCooking);
+  PxConvexMesh *mesh = mSimulation->getMeshManager().loadMesh(filename);
   if (mesh) {
     PxShape *shape =
         mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh, PxMeshScale(scale)), *material, true);
@@ -287,7 +286,6 @@ ArticulationWrapper *ArticulationBuilder::build(bool fixBase, bool balanceForce)
       buf2[i]->setSimulationFilterData(data);
     }
   }
-
 
   // for (size_t i = 0; i < nLinks; ++i) {
   //   if (PxArticulationJointBase *joint = links[i]->getInboundJoint()) {

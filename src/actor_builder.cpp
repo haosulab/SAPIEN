@@ -1,19 +1,17 @@
 #include "actor_builder.h"
 #include "common.h"
-#include "mesh_registry.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <vector>
 
 namespace sapien {
-using namespace MeshUtil;
 
 void ActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTransform &pose,
                                          const PxVec3 &scale, PxMaterial *material,
                                          PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
-  PxConvexMesh *mesh = loadObjMesh(filename, mPhysicsSDK, mCooking);
+  PxConvexMesh *mesh = mSimulation->getMeshManager().loadMesh(filename);
   if (!mesh) {
     return;
   }
@@ -33,7 +31,7 @@ void ActorBuilder::addMultipleConvexShapesFromObj(const std::string &filename,
                                                   const PxTransform &pose, const PxVec3 &scale,
                                                   PxMaterial *material, PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
-  auto meshes = loadMultipleObjMesh(filename, mPhysicsSDK, mCooking);
+  auto meshes = mSimulation->getMeshManager().loadMeshGroup(filename);
   std::cout << meshes.size() << " meshes loaded." << std::endl;
   for (auto mesh : meshes) {
     PxShape *shape =

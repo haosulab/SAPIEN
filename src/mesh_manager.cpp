@@ -25,8 +25,8 @@ static void exportMeshToFile(PxConvexMesh *pxMesh, const std::string &filename) 
     }
   }
   if (!stlId) {
-    std::cerr << "Export failed: you need to build Assimp with .stl export support." << std::endl;
-    return;
+    spdlog::critical("Export failed: you need to build Assimp with .stl export support.");
+    throw std::runtime_error("Assimp is not built with .stl support.");
   }
 
   Assimp::Exporter exporter;
@@ -102,6 +102,8 @@ static std::vector<PxVec3> getVerticesFromMeshFile(const std::string &filename) 
   return vertices;
 }
 
+MeshManager::MeshManager(Simulation *simulation) : mSimulation(simulation) {}
+
 void MeshManager::setCacheSuffix(const std::string &filename) {
   if (filename.empty()) {
     throw std::runtime_error("Invalid suffix: empty string.");
@@ -169,6 +171,60 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
                              /* mesh */ convexMesh};
 
   return convexMesh;
+}
+
+std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filename) {
+  std::vector<PxConvexMesh *> meshes;
+
+  if (!fs::is_regular_file(filename)) {
+    spdlog::error("File not found: {}", filename);
+    return meshes;
+  }
+
+  std::string fullPath = fs::absolute(filename);
+  auto it = mMeshGroupRegistry.find(fullPath);
+  if (it != mMeshGroupRegistry.end()) {
+    spdlog::info("Using loaded mesh group: {}", filename);
+    for (PxConvexMesh *mesh : it->second.meshes) {
+      meshes.push_back(mesh);
+    }
+    return meshes;
+  }
+
+  // import obj using assimp
+  Assimp::Importer importer;
+  uint32_t flags = aiProcess_Triangulate;
+  const aiScene *scene = importer.ReadFile(filename, flags);
+  if (!scene) {
+    spdlog::error(importer.GetErrorString());
+    return meshes;
+  }
+
+  for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
+    std::vector<PxVec3> vertices;
+    auto mesh = scene->mMeshes[i];
+    for (uint32_t v = 0; v < mesh->mNumVertices; ++v) {
+      auto vertex = mesh->mVertices[v];
+      vertices.push_back({vertex.x, vertex.y, vertex.z});
+    }
+
+    PxConvexMeshDesc convexDesc;
+    convexDesc.points.count = vertices.size();
+    convexDesc.points.stride = sizeof(PxVec3);
+    convexDesc.points.data = vertices.data();
+    convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // | PxConvexFlag::eSHIFT_VERTICES;
+    convexDesc.vertexLimit = 256;
+
+    PxDefaultMemoryOutputStream buf;
+    PxConvexMeshCookingResult::Enum result;
+    if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
+      spdlog::error("Failed to cook a mesh from file: {}", filename);
+    }
+    PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+    PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);
+    meshes.push_back(convexMesh);
+  }
+  return meshes;
 }
 
 } // namespace sapien

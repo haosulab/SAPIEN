@@ -3,6 +3,7 @@
 #include "filter_shader.h"
 #include "id_generator.h"
 #include "joint_system.h"
+#include "mesh_manager.h"
 #include "render_interface.h"
 #include "urdf/urdf_loader.h"
 #include <PxPhysicsAPI.h>
@@ -35,13 +36,19 @@ public:
   PxCooking *mCooking = nullptr;
   PxScene *mScene = nullptr;
 
-  std::vector<PxScene*> mScenes;
+  std::vector<PxScene *> mScenes;
 
   PxReal mTimestep = 1.0f / 60.0f;
   Renderer::IPhysxRenderer *mRenderer = nullptr;
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
   PxMaterial *mDefaultMaterial = nullptr;
   CollisionGroupManager collisionManager;
+
+private:
+  MeshManager mMeshManager;
+
+public:
+  inline MeshManager &getMeshManager() { return mMeshManager; }
 
 #ifdef _PVD
   PxPvd *mPvd = nullptr;
