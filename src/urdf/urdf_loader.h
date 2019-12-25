@@ -618,7 +618,6 @@ struct Sensor : DomBase {
     this->camera->far = farValue;
     this->camera->width = widthValue;
     this->camera->height = heightValue;
-    printf("Camera loaded!\n");
   }
 };
 

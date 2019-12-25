@@ -1,4 +1,5 @@
 #include "actor_builder.h"
+#include <spdlog/spdlog.h>
 #include "common.h"
 #include <fstream>
 #include <iostream>
@@ -13,13 +14,14 @@ void ActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTr
   material = material ? material : mSimulation->mDefaultMaterial;
   PxConvexMesh *mesh = mSimulation->getMeshManager().loadMesh(filename);
   if (!mesh) {
+    spdlog::error("Failed to load convex shape for actor");
     return;
   }
   PxShape *shape =
       mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh, PxMeshScale(scale)), *material, true);
   if (!shape) {
-    std::cerr << "create shape failed!" << std::endl;
-    exit(1);
+    spdlog::critical("Failed to create shape");
+    throw std::runtime_error("Failed to create shape");
   }
   shape->setLocalPose(pose);
   mShapes.push_back(shape);
@@ -32,13 +34,14 @@ void ActorBuilder::addMultipleConvexShapesFromObj(const std::string &filename,
                                                   PxMaterial *material, PxReal density) {
   material = material ? material : mSimulation->mDefaultMaterial;
   auto meshes = mSimulation->getMeshManager().loadMeshGroup(filename);
-  std::cout << meshes.size() << " meshes loaded." << std::endl;
+  spdlog::info("{} meshes loaded from {}", meshes.size(), filename);
+
   for (auto mesh : meshes) {
     PxShape *shape =
         mPhysicsSDK->createShape(PxConvexMeshGeometry(mesh, PxMeshScale(scale)), *material, true);
     if (!shape) {
-      std::cerr << "create shape failed!" << std::endl;
-      exit(1);
+      spdlog::critical("Failed to create shapes");
+      throw std::runtime_error("Failed to create shape");
     }
     shape->setLocalPose(pose);
     mShapes.push_back(shape);

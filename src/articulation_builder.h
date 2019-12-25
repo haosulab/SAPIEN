@@ -13,7 +13,6 @@ using namespace physx;
 class ArticulationBuilder {
   Simulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
-  PxCooking *mCooking = nullptr;
   Renderer::IPhysxRenderer *mRenderer = nullptr;
   PxArticulationReducedCoordinate *mArticulation = nullptr;
 

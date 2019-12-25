@@ -5,7 +5,6 @@
 #include "common.h"
 #include "joint_system.h"
 #include "kinematics_articulation_wrapper.h"
-#include "mesh_registry.h"
 #include "simulation.h"
 #include <eigen3/Eigen/Eigenvalues>
 #include <experimental/filesystem>
@@ -17,7 +16,6 @@ namespace URDF {
 
 using namespace tinyxml2;
 using namespace physx;
-using namespace MeshUtil;
 namespace fs = std::experimental::filesystem;
 
 static PxTransform poseFromOrigin(const Origin &origin, float scale = 1.f) {
@@ -51,7 +49,7 @@ static std::string getAbsPath(const std::string &urdfPath, const std::string &fi
     return filePath;
   }
   auto path = fs::path(urdfPath);
-  return fs::absolute(path).remove_filename().string() + filePath;
+  return fs::canonical(path).remove_filename().string() + filePath;
 }
 
 std::optional<std::string> findSRDF(const std::string &urdfName) {

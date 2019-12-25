@@ -12,7 +12,6 @@ using namespace physx;
 class ActorBuilder {
   Simulation *mSimulation = nullptr;
   PxPhysics *mPhysicsSDK = nullptr;
-  PxCooking *mCooking = nullptr;
   Renderer::IPhysxRenderer *mRenderer = nullptr;
 
   std::vector<physx_id_t> mRenderIds;
@@ -28,7 +27,7 @@ public:
 
   explicit ActorBuilder(Simulation *simulation)
       : mSimulation(simulation), mPhysicsSDK(simulation->mPhysicsSDK),
-        mCooking(simulation->mCooking), mRenderer(simulation->mRenderer) {}
+        mRenderer(simulation->mRenderer) {}
 
   /* add convex obj */
   void addConvexShapeFromObj(const std::string &filename,
@@ -38,8 +37,8 @@ public:
 
   void addMultipleConvexShapesFromObj(const std::string &filename,
                                       const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                                      const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
-                                      PxReal density = 1000.f);
+                                      const PxVec3 &scale = {1, 1, 1},
+                                      PxMaterial *material = nullptr, PxReal density = 1000.f);
 
   void addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                    const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr,

@@ -1,6 +1,5 @@
 #include "articulation_builder.h"
 #include "common.h"
-// #include "mesh_registry.h"
 #include <cassert>
 #include <numeric>
 
@@ -8,7 +7,7 @@ namespace sapien {
 
 ArticulationBuilder::ArticulationBuilder(Simulation *simulation)
     : mSimulation(simulation), mPhysicsSDK(simulation->mPhysicsSDK),
-      mCooking(simulation->mCooking), mRenderer(simulation->mRenderer) {
+      mRenderer(simulation->mRenderer) {
   mArticulation = mPhysicsSDK->createArticulationReducedCoordinate();
 }
 

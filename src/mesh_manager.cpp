@@ -123,7 +123,7 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
     return nullptr;
   }
 
-  std::string fullPath = fs::absolute(filename);
+  std::string fullPath = fs::canonical(filename);
   auto it = mMeshRegistry.find(fullPath);
   if (it != mMeshRegistry.end()) {
     spdlog::info("Using loaded mesh: {}", filename);
@@ -181,7 +181,7 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
     return meshes;
   }
 
-  std::string fullPath = fs::absolute(filename);
+  std::string fullPath = fs::canonical(filename);
   auto it = mMeshGroupRegistry.find(fullPath);
   if (it != mMeshGroupRegistry.end()) {
     spdlog::info("Using loaded mesh group: {}", filename);
