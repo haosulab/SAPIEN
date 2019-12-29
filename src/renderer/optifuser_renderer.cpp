@@ -28,35 +28,40 @@ constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
 
 OptifuserRenderer::OptifuserRenderer(const std::string &version) : glslVersion(version) { init(); }
 
-void OptifuserRenderer::addRigidbody(uint32_t uniqueId, const std::string &objFile,
-                                     const physx::PxVec3 &scale) {
+void OptifuserRenderer::resetScene(uint32_t sceneId) {
+  if (mSceneData.size() <= sceneId) {
+    mSceneData.resize(sceneId + 1);
+  }
+  mSceneData[sceneId] = {};
+  mSceneData[sceneId].scene = std::make_unique<Optifuser::Scene>();
+}
+
+void OptifuserRenderer::addRigidbody(uint32_t sceneId, uint32_t uniqueId,
+                                     const std::string &objFile, const physx::PxVec3 &scale) {
   auto objects = Optifuser::LoadObj(objFile);
-  mObjectRegistry[uniqueId] = {};
+  mSceneData[sceneId].renderId2Objects[uniqueId] = {};
   if (objects.empty()) {
     std::cerr << "Damaged file detected: " << objFile << std::endl;
   }
   for (auto &obj : objects) {
-    mObjectRegistry[uniqueId].push_back(obj.get());
+    mSceneData[sceneId].renderId2Objects[uniqueId].push_back(obj.get());
     obj->scale = {scale.x, scale.y, scale.z};
     obj->setObjId(uniqueId);
-    mScene->addObject(std::move(obj));
+    mSceneData[sceneId].scene->addObject(std::move(obj));
   }
-
-#ifdef _VERBOSE
-  printf("Adding Object %d from %s\n", uniqueId, objFile.c_str());
-#endif
 }
 
-void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::Enum type,
-                                     const physx::PxVec3 &scale, const physx::PxVec3 &color) {
+void OptifuserRenderer::addRigidbody(uint32_t sceneId, uint32_t uniqueId,
+                                     physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+                                     const physx::PxVec3 &color) {
   switch (type) {
   case physx::PxGeometryType::eBOX: {
     auto obj = Optifuser::NewFlatCube();
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z, 1};
     obj->setObjId(uniqueId);
-    mObjectRegistry[uniqueId] = {obj.get()};
-    mScene->addObject(std::move(obj));
+    mSceneData[sceneId].renderId2Objects[uniqueId] = {obj.get()};
+    mSceneData[sceneId].scene->addObject(std::move(obj));
     break;
   }
   case physx::PxGeometryType::eSPHERE: {
@@ -64,8 +69,8 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z, 1};
     obj->setObjId(uniqueId);
-    mObjectRegistry[uniqueId] = {obj.get()};
-    mScene->addObject(std::move(obj));
+    mSceneData[sceneId].renderId2Objects[uniqueId] = {obj.get()};
+    mSceneData[sceneId].scene->addObject(std::move(obj));
     break;
   }
   case physx::PxGeometryType::ePLANE: {
@@ -73,8 +78,8 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     obj->scale = {scale.x, scale.y, scale.z};
     obj->material.kd = {color.x, color.y, color.z, 1};
     obj->setObjId(uniqueId);
-    mObjectRegistry[uniqueId] = {obj.get()};
-    mScene->addObject(std::move(obj));
+    mSceneData[sceneId].renderId2Objects[uniqueId] = {obj.get()};
+    mSceneData[sceneId].scene->addObject(std::move(obj));
     break;
   }
   case physx::PxGeometryType::eCAPSULE: {
@@ -82,8 +87,8 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
     obj->scale = {1, 1, 1};
     obj->material.kd = {color.x, color.y, color.z, 1};
     obj->setObjId(uniqueId);
-    mObjectRegistry[uniqueId] = {obj.get()};
-    mScene->addObject(std::move(obj));
+    mSceneData[sceneId].renderId2Objects[uniqueId] = {obj.get()};
+    mSceneData[sceneId].scene->addObject(std::move(obj));
     break;
   }
   default:
@@ -92,42 +97,54 @@ void OptifuserRenderer::addRigidbody(uint32_t uniqueId, physx::PxGeometryType::E
   }
 }
 
-void OptifuserRenderer::setSegmentationId(uint32_t uniqueId, uint32_t segmentationId) {
-  if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
-    throw std::runtime_error("Invalid render id specified when setting segmentation id.");
+void OptifuserRenderer::setSegmentationId(uint32_t sceneId, uint32_t uniqueId,
+                                          uint32_t segmentationId) {
+
+  if (mSceneData[sceneId].renderId2Objects.find(uniqueId) ==
+      mSceneData[sceneId].renderId2Objects.end()) {
+    spdlog::critical("Invalid render id {} specified when setting segmentation id at "
+                     "OptifuserRenderer::setSegmentationId");
+    throw std::runtime_error("Invalid render id specified when setting segmentation id");
   }
-  for (auto &obj : mObjectRegistry[uniqueId]) {
+  for (auto &obj : mSceneData[sceneId].renderId2Objects[uniqueId]) {
     obj->setSegmentId(segmentationId);
   }
-  mSegId2RenderId[segmentationId].push_back(uniqueId);
+  mSceneData[sceneId].segId2RenderId[segmentationId].push_back(uniqueId);
 }
 
-void OptifuserRenderer::setSegmentationCustomData(uint32_t segmentationId,
+void OptifuserRenderer::setSegmentationCustomData(uint32_t sceneId, uint32_t segmentationId,
                                                   std::vector<float> const &customData) {
-  if (mSegId2RenderId.find(segmentationId) == mSegId2RenderId.end()) {
-    throw std::runtime_error("Invalid segmentation id.");
+  if (mSceneData[sceneId].segId2RenderId.find(segmentationId) ==
+      mSceneData[sceneId].segId2RenderId.end()) {
+    spdlog::critical("Invalid segmentation id {} specified in scene {} at "
+                     "OptifuserRenderer::setSegmentationCustomData",
+                     segmentationId, sceneId);
+    throw std::runtime_error("Invalid segmentation id");
   }
-  for (uint32_t renderId : mSegId2RenderId[segmentationId]) {
-    for (auto obj : mObjectRegistry[renderId]) {
+  for (uint32_t renderId : mSceneData[sceneId].segId2RenderId[segmentationId]) {
+    for (auto obj : mSceneData[sceneId].renderId2Objects[renderId]) {
       obj->setUserData(customData);
     }
   }
 }
 
-void OptifuserRenderer::removeRigidbody(uint32_t uniqueId) {
-  if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
-    std::cerr << "Object does not exist" << std::endl;
-    exit(1);
+void OptifuserRenderer::removeRigidbody(uint32_t sceneId, uint32_t uniqueId) {
+  if (mSceneData[sceneId].renderId2Objects.find(uniqueId) ==
+      mSceneData[sceneId].renderId2Objects.end()) {
+    spdlog::error("Failed to remove non-exist object with render id {} in scene {}", uniqueId,
+                  sceneId);
   }
-  mObjectRegistry.erase(uniqueId);
+  mSceneData[sceneId].renderId2Objects.erase(uniqueId);
 }
 
-void OptifuserRenderer::updateRigidbody(uint32_t uniqueId, const physx::PxTransform &transform) {
-  if (mObjectRegistry.find(uniqueId) == mObjectRegistry.end()) {
-    std::cerr << "Object does not exist" << std::endl;
-    exit(1);
+void OptifuserRenderer::updateRigidbody(uint32_t sceneId, uint32_t uniqueId,
+                                        const physx::PxTransform &transform) {
+  if (mSceneData[sceneId].renderId2Objects.find(uniqueId) ==
+      mSceneData[sceneId].renderId2Objects.end()) {
+    spdlog::error("Failed to update non-exist object with render id {} in scene {}", uniqueId,
+                  sceneId);
   }
-  for (auto obj : mObjectRegistry[uniqueId]) {
+  for (auto obj : mSceneData[sceneId].renderId2Objects[uniqueId]) {
     obj->position = {transform.p.x, transform.p.y, transform.p.z};
     obj->setRotation({transform.q.w, transform.q.x, transform.q.y, transform.q.z});
   }
@@ -136,7 +153,7 @@ void OptifuserRenderer::updateRigidbody(uint32_t uniqueId, const physx::PxTransf
 void OptifuserRenderer::init() {
   mContext = &Optifuser::GLFWRenderContext::Get(WINDOW_WIDTH, WINDOW_HEIGHT);
   mContext->initGui(glslVersion);
-  mScene = std::make_shared<Optifuser::Scene>();
+  // mScene = std::make_shared<Optifuser::Scene>();
 
   cam.setUp({0, 0, 1});
   cam.setForward({0, 1, 0});
@@ -159,6 +176,13 @@ void OptifuserRenderer::init() {
 
 void OptifuserRenderer::destroy() {
   // TODO: check if scene needs special destroy handling
+}
+
+Optifuser::Scene *OptifuserRenderer::getScene(uint32_t sceneId) {
+  if (sceneId >= mSceneData.size()) {
+    return nullptr;
+  }
+  return mSceneData[sceneId].scene.get();
 }
 
 void OptifuserRenderer::render() {
@@ -218,42 +242,48 @@ void OptifuserRenderer::render() {
     }
 #endif
   }
-  mContext->renderer.renderScene(*mScene, cam);
-  if (renderMode == SEGMENTATION) {
-    mContext->renderer.displaySegmentation();
-  } else if (renderMode == CUSTOM) {
-    mContext->renderer.displayUserTexture();
-#ifdef _USE_OPTIX
-  } else if (renderMode == PATHTRACER) {
-    // path tracer
-    std::cout << "Rendering with path tracer" << std::endl;
-    pathTracer->numRays = 4;
-    pathTracer->max_iterations = 100000;
-    pathTracer->renderScene(*mScene, cam);
-    pathTracer->display();
-#endif
-  } else {
-    mContext->renderer.displayLighting();
-  }
 
-  static int pickedId = 0, pickedRenderId = 0;
-  static GuiInfo pickedInfo;
-  if (Optifuser::getInput().getMouseDown(GLFW_MOUSE_BUTTON_LEFT)) {
-    int x, y;
-    Optifuser::getInput().getCursor(x, y);
-    pickedId = mContext->renderer.pickSegmentationId(x, y);
-    if (pickedId) {
-      pickedRenderId = mContext->renderer.pickObjectId(x, y);
+  auto currentScene = getScene(mSelectedSceneId);
+
+  if (currentScene) {
+    mContext->renderer.renderScene(*currentScene, cam);
+
+    if (renderMode == SEGMENTATION) {
+      mContext->renderer.displaySegmentation();
+    } else if (renderMode == CUSTOM) {
+      mContext->renderer.displayUserTexture();
+#ifdef _USE_OPTIX
+    } else if (renderMode == PATHTRACER) {
+      // path tracer
+      pathTracer->numRays = 4;
+      pathTracer->max_iterations = 100000;
+      pathTracer->renderScene(*currentScene, cam);
+      pathTracer->display();
+#endif
     } else {
-      pickedRenderId = 0;
+      mContext->renderer.displayLighting();
     }
   }
-  if (pickedId) {
-    pickedInfo = queryCallback(pickedId);
-    auto &pos = pickedInfo.linkInfo.transform.p;
-    auto &quat = pickedInfo.linkInfo.transform.q;
-    mScene->clearAxes();
-    mScene->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
+
+  static GuiInfo pickedInfo;
+  if (currentScene) {
+    if (Optifuser::getInput().getMouseDown(GLFW_MOUSE_BUTTON_LEFT)) {
+      int x, y;
+      Optifuser::getInput().getCursor(x, y);
+      pickedId = mContext->renderer.pickSegmentationId(x, y);
+      if (pickedId) {
+        pickedRenderId = mContext->renderer.pickObjectId(x, y);
+      } else {
+        pickedRenderId = 0;
+      }
+    }
+    if (pickedId) {
+      pickedInfo = queryCallback(pickedId);
+      auto &pos = pickedInfo.linkInfo.transform.p;
+      auto &quat = pickedInfo.linkInfo.transform.q;
+      currentScene->clearAxes();
+      currentScene->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
+    }
   }
 
   static const uint32_t imguiWindowSize = 300;
@@ -361,22 +391,27 @@ void OptifuserRenderer::render() {
 
       if (ImGui::CollapsingHeader("Mounted Cameras")) {
         ImGui::RadioButton("None##camera", &camIndex, -1);
-        for (auto &cam : mMountedCameras) {
-          ImGui::RadioButton(
-              (mMountedCameras[cam.first]->getName() + "##camera" + std::to_string(cam.first))
-                  .c_str(),
-              &camIndex, cam.first);
-        }
 
-        if (camIndex >= 0) {
-          uint32_t width = mMountedCameras[camIndex]->getWidth();
-          uint32_t height = mMountedCameras[camIndex]->getHeight();
-          mMountedCameras[camIndex]->takePicture();
-          ImGui::Image(
-              reinterpret_cast<ImTextureID>(
-                  mMountedCameras[camIndex]->mRenderContext->renderer.outputtex),
-              ImVec2(imguiWindowSize, imguiWindowSize / static_cast<float>(width) * height),
-              ImVec2(0, 1), ImVec2(1, 0));
+        if (currentScene) {
+          auto &mountedCameras = mSceneData[mSelectedSceneId].mountedCameras;
+
+          for (auto &cam : mountedCameras) {
+            ImGui::RadioButton(
+                (mountedCameras[cam.first]->getName() + "##camera" + std::to_string(cam.first))
+                    .c_str(),
+                &camIndex, cam.first);
+          }
+
+          if (camIndex >= 0) {
+            uint32_t width = mountedCameras[camIndex]->getWidth();
+            uint32_t height = mountedCameras[camIndex]->getHeight();
+            mountedCameras[camIndex]->takePicture();
+            ImGui::Image(
+                reinterpret_cast<ImTextureID>(
+                    mountedCameras[camIndex]->mRenderContext->renderer.outputtex),
+                ImVec2(imguiWindowSize, imguiWindowSize / static_cast<float>(width) * height),
+                ImVec2(0, 1), ImVec2(1, 0));
+          }
         }
       }
 
@@ -426,51 +461,77 @@ void OptifuserRenderer::bindSyncCallback(
   syncCallback = callback;
 }
 
-std::vector<ICamera *> OptifuserRenderer::getCameras() {
+std::vector<ICamera *> OptifuserRenderer::getCameras(uint32_t sceneId) {
   std::vector<ICamera *> output;
-  for (auto &cam : mMountedCameras) {
+  for (auto &cam : mSceneData[sceneId].mountedCameras) {
     output.push_back(cam.second.get());
   }
   return output;
 }
 
-void OptifuserRenderer::addCamera(uint32_t uniqueId, std::string const &name, uint32_t width,
-                                  uint32_t height, float fovx, float fovy, float near, float far) {
+void OptifuserRenderer::addCamera(uint32_t sceneId, uint32_t uniqueId, std::string const &name,
+                                  uint32_t width, uint32_t height, float fovx, float fovy,
+                                  float near, float far) {
+  auto scene = getScene(sceneId);
+  if (!scene) {
+    spdlog::error("Failed to add camera to non-exist scene");
+    return;
+  }
   spdlog::warn("Note: current camera implementation does not support non-square pixels, and fovy "
                "will take precedence.");
-
-  mMountedCameras[uniqueId] =
-      std::make_unique<MountedCamera>(name, width, height, fovy, mScene.get());
-  mMountedCameras[uniqueId]->near = near;
-  mMountedCameras[uniqueId]->far = far;
+  auto cam = std::make_unique<MountedCamera>(name, width, height, fovy, scene);
+  cam->near = near;
+  cam->far = far;
+  mSceneData[sceneId].mountedCameras[uniqueId] = std::move(cam);
 }
 
-void OptifuserRenderer::updateCamera(uint32_t uniqueId, physx::PxTransform const &transform) {
-  assert(mMountedCameras.find(uniqueId) != mMountedCameras.end());
-  mMountedCameras[uniqueId]->position = {transform.p.x, transform.p.y, transform.p.z};
-  mMountedCameras[uniqueId]->setRotation(
+void OptifuserRenderer::updateCamera(uint32_t sceneId, uint32_t uniqueId,
+                                     physx::PxTransform const &transform) {
+  auto scene = getScene(sceneId);
+  if (!scene) {
+    spdlog::error("Failed to add camera to non-exist scene {}", sceneId);
+    return;
+  }
+  if (mSceneData[sceneId].mountedCameras.find(uniqueId) == mSceneData[sceneId].mountedCameras.end()) {
+    spdlog::error("Failed to find camera with id {} for update", uniqueId);
+    return;
+  }
+
+  mSceneData[sceneId].mountedCameras[uniqueId]->position = {transform.p.x, transform.p.y,
+                                                              transform.p.z};
+  mSceneData[sceneId].mountedCameras[uniqueId]->setRotation(
       {transform.q.w, transform.q.x, transform.q.y, transform.q.z});
 }
 
-void OptifuserRenderer::setAmbientLight(std::array<float, 3> color) {
-  mScene->setAmbientLight({color[0], color[1], color[2]});
+void OptifuserRenderer::setAmbientLight(uint32_t sceneId, std::array<float, 3> color) {
+  mSceneData[sceneId].scene->setAmbientLight({color[0], color[1], color[2]});
 }
 
-void OptifuserRenderer::setShadowLight(std::array<float, 3> direction,
+void OptifuserRenderer::setShadowLight(uint32_t sceneId, std::array<float, 3> direction,
                                        std::array<float, 3> color) {
-  mScene->setShadowLight(
+  mSceneData[sceneId].scene->setShadowLight(
       {{direction[0], direction[1], direction[2]}, {color[0], color[1], color[2]}});
 }
 
-void OptifuserRenderer::addDirectionalLight(std::array<float, 3> direction,
+void OptifuserRenderer::addDirectionalLight(uint32_t sceneId, std::array<float, 3> direction,
                                             std::array<float, 3> color) {
-  mScene->addDirectionalLight(
+  mSceneData[sceneId].scene->addDirectionalLight(
       {{direction[0], direction[1], direction[2]}, {color[0], color[1], color[2]}});
 }
 
-void OptifuserRenderer::addPointLight(std::array<float, 3> position, std::array<float, 3> color) {
+void OptifuserRenderer::addPointLight(uint32_t sceneId, std::array<float, 3> position,
+                                      std::array<float, 3> color) {
 
-  mScene->addPointLight({{position[0], position[1], position[2]}, {color[0], color[1], color[2]}});
+  mSceneData[sceneId].scene->addPointLight(
+      {{position[0], position[1], position[2]}, {color[0], color[1], color[2]}});
+}
+
+void OptifuserRenderer::selectScene(uint32_t sceneId) {
+  if (sceneId >= mSceneData.size() || !mSceneData[sceneId].scene) {
+    spdlog::critical("Failed to select non-exist scene");
+    throw std::runtime_error("Failed to select non-exist scene");
+  }
+  mSelectedSceneId = sceneId;
 }
 
 void OptifuserRenderer::showWindow() { mContext->showWindow(); }

@@ -92,8 +92,8 @@ target_link_libraries(sapien -Wl,--start-group
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-add_executable(run "test/main.cpp")
-target_link_libraries(run sapien)
+add_executable(main "test/main.cpp")
+target_link_libraries(main sapien)
 
 add_executable(test_kinematic "test/test_kinematic.cpp")
 target_link_libraries(test_kinematic sapien)

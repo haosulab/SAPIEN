@@ -25,75 +25,75 @@ namespace fs = std::experimental::filesystem;
 
 using namespace sapien;
 
-void test1() {
-  Renderer::OptifuserRenderer renderer;
+// void test1() {
+//   Renderer::OptifuserRenderer renderer;
 
-  Simulation sim;
-  sim.setRenderer(&renderer);
-  sim.setTimestep(1.f / 60.f);
+//   Simulation sim;
+//   sim.setRenderer(&renderer);
+//   sim.setTimestep(1.f / 60.f);
 
-  auto builder = sim.createActorBuilder();
-  for (const auto entry :
-       fs::directory_iterator("/home/fx/mobility_mesh/resources/46437-4/objs")) {
-    builder->addConvexShapeFromObj(entry.path());
-    builder->addObjVisual(entry.path());
-  }
-  builder->build(true)->setGlobalPose(PxTransform({0, 1, 0}, PxIdentity));
+//   auto builder = sim.createActorBuilder();
+//   for (const auto entry :
+//        fs::directory_iterator("/home/fx/mobility_mesh/resources/46437-4/objs")) {
+//     builder->addConvexShapeFromObj(entry.path());
+//     builder->addObjVisual(entry.path());
+//   }
+//   builder->build(true)->setGlobalPose(PxTransform({0, 1, 0}, PxIdentity));
 
-  while (true) {
-    sim.step();
-    sim.updateRenderer();
-    renderer.render();
-    if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
-      break;
-    }
-  }
-}
+//   while (true) {
+//     sim.step();
+//     sim.updateRenderer();
+//     renderer.render();
+//     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
+//       break;
+//     }
+//   }
+// }
 
-void test2() {
-  Renderer::OptifuserRenderer renderer;
+// void test2() {
+//   Renderer::OptifuserRenderer renderer;
 
-  Simulation sim;
-  sim.setRenderer(&renderer);
-  sim.setTimestep(1.f / 60.f);
+//   Simulation sim;
+//   sim.setRenderer(&renderer);
+//   sim.setTimestep(1.f / 60.f);
 
-  auto builder = sim.createArticulationBuilder();
-  auto link1 = builder->addLink(nullptr);
-  builder->addBoxShapeToLink(*link1);
-  builder->addBoxVisualToLink(*link1);
-  builder->updateLinkMassAndInertia(*link1);
+//   auto builder = sim.createArticulationBuilder();
+//   auto link1 = builder->addLink(nullptr);
+//   builder->addBoxShapeToLink(*link1);
+//   builder->addBoxVisualToLink(*link1);
+//   builder->updateLinkMassAndInertia(*link1);
 
-  auto link2 = builder->addLink(link1);
-  builder->addBoxShapeToLink(*link2);
-  builder->addBoxVisualToLink(*link2);
-  builder->updateLinkMassAndInertia(*link2);
+//   auto link2 = builder->addLink(link1);
+//   builder->addBoxShapeToLink(*link2);
+//   builder->addBoxVisualToLink(*link2);
+//   builder->updateLinkMassAndInertia(*link2);
 
-  auto joint = static_cast<PxArticulationJointReducedCoordinate *>(link2->getInboundJoint());
-  joint->setJointType(PxArticulationJointType::eREVOLUTE);
-  joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eFREE);
-  joint->setParentPose({{0, 0, 0}, PxIdentity});
-  joint->setChildPose({{0, 3, 0}, PxIdentity});
+//   auto joint = static_cast<PxArticulationJointReducedCoordinate *>(link2->getInboundJoint());
+//   joint->setJointType(PxArticulationJointType::eREVOLUTE);
+//   joint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eFREE);
+//   joint->setParentPose({{0, 0, 0}, PxIdentity});
+//   joint->setChildPose({{0, 3, 0}, PxIdentity});
 
-  ArticulationWrapper *articulationWrapper = builder->build(true);
-  auto articulation = articulationWrapper->articulation;
-  auto cache = articulationWrapper->cache;
+//   ArticulationWrapper *articulationWrapper = builder->build(true);
+//   auto articulation = articulationWrapper->articulation;
+//   auto cache = articulationWrapper->cache;
 
-  auto mesh = Optifuser::NewMeshGrid();
-  mesh->position = {0, 0.001, 0};
-  renderer.mScene->addObject(std::move(mesh));
+//   auto mesh = Optifuser::NewMeshGrid();
+//   mesh->position = {0, 0.001, 0};
+//   renderer.mScene->addObject(std::move(mesh));
 
-  sim.step();
-  while (true) {
-    sim.step();
-    sim.updateRenderer();
-    articulation->copyInternalStateToCache(*cache, PxArticulationCache::eALL);
-    std::cout << cache->jointPosition[0] << std::endl;
-    renderer.render();
-    if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
-      break;
-    }
-  }
-}
+//   sim.step();
+//   while (true) {
+//     sim.step();
+//     sim.updateRenderer();
+//     articulation->copyInternalStateToCache(*cache, PxArticulationCache::eALL);
+//     std::cout << cache->jointPosition[0] << std::endl;
+//     renderer.render();
+//     if (Optifuser::getInput().getKeyState(GLFW_KEY_Q)) {
+//       break;
+//     }
+//   }
+// }
 
 void reset(ArticulationWrapper *wrapper) {
   wrapper->articulation->copyInternalStateToCache(*wrapper->cache, PxArticulationCache::eALL);
@@ -110,6 +110,7 @@ float rand_float() {
 
 void test3() {
   Renderer::OptifuserRenderer renderer("130");
+  renderer.resetScene(0);
 
   renderer.cam.position = {0, -2, 3};
   renderer.cam.setForward({0, 1, 0});
@@ -117,9 +118,9 @@ void test3() {
   renderer.cam.rotateYawPitch(0, -0.5);
 
   std::array<float, 3> color = {1 * 4, 0.773 * 4, 0.561 * 4};
-  renderer.addPointLight({0, 0, 4}, color);
-  renderer.addPointLight({0, -4, 4}, color);
-  renderer.addPointLight({0, -2, 4}, color);
+  renderer.addPointLight(0, {0, 0, 4}, color);
+  renderer.addPointLight(0, {0, -4, 4}, color);
+  renderer.addPointLight(0, {0, -2, 4}, color);
 
   Simulation sim;
   sim.setRenderer(&renderer);

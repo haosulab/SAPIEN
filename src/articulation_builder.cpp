@@ -143,8 +143,8 @@ physx_id_t ArticulationBuilder::addBoxVisualToLink(PxArticulationLink &link,
     mLink2LinkId[&link] = IDGenerator::LinkId()->next();
   }
   physx_id_t newId = IDGenerator::RenderId()->next();
-  mRenderer->addRigidbody(newId, PxGeometryType::eBOX, size, color);
-  mRenderer->setSegmentationId(newId, mLink2LinkId[&link]);
+  mRenderer->addRigidbody(0, newId, PxGeometryType::eBOX, size, color);
+  mRenderer->setSegmentationId(0, newId, mLink2LinkId[&link]);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Actor[newId] = &link;
@@ -166,8 +166,8 @@ physx_id_t ArticulationBuilder::addCapsuleVisualToLink(PxArticulationLink &link,
     mLink2LinkId[&link] = IDGenerator::LinkId()->next();
   }
   physx_id_t newId = IDGenerator::RenderId()->next();
-  mRenderer->addRigidbody(newId, PxGeometryType::eCAPSULE, {length, radius, radius}, color);
-  mRenderer->setSegmentationId(newId, mLink2LinkId[&link]);
+  mRenderer->addRigidbody(0, newId, PxGeometryType::eCAPSULE, {length, radius, radius}, color);
+  mRenderer->setSegmentationId(0, newId, mLink2LinkId[&link]);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Actor[newId] = &link;
@@ -189,8 +189,8 @@ physx_id_t ArticulationBuilder::addSphereVisualToLink(PxArticulationLink &link,
     mLink2LinkId[&link] = IDGenerator::LinkId()->next();
   }
   physx_id_t newId = IDGenerator::RenderId()->next();
-  mRenderer->addRigidbody(newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
-  mRenderer->setSegmentationId(newId, mLink2LinkId[&link]);
+  mRenderer->addRigidbody(0, newId, PxGeometryType::eSPHERE, {radius, radius, radius}, color);
+  mRenderer->setSegmentationId(0, newId, mLink2LinkId[&link]);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Actor[newId] = &link;
@@ -212,8 +212,8 @@ physx_id_t ArticulationBuilder::addObjVisualToLink(PxArticulationLink &link,
     mLink2LinkId[&link] = IDGenerator::LinkId()->next();
   }
   physx_id_t newId = IDGenerator::RenderId()->next();
-  mRenderer->addRigidbody(newId, filename, scale);
-  mRenderer->setSegmentationId(newId, mLink2LinkId[&link]);
+  mRenderer->addRigidbody(0, newId, filename, scale);
+  mRenderer->setSegmentationId(0, newId, mLink2LinkId[&link]);
   mRenderIds.push_back(newId);
   mSimulation->mRenderId2InitialPose[newId] = pose;
   mSimulation->mRenderId2Actor[newId] = &link;

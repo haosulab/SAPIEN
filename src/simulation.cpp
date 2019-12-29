@@ -199,10 +199,10 @@ void Simulation::updateRenderer() {
   for (auto idParent : mRenderId2Actor) {
     auto pose = idParent.second->getGlobalPose() * mRenderId2InitialPose[idParent.first];
 
-    mRenderer->updateRigidbody(idParent.first, pose);
+    mRenderer->updateRigidbody(0, idParent.first, pose);
   }
   for (auto &[id, pose] : mCameraId2InitialPose) {
-    mRenderer->updateCamera(id, mMountedCamera2MountedActor[id]->getGlobalPose() * pose);
+    mRenderer->updateCamera(0, id, mMountedCamera2MountedActor[id]->getGlobalPose() * pose);
   }
 }
 
@@ -330,7 +330,7 @@ physx_id_t Simulation::addMountedCamera(std::string const &name, PxRigidActor *a
   mMountedCamera2MountedActor[cameraId] = actor;
   mCameraId2InitialPose[cameraId] = pose * PxTransform(PxVec3(0), PxQuat(rot));
 
-  mRenderer->addCamera(cameraId, name, width, height, fovx, fovy, near, far);
+  mRenderer->addCamera(0, cameraId, name, width, height, fovx, fovy, near, far);
 
   return cameraId;
 }
