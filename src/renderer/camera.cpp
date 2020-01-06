@@ -1,12 +1,12 @@
 #include "camera.h"
+#include "optifuser_renderer.h"
 #include <optifuser.h>
 
 namespace sapien {
 namespace Renderer {
 
-MountedCamera::MountedCamera(std::string const &name_, uint32_t width, uint32_t height,
-                             float fovy_, Optifuser::Scene *scene,
-                             std::string const &shaderVersion)
+OptifuserCamera::OptifuserCamera(std::string const &name_, uint32_t width, uint32_t height,
+                             float fovy_, OptifuserScene *scene, std::string const &shaderDir)
     : mWidth(width), mHeight(height), mScene(scene) {
   name = name_;
   fovy = fovy_;
@@ -16,50 +16,48 @@ MountedCamera::MountedCamera(std::string const &name_, uint32_t width, uint32_t 
 
   // initialize render context
   mRenderContext = Optifuser::OffscreenRenderContext::Create(width, height);
-  mRenderContext->renderer.setShadowShader("glsl_shader/" + shaderVersion + "/shadow.vsh",
-                                           "glsl_shader/" + shaderVersion + "/shadow.fsh");
-  mRenderContext->renderer.setGBufferShader("glsl_shader/" + shaderVersion + "/gbuffer.vsh",
-                                            "glsl_shader/" + shaderVersion +
-                                                "/gbuffer_segmentation.fsh");
-  mRenderContext->renderer.setDeferredShader("glsl_shader/" + shaderVersion + "/deferred.vsh",
-                                             "glsl_shader/" + shaderVersion + "/deferred.fsh");
-  mRenderContext->renderer.setAxisShader("glsl_shader/" + shaderVersion + "/axes.vsh",
-                                         "glsl_shader/" + shaderVersion + "/axes.fsh");
+  mRenderContext->renderer.setShadowShader(shaderDir + "/shadow.vsh", shaderDir + "/shadow.fsh");
+  mRenderContext->renderer.setGBufferShader(shaderDir + "/gbuffer.vsh",
+                                            shaderDir + "/gbuffer_segmentation.fsh");
+  mRenderContext->renderer.setDeferredShader(shaderDir + "/deferred.vsh",
+                                             shaderDir + "/deferred.fsh");
+  mRenderContext->renderer.setAxisShader(shaderDir + "/axes.vsh", shaderDir + "/axes.fsh");
 }
 
-uint32_t MountedCamera::getWidth() const { return mWidth; }
-uint32_t MountedCamera::getHeight() const { return mHeight; }
-float MountedCamera::getFovy() const { return fovy; }
+IPxrScene *OptifuserCamera::getScene() { return mScene; };
 
-void MountedCamera::takePicture() { mRenderContext->renderer.renderScene(*mScene, *this); }
+uint32_t OptifuserCamera::getWidth() const { return mWidth; }
+uint32_t OptifuserCamera::getHeight() const { return mHeight; }
+float OptifuserCamera::getFovy() const { return fovy; }
 
-std::vector<float> MountedCamera::getColorRGBA() { return mRenderContext->renderer.getLighting(); }
-std::vector<float> MountedCamera::getAlbedoRGBA() { return mRenderContext->renderer.getAlbedo(); }
-std::vector<float> MountedCamera::getNormalRGBA() { return mRenderContext->renderer.getNormal(); }
-std::vector<float> MountedCamera::getDepth() { return mRenderContext->renderer.getDepth(); }
-std::vector<int> MountedCamera::getSegmentation() {
+void OptifuserCamera::takePicture() {
+  mRenderContext->renderer.renderScene(*mScene->getScene(), *this);
+}
+
+std::vector<float> OptifuserCamera::getColorRGBA() { return mRenderContext->renderer.getLighting(); }
+std::vector<float> OptifuserCamera::getAlbedoRGBA() { return mRenderContext->renderer.getAlbedo(); }
+std::vector<float> OptifuserCamera::getNormalRGBA() { return mRenderContext->renderer.getNormal(); }
+std::vector<float> OptifuserCamera::getDepth() { return mRenderContext->renderer.getDepth(); }
+std::vector<int> OptifuserCamera::getSegmentation() {
   return mRenderContext->renderer.getSegmentation();
 }
-std::vector<int> MountedCamera::getObjSegmentation() {
+std::vector<int> OptifuserCamera::getObjSegmentation() {
   return mRenderContext->renderer.getSegmentation2();
 }
 
-SensorPose MountedCamera::getSensorPose() const {
-  return {{position.x, position.y, position.z}, {rotation.w, rotation.x, rotation.y, rotation.z}};
+physx::PxTransform OptifuserCamera::getPose() const {
+  return physx::PxTransform({position.x, position.y, position.z},
+                            physx::PxQuat(rotation.x, rotation.y, rotation.z, rotation.w));
 }
-void MountedCamera::setSensorPose(const SensorPose &pose) {
-  {
-    auto [x, y, z] = pose.positionXYZ;
-    position = {x, y, z};
-  }
-  {
-    auto [w, x, y, z] = pose.rotationWXYZ;
-    // TODO: needs testing
-    rotation = {w, x, y, z};
-  }
+
+void OptifuserCamera::setPose(physx::PxTransform const &pose) {
+  position = {pose.p.x, pose.p.y, pose.p.z};
+  rotation = {pose.q.w, pose.q.x, pose.q.y, pose.q.z};
 }
-const std::string &MountedCamera::getName() const { return name; }
-glm::mat4 MountedCamera::getCameraMatrix() {
+
+const std::string &OptifuserCamera::getName() const { return name; }
+
+glm::mat4 OptifuserCamera::getCameraMatrix() {
   float f = static_cast<float>(mHeight) / std::tan(fovy / 2) / 2;
   auto matrix = glm::mat3(1.0);
   matrix[0][0] = f;
@@ -71,7 +69,7 @@ glm::mat4 MountedCamera::getCameraMatrix() {
 
 #ifdef _USE_OPTIX
 
-std::vector<float> MountedCamera::takeRaytracedPicture(uint32_t samplesPerPixel,
+std::vector<float> OptifuserCamera::takeRaytracedPicture(uint32_t samplesPerPixel,
                                                        uint32_t reflectionCount) {
   auto pathTracer = new Optifuser::OptixRenderer();
   pathTracer->init(mWidth, mHeight);
@@ -80,7 +78,7 @@ std::vector<float> MountedCamera::takeRaytracedPicture(uint32_t samplesPerPixel,
   pathTracer->invalidateCamera();
 
   for (uint32_t i = 0; i < samplesPerPixel; ++i) {
-    pathTracer->renderScene(*mScene, *this);
+    pathTracer->renderScene(*mScene->getScene(), *this);
   }
   auto result = pathTracer->getResult();
   delete pathTracer;

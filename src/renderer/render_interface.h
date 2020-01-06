@@ -9,36 +9,39 @@
 namespace sapien {
 namespace Renderer {
 
-struct JointGuiInfo {
-  std::string name;
-  std::array<float, 2> limits;
-  float value;
-};
+class ISensor;
+class ICamera;
+class IPxrScene;
+class IPxrRigidbody;
+class IPxrRenderer;
 
-struct ArticulationGuiInfo {
-  std::string name = "";
-  std::vector<JointGuiInfo> jointInfo;
-};
+// struct JointGuiInfo {
+//   std::string name;
+//   std::array<float, 2> limits;
+//   float value;
+// };
 
-struct LinkGuiInfo {
-  std::string name = "";
-  physx::PxTransform transform;
-};
+// struct ArticulationGuiInfo {
+//   std::string name = "";
+//   std::vector<JointGuiInfo> jointInfo;
+// };
 
-struct GuiInfo {
-  ArticulationGuiInfo articulationInfo;
-  LinkGuiInfo linkInfo;
-};
+// struct LinkGuiInfo {
+//   std::string name = "";
+//   physx::PxTransform transform;
+// };
 
-struct SensorPose {
-  std::array<float, 3> positionXYZ;
-  std::array<float, 4> rotationWXYZ;
-};
+// struct GuiInfo {
+//   ArticulationGuiInfo articulationInfo;
+//   LinkGuiInfo linkInfo;
+// };
+
 
 class ISensor {
 public:
-  virtual SensorPose getSensorPose() const = 0;
-  virtual void setSensorPose(const SensorPose &pose) = 0;
+  virtual physx::PxTransform getPose() const = 0;
+  virtual void setPose(physx::PxTransform const &pose) = 0;
+  virtual IPxrScene *getScene() = 0;
   virtual ~ISensor() {}
 };
 
@@ -58,47 +61,75 @@ public:
   virtual std::vector<int> getObjSegmentation() = 0;
 };
 
-class ICameraManager {
+class IPxrRigidbody {
 public:
-  virtual std::vector<ICamera *> getCameras(uint32_t sceneId) = 0;
-  virtual void addCamera(uint32_t sceneId, uint32_t uniqueId, std::string const &name,
-                         uint32_t width, uint32_t height, float fovx, float fovy, float near,
-                         float far) = 0;
-  virtual void updateCamera(uint32_t sceneId, uint32_t uniqueId,
-                            physx::PxTransform const &transform) = 0;
-  virtual ~ICameraManager() {}
+  virtual void setUniqueId(uint32_t uniqueId) = 0;
+  virtual void setSegmentationId(uint32_t segmentationId) = 0;
+  virtual void setSegmentationCustomData(std::vector<float> const &customData) = 0;
+  virtual void setInitialPose(const physx::PxTransform &transform) = 0;
+  virtual void update(const physx::PxTransform &transform) = 0;
+
+  virtual void destroy() = 0;
 };
 
-class IPhysxRenderer : public ICameraManager {
+class IPxrScene {
+
 public:
-  /* call this function to initialize a scene */
-  virtual void resetScene(uint32_t sceneId) = 0;
+  virtual IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) = 0;
 
-  /* This function is called when a rigid body is added to a scene */
-  virtual void addRigidbody(uint32_t sceneId, uint32_t uniqueId, const std::string &meshFile,
-                            const physx::PxVec3 &scale) = 0;
-  virtual void addRigidbody(uint32_t sceneId, uint32_t uniqueId, physx::PxGeometryType::Enum type,
-                            const physx::PxVec3 &scale, const physx::PxVec3 &color) = 0;
-  virtual void setSegmentationId(uint32_t sceneId, uint32_t uniqueId, uint32_t segmentationId) = 0;
-  virtual void setSegmentationCustomData(uint32_t sceneId, uint32_t segmentationId,
-                                         std::vector<float> const &customData) = 0;
+  virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+                                      const physx::PxVec3 &color) = 0;
 
-  /* This function is called when a rigid body is removed from a scene */
-  virtual void removeRigidbody(uint32_t sceneId, uint32_t uniqueId) = 0;
+  virtual void removeRigidbody(IPxrRigidbody *body) {}
 
-  /* This function is called when a rigid body is updated */
-  virtual void updateRigidbody(uint32_t sceneId, uint32_t uniqueId,
-                               const physx::PxTransform &transform) = 0;
+  virtual ICamera *addCamera(std::string const &name, uint32_t width, uint32_t height, float fovx,
+                             float fovy, float near, float far,
+                             std::string const &shaderDir = "glsl_shader/130") = 0;
+  virtual void removeCamera(ICamera *camera) = 0;
 
-  virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) = 0;
-  virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) = 0;
+  virtual std::vector<ICamera *> getCameras() = 0;
 
-  /* Save and load */
-  virtual void setSaveNames(std::vector<std::string> const &names) = 0;
-  virtual void bindSaveActionCallback(std::function<void(uint32_t index, uint32_t action)>) = 0;
-  virtual void bindSaveCallback(std::function<void(uint32_t index, std::string const &name)>) = 0;
+  virtual void destroy() = 0;
 };
+
+class IPxrRenderer {
+public:
+  virtual IPxrScene *createScene() = 0;
+  virtual void removeScene(IPxrScene *scene) = 0;
+};
+
+// class IPhysxRenderer : public ICameraManager {
+// public:
+// public:
+//   /* call this function to initialize a scene */
+//   virtual void resetScene(uint32_t sceneId) = 0;
+
+//   /* This function is called when a rigid body is added to a scene */
+//   virtual void addRigidbody(uint32_t sceneId, uint32_t uniqueId, const std::string &meshFile,
+//                             const physx::PxVec3 &scale) = 0;
+//   virtual void addRigidbody(uint32_t sceneId, uint32_t uniqueId, physx::PxGeometryType::Enum
+//   type,
+//                             const physx::PxVec3 &scale, const physx::PxVec3 &color) = 0;
+//   virtual void setSegmentationId(uint32_t sceneId, uint32_t uniqueId, uint32_t segmentationId)
+//   = 0; virtual void setSegmentationCustomData(uint32_t sceneId, uint32_t segmentationId,
+//                                          std::vector<float> const &customData) = 0;
+
+//   /* This function is called when a rigid body is removed from a scene */
+//   virtual void removeRigidbody(uint32_t sceneId, uint32_t uniqueId) = 0;
+
+//   /* This function is called when a rigid body is updated */
+//   virtual void updateRigidbody(uint32_t sceneId, uint32_t uniqueId,
+//                                const physx::PxTransform &transform) = 0;
+
+//   virtual void bindQueryCallback(std::function<GuiInfo(uint32_t)>) = 0;
+//   virtual void bindSyncCallback(std::function<void(uint32_t, const GuiInfo &info)>) = 0;
+
+//   /* Save and load */
+//   virtual void setSaveNames(std::vector<std::string> const &names) = 0;
+//   virtual void bindSaveActionCallback(std::function<void(uint32_t index, uint32_t action)>) =
+//   0; virtual void bindSaveCallback(std::function<void(uint32_t index, std::string const
+//   &name)>) = 0;
+// };
 
 } // namespace Renderer
-
 } // namespace sapien

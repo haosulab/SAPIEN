@@ -6,13 +6,12 @@ using physx_id_t = uint32_t;
 
 class IDGenerator {
 public:
-  static IDGenerator *RenderId();
-  static IDGenerator *LinkId();
-  physx_id_t next() { return _id++; }
+  inline physx_id_t next() { return _id++; }
+
+  inline IDGenerator() : _id(1) {}
 
 private:
-  IDGenerator() : _id(1) {}
   physx_id_t _id;
 };
 
-}
+} // namespace sapien

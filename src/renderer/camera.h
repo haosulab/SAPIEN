@@ -6,15 +6,17 @@
 
 namespace sapien {
 namespace Renderer {
-class MountedCamera : public Optifuser::CameraSpec, public ICamera {
+class OptifuserScene;
+
+class OptifuserCamera : public Optifuser::CameraSpec, public ICamera {
 public:
   uint32_t mWidth, mHeight;
   std::unique_ptr<Optifuser::OffscreenRenderContext> mRenderContext;
-  Optifuser::Scene *mScene;
+  OptifuserScene *mScene;
 
 public:
-  MountedCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
-                Optifuser::Scene *scene, std::string const &shaderVersion = "130");
+  OptifuserCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
+                OptifuserScene *scene, std::string const &shaderDir = "glsl_shader/130");
 
   // ICamera
   virtual const std::string &getName() const override;
@@ -29,9 +31,11 @@ public:
   virtual std::vector<int> getSegmentation() override;
   virtual std::vector<int> getObjSegmentation() override;
 
+  virtual IPxrScene *getScene() override;
+
   // ISensor
-  virtual SensorPose getSensorPose() const override;
-  virtual void setSensorPose(const SensorPose &pose) override;
+  virtual physx::PxTransform getPose() const override;
+  virtual void setPose(physx::PxTransform const &pose) override;
 
 #ifdef _USE_OPTIX
   std::vector<float> takeRaytracedPicture(uint32_t samplesPerPixel = 65536,

@@ -1,5 +1,5 @@
 #version 130
-#extension ARB_explicit_attrib_location : enable
+#extension GL_ARB_explicit_attrib_location : enable
 
 in vec2 texcoord;
 

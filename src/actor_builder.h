@@ -1,7 +1,6 @@
 #pragma once
 #include "id_generator.h"
 #include "render_interface.h"
-#include "simulation.h"
 #include <PxPhysicsAPI.h>
 #include <memory>
 #include <vector>
@@ -9,12 +8,18 @@
 namespace sapien {
 using namespace physx;
 
-class ActorBuilder {
-  Simulation *mSimulation = nullptr;
-  PxPhysics *mPhysicsSDK = nullptr;
-  Renderer::IPhysxRenderer *mRenderer = nullptr;
+class SScene;
+class Simulation;
+class SActor;
 
-  std::vector<physx_id_t> mRenderIds;
+namespace Renderer {
+class IPxrRididbody;
+}
+
+class ActorBuilder {
+  SScene *mScene;
+
+  std::vector<Renderer::IPxrRigidbody *> mRenderBodies;
   std::vector<physx::PxShape *> mShapes;
   std::vector<physx::PxReal> mDensities;
   uint32_t mCount = 0;
@@ -22,14 +27,10 @@ class ActorBuilder {
   physx_id_t mLinkId = 0;
 
 public:
+  explicit ActorBuilder(SScene *scene);
   ActorBuilder(ActorBuilder const &other) = delete;
-  const ActorBuilder &operator=(ActorBuilder const &other) = delete;
+  ActorBuilder &operator=(ActorBuilder const &other) = delete;
 
-  explicit ActorBuilder(Simulation *simulation)
-      : mSimulation(simulation), mPhysicsSDK(simulation->mPhysicsSDK),
-        mRenderer(simulation->mRenderer) {}
-
-  /* add convex obj */
   void addConvexShapeFromObj(const std::string &filename,
                              const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                              const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
@@ -50,6 +51,7 @@ public:
   void addSphereShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
                       PxMaterial *material = nullptr, PxReal density = 1000.f);
 
+  /* Visual functions */
   physx_id_t addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                           const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
                           std::string const &name = "");
@@ -65,8 +67,10 @@ public:
                           const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                           const PxVec3 &scale = {1, 1, 1}, std::string const &name = "");
 
-  PxRigidActor *build(bool isStatic = false, bool isKinematic = false,
-                      std::string const &name = "", bool addToScene = true);
+  SActor *build(bool isStatic = false, bool isKinematic = false, std::string const &name = "");
+
+private:
+  Simulation *getSimulation();
 };
 
 } // namespace sapien
