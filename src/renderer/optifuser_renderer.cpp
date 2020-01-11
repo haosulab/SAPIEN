@@ -68,8 +68,8 @@ void OptifuserRigidbody::destroy() { mParentScene->removeRigidbody(this); }
 //======== End Rigidbody ========//
 
 //======== Begin Scene ========//
-OptifuserScene::OptifuserScene(OptifuserRenderer *renderer)
-    : mParentRenderer(renderer), mScene(std::make_unique<Optifuser::Scene>()) {}
+OptifuserScene::OptifuserScene(OptifuserRenderer *renderer, std::string const &name)
+    : mParentRenderer(renderer), mScene(std::make_unique<Optifuser::Scene>()), mName(name) {}
 
 Optifuser::Scene *OptifuserScene::getScene() { return mScene.get(); }
 
@@ -196,13 +196,6 @@ OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::stri
   mContext = &Optifuser::GLFWRenderContext::Get(WINDOW_WIDTH, WINDOW_HEIGHT);
   mContext->initGui(glslVersion);
 
-  cam.setUp({0, 0, 1});
-  cam.setForward({1, 0, 0});
-  cam.position = {0, 0, 1};
-  cam.rotateYawPitch(0, 0);
-  cam.fovy = glm::radians(45.f);
-  cam.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
-
   mContext->renderer.setShadowShader(glslDir + "/shadow.vsh", glslDir + "/shadow.fsh");
   mContext->renderer.setGBufferShader(glslDir + "/gbuffer.vsh",
                                       glslDir + "/gbuffer_segmentation.fsh");
@@ -212,8 +205,8 @@ OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::stri
   mContext->renderer.enableAxisPass();
 }
 
-IPxrScene *OptifuserRenderer::createScene() {
-  mScenes.push_back(std::make_unique<OptifuserScene>(this));
+IPxrScene *OptifuserRenderer::createScene(std::string const &name) {
+  mScenes.push_back(std::make_unique<OptifuserScene>(this, name));
   return mScenes.back().get();
 }
 
@@ -221,9 +214,6 @@ void OptifuserRenderer::removeScene(IPxrScene *scene) {
   std::remove_if(mScenes.begin(), mScenes.end(), [scene](auto &s) { return scene == s.get(); });
 }
 
-void OptifuserRenderer::showWindow() { mContext->showWindow(); }
-
-void OptifuserRenderer::hideWindow() { mContext->hideWindow(); }
 
 //======== End Renderer ========//
 
@@ -656,264 +646,16 @@ void OptifuserRenderer::hideWindow() { mContext->hideWindow(); }
 //   }
 //   mContext->swapBuffers();
 // }
-void OptifuserRenderer::render(OptifuserScene &currentScene) {
-#ifdef _USE_OPTIX
-  static Optifuser::OptixRenderer *pathTracer = nullptr;
-#endif
 
-  static int renderMode = 0;
-  static float moveSpeed = 1.f;
-  mContext->processEvents();
-
-  float dt = 0.005f * moveSpeed;
-  if (Optifuser::getInput().getKeyState(GLFW_KEY_W)) {
-    cam.moveForwardRight(dt, 0);
-#ifdef _USE_OPTIX
-    if (renderMode == PATHTRACER) {
-      pathTracer->invalidateCamera();
-    }
-#endif
-  } else if (Optifuser::getInput().getKeyState(GLFW_KEY_S)) {
-    cam.moveForwardRight(-dt, 0);
-#ifdef _USE_OPTIX
-    if (renderMode == PATHTRACER) {
-      pathTracer->invalidateCamera();
-    }
-#endif
-  } else if (Optifuser::getInput().getKeyState(GLFW_KEY_A)) {
-    cam.moveForwardRight(0, -dt);
-#ifdef _USE_OPTIX
-    if (renderMode == PATHTRACER) {
-      pathTracer->invalidateCamera();
-    }
-#endif
-  } else if (Optifuser::getInput().getKeyState(GLFW_KEY_D)) {
-    cam.moveForwardRight(0, dt);
-#ifdef _USE_OPTIX
-    if (renderMode == PATHTRACER) {
-      pathTracer->invalidateCamera();
-    }
-#endif
-  }
-
-  cam.aspect =
-      static_cast<float>(mContext->getWidth()) / static_cast<float>(mContext->getHeight());
-
-  static bool renderGui = true;
-  if (Optifuser::getInput().getKeyDown(GLFW_KEY_E)) {
-    renderGui = !renderGui;
-  }
-  if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-    double dx, dy;
-    Optifuser::getInput().getCursorDelta(dx, dy);
-    cam.rotateYawPitch(-dx / 1000.f, -dy / 1000.f);
-#ifdef _USE_OPTIX
-    if (renderMode == PATHTRACER) {
-      pathTracer->invalidateCamera();
-    }
-#endif
-  }
-
-  mContext->renderer.renderScene(*currentScene.getScene(), cam);
-
-  if (renderMode == SEGMENTATION) {
-    mContext->renderer.displaySegmentation();
-  } else if (renderMode == CUSTOM) {
-    mContext->renderer.displayUserTexture();
-#ifdef _USE_OPTIX
-  } else if (renderMode == PATHTRACER) {
-    // path tracer
-    pathTracer->numRays = 4;
-    pathTracer->max_iterations = 100000;
-    pathTracer->renderScene(*currentScene.getScene(), cam);
-    pathTracer->display();
-#endif
-  } else {
-    mContext->renderer.displayLighting();
-  }
-
-  static int pickedId = -1, pickedRenderId = -1;
-  // static GuiInfo pickedInfo;
-
-  if (Optifuser::getInput().getMouseDown(GLFW_MOUSE_BUTTON_LEFT)) {
-    int x, y;
-    Optifuser::getInput().getCursor(x, y);
-    pickedId = mContext->renderer.pickSegmentationId(x, y);
-    if (pickedId) {
-      pickedRenderId = mContext->renderer.pickObjectId(x, y);
-    } else {
-      pickedRenderId = 0;
-    }
-  }
-  if (pickedId) {
-    // pickedInfo = queryCallback(pickedId);
-    // auto &pos = pickedInfo.linkInfo.transform.p;
-    // auto &quat = pickedInfo.linkInfo.transform.q;
-    // currentScene->clearAxes();
-    // currentScene->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
-  }
-
-  static const uint32_t imguiWindowSize = 300;
-  static int camIndex = -1;
-  if (renderGui) {
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-
-    ImGui::Begin("Save##window");
-    {
-      if (ImGui::CollapsingHeader("Save")) {
-        static char buf[1000];
-        ImGui::InputText("##input_buffer", buf, 1000);
-        if (ImGui::Button("Save##button")) {
-          std::cout << "save called" << std::endl;
-          // saveCallback(saveNames.size(), std::string(buf));
-        }
-      }
-      if (ImGui::CollapsingHeader("Load")) {
-        for (uint32_t i = 0; i < saveNames.size(); ++i) {
-          ImGui::Text("%s", saveNames[i].c_str());
-          ImGui::SameLine(100);
-          if (ImGui::Button(("load##" + std::to_string(i)).c_str())) {
-            // saveActionCallback(i, 0);
-          }
-          ImGui::SameLine(150);
-          if (ImGui::Button(("delete##" + std::to_string(i)).c_str())) {
-            // saveActionCallback(i, 1);
-          }
-        }
-      }
-    }
-    ImGui::End();
-
-    ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mContext->getHeight()));
-
-    ImGui::Begin("Render Options");
-    {
-      if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {
-          mContext->renderer.setDeferredShader(mGlslDir + "/deferred.vsh",
-                                               mGlslDir + "/deferred.fsh");
-        };
-        if (ImGui::RadioButton("Albedo", &renderMode, RenderMode::ALBEDO)) {
-          mContext->renderer.setDeferredShader(mGlslDir + "/deferred.vsh",
-                                               mGlslDir + "/deferred_albedo.fsh");
-        }
-        if (ImGui::RadioButton("Normal", &renderMode, RenderMode::NORMAL)) {
-          mContext->renderer.setDeferredShader(mGlslDir + "/deferred.vsh",
-                                               mGlslDir + "/deferred_normal.fsh");
-        }
-        if (ImGui::RadioButton("Depth", &renderMode, RenderMode::DEPTH)) {
-          mContext->renderer.setDeferredShader(mGlslDir + "/deferred.vsh",
-                                               mGlslDir + "/deferred_depth.fsh");
-        }
-        if (ImGui::RadioButton("Segmentation", &renderMode, RenderMode::SEGMENTATION)) {
-          mContext->renderer.setGBufferShader(mGlslDir + "/gbuffer.vsh",
-                                              mGlslDir + "/gbuffer_segmentation.fsh");
-        }
-        if (ImGui::RadioButton("Custom", &renderMode, RenderMode::CUSTOM)) {
-          mContext->renderer.setGBufferShader(mGlslDir + "/gbuffer.vsh",
-                                              mGlslDir + "/gbuffer_segmentation.fsh");
-        }
-#ifdef _USE_OPTIX
-        if (ImGui::RadioButton("PathTracer", &renderMode, RenderMode::PATHTRACER)) {
-          if (pathTracer) {
-            delete pathTracer;
-          }
-          pathTracer = new Optifuser::OptixRenderer();
-          //          pathTracer->setBlackBackground();
-          pathTracer->init(mContext->getWidth(), mContext->getHeight());
-        } else {
-        }
-#endif
-      }
-
-#ifdef _USE_OPTIX
-      if (renderMode == PATHTRACER) {
-        glEnable(GL_FRAMEBUFFER_SRGB);
-      } else {
-        glDisable(GL_FRAMEBUFFER_SRGB);
-      }
-#endif
-
-      if (ImGui::CollapsingHeader("Main Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::Text("Position");
-        ImGui::Text("%-4.3f %-4.3f %-4.3f", cam.position.x, cam.position.y, cam.position.z);
-        ImGui::Text("Forward");
-        auto forward = cam.getRotation() * glm::vec3(0, 0, -1);
-        ImGui::Text("%-4.3f %-4.3f %-4.3f", forward.x, forward.y, forward.z);
-        ImGui::Text("Fov");
-        ImGui::SliderAngle("##fov(y)", &cam.fovy, 1.f, 90.f);
-        ImGui::Text("Move speed");
-        ImGui::SliderFloat("##speed", &moveSpeed, 1.f, 100.f);
-        ImGui::Text("Width: %d", mContext->getWidth());
-        ImGui::SameLine();
-        ImGui::Text("Height: %d", mContext->getHeight());
-        ImGui::SameLine();
-        ImGui::Text("Aspect: %.2f", cam.aspect);
-        ImGui::Text("Picked link id: %d", pickedId);
-        ImGui::Text("Picked render id: %d", pickedRenderId);
-      }
-
-      if (ImGui::CollapsingHeader("Mounted Cameras")) {
-        ImGui::RadioButton("None##camera", &camIndex, -1);
-
-        auto cameras = currentScene.getCameras();
-
-        for (uint32_t i = 0; i < cameras.size(); ++i) {
-          ImGui::RadioButton((cameras[i]->getName() + "##camera" + std::to_string(i)).c_str(),
-                             &camIndex, i);
-        }
-
-        if (camIndex >= 0) {
-          uint32_t width = cameras[camIndex]->getWidth();
-          uint32_t height = cameras[camIndex]->getHeight();
-          cameras[camIndex]->takePicture();
-          ImGui::Image(
-              reinterpret_cast<ImTextureID>(static_cast<OptifuserCamera *>(cameras[camIndex])
-                                                ->mRenderContext->renderer.outputtex),
-              ImVec2(imguiWindowSize, imguiWindowSize / static_cast<float>(width) * height),
-              ImVec2(0, 1), ImVec2(1, 0));
-        }
-      }
-
-      if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::Text("Frame Time: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                    ImGui::GetIO().Framerate);
-      }
-    }
-    ImGui::End();
-
-    // if (pickedId) {
-    //   ImGui::SetNextWindowPos(ImVec2(mContext->getWidth() - imguiWindowSize, 0));
-    //   ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mContext->getHeight()));
-    //   ImGui::Begin("Selected Object");
-    //   {
-    //     if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
-    //       ImGui::Text("name: %s", pickedInfo.linkInfo.name.c_str());
-    //     }
-    //     if (ImGui::CollapsingHeader("Articulation", ImGuiTreeNodeFlags_DefaultOpen)) {
-    //       ImGui::Text("name: %s", pickedInfo.articulationInfo.name.c_str());
-    //       ImGui::Text(" dof: %ld", pickedInfo.articulationInfo.jointInfo.size());
-    //       int i = 0;
-    //       for (auto &jointInfo : pickedInfo.articulationInfo.jointInfo) {
-    //         ImGui::Text("%s", jointInfo.name.c_str());
-    //         if (ImGui::SliderFloat(("##" + std::to_string(++i)).c_str(), &jointInfo.value,
-    //                                jointInfo.limits[0], jointInfo.limits[1])) {
-    //           // syncCallback(pickedId, pickedInfo);
-    //         }
-    //       }
-    //     }
-    //   }
-    //   ImGui::End();
-    // }
-
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-  }
-  mContext->swapBuffers();
-}
+// void OptifuserRenderer::setCurrentScene(OptifuserScene &currentScene) {
+//   OptifuserScene *scene = &currentScene;
+//   mSceneIndex =
+//       std::find_if(mScenes.begin(), mScenes.end(), [scene](auto &s) { return s.get() == scene; }) -
+//       mScenes.begin();
+//   if (mSceneIndex >= mScenes.size()) {
+//     mSceneIndex = -1;
+//   }
+// }
 
 // void OptifuserRenderer::bindQueryCallback(std::function<GuiInfo(uint32_t)> callback) {
 //   queryCallback = callback;

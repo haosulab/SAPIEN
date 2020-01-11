@@ -6,16 +6,10 @@ namespace sapien {
 
 SActor::SActor(PxRigidActor *actor, physx_id_t id, SScene *scene,
                std::vector<Renderer::IPxrRigidbody *> renderBodies)
-    : mActor(actor), mId(id), mParentScene(scene), mRenderBodies(renderBodies) {}
+    : SActorBase(id, scene, renderBodies), mActor(actor) {}
 
-void SActor::updateRender(PxTransform const &pose) {
-  for (auto body : mRenderBodies) {
-    body->update(pose);
-  }
-}
-
-std::vector<Renderer::IPxrRigidbody *> SActor::getRenderBodies() {
-  return mRenderBodies;
+PxRigidActor *SActor::getPxActor() {
+  return mActor;
 }
 
 void SActor::destroy() { mParentScene->removeActor(this); }

@@ -15,28 +15,6 @@ class IPxrScene;
 class IPxrRigidbody;
 class IPxrRenderer;
 
-// struct JointGuiInfo {
-//   std::string name;
-//   std::array<float, 2> limits;
-//   float value;
-// };
-
-// struct ArticulationGuiInfo {
-//   std::string name = "";
-//   std::vector<JointGuiInfo> jointInfo;
-// };
-
-// struct LinkGuiInfo {
-//   std::string name = "";
-//   physx::PxTransform transform;
-// };
-
-// struct GuiInfo {
-//   ArticulationGuiInfo articulationInfo;
-//   LinkGuiInfo linkInfo;
-// };
-
-
 class ISensor {
 public:
   virtual physx::PxTransform getPose() const = 0;
@@ -94,7 +72,7 @@ public:
 
 class IPxrRenderer {
 public:
-  virtual IPxrScene *createScene() = 0;
+  virtual IPxrScene *createScene(std::string const &name = "") = 0;
   virtual void removeScene(IPxrScene *scene) = 0;
 };
 

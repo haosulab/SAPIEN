@@ -113,8 +113,10 @@ target_link_libraries(ant sapien)
 add_executable(creation unittest/creation.cpp)
 target_link_libraries(creation sapien)
 
-add_executable(manual_empty manualtest/empty.cpp)
-target_link_libraries(manual_empty sapien)
+add_executable(manual_actor manualtest/actor.cpp)
+target_link_libraries(manual_actor sapien)
+add_executable(manual_articulation manualtest/articulation.cpp)
+target_link_libraries(manual_articulation sapien)
 
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 

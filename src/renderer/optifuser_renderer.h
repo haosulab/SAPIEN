@@ -36,9 +36,12 @@ class OptifuserScene : public IPxrScene {
   std::unique_ptr<Optifuser::Scene> mScene;
   std::vector<std::unique_ptr<OptifuserRigidbody>> mBodies;
   std::vector<std::unique_ptr<OptifuserCamera>> mCameras;
+  std::string mName;
 
 public:
-  OptifuserScene(OptifuserRenderer *renderer);
+  OptifuserScene(OptifuserRenderer *renderer, std::string const &name = "");
+
+  inline std::string getName() { return mName; }
 
   Optifuser::Scene *getScene();
 
@@ -72,24 +75,24 @@ public:
 };
 
 class OptifuserRenderer : public IPxrRenderer {
-  const std::string mGlslDir;
 
   std::vector<std::unique_ptr<OptifuserScene>> mScenes;
 
 public:
+  const std::string mGlslDir;
+
   Optifuser::GLFWRenderContext *mContext = nullptr;
-  Optifuser::FPSCameraSpec cam;
   OptifuserRenderer(std::string const &glslDir = "glsl_shader/130",
                     std::string const &glslVersion = "130");
 
   // IPxrRenderer
-  IPxrScene *createScene() override;
+  IPxrScene *createScene(std::string const &name) override;
   void removeScene(IPxrScene *scene) override;
 
 public:
-  void showWindow();
-  void hideWindow();
-  void render(OptifuserScene &currentScene);
+  // void showWindow();
+  // void hideWindow();
+  // void render();
 };
 
 // class OptifuserRenderer : public IPhysxRenderer {

@@ -1,5 +1,6 @@
 #pragma once
 #include "id_generator.h"
+#include "sapien_actor_base.h"
 #include <PxPhysicsAPI.h>
 #include <string>
 #include <vector>
@@ -13,39 +14,20 @@ namespace Renderer {
 class IPxrRigidbody;
 }
 
-class SActor {
+class SActor : public SActorBase {
   friend ActorBuilder;
 
 private:
-  std::string mName = "";
   PxRigidActor *mActor = nullptr;
-  physx_id_t mId = 0;
-  SScene *mParentScene = nullptr;
-
-  std::vector<Renderer::IPxrRigidbody *> mRenderBodies;
 
 public:
-  /* Get the name of the actor */
-  inline std::string getName() { return mName; };
+  virtual PxRigidActor *getPxActor() override;
 
-  /* Get the name of the actor */
-  inline void setName(const std::string &name) { mName = name; }
-
-  inline PxRigidActor *getPxActor() { return mActor; }
-
-  std::vector<Renderer::IPxrRigidbody *> getRenderBodies();
-
-  /* Get the id of the actor */
-  inline physx_id_t getId() { return mId; }
-
-  inline SScene *getScene() { return mParentScene; }
-
-  void updateRender(PxTransform const &pose);
-
+public:
   void destroy();
 
 private:
-  /* Only scene can create actor */
+  /* Only actor builder can create actor */
   SActor(PxRigidActor *actor, physx_id_t id, SScene *scene,
          std::vector<Renderer::IPxrRigidbody *> renderBodies);
 };
