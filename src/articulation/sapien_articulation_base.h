@@ -35,6 +35,10 @@ public:
 
   virtual std::vector<physx::PxReal> getQf() const = 0;
   virtual void setQf(const std::vector<physx::PxReal> &v) = 0;
+  virtual void setRootPose(const physx::PxTransform &T) = 0;
+
+  virtual std::vector<std::array<physx::PxReal, 2>> getQlimits() const = 0;
+  virtual void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const = 0;
 
   virtual ~SArticulationBase() = default;
 };
@@ -42,7 +46,6 @@ public:
 class SArticulationDrivable : public SArticulationBase {
 public:
   virtual void setDriveTarget(const std::vector<physx::PxReal> &v) = 0;
-  virtual void moveBase(const physx::PxTransform &T) = 0;
 };
 
 } // namespace sapien

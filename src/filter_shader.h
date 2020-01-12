@@ -28,7 +28,6 @@ inline PxFilterFlags TypeAffinityFilterShader(PxFilterObjectAttributes attribute
   return PxFilterFlag::eKILL;
 }
 
-// TODO: test this class
 // class CollisionGroupManager {
 //   std::set<int> exclusiveGroups;
 //   std::map<int, std::set<int>> reusableGroups;

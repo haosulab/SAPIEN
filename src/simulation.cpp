@@ -87,7 +87,7 @@ public:
 
 Simulation::Simulation(uint32_t nthread) : mThreadCount(nthread), mMeshManager(this) {
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, mErrorCallback);
-  // TODO: figure out the what "track allocation" means
+  // FIXME: figure out the what "track allocation" means
 
 #ifdef _PVD
   spdlog::info("Connecting to PVD...");
@@ -122,37 +122,6 @@ Simulation::Simulation(uint32_t nthread) : mThreadCount(nthread), mMeshManager(t
     spdlog::critical("Failed to initialize PhysX Extensions");
     throw std::runtime_error("Simulation Creation Failed");
   }
-
-  // create scene
-  // PxSceneDesc sceneDesc(mPhysicsSDK->getTolerancesScale());
-  // sceneDesc.gravity = PxVec3(0.0f, 0.0f, -9.81f);
-  // sceneDesc.filterShader = StandardFilterShader;
-  // sceneDesc.solverType = PxSolverType::eTGS;
-  // sceneDesc.flags |= PxSceneFlag::eENABLE_CCD;
-
-  // create dispatcher
-  // TODO: check how GPU works here
-  // if (!sceneDesc.cpuDispatcher) {
-  //   mCpuDispatcher = PxDefaultCpuDispatcherCreate(mThreadCount);
-  //   if (!mCpuDispatcher) {
-  //     spdlog::critical("Failed to create PhysX CPU dispatcher");
-  //     throw std::runtime_error("Scene Creation Failed");
-  //   }
-  //   sceneDesc.cpuDispatcher = mCpuDispatcher;
-  // }
-  // if (!sceneDesc.filterShader) {
-  //   sceneDesc.filterShader = gDefaultFilterShader;
-  // }
-
-  // mScene = mPhysicsSDK->createScene(sceneDesc);
-  // if (!mScene) {
-  //   spdlog::critical("Failed to create PhysX Scene");
-  //   throw std::runtime_error("Scene Creation Failed");
-  // }
-  // mScene->setVisualizationParameter(PxVisualizationParameter::eSCALE, 1.f);
-  // mScene->setVisualizationParameter(PxVisualizationParameter::eACTOR_AXES, 2.f);
-  // mScene->setSimulationEventCallback(&myCC);
-
   mDefaultMaterial = mPhysicsSDK->createMaterial(5, 5, 0.01);
 }
 
@@ -174,141 +143,10 @@ Simulation::~Simulation() {
   mFoundation->release();
 }
 
-// void Simulation::step() {
-//   for (auto &wrapper : mKinematicArticulationWrappers) {
-//     wrapper->update(mTimestep);
-//   }
-//   mScene->simulate(mTimestep);
-//   while (!mScene->fetchResults(true)) {
-//     // TODO: do useful stuff here
-//   }
-//   for (auto &wrapper : mDynamicArticulationWrappers) {
-//     wrapper->update();
-//   }
-//   for (auto &wrapper : mControllableArticulationWrapper) {
-//     wrapper->update(mTimestep);
-//   }
-//   for (auto &callBack : mStepCallBacks) {
-//     callBack(*this);
-//   }
-// }
-
-// void Simulation::updateRenderer() {
-//   if (!mRenderer)
-//     return;
-//   for (auto idParent : mRenderId2Actor) {
-//     auto pose = idParent.second->getGlobalPose() * mRenderId2InitialPose[idParent.first];
-
-//     mRenderer->updateRigidbody(0, idParent.first, pose);
-//   }
-//   for (auto &[id, pose] : mCameraId2InitialPose) {
-//     mRenderer->updateCamera(0, id, mMountedCamera2MountedActor[id]->getGlobalPose() * pose);
-//   }
-// }
-
-// std::unique_ptr<ActorBuilder> Simulation::createActorBuilder() {
-//   return std::make_unique<ActorBuilder>(this);
-// }
-
-// std::unique_ptr<ArticulationBuilder> Simulation::createArticulationBuilder() {
-//   return std::make_unique<ArticulationBuilder>(this);
-// }
 
 void Simulation::setRenderer(Renderer::IPxrRenderer *renderer) {
   mRenderer = renderer;
-  // TODO: callbacks
-  // mRenderer->bindQueryCallback([this](uint32_t seg_id) {
-  //   Renderer::GuiInfo info = {};
-
-  //   if (mLinkId2Actor.find(seg_id) == mLinkId2Actor.end()) {
-  //     return info;
-  //   }
-  //   auto actor = this->mLinkId2Actor[seg_id];
-  //   info.linkInfo.name = actor->getName();
-  //   info.linkInfo.transform = actor->getGlobalPose();
-  //   if (mLinkId2Articulation.find(seg_id) == mLinkId2Articulation.end()) {
-  //     return info;
-  //   }
-  //   IArticulationBase *articulation = mLinkId2Articulation[seg_id];
-
-  //   std::vector<std::string> singleDofName;
-  //   auto totalDofs = articulation->dof();
-  //   auto dofs = articulation->get_joint_dofs();
-  //   auto names = articulation->get_joint_names();
-  //   auto limits = articulation->get_qlimits();
-  //   auto values = articulation->get_qpos();
-  //   for (uint32_t i = 0; i < dofs.size(); ++i) {
-  //     for (uint32_t j = 0; j < dofs[i]; ++j) {
-  //       singleDofName.push_back(names[i]);
-  //     }
-  //   }
-
-  //   assert(singleDofName.size() == totalDofs);
-  //   for (uint32_t i = 0; i < totalDofs; ++i) {
-  //     Renderer::JointGuiInfo jointInfo;
-  //     jointInfo.name = singleDofName[i];
-  //     auto [l1, l2] = limits[i];
-  //     l1 = std::max(l1, -10.f);
-  //     l2 = std::min(l2, 10.f);
-  //     jointInfo.limits = {l1, l2};
-  //     jointInfo.value = values[i];
-  //     info.articulationInfo.jointInfo.push_back(jointInfo);
-  //   }
-  //   return info;
-  // });
-
-  // mRenderer->bindSyncCallback([this](uint32_t seg_id, const Renderer::GuiInfo &info) {
-  //   if (this->mLinkId2Actor.find(seg_id) == this->mLinkId2Actor.end()) {
-  //     throw std::runtime_error("queried id is not an actor!");
-  //   }
-  //   if (this->mLinkId2Articulation.find(seg_id) == this->mLinkId2Articulation.end()) {
-  //     throw std::runtime_error("queried id is not an articulation!");
-  //   }
-  //   auto articulation = mLinkId2Articulation[seg_id];
-
-  //   std::vector<float> jointValues;
-  //   for (auto &info : info.articulationInfo.jointInfo) {
-  //     jointValues.push_back(info.value);
-  //   }
-  //   articulation->set_qpos(jointValues);
-  // });
-
-  // mRenderer->bindSaveActionCallback([this](uint32_t index, uint32_t action) {
-  //   switch (action) {
-  //   case 0:
-  //     loadSave(index);
-  //     break;
-  //   case 1:
-  //     deleteSave(index);
-  //   default:
-  //     break;
-  //   }
-
-  //   std::vector<std::string> names;
-  //   for (auto &s : simulationSaves) {
-  //     names.push_back(s.name);
-  //   }
-  //   mRenderer->setSaveNames(names);
-  // });
-
-  // mRenderer->bindSaveCallback([this](uint32_t index, const std::string &name) {
-  //   if (index < simulationSaves.size()) {
-  //     simulationSaves[index].name = name;
-  //   } else {
-  //     appendSaves(name);
-  //   }
-  //   std::vector<std::string> names;
-  //   for (auto &s : simulationSaves) {
-  //     names.push_back(s.name);
-  //   }
-  //   mRenderer->setSaveNames(names);
-  // });
 }
-
-// std::unique_ptr<URDF::URDFLoader> Simulation::createURDFLoader() {
-//   auto loader = std::make_unique<URDF::URDFLoader>(*this);
-//   return loader;
-// }
 
 PxMaterial *Simulation::createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction,
                                                PxReal restitution) const {

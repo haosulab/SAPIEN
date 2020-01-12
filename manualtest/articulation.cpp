@@ -100,13 +100,14 @@ int main() {
   controller.showWindow();
 
   auto s0 = sim.createScene("Scene 1");
+  s0->setTimestep(1 / 60.f);
   s0->addGround(-1);
 
   auto builder = createAntBuilder(*s0);
 
   auto s1 = builder->build(false);
   s1->setName("Ant");
-  s1->moveBase({{0, 0, 2}, PxIdentity});
+  s1->setRootPose({{0, 0, 2}, PxIdentity});
 
   auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
   r0->setAmbientLight({0.3, 0.3, 0.3});

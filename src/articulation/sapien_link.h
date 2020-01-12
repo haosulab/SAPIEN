@@ -12,13 +12,16 @@ class SArticulationBase;
 class SArticulation;
 // class SKinematicArticulation;
 
-class SLinkBase : public SActorBase {
+class SLinkBase : public SActorDynamicBase {
+protected:
+  uint32_t mIndex;  // set when "build" from articulation builder
 
 public:
   virtual SArticulationBase *getArticulation() = 0;
+  inline uint32_t getIndex() { return mIndex; };
 
 private:
-  using SActorBase::SActorBase;
+  using SActorDynamicBase::SActorDynamicBase;
 };
 
 class SLink : public SLinkBase {
@@ -29,8 +32,8 @@ private:
   SArticulation *mArticulation;
 
 public:
-  virtual SArticulationBase *getArticulation() override;
-  virtual PxRigidActor *getPxActor() override;
+  SArticulationBase *getArticulation() override;
+  PxRigidBody *getPxRigidBody() override;
 
   PxArticulationLink *getPxArticulationLink();
 

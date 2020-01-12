@@ -6,6 +6,7 @@
 #include "articulation/sapien_link.h"
 #include "renderer/render_interface.h"
 #include "sapien_actor.h"
+#include "sapien_contact.h"
 #include "simulation.h"
 #include <algorithm>
 #include <spdlog/spdlog.h>
@@ -13,12 +14,14 @@
 namespace sapien {
 
 SScene::SScene(Simulation *sim, PxScene *scene, std::string const &name)
-    : mName(name), mSimulation(sim), mPxScene(scene), mRendererScene(nullptr) {
+    : mName(name), mSimulation(sim), mPxScene(scene), mRendererScene(nullptr),
+      mSimulationCallback(this) {
   auto renderer = sim->getRenderer();
   if (renderer) {
     spdlog::info("Creating scene in renderer");
     mRendererScene = renderer->createScene(name);
   }
+  mPxScene->setSimulationEventCallback(&mSimulationCallback);
 }
 
 SScene::~SScene() {
@@ -30,7 +33,7 @@ SScene::~SScene() {
   }
 }
 
-void SScene::addActor(std::unique_ptr<SActor> actor) {
+void SScene::addActor(std::unique_ptr<SActorBase> actor) {
   mPxScene->addActor(*actor->getPxActor());
   mLinkId2Actor[actor->getId()] = actor.get();
   mActors.push_back(std::move(actor));
@@ -44,7 +47,7 @@ void SScene::addArticulation(std::unique_ptr<SArticulation> articulation) {
   mArticulations.push_back(std::move(articulation));
 }
 
-void SScene::removeActor(SActor *actor) {
+void SScene::removeActor(SActorBase *actor) {
   mLinkId2Actor.erase(actor->getId());
 
   // remove camera
@@ -53,12 +56,13 @@ void SScene::removeActor(SActor *actor) {
 
   // remove render bodies
   for (auto body : actor->getRenderBodies()) {
+    mRenderId2VisualName.erase(body->getUniqueId());
     body->destroy();
   }
 
   // remove physical bodies
   mPxScene->removeActor(*actor->getPxActor());
-  actor->getPxActor()->release(); // TODO: check if this release can be moved to creation time
+  actor->getPxActor()->release(); // FIXME: check if this release can be moved to creation time
 
   // remove sapien actor
   std::remove_if(mActors.begin(), mActors.end(), [actor](auto &a) { return a.get() == actor; });
@@ -72,6 +76,7 @@ void SScene::removeArticulation(SArticulation *articulation) {
 
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
+      mRenderId2VisualName.erase(body->getUniqueId());
       body->destroy();
     }
 
@@ -88,7 +93,7 @@ void SScene::removeArticulation(SArticulation *articulation) {
                  [articulation](auto &a) { return a.get() == articulation; });
 }
 
-SActor *SScene::findActorById(physx_id_t id) const {
+SActorBase *SScene::findActorById(physx_id_t id) const {
   auto it = mLinkId2Actor.find(id);
   if (it == mLinkId2Actor.end()) {
     return nullptr;
@@ -127,12 +132,13 @@ void SScene::removeMountedCamera(Renderer::ICamera *cam) {
 }
 
 void SScene::step() {
+  clearContacts();
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
   }
 
-  // TODO: update articulation cache
-  // TODO: process callbacks
+  // FIXME: update articulation cache
+  // FIXME: process callbacks
 }
 
 void SScene::updateRender() {
@@ -149,7 +155,7 @@ void SScene::updateRender() {
     }
   }
 
-  // TODO: update other articulation
+  // FIXME: update other articulation
 
   for (auto &cam : mCameras) {
     cam.camera->setPose(cam.actor->getPxActor()->getGlobalPose());
@@ -157,23 +163,11 @@ void SScene::updateRender() {
 }
 
 void SScene::addGround(PxReal altitude, bool render, PxMaterial *material) {
-  material = material ? material : mSimulation->mDefaultMaterial;
-  auto ground =
-      PxCreatePlane(*mSimulation->mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude), *material);
-  PxShape *shape;
-  ground->getShapes(&shape, 1);
-  PxFilterData data;
-  data.word0 = 1;
-  data.word1 = 1;
-  data.word2 = 0;
-  data.word3 = 0;
-  shape->setSimulationFilterData(data);
-  mPxScene->addActor(*ground);
-
-  if (render && mRendererScene) {
-    auto body = mRendererScene->addRigidbody(PxGeometryType::ePLANE, {10, 10, 10}, {1, 1, 1});
-    body->setInitialPose(PxTransform({0, 0, altitude}, PxIdentity));
-  }
+  createActorBuilder()->buildGround(altitude, render, material, "ground");
 }
+
+void SScene::addContact(SContact const &contact) { mContacts.push_back(contact); }
+void SScene::clearContacts() { mContacts.clear(); }
+std::vector<SContact> const &SScene::getContacts() const { return mContacts; }
 
 }; // namespace sapien

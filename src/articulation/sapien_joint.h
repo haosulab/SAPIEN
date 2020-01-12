@@ -46,6 +46,7 @@ public:
   void setLimits(std::vector<std::array<physx::PxReal, 2>> const &limits) override;
   std::vector<PxArticulationAxis::Enum> getAxes();
 
+  void setFriction(PxReal coef);
   void setDriveProperty(PxReal stiffness, PxReal damping, PxReal forceLimit = PX_MAX_F32);
 
   void setDriveVelocityTarget(std::vector<PxReal> const &v);
@@ -53,6 +54,8 @@ public:
 
   void setDriveTarget(std::vector<PxReal> const &p);
   void setDriveTarget(PxReal p);
+
+  PxTransform getGlobalPose() const;
 
 private:
   SJoint(SLink *parent, SLink *child, PxArticulationJointReducedCoordinate *pxJoint);

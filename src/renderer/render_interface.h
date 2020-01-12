@@ -42,7 +42,9 @@ public:
 class IPxrRigidbody {
 public:
   virtual void setUniqueId(uint32_t uniqueId) = 0;
+  virtual uint32_t getUniqueId() const = 0;
   virtual void setSegmentationId(uint32_t segmentationId) = 0;
+  virtual uint32_t getSegmentationId() const = 0;
   virtual void setSegmentationCustomData(std::vector<float> const &customData) = 0;
   virtual void setInitialPose(const physx::PxTransform &transform) = 0;
   virtual void update(const physx::PxTransform &transform) = 0;

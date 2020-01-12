@@ -146,7 +146,7 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
   convexDesc.points.count = vertices.size();
   convexDesc.points.stride = sizeof(PxVec3);
   convexDesc.points.data = vertices.data();
-  convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // TODO: shift vertices may improve statbility
+  convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // FIXME: shift vertices may improve statbility
   convexDesc.vertexLimit = 256;
 
   PxDefaultMemoryOutputStream buf;

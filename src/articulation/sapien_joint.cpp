@@ -131,6 +131,12 @@ std::vector<PxArticulationAxis::Enum> SJoint::getAxes() {
   throw std::runtime_error("Reached unreachable code in SJoint::getAxes()");
 }
 
+void SJoint::setFriction(PxReal coef) { mPxJoint->setFrictionCoefficient(coef); }
+
+PxTransform SJoint::getGlobalPose() const {
+  return mChildLink->getPose() * mPxJoint->getChildPose();
+}
+
 void SJoint::setDriveProperty(PxReal stiffness, PxReal damping, PxReal forceLimit) {
   if (getDof() != 1) {
     spdlog::error("Failed to set drive property, it only supports joints with 1 DOF");

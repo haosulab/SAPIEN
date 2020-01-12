@@ -48,7 +48,6 @@ void SArticulation::setQpos(std::vector<physx::PxReal> const &v) {
     mCache->jointPosition[i] = v2[i];
   }
   mPxArticulation->applyCache(*mCache, PxArticulationCache::ePOSITION);
-  // TODO set drive target ?
 }
 
 std::vector<physx::PxReal> SArticulation::getQvel() const {
@@ -67,7 +66,8 @@ void SArticulation::setQvel(std::vector<physx::PxReal> const &v) {
 
 std::vector<physx::PxReal> SArticulation::getQacc() const {
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eACCELERATION);
-  return I2E(std::vector<physx::PxReal>(mCache->jointAcceleration, mCache->jointAcceleration + dof()));
+  return I2E(
+      std::vector<physx::PxReal>(mCache->jointAcceleration, mCache->jointAcceleration + dof()));
 }
 
 void SArticulation::setQacc(std::vector<physx::PxReal> const &v) {
@@ -94,6 +94,29 @@ void SArticulation::setQf(std::vector<physx::PxReal> const &v) {
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eFORCE);
 }
 
+std::vector<std::array<physx::PxReal, 2>> SArticulation::getQlimits() const {
+  std::vector<std::array<physx::PxReal, 2>> output;
+  for (auto &j : mJoints) {
+    auto limits = j->getLimits();
+    for (auto &l : limits) {
+      output.push_back(l);
+    }
+  }
+  return output;
+}
+
+// FIXME needs testing
+void SArticulation::setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const {
+  CHECK_SIZE(v);
+  uint32_t n = 0;
+  for (auto &j : mJoints) {
+    uint32_t dof = j->getDof();
+    j->setLimits(std::vector<std::array<physx::PxReal, 2>>(v.begin() + n, v.begin() + dof));
+    n += dof;
+  }
+}
+
+// FIXME needs testing
 void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
 
@@ -107,7 +130,7 @@ void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
   }
 }
 
-void SArticulation::moveBase(physx::PxTransform const &T) {
+void SArticulation::setRootPose(physx::PxTransform const &T) {
   mPxArticulation->teleportRootLink(T, true);
 }
 

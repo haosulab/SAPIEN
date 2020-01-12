@@ -11,6 +11,7 @@ using namespace physx;
 class SScene;
 class Simulation;
 class SActor;
+class SActorStatic;
 
 namespace Renderer {
 class IPxrRididbody;
@@ -83,7 +84,8 @@ public:
                    PxReal density = 1000.f);
 
   void addCapsuleShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                       PxReal halfLength = 1, PxMaterial *material = nullptr, PxReal density = 1000.f);
+                       PxReal halfLength = 1, PxMaterial *material = nullptr,
+                       PxReal density = 1000.f);
 
   void addSphereShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
                       PxMaterial *material = nullptr, PxReal density = 1000.f);
@@ -114,12 +116,17 @@ public:
   void setMassAndInertia(PxReal mass, PxTransform const &cMassPose, PxVec3 const &inertia);
   inline void setScene(SScene *scene) { mScene = scene; }
 
-  SActor *build(bool isStatic = false, bool isKinematic = false, std::string const &name = "") const;
+  // SActor *build(bool isStatic = false, bool isKinematic = false, std::string const &name = "")
+  // const;
+  SActor *build(bool isKinematic = false, std::string const &name = "") const;
+  SActorStatic *buildStatic(std::string const &name = "") const;
+
+  SActorStatic *buildGround(PxReal altitude, bool render, PxMaterial *material,
+                            std::string const &name = "");
 
 protected:
   Simulation *getSimulation() const;
 
-  // TODO: release shapes
   void buildShapes(std::vector<PxShape *> &shapes, std::vector<PxReal> &densities) const;
   void buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBodies,
                     std::vector<physx_id_t> &renderIds) const;

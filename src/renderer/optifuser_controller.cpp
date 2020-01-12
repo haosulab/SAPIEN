@@ -143,7 +143,7 @@ void OptifuserController::render() {
   }
 
   if (mGuiModel.linkId) {
-    SActor *actor = mScene->findActorById(mGuiModel.linkId);
+    SActorBase *actor = mScene->findActorById(mGuiModel.linkId);
     SLinkBase *link = mScene->findArticulationLinkById(mGuiModel.linkId);
     if (actor) {
       mGuiModel.linkModel.name = actor->getName();
@@ -326,7 +326,7 @@ void OptifuserController::render() {
       {
         if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
           ImGui::Text("name: %s", mGuiModel.linkModel.name.c_str());
-          ImGui::Text("col1: 0x%08x, col2: 0x%08x", mGuiModel.linkModel.col1, mGuiModel.linkModel.col2);
+          ImGui::Text("col1: #%08x, col2: #%08x", mGuiModel.linkModel.col1, mGuiModel.linkModel.col2);
         }
       }
       if (mGuiModel.articulationId) {

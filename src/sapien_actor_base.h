@@ -29,6 +29,7 @@ public:
   inline physx_id_t getId() { return mId; }
   inline SScene *getScene() { return mParentScene; }
 
+  PxTransform getPose();
   inline uint32_t getCollisionGroup1() { return mCol1; }
   inline uint32_t getCollisionGroup2() { return mCol2; }
 
@@ -42,4 +43,19 @@ public:
 protected:
   SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies);
 };
+
+class SActorDynamicBase : public SActorBase {
+
+public:
+  PxVec3 getVel();
+  PxVec3 getAngularVel();
+
+  virtual PxRigidBody *getPxRigidBody() = 0;
+  PxRigidActor *getPxActor() override;
+  virtual void addForceAtPoint(PxVec3 const &force, PxVec3 const &pos);
+
+protected:
+  using SActorBase::SActorBase;
+};
+
 } // namespace sapien

@@ -167,6 +167,9 @@ bool LinkBuilder::build(SArticulation &articulation) const {
 
   links[mIndex]->mCol1 = mCollisionGroup.w0;
   links[mIndex]->mCol2 = mCollisionGroup.w1;
+  links[mIndex]->mIndex = mIndex;
+
+  pxLink->userData = links[mIndex].get();
 
   // create and wrap joint
   auto joint = static_cast<PxArticulationJointReducedCoordinate *>(pxLink->getInboundJoint());
@@ -246,7 +249,12 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
     }
   }
 
-  // TODO: check validity of each link
+  for (auto &builder : mLinkBuilders) {
+    if (!builder.checkJointProperties()) {
+      spdlog::error("Failed to build articulation: invalid joint");
+      return nullptr;
+    }
+  }
 
   auto sArticulation = std::unique_ptr<SArticulation>(new SArticulation(mScene));
   sArticulation->mPxArticulation =

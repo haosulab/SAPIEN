@@ -14,22 +14,43 @@ namespace Renderer {
 class IPxrRigidbody;
 }
 
-class SActor : public SActorBase {
+class SActor : public SActorDynamicBase {
   friend ActorBuilder;
 
 private:
-  PxRigidActor *mActor = nullptr;
+  PxRigidBody *mActor = nullptr;
 
 public:
-  virtual PxRigidActor *getPxActor() override;
+  PxRigidBody *getPxRigidBody() override;
+
+  void setPose(PxTransform const &pose);
 
 public:
   void destroy();
 
 private:
   /* Only actor builder can create actor */
-  SActor(PxRigidActor *actor, physx_id_t id, SScene *scene,
+  SActor(PxRigidBody *actor, physx_id_t id, SScene *scene,
          std::vector<Renderer::IPxrRigidbody *> renderBodies);
+};
+
+class SActorStatic : public SActorBase {
+  friend ActorBuilder;
+
+private:
+  PxRigidStatic *mActor = nullptr;
+
+public:
+  PxRigidActor *getPxActor() override;
+  void setPose(PxTransform const &pose);
+
+public:
+  void destroy();
+
+private:
+  /* Only actor builder can create actor */
+  SActorStatic(PxRigidStatic *actor, physx_id_t id, SScene *scene,
+               std::vector<Renderer::IPxrRigidbody *> renderBodies);
 };
 
 } // namespace sapien

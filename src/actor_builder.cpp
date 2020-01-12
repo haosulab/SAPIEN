@@ -237,7 +237,6 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
     body->setInitialPose(r.pose);
     renderBodies.push_back(body);
 
-    // TODO: clean up this book-keeping
     mScene->mRenderId2VisualName[newId] = r.name;
   }
 }
@@ -255,7 +254,7 @@ void ActorBuilder::resetCollisionGroup() {
   mCollisionGroup.w3 = 0;
 }
 
-SActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string const &name) const {
+SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   physx_id_t linkId = mScene->mLinkIdGenerator.next();
 
   std::vector<PxShape *> shapes;
@@ -275,30 +274,19 @@ SActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string const &
   data.word2 = 0;
   data.word2 = 0;
 
-  PxRigidActor *actor = nullptr;
-  if (isStatic) {
-    actor = getSimulation()->mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
-    for (size_t i = 0; i < shapes.size(); ++i) {
-      actor->attachShape(*shapes[i]);
-      shapes[i]->setSimulationFilterData(data);
-      shapes[i]->release(); // this shape is now reference counted by the actor
-    }
+  PxRigidDynamic *actor =
+      getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
+  actor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, isKinematic);
+  for (size_t i = 0; i < shapes.size(); ++i) {
+    actor->attachShape(*shapes[i]);
+    shapes[i]->release(); // this shape is now reference counted by the actor
+  }
+  if (shapes.size() && mUseDensity) {
+    PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
   } else {
-    PxRigidDynamic *dActor =
-        getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
-    dActor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, isKinematic);
-    actor = dActor;
-    for (size_t i = 0; i < shapes.size(); ++i) {
-      actor->attachShape(*shapes[i]);
-      shapes[i]->release(); // this shape is now reference counted by the actor
-    }
-    if (shapes.size() && mUseDensity) {
-      PxRigidBodyExt::updateMassAndInertia(*dActor, densities.data(), shapes.size());
-    } else {
-      dActor->setMass(mMass);
-      dActor->setCMassLocalPose(mCMassPose);
-      dActor->setMassSpaceInertiaTensor(mInertia);
-    }
+    actor->setMass(mMass);
+    actor->setCMassLocalPose(mCMassPose);
+    actor->setMassSpaceInertiaTensor(mInertia);
   }
 
   auto sActor = std::unique_ptr<SActor>(new SActor(actor, linkId, mScene, renderBodies));
@@ -307,9 +295,96 @@ SActor *ActorBuilder::build(bool isStatic, bool isKinematic, std::string const &
   sActor->mCol1 = mCollisionGroup.w0;
   sActor->mCol2 = mCollisionGroup.w1;
 
+  actor->userData = sActor.get();
+
   auto result = sActor.get();
   mScene->addActor(std::move(sActor));
-  
+
+  return result;
+}
+
+SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
+  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+
+  std::vector<PxShape *> shapes;
+  std::vector<PxReal> densities;
+  buildShapes(shapes, densities);
+
+  std::vector<physx_id_t> renderIds;
+  std::vector<Renderer::IPxrRigidbody *> renderBodies;
+  buildVisuals(renderBodies, renderIds);
+  for (auto body : renderBodies) {
+    body->setSegmentationId(linkId);
+  }
+
+  PxFilterData data;
+  data.word0 = mCollisionGroup.w0;
+  data.word1 = mCollisionGroup.w1;
+  data.word2 = 0;
+  data.word2 = 0;
+
+  PxRigidStatic *actor = getSimulation()->mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
+  for (size_t i = 0; i < shapes.size(); ++i) {
+    actor->attachShape(*shapes[i]);
+    shapes[i]->setSimulationFilterData(data);
+    shapes[i]->release(); // this shape is now reference counted by the actor
+  }
+
+  auto sActor =
+      std::unique_ptr<SActorStatic>(new SActorStatic(actor, linkId, mScene, renderBodies));
+  sActor->setName(name);
+
+  sActor->mCol1 = mCollisionGroup.w0;
+  sActor->mCol2 = mCollisionGroup.w1;
+
+  actor->userData = sActor.get();
+
+  auto result = sActor.get();
+  mScene->addActor(std::move(sActor));
+
+  return result;
+}
+
+SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render, PxMaterial *material,
+                                        std::string const &name) {
+  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+  material = material ? material : getSimulation()->mDefaultMaterial;
+  PxRigidStatic *ground =
+      PxCreatePlane(*getSimulation()->mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude), *material);
+  PxShape *shape;
+  ground->getShapes(&shape, 1);
+
+  PxFilterData data;
+  data.word0 = mCollisionGroup.w0;
+  data.word1 = mCollisionGroup.w1;
+  data.word2 = 0;
+  data.word2 = 0;
+
+  shape->setSimulationFilterData(data);
+
+  std::vector<Renderer::IPxrRigidbody *> renderBodies;
+  if (render && mScene->getRendererScene()) {
+    auto body =
+        mScene->mRendererScene->addRigidbody(PxGeometryType::ePLANE, {10, 10, 10}, {1, 1, 1});
+    body->setInitialPose(PxTransform({0, 0, altitude}, PxIdentity));
+    renderBodies.push_back(body);
+
+    physx_id_t newId = mScene->mRenderIdGenerator.next();
+    body->setSegmentationId(linkId);
+    body->setUniqueId(newId);
+  }
+
+  auto sActor =
+      std::unique_ptr<SActorStatic>(new SActorStatic(ground, linkId, mScene, renderBodies));
+  sActor->setName(name);
+
+  sActor->mCol1 = mCollisionGroup.w0;
+  sActor->mCol2 = mCollisionGroup.w1;
+
+  ground->userData = sActor.get();
+
+  auto result = sActor.get();
+  mScene->addActor(std::move(sActor));
 
   return result;
 }

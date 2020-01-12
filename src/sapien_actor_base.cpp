@@ -15,4 +15,22 @@ SActorBase::SActorBase(physx_id_t id, SScene *scene,
                        std::vector<Renderer::IPxrRigidbody *> renderBodies)
     : mId(id), mParentScene(scene), mRenderBodies(renderBodies) {}
 
+PxTransform SActorBase::getPose() { return getPxActor()->getGlobalPose(); }
+
+PxVec3 SActorDynamicBase::getVel() {
+  return getPxRigidBody()->getLinearVelocity();
+}
+
+PxVec3 SActorDynamicBase::getAngularVel() {
+  return getPxRigidBody()->getAngularVelocity();
+}
+
+PxRigidActor* SActorDynamicBase::getPxActor() {
+  return getPxRigidBody();
+}
+
+void SActorDynamicBase::addForceAtPoint(const PxVec3 &force, const PxVec3 &pos) {
+  PxRigidBodyExt::addForceAtPos(*getPxRigidBody(), force, pos);
+}
+
 } // namespace sapien

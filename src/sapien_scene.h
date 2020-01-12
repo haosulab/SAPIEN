@@ -1,5 +1,6 @@
 #pragma once
 #include "id_generator.h"
+#include "simulation_callback.h"
 #include <PxPhysicsAPI.h>
 #include <map>
 #include <memory>
@@ -13,7 +14,9 @@ class SActorBase;
 class SArticulation;
 class Simulation;
 class ActorBuilder;
+class LinkBuilder;
 class ArticulationBuilder;
+struct SContact;
 
 namespace Renderer {
 class IPxrScene;
@@ -23,9 +26,9 @@ class ICamera;
 using namespace physx;
 
 class SScene {
-  friend class ActorBuilder;
-  friend class LinkBuilder;
-  friend class ArticulationBuilder;
+  friend ActorBuilder;
+  friend LinkBuilder;
+  friend ArticulationBuilder;
 
 private:
   std::string mName;
@@ -38,13 +41,15 @@ private:
 
   std::map<physx_id_t, std::string> mRenderId2VisualName;
 
-  std::map<physx_id_t, SActor *> mLinkId2Actor;
+  std::map<physx_id_t, SActorBase *> mLinkId2Actor;
   std::map<physx_id_t, SLinkBase *> mLinkId2Link;
 
-  std::vector<std::unique_ptr<SActor>> mActors; // manages all actors
+  std::vector<std::unique_ptr<SActorBase>> mActors; // manages all actors
   std::vector<std::unique_ptr<SArticulation>> mArticulations;
 
-  void addActor(std::unique_ptr<SActor> actor); // called by actor builder
+  DefaultEventCallback mSimulationCallback;
+
+  void addActor(std::unique_ptr<SActorBase> actor); // called by actor builder
   void
   addArticulation(std::unique_ptr<SArticulation> articulation); // called by articulation builder
 
@@ -60,12 +65,13 @@ public:
 
   std::unique_ptr<ActorBuilder> createActorBuilder();
   std::unique_ptr<ArticulationBuilder> createArticulationBuilder();
+  // TODO URDF Loader
 
-  void removeActor(SActor *actor);
+  void removeActor(SActorBase *actor);
   void removeArticulation(SArticulation *articulation);
 
 public:
-  SActor *findActorById(physx_id_t id) const;
+  SActorBase *findActorById(physx_id_t id) const;
   SLinkBase *findArticulationLinkById(physx_id_t id) const;
 
 private:
@@ -91,5 +97,13 @@ public:
   void updateRender(); // call to sync physics world to render world
 
   void addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr);
+
+private:
+  std::vector<SContact> mContacts;
+
+public:
+  void addContact(SContact const &contact);
+  void clearContacts();
+  std::vector<SContact> const &getContacts() const;
 };
 } // namespace sapien

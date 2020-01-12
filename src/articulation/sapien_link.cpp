@@ -3,7 +3,7 @@
 
 namespace sapien {
 
-PxRigidActor *SLink::getPxActor() { return mActor; }
+PxRigidBody *SLink::getPxRigidBody() { return mActor; }
 PxArticulationLink *SLink::getPxArticulationLink() { return mActor; }
 SArticulationBase *SLink::getArticulation() { return mArticulation; }
 

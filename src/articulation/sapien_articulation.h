@@ -1,3 +1,4 @@
+#pragma once
 #include "sapien_articulation_base.h"
 #include <memory>
 
@@ -44,8 +45,11 @@ public:
   virtual std::vector<physx::PxReal> getQf() const override;
   virtual void setQf(std::vector<physx::PxReal> const &v) override;
 
+  virtual std::vector<std::array<physx::PxReal, 2>> getQlimits() const override;
+  virtual void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const override;
+
   virtual void setDriveTarget(std::vector<physx::PxReal> const &v) override;
-  virtual void moveBase(physx::PxTransform const &T) override;
+  virtual void setRootPose(physx::PxTransform const &T) override;
 
   inline PxArticulationReducedCoordinate *getPxArticulation() { return mPxArticulation; }
 
