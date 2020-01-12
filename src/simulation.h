@@ -71,7 +71,7 @@ public:
 #endif
 
 public:
-  Simulation(uint32_t nthread = 0);
+  explicit Simulation(uint32_t nthread = 0);
   ~Simulation();
 
   void setRenderer(Renderer::IPxrRenderer *renderer);

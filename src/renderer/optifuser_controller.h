@@ -32,8 +32,6 @@ struct GuiModel {
   ArticulationGuiModel articulationModel;
 };
 
-class OptifuserRenderer;
-
 class OptifuserController {
   OptifuserRenderer *mRenderer = nullptr;
   SScene *mScene = nullptr;
@@ -42,7 +40,7 @@ class OptifuserController {
 
 public:
   Optifuser::FPSCameraSpec mCamera;
-  OptifuserController(OptifuserRenderer *renderer);
+  explicit OptifuserController(OptifuserRenderer *renderer);
 
   /* called by the renderer */
   // void selectObject(int linkId);

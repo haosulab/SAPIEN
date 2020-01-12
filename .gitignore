@@ -6,3 +6,4 @@ cmake-build-debug
 /cmake-build-debug/
 /.ccls-cache/
 /.dir-locals.el
+/sapien.egg-info/

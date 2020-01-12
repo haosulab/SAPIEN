@@ -27,7 +27,7 @@ private:
   std::map<std::string, MeshGroupRecord> mMeshGroupRegistry;
 
 public:
-  MeshManager(Simulation *simulation);
+  explicit MeshManager(Simulation *simulation);
 
   physx::PxConvexMesh *loadMesh(const std::string &filename, bool useCache = true,
                                 bool saveCache = true);

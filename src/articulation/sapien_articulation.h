@@ -27,29 +27,29 @@ class SArticulation : public SArticulationDrivable {
   std::vector<uint32_t> mIndexI2E;
 
 public:
-  virtual std::vector<SLinkBase *> getLinks() override;
-  virtual std::vector<SJointBase *> getJoints() override;
+  std::vector<SLinkBase *> getLinks() override;
+  std::vector<SJointBase *> getJoints() override;
 
-  virtual EArticulationType getType() const override;
-  virtual uint32_t dof() const override;
+  EArticulationType getType() const override;
+  uint32_t dof() const override;
 
-  virtual std::vector<physx::PxReal> getQpos() const override;
-  virtual void setQpos(std::vector<physx::PxReal> const &v) override;
+  std::vector<physx::PxReal> getQpos() const override;
+  void setQpos(std::vector<physx::PxReal> const &v) override;
 
-  virtual std::vector<physx::PxReal> getQvel() const override;
-  virtual void setQvel(std::vector<physx::PxReal> const &v) override;
+  std::vector<physx::PxReal> getQvel() const override;
+  void setQvel(std::vector<physx::PxReal> const &v) override;
 
-  virtual std::vector<physx::PxReal> getQacc() const override;
-  virtual void setQacc(std::vector<physx::PxReal> const &v) override;
+  std::vector<physx::PxReal> getQacc() const override;
+  void setQacc(std::vector<physx::PxReal> const &v) override;
 
-  virtual std::vector<physx::PxReal> getQf() const override;
-  virtual void setQf(std::vector<physx::PxReal> const &v) override;
+  std::vector<physx::PxReal> getQf() const override;
+  void setQf(std::vector<physx::PxReal> const &v) override;
 
-  virtual std::vector<std::array<physx::PxReal, 2>> getQlimits() const override;
-  virtual void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const override;
+  std::vector<std::array<physx::PxReal, 2>> getQlimits() const override;
+  void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const override;
 
-  virtual void setDriveTarget(std::vector<physx::PxReal> const &v) override;
-  virtual void setRootPose(physx::PxTransform const &T) override;
+  void setDriveTarget(std::vector<physx::PxReal> const &v) override;
+  void setRootPose(physx::PxTransform const &T) override;
 
   inline PxArticulationReducedCoordinate *getPxArticulation() { return mPxArticulation; }
 

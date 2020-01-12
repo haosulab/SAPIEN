@@ -31,7 +31,7 @@ class BaseRobotEnv(BaseEnv):
     def _load_robot(self, urdf_path: str, material: sapyen.PxMaterial) -> None:
         # By default, the robot will loaded with balanced passive force
         self.loader.fix_loaded_object = True
-        self.loader.balance_passive_force = True
+        self.loader.balance_passive_force = False
         self.robot: sapyen.ArticulationWrapper = self.loader.load(urdf_path, material)
         self.robot.set_root_pose([0, 0, 0], [1, 0, 0, 0])
 
