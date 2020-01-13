@@ -232,7 +232,7 @@ void test3() {
   // articulationWrapper->set_qpos({0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
 
   // PxArticulationLink *chairLink;
-  // chair->articulation->getLinks(&chairLink, 1);
+  // chair->articulation->getBaseLinks(&chairLink, 1);
 
   // auto actorBuider = sim.createActorBuilder();
   // auto actor = actorBuider->build(false, true, "Camera Mount");

@@ -162,7 +162,7 @@ void OptifuserController::render() {
       mGuiModel.articulationModel.jointModel.resize(articulation->dof());
       uint32_t n = 0;
       auto qpos = articulation->getQpos();
-      for (auto j : articulation->getJoints()) {
+      for (auto j : articulation->getBaseJoints()) {
         auto limits = j->getLimits();
         for (uint32_t i = 0; i < j->getDof(); ++i) {
           mGuiModel.articulationModel.jointModel[n].name = j->getName();

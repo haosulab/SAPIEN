@@ -1,6 +1,7 @@
 #include "sapien_articulation.h"
 #include "sapien_joint.h"
 #include "sapien_link.h"
+#include <numeric>
 #include <spdlog/spdlog.h>
 
 #define CHECK_SIZE(v)                                                                             \
@@ -13,7 +14,7 @@
 
 namespace sapien {
 
-std::vector<SLinkBase *> SArticulation::getLinks() {
+std::vector<SLinkBase *> SArticulation::getBaseLinks() {
   std::vector<SLinkBase *> result;
   result.reserve(mLinks.size());
   for (auto &link : mLinks) {
@@ -22,7 +23,7 @@ std::vector<SLinkBase *> SArticulation::getLinks() {
   return result;
 }
 
-std::vector<SJointBase *> SArticulation::getJoints() {
+std::vector<SJointBase *> SArticulation::getBaseJoints() {
   std::vector<SJointBase *> result;
   result.reserve(mJoints.size());
   for (auto &joint : mJoints) {
@@ -120,11 +121,10 @@ void SArticulation::setQlimits(std::vector<std::array<physx::PxReal, 2>> const &
 void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
 
-  auto v2 = E2I(v);
   uint32_t i = 0;
   for (auto &j : mJoints) {
     for (auto axis : j->getAxes()) {
-      j->getPxJoint()->setDriveTarget(axis, v2[i]);
+      j->getPxJoint()->setDriveTarget(axis, v[i]);
       i += 1;
     }
   }
@@ -151,5 +151,21 @@ std::vector<PxReal> SArticulation::I2E(std::vector<PxReal> iv) const {
   }
   return ev;
 }
-
+std::vector<PxReal> SArticulation::getDriveTarget() const {
+  std::vector<PxReal> driveTarget;
+  for (auto &j : mJoints) {
+    for (auto axis : j->getAxes()) {
+      driveTarget.push_back(j->getPxJoint()->getDriveTarget(axis));
+    }
+  }
+  return driveTarget;
+}
+std::vector<SJoint *> SArticulation::getSJoints() {
+  std::vector<SJoint *> result;
+  result.reserve(mJoints.size());
+  for (auto &joint : mJoints) {
+    result.push_back(joint.get());
+  }
+  return result;
+}
 } // namespace sapien

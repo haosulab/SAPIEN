@@ -105,9 +105,9 @@ int main() {
 
   auto builder = createAntBuilder(*s0);
 
-  auto s1 = builder->build(false);
-  s1->setName("Ant");
-  s1->setRootPose({{0, 0, 2}, PxIdentity});
+  auto ant0 = builder->build(false);
+  ant0->setName("ant0");
+  ant0->setRootPose({{0, 0, 2}, PxIdentity});
 
   auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
   r0->setAmbientLight({0.3, 0.3, 0.3});
@@ -116,6 +116,17 @@ int main() {
   controller.mCamera.position = {-5, 0, 0};
 
   controller.setCurrentScene(s0.get());
+  ant0->setQf({1, 2, 3, 4, 5, 6, 7, 8});
+  ant0->setDriveTarget({2, 3, 4, 5, 6, 7, 8, 9});
+
+  // Set Drive Property
+  auto ant0Joint = ant0->getSJoints();
+  for (size_t i = 0; i < ant0->dof(); ++i) {
+    auto dof = ant0Joint[i]->getDof();
+    if (dof > 0) {
+      ant0Joint[i]->setDriveProperty(1000, 50);
+    }
+  }
 
   while (1) {
     s0->updateRender();

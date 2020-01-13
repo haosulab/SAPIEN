@@ -40,7 +40,7 @@ void SScene::addActor(std::unique_ptr<SActorBase> actor) {
 }
 
 void SScene::addArticulation(std::unique_ptr<SArticulation> articulation) {
-  for (auto link : articulation->getLinks()) {
+  for (auto link : articulation->getBaseLinks()) {
     mLinkId2Link[link->getId()] = link;
   }
   mPxScene->addArticulation(*articulation->getPxArticulation());
@@ -69,7 +69,7 @@ void SScene::removeActor(SActorBase *actor) {
 }
 
 void SScene::removeArticulation(SArticulation *articulation) {
-  for (auto link : articulation->getLinks()) {
+  for (auto link : articulation->getBaseLinks()) {
     // remove camera
     std::remove_if(mCameras.begin(), mCameras.end(),
                    [link](MountedCamera &mc) { return mc.actor == link; });
@@ -150,7 +150,7 @@ void SScene::updateRender() {
   }
 
   for (auto &articulation : mArticulations) {
-    for (auto &link : articulation->getLinks()) {
+    for (auto &link : articulation->getBaseLinks()) {
       link->updateRender(link->getPxActor()->getGlobalPose());
     }
   }

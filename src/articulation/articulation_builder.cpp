@@ -297,7 +297,7 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
     std::vector<uint32_t> E2I;
     count = 0;
     for (uint32_t i = 0; i < totalLinkCount; ++i) {
-      uint32_t dof = result->getJoints()[i]->getDof();
+      uint32_t dof = result->getBaseJoints()[i]->getDof();
       uint32_t start = dofStarts[result->mLinks[i]->getPxArticulationLink()->getLinkIndex()];
       for (uint32_t d = 0; d < dof; ++d) {
         E2I.push_back(start + d);

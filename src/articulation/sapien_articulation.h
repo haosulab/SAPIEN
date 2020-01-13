@@ -27,8 +27,9 @@ class SArticulation : public SArticulationDrivable {
   std::vector<uint32_t> mIndexI2E;
 
 public:
-  std::vector<SLinkBase *> getLinks() override;
-  std::vector<SJointBase *> getJoints() override;
+  std::vector<SLinkBase *> getBaseLinks() override;
+  std::vector<SJointBase *> getBaseJoints() override;
+  std::vector<SJoint *> getSJoints();
 
   EArticulationType getType() const override;
   uint32_t dof() const override;
@@ -48,7 +49,9 @@ public:
   std::vector<std::array<physx::PxReal, 2>> getQlimits() const override;
   void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const override;
 
+  std::vector<physx::PxReal> getDriveTarget() const override;
   void setDriveTarget(std::vector<physx::PxReal> const &v) override;
+
   void setRootPose(physx::PxTransform const &T) override;
 
   inline PxArticulationReducedCoordinate *getPxArticulation() { return mPxArticulation; }

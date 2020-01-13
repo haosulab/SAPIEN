@@ -18,8 +18,8 @@ public:
   inline void setName(std::string const &name) { mName = name; }
   inline std::string getName() { return mName; }
 
-  virtual std::vector<SLinkBase *> getLinks() = 0;
-  virtual std::vector<SJointBase *> getJoints() = 0;
+  virtual std::vector<SLinkBase *> getBaseLinks() = 0;
+  virtual std::vector<SJointBase *> getBaseJoints() = 0;
 
   virtual EArticulationType getType() const = 0;
   virtual uint32_t dof() const = 0;
@@ -46,6 +46,7 @@ public:
 class SArticulationDrivable : public SArticulationBase {
 public:
   virtual void setDriveTarget(const std::vector<physx::PxReal> &v) = 0;
+  virtual std::vector<physx::PxReal> getDriveTarget() const = 0;
 };
 
 } // namespace sapien
