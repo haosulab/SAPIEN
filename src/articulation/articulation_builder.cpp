@@ -129,7 +129,7 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   // create link
   physx_id_t linkId = mArticulationBuilder->getScene()->mLinkIdGenerator.next();
   PxArticulationLink *pxLink = pxArticulation->createLink(
-      mParent >= 0 ? links[mParent]->getPxArticulationLink() : nullptr, {{0, 0, 0}, PxIdentity});
+      mParent >= 0 ? links[mParent]->getPxActor() : nullptr, {{0, 0, 0}, PxIdentity});
 
   std::vector<PxShape *> shapes;
   std::vector<PxReal> densities;
@@ -283,7 +283,7 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
     std::vector<uint32_t> dofStarts(totalLinkCount); // link dof starts, internal order
     dofStarts[0] = 0;
     for (auto &link : result->mLinks) {
-      auto pxLink = link->getPxArticulationLink();
+      auto pxLink = link->getPxActor();
       auto idx = pxLink->getLinkIndex();
       if (idx) {
         dofStarts[idx] = pxLink->getInboundJointDof();
@@ -301,7 +301,7 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
     count = 0;
     for (uint32_t i = 0; i < totalLinkCount; ++i) {
       uint32_t dof = result->getBaseJoints()[i]->getDof();
-      uint32_t start = dofStarts[result->mLinks[i]->getPxArticulationLink()->getLinkIndex()];
+      uint32_t start = dofStarts[result->mLinks[i]->getPxActor()->getLinkIndex()];
       for (uint32_t d = 0; d < dof; ++d) {
         E2I.push_back(start + d);
       }

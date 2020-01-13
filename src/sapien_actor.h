@@ -21,7 +21,7 @@ private:
   PxRigidBody *mActor = nullptr;
 
 public:
-  PxRigidBody *getPxRigidBody() override;
+  PxRigidBody *getPxActor() override;
 
   void setPose(PxTransform const &pose);
 

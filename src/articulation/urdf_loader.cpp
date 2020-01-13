@@ -414,7 +414,7 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
       case Sensor::Type::CAMERA:
       case Sensor::Type::DEPTH:
 
-        std::vector<SLinkBase *> links = articulation->getLinks();
+        std::vector<SLinkBase *> links = articulation->getBaseLinks();
 
         auto it = std::find_if(links.begin(), links.end(), [&](SLinkBase *link) {
           return link->getName() == gazebo->reference;

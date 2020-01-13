@@ -14,7 +14,7 @@ class SArticulation;
 
 class SLinkBase : public SActorDynamicBase {
 protected:
-  uint32_t mIndex;  // set when "build" from articulation builder
+  uint32_t mIndex; // set when "build" from articulation builder
 
 public:
   virtual SArticulationBase *getArticulation() = 0;
@@ -33,9 +33,7 @@ private:
 
 public:
   SArticulationBase *getArticulation() override;
-  PxRigidBody *getPxRigidBody() override;
-
-  PxArticulationLink *getPxArticulationLink();
+  PxArticulationLink *getPxActor() override;
 
 private:
   SLink(PxArticulationLink *actor, SArticulation *articulation, physx_id_t id, SScene *scene,

@@ -50,8 +50,7 @@ public:
   PxVec3 getVel();
   PxVec3 getAngularVel();
 
-  virtual PxRigidBody *getPxRigidBody() = 0;
-  PxRigidActor *getPxActor() override;
+  PxRigidBody *getPxActor() override = 0;
   virtual void addForceAtPoint(PxVec3 const &force, PxVec3 const &pos);
 
 protected:

@@ -8,7 +8,7 @@ SActor::SActor(PxRigidBody *actor, physx_id_t id, SScene *scene,
                std::vector<Renderer::IPxrRigidbody *> renderBodies)
     : SActorDynamicBase(id, scene, renderBodies), mActor(actor) {}
 
-PxRigidBody *SActor::getPxRigidBody() { return mActor; }
+PxRigidBody *SActor::getPxActor() { return mActor; }
 
 void SActor::destroy() { mParentScene->removeActor(this); }
 
