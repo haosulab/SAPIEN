@@ -145,16 +145,16 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       if (!mesh) {
         spdlog::error("Failed to load convex mesh for actor");
         continue;
-        PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
-            PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material, true);
-        if (!shape) {
-          spdlog::critical("Failed to create shape");
-          throw std::runtime_error("Failed to create shape");
-        }
-        shape->setLocalPose(r.pose);
-        shapes.push_back(shape);
-        densities.push_back(r.density);
       }
+      PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
+          PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material, true);
+      if (!shape) {
+        spdlog::critical("Failed to create shape");
+        throw std::runtime_error("Failed to create shape");
+      }
+      shape->setLocalPose(r.pose);
+      shapes.push_back(shape);
+      densities.push_back(r.density);
       break;
     }
 
@@ -164,16 +164,16 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
         if (!mesh) {
           spdlog::error("Failed to load part of the convex mesh for actor");
           continue;
-          PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
-              PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material, true);
-          if (!shape) {
-            spdlog::critical("Failed to create shape");
-            throw std::runtime_error("Failed to create shape");
-          }
-          shape->setLocalPose(r.pose);
-          shapes.push_back(shape);
-          densities.push_back(r.density);
         }
+        PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
+            PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material, true);
+        if (!shape) {
+          spdlog::critical("Failed to create shape");
+          throw std::runtime_error("Failed to create shape");
+        }
+        shape->setLocalPose(r.pose);
+        shapes.push_back(shape);
+        densities.push_back(r.density);
       }
       break;
     }

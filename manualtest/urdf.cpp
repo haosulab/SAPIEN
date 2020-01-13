@@ -17,11 +17,12 @@ int main() {
   controller.showWindow();
 
   auto s0 = sim.createScene("Scene 1");
-  s0->setTimestep(1 / 60.f);
+  s0->setTimestep(1 / 240.f);
   s0->addGround(-1);
 
   // auto builder = createAntBuilder(*s0);
   auto loader = s0->createURDFLoader();
+  loader->fixLoadedObject = 0;
   auto a = loader->load("../assets/179/mobility.urdf");
 
   // auto s1 = builder->build(false);
@@ -37,8 +38,10 @@ int main() {
   controller.setCurrentScene(s0.get());
 
   while (1) {
+    for (int i = 0; i < 4; ++i) {
+      s0->step();
+    }
     s0->updateRender();
-    s0->step();
     controller.render();
   }
 

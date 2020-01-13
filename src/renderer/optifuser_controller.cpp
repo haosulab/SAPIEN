@@ -150,6 +150,7 @@ void OptifuserController::render() {
       mGuiModel.linkModel.transform = actor->getPxActor()->getGlobalPose();
       mGuiModel.linkModel.col1 = actor->getCollisionGroup1();
       mGuiModel.linkModel.col2 = actor->getCollisionGroup2();
+      mGuiModel.articulationId = 0;
     } else if (link) {
       mGuiModel.linkModel.name = link->getName();
       mGuiModel.linkModel.transform = link->getPxActor()->getGlobalPose();
@@ -326,7 +327,8 @@ void OptifuserController::render() {
       {
         if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
           ImGui::Text("name: %s", mGuiModel.linkModel.name.c_str());
-          ImGui::Text("col1: #%08x, col2: #%08x", mGuiModel.linkModel.col1, mGuiModel.linkModel.col2);
+          ImGui::Text("col1: #%08x, col2: #%08x", mGuiModel.linkModel.col1,
+                      mGuiModel.linkModel.col2);
         }
       }
       if (mGuiModel.articulationId) {
@@ -338,7 +340,8 @@ void OptifuserController::render() {
           for (auto &joint : mGuiModel.articulationModel.jointModel) {
             ImGui::Text("%s", joint.name.c_str());
             if (ImGui::SliderFloat(("##" + std::to_string(++i)).c_str(), &joint.value,
-                                   joint.limits[0], joint.limits[1])) {
+                                   std::max(joint.limits[0], -10.f),
+                                   std::min(joint.limits[1], 10.f))) {
               std::vector<PxReal> v;
               SLinkBase *link = mScene->findArticulationLinkById(mGuiModel.linkId);
               auto articulation = link->getArticulation();
