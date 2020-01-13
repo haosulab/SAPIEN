@@ -117,6 +117,8 @@ add_executable(manual_actor manualtest/actor.cpp)
 target_link_libraries(manual_actor sapien)
 add_executable(manual_articulation manualtest/articulation.cpp)
 target_link_libraries(manual_articulation sapien)
+add_executable(manual_urdf manualtest/urdf.cpp)
+target_link_libraries(manual_urdf sapien)
 
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 

@@ -22,6 +22,8 @@ class LinkBuilder : public ActorBuilder {
     std::vector<std::array<float, 2>> limits = {};
     PxTransform parentPose = {{0, 0, 0}, PxIdentity};
     PxTransform childPose = {{0, 0, 0}, PxIdentity};
+    PxReal friction = 0;
+    PxReal damping = 0;
     std::string name = "";
   } mJointRecord;
 
@@ -43,7 +45,7 @@ public:
   void setJointProperties(PxArticulationJointType::Enum jointType,
                           std::vector<std::array<float, 2>> const &limits,
                           PxTransform const &parentPose, PxTransform const &childPose,
-                          std::string const &jointName);
+                          PxReal friction = 0.f, PxReal damping = 0.f);
 
   std::string summary() const;
 

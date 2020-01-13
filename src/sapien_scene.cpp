@@ -4,6 +4,7 @@
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_joint.h"
 #include "articulation/sapien_link.h"
+#include "articulation/urdf_loader.h"
 #include "renderer/render_interface.h"
 #include "sapien_actor.h"
 #include "sapien_contact.h"
@@ -115,6 +116,10 @@ std::unique_ptr<ActorBuilder> SScene::createActorBuilder() {
 
 std::unique_ptr<ArticulationBuilder> SScene::createArticulationBuilder() {
   return std::make_unique<ArticulationBuilder>(this);
+}
+
+std::unique_ptr<URDF::URDFLoader> SScene::createURDFLoader() {
+  return std::make_unique<URDF::URDFLoader>(this);
 }
 
 Renderer::ICamera *SScene::addMountedCamera(std::string const &name, SActorBase *actor,

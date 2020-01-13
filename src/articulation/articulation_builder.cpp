@@ -15,14 +15,15 @@ LinkBuilder::LinkBuilder(ArticulationBuilder *articulationBuilder, int index, in
 void LinkBuilder::setJointName(const std::string &jointName) { mJointRecord.name = jointName; }
 
 void LinkBuilder::setJointProperties(PxArticulationJointType::Enum jointType,
-                                     const std::vector<std::array<float, 2>> &limits,
-                                     const PxTransform &parentPose, const PxTransform &childPose,
-                                     const std::string &jointName) {
+                                     std::vector<std::array<float, 2>> const &limits,
+                                     PxTransform const &parentPose, PxTransform const &childPose,
+                                     PxReal friction, PxReal damping) {
   mJointRecord.jointType = jointType;
   mJointRecord.limits = limits;
   mJointRecord.parentPose = parentPose;
   mJointRecord.childPose = childPose;
-  mJointRecord.name = jointName;
+  mJointRecord.friction = friction;
+  mJointRecord.damping = damping;
 }
 
 std::string LinkBuilder::summary() const {
@@ -180,6 +181,8 @@ bool LinkBuilder::build(SArticulation &articulation) const {
     joint->setChildPose(mJointRecord.childPose);
     j = std::unique_ptr<SJoint>(new SJoint(links[mParent].get(), links[mIndex].get(), joint));
     j->setLimits(mJointRecord.limits);
+    j->setFriction(mJointRecord.friction);
+    j->setDriveProperty(0, mJointRecord.damping);
   } else {
     j = std::unique_ptr<SJoint>(new SJoint(nullptr, links[mIndex].get(), nullptr));
   }

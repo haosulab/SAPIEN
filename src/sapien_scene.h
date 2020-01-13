@@ -23,6 +23,10 @@ class IPxrScene;
 class ICamera;
 } // namespace Renderer
 
+namespace URDF {
+class URDFLoader;
+}
+
 using namespace physx;
 
 class SScene {
@@ -65,7 +69,7 @@ public:
 
   std::unique_ptr<ActorBuilder> createActorBuilder();
   std::unique_ptr<ArticulationBuilder> createArticulationBuilder();
-  // TODO URDF Loader
+  std::unique_ptr<URDF::URDFLoader> createURDFLoader();
 
   void removeActor(SActorBase *actor);
   void removeArticulation(SArticulation *articulation);
