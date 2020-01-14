@@ -35,6 +35,7 @@ class LinkBuilder : public ActorBuilder {
 
 public:
   LinkBuilder(ArticulationBuilder *articulationBuilder, int index, int parentIndex = -1);
+  LinkBuilder(LinkBuilder const &other) = default;
 
   inline int getIndex() const { return mIndex; };
   inline void setParent(int parentIndex) { mParent = parentIndex; };
@@ -56,7 +57,7 @@ private:
 
 class ArticulationBuilder {
 
-  std::vector<LinkBuilder> mLinkBuilders;
+  std::vector<std::unique_ptr<LinkBuilder>> mLinkBuilders;
 
   SScene *mScene;
 

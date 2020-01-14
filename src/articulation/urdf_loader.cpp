@@ -170,6 +170,7 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
   // std::map<LinkTreeNode *, physx::PxArticulationLink *> treeNode2pxLink;
 
   auto builder = mScene->createArticulationBuilder();
+
   stack = {root};
   while (!stack.empty()) {
     LinkTreeNode *current = stack.back();
@@ -241,10 +242,6 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
       currentLinkBuilder->setMassAndInertia(
           currentInertial.mass->value * scale3, tInertia2Link,
           {scale3 * eigs.x(), scale3 * eigs.y(), scale * eigs.z()});
-      // currentPxLink.setCMassLocalPose(tInertia2Link);
-      // currentPxLink.setMassSpaceInertiaTensor(
-      //     {scale3 * eigs.x(), scale3 * eigs.y(), scale * eigs.z()});
-      // currentPxLink.setMass(currentInertial.mass->value * scale3);
     }
 
     // visual
@@ -254,33 +251,21 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
       case Geometry::BOX:
         currentLinkBuilder->addBoxVisual(tVisual2Link, visual->geometry->size * scale, {1, 1, 1},
                                          visual->name);
-        // builder.addBoxVisualToLink(currentPxLink, tVisual2Link, visual->geometry->size * scale,
-        //                            {1, 1, 1}, visual->name);
         break;
       case Geometry::CYLINDER:
         currentLinkBuilder->addCapsuleVisual(
             tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
             visual->geometry->radius * scale, visual->geometry->length * scale / 2.f, {1, 1, 1},
             visual->name);
-        // builder.addCapsuleVisualToLink(
-        //     currentPxLink, tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
-        //     visual->geometry->radius * scale, visual->geometry->length * scale / 2.f, {1, 1, 1},
-        //     visual->name);
         break;
       case Geometry::SPHERE:
         currentLinkBuilder->addSphereVisual(tVisual2Link, visual->geometry->radius * scale,
                                             {1, 1, 1}, visual->name);
-        // builder.addSphereVisualToLink(currentPxLink, tVisual2Link,
-        //                               visual->geometry->radius * scale, {1, 1, 1},
-        //                               visual->name);
         break;
       case Geometry::MESH:
         currentLinkBuilder->addObjVisual(getAbsPath(filename, visual->geometry->filename),
                                          tVisual2Link, visual->geometry->scale * scale,
                                          visual->name);
-        // builder.addObjVisualToLink(currentPxLink, getAbsPath(filename,
-        // visual->geometry->filename),
-        //                            tVisual2Link, visual->geometry->scale * scale, visual->name);
         break;
       }
     }
@@ -291,30 +276,20 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
       // TODO: add physical material support (may require URDF extension)
       switch (collision->geometry->type) {
       case Geometry::BOX:
-        // builder.addBoxShapeToLink(currentPxLink, tCollision2Link,
-        //                           collision->geometry->size * scale);
         currentLinkBuilder->addBoxShape(tCollision2Link, collision->geometry->size * scale,
                                         material, defaultDensity);
         break;
       case Geometry::CYLINDER:
-        // builder.addCapsuleShapeToLink(
-        //     currentPxLink, tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
-        //     collision->geometry->radius * scale, collision->geometry->length * scale / 2.0f);
         currentLinkBuilder->addCapsuleShape(
             tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
             collision->geometry->radius * scale, collision->geometry->length * scale / 2.0f,
             material, defaultDensity);
         break;
       case Geometry::SPHERE:
-        // builder.addSphereShapeToLink(currentPxLink, tCollision2Link,
-        //                              collision->geometry->radius * scale);
         currentLinkBuilder->addSphereShape(tCollision2Link, collision->geometry->radius * scale,
                                            material, defaultDensity);
         break;
       case Geometry::MESH:
-        // builder.addConvexObjShapeToLink(currentPxLink,
-        //                                 getAbsPath(filename, collision->geometry->filename),
-        //                                 tCollision2Link, PxVec3(1, 1, 1) * scale, material);
         currentLinkBuilder->addConvexShapeFromObj(
             getAbsPath(filename, collision->geometry->filename), tCollision2Link,
             PxVec3(1, 1, 1) * scale, material, defaultDensity);

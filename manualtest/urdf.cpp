@@ -23,7 +23,7 @@ int main() {
   // auto builder = createAntBuilder(*s0);
   auto loader = s0->createURDFLoader();
   loader->fixLoadedObject = 0;
-  auto a = loader->load("../assets/179/mobility.urdf");
+  auto a = loader->load("../assets/robot/all_robot.urdf");
 
   // auto s1 = builder->build(false);
   // s1->setName("Ant");

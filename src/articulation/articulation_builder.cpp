@@ -199,15 +199,15 @@ LinkBuilder *ArticulationBuilder::createLinkBuilder(LinkBuilder *parent) {
 }
 
 LinkBuilder *ArticulationBuilder::createLinkBuilder(int parentIdx) {
-  mLinkBuilders.push_back(LinkBuilder(this, mLinkBuilders.size(), parentIdx));
-  return &mLinkBuilders.back();
+  mLinkBuilders.push_back(std::make_unique<LinkBuilder>(this, mLinkBuilders.size(), parentIdx));
+  return mLinkBuilders.back().get();
 }
 
 std::string ArticulationBuilder::summary() const {
   std::stringstream ss;
   ss << "======= Link Summary =======" << std::endl;
   for (auto &b : mLinkBuilders) {
-    ss << b.summary() << std::endl;
+    ss << b->summary() << std::endl;
   }
   ss << "======= Joint summary =======" << std::endl;
   return ss.str();
@@ -217,20 +217,20 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
   // find tree root
   int root = -1;
   for (auto &b : mLinkBuilders) {
-    if (b.mParent < 0) {
+    if (b->mParent < 0) {
       if (root >= 0) {
         spdlog::error("Failed to build articulation: multiple roots");
         return nullptr;
       }
-      root = b.mIndex;
+      root = b->mIndex;
     }
   }
 
   // root -> children
   std::vector<std::vector<int>> childMap(mLinkBuilders.size());
   for (auto &b : mLinkBuilders) {
-    if (b.mParent >= 0) {
-      childMap[b.mParent].push_back(b.mIndex);
+    if (b->mParent >= 0) {
+      childMap[b->mParent].push_back(b->mIndex);
     }
   }
 
@@ -253,7 +253,7 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
   }
 
   for (auto &builder : mLinkBuilders) {
-    if (!builder.checkJointProperties()) {
+    if (!builder->checkJointProperties()) {
       spdlog::error("Failed to build articulation: invalid joint");
       return nullptr;
     }
@@ -269,7 +269,7 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
 
   // sorted now is topologically sorted
   for (int i : sorted) {
-    if (!mLinkBuilders[i].build(*sArticulation)) {
+    if (!mLinkBuilders[i]->build(*sArticulation)) {
       sArticulation.release();
       return nullptr;
     }
