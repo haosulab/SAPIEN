@@ -14,9 +14,11 @@ public:
   std::unique_ptr<Optifuser::OffscreenRenderContext> mRenderContext;
   OptifuserScene *mScene;
 
+  physx::PxTransform mInitialPose;
+
 public:
   OptifuserCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
-                OptifuserScene *scene, std::string const &shaderDir = "glsl_shader/130");
+                  OptifuserScene *scene, std::string const &shaderDir = "glsl_shader/130");
 
   // ICamera
   virtual const std::string &getName() const override;
@@ -35,6 +37,7 @@ public:
 
   // ISensor
   virtual physx::PxTransform getPose() const override;
+  virtual void setInitialPose(physx::PxTransform const &pose) override;
   virtual void setPose(physx::PxTransform const &pose) override;
 
 #ifdef _USE_OPTIX

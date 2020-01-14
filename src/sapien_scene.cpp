@@ -127,6 +127,7 @@ Renderer::ICamera *SScene::addMountedCamera(std::string const &name, SActorBase 
                                             uint32_t height, float fovx, float fovy, float near,
                                             float far) {
   auto cam = mRendererScene->addCamera(name, width, height, fovx, fovy, near, far);
+  cam->setInitialPose({{0, 0, 0}, {-0.5, 0.5, 0.5, -0.5}});
   mCameras.push_back({actor, cam});
   return cam;
 }

@@ -50,9 +50,16 @@ physx::PxTransform OptifuserCamera::getPose() const {
                             physx::PxQuat(rotation.x, rotation.y, rotation.z, rotation.w));
 }
 
-void OptifuserCamera::setPose(physx::PxTransform const &pose) {
+void OptifuserCamera::setInitialPose(physx::PxTransform const &pose) {
+  mInitialPose = pose;
   position = {pose.p.x, pose.p.y, pose.p.z};
   rotation = {pose.q.w, pose.q.x, pose.q.y, pose.q.z};
+}
+
+void OptifuserCamera::setPose(physx::PxTransform const &pose) {
+  auto p = pose * mInitialPose;
+  position = {p.p.x, p.p.y, p.p.z};
+  rotation = {p.q.w, p.q.x, p.q.y, p.q.z};
 }
 
 const std::string &OptifuserCamera::getName() const { return name; }

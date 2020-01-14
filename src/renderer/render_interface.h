@@ -17,6 +17,7 @@ class IPxrRenderer;
 
 class ISensor {
 public:
+  virtual void setInitialPose(physx::PxTransform const &pose) = 0;
   virtual physx::PxTransform getPose() const = 0;
   virtual void setPose(physx::PxTransform const &pose) = 0;
   virtual IPxrScene *getScene() = 0;
