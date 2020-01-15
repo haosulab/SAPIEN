@@ -23,6 +23,7 @@ struct LinkGuiModel {
   physx::PxTransform transform;
   uint32_t col1 = 0;
   uint32_t col2 = 0;
+  uint32_t col3 = 0;
 };
 
 struct GuiModel {

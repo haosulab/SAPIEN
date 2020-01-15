@@ -109,7 +109,8 @@ public:
   /* when a.g1 & b.g2 != 0, the collision is ignored
    * by default g1 = g2 = 1
    */
-  void setCollisionGroup(uint32_t g1, uint32_t g2);
+  void setCollisionGroup(uint32_t g1, uint32_t g2, uint32_t g3);
+  void addCollisionGroup(uint32_t g1, uint32_t g2, uint32_t g3);
   void resetCollisionGroup();
 
   // calling this function will overwrite the densities

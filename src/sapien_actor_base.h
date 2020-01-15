@@ -22,6 +22,7 @@ protected:
 
   uint32_t mCol1 = 0;
   uint32_t mCol2 = 0;
+  uint32_t mCol3 = 0;
 
 public:
   inline std::string getName() { return mName; };
@@ -32,6 +33,7 @@ public:
   PxTransform getPose();
   inline uint32_t getCollisionGroup1() { return mCol1; }
   inline uint32_t getCollisionGroup2() { return mCol2; }
+  inline uint32_t getCollisionGroup3() { return mCol3; }
 
   // render
   std::vector<Renderer::IPxrRigidbody *> getRenderBodies();

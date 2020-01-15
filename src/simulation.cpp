@@ -93,7 +93,7 @@ std::unique_ptr<SScene> Simulation::createScene(std::string const &name, PxVec3 
 
   PxSceneDesc sceneDesc(mPhysicsSDK->getTolerancesScale());
   sceneDesc.gravity = gravity;
-  sceneDesc.filterShader = TypeAffinityFilterShader;
+  sceneDesc.filterShader = TypeAffinityIgnoreFilterShader;
   sceneDesc.solverType = solverType;
   sceneDesc.flags = sceneFlags;
 

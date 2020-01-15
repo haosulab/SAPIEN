@@ -241,10 +241,22 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
   }
 }
 
-/* minor group: 1-95, collision will be ignored if they share the same group */
-void ActorBuilder::setCollisionGroup(uint32_t g1, uint32_t g2) {
+void ActorBuilder::setCollisionGroup(uint32_t g1, uint32_t g2, uint32_t g3) {
   mCollisionGroup.w0 = g1;
   mCollisionGroup.w1 = g2;
+  mCollisionGroup.w2 = g3;
+}
+
+void ActorBuilder::addCollisionGroup(uint32_t g1, uint32_t g2, uint32_t g3) {
+  if (g1) {
+    mCollisionGroup.w0 |= 1 << (g1 - 1);
+  }
+  if (g2) {
+    mCollisionGroup.w1 |= 1 << (g2 - 1);
+  }
+  if (g3) {
+    mCollisionGroup.w2 |= 1 << (g3 - 1);
+  }
 }
 
 void ActorBuilder::resetCollisionGroup() {
@@ -271,14 +283,15 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   PxFilterData data;
   data.word0 = mCollisionGroup.w0;
   data.word1 = mCollisionGroup.w1;
-  data.word2 = 0;
-  data.word2 = 0;
+  data.word2 = mCollisionGroup.w2;
+  data.word3 = 0;
 
   PxRigidDynamic *actor =
       getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
   actor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, isKinematic);
   for (size_t i = 0; i < shapes.size(); ++i) {
     actor->attachShape(*shapes[i]);
+    shapes[i]->setSimulationFilterData(data);
     shapes[i]->release(); // this shape is now reference counted by the actor
   }
   if (shapes.size() && mUseDensity) {
@@ -294,6 +307,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
 
   sActor->mCol1 = mCollisionGroup.w0;
   sActor->mCol2 = mCollisionGroup.w1;
+  sActor->mCol3 = mCollisionGroup.w2;
 
   actor->userData = sActor.get();
 
@@ -320,8 +334,8 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   PxFilterData data;
   data.word0 = mCollisionGroup.w0;
   data.word1 = mCollisionGroup.w1;
-  data.word2 = 0;
-  data.word2 = 0;
+  data.word2 = mCollisionGroup.w2;
+  data.word3 = 0;
 
   PxRigidStatic *actor = getSimulation()->mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
   for (size_t i = 0; i < shapes.size(); ++i) {
@@ -336,6 +350,7 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
 
   sActor->mCol1 = mCollisionGroup.w0;
   sActor->mCol2 = mCollisionGroup.w1;
+  sActor->mCol3 = mCollisionGroup.w2;
 
   actor->userData = sActor.get();
 
@@ -357,8 +372,8 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render, PxMaterial
   PxFilterData data;
   data.word0 = mCollisionGroup.w0;
   data.word1 = mCollisionGroup.w1;
-  data.word2 = 0;
-  data.word2 = 0;
+  data.word2 = mCollisionGroup.w2;
+  data.word3 = 0;
 
   shape->setSimulationFilterData(data);
 
@@ -380,6 +395,7 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render, PxMaterial
 
   sActor->mCol1 = mCollisionGroup.w0;
   sActor->mCol2 = mCollisionGroup.w1;
+  sActor->mCol3 = mCollisionGroup.w2;
 
   ground->userData = sActor.get();
 

@@ -145,12 +145,12 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   PxFilterData data;
   data.word0 = mCollisionGroup.w0;
   data.word1 = mCollisionGroup.w1;
-  data.word2 = 0;
-  data.word2 = 0;
+  data.word2 = mCollisionGroup.w2;
+  data.word3 = 0;
 
   for (size_t i = 0; i < shapes.size(); ++i) {
-    shapes[i]->setSimulationFilterData(data);
     pxLink->attachShape(*shapes[i]);
+    shapes[i]->setSimulationFilterData(data);
     shapes[i]->release(); // this shape is reference counted by link
   }
   if (shapes.size() && mUseDensity) {
@@ -168,6 +168,7 @@ bool LinkBuilder::build(SArticulation &articulation) const {
 
   links[mIndex]->mCol1 = mCollisionGroup.w0;
   links[mIndex]->mCol2 = mCollisionGroup.w1;
+  links[mIndex]->mCol3 = mCollisionGroup.w2;
   links[mIndex]->mIndex = mIndex;
 
   pxLink->userData = links[mIndex].get();

@@ -359,6 +359,34 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
     }
   }
 
+  if (srdf) {
+    uint32_t groupCount = 0;
+    for (auto &dc : srdf->disable_collisions_array) {
+      if (dc->reason == std::string("default")) {
+        if (linkName2treeNode.find(dc->link1) == linkName2treeNode.end()) {
+          spdlog::error("SRDF link name not found: {}", dc->link1);
+          continue;
+        }
+        if (linkName2treeNode.find(dc->link2) == linkName2treeNode.end()) {
+          spdlog::error("SRDF link name not found: {}", dc->link2);
+          continue;
+        }
+      }
+      LinkTreeNode *l1 = linkName2treeNode[dc->link1];
+      LinkTreeNode *l2 = linkName2treeNode[dc->link2];
+      if (l1->parent == l2 || l2->parent == l1) {
+        continue;  // ignored by default
+      }
+      groupCount += 1;
+      if (groupCount == 32) {
+        spdlog::critical("Collision group exhausted, please simplify the SRDF");
+        throw std::runtime_error("Too many collision groups");
+      }
+      l1->linkBuilder->addCollisionGroup(0, 0, groupCount);
+      l2->linkBuilder->addCollisionGroup(0, 0, groupCount);
+    }
+    spdlog::info("SRDF: ignored {} pairs", groupCount);
+  }
   // TODO collision
   // if (srdf) {
   //   for (auto &dc : srdf->disable_collisions_array) {

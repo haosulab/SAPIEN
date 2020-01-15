@@ -150,12 +150,14 @@ void OptifuserController::render() {
       mGuiModel.linkModel.transform = actor->getPxActor()->getGlobalPose();
       mGuiModel.linkModel.col1 = actor->getCollisionGroup1();
       mGuiModel.linkModel.col2 = actor->getCollisionGroup2();
+      mGuiModel.linkModel.col3 = actor->getCollisionGroup3();
       mGuiModel.articulationId = 0;
     } else if (link) {
       mGuiModel.linkModel.name = link->getName();
       mGuiModel.linkModel.transform = link->getPxActor()->getGlobalPose();
       mGuiModel.linkModel.col1 = link->getCollisionGroup1();
       mGuiModel.linkModel.col2 = link->getCollisionGroup2();
+      mGuiModel.linkModel.col3 = link->getCollisionGroup3();
       auto articulation = link->getArticulation();
       mGuiModel.articulationId = 1;
       mGuiModel.articulationModel.name = articulation->getName();
@@ -329,6 +331,7 @@ void OptifuserController::render() {
           ImGui::Text("name: %s", mGuiModel.linkModel.name.c_str());
           ImGui::Text("col1: #%08x, col2: #%08x", mGuiModel.linkModel.col1,
                       mGuiModel.linkModel.col2);
+          ImGui::Text("col3: #%08x", mGuiModel.linkModel.col3);
         }
       }
       if (mGuiModel.articulationId) {
