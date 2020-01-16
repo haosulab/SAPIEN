@@ -263,7 +263,7 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
                                             {1, 1, 1}, visual->name);
         break;
       case Geometry::MESH:
-        currentLinkBuilder->addObjVisual(getAbsPath(filename, visual->geometry->filename),
+        currentLinkBuilder->addVisualFromFile(getAbsPath(filename, visual->geometry->filename),
                                          tVisual2Link, visual->geometry->scale * scale,
                                          visual->name);
         break;
@@ -290,7 +290,7 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
                                            material, defaultDensity);
         break;
       case Geometry::MESH:
-        currentLinkBuilder->addConvexShapeFromObj(
+        currentLinkBuilder->addConvexShapeFromFile(
             getAbsPath(filename, collision->geometry->filename), tCollision2Link,
             PxVec3(1, 1, 1) * scale, material, defaultDensity);
         break;
@@ -387,26 +387,8 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
     }
     spdlog::info("SRDF: ignored {} pairs", groupCount);
   }
-  // TODO collision
-  // if (srdf) {
-  //   for (auto &dc : srdf->disable_collisions_array) {
-  //     if (dc->reason == std::string("default")) {
-  //       if (linkName2treeNode.find(dc->link1) == linkName2treeNode.end()) {
-  //         throw std::runtime_error("SRDF link name not found: " + dc->link1);
-  //       }
-  //       if (linkName2treeNode.find(dc->link2) == linkName2treeNode.end()) {
-  //         throw std::runtime_error("SRDF link name not found: " + dc->link2);
-  //       }
-  //       auto l1 = linkName2treeNode[dc->link1];
-  //       auto l2 = linkName2treeNode[dc->link2];
-  //       auto link1 = treeNode2pxLink[l1];
-  //       auto link2 = treeNode2pxLink[l2];
-  //       builder.disableCollision(*link1, *link2);
-  //     }
-  //   }
-  // }
 
-  SArticulation *articulation = builder->build(fixLoadedObject);
+  SArticulation *articulation = builder->build(fixBase);
 
   for (auto &gazebo : robot->gazebo_array) {
     for (auto &sensor : gazebo->sensor_array) {

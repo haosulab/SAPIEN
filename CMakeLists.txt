@@ -101,8 +101,11 @@ target_link_libraries(test_kinematic sapien)
 add_executable(ps3 test/ps3.cpp)
 target_link_libraries(ps3 sapien)
 
-pybind11_add_module(sapyen "python/pybind.cpp")
-target_link_libraries(sapyen PRIVATE sapien)
+# pybind11_add_module(sapyen "python/pybind.cpp")
+# target_link_libraries(sapyen PRIVATE sapien)
+
+pybind11_add_module(pysapien "python/pysapien.cpp")
+target_link_libraries(pysapien PRIVATE sapien)
 
 add_executable(cheetah test/cheetah.cpp)
 target_link_libraries(cheetah sapien)
@@ -121,6 +124,8 @@ add_executable(manual_urdf manualtest/urdf.cpp)
 target_link_libraries(manual_urdf sapien)
 
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
+
+add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtest/*.py ${CMAKE_CURRENT_BINARY_DIR})
 
 # Below are the ROS specified content
 set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")

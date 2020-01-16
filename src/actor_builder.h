@@ -69,12 +69,12 @@ public:
   ActorBuilder(ActorBuilder const &other) = default;
   ActorBuilder &operator=(ActorBuilder const &other) = default;
 
-  void addConvexShapeFromObj(const std::string &filename,
+  void addConvexShapeFromFile(const std::string &filename,
                              const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                              const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
                              PxReal density = 1000.f);
 
-  void addMultipleConvexShapesFromObj(const std::string &filename,
+  void addMultipleConvexShapesFromFile(const std::string &filename,
                                       const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                       const PxVec3 &scale = {1, 1, 1},
                                       PxMaterial *material = nullptr, PxReal density = 1000.f);
@@ -102,7 +102,7 @@ public:
   void addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
                        const PxVec3 &color = {1, 1, 1}, std::string const &name = "");
 
-  void addObjVisual(const std::string &filename,
+  void addVisualFromFile(const std::string &filename,
                     const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                     const PxVec3 &scale = {1, 1, 1}, std::string const &name = "");
 

@@ -21,14 +21,14 @@ class SArticulation : public SArticulationDrivable {
   std::vector<std::unique_ptr<SLink>> mLinks;
   std::vector<std::unique_ptr<SJoint>> mJoints;
 
-  std::vector<uint32_t> mDofStarts;
-
   std::vector<uint32_t> mIndexE2I;
   std::vector<uint32_t> mIndexI2E;
 
 public:
   std::vector<SLinkBase *> getBaseLinks() override;
   std::vector<SJointBase *> getBaseJoints() override;
+
+  std::vector<SLink *> getSLinks();
   std::vector<SJoint *> getSJoints();
 
   EArticulationType getType() const override;

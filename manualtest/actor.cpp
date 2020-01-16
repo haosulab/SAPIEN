@@ -1,4 +1,5 @@
 #include "actor_builder.h"
+#include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 #include "sapien_actor.h"
 #include "sapien_scene.h"
@@ -10,11 +11,13 @@ int main() {
   Simulation sim;
   Renderer::OptifuserRenderer renderer;
   sim.setRenderer(&renderer);
+  Renderer::OptifuserController controller(&renderer);
 
-  renderer.showWindow();
+  controller.showWindow();
 
   auto s0 = sim.createScene("Scene 1");
   s0->addGround(-1);
+  s0->setTimestep(1 / 60.f);
 
   auto s1 = sim.createScene("Scene 2");
   s1->addGround(-1);
@@ -31,18 +34,15 @@ int main() {
   auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
   r0->setAmbientLight({0.3, 0.3, 0.3});
   r0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
-  renderer.cam.position = {-5, 0, 0};
+  controller.mCamera.position = {-5, 0, 0};
 
-  renderer.setCurrentScene(*static_cast<Renderer::OptifuserScene *>(s0->getRendererScene()));
+  controller.setCurrentScene(s0.get());
 
-  while (1) {
+  while (!controller.shouldQuit()) {
     s0->updateRender();
     s0->step();
 
-    s1->updateRender();
-    s1->step();
-
-    renderer.render();
+    controller.render();
   }
 
   return 0;

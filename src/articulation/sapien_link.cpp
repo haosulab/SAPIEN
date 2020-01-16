@@ -4,7 +4,7 @@
 namespace sapien {
 
 PxArticulationLink *SLink::getPxActor() { return mActor; }
-SArticulationBase *SLink::getArticulation() { return mArticulation; }
+SArticulation *SLink::getArticulation() { return mArticulation; }
 
 SLink::SLink(PxArticulationLink *actor, SArticulation *articulation, physx_id_t id, SScene *scene,
              std::vector<Renderer::IPxrRigidbody *> renderBodies)

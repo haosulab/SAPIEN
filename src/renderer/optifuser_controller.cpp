@@ -43,6 +43,8 @@ void OptifuserController::hideWindow() { mRenderer->mContext->hideWindow(); }
 
 void OptifuserController::setCurrentScene(SScene *scene) { mScene = scene; }
 
+bool OptifuserController::shouldQuit() { return mShouldQuit; }
+
 void OptifuserController::render() {
 
 #ifdef _USE_OPTIX
@@ -83,6 +85,10 @@ void OptifuserController::render() {
       pathTracer->invalidateCamera();
     }
 #endif
+  }
+
+  if (Optifuser::getInput().getKeyDown(GLFW_KEY_Q)) {
+    mShouldQuit = true;
   }
 
   mCamera.aspect = static_cast<float>(mRenderer->mContext->getWidth()) /

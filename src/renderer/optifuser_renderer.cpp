@@ -173,21 +173,23 @@ std::vector<ICamera *> OptifuserScene::getCameras() {
 
 void OptifuserScene::destroy() { mParentRenderer->removeScene(this); }
 
-void OptifuserScene::setAmbientLight(std::array<float, 3> color) {
+void OptifuserScene::setAmbientLight(std::array<float, 3> const &color) {
   mScene->setAmbientLight({color[0], color[1], color[2]});
 }
 
-void OptifuserScene::setShadowLight(std::array<float, 3> direction, std::array<float, 3> color) {
+void OptifuserScene::setShadowLight(std::array<float, 3> const &direction,
+                                    std::array<float, 3> const &color) {
   mScene->setShadowLight(
       {{direction[0], direction[1], direction[2]}, {color[0], color[1], color[2]}});
 }
 
-void OptifuserScene::addPointLight(std::array<float, 3> position, std::array<float, 3> color) {
+void OptifuserScene::addPointLight(std::array<float, 3> const &position,
+                                   std::array<float, 3> const &color) {
   mScene->addPointLight({{position[0], position[1], position[2]}, {color[0], color[1], color[2]}});
 }
 
-void OptifuserScene::addDirectionalLight(std::array<float, 3> direction,
-                                         std::array<float, 3> color) {
+void OptifuserScene::addDirectionalLight(std::array<float, 3> const &direction,
+                                         std::array<float, 3> const &color) {
   mScene->addDirectionalLight(
       {{direction[0], direction[1], direction[2]}, {color[0], color[1], color[2]}});
 }

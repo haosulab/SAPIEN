@@ -67,16 +67,16 @@ public:
   //======== Lights ========//
 
   /* For OpenGL only */
-  void setAmbientLight(std::array<float, 3> color);
+  void setAmbientLight(std::array<float, 3> const &color) override;
 
   /* For OpenGL only */
-  void setShadowLight(std::array<float, 3> direction, std::array<float, 3> color);
+  void setShadowLight(std::array<float, 3> const &direction, std::array<float, 3> const &color) override;
 
   /* For both OpenGL and OptiX */
-  void addPointLight(std::array<float, 3> position, std::array<float, 3> color);
+  void addPointLight(std::array<float, 3> const &position, std::array<float, 3> const &color) override;
 
   /* For OptiX Only */
-  void addDirectionalLight(std::array<float, 3> direction, std::array<float, 3> color);
+  void addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color) override;
 };
 
 class OptifuserRenderer : public IPxrRenderer {

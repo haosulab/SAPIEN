@@ -651,7 +651,7 @@ class URDFLoader {
 
 public:
   /* The base of the loaded articulation will be fixed */
-  bool fixLoadedObject = true;
+  bool fixBase = true;
 
   /* The loaded articulation will use inverse dynamics to balance passive forces,
    * it will act as if there is no gravity, etc.

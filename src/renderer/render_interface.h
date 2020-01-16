@@ -70,6 +70,11 @@ public:
 
   virtual std::vector<ICamera *> getCameras() = 0;
 
+  virtual void setShadowLight(std::array<float, 3> const &direction, std::array<float, 3> const &color) = 0;
+  virtual void addPointLight(std::array<float, 3> const &position, std::array<float, 3> const &color) = 0;
+  virtual void setAmbientLight(std::array<float, 3> const &color) = 0;
+  virtual void addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color) = 0;
+
   virtual void destroy() = 0;
 };
 

@@ -137,6 +137,21 @@ void SScene::removeMountedCamera(Renderer::ICamera *cam) {
                  [cam](MountedCamera &mc) { return mc.camera == cam; });
 }
 
+void SScene::setShadowLight(PxVec3 const &direction, PxVec3 const &color) {
+  mRendererScene->setShadowLight({direction.x, direction.y, direction.z},
+                                 {color.x, color.y, color.z});
+}
+void SScene::addPointLight(PxVec3 const &position, PxVec3 const &color) {
+  mRendererScene->addPointLight({position.x, position.y, position.z}, {color.x, color.y, color.z});
+}
+void SScene::setAmbientLight(PxVec3 const &color) {
+  mRendererScene->setAmbientLight({color.x, color.y, color.z});
+}
+void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
+  mRendererScene->addDirectionalLight({direction.x, direction.y, direction.z},
+                                      {color.x, color.y, color.z});
+}
+
 void SScene::step() {
   clearContacts();
   mPxScene->simulate(mTimestep);

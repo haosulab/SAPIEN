@@ -97,6 +97,11 @@ public:
                                       float fovx, float fovy, float near = 0.1, float far = 100);
   void removeMountedCamera(Renderer::ICamera *cam);
 
+  void setShadowLight(PxVec3 const &direction, PxVec3 const &color);
+  void addPointLight(PxVec3 const &position, PxVec3 const &color);
+  void setAmbientLight(PxVec3 const &color);
+  void addDirectionalLight(PxVec3 const &direction, PxVec3 const &color);
+
   void step();         // advance time by timestep
   void updateRender(); // call to sync physics world to render world
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "id_generator.h"
 #include "sapien_actor_base.h"
+#include "sapien_articulation.h"
 #include <PxPhysicsAPI.h>
 #include <string>
 #include <vector>
@@ -32,7 +33,7 @@ private:
   SArticulation *mArticulation;
 
 public:
-  SArticulationBase *getArticulation() override;
+  SArticulation *getArticulation() override;
   PxArticulationLink *getPxActor() override;
 
 private:

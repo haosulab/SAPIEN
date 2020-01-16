@@ -160,6 +160,16 @@ std::vector<PxReal> SArticulation::getDriveTarget() const {
   }
   return driveTarget;
 }
+
+std::vector<SLink *> SArticulation::getSLinks() {
+  std::vector<SLink *> result;
+  result.reserve(mLinks.size());
+  for (auto &link : mLinks) {
+    result.push_back(link.get());
+  }
+  return result;
+}
+
 std::vector<SJoint *> SArticulation::getSJoints() {
   std::vector<SJoint *> result;
   result.reserve(mJoints.size());

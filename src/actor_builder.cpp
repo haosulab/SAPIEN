@@ -10,7 +10,7 @@ Simulation *ActorBuilder::getSimulation() const { return mScene->mSimulation; }
 
 ActorBuilder::ActorBuilder(SScene *scene) : mScene(scene) {}
 
-void ActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTransform &pose,
+void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
                                          const PxVec3 &scale, PxMaterial *material,
                                          PxReal density) {
   ActorBuilderShapeRecord r;
@@ -24,7 +24,7 @@ void ActorBuilder::addConvexShapeFromObj(const std::string &filename, const PxTr
   mShapeRecord.push_back(r);
 }
 
-void ActorBuilder::addMultipleConvexShapesFromObj(const std::string &filename,
+void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
                                                   const PxTransform &pose, const PxVec3 &scale,
                                                   PxMaterial *material, PxReal density) {
 
@@ -113,7 +113,7 @@ void ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius, const
   mVisualRecord.push_back(r);
 }
 
-void ActorBuilder::addObjVisual(const std::string &filename, const PxTransform &pose,
+void ActorBuilder::addVisualFromFile(const std::string &filename, const PxTransform &pose,
                                 const PxVec3 &scale, std::string const &name) {
 
   ActorBuilderVisualRecord r;

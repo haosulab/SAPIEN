@@ -39,12 +39,13 @@ class OptifuserController {
 
   GuiModel mGuiModel = {};
 
+  bool mShouldQuit = false;
+
 public:
   Optifuser::FPSCameraSpec mCamera;
   explicit OptifuserController(OptifuserRenderer *renderer);
 
-  /* called by the renderer */
-  // void selectObject(int linkId);
+  bool shouldQuit();
 
   void showWindow();
   void hideWindow();
