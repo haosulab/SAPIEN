@@ -28,8 +28,7 @@ int main() {
   builder->addBoxVisual();
 
   auto actor = builder->build();
-
-  actor->getPxActor()->setGlobalPose({{0, 0, 2}, PxIdentity});
+  actor->setPose({{0, 0, 2}, PxIdentity});
 
   auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
   r0->setAmbientLight({0.3, 0.3, 0.3});

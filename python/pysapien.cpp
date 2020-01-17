@@ -103,7 +103,7 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_name", &Renderer::ICamera::getName)
       .def("get_width", &Renderer::ICamera::getWidth)
       .def("get_height", &Renderer::ICamera::getHeight)
-      .def("get_hovy", &Renderer::ICamera::getFovy)
+      .def("get_fovy", &Renderer::ICamera::getFovy)
       .def("take_picture", &Renderer::ICamera::takePicture)
       .def("get_color_rgba",
            [](Renderer::ICamera &cam) {
@@ -147,12 +147,38 @@ PYBIND11_MODULE(pysapien, m) {
 
   py::class_<Renderer::OptifuserController>(m, "OptifuserController")
       .def(py::init<Renderer::OptifuserRenderer *>())
-      .def_readonly("cam", &Renderer::OptifuserController::mCamera)
+      .def_readonly("camera", &Renderer::OptifuserController::mCamera)
       .def("show_window", &Renderer::OptifuserController::showWindow)
       .def("hide_window", &Renderer::OptifuserController::hideWindow)
       .def("set_current_scene", &Renderer::OptifuserController::setCurrentScene)
       .def("render", &Renderer::OptifuserController::render)
       .def_property_readonly("should_quit", &Renderer::OptifuserController::shouldQuit);
+
+  py::class_<Optifuser::FPSCameraSpec>(m, "FPSCameraSpec")
+      .def_readwrite("name", &Optifuser::CameraSpec::name)
+      .def_property_readonly(
+          "position",
+          [](Optifuser::FPSCameraSpec &c) { return py::array_t<float>(3, (float *)(&c.position)); })
+      .def("set_position",
+           [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &arr) {
+             c.position = {arr.at(0), arr.at(1), arr.at(2)};
+           })
+      .def("update", &Optifuser::FPSCameraSpec::update)
+      .def("is_sane", &Optifuser::FPSCameraSpec::isSane)
+      .def("set_forward",
+           [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
+             c.setForward({dir.at(0), dir.at(1), dir.at(2)});
+           })
+      .def("set_up",
+           [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
+             c.setUp({dir.at(0), dir.at(1), dir.at(2)});
+           })
+      .def("rotate_yaw_pitch", &Optifuser::FPSCameraSpec::rotateYawPitch)
+      .def("move_forward_right", &Optifuser::FPSCameraSpec::moveForwardRight)
+      .def("get_rotation0", [](Optifuser::FPSCameraSpec &c) {
+        glm::quat q = c.getRotation0();
+        return make_array<float>({q.w, q.x, q.y, q.z});
+      });
 
   //======== Simulation ========//
   py::class_<Simulation>(m, "Simulation")
@@ -384,40 +410,63 @@ PYBIND11_MODULE(pysapien, m) {
            [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
               py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density) {
              a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density);
-           })
+           },
+           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+           py::arg("density") = 1000)
       .def("add_multiple_convex_shapes_from_file",
            [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
               py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density) {
              a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material,
                                                density);
-           })
+           },
+           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+           py::arg("density") = 1000)
       .def("add_box_shape",
            [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
               PxMaterial *material,
-              PxReal density) { a.addBoxShape(pose, array2vec3(size), material, density); })
-      .def("add_capsule_shape", &ActorBuilder::addCapsuleShape)
-      .def("add_sphere_shape", &ActorBuilder::addSphereShape)
+              PxReal density) { a.addBoxShape(pose, array2vec3(size), material, density); },
+           py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+           py::arg("density") = 1000)
+      .def("add_capsule_shape", &ActorBuilder::addCapsuleShape,
+           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+           py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1)
+      .def("add_sphere_shape", &ActorBuilder::addSphereShape,
+           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+           py::arg("material") = nullptr, py::arg("density") = 1)
 
       .def("add_box_visual",
            [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
               py::array_t<PxReal> color, std::string const &name) {
              a.addBoxVisual(pose, array2vec3(size), array2vec3(color), name);
-           })
+           },
+           py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("size") = make_array<PxReal>({1, 1, 1}),
+           py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def("add_capsule_visual",
            [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
               py::array_t<PxReal> color, std::string const &name) {
              a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
-           })
+           },
+           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+           py::arg("half_length") = 1, py::arg("color") = make_array<PxReal>({1, 1, 1}),
+           py::arg("name") = "")
       .def("add_sphere_visual",
            [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
               std::string const &name) {
              a.addSphereVisual(pose, radius, array2vec3(color), name);
-           })
+           },
+           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+           py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def("add_visual_from_file",
            [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
               py::array_t<PxReal> scale, std::string const &name) {
              a.addVisualFromFile(filename, pose, array2vec3(scale), name);
-           })
+           },
+           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
 
       .def("set_collision_group", &ActorBuilder::setCollisionGroup)
       .def("add_collision_group", &ActorBuilder::addCollisionGroup)
@@ -428,7 +477,8 @@ PYBIND11_MODULE(pysapien, m) {
              a.setMassAndInertia(mass, cMassPose, array2vec3(inertia));
            })
       .def("set_scene", &ActorBuilder::setScene)
-      .def("build", &ActorBuilder::build, py::return_value_policy::reference)
+      .def("build", &ActorBuilder::build, py::arg("is_kinematic") = false, py::arg("name") = "",
+           py::return_value_policy::reference)
       .def("build_static", &ActorBuilder::buildStatic, py::return_value_policy::reference);
 
   py::class_<LinkBuilder>(m, "LinkBuilder")
