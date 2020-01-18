@@ -60,8 +60,7 @@ public:
 
   //=== scenes ===//
 public:
-  std::unique_ptr<SScene> createScene(std::string const &name = "",
-                                      PxVec3 gravity = {0.f, 0.f, -9.81f},
+  std::unique_ptr<SScene> createScene(PxVec3 gravity = {0.f, 0.f, -9.81f},
                                       PxSolverType::Enum solverType = PxSolverType::ePGS,
                                       PxSceneFlags sceneFlags = PxSceneFlags());
 

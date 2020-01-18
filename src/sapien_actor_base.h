@@ -59,6 +59,9 @@ class SActorDynamicBase : public SActorBase {
 public:
   PxVec3 getVel();
   PxVec3 getAngularVel();
+  PxReal getMass();
+  PxVec3 getInertia();
+  PxTransform getCMassLocalPose();
 
   PxRigidBody *getPxActor() override = 0;
   virtual void addForceAtPoint(PxVec3 const &force, PxVec3 const &pos);

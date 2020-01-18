@@ -58,7 +58,7 @@ private:
   addArticulation(std::unique_ptr<SArticulation> articulation); // called by articulation builder
 
 public:
-  SScene(Simulation *sim, PxScene *scene, std::string const &name = "");
+  SScene(Simulation *sim, PxScene *scene);
   SScene(SScene const &other) = delete;
   SScene(SScene &&other) = delete;
   ~SScene();
@@ -88,6 +88,7 @@ private:
   std::vector<MountedCamera> mCameras;
 
 public:
+  inline void setName(std::string const &name) { mName = name; }
   inline std::string getName() { return mName; }
   inline void setTimestep(PxReal step) { mTimestep = step; }
   inline PxReal getTimestep() { return mTimestep; }

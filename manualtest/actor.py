@@ -8,7 +8,7 @@ controller = pysapien.OptifuserController(renderer)
 
 controller.show_window()
 
-s0 = sim.create_scene("Scene 1", [0, 0, -9.8], pysapien.SolverType.PGS, False, False)
+s0 = sim.create_scene()
 s0.add_ground(-1)
 s0.set_timestep(1 / 60)
 

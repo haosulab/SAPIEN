@@ -15,11 +15,11 @@ int main() {
 
   controller.showWindow();
 
-  auto s0 = sim.createScene("Scene 1");
+  auto s0 = sim.createScene();
   s0->addGround(-1);
   s0->setTimestep(1 / 60.f);
 
-  auto s1 = sim.createScene("Scene 2");
+  auto s1 = sim.createScene();
   s1->addGround(-1);
 
   auto builder = s0->createActorBuilder();

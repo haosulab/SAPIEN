@@ -16,7 +16,7 @@ int main() {
 
   controller.showWindow();
 
-  auto s0 = sim.createScene("Scene 1");
+  auto s0 = sim.createScene();
   s0->setTimestep(1 / 240.f);
   s0->addGround(-1);
 

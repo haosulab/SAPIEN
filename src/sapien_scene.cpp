@@ -14,13 +14,12 @@
 
 namespace sapien {
 
-SScene::SScene(Simulation *sim, PxScene *scene, std::string const &name)
-    : mName(name), mSimulation(sim), mPxScene(scene), mRendererScene(nullptr),
-      mSimulationCallback(this) {
+SScene::SScene(Simulation *sim, PxScene *scene)
+    : mSimulation(sim), mPxScene(scene), mRendererScene(nullptr), mSimulationCallback(this) {
   auto renderer = sim->getRenderer();
   if (renderer) {
     spdlog::info("Creating scene in renderer");
-    mRendererScene = renderer->createScene(name);
+    mRendererScene = renderer->createScene();
   }
   mPxScene->setSimulationEventCallback(&mSimulationCallback);
 }

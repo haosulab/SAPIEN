@@ -87,8 +87,7 @@ PxMaterial *Simulation::createPhysicalMaterial(PxReal staticFriction, PxReal dyn
   return mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
 }
 
-std::unique_ptr<SScene> Simulation::createScene(std::string const &name, PxVec3 gravity,
-                                                PxSolverType::Enum solverType,
+std::unique_ptr<SScene> Simulation::createScene(PxVec3 gravity, PxSolverType::Enum solverType,
                                                 PxSceneFlags sceneFlags) {
 
   PxSceneDesc sceneDesc(mPhysicsSDK->getTolerancesScale());
@@ -108,7 +107,7 @@ std::unique_ptr<SScene> Simulation::createScene(std::string const &name, PxVec3 
 
   PxScene *pxScene = mPhysicsSDK->createScene(sceneDesc);
 
-  return std::make_unique<SScene>(this, pxScene, name);
+  return std::make_unique<SScene>(this, pxScene);
 }
 
 } // namespace sapien

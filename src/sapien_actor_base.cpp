@@ -50,4 +50,8 @@ void SActorDynamicBase::addForceAtPoint(const PxVec3 &force, const PxVec3 &pos) 
   PxRigidBodyExt::addForceAtPos(*getPxActor(), force, pos);
 }
 
+PxReal SActorDynamicBase::getMass() { return getPxActor()->getMass(); }
+PxVec3 SActorDynamicBase::getInertia() { return getPxActor()->getMassSpaceInertiaTensor(); }
+PxTransform SActorDynamicBase::getCMassLocalPose() { return getPxActor()->getCMassLocalPose(); }
+
 } // namespace sapien

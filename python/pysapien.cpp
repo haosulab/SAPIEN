@@ -170,11 +170,13 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_position",
            [](Optifuser::CameraSpec &c, const py::array_t<float> &arr) {
              c.position = {arr.at(0), arr.at(1), arr.at(2)};
-           })
+           },
+           py::arg("position"))
       .def("set_rotation",
            [](Optifuser::CameraSpec &c, const py::array_t<float> &arr) {
              c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
-           })
+           },
+           py::arg("rotation"))
       .def_property_readonly(
           "position",
           [](Optifuser::CameraSpec &c) { return py::array_t<float>(3, (float *)(&c.position)); })
@@ -191,7 +193,8 @@ PYBIND11_MODULE(pysapien, m) {
            [](Optifuser::CameraSpec &c, const py::array_t<float> &dir,
               const py::array_t<float> &up) {
              c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
-           })
+           },
+           py::arg("direction"), py::arg("up"))
       .def("get_model_mat", [](Optifuser::CameraSpec &c) { return mat42array(c.getModelMat()); })
       .def("get_projection_mat",
            [](Optifuser::CameraSpec &c) { return mat42array(c.getProjectionMat()); });
@@ -202,13 +205,17 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_forward",
            [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
              c.setForward({dir.at(0), dir.at(1), dir.at(2)});
-           })
+           },
+           py::arg("forward"))
       .def("set_up",
            [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
              c.setUp({dir.at(0), dir.at(1), dir.at(2)});
-           })
-      .def("rotate_yaw_pitch", &Optifuser::FPSCameraSpec::rotateYawPitch)
-      .def("move_forward_right", &Optifuser::FPSCameraSpec::moveForwardRight)
+           },
+           py::arg("up"))
+      .def("rotate_yaw_pitch", &Optifuser::FPSCameraSpec::rotateYawPitch, py::arg("delta_yaw"),
+           py::arg("delta_pitch"))
+      .def("move_forward_right", &Optifuser::FPSCameraSpec::moveForwardRight,
+           py::arg("delta_forward"), py::arg("delta_right"))
       .def("get_rotation0", [](Optifuser::FPSCameraSpec &c) {
         glm::quat q = c.getRotation0();
         return make_array<float>({q.w, q.x, q.y, q.z});
@@ -233,13 +240,13 @@ PYBIND11_MODULE(pysapien, m) {
   //======== Simulation ========//
   py::class_<Simulation>(m, "Simulation")
       .def(py::init<>())
-      .def("set_renderer", &Simulation::setRenderer)
+      .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
       .def("create_physical_material", &Simulation::createPhysicalMaterial,
            py::return_value_policy::reference)
       .def("create_scene",
-           [](Simulation &sim, std::string const &name, py::array_t<PxReal> const &gravity,
-              PxSolverType::Enum solverType, bool enableCCD, bool enablePCM) {
+           [](Simulation &sim, py::array_t<PxReal> const &gravity, PxSolverType::Enum solverType,
+              bool enableCCD, bool enablePCM) {
              PxSceneFlags flags = PxSceneFlags();
              if (enableCCD) {
                flags |= PxSceneFlag::eENABLE_CCD;
@@ -247,25 +254,32 @@ PYBIND11_MODULE(pysapien, m) {
              if (enablePCM) {
                flags |= PxSceneFlag::eENABLE_PCM;
              }
-             return sim.createScene(name, array2vec3(gravity), solverType, flags);
-           });
+             return sim.createScene(array2vec3(gravity), solverType, flags);
+           },
+           py::arg("gravity") = make_array<PxReal>({0, 0, -9.8}),
+           py::arg("solver_type") = PxSolverType::ePGS, py::arg("enable_ccd") = false,
+           py::arg("enable_pcm") = false);
 
   py::class_<SScene>(m, "SScene")
       .def_property_readonly("name", &SScene::getName)
-      .def("set_timestep", &SScene::setTimestep)
+      .def("set_timestep", &SScene::setTimestep, py::arg("second"))
       .def("get_timestep", &SScene::getTimestep)
       .def_property("timestep", &SScene::getTimestep, &SScene::setTimestep)
       .def("create_actor_builder", &SScene::createActorBuilder)
       .def("create_articulation_builder", &SScene::createArticulationBuilder)
       .def("create_urdf_loader", &SScene::createURDFLoader)
-      .def("remove_actor", &SScene::removeActor)
-      .def("remove_articulation", &SScene::removeArticulation)
-      .def("find_actor_by_id", &SScene::findActorById, py::return_value_policy::reference)
-      .def("find_articulation_link_by_link_id", &SScene::findArticulationLinkById,
+      .def("remove_actor", &SScene::removeActor, py::arg("actor"))
+      .def("remove_articulation", &SScene::removeArticulation, py::arg("articulation"))
+      .def("find_actor_by_id", &SScene::findActorById, py::arg("id"),
+           py::return_value_policy::reference)
+      .def("find_articulation_link_by_link_id", &SScene::findArticulationLinkById, py::arg("id"),
            py::return_value_policy::reference)
 
-      .def("add_mounted_camera", &SScene::addMountedCamera, py::return_value_policy::reference)
-      .def("remove_mounted_camera", &SScene::removeMountedCamera)
+      .def("add_mounted_camera", &SScene::addMountedCamera, py::arg("name"), py::arg("actor"),
+           py::arg("pose") = PxTransform(PxIdentity), py::arg("width"), py::arg("height"),
+           py::arg("fovx"), py::arg("fovy"), py::arg("near"), py::arg("far"),
+           py::return_value_policy::reference)
+      .def("remove_mounted_camera", &SScene::removeMountedCamera, py::arg("camera"))
 
       .def("step", &SScene::step)
       .def("update_render", &SScene::updateRender)
@@ -276,50 +290,64 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_shadow_light",
            [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
              s.setShadowLight(array2vec3(direction), array2vec3(color));
-           })
+           },
+           py::arg("direction"), py::arg("color"))
       .def("set_ambient_light",
            [](SScene &s, py::array_t<PxReal> const &color) {
              s.setAmbientLight(array2vec3(color));
-           })
+           },
+           py::arg("clor"))
       .def("add_point_light",
-           [](SScene &s, py::array_t<PxReal> const &position,
-              py::array_t<PxReal> const &direction) {
-             s.addPointLight(array2vec3(position), array2vec3(direction));
-           })
+           [](SScene &s, py::array_t<PxReal> const &position, py::array_t<PxReal> const &color) {
+             s.addPointLight(array2vec3(position), array2vec3(color));
+           },
+           py::arg("position"), py::arg("color"))
       .def("add_directional_light",
            [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
              s.addDirectionalLight(array2vec3(direction), array2vec3(color));
-           })
+           },
+           py::arg("direction"), py::arg("color"))
       .def("get_renderer_scene", &SScene::getRendererScene);
 
   //======== Actor ========//
 
   py::class_<SActorBase>(m, "SActorBase")
       .def_property("name", &SActorBase::getName, &SActorBase::setName)
+      .def("get_name", &SActorBase::getName)
+      .def("set_name", &SActorBase::setName, py::arg("name"))
       .def_property_readonly("id", &SActorBase::getId)
+      .def("get_id", &SActorBase::getId)
       .def("get_scene", &SActorBase::getScene, py::return_value_policy::reference)
-
       .def_property_readonly("pose", &SActorBase::getPose)
       .def_property_readonly("col1", &SActorBase::getCollisionGroup1)
       .def_property_readonly("col2", &SActorBase::getCollisionGroup2)
       .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
 
       // TODO: check if it is okay to return a vector of REFERENCED raw pointers
-      .def_property_readonly("render_bodies", &SActorBase::getRenderBodies);
+      // .def_property_readonly("render_bodies", &SActorBase::getRenderBodies)
+      ;
 
   py::class_<SActorDynamicBase, SActorBase>(m, "SActorDynamicBase")
       .def_property_readonly("velocity",
                              [](SActorDynamicBase &a) { return vec32array(a.getVel()); })
       .def_property_readonly("angular_velocity",
                              [](SActorDynamicBase &a) { return vec32array(a.getAngularVel()); })
-      .def("add_force_at_point", [](SActorDynamicBase &a, py::array_t<PxReal> const &force,
-                                    py::array_t<PxReal> const &point) {
-        a.addForceAtPoint(array2vec3(force), array2vec3(point));
-      });
+      .def_property_readonly("mass", &SActorDynamicBase::getMass)
+      .def_property_readonly("inertia",
+                             [](SActorDynamicBase &a) { return vec32array(a.getInertia()); })
+      .def_property_readonly("cmass_local_pose", &SActorDynamicBase::getCMassLocalPose)
+      .def("add_force_at_point",
+           [](SActorDynamicBase &a, py::array_t<PxReal> const &force,
+              py::array_t<PxReal> const &point) {
+             a.addForceAtPoint(array2vec3(force), array2vec3(point));
+           },
+           py::arg("force"), py::arg("point"));
 
-  py::class_<SActorStatic, SActorBase>(m, "SActorStatic").def("set_pose", &SActorStatic::setPose);
+  py::class_<SActorStatic, SActorBase>(m, "SActorStatic")
+      .def("set_pose", &SActorStatic::setPose, py::arg("pose"));
 
-  py::class_<SActor, SActorDynamicBase>(m, "SActor").def("set_pose", &SActor::setPose);
+  py::class_<SActor, SActorDynamicBase>(m, "SActor")
+      .def("set_pose", &SActor::setPose, py::arg("pose"));
 
   py::class_<SLinkBase, SActorDynamicBase>(m, "SLinkBase")
       .def("get_index", &SLinkBase::getIndex)
@@ -333,6 +361,8 @@ PYBIND11_MODULE(pysapien, m) {
   //======== Joint ========//
   py::class_<SJointBase>(m, "SJointBase")
       .def_property("name", &SJointBase::getName, &SJointBase::setName)
+      .def("get_name", &SJointBase::getName)
+      .def("set_name", &SJointBase::setName, py::arg("name"))
       .def("get_parent_link", &SJointBase::getParentLink, py::return_value_policy::reference)
       .def("get_child_link", &SJointBase::getChildLink, py::return_value_policy::reference)
       .def("get_dof", &SJointBase::getDof)
@@ -343,24 +373,28 @@ PYBIND11_MODULE(pysapien, m) {
                                         {sizeof(std::array<PxReal, 2>), sizeof(PxReal)},
                                         reinterpret_cast<PxReal *>(limits.data()));
            })
-      .def("set_limits", [](SJointBase &j, py::array_t<PxReal> limits) {
-        std::vector<std::array<PxReal, 2>> l;
-        if (limits.ndim() == 2) {
-          if (limits.shape(1) != 2) {
-            throw std::runtime_error("Joint limit should have shape [dof, 2]");
-          }
-          for (uint32_t i = 0; i < limits.size() / 2; ++i) {
-            l.push_back({limits.at(i, 0), limits.at(i, 1)});
-          }
-        }
-        j.setLimits(l);
-      });
+      .def("set_limits",
+           [](SJointBase &j, py::array_t<PxReal> limits) {
+             std::vector<std::array<PxReal, 2>> l;
+             if (limits.ndim() == 2) {
+               if (limits.shape(1) != 2) {
+                 throw std::runtime_error("Joint limit should have shape [dof, 2]");
+               }
+               for (uint32_t i = 0; i < limits.size() / 2; ++i) {
+                 l.push_back({limits.at(i, 0), limits.at(i, 1)});
+               }
+             }
+             j.setLimits(l);
+           },
+           py::arg("limits"));
 
   py::class_<SJoint, SJointBase>(m, "SJoint")
-      .def("set_friction", &SJoint::setFriction)
-      .def("set_drive_property", &SJoint::setDriveProperty)
-      .def("set_drive_velocity_target", [](SJoint &j, PxReal v) { j.setDriveVelocityTarget(v); })
-      .def("set_drive_target", [](SJoint &j, PxReal p) { j.setDriveTarget(p); })
+      .def("set_friction", &SJoint::setFriction, py::arg("friction"))
+      .def("set_drive_property", &SJoint::setDriveProperty, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32)
+      .def("set_drive_velocity_target", [](SJoint &j, PxReal v) { j.setDriveVelocityTarget(v); },
+           py::arg("velocity"))
+      .def("set_drive_target", [](SJoint &j, PxReal p) { j.setDriveTarget(p); }, py::arg("target"))
       // TODO wrapper for array-valued targets
       .def("get_global_pose", &SJoint::getGlobalPose);
 
@@ -374,8 +408,11 @@ PYBIND11_MODULE(pysapien, m) {
 
   py::class_<SArticulationBase>(m, "SArticulationBase")
       .def_property("name", &SArticulationBase::getName, &SArticulationBase::setName)
-      .def("get_base_links", &SArticulationBase::getBaseLinks)
-      .def("get_base_joints", &SArticulationBase::getBaseJoints)
+      .def("get_name", &SArticulationBase::getName)
+      .def("set_name", &SArticulationBase::setName, py::arg("name"))
+      .def("get_base_links", &SArticulationBase::getBaseLinks, py::return_value_policy::reference)
+      .def("get_base_joints", &SArticulationBase::getBaseJoints,
+           py::return_value_policy::reference)
       .def_property_readonly("type", &SArticulationBase::getType)
       .def_property_readonly("dof", &SArticulationBase::dof)
       .def("get_qpos",
@@ -386,7 +423,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_qpos",
            [](SArticulationBase &a, const py::array_t<float> &arr) {
              a.setQpos(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-           })
+           },
+           py::arg("qpos"))
 
       .def("get_qvel",
            [](SArticulationBase &a) {
@@ -396,7 +434,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_qvel",
            [](SArticulationBase &a, const py::array_t<float> &arr) {
              a.setQvel(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-           })
+           },
+           py::arg("qvel"))
       .def("get_qacc",
            [](SArticulationBase &a) {
              auto qacc = a.getQacc();
@@ -405,7 +444,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_qacc",
            [](SArticulationBase &a, const py::array_t<float> &arr) {
              a.setQacc(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-           })
+           },
+           py::arg("qacc"))
       .def("get_qf",
            [](SArticulationBase &a) {
              auto qf = a.getQf();
@@ -414,7 +454,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_qf",
            [](SArticulationBase &a, const py::array_t<float> &arr) {
              a.setQf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-           })
+           },
+           py::arg("qf"))
 
       .def("get_qlimits",
            [](SArticulationBase &a) {
@@ -423,18 +464,20 @@ PYBIND11_MODULE(pysapien, m) {
                                         {sizeof(std::array<PxReal, 2>), sizeof(PxReal)},
                                         reinterpret_cast<PxReal *>(limits.data()));
            })
-      .def("set_qlimits", [](SArticulationBase &a, py::array_t<PxReal> limits) {
-        std::vector<std::array<PxReal, 2>> l;
-        if (limits.ndim() == 2) {
-          if (limits.shape(1) != 2) {
-            throw std::runtime_error("Joint limits should have shape [dof, 2]");
-          }
-          for (uint32_t i = 0; i < limits.size() / 2; ++i) {
-            l.push_back({limits.at(i, 0), limits.at(i, 1)});
-          }
-        }
-        a.setQlimits(l);
-      });
+      .def("set_qlimits",
+           [](SArticulationBase &a, py::array_t<PxReal> limits) {
+             std::vector<std::array<PxReal, 2>> l;
+             if (limits.ndim() == 2) {
+               if (limits.shape(1) != 2) {
+                 throw std::runtime_error("Joint limits should have shape [dof, 2]");
+               }
+               for (uint32_t i = 0; i < limits.size() / 2; ++i) {
+                 l.push_back({limits.at(i, 0), limits.at(i, 1)});
+               }
+             }
+             a.setQlimits(l);
+           },
+           py::arg("qlimits"));
 
   py::class_<SArticulationDrivable, SArticulationBase>(m, "SArticulationDrivable")
       .def("get_drive_target",
@@ -442,13 +485,15 @@ PYBIND11_MODULE(pysapien, m) {
              auto target = a.getDriveTarget();
              return py::array_t<PxReal>(target.size(), target.data());
            })
-      .def("set_drive_target", [](SArticulationDrivable &a, const py::array_t<float> &arr) {
-        a.setDriveTarget(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-      });
+      .def("set_drive_target",
+           [](SArticulationDrivable &a, const py::array_t<float> &arr) {
+             a.setDriveTarget(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           },
+           py::arg("drive_target"));
 
   py::class_<SArticulation, SArticulationDrivable>(m, "SArticulation")
-      .def("get_links", &SArticulation::getSLinks)
-      .def("get_joints", &SArticulation::getSJoints);
+      .def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
+      .def("get_joints", &SArticulation::getSJoints, py::return_value_policy::reference);
 
   //======== End Articulation ========//
 
@@ -503,10 +548,10 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("density") = 1000)
       .def("add_capsule_shape", &ActorBuilder::addCapsuleShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-           py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1)
+           py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000)
       .def("add_sphere_shape", &ActorBuilder::addSphereShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-           py::arg("material") = nullptr, py::arg("density") = 1)
+           py::arg("material") = nullptr, py::arg("density") = 1000)
 
       .def("add_box_visual",
            [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
@@ -573,10 +618,14 @@ PYBIND11_MODULE(pysapien, m) {
                throw std::runtime_error("Joint limit must be 2D array");
              }
              b.setJointProperties(jointType, l, parentPose, childPose, friction, damping);
-           });
+           },
+           py::arg("joint_type"), py::arg("limits"),
+           py::arg("parent_pose") = PxTransform(PxIdentity),
+           py::arg("child_pose") = PxTransform(PxIdentity), py::arg("friction") = 0,
+           py::arg("damping") = 0);
 
   py::class_<ArticulationBuilder>(m, "ArticulationBuilder")
-      .def("set_scene", &ArticulationBuilder::setScene)
+      .def("set_scene", &ArticulationBuilder::setScene, py::arg("scene"))
       .def("get_scene", &ArticulationBuilder::getScene)
       .def("create_link_builder",
            [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
@@ -585,9 +634,10 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("fix_base") = false);
 
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
-      .def(py::init<SScene *>())
+      .def(py::init<SScene *>(), py::arg("scene"))
       .def_readwrite("fix_base", &URDF::URDFLoader::fixBase)
       .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def_readwrite("default_density", &URDF::URDFLoader::defaultDensity)
-      .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference);
+      .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
+           py::arg("filename"), py::arg("default_material") = nullptr);
 }
