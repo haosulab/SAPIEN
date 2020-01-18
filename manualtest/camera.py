@@ -2,14 +2,11 @@ import pysapien
 import numpy as np
 from pysapien import Pose
 from transforms3d.quaternions import axangle2quat as aa
-
+import matplotlib.pyplot as plt
 
 sim = pysapien.Simulation()
 renderer = pysapien.OptifuserRenderer()
 sim.set_renderer(renderer)
-render_controller = pysapien.OptifuserController(renderer)
-
-render_controller.show_window()
 
 s0 = sim.create_scene()
 s0.add_ground(-1)
@@ -22,13 +19,16 @@ loader = s0.create_urdf_loader()
 loader.fix_base = 0
 chair = loader.load("../assets/robot/all_robot.urdf")
 
-render_controller.camera.set_position([-5, 0, 0])
-render_controller.set_current_scene(s0)
+cam = s0.find_mounted_camera("kinect2_ir_sensor")
 
-while not render_controller.should_quit:
-    s0.update_render()
-    for i in range(4):
-        s0.step()
-    render_controller.render()
+for i in range(4):
+    s0.step()
+s0.update_render()
+
+cam.take_picture()
+img = cam.get_color_rgba()
+print(img.shape)
+plt.imshow(img)
+plt.show()
 
 s0 = None

@@ -145,6 +145,16 @@ void SScene::removeMountedCamera(Renderer::ICamera *cam) {
                  [cam](MountedCamera &mc) { return mc.camera == cam; });
 }
 
+Renderer::ICamera *SScene::findMountedCamera(std::string const &name) {
+  auto it = std::find_if(mCameras.begin(), mCameras.end(),
+                         [name](MountedCamera &cam) { return cam.camera->getName() == name; });
+  if (it != mCameras.end()) {
+    return it->camera;
+  } else {
+    return nullptr;
+  }
+}
+
 void SScene::setShadowLight(PxVec3 const &direction, PxVec3 const &color) {
   if (!mRendererScene) {
     spdlog::error("Failed to add light: renderer is not added to simulation.");

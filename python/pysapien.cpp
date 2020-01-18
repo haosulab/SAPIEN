@@ -280,6 +280,8 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("fovx"), py::arg("fovy"), py::arg("near"), py::arg("far"),
            py::return_value_policy::reference)
       .def("remove_mounted_camera", &SScene::removeMountedCamera, py::arg("camera"))
+      .def("find_mounted_camera", &SScene::findMountedCamera, py::arg("name"),
+           py::return_value_policy::reference)
 
       .def("step", &SScene::step)
       .def("update_render", &SScene::updateRender)
@@ -353,8 +355,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_index", &SLinkBase::getIndex)
       .def("get_articulation", &SLinkBase::getArticulation, py::return_value_policy::reference);
 
-  py::class_<SLink, SLinkBase>(m, "Link")
-      .def("get_articulation", &SLink::getArticulation, py::return_value_policy::reference);
+  py::class_<SLink, SLinkBase>(m, "Link").def("get_articulation", &SLink::getArticulation,
+                                              py::return_value_policy::reference);
 
   //======== End Actor ========//
 
