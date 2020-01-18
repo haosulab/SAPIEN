@@ -477,7 +477,9 @@ PYBIND11_MODULE(pysapien, m) {
              }
              a.setQlimits(l);
            },
-           py::arg("qlimits"));
+           py::arg("qlimits"))
+
+      .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"));
 
   py::class_<SArticulationDrivable, SArticulationBase>(m, "SArticulationDrivable")
       .def("get_drive_target",
