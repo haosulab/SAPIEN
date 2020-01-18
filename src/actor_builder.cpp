@@ -292,7 +292,7 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
       bool status = shape->getCapsuleGeometry(geom);
       PX_ASSERT(status);
       cBody = mScene->mRendererScene->addRigidbody(
-          PxGeometryType::eCAPSULE, {geom.radius, geom.radius, geom.halfHeight}, {0, 0, 1});
+          PxGeometryType::eCAPSULE, {geom.halfHeight, geom.radius, geom.radius}, {0, 0, 1});
       break;
     }
     case PxGeometryType::eCONVEXMESH: {
