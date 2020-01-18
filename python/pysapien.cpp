@@ -281,7 +281,7 @@ PYBIND11_MODULE(pysapien, m) {
            py::return_value_policy::reference)
       .def("remove_mounted_camera", &SScene::removeMountedCamera, py::arg("camera"))
       .def("find_mounted_camera", &SScene::findMountedCamera, py::arg("name"),
-           py::return_value_policy::reference)
+           py::arg("actor") = nullptr, py::return_value_policy::reference)
 
       .def("step", &SScene::step)
       .def("update_render", &SScene::updateRender)

@@ -145,9 +145,10 @@ void SScene::removeMountedCamera(Renderer::ICamera *cam) {
                  [cam](MountedCamera &mc) { return mc.camera == cam; });
 }
 
-Renderer::ICamera *SScene::findMountedCamera(std::string const &name) {
-  auto it = std::find_if(mCameras.begin(), mCameras.end(),
-                         [name](MountedCamera &cam) { return cam.camera->getName() == name; });
+Renderer::ICamera *SScene::findMountedCamera(std::string const &name, SActorBase const *actor) {
+  auto it = std::find_if(mCameras.begin(), mCameras.end(), [name, actor](MountedCamera &cam) {
+    return (actor == nullptr || cam.actor == actor) && cam.camera->getName() == name;
+  });
   if (it != mCameras.end()) {
     return it->camera;
   } else {

@@ -97,7 +97,7 @@ public:
                                       PxTransform const &pose, uint32_t width, uint32_t height,
                                       float fovx, float fovy, float near = 0.1, float far = 100);
   void removeMountedCamera(Renderer::ICamera *cam);
-  Renderer::ICamera *findMountedCamera(std::string const &name);
+  Renderer::ICamera *findMountedCamera(std::string const &name, SActorBase const *actor = nullptr);
 
   void setShadowLight(PxVec3 const &direction, PxVec3 const &color);
   void addPointLight(PxVec3 const &position, PxVec3 const &color);
