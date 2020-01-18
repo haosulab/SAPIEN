@@ -260,7 +260,7 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("solver_type") = PxSolverType::ePGS, py::arg("enable_ccd") = false,
            py::arg("enable_pcm") = false);
 
-  py::class_<SScene>(m, "SScene")
+  py::class_<SScene>(m, "Scene")
       .def_property_readonly("name", &SScene::getName)
       .def("set_timestep", &SScene::setTimestep, py::arg("second"))
       .def("get_timestep", &SScene::getTimestep)
@@ -311,7 +311,7 @@ PYBIND11_MODULE(pysapien, m) {
 
   //======== Actor ========//
 
-  py::class_<SActorBase>(m, "SActorBase")
+  py::class_<SActorBase>(m, "ActorBase")
       .def_property("name", &SActorBase::getName, &SActorBase::setName)
       .def("get_name", &SActorBase::getName)
       .def("set_name", &SActorBase::setName, py::arg("name"))
@@ -327,7 +327,7 @@ PYBIND11_MODULE(pysapien, m) {
       // .def_property_readonly("render_bodies", &SActorBase::getRenderBodies)
       ;
 
-  py::class_<SActorDynamicBase, SActorBase>(m, "SActorDynamicBase")
+  py::class_<SActorDynamicBase, SActorBase>(m, "ActorDynamicBase")
       .def_property_readonly("velocity",
                              [](SActorDynamicBase &a) { return vec32array(a.getVel()); })
       .def_property_readonly("angular_velocity",
@@ -343,23 +343,23 @@ PYBIND11_MODULE(pysapien, m) {
            },
            py::arg("force"), py::arg("point"));
 
-  py::class_<SActorStatic, SActorBase>(m, "SActorStatic")
+  py::class_<SActorStatic, SActorBase>(m, "ActorStatic")
       .def("set_pose", &SActorStatic::setPose, py::arg("pose"));
 
-  py::class_<SActor, SActorDynamicBase>(m, "SActor")
+  py::class_<SActor, SActorDynamicBase>(m, "Actor")
       .def("set_pose", &SActor::setPose, py::arg("pose"));
 
-  py::class_<SLinkBase, SActorDynamicBase>(m, "SLinkBase")
+  py::class_<SLinkBase, SActorDynamicBase>(m, "LinkBase")
       .def("get_index", &SLinkBase::getIndex)
       .def("get_articulation", &SLinkBase::getArticulation, py::return_value_policy::reference);
 
-  py::class_<SLink, SLinkBase>(m, "SLink")
+  py::class_<SLink, SLinkBase>(m, "Link")
       .def("get_articulation", &SLink::getArticulation, py::return_value_policy::reference);
 
   //======== End Actor ========//
 
   //======== Joint ========//
-  py::class_<SJointBase>(m, "SJointBase")
+  py::class_<SJointBase>(m, "JointBase")
       .def_property("name", &SJointBase::getName, &SJointBase::setName)
       .def("get_name", &SJointBase::getName)
       .def("set_name", &SJointBase::setName, py::arg("name"))
@@ -388,7 +388,7 @@ PYBIND11_MODULE(pysapien, m) {
            },
            py::arg("limits"));
 
-  py::class_<SJoint, SJointBase>(m, "SJoint")
+  py::class_<SJoint, SJointBase>(m, "Joint")
       .def("set_friction", &SJoint::setFriction, py::arg("friction"))
       .def("set_drive_property", &SJoint::setDriveProperty, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32)
@@ -406,7 +406,7 @@ PYBIND11_MODULE(pysapien, m) {
       .value("KINEMATIC", EArticulationType::KINEMATIC)
       .export_values();
 
-  py::class_<SArticulationBase>(m, "SArticulationBase")
+  py::class_<SArticulationBase>(m, "ArticulationBase")
       .def_property("name", &SArticulationBase::getName, &SArticulationBase::setName)
       .def("get_name", &SArticulationBase::getName)
       .def("set_name", &SArticulationBase::setName, py::arg("name"))
@@ -481,7 +481,7 @@ PYBIND11_MODULE(pysapien, m) {
 
       .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"));
 
-  py::class_<SArticulationDrivable, SArticulationBase>(m, "SArticulationDrivable")
+  py::class_<SArticulationDrivable, SArticulationBase>(m, "ArticulationDrivable")
       .def("get_drive_target",
            [](SArticulationDrivable &a) {
              auto target = a.getDriveTarget();
@@ -493,13 +493,13 @@ PYBIND11_MODULE(pysapien, m) {
            },
            py::arg("drive_target"));
 
-  py::class_<SArticulation, SArticulationDrivable>(m, "SArticulation")
+  py::class_<SArticulation, SArticulationDrivable>(m, "Articulation")
       .def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
       .def("get_joints", &SArticulation::getSJoints, py::return_value_policy::reference);
 
   //======== End Articulation ========//
 
-  py::class_<SContact>(m, "SContact")
+  py::class_<SContact>(m, "Contact")
       .def_property_readonly("actor1", [](SContact &contact) { return contact.actors[0]; },
                              py::return_value_policy::reference)
       .def_property_readonly("actor2", [](SContact &contact) { return contact.actors[1]; },
