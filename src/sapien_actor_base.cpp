@@ -4,16 +4,41 @@
 namespace sapien {
 
 std::vector<Renderer::IPxrRigidbody *> SActorBase::getRenderBodies() { return mRenderBodies; }
+std::vector<Renderer::IPxrRigidbody *> SActorBase::getCollisionBodies() {
+  return mCollisionBodies;
+}
+
+void SActorBase::setRenderMode(uint32_t mode) {
+  if (mRenderMode != mode) {
+    mRenderMode = mode;
+    for (auto body : mRenderBodies) {
+      body->setVisible(mode == 0);
+    }
+    for (auto body : mCollisionBodies) {
+      body->setVisible(mode != 0);
+    }
+  }
+}
+
+uint32_t SActorBase::getRenderMode() { return mRenderMode; }
 
 void SActorBase::updateRender(PxTransform const &pose) {
-  for (auto body : mRenderBodies) {
-    body->update(pose);
+  if (mRenderMode == 0) {
+    for (auto body : mRenderBodies) {
+      body->update(pose);
+    }
+  } else {
+    for (auto body : mCollisionBodies) {
+      body->update(pose);
+    }
   }
 }
 
 SActorBase::SActorBase(physx_id_t id, SScene *scene,
-                       std::vector<Renderer::IPxrRigidbody *> renderBodies)
-    : mId(id), mParentScene(scene), mRenderBodies(renderBodies) {}
+                       std::vector<Renderer::IPxrRigidbody *> renderBodies,
+                       std::vector<Renderer::IPxrRigidbody *> collisionBodies)
+    : mId(id), mParentScene(scene), mRenderBodies(renderBodies),
+      mCollisionBodies(collisionBodies) {}
 
 PxTransform SActorBase::getPose() { return getPxActor()->getGlobalPose(); }
 

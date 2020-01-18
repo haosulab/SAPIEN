@@ -70,14 +70,14 @@ public:
   ActorBuilder &operator=(ActorBuilder const &other) = default;
 
   void addConvexShapeFromFile(const std::string &filename,
-                             const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                             const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
-                             PxReal density = 1000.f);
+                              const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                              const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
+                              PxReal density = 1000.f);
 
   void addMultipleConvexShapesFromFile(const std::string &filename,
-                                      const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                                      const PxVec3 &scale = {1, 1, 1},
-                                      PxMaterial *material = nullptr, PxReal density = 1000.f);
+                                       const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                       const PxVec3 &scale = {1, 1, 1},
+                                       PxMaterial *material = nullptr, PxReal density = 1000.f);
 
   void addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                    const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr,
@@ -103,8 +103,8 @@ public:
                        const PxVec3 &color = {1, 1, 1}, std::string const &name = "");
 
   void addVisualFromFile(const std::string &filename,
-                    const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                    const PxVec3 &scale = {1, 1, 1}, std::string const &name = "");
+                         const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
+                         const PxVec3 &scale = {1, 1, 1}, std::string const &name = "");
 
   /* when a.g1 & b.g2 != 0, the collision is ignored
    * by default g1 = g2 = 1
@@ -131,6 +131,8 @@ protected:
   void buildShapes(std::vector<PxShape *> &shapes, std::vector<PxReal> &densities) const;
   void buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBodies,
                     std::vector<physx_id_t> &renderIds) const;
+  void buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> &collisionBodies,
+                             std::vector<PxShape *> &shapes) const;
 };
 
 } // namespace sapien

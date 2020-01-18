@@ -62,9 +62,9 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_static_friction", &PxMaterial::getStaticFriction)
       .def("get_dynamic_friction", &PxMaterial::getDynamicFriction)
       .def("get_restitution", &PxMaterial::getRestitution)
-      .def("set_static_friction", &PxMaterial::setStaticFriction)
-      .def("set_dynamic_friction", &PxMaterial::setDynamicFriction)
-      .def("set_restitution", &PxMaterial::setRestitution);
+      .def("set_static_friction", &PxMaterial::setStaticFriction, py::arg("coef"))
+      .def("set_dynamic_friction", &PxMaterial::setDynamicFriction, py::arg("coef"))
+      .def("set_restitution", &PxMaterial::setRestitution, py::arg("coef"));
 
   py::class_<PxTransform>(m, "Pose")
       .def(py::init([](py::array_t<float> p, py::array_t<float> q) {
@@ -91,20 +91,23 @@ PYBIND11_MODULE(pysapien, m) {
              return repr;
            })
       .def("transform", [](PxTransform &t, PxTransform &src) { return t.transform(src); })
-      .def("set_p", [](PxTransform &t, const py::array_t<PxReal> &arr) { t.p = array2vec3(arr); })
+      .def("set_p", [](PxTransform &t, const py::array_t<PxReal> &arr) { t.p = array2vec3(arr); },
+           py::arg("p"))
       .def("set_q",
            [](PxTransform &t, const py::array_t<PxReal> &arr) {
              t.q = {arr.at(1), arr.at(2), arr.at(3), arr.at(0)}; // NOTE: wxyz to xyzw
-           })
+           },
+           py::arg("q"))
       .def(py::self * py::self);
 
   //======== Render Interface ========//
   py::class_<Renderer::IPxrRenderer>(m, "IPxrRenderer");
+  py::class_<Renderer::IPxrScene>(m, "IPxrScene");
 
   py::class_<Renderer::ISensor>(m, "ISensor")
-      .def("setInitialPose", &Renderer::ISensor::setInitialPose)
+      .def("setInitialPose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
       .def("getPose", &Renderer::ISensor::getPose)
-      .def("setPose", &Renderer::ISensor::setPose);
+      .def("setPose", &Renderer::ISensor::setPose, py::arg("pose"));
 
   py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera")
       .def("get_name", &Renderer::ICamera::getName)
@@ -153,11 +156,11 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("glsl_dir") = "glsl_shader/130", py::arg("glsl_version") = "130");
 
   py::class_<Renderer::OptifuserController>(m, "OptifuserController")
-      .def(py::init<Renderer::OptifuserRenderer *>())
+      .def(py::init<Renderer::OptifuserRenderer *>(), py::arg("renderer"))
       .def_readonly("camera", &Renderer::OptifuserController::mCamera)
       .def("show_window", &Renderer::OptifuserController::showWindow)
       .def("hide_window", &Renderer::OptifuserController::hideWindow)
-      .def("set_current_scene", &Renderer::OptifuserController::setCurrentScene)
+      .def("set_current_scene", &Renderer::OptifuserController::setCurrentScene, py::arg("scene"))
       .def("render", &Renderer::OptifuserController::render)
       .def_property_readonly("should_quit", &Renderer::OptifuserController::shouldQuit);
 
@@ -286,7 +289,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("add_directional_light",
            [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
              s.addDirectionalLight(array2vec3(direction), array2vec3(color));
-           });
+           })
+      .def("get_renderer_scene", &SScene::getRendererScene);
 
   //======== Actor ========//
 

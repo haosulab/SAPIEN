@@ -24,12 +24,13 @@ struct LinkGuiModel {
   uint32_t col1 = 0;
   uint32_t col2 = 0;
   uint32_t col3 = 0;
+  bool renderCollision = false;
 };
 
 struct GuiModel {
-  int linkId;
+  int linkId = 0;
   LinkGuiModel linkModel;
-  int articulationId;
+  int articulationId = 0;
   ArticulationGuiModel articulationModel;
 };
 

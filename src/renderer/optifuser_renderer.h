@@ -33,6 +33,9 @@ public:
   void setInitialPose(const physx::PxTransform &transform) override;
   void update(const physx::PxTransform &transform) override;
 
+  void setVisible(bool visible) override;
+  void setRenderMode(uint32_t mode) override;
+
   void destroy() override;
 };
 
@@ -55,6 +58,12 @@ public:
                                       const physx::PxVec3 &scale) override;
   virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
                                       const physx::PxVec3 &color) override;
+  virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+                                      std::vector<physx::PxVec3> const &normals,
+                                      std::vector<uint32_t> const &indices,
+                                      const physx::PxVec3 &scale,
+                                      const physx::PxVec3 &color) override;
+
   virtual void removeRigidbody(IPxrRigidbody *body) override;
 
   virtual ICamera *addCamera(std::string const &name, uint32_t width, uint32_t height, float fovx,
@@ -70,13 +79,16 @@ public:
   void setAmbientLight(std::array<float, 3> const &color) override;
 
   /* For OpenGL only */
-  void setShadowLight(std::array<float, 3> const &direction, std::array<float, 3> const &color) override;
+  void setShadowLight(std::array<float, 3> const &direction,
+                      std::array<float, 3> const &color) override;
 
   /* For both OpenGL and OptiX */
-  void addPointLight(std::array<float, 3> const &position, std::array<float, 3> const &color) override;
+  void addPointLight(std::array<float, 3> const &position,
+                     std::array<float, 3> const &color) override;
 
   /* For OptiX Only */
-  void addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color) override;
+  void addDirectionalLight(std::array<float, 3> const &direction,
+                           std::array<float, 3> const &color) override;
 };
 
 class OptifuserRenderer : public IPxrRenderer {

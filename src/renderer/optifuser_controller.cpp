@@ -134,8 +134,6 @@ void OptifuserController::render() {
     }
   }
 
-  // static int pickedId = -1, pickedRenderId = -1;
-
   if (Optifuser::getInput().getMouseDown(GLFW_MOUSE_BUTTON_LEFT)) {
     int x, y;
     Optifuser::getInput().getCursor(x, y);
@@ -157,6 +155,7 @@ void OptifuserController::render() {
       mGuiModel.linkModel.col1 = actor->getCollisionGroup1();
       mGuiModel.linkModel.col2 = actor->getCollisionGroup2();
       mGuiModel.linkModel.col3 = actor->getCollisionGroup3();
+      mGuiModel.linkModel.renderCollision = actor->getRenderMode() == 1;
       mGuiModel.articulationId = 0;
     } else if (link) {
       mGuiModel.linkModel.name = link->getName();
@@ -164,6 +163,7 @@ void OptifuserController::render() {
       mGuiModel.linkModel.col1 = link->getCollisionGroup1();
       mGuiModel.linkModel.col2 = link->getCollisionGroup2();
       mGuiModel.linkModel.col3 = link->getCollisionGroup3();
+      mGuiModel.linkModel.renderCollision = link->getRenderMode() == 1;
       auto articulation = link->getArticulation();
       mGuiModel.articulationId = 1;
       mGuiModel.articulationModel.name = articulation->getName();
@@ -338,6 +338,15 @@ void OptifuserController::render() {
           ImGui::Text("col1: #%08x, col2: #%08x", mGuiModel.linkModel.col1,
                       mGuiModel.linkModel.col2);
           ImGui::Text("col3: #%08x", mGuiModel.linkModel.col3);
+          if (ImGui::Checkbox("Collision Shape", &mGuiModel.linkModel.renderCollision)) {
+            SActorBase *link = mScene->findActorById(mGuiModel.linkId);
+            if (!link) {
+              link = mScene->findArticulationLinkById(mGuiModel.linkId);
+            }
+            if (link) {
+              link->setRenderMode(mGuiModel.linkModel.renderCollision);
+            }
+          }
         }
       }
       if (mGuiModel.articulationId) {

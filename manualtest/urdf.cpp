@@ -22,7 +22,7 @@ int main() {
 
   // auto builder = createAntBuilder(*s0);
   auto loader = s0->createURDFLoader();
-  loader->fixLoadedObject = 0;
+  loader->fixBase = 0;
   // auto a = loader->load("../assets/robot/all_robot.urdf");
   auto a = loader->load("../assets/179/mobility.urdf");
 
@@ -38,7 +38,7 @@ int main() {
 
   controller.setCurrentScene(s0.get());
 
-  while (1) {
+  while (!controller.shouldQuit()) {
     for (int i = 0; i < 4; ++i) {
       s0->step();
     }

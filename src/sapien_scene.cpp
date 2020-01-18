@@ -61,6 +61,11 @@ void SScene::removeActor(SActorBase *actor) {
     body->destroy();
   }
 
+  // remove collision bodies
+  for (auto body : actor->getCollisionBodies()) {
+    body->destroy();
+  }
+
   // remove physical bodies
   mPxScene->removeActor(*actor->getPxActor());
   actor->getPxActor()->release(); // FIXME: check if this release can be moved to creation time
@@ -126,6 +131,10 @@ Renderer::ICamera *SScene::addMountedCamera(std::string const &name, SActorBase 
                                             PxTransform const &pose, uint32_t width,
                                             uint32_t height, float fovx, float fovy, float near,
                                             float far) {
+  if (!mRendererScene) {
+    spdlog::error("Failed to add camera: renderer is not added to simulation.");
+    return nullptr;
+  }
   auto cam = mRendererScene->addCamera(name, width, height, fovx, fovy, near, far);
   cam->setInitialPose({{0, 0, 0}, {-0.5, 0.5, 0.5, -0.5}});
   mCameras.push_back({actor, cam});
@@ -138,16 +147,32 @@ void SScene::removeMountedCamera(Renderer::ICamera *cam) {
 }
 
 void SScene::setShadowLight(PxVec3 const &direction, PxVec3 const &color) {
+  if (!mRendererScene) {
+    spdlog::error("Failed to add light: renderer is not added to simulation.");
+    return;
+  }
   mRendererScene->setShadowLight({direction.x, direction.y, direction.z},
                                  {color.x, color.y, color.z});
 }
 void SScene::addPointLight(PxVec3 const &position, PxVec3 const &color) {
+  if (!mRendererScene) {
+    spdlog::error("Failed to add light: renderer is not added to simulation.");
+    return;
+  }
   mRendererScene->addPointLight({position.x, position.y, position.z}, {color.x, color.y, color.z});
 }
 void SScene::setAmbientLight(PxVec3 const &color) {
+  if (!mRendererScene) {
+    spdlog::error("Failed to add light: renderer is not added to simulation.");
+    return;
+  }
   mRendererScene->setAmbientLight({color.x, color.y, color.z});
 }
 void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
+  if (!mRendererScene) {
+    spdlog::error("Failed to add light: renderer is not added to simulation.");
+    return;
+  }
   mRendererScene->addDirectionalLight({direction.x, direction.y, direction.z},
                                       {color.x, color.y, color.z});
 }

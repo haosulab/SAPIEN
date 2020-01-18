@@ -142,6 +142,12 @@ bool LinkBuilder::build(SArticulation &articulation) const {
     body->setSegmentationId(linkId);
   }
 
+  std::vector<Renderer::IPxrRigidbody *> collisionBodies;
+  buildCollisionVisuals(collisionBodies, shapes);
+  for (auto body : collisionBodies) {
+    body->setSegmentationId(linkId);
+  }
+
   PxFilterData data;
   data.word0 = mCollisionGroup.w0;
   data.word1 = mCollisionGroup.w1;
@@ -162,8 +168,9 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   }
 
   // wrap link
-  links[mIndex] = std::unique_ptr<SLink>(
-      new SLink(pxLink, &articulation, linkId, mArticulationBuilder->getScene(), renderBodies));
+  links[mIndex] = std::unique_ptr<SLink>(new SLink(pxLink, &articulation, linkId,
+                                                   mArticulationBuilder->getScene(), renderBodies,
+                                                   collisionBodies));
   links[mIndex]->setName(mName);
 
   links[mIndex]->mCol1 = mCollisionGroup.w0;

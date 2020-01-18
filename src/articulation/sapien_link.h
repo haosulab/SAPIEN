@@ -38,7 +38,8 @@ public:
 
 private:
   SLink(PxArticulationLink *actor, SArticulation *articulation, physx_id_t id, SScene *scene,
-        std::vector<Renderer::IPxrRigidbody *> renderBodies);
+        std::vector<Renderer::IPxrRigidbody *> renderBodies,
+        std::vector<Renderer::IPxrRigidbody *> collisionBodies);
 };
 
 // class SKinematicLink : public SLinkBase {

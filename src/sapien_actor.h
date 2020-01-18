@@ -31,7 +31,8 @@ public:
 private:
   /* Only actor builder can create actor */
   SActor(PxRigidBody *actor, physx_id_t id, SScene *scene,
-         std::vector<Renderer::IPxrRigidbody *> renderBodies);
+         std::vector<Renderer::IPxrRigidbody *> renderBodies,
+         std::vector<Renderer::IPxrRigidbody *> collisionBodies);
 };
 
 class SActorStatic : public SActorBase {
@@ -50,7 +51,8 @@ public:
 private:
   /* Only actor builder can create actor */
   SActorStatic(PxRigidStatic *actor, physx_id_t id, SScene *scene,
-               std::vector<Renderer::IPxrRigidbody *> renderBodies);
+               std::vector<Renderer::IPxrRigidbody *> renderBodies,
+               std::vector<Renderer::IPxrRigidbody *> collisionBodies);
 };
 
 } // namespace sapien

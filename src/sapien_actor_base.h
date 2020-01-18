@@ -19,12 +19,18 @@ protected:
   physx_id_t mId = 0;
   SScene *mParentScene = nullptr;
   std::vector<Renderer::IPxrRigidbody *> mRenderBodies;
+  std::vector<Renderer::IPxrRigidbody *> mCollisionBodies;
 
   uint32_t mCol1 = 0;
   uint32_t mCol2 = 0;
   uint32_t mCol3 = 0;
 
+  uint32_t mRenderMode = 0;
+
 public:
+  void setRenderMode(uint32_t mode);
+  uint32_t getRenderMode();
+
   inline std::string getName() { return mName; };
   inline void setName(const std::string &name) { mName = name; }
   inline physx_id_t getId() { return mId; }
@@ -37,13 +43,15 @@ public:
 
   // render
   std::vector<Renderer::IPxrRigidbody *> getRenderBodies();
+  std::vector<Renderer::IPxrRigidbody *> getCollisionBodies();
   void updateRender(PxTransform const &pose);
 
   virtual PxRigidActor *getPxActor() = 0;
   virtual ~SActorBase() = default;
 
 protected:
-  SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies);
+  SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,
+             std::vector<Renderer::IPxrRigidbody *> collisoinBodies);
 };
 
 class SActorDynamicBase : public SActorBase {

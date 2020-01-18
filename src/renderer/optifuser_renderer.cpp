@@ -71,6 +71,15 @@ void OptifuserRigidbody::update(const physx::PxTransform &transform) {
 
 void OptifuserRigidbody::destroy() { mParentScene->removeRigidbody(this); }
 
+void OptifuserRigidbody::setVisible(bool visible) {
+  for (auto obj : mObjects) {
+    obj->visible = visible;
+  }
+}
+void OptifuserRigidbody::setRenderMode(uint32_t mode) {
+  // TODO: implement mode
+}
+
 //======== End Rigidbody ========//
 
 //======== Begin Scene ========//
@@ -94,6 +103,32 @@ IPxrRigidbody *OptifuserScene::addRigidbody(const std::string &meshFile,
   }
 
   mBodies.push_back(std::make_unique<OptifuserRigidbody>(this, objs));
+
+  return mBodies.back().get();
+}
+
+IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &points,
+                                            std::vector<physx::PxVec3> const &normals,
+                                            std::vector<uint32_t> const &indices,
+                                            const physx::PxVec3 &scale,
+                                            const physx::PxVec3 &color) {
+  std::vector<Optifuser::Vertex> vertices;
+  for (uint32_t i = 0; i < points.size(); ++i) {
+    vertices.push_back(
+        {{points[i].x, points[i].y, points[i].z}, {normals[i].x, normals[i].y, normals[i].z}});
+  }
+
+  auto obj = Optifuser::NewObject<Optifuser::Object>(
+      std::make_shared<Optifuser::TriangleMesh>(vertices, indices, false));
+  obj->material.kd.r = color.x;
+  obj->material.kd.g = color.y;
+  obj->material.kd.b = color.z;
+
+  obj->scale = {scale.x, scale.y, scale.z};
+
+  mBodies.push_back(std::make_unique<OptifuserRigidbody>(this, std::vector{obj.get()}));
+
+  mScene->addObject(std::move(obj));
 
   return mBodies.back().get();
 }

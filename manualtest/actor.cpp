@@ -24,8 +24,11 @@ int main() {
 
   auto builder = s0->createActorBuilder();
 
-  builder->addBoxShape();
-  builder->addBoxVisual();
+  // builder->addBoxShape();
+  // builder->addBoxVisual();
+
+  builder->addConvexShapeFromFile("../assets/179/textured_objs/original-4.obj");
+  builder->addVisualFromFile("../assets/179/textured_objs/original-4.obj");
 
   auto actor = builder->build();
   actor->setPose({{0, 0, 2}, PxIdentity});

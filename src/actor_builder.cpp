@@ -11,8 +11,8 @@ Simulation *ActorBuilder::getSimulation() const { return mScene->mSimulation; }
 ActorBuilder::ActorBuilder(SScene *scene) : mScene(scene) {}
 
 void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
-                                         const PxVec3 &scale, PxMaterial *material,
-                                         PxReal density) {
+                                          const PxVec3 &scale, PxMaterial *material,
+                                          PxReal density) {
   ActorBuilderShapeRecord r;
   r.type = ActorBuilderShapeRecord::Type::SingleMesh;
   r.filename = filename;
@@ -25,8 +25,8 @@ void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxT
 }
 
 void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
-                                                  const PxTransform &pose, const PxVec3 &scale,
-                                                  PxMaterial *material, PxReal density) {
+                                                   const PxTransform &pose, const PxVec3 &scale,
+                                                   PxMaterial *material, PxReal density) {
 
   ActorBuilderShapeRecord r;
   r.type = ActorBuilderShapeRecord::Type::MultipleMeshes;
@@ -114,7 +114,7 @@ void ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius, const
 }
 
 void ActorBuilder::addVisualFromFile(const std::string &filename, const PxTransform &pose,
-                                const PxVec3 &scale, std::string const &name) {
+                                     const PxVec3 &scale, std::string const &name) {
 
   ActorBuilderVisualRecord r;
   r.type = ActorBuilderVisualRecord::Type::Mesh;
@@ -266,6 +266,84 @@ void ActorBuilder::resetCollisionGroup() {
   mCollisionGroup.w3 = 0;
 }
 
+void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> &collisionBodies,
+                                         std::vector<PxShape *> &shapes) const {
+  for (auto shape : shapes) {
+    Renderer::IPxrRigidbody *cBody;
+    switch (shape->getGeometryType()) {
+    case PxGeometryType::eBOX: {
+      PxBoxGeometry geom;
+      bool status = shape->getBoxGeometry(geom);
+      PX_ASSERT(status);
+      cBody =
+          mScene->mRendererScene->addRigidbody(PxGeometryType::eBOX, geom.halfExtents, {0, 0, 1});
+      break;
+    }
+    case PxGeometryType::eSPHERE: {
+      PxSphereGeometry geom;
+      bool status = shape->getSphereGeometry(geom);
+      PX_ASSERT(status);
+      cBody = mScene->mRendererScene->addRigidbody(
+          PxGeometryType::eSPHERE, {geom.radius, geom.radius, geom.radius}, {0, 0, 1});
+      break;
+    }
+    case PxGeometryType::eCAPSULE: {
+      PxCapsuleGeometry geom;
+      bool status = shape->getCapsuleGeometry(geom);
+      PX_ASSERT(status);
+      cBody = mScene->mRendererScene->addRigidbody(
+          PxGeometryType::eCAPSULE, {geom.radius, geom.radius, geom.halfHeight}, {0, 0, 1});
+      break;
+    }
+    case PxGeometryType::eCONVEXMESH: {
+      PxConvexMeshGeometry geom;
+      bool status = shape->getConvexMeshGeometry(geom);
+      PX_ASSERT(status);
+
+      std::vector<PxVec3> vertices;
+      std::vector<PxVec3> normals;
+      std::vector<uint32_t> triangles;
+
+      PxConvexMesh *convexMesh = geom.convexMesh;
+      const PxVec3 *convexVerts = convexMesh->getVertices();
+      const PxU8 *indexBuffer = convexMesh->getIndexBuffer();
+      PxU32 nbPolygons = convexMesh->getNbPolygons();
+      PxU32 offset = 0;
+      for (PxU32 i = 0; i < nbPolygons; i++) {
+        PxHullPolygon face;
+        bool status = convexMesh->getPolygonData(i, face);
+        PX_ASSERT(status);
+
+        const PxU8 *faceIndices = indexBuffer + face.mIndexBase;
+        for (PxU32 j = 0; j < face.mNbVerts; j++) {
+          vertices.push_back(convexVerts[faceIndices[j]]);
+          normals.push_back(PxVec3(face.mPlane[0], face.mPlane[1], face.mPlane[2]));
+        }
+
+        for (PxU32 j = 2; j < face.mNbVerts; j++) {
+          triangles.push_back(offset);
+          triangles.push_back(offset + j - 1);
+          triangles.push_back(offset + j);
+        }
+
+        offset += face.mNbVerts;
+      }
+      cBody = mScene->mRendererScene->addRigidbody(vertices, normals, triangles, geom.scale.scale,
+                                                   {0, 1, 0});
+      break;
+    }
+    default:
+      spdlog::error("Failed to create collision shape rendering: unrecognized geometry type.");
+      continue;
+    }
+
+    cBody->setInitialPose(shape->getLocalPose());
+    cBody->setVisible(false);
+    cBody->setRenderMode(1);
+    collisionBodies.push_back(cBody);
+  }
+}
+
 SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   physx_id_t linkId = mScene->mLinkIdGenerator.next();
 
@@ -277,6 +355,12 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   std::vector<Renderer::IPxrRigidbody *> renderBodies;
   buildVisuals(renderBodies, renderIds);
   for (auto body : renderBodies) {
+    body->setSegmentationId(linkId);
+  }
+
+  std::vector<Renderer::IPxrRigidbody *> collisionBodies;
+  buildCollisionVisuals(collisionBodies, shapes);
+  for (auto body : collisionBodies) {
     body->setSegmentationId(linkId);
   }
 
@@ -302,7 +386,8 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
     actor->setMassSpaceInertiaTensor(mInertia);
   }
 
-  auto sActor = std::unique_ptr<SActor>(new SActor(actor, linkId, mScene, renderBodies));
+  auto sActor =
+      std::unique_ptr<SActor>(new SActor(actor, linkId, mScene, renderBodies, collisionBodies));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
@@ -331,6 +416,12 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
     body->setSegmentationId(linkId);
   }
 
+  std::vector<Renderer::IPxrRigidbody *> collisionBodies;
+  buildCollisionVisuals(collisionBodies, shapes);
+  for (auto body : collisionBodies) {
+    body->setSegmentationId(linkId);
+  }
+
   PxFilterData data;
   data.word0 = mCollisionGroup.w0;
   data.word1 = mCollisionGroup.w1;
@@ -344,8 +435,8 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
     shapes[i]->release(); // this shape is now reference counted by the actor
   }
 
-  auto sActor =
-      std::unique_ptr<SActorStatic>(new SActorStatic(actor, linkId, mScene, renderBodies));
+  auto sActor = std::unique_ptr<SActorStatic>(
+      new SActorStatic(actor, linkId, mScene, renderBodies, collisionBodies));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
@@ -390,7 +481,7 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render, PxMaterial
   }
 
   auto sActor =
-      std::unique_ptr<SActorStatic>(new SActorStatic(ground, linkId, mScene, renderBodies));
+      std::unique_ptr<SActorStatic>(new SActorStatic(ground, linkId, mScene, renderBodies, {}));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
