@@ -126,6 +126,22 @@ std::unique_ptr<URDF::URDFLoader> SScene::createURDFLoader() {
   return std::make_unique<URDF::URDFLoader>(this);
 }
 
+std::vector<Renderer::ICamera *> SScene::getMountedCameras() {
+  std::vector<Renderer::ICamera *> cameras;
+  cameras.reserve(mCameras.size());
+  for (auto &mCamera : mCameras) {
+    cameras.push_back(mCamera.camera);
+  }
+  return cameras;
+}
+std::vector<SActorBase *> SScene::getMountedActors() {
+  std::vector<SActorBase *> actors;
+  actors.reserve(mCameras.size());
+  for (auto &mCamera : mCameras) {
+    actors.push_back(mCamera.actor);
+  }
+  return actors;
+}
 Renderer::ICamera *SScene::addMountedCamera(std::string const &name, SActorBase *actor,
                                             PxTransform const &pose, uint32_t width,
                                             uint32_t height, float fovx, float fovy, float near,

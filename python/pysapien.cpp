@@ -195,8 +195,8 @@ PYBIND11_MODULE(pysapien, m) {
              c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
            },
            py::arg("direction"), py::arg("up"))
-      .def("get_model_mat", [](Optifuser::CameraSpec &c) { return mat42array(c.getModelMat()); })
-      .def("get_projection_mat",
+      .def("get_model_matrix", [](Optifuser::CameraSpec &c) { return mat42array(c.getModelMat()); })
+      .def("get_projection_matrix",
            [](Optifuser::CameraSpec &c) { return mat42array(c.getProjectionMat()); });
 
   py::class_<Optifuser::FPSCameraSpec, Optifuser::CameraSpec>(m, "FPSCameraSpec")
@@ -279,6 +279,8 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("pose") = PxTransform(PxIdentity), py::arg("width"), py::arg("height"),
            py::arg("fovx"), py::arg("fovy"), py::arg("near"), py::arg("far"),
            py::return_value_policy::reference)
+      .def("get_mounted_cameras", &SScene::getMountedCameras, py::return_value_policy::reference)
+      .def("get_mounted_actors", &SScene::getMountedActors, py::return_value_policy::reference)
       .def("remove_mounted_camera", &SScene::removeMountedCamera, py::arg("camera"))
       .def("find_mounted_camera", &SScene::findMountedCamera, py::arg("name"),
            py::arg("actor") = nullptr, py::return_value_policy::reference)

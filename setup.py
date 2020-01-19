@@ -3,6 +3,10 @@ import re
 import sys
 import platform
 import subprocess
+import socket
+import time
+import shutil
+import glob
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
@@ -10,7 +14,7 @@ from distutils.version import LooseVersion
 
 
 class CMakeExtension(Extension):
-    def __init__(self, name, sourcedir=''):
+    def __init__(self, name, sourcedir='./'):
         Extension.__init__(self, name, sources=[])
         self.sourcedir = os.path.abspath(sourcedir)
 
@@ -32,7 +36,9 @@ class CMakeBuild(build_ext):
             self.build_extension(ext)
 
     def build_extension(self, ext):
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        original_full_path = self.get_ext_fullpath(ext.name)
+        extdir = os.path.abspath(os.path.dirname(original_full_path))
+        extdir = os.path.join(extdir, self.distribution.get_name(), "core")
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable]
 
@@ -40,14 +46,8 @@ class CMakeBuild(build_ext):
         cfg = 'Debug'
         build_args = ['--config', cfg]
 
-        if platform.system() == "Windows":
-            cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
-            if sys.maxsize > 2 ** 32:
-                cmake_args += ['-A', 'x64']
-            build_args += ['--', '/m']
-        else:
-            cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-            build_args += ['--', '-j8']
+        cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
+        build_args += ['--', '-j8']
 
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
@@ -58,14 +58,87 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
 
+def check_version_info():
+    try:
+        git_revision = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").split("\n")[0]
+        git_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode("utf-8").split("\n")[
+            0]
+    except (subprocess.CalledProcessError, OSError):
+        git_revision = ""
+        git_branch = "non-git"
+
+    def read_version():
+        with open("python/VERSION") as f:
+            return f.readline().strip()
+
+    build_datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
+    version_number = read_version()
+
+    hostname = socket.gethostname()
+
+    sys.stdout.write(
+        f"====================Version Data====================\n"
+        f"Git Revision Number: {git_revision}\n"
+        f"Git Branch: {git_branch}\n"
+        f"Build Datatime: {build_datetime}\n"
+        f"Version Number: {version_number}\n"
+        f"Host Name: {hostname}\n"
+        f"====================================================\n\n")
+
+    return git_revision, git_branch, build_datetime, version_number, hostname
+
+
+# Read requirements.txt
+def read_requirements():
+    with open('python/requirements.txt', 'r') as f:
+        lines = f.readlines()
+    install_requires = [line.strip() for line in lines if line]
+    return install_requires
+
+
+# Data files for packaging
+project_python_home_dir = os.path.join("python", "py_package")
+
+glsl_target_path = os.path.join(project_python_home_dir, "glsl_shader")
+if os.path.exists(glsl_target_path):
+    shutil.rmtree(glsl_target_path)
+shutil.copytree(os.path.join("./glsl_shader"), glsl_target_path)
+
+assets_target = os.path.join(project_python_home_dir, "assets")
+if not os.path.exists(assets_target):
+    shutil.copytree(os.path.join("./assets"), assets_target)
+
+sapien_data = ["glsl_shader/*/*"]
+sapien_data.extend(glob.glob("assets/robot/**", recursive=True))
+package_data = {
+    "sapien": sapien_data,
+}
+
 setup(
-    name='sapyen',
-    version='0.0.1',
+    name='sapien',
+    version=check_version_info()[3],
     author='SAPIEN Team',
     author_email='sapien@ucsd.edu',
-    description='A test project using pybind11 and CMake',
-    long_description='TODO',
-    ext_modules=[CMakeExtension('sapyen')],
+    description=['SAPIEN: A SimulAted Parted based Interactive ENvironment'],
+    classifiers=[
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: C++",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Topic :: Education",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Utilities",
+    ],
+    license="MIT",
+    ext_modules=[CMakeExtension('sapien')],
+    install_requires=read_requirements(),
+    long_description=open("readme.md").read(),
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
+    packages=["sapien", "sapien.env", "sapien.core"],
+    keywords="robotics simulator dataset articulation part-net",
+    url="homepage.com",
+    project_urls={"Documentation": "NotImplemented.com"},
+    package_data=package_data,
+    package_dir={"sapien": project_python_home_dir}
 )

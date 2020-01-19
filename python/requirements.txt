@@ -1,0 +1,2 @@
+numpy >= 1.17
+transforms3d >= 0.3.1
