@@ -87,31 +87,16 @@ target_link_libraries(sapien -Wl,--start-group
         libPhysX_static_64.a libPhysXVehicle_static_64.a
         libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
         pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
-        stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} )
+        stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES})
 
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-
-add_executable(main "test/main.cpp")
-target_link_libraries(main sapien)
-
-add_executable(test_kinematic "test/test_kinematic.cpp")
-target_link_libraries(test_kinematic sapien)
-
-add_executable(ps3 test/ps3.cpp)
-target_link_libraries(ps3 sapien)
 
 # pybind11_add_module(sapyen "python/pybind.cpp")
 # target_link_libraries(sapyen PRIVATE sapien)
 
 pybind11_add_module(pysapien "python/pysapien.cpp")
 target_link_libraries(pysapien PRIVATE sapien)
-
-add_executable(cheetah test/cheetah.cpp)
-target_link_libraries(cheetah sapien)
-
-add_executable(ant test/ant.cpp)
-target_link_libraries(ant sapien)
 
 add_executable(creation unittest/creation.cpp)
 target_link_libraries(creation sapien)
@@ -130,7 +115,7 @@ add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtes
 # Below are the ROS specified content
 set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")
 set(OLD_ROS_VERSION "indigo" "jade" "hydro")
-set(ROS $ENV{ROS_DISTRO})
+set(ROS $ENV{ROS_DISTRO_HHH})
 if (ROS)
     list(FIND SUPPORTED_ROS_VERSION ${ROS} _index)
     if (_index GREATER -1)
