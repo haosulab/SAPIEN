@@ -68,7 +68,7 @@ public:
 
   virtual ICamera *addCamera(std::string const &name, uint32_t width, uint32_t height, float fovx,
                              float fovy, float near, float far,
-                             std::string const &shaderDir = "glsl_shader/130") override;
+                             std::string const &shaderDir = "") override;
   virtual void removeCamera(ICamera *camera) override;
   virtual std::vector<ICamera *> getCameras() override;
 
@@ -93,18 +93,22 @@ public:
 
 class OptifuserRenderer : public IPxrRenderer {
 
+  static std::string gDefaultGlslDir;
+  static std::string gDefaultGlslVersion;
+
   std::vector<std::unique_ptr<OptifuserScene>> mScenes;
 
 public:
-  const std::string mGlslDir;
+  std::string mGlslDir;
 
   Optifuser::GLFWRenderContext *mContext = nullptr;
-  OptifuserRenderer(std::string const &glslDir = "glsl_shader/130",
-                    std::string const &glslVersion = "130");
+  OptifuserRenderer(std::string const &glslDir = "", std::string const &glslVersion = "");
 
   // IPxrRenderer
   IPxrScene *createScene(std::string const &name) override;
   void removeScene(IPxrScene *scene) override;
+
+  static void setDefaultShaderConfig(std::string const &glslDir, std::string const &glslVersion);
 };
 
 } // namespace Renderer

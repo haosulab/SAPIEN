@@ -18,7 +18,7 @@ public:
 
 public:
   OptifuserCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
-                  OptifuserScene *scene, std::string const &shaderDir = "glsl_shader/130");
+                  OptifuserScene *scene, std::string const &shaderDir);
 
   // ICamera
   virtual const std::string &getName() const override;

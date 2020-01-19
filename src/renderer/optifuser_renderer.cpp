@@ -184,9 +184,16 @@ void OptifuserScene::removeRigidbody(IPxrRigidbody *body) {
 ICamera *OptifuserScene::addCamera(std::string const &name, uint32_t width, uint32_t height,
                                    float fovx, float fovy, float near, float far,
                                    std::string const &shaderDir) {
+  std::string d;
+  if (shaderDir.length()) {
+    d = shaderDir;
+  } else {
+    d = mParentRenderer->mGlslDir;
+  }
+
   spdlog::warn("Note: current camera implementation does not support non-square pixels, and fovy "
                "will take precedence.");
-  auto cam = std::make_unique<OptifuserCamera>(name, width, height, fovy, this, shaderDir);
+  auto cam = std::make_unique<OptifuserCamera>(name, width, height, fovy, this, d);
   cam->near = near;
   cam->far = far;
   mCameras.push_back(std::move(cam));
@@ -233,16 +240,21 @@ void OptifuserScene::addDirectionalLight(std::array<float, 3> const &direction,
 
 //======== Begin Renderer ========//
 
-OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::string &glslVersion)
-    : mGlslDir(glslDir) {
-  mContext = &Optifuser::GLFWRenderContext::Get(WINDOW_WIDTH, WINDOW_HEIGHT);
-  mContext->initGui(glslVersion);
+OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::string &glslVersion) {
+  if (glslDir.length()) {
+    mGlslDir = glslDir;
+  } else {
+    mGlslDir = gDefaultGlslDir;
+  }
 
-  mContext->renderer.setShadowShader(glslDir + "/shadow.vsh", glslDir + "/shadow.fsh");
-  mContext->renderer.setGBufferShader(glslDir + "/gbuffer.vsh",
-                                      glslDir + "/gbuffer_segmentation.fsh");
-  mContext->renderer.setDeferredShader(glslDir + "/deferred.vsh", glslDir + "/deferred.fsh");
-  mContext->renderer.setAxisShader(glslDir + "/axes.vsh", glslDir + "/axes.fsh");
+  mContext = &Optifuser::GLFWRenderContext::Get(WINDOW_WIDTH, WINDOW_HEIGHT);
+  mContext->initGui(glslVersion.length() ? glslVersion : gDefaultGlslVersion);
+
+  mContext->renderer.setShadowShader(mGlslDir + "/shadow.vsh", mGlslDir + "/shadow.fsh");
+  mContext->renderer.setGBufferShader(mGlslDir + "/gbuffer.vsh",
+                                      mGlslDir + "/gbuffer_segmentation.fsh");
+  mContext->renderer.setDeferredShader(mGlslDir + "/deferred.vsh", mGlslDir + "/deferred.fsh");
+  mContext->renderer.setAxisShader(mGlslDir + "/axes.vsh", mGlslDir + "/axes.fsh");
   mContext->renderer.enablePicking();
   mContext->renderer.enableAxisPass();
 }
@@ -254,6 +266,14 @@ IPxrScene *OptifuserRenderer::createScene(std::string const &name) {
 
 void OptifuserRenderer::removeScene(IPxrScene *scene) {
   std::remove_if(mScenes.begin(), mScenes.end(), [scene](auto &s) { return scene == s.get(); });
+}
+
+std::string OptifuserRenderer::gDefaultGlslDir = "glsl_shader/130";
+std::string OptifuserRenderer::gDefaultGlslVersion = "130";
+void OptifuserRenderer::setDefaultShaderConfig(std::string const &glslDir,
+                                               std::string const &glslVersion) {
+  gDefaultGlslDir = glslDir;
+  gDefaultGlslVersion = glslVersion;
 }
 
 //======== End Renderer ========//

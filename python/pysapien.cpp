@@ -152,8 +152,10 @@ PYBIND11_MODULE(pysapien, m) {
       });
 
   py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer>(m, "OptifuserRenderer")
-      .def(py::init<std::string const &, std::string const &>(),
-           py::arg("glsl_dir") = "glsl_shader/130", py::arg("glsl_version") = "130");
+      .def_static("set_default_shader_config", Renderer::OptifuserRenderer::setDefaultShaderConfig,
+                  py::arg("glsl_dir"), py::arg("glsl_version"))
+      .def(py::init<std::string const &, std::string const &>(), py::arg("glsl_dir") = "",
+           py::arg("glsl_version") = "");
 
   py::class_<Renderer::OptifuserController>(m, "OptifuserController")
       .def(py::init<Renderer::OptifuserRenderer *>(), py::arg("renderer"))
@@ -195,7 +197,8 @@ PYBIND11_MODULE(pysapien, m) {
              c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
            },
            py::arg("direction"), py::arg("up"))
-      .def("get_model_matrix", [](Optifuser::CameraSpec &c) { return mat42array(c.getModelMat()); })
+      .def("get_model_matrix",
+           [](Optifuser::CameraSpec &c) { return mat42array(c.getModelMat()); })
       .def("get_projection_matrix",
            [](Optifuser::CameraSpec &c) { return mat42array(c.getProjectionMat()); });
 
