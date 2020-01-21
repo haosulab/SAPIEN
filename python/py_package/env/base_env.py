@@ -31,15 +31,15 @@ def point_cloud_from_depth(depth, color, proj, model):
 
 
 class BaseEnv:
-    def __init__(self, sim: pysapien.Simulation, on_screening_rendering: bool):
+    def __init__(self, sim: pysapien.Simulation):
         """
         Base class of a environment of
-        :param on_screening_rendering: Whether to use rendering visualization or not
         """
         # Scene
         self.sim = sim
-        self.scene: pysapien.Scene = sim.create_scene([0, 0, -9, 81])
-        self.scene.set_timestep(200)
+        self.scene: pysapien.Scene = sim.create_scene()
+        self.scene.add_ground(-1)
+        self.scene.set_timestep(1 / 240)
 
         # Articulation loader for both robot and object, articulation builder for simple object without joint
         self.loader: pysapien.URDFLoader = self.scene.create_urdf_loader()
@@ -55,6 +55,9 @@ class BaseEnv:
         self.depth_lambda_list = []
         self.__gl_camera_mapping = []
         self._gl_projection_inv = []
+
+    def update_renderer(self):
+        self.scene.update_render()
 
     def _step(self):
         """
@@ -78,7 +81,7 @@ class BaseEnv:
         Camera added by user after the class instantiate will not be handle by this function
         :return:
         """
-        mounted_cameras: List[pysapien.ICamera] = self.scene.get_mounted_cameras()
+        mounted_cameras: List[pysapien.OptifuserCamera] = self.scene.get_mounted_cameras()
         mounted_actors: List[pysapien.ActorBase] = self.scene.get_mounted_actors()
         num = len(mounted_actors)
         for i in range(num):
@@ -101,7 +104,7 @@ class BaseEnv:
             points = np.stack([width_points, height_points], 2) * 2 - 1
             homo_padding = np.ones_like(width_points) * 2 - 1
             self.__gl_camera_mapping.append((points, homo_padding[:, :, np.newaxis]))
-            self._gl_projection_inv.append(np.linalg.inv(camera.get_projection_mat()))
+            self._gl_projection_inv.append(np.linalg.inv(camera.get_projection_matrix()))
 
     def add_camera(self, name: str, camera_pose: Union[np.ndarray, pysapien.Pose], width: int, height: int, fov=1.1,
                    near=0.01, far=100) -> None:

@@ -11,6 +11,7 @@ def __enable_gl(num: int):
     __GL_VERSION = num
     _GL_SHADER_PATH = os.path.join(GL_SHADER_ROOT, __GL_VERSION_DICT[__GL_VERSION])
     OptifuserRenderer.set_default_shader_config(_GL_SHADER_PATH, __GL_VERSION_DICT[__GL_VERSION])
+    print("Using default glsl path {}".format(_GL_SHADER_PATH))
 
 
 def enable_default_3():
