@@ -73,7 +73,7 @@ public:
 
   virtual ICamera *addCamera(std::string const &name, uint32_t width, uint32_t height, float fovx,
                              float fovy, float near, float far,
-                             std::string const &shaderDir = "glsl_shader/130") = 0;
+                             std::string const &shaderDir = "") = 0;
   virtual void removeCamera(ICamera *camera) = 0;
 
   virtual std::vector<ICamera *> getCameras() = 0;
