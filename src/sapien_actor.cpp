@@ -13,6 +13,11 @@ PxRigidBody *SActor::getPxActor() { return mActor; }
 
 void SActor::destroy() { mParentScene->removeActor(this); }
 
+EActorType SActor::getType() const {
+  return mActor->getRigidBodyFlags().isSet(PxRigidBodyFlag::eKINEMATIC) ? EActorType::KINEMATIC
+                                                                        : EActorType::DYNAMIC;
+}
+
 void SActor::setPose(PxTransform const &pose) { getPxActor()->setGlobalPose(pose); }
 
 SActorStatic::SActorStatic(PxRigidStatic *actor, physx_id_t id, SScene *scene,

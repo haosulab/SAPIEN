@@ -32,7 +32,7 @@ std::vector<SJointBase *> SArticulation::getBaseJoints() {
   return result;
 }
 
-EArticulationType SArticulation::getType() const { return DYNAMIC; }
+EArticulationType SArticulation::getType() const { return EArticulationType::DYNAMIC; }
 
 uint32_t SArticulation::dof() const { return mPxArticulation->getDofs(); }
 

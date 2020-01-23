@@ -185,10 +185,12 @@ void OptifuserController::render() {
       spdlog::error(
           "User picked an unregistered object. There is probably some implementation error!");
     }
-
-    auto &pos = mGuiModel.linkModel.transform.p;
-    auto &quat = mGuiModel.linkModel.transform.q;
     currentScene->getScene()->clearAxes();
+
+    auto &pos = mGuiModel.linkModel.showCenterOfMass ? mGuiModel.linkModel.cmassPose.p
+                                                     : mGuiModel.linkModel.transform.p;
+    auto &quat = mGuiModel.linkModel.showCenterOfMass ? mGuiModel.linkModel.cmassPose.q
+                                                      : mGuiModel.linkModel.transform.q;
     currentScene->getScene()->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
   }
 
@@ -338,6 +340,8 @@ void OptifuserController::render() {
           ImGui::Text("col1: #%08x, col2: #%08x", mGuiModel.linkModel.col1,
                       mGuiModel.linkModel.col2);
           ImGui::Text("col3: #%08x", mGuiModel.linkModel.col3);
+
+          // toggle collision shape
           if (ImGui::Checkbox("Collision Shape", &mGuiModel.linkModel.renderCollision)) {
             SActorBase *link = mScene->findActorById(mGuiModel.linkId);
             if (!link) {
@@ -345,6 +349,29 @@ void OptifuserController::render() {
             }
             if (link) {
               link->setRenderMode(mGuiModel.linkModel.renderCollision);
+            }
+          }
+
+          // toggle center of mass
+          if (ImGui::Checkbox("Center of Mass", &mGuiModel.linkModel.showCenterOfMass)) {
+            SActorBase *link = mScene->findActorById(mGuiModel.linkId);
+            if (!link) {
+              link = mScene->findArticulationLinkById(mGuiModel.linkId);
+            }
+            if (link) {
+              switch (link->getType()) {
+              case EActorType::DYNAMIC:
+              case EActorType::KINEMATIC:
+              case EActorType::ARTICULATION_LINK:
+                if (mGuiModel.linkModel.showCenterOfMass) {
+                  mGuiModel.linkModel.cmassPose =
+                      link->getPxActor()->getGlobalPose() *
+                      static_cast<PxRigidBody *>(link->getPxActor())->getCMassLocalPose();
+                }
+                break;
+              default:
+                break;
+              }
             }
           }
         }

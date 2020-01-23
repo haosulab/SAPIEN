@@ -13,6 +13,14 @@ class IPxrRigidbody;
 
 class SScene;
 
+enum class EActorType {
+  STATIC,
+  KINEMATIC,
+  DYNAMIC,
+  ARTICULATION_LINK,
+  KINEMATIC_ARTICULATION_LINK
+};
+
 class SActorBase {
 protected:
   std::string mName = "";
@@ -47,6 +55,7 @@ public:
   void updateRender(PxTransform const &pose);
 
   virtual PxRigidActor *getPxActor() = 0;
+  virtual EActorType getType() const = 0;
   virtual ~SActorBase() = default;
 
 protected:

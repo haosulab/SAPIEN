@@ -1,4 +1,4 @@
-import sapien.core as pysapien
+import pysapien
 import numpy as np
 from pysapien import Pose
 from transforms3d.quaternions import axangle2quat as aa

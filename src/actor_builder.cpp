@@ -273,32 +273,28 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
     switch (shape->getGeometryType()) {
     case PxGeometryType::eBOX: {
       PxBoxGeometry geom;
-      bool status = shape->getBoxGeometry(geom);
-      PX_ASSERT(status);
+      shape->getBoxGeometry(geom);
       cBody =
           mScene->mRendererScene->addRigidbody(PxGeometryType::eBOX, geom.halfExtents, {0, 0, 1});
       break;
     }
     case PxGeometryType::eSPHERE: {
       PxSphereGeometry geom;
-      bool status = shape->getSphereGeometry(geom);
-      PX_ASSERT(status);
+      shape->getSphereGeometry(geom);
       cBody = mScene->mRendererScene->addRigidbody(
           PxGeometryType::eSPHERE, {geom.radius, geom.radius, geom.radius}, {0, 0, 1});
       break;
     }
     case PxGeometryType::eCAPSULE: {
       PxCapsuleGeometry geom;
-      bool status = shape->getCapsuleGeometry(geom);
-      PX_ASSERT(status);
+      shape->getCapsuleGeometry(geom);
       cBody = mScene->mRendererScene->addRigidbody(
           PxGeometryType::eCAPSULE, {geom.halfHeight, geom.radius, geom.radius}, {0, 0, 1});
       break;
     }
     case PxGeometryType::eCONVEXMESH: {
       PxConvexMeshGeometry geom;
-      bool status = shape->getConvexMeshGeometry(geom);
-      PX_ASSERT(status);
+      shape->getConvexMeshGeometry(geom);
 
       std::vector<PxVec3> vertices;
       std::vector<PxVec3> normals;
@@ -311,8 +307,7 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
       PxU32 offset = 0;
       for (PxU32 i = 0; i < nbPolygons; i++) {
         PxHullPolygon face;
-        bool status = convexMesh->getPolygonData(i, face);
-        PX_ASSERT(status);
+        convexMesh->getPolygonData(i, face);
 
         const PxU8 *faceIndices = indexBuffer + face.mIndexBase;
         for (PxU32 j = 0; j < face.mNbVerts; j++) {

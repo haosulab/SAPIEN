@@ -20,11 +20,13 @@ struct ArticulationGuiModel {
 
 struct LinkGuiModel {
   std::string name = "";
-  physx::PxTransform transform;
+  physx::PxTransform transform = {{0, 0, 0}, physx::PxIdentity};
+  physx::PxTransform cmassPose = {{0, 0, 0}, physx::PxIdentity};
   uint32_t col1 = 0;
   uint32_t col2 = 0;
   uint32_t col3 = 0;
   bool renderCollision = false;
+  bool showCenterOfMass = false;
 };
 
 struct GuiModel {

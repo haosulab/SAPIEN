@@ -34,6 +34,7 @@ private:
 
 public:
   SArticulation *getArticulation() override;
+  inline EActorType getType() const override { return EActorType::ARTICULATION_LINK; }
   PxArticulationLink *getPxActor() override;
 
 private:

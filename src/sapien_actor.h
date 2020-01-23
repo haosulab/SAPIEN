@@ -22,10 +22,10 @@ private:
 
 public:
   PxRigidBody *getPxActor() override;
-
   void setPose(PxTransform const &pose);
 
 public:
+  EActorType getType() const override;
   void destroy();
 
 private:
@@ -43,6 +43,7 @@ private:
 
 public:
   PxRigidActor *getPxActor() override;
+  inline EActorType getType() const override { return EActorType::STATIC; }
   void setPose(PxTransform const &pose);
 
 public:
