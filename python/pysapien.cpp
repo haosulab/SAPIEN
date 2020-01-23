@@ -502,7 +502,13 @@ PYBIND11_MODULE(pysapien, m) {
 
   py::class_<SArticulation, SArticulationDrivable>(m, "Articulation")
       .def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
-      .def("get_joints", &SArticulation::getSJoints, py::return_value_policy::reference);
+      .def("get_joints", &SArticulation::getSJoints, py::return_value_policy::reference)
+      .def("set_root_velocity",
+           [](SArticulation &a, py::array_t<float> v) { a.setRootVelocity(array2vec3(v)); },
+           py::arg("vel"))
+      .def("set_root_angular_velocity",
+           [](SArticulation &a, py::array_t<float> v) { a.setRootAngularVelocity(array2vec3(v)); },
+           py::arg("vel"));
 
   //======== End Articulation ========//
 
@@ -644,7 +650,7 @@ PYBIND11_MODULE(pysapien, m) {
 
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
       .def(py::init<SScene *>(), py::arg("scene"))
-      .def_readwrite("fix_base", &URDF::URDFLoader::fixBase)
+      .def_readwrite("fix_root_link", &URDF::URDFLoader::fixRootLink)
       .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def_readwrite("default_density", &URDF::URDFLoader::defaultDensity)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,

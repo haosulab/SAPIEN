@@ -134,6 +134,16 @@ void SArticulation::setRootPose(physx::PxTransform const &T) {
   mPxArticulation->teleportRootLink(T, true);
 }
 
+void SArticulation::setRootVelocity(physx::PxVec3 const &v) {
+  mRootLink->getPxActor()->setLinearVelocity(v);
+}
+
+void SArticulation::setRootAngularVelocity(physx::PxVec3 const &omega) {
+  mRootLink->getPxActor()->setAngularVelocity(omega);
+}
+
+SLinkBase *SArticulation::getRootLink() { return mRootLink; }
+
 SArticulation::SArticulation(SScene *scene) : mScene(scene) {}
 
 std::vector<PxReal> SArticulation::E2I(std::vector<PxReal> ev) const {

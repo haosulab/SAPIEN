@@ -20,6 +20,7 @@ class SArticulation : public SArticulationDrivable {
 
   std::vector<std::unique_ptr<SLink>> mLinks;
   std::vector<std::unique_ptr<SJoint>> mJoints;
+  SLink *mRootLink = nullptr;
 
   std::vector<uint32_t> mIndexE2I;
   std::vector<uint32_t> mIndexI2E;
@@ -53,6 +54,10 @@ public:
   void setDriveTarget(std::vector<physx::PxReal> const &v) override;
 
   void setRootPose(physx::PxTransform const &T) override;
+  void setRootVelocity(physx::PxVec3 const &v);
+  void setRootAngularVelocity(physx::PxVec3 const &omega);
+
+  SLinkBase *getRootLink() override;
 
   inline PxArticulationReducedCoordinate *getPxArticulation() { return mPxArticulation; }
 

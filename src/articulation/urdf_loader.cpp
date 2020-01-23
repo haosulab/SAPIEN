@@ -388,7 +388,7 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
     spdlog::info("SRDF: ignored {} pairs", groupCount);
   }
 
-  SArticulation *articulation = builder->build(fixBase);
+  SArticulation *articulation = builder->build(fixRootLink);
 
   for (auto &gazebo : robot->gazebo_array) {
     for (auto &sensor : gazebo->sensor_array) {

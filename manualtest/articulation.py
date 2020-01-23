@@ -110,19 +110,18 @@ s0.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
 
 ant_builder = create_ant_builder(s0)
 
-ants = []
-for i in range(100):
-    ant = ant_builder.build()
-    ant.set_root_pose(Pose([0, 0, 2 * i]))
-    ants.append(ant)
-
+ant = ant_builder.build()
+ant.set_root_pose(Pose([0, 0, 2]))
 
 render_controller.camera.set_position([-5, 0, 2])
 render_controller.set_current_scene(s0)
 
+count = 0
 while not render_controller.should_quit:
-    for ant in ants:
-        ant.set_qf(np.random.rand(8) * 14000 - 7000)
+    count += 1
+    if count == 120:
+        ant.set_root_velocity([0, 0, 10])
+        ant.set_root_angular_velocity([0, 0, 10])
     s0.update_render()
     for i in range(4):
         s0.step()

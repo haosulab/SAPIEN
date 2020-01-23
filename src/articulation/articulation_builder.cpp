@@ -323,6 +323,12 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
     result->mIndexI2E = I2E;
   }
 
+  for (auto &j : result->mJoints) {
+    if (!j->getParentLink()) {
+      result->mRootLink = static_cast<SLink *>(j->getChildLink());
+    }
+  }
+
   result->mCache = result->mPxArticulation->createCache();
   result->mPxArticulation->zeroCache(*result->mCache);
 

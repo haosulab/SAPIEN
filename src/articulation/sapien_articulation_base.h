@@ -20,6 +20,7 @@ public:
 
   virtual std::vector<SLinkBase *> getBaseLinks() = 0;
   virtual std::vector<SJointBase *> getBaseJoints() = 0;
+  virtual SLinkBase *getRootLink() = 0;
 
   virtual EArticulationType getType() const = 0;
   virtual uint32_t dof() const = 0;

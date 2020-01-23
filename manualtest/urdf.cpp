@@ -22,7 +22,7 @@ int main() {
 
   // auto builder = createAntBuilder(*s0);
   auto loader = s0->createURDFLoader();
-  loader->fixBase = 0;
+  loader->fixRootLink = 0;
   // auto a = loader->load("../assets/robot/all_robot.urdf");
   auto a = loader->load("../assets/179/mobility.urdf");
 

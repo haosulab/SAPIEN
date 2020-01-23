@@ -124,19 +124,13 @@ int main() {
   controller.mCamera.position = {-5, 0, 0};
 
   controller.setCurrentScene(s0.get());
-  ant0->setQf({1, 2, 3, 4, 5, 6, 7, 8});
-  ant0->setDriveTarget({2, 3, 4, 5, 6, 7, 8, 9});
 
-  // Set Drive Property
-  auto ant0Joint = ant0->getSJoints();
-  for (size_t i = 0; i < ant0->dof(); ++i) {
-    auto dof = ant0Joint[i]->getDof();
-    if (dof > 0) {
-      ant0Joint[i]->setDriveProperty(1000, 50);
+  int count = 0;
+  while (!controller.shouldQuit()) {
+    if (++count == 120) {
+      ant0->getSLinks()[0]->getPxActor()->setLinearVelocity({0, 0, 10});
+      ant0->getSLinks()[0]->getPxActor()->setAngularVelocity({0, 0, 10});
     }
-  }
-
-  while (1) {
     s0->updateRender();
     s0->step();
     controller.render();
