@@ -1,9 +1,11 @@
 #pragma once
+#include "camera_controller.h"
 #include "optifuser_renderer.h"
 
 namespace sapien {
 class Simulation;
 class SScene;
+class SActorBase;
 
 namespace Renderer {
 
@@ -44,8 +46,13 @@ class OptifuserController {
 
   bool mShouldQuit = false;
 
+  Optifuser::CameraSpec mCamera;
+  SActorBase *mCurrentFocus = nullptr;
+
 public:
-  Optifuser::FPSCameraSpec mCamera;
+  FPSCameraController mFreeCameraController;
+  ArcRotateCameraController mArcCameraController;
+
   explicit OptifuserController(OptifuserRenderer *renderer);
 
   bool shouldQuit();
@@ -53,6 +60,8 @@ public:
   void showWindow();
   void hideWindow();
   void setCurrentScene(SScene *scene);
+  void focus(SActorBase *actor);
+
   void render();
 };
 } // namespace Renderer

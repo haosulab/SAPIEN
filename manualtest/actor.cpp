@@ -36,7 +36,7 @@ int main() {
   auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
   r0->setAmbientLight({0.3, 0.3, 0.3});
   r0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
-  controller.mCamera.position = {-5, 0, 0};
+  controller.mFreeCamera.position = {-5, 0, 0};
 
   controller.setCurrentScene(s0.get());
 

@@ -159,7 +159,6 @@ PYBIND11_MODULE(pysapien, m) {
 
   py::class_<Renderer::OptifuserController>(m, "OptifuserController")
       .def(py::init<Renderer::OptifuserRenderer *>(), py::arg("renderer"))
-      .def_readonly("camera", &Renderer::OptifuserController::mCamera)
       .def("show_window", &Renderer::OptifuserController::showWindow)
       .def("hide_window", &Renderer::OptifuserController::hideWindow)
       .def("set_current_scene", &Renderer::OptifuserController::setCurrentScene, py::arg("scene"))

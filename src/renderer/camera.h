@@ -48,6 +48,8 @@ public:
   // Camera intrinsic
   glm::mat4 getCameraMatrix();
 };
+
+
 } // namespace Renderer
 
 } // namespace sapien

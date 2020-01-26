@@ -30,18 +30,30 @@ enum RenderMode {
 namespace sapien {
 namespace Renderer {
 
-OptifuserController::OptifuserController(OptifuserRenderer *renderer) : mRenderer(renderer) {
-  mCamera.setUp({0, 0, 1});
-  mCamera.setForward({1, 0, 0});
+OptifuserController::OptifuserController(OptifuserRenderer *renderer)
+    : mRenderer(renderer), mFreeCameraController(mCamera), mArcCameraController(mCamera) {
   mCamera.position = {0, 0, 1};
-  mCamera.rotateYawPitch(0, 0);
-  mCamera.fovy = glm::radians(45.f);
+  mCamera.fovy = 45.f;
   mCamera.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
 }
 void OptifuserController::showWindow() { mRenderer->mContext->showWindow(); }
 void OptifuserController::hideWindow() { mRenderer->mContext->hideWindow(); }
 
 void OptifuserController::setCurrentScene(SScene *scene) { mScene = scene; }
+void OptifuserController::focus(SActorBase *actor) {
+  if (actor && !mCurrentFocus) {
+    mArcCameraController.yaw = mFreeCameraController.yaw;
+    mArcCameraController.pitch = mFreeCameraController.pitch;
+    auto [x, y, z] = actor->getPose().p;
+    mArcCameraController.center = {x, y, z};
+  } else if (!actor && mCurrentFocus) {
+    mFreeCameraController.yaw = mArcCameraController.yaw;
+    mFreeCameraController.pitch = mArcCameraController.pitch;
+    auto &p = mArcCameraController.camera.position;
+    mFreeCameraController.setPosition(p.x, p.y, p.z);
+  }
+  mCurrentFocus = actor;
+}
 
 bool OptifuserController::shouldQuit() { return mShouldQuit; }
 
@@ -57,29 +69,34 @@ void OptifuserController::render() {
   float framerate = ImGui::GetIO().Framerate;
 
   float dt = 1.f * moveSpeed / framerate;
+
   if (Optifuser::getInput().getKeyState(GLFW_KEY_W)) {
-    mCamera.moveForwardRight(dt, 0);
+    focus(nullptr);
+    mFreeCameraController.moveForwardRight(dt, 0);
 #ifdef _USE_OPTIX
     if (renderMode == PATHTRACER) {
       pathTracer->invalidateCamera();
     }
 #endif
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_S)) {
-    mCamera.moveForwardRight(-dt, 0);
+    focus(nullptr);
+    mFreeCameraController.moveForwardRight(-dt, 0);
 #ifdef _USE_OPTIX
     if (renderMode == PATHTRACER) {
       pathTracer->invalidateCamera();
     }
 #endif
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_A)) {
-    mCamera.moveForwardRight(0, -dt);
+    focus(nullptr);
+    mFreeCameraController.moveForwardRight(0, -dt);
 #ifdef _USE_OPTIX
     if (renderMode == PATHTRACER) {
       pathTracer->invalidateCamera();
     }
 #endif
   } else if (Optifuser::getInput().getKeyState(GLFW_KEY_D)) {
-    mCamera.moveForwardRight(0, dt);
+    focus(nullptr);
+    mFreeCameraController.moveForwardRight(0, dt);
 #ifdef _USE_OPTIX
     if (renderMode == PATHTRACER) {
       pathTracer->invalidateCamera();
@@ -87,9 +104,24 @@ void OptifuserController::render() {
 #endif
   }
 
+  if (mCurrentFocus) {
+    auto [x, y, z] = mCurrentFocus->getPose().p;
+
+    double dx, dy;
+    Optifuser::getInput().getWheelDelta(dx, dy);
+    mArcCameraController.r += dy;
+    if (mArcCameraController.r < 1) {
+      mArcCameraController.r = 1;
+    }
+    mArcCameraController.setCenter(x, y, z);
+  }
+
   if (Optifuser::getInput().getKeyDown(GLFW_KEY_Q)) {
     mShouldQuit = true;
   }
+
+  mCamera.aspect = static_cast<float>(mRenderer->mContext->getWidth()) /
+                   static_cast<float>(mRenderer->mContext->getHeight());
 
   mCamera.aspect = static_cast<float>(mRenderer->mContext->getWidth()) /
                    static_cast<float>(mRenderer->mContext->getHeight());
@@ -101,7 +133,11 @@ void OptifuserController::render() {
   if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
     double dx, dy;
     Optifuser::getInput().getCursorDelta(dx, dy);
-    mCamera.rotateYawPitch(-dx / 1000.f, -dy / 1000.f);
+    if (!mCurrentFocus) {
+      mFreeCameraController.rotateYawPitch(-dx / 1000.f, -dy / 1000.f);
+    } else {
+      mArcCameraController.rotateYawPitch(-dx / 1000.f, -dy / 1000.f);
+    }
 #ifdef _USE_OPTIX
     if (renderMode == PATHTRACER) {
       pathTracer->invalidateCamera();
@@ -158,6 +194,8 @@ void OptifuserController::render() {
       mGuiModel.linkModel.renderCollision = actor->getRenderMode() == 1;
       mGuiModel.articulationId = 0;
     } else if (link) {
+      actor = link;
+
       mGuiModel.linkModel.name = link->getName();
       mGuiModel.linkModel.transform = link->getPxActor()->getGlobalPose();
       mGuiModel.linkModel.col1 = link->getCollisionGroup1();
@@ -185,6 +223,11 @@ void OptifuserController::render() {
       spdlog::error(
           "User picked an unregistered object. There is probably some implementation error!");
     }
+
+    if (Optifuser::getInput().getKeyDown(GLFW_KEY_F)) {
+      focus(actor);
+    }
+
     currentScene->getScene()->clearAxes();
 
     auto &pos = mGuiModel.linkModel.showCenterOfMass ? mGuiModel.linkModel.cmassPose.p
