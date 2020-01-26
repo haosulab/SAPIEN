@@ -163,6 +163,11 @@ PYBIND11_MODULE(pysapien, m) {
       .def("hide_window", &Renderer::OptifuserController::hideWindow)
       .def("set_current_scene", &Renderer::OptifuserController::setCurrentScene, py::arg("scene"))
       .def("render", &Renderer::OptifuserController::render)
+      .def("set_camera_position", &Renderer::OptifuserController::setCameraPosition, py::arg("x"),
+           py::arg("y"), py::arg("z"))
+      .def("set_camera_rotation", &Renderer::OptifuserController::setCameraRotation,
+           py::arg("yaw"), py::arg("pitch"))
+      .def("focus", &Renderer::OptifuserController::focus, py::arg("actor"))
       .def_property_readonly("should_quit", &Renderer::OptifuserController::shouldQuit);
 
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")

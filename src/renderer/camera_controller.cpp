@@ -10,7 +10,10 @@ glm::quat FPSCameraController::getRotation0() const {
   return glm::quat(mat);
 }
 
-void FPSCameraController::setPosition(float x, float y, float z) { camera.position = {x, y, z}; }
+void FPSCameraController::setPosition(float x, float y, float z) {
+  camera.position = {x, y, z};
+  update();
+}
 
 void FPSCameraController::rotateYawPitch(float dy, float dp) {
   yaw += dy;

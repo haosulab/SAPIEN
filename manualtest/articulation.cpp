@@ -121,7 +121,7 @@ int main() {
   r0->setAmbientLight({0.3, 0.3, 0.3});
   r0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
 
-  controller.mFreeCameraController.setPosition(-5, 0, 0);
+  controller.setCameraPosition(-5, 0, 0);
 
   controller.setCurrentScene(s0.get());
   // controller.focus(ant0->getRootLink());

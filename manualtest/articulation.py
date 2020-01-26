@@ -113,7 +113,7 @@ ant_builder = create_ant_builder(s0)
 ant = ant_builder.build()
 ant.set_root_pose(Pose([0, 0, 2]))
 
-render_controller.camera.set_position([-5, 0, 2])
+render_controller.set_camera_position(-5, 0, 2)
 render_controller.set_current_scene(s0)
 
 count = 0
@@ -122,6 +122,7 @@ while not render_controller.should_quit:
     if count == 120:
         ant.set_root_velocity([0, 0, 10])
         ant.set_root_angular_velocity([0, 0, 10])
+    ant.set_qf(np.random.rand(8) * 10000 - 5000)
     s0.update_render()
     for i in range(4):
         s0.step()

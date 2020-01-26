@@ -44,8 +44,10 @@ void OptifuserController::focus(SActorBase *actor) {
   if (actor && !mCurrentFocus) {
     mArcCameraController.yaw = mFreeCameraController.yaw;
     mArcCameraController.pitch = mFreeCameraController.pitch;
-    auto [x, y, z] = actor->getPose().p;
-    mArcCameraController.center = {x, y, z};
+    auto p = actor->getPose().p;
+    mArcCameraController.center = {p.x, p.y, p.z};
+    mArcCameraController.r = glm::length(
+        glm::vec3(mCamera.position.x - p.x, mCamera.position.y - p.y, mCamera.position.z - p.z));
   } else if (!actor && mCurrentFocus) {
     mFreeCameraController.yaw = mArcCameraController.yaw;
     mFreeCameraController.pitch = mArcCameraController.pitch;
@@ -53,6 +55,18 @@ void OptifuserController::focus(SActorBase *actor) {
     mFreeCameraController.setPosition(p.x, p.y, p.z);
   }
   mCurrentFocus = actor;
+}
+
+void OptifuserController::setCameraPosition(float x, float y, float z) {
+  focus(nullptr);
+  mFreeCameraController.setPosition(x, y, z);
+}
+
+void OptifuserController::setCameraRotation(float yaw, float pitch) {
+  focus(nullptr);
+  mFreeCameraController.yaw = yaw;
+  mFreeCameraController.pitch = pitch;
+  mFreeCameraController.update();
 }
 
 bool OptifuserController::shouldQuit() { return mShouldQuit; }
