@@ -119,6 +119,9 @@ void main() {
   shadowMapCoord /= shadowMapCoord.w;
   shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
   float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, 0);
+  if (shadowMapCoord.x <= 0 || shadowMapCoord.x >= 1 || shadowMapCoord.y <= 0 || shadowMapCoord.y >= 1) {
+    visibility = 1;
+  }
 
   vec3 camDir = -normalize(csPosition.xyz);
 
