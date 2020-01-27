@@ -8,8 +8,9 @@ using namespace physx;
 SJointBase::SJointBase(SLinkBase *parent, SLinkBase *child)
     : mParentLink(parent), mChildLink(child) {}
 
-SJoint::SJoint(SLink *parent, SLink *child, PxArticulationJointReducedCoordinate *pxJoint)
-    : SJointBase(parent, child), mPxJoint(pxJoint) {}
+SJoint::SJoint(SArticulation *articulation, SLink *parent, SLink *child,
+               PxArticulationJointReducedCoordinate *pxJoint)
+    : SJointBase(parent, child), mArticulation(articulation), mPxJoint(pxJoint) {}
 
 PxArticulationJointReducedCoordinate *SJoint::getPxJoint() { return mPxJoint; }
 
@@ -84,18 +85,38 @@ void SJoint::setLimits(std::vector<std::array<physx::PxReal, 2>> const &limits) 
   case PxArticulationJointType::eREVOLUTE:
     if (limits[0][1] == std::numeric_limits<float>::infinity()) {
       mPxJoint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eFREE);
+
+      if (mArticulation->getPxArticulation()->getScene()) {
+        mArticulation->resetCache();
+      }
+
       return;
     }
     mPxJoint->setMotion(PxArticulationAxis::eTWIST, PxArticulationMotion::eLIMITED);
     mPxJoint->setLimit(PxArticulationAxis::eTWIST, limits[0][0], limits[0][1]);
+
+    if (mArticulation->getPxArticulation()->getScene()) {
+      mArticulation->resetCache();
+    }
+
     return;
   case PxArticulationJointType::ePRISMATIC:
     if (limits[0][1] == std::numeric_limits<float>::infinity()) {
       mPxJoint->setMotion(PxArticulationAxis::eX, PxArticulationMotion::eFREE);
+
+      if (mArticulation->getPxArticulation()->getScene()) {
+        mArticulation->resetCache();
+      }
+
       return;
     }
     mPxJoint->setMotion(PxArticulationAxis::eX, PxArticulationMotion::eLIMITED);
     mPxJoint->setLimit(PxArticulationAxis::eX, limits[0][0], limits[0][1]);
+
+    if (mArticulation->getPxArticulation()->getScene()) {
+      mArticulation->resetCache();
+    }
+
     return;
   case PxArticulationJointType::eSPHERICAL:
     spdlog::critical("Spherical joint not currently supported");

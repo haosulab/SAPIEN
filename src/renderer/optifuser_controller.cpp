@@ -30,6 +30,9 @@ enum RenderMode {
 namespace sapien {
 namespace Renderer {
 
+static int pickedId = 0;
+static int pickedRenderId = 0;
+
 OptifuserController::OptifuserController(OptifuserRenderer *renderer)
     : mRenderer(renderer), mFreeCameraController(mCamera), mArcCameraController(mCamera) {
   mCamera.position = {0, 0, 1};
@@ -187,10 +190,10 @@ void OptifuserController::render() {
   if (Optifuser::getInput().getMouseDown(GLFW_MOUSE_BUTTON_LEFT)) {
     int x, y;
     Optifuser::getInput().getCursor(x, y);
-    int pickedId = mRenderer->mContext->renderer.pickSegmentationId(x, y);
+    pickedId = mRenderer->mContext->renderer.pickSegmentationId(x, y);
     mGuiModel.linkId = pickedId;
 
-    int pickedRenderId = 0;
+    pickedRenderId = 0;
     if (pickedId) {
       pickedRenderId = mRenderer->mContext->renderer.pickObjectId(x, y);
     }
@@ -232,10 +235,25 @@ void OptifuserController::render() {
           ++n;
         }
       }
-
     } else {
       spdlog::error(
           "User picked an unregistered object. There is probably some implementation error!");
+    }
+
+    if (actor) {
+      switch (actor->getType()) {
+      case EActorType::DYNAMIC:
+      case EActorType::KINEMATIC:
+      case EActorType::ARTICULATION_LINK:
+        if (mGuiModel.linkModel.showCenterOfMass) {
+          mGuiModel.linkModel.cmassPose =
+              link->getPxActor()->getGlobalPose() *
+              static_cast<PxRigidBody *>(link->getPxActor())->getCMassLocalPose();
+        }
+        break;
+      default:
+        break;
+      }
     }
 
     if (Optifuser::getInput().getKeyDown(GLFW_KEY_F)) {
@@ -257,32 +275,6 @@ void OptifuserController::render() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
-    // ImGui::Begin("Save##window");
-    // {
-    //   if (ImGui::CollapsingHeader("Save")) {
-    //     static char buf[1000];
-    //     ImGui::InputText("##input_buffer", buf, 1000);
-    //     if (ImGui::Button("Save##button")) {
-    //       std::cout << "save called" << std::endl;
-    //       // saveCallback(saveNames.size(), std::string(buf));
-    //     }
-    //   }
-    //   if (ImGui::CollapsingHeader("Load")) {
-    //     for (uint32_t i = 0; i < saveNames.size(); ++i) {
-    //       ImGui::Text("%s", saveNames[i].c_str());
-    //       ImGui::SameLine(100);
-    //       if (ImGui::Button(("load##" + std::to_string(i)).c_str())) {
-    //         // saveActionCallback(i, 0);
-    //       }
-    //       ImGui::SameLine(150);
-    //       if (ImGui::Button(("delete##" + std::to_string(i)).c_str())) {
-    //         // saveActionCallback(i, 1);
-    //       }
-    //     }
-    //   }
-    // }
-    // ImGui::End();
 
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mRenderer->mContext->getHeight()));
@@ -353,8 +345,8 @@ void OptifuserController::render() {
         ImGui::Text("Height: %d", mRenderer->mContext->getHeight());
         ImGui::SameLine();
         ImGui::Text("Aspect: %.2f", mCamera.aspect);
-        // ImGui::Text("Picked link id: %d", pickedId);
-        // ImGui::Text("Picked render id: %d", pickedRenderId);
+        ImGui::Text("Picked link id: %d", pickedId);
+        ImGui::Text("Picked render id: %d", pickedRenderId);
       }
 
       if (ImGui::CollapsingHeader("Mounted Cameras")) {
@@ -414,21 +406,6 @@ void OptifuserController::render() {
             SActorBase *link = mScene->findActorById(mGuiModel.linkId);
             if (!link) {
               link = mScene->findArticulationLinkById(mGuiModel.linkId);
-            }
-            if (link) {
-              switch (link->getType()) {
-              case EActorType::DYNAMIC:
-              case EActorType::KINEMATIC:
-              case EActorType::ARTICULATION_LINK:
-                if (mGuiModel.linkModel.showCenterOfMass) {
-                  mGuiModel.linkModel.cmassPose =
-                      link->getPxActor()->getGlobalPose() *
-                      static_cast<PxRigidBody *>(link->getPxActor())->getCMassLocalPose();
-                }
-                break;
-              default:
-                break;
-              }
             }
           }
         }

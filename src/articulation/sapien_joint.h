@@ -8,6 +8,7 @@ namespace sapien {
 using namespace physx;
 
 class SArticulationBase;
+class SArticulation;
 class SLinkBase;
 class SLink;
 
@@ -35,6 +36,7 @@ protected:
 
 class SJoint : public SJointBase {
   friend class LinkBuilder;
+  SArticulation *mArticulation;
   PxArticulationJointReducedCoordinate *mPxJoint;
 
 public:
@@ -58,7 +60,8 @@ public:
   PxTransform getGlobalPose() const;
 
 private:
-  SJoint(SLink *parent, SLink *child, PxArticulationJointReducedCoordinate *pxJoint);
+  SJoint(SArticulation *articulation, SLink *parent, SLink *child,
+         PxArticulationJointReducedCoordinate *pxJoint);
 };
 
 } // namespace sapien

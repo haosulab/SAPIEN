@@ -187,12 +187,13 @@ bool LinkBuilder::build(SArticulation &articulation) const {
     joint->setJointType(mJointRecord.jointType);
     joint->setParentPose(mJointRecord.parentPose);
     joint->setChildPose(mJointRecord.childPose);
-    j = std::unique_ptr<SJoint>(new SJoint(links[mParent].get(), links[mIndex].get(), joint));
+    j = std::unique_ptr<SJoint>(
+        new SJoint(&articulation, links[mParent].get(), links[mIndex].get(), joint));
     j->setLimits(mJointRecord.limits);
     j->setFriction(mJointRecord.friction);
     j->setDriveProperty(0, mJointRecord.damping);
   } else {
-    j = std::unique_ptr<SJoint>(new SJoint(nullptr, links[mIndex].get(), nullptr));
+    j = std::unique_ptr<SJoint>(new SJoint(&articulation, nullptr, links[mIndex].get(), nullptr));
   }
   j->setName(mJointRecord.name);
   joints[mIndex] = std::move(j);

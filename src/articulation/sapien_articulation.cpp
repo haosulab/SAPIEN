@@ -188,4 +188,10 @@ std::vector<SJoint *> SArticulation::getSJoints() {
   }
   return result;
 }
+
+void SArticulation::resetCache() {
+  mPxArticulation->releaseCache(*mCache);
+  mCache = mPxArticulation->createCache();
+}
+
 } // namespace sapien

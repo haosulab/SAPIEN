@@ -61,6 +61,8 @@ public:
 
   inline PxArticulationReducedCoordinate *getPxArticulation() { return mPxArticulation; }
 
+  void resetCache();
+
 private:
   SArticulation(SScene *scene);
   SArticulation(SArticulation const &other) = delete;
