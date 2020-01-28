@@ -1,9 +1,7 @@
 import pysapien
 import numpy as np
-from pysapien import Pose
 from transforms3d.quaternions import axangle2quat as aa
 
-pysapien.OptifuserRenderer.set_default_shader_config("glsl_shader/450", "450")
 
 sim = pysapien.Simulation()
 renderer = pysapien.OptifuserRenderer()
