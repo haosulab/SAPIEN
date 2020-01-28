@@ -225,14 +225,33 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
 
   return passiveForce;
 }
-std::vector<PxReal> SArticulation::computeJacobianMatrix() {
-  // TODO: This function is temporary for use without ROS, after ROS2, it will be deleted.
-  PxU32 nRows;
-  PxU32 nCols;
-  mPxArticulation->computeDenseJacobian(*mCache, nRows, nCols);
 
-  std::vector<float> Jacobian(mCache->denseJacobian, mCache->denseJacobian + nRows * nCols);
-  return Jacobian;
+std::vector<PxReal> SArticulation::computeJacobianMatrix() {
+    // TODO: This function is temporary for use without ROS, after ROS2, it will be deleted.
+    PxU32 nRows;
+    PxU32 nCols;
+    mPxArticulation->computeDenseJacobian(*mCache, nRows, nCols);
+
+    std::vector<float> Jacobian(mCache->denseJacobian, mCache->denseJacobian + nRows * nCols);
+    std::vector<float> Jacobian2;
+    for(size_t j = 0; j < Jacobian.size() + 6; ++j){
+        Jacobian2.push_back(0);
+    }
+    for (auto &link : mLinks) {
+        //result.push_back(link.get());
+        auto index = link->getPxActor()->getLinkIndex();
+        auto midx = link->getIndex();
+        //spdlog::error("Input vector size does not match DOF of articulation {:d} {:d} {:d} {:d} {:d}", index, midx, nRows, nCols, Jacobian2.size());
+        if(index == 0)
+            continue;
+        for(size_t j = 0; j < 6; ++j){
+            for (size_t col = 0; col < nCols; ++col) {
+                Jacobian2[(midx * 6 + j) * nCols + mIndexI2E[col]] = Jacobian[((index-1) * 6 + j) * nCols + col];
+            }
+        }
+        midx += 1;
+    }
+    return Jacobian2;
 }
 
 } // namespace sapien

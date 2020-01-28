@@ -1,6 +1,6 @@
-import sapyen
+import sapyen.core as sapien
 import numpy as np
-from sapyen import Pose
+from sapyen.core import Pose
 import time
 
 renderer = sapyen.OptifuserRenderer()

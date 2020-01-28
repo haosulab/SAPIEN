@@ -101,16 +101,16 @@ target_link_libraries(pysapien PRIVATE sapien)
 add_executable(creation unittest/creation.cpp)
 target_link_libraries(creation sapien)
 
-add_executable(manual_actor manualtest/actor.cpp)
-target_link_libraries(manual_actor sapien)
-add_executable(manual_articulation manualtest/articulation.cpp)
-target_link_libraries(manual_articulation sapien)
-add_executable(manual_urdf manualtest/urdf.cpp)
-target_link_libraries(manual_urdf sapien)
+#add_executable(manual_actor manualtest/actor.cpp)
+#target_link_libraries(manual_actor sapien)
+#add_executable(manual_articulation manualtest/articulation.cpp)
+#target_link_libraries(manual_articulation sapien)
+#add_executable(manual_urdf manualtest/urdf.cpp)
+#target_link_libraries(manual_urdf sapien)
 
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 
-add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtest/*.py ${CMAKE_CURRENT_BINARY_DIR})
+#add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtest/*.py ${CMAKE_CURRENT_BINARY_DIR})
 
 # Below are the ROS specified content
 set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")
