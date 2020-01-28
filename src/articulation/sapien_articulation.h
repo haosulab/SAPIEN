@@ -63,6 +63,14 @@ public:
 
   void resetCache();
 
+  /* Dynamics Functions */
+  std::vector<physx::PxReal> computePassiveForce(bool gravity = true,
+                                                 bool coriolisAndCentrifugal = true,
+                                                 bool external = true);
+
+  /* Kinematics Functions */
+  std::vector<physx::PxReal> computeJacobianMatrix();
+
 private:
   SArticulation(SScene *scene);
   SArticulation(SArticulation const &other) = delete;

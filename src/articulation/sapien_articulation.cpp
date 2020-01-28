@@ -193,5 +193,46 @@ void SArticulation::resetCache() {
   mPxArticulation->releaseCache(*mCache);
   mCache = mPxArticulation->createCache();
 }
+std::vector<physx::PxReal>
+SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bool external) {
+  mPxArticulation->commonInit();
+  std::vector<physx::PxReal> passiveForce(dof(), 0);
+
+  if (coriolisAndCentrifugal) {
+    mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
+    mPxArticulation->computeCoriolisAndCentrifugalForce(*mCache);
+    std::vector<physx::PxReal> coriolisForce(mCache->jointForce, mCache->jointForce + dof());
+    for (size_t j = 0; j < dof(); ++j) {
+      passiveForce[j] += coriolisForce[j];
+    }
+  }
+
+  if (gravity) {
+    mPxArticulation->computeGeneralizedGravityForce(*mCache);
+    std::vector<physx::PxReal> gravityForce(mCache->jointForce, mCache->jointForce + dof());
+    for (size_t j = 0; j < dof(); ++j) {
+      passiveForce[j] += gravityForce[j];
+    }
+  }
+
+  if (external) {
+    mPxArticulation->computeGeneralizedExternalForce(*mCache);
+    std::vector<physx::PxReal> externalForce(mCache->jointForce, mCache->jointForce + dof());
+    for (size_t j = 0; j < dof(); ++j) {
+      passiveForce[j] += externalForce[j];
+    }
+  }
+
+  return passiveForce;
+}
+std::vector<PxReal> SArticulation::computeJacobianMatrix() {
+  // TODO: This function is temporary for use without ROS, after ROS2, it will be deleted.
+  PxU32 nRows;
+  PxU32 nCols;
+  mPxArticulation->computeDenseJacobian(*mCache, nRows, nCols);
+
+  std::vector<float> Jacobian(mCache->denseJacobian, mCache->denseJacobian + nRows * nCols);
+  return Jacobian;
+}
 
 } // namespace sapien
