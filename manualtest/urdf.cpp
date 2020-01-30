@@ -23,8 +23,7 @@ int main() {
   // auto builder = createAntBuilder(*s0);
   auto loader = s0->createURDFLoader();
   loader->fixRootLink = 0;
-  // auto a = loader->load("../assets/robot/all_robot.urdf");
-  auto a = loader->load("../assets/179/mobility.urdf");
+  auto a = loader->loadKinematic("../assets/robot/all_robot.urdf");
 
   // auto s1 = builder->build(false);
   // s1->setName("Ant");
@@ -34,7 +33,7 @@ int main() {
   r0->setAmbientLight({0.3, 0.3, 0.3});
   r0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
 
-  controller.mFreeCamera.position = {-5, 0, 0};
+  controller.setCameraPosition(-5, 0, 0);
 
   controller.setCurrentScene(s0.get());
 

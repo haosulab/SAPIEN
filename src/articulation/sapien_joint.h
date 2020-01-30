@@ -9,6 +9,7 @@ using namespace physx;
 
 class SArticulationBase;
 class SArticulation;
+class SKArticulation;
 class SLinkBase;
 class SLink;
 
@@ -32,6 +33,8 @@ public:
 
 protected:
   SJointBase(SLinkBase *parent, SLinkBase *child);
+
+  virtual ~SJointBase() = default;
 };
 
 class SJoint : public SJointBase {

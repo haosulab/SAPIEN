@@ -13,6 +13,7 @@ class SJoint;
 class SScene;
 class ArticulationBuilder;
 class SArticulation;
+class SKArticulation;
 
 class LinkBuilder : public ActorBuilder {
   friend ArticulationBuilder;
@@ -52,6 +53,7 @@ public:
 
 private:
   bool build(SArticulation &articulation) const;
+  bool buildKinematic(SKArticulation &articulation) const;
   bool checkJointProperties() const;
 };
 
@@ -71,11 +73,14 @@ public:
   LinkBuilder *createLinkBuilder(int parentIdx);
 
   SArticulation *build(bool fixBase = false) const;
+  SKArticulation *buildKinematic() const;
 
   std::string summary() const;
 
 private:
   bool checkTreeProperties() const;
+
+  bool prebuild(std::vector<int> &tosort) const;
 };
 
 } // namespace sapien

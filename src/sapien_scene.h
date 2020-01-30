@@ -12,6 +12,7 @@ class SLink;
 class SLinkBase;
 class SActorBase;
 class SArticulation;
+class SKArticulation;
 class Simulation;
 class ActorBuilder;
 class LinkBuilder;
@@ -50,12 +51,15 @@ private:
 
   std::vector<std::unique_ptr<SActorBase>> mActors; // manages all actors
   std::vector<std::unique_ptr<SArticulation>> mArticulations;
+  std::vector<std::unique_ptr<SKArticulation>> mKinematicArticulations;
 
   DefaultEventCallback mSimulationCallback;
 
   void addActor(std::unique_ptr<SActorBase> actor); // called by actor builder
   void
   addArticulation(std::unique_ptr<SArticulation> articulation); // called by articulation builder
+  void addKinematicArticulation(
+      std::unique_ptr<SKArticulation> articulation); // called by articulation builder
 
 public:
   SScene(Simulation *sim, PxScene *scene);
@@ -73,6 +77,7 @@ public:
 
   void removeActor(SActorBase *actor);
   void removeArticulation(SArticulation *articulation);
+  void removeKinematicArticulation(SKArticulation *articulation);
 
 public:
   SActorBase *findActorById(physx_id_t id) const;

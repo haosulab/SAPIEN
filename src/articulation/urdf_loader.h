@@ -11,6 +11,8 @@
 namespace sapien {
 class SScene;
 class SArticulation;
+class SKArticulation;
+class SArticulationBase;
 
 namespace URDF {
 using namespace tinyxml2;
@@ -668,9 +670,14 @@ public:
 
   explicit URDFLoader(SScene *scene);
   SArticulation *load(const std::string &filename, physx::PxMaterial *material = nullptr);
+  SKArticulation *loadKinematic(const std::string &filename,
+                                physx::PxMaterial *material = nullptr);
 
 private:
   std::unique_ptr<SRDF::Robot> loadSRDF(const std::string &filename);
+
+  SArticulationBase *commonLoad(const std::string &filename, physx::PxMaterial *material,
+                                bool isKinematic);
 };
 
 } // namespace URDF

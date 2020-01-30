@@ -3,6 +3,8 @@
 #include "articulation/articulation_builder.h"
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_joint.h"
+#include "articulation/sapien_kinematic_articulation.h"
+#include "articulation/sapien_kinematic_joint.h"
 #include "articulation/sapien_link.h"
 #include "articulation/urdf_loader.h"
 #include "renderer/render_interface.h"
@@ -45,6 +47,14 @@ void SScene::addArticulation(std::unique_ptr<SArticulation> articulation) {
   }
   mPxScene->addArticulation(*articulation->getPxArticulation());
   mArticulations.push_back(std::move(articulation));
+}
+
+void SScene::addKinematicArticulation(std::unique_ptr<SKArticulation> articulation) {
+  for (auto link : articulation->getBaseLinks()) {
+    mLinkId2Link[link->getId()] = link;
+    mPxScene->addActor(*link->getPxActor());
+  }
+  mKinematicArticulations.push_back(std::move(articulation));
 }
 
 void SScene::removeActor(SActorBase *actor) {
@@ -95,6 +105,29 @@ void SScene::removeArticulation(SArticulation *articulation) {
 
   // remove sapien articulation
   std::remove_if(mArticulations.begin(), mArticulations.end(),
+                 [articulation](auto &a) { return a.get() == articulation; });
+}
+
+void SScene::removeKinematicArticulation(SKArticulation *articulation) {
+  for (auto link : articulation->getBaseLinks()) {
+    // remove camera
+    std::remove_if(mCameras.begin(), mCameras.end(),
+                   [link](MountedCamera &mc) { return mc.actor == link; });
+    // remove render bodies
+    for (auto body : link->getRenderBodies()) {
+      mRenderId2VisualName.erase(body->getUniqueId());
+      body->destroy();
+    }
+
+    // remove reference
+    mLinkId2Actor.erase(link->getId());
+
+    // remove actor
+    mPxScene->removeActor(*link->getPxActor());
+    link->getPxActor()->release(); // FIXME: check if this release can be moved to creation time
+  }
+
+  std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
                  [articulation](auto &a) { return a.get() == articulation; });
 }
 
@@ -205,6 +238,9 @@ void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
 
 void SScene::step() {
   clearContacts();
+  for (auto &a : mKinematicArticulations) {
+    a->step();
+  }
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
   }
@@ -228,6 +264,11 @@ void SScene::updateRender() {
   }
 
   // FIXME: update other articulation
+  for (auto &articulation : mKinematicArticulations) {
+    for (auto &link : articulation->getBaseLinks()) {
+      link->updateRender(link->getPxActor()->getGlobalPose());
+    }
+  }
 
   for (auto &cam : mCameras) {
     cam.camera->setPose(cam.actor->getPxActor()->getGlobalPose());

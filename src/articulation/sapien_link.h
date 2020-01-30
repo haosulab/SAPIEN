@@ -2,6 +2,7 @@
 #include "id_generator.h"
 #include "sapien_actor_base.h"
 #include "sapien_articulation.h"
+#include "sapien_kinematic_articulation.h"
 #include <PxPhysicsAPI.h>
 #include <string>
 #include <vector>
@@ -10,8 +11,6 @@ namespace sapien {
 using namespace physx;
 
 class SArticulationBase;
-class SArticulation;
-// class SKinematicArticulation;
 
 class SLinkBase : public SActorDynamicBase {
 protected:
@@ -43,18 +42,22 @@ private:
         std::vector<Renderer::IPxrRigidbody *> collisionBodies);
 };
 
-// class SKinematicLink : public SLinkBase {
-// private:
-//   PxRigidActor *mActor = nullptr;
-//   SKinematicArticulation *mArticulation;
+class SKLink : public SLinkBase {
+  friend class LinkBuilder;
 
-// public:
-//   virtual SArticulationBase *getArticulation() override;
-//   virtual PxRigidActor *getPxActor() override;
+private:
+  PxRigidDynamic *mActor = nullptr;
+  SKArticulation *mArticulation;
 
-// private:
-//   SKinematicLink(PxRigidActor *actor, SKinematicArticulation *articulation, physx_id_t id,
-//                  SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies);
-// };
+public:
+  virtual SKArticulation *getArticulation() override;
+  inline EActorType getType() const override { return EActorType::KINEMATIC_ARTICULATION_LINK; }
+  virtual PxRigidDynamic *getPxActor() override;
+
+private:
+  SKLink(PxRigidDynamic *actor, SKArticulation *articulation, physx_id_t id, SScene *scene,
+         std::vector<Renderer::IPxrRigidbody *> renderBodies,
+         std::vector<Renderer::IPxrRigidbody *> collisionBodies);
+};
 
 } // namespace sapien

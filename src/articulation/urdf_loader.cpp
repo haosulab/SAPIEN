@@ -1,6 +1,7 @@
 #include "urdf_loader.h"
 #include "articulation_builder.h"
 #include "sapien_articulation.h"
+#include "sapien_kinematic_articulation.h"
 #include "sapien_link.h"
 #include "sapien_scene.h"
 #include <eigen3/Eigen/Eigenvalues>
@@ -63,7 +64,8 @@ std::unique_ptr<SRDF::Robot> URDFLoader::loadSRDF(const std::string &filename) {
   }
 }
 
-SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *material) {
+SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMaterial *material,
+                                          bool isKinematic) {
   if (filename.substr(filename.length() - 4) != std::string("urdf")) {
     throw std::invalid_argument("None URDF file passed to URDF loader");
   }
@@ -184,12 +186,6 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
     current->linkBuilder->setName(current->link->name);
     current->linkBuilder->setJointName(current->joint ? current->joint->name : "");
 
-    // create link and set its parent
-    // treeNode2pxLink[current] = builder.addLink(
-    //     current->parent ? treeNode2pxLink[current->parent] : nullptr, tJoint2Parent,
-    //     current->link->name, current->joint ? current->joint->name : "");
-
-    // PxArticulationLink &currentPxLink = *treeNode2pxLink[current];
     auto currentLinkBuilder = current->linkBuilder;
 
     // inertial
@@ -264,8 +260,8 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
         break;
       case Geometry::MESH:
         currentLinkBuilder->addVisualFromFile(getAbsPath(filename, visual->geometry->filename),
-                                         tVisual2Link, visual->geometry->scale * scale,
-                                         visual->name);
+                                              tVisual2Link, visual->geometry->scale * scale,
+                                              visual->name);
         break;
       }
     }
@@ -375,7 +371,7 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
       LinkTreeNode *l1 = linkName2treeNode[dc->link1];
       LinkTreeNode *l2 = linkName2treeNode[dc->link2];
       if (l1->parent == l2 || l2->parent == l1) {
-        continue;  // ignored by default
+        continue; // ignored by default
       }
       groupCount += 1;
       if (groupCount == 32) {
@@ -388,7 +384,12 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
     spdlog::info("SRDF: ignored {} pairs", groupCount);
   }
 
-  SArticulation *articulation = builder->build(fixRootLink);
+  SArticulationBase *articulation;
+  if (isKinematic) {
+    articulation = builder->buildKinematic();
+  } else {
+    articulation = builder->build(fixRootLink);
+  }
 
   for (auto &gazebo : robot->gazebo_array) {
     for (auto &sensor : gazebo->sensor_array) {
@@ -417,6 +418,15 @@ SArticulation *URDFLoader::load(const std::string &filename, PxMaterial *materia
     }
   }
   return articulation;
+}
+
+SArticulation *URDFLoader::load(const std::string &filename, physx::PxMaterial *material) {
+  return static_cast<SArticulation *>(commonLoad(filename, material, false));
+}
+
+SKArticulation *URDFLoader::loadKinematic(const std::string &filename,
+                                          physx::PxMaterial *material) {
+  return static_cast<SKArticulation *>(commonLoad(filename, material, true));
 }
 
 } // namespace URDF

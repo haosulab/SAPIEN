@@ -1,6 +1,8 @@
 #include "articulation_builder.h"
 #include "sapien_articulation.h"
 #include "sapien_joint.h"
+#include "sapien_kinematic_articulation.h"
+#include "sapien_kinematic_joint.h"
 #include "sapien_link.h"
 #include "sapien_scene.h"
 #include "simulation.h"
@@ -201,6 +203,93 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   return true;
 }
 
+bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
+  auto &links = articulation.mLinks;
+  auto &joints = articulation.mJoints;
+
+  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+
+  std::vector<PxShape *> shapes;
+  std::vector<PxReal> densities;
+  buildShapes(shapes, densities);
+
+  std::vector<physx_id_t> renderIds;
+  std::vector<Renderer::IPxrRigidbody *> renderBodies;
+  buildVisuals(renderBodies, renderIds);
+  for (auto body : renderBodies) {
+    body->setSegmentationId(linkId);
+  }
+
+  std::vector<Renderer::IPxrRigidbody *> collisionBodies;
+  buildCollisionVisuals(collisionBodies, shapes);
+  for (auto body : collisionBodies) {
+    body->setSegmentationId(linkId);
+  }
+
+  PxFilterData data;
+  data.word0 = mCollisionGroup.w0;
+  data.word1 = mCollisionGroup.w1;
+  data.word2 = mCollisionGroup.w2;
+  data.word3 = 0;
+
+  PxRigidDynamic *actor =
+      getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
+  actor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+  for (size_t i = 0; i < shapes.size(); ++i) {
+    actor->attachShape(*shapes[i]);
+    shapes[i]->setSimulationFilterData(data);
+    shapes[i]->release(); // this shape is now reference counted by the actor
+  }
+  if (shapes.size() && mUseDensity) {
+    PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
+  } else {
+    actor->setMass(mMass);
+    actor->setCMassLocalPose(mCMassPose);
+    actor->setMassSpaceInertiaTensor(mInertia);
+  }
+
+  links[mIndex] = std::unique_ptr<SKLink>(new SKLink(actor, &articulation, linkId,
+                                                     mArticulationBuilder->getScene(),
+                                                     renderBodies, collisionBodies));
+  links[mIndex]->setName(mName);
+
+  links[mIndex]->mCol1 = mCollisionGroup.w0;
+  links[mIndex]->mCol2 = mCollisionGroup.w1;
+  links[mIndex]->mCol3 = mCollisionGroup.w2;
+  links[mIndex]->mIndex = mIndex;
+
+  actor->userData = links[mIndex].get();
+
+  std::unique_ptr<SKJoint> j;
+  if (mParent >= 0) {
+    switch (mJointRecord.jointType) {
+    case PxArticulationJointType::eFIX:
+      j = std::unique_ptr<SKJoint>(
+          new SKJointFixed(&articulation, links[mParent].get(), links[mIndex].get()));
+      break;
+    case PxArticulationJointType::eREVOLUTE:
+      j = std::unique_ptr<SKJoint>(
+          new SKJointRevolute(&articulation, links[mParent].get(), links[mIndex].get()));
+      break;
+    case PxArticulationJointType::ePRISMATIC:
+      j = std::unique_ptr<SKJoint>(
+          new SKJointPrismatic(&articulation, links[mParent].get(), links[mIndex].get()));
+      break;
+    default:
+      spdlog::error("Unsupported kinematic joint type");
+    }
+    j->setLimits(mJointRecord.limits);
+  } else {
+    j = std::unique_ptr<SKJoint>(new SKJointFixed(&articulation, nullptr, links[mIndex].get()));
+  }
+  j->setParentPose(mJointRecord.parentPose);
+  j->setChildPose(mJointRecord.childPose);
+  j->setName(mJointRecord.name);
+  joints[mIndex] = std::move(j);
+
+  return true;
+}
+
 ArticulationBuilder::ArticulationBuilder(SScene *scene) : mScene(scene) {}
 
 LinkBuilder *ArticulationBuilder::createLinkBuilder(LinkBuilder *parent) {
@@ -222,14 +311,14 @@ std::string ArticulationBuilder::summary() const {
   return ss.str();
 }
 
-SArticulation *ArticulationBuilder::build(bool fixBase) const {
+bool ArticulationBuilder::prebuild(std::vector<int> &tosort) const {
   // find tree root
   int root = -1;
   for (auto &b : mLinkBuilders) {
     if (b->mParent < 0) {
       if (root >= 0) {
         spdlog::error("Failed to build articulation: multiple roots");
-        return nullptr;
+        return false;
       }
       root = b->mIndex;
     }
@@ -246,14 +335,13 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
   // tree traversal
   std::vector<int> visited(mLinkBuilders.size());
   std::vector<int> stack = {root};
-  std::vector<int> sorted;
   while (!stack.empty()) {
     int elem = stack.back();
     stack.pop_back();
-    sorted.push_back(elem);
+    tosort.push_back(elem);
     if (visited[elem]) {
       spdlog::error("Failed to build articulation: kinematic loop");
-      return nullptr;
+      return false;
     }
     visited[elem] = 1;
     for (int child : childMap[elem]) {
@@ -264,8 +352,17 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
   for (auto &builder : mLinkBuilders) {
     if (!builder->checkJointProperties()) {
       spdlog::error("Failed to build articulation: invalid joint");
-      return nullptr;
+      return false;
     }
+  }
+
+  return true;
+}
+
+SArticulation *ArticulationBuilder::build(bool fixBase) const {
+  std::vector<int> sorted;
+  if (!prebuild(sorted)) {
+    return nullptr;
   }
 
   auto sArticulation = std::unique_ptr<SArticulation>(new SArticulation(mScene));
@@ -332,6 +429,35 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
 
   result->mCache = result->mPxArticulation->createCache();
   result->mPxArticulation->zeroCache(*result->mCache);
+
+  return result;
+}
+
+SKArticulation *ArticulationBuilder::buildKinematic() const {
+  std::vector<int> sorted;
+  if (!prebuild(sorted)) {
+    return nullptr;
+  }
+
+  auto articulation = std::unique_ptr<SKArticulation>(new SKArticulation(mScene));
+  articulation->mLinks.resize(mLinkBuilders.size());
+  articulation->mJoints.resize(mLinkBuilders.size());
+
+  for (int i : sorted) {
+    if (!mLinkBuilders[i]->buildKinematic(*articulation)) {
+      // TODO: release actors here
+      return nullptr;
+    }
+  }
+
+  auto result = articulation.get();
+  mScene->addKinematicArticulation(std::move(articulation));
+
+  result->mDof = 0;
+  for (auto &j : result->mJoints) {
+    result->mDof += j->getDof();
+  }
+  result->mSortedIndices = sorted;
 
   return result;
 }

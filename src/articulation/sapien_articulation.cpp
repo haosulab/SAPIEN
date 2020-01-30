@@ -255,3 +255,5 @@ std::vector<PxReal> SArticulation::computeJacobianMatrix() {
 }
 
 } // namespace sapien
+
+#undef CHECK_SIZE
