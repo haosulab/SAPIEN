@@ -74,6 +74,7 @@ public:
 
   PxRigidBody *getPxActor() override = 0;
   virtual void addForceAtPoint(PxVec3 const &force, PxVec3 const &pos);
+  virtual void addForceTorque(PxVec3 const &force, PxVec3 const &torque);
 
 protected:
   using SActorBase::SActorBase;

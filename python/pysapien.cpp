@@ -91,15 +91,13 @@ PYBIND11_MODULE(pysapien, m) {
              return repr;
            })
       .def("transform", [](PxTransform &t, PxTransform &src) { return t.transform(src); })
-      .def(
-          "set_p", [](PxTransform &t, const py::array_t<PxReal> &arr) { t.p = array2vec3(arr); },
-          py::arg("p"))
-      .def(
-          "set_q",
-          [](PxTransform &t, const py::array_t<PxReal> &arr) {
-            t.q = {arr.at(1), arr.at(2), arr.at(3), arr.at(0)}; // NOTE: wxyz to xyzw
-          },
-          py::arg("q"))
+      .def("set_p", [](PxTransform &t, const py::array_t<PxReal> &arr) { t.p = array2vec3(arr); },
+           py::arg("p"))
+      .def("set_q",
+           [](PxTransform &t, const py::array_t<PxReal> &arr) {
+             t.q = {arr.at(1), arr.at(2), arr.at(3), arr.at(0)}; // NOTE: wxyz to xyzw
+           },
+           py::arg("q"))
       .def(py::self * py::self);
 
   //======== Render Interface ========//
@@ -175,18 +173,16 @@ PYBIND11_MODULE(pysapien, m) {
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
       .def(py::init([]() { return new Optifuser::CameraSpec(); }))
       .def_readwrite("name", &Optifuser::CameraSpec::name)
-      .def(
-          "set_position",
-          [](Optifuser::CameraSpec &c, const py::array_t<float> &arr) {
-            c.position = {arr.at(0), arr.at(1), arr.at(2)};
-          },
-          py::arg("position"))
-      .def(
-          "set_rotation",
-          [](Optifuser::CameraSpec &c, const py::array_t<float> &arr) {
-            c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
-          },
-          py::arg("rotation"))
+      .def("set_position",
+           [](Optifuser::CameraSpec &c, const py::array_t<float> &arr) {
+             c.position = {arr.at(0), arr.at(1), arr.at(2)};
+           },
+           py::arg("position"))
+      .def("set_rotation",
+           [](Optifuser::CameraSpec &c, const py::array_t<float> &arr) {
+             c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
+           },
+           py::arg("rotation"))
       .def_property_readonly(
           "position",
           [](Optifuser::CameraSpec &c) { return py::array_t<float>(3, (float *)(&c.position)); })
@@ -199,13 +195,12 @@ PYBIND11_MODULE(pysapien, m) {
       .def_readwrite("far", &Optifuser::CameraSpec::far)
       .def_readwrite("fovy", &Optifuser::CameraSpec::fovy)
       .def_readwrite("aspect", &Optifuser::CameraSpec::aspect)
-      .def(
-          "lookAt",
-          [](Optifuser::CameraSpec &c, const py::array_t<float> &dir,
-             const py::array_t<float> &up) {
-            c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
-          },
-          py::arg("direction"), py::arg("up"))
+      .def("lookAt",
+           [](Optifuser::CameraSpec &c, const py::array_t<float> &dir,
+              const py::array_t<float> &up) {
+             c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
+           },
+           py::arg("direction"), py::arg("up"))
       .def("get_model_matrix",
            [](Optifuser::CameraSpec &c) { return mat42array(c.getModelMat()); })
       .def("get_projection_matrix",
@@ -214,18 +209,16 @@ PYBIND11_MODULE(pysapien, m) {
   py::class_<Optifuser::FPSCameraSpec, Optifuser::CameraSpec>(m, "FPSCameraSpec")
       .def("update", &Optifuser::FPSCameraSpec::update)
       .def("is_sane", &Optifuser::FPSCameraSpec::isSane)
-      .def(
-          "set_forward",
-          [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
-            c.setForward({dir.at(0), dir.at(1), dir.at(2)});
-          },
-          py::arg("forward"))
-      .def(
-          "set_up",
-          [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
-            c.setUp({dir.at(0), dir.at(1), dir.at(2)});
-          },
-          py::arg("up"))
+      .def("set_forward",
+           [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
+             c.setForward({dir.at(0), dir.at(1), dir.at(2)});
+           },
+           py::arg("forward"))
+      .def("set_up",
+           [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
+             c.setUp({dir.at(0), dir.at(1), dir.at(2)});
+           },
+           py::arg("up"))
       .def("rotate_yaw_pitch", &Optifuser::FPSCameraSpec::rotateYawPitch, py::arg("delta_yaw"),
            py::arg("delta_pitch"))
       .def("move_forward_right", &Optifuser::FPSCameraSpec::moveForwardRight,
@@ -241,14 +234,13 @@ PYBIND11_MODULE(pysapien, m) {
            [](Renderer::OptifuserCamera &c) { return mat42array(c.getCameraMatrix()); })
 
 #ifdef _USE_OPTIX
-      .def(
-          "take_raytraced_picture",
-          [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount) {
-            return py::array_t<float>(
-                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                cam.takeRaytracedPicture(samplesPerPixel, reflectionCount).data());
-          },
-          py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4)
+      .def("take_raytraced_picture",
+           [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount) {
+             return py::array_t<float>(
+                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+                 cam.takeRaytracedPicture(samplesPerPixel, reflectionCount).data());
+           },
+           py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4)
 #endif
       ;
 
@@ -259,22 +251,21 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
       .def("create_physical_material", &Simulation::createPhysicalMaterial,
            py::return_value_policy::reference)
-      .def(
-          "create_scene",
-          [](Simulation &sim, py::array_t<PxReal> const &gravity, PxSolverType::Enum solverType,
-             bool enableCCD, bool enablePCM) {
-            PxSceneFlags flags = PxSceneFlags();
-            if (enableCCD) {
-              flags |= PxSceneFlag::eENABLE_CCD;
-            }
-            if (enablePCM) {
-              flags |= PxSceneFlag::eENABLE_PCM;
-            }
-            return sim.createScene(array2vec3(gravity), solverType, flags);
-          },
-          py::arg("gravity") = make_array<PxReal>({0, 0, -9.8}),
-          py::arg("solver_type") = PxSolverType::ePGS, py::arg("enable_ccd") = false,
-          py::arg("enable_pcm") = false);
+      .def("create_scene",
+           [](Simulation &sim, py::array_t<PxReal> const &gravity, PxSolverType::Enum solverType,
+              bool enableCCD, bool enablePCM) {
+             PxSceneFlags flags = PxSceneFlags();
+             if (enableCCD) {
+               flags |= PxSceneFlag::eENABLE_CCD;
+             }
+             if (enablePCM) {
+               flags |= PxSceneFlag::eENABLE_PCM;
+             }
+             return sim.createScene(array2vec3(gravity), solverType, flags);
+           },
+           py::arg("gravity") = make_array<PxReal>({0, 0, -9.8}),
+           py::arg("solver_type") = PxSolverType::ePGS, py::arg("enable_ccd") = false,
+           py::arg("enable_pcm") = false);
 
   py::class_<SScene>(m, "Scene")
       .def_property_readonly("name", &SScene::getName)
@@ -307,30 +298,26 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("material") = nullptr)
       .def("get_contacts", &SScene::getContacts)
 
-      .def(
-          "set_shadow_light",
-          [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
-            s.setShadowLight(array2vec3(direction), array2vec3(color));
-          },
-          py::arg("direction"), py::arg("color"))
-      .def(
-          "set_ambient_light",
-          [](SScene &s, py::array_t<PxReal> const &color) {
-            s.setAmbientLight(array2vec3(color));
-          },
-          py::arg("clor"))
-      .def(
-          "add_point_light",
-          [](SScene &s, py::array_t<PxReal> const &position, py::array_t<PxReal> const &color) {
-            s.addPointLight(array2vec3(position), array2vec3(color));
-          },
-          py::arg("position"), py::arg("color"))
-      .def(
-          "add_directional_light",
-          [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
-            s.addDirectionalLight(array2vec3(direction), array2vec3(color));
-          },
-          py::arg("direction"), py::arg("color"))
+      .def("set_shadow_light",
+           [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
+             s.setShadowLight(array2vec3(direction), array2vec3(color));
+           },
+           py::arg("direction"), py::arg("color"))
+      .def("set_ambient_light",
+           [](SScene &s, py::array_t<PxReal> const &color) {
+             s.setAmbientLight(array2vec3(color));
+           },
+           py::arg("clor"))
+      .def("add_point_light",
+           [](SScene &s, py::array_t<PxReal> const &position, py::array_t<PxReal> const &color) {
+             s.addPointLight(array2vec3(position), array2vec3(color));
+           },
+           py::arg("position"), py::arg("color"))
+      .def("add_directional_light",
+           [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
+             s.addDirectionalLight(array2vec3(direction), array2vec3(color));
+           },
+           py::arg("direction"), py::arg("color"))
       .def("get_renderer_scene", &SScene::getRendererScene);
 
   //======== Actor ========//
@@ -360,13 +347,19 @@ PYBIND11_MODULE(pysapien, m) {
       .def_property_readonly("inertia",
                              [](SActorDynamicBase &a) { return vec32array(a.getInertia()); })
       .def_property_readonly("cmass_local_pose", &SActorDynamicBase::getCMassLocalPose)
-      .def(
-          "add_force_at_point",
-          [](SActorDynamicBase &a, py::array_t<PxReal> const &force,
-             py::array_t<PxReal> const &point) {
-            a.addForceAtPoint(array2vec3(force), array2vec3(point));
-          },
-          py::arg("force"), py::arg("point"));
+      .def("add_force_at_point",
+           [](SActorDynamicBase &a, py::array_t<PxReal> const &force,
+              py::array_t<PxReal> const &point) {
+             a.addForceAtPoint(array2vec3(force), array2vec3(point));
+           },
+           py::arg("force"), py::arg("point"))
+
+      .def("add_force_torque",
+           [](SActorDynamicBase &a, py::array_t<PxReal> const &force,
+              py::array_t<PxReal> const &torque) {
+             a.addForceTorque(array2vec3(force), array2vec3(torque));
+           },
+           py::arg("force"), py::arg("torque"));
 
   py::class_<SActorStatic, SActorBase>(m, "ActorStatic")
       .def("set_pose", &SActorStatic::setPose, py::arg("pose"));
@@ -398,31 +391,28 @@ PYBIND11_MODULE(pysapien, m) {
                                         {sizeof(std::array<PxReal, 2>), sizeof(PxReal)},
                                         reinterpret_cast<PxReal *>(limits.data()));
            })
-      .def(
-          "set_limits",
-          [](SJointBase &j, py::array_t<PxReal> limits) {
-            std::vector<std::array<PxReal, 2>> l;
-            if (limits.ndim() == 2) {
-              if (limits.shape(1) != 2) {
-                throw std::runtime_error("Joint limit should have shape [dof, 2]");
-              }
-              for (uint32_t i = 0; i < limits.size() / 2; ++i) {
-                l.push_back({limits.at(i, 0), limits.at(i, 1)});
-              }
-            }
-            j.setLimits(l);
-          },
-          py::arg("limits"));
+      .def("set_limits",
+           [](SJointBase &j, py::array_t<PxReal> limits) {
+             std::vector<std::array<PxReal, 2>> l;
+             if (limits.ndim() == 2) {
+               if (limits.shape(1) != 2) {
+                 throw std::runtime_error("Joint limit should have shape [dof, 2]");
+               }
+               for (uint32_t i = 0; i < limits.size() / 2; ++i) {
+                 l.push_back({limits.at(i, 0), limits.at(i, 1)});
+               }
+             }
+             j.setLimits(l);
+           },
+           py::arg("limits"));
 
   py::class_<SJoint, SJointBase>(m, "Joint")
       .def("set_friction", &SJoint::setFriction, py::arg("friction"))
       .def("set_drive_property", &SJoint::setDriveProperty, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32)
-      .def(
-          "set_drive_velocity_target", [](SJoint &j, PxReal v) { j.setDriveVelocityTarget(v); },
-          py::arg("velocity"))
-      .def(
-          "set_drive_target", [](SJoint &j, PxReal p) { j.setDriveTarget(p); }, py::arg("target"))
+      .def("set_drive_velocity_target", [](SJoint &j, PxReal v) { j.setDriveVelocityTarget(v); },
+           py::arg("velocity"))
+      .def("set_drive_target", [](SJoint &j, PxReal p) { j.setDriveTarget(p); }, py::arg("target"))
       // TODO wrapper for array-valued targets
       .def("get_global_pose", &SJoint::getGlobalPose);
 
@@ -448,46 +438,42 @@ PYBIND11_MODULE(pysapien, m) {
              auto qpos = a.getQpos();
              return py::array_t<PxReal>(qpos.size(), qpos.data());
            })
-      .def(
-          "set_qpos",
-          [](SArticulationBase &a, const py::array_t<float> &arr) {
-            a.setQpos(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-          },
-          py::arg("qpos"))
+      .def("set_qpos",
+           [](SArticulationBase &a, const py::array_t<float> &arr) {
+             a.setQpos(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           },
+           py::arg("qpos"))
 
       .def("get_qvel",
            [](SArticulationBase &a) {
              auto qvel = a.getQvel();
              return py::array_t<PxReal>(qvel.size(), qvel.data());
            })
-      .def(
-          "set_qvel",
-          [](SArticulationBase &a, const py::array_t<float> &arr) {
-            a.setQvel(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-          },
-          py::arg("qvel"))
+      .def("set_qvel",
+           [](SArticulationBase &a, const py::array_t<float> &arr) {
+             a.setQvel(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           },
+           py::arg("qvel"))
       .def("get_qacc",
            [](SArticulationBase &a) {
              auto qacc = a.getQacc();
              return py::array_t<PxReal>(qacc.size(), qacc.data());
            })
-      .def(
-          "set_qacc",
-          [](SArticulationBase &a, const py::array_t<float> &arr) {
-            a.setQacc(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-          },
-          py::arg("qacc"))
+      .def("set_qacc",
+           [](SArticulationBase &a, const py::array_t<float> &arr) {
+             a.setQacc(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           },
+           py::arg("qacc"))
       .def("get_qf",
            [](SArticulationBase &a) {
              auto qf = a.getQf();
              return py::array_t<PxReal>(qf.size(), qf.data());
            })
-      .def(
-          "set_qf",
-          [](SArticulationBase &a, const py::array_t<float> &arr) {
-            a.setQf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-          },
-          py::arg("qf"))
+      .def("set_qf",
+           [](SArticulationBase &a, const py::array_t<float> &arr) {
+             a.setQf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           },
+           py::arg("qf"))
 
       .def("get_qlimits",
            [](SArticulationBase &a) {
@@ -496,21 +482,20 @@ PYBIND11_MODULE(pysapien, m) {
                                         {sizeof(std::array<PxReal, 2>), sizeof(PxReal)},
                                         reinterpret_cast<PxReal *>(limits.data()));
            })
-      .def(
-          "set_qlimits",
-          [](SArticulationBase &a, py::array_t<PxReal> limits) {
-            std::vector<std::array<PxReal, 2>> l;
-            if (limits.ndim() == 2) {
-              if (limits.shape(1) != 2) {
-                throw std::runtime_error("Joint limits should have shape [dof, 2]");
-              }
-              for (uint32_t i = 0; i < limits.size() / 2; ++i) {
-                l.push_back({limits.at(i, 0), limits.at(i, 1)});
-              }
-            }
-            a.setQlimits(l);
-          },
-          py::arg("qlimits"))
+      .def("set_qlimits",
+           [](SArticulationBase &a, py::array_t<PxReal> limits) {
+             std::vector<std::array<PxReal, 2>> l;
+             if (limits.ndim() == 2) {
+               if (limits.shape(1) != 2) {
+                 throw std::runtime_error("Joint limits should have shape [dof, 2]");
+               }
+               for (uint32_t i = 0; i < limits.size() / 2; ++i) {
+                 l.push_back({limits.at(i, 0), limits.at(i, 1)});
+               }
+             }
+             a.setQlimits(l);
+           },
+           py::arg("qlimits"))
 
       .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"));
 
@@ -520,32 +505,28 @@ PYBIND11_MODULE(pysapien, m) {
              auto target = a.getDriveTarget();
              return py::array_t<PxReal>(target.size(), target.data());
            })
-      .def(
-          "set_drive_target",
-          [](SArticulationDrivable &a, const py::array_t<float> &arr) {
-            a.setDriveTarget(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-          },
-          py::arg("drive_target"));
+      .def("set_drive_target",
+           [](SArticulationDrivable &a, const py::array_t<float> &arr) {
+             a.setDriveTarget(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           },
+           py::arg("drive_target"));
 
   py::class_<SArticulation, SArticulationDrivable>(m, "Articulation")
       .def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
       .def("get_joints", &SArticulation::getSJoints, py::return_value_policy::reference)
-      .def(
-          "set_root_velocity",
-          [](SArticulation &a, py::array_t<float> v) { a.setRootVelocity(array2vec3(v)); },
-          py::arg("vel"))
-      .def(
-          "set_root_angular_velocity",
-          [](SArticulation &a, py::array_t<float> v) { a.setRootAngularVelocity(array2vec3(v)); },
-          py::arg("vel"))
-      .def(
-          "compute_passive_force",
-          [](SArticulation &a, bool gravity, bool coriolisAndCentrifugal, bool external) {
-            auto force = a.computePassiveForce(gravity, coriolisAndCentrifugal, external);
-            return py::array_t<PxReal>(force.size(), force.data());
-          },
-          py::arg("gravity") = true, py::arg("coriolisAndCentrifugal") = true,
-          py::arg("external") = true)
+      .def("set_root_velocity",
+           [](SArticulation &a, py::array_t<float> v) { a.setRootVelocity(array2vec3(v)); },
+           py::arg("vel"))
+      .def("set_root_angular_velocity",
+           [](SArticulation &a, py::array_t<float> v) { a.setRootAngularVelocity(array2vec3(v)); },
+           py::arg("vel"))
+      .def("compute_passive_force",
+           [](SArticulation &a, bool gravity, bool coriolisAndCentrifugal, bool external) {
+             auto force = a.computePassiveForce(gravity, coriolisAndCentrifugal, external);
+             return py::array_t<PxReal>(force.size(), force.data());
+           },
+           py::arg("gravity") = true, py::arg("coriolisAndCentrifugal") = true,
+           py::arg("external") = true)
       .def("compute_jacobian", [](SArticulation &a) {
         auto jacobian = a.computeJacobianMatrix();
         int nRows = a.getSLinks().size() * 6;
@@ -558,12 +539,10 @@ PYBIND11_MODULE(pysapien, m) {
   //======== End Articulation ========//
 
   py::class_<SContact>(m, "Contact")
-      .def_property_readonly(
-          "actor1", [](SContact &contact) { return contact.actors[0]; },
-          py::return_value_policy::reference)
-      .def_property_readonly(
-          "actor2", [](SContact &contact) { return contact.actors[1]; },
-          py::return_value_policy::reference)
+      .def_property_readonly("actor1", [](SContact &contact) { return contact.actors[0]; },
+                             py::return_value_policy::reference)
+      .def_property_readonly("actor2", [](SContact &contact) { return contact.actors[1]; },
+                             py::return_value_policy::reference)
       .def_property_readonly(
           "point",
           [](SContact &contact) {
@@ -584,33 +563,30 @@ PYBIND11_MODULE(pysapien, m) {
   //======== Builders ========
 
   py::class_<ActorBuilder>(m, "ActorBuilder")
-      .def(
-          "add_convex_shape_from_file",
-          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density) {
-            a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density);
-          },
-          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-          py::arg("density") = 1000)
-      .def(
-          "add_multiple_convex_shapes_from_file",
-          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density) {
-            a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material,
-                                              density);
-          },
-          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-          py::arg("density") = 1000)
-      .def(
-          "add_box_shape",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
-             PxMaterial *material,
-             PxReal density) { a.addBoxShape(pose, array2vec3(size), material, density); },
-          py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-          py::arg("density") = 1000)
+      .def("add_convex_shape_from_file",
+           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
+              py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density) {
+             a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density);
+           },
+           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+           py::arg("density") = 1000)
+      .def("add_multiple_convex_shapes_from_file",
+           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
+              py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density) {
+             a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material,
+                                               density);
+           },
+           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+           py::arg("density") = 1000)
+      .def("add_box_shape",
+           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
+              PxMaterial *material,
+              PxReal density) { a.addBoxShape(pose, array2vec3(size), material, density); },
+           py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+           py::arg("density") = 1000)
       .def("add_capsule_shape", &ActorBuilder::addCapsuleShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000)
@@ -618,40 +594,36 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("material") = nullptr, py::arg("density") = 1000)
 
-      .def(
-          "add_box_visual",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
-             py::array_t<PxReal> color, std::string const &name) {
-            a.addBoxVisual(pose, array2vec3(size), array2vec3(color), name);
-          },
-          py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("size") = make_array<PxReal>({1, 1, 1}),
-          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
-      .def(
-          "add_capsule_visual",
-          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
-             py::array_t<PxReal> color, std::string const &name) {
-            a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
-          },
-          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("half_length") = 1, py::arg("color") = make_array<PxReal>({1, 1, 1}),
-          py::arg("name") = "")
-      .def(
-          "add_sphere_visual",
-          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
-             std::string const &name) {
-            a.addSphereVisual(pose, radius, array2vec3(color), name);
-          },
-          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
-      .def(
-          "add_visual_from_file",
-          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> scale, std::string const &name) {
-            a.addVisualFromFile(filename, pose, array2vec3(scale), name);
-          },
-          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+      .def("add_box_visual",
+           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
+              py::array_t<PxReal> color, std::string const &name) {
+             a.addBoxVisual(pose, array2vec3(size), array2vec3(color), name);
+           },
+           py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("size") = make_array<PxReal>({1, 1, 1}),
+           py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+      .def("add_capsule_visual",
+           [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
+              py::array_t<PxReal> color, std::string const &name) {
+             a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
+           },
+           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+           py::arg("half_length") = 1, py::arg("color") = make_array<PxReal>({1, 1, 1}),
+           py::arg("name") = "")
+      .def("add_sphere_visual",
+           [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
+              std::string const &name) {
+             a.addSphereVisual(pose, radius, array2vec3(color), name);
+           },
+           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+           py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+      .def("add_visual_from_file",
+           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
+              py::array_t<PxReal> scale, std::string const &name) {
+             a.addVisualFromFile(filename, pose, array2vec3(scale), name);
+           },
+           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
 
       .def("set_collision_group", &ActorBuilder::setCollisionGroup)
       .def("add_collision_group", &ActorBuilder::addCollisionGroup)
@@ -671,36 +643,34 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_parent", &LinkBuilder::setParent)
       .def("set_name", &LinkBuilder::setName)
       .def("set_joint_name", &LinkBuilder::setJointName)
-      .def(
-          "set_joint_properties",
-          [](LinkBuilder &b, PxArticulationJointType::Enum jointType,
-             py::array_t<PxReal> const &limits, PxTransform const &parentPose,
-             PxTransform const &childPose, PxReal friction, PxReal damping) {
-            std::vector<std::array<PxReal, 2>> l;
-            if (limits.ndim() == 2) {
-              if (limits.shape(1) != 2) {
-                throw std::runtime_error("Joint limit should have shape [dof, 2]");
-              }
-              for (uint32_t i = 0; i < limits.size() / 2; ++i) {
-                l.push_back({limits.at(i, 0), limits.at(i, 1)});
-              }
-            } else if (limits.ndim() != 1) {
-              throw std::runtime_error("Joint limit must be 2D array");
-            }
-            b.setJointProperties(jointType, l, parentPose, childPose, friction, damping);
-          },
-          py::arg("joint_type"), py::arg("limits"),
-          py::arg("parent_pose") = PxTransform(PxIdentity),
-          py::arg("child_pose") = PxTransform(PxIdentity), py::arg("friction") = 0,
-          py::arg("damping") = 0);
+      .def("set_joint_properties",
+           [](LinkBuilder &b, PxArticulationJointType::Enum jointType,
+              py::array_t<PxReal> const &limits, PxTransform const &parentPose,
+              PxTransform const &childPose, PxReal friction, PxReal damping) {
+             std::vector<std::array<PxReal, 2>> l;
+             if (limits.ndim() == 2) {
+               if (limits.shape(1) != 2) {
+                 throw std::runtime_error("Joint limit should have shape [dof, 2]");
+               }
+               for (uint32_t i = 0; i < limits.size() / 2; ++i) {
+                 l.push_back({limits.at(i, 0), limits.at(i, 1)});
+               }
+             } else if (limits.ndim() != 1) {
+               throw std::runtime_error("Joint limit must be 2D array");
+             }
+             b.setJointProperties(jointType, l, parentPose, childPose, friction, damping);
+           },
+           py::arg("joint_type"), py::arg("limits"),
+           py::arg("parent_pose") = PxTransform(PxIdentity),
+           py::arg("child_pose") = PxTransform(PxIdentity), py::arg("friction") = 0,
+           py::arg("damping") = 0);
 
   py::class_<ArticulationBuilder>(m, "ArticulationBuilder")
       .def("set_scene", &ArticulationBuilder::setScene, py::arg("scene"))
       .def("get_scene", &ArticulationBuilder::getScene)
-      .def(
-          "create_link_builder",
-          [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
-          py::arg("parent") = nullptr, py::return_value_policy::reference)
+      .def("create_link_builder",
+           [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
+           py::arg("parent") = nullptr, py::return_value_policy::reference)
       .def("build", &ArticulationBuilder::build, py::return_value_policy::reference,
            py::arg("fix_base") = false);
 

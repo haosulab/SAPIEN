@@ -50,6 +50,11 @@ void SActorDynamicBase::addForceAtPoint(const PxVec3 &force, const PxVec3 &pos) 
   PxRigidBodyExt::addForceAtPos(*getPxActor(), force, pos);
 }
 
+void SActorDynamicBase::addForceTorque(const PxVec3 &force, const PxVec3 &torque) {
+  getPxActor()->addForce(force);
+  getPxActor()->addTorque(torque);
+}
+
 PxReal SActorDynamicBase::getMass() { return getPxActor()->getMass(); }
 PxVec3 SActorDynamicBase::getInertia() { return getPxActor()->getMassSpaceInertiaTensor(); }
 PxTransform SActorDynamicBase::getCMassLocalPose() { return getPxActor()->getCMassLocalPose(); }
