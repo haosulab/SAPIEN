@@ -31,10 +31,9 @@ public:
   virtual std::vector<std::array<physx::PxReal, 2>> getLimits() = 0;
   virtual void setLimits(std::vector<std::array<physx::PxReal, 2>> const &limits) = 0;
 
+  virtual ~SJointBase() = default;
 protected:
   SJointBase(SLinkBase *parent, SLinkBase *child);
-
-  virtual ~SJointBase() = default;
 };
 
 class SJoint : public SJointBase {
