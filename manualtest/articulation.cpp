@@ -1,6 +1,8 @@
 #include "articulation/articulation_builder.cpp"
 #include "renderer/optifuser_controller.h"
+#include "sapien_drive.h"
 #include "renderer/optifuser_renderer.h"
+#include "sapien_actor.h"
 #include "sapien_scene.h"
 #include "simulation.h"
 #include <iostream>
@@ -127,11 +129,21 @@ int main() {
   // controller.focus(ant0->getRootLink());
 
   int count = 0;
+  SDrive *drive;
   while (!controller.shouldQuit()) {
     if (++count == 120) {
-      ant0->getSLinks()[0]->getPxActor()->setLinearVelocity({0, 0, 10});
-      ant0->getSLinks()[0]->getPxActor()->setAngularVelocity({0, 0, 10});
+      drive = s0->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, ant0->getRootLink(),
+                                   {{0, 0, 0}, PxIdentity});
+      drive->setProperties(2000, 4000, PX_MAX_F32, true);
+      drive->setTarget({{0, 0, 10}, PxIdentity});
     }
+    if (count == 240) {
+      drive->destroy();
+    }
+    if (count == 360) {
+      s0->removeArticulation(ant0);
+    }
+
     s0->updateRender();
     s0->step();
     controller.render();

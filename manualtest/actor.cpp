@@ -40,7 +40,12 @@ int main() {
 
   controller.setCurrentScene(s0.get());
 
+  int count = 0;
   while (!controller.shouldQuit()) {
+    if (count++ == 120) {
+      actor->destroy();
+    }
+
     s0->updateRender();
     s0->step();
 

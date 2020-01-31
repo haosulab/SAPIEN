@@ -70,12 +70,18 @@ void OptifuserRigidbody::update(const physx::PxTransform &transform) {
 }
 
 void OptifuserRigidbody::destroy() { mParentScene->removeRigidbody(this); }
+void OptifuserRigidbody::destroyVisualObjects() {
+  for (auto obj : mObjects) {
+    mParentScene->getScene()->removeObject(obj);
+  }
+}
 
 void OptifuserRigidbody::setVisible(bool visible) {
   for (auto obj : mObjects) {
     obj->visible = visible;
   }
 }
+
 void OptifuserRigidbody::setRenderMode(uint32_t mode) {
   // TODO: implement mode
 }
@@ -175,6 +181,7 @@ void OptifuserScene::removeRigidbody(IPxrRigidbody *body) {
   auto it = mBodies.begin();
   for (; it != mBodies.end(); ++it) {
     if (it->get() == body) {
+      it->get()->destroyVisualObjects();
       mBodies.erase(it);
       return;
     }
@@ -201,8 +208,9 @@ ICamera *OptifuserScene::addCamera(std::string const &name, uint32_t width, uint
 }
 
 void OptifuserScene::removeCamera(ICamera *camera) {
-  std::remove_if(mCameras.begin(), mCameras.end(),
-                 [camera](auto &c) { return camera == c.get(); });
+  mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
+                                [camera](auto &c) { return camera == c.get(); }),
+                 mCameras.end());
 }
 
 std::vector<ICamera *> OptifuserScene::getCameras() {
@@ -265,7 +273,9 @@ IPxrScene *OptifuserRenderer::createScene(std::string const &name) {
 }
 
 void OptifuserRenderer::removeScene(IPxrScene *scene) {
-  std::remove_if(mScenes.begin(), mScenes.end(), [scene](auto &s) { return scene == s.get(); });
+  mScenes.erase(std::remove_if(mScenes.begin(), mScenes.end(),
+                               [scene](auto &s) { return scene == s.get(); }),
+                mScenes.end());
 }
 
 std::string OptifuserRenderer::gDefaultGlslDir = "glsl_shader/130";

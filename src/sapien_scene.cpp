@@ -10,6 +10,7 @@
 #include "renderer/render_interface.h"
 #include "sapien_actor.h"
 #include "sapien_contact.h"
+#include "sapien_drive.h"
 #include "simulation.h"
 #include <algorithm>
 #include <spdlog/spdlog.h>
@@ -61,8 +62,9 @@ void SScene::removeActor(SActorBase *actor) {
   mLinkId2Actor.erase(actor->getId());
 
   // remove camera
-  std::remove_if(mCameras.begin(), mCameras.end(),
-                 [actor](MountedCamera &mc) { return mc.actor == actor; });
+  mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
+                                [actor](MountedCamera &mc) { return mc.actor == actor; }),
+                 mCameras.end());
 
   // remove render bodies
   for (auto body : actor->getRenderBodies()) {
@@ -80,14 +82,17 @@ void SScene::removeActor(SActorBase *actor) {
   actor->getPxActor()->release(); // FIXME: check if this release can be moved to creation time
 
   // remove sapien actor
-  std::remove_if(mActors.begin(), mActors.end(), [actor](auto &a) { return a.get() == actor; });
+  mActors.erase(std::remove_if(mActors.begin(), mActors.end(),
+                               [actor](auto &a) { return a.get() == actor; }),
+                mActors.end());
 }
 
 void SScene::removeArticulation(SArticulation *articulation) {
   for (auto link : articulation->getBaseLinks()) {
     // remove camera
-    std::remove_if(mCameras.begin(), mCameras.end(),
-                   [link](MountedCamera &mc) { return mc.actor == link; });
+    mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
+                                  [link](MountedCamera &mc) { return mc.actor == link; }),
+                   mCameras.end());
 
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
@@ -104,15 +109,17 @@ void SScene::removeArticulation(SArticulation *articulation) {
   articulation->getPxArticulation()->release();
 
   // remove sapien articulation
-  std::remove_if(mArticulations.begin(), mArticulations.end(),
-                 [articulation](auto &a) { return a.get() == articulation; });
+  mArticulations.erase(std::remove_if(mArticulations.begin(), mArticulations.end(),
+                                      [articulation](auto &a) { return a.get() == articulation; }),
+                       mArticulations.end());
 }
 
 void SScene::removeKinematicArticulation(SKArticulation *articulation) {
   for (auto link : articulation->getBaseLinks()) {
     // remove camera
-    std::remove_if(mCameras.begin(), mCameras.end(),
-                   [link](MountedCamera &mc) { return mc.actor == link; });
+    mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
+                                  [link](MountedCamera &mc) { return mc.actor == link; }),
+                   mCameras.end());
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
       mRenderId2VisualName.erase(body->getUniqueId());
@@ -127,8 +134,17 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
     link->getPxActor()->release(); // FIXME: check if this release can be moved to creation time
   }
 
-  std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
-                 [articulation](auto &a) { return a.get() == articulation; });
+  mKinematicArticulations.erase(
+      std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
+                     [articulation](auto &a) { return a.get() == articulation; }),
+      mKinematicArticulations.end());
+}
+
+void SScene::removeDrive(SDrive *drive) {
+  drive->mJoint->release();
+  mDrives.erase(std::remove_if(mDrives.begin(), mDrives.end(),
+                               [drive](auto &d) { return d.get() == drive; }),
+                mDrives.end());
 }
 
 SActorBase *SScene::findActorById(physx_id_t id) const {
@@ -190,8 +206,9 @@ Renderer::ICamera *SScene::addMountedCamera(std::string const &name, SActorBase 
 }
 
 void SScene::removeMountedCamera(Renderer::ICamera *cam) {
-  std::remove_if(mCameras.begin(), mCameras.end(),
-                 [cam](MountedCamera &mc) { return mc.camera == cam; });
+  mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
+                                [cam](MountedCamera &mc) { return mc.camera == cam; }),
+                 mCameras.end());
 }
 
 Renderer::ICamera *SScene::findMountedCamera(std::string const &name, SActorBase const *actor) {
@@ -245,7 +262,6 @@ void SScene::step() {
   while (!mPxScene->fetchResults(true)) {
   }
 
-  // FIXME: update articulation cache
   // FIXME: process callbacks
 }
 
@@ -263,7 +279,6 @@ void SScene::updateRender() {
     }
   }
 
-  // FIXME: update other articulation
   for (auto &articulation : mKinematicArticulations) {
     for (auto &link : articulation->getBaseLinks()) {
       link->updateRender(link->getPxActor()->getGlobalPose());
@@ -282,5 +297,11 @@ void SScene::addGround(PxReal altitude, bool render, PxMaterial *material) {
 void SScene::addContact(SContact const &contact) { mContacts.push_back(contact); }
 void SScene::clearContacts() { mContacts.clear(); }
 std::vector<SContact> const &SScene::getContacts() const { return mContacts; }
+
+SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+                            PxTransform const &pose2) {
+  mDrives.push_back(std::unique_ptr<SDrive>(new SDrive(this, actor1, pose1, actor2, pose2)));
+  return mDrives.back().get();
+}
 
 }; // namespace sapien

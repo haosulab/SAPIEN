@@ -17,6 +17,7 @@ class Simulation;
 class ActorBuilder;
 class LinkBuilder;
 class ArticulationBuilder;
+class SDrive;
 struct SContact;
 
 namespace Renderer {
@@ -61,12 +62,16 @@ private:
   void addKinematicArticulation(
       std::unique_ptr<SKArticulation> articulation); // called by articulation builder
 
+  std::vector<std::unique_ptr<SDrive>> mDrives;
+
 public:
   SScene(Simulation *sim, PxScene *scene);
   SScene(SScene const &other) = delete;
   SScene(SScene &&other) = delete;
   ~SScene();
   SScene &operator=(SScene const &other) = delete;
+
+  inline Simulation *getEngine() const { return mSimulation; }
 
   inline Renderer::IPxrScene *getRendererScene() { return mRendererScene; }
   inline PxScene *getPxScene() { return mPxScene; }
@@ -78,6 +83,10 @@ public:
   void removeActor(SActorBase *actor);
   void removeArticulation(SArticulation *articulation);
   void removeKinematicArticulation(SKArticulation *articulation);
+  void removeDrive(SDrive *drive);
+
+  SDrive *createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+                      PxTransform const &pose2);
 
 public:
   SActorBase *findActorById(physx_id_t id) const;

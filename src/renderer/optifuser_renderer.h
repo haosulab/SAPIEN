@@ -37,6 +37,8 @@ public:
   void setRenderMode(uint32_t mode) override;
 
   void destroy() override;
+
+  void destroyVisualObjects();
 };
 
 class OptifuserScene : public IPxrScene {
