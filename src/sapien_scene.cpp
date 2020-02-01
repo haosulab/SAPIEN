@@ -67,9 +67,7 @@ void SScene::removeActor(SActorBase *actor) {
   }
 
   // remove camera
-  mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
-                                [actor](MountedCamera &mc) { return mc.actor == actor; }),
-                 mCameras.end());
+  removeMountedCameraByMount(actor);
 
   // remove render bodies
   for (auto body : actor->getRenderBodies()) {
@@ -101,9 +99,7 @@ void SScene::removeArticulation(SArticulation *articulation) {
     }
 
     // remove camera
-    mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
-                                  [link](MountedCamera &mc) { return mc.actor == link; }),
-                   mCameras.end());
+    removeMountedCameraByMount(link);
 
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
@@ -134,9 +130,8 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
     }
 
     // remove camera
-    mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
-                                  [link](MountedCamera &mc) { return mc.actor == link; }),
-                   mCameras.end());
+    removeMountedCameraByMount(link);
+
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
       mRenderId2VisualName.erase(body->getUniqueId());
@@ -209,6 +204,7 @@ std::vector<Renderer::ICamera *> SScene::getMountedCameras() {
   }
   return cameras;
 }
+
 std::vector<SActorBase *> SScene::getMountedActors() {
   std::vector<SActorBase *> actors;
   actors.reserve(mCameras.size());
@@ -232,6 +228,7 @@ Renderer::ICamera *SScene::addMountedCamera(std::string const &name, SActorBase 
 }
 
 void SScene::removeMountedCamera(Renderer::ICamera *cam) {
+  mRendererScene->removeCamera(cam);
   mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
                                 [cam](MountedCamera &mc) { return mc.camera == cam; }),
                  mCameras.end());
@@ -327,6 +324,17 @@ SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActor
                             PxTransform const &pose2) {
   mDrives.push_back(std::unique_ptr<SDrive>(new SDrive(this, actor1, pose1, actor2, pose2)));
   return mDrives.back().get();
+}
+
+void SScene::removeMountedCameraByMount(SActorBase *actor) {
+  for (auto & cam : mCameras) {
+    if (cam.actor == actor) {
+      mRendererScene->removeCamera(cam.camera);
+    }
+  }
+  mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
+                                [actor](MountedCamera &mc) { return mc.actor == actor; }),
+                 mCameras.end());
 }
 
 }; // namespace sapien

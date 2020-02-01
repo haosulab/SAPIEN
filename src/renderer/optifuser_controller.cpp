@@ -36,7 +36,6 @@ static int pickedRenderId = 0;
 OptifuserController::OptifuserController(OptifuserRenderer *renderer)
     : mRenderer(renderer), mFreeCameraController(mCamera), mArcCameraController(mCamera) {
   mCamera.position = {0, 0, 1};
-  mCamera.fovy = 45.f;
   mCamera.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
 }
 void OptifuserController::showWindow() { mRenderer->mContext->showWindow(); }
@@ -446,5 +445,6 @@ void OptifuserController::render() {
   }
   mRenderer->mContext->swapBuffers();
 }
+
 } // namespace Renderer
 } // namespace sapien

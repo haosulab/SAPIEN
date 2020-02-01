@@ -37,8 +37,12 @@ int main() {
 
   controller.setCurrentScene(s0.get());
 
+  int count = 0;
   while (!controller.shouldQuit()) {
     for (int i = 0; i < 4; ++i) {
+      if (count++ == 120) {
+        s0->removeKinematicArticulation(a);
+      }
       s0->step();
     }
     s0->updateRender();

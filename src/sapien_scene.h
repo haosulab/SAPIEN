@@ -128,6 +128,8 @@ public:
 private:
   std::vector<SContact> mContacts;
 
+  void removeMountedCameraByMount(SActorBase *actor);
+
 public:
   void addContact(SContact const &contact);
   void clearContacts();
