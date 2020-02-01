@@ -61,6 +61,11 @@ void SScene::addKinematicArticulation(std::unique_ptr<SKArticulation> articulati
 void SScene::removeActor(SActorBase *actor) {
   mLinkId2Actor.erase(actor->getId());
 
+  // remove drives
+  for (auto drive : actor->getDrives()) {
+    drive->destroy();
+  }
+
   // remove camera
   mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
                                 [actor](MountedCamera &mc) { return mc.actor == actor; }),
@@ -89,6 +94,12 @@ void SScene::removeActor(SActorBase *actor) {
 
 void SScene::removeArticulation(SArticulation *articulation) {
   for (auto link : articulation->getBaseLinks()) {
+
+    // remove drives
+    for (auto drive : link->getDrives()) {
+      drive->destroy();
+    }
+
     // remove camera
     mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
                                   [link](MountedCamera &mc) { return mc.actor == link; }),
@@ -116,6 +127,12 @@ void SScene::removeArticulation(SArticulation *articulation) {
 
 void SScene::removeKinematicArticulation(SKArticulation *articulation) {
   for (auto link : articulation->getBaseLinks()) {
+
+    // remove drives
+    for (auto drive : link->getDrives()) {
+      drive->destroy();
+    }
+
     // remove camera
     mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
                                   [link](MountedCamera &mc) { return mc.actor == link; }),
@@ -141,6 +158,15 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
 }
 
 void SScene::removeDrive(SDrive *drive) {
+  if (drive->mScene != this) {
+    spdlog::error("failed to remove drive: drive is not in this scene.");
+  }
+  if (drive->mActor1) {
+    drive->mActor1->removeDrive(drive);
+  }
+  if (drive->mActor2) {
+    drive->mActor2->removeDrive(drive);
+  }
   drive->mJoint->release();
   mDrives.erase(std::remove_if(mDrives.begin(), mDrives.end(),
                                [drive](auto &d) { return d.get() == drive; }),
@@ -261,7 +287,6 @@ void SScene::step() {
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
   }
-
   // FIXME: process callbacks
 }
 

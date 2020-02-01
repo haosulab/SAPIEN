@@ -72,6 +72,12 @@ void OptifuserController::setCameraRotation(float yaw, float pitch) {
   mFreeCameraController.update();
 }
 
+physx::PxTransform OptifuserController::getCameraPose() const {
+  auto p = mCamera.position;
+  auto q = mCamera.getRotation();
+  return {{p.x, p.y, p.z}, {q.x, q.y, q.z, q.w}};
+}
+
 bool OptifuserController::shouldQuit() { return mShouldQuit; }
 
 void OptifuserController::render() {

@@ -167,6 +167,7 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("y"), py::arg("z"))
       .def("set_camera_rotation", &Renderer::OptifuserController::setCameraRotation,
            py::arg("yaw"), py::arg("pitch"))
+      .def("get_camera_pose", &Renderer::OptifuserController::getCameraPose)
       .def("focus", &Renderer::OptifuserController::focus, py::arg("actor"))
       .def_property_readonly("should_quit", &Renderer::OptifuserController::shouldQuit);
 

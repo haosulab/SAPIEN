@@ -34,6 +34,11 @@ void SActorBase::updateRender(PxTransform const &pose) {
   }
 }
 
+void SActorBase::addDrive(SDrive *drive) { mDrives.push_back(drive); }
+void SActorBase::removeDrive(SDrive *drive) {
+  mDrives.erase(std::remove(mDrives.begin(), mDrives.end(), drive), mDrives.end());
+}
+
 SActorBase::SActorBase(physx_id_t id, SScene *scene,
                        std::vector<Renderer::IPxrRigidbody *> renderBodies,
                        std::vector<Renderer::IPxrRigidbody *> collisionBodies)

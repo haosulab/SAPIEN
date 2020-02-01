@@ -63,6 +63,7 @@ public:
   void focus(SActorBase *actor);
   void setCameraPosition(float x, float y, float z);
   void setCameraRotation(float yaw, float pitch);
+  physx::PxTransform getCameraPose() const;
 
   void render();
 };

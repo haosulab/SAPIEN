@@ -11,6 +11,7 @@ namespace Renderer {
 class IPxrRigidbody;
 };
 
+class SDrive;
 class SScene;
 
 enum class EActorType {
@@ -29,6 +30,8 @@ protected:
   std::vector<Renderer::IPxrRigidbody *> mRenderBodies;
   std::vector<Renderer::IPxrRigidbody *> mCollisionBodies;
 
+  std::vector<SDrive *> mDrives;
+
   uint32_t mCol1 = 0;
   uint32_t mCol2 = 0;
   uint32_t mCol3 = 0;
@@ -38,6 +41,15 @@ protected:
 public:
   void setRenderMode(uint32_t mode);
   uint32_t getRenderMode();
+
+  inline std::vector<SDrive *> getDrives() const { return mDrives; }
+
+  // should not be called by users
+  void addDrive(SDrive *drive);
+
+  // should not be called by users
+  void removeDrive(SDrive *drive);
+
 
   inline std::string getName() { return mName; };
   inline void setName(const std::string &name) { mName = name; }

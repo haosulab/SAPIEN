@@ -6,7 +6,8 @@
 namespace sapien {
 
 SDrive::SDrive(SScene *scene, SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
-               PxTransform const &pose2) : mScene(scene) {
+               PxTransform const &pose2)
+    : mScene(scene), mActor1(actor1), mActor2(actor2) {
   PxRigidActor *pxa1 = actor1 ? actor1->getPxActor() : nullptr;
   PxRigidActor *pxa2 = actor2 ? actor2->getPxActor() : nullptr;
 
@@ -34,8 +35,6 @@ void SDrive::setTargetVelocity(PxVec3 const &velocity, PxVec3 const &angularVelo
   mJoint->setDriveVelocity(velocity, angularVelocity);
 }
 
-void SDrive::destroy() {
-  mScene->removeDrive(this);
-}
+void SDrive::destroy() { mScene->removeDrive(this); }
 
 } // namespace sapien

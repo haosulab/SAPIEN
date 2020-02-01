@@ -12,13 +12,16 @@ class SDrive {
 private:
   SScene *mScene;
   PxD6Joint *mJoint;
-  SActorBase *actor1;
-  SActorBase *actor2;
+  SActorBase *mActor1;
+  SActorBase *mActor2;
 
   SDrive(SScene *scene, SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
          PxTransform const &pose2);
 
 public:
+  inline SActorBase *getActor1() const { return mActor1; };
+  inline SActorBase *getActor2() const { return mActor2; };
+
   void setProperties(PxReal stiffness, PxReal damping, PxReal forceLimit, bool isAcceleration);
 
   void setTarget(PxTransform const &pose);
