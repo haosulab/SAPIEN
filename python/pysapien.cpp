@@ -157,6 +157,10 @@ PYBIND11_MODULE(pysapien, m) {
       .def(py::init<std::string const &, std::string const &>(), py::arg("glsl_dir") = "",
            py::arg("glsl_version") = "");
 
+  py::class_<Optifuser::Input>(m, "Input")
+      .def("get_key_state", &Optifuser::Input::getKeyState)
+      .def("get_key_down", &Optifuser::Input::getKeyDown);
+
   py::class_<Renderer::OptifuserController>(m, "OptifuserController")
       .def(py::init<Renderer::OptifuserRenderer *>(), py::arg("renderer"))
       .def("show_window", &Renderer::OptifuserController::showWindow)
@@ -169,7 +173,10 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("yaw"), py::arg("pitch"))
       .def("get_camera_pose", &Renderer::OptifuserController::getCameraPose)
       .def("focus", &Renderer::OptifuserController::focus, py::arg("actor"))
-      .def_property_readonly("should_quit", &Renderer::OptifuserController::shouldQuit);
+      .def_property_readonly("should_quit", &Renderer::OptifuserController::shouldQuit)
+      .def_property_readonly("input",
+                             [](Renderer::OptifuserController &) { return Optifuser::getInput(); },
+                             py::return_value_policy::reference);
 
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
       .def(py::init([]() { return new Optifuser::CameraSpec(); }))
