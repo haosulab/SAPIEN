@@ -295,8 +295,6 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMateria
 
     // joint
     if (current->joint) {
-      // auto joint = (PxArticulationJointReducedCoordinate *)currentPxLink.getInboundJoint();
-
       PxReal friction = 0;
       PxReal damping = 0;
       if (current->joint->dynamics) {

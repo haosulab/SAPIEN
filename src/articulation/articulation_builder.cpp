@@ -445,7 +445,18 @@ SKArticulation *ArticulationBuilder::buildKinematic() const {
 
   for (int i : sorted) {
     if (!mLinkBuilders[i]->buildKinematic(*articulation)) {
-      // TODO: release actors here
+      // release resources for links that are already built
+      for (auto &link : articulation->mLinks) {
+        if (link) {
+          for (auto body : link->getRenderBodies()) {
+            body->destroy();
+          }
+          for (auto body : link->getCollisionBodies()) {
+            body->destroy();
+          }
+          link->getPxActor()->release();
+        }
+      }
       return nullptr;
     }
   }
