@@ -367,7 +367,8 @@ PYBIND11_MODULE(pysapien, m) {
               py::array_t<PxReal> const &torque) {
              a.addForceTorque(array2vec3(force), array2vec3(torque));
            },
-           py::arg("force"), py::arg("torque"));
+           py::arg("force"), py::arg("torque"))
+      .def("set_dampnig", &SActorDynamicBase::setDamping, py::arg("linear"), py::arg("angular"));
 
   py::class_<SActorStatic, SActorBase>(m, "ActorStatic")
       .def("set_pose", &SActorStatic::setPose, py::arg("pose"));

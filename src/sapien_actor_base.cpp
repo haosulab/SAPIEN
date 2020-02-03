@@ -60,6 +60,12 @@ void SActorDynamicBase::addForceTorque(const PxVec3 &force, const PxVec3 &torque
   getPxActor()->addTorque(torque);
 }
 
+void SActorDynamicBase::setDamping(PxReal linear, PxReal angular) {
+  auto actor = getPxActor();
+  actor->setLinearDamping(linear);
+  actor->setAngularDamping(angular);
+}
+
 PxReal SActorDynamicBase::getMass() { return getPxActor()->getMass(); }
 PxVec3 SActorDynamicBase::getInertia() { return getPxActor()->getMassSpaceInertiaTensor(); }
 PxTransform SActorDynamicBase::getCMassLocalPose() { return getPxActor()->getCMassLocalPose(); }

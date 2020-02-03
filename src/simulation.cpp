@@ -59,7 +59,7 @@ Simulation::Simulation(uint32_t nthread) : mThreadCount(nthread), mMeshManager(t
     spdlog::critical("Failed to initialize PhysX Extensions");
     throw std::runtime_error("Simulation Creation Failed");
   }
-  mDefaultMaterial = mPhysicsSDK->createMaterial(5, 5, 0.01);
+  mDefaultMaterial = mPhysicsSDK->createMaterial(0.3, 0.3, 0.1);
 }
 
 Simulation::~Simulation() {
