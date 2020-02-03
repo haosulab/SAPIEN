@@ -44,18 +44,26 @@ void OptifuserController::hideWindow() { mRenderer->mContext->hideWindow(); }
 void OptifuserController::setCurrentScene(SScene *scene) { mScene = scene; }
 void OptifuserController::focus(SActorBase *actor) {
   if (actor && !mCurrentFocus) {
+    // none -> focus
     mArcCameraController.yaw = mFreeCameraController.yaw;
     mArcCameraController.pitch = mFreeCameraController.pitch;
     auto p = actor->getPose().p;
     mArcCameraController.center = {p.x, p.y, p.z};
     mArcCameraController.r = glm::length(
         glm::vec3(mCamera.position.x - p.x, mCamera.position.y - p.y, mCamera.position.z - p.z));
+    actor->registerListener(*this);
   } else if (!actor && mCurrentFocus) {
+    // focus -> none
     mFreeCameraController.yaw = mArcCameraController.yaw;
     mFreeCameraController.pitch = mArcCameraController.pitch;
     auto &p = mArcCameraController.camera.position;
     mFreeCameraController.setPosition(p.x, p.y, p.z);
-  }
+    mCurrentFocus->unregisterListener(*this);
+  } else if (actor && actor != mCurrentFocus) {
+    // focus1 -> focus2
+    mCurrentFocus->unregisterListener(*this);
+    actor->registerListener(*this);
+  } // none -> none
   mCurrentFocus = actor;
 }
 
@@ -202,29 +210,40 @@ void OptifuserController::render() {
     if (pickedId) {
       pickedRenderId = mRenderer->mContext->renderer.pickObjectId(x, y);
     }
+
+    SActorBase *actor = mScene->findActorById(mGuiModel.linkId);
+    if (!actor) {
+      actor = mScene->findArticulationLinkById(mGuiModel.linkId);
+    }
+
+    if (actor != mCurrentSelection) {
+      if (mCurrentSelection) {
+        mCurrentSelection->unregisterListener(*this);
+      }
+      if (actor) {
+        actor->registerListener(*this);
+      }
+      mCurrentSelection = actor;
+    }
   }
 
-  if (mGuiModel.linkId) {
-    SActorBase *actor = mScene->findActorById(mGuiModel.linkId);
-    SLinkBase *link = mScene->findArticulationLinkById(mGuiModel.linkId);
-    if (actor) {
-      mGuiModel.linkModel.name = actor->getName();
-      mGuiModel.linkModel.transform = actor->getPxActor()->getGlobalPose();
-      mGuiModel.linkModel.col1 = actor->getCollisionGroup1();
-      mGuiModel.linkModel.col2 = actor->getCollisionGroup2();
-      mGuiModel.linkModel.col3 = actor->getCollisionGroup3();
-      mGuiModel.linkModel.renderCollision = actor->getRenderMode() == 1;
-      mGuiModel.articulationId = 0;
-    } else if (link) {
-      actor = link;
+  if (mCurrentSelection) {
+    SActorBase *actor = mCurrentSelection;
+    SArticulationBase *articulation = nullptr;
+    auto t = actor->getType();
+    if (t == EActorType::ARTICULATION_LINK || t == EActorType::KINEMATIC_ARTICULATION_LINK) {
+      articulation = static_cast<SLinkBase *>(actor)->getArticulation();
+    }
 
-      mGuiModel.linkModel.name = link->getName();
-      mGuiModel.linkModel.transform = link->getPxActor()->getGlobalPose();
-      mGuiModel.linkModel.col1 = link->getCollisionGroup1();
-      mGuiModel.linkModel.col2 = link->getCollisionGroup2();
-      mGuiModel.linkModel.col3 = link->getCollisionGroup3();
-      mGuiModel.linkModel.renderCollision = link->getRenderMode() == 1;
-      auto articulation = link->getArticulation();
+    mGuiModel.linkModel.name = actor->getName();
+    mGuiModel.linkModel.transform = actor->getPxActor()->getGlobalPose();
+    mGuiModel.linkModel.col1 = actor->getCollisionGroup1();
+    mGuiModel.linkModel.col2 = actor->getCollisionGroup2();
+    mGuiModel.linkModel.col3 = actor->getCollisionGroup3();
+    mGuiModel.linkModel.renderCollision = actor->getRenderMode() == 1;
+    mGuiModel.articulationId = 0;
+
+    if (articulation) {
       mGuiModel.articulationId = 1;
       mGuiModel.articulationModel.name = articulation->getName();
 
@@ -240,25 +259,20 @@ void OptifuserController::render() {
           ++n;
         }
       }
-    } else {
-      spdlog::error(
-          "User picked an unregistered object. There is probably some implementation error!");
     }
 
-    if (actor) {
-      switch (actor->getType()) {
-      case EActorType::DYNAMIC:
-      case EActorType::KINEMATIC:
-      case EActorType::ARTICULATION_LINK:
-        if (mGuiModel.linkModel.showCenterOfMass) {
-          mGuiModel.linkModel.cmassPose =
-              link->getPxActor()->getGlobalPose() *
-              static_cast<PxRigidBody *>(link->getPxActor())->getCMassLocalPose();
-        }
-        break;
-      default:
-        break;
+    switch (actor->getType()) {
+    case EActorType::DYNAMIC:
+    case EActorType::KINEMATIC:
+    case EActorType::ARTICULATION_LINK:
+      if (mGuiModel.linkModel.showCenterOfMass) {
+        mGuiModel.linkModel.cmassPose =
+            actor->getPxActor()->getGlobalPose() *
+            static_cast<PxRigidBody *>(actor->getPxActor())->getCMassLocalPose();
       }
+      break;
+    default:
+      break;
     }
 
     if (Optifuser::getInput().getKeyDown(GLFW_KEY_F)) {
@@ -273,6 +287,82 @@ void OptifuserController::render() {
                                                       : mGuiModel.linkModel.transform.q;
     currentScene->getScene()->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
   }
+
+  // if (mGuiModel.linkId) {
+  //   SActorBase *actor = mScene->findActorById(mGuiModel.linkId);
+  //   SLinkBase *link = mScene->findArticulationLinkById(mGuiModel.linkId);
+  //   if (actor) {
+  //     mCurrentSelection = actor;
+  //     actor->registerListener(*this);
+
+  //     mGuiModel.linkModel.name = actor->getName();
+  //     mGuiModel.linkModel.transform = actor->getPxActor()->getGlobalPose();
+  //     mGuiModel.linkModel.col1 = actor->getCollisionGroup1();
+  //     mGuiModel.linkModel.col2 = actor->getCollisionGroup2();
+  //     mGuiModel.linkModel.col3 = actor->getCollisionGroup3();
+  //     mGuiModel.linkModel.renderCollision = actor->getRenderMode() == 1;
+  //     mGuiModel.articulationId = 0;
+  //   } else if (link) {
+  //     mCurrentSelection = link;
+  //     actor = link;
+  //     actor->registerListener(*this);
+
+  //     mGuiModel.linkModel.name = link->getName();
+  //     mGuiModel.linkModel.transform = link->getPxActor()->getGlobalPose();
+  //     mGuiModel.linkModel.col1 = link->getCollisionGroup1();
+  //     mGuiModel.linkModel.col2 = link->getCollisionGroup2();
+  //     mGuiModel.linkModel.col3 = link->getCollisionGroup3();
+  //     mGuiModel.linkModel.renderCollision = link->getRenderMode() == 1;
+  //     auto articulation = link->getArticulation();
+  //     mGuiModel.articulationId = 1;
+  //     mGuiModel.articulationModel.name = articulation->getName();
+
+  //     mGuiModel.articulationModel.jointModel.resize(articulation->dof());
+  //     uint32_t n = 0;
+  //     auto qpos = articulation->getQpos();
+  //     for (auto j : articulation->getBaseJoints()) {
+  //       auto limits = j->getLimits();
+  //       for (uint32_t i = 0; i < j->getDof(); ++i) {
+  //         mGuiModel.articulationModel.jointModel[n].name = j->getName();
+  //         mGuiModel.articulationModel.jointModel[n].limits = limits[i];
+  //         mGuiModel.articulationModel.jointModel[n].value = qpos[n];
+  //         ++n;
+  //       }
+  //     }
+  //   } else {
+  //     spdlog::error(
+  //         "User picked an unregistered object {}. There is probably some implementation error!",
+  //         mGuiModel.linkId);
+  //   }
+
+  //   if (actor) {
+  //     switch (actor->getType()) {
+  //     case EActorType::DYNAMIC:
+  //     case EActorType::KINEMATIC:
+  //     case EActorType::ARTICULATION_LINK:
+  //       if (mGuiModel.linkModel.showCenterOfMass) {
+  //         mGuiModel.linkModel.cmassPose =
+  //             link->getPxActor()->getGlobalPose() *
+  //             static_cast<PxRigidBody *>(link->getPxActor())->getCMassLocalPose();
+  //       }
+  //       break;
+  //     default:
+  //       break;
+  //     }
+  //   }
+
+  //   if (Optifuser::getInput().getKeyDown(GLFW_KEY_F)) {
+  //     focus(actor);
+  //   }
+
+  //   currentScene->getScene()->clearAxes();
+
+  //   auto &pos = mGuiModel.linkModel.showCenterOfMass ? mGuiModel.linkModel.cmassPose.p
+  //                                                    : mGuiModel.linkModel.transform.p;
+  //   auto &quat = mGuiModel.linkModel.showCenterOfMass ? mGuiModel.linkModel.cmassPose.q
+  //                                                     : mGuiModel.linkModel.transform.q;
+  //   currentScene->getScene()->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
+  // }
 
   static const uint32_t imguiWindowSize = 300;
   static int camIndex = -1;
@@ -364,6 +454,11 @@ void OptifuserController::render() {
                                &camIndex, i);
           }
 
+          // handle camera deletion
+          if (camIndex >= static_cast<int>(cameras.size())) {
+            camIndex = -1;
+          }
+
           if (camIndex >= 0) {
             uint32_t width = cameras[camIndex]->getWidth();
             uint32_t height = cameras[camIndex]->getHeight();
@@ -444,6 +539,16 @@ void OptifuserController::render() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   }
   mRenderer->mContext->swapBuffers();
+}
+
+void OptifuserController::onEvent(ActorPreDestroyEvent &e) {
+  if (e.actor == mCurrentFocus) {
+    focus(nullptr);
+  }
+  if (e.actor == mCurrentSelection) {
+    mGuiModel = {};
+    mCurrentSelection = nullptr;
+  }
 }
 
 } // namespace Renderer

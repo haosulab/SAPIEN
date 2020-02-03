@@ -39,10 +39,10 @@ int main() {
 
   int count = 0;
   while (!controller.shouldQuit()) {
+    if (count++ == 240) {
+      s0->removeKinematicArticulation(a);
+    }
     for (int i = 0; i < 4; ++i) {
-      if (count++ == 120) {
-        s0->removeKinematicArticulation(a);
-      }
       s0->step();
     }
     s0->updateRender();

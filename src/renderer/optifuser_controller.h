@@ -1,5 +1,6 @@
 #pragma once
 #include "camera_controller.h"
+#include "event_system/events.h"
 #include "optifuser_renderer.h"
 
 namespace sapien {
@@ -38,11 +39,12 @@ struct GuiModel {
   ArticulationGuiModel articulationModel;
 };
 
-class OptifuserController {
+class OptifuserController : public IEventListener<ActorPreDestroyEvent> {
   OptifuserRenderer *mRenderer = nullptr;
   SScene *mScene = nullptr;
 
   GuiModel mGuiModel = {};
+  SActorBase *mCurrentSelection = nullptr;
 
   bool mShouldQuit = false;
 
@@ -66,6 +68,8 @@ public:
   physx::PxTransform getCameraPose() const;
 
   void render();
+
+  void onEvent(ActorPreDestroyEvent &e) override;
 };
 } // namespace Renderer
 } // namespace sapien

@@ -3,6 +3,7 @@
 #include <PxPhysicsAPI.h>
 #include <string>
 #include <vector>
+#include "event_system/events.h"
 
 namespace sapien {
 using namespace physx;
@@ -22,7 +23,7 @@ enum class EActorType {
   KINEMATIC_ARTICULATION_LINK
 };
 
-class SActorBase {
+class SActorBase : public EventEmitter<ActorPreDestroyEvent> {
 protected:
   std::string mName = "";
   physx_id_t mId = 0;

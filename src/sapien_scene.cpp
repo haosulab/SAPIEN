@@ -59,6 +59,11 @@ void SScene::addKinematicArticulation(std::unique_ptr<SKArticulation> articulati
 }
 
 void SScene::removeActor(SActorBase *actor) {
+  // predestroy event
+  ActorPreDestroyEvent e;
+  e.actor = actor;
+  actor->emit(e);
+
   mLinkId2Actor.erase(actor->getId());
 
   // remove drives
@@ -92,6 +97,10 @@ void SScene::removeActor(SActorBase *actor) {
 
 void SScene::removeArticulation(SArticulation *articulation) {
   for (auto link : articulation->getBaseLinks()) {
+    // predestroy event
+    ActorPreDestroyEvent e;
+    e.actor = link;
+    link->emit(e);
 
     // remove drives
     for (auto drive : link->getDrives()) {
@@ -108,7 +117,7 @@ void SScene::removeArticulation(SArticulation *articulation) {
     }
 
     // remove reference
-    mLinkId2Actor.erase(link->getId());
+    mLinkId2Link.erase(link->getId());
   }
 
   // remove physical bodies
@@ -123,6 +132,10 @@ void SScene::removeArticulation(SArticulation *articulation) {
 
 void SScene::removeKinematicArticulation(SKArticulation *articulation) {
   for (auto link : articulation->getBaseLinks()) {
+    // predestroy event
+    ActorPreDestroyEvent e;
+    e.actor = link;
+    link->emit(e);
 
     // remove drives
     for (auto drive : link->getDrives()) {
@@ -139,7 +152,7 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
     }
 
     // remove reference
-    mLinkId2Actor.erase(link->getId());
+    mLinkId2Link.erase(link->getId());
 
     // remove actor
     mPxScene->removeActor(*link->getPxActor());
@@ -327,7 +340,7 @@ SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActor
 }
 
 void SScene::removeMountedCameraByMount(SActorBase *actor) {
-  for (auto & cam : mCameras) {
+  for (auto &cam : mCameras) {
     if (cam.actor == actor) {
       mRendererScene->removeCamera(cam.camera);
     }
