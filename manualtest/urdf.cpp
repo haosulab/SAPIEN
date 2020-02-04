@@ -17,21 +17,20 @@ int main() {
   controller.showWindow();
 
   auto s0 = sim.createScene();
-  s0->setTimestep(1 / 240.f);
+  s0->setTimestep(1 / 480.f);
   s0->addGround(-1);
 
   // auto builder = createAntBuilder(*s0);
   auto loader = s0->createURDFLoader();
-  loader->fixRootLink = 0;
-  auto a = loader->loadKinematic("../assets/robot/all_robot.urdf");
+  loader->fixRootLink = 1;
+  // auto a = loader->loadKinematic("../assets/robot/all_robot.urdf");
+  loader->collisionIsVisual = 1;
+  auto a = loader->load("../assets/robot/bullet_human.urdf");
+  a->setRootPose({{0, 0, 2}, PxIdentity});
 
-  // auto s1 = builder->build(false);
-  // s1->setName("Ant");
-  // s1->setRootPose({{0, 0, 2}, PxIdentity});
-
-  auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
-  r0->setAmbientLight({0.3, 0.3, 0.3});
-  r0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
+  // auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
+  s0->setAmbientLight({0.3, 0.3, 0.3});
+  s0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
 
   controller.setCameraPosition(-5, 0, 0);
 
@@ -39,10 +38,8 @@ int main() {
 
   int count = 0;
   while (!controller.shouldQuit()) {
-    if (count++ == 240) {
-      s0->removeKinematicArticulation(a);
-    }
-    for (int i = 0; i < 4; ++i) {
+
+    for (int i = 0; i < 8; ++i) {
       s0->step();
     }
     s0->updateRender();

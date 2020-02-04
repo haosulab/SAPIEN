@@ -470,6 +470,8 @@ SKArticulation *ArticulationBuilder::buildKinematic() const {
   }
   result->mSortedIndices = sorted;
 
+  result->mRootLink = static_cast<SKLink*>(result->mJoints[sorted[0]]->getChildLink());
+
   return result;
 }
 

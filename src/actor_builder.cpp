@@ -181,6 +181,11 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     case ActorBuilderShapeRecord::Type::Box: {
       PxShape *shape =
           getSimulation()->mPhysicsSDK->createShape(PxBoxGeometry(r.scale), *material, true);
+      if (!shape) {
+        spdlog::critical("Failed to build box with scale {}, {}, {}", r.scale.x, r.scale.y,
+                         r.scale.z);
+        throw std::runtime_error("Failed to create shape");
+      }
       shape->setLocalPose(r.pose);
       shapes.push_back(shape);
       densities.push_back(r.density);
@@ -190,6 +195,10 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     case ActorBuilderShapeRecord::Type::Capsule: {
       PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
           PxCapsuleGeometry(r.radius, r.length), *material, true);
+      if (!shape) {
+        spdlog::critical("Failed to build capsule with radius {}, length {}", r.radius, r.length);
+        throw std::runtime_error("Failed to create shape");
+      }
       shape->setLocalPose(r.pose);
       shapes.push_back(shape);
       densities.push_back(r.density);
@@ -199,6 +208,10 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     case ActorBuilderShapeRecord::Type::Sphere: {
       PxShape *shape =
           getSimulation()->mPhysicsSDK->createShape(PxSphereGeometry(r.radius), *material, true);
+      if (!shape) {
+        spdlog::critical("Failed to build sphere with radius {}", r.radius);
+        throw std::runtime_error("Failed to create shape");
+      }
       shape->setLocalPose(r.pose);
       shapes.push_back(shape);
       densities.push_back(r.density);

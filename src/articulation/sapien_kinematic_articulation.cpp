@@ -87,7 +87,9 @@ std::vector<physx::PxReal> SKArticulation::getQf() const { return std::vector<Px
 void SKArticulation::setQf(const std::vector<physx::PxReal> &v) {
   spdlog::warn("Setting qf for kinematic articulation has no effect");
 }
-void SKArticulation::setRootPose(const physx::PxTransform &T) {}
+void SKArticulation::setRootPose(const physx::PxTransform &T) {
+  mRootLink->getPxActor()->setGlobalPose(T);
+}
 
 std::vector<std::array<physx::PxReal, 2>> SKArticulation::getQlimits() const {
   std::vector<std::array<physx::PxReal, 2>> result;

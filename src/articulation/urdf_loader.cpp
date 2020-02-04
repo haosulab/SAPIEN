@@ -249,8 +249,9 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMateria
                                          visual->name);
         break;
       case Geometry::CYLINDER:
+      case Geometry::CAPSULE:
         currentLinkBuilder->addCapsuleVisual(
-            tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
+            tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
             visual->geometry->radius * scale, visual->geometry->length * scale / 2.f, {1, 1, 1},
             visual->name);
         break;
@@ -274,21 +275,41 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMateria
       case Geometry::BOX:
         currentLinkBuilder->addBoxShape(tCollision2Link, collision->geometry->size * scale,
                                         material, defaultDensity);
+        if (collisionIsVisual) {
+          currentLinkBuilder->addBoxVisual(tCollision2Link, collision->geometry->size * scale,
+                                           {1, 1, 1}, "");
+        }
         break;
       case Geometry::CYLINDER:
+      case Geometry::CAPSULE:
         currentLinkBuilder->addCapsuleShape(
-            tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57, {0, 1, 0})}),
+            tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
             collision->geometry->radius * scale, collision->geometry->length * scale / 2.0f,
             material, defaultDensity);
+        if (collisionIsVisual) {
+          currentLinkBuilder->addCapsuleVisual(
+              tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
+              collision->geometry->radius * scale, collision->geometry->length * scale / 2.f,
+              {1, 1, 1}, "");
+        }
         break;
       case Geometry::SPHERE:
         currentLinkBuilder->addSphereShape(tCollision2Link, collision->geometry->radius * scale,
                                            material, defaultDensity);
+        if (collisionIsVisual) {
+          currentLinkBuilder->addSphereVisual(tCollision2Link, collision->geometry->radius * scale,
+                                              {1, 1, 1}, "");
+        }
         break;
       case Geometry::MESH:
         currentLinkBuilder->addConvexShapeFromFile(
             getAbsPath(filename, collision->geometry->filename), tCollision2Link,
             PxVec3(1, 1, 1) * scale, material, defaultDensity);
+        if (collisionIsVisual) {
+          currentLinkBuilder->addVisualFromFile(
+              getAbsPath(filename, collision->geometry->filename), tCollision2Link,
+              collision->geometry->scale * scale, "");
+        }
         break;
       }
     }
@@ -302,6 +323,10 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMateria
         damping = current->joint->dynamics->damping;
       }
 
+      if (current->joint->axis->xyz.magnitudeSquared() < 0.01) {
+        current->joint->axis->xyz = {1, 0, 0};
+      }
+
       PxVec3 axis1 = current->joint->axis->xyz.getNormalized();
 
       PxVec3 axis2;
@@ -313,7 +338,7 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMateria
       PxVec3 axis3 = axis1.cross(axis2);
       const PxTransform tAxis2Joint = {PxVec3(0), PxQuat(PxMat33(axis1, axis2, axis3))};
       if (!tAxis2Joint.isSane()) {
-        printf("WRONG!\n");
+        spdlog::critical("URDF loading failed: invalid joint pose");
         exit(1);
       }
       const PxTransform tAxis2Parent = tJoint2Parent * tAxis2Joint;

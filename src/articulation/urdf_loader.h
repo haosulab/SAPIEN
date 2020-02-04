@@ -245,6 +245,8 @@ struct Cylinder : DomBase {
   LOAD_ATTR_END()
 };
 
+typedef Cylinder Capsule;
+
 struct Sphere : DomBase {
   DECLARE_CONSTRUCTOR(Sphere)
   DECLARE_ATTR(physx::PxReal, radius)
@@ -266,7 +268,7 @@ struct Mesh : DomBase {
 };
 
 struct Geometry : DomBase {
-  enum Type { BOX, CYLINDER, SPHERE, MESH } type;
+  enum Type { BOX, CYLINDER, SPHERE, MESH, CAPSULE } type;
   physx::PxVec3 size;
   physx::PxReal radius;
   physx::PxReal length;
@@ -314,6 +316,17 @@ struct Geometry : DomBase {
       scale = g.scale;
       return;
     }
+
+    if (strcmp(childTag, "capsule") == 0) {
+      type = CAPSULE;
+      auto g = Capsule(*child);
+      radius = g.radius;
+      length = g.length;
+      return;
+    }
+
+    spdlog::critical("Unrecognized geometry tag <{}>", childTag);
+    exit(1);
   }
 };
 
@@ -666,6 +679,9 @@ public:
 
   /* density used if the inertia is not specified for a link */
   float defaultDensity = 1000.f;
+
+  /* collision will be rendered along with visual */
+  bool collisionIsVisual = false;
 
   explicit URDFLoader(SScene *scene);
   SArticulation *load(const std::string &filename, physx::PxMaterial *material = nullptr);

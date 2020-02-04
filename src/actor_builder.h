@@ -56,9 +56,9 @@ protected:
   SScene *mScene;
 
   bool mUseDensity = true;
-  PxReal mMass = 1;
+  PxReal mMass = 1e-3;
   PxTransform mCMassPose = {{0, 0, 0}, PxIdentity};
-  PxVec3 mInertia = {1, 1, 1};
+  PxVec3 mInertia = {1e-3, 1e-3, 1e-3};
 
   struct {
     uint32_t w0 = 1, w1 = 1, w2 = 0, w3 = 0;

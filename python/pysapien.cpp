@@ -701,6 +701,7 @@ PYBIND11_MODULE(pysapien, m) {
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
       .def(py::init<SScene *>(), py::arg("scene"))
       .def_readwrite("fix_root_link", &URDF::URDFLoader::fixRootLink)
+      .def_readwrite("collision_is_visual", &URDF::URDFLoader::collisionIsVisual)
       .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def_readwrite("default_density", &URDF::URDFLoader::defaultDensity)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
