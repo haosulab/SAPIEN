@@ -1,8 +1,8 @@
 #include "articulation/articulation_builder.cpp"
 #include "renderer/optifuser_controller.h"
-#include "sapien_drive.h"
 #include "renderer/optifuser_renderer.h"
 #include "sapien_actor.h"
+#include "sapien_drive.h"
 #include "sapien_scene.h"
 #include "simulation.h"
 #include <iostream>
@@ -130,18 +130,18 @@ int main() {
 
   int count = 0;
   SDrive *drive;
+  std::vector<float> d;
   while (!controller.shouldQuit()) {
     if (++count == 120) {
+      d = ant0->packData();
       drive = s0->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, ant0->getRootLink(),
-                                   {{0, 0, 0}, PxIdentity});
+                              {{0, 0, 0}, PxIdentity});
       drive->setProperties(2000, 4000, PX_MAX_F32, true);
       drive->setTarget({{0, 0, 10}, PxIdentity});
     }
-    if (count == 240) {
+    if (count == 150) {
       drive->destroy();
-    }
-    if (count == 360) {
-      s0->removeArticulation(ant0);
+      ant0->unpackData(d);
     }
 
     s0->updateRender();

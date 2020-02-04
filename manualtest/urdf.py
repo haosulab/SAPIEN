@@ -2,7 +2,6 @@ import pysapien
 import numpy as np
 from transforms3d.quaternions import axangle2quat as aa
 
-
 sim = pysapien.Simulation()
 renderer = pysapien.OptifuserRenderer()
 sim.set_renderer(renderer)

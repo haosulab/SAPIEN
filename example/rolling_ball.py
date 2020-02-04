@@ -20,7 +20,7 @@ scene.set_ambient_light([0.2, 0.2, 0.2])
 scene.set_shadow_light([1, -1, -1], [.5, .5, .5])
 
 # stratic friction, dynamic driction, restitution
-smooth_material = sim.create_physical_material(10, 10, 1)
+smooth_material = sim.create_physical_material(0.5, 0.5, 1)
 
 
 def build_sphere(pos, r):

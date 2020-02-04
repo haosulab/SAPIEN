@@ -8,6 +8,7 @@
 #include "sapien_actor.h"
 #include "sapien_actor_base.h"
 #include "sapien_contact.h"
+#include "sapien_drive.h"
 #include "sapien_scene.h"
 #include "simulation.h"
 
@@ -159,7 +160,8 @@ PYBIND11_MODULE(pysapien, m) {
 
   py::class_<Optifuser::Input>(m, "Input")
       .def("get_key_state", &Optifuser::Input::getKeyState)
-      .def("get_key_down", &Optifuser::Input::getKeyDown);
+      .def("get_key_down", &Optifuser::Input::getKeyDown)
+      .def("get_key_mods", &Optifuser::Input::getKeyMods);
 
   py::class_<Renderer::OptifuserController>(m, "OptifuserController")
       .def(py::init<Renderer::OptifuserRenderer *>(), py::arg("renderer"))
@@ -326,7 +328,19 @@ PYBIND11_MODULE(pysapien, m) {
              s.addDirectionalLight(array2vec3(direction), array2vec3(color));
            },
            py::arg("direction"), py::arg("color"))
-      .def("get_renderer_scene", &SScene::getRendererScene);
+      .def("get_renderer_scene", &SScene::getRendererScene)
+
+      // drive, constrains, and joints
+      .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
+           py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference);
+
+  //======= Drive =======//
+  py::class_<SDrive>(m, "Drive")
+      .def("set_properties", &SDrive::setProperties, py::arg("stiffness"), py::arg("damping"),
+           py::arg("force_limit") = PX_MAX_F32, py::arg("isAcceleration") = true)
+      .def("set_target", &SDrive::setTarget, py::arg("pose"))
+      .def("set_target_velocity", &SDrive::setTargetVelocity, py::arg("linear"), py::arg("angular"))
+      .def("destroy", &SDrive::destroy);
 
   //======== Actor ========//
 
@@ -645,7 +659,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_scene", &ActorBuilder::setScene)
       .def("build", &ActorBuilder::build, py::arg("is_kinematic") = false, py::arg("name") = "",
            py::return_value_policy::reference)
-      .def("build_static", &ActorBuilder::buildStatic, py::return_value_policy::reference);
+      .def("build_static", &ActorBuilder::buildStatic, py::return_value_policy::reference,
+           py::arg("name") = "");
 
   py::class_<LinkBuilder, ActorBuilder>(m, "LinkBuilder")
       .def("get_index", &LinkBuilder::getIndex)
