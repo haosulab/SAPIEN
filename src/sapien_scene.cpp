@@ -60,9 +60,9 @@ void SScene::addKinematicArticulation(std::unique_ptr<SKArticulation> articulati
 
 void SScene::removeActor(SActorBase *actor) {
   // predestroy event
-  ActorPreDestroyEvent e;
+  EventActorPreDestroy e;
   e.actor = actor;
-  actor->emit(e);
+  actor->EventEmitter<EventActorPreDestroy>::emit(e);
 
   mLinkId2Actor.erase(actor->getId());
 
@@ -87,7 +87,7 @@ void SScene::removeActor(SActorBase *actor) {
 
   // remove physical bodies
   mPxScene->removeActor(*actor->getPxActor());
-  actor->getPxActor()->release(); // FIXME: check if this release can be moved to creation time
+  actor->getPxActor()->release();
 
   // remove sapien actor
   mActors.erase(std::remove_if(mActors.begin(), mActors.end(),
@@ -96,11 +96,15 @@ void SScene::removeActor(SActorBase *actor) {
 }
 
 void SScene::removeArticulation(SArticulation *articulation) {
+  EventArticulationPreDestroy e;
+  e.articulation = articulation;
+  articulation->EventEmitter<EventArticulationPreDestroy>::emit(e);
+
   for (auto link : articulation->getBaseLinks()) {
     // predestroy event
-    ActorPreDestroyEvent e;
+    EventActorPreDestroy e;
     e.actor = link;
-    link->emit(e);
+    link->EventEmitter<EventActorPreDestroy>::emit(e);
 
     // remove drives
     for (auto drive : link->getDrives()) {
@@ -131,11 +135,15 @@ void SScene::removeArticulation(SArticulation *articulation) {
 }
 
 void SScene::removeKinematicArticulation(SKArticulation *articulation) {
+  EventArticulationPreDestroy e;
+  e.articulation = articulation;
+  articulation->EventEmitter<EventArticulationPreDestroy>::emit(e);
+
   for (auto link : articulation->getBaseLinks()) {
     // predestroy event
-    ActorPreDestroyEvent e;
+    EventActorPreDestroy e;
     e.actor = link;
-    link->emit(e);
+    link->EventEmitter<EventActorPreDestroy>::emit(e);
 
     // remove drives
     for (auto drive : link->getDrives()) {
@@ -156,7 +164,7 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
 
     // remove actor
     mPxScene->removeActor(*link->getPxActor());
-    link->getPxActor()->release(); // FIXME: check if this release can be moved to creation time
+    link->getPxActor()->release();
   }
 
   mKinematicArticulations.erase(
@@ -291,13 +299,18 @@ void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
 
 void SScene::step() {
   clearContacts();
+  for (auto &a : mActors) {
+    a->prestep();
+  }
+  for (auto &a : mArticulations) {
+    a->prestep();
+  }
   for (auto &a : mKinematicArticulations) {
-    a->step();
+    a->prestep();
   }
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
   }
-  // FIXME: process callbacks
 }
 
 void SScene::updateRender() {

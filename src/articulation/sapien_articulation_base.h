@@ -1,4 +1,5 @@
 #pragma once
+#include "event_system/event_system.h"
 #include "id_generator.h"
 #include <PxPhysicsAPI.h>
 #include <array>
@@ -11,7 +12,8 @@ class SJointBase;
 
 enum EArticulationType { DYNAMIC, KINEMATIC };
 
-class SArticulationBase {
+class SArticulationBase : public EventEmitter<EventArticulationPreDestroy>,
+                          public EventEmitter<EventArticulationStep> {
   std::string mName;
 
 public:
@@ -40,6 +42,8 @@ public:
 
   virtual std::vector<std::array<physx::PxReal, 2>> getQlimits() const = 0;
   virtual void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const = 0;
+
+  virtual void prestep() = 0;
 
   virtual ~SArticulationBase() = default;
 };

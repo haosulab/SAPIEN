@@ -3,6 +3,7 @@
 #include "sapien_kinematic_joint.h"
 #include "sapien_link.h"
 #include <spdlog/spdlog.h>
+#include "sapien_scene.h"
 
 #define CHECK_SIZE(v)                                                                             \
   {                                                                                               \
@@ -115,7 +116,20 @@ std::vector<physx::PxReal> SKArticulation::getDriveTarget() const {
   return std::vector<PxReal>(0, dof());
 }
 
-void SKArticulation::step() {
+void SKArticulation::prestep() {
+  auto time = mScene->getTimestep();
+  EventArticulationStep s;
+  s.articulation = this;
+  s.time = time;
+  EventEmitter<EventArticulationStep>::emit(s);
+
+  for (auto &l : mLinks) {
+    EventActorStep s;
+    s.actor = l.get();
+    s.time = time;
+    l->EventEmitter<EventActorStep>::emit(s);
+  }
+
   std::vector<PxTransform> poses(mJoints.size());
   poses[mSortedIndices[0]] = mJoints[mSortedIndices[0]]->getChildLink()->getPose();
 

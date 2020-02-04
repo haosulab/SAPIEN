@@ -48,7 +48,7 @@ public:
   virtual void setDriveTarget(std::vector<physx::PxReal> const &v) override;
   virtual std::vector<physx::PxReal> getDriveTarget() const override;
 
-  void step();
+  void prestep() override;
 
 private:
   SKArticulation(SScene *scene);

@@ -1,6 +1,6 @@
 #pragma once
 #include "camera_controller.h"
-#include "event_system/events.h"
+#include "event_system/event_system.h"
 #include "optifuser_renderer.h"
 
 namespace sapien {
@@ -39,7 +39,7 @@ struct GuiModel {
   ArticulationGuiModel articulationModel;
 };
 
-class OptifuserController : public IEventListener<ActorPreDestroyEvent> {
+class OptifuserController : public IEventListener<EventActorPreDestroy> {
   OptifuserRenderer *mRenderer = nullptr;
   SScene *mScene = nullptr;
 
@@ -69,7 +69,7 @@ public:
 
   void render();
 
-  void onEvent(ActorPreDestroyEvent &e) override;
+  void onEvent(EventActorPreDestroy &e) override;
 };
 } // namespace Renderer
 } // namespace sapien

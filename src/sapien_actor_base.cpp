@@ -1,5 +1,6 @@
 #include "sapien_actor_base.h"
 #include "renderer/render_interface.h"
+#include "sapien_scene.h"
 
 namespace sapien {
 
@@ -21,6 +22,13 @@ void SActorBase::setRenderMode(uint32_t mode) {
 }
 
 uint32_t SActorBase::getRenderMode() { return mRenderMode; }
+
+void SActorBase::prestep() {
+  EventActorStep s;
+  s.actor = this;
+  s.time = mParentScene->getTimestep();
+  EventEmitter<EventActorStep>::emit(s);
+}
 
 void SActorBase::updateRender(PxTransform const &pose) {
   if (mRenderMode == 0) {

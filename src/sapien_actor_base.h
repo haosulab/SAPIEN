@@ -1,9 +1,9 @@
 #pragma once
+#include "event_system/event_system.h"
 #include "id_generator.h"
 #include <PxPhysicsAPI.h>
 #include <string>
 #include <vector>
-#include "event_system/events.h"
 
 namespace sapien {
 using namespace physx;
@@ -23,7 +23,7 @@ enum class EActorType {
   KINEMATIC_ARTICULATION_LINK
 };
 
-class SActorBase : public EventEmitter<ActorPreDestroyEvent> {
+class SActorBase : public EventEmitter<EventActorPreDestroy>, public EventEmitter<EventActorStep> {
 protected:
   std::string mName = "";
   physx_id_t mId = 0;
@@ -51,7 +51,6 @@ public:
   // should not be called by users
   void removeDrive(SDrive *drive);
 
-
   inline std::string getName() { return mName; };
   inline void setName(const std::string &name) { mName = name; }
   inline physx_id_t getId() { return mId; }
@@ -70,6 +69,9 @@ public:
   virtual PxRigidActor *getPxActor() = 0;
   virtual EActorType getType() const = 0;
   virtual ~SActorBase() = default;
+
+  // called by scene to notify a simulation step is about to happen
+  virtual void prestep();
 
 protected:
   SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,

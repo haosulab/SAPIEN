@@ -51,18 +51,18 @@ void OptifuserController::focus(SActorBase *actor) {
     mArcCameraController.center = {p.x, p.y, p.z};
     mArcCameraController.r = glm::length(
         glm::vec3(mCamera.position.x - p.x, mCamera.position.y - p.y, mCamera.position.z - p.z));
-    actor->registerListener(*this);
+    actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
   } else if (!actor && mCurrentFocus) {
     // focus -> none
     mFreeCameraController.yaw = mArcCameraController.yaw;
     mFreeCameraController.pitch = mArcCameraController.pitch;
     auto &p = mArcCameraController.camera.position;
     mFreeCameraController.setPosition(p.x, p.y, p.z);
-    mCurrentFocus->unregisterListener(*this);
+    mCurrentFocus->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
   } else if (actor && actor != mCurrentFocus) {
     // focus1 -> focus2
-    mCurrentFocus->unregisterListener(*this);
-    actor->registerListener(*this);
+    mCurrentFocus->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
+    actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
   } // none -> none
   mCurrentFocus = actor;
 }
@@ -218,10 +218,10 @@ void OptifuserController::render() {
 
     if (actor != mCurrentSelection) {
       if (mCurrentSelection) {
-        mCurrentSelection->unregisterListener(*this);
+        mCurrentSelection->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
       }
       if (actor) {
-        actor->registerListener(*this);
+        actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
       }
       mCurrentSelection = actor;
     }
@@ -541,7 +541,7 @@ void OptifuserController::render() {
   mRenderer->mContext->swapBuffers();
 }
 
-void OptifuserController::onEvent(ActorPreDestroyEvent &e) {
+void OptifuserController::onEvent(EventActorPreDestroy &e) {
   if (e.actor == mCurrentFocus) {
     focus(nullptr);
   }

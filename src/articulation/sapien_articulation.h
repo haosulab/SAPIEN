@@ -57,6 +57,8 @@ public:
   void setRootVelocity(physx::PxVec3 const &v);
   void setRootAngularVelocity(physx::PxVec3 const &omega);
 
+  void prestep() override;
+
   SLinkBase *getRootLink() override;
 
   inline PxArticulationReducedCoordinate *getPxArticulation() { return mPxArticulation; }
