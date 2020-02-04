@@ -19,11 +19,11 @@ scene.set_ambient_light([0.2, 0.2, 0.2])
 scene.set_shadow_light([1, -1, -1], [.5, .5, .5])
 
 # load cup
-cup_file_name = "cup.stl"
+cup_file_name = "cup.obj"
 cup_pose = Pose([0, 0, 0])
-cup_scale = [10] * 3
+cup_scale = [20] * 3
 cup_builder = scene.create_actor_builder()
-cup_builder.add_convex_shape_from_file(cup_file_name, cup_pose, cup_scale)
+cup_builder.add_multiple_convex_shapes_from_file(cup_file_name, cup_pose, cup_scale)
 cup_builder.add_visual_from_file(cup_file_name, cup_pose, cup_scale)
 cup = cup_builder.build()
 
