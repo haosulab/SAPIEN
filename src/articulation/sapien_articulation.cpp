@@ -272,6 +272,119 @@ std::vector<PxReal> SArticulation::computeJacobianMatrix() {
   return Jacobian2;
 }
 
+#define PUSH_QUAT(data, q)                                                                        \
+  {                                                                                               \
+    (data).push_back((q).x);                                                                      \
+    (data).push_back((q).y);                                                                      \
+    (data).push_back((q).z);                                                                      \
+    (data).push_back((q).w);                                                                      \
+  }
+
+#define PUSH_VEC3(data, v)                                                                        \
+  {                                                                                               \
+    (data).push_back((v).x);                                                                      \
+    (data).push_back((v).y);                                                                      \
+    (data).push_back((v).z);                                                                      \
+  }
+
+std::vector<PxReal> SArticulation::packData() {
+  std::vector<PxReal> data;
+
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eALL);
+  auto ndof = mPxArticulation->getDofs();
+  auto nlinks = mPxArticulation->getNbLinks();
+
+  data.insert(data.end(), mCache->jointPosition, mCache->jointPosition + ndof);
+  data.insert(data.end(), mCache->jointVelocity, mCache->jointVelocity + ndof);
+  data.insert(data.end(), mCache->jointAcceleration, mCache->jointAcceleration + ndof);
+  data.insert(data.end(), mCache->jointForce, mCache->jointForce + ndof);
+
+  for (uint32_t i = 0; i < nlinks; ++i) {
+    auto lv = mCache->linkVelocity[i].linear;
+    auto av = mCache->linkVelocity[i].angular;
+    PUSH_VEC3(data, lv);
+    PUSH_VEC3(data, av);
+  }
+
+  for (uint32_t i = 0; i < nlinks; ++i) {
+    auto la = mCache->linkAcceleration[i].linear;
+    auto aa = mCache->linkAcceleration[i].angular;
+    PUSH_VEC3(data, la);
+    PUSH_VEC3(data, aa);
+  }
+
+  auto [transform, lv, av, la, aa] = *mCache->rootLinkData;
+  PUSH_VEC3(data, transform.p);
+  PUSH_QUAT(data, transform.q);
+  PUSH_VEC3(data, lv);
+  PUSH_VEC3(data, av);
+  PUSH_VEC3(data, la);
+  PUSH_VEC3(data, aa);
+
+  return data;
+}
+
+void SArticulation::unpackData(std::vector<PxReal> const &data) {
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eALL);
+  auto ndof = mPxArticulation->getDofs();
+  auto nlinks = mPxArticulation->getNbLinks();
+
+  if (data.size() != ndof * 4          // joint size
+                         + nlinks * 12 // link size
+                         + 19          // root size
+  ) {
+    spdlog::error("Failed to unpack articulation data: {} numbers expected but {} provided",
+                  ndof * 4 + nlinks * 12 + 19, data.size());
+    return;
+  }
+
+  mPxArticulation->zeroCache(*mCache);
+  uint32_t p = 0;
+
+  // restore joints
+  for (uint32_t j = 0; j < ndof; ++j) {
+    mCache->jointPosition[j] = data[p++];
+  }
+  for (uint32_t j = 0; j < ndof; ++j) {
+    mCache->jointVelocity[j] = data[p++];
+  }
+  for (uint32_t j = 0; j < ndof; ++j) {
+    mCache->jointAcceleration[j] = data[p++];
+  }
+  for (uint32_t j = 0; j < ndof; ++j) {
+    mCache->jointForce[j] = data[p++];
+  }
+
+  // restore links
+  for (uint32_t i = 0; i < nlinks; ++i) {
+    mCache->linkVelocity[i].linear = {data[p], data[p + 1], data[p + 2]};
+    p += 3;
+    mCache->linkVelocity[i].angular = {data[p], data[p + 1], data[p + 2]};
+    p += 3;
+  }
+  for (uint32_t i = 0; i < nlinks; ++i) {
+    mCache->linkAcceleration[i].linear = {data[p], data[p + 1], data[p + 2]};
+    p += 3;
+    mCache->linkAcceleration[i].angular = {data[p], data[p + 1], data[p + 2]};
+    p += 3;
+  }
+
+  // restore root
+  mCache->rootLinkData->transform = {{data[p], data[p + 1], data[p + 2]},
+                                     {data[p + 3], data[p + 4], data[p + 5], data[p + 6]}};
+  p += 7;
+  mCache->rootLinkData->worldLinVel = {data[p], data[p + 1], data[p + 2]};
+  p += 3;
+  mCache->rootLinkData->worldAngVel = {data[p], data[p + 1], data[p + 2]};
+  p += 3;
+  mCache->rootLinkData->worldLinAccel = {data[p], data[p + 1], data[p + 2]};
+  p += 3;
+  mCache->rootLinkData->worldAngAccel = {data[p], data[p + 1], data[p + 2]};
+  p += 3;
+
+  mPxArticulation->applyCache(*mCache, PxArticulationCache::eALL);
+} // namespace sapien
+
 } // namespace sapien
 
 #undef CHECK_SIZE

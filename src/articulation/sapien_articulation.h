@@ -73,6 +73,9 @@ public:
   /* Kinematics Functions */
   std::vector<physx::PxReal> computeJacobianMatrix();
 
+  std::vector<PxReal> packData();
+  void unpackData(std::vector<PxReal> const &data);
+
 private:
   SArticulation(SScene *scene);
   SArticulation(SArticulation const &other) = delete;
