@@ -47,10 +47,14 @@ public:
     // TODO: add namespace support
     mTime = rclcpp::Time(0, 0, RCL_ROS_TIME);
     mClock = rclcpp::Clock::make_shared(RCL_ROS_TIME);
-    mClockPub = mNode.create_publisher<rosgraph_msgs::msg::Clock>("/clock", rmw_qos_profile_default);
+    mClockPub =
+        mNode.create_publisher<rosgraph_msgs::msg::Clock>("/clock", rmw_qos_profile_default);
     if (!mClock->ros_time_is_active()) {
       RCLCPP_WARN(mNode.get_logger(), "ROS Time is not active for scene with name %s",
                   scene->getName().c_str());
+    } else {
+      RCLCPP_INFO(mNode.get_logger(), "Current time of scene %s is %ulld \n",
+                  mScene->getName().c_str(), mClock->now().nanoseconds());
     }
   };
 
@@ -70,8 +74,10 @@ public:
   };
 
 protected:
-  void onEvent(StepEvent &event) override { float currentTimeStep = mScene->getTimestep(); };
-  void updateROSTime() {
+  void onEvent(StepEvent &event) override {
+    // Update time step and publish the /clock message
+    float currentTimeStep = mScene->getTimestep();
+    mTime = mTime + rclcpp::Duration(rcl_duration_value_t(currentTimeStep * 10e9));
     rosgraph_msgs::msg::Clock clockMessage;
     clockMessage.set__clock(mTime);
     mClockPub->publish(clockMessage);
