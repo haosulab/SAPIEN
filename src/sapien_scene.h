@@ -1,4 +1,5 @@
 #pragma once
+#include "event_system/events.h"
 #include "id_generator.h"
 #include "simulation_callback.h"
 #include <PxPhysicsAPI.h>
@@ -31,7 +32,7 @@ class URDFLoader;
 
 using namespace physx;
 
-class SScene {
+class SScene : public EventEmitter<StepEvent> {
   friend ActorBuilder;
   friend LinkBuilder;
   friend ArticulationBuilder;
@@ -120,9 +121,8 @@ public:
   void setAmbientLight(PxVec3 const &color);
   void addDirectionalLight(PxVec3 const &direction, PxVec3 const &color);
 
-  void step();         // advance time by timestep
+  void step();         // advance time by TimeStep
   void updateRender(); // call to sync physics world to render world
-
   void addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr);
 
 private:

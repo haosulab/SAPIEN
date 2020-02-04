@@ -32,7 +32,7 @@ protected:
 
     // Create Publisher
     std::string prefix = nameSpace + "/joint_states";
-    mPub = node->create_publisher<sensor_msgs::msg::JointState>(prefix, 5);
+    mPub = node->create_publisher<sensor_msgs::msg::JointState>(prefix, rmw_qos_profile_default);
   };
 
 

@@ -297,6 +297,9 @@ void SScene::step() {
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
   }
+  StepEvent event;
+  event.timeStep = getTimestep();
+  emit(event);
   // FIXME: process callbacks
 }
 
