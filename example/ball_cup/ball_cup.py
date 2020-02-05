@@ -44,6 +44,8 @@ def build_sphere(pos, r):
 num_balls = 50
 ball_r = 0.1
 balls_distr_r = 0.03
+
+balls = []
 for i in range(num_balls):
     pos_z = np.random.uniform(1, 1)
     rand_theta = np.random.rand() * np.pi * 2
@@ -52,6 +54,7 @@ for i in range(num_balls):
     pos = [pos_x, pos_y, pos_z + i * 0.2]
     b = build_sphere(pos, ball_r)
     b.set_name('ball' + str(i))
+    balls.append(b)
 
 # render
 render_control.set_current_scene(scene)
@@ -64,14 +67,26 @@ count = 0
 while not render_control.should_quit:
     ground_ball = set()
     count += 1
+    if count == 120:
+        ball_data = [b.pack() for b in balls]
+        cup1_data = cup1.pack()
+        cup2_data = cup2.pack()
+
     if 120 < count < 200:
-        cup1.add_force_torque([90, 0, 3500], [0, 0, 20])
+        cup1.add_force_torque([85, 0, 3500], [0, 0, 20])
     if 200 < count < 240:
         cup1.add_force_torque([0, 0, 3500], [0, 0, -20])
     if 240 < count < 360:
         cup1.add_force_torque([20, 0, 2800], [0, 100, 0])
     if 360 < count < 480:
         cup1.add_force_torque([0, 0, 2800], [0, 0, 0])
+
+    if count == 660:
+        for b, d in zip(balls, ball_data):
+            b.unpack(d)
+        cup1.unpack(cup1_data)
+        cup2.unpack(cup2_data)
+        count = 120
 
     contacts = scene.get_contacts()
     for c in contacts:
@@ -93,6 +108,5 @@ while not render_control.should_quit:
     scene.update_render()
     # render the frame
     render_control.render()
-
 
 scene = 0

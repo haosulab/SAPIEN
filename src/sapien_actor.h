@@ -29,6 +29,9 @@ public:
   EActorType getType() const override;
   void destroy();
 
+  std::vector<PxReal> packData();
+  void unpackData(std::vector<PxReal> const &data);
+
 private:
   /* Only actor builder can create actor */
   SActor(PxRigidBody *actor, physx_id_t id, SScene *scene,
@@ -46,6 +49,9 @@ public:
   PxRigidActor *getPxActor() override;
   inline EActorType getType() const override { return EActorType::STATIC; }
   void setPose(PxTransform const &pose);
+
+  std::vector<PxReal> packData();
+  void unpackData(std::vector<PxReal> const &data);
 
 public:
   void destroy();

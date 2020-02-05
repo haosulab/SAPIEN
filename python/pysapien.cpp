@@ -25,7 +25,7 @@
 using namespace sapien;
 namespace py = pybind11;
 
-PxVec3 array2vec3(const py::array_t<float> &arr) { return {arr.at(0), arr.at(1), arr.at(2)}; }
+PxVec3 array2vec3(const py::array_t<PxReal> &arr) { return {arr.at(0), arr.at(1), arr.at(2)}; }
 
 template <typename T> py::array_t<T> make_array(std::vector<T> const &values) {
   return py::array_t(values.size(), values.data());
@@ -36,11 +36,11 @@ py::array_t<PxReal> vec32array(PxVec3 const &vec) {
   return make_array(v);
 }
 
-py::array_t<float> mat42array(glm::mat4 const &mat) {
+py::array_t<PxReal> mat42array(glm::mat4 const &mat) {
   float arr[] = {mat[0][0], mat[1][0], mat[2][0], mat[3][0], mat[0][1], mat[1][1],
                  mat[2][1], mat[3][1], mat[0][2], mat[1][2], mat[2][2], mat[3][2],
                  mat[0][3], mat[1][3], mat[2][3], mat[3][3]};
-  return py::array_t<float>({4, 4}, arr);
+  return py::array_t<PxReal>({4, 4}, arr);
 }
 
 PYBIND11_MODULE(pysapien, m) {
@@ -68,7 +68,7 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_restitution", &PxMaterial::setRestitution, py::arg("coef"));
 
   py::class_<PxTransform>(m, "Pose")
-      .def(py::init([](py::array_t<float> p, py::array_t<float> q) {
+      .def(py::init([](py::array_t<PxReal> p, py::array_t<PxReal> q) {
              return new PxTransform({p.at(0), p.at(1), p.at(2)},
                                     {q.at(1), q.at(2), q.at(3), q.at(0)});
            }),
@@ -118,25 +118,25 @@ PYBIND11_MODULE(pysapien, m) {
       .def("take_picture", &Renderer::ICamera::takePicture)
       .def("get_color_rgba",
            [](Renderer::ICamera &cam) {
-             return py::array_t<float>(
+             return py::array_t<PxReal>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.getColorRGBA().data());
            })
       .def("get_albedo_rgba",
            [](Renderer::ICamera &cam) {
-             return py::array_t<float>(
+             return py::array_t<PxReal>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.getAlbedoRGBA().data());
            })
       .def("get_normal_rgba",
            [](Renderer::ICamera &cam) {
-             return py::array_t<float>(
+             return py::array_t<PxReal>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.getNormalRGBA().data());
            })
       .def("get_depth",
            [](Renderer::ICamera &cam) {
-             return py::array_t<float>(
+             return py::array_t<PxReal>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
                  cam.getDepth().data());
            })
@@ -184,18 +184,18 @@ PYBIND11_MODULE(pysapien, m) {
       .def(py::init([]() { return new Optifuser::CameraSpec(); }))
       .def_readwrite("name", &Optifuser::CameraSpec::name)
       .def("set_position",
-           [](Optifuser::CameraSpec &c, const py::array_t<float> &arr) {
+           [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
              c.position = {arr.at(0), arr.at(1), arr.at(2)};
            },
            py::arg("position"))
       .def("set_rotation",
-           [](Optifuser::CameraSpec &c, const py::array_t<float> &arr) {
+           [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
              c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
            },
            py::arg("rotation"))
       .def_property_readonly(
           "position",
-          [](Optifuser::CameraSpec &c) { return py::array_t<float>(3, (float *)(&c.position)); })
+          [](Optifuser::CameraSpec &c) { return py::array_t<PxReal>(3, (float *)(&c.position)); })
       .def_property_readonly("rotation",
                              [](Optifuser::CameraSpec &c) {
                                auto rot = c.getRotation();
@@ -206,8 +206,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def_readwrite("fovy", &Optifuser::CameraSpec::fovy)
       .def_readwrite("aspect", &Optifuser::CameraSpec::aspect)
       .def("lookAt",
-           [](Optifuser::CameraSpec &c, const py::array_t<float> &dir,
-              const py::array_t<float> &up) {
+           [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &dir,
+              const py::array_t<PxReal> &up) {
              c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
            },
            py::arg("direction"), py::arg("up"))
@@ -220,12 +220,12 @@ PYBIND11_MODULE(pysapien, m) {
       .def("update", &Optifuser::FPSCameraSpec::update)
       .def("is_sane", &Optifuser::FPSCameraSpec::isSane)
       .def("set_forward",
-           [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
+           [](Optifuser::FPSCameraSpec &c, const py::array_t<PxReal> &dir) {
              c.setForward({dir.at(0), dir.at(1), dir.at(2)});
            },
            py::arg("forward"))
       .def("set_up",
-           [](Optifuser::FPSCameraSpec &c, const py::array_t<float> &dir) {
+           [](Optifuser::FPSCameraSpec &c, const py::array_t<PxReal> &dir) {
              c.setUp({dir.at(0), dir.at(1), dir.at(2)});
            },
            py::arg("up"))
@@ -246,7 +246,7 @@ PYBIND11_MODULE(pysapien, m) {
 #ifdef _USE_OPTIX
       .def("take_raytraced_picture",
            [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount) {
-             return py::array_t<float>(
+             return py::array_t<PxReal>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.takeRaytracedPicture(samplesPerPixel, reflectionCount).data());
            },
@@ -339,7 +339,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_properties", &SDrive::setProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("isAcceleration") = true)
       .def("set_target", &SDrive::setTarget, py::arg("pose"))
-      .def("set_target_velocity", &SDrive::setTargetVelocity, py::arg("linear"), py::arg("angular"))
+      .def("set_target_velocity", &SDrive::setTargetVelocity, py::arg("linear"),
+           py::arg("angular"))
       .def("destroy", &SDrive::destroy);
 
   //======== Actor ========//
@@ -385,10 +386,18 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_dampnig", &SActorDynamicBase::setDamping, py::arg("linear"), py::arg("angular"));
 
   py::class_<SActorStatic, SActorBase>(m, "ActorStatic")
-      .def("set_pose", &SActorStatic::setPose, py::arg("pose"));
+      .def("set_pose", &SActorStatic::setPose, py::arg("pose"))
+      .def("pack", &SActorStatic::packData)
+      .def("unpack", [](SActorStatic &a, const py::array_t<PxReal> &arr) {
+        a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+      });
 
   py::class_<SActor, SActorDynamicBase>(m, "Actor")
-      .def("set_pose", &SActor::setPose, py::arg("pose"));
+      .def("set_pose", &SActor::setPose, py::arg("pose"))
+      .def("pack", &SActor::packData)
+      .def("unpack", [](SActor &a, const py::array_t<PxReal> &arr) {
+        a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+      });
 
   py::class_<SLinkBase, SActorDynamicBase>(m, "LinkBase")
       .def("get_index", &SLinkBase::getIndex)
@@ -462,7 +471,7 @@ PYBIND11_MODULE(pysapien, m) {
              return py::array_t<PxReal>(qpos.size(), qpos.data());
            })
       .def("set_qpos",
-           [](SArticulationBase &a, const py::array_t<float> &arr) {
+           [](SArticulationBase &a, const py::array_t<PxReal> &arr) {
              a.setQpos(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
            },
            py::arg("qpos"))
@@ -473,7 +482,7 @@ PYBIND11_MODULE(pysapien, m) {
              return py::array_t<PxReal>(qvel.size(), qvel.data());
            })
       .def("set_qvel",
-           [](SArticulationBase &a, const py::array_t<float> &arr) {
+           [](SArticulationBase &a, const py::array_t<PxReal> &arr) {
              a.setQvel(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
            },
            py::arg("qvel"))
@@ -483,7 +492,7 @@ PYBIND11_MODULE(pysapien, m) {
              return py::array_t<PxReal>(qacc.size(), qacc.data());
            })
       .def("set_qacc",
-           [](SArticulationBase &a, const py::array_t<float> &arr) {
+           [](SArticulationBase &a, const py::array_t<PxReal> &arr) {
              a.setQacc(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
            },
            py::arg("qacc"))
@@ -493,7 +502,7 @@ PYBIND11_MODULE(pysapien, m) {
              return py::array_t<PxReal>(qf.size(), qf.data());
            })
       .def("set_qf",
-           [](SArticulationBase &a, const py::array_t<float> &arr) {
+           [](SArticulationBase &a, const py::array_t<PxReal> &arr) {
              a.setQf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
            },
            py::arg("qf"))
@@ -529,7 +538,7 @@ PYBIND11_MODULE(pysapien, m) {
              return py::array_t<PxReal>(target.size(), target.data());
            })
       .def("set_drive_target",
-           [](SArticulationDrivable &a, const py::array_t<float> &arr) {
+           [](SArticulationDrivable &a, const py::array_t<PxReal> &arr) {
              a.setDriveTarget(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
            },
            py::arg("drive_target"));
@@ -538,10 +547,10 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
       .def("get_joints", &SArticulation::getSJoints, py::return_value_policy::reference)
       .def("set_root_velocity",
-           [](SArticulation &a, py::array_t<float> v) { a.setRootVelocity(array2vec3(v)); },
+           [](SArticulation &a, py::array_t<PxReal> v) { a.setRootVelocity(array2vec3(v)); },
            py::arg("vel"))
       .def("set_root_angular_velocity",
-           [](SArticulation &a, py::array_t<float> v) { a.setRootAngularVelocity(array2vec3(v)); },
+           [](SArticulation &a, py::array_t<PxReal> v) { a.setRootAngularVelocity(array2vec3(v)); },
            py::arg("vel"))
       .def("compute_passive_force",
            [](SArticulation &a, bool gravity, bool coriolisAndCentrifugal, bool external) {
@@ -550,14 +559,19 @@ PYBIND11_MODULE(pysapien, m) {
            },
            py::arg("gravity") = true, py::arg("coriolisAndCentrifugal") = true,
            py::arg("external") = true)
-      .def("compute_jacobian", [](SArticulation &a) {
-        auto jacobian = a.computeJacobianMatrix();
-        int nRows = a.getSLinks().size() * 6;
-        int nCols = a.dof() + !a.getPxArticulation()->getArticulationFlags().isSet(
-                                  PxArticulationFlag::eFIX_BASE) *
-                                  6;
-        return py::array_t<PxReal>({nRows, nCols}, {sizeof(PxReal) * nCols, sizeof(PxReal)},
-                                   jacobian.data());
+      .def("compute_jacobian",
+           [](SArticulation &a) {
+             auto jacobian = a.computeJacobianMatrix();
+             int nRows = a.getSLinks().size() * 6;
+             int nCols = a.dof() + !a.getPxArticulation()->getArticulationFlags().isSet(
+                                       PxArticulationFlag::eFIX_BASE) *
+                                       6;
+             return py::array_t<PxReal>({nRows, nCols}, {sizeof(PxReal) * nCols, sizeof(PxReal)},
+                                        jacobian.data());
+           })
+      .def("pack", &SArticulation::packData)
+      .def("unpack", [](SArticulation &a, const py::array_t<PxReal> &arr) {
+        a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
       });
   //======== End Articulation ========//
 
