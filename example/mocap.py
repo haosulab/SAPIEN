@@ -12,7 +12,7 @@ render_controller.show_window()
 
 scene: sapien.Scene = sim.create_scene()
 scene.add_ground(0)
-scene.set_timestep(1 / 240)
+scene.set_timestep(1 / 60)
 
 scene.set_ambient_light([0.5, 0.5, 0.5])
 scene.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
@@ -58,7 +58,6 @@ pan = [j for j in robot.get_joints() if j.name == 'pan_joint'][0]
 pan.set_drive_property(100, 200)
 pan.set_drive_target(0)
 
-
 drive = scene.create_drive(anchor, Pose(), gripper, Pose())
 drive.set_properties(4000, 8000)
 drive.set_target(Pose())
@@ -100,7 +99,7 @@ while not render_controller.should_quit:
         close_gripper()
 
     scene.update_render()
-    for i in range(4):
+    for i in range(1):
         scene.step()
     render_controller.render()
 

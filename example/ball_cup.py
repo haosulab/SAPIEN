@@ -2,6 +2,8 @@ import sapien.core as sapien
 from sapien.core import Pose
 import numpy as np
 
+np.random.seed(1)
+
 # setup
 # create renderer to display
 renderer = sapien.OptifuserRenderer()  # default renderer for sapien
@@ -19,7 +21,7 @@ scene.set_ambient_light([0.2, 0.2, 0.2])
 scene.set_shadow_light([1, -1, -1], [.5, .5, .5])
 
 # load cup
-cup_file_name = "cup.obj"
+cup_file_name = "ball_cup/cup.obj"
 cup_pose = Pose([0, 0, 0])
 cup_scale = [7] * 3
 cup_builder = scene.create_actor_builder()
@@ -41,8 +43,8 @@ def build_sphere(pos, r):
     return sphere_builder.build()
 
 
-num_balls = 50
-ball_r = 0.1
+num_balls = 100
+ball_r = 0.09
 balls_distr_r = 0.03
 
 balls = []
@@ -58,35 +60,36 @@ for i in range(num_balls):
 
 # render
 render_control.set_current_scene(scene)
-render_control.set_camera_position(-10, -10, 5)
+render_control.set_camera_position(-5, -5, 4)
 render_control.set_camera_rotation(np.pi / 4, -np.pi / 9)
 render_control.show_window()
+
+
+ball_data = [b.pack() for b in balls]
+cup1_data = cup1.pack()
+cup2_data = cup2.pack()
 
 count = 0
 # simulation loop
 while not render_control.should_quit:
     ground_ball = set()
     count += 1
-    if count == 120:
-        ball_data = [b.pack() for b in balls]
-        cup1_data = cup1.pack()
-        cup2_data = cup2.pack()
 
-    if 120 < count < 200:
-        cup1.add_force_torque([85, 0, 3500], [0, 0, 20])
+    if 130 < count < 200:
+        cup1.add_force_torque([100, 0, 3900], [0, 0, 20])
     if 200 < count < 240:
-        cup1.add_force_torque([0, 0, 3500], [0, 0, -20])
-    if 240 < count < 360:
-        cup1.add_force_torque([20, 0, 2800], [0, 100, 0])
-    if 360 < count < 480:
-        cup1.add_force_torque([0, 0, 2800], [0, 0, 0])
+        cup1.add_force_torque([0, 0, 3700], [0, 0, -20])
+    if 240 < count < 300:
+        cup1.add_force_torque([30, 0, 3200], [0, 100, 0])
+    if 300 < count < 480:
+        cup1.add_force_torque([0, 0, 3100], [0, -50, 0])
 
     if count == 660:
         for b, d in zip(balls, ball_data):
             b.unpack(d)
         cup1.unpack(cup1_data)
         cup2.unpack(cup2_data)
-        count = 120
+        count = 0
 
     contacts = scene.get_contacts()
     for c in contacts:

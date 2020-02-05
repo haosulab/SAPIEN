@@ -29,7 +29,9 @@ def build_sphere(pos, r):
     sphere_builder.add_sphere_shape(Pose(pos), r, None, 400)  # 400 is the density
     # add visual display for sphere
     sphere_builder.add_sphere_visual(Pose(pos), r, color=[1, 1, 1])
-    return sphere_builder.build()
+    ball = sphere_builder.build()
+    ball.set_damping(.5, .5)
+    return ball
 
 
 def build_box(pos, size):
@@ -86,7 +88,6 @@ def on_press(key):
 
         # get forward
         cam_p = render_control.get_camera_pose().p[:2]
-        print(key)
         ball_p = sphere.pose.p[:2]
         forward = ball_p - cam_p
         forward = forward / np.linalg.norm(forward)
@@ -94,6 +95,7 @@ def on_press(key):
         force_vec = rot @ forward
         force_vec = force_vec / np.linalg.norm(force_vec) * BALL_MOVE_FORCE
         sphere.add_force_torque([force_vec[0], force_vec[1], 0], [0, 0, 0])
+
 
 print('\n\nUse mouse right click to move view point\n' + 'i: forward\nj: left\nk: backward\nl:right\n' +
       'Camera follows sphere until user moves camera with w,a,s,d')
