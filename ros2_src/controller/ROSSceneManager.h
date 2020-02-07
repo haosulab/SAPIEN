@@ -29,7 +29,7 @@ protected:
 
 protected:
 public:
-  ROSSceneManager(SScene *scene) : mScene(scene), mNode(scene->getName(), "/" + scene->getName()) {
+  explicit ROSSceneManager(SScene *scene) : mScene(scene), mNode(scene->getName(), "/" + scene->getName()) {
     nameSpace = "/" + scene->getName();
     // Set the use_sim_time
     auto parameters_client = rclcpp::SyncParametersClient(&mNode);
