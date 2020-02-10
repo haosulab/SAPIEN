@@ -7,3 +7,5 @@ cmake-build-debug
 /.ccls-cache/
 /.dir-locals.el
 /sapien.egg-info/
+/__pycache__
+.ini
