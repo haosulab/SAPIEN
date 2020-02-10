@@ -1,5 +1,5 @@
 #pragma once
-#include "event_system/events.h"
+#include "event_system/event_system.h"
 #include "id_generator.h"
 #include "simulation_callback.h"
 #include <PxPhysicsAPI.h>
@@ -32,7 +32,7 @@ class URDFLoader;
 
 using namespace physx;
 
-class SScene : public EventEmitter<StepEvent> {
+class SScene : public EventEmitter<EventStep> {
   friend ActorBuilder;
   friend LinkBuilder;
   friend ArticulationBuilder;

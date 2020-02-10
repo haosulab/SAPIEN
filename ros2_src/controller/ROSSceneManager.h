@@ -1,6 +1,6 @@
 #pragma once
 
-#include "event_system/events.h"
+#include "event_system/event_system.h"
 #include "rclcpp/rclcpp.hpp"
 #include "rosgraph_msgs/msg/clock.hpp"
 #include "sapien_scene.h"
@@ -12,7 +12,7 @@ namespace ros2 {
 
 class RobotManager;
 
-class ROSSceneManager : public IEventListener<StepEvent> {
+class ROSSceneManager : public IEventListener<EventStep> {
 protected:
   SScene *mScene;
   rclcpp::Node mNode;
