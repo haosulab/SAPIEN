@@ -20,4 +20,8 @@ public:
 };
 
 
+struct StepEvent : public Event {
+  float timeStep;
+};
+
 }; // namespace sapien

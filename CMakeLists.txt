@@ -114,60 +114,29 @@ add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py $
 
 add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtest/*.py ${CMAKE_CURRENT_BINARY_DIR})
 
-# Below are the ROS specified content
-set(SUPPORTED_ROS_VERSION "melodic" "kinetic" "lunar")
-set(OLD_ROS_VERSION "indigo" "jade" "hydro")
-set(ROS $ENV{ROS_DISTRO_HHH})
+
+# Below are the ROS2 specified cmake
+set(SUPPORTED_ROS_VERSION "dashing")
+set(OLD_ROS_VERSION "crystal" "bouncy" "ardent")
+set(ROS $ENV{ROS_DISTRO})
 if (ROS)
     list(FIND SUPPORTED_ROS_VERSION ${ROS} _index)
     if (_index GREATER -1)
         message("Your ROS Distribution is ${ROS}")
-        find_package(catkin REQUIRED COMPONENTS
-                sapien_ros_utils
-                roslaunch
-                moveit_core
-                moveit_ros_planning
-                moveit_ros_planning_interface
-                actionlib
-                actionlib_msgs
-                roscpp)
+        if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            add_compile_options(-Wall -Wextra -Wpedantic)
+        endif ()
+        find_package(ament_cmake REQUIRED)
+        find_package(rclcpp REQUIRED)
+        find_package(sensor_msgs REQUIRED)
+        find_package(std_msgs REQUIRED)
 
-        include_directories(${catkin_INCLUDE_DIRS} "robot")
-
-        add_library(sapien_robot
-                robot/controller/joint_trajectory_controller.cpp
-                robot/controller/cartesian_velocity_controller.cpp
-                robot/controller/velocity_control_service.cpp
-                robot/controller/joint_pub_node.cpp
-                robot/controller/controller_manger.cpp
-                robot/controller/group_planner.cpp
-                robot/device/input_device.cpp
-                robot/device/joystick_ps3.cpp
-                )
-        target_link_libraries(sapien_robot sapien ${catkin_LIBRARIES})
-
-        add_executable(robot robot/test/robot.cpp)
-        target_link_libraries(robot sapien_robot)
-        add_executable(movo_ps3 robot/example/movo_ps3_test.cpp)
-        target_link_libraries(movo_ps3 sapien_robot)
-        add_executable(gripper_ps3 robot/example/single_gripper_ps3_test.cpp)
-        target_link_libraries(gripper_ps3 sapien_robot)
-        #        add_executable(movo_keyboard robot/example/movo_keyboard_test.cpp)
-        #        target_link_libraries(movo_keyboard sapien_robot)
-        pybind11_add_module(sapyen_robot "python/pybind-robot.cpp")
-        target_link_libraries(sapyen_robot PRIVATE sapien_robot)
-        add_executable(xarm_ps3 robot/example/xarm_ps3_test.cpp)
-        target_link_libraries(xarm_ps3 sapien_robot)
-        add_executable(paper_demo robot/example/paper_demo.cpp)
-        target_link_libraries(paper_demo sapien_robot)
-
-        set_target_properties(sapien_robot PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-        set_target_properties(sapien_robot PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-
-
+        add_library(sapien_controller ros2_src/controller/joint_publisher.cpp ros2_src/controller/robot_manager.cpp ros2_src/controller/ROSSceneManager.cpp)
+        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs)
+        ament_package()
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)
         message("Your ROS version not supported. Please update to kinetic or above.")
     endif ()
 else ()
-    message(WARNING "No ROS Found")
+    message(WARNING "No ROS Found, will not compile source in ros2_src")
 endif ()

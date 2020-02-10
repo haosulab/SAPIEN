@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-    <name>physxtest</name>
+    <name>sapien</name>
     <version>1.0.0</version>
     <description>Physx simulation project ros binding</description>
     <maintainer email="sapien@ucsd.edu"></maintainer>
