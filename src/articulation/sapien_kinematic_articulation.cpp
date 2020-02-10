@@ -2,8 +2,8 @@
 #include "sapien_joint.h"
 #include "sapien_kinematic_joint.h"
 #include "sapien_link.h"
-#include <spdlog/spdlog.h>
 #include "sapien_scene.h"
+#include <spdlog/spdlog.h>
 
 #define CHECK_SIZE(v)                                                                             \
   {                                                                                               \
@@ -111,9 +111,15 @@ void SKArticulation::setQlimits(std::vector<std::array<physx::PxReal, 2>> const 
 }
 
 void SKArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
-  // TODO: implement
-  spdlog::critical("set drive target not implemented for kinematic articulation");
+  CHECK_SIZE(v);
+  auto it = v.begin();
+  for (auto &j : mJoints) {
+    uint32_t dof = j->getDof();
+    j->setDriveTarget({it, it + dof});
+    it += dof;
+  }
 }
+
 std::vector<physx::PxReal> SKArticulation::getDriveTarget() const {
   return std::vector<PxReal>(0, dof());
 }
@@ -137,6 +143,7 @@ void SKArticulation::prestep() {
 
   for (uint32_t n = 1; n < mSortedIndices.size(); ++n) {
     uint32_t idx = mSortedIndices[n];
+    mJoints[idx]->updatePos(mScene->getTimestep());
     poses[idx] = poses[mJoints[idx]->getParentLink()->getIndex()] *
                  mJoints[idx]->getChild2ParentTransform();
     mLinks[idx]->getPxActor()->setKinematicTarget(poses[idx]);

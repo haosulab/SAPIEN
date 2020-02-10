@@ -33,6 +33,38 @@ void SKJointSingleDof::setVel(const std::vector<PxReal> &v) {
   vel = v[0];
 }
 
+void SKJointSingleDof::setDriveProperties(PxReal accStiffness, PxReal accDamping, PxReal vmax) {
+  stiffness = accStiffness;
+  damping = accDamping;
+  maxVel = vmax;
+}
+
+void SKJointSingleDof::setDriveTarget(std::vector<PxReal> const &p) {
+  if (p.size() != 1) {
+    spdlog::error("setDriveTarget failed: argument does not match joint DOF");
+  }
+  targetPos = p[0];
+}
+void SKJointSingleDof::setDriveVelocityTarget(std::vector<PxReal> const &v) {
+  if (v.size() != 1) {
+    spdlog::error("setDriveVelocityTarget failed: argument does not match joint DOF");
+  }
+  targetVel = v[0];
+}
+
+void SKJointSingleDof::updatePos(PxReal dt) {
+  acc = stiffness * (targetPos - pos) + damping * (targetVel - vel);
+  vel += acc * dt;
+  if (vel > maxVel) {
+    vel = maxVel;
+  } else if (vel < -maxVel) {
+    vel = -maxVel;
+  }
+
+  pos += vel * dt;
+  pos = std::clamp(pos, lowerLimit, upperLimit);
+}
+
 void SKJointFixed::setLimits(const std::vector<std::array<physx::PxReal, 2>> &limits) {
   if (limits.size()) {
     spdlog::error("setLimits failed: fixed joint does not support limits");
