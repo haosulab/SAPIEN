@@ -20,7 +20,7 @@ protected:
 
   sensor_msgs::msg::JointState *mJointStates = nullptr;
 
-protected:
+public:
   JointPublisher(const std::string &nameSpace, rclcpp::Node *node, rclcpp::Clock::SharedPtr clock,
                  sensor_msgs::msg::JointState *states, double pubFrequency)
       : mNode(node), mJointStates(states) {
@@ -34,7 +34,9 @@ protected:
     std::string prefix = nameSpace + "/joint_states";
     mPub = node->create_publisher<sensor_msgs::msg::JointState>(prefix, rmw_qos_profile_default);
   };
+  ~JointPublisher()= default;;
 
+protected:
 
   void pubJointStates() { mPub->publish(*mJointStates); };
 };
