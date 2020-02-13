@@ -38,7 +38,7 @@ public:
 
 protected:
 
-  void pubJointStates() { mPub->publish(*mJointStates); };
+  inline void pubJointStates() { mPub->publish(*mJointStates); };
 };
 
 } // namespace sapien::ros2

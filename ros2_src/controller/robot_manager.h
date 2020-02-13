@@ -17,14 +17,15 @@ class RobotManager {
 
 public:
 protected:
-  rclcpp::Node::UniquePtr mNode = nullptr;
+  // State
+  rclcpp::Node::SharedPtr mNode = nullptr;
   sensor_msgs::msg::JointState::UniquePtr mJointStates = nullptr;
+  SControllableArticulation *wrapper;
+  rclcpp::Clock::SharedPtr mClock;
 
   // Cache
   std::string mNameSpace;
   uint32_t mJointNum = 0;
-  SControllableArticulation *wrapper;
-  rclcpp::Clock::SharedPtr mClock;
 
   // Controllers
   std::unique_ptr<JointPublisher> mJointPublisher = nullptr;
@@ -42,14 +43,12 @@ public:
                                                        mJointStates.get(), pubFrequency);
   };
 
-  RobotManager(SControllableArticulation *wrapper, const std::string &nameSpace,
+  RobotManager(SControllableArticulation *wrapper, const std::string &nameSpace, const std::string robotName,
                rclcpp::Clock::SharedPtr clock)
       : wrapper(wrapper), mClock(std::move(clock)) {
 
     // Create Node
-    auto nodeName(nameSpace.substr(1));
-    std::replace(nodeName.begin(), nodeName.end(), '/', '_');
-    mNode = rclcpp::Node::make_unique(nodeName, nameSpace);
+    mNode = rclcpp::Node::make_shared(robotName, nameSpace);
 
     // Create Initial Joint States
     mJointStates = std::make_unique<sensor_msgs::msg::JointState>();

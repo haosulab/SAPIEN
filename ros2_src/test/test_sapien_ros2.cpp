@@ -40,6 +40,10 @@ void test1(int argc, char *argv[]) {
   auto controllableWrapper = ros2::SControllableArticulation(robot);
   scene->registerListener(controllableWrapper);
 
+  // Test Controller
+  robotManager->createJointPublisher(60);
+  sceneManager.start();
+
   uint32_t step = 0;
   while (!controller.shouldQuit()) {
     scene->step();
