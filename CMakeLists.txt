@@ -131,8 +131,24 @@ if (ROS)
         find_package(sensor_msgs REQUIRED)
         find_package(std_msgs REQUIRED)
 
-        add_library(sapien_controller ros2_src/controller/joint_publisher.cpp ros2_src/controller/robot_manager.cpp ros2_src/controller/ROSSceneManager.cpp)
-        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs)
+        include_directories(
+                "/opt/ros/${ROS}/include"
+                "ros2_src"
+        )
+
+        # incomplete class
+#        add_library(sapien_controller ros2_src/controller/joint_publisher.cpp ros2_src/controller/robot_manager.cpp ros2_src/controller/ROSSceneManager.cpp)
+#        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs)
+
+        file(GLOB_RECURSE SAPIEN_DEVICE_SRC "ros2_src/device/*.cpp" "ros2_src/device/*.h")
+        add_library(sapien_device ${SAPIEN_DEVICE_SRC})
+        ament_target_dependencies(sapien_device rclcpp std_msgs)
+
+        set_target_properties(sapien_device PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
+        # test
+        add_executable(manual_PS3 manualtest/PS3ROSTest.cpp)
+        target_link_libraries(manual_PS3 sapien_device)
         ament_package()
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)
         message("Your ROS version not supported. Please update to kinetic or above.")
