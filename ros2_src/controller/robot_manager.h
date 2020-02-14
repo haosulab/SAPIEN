@@ -16,11 +16,12 @@ class RobotManager {
   friend class SceneManager;
 
 public:
+  SControllableArticulation *wrapper;
+
 protected:
   // State
-  rclcpp::Node::SharedPtr mNode = nullptr;
+  rclcpp::Node::SharedPtr mNode;
   sensor_msgs::msg::JointState::UniquePtr mJointStates = nullptr;
-  SControllableArticulation *wrapper;
   rclcpp::Clock::SharedPtr mClock;
 
   // Cache
@@ -39,15 +40,14 @@ public:
       return;
     }
 
-    mJointPublisher = std::make_unique<JointPublisher>(mNameSpace, mNode.get(), mClock,
-                                                       mJointStates.get(), pubFrequency);
+    mJointPublisher = std::make_unique<JointPublisher>(mNameSpace, mNode->shared_from_this(),
+                                                       mClock, mJointStates.get(), pubFrequency);
   };
 
-  RobotManager(SControllableArticulation *wrapper, const std::string &nameSpace, const std::string robotName,
-               rclcpp::Clock::SharedPtr clock)
-      : wrapper(wrapper), mClock(std::move(clock)) {
+  RobotManager(SControllableArticulation *wrapper, const std::string &nameSpace,
+               const std::string &robotName, rclcpp::Clock::SharedPtr clock)
+      : wrapper(wrapper), mClock(std::move(clock)), mNameSpace(nameSpace + "/" + robotName) {
 
-    // Create Node
     mNode = rclcpp::Node::make_shared(robotName, nameSpace);
 
     // Create Initial Joint States
@@ -87,11 +87,18 @@ protected:
     mJointStates->header.stamp = mClock->now();
     mJointStates->position.assign(jointAngles.begin(), jointAngles.begin() + mJointNum);
     mJointStates->velocity.assign(jointVelocity.begin(), jointVelocity.begin() + mJointNum);
+    mJointStates->header.stamp = mClock->now();
   };
 
   // Step function when simulator step once
   void step() {
     updateJointStates(wrapper->mJointPositions.read(), wrapper->mJointVelocities.read());
   };
+
+  void start() {
+    if (mJointPublisher) {
+      mJointPublisher->start();
+    }
+  }
 };
 } // namespace sapien::ros2

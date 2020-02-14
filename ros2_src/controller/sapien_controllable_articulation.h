@@ -4,6 +4,7 @@
 #include "articulation/sapien_articulation_base.h"
 #include "articulation/sapien_joint.h"
 #include "event_system/event_system.h"
+#include <iostream>
 #include <queue>
 #include <spdlog/spdlog.h>
 #include <vector>
@@ -82,18 +83,21 @@ protected:
   // Cache
   std::vector<std::string> mQNames;
   std::vector<SJoint *> mJoints;
+  float mTimeStep = 0;
 
 public:
   // State
   ThreadSafeVector<float> mJointPositions;
   ThreadSafeVector<float> mJointVelocities;
-  ThreadSafeQueue<std::vector<float>> mPositionCommands;
-  ThreadSafeQueue<std::vector<float>> mVelocityCommands;
+  std::vector<ThreadSafeQueue<std::vector<float>> *> mPositionCommands;
+  std::vector<ThreadSafeQueue<std::vector<float>> *> mVelocityCommands;
+  std::vector<std::vector<uint32_t>> mPositionCommandsIndex;
+  std::vector<std::vector<uint32_t>> mVelocityCommandsIndex;
 
 public:
   explicit SControllableArticulation(SArticulation *articulation)
       : mArticulation(articulation), mJointPositions(articulation->dof()),
-        mJointVelocities(articulation->dof()){
+        mJointVelocities(articulation->dof()) {
     auto joints = mArticulation->getSJoints();
     for (int i = 0; i < joints.size(); ++i) {
       if (joints[i]->getDof() > 0) {
@@ -107,33 +111,106 @@ public:
 
   inline std::vector<std::string> getDriveJointNames() { return mQNames; }
 
+  bool registerPositionCommands(ThreadSafeQueue<std::vector<float>> *command,
+                                const std::vector<std::string> &commandedJointNames) {
+    std::vector<uint32_t> controllerIndex = {};
+    for (const auto &qName : commandedJointNames) {
+      auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
+      if (iterator == mQNames.end()) {
+        std::cerr << "Joint name given controller not found in the articulation: " << qName
+                  << std::endl;
+        return false;
+      }
+      auto index = iterator - mQNames.begin();
+      controllerIndex.push_back(index);
+    }
+
+    // Register position based command
+    mPositionCommandsIndex.push_back(controllerIndex);
+    mPositionCommands.push_back(command);
+    return true;
+  };
+
+  bool registerVelocityCommands(ThreadSafeQueue<std::vector<float>> *command,
+                                const std::vector<std::string> &commandedJointNames) {
+    std::vector<uint32_t> controllerIndex = {};
+    for (const auto &qName : commandedJointNames) {
+      auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
+      if (iterator == mQNames.end()) {
+        std::cerr << "Joint name given controller not found in the articulation: " << qName
+                  << std::endl;
+        return false;
+      }
+      auto index = iterator - mQNames.begin();
+      controllerIndex.push_back(index);
+    }
+
+    // Register velocity based command
+    mVelocityCommandsIndex.push_back(controllerIndex);
+    mVelocityCommands.push_back(command);
+    return true;
+  };
+
 protected:
   void onEvent(EventStep &event) override {
     mJointPositions.write(mArticulation->getQpos());
     mJointVelocities.write(mArticulation->getQvel());
-    if (!mPositionCommands.empty()) {
-      auto command = mPositionCommands.pop();
-      CHECK_VEC_SIZE(command, mArticulation->dof());
+    mTimeStep = event.timeStep;
+
+    // Aggregate position commands information
+    std::vector<float> currentPositionCommands(mArticulation->dof(), -2000);
+    for (size_t k = 0; k < mPositionCommands.size(); ++k) {
+      if (mPositionCommands[k]->empty()) {
+        continue;
+      }
+      auto index = mPositionCommandsIndex[k];
+      auto command = mPositionCommands[k]->pop();
+      for (size_t i = 0; i < index.size(); ++i) {
+        currentPositionCommands[index[i]] = command[i];
+      }
+    }
+    // Aggregate velocity commands information
+    std::vector<float> currentVelocityCommands(mArticulation->dof(), -2000);
+    for (size_t k = 0; k < mVelocityCommands.size(); ++k) {
+      if (mVelocityCommands[k]->empty()) {
+        continue;
+      }
+      auto index = mVelocityCommandsIndex[k];
+      auto command = mVelocityCommands[k]->pop();
+      for (size_t i = 0; i < index.size(); ++i) {
+        currentVelocityCommands[index[i]] = command[i];
+      }
+    }
+
+    // Integrate Position and Velocity Commands
+    auto lastDriveTarget = mArticulation->getDriveTarget();
+    for (size_t l = 0; l < currentPositionCommands.size(); ++l) {
+      if (currentVelocityCommands[l] > -999) {
+        if (currentPositionCommands[l] > -999) {
+          currentPositionCommands[l] += currentVelocityCommands[l] * mTimeStep;
+        } else {
+          currentPositionCommands[l] = lastDriveTarget[l] + currentVelocityCommands[l] * mTimeStep;
+        }
+      }
       uint32_t i = 0;
       for (auto &j : mJoints) {
         for (auto axis : j->getAxes()) {
           // We use -1000 to represent inactive control command
-          if (command[i] > -999) {
-            j->getPxJoint()->setDriveTarget(axis, command[i]);
+          if (currentPositionCommands[i] > -999) {
+            j->getPxJoint()->setDriveTarget(axis, currentPositionCommands[i]);
           }
           i += 1;
         }
       }
     }
+
     if (!mVelocityCommands.empty()) {
-      auto command = mVelocityCommands.pop();
-      CHECK_VEC_SIZE(command, mArticulation->dof());
       uint32_t i = 0;
       for (auto &j : mJoints) {
         for (auto axis : j->getAxes()) {
           // We use -1000 to represent inactive control command
-          if (command[i] > -999) {
-            j->getPxJoint()->setDriveVelocity(axis, command[i]);
+          if (currentVelocityCommands[i] > -999) {
+            j->getPxJoint()->setDriveVelocity(axis, currentVelocityCommands[i]);
           }
           i += 1;
         }
