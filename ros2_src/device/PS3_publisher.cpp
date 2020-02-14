@@ -23,7 +23,7 @@ void PS3Publisher::pubPS3() {
   mPub->publish(message);
 }
 
-PS3Publisher::PS3Publisher(const std::string &nameSpace, rclcpp::Node *node, rclcpp::Clock::SharedPtr clock, double pubFrequency)
+PS3Publisher::PS3Publisher(const std::string &nameSpace, std::shared_ptr<rclcpp::Node> node, rclcpp::Clock::SharedPtr clock, double pubFrequency)
     : mNode(node) {
   ps3 = std::make_unique<sapien::robot::PS3>();
   mClock = clock;
@@ -35,10 +35,8 @@ PS3Publisher::PS3Publisher(const std::string &nameSpace, rclcpp::Node *node, rcl
   // Create Timer
   auto _interval = static_cast<unsigned long long>(1 / pubFrequency * 1e6);
   auto interval = std::chrono::microseconds(_interval);
-  auto pubCallBack = std::bind(&PS3Publisher::pubPS3, this);
 
-  rclcpp::create_timer(node, std::move(clock), rclcpp::Duration(interval), pubCallBack);
-//  timer_ = mNode->create_wall_timer(interval, pubCallBack);
+  timer = rclcpp::create_timer(node, mClock,  rclcpp::Duration(interval), std::bind(&PS3Publisher::pubPS3, this));
 };
 
 }

@@ -19,16 +19,16 @@ class PS3Publisher{
 
 protected:
   rclcpp::Publisher<sensor_msgs::msg::Joy>::SharedPtr mPub;
-//  rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Node *mNode;
+  std::shared_ptr<rclcpp::Node> mNode;
   rclcpp::Clock::SharedPtr mClock;
   std::unique_ptr<sapien::robot::PS3> ps3;
+  rclcpp::TimerBase::SharedPtr timer;
 
 private:
   void pubPS3();
 
 public:
-  PS3Publisher(const std::string &nameSpace, rclcpp::Node *node, rclcpp::Clock::SharedPtr clock, double pubFrequency);
+  PS3Publisher(const std::string &nameSpace, std::shared_ptr<rclcpp::Node> node, rclcpp::Clock::SharedPtr clock, double pubFrequency);
 };
 
 } // namespace sapien::ros2

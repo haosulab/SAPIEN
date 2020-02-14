@@ -26,7 +26,7 @@ protected:
 public:
   JointPublisher(const std::string &nameSpace, const rclcpp::Node::SharedPtr& node,
                  rclcpp::Clock::SharedPtr clock, sensor_msgs::msg::JointState *states,
-                 double pubFrequency);;
+                 double pubFrequency);
   ~JointPublisher() = default;
   ;
 

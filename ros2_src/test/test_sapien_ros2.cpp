@@ -54,10 +54,10 @@ void test1(int argc, char *argv[]) {
     step++;
     robotManager->balancePassiveForce();
 //    std::cout << sceneManager.now().nanoseconds() / 1e9 << std::endl;
-    if (step == 100) {
-      std::vector<float> temp(robot->dof(), -1);
-      controllableWrapper->mPositionCommands.push(temp);
-    }
+//    if (step == 100) {
+//      std::vector<float> temp(robot->dof(), -1);
+//      controllableWrapper->mPositionCommands.push(temp);
+//    }
   }
   rclcpp::shutdown();
 }

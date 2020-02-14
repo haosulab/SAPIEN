@@ -119,7 +119,7 @@ public:
       return;
     }
 
-    ps3Publisher = std::make_unique<PS3Publisher>(mNameSpace, mNode.get(), mClock, pubFrequency);
+    ps3Publisher = std::make_unique<PS3Publisher>(mNameSpace, mNode->shared_from_this(), mClock, pubFrequency);
   }
 
   rclcpp::Time now() { return mClock->now(); };
