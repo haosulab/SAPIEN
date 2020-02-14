@@ -37,11 +37,10 @@ void test1(int argc, char *argv[]) {
   ros2::SceneManager sceneManager(scene.get(), "scene1");
   auto robotManager = sceneManager.buildRobotManager(robot, "movo");
   robotManager->setDriveProperty(2000, 50);
-  auto controllableWrapper = ros2::SControllableArticulation(robot);
-  scene->registerListener(controllableWrapper);
+  auto controllableWrapper = robotManager->wrapper;
 
   // Test Controller
-  robotManager->createJointPublisher(60);
+  robotManager->createJointPublisher(20);
   sceneManager.start();
 
   uint32_t step = 0;
@@ -51,11 +50,13 @@ void test1(int argc, char *argv[]) {
     controller.render();
     step++;
     robotManager->balancePassiveForce();
+//    std::cout << sceneManager.now().nanoseconds() / 1e9 << std::endl;
     if (step == 100) {
       std::vector<float> temp(robot->dof(), -1);
-      controllableWrapper.mPositionCommands.push(temp);
+      controllableWrapper->mPositionCommands.push(temp);
     }
   }
+  rclcpp::shutdown();
 }
 
 int main(int argc, char *argv[]) { test1(argc, argv); }

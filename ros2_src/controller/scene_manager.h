@@ -88,22 +88,31 @@ public:
         std::make_unique<RobotManager>(wrapper.get(), robotNameSpace, robotName, mClock);
     auto robotMangerWeakPtr = robotManager.get();
 
+    // Register Scene Call Back
+    mScene->registerListener(*wrapper);
+
     // Maintain Cache and add to executor
     mExecutor.add_node(robotManager->mNode->shared_from_this());
     mRobotManagers.push_back(std::move(robotManager));
     mArticulationWrappers.push_back(std::move(wrapper));
+
     return robotMangerWeakPtr;
   };
 
   void start() {
+    for (auto &mRobotManager : mRobotManagers) {
+      mRobotManager->start();
+    }
     mThread = std::thread(&rclcpp::executors::SingleThreadedExecutor::spin, &mExecutor);
   }
+
+  rclcpp::Time now() { return mClock->now(); };
 
 protected:
   void onEvent(EventStep &event) override {
     // Update time step and publish the /clock message
     float currentTimeStep = mScene->getTimestep();
-    mTime = mTime + rclcpp::Duration(rcl_duration_value_t(currentTimeStep * 10e9));
+    mTime = mTime + rclcpp::Duration(rcl_duration_value_t(currentTimeStep * 1e9));
     rosgraph_msgs::msg::Clock clockMessage;
     clockMessage.set__clock(mTime);
     mClockPub->publish(clockMessage);
