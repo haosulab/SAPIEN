@@ -36,7 +36,7 @@ void test1(int argc, char *argv[]) {
   rclcpp::init(argc, argv);
   ros2::SceneManager sceneManager(scene.get(), "scene1");
   auto robotManager = sceneManager.buildRobotManager(robot, "movo");
-  robotManager->setDriveProperty(2000, 50);
+  robotManager->setDriveProperty(0, 50);
   auto controllableWrapper = robotManager->wrapper;
 
   // Test Controller

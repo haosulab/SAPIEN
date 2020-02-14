@@ -17,6 +17,7 @@ class RobotManager {
 
 public:
   SControllableArticulation *wrapper;
+
 protected:
   // State
   rclcpp::Node::SharedPtr mNode;
