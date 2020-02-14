@@ -44,6 +44,9 @@ void test1(int argc, char *argv[]) {
   robotManager->createJointPublisher(60);
   sceneManager.start();
 
+  // test PS3
+  sceneManager.createPS3Publisher(50.0f);
+
   uint32_t step = 0;
   while (!controller.shouldQuit()) {
     scene->step();

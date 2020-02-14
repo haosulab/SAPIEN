@@ -142,10 +142,9 @@ if (ROS)
 
         file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/articulation/*.cpp")
         add_library(sapien_controller ${SAPIEN_ROBOT_SRC})
-        target_link_libraries(sapien_controller sapien)
+        target_link_libraries(sapien_controller sapien sapien_device)
         ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs)
 
-        set_target_properties(sapien_device PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
         # test
         add_executable(manual_PS3 manualtest/PS3ROSTest.cpp)

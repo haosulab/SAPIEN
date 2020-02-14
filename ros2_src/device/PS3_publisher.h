@@ -19,7 +19,7 @@ class PS3Publisher{
 
 protected:
   rclcpp::Publisher<sensor_msgs::msg::Joy>::SharedPtr mPub;
-  rclcpp::TimerBase::SharedPtr timer_;
+//  rclcpp::TimerBase::SharedPtr timer_;
   rclcpp::Node *mNode;
   rclcpp::Clock::SharedPtr mClock;
   std::unique_ptr<sapien::robot::PS3> ps3;

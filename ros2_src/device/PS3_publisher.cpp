@@ -37,9 +37,8 @@ PS3Publisher::PS3Publisher(const std::string &nameSpace, rclcpp::Node *node, rcl
   auto interval = std::chrono::microseconds(_interval);
   auto pubCallBack = std::bind(&PS3Publisher::pubPS3, this);
 
-  // TODO: Use passed in clock for timer
-//  rclcpp::create_timer(node, std::move(clock), rclcpp::Duration(interval), pubCallBack);
-  timer_ = mNode->create_wall_timer(interval, pubCallBack);
+  rclcpp::create_timer(node, std::move(clock), rclcpp::Duration(interval), pubCallBack);
+//  timer_ = mNode->create_wall_timer(interval, pubCallBack);
 };
 
 }
