@@ -142,7 +142,7 @@ if (ROS)
 
         file(GLOB_RECURSE SAPIEN_DEVICE_SRC "ros2_src/device/*.cpp" "ros2_src/device/*.h")
         add_library(sapien_device ${SAPIEN_DEVICE_SRC})
-        ament_target_dependencies(sapien_device rclcpp std_msgs)
+        ament_target_dependencies(sapien_device rclcpp std_msgs sensor_msgs)
 
         set_target_properties(sapien_device PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
