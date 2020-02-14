@@ -224,7 +224,7 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
     }
   }
 
-  return passiveForce;
+  return I2E(passiveForce);
 }
 
 void SArticulation::prestep() {

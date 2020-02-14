@@ -1,32 +1,36 @@
 #pragma once
 
+#include <numeric>
 #include <utility>
 
 #include "joint_publisher.h"
 #include "rclcpp/rclcpp.hpp"
+#include "sapien_controllable_articulation.h"
 
 namespace sapien::ros2 {
 
 class JointPublisher;
 class SceneManager;
-class ControllableArticulationWrapper;
+class SControllableArticulation;
 class RobotManager {
-  friend SceneManager;
+  friend class SceneManager;
 
 public:
 protected:
-  std::unique_ptr<JointPublisher> mJointPublisher = nullptr;
-  rclcpp::Node::UniquePtr mNode = nullptr;
+  // State
+  rclcpp::Node::SharedPtr mNode = nullptr;
   sensor_msgs::msg::JointState::UniquePtr mJointStates = nullptr;
+  SControllableArticulation *wrapper;
+  rclcpp::Clock::SharedPtr mClock;
 
   // Cache
   std::string mNameSpace;
   uint32_t mJointNum = 0;
-  ControllableArticulationWrapper *wrapper;
-  rclcpp::Clock::SharedPtr mClock;
+
+  // Controllers
+  std::unique_ptr<JointPublisher> mJointPublisher = nullptr;
 
 public:
-  const std::vector<std::string> getDriveJointNames(){};
   void createJointPublisher(double pubFrequency) {
     if (mJointPublisher) {
       RCLCPP_WARN(mNode->get_logger(),
@@ -35,19 +39,16 @@ public:
       return;
     }
 
-    mJointPublisher = std::make_unique<JointPublisher>(this, mNameSpace, &mNode, mClock,
+    mJointPublisher = std::make_unique<JointPublisher>(mNameSpace, mNode.get(), mClock,
                                                        mJointStates.get(), pubFrequency);
   };
 
-protected:
-  RobotManager(ControllableArticulationWrapper *wrapper, const std::string& nameSpace, rclcpp::Clock::SharedPtr clock)
+  RobotManager(SControllableArticulation *wrapper, const std::string &nameSpace, const std::string robotName,
+               rclcpp::Clock::SharedPtr clock)
       : wrapper(wrapper), mClock(std::move(clock)) {
 
     // Create Node
-    auto nameIter = nameSpace.find('/');
-    auto nodeName(nameSpace);
-    nodeName[nameIter] = '_';
-    mNode = rclcpp::Node::make_unique(nodeName, nameSpace);
+    mNode = rclcpp::Node::make_shared(robotName, nameSpace);
 
     // Create Initial Joint States
     mJointStates = std::make_unique<sensor_msgs::msg::JointState>();
@@ -58,6 +59,29 @@ protected:
     mJointStates->velocity.resize(jointName.size());
   };
 
+  void setDriveProperty(float stiffness, float damping, float forceLimit = PX_MAX_F32,
+                        const std::vector<uint32_t> &jointIndex = {}) {
+    std::vector<uint32_t> index(jointIndex);
+    if (jointIndex.empty()) {
+      index.resize(wrapper->mJoints.size());
+      std::iota(std::begin(index), std::end(index), 0);
+    }
+
+    for (unsigned int i : index) {
+      assert(i < wrapper->mArticulation->dof());
+      auto joint = wrapper->mJoints[i];
+      joint->setDriveProperty(stiffness, damping, forceLimit);
+    }
+  };
+
+  void balancePassiveForce(bool gravity = true, bool coriolisAndCentrifugal = true,
+                           bool external = true) {
+    auto balanceForce =
+        wrapper->mArticulation->computePassiveForce(gravity, coriolisAndCentrifugal, external);
+    wrapper->mArticulation->setQf(balanceForce);
+  };
+
+protected:
   void updateJointStates(const std::vector<float> &jointAngles,
                          const std::vector<float> &jointVelocity) {
     mJointStates->header.stamp = mClock->now();
@@ -67,9 +91,7 @@ protected:
 
   // Step function when simulator step once
   void step() {
-    if (mJointPublisher) {
-      updateJointStates(wrapper->popCurrentJointPositions, wrapper->popCurrentJointVelocities);
-    }
+    updateJointStates(wrapper->mJointPositions.read(), wrapper->mJointVelocities.read());
   };
 };
 } // namespace sapien::ros2
