@@ -155,8 +155,14 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMateria
     }
   }
   if (roots.size() > 1) {
-    spdlog::error("Multiple root nodes detected in a single URDF");
+    spdlog::error("Failed to load URDF: multiple root nodes detected in a single URDF");
+    return nullptr;
   }
+  if (roots.size() == 0) {
+    spdlog::error("Failed to load URDF: no root node found");
+    return nullptr;
+  }
+  root = roots[0];
 
   // check tree property
   std::map<LinkTreeNode *, bool> link2visited;

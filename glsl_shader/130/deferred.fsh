@@ -77,18 +77,18 @@ const float eps = 0.1;
 // The Oren-Nayar shading model
 float orenNayar(vec3 l, vec3 v, vec3 n, float r) {
   float a = r * r;
-  float NoL = clamp(dot(n, l), 0, 1);
-  float NoV = clamp(dot(n, v), 0, 1);
-  float LoV = clamp(dot(l, v), 0, 1);
+  float NoL = clamp(dot(n, l), 0.0, 1.0);
+  float NoV = clamp(dot(n, v), 0.0, 1.0);
+  float LoV = clamp(dot(l, v), 0.0, 1.0);
   float NLNV = NoL * NoV;
 
-  if (NoL < 0 || NoV <0) return 0;
+  if (NoL < 0.0 || NoV < 0.0) return 0.0;
 
-  float A = 1 - 0.5 * (a / (a + 0.33));
+  float A = 1.0 - 0.5 * (a / (a + 0.33));
   float B = 0.45 * (a / (a + 0.09));
-  float C = max(0, LoV - NLNV) / max(NoL, NoV);
+  float C = max(0.0, LoV - NLNV) / max(NoL, NoV);
 
-  return min(max(0, NoL) * (A + B * C), 1);
+  return min(max(0.0, NoL) * (A + B * C), 1.0);
 }
 
 float ggx (vec3 L, vec3 V, vec3 N, float roughness, float F0) {
