@@ -226,9 +226,6 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
 
   auto rScene = mScene->getRendererScene();
   for (auto &r : mVisualRecord) {
-    physx_id_t newId = mScene->mRenderIdGenerator.next();
-    renderIds.push_back(newId);
-
     Renderer::IPxrRigidbody *body;
     switch (r.type) {
     case ActorBuilderVisualRecord::Type::Box:
@@ -246,11 +243,16 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
       body = rScene->addRigidbody(r.filename, r.scale);
       break;
     }
-    body->setUniqueId(newId);
-    body->setInitialPose(r.pose);
-    renderBodies.push_back(body);
+    if (body) {
+      physx_id_t newId = mScene->mRenderIdGenerator.next();
 
-    mScene->mRenderId2VisualName[newId] = r.name;
+      renderIds.push_back(newId);
+      body->setUniqueId(newId);
+      body->setInitialPose(r.pose);
+      renderBodies.push_back(body);
+
+      mScene->mRenderId2VisualName[newId] = r.name;
+    }
   }
 }
 
@@ -345,10 +347,12 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
       continue;
     }
 
-    cBody->setInitialPose(shape->getLocalPose());
-    cBody->setVisible(false);
-    cBody->setRenderMode(1);
-    collisionBodies.push_back(cBody);
+    if (cBody) {
+      cBody->setInitialPose(shape->getLocalPose());
+      cBody->setVisible(false);
+      cBody->setRenderMode(1);
+      collisionBodies.push_back(cBody);
+    }
   }
 }
 

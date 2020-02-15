@@ -33,6 +33,12 @@ public:
 
   // update pos by vel
   virtual void updatePos(PxReal dt) = 0;
+
+public:
+  using SJointBase::SJointBase;
+  SKJoint(SKJoint const &) = delete;
+  SKJoint &operator=(SKJoint const &) = delete;
+  ~SKJoint() = default;
 };
 
 class SKJointSingleDof : public SKJoint {
@@ -65,8 +71,8 @@ public:
   void setLimits(std::vector<std::array<PxReal, 2>> const &limits) override;
 
   void setDriveProperties(PxReal accStiffness, PxReal accDamping, PxReal maxVel) override;
-   void setDriveTarget(std::vector<PxReal> const &p) override;
-   void setDriveVelocityTarget(std::vector<PxReal> const &v) override;
+  void setDriveTarget(std::vector<PxReal> const &p) override;
+  void setDriveVelocityTarget(std::vector<PxReal> const &v) override;
   virtual void updatePos(PxReal dt) override;
 
   using SKJoint::SKJoint;

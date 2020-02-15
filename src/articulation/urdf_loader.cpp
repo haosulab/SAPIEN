@@ -99,8 +99,8 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMateria
   std::map<std::string, LinkTreeNode *> linkName2treeNode;
   std::map<std::string, LinkTreeNode *> jointName2treeNode;
 
-  if (robot->link_array.size() >= 64) {
-    std::cerr << "cannot build articulation with more than 64 links: " << filename << std::endl;
+  if (robot->link_array.size() >= 64 && !isKinematic) {
+    spdlog::error("cannot build dynamic articulation with more than 64 links");
     return nullptr;
   }
 
@@ -141,16 +141,21 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMateria
     jointName2treeNode[name] = childNode;
   }
 
+  std::vector<LinkTreeNode*> roots;
   // find root
   LinkTreeNode *root = nullptr;
   for (const auto &node : treeNodes) {
     if (!node->parent) {
-      if (root) {
-        std::cerr << "Error: multiple root nodes detected." << std::endl;
-        exit(1);
-      }
-      root = node.get();
+      roots.push_back(node.get());
+      // if (root) {
+      //   std::cerr << "Error: multiple root nodes detected." << std::endl;
+      //   exit(1);
+      // }
+      // root = node.get();
     }
+  }
+  if (roots.size() > 1) {
+    spdlog::error("Multiple root nodes detected in a single URDF");
   }
 
   // check tree property

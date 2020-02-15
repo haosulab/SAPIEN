@@ -50,6 +50,10 @@ public:
 
   void prestep() override;
 
+  SKArticulation(SKArticulation const &) = delete;
+  SKArticulation &operator=(SKArticulation const &) = delete;
+  ~SKArticulation() = default;
+
 private:
   SKArticulation(SScene *scene);
 };
