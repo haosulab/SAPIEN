@@ -9,3 +9,5 @@ cmake-build-debug
 /sapien.egg-info/
 /__pycache__
 .ini
+/ros2_ws/log/
+/ros2_ws/install/

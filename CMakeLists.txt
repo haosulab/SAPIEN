@@ -130,6 +130,7 @@ if (ROS)
         find_package(rclcpp REQUIRED)
         find_package(sensor_msgs REQUIRED)
         find_package(std_msgs REQUIRED)
+        find_package(sapien_ros2_communication_interface REQUIRED)
 
         include_directories(
                 "/opt/ros/${ROS}/include"
@@ -143,7 +144,7 @@ if (ROS)
         file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/articulation/*.cpp")
         add_library(sapien_controller ${SAPIEN_ROBOT_SRC})
         target_link_libraries(sapien_controller sapien)
-        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs)
+        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msg sapien_ros2_communication_interface)
 
         set_target_properties(sapien_device PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
