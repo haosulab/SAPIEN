@@ -1,80 +1,17 @@
 #pragma once
 
 #include "articulation/sapien_articulation.h"
-#include "articulation/sapien_articulation_base.h"
 #include "articulation/sapien_joint.h"
 #include "event_system/event_system.h"
-#include <iostream>
-#include <queue>
-#include <spdlog/spdlog.h>
-#include <vector>
-
-#define CHECK_VEC_SIZE(v, n)                                                                      \
-  {                                                                                               \
-    if ((v).size() != n) {                                                                        \
-      spdlog::error("Input vector size does not match DOF of articulation");                      \
-      return;                                                                                     \
-    }                                                                                             \
-  }
+#include "thread_safe_structure.h"
+#include <rclcpp/rclcpp.hpp>
+#include <utility>
 
 namespace sapien::ros2 {
 
 class RobotManager;
 
-template <typename T> class ThreadSafeVector {
-public:
-  ThreadSafeVector(uint32_t num) : mVec(num){};
-  void write(const std::vector<T> &input) {
-    std::lock_guard<std::mutex> guard(mLock);
-    if (input.size() != mVec.size()) {
-      spdlog::warn("Attempt to write a thread safe vector with a vector of differernt size!");
-      return;
-    }
-    for (int i = 0; i < mVec.size(); ++i) {
-      mVec[i] = input[i];
-    }
-  };
-
-  std::vector<T> read() {
-    std::lock_guard<std::mutex> guard(mLock);
-    std::vector<T> result(mVec);
-    return result;
-  };
-
-private:
-  std::vector<T> mVec;
-  std::mutex mLock;
-};
-
-template <typename T> class ThreadSafeQueue {
-public:
-  ThreadSafeQueue() : mQueue(){};
-  bool empty() {
-    std::lock_guard<std::mutex> guard(mLock);
-    return mQueue.empty();
-  };
-  void clear() {
-    std::lock_guard<std::mutex> guard(mLock);
-    std::queue<T> emptyQueue;
-    std::swap(mQueue, emptyQueue);
-  };
-  T pop() {
-    std::lock_guard<std::mutex> guard(mLock);
-    T topElement = mQueue.front();
-    mQueue.pop();
-    return topElement;
-  };
-  void push(const T &element) {
-    std::lock_guard<std::mutex> guard(mLock);
-    mQueue.push(element);
-  }
-
-private:
-  std::mutex mLock;
-  std::queue<T> mQueue;
-};
-
-class SControllableArticulation : public IEventListener<EventStep> {
+class SControllableArticulationWrapper : public IEventListener<EventStep> {
   friend RobotManager;
 
 protected:
@@ -84,27 +21,33 @@ protected:
   std::vector<std::string> mQNames;
   std::vector<SJoint *> mJoints;
   float mTimeStep = 0;
+  rclcpp::Clock::SharedPtr mClock = nullptr;
 
 public:
   // State
   ThreadSafeVector<float> mJointPositions;
   ThreadSafeVector<float> mJointVelocities;
+
   std::vector<ThreadSafeQueue<std::vector<float>> *> mPositionCommands;
   std::vector<ThreadSafeQueue<std::vector<float>> *> mVelocityCommands;
+  std::vector<ThreadSafeVector<float> *> mContinuousVelocityCommands;
+
   std::vector<std::vector<uint32_t>> mPositionCommandsIndex;
   std::vector<std::vector<uint32_t>> mVelocityCommandsIndex;
+  std::vector<std::vector<uint32_t>> mContinuousVelocityCommandsIndex;
 
 public:
-  explicit SControllableArticulation(SArticulation *articulation)
-      : mArticulation(articulation), mJointPositions(articulation->dof()),
-        mJointVelocities(articulation->dof()) {
+  explicit SControllableArticulationWrapper(SArticulation *articulation,
+                                            rclcpp::Clock::SharedPtr clock)
+      : mArticulation(articulation), mClock(std::move(clock)),
+        mJointPositions(articulation->dof()), mJointVelocities(articulation->dof()) {
     auto joints = mArticulation->getSJoints();
-    for (int i = 0; i < joints.size(); ++i) {
-      if (joints[i]->getDof() > 0) {
-        mJoints.push_back(joints[i]);
+    for (auto &joint : joints) {
+      if (joint->getDof() > 0) {
+        mJoints.push_back(joint);
       }
-      for (int j = 0; j < joints[i]->getDof(); ++j) {
-        mQNames.push_back(joints[i]->getName());
+      for (uint32_t j = 0; j < joint->getDof(); ++j) {
+        mQNames.push_back(joint->getName());
       }
     }
   };
@@ -117,8 +60,7 @@ public:
     for (const auto &qName : commandedJointNames) {
       auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
       if (iterator == mQNames.end()) {
-        std::cerr << "Joint name given controller not found in the articulation: " << qName
-                  << std::endl;
+        spdlog::warn("Joint name given not found in articulation %s \n", qName.c_str());
         return false;
       }
       auto index = iterator - mQNames.begin();
@@ -137,8 +79,7 @@ public:
     for (const auto &qName : commandedJointNames) {
       auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
       if (iterator == mQNames.end()) {
-        std::cerr << "Joint name given controller not found in the articulation: " << qName
-                  << std::endl;
+        spdlog::warn("Joint name given not found in articulation %s \n", qName.c_str());
         return false;
       }
       auto index = iterator - mQNames.begin();
@@ -148,6 +89,24 @@ public:
     // Register velocity based command
     mVelocityCommandsIndex.push_back(controllerIndex);
     mVelocityCommands.push_back(command);
+    return true;
+  };
+  bool registerContinuousVelocityCommands(ThreadSafeVector<float> *command,
+                                          const std::vector<std::string> &commandedJointNames) {
+    std::vector<uint32_t> controllerIndex = {};
+    for (const auto &qName : commandedJointNames) {
+      auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
+      if (iterator == mQNames.end()) {
+        spdlog::warn("Joint name given not found in articulation %s \n", qName.c_str());
+        return false;
+      }
+      auto index = iterator - mQNames.begin();
+      controllerIndex.push_back(index);
+    }
+
+    // Register velocity based command
+    mContinuousVelocityCommandsIndex.push_back(controllerIndex);
+    mContinuousVelocityCommands.push_back(command);
     return true;
   };
 
@@ -185,17 +144,18 @@ protected:
     // Integrate Position and Velocity Commands
     auto lastDriveTarget = mArticulation->getDriveTarget();
     for (size_t l = 0; l < currentPositionCommands.size(); ++l) {
-      if (currentVelocityCommands[l] > -999) {
-        if (currentPositionCommands[l] > -999) {
-          currentPositionCommands[l] += currentVelocityCommands[l] * mTimeStep;
-        } else {
-          currentPositionCommands[l] = lastDriveTarget[l] + currentVelocityCommands[l] * mTimeStep;
-        }
+      if (currentPositionCommands[l] > -999) {
+        currentPositionCommands[l] += currentVelocityCommands[l] * mTimeStep;
+      } else {
+        currentPositionCommands[l] = lastDriveTarget[l] + currentVelocityCommands[l] * mTimeStep;
       }
+    }
+
+    // Execute position command
+    if (!mPositionCommands.empty() || !mVelocityCommands.empty()) {
       uint32_t i = 0;
       for (auto &j : mJoints) {
         for (auto axis : j->getAxes()) {
-          // We use -1000 to represent inactive control command
           if (currentPositionCommands[i] > -999) {
             j->getPxJoint()->setDriveTarget(axis, currentPositionCommands[i]);
           }
@@ -204,14 +164,23 @@ protected:
       }
     }
 
-    if (!mVelocityCommands.empty()) {
+    // Aggregate continuous velocity information to velocity command
+    if (!mContinuousVelocityCommands.empty()) {
+      for (size_t i = 0; i < mContinuousVelocityCommands.size(); ++i) {
+        auto continuousVelocityCommands = mContinuousVelocityCommands[i]->read();
+        auto index = mContinuousVelocityCommandsIndex[i];
+        for (size_t j = 0; j < index.size(); ++j) {
+          currentVelocityCommands[index[j]] = continuousVelocityCommands[j];
+        }
+      }
+    }
+
+    // Execute velocity command
+    if (!mVelocityCommands.empty() || !mContinuousVelocityCommands.empty()) {
       uint32_t i = 0;
       for (auto &j : mJoints) {
         for (auto axis : j->getAxes()) {
-          // We use -1000 to represent inactive control command
-          if (currentVelocityCommands[i] > -999) {
-            j->getPxJoint()->setDriveVelocity(axis, currentVelocityCommands[i]);
-          }
+          j->getPxJoint()->setDriveVelocity(axis, currentVelocityCommands[i]);
           i += 1;
         }
       }

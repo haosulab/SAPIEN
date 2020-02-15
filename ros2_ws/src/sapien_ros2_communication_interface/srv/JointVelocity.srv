@@ -1,5 +1,6 @@
 builtin_interfaces/Time stamp
 string[] name
-float64[] velocity
+float32[] velocity
+bool continuous false
 ---
 bool success

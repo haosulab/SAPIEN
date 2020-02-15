@@ -24,7 +24,7 @@ protected:
 
   // Cache
   std::vector<std::unique_ptr<RobotManager>> mRobotManagers;
-  std::vector<std::unique_ptr<SControllableArticulation>> mArticulationWrappers;
+  std::vector<std::unique_ptr<SControllableArticulationWrapper>> mArticulationWrappers;
 
   // Clock and Time Manage
   rclcpp::TimeSource mTS;
@@ -83,7 +83,7 @@ public:
 
   RobotManager *buildRobotManager(SArticulation *articulation, const std::string &robotName) {
     auto robotNameSpace = mNameSpace;
-    auto wrapper = std::make_unique<SControllableArticulation>(articulation);
+    auto wrapper = std::make_unique<SControllableArticulationWrapper>(articulation, mClock);
     auto robotManager =
         std::make_unique<RobotManager>(wrapper.get(), robotNameSpace, robotName, mClock);
     auto robotMangerWeakPtr = robotManager.get();

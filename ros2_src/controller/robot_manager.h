@@ -11,12 +11,12 @@ namespace sapien::ros2 {
 
 class JointPublisher;
 class SceneManager;
-class SControllableArticulation;
+class SControllableArticulationWrapper;
 class RobotManager {
   friend class SceneManager;
 
 public:
-  SControllableArticulation *wrapper;
+  SControllableArticulationWrapper *wrapper;
 
 protected:
   // State
@@ -44,7 +44,7 @@ public:
                                                        mClock, mJointStates.get(), pubFrequency);
   };
 
-  RobotManager(SControllableArticulation *wrapper, const std::string &nameSpace,
+  RobotManager(SControllableArticulationWrapper *wrapper, const std::string &nameSpace,
                const std::string &robotName, rclcpp::Clock::SharedPtr clock)
       : wrapper(wrapper), mClock(std::move(clock)), mNameSpace(nameSpace + "/" + robotName) {
 
