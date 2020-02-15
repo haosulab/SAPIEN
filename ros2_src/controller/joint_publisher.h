@@ -21,6 +21,7 @@ protected:
   rclcpp::Clock::SharedPtr mClock;
   rclcpp::Duration mInterval;
   std::thread mThread;
+  rclcpp::TimerBase::SharedPtr mTimer;
   bool stop = false;
 
 public:

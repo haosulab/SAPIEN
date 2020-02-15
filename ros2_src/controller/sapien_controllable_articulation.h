@@ -3,7 +3,7 @@
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_joint.h"
 #include "event_system/event_system.h"
-#include "thread_safe_structure.h"
+#include "utils/thread_safe_structure.hpp"
 #include <rclcpp/rclcpp.hpp>
 #include <utility>
 

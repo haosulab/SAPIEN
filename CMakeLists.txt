@@ -141,20 +141,17 @@ if (ROS)
         add_library(sapien_device ${SAPIEN_DEVICE_SRC})
         ament_target_dependencies(sapien_device rclcpp sensor_msgs)
 
-        file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/articulation/*.cpp")
+        file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/articulation/*.cpp" "ros2_src/utils/*.hpp")
         add_library(sapien_controller ${SAPIEN_ROBOT_SRC})
         target_link_libraries(sapien_controller sapien)
         ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msg sapien_ros2_communication_interface)
-        target_link_libraries(sapien_controller sapien sapien_device)
-        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs)
-
 
         # test
         add_executable(manual_PS3 manualtest/PS3ROSTest.cpp)
         target_link_libraries(manual_PS3 sapien_device)
 
         add_executable(test_ros2 ros2_src/test/test_sapien_ros2.cpp)
-        target_link_libraries(test_ros2 sapien_controller)
+        target_link_libraries(test_ros2 sapien_controller sapien_device)
 
         ament_package()
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)

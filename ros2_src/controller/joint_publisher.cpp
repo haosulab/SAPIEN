@@ -11,15 +11,11 @@ JointPublisher::JointPublisher(const std::string &nameSpace, const rclcpp::Node:
   // Create Publisher
   std::string prefix = nameSpace + "/joint_states";
   mPub = node->create_publisher<sensor_msgs::msg::JointState>(prefix, 10);
+  mTimer = rclcpp::create_timer(node, mClock, rclcpp::Duration(mInterval),
+                                std::bind(&JointPublisher::publishLoop, this));
 }
 void JointPublisher::publishLoop() {
-  auto target = mClock->now() + mInterval;
-  while (rclcpp::ok() && !stop) {
-    if (mClock->now() > target) {
-      mPub->publish(*mJointStates);
-      RCLCPP_INFO(mNode->get_logger(), "1");
-      target = target + mInterval;
-    }
-  }
+  mPub->publish(*mJointStates);
+  RCLCPP_INFO(mNode->get_logger(), "1");
 }
 }

@@ -4,7 +4,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "sapien_ros2_communication_interface/srv/joint_velocity.hpp"
-#include "thread_safe_structure.h"
+#include "utils/thread_safe_structure.hpp"
 
 namespace sapien::ros2 {
 
