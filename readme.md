@@ -35,16 +35,8 @@ use `std::weak_ptr` so you can test its validity or prolong its life.
 In general, you do not need explicit `new` and `delete` so memory leak should
 not occur. **Avoid ownership loops**. They do leak.
 
-# TODO List
-## Finish Articulation
-Articulation is required for precise robot control. Please read detailed
-[documentation](https://gameworksdocs.nvidia.com/PhysX/4.0/documentation/PhysXGuide/Manual/Articulations.html).
-To read this documentation, you need to first understand basic PhysX and PhysX
-Joints. This documentation still omits a lot of details, please ask developers
-directly.
+# Installation
+```bash
+apt install libx11-6 libassimp4 libxcb1
+```
 
-## Finish URDF Loading
-URDF is a simple universal file format for robot loading. We will convert all robots into URDF. We need to first finish supporting basic URDF and then consider several common extensions, e.g. Gazebo.
-
-## Renderer
-We need a fast, off-the-shelf, easy to use renderer.
