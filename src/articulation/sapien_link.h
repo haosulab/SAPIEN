@@ -54,6 +54,10 @@ public:
   inline EActorType getType() const override { return EActorType::KINEMATIC_ARTICULATION_LINK; }
   virtual PxRigidDynamic *getPxActor() override;
 
+  SKLink(SKLink const &) = delete;
+  SKLink &operator=(SKLink const &) = delete;
+  ~SKLink() = default;
+
 private:
   SKLink(PxRigidDynamic *actor, SKArticulation *articulation, physx_id_t id, SScene *scene,
          std::vector<Renderer::IPxrRigidbody *> renderBodies,

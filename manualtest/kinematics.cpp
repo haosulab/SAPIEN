@@ -1,4 +1,5 @@
-#include "articulation/articulation_builder.cpp"
+#include "articulation/articulation_builder.h"
+#include "articulation/sapien_kinematic_articulation.h"
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 #include "sapien_scene.h"

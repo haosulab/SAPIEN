@@ -1,6 +1,9 @@
 #version 450
+
 uniform mat4 gbufferModelMatrix;
+uniform mat4 gbufferModelMatrixInverse;
 uniform mat4 gbufferViewMatrix;
+uniform mat4 gbufferViewMatrixInverse;
 uniform mat4 gbufferProjectionMatrix;
 uniform mat4 user_data;
 
@@ -16,7 +19,7 @@ out vec4 cameraSpacePosition;
 out vec4 nox;
 
 void main() {
-  mat3 normalMatrix = mat3(transpose(inverse(gbufferViewMatrix * gbufferModelMatrix)));
+  mat3 normalMatrix = mat3(transpose(gbufferModelMatrixInverse * gbufferViewMatrixInverse));
 
   cameraSpacePosition = gbufferViewMatrix * gbufferModelMatrix * vec4(vpos, 1.f);
   gl_Position    = gbufferProjectionMatrix * cameraSpacePosition;

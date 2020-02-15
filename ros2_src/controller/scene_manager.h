@@ -8,6 +8,7 @@
 #include "robot_manager.h"
 #include "rosgraph_msgs/msg/clock.hpp"
 #include "sapien_scene.h"
+#include "device/PS3_publisher.h"
 
 namespace sapien {
 class SControllableArticulation;
@@ -35,6 +36,9 @@ protected:
   // Thread and spin
   std::thread mThread;
   rclcpp::executors::SingleThreadedExecutor mExecutor;
+
+  // PS3
+  std::unique_ptr<PS3Publisher> ps3Publisher = nullptr;
 
 protected:
 public:
@@ -104,6 +108,18 @@ public:
       mRobotManager->start();
     }
     mThread = std::thread(&rclcpp::executors::SingleThreadedExecutor::spin, &mExecutor);
+  }
+
+
+  void createPS3Publisher(double pubFrequency) {
+    if (ps3Publisher) {
+      RCLCPP_WARN(mNode->get_logger(),
+                  "PS3 publisher Node has already been created for this Scene Manager");
+      RCLCPP_WARN(mNode->get_logger(), "Scene Manager will use the original PS3 pub node");
+      return;
+    }
+
+    ps3Publisher = std::make_unique<PS3Publisher>(mNameSpace, mNode->shared_from_this(), mClock, pubFrequency);
   }
 
   rclcpp::Time now() { return mClock->now(); };

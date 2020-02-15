@@ -16,6 +16,8 @@
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_articulation_base.h"
 #include "articulation/sapien_joint.h"
+#include "articulation/sapien_kinematic_articulation.h"
+#include "articulation/sapien_kinematic_joint.h"
 #include "articulation/sapien_link.h"
 #include "articulation/urdf_loader.h"
 
@@ -287,6 +289,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("create_urdf_loader", &SScene::createURDFLoader)
       .def("remove_actor", &SScene::removeActor, py::arg("actor"))
       .def("remove_articulation", &SScene::removeArticulation, py::arg("articulation"))
+      .def("remove_kinematic_articulation", &SScene::removeKinematicArticulation,
+           py::arg("kinematic_articulation"))
       .def("find_actor_by_id", &SScene::findActorById, py::arg("id"),
            py::return_value_policy::reference)
       .def("find_articulation_link_by_link_id", &SScene::findArticulationLinkById, py::arg("id"),
@@ -405,6 +409,8 @@ PYBIND11_MODULE(pysapien, m) {
 
   py::class_<SLink, SLinkBase>(m, "Link").def("get_articulation", &SLink::getArticulation,
                                               py::return_value_policy::reference);
+  py::class_<SKLink, SLinkBase>(m, "KinematicLink")
+      .def("get_articulation", &SKLink::getArticulation, py::return_value_policy::reference);
 
   //======== End Actor ========//
 
@@ -447,6 +453,12 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_drive_target", [](SJoint &j, PxReal p) { j.setDriveTarget(p); }, py::arg("target"))
       // TODO wrapper for array-valued targets
       .def("get_global_pose", &SJoint::getGlobalPose);
+
+  py::class_<SKJoint, SJointBase>(m, "KinematicJoint");
+  py::class_<SKJointFixed, SKJoint>(m, "KinematicJointFixed");
+  py::class_<SKJointSingleDof, SKJoint>(m, "KinematicJointSingleDof");
+  py::class_<SKJointPrismatic, SKJointSingleDof>(m, "KinematicJointPrismatic");
+  py::class_<SKJointRevolute, SKJointSingleDof>(m, "KinematicJointRevolute");
 
   //======== End Joint ========//
 
@@ -549,9 +561,10 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_root_velocity",
            [](SArticulation &a, py::array_t<PxReal> v) { a.setRootVelocity(array2vec3(v)); },
            py::arg("vel"))
-      .def("set_root_angular_velocity",
-           [](SArticulation &a, py::array_t<PxReal> v) { a.setRootAngularVelocity(array2vec3(v)); },
-           py::arg("vel"))
+      .def(
+          "set_root_angular_velocity",
+          [](SArticulation &a, py::array_t<PxReal> v) { a.setRootAngularVelocity(array2vec3(v)); },
+          py::arg("vel"))
       .def("compute_passive_force",
            [](SArticulation &a, bool gravity, bool coriolisAndCentrifugal, bool external) {
              auto force = a.computePassiveForce(gravity, coriolisAndCentrifugal, external);
@@ -573,6 +586,9 @@ PYBIND11_MODULE(pysapien, m) {
       .def("unpack", [](SArticulation &a, const py::array_t<PxReal> &arr) {
         a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
       });
+
+  py::class_<SKArticulation, SArticulationDrivable>(m, "KinematicArticulation");
+
   //======== End Articulation ========//
 
   py::class_<SContact>(m, "Contact")
@@ -709,8 +725,10 @@ PYBIND11_MODULE(pysapien, m) {
       .def("create_link_builder",
            [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
            py::arg("parent") = nullptr, py::return_value_policy::reference)
-      .def("build", &ArticulationBuilder::build, py::return_value_policy::reference,
-           py::arg("fix_base") = false);
+      .def("build", &ArticulationBuilder::build, py::arg("fix_base") = false,
+           py::return_value_policy::reference)
+      .def("build_kinematic", &ArticulationBuilder::buildKinematic,
+           py::return_value_policy::reference);
 
   py::class_<URDF::URDFLoader>(m, "URDFLoader")
       .def(py::init<SScene *>(), py::arg("scene"))
@@ -719,5 +737,7 @@ PYBIND11_MODULE(pysapien, m) {
       .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def_readwrite("default_density", &URDF::URDFLoader::defaultDensity)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
+           py::arg("filename"), py::arg("default_material") = nullptr)
+      .def("load_kinematic", &URDF::URDFLoader::loadKinematic, py::return_value_policy::reference,
            py::arg("filename"), py::arg("default_material") = nullptr);
 }
