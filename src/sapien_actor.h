@@ -24,6 +24,8 @@ private:
 public:
   PxRigidBody *getPxActor() override;
   void setPose(PxTransform const &pose);
+  void setVelocity(PxVec3 const &v);
+  void setAngularVelocity(PxVec3 const &v);
 
 public:
   EActorType getType() const override;

@@ -398,6 +398,9 @@ PYBIND11_MODULE(pysapien, m) {
 
   py::class_<SActor, SActorDynamicBase>(m, "Actor")
       .def("set_pose", &SActor::setPose, py::arg("pose"))
+      .def("set_velocity", [](SActor &a, py::array_t<PxReal> v) { a.setVelocity(array2vec3(v)); })
+      .def("set_angular_velocity",
+           [](SActor &a, py::array_t<PxReal> v) { a.setAngularVelocity(array2vec3(v)); })
       .def("pack", &SActor::packData)
       .def("unpack", [](SActor &a, const py::array_t<PxReal> &arr) {
         a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));

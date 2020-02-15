@@ -21,6 +21,9 @@ EActorType SActor::getType() const {
 
 void SActor::setPose(PxTransform const &pose) { getPxActor()->setGlobalPose(pose); }
 
+void SActor::setVelocity(PxVec3 const &v) { getPxActor()->setLinearVelocity(v); }
+void SActor::setAngularVelocity(PxVec3 const &v) { getPxActor()->setAngularVelocity(v); }
+
 std::vector<PxReal> SActor::packData() {
   std::vector<PxReal> data;
   auto pose = getPose();
