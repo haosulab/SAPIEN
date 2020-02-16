@@ -16,7 +16,7 @@
 // TODO: should be included from sapien through manager
 #include <PxPhysicsAPI.h>
 
-namespace sapien::robot {
+namespace sapien::ros2 {
 
 /**
  * TODO: should be in manager.
@@ -104,10 +104,10 @@ protected:
   ControlMode mode = ControlMode::BODY;
 
   std::vector<std::string> gripperJoints = {};
-//  JointVelocityController *gripper = nullptr;
-//  CartesianVelocityController *arm_cartesian = nullptr;
-//  JointVelocityController *translation = nullptr;
-//  JointVelocityController *rotation = nullptr;
+  //  JointVelocityController *gripper = nullptr;
+  //  CartesianVelocityController *arm_cartesian = nullptr;
+  //  JointVelocityController *translation = nullptr;
+  //  JointVelocityController *rotation = nullptr;
 
   float gripper_velocity = 0;
   bool grasped = false;
@@ -115,9 +115,9 @@ protected:
   float arm_angular_velocity = 0;
 
   // TODO: should work
-//  PxVec3 pos = {0, 0, 0};
-//  PxReal angle = 0;
-//  PxTransform currentPose;
+  //  PxVec3 pos = {0, 0, 0};
+  //  PxReal angle = 0;
+  //  PxTransform currentPose;
   float translation_velocity = 0;
   float rotation_velocity = 0;
   float time_step;
@@ -130,9 +130,9 @@ protected:
   void parseEndingSignal();
 
 public:
-//  ControllerManger *manger;
+  //  ControllerManger *manger;
   explicit PS3RobotControl();
-//  explicit PS3RobotControl(ControllerManger *m);
+  //  explicit PS3RobotControl(ControllerManger *m);
   virtual ~PS3RobotControl() { input->shutdown(); }
   virtual void step();
   std::vector<int> get_cache();
@@ -143,11 +143,11 @@ public:
   inline bool record_single_step() { return recordCurrentStep; }
   inline void set_gripper_velocity(float v) { gripper_velocity = v; }
   inline void set_arm_velocity(float v) {
-//    arm_cartesian->setVelocity(v);
+    //    arm_cartesian->setVelocity(v);
     arm_velocity = v;
   }
   inline void set_arm_angular_velocity(float v) {
-//    arm_cartesian->setAngularVelocity(v);
+    //    arm_cartesian->setAngularVelocity(v);
     arm_angular_velocity = v;
   }
   inline float get_gripper_velocity() { return gripper_velocity; }
@@ -160,4 +160,4 @@ public:
   inline float get_rotation_velocity() { return rotation_velocity; }
 };
 
-} // namespace sapien::robot
+} // namespace sapien::ros2

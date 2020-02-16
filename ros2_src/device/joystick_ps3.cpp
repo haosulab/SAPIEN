@@ -1,7 +1,7 @@
 #include "joystick_ps3.h"
 #include <cassert>
 
-namespace sapien::robot {
+namespace sapien::ros2 {
 
 PS3::PS3()
     : InputDevice("SHANWAN PS3 GamePad"), buttonCache(PS3_BUTTON_COUNT),
