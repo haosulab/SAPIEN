@@ -49,12 +49,7 @@ public:
   void createJointPublisher(double pubFrequency);
   std::weak_ptr<JointVelocityController>
   buildJointVelocityController(const std::vector<std::string> &jointNames,
-                               const std::string &serviceName) {
-    auto controller = std::make_shared<JointVelocityController>(mNameSpace, mNode, mClock,
-                                                                mWrapper, jointNames, serviceName);
-    mJointVelocityControllers.push_back(controller);
-    return std::weak_ptr<JointVelocityController>(controller);
-  };
+                               const std::string &serviceName);;
 
 protected:
   void updateJointStates(const std::vector<float> &jointAngles,

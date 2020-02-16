@@ -34,17 +34,7 @@ void RobotManager::setDriveProperty(float stiffness, float damping, float forceL
     joint->setDriveProperty(stiffness, damping, forceLimit);
   }
 }
-void RobotManager::createJointPublisher(double pubFrequency) {
-  if (mJointPublisher) {
-    RCLCPP_WARN(mNode->get_logger(),
-                "Joint Pub Node has already been created for this Robot Manager");
-    RCLCPP_WARN(mNode->get_logger(), "Robot Manager will use the original joint state pub node");
-    return;
-  }
 
-  mJointPublisher = std::make_unique<JointPublisher>(mNameSpace, mNode->shared_from_this(), mClock,
-                                                     mJointStates.get(), pubFrequency);
-}
 void RobotManager::balancePassiveForce(bool gravity, bool coriolisAndCentrifugal, bool external) {
   auto balanceForce =
       mWrapper->mArticulation->computePassiveForce(gravity, coriolisAndCentrifugal, external);
@@ -58,5 +48,27 @@ void RobotManager::updateJointStates(const std::vector<float> &jointAngles,
 }
 void RobotManager::step() {
   updateJointStates(mWrapper->mJointPositions.read(), mWrapper->mJointVelocities.read());
+}
+
+// Create controller and publisher
+void RobotManager::createJointPublisher(double pubFrequency) {
+  if (mJointPublisher) {
+    RCLCPP_WARN(mNode->get_logger(),
+                "Joint Pub Node has already been created for this Robot Manager");
+    RCLCPP_WARN(mNode->get_logger(), "Robot Manager will use the original joint state pub node");
+    return;
+  }
+
+  mJointPublisher = std::make_unique<JointPublisher>(mNameSpace, mNode->shared_from_this(), mClock,
+                                                     mJointStates.get(), pubFrequency);
+}
+
+std::weak_ptr<JointVelocityController>
+RobotManager::buildJointVelocityController(const std::vector<std::string> &jointNames,
+                                           const std::string &serviceName) {
+  auto controller = std::make_shared<JointVelocityController>(mNameSpace, mNode, mClock, mWrapper,
+                                                              jointNames, serviceName);
+  mJointVelocityControllers.push_back(controller);
+  return std::weak_ptr<JointVelocityController>(controller);
 }
 } // namespace sapien::ros2
