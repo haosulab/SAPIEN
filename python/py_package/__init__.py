@@ -1,1 +1,1 @@
-from sapien import core, env
+from sapien import core, env, asset

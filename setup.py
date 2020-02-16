@@ -134,7 +134,7 @@ setup(
     long_description=open("readme.md").read(),
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    packages=["sapien", "sapien.env", "sapien.core"],
+    packages=["sapien", "sapien.env", "sapien.core", "sapien.asset"],
     keywords="robotics simulator dataset articulation part-net",
     url="homepage.com",
     project_urls={"Documentation": "NotImplemented.com"},
