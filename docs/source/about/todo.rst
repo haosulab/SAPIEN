@@ -2,7 +2,7 @@ To Do Feature List
 ====================
 
 C++ Function
---------
+-------------
 
 - [X] Contact buffer
 - [ ] Collision Group Loader
@@ -11,13 +11,13 @@ C++ Function
 
 
 Python API
-----------
+-----------
 
 - [ ] Cartesian velocity acceleration
 - [ ] Kinematic Jacobian
 
 ROS Related
------------
+------------
 
 - [ ] Virtual Odometry
 

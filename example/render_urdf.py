@@ -1,5 +1,4 @@
 import sapien.core as sapien
-import os
 import transforms3d
 from sapien.core import Pose
 import numpy as np
