@@ -9,6 +9,7 @@
 #include "robot_manager.h"
 #include "rosgraph_msgs/msg/clock.hpp"
 #include "sapien_scene.h"
+#include "sapien_controllable_articulation.h"
 
 namespace sapien {
 class SControllableArticulation;
@@ -67,7 +68,7 @@ public:
     mTS.attachClock(mClock);
 
     mClockPub =
-        mNode->create_publisher<rosgraph_msgs::msg::Clock>("/clock", rmw_qos_profile_default);
+        mNode->create_publisher<rosgraph_msgs::msg::Clock>("/clock", 10);
     if (!mClock->ros_time_is_active()) {
       RCLCPP_WARN(mNode->get_logger(), "ROS Time is not active for scene with name %s",
                   scene->getName().c_str());

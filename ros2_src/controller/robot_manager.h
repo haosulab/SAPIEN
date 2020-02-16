@@ -6,12 +6,11 @@
 #include "joint_velocity_controller.h"
 #include "joint_publisher.h"
 #include "rclcpp/rclcpp.hpp"
-#include "sapien_controllable_articulation.h"
 #include "sensor_msgs/msg/joint_state.hpp"
+#include <PxPhysicsAPI.h>
 
 namespace sapien::ros2 {
 
-class JointPublisher;
 class SceneManager;
 class SControllableArticulationWrapper;
 class JointVelocityController;

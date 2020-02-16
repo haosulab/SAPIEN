@@ -1,5 +1,154 @@
-//
-// Created by sim on 2/11/20.
-//
-
 #include "sapien_controllable_articulation.h"
+#include "articulation/sapien_articulation.h"
+#include "articulation/sapien_joint.h"
+namespace sapien::ros2 {
+
+sapien::ros2::SControllableArticulationWrapper::SControllableArticulationWrapper(
+    sapien::SArticulation *articulation, rclcpp::Clock::SharedPtr clock)
+    : mArticulation(articulation), mClock(std::move(clock)), mJointPositions(articulation->dof()),
+      mJointVelocities(articulation->dof()) {
+  auto joints = mArticulation->getSJoints();
+  for (auto &joint : joints) {
+    if (joint->getDof() > 0) {
+      mJoints.push_back(joint);
+    }
+    for (uint32_t j = 0; j < joint->getDof(); ++j) {
+      mQNames.push_back(joint->getName());
+    }
+  }
+}
+bool sapien::ros2::SControllableArticulationWrapper::registerPositionCommands(
+    ThreadSafeQueue<std::vector<float>> *command,
+    const std::vector<std::string> &commandedJointNames) {
+  std::vector<uint32_t> controllerIndex = {};
+  for (const auto &qName : commandedJointNames) {
+    auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
+    if (iterator == mQNames.end()) {
+      spdlog::warn("Joint name given not found in articulation %s \n", qName.c_str());
+      return false;
+    }
+    auto index = iterator - mQNames.begin();
+    controllerIndex.push_back(index);
+  }
+
+  // Register position based command
+  mPositionCommandsIndex.push_back(controllerIndex);
+  mPositionCommands.push_back(command);
+  return true;
+}
+bool sapien::ros2::SControllableArticulationWrapper::registerVelocityCommands(
+    ThreadSafeQueue<std::vector<float>> *command,
+    const std::vector<std::string> &commandedJointNames) {
+  std::vector<uint32_t> controllerIndex = {};
+  for (const auto &qName : commandedJointNames) {
+    auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
+    if (iterator == mQNames.end()) {
+      spdlog::warn("Joint name given not found in articulation %s \n", qName.c_str());
+      return false;
+    }
+    auto index = iterator - mQNames.begin();
+    controllerIndex.push_back(index);
+  }
+
+  // Register velocity based command
+  mVelocityCommandsIndex.push_back(controllerIndex);
+  mVelocityCommands.push_back(command);
+  return true;
+}
+bool sapien::ros2::SControllableArticulationWrapper::registerContinuousVelocityCommands(
+    ThreadSafeVector<float> *command, const std::vector<std::string> &commandedJointNames) {
+  std::vector<uint32_t> controllerIndex = {};
+  for (const auto &qName : commandedJointNames) {
+    auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
+    if (iterator == mQNames.end()) {
+      spdlog::warn("Joint name given not found in articulation %s \n", qName.c_str());
+      return false;
+    }
+    auto index = iterator - mQNames.begin();
+    controllerIndex.push_back(index);
+  }
+
+  // Register velocity based command
+  mContinuousVelocityCommandsIndex.push_back(controllerIndex);
+  mContinuousVelocityCommands.push_back(command);
+  return true;
+}
+
+void sapien::ros2::SControllableArticulationWrapper::onEvent(sapien::EventStep &event) {
+  mJointPositions.write(mArticulation->getQpos());
+  mJointVelocities.write(mArticulation->getQvel());
+  mTimeStep = event.timeStep;
+
+  // Aggregate position commands information
+  std::vector<float> currentPositionCommands(mArticulation->dof(), -2000);
+  for (size_t k = 0; k < mPositionCommands.size(); ++k) {
+    if (mPositionCommands[k]->empty()) {
+      continue;
+    }
+    auto index = mPositionCommandsIndex[k];
+    auto command = mPositionCommands[k]->pop();
+    for (size_t i = 0; i < index.size(); ++i) {
+      currentPositionCommands[index[i]] = command[i];
+    }
+  }
+
+  // Aggregate velocity commands information
+  std::vector<float> currentVelocityCommands(mArticulation->dof(), 0);
+  for (size_t k = 0; k < mVelocityCommands.size(); ++k) {
+    if (mVelocityCommands[k]->empty()) {
+      continue;
+    }
+    auto index = mVelocityCommandsIndex[k];
+    auto command = mVelocityCommands[k]->pop();
+    for (size_t i = 0; i < index.size(); ++i) {
+      currentVelocityCommands[index[i]] = command[i];
+    }
+  }
+
+  // Integrate Position and Velocity Commands
+  auto lastDriveTarget = mArticulation->getDriveTarget();
+  for (size_t l = 0; l < currentPositionCommands.size(); ++l) {
+    if (currentPositionCommands[l] > -999) {
+      currentPositionCommands[l] += currentVelocityCommands[l] * mTimeStep;
+    } else {
+      currentPositionCommands[l] = lastDriveTarget[l] + currentVelocityCommands[l] * mTimeStep;
+    }
+  }
+
+  // Execute position command
+  if (!mPositionCommands.empty() || !mVelocityCommands.empty()) {
+    uint32_t i = 0;
+    for (auto &j : mJoints) {
+      for (auto axis : j->getAxes()) {
+        if (currentPositionCommands[i] > -999) {
+          j->getPxJoint()->setDriveTarget(axis, currentPositionCommands[i]);
+        }
+        i += 1;
+      }
+    }
+  }
+
+  // Aggregate continuous velocity information to velocity command
+  // Continuous command should be added to the normal velocity command before drive velocity
+  if (!mContinuousVelocityCommands.empty()) {
+    for (size_t i = 0; i < mContinuousVelocityCommands.size(); ++i) {
+      auto continuousVelocityCommands = mContinuousVelocityCommands[i]->read();
+      auto index = mContinuousVelocityCommandsIndex[i];
+      for (size_t j = 0; j < index.size(); ++j) {
+        currentVelocityCommands[index[j]] += continuousVelocityCommands[j];
+      }
+    }
+  }
+
+  // Execute velocity command
+  if (!mVelocityCommands.empty() || !mContinuousVelocityCommands.empty()) {
+    uint32_t i = 0;
+    for (auto &j : mJoints) {
+      for (auto axis : j->getAxes()) {
+        j->getPxJoint()->setDriveVelocity(axis, currentVelocityCommands[i]);
+        i += 1;
+      }
+    }
+  }
+}
+} // namespace sapien::ros2

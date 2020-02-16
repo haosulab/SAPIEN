@@ -1,4 +1,7 @@
 #include "robot_manager.h"
+#include "articulation/sapien_articulation.h"
+#include "articulation/sapien_joint.h"
+#include "sapien_controllable_articulation.h"
 
 namespace sapien::ros2 {
 
