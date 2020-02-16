@@ -20,7 +20,6 @@ protected:
 
   rclcpp::Clock::SharedPtr mClock;
   rclcpp::Duration mInterval;
-  std::thread mThread;
   rclcpp::TimerBase::SharedPtr mTimer;
   bool stop = false;
 
@@ -33,7 +32,6 @@ public:
 
 protected:
   void publishLoop();
-  inline void start() { mThread = std::thread(&JointPublisher::publishLoop, this); }
 };
 
 } // namespace sapien::ros2

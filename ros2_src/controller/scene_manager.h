@@ -2,13 +2,13 @@
 
 #include <utility>
 
+#include "device/PS3_publisher.h"
 #include "event_system/event_system.h"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time_source.hpp"
 #include "robot_manager.h"
 #include "rosgraph_msgs/msg/clock.hpp"
 #include "sapien_scene.h"
-#include "device/PS3_publisher.h"
 
 namespace sapien {
 class SControllableArticulation;
@@ -110,7 +110,6 @@ public:
     mThread = std::thread(&rclcpp::executors::SingleThreadedExecutor::spin, &mExecutor);
   }
 
-
   void createPS3Publisher(double pubFrequency) {
     if (ps3Publisher) {
       RCLCPP_WARN(mNode->get_logger(),
@@ -119,7 +118,8 @@ public:
       return;
     }
 
-    ps3Publisher = std::make_unique<PS3Publisher>(mNameSpace, mNode->shared_from_this(), mClock, pubFrequency);
+    ps3Publisher = std::make_unique<PS3Publisher>(mNameSpace, mNode->shared_from_this(), mClock,
+                                                  pubFrequency);
   }
 
   rclcpp::Time now() { return mClock->now(); };
@@ -134,8 +134,8 @@ protected:
     mClockPub->publish(clockMessage);
 
     // Fetch current information and add control signal to system for each robot
-    for (int i = 0; i < mRobotManagers.size(); ++i) {
-      mRobotManagers[i]->step();
+    for (auto & mRobotManager : mRobotManagers) {
+      mRobotManager->step();
     }
   };
 };

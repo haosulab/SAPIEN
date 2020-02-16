@@ -3,20 +3,24 @@
 #include <numeric>
 #include <utility>
 
+#include "joint_velocity_controller.h"
 #include "joint_publisher.h"
 #include "rclcpp/rclcpp.hpp"
 #include "sapien_controllable_articulation.h"
+#include "sensor_msgs/msg/joint_state.hpp"
 
 namespace sapien::ros2 {
 
 class JointPublisher;
 class SceneManager;
 class SControllableArticulationWrapper;
+class JointVelocityController;
+
 class RobotManager {
   friend class SceneManager;
 
 public:
-  SControllableArticulationWrapper *wrapper;
+  SControllableArticulationWrapper *mWrapper;
 
 protected:
   // State
@@ -30,75 +34,36 @@ protected:
 
   // Controllers
   std::unique_ptr<JointPublisher> mJointPublisher = nullptr;
+  std::vector<std::shared_ptr<JointVelocityController>> mJointVelocityControllers = {};
 
 public:
-  void createJointPublisher(double pubFrequency) {
-    if (mJointPublisher) {
-      RCLCPP_WARN(mNode->get_logger(),
-                  "Joint Pub Node has already been created for this Robot Manager");
-      RCLCPP_WARN(mNode->get_logger(), "Robot Manager will use the original joint state pub node");
-      return;
-    }
-
-    mJointPublisher = std::make_unique<JointPublisher>(mNameSpace, mNode->shared_from_this(),
-                                                       mClock, mJointStates.get(), pubFrequency);
-  };
-
   RobotManager(SControllableArticulationWrapper *wrapper, const std::string &nameSpace,
-               const std::string &robotName, rclcpp::Clock::SharedPtr clock)
-      : wrapper(wrapper), mClock(std::move(clock)), mNameSpace(nameSpace + "/" + robotName) {
-
-    mNode = rclcpp::Node::make_shared(robotName, nameSpace);
-
-    // Create Initial Joint States
-    mJointStates = std::make_unique<sensor_msgs::msg::JointState>();
-    auto jointName = wrapper->getDriveJointNames();
-    mJointNum = jointName.size();
-    mJointStates->name = jointName;
-    mJointStates->position.resize(jointName.size());
-    mJointStates->velocity.resize(jointName.size());
-  };
+               const std::string &robotName, rclcpp::Clock::SharedPtr clock);
 
   void setDriveProperty(float stiffness, float damping, float forceLimit = PX_MAX_F32,
-                        const std::vector<uint32_t> &jointIndex = {}) {
-    std::vector<uint32_t> index(jointIndex);
-    if (jointIndex.empty()) {
-      index.resize(wrapper->mJoints.size());
-      std::iota(std::begin(index), std::end(index), 0);
-    }
-
-    for (unsigned int i : index) {
-      assert(i < wrapper->mArticulation->dof());
-      auto joint = wrapper->mJoints[i];
-      joint->setDriveProperty(stiffness, damping, forceLimit);
-    }
-  };
+                        const std::vector<uint32_t> &jointIndex = {});
 
   void balancePassiveForce(bool gravity = true, bool coriolisAndCentrifugal = true,
-                           bool external = true) {
-    auto balanceForce =
-        wrapper->mArticulation->computePassiveForce(gravity, coriolisAndCentrifugal, external);
-    wrapper->mArticulation->setQf(balanceForce);
+                           bool external = true);
+
+  // Create controller and publisher
+  void createJointPublisher(double pubFrequency);
+  std::weak_ptr<JointVelocityController>
+  buildJointVelocityController(const std::vector<std::string> &jointNames,
+                               const std::string &serviceName) {
+    auto controller = std::make_shared<JointVelocityController>(mNameSpace, mNode, mClock,
+                                                                mWrapper, jointNames, serviceName);
+    mJointVelocityControllers.push_back(controller);
+    return std::weak_ptr<JointVelocityController>(controller);
   };
 
 protected:
   void updateJointStates(const std::vector<float> &jointAngles,
-                         const std::vector<float> &jointVelocity) {
-    mJointStates->header.stamp = mClock->now();
-    mJointStates->position.assign(jointAngles.begin(), jointAngles.begin() + mJointNum);
-    mJointStates->velocity.assign(jointVelocity.begin(), jointVelocity.begin() + mJointNum);
-    mJointStates->header.stamp = mClock->now();
-  };
+                         const std::vector<float> &jointVelocity);
 
   // Step function when simulator step once
-  void step() {
-    updateJointStates(wrapper->mJointPositions.read(), wrapper->mJointVelocities.read());
-  };
+  void step();
 
-  void start() {
-    if (mJointPublisher) {
-      mJointPublisher->start();
-    }
-  }
+  void start() {}
 };
 } // namespace sapien::ros2

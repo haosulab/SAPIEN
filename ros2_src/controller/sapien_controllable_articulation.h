@@ -128,8 +128,9 @@ protected:
         currentPositionCommands[index[i]] = command[i];
       }
     }
+
     // Aggregate velocity commands information
-    std::vector<float> currentVelocityCommands(mArticulation->dof(), -2000);
+    std::vector<float> currentVelocityCommands(mArticulation->dof(), 0);
     for (size_t k = 0; k < mVelocityCommands.size(); ++k) {
       if (mVelocityCommands[k]->empty()) {
         continue;
@@ -170,7 +171,7 @@ protected:
         auto continuousVelocityCommands = mContinuousVelocityCommands[i]->read();
         auto index = mContinuousVelocityCommandsIndex[i];
         for (size_t j = 0; j < index.size(); ++j) {
-          currentVelocityCommands[index[j]] = continuousVelocityCommands[j];
+          currentVelocityCommands[index[j]] += continuousVelocityCommands[j];
         }
       }
     }

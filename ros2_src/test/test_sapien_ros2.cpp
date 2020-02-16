@@ -35,12 +35,20 @@ void test1(int argc, char *argv[]) {
   // ROS2 specified class
   rclcpp::init(argc, argv);
   ros2::SceneManager sceneManager(scene.get(), "scene1");
-  auto robotManager = sceneManager.buildRobotManager(robot, "movo");
-  robotManager->setDriveProperty(0, 50);
-  auto controllableWrapper = robotManager->wrapper;
+  auto robotManager = sceneManager.buildRobotManager(robot, "xarm6");
+  robotManager->setDriveProperty(1000, 50, 5000, {0, 1, 2, 3, 4, 5});
+  robotManager->setDriveProperty(0, 50, 50, {6, 7, 8, 9, 10, 11});
 
   // Test Controller
-  robotManager->createJointPublisher(20);
+  std::vector<std::string> gripperJoints = {"drive_joint",
+                                            "left_finger_joint",
+                                            "left_inner_knuckle_joint",
+                                            "right_outer_knuckle_joint",
+                                            "right_finger_joint",
+                                            "right_inner_knuckle_joint"};
+  robotManager->createJointPublisher(20.0f);
+  auto gripperController =
+      robotManager->buildJointVelocityController(gripperJoints, "gripper_joint_velocity");
   sceneManager.start();
 
   // test PS3
@@ -53,7 +61,12 @@ void test1(int argc, char *argv[]) {
     controller.render();
     step++;
     robotManager->balancePassiveForce();
-//    std::cout << sceneManager.now().nanoseconds() / 1e9 << std::endl;
+    if(step >= 500){
+      gripperController.lock()->moveJoint({5,5,5,5,5,5});
+    }
+//    if (step == 1000) {
+//      gripperController.lock()->moveJoint({1, 1, 1, 1, 1, 1}, true);
+//    }
   }
   rclcpp::shutdown();
 }

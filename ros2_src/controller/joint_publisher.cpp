@@ -16,6 +16,5 @@ JointPublisher::JointPublisher(const std::string &nameSpace, const rclcpp::Node:
 }
 void JointPublisher::publishLoop() {
   mPub->publish(*mJointStates);
-  RCLCPP_INFO(mNode->get_logger(), "1");
 }
 }

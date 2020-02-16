@@ -1,3 +1,4 @@
+#pragma once
 #include <mutex>
 #include <queue>
 #include <spdlog/spdlog.h>
