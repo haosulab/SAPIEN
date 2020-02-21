@@ -153,14 +153,14 @@ struct DisableCollisions : DomBase {
 struct Robot : DomBase {
   DECLARE_CONSTRUCTOR(Robot)
 
-  DECLARE_CHILD(DisableCollisions, disable_collisions);
+  DECLARE_CHILD(DisableCollisions, disable_collisions)
 
   LOAD_CHILD_BEGIN()
   LOAD_CHILD(DisableCollisions, disable_collisions);
   LOAD_CHILD_END()
 };
 
-}; // namespace SRDF
+} // namespace SRDF
 
 struct Origin : DomBase {
   DECLARE_CONSTRUCTOR(Origin)
@@ -636,7 +636,7 @@ struct Sensor : DomBase {
 struct Gazebo : DomBase {
   DECLARE_CONSTRUCTOR(Gazebo)
   DECLARE_ATTR(std::string, reference)
-  DECLARE_CHILD(Sensor, sensor);
+  DECLARE_CHILD(Sensor, sensor)
 
   LOAD_ATTR_BEGIN()
   LOAD_ATTR_OPTIONAL(std::string, reference, "")

@@ -1,0 +1,77 @@
+<?xml version="1.0" ?>
+<!--This does not replace URDF, and is not an extension of URDF.
+    This is a format for representing semantic information about the robot structure.
+    A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
+-->
+<robot name="xarm6">
+    <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
+    <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
+    <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
+    <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
+    <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
+    <group name="arm">
+        <chain base_link="base_link" tip_link="xarm_gripper_link_base" />
+    </group>
+    <group name="ee">
+        <joint name="gripper_fix" />
+        <joint name="drive_joint" />
+        <joint name="left_finger_joint" />
+        <joint name="left_inner_knuckle_joint" />
+        <joint name="right_inner_knuckle_joint" />
+        <joint name="right_outer_knuckle_joint" />
+        <joint name="right_finger_joint" />
+    </group>
+    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
+    <end_effector name="end_effector" parent_link="link6" group="ee" parent_group="arm" />
+    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="left_finger" link2="left_inner_knuckle" reason="Default" />
+    <disable_collisions link1="left_finger" link2="left_outer_knuckle" reason="Adjacent" />
+    <disable_collisions link1="left_finger" link2="link4" reason="Never" />
+    <disable_collisions link1="left_finger" link2="link5" reason="Never" />
+    <disable_collisions link1="left_finger" link2="link6" reason="Never" />
+    <disable_collisions link1="left_finger" link2="right_finger" reason="Never" />
+    <disable_collisions link1="left_finger" link2="right_inner_knuckle" reason="Never" />
+    <disable_collisions link1="left_finger" link2="right_outer_knuckle" reason="Never" />
+    <disable_collisions link1="left_finger" link2="xarm_gripper_link_base" reason="Never" />
+    <disable_collisions link1="left_inner_knuckle" link2="left_outer_knuckle" reason="Never" />
+    <disable_collisions link1="left_inner_knuckle" link2="link4" reason="Never" />
+    <disable_collisions link1="left_inner_knuckle" link2="link5" reason="Never" />
+    <disable_collisions link1="left_inner_knuckle" link2="link6" reason="Never" />
+    <disable_collisions link1="left_inner_knuckle" link2="right_finger" reason="Never" />
+    <disable_collisions link1="left_inner_knuckle" link2="right_inner_knuckle" reason="Never" />
+    <disable_collisions link1="left_inner_knuckle" link2="right_outer_knuckle" reason="Never" />
+    <disable_collisions link1="left_inner_knuckle" link2="xarm_gripper_link_base" reason="Adjacent" />
+    <disable_collisions link1="left_outer_knuckle" link2="link5" reason="Never" />
+    <disable_collisions link1="left_outer_knuckle" link2="link6" reason="Never" />
+    <disable_collisions link1="left_outer_knuckle" link2="right_finger" reason="Never" />
+    <disable_collisions link1="left_outer_knuckle" link2="right_inner_knuckle" reason="Never" />
+    <disable_collisions link1="left_outer_knuckle" link2="right_outer_knuckle" reason="Never" />
+    <disable_collisions link1="left_outer_knuckle" link2="xarm_gripper_link_base" reason="Adjacent" />
+    <disable_collisions link1="link1" link2="link2" reason="Adjacent" />
+    <disable_collisions link1="link1" link2="link3" reason="Never" />
+    <disable_collisions link1="link1" link2="link_base" reason="Adjacent" />
+    <disable_collisions link1="link2" link2="link3" reason="Adjacent" />
+    <disable_collisions link1="link2" link2="link_base" reason="Never" />
+    <disable_collisions link1="link3" link2="link4" reason="Adjacent" />
+    <disable_collisions link1="link3" link2="link5" reason="Never" />
+    <disable_collisions link1="link3" link2="link6" reason="Never" />
+    <disable_collisions link1="link4" link2="link5" reason="Adjacent" />
+    <disable_collisions link1="link4" link2="link6" reason="Never" />
+    <disable_collisions link1="link4" link2="right_finger" reason="Never" />
+    <disable_collisions link1="link4" link2="right_inner_knuckle" reason="Never" />
+    <disable_collisions link1="link5" link2="link6" reason="Adjacent" />
+    <disable_collisions link1="link5" link2="right_finger" reason="Never" />
+    <disable_collisions link1="link5" link2="right_inner_knuckle" reason="Never" />
+    <disable_collisions link1="link5" link2="right_outer_knuckle" reason="Never" />
+    <disable_collisions link1="link5" link2="xarm_gripper_link_base" reason="Never" />
+    <disable_collisions link1="link6" link2="right_finger" reason="Never" />
+    <disable_collisions link1="link6" link2="right_inner_knuckle" reason="Never" />
+    <disable_collisions link1="link6" link2="right_outer_knuckle" reason="Never" />
+    <disable_collisions link1="link6" link2="xarm_gripper_link_base" reason="Adjacent" />
+    <disable_collisions link1="right_finger" link2="right_inner_knuckle" reason="Default" />
+    <disable_collisions link1="right_finger" link2="right_outer_knuckle" reason="Adjacent" />
+    <disable_collisions link1="right_finger" link2="xarm_gripper_link_base" reason="Never" />
+    <disable_collisions link1="right_inner_knuckle" link2="right_outer_knuckle" reason="Never" />
+    <disable_collisions link1="right_inner_knuckle" link2="xarm_gripper_link_base" reason="Adjacent" />
+    <disable_collisions link1="right_outer_knuckle" link2="xarm_gripper_link_base" reason="Adjacent" />
+</robot>

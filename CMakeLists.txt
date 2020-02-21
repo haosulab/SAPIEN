@@ -116,7 +116,7 @@ add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtes
 
 
 # Below are the ROS2 specified cmake
-set(SUPPORTED_ROS_VERSION "dashing")
+set(SUPPORTED_ROS_VERSION "dashing" "eloquent")
 set(OLD_ROS_VERSION "crystal" "bouncy" "ardent")
 set(ROS $ENV{ROS_DISTRO})
 if (ROS)
@@ -131,6 +131,8 @@ if (ROS)
         find_package(sensor_msgs REQUIRED)
         find_package(std_msgs REQUIRED)
         find_package(sapien_ros2_communication_interface REQUIRED)
+        find_package(moveit_core)
+        find_package(moveit_ros_planning)
 
         include_directories(
                 "/opt/ros/${ROS}/include"
@@ -144,7 +146,7 @@ if (ROS)
         file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/articulation/*.cpp" "ros2_src/utils/*.hpp")
         add_library(sapien_controller ${SAPIEN_ROBOT_SRC})
         target_link_libraries(sapien_controller sapien)
-        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msg sapien_ros2_communication_interface)
+        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs sapien_ros2_communication_interface moveit_core moveit_ros_planning)
 
         # test
         add_executable(manual_PS3 manualtest/PS3ROSTest.cpp)
