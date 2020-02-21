@@ -15,7 +15,6 @@ void test1(int argc, char *argv[]) {
   sim.setRenderer(&renderer);
 
   auto controller = Renderer::OptifuserController(&renderer);
-  controller.showWindow();
 
   auto scene = sim.createScene();
   scene->setShadowLight({0, 1, -1}, {0.5, 0.5, 0.5});
@@ -39,7 +38,7 @@ void test1(int argc, char *argv[]) {
   robotManager->setDriveProperty(1000, 50, 5000, {0, 1, 2, 3, 4, 5});
   robotManager->setDriveProperty(0, 50, 50, {6, 7, 8, 9, 10, 11});
 
-  // Test Controller
+  // Test Baisc Controller
   std::vector<std::string> gripperJoints = {"drive_joint",
                                             "left_finger_joint",
                                             "left_inner_knuckle_joint",
@@ -51,22 +50,32 @@ void test1(int argc, char *argv[]) {
       robotManager->buildJointVelocityController(gripperJoints, "gripper_joint_velocity");
   sceneManager.start();
 
+  // Test IK Controller
+  auto armController =
+      robotManager->buildCartesianVelocityController("arm", "arm_cartesian_velocity");
+
   // test PS3
   sceneManager.createPS3Publisher(50.0f);
 
   uint32_t step = 0;
+  controller.showWindow();
   while (!controller.shouldQuit()) {
     scene->step();
     scene->updateRender();
     controller.render();
     step++;
+
+    // Balance force
     robotManager->balancePassiveForce();
-    if(step >= 500){
-      gripperController.lock()->moveJoint({5,5,5,5,5,5});
+    // Move arm IK
+    armController.lock()->moveCartesian({0.0, 0.02, 0.02}, ros2::MoveType::WorldTranslate);
+
+    if (step >= 500) {
+      gripperController.lock()->moveJoint({5, 5, 5, 5, 5, 5});
     }
-//    if (step == 1000) {
-//      gripperController.lock()->moveJoint({1, 1, 1, 1, 1, 1}, true);
-//    }
+    //    if (step == 1000) {
+    //      gripperController.lock()->moveJoint({1, 1, 1, 1, 1, 1}, true);
+    //    }
   }
   rclcpp::shutdown();
 }
