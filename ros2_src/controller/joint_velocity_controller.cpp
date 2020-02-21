@@ -3,14 +3,13 @@
 namespace sapien::ros2 {
 
 sapien::ros2::JointVelocityController::JointVelocityController(
-    const std::string &nameSpace, rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
+    rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
     sapien::ros2::SControllableArticulationWrapper *wrapper,
     const std::vector<std::string> &jointNames, const std::string &serviceName)
     : mNode(std::move(node)), mClock(std::move(clock)), mJointNames(jointNames),
       mContinuousCommands(jointNames.size()), mCommands() {
-  auto serverName = nameSpace + "/" + serviceName;
   mService = mNode->create_service<sapien_ros2_communication_interface::srv::JointVelocity>(
-      serviceName,
+      std::string(mNode->get_name()) + "/" + serviceName,
       [this](const std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Request>
                  req,
              std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Response> res)

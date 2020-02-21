@@ -14,7 +14,7 @@ public:
       spdlog::warn("Attempt to write a thread safe vector with a vector of differernt size!");
       return;
     }
-    for (int i = 0; i < mVec.size(); ++i) {
+    for (size_t i = 0; i < mVec.size(); ++i) {
       mVec[i] = input[i];
     }
   };

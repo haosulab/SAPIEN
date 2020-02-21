@@ -36,8 +36,7 @@ protected:
   ThreadSafeQueue<std::vector<float>> mCommands;
 
 public:
-  JointVelocityController(const std::string &nameSpace, rclcpp::Node::SharedPtr node,
-                          rclcpp::Clock::SharedPtr clock,
+  JointVelocityController(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
                           SControllableArticulationWrapper *wrapper,
                           const std::vector<std::string> &jointNames,
                           const std::string &serviceName);
@@ -56,4 +55,3 @@ protected:
       std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Response> res);
 };
 } // namespace sapien::ros2
-

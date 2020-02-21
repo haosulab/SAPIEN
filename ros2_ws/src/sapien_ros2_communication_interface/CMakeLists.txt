@@ -19,6 +19,7 @@ endif ()
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -30,11 +31,12 @@ set(MSG_FILES
 
 set(SRV_FILES
         "srv/JointVelocity.srv"
+        "srv/CartesianVelocity.srv"
         )
 rosidl_generate_interfaces(${PROJECT_NAME}
         ${MSG_FILES}
         ${SRV_FILES}
-        DEPENDENCIES builtin_interfaces
+        DEPENDENCIES builtin_interfaces geometry_msgs
         )
 
 

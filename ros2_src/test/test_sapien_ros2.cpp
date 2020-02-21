@@ -73,9 +73,6 @@ void test1(int argc, char *argv[]) {
     if (step >= 500) {
       gripperController.lock()->moveJoint({5, 5, 5, 5, 5, 5});
     }
-    //    if (step == 1000) {
-    //      gripperController.lock()->moveJoint({1, 1, 1, 1, 1, 1}, true);
-    //    }
   }
   rclcpp::shutdown();
 }

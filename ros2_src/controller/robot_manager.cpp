@@ -145,7 +145,7 @@ void RobotManager::createJointPublisher(double pubFrequency) {
 std::weak_ptr<JointVelocityController>
 RobotManager::buildJointVelocityController(const std::vector<std::string> &jointNames,
                                            const std::string &serviceName) {
-  auto controller = std::make_shared<JointVelocityController>(mNameSpace, mNode, mClock, mWrapper,
+  auto controller = std::make_shared<JointVelocityController>(mNode, mClock, mWrapper,
                                                               jointNames, serviceName);
   mJointVelocityControllers.push_back(controller);
   return std::weak_ptr<JointVelocityController>(controller);
@@ -160,7 +160,7 @@ RobotManager::buildCartesianVelocityController(const std::string &groupName,
     assert(mLoadRobot);
   }
   auto controller = std::make_shared<CartesianVelocityController>(
-      mNameSpace, mNode, mClock, mWrapper, mRobotState.get(), groupName, serviceName);
+      mNode, mClock, mWrapper, mRobotState.get(), groupName, serviceName);
   controller->mTimeStep = mSceneManager->mTimeStep;
   mCartesianVelocityControllers.push_back(controller);
   return std::weak_ptr<CartesianVelocityController>(controller);
