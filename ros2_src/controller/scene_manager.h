@@ -8,8 +8,10 @@
 #include "rclcpp/time_source.hpp"
 #include "robot_manager.h"
 #include "rosgraph_msgs/msg/clock.hpp"
-#include "sapien_scene.h"
 #include "sapien_controllable_articulation.h"
+#include "sapien_scene.h"
+#include "scene_manager.h"
+#include "robot_manager.h"
 
 namespace sapien {
 class SControllableArticulation;
@@ -19,6 +21,8 @@ namespace ros2 {
 class RobotManager;
 
 class SceneManager : public IEventListener<EventStep> {
+  friend RobotManager;
+
 protected:
   SScene *mScene;
   rclcpp::Node::SharedPtr mNode;
@@ -33,6 +37,7 @@ protected:
   rclcpp::Clock::SharedPtr mClock;
   rclcpp::Time mTime;
   rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr mClockPub;
+  float mTimeStep;
 
   // Thread and spin
   std::thread mThread;
@@ -49,12 +54,12 @@ public:
     scene->setName(name);
     mNode = rclcpp::Node::make_shared(name);
     // Set the use_sim_time
-    auto parameters_client = rclcpp::SyncParametersClient(mNode.get());
+    auto parametersClient = rclcpp::SyncParametersClient(mNode.get());
     using namespace std::chrono_literals;
-    parameters_client.wait_for_service(0.2s);
+    parametersClient.wait_for_service(0.1s);
 
     auto set_parameters_results =
-        parameters_client.set_parameters({rclcpp::Parameter("use_sim_time", true)});
+        parametersClient.set_parameters({rclcpp::Parameter("use_sim_time", true)});
     for (auto &result : set_parameters_results) {
       assert(result.successful);
     }
@@ -67,8 +72,7 @@ public:
     mClock = rclcpp::Clock::make_shared(RCL_ROS_TIME);
     mTS.attachClock(mClock);
 
-    mClockPub =
-        mNode->create_publisher<rosgraph_msgs::msg::Clock>("/clock", 10);
+    mClockPub = mNode->create_publisher<rosgraph_msgs::msg::Clock>("/clock", 10);
     if (!mClock->ros_time_is_active()) {
       RCLCPP_WARN(mNode->get_logger(), "ROS Time is not active for scene with name %s",
                   scene->getName().c_str());
@@ -92,6 +96,7 @@ public:
     auto robotManager =
         std::make_unique<RobotManager>(wrapper.get(), robotNameSpace, robotName, mClock);
     auto robotMangerWeakPtr = robotManager.get();
+    robotManager->mSceneManager = this;
 
     // Register Scene Call Back
     mScene->registerListener(*wrapper);
@@ -128,15 +133,21 @@ public:
 protected:
   void onEvent(EventStep &event) override {
     // Update time step and publish the /clock message
-    float currentTimeStep = mScene->getTimestep();
+    float currentTimeStep = event.timeStep;
     mTime = mTime + rclcpp::Duration(rcl_duration_value_t(currentTimeStep * 1e9));
     rosgraph_msgs::msg::Clock clockMessage;
     clockMessage.set__clock(mTime);
     mClockPub->publish(clockMessage);
 
     // Fetch current information and add control signal to system for each robot
-    for (auto & mRobotManager : mRobotManagers) {
-      mRobotManager->step();
+    // Update each robot if time step change
+    bool changeTimeStep = false;
+    if (abs(currentTimeStep - mTimeStep) > 1e-7) {
+      changeTimeStep = true;
+      mTimeStep = currentTimeStep;
+    }
+    for (auto &mRobotManager : mRobotManagers) {
+      mRobotManager->step(changeTimeStep, currentTimeStep);
     }
   };
 };

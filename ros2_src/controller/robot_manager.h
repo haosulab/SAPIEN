@@ -3,8 +3,11 @@
 #include <numeric>
 #include <utility>
 
-#include "joint_velocity_controller.h"
+#include "cartesian_velocity_controller.h"
 #include "joint_publisher.h"
+#include "joint_velocity_controller.h"
+#include "moveit/robot_model/robot_model.h"
+#include "moveit/robot_model_loader/robot_model_loader.h"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include <PxPhysicsAPI.h>
@@ -22,18 +25,27 @@ public:
   SControllableArticulationWrapper *mWrapper;
 
 protected:
-  // State
+  // Basic handle
   rclcpp::Node::SharedPtr mNode;
   sensor_msgs::msg::JointState::UniquePtr mJointStates = nullptr;
   rclcpp::Clock::SharedPtr mClock;
+  SceneManager *mSceneManager = nullptr;
 
   // Cache
   std::string mNameSpace;
+  std::vector<uint32_t> mJointIndex;
   uint32_t mJointNum = 0;
+  bool mLoadRobot = false;
 
   // Controllers
   std::unique_ptr<JointPublisher> mJointPublisher = nullptr;
   std::vector<std::shared_ptr<JointVelocityController>> mJointVelocityControllers = {};
+  std::vector<std::shared_ptr<CartesianVelocityController>> mCartesianVelocityControllers = {};
+
+  // Robot model
+  robot_model_loader::RobotModelLoaderUniquePtr mRobotLoader = nullptr;
+  robot_model::RobotModelPtr mRobotModel = nullptr;
+  robot_state::RobotStateUniquePtr mRobotState = nullptr;
 
 public:
   RobotManager(SControllableArticulationWrapper *wrapper, const std::string &nameSpace,
@@ -49,14 +61,16 @@ public:
   void createJointPublisher(double pubFrequency);
   std::weak_ptr<JointVelocityController>
   buildJointVelocityController(const std::vector<std::string> &jointNames,
-                               const std::string &serviceName);;
+                               const std::string &serviceName);
+  std::weak_ptr<CartesianVelocityController>
+  buildCartesianVelocityController(const std::string &groupName, const std::string &serviceName);
 
 protected:
-  void updateJointStates(const std::vector<float> &jointAngles,
+  void updateStates(const std::vector<float> &jointPosition,
                          const std::vector<float> &jointVelocity);
 
   // Step function when simulator step once
-  void step();
+  void step(bool timeStepChange = false, float newTimeStep = 0);
 
   void start() {}
 };

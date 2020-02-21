@@ -40,19 +40,20 @@ public:
                           rclcpp::Clock::SharedPtr clock,
                           SControllableArticulationWrapper *wrapper,
                           const std::vector<std::string> &jointNames,
-                          const std::string &serviceName);;
+                          const std::string &serviceName);
 
-  void moveJoint(const std::vector<float> &velocity, bool continuous = false);;
+  void moveJoint(const std::vector<float> &velocity, bool continuous = false);
 
   void moveJoint(const std::vector<std::string> &jointNames, const std::vector<float> &velocity,
-                 bool continuous = false);;
+                 bool continuous = false);
 
   void moveJoint(const std::vector<std::string> &jointNames, float velocity,
-                 bool continuous = false);;
+                 bool continuous = false);
 
 protected:
   void handleService(
       const std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Request> req,
       std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Response> res);
 };
-}; // namespace sapien::ros2
+} // namespace sapien::ros2
+

@@ -28,7 +28,6 @@ public:
                  rclcpp::Clock::SharedPtr clock, sensor_msgs::msg::JointState *states,
                  double pubFrequency);
   ~JointPublisher() = default;
-  ;
 
 protected:
   void publishLoop();

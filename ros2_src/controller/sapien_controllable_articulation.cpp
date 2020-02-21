@@ -101,7 +101,7 @@ void sapien::ros2::SControllableArticulationWrapper::onEvent(sapien::EventStep &
     auto index = mVelocityCommandsIndex[k];
     auto command = mVelocityCommands[k]->pop();
     for (size_t i = 0; i < index.size(); ++i) {
-      currentVelocityCommands[index[i]] = command[i];
+      currentVelocityCommands[index[i]] += command[i];
     }
   }
 

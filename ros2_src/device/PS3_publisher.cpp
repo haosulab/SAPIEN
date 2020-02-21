@@ -31,7 +31,7 @@ PS3Publisher::PS3Publisher(const std::string &nameSpace, std::shared_ptr<rclcpp:
 
   // Create Publisher
   std::string prefix = nameSpace + "/PS3_joystick";
-  mPub = mNode->create_publisher<sensor_msgs::msg::Joy>(prefix, rmw_qos_profile_default);
+  mPub = mNode->create_publisher<sensor_msgs::msg::Joy>(prefix, 10);
 
   // Create Timer
   auto _interval = static_cast<unsigned long long>(1 / pubFrequency * 1e6);
