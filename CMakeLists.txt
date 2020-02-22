@@ -133,11 +133,17 @@ if (ROS)
         find_package(sapien_ros2_communication_interface REQUIRED)
         find_package(moveit_core)
         find_package(moveit_ros_planning)
+        find_package(ament_index_cpp)
 
         include_directories(
                 "/opt/ros/${ROS}/include"
                 "ros2_src"
         )
+
+        file(GLOB_RECURSE SAPIEN_URDF_SRC "ros2_src/urdf/*.cpp" "ros2_src/urdf/*.h")
+        add_library(sapien_ros_urdf ${SAPIEN_URDF_SRC} ros2_src/test/test_ros_urdf.cpp)
+        target_link_libraries(sapien_ros_urdf tinyxml2 sapien)
+        ament_target_dependencies(sapien_ros_urdf rclcpp ament_index_cpp)
 
         file(GLOB_RECURSE SAPIEN_DEVICE_SRC "ros2_src/device/*.cpp" "ros2_src/device/*.h")
         add_library(sapien_device ${SAPIEN_DEVICE_SRC})
@@ -154,6 +160,9 @@ if (ROS)
 
         add_executable(test_ros2 ros2_src/test/test_sapien_ros2.cpp)
         target_link_libraries(test_ros2 sapien_controller sapien_device)
+
+        add_executable(test_ros_urdf ros2_src/test/test_ros_urdf.cpp)
+        target_link_libraries(test_ros_urdf sapien_ros_urdf)
 
         ament_package()
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)

@@ -687,11 +687,13 @@ public:
   SArticulation *load(const std::string &filename, physx::PxMaterial *material = nullptr);
   SKArticulation *loadKinematic(const std::string &filename,
                                 physx::PxMaterial *material = nullptr);
+  SKArticulation *loadKinematic(const std::string &filename, const std::shared_ptr<XMLDocument> loadedDoc,
+                                physx::PxMaterial *material = nullptr);
 
 private:
   std::unique_ptr<SRDF::Robot> loadSRDF(const std::string &filename);
 
-  SArticulationBase *commonLoad(const std::string &filename, physx::PxMaterial *material,
+  SArticulationBase *commonLoad(const std::string &filename, const std::shared_ptr<XMLDocument> loadedDoc, physx::PxMaterial *material,
                                 bool isKinematic);
 };
 
