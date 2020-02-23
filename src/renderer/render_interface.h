@@ -21,7 +21,8 @@ public:
   virtual physx::PxTransform getPose() const = 0;
   virtual void setPose(physx::PxTransform const &pose) = 0;
   virtual IPxrScene *getScene() = 0;
-  virtual ~ISensor() {}
+
+  virtual ~ISensor() = default;
 };
 
 class ICamera : public ISensor {
@@ -54,6 +55,8 @@ public:
   virtual void setRenderMode(uint32_t mode) = 0;
 
   virtual void destroy() = 0;
+
+  virtual ~IPxrRigidbody() = default;
 };
 
 class IPxrScene {
@@ -87,12 +90,16 @@ public:
                                    std::array<float, 3> const &color) = 0;
 
   virtual void destroy() = 0;
+
+  virtual ~IPxrScene() = default;
 };
 
 class IPxrRenderer {
 public:
   virtual IPxrScene *createScene(std::string const &name = "") = 0;
   virtual void removeScene(IPxrScene *scene) = 0;
+
+  virtual ~IPxrRenderer() = default;
 };
 
 } // namespace Renderer

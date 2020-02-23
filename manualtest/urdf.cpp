@@ -42,7 +42,6 @@ int main() {
   controller.setCameraPosition(-5, 0, 0);
   controller.setCurrentScene(s0.get());
 
-  int count = 0;
   while (!controller.shouldQuit()) {
     for (int i = 0; i < 8; ++i) {
       s0->step();
