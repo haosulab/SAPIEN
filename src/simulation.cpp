@@ -13,7 +13,13 @@ static PxDefaultAllocator gDefaultAllocatorCallback;
 void SapienErrorCallback::reportError(PxErrorCode::Enum code, const char *message,
                                       const char *file, int line) {
   mLastErrorCode = code;
+
+#ifdef NDEBUG
+  spdlog::critical("{}", message);
+#else
   spdlog::critical("{}:{}: {}", file, line, message);
+#endif
+  throw std::runtime_error("PhysX Error");
 }
 
 PxErrorCode::Enum SapienErrorCallback::getLastErrorCode() {
