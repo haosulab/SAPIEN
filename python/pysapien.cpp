@@ -366,6 +366,7 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_id", &SActorBase::getId)
       .def("get_scene", &SActorBase::getScene, py::return_value_policy::reference)
       .def_property_readonly("pose", &SActorBase::getPose)
+      .def("get_pose", &SActorBase::getPose)
       .def_property_readonly("col1", &SActorBase::getCollisionGroup1)
       .def_property_readonly("col2", &SActorBase::getCollisionGroup2)
       .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
@@ -376,13 +377,20 @@ PYBIND11_MODULE(pysapien, m) {
 
   py::class_<SActorDynamicBase, SActorBase>(m, "ActorDynamicBase")
       .def_property_readonly("velocity",
-                             [](SActorDynamicBase &a) { return vec32array(a.getVel()); })
-      .def_property_readonly("angular_velocity",
-                             [](SActorDynamicBase &a) { return vec32array(a.getAngularVel()); })
+                             [](SActorDynamicBase &a) { return vec32array(a.getVelocity()); })
+      .def("get_velocity", [](SActorDynamicBase &a) { return vec32array(a.getVelocity()); })
+      .def_property_readonly(
+          "angular_velocity",
+          [](SActorDynamicBase &a) { return vec32array(a.getAngularVelocity()); })
+      .def("get_angular_velocity",
+           [](SActorDynamicBase &a) { return vec32array(a.getAngularVelocity()); })
       .def_property_readonly("mass", &SActorDynamicBase::getMass)
+      .def("get_mass", &SActorDynamicBase::getMass)
       .def_property_readonly("inertia",
                              [](SActorDynamicBase &a) { return vec32array(a.getInertia()); })
+      .def("get_inertia", [](SActorDynamicBase &a) { return vec32array(a.getInertia()); })
       .def_property_readonly("cmass_local_pose", &SActorDynamicBase::getCMassLocalPose)
+      .def("get_cmass_local_pose", &SActorDynamicBase::getCMassLocalPose)
       .def("add_force_at_point",
            [](SActorDynamicBase &a, py::array_t<PxReal> const &force,
               py::array_t<PxReal> const &point) {
@@ -553,7 +561,12 @@ PYBIND11_MODULE(pysapien, m) {
            },
            py::arg("qlimits"))
 
-      .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"));
+      .def_property_readonly("pose", &SArticulationBase::getRootPose, "same as get_root_pose()")
+      .def("get_root_pose", &SArticulationBase::getRootPose)
+      .def("get_pose", &SArticulationBase::getRootPose, "same as get_root_pose")
+
+      .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"))
+      .def("set_pose", &SArticulationBase::setRootPose, py::arg("pose"), "same as set_root_pose");
 
   py::class_<SArticulationDrivable, SArticulationBase>(m, "ArticulationDrivable")
       .def("get_drive_target",
@@ -623,7 +636,13 @@ PYBIND11_MODULE(pysapien, m) {
           [](SContact &contact) {
             return make_array<PxReal>({contact.impulse.x, contact.impulse.y, contact.impulse.z});
           })
-      .def_readonly("separation", &SContact::separation);
+      .def_readonly("separation", &SContact::separation)
+      .def("__repr__", [](SContact const &c) {
+        std::ostringstream oss;
+        oss << "[" << c.actors[0]->getName() << ", " << c.actors[1]->getName() << "]";
+        oss << " Separation: " << c.separation << "\n";
+        return oss.str();
+      });
 
   //======== Builders ========
 
@@ -750,6 +769,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def_readwrite("default_density", &URDF::URDFLoader::defaultDensity)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
            py::arg("filename"), py::arg("material") = nullptr)
-      .def("load_kinematic", py::overload_cast<const std::string &, physx::PxMaterial *>(&URDF::URDFLoader::loadKinematic), py::return_value_policy::reference,
-           py::arg("filename"), py::arg("material") = nullptr);
+      .def("load_kinematic",
+           py::overload_cast<const std::string &, physx::PxMaterial *>(
+               &URDF::URDFLoader::loadKinematic),
+           py::return_value_policy::reference, py::arg("filename"), py::arg("material") = nullptr);
 }

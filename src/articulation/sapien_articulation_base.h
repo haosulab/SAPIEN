@@ -38,6 +38,8 @@ public:
 
   virtual std::vector<physx::PxReal> getQf() const = 0;
   virtual void setQf(const std::vector<physx::PxReal> &v) = 0;
+
+  virtual physx::PxTransform getRootPose();
   virtual void setRootPose(const physx::PxTransform &T) = 0;
 
   virtual std::vector<std::array<physx::PxReal, 2>> getQlimits() const = 0;

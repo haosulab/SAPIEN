@@ -35,8 +35,8 @@ std::vector<PxReal> SActor::packData() {
   data.push_back(pose.q.z);
   data.push_back(pose.q.w);
 
-  auto lv = getVel();
-  auto av = getAngularVel();
+  auto lv = getVelocity();
+  auto av = getAngularVelocity();
   data.push_back(lv.x);
   data.push_back(lv.y);
   data.push_back(lv.z);

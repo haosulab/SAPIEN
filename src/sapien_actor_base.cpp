@@ -55,9 +55,9 @@ SActorBase::SActorBase(physx_id_t id, SScene *scene,
 
 PxTransform SActorBase::getPose() { return getPxActor()->getGlobalPose(); }
 
-PxVec3 SActorDynamicBase::getVel() { return getPxActor()->getLinearVelocity(); }
+PxVec3 SActorDynamicBase::getVelocity() { return getPxActor()->getLinearVelocity(); }
 
-PxVec3 SActorDynamicBase::getAngularVel() { return getPxActor()->getAngularVelocity(); }
+PxVec3 SActorDynamicBase::getAngularVelocity() { return getPxActor()->getAngularVelocity(); }
 
 void SActorDynamicBase::addForceAtPoint(const PxVec3 &force, const PxVec3 &pos) {
   PxRigidBodyExt::addForceAtPos(*getPxActor(), force, pos);

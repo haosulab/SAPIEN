@@ -81,8 +81,8 @@ protected:
 class SActorDynamicBase : public SActorBase {
 
 public:
-  PxVec3 getVel();
-  PxVec3 getAngularVel();
+  PxVec3 getVelocity();
+  PxVec3 getAngularVelocity();
   PxReal getMass();
   PxVec3 getInertia();
   PxTransform getCMassLocalPose();
