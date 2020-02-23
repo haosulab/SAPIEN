@@ -24,11 +24,10 @@ int main() {
 
   auto builder = s0->createActorBuilder();
 
-  // builder->addBoxShape();
-  // builder->addBoxVisual();
-
-  builder->addConvexShapeFromFile("../assets/179/textured_objs/original-4.obj");
-  builder->addVisualFromFile("../assets/179/textured_objs/original-4.obj");
+  builder->addDecomposedConvexShapesFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
+                                             {0.1, 0.1, 0.1});
+  builder->addVisualFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
+                             {0.1, 0.1, 0.1});
 
   auto actor = builder->build();
   actor->setPose({{0, 0, 2}, PxIdentity});
@@ -42,9 +41,9 @@ int main() {
 
   int count = 0;
   while (!controller.shouldQuit()) {
-    if (count++ == 120) {
-      actor->destroy();
-    }
+    // if (count++ == 120) {
+    //   actor->destroy();
+    // }
 
     s0->updateRender();
     s0->step();

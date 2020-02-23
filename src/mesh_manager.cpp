@@ -1,4 +1,5 @@
 #include "mesh_manager.h"
+#include "VHACD.h"
 #include "simulation.h"
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
@@ -224,6 +225,87 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
     PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);
     meshes.push_back(convexMesh);
   }
+  return meshes;
+}
+
+std::vector<physx::PxConvexMesh *> MeshManager::loadMeshGroupVHACD(const std::string &filename) {
+  VHACD::IVHACD *vhacd = VHACD::CreateVHACD();
+
+  std::vector<PxConvexMesh *> meshes;
+  if (!fs::is_regular_file(filename)) {
+    spdlog::error("File not found: {}", filename);
+    return meshes;
+  }
+
+  std::string fullPath = fs::canonical(filename);
+  auto it = mMeshGroupRegistry.find(fullPath);
+  if (it != mMeshGroupRegistry.end()) {
+    spdlog::info("Using loaded mesh group: {}", filename);
+    for (PxConvexMesh *mesh : it->second.meshes) {
+      meshes.push_back(mesh);
+    }
+    return meshes;
+  }
+
+  // import obj using assimp
+  Assimp::Importer importer;
+  uint32_t flags = aiProcess_Triangulate;
+  const aiScene *scene = importer.ReadFile(filename, flags);
+  if (!scene) {
+    spdlog::error(importer.GetErrorString());
+    return meshes;
+  }
+
+  for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
+    auto mesh = scene->mMeshes[i];
+
+    std::vector<float> points;
+    points.reserve(mesh->mNumVertices * 3);
+    for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
+      points.push_back(mesh->mVertices[i].x);
+      points.push_back(mesh->mVertices[i].y);
+      points.push_back(mesh->mVertices[i].z);
+    }
+
+    std::vector<uint32_t> triangles;
+    triangles.reserve(mesh->mNumFaces * 3);
+    for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
+      assert(mesh->mFaces[i].mNumIndices == 3);
+      triangles.push_back(mesh->mFaces[i].mIndices[0]);
+      triangles.push_back(mesh->mFaces[i].mIndices[1]);
+      triangles.push_back(mesh->mFaces[i].mIndices[2]);
+    }
+
+    VHACD::IVHACD::Parameters params;
+    vhacd->Compute(points.data(), mesh->mNumVertices, triangles.data(), mesh->mNumFaces, params);
+    uint32_t hullCount = vhacd->GetNConvexHulls();
+    for (uint32_t i = 0; i < hullCount; ++i) {
+      VHACD::IVHACD::ConvexHull hull;
+      vhacd->GetConvexHull(i, hull);
+
+      std::vector<PxVec3> vertices;
+      for (uint32_t v = 0; v < hull.m_nPoints; ++v) {
+        vertices.push_back(
+            PxVec3(hull.m_points[3 * v], hull.m_points[3 * v + 1], hull.m_points[3 * v + 2]));
+      }
+      PxConvexMeshDesc convexDesc;
+      convexDesc.points.count = vertices.size();
+      convexDesc.points.stride = sizeof(PxVec3);
+      convexDesc.points.data = vertices.data();
+      convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // | PxConvexFlag::eSHIFT_VERTICES;
+      convexDesc.vertexLimit = 256;
+      PxDefaultMemoryOutputStream buf;
+      PxConvexMeshCookingResult::Enum result;
+      if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
+        spdlog::error("Failed to cook a mesh from file: {}", filename);
+      }
+      PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+      PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);
+      meshes.push_back(convexMesh);
+    }
+  }
+
+  vhacd->Release();
   return meshes;
 }
 

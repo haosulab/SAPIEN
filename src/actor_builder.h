@@ -20,7 +20,7 @@ class IPxrRididbody;
 class ActorBuilder {
 protected:
   struct ActorBuilderShapeRecord {
-    enum Type { SingleMesh, MultipleMeshes, Box, Capsule, Sphere } type;
+    enum Type { SingleMesh, MultipleMeshes, DecomposedMeshes, Box, Capsule, Sphere } type;
     // mesh, scale also for box
     std::string filename;
     PxVec3 scale;
@@ -79,6 +79,11 @@ public:
                                        const PxVec3 &scale = {1, 1, 1},
                                        PxMaterial *material = nullptr, PxReal density = 1000.f);
 
+  void addDecomposedConvexShapesFromFile(const std::string &filename,
+                                         const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                         const PxVec3 &scale = {1, 1, 1},
+                                         PxMaterial *material = nullptr, PxReal density = 1000.f);
+
   void addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                    const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr,
                    PxReal density = 1000.f);
@@ -117,8 +122,6 @@ public:
   void setMassAndInertia(PxReal mass, PxTransform const &cMassPose, PxVec3 const &inertia);
   inline void setScene(SScene *scene) { mScene = scene; }
 
-  // SActor *build(bool isStatic = false, bool isKinematic = false, std::string const &name = "")
-  // const;
   SActor *build(bool isKinematic = false, std::string const &name = "") const;
   SActorStatic *buildStatic(std::string const &name = "") const;
 

@@ -33,6 +33,7 @@ public:
                                 bool saveCache = true);
 
   std::vector<physx::PxConvexMesh *> loadMeshGroup(const std::string &filename);
+  std::vector<physx::PxConvexMesh *> loadMeshGroupVHACD(const std::string &filename);
 
 public:
   // cache config
