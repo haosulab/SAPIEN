@@ -35,18 +35,22 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
     }
     RCLCPP_INFO(mNode->get_logger(), "service not available, waiting again...");
   }
-  assert(paramClient.wait_for_service(20s));
 
   if (paramClient.has_parameter(robotURDFName) && paramClient.has_parameter(robotSRDFName)) {
-    // Load robot model
+    // Remapping config parameter to current node and load robot model
     // With current convention, a specific robot will have one kinematics parameters
     // No matter how many time it is instantiated
-    const auto URDFString = paramClient.get_parameter<std::string>(robotURDFName);
-    const auto SRDFString = paramClient.get_parameter<std::string>(robotSRDFName);
-    robot_model_loader::RobotModelLoader::Options opt(URDFString, SRDFString);
-    mRobotLoader = std::make_unique<robot_model_loader::RobotModelLoader>(mNode, opt);
+    std::vector<std::string> key = paramClient.list_parameters({}, 10).names;
+    std::vector<rclcpp::Parameter> value = paramClient.get_parameters(key);
+    for (auto &j : value) {
+      if (j.get_name() == "use_sim_time")
+        continue;
+      RCLCPP_INFO(mNode->get_logger(), "%s", j.get_name().c_str());
+      mNode->declare_parameter(j.get_name(), j.get_parameter_value());
+    }
 
     // Load robot and robot state
+    mRobotLoader = std::make_unique<robot_model_loader::RobotModelLoader>(mNode);
     mRobotModel = mRobotLoader->getModel();
     RCLCPP_INFO(mNode->get_logger(), "Load ROS robot model %s, base frame: %s",
                 robotURDFName.c_str(), mRobotModel->getModelFrame().c_str());
@@ -145,8 +149,8 @@ void RobotManager::createJointPublisher(double pubFrequency) {
 std::weak_ptr<JointVelocityController>
 RobotManager::buildJointVelocityController(const std::vector<std::string> &jointNames,
                                            const std::string &serviceName) {
-  auto controller = std::make_shared<JointVelocityController>(mNode, mClock, mWrapper,
-                                                              jointNames, serviceName);
+  auto controller =
+      std::make_shared<JointVelocityController>(mNode, mClock, mWrapper, jointNames, serviceName);
   mJointVelocityControllers.push_back(controller);
   return std::weak_ptr<JointVelocityController>(controller);
 }

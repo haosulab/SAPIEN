@@ -70,8 +70,11 @@ void test1(int argc, char *argv[]) {
     // Move arm IK
     armController.lock()->moveCartesian({0.0, 0.02, 0.02}, ros2::MoveType::WorldTranslate);
 
-    if (step >= 500) {
+    if (step >= 500 && step < 1000) {
       gripperController.lock()->moveJoint({5, 5, 5, 5, 5, 5});
+    }
+    if (step == 1000) {
+      gripperController.lock()->moveJoint({-0.1, -0.1, -0.1, -0.1, -0.1, -0.1}, true);
     }
   }
   rclcpp::shutdown();

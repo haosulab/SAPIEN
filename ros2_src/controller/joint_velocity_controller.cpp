@@ -8,12 +8,15 @@ sapien::ros2::JointVelocityController::JointVelocityController(
     const std::vector<std::string> &jointNames, const std::string &serviceName)
     : mNode(std::move(node)), mClock(std::move(clock)), mJointNames(jointNames),
       mContinuousCommands(jointNames.size()), mCommands() {
+  // Create Service
   mService = mNode->create_service<sapien_ros2_communication_interface::srv::JointVelocity>(
       std::string(mNode->get_name()) + "/" + serviceName,
       [this](const std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Request>
                  req,
              std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Response> res)
           -> void { this->handleService(req, std::move(res)); });
+
+  // Register command
   wrapper->registerContinuousVelocityCommands(&mContinuousCommands, mJointNames);
   wrapper->registerVelocityCommands(&mCommands, mJointNames);
 }

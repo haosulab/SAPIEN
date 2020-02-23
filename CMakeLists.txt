@@ -136,7 +136,7 @@ if (ROS)
         find_package(std_msgs REQUIRED)
         find_package(sapien_ros2_communication_interface REQUIRED)
         find_package(moveit_core)
-        find_package(moveit_ros_planning)
+        find_package(moveit_ros_planning_interface)
         find_package(ament_index_cpp)
 
         include_directories(
@@ -153,10 +153,10 @@ if (ROS)
         add_library(sapien_device ${SAPIEN_DEVICE_SRC})
         ament_target_dependencies(sapien_device rclcpp sensor_msgs)
 
-        file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/articulation/*.cpp" "ros2_src/utils/*.hpp")
+        file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/articulation/*.cpp" "ros2_src/utils/*.hpp" "ros2_src/sensor/*.cpp")
         add_library(sapien_controller ${SAPIEN_ROBOT_SRC})
         target_link_libraries(sapien_controller sapien)
-        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs sapien_ros2_communication_interface moveit_core moveit_ros_planning)
+        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs sapien_ros2_communication_interface moveit_core moveit_ros_planning_interface)
 
         # test
         add_executable(manual_PS3 manualtest/PS3ROSTest.cpp)

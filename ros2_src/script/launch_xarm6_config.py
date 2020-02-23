@@ -38,7 +38,7 @@ def generate_launch_description():
     robot_description_semantic = {'robot_description_semantic': robot_description_semantic_config}
 
     kinematics_yaml = load_yaml('sapien_resources', 'xarm6_moveit_config/config/kinematics.yaml')
-    robot_description_kinematics = {'robot_description_kinematics': kinematics_yaml}
+    # robot_description_kinematics = {'robot_description_kinematics': kinematics_yaml}
 
     controllers_yaml = load_yaml('sapien_resources', 'xarm6_moveit_config/config/controllers.yaml')
     moveit_controllers = {'moveit_simple_controller_manager': controllers_yaml}
