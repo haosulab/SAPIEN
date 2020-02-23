@@ -5,7 +5,6 @@ import numpy as np
 from PIL import Image
 import argparse
 from sapien.asset import download_partnet_mobility
-
 '''
 Exapmle usage:
 python3 render_asset.py 179
@@ -21,8 +20,13 @@ urdf = download_partnet_mobility(args.id)
 sim = sapien.Simulation()
 renderer = sapien.OptifuserRenderer()
 sim.set_renderer(renderer)
+
+controller = sapien.OptifuserController(renderer)
+
 scene: sapien.Scene = sim.create_scene()
 scene.set_timestep(1 / 60)
+
+controller.set_current_scene(scene)
 
 # create some lights
 scene.set_ambient_light([0.5, 0.5, 0.5])
@@ -46,6 +50,7 @@ cam_mount.set_pose(Pose(p, quat))
 # load URDF as a kinematic robot
 loader = scene.create_urdf_loader()
 loader.fix_root_link = 1
+loader.scale = 1
 robot: sapien.KinematicArticulation = loader.load_kinematic(urdf)
 
 if not robot:
@@ -74,10 +79,16 @@ img = Image.fromarray(img)
 img.save('output.png')
 
 # delete the robot
+
+controller.show_window()
+while not controller.should_quit:
+    scene.update_render()
+    scene.step()
+    controller.render()
+
 scene.remove_kinematic_articulation(robot)
 
 # delete scene
 scene = None
-
 
 # 179, 2440, 723

@@ -349,10 +349,19 @@ PYBIND11_MODULE(pysapien, m) {
 
   //======== Actor ========//
 
+  py::enum_<EActorType>(m, "ActorType")
+      .value("STATIC", EActorType::STATIC)
+      .value("KINEMATIC", EActorType::KINEMATIC)
+      .value("DYNAMIC", EActorType::DYNAMIC)
+      .value("LINK", EActorType::ARTICULATION_LINK)
+      .value("KINEMATIC_LINK", EActorType::KINEMATIC_ARTICULATION_LINK)
+      .export_values();
+
   py::class_<SActorBase>(m, "ActorBase")
       .def_property("name", &SActorBase::getName, &SActorBase::setName)
       .def("get_name", &SActorBase::getName)
       .def("set_name", &SActorBase::setName, py::arg("name"))
+      .def_property_readonly("type", &SActorBase::getType)
       .def_property_readonly("id", &SActorBase::getId)
       .def("get_id", &SActorBase::getId)
       .def("get_scene", &SActorBase::getScene, py::return_value_policy::reference)

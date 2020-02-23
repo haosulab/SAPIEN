@@ -147,7 +147,7 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, const std
     jointName2treeNode[name] = childNode;
   }
 
-  std::vector<LinkTreeNode*> roots;
+  std::vector<LinkTreeNode *> roots;
   // find root
   LinkTreeNode *root = nullptr;
   for (const auto &node : treeNodes) {
@@ -373,8 +373,8 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, const std
       } else if (current->joint->type == "prismatic") {
         currentLinkBuilder->setJointProperties(
             PxArticulationJointType::ePRISMATIC,
-            {{current->joint->limit->lower, current->joint->limit->upper}}, tAxis2Parent,
-            tAxis2Joint, friction, damping);
+            {{current->joint->limit->lower * scale, current->joint->limit->upper * scale}},
+            tAxis2Parent, tAxis2Joint, friction, damping);
       } else if (current->joint->type == "fixed") {
         currentLinkBuilder->setJointProperties(PxArticulationJointType::eFIX, {}, tAxis2Parent,
                                                tAxis2Joint, friction, damping);
