@@ -11,3 +11,4 @@ cmake-build-debug
 .ini
 /ros2_ws/log/
 /ros2_ws/install/
+/dist/
