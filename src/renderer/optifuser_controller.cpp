@@ -35,8 +35,9 @@ static int pickedRenderId = 0;
 
 OptifuserController::OptifuserController(OptifuserRenderer *renderer)
     : mRenderer(renderer), mFreeCameraController(mCamera), mArcCameraController(mCamera) {
-  mCamera.position = {0, 0, 1};
   mCamera.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
+  setCameraPosition(0, 0, 1);
+  setCameraRotation(0, 0);
 }
 void OptifuserController::showWindow() { mRenderer->mContext->showWindow(); }
 void OptifuserController::hideWindow() { mRenderer->mContext->hideWindow(); }

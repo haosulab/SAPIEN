@@ -229,6 +229,7 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
 }
 
 std::vector<physx::PxConvexMesh *> MeshManager::loadMeshGroupVHACD(const std::string &filename) {
+  spdlog::info("Decomposing {} into convex shapes with VHACD...", filename);
   VHACD::IVHACD *vhacd = VHACD::CreateVHACD();
 
   std::vector<PxConvexMesh *> meshes;
@@ -270,15 +271,22 @@ std::vector<physx::PxConvexMesh *> MeshManager::loadMeshGroupVHACD(const std::st
     std::vector<uint32_t> triangles;
     triangles.reserve(mesh->mNumFaces * 3);
     for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
-      assert(mesh->mFaces[i].mNumIndices == 3);
+      if (mesh->mFaces[i].mNumIndices != 3) {
+        spdlog::error("Detected non-triangular face with {} vertices",
+                      mesh->mFaces[i].mNumIndices);
+        continue;
+      }
       triangles.push_back(mesh->mFaces[i].mIndices[0]);
       triangles.push_back(mesh->mFaces[i].mIndices[1]);
       triangles.push_back(mesh->mFaces[i].mIndices[2]);
     }
 
     VHACD::IVHACD::Parameters params;
-    vhacd->Compute(points.data(), mesh->mNumVertices, triangles.data(), mesh->mNumFaces, params);
+    spdlog::info("Processing mesh {}", i);
+    vhacd->Compute(points.data(), mesh->mNumVertices, triangles.data(), triangles.size() / 3,
+                   params);
     uint32_t hullCount = vhacd->GetNConvexHulls();
+
     for (uint32_t i = 0; i < hullCount; ++i) {
       VHACD::IVHACD::ConvexHull hull;
       vhacd->GetConvexHull(i, hull);
@@ -306,6 +314,7 @@ std::vector<physx::PxConvexMesh *> MeshManager::loadMeshGroupVHACD(const std::st
   }
 
   vhacd->Release();
+  spdlog::info("VHACD complete");
   return meshes;
 }
 
