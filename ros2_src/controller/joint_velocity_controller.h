@@ -8,16 +8,6 @@
 #include "spdlog/spdlog.h"
 #include "utils/delayed_controller_base.hpp"
 
-#define HANDLE_COMMAND(continuous, vec)                                                           \
-  {                                                                                               \
-    if (continuous) {                                                                             \
-      mContinuousCommands.write(vec);                                                             \
-      updateCommandTimer(mNode->now(), 1);                                                        \
-    } else {                                                                                      \
-      mCommands.push(vec);                                                                        \
-      updateCommandTimer(mNode->now(), 0);                                                        \
-    }                                                                                             \
-  }
 
 namespace sapien::ros2 {
 

@@ -38,6 +38,10 @@ public:
     std::lock_guard<std::mutex> guard(mLock);
     return mQueue.empty();
   };
+  uint32_t size() {
+    std::lock_guard<std::mutex> guard(mLock);
+    return mQueue.size();
+  };
   void clear() {
     std::lock_guard<std::mutex> guard(mLock);
     std::queue<T> emptyQueue;

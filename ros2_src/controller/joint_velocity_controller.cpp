@@ -2,6 +2,18 @@
 #include "sapien_controllable_articulation.h"
 #include <utility>
 #include <vector>
+
+#define HANDLE_COMMAND(continuous, vec)                                                           \
+  {                                                                                               \
+    if (continuous) {                                                                             \
+      mContinuousCommands.write(vec);                                                             \
+      updateCommandTimer(mClock->now(), 1);                                                        \
+    } else {                                                                                      \
+      mCommands.push(vec);                                                                        \
+      updateCommandTimer(mClock->now(), 0);                                                        \
+    }                                                                                             \
+  }
+
 namespace sapien::ros2 {
 
 sapien::ros2::JointVelocityController::JointVelocityController(

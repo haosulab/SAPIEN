@@ -38,7 +38,7 @@ void test1(int argc, char *argv[]) {
   robotManager->setDriveProperty(1000, 50, 5000, {0, 1, 2, 3, 4, 5});
   robotManager->setDriveProperty(0, 50, 50, {6, 7, 8, 9, 10, 11});
 
-  // Test Baisc Controller
+  // Test Basic Controller
   std::vector<std::string> gripperJoints = {"drive_joint",
                                             "left_finger_joint",
                                             "left_inner_knuckle_joint",
@@ -47,12 +47,12 @@ void test1(int argc, char *argv[]) {
                                             "right_inner_knuckle_joint"};
   robotManager->createJointPublisher(20.0f);
   auto gripperController =
-      robotManager->buildJointVelocityController(gripperJoints, "gripper_joint_velocity", 0);
+      robotManager->buildJointVelocityController(gripperJoints, "gripper_joint_velocity", 0.0f);
   sceneManager.start();
 
   // Test IK Controller
   auto armController =
-      robotManager->buildCartesianVelocityController("arm", "arm_cartesian_velocity", 50.0f);
+      robotManager->buildCartesianVelocityController("arm", "arm_cartesian_velocity", 40.0f);
 
   // test PS3
   sceneManager.createPS3Publisher(50.0f);
