@@ -47,12 +47,12 @@ void test1(int argc, char *argv[]) {
                                             "right_inner_knuckle_joint"};
   robotManager->createJointPublisher(20.0f);
   auto gripperController =
-      robotManager->buildJointVelocityController(gripperJoints, "gripper_joint_velocity");
+      robotManager->buildJointVelocityController(gripperJoints, "gripper_joint_velocity", 0);
   sceneManager.start();
 
   // Test IK Controller
   auto armController =
-      robotManager->buildCartesianVelocityController("arm", "arm_cartesian_velocity");
+      robotManager->buildCartesianVelocityController("arm", "arm_cartesian_velocity", 50.0f);
 
   // test PS3
   sceneManager.createPS3Publisher(50.0f);
@@ -64,6 +64,7 @@ void test1(int argc, char *argv[]) {
     scene->updateRender();
     controller.render();
     step++;
+    std::cout << step << std::endl;
 
     // Balance force
     robotManager->balancePassiveForce();

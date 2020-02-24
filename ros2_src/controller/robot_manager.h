@@ -11,6 +11,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include <PxPhysicsAPI.h>
+#include <vector>
 
 namespace sapien::ros2 {
 
@@ -38,6 +39,7 @@ protected:
   bool mLoadRobot = false;
 
   // Controllers
+  // TODO: use unique ptr, since controller handle make no sense without robot state
   std::unique_ptr<JointPublisher> mJointPublisher = nullptr;
   std::vector<std::shared_ptr<JointVelocityController>> mJointVelocityControllers = {};
   std::vector<std::shared_ptr<CartesianVelocityController>> mCartesianVelocityControllers = {};
@@ -61,13 +63,14 @@ public:
   void createJointPublisher(double pubFrequency);
   std::weak_ptr<JointVelocityController>
   buildJointVelocityController(const std::vector<std::string> &jointNames,
-                               const std::string &serviceName);
+                               const std::string &serviceName, double latency = 0);
   std::weak_ptr<CartesianVelocityController>
-  buildCartesianVelocityController(const std::string &groupName, const std::string &serviceName);
+  buildCartesianVelocityController(const std::string &groupName, const std::string &serviceName,
+                                   double latency = 0);
 
 protected:
   void updateStates(const std::vector<float> &jointPosition,
-                         const std::vector<float> &jointVelocity);
+                    const std::vector<float> &jointVelocity);
 
   // Step function when simulator step once
   void step(bool timeStepChange = false, float newTimeStep = 0);

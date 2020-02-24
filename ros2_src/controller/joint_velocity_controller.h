@@ -1,18 +1,21 @@
 #pragma once
 
 #include <utility>
+#include <vector>
 
 #include "rclcpp/rclcpp.hpp"
 #include "sapien_ros2_communication_interface/srv/joint_velocity.hpp"
 #include "spdlog/spdlog.h"
-#include "utils/thread_safe_structure.hpp"
+#include "utils/delayed_controller_base.hpp"
 
 #define HANDLE_COMMAND(continuous, vec)                                                           \
   {                                                                                               \
     if (continuous) {                                                                             \
       mContinuousCommands.write(vec);                                                             \
+      updateCommandTimer(mNode->now(), 1);                                                        \
     } else {                                                                                      \
       mCommands.push(vec);                                                                        \
+      updateCommandTimer(mNode->now(), 0);                                                        \
     }                                                                                             \
   }
 
@@ -21,13 +24,12 @@ namespace sapien::ros2 {
 class SControllableArticulationWrapper;
 class RobotManager;
 
-class JointVelocityController {
+class JointVelocityController : public DelayedControllerBase {
   friend RobotManager;
 
 public:
 protected:
   rclcpp::Node::SharedPtr mNode;
-  rclcpp::Clock::SharedPtr mClock;
   rclcpp::Service<sapien_ros2_communication_interface::srv::JointVelocity>::SharedPtr mService;
 
   std::vector<std::string> mJointNames;
@@ -37,9 +39,9 @@ protected:
 
 public:
   JointVelocityController(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
-                          SControllableArticulationWrapper *wrapper,
+                          sapien::ros2::SControllableArticulationWrapper *wrapper,
                           const std::vector<std::string> &jointNames,
-                          const std::string &serviceName);
+                          const std::string &serviceName, double latency);
 
   void moveJoint(const std::vector<float> &velocity, bool continuous = false);
 

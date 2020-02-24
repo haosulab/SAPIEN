@@ -6,7 +6,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "sapien_ros2_communication_interface/srv/cartesian_velocity.hpp"
-#include "utils/thread_safe_structure.hpp"
+#include "utils/delayed_controller_base.hpp"
 
 #define COMPUTE_VELOCITY_AND_INTEGRATE(frame_name)                                                \
   {                                                                                               \
@@ -19,30 +19,14 @@ namespace sapien::ros2 {
 class SControllableArticulationWrapper;
 class RobotManager;
 
-enum CartesianCommand {
-  X_F = 0,
-  Y_F = 1,
-  Z_F = 2,
-  ROLL_F = 3,
-  PITCH_F = 4,
-  YAW_F = 5,
-  X_B = 6,
-  Y_B = 7,
-  Z_B = 8,
-  ROLL_B = 9,
-  PITCH_B = 10,
-  YAW_B = 11
-};
-
 enum MoveType { WorldTranslate, WorldRotate, LocalTranslate, LocalRotate };
 
-class CartesianVelocityController {
+class CartesianVelocityController : public DelayedControllerBase {
   friend RobotManager;
 
 public:
 protected:
   rclcpp::Node::SharedPtr mNode;
-  rclcpp::Clock::SharedPtr mClock;
   robot_state::RobotState *mRobotState = nullptr;
   robot_state::RobotState mLocalRobotState;
   const robot_state::JointModelGroup *mJointModelGroup;
@@ -66,7 +50,7 @@ public:
   CartesianVelocityController(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
                               SControllableArticulationWrapper *wrapper,
                               robot_state::RobotState *robotState, const std::string &groupName,
-                              const std::string &serviceName);
+                              const std::string &serviceName, double latency);
 
   void moveCartesian(const std::array<float, 3> &vec, MoveType type);
 
@@ -86,5 +70,4 @@ protected:
     return hatMatrix;
   };
 };
-
 } // namespace sapien::ros2

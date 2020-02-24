@@ -4,11 +4,12 @@
 #include "utils/thread_safe_structure.hpp"
 #include <rclcpp/rclcpp.hpp>
 #include <utility>
+#include <vector>
 
 namespace sapien {
 class SArticulation;
 class SJoint;
-}
+} // namespace sapien
 namespace sapien::ros2 {
 
 class RobotManager;
@@ -38,6 +39,10 @@ public:
   std::vector<std::vector<uint32_t>> mVelocityCommandsIndex;
   std::vector<std::vector<uint32_t>> mContinuousVelocityCommandsIndex;
 
+  std::vector<ThreadSafeQueue<rclcpp::Time> *> mPositionCommandsTimer;
+  std::vector<ThreadSafeQueue<rclcpp::Time> *> mVelocityCommandsTimer;
+  std::vector<ThreadSafeQueue<rclcpp::Time> *> mContinuousVelocityCommandsTimer;
+
 public:
   explicit SControllableArticulationWrapper(SArticulation *articulation,
                                             rclcpp::Clock::SharedPtr clock);
@@ -45,12 +50,16 @@ public:
   inline std::vector<std::string> getDriveJointNames() { return mQNames; }
 
   bool registerPositionCommands(ThreadSafeQueue<std::vector<float>> *command,
-                                const std::vector<std::string> &commandedJointNames);
+                                const std::vector<std::string> &commandedJointNames,
+                                ThreadSafeQueue<rclcpp::Time> *commandTimer);
 
   bool registerVelocityCommands(ThreadSafeQueue<std::vector<float>> *command,
-                                const std::vector<std::string> &commandedJointNames);
+                                const std::vector<std::string> &commandedJointNames,
+                                ThreadSafeQueue<rclcpp::Time> *commandTimer);
+
   bool registerContinuousVelocityCommands(ThreadSafeVector<float> *command,
-                                          const std::vector<std::string> &commandedJointNames);
+                                          const std::vector<std::string> &commandedJointNames,
+                                          ThreadSafeQueue<rclcpp::Time> *commandTimer);
 
 protected:
   void onEvent(EventStep &event) override;

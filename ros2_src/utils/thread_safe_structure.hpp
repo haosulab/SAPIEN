@@ -32,6 +32,8 @@ private:
 template <typename T> class ThreadSafeQueue {
 public:
   ThreadSafeQueue() : mQueue(){};
+  ThreadSafeQueue(const ThreadSafeQueue &other) = delete;
+  const ThreadSafeQueue &operator=(const ThreadSafeQueue &other) = delete;
   bool empty() {
     std::lock_guard<std::mutex> guard(mLock);
     return mQueue.empty();

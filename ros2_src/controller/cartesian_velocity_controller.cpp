@@ -5,9 +5,9 @@ namespace sapien::ros2 {
 
 sapien::ros2::CartesianVelocityController::CartesianVelocityController(
     rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
-    sapien::ros2::SControllableArticulationWrapper *wrapper, robot_state::RobotState *robotState,
-    const std::string &groupName, const std::string &serviceName)
-    : mNode(std::move(node)), mClock(std::move(clock)), mRobotState(robotState),
+    SControllableArticulationWrapper *wrapper, robot_state::RobotState *robotState,
+    const std::string &groupName, const std::string &serviceName, double latency)
+    : DelayedControllerBase(clock, latency), mNode(std::move(node)), mRobotState(robotState),
       mLocalRobotState(*robotState), mVelocityCommand() {
   // Time step will be initialized when build it using robot manager
   // Do not worry if not initialized here
@@ -29,7 +29,7 @@ sapien::ros2::CartesianVelocityController::CartesianVelocityController(
                  res) -> void { this->handleService(req, std::move(res)); });
 
   // Register
-  wrapper->registerVelocityCommands(&mVelocityCommand, mJointNames);
+  wrapper->registerVelocityCommands(&mVelocityCommand, mJointNames, &(mCommandTimer[0]));
 }
 void sapien::ros2::CartesianVelocityController::moveCartesian(const std::array<float, 3> &vec,
                                                               sapien::ros2::MoveType type) {
@@ -67,11 +67,10 @@ void sapien::ros2::CartesianVelocityController::moveCartesian(const std::array<f
     RCLCPP_WARN(mNode->get_logger(), "IK not found.");
     return;
   }
-  //    mLocalRobotState.copyJointGroupPositions(mJointModelGroup, mJointValues);
-  //    mVelocityCommand.push(std::vector<float>(mJointValues.begin(), mJointValues.end()));
   std::vector<float> stepVelocity(jointVelocity.data(),
                                   jointVelocity.data() + mJointModelGroup->getVariableCount());
   mVelocityCommand.push(stepVelocity);
+  updateCommandTimer(mClock->now());
 
   // Update control bool
   mCurrentStepCalled = true;
@@ -112,16 +111,18 @@ void sapien::ros2::CartesianVelocityController::handleService(
   twist = twist * (residual / mTimeStep);
   mRobotState->computeVariableVelocity(mJointModelGroup, jointVelocity, twist,
                                        mJointModelGroup->getLinkModel(mEEName));
-  mVelocityCommand.push(stepVelocity);
   foundIK =
       mRobotState->integrateVariableVelocity(mJointModelGroup, jointVelocity, mTimeStep) & foundIK;
-  res->set__success(foundIK);
 
   // Log
-  if (!foundIK) {
+  if (!foundIK)
     RCLCPP_WARN(mNode->get_logger(), "Cartesian velocity service do not find a solution");
+  else {
+    mVelocityCommand.push(stepVelocity);
+    updateCommandTimer(req->time_stamp);
   }
 
+  res->set__success(foundIK);
   // Update control bool
   mCurrentStepCalled = true;
 }

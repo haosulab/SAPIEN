@@ -1,13 +1,15 @@
 #include "joint_velocity_controller.h"
 #include "sapien_controllable_articulation.h"
+#include <utility>
+#include <vector>
 namespace sapien::ros2 {
 
 sapien::ros2::JointVelocityController::JointVelocityController(
     rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
     sapien::ros2::SControllableArticulationWrapper *wrapper,
-    const std::vector<std::string> &jointNames, const std::string &serviceName)
-    : mNode(std::move(node)), mClock(std::move(clock)), mJointNames(jointNames),
-      mContinuousCommands(jointNames.size()), mCommands() {
+    const std::vector<std::string> &jointNames, const std::string &serviceName, double latency)
+    : DelayedControllerBase(std::move(clock), latency, 2), mNode(std::move(node)),
+      mJointNames(jointNames), mContinuousCommands(jointNames.size()), mCommands() {
   // Create Service
   mService = mNode->create_service<sapien_ros2_communication_interface::srv::JointVelocity>(
       std::string(mNode->get_name()) + "/" + serviceName,
@@ -17,8 +19,9 @@ sapien::ros2::JointVelocityController::JointVelocityController(
           -> void { this->handleService(req, std::move(res)); });
 
   // Register command
-  wrapper->registerContinuousVelocityCommands(&mContinuousCommands, mJointNames);
-  wrapper->registerVelocityCommands(&mCommands, mJointNames);
+  wrapper->registerContinuousVelocityCommands(&mContinuousCommands, mJointNames,
+                                              &(mCommandTimer[1]));
+  wrapper->registerVelocityCommands(&mCommands, mJointNames, &(mCommandTimer[0]));
 }
 void sapien::ros2::JointVelocityController::moveJoint(const std::vector<float> &velocity,
                                                       bool continuous) {
@@ -89,8 +92,10 @@ void sapien::ros2::JointVelocityController::handleService(
 
   if (req->continuous) {
     mContinuousCommands.write(velocityCommands);
+    updateCommandTimer(req->stamp, 1);
   } else {
     mCommands.push(velocityCommands);
+    updateCommandTimer(req->stamp, 0);
   }
   res->set__success(true);
 }

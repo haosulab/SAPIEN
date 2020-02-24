@@ -3,6 +3,7 @@
 #include "articulation/sapien_joint.h"
 #include "sapien_controllable_articulation.h"
 #include "scene_manager.h"
+#include <vector>
 
 namespace sapien::ros2 {
 
@@ -45,7 +46,6 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
     for (auto &j : value) {
       if (j.get_name() == "use_sim_time")
         continue;
-      RCLCPP_INFO(mNode->get_logger(), "%s", j.get_name().c_str());
       mNode->declare_parameter(j.get_name(), j.get_parameter_value());
     }
 
@@ -148,23 +148,23 @@ void RobotManager::createJointPublisher(double pubFrequency) {
 
 std::weak_ptr<JointVelocityController>
 RobotManager::buildJointVelocityController(const std::vector<std::string> &jointNames,
-                                           const std::string &serviceName) {
-  auto controller =
-      std::make_shared<JointVelocityController>(mNode, mClock, mWrapper, jointNames, serviceName);
+                                           const std::string &serviceName, double latency) {
+  auto controller = std::make_shared<JointVelocityController>(mNode, mClock, mWrapper, jointNames,
+                                                              serviceName, latency);
   mJointVelocityControllers.push_back(controller);
   return std::weak_ptr<JointVelocityController>(controller);
 }
 
 std::weak_ptr<CartesianVelocityController>
 RobotManager::buildCartesianVelocityController(const std::string &groupName,
-                                               const std::string &serviceName) {
+                                               const std::string &serviceName, double latency) {
   if (!mLoadRobot) {
     RCLCPP_ERROR(mNode->get_logger(),
                  "No robot load from parameter server, fail to build cartesian controller!");
     assert(mLoadRobot);
   }
   auto controller = std::make_shared<CartesianVelocityController>(
-      mNode, mClock, mWrapper, mRobotState.get(), groupName, serviceName);
+      mNode, mClock, mWrapper, mRobotState.get(), groupName, serviceName, latency);
   controller->mTimeStep = mSceneManager->mTimeStep;
   mCartesianVelocityControllers.push_back(controller);
   return std::weak_ptr<CartesianVelocityController>(controller);
