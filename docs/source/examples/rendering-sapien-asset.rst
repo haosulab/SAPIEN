@@ -2,6 +2,7 @@ Rendering SAPIEN Asset
 ========================
 
 This is an example to use SAPIEN to render an image of an articulated object
+
 .. code-block:: python
 
     import sapien.core as sapien

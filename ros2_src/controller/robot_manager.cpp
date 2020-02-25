@@ -21,6 +21,7 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
   mJointStates->position.resize(jointName.size());
   mJointStates->velocity.resize(jointName.size());
 
+
   // Load robot description from remote node, do not use node to access parameters
   // SAPIEN convention: the remote node name must be "$/{robotName}_config"
   // Note that you must add a "/" before the name of the node, otherwise it do not exist

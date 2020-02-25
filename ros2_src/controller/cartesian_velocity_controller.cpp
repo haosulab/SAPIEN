@@ -1,4 +1,6 @@
 #include "cartesian_velocity_controller.h"
+
+#include <utility>
 #include "sapien_controllable_articulation.h"
 
 namespace sapien::ros2 {
@@ -7,7 +9,7 @@ sapien::ros2::CartesianVelocityController::CartesianVelocityController(
     rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
     SControllableArticulationWrapper *wrapper, robot_state::RobotState *robotState,
     const std::string &groupName, const std::string &serviceName, double latency)
-    : DelayedControllerBase(clock, latency), mNode(std::move(node)), mRobotState(robotState),
+    : DelayedControllerBase(std::move(clock), latency), mNode(std::move(node)), mRobotState(robotState),
       mLocalRobotState(*robotState), mVelocityCommand() {
   // Time step will be initialized when build it using robot manager
   // Do not worry if not initialized here

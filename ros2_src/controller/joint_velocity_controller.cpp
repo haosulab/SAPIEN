@@ -7,10 +7,10 @@
   {                                                                                               \
     if (continuous) {                                                                             \
       mContinuousCommands.write(vec);                                                             \
-      updateCommandTimer(mClock->now(), 1);                                                        \
+      updateCommandTimer(mClock->now(), 1);                                                       \
     } else {                                                                                      \
       mCommands.push(vec);                                                                        \
-      updateCommandTimer(mClock->now(), 0);                                                        \
+      updateCommandTimer(mClock->now(), 0);                                                       \
     }                                                                                             \
   }
 

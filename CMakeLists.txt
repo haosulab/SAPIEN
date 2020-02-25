@@ -165,6 +165,11 @@ if (ROS)
         add_executable(test_ros2 ros2_src/test/test_sapien_ros2.cpp)
         target_link_libraries(test_ros2 sapien_controller sapien_device)
 
+        # pybind for sapien-ros2
+        set_target_properties(sapien_controller PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+        pybind11_add_module(pysapien-ros2 "python/pysapien-ros2.cpp")
+        target_link_libraries(pysapien-ros2 PRIVATE sapien_controller)
+
         add_executable(test_ros_urdf ros2_src/test/test_ros_urdf.cpp)
         target_link_libraries(test_ros_urdf sapien_ros_urdf)
 

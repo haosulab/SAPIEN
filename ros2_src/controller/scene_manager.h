@@ -37,7 +37,7 @@ protected:
   rclcpp::Clock::SharedPtr mClock;
   rclcpp::Time mTime;
   rclcpp::Publisher<rosgraph_msgs::msg::Clock>::SharedPtr mClockPub;
-  float mTimeStep;
+  float mTimeStep = 0;
 
   // Thread and spin
   std::thread mThread;
