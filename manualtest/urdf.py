@@ -16,11 +16,11 @@ s0.set_timestep(1 / 240)
 s0.set_ambient_light([0.5, 0.5, 0.5])
 s0.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
 
-loader = s0.create_urdf_loader()
-loader.fix_base = 0
-chair = loader.load("../assets/robot/all_robot.urdf")
+loader: pysapien.URDFLoader = s0.create_urdf_loader()
+loader.fix_root_link = 0
+chair = loader.load("../assets/robot/locobot_description.urdf")
 
-render_controller.camera.set_position([-5, 0, 0])
+render_controller.set_camera_position(-5, 0, 0)
 render_controller.set_current_scene(s0)
 
 while not render_controller.should_quit:
