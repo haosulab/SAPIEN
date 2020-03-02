@@ -31,7 +31,7 @@ def point_cloud_from_depth(depth, color, proj, model):
 
 
 class BaseEnv:
-    def __init__(self, sim: pysapien.Simulation):
+    def __init__(self, sim: pysapien.Engine):
         """
         Base class of a environment of
         """

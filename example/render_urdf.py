@@ -19,7 +19,7 @@ args = parser.parse_args()
 urdf = download_partnet_mobility(args.id, token)
 
 # create SAPIEN simulation environment
-sim = sapien.Simulation()
+sim = sapien.Engine()
 renderer = sapien.OptifuserRenderer()
 sim.set_renderer(renderer)
 

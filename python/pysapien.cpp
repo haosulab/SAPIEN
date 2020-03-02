@@ -265,7 +265,7 @@ PYBIND11_MODULE(pysapien, m) {
       ;
 
   //======== Simulation ========//
-  py::class_<Simulation>(m, "Simulation")
+  py::class_<Simulation>(m, "Engine")
       .def(py::init<>())
       .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)

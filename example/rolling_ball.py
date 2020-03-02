@@ -9,7 +9,7 @@ renderer = sapien.OptifuserRenderer()  # default renderer for sapien
 render_control = sapien.OptifuserController(renderer)  # used to control the renderer
 
 # create simulcation and scene
-sim = sapien.Simulation()
+sim = sapien.Engine()
 sim.set_renderer(renderer)
 scene = sim.create_scene()
 scene.set_timestep(1 / 60)

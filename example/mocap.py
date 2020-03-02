@@ -3,7 +3,7 @@ import transforms3d
 from sapien.core import Pose
 import numpy as np
 
-sim = sapien.Simulation()
+sim = sapien.Engine()
 renderer = sapien.OptifuserRenderer()
 sim.set_renderer(renderer)
 render_controller = sapien.OptifuserController(renderer)

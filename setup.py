@@ -119,11 +119,6 @@ def read_requirements():
 # Data files for packaging
 project_python_home_dir = os.path.join("python", "py_package")
 
-# glsl_target_path = os.path.join(project_python_home_dir, "glsl_shader")
-# if os.path.exists(glsl_target_path):
-#     shutil.rmtree(glsl_target_path)
-# shutil.copytree(os.path.join("./glsl_shader"), glsl_target_path)
-
 assets_target = os.path.join(project_python_home_dir, "assets")
 if not os.path.exists(assets_target):
     shutil.copytree(os.path.join("./assets"), assets_target)
@@ -134,10 +129,12 @@ package_data = {
     "sapien": sapien_data,
 }
 
-setup(name='sapien',
+name = 'sapien'
+
+setup(name=name,
       version=check_version_info()[3],
       author='SAPIEN Team',
-      author_email='sapien@ucsd.edu',
+      author_email='sapienaicontact@gmail.com',
       description=['SAPIEN: A SimulAted Parted based Interactive ENvironment'],
       classifiers=[
           "Operating System :: POSIX :: Linux",
@@ -155,8 +152,8 @@ setup(name='sapien',
       cmdclass=dict(build_ext=CMakeBuild),
       zip_safe=False,
       packages=["sapien", "sapien.env", "sapien.core", "sapien.asset", "sapien.extension"],
-      keywords="robotics simulator dataset articulation part-net",
-      url="homepage.com",
-      project_urls={"Documentation": "NotImplemented.com"},
+      keywords="robotics simulator dataset articulation partnet",
+      url="sapien.ucsd.edu",
+      project_urls={"Documentation": "sapien.ucsd.edu/docs"},
       package_data=package_data,
       package_dir={"sapien": project_python_home_dir})

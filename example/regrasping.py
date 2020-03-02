@@ -4,7 +4,7 @@ from sapien.core import Pose
 renderer = sapien.OptifuserRenderer()  # default renderer for sapien
 render_control = sapien.OptifuserController(renderer)  # used to control the renderer
 
-sim = sapien.Simulation()
+sim = sapien.Engine()
 sim.set_renderer(renderer)
 scene = sim.create_scene(gravity=[0, 0, 0])
 scene.set_timestep(1 / 60)
