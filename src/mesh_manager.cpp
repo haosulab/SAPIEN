@@ -11,6 +11,8 @@
 #include <spdlog/spdlog.h>
 #include <sstream>
 
+#include "Model_OBJ.h"
+
 namespace sapien {
 namespace fs = std::experimental::filesystem;
 
@@ -315,6 +317,114 @@ std::vector<physx::PxConvexMesh *> MeshManager::loadMeshGroupVHACD(const std::st
 
   vhacd->Release();
   spdlog::info("VHACD complete");
+  return meshes;
+}
+
+std::vector<physx::PxConvexMesh *>
+MeshManager::loadMeshGroupManifoldVHACD(const std::string &filename) {
+  spdlog::info("Computing manifold and decompose: {}", filename);
+  VHACD::IVHACD *vhacd = VHACD::CreateVHACD();
+  Model_OBJ manifoldProcessor;
+
+  std::vector<PxConvexMesh *> meshes;
+  if (!fs::is_regular_file(filename)) {
+    spdlog::error("File not found: {}", filename);
+    return meshes;
+  }
+
+  std::string fullPath = fs::canonical(filename);
+  auto it = mMeshGroupRegistry.find(fullPath);
+  if (it != mMeshGroupRegistry.end()) {
+    spdlog::info("Using loaded mesh group: {}", filename);
+    for (PxConvexMesh *mesh : it->second.meshes) {
+      meshes.push_back(mesh);
+    }
+    return meshes;
+  }
+
+  // import obj using assimp
+  Assimp::Importer importer;
+  uint32_t flags = aiProcess_Triangulate;
+  const aiScene *scene = importer.ReadFile(filename, flags);
+  if (!scene) {
+    spdlog::error(importer.GetErrorString());
+    return meshes;
+  }
+  {
+    std::vector<glm::dvec3> points;
+    std::vector<glm::ivec3> triangles;
+    for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
+      auto mesh = scene->mMeshes[i];
+
+      for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
+        points.push_back(
+            glm::dvec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z));
+      }
+
+      for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
+        if (mesh->mFaces[i].mNumIndices != 3) {
+          spdlog::error("Detected non-triangular face with {} vertices",
+                        mesh->mFaces[i].mNumIndices);
+          continue;
+        }
+        triangles.push_back(glm::ivec3(mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1],
+                                       mesh->mFaces[i].mIndices[2]));
+      }
+    }
+    manifoldProcessor.Load(points, triangles);
+    spdlog::info("Processing Manifold...");
+    manifoldProcessor.Process_Manifold(20000);
+  }
+
+  std::vector<float> points;
+  points.reserve(manifoldProcessor.vertices.size() * 3);
+  for (auto &v : manifoldProcessor.vertices) {
+    points.push_back(v.x);
+    points.push_back(v.y);
+    points.push_back(v.z);
+  }
+
+  std::vector<uint32_t> triangles;
+  points.reserve(manifoldProcessor.face_indices.size() * 3);
+  for (auto &f : manifoldProcessor.face_indices) {
+    triangles.push_back(f.x);
+    triangles.push_back(f.y);
+    triangles.push_back(f.z);
+  }
+
+  VHACD::IVHACD::Parameters params;
+  params.m_resolution = 1000000;
+  spdlog::info("Decomposing...");
+  vhacd->Compute(points.data(), points.size() / 3, triangles.data(), triangles.size() / 3, params);
+  uint32_t hullCount = vhacd->GetNConvexHulls();
+  spdlog::info("Decomposed into {} hulls", hullCount);
+  for (uint32_t i = 0; i < hullCount; ++i) {
+    VHACD::IVHACD::ConvexHull hull;
+    vhacd->GetConvexHull(i, hull);
+
+    std::vector<PxVec3> vertices;
+    for (uint32_t v = 0; v < hull.m_nPoints; ++v) {
+      vertices.push_back(
+          PxVec3(hull.m_points[3 * v], hull.m_points[3 * v + 1], hull.m_points[3 * v + 2]));
+    }
+    PxConvexMeshDesc convexDesc;
+    convexDesc.points.count = vertices.size();
+    convexDesc.points.stride = sizeof(PxVec3);
+    convexDesc.points.data = vertices.data();
+    convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // | PxConvexFlag::eSHIFT_VERTICES;
+    convexDesc.vertexLimit = 256;
+    PxDefaultMemoryOutputStream buf;
+    PxConvexMeshCookingResult::Enum result;
+    if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
+      spdlog::error("Failed to cook a mesh from file: {}", filename);
+    }
+    PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+    PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);
+    meshes.push_back(convexMesh);
+  }
+
+  vhacd->Release();
+  spdlog::info("Processing complete.");
   return meshes;
 }
 

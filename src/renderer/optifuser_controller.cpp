@@ -409,7 +409,7 @@ void OptifuserController::render() {
           if (pathTracer) {
             delete pathTracer;
           }
-          pathTracer = new Optifuser::OptixRenderer();
+          pathTracer = new Optifuser::OptixRenderer(OptifuserRenderer::gPtxDir);
           pathTracer->setBlackBackground();
           pathTracer->init(mRenderer->mContext->getWidth(), mRenderer->mContext->getHeight());
         } else {

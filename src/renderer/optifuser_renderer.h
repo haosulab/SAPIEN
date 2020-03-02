@@ -111,6 +111,13 @@ public:
   void removeScene(IPxrScene *scene) override;
 
   static void setDefaultShaderConfig(std::string const &glslDir, std::string const &glslVersion);
+
+#ifdef _USE_OPTIX
+  static std::string gPtxDir;
+  static void setOptixConfig(std::string const &ptxDir);
+#endif
+
+  void enableGlobalAxes(bool enable = true);
 };
 
 } // namespace Renderer

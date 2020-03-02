@@ -10,11 +10,13 @@ Exapmle usage:
 python3 render_asset.py 179
 '''
 
+token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjEzNy4xMTAuMTAyLjIwNSIsInByaXZpbGVnZSI6MSwiaWF0IjoxNTgzMDk5NDYwLCJleHAiOjE2MTQ2MzU0NjB9.57VIgJJzYVd3j0c5nlM_oyzJlQAJSCyla8TqM5DoyLE'
+
 # take a part net id from command line
 parser = argparse.ArgumentParser()
 parser.add_argument('id', type=str)
 args = parser.parse_args()
-urdf = download_partnet_mobility(args.id)
+urdf = download_partnet_mobility(args.id, token)
 
 # create SAPIEN simulation environment
 sim = sapien.Simulation()
@@ -78,9 +80,15 @@ img = (img * 255).clip(0, 255).astype('uint8')
 img = Image.fromarray(img)
 img.save('output.png')
 
+photo = camera.take_raytraced_picture(256)[:, :, :3]
+photo = np.power(photo, 1 / 2.2)
+photo = (np.clip(photo, 0, 1) * 255).astype(np.uint8)
+Image.fromarray(photo).save('raytraced.ang')
+
 # delete the robot
 
 controller.show_window()
+controller.focus(robot.get_base_links()[0])
 while not controller.should_quit:
     scene.update_render()
     scene.step()

@@ -78,7 +78,7 @@ glm::mat4 OptifuserCamera::getCameraMatrix() {
 
 std::vector<float> OptifuserCamera::takeRaytracedPicture(uint32_t samplesPerPixel,
                                                        uint32_t reflectionCount) {
-  auto pathTracer = new Optifuser::OptixRenderer();
+  auto pathTracer = new Optifuser::OptixRenderer(OptifuserRenderer::gPtxDir);
   pathTracer->init(mWidth, mHeight);
   pathTracer->numRays = reflectionCount;
   pathTracer->max_iterations = samplesPerPixel;

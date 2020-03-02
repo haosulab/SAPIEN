@@ -194,7 +194,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     }
 
     case ActorBuilderShapeRecord::Type::DecomposedMeshes: {
-      auto meshes = getSimulation()->getMeshManager().loadMeshGroupVHACD(r.filename);
+      auto meshes = getSimulation()->getMeshManager().loadMeshGroupManifoldVHACD(r.filename);
       for (auto mesh : meshes) {
         if (!mesh) {
           spdlog::error("Failed to load part of the convex mesh for actor");

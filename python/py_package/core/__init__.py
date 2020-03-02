@@ -1,9 +1,16 @@
 from .pysapien import *
 import pkg_resources
 import os
+import sys
 
 GL_SHADER_ROOT = pkg_resources.resource_filename("sapien", "glsl_shader")
+PTX_ROOT = pkg_resources.resource_filename("sapien", 'ptx')
 __GL_VERSION_DICT = {3: "130", 4: "450"}
+
+
+def __enable_ptx():
+    assert os.path.exists(PTX_ROOT)
+    OptifuserRenderer.set_optix_config(PTX_ROOT)
 
 
 def __enable_gl(num: int):
@@ -23,3 +30,9 @@ def enable_default_gl4():
 
 
 enable_default_3()
+
+try:
+    __enable_ptx()
+    sys.stderr.write('ray tracing enabled\n')
+except:
+    pass

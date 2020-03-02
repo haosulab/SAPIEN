@@ -155,8 +155,14 @@ PYBIND11_MODULE(pysapien, m) {
       });
 
   py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer>(m, "OptifuserRenderer")
+      .def("enable_global_axes", &Renderer::OptifuserRenderer::enableGlobalAxes,
+           py::arg("enable") = true)
       .def_static("set_default_shader_config", Renderer::OptifuserRenderer::setDefaultShaderConfig,
                   py::arg("glsl_dir"), py::arg("glsl_version"))
+#ifdef _USE_OPTIX
+      .def_static("set_optix_config", Renderer::OptifuserRenderer::setOptixConfig,
+                  py::arg("ptx_dir"))
+#endif
       .def(py::init<std::string const &, std::string const &>(), py::arg("glsl_dir") = "",
            py::arg("glsl_version") = "");
 
@@ -180,7 +186,9 @@ PYBIND11_MODULE(pysapien, m) {
       .def_property_readonly("should_quit", &Renderer::OptifuserController::shouldQuit)
       .def_property_readonly("input",
                              [](Renderer::OptifuserController &) { return Optifuser::getInput(); },
-                             py::return_value_policy::reference);
+                             py::return_value_policy::reference)
+      .def("get_selected_actor", &Renderer::OptifuserController::getSelectedActor,
+           py::return_value_policy::reference);
 
   py::class_<Optifuser::CameraSpec>(m, "CameraSpec")
       .def(py::init([]() { return new Optifuser::CameraSpec(); }))

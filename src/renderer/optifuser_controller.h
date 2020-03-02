@@ -46,6 +46,7 @@ class OptifuserController : public IEventListener<EventActorPreDestroy> {
   GuiModel mGuiModel = {};
   SActorBase *mCurrentSelection = nullptr;
 
+
   bool mShouldQuit = false;
 
   Optifuser::CameraSpec mCamera;
@@ -70,6 +71,8 @@ public:
   void render();
 
   void onEvent(EventActorPreDestroy &e) override;
+
+  inline SActorBase *getSelectedActor() const { return mCurrentSelection; }
 };
 } // namespace Renderer
 } // namespace sapien

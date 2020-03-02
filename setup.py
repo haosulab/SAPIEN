@@ -12,6 +12,13 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--optix-home', type=str, default=None)
+args, unknown = parser.parse_known_args()
+sys.argv = [sys.argv[0]] + unknown
+
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir='./'):
@@ -39,8 +46,10 @@ class CMakeBuild(build_ext):
         original_full_path = self.get_ext_fullpath(ext.name)
         extdir = os.path.abspath(os.path.dirname(original_full_path))
         extdir = os.path.join(extdir, self.distribution.get_name(), "core")
-        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
-                      '-DPYTHON_EXECUTABLE=' + sys.executable]
+        cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
+
+        if args.optix_home is not None:
+            cmake_args.append('-DOPTIX_HOME=' + args.optix_home)
 
         cfg = 'Release'
         build_args = ['--config', cfg]
@@ -51,17 +60,30 @@ class CMakeBuild(build_ext):
         env = os.environ.copy()
         env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
                                                               self.distribution.get_version())
+
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
 
+        glsl_target_path = os.path.join(self.build_lib, 'sapien', 'glsl_shader')
+        if os.path.exists(glsl_target_path):
+            shutil.rmtree(glsl_target_path)
+        shutil.copytree(os.path.join(self.build_temp, 'glsl_shader'), glsl_target_path)
+
+        if args.optix_home:
+            ptx_target_path = os.path.join(self.build_lib, 'sapien', 'ptx')
+            print(ptx_target_path)
+            if os.path.exists(ptx_target_path):
+                shutil.rmtree(ptx_target_path)
+            shutil.copytree(os.path.join(self.build_temp, 'ptx'), ptx_target_path)
+
 
 def check_version_info():
     try:
         git_revision = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").split("\n")[0]
-        git_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode("utf-8").split("\n")[
-            0]
+        git_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref",
+                                              "HEAD"]).decode("utf-8").split("\n")[0]
     except (subprocess.CalledProcessError, OSError):
         git_revision = ""
         git_branch = "non-git"
@@ -75,14 +97,13 @@ def check_version_info():
 
     hostname = socket.gethostname()
 
-    sys.stdout.write(
-        f"====================Version Data====================\n"
-        f"Git Revision Number: {git_revision}\n"
-        f"Git Branch: {git_branch}\n"
-        f"Build Datatime: {build_datetime}\n"
-        f"Version Number: {version_number}\n"
-        f"Host Name: {hostname}\n"
-        f"====================================================\n\n")
+    sys.stdout.write(f"====================Version Data====================\n"
+                     f"Git Revision Number: {git_revision}\n"
+                     f"Git Branch: {git_branch}\n"
+                     f"Build Datatime: {build_datetime}\n"
+                     f"Version Number: {version_number}\n"
+                     f"Host Name: {hostname}\n"
+                     f"====================================================\n\n")
 
     return git_revision, git_branch, build_datetime, version_number, hostname
 
@@ -98,10 +119,10 @@ def read_requirements():
 # Data files for packaging
 project_python_home_dir = os.path.join("python", "py_package")
 
-glsl_target_path = os.path.join(project_python_home_dir, "glsl_shader")
-if os.path.exists(glsl_target_path):
-    shutil.rmtree(glsl_target_path)
-shutil.copytree(os.path.join("./glsl_shader"), glsl_target_path)
+# glsl_target_path = os.path.join(project_python_home_dir, "glsl_shader")
+# if os.path.exists(glsl_target_path):
+#     shutil.rmtree(glsl_target_path)
+# shutil.copytree(os.path.join("./glsl_shader"), glsl_target_path)
 
 assets_target = os.path.join(project_python_home_dir, "assets")
 if not os.path.exists(assets_target):
@@ -113,31 +134,29 @@ package_data = {
     "sapien": sapien_data,
 }
 
-setup(
-    name='sapien',
-    version=check_version_info()[3],
-    author='SAPIEN Team',
-    author_email='sapien@ucsd.edu',
-    description=['SAPIEN: A SimulAted Parted based Interactive ENvironment'],
-    classifiers=[
-        "Operating System :: POSIX :: Linux",
-        "Programming Language :: C++",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Topic :: Education",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "Topic :: Utilities",
-    ],
-    license="MIT",
-    ext_modules=[CMakeExtension('sapien')],
-    install_requires=read_requirements(),
-    long_description=open("readme.md").read(),
-    cmdclass=dict(build_ext=CMakeBuild),
-    zip_safe=False,
-    packages=["sapien", "sapien.env", "sapien.core", "sapien.asset", "sapien.extension"],
-    keywords="robotics simulator dataset articulation part-net",
-    url="homepage.com",
-    project_urls={"Documentation": "NotImplemented.com"},
-    package_data=package_data,
-    package_dir={"sapien": project_python_home_dir}
-)
+setup(name='sapien',
+      version=check_version_info()[3],
+      author='SAPIEN Team',
+      author_email='sapien@ucsd.edu',
+      description=['SAPIEN: A SimulAted Parted based Interactive ENvironment'],
+      classifiers=[
+          "Operating System :: POSIX :: Linux",
+          "Programming Language :: C++",
+          "Programming Language :: Python :: 3.6",
+          "Programming Language :: Python :: 3.7",
+          "Topic :: Education",
+          "Topic :: Software Development :: Libraries :: Python Modules",
+          "Topic :: Utilities",
+      ],
+      license="MIT",
+      ext_modules=[CMakeExtension('sapien')],
+      install_requires=read_requirements(),
+      long_description=open("readme.md").read(),
+      cmdclass=dict(build_ext=CMakeBuild),
+      zip_safe=False,
+      packages=["sapien", "sapien.env", "sapien.core", "sapien.asset", "sapien.extension"],
+      keywords="robotics simulator dataset articulation part-net",
+      url="homepage.com",
+      project_urls={"Documentation": "NotImplemented.com"},
+      package_data=package_data,
+      package_dir={"sapien": project_python_home_dir})

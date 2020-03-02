@@ -286,6 +286,17 @@ void OptifuserRenderer::setDefaultShaderConfig(std::string const &glslDir,
   gDefaultGlslVersion = glslVersion;
 }
 
+#ifdef _USE_OPTIX
+std::string OptifuserRenderer::gPtxDir = "ptx";
+void OptifuserRenderer::setOptixConfig(std::string const &ptxDir) {
+  gPtxDir = ptxDir;
+}
+#endif
+
+void OptifuserRenderer::enableGlobalAxes(bool enable) {
+  mContext->renderer.enableGlobalAxes(enable);
+}
+
 //======== End Renderer ========//
 
 } // namespace Renderer
