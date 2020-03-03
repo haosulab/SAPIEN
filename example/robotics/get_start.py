@@ -4,6 +4,7 @@ import pysapien as sapien
 def robot_basic_control_demo(fix_robot_root, balance_passive_force, add_joint_damping):
     sim = sapien.Engine()
     renderer = sapien.OptifuserRenderer()
+    renderer.enable_global_axes(False)
     sim.set_renderer(renderer)
     renderer_controller = sapien.OptifuserController(renderer)
     renderer_controller.set_camera_position(-2, 0, 1)
@@ -18,7 +19,7 @@ def robot_basic_control_demo(fix_robot_root, balance_passive_force, add_joint_da
 
     loader = scene0.create_urdf_loader()
     loader.fix_root_link = fix_robot_root
-    robot: sapien.Articulation = loader.load("assets/robot/jaco2.urdf")
+    robot = loader.load("assets/robot/jaco2.urdf")
 
     arm_init_qpos = [4.71, 2.84, 0, 0.75, 4.62, 4.48, 4.88]
     gripper_init_qpos = [0, 0, 0, 0, 0, 0]
