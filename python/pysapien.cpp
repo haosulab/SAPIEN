@@ -349,9 +349,13 @@ PYBIND11_MODULE(pysapien, m) {
   //======= Drive =======//
   py::class_<SDrive>(m, "Drive")
       .def("set_properties", &SDrive::setProperties, py::arg("stiffness"), py::arg("damping"),
-           py::arg("force_limit") = PX_MAX_F32, py::arg("isAcceleration") = true)
+           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
       .def("set_target", &SDrive::setTarget, py::arg("pose"))
-      .def("set_target_velocity", &SDrive::setTargetVelocity, py::arg("linear"),
+      .def("set_target_velocity",
+           [](SDrive &d, py::array_t<PxReal> const &linear, py::array_t<PxReal> const &angular) {
+             d.setTargetVelocity(array2vec3(linear), array2vec3(angular));
+           },
+           py::arg("linear"),
            py::arg("angular"))
       .def("destroy", &SDrive::destroy);
 

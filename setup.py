@@ -127,6 +127,7 @@ sapien_data = ["glsl_shader/*/*"]
 sapien_data.extend(glob.glob("assets/robot/**", recursive=True))
 package_data = {
     "sapien": sapien_data,
+    "sapien.core": ["__init__.pyi"]
 }
 
 name = 'sapien'
