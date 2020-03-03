@@ -2,6 +2,13 @@ Welcome to sapien's documentation!
 ==================================
 
 .. toctree::
+	 :maxdepth: 2
+	 :caption: Tutorial
+
+	 tutorial/robotics/index
+
+
+.. toctree::
    :maxdepth: 2
    :caption: Examples
 
