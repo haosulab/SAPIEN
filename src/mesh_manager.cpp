@@ -353,6 +353,7 @@ MeshManager::loadMeshGroupManifoldVHACD(const std::string &filename) {
   {
     std::vector<glm::dvec3> points;
     std::vector<glm::ivec3> triangles;
+    uint32_t count = 0;
     for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
       auto mesh = scene->mMeshes[i];
 
@@ -367,9 +368,10 @@ MeshManager::loadMeshGroupManifoldVHACD(const std::string &filename) {
                         mesh->mFaces[i].mNumIndices);
           continue;
         }
-        triangles.push_back(glm::ivec3(mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1],
-                                       mesh->mFaces[i].mIndices[2]));
+        triangles.push_back(glm::ivec3(mesh->mFaces[i].mIndices[0] + count, mesh->mFaces[i].mIndices[1] + count,
+                                       mesh->mFaces[i].mIndices[2] + count));
       }
+      count = points.size();
     }
     manifoldProcessor.Load(points, triangles);
     spdlog::info("Processing Manifold...");
