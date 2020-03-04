@@ -3,7 +3,13 @@ Welcome to sapien's documentation!
 
 .. toctree::
 	 :maxdepth: 2
-	 :caption: Tutorial
+	 :caption: Basic SAPIEN Python API
+
+	 tutorial/basic/index
+
+.. toctree::
+	 :maxdepth: 2
+	 :caption: Robotics in SAPIEN
 
 	 tutorial/robotics/index
 
