@@ -1,4 +1,0 @@
-link_0 hinge cabinet_door cabinet_door_surface handle
-link_1 hinge cabinet_door cabinet_door_surface handle
-link_2 slider drawer drawer_front drawer_side drawer_side drawer_back drawer_bottom handle
-link_3 heavy shelf shelf vertical_side_panel vertical_side_panel back_panel bottom_panel frame_horizontal_bar frame_horizontal_bar frame_horizontal_bar frame_horizontal_bar frame_vertical_bar frame_vertical_bar frame_horizontal_bar frame_horizontal_bar base_side_panel base_side_panel base_side_panel base_side_panel
