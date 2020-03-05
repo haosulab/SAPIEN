@@ -25,7 +25,7 @@ int main() {
   // auto builder = createAntBuilder(*s0);
   auto loader = s0->createURDFLoader();
   loader->fixRootLink = 0;
-  auto a = loader->loadKinematic("../assets/robot/locobot_description.urdf");
+  auto a = loader->loadKinematic("../assets/robot/locobot_lite_description.urdf");
   // loader->coalitionists = 1;
   // auto a = loader->load("../assets/robot/bullet_human.urdf");
   a->setRootPose({{0, 0, -1}, PxIdentity});
@@ -37,7 +37,7 @@ int main() {
   for (auto j : a->getBaseJoints()) {
     static_cast<SKJoint *>(j)->setDriveProperties(1, 1, 1);
   }
-  a->setDriveTarget({0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1});
+//  a->setDriveTarget({0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1});
 
   controller.setCameraPosition(-5, 0, 0);
   controller.setCurrentScene(s0.get());

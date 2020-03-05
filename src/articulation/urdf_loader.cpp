@@ -64,34 +64,10 @@ std::unique_ptr<SRDF::Robot> URDFLoader::loadSRDF(const std::string &filename) {
   }
 }
 
-SArticulationBase *URDFLoader::commonLoad(const std::string &filename, const std::shared_ptr<XMLDocument> loadedDoc,
-    PxMaterial *material, bool isKinematic) {
-  if (filename.substr(filename.length() - 4) != std::string("urdf")) {
-    throw std::invalid_argument("None URDF file passed to URDF loader");
-  }
-  auto srdfName = findSRDF(filename);
-  std::unique_ptr<SRDF::Robot> srdf = srdfName ? loadSRDF(srdfName.value()) : nullptr;
-#ifdef _VERBOSE
-  if (srdf) {
-    std::cout << "SRDF found " << srdfName.value() << std::endl;
-  }
-#endif
-
-  if (scale <= 0.f) {
-    throw std::runtime_error("Invalid URDF scale, valid scale should >= 0");
-  }
-
-  XMLDocument *doc;
-  if(!loadedDoc) {
-    doc = new XMLDocument();
-    if (doc->LoadFile(filename.c_str())) {
-      std::cerr << "Error loading " << filename << std::endl;
-      return nullptr;
-    }
-  } else {
-    doc = loadedDoc.get();
-  }
-
+SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename, XMLDocument *doc,
+                                                     std::unique_ptr<SRDF::Robot> srdf,
+                                                     physx::PxMaterial *material,
+                                                     bool isKinematic) {
   XMLPrinter printer;
   std::unique_ptr<Robot> robot;
   if (strcmp("robot", doc->RootElement()->Name()) == 0) {
@@ -460,18 +436,63 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, const std
   return articulation;
 }
 
-SArticulation *URDFLoader::load(const std::string &filename, physx::PxMaterial *material) {
-  return static_cast<SArticulation *>(commonLoad(filename, nullptr, material, false));
+SArticulationBase *URDFLoader::commonLoad(const std::string &filename, XMLDocument *loadedDoc,
+                                          PxMaterial *material, bool isKinematic) {
+  if (filename.substr(filename.length() - 4) != std::string("urdf")) {
+    throw std::invalid_argument("None URDF file passed to URDF loader");
+  }
+  auto srdfName = findSRDF(filename);
+  std::unique_ptr<SRDF::Robot> srdf = srdfName ? loadSRDF(srdfName.value()) : nullptr;
+#ifdef _VERBOSE
+  if (srdf) {
+    std::cout << "SRDF found " << srdfName.value() << std::endl;
+  }
+#endif
+
+  if (scale <= 0.f) {
+    throw std::runtime_error("Invalid URDF scale, valid scale should >= 0");
+  }
+  return parseRobotDescription(filename, loadedDoc, std::move(srdf), material, isKinematic);
 }
+
+SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMaterial *material,
+                                          bool isKinematic) {
+  if (filename.substr(filename.length() - 4) != std::string("urdf")) {
+    throw std::invalid_argument("None URDF file passed to URDF loader");
+  }
+  auto srdfName = findSRDF(filename);
+  std::unique_ptr<SRDF::Robot> srdf = srdfName ? loadSRDF(srdfName.value()) : nullptr;
+#ifdef _VERBOSE
+  if (srdf) {
+    std::cout << "SRDF found " << srdfName.value() << std::endl;
+  }
+#endif
+
+  if (scale <= 0.f) {
+    throw std::runtime_error("Invalid URDF scale, valid scale should >= 0");
+  }
+
+  XMLDocument *doc;
+  doc = new XMLDocument();
+  if (doc->LoadFile(filename.c_str())) {
+    std::cerr << "Error loading " << filename << std::endl;
+    return nullptr;
+  }
+  return parseRobotDescription(filename, doc, std::move(srdf), material, isKinematic);
+}
+
+SArticulation *URDFLoader::load(const std::string &filename, physx::PxMaterial *material) {
+  return static_cast<SArticulation *>(commonLoad(filename, material, false));
+}
+
+SArticulation *URDFLoader::loadFromXML(const std::string &filename, XMLDocument *loadedDoc,
+                                physx::PxMaterial *material) {
+  return static_cast<SArticulation *>(commonLoad(filename, loadedDoc, material, false));
+};
 
 SKArticulation *URDFLoader::loadKinematic(const std::string &filename,
                                           physx::PxMaterial *material) {
-  return static_cast<SKArticulation *>(commonLoad(filename, nullptr, material, true));
-}
-SKArticulation *URDFLoader::loadKinematic(const std::string &filename,
-                                          const std::shared_ptr<XMLDocument> loadedDoc,
-                                          physx::PxMaterial *material) {
-  return static_cast<SKArticulation *>(commonLoad(filename, loadedDoc, material, true));
+  return static_cast<SKArticulation *>(commonLoad(filename,  material, true));
 }
 
 } // namespace URDF

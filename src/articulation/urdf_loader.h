@@ -684,17 +684,26 @@ public:
   bool collisionIsVisual = false;
 
   explicit URDFLoader(SScene *scene);
+
   SArticulation *load(const std::string &filename, physx::PxMaterial *material = nullptr);
+  SArticulation *loadFromXML(const std::string &filename, XMLDocument *loadedDoc,
+                      physx::PxMaterial *material);
+
   SKArticulation *loadKinematic(const std::string &filename,
-                                physx::PxMaterial *material = nullptr);
-  SKArticulation *loadKinematic(const std::string &filename, const std::shared_ptr<XMLDocument> loadedDoc,
                                 physx::PxMaterial *material = nullptr);
 
 private:
   std::unique_ptr<SRDF::Robot> loadSRDF(const std::string &filename);
 
-  SArticulationBase *commonLoad(const std::string &filename, const std::shared_ptr<XMLDocument> loadedDoc, physx::PxMaterial *material,
+  SArticulationBase *commonLoad(const std::string &filename, XMLDocument *loadedDoc,
+                                physx::PxMaterial *material, bool isKinematic);
+
+  SArticulationBase *commonLoad(const std::string &filename, physx::PxMaterial *material,
                                 bool isKinematic);
+
+  SArticulationBase *parseRobotDescription(const std::string &filename, XMLDocument *doc,
+                                           std::unique_ptr<SRDF::Robot> srdf,
+                                           physx::PxMaterial *material, bool isKinematic);
 };
 
 } // namespace URDF
