@@ -24,8 +24,8 @@ int main() {
 
   auto builder = s0->createActorBuilder();
 
-  builder->addDecomposedConvexShapesFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
-                                             {0.1, 0.1, 0.1});
+  // builder->addDecomposedConvexShapesFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
+  //                                            {0.1, 0.1, 0.1});
   builder->addVisualFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
                              {0.1, 0.1, 0.1});
 
@@ -39,12 +39,7 @@ int main() {
 
   controller.setCurrentScene(s0.get());
 
-  int count = 0;
   while (!controller.shouldQuit()) {
-    // if (count++ == 120) {
-    //   actor->destroy();
-    // }
-
     s0->updateRender();
     s0->step();
 

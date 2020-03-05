@@ -7,9 +7,3 @@
 [submodule "3rd_party/tinyxml2"]
 	path = 3rd_party/tinyxml2
 	url = https://github.com/leethomason/tinyxml2.git
-[submodule "3rd_party/v-hacd"]
-	path = 3rd_party/v-hacd
-	url = https://github.com/fbxiang/v-hacd.git
-[submodule "3rd_party/Manifold"]
-	path = 3rd_party/Manifold
-	url = https://github.com/fbxiang/Manifold.git

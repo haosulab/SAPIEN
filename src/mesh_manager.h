@@ -34,18 +34,6 @@ public:
 
   std::vector<physx::PxConvexMesh *> loadMeshGroup(const std::string &filename);
 
-  /* 1. VHACD
-   * 2. QuickHull
-   * Undefined behavior on non-watertight meshes
-   */
-  std::vector<physx::PxConvexMesh *> loadMeshGroupVHACD(const std::string &filename);
-
-  /* 1. Robust Watertight Manifold Surface Generation Method for ShapeNet Models
-   * 2. VHACD
-   * 3. QuickHull
-   */
-  std::vector<physx::PxConvexMesh *> loadMeshGroupManifoldVHACD(const std::string &filename);
-
 public:
   // cache config
 

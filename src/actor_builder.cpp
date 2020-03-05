@@ -39,21 +39,6 @@ void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
   mShapeRecord.push_back(r);
 }
 
-void ActorBuilder::addDecomposedConvexShapesFromFile(const std::string &filename,
-                                                     const PxTransform &pose, const PxVec3 &scale,
-                                                     PxMaterial *material, PxReal density) {
-
-  ActorBuilderShapeRecord r;
-  r.type = ActorBuilderShapeRecord::Type::DecomposedMeshes;
-  r.filename = filename;
-  r.pose = pose;
-  r.scale = scale;
-  r.material = material;
-  r.density = density;
-
-  mShapeRecord.push_back(r);
-}
-
 void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMaterial *material,
                                PxReal density) {
   ActorBuilderShapeRecord r;
@@ -175,26 +160,6 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
 
     case ActorBuilderShapeRecord::Type::MultipleMeshes: {
       auto meshes = getSimulation()->getMeshManager().loadMeshGroup(r.filename);
-      for (auto mesh : meshes) {
-        if (!mesh) {
-          spdlog::error("Failed to load part of the convex mesh for actor");
-          continue;
-        }
-        PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
-            PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material, true);
-        if (!shape) {
-          spdlog::critical("Failed to create shape");
-          throw std::runtime_error("Failed to create shape");
-        }
-        shape->setLocalPose(r.pose);
-        shapes.push_back(shape);
-        densities.push_back(r.density);
-      }
-      break;
-    }
-
-    case ActorBuilderShapeRecord::Type::DecomposedMeshes: {
-      auto meshes = getSimulation()->getMeshManager().loadMeshGroupManifoldVHACD(r.filename);
       for (auto mesh : meshes) {
         if (!mesh) {
           spdlog::error("Failed to load part of the convex mesh for actor");

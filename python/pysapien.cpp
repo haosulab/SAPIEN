@@ -688,15 +688,6 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
            py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
            py::arg("density") = 1000)
-      .def("add_decomposed_convex_shapes_from_file",
-           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-              py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density) {
-             a.addDecomposedConvexShapesFromFile(filename, pose, array2vec3(scale), material,
-                                                 density);
-           },
-           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
-           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-           py::arg("density") = 1000)
       .def("add_box_shape",
            [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
               PxMaterial *material,
