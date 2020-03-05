@@ -45,8 +45,6 @@ include_directories(
 
 include_directories("/usr/include/eigen3")
 include_directories("3rd_party/optifuser/3rd_party/imgui" "3rd_party/optifuser/3rd_party/imgui/examples")
-include_directories("3rd_party/v-hacd/src/VHACD_Lib/public")
-include_directories("3rd_party/Manifold/src")
 
 file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
         "3rd_party/imgui/examples/imgui_impl_glfw.cpp"
@@ -71,9 +69,6 @@ endif ()
 add_subdirectory("3rd_party/optifuser")
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
-add_subdirectory("3rd_party/v-hacd/src")
-add_subdirectory("3rd_party/Manifold")
-set_target_properties(vhacd PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 include_directories("3rd_party/pybind11/include")
 
@@ -92,10 +87,9 @@ target_link_libraries(sapien -Wl,--start-group
         libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
         libPhysX_static_64.a libPhysXVehicle_static_64.a
         libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
-        pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser vhacd
-        stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} manifold)
+        pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
+        stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES})
 
-set_target_properties(manifold PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
