@@ -19,7 +19,7 @@ scene.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
 
 loader = scene.create_urdf_loader()
 loader.fix_root_link = 1
-robot = loader.load("../assets/robot/all_robot.urdf")
+robot = loader.load("../assets_local/robot/all_robot.urdf")
 
 actor_builder: sapien.ActorBuilder = scene.create_actor_builder()
 actor_builder.add_sphere_visual(Pose(), 0.02, [1, 0, 0], "anchor")
