@@ -140,11 +140,18 @@ void OptifuserController::render() {
 
     double dx, dy;
     Optifuser::getInput().getWheelDelta(dx, dy);
+
     mArcCameraController.r += dy;
     if (mArcCameraController.r < 1) {
       mArcCameraController.r = 1;
     }
     mArcCameraController.setCenter(x, y, z);
+
+#ifdef _USE_OPTIX
+    if ((dx != 0 || dy != 0) && renderMode == PATHTRACER) {
+      pathTracer->invalidateCamera();
+    }
+#endif
   }
 
   if (Optifuser::getInput().getKeyDown(GLFW_KEY_Q)) {
@@ -289,82 +296,6 @@ void OptifuserController::render() {
     currentScene->getScene()->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
   }
 
-  // if (mGuiModel.linkId) {
-  //   SActorBase *actor = mScene->findActorById(mGuiModel.linkId);
-  //   SLinkBase *link = mScene->findArticulationLinkById(mGuiModel.linkId);
-  //   if (actor) {
-  //     mCurrentSelection = actor;
-  //     actor->registerListener(*this);
-
-  //     mGuiModel.linkModel.name = actor->getName();
-  //     mGuiModel.linkModel.transform = actor->getPxActor()->getGlobalPose();
-  //     mGuiModel.linkModel.col1 = actor->getCollisionGroup1();
-  //     mGuiModel.linkModel.col2 = actor->getCollisionGroup2();
-  //     mGuiModel.linkModel.col3 = actor->getCollisionGroup3();
-  //     mGuiModel.linkModel.renderCollision = actor->getRenderMode() == 1;
-  //     mGuiModel.articulationId = 0;
-  //   } else if (link) {
-  //     mCurrentSelection = link;
-  //     actor = link;
-  //     actor->registerListener(*this);
-
-  //     mGuiModel.linkModel.name = link->getName();
-  //     mGuiModel.linkModel.transform = link->getPxActor()->getGlobalPose();
-  //     mGuiModel.linkModel.col1 = link->getCollisionGroup1();
-  //     mGuiModel.linkModel.col2 = link->getCollisionGroup2();
-  //     mGuiModel.linkModel.col3 = link->getCollisionGroup3();
-  //     mGuiModel.linkModel.renderCollision = link->getRenderMode() == 1;
-  //     auto articulation = link->getArticulation();
-  //     mGuiModel.articulationId = 1;
-  //     mGuiModel.articulationModel.name = articulation->getName();
-
-  //     mGuiModel.articulationModel.jointModel.resize(articulation->dof());
-  //     uint32_t n = 0;
-  //     auto qpos = articulation->getQpos();
-  //     for (auto j : articulation->getBaseJoints()) {
-  //       auto limits = j->getLimits();
-  //       for (uint32_t i = 0; i < j->getDof(); ++i) {
-  //         mGuiModel.articulationModel.jointModel[n].name = j->getName();
-  //         mGuiModel.articulationModel.jointModel[n].limits = limits[i];
-  //         mGuiModel.articulationModel.jointModel[n].value = qpos[n];
-  //         ++n;
-  //       }
-  //     }
-  //   } else {
-  //     spdlog::error(
-  //         "User picked an unregistered object {}. There is probably some implementation error!",
-  //         mGuiModel.linkId);
-  //   }
-
-  //   if (actor) {
-  //     switch (actor->getType()) {
-  //     case EActorType::DYNAMIC:
-  //     case EActorType::KINEMATIC:
-  //     case EActorType::ARTICULATION_LINK:
-  //       if (mGuiModel.linkModel.showCenterOfMass) {
-  //         mGuiModel.linkModel.cmassPose =
-  //             link->getPxActor()->getGlobalPose() *
-  //             static_cast<PxRigidBody *>(link->getPxActor())->getCMassLocalPose();
-  //       }
-  //       break;
-  //     default:
-  //       break;
-  //     }
-  //   }
-
-  //   if (Optifuser::getInput().getKeyDown(GLFW_KEY_F)) {
-  //     focus(actor);
-  //   }
-
-  //   currentScene->getScene()->clearAxes();
-
-  //   auto &pos = mGuiModel.linkModel.showCenterOfMass ? mGuiModel.linkModel.cmassPose.p
-  //                                                    : mGuiModel.linkModel.transform.p;
-  //   auto &quat = mGuiModel.linkModel.showCenterOfMass ? mGuiModel.linkModel.cmassPose.q
-  //                                                     : mGuiModel.linkModel.transform.q;
-  //   currentScene->getScene()->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
-  // }
-
   static const uint32_t imguiWindowSize = 300;
   static int camIndex = -1;
   if (renderGui) {
@@ -487,6 +418,17 @@ void OptifuserController::render() {
       {
         if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
           ImGui::Text("name: %s", mGuiModel.linkModel.name.c_str());
+
+          ImGui::Text("Position: %.2f %.2f %.2f", mGuiModel.linkModel.transform.p.x,
+                      mGuiModel.linkModel.transform.p.y, mGuiModel.linkModel.transform.p.z);
+
+          glm::vec3 angles = glm::eulerAngles(glm::quat(mGuiModel.linkModel.transform.q.w,
+                                                        mGuiModel.linkModel.transform.q.x,
+                                                        mGuiModel.linkModel.transform.q.y,
+                                                        mGuiModel.linkModel.transform.q.z)) /
+                             glm::pi<float>() * 180.f;
+          ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles.x, angles.y, angles.z);
+
           ImGui::Text("col1: #%08x, col2: #%08x", mGuiModel.linkModel.col1,
                       mGuiModel.linkModel.col2);
           ImGui::Text("col3: #%08x", mGuiModel.linkModel.col3);

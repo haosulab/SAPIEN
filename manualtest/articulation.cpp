@@ -141,10 +141,6 @@ int main() {
       drive->setProperties(2000, 4000, PX_MAX_F32, true);
       drive->setTarget({{0, 0, 10}, PxIdentity});
     }
-    if (count == 150) {
-      drive->destroy();
-      ant0->unpackData(d);
-    }
 
     s0->updateRender();
     s0->step();
