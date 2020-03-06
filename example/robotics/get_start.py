@@ -1,4 +1,4 @@
-import pysapien as sapien
+import sapien.core as sapien
 
 
 def robot_basic_control_demo(fix_robot_root, balance_passive_force, add_joint_damping):

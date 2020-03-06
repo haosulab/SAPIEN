@@ -1,4 +1,4 @@
-import pysapien as sapien
+import sapien.core as sapien
 import numpy as np
 
 
