@@ -1,6 +1,7 @@
 import re
 from typing import List, Union, Optional
-from .physx_utils import transform2mat, mat2transform, pysapien
+from .physx_utils import transform2mat, mat2transform
+import sapien.core as sapien
 import numpy as np
 import warnings
 import os
@@ -31,26 +32,26 @@ def point_cloud_from_depth(depth, color, proj, model):
 
 
 class BaseEnv:
-    def __init__(self, sim: pysapien.Engine):
+    def __init__(self, sim: sapien.Engine):
         """
         Base class of a environment of
         """
         # Scene
         self.sim = sim
-        self.scene: pysapien.Scene = sim.create_scene()
+        self.scene: sapien.Scene = sim.create_scene()
         self.scene.add_ground(-1)
         self.scene.set_timestep(1 / 240)
 
         # Articulation loader for both robot and object, articulation builder for simple object without joint
-        self.loader: pysapien.URDFLoader = self.scene.create_urdf_loader()
+        self.loader: sapien.URDFLoader = self.scene.create_urdf_loader()
         self.builder = self.scene.create_actor_builder()
 
         # Camera
         self.camera_frame_id = []
         self.camera_pose = []
         self.camera_name_list = []
-        self.cam_list: List[pysapien.OptifuserCamera] = []
-        self.mount_actor_list: List[pysapien.PxRigidActor] = []
+        self.cam_list: List[sapien.OptifuserCamera] = []
+        self.mount_actor_list: List[sapien.PxRigidActor] = []
         self.mapping_list = []
         self.depth_lambda_list = []
         self.__gl_camera_mapping = []
@@ -81,8 +82,8 @@ class BaseEnv:
         Camera added by user after the class instantiate will not be handle by this function
         :return:
         """
-        mounted_cameras: List[pysapien.OptifuserCamera] = self.scene.get_mounted_cameras()
-        mounted_actors: List[pysapien.ActorBase] = self.scene.get_mounted_actors()
+        mounted_cameras: List[sapien.OptifuserCamera] = self.scene.get_mounted_cameras()
+        mounted_actors: List[sapien.ActorBase] = self.scene.get_mounted_actors()
         num = len(mounted_actors)
         for i in range(num):
             camera = mounted_cameras[i]
@@ -106,7 +107,7 @@ class BaseEnv:
             self.__gl_camera_mapping.append((points, homo_padding[:, :, np.newaxis]))
             self._gl_projection_inv.append(np.linalg.inv(camera.get_projection_matrix()))
 
-    def add_camera(self, name: str, camera_pose: Union[np.ndarray, pysapien.Pose], width: int, height: int, fov=1.1,
+    def add_camera(self, name: str, camera_pose: Union[np.ndarray, sapien.Pose], width: int, height: int, fov=1.1,
                    near=0.01, far=100) -> None:
         """
         Add custom mounted camera to the scene. These camera have same property as the urdf-defined camera
@@ -125,13 +126,13 @@ class BaseEnv:
         if isinstance(camera_pose, np.ndarray):
             assert camera_pose.shape == (4, 4), "Camera pose matrix must be (4, 4)"
             pose = mat2transform(camera_pose)
-        elif isinstance(camera_pose, pysapien.Pose):
+        elif isinstance(camera_pose, sapien.Pose):
             pose = camera_pose
             camera_pose = transform2mat(pose)
         else:
             raise RuntimeError("Unknown format of camera pose: {}".format(type(camera_pose)))
 
-        camera = self.sim.add_mounted_camera(name, actor, pysapien.Pose([0, 0, 0], [1, 0, 0, 0]), width, height, fov,
+        camera = self.sim.add_mounted_camera(name, actor, sapien.Pose([0, 0, 0], [1, 0, 0, 0]), width, height, fov,
                                              fov, near, far)
         actor.set_global_pose(pose)
 

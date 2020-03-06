@@ -24,7 +24,9 @@ def download_partnet_mobility(model_id, token=None, directory=None):
     print('downloading from', url.format(model_id, token))
     r = requests.get(url.format(model_id, token), stream=True)
     if not r.ok:
-        raise Exception("Download PartNet-Mobility failed")
+        raise Exception("Download PartNet-Mobility failed. "
+                        "Please check your token and IP address."
+                        "Also make sure sure the model id is valid")
 
     z = zipfile.ZipFile(io.BytesIO(r.content))
 

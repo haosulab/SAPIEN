@@ -1,4 +1,5 @@
-from .base_env import BaseEnv, pysapien
+from .base_env import BaseEnv
+import sapien.core as sapien
 import os
 from .path_utils import get_assets_path
 from typing import List
@@ -37,11 +38,11 @@ class RobotArmEnv(BaseEnv):
         self.__init_cache = np.stack(
             [self.robot.get_qpos(), self.robot.get_qvel(), self.robot.get_qacc(), self.robot.get_qf()], axis=0)
 
-    def _load_robot(self, urdf_path: str, material: pysapien.PxMaterial) -> None:
+    def _load_robot(self, urdf_path: str, material: sapien.PxMaterial) -> None:
         # By default, the robot will loaded with balanced passive force
         self.loader.fix_base = True
-        self.robot: pysapien.Articulation = self.loader.load(urdf_path, material)
-        self.robot.set_root_pose(pysapien.Pose([0, 0, 0], [1, 0, 0, 0]))
+        self.robot: sapien.Articulation = self.loader.load(urdf_path, material)
+        self.robot.set_root_pose(sapien.Pose([0, 0, 0], [1, 0, 0, 0]))
 
         # Link mapping, remember to set the self._base_link_name if your robot base is not that name
         self._q_names = [j.name for j in self.robot.get_joints() if j.get_dof()]
