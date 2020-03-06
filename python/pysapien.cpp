@@ -675,6 +675,13 @@ PYBIND11_MODULE(pysapien, m) {
           },
           py::arg("gravity") = true, py::arg("coriolisAndCentrifugal") = true,
           py::arg("external") = true)
+      .def("compute_drive_force",
+           [](SArticulation &a, const py::array_t<PxReal> &arr) {
+             assert(arr.size() == a.dof());
+             std::vector<PxReal> qacc(arr.data(), arr.data() + a.dof());
+             auto qf = a.computeDriveForce(qacc);
+             return py::array_t<PxReal>(qf.size(), qf.data());
+           })
       .def("compute_jacobian",
            [](SArticulation &a) {
              auto jacobian = a.computeJacobianMatrix();

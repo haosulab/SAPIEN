@@ -227,6 +227,19 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
   return I2E(passiveForce);
 }
 
+std::vector<physx::PxReal> SArticulation::computeDriveForce(const std::vector<PxReal> &qacc) {
+  assert(qacc.size() == dof());
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
+
+  for (int i = 0; i < dof(); ++i) {
+    mCache->jointAcceleration[i] = qacc[i];
+  }
+  mPxArticulation->computeJointForce(*mCache);
+  std::vector<physx::PxReal> result(mCache->jointForce, mCache->jointForce + dof());
+  return result;
+}
+
 void SArticulation::prestep() {
   auto time = mScene->getTimestep();
   EventArticulationStep s;
@@ -383,7 +396,8 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
   p += 3;
 
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eALL);
-} // namespace sapien
+}
+// namespace sapien
 
 } // namespace sapien
 

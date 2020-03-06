@@ -1,4 +1,4 @@
-Off-screen rendering and SAPIEN assets
+SAPIEN assets and rendering
 =======================================
 
 .. highlight:: python
@@ -9,8 +9,8 @@ This tutorial will focus on how to download SAPIEN assets in Python and perform 
 Get your unique access token
 -----------------------------
 
-In order to download the SAPIEN assets, your need to fist register on `SAPIEN website <sapien.uscd.edu>`_,
-When logging in, you can see the ``Generate Python Access Token`` on the `Download page <sapien.ucsd.edu/downloads>`_.
+In order to download the SAPIEN assets, your need to fist register on `SAPIEN website <https://sapien.ucsd.edu/>`_,
+When logging in, you can see the ``Generate Python Access Token`` on the `Download page <https://sapien.ucsd.edu/downloads>`_.
 
 .. figure:: assets/sapien_download.png
    :width: 1280px
