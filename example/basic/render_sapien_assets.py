@@ -70,6 +70,3 @@ cloud.colors = open3d.utility.Vector3dVector(color_map[obj_segmentation])
 
 open3d.io.write_point_cloud('cloud.pcd', cloud)
 open3d.visualization.draw_geometries([cloud])
-
-
-camera.get_albedo_rgba()
