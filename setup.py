@@ -97,13 +97,15 @@ def check_version_info():
 
     hostname = socket.gethostname()
 
-    sys.stdout.write(f"====================Version Data====================\n"
-                     f"Git Revision Number: {git_revision}\n"
-                     f"Git Branch: {git_branch}\n"
-                     f"Build Datatime: {build_datetime}\n"
-                     f"Version Number: {version_number}\n"
-                     f"Host Name: {hostname}\n"
-                     f"====================================================\n\n")
+    sys.stdout.write("====================Version Data====================\n"
+                     "Git Revision Number: {}\n"
+                     "Git Branch: {}\n"
+                     "Build Datetime: {}\n"
+                     "Version Number: {}\n"
+                     "Host Name: {}\n"
+                     "====================================================\n\n".format(git_revision, git_branch,
+                                                                                       build_datetime, version_number,
+                                                                                       hostname))
 
     return git_revision, git_branch, build_datetime, version_number, hostname
 

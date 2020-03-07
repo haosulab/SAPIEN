@@ -229,6 +229,7 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
 
 std::vector<physx::PxReal> SArticulation::computeDriveForce(const std::vector<PxReal> &qacc) {
   assert(qacc.size() == dof());
+  mPxArticulation->commonInit();
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
 
