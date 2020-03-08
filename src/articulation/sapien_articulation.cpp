@@ -227,18 +227,19 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
   return I2E(passiveForce);
 }
 
-std::vector<physx::PxReal> SArticulation::computeDriveForce(const std::vector<PxReal> &qacc) {
+std::vector<physx::PxReal> SArticulation::computeInverseDynamics(const std::vector<PxReal> &qacc) {
   assert(qacc.size() == dof());
+  std::vector<PxReal> internalQacc = E2I(qacc);
   mPxArticulation->commonInit();
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
 
-  for (int i = 0; i < dof(); ++i) {
-    mCache->jointAcceleration[i] = qacc[i];
+  for (size_t i = 0; i < dof(); ++i) {
+    mCache->jointAcceleration[i] = internalQacc[i];
   }
   mPxArticulation->computeJointForce(*mCache);
   std::vector<physx::PxReal> result(mCache->jointForce, mCache->jointForce + dof());
-  return result;
+  return I2E(result);
 }
 
 void SArticulation::prestep() {

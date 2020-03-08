@@ -69,7 +69,7 @@ public:
   std::vector<physx::PxReal> computePassiveForce(bool gravity = true,
                                                  bool coriolisAndCentrifugal = true,
                                                  bool external = true);
-  std::vector<physx::PxReal> computeDriveForce(const std::vector<PxReal> &qacc);
+  std::vector<physx::PxReal> computeInverseDynamics(const std::vector<PxReal> &qacc);
 
   /* Kinematics Functions */
   std::vector<physx::PxReal> computeJacobianMatrix();
