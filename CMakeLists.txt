@@ -40,7 +40,6 @@ include_directories(
         "3rd_party/optifuser/include"
         "src"
         "ros2_src"
-        "unittest"
 )
 
 include_directories("/usr/include/eigen3")
@@ -96,8 +95,10 @@ set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 pybind11_add_module(pysapien "python/pysapien.cpp")
 target_link_libraries(pysapien PRIVATE sapien)
 
-add_executable(creation unittest/creation.cpp)
-target_link_libraries(creation sapien)
+file(GLOB_RECURSE UNITTEST_SRC unittest/*.cpp)
+
+add_executable(unittest ${UNITTEST_SRC})
+target_link_libraries(unittest sapien)
 
 add_executable(manual_actor manualtest/actor.cpp)
 target_link_libraries(manual_actor sapien)

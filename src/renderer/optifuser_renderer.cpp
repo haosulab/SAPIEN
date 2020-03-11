@@ -201,8 +201,8 @@ ICamera *OptifuserScene::addCamera(std::string const &name, uint32_t width, uint
   spdlog::warn("Note: current camera implementation does not support non-square pixels, and fovy "
                "will take precedence.");
   auto cam = std::make_unique<OptifuserCamera>(name, width, height, fovy, this, d);
-  cam->near = near;
-  cam->far = far;
+  cam->mCameraSpec->near = near;
+  cam->mCameraSpec->far = far;
   mCameras.push_back(std::move(cam));
   return mCameras.back().get();
 }

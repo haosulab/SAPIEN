@@ -8,13 +8,16 @@ namespace sapien {
 namespace Renderer {
 class OptifuserScene;
 
-class OptifuserCamera : public Optifuser::CameraSpec, public ICamera {
+class OptifuserCamera : public ICamera {
+  enum Mode { PERSPECTIVE, ORTHOGRAPHIC } mMode;
+
 public:
   uint32_t mWidth, mHeight;
   std::unique_ptr<Optifuser::OffscreenRenderContext> mRenderContext;
   OptifuserScene *mScene;
-
   physx::PxTransform mInitialPose;
+
+  std::unique_ptr<Optifuser::CameraSpec> mCameraSpec;
 
 public:
   OptifuserCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
@@ -40,6 +43,11 @@ public:
   virtual void setInitialPose(physx::PxTransform const &pose) override;
   virtual void setPose(physx::PxTransform const &pose) override;
 
+  void changeModeToOrthographic(float scaling);
+  void changeModeToPerspective(float fovy);
+
+  inline Mode getMode() { return mMode; }
+
 #ifdef _USE_OPTIX
   std::vector<float> takeRaytracedPicture(uint32_t samplesPerPixel = 65536,
                                           uint32_t reflectionCount = 4);
@@ -49,7 +57,5 @@ public:
   glm::mat4 getCameraMatrix();
 };
 
-
 } // namespace Renderer
-
 } // namespace sapien

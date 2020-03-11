@@ -34,8 +34,10 @@ static int pickedId = 0;
 static int pickedRenderId = 0;
 
 OptifuserController::OptifuserController(OptifuserRenderer *renderer)
-    : mRenderer(renderer), mFreeCameraController(mCamera), mArcCameraController(mCamera) {
-  mCamera.aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
+    : mRenderer(renderer), mCameraMode(0),
+      mCamera(std::make_unique<Optifuser::PerspectiveCameraSpec>()),
+      mFreeCameraController(mCamera.get()), mArcCameraController(mCamera.get()) {
+  mCamera->aspect = WINDOW_WIDTH / (float)WINDOW_HEIGHT;
   setCameraPosition(0, 0, 1);
   setCameraRotation(0, 0);
 }
@@ -50,14 +52,14 @@ void OptifuserController::focus(SActorBase *actor) {
     mArcCameraController.pitch = mFreeCameraController.pitch;
     auto p = actor->getPose().p;
     mArcCameraController.center = {p.x, p.y, p.z};
-    mArcCameraController.r = glm::length(
-        glm::vec3(mCamera.position.x - p.x, mCamera.position.y - p.y, mCamera.position.z - p.z));
+    mArcCameraController.r = glm::length(glm::vec3(
+        mCamera->position.x - p.x, mCamera->position.y - p.y, mCamera->position.z - p.z));
     actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
   } else if (!actor && mCurrentFocus) {
     // focus -> none
     mFreeCameraController.yaw = mArcCameraController.yaw;
     mFreeCameraController.pitch = mArcCameraController.pitch;
-    auto &p = mArcCameraController.camera.position;
+    auto &p = mArcCameraController.camera->position;
     mFreeCameraController.setPosition(p.x, p.y, p.z);
     mCurrentFocus->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
   } else if (actor && actor != mCurrentFocus) {
@@ -80,9 +82,37 @@ void OptifuserController::setCameraRotation(float yaw, float pitch) {
   mFreeCameraController.update();
 }
 
+void OptifuserController::setCameraOrthographic(bool ortho) {
+  if (ortho) {
+    mCameraMode = 1;
+    auto cam = std::make_unique<Optifuser::OrthographicCameraSpec>();
+    cam->name = mCamera->name;
+    cam->aspect = mCamera->aspect;
+    cam->position = mCamera->position;
+    cam->setRotation(mCamera->getRotation());
+    cam->near = mCamera->near;
+    cam->far = mCamera->far;
+    cam->scaling = 1.f;
+    mCamera = std::move(cam);
+  } else {
+    mCameraMode = 0;
+    auto cam = std::make_unique<Optifuser::PerspectiveCameraSpec>();
+    cam->name = mCamera->name;
+    cam->aspect = mCamera->aspect;
+    cam->position = mCamera->position;
+    cam->setRotation(mCamera->getRotation());
+    cam->near = mCamera->near;
+    cam->far = mCamera->far;
+    cam->fovy = glm::radians(35.f);
+    mCamera = std::move(cam);
+  }
+  mFreeCameraController.changeCamera(mCamera.get());
+  mArcCameraController.changeCamera(mCamera.get());
+}
+
 physx::PxTransform OptifuserController::getCameraPose() const {
-  auto p = mCamera.position;
-  auto q = mCamera.getRotation();
+  auto p = mCamera->position;
+  auto q = mCamera->getRotation();
   return {{p.x, p.y, p.z}, {q.x, q.y, q.z, q.w}};
 }
 
@@ -158,11 +188,11 @@ void OptifuserController::render() {
     mShouldQuit = true;
   }
 
-  mCamera.aspect = static_cast<float>(mRenderer->mContext->getWidth()) /
-                   static_cast<float>(mRenderer->mContext->getHeight());
+  mCamera->aspect = static_cast<float>(mRenderer->mContext->getWidth()) /
+                    static_cast<float>(mRenderer->mContext->getHeight());
 
-  mCamera.aspect = static_cast<float>(mRenderer->mContext->getWidth()) /
-                   static_cast<float>(mRenderer->mContext->getHeight());
+  mCamera->aspect = static_cast<float>(mRenderer->mContext->getWidth()) /
+                    static_cast<float>(mRenderer->mContext->getHeight());
 
   static bool renderGui = true;
   if (Optifuser::getInput().getKeyDown(GLFW_KEY_E)) {
@@ -189,7 +219,7 @@ void OptifuserController::render() {
   }
 
   if (currentScene) {
-    mRenderer->mContext->renderer.renderScene(*currentScene->getScene(), mCamera);
+    mRenderer->mContext->renderer.renderScene(*currentScene->getScene(), *mCamera);
 
     if (renderMode == SEGMENTATION) {
       mRenderer->mContext->renderer.displaySegmentation();
@@ -200,7 +230,7 @@ void OptifuserController::render() {
       // path tracer
       pathTracer->numRays = 4;
       pathTracer->max_iterations = 100000;
-      pathTracer->renderScene(*currentScene->getScene(), mCamera);
+      pathTracer->renderScene(*currentScene->getScene(), *mCamera);
       pathTracer->display();
 #endif
     } else {
@@ -357,21 +387,39 @@ void OptifuserController::render() {
 #endif
 
       if (ImGui::CollapsingHeader("Main Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+        static bool ortho;
+        if (ImGui::Checkbox("Orthographic", &ortho)) {
+          if (ortho) {
+            setCameraOrthographic(true);
+          } else {
+            setCameraOrthographic(false);
+          }
+        }
+
         ImGui::Text("Position");
-        ImGui::Text("%-4.3f %-4.3f %-4.3f", mCamera.position.x, mCamera.position.y,
-                    mCamera.position.z);
+        ImGui::Text("%-4.3f %-4.3f %-4.3f", mCamera->position.x, mCamera->position.y,
+                    mCamera->position.z);
         ImGui::Text("Forward");
-        auto forward = mCamera.getRotation() * glm::vec3(0, 0, -1);
+        auto forward = mCamera->getRotation() * glm::vec3(0, 0, -1);
         ImGui::Text("%-4.3f %-4.3f %-4.3f", forward.x, forward.y, forward.z);
-        ImGui::Text("Fov");
-        ImGui::SliderAngle("##fov(y)", &mCamera.fovy, 1.f, 90.f);
+
+        if (mCameraMode == 0) {
+          ImGui::Text("Fov");
+          auto fovy = &static_cast<Optifuser::PerspectiveCameraSpec *>(mCamera.get())->fovy;
+          ImGui::SliderAngle("##fov(y)", fovy, 1.f, 90.f);
+        } else {
+          ImGui::Text("Scaling");
+          auto scaling = &static_cast<Optifuser::OrthographicCameraSpec *>(mCamera.get())->scaling;
+          ImGui::SliderFloat("##scaling", scaling, 0.1f, 10.f);
+        }
         ImGui::Text("Move speed");
         ImGui::SliderFloat("##speed", &moveSpeed, 1.f, 10.f);
         ImGui::Text("Width: %d", mRenderer->mContext->getWidth());
         ImGui::SameLine();
         ImGui::Text("Height: %d", mRenderer->mContext->getHeight());
         ImGui::SameLine();
-        ImGui::Text("Aspect: %.2f", mCamera.aspect);
+        ImGui::Text("Aspect: %.2f", mCamera->aspect);
         ImGui::Text("Picked link id: %d", pickedId);
         ImGui::Text("Picked render id: %d", pickedRenderId);
       }

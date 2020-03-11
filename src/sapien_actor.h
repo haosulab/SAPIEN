@@ -19,13 +19,14 @@ class SActor : public SActorDynamicBase {
   friend ActorBuilder;
 
 private:
-  PxRigidBody *mActor = nullptr;
+  PxRigidDynamic *mActor = nullptr;
 
 public:
-  PxRigidBody *getPxActor() override;
+  PxRigidDynamic *getPxActor() override;
   void setPose(PxTransform const &pose);
   void setVelocity(PxVec3 const &v);
   void setAngularVelocity(PxVec3 const &v);
+  void lockMotion(bool x, bool y, bool z, bool ax, bool ay, bool az);
 
 public:
   EActorType getType() const override;
@@ -36,7 +37,7 @@ public:
 
 private:
   /* Only actor builder can create actor */
-  SActor(PxRigidBody *actor, physx_id_t id, SScene *scene,
+  SActor(PxRigidDynamic *actor, physx_id_t id, SScene *scene,
          std::vector<Renderer::IPxrRigidbody *> renderBodies,
          std::vector<Renderer::IPxrRigidbody *> collisionBodies);
 };

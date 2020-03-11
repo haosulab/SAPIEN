@@ -67,11 +67,8 @@ PYBIND11_MODULE(pysapien, m) {
   auto PyInput = py::class_<Optifuser::Input>(m, "Input");
   auto PyOptifuserController = py::class_<Renderer::OptifuserController>(m, "OptifuserController");
   auto PyCameraSpec = py::class_<Optifuser::CameraSpec>(m, "CameraSpec");
-  auto PyFPSCameraSpec =
-      py::class_<Optifuser::FPSCameraSpec, Optifuser::CameraSpec>(m, "FPSCameraSpec");
   auto PyOptifuserCamera =
-      py::class_<Renderer::OptifuserCamera, Optifuser::CameraSpec, Renderer::ICamera>(
-          m, "OptifuserCamera");
+      py::class_<Renderer::OptifuserCamera, Renderer::ICamera>(m, "OptifuserCamera");
   auto PyEngine = py::class_<Simulation>(m, "Engine");
   auto PyScene = py::class_<SScene>(m, "Scene");
   auto PyDrive = py::class_<SDrive>(m, "Drive");
@@ -175,9 +172,9 @@ PYBIND11_MODULE(pysapien, m) {
 
   //======== Render Interface ========//
 
-  PyISensor.def("setInitialPose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
-      .def("getPose", &Renderer::ISensor::getPose)
-      .def("setPose", &Renderer::ISensor::setPose, py::arg("pose"));
+  PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
+      .def("get_pose", &Renderer::ISensor::getPose)
+      .def("set_pose", &Renderer::ISensor::setPose, py::arg("pose"));
 
   PyICamera.def("get_name", &Renderer::ICamera::getName)
       .def("get_width", &Renderer::ICamera::getWidth)
@@ -254,20 +251,17 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_selected_actor", &Renderer::OptifuserController::getSelectedActor,
            py::return_value_policy::reference);
 
-  PyCameraSpec.def(py::init([]() { return new Optifuser::CameraSpec(); }))
-      .def_readwrite("name", &Optifuser::CameraSpec::name)
-      .def(
-          "set_position",
-          [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
-            c.position = {arr.at(0), arr.at(1), arr.at(2)};
-          },
-          py::arg("position"))
-      .def(
-          "set_rotation",
-          [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
-            c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
-          },
-          py::arg("rotation"))
+  PyCameraSpec.def_readwrite("name", &Optifuser::CameraSpec::name)
+      .def("set_position",
+           [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
+             c.position = {arr.at(0), arr.at(1), arr.at(2)};
+           },
+           py::arg("position"))
+      .def("set_rotation",
+           [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
+             c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
+           },
+           py::arg("rotation"))
       .def_property_readonly(
           "position",
           [](Optifuser::CameraSpec &c) { return py::array_t<PxReal>(3, (float *)(&c.position)); })
@@ -278,7 +272,6 @@ PYBIND11_MODULE(pysapien, m) {
                              })
       .def_readwrite("near", &Optifuser::CameraSpec::near)
       .def_readwrite("far", &Optifuser::CameraSpec::far)
-      .def_readwrite("fovy", &Optifuser::CameraSpec::fovy)
       .def_readwrite("aspect", &Optifuser::CameraSpec::aspect)
       .def(
           "lookAt",
@@ -292,33 +285,13 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_projection_matrix",
            [](Optifuser::CameraSpec &c) { return mat42array(c.getProjectionMat()); });
 
-  PyFPSCameraSpec.def("update", &Optifuser::FPSCameraSpec::update)
-      .def("is_sane", &Optifuser::FPSCameraSpec::isSane)
-      .def(
-          "set_forward",
-          [](Optifuser::FPSCameraSpec &c, const py::array_t<PxReal> &dir) {
-            c.setForward({dir.at(0), dir.at(1), dir.at(2)});
-          },
-          py::arg("forward"))
-      .def(
-          "set_up",
-          [](Optifuser::FPSCameraSpec &c, const py::array_t<PxReal> &dir) {
-            c.setUp({dir.at(0), dir.at(1), dir.at(2)});
-          },
-          py::arg("up"))
-      .def("rotate_yaw_pitch", &Optifuser::FPSCameraSpec::rotateYawPitch, py::arg("delta_yaw"),
-           py::arg("delta_pitch"))
-      .def("move_forward_right", &Optifuser::FPSCameraSpec::moveForwardRight,
-           py::arg("delta_forward"), py::arg("delta_right"))
-      .def("get_rotation0", [](Optifuser::FPSCameraSpec &c) {
-        glm::quat q = c.getRotation0();
-        return make_array<float>({q.w, q.x, q.y, q.z});
-      });
-
   PyOptifuserCamera
       .def("get_camera_matrix",
            [](Renderer::OptifuserCamera &c) { return mat42array(c.getCameraMatrix()); })
-
+      .def("set_mode_orthographic", &Renderer::OptifuserCamera::changeModeToOrthographic,
+           py::arg("scaling") = 1.f)
+      .def("set_mode_perspective", &Renderer::OptifuserCamera::changeModeToPerspective,
+           py::arg("fovy") = glm::radians(35.f))
 #ifdef _USE_OPTIX
       .def(
           "take_raytraced_picture",
@@ -498,6 +471,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("set_velocity", [](SActor &a, py::array_t<PxReal> v) { a.setVelocity(array2vec3(v)); })
       .def("set_angular_velocity",
            [](SActor &a, py::array_t<PxReal> v) { a.setAngularVelocity(array2vec3(v)); })
+      .def("lock_motion", &SActor::lockMotion, py::arg("x") = true, py::arg("y") = true,
+           py::arg("z") = true, py::arg("rx") = true, py::arg("ry") = true, py::arg("rz") = true)
       .def("pack", &SActor::packData)
       .def("unpack", [](SActor &a, const py::array_t<PxReal> &arr) {
         a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));

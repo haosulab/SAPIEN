@@ -5,12 +5,12 @@
 
 namespace sapien {
 
-SActor::SActor(PxRigidBody *actor, physx_id_t id, SScene *scene,
+SActor::SActor(PxRigidDynamic *actor, physx_id_t id, SScene *scene,
                std::vector<Renderer::IPxrRigidbody *> renderBodies,
                std::vector<Renderer::IPxrRigidbody *> collisionBodies)
     : SActorDynamicBase(id, scene, renderBodies, collisionBodies), mActor(actor) {}
 
-PxRigidBody *SActor::getPxActor() { return mActor; }
+PxRigidDynamic *SActor::getPxActor() { return mActor; }
 
 void SActor::destroy() { mParentScene->removeActor(this); }
 
@@ -23,6 +23,28 @@ void SActor::setPose(PxTransform const &pose) { getPxActor()->setGlobalPose(pose
 
 void SActor::setVelocity(PxVec3 const &v) { getPxActor()->setLinearVelocity(v); }
 void SActor::setAngularVelocity(PxVec3 const &v) { getPxActor()->setAngularVelocity(v); }
+void SActor::lockMotion(bool x, bool y, bool z, bool ax, bool ay, bool az) {
+  auto flags = PxRigidDynamicLockFlags();
+  if (x) {
+    flags |= PxRigidDynamicLockFlag::eLOCK_LINEAR_X;
+  }
+  if (y) {
+    flags |= PxRigidDynamicLockFlag::eLOCK_LINEAR_Y;
+  }
+  if (z) {
+    flags |= PxRigidDynamicLockFlag::eLOCK_LINEAR_Z;
+  }
+  if (ax) {
+    flags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_X;
+  }
+  if (ay) {
+    flags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y;
+  }
+  if (az) {
+    flags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z;
+  }
+  mActor->setRigidDynamicLockFlags(flags);
+}
 
 std::vector<PxReal> SActor::packData() {
   std::vector<PxReal> data;

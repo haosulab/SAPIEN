@@ -46,10 +46,10 @@ class OptifuserController : public IEventListener<EventActorPreDestroy> {
   GuiModel mGuiModel = {};
   SActorBase *mCurrentSelection = nullptr;
 
-
   bool mShouldQuit = false;
 
-  Optifuser::CameraSpec mCamera;
+  int mCameraMode;
+  std::unique_ptr<Optifuser::CameraSpec> mCamera;
   SActorBase *mCurrentFocus = nullptr;
 
 public:
@@ -66,6 +66,7 @@ public:
   void focus(SActorBase *actor);
   void setCameraPosition(float x, float y, float z);
   void setCameraRotation(float yaw, float pitch);
+  void setCameraOrthographic(bool ortho = true);
   physx::PxTransform getCameraPose() const;
 
   void render();

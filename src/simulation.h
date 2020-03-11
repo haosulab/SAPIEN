@@ -21,11 +21,6 @@ namespace sapien {
 using namespace physx;
 class SScene;
 
-struct SimulationSave {
-  std::string name;
-  std::vector<PxReal> data;
-};
-
 class SapienErrorCallback : public PxErrorCallback {
   PxErrorCode::Enum mLastErrorCode = PxErrorCode::eNO_ERROR;
 
@@ -51,14 +46,12 @@ private:
 public:
   PxMaterial *mDefaultMaterial = nullptr;
 
-  //=== mesh managers ===//
 private:
   MeshManager mMeshManager;
 
 public:
   inline MeshManager &getMeshManager() { return mMeshManager; }
 
-  //=== scenes ===//
 public:
   std::unique_ptr<SScene> createScene(PxVec3 gravity = {0.f, 0.f, -9.81f},
                                       PxSolverType::Enum solverType = PxSolverType::ePGS,
