@@ -422,11 +422,7 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_pose", &SActorBase::getPose)
       .def_property_readonly("col1", &SActorBase::getCollisionGroup1)
       .def_property_readonly("col2", &SActorBase::getCollisionGroup2)
-      .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
-
-      // TODO: check if it is okay to return a vector of REFERENCED raw pointers
-      // .def_property_readonly("render_bodies", &SActorBase::getRenderBodies)
-      ;
+      .def_property_readonly("col3", &SActorBase::getCollisionGroup3);
 
   PyActorDynamicBase
       .def_property_readonly("velocity",
