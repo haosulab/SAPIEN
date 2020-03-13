@@ -1,4 +1,0 @@
-<?xml version="1.0" ?>
-<robot name="partnet_6f36520144753550f91663a74ccd2338">
-  <disable_collisions link1="link_15" link2="link_16" reason="default"/>
-</robot>

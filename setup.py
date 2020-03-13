@@ -6,13 +6,11 @@ import subprocess
 import socket
 import time
 import shutil
-import glob
+import argparse
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
-
-import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--optix-home', type=str, default=None)
@@ -88,12 +86,9 @@ def check_version_info():
         git_revision = ""
         git_branch = "non-git"
 
-    def read_version():
-        with open("python/VERSION") as f:
-            return f.readline().strip()
-
     build_datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
-    version_number = read_version()
+    with open("python/VERSION") as f:
+        version_number = f.readline().strip()
 
     hostname = socket.gethostname()
 
@@ -120,21 +115,13 @@ def read_requirements():
 
 # Data files for packaging
 project_python_home_dir = os.path.join("python", "py_package")
-
-assets_target = os.path.join(project_python_home_dir, "assets")
-if not os.path.exists(assets_target):
-    shutil.copytree(os.path.join("./assets"), assets_target)
-
 sapien_data = ["glsl_shader/*/*"]
-sapien_data.extend(glob.glob("assets/robot/**", recursive=True))
 package_data = {
     "sapien": sapien_data,
     "sapien.core": ["__init__.pyi"]
 }
 
-name = 'sapien'
-
-setup(name=name,
+setup(name="sapien",
       version=check_version_info()[3],
       author='Sapien',
       python_requires='>=3.6',

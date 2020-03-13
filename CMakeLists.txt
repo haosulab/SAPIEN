@@ -119,7 +119,7 @@ add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtes
 
 # Below are the ROS2 specified cmake
 set(SUPPORTED_ROS_VERSION "dashing" "eloquent")
-set(OLD_ROS_VERSION "crystal" "bouncy" "ardent")
+set(OLD_ROS_VERSION "crystal" "bouncy" "ardent" "melodic" "kinetic")
 set(ROS $ENV{ROS_DISTRO})
 if (ROS)
     list(FIND SUPPORTED_ROS_VERSION ${ROS} _index)
@@ -142,11 +142,6 @@ if (ROS)
                 "ros2_src"
         )
 
-        file(GLOB_RECURSE SAPIEN_URDF_SRC "ros2_src/urdf/*.cpp" "ros2_src/urdf/*.h")
-        add_library(sapien_ros_urdf ${SAPIEN_URDF_SRC} ros2_src/test/test_ros_urdf.cpp)
-        target_link_libraries(sapien_ros_urdf tinyxml2 sapien)
-        ament_target_dependencies(sapien_ros_urdf rclcpp ament_index_cpp)
-
         file(GLOB_RECURSE SAPIEN_DEVICE_SRC "ros2_src/device/*.cpp" "ros2_src/device/*.h")
         add_library(sapien_device ${SAPIEN_DEVICE_SRC})
         ament_target_dependencies(sapien_device rclcpp sensor_msgs)
@@ -155,6 +150,11 @@ if (ROS)
         add_library(sapien_controller ${SAPIEN_ROBOT_SRC})
         target_link_libraries(sapien_controller sapien)
         ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs sapien_ros2_communication_interface moveit_core moveit_ros_planning_interface)
+
+        file(GLOB_RECURSE SAPIEN_URDF_SRC "ros2_src/urdf/*.cpp" "ros2_src/urdf/*.h")
+        add_library(sapien_ros_urdf ${SAPIEN_URDF_SRC} ros2_src/test/test_ros_urdf.cpp)
+        target_link_libraries(sapien_ros_urdf tinyxml2 sapien_controller)
+        ament_target_dependencies(sapien_ros_urdf rclcpp ament_index_cpp)
 
         # test
         add_executable(manual_PS3 manualtest/PS3ROSTest.cpp)
