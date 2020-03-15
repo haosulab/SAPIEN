@@ -19,7 +19,7 @@ def robot_basic_control_demo(fix_robot_root, balance_passive_force, add_joint_da
 
     loader = scene0.create_urdf_loader()
     loader.fix_root_link = fix_robot_root
-    robot = loader.load("assets/robot/jaco2.urdf")
+    robot = loader.load("assets/robot/jaco2.urdf").set_root_pose(sapien.Pose([0, 0, 0], [1, 0, 0, 0]))
 
     arm_init_qpos = [4.71, 2.84, 0, 0.75, 4.62, 4.48, 4.88]
     gripper_init_qpos = [0, 0, 0, 0, 0, 0]
