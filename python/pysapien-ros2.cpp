@@ -9,7 +9,8 @@
 using namespace sapien::ros2;
 namespace py = pybind11;
 
-PYBIND11_MODULE(pysapien, m) {
+PYBIND11_MODULE(pysapien_ros2, m) {
+  //======== Module Function ========//
   m.def(
       "rclcpp_init",
       [](const std::vector<std::string> &args) {
@@ -22,21 +23,19 @@ PYBIND11_MODULE(pysapien, m) {
       },
       py::arg("args"));
 
-  py::enum_<MoveType>(m, "MoveType")
-      .value("WORLD_TRANSLATE", MoveType::WorldTranslate)
-      .value("WORLD_ROTATE", MoveType::WorldTranslate)
-      .value("LOCAL_TRANSLATE", MoveType::WorldTranslate)
-      .value("LOCAL_ROTATE", MoveType::WorldTranslate)
-      .export_values();
+  //======== Manager ========//
 
-  py::class_<SceneManager>(m, "SceneManager")
+  auto PySceneManager = py::class_<SceneManager>(m, "SceneManager");
+  auto PyRobotManager = py::class_<RobotManager>(m, "RobotManager");
+
+  PySceneManager
       .def(py::init<sapien::SScene *, std::string const &>(), py::arg("scene"),
            py::arg("scene_name"))
       .def("start", &SceneManager::start)
-      .def("build_robot_manager", &SceneManager::buildRobotManager, py::arg("articulation"),
-           py::arg("robot_name"));
+      .def("build_robot_manager", &SceneManager::buildRobotManager,
+           py::return_value_policy::reference, py::arg("articulation"), py::arg("robot_name"));
 
-  py::class_<RobotManager>(m, "RobotManager")
+  PyRobotManager
       .def("set_drive_property", &RobotManager::setDriveProperty, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
            py::arg("joint_index") = std::vector<uint32_t>())
@@ -48,7 +47,21 @@ PYBIND11_MODULE(pysapien, m) {
       .def("build_cartesian_velocity_controller", &RobotManager::buildCartesianVelocityController,
            py::arg("group_name"), py::arg("service_name"), py::arg("latency") = 0);
 
-  py::class_<JointVelocityController>(m, "JointVelocityController")
+  //======== Controller ========//
+
+  auto PyMoveType = py::enum_<MoveType>(m, "MoveType");
+  auto PyJointVelocityController =
+      py::class_<JointVelocityController>(m, "JointVelocityController");
+  auto PyCartesianVelocityController =
+      py::class_<CartesianVelocityController>(m, "CartesianVelocityController");
+
+  PyMoveType.value("WORLD_TRANSLATE", MoveType::WorldTranslate)
+      .value("WORLD_ROTATE", MoveType::WorldTranslate)
+      .value("LOCAL_TRANSLATE", MoveType::WorldTranslate)
+      .value("LOCAL_ROTATE", MoveType::WorldTranslate)
+      .export_values();
+
+  PyJointVelocityController
       .def(
           "move_joint",
           [](JointVelocityController &a, const std::vector<std::string> &jointNames,
@@ -63,17 +76,19 @@ PYBIND11_MODULE(pysapien, m) {
       .def(
           "move_joint",
           [](JointVelocityController &a, const std::vector<float> &velocity, bool continuous) {
-            a.moveJoint(velocity);
+            a.moveJoint(velocity, continuous);
           },
           py::arg("velocity"), py::arg("continuous") = true);
 
-  py::class_<CartesianVelocityController>(m, "CartesianVelocityController")
-      .def("move_cartesian", [](CartesianVelocityController &c, py::array_t<float> vec) {
+  PyCartesianVelocityController.def(
+      "move_cartesian",
+      [](CartesianVelocityController &c, const py::array_t<float> &vec, MoveType type) {
         if (vec.size() != 3) {
           std::stringstream ss;
           ss << "Cartesian velocity command should have size 3, but given " << vec.size();
           throw std::runtime_error(ss.str());
         }
         std::array<float, 3> v = {*vec.data(), *(vec.data() + 1), *(vec.data() + 2)};
+        c.moveCartesian(v, type);
       });
 }

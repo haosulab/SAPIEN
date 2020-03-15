@@ -46,6 +46,7 @@ py::array_t<PxReal> mat42array(glm::mat4 const &mat) {
 }
 
 PYBIND11_MODULE(pysapien, m) {
+  m.doc() = "SAPIEN core module. For ROS support, please refer to sapien-ros2";
 
   // enums
   auto PySolverType = py::enum_<PxSolverType::Enum>(m, "SolverType");
@@ -254,16 +255,18 @@ PYBIND11_MODULE(pysapien, m) {
            py::return_value_policy::reference);
 
   PyCameraSpec.def_readwrite("name", &Optifuser::CameraSpec::name)
-      .def("set_position",
-           [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
-             c.position = {arr.at(0), arr.at(1), arr.at(2)};
-           },
-           py::arg("position"))
-      .def("set_rotation",
-           [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
-             c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
-           },
-           py::arg("rotation"))
+      .def(
+          "set_position",
+          [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
+            c.position = {arr.at(0), arr.at(1), arr.at(2)};
+          },
+          py::arg("position"))
+      .def(
+          "set_rotation",
+          [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
+            c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
+          },
+          py::arg("rotation"))
       .def_property_readonly(
           "position",
           [](Optifuser::CameraSpec &c) { return py::array_t<PxReal>(3, (float *)(&c.position)); })
