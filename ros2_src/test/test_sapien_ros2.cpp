@@ -28,7 +28,7 @@ void test1(int argc, char *argv[]) {
   auto loader = scene->createURDFLoader();
   loader->fixRootLink = true;
   loader->scale = 1.0;
-  auto robot = loader->load("../assets/robot/xarm6.urdf");
+  auto robot = loader->load("../example/assets/robot/xarm6.urdf");
   robot->setRootPose({{0, 0, 0.5}, PxIdentity});
 
   // ROS2 specified class

@@ -7,6 +7,7 @@
 
 #include "sapien_ros2_communication_interface/srv/cartesian_velocity.hpp"
 #include "utils/delayed_controller_base.hpp"
+#include "articulation/sapien_articulation.h"
 
 #define COMPUTE_VELOCITY_AND_INTEGRATE(frame_name)                                                \
   {                                                                                               \

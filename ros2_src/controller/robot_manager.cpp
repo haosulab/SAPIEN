@@ -45,7 +45,7 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
     std::vector<std::string> key = paramClient.list_parameters({}, 10).names;
     std::vector<rclcpp::Parameter> value = paramClient.get_parameters(key);
     for (auto &j : value) {
-      if (j.get_name() == "use_sim_time")
+      if(mNode->has_parameter(j.get_name()))
         continue;
       mNode->declare_parameter(j.get_name(), j.get_parameter_value());
     }

@@ -11,7 +11,6 @@
 #include "sapien_controllable_articulation.h"
 #include "sapien_scene.h"
 #include "scene_manager.h"
-#include "robot_manager.h"
 
 namespace sapien {
 class SControllableArticulation;
@@ -19,8 +18,10 @@ class SScene;
 namespace ros2 {
 
 class RobotManager;
+class URDFLoaderROS;
 
 class SceneManager : public IEventListener<EventStep> {
+  friend URDFLoaderROS;
   friend RobotManager;
 
 protected:
@@ -50,6 +51,9 @@ protected:
 public:
   explicit SceneManager(SScene *scene, const std::string &name) : mScene(scene), mExecutor() {
     // Namespace of scene manager should be the same as the scene
+    if (!scene->getName().empty() && scene->getName() != name)
+      RCLCPP_WARN(mNode->get_logger(), "Name of scene will be updated, original: %s, now: %s",
+                  scene->getName().c_str(), name.c_str());
     mNameSpace = "/" + name;
     scene->setName(name);
     mNode = rclcpp::Node::make_shared(name);
