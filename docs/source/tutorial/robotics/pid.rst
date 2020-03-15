@@ -52,7 +52,12 @@ In most cases, it is always recommended to use the ``set_drive_target`` instead 
 
 .. literalinclude:: ../../../../example/robotics/pid.py
    :lineno-start: 65
-   :lines: 65-74, 83-83
+   :lines: 65-74
+   :dedent: 4
+
+.. literalinclude:: ../../../../example/robotics/pid.py
+   :lineno-start: 79
+   :lines: 79-88
    :dedent: 4
 
 .. note::

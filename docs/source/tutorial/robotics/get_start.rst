@@ -2,7 +2,7 @@ Getting Started
 ================
 
 .. note::
-	If you haven’t already done so, make sure you’ve completed the steps in `it <>` before starting tutorial of the robotics part.
+	If you haven’t already done so, make sure you’ve completed the steps in :ref:`basic` before starting tutorial of the robotics part.
 
 .. highlight:: python
    :linenothreshold: 5

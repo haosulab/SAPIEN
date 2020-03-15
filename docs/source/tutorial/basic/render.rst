@@ -1,8 +1,16 @@
+.. _render:
+
 SAPIEN assets and rendering
 =======================================
 
 .. highlight:: python
    :linenothreshold: 5
+
+In this tutorial, you will learn the following:
+
+* Download SAPIEN asset in Python and load it into sapien.
+* Setup customized camera in simulation scene.
+* Off-screen rendering for RGB, depth, segmentation and point cloud.
 
 This tutorial will focus on how to download SAPIEN assets in Python and perform off-screen rendering.
 
@@ -46,7 +54,7 @@ However, you need to create some cameras and place them at the right place as fo
    :lineno-start: 25
    :lines: 25-37
 
-Camera should be placed on an``Actor``, which is a object contained in the ``scene``.
+Camera should be placed on an ``Actor``, which is a object contained in the ``scene``.
 If the actor is moving during simulation, the camera will move accordingly.
 Thus by setting the position and orientation of the mounted actor, we could set the pose of camera.
 

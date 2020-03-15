@@ -1,3 +1,5 @@
+.. _minimal:
+
 A minimal example
 ==================
 
@@ -5,18 +7,15 @@ A minimal example
    :linenothreshold: 5
 
 SAPIEN provides a serial of API to build and evaluate your simulation environment.
-Here is a minimal example to create an simulation environment and visualize it.
+In this tutorial, you will learn the following:
+
+* Create a simulation scene to run simulation step
+* Setup a renderer to visualize the simulated results
+* Load an articulated object from URDF file
 
 Installation
 ------------
-
-First install package dependencies.
-
-.. code-block:: bash
-
-    apt install libx11-6 libassimp4 libxcb1 libglew2.0
-
-Then we install SAPIEN python package from pre-built package
+First install SAPIEN python package from PyPI.
 
 .. code::
 
@@ -50,6 +49,8 @@ bind a ``scene`` by ``set_current_scene()``.
 
 .. note::
    You need the ``show_window()`` to see the visualization by create a GL window, and use ``hide_window`` once you do not need it.
+
+.. _load_urdf:
 
 Load SAPIEN assets
 -------------------
