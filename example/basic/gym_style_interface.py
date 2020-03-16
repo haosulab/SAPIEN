@@ -255,3 +255,4 @@ if __name__ == '__main__':
         observation, reward, done, info = env.step(action)
 
     env.close()
+    env.sim = None

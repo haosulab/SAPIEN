@@ -23,3 +23,5 @@ while not renderer_controller.should_quit:
     scene0.update_render()
     scene0.step()
     renderer_controller.render()
+
+scene0 = None

@@ -88,6 +88,8 @@ def robot_basic_control_demo(use_internal_pd, use_external_pid):
             steps += 1
         renderer_controller.render()
 
+    scene0 = None
+
 
 if __name__ == '__main__':
     robot_basic_control_demo(False, True)

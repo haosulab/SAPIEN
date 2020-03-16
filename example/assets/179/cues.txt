@@ -1,0 +1,18 @@
+link_0 hinge caster_stem caster_stem
+link_1 hinge wheel wheel
+link_2 hinge wheel wheel
+link_3 hinge caster_stem caster_stem
+link_4 hinge wheel wheel
+link_5 hinge wheel wheel
+link_6 hinge caster_stem caster_stem
+link_7 hinge wheel wheel
+link_8 hinge wheel wheel
+link_9 hinge caster_stem caster_stem
+link_10 hinge wheel wheel
+link_11 hinge wheel wheel
+link_12 hinge caster_stem caster_stem
+link_13 hinge wheel wheel
+link_14 hinge wheel wheel
+link_15 slider+ back_soft_surface back_soft_surface armrest_soft_surface arm_vertical_bar arm_horizontal_bar other_leaf armrest_soft_surface arm_vertical_bar arm_horizontal_bar other_leaf seat_soft_surface seat_support central_support seat_connector
+link_16 free central_support central_support central_support leg leg leg leg leg
+link_15_helper slider link_15_helper

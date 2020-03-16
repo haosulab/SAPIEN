@@ -15,7 +15,7 @@ simulation scene and visualize it using renderer controller like before
 
 .. literalinclude:: ../../../../example/robotics/get_start.py
    :lineno-start: 1
-   :lines: 1-17
+   :lines: 1-18
 
 Load robot and set joint position
 --------------------------------------
@@ -28,14 +28,14 @@ degree of freedom.
 
 .. literalinclude:: ../../../../example/robotics/get_start.py
    :dedent: 4
-   :lineno-start: 19
-   :lines: 19-26
+   :lineno-start: 20
+   :lines: 20-28
 
 Like before, run simulation step and on-screen rendering.
 
 .. literalinclude:: ../../../../example/robotics/get_start.py
-   :lineno-start: 32
-   :lines: 32-46
+   :lineno-start: 34
+   :lines: 34-44
 
 Change flag of URDF Loader
 --------------------------------------
@@ -70,9 +70,9 @@ in order to compensate specified passive force. Here we only consider gravity, c
 force.
 
 .. literalinclude:: ../../../../example/robotics/get_start.py
-   :lineno-start: 38
+   :lineno-start: 40
    :dedent: 12
-   :lines: 38-39
+   :lines: 40-41
 
 Now we run all the code with
 ``robot_basic_control_demo(True, True, False)``
@@ -94,8 +94,8 @@ before the while loop.
 
 .. literalinclude:: ../../../../example/robotics/get_start.py
    :dedent: 4
-   :lineno-start: 28
-   :lines: 28-30
+   :lineno-start: 30
+   :lines: 30-32
 
 Now we run all the code with
 ``robot_basic_control_demo(True, True, True)``

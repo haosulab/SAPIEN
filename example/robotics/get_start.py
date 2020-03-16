@@ -43,6 +43,8 @@ def robot_basic_control_demo(fix_robot_root, balance_passive_force, add_joint_da
             steps += 1
         renderer_controller.render()
 
+    scene0 = None
+
 
 if __name__ == '__main__':
     robot_basic_control_demo(fix_robot_root=True, balance_passive_force=True, add_joint_damping=True)
