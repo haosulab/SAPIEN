@@ -1,3 +1,4 @@
+#include "pysapien.cpp"
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
@@ -9,9 +10,12 @@
 using namespace sapien::ros2;
 namespace py = pybind11;
 
-PYBIND11_MODULE(pysapien_ros2, m) {
+PYBIND11_MODULE(pysapien_ros2, m_ros2) {
+  //======== Reference Declaration ========//
+  py::module::import("pysapien");
+
   //======== Module Function ========//
-  m.def(
+  m_ros2.def(
       "rclcpp_init",
       [](const std::vector<std::string> &args) {
         std::vector<char *> str;
@@ -25,8 +29,8 @@ PYBIND11_MODULE(pysapien_ros2, m) {
 
   //======== Manager ========//
 
-  auto PySceneManager = py::class_<SceneManager>(m, "SceneManager");
-  auto PyRobotManager = py::class_<RobotManager>(m, "RobotManager");
+  auto PySceneManager = py::class_<SceneManager>(m_ros2, "SceneManager");
+  auto PyRobotManager = py::class_<RobotManager>(m_ros2, "RobotManager");
 
   PySceneManager
       .def(py::init<sapien::SScene *, std::string const &>(), py::arg("scene"),
@@ -49,11 +53,11 @@ PYBIND11_MODULE(pysapien_ros2, m) {
 
   //======== Controller ========//
 
-  auto PyMoveType = py::enum_<MoveType>(m, "MoveType");
+  auto PyMoveType = py::enum_<MoveType>(m_ros2, "MoveType");
   auto PyJointVelocityController =
-      py::class_<JointVelocityController>(m, "JointVelocityController");
+      py::class_<JointVelocityController>(m_ros2, "JointVelocityController");
   auto PyCartesianVelocityController =
-      py::class_<CartesianVelocityController>(m, "CartesianVelocityController");
+      py::class_<CartesianVelocityController>(m_ros2, "CartesianVelocityController");
 
   PyMoveType.value("WORLD_TRANSLATE", MoveType::WorldTranslate)
       .value("WORLD_ROTATE", MoveType::WorldTranslate)

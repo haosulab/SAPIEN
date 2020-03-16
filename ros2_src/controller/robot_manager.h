@@ -61,12 +61,12 @@ public:
 
   // Create controller and publisher
   void createJointPublisher(double pubFrequency);
-  std::weak_ptr<JointVelocityController>
-  buildJointVelocityController(const std::vector<std::string> &jointNames,
-                               const std::string &serviceName, double latency = 0);
-  std::weak_ptr<CartesianVelocityController>
-  buildCartesianVelocityController(const std::string &groupName, const std::string &serviceName,
-                                   double latency = 0);
+  JointVelocityController *buildJointVelocityController(const std::vector<std::string> &jointNames,
+                                                        const std::string &serviceName,
+                                                        double latency = 0);
+  CartesianVelocityController *buildCartesianVelocityController(const std::string &groupName,
+                                                                const std::string &serviceName,
+                                                                double latency = 0);
 
 protected:
   void updateStates(const std::vector<float> &jointPosition,

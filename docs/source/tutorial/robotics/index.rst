@@ -8,5 +8,4 @@ robot and implement some basic robotics tasks.
 
 	get_start
 	pid
-	hand_eye_calibration
 

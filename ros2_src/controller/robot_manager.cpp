@@ -21,7 +21,6 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
   mJointStates->position.resize(jointName.size());
   mJointStates->velocity.resize(jointName.size());
 
-
   // Load robot description from remote node, do not use node to access parameters
   // SAPIEN convention: the remote node name must be "$/{robotName}_config"
   // Note that you must add a "/" before the name of the node, otherwise it do not exist
@@ -45,7 +44,7 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
     std::vector<std::string> key = paramClient.list_parameters({}, 10).names;
     std::vector<rclcpp::Parameter> value = paramClient.get_parameters(key);
     for (auto &j : value) {
-      if(mNode->has_parameter(j.get_name()))
+      if (mNode->has_parameter(j.get_name()))
         continue;
       mNode->declare_parameter(j.get_name(), j.get_parameter_value());
     }
@@ -147,16 +146,16 @@ void RobotManager::createJointPublisher(double pubFrequency) {
                                                      mJointStates.get(), pubFrequency);
 }
 
-std::weak_ptr<JointVelocityController>
+JointVelocityController *
 RobotManager::buildJointVelocityController(const std::vector<std::string> &jointNames,
                                            const std::string &serviceName, double latency) {
   auto controller = std::make_shared<JointVelocityController>(mNode, mClock, mWrapper, jointNames,
                                                               serviceName, latency);
   mJointVelocityControllers.push_back(controller);
-  return std::weak_ptr<JointVelocityController>(controller);
+  return controller.get();
 }
 
-std::weak_ptr<CartesianVelocityController>
+CartesianVelocityController *
 RobotManager::buildCartesianVelocityController(const std::string &groupName,
                                                const std::string &serviceName, double latency) {
   if (!mLoadRobot) {
@@ -168,6 +167,6 @@ RobotManager::buildCartesianVelocityController(const std::string &groupName,
       mNode, mClock, mWrapper, mRobotState.get(), groupName, serviceName, latency);
   controller->mTimeStep = mSceneManager->mTimeStep;
   mCartesianVelocityControllers.push_back(controller);
-  return std::weak_ptr<CartesianVelocityController>(controller);
+  return controller.get();
 }
 } // namespace sapien::ros2

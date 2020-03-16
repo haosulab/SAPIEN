@@ -69,16 +69,16 @@ void test1(int argc, char *argv[]) {
     // Balance force
     robotManager->balancePassiveForce();
     // Move arm IK
-    armController.lock()->moveCartesian({0.0, 0.02, 0.02}, ros2::MoveType::WorldTranslate);
+    armController->moveCartesian({0.0, 0.02, 0.02}, ros2::MoveType::WorldTranslate);
 
     if (step >= 500 && step < 1000) {
-      gripperController.lock()->moveJoint({5, 5, 5, 5, 5, 5});
+      gripperController->moveJoint({5, 5, 5, 5, 5, 5});
     }
     if (step == 1000) {
-      gripperController.lock()->moveJoint({-0.1, -0.1, -0.1, -0.1, -0.1, -0.1}, true);
+      gripperController->moveJoint({-0.1, -0.1, -0.1, -0.1, -0.1, -0.1}, true);
     }
   }
-  rclcpp::shutdown();
+//  rclcpp::shutdown();
 }
 
 int main(int argc, char *argv[]) { test1(argc, argv); }
