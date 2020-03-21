@@ -31,6 +31,8 @@ public:
   virtual uint32_t getWidth() const = 0;
   virtual uint32_t getHeight() const = 0;
   virtual float getFovy() const = 0;
+  virtual float getNear() const = 0;
+  virtual float getFar() const = 0;
 
   virtual void takePicture() = 0;
   virtual std::vector<float> getColorRGBA() = 0;

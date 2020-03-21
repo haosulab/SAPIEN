@@ -40,6 +40,14 @@ float OptifuserCamera::getFovy() const {
   return static_cast<Optifuser::PerspectiveCameraSpec *>(mCameraSpec.get())->fovy;
 }
 
+float OptifuserCamera::getNear() const {
+  return mCameraSpec->near;
+}
+
+float OptifuserCamera::getFar() const {
+  return mCameraSpec->far;
+}
+
 void OptifuserCamera::takePicture() {
   mRenderContext->renderer.renderScene(*mScene->getScene(), *this->mCameraSpec);
 }

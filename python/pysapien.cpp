@@ -180,6 +180,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_width", &Renderer::ICamera::getWidth)
       .def("get_height", &Renderer::ICamera::getHeight)
       .def("get_fovy", &Renderer::ICamera::getFovy)
+      .def("get_near", &Renderer::ICamera::getNear)
+      .def("get_far", &Renderer::ICamera::getFar)
       .def("take_picture", &Renderer::ICamera::takePicture)
       .def("get_color_rgba",
            [](Renderer::ICamera &cam) {

@@ -28,6 +28,8 @@ public:
   virtual uint32_t getWidth() const override;
   virtual uint32_t getHeight() const override;
   virtual float getFovy() const override;
+  virtual float getNear() const;
+  virtual float getFar() const;
   virtual void takePicture() override;
   virtual std::vector<float> getColorRGBA() override;
   virtual std::vector<float> getAlbedoRGBA() override;
