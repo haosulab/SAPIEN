@@ -835,9 +835,11 @@ PYBIND11_MODULE(pysapien, m) {
       .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def_readwrite("default_density", &URDF::URDFLoader::defaultDensity)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
-           py::arg("filename"), py::arg("material") = nullptr)
+           py::arg("filename"),
+           py::arg("material") = (physx::PxMaterial *) nullptr)
       .def("load_kinematic",
            py::overload_cast<const std::string &, physx::PxMaterial *>(
                &URDF::URDFLoader::loadKinematic),
-           py::return_value_policy::reference, py::arg("filename"), py::arg("material") = nullptr);
+           py::return_value_policy::reference, py::arg("filename"),
+           py::arg("material") = (physx::PxMaterial *) nullptr);
 }

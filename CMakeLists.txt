@@ -95,7 +95,7 @@ target_link_libraries(sapien -Wl,--start-group
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-pybind11_add_module(pysapien "python/pysapien.cpp")
+pybind11_add_module(pysapien SHARED "python/pysapien.cpp")
 target_link_libraries(pysapien PRIVATE sapien)
 
 file(GLOB_RECURSE UNITTEST_SRC unittest/*.cpp)
@@ -165,7 +165,7 @@ if (ROS)
 
         # pybind for sapien-ros2
         set_target_properties(sapien_controller PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-        pybind11_add_module(pysapien_ros2 SHARED python/pysapien-ros2.cpp)
+        pybind11_add_module(pysapien_ros2 python/pysapien-ros2.cpp)
         target_link_libraries(pysapien_ros2 PRIVATE sapien_controller)
 
         add_executable(test_ros_urdf ros2_src/test/test_ros_urdf.cpp)

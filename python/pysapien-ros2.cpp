@@ -47,9 +47,11 @@ PYBIND11_MODULE(pysapien_ros2, m_ros2) {
            py::arg("coriolis_centrifugal") = true, py::arg("external") = true)
       .def("create_joint_publisher", &RobotManager::createJointPublisher, py::arg("frequency"))
       .def("build_joint_velocity_controller", &RobotManager::buildJointVelocityController,
-           py::arg("joint_names"), py::arg("service_name"), py::arg("latency") = 0)
+           py::return_value_policy::reference, py::arg("joint_names"), py::arg("service_name"),
+           py::arg("latency") = 0)
       .def("build_cartesian_velocity_controller", &RobotManager::buildCartesianVelocityController,
-           py::arg("group_name"), py::arg("service_name"), py::arg("latency") = 0);
+           py::return_value_policy::reference, py::arg("group_name"), py::arg("service_name"),
+           py::arg("latency") = 0);
 
   //======== Controller ========//
 
@@ -59,30 +61,49 @@ PYBIND11_MODULE(pysapien_ros2, m_ros2) {
   auto PyCartesianVelocityController =
       py::class_<CartesianVelocityController>(m_ros2, "CartesianVelocityController");
 
+  // The enum_::export_values() function exports the enum entries into the parent scope,
+  // which should be skipped for newer C++11-style strongly typed enums.
   PyMoveType.value("WORLD_TRANSLATE", MoveType::WorldTranslate)
       .value("WORLD_ROTATE", MoveType::WorldTranslate)
       .value("LOCAL_TRANSLATE", MoveType::WorldTranslate)
-      .value("LOCAL_ROTATE", MoveType::WorldTranslate)
-      .export_values();
+      .value("LOCAL_ROTATE", MoveType::WorldTranslate);
+
+  //  PyJointVelocityController
+  //      .def(
+  //          "move_joint",
+  //          [](JointVelocityController &a, const std::vector<std::string> &jointNames,
+  //             float velocity, bool continuous) { a.moveJoint(jointNames, velocity, continuous);
+  //             },
+  //          py::arg("joint_names"), py::arg("velocity"), py::arg("continuous") = true)
+  //      .def(
+  //          "move_joint",
+  //          [](JointVelocityController &a, const std::vector<std::string> &jointNames,
+  //             const std::vector<float> &velocity,
+  //             bool continuous) { a.moveJoint(jointNames, velocity, continuous); },
+  //          py::arg("joint_names"), py::arg("velocities"), py::arg("continuous") = true)
+  //      .def(
+  //          "move_joint",
+  //          [](JointVelocityController &a, const std::vector<float> &velocity, bool continuous) {
+  //            a.moveJoint(velocity, continuous);
+  //          },
+  //          py::arg("velocity"), py::arg("continuous") = true);
 
   PyJointVelocityController
+      .def("move_joint",
+           py::overload_cast<const std::vector<std::string> &, float, bool>(
+               &JointVelocityController::moveJoint),
+          py::arg("joint_names"), py::arg("velocity"), py::arg("continuous") = true,
+           "Move joints with given names, same velocity for all joints.")
+      .def("move_joint",
+           py::overload_cast<const std::vector<std::string> &, const std::vector<float> &, bool>(
+               &JointVelocityController::moveJoint),
+          py::arg("joint_names"), py::arg("velocities"), py::arg("continuous") = true,
+           "Move joints with given names, velocity is specified for each joints.")
       .def(
           "move_joint",
-          [](JointVelocityController &a, const std::vector<std::string> &jointNames,
-             float velocity, bool continuous) { a.moveJoint(jointNames, velocity, continuous); },
-          py::arg("joint_names"), py::arg("velocity"), py::arg("continuous") = true)
-      .def(
-          "move_joint",
-          [](JointVelocityController &a, const std::vector<std::string> &jointNames,
-             const std::vector<float> &velocity,
-             bool continuous) { a.moveJoint(jointNames, velocity, continuous); },
-          py::arg("joint_names"), py::arg("velocities"), py::arg("continuous") = true)
-      .def(
-          "move_joint",
-          [](JointVelocityController &a, const std::vector<float> &velocity, bool continuous) {
-            a.moveJoint(velocity, continuous);
-          },
-          py::arg("velocity"), py::arg("continuous") = true);
+          py::overload_cast<const std::vector<float> &, bool>(&JointVelocityController::moveJoint),
+          py::arg("velocity"), py::arg("continuous") = true,
+          "Move joints with velocity, given default order.");
 
   PyCartesianVelocityController.def(
       "move_cartesian",

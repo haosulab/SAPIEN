@@ -1,5 +1,5 @@
-import pysapien as sapien
-# import sapien.core as sapien
+# import pysapien as sapien
+import sapien.core as sapien
 import sys
 import numpy as np
 import pysapien_ros2

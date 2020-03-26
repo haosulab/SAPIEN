@@ -24,26 +24,26 @@ public:
                   OptifuserScene *scene, std::string const &shaderDir);
 
   // ICamera
-  virtual const std::string &getName() const override;
-  virtual uint32_t getWidth() const override;
-  virtual uint32_t getHeight() const override;
-  virtual float getFovy() const override;
-  virtual float getNear() const;
-  virtual float getFar() const;
-  virtual void takePicture() override;
-  virtual std::vector<float> getColorRGBA() override;
-  virtual std::vector<float> getAlbedoRGBA() override;
-  virtual std::vector<float> getNormalRGBA() override;
-  virtual std::vector<float> getDepth() override;
-  virtual std::vector<int> getSegmentation() override;
-  virtual std::vector<int> getObjSegmentation() override;
+  const std::string &getName() const override;
+  uint32_t getWidth() const override;
+  uint32_t getHeight() const override;
+  float getFovy() const override;
+  float getNear() const override;
+  float getFar() const override;
+  void takePicture() override;
+  std::vector<float> getColorRGBA() override;
+  std::vector<float> getAlbedoRGBA() override;
+  std::vector<float> getNormalRGBA() override;
+  std::vector<float> getDepth() override;
+  std::vector<int> getSegmentation() override;
+  std::vector<int> getObjSegmentation() override;
 
-  virtual IPxrScene *getScene() override;
+  IPxrScene *getScene() override;
 
   // ISensor
-  virtual physx::PxTransform getPose() const override;
-  virtual void setInitialPose(physx::PxTransform const &pose) override;
-  virtual void setPose(physx::PxTransform const &pose) override;
+  physx::PxTransform getPose() const override;
+  void setInitialPose(physx::PxTransform const &pose) override;
+  void setPose(physx::PxTransform const &pose) override;
 
   void changeModeToOrthographic(float scaling);
   void changeModeToPerspective(float fovy);
