@@ -173,6 +173,49 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
   return convexMesh;
 }
 
+std::vector<std::vector<int>> splitMesh(aiMesh *mesh) {
+  // build adjacency list
+  spdlog::info("splitting mesh with {} vertices", mesh->mNumVertices);
+  std::vector<std::set<int>> adj(mesh->mNumVertices);
+  for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
+    for (uint32_t j = 0; j < mesh->mFaces[i].mNumIndices; ++j) {
+      uint32_t a = mesh->mFaces[i].mIndices[j];
+      uint32_t b = mesh->mFaces[i].mIndices[(j + 1) % mesh->mFaces[i].mNumIndices];
+      adj[a].insert(b);
+      adj[b].insert(a);
+    }
+  }
+
+  std::vector<std::vector<int>> groups;
+  std::vector<int> visited(mesh->mNumVertices, 0);
+  for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
+    if (visited[i]) {
+      continue;
+    }
+
+    // new group
+    groups.emplace_back();
+
+    // traverse group
+    visited[i] = 1;
+    std::vector<int> q;
+    q.push_back(i);
+    while (!q.empty()) {
+      int n = q.back();
+      q.pop_back();
+      for (auto m : adj[n]) {
+        if (!visited[m]) {
+          visited[m] = 1;
+          groups.back().push_back(m);
+          q.push_back(m);
+        }
+      }
+    }
+  }
+
+  return groups;
+}
+
 std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filename) {
   std::vector<PxConvexMesh *> meshes;
 
@@ -193,36 +236,42 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
 
   // import obj using assimp
   Assimp::Importer importer;
-  uint32_t flags = aiProcess_Triangulate;
+  uint32_t flags = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
+
   const aiScene *scene = importer.ReadFile(filename, flags);
   if (!scene) {
     spdlog::error(importer.GetErrorString());
     return meshes;
   }
 
+  spdlog::info("Found {} meshes", scene->mNumMeshes);
   for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
-    std::vector<PxVec3> vertices;
     auto mesh = scene->mMeshes[i];
-    for (uint32_t v = 0; v < mesh->mNumVertices; ++v) {
-      auto vertex = mesh->mVertices[v];
-      vertices.push_back({vertex.x, vertex.y, vertex.z});
-    }
+    auto vertexGroups = splitMesh(mesh);
 
-    PxConvexMeshDesc convexDesc;
-    convexDesc.points.count = vertices.size();
-    convexDesc.points.stride = sizeof(PxVec3);
-    convexDesc.points.data = vertices.data();
-    convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // | PxConvexFlag::eSHIFT_VERTICES;
-    convexDesc.vertexLimit = 256;
+    spdlog::info("Decomposed mesh {} into {} components", i + 1, vertexGroups.size());
+    for (auto &g : vertexGroups) {
+      std::vector<PxVec3> vertices;
+      for (auto v : g) {
+        auto vertex = mesh->mVertices[v];
+        vertices.push_back({vertex.x, vertex.y, vertex.z});
+      }
+      PxConvexMeshDesc convexDesc;
+      convexDesc.points.count = vertices.size();
+      convexDesc.points.stride = sizeof(PxVec3);
+      convexDesc.points.data = vertices.data();
+      convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // | PxConvexFlag::eSHIFT_VERTICES;
+      convexDesc.vertexLimit = 256;
 
-    PxDefaultMemoryOutputStream buf;
-    PxConvexMeshCookingResult::Enum result;
-    if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
-      spdlog::error("Failed to cook a mesh from file: {}", filename);
+      PxDefaultMemoryOutputStream buf;
+      PxConvexMeshCookingResult::Enum result;
+      if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
+        spdlog::error("Failed to cook a mesh from file: {}", filename);
+      }
+      PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
+      PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);
+      meshes.push_back(convexMesh);
     }
-    PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
-    PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);
-    meshes.push_back(convexMesh);
   }
   return meshes;
 }
