@@ -2,26 +2,24 @@
 
 #include <utility>
 
+#include "controller/sapien_controllable_articulation.h"
 #include "device/PS3_publisher.h"
 #include "event_system/event_system.h"
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/time_source.hpp"
 #include "robot_manager.h"
 #include "rosgraph_msgs/msg/clock.hpp"
-#include "sapien_controllable_articulation.h"
 #include "sapien_scene.h"
-#include "scene_manager.h"
 
 namespace sapien {
-class SControllableArticulation;
 class SScene;
 namespace ros2 {
 
 class RobotManager;
-class URDFLoaderROS;
+class ROSURDFLoader;
 
 class SceneManager : public IEventListener<EventStep> {
-  friend URDFLoaderROS;
+  friend ROSURDFLoader;
   friend RobotManager;
 
 protected:

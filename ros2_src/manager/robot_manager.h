@@ -3,9 +3,9 @@
 #include <numeric>
 #include <utility>
 
-#include "cartesian_velocity_controller.h"
-#include "joint_publisher.h"
-#include "joint_velocity_controller.h"
+#include "controller/cartesian_velocity_controller.h"
+#include "controller/joint_publisher.h"
+#include "controller/joint_velocity_controller.h"
 #include "moveit/robot_model/robot_model.h"
 #include "moveit/robot_model_loader/robot_model_loader.h"
 #include "rclcpp/rclcpp.hpp"
@@ -18,9 +18,11 @@ namespace sapien::ros2 {
 class SceneManager;
 class SControllableArticulationWrapper;
 class JointVelocityController;
+class ROSURDFLoader;
 
 class RobotManager {
-  friend class SceneManager;
+  friend SceneManager;
+  friend ROSURDFLoader;
 
 public:
   SControllableArticulationWrapper *mWrapper;

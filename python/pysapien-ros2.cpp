@@ -1,19 +1,15 @@
-#include "pysapien.cpp"
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "controller/robot_manager.h"
-#include "controller/scene_manager.h"
+#include "manager/robot_manager.h"
+#include "manager/scene_manager.h"
 
 using namespace sapien::ros2;
 namespace py = pybind11;
 
 PYBIND11_MODULE(pysapien_ros2, m_ros2) {
-  //======== Reference Declaration ========//
-  py::module::import("pysapien");
-
   //======== Module Function ========//
   m_ros2.def(
       "rclcpp_init",

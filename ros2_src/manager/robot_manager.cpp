@@ -1,7 +1,7 @@
 #include "robot_manager.h"
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_joint.h"
-#include "sapien_controllable_articulation.h"
+#include "controller/sapien_controllable_articulation.h"
 #include "scene_manager.h"
 #include <vector>
 

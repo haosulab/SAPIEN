@@ -5,8 +5,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation")
 
 if (NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Debug")
-endif()
+    set(CMAKE_BUILD_TYPE "Debug")
+endif ()
 
 set(CMAKE_DEBUG_POSTFIX "")
 set(OpenGL_GL_PREFERENCE "LEGACY")
@@ -95,7 +95,7 @@ target_link_libraries(sapien -Wl,--start-group
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-pybind11_add_module(pysapien SHARED "python/pysapien.cpp")
+pybind11_add_module(pysapien "python/pysapien.cpp")
 target_link_libraries(pysapien PRIVATE sapien)
 
 file(GLOB_RECURSE UNITTEST_SRC unittest/*.cpp)
@@ -138,23 +138,22 @@ if (ROS)
         find_package(ament_index_cpp)
 
         include_directories(
-                "/opt/ros/${ROS}/include"
                 "ros2_src"
         )
 
-        file(GLOB_RECURSE SAPIEN_DEVICE_SRC "ros2_src/device/*.cpp" "ros2_src/device/*.h")
+        file(GLOB_RECURSE SAPIEN_DEVICE_SRC "ros2_src/device/*.cpp")
         add_library(sapien_device ${SAPIEN_DEVICE_SRC})
         ament_target_dependencies(sapien_device rclcpp sensor_msgs)
 
-        file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/articulation/*.cpp" "ros2_src/utils/*.hpp" "ros2_src/sensor/*.cpp")
+        file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/sensor/*.cpp" "ros2_src/utils/*.hpp")
         add_library(sapien_controller ${SAPIEN_ROBOT_SRC})
         target_link_libraries(sapien_controller sapien)
-        ament_target_dependencies(sapien_controller rclcpp std_msgs sensor_msgs std_msgs sapien_ros2_communication_interface moveit_core moveit_ros_planning_interface)
+        ament_target_dependencies(sapien_controller rclcpp sensor_msgs sapien_ros2_communication_interface moveit_core moveit_ros_planning_interface)
 
-        file(GLOB_RECURSE SAPIEN_URDF_SRC "ros2_src/urdf/*.cpp" "ros2_src/urdf/*.h")
-        add_library(sapien_ros_urdf ${SAPIEN_URDF_SRC} ros2_src/test/test_ros_urdf.cpp)
-        target_link_libraries(sapien_ros_urdf tinyxml2 sapien_controller)
-        ament_target_dependencies(sapien_ros_urdf rclcpp ament_index_cpp)
+        file(GLOB_RECURSE SAPIEN_ROBOT_MANAGER_SRC "ros2_src/manager/*.cpp")
+        add_library(sapien_robot_handle ${SAPIEN_ROBOT_MANAGER_SRC})
+        target_link_libraries(sapien_robot_handle tinyxml2 sapien_controller)
+        ament_target_dependencies(sapien_robot_handle ament_index_cpp)
 
         # test
         add_executable(manual_PS3 manualtest/PS3ROSTest.cpp)
@@ -164,12 +163,10 @@ if (ROS)
         target_link_libraries(test_ros2 sapien_controller sapien_device)
 
         # pybind for sapien-ros2
+        set_target_properties(sapien_robot_handle PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
         set_target_properties(sapien_controller PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
         pybind11_add_module(pysapien_ros2 python/pysapien-ros2.cpp)
-        target_link_libraries(pysapien_ros2 PRIVATE sapien_controller)
-
-        add_executable(test_ros_urdf ros2_src/test/test_ros_urdf.cpp)
-        target_link_libraries(test_ros_urdf sapien_ros_urdf)
+        target_link_libraries(pysapien_ros2 PRIVATE sapien_robot_handle)
 
         ament_package()
     elseif (${ROS} IN_LIST OLD_ROS_VERSION)
