@@ -18,11 +18,11 @@ namespace sapien::ros2 {
 class SceneManager;
 class SControllableArticulationWrapper;
 class JointVelocityController;
-class ROSURDFLoader;
+class RobotLoader;
 
 class RobotManager {
   friend SceneManager;
-  friend ROSURDFLoader;
+  friend RobotLoader;
 
 public:
   SControllableArticulationWrapper *mWrapper;

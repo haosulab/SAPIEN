@@ -40,7 +40,7 @@ def main():
     # Gif recorder
     recorder = GifRecorder()
     camera_mount_actor = scene.create_actor_builder().build(is_kinematic=True)
-    camera_mount_actor.set_pose(sapien.Pose([-0.5, 1.5, 0.5], [0.8775826, 0,0, -0.4794255]))
+    camera_mount_actor.set_pose(sapien.Pose([-0.5, 1.5, 0.5], [0.8775826, 0, 0, -0.4794255]))
     camera = scene.add_mounted_camera('first_camera', camera_mount_actor, sapien.Pose(), 640, 480, np.deg2rad(35),
                                       np.deg2rad(35), 0.1, 100)
 
@@ -92,7 +92,7 @@ def main():
             scene.update_render()
             controller.render()
             camera.take_picture()
-            recorder.record(camera.get_obj_segmentation() +20)
+            recorder.record(camera.get_obj_segmentation() + 20)
 
         robot_manager.balance_passive_force()
         ball.set_velocity(ball_velocity[step % 36000])

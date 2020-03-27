@@ -1,7 +1,7 @@
 #include "articulation/sapien_articulation.h"
 #include "articulation/urdf_loader.h"
 #include "controller/sapien_controllable_articulation.h"
-#include "manager/ros_urdf_loader.h"
+#include "manager/robot_loader.h"
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 #include "scene.h"
@@ -31,7 +31,7 @@ void test1(int argc, char *argv[]) {
   // ROS2 specified class
   rclcpp::init(argc, argv);
   ros2::SceneManager sceneManager(scene.get(), "scene1");
-  ros2::ROSURDFLoader loader(&sceneManager);
+  ros2::RobotLoader loader(&sceneManager);
   auto [robot, robotManager] = loader.load("sapien_resources", "xarm6_description/urdf/xarm6.urdf", "xarm6_moveit_config/config/xarm6.srdf", "xarm6");
 
 //  auto robotManager = sceneManager.buildRobotManager(robot, "xarm6");

@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation")
 
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Debug")
+    set(CMAKE_BUILD_TYPE "Release")
 endif ()
 
 set(CMAKE_DEBUG_POSTFIX "")
@@ -42,7 +42,6 @@ endif ()
 include_directories(
         "3rd_party/optifuser/include"
         "src"
-        "ros2_src"
 )
 
 include_directories("/usr/include/eigen3")

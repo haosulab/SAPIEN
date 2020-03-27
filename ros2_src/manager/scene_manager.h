@@ -16,10 +16,10 @@ class SScene;
 namespace ros2 {
 
 class RobotManager;
-class ROSURDFLoader;
+class RobotLoader;
 
 class SceneManager : public IEventListener<EventStep> {
-  friend ROSURDFLoader;
+  friend RobotLoader;
   friend RobotManager;
 
 protected:

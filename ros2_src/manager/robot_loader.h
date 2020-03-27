@@ -9,7 +9,7 @@
 namespace sapien::ros2 {
 using namespace tinyxml2;
 
-class ROSURDFLoader {
+class RobotLoader {
 protected:
   /* Global Definition */
   const std::string ROBOT_PARAM_NAME = "robot_description";
@@ -124,7 +124,7 @@ public:
     return loadRobot(robotName, paths.at(0), paths.at(1), material);
   };
 
-  explicit ROSURDFLoader(SceneManager *manager) : mNode(manager->mNode), mManager(manager) {
+  explicit RobotLoader(SceneManager *manager) : mNode(manager->mNode), mManager(manager) {
     // The general standard should be, if no srdf: srdf path should be empty
     // If no urdf, directly raise error and exit;
     mLoader = mManager->mScene->createURDFLoader();

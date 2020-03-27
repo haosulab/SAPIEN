@@ -1,7 +1,7 @@
 #include "articulation/sapien_articulation.h"
 #include "articulation/urdf_loader.h"
 #include "controller/sapien_controllable_articulation.h"
-#include "controller/scene_manager.h"
+#include "manager/scene_manager.h"
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 #include "sapien_scene.h"

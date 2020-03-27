@@ -63,9 +63,9 @@ def generate_launch_description():
                           parameters=[
                               robot_description,
                               robot_description_semantic,
-                              kinematics_yaml,
-                              ompl_planning_pipeline_config,
-                              moveit_controllers
+                              # kinematics_yaml,
+                              # ompl_planning_pipeline_config,
+                              # moveit_controllers
                           ])
 
     return LaunchDescription([parameter_node])
