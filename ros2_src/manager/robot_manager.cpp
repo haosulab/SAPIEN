@@ -20,34 +20,38 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
   mJointStates->name = jointName;
   mJointStates->position.resize(jointName.size());
   mJointStates->velocity.resize(jointName.size());
+}
 
+void RobotManager::init() {
   // Load robot description from remote node, do not use node to access parameters
   // SAPIEN convention: the remote node name must be "$/{robotName}_config"
   // Note that you must add a "/" before the name of the node, otherwise it do not exist
   const std::string robotURDFName = "robot_description";
   const std::string robotSRDFName = "robot_description_semantic";
-  const std::string robotConfigNodeName = "/" + robotName + "_config";
+  const std::string robotConfigNodeName = "/" + std::string(mNode->get_name()) + "_config";
 
-  rclcpp::SyncParametersClient paramClient(mNode.get(), robotConfigNodeName);
-  while (!paramClient.wait_for_service(1s)) {
-    if (!rclcpp::ok()) {
-      RCLCPP_ERROR(mNode->get_logger(), "Interrupted while waiting for the service. Exiting.");
-      rclcpp::shutdown();
-    }
-    RCLCPP_INFO(mNode->get_logger(), "service not available, waiting again...");
-  }
+//  rclcpp::SyncParametersClient paramClient(mNode.get(), robotConfigNodeName);
+//  while (!paramClient.wait_for_service(1s)) {
+//    if (!rclcpp::ok()) {
+//      RCLCPP_ERROR(mNode->get_logger(), "Interrupted while waiting for the service. Exiting.");
+//      rclcpp::shutdown();
+//    }
+//    RCLCPP_INFO(mNode->get_logger(), "service not available, waiting again...");
+//  }
 
-  if (paramClient.has_parameter(robotURDFName) && paramClient.has_parameter(robotSRDFName)) {
-    // Remapping config parameter to current node and load robot model
-    // With current convention, a specific robot will have one kinematics parameters
-    // No matter how many time it is instantiated
-    std::vector<std::string> key = paramClient.list_parameters({}, 10).names;
-    std::vector<rclcpp::Parameter> value = paramClient.get_parameters(key);
-    for (auto &j : value) {
-      if (mNode->has_parameter(j.get_name()))
-        continue;
-      mNode->declare_parameter(j.get_name(), j.get_parameter_value());
-    }
+  //  if (paramClient.has_parameter(robotURDFName) && paramClient.has_parameter(robotSRDFName)) {
+  //    // Remapping config parameter to current node and load robot model
+  //    // With current convention, a specific robot will have one kinematics parameters
+  //    // No matter how many time it is instantiated
+  //    std::vector<std::string> key = paramClient.list_parameters({}, 10).names;
+  //    std::vector<rclcpp::Parameter> value = paramClient.get_parameters(key);
+  //    for (auto &j : value) {
+  //      if (mNode->has_parameter(j.get_name()))
+  //        continue;
+  //      mNode->declare_parameter(j.get_name(), j.get_parameter_value());
+  //    }
+  //  }
+  if (mNode->has_parameter(robotURDFName) && mNode->has_parameter(robotSRDFName)) {
 
     // Load robot and robot state
     mRobotLoader = std::make_unique<robot_model_loader::RobotModelLoader>(mNode);
@@ -58,6 +62,7 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
 
     // Build up index for transformation from simulation to robot state
     auto variableNames = mRobotState->getVariableNames();
+    std::vector<std::string> jointName = mJointStates->name;
     if (variableNames.size() != mJointNum) {
       RCLCPP_ERROR(mNode->get_logger(), "Robot State has different dof from robot articulation");
       exit(0);

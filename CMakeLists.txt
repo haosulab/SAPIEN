@@ -152,7 +152,7 @@ if (ROS)
 
         file(GLOB_RECURSE SAPIEN_ROBOT_MANAGER_SRC "ros2_src/manager/*.cpp")
         add_library(sapien_robot_handle ${SAPIEN_ROBOT_MANAGER_SRC})
-        target_link_libraries(sapien_robot_handle tinyxml2 sapien_controller)
+        target_link_libraries(sapien_robot_handle tinyxml2 sapien_controller sapien_device)
         ament_target_dependencies(sapien_robot_handle ament_index_cpp)
 
         # test
@@ -160,7 +160,9 @@ if (ROS)
         target_link_libraries(manual_PS3 sapien_device)
 
         add_executable(test_ros2 ros2_src/test/test_sapien_ros2.cpp)
-        target_link_libraries(test_ros2 sapien_controller sapien_device)
+        target_link_libraries(test_ros2 sapien_robot_handle)
+        add_executable(test_ros2_urdf_loader ros2_src/test/test_ros_urdf.cpp)
+        target_link_libraries(test_ros2_urdf_loader sapien_robot_handle)
 
         # pybind for sapien-ros2
         set_target_properties(sapien_robot_handle PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

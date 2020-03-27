@@ -686,16 +686,19 @@ public:
   explicit URDFLoader(SScene *scene);
 
   SArticulation *load(const std::string &filename, physx::PxMaterial *material = nullptr);
-  SArticulation *loadFromXML(const std::string &filename, XMLDocument *loadedDoc,
-                      physx::PxMaterial *material);
 
   SKArticulation *loadKinematic(const std::string &filename,
                                 physx::PxMaterial *material = nullptr);
 
+  /* Directly load robot model from string, srdf is optional */
+  /* Using this mode, the path in URDF should be absolute path, rather than relative one*/
+  SArticulation *loadFromXML(const std::string &URDFString, const std::string &SRDFString="",
+                             physx::PxMaterial *material=nullptr, bool isKinematic = false);
+
 private:
   std::unique_ptr<SRDF::Robot> loadSRDF(const std::string &filename);
 
-  SArticulationBase *commonLoad(const std::string &filename, XMLDocument *loadedDoc,
+  SArticulationBase *commonLoad(XMLDocument *URDFDoc, std::unique_ptr<SRDF::Robot> srdf,
                                 physx::PxMaterial *material, bool isKinematic);
 
   SArticulationBase *commonLoad(const std::string &filename, physx::PxMaterial *material,

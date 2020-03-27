@@ -55,6 +55,8 @@ public:
   RobotManager(SControllableArticulationWrapper *wrapper, const std::string &nameSpace,
                const std::string &robotName, rclcpp::Clock::SharedPtr clock);
 
+  void init();
+
   void setDriveProperty(float stiffness, float damping, float forceLimit = PX_MAX_F32,
                         const std::vector<uint32_t> &jointIndex = {});
 

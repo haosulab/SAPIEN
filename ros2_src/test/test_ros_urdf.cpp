@@ -1,62 +1,82 @@
-//
-// Created by zack on 2/21/20.
-//
-#include "urdf/ros_urdf_loader.h"
-#include "articulation/articulation_builder.h"
-#include "articulation/sapien_kinematic_articulation.h"
-#include "articulation/sapien_kinematic_joint.h"
+#include "articulation/sapien_articulation.h"
 #include "articulation/urdf_loader.h"
+#include "controller/sapien_controllable_articulation.h"
+#include "manager/ros_urdf_loader.h"
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
-#include "sapien_scene.h"
+#include "scene.h"
 #include "simulation.h"
-#include <thread>
 
-using namespace sapien::ros2;
 using namespace sapien;
-
-int main(int argc, char *argv[]) {
+void test1(int argc, char *argv[]) {
   Simulation sim;
   Renderer::OptifuserRenderer renderer;
   sim.setRenderer(&renderer);
-  Renderer::OptifuserController controller(&renderer);
 
-  controller.showWindow();
+  auto controller = Renderer::OptifuserController(&renderer);
 
-  auto s0 = sim.createScene();
-  s0->setTimestep(1 / 480.f);
-  s0->addGround(-1);
+  auto scene = sim.createScene();
+  scene->setShadowLight({0, 1, -1}, {0.5, 0.5, 0.5});
+  scene->setAmbientLight({0.5, 0.5, 0.5});
+  controller.setCameraPosition(-0.5, 2, 0.5);
+  controller.setCameraRotation(-1, 0);
+  controller.setCurrentScene(scene.get());
+  scene->addGround(0);
+  scene->setTimestep(1.0 / 60);
+
+//  auto loader = scene->createURDFLoader();
+//  loader->fixRootLink = true;
+//  auto robot = loader->load("../example/assets/robot/xarm6.urdf");
+
+  // ROS2 specified class
   rclcpp::init(argc, argv);
+  ros2::SceneManager sceneManager(scene.get(), "scene1");
+  ros2::ROSURDFLoader loader(&sceneManager);
+  auto [robot, robotManager] = loader.load("sapien_resources", "xarm6_description/urdf/xarm6.urdf", "xarm6_moveit_config/config/xarm6.srdf", "xarm6");
 
-  auto node = std::make_shared<rclcpp::Node>("ros_test");
+//  auto robotManager = sceneManager.buildRobotManager(robot, "xarm6");
+  robot->setRootPose({{0, 0, 0.5}, PxIdentity});
+  robotManager->setDriveProperty(1000, 50, 5000, {0, 1, 2, 3, 4, 5});
+  robotManager->setDriveProperty(0, 50, 50, {6, 7, 8, 9, 10, 11});
 
-  auto loader = ROS_urdf_Loader(node, s0.get(), "sapien_resources", "panda_urdf_description/urdf/panda.urdf");
+  // Test Basic Controller
+  std::vector<std::string> gripperJoints = {"drive_joint",
+                                            "left_finger_joint",
+                                            "left_inner_knuckle_joint",
+                                            "right_outer_knuckle_joint",
+                                            "right_finger_joint",
+                                            "right_inner_knuckle_joint"};
+  robotManager->createJointPublisher(20.0f);
+  auto gripperController =
+      robotManager->buildJointVelocityController(gripperJoints, "gripper_joint_velocity", 0.0f);
+  sceneManager.start();
 
-  auto a = loader.loadArticulation(nullptr);
+  // Test IK Controller
+  auto armController =
+      robotManager->buildCartesianVelocityController("arm", "arm_cartesian_velocity", 0.0f);
 
-  a->setRootPose({{0, 0, -1}, PxIdentity});
-
-  s0->setAmbientLight({0.3, 0.3, 0.3});
-  s0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
-
-  for (auto j : a->getBaseJoints()) {
-    static_cast<SKJoint *>(j)->setDriveProperties(1, 1, 1);
-  }
-//  a->setDriveTarget({0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1});
-
-  controller.setCameraPosition(-5, 0, 0);
-  controller.setCurrentScene(s0.get());
-
-
+  uint32_t step = 0;
+  controller.showWindow();
   while (!controller.shouldQuit()) {
-    for (int i = 0; i < 8; ++i) {
-      s0->step();
-    }
-    s0->updateRender();
+    scene->step();
+    scene->updateRender();
     controller.render();
-    rclcpp::spin_some(node);
-  }
+    step++;
+    std::cout << step << std::endl;
 
-  rclcpp::shutdown();
-  return 0;
+    // Balance force
+    robotManager->balancePassiveForce();
+    // Move arm IK
+    armController->moveCartesian({0.02, 0.00, 0.02}, ros2::MoveType::WorldTranslate);
+
+    if (step >= 500 && step < 1000) {
+      gripperController->moveJoint({5, 5, 5, 5, 5, 5});
+    }
+    if (step == 1000) {
+      gripperController->moveJoint({-0.1, -0.1, -0.1, -0.1, -0.1, -0.1}, true);
+    }
+  }
+//  rclcpp::shutdown();
 }
+
+int main(int argc, char *argv[]) { test1(argc, argv); }
