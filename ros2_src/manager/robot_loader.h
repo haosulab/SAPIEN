@@ -23,6 +23,11 @@ protected:
   std::unique_ptr<URDF::URDFLoader> mLoader = nullptr;
 
 public:
+  /* Variables from URDF Loader */
+  bool &fixRootLink;
+  float &defaultDensity;
+  bool &collisionIsVisual;
+
 protected:
   static std::array<std::string, 2> getFilePath(const std::string &packageName,
                                                 const std::string &robotRelativePath,
@@ -124,11 +129,13 @@ public:
     return loadRobot(robotName, paths.at(0), paths.at(1), material);
   };
 
-  explicit RobotLoader(SceneManager *manager) : mNode(manager->mNode), mManager(manager) {
-    // The general standard should be, if no srdf: srdf path should be empty
-    // If no urdf, directly raise error and exit;
-    mLoader = mManager->mScene->createURDFLoader();
-  };
+  explicit RobotLoader(SceneManager *manager)
+      : mNode(manager->mNode), mManager(manager), mLoader(mManager->mScene->createURDFLoader()),
+        fixRootLink(mLoader->fixRootLink), defaultDensity(mLoader->defaultDensity),
+        collisionIsVisual(mLoader->collisionIsVisual){
+            // The general standard: if no srdf, srdf path should be empty
+            // If no urdf, directly raise error and exit;
+        };
 
 }; // end class ROS_urdf_Loader
 } // end namespace sapien::ros2

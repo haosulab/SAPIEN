@@ -24,17 +24,13 @@ void test1(int argc, char *argv[]) {
   scene->addGround(0);
   scene->setTimestep(1.0 / 60);
 
-//  auto loader = scene->createURDFLoader();
-//  loader->fixRootLink = true;
-//  auto robot = loader->load("../example/assets/robot/xarm6.urdf");
-
   // ROS2 specified class
   rclcpp::init(argc, argv);
   ros2::SceneManager sceneManager(scene.get(), "scene1");
   ros2::RobotLoader loader(&sceneManager);
+  loader.fixRootLink = true;
   auto [robot, robotManager] = loader.load("sapien_resources", "xarm6_description/urdf/xarm6.urdf", "xarm6_moveit_config/config/xarm6.srdf", "xarm6");
 
-//  auto robotManager = sceneManager.buildRobotManager(robot, "xarm6");
   robot->setRootPose({{0, 0, 0.5}, PxIdentity});
   robotManager->setDriveProperty(1000, 50, 5000, {0, 1, 2, 3, 4, 5});
   robotManager->setDriveProperty(0, 50, 50, {6, 7, 8, 9, 10, 11});
