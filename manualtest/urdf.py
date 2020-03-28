@@ -18,7 +18,7 @@ s0.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
 
 loader: pysapien.URDFLoader = s0.create_urdf_loader()
 loader.fix_root_link = 0
-chair = loader.load_kinematic("assets/robot/locobot_description.urdf")
+robot = loader.load("assets_local/robot/panda.urdf")
 
 render_controller.set_camera_position(-5, 0, 0)
 render_controller.set_current_scene(s0)
@@ -30,6 +30,10 @@ while not render_controller.should_quit:
         s0.step()
         steps += 1
     render_controller.render()
+
+    if steps > 1:
+        jacobian = robot.compute_jacobian()
+        print("The shape of jacobian", jacobian.shape)
 
     # if steps > 10000:
     #     for link in chair.get_base_links():

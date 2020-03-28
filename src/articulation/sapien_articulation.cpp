@@ -162,6 +162,49 @@ std::vector<PxReal> SArticulation::I2E(std::vector<PxReal> iv) const {
   }
   return ev;
 }
+
+Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+SArticulation::buildColummPermutation(const std::vector<uint32_t> &indexI2E) {
+  auto size = indexI2E.size();
+  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> permutation(size, size);
+  permutation.block(0, 0, size, size) = Eigen::MatrixXf::Constant(size, size, 0);
+  for (size_t i = 0; i < size; ++i) {
+    permutation(i, indexI2E[i]) = 1;
+  }
+  return permutation;
+}
+
+Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+SArticulation::buildRowPermutation() {
+  uint32_t nValidLinks = getPxArticulation()->getNbLinks() - 1;
+  uint32_t size = nValidLinks * 6;
+  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> permutation(size, size);
+  permutation.block(0, 0, size, size) = Eigen::MatrixXf::Constant(size, size, 0);
+
+  // Find the index of root link for external order (SLinks), normally it is 0
+  uint32_t rootExternalIndex = -1;
+  for (auto &link : getSLinks()) {
+    auto internalIndex = link->getPxActor()->getLinkIndex();
+    if (internalIndex == 0) {
+      rootExternalIndex = link->getIndex();
+      break;
+    }
+  }
+  assert(rootExternalIndex >= 0);
+
+  for (size_t k = 0; k < nValidLinks + 1; ++k) {
+    if (k == rootExternalIndex)
+      continue;
+    auto internalIndex = getSLinks()[k]->getPxActor()->getLinkIndex() - 1;
+    auto externalIndex = k < rootExternalIndex ? k : k - 1;
+    for (int j = 0; j < 6; ++j) {
+      permutation(externalIndex * 6 + j, internalIndex * 6 + j) = 1;
+    }
+  }
+
+  return permutation;
+}
+
 std::vector<PxReal> SArticulation::getDriveTarget() const {
   std::vector<PxReal> driveTarget;
   for (auto &j : mJoints) {
@@ -257,34 +300,25 @@ void SArticulation::prestep() {
   }
 }
 
-std::vector<PxReal> SArticulation::computeJacobianMatrix() {
-  // TODO: This function is temporary for use without ROS, after ROS2, it will be deleted.
+Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+SArticulation::computeJacobianMatrix() {
+  // Note that the Physx computeDenseJacobian will neglect the root link if it is not fixed
+  // But consider it otherwise. Thus both the nRows and nCols will be influence by FIX_BASE
+  using namespace Eigen;
   PxU32 nRows;
   PxU32 nCols;
   mPxArticulation->computeDenseJacobian(*mCache, nRows, nCols);
+  uint32_t freeBase = (nCols == dof()) ? 0 : 6;
+  Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> originJacobian =
+      Map<Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>>(mCache->denseJacobian, nRows, nCols);
+  Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> eliminatedJacobian(
+      originJacobian.block(freeBase, freeBase, nRows - freeBase, nCols - freeBase));
 
-  std::vector<float> Jacobian(mCache->denseJacobian, mCache->denseJacobian + nRows * nCols);
-  std::vector<float> Jacobian2;
-  for (size_t j = 0; j < Jacobian.size() + 6; ++j) {
-    Jacobian2.push_back(0);
-  }
-  for (auto &link : mLinks) {
-    // result.push_back(link.get());
-    auto index = link->getPxActor()->getLinkIndex();
-    auto midx = link->getIndex();
-    // spdlog::error("Input vector size does not match DOF of articulation {:d} {:d} {:d} {:d}
-    // {:d}", index, midx, nRows, nCols, Jacobian2.size());
-    if (index == 0)
-      continue;
-    for (size_t j = 0; j < 6; ++j) {
-      for (size_t col = 0; col < nCols; ++col) {
-        Jacobian2[(midx * 6 + j) * nCols + mIndexI2E[col]] =
-            Jacobian[((index - 1) * 6 + j) * nCols + col];
-      }
-    }
-    midx += 1;
-  }
-  return Jacobian2;
+  // Switch joint(column) order from internal to external
+  eliminatedJacobian = eliminatedJacobian * mColumnPermutationI2E;
+
+  // Switch link(row) order from internal to external
+  return mRowPermutationI2E * eliminatedJacobian;
 }
 
 #define PUSH_QUAT(data, q)                                                                        \
@@ -399,6 +433,7 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
 
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eALL);
 }
+
 // namespace sapien
 
 } // namespace sapien

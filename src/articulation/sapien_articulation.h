@@ -1,5 +1,6 @@
 #pragma once
 #include "sapien_articulation_base.h"
+#include <Eigen/Dense>
 #include <memory>
 
 namespace sapien {
@@ -24,6 +25,10 @@ class SArticulation : public SArticulationDrivable {
 
   std::vector<uint32_t> mIndexE2I;
   std::vector<uint32_t> mIndexI2E;
+
+  /* Due to the capacity of matrix, cache the permutation matrix in advance */
+  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> mColumnPermutationI2E;
+  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> mRowPermutationI2E;
 
 public:
   std::vector<SLinkBase *> getBaseLinks() override;
@@ -72,7 +77,7 @@ public:
   std::vector<physx::PxReal> computeInverseDynamics(const std::vector<PxReal> &qacc);
 
   /* Kinematics Functions */
-  std::vector<physx::PxReal> computeJacobianMatrix();
+  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> computeJacobianMatrix();
 
   std::vector<PxReal> packData();
   void unpackData(std::vector<PxReal> const &data);
@@ -84,6 +89,11 @@ private:
 
   std::vector<PxReal> E2I(std::vector<PxReal> ev) const;
   std::vector<PxReal> I2E(std::vector<PxReal> iv) const;
+
+  /* Functions for building permutation matrix for Jacobian calculation */
+  static Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+  buildColummPermutation(const std::vector<uint32_t> &indexI2E);
+  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> buildRowPermutation();
 };
 
 } // namespace sapien

@@ -1,4 +1,5 @@
 #include <pybind11/numpy.h>
+#include <pybind11/eigen.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -658,16 +659,7 @@ PYBIND11_MODULE(pysapien, m) {
              auto qf = a.computeInverseDynamics(qacc);
              return py::array_t<PxReal>(qf.size(), qf.data());
            })
-      .def("compute_jacobian",
-           [](SArticulation &a) {
-             auto jacobian = a.computeJacobianMatrix();
-             int nRows = a.getSLinks().size() * 6;
-             int nCols = a.dof() + !a.getPxArticulation()->getArticulationFlags().isSet(
-                                       PxArticulationFlag::eFIX_BASE) *
-                                       6;
-             return py::array_t<PxReal>({nRows, nCols}, {sizeof(PxReal) * nCols, sizeof(PxReal)},
-                                        jacobian.data());
-           })
+      .def("compute_jacobian", &SArticulation::computeJacobianMatrix)
       .def("pack", &SArticulation::packData)
       .def("unpack", [](SArticulation &a, const py::array_t<PxReal> &arr) {
         a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
@@ -835,11 +827,10 @@ PYBIND11_MODULE(pysapien, m) {
       .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def_readwrite("default_density", &URDF::URDFLoader::defaultDensity)
       .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
-           py::arg("filename"),
-           py::arg("material") = (physx::PxMaterial *) nullptr)
+           py::arg("filename"), py::arg("material") = (physx::PxMaterial *)nullptr)
       .def("load_kinematic",
            py::overload_cast<const std::string &, physx::PxMaterial *>(
                &URDF::URDFLoader::loadKinematic),
            py::return_value_policy::reference, py::arg("filename"),
-           py::arg("material") = (physx::PxMaterial *) nullptr);
+           py::arg("material") = (physx::PxMaterial *)nullptr);
 }
