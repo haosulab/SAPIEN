@@ -19,7 +19,7 @@ void SapienErrorCallback::reportError(PxErrorCode::Enum code, const char *messag
 #else
   spdlog::critical("{}:{}: {}", file, line, message);
 #endif
-  throw std::runtime_error("PhysX Error");
+  // throw std::runtime_error("PhysX Error");
 }
 
 PxErrorCode::Enum SapienErrorCallback::getLastErrorCode() {

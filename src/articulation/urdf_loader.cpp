@@ -239,19 +239,19 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin, scale);
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        currentLinkBuilder->addBoxVisual(tVisual2Link, visual->geometry->size * scale, {1, 1, 1},
+        currentLinkBuilder->addBoxVisual(tVisual2Link, visual->geometry->size * scale, PxVec3{1, 1, 1},
                                          visual->name);
         break;
       case Geometry::CYLINDER:
       case Geometry::CAPSULE:
         currentLinkBuilder->addCapsuleVisual(
             tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
-            visual->geometry->radius * scale, visual->geometry->length * scale / 2.f, {1, 1, 1},
+            visual->geometry->radius * scale, visual->geometry->length * scale / 2.f, PxVec3{1, 1, 1},
             visual->name);
         break;
       case Geometry::SPHERE:
         currentLinkBuilder->addSphereVisual(tVisual2Link, visual->geometry->radius * scale,
-                                            {1, 1, 1}, visual->name);
+                                            PxVec3{1, 1, 1}, visual->name);
         break;
       case Geometry::MESH:
         currentLinkBuilder->addVisualFromFile(getAbsPath(filename, visual->geometry->filename),
@@ -271,7 +271,7 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
                                         material, defaultDensity);
         if (collisionIsVisual) {
           currentLinkBuilder->addBoxVisual(tCollision2Link, collision->geometry->size * scale,
-                                           {1, 1, 1}, "");
+                                           PxVec3{1, 1, 1}, "");
         }
         break;
       case Geometry::CYLINDER:
@@ -284,7 +284,7 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
           currentLinkBuilder->addCapsuleVisual(
               tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
               collision->geometry->radius * scale, collision->geometry->length * scale / 2.f,
-              {1, 1, 1}, "");
+              PxVec3{1, 1, 1}, "");
         }
         break;
       case Geometry::SPHERE:
@@ -292,7 +292,7 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
                                            material, defaultDensity);
         if (collisionIsVisual) {
           currentLinkBuilder->addSphereVisual(tCollision2Link, collision->geometry->radius * scale,
-                                              {1, 1, 1}, "");
+                                              PxVec3{1, 1, 1}, "");
         }
         break;
       case Geometry::MESH:

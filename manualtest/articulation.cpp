@@ -14,18 +14,23 @@
 using namespace sapien;
 
 std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
+  Renderer::PxrMaterial copper = {};
+  copper.base_color = { 0.875, 0.553, 0.221, 1 };
+  copper.metallic = 1.f;
+  copper.roughness = 0.3f;
+
   auto builder = scene.createArticulationBuilder();
   auto body = builder->createLinkBuilder();
   body->addSphereShape({{0, 0, 0}, PxIdentity}, 0.25);
-  body->addSphereVisual({{0, 0, 0}, PxIdentity}, 0.25);
+  body->addSphereVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.25, copper);
   body->addCapsuleShape({{0.141, 0, 0}, PxIdentity}, 0.08, 0.141);
-  body->addCapsuleVisual({{0.141, 0, 0}, PxIdentity}, 0.08, 0.141);
+  body->addCapsuleVisualWithMaterial({{0.141, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
   body->addCapsuleShape({{-0.141, 0, 0}, PxIdentity}, 0.08, 0.141);
-  body->addCapsuleVisual({{-0.141, 0, 0}, PxIdentity}, 0.08, 0.141);
+  body->addCapsuleVisualWithMaterial({{-0.141, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
   body->addCapsuleShape({{0, 0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141);
-  body->addCapsuleVisual({{0, 0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141);
+  body->addCapsuleVisualWithMaterial({{0, 0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141, copper);
   body->addCapsuleShape({{0, -0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141);
-  body->addCapsuleVisual({{0, -0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141);
+  body->addCapsuleVisualWithMaterial({{0, -0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141, copper);
   body->setName("body");
 
   auto l1 = builder->createLinkBuilder(body);
@@ -35,7 +40,7 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
                          {{0.282, 0, 0}, {0, 0.7071068, 0, 0.7071068}},
                          {{0.141, 0, 0}, {0, -0.7071068, 0, 0.7071068}});
   l1->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
-  l1->addCapsuleVisual({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
+  l1->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
 
   auto l2 = builder->createLinkBuilder(body);
   l2->setName("l2");
@@ -44,7 +49,7 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
                          {{-0.282, 0, 0}, {0.7071068, 0, -0.7071068, 0}},
                          {{0.141, 0, 0}, {0, -0.7071068, 0, 0.7071068}});
   l2->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
-  l2->addCapsuleVisual({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
+  l2->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
 
   auto l3 = builder->createLinkBuilder(body);
   l3->setName("l3");
@@ -53,7 +58,7 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
                          {{0, 0.282, 0}, {-0.5, 0.5, 0.5, 0.5}},
                          {{0.141, 0, 0}, {0, -0.7071068, 0, 0.7071068}});
   l3->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
-  l3->addCapsuleVisual({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
+  l3->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
 
   auto l4 = builder->createLinkBuilder(body);
   l4->setName("l4");
@@ -62,7 +67,7 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
                          {{0, -0.282, 0}, {0.5, 0.5, -0.5, 0.5}},
                          {{0.141, 0, 0}, {0, -0.7071068, 0, 0.7071068}});
   l4->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
-  l4->addCapsuleVisual({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
+  l4->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
 
   auto f1 = builder->createLinkBuilder(l1);
   f1->setName("f1");
@@ -71,7 +76,7 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
                          {{-0.141, 0, 0}, {0.7071068, 0.7071068, 0, 0}},
                          {{0.282, 0, 0}, {0.7071068, 0.7071068, 0, 0}});
   f1->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
-  f1->addCapsuleVisual({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
+  f1->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.282, copper);
 
   auto f2 = builder->createLinkBuilder(l2);
   f2->setName("f2");
@@ -80,7 +85,7 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
                          {{-0.141, 0, 0}, {0.7071068, 0.7071068, 0, 0}},
                          {{0.282, 0, 0}, {0.7071068, 0.7071068, 0, 0}});
   f2->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
-  f2->addCapsuleVisual({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
+  f2->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.282, copper);
 
   auto f3 = builder->createLinkBuilder(l3);
   f3->setName("f3");
@@ -89,7 +94,7 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
                          {{-0.141, 0, 0}, {0.7071068, 0.7071068, 0, 0}},
                          {{0.282, 0, 0}, {0.7071068, 0.7071068, 0, 0}});
   f3->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
-  f3->addCapsuleVisual({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
+  f3->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.282, copper);
 
   auto f4 = builder->createLinkBuilder(l4);
   f4->setName("f4");
@@ -98,7 +103,7 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
                          {{-0.141, 0, 0}, {0.7071068, 0.7071068, 0, 0}},
                          {{0.282, 0, 0}, {0.7071068, 0.7071068, 0, 0}});
   f4->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
-  f4->addCapsuleVisual({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
+  f4->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.282, copper);
 
   return builder;
 }

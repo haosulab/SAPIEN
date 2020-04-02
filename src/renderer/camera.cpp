@@ -138,7 +138,7 @@ std::vector<float> OptifuserCamera::takeRaytracedPicture(uint32_t samplesPerPixe
   pathTracer->invalidateCamera();
 
   for (uint32_t i = 0; i < samplesPerPixel; ++i) {
-    pathTracer->renderScene(*mScene->getScene(), *this);
+    pathTracer->renderScene(*mScene->getScene(), *mCameraSpec);
   }
   auto result = pathTracer->getResult();
   delete pathTracer;

@@ -44,7 +44,7 @@ protected:
     PxReal radius;
     PxReal length;
 
-    PxVec3 color;
+    Renderer::PxrMaterial material;
 
     PxTransform pose;
     std::string name;
@@ -91,16 +91,30 @@ public:
                       PxMaterial *material = nullptr, PxReal density = 1000.f);
 
   /* Visual functions */
-  void addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                    const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
+  void addBoxVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                    const PxVec3 &size = {1, 1, 1}, const Renderer::PxrMaterial &material = {},
                     std::string const &name = "");
+  inline void addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                           const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
+                           std::string const &name = "") {
+    addBoxVisualWithMaterial(pose, size, {{color.x, color.y, color.z, 1}}, name);
+  }
 
-  void addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                        PxReal halfLength = 1, const PxVec3 &color = {1, 1, 1},
+  void addCapsuleVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                        PxReal halfLength = 1, const Renderer::PxrMaterial &material = {},
                         std::string const &name = "");
+  inline void addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                               PxReal radius = 1, PxReal halfLength = 1,
+                               const PxVec3 &color = {1, 1, 1}, std::string const &name = "") {
+    addCapsuleVisualWithMaterial(pose, radius, halfLength, {{color.x, color.y, color.z, 1}}, name);
+  }
 
-  void addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                       const PxVec3 &color = {1, 1, 1}, std::string const &name = "");
+  void addSphereVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                       const Renderer::PxrMaterial &material = {}, std::string const &name = "");
+  inline void addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                              const PxVec3 &color = {1, 1, 1}, std::string const &name = "") {
+    addSphereVisualWithMaterial(pose, radius, {{color.x, color.y, color.z, 1}}, name);
+  }
 
   void addVisualFromFile(const std::string &filename,
                          const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),

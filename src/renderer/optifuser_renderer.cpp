@@ -117,7 +117,7 @@ IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &po
                                             std::vector<physx::PxVec3> const &normals,
                                             std::vector<uint32_t> const &indices,
                                             const physx::PxVec3 &scale,
-                                            const physx::PxVec3 &color) {
+                                            const PxrMaterial &material) {
   std::vector<Optifuser::Vertex> vertices;
   for (uint32_t i = 0; i < points.size(); ++i) {
     vertices.push_back(
@@ -126,9 +126,21 @@ IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &po
 
   auto obj = Optifuser::NewObject<Optifuser::Object>(
       std::make_shared<Optifuser::TriangleMesh>(vertices, indices, false));
-  obj->material.kd.r = color.x;
-  obj->material.kd.g = color.y;
-  obj->material.kd.b = color.z;
+
+  {
+    obj->material.kd.r = material.base_color[0];
+    obj->material.kd.g = material.base_color[1];
+    obj->material.kd.b = material.base_color[2];
+    obj->material.kd.a = material.base_color[3];
+  }
+
+  {
+    obj->pbrMaterial->kd = {material.base_color[0], material.base_color[1], material.base_color[2],
+                            material.base_color[3]};
+    obj->pbrMaterial->ks = material.specular;
+    obj->pbrMaterial->roughness = material.roughness;
+    obj->pbrMaterial->metallic = material.metallic;
+  }
 
   obj->scale = {scale.x, scale.y, scale.z};
 
@@ -141,7 +153,7 @@ IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &po
 
 IPxrRigidbody *OptifuserScene::addRigidbody(physx::PxGeometryType::Enum type,
                                             const physx::PxVec3 &scale,
-                                            const physx::PxVec3 &color) {
+                                            const PxrMaterial &material) {
   std::unique_ptr<Optifuser::Object> obj;
   switch (type) {
   case physx::PxGeometryType::eBOX: {
@@ -169,7 +181,17 @@ IPxrRigidbody *OptifuserScene::addRigidbody(physx::PxGeometryType::Enum type,
     return nullptr;
   }
 
-  obj->material.kd = {color.x, color.y, color.z, 1};
+  {
+    obj->material.kd = {material.base_color[0], material.base_color[1], material.base_color[2],
+                        material.base_color[3]};
+  }
+  {
+    obj->pbrMaterial->kd = {material.base_color[0], material.base_color[1], material.base_color[2],
+                            material.base_color[3]};
+    obj->pbrMaterial->ks = material.specular;
+    obj->pbrMaterial->roughness = material.roughness;
+    obj->pbrMaterial->metallic = material.metallic;
+  }
 
   mBodies.push_back(std::make_unique<OptifuserRigidbody>(this, std::vector{obj.get()}));
   mScene->addObject(std::move(obj));
@@ -288,9 +310,7 @@ void OptifuserRenderer::setDefaultShaderConfig(std::string const &glslDir,
 
 #ifdef _USE_OPTIX
 std::string OptifuserRenderer::gPtxDir = "ptx";
-void OptifuserRenderer::setOptixConfig(std::string const &ptxDir) {
-  gPtxDir = ptxDir;
-}
+void OptifuserRenderer::setOptixConfig(std::string const &ptxDir) { gPtxDir = ptxDir; }
 #endif
 
 void OptifuserRenderer::enableGlobalAxes(bool enable) {
