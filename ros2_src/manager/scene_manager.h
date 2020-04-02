@@ -1,14 +1,15 @@
 #pragma once
 
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/time_source.hpp>
+#include <rosgraph_msgs/msg/clock.hpp>
 #include <utility>
 
 #include "controller/sapien_controllable_articulation.h"
 #include "device/PS3_publisher.h"
 #include "event_system/event_system.h"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp/time_source.hpp"
 #include "robot_manager.h"
-#include "rosgraph_msgs/msg/clock.hpp"
+#include "robot_loader.h"
 #include "sapien_scene.h"
 
 namespace sapien {
@@ -68,7 +69,6 @@ public:
     rclcpp::spin_some(mNode->shared_from_this());
 
     // ROS Time Clock which is different wall time and steady time, given by /clock topic
-    // TODO: add namespace support
     mTS.attachNode(mNode);
     mTime = rclcpp::Time(0, 0, RCL_ROS_TIME);
     mClock = rclcpp::Clock::make_shared(RCL_ROS_TIME);
@@ -117,6 +117,8 @@ public:
     }
     mThread = std::thread(&rclcpp::executors::SingleThreadedExecutor::spin, &mExecutor);
   }
+
+  std::unique_ptr<RobotLoader> createRobotLoader() { return std::make_unique<RobotLoader>(this); };
 
   void createPS3Publisher(double pubFrequency) {
     if (ps3Publisher) {

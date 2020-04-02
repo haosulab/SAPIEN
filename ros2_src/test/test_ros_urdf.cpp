@@ -1,7 +1,6 @@
-#include "articulation/sapien_articulation.h"
-#include "articulation/urdf_loader.h"
 #include "controller/sapien_controllable_articulation.h"
 #include "manager/robot_loader.h"
+#include "manager/scene_manager.h"
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 #include "scene.h"
@@ -29,7 +28,9 @@ void test1(int argc, char *argv[]) {
   ros2::SceneManager sceneManager(scene.get(), "scene1");
   ros2::RobotLoader loader(&sceneManager);
   loader.fixRootLink = true;
-  auto [robot, robotManager] = loader.load("sapien_resources", "xarm6_description/urdf/xarm6.urdf", "xarm6_moveit_config/config/xarm6.srdf", "xarm6");
+  auto [robot, robotManager] =
+      loader.loadROS("sapien_resources", "xarm6_description/urdf/xarm6.urdf",
+                     "xarm6_moveit_config/config/xarm6.srdf", "xarm6");
 
   robot->setRootPose({{0, 0, 0.5}, PxIdentity});
   robotManager->setDriveProperty(1000, 50, 5000, {0, 1, 2, 3, 4, 5});
@@ -51,6 +52,10 @@ void test1(int argc, char *argv[]) {
   auto armController =
       robotManager->buildCartesianVelocityController("arm", "arm_cartesian_velocity", 0.0f);
 
+  // Load second robot
+  auto [robot2, robotManager2] = loader.load("../assets_local/robot/panda.urdf");
+  robot2->setRootPose({2,0,0});
+
   uint32_t step = 0;
   controller.showWindow();
   while (!controller.shouldQuit()) {
@@ -58,7 +63,6 @@ void test1(int argc, char *argv[]) {
     scene->updateRender();
     controller.render();
     step++;
-    std::cout << step << std::endl;
 
     // Balance force
     robotManager->balancePassiveForce();
@@ -72,7 +76,7 @@ void test1(int argc, char *argv[]) {
       gripperController->moveJoint({-0.1, -0.1, -0.1, -0.1, -0.1, -0.1}, true);
     }
   }
-//  rclcpp::shutdown();
+  //  rclcpp::shutdown();
 }
 
 int main(int argc, char *argv[]) { test1(argc, argv); }
