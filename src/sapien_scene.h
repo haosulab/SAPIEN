@@ -116,6 +116,9 @@ public:
   std::vector<Renderer::ICamera *> getMountedCameras();
   std::vector<SActorBase *> getMountedActors();
 
+  std::vector<SActorBase*> getAllActors() const;
+  std::vector<SArticulationBase*> getAllArticulations() const;
+
   void setShadowLight(PxVec3 const &direction, PxVec3 const &color);
   void addPointLight(PxVec3 const &position, PxVec3 const &color);
   void setAmbientLight(PxVec3 const &color);

@@ -49,6 +49,15 @@ py::array_t<PxReal> mat42array(glm::mat4 const &mat) {
 PYBIND11_MODULE(pysapien, m) {
   m.doc() = "SAPIEN core module. For ROS support, please refer to sapien-ros2";
 
+  // collision geometry and shape
+  auto PyGeometry = py::class_<SGeometry>(m, "CollisionGeometry");
+  auto PyBoxGeometry = py::class_<SBoxGeometry, SGeometry>(m, "BoxGeometry");
+  auto PySphereGeometry = py::class_<SSphereGeometry, SGeometry>(m, "SphereGeometry");
+  auto PyCapsuleGeometry = py::class_<SCapsuleGeometry, SGeometry>(m, "CapsuleGeometry");
+  auto PyPlaneGeometry = py::class_<SPlaneGeometry, SGeometry>(m, "PlaneGeometry");
+  auto PyConvexMeshGeometry = py::class_<SConvexMeshGeometry, SGeometry>(m, "ConvexMeshGeometry");
+  auto PyShape = py::class_<SShape>(m, "CollisionShape");
+
   // enums
   auto PySolverType = py::enum_<PxSolverType::Enum>(m, "SolverType");
   auto PyActorType = py::enum_<EActorType>(m, "ActorType");
@@ -109,8 +118,7 @@ PYBIND11_MODULE(pysapien, m) {
       .value("UNDEFINED", PxArticulationJointType::eUNDEFINED)
       .export_values();
 
-  PyPxMaterial
-      .def("get_static_friction", &PxMaterial::getStaticFriction)
+  PyPxMaterial.def("get_static_friction", &PxMaterial::getStaticFriction)
       .def("get_dynamic_friction", &PxMaterial::getDynamicFriction)
       .def("get_restitution", &PxMaterial::getRestitution)
       .def("set_static_friction", &PxMaterial::setStaticFriction, py::arg("coef"))
@@ -171,9 +179,77 @@ PYBIND11_MODULE(pysapien, m) {
            })
       .def(py::self * py::self);
 
+  //======== Geometry ========//
+
+  PyBoxGeometry.def_property_readonly("half_lengths",
+                                      [](SBoxGeometry &g) { return vec32array(g.halfLengths); });
+  PySphereGeometry.def_readonly("radius", &SSphereGeometry::radius);
+  PyCapsuleGeometry.def_readonly("radius", &SCapsuleGeometry::radius)
+      .def_readonly("half_length", &SCapsuleGeometry::halfLength);
+  PyConvexMeshGeometry
+      .def_property_readonly("scale", [](SConvexMeshGeometry &g) { return vec32array(g.scale); })
+      .def_property_readonly(
+          "rotation",
+          [](SConvexMeshGeometry &g) {
+            return make_array<PxReal>({g.rotation.w, g.rotation.x, g.rotation.y, g.rotation.z});
+          })
+      .def_property_readonly("vertices",
+                             [](SConvexMeshGeometry &g) {
+                               int nRows = g.vertices.size() / 3;
+                               int nCols = 3;
+                               return py::array_t<PxReal>({nRows, nCols},
+                                                          {sizeof(PxReal) * nCols, sizeof(PxReal)},
+                                                          g.vertices.data());
+                             })
+      .def_property_readonly(
+          "indices", [](SConvexMeshGeometry &g) { return make_array<uint32_t>(g.indices); });
+
+  PyShape.def_readonly("type", &SShape::type)
+      .def_readonly("pose", &SShape::pose)
+      .def_property_readonly(
+          "box_geometry", [](SShape &s) {
+                            if (s.type == "box") {
+                              return static_cast<SBoxGeometry *>(s.geometry.get());
+                            }
+                            return static_cast<SBoxGeometry *>(nullptr);
+                          },
+          py::return_value_policy::reference)
+      .def_property_readonly(
+          "sphere_geometry", [](SShape &s) {
+                            if (s.type == "sphere") {
+                              return static_cast<SSphereGeometry *>(s.geometry.get());
+                            }
+                            return static_cast<SSphereGeometry *>(nullptr);
+                          },
+          py::return_value_policy::reference)
+      .def_property_readonly(
+          "capsule_geometry", [](SShape &s) {
+                            if (s.type == "capsule") {
+                              return static_cast<SCapsuleGeometry *>(s.geometry.get());
+                            }
+                            return static_cast<SCapsuleGeometry *>(nullptr);
+                          },
+          py::return_value_policy::reference)
+      .def_property_readonly(
+          "plane_geometry", [](SShape &s) {
+                            if (s.type == "plane") {
+                              return static_cast<SPlaneGeometry *>(s.geometry.get());
+                            }
+                            return static_cast<SPlaneGeometry *>(nullptr);
+                          },
+          py::return_value_policy::reference)
+      .def_property_readonly(
+          "convex_mesh_geometry", [](SShape &s) {
+                            if (s.type == "convex_mesh") {
+                              return static_cast<SConvexMeshGeometry *>(s.geometry.get());
+                            }
+                            return static_cast<SConvexMeshGeometry *>(nullptr);
+                          },
+          py::return_value_policy::reference);
+
+
   //======== Render Interface ========//
-  PyRenderMaterial
-      .def(py::init<>())
+  PyRenderMaterial.def(py::init<>())
       .def("set_base_color",
            [](Renderer::PxrMaterial &mat, py::array_t<float> color) {
              mat.base_color = {color.at(0), color.at(1), color.at(2), color.at(3)};
@@ -379,6 +455,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr)
       .def("get_contacts", &SScene::getContacts)
+      .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
+      .def("get_all_articulations", &SScene::getAllArticulations, py::return_value_policy::reference)
 
       .def("set_shadow_light",
            [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
@@ -438,7 +516,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_pose", &SActorBase::getPose)
       .def_property_readonly("col1", &SActorBase::getCollisionGroup1)
       .def_property_readonly("col2", &SActorBase::getCollisionGroup2)
-      .def_property_readonly("col3", &SActorBase::getCollisionGroup3);
+      .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
+      .def("get_collision_shapes", &SActorBase::getCollisionShapes);
 
   PyActorDynamicBase
       .def_property_readonly("velocity",
@@ -768,9 +847,8 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def("add_sphere_visual_complex",
            [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
-              const Renderer::PxrMaterial &mat, std::string const &name) {
-             a.addSphereVisualWithMaterial(pose, radius, mat, name);
-           },
+              const Renderer::PxrMaterial &mat,
+              std::string const &name) { a.addSphereVisualWithMaterial(pose, radius, mat, name); },
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
       .def("add_visual_from_file",
