@@ -126,14 +126,6 @@ IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &po
 
   auto obj = Optifuser::NewObject<Optifuser::Object>(
       std::make_shared<Optifuser::TriangleMesh>(vertices, indices, false));
-
-  {
-    obj->material.kd.r = material.base_color[0];
-    obj->material.kd.g = material.base_color[1];
-    obj->material.kd.b = material.base_color[2];
-    obj->material.kd.a = material.base_color[3];
-  }
-
   {
     obj->pbrMaterial->kd = {material.base_color[0], material.base_color[1], material.base_color[2],
                             material.base_color[3]};
@@ -181,10 +173,6 @@ IPxrRigidbody *OptifuserScene::addRigidbody(physx::PxGeometryType::Enum type,
     return nullptr;
   }
 
-  {
-    obj->material.kd = {material.base_color[0], material.base_color[1], material.base_color[2],
-                        material.base_color[3]};
-  }
   {
     obj->pbrMaterial->kd = {material.base_color[0], material.base_color[1], material.base_color[2],
                             material.base_color[3]};

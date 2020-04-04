@@ -91,6 +91,10 @@ float orenNayar(vec3 l, vec3 v, vec3 n, float r) {
   return min(max(0.0, NoL) * (A + B * C), 1.0);
 }
 
+float diffuse(vec3 l, vec3 v, vec3 n) {
+  return max(dot(l, n), 0.f) / 3.141592653589793f;
+}
+
 float ggx (vec3 L, vec3 V, vec3 N, float roughness, float F0) {
   float alpha = roughness*roughness;
   vec3 H = normalize(L + V);
@@ -101,16 +105,48 @@ float ggx (vec3 L, vec3 V, vec3 N, float roughness, float F0) {
   float alphaSqr = alpha * alpha;
   float denom = dotNH * dotNH * (alphaSqr - 1.0) + 1.0;
   float D = alphaSqr / (3.141592653589793 * denom * denom);
-  float F = F0 + (1.0 - F0) * pow(1.0 - dotLH, 5.0);
+  // float F = F0 + (1.0 - F0) * pow(1.0 - dotLH, 5.0);
+  float F = F0;  // TODO: add Fresnel
   float k = 0.5 * alpha;
   float k2 = k * k;
   return dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2);
 }
 
+float SmithG1(vec3 v, vec3 normal, float a2) {
+  float dotNV = dot(v, normal);
+  return 2 * dotNV / (dotNV + sqrt(a2 + (1-a2) * dotNV * dotNV));
+}
+
+float SmithGGXMasking(vec3 wi, vec3 wo, vec3 normal, float a2) {
+  return SmithG1(wi, normal, a2) * SmithG1(wo, normal, a2);
+}
+
+float ggx2(vec3 wi, vec3 wo, vec3 normal, float roughness,
+           float ks) {
+  float a2 = roughness * roughness;
+  float F0 = ks;
+  if (dot(wi, normal) > 0 && dot(wo, normal) > 0) {
+    vec3 wm = normalize(wi + wo);
+    float dotMN = dot(wm, normal);
+    // float F = fresnel_schlick(dot(wi, wm), 5.f, F0, 1);
+    float F = F0;
+    float G = SmithGGXMasking(wi, wo, normal, a2);
+    float D2 = dotMN * dotMN * (a2 - 1) + 1; D2 = D2 * D2;
+    float D = a2 / (3.141592653589793f * D2);
+    return F * G * D;
+  } else {
+    return 0.f;
+  }
+}
+
 void main() {
   vec3 albedo = texture(colortex0, texcoord).xyz;
-  vec4 specular = texture(colortex1, texcoord);
-  float roughness = 2 / (2 + specular.a);
+  vec3 srm = texture(colortex1, texcoord).xyz;
+  float F0 = srm.x;
+  float roughness = srm.y;
+  float metallic = srm.z;
+  // vec3 specular = mix(vec3(1.f, 1.f, 1.f), albedo, metallic);
+
   vec3 normal = texture(colortex2, texcoord).xyz;
   vec4 csPosition = getCameraSpacePosition(texcoord);
 
@@ -132,15 +168,30 @@ void main() {
     float d = max(length(l), 0.0001);
     vec3 lightDir = normalize(l);
 
-    // point light diffuse
-    color += albedo * pointLights[i].emission * orenNayar(lightDir, camDir, normal, 0.3f) / d / d;
-    color += specular.rgb * pointLights[i].emission
-             * ggx(lightDir, camDir, normal, roughness, 0.05) / d / d;
+    // diffuse
+    color += (1 - metallic) * albedo * pointLights[i].emission *
+             diffuse(lightDir, camDir, normal) / d / d;
+
+    // metallic
+    color += metallic * albedo * pointLights[i].emission *
+             ggx2(lightDir, camDir, normal, roughness, 1.f) / d / d;
+
+    // specular
+    color += pointLights[i].emission * ggx2(lightDir, camDir, normal, roughness, F0) / d / d;
   }
 
   vec3 lightDir = -normalize((gbufferViewMatrix * vec4(shadowLightDirection, 0)).xyz);
-  color += albedo * shadowLightEmission * orenNayar(lightDir, camDir, normal, 0.3f) * visibility;
-  color += specular.rgb * shadowLightEmission * ggx(lightDir, camDir, normal, roughness, 0.05) * visibility;
+
+  // diffuse
+  color += (1.f - metallic) * albedo * shadowLightEmission
+           * diffuse(lightDir, camDir, normal) * visibility;
+
+  // metallic
+  color += metallic * albedo * shadowLightEmission
+           * ggx2(lightDir, camDir, normal, roughness, 1.f) * visibility;
+
+  // specular
+  color += shadowLightEmission * ggx2(lightDir, camDir, normal, roughness, F0) * visibility;
 
   // for (int i = 0; i < N_DIRECTION_LIGHTS; i++) {
   //   vec3 lightDir = -normalize((gbufferViewMatrix * vec4(directionalLights[i].direction, 0)).xyz);

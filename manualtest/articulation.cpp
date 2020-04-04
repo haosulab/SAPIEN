@@ -15,9 +15,10 @@ using namespace sapien;
 
 std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
   Renderer::PxrMaterial copper = {};
-  copper.base_color = { 0.875, 0.553, 0.221, 1 };
+  copper.base_color = {0.975, 0.453, 0.221, 1};
   copper.metallic = 1.f;
-  copper.roughness = 0.3f;
+  copper.roughness = 0.7f;
+  copper.specular = 0.5f;
 
   auto builder = scene.createArticulationBuilder();
   auto body = builder->createLinkBuilder();
@@ -28,9 +29,11 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
   body->addCapsuleShape({{-0.141, 0, 0}, PxIdentity}, 0.08, 0.141);
   body->addCapsuleVisualWithMaterial({{-0.141, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
   body->addCapsuleShape({{0, 0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141);
-  body->addCapsuleVisualWithMaterial({{0, 0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141, copper);
+  body->addCapsuleVisualWithMaterial({{0, 0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08,
+                                     0.141, copper);
   body->addCapsuleShape({{0, -0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141);
-  body->addCapsuleVisualWithMaterial({{0, -0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141, copper);
+  body->addCapsuleVisualWithMaterial({{0, -0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08,
+                                     0.141, copper);
   body->setName("body");
 
   auto l1 = builder->createLinkBuilder(body);
@@ -127,8 +130,8 @@ int main() {
   ant0->setRootPose({{0, 0, 2}, PxIdentity});
 
   auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
-  r0->setAmbientLight({0.3, 0.3, 0.3});
-  r0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
+  r0->setAmbientLight({0, 0, 0});
+  r0->setShadowLight({0, -1, -1}, {1, 1, 1});
 
   controller.setCameraPosition(-5, 0, 0);
 
