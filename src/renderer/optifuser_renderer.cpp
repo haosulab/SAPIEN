@@ -117,7 +117,7 @@ IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &po
                                             std::vector<physx::PxVec3> const &normals,
                                             std::vector<uint32_t> const &indices,
                                             const physx::PxVec3 &scale,
-                                            const physx::PxVec3 &color) {
+                                            const PxrMaterial &material) {
   std::vector<Optifuser::Vertex> vertices;
   for (uint32_t i = 0; i < points.size(); ++i) {
     vertices.push_back(
@@ -126,9 +126,13 @@ IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &po
 
   auto obj = Optifuser::NewObject<Optifuser::Object>(
       std::make_shared<Optifuser::TriangleMesh>(vertices, indices, false));
-  obj->material.kd.r = color.x;
-  obj->material.kd.g = color.y;
-  obj->material.kd.b = color.z;
+  {
+    obj->pbrMaterial->kd = {material.base_color[0], material.base_color[1], material.base_color[2],
+                            material.base_color[3]};
+    obj->pbrMaterial->ks = material.specular;
+    obj->pbrMaterial->roughness = material.roughness;
+    obj->pbrMaterial->metallic = material.metallic;
+  }
 
   obj->scale = {scale.x, scale.y, scale.z};
 
@@ -141,7 +145,7 @@ IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &po
 
 IPxrRigidbody *OptifuserScene::addRigidbody(physx::PxGeometryType::Enum type,
                                             const physx::PxVec3 &scale,
-                                            const physx::PxVec3 &color) {
+                                            const PxrMaterial &material) {
   std::unique_ptr<Optifuser::Object> obj;
   switch (type) {
   case physx::PxGeometryType::eBOX: {
@@ -169,7 +173,13 @@ IPxrRigidbody *OptifuserScene::addRigidbody(physx::PxGeometryType::Enum type,
     return nullptr;
   }
 
-  obj->material.kd = {color.x, color.y, color.z, 1};
+  {
+    obj->pbrMaterial->kd = {material.base_color[0], material.base_color[1], material.base_color[2],
+                            material.base_color[3]};
+    obj->pbrMaterial->ks = material.specular;
+    obj->pbrMaterial->roughness = material.roughness;
+    obj->pbrMaterial->metallic = material.metallic;
+  }
 
   mBodies.push_back(std::make_unique<OptifuserRigidbody>(this, std::vector{obj.get()}));
   mScene->addObject(std::move(obj));
@@ -263,8 +273,13 @@ OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::stri
                                       mGlslDir + "/gbuffer_segmentation.fsh");
   mContext->renderer.setDeferredShader(mGlslDir + "/deferred.vsh", mGlslDir + "/deferred.fsh");
   mContext->renderer.setAxisShader(mGlslDir + "/axes.vsh", mGlslDir + "/axes.fsh");
+  mContext->renderer.setTransparencyShader(mGlslDir + "/transparency.vsh",
+                                           mGlslDir + "/transparency.fsh");
+  mContext->renderer.setDisplayShader(mGlslDir + "/display.vsh", mGlslDir + "/display_normal.fsh");
+
   mContext->renderer.enablePicking();
   mContext->renderer.enableAxisPass();
+  mContext->renderer.enableDisplayPass();
 }
 
 IPxrScene *OptifuserRenderer::createScene(std::string const &name) {
@@ -288,9 +303,7 @@ void OptifuserRenderer::setDefaultShaderConfig(std::string const &glslDir,
 
 #ifdef _USE_OPTIX
 std::string OptifuserRenderer::gPtxDir = "ptx";
-void OptifuserRenderer::setOptixConfig(std::string const &ptxDir) {
-  gPtxDir = ptxDir;
-}
+void OptifuserRenderer::setOptixConfig(std::string const &ptxDir) { gPtxDir = ptxDir; }
 #endif
 
 void OptifuserRenderer::enableGlobalAxes(bool enable) {

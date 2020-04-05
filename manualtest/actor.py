@@ -1,10 +1,10 @@
-import pysapien
-from pysapien import Pose
+import sapien.core as sapien
+from sapien.core import Pose
 
-sim = pysapien.Simulation()
-renderer = pysapien.OptifuserRenderer()
+sim = sapien.Engine()
+renderer = sapien.OptifuserRenderer()
 sim.set_renderer(renderer)
-controller = pysapien.OptifuserController(renderer)
+controller = sapien.OptifuserController(renderer)
 
 controller.show_window()
 
@@ -13,14 +13,17 @@ s0.add_ground(-1)
 s0.set_timestep(1 / 60)
 
 s0.set_ambient_light([0.5, 0.5, 0.5])
+s0.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
 
 builder = s0.create_actor_builder()
-builder.add_box_shape()
-builder.add_box_visual()
+# builder.add_box_shape()
+# builder.add_box_visual()
+builder.add_multiple_convex_shapes_from_file('/home/fx/source/py-vhacd/example/decomposed.obj')
+builder.add_visual_from_file('/home/fx/source/py-vhacd/example/decomposed.obj')
+
 actor = builder.build()
 
 actor.set_pose(Pose([0, 0, 2]))
-controller.camera.set_position([-5, 0, 0])
 
 controller.set_current_scene(s0)
 

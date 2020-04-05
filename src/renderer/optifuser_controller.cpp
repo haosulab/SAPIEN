@@ -221,7 +221,9 @@ void OptifuserController::render() {
   if (currentScene) {
     mRenderer->mContext->renderer.renderScene(*currentScene->getScene(), *mCamera);
 
-    if (renderMode == SEGMENTATION) {
+    if (renderMode == LIGHTING) {
+      mRenderer->mContext->renderer.displayLighting();
+    } else if (renderMode == SEGMENTATION) {
       mRenderer->mContext->renderer.displaySegmentation();
     } else if (renderMode == CUSTOM) {
       mRenderer->mContext->renderer.displayUserTexture();
@@ -234,7 +236,7 @@ void OptifuserController::render() {
       pathTracer->display();
 #endif
     } else {
-      mRenderer->mContext->renderer.displayLighting();
+      mRenderer->mContext->renderer.display();
     }
   }
 
@@ -328,6 +330,7 @@ void OptifuserController::render() {
 
   static const uint32_t imguiWindowSize = 300;
   static int camIndex = -1;
+  int changeShader = 0;
   if (renderGui) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -339,31 +342,19 @@ void OptifuserController::render() {
     ImGui::Begin("Render Options");
     {
       if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {
-          mRenderer->mContext->renderer.setDeferredShader(mRenderer->mGlslDir + "/deferred.vsh",
-                                                          mRenderer->mGlslDir + "/deferred.fsh");
-        };
+        if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {};
         if (ImGui::RadioButton("Albedo", &renderMode, RenderMode::ALBEDO)) {
-          mRenderer->mContext->renderer.setDeferredShader(
-              mRenderer->mGlslDir + "/deferred.vsh", mRenderer->mGlslDir + "/deferred_albedo.fsh");
+          changeShader = 1;
         }
         if (ImGui::RadioButton("Normal", &renderMode, RenderMode::NORMAL)) {
-          mRenderer->mContext->renderer.setDeferredShader(
-              mRenderer->mGlslDir + "/deferred.vsh", mRenderer->mGlslDir + "/deferred_normal.fsh");
+          changeShader = 1;
         }
         if (ImGui::RadioButton("Depth", &renderMode, RenderMode::DEPTH)) {
-          mRenderer->mContext->renderer.setDeferredShader(
-              mRenderer->mGlslDir + "/deferred.vsh", mRenderer->mGlslDir + "/deferred_depth.fsh");
+          changeShader = 1;
         }
         if (ImGui::RadioButton("Segmentation", &renderMode, RenderMode::SEGMENTATION)) {
-          mRenderer->mContext->renderer.setGBufferShader(mRenderer->mGlslDir + "/gbuffer.vsh",
-                                                         mRenderer->mGlslDir +
-                                                             "/gbuffer_segmentation.fsh");
         }
         if (ImGui::RadioButton("Custom", &renderMode, RenderMode::CUSTOM)) {
-          mRenderer->mContext->renderer.setGBufferShader(mRenderer->mGlslDir + "/gbuffer.vsh",
-                                                         mRenderer->mGlslDir +
-                                                             "/gbuffer_segmentation.fsh");
         }
 #ifdef _USE_OPTIX
         if (ImGui::RadioButton("PathTracer", &renderMode, RenderMode::PATHTRACER)) {
@@ -445,7 +436,7 @@ void OptifuserController::render() {
             cameras[camIndex]->takePicture();
             ImGui::Image(
                 reinterpret_cast<ImTextureID>(static_cast<OptifuserCamera *>(cameras[camIndex])
-                                                  ->mRenderContext->renderer.outputtex),
+                                                  ->mRenderContext->renderer.lightingtex),
                 ImVec2(imguiWindowSize, imguiWindowSize / static_cast<float>(width) * height),
                 ImVec2(0, 1), ImVec2(1, 0));
           }
@@ -526,10 +517,39 @@ void OptifuserController::render() {
       ImGui::End();
     }
 
+    {
+      auto err = glGetError();
+      if (err != GL_NO_ERROR) {
+        spdlog::error("Error0 {:x}", err);
+        throw "";
+      }
+    }
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    {
+      auto err = glGetError();
+      if (err != GL_NO_ERROR) {
+        spdlog::error("Error1 {:x}", err);
+        throw "";
+      }
+    }
+
   }
+
   mRenderer->mContext->swapBuffers();
+
+  if (changeShader) {
+    if (renderMode == ALBEDO) {
+      mRenderer->mContext->renderer.setDisplayShader(mRenderer->mGlslDir + "/display.vsh",
+                                                     mRenderer->mGlslDir + "/display_albedo.fsh");
+    } else if (renderMode == NORMAL) {
+      mRenderer->mContext->renderer.setDisplayShader(mRenderer->mGlslDir + "/display.vsh",
+                                                     mRenderer->mGlslDir + "/display_normal.fsh");
+    } else if (renderMode == DEPTH) {
+      mRenderer->mContext->renderer.setDisplayShader(mRenderer->mGlslDir + "/display.vsh",
+                                                     mRenderer->mGlslDir + "/display_depth.fsh");
+    }
+  }
 }
 
 void OptifuserController::onEvent(EventActorPreDestroy &e) {

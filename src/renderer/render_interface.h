@@ -15,6 +15,16 @@ class IPxrScene;
 class IPxrRigidbody;
 class IPxrRenderer;
 
+struct PxrMaterial {
+  std::array<float, 4> base_color = {1, 1, 1, 1};
+  float specular = 0.f;
+  float roughness = 0.85f;
+  float metallic = 0.f;
+  std::string color_texture = "";
+  std::string specular_texture = "";
+  std::string normal_texture = "";
+};
+
 class ISensor {
 public:
   virtual void setInitialPose(physx::PxTransform const &pose) = 0;
@@ -67,12 +77,22 @@ public:
   virtual IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) = 0;
 
   virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                                      const physx::PxVec3 &color) = 0;
+                                      const PxrMaterial &material) = 0;
+  inline IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+                                     const physx::PxVec3 &color) {
+    return addRigidbody(type, scale, PxrMaterial{{color.x, color.y, color.z, 1.f}});
+  };
 
   virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                       std::vector<physx::PxVec3> const &normals,
                                       std::vector<uint32_t> const &indices,
-                                      const physx::PxVec3 &scale, const physx::PxVec3 &color) = 0;
+                                      const physx::PxVec3 &scale, const PxrMaterial &material) = 0;
+  inline IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+                                      std::vector<physx::PxVec3> const &normals,
+                                      std::vector<uint32_t> const &indices,
+                                     const physx::PxVec3 &scale, const physx::PxVec3 &color) {
+    return addRigidbody(vertices, normals, indices, scale, PxrMaterial{{color.x, color.y, color.z, 1.f}});
+  }
 
   virtual void removeRigidbody(IPxrRigidbody *body) = 0;
 

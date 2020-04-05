@@ -3,9 +3,10 @@
 
 uniform struct Material {
   vec4 kd;
-  vec3 ks;
-  vec3 ka;
-  float ke;
+  float ks;
+
+  float roughness;
+  float metallic;
 
   bool has_kd_map;
   bool has_ks_map;
@@ -33,7 +34,7 @@ layout (location=6) out vec4 GUSER;
 in vec2 texcoord;
 in mat3 tbn;
 in vec4 cameraSpacePosition;
-in vec4 nox;
+in vec4 custom;
 
 void main() {
   if (material.has_kd_map) {
@@ -44,16 +45,19 @@ void main() {
   } else {
     GCOLOR = vec4(material.kd.rgb, 1);
   }
+
   if (material.has_ks_map) {
-    GSPECULAR = texture(material.ks_map, texcoord);
+    GSPECULAR.r = texture(material.ks_map, texcoord).r;
   } else {
-    GSPECULAR = vec4(material.ks, material.ke);
+    GSPECULAR.r = material.ks;
   }
+  GSPECULAR.g = material.roughness;
+  GSPECULAR.b = material.metallic;
 
   GSEGMENTATION = segmentation;
   GSEGMENTATION2 = segmentation2;
   GSEGMENTATIONCOLOR = vec4(segmentation_color, 1);
-  GUSER = nox;
+  GUSER = custom;
 
   if (material.has_height_map) {
     const vec2 size = vec2(2.0,0.0);

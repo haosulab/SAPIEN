@@ -24,10 +24,13 @@ int main() {
 
   auto builder = s0->createActorBuilder();
 
+
+  builder->addMultipleConvexShapesFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
+  builder->addVisualFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
   // builder->addDecomposedConvexShapesFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
   //                                            {0.1, 0.1, 0.1});
-  builder->addVisualFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
-                             {0.1, 0.1, 0.1});
+  // builder->addVisualFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
+  //                            {0.1, 0.1, 0.1});
 
   auto actor = builder->build();
   actor->setPose({{0, 0, 2}, PxIdentity});

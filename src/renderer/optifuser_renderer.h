@@ -58,13 +58,14 @@ public:
   // IPxrScene
   virtual IPxrRigidbody *addRigidbody(const std::string &meshFile,
                                       const physx::PxVec3 &scale) override;
+
   virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                                      const physx::PxVec3 &color) override;
+                                      const PxrMaterial &material) override;
+
   virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                       std::vector<physx::PxVec3> const &normals,
                                       std::vector<uint32_t> const &indices,
-                                      const physx::PxVec3 &scale,
-                                      const physx::PxVec3 &color) override;
+                                      const physx::PxVec3 &scale, const PxrMaterial &material) override;
 
   virtual void removeRigidbody(IPxrRigidbody *body) override;
 

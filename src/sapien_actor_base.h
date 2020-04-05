@@ -1,4 +1,5 @@
 #pragma once
+#include "sapien_shape.h"
 #include "event_system/event_system.h"
 #include "id_generator.h"
 #include <PxPhysicsAPI.h>
@@ -60,6 +61,8 @@ public:
   inline uint32_t getCollisionGroup1() { return mCol1; }
   inline uint32_t getCollisionGroup2() { return mCol2; }
   inline uint32_t getCollisionGroup3() { return mCol3; }
+
+  std::vector<SShape> getCollisionShapes();
 
   // render
   std::vector<Renderer::IPxrRigidbody *> getRenderBodies();

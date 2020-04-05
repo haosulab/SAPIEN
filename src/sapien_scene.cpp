@@ -366,4 +366,22 @@ void SScene::removeMountedCameraByMount(SActorBase *actor) {
                  mCameras.end());
 }
 
+std::vector<SActorBase*> SScene::getAllActors() const {
+  std::vector<SActorBase*> output;
+  for (auto &actor: mActors) {
+    output.push_back(actor.get());
+  }
+  return output;
+}
+std::vector<SArticulationBase*> SScene::getAllArticulations() const {
+  std::vector<SArticulationBase*> output;
+  for (auto &articulation: mArticulations) {
+    output.push_back(articulation.get());
+  }
+  for (auto &articulation: mKinematicArticulations) {
+    output.push_back(articulation.get());
+  }
+  return output;
+}
+
 }; // namespace sapien
