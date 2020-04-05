@@ -24,6 +24,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message("Complie source code on Mac OSX")
     set(MACOSX TRUE)
+    add_definitions(-D_USE_MACOSX)
 endif ()
 
 find_package(OpenGL REQUIRED)
@@ -89,7 +90,6 @@ endif ()
 add_subdirectory("3rd_party/optifuser")
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
-
 include_directories("3rd_party/pybind11/include")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
