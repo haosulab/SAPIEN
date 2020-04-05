@@ -1,31 +1,44 @@
 #version 130
 #extension GL_ARB_explicit_attrib_location : enable
 
+// GBuffer Uniforms
+uniform struct Material {
+  vec4 kd;
+  float ks;
+
+  float roughness;
+  float metallic;
+
+  bool has_kd_map;
+  bool has_ks_map;
+  bool has_height_map;
+  bool has_normal_map;
+
+  sampler2D kd_map;
+  sampler2D ks_map;
+  sampler2D height_map;
+  sampler2D normal_map;
+} material;
+
+uniform int segmentation;
+uniform int segmentation2;
+uniform vec3 segmentation_color;
+
+layout (location=0) out vec4 GCOLOR;
+layout (location=1) out vec4 GSPECULAR;
+layout (location=2) out vec4 GNORMAL;
+layout (location=3) out int GSEGMENTATION;
+layout (location=4) out int GSEGMENTATION2;
+layout (location=5) out vec4 GSEGMENTATIONCOLOR;
+layout (location=6) out vec4 GUSER;
+layout (location=7) out vec4 LIGHTING;
+
 in vec2 texcoord;
+in mat3 tbn;
+in vec4 cameraSpacePosition;
+in vec4 custom;
 
-uniform sampler2D shadowtex;
-uniform mat4 cameraToShadowMatrix;
-uniform mat4 shadowProjectionMatrix;
-uniform vec3 shadowLightDirection;
-uniform vec3 shadowLightEmission;
-
-uniform sampler2D colortex0;  // albedo
-uniform sampler2D colortex1;  // 
-uniform sampler2D colortex2;  // normal
-uniform sampler2D depthtex0;  // depth
-uniform samplerCube skybox;
-
-uniform mat4 gbufferViewMatrix;
-uniform mat4 gbufferViewMatrixInverse;
-uniform mat4 gbufferProjectionMatrix;
-uniform mat4 gbufferProjectionMatrixInverse;
-uniform mat4 environmentViewMatrix;
-uniform mat4 environmentViewMatrixInverse;
-
-uniform vec3 ambientLight;
-
-out vec4 FragColor;
-
+// Lighting uniforms
 #define N_DIRECTION_LIGHTS 5
 struct DirectionalLight
 {
@@ -42,52 +55,23 @@ struct PointLight
 
 uniform DirectionalLight directionalLights[N_DIRECTION_LIGHTS];
 uniform PointLight pointLights[N_POINT_LIGHTS];
+uniform vec3 ambientLight;
 
-vec4 tex2camera(vec4 pos) {
-  vec4 ndc = pos * 2.f - 1.f;
-  vec4 cam = gbufferProjectionMatrixInverse * ndc;
-  return cam / cam.w;
-}
+uniform sampler2D shadowtex;
+uniform mat4 cameraToShadowMatrix;
+uniform mat4 shadowProjectionMatrix;
+uniform vec3 shadowLightDirection;
+uniform vec3 shadowLightEmission;
+
+uniform mat4 gbufferViewMatrix;
+uniform mat4 gbufferViewMatrixInverse;
+uniform mat4 gbufferProjectionMatrix;
+uniform mat4 gbufferProjectionMatrixInverse;
+uniform mat4 environmentViewMatrix;
+uniform mat4 environmentViewMatrixInverse;
 
 vec4 world2camera(vec4 pos) {
   return gbufferViewMatrix * pos;
-}
-
-vec4 getCameraSpacePosition(vec2 texcoord) {
-  float depth = texture(depthtex0, texcoord).x;
-  return tex2camera(vec4(texcoord, depth, 1.f));
-}
-
-vec3 getBackgroundColor(vec3 texcoord) {
-  float r = sqrt(texcoord.x * texcoord.x + texcoord.y * texcoord.y);
-  float angle = atan(texcoord.z / r) * 57.3;
-
-  vec3 horizonColor = vec3(0.9, 0.9, 0.9);
-  vec3 zenithColor = vec3(0.522, 0.757, 0.914);
-  vec3 groundColor = vec3(0.5, 0.410, 0.271);
-  
-  return mix(mix(zenithColor, horizonColor, smoothstep(15.f, 5.f, angle)),
-             groundColor,
-             smoothstep(-5.f, -15.f, angle));
-}
-
-const float eps = 0.1;
-
-// The Oren-Nayar shading model
-float orenNayar(vec3 l, vec3 v, vec3 n, float r) {
-  float a = r * r;
-  float NoL = clamp(dot(n, l), 0.0, 1.0);
-  float NoV = clamp(dot(n, v), 0.0, 1.0);
-  float LoV = clamp(dot(l, v), 0.0, 1.0);
-  float NLNV = NoL * NoV;
-
-  if (NoL < 0.0 || NoV < 0.0) return 0.0;
-
-  float A = 1.0 - 0.5 * (a / (a + 0.33));
-  float B = 0.45 * (a / (a + 0.09));
-  float C = max(0.0, LoV - NLNV) / max(NoL, NoV);
-
-  return min(max(0.0, NoL) * (A + B * C), 1.0);
 }
 
 float diffuse(vec3 l, vec3 v, vec3 n) {
@@ -104,7 +88,7 @@ float SmithGGXMasking(vec3 wi, vec3 wo, vec3 normal, float a2) {
 }
 
 float ggx(vec3 wi, vec3 wo, vec3 normal, float roughness,
-           float ks) {
+          float ks) {
   float a2 = roughness * roughness;
   float F0 = ks;
   if (dot(wi, normal) > 0 && dot(wo, normal) > 0) {
@@ -121,16 +105,64 @@ float ggx(vec3 wi, vec3 wo, vec3 normal, float roughness,
   }
 }
 
+float eps = 0.1;
+
 void main() {
-  vec3 albedo = texture(colortex0, texcoord).xyz;
-  vec3 srm = texture(colortex1, texcoord).xyz;
+  // Geometry processing
+  vec4 COLOR = vec4(0.f, 0.f, 0.f, 0.f);
+  if (material.has_kd_map) {
+    COLOR = texture(material.kd_map, texcoord);
+    if (COLOR.a == 0) {
+      discard;
+    }
+  } else {
+    COLOR = material.kd;
+  }
+  GCOLOR = vec4(COLOR.rgb, 1.f);
+
+  float alpha = COLOR.a;
+
+  if (material.has_ks_map) {
+    GSPECULAR.r = texture(material.ks_map, texcoord).r;
+  } else {
+    GSPECULAR.r = material.ks;
+  }
+  GSPECULAR.g = material.roughness;
+  GSPECULAR.b = material.metallic;
+
+  GSEGMENTATION = segmentation;
+  GSEGMENTATION2 = segmentation2;
+  GSEGMENTATIONCOLOR = vec4(segmentation_color, 1);
+  GUSER = custom;
+
+  if (material.has_height_map) {
+    const vec2 size = vec2(2.0,0.0);
+    const ivec3 off = ivec3(-1,0,1);
+    const float heightScale = 4.0;
+
+    float s11 = texture(material.height_map, texcoord).x;
+    float s01 = textureOffset(material.height_map, texcoord, off.xy).x;
+    float s21 = textureOffset(material.height_map, texcoord, off.zy).x;
+    float s10 = textureOffset(material.height_map, texcoord, off.yx).x;
+    float s12 = textureOffset(material.height_map, texcoord, off.yz).x;
+    vec3 va = normalize(vec3(size.xy, heightScale * (s21-s01)));
+    vec3 vb = normalize(vec3(size.yx, heightScale * (s12-s10)));
+    vec3 n = cross(va,vb);
+    GNORMAL = vec4(normalize(tbn * n), 1);
+  } else {
+    GNORMAL = vec4(normalize(tbn * vec3(0,0,1)), 1);
+  }
+
+  // Lighting
+  vec3 albedo = GCOLOR.rgb;
+  vec3 srm = GSPECULAR.xyz;
   float F0 = srm.x;
   float roughness = srm.y;
   float metallic = srm.z;
-  // vec3 specular = mix(vec3(1.f, 1.f, 1.f), albedo, metallic);
+  vec3 specular = mix(vec3(1.f, 1.f, 1.f), albedo, metallic);
 
-  vec3 normal = texture(colortex2, texcoord).xyz;
-  vec4 csPosition = getCameraSpacePosition(texcoord);
+  vec3 normal = GNORMAL.xyz;
+  vec4 csPosition = cameraSpacePosition;
 
   vec4 ssPosition = cameraToShadowMatrix * vec4((csPosition.xyz + normal * eps), 1);
   vec4 shadowMapCoord = shadowProjectionMatrix * ssPosition;
@@ -182,15 +214,7 @@ void main() {
 
   color += ambientLight * albedo;
 
-  float depth = texture(depthtex0, texcoord).x;
-  if (depth == 1) {
-    // FragColor = texture(skybox, (environmentViewMatrixInverse * csPosition).xyz);
-    // FragColor = vec4(getBackgroundColor((gbufferViewMatrixInverse * csPosition).xyz), 1.f);
-    FragColor = vec4(1,1,1,0);
-  } else {
-    FragColor = vec4(color, 1.f);
-  }
-  // FragColor.r = pow(FragColor.r, 1.f / 2.2f);
-  // FragColor.g = pow(FragColor.g, 1.f / 2.2f);
-  // FragColor.b = pow(FragColor.b, 1.f / 2.2f);
+  // LIGHTING = vec4(color, alpha);
+  LIGHTING = vec4(color, alpha);
 }
+

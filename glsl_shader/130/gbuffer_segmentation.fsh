@@ -34,7 +34,7 @@ layout (location=6) out vec4 GUSER;
 in vec2 texcoord;
 in mat3 tbn;
 in vec4 cameraSpacePosition;
-in vec4 nox;
+in vec4 custom;
 
 void main() {
   if (material.has_kd_map) {
@@ -57,7 +57,7 @@ void main() {
   GSEGMENTATION = segmentation;
   GSEGMENTATION2 = segmentation2;
   GSEGMENTATIONCOLOR = vec4(segmentation_color, 1);
-  GUSER = nox;
+  GUSER = custom;
 
   if (material.has_height_map) {
     const vec2 size = vec2(2.0,0.0);

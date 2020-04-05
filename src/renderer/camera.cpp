@@ -26,7 +26,11 @@ OptifuserCamera::OptifuserCamera(std::string const &name_, uint32_t width, uint3
                                             shaderDir + "/gbuffer_segmentation.fsh");
   mRenderContext->renderer.setDeferredShader(shaderDir + "/deferred.vsh",
                                              shaderDir + "/deferred.fsh");
-  mRenderContext->renderer.setAxisShader(shaderDir + "/axes.vsh", shaderDir + "/axes.fsh");
+  // mRenderContext->renderer.setAxisShader(shaderDir + "/axes.vsh", shaderDir + "/axes.fsh");
+  mRenderContext->renderer.setTransparencyShader(shaderDir + "/transparency.vsh",
+                                                 shaderDir + "/transparency.fsh");
+  mRenderContext->renderer.enableDisplayPass(false);
+  mRenderContext->renderer.enableAxisPass(false);
 }
 
 IPxrScene *OptifuserCamera::getScene() { return mScene; };
@@ -40,13 +44,9 @@ float OptifuserCamera::getFovy() const {
   return static_cast<Optifuser::PerspectiveCameraSpec *>(mCameraSpec.get())->fovy;
 }
 
-float OptifuserCamera::getNear() const {
-  return mCameraSpec->near;
-}
+float OptifuserCamera::getNear() const { return mCameraSpec->near; }
 
-float OptifuserCamera::getFar() const {
-  return mCameraSpec->far;
-}
+float OptifuserCamera::getFar() const { return mCameraSpec->far; }
 
 void OptifuserCamera::takePicture() {
   mRenderContext->renderer.renderScene(*mScene->getScene(), *this->mCameraSpec);

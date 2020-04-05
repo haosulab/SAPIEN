@@ -273,8 +273,13 @@ OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::stri
                                       mGlslDir + "/gbuffer_segmentation.fsh");
   mContext->renderer.setDeferredShader(mGlslDir + "/deferred.vsh", mGlslDir + "/deferred.fsh");
   mContext->renderer.setAxisShader(mGlslDir + "/axes.vsh", mGlslDir + "/axes.fsh");
+  mContext->renderer.setTransparencyShader(mGlslDir + "/transparency.vsh",
+                                           mGlslDir + "/transparency.fsh");
+  mContext->renderer.setDisplayShader(mGlslDir + "/display.vsh", mGlslDir + "/display_normal.fsh");
+
   mContext->renderer.enablePicking();
   mContext->renderer.enableAxisPass();
+  mContext->renderer.enableDisplayPass();
 }
 
 IPxrScene *OptifuserRenderer::createScene(std::string const &name) {
