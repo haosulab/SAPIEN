@@ -1,5 +1,6 @@
 #pragma once
 #include <PxPhysicsAPI.h>
+#include <string>
 #include <map>
 #include <memory>
 #include <vector>

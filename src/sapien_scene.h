@@ -4,6 +4,7 @@
 #include "simulation_callback.h"
 #include <PxPhysicsAPI.h>
 #include <map>
+#include <string>
 #include <memory>
 #include <vector>
 

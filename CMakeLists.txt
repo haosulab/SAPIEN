@@ -21,31 +21,50 @@ endif ()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    message("Complie source code on Mac OSX")
+    set(MACOSX TRUE)
+endif ()
+
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(ASSIMP REQUIRED)
 find_package(spdlog REQUIRED)
 
-include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
-        "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
-        "src/renderer"
-        )
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
-            "3rd_party/optifuser/build/lib")
-else ()
-    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release"
-            "3rd_party/optifuser/build/lib")
-endif ()
-
+## include headers inside the project
 include_directories(
         "3rd_party/optifuser/include"
+        "3rd_party/optifuser/3rd_party/imgui"
+        "3rd_party/optifuser/3rd_party/imgui/examples"
         "src"
-)
+        "src/renderer")
 
-include_directories("/usr/include/eigen3")
-include_directories("3rd_party/optifuser/3rd_party/imgui" "3rd_party/optifuser/3rd_party/imgui/examples")
+## include headers outside the project
+include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
+        "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include"
+        "/usr/include/eigen3")
+
+if (MACOSX)
+    include_directories("/usr/local/include" "/usr/local/opt/glew/include"
+            "/usr/local/include/eigen3")
+endif ()
+
+## Link directory inside the project
+link_directories("${CMAKE_CURRENT_BINARY_DIR}/3rd_party/optifuser/lib")
+
+## Link directory outside the project
+if (NOT MACOSX)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked")
+    else ()
+        link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release")
+    endif ()
+else ()
+    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/mac.x86_64/release")
+    link_directories("/usr/local/opt/glm/lib" "/usr/local/opt/glew/lib"
+            "/usr/local/lib")
+endif ()
 
 file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
         "3rd_party/imgui/examples/imgui_impl_glfw.cpp"
@@ -82,14 +101,26 @@ if (EXISTS ${OPTIX_HOME})
     add_dependencies(sapien ptx_dir)
 endif ()
 
-target_link_libraries(sapien -Wl,--start-group
-        libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
-        libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
-        libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
-        libPhysX_static_64.a libPhysXVehicle_static_64.a
-        libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
-        pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
-        stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES})
+if (MACOSX)
+    target_link_libraries(sapien
+            libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
+            libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
+            libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
+            libPhysX_static_64.a libPhysXVehicle_static_64.a
+            libSnippetRender_static_64.a libSnippetUtils_static_64.a
+            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
+            tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES})
+else ()
+    target_link_libraries(sapien -WL, --start-group
+            libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
+            libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
+            libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
+            libPhysX_static_64.a libPhysXVehicle_static_64.a
+            libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
+            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
+            stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES})
+endif ()
+
 
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
