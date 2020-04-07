@@ -5,7 +5,7 @@ import sys
 
 GL_SHADER_ROOT = pkg_resources.resource_filename("sapien", "glsl_shader")
 PTX_ROOT = pkg_resources.resource_filename("sapien", 'ptx')
-__GL_VERSION_DICT = {3: "130", 4: "450"}
+__GL_VERSION_DICT = {3: "130", 4: "410"}
 
 
 def __enable_ptx():
@@ -21,7 +21,7 @@ def __enable_gl(num: int):
     print("Using default glsl path {}".format(_GL_SHADER_PATH))
 
 
-def enable_default_3():
+def enable_default_gl3():
     __enable_gl(3)
 
 
@@ -29,7 +29,10 @@ def enable_default_gl4():
     __enable_gl(4)
 
 
-enable_default_3()
+if sys.platform.startswith("darwin"):
+    enable_default_gl4()
+else:
+    enable_default_gl3()
 
 try:
     __enable_ptx()
