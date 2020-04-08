@@ -111,7 +111,7 @@ if (MACOSX)
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES})
 else ()
-    target_link_libraries(sapien -WL, --start-group
+    target_link_libraries(sapien -Wl,--start-group
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
             libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
             libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
