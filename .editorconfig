@@ -11,3 +11,7 @@ indent_style = space
 [*.rst]
 indent_style = space
 indent_size = 3
+
+[CMakeLists.txt]
+indent_style = space
+indent_size = 4

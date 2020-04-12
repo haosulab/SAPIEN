@@ -7,6 +7,10 @@
 #include <spdlog/spdlog.h>
 #include <sstream>
 
+#ifdef _PROFILE
+#include <easy/profiler.h>
+#endif
+
 namespace sapien {
 static PxDefaultAllocator gDefaultAllocatorCallback;
 
@@ -29,6 +33,11 @@ PxErrorCode::Enum SapienErrorCallback::getLastErrorCode() {
 }
 
 Simulation::Simulation(uint32_t nthread) : mThreadCount(nthread), mMeshManager(this) {
+#ifdef _PROFILE
+  profiler::startListen();
+  spdlog::info("Profiling enabled");
+#endif
+
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, mErrorCallback);
   // FIXME: figure out the what "track allocation" means
 

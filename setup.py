@@ -14,6 +14,7 @@ from distutils.version import LooseVersion
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--optix-home', type=str, default=None)
+parser.add_argument('--cuda-include-path', type=str, default=None)
 args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
 
@@ -46,8 +47,12 @@ class CMakeBuild(build_ext):
         extdir = os.path.join(extdir, self.distribution.get_name(), "core")
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
 
-        if args.optix_home is not None:
+        if args.optix_home:
             cmake_args.append('-DOPTIX_HOME=' + args.optix_home)
+            cmake_args.append('-DUSE_PRECOMPILED_PTX=ON')
+
+        if args.cuda_include_path:
+            cmake_args.append('-DCUDA_INCLUDE_PATH=' + args.cuda_include_path)
 
         cfg = 'Release'
         build_args = ['--config', cfg]

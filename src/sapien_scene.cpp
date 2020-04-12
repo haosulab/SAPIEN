@@ -15,6 +15,10 @@
 #include <algorithm>
 #include <spdlog/spdlog.h>
 
+#ifdef _PROFILE
+#include <easy/profiler.h>
+#endif
+
 namespace sapien {
 
 SScene::SScene(Simulation *sim, PxScene *scene)
@@ -298,6 +302,10 @@ void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
 }
 
 void SScene::step() {
+  #ifdef _PROFILE
+  EASY_BLOCK("Pre-step processing", profiler::colors::Blue);
+  #endif
+
   clearContacts();
   for (auto &a : mActors) {
     a->prestep();
@@ -308,15 +316,33 @@ void SScene::step() {
   for (auto &a : mKinematicArticulations) {
     a->prestep();
   }
+
+#ifdef _PROFILE
+  EASY_END_BLOCK;
+  EASY_BLOCK("PhysX scene Step", profiler::colors::Red);
+#endif
+
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
   }
+
+#ifdef _PROFILE
+  EASY_END_BLOCK;
+#endif
+
   EventStep event;
   event.timeStep = getTimestep();
   emit(event);
 }
 
+void SScene::stepAsync() { mStepThread = std::thread(&SScene::step, this); }
+
+void SScene::stepWait() { mStepThread.join(); }
+
 void SScene::updateRender() {
+#ifdef _PROFILE
+  EASY_FUNCTION("Update Render", profiler::colors::Magenta);
+#endif
   if (!mRendererScene) {
     return;
   }
@@ -366,19 +392,19 @@ void SScene::removeMountedCameraByMount(SActorBase *actor) {
                  mCameras.end());
 }
 
-std::vector<SActorBase*> SScene::getAllActors() const {
-  std::vector<SActorBase*> output;
-  for (auto &actor: mActors) {
+std::vector<SActorBase *> SScene::getAllActors() const {
+  std::vector<SActorBase *> output;
+  for (auto &actor : mActors) {
     output.push_back(actor.get());
   }
   return output;
 }
-std::vector<SArticulationBase*> SScene::getAllArticulations() const {
-  std::vector<SArticulationBase*> output;
-  for (auto &articulation: mArticulations) {
+std::vector<SArticulationBase *> SScene::getAllArticulations() const {
+  std::vector<SArticulationBase *> output;
+  for (auto &articulation : mArticulations) {
     output.push_back(articulation.get());
   }
-  for (auto &articulation: mKinematicArticulations) {
+  for (auto &articulation : mKinematicArticulations) {
     output.push_back(articulation.get());
   }
   return output;

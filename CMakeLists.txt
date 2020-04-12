@@ -4,6 +4,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation")
 
+set(PROFILE FALSE CACHE BOOL "Whether to use Profiler")
+
+set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
+
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif ()
@@ -32,6 +36,22 @@ find_package(GLEW REQUIRED)
 find_package(ASSIMP REQUIRED)
 find_package(spdlog REQUIRED)
 
+if (EXISTS ${CUDA_INCLUDE_PATH})
+    include_directories(${CUDA_INCLUDE_PATH})
+endif()
+
+include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
+        "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
+        "src/renderer"
+        )
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
+            "3rd_party/optifuser/build/lib")
+else ()
+    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release"
+            "3rd_party/optifuser/build/lib")
+endif ()
 
 ## include headers inside the project
 include_directories(
@@ -87,7 +107,7 @@ else ()
     add_definitions(-DNDEBUG)
 endif ()
 
-add_subdirectory("3rd_party/optifuser")
+add_subdirectory("3rd_party/optifuser" EXCLUDE_FROM_ALL)
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
 include_directories("3rd_party/pybind11/include")
@@ -101,6 +121,15 @@ if (EXISTS ${OPTIX_HOME})
     add_dependencies(sapien ptx_dir)
 endif ()
 
+if (${PROFILE})
+    find_package(easy_profiler REQUIRED)
+    add_definitions(-D_PROFILE)
+    set(EASY_PROFILER_LIBRARY easy_profiler)
+    message("-- Profiler On")
+else ()
+    message("-- Profiler Off")
+endif ()
+
 if (MACOSX)
     target_link_libraries(sapien
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -109,7 +138,7 @@ if (MACOSX)
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
-            tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES})
+            tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY})
 else ()
     target_link_libraries(sapien -Wl,--start-group
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -118,9 +147,8 @@ else ()
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
-            stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES})
+            stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY})
 endif ()
-
 
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

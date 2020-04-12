@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <thread>
 #include <vector>
 
 namespace sapien {
@@ -96,6 +97,7 @@ public:
 
 private:
   PxReal mTimestep = 1 / 500.f;
+  std::thread mStepThread;
 
   struct MountedCamera {
     SActorBase *actor;
@@ -117,15 +119,18 @@ public:
   std::vector<Renderer::ICamera *> getMountedCameras();
   std::vector<SActorBase *> getMountedActors();
 
-  std::vector<SActorBase*> getAllActors() const;
-  std::vector<SArticulationBase*> getAllArticulations() const;
+  std::vector<SActorBase *> getAllActors() const;
+  std::vector<SArticulationBase *> getAllArticulations() const;
 
   void setShadowLight(PxVec3 const &direction, PxVec3 const &color);
   void addPointLight(PxVec3 const &position, PxVec3 const &color);
   void setAmbientLight(PxVec3 const &color);
   void addDirectionalLight(PxVec3 const &direction, PxVec3 const &color);
 
-  void step();         // advance time by TimeStep
+  void step(); // advance time by TimeStep
+  void stepAsync();
+  void stepWait();
+
   void updateRender(); // call to sync physics world to render world
   void addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr);
 
