@@ -35,3 +35,4 @@ function build_manylinux14_wheel() {
 build_manylinux14_wheel 35
 build_manylinux14_wheel 36
 build_manylinux14_wheel 37
+rm -rf build
