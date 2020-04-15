@@ -1,14 +1,11 @@
-import sapien.core
 from typing import *
 from typing import Iterable as iterable
 from typing import Iterator as iterator
-from numpy import float64
+from numpy import float32, uint32, int32
+from numpy import array
 _Shape = Tuple[int, ...]
 import numpy
-import s
-import y
 import sapien.core.pysapien
-import SolverType
 __all__  = [
 "ActorBase",
 "ActorDynamicBase",
@@ -216,7 +213,7 @@ class ActorBuilder():
         """
     def add_box_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), size: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), material: PxrMaterial = PxrMaterial(), name: str = '') -> None: 
         """
-        add_box_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), size: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), material: sapien.core.pysapien.PxrMaterial = <sapien.core.pysapien.PxrMaterial object at 0x7f98cf488a08>, name: str = '') -> None
+        add_box_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), size: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), material: sapien.core.pysapien.PxrMaterial = PxrMaterial(), name: str = '') -> None
         """
     def add_capsule_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: PxMaterial = None, density: float = 1000) -> None: 
         """
@@ -228,7 +225,7 @@ class ActorBuilder():
         """
     def add_capsule_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: PxrMaterial = PxrMaterial(), name: str = '') -> None: 
         """
-        add_capsule_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: sapien.core.pysapien.PxrMaterial = <sapien.core.pysapien.PxrMaterial object at 0x7f98cf488ab0>, name: str = '') -> None
+        add_capsule_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: sapien.core.pysapien.PxrMaterial = PxrMaterial(), name: str = '') -> None
         """
     def add_collision_group(self, arg0: int, arg1: int, arg2: int) -> None: ...
     def add_convex_shape_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), material: PxMaterial = None, density: float = 1000) -> None: 
@@ -249,7 +246,7 @@ class ActorBuilder():
         """
     def add_sphere_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: PxrMaterial = PxrMaterial(), name: str = '') -> None: 
         """
-        add_sphere_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: sapien.core.pysapien.PxrMaterial = <sapien.core.pysapien.PxrMaterial object at 0x7f98cf488b58>, name: str = '') -> None
+        add_sphere_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: sapien.core.pysapien.PxrMaterial = PxrMaterial(), name: str = '') -> None
         """
     def add_visual_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: 
         """
@@ -540,7 +537,7 @@ class ArticulationBuilder():
     pass
 class Articulation(ArticulationDrivable, ArticulationBase):
     def compute_inverse_dynamics(self, arg0: numpy.ndarray[float32]) -> numpy.ndarray[float32]: ...
-    def compute_jacobian(self) -> numpy.ndarray[float32, _Shape[m, n]]: ...
+    def compute_jacobian(self) -> numpy.ndarray[float32]: ...
     def compute_passive_force(self, gravity: bool = True, coriolisAndCentrifugal: bool = True, external: bool = True) -> numpy.ndarray[float32]: ...
     def get_base_joints(self) -> List[JointBase]: ...
     def get_base_links(self) -> List[LinkBase]: ...
@@ -1308,7 +1305,7 @@ class LinkBuilder(ActorBuilder):
         """
     def add_box_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), size: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), material: PxrMaterial = PxrMaterial(), name: str = '') -> None: 
         """
-        add_box_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), size: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), material: sapien.core.pysapien.PxrMaterial = <sapien.core.pysapien.PxrMaterial object at 0x7f98cf488a08>, name: str = '') -> None
+        add_box_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), size: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), material: sapien.core.pysapien.PxrMaterial = PxrMaterial(), name: str = '') -> None
         """
     def add_capsule_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: PxMaterial = None, density: float = 1000) -> None: 
         """
@@ -1320,7 +1317,7 @@ class LinkBuilder(ActorBuilder):
         """
     def add_capsule_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: PxrMaterial = PxrMaterial(), name: str = '') -> None: 
         """
-        add_capsule_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: sapien.core.pysapien.PxrMaterial = <sapien.core.pysapien.PxrMaterial object at 0x7f98cf488ab0>, name: str = '') -> None
+        add_capsule_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: sapien.core.pysapien.PxrMaterial = PxrMaterial(), name: str = '') -> None
         """
     def add_collision_group(self, arg0: int, arg1: int, arg2: int) -> None: ...
     def add_convex_shape_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), material: PxMaterial = None, density: float = 1000) -> None: 
@@ -1341,7 +1338,7 @@ class LinkBuilder(ActorBuilder):
         """
     def add_sphere_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: PxrMaterial = PxrMaterial(), name: str = '') -> None: 
         """
-        add_sphere_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: sapien.core.pysapien.PxrMaterial = <sapien.core.pysapien.PxrMaterial object at 0x7f98cf488b58>, name: str = '') -> None
+        add_sphere_visual_complex(self: sapien.core.pysapien.ActorBuilder, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: sapien.core.pysapien.PxrMaterial = PxrMaterial(), name: str = '') -> None
         """
     def add_visual_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: 
         """
@@ -1448,6 +1445,7 @@ class PxMaterial():
     pass
 class PxrMaterial():
     def __init__(self) -> None: ...
+    def __repr__(self) -> str: ...
     def set_base_color(self, rgba: numpy.ndarray[float32]) -> None: ...
     @property
     def base_color(self) -> numpy.ndarray[float32]:

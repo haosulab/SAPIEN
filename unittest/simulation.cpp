@@ -1,7 +1,7 @@
-#include "renderer/optifuser_renderer.h"
-#include "sapien_scene.h"
 #include "simulation.h"
 #include "common.h"
+#include "renderer/optifuser_renderer.h"
+#include "sapien_scene.h"
 
 #include "catch.hpp"
 
@@ -39,9 +39,9 @@ TEST_CASE("Create material", "[simulation]") {
   Simulation sim;
   auto s0 = sim.createPhysicalMaterial(0.2, 0.1, 0.5);
 
-  REQUIRE(s0->getStaticFriction() - 0.2 < 1e-8);
-  REQUIRE(s0->getDynamicFriction() - 0.1 < 1e-8);
-  REQUIRE(s0->getRestitution() - 0.5 < 1e-8);
+  REQUIRE_CLOSE(s0->getStaticFriction(), 0.2);
+  REQUIRE_CLOSE(s0->getDynamicFriction(), 0.1);
+  REQUIRE_CLOSE(s0->getRestitution(), 0.5);
 
   REQUIRE_NO_ERROR(sim);
 }

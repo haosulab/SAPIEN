@@ -206,47 +206,46 @@ PYBIND11_MODULE(pysapien, m) {
 
   PyShape.def_readonly("type", &SShape::type)
       .def_readonly("pose", &SShape::pose)
-      .def_property_readonly(
-          "box_geometry", [](SShape &s) {
-                            if (s.type == "box") {
-                              return static_cast<SBoxGeometry *>(s.geometry.get());
-                            }
-                            return static_cast<SBoxGeometry *>(nullptr);
-                          },
-          py::return_value_policy::reference)
-      .def_property_readonly(
-          "sphere_geometry", [](SShape &s) {
-                            if (s.type == "sphere") {
-                              return static_cast<SSphereGeometry *>(s.geometry.get());
-                            }
-                            return static_cast<SSphereGeometry *>(nullptr);
-                          },
-          py::return_value_policy::reference)
-      .def_property_readonly(
-          "capsule_geometry", [](SShape &s) {
-                            if (s.type == "capsule") {
-                              return static_cast<SCapsuleGeometry *>(s.geometry.get());
-                            }
-                            return static_cast<SCapsuleGeometry *>(nullptr);
-                          },
-          py::return_value_policy::reference)
-      .def_property_readonly(
-          "plane_geometry", [](SShape &s) {
-                            if (s.type == "plane") {
-                              return static_cast<SPlaneGeometry *>(s.geometry.get());
-                            }
-                            return static_cast<SPlaneGeometry *>(nullptr);
-                          },
-          py::return_value_policy::reference)
-      .def_property_readonly(
-          "convex_mesh_geometry", [](SShape &s) {
-                            if (s.type == "convex_mesh") {
-                              return static_cast<SConvexMeshGeometry *>(s.geometry.get());
-                            }
-                            return static_cast<SConvexMeshGeometry *>(nullptr);
-                          },
-          py::return_value_policy::reference);
-
+      .def_property_readonly("box_geometry",
+                             [](SShape &s) {
+                               if (s.type == "box") {
+                                 return static_cast<SBoxGeometry *>(s.geometry.get());
+                               }
+                               return static_cast<SBoxGeometry *>(nullptr);
+                             },
+                             py::return_value_policy::reference)
+      .def_property_readonly("sphere_geometry",
+                             [](SShape &s) {
+                               if (s.type == "sphere") {
+                                 return static_cast<SSphereGeometry *>(s.geometry.get());
+                               }
+                               return static_cast<SSphereGeometry *>(nullptr);
+                             },
+                             py::return_value_policy::reference)
+      .def_property_readonly("capsule_geometry",
+                             [](SShape &s) {
+                               if (s.type == "capsule") {
+                                 return static_cast<SCapsuleGeometry *>(s.geometry.get());
+                               }
+                               return static_cast<SCapsuleGeometry *>(nullptr);
+                             },
+                             py::return_value_policy::reference)
+      .def_property_readonly("plane_geometry",
+                             [](SShape &s) {
+                               if (s.type == "plane") {
+                                 return static_cast<SPlaneGeometry *>(s.geometry.get());
+                               }
+                               return static_cast<SPlaneGeometry *>(nullptr);
+                             },
+                             py::return_value_policy::reference)
+      .def_property_readonly("convex_mesh_geometry",
+                             [](SShape &s) {
+                               if (s.type == "convex_mesh") {
+                                 return static_cast<SConvexMeshGeometry *>(s.geometry.get());
+                               }
+                               return static_cast<SConvexMeshGeometry *>(nullptr);
+                             },
+                             py::return_value_policy::reference);
 
   //======== Render Interface ========//
   PyRenderMaterial.def(py::init<>())
@@ -263,6 +262,7 @@ PYBIND11_MODULE(pysapien, m) {
       .def_readwrite("specular", &Renderer::PxrMaterial::specular)
       .def_readwrite("roughness", &Renderer::PxrMaterial::roughness)
       .def_readwrite("metallic", &Renderer::PxrMaterial::metallic)
+      .def("__repr__", [](Renderer::PxrMaterial &m) { return "PxrMaterial()"; })
 
       // TODO: implement those together with UV
       // .def_readwrite("color_texture", &Renderer::PxrMaterial::color_texture)
@@ -439,9 +439,8 @@ PYBIND11_MODULE(pysapien, m) {
            py::return_value_policy::reference)
       .def("find_articulation_link_by_link_id", &SScene::findArticulationLinkById, py::arg("id"),
            py::return_value_policy::reference)
-
       .def("add_mounted_camera", &SScene::addMountedCamera, py::arg("name"), py::arg("actor"),
-           py::arg("pose") = PxTransform(PxIdentity), py::arg("width"), py::arg("height"),
+           py::arg("pose"), py::arg("width"), py::arg("height"),
            py::arg("fovx"), py::arg("fovy"), py::arg("near"), py::arg("far"),
            py::return_value_policy::reference)
       .def("get_mounted_cameras", &SScene::getMountedCameras, py::return_value_policy::reference)
@@ -456,7 +455,8 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("material") = nullptr)
       .def("get_contacts", &SScene::getContacts)
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
-      .def("get_all_articulations", &SScene::getAllArticulations, py::return_value_policy::reference)
+      .def("get_all_articulations", &SScene::getAllArticulations,
+           py::return_value_policy::reference)
 
       .def("set_shadow_light",
            [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
@@ -768,8 +768,9 @@ PYBIND11_MODULE(pysapien, m) {
       .def_readonly("separation", &SContact::separation)
       .def("__repr__", [](SContact const &c) {
         std::ostringstream oss;
-        oss << "[" << c.actors[0]->getName() << ", " << c.actors[1]->getName() << "]";
-        oss << " Separation: " << c.separation << "\n";
+        oss << "Contact(actor0=" << c.actors[0]->getName()
+            << ", actor1=" << c.actors[1]->getName()
+            << ", separation=" << c.separation << ")";
         return oss.str();
       });
 
