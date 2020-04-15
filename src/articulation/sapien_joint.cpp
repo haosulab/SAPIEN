@@ -195,11 +195,17 @@ void SJoint::setDriveTarget(PxReal p) { setDriveTarget(std::vector{p}); }
 
 
 PxTransform SJoint::getParentPose() const {
-  return mPxJoint->getParentPose();
+  if (mPxJoint) {
+    return mPxJoint->getParentPose();
+  }
+  return PxTransform(PxIdentity);
 }
 
 PxTransform SJoint::getChildPose() const {
-  return mPxJoint->getChildPose();
+  if (mPxJoint) {
+    return mPxJoint->getChildPose();
+  }
+  return PxTransform(PxIdentity);
 }
 
 } // namespace sapien
