@@ -31,6 +31,12 @@ public:
   virtual std::vector<std::array<physx::PxReal, 2>> getLimits() = 0;
   virtual void setLimits(std::vector<std::array<physx::PxReal, 2>> const &limits) = 0;
 
+  /* Get the pose of this joint in parent frame */
+  virtual PxTransform getParentPose() const = 0;
+
+  /* Get the pose of this joint in child frame */
+  virtual PxTransform getChildPose() const = 0;
+
   virtual ~SJointBase() = default;
 protected:
   SJointBase(SLinkBase *parent, SLinkBase *child);
@@ -60,6 +66,9 @@ public:
   void setDriveTarget(PxReal p);
 
   PxTransform getGlobalPose() const;
+
+  virtual PxTransform getParentPose() const override;
+  virtual PxTransform getChildPose() const override;
 
 private:
   SJoint(SArticulation *articulation, SLink *parent, SLink *child,

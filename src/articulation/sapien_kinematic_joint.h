@@ -26,6 +26,14 @@ public:
   void setParentPose(PxTransform const &pose) { joint2parent = pose; }
   void setChildPose(PxTransform const &pose) { child2joint = pose.getInverse(); }
 
+  virtual inline PxTransform getParentPose() const override {
+    return joint2parent;
+  }
+
+  virtual inline PxTransform getChildPose() const override {
+    return child2joint.getInverse();
+  }
+
   virtual PxTransform getJointPose() const = 0;
   inline PxTransform getChild2ParentTransform() const {
     return joint2parent * getJointPose() * child2joint;

@@ -193,4 +193,13 @@ void SJoint::setDriveTarget(std::vector<PxReal> const &p) {
 }
 void SJoint::setDriveTarget(PxReal p) { setDriveTarget(std::vector{p}); }
 
+
+PxTransform SJoint::getParentPose() const {
+  return mPxJoint->getParentPose();
+}
+
+PxTransform SJoint::getChildPose() const {
+  return mPxJoint->getChildPose();
+}
+
 } // namespace sapien

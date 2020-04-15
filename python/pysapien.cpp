@@ -583,6 +583,8 @@ PYBIND11_MODULE(pysapien, m) {
       .def("get_parent_link", &SJointBase::getParentLink, py::return_value_policy::reference)
       .def("get_child_link", &SJointBase::getChildLink, py::return_value_policy::reference)
       .def("get_dof", &SJointBase::getDof)
+      .def("get_pose_in_parent_frame", &SJointBase::getParentPose)
+      .def("get_pose_in_child_frame", &SJointBase::getChildPose)
       .def("get_limits",
            [](SJointBase &j) {
              auto limits = j.getLimits();
