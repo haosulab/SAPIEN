@@ -608,8 +608,12 @@ PYBIND11_MODULE(pysapien, m) {
            py::arg("limits"));
 
   PyJoint.def("set_friction", &SJoint::setFriction, py::arg("friction"))
+      .def_property_readonly("friction", &SJoint::getFriction)
       .def("set_drive_property", &SJoint::setDriveProperty, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32)
+      .def_property_readonly("stiffness", &SJoint::getDriveStiffness)
+      .def_property_readonly("damping", &SJoint::getDriveDamping)
+      .def_property_readonly("force_limit", &SJoint::getDriveForceLimit)
       .def("set_drive_velocity_target", [](SJoint &j, PxReal v) { j.setDriveVelocityTarget(v); },
            py::arg("velocity"))
       .def("set_drive_target", [](SJoint &j, PxReal p) { j.setDriveTarget(p); }, py::arg("target"))
@@ -736,6 +740,13 @@ PYBIND11_MODULE(pysapien, m) {
              std::vector<PxReal> qacc(arr.data(), arr.data() + a.dof());
              auto qf = a.computeInverseDynamics(qacc);
              return py::array_t<PxReal>(qf.size(), qf.data());
+           })
+      .def("compute_forward_dynamics",
+           [](SArticulation &a, const py::array_t<PxReal> &arr) {
+             assert(arr.size() == a.dof());
+             std::vector<PxReal> qf(arr.data(), arr.data() + a.dof());
+             auto qacc = a.computeForwardDynamics(qf);
+             return py::array_t<PxReal>(qacc.size(), qacc.data());
            })
       .def("compute_jacobian", &SArticulation::computeJacobianMatrix)
       .def("pack", &SArticulation::packData)

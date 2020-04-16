@@ -54,10 +54,15 @@ public:
 
   std::vector<std::array<physx::PxReal, 2>> getLimits() override;
   void setLimits(std::vector<std::array<physx::PxReal, 2>> const &limits) override;
-  std::vector<PxArticulationAxis::Enum> getAxes();
+  std::vector<PxArticulationAxis::Enum> getAxes() const;
 
   void setFriction(PxReal coef);
   void setDriveProperty(PxReal stiffness, PxReal damping, PxReal forceLimit = PX_MAX_F32);
+
+  PxReal getFriction() const;
+  PxReal getDriveStiffness() const;
+  PxReal getDriveDamping() const;
+  PxReal getDriveForceLimit() const;
 
   void setDriveVelocityTarget(std::vector<PxReal> const &v);
   void setDriveVelocityTarget(PxReal v);

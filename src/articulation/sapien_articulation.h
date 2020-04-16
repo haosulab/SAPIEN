@@ -75,6 +75,7 @@ public:
                                                  bool coriolisAndCentrifugal = true,
                                                  bool external = true);
   std::vector<physx::PxReal> computeInverseDynamics(const std::vector<PxReal> &qacc);
+  std::vector<physx::PxReal> computeForwardDynamics(const std::vector<PxReal> &qf);
 
   /* Kinematics Functions */
   Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> computeJacobianMatrix();

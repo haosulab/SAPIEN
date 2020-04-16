@@ -129,7 +129,7 @@ void SJoint::setLimits(std::vector<std::array<physx::PxReal, 2>> const &limits) 
   throw std::runtime_error("Reached unreachable code in SJoint::setLimits()");
 }
 
-std::vector<PxArticulationAxis::Enum> SJoint::getAxes() {
+std::vector<PxArticulationAxis::Enum> SJoint::getAxes() const {
   if (!mPxJoint) {
     return {};
   }
@@ -193,7 +193,6 @@ void SJoint::setDriveTarget(std::vector<PxReal> const &p) {
 }
 void SJoint::setDriveTarget(PxReal p) { setDriveTarget(std::vector{p}); }
 
-
 PxTransform SJoint::getParentPose() const {
   if (mPxJoint) {
     return mPxJoint->getParentPose();
@@ -206,6 +205,44 @@ PxTransform SJoint::getChildPose() const {
     return mPxJoint->getChildPose();
   }
   return PxTransform(PxIdentity);
+}
+
+PxReal SJoint::getFriction() const {
+  if (mPxJoint) {
+    return mPxJoint->getFrictionCoefficient();
+  }
+  return 0.f;
+}
+
+PxReal SJoint::getDriveStiffness() const {
+  auto ax = getAxes();
+  if (ax.size()) {
+    PxReal stiffness, damping, maxForce;
+    PxArticulationDriveType::Enum type;
+    mPxJoint->getDrive(ax[0], stiffness, damping, maxForce, type);
+    return stiffness;
+  }
+  return 0.f;
+}
+PxReal SJoint::getDriveDamping() const {
+  auto ax = getAxes();
+  if (ax.size()) {
+    PxReal stiffness, damping, maxForce;
+    PxArticulationDriveType::Enum type;
+    mPxJoint->getDrive(ax[0], stiffness, damping, maxForce, type);
+    return damping;
+  }
+  return 0.f;
+}
+PxReal SJoint::getDriveForceLimit() const {
+  auto ax = getAxes();
+  if (ax.size()) {
+    PxReal stiffness, damping, maxForce;
+    PxArticulationDriveType::Enum type;
+    mPxJoint->getDrive(ax[0], stiffness, damping, maxForce, type);
+    return maxForce;
+  }
+  return 0.f;
 }
 
 } // namespace sapien

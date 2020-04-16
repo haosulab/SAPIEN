@@ -270,8 +270,30 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
   return I2E(passiveForce);
 }
 
+std::vector<physx::PxReal> SArticulation::computeForwardDynamics(const std::vector<PxReal> &qf) {
+  if (qf.size() != dof()) {
+    spdlog::error("Input vector size does not match DOF of articulation");
+    std::vector(dof(), 0);
+  }
+
+  std::vector<PxReal> internalQf = E2I(qf);
+  mPxArticulation->commonInit();
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
+  for (size_t i = 0; i < dof(); ++i) {
+    mCache->jointForce[i] = internalQf[i];
+  }
+  mPxArticulation->computeJointAcceleration(*mCache);
+  std::vector<physx::PxReal> result(mCache->jointAcceleration, mCache->jointAcceleration + dof());
+  return I2E(result);
+}
+
 std::vector<physx::PxReal> SArticulation::computeInverseDynamics(const std::vector<PxReal> &qacc) {
-  assert(qacc.size() == dof());
+  if (qacc.size() != dof()) {
+    spdlog::error("Input vector size does not match DOF of articulation");
+    std::vector(dof(), 0);
+  }
+
   std::vector<PxReal> internalQacc = E2I(qacc);
   mPxArticulation->commonInit();
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);

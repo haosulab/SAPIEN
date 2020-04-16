@@ -1,11 +1,14 @@
+import sapien.core
 from typing import *
 from typing import Iterable as iterable
 from typing import Iterator as iterator
-from numpy import float32, uint32, int32
-from numpy import array
+from numpy import float64
 _Shape = Tuple[int, ...]
-import numpy
+import s
+import y
 import sapien.core.pysapien
+import numpy
+import SolverType
 __all__  = [
 "ActorBase",
 "ActorDynamicBase",
@@ -536,8 +539,9 @@ class ArticulationBuilder():
     def set_scene(self, scene: Scene) -> None: ...
     pass
 class Articulation(ArticulationDrivable, ArticulationBase):
+    def compute_forward_dynamics(self, arg0: numpy.ndarray[float32]) -> numpy.ndarray[float32]: ...
     def compute_inverse_dynamics(self, arg0: numpy.ndarray[float32]) -> numpy.ndarray[float32]: ...
-    def compute_jacobian(self) -> numpy.ndarray[float32]: ...
+    def compute_jacobian(self) -> numpy.ndarray[float32, _Shape[m, n]]: ...
     def compute_passive_force(self, gravity: bool = True, coriolisAndCentrifugal: bool = True, external: bool = True) -> numpy.ndarray[float32]: ...
     def get_base_joints(self) -> List[JointBase]: ...
     def get_base_links(self) -> List[LinkBase]: ...
@@ -895,6 +899,21 @@ class Joint(JointBase):
     def set_limits(self, limits: numpy.ndarray[float32]) -> None: ...
     def set_name(self, name: str) -> None: ...
     @property
+    def damping(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def force_limit(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def friction(self) -> float:
+        """
+        :type: float
+        """
+    @property
     def name(self) -> str:
         """
         :type: str
@@ -902,6 +921,11 @@ class Joint(JointBase):
     @name.setter
     def name(self, arg1: str) -> None:
         pass
+    @property
+    def stiffness(self) -> float:
+        """
+        :type: float
+        """
     pass
 class KinematicArticulation(ArticulationDrivable, ArticulationBase):
     def get_base_joints(self) -> List[JointBase]: ...
@@ -1480,10 +1504,7 @@ class PxrMaterial():
 class Scene():
     def add_directional_light(self, direction: numpy.ndarray[float32], color: numpy.ndarray[float32]) -> None: ...
     def add_ground(self, altitude: float, render: bool = True, material: PxMaterial = None) -> None: ...
-    def add_mounted_camera(self, name: str, actor: ActorBase, pose: Pose, width: int, height: int, fovx: float, fovy: float, near: float, far: float) -> ICamera: 
-        """
-        add_mounted_camera(self: sapien.core.pysapien.Scene, name: str, actor: sapien.core.pysapien.ActorBase, pose: sapien.core.pysapien.Pose = Pose([0, 0, 0], [1, 0, 0, 0]), width: int, height: int, fovx: float, fovy: float, near: float, far: float) -> sapien.core.pysapien.ICamera
-        """
+    def add_mounted_camera(self, name: str, actor: ActorBase, pose: Pose, width: int, height: int, fovx: float, fovy: float, near: float, far: float) -> ICamera: ...
     def add_point_light(self, position: numpy.ndarray[float32], color: numpy.ndarray[float32]) -> None: ...
     def create_actor_builder(self) -> ActorBuilder: ...
     def create_articulation_builder(self) -> ArticulationBuilder: ...
@@ -1590,13 +1611,13 @@ class URDFLoader():
     pass
 DYNAMIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.DYNAMIC
 FIX: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.FIX
-GL_SHADER_ROOT = ...
+GL_SHADER_ROOT = '/home/fx/.local/lib/python3.6/site-packages/sapien/glsl_shader'
 KINEMATIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.KINEMATIC
 KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = ActorType.KINEMATIC_LINK
 LINK: sapien.core.pysapien.ActorType # value = ActorType.LINK
 PGS: sapien.core.pysapien.SolverType # value = SolverType.PGS
 PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.PRISMATIC
-PTX_ROOT = ...
+PTX_ROOT = '/home/fx/.local/lib/python3.6/site-packages/sapien/ptx'
 REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.REVOLUTE
 SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.SPHERICAL
 STATIC: sapien.core.pysapien.ActorType # value = ActorType.STATIC
