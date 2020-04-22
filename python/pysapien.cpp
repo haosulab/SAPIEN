@@ -283,25 +283,25 @@ PYBIND11_MODULE(pysapien, m) {
       .def("take_picture", &Renderer::ICamera::takePicture)
       .def("get_color_rgba",
            [](Renderer::ICamera &cam) {
-             return py::array_t<PxReal>(
+             return py::array_t<float>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.getColorRGBA().data());
            })
       .def("get_albedo_rgba",
            [](Renderer::ICamera &cam) {
-             return py::array_t<PxReal>(
+             return py::array_t<float>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.getAlbedoRGBA().data());
            })
       .def("get_normal_rgba",
            [](Renderer::ICamera &cam) {
-             return py::array_t<PxReal>(
+             return py::array_t<float>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.getNormalRGBA().data());
            })
       .def("get_depth",
            [](Renderer::ICamera &cam) {
-             return py::array_t<PxReal>(
+             return py::array_t<float>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
                  cam.getDepth().data());
            })
@@ -385,6 +385,10 @@ PYBIND11_MODULE(pysapien, m) {
            [](Optifuser::CameraSpec &c) { return mat42array(c.getProjectionMat()); });
 
   PyOptifuserCamera
+      .def("get_model_matrix",
+           [](Renderer::OptifuserCamera &c) { return mat42array(c.mCameraSpec->getModelMat()); })
+      .def("get_projection_matrix",
+           [](Renderer::OptifuserCamera &c) { return mat42array(c.mCameraSpec->getProjectionMat()); })
       .def("get_camera_matrix",
            [](Renderer::OptifuserCamera &c) { return mat42array(c.getCameraMatrix()); })
       .def("set_mode_orthographic", &Renderer::OptifuserCamera::changeModeToOrthographic,
