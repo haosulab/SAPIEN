@@ -24,7 +24,6 @@ PYBIND11_MODULE(pysapien_ros2, m_ros2) {
       py::arg("args"));
 
   //======== Manager ========//
-
   auto PySceneManager = py::class_<SceneManager>(m_ros2, "SceneManager");
   auto PyRobotManager = py::class_<RobotManager>(m_ros2, "RobotManager");
 

@@ -403,8 +403,6 @@ void init_ex1(py::module &m) {
            [](Renderer::OptifuserCamera &c) { return mat42array(c.mCameraSpec->getModelMat()); })
       .def("get_projection_matrix",
            [](Renderer::OptifuserCamera &c) { return mat42array(c.mCameraSpec->getProjectionMat()); })
-      .def("get_camera_matrix",
-           [](Renderer::OptifuserCamera &c) { return mat42array(c.getCameraMatrix()); })
       .def("set_mode_orthographic", &Renderer::OptifuserCamera::changeModeToOrthographic,
            py::arg("scaling") = 1.f)
       .def("set_mode_perspective", &Renderer::OptifuserCamera::changeModeToPerspective,
@@ -420,44 +418,6 @@ void init_ex1(py::module &m) {
 #endif
       ;
 
-  //======== Simulation ========//
-  PyEngine.def(py::init<>())
-      .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
-      .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
-      .def("create_physical_material", &Simulation::createPhysicalMaterial,
-           py::return_value_policy::reference)
-      .def("create_scene",
-           [](Simulation &sim, py::array_t<PxReal> const &gravity, PxSolverType::Enum solverType,
-              bool enableCCD, bool enablePCM) {
-             PxSceneFlags flags = PxSceneFlags();
-             if (enableCCD) {
-               flags |= PxSceneFlag::eENABLE_CCD;
-             }
-             if (enablePCM) {
-               flags |= PxSceneFlag::eENABLE_PCM;
-             }
-             return sim.createScene(array2vec3(gravity), solverType, flags);
-           },
-           py::arg("gravity") = make_array<PxReal>({0, 0, -9.8}),
-           py::arg("solver_type") = PxSolverType::ePGS, py::arg("enable_ccd") = false,
-           py::arg("enable_pcm") = false);
-
-  PyScene.def_property_readonly("name", &SScene::getName)
-      .def("set_mode_orthographic", &Renderer::OptifuserCamera::changeModeToOrthographic,
-           py::arg("scaling") = 1.f)
-      .def("set_mode_perspective", &Renderer::OptifuserCamera::changeModeToPerspective,
-           py::arg("fovy") = glm::radians(35.f))
-#ifdef _USE_OPTIX
-      .def(
-          "take_raytraced_picture",
-          [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount) {
-            return py::array_t<PxReal>(
-                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                cam.takeRaytracedPicture(samplesPerPixel, reflectionCount).data());
-          },
-          py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4)
-#endif
-      ;
 
   //======== Simulation ========//
   PyEngine.def(py::init<>())

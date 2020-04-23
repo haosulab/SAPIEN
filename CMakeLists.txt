@@ -161,7 +161,7 @@ file(GLOB_RECURSE UNITTEST_SRC unittest/*.cpp)
 add_executable(unittest ${UNITTEST_SRC})
 target_link_libraries(unittest sapien)
 
-add_executable(manual_actor manualtest/actor.cpp)
+add_executable(manual_actor manualtest/actor.cpp python/pysapien_content.hpp)
 target_link_libraries(manual_actor sapien)
 add_executable(manual_articulation manualtest/articulation.cpp)
 target_link_libraries(manual_articulation sapien)
@@ -209,7 +209,7 @@ if (ROS)
         ament_target_dependencies(sapien_controller rclcpp sensor_msgs sapien_ros2_communication_interface moveit_core moveit_ros_planning_interface)
 
         file(GLOB_RECURSE SAPIEN_ROBOT_MANAGER_SRC "ros2_src/manager/*.cpp")
-        add_library(sapien_robot_handle ${SAPIEN_ROBOT_MANAGER_SRC})
+        add_library(sapien_robot_handle ${SAPIEN_ROBOT_MANAGER_SRC} ros2_src/manager/robot_descriptor.cpp)
         target_link_libraries(sapien_robot_handle tinyxml2 sapien_controller sapien_device)
         ament_target_dependencies(sapien_robot_handle ament_index_cpp)
 
@@ -219,8 +219,8 @@ if (ROS)
 
         add_executable(test_ros2 ros2_src/test/test_sapien_ros2.cpp)
         target_link_libraries(test_ros2 sapien_robot_handle)
-        add_executable(test_ros2_urdf_loader ros2_src/test/test_ros_urdf.cpp)
-        target_link_libraries(test_ros2_urdf_loader sapien_robot_handle)
+        add_executable(test_ros2_robot_descriptor ros2_src/test/test_robot_descriptor.cpp)
+        target_link_libraries(test_ros2_robot_descriptor sapien_robot_handle)
 
         # pybind for sapien-ros2
         set_target_properties(sapien_robot_handle PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
