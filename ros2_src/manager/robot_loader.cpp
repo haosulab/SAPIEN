@@ -33,7 +33,7 @@ void RobotLoader::publishRobotDescription(rclcpp::Node::SharedPtr &node,
   node->declare_parameter(ROBOT_PARAM_NAME,
                           rclcpp::ParameterValue(modifyURDFPath2ROSConvention(URDFString)));
   node->declare_parameter(SEMANTIC_PARAM_NAME, rclcpp::ParameterValue(SRDFString));
-  RCLCPP_INFO(node->get_logger(), "Successfully parsing URDF for ROS [%s]", node->get_name());
+  //  RCLCPP_INFO(node->get_logger(), "Successfully parsing URDF for ROS [%s]", node->get_name());
 }
 
 std::array<std::string, 2> sapien::ros2::RobotLoader::parseURDFFile(const std::string &URDFPath) {
@@ -42,7 +42,8 @@ std::array<std::string, 2> sapien::ros2::RobotLoader::parseURDFFile(const std::s
   if (!file) {
     throw std::runtime_error("Can not load URDF path: " + URDFPath);
   }
-  RCLCPP_INFO(mNode->get_logger(), "Find URDF file %s [%s]", URDFPath.c_str(), mNode->get_name());
+  //  RCLCPP_INFO(mNode->get_logger(), "Find URDF file %s [%s]", URDFPath.c_str(),
+  //  mNode->get_name());
   std::string originURDFString;
   std::ifstream t(URDFPath);
   t.seekg(0, std::ios::end);
@@ -59,10 +60,10 @@ sapien::ros2::RobotLoader::loadRobot(const std::string &name, const std::string 
   auto URDFInfo = parseURDFFile(URDFPath);
   std::string SRDFString;
   if (URDFInfo[0].empty()) {
-    RCLCPP_ERROR(mNode->get_logger(), "Can not open URDF path %s", URDFPath.c_str());
+    //    RCLCPP_ERROR(mNode->get_logger(), "Can not open URDF path %s", URDFPath.c_str());
     return {nullptr, nullptr};
   }
-
+  //
   // Read srdf string from file
   if (!SRDFPath.empty()) {
     std::ifstream t(SRDFPath);
@@ -73,9 +74,9 @@ sapien::ros2::RobotLoader::loadRobot(const std::string &name, const std::string 
   }
 
   // Load articulation and manager
-  auto robot = mLoader->loadFromXML(URDFInfo[0], SRDFString, material, false);
+  auto robot = mLoader->loadFromXML(URDFInfo[0], SRDFString, nullptr, false);
   if (not robot) {
-    RCLCPP_ERROR(mNode->get_logger(), "Robot URDF parse fail: %s", URDFPath.c_str());
+    //    RCLCPP_ERROR(mNode->get_logger(), "Robot URDF parse fail: %s", URDFPath.c_str());
     return {nullptr, nullptr};
   }
 
@@ -83,11 +84,11 @@ sapien::ros2::RobotLoader::loadRobot(const std::string &name, const std::string 
   // SAPIEN URDF with absolute path can both be recognized by ROS.
   // Thus both URDFInfo[0] or URDFInfo[1] can be used for ROS applications
   auto robotManager = mManager->buildRobotManager(robot, name);
-  publishRobotDescription(robotManager->mNode, URDFInfo[0], SRDFString);
+  publishRobotDescription(robotManager->mNode, URDFInfo[1], "");
 
   // Robot Manager should be init after the parameters are loaded
   robotManager->init();
-  return {robot, robotManager};
+  return {robot, (RobotManager *)nullptr};
 }
 
 sapien::ros2::RobotLoader::RobotLoader(sapien::ros2::SceneManager *manager)
@@ -99,13 +100,13 @@ sapien::ros2::RobotLoader::RobotLoader(sapien::ros2::SceneManager *manager)
 }
 
 std::tuple<SArticulation *, RobotManager *>
-sapien::ros2::RobotLoader::loadROS(const std::string &ROSPackageName,
-                                   const std::string &robotRelativePath,
-                                   const std::string &semanticRelativePath,
-                                   const std::string &name, physx::PxMaterial *material) {
-  auto paths = getFilePath(ROSPackageName, robotRelativePath, semanticRelativePath);
-  std::string robotName = name.empty() ? ROSPackageName : name;
-  return loadRobot(robotName, paths.at(0), paths.at(1), material);
+sapien::ros2::RobotLoader::loadFromROS(const std::string &ROSPackageName,
+                                       const std::string &robotRelativePath,
+                                       const std::string &semanticRelativePath,
+                                       const std::string &name, physx::PxMaterial *material) {
+  //  auto paths = getFilePath(ROSPackageName, robotRelativePath, semanticRelativePath);
+  //  std::string robotName = name.empty() ? ROSPackageName : name;
+  return loadRobot("", "", "", material);
 }
 
 std::tuple<SArticulation *, RobotManager *> RobotLoader::load(const std::string &robotPath,
@@ -115,6 +116,7 @@ std::tuple<SArticulation *, RobotManager *> RobotLoader::load(const std::string 
   std::string SRDFPath(robotPath);
   SRDFPath = semanticPath.empty() ? SRDFPath.replace(SRDFPath.end() - 4, SRDFPath.end(), "srdf")
                                   : semanticPath;
+  SRDFPath = std::experimental::filesystem::exists(SRDFPath) ? SRDFPath : "";
 
   std::string robotName = name.empty() ? getRobotNameFromPath(robotPath) : name;
   return loadRobot(robotName, robotPath, SRDFPath, material);
@@ -127,10 +129,10 @@ RobotLoader::loadFromString(const std::string &URDFString, const std::string &SR
   auto parsedURDFString = modifyURDFPath2SapienConvention(URDFString);
   auto robot = mLoader->loadFromXML(parsedURDFString, SRDFString, material, false);
   if (not robot) {
-    RCLCPP_ERROR(mNode->get_logger(), "Fail to load robot");
+    //    RCLCPP_ERROR(mNode->get_logger(), "Fail to load robot");
     return {nullptr, nullptr};
   }
-  auto robotManager = mManager->buildRobotManager(robot, name);
+  auto robotManager = mManager->buildRobotManager1(robot, name);
   publishRobotDescription(robotManager->mNode, URDFString, SRDFString);
 
   // Robot Manager should be init after the parameters are loaded

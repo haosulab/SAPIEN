@@ -51,11 +51,10 @@ protected:
 public:
   explicit RobotLoader(SceneManager *manager);
   /* Load robot using ROS convention by ament package list */
-  std::tuple<SArticulation *, RobotManager *> loadROS(const std::string &ROSPackageName,
-                                                      const std::string &robotRelativePath,
-                                                      const std::string &semanticRelativePath = "",
-                                                      const std::string &name = "",
-                                                      physx::PxMaterial *material = nullptr);
+  std::tuple<SArticulation *, RobotManager *>
+  loadFromROS(const std::string &ROSPackageName, const std::string &robotRelativePath,
+              const std::string &semanticRelativePath = "", const std::string &name = "",
+              physx::PxMaterial *material = nullptr);
 
   /* Load pure robot urdf, does not rely on ROS package indexing */
   std::tuple<SArticulation *, RobotManager *> load(const std::string &robotPath,
@@ -67,6 +66,8 @@ public:
   std::tuple<SArticulation *, RobotManager *>
   loadFromString(const std::string &URDFString, const std::string &SRDFString,
                  const std::string &name, physx::PxMaterial *material = nullptr);
+
+
 
   /* Setter and getter */
   inline void setFixRootLink(bool value) { fixRootLink = value; }

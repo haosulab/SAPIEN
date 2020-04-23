@@ -26,11 +26,12 @@ void test1(int argc, char *argv[]) {
   // ROS2 specified class
   rclcpp::init(argc, argv);
   ros2::SceneManager sceneManager(scene.get(), "scene1");
-  ros2::RobotLoader loader(&sceneManager);
-  loader.fixRootLink = true;
+  auto loader = sceneManager.createRobotLoader();
+//  ros2::RobotLoader loader(&sceneManager);
+  loader->fixRootLink = true;
   auto [robot, robotManager] =
-      loader.loadROS("sapien_resources", "xarm6_description/urdf/xarm6.urdf",
-                     "xarm6_moveit_config/config/xarm6.srdf", "xarm6");
+      loader->loadFromROS("sapien_resources", "xarm6_description/urdf/xarm6.urdf",
+                          "xarm6_moveit_config/config/xarm6.srdf", "xarm6");
 
   robot->setRootPose({{0, 0, 0.5}, PxIdentity});
   robotManager->setDriveProperty(1000, 50, 5000, {0, 1, 2, 3, 4, 5});
@@ -53,7 +54,7 @@ void test1(int argc, char *argv[]) {
       robotManager->buildCartesianVelocityController("arm", "arm_cartesian_velocity", 0.0f);
 
   // Load second robot
-  auto [robot2, robotManager2] = loader.load("../assets_local/robot/panda.urdf");
+  auto [robot2, robotManager2] = loader->load("../assets_local/robot/panda.urdf");
   robot2->setRootPose({2,0,0});
 
   uint32_t step = 0;
