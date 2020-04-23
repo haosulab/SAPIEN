@@ -84,18 +84,18 @@ std::string LinkBuilder::summary() const {
 
 bool LinkBuilder::checkJointProperties() const {
   if (!mJointRecord.parentPose.isSane()) {
-    spdlog::error("Invalid parent pose for joint {}. \"{}\"", mIndex, mJointRecord.name);
+    spdlog::get("SAPIEN")->error("Invalid parent pose for joint {}. \"{}\"", mIndex, mJointRecord.name);
     return false;
   }
   if (!mJointRecord.childPose.isSane()) {
-    spdlog::error("Invalid child pose for joint {}. \"{}\"", mIndex, mJointRecord.name);
+    spdlog::get("SAPIEN")->error("Invalid child pose for joint {}. \"{}\"", mIndex, mJointRecord.name);
     return false;
   }
 
   switch (mJointRecord.jointType) {
   case PxArticulationJointType::eFIX: {
     if (mJointRecord.limits.size() != 0) {
-      spdlog::error("Fixed joint should have 0 limits for joint {}. \"{}\"", mIndex,
+      spdlog::get("SAPIEN")->error("Fixed joint should have 0 limits for joint {}. \"{}\"", mIndex,
                     mJointRecord.name);
       return false;
     }
@@ -103,7 +103,7 @@ bool LinkBuilder::checkJointProperties() const {
   }
   case PxArticulationJointType::eREVOLUTE: {
     if (mJointRecord.limits.size() != 1) {
-      spdlog::error("Revolute joint should have 1 limits for joint {}. \"{}\"", mIndex,
+      spdlog::get("SAPIEN")->error("Revolute joint should have 1 limits for joint {}. \"{}\"", mIndex,
                     mJointRecord.name);
       return false;
     }
@@ -111,14 +111,14 @@ bool LinkBuilder::checkJointProperties() const {
   }
   case PxArticulationJointType::ePRISMATIC: {
     if (mJointRecord.limits.size() != 1) {
-      spdlog::error("Prismatic joint should have 1 limits for joint {}. \"{}\"", mIndex,
+      spdlog::get("SAPIEN")->error("Prismatic joint should have 1 limits for joint {}. \"{}\"", mIndex,
                     mJointRecord.name);
       return false;
     }
     return true;
   }
   default:
-    spdlog::error("Unsupported joint type for joint {}. \"{}\"", mIndex, mJointRecord.name);
+    spdlog::get("SAPIEN")->error("Unsupported joint type for joint {}. \"{}\"", mIndex, mJointRecord.name);
     return false;
   }
 }
@@ -276,7 +276,7 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
           new SKJointPrismatic(&articulation, links[mParent].get(), links[mIndex].get()));
       break;
     default:
-      spdlog::error("Unsupported kinematic joint type");
+      spdlog::get("SAPIEN")->error("Unsupported kinematic joint type");
     }
     j->setLimits(mJointRecord.limits);
   } else {
@@ -317,7 +317,7 @@ bool ArticulationBuilder::prebuild(std::vector<int> &tosort) const {
   for (auto &b : mLinkBuilders) {
     if (b->mParent < 0) {
       if (root >= 0) {
-        spdlog::error("Failed to build articulation: multiple roots");
+        spdlog::get("SAPIEN")->error("Failed to build articulation: multiple roots");
         return false;
       }
       root = b->mIndex;
@@ -340,7 +340,7 @@ bool ArticulationBuilder::prebuild(std::vector<int> &tosort) const {
     stack.pop_back();
     tosort.push_back(elem);
     if (visited[elem]) {
-      spdlog::error("Failed to build articulation: kinematic loop");
+      spdlog::get("SAPIEN")->error("Failed to build articulation: kinematic loop");
       return false;
     }
     visited[elem] = 1;
@@ -351,7 +351,7 @@ bool ArticulationBuilder::prebuild(std::vector<int> &tosort) const {
 
   for (auto &builder : mLinkBuilders) {
     if (!builder->checkJointProperties()) {
-      spdlog::error("Failed to build articulation: invalid joint");
+      spdlog::get("SAPIEN")->error("Failed to build articulation: invalid joint");
       return false;
     }
   }

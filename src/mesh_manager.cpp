@@ -25,7 +25,7 @@ static void exportMeshToFile(PxConvexMesh *pxMesh, const std::string &filename) 
     }
   }
   if (!stlId) {
-    spdlog::critical("Export failed: you need to build Assimp with .stl export support.");
+    spdlog::get("SAPIEN")->critical("Export failed: you need to build Assimp with .stl export support.");
     throw std::runtime_error("Assimp is not built with .stl support.");
   }
 
@@ -88,7 +88,7 @@ static std::vector<PxVec3> getVerticesFromMeshFile(const std::string &filename) 
   const aiScene *scene = importer.ReadFile(filename, flags);
 
   if (!scene) {
-    spdlog::error(importer.GetErrorString());
+    spdlog::get("SAPIEN")->error(importer.GetErrorString());
     return {};
   }
 
@@ -119,14 +119,14 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
                                            bool saveCache) {
 
   if (!fs::is_regular_file(filename)) {
-    spdlog::error("File not found: {}", filename);
+    spdlog::get("SAPIEN")->error("File not found: {}", filename);
     return nullptr;
   }
 
   std::string fullPath = fs::canonical(filename);
   auto it = mMeshRegistry.find(fullPath);
   if (it != mMeshRegistry.end()) {
-    spdlog::info("Using loaded mesh: {}", filename);
+    spdlog::get("SAPIEN")->info("Using loaded mesh: {}", filename);
     return it->second.mesh;
   }
 
@@ -152,19 +152,19 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
   PxDefaultMemoryOutputStream buf;
   PxConvexMeshCookingResult::Enum result;
   if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
-    spdlog::error("Failed to cook mesh: {}", filename);
+    spdlog::get("SAPIEN")->error("Failed to cook mesh: {}", filename);
     return nullptr;
   }
   PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
   PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);
 
-  spdlog::info("Created {} vertices from: {}", std::to_string(convexMesh->getNbVertices()),
+  spdlog::get("SAPIEN")->info("Created {} vertices from: {}", std::to_string(convexMesh->getNbVertices()),
                filename);
 
   if (saveCache) {
     std::string cachedFilename = getCachedFilename(filename);
     exportMeshToFile(convexMesh, cachedFilename);
-    spdlog::info("Saved cache file: {}", cachedFilename);
+    spdlog::get("SAPIEN")->info("Saved cache file: {}", cachedFilename);
   }
 
   mMeshRegistry[fullPath] = {/* cached */ cacheDidLoad || saveCache, /* filename */ fullPath,
@@ -175,7 +175,7 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
 
 std::vector<std::vector<int>> splitMesh(aiMesh *mesh) {
   // build adjacency list
-  spdlog::info("splitting mesh with {} vertices", mesh->mNumVertices);
+  spdlog::get("SAPIEN")->info("splitting mesh with {} vertices", mesh->mNumVertices);
   std::vector<std::set<int>> adj(mesh->mNumVertices);
   for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
     for (uint32_t j = 0; j < mesh->mFaces[i].mNumIndices; ++j) {
@@ -220,14 +220,14 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
   std::vector<PxConvexMesh *> meshes;
 
   if (!fs::is_regular_file(filename)) {
-    spdlog::error("File not found: {}", filename);
+    spdlog::get("SAPIEN")->error("File not found: {}", filename);
     return meshes;
   }
 
   std::string fullPath = fs::canonical(filename);
   auto it = mMeshGroupRegistry.find(fullPath);
   if (it != mMeshGroupRegistry.end()) {
-    spdlog::info("Using loaded mesh group: {}", filename);
+    spdlog::get("SAPIEN")->info("Using loaded mesh group: {}", filename);
     for (PxConvexMesh *mesh : it->second.meshes) {
       meshes.push_back(mesh);
     }
@@ -240,16 +240,16 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
 
   const aiScene *scene = importer.ReadFile(filename, flags);
   if (!scene) {
-    spdlog::error(importer.GetErrorString());
+    spdlog::get("SAPIEN")->error(importer.GetErrorString());
     return meshes;
   }
 
-  spdlog::info("Found {} meshes", scene->mNumMeshes);
+  spdlog::get("SAPIEN")->info("Found {} meshes", scene->mNumMeshes);
   for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
     auto mesh = scene->mMeshes[i];
     auto vertexGroups = splitMesh(mesh);
 
-    spdlog::info("Decomposed mesh {} into {} components", i + 1, vertexGroups.size());
+    spdlog::get("SAPIEN")->info("Decomposed mesh {} into {} components", i + 1, vertexGroups.size());
     for (auto &g : vertexGroups) {
       std::vector<PxVec3> vertices;
       for (auto v : g) {
@@ -266,7 +266,7 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
       PxDefaultMemoryOutputStream buf;
       PxConvexMeshCookingResult::Enum result;
       if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
-        spdlog::error("Failed to cook a mesh from file: {}", filename);
+        spdlog::get("SAPIEN")->error("Failed to cook a mesh from file: {}", filename);
       }
       PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
       PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);

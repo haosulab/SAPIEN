@@ -25,7 +25,6 @@ SScene::SScene(Simulation *sim, PxScene *scene)
     : mSimulation(sim), mPxScene(scene), mRendererScene(nullptr), mSimulationCallback(this) {
   auto renderer = sim->getRenderer();
   if (renderer) {
-    spdlog::info("Creating scene in renderer");
     mRendererScene = renderer->createScene();
   }
   mPxScene->setSimulationEventCallback(&mSimulationCallback);
@@ -179,7 +178,7 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
 
 void SScene::removeDrive(SDrive *drive) {
   if (drive->mScene != this) {
-    spdlog::error("failed to remove drive: drive is not in this scene.");
+    spdlog::get("SAPIEN")->error("failed to remove drive: drive is not in this scene.");
   }
   if (drive->mActor1) {
     drive->mActor1->removeDrive(drive);
@@ -243,7 +242,7 @@ Renderer::ICamera *SScene::addMountedCamera(std::string const &name, SActorBase 
                                             uint32_t height, float fovx, float fovy, float near,
                                             float far) {
   if (!mRendererScene) {
-    spdlog::error("Failed to add camera: renderer is not added to simulation.");
+    spdlog::get("SAPIEN")->error("Failed to add camera: renderer is not added to simulation.");
     return nullptr;
   }
   auto cam = mRendererScene->addCamera(name, width, height, fovx, fovy, near, far);
@@ -272,7 +271,7 @@ Renderer::ICamera *SScene::findMountedCamera(std::string const &name, SActorBase
 
 void SScene::setShadowLight(PxVec3 const &direction, PxVec3 const &color) {
   if (!mRendererScene) {
-    spdlog::error("Failed to add light: renderer is not added to simulation.");
+    spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
     return;
   }
   mRendererScene->setShadowLight({direction.x, direction.y, direction.z},
@@ -280,21 +279,21 @@ void SScene::setShadowLight(PxVec3 const &direction, PxVec3 const &color) {
 }
 void SScene::addPointLight(PxVec3 const &position, PxVec3 const &color) {
   if (!mRendererScene) {
-    spdlog::error("Failed to add light: renderer is not added to simulation.");
+    spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
     return;
   }
   mRendererScene->addPointLight({position.x, position.y, position.z}, {color.x, color.y, color.z});
 }
 void SScene::setAmbientLight(PxVec3 const &color) {
   if (!mRendererScene) {
-    spdlog::error("Failed to add light: renderer is not added to simulation.");
+    spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
     return;
   }
   mRendererScene->setAmbientLight({color.x, color.y, color.z});
 }
 void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
   if (!mRendererScene) {
-    spdlog::error("Failed to add light: renderer is not added to simulation.");
+    spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
     return;
   }
   mRendererScene->addDirectionalLight({direction.x, direction.y, direction.z},

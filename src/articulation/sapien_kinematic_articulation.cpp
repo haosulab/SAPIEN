@@ -8,7 +8,7 @@
 #define CHECK_SIZE(v)                                                                             \
   {                                                                                               \
     if ((v).size() != dof()) {                                                                    \
-      spdlog::error("Input vector size does not match DOF of articulation");                      \
+      spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");                      \
       return;                                                                                     \
     }                                                                                             \
   }
@@ -80,12 +80,12 @@ std::vector<physx::PxReal> SKArticulation::getQacc() const {
   return std::vector<PxReal>(0, dof());
 }
 void SKArticulation::setQacc(const std::vector<physx::PxReal> &v) {
-  spdlog::warn("Setting qacc for kinematic articulation has no effect");
+  spdlog::get("SAPIEN")->warn("Setting qacc for kinematic articulation has no effect");
 }
 
 std::vector<physx::PxReal> SKArticulation::getQf() const { return std::vector<PxReal>(0, dof()); }
 void SKArticulation::setQf(const std::vector<physx::PxReal> &v) {
-  spdlog::warn("Setting qf for kinematic articulation has no effect");
+  spdlog::get("SAPIEN")->warn("Setting qf for kinematic articulation has no effect");
 }
 void SKArticulation::setRootPose(const physx::PxTransform &T) {
   mRootLink->getPxActor()->setGlobalPose(T);

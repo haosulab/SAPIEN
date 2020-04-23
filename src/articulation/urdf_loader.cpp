@@ -83,7 +83,7 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
   std::map<std::string, LinkTreeNode *> jointName2treeNode;
 
   if (robot->link_array.size() >= 64 && !isKinematic) {
-    spdlog::error("cannot build dynamic articulation with more than 64 links");
+    spdlog::get("SAPIEN")->error("cannot build dynamic articulation with more than 64 links");
     return nullptr;
   }
 
@@ -138,11 +138,12 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
     }
   }
   if (roots.size() > 1) {
-    spdlog::error("Failed to load URDF: multiple root nodes detected in a single URDF");
+    spdlog::get("SAPIEN")->error(
+        "Failed to load URDF: multiple root nodes detected in a single URDF");
     return nullptr;
   }
   if (roots.size() == 0) {
-    spdlog::error("Failed to load URDF: no root node found");
+    spdlog::get("SAPIEN")->error("Failed to load URDF: no root node found");
     return nullptr;
   }
   root = roots[0];
@@ -239,15 +240,15 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin, scale);
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        currentLinkBuilder->addBoxVisual(tVisual2Link, visual->geometry->size * scale, PxVec3{1, 1, 1},
-                                         visual->name);
+        currentLinkBuilder->addBoxVisual(tVisual2Link, visual->geometry->size * scale,
+                                         PxVec3{1, 1, 1}, visual->name);
         break;
       case Geometry::CYLINDER:
       case Geometry::CAPSULE:
         currentLinkBuilder->addCapsuleVisual(
             tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
-            visual->geometry->radius * scale, visual->geometry->length * scale / 2.f, PxVec3{1, 1, 1},
-            visual->name);
+            visual->geometry->radius * scale, visual->geometry->length * scale / 2.f,
+            PxVec3{1, 1, 1}, visual->name);
         break;
       case Geometry::SPHERE:
         currentLinkBuilder->addSphereVisual(tVisual2Link, visual->geometry->radius * scale,
@@ -332,7 +333,7 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
       PxVec3 axis3 = axis1.cross(axis2);
       const PxTransform tAxis2Joint = {PxVec3(0), PxQuat(PxMat33(axis1, axis2, axis3))};
       if (!tAxis2Joint.isSane()) {
-        spdlog::critical("URDF loading failed: invalid joint pose");
+        spdlog::get("SAPIEN")->critical("URDF loading failed: invalid joint pose");
         exit(1);
       }
       const PxTransform tAxis2Parent = tJoint2Parent * tAxis2Joint;
@@ -377,11 +378,11 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
     for (auto &dc : srdf->disable_collisions_array) {
       if (dc->reason == std::string("default")) {
         if (linkName2treeNode.find(dc->link1) == linkName2treeNode.end()) {
-          spdlog::error("SRDF link name not found: {}", dc->link1);
+          spdlog::get("SAPIEN")->error("SRDF link name not found: {}", dc->link1);
           continue;
         }
         if (linkName2treeNode.find(dc->link2) == linkName2treeNode.end()) {
-          spdlog::error("SRDF link name not found: {}", dc->link2);
+          spdlog::get("SAPIEN")->error("SRDF link name not found: {}", dc->link2);
           continue;
         }
         LinkTreeNode *l1 = linkName2treeNode[dc->link1];
@@ -391,14 +392,14 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
         }
         groupCount += 1;
         if (groupCount == 32) {
-          spdlog::critical("Collision group exhausted, please simplify the SRDF");
+          spdlog::get("SAPIEN")->critical("Collision group exhausted, please simplify the SRDF");
           throw std::runtime_error("Too many collision groups");
         }
         l1->linkBuilder->addCollisionGroup(0, 0, groupCount);
         l2->linkBuilder->addCollisionGroup(0, 0, groupCount);
       }
     }
-    spdlog::info("SRDF: ignored {} pairs", groupCount);
+    spdlog::get("SAPIEN")->info("SRDF: ignored {} pairs", groupCount);
   }
 
   SArticulationBase *articulation;
@@ -424,7 +425,8 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
         });
 
         if (it == links.end()) {
-          spdlog::error("Failed to find the link to mount camera: ", gazebo->reference);
+          spdlog::get("SAPIEN")->error("Failed to find the link to mount camera: ",
+                                       gazebo->reference);
           continue;
         }
 
@@ -482,13 +484,13 @@ SArticulation *URDFLoader::loadFromXML(const std::string &URDFString,
   // parse file
   auto URDFDoc = XMLDocument();
   if (URDFDoc.Parse(URDFString.c_str(), URDFString.length())) {
-    spdlog::error("Failed parsing given URDF string.");
+    spdlog::get("SAPIEN")->error("Failed parsing given URDF string.");
   }
   std::unique_ptr<SRDF::Robot> srdf = nullptr;
   if (!SRDFString.empty()) {
     XMLDocument SRDFDoc;
     if (SRDFDoc.Parse(SRDFString.c_str(), SRDFString.length())) {
-      spdlog::error("Failed parsing given SRDF string.");
+      spdlog::get("SAPIEN")->error("Failed parsing given SRDF string.");
     } else {
       if (strcmp("robot", SRDFDoc.RootElement()->Name()) == 0) {
         srdf = std::make_unique<SRDF::Robot>(*SRDFDoc.RootElement());

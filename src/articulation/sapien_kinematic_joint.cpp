@@ -8,7 +8,7 @@ SKJoint::SKJoint(SKArticulation *articulation, SKLink *parent, SKLink *child)
 
 void SKJointSingleDof::setLimits(const std::vector<std::array<PxReal, 2>> &limits) {
   if (limits.size() != 1) {
-    spdlog::error("setLimits failed: argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error("setLimits failed: argument does not match joint DOF");
   }
   lowerLimit = limits[0][0];
   upperLimit = limits[0][1];
@@ -16,7 +16,7 @@ void SKJointSingleDof::setLimits(const std::vector<std::array<PxReal, 2>> &limit
 
 void SKJointSingleDof::setPos(const std::vector<PxReal> &v) {
   if (v.size() != 1) {
-    spdlog::error("setPos failed: argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error("setPos failed: argument does not match joint DOF");
   }
   pos = v[0];
   if (pos < lowerLimit) {
@@ -28,7 +28,7 @@ void SKJointSingleDof::setPos(const std::vector<PxReal> &v) {
 
 void SKJointSingleDof::setVel(const std::vector<PxReal> &v) {
   if (v.size() != 1) {
-    spdlog::error("setPos failed: argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error("setPos failed: argument does not match joint DOF");
   }
   vel = v[0];
 }
@@ -41,13 +41,13 @@ void SKJointSingleDof::setDriveProperties(PxReal accStiffness, PxReal accDamping
 
 void SKJointSingleDof::setDriveTarget(std::vector<PxReal> const &p) {
   if (p.size() != 1) {
-    spdlog::error("setDriveTarget failed: argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error("setDriveTarget failed: argument does not match joint DOF");
   }
   targetPos = p[0];
 }
 void SKJointSingleDof::setDriveVelocityTarget(std::vector<PxReal> const &v) {
   if (v.size() != 1) {
-    spdlog::error("setDriveVelocityTarget failed: argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error("setDriveVelocityTarget failed: argument does not match joint DOF");
   }
   targetVel = v[0];
 }
@@ -67,19 +67,19 @@ void SKJointSingleDof::updatePos(PxReal dt) {
 
 void SKJointFixed::setLimits(const std::vector<std::array<physx::PxReal, 2>> &limits) {
   if (limits.size()) {
-    spdlog::error("setLimits failed: fixed joint does not support limits");
+    spdlog::get("SAPIEN")->error("setLimits failed: fixed joint does not support limits");
   }
 }
 
 void SKJointFixed::setPos(const std::vector<PxReal> &v) {
   if (v.size() != 0) {
-    spdlog::error("setPos failed: fixed joint does not support joint pos");
+    spdlog::get("SAPIEN")->error("setPos failed: fixed joint does not support joint pos");
   }
 }
 
 void SKJointFixed::setVel(const std::vector<PxReal> &v) {
   if (v.size() != 0) {
-    spdlog::error("setVel failed: fixed joint does not support joint vel");
+    spdlog::get("SAPIEN")->error("setVel failed: fixed joint does not support joint vel");
   }
 }
 

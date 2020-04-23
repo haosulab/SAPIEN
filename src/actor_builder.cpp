@@ -145,13 +145,13 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     case ActorBuilderShapeRecord::Type::SingleMesh: {
       PxConvexMesh *mesh = getSimulation()->getMeshManager().loadMesh(r.filename);
       if (!mesh) {
-        spdlog::error("Failed to load convex mesh for actor");
+        spdlog::get("SAPIEN")->error("Failed to load convex mesh for actor");
         continue;
       }
       PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
           PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material, true);
       if (!shape) {
-        spdlog::critical("Failed to create shape");
+        spdlog::get("SAPIEN")->critical("Failed to create shape");
         throw std::runtime_error("Failed to create shape");
       }
       shape->setLocalPose(r.pose);
@@ -164,13 +164,13 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       auto meshes = getSimulation()->getMeshManager().loadMeshGroup(r.filename);
       for (auto mesh : meshes) {
         if (!mesh) {
-          spdlog::error("Failed to load part of the convex mesh for actor");
+          spdlog::get("SAPIEN")->error("Failed to load part of the convex mesh for actor");
           continue;
         }
         PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
             PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material, true);
         if (!shape) {
-          spdlog::critical("Failed to create shape");
+          spdlog::get("SAPIEN")->critical("Failed to create shape");
           throw std::runtime_error("Failed to create shape");
         }
         shape->setLocalPose(r.pose);
@@ -184,7 +184,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       PxShape *shape =
           getSimulation()->mPhysicsSDK->createShape(PxBoxGeometry(r.scale), *material, true);
       if (!shape) {
-        spdlog::critical("Failed to build box with scale {}, {}, {}", r.scale.x, r.scale.y,
+        spdlog::get("SAPIEN")->critical("Failed to build box with scale {}, {}, {}", r.scale.x, r.scale.y,
                          r.scale.z);
         throw std::runtime_error("Failed to create shape");
       }
@@ -198,7 +198,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
           PxCapsuleGeometry(r.radius, r.length), *material, true);
       if (!shape) {
-        spdlog::critical("Failed to build capsule with radius {}, length {}", r.radius, r.length);
+        spdlog::get("SAPIEN")->critical("Failed to build capsule with radius {}, length {}", r.radius, r.length);
         throw std::runtime_error("Failed to create shape");
       }
       shape->setLocalPose(r.pose);
@@ -211,7 +211,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       PxShape *shape =
           getSimulation()->mPhysicsSDK->createShape(PxSphereGeometry(r.radius), *material, true);
       if (!shape) {
-        spdlog::critical("Failed to build sphere with radius {}", r.radius);
+        spdlog::get("SAPIEN")->critical("Failed to build sphere with radius {}", r.radius);
         throw std::runtime_error("Failed to create shape");
       }
       shape->setLocalPose(r.pose);
@@ -345,7 +345,7 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
       break;
     }
     default:
-      spdlog::error("Failed to create collision shape rendering: unrecognized geometry type.");
+      spdlog::get("SAPIEN")->error("Failed to create collision shape rendering: unrecognized geometry type.");
       continue;
     }
 

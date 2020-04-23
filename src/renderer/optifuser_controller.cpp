@@ -520,7 +520,7 @@ void OptifuserController::render() {
     {
       auto err = glGetError();
       if (err != GL_NO_ERROR) {
-        spdlog::error("Error0 {:x}", err);
+        spdlog::get("SAPIEN")->error("Error0 {:x}", err);
         throw "";
       }
     }
@@ -529,7 +529,7 @@ void OptifuserController::render() {
     {
       auto err = glGetError();
       if (err != GL_NO_ERROR) {
-        spdlog::error("Error1 {:x}", err);
+        spdlog::get("SAPIEN")->error("Error1 {:x}", err);
         throw "";
       }
     }

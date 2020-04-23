@@ -91,7 +91,7 @@ const std::string &OptifuserCamera::getName() const { return mCameraSpec->name; 
 
 glm::mat4 OptifuserCamera::getCameraMatrix() {
   if (mMode == ORTHOGRAPHIC) {
-    spdlog::error("Orthographic Camera Matrix is not implemented yet");
+    spdlog::get("SAPIEN")->error("Orthographic Camera Matrix is not implemented yet");
     return glm::mat4(1);
   } else {
     float fovy = static_cast<Optifuser::PerspectiveCameraSpec *>(mCameraSpec.get())->fovy;

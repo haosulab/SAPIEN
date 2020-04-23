@@ -132,7 +132,7 @@ std::vector<SShape> SActorBase::getCollisionShapes() {
           break;
         }
       default:
-        spdlog::critical("Unrecognized geometry in getCollisionShapes");
+        spdlog::get("SAPIEN")->critical("Unrecognized geometry in getCollisionShapes");
         throw std::runtime_error("Unrecognized geometry");
     }
   }

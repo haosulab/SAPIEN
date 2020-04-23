@@ -25,7 +25,7 @@ using namespace tinyxml2;
 
 #define DECLARE_CONSTRUCTOR(type)                                                                 \
   type() {}                                                                                       \
-  type(const XMLElement &elem) {                                                                  \
+  explicit type(const XMLElement &elem) {                                                         \
     for (const XMLElement *child = elem.FirstChildElement(); child;                               \
          child = child->NextSiblingElement()) {                                                   \
       if (child) {                                                                                \
@@ -41,7 +41,6 @@ using namespace tinyxml2;
     const char *tag = child.Name();
 
 #define LOAD_CHILD_END()                                                                          \
-  spdlog::warn("Ignored URDF type <{}>.", tag);                                                   \
   }
 
 #define LOAD_CHILD_UNIQUE(type, name)                                                             \
@@ -71,14 +70,14 @@ using namespace tinyxml2;
 /* Error if a unique child is not set */
 #define CHECK_CHILD_UNIQUE(name)                                                                  \
   if (!name) {                                                                                    \
-    spdlog::critical("Missing required child <{}>", #name);                                       \
+    spdlog::get("sapien")->critical("Missing required child <{}>", #name);                                       \
     throw std::runtime_error("Missing required child");                                           \
   }
 
 /* Error if a child array is empty */
 #define CHECK_CHILD(name)                                                                         \
   if (name##_array.empty()) {                                                                     \
-    spdlog::critical("Missing required children <{}>", #name);                                    \
+    spdlog::get("sapien")->critical("Missing required children <{}>", #name);                                    \
     throw std::runtime_error("Missing required child");                                           \
   }
 
@@ -90,9 +89,9 @@ using namespace tinyxml2;
 
 struct DomBase {
 
-  void loadAttrs(const XMLElement &elem) {}
-  void loadChild(const XMLElement &child) {}
-  void checkChildren() {}
+  virtual void loadAttrs(const XMLElement &elem) {}
+  virtual void loadChild(const XMLElement &child) {}
+  virtual void checkChildren() {}
 
   template <typename T> static inline T _read_attr(const std::string &str);
 
@@ -279,11 +278,11 @@ struct Geometry : DomBase {
   Geometry(const XMLElement &elem) {
     const XMLElement *child = elem.FirstChildElement();
     if (!child) {
-      spdlog::critical("<geometry> contains no child");
+      spdlog::get("sapien")->critical("<geometry> contains no child");
       throw std::runtime_error("<geometry> contains no child");
     }
     if (child->NextSibling()) {
-      spdlog::critical("<geometry> contains more than 1 child");
+      spdlog::get("SAPIEN")->critical("<geometry> contains more than 1 child");
       throw std::runtime_error("<geometry> contains more than 1 child");
     }
     const char *childTag = child->Name();
@@ -325,7 +324,7 @@ struct Geometry : DomBase {
       return;
     }
 
-    spdlog::critical("Unrecognized geometry tag <{}>", childTag);
+    spdlog::get("SAPIEN")->critical("Unrecognized geometry tag <{}>", childTag);
     exit(1);
   }
 };
@@ -511,7 +510,7 @@ struct Joint : DomBase {
   {
     if (type == "revolute" || type == "prismatic") {
       if (!limit) {
-        spdlog::critical("Missing required attribute [limit] on <{}>", type);
+        spdlog::get("SAPIEN")->critical("Missing required attribute [limit] on <{}>", type);
         throw std::runtime_error("Missing required attribute");
       }
     }
@@ -544,7 +543,7 @@ struct Sensor : DomBase {
 
     const char *type_ = elem.Attribute("type");
     if (!type_) {
-      spdlog::critical("Missing attribute [type] on <sensor>");
+      spdlog::get("SAPIEN")->critical("Missing attribute [type] on <sensor>");
       throw std::runtime_error("Missing attribute [type] on <sensor>");
     }
     std::string type_string = type_;
@@ -578,37 +577,37 @@ struct Sensor : DomBase {
     this->camera = std::make_unique<Camera>();
     auto camera = elem.FirstChildElement("camera");
     if (!camera) {
-      spdlog::critical("Missing <camera> child on color or depth camera sensor");
+      spdlog::get("SAPIEN")->critical("Missing <camera> child on color or depth camera sensor");
       throw std::runtime_error("Missing <camera> child on color or depth camera sensor");
     }
     auto fovx = camera->FirstChildElement("horizontal_fov");
     auto fovy = camera->FirstChildElement("vertical_fov");
     if (!fovx && !fovy) {
-      spdlog::critical("Missing horizontal_fov/vertical_fov on camera");
+      spdlog::get("SAPIEN")->critical("Missing horizontal_fov/vertical_fov on camera");
       throw std::runtime_error("Missing horizontal_fov/vertical_fov on camera");
     }
     auto clip = camera->FirstChildElement("clip");
     auto image = camera->FirstChildElement("image");
     if (!clip || !image) {
-      spdlog::critical("Missing <clip> or <image> on camera");
+      spdlog::get("SAPIEN")->critical("Missing <clip> or <image> on camera");
       throw std::runtime_error("Missing <clip> or <image> on camera");
     }
     auto near = clip->FirstChildElement("near");
     auto far = clip->FirstChildElement("far");
     if (!near || !far) {
-      spdlog::critical("Missing near/far on clip");
+      spdlog::get("SAPIEN")->critical("Missing near/far on clip");
       throw std::runtime_error("Missing near/far on clip");
     }
     float nearValue = std::atof(near->GetText());
     float farValue = std::atof(far->GetText());
 
     if (image->FirstChildElement("format")) {
-      spdlog::warn("Ignored <format> on camera");
+      spdlog::get("SAPIEN")->warn("Ignored <format> on camera");
     }
     auto width = image->FirstChildElement("width");
     auto height = image->FirstChildElement("height");
     if (!width || !height) {
-      spdlog::critical("Missing <width> or <height> on image");
+      spdlog::get("SAPIEN")->critical("Missing <width> or <height> on image");
       throw std::runtime_error("Missing <width> or <height> on image");
     }
     float widthValue = std::atoi(width->GetText());

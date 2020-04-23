@@ -2,9 +2,6 @@
 #include <objectLoader.h>
 #include <spdlog/spdlog.h>
 #define IMGUI_IMPL_OPENGL_LOADER_GLEW
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
 
 namespace sapien {
 namespace Renderer {
@@ -99,7 +96,7 @@ IPxrRigidbody *OptifuserScene::addRigidbody(const std::string &meshFile,
   auto objects = Optifuser::LoadObj(meshFile);
   std::vector<Optifuser::Object *> objs;
   if (objects.empty()) {
-    spdlog::error("Failed to load damaged file: {}", meshFile);
+    spdlog::get("SAPIEN")->error("Failed to load damaged file: {}", meshFile);
     return nullptr;
   }
   for (auto &obj : objects) {
@@ -169,7 +166,7 @@ IPxrRigidbody *OptifuserScene::addRigidbody(physx::PxGeometryType::Enum type,
     break;
   }
   default:
-    spdlog::error("Failed to add Rididbody: unimplemented shape");
+    spdlog::get("SAPIEN")->error("Failed to add Rididbody: unimplemented shape");
     return nullptr;
   }
 
@@ -208,8 +205,8 @@ ICamera *OptifuserScene::addCamera(std::string const &name, uint32_t width, uint
     d = mParentRenderer->mGlslDir;
   }
 
-  spdlog::warn("Note: current camera implementation does not support non-square pixels, and fovy "
-               "will take precedence.");
+  spdlog::get("SAPIEN")->warn("Note: current camera implementation does not support non-square "
+                              "pixels, and fovy will take precedence.");
   auto cam = std::make_unique<OptifuserCamera>(name, width, height, fovy, this, d);
   cam->mCameraSpec->near = near;
   cam->mCameraSpec->far = far;

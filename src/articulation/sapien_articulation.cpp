@@ -8,7 +8,7 @@
 #define CHECK_SIZE(v)                                                                             \
   {                                                                                               \
     if ((v).size() != dof()) {                                                                    \
-      spdlog::error("Input vector size does not match DOF of articulation");                      \
+      spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");                      \
       return;                                                                                     \
     }                                                                                             \
   }
@@ -272,7 +272,7 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
 
 std::vector<physx::PxReal> SArticulation::computeForwardDynamics(const std::vector<PxReal> &qf) {
   if (qf.size() != dof()) {
-    spdlog::error("Input vector size does not match DOF of articulation");
+    spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");
     std::vector(dof(), 0);
   }
 
@@ -290,7 +290,7 @@ std::vector<physx::PxReal> SArticulation::computeForwardDynamics(const std::vect
 
 std::vector<physx::PxReal> SArticulation::computeInverseDynamics(const std::vector<PxReal> &qacc) {
   if (qacc.size() != dof()) {
-    spdlog::error("Input vector size does not match DOF of articulation");
+    spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");
     std::vector(dof(), 0);
   }
 
@@ -404,7 +404,7 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
                          + nlinks * 12 // link size
                          + 19          // root size
   ) {
-    spdlog::error("Failed to unpack articulation data: {} numbers expected but {} provided",
+    spdlog::get("SAPIEN")->error("Failed to unpack articulation data: {} numbers expected but {} provided",
                   ndof * 4 + nlinks * 12 + 19, data.size());
     return;
   }

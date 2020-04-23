@@ -26,10 +26,10 @@ uint32_t SJoint::getDof() const {
   case PxArticulationJointType::ePRISMATIC:
     return 1;
   case PxArticulationJointType::eSPHERICAL:
-    spdlog::critical("Spherical joint not currently supported");
+    spdlog::get("SAPIEN")->critical("Spherical joint not currently supported");
     throw std::runtime_error("Unsupported joint type");
   case PxArticulationJointType::eUNDEFINED:
-    spdlog::critical("Undefined joint encountered in getDof");
+    spdlog::get("SAPIEN")->critical("Undefined joint encountered in getDof");
     throw std::runtime_error("Undefined joint");
   }
   throw std::runtime_error("Reached unreachable code in SJoint::getDof()");
@@ -60,10 +60,10 @@ std::vector<std::array<physx::PxReal, 2>> SJoint::getLimits() {
       return {{low, high}};
     }
   case PxArticulationJointType::eSPHERICAL:
-    spdlog::critical("Spherical joint not currently supported");
+    spdlog::get("SAPIEN")->critical("Spherical joint not currently supported");
     throw std::runtime_error("Unsupported joint type");
   case PxArticulationJointType::eUNDEFINED:
-    spdlog::critical("Undefined joint encountered in getLimits");
+    spdlog::get("SAPIEN")->critical("Undefined joint encountered in getLimits");
     throw std::runtime_error("Undefined joint");
   }
 
@@ -76,7 +76,7 @@ void SJoint::setLimits(std::vector<std::array<physx::PxReal, 2>> const &limits) 
   }
 
   if (limits.size() != getDof()) {
-    spdlog::error("Failed to set joint limits: dimensions of argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error("Failed to set joint limits: dimensions of argument does not match joint DOF");
     return;
   }
   switch (mPxJoint->getJointType()) {
@@ -119,10 +119,10 @@ void SJoint::setLimits(std::vector<std::array<physx::PxReal, 2>> const &limits) 
 
     return;
   case PxArticulationJointType::eSPHERICAL:
-    spdlog::critical("Spherical joint not currently supported");
+    spdlog::get("SAPIEN")->critical("Spherical joint not currently supported");
     throw std::runtime_error("Unsupported joint type");
   case PxArticulationJointType::eUNDEFINED:
-    spdlog::critical("Undefined joint encountered in setLimits");
+    spdlog::get("SAPIEN")->critical("Undefined joint encountered in setLimits");
     throw std::runtime_error("Undefined joint");
   }
 
@@ -142,10 +142,10 @@ std::vector<PxArticulationAxis::Enum> SJoint::getAxes() const {
   case PxArticulationJointType::ePRISMATIC:
     return {PxArticulationAxis::eX};
   case PxArticulationJointType::eSPHERICAL:
-    spdlog::critical("Spherical joint not currently supported");
+    spdlog::get("SAPIEN")->critical("Spherical joint not currently supported");
     throw std::runtime_error("Unsupported joint type");
   case PxArticulationJointType::eUNDEFINED:
-    spdlog::critical("Undefined joint encountered in getAxes");
+    spdlog::get("SAPIEN")->critical("Undefined joint encountered in getAxes");
     throw std::runtime_error("Undefined joint");
   }
 
@@ -170,7 +170,7 @@ void SJoint::setDriveProperty(PxReal stiffness, PxReal damping, PxReal forceLimi
 
 void SJoint::setDriveVelocityTarget(std::vector<PxReal> const &v) {
   if (v.size() != getDof()) {
-    spdlog::error("Failed to set drive: dimensions of argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error("Failed to set drive: dimensions of argument does not match joint DOF");
     return;
   }
   auto axes = getAxes();
@@ -183,7 +183,7 @@ void SJoint::setDriveVelocityTarget(PxReal v) { setDriveVelocityTarget(std::vect
 
 void SJoint::setDriveTarget(std::vector<PxReal> const &p) {
   if (p.size() != getDof()) {
-    spdlog::error("Failed to set drive: dimensions of argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error("Failed to set drive: dimensions of argument does not match joint DOF");
     return;
   }
   auto axes = getAxes();
