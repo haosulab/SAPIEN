@@ -46,7 +46,7 @@ py::array_t<PxReal> mat42array(glm::mat4 const &mat) {
   return py::array_t<PxReal>({4, 4}, arr);
 }
 
-void init_ex1(py::module &m) {
+void buildSapien(py::module &m) {
   m.doc() = "SAPIEN core module";
 
   // collision geometry and shape

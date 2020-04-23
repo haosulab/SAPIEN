@@ -1,15 +1,19 @@
-#include <pybind11/numpy.h>
-#include <pybind11/operators.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include "pysapien_content.hpp"
 
+#include "manager/robot_descriptor.h"
+#include "manager/robot_loader.h"
 #include "manager/robot_manager.h"
 #include "manager/scene_manager.h"
 
 using namespace sapien::ros2;
 namespace py = pybind11;
 
-PYBIND11_MODULE(pysapien_ros2, m_ros2) {
+PYBIND11_MODULE(pysapien_ros2, m) {
+  /* Build core module of sapien */
+  auto m_core = m.def_submodule("core");
+  buildSapien(m_core);
+
+  auto m_ros2 = m.def_submodule("ros2");
   //======== Module Function ========//
   m_ros2.def(
       "rclcpp_init",
@@ -26,11 +30,14 @@ PYBIND11_MODULE(pysapien_ros2, m_ros2) {
   //======== Manager ========//
   auto PySceneManager = py::class_<SceneManager>(m_ros2, "SceneManager");
   auto PyRobotManager = py::class_<RobotManager>(m_ros2, "RobotManager");
+  auto PyRobotLoader = py::class_<RobotLoader>(m_ros2, "RobotLoader");
+  auto PyRobotDescriptor = py::class_<RobotDescriptor>(m_ros2, "RobotDescriptor");
 
   PySceneManager
       .def(py::init<sapien::SScene *, std::string const &>(), py::arg("scene"),
            py::arg("scene_name"))
       .def("start", &SceneManager::start)
+      .def("create_robot_loader", &SceneManager::createRobotLoader)
       .def("build_robot_manager", &SceneManager::buildRobotManager,
            py::return_value_policy::reference, py::arg("articulation"), py::arg("robot_name"));
 
@@ -48,6 +55,33 @@ PYBIND11_MODULE(pysapien_ros2, m_ros2) {
            py::return_value_policy::reference, py::arg("group_name"), py::arg("service_name"),
            py::arg("latency") = 0);
 
+  PyRobotLoader.def(py::init<SceneManager *>(), py::arg("scene_manager"))
+      .def_property("fix_root_link", &RobotLoader::getFixRootLink, &RobotLoader::setFixRootLink)
+      .def_property("collision_is_visual", &RobotLoader::getCollisionIsVisual,
+                    &RobotLoader::setCollisionIsVisual)
+      .def_property("default_density", &RobotLoader::getDefaultDensity,
+                    &RobotLoader::setDefaultDensity)
+      //      .def("load_from_string", &RobotLoader::loadFromXML,
+      //      py::return_value_policy::reference)
+      .def("load_from_ros", &RobotLoader::loadFromROS, py::return_value_policy::reference,
+           py::arg("ros_package_name"), py::arg("urdf_relative_path"),
+           py::arg("srdf_relative_path") = "", py::arg("name") = "", py::arg("material") = nullptr)
+      .def("load", &RobotLoader::load, py::return_value_policy::reference, py::arg("urdf_path"),
+           py::arg("srdf_path") = "", py::arg("name") = "", py::arg("material") = nullptr)
+      .def("load_from_string", &RobotLoader::loadFromString, py::return_value_policy::reference,
+           py::arg("urdf"), py::arg("srdf"), py::arg("name"), py::arg("material") = nullptr);
+
+  PyRobotDescriptor
+      .def(py::init<bool, std::string const &, std::string const &, std::string const &>(),
+           py::arg("is_path"), py::arg("urdf"), py::arg("srdf"), py::arg("substitutee_path") = "")
+      .def(py::init<std::string const &, std::string const &, std::string const &, bool>(),
+           py::arg("ros_package_name"), py::arg("urdf_relative_path"),
+           py::arg("srdf_relative_path"), py::arg("use_share_directory"))
+      .def("get_urdf", &RobotDescriptor::getURDF)
+      .def("build", &RobotDescriptor::build, py::arg("scene"), py::arg("material") = nullptr,
+           py::return_value_policy::reference);
+
+
   //======== Controller ========//
 
   auto PyMoveType = py::enum_<MoveType>(m_ros2, "MoveType");
@@ -63,36 +97,16 @@ PYBIND11_MODULE(pysapien_ros2, m_ros2) {
       .value("LOCAL_TRANSLATE", MoveType::WorldTranslate)
       .value("LOCAL_ROTATE", MoveType::WorldTranslate);
 
-  //  PyJointVelocityController
-  //      .def(
-  //          "move_joint",
-  //          [](JointVelocityController &a, const std::vector<std::string> &jointNames,
-  //             float velocity, bool continuous) { a.moveJoint(jointNames, velocity, continuous);
-  //             },
-  //          py::arg("joint_names"), py::arg("velocity"), py::arg("continuous") = true)
-  //      .def(
-  //          "move_joint",
-  //          [](JointVelocityController &a, const std::vector<std::string> &jointNames,
-  //             const std::vector<float> &velocity,
-  //             bool continuous) { a.moveJoint(jointNames, velocity, continuous); },
-  //          py::arg("joint_names"), py::arg("velocities"), py::arg("continuous") = true)
-  //      .def(
-  //          "move_joint",
-  //          [](JointVelocityController &a, const std::vector<float> &velocity, bool continuous) {
-  //            a.moveJoint(velocity, continuous);
-  //          },
-  //          py::arg("velocity"), py::arg("continuous") = true);
-
   PyJointVelocityController
       .def("move_joint",
            py::overload_cast<const std::vector<std::string> &, float, bool>(
                &JointVelocityController::moveJoint),
-          py::arg("joint_names"), py::arg("velocity"), py::arg("continuous") = true,
+           py::arg("joint_names"), py::arg("velocity"), py::arg("continuous") = true,
            "Move joints with given names, same velocity for all joints.")
       .def("move_joint",
            py::overload_cast<const std::vector<std::string> &, const std::vector<float> &, bool>(
                &JointVelocityController::moveJoint),
-          py::arg("joint_names"), py::arg("velocities"), py::arg("continuous") = true,
+           py::arg("joint_names"), py::arg("velocities"), py::arg("continuous") = true,
            "Move joints with given names, velocity is specified for each joints.")
       .def(
           "move_joint",

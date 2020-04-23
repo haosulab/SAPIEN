@@ -5,4 +5,4 @@
 using namespace sapien;
 namespace py = pybind11;
 
-PYBIND11_MODULE(pysapien, m) { init_ex1(m); }
+PYBIND11_MODULE(pysapien, m) { buildSapien(m); }
