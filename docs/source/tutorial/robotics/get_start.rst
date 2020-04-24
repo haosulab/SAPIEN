@@ -1,8 +1,10 @@
+.. _get_start:
+
 Getting Started
 ================
 
 .. note::
-	If you haven’t already done so, make sure you’ve completed the steps in :ref:`basic` before starting tutorial of the robotics part.
+	If you haven’t already done so, make sure you’ve completed the steps in :ref:`basic` before starting tutorial of the robotics part. The assets (robot) used in this this tutorial can be found `here <https://github.com/haosulab/SAPIEN-Release/tree/master/example/assets>`_
 
 .. highlight:: python
    :linenothreshold: 5
@@ -88,7 +90,7 @@ However, it will then deviate from this pose gradually due to numerical error.
 Add damping to joints
 --------------------------------------
 
-To make the robot stay at this pose, we need to add some dumping to the robot joint.
+To make the robot stay at this pose, we need to add some damping to the robot joint.
 It will penalize the joint velocity to stabilize the robot. Add the following code
 before the while loop.
 
