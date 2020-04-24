@@ -1,4 +1,5 @@
 #include "pysapien_content.hpp"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 #include "manager/robot_descriptor.h"
 #include "manager/robot_loader.h"
@@ -13,6 +14,7 @@ PYBIND11_MODULE(pysapien_ros2, m) {
   auto m_core = m.def_submodule("core");
   buildSapien(m_core);
 
+  /* Build ros2 module of sapien */
   auto m_ros2 = m.def_submodule("ros2");
   //======== Module Function ========//
   m_ros2.def(
@@ -24,6 +26,7 @@ PYBIND11_MODULE(pysapien_ros2, m) {
           str.push_back(const_cast<char *>(s.c_str()));
         int size = str.size();
         rclcpp::init(size, str.data());
+        auto logger = spdlog::stdout_color_mt("SAPIEN_ROS2");
       },
       py::arg("args"));
 
@@ -37,9 +40,7 @@ PYBIND11_MODULE(pysapien_ros2, m) {
       .def(py::init<sapien::SScene *, std::string const &>(), py::arg("scene"),
            py::arg("scene_name"))
       .def("start", &SceneManager::start)
-      .def("create_robot_loader", &SceneManager::createRobotLoader)
-      .def("build_robot_manager", &SceneManager::buildRobotManager,
-           py::return_value_policy::reference, py::arg("articulation"), py::arg("robot_name"));
+      .def("create_robot_loader", &SceneManager::createRobotLoader);
 
   PyRobotManager
       .def("set_drive_property", &RobotManager::setDriveProperty, py::arg("stiffness"),
@@ -61,29 +62,21 @@ PYBIND11_MODULE(pysapien_ros2, m) {
                     &RobotLoader::setCollisionIsVisual)
       .def_property("default_density", &RobotLoader::getDefaultDensity,
                     &RobotLoader::setDefaultDensity)
-      //      .def("load_from_string", &RobotLoader::loadFromXML,
-      //      py::return_value_policy::reference)
-      .def("load_from_ros", &RobotLoader::loadFromROS, py::return_value_policy::reference,
-           py::arg("ros_package_name"), py::arg("urdf_relative_path"),
-           py::arg("srdf_relative_path") = "", py::arg("name") = "", py::arg("material") = nullptr)
-      .def("load", &RobotLoader::load, py::return_value_policy::reference, py::arg("urdf_path"),
-           py::arg("srdf_path") = "", py::arg("name") = "", py::arg("material") = nullptr)
-      .def("load_from_string", &RobotLoader::loadFromString, py::return_value_policy::reference,
-           py::arg("urdf"), py::arg("srdf"), py::arg("name"), py::arg("material") = nullptr);
+      .def("load_robot_and_manager", &RobotLoader::loadRobotAndManager,
+           py::arg("robot_descriptor"), py::arg("robot_name"),
+           py::arg("material") = (physx::PxMaterial *)nullptr, py::return_value_policy::reference);
 
   PyRobotDescriptor
       .def(py::init<bool, std::string const &, std::string const &, std::string const &>(),
-           py::arg("is_path"), py::arg("urdf"), py::arg("srdf"), py::arg("substitutee_path") = "")
+           py::arg("is_path"), py::arg("urdf"), py::arg("srdf"), py::arg("substitute_path") = "")
       .def(py::init<std::string const &, std::string const &, std::string const &, bool>(),
            py::arg("ros_package_name"), py::arg("urdf_relative_path"),
            py::arg("srdf_relative_path"), py::arg("use_share_directory"))
       .def("get_urdf", &RobotDescriptor::getURDF)
-      .def("build", &RobotDescriptor::build, py::arg("scene"), py::arg("material") = nullptr,
-           py::return_value_policy::reference);
-
+      .def("get_srdf", &RobotDescriptor::getSRDF)
+      .def("get_standard_urdf", &RobotDescriptor::getStandardURDF);
 
   //======== Controller ========//
-
   auto PyMoveType = py::enum_<MoveType>(m_ros2, "MoveType");
   auto PyJointVelocityController =
       py::class_<JointVelocityController>(m_ros2, "JointVelocityController");

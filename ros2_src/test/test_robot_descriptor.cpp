@@ -1,12 +1,17 @@
 #include "controller/sapien_controllable_articulation.h"
 #include "manager/scene_manager.h"
+#include "manager/robot_loader.h"
+#include "manager/robot_descriptor.h"
+#include "manager/robot_manager.h"
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
-#include "scene.h"
+#include "sapien_scene.h"
 #include "simulation.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 
 using namespace sapien;
 void test1(int argc, char *argv[]) {
+  auto logger = spdlog::stdout_color_mt("SAPIEN_ROS2");
   Simulation sim;
   Renderer::OptifuserRenderer renderer;
   sim.setRenderer(&renderer);
@@ -27,8 +32,9 @@ void test1(int argc, char *argv[]) {
   ros2::SceneManager sceneManager(scene.get(), "scene1");
   ros2::RobotDescriptor descriptor("sapien_resources", "xarm6_description/urdf/xarm6.urdf",
                                    "xarm6_moveit_config/config/xarm6.srdf", true);
-  auto robot = descriptor.build(scene.get());
-  auto robotManager = sceneManager.buildRobotManager(descriptor, "xarm6");
+
+  auto loader = sceneManager.createRobotLoader();
+  auto [robot, robotManager] = loader->loadRobotAndManager(descriptor, "xarm6");
 
   robot->setRootPose({{0, 0, 0.5}, PxIdentity});
   robotManager->setDriveProperty(1000, 50, 5000, {0, 1, 2, 3, 4, 5});

@@ -6,11 +6,11 @@
 #include "controller/cartesian_velocity_controller.h"
 #include "controller/joint_publisher.h"
 #include "controller/joint_velocity_controller.h"
-#include "moveit/robot_model/robot_model.h"
-#include "moveit/robot_model_loader/robot_model_loader.h"
-#include "rclcpp/rclcpp.hpp"
-#include "sensor_msgs/msg/joint_state.hpp"
-#include <PxPhysicsAPI.h>
+
+#include <moveit/robot_model/robot_model.h>
+#include <moveit/robot_model_loader/robot_model_loader.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joint_state.hpp>
 #include <vector>
 
 namespace sapien::ros2 {
