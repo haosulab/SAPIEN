@@ -1,7 +1,7 @@
 #include "cartesian_velocity_controller.h"
 
-#include <utility>
 #include "sapien_controllable_articulation.h"
+#include <utility>
 
 namespace sapien::ros2 {
 
@@ -9,8 +9,8 @@ sapien::ros2::CartesianVelocityController::CartesianVelocityController(
     rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
     SControllableArticulationWrapper *wrapper, robot_state::RobotState *robotState,
     const std::string &groupName, const std::string &serviceName, double latency)
-    : DelayedControllerBase(std::move(clock), latency), mNode(std::move(node)), mRobotState(robotState),
-      mLocalRobotState(*robotState), mVelocityCommand() {
+    : DelayedControllerBase(std::move(clock), latency), mNode(std::move(node)),
+      mRobotState(robotState), mLocalRobotState(*robotState), mVelocityCommand() {
   // Time step will be initialized when build it using robot manager
   // Do not worry if not initialized here
   mJointModelGroup = mLocalRobotState.getJointModelGroup(groupName);
@@ -33,8 +33,9 @@ sapien::ros2::CartesianVelocityController::CartesianVelocityController(
   // Register
   wrapper->registerVelocityCommands(&mVelocityCommand, mJointNames, &(mCommandTimer[0]));
 }
-void sapien::ros2::CartesianVelocityController::moveCartesian(const std::array<float, 3> &vec,
+void sapien::ros2::CartesianVelocityController::moveCartesian(const std::array<double, 3> &vec,
                                                               sapien::ros2::MoveType type) {
+  auto logger = spdlog::get("SAPIEN_ROS2");
   if (!mLastStepCalled) {
     synchronizeRealRobotState();
   }
@@ -42,6 +43,14 @@ void sapien::ros2::CartesianVelocityController::moveCartesian(const std::array<f
   Eigen::VectorXd twist(6);
   Eigen::VectorXd jointVelocity;
   switch (type) {
+  case SpatialTwist: {
+    logger->warn("Move Cartesian method do you support direct twist type, please use Move Twist");
+    return;
+  }
+  case BodyTwist: {
+    logger->warn("Move Cartesian method do you support direct twist type, please use Move Twist");
+    return;
+  }
   case WorldTranslate: {
     twist << vec[0], vec[1], vec[2], 0, 0, 0;
     twist = transformTwist(twist, mBaseName);
@@ -66,7 +75,39 @@ void sapien::ros2::CartesianVelocityController::moveCartesian(const std::array<f
   }
   }
   if (!foundIK) {
-    RCLCPP_WARN(mNode->get_logger(), "IK not found.");
+    logger->warn("IK not found");
+    return;
+  }
+  std::vector<float> stepVelocity(jointVelocity.data(),
+                                  jointVelocity.data() + mJointModelGroup->getVariableCount());
+  mVelocityCommand.push(stepVelocity);
+  updateCommandTimer(mClock->now());
+
+  // Update control bool
+  mCurrentStepCalled = true;
+}
+
+void CartesianVelocityController::moveTwist(const std::array<double, 6> &vec, MoveType type) {
+  auto logger = spdlog::get("SAPIEN_ROS2");
+  if (!mLastStepCalled) {
+    synchronizeRealRobotState();
+  }
+  bool foundIK = false;
+  Eigen::VectorXd twist(6);
+  twist << vec[0], vec[1], vec[2], vec[3], vec[4], vec[5];
+  Eigen::VectorXd jointVelocity;
+  if (type < 4) {
+    logger->warn("Only twist type is support for move twist function");
+    return;
+  } else if (type == 4) {
+    COMPUTE_VELOCITY_AND_INTEGRATE(mEEName);
+  } else {
+    twist = transformTwist(twist, mBaseName);
+    COMPUTE_VELOCITY_AND_INTEGRATE(mEEName)
+  }
+
+  if (!foundIK) {
+    logger->warn("IK not found");
     return;
   }
   std::vector<float> stepVelocity(jointVelocity.data(),
@@ -79,9 +120,11 @@ void sapien::ros2::CartesianVelocityController::moveCartesian(const std::array<f
 }
 void sapien::ros2::CartesianVelocityController::synchronizeRealRobotState() {
   // Copy global real time robot state to local robot state
+  // TODO: do something when simulation timestep change
   mRobotState->copyJointGroupPositions(mJointModelGroup, mJointValues);
   mLocalRobotState.setJointGroupPositions(mJointModelGroup, mJointValues);
 }
+
 void sapien::ros2::CartesianVelocityController::handleService(
     const std::shared_ptr<sapien_ros2_communication_interface::srv::CartesianVelocity_Request> req,
     std::shared_ptr<sapien_ros2_communication_interface::srv::CartesianVelocity_Response> res) {
@@ -128,6 +171,7 @@ void sapien::ros2::CartesianVelocityController::handleService(
   // Update control bool
   mCurrentStepCalled = true;
 }
+
 Eigen::VectorXd
 sapien::ros2::CartesianVelocityController::transformTwist(const Eigen::VectorXd &twist,
                                                           const std::string &frame) {

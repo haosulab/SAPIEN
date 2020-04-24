@@ -107,15 +107,26 @@ PYBIND11_MODULE(pysapien_ros2, m) {
           py::arg("velocity"), py::arg("continuous") = true,
           "Move joints with velocity, given default order.");
 
-  PyCartesianVelocityController.def(
-      "move_cartesian",
-      [](CartesianVelocityController &c, const py::array_t<float> &vec, MoveType type) {
-        if (vec.size() != 3) {
-          std::stringstream ss;
-          ss << "Cartesian velocity command should have size 3, but given " << vec.size();
-          throw std::runtime_error(ss.str());
-        }
-        std::array<float, 3> v = {*vec.data(), *(vec.data() + 1), *(vec.data() + 2)};
-        c.moveCartesian(v, type);
-      });
+  PyCartesianVelocityController
+      .def("move_twist",
+           [](CartesianVelocityController &c, const py::array_t<double> &vec, MoveType type) {
+             if (vec.size() != 6) {
+               std::stringstream ss;
+               ss << "Cartesian velocity command should have size 3, but given " << vec.size();
+               throw std::runtime_error(ss.str());
+             }
+             std::array<double, 6> v = {*vec.data(),       *(vec.data() + 1), *(vec.data() + 2),
+                                        *(vec.data() + 3), *(vec.data() + 4), *(vec.data() + 5)};
+             c.moveTwist(v, type);
+           })
+      .def("move_cartesian",
+           [](CartesianVelocityController &c, const py::array_t<double> &vec, MoveType type) {
+             if (vec.size() != 3) {
+               std::stringstream ss;
+               ss << "Cartesian velocity command should have size 3, but given " << vec.size();
+               throw std::runtime_error(ss.str());
+             }
+             std::array<double, 3> v = {*vec.data(), *(vec.data() + 1), *(vec.data() + 2)};
+             c.moveCartesian(v, type);
+           });
 }

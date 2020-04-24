@@ -5,22 +5,36 @@
 #include "moveit/robot_state/robot_state.h"
 #include "rclcpp/rclcpp.hpp"
 
+#include "articulation/sapien_articulation.h"
 #include "sapien_ros2_communication_interface/srv/cartesian_velocity.hpp"
 #include "utils/delayed_controller_base.hpp"
-#include "articulation/sapien_articulation.h"
 
 #define COMPUTE_VELOCITY_AND_INTEGRATE(frame_name)                                                \
   {                                                                                               \
     mRobotState->computeVariableVelocity(mJointModelGroup, jointVelocity, twist,                  \
                                          mJointModelGroup->getLinkModel(frame_name));             \
-    foundIK = mRobotState->integrateVariableVelocity(mJointModelGroup, jointVelocity, mTimeStep); \
+    if (jointVelocity.maxCoeff() > mJointVelocityLimit ||                                         \
+        jointVelocity.minCoeff() < -mJointVelocityLimit) {                                        \
+      logger->warn("Joint velocity exceed max value {}, no command taken", mJointVelocityLimit);  \
+      return;                                                                                     \
+    } else {                                                                                      \
+      foundIK =                                                                                   \
+          mRobotState->integrateVariableVelocity(mJointModelGroup, jointVelocity, mTimeStep);     \
+    }                                                                                             \
   }
 
 namespace sapien::ros2 {
 class SControllableArticulationWrapper;
 class RobotManager;
 
-enum MoveType { WorldTranslate, WorldRotate, LocalTranslate, LocalRotate };
+enum MoveType {
+  WorldTranslate = 0,
+  WorldRotate = 1,
+  LocalTranslate = 2,
+  LocalRotate = 3,
+  BodyTwist = 4,
+  SpatialTwist = 5
+};
 
 class CartesianVelocityController : public DelayedControllerBase {
   friend RobotManager;
@@ -44,6 +58,9 @@ protected:
   bool mCurrentStepCalled = false;
   bool mLastStepCalled = false;
 
+  // Velocity limit
+  float mJointVelocityLimit = 2.0;
+
   // Command
   ThreadSafeQueue<std::vector<float>> mVelocityCommand;
 
@@ -53,7 +70,11 @@ public:
                               robot_state::RobotState *robotState, const std::string &groupName,
                               const std::string &serviceName, double latency);
 
-  void moveCartesian(const std::array<float, 3> &vec, MoveType type);
+  void moveCartesian(const std::array<double, 3> &vec, MoveType type);
+  void moveTwist(const std::array<double, 6> &vec, MoveType type);
+
+  inline float getJointVelocityLimit() { return mJointVelocityLimit; }
+  inline void setJointVelocityLimit(float limit) { mJointVelocityLimit = limit; }
 
 protected:
   void synchronizeRealRobotState();

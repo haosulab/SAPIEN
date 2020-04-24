@@ -1,8 +1,8 @@
 #include "controller/sapien_controllable_articulation.h"
-#include "manager/scene_manager.h"
-#include "manager/robot_loader.h"
 #include "manager/robot_descriptor.h"
+#include "manager/robot_loader.h"
 #include "manager/robot_manager.h"
+#include "manager/scene_manager.h"
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 #include "sapien_scene.h"
@@ -55,6 +55,7 @@ void test1(int argc, char *argv[]) {
   // Test IK Controller
   auto armController =
       robotManager->buildCartesianVelocityController("arm", "arm_cartesian_velocity", 0.0f);
+  armController->setJointVelocityLimit(1.0f);
 
   uint32_t step = 0;
   controller.showWindow();
@@ -67,14 +68,12 @@ void test1(int argc, char *argv[]) {
     // Balance force
     robotManager->balancePassiveForce();
     // Move arm IK
-    armController->moveCartesian({0.02, 0.00, 0.02}, ros2::MoveType::WorldTranslate);
+    armController->moveTwist({0.02, 0.00, 0.02, 0, 0, 0}, ros2::MoveType::SpatialTwist);
 
     if (step >= 500 && step < 1000) {
       gripperController->moveJoint({5, 5, 5, 5, 5, 5});
     }
-    if (step == 1000) {
-      gripperController->moveJoint({-0.1, -0.1, -0.1, -0.1, -0.1, -0.1}, true);
-    }
+
   }
   //  rclcpp::shutdown();
 }

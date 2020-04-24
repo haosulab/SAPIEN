@@ -92,9 +92,13 @@ void sapien::ros2::SControllableArticulationWrapper::onEvent(sapien::EventStep &
   for (size_t k = 0; k < mPositionCommands.size(); ++k) {
     if (mPositionCommands[k]->empty() || mPositionCommandsTimer[k]->front() > current)
       continue;
-    auto index = mPositionCommandsIndex[k];
+
     auto command = mPositionCommands[k]->pop();
-    mPositionCommandsTimer[k]->pop();
+    auto index = mPositionCommandsIndex[k];
+    while (!mPositionCommands[k]->empty() && mPositionCommandsTimer[k]->front() < current) {
+      mPositionCommands[k]->pop();
+      mPositionCommandsTimer[k]->pop();
+    }
     for (size_t i = 0; i < index.size(); ++i) {
       currentPositionCommands[index[i]] = command[i];
     }
@@ -103,12 +107,15 @@ void sapien::ros2::SControllableArticulationWrapper::onEvent(sapien::EventStep &
   // Aggregate velocity commands information
   std::vector<float> currentVelocityCommands(mArticulation->dof(), 0);
   for (size_t k = 0; k < mVelocityCommands.size(); ++k) {
-    if (mVelocityCommands[k]->empty() || mVelocityCommandsTimer[k]->front() > current) {
+    if (mVelocityCommands[k]->empty() || mVelocityCommandsTimer[k]->front() > current)
       continue;
-    }
+
     auto index = mVelocityCommandsIndex[k];
-    auto command = mVelocityCommands[k]->pop();
-    mVelocityCommandsTimer[k]->pop();
+    auto command = mVelocityCommands[k]->front();
+    while (!mVelocityCommands[k]->empty() && mVelocityCommandsTimer[k]->front() < current) {
+      mVelocityCommands[k]->pop();
+      mVelocityCommandsTimer[k]->pop();
+    }
     for (size_t i = 0; i < index.size(); ++i) {
       currentVelocityCommands[index[i]] += command[i];
     }
