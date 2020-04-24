@@ -478,8 +478,7 @@ SArticulation *URDFLoader::load(const std::string &filename, physx::PxMaterial *
 }
 
 SArticulation *URDFLoader::loadFromXML(const std::string &URDFString,
-                                       const std::string &SRDFString, physx::PxMaterial *material,
-                                       bool isKinematic) {
+                                       const std::string &SRDFString, physx::PxMaterial *material) {
 
   // parse file
   auto URDFDoc = XMLDocument();
@@ -500,7 +499,7 @@ SArticulation *URDFLoader::loadFromXML(const std::string &URDFString,
     }
   }
   return static_cast<SArticulation *>(
-      commonLoad(&URDFDoc, std::move(srdf), material, isKinematic));
+      commonLoad(&URDFDoc, std::move(srdf), material, false));
 };
 
 SKArticulation *URDFLoader::loadKinematic(const std::string &filename,

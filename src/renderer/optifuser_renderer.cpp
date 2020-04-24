@@ -1,7 +1,6 @@
 #include "optifuser_renderer.h"
 #include <objectLoader.h>
 #include <spdlog/spdlog.h>
-#define IMGUI_IMPL_OPENGL_LOADER_GLEW
 
 namespace sapien {
 namespace Renderer {

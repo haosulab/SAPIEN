@@ -40,8 +40,7 @@ using namespace tinyxml2;
   void loadChild(const XMLElement &child) {                                                       \
     const char *tag = child.Name();
 
-#define LOAD_CHILD_END()                                                                          \
-  }
+#define LOAD_CHILD_END() }
 
 #define LOAD_CHILD_UNIQUE(type, name)                                                             \
   if (strcmp(tag, #name) == 0) {                                                                  \
@@ -70,14 +69,14 @@ using namespace tinyxml2;
 /* Error if a unique child is not set */
 #define CHECK_CHILD_UNIQUE(name)                                                                  \
   if (!name) {                                                                                    \
-    spdlog::get("sapien")->critical("Missing required child <{}>", #name);                                       \
+    spdlog::get("sapien")->critical("Missing required child <{}>", #name);                        \
     throw std::runtime_error("Missing required child");                                           \
   }
 
 /* Error if a child array is empty */
 #define CHECK_CHILD(name)                                                                         \
   if (name##_array.empty()) {                                                                     \
-    spdlog::get("sapien")->critical("Missing required children <{}>", #name);                                    \
+    spdlog::get("sapien")->critical("Missing required children <{}>", #name);                     \
     throw std::runtime_error("Missing required child");                                           \
   }
 
@@ -89,9 +88,9 @@ using namespace tinyxml2;
 
 struct DomBase {
 
-  virtual void loadAttrs(const XMLElement &elem) {}
-  virtual void loadChild(const XMLElement &child) {}
-  virtual void checkChildren() {}
+  void loadAttrs(const XMLElement &elem) {}
+  void loadChild(const XMLElement &child) {}
+  void checkChildren() {}
 
   template <typename T> static inline T _read_attr(const std::string &str);
 
@@ -691,8 +690,8 @@ public:
 
   /* Directly load robot model from string, srdf is optional */
   /* Using this mode, the path in URDF should be absolute path, rather than relative one*/
-  SArticulation *loadFromXML(const std::string &URDFString, const std::string &SRDFString="",
-                             physx::PxMaterial *material=nullptr, bool isKinematic = false);
+  SArticulation *loadFromXML(const std::string &URDFString, const std::string &SRDFString = "",
+                             physx::PxMaterial *material = nullptr);
 
 private:
   std::unique_ptr<SRDF::Robot> loadSRDF(const std::string &filename);

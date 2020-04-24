@@ -980,7 +980,7 @@ void buildSapien(py::module &m) {
            py::arg("filename"), py::arg("material") = (physx::PxMaterial *)nullptr)
       .def("load_from_string", &URDF::URDFLoader::loadFromXML, py::return_value_policy::reference,
            py::arg("urdf_string"), py::arg("srdf_string"),
-           py::arg("material") = (physx::PxMaterial *)nullptr, py::arg("is_kinematic") = false)
+           py::arg("material") = (physx::PxMaterial *)nullptr)
       .def("load_kinematic",
            py::overload_cast<const std::string &, physx::PxMaterial *>(
                &URDF::URDFLoader::loadKinematic),

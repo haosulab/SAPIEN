@@ -5,6 +5,7 @@
 #include <fstream>
 #include <memory>
 #include <spdlog/spdlog.h>
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include <sstream>
 
 #ifdef _PROFILE
@@ -33,8 +34,7 @@ PxErrorCode::Enum SapienErrorCallback::getLastErrorCode() {
 }
 
 Simulation::Simulation(uint32_t nthread) : mThreadCount(nthread), mMeshManager(this) {
-  auto logger = std::make_shared<spdlog::logger>("SAPIEN");
-  spdlog::register_logger(logger);
+  auto logger = spdlog::stdout_color_mt("SAPIEN");
 
 #ifdef _PROFILE
   profiler::startListen();
