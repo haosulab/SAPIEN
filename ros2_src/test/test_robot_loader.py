@@ -1,10 +1,8 @@
 # import sapien.core as sapien
 import sys
-import pysapien_ros2
+import sapien.core as sapien
 import numpy as np
-
-sapien = pysapien_ros2.core
-ros2 = pysapien_ros2.ros2
+import sapien.ros2 as ros2
 
 
 def substitute_path(string: str, path):

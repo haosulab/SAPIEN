@@ -1,5 +1,4 @@
 import os
-import re
 import sys
 import platform
 import subprocess
@@ -33,18 +32,13 @@ class CMakeBuild(build_ext):
             raise RuntimeError("CMake must be installed to build the following extensions: " +
                                ", ".join(e.name for e in self.extensions))
 
-        if platform.system() == "Windows":
-            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
-            if cmake_version < '3.12.0':
-                raise RuntimeError("CMake >= 3.12.0 is required on Windows")
-
         for ext in self.extensions:
             self.build_extension(ext)
 
     def build_extension(self, ext):
         original_full_path = self.get_ext_fullpath(ext.name)
         extdir = os.path.abspath(os.path.dirname(original_full_path))
-        extdir = os.path.join(extdir, self.distribution.get_name(), "core")
+        extdir = os.path.join(extdir, ext.name, "core")
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
 
         if args.optix_home:
@@ -67,7 +61,7 @@ class CMakeBuild(build_ext):
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.', "--target", "pysapien"] + build_args, cwd=self.build_temp)
+        subprocess.check_call(['cmake', '--build', '.', "--target", "pysapien_ros2"] + build_args, cwd=self.build_temp)
 
         glsl_target_path = os.path.join(self.build_lib, 'sapien', 'glsl_shader')
         if os.path.exists(glsl_target_path):
@@ -81,8 +75,20 @@ class CMakeBuild(build_ext):
                 shutil.rmtree(ptx_target_path)
             shutil.copytree(os.path.join(self.build_temp, 'ptx'), ptx_target_path)
 
+        # Different from sapien, soft link python so in ros2 directory
+        files = os.listdir(extdir)
+        for file in files:
+            if file.endswith(".so"):
+                print("Soft link {}".format(file))
+                break
+
 
 def check_version_info():
+    if "ROS_DISTRO" in os.environ:
+        print("Build ROS2 support with version {}".format(os.environ["ROS_DISTRO"]))
+    else:
+        print("No ROS2 detected, do you forget to source the setup file?")
+
     try:
         git_revision = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").split("\n")[0]
         git_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref",
@@ -119,14 +125,14 @@ def read_requirements():
 
 
 # Data files for packaging
-project_python_home_dir = os.path.join("python", "py_package")
+project_python_home_dir = os.path.join("python", "py_ros2_package")
 sapien_data = ["glsl_shader/*/*"]
 package_data = {
     "sapien": sapien_data,
     "sapien.core": ["__init__.pyi"]
 }
 
-setup(name="sapien",
+setup(name="sapien_robot",
       version=check_version_info()[3],
       author='Sapien',
       python_requires='>=3.6',
@@ -155,7 +161,7 @@ setup(name="sapien",
       long_description=open("readme.md").read(),
       cmdclass=dict(build_ext=CMakeBuild),
       zip_safe=False,
-      packages=["sapien", "sapien.core", "sapien.asset"],
+      packages=["sapien", "sapien.core", "sapien.asset", "sapien.ros2"],
       keywords="robotics simulator dataset articulation partnet",
       url="https://sapien.ucsd.edu",
       project_urls={"Documentation": "https://sapien.ucsd.edu/docs"},

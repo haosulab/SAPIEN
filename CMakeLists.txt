@@ -214,8 +214,6 @@ if (ROS)
         add_executable(manual_PS3 manualtest/PS3ROSTest.cpp)
         target_link_libraries(manual_PS3 sapien_controller)
 
-        add_executable(test_ros2 ros2_src/test/test_sapien_ros2.cpp)
-        target_link_libraries(test_ros2 sapien_robot_handle)
         add_executable(test_ros2_robot_descriptor ros2_src/test/test_robot_descriptor.cpp)
         target_link_libraries(test_ros2_robot_descriptor sapien_robot_handle)
 
