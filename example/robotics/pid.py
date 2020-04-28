@@ -64,7 +64,7 @@ def robot_basic_control_demo(use_internal_pd, use_external_pid):
 
     pids = []
     pid_parameters = [(40, 5, 2), (40, 5.0, 2), (40, 5.0, 2), (20, 5.0, 2), (5, 0.8, 2), (5, 0.8, 2),
-                      (5, 0.8, 2), (0.1, 0, 0.02), (0.1, 0, 0.02), (0.1, 0, 0.02), (0.1, 0, 0.02), (0.1, 0, 0.02),
+                      (5, 0.8, 0.4), (0.1, 0, 0.02), (0.1, 0, 0.02), (0.1, 0, 0.02), (0.1, 0, 0.02), (0.1, 0, 0.02),
                       (0.1, 0, 0.02)]
     active_joints = [joint for joint in robot.get_joints() if joint.get_dof() > 0]
     for i, joint in enumerate(active_joints):
