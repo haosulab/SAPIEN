@@ -33,7 +33,8 @@ PxErrorCode::Enum SapienErrorCallback::getLastErrorCode() {
   return code;
 }
 
-Simulation::Simulation(uint32_t nthread) : mThreadCount(nthread), mMeshManager(this) {
+Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranceSpeed)
+    : mThreadCount(nthread), mMeshManager(this) {
   auto logger = spdlog::stdout_color_mt("SAPIEN");
 
 #ifdef _PROFILE
@@ -58,7 +59,11 @@ Simulation::Simulation(uint32_t nthread) : mThreadCount(nthread), mMeshManager(t
         PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true, mPvd);
   }
 #else
-  mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true);
+  PxTolerancesScale toleranceScale;
+  toleranceScale.length = toleranceLength;
+  toleranceScale.speed = toleranceSpeed;
+
+  mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, toleranceScale, true);
 #endif
 
   if (!mPhysicsSDK) {
@@ -67,7 +72,7 @@ Simulation::Simulation(uint32_t nthread) : mThreadCount(nthread), mMeshManager(t
   }
 
   mCooking =
-      PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, PxCookingParams(PxTolerancesScale()));
+      PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, PxCookingParams(toleranceScale));
   if (!mCooking) {
     spdlog::get("SAPIEN")->critical("Failed to create PhysX Cooking");
     throw std::runtime_error("Simulation Creation Failed");

@@ -63,7 +63,7 @@ public:
 #endif
 
 public:
-  explicit Simulation(uint32_t nthread = 0);
+  explicit Simulation(uint32_t nthread = 0, PxReal toleranceLength=0.1f, PxReal toleranceSpeed=0.2f);
   ~Simulation();
 
   void setRenderer(Renderer::IPxrRenderer *renderer);
