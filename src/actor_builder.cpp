@@ -77,7 +77,8 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMate
 }
 
 void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &size,
-                                const Renderer::PxrMaterial &material, std::string const &name) {
+                                            const Renderer::PxrMaterial &material,
+                                            std::string const &name) {
   ActorBuilderVisualRecord r;
   r.type = ActorBuilderVisualRecord::Type::Box;
   r.pose = pose;
@@ -88,9 +89,10 @@ void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec
   mVisualRecord.push_back(r);
 }
 
-void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal radius, PxReal halfLength,
-                                    const Renderer::PxrMaterial &material,
-                                    std::string const &name) {
+void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal radius,
+                                                PxReal halfLength,
+                                                const Renderer::PxrMaterial &material,
+                                                std::string const &name) {
   ActorBuilderVisualRecord r;
   r.type = ActorBuilderVisualRecord::Type::Capsule;
   r.pose = pose;
@@ -103,8 +105,8 @@ void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal 
 }
 
 void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal radius,
-                                   const Renderer::PxrMaterial &material,
-                                   std::string const &name) {
+                                               const Renderer::PxrMaterial &material,
+                                               std::string const &name) {
   ActorBuilderVisualRecord r;
   r.type = ActorBuilderVisualRecord::Type::Sphere;
   r.pose = pose;
@@ -184,8 +186,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       PxShape *shape =
           getSimulation()->mPhysicsSDK->createShape(PxBoxGeometry(r.scale), *material, true);
       if (!shape) {
-        spdlog::get("SAPIEN")->critical("Failed to build box with scale {}, {}, {}", r.scale.x, r.scale.y,
-                         r.scale.z);
+        spdlog::get("SAPIEN")->critical("Failed to build box with scale {}, {}, {}", r.scale.x,
+                                        r.scale.y, r.scale.z);
         throw std::runtime_error("Failed to create shape");
       }
       shape->setLocalPose(r.pose);
@@ -198,7 +200,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
           PxCapsuleGeometry(r.radius, r.length), *material, true);
       if (!shape) {
-        spdlog::get("SAPIEN")->critical("Failed to build capsule with radius {}, length {}", r.radius, r.length);
+        spdlog::get("SAPIEN")->critical("Failed to build capsule with radius {}, length {}",
+                                        r.radius, r.length);
         throw std::runtime_error("Failed to create shape");
       }
       shape->setLocalPose(r.pose);
@@ -345,7 +348,8 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
       break;
     }
     default:
-      spdlog::get("SAPIEN")->error("Failed to create collision shape rendering: unrecognized geometry type.");
+      spdlog::get("SAPIEN")->error(
+          "Failed to create collision shape rendering: unrecognized geometry type.");
       continue;
     }
 
@@ -466,6 +470,7 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
 }
 
 SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render, PxMaterial *material,
+                                        Renderer::PxrMaterial const &renderMaterial,
                                         std::string const &name) {
   physx_id_t linkId = mScene->mLinkIdGenerator.next();
   material = material ? material : getSimulation()->mDefaultMaterial;
@@ -484,8 +489,8 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render, PxMaterial
 
   std::vector<Renderer::IPxrRigidbody *> renderBodies;
   if (render && mScene->getRendererScene()) {
-    auto body = mScene->mRendererScene->addRigidbody(PxGeometryType::ePLANE, {10, 10, 10},
-                                                     PxVec3{1, 1, 1});
+    auto body =
+        mScene->mRendererScene->addRigidbody(PxGeometryType::ePLANE, {10, 10, 10}, renderMaterial);
     body->setInitialPose(PxTransform({0, 0, altitude}, PxIdentity));
     renderBodies.push_back(body);
 

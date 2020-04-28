@@ -135,6 +135,7 @@ public:
   SActorStatic *buildStatic(std::string const &name = "") const;
 
   SActorStatic *buildGround(PxReal altitude, bool render, PxMaterial *material,
+                            Renderer::PxrMaterial const & renderMaterial = {},
                             std::string const &name = "");
 
 protected:

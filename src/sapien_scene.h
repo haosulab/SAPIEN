@@ -8,6 +8,7 @@
 #include <memory>
 #include <thread>
 #include <vector>
+#include "renderer/render_interface.h"
 
 namespace sapien {
 class SActor;
@@ -131,7 +132,8 @@ public:
   void stepWait();
 
   void updateRender(); // call to sync physics world to render world
-  void addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr);
+  void addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr,
+                 Renderer::PxrMaterial const &renderMaterial = {});
 
 private:
   std::vector<SContact> mContacts;

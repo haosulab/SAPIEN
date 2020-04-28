@@ -384,8 +384,9 @@ void SScene::updateRender() {
   }
 }
 
-void SScene::addGround(PxReal altitude, bool render, PxMaterial *material) {
-  createActorBuilder()->buildGround(altitude, render, material, "ground");
+void SScene::addGround(PxReal altitude, bool render, PxMaterial *material,
+                       Renderer::PxrMaterial const &renderMaterial) {
+  createActorBuilder()->buildGround(altitude, render, material, renderMaterial, "ground");
 }
 
 void SScene::addContact(SContact const &contact) { mContacts.push_back(contact); }

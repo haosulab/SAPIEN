@@ -420,7 +420,9 @@ void buildSapien(py::module &m) {
 
 
   //======== Simulation ========//
-  PyEngine.def(py::init<>())
+  PyEngine.def(py::init<uint32_t, PxReal, PxReal>(), py::arg("n_thread")=0,
+               py::arg("tolerance_length") = 0.1f,
+               py::arg("tolerance_speed") = 0.2f)
       .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
       .def("create_physical_material", &Simulation::createPhysicalMaterial,
@@ -469,7 +471,7 @@ void buildSapien(py::module &m) {
       .def("step", &SScene::step)
       .def("update_render", &SScene::updateRender)
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
-           py::arg("material") = nullptr)
+           py::arg("material") = nullptr, py::arg("render_material") = Renderer::PxrMaterial())
       .def("get_contacts", &SScene::getContacts)
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
       .def("get_all_articulations", &SScene::getAllArticulations,
@@ -897,27 +899,24 @@ void buildSapien(py::module &m) {
           py::arg("name") = "")
       .def(
           "add_sphere_visual",
-          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
-             std::string const &name) {
-            a.addSphereVisual(pose, radius, array2vec3(color), name);
-          },
-          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
-      .def(
-          "add_sphere_visual_complex",
-          [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
-             const Renderer::PxrMaterial &mat,
-             std::string const &name) { a.addSphereVisualWithMaterial(pose, radius, mat, name); },
-          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
-      .def(
-          "add_visual_from_file",
-          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> scale, std::string const &name) {
-            a.addVisualFromFile(filename, pose, array2vec3(scale), name);
-          },
-          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,std::string const &name) {
+             a.addSphereVisual(pose, radius, array2vec3(color), name);
+           },
+           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+           py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+      .def("add_sphere_visual_complex",
+           [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
+              const Renderer::PxrMaterial &mat,
+              std::string const &name) { a.addSphereVisualWithMaterial(pose, radius, mat, name); },
+           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+           py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
+      .def("add_visual_from_file",
+           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
+              py::array_t<PxReal> scale, std::string const &name) {
+             a.addVisualFromFile(filename, pose, array2vec3(scale), name);
+           },
+           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
 
       .def("set_collision_group", &ActorBuilder::setCollisionGroup)
       .def("add_collision_group", &ActorBuilder::addCollisionGroup)
@@ -937,35 +936,33 @@ void buildSapien(py::module &m) {
       .def("set_parent", &LinkBuilder::setParent)
       .def("set_name", &LinkBuilder::setName)
       .def("set_joint_name", &LinkBuilder::setJointName)
-      .def(
-          "set_joint_properties",
-          [](LinkBuilder &b, PxArticulationJointType::Enum jointType,
-             py::array_t<PxReal> const &limits, PxTransform const &parentPose,
-             PxTransform const &childPose, PxReal friction, PxReal damping) {
-            std::vector<std::array<PxReal, 2>> l;
-            if (limits.ndim() == 2) {
-              if (limits.shape(1) != 2) {
-                throw std::runtime_error("Joint limit should have shape [dof, 2]");
-              }
-              for (uint32_t i = 0; i < limits.size() / 2; ++i) {
-                l.push_back({limits.at(i, 0), limits.at(i, 1)});
-              }
-            } else if (limits.ndim() != 1) {
-              throw std::runtime_error("Joint limit must be 2D array");
-            }
-            b.setJointProperties(jointType, l, parentPose, childPose, friction, damping);
-          },
-          py::arg("joint_type"), py::arg("limits"),
-          py::arg("parent_pose") = PxTransform(PxIdentity),
-          py::arg("child_pose") = PxTransform(PxIdentity), py::arg("friction") = 0,
-          py::arg("damping") = 0);
+      .def("set_joint_properties",
+           [](LinkBuilder &b, PxArticulationJointType::Enum jointType,
+              py::array_t<PxReal> const &limits, PxTransform const &parentPose,
+              PxTransform const &childPose, PxReal friction, PxReal damping) {
+             std::vector<std::array<PxReal, 2>> l;
+             if (limits.ndim() == 2) {
+               if (limits.shape(1) != 2) {
+                 throw std::runtime_error("Joint limit should have shape [dof, 2]");
+               }
+               for (uint32_t i = 0; i < limits.size() / 2; ++i) {
+                 l.push_back({limits.at(i, 0), limits.at(i, 1)});
+               }
+             } else if (limits.ndim() != 1) {
+               throw std::runtime_error("Joint limit must be 2D array");
+             }
+             b.setJointProperties(jointType, l, parentPose, childPose, friction, damping);
+           },
+           py::arg("joint_type"), py::arg("limits"),
+           py::arg("parent_pose") = PxTransform(PxIdentity),
+           py::arg("child_pose") = PxTransform(PxIdentity), py::arg("friction") = 0,
+           py::arg("damping") = 0);
 
   PyArticulationBuilder.def("set_scene", &ArticulationBuilder::setScene, py::arg("scene"))
       .def("get_scene", &ArticulationBuilder::getScene)
-      .def(
-          "create_link_builder",
-          [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
-          py::arg("parent") = nullptr, py::return_value_policy::reference)
+      .def("create_link_builder",
+           [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
+           py::arg("parent") = nullptr, py::return_value_policy::reference)
       .def("build", &ArticulationBuilder::build, py::arg("fix_base") = false,
            py::return_value_policy::reference)
       .def("build_kinematic", &ArticulationBuilder::buildKinematic,
