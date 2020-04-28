@@ -97,7 +97,6 @@ public:
 
 private:
   PxReal mTimestep = 1 / 500.f;
-  std::thread mStepThread;
 
   struct MountedCamera {
     SActorBase *actor;

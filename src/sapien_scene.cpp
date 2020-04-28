@@ -334,9 +334,27 @@ void SScene::step() {
   emit(event);
 }
 
-void SScene::stepAsync() { mStepThread = std::thread(&SScene::step, this); }
+void SScene::stepAsync() {
+  clearContacts();
+  for (auto &a : mActors) {
+    a->prestep();
+  }
+  for (auto &a : mArticulations) {
+    a->prestep();
+  }
+  for (auto &a : mKinematicArticulations) {
+    a->prestep();
+  }
+  mPxScene->simulate(mTimestep);
+}
 
-void SScene::stepWait() { mStepThread.join(); }
+void SScene::stepWait() {
+  while (!mPxScene->fetchResults(true)) {
+  }
+  EventStep event;
+  event.timeStep = getTimestep();
+  emit(event);
+}
 
 void SScene::updateRender() {
 #ifdef _PROFILE

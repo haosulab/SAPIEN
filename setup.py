@@ -15,6 +15,7 @@ from distutils.version import LooseVersion
 parser = argparse.ArgumentParser()
 parser.add_argument('--optix-home', type=str, default=None)
 parser.add_argument('--cuda-include-path', type=str, default=None)
+parser.add_argument('--profile', action='store_true')
 args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
 
