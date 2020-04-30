@@ -307,6 +307,20 @@ std::vector<physx::PxReal> SArticulation::computeInverseDynamics(const std::vect
   return I2E(result);
 }
 
+Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+SArticulation::computeMassMatrix() {
+  using namespace Eigen;
+  mPxArticulation->commonInit();
+  mPxArticulation->computeGeneralizedMassMatrix(*mCache);
+
+  int mDof = dof();
+
+  Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> originMass =
+                                       Map<Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>>(mCache->massMatrix, mDof, mDof);
+
+  return mColumnPermutationI2E.transpose() * originMass * mColumnPermutationI2E;
+}
+
 void SArticulation::prestep() {
   auto time = mScene->getTimestep();
   EventArticulationStep s;

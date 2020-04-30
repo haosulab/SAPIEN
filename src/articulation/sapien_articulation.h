@@ -76,6 +76,7 @@ public:
                                                  bool external = true);
   std::vector<physx::PxReal> computeInverseDynamics(const std::vector<PxReal> &qacc);
   std::vector<physx::PxReal> computeForwardDynamics(const std::vector<PxReal> &qf);
+  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> computeMassMatrix();
 
   /* Kinematics Functions */
   Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> computeJacobianMatrix();

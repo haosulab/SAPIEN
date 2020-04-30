@@ -785,6 +785,7 @@ void buildSapien(py::module &m) {
              auto qacc = a.computeForwardDynamics(qf);
              return py::array_t<PxReal>(qacc.size(), qacc.data());
            })
+      .def("compute_mass_matrix", &SArticulation::computeMassMatrix)
       .def("compute_jacobian", &SArticulation::computeJacobianMatrix)
       .def("pack", &SArticulation::packData)
       .def("unpack", [](SArticulation &a, const py::array_t<PxReal> &arr) {
