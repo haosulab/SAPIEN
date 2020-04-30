@@ -99,9 +99,9 @@ void CartesianVelocityController::moveTwist(const std::array<double, 6> &vec, Mo
   if (type < 4) {
     logger->warn("Only twist type is support for move twist function");
     return;
-  } else if (type == 4) {
+  } else if (type == MoveType::BodyTwist) {
     COMPUTE_VELOCITY_AND_INTEGRATE(mEEName);
-  } else {
+  } else if (type == MoveType::SpatialTwist) {
     twist = transformTwist(twist, mBaseName);
     COMPUTE_VELOCITY_AND_INTEGRATE(mEEName)
   }
@@ -120,7 +120,6 @@ void CartesianVelocityController::moveTwist(const std::array<double, 6> &vec, Mo
 }
 void sapien::ros2::CartesianVelocityController::synchronizeRealRobotState() {
   // Copy global real time robot state to local robot state
-  // TODO: do something when simulation timestep change
   mRobotState->copyJointGroupPositions(mJointModelGroup, mJointValues);
   mLocalRobotState.setJointGroupPositions(mJointModelGroup, mJointValues);
 }

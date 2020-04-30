@@ -32,8 +32,8 @@ enum MoveType {
   WorldRotate = 1,
   LocalTranslate = 2,
   LocalRotate = 3,
-  BodyTwist = 4,
-  SpatialTwist = 5
+  SpatialTwist = 4,
+  BodyTwist = 5
 };
 
 class CartesianVelocityController : public DelayedControllerBase {
