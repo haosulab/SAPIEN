@@ -195,6 +195,7 @@ std::vector<std::vector<int>> splitMesh(aiMesh *mesh) {
 
     // new group
     groups.emplace_back();
+    groups.back().push_back(i);
 
     // traverse group
     visited[i] = 1;
@@ -236,7 +237,15 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
 
   // import obj using assimp
   Assimp::Importer importer;
-  uint32_t flags = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices;
+  importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
+                              aiComponent_NORMALS |
+                              aiComponent_TEXCOORDS |
+                              aiComponent_COLORS |
+                              aiComponent_TANGENTS_AND_BITANGENTS | 
+                              aiComponent_MATERIALS |
+                              aiComponent_TEXTURES);
+
+  uint32_t flags = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_RemoveComponent;
 
   const aiScene *scene = importer.ReadFile(filename, flags);
   if (!scene) {
@@ -251,6 +260,7 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
 
     spdlog::get("SAPIEN")->info("Decomposed mesh {} into {} components", i + 1, vertexGroups.size());
     for (auto &g : vertexGroups) {
+      spdlog::get("SAPIEN")->info("vertex count: {}", g.size());
       std::vector<PxVec3> vertices;
       for (auto v : g) {
         auto vertex = mesh->mVertices[v];
