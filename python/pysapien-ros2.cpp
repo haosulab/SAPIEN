@@ -86,9 +86,11 @@ PYBIND11_MODULE(pysapien_ros2, m) {
   // The enum_::export_values() function exports the enum entries into the parent scope,
   // which should be skipped for newer C++11-style strongly typed enums.
   PyMoveType.value("WORLD_TRANSLATE", MoveType::WorldTranslate)
-      .value("WORLD_ROTATE", MoveType::WorldTranslate)
-      .value("LOCAL_TRANSLATE", MoveType::WorldTranslate)
-      .value("LOCAL_ROTATE", MoveType::WorldTranslate);
+      .value("WORLD_ROTATE", MoveType::WorldRotate)
+      .value("LOCAL_TRANSLATE", MoveType::LocalTranslate)
+      .value("LOCAL_ROTATE", MoveType::LocalRotate)
+      .value("BODY_TWIST", MoveType::BodyTwist)
+      .value("SPATIAL_TWIST", MoveType::SpatialTwist);
 
   PyJointVelocityController
       .def("move_joint",
@@ -115,8 +117,8 @@ PYBIND11_MODULE(pysapien_ros2, m) {
                ss << "Cartesian velocity command should have size 3, but given " << vec.size();
                throw std::runtime_error(ss.str());
              }
-             std::array<double, 6> v = {*vec.data(),       *(vec.data() + 1), *(vec.data() + 2),
-                                        *(vec.data() + 3), *(vec.data() + 4), *(vec.data() + 5)};
+             std::array<double, 6> v = {vec.at(0), vec.at(1), vec.at(2),
+                                        vec.at(3), vec.at(4), vec.at(5)};
              c.moveTwist(v, type);
            })
       .def("move_cartesian",

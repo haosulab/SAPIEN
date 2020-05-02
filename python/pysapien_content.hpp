@@ -418,14 +418,14 @@ void buildSapien(py::module &m) {
 #endif
       ;
 
-
   //======== Simulation ========//
-  PyEngine.def(py::init<uint32_t, PxReal, PxReal>(), py::arg("n_thread")=0,
-               py::arg("tolerance_length") = 0.1f,
-               py::arg("tolerance_speed") = 0.2f)
+  PyEngine
+      .def(py::init<uint32_t, PxReal, PxReal>(), py::arg("n_thread") = 0,
+           py::arg("tolerance_length") = 0.1f, py::arg("tolerance_speed") = 0.2f)
       .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
       .def("create_physical_material", &Simulation::createPhysicalMaterial,
+           py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"),
            py::return_value_policy::reference)
       .def(
           "create_scene",
@@ -769,7 +769,7 @@ void buildSapien(py::module &m) {
             auto force = a.computePassiveForce(gravity, coriolisAndCentrifugal, external);
             return py::array_t<PxReal>(force.size(), force.data());
           },
-          py::arg("gravity") = true, py::arg("coriolisAndCentrifugal") = true,
+          py::arg("gravity") = true, py::arg("coriolis_and_centrifugal") = true,
           py::arg("external") = true)
       .def("compute_inverse_dynamics",
            [](SArticulation &a, const py::array_t<PxReal> &arr) {
@@ -937,33 +937,35 @@ void buildSapien(py::module &m) {
       .def("set_parent", &LinkBuilder::setParent)
       .def("set_name", &LinkBuilder::setName)
       .def("set_joint_name", &LinkBuilder::setJointName)
-      .def("set_joint_properties",
-           [](LinkBuilder &b, PxArticulationJointType::Enum jointType,
-              py::array_t<PxReal> const &limits, PxTransform const &parentPose,
-              PxTransform const &childPose, PxReal friction, PxReal damping) {
-             std::vector<std::array<PxReal, 2>> l;
-             if (limits.ndim() == 2) {
-               if (limits.shape(1) != 2) {
-                 throw std::runtime_error("Joint limit should have shape [dof, 2]");
-               }
-               for (uint32_t i = 0; i < limits.size() / 2; ++i) {
-                 l.push_back({limits.at(i, 0), limits.at(i, 1)});
-               }
-             } else if (limits.ndim() != 1) {
-               throw std::runtime_error("Joint limit must be 2D array");
-             }
-             b.setJointProperties(jointType, l, parentPose, childPose, friction, damping);
-           },
-           py::arg("joint_type"), py::arg("limits"),
-           py::arg("parent_pose") = PxTransform(PxIdentity),
-           py::arg("child_pose") = PxTransform(PxIdentity), py::arg("friction") = 0,
-           py::arg("damping") = 0);
+      .def(
+          "set_joint_properties",
+          [](LinkBuilder &b, PxArticulationJointType::Enum jointType,
+             py::array_t<PxReal> const &limits, PxTransform const &parentPose,
+             PxTransform const &childPose, PxReal friction, PxReal damping) {
+            std::vector<std::array<PxReal, 2>> l;
+            if (limits.ndim() == 2) {
+              if (limits.shape(1) != 2) {
+                throw std::runtime_error("Joint limit should have shape [dof, 2]");
+              }
+              for (uint32_t i = 0; i < limits.size() / 2; ++i) {
+                l.push_back({limits.at(i, 0), limits.at(i, 1)});
+              }
+            } else if (limits.ndim() != 1) {
+              throw std::runtime_error("Joint limit must be 2D array");
+            }
+            b.setJointProperties(jointType, l, parentPose, childPose, friction, damping);
+          },
+          py::arg("joint_type"), py::arg("limits"),
+          py::arg("parent_pose") = PxTransform(PxIdentity),
+          py::arg("child_pose") = PxTransform(PxIdentity), py::arg("friction") = 0,
+          py::arg("damping") = 0);
 
   PyArticulationBuilder.def("set_scene", &ArticulationBuilder::setScene, py::arg("scene"))
       .def("get_scene", &ArticulationBuilder::getScene)
-      .def("create_link_builder",
-           [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
-           py::arg("parent") = nullptr, py::return_value_policy::reference)
+      .def(
+          "create_link_builder",
+          [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
+          py::arg("parent") = nullptr, py::return_value_policy::reference)
       .def("build", &ArticulationBuilder::build, py::arg("fix_base") = false,
            py::return_value_policy::reference)
       .def("build_kinematic", &ArticulationBuilder::buildKinematic,
