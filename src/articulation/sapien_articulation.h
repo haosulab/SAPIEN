@@ -90,7 +90,7 @@ public:
                                                              SLink *targetFrame);
   Matrix<PxReal, 6, 6, RowMajor> computeAdjointMatrix(uint32_t sourceLinkId,
                                                       uint32_t targetLinkId);
-  VectorXf computeDiffIk(const VectorXf &twist, uint32_t commandedLinkId,
+  VectorXf computeDiffIk(const VectorXd &twist, uint32_t commandedLinkId,
                          const std::vector<uint32_t> &activeJointsId = {});
 
   /* Save and Load */

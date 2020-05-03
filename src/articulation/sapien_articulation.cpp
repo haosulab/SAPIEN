@@ -242,7 +242,7 @@ std::vector<SJoint *> SArticulation::getSJoints() {
 std::vector<SJoint *> SArticulation::getActiveJoints() {
   std::vector<SJoint *> activeJoints(dof());
   for (auto &j : mJoints) {
-    for (auto axis : j->getAxes()) {
+    for (size_t i = 0; i < j->getAxes().size(); ++i) {
       activeJoints.push_back(j.get());
     }
   }
@@ -487,7 +487,7 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eALL);
 }
 
-Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::VectorXf &spatialTwist,
+Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::VectorXd &spatialTwist,
                                              uint32_t commandedLinkId,
                                              const std::vector<uint32_t> &activeQIds) {
   auto logger = spdlog::get("SAPIEN");
@@ -525,7 +525,7 @@ Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::VectorXf &spatialTwist
   for (std::size_t i = 0; i < static_cast<std::size_t>(s.rows()); ++i) {
     invS(i) = fabs(s(i)) > maxS * epsilon ? 1.0 / s(i) : 0.0;
   }
-  qvel = v * invS.asDiagonal() * u.transpose() * spatialTwist;
+  qvel = v * invS.asDiagonal() * u.transpose() * spatialTwist.cast<PxReal>();
   return qvel;
 }
 
@@ -533,10 +533,10 @@ Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor>
 SArticulation::computeAdjointMatrix(SLink *sourceFrame, SLink *targetFrame) {
   auto mat44 = computeRelativeTransformation(sourceFrame, targetFrame);
   Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> adjoint;
-  adjoint.block<3, 3>(0, 3) = mat44.block<3, 3>(0, 0);
+  adjoint.block<3, 3>(0, 0) = mat44.block<3, 3>(0, 0);
   adjoint.block<3, 3>(3, 3) = mat44.block<3, 3>(0, 0);
   Eigen::Vector3f position = mat44.block<3, 1>(0, 3);
-  adjoint.block<3, 3>(3, 0) = skewSymmetric(position) * mat44.block<3, 3>(0, 0);
+  adjoint.block<3, 3>(0, 3) = skewSymmetric(position) * mat44.block<3, 3>(0, 0);
   return adjoint;
 }
 
@@ -549,7 +549,7 @@ SArticulation::computeRelativeTransformation(SLink *sourceFrame, SLink *targetFr
   Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> mat44;
   Eigen::Quaternionf quat(relative.q.w, relative.q.x, relative.q.y, relative.q.z);
   mat44.block<3, 3>(0, 0) = quat.normalized().toRotationMatrix();
-  mat44.block<3, 1>(0, 3) = Eigen::Vector3f(relative.p.x, relative.p.y, relative.p.z);
+  mat44.block<4, 1>(0, 3) = Eigen::Vector4f(relative.p.x, relative.p.y, relative.p.z, 1);
   return mat44;
 }
 Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>

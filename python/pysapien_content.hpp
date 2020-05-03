@@ -148,7 +148,7 @@ void buildSapien(py::module &m) {
       .def("to_transformation_matrix",
            [](PxTransform &t) {
              t.q.normalize();
-             Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> mat44;
+             Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> mat44;
              Eigen::Quaternionf q(t.q.w, t.q.x, t.q.y, t.q.z);
              mat44.block<3, 3>(0, 0) = q.normalized().toRotationMatrix();
              mat44.block<3, 1>(0, 3) = Eigen::Vector3f(t.p.x, t.p.y, t.p.z);
@@ -419,13 +419,14 @@ void buildSapien(py::module &m) {
       .def("set_mode_perspective", &Renderer::OptifuserCamera::changeModeToPerspective,
            py::arg("fovy") = glm::radians(35.f))
 #ifdef _USE_OPTIX
-    .def("take_raytraced_picture",
-           [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount) {
-             return py::array_t<PxReal>(
-                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                 cam.takeRaytracedPicture(samplesPerPixel, reflectionCount).data());
-           },
-           py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4)
+      .def(
+          "take_raytraced_picture",
+          [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount) {
+            return py::array_t<PxReal>(
+                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+                cam.takeRaytracedPicture(samplesPerPixel, reflectionCount).data());
+          },
+          py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4)
 #endif
       ;
 
@@ -804,9 +805,10 @@ void buildSapien(py::module &m) {
            py::overload_cast<uint32_t, uint32_t>(&SArticulation::computeRelativeTransformation),
            py::arg("source_link_ik"), py::arg("target_link_id"))
       .def("compute_adjoint_matrix",
-           py::overload_cast<uint32_t, uint32_t>(&SArticulation::computeRelativeTransformation),
+           py::overload_cast<uint32_t, uint32_t>(&SArticulation::computeAdjointMatrix),
            py::arg("source_link_ik"), py::arg("target_link_id"))
-      .def("compute_diff_ik", &SArticulation::computeDiffIk)
+      .def("compute_diff_ik", &SArticulation::computeDiffIk, py::arg("spatial_twist"),
+           py::arg("commanded_link_id"), py::arg("active_joint_ids") = std::vector<uint32_t>())
       .def("pack", &SArticulation::packData)
       .def("unpack", [](SArticulation &a, const py::array_t<PxReal> &arr) {
         a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
@@ -920,24 +922,27 @@ void buildSapien(py::module &m) {
           py::arg("name") = "")
       .def(
           "add_sphere_visual",
-          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,std::string const &name) {
-             a.addSphereVisual(pose, radius, array2vec3(color), name);
-           },
-           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-           py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
-      .def("add_sphere_visual_complex",
-           [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
-              const Renderer::PxrMaterial &mat,
-              std::string const &name) { a.addSphereVisualWithMaterial(pose, radius, mat, name); },
-           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-           py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
-      .def("add_visual_from_file",
-           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-              py::array_t<PxReal> scale, std::string const &name) {
-             a.addVisualFromFile(filename, pose, array2vec3(scale), name);
-           },
-           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
-           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
+             std::string const &name) {
+            a.addSphereVisual(pose, radius, array2vec3(color), name);
+          },
+          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+      .def(
+          "add_sphere_visual_complex",
+          [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
+             const Renderer::PxrMaterial &mat,
+             std::string const &name) { a.addSphereVisualWithMaterial(pose, radius, mat, name); },
+          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+          py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
+      .def(
+          "add_visual_from_file",
+          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
+             py::array_t<PxReal> scale, std::string const &name) {
+            a.addVisualFromFile(filename, pose, array2vec3(scale), name);
+          },
+          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
 
       .def("set_collision_group", &ActorBuilder::setCollisionGroup)
       .def("add_collision_group", &ActorBuilder::addCollisionGroup)
