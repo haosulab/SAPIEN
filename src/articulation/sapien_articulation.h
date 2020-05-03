@@ -80,6 +80,16 @@ public:
 
   /* Kinematics Functions */
   Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> computeJacobianMatrix();
+  static Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>
+  computeRelativeTransformation(SLink *sourceFrame, SLink *targetFrame);
+  Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>
+  computeRelativeTransformation(uint32_t sourceLinkId, uint32_t targetLinkId);
+  Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> computeAdjointMatrix(SLink *sourceFrame,
+                                                                    SLink *targetFrame);
+  Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> computeAdjointMatrix(uint32_t sourceLinkId,
+                                                                    uint32_t targetLinkId);
+  Eigen::VectorXf computeDiffIk(const Eigen::VectorXf &twist, uint32_t commandedLinkId,
+                                const std::vector<uint32_t> &activeJointsId = {});
 
   std::vector<PxReal> packData();
   void unpackData(std::vector<PxReal> const &data);

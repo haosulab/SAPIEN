@@ -8,12 +8,18 @@
 #define CHECK_SIZE(v)                                                                             \
   {                                                                                               \
     if ((v).size() != dof()) {                                                                    \
-      spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");                      \
+      spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");       \
       return;                                                                                     \
     }                                                                                             \
   }
 
 namespace sapien {
+
+static Eigen::Matrix3f skewSymmetric(Eigen::Vector3f t) {
+  Eigen::Matrix3f hatMatrix;
+  hatMatrix << 0, -t(2), t(1), t(2), 0, -t(0), -t(1), t(0), 0;
+  return hatMatrix;
+};
 
 std::vector<SLinkBase *> SArticulation::getBaseLinks() {
   std::vector<SLinkBase *> result;
@@ -316,7 +322,7 @@ SArticulation::computeMassMatrix() {
   int mDof = dof();
 
   Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> originMass =
-                                       Map<Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>>(mCache->massMatrix, mDof, mDof);
+      Map<Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>>(mCache->massMatrix, mDof, mDof);
 
   return mColumnPermutationI2E.transpose() * originMass * mColumnPermutationI2E;
 }
@@ -418,8 +424,9 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
                          + nlinks * 12 // link size
                          + 19          // root size
   ) {
-    spdlog::get("SAPIEN")->error("Failed to unpack articulation data: {} numbers expected but {} provided",
-                  ndof * 4 + nlinks * 12 + 19, data.size());
+    spdlog::get("SAPIEN")->error(
+        "Failed to unpack articulation data: {} numbers expected but {} provided",
+        ndof * 4 + nlinks * 12 + 19, data.size());
     return;
   }
 
@@ -470,7 +477,81 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eALL);
 }
 
-// namespace sapien
+Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::VectorXf &spatialTwist,
+                                             uint32_t commandedLinkId,
+                                             const std::vector<uint32_t> &activeQIds) {
+  auto logger = spdlog::get("SAPIEN");
+  auto numCol = activeQIds.empty() ? dof() : activeQIds.size();
+  Eigen::VectorXf qvel(numCol);
+
+  if (commandedLinkId == 0) {
+    logger->warn("Link with id 0 (root link) can not be a valid commanded link.");
+    return qvel;
+  }
+
+  auto denseJacobian = computeJacobianMatrix();
+  Eigen::MatrixXf jacobian = denseJacobian.block(commandedLinkId * 6 - 6, 0, 6, dof());
+  Eigen::MatrixXf reducedJacobian(jacobian);
+  if (!activeQIds.empty()) {
+    reducedJacobian.resize(6, numCol);
+    for (size_t i = 0; i < numCol; ++i) {
+      if (activeQIds[i] >= dof()) {
+        logger->warn("Articulation has {} joints, but given joint id {}", dof(), activeQIds[i]);
+        return qvel;
+      }
+      reducedJacobian.block<6, 1>(0, i) = jacobian.block<6, 1>(0, activeQIds[i]);
+    }
+  }
+
+  Eigen::JacobiSVD<Eigen::MatrixXf> svd_of_j(reducedJacobian,
+                                             Eigen::ComputeThinU | Eigen::ComputeThinV);
+  const Eigen::MatrixXf &u = svd_of_j.matrixU();
+  const Eigen::MatrixXf &v = svd_of_j.matrixV();
+  const Eigen::VectorXf &s = svd_of_j.singularValues();
+
+  Eigen::VectorXf invS = s;
+  static const float epsilon = std::numeric_limits<float>::epsilon();
+  double maxS = s[0];
+  for (std::size_t i = 0; i < static_cast<std::size_t>(s.rows()); ++i) {
+    invS(i) = fabs(s(i)) > maxS * epsilon ? 1.0 / s(i) : 0.0;
+  }
+  qvel = v * invS.asDiagonal() * u.transpose() * spatialTwist;
+  return qvel;
+}
+
+Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor>
+SArticulation::computeAdjointMatrix(SLink *sourceFrame, SLink *targetFrame) {
+  auto mat44 = computeRelativeTransformation(sourceFrame, targetFrame);
+  Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> adjoint;
+  adjoint.block<3, 3>(0, 3) = mat44.block<3, 3>(0, 0);
+  adjoint.block<3, 3>(3, 3) = mat44.block<3, 3>(0, 0);
+  Eigen::Vector3f position = mat44.block<3,1>(0,3);
+  adjoint.block<3, 3>(3, 0) = skewSymmetric(position) * mat44.block<3, 3>(0, 0);
+  return adjoint;
+}
+
+Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>
+SArticulation::computeRelativeTransformation(SLink *sourceFrame, SLink *targetFrame) {
+  auto s = sourceFrame->getPose();
+  auto t = targetFrame->getPose();
+  auto relative = t.getInverse().transform(s);
+
+  Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> mat44;
+  Eigen::Quaternionf quat(relative.q.w, relative.q.x, relative.q.y, relative.q.z);
+  mat44.block<3, 3>(0, 0) = quat.normalized().toRotationMatrix();
+  mat44.block<3, 1>(0, 3) = Eigen::Vector3f(relative.p.x, relative.p.y, relative.p.z);
+  return mat44;
+}
+Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>
+SArticulation::computeRelativeTransformation(uint32_t sourceLinkId, uint32_t targetLinkId) {
+  auto links = getSLinks();
+  return computeRelativeTransformation(links.at(sourceLinkId), links.at(targetLinkId));
+}
+Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor>
+SArticulation::computeAdjointMatrix(uint32_t sourceLinkId, uint32_t targetLinkId) {
+  auto links = getSLinks();
+  return computeAdjointMatrix(links.at(sourceLinkId), links.at(targetLinkId));
+}
 
 } // namespace sapien
 
