@@ -145,6 +145,15 @@ void buildSapien(py::module &m) {
             return new PxTransform({um(0, 3), um(1, 3), um(2, 3)}, {x, y, z, w});
           },
           py::return_value_policy::automatic, py::arg("mat44"))
+      .def("to_transformation_matrix",
+           [](PxTransform &t) {
+             t.q.normalize();
+             Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> mat44;
+             Eigen::Quaternionf q(t.q.w, t.q.x, t.q.y, t.q.z);
+             mat44.block<3, 3>(0, 0) = q.normalized().toRotationMatrix();
+             mat44.block<3, 1>(0, 3) = Eigen::Vector3f(t.p.x, t.p.y, t.p.z);
+             return mat44;
+           })
       .def_property_readonly(
           "p", [](PxTransform &t) { return py::array_t<PxReal>(3, (PxReal *)(&t.p)); })
       .def_property_readonly("q",
@@ -402,7 +411,9 @@ void buildSapien(py::module &m) {
       .def("get_model_matrix",
            [](Renderer::OptifuserCamera &c) { return mat42array(c.mCameraSpec->getModelMat()); })
       .def("get_projection_matrix",
-           [](Renderer::OptifuserCamera &c) { return mat42array(c.mCameraSpec->getProjectionMat()); })
+           [](Renderer::OptifuserCamera &c) {
+             return mat42array(c.mCameraSpec->getProjectionMat());
+           })
       .def("set_mode_orthographic", &Renderer::OptifuserCamera::changeModeToOrthographic,
            py::arg("scaling") = 1.f)
       .def("set_mode_perspective", &Renderer::OptifuserCamera::changeModeToPerspective,
@@ -755,6 +766,8 @@ void buildSapien(py::module &m) {
 
   PyArticulation.def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
       .def("get_joints", &SArticulation::getSJoints, py::return_value_policy::reference)
+      .def("get_active_joints", &SArticulation::getActiveJoints,
+           py::return_value_policy::reference)
       .def(
           "set_root_velocity",
           [](SArticulation &a, py::array_t<PxReal> v) { a.setRootVelocity(array2vec3(v)); },
@@ -785,8 +798,15 @@ void buildSapien(py::module &m) {
              auto qacc = a.computeForwardDynamics(qf);
              return py::array_t<PxReal>(qacc.size(), qacc.data());
            })
-      .def("compute_mass_matrix", &SArticulation::computeMassMatrix)
+      .def("compute_manipulator_inertia_matrix", &SArticulation::computeManipulatorInertiaMatrix)
       .def("compute_jacobian", &SArticulation::computeJacobianMatrix)
+      .def("compute_transformation_matrix",
+           py::overload_cast<uint32_t, uint32_t>(&SArticulation::computeRelativeTransformation),
+           py::arg("source_link_ik"), py::arg("target_link_id"))
+      .def("compute_adjoint_matrix",
+           py::overload_cast<uint32_t, uint32_t>(&SArticulation::computeRelativeTransformation),
+           py::arg("source_link_ik"), py::arg("target_link_id"))
+      .def("compute_diff_ik", &SArticulation::computeDiffIk)
       .def("pack", &SArticulation::packData)
       .def("unpack", [](SArticulation &a, const py::array_t<PxReal> &arr) {
         a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));

@@ -5,6 +5,7 @@
 
 namespace sapien {
 using namespace physx;
+using namespace Eigen;
 
 class SScene;
 class SLink;
@@ -27,8 +28,8 @@ class SArticulation : public SArticulationDrivable {
   std::vector<uint32_t> mIndexI2E;
 
   /* Due to the capacity of matrix, cache the permutation matrix in advance */
-  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> mColumnPermutationI2E;
-  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> mRowPermutationI2E;
+  Matrix<PxReal, Dynamic, Dynamic, RowMajor> mColumnPermutationI2E;
+  Matrix<PxReal, Dynamic, Dynamic, RowMajor> mRowPermutationI2E;
 
 public:
   std::vector<SLinkBase *> getBaseLinks() override;
@@ -36,6 +37,7 @@ public:
 
   std::vector<SLink *> getSLinks();
   std::vector<SJoint *> getSJoints();
+  std::vector<SJoint *> getActiveJoints();
 
   EArticulationType getType() const override;
   uint32_t dof() const override;
@@ -76,21 +78,22 @@ public:
                                                  bool external = true);
   std::vector<physx::PxReal> computeInverseDynamics(const std::vector<PxReal> &qacc);
   std::vector<physx::PxReal> computeForwardDynamics(const std::vector<PxReal> &qf);
-  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> computeMassMatrix();
+  Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeManipulatorInertiaMatrix();
 
   /* Kinematics Functions */
-  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> computeJacobianMatrix();
-  static Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>
-  computeRelativeTransformation(SLink *sourceFrame, SLink *targetFrame);
-  Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>
-  computeRelativeTransformation(uint32_t sourceLinkId, uint32_t targetLinkId);
-  Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> computeAdjointMatrix(SLink *sourceFrame,
-                                                                    SLink *targetFrame);
-  Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> computeAdjointMatrix(uint32_t sourceLinkId,
-                                                                    uint32_t targetLinkId);
-  Eigen::VectorXf computeDiffIk(const Eigen::VectorXf &twist, uint32_t commandedLinkId,
-                                const std::vector<uint32_t> &activeJointsId = {});
+  Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeJacobianMatrix();
+  static Matrix<PxReal, 4, 4, RowMajor> computeRelativeTransformation(SLink *sourceFrame,
+                                                                      SLink *targetFrame);
+  Matrix<PxReal, 4, 4, RowMajor> computeRelativeTransformation(uint32_t sourceLinkId,
+                                                               uint32_t targetLinkId);
+  static Matrix<PxReal, 6, 6, RowMajor> computeAdjointMatrix(SLink *sourceFrame,
+                                                             SLink *targetFrame);
+  Matrix<PxReal, 6, 6, RowMajor> computeAdjointMatrix(uint32_t sourceLinkId,
+                                                      uint32_t targetLinkId);
+  VectorXf computeDiffIk(const VectorXf &twist, uint32_t commandedLinkId,
+                         const std::vector<uint32_t> &activeJointsId = {});
 
+  /* Save and Load */
   std::vector<PxReal> packData();
   void unpackData(std::vector<PxReal> const &data);
 
@@ -103,9 +106,9 @@ private:
   std::vector<PxReal> I2E(std::vector<PxReal> iv) const;
 
   /* Functions for building permutation matrix for Jacobian calculation */
-  static Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-  buildColummPermutation(const std::vector<uint32_t> &indexI2E);
-  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> buildRowPermutation();
+  static Matrix<PxReal, Dynamic, Dynamic, RowMajor>
+  buildColumnPermutation(const std::vector<uint32_t> &indexI2E);
+  Matrix<PxReal, Dynamic, Dynamic, RowMajor> buildRowPermutation();
 };
 
 } // namespace sapien

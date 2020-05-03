@@ -170,7 +170,7 @@ std::vector<PxReal> SArticulation::I2E(std::vector<PxReal> iv) const {
 }
 
 Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-SArticulation::buildColummPermutation(const std::vector<uint32_t> &indexI2E) {
+SArticulation::buildColumnPermutation(const std::vector<uint32_t> &indexI2E) {
   auto size = indexI2E.size();
   Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> permutation(size, size);
   permutation.block(0, 0, size, size) = Eigen::MatrixXf::Constant(size, size, 0);
@@ -237,6 +237,16 @@ std::vector<SJoint *> SArticulation::getSJoints() {
     result.push_back(joint.get());
   }
   return result;
+}
+
+std::vector<SJoint *> SArticulation::getActiveJoints() {
+  std::vector<SJoint *> activeJoints(dof());
+  for (auto &j : mJoints) {
+    for (auto axis : j->getAxes()) {
+      activeJoints.push_back(j.get());
+    }
+  }
+  return activeJoints;
 }
 
 void SArticulation::resetCache() {
@@ -314,7 +324,7 @@ std::vector<physx::PxReal> SArticulation::computeInverseDynamics(const std::vect
 }
 
 Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-SArticulation::computeMassMatrix() {
+SArticulation::computeManipulatorInertiaMatrix() {
   using namespace Eigen;
   mPxArticulation->commonInit();
   mPxArticulation->computeGeneralizedMassMatrix(*mCache);
@@ -525,7 +535,7 @@ SArticulation::computeAdjointMatrix(SLink *sourceFrame, SLink *targetFrame) {
   Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> adjoint;
   adjoint.block<3, 3>(0, 3) = mat44.block<3, 3>(0, 0);
   adjoint.block<3, 3>(3, 3) = mat44.block<3, 3>(0, 0);
-  Eigen::Vector3f position = mat44.block<3,1>(0,3);
+  Eigen::Vector3f position = mat44.block<3, 1>(0, 3);
   adjoint.block<3, 3>(3, 0) = skewSymmetric(position) * mat44.block<3, 3>(0, 0);
   return adjoint;
 }

@@ -419,7 +419,7 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
     }
     result->mIndexE2I = E2I;
     result->mIndexI2E = I2E;
-    result->mColumnPermutationI2E = sapien::SArticulation::buildColummPermutation(I2E);
+    result->mColumnPermutationI2E = sapien::SArticulation::buildColumnPermutation(I2E);
     result->mRowPermutationI2E = result->buildRowPermutation();
   }
 
