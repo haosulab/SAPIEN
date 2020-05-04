@@ -26,13 +26,9 @@ public:
   void setParentPose(PxTransform const &pose) { joint2parent = pose; }
   void setChildPose(PxTransform const &pose) { child2joint = pose.getInverse(); }
 
-  virtual inline PxTransform getParentPose() const override {
-    return joint2parent;
-  }
+  virtual inline PxTransform getParentPose() const override { return joint2parent; }
 
-  virtual inline PxTransform getChildPose() const override {
-    return child2joint.getInverse();
-  }
+  virtual inline PxTransform getChildPose() const override { return child2joint.getInverse(); }
 
   virtual PxTransform getJointPose() const = 0;
   inline PxTransform getChild2ParentTransform() const {
@@ -83,6 +79,10 @@ public:
   void setDriveVelocityTarget(std::vector<PxReal> const &v) override;
   virtual void updatePos(PxReal dt) override;
 
+  virtual inline PxArticulationJointType::Enum getType() const override {
+    return PxArticulationJointType::eUNDEFINED;
+  };
+
   using SKJoint::SKJoint;
 };
 
@@ -90,12 +90,20 @@ class SKJointRevolute : public SKJointSingleDof {
 public:
   using SKJointSingleDof::SKJointSingleDof;
 
+  virtual inline PxArticulationJointType::Enum getType() const override {
+    return PxArticulationJointType::eREVOLUTE;
+  };
+
   PxTransform getJointPose() const override;
 };
 
 class SKJointPrismatic : public SKJointSingleDof {
 public:
   using SKJointSingleDof::SKJointSingleDof;
+  
+  virtual inline PxArticulationJointType::Enum getType() const override {
+    return PxArticulationJointType::ePRISMATIC;
+  };
 
   PxTransform getJointPose() const override;
 };
@@ -116,6 +124,10 @@ public:
   inline void updatePos(PxReal dt) override{};
 
   inline PxTransform getJointPose() const override { return {{0, 0, 0}, PxIdentity}; }
+
+  virtual inline PxArticulationJointType::Enum getType() const override {
+    return PxArticulationJointType::eFIX;
+  };
 
 public:
   using SKJoint::SKJoint;

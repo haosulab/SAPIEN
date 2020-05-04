@@ -616,6 +616,7 @@ void buildSapien(py::module &m) {
 
   //======== Joint ========//
   PyJointBase.def_property("name", &SJointBase::getName, &SJointBase::setName)
+      .def_property_readonly("type", &SJointBase::getType)
       .def("get_name", &SJointBase::getName)
       .def("set_name", &SJointBase::setName, py::arg("name"))
       .def("get_parent_link", &SJointBase::getParentLink, py::return_value_policy::reference)

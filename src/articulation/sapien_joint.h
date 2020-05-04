@@ -37,6 +37,8 @@ public:
   /* Get the pose of this joint in child frame */
   virtual PxTransform getChildPose() const = 0;
 
+  virtual PxArticulationJointType::Enum getType() const = 0;
+
   virtual ~SJointBase() = default;
 protected:
   SJointBase(SLinkBase *parent, SLinkBase *child);
@@ -74,6 +76,8 @@ public:
 
   virtual PxTransform getParentPose() const override;
   virtual PxTransform getChildPose() const override;
+
+  virtual PxArticulationJointType::Enum getType() const override;
 
 private:
   SJoint(SArticulation *articulation, SLink *parent, SLink *child,
