@@ -18,15 +18,19 @@ class SKArticulation;
 class LinkBuilder : public ActorBuilder {
   friend ArticulationBuilder;
 
+public:
   struct JointRecord {
     PxArticulationJointType::Enum jointType = PxArticulationJointType::eFIX;
-    std::vector<std::array<float, 2>> limits = {};
+    std::vector<std::array<PxReal, 2>> limits = {};
     PxTransform parentPose = {{0, 0, 0}, PxIdentity};
     PxTransform childPose = {{0, 0, 0}, PxIdentity};
     PxReal friction = 0;
     PxReal damping = 0;
     std::string name = "";
-  } mJointRecord;
+  };
+
+protected:
+  JointRecord mJointRecord;
 
   ArticulationBuilder *mArticulationBuilder;
   int mIndex;
@@ -36,7 +40,8 @@ class LinkBuilder : public ActorBuilder {
 
 public:
   LinkBuilder(ArticulationBuilder *articulationBuilder, int index, int parentIndex = -1);
-  LinkBuilder(LinkBuilder const &other) = default;
+  LinkBuilder(LinkBuilder const &other) = delete;
+  LinkBuilder &operator=(LinkBuilder const &other) = delete;
 
   inline int getIndex() const { return mIndex; };
   inline void setParent(int parentIndex) { mParent = parentIndex; };
@@ -45,9 +50,11 @@ public:
 
   void setJointName(std::string const &jointName);
   void setJointProperties(PxArticulationJointType::Enum jointType,
-                          std::vector<std::array<float, 2>> const &limits,
+                          std::vector<std::array<PxReal, 2>> const &limits,
                           PxTransform const &parentPose, PxTransform const &childPose,
                           PxReal friction = 0.f, PxReal damping = 0.f);
+
+  inline const JointRecord &getJoint() const { return mJointRecord; };
 
   std::string summary() const;
 
@@ -76,6 +83,8 @@ public:
   SKArticulation *buildKinematic() const;
 
   std::string summary() const;
+
+  std::vector<LinkBuilder *> getLinkBuilders();
 
 private:
   bool checkTreeProperties() const;

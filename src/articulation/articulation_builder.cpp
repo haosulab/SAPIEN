@@ -17,7 +17,7 @@ LinkBuilder::LinkBuilder(ArticulationBuilder *articulationBuilder, int index, in
 void LinkBuilder::setJointName(const std::string &jointName) { mJointRecord.name = jointName; }
 
 void LinkBuilder::setJointProperties(PxArticulationJointType::Enum jointType,
-                                     std::vector<std::array<float, 2>> const &limits,
+                                     std::vector<std::array<PxReal, 2>> const &limits,
                                      PxTransform const &parentPose, PxTransform const &childPose,
                                      PxReal friction, PxReal damping) {
   mJointRecord.jointType = jointType;
@@ -475,6 +475,14 @@ SKArticulation *ArticulationBuilder::buildKinematic() const {
   result->mRootLink = static_cast<SKLink*>(result->mJoints[sorted[0]]->getChildLink());
 
   return result;
+}
+
+std::vector<LinkBuilder *> ArticulationBuilder::getLinkBuilders() {
+  std::vector<LinkBuilder *> builders;
+  for (auto &b : mLinkBuilders) {
+    builders.push_back(b.get());
+  }
+  return builders;
 }
 
 } // namespace sapien

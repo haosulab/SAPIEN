@@ -10,11 +10,34 @@ Simulation *ActorBuilder::getSimulation() const { return mScene->mSimulation; }
 
 ActorBuilder::ActorBuilder(SScene *scene) : mScene(scene) {}
 
+void ActorBuilder::removeAllShapes() {
+  mShapeRecord.clear();
+}
+void ActorBuilder::removeAllVisuals() {
+  mVisualRecord.clear();
+}
+int ActorBuilder::getShapeCount() const {
+  return mShapeRecord.size();
+}
+int ActorBuilder::getVisualCount() const {
+  return mVisualRecord.size();
+}
+void ActorBuilder::removeShapeAt(uint32_t index) {
+  if (index < mShapeRecord.size()) {
+    mShapeRecord.erase(mShapeRecord.begin() + index);
+  }
+}
+void ActorBuilder::removeVisualAt(uint32_t index) {
+  if (index < mVisualRecord.size()) {
+    mVisualRecord.erase(mVisualRecord.begin() + index);
+  }
+}
+
 void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
                                           const PxVec3 &scale, PxMaterial *material,
                                           PxReal density) {
-  ActorBuilderShapeRecord r;
-  r.type = ActorBuilderShapeRecord::Type::SingleMesh;
+  ShapeRecord r;
+  r.type = ShapeRecord::Type::SingleMesh;
   r.filename = filename;
   r.pose = pose;
   r.scale = scale;
@@ -28,8 +51,8 @@ void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
                                                    const PxTransform &pose, const PxVec3 &scale,
                                                    PxMaterial *material, PxReal density) {
 
-  ActorBuilderShapeRecord r;
-  r.type = ActorBuilderShapeRecord::Type::MultipleMeshes;
+  ShapeRecord r;
+  r.type = ShapeRecord::Type::MultipleMeshes;
   r.filename = filename;
   r.pose = pose;
   r.scale = scale;
@@ -41,8 +64,8 @@ void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
 
 void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMaterial *material,
                                PxReal density) {
-  ActorBuilderShapeRecord r;
-  r.type = ActorBuilderShapeRecord::Type::Box;
+  ShapeRecord r;
+  r.type = ShapeRecord::Type::Box;
   r.pose = pose;
   r.scale = size;
   r.material = material;
@@ -53,8 +76,8 @@ void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMa
 
 void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxReal halfLength,
                                    PxMaterial *material, PxReal density) {
-  ActorBuilderShapeRecord r;
-  r.type = ActorBuilderShapeRecord::Type::Capsule;
+  ShapeRecord r;
+  r.type = ShapeRecord::Type::Capsule;
   r.pose = pose;
   r.radius = radius;
   r.length = halfLength;
@@ -66,8 +89,8 @@ void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxRea
 
 void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMaterial *material,
                                   PxReal density) {
-  ActorBuilderShapeRecord r;
-  r.type = ActorBuilderShapeRecord::Type::Sphere;
+  ShapeRecord r;
+  r.type = ShapeRecord::Type::Sphere;
   r.pose = pose;
   r.radius = radius;
   r.material = material;
@@ -79,8 +102,8 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMate
 void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &size,
                                             const Renderer::PxrMaterial &material,
                                             std::string const &name) {
-  ActorBuilderVisualRecord r;
-  r.type = ActorBuilderVisualRecord::Type::Box;
+  VisualRecord r;
+  r.type = VisualRecord::Type::Box;
   r.pose = pose;
   r.scale = size;
   r.material = material;
@@ -93,8 +116,8 @@ void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal 
                                                 PxReal halfLength,
                                                 const Renderer::PxrMaterial &material,
                                                 std::string const &name) {
-  ActorBuilderVisualRecord r;
-  r.type = ActorBuilderVisualRecord::Type::Capsule;
+  VisualRecord r;
+  r.type = VisualRecord::Type::Capsule;
   r.pose = pose;
   r.radius = radius;
   r.length = halfLength;
@@ -107,8 +130,8 @@ void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal 
 void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal radius,
                                                const Renderer::PxrMaterial &material,
                                                std::string const &name) {
-  ActorBuilderVisualRecord r;
-  r.type = ActorBuilderVisualRecord::Type::Sphere;
+  VisualRecord r;
+  r.type = VisualRecord::Type::Sphere;
   r.pose = pose;
   r.radius = radius;
   r.material = material;
@@ -120,8 +143,8 @@ void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal r
 void ActorBuilder::addVisualFromFile(const std::string &filename, const PxTransform &pose,
                                      const PxVec3 &scale, std::string const &name) {
 
-  ActorBuilderVisualRecord r;
-  r.type = ActorBuilderVisualRecord::Type::Mesh;
+  VisualRecord r;
+  r.type = VisualRecord::Type::Mesh;
   r.pose = pose;
   r.scale = scale;
   r.filename = filename;
@@ -144,7 +167,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     auto material = r.material ? r.material : getSimulation()->mDefaultMaterial;
 
     switch (r.type) {
-    case ActorBuilderShapeRecord::Type::SingleMesh: {
+    case ShapeRecord::Type::SingleMesh: {
       PxConvexMesh *mesh = getSimulation()->getMeshManager().loadMesh(r.filename);
       if (!mesh) {
         spdlog::get("SAPIEN")->error("Failed to load convex mesh for actor");
@@ -162,7 +185,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       break;
     }
 
-    case ActorBuilderShapeRecord::Type::MultipleMeshes: {
+    case ShapeRecord::Type::MultipleMeshes: {
       auto meshes = getSimulation()->getMeshManager().loadMeshGroup(r.filename);
       for (auto mesh : meshes) {
         if (!mesh) {
@@ -182,7 +205,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       break;
     }
 
-    case ActorBuilderShapeRecord::Type::Box: {
+    case ShapeRecord::Type::Box: {
       PxShape *shape =
           getSimulation()->mPhysicsSDK->createShape(PxBoxGeometry(r.scale), *material, true);
       if (!shape) {
@@ -196,7 +219,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       break;
     }
 
-    case ActorBuilderShapeRecord::Type::Capsule: {
+    case ShapeRecord::Type::Capsule: {
       PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
           PxCapsuleGeometry(r.radius, r.length), *material, true);
       if (!shape) {
@@ -210,7 +233,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       break;
     }
 
-    case ActorBuilderShapeRecord::Type::Sphere: {
+    case ShapeRecord::Type::Sphere: {
       PxShape *shape =
           getSimulation()->mPhysicsSDK->createShape(PxSphereGeometry(r.radius), *material, true);
       if (!shape) {
@@ -233,18 +256,18 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
   for (auto &r : mVisualRecord) {
     Renderer::IPxrRigidbody *body;
     switch (r.type) {
-    case ActorBuilderVisualRecord::Type::Box:
+    case VisualRecord::Type::Box:
       body = rScene->addRigidbody(PxGeometryType::eBOX, r.scale, r.material);
       break;
-    case ActorBuilderVisualRecord::Type::Sphere:
+    case VisualRecord::Type::Sphere:
       body = rScene->addRigidbody(PxGeometryType::eSPHERE, {r.radius, r.radius, r.radius},
                                   r.material);
       break;
-    case ActorBuilderVisualRecord::Type::Capsule:
+    case VisualRecord::Type::Capsule:
       body = rScene->addRigidbody(PxGeometryType::eCAPSULE, {r.length, r.radius, r.radius},
                                   r.material);
       break;
-    case ActorBuilderVisualRecord::Type::Mesh:
+    case VisualRecord::Type::Mesh:
       body = rScene->addRigidbody(r.filename, r.scale);
       break;
     }

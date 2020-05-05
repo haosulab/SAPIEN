@@ -18,8 +18,8 @@ class IPxrRididbody;
 }
 
 class ActorBuilder {
-protected:
-  struct ActorBuilderShapeRecord {
+public:
+  struct ShapeRecord {
     enum Type { SingleMesh, MultipleMeshes, Box, Capsule, Sphere } type;
     // mesh, scale also for box
     std::string filename;
@@ -35,7 +35,7 @@ protected:
     PxReal density;
   };
 
-  struct ActorBuilderVisualRecord {
+  struct VisualRecord {
     enum Type { Mesh, Box, Capsule, Sphere } type;
 
     std::string filename;
@@ -50,8 +50,9 @@ protected:
     std::string name;
   };
 
-  std::vector<ActorBuilderShapeRecord> mShapeRecord;
-  std::vector<ActorBuilderVisualRecord> mVisualRecord;
+protected:
+  std::vector<ShapeRecord> mShapeRecord;
+  std::vector<VisualRecord> mVisualRecord;
 
   SScene *mScene;
 
@@ -66,8 +67,17 @@ protected:
 
 public:
   explicit ActorBuilder(SScene *scene = nullptr);
-  ActorBuilder(ActorBuilder const &other) = default;
-  ActorBuilder &operator=(ActorBuilder const &other) = default;
+  ActorBuilder(ActorBuilder const &other) = delete;
+  ActorBuilder &operator=(ActorBuilder const &other) = delete;
+
+  void removeAllShapes();
+  void removeAllVisuals();
+  int getShapeCount() const;
+  int getVisualCount() const;
+  void removeShapeAt(uint32_t index);
+  void removeVisualAt(uint32_t index);
+  inline std::vector<ShapeRecord> const &getShapes() const { return mShapeRecord; }
+  inline std::vector<VisualRecord> const &getVisuals() const { return mVisualRecord; }
 
   void addConvexShapeFromFile(const std::string &filename,
                               const PxTransform &pose = {{0, 0, 0}, PxIdentity},
@@ -92,25 +102,28 @@ public:
 
   /* Visual functions */
   void addBoxVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                    const PxVec3 &size = {1, 1, 1}, const Renderer::PxrMaterial &material = {},
-                    std::string const &name = "");
+                                const PxVec3 &size = {1, 1, 1},
+                                const Renderer::PxrMaterial &material = {},
+                                std::string const &name = "");
   inline void addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                            const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
                            std::string const &name = "") {
     addBoxVisualWithMaterial(pose, size, {{color.x, color.y, color.z, 1}}, name);
   }
 
-  void addCapsuleVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                        PxReal halfLength = 1, const Renderer::PxrMaterial &material = {},
-                        std::string const &name = "");
+  void addCapsuleVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                    PxReal radius = 1, PxReal halfLength = 1,
+                                    const Renderer::PxrMaterial &material = {},
+                                    std::string const &name = "");
   inline void addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                PxReal radius = 1, PxReal halfLength = 1,
                                const PxVec3 &color = {1, 1, 1}, std::string const &name = "") {
     addCapsuleVisualWithMaterial(pose, radius, halfLength, {{color.x, color.y, color.z, 1}}, name);
   }
 
-  void addSphereVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                       const Renderer::PxrMaterial &material = {}, std::string const &name = "");
+  void addSphereVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                   PxReal radius = 1, const Renderer::PxrMaterial &material = {},
+                                   std::string const &name = "");
   inline void addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
                               const PxVec3 &color = {1, 1, 1}, std::string const &name = "") {
     addSphereVisualWithMaterial(pose, radius, {{color.x, color.y, color.z, 1}}, name);
@@ -135,7 +148,7 @@ public:
   SActorStatic *buildStatic(std::string const &name = "") const;
 
   SActorStatic *buildGround(PxReal altitude, bool render, PxMaterial *material,
-                            Renderer::PxrMaterial const & renderMaterial = {},
+                            Renderer::PxrMaterial const &renderMaterial = {},
                             std::string const &name = "");
 
 protected:

@@ -13,6 +13,7 @@ class SScene;
 class SArticulation;
 class SKArticulation;
 class SArticulationBase;
+class ArticulationBuilder;
 
 namespace URDF {
 using namespace tinyxml2;
@@ -693,6 +694,10 @@ public:
   SArticulation *loadFromXML(const std::string &URDFString, const std::string &SRDFString = "",
                              physx::PxMaterial *material = nullptr);
 
+  std::unique_ptr<ArticulationBuilder>
+  loadFileAsArticulationBuilder(const std::string &filename,
+                                physx::PxMaterial *material = nullptr);
+
 private:
   std::unique_ptr<SRDF::Robot> loadSRDF(const std::string &filename);
 
@@ -705,6 +710,11 @@ private:
   SArticulationBase *parseRobotDescription(const std::string &filename, XMLDocument *doc,
                                            std::unique_ptr<SRDF::Robot> srdf,
                                            physx::PxMaterial *material, bool isKinematic);
+
+  std::unique_ptr<ArticulationBuilder>
+  parseRobotDescriptionAsArticulationBuilder(const std::string &filename, XMLDocument *doc,
+                                             std::unique_ptr<SRDF::Robot> srdf,
+                                             physx::PxMaterial *material);
 };
 
 } // namespace URDF
