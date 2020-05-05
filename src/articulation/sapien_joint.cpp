@@ -245,4 +245,11 @@ PxReal SJoint::getDriveForceLimit() const {
   return 0.f;
 }
 
+PxArticulationJointType::Enum SJoint::getType() const {
+  if (mPxJoint) {
+    return mPxJoint->getJointType();
+  }
+  return PxArticulationJointType::eUNDEFINED;
+}
+
 } // namespace sapien
