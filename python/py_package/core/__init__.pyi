@@ -4,9 +4,9 @@ from typing import Iterable as iterable
 from typing import Iterator as iterator
 from numpy import float64
 _Shape = Tuple[int, ...]
-import sapien.core.pysapien
-import s
 import y
+import s
+import sapien.core.pysapien
 import SolverType
 import numpy
 __all__  = [
@@ -38,6 +38,7 @@ __all__  = [
 "Input",
 "JointBase",
 "Joint",
+"JointRecord",
 "KinematicArticulation",
 "KinematicJoint",
 "KinematicJointFixed",
@@ -49,6 +50,7 @@ __all__  = [
 "KinematicLink",
 "LinkBuilder",
 "OptifuserCamera",
+"OptifuserConfig",
 "OptifuserController",
 "OptifuserRenderer",
 "PlaneGeometry",
@@ -56,9 +58,11 @@ __all__  = [
 "PxMaterial",
 "PxrMaterial",
 "Scene",
+"ShapeRecord",
 "SolverType",
 "SphereGeometry",
 "URDFLoader",
+"VisualRecord",
 "__enable_gl",
 "__enable_ptx",
 "enable_default_gl3",
@@ -78,8 +82,7 @@ __all__  = [
 "STATIC",
 "TGS",
 "UNDEFINED",
-"__GL_VERSION_DICT",
-"__warningregistry__"
+"__GL_VERSION_DICT"
 ]
 class ActorBase():
     def get_collision_shapes(self) -> List[CollisionShape]: ...
@@ -258,6 +261,12 @@ class ActorBuilder():
         """
     def build(self, is_kinematic: bool = False, name: str = '') -> Actor: ...
     def build_static(self, name: str = '') -> ActorStatic: ...
+    def get_shapes(self) -> List[ShapeRecord]: ...
+    def get_visuals(self) -> List[VisualRecord]: ...
+    def remove_all_shapes(self) -> None: ...
+    def remove_all_visuals(self) -> None: ...
+    def remove_shape_at(self, index: int) -> None: ...
+    def remove_visual_at(self, index: int) -> None: ...
     def reset_collision_group(self) -> None: ...
     def set_collision_group(self, arg0: int, arg1: int, arg2: int) -> None: ...
     def set_mass_and_inertia(self, arg0: float, arg1: Pose, arg2: numpy.ndarray[float32]) -> None: ...
@@ -536,6 +545,7 @@ class ArticulationBuilder():
     def build(self, fix_base: bool = False) -> Articulation: ...
     def build_kinematic(self) -> KinematicArticulation: ...
     def create_link_builder(self, parent: LinkBuilder = None) -> LinkBuilder: ...
+    def get_link_builders(self) -> List[LinkBuilder]: ...
     def get_scene(self) -> Scene: ...
     def set_scene(self, scene: Scene) -> None: ...
     pass
@@ -888,6 +898,11 @@ class JointBase():
     @name.setter
     def name(self, arg1: str) -> None:
         pass
+    @property
+    def type(self) -> ArticulationJointType:
+        """
+        :type: ArticulationJointType
+        """
     pass
 class Joint(JointBase):
     def get_child_link(self) -> LinkBase: ...
@@ -931,6 +946,48 @@ class Joint(JointBase):
     def stiffness(self) -> float:
         """
         :type: float
+        """
+    @property
+    def type(self) -> ArticulationJointType:
+        """
+        :type: ArticulationJointType
+        """
+    pass
+class JointRecord():
+    @property
+    def child_pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def damping(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def friction(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def joint_type(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def limits(self) -> numpy.ndarray[float32]:
+        """
+        :type: numpy.ndarray[float32]
+        """
+    @property
+    def name(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def parent_pose(self) -> Pose:
+        """
+        :type: Pose
         """
     pass
 class KinematicArticulation(ArticulationDrivable, ArticulationBase):
@@ -1004,6 +1061,11 @@ class KinematicJoint(JointBase):
     @name.setter
     def name(self, arg1: str) -> None:
         pass
+    @property
+    def type(self) -> ArticulationJointType:
+        """
+        :type: ArticulationJointType
+        """
     pass
 class KinematicJointFixed(KinematicJoint, JointBase):
     def get_child_link(self) -> LinkBase: ...
@@ -1023,6 +1085,11 @@ class KinematicJointFixed(KinematicJoint, JointBase):
     @name.setter
     def name(self, arg1: str) -> None:
         pass
+    @property
+    def type(self) -> ArticulationJointType:
+        """
+        :type: ArticulationJointType
+        """
     pass
 class KinematicJointSingleDof(KinematicJoint, JointBase):
     def get_child_link(self) -> LinkBase: ...
@@ -1042,6 +1109,11 @@ class KinematicJointSingleDof(KinematicJoint, JointBase):
     @name.setter
     def name(self, arg1: str) -> None:
         pass
+    @property
+    def type(self) -> ArticulationJointType:
+        """
+        :type: ArticulationJointType
+        """
     pass
 class KinematicJointRevolute(KinematicJointSingleDof, KinematicJoint, JointBase):
     def get_child_link(self) -> LinkBase: ...
@@ -1061,6 +1133,11 @@ class KinematicJointRevolute(KinematicJointSingleDof, KinematicJoint, JointBase)
     @name.setter
     def name(self, arg1: str) -> None:
         pass
+    @property
+    def type(self) -> ArticulationJointType:
+        """
+        :type: ArticulationJointType
+        """
     pass
 class KinematicJointPrismatic(KinematicJointSingleDof, KinematicJoint, JointBase):
     def get_child_link(self) -> LinkBase: ...
@@ -1080,6 +1157,11 @@ class KinematicJointPrismatic(KinematicJointSingleDof, KinematicJoint, JointBase
     @name.setter
     def name(self, arg1: str) -> None:
         pass
+    @property
+    def type(self) -> ArticulationJointType:
+        """
+        :type: ArticulationJointType
+        """
     pass
 class LinkBase(ActorDynamicBase, ActorBase):
     def add_force_at_point(self, force: numpy.ndarray[float32], point: numpy.ndarray[float32]) -> None: ...
@@ -1377,6 +1459,13 @@ class LinkBuilder(ActorBuilder):
     def build(self, is_kinematic: bool = False, name: str = '') -> Actor: ...
     def build_static(self, name: str = '') -> ActorStatic: ...
     def get_index(self) -> int: ...
+    def get_joints(self) -> JointRecord: ...
+    def get_shapes(self) -> List[ShapeRecord]: ...
+    def get_visuals(self) -> List[VisualRecord]: ...
+    def remove_all_shapes(self) -> None: ...
+    def remove_all_visuals(self) -> None: ...
+    def remove_shape_at(self, index: int) -> None: ...
+    def remove_visual_at(self, index: int) -> None: ...
     def reset_collision_group(self) -> None: ...
     def set_collision_group(self, arg0: int, arg1: int, arg2: int) -> None: ...
     def set_joint_name(self, arg0: str) -> None: ...
@@ -1411,6 +1500,42 @@ class OptifuserCamera(ICamera, ISensor):
     def set_mode_perspective(self, fovy: float = 0.6108652353286743) -> None: ...
     def set_pose(self, pose: Pose) -> None: ...
     def take_picture(self) -> None: ...
+    def take_raytraced_picture(self, samples_per_pixel: int = 128, reflection_count: int = 4) -> numpy.ndarray[float32]: ...
+    pass
+class OptifuserConfig():
+    def __init__(self) -> None: ...
+    @property
+    def shadow_frustum_size(self) -> float:
+        """
+        :type: float
+        """
+    @shadow_frustum_size.setter
+    def shadow_frustum_size(self, arg0: float) -> None:
+        pass
+    @property
+    def shadow_map_size(self) -> int:
+        """
+        :type: int
+        """
+    @shadow_map_size.setter
+    def shadow_map_size(self, arg0: int) -> None:
+        pass
+    @property
+    def use_ao(self) -> bool:
+        """
+        :type: bool
+        """
+    @use_ao.setter
+    def use_ao(self, arg0: bool) -> None:
+        pass
+    @property
+    def use_shadow(self) -> bool:
+        """
+        :type: bool
+        """
+    @use_shadow.setter
+    def use_shadow(self, arg0: bool) -> None:
+        pass
     pass
 class OptifuserController():
     def __init__(self, renderer: OptifuserRenderer) -> None: ...
@@ -1435,10 +1560,12 @@ class OptifuserController():
         """
     pass
 class OptifuserRenderer(IPxrRenderer):
-    def __init__(self, glsl_dir: str = '', glsl_version: str = '') -> None: ...
+    def __init__(self, glsl_dir: str = '', glsl_version: str = '', config: OptifuserConfig = <OptifuserConfig object at 0x7fa423f08b58>) -> None: ...
     def enable_global_axes(self, enable: bool = True) -> None: ...
     @staticmethod
     def set_default_shader_config(glsl_dir: str, glsl_version: str) -> None: ...
+    @staticmethod
+    def set_optix_config(ptx_dir: str) -> None: ...
     pass
 class PlaneGeometry(CollisionGeometry):
     pass
@@ -1555,6 +1682,38 @@ class Scene():
     def timestep(self, arg1: float) -> None:
         pass
     pass
+class ShapeRecord():
+    @property
+    def density(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def filename(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def material(self) -> PxMaterial:
+        """
+        :type: PxMaterial
+        """
+    @property
+    def pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def radius(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def scale(self) -> numpy.ndarray[float32]:
+        """
+        :type: numpy.ndarray[float32]
+        """
+    pass
 class SolverType():
     """
     Members:
@@ -1587,6 +1746,7 @@ class SphereGeometry(CollisionGeometry):
 class URDFLoader():
     def __init__(self, scene: Scene) -> None: ...
     def load(self, filename: str, material: PxMaterial = None) -> Articulation: ...
+    def load_file_as_articulation_builder(self, filename: str, material: PxMaterial = None) -> ArticulationBuilder: ...
     def load_from_string(self, urdf_string: str, srdf_string: str, material: PxMaterial = None) -> Articulation: ...
     def load_kinematic(self, filename: str, material: PxMaterial = None) -> KinematicArticulation: ...
     @property
@@ -1622,19 +1782,50 @@ class URDFLoader():
     def scale(self, arg0: float) -> None:
         pass
     pass
+class VisualRecord():
+    @property
+    def density(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def filename(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def material(self) -> PxrMaterial:
+        """
+        :type: PxrMaterial
+        """
+    @property
+    def pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def radius(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def scale(self) -> numpy.ndarray[float32]:
+        """
+        :type: numpy.ndarray[float32]
+        """
+    pass
 DYNAMIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.DYNAMIC
 FIX: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.FIX
-GL_SHADER_ROOT = '/home/sim/.local/lib/python3.6/site-packages/sapien/glsl_shader'
+GL_SHADER_ROOT = ''
 KINEMATIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.KINEMATIC
 KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = ActorType.KINEMATIC_LINK
 LINK: sapien.core.pysapien.ActorType # value = ActorType.LINK
 PGS: sapien.core.pysapien.SolverType # value = SolverType.PGS
 PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.PRISMATIC
-PTX_ROOT = '/home/sim/.local/lib/python3.6/site-packages/sapien/ptx'
+PTX_ROOT = ''
 REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.REVOLUTE
 SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.SPHERICAL
 STATIC: sapien.core.pysapien.ActorType # value = ActorType.STATIC
 TGS: sapien.core.pysapien.SolverType # value = SolverType.TGS
 UNDEFINED: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.UNDEFINED
 __GL_VERSION_DICT = {3: '130', 4: '410'}
-__warningregistry__: dict # value = {'version': 5, ('Module sapien was already imported from /home/sim/.local/lib/python3.6/site-packages/sapien/__init__.py, but /home/sim/project/sapien is being added to sys.path', <class 'UserWarning'>, 2): True}

@@ -7,7 +7,8 @@ namespace sapien {
 namespace Renderer {
 
 OptifuserCamera::OptifuserCamera(std::string const &name_, uint32_t width, uint32_t height,
-                                 float fovy_, OptifuserScene *scene, std::string const &shaderDir)
+                                 float fovy_, OptifuserScene *scene, std::string const &shaderDir,
+                                 OptifuserConfig const &config)
     : mWidth(width), mHeight(height), mScene(scene) {
 
   auto cam = std::make_unique<Optifuser::PerspectiveCameraSpec>();
@@ -21,16 +22,34 @@ OptifuserCamera::OptifuserCamera(std::string const &name_, uint32_t width, uint3
 
   // initialize render context
   mRenderContext = Optifuser::OffscreenRenderContext::Create(width, height);
+
+  mRenderContext->renderer.enableDisplayPass(false);
+  mRenderContext->renderer.enableAxisPass(false);
+  if (config.useShadow) {
+    mRenderContext->renderer.enableShadowPass(true, config.shadowMapSize,
+                                              config.shadowFrustumSize);
+  }
+  if (config.useAo) {
+    mRenderContext->renderer.enableAOPass();
+  }
+
+  if (config.useShadow) {
+    mRenderContext->renderer.setShadowShader(shaderDir + "/shadow.vsh", shaderDir + "/shadow.fsh");
+  }
+  if (config.useAo) {
+    mRenderContext->renderer.setAOShader(shaderDir + "/ssao.vsh", shaderDir + "/ssao.fsh");
+  }
+
   mRenderContext->renderer.setShadowShader(shaderDir + "/shadow.vsh", shaderDir + "/shadow.fsh");
   mRenderContext->renderer.setGBufferShader(shaderDir + "/gbuffer.vsh",
                                             shaderDir + "/gbuffer_segmentation.fsh");
+  mRenderContext->renderer.setAOShader(shaderDir + "/ssao.vsh", shaderDir + "/ssao.fsh");
   mRenderContext->renderer.setDeferredShader(shaderDir + "/deferred.vsh",
                                              shaderDir + "/deferred.fsh");
-  // mRenderContext->renderer.setAxisShader(shaderDir + "/axes.vsh", shaderDir + "/axes.fsh");
   mRenderContext->renderer.setTransparencyShader(shaderDir + "/transparency.vsh",
                                                  shaderDir + "/transparency.fsh");
-  mRenderContext->renderer.enableDisplayPass(false);
-  mRenderContext->renderer.enableAxisPass(false);
+  mRenderContext->renderer.setCompositeShader(shaderDir + "/composite.vsh",
+                                              shaderDir + "/composite.fsh");
 }
 
 IPxrScene *OptifuserCamera::getScene() { return mScene; };

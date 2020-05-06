@@ -1,4 +1,5 @@
 #pragma once
+#include "config.h"
 #include "render_interface.h"
 #include <camera_spec.h>
 #include <memory>
@@ -6,6 +7,8 @@
 
 namespace sapien {
 namespace Renderer {
+struct OptifuserConfig;
+
 class OptifuserScene;
 
 class OptifuserCamera : public ICamera {
@@ -21,7 +24,8 @@ public:
 
 public:
   OptifuserCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
-                  OptifuserScene *scene, std::string const &shaderDir);
+                  OptifuserScene *scene, std::string const &shaderDir,
+                  OptifuserConfig const &config = {});
 
   // ICamera
   const std::string &getName() const override;

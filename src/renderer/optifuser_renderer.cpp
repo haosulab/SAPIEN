@@ -206,7 +206,8 @@ ICamera *OptifuserScene::addCamera(std::string const &name, uint32_t width, uint
 
   spdlog::get("SAPIEN")->warn("Note: current camera implementation does not support non-square "
                               "pixels, and fovy will take precedence.");
-  auto cam = std::make_unique<OptifuserCamera>(name, width, height, fovy, this, d);
+  auto cam = std::make_unique<OptifuserCamera>(name, width, height, fovy, this, d,
+                                               mParentRenderer->mConfig);
   cam->mCameraSpec->near = near;
   cam->mCameraSpec->far = far;
   mCameras.push_back(std::move(cam));
@@ -254,7 +255,10 @@ void OptifuserScene::addDirectionalLight(std::array<float, 3> const &direction,
 
 //======== Begin Renderer ========//
 
-OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::string &glslVersion) {
+OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::string &glslVersion,
+                                     OptifuserConfig const &config) {
+  mConfig = config;
+
   if (glslDir.length()) {
     mGlslDir = glslDir;
   } else {
@@ -264,18 +268,33 @@ OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::stri
   mContext = &Optifuser::GLFWRenderContext::Get(WINDOW_WIDTH, WINDOW_HEIGHT);
   mContext->initGui(glslVersion.length() ? glslVersion : gDefaultGlslVersion);
 
-  mContext->renderer.setShadowShader(mGlslDir + "/shadow.vsh", mGlslDir + "/shadow.fsh");
+  mContext->renderer.enableAxisPass();
+  mContext->renderer.enableDisplayPass();
+
+  if (config.useShadow) {
+    mContext->renderer.enableShadowPass(true, config.shadowMapSize, config.shadowFrustumSize);
+  }
+  if (config.useAo) {
+    mContext->renderer.enableAOPass();
+  }
+
+  if (config.useShadow) {
+    mContext->renderer.setShadowShader(mGlslDir + "/shadow.vsh", mGlslDir + "/shadow.fsh");
+  }
+
   mContext->renderer.setGBufferShader(mGlslDir + "/gbuffer.vsh",
                                       mGlslDir + "/gbuffer_segmentation.fsh");
+  if (config.useAo) {
+    mContext->renderer.setAOShader(mGlslDir + "/ssao.vsh", mGlslDir + "/ssao.fsh");
+  }
   mContext->renderer.setDeferredShader(mGlslDir + "/deferred.vsh", mGlslDir + "/deferred.fsh");
   mContext->renderer.setAxisShader(mGlslDir + "/axes.vsh", mGlslDir + "/axes.fsh");
   mContext->renderer.setTransparencyShader(mGlslDir + "/transparency.vsh",
                                            mGlslDir + "/transparency.fsh");
+  mContext->renderer.setCompositeShader(mGlslDir + "/composite.vsh", mGlslDir + "/composite.fsh");
   mContext->renderer.setDisplayShader(mGlslDir + "/display.vsh", mGlslDir + "/display_normal.fsh");
 
   mContext->renderer.enablePicking();
-  mContext->renderer.enableAxisPass();
-  mContext->renderer.enableDisplayPass();
 }
 
 IPxrScene *OptifuserRenderer::createScene(std::string const &name) {

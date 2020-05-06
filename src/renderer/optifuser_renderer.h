@@ -4,12 +4,14 @@
 #include <camera_spec.h>
 #include <memory>
 #include <optifuser.h>
+#include "config.h"
 
 namespace sapien {
 namespace Renderer {
 
 class OptifuserRenderer;
 class OptifuserScene;
+
 
 class OptifuserRigidbody : public IPxrRigidbody {
   OptifuserScene *mParentScene = nullptr;
@@ -65,7 +67,8 @@ public:
   virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                       std::vector<physx::PxVec3> const &normals,
                                       std::vector<uint32_t> const &indices,
-                                      const physx::PxVec3 &scale, const PxrMaterial &material) override;
+                                      const physx::PxVec3 &scale,
+                                      const PxrMaterial &material) override;
 
   virtual void removeRigidbody(IPxrRigidbody *body) override;
 
@@ -103,9 +106,11 @@ class OptifuserRenderer : public IPxrRenderer {
 
 public:
   std::string mGlslDir;
+  OptifuserConfig mConfig;
 
   Optifuser::GLFWRenderContext *mContext = nullptr;
-  OptifuserRenderer(std::string const &glslDir = "", std::string const &glslVersion = "");
+  OptifuserRenderer(std::string const &glslDir = "", std::string const &glslVersion = "",
+                    OptifuserConfig const &config = {});
 
   // IPxrRenderer
   IPxrScene *createScene(std::string const &name) override;

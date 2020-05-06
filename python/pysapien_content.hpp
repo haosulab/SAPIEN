@@ -76,6 +76,7 @@ void buildSapien(py::module &m) {
   auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
   auto PyOptifuserRenderer =
       py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer>(m, "OptifuserRenderer");
+  auto PyOptifuserConfig = py::class_<Renderer::OptifuserConfig>(m, "OptifuserConfig");
   auto PyInput = py::class_<Optifuser::Input>(m, "Input");
   auto PyOptifuserController = py::class_<Renderer::OptifuserController>(m, "OptifuserController");
   auto PyCameraSpec = py::class_<Optifuser::CameraSpec>(m, "CameraSpec");
@@ -330,6 +331,12 @@ void buildSapien(py::module &m) {
             cam.getObjSegmentation().data());
       });
 
+  PyOptifuserConfig.def(py::init<>())
+      .def_readwrite("use_shadow", &Renderer::OptifuserConfig::useShadow)
+      .def_readwrite("use_ao", &Renderer::OptifuserConfig::useAo)
+      .def_readwrite("shadow_map_size", &Renderer::OptifuserConfig::shadowMapSize)
+      .def_readwrite("shadow_frustum_size", &Renderer::OptifuserConfig::shadowFrustumSize);
+
   PyOptifuserRenderer
       .def("enable_global_axes", &Renderer::OptifuserRenderer::enableGlobalAxes,
            py::arg("enable") = true)
@@ -339,8 +346,9 @@ void buildSapien(py::module &m) {
       .def_static("set_optix_config", Renderer::OptifuserRenderer::setOptixConfig,
                   py::arg("ptx_dir"))
 #endif
-      .def(py::init<std::string const &, std::string const &>(), py::arg("glsl_dir") = "",
-           py::arg("glsl_version") = "");
+      .def(py::init<std::string const &, std::string const &, Renderer::OptifuserConfig const &>(),
+           py::arg("glsl_dir") = "", py::arg("glsl_version") = "",
+           py::arg("config") = Renderer::OptifuserConfig());
 
   PyInput.def("get_key_state", &Optifuser::Input::getKeyState)
       .def("get_key_down", &Optifuser::Input::getKeyDown)
