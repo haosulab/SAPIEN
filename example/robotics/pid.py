@@ -79,7 +79,7 @@ def robot_basic_control_demo(use_internal_pd, use_external_pid):
     while not renderer_controller.should_quit:
         scene0.update_render()
         for i in range(4):
-            qf = robot.compute_passive_force(gravity=True, coriolisAndCentrifugal=True, external=True)
+            qf = robot.compute_passive_force(gravity=True, coriolis_and_centrifugal=True, external=True)
             if use_external_pid:
                 pid_qf = pid_forward(pids, target_pos, robot.get_qpos(), scene0.get_timestep())
                 qf += pid_qf

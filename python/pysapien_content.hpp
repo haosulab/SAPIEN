@@ -420,12 +420,12 @@ void buildSapien(py::module &m) {
            py::arg("fovy") = glm::radians(35.f))
 #ifdef _USE_OPTIX
       .def("take_raytraced_picture",
-           [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount) {
+           [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount, bool denoise) {
              return py::array_t<PxReal>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                 cam.takeRaytracedPicture(samplesPerPixel, reflectionCount).data());
+                 cam.takeRaytracedPicture(samplesPerPixel, reflectionCount, denoise).data());
            },
-           py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4)
+           py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4, py::arg("use_denoiser") = true)
 #endif
       ;
 

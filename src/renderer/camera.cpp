@@ -149,9 +149,11 @@ void OptifuserCamera::changeModeToPerspective(float fovy) {
 #ifdef _USE_OPTIX
 
 std::vector<float> OptifuserCamera::takeRaytracedPicture(uint32_t samplesPerPixel,
-                                                         uint32_t reflectionCount) {
+                                                         uint32_t reflectionCount,
+                                                         bool denoise) {
   auto pathTracer = new Optifuser::OptixRenderer(OptifuserRenderer::gPtxDir);
   pathTracer->init(mWidth, mHeight);
+  pathTracer->enableDenoiser(denoise, samplesPerPixel);
   pathTracer->numRays = reflectionCount;
   pathTracer->max_iterations = samplesPerPixel;
   pathTracer->invalidateCamera();

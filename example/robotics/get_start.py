@@ -37,7 +37,7 @@ def robot_basic_control_demo(fix_robot_root, balance_passive_force, add_joint_da
         scene0.update_render()
         for i in range(4):
             if balance_passive_force:
-                qf = robot.compute_passive_force(gravity=True, coriolisAndCentrifugal=True, external=False)
+                qf = robot.compute_passive_force(gravity=True, coriolis_and_centrifugal=True, external=False)
                 robot.set_qf(qf)
             scene0.step()
             steps += 1

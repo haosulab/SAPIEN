@@ -55,8 +55,8 @@ public:
   inline Mode getMode() { return mMode; }
 
 #ifdef _USE_OPTIX
-  std::vector<float> takeRaytracedPicture(uint32_t samplesPerPixel = 65536,
-                                          uint32_t reflectionCount = 4);
+  std::vector<float> takeRaytracedPicture(uint32_t samplesPerPixel = 16,
+                                          uint32_t reflectionCount = 4, bool useDenoiser = true);
 #endif
 
   // Camera intrinsic

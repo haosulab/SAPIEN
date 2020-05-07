@@ -364,18 +364,11 @@ void OptifuserController::render() {
           pathTracer = new Optifuser::OptixRenderer(OptifuserRenderer::gPtxDir);
           pathTracer->setBlackBackground();
           pathTracer->init(mRenderer->mContext->getWidth(), mRenderer->mContext->getHeight());
+          pathTracer->enableDenoiser();
         } else {
         }
 #endif
       }
-
-#ifdef _USE_OPTIX
-      if (renderMode == PATHTRACER) {
-        glEnable(GL_FRAMEBUFFER_SRGB);
-      } else {
-        glDisable(GL_FRAMEBUFFER_SRGB);
-      }
-#endif
 
       if (ImGui::CollapsingHeader("Main Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
 
@@ -492,6 +485,55 @@ void OptifuserController::render() {
           }
         }
       }
+      if (ImGui::CollapsingHeader("Actor Details")) {
+        SActorBase *link = mScene->findActorById(mGuiModel.linkId);
+        if (!link) {
+          link = mScene->findArticulationLinkById(mGuiModel.linkId);
+        }
+        if (link) {
+          auto actor = link->getPxActor();
+          std::vector<PxShape *> shapes(actor->getNbShapes());
+          actor->getShapes(shapes.data(), shapes.size());
+          int primitives = 0;
+          int meshes = 0;
+          PxReal minDynamicFriction = 100;
+          PxReal maxDynamicFriction = -1;
+          PxReal minStaticFriction = 100;
+          PxReal maxStaticFriction = -1;
+          PxReal minRestitution = 100;
+          PxReal maxRestitution = -1;
+          for (auto s : shapes) {
+            if (s->getGeometryType() == PxGeometryType::eCONVEXMESH) {
+              meshes += 1;
+            } else {
+              primitives += 1;
+            }
+            std::vector<PxMaterial *> mats(s->getNbMaterials());
+            s->getMaterials(mats.data(), s->getNbMaterials());
+            for (auto m : mats) {
+              PxReal sf = m->getStaticFriction();
+              minStaticFriction = std::min(minStaticFriction, sf);
+              maxStaticFriction = std::max(maxStaticFriction, sf);
+              PxReal df = m->getDynamicFriction();
+              minDynamicFriction = std::min(minDynamicFriction, df);
+              maxDynamicFriction = std::max(maxDynamicFriction, df);
+              PxReal r = m->getRestitution();
+              minRestitution = std::min(minRestitution, r);
+              maxRestitution = std::max(maxRestitution, r);
+            }
+          }
+          ImGui::Text("Primitive Count: %d", primitives);
+          ImGui::Text("Convex Mesh Count: %d", meshes);
+          if (maxStaticFriction >= 0) {
+            ImGui::Text("Static friction: %.2f - %.2f", minStaticFriction, maxStaticFriction);
+            ImGui::Text("Dynamic friction: %.2f - %.2f", minDynamicFriction, maxDynamicFriction);
+            ImGui::Text("Restitution : %.2f - %.2f", minRestitution, maxRestitution);
+          } else {
+            ImGui::Text("No Physical Material");
+          }
+        }
+      }
+
       if (mGuiModel.articulationId) {
         if (ImGui::CollapsingHeader("Articulation", ImGuiTreeNodeFlags_DefaultOpen)) {
           ImGui::Text("name: %s", mGuiModel.articulationModel.name.c_str());
