@@ -65,6 +65,8 @@ public:
   PxReal getDriveStiffness() const;
   PxReal getDriveDamping() const;
   PxReal getDriveForceLimit() const;
+  PxReal getDriveTarget() const;
+  PxReal getDriveVelocityTarget() const;
 
   void setDriveVelocityTarget(std::vector<PxReal> const &v);
   void setDriveVelocityTarget(PxReal v);

@@ -342,7 +342,8 @@ void OptifuserController::render() {
     ImGui::Begin("Render Options");
     {
       if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
-        if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {};
+        if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {
+        };
         if (ImGui::RadioButton("Albedo", &renderMode, RenderMode::ALBEDO)) {
           changeShader = 1;
         }
@@ -536,23 +537,67 @@ void OptifuserController::render() {
 
       if (mGuiModel.articulationId) {
         if (ImGui::CollapsingHeader("Articulation", ImGuiTreeNodeFlags_DefaultOpen)) {
+          SLinkBase *link = mScene->findArticulationLinkById(mGuiModel.linkId);
+          auto articulation = link->getArticulation();
+
           ImGui::Text("name: %s", mGuiModel.articulationModel.name.c_str());
           ImGui::Text(" dof: %ld", mGuiModel.articulationModel.jointModel.size());
+          if (articulation->getType() == EArticulationType::DYNAMIC) {
+            ImGui::Text("type: Dynamic");
+          } else {
+            ImGui::Text("type: Kinematic");
+          }
+
+          static bool articulationDetails;
+          ImGui::Checkbox("Details##ArticulationDetails", &articulationDetails);
+          
+          std::vector<SJoint *> joints;
+          if (articulation->getType() == EArticulationType::DYNAMIC) {
+            auto a = static_cast<sapien::SArticulation *>(articulation);
+            auto js = a->getSJoints();
+            for (auto j : js) {
+              if (j->getDof()) {
+                joints.push_back(j);
+              }
+            }
+          }
 
           int i = 0;
           for (auto &joint : mGuiModel.articulationModel.jointModel) {
             ImGui::Text("%s", joint.name.c_str());
-            if (ImGui::SliderFloat(("##" + std::to_string(++i)).c_str(), &joint.value,
+            if (ImGui::SliderFloat(("##" + std::to_string(i)).c_str(), &joint.value,
                                    std::max(joint.limits[0], -10.f),
                                    std::min(joint.limits[1], 10.f))) {
               std::vector<PxReal> v;
-              SLinkBase *link = mScene->findArticulationLinkById(mGuiModel.linkId);
-              auto articulation = link->getArticulation();
               for (auto j : mGuiModel.articulationModel.jointModel) {
                 v.push_back(j.value);
               }
               articulation->setQpos(v);
             }
+            if (articulationDetails && joints.size()) {
+              auto j = joints[i];
+              float friction = j->getFriction();
+              float stiffness = j->getDriveStiffness();
+              float damping = j->getDriveDamping();
+              float maxForce = j->getDriveForceLimit();
+              float target = j->getDriveTarget();
+              float vtarget = j->getDriveVelocityTarget();
+              ImGui::Text("Friction: %.2f", friction);
+              ImGui::Text("Damping: %.2f", damping);
+              ImGui::Text("Stiffness: %.2f", stiffness);
+              if (maxForce > 1e6) {
+                ImGui::Text("Max Force: >1e6");
+              } else {
+                ImGui::Text("Max Force: %.2f", maxForce);
+              }
+              if (stiffness > 0) {
+                ImGui::Text("Drive Position Target: %.2f", target);
+                ImGui::Text("Drive Velocity Target: %.2f", vtarget);
+              }
+
+            }
+
+            ++i;
           }
         }
       }
@@ -575,7 +620,6 @@ void OptifuserController::render() {
         throw "";
       }
     }
-
   }
 
   mRenderer->mContext->swapBuffers();

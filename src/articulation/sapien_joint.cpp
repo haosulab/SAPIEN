@@ -245,6 +245,28 @@ PxReal SJoint::getDriveForceLimit() const {
   return 0.f;
 }
 
+PxReal SJoint::getDriveTarget() const {
+  auto ax = getAxes();
+  if (ax.size() > 1) {
+    throw std::runtime_error("get drive target not implemented for multi-dof joints");
+  }
+  if (ax.size()) {
+    return mPxJoint->getDriveTarget(ax[0]);
+  }
+  return 0.f;
+}
+
+PxReal SJoint::getDriveVelocityTarget() const {
+  auto ax = getAxes();
+  if (ax.size() > 1) {
+    throw std::runtime_error("get drive target not implemented for multi-dof joints");
+  }
+  if (ax.size()) {
+    return mPxJoint->getDriveVelocity(ax[0]);
+  }
+  return 0.f;
+}
+
 PxArticulationJointType::Enum SJoint::getType() const {
   if (mPxJoint) {
     return mPxJoint->getJointType();

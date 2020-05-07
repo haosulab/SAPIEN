@@ -4,11 +4,11 @@ from typing import Iterable as iterable
 from typing import Iterator as iterator
 from numpy import float64
 _Shape = Tuple[int, ...]
+import SolverType
 import y
 import sapien.core.pysapien
 import s
 import numpy
-import SolverType
 __all__  = [
 "ActorBase",
 "ActorDynamicBase",
@@ -1560,7 +1560,7 @@ class OptifuserController():
         """
     pass
 class OptifuserRenderer(IPxrRenderer):
-    def __init__(self, glsl_dir: str = '', glsl_version: str = '', config: OptifuserConfig = <OptifuserConfig object at 0x7fe7731d2b90>) -> None: ...
+    def __init__(self, glsl_dir: str = '', glsl_version: str = '', config: OptifuserConfig = <OptifuserConfig object at 0x7f1d0daf6b90>) -> None: ...
     def enable_global_axes(self, enable: bool = True) -> None: ...
     @staticmethod
     def set_default_shader_config(glsl_dir: str, glsl_version: str) -> None: ...
@@ -1816,13 +1816,13 @@ class VisualRecord():
     pass
 DYNAMIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.DYNAMIC
 FIX: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.FIX
-GL_SHADER_ROOT = '/home/fx/.local/lib/python3.6/site-packages/sapien/glsl_shader'
+GL_SHADER_ROOT = ''
 KINEMATIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.KINEMATIC
 KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = ActorType.KINEMATIC_LINK
 LINK: sapien.core.pysapien.ActorType # value = ActorType.LINK
 PGS: sapien.core.pysapien.SolverType # value = SolverType.PGS
 PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.PRISMATIC
-PTX_ROOT = '/home/fx/.local/lib/python3.6/site-packages/sapien/ptx'
+PTX_ROOT = ''
 REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.REVOLUTE
 SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.SPHERICAL
 STATIC: sapien.core.pysapien.ActorType # value = ActorType.STATIC
