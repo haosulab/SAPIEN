@@ -1,18 +1,32 @@
 #version 410
 
+
 in vec2 texcoord;
 
+uniform bool shadowLightEnabled;
 uniform sampler2D shadowtex;
 uniform mat4 cameraToShadowMatrix;
 uniform mat4 shadowProjectionMatrix;
 uniform vec3 shadowLightDirection;
 uniform vec3 shadowLightEmission;
+uniform int shadowtexSize;
 
 uniform sampler2D colortex0;  // albedo
 uniform sampler2D colortex1;  // 
 uniform sampler2D colortex2;  // normal
 uniform sampler2D depthtex0;  // depth
 uniform samplerCube skybox;
+
+uniform sampler2D randomtex;
+uniform int randomtexWidth;
+uniform int randomtexHeight;
+
+uniform bool aoEnabled;
+uniform sampler2D aotex;
+const float AO_STRENGTH = 0.1;
+
+uniform int viewWidth;
+uniform int viewHeight;
 
 uniform mat4 gbufferViewMatrix;
 uniform mat4 gbufferViewMatrixInverse;
@@ -70,7 +84,7 @@ vec3 getBackgroundColor(vec3 texcoord) {
              smoothstep(-5.f, -15.f, angle));
 }
 
-const float eps = 0.1;
+const float eps = 0.02;
 
 // The Oren-Nayar shading model
 float orenNayar(vec3 l, vec3 v, vec3 n, float r) {
@@ -120,25 +134,52 @@ float ggx(vec3 wi, vec3 wo, vec3 normal, float roughness,
   }
 }
 
+mat2 getShadowRotation(vec2 coord) {
+  float rand = 6.283185307179586 *
+               texture(randomtex, coord * vec2(viewWidth / randomtexWidth, viewHeight / randomtexHeight)).x;
+  return mat2(cos(rand), sin(rand), -sin(rand), cos(rand));
+}
+
+float getShadowColor(vec2 texcoord) {
+  vec3 normal = texture(colortex2, texcoord).xyz;
+  vec4 csPosition = getCameraSpacePosition(texcoord);
+
+  vec4 ssPosition = cameraToShadowMatrix * vec4((csPosition.xyz + normal * eps), 1);
+
+  vec4 shadowMapCoord = shadowProjectionMatrix * ssPosition;
+  shadowMapCoord /= shadowMapCoord.w;
+  shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
+
+  float shadowColor = 0.f;
+
+  for (int y = -1; y < 2; y++) {
+    for (int x = -1; x < 2; x++) {
+      vec2 offset = vec2(x, y) / shadowtexSize;
+      offset = getShadowRotation(texcoord) * offset;
+
+      float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy + offset).r, 0);
+      if (shadowMapCoord.x <= 0 || shadowMapCoord.x >= 1 || shadowMapCoord.y <= 0 || shadowMapCoord.y >= 1) {
+        visibility = 1.f;
+      }
+
+      shadowColor += visibility;
+    }
+  }
+  return shadowColor / 9.f;
+}
+
+
 void main() {
   vec3 albedo = texture(colortex0, texcoord).xyz;
   vec3 srm = texture(colortex1, texcoord).xyz;
   float F0 = srm.x;
   float roughness = srm.y;
   float metallic = srm.z;
-  // vec3 specular = mix(vec3(1.f, 1.f, 1.f), albedo, metallic);
 
   vec3 normal = texture(colortex2, texcoord).xyz;
   vec4 csPosition = getCameraSpacePosition(texcoord);
 
-  vec4 ssPosition = cameraToShadowMatrix * vec4((csPosition.xyz + normal * eps), 1);
-  vec4 shadowMapCoord = shadowProjectionMatrix * ssPosition;
-  shadowMapCoord /= shadowMapCoord.w;
-  shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
-  float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, 0);
-  if (shadowMapCoord.x <= 0 || shadowMapCoord.x >= 1 || shadowMapCoord.y <= 0 || shadowMapCoord.y >= 1) {
-    visibility = 1;
-  }
+  float visibility = shadowLightEnabled ? getShadowColor(texcoord) : 1;
 
   vec3 camDir = -normalize(csPosition.xyz);
 
@@ -179,7 +220,11 @@ void main() {
   //   color += albedo * directionalLights[i].emission * max(0, dot(lightDir, normal));
   // }
 
-  color += ambientLight * albedo;
+  if (aoEnabled) {
+    color += ambientLight * albedo * (1 - (1 - texture(aotex, texcoord).x) * AO_STRENGTH);
+  } else {
+    color += ambientLight * albedo;
+  }
 
   float depth = texture(depthtex0, texcoord).x;
   if (depth == 1) {
@@ -189,7 +234,4 @@ void main() {
   } else {
     FragColor = vec4(color, 1.f);
   }
-  // FragColor.r = pow(FragColor.r, 1.f / 2.2f);
-  // FragColor.g = pow(FragColor.g, 1.f / 2.2f);
-  // FragColor.b = pow(FragColor.b, 1.f / 2.2f);
 }

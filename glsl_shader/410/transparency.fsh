@@ -1,5 +1,6 @@
 #version 410
 
+
 // GBuffer Uniforms
 uniform struct Material {
   vec4 kd;
@@ -56,11 +57,20 @@ uniform DirectionalLight directionalLights[N_DIRECTION_LIGHTS];
 uniform PointLight pointLights[N_POINT_LIGHTS];
 uniform vec3 ambientLight;
 
+uniform bool shadowLightEnabled;
 uniform sampler2D shadowtex;
 uniform mat4 cameraToShadowMatrix;
 uniform mat4 shadowProjectionMatrix;
 uniform vec3 shadowLightDirection;
 uniform vec3 shadowLightEmission;
+uniform int shadowtexSize;
+
+uniform sampler2D randomtex;
+uniform int randomtexWidth;
+uniform int randomtexHeight;
+
+uniform int viewWidth;
+uniform int viewHeight;
 
 uniform mat4 gbufferViewMatrix;
 uniform mat4 gbufferViewMatrixInverse;
@@ -104,7 +114,39 @@ float ggx(vec3 wi, vec3 wo, vec3 normal, float roughness,
   }
 }
 
-float eps = 0.1;
+const float eps = 0.02;
+
+mat2 getShadowRotation(vec2 coord) {
+  float rand = 6.283185307179586 *
+               texture(randomtex, coord * vec2(viewWidth / randomtexWidth, viewHeight / randomtexHeight)).x;
+  return mat2(cos(rand), sin(rand), -sin(rand), cos(rand));
+}
+
+float getShadowColor(vec2 texcoord, vec3 normal, vec4 csPosition) {
+  vec4 ssPosition = cameraToShadowMatrix * vec4((csPosition.xyz + normal * eps), 1);
+
+  vec4 shadowMapCoord = shadowProjectionMatrix * ssPosition;
+  shadowMapCoord /= shadowMapCoord.w;
+  shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
+
+  float shadowColor = 0.f;
+
+  for (int y = -1; y < 2; y++) {
+    for (int x = -1; x < 2; x++) {
+      vec2 offset = vec2(x, y) / shadowtexSize;
+      offset = getShadowRotation(texcoord) * offset;
+
+      float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy + offset).r, 0);
+      if (shadowMapCoord.x <= 0 || shadowMapCoord.x >= 1 || shadowMapCoord.y <= 0 || shadowMapCoord.y >= 1) {
+        visibility = 1.f;
+      }
+
+      shadowColor += visibility;
+    }
+  }
+  return shadowColor / 9.f;
+}
+
 
 void main() {
   // Geometry processing
@@ -132,7 +174,7 @@ void main() {
   GSEGMENTATION = segmentation;
   GSEGMENTATION2 = segmentation2;
   GSEGMENTATIONCOLOR = vec4(segmentation_color, 1);
-  GUSER = custom;
+  GUSER = vec4(cameraSpacePosition.xyz, 1);
 
   if (material.has_height_map) {
     const vec2 size = vec2(2.0,0.0);
@@ -167,10 +209,8 @@ void main() {
   vec4 shadowMapCoord = shadowProjectionMatrix * ssPosition;
   shadowMapCoord /= shadowMapCoord.w;
   shadowMapCoord = shadowMapCoord * 0.5 + 0.5;  // convert to 0-1
-  float visibility = step(shadowMapCoord.z - texture(shadowtex, shadowMapCoord.xy).r, 0);
-  if (shadowMapCoord.x <= 0 || shadowMapCoord.x >= 1 || shadowMapCoord.y <= 0 || shadowMapCoord.y >= 1) {
-    visibility = 1;
-  }
+
+  float visibility = shadowLightEnabled ? getShadowColor(texcoord, normal, csPosition) : 1;
 
   vec3 camDir = -normalize(csPosition.xyz);
 

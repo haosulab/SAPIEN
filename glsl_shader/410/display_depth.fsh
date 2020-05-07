@@ -1,5 +1,6 @@
 #version 410
 
+
 in vec2 texcoord;
 
 uniform sampler2D colortex0;  // albedo

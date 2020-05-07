@@ -1,5 +1,6 @@
 #version 410
 
+
 uniform struct Material {
   vec4 kd;
   float ks;
@@ -56,7 +57,8 @@ void main() {
   GSEGMENTATION = segmentation;
   GSEGMENTATION2 = segmentation2;
   GSEGMENTATIONCOLOR = vec4(segmentation_color, 1);
-  GUSER = custom;
+  GUSER = vec4(cameraSpacePosition.xyz, 1);
+  // GUSER = custom;
 
   if (material.has_height_map) {
     const vec2 size = vec2(2.0,0.0);
