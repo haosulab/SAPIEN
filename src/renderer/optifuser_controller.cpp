@@ -61,10 +61,14 @@ void OptifuserController::focus(SActorBase *actor) {
     mFreeCameraController.pitch = mArcCameraController.pitch;
     auto &p = mArcCameraController.camera->position;
     mFreeCameraController.setPosition(p.x, p.y, p.z);
-    mCurrentFocus->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
+    if (mCurrentSelection != mCurrentFocus) {
+      mCurrentFocus->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
+    }
   } else if (actor && actor != mCurrentFocus) {
     // focus1 -> focus2
-    mCurrentFocus->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
+    if (mCurrentSelection != mCurrentFocus) {
+      mCurrentFocus->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
+    }
     actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
   } // none -> none
   mCurrentFocus = actor;
@@ -257,7 +261,7 @@ void OptifuserController::render() {
     }
 
     if (actor != mCurrentSelection) {
-      if (mCurrentSelection) {
+      if (mCurrentSelection && mCurrentSelection != mCurrentFocus) {
         mCurrentSelection->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
       }
       if (actor) {
@@ -550,7 +554,7 @@ void OptifuserController::render() {
 
           static bool articulationDetails;
           ImGui::Checkbox("Details##ArticulationDetails", &articulationDetails);
-          
+
           std::vector<SJoint *> joints;
           if (articulation->getType() == EArticulationType::DYNAMIC) {
             auto a = static_cast<sapien::SArticulation *>(articulation);
@@ -594,7 +598,6 @@ void OptifuserController::render() {
                 ImGui::Text("Drive Position Target: %.2f", target);
                 ImGui::Text("Drive Velocity Target: %.2f", vtarget);
               }
-
             }
 
             ++i;
