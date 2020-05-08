@@ -17,6 +17,9 @@ void DefaultEventCallback::onContact(const PxContactPairHeader &pairHeader,
       contact.normal = p.normal;
       contact.impulse = p.impulse;
       contact.separation = p.separation;
+      contact.starts = pairs[i].events & PxPairFlag::eNOTIFY_TOUCH_FOUND;
+      contact.ends = pairs[i].events & PxPairFlag::eNOTIFY_TOUCH_LOST;
+      contact.persists = pairs[i].events & PxPairFlag::eNOTIFY_TOUCH_PERSISTS;
       mScene->addContact(contact);
     }
   }

@@ -13,6 +13,9 @@ struct SContact {
   PxVec3 normal;
   PxVec3 impulse;
   PxReal separation;
+  bool starts;
+  bool ends;
+  bool persists;
 };
 
 } // namespace sapien

@@ -818,6 +818,9 @@ void buildSapien(py::module &m) {
             return make_array<PxReal>({contact.impulse.x, contact.impulse.y, contact.impulse.z});
           })
       .def_readonly("separation", &SContact::separation)
+      .def_readonly("starts", &SContact::starts)
+      .def_readonly("persists", &SContact::persists)
+      .def_readonly("ends", &SContact::ends)
       .def("__repr__", [](SContact const &c) {
         std::ostringstream oss;
         oss << "Contact(actor0=" << c.actors[0]->getName() << ", actor1=" << c.actors[1]->getName()
