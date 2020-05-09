@@ -51,6 +51,9 @@ class OptifuserController : public IEventListener<EventActorPreDestroy> {
   int mCameraMode;
   std::unique_ptr<Optifuser::CameraSpec> mCamera;
   SActorBase *mCurrentFocus = nullptr;
+  bool paused = false;
+  bool flipX = false;
+  bool flipY = false;
 
 public:
   FPSCameraController mFreeCameraController;

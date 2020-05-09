@@ -143,7 +143,7 @@ physx::PxTransform OptifuserController::getCameraPose() const {
 bool OptifuserController::shouldQuit() { return mShouldQuit; }
 
 void OptifuserController::render() {
-
+  do {
 #ifdef _USE_OPTIX
   static Optifuser::OptixRenderer *pathTracer = nullptr;
 #endif
@@ -225,6 +225,12 @@ void OptifuserController::render() {
   if (Optifuser::getInput().getMouseButton(GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
     double dx, dy;
     Optifuser::getInput().getCursorDelta(dx, dy);
+    if (flipX) {
+      dx = -dx;
+    }
+    if (flipY) {
+      dy = -dy;
+    }
     if (!mCurrentFocus) {
       mFreeCameraController.rotateYawPitch(-dx / 1000.f, -dy / 1000.f);
     } else {
@@ -356,6 +362,11 @@ void OptifuserController::render() {
 
     ImGui::Begin("Render Options");
     {
+      if (ImGui::CollapsingHeader("Control", ImGuiTreeNodeFlags_DefaultOpen)) {
+        ImGui::Checkbox("Pause", &paused);
+        ImGui::Checkbox("Flip X", &flipX);
+        ImGui::Checkbox("Flip Y", &flipY);
+      }
       if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
         if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {
         };
@@ -626,30 +637,30 @@ void OptifuserController::render() {
       }
     }
     ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    {
-      auto err = glGetError();
-      if (err != GL_NO_ERROR) {
-        spdlog::get("SAPIEN")->error("Error1 {:x}", err);
-        throw "";
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());{
+        auto err = glGetError();
+        if (err != GL_NO_ERROR) {
+          spdlog::get("SAPIEN")->error("Error1 {:x}", err);
+          throw "";
+        }
       }
     }
-  }
 
-  mRenderer->mContext->swapBuffers();
+    mRenderer->mContext->swapBuffers();
 
-  if (changeShader) {
-    if (renderMode == ALBEDO) {
-      mRenderer->mContext->renderer.setDisplayShader(mRenderer->mGlslDir + "/display.vsh",
-                                                     mRenderer->mGlslDir + "/display_albedo.fsh");
-    } else if (renderMode == NORMAL) {
-      mRenderer->mContext->renderer.setDisplayShader(mRenderer->mGlslDir + "/display.vsh",
-                                                     mRenderer->mGlslDir + "/display_normal.fsh");
-    } else if (renderMode == DEPTH) {
-      mRenderer->mContext->renderer.setDisplayShader(mRenderer->mGlslDir + "/display.vsh",
-                                                     mRenderer->mGlslDir + "/display_depth.fsh");
+    if (changeShader) {
+      if (renderMode == ALBEDO) {
+        mRenderer->mContext->renderer.setDisplayShader(
+            mRenderer->mGlslDir + "/display.vsh", mRenderer->mGlslDir + "/display_albedo.fsh");
+      } else if (renderMode == NORMAL) {
+        mRenderer->mContext->renderer.setDisplayShader(
+            mRenderer->mGlslDir + "/display.vsh", mRenderer->mGlslDir + "/display_normal.fsh");
+      } else if (renderMode == DEPTH) {
+        mRenderer->mContext->renderer.setDisplayShader(mRenderer->mGlslDir + "/display.vsh",
+                                                       mRenderer->mGlslDir + "/display_depth.fsh");
+      }
     }
-  }
+  } while (paused);
 }
 
 void OptifuserController::onEvent(EventActorPreDestroy &e) {
