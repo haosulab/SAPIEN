@@ -25,6 +25,8 @@
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 
+#include "utils/pose.hpp"
+
 using namespace sapien;
 namespace py = pybind11;
 
@@ -137,41 +139,15 @@ void buildSapien(py::module &m) {
            }),
            py::return_value_policy::automatic, py::arg("p") = make_array<float>({0, 0, 0}),
            py::arg("q") = make_array<float>({1, 0, 0, 0}))
-      .def_static("from_transformation_matrix",
-                  [](const py::array_t<PxReal> &mat) {
-                    assert(mat.size() == 16 && mat.shape()[0] == 4);
-                    auto um = mat.unchecked<2>();
-                    float w = 0.5 * std::sqrt(1.0 + um(0, 0) + um(1, 1) + um(2, 2));
-                    float over_w = 0.25 / w;
-                    float x = (um(2, 1) - um(1, 2)) * over_w;
-                    float y = (um(0, 2) - um(2, 0)) * over_w;
-                    float z = (um(1, 0) - um(0, 1)) * over_w;
-                    return new PxTransform({um(0, 3), um(1, 3), um(2, 3)}, {x, y, z, w});
-                  },
+      .def_static("from_transformation_matrix", &utils::fromTransFormationMatrix,
                   py::return_value_policy::automatic, py::arg("mat44"))
-      .def("to_transformation_matrix",
-           [](PxTransform &t) {
-             t.q.normalize();
-             Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> mat44;
-             Eigen::Quaternionf q(t.q.w, t.q.x, t.q.y, t.q.z);
-             mat44.block<3, 3>(0, 0) = q.normalized().toRotationMatrix();
-             mat44.block<3, 1>(0, 3) = Eigen::Vector3f(t.p.x, t.p.y, t.p.z);
-             return mat44;
-           })
+      .def("to_transformation_matrix", &utils::toTransformationMatrix)
       .def_property_readonly(
-          "p", [](PxTransform &t) { return py::array_t<PxReal>(3, (PxReal *)(&t.p)); })
-      .def_property_readonly("q",
-                             [](PxTransform &t) {
-                               return make_array<float>({t.q.w, t.q.x, t.q.y, t.q.z});
-                             })
+          "p", [](PxTransform &t) { return Eigen::Matrix<PxReal, 3, 1>(t.p.x, t.p.y, t.p.z); })
+      .def_property_readonly( "q",
+          [](PxTransform &t) { return Eigen::Matrix<PxReal, 4, 1>(t.q.w, t.q.x, t.q.y, t.q.z); })
       .def("inv", &PxTransform::getInverse)
-      .def("__repr__",
-           [](const PxTransform &pose) {
-             std::ostringstream oss;
-             oss << "Pose([" << pose.p.x << ", " << pose.p.y << ", " << pose.p.z << "], ["
-                 << pose.q.w << ", " << pose.q.x << ", " << pose.q.y << ", " << pose.q.z << "])";
-             return oss.str();
-           })
+      .def("__repr__", &utils::poseRepresentation)
       .def("transform", [](PxTransform &t, PxTransform &src) { return t.transform(src); })
       .def("set_p", [](PxTransform &t, const py::array_t<PxReal> &arr) { t.p = array2vec3(arr); },
            py::arg("p"))
@@ -535,6 +511,12 @@ void buildSapien(py::module &m) {
       .export_values();
 
   PyActorBase.def_property("name", &SActorBase::getName, &SActorBase::setName)
+      .def("__repr__",
+           [](SActorBase &actor) {
+             std::ostringstream oss;
+             oss << "Actor [" << actor.getName() << "] with id number [" << actor.getId() << "]\n";
+             return oss.str();
+           })
       .def("get_name", &SActorBase::getName)
       .def("set_name", &SActorBase::setName, py::arg("name"))
       .def_property_readonly("type", &SActorBase::getType)
@@ -608,6 +590,13 @@ void buildSapien(py::module &m) {
   //======== Joint ========//
   PyJointBase.def_property("name", &SJointBase::getName, &SJointBase::setName)
       .def_property_readonly("type", &SJointBase::getType)
+      .def("__repr__ ", [](SJointBase &joint){
+        std::ostringstream oss;
+             oss << "Joint [" << joint.getName() << "] with parent link ["
+                 << joint.getParentLink()->getName() << "] and child link ["
+                 << joint.getChildLink()->getName() << "]\n";
+             return oss.str();
+           })
       .def("get_name", &SJointBase::getName)
       .def("set_name", &SJointBase::setName, py::arg("name"))
       .def("get_parent_link", &SJointBase::getParentLink, py::return_value_policy::reference)
@@ -981,7 +970,7 @@ void buildSapien(py::module &m) {
       .def_property_readonly(
           "scale", [](ActorBuilder::VisualRecord const &r) { return vec32array(r.scale); })
       .def_readonly("radius", &ActorBuilder::VisualRecord::radius)
-      .def_readonly("radius", &ActorBuilder::VisualRecord::length)
+      .def_readonly("length", &ActorBuilder::VisualRecord::length)
       .def_readonly("pose", &ActorBuilder::VisualRecord::pose)
       .def_readonly("material", &ActorBuilder::VisualRecord::material,
                     py::return_value_policy::reference);

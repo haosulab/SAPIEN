@@ -370,13 +370,12 @@ SArticulation::computeWorldTwistJacobianMatrix() {
   std::vector<PxArticulationLink *> internalLinks(mPxArticulation->getNbLinks());
   mPxArticulation->getLinks(internalLinks.data(), mPxArticulation->getNbLinks());
 
-  assert((nCols - freeBase) / 6 == internalLinks.size());
   Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> vel2twist =
       Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>::Identity(nRows - freeBase,
                                                                   nRows - freeBase);
-  for (size_t i = 0; i < internalLinks.size(); ++i) {
+  for (size_t i = 1; i < internalLinks.size(); ++i) {
     auto p = internalLinks[i]->getGlobalPose().p;
-    vel2twist.block<3, 3>(6 * i, 6 * i + 3) = skewSymmetric({p[0], p[1], p[2]});
+    vel2twist.block<3, 3>(6 * i - 6, 6 * i -3) = skewSymmetric({p[0], p[1], p[2]});
   }
 
   eliminatedJacobian = vel2twist * eliminatedJacobian;
@@ -523,7 +522,7 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eALL);
 }
 
-Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::VectorXd &spatialTwist,
+Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::Matrix<double, 6, 1> &spatialTwist,
                                              uint32_t commandedLinkId,
                                              const std::vector<uint32_t> &activeQIds) {
   auto logger = spdlog::get("SAPIEN");
