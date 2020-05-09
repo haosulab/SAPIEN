@@ -353,7 +353,7 @@ void SArticulation::prestep() {
 }
 
 Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-SArticulation::computeWorldCartesianJacobianMatrix() {
+SArticulation::computeWorldTwistJacobianMatrix() {
   // NOTE: 1. PhysX computeDenseJacobian computes Jacobian for the 6D root link
   // motion, which we discard. 2. PhysX computes the Jacobian for Cartesian
   // velocity, for twist Jacobian, see computeWorldTwistJacobianMatrix.
@@ -389,7 +389,7 @@ SArticulation::computeWorldCartesianJacobianMatrix() {
 }
 
 Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-SArticulation::computeWorldTwistJacobianMatrix() {
+SArticulation::computeWorldCartesianJacobianMatrix() {
   // NOTE: this function computes the Jacobian for twist motion, commonly used
   // in robotics.
   using namespace Eigen;
