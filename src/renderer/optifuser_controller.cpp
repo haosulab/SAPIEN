@@ -74,6 +74,26 @@ void OptifuserController::focus(SActorBase *actor) {
   mCurrentFocus = actor;
 }
 
+void OptifuserController::select(SActorBase *actor) {
+  if (actor != mCurrentSelection) {
+    if (mCurrentSelection) {
+      for (auto b : mCurrentSelection->getRenderBodies()) {
+        b->setRenderMode(0);
+      }
+    }
+    if (mCurrentSelection && mCurrentSelection != mCurrentFocus) {
+      mCurrentSelection->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
+    }
+    if (actor) {
+      actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
+      for (auto b : actor->getRenderBodies()) {
+        b->setRenderMode(2);
+      }
+    }
+    mCurrentSelection = actor;
+  }
+}
+
 void OptifuserController::setCameraPosition(float x, float y, float z) {
   focus(nullptr);
   mFreeCameraController.setPosition(x, y, z);
@@ -259,16 +279,7 @@ void OptifuserController::render() {
     if (!actor) {
       actor = mScene->findArticulationLinkById(mGuiModel.linkId);
     }
-
-    if (actor != mCurrentSelection) {
-      if (mCurrentSelection && mCurrentSelection != mCurrentFocus) {
-        mCurrentSelection->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
-      }
-      if (actor) {
-        actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
-      }
-      mCurrentSelection = actor;
-    }
+    select(actor);
   }
 
   if (mCurrentSelection) {

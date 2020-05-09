@@ -20,6 +20,8 @@ uniform struct Material {
   sampler2D normal_map;
 } material;
 
+uniform float opacity;
+
 uniform int segmentation;
 uniform int segmentation2;
 uniform vec3 segmentation_color;
@@ -161,7 +163,7 @@ void main() {
   }
   GCOLOR = vec4(COLOR.rgb, 1.f);
 
-  float alpha = COLOR.a;
+  float alpha = COLOR.a * opacity;
 
   if (material.has_ks_map) {
     GSPECULAR.r = texture(material.ks_map, texcoord).r;

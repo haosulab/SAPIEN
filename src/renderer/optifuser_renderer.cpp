@@ -74,12 +74,28 @@ void OptifuserRigidbody::destroyVisualObjects() {
 
 void OptifuserRigidbody::setVisible(bool visible) {
   for (auto obj : mObjects) {
-    obj->visible = visible;
+    obj->visibility = visible ? 1.f : 0.f;
   }
 }
 
 void OptifuserRigidbody::setRenderMode(uint32_t mode) {
-  // TODO: implement mode
+  if (mode == 0) {
+    for (auto obj : mObjects) {
+      obj->visibility = 1.f;
+    }
+    return;
+  }
+  if (mode == 1) {
+    for (auto obj : mObjects) {
+      obj->visibility = 0.f;
+    }
+    return;
+  }
+  if (mode == 2) {
+    for (auto obj : mObjects) {
+      obj->visibility = 0.5f;
+    }
+  }
 }
 
 //======== End Rigidbody ========//

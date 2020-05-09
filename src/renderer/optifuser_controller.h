@@ -64,6 +64,7 @@ public:
   void hideWindow();
   void setCurrentScene(SScene *scene);
   void focus(SActorBase *actor);
+  void select(SActorBase *actor);
   void setCameraPosition(float x, float y, float z);
   void setCameraRotation(float yaw, float pitch);
   void setCameraOrthographic(bool ortho = true);

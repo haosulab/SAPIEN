@@ -14,10 +14,10 @@ void SActorBase::setRenderMode(uint32_t mode) {
   if (mRenderMode != mode) {
     mRenderMode = mode;
     for (auto body : mRenderBodies) {
-      body->setVisible(mode == 0);
+      body->setVisible(mode != 1);
     }
     for (auto body : mCollisionBodies) {
-      body->setVisible(mode != 0);
+      body->setVisible(mode == 1);
     }
   }
 }
