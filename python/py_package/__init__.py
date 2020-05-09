@@ -1,1 +1,1 @@
-from sapien import core, asset
+from sapien import core, asset, example
