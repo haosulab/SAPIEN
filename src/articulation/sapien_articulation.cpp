@@ -353,9 +353,47 @@ void SArticulation::prestep() {
 }
 
 Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-SArticulation::computeJacobianMatrix() {
-  // Note that the Physx computeDenseJacobian will neglect the root link if it is not fixed
-  // But consider it otherwise. Thus both the nRows and nCols will be influence by FIX_BASE
+SArticulation::computeWorldCartesianJacobianMatrix() {
+  // NOTE: 1. PhysX computeDenseJacobian computes Jacobian for the 6D root link
+  // motion, which we discard. 2. PhysX computes the Jacobian for Cartesian
+  // velocity, for twist Jacobian, see computeWorldTwistJacobianMatrix.
+  using namespace Eigen;
+  PxU32 nRows;
+  PxU32 nCols;
+  mPxArticulation->computeDenseJacobian(*mCache, nRows, nCols);
+  uint32_t freeBase = (nCols == dof()) ? 0 : 6;
+  Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> originJacobian =
+      Map<Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>>(mCache->denseJacobian, nRows, nCols);
+  Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> eliminatedJacobian(
+      originJacobian.block(freeBase, freeBase, nRows - freeBase, nCols - freeBase));
+
+  std::vector<PxArticulationLink *> internalLinks(mPxArticulation->getNbLinks());
+  mPxArticulation->getLinks(internalLinks.data(), mPxArticulation->getNbLinks());
+
+  assert((nCols - freeBase) / 6 == internalLinks.size());
+  Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> vel2twist =
+      Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>::Identity(nCols - freeBase,
+                                                                  nCols - freeBase);
+  for (size_t i = 0; i < internalLinks.size(); ++i) {
+    auto p = mLinks[i]->getPose().p;
+    PxReal ssm[9] = {0, -p[2], p[1], p[2], 0, -p[1], -p[1], p[0], 0};
+    auto m = Map<Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>>(ssm, 3, 3);
+    vel2twist.block(6 * i, 6 * i + 3, 3, 3) = m;
+  }
+
+  eliminatedJacobian = vel2twist * eliminatedJacobian;
+
+  // Switch joint(column) order from internal to external
+  eliminatedJacobian = eliminatedJacobian * mColumnPermutationI2E;
+
+  // Switch link(row) order from internal to external
+  return mRowPermutationI2E * eliminatedJacobian;
+}
+
+Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+SArticulation::computeWorldTwistJacobianMatrix() {
+  // NOTE: this function computes the Jacobian for twist motion, commonly used
+  // in robotics.
   using namespace Eigen;
   PxU32 nRows;
   PxU32 nCols;
@@ -499,7 +537,7 @@ Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::VectorXd &spatialTwist
     return qvel;
   }
 
-  auto denseJacobian = computeJacobianMatrix();
+  auto denseJacobian = computeWorldTwistJacobianMatrix();
   Eigen::MatrixXf jacobian = denseJacobian.block(commandedLinkId * 6 - 6, 0, 6, dof());
   Eigen::MatrixXf reducedJacobian(jacobian);
   if (!activeQIds.empty()) {

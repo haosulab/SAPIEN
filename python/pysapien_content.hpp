@@ -781,7 +781,9 @@ void buildSapien(py::module &m) {
              return py::array_t<PxReal>(qacc.size(), qacc.data());
            })
       .def("compute_manipulator_inertia_matrix", &SArticulation::computeManipulatorInertiaMatrix)
-      .def("compute_jacobian", &SArticulation::computeJacobianMatrix)
+      .def("compute_jacobian", &SArticulation::computeWorldTwistJacobianMatrix)
+      .def("compute_world_twist_jacobian", &SArticulation::computeWorldTwistJacobianMatrix)
+      .def("compute_world_cartesian_jacobian", &SArticulation::computeWorldCartesianJacobianMatrix)
       .def("compute_transformation_matrix",
            py::overload_cast<uint32_t, uint32_t>(&SArticulation::computeRelativeTransformation),
            py::arg("source_link_ik"), py::arg("target_link_id"))
