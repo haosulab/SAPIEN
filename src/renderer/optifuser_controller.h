@@ -54,6 +54,7 @@ class OptifuserController : public IEventListener<EventActorPreDestroy> {
   bool paused = false;
   bool flipX = false;
   bool flipY = false;
+  bool transparentSelection = false;
 
 public:
   FPSCameraController mFreeCameraController;

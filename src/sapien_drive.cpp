@@ -29,10 +29,19 @@ void SDrive::setProperties(PxReal stiffness, PxReal damping, PxReal forceLimit,
   mJoint->setDrive(PxD6Drive::eSLERP, drive);
 }
 
+PxTransform SDrive::getLocalPose1() const { return mJoint->getLocalPose(PxJointActorIndex::eACTOR0); }
+PxTransform SDrive::getLocalPose2() const { return mJoint->getLocalPose(PxJointActorIndex::eACTOR1); }
+
 void SDrive::setTarget(PxTransform const &pose) { mJoint->setDrivePosition(pose); }
+PxTransform SDrive::getTarget() const { return mJoint->getDrivePosition(); }
 
 void SDrive::setTargetVelocity(PxVec3 const &velocity, PxVec3 const &angularVelocity) {
   mJoint->setDriveVelocity(velocity, angularVelocity);
+}
+std::tuple<PxVec3, PxVec3> SDrive::getTargetVelocity() const {
+  PxVec3 linear, angular;
+  mJoint->getDriveVelocity(linear, angular);
+  return {linear, angular};
 }
 
 void SDrive::destroy() { mScene->removeDrive(this); }

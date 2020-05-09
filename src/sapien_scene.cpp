@@ -396,7 +396,14 @@ std::vector<SContact> const &SScene::getContacts() const { return mContacts; }
 SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
                             PxTransform const &pose2) {
   mDrives.push_back(std::unique_ptr<SDrive>(new SDrive(this, actor1, pose1, actor2, pose2)));
-  return mDrives.back().get();
+  auto drive = mDrives.back().get();
+  if (actor1) {
+    actor1->addDrive(drive);
+  }
+  if (actor2) {
+    actor2->addDrive(drive);
+  }
+  return drive;
 }
 
 void SScene::removeMountedCameraByMount(SActorBase *actor) {
