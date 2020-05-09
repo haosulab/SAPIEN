@@ -376,9 +376,7 @@ SArticulation::computeWorldCartesianJacobianMatrix() {
                                                                   nCols - freeBase);
   for (size_t i = 0; i < internalLinks.size(); ++i) {
     auto p = mLinks[i]->getPose().p;
-    PxReal ssm[9] = {0, -p[2], p[1], p[2], 0, -p[1], -p[1], p[0], 0};
-    auto m = Map<Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>>(ssm, 3, 3);
-    vel2twist.block(6 * i, 6 * i + 3, 3, 3) = m;
+    vel2twist.block(6 * i, 6 * i + 3, 3, 3) = skewSymmetric({p[0], p[1], p[2]});
   }
 
   eliminatedJacobian = vel2twist * eliminatedJacobian;
