@@ -82,7 +82,8 @@ public:
 
   /* Kinematics Functions */
   Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeWorldCartesianJacobianMatrix();
-  Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeWorldTwistJacobianMatrix();
+  Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeSpatialTwistJacobianMatrix();
+  Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeJacobianMatrix();
 
   static Matrix<PxReal, 4, 4, RowMajor> computeRelativeTransformation(SLink *sourceFrame,
                                                                       SLink *targetFrame);
@@ -92,9 +93,15 @@ public:
                                                              SLink *targetFrame);
   Matrix<PxReal, 6, 6, RowMajor> computeAdjointMatrix(uint32_t sourceLinkId,
                                                       uint32_t targetLinkId);
-  VectorXf computeDiffIk(const Matrix<double,6,1> &twist, uint32_t commandedLinkId,
-                         const std::vector<uint32_t> &activeJointsId = {});
 
+  Matrix<PxReal, Dynamic, 1> computeTwistDiffIK(const Eigen::Matrix<PxReal, 6, 1> &spatialTwist,
+                                                uint32_t commandedLinkId,
+                                                const std::vector<uint32_t> &activeQIds = {});
+
+  Matrix<PxReal, Dynamic, 1>
+  computeCartesianVelocityDiffIK(const Eigen::Matrix<PxReal, 6, 1> &cartesianVelocity,
+                                 uint32_t commandedLinkId,
+                                 const std::vector<uint32_t> &activeQIds = {});
   /* Save and Load */
   std::vector<PxReal> packData();
   void unpackData(std::vector<PxReal> const &data);

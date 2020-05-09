@@ -770,17 +770,20 @@ void buildSapien(py::module &m) {
              return py::array_t<PxReal>(qacc.size(), qacc.data());
            })
       .def("compute_manipulator_inertia_matrix", &SArticulation::computeManipulatorInertiaMatrix)
-      .def("compute_jacobian", &SArticulation::computeWorldTwistJacobianMatrix)
-      .def("compute_world_twist_jacobian", &SArticulation::computeWorldTwistJacobianMatrix)
+      .def("compute_jacobian", &SArticulation::computeJacobianMatrix)
+      .def("compute_spatial_twist_jacobian", &SArticulation::computeSpatialTwistJacobianMatrix)
       .def("compute_world_cartesian_jacobian", &SArticulation::computeWorldCartesianJacobianMatrix)
       .def("compute_transformation_matrix",
            py::overload_cast<uint32_t, uint32_t>(&SArticulation::computeRelativeTransformation),
-           py::arg("source_link_ik"), py::arg("target_link_id"))
+           py::arg("source_link_id"), py::arg("target_link_id"))
       .def("compute_adjoint_matrix",
            py::overload_cast<uint32_t, uint32_t>(&SArticulation::computeAdjointMatrix),
            py::arg("source_link_ik"), py::arg("target_link_id"))
-      .def("compute_diff_ik", &SArticulation::computeDiffIk, py::arg("spatial_twist"),
+      .def("compute_twist_diff_ik", &SArticulation::computeTwistDiffIK, py::arg("spatial_twist"),
            py::arg("commanded_link_id"), py::arg("active_joint_ids") = std::vector<uint32_t>())
+      .def("compute_cartesian_diff_ik", &SArticulation::computeCartesianVelocityDiffIK,
+           py::arg("world_velocity"), py::arg("commanded_link_id"),
+           py::arg("active_joint_ids") = std::vector<uint32_t>())
       .def("pack", &SArticulation::packData)
       .def("unpack", [](SArticulation &a, const py::array_t<PxReal> &arr) {
         a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));

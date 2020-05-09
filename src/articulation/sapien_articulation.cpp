@@ -353,10 +353,19 @@ void SArticulation::prestep() {
 }
 
 Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-SArticulation::computeWorldTwistJacobianMatrix() {
+SArticulation::computeJacobianMatrix() {
+  spdlog::get("SAPIEN")->warn(
+      "To avoid conflicts, This function will be replaced by [compute_spatial_twist_jacobian] "
+      "after May 17th, 2020. Another similar function is [compute_world_cartesian_jacobian] which "
+      "will return the gradient of world velocity with respect to joint velocity");
+  return computeSpatialTwistJacobianMatrix();
+}
+
+Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
+SArticulation::computeSpatialTwistJacobianMatrix() {
   // NOTE: 1. PhysX computeDenseJacobian computes Jacobian for the 6D root link
   // motion, which we discard. 2. PhysX computes the Jacobian for Cartesian
-  // velocity, for twist Jacobian, see computeWorldTwistJacobianMatrix.
+  // velocity, for twist Jacobian, see computeSpatialTwistJacobianMatrix.
   using namespace Eigen;
   PxU32 nRows;
   PxU32 nCols;
@@ -375,7 +384,7 @@ SArticulation::computeWorldTwistJacobianMatrix() {
                                                                   nRows - freeBase);
   for (size_t i = 1; i < internalLinks.size(); ++i) {
     auto p = internalLinks[i]->getGlobalPose().p;
-    vel2twist.block<3, 3>(6 * i - 6, 6 * i -3) = skewSymmetric({p[0], p[1], p[2]});
+    vel2twist.block<3, 3>(6 * i - 6, 6 * i - 3) = skewSymmetric({p[0], p[1], p[2]});
   }
 
   eliminatedJacobian = vel2twist * eliminatedJacobian;
@@ -522,9 +531,10 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eALL);
 }
 
-Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::Matrix<double, 6, 1> &spatialTwist,
-                                             uint32_t commandedLinkId,
-                                             const std::vector<uint32_t> &activeQIds) {
+Matrix<PxReal, Dynamic, 1>
+SArticulation::computeTwistDiffIK(const Eigen::Matrix<PxReal, 6, 1> &spatialTwist,
+                                  uint32_t commandedLinkId,
+                                  const std::vector<uint32_t> &activeQIds) {
   auto logger = spdlog::get("SAPIEN");
   auto numCol = activeQIds.empty() ? dof() : activeQIds.size();
   Eigen::VectorXf qvel(numCol);
@@ -534,7 +544,7 @@ Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::Matrix<double, 6, 1> &
     return qvel;
   }
 
-  auto denseJacobian = computeWorldTwistJacobianMatrix();
+  auto denseJacobian = computeSpatialTwistJacobianMatrix();
   Eigen::MatrixXf jacobian = denseJacobian.block(commandedLinkId * 6 - 6, 0, 6, dof());
   Eigen::MatrixXf reducedJacobian(jacobian);
   if (!activeQIds.empty()) {
@@ -560,7 +570,7 @@ Eigen::VectorXf SArticulation::computeDiffIk(const Eigen::Matrix<double, 6, 1> &
   for (std::size_t i = 0; i < static_cast<std::size_t>(s.rows()); ++i) {
     invS(i) = fabs(s(i)) > maxS * epsilon ? 1.0 / s(i) : 0.0;
   }
-  qvel = v * invS.asDiagonal() * u.transpose() * spatialTwist.cast<PxReal>();
+  qvel = v * invS.asDiagonal() * u.transpose() * spatialTwist;
   return qvel;
 }
 
@@ -573,6 +583,49 @@ SArticulation::computeAdjointMatrix(SLink *sourceFrame, SLink *targetFrame) {
   Eigen::Vector3f position = mat44.block<3, 1>(0, 3);
   adjoint.block<3, 3>(0, 3) = skewSymmetric(position) * mat44.block<3, 3>(0, 0);
   return adjoint;
+}
+
+Matrix<PxReal, Dynamic, 1>
+SArticulation::computeCartesianVelocityDiffIK(const Eigen::Matrix<PxReal, 6, 1> &cartesianVelocity,
+                                              uint32_t commandedLinkId,
+                                              const std::vector<uint32_t> &activeQIds) {
+  auto logger = spdlog::get("SAPIEN");
+  auto numCol = activeQIds.empty() ? dof() : activeQIds.size();
+  Eigen::VectorXf qvel(numCol);
+
+  if (commandedLinkId == 0) {
+    logger->warn("Link with id 0 (root link) can not be a valid commanded link.");
+    return qvel;
+  }
+
+  auto denseJacobian = computeWorldCartesianJacobianMatrix();
+  Eigen::MatrixXf jacobian = denseJacobian.block(commandedLinkId * 6 - 6, 0, 6, dof());
+  Eigen::MatrixXf reducedJacobian(jacobian);
+  if (!activeQIds.empty()) {
+    reducedJacobian.resize(6, numCol);
+    for (size_t i = 0; i < numCol; ++i) {
+      if (activeQIds[i] >= dof()) {
+        logger->warn("Articulation has {} joints, but given joint id {}", dof(), activeQIds[i]);
+        return qvel;
+      }
+      reducedJacobian.block<6, 1>(0, i) = jacobian.block<6, 1>(0, activeQIds[i]);
+    }
+  }
+
+  Eigen::JacobiSVD<Eigen::MatrixXf> svd_of_j(reducedJacobian,
+                                             Eigen::ComputeThinU | Eigen::ComputeThinV);
+  const Eigen::MatrixXf &u = svd_of_j.matrixU();
+  const Eigen::MatrixXf &v = svd_of_j.matrixV();
+  const Eigen::VectorXf &s = svd_of_j.singularValues();
+
+  Eigen::VectorXf invS = s;
+  static const float epsilon = std::numeric_limits<float>::epsilon();
+  double maxS = s[0];
+  for (std::size_t i = 0; i < static_cast<std::size_t>(s.rows()); ++i) {
+    invS(i) = fabs(s(i)) > maxS * epsilon ? 1.0 / s(i) : 0.0;
+  }
+  qvel = v * invS.asDiagonal() * u.transpose() * cartesianVelocity;
+  return qvel;
 }
 
 Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>
