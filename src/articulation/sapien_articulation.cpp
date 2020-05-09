@@ -372,11 +372,11 @@ SArticulation::computeWorldTwistJacobianMatrix() {
 
   assert((nCols - freeBase) / 6 == internalLinks.size());
   Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> vel2twist =
-      Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>::Identity(nCols - freeBase,
-                                                                  nCols - freeBase);
+      Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>::Identity(nRows - freeBase,
+                                                                  nRows - freeBase);
   for (size_t i = 0; i < internalLinks.size(); ++i) {
-    auto p = mLinks[i]->getPose().p;
-    vel2twist.block(6 * i, 6 * i + 3, 3, 3) = skewSymmetric({p[0], p[1], p[2]});
+    auto p = internalLinks[i]->getGlobalPose().p;
+    vel2twist.block<3, 3>(6 * i, 6 * i + 3) = skewSymmetric({p[0], p[1], p[2]});
   }
 
   eliminatedJacobian = vel2twist * eliminatedJacobian;
