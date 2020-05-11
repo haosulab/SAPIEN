@@ -107,12 +107,21 @@ void OptifuserController::editTransform() {
   }
   if (mGuiModel.linkId) {
     SActorBase *actor = mScene->findActorById(mGuiModel.linkId);
+    if (!actor) {
+      actor = mScene->findArticulationLinkById(mGuiModel.linkId);
+    }
+
     if (actor &&
         (actor->getType() == EActorType::DYNAMIC || actor->getType() == EActorType::KINEMATIC)) {
+      ImGui::SameLine();
       if (ImGui::Button("Teleport Actor")) {
         static_cast<SActor *>(actor)->setPose(pose);
       }
+    }
 
+    if (actor && (actor->getType() == EActorType::DYNAMIC ||
+                  actor->getType() == EActorType::ARTICULATION_LINK)) {
+      ImGui::SameLine();
       if (ImGui::Button("Drive Actor")) {
         SDrive *validDrive = nullptr;
         auto drives = actor->getDrives();
@@ -124,7 +133,8 @@ void OptifuserController::editTransform() {
           }
         }
         if (!validDrive) {
-          validDrive = mScene->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, actor, {{0, 0, 0}, PxIdentity});
+          validDrive = mScene->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, actor,
+                                           {{0, 0, 0}, PxIdentity});
           validDrive->setProperties(10000, 10000, PX_MAX_F32, false);
         }
         validDrive->setTarget(pose);
@@ -639,6 +649,23 @@ void OptifuserController::render() {
                 createGizmoVisual(link);
               }
             }
+            switch (link->getType()) {
+              case EActorType::ARTICULATION_LINK:
+                ImGui::Text("Type: Articulation Link");
+                break;
+              case EActorType::DYNAMIC:
+                ImGui::Text("Type: Dynamic Actor");
+                break;
+              case EActorType::KINEMATIC:
+                ImGui::Text("Type: Kinematic Actor");
+                break;
+              case EActorType::KINEMATIC_ARTICULATION_LINK:
+                ImGui::Text("Type: Kinematic Articulation Link");
+                break;
+              case EActorType::STATIC:
+                ImGui::Text("Type: Static");
+                break;
+            }
 
             // toggle collision shape
             if (ImGui::Checkbox("Collision Shape", &mGuiModel.linkModel.renderCollision)) {
@@ -778,7 +805,8 @@ void OptifuserController::render() {
                 if (ImGui::Button(("Remove Drive##" + std::to_string(i)).c_str())) {
                   drives[i]->destroy();
                 }
-                ImGui::Text("Caution: Accessing a removed drive will cause crash");
+                ImGui::Text("Caution: Accessing a removed drive");
+                ImGui::Text("will cause crash");
               }
               ImGui::NewLine();
             }
