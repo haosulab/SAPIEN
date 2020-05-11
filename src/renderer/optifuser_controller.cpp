@@ -12,8 +12,28 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include <glm/gtx/matrix_decompose.hpp>
+// After ImGui
+#include "ImGuizmo.h"
 
 constexpr int WINDOW_WIDTH = 1200, WINDOW_HEIGHT = 800;
+static const uint32_t imguiWindowSize = 300;
+
+glm::mat4 PxTransform2Mat4(physx::PxTransform const &t) {
+  glm::mat4 rot = glm::toMat4(glm::quat(t.q.w, t.q.x, t.q.y, t.q.z));
+  glm::mat4 pos = glm::translate(glm::mat4(1.f), {t.p.x, t.p.y, t.p.z});
+  return pos * rot;
+}
+
+physx::PxTransform Mat42PxTransform(glm::mat4 const &m) {
+  glm::vec3 scale;
+  glm::quat rot;
+  glm::vec3 pos;
+  glm::vec3 skew;
+  glm::vec4 perspective;
+  glm::decompose(m, scale, rot, pos, skew, perspective);
+  return {{pos.x, pos.y, pos.z}, {rot.x, rot.y, rot.z, rot.w}};
+}
 
 enum RenderMode {
   LIGHTING,
@@ -33,6 +53,112 @@ namespace Renderer {
 
 static int pickedId = 0;
 static int pickedRenderId = 0;
+
+void OptifuserController::editTransform() {
+  static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
+  static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
+  static bool useSnap = false;
+  static float snap[3] = {1.f, 1.f, 1.f};
+  static float bounds[] = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f};
+  static float boundsSnap[] = {0.1f, 0.1f, 0.1f};
+  static bool boundSizing = false;
+  static bool boundSizingSnap = false;
+
+  ImGui::SetNextWindowPos(ImVec2(imguiWindowSize, 0));
+  ImGui::SetNextWindowSize(ImVec2(mRenderer->mContext->getWidth() - 2 * imguiWindowSize, 0));
+
+  ImGui::Begin("Gizmo");
+  if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+    mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+  ImGui::SameLine();
+  if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+    mCurrentGizmoOperation = ImGuizmo::ROTATE;
+  float matrixTranslation[3], matrixRotation[3], matrixScale[3] = {1, 1, 1};
+  ImGuizmo::DecomposeMatrixToComponents(&gizmoTransform[0][0], matrixTranslation, matrixRotation,
+                                        matrixScale);
+  ImGui::InputFloat3("Tr", matrixTranslation, 3);
+  ImGui::InputFloat3("Rt", matrixRotation, 3);
+  ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale,
+                                          &gizmoTransform[0][0]);
+
+  if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+    mCurrentGizmoMode = ImGuizmo::LOCAL;
+  if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+    mCurrentGizmoMode = ImGuizmo::WORLD;
+  ImGui::Checkbox("", &useSnap);
+  ImGui::SameLine();
+
+  switch (mCurrentGizmoOperation) {
+  case ImGuizmo::TRANSLATE:
+    ImGui::InputFloat3("Snap", &snap[0]);
+    break;
+  case ImGuizmo::ROTATE:
+    ImGui::InputFloat("Angle Snap", &snap[0]);
+    break;
+  }
+
+  if (ImGui::Button("Reset")) {
+    gizmoTransform = glm::mat4(1);
+    createGizmoVisual(nullptr);
+  }
+  auto pose = Mat42PxTransform(gizmoTransform);
+  for (auto b : gizmoBody) {
+    b->update(pose);
+  }
+  if (mGuiModel.linkId) {
+    SActorBase *actor = mScene->findActorById(mGuiModel.linkId);
+    if (actor &&
+        (actor->getType() == EActorType::DYNAMIC || actor->getType() == EActorType::KINEMATIC)) {
+      if (ImGui::Button("Teleport Actor")) {
+        static_cast<SActor *>(actor)->setPose(pose);
+      }
+
+      if (ImGui::Button("Drive Actor")) {
+        SDrive *validDrive = nullptr;
+        auto drives = actor->getDrives();
+        for (SDrive *d : drives) {
+          if (d->getActor1() == nullptr &&
+              d->getLocalPose1() == PxTransform({{0, 0, 0}, PxIdentity}) &&
+              d->getLocalPose2() == PxTransform({{0, 0, 0}, PxIdentity})) {
+            validDrive = d;
+          }
+        }
+        if (!validDrive) {
+          validDrive = mScene->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, actor, {{0, 0, 0}, PxIdentity});
+          validDrive->setProperties(10000, 10000, PX_MAX_F32, false);
+        }
+        validDrive->setTarget(pose);
+      }
+    }
+  }
+
+  ImGuiIO &io = ImGui::GetIO();
+  ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+  auto view = mCamera->getViewMat();
+  auto proj = mCamera->getProjectionMat();
+  ImGuizmo::Manipulate(&view[0][0], &proj[0][0], mCurrentGizmoOperation, mCurrentGizmoMode,
+                       &gizmoTransform[0][0], NULL, useSnap ? &snap[0] : NULL,
+                       boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+  ImGui::End();
+}
+
+void OptifuserController::createGizmoVisual(SActorBase *actor) {
+  if (mScene) {
+    for (auto b : gizmoBody) {
+      b->destroy();
+    }
+    gizmoBody.clear();
+    if (actor) {
+      for (auto b : actor->getRenderBodies()) {
+        auto body = static_cast<OptifuserRigidbody *>(b);
+        auto scene = static_cast<OptifuserScene *>(mScene->getRendererScene());
+        gizmoBody.push_back(scene->cloneRigidbody(body));
+        gizmoBody.back()->setUniqueId(0);
+        gizmoBody.back()->setRenderMode(2);
+      }
+    }
+  }
+}
 
 OptifuserController::OptifuserController(OptifuserRenderer *renderer)
     : mRenderer(renderer), mCameraMode(0),
@@ -352,13 +478,17 @@ void OptifuserController::render() {
       currentScene->getScene()->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
     }
 
-    static const uint32_t imguiWindowSize = 300;
     static int camIndex = -1;
     int changeShader = 0;
     if (renderGui) {
       ImGui_ImplOpenGL3_NewFrame();
       ImGui_ImplGlfw_NewFrame();
+
       ImGui::NewFrame();
+      if (gizmo) {
+        ImGuizmo::BeginFrame();
+        editTransform();
+      }
 
       ImGui::SetNextWindowPos(ImVec2(0, 0));
       ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mRenderer->mContext->getHeight()));
@@ -369,8 +499,8 @@ void OptifuserController::render() {
           ImGui::Checkbox("Pause", &paused);
           ImGui::Checkbox("Flip X", &flipX);
           ImGui::Checkbox("Flip Y", &flipY);
-          ImGui::Checkbox("Flip Y", &flipY);
           ImGui::Checkbox("Transparent Selection", &transparentSelection);
+          ImGui::Checkbox("Show Gizmo", &gizmo);
         }
         if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
           if (ImGui::RadioButton("Lighting", &renderMode, RenderMode::LIGHTING)) {
@@ -498,12 +628,20 @@ void OptifuserController::render() {
                         mGuiModel.linkModel.col2);
             ImGui::Text("col3: #%08x", mGuiModel.linkModel.col3);
 
+            SActorBase *link = mScene->findActorById(mGuiModel.linkId);
+            if (!link) {
+              link = mScene->findArticulationLinkById(mGuiModel.linkId);
+            }
+            if (link) {
+              if (ImGui::Button("Gizmo to Actor")) {
+                gizmo = true;
+                gizmoTransform = PxTransform2Mat4(link->getPose());
+                createGizmoVisual(link);
+              }
+            }
+
             // toggle collision shape
             if (ImGui::Checkbox("Collision Shape", &mGuiModel.linkModel.renderCollision)) {
-              SActorBase *link = mScene->findActorById(mGuiModel.linkId);
-              if (!link) {
-                link = mScene->findArticulationLinkById(mGuiModel.linkId);
-              }
               if (link) {
                 link->setRenderMode(mGuiModel.linkModel.renderCollision);
               }
@@ -511,10 +649,6 @@ void OptifuserController::render() {
 
             // toggle center of mass
             if (ImGui::Checkbox("Center of Mass", &mGuiModel.linkModel.showCenterOfMass)) {
-              SActorBase *link = mScene->findActorById(mGuiModel.linkId);
-              if (!link) {
-                link = mScene->findArticulationLinkById(mGuiModel.linkId);
-              }
             }
           }
         }
@@ -638,9 +772,13 @@ void OptifuserController::render() {
                     glm::eulerAngles(glm::quat(target.q.w, target.q.x, target.q.y, target.q.z)) /
                     glm::pi<float>() * 180.f;
                 ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles.x, angles.y, angles.z);
-
                 ImGui::Text("Linear Velocity: %.2f %.2f %.2f", v.x, v.y, v.z);
                 ImGui::Text("Angular Velocity: %.2f %.2f %.2f", w.x, w.y, w.z);
+
+                if (ImGui::Button(("Remove Drive##" + std::to_string(i)).c_str())) {
+                  drives[i]->destroy();
+                }
+                ImGui::Text("Caution: Accessing a removed drive will cause crash");
               }
               ImGui::NewLine();
             }
@@ -721,6 +859,7 @@ void OptifuserController::render() {
           throw "";
         }
       }
+
       ImGui::Render();
       ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
       {

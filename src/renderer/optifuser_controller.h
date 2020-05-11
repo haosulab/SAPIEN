@@ -55,6 +55,13 @@ class OptifuserController : public IEventListener<EventActorPreDestroy> {
   bool flipX = false;
   bool flipY = false;
   bool transparentSelection = false;
+  bool gizmo = false;
+  glm::mat4 gizmoTransform = glm::mat4(1);
+
+  void editTransform();
+
+  std::vector<IPxrRigidbody *> gizmoBody;
+  void createGizmoVisual(SActorBase *actor);
 
 public:
   FPSCameraController mFreeCameraController;

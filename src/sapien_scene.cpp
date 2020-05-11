@@ -180,13 +180,19 @@ void SScene::removeDrive(SDrive *drive) {
   if (drive->mScene != this) {
     spdlog::get("SAPIEN")->error("failed to remove drive: drive is not in this scene.");
   }
+  drive->mJoint->release();
   if (drive->mActor1) {
     drive->mActor1->removeDrive(drive);
+    if (drive->mActor1->getType() == EActorType::DYNAMIC)  {
+      static_cast<PxRigidDynamic *>(drive->getActor1()->getPxActor())->wakeUp();
+    }
   }
   if (drive->mActor2) {
     drive->mActor2->removeDrive(drive);
+    if (drive->mActor2->getType() == EActorType::DYNAMIC) {
+      static_cast<PxRigidDynamic *>(drive->getActor2()->getPxActor())->wakeUp();
+    }
   }
-  drive->mJoint->release();
   mDrives.erase(std::remove_if(mDrives.begin(), mDrives.end(),
                                [drive](auto &d) { return d.get() == drive; }),
                 mDrives.end());
@@ -301,9 +307,9 @@ void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
 }
 
 void SScene::step() {
-  #ifdef _PROFILE
+#ifdef _PROFILE
   EASY_BLOCK("Pre-step processing", profiler::colors::Blue);
-  #endif
+#endif
 
   clearContacts();
   for (auto &a : mActors) {

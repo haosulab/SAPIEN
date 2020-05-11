@@ -147,7 +147,7 @@ int main() {
       drive = s0->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, ant0->getRootLink(),
                               {{0, 0, 0}, PxIdentity});
       drive->setProperties(2000, 4000, PX_MAX_F32, true);
-      drive->setTarget({{0, 0, 1}, PxIdentity});
+      drive->setTarget({{0, 0, 1}, PxQuat(1, {0, 1, 0})});
     }
 
     s0->updateRender();

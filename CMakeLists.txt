@@ -58,6 +58,7 @@ include_directories(
         "3rd_party/optifuser/include"
         "3rd_party/optifuser/3rd_party/imgui"
         "3rd_party/optifuser/3rd_party/imgui/examples"
+        "3rd_party/optifuser/3rd_party/ImGuizmo"
         "src"
         "src/renderer")
 
@@ -86,10 +87,6 @@ else ()
     link_directories("/usr/local/opt/glm/lib" "/usr/local/opt/glew/lib"
             "/usr/local/lib")
 endif ()
-
-file(GLOB GUI_SRC "3rd_party/imgui/*.cpp"
-        "3rd_party/imgui/examples/imgui_impl_glfw.cpp"
-        "3rd_party/imgui/examples/imgui_impl_opengl3.cpp")
 
 set(OPTIX_HOME "NOT FOUND" CACHE FILEPATH "Home to OptiX")
 if (EXISTS ${OPTIX_HOME})

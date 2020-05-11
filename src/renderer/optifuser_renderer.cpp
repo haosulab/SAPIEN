@@ -210,6 +210,22 @@ void OptifuserScene::removeRigidbody(IPxrRigidbody *body) {
   }
 }
 
+IPxrRigidbody *OptifuserScene::cloneRigidbody(OptifuserRigidbody *other) {
+  auto &otherObjs = other->getVisualObjects();
+
+  std::vector<Optifuser::Object *> objs;
+  for (auto &obj : otherObjs) {
+    auto newobj = obj->clone();
+    objs.push_back(newobj.get());
+    mScene->addObject(std::move(newobj));
+  }
+  mBodies.push_back(std::make_unique<OptifuserRigidbody>(this, objs));
+  auto body = mBodies.back().get();
+  body->setInitialPose(other->getInitialPose());
+  return body;
+}
+
+
 ICamera *OptifuserScene::addCamera(std::string const &name, uint32_t width, uint32_t height,
                                    float fovx, float fovy, float near, float far,
                                    std::string const &shaderDir) {

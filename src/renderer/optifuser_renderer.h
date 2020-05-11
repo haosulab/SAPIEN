@@ -1,17 +1,16 @@
 #pragma once
 #include "camera.h"
+#include "config.h"
 #include "render_interface.h"
 #include <camera_spec.h>
 #include <memory>
 #include <optifuser.h>
-#include "config.h"
 
 namespace sapien {
 namespace Renderer {
 
 class OptifuserRenderer;
 class OptifuserScene;
-
 
 class OptifuserRigidbody : public IPxrRigidbody {
   OptifuserScene *mParentScene = nullptr;
@@ -33,6 +32,7 @@ public:
   uint32_t getSegmentationId() const override;
   void setSegmentationCustomData(const std::vector<float> &customData) override;
   void setInitialPose(const physx::PxTransform &transform) override;
+  inline physx::PxTransform getInitialPose() const { return mInitialPose; };
   void update(const physx::PxTransform &transform) override;
 
   void setVisible(bool visible) override;
@@ -41,6 +41,7 @@ public:
   void destroy() override;
 
   void destroyVisualObjects();
+  inline std::vector<Optifuser::Object *> const &getVisualObjects() const { return mObjects; }
 };
 
 class OptifuserScene : public IPxrScene {
@@ -69,6 +70,7 @@ public:
                                       std::vector<uint32_t> const &indices,
                                       const physx::PxVec3 &scale,
                                       const PxrMaterial &material) override;
+  virtual IPxrRigidbody *cloneRigidbody(OptifuserRigidbody *other);
 
   virtual void removeRigidbody(IPxrRigidbody *body) override;
 
