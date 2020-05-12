@@ -10,40 +10,15 @@ class SActorBase;
 
 namespace Renderer {
 
-struct JointGuiModel {
-  std::string name;
-  std::array<float, 2> limits;
-  float value;
-};
-
-struct ArticulationGuiModel {
-  std::string name = "";
-  std::vector<JointGuiModel> jointModel;
-};
-
-struct LinkGuiModel {
-  std::string name = "";
-  physx::PxTransform transform = {{0, 0, 0}, physx::PxIdentity};
-  physx::PxTransform cmassPose = {{0, 0, 0}, physx::PxIdentity};
-  uint32_t col1 = 0;
-  uint32_t col2 = 0;
-  uint32_t col3 = 0;
-  bool renderCollision = false;
-  bool showCenterOfMass = false;
-};
-
-struct GuiModel {
-  int linkId = 0;
-  LinkGuiModel linkModel;
-  int articulationId = 0;
-  ArticulationGuiModel articulationModel;
-};
-
 class OptifuserController : public IEventListener<EventActorPreDestroy> {
   OptifuserRenderer *mRenderer = nullptr;
   SScene *mScene = nullptr;
 
-  GuiModel mGuiModel = {};
+  // GuiModel mGuiModel = {};
+  // int mLinkId = 0;
+  // int mArticulationId = 0;
+  bool showCM = false;
+
   SActorBase *mCurrentSelection = nullptr;
 
   bool mShouldQuit = false;

@@ -95,6 +95,8 @@ void OptifuserController::editTransform() {
   case ImGuizmo::ROTATE:
     ImGui::InputFloat("Angle Snap", &snap[0]);
     break;
+  default:
+    break;
   }
 
   if (ImGui::Button("Reset")) {
@@ -105,12 +107,8 @@ void OptifuserController::editTransform() {
   for (auto b : gizmoBody) {
     b->update(pose);
   }
-  if (mGuiModel.linkId) {
-    SActorBase *actor = mScene->findActorById(mGuiModel.linkId);
-    if (!actor) {
-      actor = mScene->findArticulationLinkById(mGuiModel.linkId);
-    }
-
+  if (mCurrentSelection) {
+    SActorBase *actor = mCurrentSelection;
     if (actor &&
         (actor->getType() == EActorType::DYNAMIC || actor->getType() == EActorType::KINEMATIC)) {
       ImGui::SameLine();
@@ -413,63 +411,29 @@ void OptifuserController::render() {
       int x, y;
       Optifuser::getInput().getCursor(x, y);
       pickedId = mRenderer->mContext->renderer.pickSegmentationId(x, y);
-      mGuiModel.linkId = pickedId;
 
       pickedRenderId = 0;
       if (pickedId) {
         pickedRenderId = mRenderer->mContext->renderer.pickObjectId(x, y);
       }
 
-      SActorBase *actor = mScene->findActorById(mGuiModel.linkId);
+      SActorBase *actor = mScene->findActorById(pickedId);
       if (!actor) {
-        actor = mScene->findArticulationLinkById(mGuiModel.linkId);
+        actor = mScene->findArticulationLinkById(pickedId);
       }
       select(actor);
     }
 
     if (mCurrentSelection) {
       SActorBase *actor = mCurrentSelection;
-      SArticulationBase *articulation = nullptr;
-      auto t = actor->getType();
-      if (t == EActorType::ARTICULATION_LINK || t == EActorType::KINEMATIC_ARTICULATION_LINK) {
-        articulation = static_cast<SLinkBase *>(actor)->getArticulation();
-      }
-
-      mGuiModel.linkModel.name = actor->getName();
-      mGuiModel.linkModel.transform = actor->getPxActor()->getGlobalPose();
-      mGuiModel.linkModel.col1 = actor->getCollisionGroup1();
-      mGuiModel.linkModel.col2 = actor->getCollisionGroup2();
-      mGuiModel.linkModel.col3 = actor->getCollisionGroup3();
-      mGuiModel.linkModel.renderCollision = actor->getRenderMode() == 1;
-      mGuiModel.articulationId = 0;
-
-      if (articulation) {
-        mGuiModel.articulationId = 1;
-        mGuiModel.articulationModel.name = articulation->getName();
-
-        mGuiModel.articulationModel.jointModel.resize(articulation->dof());
-        uint32_t n = 0;
-        auto qpos = articulation->getQpos();
-        for (auto j : articulation->getBaseJoints()) {
-          auto limits = j->getLimits();
-          for (uint32_t i = 0; i < j->getDof(); ++i) {
-            mGuiModel.articulationModel.jointModel[n].name = j->getName();
-            mGuiModel.articulationModel.jointModel[n].limits = limits[i];
-            mGuiModel.articulationModel.jointModel[n].value = qpos[n];
-            ++n;
-          }
-        }
-      }
+      PxTransform cmPose = PxTransform({0, 0, 0}, PxIdentity);
 
       switch (actor->getType()) {
       case EActorType::DYNAMIC:
       case EActorType::KINEMATIC:
       case EActorType::ARTICULATION_LINK:
-        if (mGuiModel.linkModel.showCenterOfMass) {
-          mGuiModel.linkModel.cmassPose =
-              actor->getPxActor()->getGlobalPose() *
-              static_cast<PxRigidBody *>(actor->getPxActor())->getCMassLocalPose();
-        }
+        cmPose = actor->getPxActor()->getGlobalPose() *
+                 static_cast<PxRigidBody *>(actor->getPxActor())->getCMassLocalPose();
         break;
       default:
         break;
@@ -481,10 +445,8 @@ void OptifuserController::render() {
 
       currentScene->getScene()->clearAxes();
 
-      auto &pos = mGuiModel.linkModel.showCenterOfMass ? mGuiModel.linkModel.cmassPose.p
-                                                       : mGuiModel.linkModel.transform.p;
-      auto &quat = mGuiModel.linkModel.showCenterOfMass ? mGuiModel.linkModel.cmassPose.q
-                                                        : mGuiModel.linkModel.transform.q;
+      auto pos = showCM ? cmPose.p : actor->getPxActor()->getGlobalPose().p;
+      auto quat = showCM ? cmPose.q : actor->getPxActor()->getGlobalPose().q;
       currentScene->getScene()->addAxes({pos.x, pos.y, pos.z}, {quat.w, quat.x, quat.y, quat.z});
     }
 
@@ -616,76 +578,113 @@ void OptifuserController::render() {
       }
       ImGui::End();
 
-      if (mGuiModel.linkId) {
-        ImGui::SetNextWindowPos(ImVec2(mRenderer->mContext->getWidth() - imguiWindowSize, 0));
-        ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mRenderer->mContext->getHeight()));
-        ImGui::Begin("Selected Object");
-        {
+      SArticulationBase *articulation = nullptr;
+      ImGui::SetNextWindowPos(ImVec2(mRenderer->mContext->getWidth() - imguiWindowSize, 0));
+      ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mRenderer->mContext->getHeight()));
+      ImGui::Begin("Object Properties");
+      if (ImGui::CollapsingHeader("World")) {
+        ImGui::Text("Scene: %s", mScene->getName().c_str());
+        if (ImGui::TreeNode("Actors")) {
+          auto actors = mScene->getAllActors();
+          for (uint32_t i = 0; i < actors.size(); ++i) {
+            std::string name = actors[i]->getName();
+            if (name.empty()) {
+              name = "(no name)";
+            }
+            if (actors[i] == mCurrentSelection) {
+              ImGui::TextColored({1, 0, 0, 1}, "%s", name.c_str());
+            } else {
+              if (ImGui::Selectable((name + "##actor" + std::to_string(i)).c_str())) {
+                select(actors[i]);
+              }
+            }
+          }
+          ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Articulations")) {
+          auto articulations = mScene->getAllArticulations();
+          for (uint32_t i = 0; i < articulations.size(); ++i) {
+            std::string name = articulations[i]->getName();
+            if (name.empty()) {
+              name = "(no name)";
+            }
+            if (ImGui::TreeNode(
+                    (name + "##articulation" + std::to_string(i))
+                        .c_str())) {
+              auto links = articulations[i]->getBaseLinks();
+              for (uint32_t j = 0; j < links.size(); ++j) {
+                std::string name = links[j]->getName();
+                if (name.empty()) {
+                  name = "(no name)";
+                }
+                if (links[j] == mCurrentSelection) {
+                  ImGui::TextColored({1, 0, 0, 1}, "%s", name.c_str());
+                } else {
+                  if (ImGui::Selectable((name + "##a" + std::to_string(i) + "_" +
+                                         std::to_string(j))
+                                            .c_str())) {
+                    select(links[j]);
+                  }
+                }
+              }
+              ImGui::TreePop();
+            }
+          }
+          ImGui::TreePop();
+        }
+      }
+      {
+        if (mCurrentSelection) {
           if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::Text("name: %s", mGuiModel.linkModel.name.c_str());
+            ImGui::Text("name: %s", mCurrentSelection->getName().c_str());
+            auto pose = mCurrentSelection->getPose();
+            ImGui::Text("Position: %.2f %.2f %.2f", pose.p.x, pose.p.y, pose.p.z);
 
-            ImGui::Text("Position: %.2f %.2f %.2f", mGuiModel.linkModel.transform.p.x,
-                        mGuiModel.linkModel.transform.p.y, mGuiModel.linkModel.transform.p.z);
-
-            glm::vec3 angles = glm::eulerAngles(glm::quat(mGuiModel.linkModel.transform.q.w,
-                                                          mGuiModel.linkModel.transform.q.x,
-                                                          mGuiModel.linkModel.transform.q.y,
-                                                          mGuiModel.linkModel.transform.q.z)) /
-                               glm::pi<float>() * 180.f;
+            glm::vec3 angles =
+                glm::eulerAngles(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z)) /
+                glm::pi<float>() * 180.f;
             ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles.x, angles.y, angles.z);
 
-            ImGui::Text("col1: #%08x, col2: #%08x", mGuiModel.linkModel.col1,
-                        mGuiModel.linkModel.col2);
-            ImGui::Text("col3: #%08x", mGuiModel.linkModel.col3);
+            ImGui::Text("col1: #%08x, col2: #%08x", mCurrentSelection->getCollisionGroup1(),
+                        mCurrentSelection->getCollisionGroup2());
+            ImGui::Text("col3: #%08x", mCurrentSelection->getCollisionGroup3());
 
-            SActorBase *link = mScene->findActorById(mGuiModel.linkId);
-            if (!link) {
-              link = mScene->findArticulationLinkById(mGuiModel.linkId);
+            if (ImGui::Button("Gizmo to Actor")) {
+              gizmo = true;
+              gizmoTransform = PxTransform2Mat4(mCurrentSelection->getPose());
+              createGizmoVisual(mCurrentSelection);
             }
-            if (link) {
-              if (ImGui::Button("Gizmo to Actor")) {
-                gizmo = true;
-                gizmoTransform = PxTransform2Mat4(link->getPose());
-                createGizmoVisual(link);
-              }
-            }
-            switch (link->getType()) {
-              case EActorType::ARTICULATION_LINK:
-                ImGui::Text("Type: Articulation Link");
-                break;
-              case EActorType::DYNAMIC:
-                ImGui::Text("Type: Dynamic Actor");
-                break;
-              case EActorType::KINEMATIC:
-                ImGui::Text("Type: Kinematic Actor");
-                break;
-              case EActorType::KINEMATIC_ARTICULATION_LINK:
-                ImGui::Text("Type: Kinematic Articulation Link");
-                break;
-              case EActorType::STATIC:
-                ImGui::Text("Type: Static");
-                break;
+            switch (mCurrentSelection->getType()) {
+            case EActorType::ARTICULATION_LINK:
+              ImGui::Text("Type: Articulation Link");
+              break;
+            case EActorType::DYNAMIC:
+              ImGui::Text("Type: Dynamic Actor");
+              break;
+            case EActorType::KINEMATIC:
+              ImGui::Text("Type: Kinematic Actor");
+              break;
+            case EActorType::KINEMATIC_ARTICULATION_LINK:
+              ImGui::Text("Type: Kinematic Articulation Link");
+              break;
+            case EActorType::STATIC:
+              ImGui::Text("Type: Static");
+              break;
             }
 
+            static bool renderCollision;
+            renderCollision = mCurrentSelection->getRenderMode();
             // toggle collision shape
-            if (ImGui::Checkbox("Collision Shape", &mGuiModel.linkModel.renderCollision)) {
-              if (link) {
-                link->setRenderMode(mGuiModel.linkModel.renderCollision);
-              }
+            if (ImGui::Checkbox("Collision Shape", &renderCollision)) {
+              mCurrentSelection->setRenderMode(renderCollision);
             }
 
             // toggle center of mass
-            if (ImGui::Checkbox("Center of Mass", &mGuiModel.linkModel.showCenterOfMass)) {
-            }
+            ImGui::Checkbox("Center of Mass", &showCM);
           }
-        }
-        SActorBase *link = mScene->findActorById(mGuiModel.linkId);
-        if (!link) {
-          link = mScene->findArticulationLinkById(mGuiModel.linkId);
-        }
-        if (ImGui::CollapsingHeader("Actor Details")) {
-          if (link) {
-            auto actor = link->getPxActor();
+
+          if (ImGui::CollapsingHeader("Actor Details")) {
+            auto actor = mCurrentSelection->getPxActor();
             std::vector<PxShape *> shapes(actor->getNbShapes());
             actor->getShapes(shapes.data(), shapes.size());
             int primitives = 0;
@@ -725,155 +724,236 @@ void OptifuserController::render() {
             } else {
               ImGui::Text("No Physical Material");
             }
-          }
-        }
-        if (link->getDrives().size()) {
-          auto drives = link->getDrives();
-          if (ImGui::CollapsingHeader("Drives")) {
-            for (size_t i = 0; i < drives.size(); ++i) {
-              ImGui::Text("Drive %ld", i + 1);
-              if (drives[i]->getActor2() == link) {
-                if (drives[i]->getActor1()) {
-                  ImGui::Text("Drive towards pose relative to actor [%s]",
-                              drives[i]->getActor1()->getName().c_str());
-                } else {
-                  ImGui::Text("Drive towards absolute pose");
+
+            if (mCurrentSelection->getDrives().size()) {
+              auto drives = mCurrentSelection->getDrives();
+              if (ImGui::TreeNode("Drives")) {
+                for (size_t i = 0; i < drives.size(); ++i) {
+                  ImGui::Text("Drive %ld", i + 1);
+                  if (drives[i]->getActor2() == mCurrentSelection) {
+                    if (drives[i]->getActor1()) {
+                      ImGui::Text("Drive towards pose relative to actor [%s]",
+                                  drives[i]->getActor1()->getName().c_str());
+                    } else {
+                      ImGui::Text("Drive towards absolute pose");
+                    }
+                  } else {
+                    if (drives[i]->getActor2()) {
+                      ImGui::Text("Drive other actor [%s] towards pose relative to this actor.",
+                                  drives[i]->getActor1()->getName().c_str());
+                    } else {
+                      ImGui::Text(
+                          "This drive is created by specifying world frame as the second actor, "
+                          "for "
+                          "best performance, consider using world frame as the first actor");
+                    }
+                  }
+                  ImGui::NewLine();
+
+                  {
+                    // actor 1
+                    if (drives[i]->getActor1() == mCurrentSelection) {
+                      ImGui::Text("Actor 1: this actor");
+                    } else {
+                      ImGui::Text("Actor 1: %s", drives[i]->getActor1()
+                                                     ? drives[i]->getActor1()->getName().c_str()
+                                                     : "world frame");
+                    }
+                    auto pose1 = drives[i]->getLocalPose1();
+                    ImGui::Text("Drive attached at");
+                    ImGui::Text("Position: %.2f %.2f %.2f", pose1.p.x, pose1.p.y, pose1.p.z);
+                    glm::vec3 angles1 =
+                        glm::eulerAngles(glm::quat(pose1.q.w, pose1.q.x, pose1.q.y, pose1.q.z)) /
+                        glm::pi<float>() * 180.f;
+                    ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles1.x, angles1.y, angles1.z);
+                  }
+                  ImGui::NewLine();
+
+                  {
+                    // actor 2
+                    if (drives[i]->getActor2() == mCurrentSelection) {
+                      ImGui::Text("Actor 2: this actor");
+                    } else {
+                      ImGui::Text("Actor 2: %s", drives[i]->getActor2()
+                                                     ? drives[i]->getActor2()->getName().c_str()
+                                                     : "world frame");
+                    }
+                    auto pose2 = drives[i]->getLocalPose2();
+                    ImGui::Text("Drive attached at");
+                    ImGui::Text("Position: %.2f %.2f %.2f", pose2.p.x, pose2.p.y, pose2.p.z);
+                    glm::vec3 angles2 =
+                        glm::eulerAngles(glm::quat(pose2.q.w, pose2.q.x, pose2.q.y, pose2.q.z)) /
+                        glm::pi<float>() * 280.f;
+                    ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles2.x, angles2.y, angles2.z);
+                  }
+                  ImGui::NewLine();
+
+                  {
+                    auto target = drives[i]->getTarget();
+                    auto [v, w] = drives[i]->getTargetVelocity();
+
+                    ImGui::Text("Drive target");
+                    ImGui::Text("Position: %.2f %.2f %.2f", target.p.x, target.p.y, target.p.z);
+                    glm::vec3 angles = glm::eulerAngles(glm::quat(target.q.w, target.q.x,
+                                                                  target.q.y, target.q.z)) /
+                                       glm::pi<float>() * 180.f;
+                    ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles.x, angles.y, angles.z);
+                    ImGui::Text("Linear Velocity: %.2f %.2f %.2f", v.x, v.y, v.z);
+                    ImGui::Text("Angular Velocity: %.2f %.2f %.2f", w.x, w.y, w.z);
+
+                    if (ImGui::Button(("Remove Drive##" + std::to_string(i)).c_str())) {
+                      drives[i]->destroy();
+                    }
+                    ImGui::Text("Caution: Accessing a removed drive");
+                    ImGui::Text("will cause crash");
+                  }
+                  ImGui::NewLine();
                 }
+                ImGui::TreePop();
+              }
+            }
+          }
+
+          if (mCurrentSelection->getType() == EActorType::ARTICULATION_LINK ||
+              mCurrentSelection->getType() == EActorType::KINEMATIC_ARTICULATION_LINK) {
+            SLinkBase *link = static_cast<SLinkBase *>(mCurrentSelection);
+            articulation = link->getArticulation();
+
+            struct JointGuiModel {
+              std::string name;
+              std::array<float, 2> limits;
+              float value;
+            };
+            std::vector<JointGuiModel> jointValues;
+            jointValues.resize(articulation->dof());
+            uint32_t n = 0;
+            auto qpos = articulation->getQpos();
+            for (auto j : articulation->getBaseJoints()) {
+              auto limits = j->getLimits();
+              for (uint32_t i = 0; i < j->getDof(); ++i) {
+                jointValues[n].name = j->getName();
+                jointValues[n].limits = limits[i];
+                jointValues[n].value = qpos[n];
+                ++n;
+              }
+            }
+
+            if (ImGui::CollapsingHeader("Articulation", ImGuiTreeNodeFlags_DefaultOpen)) {
+              ImGui::Text("name: %s", link->getArticulation()->getName().c_str());
+              ImGui::Text("dof: %ld", jointValues.size());
+              if (articulation->getType() == EArticulationType::DYNAMIC) {
+                ImGui::Text("type: Dynamic");
               } else {
-                if (drives[i]->getActor2()) {
-                  ImGui::Text("Drive other actor [%s] towards pose relative to this actor.",
-                              drives[i]->getActor1()->getName().c_str());
-                } else {
-                  ImGui::Text(
-                      "This drive is created by specifying world frame as the second actor, for "
-                      "best performance, consider using world frame as the first actor");
-                }
-              }
-              ImGui::NewLine();
-
-              {
-                // actor 1
-                if (drives[i]->getActor1() == link) {
-                  ImGui::Text("Actor 1: this actor");
-                } else {
-                  ImGui::Text("Actor 1: %s", drives[i]->getActor1()
-                                                 ? drives[i]->getActor1()->getName().c_str()
-                                                 : "world frame");
-                }
-                auto pose1 = drives[i]->getLocalPose1();
-                ImGui::Text("Drive attached at");
-                ImGui::Text("Position: %.2f %.2f %.2f", pose1.p.x, pose1.p.y, pose1.p.z);
-                glm::vec3 angles1 =
-                    glm::eulerAngles(glm::quat(pose1.q.w, pose1.q.x, pose1.q.y, pose1.q.z)) /
-                    glm::pi<float>() * 180.f;
-                ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles1.x, angles1.y, angles1.z);
-              }
-              ImGui::NewLine();
-
-              {
-                // actor 2
-                if (drives[i]->getActor2() == link) {
-                  ImGui::Text("Actor 2: this actor");
-                } else {
-                  ImGui::Text("Actor 2: %s", drives[i]->getActor2()
-                                                 ? drives[i]->getActor2()->getName().c_str()
-                                                 : "world frame");
-                }
-                auto pose2 = drives[i]->getLocalPose2();
-                ImGui::Text("Drive attached at");
-                ImGui::Text("Position: %.2f %.2f %.2f", pose2.p.x, pose2.p.y, pose2.p.z);
-                glm::vec3 angles2 =
-                    glm::eulerAngles(glm::quat(pose2.q.w, pose2.q.x, pose2.q.y, pose2.q.z)) /
-                    glm::pi<float>() * 280.f;
-                ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles2.x, angles2.y, angles2.z);
-              }
-              ImGui::NewLine();
-
-              {
-                auto target = drives[i]->getTarget();
-                auto [v, w] = drives[i]->getTargetVelocity();
-
-                ImGui::Text("Drive target");
-                ImGui::Text("Position: %.2f %.2f %.2f", target.p.x, target.p.y, target.p.z);
-                glm::vec3 angles =
-                    glm::eulerAngles(glm::quat(target.q.w, target.q.x, target.q.y, target.q.z)) /
-                    glm::pi<float>() * 180.f;
-                ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles.x, angles.y, angles.z);
-                ImGui::Text("Linear Velocity: %.2f %.2f %.2f", v.x, v.y, v.z);
-                ImGui::Text("Angular Velocity: %.2f %.2f %.2f", w.x, w.y, w.z);
-
-                if (ImGui::Button(("Remove Drive##" + std::to_string(i)).c_str())) {
-                  drives[i]->destroy();
-                }
-                ImGui::Text("Caution: Accessing a removed drive");
-                ImGui::Text("will cause crash");
-              }
-              ImGui::NewLine();
-            }
-          }
-        }
-        if (mGuiModel.articulationId) {
-          if (ImGui::CollapsingHeader("Articulation", ImGuiTreeNodeFlags_DefaultOpen)) {
-            SLinkBase *link = mScene->findArticulationLinkById(mGuiModel.linkId);
-            auto articulation = link->getArticulation();
-
-            ImGui::Text("name: %s", mGuiModel.articulationModel.name.c_str());
-            ImGui::Text(" dof: %ld", mGuiModel.articulationModel.jointModel.size());
-            if (articulation->getType() == EArticulationType::DYNAMIC) {
-              ImGui::Text("type: Dynamic");
-            } else {
-              ImGui::Text("type: Kinematic");
-            }
-
-            static bool articulationDetails;
-            ImGui::Checkbox("Details##ArticulationDetails", &articulationDetails);
-
-            std::vector<SJoint *> joints;
-            if (articulation->getType() == EArticulationType::DYNAMIC) {
-              auto a = static_cast<sapien::SArticulation *>(articulation);
-              auto js = a->getSJoints();
-              for (auto j : js) {
-                if (j->getDof()) {
-                  joints.push_back(j);
-                }
-              }
-            }
-
-            int i = 0;
-            for (auto &joint : mGuiModel.articulationModel.jointModel) {
-              ImGui::Text("%s", joint.name.c_str());
-              if (ImGui::SliderFloat(("##" + std::to_string(i)).c_str(), &joint.value,
-                                     std::max(joint.limits[0], -10.f),
-                                     std::min(joint.limits[1], 10.f))) {
-                std::vector<PxReal> v;
-                for (auto j : mGuiModel.articulationModel.jointModel) {
-                  v.push_back(j.value);
-                }
-                articulation->setQpos(v);
-              }
-              if (articulationDetails && joints.size()) {
-                auto j = joints[i];
-                float friction = j->getFriction();
-                float stiffness = j->getDriveStiffness();
-                float damping = j->getDriveDamping();
-                float maxForce = j->getDriveForceLimit();
-                float target = j->getDriveTarget();
-                float vtarget = j->getDriveVelocityTarget();
-                ImGui::Text("Friction: %.2f", friction);
-                ImGui::Text("Damping: %.2f", damping);
-                ImGui::Text("Stiffness: %.2f", stiffness);
-                if (maxForce > 1e6) {
-                  ImGui::Text("Max Force: >1e6");
-                } else {
-                  ImGui::Text("Max Force: %.2f", maxForce);
-                }
-                if (stiffness > 0) {
-                  ImGui::Text("Drive Position Target: %.2f", target);
-                  ImGui::Text("Drive Velocity Target: %.2f", vtarget);
-                }
+                ImGui::Text("type: Kinematic");
               }
 
-              ++i;
+              if (ImGui::TreeNode("Joints")) {
+                static bool articulationDetails;
+                ImGui::Checkbox("Details", &articulationDetails);
+
+                std::vector<SJoint *> activeJoints;
+                if (articulation->getType() == EArticulationType::DYNAMIC) {
+                  auto a = static_cast<sapien::SArticulation *>(articulation);
+                  auto js = a->getSJoints();
+                  for (auto j : js) {
+                    if (j->getDof()) {
+                      activeJoints.push_back(j);
+                    }
+                  }
+                }
+
+                int i = 0;
+                for (auto &joint : jointValues) {
+                  ImGui::Text("joint: %s", joint.name.c_str());
+                  if (ImGui::SliderFloat(("##" + std::to_string(i)).c_str(), &joint.value,
+                                         std::max(joint.limits[0], -10.f),
+                                         std::min(joint.limits[1], 10.f))) {
+                    std::vector<PxReal> v;
+                    for (auto j : jointValues) {
+                      v.push_back(j.value);
+                    }
+                    articulation->setQpos(v);
+                  }
+                  if (articulationDetails && activeJoints.size()) {
+                    auto j = activeJoints[i];
+                    float friction = j->getFriction();
+                    float stiffness = j->getDriveStiffness();
+                    float damping = j->getDriveDamping();
+                    float maxForce = j->getDriveForceLimit();
+                    float target = j->getDriveTarget();
+                    float vtarget = j->getDriveVelocityTarget();
+                    ImGui::Text("Friction: %.2f", friction);
+                    ImGui::Text("Damping: %.2f", damping);
+                    ImGui::Text("Stiffness: %.2f", stiffness);
+                    if (maxForce > 1e6) {
+                      ImGui::Text("Max Force: >1e6");
+                    } else {
+                      ImGui::Text("Max Force: %.2f", maxForce);
+                    }
+                    if (stiffness > 0) {
+                      ImGui::Text("Drive Position Target: %.2f", target);
+                      ImGui::Text("Drive Velocity Target: %.2f", vtarget);
+                    }
+                    ImGui::NewLine();
+                  }
+                  ++i;
+                }
+                ImGui::TreePop();
+              }
+
+              // show links
+              if (ImGui::TreeNode("Link Tree")) {
+                auto links = articulation->getBaseLinks();
+                auto joints = articulation->getBaseJoints();
+
+                struct LinkNode {
+                  uint32_t parent;
+                  uint32_t index;
+                  std::vector<uint32_t> children;
+                };
+                std::vector<LinkNode> nodes(links.size());
+                uint32_t root = joints.size();
+                for (uint32_t i = 0; i < joints.size(); ++i) {
+                  auto p = joints[i]->getParentLink();
+                  nodes[i].index = i;
+                  if (p) {
+                    nodes[i].parent = p->getIndex();
+                    nodes[p->getIndex()].children.push_back(i);
+                  } else {
+                    root = i;
+                  }
+                }
+
+                std::vector<uint32_t> stack;
+                std::vector<uint32_t> indents;
+                stack.push_back(root);
+                indents.push_back(0);
+
+                while (!stack.empty()) {
+                  uint32_t idx = stack.back();
+                  uint32_t indent = indents.back();
+                  stack.pop_back();
+                  indents.pop_back();
+
+                  if (links[idx] == mCurrentSelection) {
+                    ImGui::TextColored({1, 0, 0, 1}, "%sLink %i: %s",
+                                       std::string(indent, ' ').c_str(), idx,
+                                       links[idx]->getName().c_str());
+                  } else {
+                    if (ImGui::Selectable((std::string(indent, ' ') + "Link " +
+                                           std::to_string(idx) + ": " + links[idx]->getName())
+                                              .c_str())) {
+
+                      select(links[idx]);
+                    }
+                  }
+                  for (uint32_t c : nodes[idx].children) {
+                    stack.push_back(c);
+                    indents.push_back(indent + 2);
+                  }
+                }
+                ImGui::TreePop();
+              }
             }
           }
         }
@@ -921,7 +1001,6 @@ void OptifuserController::onEvent(EventActorPreDestroy &e) {
     focus(nullptr);
   }
   if (e.actor == mCurrentSelection) {
-    mGuiModel = {};
     mCurrentSelection = nullptr;
   }
 }

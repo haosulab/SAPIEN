@@ -42,7 +42,7 @@ protected:
 
 public:
   void setRenderMode(uint32_t mode);
-  uint32_t getRenderMode();
+  uint32_t getRenderMode() const;
 
   inline std::vector<SDrive *> getDrives() const { return mDrives; }
 

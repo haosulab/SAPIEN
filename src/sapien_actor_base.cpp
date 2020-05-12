@@ -22,7 +22,7 @@ void SActorBase::setRenderMode(uint32_t mode) {
   }
 }
 
-uint32_t SActorBase::getRenderMode() { return mRenderMode; }
+uint32_t SActorBase::getRenderMode() const { return mRenderMode; }
 
 void SActorBase::prestep() {
   EventActorStep s;
