@@ -21,7 +21,7 @@ PxTransform *fromTransFormationMatrix(const py::array_t<PxReal> &mat) {
 
 Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> toTransformationMatrix(PxTransform &t) {
   t.q.normalize();
-  Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> mat44;
+  Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> mat44 = Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>::Identity(4,4);
   Eigen::Quaternionf q(t.q.w, t.q.x, t.q.y, t.q.z);
   mat44.block<3, 3>(0, 0) = q.normalized().toRotationMatrix();
   mat44.block<3, 1>(0, 3) = Eigen::Matrix<PxReal, 3, 1>(t.p.x, t.p.y, t.p.z);

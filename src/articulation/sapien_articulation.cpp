@@ -577,7 +577,8 @@ SArticulation::computeTwistDiffIK(const Eigen::Matrix<PxReal, 6, 1> &spatialTwis
 Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor>
 SArticulation::computeAdjointMatrix(SLink *sourceFrame, SLink *targetFrame) {
   auto mat44 = computeRelativeTransformation(sourceFrame, targetFrame);
-  Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> adjoint;
+  Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor> adjoint =
+      Eigen::Matrix<PxReal, 6, 6, Eigen::RowMajor>::Zero(6, 6);
   adjoint.block<3, 3>(0, 0) = mat44.block<3, 3>(0, 0);
   adjoint.block<3, 3>(3, 3) = mat44.block<3, 3>(0, 0);
   Eigen::Vector3f position = mat44.block<3, 1>(0, 3);
@@ -634,10 +635,11 @@ SArticulation::computeRelativeTransformation(SLink *sourceFrame, SLink *targetFr
   auto t = targetFrame->getPose();
   auto relative = t.getInverse().transform(s);
 
-  Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> mat44;
+  Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> mat44 =
+      Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>::Identity(4, 4);
   Eigen::Quaternionf quat(relative.q.w, relative.q.x, relative.q.y, relative.q.z);
   mat44.block<3, 3>(0, 0) = quat.normalized().toRotationMatrix();
-  mat44.block<4, 1>(0, 3) = Eigen::Vector4f(relative.p.x, relative.p.y, relative.p.z, 1);
+  mat44.block<3, 1>(0, 3) = Eigen::Matrix<PxReal, 3,1>(relative.p.x, relative.p.y, relative.p.z);
   return mat44;
 }
 Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>
