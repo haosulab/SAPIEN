@@ -25,6 +25,7 @@ Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> toTransformationMatrix(PxTransform 
   Eigen::Quaternionf q(t.q.w, t.q.x, t.q.y, t.q.z);
   mat44.block<3, 3>(0, 0) = q.normalized().toRotationMatrix();
   mat44.block<3, 1>(0, 3) = Eigen::Matrix<PxReal, 3, 1>(t.p.x, t.p.y, t.p.z);
+  mat44(3, 3) = 1.f;
   return mat44;
 }
 
