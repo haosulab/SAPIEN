@@ -225,7 +225,6 @@ IPxrRigidbody *OptifuserScene::cloneRigidbody(OptifuserRigidbody *other) {
   return body;
 }
 
-
 ICamera *OptifuserScene::addCamera(std::string const &name, uint32_t width, uint32_t height,
                                    float fovx, float fovy, float near, float far,
                                    std::string const &shaderDir) {
@@ -235,9 +234,12 @@ ICamera *OptifuserScene::addCamera(std::string const &name, uint32_t width, uint
   } else {
     d = mParentRenderer->mGlslDir;
   }
+  if (fovx != 0) {
+    spdlog::get("SAPIEN")->warn(
+        "Current camera implementation does not support non-square"
+        "pixels, and fovy will be used. Set fovx to 0 to suppress this warning");
+  }
 
-  spdlog::get("SAPIEN")->warn("Note: current camera implementation does not support non-square "
-                              "pixels, and fovy will take precedence.");
   auto cam = std::make_unique<OptifuserCamera>(name, width, height, fovy, this, d,
                                                mParentRenderer->mConfig);
   cam->mCameraSpec->near = near;
@@ -327,6 +329,8 @@ OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::stri
   mContext->renderer.setDisplayShader(mGlslDir + "/display.vsh", mGlslDir + "/display_normal.fsh");
 
   mContext->renderer.enablePicking();
+
+  setLogLevel("warn");
 }
 
 IPxrScene *OptifuserRenderer::createScene(std::string const &name) {
@@ -355,6 +359,20 @@ void OptifuserRenderer::setOptixConfig(std::string const &ptxDir) { gPtxDir = pt
 
 void OptifuserRenderer::enableGlobalAxes(bool enable) {
   mContext->renderer.enableGlobalAxes(enable);
+}
+
+void OptifuserRenderer::setLogLevel(std::string const &level) {
+  if (level == "debug") {
+    spdlog::get("Optifuser")->set_level(spdlog::level::debug);
+  } else if (level == "info") {
+    spdlog::get("Optifuser")->set_level(spdlog::level::info);
+  } else if (level == "warn" || level == "warning") {
+    spdlog::get("Optifuser")->set_level(spdlog::level::warn);
+  } else if (level == "err" || level == "error") {
+    spdlog::get("Optifuser")->set_level(spdlog::level::err);
+  } else {
+    spdlog::error("Invalid log level \"{}\"", level);
+  }
 }
 
 //======== End Renderer ========//

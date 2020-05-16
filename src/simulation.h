@@ -65,6 +65,7 @@ public:
 
   void setRenderer(Renderer::IPxrRenderer *renderer);
   inline Renderer::IPxrRenderer *getRenderer() { return mRenderer; }
+  void setLogLevel(std::string const &level);
 
   PxMaterial *createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction,
                                      PxReal restitution) const;

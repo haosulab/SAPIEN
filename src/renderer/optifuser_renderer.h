@@ -120,6 +120,8 @@ public:
 
   static void setDefaultShaderConfig(std::string const &glslDir, std::string const &glslVersion);
 
+  void setLogLevel(std::string const &level);
+
 #ifdef _USE_OPTIX
   static std::string gPtxDir;
   static void setOptixConfig(std::string const &ptxDir);

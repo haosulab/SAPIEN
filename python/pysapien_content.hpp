@@ -327,7 +327,8 @@ void buildSapien(py::module &m) {
 #endif
       .def(py::init<std::string const &, std::string const &, Renderer::OptifuserConfig const &>(),
            py::arg("glsl_dir") = "", py::arg("glsl_version") = "",
-           py::arg("config") = Renderer::OptifuserConfig());
+           py::arg("config") = Renderer::OptifuserConfig())
+      .def("set_log_level", &Renderer::OptifuserRenderer::setLogLevel, py::arg("level"));
 
   PyInput.def("get_key_state", &Optifuser::Input::getKeyState)
       .def("get_key_down", &Optifuser::Input::getKeyDown)
@@ -425,6 +426,7 @@ void buildSapien(py::module &m) {
       .def("create_physical_material", &Simulation::createPhysicalMaterial,
            py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"),
            py::return_value_policy::reference)
+      .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
       .def("create_scene",
            [](Simulation &sim, py::array_t<PxReal> const &gravity, PxSolverType::Enum solverType,
               bool enableCCD, bool enablePCM, SceneConfig const *config) {
@@ -433,10 +435,10 @@ void buildSapien(py::module &m) {
                config2 = *config;
              } else {
                std::cerr << "Scene creation without config is deprecated and will be "
-                   "removed in the next release. The new scene creation API "
-                   "will be engine.create_scene(config=SceneConfig())\n";
+                            "removed in the next release. The new scene creation API "
+                            "will be engine.create_scene(config=SceneConfig())\n";
                sleep(3);
-             
+
                config2.gravity = {gravity.at(0), gravity.at(1), gravity.at(2)};
                config2.enablePCM = enablePCM;
                config2.enableCCD = enableCCD;

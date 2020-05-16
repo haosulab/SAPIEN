@@ -35,7 +35,8 @@ PxErrorCode::Enum SapienErrorCallback::getLastErrorCode() {
 
 Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranceSpeed)
     : mThreadCount(nthread), mMeshManager(this) {
-  auto logger = spdlog::stdout_color_mt("SAPIEN");
+  auto logger = spdlog::stderr_color_mt("SAPIEN");
+  setLogLevel("warn");
 
 #ifdef _PROFILE
   profiler::startListen();
@@ -146,6 +147,20 @@ std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
   PxScene *pxScene = mPhysicsSDK->createScene(sceneDesc);
 
   return std::make_unique<SScene>(this, pxScene, config);
+}
+
+void Simulation::setLogLevel(std::string const &level) {
+  if (level == "debug") {
+    spdlog::get("SAPIEN")->set_level(spdlog::level::debug);
+  } else if (level == "info") {
+    spdlog::get("SAPIEN")->set_level(spdlog::level::info);
+  } else if (level == "warn" || level == "warning") {
+    spdlog::get("SAPIEN")->set_level(spdlog::level::warn);
+  } else if (level == "err" || level == "error") {
+    spdlog::get("SAPIEN")->set_level(spdlog::level::err);
+  } else {
+    spdlog::error("Invalid log level \"{}\"", level);
+  }
 }
 
 } // namespace sapien
