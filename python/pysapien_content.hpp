@@ -428,13 +428,15 @@ void buildSapien(py::module &m) {
       .def("create_scene",
            [](Simulation &sim, py::array_t<PxReal> const &gravity, PxSolverType::Enum solverType,
               bool enableCCD, bool enablePCM, SceneConfig const *config) {
-             spdlog::get("SAPIEN")->warn("Scene creation without config is deprecated and will be "
-                                         "removed in the next release. The new scene creation API "
-                                         "will be engine.create_scene(config=SceneConfig())");
              SceneConfig config2;
              if (config) {
                config2 = *config;
              } else {
+               std::cerr << "Scene creation without config is deprecated and will be "
+                   "removed in the next release. The new scene creation API "
+                   "will be engine.create_scene(config=SceneConfig())\n";
+               sleep(3);
+             
                config2.gravity = {gravity.at(0), gravity.at(1), gravity.at(2)};
                config2.enablePCM = enablePCM;
                config2.enableCCD = enableCCD;
