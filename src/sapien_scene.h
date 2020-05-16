@@ -1,14 +1,15 @@
 #pragma once
 #include "event_system/event_system.h"
 #include "id_generator.h"
+#include "renderer/render_interface.h"
+#include "sapien_scene_config.h"
 #include "simulation_callback.h"
 #include <PxPhysicsAPI.h>
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
 #include <thread>
 #include <vector>
-#include "renderer/render_interface.h"
 
 namespace sapien {
 class SActor;
@@ -41,6 +42,20 @@ class SScene : public EventEmitter<EventStep> {
   friend ArticulationBuilder;
 
 private:
+  // defaults
+  PxMaterial *mDefaultMaterial;
+  float mDefaultSleepThreshold;
+  float mDefaultContactOffset;
+  uint32_t mDefaultSolverIterations;
+  uint32_t mDefaultSolverVelocityIterations;
+
+public:
+  inline float getDefaultSleepThreshold() const { return mDefaultSleepThreshold; }
+  inline uint32_t getDefaultSolverIterations() const { return mDefaultSolverIterations; }
+  inline uint32_t getDefaultSolverVelocityIterations() const { return mDefaultSolverVelocityIterations; }
+  inline float getDefaultContactOffset() const { return mDefaultContactOffset; }
+
+private:
   std::string mName;
   Simulation *mSimulation;             // sapien simulation
   PxScene *mPxScene;                   // physx scene
@@ -69,7 +84,7 @@ private:
   std::vector<std::unique_ptr<SDrive>> mDrives;
 
 public:
-  SScene(Simulation *sim, PxScene *scene);
+  SScene(Simulation *sim, PxScene *scene, SceneConfig const &config);
   SScene(SScene const &other) = delete;
   SScene(SScene &&other) = delete;
   ~SScene();
@@ -134,6 +149,8 @@ public:
   void updateRender(); // call to sync physics world to render world
   void addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr,
                  Renderer::PxrMaterial const &renderMaterial = {});
+
+  inline PxMaterial *getDefaultMaterial() { return mDefaultMaterial; }
 
 private:
   std::vector<SContact> mContacts;

@@ -1,3 +1,4 @@
+#pragma once
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
@@ -85,6 +86,7 @@ void buildSapien(py::module &m) {
   auto PyOptifuserCamera =
       py::class_<Renderer::OptifuserCamera, Renderer::ICamera>(m, "OptifuserCamera");
   auto PyEngine = py::class_<Simulation>(m, "Engine");
+  auto PySceneConfig = py::class_<SceneConfig>(m, "SceneConfig");
   auto PyScene = py::class_<SScene>(m, "Scene");
   auto PyDrive = py::class_<SDrive>(m, "Drive");
   auto PyActorBase = py::class_<SActorBase>(m, "ActorBase");
@@ -144,7 +146,8 @@ void buildSapien(py::module &m) {
       .def("to_transformation_matrix", &utils::toTransformationMatrix)
       .def_property_readonly(
           "p", [](PxTransform &t) { return Eigen::Matrix<PxReal, 3, 1>(t.p.x, t.p.y, t.p.z); })
-      .def_property_readonly( "q",
+      .def_property_readonly(
+          "q",
           [](PxTransform &t) { return Eigen::Matrix<PxReal, 4, 1>(t.q.w, t.q.x, t.q.y, t.q.z); })
       .def("inv", &PxTransform::getInverse)
       .def("__repr__", &utils::poseRepresentation)
@@ -394,14 +397,22 @@ void buildSapien(py::module &m) {
            py::arg("scaling") = 1.f)
       .def("set_mode_perspective", &Renderer::OptifuserCamera::changeModeToPerspective,
            py::arg("fovy") = glm::radians(35.f))
+      .def("get_custom_rgba",
+           [](Renderer::OptifuserCamera &c) {
+             return py::array_t<float>(
+                 {static_cast<int>(c.getHeight()), static_cast<int>(c.getWidth()), 4},
+                 c.getCustomRGBA().data());
+           })
 #ifdef _USE_OPTIX
       .def("take_raytraced_picture",
-           [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount, bool denoise) {
+           [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount,
+              bool denoise) {
              return py::array_t<PxReal>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.takeRaytracedPicture(samplesPerPixel, reflectionCount, denoise).data());
            },
-           py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4, py::arg("use_denoiser") = true)
+           py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4,
+           py::arg("use_denoiser") = true)
 #endif
       ;
 
@@ -416,19 +427,43 @@ void buildSapien(py::module &m) {
            py::return_value_policy::reference)
       .def("create_scene",
            [](Simulation &sim, py::array_t<PxReal> const &gravity, PxSolverType::Enum solverType,
-              bool enableCCD, bool enablePCM) {
-             PxSceneFlags flags = PxSceneFlags();
-             if (enableCCD) {
-               flags |= PxSceneFlag::eENABLE_CCD;
+              bool enableCCD, bool enablePCM, SceneConfig const *config) {
+             spdlog::get("SAPIEN")->warn("Scene creation without config is deprecated and will be "
+                                         "removed in the next release. The new scene creation API "
+                                         "will be engine.create_scene(config=SceneConfig())");
+             SceneConfig config2;
+             if (config) {
+               config2 = *config;
+             } else {
+               config2.gravity = {gravity.at(0), gravity.at(1), gravity.at(2)};
+               config2.enablePCM = enablePCM;
+               config2.enableCCD = enableCCD;
+               if (solverType == PxSolverType::eTGS) {
+                 config2.enableTGS = true;
+               }
              }
-             if (enablePCM) {
-               flags |= PxSceneFlag::eENABLE_PCM;
-             }
-             return sim.createScene(array2vec3(gravity), solverType, flags);
+             return sim.createScene(config2);
            },
            py::arg("gravity") = make_array<PxReal>({0, 0, -9.8}),
            py::arg("solver_type") = PxSolverType::ePGS, py::arg("enable_ccd") = false,
-           py::arg("enable_pcm") = false);
+           py::arg("enable_pcm") = true, py::arg("config") = nullptr);
+
+  PySceneConfig.def(py::init<>())
+      .def_readwrite("gravity", &SceneConfig::gravity)
+      .def_readwrite("default_static_friction", &SceneConfig::static_friction)
+      .def_readwrite("default_dynamic_friction", &SceneConfig::dynamic_friction)
+      .def_readwrite("default_restitution", &SceneConfig::restitution)
+      .def_readwrite("bounce_threshold", &SceneConfig::bounceThreshold)
+      .def_readwrite("sleep_threshold", &SceneConfig::sleepThreshold)
+      .def_readwrite("contact_offset", &SceneConfig::contactOffset)
+      .def_readwrite("solver_iterations", &SceneConfig::solverIterations)
+      .def_readwrite("solver_velocity_iterations", &SceneConfig::solverVelocityIterations)
+      .def_readwrite("enable_pcm", &SceneConfig::enablePCM)
+      .def_readwrite("enable_tgs", &SceneConfig::enableTGS)
+      .def_readwrite("enable_ccd", &SceneConfig::enableCCD)
+      .def_readwrite("enable_enhanced_determinism", &SceneConfig::enableEnhancedDeterminism)
+      .def_readwrite("enable_friction_every_iteration", &SceneConfig::enableFrictionEveryIteration)
+      .def_readwrite("enable_adaptive_force", &SceneConfig::enableAdaptiveForce);
 
   PyScene.def_property_readonly("name", &SScene::getName)
       .def("set_timestep", &SScene::setTimestep, py::arg("second"))
@@ -574,9 +609,12 @@ void buildSapien(py::module &m) {
       .def("lock_motion", &SActor::lockMotion, py::arg("x") = true, py::arg("y") = true,
            py::arg("z") = true, py::arg("rx") = true, py::arg("ry") = true, py::arg("rz") = true)
       .def("pack", &SActor::packData)
-      .def("unpack", [](SActor &a, const py::array_t<PxReal> &arr) {
-        a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-      });
+      .def("unpack",
+           [](SActor &a, const py::array_t<PxReal> &arr) {
+             a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           })
+      .def("set_solver_iterations", &SActor::setSolverIterations, py::arg("position"),
+           py::arg("velocity") = 1);
 
   PyLinkBase.def("get_index", &SLinkBase::getIndex)
       .def("get_articulation", &SLinkBase::getArticulation, py::return_value_policy::reference);
@@ -590,8 +628,9 @@ void buildSapien(py::module &m) {
   //======== Joint ========//
   PyJointBase.def_property("name", &SJointBase::getName, &SJointBase::setName)
       .def_property_readonly("type", &SJointBase::getType)
-      .def("__repr__ ", [](SJointBase &joint){
-        std::ostringstream oss;
+      .def("__repr__ ",
+           [](SJointBase &joint) {
+             std::ostringstream oss;
              oss << "Joint [" << joint.getName() << "] with parent link ["
                  << joint.getParentLink()->getName() << "] and child link ["
                  << joint.getChildLink()->getName() << "]\n";

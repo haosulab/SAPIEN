@@ -1,11 +1,11 @@
 #include "simulation.h"
 #include "actor_builder.h"
 #include "sapien_scene.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include <cassert>
 #include <fstream>
 #include <memory>
 #include <spdlog/spdlog.h>
-#include "spdlog/sinks/stdout_color_sinks.h"
 #include <sstream>
 
 #ifdef _PROFILE
@@ -71,8 +71,7 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
     throw std::runtime_error("Simulation Creation Failed");
   }
 
-  mCooking =
-      PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, PxCookingParams(toleranceScale));
+  mCooking = PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, PxCookingParams(toleranceScale));
   if (!mCooking) {
     spdlog::get("SAPIEN")->critical("Failed to create PhysX Cooking");
     throw std::runtime_error("Simulation Creation Failed");
@@ -82,11 +81,10 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
     spdlog::get("SAPIEN")->critical("Failed to initialize PhysX Extensions");
     throw std::runtime_error("Simulation Creation Failed");
   }
-  mDefaultMaterial = mPhysicsSDK->createMaterial(0.3, 0.3, 0.1);
 }
 
 Simulation::~Simulation() {
-  mDefaultMaterial->release();
+  // mDefaultMaterial->release();
   if (mCpuDispatcher) {
     mCpuDispatcher->release();
   }
@@ -110,13 +108,30 @@ PxMaterial *Simulation::createPhysicalMaterial(PxReal staticFriction, PxReal dyn
   return mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
 }
 
-std::unique_ptr<SScene> Simulation::createScene(PxVec3 gravity, PxSolverType::Enum solverType,
-                                                PxSceneFlags sceneFlags) {
+std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
 
   PxSceneDesc sceneDesc(mPhysicsSDK->getTolerancesScale());
-  sceneDesc.gravity = gravity;
+  sceneDesc.gravity = PxVec3({config.gravity.x(), config.gravity.y(), config.gravity.z()});
   sceneDesc.filterShader = TypeAffinityIgnoreFilterShader;
-  sceneDesc.solverType = solverType;
+  sceneDesc.solverType = config.enableTGS ? PxSolverType::eTGS : PxSolverType::ePGS;
+  sceneDesc.bounceThresholdVelocity = config.bounceThreshold;
+  PxSceneFlags sceneFlags;
+  if (config.enableEnhancedDeterminism) {
+    sceneFlags |= PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
+  }
+  if (config.enablePCM) {
+    sceneFlags |= PxSceneFlag::eENABLE_PCM;
+  }
+  if (config.enableCCD) {
+    sceneFlags |= PxSceneFlag::eENABLE_CCD;
+  }
+  if (config.enableFrictionEveryIteration) {
+    sceneFlags |= PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
+  }
+  if (config.enableAdaptiveForce) {
+    sceneFlags |= PxSceneFlag::eADAPTIVE_FORCE;
+  }
+
   sceneDesc.flags = sceneFlags;
 
   if (!mCpuDispatcher) {
@@ -130,7 +145,7 @@ std::unique_ptr<SScene> Simulation::createScene(PxVec3 gravity, PxSolverType::En
 
   PxScene *pxScene = mPhysicsSDK->createScene(sceneDesc);
 
-  return std::make_unique<SScene>(this, pxScene);
+  return std::make_unique<SScene>(this, pxScene, config);
 }
 
 } // namespace sapien

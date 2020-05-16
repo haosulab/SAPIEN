@@ -27,6 +27,7 @@ public:
   void setVelocity(PxVec3 const &v);
   void setAngularVelocity(PxVec3 const &v);
   void lockMotion(bool x, bool y, bool z, bool ax, bool ay, bool az);
+  void setSolverIterations(uint32_t position, uint32_t velocity = 1);
 
 public:
   EActorType getType() const override;

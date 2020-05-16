@@ -19,8 +19,8 @@ TEST_CASE("Multiple scenes", "[simulation]") {
   Simulation sim;
 
   auto s0 = sim.createScene();
-  auto s1 = sim.createScene({0, 0, 1}, PxSolverType::eTGS);
-  auto s2 = sim.createScene({0, 0, 1}, PxSolverType::ePGS, PxSceneFlag::eENABLE_CCD);
+  // auto s1 = sim.createScene({0, 0, 1}, PxSolverType::eTGS);
+  // auto s2 = sim.createScene({0, 0, 1}, PxSolverType::ePGS, PxSceneFlag::eENABLE_CCD);
 
   REQUIRE_NO_ERROR(sim);
 }

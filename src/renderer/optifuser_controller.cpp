@@ -582,6 +582,31 @@ void OptifuserController::render() {
       ImGui::SetNextWindowPos(ImVec2(mRenderer->mContext->getWidth() - imguiWindowSize, 0));
       ImGui::SetNextWindowSize(ImVec2(imguiWindowSize, mRenderer->mContext->getHeight()));
       ImGui::Begin("Object Properties");
+      if (ImGui::CollapsingHeader("Global")) {
+        auto flags = mScene->getPxScene()->getFlags();
+
+        bool b = flags & PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
+        ImGui::Checkbox("Enhanced determinism", &b);
+        b = flags & PxSceneFlag::eENABLE_PCM;
+        ImGui::Checkbox("PCM(persistent contact manifold)", &b);
+        b = flags & PxSceneFlag::eENABLE_CCD;
+        ImGui::Checkbox("CCD(continuous collision detection)", &b);
+        b = flags & PxSceneFlag::eENABLE_STABILIZATION;
+        ImGui::Checkbox("Stabilization", &b);
+        b = flags & PxSceneFlag::eENABLE_AVERAGE_POINT;
+        ImGui::Checkbox("Average point", &b);
+        b = flags & PxSceneFlag::eENABLE_GPU_DYNAMICS;
+        ImGui::Checkbox("GPU dynamics", &b);
+        b = flags & PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
+        ImGui::Checkbox("Friction in every solver iteration", &b);
+        b = flags & PxSceneFlag::eADAPTIVE_FORCE;
+        ImGui::Checkbox("Adaptive force", &b);
+
+        ImGui::Text("Contact offset: %.4f", mScene->getDefaultContactOffset());
+        ImGui::Text("Sleep threshold: %.4f", mScene->getDefaultSleepThreshold());
+        ImGui::Text("Solver iterations: %d", mScene->getDefaultSolverIterations());
+        ImGui::Text("Solver velocity iterations: %d", mScene->getDefaultSolverVelocityIterations());
+      }
       if (ImGui::CollapsingHeader("World")) {
         ImGui::Text("Scene: %s", mScene->getName().c_str());
         if (ImGui::TreeNode("Actors")) {
@@ -608,9 +633,7 @@ void OptifuserController::render() {
             if (name.empty()) {
               name = "(no name)";
             }
-            if (ImGui::TreeNode(
-                    (name + "##articulation" + std::to_string(i))
-                        .c_str())) {
+            if (ImGui::TreeNode((name + "##articulation" + std::to_string(i)).c_str())) {
               auto links = articulations[i]->getBaseLinks();
               for (uint32_t j = 0; j < links.size(); ++j) {
                 std::string name = links[j]->getName();
@@ -620,9 +643,8 @@ void OptifuserController::render() {
                 if (links[j] == mCurrentSelection) {
                   ImGui::TextColored({1, 0, 0, 1}, "%s", name.c_str());
                 } else {
-                  if (ImGui::Selectable((name + "##a" + std::to_string(i) + "_" +
-                                         std::to_string(j))
-                                            .c_str())) {
+                  if (ImGui::Selectable(
+                          (name + "##a" + std::to_string(i) + "_" + std::to_string(j)).c_str())) {
                     select(links[j]);
                   }
                 }
@@ -723,6 +745,10 @@ void OptifuserController::render() {
               ImGui::Text("Restitution : %.2f - %.2f", minRestitution, maxRestitution);
             } else {
               ImGui::Text("No Physical Material");
+            }
+            if (mCurrentSelection->getType() == EActorType::DYNAMIC) {
+              bool b = static_cast<PxRigidDynamic*>(actor)->isSleeping();
+              ImGui::Checkbox("Sleeping", &b);
             }
 
             if (mCurrentSelection->getDrives().size()) {

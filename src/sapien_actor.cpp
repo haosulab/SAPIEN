@@ -46,6 +46,10 @@ void SActor::lockMotion(bool x, bool y, bool z, bool ax, bool ay, bool az) {
   mActor->setRigidDynamicLockFlags(flags);
 }
 
+void SActor::setSolverIterations(uint32_t position, uint32_t velocity) {
+  getPxActor()->setSolverIterationCounts(position, velocity);
+}
+
 std::vector<PxReal> SActor::packData() {
   std::vector<PxReal> data;
   auto pose = getPose();
@@ -74,8 +78,8 @@ std::vector<PxReal> SActor::packData() {
 void SActor::unpackData(std::vector<PxReal> const &data) {
   if (getType() == EActorType::DYNAMIC) {
     if (data.size() != 13) {
-      spdlog::get("SAPIEN")->error("Failed to unpack actor: {} numbers expected but {} provided", 13,
-                    data.size());
+      spdlog::get("SAPIEN")->error("Failed to unpack actor: {} numbers expected but {} provided",
+                                   13, data.size());
       return;
     }
     getPxActor()->setGlobalPose(
@@ -84,7 +88,8 @@ void SActor::unpackData(std::vector<PxReal> const &data) {
     getPxActor()->setAngularVelocity({data[10], data[11], data[12]});
   } else {
     if (data.size() != 7) {
-      spdlog::get("SAPIEN")->error("Failed to unpack actor: {} numbers expected but {} provided", 7, data.size());
+      spdlog::get("SAPIEN")->error("Failed to unpack actor: {} numbers expected but {} provided",
+                                   7, data.size());
       return;
     }
     getPxActor()->setGlobalPose(
@@ -119,7 +124,8 @@ std::vector<PxReal> SActorStatic::packData() {
 
 void SActorStatic::unpackData(std::vector<PxReal> const &data) {
   if (data.size() != 7) {
-    spdlog::get("SAPIEN")->error("Failed to unpack actor: {} numbers expected but {} provided", 13, data.size());
+    spdlog::get("SAPIEN")->error("Failed to unpack actor: {} numbers expected but {} provided", 13,
+                                 data.size());
     return;
   }
   getPxActor()->setGlobalPose({{data[0], data[1], data[2]}, {data[3], data[4], data[5], data[6]}});

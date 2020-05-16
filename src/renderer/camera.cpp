@@ -80,6 +80,9 @@ std::vector<float> OptifuserCamera::getAlbedoRGBA() {
 std::vector<float> OptifuserCamera::getNormalRGBA() {
   return mRenderContext->renderer.getNormal();
 }
+std::vector<float> OptifuserCamera::getCustomRGBA() {
+  return mRenderContext->renderer.getUserTexture();
+}
 std::vector<float> OptifuserCamera::getDepth() { return mRenderContext->renderer.getDepth(); }
 std::vector<int> OptifuserCamera::getSegmentation() {
   return mRenderContext->renderer.getSegmentation();
@@ -149,8 +152,7 @@ void OptifuserCamera::changeModeToPerspective(float fovy) {
 #ifdef _USE_OPTIX
 
 std::vector<float> OptifuserCamera::takeRaytracedPicture(uint32_t samplesPerPixel,
-                                                         uint32_t reflectionCount,
-                                                         bool denoise) {
+                                                         uint32_t reflectionCount, bool denoise) {
   auto pathTracer = new Optifuser::OptixRenderer(OptifuserRenderer::gPtxDir);
   pathTracer->init(mWidth, mHeight);
   pathTracer->enableDenoiser(denoise, samplesPerPixel);

@@ -42,6 +42,8 @@ public:
   std::vector<int> getSegmentation() override;
   std::vector<int> getObjSegmentation() override;
 
+  std::vector<float> getCustomRGBA();
+
   IPxrScene *getScene() override;
 
   // ISensor

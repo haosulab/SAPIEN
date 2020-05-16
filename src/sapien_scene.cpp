@@ -21,8 +21,15 @@
 
 namespace sapien {
 
-SScene::SScene(Simulation *sim, PxScene *scene)
+SScene::SScene(Simulation *sim, PxScene *scene, SceneConfig const &config)
     : mSimulation(sim), mPxScene(scene), mRendererScene(nullptr), mSimulationCallback(this) {
+  mDefaultMaterial = sim->createPhysicalMaterial(config.static_friction, config.dynamic_friction,
+                                                 config.restitution);
+  mDefaultContactOffset = config.contactOffset;
+  mDefaultSleepThreshold = config.sleepThreshold;
+  mDefaultSolverIterations = config.solverIterations;
+  mDefaultSolverVelocityIterations = config.solverVelocityIterations;
+
   auto renderer = sim->getRenderer();
   if (renderer) {
     mRendererScene = renderer->createScene();
@@ -31,6 +38,7 @@ SScene::SScene(Simulation *sim, PxScene *scene)
 }
 
 SScene::~SScene() {
+  mDefaultMaterial->release();
   if (mRendererScene) {
     mSimulation->getRenderer()->removeScene(mRendererScene);
   }
@@ -183,14 +191,22 @@ void SScene::removeDrive(SDrive *drive) {
   drive->mJoint->release();
   if (drive->mActor1) {
     drive->mActor1->removeDrive(drive);
-    if (drive->mActor1->getType() == EActorType::DYNAMIC)  {
+    if (drive->mActor1->getType() == EActorType::DYNAMIC) {
       static_cast<PxRigidDynamic *>(drive->getActor1()->getPxActor())->wakeUp();
+    } else if (drive->mActor1->getType() == EActorType::ARTICULATION_LINK) {
+      static_cast<PxArticulationLink *>(drive->getActor1()->getPxActor())
+          ->getArticulation()
+          .wakeUp();
     }
   }
   if (drive->mActor2) {
     drive->mActor2->removeDrive(drive);
     if (drive->mActor2->getType() == EActorType::DYNAMIC) {
       static_cast<PxRigidDynamic *>(drive->getActor2()->getPxActor())->wakeUp();
+    } else if (drive->mActor2->getType() == EActorType::ARTICULATION_LINK) {
+      static_cast<PxArticulationLink *>(drive->getActor2()->getPxActor())
+          ->getArticulation()
+          .wakeUp();
     }
   }
   mDrives.erase(std::remove_if(mDrives.begin(), mDrives.end(),
@@ -405,9 +421,19 @@ SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActor
   auto drive = mDrives.back().get();
   if (actor1) {
     actor1->addDrive(drive);
+    if (actor1->getType() == EActorType::DYNAMIC) {
+      static_cast<PxRigidDynamic *>(actor1->getPxActor())->wakeUp();
+    } else if (actor1->getType() == EActorType::ARTICULATION_LINK) {
+      static_cast<PxArticulationLink *>(actor1->getPxActor())->getArticulation().wakeUp();
+    }
   }
   if (actor2) {
     actor2->addDrive(drive);
+    if (actor2->getType() == EActorType::DYNAMIC) {
+      static_cast<PxRigidDynamic *>(actor2->getPxActor())->wakeUp();
+    } else if (actor2->getType() == EActorType::ARTICULATION_LINK) {
+      static_cast<PxArticulationLink *>(actor2->getPxActor())->getArticulation().wakeUp();
+    }
   }
   return drive;
 }
