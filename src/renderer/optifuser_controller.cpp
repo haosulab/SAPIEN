@@ -605,7 +605,8 @@ void OptifuserController::render() {
         ImGui::Text("Contact offset: %.4f", mScene->getDefaultContactOffset());
         ImGui::Text("Sleep threshold: %.4f", mScene->getDefaultSleepThreshold());
         ImGui::Text("Solver iterations: %d", mScene->getDefaultSolverIterations());
-        ImGui::Text("Solver velocity iterations: %d", mScene->getDefaultSolverVelocityIterations());
+        ImGui::Text("Solver velocity iterations: %d",
+                    mScene->getDefaultSolverVelocityIterations());
       }
       if (ImGui::CollapsingHeader("World")) {
         ImGui::Text("Scene: %s", mScene->getName().c_str());
@@ -747,8 +748,18 @@ void OptifuserController::render() {
               ImGui::Text("No Physical Material");
             }
             if (mCurrentSelection->getType() == EActorType::DYNAMIC) {
-              bool b = static_cast<PxRigidDynamic*>(actor)->isSleeping();
+              bool b = static_cast<PxRigidDynamic *>(actor)->isSleeping();
               ImGui::Checkbox("Sleeping", &b);
+            } else if (mCurrentSelection->getType() == EActorType::ARTICULATION_LINK) {
+              bool b = static_cast<PxArticulationLink *>(actor)->getArticulation().isSleeping();
+              ImGui::Checkbox("Sleeping", &b);
+            }
+            if (mCurrentSelection->getType() == EActorType::DYNAMIC ||
+                mCurrentSelection->getType() == EActorType::ARTICULATION_LINK) {
+              auto body = static_cast<PxRigidBody *>(actor);
+              ImGui::Text("Mass: %.4f", body->getMass());
+              auto inertia = body->getMassSpaceInertiaTensor();
+              ImGui::Text("inertia: %.4f %.4f %.4f", inertia.x, inertia.y, inertia.z);
             }
 
             if (mCurrentSelection->getDrives().size()) {
