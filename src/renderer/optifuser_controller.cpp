@@ -610,6 +610,7 @@ void OptifuserController::render() {
         ImGui::Checkbox("Adaptive force", &b);
 
         ImGui::Text("Contact offset: %.4f", mScene->getDefaultContactOffset());
+        ImGui::Text("Bounce threshold: %.4f", mScene->getPxScene()->getBounceThresholdVelocity());
         ImGui::Text("Sleep threshold: %.4f", mScene->getDefaultSleepThreshold());
         ImGui::Text("Solver iterations: %d", mScene->getDefaultSolverIterations());
         ImGui::Text("Solver velocity iterations: %d",
