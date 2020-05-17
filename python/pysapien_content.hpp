@@ -813,7 +813,6 @@ void buildSapien(py::module &m) {
              return py::array_t<PxReal>(qacc.size(), qacc.data());
            })
       .def("compute_manipulator_inertia_matrix", &SArticulation::computeManipulatorInertiaMatrix)
-      .def("compute_jacobian", &SArticulation::computeJacobianMatrix)
       .def("compute_spatial_twist_jacobian", &SArticulation::computeSpatialTwistJacobianMatrix)
       .def("compute_world_cartesian_jacobian", &SArticulation::computeWorldCartesianJacobianMatrix)
       .def("compute_transformation_matrix",

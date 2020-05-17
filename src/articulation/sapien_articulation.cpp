@@ -353,15 +353,6 @@ void SArticulation::prestep() {
 }
 
 Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-SArticulation::computeJacobianMatrix() {
-  spdlog::get("SAPIEN")->warn(
-      "To avoid conflicts, This function will be replaced by [compute_spatial_twist_jacobian] "
-      "after May 17th, 2020. Another similar function is [compute_world_cartesian_jacobian] which "
-      "will return the gradient of world velocity with respect to joint velocity");
-  return computeSpatialTwistJacobianMatrix();
-}
-
-Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
 SArticulation::computeSpatialTwistJacobianMatrix() {
   // NOTE: 1. PhysX computeDenseJacobian computes Jacobian for the 6D root link
   // motion, which we discard. 2. PhysX computes the Jacobian for Cartesian

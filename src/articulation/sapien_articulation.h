@@ -83,7 +83,6 @@ public:
   /* Kinematics Functions */
   Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeWorldCartesianJacobianMatrix();
   Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeSpatialTwistJacobianMatrix();
-  Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeJacobianMatrix();
 
   static Matrix<PxReal, 4, 4, RowMajor> computeRelativeTransformation(SLink *sourceFrame,
                                                                       SLink *targetFrame);
