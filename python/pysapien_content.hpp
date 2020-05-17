@@ -870,34 +870,43 @@ void buildSapien(py::module &m) {
   PyActorBuilder
       .def("add_convex_shape_from_file",
            [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-              py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density) {
-             a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density);
+              py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density,
+              PxReal patchRadius, PxReal minPatchRadius) {
+             a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density,
+                                      patchRadius, minPatchRadius);
            },
            py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
            py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-           py::arg("density") = 1000)
+           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
+           py::arg("min_patch_radius") = 0.f)
       .def("add_multiple_convex_shapes_from_file",
            [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-              py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density) {
+              py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density,
+              PxReal patchRadius, PxReal minPatchRadius) {
              a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material,
-                                               density);
+                                               density, patchRadius, minPatchRadius);
            },
            py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
            py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-           py::arg("density") = 1000)
+           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
+           py::arg("min_patch_radius") = 0.f)
       .def("add_box_shape",
            [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
-              PxMaterial *material,
-              PxReal density) { a.addBoxShape(pose, array2vec3(size), material, density); },
+              PxMaterial *material, PxReal density, PxReal patchRadius, PxReal minPatchRadius) {
+             a.addBoxShape(pose, array2vec3(size), material, density, patchRadius, minPatchRadius);
+           },
            py::arg("pose") = PxTransform(PxIdentity),
            py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-           py::arg("density") = 1000)
+           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
+           py::arg("min_patch_radius") = 0.f)
       .def("add_capsule_shape", &ActorBuilder::addCapsuleShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-           py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000)
+           py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000,
+           py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f)
       .def("add_sphere_shape", &ActorBuilder::addSphereShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-           py::arg("material") = nullptr, py::arg("density") = 1000)
+           py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
+           py::arg("min_patch_radius") = 0.f)
 
       .def("add_box_visual",
            [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,

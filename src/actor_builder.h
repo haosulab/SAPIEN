@@ -33,6 +33,9 @@ public:
     PxMaterial *material;
     PxTransform pose;
     PxReal density;
+
+    PxReal patchRadius;
+    PxReal minPatchRadius;
   };
 
   struct VisualRecord {
@@ -82,23 +85,27 @@ public:
   void addConvexShapeFromFile(const std::string &filename,
                               const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                               const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
-                              PxReal density = 1000.f);
+                              PxReal density = 1000.f, PxReal patchRadius = 0.f,
+                              PxReal minPatchRadius = 0.f);
 
   void addMultipleConvexShapesFromFile(const std::string &filename,
                                        const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                        const PxVec3 &scale = {1, 1, 1},
-                                       PxMaterial *material = nullptr, PxReal density = 1000.f);
+                                       PxMaterial *material = nullptr, PxReal density = 1000.f,
+                                       PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f);
 
   void addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                    const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr,
-                   PxReal density = 1000.f);
+                   PxReal density = 1000.f, PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f);
 
   void addCapsuleShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
                        PxReal halfLength = 1, PxMaterial *material = nullptr,
-                       PxReal density = 1000.f);
+                       PxReal density = 1000.f, PxReal patchRadius = 0.f,
+                       PxReal minPatchRadius = 0.f);
 
   void addSphereShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                      PxMaterial *material = nullptr, PxReal density = 1000.f);
+                      PxMaterial *material = nullptr, PxReal density = 1000.f,
+                      PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f);
 
   /* Visual functions */
   void addBoxVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},

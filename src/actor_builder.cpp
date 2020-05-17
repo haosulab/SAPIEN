@@ -27,7 +27,8 @@ void ActorBuilder::removeVisualAt(uint32_t index) {
 
 void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
                                           const PxVec3 &scale, PxMaterial *material,
-                                          PxReal density) {
+                                          PxReal density, PxReal patchRadius,
+                                          PxReal minPatchRadius) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::SingleMesh;
   r.filename = filename;
@@ -35,13 +36,16 @@ void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxT
   r.scale = scale;
   r.material = material;
   r.density = density;
+  r.patchRadius = patchRadius;
+  r.minPatchRadius = minPatchRadius;
 
   mShapeRecord.push_back(r);
 }
 
 void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
                                                    const PxTransform &pose, const PxVec3 &scale,
-                                                   PxMaterial *material, PxReal density) {
+                                                   PxMaterial *material, PxReal density,
+                                                   PxReal patchRadius, PxReal minPatchRadius) {
 
   ShapeRecord r;
   r.type = ShapeRecord::Type::MultipleMeshes;
@@ -50,24 +54,29 @@ void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
   r.scale = scale;
   r.material = material;
   r.density = density;
+  r.patchRadius = patchRadius;
+  r.minPatchRadius = minPatchRadius;
 
   mShapeRecord.push_back(r);
 }
 
 void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMaterial *material,
-                               PxReal density) {
+                               PxReal density, PxReal patchRadius, PxReal minPatchRadius) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Box;
   r.pose = pose;
   r.scale = size;
   r.material = material;
   r.density = density;
+  r.patchRadius = patchRadius;
+  r.minPatchRadius = minPatchRadius;
 
   mShapeRecord.push_back(r);
 }
 
 void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxReal halfLength,
-                                   PxMaterial *material, PxReal density) {
+                                   PxMaterial *material, PxReal density, PxReal patchRadius,
+                                   PxReal minPatchRadius) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Capsule;
   r.pose = pose;
@@ -75,18 +84,22 @@ void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxRea
   r.length = halfLength;
   r.material = material;
   r.density = density;
+  r.patchRadius = patchRadius;
+  r.minPatchRadius = minPatchRadius;
 
   mShapeRecord.push_back(r);
 }
 
 void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMaterial *material,
-                                  PxReal density) {
+                                  PxReal density, PxReal patchRadius, PxReal minPatchRadius) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Sphere;
   r.pose = pose;
   r.radius = radius;
   r.material = material;
   r.density = density;
+  r.patchRadius = patchRadius;
+  r.minPatchRadius = minPatchRadius;
 
   mShapeRecord.push_back(r);
 }
@@ -173,6 +186,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
         throw std::runtime_error("Failed to create shape");
       }
       shape->setLocalPose(r.pose);
+      shape->setTorsionalPatchRadius(r.patchRadius);
+      shape->setMinTorsionalPatchRadius(r.minPatchRadius);
       shapes.push_back(shape);
       densities.push_back(r.density);
       break;
@@ -193,6 +208,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
           throw std::runtime_error("Failed to create shape");
         }
         shape->setLocalPose(r.pose);
+        shape->setTorsionalPatchRadius(r.patchRadius);
+        shape->setMinTorsionalPatchRadius(r.minPatchRadius);
         shapes.push_back(shape);
         densities.push_back(r.density);
       }
@@ -209,6 +226,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
         throw std::runtime_error("Failed to create shape");
       }
       shape->setLocalPose(r.pose);
+      shape->setTorsionalPatchRadius(r.patchRadius);
+      shape->setMinTorsionalPatchRadius(r.minPatchRadius);
       shapes.push_back(shape);
       densities.push_back(r.density);
       break;
@@ -224,6 +243,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
         throw std::runtime_error("Failed to create shape");
       }
       shape->setLocalPose(r.pose);
+      shape->setTorsionalPatchRadius(r.patchRadius);
+      shape->setMinTorsionalPatchRadius(r.minPatchRadius);
       shapes.push_back(shape);
       densities.push_back(r.density);
       break;
@@ -238,6 +259,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
         throw std::runtime_error("Failed to create shape");
       }
       shape->setLocalPose(r.pose);
+      shape->setTorsionalPatchRadius(r.patchRadius);
+      shape->setMinTorsionalPatchRadius(r.minPatchRadius);
       shapes.push_back(shape);
       densities.push_back(r.density);
       break;
