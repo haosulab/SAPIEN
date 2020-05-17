@@ -4,11 +4,8 @@ from typing import Iterable as iterable
 from typing import Iterator as iterator
 from numpy import float64
 _Shape = Tuple[int, ...]
-import s
-import sapien.core.pysapien
 import numpy
-import SolverType
-import y
+import sapien.core.pysapien
 __all__  = [
 "ActorBase",
 "ActorDynamicBase",
@@ -58,6 +55,7 @@ __all__  = [
 "PxMaterial",
 "PxrMaterial",
 "Scene",
+"SceneConfig",
 "ShapeRecord",
 "SolverType",
 "SphereGeometry",
@@ -294,6 +292,7 @@ class Actor(ActorDynamicBase, ActorBase):
     def set_damping(self, linear: float, angular: float) -> None: ...
     def set_name(self, name: str) -> None: ...
     def set_pose(self, pose: Pose) -> None: ...
+    def set_solver_iterations(self, position: int, velocity: int = 1) -> None: ...
     def set_velocity(self, arg0: numpy.ndarray[float32]) -> None: ...
     def unpack(self, arg0: numpy.ndarray[float32]) -> None: ...
     @property
@@ -863,11 +862,12 @@ class Drive():
 class Engine():
     def __init__(self, n_thread: int = 0, tolerance_length: float = 0.10000000149011612, tolerance_speed: float = 0.20000000298023224) -> None: ...
     def create_physical_material(self, static_friction: float, dynamic_friction: float, restitution: float) -> PxMaterial: ...
-    def create_scene(self, gravity: numpy.ndarray[float32] = array([ 0. ,  0. , -9.8], dtype=float32), solver_type: SolverType = SolverType.PGS, enable_ccd: bool = False, enable_pcm: bool = False) -> Scene: 
+    def create_scene(self, gravity: numpy.ndarray[float32] = array([ 0. ,  0. , -9.8], dtype=float32), solver_type: SolverType = SolverType.PGS, enable_ccd: bool = False, enable_pcm: bool = True, config: SceneConfig = None) -> Scene: 
         """
-        create_scene(self: sapien.core.pysapien.Engine, gravity: numpy.ndarray[float32] = array([ 0. ,  0. , -9.8], dtype=float32), solver_type: sapien.core.pysapien.SolverType = SolverType.PGS, enable_ccd: bool = False, enable_pcm: bool = False) -> sapien.core.pysapien.Scene
+        create_scene(self: sapien.core.pysapien.Engine, gravity: numpy.ndarray[float32] = array([ 0. ,  0. , -9.8], dtype=float32), solver_type: sapien.core.pysapien.SolverType = SolverType.PGS, enable_ccd: bool = False, enable_pcm: bool = True, config: sapien.core.pysapien.SceneConfig = None) -> sapien.core.pysapien.Scene
         """
     def get_renderer(self) -> IPxrRenderer: ...
+    def set_log_level(self, level: str) -> None: ...
     def set_renderer(self, renderer: IPxrRenderer) -> None: ...
     pass
 class ISensor():
@@ -1514,6 +1514,7 @@ class OptifuserCamera(ICamera, ISensor):
     def get_albedo_rgba(self) -> numpy.ndarray[float32]: ...
     def get_camera_matrix(self) -> numpy.ndarray[float32]: ...
     def get_color_rgba(self) -> numpy.ndarray[float32]: ...
+    def get_custom_rgba(self) -> numpy.ndarray[float32]: ...
     def get_depth(self) -> numpy.ndarray[float32]: ...
     def get_far(self) -> float: ...
     def get_fovy(self) -> float: ...
@@ -1532,6 +1533,7 @@ class OptifuserCamera(ICamera, ISensor):
     def set_mode_perspective(self, fovy: float = 0.6108652353286743) -> None: ...
     def set_pose(self, pose: Pose) -> None: ...
     def take_picture(self) -> None: ...
+    def take_raytraced_picture(self, samples_per_pixel: int = 128, reflection_count: int = 4, use_denoiser: bool = True) -> numpy.ndarray[float32]: ...
     pass
 class OptifuserConfig():
     def __init__(self) -> None: ...
@@ -1591,10 +1593,13 @@ class OptifuserController():
         """
     pass
 class OptifuserRenderer(IPxrRenderer):
-    def __init__(self, glsl_dir: str = '', glsl_version: str = '', config: OptifuserConfig = <OptifuserConfig object at 0x7fd93cfa7340>) -> None: ...
+    def __init__(self, glsl_dir: str = '', glsl_version: str = '', config: OptifuserConfig = OptifuserConfig()) -> None: ...
     def enable_global_axes(self, enable: bool = True) -> None: ...
     @staticmethod
     def set_default_shader_config(glsl_dir: str, glsl_version: str) -> None: ...
+    def set_log_level(self, level: str) -> None: ...
+    @staticmethod
+    def set_optix_config(ptx_dir: str) -> None: ...
     pass
 class PlaneGeometry(CollisionGeometry):
     pass
@@ -1709,6 +1714,129 @@ class Scene():
         """
     @timestep.setter
     def timestep(self, arg1: float) -> None:
+        pass
+    pass
+class SceneConfig():
+    def __init__(self) -> None: ...
+    @property
+    def bounce_threshold(self) -> float:
+        """
+        :type: float
+        """
+    @bounce_threshold.setter
+    def bounce_threshold(self, arg0: float) -> None:
+        pass
+    @property
+    def contact_offset(self) -> float:
+        """
+        :type: float
+        """
+    @contact_offset.setter
+    def contact_offset(self, arg0: float) -> None:
+        pass
+    @property
+    def default_dynamic_friction(self) -> float:
+        """
+        :type: float
+        """
+    @default_dynamic_friction.setter
+    def default_dynamic_friction(self, arg0: float) -> None:
+        pass
+    @property
+    def default_restitution(self) -> float:
+        """
+        :type: float
+        """
+    @default_restitution.setter
+    def default_restitution(self, arg0: float) -> None:
+        pass
+    @property
+    def default_static_friction(self) -> float:
+        """
+        :type: float
+        """
+    @default_static_friction.setter
+    def default_static_friction(self, arg0: float) -> None:
+        pass
+    @property
+    def enable_adaptive_force(self) -> bool:
+        """
+        :type: bool
+        """
+    @enable_adaptive_force.setter
+    def enable_adaptive_force(self, arg0: bool) -> None:
+        pass
+    @property
+    def enable_ccd(self) -> bool:
+        """
+        :type: bool
+        """
+    @enable_ccd.setter
+    def enable_ccd(self, arg0: bool) -> None:
+        pass
+    @property
+    def enable_enhanced_determinism(self) -> bool:
+        """
+        :type: bool
+        """
+    @enable_enhanced_determinism.setter
+    def enable_enhanced_determinism(self, arg0: bool) -> None:
+        pass
+    @property
+    def enable_friction_every_iteration(self) -> bool:
+        """
+        :type: bool
+        """
+    @enable_friction_every_iteration.setter
+    def enable_friction_every_iteration(self, arg0: bool) -> None:
+        pass
+    @property
+    def enable_pcm(self) -> bool:
+        """
+        :type: bool
+        """
+    @enable_pcm.setter
+    def enable_pcm(self, arg0: bool) -> None:
+        pass
+    @property
+    def enable_tgs(self) -> bool:
+        """
+        :type: bool
+        """
+    @enable_tgs.setter
+    def enable_tgs(self, arg0: bool) -> None:
+        pass
+    @property
+    def gravity(self) -> numpy.ndarray[float32, _Shape[3, 1]]:
+        """
+        :type: numpy.ndarray[float32, _Shape[3, 1]]
+        """
+    @gravity.setter
+    def gravity(self, arg0: numpy.ndarray[float32, _Shape[3, 1]]) -> None:
+        pass
+    @property
+    def sleep_threshold(self) -> float:
+        """
+        :type: float
+        """
+    @sleep_threshold.setter
+    def sleep_threshold(self, arg0: float) -> None:
+        pass
+    @property
+    def solver_iterations(self) -> int:
+        """
+        :type: int
+        """
+    @solver_iterations.setter
+    def solver_iterations(self, arg0: int) -> None:
+        pass
+    @property
+    def solver_velocity_iterations(self) -> int:
+        """
+        :type: int
+        """
+    @solver_velocity_iterations.setter
+    def solver_velocity_iterations(self, arg0: int) -> None:
         pass
     pass
 class ShapeRecord():
@@ -1850,11 +1978,13 @@ class VisualRecord():
     pass
 DYNAMIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.DYNAMIC
 FIX: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.FIX
+GL_SHADER_ROOT = ''
 KINEMATIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.KINEMATIC
 KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = ActorType.KINEMATIC_LINK
 LINK: sapien.core.pysapien.ActorType # value = ActorType.LINK
 PGS: sapien.core.pysapien.SolverType # value = SolverType.PGS
 PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.PRISMATIC
+PTX_ROOT = ''
 REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.REVOLUTE
 SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.SPHERICAL
 STATIC: sapien.core.pysapien.ActorType # value = ActorType.STATIC
