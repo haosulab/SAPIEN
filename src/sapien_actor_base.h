@@ -38,11 +38,11 @@ protected:
   uint32_t mCol2 = 0;
   uint32_t mCol3 = 0;
 
-  uint32_t mRenderMode = 0;
+  bool collisionRender = false;
 
 public:
-  void setRenderMode(uint32_t mode);
-  uint32_t getRenderMode() const;
+  void renderCollisionBodies(bool collision);
+  bool isRenderingCollision() const;
 
   inline std::vector<SDrive *> getDrives() const { return mDrives; }
 

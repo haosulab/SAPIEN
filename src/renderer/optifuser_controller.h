@@ -19,7 +19,7 @@ class OptifuserController : public IEventListener<EventActorPreDestroy> {
   // int mArticulationId = 0;
   bool showCM = false;
 
-  SActorBase *mCurrentSelection = nullptr;
+  SActorBase *mSelectedActor = nullptr;
 
   bool mShouldQuit = false;
 
@@ -27,6 +27,7 @@ class OptifuserController : public IEventListener<EventActorPreDestroy> {
   std::unique_ptr<Optifuser::CameraSpec> mCamera;
   SActorBase *mCurrentFocus = nullptr;
   bool paused = false;
+  bool singleStep = true;
   bool flipX = false;
   bool flipY = false;
   bool transparentSelection = false;
@@ -60,7 +61,7 @@ public:
 
   void onEvent(EventActorPreDestroy &e) override;
 
-  inline SActorBase *getSelectedActor() const { return mCurrentSelection; }
+  inline SActorBase *getSelectedActor() const { return mSelectedActor; }
 };
 } // namespace Renderer
 } // namespace sapien

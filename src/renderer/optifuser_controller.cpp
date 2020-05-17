@@ -4,6 +4,7 @@
 #include "articulation/sapien_link.h"
 #include "render_interface.h"
 #include "sapien_actor.h"
+#include "sapien_contact.h"
 #include "sapien_drive.h"
 #include "sapien_scene.h"
 #include "simulation.h"
@@ -107,8 +108,8 @@ void OptifuserController::editTransform() {
   for (auto b : gizmoBody) {
     b->update(pose);
   }
-  if (mCurrentSelection) {
-    SActorBase *actor = mCurrentSelection;
+  if (mSelectedActor) {
+    SActorBase *actor = mSelectedActor;
     if (actor &&
         (actor->getType() == EActorType::DYNAMIC || actor->getType() == EActorType::KINEMATIC)) {
       ImGui::SameLine();
@@ -196,12 +197,12 @@ void OptifuserController::focus(SActorBase *actor) {
     mFreeCameraController.pitch = mArcCameraController.pitch;
     auto &p = mArcCameraController.camera->position;
     mFreeCameraController.setPosition(p.x, p.y, p.z);
-    if (mCurrentSelection != mCurrentFocus) {
+    if (mSelectedActor != mCurrentFocus) {
       mCurrentFocus->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
     }
   } else if (actor && actor != mCurrentFocus) {
     // focus1 -> focus2
-    if (mCurrentSelection != mCurrentFocus) {
+    if (mSelectedActor != mCurrentFocus) {
       mCurrentFocus->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
     }
     actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
@@ -210,14 +211,14 @@ void OptifuserController::focus(SActorBase *actor) {
 }
 
 void OptifuserController::select(SActorBase *actor) {
-  if (actor != mCurrentSelection) {
-    if (mCurrentSelection) {
-      for (auto b : mCurrentSelection->getRenderBodies()) {
+  if (actor != mSelectedActor) {
+    if (mSelectedActor) {
+      for (auto b : mSelectedActor->getRenderBodies()) {
         b->setRenderMode(0);
       }
     }
-    if (mCurrentSelection && mCurrentSelection != mCurrentFocus) {
-      mCurrentSelection->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
+    if (mSelectedActor && mSelectedActor != mCurrentFocus) {
+      mSelectedActor->EventEmitter<EventActorPreDestroy>::unregisterListener(*this);
     }
     if (actor) {
       actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
@@ -227,7 +228,7 @@ void OptifuserController::select(SActorBase *actor) {
         }
       }
     }
-    mCurrentSelection = actor;
+    mSelectedActor = actor;
   }
 }
 
@@ -280,6 +281,7 @@ physx::PxTransform OptifuserController::getCameraPose() const {
 bool OptifuserController::shouldQuit() { return mShouldQuit; }
 
 void OptifuserController::render() {
+  singleStep = false;
   do {
 #ifdef _USE_OPTIX
     static Optifuser::OptixRenderer *pathTracer = nullptr;
@@ -424,8 +426,8 @@ void OptifuserController::render() {
       select(actor);
     }
 
-    if (mCurrentSelection) {
-      SActorBase *actor = mCurrentSelection;
+    if (mSelectedActor) {
+      SActorBase *actor = mSelectedActor;
       PxTransform cmPose = PxTransform({0, 0, 0}, PxIdentity);
 
       switch (actor->getType()) {
@@ -469,6 +471,11 @@ void OptifuserController::render() {
       {
         if (ImGui::CollapsingHeader("Control", ImGuiTreeNodeFlags_DefaultOpen)) {
           ImGui::Checkbox("Pause", &paused);
+          if (paused) {
+            if (ImGui::Button("Single step")) {
+              singleStep = true;
+            }
+          }
           ImGui::Checkbox("Flip X", &flipX);
           ImGui::Checkbox("Flip Y", &flipY);
           ImGui::Checkbox("Transparent Selection", &transparentSelection);
@@ -617,7 +624,7 @@ void OptifuserController::render() {
             if (name.empty()) {
               name = "(no name)";
             }
-            if (actors[i] == mCurrentSelection) {
+            if (actors[i] == mSelectedActor) {
               ImGui::TextColored({1, 0, 0, 1}, "%s", name.c_str());
             } else {
               if (ImGui::Selectable((name + "##actor" + std::to_string(i)).c_str())) {
@@ -641,7 +648,7 @@ void OptifuserController::render() {
                 if (name.empty()) {
                   name = "(no name)";
                 }
-                if (links[j] == mCurrentSelection) {
+                if (links[j] == mSelectedActor) {
                   ImGui::TextColored({1, 0, 0, 1}, "%s", name.c_str());
                 } else {
                   if (ImGui::Selectable(
@@ -655,12 +662,60 @@ void OptifuserController::render() {
           }
           ImGui::TreePop();
         }
+        if (ImGui::TreeNode("Contacts")) {
+          if (!paused) {
+            ImGui::Text("Please pause the simulation");
+          } else {
+            auto &contacts = mScene->getContacts();
+            for (uint32_t i = 0; i < contacts.size(); ++i) {
+              if (ImGui::TreeNode((contacts[i].actors[0]->getName() + "-" +
+                                   contacts[i].actors[1]->getName() + "##contact" +
+                                   std::to_string(i))
+                                      .c_str())) {
+                if (ImGui::Selectable((contacts[i].actors[0]->getName()).c_str())) {
+                  select(contacts[i].actors[0]);
+                }
+                if (ImGui::Selectable((contacts[i].actors[1]->getName()).c_str())) {
+                  select(contacts[i].actors[1]);
+                }
+                ImGui::Text("Separation: %.4f", contacts[i].separation);
+                ImGui::Text("Impulse: %.4f %.4f %.4f", contacts[i].impulse.x,
+                            contacts[i].impulse.y, contacts[i].impulse.z);
+                if (contacts[i].starts) {
+                  ImGui::Text("Type: start");
+                } else if (contacts[i].persists) {
+                  ImGui::Text("Type: persist");
+                } else if (contacts[i].ends) {
+                  ImGui::Text("Type: ends");
+                }
+                if (ImGui::Selectable("Position")) {
+                  select(nullptr);
+                  currentScene->getScene()->clearAxes();
+                  glm::vec3 v = {contacts[i].normal.x, contacts[i].normal.y, contacts[i].normal.z};
+                  glm::vec3 t1 = glm::cross(v, glm::vec3(1, 0, 0));
+                  if (glm::length2(t1) < 0.01) {
+                    t1 = glm::cross(v, glm::vec3(0, 1, 0));
+                  }
+                  t1 = glm::normalize(t1);
+                  glm::vec3 t2 = glm::cross(v, t1);
+                  glm::mat3 m(v, t1, t2);
+
+                  currentScene->getScene()->addAxes(
+                      {contacts[i].point.x, contacts[i].point.y, contacts[i].point.z},
+                      glm::quat(m));
+                }
+                ImGui::TreePop();
+              }
+            }
+          }
+          ImGui::TreePop();
+        }
       }
       {
-        if (mCurrentSelection) {
+        if (mSelectedActor) {
           if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::Text("name: %s", mCurrentSelection->getName().c_str());
-            auto pose = mCurrentSelection->getPose();
+            ImGui::Text("name: %s", mSelectedActor->getName().c_str());
+            auto pose = mSelectedActor->getPose();
             ImGui::Text("Position: %.2f %.2f %.2f", pose.p.x, pose.p.y, pose.p.z);
 
             glm::vec3 angles =
@@ -668,16 +723,16 @@ void OptifuserController::render() {
                 glm::pi<float>() * 180.f;
             ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles.x, angles.y, angles.z);
 
-            ImGui::Text("col1: #%08x, col2: #%08x", mCurrentSelection->getCollisionGroup1(),
-                        mCurrentSelection->getCollisionGroup2());
-            ImGui::Text("col3: #%08x", mCurrentSelection->getCollisionGroup3());
+            ImGui::Text("col1: #%08x, col2: #%08x", mSelectedActor->getCollisionGroup1(),
+                        mSelectedActor->getCollisionGroup2());
+            ImGui::Text("col3: #%08x", mSelectedActor->getCollisionGroup3());
 
             if (ImGui::Button("Gizmo to Actor")) {
               gizmo = true;
-              gizmoTransform = PxTransform2Mat4(mCurrentSelection->getPose());
-              createGizmoVisual(mCurrentSelection);
+              gizmoTransform = PxTransform2Mat4(mSelectedActor->getPose());
+              createGizmoVisual(mSelectedActor);
             }
-            switch (mCurrentSelection->getType()) {
+            switch (mSelectedActor->getType()) {
             case EActorType::ARTICULATION_LINK:
               ImGui::Text("Type: Articulation Link");
               break;
@@ -696,10 +751,10 @@ void OptifuserController::render() {
             }
 
             static bool renderCollision;
-            renderCollision = mCurrentSelection->getRenderMode();
+            renderCollision = mSelectedActor->isRenderingCollision();
             // toggle collision shape
             if (ImGui::Checkbox("Collision Shape", &renderCollision)) {
-              mCurrentSelection->setRenderMode(renderCollision);
+              mSelectedActor->renderCollisionBodies(renderCollision);
             }
 
             // toggle center of mass
@@ -707,7 +762,7 @@ void OptifuserController::render() {
           }
 
           if (ImGui::CollapsingHeader("Actor Details")) {
-            auto actor = mCurrentSelection->getPxActor();
+            auto actor = mSelectedActor->getPxActor();
             std::vector<PxShape *> shapes(actor->getNbShapes());
             actor->getShapes(shapes.data(), shapes.size());
             int primitives = 0;
@@ -747,27 +802,27 @@ void OptifuserController::render() {
             } else {
               ImGui::Text("No Physical Material");
             }
-            if (mCurrentSelection->getType() == EActorType::DYNAMIC) {
+            if (mSelectedActor->getType() == EActorType::DYNAMIC) {
               bool b = static_cast<PxRigidDynamic *>(actor)->isSleeping();
               ImGui::Checkbox("Sleeping", &b);
-            } else if (mCurrentSelection->getType() == EActorType::ARTICULATION_LINK) {
+            } else if (mSelectedActor->getType() == EActorType::ARTICULATION_LINK) {
               bool b = static_cast<PxArticulationLink *>(actor)->getArticulation().isSleeping();
               ImGui::Checkbox("Sleeping", &b);
             }
-            if (mCurrentSelection->getType() == EActorType::DYNAMIC ||
-                mCurrentSelection->getType() == EActorType::ARTICULATION_LINK) {
+            if (mSelectedActor->getType() == EActorType::DYNAMIC ||
+                mSelectedActor->getType() == EActorType::ARTICULATION_LINK) {
               auto body = static_cast<PxRigidBody *>(actor);
               ImGui::Text("Mass: %.4f", body->getMass());
               auto inertia = body->getMassSpaceInertiaTensor();
               ImGui::Text("inertia: %.4f %.4f %.4f", inertia.x, inertia.y, inertia.z);
             }
 
-            if (mCurrentSelection->getDrives().size()) {
-              auto drives = mCurrentSelection->getDrives();
+            if (mSelectedActor->getDrives().size()) {
+              auto drives = mSelectedActor->getDrives();
               if (ImGui::TreeNode("Drives")) {
                 for (size_t i = 0; i < drives.size(); ++i) {
                   ImGui::Text("Drive %ld", i + 1);
-                  if (drives[i]->getActor2() == mCurrentSelection) {
+                  if (drives[i]->getActor2() == mSelectedActor) {
                     if (drives[i]->getActor1()) {
                       ImGui::Text("Drive towards pose relative to actor [%s]",
                                   drives[i]->getActor1()->getName().c_str());
@@ -789,7 +844,7 @@ void OptifuserController::render() {
 
                   {
                     // actor 1
-                    if (drives[i]->getActor1() == mCurrentSelection) {
+                    if (drives[i]->getActor1() == mSelectedActor) {
                       ImGui::Text("Actor 1: this actor");
                     } else {
                       ImGui::Text("Actor 1: %s", drives[i]->getActor1()
@@ -808,7 +863,7 @@ void OptifuserController::render() {
 
                   {
                     // actor 2
-                    if (drives[i]->getActor2() == mCurrentSelection) {
+                    if (drives[i]->getActor2() == mSelectedActor) {
                       ImGui::Text("Actor 2: this actor");
                     } else {
                       ImGui::Text("Actor 2: %s", drives[i]->getActor2()
@@ -851,9 +906,9 @@ void OptifuserController::render() {
             }
           }
 
-          if (mCurrentSelection->getType() == EActorType::ARTICULATION_LINK ||
-              mCurrentSelection->getType() == EActorType::KINEMATIC_ARTICULATION_LINK) {
-            SLinkBase *link = static_cast<SLinkBase *>(mCurrentSelection);
+          if (mSelectedActor->getType() == EActorType::ARTICULATION_LINK ||
+              mSelectedActor->getType() == EActorType::KINEMATIC_ARTICULATION_LINK) {
+            SLinkBase *link = static_cast<SLinkBase *>(mSelectedActor);
             articulation = link->getArticulation();
 
             struct JointGuiModel {
@@ -972,7 +1027,7 @@ void OptifuserController::render() {
                   stack.pop_back();
                   indents.pop_back();
 
-                  if (links[idx] == mCurrentSelection) {
+                  if (links[idx] == mSelectedActor) {
                     ImGui::TextColored({1, 0, 0, 1}, "%sLink %i: %s",
                                        std::string(indent, ' ').c_str(), idx,
                                        links[idx]->getName().c_str());
@@ -1030,15 +1085,15 @@ void OptifuserController::render() {
                                                        mRenderer->mGlslDir + "/display_depth.fsh");
       }
     }
-  } while (paused);
+  } while (paused && !singleStep);
 }
 
 void OptifuserController::onEvent(EventActorPreDestroy &e) {
   if (e.actor == mCurrentFocus) {
     focus(nullptr);
   }
-  if (e.actor == mCurrentSelection) {
-    mCurrentSelection = nullptr;
+  if (e.actor == mSelectedActor) {
+    mSelectedActor = nullptr;
   }
 }
 

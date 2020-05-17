@@ -10,19 +10,17 @@ std::vector<Renderer::IPxrRigidbody *> SActorBase::getCollisionBodies() {
   return mCollisionBodies;
 }
 
-void SActorBase::setRenderMode(uint32_t mode) {
-  if (mRenderMode != mode) {
-    mRenderMode = mode;
-    for (auto body : mRenderBodies) {
-      body->setVisible(mode != 1);
-    }
-    for (auto body : mCollisionBodies) {
-      body->setVisible(mode == 1);
-    }
+void SActorBase::renderCollisionBodies(bool collision) {
+  collisionRender = collision;
+  for (auto body : mRenderBodies) {
+    body->setVisible(!collision);
+  }
+  for (auto body : mCollisionBodies) {
+    body->setVisible(collision);
   }
 }
 
-uint32_t SActorBase::getRenderMode() const { return mRenderMode; }
+bool SActorBase::isRenderingCollision() const { return collisionRender; }
 
 void SActorBase::prestep() {
   EventActorStep s;
@@ -32,14 +30,11 @@ void SActorBase::prestep() {
 }
 
 void SActorBase::updateRender(PxTransform const &pose) {
-  if (mRenderMode == 0) {
-    for (auto body : mRenderBodies) {
-      body->update(pose);
-    }
-  } else {
-    for (auto body : mCollisionBodies) {
-      body->update(pose);
-    }
+  for (auto body : mRenderBodies) {
+    body->update(pose);
+  }
+  for (auto body : mCollisionBodies) {
+    body->update(pose);
   }
 }
 
@@ -58,82 +53,77 @@ std::vector<SShape> SActorBase::getCollisionShapes() {
     SShape &outputShape = output.back();
     outputShape.pose = shape->getLocalPose();
     switch (shape->getGeometryType()) {
-      case PxGeometryType::eBOX:
-        {
-          outputShape.type = "box";
-          PxBoxGeometry g;
-          shape->getBoxGeometry(g);
-          auto sg = std::make_unique<SBoxGeometry>();
-          sg->halfLengths = g.halfExtents;
-          outputShape.geometry = std::move(sg);
-          break;
-        }
-      case PxGeometryType::eSPHERE:
-        {
-          outputShape.type = "sphere";
-          PxSphereGeometry g;
-          shape->getSphereGeometry(g);
-          auto sg = std::make_unique<SSphereGeometry>();
-          sg->radius = g.radius;
-          outputShape.geometry = std::move(sg);
-          break;
-        }
+    case PxGeometryType::eBOX: {
+      outputShape.type = "box";
+      PxBoxGeometry g;
+      shape->getBoxGeometry(g);
+      auto sg = std::make_unique<SBoxGeometry>();
+      sg->halfLengths = g.halfExtents;
+      outputShape.geometry = std::move(sg);
+      break;
+    }
+    case PxGeometryType::eSPHERE: {
+      outputShape.type = "sphere";
+      PxSphereGeometry g;
+      shape->getSphereGeometry(g);
+      auto sg = std::make_unique<SSphereGeometry>();
+      sg->radius = g.radius;
+      outputShape.geometry = std::move(sg);
+      break;
+    }
 
-      case PxGeometryType::eCAPSULE:
-        {
-          outputShape.type = "capsule";
-          PxCapsuleGeometry g;
-          shape->getCapsuleGeometry(g);
-          auto sg = std::make_unique<SCapsuleGeometry>();
-          sg->radius = g.radius;
-          sg->halfLength = g.halfHeight;
-          outputShape.geometry = std::move(sg);
-          break;
-        }
+    case PxGeometryType::eCAPSULE: {
+      outputShape.type = "capsule";
+      PxCapsuleGeometry g;
+      shape->getCapsuleGeometry(g);
+      auto sg = std::make_unique<SCapsuleGeometry>();
+      sg->radius = g.radius;
+      sg->halfLength = g.halfHeight;
+      outputShape.geometry = std::move(sg);
+      break;
+    }
 
-      case PxGeometryType::ePLANE:
-        {
-          outputShape.type = "plane";
-          auto sg = std::make_unique<SPlaneGeometry>();
-          outputShape.geometry = std::move(sg);
-          break;
-        }
-      case PxGeometryType::eCONVEXMESH:
-        {
-          outputShape.type = "convex_mesh";
-          PxConvexMeshGeometry g;
-          shape->getConvexMeshGeometry(g);
-          auto sg = std::make_unique<SConvexMeshGeometry>();
-          sg->scale = g.scale.scale;
-          sg->rotation = g.scale.rotation;
+    case PxGeometryType::ePLANE: {
+      outputShape.type = "plane";
+      auto sg = std::make_unique<SPlaneGeometry>();
+      outputShape.geometry = std::move(sg);
+      break;
+    }
+    case PxGeometryType::eCONVEXMESH: {
+      outputShape.type = "convex_mesh";
+      PxConvexMeshGeometry g;
+      shape->getConvexMeshGeometry(g);
+      auto sg = std::make_unique<SConvexMeshGeometry>();
+      sg->scale = g.scale.scale;
+      sg->rotation = g.scale.rotation;
 
-          // fill vertices
-          sg->vertices.reserve(3 * g.convexMesh->getNbVertices());
-          auto vertices = g.convexMesh->getVertices();
-          for (uint32_t i = 0; i < g.convexMesh->getNbVertices(); ++i) {
-            sg->vertices.push_back(vertices[i].x);
-            sg->vertices.push_back(vertices[i].y);
-            sg->vertices.push_back(vertices[i].z);
-          }
+      // fill vertices
+      sg->vertices.reserve(3 * g.convexMesh->getNbVertices());
+      auto vertices = g.convexMesh->getVertices();
+      for (uint32_t i = 0; i < g.convexMesh->getNbVertices(); ++i) {
+        sg->vertices.push_back(vertices[i].x);
+        sg->vertices.push_back(vertices[i].y);
+        sg->vertices.push_back(vertices[i].z);
+      }
 
-          // fill indices
-          sg->indices.reserve(3 * g.convexMesh->getNbPolygons());
-          auto indices = g.convexMesh->getIndexBuffer();
-          for (uint32_t i = 0; i < g.convexMesh->getNbPolygons(); ++i) {
-            PxHullPolygon polygon;
-            g.convexMesh->getPolygonData(i, polygon);
-            for (int j = 0; j < int(polygon.mNbVerts) - 2; ++j) {
-              sg->indices.push_back(indices[polygon.mIndexBase]);
-              sg->indices.push_back(indices[polygon.mIndexBase + j + 1]);
-              sg->indices.push_back(indices[polygon.mIndexBase + j + 2]);
-            }
-          }
-          outputShape.geometry = std::move(sg);
-          break;
+      // fill indices
+      sg->indices.reserve(3 * g.convexMesh->getNbPolygons());
+      auto indices = g.convexMesh->getIndexBuffer();
+      for (uint32_t i = 0; i < g.convexMesh->getNbPolygons(); ++i) {
+        PxHullPolygon polygon;
+        g.convexMesh->getPolygonData(i, polygon);
+        for (int j = 0; j < int(polygon.mNbVerts) - 2; ++j) {
+          sg->indices.push_back(indices[polygon.mIndexBase]);
+          sg->indices.push_back(indices[polygon.mIndexBase + j + 1]);
+          sg->indices.push_back(indices[polygon.mIndexBase + j + 2]);
         }
-      default:
-        spdlog::get("SAPIEN")->critical("Unrecognized geometry in getCollisionShapes");
-        throw std::runtime_error("Unrecognized geometry");
+      }
+      outputShape.geometry = std::move(sg);
+      break;
+    }
+    default:
+      spdlog::get("SAPIEN")->critical("Unrecognized geometry in getCollisionShapes");
+      throw std::runtime_error("Unrecognized geometry");
     }
   }
   return output;
