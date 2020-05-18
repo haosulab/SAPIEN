@@ -774,6 +774,13 @@ void OptifuserController::render() {
             PxReal maxStaticFriction = -1;
             PxReal minRestitution = 100;
             PxReal maxRestitution = -1;
+
+            PxReal minPatchRadius = 100000.f;
+            PxReal maxPatchRadius = -1.f;
+
+            PxReal minMinPatchRadius = 100000.f;
+            PxReal maxMinPatchRadius = -1.f;
+
             for (auto s : shapes) {
               if (s->getGeometryType() == PxGeometryType::eCONVEXMESH) {
                 meshes += 1;
@@ -793,6 +800,12 @@ void OptifuserController::render() {
                 minRestitution = std::min(minRestitution, r);
                 maxRestitution = std::max(maxRestitution, r);
               }
+              PxReal p = s->getTorsionalPatchRadius();
+              minPatchRadius = std::min(minPatchRadius, p);
+              maxPatchRadius = std::max(maxPatchRadius, p);
+              p = s->getMinTorsionalPatchRadius();
+              minMinPatchRadius = std::min(minMinPatchRadius, p);
+              maxMinPatchRadius = std::max(maxMinPatchRadius, p);
             }
             ImGui::Text("Primitive Count: %d", primitives);
             ImGui::Text("Convex Mesh Count: %d", meshes);
@@ -800,6 +813,8 @@ void OptifuserController::render() {
               ImGui::Text("Static friction: %.2f - %.2f", minStaticFriction, maxStaticFriction);
               ImGui::Text("Dynamic friction: %.2f - %.2f", minDynamicFriction, maxDynamicFriction);
               ImGui::Text("Restitution : %.2f - %.2f", minRestitution, maxRestitution);
+              ImGui::Text("Patch radius : %.2f - %.2f", minPatchRadius, maxPatchRadius);
+              ImGui::Text("Min patch radius : %.2f - %.2f", minMinPatchRadius, maxMinPatchRadius);
             } else {
               ImGui::Text("No Physical Material");
             }
