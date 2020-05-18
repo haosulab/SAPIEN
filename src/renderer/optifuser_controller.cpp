@@ -478,7 +478,13 @@ void OptifuserController::render() {
           }
           ImGui::Checkbox("Flip X", &flipX);
           ImGui::Checkbox("Flip Y", &flipY);
-          ImGui::Checkbox("Transparent Selection", &transparentSelection);
+          if (ImGui::Checkbox("Transparent Selection", &transparentSelection)) {
+            if (mSelectedActor) {
+              auto actor = mSelectedActor;
+              select(nullptr);
+              select(actor);
+            }
+          }
           ImGui::Checkbox("Show Gizmo", &gizmo);
         }
         if (ImGui::CollapsingHeader("Render Mode", ImGuiTreeNodeFlags_DefaultOpen)) {
