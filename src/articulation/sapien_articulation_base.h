@@ -48,6 +48,8 @@ public:
   virtual void prestep() = 0;
 
   virtual ~SArticulationBase() = default;
+
+  std::string exportKinematicsChainAsURDF(bool fixRoot);
 };
 
 class SArticulationDrivable : public SArticulationBase {
