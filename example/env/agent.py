@@ -1,6 +1,15 @@
 class Agent(object):
     def init(self, env):
+        """Called once when the agent is added to the env"""
         raise NotImplementedError()
+
+    def reset(self, env) -> None:
+        """Called after init to restore the internal states of the agent"""
+        raise NotImplementedError()
+
+    def close(self, env) -> None:
+        """Called before the environment is about to be destroyed."""
+        pass
 
     @property
     def action_spec(self) -> dict:
