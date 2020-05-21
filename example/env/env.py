@@ -59,12 +59,3 @@ class Env:
     def description(self) -> str:
         """Human readable description of the environment"""
         return ''
-
-
-def private(func):
-    def wrapper(self, *args, **kwargs):
-        print('nope')
-        return func(*args, **kwargs)
-
-    return wrapper
-
