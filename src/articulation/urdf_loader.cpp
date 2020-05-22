@@ -306,7 +306,7 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
       case Geometry::MESH:
         currentLinkBuilder->addConvexShapeFromFile(
             getAbsPath(filename, collision->geometry->filename), tCollision2Link,
-            PxVec3(1, 1, 1) * scale, material, defaultDensity);
+            collision->geometry->scale * scale, material, defaultDensity);
         if (collisionIsVisual) {
           currentLinkBuilder->addVisualFromFile(
               getAbsPath(filename, collision->geometry->filename), tCollision2Link,
@@ -748,7 +748,7 @@ std::unique_ptr<ArticulationBuilder> URDFLoader::parseRobotDescriptionAsArticula
       case Geometry::MESH:
         currentLinkBuilder->addConvexShapeFromFile(
             getAbsPath(filename, collision->geometry->filename), tCollision2Link,
-            PxVec3(1, 1, 1) * scale, material, defaultDensity);
+            collision->geometry->scale * scale, material, defaultDensity);
         if (collisionIsVisual) {
           currentLinkBuilder->addVisualFromFile(
               getAbsPath(filename, collision->geometry->filename), tCollision2Link,
