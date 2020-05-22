@@ -275,10 +275,10 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
       // TODO: add physical material support (may require URDF extension)
       switch (collision->geometry->type) {
       case Geometry::BOX:
-        currentLinkBuilder->addBoxShape(tCollision2Link, collision->geometry->size * scale,
+        currentLinkBuilder->addBoxShape(tCollision2Link, collision->geometry->size * scale / 2.f,
                                         material, defaultDensity);
         if (collisionIsVisual) {
-          currentLinkBuilder->addBoxVisual(tCollision2Link, collision->geometry->size * scale,
+          currentLinkBuilder->addBoxVisual(tCollision2Link, collision->geometry->size * scale / 2.f,
                                            PxVec3{1, 1, 1}, "");
         }
         break;
