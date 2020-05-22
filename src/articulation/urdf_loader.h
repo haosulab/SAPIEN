@@ -101,7 +101,9 @@ struct DomBase {
     if (result) {
       return _read_attr<T>(result);
     }
-    throw "Attribute " + name + " does not exist.";
+    spdlog::get("sapien")->critical("Attribute {} does not exist on {}, at line {}.", name,
+                                    elem.Name(), elem.GetLineNum());
+    throw std::runtime_error("Missing attribute");
   }
 
   template <typename T>
@@ -278,11 +280,11 @@ struct Geometry : DomBase {
   Geometry(const XMLElement &elem) {
     const XMLElement *child = elem.FirstChildElement();
     if (!child) {
-      spdlog::get("sapien")->critical("<geometry> contains no child");
+      spdlog::get("sapien")->critical("<geometry> contains no child, at line {}", elem.GetLineNum());
       throw std::runtime_error("<geometry> contains no child");
     }
     if (child->NextSibling()) {
-      spdlog::get("SAPIEN")->critical("<geometry> contains more than 1 child");
+      spdlog::get("SAPIEN")->critical("<geometry> contains more than 1 child, at line {}", elem.GetLineNum());
       throw std::runtime_error("<geometry> contains more than 1 child");
     }
     const char *childTag = child->Name();
@@ -432,8 +434,8 @@ struct Dynamics : DomBase {
   DECLARE_ATTR(physx::PxReal, friction)
 
   LOAD_ATTR_BEGIN()
-  LOAD_ATTR(physx::PxReal, damping)
-  LOAD_ATTR(physx::PxReal, friction)
+  LOAD_ATTR_OPTIONAL(physx::PxReal, damping, 0)
+  LOAD_ATTR_OPTIONAL(physx::PxReal, friction, 0)
   LOAD_ATTR_END()
 };
 
@@ -528,7 +530,7 @@ struct Camera {
 };
 
 struct Sensor : DomBase {
-  enum Type { CAMERA, DEPTH, RAY } type;
+  enum Type { CAMERA, DEPTH, RAY, UNKNOWN } type;
   std::string name;
   std::unique_ptr<Origin> origin;
   std::unique_ptr<Camera> camera;
@@ -543,7 +545,7 @@ struct Sensor : DomBase {
 
     const char *type_ = elem.Attribute("type");
     if (!type_) {
-      spdlog::get("SAPIEN")->critical("Missing attribute [type] on <sensor>");
+      spdlog::get("SAPIEN")->critical("Missing attribute [type] on <sensor>, at line {}", elem.GetLineNum());
       throw std::runtime_error("Missing attribute [type] on <sensor>");
     }
     std::string type_string = type_;
@@ -554,7 +556,9 @@ struct Sensor : DomBase {
     } else if (type_string == "ray") {
       type = RAY;
     } else {
-      throw std::runtime_error("Unknown sensor type!");
+      type = UNKNOWN;
+      spdlog::get("SAPIEN")->warn("Sensor type " + type_string + " is not supported");
+      return;
     }
     auto pose = elem.FirstChildElement("pose");
     origin = std::make_unique<Origin>();
@@ -577,25 +581,25 @@ struct Sensor : DomBase {
     this->camera = std::make_unique<Camera>();
     auto camera = elem.FirstChildElement("camera");
     if (!camera) {
-      spdlog::get("SAPIEN")->critical("Missing <camera> child on color or depth camera sensor");
+      spdlog::get("SAPIEN")->critical("Missing <camera> child on color or depth camera sensor, at line {}", elem.GetLineNum());
       throw std::runtime_error("Missing <camera> child on color or depth camera sensor");
     }
     auto fovx = camera->FirstChildElement("horizontal_fov");
     auto fovy = camera->FirstChildElement("vertical_fov");
     if (!fovx && !fovy) {
-      spdlog::get("SAPIEN")->critical("Missing horizontal_fov/vertical_fov on camera");
+      spdlog::get("SAPIEN")->critical("Missing horizontal_fov/vertical_fov on camera, at line {}", elem.GetLineNum());
       throw std::runtime_error("Missing horizontal_fov/vertical_fov on camera");
     }
     auto clip = camera->FirstChildElement("clip");
     auto image = camera->FirstChildElement("image");
     if (!clip || !image) {
-      spdlog::get("SAPIEN")->critical("Missing <clip> or <image> on camera");
+      spdlog::get("SAPIEN")->critical("Missing <clip> or <image> on camera {}", elem.GetLineNum());
       throw std::runtime_error("Missing <clip> or <image> on camera");
     }
     auto near = clip->FirstChildElement("near");
     auto far = clip->FirstChildElement("far");
     if (!near || !far) {
-      spdlog::get("SAPIEN")->critical("Missing near/far on clip");
+      spdlog::get("SAPIEN")->critical("Missing near/far on clip {}", elem.GetLineNum());
       throw std::runtime_error("Missing near/far on clip");
     }
     float nearValue = std::atof(near->GetText());
@@ -607,7 +611,7 @@ struct Sensor : DomBase {
     auto width = image->FirstChildElement("width");
     auto height = image->FirstChildElement("height");
     if (!width || !height) {
-      spdlog::get("SAPIEN")->critical("Missing <width> or <height> on image");
+      spdlog::get("SAPIEN")->critical("Missing <width> or <height> on image {}", elem.GetLineNum());
       throw std::runtime_error("Missing <width> or <height> on image");
     }
     float widthValue = std::atoi(width->GetText());

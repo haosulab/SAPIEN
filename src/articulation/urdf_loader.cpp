@@ -56,7 +56,7 @@ struct LinkTreeNode {
 std::unique_ptr<SRDF::Robot> URDFLoader::loadSRDF(const std::string &filename) {
   XMLDocument doc;
   if (doc.LoadFile(filename.c_str())) {
-    std::cerr << "Error loading " << filename << std::endl;
+    spdlog::get("SAPIEN")->error("SRDF loading faild for {}", filename);
     return nullptr;
   }
   if (strcmp("robot", doc.RootElement()->Name()) == 0) {
@@ -193,29 +193,36 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
       // mass is specified
       const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin, scale);
 
-      Eigen::Matrix3f inertia;
-      inertia(0, 0) = currentInertia.ixx;
-      inertia(1, 1) = currentInertia.iyy;
-      inertia(2, 2) = currentInertia.izz;
-      inertia(0, 1) = currentInertia.ixy;
-      inertia(1, 0) = currentInertia.ixy;
-      inertia(0, 2) = currentInertia.ixz;
-      inertia(2, 0) = currentInertia.ixz;
-      inertia(1, 2) = currentInertia.iyz;
-      inertia(2, 1) = currentInertia.iyz;
+      PxVec3 eigs;
+      PxTransform tInertia2Inertial;
+      if (currentInertia.ixy == 0 && currentInertia.ixz == 0 && currentInertia.iyz == 0) {
+        tInertia2Inertial = PxTransform(PxVec3(0), PxIdentity);
+        eigs = {currentInertia.ixx, currentInertia.iyy, currentInertia.izz};
+      } else {
+        Eigen::Matrix3f inertia;
+        inertia(0, 0) = currentInertia.ixx;
+        inertia(1, 1) = currentInertia.iyy;
+        inertia(2, 2) = currentInertia.izz;
+        inertia(0, 1) = currentInertia.ixy;
+        inertia(1, 0) = currentInertia.ixy;
+        inertia(0, 2) = currentInertia.ixz;
+        inertia(2, 0) = currentInertia.ixz;
+        inertia(1, 2) = currentInertia.iyz;
+        inertia(2, 1) = currentInertia.iyz;
 
-      Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> es;
-      es.compute(inertia);
-      auto eigs = es.eigenvalues();
-      Eigen::Matrix3f m;
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> es;
+        es.compute(inertia);
+        eigs = {es.eigenvalues().x(), es.eigenvalues().y(), es.eigenvalues().z()};
+        Eigen::Matrix3f m;
 
-      auto eig_vecs = es.eigenvectors();
-      PxVec3 col0 = {eig_vecs(0, 0), eig_vecs(1, 0), eig_vecs(2, 0)};
-      PxVec3 col1 = {eig_vecs(0, 1), eig_vecs(1, 1), eig_vecs(2, 1)};
-      PxVec3 col2 = {eig_vecs(0, 2), eig_vecs(1, 2), eig_vecs(2, 2)};
-      PxMat33 mat = PxMat33(col0, col1, col2);
+        auto eig_vecs = es.eigenvectors();
+        PxVec3 col0 = {eig_vecs(0, 0), eig_vecs(1, 0), eig_vecs(2, 0)};
+        PxVec3 col1 = {eig_vecs(0, 1), eig_vecs(1, 1), eig_vecs(2, 1)};
+        PxVec3 col2 = {eig_vecs(0, 2), eig_vecs(1, 2), eig_vecs(2, 2)};
+        PxMat33 mat = PxMat33(col0, col1, col2);
 
-      const PxTransform tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
+        tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
+      }
 
       if (!tInertia2Inertial.isSane()) {
         printf("Got insane inertia-inertial pose!\n");
@@ -232,7 +239,7 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
       float scale3 = scale * scale * scale;
       currentLinkBuilder->setMassAndInertia(
           currentInertial.mass->value * scale3, tInertia2Link,
-          {scale3 * eigs.x(), scale3 * eigs.y(), scale * eigs.z()});
+          {scale3 * eigs.x, scale3 * eigs.y, scale * eigs.z});
     }
 
     // visual
@@ -413,7 +420,7 @@ SArticulationBase *URDFLoader::parseRobotDescription(const std::string &filename
     for (auto &sensor : gazebo->sensor_array) {
       switch (sensor->type) {
       case Sensor::Type::RAY:
-        std::cerr << "Ray Sensor not supported yet" << std::endl;
+      case Sensor::Type::UNKNOWN:
         break;
       case Sensor::Type::CAMERA:
       case Sensor::Type::DEPTH:
@@ -467,7 +474,7 @@ SArticulationBase *URDFLoader::commonLoad(const std::string &filename, PxMateria
   XMLDocument *doc;
   doc = new XMLDocument();
   if (doc->LoadFile(filename.c_str())) {
-    std::cerr << "Error loading " << filename << std::endl;
+    spdlog::get("SAPIEN")->error("Failed to open URDF file: {}", filename);
     return nullptr;
   }
   return parseRobotDescription(filename, doc, std::move(srdf), material, isKinematic);
@@ -629,29 +636,36 @@ std::unique_ptr<ArticulationBuilder> URDFLoader::parseRobotDescriptionAsArticula
       // mass is specified
       const PxTransform tInertial2Link = poseFromOrigin(*currentInertial.origin, scale);
 
-      Eigen::Matrix3f inertia;
-      inertia(0, 0) = currentInertia.ixx;
-      inertia(1, 1) = currentInertia.iyy;
-      inertia(2, 2) = currentInertia.izz;
-      inertia(0, 1) = currentInertia.ixy;
-      inertia(1, 0) = currentInertia.ixy;
-      inertia(0, 2) = currentInertia.ixz;
-      inertia(2, 0) = currentInertia.ixz;
-      inertia(1, 2) = currentInertia.iyz;
-      inertia(2, 1) = currentInertia.iyz;
+      PxVec3 eigs;
+      PxTransform tInertia2Inertial;
+      if (currentInertia.ixy == 0 && currentInertia.ixz == 0 && currentInertia.iyz == 0) {
+        tInertia2Inertial = PxTransform(PxVec3(0), PxIdentity);
+        eigs = {currentInertia.ixx, currentInertia.iyy, currentInertia.izz};
+      } else {
+        Eigen::Matrix3f inertia;
+        inertia(0, 0) = currentInertia.ixx;
+        inertia(1, 1) = currentInertia.iyy;
+        inertia(2, 2) = currentInertia.izz;
+        inertia(0, 1) = currentInertia.ixy;
+        inertia(1, 0) = currentInertia.ixy;
+        inertia(0, 2) = currentInertia.ixz;
+        inertia(2, 0) = currentInertia.ixz;
+        inertia(1, 2) = currentInertia.iyz;
+        inertia(2, 1) = currentInertia.iyz;
 
-      Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> es;
-      es.compute(inertia);
-      auto eigs = es.eigenvalues();
-      Eigen::Matrix3f m;
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> es;
+        es.compute(inertia);
+        eigs = {es.eigenvalues().x(), es.eigenvalues().y(), es.eigenvalues().z()};
+        Eigen::Matrix3f m;
 
-      auto eig_vecs = es.eigenvectors();
-      PxVec3 col0 = {eig_vecs(0, 0), eig_vecs(1, 0), eig_vecs(2, 0)};
-      PxVec3 col1 = {eig_vecs(0, 1), eig_vecs(1, 1), eig_vecs(2, 1)};
-      PxVec3 col2 = {eig_vecs(0, 2), eig_vecs(1, 2), eig_vecs(2, 2)};
-      PxMat33 mat = PxMat33(col0, col1, col2);
+        auto eig_vecs = es.eigenvectors();
+        PxVec3 col0 = {eig_vecs(0, 0), eig_vecs(1, 0), eig_vecs(2, 0)};
+        PxVec3 col1 = {eig_vecs(0, 1), eig_vecs(1, 1), eig_vecs(2, 1)};
+        PxVec3 col2 = {eig_vecs(0, 2), eig_vecs(1, 2), eig_vecs(2, 2)};
+        PxMat33 mat = PxMat33(col0, col1, col2);
 
-      const PxTransform tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
+        tInertia2Inertial = PxTransform(PxVec3(0), PxQuat(mat).getNormalized());
+      }
 
       if (!tInertia2Inertial.isSane()) {
         printf("Got insane inertia-inertial pose!\n");
@@ -666,9 +680,8 @@ std::unique_ptr<ArticulationBuilder> URDFLoader::parseRobotDescriptionAsArticula
       }
 
       float scale3 = scale * scale * scale;
-      currentLinkBuilder->setMassAndInertia(
-          currentInertial.mass->value * scale3, tInertia2Link,
-          {scale3 * eigs.x(), scale3 * eigs.y(), scale * eigs.z()});
+      currentLinkBuilder->setMassAndInertia(currentInertial.mass->value * scale3, tInertia2Link,
+                                            {scale3 * eigs.x, scale3 * eigs.y, scale * eigs.z});
     }
 
     // visual
