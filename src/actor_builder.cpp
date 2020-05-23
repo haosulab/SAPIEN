@@ -273,6 +273,9 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
                                 std::vector<physx_id_t> &renderIds) const {
 
   auto rScene = mScene->getRendererScene();
+  if (!rScene) {
+    return;
+  }
   for (auto &r : mVisualRecord) {
     Renderer::IPxrRigidbody *body;
     switch (r.type) {
@@ -331,27 +334,31 @@ void ActorBuilder::resetCollisionGroup() {
 
 void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> &collisionBodies,
                                          std::vector<PxShape *> &shapes) const {
+  auto rendererScene = mScene->getRendererScene();
+  if (!rendererScene) {
+    return;
+  }
   for (auto shape : shapes) {
     Renderer::IPxrRigidbody *cBody;
     switch (shape->getGeometryType()) {
     case PxGeometryType::eBOX: {
       PxBoxGeometry geom;
       shape->getBoxGeometry(geom);
-      cBody = mScene->mRendererScene->addRigidbody(PxGeometryType::eBOX, geom.halfExtents,
+      cBody = rendererScene->addRigidbody(PxGeometryType::eBOX, geom.halfExtents,
                                                    PxVec3{0, 0, 1});
       break;
     }
     case PxGeometryType::eSPHERE: {
       PxSphereGeometry geom;
       shape->getSphereGeometry(geom);
-      cBody = mScene->mRendererScene->addRigidbody(
+      cBody = rendererScene->addRigidbody(
           PxGeometryType::eSPHERE, {geom.radius, geom.radius, geom.radius}, PxVec3{0, 0, 1});
       break;
     }
     case PxGeometryType::eCAPSULE: {
       PxCapsuleGeometry geom;
       shape->getCapsuleGeometry(geom);
-      cBody = mScene->mRendererScene->addRigidbody(
+      cBody = rendererScene->addRigidbody(
           PxGeometryType::eCAPSULE, {geom.halfHeight, geom.radius, geom.radius}, PxVec3{0, 0, 1});
       break;
     }
@@ -386,7 +393,7 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
 
         offset += face.mNbVerts;
       }
-      cBody = mScene->mRendererScene->addRigidbody(vertices, normals, triangles, geom.scale.scale,
+      cBody = rendererScene->addRigidbody(vertices, normals, triangles, geom.scale.scale,
                                                    PxVec3{0, 1, 0});
       break;
     }
