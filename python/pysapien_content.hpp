@@ -23,6 +23,10 @@
 #include "articulation/sapien_link.h"
 #include "articulation/urdf_loader.h"
 
+#ifdef _USE_PINOCCHIO
+#include "articulation/pinocchio_model.h"
+#endif
+
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 
@@ -116,6 +120,10 @@ void buildSapien(py::module &m) {
   auto PyLinkBuilder = py::class_<LinkBuilder, ActorBuilder>(m, "LinkBuilder");
   auto PyJointRecord = py::class_<LinkBuilder::JointRecord>(m, "JointRecord");
   auto PyArticulationBuilder = py::class_<ArticulationBuilder>(m, "ArticulationBuilder");
+
+#ifdef _USE_PINOCCHIO
+  auto PyPinocchioModel = py::class_<PinocchioModel>(m, "PinocchioModel");
+#endif
 
   //======== Internal ========//
   PySolverType.value("PGS", PxSolverType::ePGS).value("TGS", PxSolverType::eTGS).export_values();
@@ -766,7 +774,11 @@ void buildSapien(py::module &m) {
       .def("get_pose", &SArticulationBase::getRootPose, "same as get_root_pose")
 
       .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"))
-      .def("set_pose", &SArticulationBase::setRootPose, py::arg("pose"), "same as set_root_pose");
+      .def("set_pose", &SArticulationBase::setRootPose, py::arg("pose"), "same as set_root_pose")
+#ifdef _USE_PINOCCHIO
+      .def("create_pinocchio_model", &SArticulationBase::createPinocchioModel)
+#endif
+      ;
 
   PyArticulationDrivable
       .def("get_drive_target",
@@ -1114,4 +1126,26 @@ void buildSapien(py::module &m) {
            py::arg("material") = (physx::PxMaterial *)nullptr)
       .def("load_file_as_articulation_builder", &URDF::URDFLoader::loadFileAsArticulationBuilder,
            py::arg("filename"), py::arg("material") = nullptr);
+
+#ifdef _USE_PINOCCHIO
+  PyPinocchioModel
+      .def("compute_forward_kinematics", &PinocchioModel::computeForwardKinematics,
+           py::arg("qpos"))
+      .def("get_link_pose", &PinocchioModel::getLinkPose, py::arg("link_index"))
+      .def("compute_inverse_kinematics", &PinocchioModel::computeInverseKinematics,
+           py::arg("link_index"), py::arg("pose"), py::arg("eps") = 1e-4,
+           py::arg("max_iterations") = 1000, py::arg("dt") = 0.1, py::arg("damp") = 1e-6)
+      .def("compute_forward_dynamics", &PinocchioModel::computeForwardDynamics, py::arg("qpos"),
+           py::arg("qvel"), py::arg("qf"))
+      .def("compute_inverse_dynamics", &PinocchioModel::computeForwardDynamics, py::arg("qpos"),
+           py::arg("qvel"), py::arg("qacc"))
+      .def("compute_generalized_mass_matrix", &PinocchioModel::computeGeneralizedMassMatrix,
+           py::arg("qpos"))
+      .def("compute_coriolis_matrix", &PinocchioModel::computeCoriolisMatrix, py::arg("qpos"),
+           py::arg("qvel"))
+
+      .def("compute_full_jacobian", &PinocchioModel::computeFullJacobian, py::arg("qpos"))
+      .def("get_link_jacobian", &PinocchioModel::getLinkJacobian, py::arg("link_index"),
+           py::arg("local") = false);
+#endif
 }

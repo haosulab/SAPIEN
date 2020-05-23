@@ -3,6 +3,7 @@
 #include <pinocchio/algorithm/aba.hpp>
 #include <pinocchio/algorithm/crba.hpp>
 #include <pinocchio/algorithm/rnea.hpp>
+#include <pinocchio/algorithm/joint-configuration.hpp>
 
 namespace sapien {
 std::unique_ptr<PinocchioModel> PinocchioModel::fromURDFXML(std::string const &urdf) {
@@ -42,6 +43,10 @@ void PinocchioModel::setLinkOrder(std::vector<std::string> names) {
     }
     linkIdx2FrameIdx.push_back(i);
   }
+}
+
+Eigen::MatrixXd PinocchioModel::getRandomConfiguration() {
+  return indexS2P.transpose() * pinocchio::randomConfiguration(model);
 }
 
 void PinocchioModel::computeForwardKinematics(const Eigen::VectorXd &qpos) {
@@ -106,6 +111,49 @@ Eigen::VectorXd PinocchioModel::computeForwardDynamics(const Eigen::VectorXd &qp
                                                        const Eigen::VectorXd &qf) {
   return indexS2P.transpose() *
          pinocchio::aba(model, data, indexS2P * qpos, indexS2P * qvel, indexS2P * qf);
+}
+
+std::tuple<Eigen::VectorXd, bool, Eigen::Matrix<double, 6, 1>>
+PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform const &pose,
+                                         double eps, int maxIter, double dt, double damp) {
+  assert(index < linkIdx2FrameIdx.size());
+  auto frameIdx = linkIdx2FrameIdx[linkIdx];
+  auto jointIdx = model.frames[frameIdx].parent;
+  pinocchio::SE3 l2w;
+  l2w.translation({pose.p.x, pose.p.y, pose.p.z});
+  l2w.rotation(Eigen::Quaterniond(pose.q.w, pose.q.x, pose.q.y, pose.q.z).toRotationMatrix());
+  auto l2j = model.frames[frameIdx].placement;
+  pinocchio::SE3 oMdes = l2w * l2j.inverse();
+
+  Eigen::VectorXd q = pinocchio::neutral(model);
+
+  pinocchio::Data::Matrix6x J(6, model.nv);
+  J.setZero();
+  bool success = false;
+  typedef Eigen::Matrix<double, 6, 1> Vector6d;
+  Vector6d err;
+  Eigen::VectorXd v(model.nv);
+
+  for (int i = 0;; i++) {
+    pinocchio::forwardKinematics(model, data, q);
+    const pinocchio::SE3 dMi = oMdes.actInv(data.oMi[jointIdx]);
+    err = pinocchio::log6(dMi).toVector();
+    if (err.norm() < eps) {
+      success = true;
+      break;
+    }
+    if (i >= maxIter) {
+      success = false;
+      break;
+    }
+    pinocchio::computeJointJacobian(model, data, q, jointIdx, J);
+    pinocchio::Data::Matrix6 JJt;
+    JJt.noalias() = J * J.transpose();
+    JJt.diagonal().array() += damp;
+    v.noalias() = -J.transpose() * JJt.ldlt().solve(err);
+    q = pinocchio::integrate(model, q, v * dt);
+  }
+  return {q, success, err};
 }
 
 } // namespace sapien

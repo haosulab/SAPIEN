@@ -36,6 +36,9 @@ public:
   void setJointOrder(std::vector<std::string> names);
   void setLinkOrder(std::vector<std::string> names);
 
+  /** generate a random qpos */
+  Eigen::MatrixXd getRandomConfiguration();
+
   /** compute and cache the forward dynamics */
   void computeForwardKinematics(const Eigen::VectorXd &qpos);
 
@@ -81,6 +84,15 @@ public:
    */
   Eigen::VectorXd computeForwardDynamics(const Eigen::VectorXd &qpos, const Eigen::VectorXd &qvel,
                                          const Eigen::VectorXd &qf);
+
+  /** Numerical IK clik algorithm
+   *  computes the numerical IK for a given link
+   *  https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_i-inverse-kinematics.html
+   *
+   */
+  std::tuple<Eigen::VectorXd, bool, Eigen::Matrix<double, 6, 1>>
+  computeInverseKinematics(uint32_t linkIdx, physx::PxTransform const &pose, double eps = 1e-4,
+                           int maxIter = 1000, double dt = 1e-1, double damp = 1e-6);
 };
 
 }; // namespace sapien

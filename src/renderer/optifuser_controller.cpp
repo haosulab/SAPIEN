@@ -734,6 +734,8 @@ void OptifuserController::render() {
                 glm::eulerAngles(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z)) /
                 glm::pi<float>() * 180.f;
             ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles.x, angles.y, angles.z);
+            ImGui::Text("Quat (wxyz): %.2f %.2f %.2f %.2f", pose.q.w, pose.q.x, pose.q.y,
+                        pose.q.z);
 
             ImGui::Text("col1: #%08x, col2: #%08x", mSelectedActor->getCollisionGroup1(),
                         mSelectedActor->getCollisionGroup2());
@@ -885,6 +887,8 @@ void OptifuserController::render() {
                         glm::eulerAngles(glm::quat(pose1.q.w, pose1.q.x, pose1.q.y, pose1.q.z)) /
                         glm::pi<float>() * 180.f;
                     ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles1.x, angles1.y, angles1.z);
+                    ImGui::Text("Quat (wxyz): %.2f %.2f %.2f %.2f", pose1.q.w, pose1.q.x,
+                                pose1.q.y, pose1.q.z);
                   }
                   ImGui::NewLine();
 
@@ -904,6 +908,8 @@ void OptifuserController::render() {
                         glm::eulerAngles(glm::quat(pose2.q.w, pose2.q.x, pose2.q.y, pose2.q.z)) /
                         glm::pi<float>() * 280.f;
                     ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles2.x, angles2.y, angles2.z);
+                    ImGui::Text("Quat (wxyz): %.2f %.2f %.2f %.2f", pose2.q.w, pose2.q.x,
+                                pose2.q.y, pose2.q.z);
                   }
                   ImGui::NewLine();
 
@@ -917,6 +923,8 @@ void OptifuserController::render() {
                                                                   target.q.y, target.q.z)) /
                                        glm::pi<float>() * 180.f;
                     ImGui::Text("Euler (degree): %.2f %.2f %.2f", angles.x, angles.y, angles.z);
+                    ImGui::Text("Quat (wxyz): %.2f %.2f %.2f %.2f", target.q.w, target.q.x,
+                                target.q.y, target.q.z);
                     ImGui::Text("Linear Velocity: %.2f %.2f %.2f", v.x, v.y, v.z);
                     ImGui::Text("Angular Velocity: %.2f %.2f %.2f", w.x, w.y, w.z);
 

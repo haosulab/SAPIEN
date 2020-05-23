@@ -1,42 +1,41 @@
 import sapien.core as sapien
 import numpy as np
 from transforms3d.quaternions import axangle2quat as aa
+from sapien.core import SceneConfig, Pose
 
 sim = sapien.Engine()
 renderer = sapien.OptifuserRenderer()
 sim.set_renderer(renderer)
 render_controller = sapien.OptifuserController(renderer)
 
-render_controller.show_window()
+scene = sim.create_scene(config=SceneConfig())
+scene.add_ground(0)
+scene.set_timestep(1 / 100)
 
-s0 = sim.create_scene()
-s0.add_ground(-1)
-s0.set_timestep(1 / 240)
+scene.set_ambient_light([0.5, 0.5, 0.5])
+scene.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
 
-s0.set_ambient_light([0.5, 0.5, 0.5])
-s0.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
-
-loader = s0.create_urdf_loader()
-loader.collision_is_visual = True
+loader = scene.create_urdf_loader()
 loader.fix_root_link = 1
-robot = loader.load("/home/fx/source/URDFPacker/test_env/urdf_export/export.urdf")
+robot = loader.load_kinematic("../assets_local/robot/panda.urdf")
+model = robot.create_pinocchio_model()
 
+targetPose = Pose([-0.01, -0.39, 0.96], [0.21, 0.73, 0.41, 0.5])
+result, success, error = model.compute_inverse_kinematics(9, targetPose)
+print('success: ', success)
+print('error: ', error)
+
+robot.set_qpos(result)
+
+render_controller.show_window()
 render_controller.set_camera_position(-5, 0, 0)
-render_controller.set_current_scene(s0)
+render_controller.set_current_scene(scene)
 
 steps = 0
 while not render_controller.should_quit:
-    s0.update_render()
+    scene.update_render()
     for i in range(4):
-        s0.step()
+        scene.step()
         steps += 1
     render_controller.render()
-
-    # if steps > 10000:
-    #     for link in chair.get_base_links():
-    #         name = link.get_name()
-    #         pose = link.get_pose()
-    #         print(name, pose)
-    #     break
-
-s0 = None
+# scene = None
