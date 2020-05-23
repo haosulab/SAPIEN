@@ -213,8 +213,10 @@ void OptifuserController::focus(SActorBase *actor) {
 void OptifuserController::select(SActorBase *actor) {
   if (actor != mSelectedActor) {
     if (mSelectedActor) {
-      for (auto b : mSelectedActor->getRenderBodies()) {
-        b->setRenderMode(0);
+      if (!mSelectedActor->isRenderingCollision()) {
+        for (auto b : mSelectedActor->getRenderBodies()) {
+          b->setRenderMode(0);
+        }
       }
     }
     if (mSelectedActor && mSelectedActor != mCurrentFocus) {
@@ -223,8 +225,10 @@ void OptifuserController::select(SActorBase *actor) {
     if (actor) {
       actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
       if (transparentSelection) {
-        for (auto b : actor->getRenderBodies()) {
-          b->setRenderMode(2);
+        if (!mSelectedActor->isRenderingCollision()) {
+          for (auto b : actor->getRenderBodies()) {
+            b->setRenderMode(2);
+          }
         }
       }
     }
@@ -434,6 +438,7 @@ void OptifuserController::render() {
       case EActorType::DYNAMIC:
       case EActorType::KINEMATIC:
       case EActorType::ARTICULATION_LINK:
+      case EActorType::KINEMATIC_ARTICULATION_LINK:
         cmPose = actor->getPxActor()->getGlobalPose() *
                  static_cast<PxRigidBody *>(actor->getPxActor())->getCMassLocalPose();
         break;
@@ -953,6 +958,17 @@ void OptifuserController::render() {
             }
 
             if (ImGui::CollapsingHeader("Articulation", ImGuiTreeNodeFlags_DefaultOpen)) {
+              if (ImGui::Button("Show collisions")) {
+                for (auto l : articulation->getBaseLinks()) {
+                  l->renderCollisionBodies(true);
+                }
+              }
+              ImGui::SameLine();
+              if (ImGui::Button("Hide collisions")) {
+                for (auto l : articulation->getBaseLinks()) {
+                  l->renderCollisionBodies(false);
+                }
+              }
               ImGui::Text("name: %s", link->getArticulation()->getName().c_str());
               ImGui::Text("dof: %ld", jointValues.size());
               if (articulation->getType() == EArticulationType::DYNAMIC) {
