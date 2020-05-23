@@ -6,6 +6,10 @@
 #include <string>
 #include <vector>
 
+#ifdef _USE_PINOCCHIO
+#include "pinocchio_model.h"
+#endif
+
 namespace sapien {
 class SLinkBase;
 class SJointBase;
@@ -50,6 +54,10 @@ public:
   virtual ~SArticulationBase() = default;
 
   std::string exportKinematicsChainAsURDF(bool fixRoot);
+
+  #ifdef _USE_PINOCCHIO
+  std::unique_ptr<PinocchioModel> createPinocchioModel();
+  #endif
 };
 
 class SArticulationDrivable : public SArticulationBase {

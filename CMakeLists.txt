@@ -8,6 +8,8 @@ set(PROFILE FALSE CACHE BOOL "Whether to use Profiler")
 
 set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
 
+set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
+
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif ()
@@ -51,6 +53,15 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 else ()
     link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release"
             "3rd_party/optifuser/build/lib")
+endif ()
+
+if (${BUILD_WITH_PINOCCHIO_SUPPORT})
+    find_package(Boost COMPONENTS system REQUIRED)
+    find_package(pinocchio REQUIRED)
+    set(PINOCCHIO_LIBRARY ${pinocchio_LIBRARIES} ${Boost_LIBRARIES} urdfdom_model)
+    add_definitions(-DPINOCCHIO_URDFDOM_TYPEDEF_SHARED_PTR)
+    add_definitions(-DPINOCCHIO_WITH_URDFDOM)
+    add_definitions(-D_USE_PINOCCHIO)
 endif ()
 
 ## include headers inside the project
@@ -135,7 +146,8 @@ if (MACOSX)
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
-            tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY})
+            tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
+            ${PINOCCHIO_LIBRARY})
 else ()
     target_link_libraries(sapien -Wl,--start-group
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -144,7 +156,8 @@ else ()
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
-            stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY})
+            stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
+            ${PINOCCHIO_LIBRARY})
 endif ()
 
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
@@ -163,7 +176,7 @@ target_link_libraries(manual_actor sapien)
 add_executable(manual_articulation manualtest/articulation.cpp)
 target_link_libraries(manual_articulation sapien)
 add_executable(manual_urdf manualtest/urdf.cpp)
-target_link_libraries(manual_urdf sapien)
+target_link_libraries(manual_urdf sapien ${PINOCCHIO_LIBRARY})
 add_executable(manual_kinematics manualtest/kinematics.cpp)
 target_link_libraries(manual_kinematics sapien)
 

@@ -15,15 +15,18 @@ static std::string exportLink(SLinkBase *link) {
   PxVec3 inertia = link->getInertia();
   PxTransform massPose = link->getCMassLocalPose();
 
-  auto angles = Eigen::Quaternionf(massPose.q.w, massPose.q.x, massPose.q.y, massPose.q.z)
-                    .toRotationMatrix()
-                    .eulerAngles(0, 1, 2);
+  Eigen::Quaternionf eq;
+  eq.w() = massPose.q.w;
+  eq.x() = massPose.q.x;
+  eq.y() = massPose.q.y;
+  eq.z() = massPose.q.z;
+  auto angles = eq.toRotationMatrix().eulerAngles(2, 1, 0);
 
   ss << "<link name=\"link_" << link->getIndex() << "\">";
   ss << "<inertial>";
 
   ss << "<origin xyz=\"" << massPose.p.x << " " << massPose.p.y << " " << massPose.p.z
-     << "\" rpy=\" " << angles[0] << " " << angles[1] << " " << angles[2] << "\" />";
+     << "\" rpy=\" " << angles[2] << " " << angles[1] << " " << angles[0] << "\" />";
 
   ss << "<mass value=\"" << mass << "\" />";
 
@@ -65,34 +68,52 @@ static std::string exportJoint(SJointBase *joint, bool rootFixed) {
   default:
     throw std::runtime_error("unknown joint type");
   }
-  
+
   PxTransform j2p = joint->getParentPose();
-  PxTransform j2c = joint->getChildPose();
-  PxTransform c2p = j2p * j2c.getInverse();
-  PxVec3 jxInC = j2c.q.rotate({1, 0, 0});
+  // PxTransform j2c = joint->getChildPose();
+  PxTransform c2j = joint->getChildPose().getInverse();
+  // PxTransform c2p = j2p * j2c.getInverse();
+  // PxVec3 jxInC = j2c.q.rotate({1, 0, 0});
 
-  auto angles = Eigen::Quaternionf(c2p.q.w, c2p.q.x, c2p.q.y, c2p.q.z)
-                .toRotationMatrix()
-                .eulerAngles(0, 1, 2);
+  Eigen::Quaternionf eq;
+  eq.w() = j2p.q.w;
+  eq.x() = j2p.q.x;
+  eq.y() = j2p.q.y;
+  eq.z() = j2p.q.z;
+  auto angles = eq.toRotationMatrix().eulerAngles(2, 1, 0);
 
+  // dummy link is the joint frame
+  ss << "<link name=\"link_dummy_" << joint->getChildLink()->getIndex() << "\" />";
+
+  // joint that connects parent with dummy
   ss << "<joint name=\"" << name << "\" type=\"" << type << "\">";
-
-  ss << "<origin xyz=\""
-     << c2p.p.x << " " << c2p.p.y << " " << c2p.p.z
-     << "\" rpy=\""
-     << angles[0] << " " << angles[1] << " " << angles[2]
-     << "\" />";
-
-  ss << "<axis xyz=\"" << jxInC.x << " " << jxInC.y << " " << jxInC.z <<  "\" />";
-
+  ss << "<origin xyz=\"" << j2p.p.x << " " << j2p.p.y << " " << j2p.p.z << "\" rpy=\"" << angles[2]
+     << " " << angles[1] << " " << angles[0] << "\" />";
+  ss << "<axis xyz=\"1 0 0\" />";
   ss << "<parent link=\"link_" << joint->getParentLink()->getIndex() << "\" />";
-  ss << "<child link=\"link_" << joint->getChildLink()->getIndex() << "\" />";
+  ss << "<child link=\"link_dummy_" << joint->getChildLink()->getIndex() << "\" />";
   if (type == "prismatic" || type == "revolute") {
-    ss << "<limit effort=\"0\" velocity=\"0\" lower=\""
-       << joint->getLimits()[0][0] << "\" upper=\""
-       << joint->getLimits()[0][1] << "\" />";
+    ss << "<limit effort=\"0\" velocity=\"0\" lower=\"" << joint->getLimits()[0][0]
+       << "\" upper=\"" << joint->getLimits()[0][1] << "\" />";
   }
   ss << "</joint>";
+
+  // fixed joint that connects dummy and child
+  ss << "<joint name=\"joint_dummy_" << joint->getChildLink()->getIndex() << "\" type=\"fixed\">";
+
+  eq.w() = c2j.q.w;
+  eq.x() = c2j.q.x;
+  eq.y() = c2j.q.y;
+  eq.z() = c2j.q.z;
+  angles = eq.toRotationMatrix().eulerAngles(2, 1, 0);
+
+  ss << "<origin xyz=\"" << c2j.p.x << " " << c2j.p.y << " " << c2j.p.z << "\" rpy=\"" << angles[2]
+     << " " << angles[1] << " " << angles[0] << "\" />";
+  ss << "<axis xyz=\"0 0 0\" />";
+  ss << "<parent link=\"link_dummy_" << joint->getChildLink()->getIndex() << "\" />";
+  ss << "<child link=\"link_" << joint->getChildLink()->getIndex() << "\" />";
+  ss << "</joint>";
+
   return ss.str();
 }
 
@@ -112,5 +133,24 @@ std::string SArticulationBase::exportKinematicsChainAsURDF(bool fixRoot) {
   output += "</robot>";
   return output;
 }
+
+#ifdef _USE_PINOCCHIO
+std::unique_ptr<PinocchioModel> SArticulationBase::createPinocchioModel() {
+  auto pm = PinocchioModel::fromURDFXML(exportKinematicsChainAsURDF(true));
+  std::vector<std::string> jointNames;
+  std::vector<std::string> linkNames;
+  for (auto j : getBaseJoints()) {
+    if (j->getDof() > 0) {
+      jointNames.push_back("joint_" + std::to_string(j->getChildLink()->getIndex()));
+    }
+  }
+  for (auto l : getBaseLinks()) {
+    linkNames.push_back("link_" + std::to_string(l->getIndex()));
+  }
+  pm->setJointOrder(jointNames);
+  pm->setLinkOrder(linkNames);
+  return pm;
+}
+#endif
 
 } // namespace sapien
