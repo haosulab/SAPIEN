@@ -4,8 +4,17 @@
 #include <rclcpp/rclcpp.hpp>
 #include <spdlog/spdlog.h>
 
-namespace fs = std::experimental::filesystem;
+#define SET_PARAMETERS(name, value)                                                               \
+  {                                                                                               \
+    if (node->has_parameter(name)) {                                                              \
+      rclcpp::Parameter param(name, value);                                                       \
+      node->set_parameter(param);                                                                 \
+    } else {                                                                                      \
+      node->declare_parameter(name, rclcpp::ParameterValue(value));                               \
+    }                                                                                             \
+  }
 
+namespace fs = std::experimental::filesystem;
 namespace sapien::ros2 {
 struct MotionPlan {
   std::vector<std::string> jointNames;
@@ -37,19 +46,16 @@ struct MotionPlanningConfig {
 
   void publishPlannerOption(rclcpp::Node::SharedPtr &node) const {
     const std::string ns("default_planner_options.");
-    node->declare_parameter(ns + "planning_attempts", rclcpp::ParameterValue(planning_attempts));
-    node->declare_parameter(ns + "max_velocity_scaling_factor",
-                            rclcpp::ParameterValue(max_velocity_scaling_factor));
-    node->declare_parameter(ns + "max_acceleration_scaling_factor",
-                            rclcpp::ParameterValue(max_acceleration_scaling_factor));
+    SET_PARAMETERS(ns + "planning_attempts", planning_attempts);
+    SET_PARAMETERS(ns + "max_velocity_scaling_factor", max_velocity_scaling_factor);
+    SET_PARAMETERS(ns + "max_acceleration_scaling_factor", max_acceleration_scaling_factor);
   }
 
   void publishGeneralOMPLConfig(rclcpp::Node::SharedPtr &node) const {
     const std::string ns("ompl.");
-    node->declare_parameter(ns + "planning_plugin", rclcpp::ParameterValue(planning_plugin));
-    node->declare_parameter(ns + "request_adapters", rclcpp::ParameterValue(request_adapter));
-    node->declare_parameter(ns + "start_state_max_bounds_error",
-                            rclcpp::ParameterValue(start_state_max_bounds_error));
+    SET_PARAMETERS(ns + "planning_plugin", planning_plugin);
+    SET_PARAMETERS(ns + "request_adapters", request_adapter);
+    SET_PARAMETERS(ns + "start_state_max_bounds_error", start_state_max_bounds_error);
   }
 
   bool publishDefaultOMPLPlannerConfig(rclcpp::Node::SharedPtr &node,
@@ -91,7 +97,12 @@ struct MotionPlanningConfig {
         std::string finalParamString = "ompl." + nodeNameString;
         finalParamString += ".";
         finalParamString += paraName;
-        node->declare_parameter(finalParamString, parameterValue);
+        if (node->has_parameter(finalParamString)) {
+          rclcpp::Parameter parameter(finalParamString, parameterValue);
+          node->set_parameter(parameter);
+        } else {
+          node->declare_parameter(finalParamString, parameterValue);
+        }
       }
     }
     return true;

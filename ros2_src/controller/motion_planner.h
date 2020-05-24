@@ -6,7 +6,7 @@
 #include <moveit/moveit_cpp/planning_component.h>
 #include <moveit/robot_state/conversions.h>
 
-#include <controller/motion_planning_config.hpp>
+#include <manager/motion_planning_config.hpp>
 
 namespace sapien::ros2 {
 using namespace moveit::planning_interface;
@@ -43,10 +43,8 @@ public:
       logger->info(pipelineName);
     }
 
-    mComponent = std::make_unique<PlanningComponent>(PlanningComponent(groupName, mMoveItCpp));
+    mComponent = std::make_unique<PlanningComponent>(groupName, mMoveItCpp);
     mJointModelGroup = mMoveItCpp->getRobotModel()->getJointModelGroup(groupName);
-    auto state = mComponent->getStartState();
-    std::cout << state->getVariablePositions();
     mEEName = mJointModelGroup->getLinkModelNames().back();
     mBaseName = mJointModelGroup->getLinkModelNames()[0];
   };
