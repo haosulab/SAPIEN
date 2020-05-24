@@ -225,7 +225,7 @@ void OptifuserController::select(SActorBase *actor) {
     if (actor) {
       actor->EventEmitter<EventActorPreDestroy>::registerListener(*this);
       if (transparentSelection) {
-        if (!mSelectedActor->isRenderingCollision()) {
+        if (!actor->isRenderingCollision()) {
           for (auto b : actor->getRenderBodies()) {
             b->setRenderMode(2);
           }
