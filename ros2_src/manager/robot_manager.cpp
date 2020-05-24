@@ -22,6 +22,7 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
 }
 
 void RobotManager::init() {
+  auto logger = spdlog::get("SAPIEN_ROS2");
   // Load robot description from remote node, do not use node to access parameters
   // SAPIEN convention: the remote node name must be "$/{robotName}_config"
   // Note that you must add a "/" before the name of the node, otherwise it do not exist
@@ -29,14 +30,14 @@ void RobotManager::init() {
   const std::string robotSRDFName = "robot_description_semantic";
   const std::string robotConfigNodeName = "/" + std::string(mNode->get_name()) + "_config";
 
-//  rclcpp::SyncParametersClient paramClient(mNode.get(), robotConfigNodeName);
-//  while (!paramClient.wait_for_service(1s)) {
-//    if (!rclcpp::ok()) {
-//      RCLCPP_ERROR(mNode->get_logger(), "Interrupted while waiting for the service. Exiting.");
-//      rclcpp::shutdown();
-//    }
-//    RCLCPP_INFO(mNode->get_logger(), "service not available, waiting again...");
-//  }
+  //  rclcpp::SyncParametersClient paramClient(mNode.get(), robotConfigNodeName);
+  //  while (!paramClient.wait_for_service(1s)) {
+  //    if (!rclcpp::ok()) {
+  //      RCLCPP_ERROR(mNode->get_logger(), "Interrupted while waiting for the service. Exiting.");
+  //      rclcpp::shutdown();
+  //    }
+  //    RCLCPP_INFO(mNode->get_logger(), "service not available, waiting again...");
+  //  }
 
   //  if (paramClient.has_parameter(robotURDFName) && paramClient.has_parameter(robotSRDFName)) {
   //    // Remapping config parameter to current node and load robot model
@@ -55,23 +56,22 @@ void RobotManager::init() {
     // Load robot and robot state
     mRobotLoader = std::make_unique<robot_model_loader::RobotModelLoader>(mNode);
     mRobotModel = mRobotLoader->getModel();
-    RCLCPP_INFO(mNode->get_logger(), "Load ROS robot model %s, base frame: %s",
-                robotURDFName.c_str(), mRobotModel->getModelFrame().c_str());
+    logger->info("Load ROS robot model {}, base frame: {}", robotURDFName,
+                 mRobotModel->getModelFrame());
     mRobotState = std::make_unique<robot_state::RobotState>(mRobotModel);
 
     // Build up index for transformation from simulation to robot state
     auto variableNames = mRobotState->getVariableNames();
     std::vector<std::string> jointName = mJointStates->name;
     if (variableNames.size() != mJointNum) {
-      RCLCPP_ERROR(mNode->get_logger(), "Robot State has different dof from robot articulation");
+      logger->error("Robot State has different dof from robot articulation");
       exit(0);
     }
     for (auto &variableName : variableNames) {
       auto iter = std::find(jointName.begin(), jointName.end(), variableName);
       if (iter == jointName.end()) {
-        RCLCPP_ERROR(mNode->get_logger(),
-                     "Robot State variable name %s not found in articulation joint names",
-                     variableName.c_str());
+        logger->error("Robot State variable name {} not found in articulation joint names",
+                      variableName);
         exit(0);
       }
       uint32_t index = iter - jointName.begin();
@@ -79,10 +79,8 @@ void RobotManager::init() {
     }
     mLoadRobot = true;
   } else {
-    RCLCPP_WARN(mNode->get_logger(),
-                "No parameter %s found, inverse kinematics and motion planning features will "
-                "be disabled!",
-                robotURDFName.c_str());
+    logger->warn("No parameter %s found for ROS2, building robot manager fail");
+    logger->warn("Inverse kinematics and motion planning features will be disabled!");
     mLoadRobot = false;
   }
 }
@@ -120,6 +118,7 @@ void RobotManager::updateStates(const std::vector<float> &jointPosition,
     robotStateVariable[i] = double(jointPosition[mJointIndex[i]]);
   }
   mRobotState->setVariablePositions(robotStateVariable);
+  mRobotState->update();
 }
 void RobotManager::step(bool timeStepChange, float newTimeStep) {
   updateStates(mWrapper->mJointPositions.read(), mWrapper->mJointVelocities.read());
@@ -139,10 +138,10 @@ void RobotManager::step(bool timeStepChange, float newTimeStep) {
 
 // Create controller and publisher
 void RobotManager::createJointPublisher(double pubFrequency) {
+  auto logger = spdlog::get("SAPIEN_ROS2");
   if (mJointPublisher) {
-    RCLCPP_WARN(mNode->get_logger(),
-                "Joint Pub Node has already been created for this Robot Manager");
-    RCLCPP_WARN(mNode->get_logger(), "Robot Manager will use the original joint state pub node");
+    logger->warn("Joint Pub Node has already been created for this Robot Manager");
+    logger->warn("Robot Manager will use the original joint state pub node");
     return;
   }
 
@@ -162,9 +161,9 @@ RobotManager::buildJointVelocityController(const std::vector<std::string> &joint
 CartesianVelocityController *
 RobotManager::buildCartesianVelocityController(const std::string &groupName,
                                                const std::string &serviceName, double latency) {
+  auto logger = spdlog::get("SAPIEN_ROS2");
   if (!mLoadRobot) {
-    RCLCPP_ERROR(mNode->get_logger(),
-                 "No robot load from parameter server, fail to build cartesian controller!");
+    logger->error("No robot load from parameter server, fail to build cartesian controller!");
     assert(mLoadRobot);
   }
   auto controller = std::make_shared<CartesianVelocityController>(
