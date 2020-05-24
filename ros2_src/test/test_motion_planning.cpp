@@ -1,3 +1,4 @@
+#include "articulation/sapien_link.h"
 #include "controller/sapien_controllable_articulation.h"
 #include "manager/robot_descriptor.h"
 #include "manager/robot_loader.h"
@@ -11,6 +12,7 @@
 
 using namespace sapien;
 void test1(int argc, char *argv[]) {
+  rcutils_logging_set_default_logger_level(30);
   auto logger = spdlog::stdout_color_mt("SAPIEN_ROS2");
   Simulation sim;
   Renderer::OptifuserRenderer renderer;
@@ -54,7 +56,9 @@ void test1(int argc, char *argv[]) {
   // Test motion planning
   ros2::MotionPlanningConfig config;
   ros2::setResourcesDirectory("/home/sim/project/sapien/python/py_ros2_package/ros2");
-  robotManager->loadMotionPlanningConfig(config);
+  config.max_acceleration_scaling_factor = 0.6;
+  robotManager->setMotionPlanningConfig(config);
+  ros2::MotionPlanner *planner = robotManager->buildMotionPlanner("arm", "NOT_USED");
   sceneManager.start();
 
   uint32_t step = 0;
@@ -64,6 +68,20 @@ void test1(int argc, char *argv[]) {
     scene->updateRender();
     controller.render();
     step++;
+
+    if (step == 1000) {
+      planner->setStartStateToCurrentState();
+      auto pose = robot->getSLinks()[7]->getPose();
+      pose.p.x += 0.2;
+      planner->setGoalState(pose);
+      auto plan = planner->plan();
+      std::cout << plan.duration << "\n\n"
+//                << plan.jointNames << "\n\n"
+                << plan.effort << "\n\n"
+                << plan.acceleration << "\n\n"
+                << plan.position << "\n\n"
+                << plan.velocity;
+    }
 
     // Balance force
     robotManager->balancePassiveForce();

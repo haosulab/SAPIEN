@@ -11,6 +11,7 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
     : mWrapper(wrapper), mClock(std::move(clock)), mNameSpace(nameSpace + "/" + robotName) {
 
   mNode = rclcpp::Node::make_shared(robotName, nameSpace);
+  mMoveitCppOption = std::make_unique<moveit::planning_interface::MoveItCpp::Options>(mNode);
 
   // Create Initial Joint States
   mJointStates = std::make_unique<sensor_msgs::msg::JointState>();
@@ -32,31 +33,12 @@ void RobotManager::init() {
   const std::string robotSRDFName = "robot_description_semantic";
   const std::string robotConfigNodeName = "/" + std::string(mNode->get_name()) + "_config";
 
-  //  rclcpp::SyncParametersClient paramClient(mNode.get(), robotConfigNodeName);
-  //  while (!paramClient.wait_for_service(1s)) {
-  //    if (!rclcpp::ok()) {
-  //      RCLCPP_ERROR(mNode->get_logger(), "Interrupted while waiting for the service. Exiting.");
-  //      rclcpp::shutdown();
-  //    }
-  //    RCLCPP_INFO(mNode->get_logger(), "service not available, waiting again...");
-  //  }
-
-  //  if (paramClient.has_parameter(robotURDFName) && paramClient.has_parameter(robotSRDFName)) {
-  //    // Remapping config parameter to current node and load robot model
-  //    // With current convention, a specific robot will have one kinematics parameters
-  //    // No matter how many time it is instantiated
-  //    std::vector<std::string> key = paramClient.list_parameters({}, 10).names;
-  //    std::vector<rclcpp::Parameter> value = paramClient.get_parameters(key);
-  //    for (auto &j : value) {
-  //      if (mNode->has_parameter(j.get_name()))
-  //        continue;
-  //      mNode->declare_parameter(j.get_name(), j.get_parameter_value());
-  //    }
-  //  }
   if (mNode->has_parameter(robotURDFName) && mNode->has_parameter(robotSRDFName)) {
 
     // Load robot and robot state
-    mRobotLoader = std::make_unique<robot_model_loader::RobotModelLoader>(mNode);
+    auto opt = robot_model_loader::RobotModelLoader::Options();
+    opt.load_kinematics_solvers_ = false;
+    mRobotLoader = std::make_unique<robot_model_loader::RobotModelLoader>(mNode, opt);
     mRobotModel = mRobotLoader->getModel();
     logger->info("Load ROS robot model {}, base frame: {}", robotURDFName,
                  mRobotModel->getModelFrame());
@@ -85,6 +67,8 @@ void RobotManager::init() {
     logger->warn("Inverse kinematics and motion planning features will be disabled!");
     mLoadRobot = false;
   }
+  setKinematicsConfig();
+  setMotionPlanningConfig();
 }
 
 void RobotManager::setDriveProperty(float stiffness, float damping, float forceLimit,
