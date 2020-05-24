@@ -11,15 +11,15 @@
 
 #define COMPUTE_VELOCITY_AND_INTEGRATE(frame_name)                                                \
   {                                                                                               \
-    mRobotState->computeVariableVelocity(mJointModelGroup, jointVelocity, twist,                  \
-                                         mJointModelGroup->getLinkModel(frame_name));             \
+    mLocalRobotState.computeVariableVelocity(mJointModelGroup, jointVelocity, twist,             \
+                                              mJointModelGroup->getLinkModel(frame_name));        \
     if (jointVelocity.maxCoeff() > mJointVelocityLimit ||                                         \
         jointVelocity.minCoeff() < -mJointVelocityLimit) {                                        \
       logger->warn("Joint velocity exceed max value {}, no command taken", mJointVelocityLimit);  \
       return;                                                                                     \
     } else {                                                                                      \
       foundIK =                                                                                   \
-          mRobotState->integrateVariableVelocity(mJointModelGroup, jointVelocity, mTimeStep);     \
+          mLocalRobotState.integrateVariableVelocity(mJointModelGroup, jointVelocity, mTimeStep);     \
     }                                                                                             \
   }
 

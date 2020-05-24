@@ -141,7 +141,7 @@ void sapien::ros2::CartesianVelocityController::handleService(
   // Calculate step velocity
   Eigen::VectorXd jointVelocity;
   bool foundIK = true;
-  mRobotState->computeVariableVelocity(mJointModelGroup, jointVelocity, twist,
+  mLocalRobotState.computeVariableVelocity(mJointModelGroup, jointVelocity, twist,
                                        mJointModelGroup->getLinkModel(mEEName));
   std::vector<float> stepVelocity(jointVelocity.data(),
                                   jointVelocity.data() + mJointModelGroup->getVariableCount());
