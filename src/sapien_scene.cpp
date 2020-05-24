@@ -186,7 +186,7 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
 
 void SScene::removeDrive(SDrive *drive) {
   if (drive->mScene != this) {
-    spdlog::get("SAPIEN")->error("failed to remove drive: drive is not in this scene.");
+    spdlog::get("SAPIEN")->error("Failed to remove drive: drive is not in this scene.");
   }
   drive->mJoint->release();
   if (drive->mActor1) {
@@ -383,6 +383,7 @@ void SScene::updateRender() {
   EASY_FUNCTION("Update Render", profiler::colors::Magenta);
 #endif
   if (!mRendererScene) {
+    spdlog::get("SAPIEN")->error("Failed to update render: renderer is not added.");
     return;
   }
   for (auto &actor : mActors) {

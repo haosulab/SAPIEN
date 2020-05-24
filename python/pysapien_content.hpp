@@ -502,6 +502,8 @@ void buildSapien(py::module &m) {
            py::arg("actor") = nullptr, py::return_value_policy::reference)
 
       .def("step", &SScene::step)
+      .def("step_async", &SScene::stepAsync)
+      .def("step_wait", &SScene::stepWait)
       .def("update_render", &SScene::updateRender)
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr, py::arg("render_material") = Renderer::PxrMaterial())
