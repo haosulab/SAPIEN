@@ -5,75 +5,11 @@
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/moveit_cpp/planning_component.h>
 #include <moveit/robot_state/conversions.h>
-#include <rcl_yaml_param_parser/parser.h>
-#include <rclcpp/rclcpp.hpp>
-#include <spdlog/spdlog.h>
+
+#include <controller/motion_planning_config.hpp>
 
 namespace sapien::ros2 {
 using namespace moveit::planning_interface;
-namespace fs = std::experimental::filesystem;
-
-struct MotionPlan {
-  std::vector<std::string> jointNames;
-  Eigen::VectorXd duration;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> position;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> velocity;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> acceleration;
-  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> effort;
-
-  MotionPlan(uint32_t dof, uint32_t PointsNum)
-      : duration(PointsNum), position(PointsNum, dof), velocity(PointsNum, dof),
-        acceleration(PointsNum, dof), effort(PointsNum, dof) {}
-};
-
-struct MotionPlanningConfig {
-  /* default planner options */
-  int planning_attempts = 10;
-  float max_velocity_scaling_factor = 1.0;
-  float max_acceleration_scaling_factor = 1.0;
-
-  /* default general OMPL options */
-  std::string planning_plugin = "ompl_interface/OMPLPlanner";
-  std::string request_adapter = "default_planner_request_adapters/AddTimeOptimalParameterization "
-                                "default_planner_request_adapters/FixWorkspaceBounds "
-                                "default_planner_request_adapters/FixStartStateBounds "
-                                "default_planner_request_adapters/FixStartStateCollision "
-                                "default_planner_request_adapters/FixStartStatePathConstraints";
-  float start_state_max_bounds_error = 0.1;
-
-  void publishPlannerOption(rclcpp::Node::SharedPtr &node) const {
-    const std::string ns("default_planner_options.");
-    node->declare_parameter(ns + "planning_attempts", rclcpp::ParameterValue(planning_attempts));
-    node->declare_parameter(ns + "max_velocity_scaling_factor",
-                            rclcpp::ParameterValue(max_velocity_scaling_factor));
-    node->declare_parameter(ns + "max_acceleration_scaling_factor",
-                            rclcpp::ParameterValue(max_acceleration_scaling_factor));
-  }
-
-  void publishGeneralOMPLConfig(rclcpp::Node::SharedPtr &node) const {
-    const std::string ns("ompl.");
-    node->declare_parameter(ns + "planning_plugin", rclcpp::ParameterValue(planning_plugin));
-    node->declare_parameter(ns + "request_adapters", rclcpp::ParameterValue(request_adapter));
-    node->declare_parameter(ns + "start_state_max_bounds_error",
-                            rclcpp::ParameterValue(start_state_max_bounds_error));
-  }
-
-  bool publishDefaultOMPLPlannerConfig(rclcpp::Node::SharedPtr &node,
-                                       const std::string &directory) const {
-    std::string filePath = directory + "/motion_planning/default_ompl_planning.yaml";
-    auto logger = spdlog::get("SAPIEN_ROS2");
-    if (!fs::exists(filePath)) {
-      logger->warn("File path {} does not exist", filePath);
-      logger->warn("OMPL motion planning fail for the motion planner.");
-      return false;
-    }
-    rcutils_allocator_t allocator = rcutils_get_default_allocator();
-    rcl_params_t *params = rcl_yaml_node_struct_init(allocator);
-    rcl_parse_yaml_file(filePath.c_str(), params);
-    rcl_yaml_node_struct_print(params);
-    return true;
-  }
-};
 
 class RobotManager;
 
