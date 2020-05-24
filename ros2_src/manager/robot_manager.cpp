@@ -23,6 +23,8 @@ RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std:
 
 void RobotManager::init() {
   auto logger = spdlog::get("SAPIEN_ROS2");
+  rclcpp::Parameter paramUseSimTime("use_sim_time", true);
+  mNode->set_parameter(paramUseSimTime);
   // Load robot description from remote node, do not use node to access parameters
   // SAPIEN convention: the remote node name must be "$/{robotName}_config"
   // Note that you must add a "/" before the name of the node, otherwise it do not exist

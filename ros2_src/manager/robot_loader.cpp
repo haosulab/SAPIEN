@@ -24,10 +24,10 @@ sapien::ros2::RobotLoader::RobotLoader(sapien::ros2::SceneManager *manager)
 void RobotLoader::publishRobotDescription(rclcpp::Node::SharedPtr &node,
                                           const std::string &URDFString,
                                           const std::string &SRDFString) {
-//  auto logger = spdlog::get("SAPIEN_ROS2");
+  auto logger = spdlog::get("SAPIEN_ROS2");
   node->declare_parameter(ROBOT_PARAM_NAME, rclcpp::ParameterValue(URDFString));
   node->declare_parameter(SEMANTIC_PARAM_NAME, rclcpp::ParameterValue(SRDFString));
-//  logger->info("Successfully publishing robot description for ROS [{}]", node->get_name());
+  logger->info("Publishing robot description for ROS [{}]", node->get_name());
 }
 
 std::tuple<sapien::SArticulation *, RobotManager *>
