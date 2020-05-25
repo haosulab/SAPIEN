@@ -17,18 +17,35 @@ PYBIND11_MODULE(pysapien_ros2, m) {
   /* Build ros2 module of sapien */
   auto m_ros2 = m.def_submodule("ros2");
   //======== Module Function ========//
-  m_ros2.def(
-      "rclcpp_init",
-      [](const std::vector<std::string> &args) {
-        std::vector<char *> str;
-        str.reserve(args.size());
-        for (auto &s : args)
-          str.push_back(const_cast<char *>(s.c_str()));
-        int size = str.size();
-        rclcpp::init(size, str.data());
-        auto logger = spdlog::stdout_color_mt("SAPIEN_ROS2");
-      },
-      py::arg("args"));
+  m_ros2.def("set_resources_directory", setResourcesDirectory)
+      .def("init_spd_logger", []() { auto logger = spdlog::stdout_color_mt("SAPIEN_ROS2"); })
+      .def("set_ros2_logging_level",
+           [](const std::string &level) {
+             if (level == "debug") {
+               rcutils_logging_set_default_logger_level(10);
+             } else if (level == "info") {
+               rcutils_logging_set_default_logger_level(20);
+             } else if (level == "warn" || level == "warning") {
+               rcutils_logging_set_default_logger_level(30);
+             } else if (level == "err" || level == "error") {
+               rcutils_logging_set_default_logger_level(40);
+             } else if (level == "fatal") {
+               rcutils_logging_set_default_logger_level(50);
+             } else {
+               std::cerr << "Invalid log level \"" << level << "\"" << std::endl;
+             }
+           })
+      .def(
+          "rclcpp_init",
+          [](const std::vector<std::string> &args) {
+            std::vector<char *> str;
+            str.reserve(args.size());
+            for (auto &s : args)
+              str.push_back(const_cast<char *>(s.c_str()));
+            int size = str.size();
+            rclcpp::init(size, str.data());
+          },
+          py::arg("args"));
 
   //======== Manager ========//
   auto PySceneManager = py::class_<SceneManager>(m_ros2, "SceneManager");
@@ -48,7 +65,15 @@ PYBIND11_MODULE(pysapien_ros2, m) {
            py::arg("joint_index") = std::vector<uint32_t>())
       .def("balance_passive_force", &RobotManager::balancePassiveForce, py::arg("gravity") = true,
            py::arg("coriolis_centrifugal") = true, py::arg("external") = true)
+      .def("", &RobotManager::setMotionPlanningConfig)
+      .def("set_kinematics_config", &RobotManager::setKinematicsConfig)
+      .def("set_motion_planning_config", &RobotManager::setMotionPlanningConfig)
+      .def("get_group_names", &RobotManager::getGroupNames)
+      .def("get_kinematics_config", &RobotManager::getKinematicsConfig)
+      .def("get_motion_planning_config", &RobotManager::getMotionPlanningConfig)
       .def("create_joint_publisher", &RobotManager::createJointPublisher, py::arg("frequency"))
+      .def("build_motion_planner", &RobotManager::buildMotionPlanner, py::arg("group_name"),
+           py::arg("service_name"))
       .def("build_joint_velocity_controller", &RobotManager::buildJointVelocityController,
            py::return_value_policy::reference, py::arg("joint_names"), py::arg("service_name"),
            py::arg("latency") = 0)
@@ -78,10 +103,16 @@ PYBIND11_MODULE(pysapien_ros2, m) {
 
   //======== Controller ========//
   auto PyMoveType = py::enum_<MoveType>(m_ros2, "MoveType");
+  auto PyKinematicsSolverType = py::enum_<KinematicsSolver>(m_ros2, "KinematicsSolverType");
+  auto PyKinematicsConfig = py::class_<KinematicsConfig>(m_ros2, "KinematicsConfig");
+  auto PyMotionPlanningConfig = py::class_<MotionPlanningConfig>(m_ros2, "MotionPlanningConfig");
+
   auto PyJointVelocityController =
       py::class_<JointVelocityController>(m_ros2, "JointVelocityController");
   auto PyCartesianVelocityController =
       py::class_<CartesianVelocityController>(m_ros2, "CartesianVelocityController");
+  auto PyMotionPlanner = py::class_<MotionPlanner>(m_ros2, "MotionPlanner");
+  auto PyMotionPlan = py::class_<MotionPlan>(m_ros2, "MotionPlan");
 
   // The enum_::export_values() function exports the enum entries into the parent scope,
   // which should be skipped for newer C++11-style strongly typed enums.
@@ -91,6 +122,26 @@ PYBIND11_MODULE(pysapien_ros2, m) {
       .value("LOCAL_ROTATE", MoveType::LocalRotate)
       .value("BODY_TWIST", MoveType::BodyTwist)
       .value("SPATIAL_TWIST", MoveType::SpatialTwist);
+
+  PyKinematicsSolverType.value("KDL", KinematicsSolver::KDL);
+
+  PyKinematicsConfig.def(py::init<>())
+      .def_readwrite("kinematics_solver_timeout", &KinematicsConfig::kinematics_solver_timeout)
+      .def_readwrite("kinematics_solver_attempts", &KinematicsConfig::kinematics_solver_attempts)
+      .def_readwrite("kinematics_solver_search_resolution",
+                     &KinematicsConfig::kinematics_solver_search_resolution)
+      .def_readwrite("kinematics_solver_type", &KinematicsConfig::kinematics_solver);
+
+  PyMotionPlanningConfig.def(py::init<>())
+      .def_readwrite("max_acceleration_scaling_factor",
+                     &MotionPlanningConfig::max_acceleration_scaling_factor)
+      .def_readwrite("start_state_max_bounds_error",
+                     &MotionPlanningConfig::start_state_max_bounds_error)
+      .def_readwrite("request_adapter", &MotionPlanningConfig::request_adapter)
+      .def_readwrite("planning_plugin", &MotionPlanningConfig::planning_plugin)
+      .def_readwrite("planning_attempts", &MotionPlanningConfig::planning_attempts)
+      .def_readwrite("max_velocity_scaling_factor",
+                     &MotionPlanningConfig::max_velocity_scaling_factor);
 
   PyJointVelocityController
       .def("move_joint",
@@ -131,4 +182,20 @@ PYBIND11_MODULE(pysapien_ros2, m) {
              std::array<double, 3> v = {*vec.data(), *(vec.data() + 1), *(vec.data() + 2)};
              c.moveCartesian(v, type);
            });
+
+  PyMotionPlan.def_readonly("joint_names", &MotionPlan::jointNames)
+      .def_readonly("duration", &MotionPlan::duration)
+      .def_readonly("position", &MotionPlan::position)
+      .def_readonly("velocity", &MotionPlan::velocity)
+      .def_readonly("acceleration", &MotionPlan::acceleration);
+
+  PyMotionPlanner.def("set_start_state", &MotionPlanner::setStartState, py::arg("qpos"))
+      .def("set_goal_state", py::overload_cast<Eigen::VectorXd &>(&MotionPlanner::setGoalState),
+           py::arg("qpos"))
+      .def("set_goal_state",
+           py::overload_cast<const PxTransform &, const std::string &>(
+               &MotionPlanner::setGoalState),
+           py::arg("pose"), py::arg("link_name") = "")
+      .def("set_start_state_to_current_state", &MotionPlanner::setStartStateToCurrentState)
+      .def("plan", &MotionPlanner::plan);
 }
