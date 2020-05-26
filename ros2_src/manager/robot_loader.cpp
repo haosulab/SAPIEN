@@ -18,7 +18,6 @@ sapien::ros2::RobotLoader::RobotLoader(sapien::ros2::SceneManager *manager)
   // The general standard: if no srdf, srdf path should be empty
   // If no urdf, directly raise error and exit;
   auto logger = spdlog::get("SAPIEN_ROS2");
-  logger->warn("Default density 1000");
 }
 
 void RobotLoader::publishRobotDescription(rclcpp::Node::SharedPtr &node,

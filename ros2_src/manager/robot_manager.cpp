@@ -212,11 +212,15 @@ bool RobotManager::setMotionPlanningConfig(const MotionPlanningConfig &config) {
   // Load parameters from motion planning config
   config.publishPlannerOption(mNode);
   config.publishGeneralOMPLConfig(mNode);
-  auto parseFile =
-      config.publishDefaultOMPLPlannerConfig(mNode, SAPIEN_ROS2_RESOURCES_DIRECTORY);
+  auto parseFile = config.publishDefaultOMPLPlannerConfig(mNode, getResourcesDirectory());
 
   mPlanningConfig = config;
   *mMoveitCppOption = options;
   return parseFile;
 }
+void RobotManager::setResourcesDirectory(const std::string &path) {
+  SAPIEN_ROS2_RESOURCES_DIRECTORY = path;
+}
+std::string RobotManager::SAPIEN_ROS2_RESOURCES_DIRECTORY = "";
+
 } // namespace sapien::ros2

@@ -1,9 +1,8 @@
 #pragma once
 
-//#include <experimental/filesystem>
-#include <vector>
 #include <numeric>
 #include <utility>
+#include <vector>
 
 #include "controller/cartesian_velocity_controller.h"
 #include "controller/joint_publisher.h"
@@ -19,17 +18,9 @@
 
 namespace sapien::ros2 {
 
-static std::string SAPIEN_ROS2_RESOURCES_DIRECTORY; // No / in this string
-
-inline void setResourcesDirectory(const std::string &path) {
-  SAPIEN_ROS2_RESOURCES_DIRECTORY = fs::absolute(path);
-}
-
 class SceneManager;
 class SControllableArticulationWrapper;
-// class JointVelocityController;
 class RobotLoader;
-// class MotionPlanner;
 
 class RobotManager {
   friend SceneManager;
@@ -37,6 +28,7 @@ class RobotManager {
 
 public:
   SControllableArticulationWrapper *mWrapper;
+  static std::string SAPIEN_ROS2_RESOURCES_DIRECTORY; // No / in this string
 
 protected:
   // Basic handle
@@ -74,6 +66,8 @@ public:
                const std::string &robotName, rclcpp::Clock::SharedPtr clock);
 
   void init();
+  static inline std::string getResourcesDirectory() { return SAPIEN_ROS2_RESOURCES_DIRECTORY; }
+  static void setResourcesDirectory(const std::string &path);
 
   void setDriveProperty(float stiffness, float damping, float forceLimit = PX_MAX_F32,
                         const std::vector<uint32_t> &jointIndex = {});
@@ -91,17 +85,17 @@ public:
                                                                 double latency = 0);
   MotionPlanner *buildMotionPlanner(const std::string &groupName, const std::string &serviceName);
 
-  // Robot Level Control
-  inline const std::vector<std::string> &getGroupNames() {
-    return mRobotModel->getJointModelGroupNames();
-  }
-
+  // Config
   inline KinematicsConfig getKinematicsConfig() const { return mKinematicsConfig; }
   inline MotionPlanningConfig getMotionPlanningConfig() const { return mPlanningConfig; }
 
   bool setKinematicsConfig(const KinematicsConfig &config = KinematicsConfig());
-
   bool setMotionPlanningConfig(const MotionPlanningConfig &config = MotionPlanningConfig());
+
+  // Robot Level Control
+  inline const std::vector<std::string> &getGroupNames() {
+    return mRobotModel->getJointModelGroupNames();
+  }
 
 protected:
   void updateStates(const std::vector<float> &jointPosition,

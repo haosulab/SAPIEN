@@ -17,8 +17,9 @@ PYBIND11_MODULE(pysapien_ros2, m) {
   /* Build ros2 module of sapien */
   auto m_ros2 = m.def_submodule("ros2");
   //======== Module Function ========//
-  m_ros2.def("set_resources_directory", setResourcesDirectory)
-      .def("init_spd_logger", []() { auto logger = spdlog::stdout_color_mt("SAPIEN_ROS2"); })
+  m_ros2.def("set_resources_directory", &RobotManager::setResourcesDirectory, py::arg("path"))
+      .def("get_resources_directory", &RobotManager::getResourcesDirectory)
+      .def("init_spd_logger", []() { auto logger = spdlog::stderr_color_mt("SAPIEN_ROS2"); })
       .def("set_ros2_logging_level",
            [](const std::string &level) {
              if (level == "debug") {
@@ -52,6 +53,9 @@ PYBIND11_MODULE(pysapien_ros2, m) {
   auto PyRobotManager = py::class_<RobotManager>(m_ros2, "RobotManager");
   auto PyRobotLoader = py::class_<RobotLoader>(m_ros2, "RobotLoader");
   auto PyRobotDescriptor = py::class_<RobotDescriptor>(m_ros2, "RobotDescriptor");
+  auto PyKinematicsSolverType = py::enum_<KinematicsSolver>(m_ros2, "KinematicsSolverType");
+  auto PyKinematicsConfig = py::class_<KinematicsConfig>(m_ros2, "KinematicsConfig");
+  auto PyMotionPlanningConfig = py::class_<MotionPlanningConfig>(m_ros2, "MotionPlanningConfig");
 
   PySceneManager
       .def(py::init<sapien::SScene *, std::string const &>(), py::arg("scene"),
@@ -65,9 +69,10 @@ PYBIND11_MODULE(pysapien_ros2, m) {
            py::arg("joint_index") = std::vector<uint32_t>())
       .def("balance_passive_force", &RobotManager::balancePassiveForce, py::arg("gravity") = true,
            py::arg("coriolis_centrifugal") = true, py::arg("external") = true)
-      .def("", &RobotManager::setMotionPlanningConfig)
-      .def("set_kinematics_config", &RobotManager::setKinematicsConfig)
-      .def("set_motion_planning_config", &RobotManager::setMotionPlanningConfig)
+      .def("set_kinematics_config", &RobotManager::setKinematicsConfig,
+           py::arg("config") = KinematicsConfig())
+      .def("set_motion_planning_config", &RobotManager::setMotionPlanningConfig,
+           py::arg("config") = MotionPlanningConfig())
       .def("get_group_names", &RobotManager::getGroupNames)
       .def("get_kinematics_config", &RobotManager::getKinematicsConfig)
       .def("get_motion_planning_config", &RobotManager::getMotionPlanningConfig)
@@ -103,9 +108,6 @@ PYBIND11_MODULE(pysapien_ros2, m) {
 
   //======== Controller ========//
   auto PyMoveType = py::enum_<MoveType>(m_ros2, "MoveType");
-  auto PyKinematicsSolverType = py::enum_<KinematicsSolver>(m_ros2, "KinematicsSolverType");
-  auto PyKinematicsConfig = py::class_<KinematicsConfig>(m_ros2, "KinematicsConfig");
-  auto PyMotionPlanningConfig = py::class_<MotionPlanningConfig>(m_ros2, "MotionPlanningConfig");
 
   auto PyJointVelocityController =
       py::class_<JointVelocityController>(m_ros2, "JointVelocityController");

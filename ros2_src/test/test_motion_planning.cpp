@@ -31,6 +31,7 @@ void test1(int argc, char *argv[]) {
 
   // ROS2 specified class
   rclcpp::init(argc, argv);
+  ros2::RobotManager::setResourcesDirectory("/home/sim/project/sapien/python/py_ros2_package/ros2");
   ros2::SceneManager sceneManager(scene.get(), "scene1");
   ros2::RobotDescriptor descriptor("sapien_resources", "xarm6_description/urdf/xarm6.urdf",
                                    "xarm6_moveit_config/config/xarm6.srdf", true);
@@ -55,10 +56,9 @@ void test1(int argc, char *argv[]) {
 
   // Test motion planning
   ros2::MotionPlanningConfig config;
-  ros2::setResourcesDirectory("/home/sim/project/sapien/python/py_ros2_package/ros2");
   config.max_acceleration_scaling_factor = 0.6;
   robotManager->setMotionPlanningConfig(config);
-  ros2::MotionPlanner *planner = robotManager->buildMotionPlanner("arm", "NOT_USED");
+//  ros2::MotionPlanner *planner = robotManager->buildMotionPlanner("arm", "NOT_USED");
   sceneManager.start();
 
   uint32_t step = 0;
@@ -70,17 +70,17 @@ void test1(int argc, char *argv[]) {
     step++;
 
     if (step == 1000) {
-      planner->setStartStateToCurrentState();
+//      planner->setStartStateToCurrentState();
       auto pose = robot->getSLinks()[7]->getPose();
       pose.p.x += 0.2;
-      planner->setGoalState(pose);
-      auto plan = planner->plan();
-      std::cout << plan.duration << "\n\n"
-//                << plan.jointNames << "\n\n"
-                << plan.effort << "\n\n"
-                << plan.acceleration << "\n\n"
-                << plan.position << "\n\n"
-                << plan.velocity;
+//      planner->setGoalState(pose);
+//      auto plan = planner->plan();
+//      std::cout << plan.duration << "\n\n"
+////                << plan.jointNames << "\n\n"
+//                << plan.effort << "\n\n"
+//                << plan.acceleration << "\n\n"
+//                << plan.position << "\n\n"
+//                << plan.velocity;
     }
 
     // Balance force
