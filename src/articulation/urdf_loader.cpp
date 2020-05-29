@@ -53,19 +53,6 @@ struct LinkTreeNode {
   LinkBuilder *linkBuilder = nullptr;
 };
 
-std::unique_ptr<SRDF::Robot> URDFLoader::loadSRDF(const std::string &filename) {
-  XMLDocument doc;
-  if (doc.LoadFile(filename.c_str())) {
-    spdlog::get("SAPIEN")->error("SRDF loading faild for {}", filename);
-    return nullptr;
-  }
-  if (strcmp("robot", doc.RootElement()->Name()) == 0) {
-    return std::make_unique<SRDF::Robot>(*doc.RootElement());
-  } else {
-    throw std::runtime_error("SRDF root is not <robot/> in " + filename);
-  }
-}
-
 std::tuple<std::unique_ptr<ArticulationBuilder>, std::vector<SensorRecord>>
 URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const *srdfDoc,
                                   const std::string &urdfFilename, bool isKinematic,
@@ -117,6 +104,17 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
     }
     std::string parent = joint->parent->link;
     std::string child = joint->child->link;
+    if (linkName2treeNode.find(parent) == linkName2treeNode.end()) {
+      spdlog::get("SAPIEN")->error(
+          "Failed to load URDF: parent of joint {} does not exist", name);
+      return {nullptr, std::vector<SensorRecord>()};
+    }
+    if (linkName2treeNode.find(child) == linkName2treeNode.end()) {
+      spdlog::get("SAPIEN")->error(
+          "Failed to load URDF: child of joint {} does not exist", name);
+      return {nullptr, std::vector<SensorRecord>()};
+    }
+
     LinkTreeNode *parentNode = linkName2treeNode[parent];
     LinkTreeNode *childNode = linkName2treeNode[child];
     if (childNode->parent) {

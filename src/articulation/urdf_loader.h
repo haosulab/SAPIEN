@@ -285,7 +285,7 @@ struct Geometry : DomBase {
                                       elem.GetLineNum());
       throw std::runtime_error("<geometry> contains no child");
     }
-    if (child->NextSibling()) {
+    if (child->NextSiblingElement()) {
       spdlog::get("SAPIEN")->critical("<geometry> contains more than 1 child, at line {}",
                                       elem.GetLineNum());
       throw std::runtime_error("<geometry> contains more than 1 child");
@@ -739,8 +739,6 @@ public:
   loadFileAsArticulationBuilder(const std::string &filename, URDFConfig const &config = {});
 
 private:
-  std::unique_ptr<SRDF::Robot> loadSRDF(const std::string &filename);
-
   std::tuple<std::unique_ptr<ArticulationBuilder>, std::vector<SensorRecord>>
   parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const *srdfDoc,
                         const std::string &urdfFilename, bool isKinematic,
