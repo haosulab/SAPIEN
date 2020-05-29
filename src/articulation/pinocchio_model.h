@@ -19,6 +19,13 @@ class PinocchioModel {
    */
   Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> indexS2P;
 
+  Eigen::VectorXi QIDX;
+  Eigen::VectorXi NQ;
+  Eigen::VectorXi NV;
+
+  Eigen::VectorXd posS2P(const Eigen::VectorXd &qpos);
+  Eigen::VectorXd posP2S(const Eigen::VectorXd &qpos);
+
   std::vector<int> linkIdx2FrameIdx;
 
 public:
@@ -55,6 +62,12 @@ public:
    *  must be called after computeFullJacobian
    */
   Eigen::Matrix<double, 6, Eigen::Dynamic> getLinkJacobian(uint32_t index, bool local = false);
+
+  /** compute the local Jacobian for a single link
+   *
+   */
+  Eigen::Matrix<double, 6, Eigen::Dynamic>
+  computeSingleLinkLocalJacobian(Eigen::VectorXd const &qpos, uint32_t index);
 
   /** M in Ma + Cv + g = t
    *
