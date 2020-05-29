@@ -35,8 +35,12 @@ PxErrorCode::Enum SapienErrorCallback::getLastErrorCode() {
 
 Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranceSpeed)
     : mThreadCount(nthread), mMeshManager(this) {
-  auto logger = spdlog::stderr_color_mt("SAPIEN");
-  setLogLevel("warn");
+  if (!spdlog::get("SAPIEN")) {
+    std::shared_ptr<spdlog::logger> logger = std::make_shared<spdlog::logger>(
+        "SAPIEN", std::make_shared<spdlog::sinks::stderr_color_sink_st>());
+    spdlog::register_logger(logger);
+    setLogLevel("warn");
+  }
 
 #ifdef _PROFILE
   profiler::startListen();

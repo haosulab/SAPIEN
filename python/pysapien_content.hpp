@@ -35,6 +35,67 @@
 using namespace sapien;
 namespace py = pybind11;
 
+URDF::URDFConfig parseURDFConfig(py::dict &dict) {
+  URDF::URDFConfig config;
+  if (dict.contains("material")) {
+    std::cout << "found material" << std::endl;
+    config.material = dict["material"].cast<PxMaterial *>();
+  }
+  if (dict.contains("density")) {
+    std::cout << "found density" << std::endl;
+    config.density = dict["density"].cast<float>();
+  }
+  if (dict.contains("link")) {
+    std::cout << "found link" << std::endl;
+
+    auto linkDict = dict["link"].cast<py::dict>();
+    for (auto kv : linkDict) {
+      auto name = kv.first.cast<std::string>();
+      auto dict2 = kv.second.cast<py::dict>();
+      if (dict2.contains("material")) {
+        std::cout << "found link material" << std::endl;
+        config.link[name].material = dict2["material"].cast<PxMaterial *>();
+      }
+      if (dict2.contains("density")) {
+        std::cout << "found link density" << std::endl;
+        config.link[name].density = dict2["density"].cast<float>();
+      }
+      if (dict2.contains("patch_radius")) {
+        std::cout << "found link patch" << std::endl;
+        config.link[name].patchRadius = dict2["patch_radius"].cast<float>();
+      }
+      if (dict2.contains("min_patch_radius")) {
+        config.link[name].minPatchRadius = dict2["min_patch_radius"].cast<float>();
+      }
+      if (dict2.contains("shape")) {
+        std::cout << "found shape" << std::endl;
+        auto shapeDict = dict2["shape"].cast<py::dict>();
+        for (auto kv2 : shapeDict) {
+          auto idx = kv2.first.cast<int>();
+          auto dict3 = kv2.second.cast<py::dict>();
+
+          if (dict3.contains("material")) {
+            std::cout << "found shape material" << std::endl;
+            config.link[name].shape[idx].material = dict3["material"].cast<PxMaterial *>();
+          }
+          if (dict3.contains("density")) {
+            std::cout << "found shape density" << std::endl;
+            config.link[name].shape[idx].density = dict3["density"].cast<float>();
+          }
+          if (dict3.contains("patch_radius")) {
+            std::cout << "found shape patch" << std::endl;
+            config.link[name].shape[idx].patchRadius = dict3["patch_radius"].cast<float>();
+          }
+          if (dict3.contains("min_patch_radius")) {
+            config.link[name].shape[idx].minPatchRadius = dict3["min_patch_radius"].cast<float>();
+          }
+        }
+      }
+    }
+  }
+  return config;
+}
+
 PxVec3 array2vec3(const py::array_t<PxReal> &arr) { return {arr.at(0), arr.at(1), arr.at(2)}; }
 
 template <typename T> py::array_t<T> make_array(std::vector<T> const &values) {
@@ -1115,19 +1176,40 @@ void buildSapien(py::module &m) {
       .def_readwrite("fix_root_link", &URDF::URDFLoader::fixRootLink)
       .def_readwrite("collision_is_visual", &URDF::URDFLoader::collisionIsVisual)
       .def_readwrite("scale", &URDF::URDFLoader::scale)
-      .def_readwrite("default_density", &URDF::URDFLoader::defaultDensity)
-      .def("load", &URDF::URDFLoader::load, py::return_value_policy::reference,
-           py::arg("filename"), py::arg("material") = (physx::PxMaterial *)nullptr)
-      .def("load_from_string", &URDF::URDFLoader::loadFromXML, py::return_value_policy::reference,
-           py::arg("urdf_string"), py::arg("srdf_string"),
-           py::arg("material") = (physx::PxMaterial *)nullptr)
+      .def_property("default_density",
+                    [](URDF::URDFLoader &) {
+                      throw std::runtime_error("default_density is moved to URDF config");
+                    },
+                    [](URDF::URDFLoader &) {
+                      throw std::runtime_error("default_density is moved to URDF config");
+                    })
+      .def("load",
+           [](URDF::URDFLoader &loader, std::string const &filename, py::dict &dict) {
+             auto config = parseURDFConfig(dict);
+             return loader.load(filename, config);
+           },
+           py::return_value_policy::reference, py::arg("filename"), py::arg("config") = py::dict())
       .def("load_kinematic",
-           py::overload_cast<const std::string &, physx::PxMaterial *>(
-               &URDF::URDFLoader::loadKinematic),
+           [](URDF::URDFLoader &loader, std::string const &filename, py::dict &dict) {
+             auto config = parseURDFConfig(dict);
+             return loader.load(filename, config);
+           },
+           py::return_value_policy::reference, py::arg("filename"), py::arg("config") = py::dict())
+      .def("load_from_string",
+           [](URDF::URDFLoader &loader, std::string const &urdf, std::string const &srdf,
+              py::dict &dict) {
+             auto config = parseURDFConfig(dict);
+             return loader.loadFromXML(urdf, srdf, config);
+           },
+           py::return_value_policy::reference, py::arg("urdf_string"), py::arg("srdf_string"),
+           py::arg("config") = py::dict())
+      .def("load_file_as_articulation_builder",
+           [](URDF::URDFLoader &loader, std::string const &filename, py::dict &dict) {
+             auto config = parseURDFConfig(dict);
+             return loader.loadFileAsArticulationBuilder(filename, config);
+           },
            py::return_value_policy::reference, py::arg("filename"),
-           py::arg("material") = (physx::PxMaterial *)nullptr)
-      .def("load_file_as_articulation_builder", &URDF::URDFLoader::loadFileAsArticulationBuilder,
-           py::arg("filename"), py::arg("material") = nullptr);
+           py::arg("config") = py::dict());
 
 #ifdef _USE_PINOCCHIO
   PyPinocchioModel
@@ -1148,6 +1230,8 @@ void buildSapien(py::module &m) {
 
       .def("compute_full_jacobian", &PinocchioModel::computeFullJacobian, py::arg("qpos"))
       .def("get_link_jacobian", &PinocchioModel::getLinkJacobian, py::arg("link_index"),
-           py::arg("local") = false);
+           py::arg("local") = false)
+      .def("compute_single_link_local_jacobian", &PinocchioModel::computeSingleLinkLocalJacobian,
+           py::arg("qpos"), py::arg("link_index"));
 #endif
 }

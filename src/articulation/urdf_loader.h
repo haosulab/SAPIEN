@@ -1,6 +1,7 @@
 #pragma once
 #include <PxPhysicsAPI.h>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <spdlog/spdlog.h>
 #include <sstream>
@@ -280,11 +281,13 @@ struct Geometry : DomBase {
   Geometry(const XMLElement &elem) {
     const XMLElement *child = elem.FirstChildElement();
     if (!child) {
-      spdlog::get("sapien")->critical("<geometry> contains no child, at line {}", elem.GetLineNum());
+      spdlog::get("sapien")->critical("<geometry> contains no child, at line {}",
+                                      elem.GetLineNum());
       throw std::runtime_error("<geometry> contains no child");
     }
     if (child->NextSibling()) {
-      spdlog::get("SAPIEN")->critical("<geometry> contains more than 1 child, at line {}", elem.GetLineNum());
+      spdlog::get("SAPIEN")->critical("<geometry> contains more than 1 child, at line {}",
+                                      elem.GetLineNum());
       throw std::runtime_error("<geometry> contains more than 1 child");
     }
     const char *childTag = child->Name();
@@ -523,8 +526,8 @@ struct Joint : DomBase {
 struct Camera {
   float near;
   float far;
-  float width;
-  float height;
+  uint32_t width;
+  uint32_t height;
   float fovx;
   float fovy;
 };
@@ -545,7 +548,8 @@ struct Sensor : DomBase {
 
     const char *type_ = elem.Attribute("type");
     if (!type_) {
-      spdlog::get("SAPIEN")->critical("Missing attribute [type] on <sensor>, at line {}", elem.GetLineNum());
+      spdlog::get("SAPIEN")->critical("Missing attribute [type] on <sensor>, at line {}",
+                                      elem.GetLineNum());
       throw std::runtime_error("Missing attribute [type] on <sensor>");
     }
     std::string type_string = type_;
@@ -581,13 +585,15 @@ struct Sensor : DomBase {
     this->camera = std::make_unique<Camera>();
     auto camera = elem.FirstChildElement("camera");
     if (!camera) {
-      spdlog::get("SAPIEN")->critical("Missing <camera> child on color or depth camera sensor, at line {}", elem.GetLineNum());
+      spdlog::get("SAPIEN")->critical(
+          "Missing <camera> child on color or depth camera sensor, at line {}", elem.GetLineNum());
       throw std::runtime_error("Missing <camera> child on color or depth camera sensor");
     }
     auto fovx = camera->FirstChildElement("horizontal_fov");
     auto fovy = camera->FirstChildElement("vertical_fov");
     if (!fovx && !fovy) {
-      spdlog::get("SAPIEN")->critical("Missing horizontal_fov/vertical_fov on camera, at line {}", elem.GetLineNum());
+      spdlog::get("SAPIEN")->critical("Missing horizontal_fov/vertical_fov on camera, at line {}",
+                                      elem.GetLineNum());
       throw std::runtime_error("Missing horizontal_fov/vertical_fov on camera");
     }
     auto clip = camera->FirstChildElement("clip");
@@ -611,7 +617,8 @@ struct Sensor : DomBase {
     auto width = image->FirstChildElement("width");
     auto height = image->FirstChildElement("height");
     if (!width || !height) {
-      spdlog::get("SAPIEN")->critical("Missing <width> or <height> on image {}", elem.GetLineNum());
+      spdlog::get("SAPIEN")->critical("Missing <width> or <height> on image {}",
+                                      elem.GetLineNum());
       throw std::runtime_error("Missing <width> or <height> on image");
     }
     float widthValue = std::atoi(width->GetText());
@@ -662,6 +669,40 @@ struct Robot : DomBase {
   LOAD_CHILD_END()
 };
 
+struct URDFConfig {
+  struct ShapeConfig {
+    physx::PxMaterial *material = nullptr;
+    float patchRadius = 0.f;
+    float minPatchRadius = 0.f;
+    float density = 1000.f;
+  };
+  struct LinkConfig {
+    // default material for a link
+    physx::PxMaterial *material = nullptr;
+    std::map<int, ShapeConfig> shape;
+    // patch radius for the whole link
+    float patchRadius = 0.f;
+    float minPatchRadius = 0.f;
+    // density for the whole link
+    float density = 1000.f;
+  };
+  std::map<std::string, LinkConfig> link = {};
+
+  physx::PxMaterial *material = nullptr;
+  float density = 1000.f;
+};
+
+struct SensorRecord {
+  std::string type;
+  std::string name;
+  std::string linkName;
+  physx::PxTransform localPose;
+  uint32_t width;
+  uint32_t height;
+  float fovx;
+  float fovy;
+};
+
 class URDFLoader {
   SScene *mScene;
   std::string mUrdfString;
@@ -680,45 +721,30 @@ public:
    */
   float scale = 1.f;
 
-  /* density used if the inertia is not specified for a link */
-  float defaultDensity = 1000.f;
-
   /* collision will be rendered along with visual */
   bool collisionIsVisual = false;
 
   explicit URDFLoader(SScene *scene);
 
-  SArticulation *load(const std::string &filename, physx::PxMaterial *material = nullptr);
+  SArticulation *load(const std::string &filename, URDFConfig const &config = {});
 
-  SKArticulation *loadKinematic(const std::string &filename,
-                                physx::PxMaterial *material = nullptr);
+  SKArticulation *loadKinematic(const std::string &filename, URDFConfig const &config = {});
 
   /* Directly load robot model from string, srdf is optional */
   /* Using this mode, the path in URDF should be absolute path, rather than relative one*/
   SArticulation *loadFromXML(const std::string &URDFString, const std::string &SRDFString = "",
-                             physx::PxMaterial *material = nullptr);
+                             URDFConfig const &config = {});
 
   std::unique_ptr<ArticulationBuilder>
-  loadFileAsArticulationBuilder(const std::string &filename,
-                                physx::PxMaterial *material = nullptr);
+  loadFileAsArticulationBuilder(const std::string &filename, URDFConfig const &config = {});
 
 private:
   std::unique_ptr<SRDF::Robot> loadSRDF(const std::string &filename);
 
-  SArticulationBase *commonLoad(XMLDocument *URDFDoc, std::unique_ptr<SRDF::Robot> srdf,
-                                physx::PxMaterial *material, bool isKinematic);
-
-  SArticulationBase *commonLoad(const std::string &filename, physx::PxMaterial *material,
-                                bool isKinematic);
-
-  SArticulationBase *parseRobotDescription(const std::string &filename, XMLDocument *doc,
-                                           std::unique_ptr<SRDF::Robot> srdf,
-                                           physx::PxMaterial *material, bool isKinematic);
-
-  std::unique_ptr<ArticulationBuilder>
-  parseRobotDescriptionAsArticulationBuilder(const std::string &filename, XMLDocument *doc,
-                                             std::unique_ptr<SRDF::Robot> srdf,
-                                             physx::PxMaterial *material);
+  std::tuple<std::unique_ptr<ArticulationBuilder>, std::vector<SensorRecord>>
+  parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const *srdfDoc,
+                        const std::string &urdfFilename, bool isKinematic,
+                        URDFConfig const &config);
 };
 
 } // namespace URDF
