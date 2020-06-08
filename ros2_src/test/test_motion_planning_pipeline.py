@@ -1,24 +1,7 @@
 import numpy as np
-import imageio
-from PIL import ImageColor
-
 import sapien.core as sapien
 import sapien.ros2 as sr
 import transforms3d
-
-
-# class GifRecorder:
-#     def __init__(self):
-#         self.images = []
-#         self.color_map = np.array([ImageColor.getrgb(color) for color in ImageColor.colormap.keys()], dtype=np.uint8)
-#
-#     def record(self, img):
-#         self.images.append((img * 256).astype(np.uint8))
-#
-#     def save(self, filename):
-#         with imageio.get_writer(filename, mode='I', format="GIF-FI") as writer:
-#             for img in self.images:
-#                 writer.append_data(img)
 
 
 def main():
@@ -56,7 +39,7 @@ def main():
     robot.set_root_pose(sapien.Pose([0, 0, 0], [1, 0, 0, 0]))
     robot.set_qpos([0, 0, 0, -1.5, 0, 1.5, 0.7, 0.4, 0.4])
     robot.set_drive_target([0, 0, 0, -1.5, 0, 1.5, 0.7, 0.4, 0.4])
-    manager.set_drive_property(3000, 500, 50000, np.arange(9))
+    manager.set_drive_property(300, 50, 50000, np.arange(9))
 
     manager.create_joint_publisher(20)
     arm_controller = manager.build_cartesian_velocity_controller("panda_arm", "arm_cartesian_velocity", 0)
@@ -67,11 +50,37 @@ def main():
 
     # Start
     controller.show_window()
+    scene.step()
     scene_manager.start()
+    scene.step()
+
+    current_pose = robot.get_links()[9].get_pose()
+    target_pose = np.array([-0., 0.3, -0.]) + current_pose.p
+    current_pose.set_p(target_pose)
+    planner.set_start_state_to_current_state()
+    # planner.set_start_state(robot.get_qpos()[:7])
+    planner.set_goal_state(current_pose)
+    plan = planner.plan()
     step = 0
-    import time
-    time.sleep(2.0)
+    times = 20
+
     while not controller.should_quit:
+        plan_num = step // times
+        rest_num = times - step % times
+        next_position = np.concatenate([plan.position[plan_num + 1], np.zeros(2)])
+        current_position = robot.get_qpos()
+        current_velocity = plan.velocity[plan_num + 1]
+        delta_qpos = next_position - current_position
+        manager.balance_passive_force()
+        # if step > 300:
+        #     robot.set_qpos(np.concatenate([plan.position[-1, :], np.zeros(2)]))
+        #     print(current_pose.p - robot.get_links()[9].get_pose().p)
+        #     step = 501
+
+        robot.set_drive_target(current_position + delta_qpos / rest_num)
+        for i in range(7):
+            robot.get_active_joints()[9+i].set_drive_velocity_target(current_velocity[i])
+
         scene.step()
         scene.update_render()
         controller.render()
