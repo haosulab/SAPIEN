@@ -43,6 +43,7 @@ sapien::ros2::SceneManager::SceneManager(sapien::SScene *scene, const std::strin
 
   // Register Simulation Callback
   mScene->registerListener(*this);
+  mTimeStep = scene->getTimestep();
 
   // Add it to executor
   mExecutor.add_node(mNode);
@@ -71,6 +72,9 @@ sapien::ros2::SceneManager::buildRobotManager(sapien::SArticulation *articulatio
 void sapien::ros2::SceneManager::start() {
   for (auto &mRobotManager : mRobotManagers) {
     mRobotManager->start();
+  }
+  for (auto &mRobotManager : mRobotManagers) {
+    mRobotManager->step(true, mTimeStep);
   }
   mThread = std::thread(&rclcpp::executors::SingleThreadedExecutor::spin, &mExecutor);
 }

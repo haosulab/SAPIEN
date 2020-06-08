@@ -167,8 +167,8 @@ MotionPlanner *RobotManager::buildMotionPlanner(const std::string &groupName,
   }
   if (!mMoveItCpp)
     mMoveItCpp.reset(new MoveItCpp(mNode, *mMoveitCppOption));
-  auto planner =
-      std::make_unique<MotionPlanner>(mNode, mClock, mMoveItCpp, groupName, serviceName);
+  auto planner = std::make_unique<MotionPlanner>(mNode, mClock, mMoveItCpp, groupName, serviceName,
+                                                 mRobotState.get());
   auto plannerPtr = planner.get();
   mMotionPlanners.push_back(std::move(planner));
   return plannerPtr;

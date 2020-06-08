@@ -19,7 +19,8 @@ protected:
 
   MoveItCppPtr mMoveItCpp;
   PlanningComponentUniquePtr mComponent;
-  robot_state::RobotState mRobotState;
+//  robot_state::RobotState *mRobotState;
+  robot_state::RobotState *mManagerRobotState;
   const robot_state::JointModelGroup *mJointModelGroup;
 
 public:
@@ -30,19 +31,21 @@ protected:
 public:
   MotionPlanner(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
                 const MoveItCppPtr &moveitCpp, const std::string &groupName,
-                const std::string &serviceName);
+                const std::string &serviceName, robot_state::RobotState *robotState);
 
   /* Set Start and End State */
-  inline void setStartStateToCurrentState() { mComponent->setStartStateToCurrentState(); }
+  inline void setStartStateToCurrentState() { mComponent->setStartState(*mManagerRobotState); }
 
   inline bool setStartState(Eigen::VectorXd &qpos) {
-    mRobotState.copyJointGroupPositions(mJointModelGroup, qpos);
-    return mComponent->setStartState(mRobotState);
+    robot_state::RobotState state(*mManagerRobotState);
+    state.setJointGroupPositions(mJointModelGroup, qpos);
+    return mComponent->setStartState(state);
   }
 
   inline bool setGoalState(Eigen::VectorXd &qpos) {
-    mRobotState.copyJointGroupPositions(mJointModelGroup, qpos);
-    return mComponent->setGoal(mRobotState);
+    robot_state::RobotState state(*mManagerRobotState);
+    state.setJointGroupPositions(mJointModelGroup, qpos);
+    return mComponent->setGoal(state);
   }
 
   bool setGoalState(const physx::PxTransform &Pose, const std::string &linkName = "");

@@ -5,9 +5,10 @@ namespace sapien::ros2 {
 
 MotionPlanner::MotionPlanner(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
                              const moveit::planning_interface::MoveItCppPtr &moveitCpp,
-                             const std::string &groupName, const std::string &serviceName)
+                             const std::string &groupName, const std::string &serviceName,
+                             robot_state::RobotState *robotState)
     : mNode(std::move(node)), mClock(std::move(clock)), mMoveItCpp(moveitCpp),
-      mRobotState(moveitCpp->getRobotModel()) {
+      mManagerRobotState(robotState) {
   auto pipelineNames = moveitCpp->getPlanningPipelineNames(groupName);
   auto logger = spdlog::get("SAPIEN_ROS2");
   logger->info("There are {} pipelines loaded for group {}", pipelineNames.size(), groupName);
