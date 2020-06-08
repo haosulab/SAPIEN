@@ -129,7 +129,8 @@ project_python_home_dir = os.path.join("python", "py_ros2_package")
 sapien_data = ["glsl_shader/*/*"]
 package_data = {
     "sapien": sapien_data,
-    "sapien.core": ["__init__.pyi"]
+    "sapien.ros2": ["motion_planning/default_ompl_planning.yaml"],
+    "sapien.core": ["__init__.pyi", ]
 }
 
 setup(name="sapien_robot",

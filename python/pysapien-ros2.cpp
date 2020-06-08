@@ -186,6 +186,12 @@ PYBIND11_MODULE(pysapien_ros2, m) {
            });
 
   PyMotionPlan.def_readonly("joint_names", &MotionPlan::jointNames)
+      .def("__repr__",
+           [](MotionPlan &plan) {
+             std::ostringstream oss;
+             oss << "Motion Plan contains [" << plan.duration.cols() << "] trajectory points";
+             return oss.str();
+           })
       .def_readonly("duration", &MotionPlan::duration)
       .def_readonly("position", &MotionPlan::position)
       .def_readonly("velocity", &MotionPlan::velocity)
