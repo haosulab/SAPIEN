@@ -371,7 +371,7 @@ void OptifuserRenderer::setLogLevel(std::string const &level) {
   } else if (level == "err" || level == "error") {
     spdlog::get("Optifuser")->set_level(spdlog::level::err);
   } else {
-    spdlog::error("Invalid log level \"{}\"", level);
+    spdlog::get("Optifuser")->error("Invalid log level \"{}\"", level);
   }
 }
 
