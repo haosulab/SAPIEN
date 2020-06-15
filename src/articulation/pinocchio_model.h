@@ -35,6 +35,9 @@ public:
   PinocchioModel &operator=(PinocchioModel const &other) = delete;
   ~PinocchioModel() = default;
 
+  inline pinocchio::Model &getInternalModel() { return model; }
+  inline pinocchio::Data &getInternalData() { return data; }
+
 private:
   inline PinocchioModel(){};
 

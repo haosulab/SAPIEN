@@ -10,6 +10,9 @@
 #include "simulation.h"
 #include <iostream>
 
+#include <pinocchio/algorithm/kinematics-derivatives.hpp>
+#include <chrono>
+
 using namespace sapien;
 
 template <class MatT>
@@ -161,8 +164,10 @@ int main() {
 
   auto loader = s0->createURDFLoader();
   loader->fixRootLink = 1;
-  // auto a = loader->load("../assets_local/robot/panda.urdf");
-  auto a = loader->load("../assets_local/robot/tmp.urdf");
+  auto a = loader->loadKinematic("../assets_local/robot/panda.urdf");
+  // auto a = loader->load("../assets_local/robot/tmp.urdf");
+  // auto a = loader->loadKinematic("../assets_local/old_kinova/old_kinova_parallel.urdf");
+  // auto b = loader->loadKinematic("../assets/tmp.urdf");
 
   // std::cout << a->exportKinematicsChainAsURDF(true) << std::endl;
 
@@ -177,34 +182,46 @@ int main() {
   // }
   // std::cout << q2 << std::endl;
 
-  // auto pm = a->createPinocchioModel();
-  // pm->computeForwardKinematics(q2);
-  // for (uint32_t i = 0; i < a->getBaseLinks().size(); ++i) {
-  //   assert(poseClose(pm->getLinkPose(i), a->getBaseLinks()[i]->getPose()));
-  //   std::cout << std::endl;
-  // }
+  // std::cout << a->exportKinematicsChainAsURDF(true) << std::endl;
 
-  // auto J = a->computeSpatialTwistJacobianMatrix();
-  // std::cout << J << std::endl;
-  // std::cout << std::endl;
+  auto pm = a->createPinocchioModel();
+  auto q2 = pm->getRandomConfiguration();
+  std::cout << q2 << std::endl;
 
-  // J = a->computeWorldCartesianJacobianMatrix();
-  // std::cout << J << std::endl;
-  // std::cout << std::endl;
+  if (q2.size() != a->dof()) {
+    throw std::runtime_error("DOF mismatch");
+  }
 
-  // std::cout << a->computeManipulatorInertiaMatrix() << std::endl;
-  // std::cout << std::endl;
-  // std::cout << pm->computeGeneralizedMassMatrix(q2) << std::endl;
+  std::vector<float> q;
+  for (uint32_t i = 0; i < q2.size(); ++i) {
+    q.push_back(q2(i));
+  }
+  a->setQpos(q);
+  s0->step();
 
-  // pm->computeFullJacobian(q2);
-  // for (uint32_t i = 0; i < a->getBaseLinks().size(); ++i) {
-  //   std::cout << a->getBaseLinks()[i]->getName() << std::endl;
-  //   std::cout << pm->getLinkJacobian(i) << std::endl;
-  // }
+  pm->computeForwardKinematics(q2);
+  for (uint32_t i = 0; i < a->getBaseLinks().size(); ++i) {
+    bool close = poseClose(pm->getLinkPose(i), a->getBaseLinks()[i]->getPose());
+    if (!close) {
+      throw std::runtime_error("pose not close");
+    }
+  }
 
   s0->setAmbientLight({0.3, 0.3, 0.3});
   s0->setShadowLight({1, -1, -1}, {.5, .5, 0.4});
   controller.setCurrentScene(s0.get());
+
+  pm->computeFullJacobian(q2);
+  
+  // auto start = std::chrono::high_resolution_clock::now(); 
+  // for (uint32_t i = 0; i < 1000; ++i) {
+  //   pinocchio::computeJointKinematicHessians(model, data);
+  //   Eigen::Tensor<double, 3> tensor;
+  //   tensor.resize(9, 6, 9);
+  //   pinocchio::getJointKinematicHessian(model, data, 5, pinocchio::ReferenceFrame::WORLD, tensor);
+  // }
+  // auto end = std::chrono::high_resolution_clock::now(); 
+  // std::cout << "ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << std::endl;
 
   while (!controller.shouldQuit()) {
     for (int i = 0; i < 8; ++i) {
@@ -226,15 +243,17 @@ int main() {
 
       // pm->computeFullJacobian(q2);
 
-      // auto j = pm->getLinkJacobian(9);
+      // auto j = pm->computeSingleLinkLocalJacobian(q2, 9);
       // Eigen::VectorXd v(6);
-      // v << 0, -0.1, 0, 0, 0, 1;
+      // v << 0, 0, 0, 0, 0, 1;
       // auto qvel = pseudoinverse(j) * v;
       // for (uint32_t i = 0; i < q.size(); ++i) {
       //   q[i] = qvel[i] / 10;
       // }
       // a->setQvel(q);
+
       // a->setQf(qf);
+
       s0->step();
     }
     s0->updateRender();
