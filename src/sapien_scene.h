@@ -55,6 +55,8 @@ public:
   inline uint32_t getDefaultSolverVelocityIterations() const { return mDefaultSolverVelocityIterations; }
   inline float getDefaultContactOffset() const { return mDefaultContactOffset; }
 
+  std::map<physx_id_t, std::string> mRenderId2VisualName;
+
 private:
   std::string mName;
   Simulation *mSimulation;             // sapien simulation
@@ -63,8 +65,6 @@ private:
 
   IDGenerator mLinkIdGenerator;   // assign 1 link id to each actor
   IDGenerator mRenderIdGenerator; //  assign 1 link id to each visual
-
-  std::map<physx_id_t, std::string> mRenderId2VisualName;
 
   std::map<physx_id_t, SActorBase *> mLinkId2Actor;
   std::map<physx_id_t, SLinkBase *> mLinkId2Link;

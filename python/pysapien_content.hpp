@@ -597,7 +597,9 @@ void buildSapien(py::module &m) {
 
       // drive, constrains, and joints
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
-           py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference);
+           py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
+      .def_readonly("render_id_to_visual_name", &SScene::mRenderId2VisualName);
+
 
   //======= Drive =======//
   PyDrive
