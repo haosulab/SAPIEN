@@ -1257,7 +1257,7 @@ void buildSapien(py::module &m) {
 #endif
 
 #ifdef _USE_VULKAN
-  // PySapienVulkanRenderer
+  PySapienVulkanRenderer.def(py::init<>());
   // PySapienVulkanCamera
 #ifdef ON_SCREEN
   // PySapienVulkanController
