@@ -5,10 +5,9 @@ set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation")
 
 set(PROFILE FALSE CACHE BOOL "Whether to use Profiler")
-
 set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
-
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
+set(BUILD_WITH_VULKAN_SUPPORT TRUE CACHE BOOL "Build the SAPIEN Vulkan renderer")
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
@@ -99,6 +98,11 @@ else ()
             "/usr/local/lib")
 endif ()
 
+set(ON_SCREEN TRUE CACHE BOOL "Vulkan renderer with on screen rendering") 
+if (${ON_SCREEN}) 
+    add_definitions(-DON_SCREEN)
+endif()
+
 set(OPTIX_HOME "NOT FOUND" CACHE FILEPATH "Home to OptiX")
 if (EXISTS ${OPTIX_HOME})
     include_directories("${OPTIX_HOME}/include")
@@ -119,6 +123,17 @@ add_subdirectory("3rd_party/optifuser" EXCLUDE_FROM_ALL)
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
 include_directories("3rd_party/pybind11/include")
+
+if (${BUILD_WITH_VULKAN_SUPPORT})
+    add_definitions(-D_USE_VULKAN)
+    add_subdirectory("3rd_party/sapien-vulkan" EXCLUDE_FROM_ALL)
+    include_directories("3rd_party/sapien-vulkan/include")
+    add_executable(manual_vulkan manualtest/vulkan.cpp)
+    target_link_libraries(manual_vulkan sapien)
+
+    set_target_properties(sapien-vulkan PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+endif()
+
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})
@@ -157,7 +172,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY})
+            ${PINOCCHIO_LIBRARY} sapien-vulkan)
 endif ()
 
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
