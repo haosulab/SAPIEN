@@ -32,6 +32,13 @@
 
 #include "utils/pose.hpp"
 
+#ifdef _USE_VULKAN
+#include "renderer/sapien_vulkan_renderer.h"
+#ifdef ON_SCREEN
+#include "renderer/sapien_vulkan_controller.h"
+#endif
+#endif
+
 using namespace sapien;
 namespace py = pybind11;
 
@@ -142,6 +149,7 @@ void buildSapien(py::module &m) {
   py::class_<Renderer::IPxrScene>(m, "IPxrScene");
   auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
   auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
+
   auto PyOptifuserRenderer =
       py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer>(m, "OptifuserRenderer");
   auto PyOptifuserConfig = py::class_<Renderer::OptifuserConfig>(m, "OptifuserConfig");
@@ -150,6 +158,7 @@ void buildSapien(py::module &m) {
   auto PyCameraSpec = py::class_<Optifuser::CameraSpec>(m, "CameraSpec");
   auto PyOptifuserCamera =
       py::class_<Renderer::OptifuserCamera, Renderer::ICamera>(m, "OptifuserCamera");
+
   auto PyEngine = py::class_<Simulation>(m, "Engine");
   auto PySceneConfig = py::class_<SceneConfig>(m, "SceneConfig");
   auto PyScene = py::class_<SScene>(m, "Scene");
@@ -181,6 +190,16 @@ void buildSapien(py::module &m) {
   auto PyLinkBuilder = py::class_<LinkBuilder, ActorBuilder>(m, "LinkBuilder");
   auto PyJointRecord = py::class_<LinkBuilder::JointRecord>(m, "JointRecord");
   auto PyArticulationBuilder = py::class_<ArticulationBuilder>(m, "ArticulationBuilder");
+
+#ifdef _USE_VULKAN
+  auto PySapienVulkanRenderer =
+      py::class_<Renderer::SapienVulkanRenderer, Renderer::IPxrRenderer>(m, "VulkanRenderer");
+  auto PySapienVulkanCamera =
+      py::class_<Renderer::SapienVulkanCamera, Renderer::ICamera>(m, "VulkanCamera");
+#ifdef ON_SCREEN
+  auto PySapienVulkanController = py::class_<Renderer::SapienVulkanController>(m, "VulkanController");
+#endif
+#endif
 
 #ifdef _USE_PINOCCHIO
   auto PyPinocchioModel = py::class_<PinocchioModel>(m, "PinocchioModel");
@@ -1236,4 +1255,14 @@ void buildSapien(py::module &m) {
       .def("compute_single_link_local_jacobian", &PinocchioModel::computeSingleLinkLocalJacobian,
            py::arg("qpos"), py::arg("link_index"));
 #endif
+
+#ifdef _USE_VULKAN
+  // PySapienVulkanRenderer
+  // PySapienVulkanCamera
+#ifdef ON_SCREEN
+  // PySapienVulkanController
+#endif
+#endif
+
+
 }
