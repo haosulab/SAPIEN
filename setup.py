@@ -82,6 +82,13 @@ class CMakeBuild(build_ext):
                 shutil.rmtree(ptx_target_path)
             shutil.copytree(os.path.join(self.build_temp, 'ptx'), ptx_target_path)
 
+        spv_path = os.path.join(self.build_lib, 'sapien', 'spv')
+        spv_build_path = os.path.join(self.build_temp, 'spv')
+        if os.path.exists(spv_path):
+            shutil.rmtree(spv_path)
+        if os.path.exists(spv_build_path):
+            shutil.copytree(spv_build_path, spv_path)
+
 
 def check_version_info():
     try:
