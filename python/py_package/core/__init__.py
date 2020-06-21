@@ -6,6 +6,7 @@ import sys
 GL_SHADER_ROOT = pkg_resources.resource_filename("sapien", "glsl_shader")
 PTX_ROOT = pkg_resources.resource_filename("sapien", 'ptx')
 __GL_VERSION_DICT = {3: "130", 4: "410"}
+SPV_ROOT = pkg_resources.resource_filename("sapien", 'spv')
 
 
 def __enable_ptx():
@@ -19,6 +20,11 @@ def __enable_gl(num: int):
     _GL_SHADER_PATH = os.path.join(GL_SHADER_ROOT, __GL_VERSION_DICT[__GL_VERSION])
     OptifuserRenderer.set_default_shader_config(_GL_SHADER_PATH, __GL_VERSION_DICT[__GL_VERSION])
     print("Using default glsl path {}".format(_GL_SHADER_PATH))
+
+
+def __enable_vulkan():
+    assert os.path.exists(SPV_ROOT)
+    VulkanRenderer.set_shader_dir(SPV_ROOT)
 
 
 def enable_default_gl3():
@@ -37,5 +43,12 @@ else:
 try:
     __enable_ptx()
     sys.stderr.write('ray tracing enabled\n')
+except:
+    pass
+
+
+try:
+    __enable_vulkan()
+    sys.stderr.write('Vulkan enabled\n')
 except:
     pass

@@ -1257,10 +1257,19 @@ void buildSapien(py::module &m) {
 #endif
 
 #ifdef _USE_VULKAN
-  PySapienVulkanRenderer.def(py::init<>());
+  PySapienVulkanRenderer.def(py::init<bool>(), py::arg("offscreen_only")=false)
+      .def_static("set_shader_dir",
+                  &svulkan::VulkanContext::setDefaultShaderDir,
+                  py::arg("spv_dir"));
   // PySapienVulkanCamera
 #ifdef ON_SCREEN
-  // PySapienVulkanController
+  PySapienVulkanController
+      .def(py::init<Renderer::SapienVulkanRenderer*>(), py::arg("renderer"))
+      .def_property_readonly("is_closed", &Renderer::SapienVulkanController::isClosed)
+      .def("render", &Renderer::SapienVulkanController::render)
+      .def("set_current_scene", &Renderer::SapienVulkanController::setScene,
+                               py::arg("scene"));
+
 #endif
 #endif
 
