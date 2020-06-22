@@ -143,8 +143,12 @@ public:
   std::vector<int> getSegmentation() override;
   std::vector<int> getObjSegmentation() override;
 
+  std::vector<float> getPositionRGBA();
+
   inline IPxrScene *getScene() override { return mScene; }
 
+  glm::mat4 getModelMatrix() const;
+  glm::mat4 getProjectionMatrix() const;
 
   // ISensor
   physx::PxTransform getPose() const override;

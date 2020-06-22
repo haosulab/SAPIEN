@@ -81,6 +81,11 @@ std::vector<int> SapienVulkanCamera::getObjSegmentation() {
   return output;
 }
 
+std::vector<float> SapienVulkanCamera::getPositionRGBA() {
+  waitForFence();
+  return mRenderer->downloadPosition();
+}
+
 
 physx::PxTransform SapienVulkanCamera::getPose() const {
   auto p = mCamera->position;
@@ -117,6 +122,14 @@ bool SapienVulkanCamera::isOrthographic() const {
 void SapienVulkanCamera::waitForFence() {
   auto &context = mScene->getParentRenderer()->mContext;
   context->getDevice().waitForFences({mFence.get()}, VK_TRUE, UINT64_MAX);
+}
+
+glm::mat4 SapienVulkanCamera::getModelMatrix() const {
+  return mCamera->getModelMat();
+}
+
+glm::mat4 SapienVulkanCamera::getProjectionMatrix() const {
+  return mCamera->getProjectionMat();
 }
 
 } // namespace Renderer
