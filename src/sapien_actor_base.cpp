@@ -22,6 +22,23 @@ void SActorBase::renderCollisionBodies(bool collision) {
 
 bool SActorBase::isRenderingCollision() const { return collisionRender; }
 
+void SActorBase::hideVisual() {
+  for (auto body : mRenderBodies) {
+    body->setVisible(false);
+  }
+  for (auto body : mCollisionBodies) {
+    body->setVisible(false);
+  }
+}
+void SActorBase::unhideVisual() {
+  for (auto body : mRenderBodies) {
+    body->setVisible(true);
+  }
+}
+bool SActorBase::isHidingVisual() const {
+  return mHidden;
+}
+
 void SActorBase::prestep() {
   EventActorStep s;
   s.actor = this;

@@ -137,7 +137,7 @@ endif()
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})
-add_library(sapien ${PROJECT_SRC})
+add_library(sapien STATIC ${PROJECT_SRC})
 add_dependencies(sapien shader)
 
 if (EXISTS ${OPTIX_HOME})
@@ -160,7 +160,7 @@ if (MACOSX)
             libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
-            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
+            pthread ${OPENGL_LIBRARY} glfw3 GLEW ${ASSIMP_LIBRARIES} dl optifuser
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
             ${PINOCCHIO_LIBRARY})
 else ()
@@ -170,7 +170,7 @@ else ()
             libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
-            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
+            pthread ${OPENGL_LIBRARY} glfw3 GLEW ${ASSIMP_LIBRARIES} dl optifuser
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
             ${PINOCCHIO_LIBRARY} sapien-vulkan)
 endif ()

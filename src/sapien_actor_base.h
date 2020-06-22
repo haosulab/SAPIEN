@@ -39,10 +39,15 @@ protected:
   uint32_t mCol3 = 0;
 
   bool collisionRender = false;
+  bool mHidden = false;
 
 public:
   void renderCollisionBodies(bool collision);
   bool isRenderingCollision() const;
+
+  void hideVisual();
+  void unhideVisual();
+  bool isHidingVisual() const;
 
   inline std::vector<SDrive *> getDrives() const { return mDrives; }
 

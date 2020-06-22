@@ -659,7 +659,10 @@ void buildSapien(py::module &m) {
       .def_property_readonly("col1", &SActorBase::getCollisionGroup1)
       .def_property_readonly("col2", &SActorBase::getCollisionGroup2)
       .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
-      .def("get_collision_shapes", &SActorBase::getCollisionShapes);
+      .def("get_collision_shapes", &SActorBase::getCollisionShapes)
+      .def("hide_visual", &SActorBase::hideVisual)
+      .def("unhide_visual", &SActorBase::unhideVisual)
+      .def("is_hiding_visual", &SActorBase::isHidingVisual);
 
   PyActorDynamicBase
       .def_property_readonly("velocity",
@@ -1261,7 +1264,21 @@ void buildSapien(py::module &m) {
       .def_static("set_shader_dir",
                   &svulkan::VulkanContext::setDefaultShaderDir,
                   py::arg("spv_dir"));
-  // PySapienVulkanCamera
+  PySapienVulkanCamera
+      .def("get_position_rgba", [](Renderer::SapienVulkanCamera &cam) {
+        return py::array_t<float>(
+            {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+            cam.getPositionRGBA().data());
+      })
+      .def("get_model_matrix",
+           [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getModelMatrix()); })
+      .def("get_projection_matrix",
+           [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getProjectionMatrix()); })
+      .def("set_mode_orthographic", &Renderer::SapienVulkanCamera::changeModeToOrthographic,
+           py::arg("scaling") = 1.f)
+      .def("set_mode_perspective", &Renderer::SapienVulkanCamera::changeModeToPerspective,
+           py::arg("fovy") = glm::radians(35.f));
+
 #ifdef ON_SCREEN
   PySapienVulkanController
       .def(py::init<Renderer::SapienVulkanRenderer*>(), py::arg("renderer"))
