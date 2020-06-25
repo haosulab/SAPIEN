@@ -7,6 +7,8 @@
 
 #include "sapien_vulkan/gui/gui.h"
 
+#include "hud/hud_options.hpp"
+
 namespace sapien {
 class Simulation;
 class SScene;
@@ -36,6 +38,10 @@ class SapienVulkanController {
   void render();
   inline void setScene(SScene * scene) { mScene = scene; }
   inline bool isClosed() const { return mWindow->isClosed(); };
+
+ private:
+  // ImGui Modules
+  HudControlWindow mHudControlWindow;
 };
 
 } // namespace Renderer

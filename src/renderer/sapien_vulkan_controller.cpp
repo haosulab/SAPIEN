@@ -53,6 +53,7 @@ void SapienVulkanController::render() {
 
   {
     ImGui::NewFrame();
+    mHudControlWindow.draw();
     ImGui::Render();
   }
 
@@ -94,13 +95,19 @@ void SapienVulkanController::render() {
     mWindow->close();
   }
 
+  float r = mHudControlWindow.mHudStats.mFrameRate > 0 ?
+            std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f) :
+            0.f;
   if (mWindow->isMouseKeyDown(1)) {
     auto [x, y] = mWindow->getMouseDelta();
-    float r = 1e-3;
-    mFPSController->rotate(0, -r * y, -r * x);
+    float r1 = mHudControlWindow.mHudControl.mInvertX ? -r : r;
+    float r2 = mHudControlWindow.mHudControl.mInvertY ? -r : r;
+    r1 *= mHudControlWindow.mHudControl.mRotateSpeed;
+    r2 *= mHudControlWindow.mHudControl.mRotateSpeed;
+    mFPSController->rotate(0, -r2 * y, -r1 * x);
   }
 
-  constexpr float r = 1e-3;
+  r *= mHudControlWindow.mHudControl.mMoveSpeed;
   if (mWindow->isKeyDown('w')) {
     mFPSController->move(r, 0, 0);
   }
