@@ -528,7 +528,7 @@ SKArticulation *URDFLoader::loadKinematic(const std::string &filename, URDFConfi
   std::unique_ptr<XMLDocument> srdfDoc = nullptr;
   if (srdfName) {
     srdfDoc = std::make_unique<XMLDocument>();
-    if (srdfDoc->LoadFile(filename.c_str())) {
+    if (srdfDoc->LoadFile(srdfName.value().c_str())) {
       srdfDoc = nullptr;
       spdlog::get("SAPIEN")->error("SRDF loading faild for {}", filename);
     }
@@ -573,7 +573,7 @@ URDFLoader::loadFileAsArticulationBuilder(const std::string &filename, URDFConfi
   std::unique_ptr<XMLDocument> srdfDoc = nullptr;
   if (srdfName) {
     srdfDoc = std::make_unique<XMLDocument>();
-    if (srdfDoc->LoadFile(filename.c_str())) {
+    if (srdfDoc->LoadFile(srdfName.value().c_str())) {
       srdfDoc = nullptr;
       spdlog::get("SAPIEN")->error("SRDF loading faild for {}", filename);
     }
