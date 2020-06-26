@@ -48,8 +48,8 @@ struct HudRenderMode {
 struct HudStats {
   float mFrameRate{};
   void draw() {
+    mFrameRate = ImGui::GetIO().Framerate;
     if (ImGui::CollapsingHeader("Stats")) {
-      mFrameRate = ImGui::GetIO().Framerate;
       ImGui::Text("FPS: %.1f", mFrameRate);
       ImGui::Text("Frame time: %.3f ms", 1000.f / mFrameRate);
     }

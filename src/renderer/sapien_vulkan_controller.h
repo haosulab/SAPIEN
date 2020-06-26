@@ -7,7 +7,7 @@
 
 #include "sapien_vulkan/gui/gui.h"
 
-#include "hud/hud_options.hpp"
+#include "hud/hud_control_window.hpp"
 
 namespace sapien {
 class Simulation;
