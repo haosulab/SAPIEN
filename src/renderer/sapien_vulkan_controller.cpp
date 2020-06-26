@@ -107,6 +107,21 @@ void SapienVulkanController::render() {
       mFPSController->rotate(0, -r2 * y, -r1 * x);
     }
 
+    if (ImGui::IsMouseClicked(0)) {
+      auto [x, y] = mWindow->getMousePosition();
+      auto pixel = mVulkanRenderer->getRenderTargets().segmentation->downloadPixel<uint32_t>(
+          mRenderer->mContext->getPhysicalDevice(),
+          mRenderer->mContext->getDevice(),
+          mRenderer->mContext->getCommandPool(),
+          mRenderer->mContext->getGraphicsQueue(),
+          static_cast<int>(x), static_cast<int>(y));
+      if (pixel.size()) {
+        std::cout << pixel[0] << " " << pixel[1] << std::endl;
+      } else {
+        std::cout << "None" << std::endl;
+      }
+    }
+
     r *= mHudControlWindow.mHudControl.mMoveSpeed;
     if (mWindow->isKeyDown('w')) {
       mFPSController->move(r, 0, 0);
