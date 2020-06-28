@@ -57,6 +57,7 @@ void SapienVulkanController::render() {
     {
       ImGui::NewFrame();
       mHudControlWindow.draw();
+      mHudObjectWindow.draw(mScene, mSelectedId);
       ImGui::Render();
     }
 
@@ -107,7 +108,9 @@ void SapienVulkanController::render() {
       mFPSController->rotate(0, -r2 * y, -r1 * x);
     }
 
-    if (ImGui::IsMouseClicked(0)) {
+    
+
+    if (!ImGui::GetIO().WantCaptureMouse && ImGui::IsMouseClicked(0)) {
       auto [x, y] = mWindow->getMousePosition();
       auto pixel = mVulkanRenderer->getRenderTargets().segmentation->downloadPixel<uint32_t>(
           mRenderer->mContext->getPhysicalDevice(),
@@ -116,7 +119,9 @@ void SapienVulkanController::render() {
           mRenderer->mContext->getGraphicsQueue(),
           static_cast<int>(x), static_cast<int>(y));
       if (pixel.size()) {
-        std::cout << pixel[0] << " " << pixel[1] << std::endl;
+        auto actorId = pixel[0];
+        // auto visualId = pixel[1];
+        selectActor(actorId);
       } else {
         std::cout << "None" << std::endl;
       }
@@ -136,6 +141,11 @@ void SapienVulkanController::render() {
       mFPSController->move(0, -r, 0);
     }
   } while(mHudControlWindow.mHudControl.mPause);
+}
+
+
+void SapienVulkanController::selectActor(physx_id_t actorId) {
+  mSelectedId = actorId;
 }
 
 } // namespace Renderer
