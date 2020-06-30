@@ -25,6 +25,7 @@ class SapienVulkanController {
   std::unique_ptr<svulkan::Camera> mCamera;
   std::unique_ptr<svulkan::VulkanRendererForEditor> mVulkanRenderer;
   std::unique_ptr<svulkan::FPSCameraController> mFPSController;
+  std::unique_ptr<svulkan::ArcRotateCameraController> mArcRotateController;
   std::unique_ptr<svulkan::VulkanWindow> mWindow;
 
   uint32_t mWidth;
@@ -41,12 +42,14 @@ class SapienVulkanController {
   inline bool isClosed() const { return mWindow->isClosed(); };
 
   void selectActor(physx_id_t actorId);
+  void focusActor(physx_id_t actorId);
 
  private:
   bool mDefaultMouseClickBehavior {true};
   bool mDefaultKeyPressBehavior {true};
 
   physx_id_t mSelectedId {0};
+  physx_id_t mFocusedId {0};
   // ImGui Modules
   HudControlWindow mHudControlWindow;
   HudObjectWindow mHudObjectWindow;
