@@ -165,6 +165,8 @@ void SapienVulkanController::render() {
 
     if (mHudObjectWindow.mHudWorld.mSelect) {
       selectActor(mHudObjectWindow.mHudWorld.mSelectedId);
+    } else if (mHudObjectWindow.mHudArticulation.mSelect) {
+      selectActor(mHudObjectWindow.mHudArticulation.mSelectedId);
     }
 
     if (mSelectedId) {
@@ -174,7 +176,11 @@ void SapienVulkanController::render() {
         actor = mScene->findArticulationLinkById(mSelectedId);
       }
       if (actor) {
-        auto pose = actor->getPose();
+        auto pose =  actor->getPose();
+        if (mHudObjectWindow.mHudActor.mShowCenterOfMass &&
+            actor->getType() != EActorType::STATIC) {
+          pose = pose * static_cast<SActorDynamicBase*>(actor)->getCMassLocalPose();
+        }
         glm::mat4 mat(1);
         mat[0][0] *= 0.1;
         mat[1][1] *= 0.1;
@@ -192,7 +198,6 @@ void SapienVulkanController::render() {
 
 
 void SapienVulkanController::selectActor(physx_id_t actorId) {
-  // std::cout << actorId << std::endl;
   mSelectedId = actorId;
 }
 

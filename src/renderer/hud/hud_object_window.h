@@ -5,11 +5,19 @@
 namespace sapien {
 class SScene;
 class SActorBase;
+class SArticulationBase;
 
 namespace Renderer {
 
 struct HudActor {
+  bool mShowCenterOfMass;
   void draw(SActorBase *actor);
+};
+
+struct HudArticulation {
+  bool mSelect = false;
+  physx_id_t mSelectedId;
+  void draw(SArticulationBase *articulation, SActorBase *actor);
 };
 
 struct HudWorld {
@@ -20,8 +28,9 @@ struct HudWorld {
 };
 
 struct HudObjectWindow {
-  HudActor mHudActor = {};
-  HudWorld mHudWorld = {};
+  HudActor mHudActor {};
+  HudArticulation mHudArticulation {};
+  HudWorld mHudWorld {};
 
   void draw(SScene *scene, physx_id_t selectedId);
 };
