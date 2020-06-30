@@ -1,9 +1,9 @@
 #ifdef _USE_VULKAN
 #ifdef ON_SCREEN
 #include "sapien_vulkan_controller.h"
-#include "sapien_scene.h"
-#include "sapien_actor_base.h"
 #include "articulation/sapien_link.h"
+#include "sapien_actor_base.h"
+#include "sapien_scene.h"
 
 namespace sapien {
 namespace Renderer {
@@ -13,6 +13,8 @@ SapienVulkanController::SapienVulkanController(SapienVulkanRenderer *renderer)
   mCamera = mRenderer->mContext->createCamera();
   mVulkanRenderer = mRenderer->mContext->createVulkanRendererForEditor();
   mFPSController = std::make_unique<svulkan::FPSCameraController>(
+      *mCamera, glm::vec3{1.f, 0.f, 0.f}, glm::vec3{0.f, 0.f, 1.f});
+  mArcRotateController = std::make_unique<svulkan::ArcRotateCameraController>(
       *mCamera, glm::vec3{1.f, 0.f, 0.f}, glm::vec3{0.f, 0.f, 1.f});
   mWindow = mRenderer->mContext->createWindow(1280, 720);
   mWindow->initImgui(mRenderer->mContext->getDescriptorPool(),
@@ -99,67 +101,94 @@ void SapienVulkanController::render() {
         mWindow->close();
       }
       float r = mHudControlWindow.mHudStats.mFrameRate > 0
-                ? std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f)
-                : 0.f;
+                    ? std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f)
+                    : 0.f;
 
       r *= mHudControlWindow.mHudControl.mMoveSpeed;
       if (mWindow->isKeyDown('w')) {
+        focusActor(0);
         mFPSController->move(r, 0, 0);
       }
       if (mWindow->isKeyDown('s')) {
+        focusActor(0);
         mFPSController->move(-r, 0, 0);
       }
       if (mWindow->isKeyDown('a')) {
+        focusActor(0);
         mFPSController->move(0, r, 0);
       }
       if (mWindow->isKeyDown('d')) {
+        focusActor(0);
         mFPSController->move(0, -r, 0);
+      }
+      if (mWindow->isKeyPressed('f')) {
+        focusActor(0);
+        focusActor(mSelectedId);
       }
     }
 
     if (mDefaultMouseClickBehavior) {
       float r = mHudControlWindow.mHudStats.mFrameRate > 0
-                ? std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f)
-                : 0.f;
+                    ? std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f)
+                    : 0.f;
+
+      SActorBase *focusedActor{};
+      if (mFocusedId) {
+        focusedActor = mScene->findActorById(mFocusedId);
+        if (!focusedActor) {
+          focusedActor = mScene->findArticulationLinkById(mFocusedId);
+        }
+        if (!focusedActor) {
+          focusActor(0);
+          return;
+        }
+
+        auto p = focusedActor->getPose().p;
+        mArcRotateController->setCenter(p.x, p.y, p.z);
+
+        mArcRotateController->zoom(mWindow->getMouseWheelDelta().x);
+      }
+
       if (mWindow->isMouseKeyDown(1)) {
         auto [x, y] = mWindow->getMouseDelta();
         float r1 = mHudControlWindow.mHudControl.mInvertX ? -r : r;
         float r2 = mHudControlWindow.mHudControl.mInvertY ? -r : r;
         r1 *= mHudControlWindow.mHudControl.mRotateSpeed;
         r2 *= mHudControlWindow.mHudControl.mRotateSpeed;
-        mFPSController->rotate(0, -r2 * y, -r1 * x);
+
+        if (mFocusedId) {
+          mArcRotateController->rotateYawPitch(-r1 * x, r2 * y);
+        } else {
+          mFPSController->rotate(0, -r2 * y, -r1 * x);
+        }
       }
 
       if (!ImGui::GetIO().WantCaptureMouse && ImGui::IsMouseClicked(0)) {
         auto [x, y] = mWindow->getMousePosition();
         auto pixel = mVulkanRenderer->getRenderTargets().segmentation->downloadPixel<uint32_t>(
-            mRenderer->mContext->getPhysicalDevice(),
-            mRenderer->mContext->getDevice(),
-            mRenderer->mContext->getCommandPool(),
-            mRenderer->mContext->getGraphicsQueue(),
+            mRenderer->mContext->getPhysicalDevice(), mRenderer->mContext->getDevice(),
+            mRenderer->mContext->getCommandPool(), mRenderer->mContext->getGraphicsQueue(),
             static_cast<int>(x), static_cast<int>(y));
         if (pixel.size()) {
           auto actorId = pixel[1];
           selectActor(actorId);
-        } else {
-          std::cout << "None" << std::endl;
         }
       }
     }
 
     if (mHudControlWindow.mHudRenderMode.mSwitchMode) {
       switch (mHudControlWindow.mHudRenderMode.mMode) {
-        case 0:
-          mVulkanRenderer->switchToLighting();
-          break;
-        case 1:
-          mVulkanRenderer->switchToNormal();
-          break;
-        case 2:
-          mVulkanRenderer->switchToDepth();
-          break;
-        default:
-          break;
+      case 0:
+        mVulkanRenderer->switchToLighting();
+        break;
+      case 1:
+        mVulkanRenderer->switchToNormal();
+        break;
+      case 2:
+        mVulkanRenderer->switchToDepth();
+        break;
+      default:
+        break;
       }
     }
 
@@ -176,10 +205,10 @@ void SapienVulkanController::render() {
         actor = mScene->findArticulationLinkById(mSelectedId);
       }
       if (actor) {
-        auto pose =  actor->getPose();
+        auto pose = actor->getPose();
         if (mHudObjectWindow.mHudActor.mShowCenterOfMass &&
             actor->getType() != EActorType::STATIC) {
-          pose = pose * static_cast<SActorDynamicBase*>(actor)->getCMassLocalPose();
+          pose = pose * static_cast<SActorDynamicBase *>(actor)->getCMassLocalPose();
         }
         glm::mat4 mat(1);
         mat[0][0] *= 0.1;
@@ -193,12 +222,36 @@ void SapienVulkanController::render() {
       }
     }
 
-  } while(mHudControlWindow.mHudControl.mPause);
+  } while (mHudControlWindow.mHudControl.mPause);
 }
 
+void SapienVulkanController::selectActor(physx_id_t actorId) { mSelectedId = actorId; }
 
-void SapienVulkanController::selectActor(physx_id_t actorId) {
-  mSelectedId = actorId;
+void SapienVulkanController::focusActor(physx_id_t actorId) {
+  if (mFocusedId != actorId) {
+    auto actor = mScene->findActorById(actorId);
+    if (!actor) {
+      actor = mScene->findArticulationLinkById(actorId);
+    }
+    if (!actor) {
+      mFocusedId = 0;
+      auto p = mCamera->position;
+      auto yp = mArcRotateController->getYawPitch();
+      mFPSController->setXYZ(p.x, p.y, p.z);
+      mFPSController->setRPY(0, -yp.y, yp.x);
+    } else if (mFocusedId == 0) {
+      auto [x, y, z] = actor->getPose().p;
+
+      auto p = mFPSController->getXYZ();
+      auto rpy = mFPSController->getRPY();
+      float r = glm::length(glm::vec3(x, y, z) - p);
+
+      mArcRotateController->setCenter(x, y, z);
+      mArcRotateController->setYawPitch(rpy.z, -rpy.y);
+      mArcRotateController->setRadius(r);
+      mFocusedId = actorId;
+    }
+  }
 }
 
 } // namespace Renderer
