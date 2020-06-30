@@ -2,6 +2,8 @@
 #ifdef ON_SCREEN
 #include "sapien_vulkan_controller.h"
 #include "sapien_scene.h"
+#include "sapien_actor_base.h"
+#include "articulation/sapien_link.h"
 
 namespace sapien {
 namespace Renderer {
@@ -9,10 +11,10 @@ namespace Renderer {
 SapienVulkanController::SapienVulkanController(SapienVulkanRenderer *renderer)
     : mRenderer(renderer), mWidth(0), mHeight(0) {
   mCamera = mRenderer->mContext->createCamera();
-  mVulkanRenderer = mRenderer->mContext->createVulkanRenderer();
+  mVulkanRenderer = mRenderer->mContext->createVulkanRendererForEditor();
   mFPSController = std::make_unique<svulkan::FPSCameraController>(
       *mCamera, glm::vec3{1.f, 0.f, 0.f}, glm::vec3{0.f, 0.f, 1.f});
-  mWindow = mRenderer->mContext->createWindow();
+  mWindow = mRenderer->mContext->createWindow(1280, 720);
   mWindow->initImgui(mRenderer->mContext->getDescriptorPool(),
                      mRenderer->mContext->getCommandPool());
 
@@ -92,59 +94,105 @@ void SapienVulkanController::render() {
     }
     // wait idle
 
-    if (mWindow->isKeyDown('q')) {
-      mWindow->close();
-    }
+    if (mDefaultKeyPressBehavior) {
+      if (mWindow->isKeyDown('q')) {
+        mWindow->close();
+      }
+      float r = mHudControlWindow.mHudStats.mFrameRate > 0
+                ? std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f)
+                : 0.f;
 
-    float r = mHudControlWindow.mHudStats.mFrameRate > 0
-                  ? std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f)
-                  : 0.f;
-    if (mWindow->isMouseKeyDown(1)) {
-      auto [x, y] = mWindow->getMouseDelta();
-      float r1 = mHudControlWindow.mHudControl.mInvertX ? -r : r;
-      float r2 = mHudControlWindow.mHudControl.mInvertY ? -r : r;
-      r1 *= mHudControlWindow.mHudControl.mRotateSpeed;
-      r2 *= mHudControlWindow.mHudControl.mRotateSpeed;
-      mFPSController->rotate(0, -r2 * y, -r1 * x);
-    }
-
-    
-
-    if (!ImGui::GetIO().WantCaptureMouse && ImGui::IsMouseClicked(0)) {
-      auto [x, y] = mWindow->getMousePosition();
-      auto pixel = mVulkanRenderer->getRenderTargets().segmentation->downloadPixel<uint32_t>(
-          mRenderer->mContext->getPhysicalDevice(),
-          mRenderer->mContext->getDevice(),
-          mRenderer->mContext->getCommandPool(),
-          mRenderer->mContext->getGraphicsQueue(),
-          static_cast<int>(x), static_cast<int>(y));
-      if (pixel.size()) {
-        auto actorId = pixel[0];
-        // auto visualId = pixel[1];
-        selectActor(actorId);
-      } else {
-        std::cout << "None" << std::endl;
+      r *= mHudControlWindow.mHudControl.mMoveSpeed;
+      if (mWindow->isKeyDown('w')) {
+        mFPSController->move(r, 0, 0);
+      }
+      if (mWindow->isKeyDown('s')) {
+        mFPSController->move(-r, 0, 0);
+      }
+      if (mWindow->isKeyDown('a')) {
+        mFPSController->move(0, r, 0);
+      }
+      if (mWindow->isKeyDown('d')) {
+        mFPSController->move(0, -r, 0);
       }
     }
 
-    r *= mHudControlWindow.mHudControl.mMoveSpeed;
-    if (mWindow->isKeyDown('w')) {
-      mFPSController->move(r, 0, 0);
+    if (mDefaultMouseClickBehavior) {
+      float r = mHudControlWindow.mHudStats.mFrameRate > 0
+                ? std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f)
+                : 0.f;
+      if (mWindow->isMouseKeyDown(1)) {
+        auto [x, y] = mWindow->getMouseDelta();
+        float r1 = mHudControlWindow.mHudControl.mInvertX ? -r : r;
+        float r2 = mHudControlWindow.mHudControl.mInvertY ? -r : r;
+        r1 *= mHudControlWindow.mHudControl.mRotateSpeed;
+        r2 *= mHudControlWindow.mHudControl.mRotateSpeed;
+        mFPSController->rotate(0, -r2 * y, -r1 * x);
+      }
+
+      if (!ImGui::GetIO().WantCaptureMouse && ImGui::IsMouseClicked(0)) {
+        auto [x, y] = mWindow->getMousePosition();
+        auto pixel = mVulkanRenderer->getRenderTargets().segmentation->downloadPixel<uint32_t>(
+            mRenderer->mContext->getPhysicalDevice(),
+            mRenderer->mContext->getDevice(),
+            mRenderer->mContext->getCommandPool(),
+            mRenderer->mContext->getGraphicsQueue(),
+            static_cast<int>(x), static_cast<int>(y));
+        if (pixel.size()) {
+          auto actorId = pixel[1];
+          selectActor(actorId);
+        } else {
+          std::cout << "None" << std::endl;
+        }
+      }
     }
-    if (mWindow->isKeyDown('s')) {
-      mFPSController->move(-r, 0, 0);
+
+    if (mHudControlWindow.mHudRenderMode.mSwitchMode) {
+      switch (mHudControlWindow.mHudRenderMode.mMode) {
+        case 0:
+          mVulkanRenderer->switchToLighting();
+          break;
+        case 1:
+          mVulkanRenderer->switchToNormal();
+          break;
+        case 2:
+          mVulkanRenderer->switchToDepth();
+          break;
+        default:
+          break;
+      }
     }
-    if (mWindow->isKeyDown('a')) {
-      mFPSController->move(0, r, 0);
+
+    if (mHudObjectWindow.mHudWorld.mSelect) {
+      selectActor(mHudObjectWindow.mHudWorld.mSelectedId);
     }
-    if (mWindow->isKeyDown('d')) {
-      mFPSController->move(0, -r, 0);
+
+    if (mSelectedId) {
+      mVulkanRenderer->clearAxes();
+      auto actor = mScene->findActorById(mSelectedId);
+      if (!actor) {
+        actor = mScene->findArticulationLinkById(mSelectedId);
+      }
+      if (actor) {
+        auto pose = actor->getPose();
+        glm::mat4 mat(1);
+        mat[0][0] *= 0.1;
+        mat[1][1] *= 0.1;
+        mat[2][2] *= 0.1;
+        mat = glm::mat4(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z)) * mat;
+        mat[3][0] = pose.p.x;
+        mat[3][1] = pose.p.y;
+        mat[3][2] = pose.p.z;
+        mVulkanRenderer->addAxes(mat);
+      }
     }
+
   } while(mHudControlWindow.mHudControl.mPause);
 }
 
 
 void SapienVulkanController::selectActor(physx_id_t actorId) {
+  // std::cout << actorId << std::endl;
   mSelectedId = actorId;
 }
 

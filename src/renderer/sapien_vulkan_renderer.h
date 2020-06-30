@@ -4,6 +4,7 @@
 
 #include "sapien_vulkan/internal/vulkan_context.h"
 #include "sapien_vulkan/internal/vulkan_renderer.h"
+#include "sapien_vulkan/internal/vulkan_renderer_for_editor.h"
 #include "sapien_vulkan/object.h"
 #include "sapien_vulkan/scene.h"
 #include "sapien_vulkan/camera.h"

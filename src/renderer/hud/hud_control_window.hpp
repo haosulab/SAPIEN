@@ -32,16 +32,23 @@ struct HudControl {
 
 struct HudRenderMode {
   enum Mode {
-    eLighting=0, eAlbedo=1, eNormal=2, eDepth=3
+    eLighting=0, eNormal=1, eDepth=2
   };
   int mMode = Mode::eLighting;
+  bool mSwitchMode = false;
 
   void draw() {
+    mSwitchMode = false;
     if (ImGui::CollapsingHeader("Display")) {
-      ImGui::RadioButton("Lighting", &mMode, Mode::eLighting);
-      ImGui::RadioButton("Albedo", &mMode, Mode::eAlbedo);
-      ImGui::RadioButton("Normal", &mMode, Mode::eNormal);
-      ImGui::RadioButton("Depth", &mMode, Mode::eDepth);
+      if (ImGui::RadioButton("Lighting", &mMode, Mode::eLighting)) {
+        mSwitchMode = true;
+      }
+      if (ImGui::RadioButton("Normal", &mMode, Mode::eNormal)) {
+        mSwitchMode = true;
+      }
+      if (ImGui::RadioButton("Depth", &mMode, Mode::eDepth)) {
+        mSwitchMode = true;
+      }
     }
   }
 };

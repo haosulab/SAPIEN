@@ -23,7 +23,7 @@ class SapienVulkanController {
   // SapienVulkanScene *mScene{};
 
   std::unique_ptr<svulkan::Camera> mCamera;
-  std::unique_ptr<svulkan::VulkanRenderer> mVulkanRenderer;
+  std::unique_ptr<svulkan::VulkanRendererForEditor> mVulkanRenderer;
   std::unique_ptr<svulkan::FPSCameraController> mFPSController;
   std::unique_ptr<svulkan::VulkanWindow> mWindow;
 
@@ -43,6 +43,9 @@ class SapienVulkanController {
   void selectActor(physx_id_t actorId);
 
  private:
+  bool mDefaultMouseClickBehavior {true};
+  bool mDefaultKeyPressBehavior {true};
+
   physx_id_t mSelectedId {0};
   // ImGui Modules
   HudControlWindow mHudControlWindow;

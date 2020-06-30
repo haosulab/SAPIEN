@@ -111,92 +111,92 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
   return builder;
 }
 
-// int main() {
-//   Simulation sim;
-//   Renderer::SapienVulkanRenderer renderer;
-//   sim.setRenderer(&renderer);
-//   Renderer::SapienVulkanController controller(&renderer);
-
-//   // controller.showWindow();
-
-//   auto s0 = sim.createScene();
-//   s0->setTimestep(1 / 60.f);
-//   s0->addGround(-1);
-
-//   auto builder = createAntBuilder(*s0);
-
-//   auto ant0 = builder->build(false);
-//   ant0->setName("ant0");
-//   ant0->setRootPose({{0, 0, 2}, PxIdentity});
-
-//   auto r0 = static_cast<Renderer::SapienVulkanScene *>(s0->getRendererScene());
-//   r0->setAmbientLight({0, 0, 0});
-//   r0->setShadowLight({0, -1, -1}, {1, 1, 1});
-
-//   // controller.setCameraPosition(-5, 0, 0);
-
-//   controller.setScene(s0.get());
-//   // controller.focus(ant0->getRootLink());
-
-//   int count = 0;
-//   SDrive *drive;
-//   std::vector<float> d;
-//   while (!controller.isClosed()) {
-//     if (++count == 120) {
-//       d = ant0->packData();
-//       drive = s0->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, ant0->getRootLink(),
-//                               {{0, 0, 0}, PxIdentity});
-//       drive->setProperties(2000, 4000, PX_MAX_F32, true);
-//       drive->setTarget({{0, 0, 1}, PxQuat(1, {0, 1, 0})});
-//     }
-
-//     s0->updateRender();
-//     s0->step();
-//     controller.render();
-//   }
-
-//   return 0;
-// }
-
-
 int main() {
   Simulation sim;
   Renderer::SapienVulkanRenderer renderer;
   sim.setRenderer(&renderer);
   Renderer::SapienVulkanController controller(&renderer);
 
+  // controller.showWindow();
+
   auto s0 = sim.createScene();
-  s0->addGround(-1);
   s0->setTimestep(1 / 60.f);
+  s0->addGround(-1);
 
-  auto s1 = sim.createScene();
-  s1->addGround(-1);
+  auto builder = createAntBuilder(*s0);
 
-  auto builder = s0->createActorBuilder();
-
-
-  builder->addMultipleConvexShapesFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
-  builder->addVisualFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
-  // builder->addDecomposedConvexShapesFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
-  //                                            {0.1, 0.1, 0.1});
-  // builder->addVisualFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
-  //                            {0.1, 0.1, 0.1});
-
-  auto actor = builder->build();
-  actor->setPose({{0, 0, 2}, PxIdentity});
+  auto ant0 = builder->build(false);
+  ant0->setName("ant0");
+  ant0->setRootPose({{0, 0, 2}, PxIdentity});
 
   auto r0 = static_cast<Renderer::SapienVulkanScene *>(s0->getRendererScene());
-  r0->setAmbientLight({0.3, 0.3, 0.3});
-  r0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
+  r0->setAmbientLight({0, 0, 0});
+  r0->setShadowLight({0, -1, -1}, {1, 1, 1});
+
+  // controller.setCameraPosition(-5, 0, 0);
 
   controller.setScene(s0.get());
+  // controller.focus(ant0->getRootLink());
 
+  int count = 0;
+  SDrive *drive;
+  std::vector<float> d;
   while (!controller.isClosed()) {
+    if (++count == 120) {
+      d = ant0->packData();
+      drive = s0->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, ant0->getRootLink(),
+                              {{0, 0, 0}, PxIdentity});
+      drive->setProperties(2000, 4000, PX_MAX_F32, true);
+      drive->setTarget({{0, 0, 1}, PxQuat(1, {0, 1, 0})});
+    }
+
     s0->updateRender();
     s0->step();
-
     controller.render();
   }
 
   return 0;
 }
+
+
+// int main() {
+//   Simulation sim;
+//   Renderer::SapienVulkanRenderer renderer;
+//   sim.setRenderer(&renderer);
+//   Renderer::SapienVulkanController controller(&renderer);
+
+//   auto s0 = sim.createScene();
+//   s0->addGround(-1);
+//   s0->setTimestep(1 / 60.f);
+
+//   auto s1 = sim.createScene();
+//   s1->addGround(-1);
+
+//   auto builder = s0->createActorBuilder();
+
+
+//   builder->addMultipleConvexShapesFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
+//   builder->addVisualFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
+//   // builder->addDecomposedConvexShapesFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
+//   //                                            {0.1, 0.1, 0.1});
+//   // builder->addVisualFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
+//   //                            {0.1, 0.1, 0.1});
+
+//   auto actor = builder->build();
+//   actor->setPose({{0, 0, 2}, PxIdentity});
+
+//   auto r0 = static_cast<Renderer::SapienVulkanScene *>(s0->getRendererScene());
+//   r0->setAmbientLight({0.3, 0.3, 0.3});
+//   r0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
+
+//   controller.setScene(s0.get());
+
+//   while (!controller.isClosed()) {
+//     s0->updateRender();
+//     s0->step();
+
+//     controller.render();
+//   }
+
+//   return 0;
+// }
