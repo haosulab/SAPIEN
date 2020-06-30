@@ -58,6 +58,7 @@ void HudActor::draw(SActorBase *actor) {
 }
 
 void HudWorld::draw(SScene *scene, physx_id_t selectedId) {
+  mSelect = false;
   if (ImGui::CollapsingHeader("World")) {
     ImGui::Text("Scene: %s", scene->getName().c_str());
     if (ImGui::TreeNode("Actors")) {
@@ -71,7 +72,8 @@ void HudWorld::draw(SScene *scene, physx_id_t selectedId) {
           ImGui::TextColored({1, 0, 0, 1}, "%s", name.c_str());
         } else {
           if (ImGui::Selectable((name + "##actor" + std::to_string(i)).c_str())) {
-            // select(actors[i]);
+            mSelect = true;
+            mSelectedId = actors[i]->getId();
           }
         }
       }
@@ -96,7 +98,8 @@ void HudWorld::draw(SScene *scene, physx_id_t selectedId) {
             } else {
               if (ImGui::Selectable(
                       (name + "##a" + std::to_string(i) + "_" + std::to_string(j)).c_str())) {
-                // select(links[j]);
+                mSelect = true;
+                mSelectedId = links[j]->getId();
               }
             }
           }
@@ -114,10 +117,12 @@ void HudWorld::draw(SScene *scene, physx_id_t selectedId) {
                              std::to_string(i))
                             .c_str())) {
           if (ImGui::Selectable((contacts[i].actors[0]->getName()).c_str())) {
-            // select(contacts[i].actors[0]);
+            mSelect = true;
+            mSelectedId = contacts[i].actors[0]->getId();
           }
           if (ImGui::Selectable((contacts[i].actors[1]->getName()).c_str())) {
-            // select(contacts[i].actors[1]);
+            mSelect = true;
+            mSelectedId = contacts[i].actors[1]->getId();
           }
           ImGui::Text("Separation: %.4f", contacts[i].separation);
           ImGui::Text("Impulse: %.4f %.4f %.4f", contacts[i].impulse.x,
@@ -130,7 +135,8 @@ void HudWorld::draw(SScene *scene, physx_id_t selectedId) {
             ImGui::Text("Type: ends");
           }
           if (ImGui::Selectable("Position")) {
-            // select(nullptr);
+            mSelect = true;
+            mSelectedId = 0;
             // currentScene->getScene()->clearAxes();
             glm::vec3 v = {contacts[i].normal.x, contacts[i].normal.y, contacts[i].normal.z};
             glm::vec3 t1 = glm::cross(v, glm::vec3(1, 0, 0));
@@ -158,6 +164,9 @@ void HudObjectWindow::draw(SScene *scene, physx_id_t selectedId) {
     return;
   }
   auto actor = scene->findActorById(selectedId);
+  if (!actor) {
+    actor = scene->findArticulationLinkById(selectedId);
+  }
 
   ImGui::Begin("Object");
   mHudWorld.draw(scene, selectedId);

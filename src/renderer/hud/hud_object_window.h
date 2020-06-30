@@ -13,7 +13,9 @@ struct HudActor {
 };
 
 struct HudWorld {
-  
+  bool mSelect = false;
+  physx_id_t mSelectedId;
+
   void draw(SScene *scene, physx_id_t selectedId); 
 };
 
