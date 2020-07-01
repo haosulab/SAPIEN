@@ -187,6 +187,9 @@ void SapienVulkanController::render() {
       case 2:
         mVulkanRenderer->switchToDepth();
         break;
+      case 3:
+        mVulkanRenderer->switchToSegmentation();
+        break;
       default:
         break;
       }

@@ -32,7 +32,7 @@ struct HudControl {
 
 struct HudRenderMode {
   enum Mode {
-    eLighting=0, eNormal=1, eDepth=2
+    eLighting=0, eNormal=1, eDepth=2, eSegmentation = 3
   };
   int mMode = Mode::eLighting;
   bool mSwitchMode = false;
@@ -47,6 +47,9 @@ struct HudRenderMode {
         mSwitchMode = true;
       }
       if (ImGui::RadioButton("Depth", &mMode, Mode::eDepth)) {
+        mSwitchMode = true;
+      }
+      if (ImGui::RadioButton("Segmentation", &mMode, Mode::eSegmentation)) {
         mSwitchMode = true;
       }
     }
