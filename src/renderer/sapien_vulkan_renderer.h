@@ -39,6 +39,7 @@ public:
   inline physx::PxTransform getInitialPose() const { return mInitialPose; };
   void update(const physx::PxTransform &transform) override;
 
+  void setVisibility(float visibility) override;
   void setVisible(bool visible) override;
   void setRenderMode(uint32_t mode) override;
 

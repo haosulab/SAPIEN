@@ -72,6 +72,12 @@ void OptifuserRigidbody::destroyVisualObjects() {
   }
 }
 
+void OptifuserRigidbody::setVisibility(float visibility) {
+  for (auto obj : mObjects) {
+    obj->visibility = visibility;
+  }
+}
+
 void OptifuserRigidbody::setVisible(bool visible) {
   for (auto obj : mObjects) {
     obj->visibility = visible ? 1.f : 0.f;

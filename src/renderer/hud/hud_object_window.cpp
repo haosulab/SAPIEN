@@ -33,6 +33,34 @@ void HudActor::draw(SActorBase *actor) {
     // name
     ImGui::Text("Name: %s", actor->getName().c_str());
 
+    {
+      ImGui::Text("Display Opacity");
+      float visibility = actor->getDisplayVisibility();
+      if (ImGui::SliderFloat("##Opacity", &visibility, 0.f, 1.f)) {
+        actor->setDisplayVisibility(visibility);
+      }
+      if (ImGui::Button("Make everything transparent")) {
+        for (auto a : actor->getScene()->getAllActors()) {
+          a->setDisplayVisibility(0.5);
+        }
+        for (auto a : actor->getScene()->getAllArticulations()) {
+          for (auto b : a->getBaseLinks()) {
+            b->setDisplayVisibility(0.5);
+          }
+        }
+      }
+      if (ImGui::Button("Make everything normal")) {
+        for (auto a : actor->getScene()->getAllActors()) {
+          a->setDisplayVisibility(1);
+        }
+        for (auto a : actor->getScene()->getAllArticulations()) {
+          for (auto b : a->getBaseLinks()) {
+            b->setDisplayVisibility(1);
+          }
+        }
+      }
+    }
+
     // type
     switch (actor->getType()) {
     case EActorType::STATIC:
