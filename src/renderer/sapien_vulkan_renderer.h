@@ -75,6 +75,7 @@ public:
                                       std::vector<uint32_t> const &indices,
                                       const physx::PxVec3 &scale,
                                       const PxrMaterial &material) override;
+  virtual IPxrRigidbody *cloneRigidbody(SapienVulkanRigidbody *other);
 
   // virtual IPxrRigidbody *cloneRigidbody(SapienVulkanRigidbody *other);
 

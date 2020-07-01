@@ -164,6 +164,27 @@ std::vector<ICamera *> SapienVulkanScene::getCameras() {
   return cams;
 }
 
+IPxrRigidbody *SapienVulkanScene::cloneRigidbody(SapienVulkanRigidbody *other) {
+  auto &otherObjs = other->getVisualObjects();
+  std::vector<svulkan::Object *> objs;
+  for (auto &obj : otherObjs) {
+    std::unique_ptr<svulkan::VulkanObject> vobj = std::make_unique<svulkan::VulkanObject>(
+        mParentRenderer->mContext->getPhysicalDevice(), mParentRenderer->mContext->getDevice(),
+        mParentRenderer->mContext->getDescriptorPool(),
+        mParentRenderer->mContext->getDescriptorSetLayouts().object.get());
+    vobj->setMesh(obj->getVulkanObject()->mMesh);
+    vobj->setMaterial(obj->getVulkanObject()->mMaterial);
+    auto newobj = std::make_unique<svulkan::Object>(std::move(vobj));
+    newobj->mTransform = obj->mTransform;
+    objs.push_back(newobj.get());
+    mScene->addObject(std::move(newobj));
+  }
+  mBodies.push_back(std::make_unique<SapienVulkanRigidbody>(this, objs));
+  auto body = mBodies.back().get();
+  body->setInitialPose(other->getInitialPose());
+  return body;
+}
+
 } // namespace Renderer
 } // namespace sapien
 #endif
