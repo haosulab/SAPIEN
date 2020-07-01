@@ -44,6 +44,17 @@ class SapienVulkanController {
   void selectActor(physx_id_t actorId);
   void focusActor(physx_id_t actorId);
   void viewFromCamera(uint32_t camera);
+  void pause(bool p);
+
+  void setFreeCameraPosition(float x, float y, float z);
+  void setFreeCameraRotation(float yaw, float pitch, float roll);
+
+  inline void setDefaultControl(bool mouse, bool keyboard) {
+    mDefaultMouseClickBehavior = mouse;
+    mDefaultKeyPressBehavior = keyboard;
+  }
+
+  void close();
 
  private:
   bool mDefaultMouseClickBehavior {true};
@@ -61,6 +72,18 @@ class SapienVulkanController {
   std::vector<IPxrRigidbody*> mGizmoBody {};
   void editTransform();
   void createGizmoVisual(SActorBase *actor);
+
+ public:
+  // input
+  bool keyPressed(char k);
+  bool keyDown(char k);
+  bool mouseClick(int key);
+  bool mouseDown(int key);
+
+  std::tuple<int, int> getMousePos();
+  std::tuple<float, float> getMouseDelta();
+  std::tuple<float, float> getMouseWheelDelta();
+
 };
 
 } // namespace Renderer

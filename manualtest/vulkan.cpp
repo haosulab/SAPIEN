@@ -133,6 +133,13 @@ int main() {
   r0->setAmbientLight({0, 0, 0});
   r0->setShadowLight({0, -1, -1}, {1, 1, 1});
 
+  {
+    auto builder = s0->createActorBuilder();
+    builder->addSphereShape();
+    builder->addSphereVisual();
+    builder->build();
+  }
+
   auto a = s0->createActorBuilder()->build(true);
   a->setPose(PxTransform({-2, 0, 0}, PxIdentity));
   s0->addMountedCamera("test", a, PxTransform(), 800, 600, 0.f, 1.f);
