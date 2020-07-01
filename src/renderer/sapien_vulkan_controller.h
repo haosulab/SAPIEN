@@ -56,6 +56,11 @@ class SapienVulkanController {
   // ImGui Modules
   HudControlWindow mHudControlWindow;
   HudObjectWindow mHudObjectWindow;
+
+  glm::mat4 mGizmoTransform {1};
+  std::vector<IPxrRigidbody*> mGizmoBody {};
+  void editTransform();
+  void createGizmoVisual(SActorBase *actor);
 };
 
 } // namespace Renderer

@@ -2,11 +2,158 @@
 #ifdef ON_SCREEN
 #include "sapien_vulkan_controller.h"
 #include "articulation/sapien_link.h"
+#include "sapien_actor.h"
 #include "sapien_actor_base.h"
+#include "sapien_drive.h"
 #include "sapien_scene.h"
+
+#include "ImGuizmo.h"
 
 namespace sapien {
 namespace Renderer {
+
+glm::mat4 PxTransform2Mat4(physx::PxTransform const &t) {
+  glm::mat4 rot = glm::toMat4(glm::quat(t.q.w, t.q.x, t.q.y, t.q.z));
+  glm::mat4 pos = glm::translate(glm::mat4(1.f), {t.p.x, t.p.y, t.p.z});
+  return pos * rot;
+}
+
+static physx::PxTransform Mat42PxTransform(glm::mat4 const &m) {
+  glm::vec3 scale;
+  glm::quat rot;
+  glm::vec3 pos;
+  glm::vec3 skew;
+  glm::vec4 perspective;
+  glm::decompose(m, scale, rot, pos, skew, perspective);
+  return {{pos.x, pos.y, pos.z}, {rot.x, rot.y, rot.z, rot.w}};
+}
+
+void SapienVulkanController::editTransform() {
+  static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
+  static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
+  static bool useSnap = false;
+  static float snap[3] = {1.f, 1.f, 1.f};
+  static float bounds[] = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f};
+  static float boundsSnap[] = {0.1f, 0.1f, 0.1f};
+  static bool boundSizing = false;
+  static bool boundSizingSnap = false;
+
+  // ImGui::SetNextWindowPos(ImVec2(imguiWindowSize, 0));
+  // ImGui::SetNextWindowSize(ImVec2(mRenderer->mContext->getWidth() - 2 * imguiWindowSize, 0));
+
+  ImGui::Begin("Gizmo");
+  if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+    mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+  ImGui::SameLine();
+  if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+    mCurrentGizmoOperation = ImGuizmo::ROTATE;
+  float matrixTranslation[3], matrixRotation[3], matrixScale[3] = {1, 1, 1};
+  ImGuizmo::DecomposeMatrixToComponents(&mGizmoTransform[0][0], matrixTranslation, matrixRotation,
+                                        matrixScale);
+  ImGui::InputFloat3("Tr", matrixTranslation, 3);
+  ImGui::InputFloat3("Rt", matrixRotation, 3);
+  ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale,
+                                          &mGizmoTransform[0][0]);
+
+  if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+    mCurrentGizmoMode = ImGuizmo::LOCAL;
+  if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+    mCurrentGizmoMode = ImGuizmo::WORLD;
+  ImGui::Checkbox("", &useSnap);
+  ImGui::SameLine();
+
+  switch (mCurrentGizmoOperation) {
+  case ImGuizmo::TRANSLATE:
+    ImGui::InputFloat3("Snap", &snap[0]);
+    break;
+  case ImGuizmo::ROTATE:
+    ImGui::InputFloat("Angle Snap", &snap[0]);
+    break;
+  default:
+    break;
+  }
+
+  if (ImGui::Button("Reset")) {
+    mGizmoTransform = glm::mat4(1);
+    createGizmoVisual(nullptr);
+  }
+  auto pose = Mat42PxTransform(mGizmoTransform);
+  for (auto b : mGizmoBody) {
+    b->update(pose);
+  }
+  if (mSelectedId) {
+    SActorBase *actor = mScene->findActorById(mSelectedId);
+    if (!actor) {
+      actor = mScene->findArticulationLinkById(mSelectedId);
+    }
+    if (actor &&
+        (actor->getType() == EActorType::DYNAMIC || actor->getType() == EActorType::KINEMATIC)) {
+      ImGui::SameLine();
+      if (ImGui::Button("Teleport Actor")) {
+        static_cast<SActor *>(actor)->setPose(pose);
+      }
+    }
+
+    if (actor && (actor->getType() == EActorType::DYNAMIC ||
+                  actor->getType() == EActorType::ARTICULATION_LINK)) {
+      ImGui::SameLine();
+      if (ImGui::Button("Drive Actor")) {
+        SDrive *validDrive = nullptr;
+        auto drives = actor->getDrives();
+        for (SDrive *d : drives) {
+          if (d->getActor1() == nullptr &&
+              d->getLocalPose1() == PxTransform({{0, 0, 0}, PxIdentity}) &&
+              d->getLocalPose2() == PxTransform({{0, 0, 0}, PxIdentity})) {
+            validDrive = d;
+          }
+        }
+        if (!validDrive) {
+          validDrive = mScene->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, actor,
+                                           {{0, 0, 0}, PxIdentity});
+          validDrive->setProperties(10000, 10000, PX_MAX_F32, false);
+        }
+        validDrive->setTarget(pose);
+      }
+    }
+
+    if (actor) {
+      if (ImGui::Button("Gizmo to actor")) {
+        mGizmoTransform = PxTransform2Mat4(actor->getPose());
+        createGizmoVisual(actor);
+      }
+    }
+  }
+
+  ImGuiIO &io = ImGui::GetIO();
+  ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+  auto view = mCamera->getViewMat();
+  auto proj = mCamera->getProjectionMat();
+  proj[1][1] *= -1;
+  ImGuizmo::Manipulate(&view[0][0], &proj[0][0], mCurrentGizmoOperation, mCurrentGizmoMode,
+                       &mGizmoTransform[0][0], NULL, useSnap ? &snap[0] : NULL,
+                       boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
+  ImGui::End();
+}
+
+void SapienVulkanController::createGizmoVisual(SActorBase *actor) {
+  if (!mScene) {
+    return;
+  }
+  for (auto b : mGizmoBody) {
+    b->destroy();
+  }
+  mGizmoBody.clear();
+  if (!actor) {
+    return;
+  }
+  for (auto b : actor->getRenderBodies()) {
+    auto b2 = static_cast<SapienVulkanScene *>(mScene->getRendererScene())
+                  ->cloneRigidbody(static_cast<SapienVulkanRigidbody *>(b));
+    b2->setVisibility(0.5);
+    mGizmoBody.push_back(b2);
+    mGizmoBody.back()->setUniqueId(0);
+  }
+}
 
 SapienVulkanController::SapienVulkanController(SapienVulkanRenderer *renderer)
     : mRenderer(renderer), mWidth(0), mHeight(0) {
@@ -75,6 +222,9 @@ void SapienVulkanController::render() {
 
     {
       ImGui::NewFrame();
+      ImGuizmo::BeginFrame();
+      editTransform();
+
       mHudControlWindow.draw();
       mHudObjectWindow.draw(mScene, mSelectedId);
       ImGui::Render();
