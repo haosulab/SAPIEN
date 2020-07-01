@@ -4,9 +4,9 @@ from typing import Iterable as iterable
 from typing import Iterator as iterator
 from numpy import float64
 _Shape = Tuple[int, ...]
-import SolverType
-import numpy
 import sapien.core.pysapien
+import numpy
+import SolverType
 __all__  = [
 "ActorBase",
 "ActorDynamicBase",
@@ -2067,12 +2067,39 @@ class VulkanCamera(ICamera, ISensor):
     pass
 class VulkanController():
     def __init__(self, renderer: VulkanRenderer) -> None: ...
+    def close(self) -> None: ...
+    def focus_actor(self, actor: ActorBase) -> None: ...
+    def key_down(self, key: str) -> bool: ...
+    def key_press(self, key: str) -> bool: ...
+    def mouse_click(self, key_code: int = 0) -> bool: ...
+    def mouse_down(self, key_code: int = 0) -> bool: ...
+    def pause(self, p: bool = True) -> None: ...
     def render(self) -> None: ...
+    def select_actor(self, actor: ActorBase) -> None: ...
     def set_current_scene(self, scene: Scene) -> None: ...
+    def set_default_control(self, mouse: bool, keyboard: bool) -> None: ...
+    def set_free_camera_position(self, x: float, y: float, z: float) -> None: ...
+    def set_free_camera_rotation(self, yaw: float, pitch: float, roll: float) -> None: ...
+    def view_from_camera(self, camera_index: int) -> None: ...
     @property
     def is_closed(self) -> bool:
         """
         :type: bool
+        """
+    @property
+    def mouse_delta(self) -> Tuple[float, float]:
+        """
+        :type: Tuple[float, float]
+        """
+    @property
+    def mouse_pos(self) -> Tuple[int, int]:
+        """
+        :type: Tuple[int, int]
+        """
+    @property
+    def wheel_delta(self) -> Tuple[float, float]:
+        """
+        :type: Tuple[float, float]
         """
     pass
 class VulkanRenderer(IPxrRenderer):

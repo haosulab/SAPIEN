@@ -1285,10 +1285,38 @@ void buildSapien(py::module &m) {
       .def_property_readonly("is_closed", &Renderer::SapienVulkanController::isClosed)
       .def("render", &Renderer::SapienVulkanController::render)
       .def("set_current_scene", &Renderer::SapienVulkanController::setScene,
-                               py::arg("scene"));
+                               py::arg("scene"))
+
+      // UI control
+      .def("select_actor", [](Renderer::SapienVulkanController & c, SActorBase * actor) {
+        c.selectActor(actor->getId());
+      }, py::arg("actor"))
+      .def("focus_actor", [](Renderer::SapienVulkanController & c, SActorBase * actor) {
+        c.focusActor(actor->getId());
+      }, py::arg("actor"))
+      .def("view_from_camera", [](Renderer::SapienVulkanController & c, uint32_t camera_index) {
+        c.viewFromCamera(camera_index);
+      }, py::arg("camera_index"))
+      .def("pause", &Renderer::SapienVulkanController::pause, py::arg("p") = true)
+      .def("set_free_camera_position", &Renderer::SapienVulkanController::setFreeCameraPosition,
+           py::arg("x"), py::arg("y"), py::arg("z"))
+      .def("set_free_camera_rotation", &Renderer::SapienVulkanController::setFreeCameraRotation,
+           py::arg("yaw"), py::arg("pitch"), py::arg("roll"))
+      .def("set_default_control", &Renderer::SapienVulkanController::setDefaultControl,
+           py::arg("mouse"), py::arg("keyboard"))
+      .def("close", &Renderer::SapienVulkanController::close)
+
+      // input
+      .def("mouse_down", &Renderer::SapienVulkanController::mouseDown, py::arg("key_code")=0)
+      .def("mouse_click", &Renderer::SapienVulkanController::mouseClick, py::arg("key_code")=0)
+      .def("key_down", &Renderer::SapienVulkanController::keyDown, py::arg("key"))
+      .def("key_press", &Renderer::SapienVulkanController::keyPressed, py::arg("key"))
+      .def_property_readonly("mouse_pos", &Renderer::SapienVulkanController::getMousePos)
+      .def_property_readonly("mouse_delta", &Renderer::SapienVulkanController::getMouseDelta)
+      .def_property_readonly("wheel_delta", &Renderer::SapienVulkanController::getMouseWheelDelta)
+      ;
 
 #endif
 #endif
-
 
 }

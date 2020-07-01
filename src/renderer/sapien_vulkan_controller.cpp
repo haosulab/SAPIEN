@@ -223,10 +223,36 @@ void SapienVulkanController::render() {
     {
       ImGui::NewFrame();
       ImGuizmo::BeginFrame();
-      editTransform();
 
-      mHudControlWindow.draw();
-      mHudObjectWindow.draw(mScene, mSelectedId);
+      ImGui::SetNextWindowPos(ImVec2(0, 0));
+      ImGui::SetNextWindowSize(ImVec2(mWidth, 60));
+      ImGui::Begin("Menu");
+      static bool control{}, object{}, gizmo{}, contact{};
+      ImGui::Checkbox("Control", &control);
+      ImGui::SameLine();
+      ImGui::Checkbox("World", &object);
+      ImGui::SameLine();
+      ImGui::Checkbox("Gizmo", &gizmo);
+      ImGui::SameLine();
+      ImGui::Checkbox("Contact", &contact);
+      ImGui::End();
+
+      if (gizmo) {
+        editTransform();
+      } else {
+        if (mGizmoBody.size()) {
+          createGizmoVisual(nullptr);
+        }
+      }
+
+      if (control) {
+        mHudControlWindow.draw();
+      }
+
+      if (object) {
+        mHudObjectWindow.draw(mScene, mSelectedId);
+      }
+
       ImGui::Render();
     }
 
@@ -265,13 +291,13 @@ void SapienVulkanController::render() {
     }
     // wait idle
 
+    float frameRate = ImGui::GetIO().Framerate;
+
     if (mDefaultKeyPressBehavior) {
       if (mWindow->isKeyDown('q')) {
         mWindow->close();
       }
-      float r = mHudControlWindow.mHudStats.mFrameRate > 0
-                    ? std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f)
-                    : 0.f;
+      float r = frameRate > 0 ? std::clamp(1 / frameRate, 0.f, 1.f) : 0.f;
 
       r *= mHudControlWindow.mHudControl.mMoveSpeed;
       if (mWindow->isKeyDown('w')) {
@@ -302,9 +328,7 @@ void SapienVulkanController::render() {
     }
 
     if (mDefaultMouseClickBehavior) {
-      float r = mHudControlWindow.mHudStats.mFrameRate > 0
-                    ? std::clamp(1 / mHudControlWindow.mHudStats.mFrameRate, 0.f, 1.f)
-                    : 0.f;
+      float r = frameRate > 0 ? std::clamp(1 / frameRate, 0.f, 1.f) : 0.f;
 
       SActorBase *focusedActor{};
       if (mFocusedId) {
@@ -338,7 +362,7 @@ void SapienVulkanController::render() {
         }
       }
 
-      if (!ImGui::GetIO().WantCaptureMouse && ImGui::IsMouseClicked(0)) {
+      if (mWindow->isMouseKeyDown(0)) {
         auto [x, y] = mWindow->getMousePosition();
         auto pixel = mVulkanRenderer->getRenderTargets().segmentation->downloadPixel<uint32_t>(
             mRenderer->mContext->getPhysicalDevice(), mRenderer->mContext->getDevice(),
@@ -456,6 +480,42 @@ void SapienVulkanController::viewFromCamera(uint32_t camera) {
     focusActor(0);
   }
   mCameraView = camera;
+}
+
+void SapienVulkanController::pause(bool p) { mHudControlWindow.mHudControl.mPause = p; }
+
+void SapienVulkanController::setFreeCameraPosition(float x, float y, float z) {
+  focusActor(0);
+  viewFromCamera(0);
+  mFPSController->setXYZ(x, y, z);
+}
+
+void SapienVulkanController::setFreeCameraRotation(float yaw, float pitch, float roll) {
+  focusActor(0);
+  viewFromCamera(0);
+  mFPSController->setRPY(roll, pitch, yaw);
+}
+
+void SapienVulkanController::close() { mWindow->close(); }
+
+bool SapienVulkanController::keyPressed(char k) { return mWindow->isKeyPressed(k); }
+bool SapienVulkanController::keyDown(char k) { return mWindow->isKeyDown(k); }
+bool SapienVulkanController::mouseClick(int key) { return mWindow->isMouseKeyClicked(key); }
+bool SapienVulkanController::mouseDown(int key) { return mWindow->isMouseKeyDown(key); }
+
+std::tuple<int, int> SapienVulkanController::getMousePos() {
+  auto [x, y] = mWindow->getMousePosition();
+  return {x, y};
+}
+
+std::tuple<float, float> SapienVulkanController::getMouseDelta() {
+  auto [x, y] = mWindow->getMouseDelta();
+  return {x, y};
+}
+
+std::tuple<float, float> SapienVulkanController::getMouseWheelDelta() {
+  auto [x, y] = mWindow->getMouseWheelDelta();
+  return {x, y};
 }
 
 } // namespace Renderer

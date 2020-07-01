@@ -27,6 +27,10 @@ struct HudWorld {
   void draw(SScene *scene, physx_id_t selectedId); 
 };
 
+struct HudSettings {
+  void draw(SScene *scene);
+};
+
 struct HudCamera {
   int mIndex {};
 
@@ -41,6 +45,7 @@ struct HudObjectWindow {
   HudArticulation mHudArticulation {};
   HudWorld mHudWorld {};
   HudCamera mHudCamera {};
+  HudSettings mHudSettings {};
 
   void draw(SScene *scene, physx_id_t selectedId);
 };

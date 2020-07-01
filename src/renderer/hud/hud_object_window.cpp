@@ -16,6 +16,35 @@
 namespace sapien {
 namespace Renderer {
 
+void HudSettings::draw(SScene *scene) {
+  auto flags = scene->getPxScene()->getFlags();
+
+  bool b = flags & PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
+  ImGui::Checkbox("Enhanced determinism", &b);
+  b = flags & PxSceneFlag::eENABLE_PCM;
+  ImGui::Checkbox("PCM(persistent contact manifold)", &b);
+  b = flags & PxSceneFlag::eENABLE_CCD;
+  ImGui::Checkbox("CCD(continuous collision detection)", &b);
+  b = flags & PxSceneFlag::eENABLE_STABILIZATION;
+  ImGui::Checkbox("Stabilization", &b);
+  b = flags & PxSceneFlag::eENABLE_AVERAGE_POINT;
+  ImGui::Checkbox("Average point", &b);
+  b = flags & PxSceneFlag::eENABLE_GPU_DYNAMICS;
+  ImGui::Checkbox("GPU dynamics", &b);
+  b = flags & PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
+  ImGui::Checkbox("Friction in every solver iteration", &b);
+  b = flags & PxSceneFlag::eADAPTIVE_FORCE;
+  ImGui::Checkbox("Adaptive force", &b);
+
+  ImGui::Text("Contact offset: %.4g", scene->getDefaultContactOffset());
+  ImGui::Text("Bounce threshold: %.4g", scene->getPxScene()->getBounceThresholdVelocity());
+  ImGui::Text("Sleep threshold: %.4g", scene->getDefaultSleepThreshold());
+  ImGui::Text("Solver iterations: %d", scene->getDefaultSolverIterations());
+  ImGui::Text("Solver velocity iterations: %d",
+              scene->getDefaultSolverVelocityIterations());
+  
+}
+
 void HudActor::draw(SActorBase *actor) {
   if (ImGui::CollapsingHeader("Actor")) {
     // name
@@ -324,17 +353,17 @@ void HudArticulation::draw(SArticulationBase *articulation, SActorBase *actor) {
           float maxForce = j->getDriveForceLimit();
           float target = j->getDriveTarget();
           float vtarget = j->getDriveVelocityTarget();
-          ImGui::Text("Friction: %.2f", friction);
-          ImGui::Text("Damping: %.2f", damping);
-          ImGui::Text("Stiffness: %.2f", stiffness);
+          ImGui::Text("Friction: %.4g", friction);
+          ImGui::Text("Damping: %.4g", damping);
+          ImGui::Text("Stiffness: %.4g", stiffness);
           if (maxForce > 1e6) {
             ImGui::Text("Max Force: >1e6");
           } else {
-            ImGui::Text("Max Force: %.2f", maxForce);
+            ImGui::Text("Max Force: %.4g", maxForce);
           }
           if (stiffness > 0) {
-            ImGui::Text("Drive Position Target: %.2f", target);
-            ImGui::Text("Drive Velocity Target: %.2f", vtarget);
+            ImGui::Text("Drive Position Target: %.4g", target);
+            ImGui::Text("Drive Velocity Target: %.4g", vtarget);
           }
           ImGui::NewLine();
         }
@@ -464,8 +493,8 @@ void HudWorld::draw(SScene *scene, physx_id_t selectedId) {
             mSelect = true;
             mSelectedId = contacts[i].actors[1]->getId();
           }
-          ImGui::Text("Separation: %.4f", contacts[i].separation);
-          ImGui::Text("Impulse: %.4f %.4f %.4f", contacts[i].impulse.x, contacts[i].impulse.y,
+          ImGui::Text("Separation: %.4g", contacts[i].separation);
+          ImGui::Text("Impulse: %.4g %.4g %.4g", contacts[i].impulse.x, contacts[i].impulse.y,
                       contacts[i].impulse.z);
           if (contacts[i].starts) {
             ImGui::Text("Type: start");
@@ -544,6 +573,7 @@ void HudObjectWindow::draw(SScene *scene, physx_id_t selectedId) {
   }
 
   ImGui::Begin("Object");
+  mHudSettings.draw(scene);
   mHudWorld.draw(scene, selectedId);
   if (actor) {
     mHudActor.draw(actor);
