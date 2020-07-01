@@ -11,22 +11,10 @@
 #include "sapien_drive.h"
 #include "sapien_scene.h"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/glm.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtx/norm.hpp>
+#include "hud_common.h"
 
 namespace sapien {
 namespace Renderer {
-
-static void PrintPose(PxTransform const &pose) {
-  glm::vec3 angles = glm::eulerAngles(glm::quat(pose.q.w, pose.q.x, pose.q.y, pose.q.z)) /
-                     glm::pi<float>() * 180.f;
-
-  ImGui::Text("Position: %.4g %.4g %.4g", pose.p.x, pose.p.y, pose.p.z);
-  ImGui::Text("Quat (wxyz): %.4g %.4g %.4g %.4g", pose.q.w, pose.q.x, pose.q.y, pose.q.z);
-  ImGui::Text("Euler (degree): %.4g %.4g %.4g", angles.x, angles.y, angles.z);
-};
 
 void HudActor::draw(SActorBase *actor) {
   if (ImGui::CollapsingHeader("Actor")) {
@@ -511,6 +499,37 @@ void HudWorld::draw(SScene *scene, physx_id_t selectedId) {
   }
 }
 
+void HudCamera::draw(SScene *scene) {
+  auto cameras = scene->getMountedCameras();
+  auto actors = scene->getMountedActors();
+  if (mIndex > cameras.size() + 1) {
+    mIndex = 0;
+  }
+
+  if (ImGui::CollapsingHeader("Cameras")) {
+    mRequestCameraView = false;
+    ImGui::RadioButton("None", &mIndex, 0);
+    for (uint32_t i = 0; i < cameras.size(); ++i) {
+      ImGui::RadioButton((cameras[i]->getName() + "##camera" + std::to_string(i)).c_str(), &mIndex,
+                         i + 1);
+      if (mIndex == i + 1) {
+        float near = cameras[i]->getNear();
+        float far = cameras[i]->getFar();
+        float fovy = cameras[i]->getFovy();
+        uint32_t width = cameras[i]->getWidth();
+        uint32_t height = cameras[i]->getHeight();
+        ImGui::Text("Size: %d x %d", width, height);
+        ImGui::Text("Range: %g - %g", near, far);
+        ImGui::Text("Fovy(rad): %g", fovy);
+        if (ImGui::Button("Camera View")) {
+          mRequestCameraView = true;
+          mRequestIndex = i + 1;
+        }
+      }
+    }
+  }
+}
+
 void HudObjectWindow::draw(SScene *scene, physx_id_t selectedId) {
   if (!scene) {
     return;
@@ -531,6 +550,9 @@ void HudObjectWindow::draw(SScene *scene, physx_id_t selectedId) {
   }
   if (articulation) {
     mHudArticulation.draw(articulation, actor);
+  }
+  if (scene->getMountedCameras().size()) {
+    mHudCamera.draw(scene);
   }
   ImGui::End();
 }

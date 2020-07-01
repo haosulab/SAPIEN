@@ -58,11 +58,30 @@ void SapienVulkanController::render() {
       return;
     }
 
+    mHudControlWindow.mHudCameraInfo.mPosition = mCamera->position;
+    mHudControlWindow.mHudCameraInfo.mRotation = mCamera->rotation;
+    mHudControlWindow.mHudCameraInfo.mNear = mCamera->near;
+    mHudControlWindow.mHudCameraInfo.mFar = mCamera->far;
+    mHudControlWindow.mHudCameraInfo.mFovy = mCamera->fovy;
+    mHudControlWindow.mHudCameraInfo.mWidth = mWidth;
+    mHudControlWindow.mHudCameraInfo.mHeight = mHeight;
+    if (mCameraView) {
+      mHudControlWindow.mHudCameraInfo.mTextInfo = "Viewing from a mounted camera";
+    } else if (mFocusedId) {
+      mHudControlWindow.mHudCameraInfo.mTextInfo = "Focusing on an actor";
+    } else {
+      mHudControlWindow.mHudCameraInfo.mTextInfo = "Free";
+    }
+
     {
       ImGui::NewFrame();
       mHudControlWindow.draw();
       mHudObjectWindow.draw(mScene, mSelectedId);
       ImGui::Render();
+    }
+
+    if (mHudControlWindow.mHudCameraInfo.mUpdate) {
+      mCamera->fovy = mHudControlWindow.mHudCameraInfo.mFovy;
     }
 
     // wait for previous frame to finish
@@ -106,22 +125,27 @@ void SapienVulkanController::render() {
 
       r *= mHudControlWindow.mHudControl.mMoveSpeed;
       if (mWindow->isKeyDown('w')) {
+        viewFromCamera(0);
         focusActor(0);
         mFPSController->move(r, 0, 0);
       }
       if (mWindow->isKeyDown('s')) {
+        viewFromCamera(0);
         focusActor(0);
         mFPSController->move(-r, 0, 0);
       }
       if (mWindow->isKeyDown('a')) {
+        viewFromCamera(0);
         focusActor(0);
         mFPSController->move(0, r, 0);
       }
       if (mWindow->isKeyDown('d')) {
+        viewFromCamera(0);
         focusActor(0);
         mFPSController->move(0, -r, 0);
       }
       if (mWindow->isKeyPressed('f')) {
+        viewFromCamera(0);
         focusActor(0);
         focusActor(mSelectedId);
       }
@@ -150,6 +174,7 @@ void SapienVulkanController::render() {
       }
 
       if (mWindow->isMouseKeyDown(1)) {
+        viewFromCamera(0);
         auto [x, y] = mWindow->getMouseDelta();
         float r1 = mHudControlWindow.mHudControl.mInvertX ? -r : r;
         float r2 = mHudControlWindow.mHudControl.mInvertY ? -r : r;
@@ -225,6 +250,25 @@ void SapienVulkanController::render() {
       }
     }
 
+    if (mHudObjectWindow.mHudCamera.mRequestCameraView) {
+      viewFromCamera(mHudObjectWindow.mHudCamera.mRequestIndex);
+    }
+
+    if (mCameraView) {
+      uint32_t idx = mCameraView - 1;
+      auto cameras = mScene->getMountedCameras();
+      if (idx >= cameras.size()) {
+        viewFromCamera(0);
+      } else {
+        auto pose = cameras[idx]->getPose();
+        mCamera->position = {pose.p.x, pose.p.y, pose.p.z};
+        mCamera->rotation = {pose.q.w, pose.q.x, pose.q.y, pose.q.z};
+        mCamera->fovy = cameras[idx]->getFovy();
+        mCamera->near = cameras[idx]->getNear();
+        mCamera->far = cameras[idx]->getFar();
+      }
+    }
+
   } while (mHudControlWindow.mHudControl.mPause);
 }
 
@@ -255,6 +299,13 @@ void SapienVulkanController::focusActor(physx_id_t actorId) {
       mFocusedId = actorId;
     }
   }
+}
+
+void SapienVulkanController::viewFromCamera(uint32_t camera) {
+  if (camera) {
+    focusActor(0);
+  }
+  mCameraView = camera;
 }
 
 } // namespace Renderer

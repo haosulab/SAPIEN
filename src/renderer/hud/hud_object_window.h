@@ -27,10 +27,20 @@ struct HudWorld {
   void draw(SScene *scene, physx_id_t selectedId); 
 };
 
+struct HudCamera {
+  int mIndex {};
+
+  bool mRequestCameraView {};
+  uint32_t mRequestIndex {};
+  
+  void draw(SScene *scene);
+};
+
 struct HudObjectWindow {
   HudActor mHudActor {};
   HudArticulation mHudArticulation {};
   HudWorld mHudWorld {};
+  HudCamera mHudCamera {};
 
   void draw(SScene *scene, physx_id_t selectedId);
 };
