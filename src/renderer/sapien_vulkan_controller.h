@@ -7,7 +7,7 @@
 
 #include "sapien_vulkan/gui/gui.h"
 
-#include "hud/hud_control_window.hpp"
+#include "hud/hud_control_window.h"
 #include "hud/hud_object_window.h"
 
 namespace sapien {
@@ -43,6 +43,7 @@ class SapienVulkanController {
 
   void selectActor(physx_id_t actorId);
   void focusActor(physx_id_t actorId);
+  void viewFromCamera(uint32_t camera);
 
  private:
   bool mDefaultMouseClickBehavior {true};
@@ -50,6 +51,8 @@ class SapienVulkanController {
 
   physx_id_t mSelectedId {0};
   physx_id_t mFocusedId {0};
+  uint32_t mCameraView {0};
+
   // ImGui Modules
   HudControlWindow mHudControlWindow;
   HudObjectWindow mHudObjectWindow;

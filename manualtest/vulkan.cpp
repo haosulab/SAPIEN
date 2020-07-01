@@ -1,8 +1,8 @@
 #include "articulation/articulation_builder.h"
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_link.h"
-#include "renderer/sapien_vulkan_renderer.h"
 #include "renderer/sapien_vulkan_controller.h"
+#include "renderer/sapien_vulkan_renderer.h"
 #include "sapien_actor.h"
 #include "sapien_drive.h"
 #include "sapien_scene.h"
@@ -133,8 +133,11 @@ int main() {
   r0->setAmbientLight({0, 0, 0});
   r0->setShadowLight({0, -1, -1}, {1, 1, 1});
 
-  // controller.setCameraPosition(-5, 0, 0);
+  auto a = s0->createActorBuilder()->build(true);
+  a->setPose(PxTransform({-2, 0, 0}, PxIdentity));
+  s0->addMountedCamera("test", a, PxTransform(), 800, 600, 0.f, 1.f);
 
+  // controller.setCameraPosition(-5, 0, 0);
   controller.setScene(s0.get());
   // controller.focus(ant0->getRootLink());
 
@@ -158,7 +161,6 @@ int main() {
   return 0;
 }
 
-
 // int main() {
 //   Simulation sim;
 //   Renderer::SapienVulkanRenderer renderer;
@@ -174,10 +176,10 @@ int main() {
 
 //   auto builder = s0->createActorBuilder();
 
-
 //   builder->addMultipleConvexShapesFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
 //   builder->addVisualFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
-//   // builder->addDecomposedConvexShapesFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
+//   // builder->addDecomposedConvexShapesFromFile("../assets/shapenet/cup.dae",
+//   PxTransform(PxIdentity),
 //   //                                            {0.1, 0.1, 0.1});
 //   // builder->addVisualFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
 //   //                            {0.1, 0.1, 0.1});
