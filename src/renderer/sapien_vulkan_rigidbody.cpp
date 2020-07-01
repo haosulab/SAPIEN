@@ -51,8 +51,13 @@ void SapienVulkanRigidbody::destroyVisualObjects() {
   }
 }
 
+void SapienVulkanRigidbody::setVisibility(float visibility) {
+  for (auto obj : mObjects) {
+    obj->mVisibility = visibility;
+  }
+}
+
 void SapienVulkanRigidbody::setVisible(bool visible) {
-  // TODO: implement visibility
   for (auto obj : mObjects) {
     obj->mVisibility = visible ? 1.f : 0.f;
   }

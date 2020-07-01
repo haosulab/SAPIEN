@@ -63,6 +63,7 @@ public:
   virtual void setInitialPose(const physx::PxTransform &transform) = 0;
   virtual void update(const physx::PxTransform &transform) = 0;
 
+  virtual void setVisibility(float visibility) = 0;
   virtual void setVisible(bool visible) = 0;
   virtual void setRenderMode(uint32_t mode) = 0;
 

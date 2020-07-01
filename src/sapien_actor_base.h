@@ -1,7 +1,7 @@
 #pragma once
-#include "sapien_shape.h"
 #include "event_system/event_system.h"
 #include "id_generator.h"
+#include "sapien_shape.h"
 #include <PxPhysicsAPI.h>
 #include <string>
 #include <vector>
@@ -40,6 +40,7 @@ protected:
 
   bool collisionRender = false;
   bool mHidden = false;
+  float mDisplayVisibility{1.f};
 
 public:
   void renderCollisionBodies(bool collision);
@@ -80,6 +81,9 @@ public:
 
   // called by scene to notify a simulation step is about to happen
   virtual void prestep();
+
+  void setDisplayVisibility(float visibility);
+  float getDisplayVisibility() const;
 
 protected:
   SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,
