@@ -62,10 +62,14 @@ URDF::URDFConfig parseURDFConfig(py::dict &dict) {
       if (dict2.contains("material")) {
         std::cout << "found link material" << std::endl;
         config.link[name].material = dict2["material"].cast<PxMaterial *>();
+      } else {
+        config.link[name].material = config.material;
       }
       if (dict2.contains("density")) {
         std::cout << "found link density" << std::endl;
         config.link[name].density = dict2["density"].cast<float>();
+      } else {
+        config.link[name].density = config.density;
       }
       if (dict2.contains("patch_radius")) {
         std::cout << "found link patch" << std::endl;
@@ -84,17 +88,25 @@ URDF::URDFConfig parseURDFConfig(py::dict &dict) {
           if (dict3.contains("material")) {
             std::cout << "found shape material" << std::endl;
             config.link[name].shape[idx].material = dict3["material"].cast<PxMaterial *>();
+          } else {
+            config.link[name].shape[idx].material = config.link[name].material;
           }
           if (dict3.contains("density")) {
             std::cout << "found shape density" << std::endl;
             config.link[name].shape[idx].density = dict3["density"].cast<float>();
+          } else {
+            config.link[name].shape[idx].density = config.link[name].density;
           }
           if (dict3.contains("patch_radius")) {
             std::cout << "found shape patch" << std::endl;
             config.link[name].shape[idx].patchRadius = dict3["patch_radius"].cast<float>();
+          } else {
+            config.link[name].shape[idx].patchRadius = config.link[name].patchRadius;
           }
           if (dict3.contains("min_patch_radius")) {
             config.link[name].shape[idx].minPatchRadius = dict3["min_patch_radius"].cast<float>();
+          } else {
+            config.link[name].shape[idx].minPatchRadius = config.link[name].minPatchRadius;
           }
         }
       }
@@ -197,7 +209,8 @@ void buildSapien(py::module &m) {
   auto PySapienVulkanCamera =
       py::class_<Renderer::SapienVulkanCamera, Renderer::ICamera>(m, "VulkanCamera");
 #ifdef ON_SCREEN
-  auto PySapienVulkanController = py::class_<Renderer::SapienVulkanController>(m, "VulkanController");
+  auto PySapienVulkanController =
+      py::class_<Renderer::SapienVulkanController>(m, "VulkanController");
 #endif
 #endif
 
@@ -515,30 +528,7 @@ void buildSapien(py::module &m) {
            py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"),
            py::return_value_policy::reference)
       .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
-      .def("create_scene",
-           [](Simulation &sim, py::array_t<PxReal> const &gravity, PxSolverType::Enum solverType,
-              bool enableCCD, bool enablePCM, SceneConfig const *config) {
-             SceneConfig config2;
-             if (config) {
-               config2 = *config;
-             } else {
-               std::cerr << "Scene creation without config is deprecated and will be "
-                            "removed in the next release. The new scene creation API "
-                            "will be engine.create_scene(config=SceneConfig())\n";
-               sleep(3);
-
-               config2.gravity = {gravity.at(0), gravity.at(1), gravity.at(2)};
-               config2.enablePCM = enablePCM;
-               config2.enableCCD = enableCCD;
-               if (solverType == PxSolverType::eTGS) {
-                 config2.enableTGS = true;
-               }
-             }
-             return sim.createScene(config2);
-           },
-           py::arg("gravity") = make_array<PxReal>({0, 0, -9.8}),
-           py::arg("solver_type") = PxSolverType::ePGS, py::arg("enable_ccd") = false,
-           py::arg("enable_pcm") = true, py::arg("config") = nullptr);
+      .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig());
 
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)
@@ -618,7 +608,6 @@ void buildSapien(py::module &m) {
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
            py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
       .def_readonly("render_id_to_visual_name", &SScene::mRenderId2VisualName);
-
 
   //======= Drive =======//
   PyDrive
@@ -1260,16 +1249,16 @@ void buildSapien(py::module &m) {
 #endif
 
 #ifdef _USE_VULKAN
-  PySapienVulkanRenderer.def(py::init<bool>(), py::arg("offscreen_only")=false)
-      .def_static("set_shader_dir",
-                  &svulkan::VulkanContext::setDefaultShaderDir,
+  PySapienVulkanRenderer.def(py::init<bool>(), py::arg("offscreen_only") = false)
+      .def_static("set_shader_dir", &svulkan::VulkanContext::setDefaultShaderDir,
                   py::arg("spv_dir"));
   PySapienVulkanCamera
-      .def("get_position_rgba", [](Renderer::SapienVulkanCamera &cam) {
-        return py::array_t<float>(
-            {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-            cam.getPositionRGBA().data());
-      })
+      .def("get_position_rgba",
+           [](Renderer::SapienVulkanCamera &cam) {
+             return py::array_t<float>(
+                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+                 cam.getPositionRGBA().data());
+           })
       .def("get_model_matrix",
            [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getModelMatrix()); })
       .def("get_projection_matrix",
@@ -1280,23 +1269,27 @@ void buildSapien(py::module &m) {
            py::arg("fovy") = glm::radians(35.f));
 
 #ifdef ON_SCREEN
-  PySapienVulkanController
-      .def(py::init<Renderer::SapienVulkanRenderer*>(), py::arg("renderer"))
+  PySapienVulkanController.def(py::init<Renderer::SapienVulkanRenderer *>(), py::arg("renderer"))
       .def_property_readonly("is_closed", &Renderer::SapienVulkanController::isClosed)
       .def("render", &Renderer::SapienVulkanController::render)
-      .def("set_current_scene", &Renderer::SapienVulkanController::setScene,
-                               py::arg("scene"))
+      .def("set_current_scene", &Renderer::SapienVulkanController::setScene, py::arg("scene"))
 
       // UI control
-      .def("select_actor", [](Renderer::SapienVulkanController & c, SActorBase * actor) {
-        c.selectActor(actor->getId());
-      }, py::arg("actor"))
-      .def("focus_actor", [](Renderer::SapienVulkanController & c, SActorBase * actor) {
-        c.focusActor(actor->getId());
-      }, py::arg("actor"))
-      .def("view_from_camera", [](Renderer::SapienVulkanController & c, uint32_t camera_index) {
-        c.viewFromCamera(camera_index);
-      }, py::arg("camera_index"))
+      .def("select_actor",
+           [](Renderer::SapienVulkanController &c, SActorBase *actor) {
+             c.selectActor(actor->getId());
+           },
+           py::arg("actor"))
+      .def("focus_actor",
+           [](Renderer::SapienVulkanController &c, SActorBase *actor) {
+             c.focusActor(actor->getId());
+           },
+           py::arg("actor"))
+      .def("view_from_camera",
+           [](Renderer::SapienVulkanController &c, uint32_t camera_index) {
+             c.viewFromCamera(camera_index);
+           },
+           py::arg("camera_index"))
       .def("pause", &Renderer::SapienVulkanController::pause, py::arg("p") = true)
       .def("set_free_camera_position", &Renderer::SapienVulkanController::setFreeCameraPosition,
            py::arg("x"), py::arg("y"), py::arg("z"))
@@ -1307,16 +1300,14 @@ void buildSapien(py::module &m) {
       .def("close", &Renderer::SapienVulkanController::close)
 
       // input
-      .def("mouse_down", &Renderer::SapienVulkanController::mouseDown, py::arg("key_code")=0)
-      .def("mouse_click", &Renderer::SapienVulkanController::mouseClick, py::arg("key_code")=0)
+      .def("mouse_down", &Renderer::SapienVulkanController::mouseDown, py::arg("key_code") = 0)
+      .def("mouse_click", &Renderer::SapienVulkanController::mouseClick, py::arg("key_code") = 0)
       .def("key_down", &Renderer::SapienVulkanController::keyDown, py::arg("key"))
       .def("key_press", &Renderer::SapienVulkanController::keyPressed, py::arg("key"))
       .def_property_readonly("mouse_pos", &Renderer::SapienVulkanController::getMousePos)
       .def_property_readonly("mouse_delta", &Renderer::SapienVulkanController::getMouseDelta)
-      .def_property_readonly("wheel_delta", &Renderer::SapienVulkanController::getMouseWheelDelta)
-      ;
+      .def_property_readonly("wheel_delta", &Renderer::SapienVulkanController::getMouseWheelDelta);
 
 #endif
 #endif
-
 }
