@@ -130,6 +130,8 @@ if (${BUILD_WITH_VULKAN_SUPPORT})
     include_directories("3rd_party/sapien-vulkan/include")
     add_executable(manual_vulkan manualtest/vulkan.cpp)
     target_link_libraries(manual_vulkan sapien)
+    add_executable(manual_vulkan_perf manualtest/vulkan_performance.cpp)
+    target_link_libraries(manual_vulkan_perf sapien)
 
     set_target_properties(sapien-vulkan PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 endif()

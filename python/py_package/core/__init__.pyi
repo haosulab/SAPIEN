@@ -4,9 +4,8 @@ from typing import Iterable as iterable
 from typing import Iterator as iterator
 from numpy import float64
 _Shape = Tuple[int, ...]
-import sapien.core.pysapien
 import numpy
-import SolverType
+import sapien.core.pysapien
 __all__  = [
 "ActorBase",
 "ActorDynamicBase",
@@ -895,10 +894,7 @@ class Drive():
 class Engine():
     def __init__(self, n_thread: int = 0, tolerance_length: float = 0.10000000149011612, tolerance_speed: float = 0.20000000298023224) -> None: ...
     def create_physical_material(self, static_friction: float, dynamic_friction: float, restitution: float) -> PxMaterial: ...
-    def create_scene(self, gravity: numpy.ndarray[float32] = array([ 0. ,  0. , -9.8], dtype=float32), solver_type: SolverType = SolverType.PGS, enable_ccd: bool = False, enable_pcm: bool = True, config: SceneConfig = None) -> Scene: 
-        """
-        create_scene(self: sapien.core.pysapien.Engine, gravity: numpy.ndarray[float32] = array([ 0. ,  0. , -9.8], dtype=float32), solver_type: sapien.core.pysapien.SolverType = SolverType.PGS, enable_ccd: bool = False, enable_pcm: bool = True, config: sapien.core.pysapien.SceneConfig = None) -> sapien.core.pysapien.Scene
-        """
+    def create_scene(self, config: SceneConfig = SceneConfig()) -> Scene: ...
     def get_renderer(self) -> IPxrRenderer: ...
     def set_log_level(self, level: str) -> None: ...
     def set_renderer(self, renderer: IPxrRenderer) -> None: ...

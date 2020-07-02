@@ -352,8 +352,8 @@ void SapienVulkanController::render() {
         auto [x, y] = mWindow->getMouseDelta();
         float r1 = mHudControlWindow.mHudControl.mInvertX ? -r : r;
         float r2 = mHudControlWindow.mHudControl.mInvertY ? -r : r;
-        r1 *= mHudControlWindow.mHudControl.mRotateSpeed;
-        r2 *= mHudControlWindow.mHudControl.mRotateSpeed;
+        r1 = mHudControlWindow.mHudControl.mRotateSpeed * 0.001;
+        r2 = mHudControlWindow.mHudControl.mRotateSpeed * 0.001;
 
         if (mFocusedId) {
           mArcRotateController->rotateYawPitch(-r1 * x, r2 * y);

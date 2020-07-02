@@ -11,8 +11,8 @@ struct HudControl {
   bool mInvertX {};
   bool mInvertY {};
 
-  float mRotateSpeed {1.f};
-  float mMoveSpeed {1.f};
+  float mRotateSpeed {3.f};
+  float mMoveSpeed {3.f};
 
   bool mStepped {};
 

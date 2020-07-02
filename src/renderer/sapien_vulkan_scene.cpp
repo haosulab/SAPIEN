@@ -116,9 +116,20 @@ IPxrRigidbody *SapienVulkanScene::addRigidbody(std::vector<physx::PxVec3> const 
       mParentRenderer->mContext->getDescriptorSetLayouts().object.get());
 
   vobj->setMesh(vulkanMesh);
+
   std::shared_ptr<svulkan::VulkanMaterial> mat = mParentRenderer->mContext->createMaterial();
   vobj->setMaterial(mat);
   auto obj = std::make_unique<svulkan::Object>(std::move(vobj));
+
+  svulkan::PBRMaterialUBO matubo;
+  matubo.baseColor = {material.base_color[0], material.base_color[1], material.base_color[2],
+    material.base_color[3]};
+  matubo.specular = material.specular;
+  matubo.roughness = material.roughness;
+  matubo.metallic = material.metallic;
+  obj->updateMaterial(matubo);
+
+  obj->mTransform.scale = {scale.x, scale.y, scale.z};
 
   mBodies.push_back(std::make_unique<SapienVulkanRigidbody>(this, std::vector{obj.get()}));
   mScene->addObject(std::move(obj));
