@@ -17,32 +17,32 @@ namespace sapien {
 namespace Renderer {
 
 void HudSettings::draw(SScene *scene) {
-  auto flags = scene->getPxScene()->getFlags();
+  if (ImGui::CollapsingHeader("Settings")) {
+    auto flags = scene->getPxScene()->getFlags();
+    bool b = flags & PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
+    ImGui::Checkbox("Enhanced determinism", &b);
+    b = flags & PxSceneFlag::eENABLE_PCM;
+    ImGui::Checkbox("PCM(persistent contact manifold)", &b);
+    b = flags & PxSceneFlag::eENABLE_CCD;
+    ImGui::Checkbox("CCD(continuous collision detection)", &b);
+    b = flags & PxSceneFlag::eENABLE_STABILIZATION;
+    ImGui::Checkbox("Stabilization", &b);
+    b = flags & PxSceneFlag::eENABLE_AVERAGE_POINT;
+    ImGui::Checkbox("Average point", &b);
+    b = flags & PxSceneFlag::eENABLE_GPU_DYNAMICS;
+    ImGui::Checkbox("GPU dynamics", &b);
+    b = flags & PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
+    ImGui::Checkbox("Friction in every solver iteration", &b);
+    b = flags & PxSceneFlag::eADAPTIVE_FORCE;
+    ImGui::Checkbox("Adaptive force", &b);
 
-  bool b = flags & PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
-  ImGui::Checkbox("Enhanced determinism", &b);
-  b = flags & PxSceneFlag::eENABLE_PCM;
-  ImGui::Checkbox("PCM(persistent contact manifold)", &b);
-  b = flags & PxSceneFlag::eENABLE_CCD;
-  ImGui::Checkbox("CCD(continuous collision detection)", &b);
-  b = flags & PxSceneFlag::eENABLE_STABILIZATION;
-  ImGui::Checkbox("Stabilization", &b);
-  b = flags & PxSceneFlag::eENABLE_AVERAGE_POINT;
-  ImGui::Checkbox("Average point", &b);
-  b = flags & PxSceneFlag::eENABLE_GPU_DYNAMICS;
-  ImGui::Checkbox("GPU dynamics", &b);
-  b = flags & PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
-  ImGui::Checkbox("Friction in every solver iteration", &b);
-  b = flags & PxSceneFlag::eADAPTIVE_FORCE;
-  ImGui::Checkbox("Adaptive force", &b);
-
-  ImGui::Text("Contact offset: %.4g", scene->getDefaultContactOffset());
-  ImGui::Text("Bounce threshold: %.4g", scene->getPxScene()->getBounceThresholdVelocity());
-  ImGui::Text("Sleep threshold: %.4g", scene->getDefaultSleepThreshold());
-  ImGui::Text("Solver iterations: %d", scene->getDefaultSolverIterations());
-  ImGui::Text("Solver velocity iterations: %d",
-              scene->getDefaultSolverVelocityIterations());
-  
+    ImGui::Text("Contact offset: %.4g", scene->getDefaultContactOffset());
+    ImGui::Text("Bounce threshold: %.4g", scene->getPxScene()->getBounceThresholdVelocity());
+    ImGui::Text("Sleep threshold: %.4g", scene->getDefaultSleepThreshold());
+    ImGui::Text("Solver iterations: %d", scene->getDefaultSolverIterations());
+    ImGui::Text("Solver velocity iterations: %d",
+                scene->getDefaultSolverVelocityIterations());
+  }
 }
 
 void HudActor::draw(SActorBase *actor) {
