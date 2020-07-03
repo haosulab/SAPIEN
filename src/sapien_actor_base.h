@@ -26,21 +26,23 @@ enum class EActorType {
 
 class SActorBase : public EventEmitter<EventActorPreDestroy>, public EventEmitter<EventActorStep> {
 protected:
-  std::string mName = "";
-  physx_id_t mId = 0;
-  SScene *mParentScene = nullptr;
-  std::vector<Renderer::IPxrRigidbody *> mRenderBodies;
-  std::vector<Renderer::IPxrRigidbody *> mCollisionBodies;
+  std::string mName {""};
+  physx_id_t mId {0};
+  SScene *mParentScene {};
+  std::vector<Renderer::IPxrRigidbody *> mRenderBodies {};
+  std::vector<Renderer::IPxrRigidbody *> mCollisionBodies {};
 
-  std::vector<SDrive *> mDrives;
+  std::vector<SDrive *> mDrives {};
 
-  uint32_t mCol1 = 0;
-  uint32_t mCol2 = 0;
-  uint32_t mCol3 = 0;
+  uint32_t mCol1 {0};
+  uint32_t mCol2 {0};
+  uint32_t mCol3 {0};
 
-  bool collisionRender = false;
-  bool mHidden = false;
+  bool collisionRender {false};
+  bool mHidden {false};
   float mDisplayVisibility{1.f};
+
+  bool mBeingDestroyed {false};
 
 public:
   void renderCollisionBodies(bool collision);
@@ -68,7 +70,7 @@ public:
   inline uint32_t getCollisionGroup2() { return mCol2; }
   inline uint32_t getCollisionGroup3() { return mCol3; }
 
-  std::vector<SShape> getCollisionShapes();
+  std::vector<std::unique_ptr<SShape>> getCollisionShapes();
 
   // render
   std::vector<Renderer::IPxrRigidbody *> getRenderBodies();
@@ -84,6 +86,11 @@ public:
 
   void setDisplayVisibility(float visibility);
   float getDisplayVisibility() const;
+
+  // internal use only
+  inline void markDestroyed() { mBeingDestroyed = true; }
+
+  inline bool isBeingDestroyed() const { return mBeingDestroyed; }
 
 protected:
   SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,

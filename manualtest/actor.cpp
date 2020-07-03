@@ -23,17 +23,15 @@ int main() {
   s1->addGround(-1);
 
   auto builder = s0->createActorBuilder();
-
-
-  builder->addMultipleConvexShapesFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
-  builder->addVisualFromFile("/home/fx/source/py-vhacd/example/decomposed.obj");
-  // builder->addDecomposedConvexShapesFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
-  //                                            {0.1, 0.1, 0.1});
-  // builder->addVisualFromFile("../assets/shapenet/cup.dae", PxTransform(PxIdentity),
-  //                            {0.1, 0.1, 0.1});
-
+  builder->addConvexShapeFromFile("/home/fx/source/sapien/assets/bottle/model.obj");
+  builder->addVisualFromFile("/home/fx/source/sapien/assets/bottle/model.obj");
   auto actor = builder->build();
   actor->setPose({{0, 0, 2}, PxIdentity});
+  auto shapes = actor->getCollisionShapes();
+  for (auto &s : shapes) {
+    auto scale = static_cast<SConvexMeshGeometry*>(s->geometry.get())->scale;
+    std::cout << scale.x << " " << scale.y << " " << scale.z << std::endl;
+  }
 
   auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
   r0->setAmbientLight({0.3, 0.3, 0.3});

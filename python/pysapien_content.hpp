@@ -195,6 +195,7 @@ void buildSapien(py::module &m) {
   auto PyArticulation = py::class_<SArticulation, SArticulationDrivable>(m, "Articulation");
   py::class_<SKArticulation, SArticulationDrivable>(m, "KinematicArticulation");
   auto PyContact = py::class_<SContact>(m, "Contact");
+  auto PyContactPoint = py::class_<SContactPoint>(m, "ContactPoint");
 
   auto PyActorBuilder = py::class_<ActorBuilder>(m, "ActorBuilder");
   auto PyShapeRecord = py::class_<ActorBuilder::ShapeRecord>(m, "ShapeRecord");
@@ -926,31 +927,34 @@ void buildSapien(py::module &m) {
                              py::return_value_policy::reference)
       .def_property_readonly("actor2", [](SContact &contact) { return contact.actors[1]; },
                              py::return_value_policy::reference)
-      .def_property_readonly(
-          "point",
-          [](SContact &contact) {
-            return make_array<PxReal>({contact.point.x, contact.point.y, contact.point.z});
-          })
-      .def_property_readonly(
-          "normal",
-          [](SContact &contact) {
-            return make_array<PxReal>({contact.normal.x, contact.normal.y, contact.normal.z});
-          })
-      .def_property_readonly(
-          "impulse",
-          [](SContact &contact) {
-            return make_array<PxReal>({contact.impulse.x, contact.impulse.y, contact.impulse.z});
-          })
-      .def_readonly("separation", &SContact::separation)
       .def_readonly("starts", &SContact::starts)
       .def_readonly("persists", &SContact::persists)
       .def_readonly("ends", &SContact::ends)
+      .def_readonly("points", &SContact::points)
       .def("__repr__", [](SContact const &c) {
         std::ostringstream oss;
         oss << "Contact(actor0=" << c.actors[0]->getName() << ", actor1=" << c.actors[1]->getName()
-            << ", separation=" << c.separation << ")";
+            << ")";
         return oss.str();
       });
+
+  PyContactPoint
+      .def_property_readonly(
+          "position",
+          [](SContactPoint &point) {
+            return make_array<PxReal>({point.position.x, point.position.y, point.position.z});
+          })
+      .def_property_readonly(
+          "normal",
+          [](SContactPoint &point) {
+            return make_array<PxReal>({point.normal.x, point.normal.y, point.normal.z});
+          })
+      .def_property_readonly(
+          "impulse",
+          [](SContactPoint &point) {
+            return make_array<PxReal>({point.impulse.x, point.impulse.y, point.impulse.z});
+          })
+      .def_readonly("separation", &SContactPoint::separation);
 
   //======== Builders ========
 

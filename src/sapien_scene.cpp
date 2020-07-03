@@ -69,7 +69,46 @@ void SScene::addKinematicArticulation(std::unique_ptr<SKArticulation> articulati
   mKinematicArticulations.push_back(std::move(articulation));
 }
 
+void SScene::removeCleanUp() {
+  if (mRequiresRemoveCleanUp) {
+    mRequiresRemoveCleanUp = false;
+    // release actors
+    for (auto &a : mActors) {
+      if (a->isBeingDestroyed()) {
+        a->getPxActor()->release();
+      }
+    }
+    mActors.erase(std::remove_if(mActors.begin(), mActors.end(),
+                                 [](auto &a) { return a->isBeingDestroyed(); }),
+                  mActors.end());
+
+    // release articulation
+    for (auto &a : mArticulations) {
+      if (a->isBeingDestroyed()) {
+        a->getPxArticulation()->release();
+      }
+    }
+    mArticulations.erase(std::remove_if(mArticulations.begin(), mArticulations.end(),
+                                        [](auto &a) { return a->isBeingDestroyed(); }),
+                         mArticulations.end());
+
+    // release kinematic articulation
+    for (auto &a : mKinematicArticulations) {
+      if (a->isBeingDestroyed()) {
+        for (auto l : a->getBaseLinks()) {
+          l->getPxActor()->release();
+        }
+      }
+    }
+    mKinematicArticulations.erase(std::remove_if(mKinematicArticulations.begin(),
+                                                 mKinematicArticulations.end(),
+                                                 [](auto &a) { return a->isBeingDestroyed(); }),
+                                  mKinematicArticulations.end());
+  }
+}
+
 void SScene::removeActor(SActorBase *actor) {
+  mRequiresRemoveCleanUp = true;
   // predestroy event
   EventActorPreDestroy e;
   e.actor = actor;
@@ -98,15 +137,14 @@ void SScene::removeActor(SActorBase *actor) {
 
   // remove physical bodies
   mPxScene->removeActor(*actor->getPxActor());
-  actor->getPxActor()->release();
 
-  // remove sapien actor
-  mActors.erase(std::remove_if(mActors.begin(), mActors.end(),
-                               [actor](auto &a) { return a.get() == actor; }),
-                mActors.end());
+  actor->markDestroyed();
+  // actor->getPxActor()->release();
 }
 
 void SScene::removeArticulation(SArticulation *articulation) {
+  mRequiresRemoveCleanUp = true;
+
   EventArticulationPreDestroy e;
   e.articulation = articulation;
   articulation->EventEmitter<EventArticulationPreDestroy>::emit(e);
@@ -137,15 +175,22 @@ void SScene::removeArticulation(SArticulation *articulation) {
 
   // remove physical bodies
   mPxScene->removeArticulation(*articulation->getPxArticulation());
-  articulation->getPxArticulation()->release();
 
-  // remove sapien articulation
-  mArticulations.erase(std::remove_if(mArticulations.begin(), mArticulations.end(),
-                                      [articulation](auto &a) { return a.get() == articulation; }),
-                       mArticulations.end());
+  // mark removed
+  articulation->markDestroyed();
+
+  // articulation->getPxArticulation()->release();
+
+  // // remove sapien articulation
+  // mArticulations.erase(std::remove_if(mArticulations.begin(), mArticulations.end(),
+  //                                     [articulation](auto &a) { return a.get() == articulation;
+  //                                     }),
+  //                      mArticulations.end());
 }
 
 void SScene::removeKinematicArticulation(SKArticulation *articulation) {
+  mRequiresRemoveCleanUp = true;
+
   EventArticulationPreDestroy e;
   e.articulation = articulation;
   articulation->EventEmitter<EventArticulationPreDestroy>::emit(e);
@@ -175,13 +220,14 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
 
     // remove actor
     mPxScene->removeActor(*link->getPxActor());
-    link->getPxActor()->release();
+    // link->getPxActor()->release();
   }
 
-  mKinematicArticulations.erase(
-      std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
-                     [articulation](auto &a) { return a.get() == articulation; }),
-      mKinematicArticulations.end());
+  articulation->markDestroyed();
+  // mKinematicArticulations.erase(
+  //     std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
+  //                    [articulation](auto &a) { return a.get() == articulation; }),
+  //     mKinematicArticulations.end());
 }
 
 void SScene::removeDrive(SDrive *drive) {
@@ -327,15 +373,17 @@ void SScene::step() {
   EASY_BLOCK("Pre-step processing", profiler::colors::Blue);
 #endif
 
-  clearContacts();
   for (auto &a : mActors) {
-    a->prestep();
+    if (!a->isBeingDestroyed())
+      a->prestep();
   }
   for (auto &a : mArticulations) {
-    a->prestep();
+    if (!a->isBeingDestroyed())
+      a->prestep();
   }
   for (auto &a : mKinematicArticulations) {
-    a->prestep();
+    if (!a->isBeingDestroyed())
+      a->prestep();
   }
 
 #ifdef _PROFILE
@@ -351,21 +399,25 @@ void SScene::step() {
   EASY_END_BLOCK;
 #endif
 
+  removeCleanUp();
+
   EventStep event;
   event.timeStep = getTimestep();
   emit(event);
 }
 
 void SScene::stepAsync() {
-  clearContacts();
   for (auto &a : mActors) {
-    a->prestep();
+    if (!a->isBeingDestroyed())
+      a->prestep();
   }
   for (auto &a : mArticulations) {
-    a->prestep();
+    if (!a->isBeingDestroyed())
+      a->prestep();
   }
   for (auto &a : mKinematicArticulations) {
-    a->prestep();
+    if (!a->isBeingDestroyed())
+      a->prestep();
   }
   mPxScene->simulate(mTimestep);
 }
@@ -373,6 +425,9 @@ void SScene::stepAsync() {
 void SScene::stepWait() {
   while (!mPxScene->fetchResults(true)) {
   }
+
+  removeCleanUp();
+
   EventStep event;
   event.timeStep = getTimestep();
   emit(event);
@@ -412,9 +467,36 @@ void SScene::addGround(PxReal altitude, bool render, PxMaterial *material,
   createActorBuilder()->buildGround(altitude, render, material, renderMaterial, "ground");
 }
 
-void SScene::addContact(SContact const &contact) { mContacts.push_back(contact); }
-void SScene::clearContacts() { mContacts.clear(); }
-std::vector<SContact> const &SScene::getContacts() const { return mContacts; }
+void SScene::updateContact(PxShape *shape1, PxShape *shape2, std::unique_ptr<SContact> contact) {
+  auto pair = std::make_pair(shape1, shape2);
+  if (contact->starts) {
+    if (mContacts.find(pair) != mContacts.end()) {
+      spdlog::get("SAPIEN")->error("Error adding contact pair: it already exists");
+    }
+    mContacts[pair] = std::move(contact);
+  } else if (contact->persists) {
+    auto it = mContacts.find(pair);
+    if (it == mContacts.end()) {
+      spdlog::get("SAPIEN")->error("Error updating contact pair: it has not started");
+    }
+    it->second = std::move(contact);
+  } else if (contact->ends) {
+    auto it = mContacts.find(pair);
+    if (it == mContacts.end()) {
+      spdlog::get("SAPIEN")->error("Error updating contact pair: it has not started");
+      return;
+    }
+    mContacts.erase(it);
+  }
+}
+
+std::vector<SContact *> SScene::getContacts() const {
+  std::vector<SContact *> contacts{};
+  for (auto &it : mContacts) {
+    contacts.push_back(it.second.get());
+  }
+  return contacts;
+}
 
 SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
                             PxTransform const &pose2) {

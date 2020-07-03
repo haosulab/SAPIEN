@@ -4,6 +4,7 @@
 #include "articulation/sapien_link.h"
 #include "sapien_actor.h"
 #include "sapien_actor_base.h"
+#include "sapien_contact.h"
 #include "sapien_drive.h"
 #include "sapien_scene.h"
 
@@ -28,7 +29,7 @@ static physx::PxTransform Mat42PxTransform(glm::mat4 const &m) {
   return {{pos.x, pos.y, pos.z}, {rot.x, rot.y, rot.z, rot.w}};
 }
 
-void SapienVulkanController::editTransform() {
+void SapienVulkanController::editGizmoTransform() {
   static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
   static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
   static bool useSnap = false;
@@ -135,6 +136,215 @@ void SapienVulkanController::editTransform() {
   ImGui::End();
 }
 
+void SapienVulkanController::editContactVisualization() {
+  if (!mScene) {
+    return;
+  }
+  ImGui::Begin("Contact");
+
+  if (ImGui::Button("Make everything transparent")) {
+    for (auto a : mScene->getAllActors()) {
+      a->setDisplayVisibility(0.5);
+    }
+    for (auto a : mScene->getAllArticulations()) {
+      for (auto b : a->getBaseLinks()) {
+        b->setDisplayVisibility(0.5);
+      }
+    }
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Make everything normal")) {
+    for (auto a : mScene->getAllActors()) {
+      a->setDisplayVisibility(1);
+    }
+    for (auto a : mScene->getAllArticulations()) {
+      for (auto b : a->getBaseLinks()) {
+        b->setDisplayVisibility(1);
+      }
+    }
+  }
+
+  auto actor = mScene->findActorById(mSelectedId);
+  if (!actor) {
+    actor = mScene->findArticulationLinkById(mSelectedId);
+  }
+  if (!actor) {
+    ImGui::Text("No actor selected");
+  } else {
+    static bool showContacts{true}, showImpulses{true};
+    static float scale = 0.1f;
+    ImGui::Checkbox("Show contacts", &showContacts);
+    if (showContacts) {
+      ImGui::SliderFloat("Contact frame scale", &scale, 0.01f, 1.f);
+    }
+    static float impulseScale{1.f}, maxImpulse{1.f};
+    ImGui::Checkbox("Show Impulses", &showImpulses);
+    if (showImpulses) {
+      ImGui::SliderFloat("Max impulse display length", &impulseScale, 0.1f, 10.f);
+      if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip("The longest length of the impulse display");
+      }
+      ImGui::SliderFloat("Max impulse", &maxImpulse, 1e-4f, 1e4f, "%f", 10);
+      if (ImGui::IsItemHovered()) {
+        ImGui::SetTooltip(
+            "Impulse greater than this number will be displayed at maximum display length");
+      }
+    }
+
+    mVulkanRenderer->clearSticks();
+    bool hovered = false;
+
+    uint32_t pair_count = 0;
+    for (auto contact : mScene->getContacts()) {
+      if (contact->actors[0] == actor || contact->actors[1] == actor) {
+        uint32_t point_count = 0;
+        for (auto point : contact->points) {
+          ImGui::Selectable(
+              ("Pair " + std::to_string(pair_count) + " Point " + std::to_string(point_count++))
+                  .c_str());
+          if (ImGui::IsItemHovered()) {
+            hovered = true;
+            // if (showContacts)
+            {
+              glm::mat4 s(1);
+              s[0][0] = s[1][1] = s[2][2] = scale;
+
+              // invert x axis if current actor is the first actor
+              // this makes the x axis pointing outwards
+              if (contact->actors[0] == actor) {
+                s[0][0] *= -1;
+              }
+
+              glm::vec3 v = {point.normal.x, point.normal.y, point.normal.z};
+              glm::vec3 t1 = glm::cross(v, glm::vec3(1, 0, 0));
+              if (glm::length2(t1) < 0.01) {
+                t1 = glm::cross(v, glm::vec3(0, 1, 0));
+              }
+              t1 = glm::normalize(t1);
+              glm::vec3 t2 = glm::cross(v, t1);
+              glm::mat3 m(v, t1, t2);
+              glm::mat4 transform = glm::mat4(m) * s;
+              transform[3][0] = point.position.x;
+              transform[3][1] = point.position.y;
+              transform[3][2] = point.position.z;
+              transform[3][3] = 1.f;
+              mVulkanRenderer->addAxes(transform);
+            }
+            // if (showImpulses)
+            {
+              glm::mat4 s(1);
+              glm::vec3 v = {point.impulse.x, point.impulse.y, point.impulse.z};
+              float mag = glm::length(v);
+              s[0][0] = s[1][1] = s[2][2] = impulseScale * std::min(1.f, mag / maxImpulse);
+
+              // invert x axis if current actor is the first actor
+              // this makes the x axis pointing outwards
+              if (contact->actors[0] == actor) {
+                s[0][0] *= -1;
+              }
+
+              if (mag != 0.f) {
+                v = glm::normalize(v);
+                glm::vec3 t1 = glm::cross(v, glm::vec3(1, 0, 0));
+                if (glm::length2(t1) < 0.01) {
+                  t1 = glm::cross(v, glm::vec3(0, 1, 0));
+                }
+                t1 = glm::normalize(t1);
+                glm::vec3 t2 = glm::cross(v, t1);
+                glm::mat3 m(v, t1, t2);
+                glm::mat4 transform = glm::mat4(m) * s;
+                transform[3][0] = point.position.x;
+                transform[3][1] = point.position.y;
+                transform[3][2] = point.position.z;
+                transform[3][3] = 1.f;
+                mVulkanRenderer->addStick(transform);
+              }
+            }
+          }
+          ImGui::Text("%s - %s", contact->actors[0]->getName().c_str(),
+                      contact->actors[1]->getName().c_str());
+          if (contact->starts) {
+            ImGui::Text("Type: start");
+          } else if (contact->persists) {
+            ImGui::Text("Type: persist");
+          } else if (contact->ends) {
+            ImGui::Text("Type: ends");
+          }
+          ImGui::Text("Separation: %.4g", point.separation);
+          ImGui::Text("Impulse: %.4g %.4g %.4g", point.impulse.x, point.impulse.y,
+                      point.impulse.z);
+          ImGui::NewLine();
+        }
+        pair_count++;
+      }
+    }
+
+    if (!hovered) {
+      for (auto contact : mScene->getContacts()) {
+        if (contact->actors[0] == actor || contact->actors[1] == actor) {
+          for (auto point : contact->points) {
+            if (showContacts) {
+              glm::mat4 s(1);
+              s[0][0] = s[1][1] = s[2][2] = scale;
+
+              // invert x axis if current actor is the first actor
+              // this makes the x axis pointing outwards
+              if (contact->actors[0] == actor) {
+                s[0][0] *= -1;
+              }
+
+              glm::vec3 v = {point.normal.x, point.normal.y, point.normal.z};
+              glm::vec3 t1 = glm::cross(v, glm::vec3(1, 0, 0));
+              if (glm::length2(t1) < 0.01) {
+                t1 = glm::cross(v, glm::vec3(0, 1, 0));
+              }
+              t1 = glm::normalize(t1);
+              glm::vec3 t2 = glm::cross(v, t1);
+              glm::mat3 m(v, t1, t2);
+              glm::mat4 transform = glm::mat4(m) * s;
+              transform[3][0] = point.position.x;
+              transform[3][1] = point.position.y;
+              transform[3][2] = point.position.z;
+              transform[3][3] = 1.f;
+              mVulkanRenderer->addAxes(transform);
+            }
+            if (showImpulses) {
+              glm::mat4 s(1);
+              glm::vec3 v = {point.impulse.x, point.impulse.y, point.impulse.z};
+              float mag = glm::length(v);
+              s[0][0] = s[1][1] = s[2][2] = impulseScale * std::min(1.f, mag / maxImpulse);
+
+              // invert x axis if current actor is the first actor
+              // this makes the x axis pointing outwards
+              if (contact->actors[0] == actor) {
+                s[0][0] *= -1;
+              }
+
+              if (mag != 0.f) {
+                v = glm::normalize(v);
+                glm::vec3 t1 = glm::cross(v, glm::vec3(1, 0, 0));
+                if (glm::length2(t1) < 0.01) {
+                  t1 = glm::cross(v, glm::vec3(0, 1, 0));
+                }
+                t1 = glm::normalize(t1);
+                glm::vec3 t2 = glm::cross(v, t1);
+                glm::mat3 m(v, t1, t2);
+                glm::mat4 transform = glm::mat4(m) * s;
+                transform[3][0] = point.position.x;
+                transform[3][1] = point.position.y;
+                transform[3][2] = point.position.z;
+                transform[3][3] = 1.f;
+                mVulkanRenderer->addStick(transform);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ImGui::End();
+}
+
 void SapienVulkanController::createGizmoVisual(SActorBase *actor) {
   if (!mScene) {
     return;
@@ -227,10 +437,10 @@ void SapienVulkanController::render() {
       ImGui::SetNextWindowPos(ImVec2(0, 0));
       ImGui::SetNextWindowSize(ImVec2(mWidth, 60));
       ImGui::Begin("Menu");
-      static bool control{}, object{}, gizmo{}, contact{};
+      static bool control{true}, object{true}, gizmo{}, contact{};
       ImGui::Checkbox("Control", &control);
       ImGui::SameLine();
-      ImGui::Checkbox("World", &object);
+      ImGui::Checkbox("Object", &object);
       ImGui::SameLine();
       ImGui::Checkbox("Gizmo", &gizmo);
       ImGui::SameLine();
@@ -238,7 +448,7 @@ void SapienVulkanController::render() {
       ImGui::End();
 
       if (gizmo) {
-        editTransform();
+        editGizmoTransform();
       } else {
         if (mGizmoBody.size()) {
           createGizmoVisual(nullptr);
@@ -251,6 +461,10 @@ void SapienVulkanController::render() {
 
       if (object) {
         mHudObjectWindow.draw(mScene, mSelectedId);
+      }
+
+      if (contact) {
+        editContactVisualization();
       }
 
       ImGui::Render();
@@ -400,8 +614,8 @@ void SapienVulkanController::render() {
       selectActor(mHudObjectWindow.mHudArticulation.mSelectedId);
     }
 
+    mVulkanRenderer->clearAxes();
     if (mSelectedId) {
-      mVulkanRenderer->clearAxes();
       auto actor = mScene->findActorById(mSelectedId);
       if (!actor) {
         actor = mScene->findArticulationLinkById(mSelectedId);
@@ -443,7 +657,7 @@ void SapienVulkanController::render() {
       }
     }
 
-  } while (mHudControlWindow.mHudControl.mPause);
+  } while (mHudControlWindow.mHudControl.mPause && !mHudControlWindow.mHudControl.mStepped);
 }
 
 void SapienVulkanController::selectActor(physx_id_t actorId) { mSelectedId = actorId; }
