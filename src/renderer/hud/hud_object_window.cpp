@@ -46,7 +46,7 @@ void HudSettings::draw(SScene *scene) {
 }
 
 void HudActor::draw(SActorBase *actor) {
-  if (ImGui::CollapsingHeader("Actor")) {
+  if (ImGui::CollapsingHeader("Actor", ImGuiTreeNodeFlags_DefaultOpen)) {
     // name
     ImGui::Text("Name: %s", actor->getName().c_str());
 
@@ -479,50 +479,40 @@ void HudWorld::draw(SScene *scene, physx_id_t selectedId) {
       ImGui::TreePop();
     }
     if (ImGui::TreeNode("Contacts")) {
-      auto &contacts = scene->getContacts();
+      auto contacts = scene->getContacts();
       ImGui::Text("%ld contacts", contacts.size());
+
       for (uint32_t i = 0; i < contacts.size(); ++i) {
-        if (ImGui::TreeNode((contacts[i].actors[0]->getName() + "-" +
-                             contacts[i].actors[1]->getName() + "##contact" + std::to_string(i))
+        if (ImGui::TreeNode((contacts[i]->actors[0]->getName() + "-" +
+                             contacts[i]->actors[1]->getName() + "##contact" + std::to_string(i))
                                 .c_str())) {
-          if (ImGui::Selectable((contacts[i].actors[0]->getName()).c_str())) {
+          if (ImGui::Selectable((contacts[i]->actors[0]->getName()).c_str())) {
             mSelect = true;
-            mSelectedId = contacts[i].actors[0]->getId();
+            mSelectedId = contacts[i]->actors[0]->getId();
           }
-          if (ImGui::Selectable((contacts[i].actors[1]->getName()).c_str())) {
+          if (ImGui::Selectable((contacts[i]->actors[1]->getName()).c_str())) {
             mSelect = true;
-            mSelectedId = contacts[i].actors[1]->getId();
+            mSelectedId = contacts[i]->actors[1]->getId();
           }
-          ImGui::Text("Separation: %.4g", contacts[i].separation);
-          ImGui::Text("Impulse: %.4g %.4g %.4g", contacts[i].impulse.x, contacts[i].impulse.y,
-                      contacts[i].impulse.z);
-          if (contacts[i].starts) {
+          if (contacts[i]->starts) {
             ImGui::Text("Type: start");
-          } else if (contacts[i].persists) {
+          } else if (contacts[i]->persists) {
             ImGui::Text("Type: persist");
-          } else if (contacts[i].ends) {
+          } else if (contacts[i]->ends) {
             ImGui::Text("Type: ends");
           }
-          if (ImGui::Selectable("Position")) {
-            mSelect = true;
-            mSelectedId = 0;
-            // currentScene->getScene()->clearAxes();
-            glm::vec3 v = {contacts[i].normal.x, contacts[i].normal.y, contacts[i].normal.z};
-            glm::vec3 t1 = glm::cross(v, glm::vec3(1, 0, 0));
-            if (glm::length2(t1) < 0.01) {
-              t1 = glm::cross(v, glm::vec3(0, 1, 0));
-            }
-            t1 = glm::normalize(t1);
-            glm::vec3 t2 = glm::cross(v, t1);
-            glm::mat3 m(v, t1, t2);
 
-            // currentScene->getScene()->addAxes(
-            //     {contacts[i].point.x, contacts[i].point.y, contacts[i].point.z},
-            //     glm::quat(m));
+          for (uint32_t j = 0; j < contacts[i]->points.size(); ++j) {
+            auto &point = contacts[i]->points[j];
+            ImGui::Text("Contact point %d", j);
+            ImGui::Text("Separation: %.4g", point.separation);
+            ImGui::Text("Impulse: %.4g %.4g %.4g", point.impulse.x, point.impulse.y, point.impulse.z);
           }
+
           ImGui::TreePop();
         }
       }
+
       ImGui::TreePop();
     }
   }

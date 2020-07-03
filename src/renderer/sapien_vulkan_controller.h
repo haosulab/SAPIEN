@@ -70,8 +70,10 @@ class SapienVulkanController {
 
   glm::mat4 mGizmoTransform {1};
   std::vector<IPxrRigidbody*> mGizmoBody {};
-  void editTransform();
+  void editGizmoTransform();
   void createGizmoVisual(SActorBase *actor);
+
+  void editContactVisualization();
 
  public:
   // input

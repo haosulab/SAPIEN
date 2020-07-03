@@ -7,6 +7,12 @@ namespace sapien {
 
 physx::PxTransform SArticulationBase::getRootPose() { return getRootLink()->getPose(); }
 
+void SArticulationBase::markDestroyed() {
+  for (auto l : getBaseLinks()) {
+    l->markDestroyed();
+  }
+}
+
 static std::string exportLink(SLinkBase *link) {
   std::stringstream ss;
   std::string name = std::to_string(link->getIndex());

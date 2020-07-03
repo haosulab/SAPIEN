@@ -74,54 +74,54 @@ void SActorBase::removeDrive(SDrive *drive) {
   mDrives.erase(std::remove(mDrives.begin(), mDrives.end(), drive), mDrives.end());
 }
 
-std::vector<SShape> SActorBase::getCollisionShapes() {
-  std::vector<SShape> output;
+std::vector<std::unique_ptr<SShape>> SActorBase::getCollisionShapes() {
+  std::vector<std::unique_ptr<SShape>> output;
   auto actor = getPxActor();
   std::vector<PxShape *> shapes(actor->getNbShapes());
   actor->getShapes(shapes.data(), shapes.size());
   for (PxShape *shape : shapes) {
-    output.emplace_back();
-    SShape &outputShape = output.back();
-    outputShape.pose = shape->getLocalPose();
+    output.push_back(std::make_unique<SShape>());
+    SShape *outputShape = output.back().get();
+    outputShape->pose = shape->getLocalPose();
     switch (shape->getGeometryType()) {
     case PxGeometryType::eBOX: {
-      outputShape.type = "box";
+      outputShape->type = "box";
       PxBoxGeometry g;
       shape->getBoxGeometry(g);
       auto sg = std::make_unique<SBoxGeometry>();
       sg->halfLengths = g.halfExtents;
-      outputShape.geometry = std::move(sg);
+      outputShape->geometry = std::move(sg);
       break;
     }
     case PxGeometryType::eSPHERE: {
-      outputShape.type = "sphere";
+      outputShape->type = "sphere";
       PxSphereGeometry g;
       shape->getSphereGeometry(g);
       auto sg = std::make_unique<SSphereGeometry>();
       sg->radius = g.radius;
-      outputShape.geometry = std::move(sg);
+      outputShape->geometry = std::move(sg);
       break;
     }
 
     case PxGeometryType::eCAPSULE: {
-      outputShape.type = "capsule";
+      outputShape->type = "capsule";
       PxCapsuleGeometry g;
       shape->getCapsuleGeometry(g);
       auto sg = std::make_unique<SCapsuleGeometry>();
       sg->radius = g.radius;
       sg->halfLength = g.halfHeight;
-      outputShape.geometry = std::move(sg);
+      outputShape->geometry = std::move(sg);
       break;
     }
 
     case PxGeometryType::ePLANE: {
-      outputShape.type = "plane";
+      outputShape->type = "plane";
       auto sg = std::make_unique<SPlaneGeometry>();
-      outputShape.geometry = std::move(sg);
+      outputShape->geometry = std::move(sg);
       break;
     }
     case PxGeometryType::eCONVEXMESH: {
-      outputShape.type = "convex_mesh";
+      outputShape->type = "convex_mesh";
       PxConvexMeshGeometry g;
       shape->getConvexMeshGeometry(g);
       auto sg = std::make_unique<SConvexMeshGeometry>();
@@ -149,7 +149,7 @@ std::vector<SShape> SActorBase::getCollisionShapes() {
           sg->indices.push_back(indices[polygon.mIndexBase + j + 2]);
         }
       }
-      outputShape.geometry = std::move(sg);
+      outputShape->geometry = std::move(sg);
       break;
     }
     default:

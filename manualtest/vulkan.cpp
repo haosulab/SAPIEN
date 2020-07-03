@@ -133,25 +133,24 @@ int main() {
   r0->setAmbientLight({0, 0, 0});
   r0->setShadowLight({0, -1, -1}, {1, 1, 1});
 
-  {
-    auto builder = s0->createActorBuilder();
-    builder->addSphereShape();
-    builder->addSphereVisual();
-    builder->build();
-  }
+  auto builder2 = s0->createActorBuilder();
+  builder2->addSphereShape();
+  builder2->addSphereVisual();
+  auto ball = builder2->build(false, "ball");
 
   auto a = s0->createActorBuilder()->build(true);
   a->setPose(PxTransform({-2, 0, 0}, PxIdentity));
   s0->addMountedCamera("test", a, PxTransform(), 800, 600, 0.f, 1.f);
 
-  // controller.setCameraPosition(-5, 0, 0);
   controller.setScene(s0.get());
-  // controller.focus(ant0->getRootLink());
+  controller.setFreeCameraPosition(-3, 0, 0);
+  // controller.pause(true);
 
   int count = 0;
   SDrive *drive;
   std::vector<float> d;
   while (!controller.isClosed()) {
+
     if (++count == 120) {
       d = ant0->packData();
       drive = s0->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, ant0->getRootLink(),

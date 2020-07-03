@@ -6,11 +6,10 @@ namespace Renderer {
 
 void HudControl::draw() {
   mStepped = false;
-  if (ImGui::CollapsingHeader("Control")) {
-    if (ImGui::Checkbox("Pause", &mPause)) {
-      if (ImGui::Button("Single step")) {
-        mStepped = true;
-      }
+  if (ImGui::CollapsingHeader("Control", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Checkbox("Pause", &mPause);
+    if (mPause && ImGui::Button("Single step")) {
+      mStepped = true;
     }
     ImGui::Checkbox("Flip X", &mInvertX);
     ImGui::Checkbox("Flip Y", &mInvertY);
@@ -21,7 +20,7 @@ void HudControl::draw() {
 
 void HudRenderMode::draw() {
   mSwitchMode = false;
-  if (ImGui::CollapsingHeader("Display")) {
+  if (ImGui::CollapsingHeader("Display", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::RadioButton("Lighting", &mMode, Mode::eLighting)) {
       mSwitchMode = true;
     }
@@ -39,7 +38,7 @@ void HudRenderMode::draw() {
 
 void HudCameraInfo::draw() {
   mUpdate = false;
-  if (ImGui::CollapsingHeader("View Camera")) {
+  if (ImGui::CollapsingHeader("View Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
     PrintPose(mPosition, mRotation);
     ImGui::Text("Size: %d x %d", mWidth, mHeight);
     ImGui::Text("Range: %.4g - %.4g", mNear, mFar);
@@ -54,7 +53,7 @@ void HudCameraInfo::draw() {
 
 void HudStats::draw() {
   mFrameRate = ImGui::GetIO().Framerate;
-  if (ImGui::CollapsingHeader("Stats")) {
+  if (ImGui::CollapsingHeader("Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::Text("FPS: %.1f", mFrameRate);
     ImGui::Text("Frame time: %.3f ms", 1000.f / mFrameRate);
   }

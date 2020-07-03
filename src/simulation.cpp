@@ -110,7 +110,9 @@ void Simulation::setRenderer(Renderer::IPxrRenderer *renderer) { mRenderer = ren
 
 PxMaterial *Simulation::createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction,
                                                PxReal restitution) const {
-  return mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
+  auto mat = mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
+  mat->setFlag(PxMaterialFlag::eIMPROVED_PATCH_FRICTION, true);
+  return mat;
 }
 
 std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {

@@ -20,6 +20,7 @@ class SArticulationBase : public EventEmitter<EventArticulationPreDestroy>,
                           public EventEmitter<EventArticulationStep> {
   std::string mName;
 
+  bool mBeingDestroyed {false};
 public:
   inline void setName(std::string const &name) { mName = name; }
   inline std::string getName() { return mName; }
@@ -54,6 +55,11 @@ public:
   virtual ~SArticulationBase() = default;
 
   std::string exportKinematicsChainAsURDF(bool fixRoot);
+
+  // internal use only
+  void markDestroyed();
+
+  inline bool isBeingDestroyed() const { return mBeingDestroyed; }
 
   #ifdef _USE_PINOCCHIO
   std::unique_ptr<PinocchioModel> createPinocchioModel();

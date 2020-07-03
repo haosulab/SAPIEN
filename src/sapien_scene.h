@@ -83,6 +83,15 @@ private:
 
   std::vector<std::unique_ptr<SDrive>> mDrives;
 
+ private:
+  bool mRequiresRemoveCleanUp;
+
+  /**
+   *  call to clean up actors and articulations in being destroyed states
+   *  Should be called after a step call has finished
+   */
+  void removeCleanUp();
+
 public:
   SScene(Simulation *sim, PxScene *scene, SceneConfig const &config);
   SScene(SScene const &other) = delete;
@@ -99,9 +108,27 @@ public:
   std::unique_ptr<ArticulationBuilder> createArticulationBuilder();
   std::unique_ptr<URDF::URDFLoader> createURDFLoader();
 
+  /** Mark an actor in a destroyed state
+   *  Actors in destroyed state do not emit events
+   *  The actors are truly removed at the end of this current frame
+   *  (a frame starts after the last step call and ends after the future step call)
+   *  use #isBeingDestroyed to see if the actor is removed in this frame
+   */
   void removeActor(SActorBase *actor);
+
+  /** Mark an articulation in a destroyed state
+   *  Also marks its links
+   *  Same rules as #removeActor applies
+   */
   void removeArticulation(SArticulation *articulation);
+
+  /** Mark an articulation in a destroyed state
+   *  Also marks its links
+   *  Same rules as #removeActor applies
+   */
   void removeKinematicArticulation(SKArticulation *articulation);
+
+  /** Remove a drive immediately */
   void removeDrive(SDrive *drive);
 
   SDrive *createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
@@ -153,13 +180,13 @@ public:
   inline PxMaterial *getDefaultMaterial() { return mDefaultMaterial; }
 
 private:
-  std::vector<SContact> mContacts;
+  // std::vector<SContact> mContacts;
+  std::map<std::pair<PxShape*, PxShape*>, std::unique_ptr<SContact>> mContacts;
 
   void removeMountedCameraByMount(SActorBase *actor);
 
 public:
-  void addContact(SContact const &contact);
-  void clearContacts();
-  std::vector<SContact> const &getContacts() const;
+  void updateContact(PxShape *shape1, PxShape * shape2, std::unique_ptr<SContact> contact);
+  std::vector<SContact *> getContacts() const;
 };
 } // namespace sapien
