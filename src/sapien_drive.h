@@ -27,6 +27,12 @@ public:
   PxTransform getLocalPose2() const;
 
   void setProperties(PxReal stiffness, PxReal damping, PxReal forceLimit, bool isAcceleration);
+  void setXProperties(PxReal stiffness, PxReal damping, PxReal forceLimit, bool isAcceleration);
+  void setYProperties(PxReal stiffness, PxReal damping, PxReal forceLimit, bool isAcceleration);
+  void setZProperties(PxReal stiffness, PxReal damping, PxReal forceLimit, bool isAcceleration);
+  void setRotationProperties(PxReal stiffness, PxReal damping, PxReal forceLimit, bool isAcceleration);
+
+  void lockMotion(bool tx, bool ty, bool tz, bool rx, bool ry, bool rz);
 
   void setTarget(PxTransform const &pose);
   PxTransform getTarget() const;
