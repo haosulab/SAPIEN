@@ -578,7 +578,7 @@ void buildSapien(py::module &m) {
       .def("update_render", &SScene::updateRender)
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr, py::arg("render_material") = Renderer::PxrMaterial())
-      .def("get_contacts", &SScene::getContacts)
+      .def("get_contacts", &SScene::getContacts, py::return_value_policy::reference)
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
       .def("get_all_articulations", &SScene::getAllArticulations,
            py::return_value_policy::reference)

@@ -6,8 +6,6 @@ from numpy import float64
 _Shape = Tuple[int, ...]
 import numpy
 import sapien.core.pysapien
-import y
-import s
 __all__  = [
 "ActorBase",
 "ActorDynamicBase",
@@ -27,6 +25,7 @@ __all__  = [
 "BoxGeometry",
 "CollisionShape",
 "Contact",
+"ContactPoint",
 "ConvexMeshGeometry",
 "Drive",
 "Engine",
@@ -835,6 +834,23 @@ class Contact():
         :type: bool
         """
     @property
+    def persists(self) -> bool:
+        """
+        :type: bool
+        """
+    @property
+    def points(self) -> List[ContactPoint]:
+        """
+        :type: List[ContactPoint]
+        """
+    @property
+    def starts(self) -> bool:
+        """
+        :type: bool
+        """
+    pass
+class ContactPoint():
+    @property
     def impulse(self) -> numpy.ndarray[float32]:
         """
         :type: numpy.ndarray[float32]
@@ -845,12 +861,7 @@ class Contact():
         :type: numpy.ndarray[float32]
         """
     @property
-    def persists(self) -> bool:
-        """
-        :type: bool
-        """
-    @property
-    def point(self) -> numpy.ndarray[float32]:
+    def position(self) -> numpy.ndarray[float32]:
         """
         :type: numpy.ndarray[float32]
         """
@@ -858,11 +869,6 @@ class Contact():
     def separation(self) -> float:
         """
         :type: float
-        """
-    @property
-    def starts(self) -> bool:
-        """
-        :type: bool
         """
     pass
 class ConvexMeshGeometry(CollisionGeometry):
@@ -896,7 +902,7 @@ class Drive():
 class Engine():
     def __init__(self, n_thread: int = 0, tolerance_length: float = 0.10000000149011612, tolerance_speed: float = 0.20000000298023224) -> None: ...
     def create_physical_material(self, static_friction: float, dynamic_friction: float, restitution: float) -> PxMaterial: ...
-    def create_scene(self, config: SceneConfig = <SceneConfig object at 0x7f83c547f8f0>) -> Scene: ...
+    def create_scene(self, config: SceneConfig = SceneConfig()) -> Scene: ...
     def get_renderer(self) -> IPxrRenderer: ...
     def set_log_level(self, level: str) -> None: ...
     def set_renderer(self, renderer: IPxrRenderer) -> None: ...
@@ -1634,7 +1640,7 @@ class OptifuserController():
         """
     pass
 class OptifuserRenderer(IPxrRenderer):
-    def __init__(self, glsl_dir: str = '', glsl_version: str = '', config: OptifuserConfig = <OptifuserConfig object at 0x7f83c555ff48>) -> None: ...
+    def __init__(self, glsl_dir: str = '', glsl_version: str = '', config: OptifuserConfig = OptifuserConfig()) -> None: ...
     def enable_global_axes(self, enable: bool = True) -> None: ...
     @staticmethod
     def set_default_shader_config(glsl_dir: str, glsl_version: str) -> None: ...
@@ -2107,16 +2113,16 @@ class VulkanRenderer(IPxrRenderer):
     pass
 DYNAMIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.DYNAMIC
 FIX: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.FIX
-GL_SHADER_ROOT = '/home/fx/.local/lib/python3.6/site-packages/sapien/glsl_shader'
+GL_SHADER_ROOT = ...
 KINEMATIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.KINEMATIC
 KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = ActorType.KINEMATIC_LINK
 LINK: sapien.core.pysapien.ActorType # value = ActorType.LINK
 PGS: sapien.core.pysapien.SolverType # value = SolverType.PGS
 PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.PRISMATIC
-PTX_ROOT = '/home/fx/.local/lib/python3.6/site-packages/sapien/ptx'
+PTX_ROOT = ...
 REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.REVOLUTE
 SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.SPHERICAL
-SPV_ROOT = '/home/fx/.local/lib/python3.6/site-packages/sapien/spv'
+SPV_ROOT = ...
 STATIC: sapien.core.pysapien.ActorType # value = ActorType.STATIC
 TGS: sapien.core.pysapien.SolverType # value = SolverType.TGS
 UNDEFINED: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.UNDEFINED
