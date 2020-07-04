@@ -1209,7 +1209,7 @@ void buildSapien(py::module &m) {
       .def("load_kinematic",
            [](URDF::URDFLoader &loader, std::string const &filename, py::dict &dict) {
              auto config = parseURDFConfig(dict);
-             return loader.load(filename, config);
+             return loader.loadKinematic(filename, config);
            },
            py::return_value_policy::reference, py::arg("filename"), py::arg("config") = py::dict())
       .def("load_from_string",

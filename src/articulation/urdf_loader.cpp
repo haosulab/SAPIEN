@@ -242,7 +242,7 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin, scale);
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        currentLinkBuilder->addBoxVisual(tVisual2Link, visual->geometry->size * scale,
+        currentLinkBuilder->addBoxVisual(tVisual2Link, visual->geometry->size * scale / 2.f,
                                          PxVec3{1, 1, 1}, visual->name);
         break;
       case Geometry::CYLINDER:
