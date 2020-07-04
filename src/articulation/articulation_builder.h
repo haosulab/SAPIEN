@@ -44,11 +44,15 @@ public:
   LinkBuilder &operator=(LinkBuilder const &other) = delete;
 
   inline int getIndex() const { return mIndex; };
+  inline int getParent() { return mParent; };
   inline void setParent(int parentIndex) { mParent = parentIndex; };
 
+  inline std::string getName() { return mName; }
   inline void setName(std::string const &name) { mName = name; }
 
+  std::string getJointName();
   void setJointName(std::string const &jointName);
+
   void setJointProperties(PxArticulationJointType::Enum jointType,
                           std::vector<std::array<PxReal, 2>> const &limits,
                           PxTransform const &parentPose, PxTransform const &childPose,

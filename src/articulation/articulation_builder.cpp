@@ -15,6 +15,7 @@ LinkBuilder::LinkBuilder(ArticulationBuilder *articulationBuilder, int index, in
       mIndex(index), mParent(parentIndex) {}
 
 void LinkBuilder::setJointName(const std::string &jointName) { mJointRecord.name = jointName; }
+std::string LinkBuilder::getJointName() { return mJointRecord.name; }
 
 void LinkBuilder::setJointProperties(PxArticulationJointType::Enum jointType,
                                      std::vector<std::array<PxReal, 2>> const &limits,

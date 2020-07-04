@@ -614,6 +614,14 @@ void buildSapien(py::module &m) {
   PyDrive
       .def("set_properties", &SDrive::setProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
+      .def("set_x_properties", &SDrive::setXProperties, py::arg("stiffness"), py::arg("damping"),
+           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
+      .def("set_y_properties", &SDrive::setYProperties, py::arg("stiffness"), py::arg("damping"),
+           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
+      .def("set_z_properties", &SDrive::setZProperties, py::arg("stiffness"), py::arg("damping"),
+           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
+      .def("lock_motion", &SDrive::lockMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
+           py::arg("rx"), py::arg("ry"), py::arg("rz"))
       .def("set_target", &SDrive::setTarget, py::arg("pose"))
       .def("set_target_velocity",
            [](SDrive &d, py::array_t<PxReal> const &linear, py::array_t<PxReal> const &angular) {
@@ -1122,7 +1130,9 @@ void buildSapien(py::module &m) {
                     py::return_value_policy::reference);
 
   PyLinkBuilder.def("get_index", &LinkBuilder::getIndex)
+      .def("get_parent", &LinkBuilder::getParent)
       .def("set_parent", &LinkBuilder::setParent)
+      .def("get_name", &LinkBuilder::getName)
       .def("set_name", &LinkBuilder::setName)
       .def("set_joint_name", &LinkBuilder::setJointName)
       .def("set_joint_properties",
