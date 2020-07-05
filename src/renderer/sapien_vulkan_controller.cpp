@@ -579,8 +579,12 @@ void SapienVulkanController::render() {
       if (mWindow->isMouseKeyDown(0)) {
         auto [x, y] = mWindow->getMousePosition();
 #ifdef _USE_MACOSX
-        x *= 2;
-        y *= 2;
+        int w1, h1, w2, h2;
+        glfwGetWindowSize(mWindow->getWindow(), &w1, &h1);
+        glfwGetFramebufferSize(mWindow->getWindow(), &w2, &h2);
+        float factor = w2 / w1;
+        x *= factor;
+        y *= factor;
 #endif
         auto pixel = mVulkanRenderer->getRenderTargets().segmentation->downloadPixel<uint32_t>(
             mRenderer->mContext->getPhysicalDevice(), mRenderer->mContext->getDevice(),
