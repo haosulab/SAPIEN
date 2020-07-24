@@ -55,8 +55,9 @@ public:
   static RobotDescriptor fromPath(const std::string &URDF, const std::string &SRDF = "",
                                   const std::string &substitutePath = "");
   static RobotDescriptor
-  fromParamterServer(const std::string URDFParamName = "/robot_description",
-                     const std::string SRDFParamName = "/robot_description_semantic");
+  fromParameterServer(ros::NodeHandlePtr node,
+                     const std::string &URDFParamName = "robot_description",
+                     const std::string &SRDFParamName = "robot_description_semantic");
 
   /* util function for urdf modification */
   static std::string fromSAPIENConvention(const std::string &URDFString);

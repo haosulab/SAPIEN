@@ -30,9 +30,10 @@ std::tuple<sapien::SArticulation *, RobotManager *> RobotLoader::loadFromParamet
     const std::string &robotName, const sapien::URDF::URDFConfig &config, double frequency,
     const std::string &URDFParamName, const std::string &SRDFName) {
   auto logger = spdlog::get("SAPIEN_ROS1");
+  ros::NodeHandlePtr robotNode(new ros::NodeHandle(*mNode, robotName));
   std::string urdfName = URDFParamName.empty() ? ROBOT_PARAM_NAME : URDFParamName;
   std::string srdfName = SRDFName.empty() ? SEMANTIC_PARAM_NAME : SRDFName;
-  RobotDescriptor descriptor = RobotDescriptor::fromParamterServer(urdfName, srdfName);
+  RobotDescriptor descriptor = RobotDescriptor::fromParameterServer(robotNode, urdfName, srdfName);
 
   const std::string &urdf = descriptor.getURDF();
   const std::string &srdf = descriptor.getSRDF();
@@ -46,6 +47,6 @@ std::tuple<sapien::SArticulation *, RobotManager *> RobotLoader::loadFromParamet
 
   // Load robot manager
   // Robot Manager should be init after the parameters are loaded
-  auto robotManager = mManager->buildRobotManager(robot, robotName, frequency);
+  auto robotManager = mManager->buildRobotManager(robot, robotNode, robotName, frequency);
   return {robot, robotManager};
 }

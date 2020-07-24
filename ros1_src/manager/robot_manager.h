@@ -24,10 +24,12 @@ class RobotManager {
   friend SceneManager;
   //  friend RobotLoader;
 
+public:
+  ros::NodeHandlePtr mNode;
+
 protected:
   // Basic handle
   SControllableArticulationWrapper *mWrapper;
-  ros::NodeHandlePtr mNode;
   SRobotHW mRobotHW;
   SceneManager *mSceneManager;
 
@@ -43,7 +45,7 @@ protected:
 
 public:
   RobotManager(SControllableArticulationWrapper *wrapper, const std::string &robotName,
-               const ros::NodeHandlePtr& parentNode, double freqency);
+               const ros::NodeHandlePtr &parentNode, double freqency);
 
   void init();
 
@@ -53,26 +55,10 @@ public:
   void balancePassiveForce(bool gravity = true, bool coriolisAndCentrifugal = true,
                            bool external = true);
 
-  // Create controller and publisher
-  //  void createJointPublisher(double pubFrequency);
-  //  inline KinematicsConfig getKinematicsConfig() const { return mKinematicsConfig; }
-  //  inline MotionPlanningConfig getMotionPlanningConfig() const { return mPlanningConfig; }
-
-  //  bool setKinematicsConfig(const KinematicsConfig &config = KinematicsConfig());
-  //  bool setMotionPlanningConfig(const MotionPlanningConfig &config = MotionPlanningConfig());
-
-  // Robot Level Control
-  //  inline const std::vector<std::string> &getGroupNames() {
-  //    return mRobotModel->getJointModelGroupNames();
-  //  }
-
 protected:
-  //  void updateStates(const std::vector<float> &jointPosition,
-  //                    const std::vector<float> &jointVelocity);
-
   // Step function when simulator step once
   void step(bool timeStepChange = false, float newTimeStep = 0){};
 
-  void start() {}
+  inline void start() {}
 };
 } // namespace sapien::ros1

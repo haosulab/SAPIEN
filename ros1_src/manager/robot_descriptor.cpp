@@ -136,16 +136,16 @@ std::string RobotDescriptor::substituteRelativePath(const std::string &URDFStrin
 
   return modifiedURDFString;
 }
-RobotDescriptor RobotDescriptor::fromParamterServer(const std::string URDFParamName,
-                                                    const std::string SRDFParamName) {
-  auto node = ros::NodeHandle("~");
+RobotDescriptor RobotDescriptor::fromParameterServer(ros::NodeHandlePtr node,
+                                                    const std::string &URDFParamName,
+                                                    const std::string &SRDFParamName) {
   auto logger = spdlog::get("SAPIEN_ROS1");
   std::string urdf, srdf;
-  if (!node.getParam(URDFParamName, urdf)) {
+  if (!node->getParam(URDFParamName, urdf)) {
     logger->error("URDF name is not set as: name {}", URDFParamName);
     assert(!urdf.empty());
   }
-  if (!node.getParam(SRDFParamName, srdf)) {
+  if (!node->getParam(SRDFParamName, srdf)) {
     logger->warn("SRDF name is not set as: name {}", SRDFParamName);
     srdf = "";
   }

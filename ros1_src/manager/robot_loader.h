@@ -17,8 +17,8 @@ class RobotDescriptor;
 class RobotLoader {
 protected:
   /* Global Definition */
-  const std::string ROBOT_PARAM_NAME = "/robot_description";
-  const std::string SEMANTIC_PARAM_NAME = "/robot_description_semantic";
+  const std::string ROBOT_PARAM_NAME = "robot_description";
+  const std::string SEMANTIC_PARAM_NAME = "robot_description_semantic";
 
   // Basic handle
   ros::NodeHandlePtr mNode;

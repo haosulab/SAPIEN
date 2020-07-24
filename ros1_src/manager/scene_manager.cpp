@@ -8,7 +8,7 @@
 namespace sapien::ros1 {
 
 SceneManager::SceneManager(sapien::SScene *scene, const std::string &name, uint8_t numThread)
-    : mScene(scene), mNameSpace("/" + name), mNode(new ros::NodeHandle()), mSpinner(numThread) {
+    : mScene(scene), mNameSpace("/" + name), mNode(new ros::NodeHandle(name)), mSpinner(numThread) {
   // Namespace of scene manager should be the same as the scene
   auto logger = spdlog::get("SAPIEN_ROS1");
   if (!scene->getName().empty() && scene->getName() != name)
@@ -30,7 +30,7 @@ SceneManager::SceneManager(sapien::SScene *scene, const std::string &name, uint8
 }
 SceneManager::~SceneManager() {
   mScene->unregisterListener(*this);
-  mSpinner.stop();
+  stop();
 }
 
 // RobotManager *SceneManager::buildRobotManager(sapien::SArticulation *articulation,
@@ -71,11 +71,10 @@ void SceneManager::onEvent(sapien::EventStep &event) {
   //    mRobotManager->step(changeTimeStep, currentTimeStep);
   //  }
 }
-RobotManager *SceneManager::buildRobotManager(SArticulation *articulation,
+RobotManager *SceneManager::buildRobotManager(SArticulation *articulation, ros::NodeHandlePtr node,
                                               const std::string &robotName, double frequency) {
-  auto robotNameSpace = mNameSpace;
   auto wrapper = std::make_unique<SControllableArticulationWrapper>(articulation);
-  auto robotManager = std::make_unique<RobotManager>(wrapper.get(), robotName, mNode, frequency);
+  auto robotManager = std::make_unique<RobotManager>(wrapper.get(), robotName, node, frequency);
   auto robotMangerWeakPtr = robotManager.get();
   robotManager->mSceneManager = this;
 

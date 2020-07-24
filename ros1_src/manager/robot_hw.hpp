@@ -11,6 +11,7 @@
 #include <joint_limits_interface/joint_limits_rosparam.h>
 
 #include <memory>
+#include <spdlog/spdlog.h>
 #include <utility>
 
 namespace sapien::ros1 {
@@ -21,6 +22,7 @@ private:
   SControllableArticulationWrapper *mWrapper;
   std::string mRobotName;
   uint32_t mDof;
+  ros::Timer mTimer;
 
   ThreadSafeQueue<std::vector<physx::PxReal>> mWrapperPosition;
   ThreadSafeQueue<std::vector<physx::PxReal>> mWrapperVelocity;
@@ -53,7 +55,7 @@ public:
     mVelocity.resize(mDof);
     mEffort.resize(mDof);
     mPositionCommand.resize(mDof);
-    mVelocityCommand.resize(mDof);
+    mVelocityCommand.resize(mDof, 0);
 
     for (uint32_t j = 0; j < mDof; ++j) {
       // Create joint state interface
@@ -65,7 +67,8 @@ public:
       hardware_interface::JointHandle jointPositionHandle(jointStateHandle, &mPositionCommand[j]);
       joint_limits_interface::JointLimits limits;
       joint_limits_interface::getJointLimits(jointNames[j], *mNode, limits);
-      joint_limits_interface::PositionJointSaturationHandle jointLimitsHandle(jointPositionHandle, limits);
+      joint_limits_interface::PositionJointSaturationHandle jointLimitsHandle(jointPositionHandle,
+                                                                              limits);
       mPositionJointLimitInterface.registerHandle(jointLimitsHandle);
       mJointPositionInterface.registerHandle(jointPositionHandle);
 
@@ -81,13 +84,15 @@ public:
 
     // Add timer loop
     ros::Duration interval(1 / frequency);
-    ros::Timer HWLoop = mNode->createTimer(interval, &SRobotHW::update, this, false, true);
+    mTimer = mNode->createTimer(interval, &SRobotHW::update, this, false, true);
+    assert(mTimer.hasStarted());
   }
 
   void read(const ros::Time &time, const ros::Duration &period) {
     auto position = mWrapper->mJointPositions.read();
     auto velocity = mWrapper->mJointVelocities.read();
     mPosition.assign(position.begin(), position.end());
+    mPositionCommand.assign(position.begin(), position.end());
     mVelocity.assign(velocity.begin(), velocity.end());
     auto qf = mWrapper->mArticulation->getQf();
     for (size_t j = 0; j < qf.size(); ++j) {
@@ -100,7 +105,7 @@ public:
     mWrapperPosition.push(
         std::vector<physx::PxReal>(mPositionCommand.begin(), mPositionCommand.end()));
     mWrapperVelocity.push(
-        std::vector<physx::PxReal>(mPositionCommand.begin(), mPositionCommand.end()));
+        std::vector<physx::PxReal>(mVelocityCommand.begin(), mVelocityCommand.end()));
     mWrapperPositionTime.push(time);
     mWrapperVelocityTime.push(time);
   }

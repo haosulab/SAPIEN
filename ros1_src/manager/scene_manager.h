@@ -3,6 +3,7 @@
 #include <ros/ros.h>
 #include <ros/timer.h>
 #include <rosgraph_msgs/Clock.h>
+#include <thread>
 #include <utility>
 
 #include "event_system/event_system.h"
@@ -36,18 +37,19 @@ protected:
   // Clock and Time Manage
   ros::Publisher mClockPub;
   ros::Time mTime;
-  float mTimeStep = 0;
+//  float mTimeStep = 0;
 
   // Thread and spin
-  ros::AsyncSpinner mSpinner;
+  ros::MultiThreadedSpinner mSpinner;
+  std::thread mThread;
 
 protected:
-  RobotManager *buildRobotManager(SArticulation *articulation, const std::string &robotName,
-                                  double frequency);
+  RobotManager *buildRobotManager(SArticulation *articulation, ros::NodeHandlePtr node,
+                                  const std::string &robotName, double frequency);
   void onEvent(EventStep &event) override;
 
 public:
-  explicit SceneManager(SScene *scene, const std::string &name, uint8_t numThread = 1);
+  explicit SceneManager(SScene *scene, const std::string &name, uint8_t numThread = 2);
   ~SceneManager();
 
   inline std::unique_ptr<RobotLoader> createRobotLoader() {
@@ -55,8 +57,10 @@ public:
   };
 
   /* ROS1 communication spin loop*/
-  inline void start() { mSpinner.start(); };
-  inline void stop() { mSpinner.stop(); };
+  inline void start() {
+    mThread = std::thread(&ros::MultiThreadedSpinner::spin, mSpinner, nullptr);
+  };
+  inline void stop() { mThread.detach(); };
 };
 
 } // namespace ros1

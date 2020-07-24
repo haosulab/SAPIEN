@@ -7,9 +7,9 @@
 namespace sapien::ros1 {
 
 RobotManager::RobotManager(SControllableArticulationWrapper *wrapper, const std::string &robotName,
-                           const ros::NodeHandlePtr& parentNode, double frenquency)
-    : mWrapper(wrapper), mNode(new ros::NodeHandle(*parentNode, robotName)),
-      mRobotHW(mNode, wrapper, robotName, frenquency) {
+                           const ros::NodeHandlePtr& node, double frenquency)
+    :mNode(node), mWrapper(wrapper),
+     mRobotHW(mNode, wrapper, robotName, frenquency) {
   auto logger = spdlog::get("SAPIEN_ROS1");
 }
 
