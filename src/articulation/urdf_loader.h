@@ -71,7 +71,7 @@ using namespace tinyxml2;
 /* Error if a unique child is not set */
 #define CHECK_CHILD_UNIQUE(name)                                                                  \
   if (!name) {                                                                                    \
-    spdlog::get("sapien")->critical("Missing required child <{}>", #name);                        \
+    spdlog::get("SAPIEN")->critical("Missing required child <{}>", #name);                        \
     throw std::runtime_error("Missing required child");                                           \
   }
 
@@ -281,7 +281,7 @@ struct Geometry : DomBase {
   Geometry(const XMLElement &elem) {
     const XMLElement *child = elem.FirstChildElement();
     if (!child) {
-      spdlog::get("sapien")->critical("<geometry> contains no child, at line {}",
+      spdlog::get("SAPIEN")->critical("<geometry> contains no child, at line {}",
                                       elem.GetLineNum());
       throw std::runtime_error("<geometry> contains no child");
     }
@@ -710,11 +710,6 @@ class URDFLoader {
 public:
   /* The base of the loaded articulation will be fixed */
   bool fixRootLink = true;
-
-  /* The loaded articulation will use inverse dynamics to balance passive forces,
-   * it will act as if there is no gravity, etc.
-   */
-  // bool balancePassiveForce = false;
 
   /* Load the articulation at a different scale.
    * It will scale mass and inertia accordingly
