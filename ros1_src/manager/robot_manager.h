@@ -47,8 +47,6 @@ public:
   RobotManager(SControllableArticulationWrapper *wrapper, const std::string &robotName,
                const ros::NodeHandlePtr &parentNode, double freqency);
 
-  void init();
-
   void setDriveProperty(float stiffness, float damping, float forceLimit = PX_MAX_F32,
                         const std::vector<uint32_t> &jointIndex = {});
 

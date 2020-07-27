@@ -53,9 +53,9 @@ protected:
 
 public:
   explicit SceneManager(SScene *scene, const std::string &name, uint8_t numThread = 4);
-  ~SceneManager();
+  ~SceneManager() override;
 
-  void startAllCamera(double frenquency);
+  void startAllCamera(double frequency);
 
   inline std::unique_ptr<RobotLoader> createRobotLoader() {
     return std::make_unique<RobotLoader>(this);

@@ -36,25 +36,6 @@ SceneManager::~SceneManager() {
   stop();
 }
 
-// RobotManager *SceneManager::buildRobotManager(sapien::SArticulation *articulation,
-//                                              const std::string &robotName) {
-//  auto robotNameSpace = mNameSpace;
-//  auto wrapper = std::make_unique<SControllableArticulationWrapper>(articulation, mClock);
-//  auto robotManager =
-//      std::make_unique<RobotManager>(wrapper.get(), robotNameSpace, robotName, mClock);
-//  auto robotMangerWeakPtr = robotManager.get();
-//  robotManager->mSceneManager = this;
-//
-//  // Register Scene Call Back
-//  mScene->registerListener(*wrapper);
-//
-//  // Maintain Cache and add to executor
-//  mExecutor.add_node(robotManager->mNode->shared_from_this());
-//  mRobotManagers.push_back(std::move(robotManager));
-//  mArticulationWrappers.push_back(std::move(wrapper));
-//
-//  return robotMangerWeakPtr;
-//}
 void SceneManager::onEvent(sapien::EventStep &event) {
   // Update time step and publish the /clock message
   float currentTimeStep = event.timeStep;
@@ -68,16 +49,6 @@ void SceneManager::onEvent(sapien::EventStep &event) {
     j->update();
   }
 
-  // Fetch current information and add control signal to system for each robot
-  // Update each robot if time step change
-  //  bool changeTimeStep = false;
-  //  if (abs(currentTimeStep - mTimeStep) > 1e-7) {
-  //    changeTimeStep = true;
-  //    mTimeStep = currentTimeStep;
-  //  }
-  //  for (auto &mRobotManager : mRobotManagers) {
-  //    mRobotManager->step(changeTimeStep, currentTimeStep);
-  //  }
 }
 RobotManager *SceneManager::buildRobotManager(SArticulation *articulation, ros::NodeHandlePtr node,
                                               const std::string &robotName, double frequency) {

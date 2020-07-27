@@ -17,15 +17,6 @@ RobotLoader::RobotLoader(SceneManager *manager)
   auto logger = spdlog::get("SAPIEN_ROS1");
 }
 
-// void RobotLoader::publishRobotDescription(rclcpp::Node::SharedPtr &node,
-//                                          const std::string &URDFString,
-//                                          const std::string &SRDFString) {
-//  auto logger = spdlog::get("SAPIEN_ROS2");
-//  node->declare_parameter(ROBOT_PARAM_NAME, rclcpp::ParameterValue(URDFString));
-//  node->declare_parameter(SEMANTIC_PARAM_NAME, rclcpp::ParameterValue(SRDFString));
-//  logger->info("Publishing robot description for ROS [{}]", node->get_name());
-//}
-
 std::tuple<sapien::SArticulation *, RobotManager *> RobotLoader::loadFromParameterServer(
     const std::string &robotName, const sapien::URDF::URDFConfig &config, double frequency,
     const std::string &URDFParamName, const std::string &SRDFName) {

@@ -48,7 +48,6 @@ int main(int argc, char **argv) {
   robot->setDriveTarget(initQpos);
 //  s0->step();
 
-  int count = 0;
   sceneManager.startAllCamera(30);
   sceneManager.start();
   while (!controller.shouldQuit()) {
