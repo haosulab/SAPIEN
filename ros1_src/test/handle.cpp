@@ -31,12 +31,8 @@ int main(int argc, char **argv) {
   s0->setAmbientLight({0.5, 0.5, 0.5});
   s0->setShadowLight({0, -1, -1}, {1, 1, 1});
 
-  auto a = s0->createActorBuilder()->build(true);
-  a->setPose(PxTransform({-2, 0, 0}, PxIdentity));
-  s0->addMountedCamera("test", a, PxTransform(), 800, 600, 0.f, 1.f);
-  controller.setCurrentScene(s0.get());
-
   // controller.pause(true);
+  controller.setCurrentScene(s0.get());
   controller.showWindow();
 
   // Scene Manager
@@ -53,15 +49,12 @@ int main(int argc, char **argv) {
 //  s0->step();
 
   int count = 0;
+  sceneManager.startAllCamera(30);
   sceneManager.start();
   while (!controller.shouldQuit()) {
     robotManager->balancePassiveForce();
-    logger->info("joint 1: {}", robot->getDriveTarget()[1]);
-    logger->info("joint 1: {}", robot->getQpos()[1]);
     s0->updateRender();
     s0->step();
-    logger->info("joint 1 after: {}", robot->getDriveTarget()[1]);
-    logger->info("joint 1 after: {}", robot->getQpos()[1]);
     controller.render();
   }
 

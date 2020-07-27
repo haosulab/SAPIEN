@@ -19,6 +19,7 @@ class RobotManager;
 class RobotLoader;
 class SControllableArticulationWrapper;
 class RobotDescriptor;
+class CameraPublisher;
 
 class SceneManager : public IEventListener<EventStep> {
   friend RobotManager;
@@ -37,11 +38,13 @@ protected:
   // Clock and Time Manage
   ros::Publisher mClockPub;
   ros::Time mTime;
-//  float mTimeStep = 0;
 
   // Thread and spin
   ros::MultiThreadedSpinner mSpinner;
   std::thread mThread;
+
+  // Publishers
+  std::vector<std::unique_ptr<CameraPublisher>> mCameraPub;
 
 protected:
   RobotManager *buildRobotManager(SArticulation *articulation, ros::NodeHandlePtr node,
@@ -49,8 +52,10 @@ protected:
   void onEvent(EventStep &event) override;
 
 public:
-  explicit SceneManager(SScene *scene, const std::string &name, uint8_t numThread = 2);
+  explicit SceneManager(SScene *scene, const std::string &name, uint8_t numThread = 4);
   ~SceneManager();
+
+  void startAllCamera(double frenquency);
 
   inline std::unique_ptr<RobotLoader> createRobotLoader() {
     return std::make_unique<RobotLoader>(this);

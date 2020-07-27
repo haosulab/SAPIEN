@@ -1,6 +1,8 @@
 #include "scene_manager.h"
 
+#include "camera_publisher.h"
 #include "robot_manager.h"
+#include "sapien_actor_base.h"
 #include "sapien_controllable_articulation.h"
 #include "sapien_scene.h"
 #include <spdlog/spdlog.h>
@@ -8,7 +10,8 @@
 namespace sapien::ros1 {
 
 SceneManager::SceneManager(sapien::SScene *scene, const std::string &name, uint8_t numThread)
-    : mScene(scene), mNameSpace("/" + name), mNode(new ros::NodeHandle(name)), mSpinner(numThread) {
+    : mScene(scene), mNameSpace("/" + name), mNode(new ros::NodeHandle(name)),
+      mSpinner(numThread) {
   // Namespace of scene manager should be the same as the scene
   auto logger = spdlog::get("SAPIEN_ROS1");
   if (!scene->getName().empty() && scene->getName() != name)
@@ -60,6 +63,11 @@ void SceneManager::onEvent(sapien::EventStep &event) {
   clockMessage.clock = mTime;
   mClockPub.publish(clockMessage);
 
+  // Update camera publisher
+  for (auto & j : mCameraPub) {
+    j->update();
+  }
+
   // Fetch current information and add control signal to system for each robot
   // Update each robot if time step change
   //  bool changeTimeStep = false;
@@ -84,5 +92,16 @@ RobotManager *SceneManager::buildRobotManager(SArticulation *articulation, ros::
   mRobotManagers.push_back(std::move(robotManager));
   mArticulationWrappers.push_back(std::move(wrapper));
   return robotMangerWeakPtr;
+}
+void SceneManager::startAllCamera(double frequency) {
+  auto logger = spdlog::get("SAPIEN_ROS1");
+  for (int j = 0; j < mScene->getMountedCameras().size(); ++j) {
+    auto cam = mScene->getMountedCameras()[j];
+    auto actor = mScene->getMountedActors()[j];
+    auto frameName = actor->getName();
+    auto cameraPub = std::make_unique<CameraPublisher>(cam, mNode, frameName, frequency);
+    mCameraPub.push_back(std::move(cameraPub));
+    cam->takePicture();
+  }
 }
 } // namespace sapien::ros1

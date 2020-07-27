@@ -116,7 +116,6 @@ public:
     read(currentReal, elapsed);
     mControllerManager->update(currentReal, elapsed);
     write(currentReal, elapsed);
-    std::cout << "One HW update" << ros::Time::now().toSec() << std::endl;
   }
 };
 } // namespace sapien::ros1
