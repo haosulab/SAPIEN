@@ -406,7 +406,7 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
   if (srdf) {
     uint32_t groupCount = 0;
     for (auto &dc : srdf->disable_collisions_array) {
-      if (dc->reason == std::string("default")) {
+      if (dc->reason == std::string("Default")) {
         if (linkName2treeNode.find(dc->link1) == linkName2treeNode.end()) {
           spdlog::get("SAPIEN")->error("SRDF link name not found: {}", dc->link1);
           continue;
