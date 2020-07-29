@@ -1,6 +1,7 @@
 #pragma once
 
 #include "articulation/sapien_articulation.h"
+#include "articulation/articulation_builder.h"
 #include "articulation/urdf_loader.h"
 #include <ros/ros.h>
 

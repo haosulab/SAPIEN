@@ -92,7 +92,7 @@ public:
     auto position = mWrapper->mJointPositions.read();
     auto velocity = mWrapper->mJointVelocities.read();
     mPosition.assign(position.begin(), position.end());
-    mPositionCommand.assign(position.begin(), position.end());
+    //    mPositionCommand.assign(position.begin(), position.end());
     mVelocity.assign(velocity.begin(), velocity.end());
     auto qf = mWrapper->mArticulation->getQf();
     for (size_t j = 0; j < qf.size(); ++j) {
@@ -116,6 +116,14 @@ public:
     read(currentReal, elapsed);
     mControllerManager->update(currentReal, elapsed);
     write(currentReal, elapsed);
+  }
+
+  void start() {
+    auto position = mWrapper->mJointPositions.read();
+    mPositionCommand.assign(position.begin(), position.end());
+    for (double &j : mVelocityCommand) {
+      j = 0;
+    }
   }
 };
 } // namespace sapien::ros1

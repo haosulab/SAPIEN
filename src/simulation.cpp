@@ -37,8 +37,6 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
     : mThreadCount(nthread), mMeshManager(this) {
   if (!spdlog::get("SAPIEN")) {
     auto logger = spdlog::stderr_color_mt("SAPIEN");
-    logger->warn("debug");
-    spdlog::get("SAPIEN")->warn("debug2");
     setLogLevel("warn");
   }
 

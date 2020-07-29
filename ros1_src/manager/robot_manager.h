@@ -57,6 +57,6 @@ protected:
   // Step function when simulator step once
   void step(bool timeStepChange = false, float newTimeStep = 0){};
 
-  inline void start() {}
+  inline void start() { mRobotHW.start(); }
 };
 } // namespace sapien::ros1

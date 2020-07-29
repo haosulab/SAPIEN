@@ -142,9 +142,9 @@ void CameraPublisher::publishPointCloud(const ros::Time &now) {
       auto value = -cloudImage[numPos + 2];
       if (value > this->mPointCloudCutoff && value < this->mPointCloudCutoffMax &&
           depthImage[index] < 0.999) {
-        *iter_x = cloudImage[numPos + 0];
-        *iter_y = cloudImage[numPos + 1];
-        *iter_z = cloudImage[numPos + 2];
+        *iter_x = -cloudImage[numPos + 2];
+        *iter_y = -cloudImage[numPos + 0];
+        *iter_z = cloudImage[numPos + 1];
       } else {
         *iter_x = *iter_y = *iter_z = badPoint;
       }

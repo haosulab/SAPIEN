@@ -285,14 +285,14 @@ if (ROS)
 
         file(GLOB_RECURSE SAPIEN_ROBOT_MANAGER_SRC_ROS1 "ros1_src/manager/*.cpp")
         message(${SAPIEN_ROBOT_MANAGER_SRC_ROS1})
-        add_library(sapien_robot_handle_ros1 ${SAPIEN_ROBOT_MANAGER_SRC_ROS1})
+        add_library(sapien_robot_handle_ros1 STATIC ${SAPIEN_ROBOT_MANAGER_SRC_ROS1})
         target_link_libraries(sapien_robot_handle_ros1 ${catkin_LIBRARIES} sapien)
 
         add_executable(test_ros1_robot_handle ros1_src/test/handle.cpp)
         target_link_libraries(test_ros1_robot_handle sapien_robot_handle_ros1)
 
         set_target_properties(sapien_robot_handle_ros1 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-        pybind11_add_module(pysapien_ros1 python/pysapien-ros1.cpp)
+        pybind11_add_module(pysapien_ros1 python/pysapien-ros1.cpp NO_EXTRAS)
         target_link_libraries(pysapien_ros1 PRIVATE sapien_robot_handle_ros1)
     endif ()
 else ()
