@@ -13,7 +13,7 @@ PYBIND11_MODULE(pysapien_ros1, m) {
   auto m_core = m.def_submodule("core");
   buildSapien(m_core);
 
-  /* Build ros2 module of sapien */
+  /* Build ros1 module of sapien */
   auto m_ros1 = m.def_submodule("ros1");
   //======== Module Function ========//
   m_ros1.def("init_spd_logger", []() { auto logger = spdlog::stderr_color_mt("SAPIEN_ROS1"); })
@@ -53,8 +53,14 @@ PYBIND11_MODULE(pysapien_ros1, m) {
       .def_property("fix_root_link", &RobotLoader::getFixRootLink, &RobotLoader::setFixRootLink)
       .def_property("collision_is_visual", &RobotLoader::getCollisionIsVisual,
                     &RobotLoader::setCollisionIsVisual)
-      .def("load_from_parameter_server", &RobotLoader::loadFromParameterServer,
-           py::arg("robot_name"), py::arg("urdf_config"), py::arg("frequency"),
-           py::arg("urdf_param_name") = "", py::arg("srdf_param_name") = "",
-           py::return_value_policy::reference);
+      .def(
+          "load_from_parameter_server",
+          [](RobotLoader &loader, const std::string &robotName, py::dict &dict, double frequency,
+             const std::string &URDFParamName = "", const std::string &SRDFName = "") {
+            auto config = parseURDFConfig(dict);
+            return loader.loadFromParameterServer(robotName, config, frequency);
+          },
+          py::arg("robot_name"), py::arg("urdf_config"), py::arg("frequency"),
+          py::arg("urdf_param_name") = "", py::arg("srdf_param_name") = "",
+          py::return_value_policy::reference);
 }

@@ -1,14 +1,13 @@
 import numpy as np
 
 import pysapien_ros1.core as sapien
-# import sapien.core as sapien
 import pysapien_ros1.ros1 as sr
 import xml.etree.ElementTree as ET
 from transforms3d.euler import euler2quat
 import os
 
 
-def load_sapien_sdf(sdf_file, scene: sapien.Scene):
+def load_sapien_sdf(sdf_file, scene, table_height):
     model_path = os.getenv('SAPIEN_MODEL_PATH')
     assert model_path, 'SAPIEN_MODEL_PATH environment variable is required'
     if model_path[-1] != '/':
@@ -19,7 +18,8 @@ def load_sapien_sdf(sdf_file, scene: sapien.Scene):
     for l in world.findall('light'):
         assert l.attrib['type'] == 'point'
         color = [float(x) / 3.14 for x in l.find('diffuse').text.split()]
-        position = [float(x) for x in l.find('pose').text.split()][:3]
+        position = np.array([float(x) for x in l.find('pose').text.split()][:3])
+        position[2] += table_height
         scene.add_point_light(position, color)
     for sdf_model in world.findall('model'):
         builder = scene.create_actor_builder()
@@ -70,7 +70,8 @@ def load_sapien_sdf(sdf_file, scene: sapien.Scene):
         builder.set_mass_and_inertia(mass, sapien.Pose(xyzrpy[:3], euler2quat(*xyzrpy[3:])), [ixx, ixy, ixz])
         model_pose = sdf_model.find('pose')
         model = builder.build(name=sdf_model.attrib['name'])
-        xyzrpy = [float(x) for x in model_pose.text.strip().split()]
+        xyzrpy = np.array([float(x) for x in model_pose.text.strip().split()])
+        xyzrpy[2] += table_height
         model.set_pose(sapien.Pose(xyzrpy[:3], euler2quat(*xyzrpy[3:])))
         model.set_velocity([0, 0, 0])
         model.set_damping(1, 1)
@@ -98,6 +99,35 @@ def set_up_gripper_joint(robot, scene):
     ld2.lock_motion(0, 0, 0, 1, 1, 1)
 
 
+def setup_table(scene: sapien.Scene, height, table_physical_material):
+    table_size = np.array([1, 0.8, 0.01]) / 2
+    table_pose = np.array([0, 0, height - 0.01])
+    table_vis_material = sapien.PxrMaterial()
+    table_vis_material.roughness = 0.025
+    table_vis_material.specular = 0.95
+    table_vis_material.metallic = 0.6
+    rgbd = np.array([171, 171, 171, 255])
+    table_vis_material.set_base_color(rgbd / 255)
+    builder = scene.create_actor_builder()
+    builder.add_box_visual_complex(sapien.Pose(table_pose), table_size, table_vis_material)
+    builder.add_box_shape(sapien.Pose(table_pose), table_size, table_physical_material)
+    table = builder.build_static("table")
+
+    table_leg_position1 = [0.45, 0.35, height / 2]
+    table_leg_position2 = [-0.45, -0.35, height / 2]
+    table_leg_position3 = [-0.45, 0.35, height / 2]
+    table_leg_position4 = [0.45, -0.35, height / 2]
+    table_leg_size = np.array([0.025, 0.025, height / 2 - 0.01])
+    builder = scene.create_actor_builder()
+    builder.add_box_visual_complex(sapien.Pose(table_leg_position1), table_leg_size)
+    builder.add_box_visual_complex(sapien.Pose(table_leg_position2), table_leg_size)
+    builder.add_box_visual_complex(sapien.Pose(table_leg_position3), table_leg_size)
+    builder.add_box_visual_complex(sapien.Pose(table_leg_position4), table_leg_size)
+    legs = builder.build_static("table_leg")
+
+    return [table, legs]
+
+
 def main():
     engine = sapien.Engine()
     optifuser_config = sapien.OptifuserConfig()
@@ -105,6 +135,7 @@ def main():
     engine.set_renderer(renderer)
     controller = sapien.OptifuserController(renderer)
 
+    # Load scene and ground
     scene_config = sapien.SceneConfig()
     scene_config.solver_iterations = 15
     scene_config.solver_velocity_iterations = 2
@@ -118,14 +149,19 @@ def main():
     ground_color = np.array([202, 164, 114, 256]) / 256
     ground_material.set_base_color(ground_color)
     ground_material.specular = 0.5
-    scene.add_ground(0, ground_material)
+    scene.add_ground(0, render_material=ground_material)
     controller.set_current_scene(scene)
+
+    # Load table
+    table_height = 0.8
+    table_material = engine.create_physical_material(0.9, 0.6, 0.05)
+    table_list = setup_table(scene, table_height, table_material)
 
     # Load sdf
     os.environ.update({
         "SAPIEN_MODEL_PATH": "/home/sim/project/iros_ws/src/simulator_for_manipulation_and_grasping/ocrtoc_materials/models"})
-    sdf_file = '/home/sim/project/iros_ws/src/simulator_for_manipulation_and_grasping/ocrtoc_materials/scenes/1-1/input.world'
-    sdf_objects = load_sapien_sdf(sdf_file, scene)
+    sdf_file = '/home/sim/project/iros_ws/src/simulator_for_manipulation_and_grasping/ocrtoc_materials/scenes/1-2/input.world'
+    sdf_objects = load_sapien_sdf(sdf_file, scene, table_height)
 
     controller.set_camera_position(-0.8, 0.875, 0.65)
     controller.set_camera_rotation(-1, 0)
@@ -137,9 +173,10 @@ def main():
     loader = scene_manager.create_robot_loader()
     loader.fix_root_link = True
 
+    # Load robot
     robot, manager = loader.load_from_parameter_server("ur5e", {}, 125)
     set_up_gripper_joint(robot, scene)
-    robot.set_root_pose(sapien.Pose([0, 0, 0], [1, 0, 0, 0]))
+    robot.set_root_pose(sapien.Pose([-0.005, -0.24, table_height], [1, 0, 0, 0]))
     init_qpos = np.array([0, -1.57, 0, -1.57, 0, 0, 0, 0, 0, 0, 0, 0])
     robot.set_qpos(init_qpos)
     robot.set_drive_target(init_qpos)
@@ -153,6 +190,12 @@ def main():
     scene_manager.start()
     step = 0
     while not controller.should_quit:
+        scene.update_render()
+        controller.render()
+        step += 1
+
+    while True:
+        manager.balance_passive_force()
         scene.step()
         scene.update_render()
         controller.render()
