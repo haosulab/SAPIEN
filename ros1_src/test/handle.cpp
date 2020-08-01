@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   s0->addGround(0);
 
   s0->setAmbientLight({0.5, 0.5, 0.5});
-  s0->setShadowLight({0, -1, -1}, {1, 1, 1});
+//  s0->setShadowLight({0, -1, -1}, {1, 1, 1});
 
   // controller.pause(true);
   controller.setCurrentScene(s0.get());

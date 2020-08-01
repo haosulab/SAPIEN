@@ -62,9 +62,7 @@ public:
   };
 
   /* ROS1 communication spin loop*/
-  inline void start() {
-    mThread = std::thread(&ros::MultiThreadedSpinner::spin, mSpinner, nullptr);
-  };
+  void start();;
   inline void stop() { mThread.detach(); };
 };
 

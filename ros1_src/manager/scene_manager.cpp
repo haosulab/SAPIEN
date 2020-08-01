@@ -45,10 +45,9 @@ void SceneManager::onEvent(sapien::EventStep &event) {
   mClockPub.publish(clockMessage);
 
   // Update camera publisher
-  for (auto & j : mCameraPub) {
+  for (auto &j : mCameraPub) {
     j->update();
   }
-
 }
 RobotManager *SceneManager::buildRobotManager(SArticulation *articulation, ros::NodeHandlePtr node,
                                               const std::string &robotName, double frequency) {
@@ -74,5 +73,11 @@ void SceneManager::startAllCamera(double frequency) {
     mCameraPub.push_back(std::move(cameraPub));
     cam->takePicture();
   }
+}
+void SceneManager::start() {
+  for (auto & mRobotManager : mRobotManagers) {
+    mRobotManager->start();
+  }
+  mThread = std::thread(&ros::MultiThreadedSpinner::spin, mSpinner, nullptr);
 }
 } // namespace sapien::ros1
