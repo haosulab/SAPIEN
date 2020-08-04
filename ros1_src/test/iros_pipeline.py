@@ -112,6 +112,7 @@ def setup_table(scene: sapien.Scene, height, table_physical_material):
     builder.add_box_visual_complex(sapien.Pose(table_pose), table_size, table_vis_material)
     builder.add_box_shape(sapien.Pose(table_pose), table_size, table_physical_material)
     table = builder.build_static("table")
+    table.set_pose(sapien.Pose([0, 0, 0], [-0.7071, 0, 0, 0.7071]))
 
     table_leg_position1 = [0.45, 0.35, height / 2]
     table_leg_position2 = [-0.45, -0.35, height / 2]
@@ -124,6 +125,7 @@ def setup_table(scene: sapien.Scene, height, table_physical_material):
     builder.add_box_visual_complex(sapien.Pose(table_leg_position3), table_leg_size)
     builder.add_box_visual_complex(sapien.Pose(table_leg_position4), table_leg_size)
     legs = builder.build_static("table_leg")
+    legs.set_pose(table.get_pose())
 
     return [table, legs]
 
@@ -160,11 +162,11 @@ def main():
     # Load sdf
     os.environ.update({
         "SAPIEN_MODEL_PATH": "/home/sim/project/iros_ws/src/simulator_for_manipulation_and_grasping/ocrtoc_materials/models"})
-    sdf_file = '/home/sim/project/iros_ws/src/simulator_for_manipulation_and_grasping/ocrtoc_materials/scenes/1-2/input.world'
+    sdf_file = '/home/sim/project/iros_ws/src/simulator_for_manipulation_and_grasping/ocrtoc_materials/scenes/2-1/input.world'
     sdf_objects = load_sapien_sdf(sdf_file, scene, table_height)
 
-    controller.set_camera_position(-0.8, 0.875, 0.65)
-    controller.set_camera_rotation(-1, 0)
+    controller.set_camera_position(2.5, 0, 3)
+    controller.set_camera_rotation(3.14, -0.7)
     scene.set_shadow_light([0, -1, -1], [1, 1, 1])
     scene.set_ambient_light((0.5, 0.5, 0.5))
 
@@ -176,8 +178,8 @@ def main():
     # Load robot
     robot, manager = loader.load_from_parameter_server("ur5e", {}, 125)
     set_up_gripper_joint(robot, scene)
-    robot.set_root_pose(sapien.Pose([-0.005, -0.24, table_height], [1, 0, 0, 0]))
-    init_qpos = np.array([0, -1.57, 0, -1.57, 0, 0, 0, 0, 0, 0, 0, 0])
+    robot.set_root_pose(sapien.Pose([-0.24, -0.005, table_height], [-0.7071, 0, 0, 0.7071]))
+    init_qpos = np.array([-1.56, -1.63, -1.406, -1.701, 1.562, 0, 0, 0, 0, 0, 0, 0])
     robot.set_qpos(init_qpos)
     robot.set_drive_target(init_qpos)
     manager.set_drive_property(3000, 500, 1000, [0, 1, 2, 3, 4, 5])
@@ -190,13 +192,8 @@ def main():
     scene_manager.start()
     step = 0
     while not controller.should_quit:
-        scene.update_render()
-        controller.render()
-        step += 1
-
-    while True:
         manager.balance_passive_force()
-        scene.step()
+        # scene.step()
         scene.update_render()
         controller.render()
         step += 1
