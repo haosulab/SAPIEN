@@ -97,13 +97,15 @@ public:
     return mRobotModel->getJointModelGroupNames();
   }
 
+  // Articulation function
+  physx::PxTransform getRootPose();
+
 protected:
   void updateStates(const std::vector<float> &jointPosition,
                     const std::vector<float> &jointVelocity);
 
   // Step function when simulator step once
   void step(bool timeStepChange = false, float newTimeStep = 0);
-
   void start() {}
 };
 } // namespace sapien::ros2

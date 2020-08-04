@@ -1,5 +1,6 @@
 #include "robot_manager.h"
 #include "articulation/sapien_joint.h"
+#include "articulation/sapien_articulation.h"
 #include "controller/sapien_controllable_articulation.h"
 #include "scene_manager.h"
 #include <vector>
@@ -169,6 +170,8 @@ MotionPlanner *RobotManager::buildMotionPlanner(const std::string &groupName,
     mMoveItCpp.reset(new MoveItCpp(mNode, *mMoveitCppOption));
   auto planner =
       std::make_unique<MotionPlanner>(mNode, mClock, mMoveItCpp, groupName, serviceName);
+  planner->mScene = mSceneManager->mScene;
+  planner->mManager = this;
   auto plannerPtr = planner.get();
   mMotionPlanners.push_back(std::move(planner));
   return plannerPtr;
@@ -222,5 +225,6 @@ void RobotManager::setResourcesDirectory(const std::string &path) {
   SAPIEN_ROS2_RESOURCES_DIRECTORY = path;
 }
 std::string RobotManager::SAPIEN_ROS2_RESOURCES_DIRECTORY = "";
+physx::PxTransform RobotManager::getRootPose() { return mWrapper->mArticulation->getRootPose(); }
 
 } // namespace sapien::ros2

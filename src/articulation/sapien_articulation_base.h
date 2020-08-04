@@ -3,16 +3,16 @@
 #include "id_generator.h"
 #include <PxPhysicsAPI.h>
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
-
-#ifdef _USE_PINOCCHIO
-#include "pinocchio_model.h"
-#endif
 
 namespace sapien {
 class SLinkBase;
 class SJointBase;
+#ifdef _USE_PINOCCHIO
+class PinocchioModel;
+#endif
 
 enum EArticulationType { DYNAMIC, KINEMATIC };
 
@@ -20,7 +20,8 @@ class SArticulationBase : public EventEmitter<EventArticulationPreDestroy>,
                           public EventEmitter<EventArticulationStep> {
   std::string mName;
 
-  bool mBeingDestroyed {false};
+  bool mBeingDestroyed{false};
+
 public:
   inline void setName(std::string const &name) { mName = name; }
   inline std::string getName() { return mName; }
@@ -61,9 +62,9 @@ public:
 
   inline bool isBeingDestroyed() const { return mBeingDestroyed; }
 
-  #ifdef _USE_PINOCCHIO
+#ifdef _USE_PINOCCHIO
   std::unique_ptr<PinocchioModel> createPinocchioModel();
-  #endif
+#endif
 };
 
 class SArticulationDrivable : public SArticulationBase {

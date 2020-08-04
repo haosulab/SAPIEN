@@ -1,5 +1,8 @@
 #include "motion_planner.h"
 #include "manager/motion_planning_config.hpp"
+#include "manager/robot_manager.h"
+#include "sapien_actor_base.h"
+#include "sapien_scene.h"
 #include <spdlog/spdlog.h>
 namespace sapien::ros2 {
 
@@ -57,5 +60,76 @@ MotionPlan MotionPlanner::plan() {
   plan.jointNames = jointNames;
 
   return plan;
+}
+
+bool MotionPlanner::updateCollisionObjects(SActorBase *actor) {
+  if (actor->getCollisionShapes().empty()) {
+    return false;
+  }
+  moveit_msgs::msg::CollisionObject collisionObject;
+  planning_scene_monitor::LockedPlanningSceneRW scene(mMoveItCpp->getPlanningSceneMonitor());
+  std::vector<moveit_msgs::msg::CollisionObject> collisionObjs;
+  scene->getCollisionObjectMsgs(collisionObjs);
+  auto name = actor->getName();
+  bool known = false;
+  auto rootPose = mManager->getRootPose().getInverse();
+  for (auto &collisionObj : collisionObjs) {
+    if (collisionObj.id == name) {
+      known = true;
+      break;
+    }
+  }
+
+  if (!known) {
+    auto collisions = actor->getCollisionShapes();
+    for (auto &collision : collisions) {
+      auto shape = collision.get();
+      if (shape->type == "convex_mesh") {
+        auto geometry = static_cast<SConvexMeshGeometry *>(shape->geometry.get());
+        auto scale = geometry->scale;
+        shape_msgs::msg::Mesh mesh;
+        for (size_t l = 0; l < geometry->vertices.size(); l += 3) {
+          geometry_msgs::msg::Point point;
+          point.set__x(geometry->vertices[l] * scale[0]);
+          point.set__y(geometry->vertices[l + 1] * scale[1]);
+          point.set__z(geometry->vertices[l + 2] * scale[2]);
+          mesh.vertices.push_back(point);
+        }
+        auto index = geometry->indices;
+        for (size_t m = 0; m < index.size(); m += 3) {
+          shape_msgs::msg::MeshTriangle triangle;
+          triangle.set__vertex_indices({index[m], index[m + 1], index[m + 2]});
+          mesh.triangles.push_back(triangle);
+        }
+        auto meshPose = fillPose(rootPose * actor->getPose() * shape->pose);
+        collisionObject.meshes.push_back(mesh);
+        collisionObject.mesh_poses.push_back(meshPose);
+      }
+    }
+    collisionObject.set__operation(moveit_msgs::msg::CollisionObject::ADD);
+  } else {
+    auto collisions = actor->getCollisionShapes();
+    for (auto &collision : collisions) {
+      auto meshPose = fillPose(rootPose * actor->getPose() * collision->pose);
+      collisionObject.mesh_poses.push_back(meshPose);
+    }
+    collisionObject.set__operation(moveit_msgs::msg::CollisionObject::MOVE);
+  }
+  collisionObject.set__id(name);
+  collisionObject.header.frame_id = mBaseName;
+  scene->processCollisionObjectMsg(collisionObject);
+  return true;
+}
+
+geometry_msgs::msg::Pose MotionPlanner::fillPose(const physx::PxTransform &pose) {
+  geometry_msgs::msg::Pose meshPose;
+  meshPose.position.x = pose.p.x;
+  meshPose.position.y = pose.p.y;
+  meshPose.position.z = pose.p.z;
+  meshPose.orientation.w = pose.q.w;
+  meshPose.orientation.x = pose.q.x;
+  meshPose.orientation.y = pose.q.y;
+  meshPose.orientation.z = pose.q.z;
+  return meshPose;
 }
 }; // namespace sapien::ros2

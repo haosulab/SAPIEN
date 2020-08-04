@@ -4,7 +4,7 @@
 #include <vector>
 namespace sapien::ros2 {
 
-sapien::ros2::SControllableArticulationWrapper::SControllableArticulationWrapper(
+SControllableArticulationWrapper::SControllableArticulationWrapper(
     sapien::SArticulation *articulation, rclcpp::Clock::SharedPtr clock)
     : mArticulation(articulation), mClock(std::move(clock)), mJointPositions(articulation->dof()),
       mJointVelocities(articulation->dof()) {
@@ -18,7 +18,7 @@ sapien::ros2::SControllableArticulationWrapper::SControllableArticulationWrapper
     }
   }
 }
-bool sapien::ros2::SControllableArticulationWrapper::registerPositionCommands(
+bool SControllableArticulationWrapper::registerPositionCommands(
     ThreadSafeQueue<std::vector<float>> *command,
     const std::vector<std::string> &commandedJointNames,
     ThreadSafeQueue<rclcpp::Time> *commandTimer) {
@@ -39,7 +39,7 @@ bool sapien::ros2::SControllableArticulationWrapper::registerPositionCommands(
   mPositionCommandsTimer.push_back(commandTimer);
   return true;
 }
-bool sapien::ros2::SControllableArticulationWrapper::registerVelocityCommands(
+bool SControllableArticulationWrapper::registerVelocityCommands(
     ThreadSafeQueue<std::vector<float>> *command,
     const std::vector<std::string> &commandedJointNames,
     ThreadSafeQueue<rclcpp::Time> *commandTimer) {
@@ -60,7 +60,7 @@ bool sapien::ros2::SControllableArticulationWrapper::registerVelocityCommands(
   mVelocityCommandsTimer.push_back(commandTimer);
   return true;
 }
-bool sapien::ros2::SControllableArticulationWrapper::registerContinuousVelocityCommands(
+bool SControllableArticulationWrapper::registerContinuousVelocityCommands(
     ThreadSafeVector<float> *command, const std::vector<std::string> &commandedJointNames,
     ThreadSafeQueue<rclcpp::Time> *commandTimer) {
   std::vector<uint32_t> controllerIndex = {};
@@ -81,7 +81,7 @@ bool sapien::ros2::SControllableArticulationWrapper::registerContinuousVelocityC
   return true;
 }
 
-void sapien::ros2::SControllableArticulationWrapper::onEvent(sapien::EventStep &event) {
+void SControllableArticulationWrapper::onEvent(sapien::EventStep &event) {
   mJointPositions.write(mArticulation->getQpos());
   mJointVelocities.write(mArticulation->getQvel());
   mTimeStep = event.timeStep;

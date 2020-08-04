@@ -2,6 +2,9 @@
 #include "sapien_joint.h"
 #include "sapien_link.h"
 #include <eigen3/Eigen/Eigen>
+#ifdef _USE_PINOCCHIO
+#include "pinocchio_model.h"
+#endif
 
 namespace sapien {
 

@@ -1,21 +1,29 @@
 #pragma once
 
 #include <PxPhysicsAPI.h>
+#include <geometry_msgs/msg/point.hpp>
 #include <memory>
 #include <moveit/moveit_cpp/moveit_cpp.h>
 #include <moveit/moveit_cpp/planning_component.h>
 #include <moveit/robot_state/conversions.h>
 
-namespace sapien::ros2 {
-using namespace moveit::planning_interface;
+namespace sapien {
+class SScene;
+class SActorBase;
 
+namespace ros2 {
+using namespace moveit::planning_interface;
 struct MotionPlan;
+class RobotManager;
 
 class MotionPlanner {
+  friend RobotManager;
 
 protected:
   rclcpp::Node::SharedPtr mNode;
   rclcpp::Clock::SharedPtr mClock;
+  SScene *mScene;
+  RobotManager *mManager;
 
   MoveItCppPtr mMoveItCpp;
   PlanningComponentUniquePtr mComponent;
@@ -26,7 +34,6 @@ public:
   std::string mEEName;
   std::string mBaseName;
 
-protected:
 public:
   MotionPlanner(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
                 const MoveItCppPtr &moveitCpp, const std::string &groupName,
@@ -49,6 +56,11 @@ public:
 
   /* Planning */
   MotionPlan plan();
+  bool updateCollisionObjects(SActorBase *actor);
+
+protected:
+  geometry_msgs::msg::Pose fillPose(const physx::PxTransform &pose);
 };
 
-}
+} // namespace ros2
+} // namespace sapien

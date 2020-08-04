@@ -246,7 +246,7 @@ if (ROS)
 
         file(GLOB_RECURSE SAPIEN_ROBOT_MANAGER_SRC "ros2_src/manager/*.cpp")
         add_library(sapien_robot_handle ${SAPIEN_ROBOT_MANAGER_SRC})
-        target_link_libraries(sapien_robot_handle tinyxml2 sapien_controller /opt/ros/eloquent/lib/librmw_fastrtps_cpp.so)
+        target_link_libraries(sapien_robot_handle tinyxml2 sapien_controller)
         ament_target_dependencies(sapien_robot_handle ament_index_cpp)
 
         # test

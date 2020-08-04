@@ -24,11 +24,6 @@ protected:
   std::string mURDFString;
   std::string mSRDFString;
 
-  /* tag from urdf loader*/
-  bool fixRootLink = true;
-  float defaultDensity = 1000.f;
-  bool collisionIsVisual = false;
-
   /* Articulation Reference */
   SArticulation *mArticulation = nullptr;
 
@@ -47,11 +42,15 @@ protected:
                                                 const std::string &SRDFRelativePath = "");
 
 public:
-  RobotDescriptor(bool isPath, const std::string &URDF, const std::string &SRDF,
+  /* Constructor */
+  RobotDescriptor(const std::string &URDF, const std::string &SRDF,
                   const std::string &substitutePath = "");
 
-  RobotDescriptor(const std::string &ROSPackageName, const std::string &URDFRelativePath,
-                  const std::string &SRDFRelativePath, bool useSharedDirectory);
+  static std::unique_ptr<RobotDescriptor> fromPath(const std::string &URDFPath,
+                                                   const std::string &SRDFPath);
+  static std::unique_ptr<RobotDescriptor> fromROS(const std::string &ROSPackageName,
+                                                  const std::string &URDFRelativePath,
+                                                  const std::string &SRDFRelativePath);
 
   /* util function for urdf modification */
   static std::string fromSAPIENConvention(const std::string &URDFString);
@@ -60,7 +59,7 @@ public:
                                             const std::string &URDFPath);
   /* inline function to get string */
   inline std::string getURDF() { return mURDFString; };
-  inline std::string getStandardURDF(){return fromSAPIENConvention(mURDFString);}
+  inline std::string getStandardURDF() { return fromSAPIENConvention(mURDFString); }
   inline std::string getSRDF() { return mSRDFString; };
 };
 } // namespace ros2

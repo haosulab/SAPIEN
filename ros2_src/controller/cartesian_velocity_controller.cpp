@@ -1,5 +1,6 @@
 #include "cartesian_velocity_controller.h"
 
+#include "articulation/sapien_articulation.h"
 #include "sapien_controllable_articulation.h"
 #include <utility>
 
@@ -142,7 +143,7 @@ void sapien::ros2::CartesianVelocityController::handleService(
   Eigen::VectorXd jointVelocity;
   bool foundIK = true;
   mLocalRobotState.computeVariableVelocity(mJointModelGroup, jointVelocity, twist,
-                                       mJointModelGroup->getLinkModel(mEEName));
+                                           mJointModelGroup->getLinkModel(mEEName));
   std::vector<float> stepVelocity(jointVelocity.data(),
                                   jointVelocity.data() + mJointModelGroup->getVariableCount());
   for (int i = 0; i < numStep; ++i) {

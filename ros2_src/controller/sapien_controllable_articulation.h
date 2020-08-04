@@ -1,5 +1,6 @@
 #pragma once
 
+#include <PxPhysicsAPI.h>
 #include "event_system/event_system.h"
 #include "utils/thread_safe_structure.hpp"
 #include <rclcpp/rclcpp.hpp>

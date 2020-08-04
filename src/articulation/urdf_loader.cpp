@@ -7,8 +7,7 @@
 #include <eigen3/Eigen/Eigenvalues>
 #include <experimental/filesystem>
 
-namespace sapien {
-namespace URDF {
+namespace sapien::URDF {
 using namespace tinyxml2;
 using namespace physx;
 namespace fs = std::experimental::filesystem;
@@ -628,5 +627,4 @@ SArticulation *URDFLoader::loadFromXML(const std::string &URDFString,
   return articulation;
 };
 
-} // namespace URDF
 } // namespace sapien
