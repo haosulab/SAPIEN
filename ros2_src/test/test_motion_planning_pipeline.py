@@ -1,7 +1,7 @@
 import numpy as np
 
-import pysapien_ros2.core as sapien
-import pysapien_ros2.ros2 as sr
+import sapien.core as sapien
+import sapien.ros2 as sr
 import transforms3d
 
 
@@ -100,12 +100,5 @@ scene = None
 
 if __name__ == '__main__':
     import sys
-    import os
-
-    sr.init_spd_logger()
-    sr.set_ros2_logging_level("warning")
-    resources_dir = os.path.abspath("/home/sim/project/sapien/python/py_ros2_package/ros2".rstrip('/'))
-    sr.set_resources_directory(resources_dir)
-    print(resources_dir)
     sr.rclcpp_init(sys.argv)
     main()

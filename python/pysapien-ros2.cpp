@@ -48,74 +48,11 @@ PYBIND11_MODULE(pysapien_ros2, m) {
           },
           py::arg("args"));
 
-  //======== Manager ========//
-  auto PySceneManager = py::class_<SceneManager>(m_ros2, "SceneManager");
-  auto PyRobotManager = py::class_<RobotManager>(m_ros2, "RobotManager");
-  auto PyRobotLoader = py::class_<RobotLoader>(m_ros2, "RobotLoader");
-  auto PyRobotDescriptor = py::class_<RobotDescriptor>(m_ros2, "RobotDescriptor");
+  //======== Controller ========//
   auto PyKinematicsSolverType = py::enum_<KinematicsSolver>(m_ros2, "KinematicsSolverType");
   auto PyKinematicsConfig = py::class_<KinematicsConfig>(m_ros2, "KinematicsConfig");
   auto PyMotionPlanningConfig = py::class_<MotionPlanningConfig>(m_ros2, "MotionPlanningConfig");
-
-  PySceneManager
-      .def(py::init<sapien::SScene *, std::string const &>(), py::arg("scene"),
-           py::arg("scene_name"))
-      .def("start", &SceneManager::start)
-      .def("now", [](SceneManager &manager) { return manager.now().seconds(); })
-      .def("create_robot_loader", &SceneManager::createRobotLoader);
-
-  PyRobotManager
-      .def("set_drive_property", &RobotManager::setDriveProperty, py::arg("stiffness"),
-           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
-           py::arg("joint_index") = std::vector<uint32_t>())
-      .def("balance_passive_force", &RobotManager::balancePassiveForce, py::arg("gravity") = true,
-           py::arg("coriolis_centrifugal") = true, py::arg("external") = true)
-      .def("set_kinematics_config", &RobotManager::setKinematicsConfig,
-           py::arg("config") = KinematicsConfig())
-      .def("set_motion_planning_config", &RobotManager::setMotionPlanningConfig,
-           py::arg("config") = MotionPlanningConfig())
-      .def("get_group_names", &RobotManager::getGroupNames)
-      .def("get_kinematics_config", &RobotManager::getKinematicsConfig)
-      .def("get_motion_planning_config", &RobotManager::getMotionPlanningConfig)
-      .def("create_joint_publisher", &RobotManager::createJointPublisher, py::arg("frequency"))
-      .def("build_motion_planner", &RobotManager::buildMotionPlanner, py::arg("group_name"),
-           py::arg("service_name") = "")
-      .def("build_joint_velocity_controller", &RobotManager::buildJointVelocityController,
-           py::return_value_policy::reference, py::arg("joint_names"),
-           py::arg("service_name") = "", py::arg("latency") = 0)
-      .def("build_cartesian_velocity_controller", &RobotManager::buildCartesianVelocityController,
-           py::return_value_policy::reference, py::arg("group_name"), py::arg("service_name") = "",
-           py::arg("latency") = 0);
-
-  PyRobotLoader.def(py::init<SceneManager *>(), py::arg("scene_manager"))
-      .def_property("fix_root_link", &RobotLoader::getFixRootLink, &RobotLoader::setFixRootLink)
-      .def_property("collision_is_visual", &RobotLoader::getCollisionIsVisual,
-                    &RobotLoader::setCollisionIsVisual)
-      .def(
-          "load_robot_and_manager",
-          [](RobotLoader &loader, RobotDescriptor &descriptor, const std::string &name,
-             py::dict &dict) {
-            auto config = parseURDFConfig(dict);
-            return loader.loadRobotAndManager(descriptor, name, config);
-          },
-          py::arg("robot_descriptor"), py::arg("robot_name"), py::arg("config") = py::dict(),
-          py::return_value_policy::reference);
-
-  PyRobotDescriptor
-      .def(py::init<std::string const &, std::string const &, std::string const &>(),
-           py::arg("urdf"), py::arg("srdf"), py::arg("substitute_path") = "")
-      .def_static("from_path", &RobotDescriptor::fromPath, py::return_value_policy::automatic,
-                  py::arg("urdf_path"), py::arg("srdf_path"))
-      .def_static("from_ros", &RobotDescriptor::fromROS, py::return_value_policy::automatic,
-                  py::arg("ros2_package_name"), py::arg("urdf_relative_path"),
-                  py::arg("srdf_relative_path"))
-      .def("get_urdf", &RobotDescriptor::getURDF)
-      .def("get_srdf", &RobotDescriptor::getSRDF)
-      .def("get_standard_urdf", &RobotDescriptor::getStandardURDF);
-
-  //======== Controller ========//
   auto PyMoveType = py::enum_<MoveType>(m_ros2, "MoveType");
-
   auto PyJointVelocityController =
       py::class_<JointVelocityController>(m_ros2, "JointVelocityController");
   auto PyCartesianVelocityController =
@@ -215,4 +152,66 @@ PYBIND11_MODULE(pysapien_ros2, m) {
              }
            })
       .def("plan", &MotionPlanner::plan);
+
+  //======== Manager ========//
+  auto PySceneManager = py::class_<SceneManager>(m_ros2, "SceneManager");
+  auto PyRobotManager = py::class_<RobotManager>(m_ros2, "RobotManager");
+  auto PyRobotLoader = py::class_<RobotLoader>(m_ros2, "RobotLoader");
+  auto PyRobotDescriptor = py::class_<RobotDescriptor>(m_ros2, "RobotDescriptor");
+
+  PySceneManager
+      .def(py::init<sapien::SScene *, std::string const &>(), py::arg("scene"),
+           py::arg("scene_name"))
+      .def("start", &SceneManager::start)
+      .def("now", [](SceneManager &manager) { return manager.now().seconds(); })
+      .def("create_robot_loader", &SceneManager::createRobotLoader);
+
+  PyRobotManager
+      .def("set_drive_property", &RobotManager::setDriveProperty, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("joint_index") = std::vector<uint32_t>())
+      .def("balance_passive_force", &RobotManager::balancePassiveForce, py::arg("gravity") = true,
+           py::arg("coriolis_centrifugal") = true, py::arg("external") = true)
+      .def("set_kinematics_config", &RobotManager::setKinematicsConfig,
+           py::arg("config") = KinematicsConfig())
+      .def("set_motion_planning_config", &RobotManager::setMotionPlanningConfig,
+           py::arg("config") = MotionPlanningConfig())
+      .def("get_group_names", &RobotManager::getGroupNames)
+      .def("get_kinematics_config", &RobotManager::getKinematicsConfig)
+      .def("get_motion_planning_config", &RobotManager::getMotionPlanningConfig)
+      .def("create_joint_publisher", &RobotManager::createJointPublisher, py::arg("frequency"))
+      .def("build_motion_planner", &RobotManager::buildMotionPlanner, py::arg("group_name"),
+           py::arg("service_name") = "")
+      .def("build_joint_velocity_controller", &RobotManager::buildJointVelocityController,
+           py::return_value_policy::reference, py::arg("joint_names"),
+           py::arg("service_name") = "", py::arg("latency") = 0)
+      .def("build_cartesian_velocity_controller", &RobotManager::buildCartesianVelocityController,
+           py::return_value_policy::reference, py::arg("group_name"), py::arg("service_name") = "",
+           py::arg("latency") = 0);
+
+  PyRobotLoader.def(py::init<SceneManager *>(), py::arg("scene_manager"))
+      .def_property("fix_root_link", &RobotLoader::getFixRootLink, &RobotLoader::setFixRootLink)
+      .def_property("collision_is_visual", &RobotLoader::getCollisionIsVisual,
+                    &RobotLoader::setCollisionIsVisual)
+      .def(
+          "load_robot_and_manager",
+          [](RobotLoader &loader, RobotDescriptor &descriptor, const std::string &name,
+             py::dict &dict) {
+            auto config = parseURDFConfig(dict);
+            return loader.loadRobotAndManager(descriptor, name, config);
+          },
+          py::arg("robot_descriptor"), py::arg("robot_name"), py::arg("config") = py::dict(),
+          py::return_value_policy::reference);
+
+  PyRobotDescriptor
+      .def(py::init<std::string const &, std::string const &, std::string const &>(),
+           py::arg("urdf"), py::arg("srdf"), py::arg("substitute_path") = "")
+      .def_static("from_path", &RobotDescriptor::fromPath, py::return_value_policy::automatic,
+                  py::arg("urdf_path"), py::arg("srdf_path"))
+      .def_static("from_ros", &RobotDescriptor::fromROS, py::return_value_policy::automatic,
+                  py::arg("ros2_package_name"), py::arg("urdf_relative_path"),
+                  py::arg("srdf_relative_path"))
+      .def("get_urdf", &RobotDescriptor::getURDF)
+      .def("get_srdf", &RobotDescriptor::getSRDF)
+      .def("get_standard_urdf", &RobotDescriptor::getStandardURDF);
 }
