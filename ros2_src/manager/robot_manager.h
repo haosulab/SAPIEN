@@ -78,12 +78,12 @@ public:
   // Create controller and publisher
   void createJointPublisher(double pubFrequency);
   JointVelocityController *buildJointVelocityController(const std::vector<std::string> &jointNames,
-                                                        const std::string &serviceName,
+                                                        const std::string &serviceName="",
                                                         double latency = 0);
   CartesianVelocityController *buildCartesianVelocityController(const std::string &groupName,
-                                                                const std::string &serviceName,
+                                                                const std::string &serviceName="",
                                                                 double latency = 0);
-  MotionPlanner *buildMotionPlanner(const std::string &groupName, const std::string &serviceName);
+  MotionPlanner *buildMotionPlanner(const std::string &groupName, const std::string &serviceName="");
 
   // Config
   inline KinematicsConfig getKinematicsConfig() const { return mKinematicsConfig; }

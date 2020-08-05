@@ -37,7 +37,7 @@ public:
 public:
   MotionPlanner(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
                 const MoveItCppPtr &moveitCpp, const std::string &groupName,
-                const std::string &serviceName);
+                const std::string &serviceName="");
 
   /* Set Start and End State */
   inline void setStartStateToCurrentState() { mComponent->setStartStateToCurrentState(); }

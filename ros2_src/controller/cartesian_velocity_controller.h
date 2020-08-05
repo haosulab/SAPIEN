@@ -68,7 +68,7 @@ public:
   CartesianVelocityController(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
                               SControllableArticulationWrapper *wrapper,
                               robot_state::RobotState *robotState, const std::string &groupName,
-                              const std::string &serviceName, double latency);
+                              const std::string &serviceName="", double latency=0);
 
   void moveCartesian(const std::array<double, 3> &vec, MoveType type);
   void moveTwist(const std::array<double, 6> &vec, MoveType type);

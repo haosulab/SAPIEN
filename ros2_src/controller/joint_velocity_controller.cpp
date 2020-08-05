@@ -23,12 +23,15 @@ sapien::ros2::JointVelocityController::JointVelocityController(
     : DelayedControllerBase(std::move(clock), latency, 2), mNode(std::move(node)),
       mJointNames(jointNames), mContinuousCommands(jointNames.size()), mCommands() {
   // Create Service
-  mService = mNode->create_service<sapien_ros2_communication_interface::srv::JointVelocity>(
-      std::string(mNode->get_name()) + "/" + serviceName,
-      [this](const std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Request>
-                 req,
-             std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Response> res)
-          -> void { this->handleService(req, std::move(res)); });
+  if (!serviceName.empty()) {
+    mService = mNode->create_service<sapien_ros2_communication_interface::srv::JointVelocity>(
+        std::string(mNode->get_name()) + "/" + serviceName,
+        [this](
+            const std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Request>
+                req,
+            std::shared_ptr<sapien_ros2_communication_interface::srv::JointVelocity_Response> res)
+            -> void { this->handleService(req, std::move(res)); });
+  }
 
   // Register command
   wrapper->registerContinuousVelocityCommands(&mContinuousCommands, mJointNames,

@@ -61,6 +61,7 @@ PYBIND11_MODULE(pysapien_ros2, m) {
       .def(py::init<sapien::SScene *, std::string const &>(), py::arg("scene"),
            py::arg("scene_name"))
       .def("start", &SceneManager::start)
+      .def("now", [](SceneManager &manager) { return manager.now().seconds(); })
       .def("create_robot_loader", &SceneManager::createRobotLoader);
 
   PyRobotManager
@@ -78,30 +79,36 @@ PYBIND11_MODULE(pysapien_ros2, m) {
       .def("get_motion_planning_config", &RobotManager::getMotionPlanningConfig)
       .def("create_joint_publisher", &RobotManager::createJointPublisher, py::arg("frequency"))
       .def("build_motion_planner", &RobotManager::buildMotionPlanner, py::arg("group_name"),
-           py::arg("service_name"))
+           py::arg("service_name") = "")
       .def("build_joint_velocity_controller", &RobotManager::buildJointVelocityController,
-           py::return_value_policy::reference, py::arg("joint_names"), py::arg("service_name"),
-           py::arg("latency") = 0)
+           py::return_value_policy::reference, py::arg("joint_names"),
+           py::arg("service_name") = "", py::arg("latency") = 0)
       .def("build_cartesian_velocity_controller", &RobotManager::buildCartesianVelocityController,
-           py::return_value_policy::reference, py::arg("group_name"), py::arg("service_name"),
+           py::return_value_policy::reference, py::arg("group_name"), py::arg("service_name") = "",
            py::arg("latency") = 0);
 
   PyRobotLoader.def(py::init<SceneManager *>(), py::arg("scene_manager"))
       .def_property("fix_root_link", &RobotLoader::getFixRootLink, &RobotLoader::setFixRootLink)
       .def_property("collision_is_visual", &RobotLoader::getCollisionIsVisual,
                     &RobotLoader::setCollisionIsVisual)
-      .def_property("default_density", &RobotLoader::getDefaultDensity,
-                    &RobotLoader::setDefaultDensity)
-      .def("load_robot_and_manager", &RobotLoader::loadRobotAndManager,
-           py::arg("robot_descriptor"), py::arg("robot_name"),
-           py::arg("material") = (physx::PxMaterial *)nullptr, py::return_value_policy::reference);
+      .def(
+          "load_robot_and_manager",
+          [](RobotLoader &loader, RobotDescriptor &descriptor, const std::string &name,
+             py::dict &dict) {
+            auto config = parseURDFConfig(dict);
+            return loader.loadRobotAndManager(descriptor, name, config);
+          },
+          py::arg("robot_descriptor"), py::arg("robot_name"), py::arg("config") = py::dict(),
+          py::return_value_policy::reference);
 
   PyRobotDescriptor
-      .def(py::init<bool, std::string const &, std::string const &, std::string const &>(),
-           py::arg("is_path"), py::arg("urdf"), py::arg("srdf"), py::arg("substitute_path") = "")
-      .def(py::init<std::string const &, std::string const &, std::string const &, bool>(),
-           py::arg("ros_package_name"), py::arg("urdf_relative_path"),
-           py::arg("srdf_relative_path"), py::arg("use_share_directory"))
+      .def(py::init<std::string const &, std::string const &, std::string const &>(),
+           py::arg("urdf"), py::arg("srdf"), py::arg("substitute_path") = "")
+      .def_static("from_path", &RobotDescriptor::fromPath, py::return_value_policy::automatic,
+                  py::arg("urdf_path"), py::arg("srdf_path"))
+      .def_static("from_ros", &RobotDescriptor::fromROS, py::return_value_policy::automatic,
+                  py::arg("ros2_package_name"), py::arg("urdf_relative_path"),
+                  py::arg("srdf_relative_path"))
       .def("get_urdf", &RobotDescriptor::getURDF)
       .def("get_srdf", &RobotDescriptor::getSRDF)
       .def("get_standard_urdf", &RobotDescriptor::getStandardURDF);
@@ -163,6 +170,8 @@ PYBIND11_MODULE(pysapien_ros2, m) {
           "Move joints with velocity, given default order.");
 
   PyCartesianVelocityController
+      .def_property("joint_velocity_limit", &CartesianVelocityController::getJointVelocityLimit,
+                    &CartesianVelocityController::setJointVelocityLimit)
       .def("move_twist",
            [](CartesianVelocityController &c, const py::array_t<double> &vec, MoveType type) {
              if (vec.size() != 6) {
@@ -199,5 +208,11 @@ PYBIND11_MODULE(pysapien_ros2, m) {
                &MotionPlanner::setGoalState),
            py::arg("pose"), py::arg("link_name") = "")
       .def("set_start_state_to_current_state", &MotionPlanner::setStartStateToCurrentState)
+      .def("update_collision_objects",
+           [](MotionPlanner &planner, std::vector<SActorBase *> actors) {
+             for (auto &actor : actors) {
+               planner.updateCollisionObjects(actor);
+             }
+           })
       .def("plan", &MotionPlanner::plan);
 }

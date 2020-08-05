@@ -239,13 +239,13 @@ if (ROS)
         )
 
         file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/sensor/*.cpp" "ros2_src/utils/*.hpp" "ros2_src/device/*.cpp")
-        add_library(sapien_controller ${SAPIEN_ROBOT_SRC})
+        add_library(sapien_controller STATIC ${SAPIEN_ROBOT_SRC})
         target_link_libraries(sapien_controller sapien)
         ament_target_dependencies(sapien_controller rclcpp sensor_msgs sapien_ros2_communication_interface Boost
                 moveit_core moveit_ros_planning_interface)
 
         file(GLOB_RECURSE SAPIEN_ROBOT_MANAGER_SRC "ros2_src/manager/*.cpp")
-        add_library(sapien_robot_handle ${SAPIEN_ROBOT_MANAGER_SRC})
+        add_library(sapien_robot_handle STATIC ${SAPIEN_ROBOT_MANAGER_SRC})
         target_link_libraries(sapien_robot_handle tinyxml2 sapien_controller)
         ament_target_dependencies(sapien_robot_handle ament_index_cpp)
 
