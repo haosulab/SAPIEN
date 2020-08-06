@@ -129,6 +129,7 @@ project_python_home_dir = os.path.join("python", "py_ros2_package")
 sapien_data = ["glsl_shader/*/*"]
 package_data = {
     "sapien": sapien_data,
+    "sapien.ros2": ["__init__.pyi", "motion_planning/*"],
     "sapien.core": ["__init__.pyi"]
 }
 

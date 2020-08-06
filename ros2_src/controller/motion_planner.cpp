@@ -22,6 +22,10 @@ MotionPlanner::MotionPlanner(rclcpp::Node::SharedPtr node, rclcpp::Clock::Shared
   mJointModelGroup = mMoveItCpp->getRobotModel()->getJointModelGroup(groupName);
   mEEName = mJointModelGroup->getLinkModelNames().back();
   mBaseName = mJointModelGroup->getLinkModelNames()[0];
+
+  mPlanRequestParams.planning_pipeline = *pipelineNames.begin();
+  mPlanRequestParams.planner_id = serviceName;
+  mPlanRequestParams.planning_attempts = 10;
 }
 bool MotionPlanner::setGoalState(const physx::PxTransform &Pose, const std::string &linkName) {
   geometry_msgs::msg::PoseStamped targetPose;
@@ -37,7 +41,10 @@ bool MotionPlanner::setGoalState(const physx::PxTransform &Pose, const std::stri
   return mComponent->setGoal(targetPose, targetLink);
 }
 MotionPlan MotionPlanner::plan() {
-  auto solution = mComponent->plan();
+  auto solution = mComponent->plan(mPlanRequestParams);
+  if (solution.error_code != PlanningComponent::MoveItErrorCode::SUCCESS) {
+    return MotionPlan(0, 0);
+  }
   auto pointsNum = solution.trajectory->getWayPointCount();
   auto jointNames = solution.trajectory->getGroup()->getActiveJointModelNames();
   auto dof = jointNames.size();

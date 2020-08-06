@@ -30,6 +30,8 @@ protected:
   robot_state::RobotState mRobotState;
   const robot_state::JointModelGroup *mJointModelGroup;
 
+  PlanningComponent::PlanRequestParameters mPlanRequestParams;
+
 public:
   std::string mEEName;
   std::string mBaseName;
