@@ -193,7 +193,7 @@ def main():
     step = 0
     while not controller.should_quit:
         manager.balance_passive_force()
-        # scene.step()
+        scene.step()
         scene.update_render()
         controller.render()
         step += 1

@@ -49,6 +49,10 @@ protected:
   ros::Duration mInterval;
   ros::Time mNextTime;
 
+  // Noise
+  float mMean = -0.005;
+  float mStd = 0.008;
+
 public:
   // Init
   CameraPublisher(Renderer::ICamera *camera, const ros::NodeHandlePtr &node,

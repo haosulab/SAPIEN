@@ -1,5 +1,6 @@
 #include "camera_publisher.h"
 #include "sensor_msgs/image_encodings.h"
+#include <random>
 
 namespace sapien::ros1 {
 
@@ -82,6 +83,11 @@ void CameraPublisher::publishDepthImage(const ros::Time &now) {
   const float bad_point = std::numeric_limits<float>::quiet_NaN();
   auto *dest = (float *)(&(mDepthImageMsg.data[0]));
 
+  // Noise generator
+  std::random_device rd{};
+  std::mt19937 gen{rd()};
+  std::normal_distribution<float> d{mMean, mStd};
+
   // convert depth based on cutoff
   for (uint32_t j = 0; j < mHeight; j++) {
     for (uint32_t i = 0; i < mWidth; i++) {
@@ -89,7 +95,7 @@ void CameraPublisher::publishDepthImage(const ros::Time &now) {
       auto value = -cloudImage[index * 4 + 2];
       if (value > this->mPointCloudCutoff && value < this->mPointCloudCutoffMax &&
           depthImage[index] < 0.999) {
-        dest[i + j * mWidth] = value;
+        dest[i + j * mWidth] = value + d(gen);
       } else {
         dest[i + j * mWidth] = bad_point;
       }
@@ -123,6 +129,11 @@ void CameraPublisher::publishPointCloud(const ros::Time &now) {
   mPointCloudMsg.header.stamp = now;
   const float badPoint = std::numeric_limits<float>::quiet_NaN();
 
+  // Noise generator
+  std::random_device rd{};
+  std::mt19937 gen{rd()};
+  std::normal_distribution<float> d{mMean, mStd};
+
   sensor_msgs::PointCloud2Modifier pcd_modifier(mPointCloudMsg);
   pcd_modifier.setPointCloud2FieldsByString(2, "xyz", "rgb");
   pcd_modifier.resize(mWidth * mHeight);
@@ -142,9 +153,10 @@ void CameraPublisher::publishPointCloud(const ros::Time &now) {
       auto value = -cloudImage[numPos + 2];
       if (value > this->mPointCloudCutoff && value < this->mPointCloudCutoffMax &&
           depthImage[index] < 0.999) {
-        *iter_x = -cloudImage[numPos + 2];
-        *iter_y = -cloudImage[numPos + 0];
-        *iter_z = cloudImage[numPos + 1];
+        float noise = d(gen) + 1;
+        *iter_x = -cloudImage[numPos + 2] * noise;
+        *iter_y = -cloudImage[numPos + 0] * noise;
+        *iter_z = cloudImage[numPos + 1] * noise;
       } else {
         *iter_x = *iter_y = *iter_z = badPoint;
       }
