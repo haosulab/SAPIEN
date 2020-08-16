@@ -658,6 +658,7 @@ void buildSapien(py::module &m) {
       .def_property_readonly("col2", &SActorBase::getCollisionGroup2)
       .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
       .def("get_collision_shapes", &SActorBase::getCollisionShapes)
+      .def("render_collision", &SActorBase::renderCollisionBodies, py::arg("render")=true)
       .def("hide_visual", &SActorBase::hideVisual)
       .def("unhide_visual", &SActorBase::unhideVisual)
       .def("is_hiding_visual", &SActorBase::isHidingVisual);
