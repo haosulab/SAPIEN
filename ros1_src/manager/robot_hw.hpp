@@ -42,6 +42,11 @@ private:
 
   std::unique_ptr<controller_manager::ControllerManager> mControllerManager = nullptr;
 
+  // Mimic joint code
+  bool mMimic = false;
+  uint32_t mRightDriveIndex;
+  uint32_t mLeftDriveIndex;
+
 public:
   SRobotHW(ros::NodeHandlePtr &node, SControllableArticulationWrapper *wrapper,
            std::string robotName, float frequency)
@@ -86,6 +91,17 @@ public:
     ros::Duration interval(1 / frequency);
     mTimer = mNode->createTimer(interval, &SRobotHW::update, this, false, true);
     assert(mTimer.hasStarted());
+
+    // Mimic joint
+    auto findLeftGripper =
+        std::find(jointNames.begin(), jointNames.end(), "robotiq_2f_85_left_driver_joint");
+    auto findRightGripper =
+        std::find(jointNames.begin(), jointNames.end(), "robotiq_2f_85_right_driver_joint");
+    if (findLeftGripper != jointNames.end() && findRightGripper != jointNames.end()) {
+      mMimic = true;
+      mRightDriveIndex = findRightGripper - jointNames.begin();
+      mLeftDriveIndex = findLeftGripper - jointNames.begin();
+    }
   }
 
   void read(const ros::Time &time, const ros::Duration &period) {
@@ -102,6 +118,10 @@ public:
 
   void write(const ros::Time &time, const ros::Duration &period) {
     mPositionJointLimitInterface.enforceLimits(period);
+    if (mMimic) {
+      mPositionCommand[mLeftDriveIndex] = mPositionCommand[mRightDriveIndex];
+      mVelocityCommand[mLeftDriveIndex] = mVelocityCommand[mRightDriveIndex];
+    }
     mWrapperPosition.push(
         std::vector<physx::PxReal>(mPositionCommand.begin(), mPositionCommand.end()));
     mWrapperVelocity.push(

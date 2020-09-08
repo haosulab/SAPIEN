@@ -5,6 +5,7 @@
 #include "sapien_actor_base.h"
 #include "sapien_controllable_articulation.h"
 #include "sapien_scene.h"
+#include <sapien_actor.h>
 #include <spdlog/spdlog.h>
 
 namespace sapien::ros1 {
@@ -63,21 +64,66 @@ RobotManager *SceneManager::buildRobotManager(SArticulation *articulation, ros::
   mArticulationWrappers.push_back(std::move(wrapper));
   return robotMangerWeakPtr;
 }
-void SceneManager::startAllCamera(double frequency) {
+void SceneManager::startAllCamera(double frequency, float mean, float std, float cloudCutOff,
+                                  float cloudCutOffMax) {
   auto logger = spdlog::get("SAPIEN_ROS1");
   for (int j = 0; j < mScene->getMountedCameras().size(); ++j) {
     auto cam = mScene->getMountedCameras()[j];
     auto actor = mScene->getMountedActors()[j];
     auto frameName = actor->getName();
     auto cameraPub = std::make_unique<CameraPublisher>(cam, mNode, frameName, frequency);
+    cameraPub->mPointCloudCutoff = cloudCutOff;
+    cameraPub->mPointCloudCutoffMax = cloudCutOffMax;
+    cameraPub->mMean = mean;
+    cameraPub->mStd = std;
     mCameraPub.push_back(std::move(cameraPub));
     cam->takePicture();
   }
 }
 void SceneManager::start() {
-  for (auto & mRobotManager : mRobotManagers) {
+  for (auto &mRobotManager : mRobotManagers) {
     mRobotManager->start();
   }
   mThread = std::thread(&ros::MultiThreadedSpinner::spin, mSpinner, nullptr);
+}
+bool SceneManager::onGetModelService(gazebo_msgs::GetModelStateRequest &req,
+                                     gazebo_msgs::GetModelStateResponse &res) {
+  auto logger = spdlog::get("SAPIEN_ROS1");
+  logger->warn("receive {}", req.model_name);
+  std::string name = req.model_name;
+  auto index = std::find(mModelNames.begin(), mModelNames.end(), name);
+  if (index == mModelNames.end()) {
+    logger->error("Model name [{}] not found", name);
+    res.success = false;
+    return false;
+  }
+
+  uint32_t actorIndex = index - mModelNames.begin();
+  auto sapienPose = mModelActors[actorIndex]->getPose();
+  geometry_msgs::Pose pose;
+  pose.position.x = sapienPose.p.x;
+  pose.position.y = sapienPose.p.y;
+  pose.position.z = sapienPose.p.z;
+  pose.orientation.w = sapienPose.q.w;
+  pose.orientation.x = sapienPose.q.x;
+  pose.orientation.y = sapienPose.q.y;
+  pose.orientation.z = sapienPose.q.z;
+  res.pose = pose;
+  res.success = true;
+  res.status_message = "GetModelState: got properties";
+  return true;
+}
+
+void SceneManager::startGetModelService(const std::string &serviceName,
+                                        std::vector<SActorBase *> &actors) {
+  mModelActors.clear();
+  mModelNames.clear();
+  for (auto &k : actors) {
+    mModelActors.push_back(k);
+    mModelNames.push_back(k->getName());
+  }
+
+  mGetModelService = std::make_unique<ros::ServiceServer>(
+      mNode->advertiseService(serviceName, &SceneManager::onGetModelService, this));
 }
 } // namespace sapien::ros1

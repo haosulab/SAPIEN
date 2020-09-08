@@ -10,9 +10,9 @@ CameraPublisher::CameraPublisher(Renderer::ICamera *camera, const ros::NodeHandl
       mCamera(dynamic_cast<Renderer::OptifuserCamera *>(camera)), mWidth(camera->getWidth()),
       mHeight(camera->getHeight()), mPointCloudMsg(), mColorImageMsg(), mDepthImageMsg(),
       mFrameName(frameName) {
-  std::string pointCloudTopicName = "points";
-  std::string colorImageTopicName = "color";
-  std::string depthImageTopicName = "depth";
+  std::string pointCloudTopicName = "depth/points";
+  std::string colorImageTopicName = "color/image_raw";
+  std::string depthImageTopicName = "depth/image_raw";
 
   // Init publisher
   ros::AdvertiseOptions pointCloudOption = ros::AdvertiseOptions::create<sensor_msgs::PointCloud2>(

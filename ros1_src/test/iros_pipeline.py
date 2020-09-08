@@ -171,12 +171,12 @@ def main():
     scene.set_ambient_light((0.5, 0.5, 0.5))
 
     sr.init_spd_logger()
-    scene_manager = sr.SceneManager(scene, "sapien_sim")
+    scene_manager = sr.SceneManager(scene, "")
     loader = scene_manager.create_robot_loader()
     loader.fix_root_link = True
 
     # Load robot
-    robot, manager = loader.load_from_parameter_server("ur5e", {}, 125)
+    robot, manager = loader.load_from_parameter_server("", {}, 125)
     set_up_gripper_joint(robot, scene)
     robot.set_root_pose(sapien.Pose([-0.24, -0.005, table_height], [-0.7071, 0, 0, 0.7071]))
     init_qpos = np.array([-1.56, -1.63, -1.406, -1.701, 1.562, 0, 0, 0, 0, 0, 0, 0])
@@ -185,6 +185,7 @@ def main():
     manager.set_drive_property(3000, 500, 1000, [0, 1, 2, 3, 4, 5])
     manager.set_drive_property(400, 50, 300, [7, 10])
     scene_manager.start_all_ros_camera(30)
+    scene_manager.start_get_model_service("/sapien/get_model_state", sdf_objects)
     scene.step()
 
     # Start
