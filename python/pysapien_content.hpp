@@ -1202,6 +1202,7 @@ void buildSapien(py::module &m) {
 
   PyURDFLoader.def(py::init<SScene *>(), py::arg("scene"))
       .def_readwrite("fix_root_link", &URDF::URDFLoader::fixRootLink)
+      .def_readwrite("load_multiple_shapes_from_file", &URDF::URDFLoader::multipleMeshesInOneFile)
       .def_readwrite("collision_is_visual", &URDF::URDFLoader::collisionIsVisual)
       .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def_property("default_density",

@@ -327,9 +327,15 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
         }
         break;
       case Geometry::MESH:
-        currentLinkBuilder->addConvexShapeFromFile(
-            getAbsPath(urdfFilename, collision->geometry->filename), tCollision2Link,
-            collision->geometry->scale * scale, material, density, patchRadius, minPatchRadius);
+        if (multipleMeshesInOneFile) {
+          currentLinkBuilder->addMultipleConvexShapesFromFile(
+              getAbsPath(urdfFilename, collision->geometry->filename), tCollision2Link,
+              collision->geometry->scale * scale, material, density, patchRadius, minPatchRadius);
+        } else {
+          currentLinkBuilder->addConvexShapeFromFile(
+              getAbsPath(urdfFilename, collision->geometry->filename), tCollision2Link,
+              collision->geometry->scale * scale, material, density, patchRadius, minPatchRadius);
+        }
         if (collisionIsVisual) {
           currentLinkBuilder->addVisualFromFile(
               getAbsPath(urdfFilename, collision->geometry->filename), tCollision2Link,
