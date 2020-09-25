@@ -13,6 +13,7 @@
 namespace sapien {
 class SLinkBase;
 class SJointBase;
+class SScene;
 
 enum EArticulationType { DYNAMIC, KINEMATIC };
 
@@ -51,6 +52,8 @@ public:
   virtual void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const = 0;
 
   virtual void prestep() = 0;
+
+  virtual SScene* getScene() const = 0;
 
   virtual ~SArticulationBase() = default;
 

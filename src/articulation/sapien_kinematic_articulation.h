@@ -48,6 +48,8 @@ public:
   virtual void setDriveTarget(std::vector<physx::PxReal> const &v) override;
   virtual std::vector<physx::PxReal> getDriveTarget() const override;
 
+  SScene *getScene() const override { return mScene; }
+
   void prestep() override;
 
   SKArticulation(SKArticulation const &) = delete;

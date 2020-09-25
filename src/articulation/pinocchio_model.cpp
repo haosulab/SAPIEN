@@ -11,9 +11,11 @@
   }
 
 namespace sapien {
-std::unique_ptr<PinocchioModel> PinocchioModel::fromURDFXML(std::string const &urdf) {
+std::unique_ptr<PinocchioModel> PinocchioModel::fromURDFXML(std::string const &urdf,
+                                                            Eigen::Vector3d gravity) {
   auto m = std::unique_ptr<PinocchioModel>(new PinocchioModel);
   pinocchio::urdf::buildModelFromXML(urdf, m->model);
+  m->model.gravity = {gravity, Eigen::Vector3d{0, 0, 0}};
   m->data = pinocchio::Data(m->model);
   m->indexS2P.setIdentity(m->model.nv);
   return m;

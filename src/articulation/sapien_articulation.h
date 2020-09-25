@@ -64,6 +64,8 @@ public:
   void setRootVelocity(physx::PxVec3 const &v);
   void setRootAngularVelocity(physx::PxVec3 const &omega);
 
+  SScene *getScene() const override { return mScene; }
+
   void prestep() override;
 
   SLinkBase *getRootLink() override;

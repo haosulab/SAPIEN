@@ -29,7 +29,8 @@ class PinocchioModel {
   std::vector<int> linkIdx2FrameIdx;
 
 public:
-  static std::unique_ptr<PinocchioModel> fromURDFXML(std::string const &urdf);
+  static std::unique_ptr<PinocchioModel> fromURDFXML(std::string const &urdf,
+                                                     Eigen::Vector3d gravity);
 
   PinocchioModel(PinocchioModel const &other) = delete;
   PinocchioModel &operator=(PinocchioModel const &other) = delete;

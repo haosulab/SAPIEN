@@ -1,6 +1,7 @@
 #include "sapien_articulation_base.h"
 #include "sapien_joint.h"
 #include "sapien_link.h"
+#include "sapien_scene.h"
 #include <eigen3/Eigen/Eigen>
 
 namespace sapien {
@@ -142,7 +143,9 @@ std::string SArticulationBase::exportKinematicsChainAsURDF(bool fixRoot) {
 
 #ifdef _USE_PINOCCHIO
 std::unique_ptr<PinocchioModel> SArticulationBase::createPinocchioModel() {
-  auto pm = PinocchioModel::fromURDFXML(exportKinematicsChainAsURDF(true));
+  PxVec3 gravity = getScene()->getPxScene()->getGravity();
+  auto pm = PinocchioModel::fromURDFXML(exportKinematicsChainAsURDF(true),
+                                        {gravity.x, gravity.y, gravity.z});
   std::vector<std::string> jointNames;
   std::vector<std::string> linkNames;
   for (auto j : getBaseJoints()) {
