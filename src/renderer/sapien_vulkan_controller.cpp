@@ -368,7 +368,9 @@ void SapienVulkanController::createGizmoVisual(SActorBase *actor) {
 SapienVulkanController::SapienVulkanController(SapienVulkanRenderer *renderer)
     : mRenderer(renderer), mWidth(0), mHeight(0) {
   mCamera = mRenderer->mContext->createCamera();
-  mVulkanRenderer = mRenderer->mContext->createVulkanRendererForEditor();
+  svulkan::VulkanRendererConfig config;
+  config.customTextureCount = 1;
+  mVulkanRenderer = mRenderer->mContext->createVulkanRendererForEditor(config);
   mFPSController = std::make_unique<svulkan::FPSCameraController>(
       *mCamera, glm::vec3{1.f, 0.f, 0.f}, glm::vec3{0.f, 0.f, 1.f});
   mArcRotateController = std::make_unique<svulkan::ArcRotateCameraController>(
@@ -610,6 +612,9 @@ void SapienVulkanController::render() {
         break;
       case 3:
         mVulkanRenderer->switchToSegmentation();
+        break;
+      case 4:
+        mVulkanRenderer->switchToCustom();
         break;
       default:
         break;

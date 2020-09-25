@@ -8,6 +8,17 @@ namespace sapien {
 
 void DefaultEventCallback::onContact(const PxContactPairHeader &pairHeader,
                                      const PxContactPair *pairs, PxU32 nbPairs) {
+  // PxContactPairExtraDataIterator iter(pairHeader.extraDataStream,
+  //                                     pairHeader.extraDataStreamSize);
+  // while(iter.nextItemSet())
+  // {
+  //   if (iter.postSolverVelocity)
+  //   {
+  //     PxVec3 linearVelocityActor0 = iter.postSolverVelocity->linearVelocity[0];
+  //     PxVec3 linearVelocityActor1 = iter.postSolverVelocity->linearVelocity[1];
+  //   }
+  // }
+
   for (uint32_t i = 0; i < nbPairs; ++i) {
     std::unique_ptr<SContact> contact = std::make_unique<SContact>();
     contact->actors[0] = static_cast<SActorBase *>(pairHeader.actors[0]->userData);

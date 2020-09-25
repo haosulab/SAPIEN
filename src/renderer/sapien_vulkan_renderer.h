@@ -2,12 +2,12 @@
 #pragma once
 #include "renderer/render_interface.h"
 
+#include "sapien_vulkan/camera.h"
 #include "sapien_vulkan/internal/vulkan_context.h"
 #include "sapien_vulkan/internal/vulkan_renderer.h"
 #include "sapien_vulkan/internal/vulkan_renderer_for_editor.h"
 #include "sapien_vulkan/object.h"
 #include "sapien_vulkan/scene.h"
-#include "sapien_vulkan/camera.h"
 
 namespace sapien {
 namespace Renderer {
@@ -98,7 +98,7 @@ public:
   void setShadowLight(std::array<float, 3> const &direction,
                       std::array<float, 3> const &color) override;
 
-  inline SapienVulkanRenderer* getParentRenderer() const { return mParentRenderer; }
+  inline SapienVulkanRenderer *getParentRenderer() const { return mParentRenderer; }
 };
 
 class SapienVulkanRenderer : public IPxrRenderer {
@@ -127,17 +127,19 @@ class SapienVulkanCamera : public ICamera {
   vk::UniqueFence mFence;
 
   void waitForFence();
+
 public:
   inline std::string const &getName() const override { return mName; }
   inline uint32_t getWidth() const override { return mWidth; };
-  inline uint32_t getHeight() const override{return mHeight; };
+  inline uint32_t getHeight() const override { return mHeight; };
 
   inline float getFovy() const override { return mCamera->fovy; }
   inline float getNear() const override { return mCamera->near; }
   inline float getFar() const override { return mCamera->far; }
 
   SapienVulkanCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
-                     float near, float far, SapienVulkanScene *scene, std::string const &shaderDir);
+                     float near, float far, SapienVulkanScene *scene,
+                     std::string const &shaderDir);
   void takePicture() override;
   std::vector<float> getColorRGBA() override;
   std::vector<float> getAlbedoRGBA() override;
@@ -147,6 +149,7 @@ public:
   std::vector<int> getObjSegmentation() override;
 
   std::vector<float> getPositionRGBA();
+  std::vector<float> getCustomRGBA();
 
   inline IPxrScene *getScene() override { return mScene; }
 
@@ -163,8 +166,6 @@ public:
 
   bool isOrthographic() const;
 };
-
-
 
 } // namespace Renderer
 } // namespace sapien

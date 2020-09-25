@@ -33,6 +33,9 @@ void HudRenderMode::draw() {
     if (ImGui::RadioButton("Segmentation", &mMode, Mode::eSegmentation)) {
       mSwitchMode = true;
     }
+    if (ImGui::RadioButton("Custom", &mMode, Mode::eCustom)) {
+      mSwitchMode = true;
+    }
   }
 }
 
@@ -58,8 +61,8 @@ void HudStats::draw() {
     ImGui::Text("Frame time: %.3f ms", 1000.f / mFrameRate);
   }
 }
-  
-void HudControlWindow::draw(){
+
+void HudControlWindow::draw() {
   ImGui::Begin("Control");
   mHudControl.draw();
   mHudRenderMode.draw();
@@ -68,5 +71,5 @@ void HudControlWindow::draw(){
   ImGui::End();
 }
 
-}
-}
+} // namespace Renderer
+} // namespace sapien

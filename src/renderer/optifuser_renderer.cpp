@@ -47,6 +47,9 @@ void OptifuserRigidbody::setSegmentationId(uint32_t segmentationId) {
 uint32_t OptifuserRigidbody::getSegmentationId() const { return mSegmentationId; }
 
 void OptifuserRigidbody::setSegmentationCustomData(const std::vector<float> &customData) {
+  if (customData.size() != 16) {
+    throw std::invalid_argument("custom data must have length 16");
+  }
   for (auto obj : mObjects) {
     obj->setUserData(customData);
   }

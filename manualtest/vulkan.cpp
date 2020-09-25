@@ -8,6 +8,7 @@
 #include "sapien_scene.h"
 #include "simulation.h"
 #include <iostream>
+#include "articulation/urdf_loader.h"
 
 #define PI (3.141592653589793238462643383279502884f)
 
@@ -130,7 +131,7 @@ int main() {
   ant0->setRootPose({{0, 0, 2}, PxIdentity});
 
   auto r0 = static_cast<Renderer::SapienVulkanScene *>(s0->getRendererScene());
-  r0->setAmbientLight({0, 0, 0});
+  r0->setAmbientLight({0.2, 0.2, 0.2});
   r0->setShadowLight({0, -1, -1}, {1, 1, 1});
 
   auto builder2 = s0->createActorBuilder();
@@ -145,6 +146,9 @@ int main() {
   controller.setScene(s0.get());
   controller.setFreeCameraPosition(-3, 0, 0);
   // controller.pause(true);
+
+  auto loader = s0->createURDFLoader();
+  loader->loadKinematic("../assets/shadow/kinova_shadow.urdf");
 
   int count = 0;
   SDrive *drive;

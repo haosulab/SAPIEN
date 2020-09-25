@@ -164,7 +164,7 @@ int main() {
 
   auto loader = s0->createURDFLoader();
   loader->fixRootLink = 1;
-  auto a = loader->loadKinematic("../assets_local/robot/panda.urdf");
+  auto a = loader->loadKinematic("../assets/shadow/kinova_shadow.urdf");
   // auto a = loader->load("../assets_local/robot/tmp.urdf");
   // auto a = loader->loadKinematic("../assets_local/old_kinova/old_kinova_parallel.urdf");
   // auto b = loader->loadKinematic("../assets/tmp.urdf");
@@ -184,34 +184,34 @@ int main() {
 
   // std::cout << a->exportKinematicsChainAsURDF(true) << std::endl;
 
-  auto pm = a->createPinocchioModel();
-  auto q2 = pm->getRandomConfiguration();
-  std::cout << q2 << std::endl;
+  // auto pm = a->createPinocchioModel();
+  // auto q2 = pm->getRandomConfiguration();
+  // std::cout << q2 << std::endl;
 
-  if (q2.size() != a->dof()) {
-    throw std::runtime_error("DOF mismatch");
-  }
+  // if (q2.size() != a->dof()) {
+  //   throw std::runtime_error("DOF mismatch");
+  // }
 
-  std::vector<float> q;
-  for (uint32_t i = 0; i < q2.size(); ++i) {
-    q.push_back(q2(i));
-  }
-  a->setQpos(q);
-  s0->step();
+  // std::vector<float> q;
+  // for (uint32_t i = 0; i < q2.size(); ++i) {
+  //   q.push_back(q2(i));
+  // }
+  // a->setQpos(q);
+  // s0->step();
 
-  pm->computeForwardKinematics(q2);
-  for (uint32_t i = 0; i < a->getBaseLinks().size(); ++i) {
-    bool close = poseClose(pm->getLinkPose(i), a->getBaseLinks()[i]->getPose());
-    if (!close) {
-      throw std::runtime_error("pose not close");
-    }
-  }
+  // pm->computeForwardKinematics(q2);
+  // for (uint32_t i = 0; i < a->getBaseLinks().size(); ++i) {
+  //   bool close = poseClose(pm->getLinkPose(i), a->getBaseLinks()[i]->getPose());
+  //   if (!close) {
+  //     throw std::runtime_error("pose not close");
+  //   }
+  // }
 
-  s0->setAmbientLight({0.3, 0.3, 0.3});
-  s0->setShadowLight({1, -1, -1}, {.5, .5, 0.4});
-  controller.setCurrentScene(s0.get());
+  // s0->setAmbientLight({0.3, 0.3, 0.3});
+  // s0->setShadowLight({1, -1, -1}, {.5, .5, 0.4});
+  // controller.setCurrentScene(s0.get());
 
-  pm->computeFullJacobian(q2);
+  // pm->computeFullJacobian(q2);
   
   // auto start = std::chrono::high_resolution_clock::now(); 
   // for (uint32_t i = 0; i < 1000; ++i) {

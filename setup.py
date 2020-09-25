@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--optix-home', type=str, default=None)
 parser.add_argument('--cuda-include-path', type=str, default=None)
 parser.add_argument('--profile', action='store_true')
+parser.add_argument('--debug', action='store_true')
 args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
 
@@ -55,7 +56,10 @@ class CMakeBuild(build_ext):
         if args.cuda_include_path:
             cmake_args.append('-DCUDA_INCLUDE_PATH=' + args.cuda_include_path)
 
-        cfg = 'Release'
+        if args.debug:
+            cfg = 'Debug'
+        else:
+            cfg = 'Release'
         build_args = ['--config', cfg]
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]

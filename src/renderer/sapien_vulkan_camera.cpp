@@ -3,12 +3,16 @@
 
 namespace sapien {
 namespace Renderer {
-SapienVulkanCamera::SapienVulkanCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
-                                       float near, float far, SapienVulkanScene *scene,
+SapienVulkanCamera::SapienVulkanCamera(std::string const &name, uint32_t width, uint32_t height,
+                                       float fovy, float near, float far, SapienVulkanScene *scene,
                                        std::string const &shaderDir)
     : mName(name), mWidth(width), mHeight(height), mScene(scene) {
   auto &context = mScene->getParentRenderer()->mContext;
-  mRenderer = context->createVulkanRenderer();
+
+  svulkan::VulkanRendererConfig config;
+  config.customTextureCount = 1;
+
+  mRenderer = context->createVulkanRenderer(config);
   mRenderer->resize(width, height);
 
   mCamera = context->createCamera();
@@ -34,8 +38,7 @@ void SapienVulkanCamera::takePicture() {
   mCommandBuffer->end();
 
   vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  vk::SubmitInfo info(0, nullptr, &waitStage, 1, &mCommandBuffer.get(),
-                      0, nullptr);
+  vk::SubmitInfo info(0, nullptr, &waitStage, 1, &mCommandBuffer.get(), 0, nullptr);
   context->getGraphicsQueue().submit(info, mFence.get());
 }
 
@@ -86,6 +89,10 @@ std::vector<float> SapienVulkanCamera::getPositionRGBA() {
   return mRenderer->downloadPosition();
 }
 
+std::vector<float> SapienVulkanCamera::getCustomRGBA() {
+  waitForFence();
+  return mRenderer->downloadCustom(0);
+}
 
 physx::PxTransform SapienVulkanCamera::getPose() const {
   auto p = mCamera->position;
@@ -115,22 +122,16 @@ void SapienVulkanCamera::changeModeToPerspective(float fovy) {
   mCamera->fovy = fovy;
 }
 
-bool SapienVulkanCamera::isOrthographic() const {
-  return mCamera->ortho;
-}
+bool SapienVulkanCamera::isOrthographic() const { return mCamera->ortho; }
 
 void SapienVulkanCamera::waitForFence() {
   auto &context = mScene->getParentRenderer()->mContext;
   context->getDevice().waitForFences({mFence.get()}, VK_TRUE, UINT64_MAX);
 }
 
-glm::mat4 SapienVulkanCamera::getModelMatrix() const {
-  return mCamera->getModelMat();
-}
+glm::mat4 SapienVulkanCamera::getModelMatrix() const { return mCamera->getModelMat(); }
 
-glm::mat4 SapienVulkanCamera::getProjectionMatrix() const {
-  return mCamera->getProjectionMat();
-}
+glm::mat4 SapienVulkanCamera::getProjectionMatrix() const { return mCamera->getProjectionMat(); }
 
 } // namespace Renderer
 } // namespace sapien

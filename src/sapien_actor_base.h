@@ -26,23 +26,23 @@ enum class EActorType {
 
 class SActorBase : public EventEmitter<EventActorPreDestroy>, public EventEmitter<EventActorStep> {
 protected:
-  std::string mName {""};
-  physx_id_t mId {0};
-  SScene *mParentScene {};
-  std::vector<Renderer::IPxrRigidbody *> mRenderBodies {};
-  std::vector<Renderer::IPxrRigidbody *> mCollisionBodies {};
+  std::string mName{""};
+  physx_id_t mId{0};
+  SScene *mParentScene{};
+  std::vector<Renderer::IPxrRigidbody *> mRenderBodies{};
+  std::vector<Renderer::IPxrRigidbody *> mCollisionBodies{};
 
-  std::vector<SDrive *> mDrives {};
+  std::vector<SDrive *> mDrives{};
 
-  uint32_t mCol1 {0};
-  uint32_t mCol2 {0};
-  uint32_t mCol3 {0};
+  uint32_t mCol1{0};
+  uint32_t mCol2{0};
+  uint32_t mCol3{0};
 
-  bool collisionRender {false};
-  bool mHidden {false};
+  bool collisionRender{false};
+  bool mHidden{false};
   float mDisplayVisibility{1.f};
 
-  bool mBeingDestroyed {false};
+  bool mBeingDestroyed{false};
 
 public:
   void renderCollisionBodies(bool collision);
@@ -87,7 +87,7 @@ public:
   void setDisplayVisibility(float visibility);
   float getDisplayVisibility() const;
 
-  // internal use only
+  /** internal use only, actors marked as destroyed will be removed in the next step */
   inline void markDestroyed() { mBeingDestroyed = true; }
 
   inline bool isBeingDestroyed() const { return mBeingDestroyed; }

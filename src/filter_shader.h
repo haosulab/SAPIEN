@@ -24,11 +24,10 @@ TypeAffinityIgnoreFilterShader(PxFilterObjectAttributes attributes0, PxFilterDat
   }
 
   if ((filterData0.word0 & filterData1.word1) || (filterData1.word0 & filterData0.word1)) {
-    pairFlags = PxPairFlag::eCONTACT_DEFAULT | 
-                PxPairFlag::eNOTIFY_CONTACT_POINTS |
-                PxPairFlag::eNOTIFY_TOUCH_PERSISTS |
-                PxPairFlag::eNOTIFY_TOUCH_FOUND |
-                PxPairFlag::eNOTIFY_TOUCH_LOST;
+    pairFlags = PxPairFlag::eCONTACT_DEFAULT | PxPairFlag::eNOTIFY_CONTACT_POINTS |
+                PxPairFlag::eNOTIFY_TOUCH_PERSISTS | PxPairFlag::eNOTIFY_TOUCH_FOUND |
+                PxPairFlag::eNOTIFY_TOUCH_LOST | PxPairFlag::ePRE_SOLVER_VELOCITY |
+                PxPairFlag::ePOST_SOLVER_VELOCITY;
 
     return PxFilterFlag::eDEFAULT;
   }
