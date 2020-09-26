@@ -15,7 +15,7 @@ In this tutorial, you will learn the following:
 * Customize a simple Ant environment for training RL
 
 .. note::
-	If you haven’t already done so, make sure you’ve completed the steps in :doc:`minimal` and :doc:`render` section before starting tutorial of the robotics part.
+   If you haven’t already done so, make sure you’ve completed the steps in :doc:`minimal` and :doc:`render` section before starting tutorial of the robotics part.
 
 Write a SAPIEN environment base
 --------------------------------------

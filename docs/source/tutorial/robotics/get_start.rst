@@ -4,7 +4,7 @@ Getting Started
 ================
 
 .. note::
-	If you haven’t already done so, make sure you’ve completed the steps in :ref:`basic` before starting tutorial of the robotics part. The assets (robot) used in this this tutorial can be found `here <https://github.com/haosulab/SAPIEN-Release/tree/master/example/assets>`_
+   If you haven't already done so, make sure you've completed the steps in :ref:`basic_index` before starting tutorial of the robotics part. The assets (robot) used in this this tutorial can be found `here <https://github.com/haosulab/SAPIEN-Release/tree/master/example/assets>`_
 
 .. highlight:: python
    :linenothreshold: 5
@@ -59,7 +59,7 @@ is set to our desired joint angle. However, due to gravitational force and other
 passive force like Coriolis and Centrifugal force, the Jaco2 arm will immediately drop down.
 
 .. note::
-	When a robot is already loaded, change flags of URDF loader will have no effect on it.
+   When a robot is already loaded, change flags of URDF loader will have no effect on it.
 
 Gravity compensation
 --------------------------------------

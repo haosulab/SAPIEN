@@ -6,6 +6,6 @@ robot and implement some basic robotics tasks.
 
 .. toctree::
 
-	get_start
-	pid
+   get_start
+   pid
 

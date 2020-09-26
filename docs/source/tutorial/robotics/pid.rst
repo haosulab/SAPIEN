@@ -2,7 +2,7 @@ Use PID to drive the robot
 ==========================
 
 .. note::
-	If you haven’t already done so, make sure you’ve completed the steps in :doc:`get_start` before this tutorial.
+   If you haven’t already done so, make sure you’ve completed the steps in :doc:`get_start` before this tutorial.
 
 .. highlight:: python
    :linenothreshold: 5
