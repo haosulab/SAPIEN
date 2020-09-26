@@ -45,8 +45,12 @@ public:
 
   void destroy() override;
 
+  /** internal use only */
   void destroyVisualObjects();
+  /** internal use only */
   inline std::vector<svulkan::Object *> const &getVisualObjects() const { return mObjects; }
+
+  std::vector<std::unique_ptr<RenderShape>> getRenderShapes() const override;
 };
 
 class SapienVulkanScene : public IPxrScene {
@@ -155,6 +159,7 @@ public:
 
   glm::mat4 getModelMatrix() const;
   glm::mat4 getProjectionMatrix() const;
+  glm::mat4 getCameraMatrix() const;
 
   // ISensor
   physx::PxTransform getPose() const override;

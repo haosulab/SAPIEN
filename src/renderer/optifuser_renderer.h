@@ -41,6 +41,8 @@ public:
 
   void destroy() override;
 
+  std::vector<std::unique_ptr<RenderShape>> getRenderShapes() const override;
+
   void destroyVisualObjects();
   inline std::vector<Optifuser::Object *> const &getVisualObjects() const { return mObjects; }
 };

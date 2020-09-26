@@ -8,6 +8,8 @@ function build_manylinux14_wheel() {
       PY_DOT=3.6
   elif [ "$PY_VERSION" -eq 37 ]; then
       PY_DOT=3.7
+  elif [ "$PY_VERSION" -eq 38 ]; then
+      PY_DOT=3.8
   else
     echo "Error, python version not found!"
   fi

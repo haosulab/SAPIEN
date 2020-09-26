@@ -75,6 +75,11 @@ void OptifuserRigidbody::destroyVisualObjects() {
   }
 }
 
+std::vector<std::unique_ptr<RenderShape>> OptifuserRigidbody::getRenderShapes() const {
+  throw std::runtime_error("Getting render shape is not supported for Optifuser. Please consider "
+                           "switching to Vulkan renderer.");
+}
+
 void OptifuserRigidbody::setVisibility(float visibility) {
   for (auto obj : mObjects) {
     obj->visibility = visibility;

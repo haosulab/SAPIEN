@@ -205,6 +205,9 @@ void buildSapien(py::module &m) {
   auto PyJointRecord = py::class_<LinkBuilder::JointRecord>(m, "JointRecord");
   auto PyArticulationBuilder = py::class_<ArticulationBuilder>(m, "ArticulationBuilder");
 
+  auto PyRenderShape = py::class_<Renderer::RenderShape>(m, "RenderShape");
+  auto PyRenderMeshGeometry = py::class_<Renderer::RenderMeshGeometry>(m, "RenderGeometry");
+
 #ifdef _USE_VULKAN
   auto PySapienVulkanRenderer =
       py::class_<Renderer::SapienVulkanRenderer, Renderer::IPxrRenderer>(m, "VulkanRenderer");
@@ -676,6 +679,7 @@ void buildSapien(py::module &m) {
       .def_property_readonly("col2", &SActorBase::getCollisionGroup2)
       .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
       .def("get_collision_shapes", &SActorBase::getCollisionShapes)
+      .def("get_visual_bodies", &SActorBase::getRenderBodies, py::return_value_policy::reference)
       .def("render_collision", &SActorBase::renderCollisionBodies, py::arg("render") = true)
       .def("hide_visual", &SActorBase::hideVisual)
       .def("unhide_visual", &SActorBase::unhideVisual)
@@ -1330,6 +1334,8 @@ void buildSapien(py::module &m) {
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
                  cam.getCustomRGBA().data());
            })
+      .def("get_camera_matrix",
+           [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getCameraMatrix()); })
       .def("get_model_matrix",
            [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getModelMatrix()); })
       .def("get_projection_matrix",
@@ -1387,7 +1393,49 @@ void buildSapien(py::module &m) {
   PyRenderBody.def("get_unique_id", &Renderer::IPxrRigidbody::getUniqueId)
       .def("get_segmentation_id", &Renderer::IPxrRigidbody::getSegmentationId)
       .def("set_custom_data", &Renderer::IPxrRigidbody::setSegmentationCustomData,
-           py::arg("custom_data"));
+           py::arg("custom_data"))
+      .def("get_render_shapes", &Renderer::IPxrRigidbody::getRenderShapes);
+
+  PyRenderShape.def_readonly("type", &Renderer::RenderShape::type)
+      .def_readonly("pose", &Renderer::RenderShape::pose)
+      .def_property_readonly("scale",
+                             [](Renderer::RenderShape &shape) { return vec32array(shape.scale); })
+      .def_property_readonly(
+          "mesh", [](Renderer::RenderShape &shape) { return shape.geometry.get(); },
+          py::return_value_policy::reference);
+  PyRenderMeshGeometry
+      .def_property_readonly("vertices",
+                             [](Renderer::RenderMeshGeometry &geom) {
+                               return py::array_t<float>(
+                                   {static_cast<int>(geom.vertices.size() / 3), 3},
+                                   {sizeof(float) * 3, sizeof(float)}, geom.vertices.data());
+                             })
+      .def_property_readonly("normals",
+                             [](Renderer::RenderMeshGeometry &geom) {
+                               return py::array_t<float>(
+                                   {static_cast<int>(geom.normals.size() / 3), 3},
+                                   {sizeof(float) * 3, sizeof(float)}, geom.normals.data());
+                             })
+      .def_property_readonly("uvs",
+                             [](Renderer::RenderMeshGeometry &geom) {
+                               return py::array_t<float>(
+                                   {static_cast<int>(geom.uvs.size() / 2), 2},
+                                   {sizeof(float) * 2, sizeof(float)}, geom.uvs.data());
+                             })
+      .def_property_readonly("tangents",
+                             [](Renderer::RenderMeshGeometry &geom) {
+                               return py::array_t<float>(
+                                   {static_cast<int>(geom.tangents.size() / 3), 3},
+                                   {sizeof(float) * 3, sizeof(float)}, geom.tangents.data());
+                             })
+      .def_property_readonly("bitangents",
+                             [](Renderer::RenderMeshGeometry &geom) {
+                               return py::array_t<float>(
+                                   {static_cast<int>(geom.bitangents.size() / 3), 3},
+                                   {sizeof(float) * 3, sizeof(float)}, geom.bitangents.data());
+                             })
+      .def_property_readonly(
+          "indices", [](Renderer::RenderMeshGeometry &geom) { return make_array(geom.indices); });
 
 #endif
 }

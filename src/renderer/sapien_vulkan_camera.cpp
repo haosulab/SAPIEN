@@ -133,6 +133,22 @@ glm::mat4 SapienVulkanCamera::getModelMatrix() const { return mCamera->getModelM
 
 glm::mat4 SapienVulkanCamera::getProjectionMatrix() const { return mCamera->getProjectionMat(); }
 
+glm::mat4 SapienVulkanCamera::getCameraMatrix() const {
+  if (mCamera->ortho) {
+    spdlog::get("SAPIEN")->error("Orthographic Camera Matrix is not implemented yet");
+    return glm::mat4(1);
+  } else {
+    float fovy = mCamera->fovy;
+    float f = static_cast<float>(mHeight) / std::tan(fovy / 2) / 2;
+    auto matrix = glm::mat3(1.0);
+    matrix[0][0] = f;
+    matrix[2][0] = static_cast<float>(mWidth) / 2;
+    matrix[1][1] = f;
+    matrix[2][1] = static_cast<float>(mHeight) / 2;
+    return matrix;
+  }
+}
+
 } // namespace Renderer
 } // namespace sapien
 #endif

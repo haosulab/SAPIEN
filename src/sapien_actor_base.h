@@ -94,7 +94,7 @@ public:
 
 protected:
   SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,
-             std::vector<Renderer::IPxrRigidbody *> collisoinBodies);
+             std::vector<Renderer::IPxrRigidbody *> collisionBodies);
 };
 
 class SActorDynamicBase : public SActorBase {

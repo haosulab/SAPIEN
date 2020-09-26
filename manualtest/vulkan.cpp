@@ -14,6 +14,14 @@
 
 using namespace sapien;
 
+template<typename T>
+void print_vec(std::vector<T> vec) {
+  for (auto& x : vec) {
+    std::cout << x << " ";
+  }
+  std::cout << std::endl;
+}
+
 std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
   Renderer::PxrMaterial copper = {};
   copper.base_color = {0.975, 0.453, 0.221, 1};
@@ -135,9 +143,9 @@ int main() {
   r0->setShadowLight({0, -1, -1}, {1, 1, 1});
 
   auto builder2 = s0->createActorBuilder();
-  builder2->addSphereShape();
-  builder2->addSphereVisual();
-  auto ball = builder2->build(false, "ball");
+  builder2->addBoxShape();
+  builder2->addBoxVisual();
+  auto object = builder2->build(false, "object");
 
   auto a = s0->createActorBuilder()->build(true);
   a->setPose(PxTransform({-2, 0, 0}, PxIdentity));
@@ -149,6 +157,14 @@ int main() {
 
   auto loader = s0->createURDFLoader();
   loader->loadKinematic("../assets/shadow/kinova_shadow.urdf");
+
+  auto bodies = object->getRenderBodies();
+  auto shapes = bodies[0]->getRenderShapes();
+  std::cout << "vertex size " << shapes[0]->geometry->vertices.size() << std::endl;
+  std::cout << "index size " << shapes[0]->geometry->indices.size() << std::endl;
+
+  print_vec(shapes[0]->geometry->vertices);
+  print_vec(shapes[0]->geometry->indices);
 
   int count = 0;
   SDrive *drive;

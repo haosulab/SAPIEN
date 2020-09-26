@@ -3,6 +3,7 @@
 #include <array>
 #include <foundation/PxTransform.h>
 #include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -14,6 +15,29 @@ class ICamera;
 class IPxrScene;
 class IPxrRigidbody;
 class IPxrRenderer;
+
+struct RenderMeshGeometry {
+  std::vector<float> vertices;
+  std::vector<float> normals;
+  std::vector<float> uvs;
+  std::vector<float> tangents;
+  std::vector<float> bitangents;
+  std::vector<uint32_t> indices;
+};
+
+struct RenderShape {
+  std::string type = "invalid";
+  physx::PxVec3 scale = {0, 0, 0};
+  physx::PxTransform pose = physx::PxTransform(physx::PxIdentity);
+  std::unique_ptr<RenderMeshGeometry> geometry = nullptr;
+
+  inline RenderShape(){};
+  RenderShape(RenderShape const &) = delete;
+  RenderShape(RenderShape &&) = default;
+  RenderShape &operator=(RenderShape const &) = delete;
+  RenderShape &operator=(RenderShape &&) = default;
+  ~RenderShape() = default;
+};
 
 struct PxrMaterial {
   std::array<float, 4> base_color = {1, 1, 1, 1};
@@ -69,6 +93,8 @@ public:
 
   virtual void destroy() = 0;
 
+  virtual std::vector<std::unique_ptr<RenderShape>> getRenderShapes() const = 0;
+
   virtual ~IPxrRigidbody() = default;
 };
 
@@ -89,10 +115,11 @@ public:
                                       std::vector<uint32_t> const &indices,
                                       const physx::PxVec3 &scale, const PxrMaterial &material) = 0;
   inline IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                                      std::vector<physx::PxVec3> const &normals,
-                                      std::vector<uint32_t> const &indices,
+                                     std::vector<physx::PxVec3> const &normals,
+                                     std::vector<uint32_t> const &indices,
                                      const physx::PxVec3 &scale, const physx::PxVec3 &color) {
-    return addRigidbody(vertices, normals, indices, scale, PxrMaterial{{color.x, color.y, color.z, 1.f}});
+    return addRigidbody(vertices, normals, indices, scale,
+                        PxrMaterial{{color.x, color.y, color.z, 1.f}});
   }
 
   virtual void removeRigidbody(IPxrRigidbody *body) = 0;
