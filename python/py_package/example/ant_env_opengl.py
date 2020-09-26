@@ -101,9 +101,9 @@ class SapienControlEnv:
         self.timestep = timestep
 
         self._engine = sapien.Engine()
-        self._renderer = sapien.VulkanRenderer()
+        self._renderer = sapien.OptifuserRenderer()
         self._engine.set_renderer(self._renderer)
-        self.sim = self._engine.create_scene()
+        self.sim = self._engine.create_scene(gravity=np.array(gravity))
         self.sim.set_timestep(timestep)
         self.viewer = self.viewer_setup()
 
@@ -131,9 +131,7 @@ class SapienControlEnv:
         self.viewer.render()
 
     def close(self):
-        self.viewer = None
-        self.sim = None
-        self._renderer = None
+        self.viewer.hide_window()
 
     def get_qpos(self):
         if not self._root:
@@ -175,7 +173,7 @@ class SapienControlEnv:
     def reset_model(self) -> np.ndarray:
         raise NotImplementedError
 
-    def viewer_setup(self, width=640, height=480) -> sapien.VulkanController:
+    def viewer_setup(self, width=640, height=480) -> sapien.OptifuserController:
         raise NotImplementedError
 
 
@@ -233,17 +231,18 @@ class SapienAntEnv(SapienControlEnv):
         self.model.set_qvel(self.model.get_qvel() + np.random.rand(self.model.dof) * 0.1)
         return self._get_obs()
 
-    def viewer_setup(self, width=640, height=480) -> sapien.VulkanController:
+    def viewer_setup(self, width=640, height=480) -> sapien.OptifuserController:
         self.sim.set_ambient_light([.4, .4, .4])
         self.sim.set_shadow_light([1, -1, -1], [.5, .5, .5])
         self.sim.add_point_light([2, 2, 2], [1, 1, 1])
         self.sim.add_point_light([2, -2, 2], [1, 1, 1])
         self.sim.add_point_light([-2, 0, 2], [1, 1, 1])
 
-        controller = sapien.VulkanController(self._renderer)
+        controller = sapien.OptifuserController(self._renderer)
         controller.set_current_scene(self.sim)
-        controller.set_free_camera_position(0, 1, 10)
-        controller.set_free_camera_rotation(0, -1.5, 0)
+        controller.set_camera_position(0, 1, 10)
+        controller.set_camera_rotation(0, -1.5)
+        controller.show_window()
         return controller
 
 
