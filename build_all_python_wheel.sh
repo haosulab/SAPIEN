@@ -4,18 +4,22 @@ function build_manylinux14_wheel() {
   echo "Start deal with python verion $PY_VERSION now"
   if [ "$PY_VERSION" -eq 35 ]; then
       PY_DOT=3.5
+      EXT="m"
   elif [ "$PY_VERSION" -eq 36 ]; then
       PY_DOT=3.6
+      EXT="m"
   elif [ "$PY_VERSION" -eq 37 ]; then
       PY_DOT=3.7
+      EXT="m"
   elif [ "$PY_VERSION" -eq 38 ]; then
       PY_DOT=3.8
+      EXT=""
   else
     echo "Error, python version not found!"
   fi
 
-  INCLUDE_PATH=/opt/python/cp${PY_VERSION}-cp${PY_VERSION}m/include/python${PY_DOT}m
-  BIN=/opt/python/cp${PY_VERSION}-cp${PY_VERSION}m/bin/python
+  INCLUDE_PATH=/opt/python/cp${PY_VERSION}-cp${PY_VERSION}${EXT}/include/python${PY_DOT}${EXT}
+  BIN=/opt/python/cp${PY_VERSION}-cp${PY_VERSION}${EXT}/bin/python
   echo "Using bin path ${BIN}"
   echo "Using include path ${INCLUDE_PATH}"
 
@@ -26,7 +30,7 @@ function build_manylinux14_wheel() {
 
   PACKAGE_VERSION=$(<./python/VERSION)
   echo "SAPIEN verion ${PACKAGE_VERSION}"
-  WHEEL_NAME="./dist/sapien-${PACKAGE_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}m-linux_x86_64.whl"
+  WHEEL_NAME="./dist/sapien-${PACKAGE_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}${EXT}-linux_x86_64.whl"
   if test -f "$WHEEL_NAME"; then
     echo "$FILE exist, begin audit and repair"
   fi
@@ -37,4 +41,5 @@ function build_manylinux14_wheel() {
 build_manylinux14_wheel 35
 build_manylinux14_wheel 36
 build_manylinux14_wheel 37
+build_manylinux14_wheel 38
 rm -rf build
