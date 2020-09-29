@@ -103,7 +103,9 @@ class SapienControlEnv:
         self._engine = sapien.Engine()
         self._renderer = sapien.OptifuserRenderer()
         self._engine.set_renderer(self._renderer)
-        self.sim = self._engine.create_scene(gravity=np.array(gravity))
+        config = sapien.SceneConfig()
+        config.gravity = np.array(gravity)
+        self.sim = self._engine.create_scene(config)
         self.sim.set_timestep(timestep)
         self.viewer = self.viewer_setup()
 

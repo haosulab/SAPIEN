@@ -79,6 +79,9 @@ public:
 
 class IPxrRigidbody {
 public:
+  virtual void setName(std::string const &name) = 0;
+  virtual std::string getName() const = 0;
+
   virtual void setUniqueId(uint32_t uniqueId) = 0;
   virtual uint32_t getUniqueId() const = 0;
   virtual void setSegmentationId(uint32_t segmentationId) = 0;

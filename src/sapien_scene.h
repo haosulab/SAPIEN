@@ -55,8 +55,6 @@ public:
   inline uint32_t getDefaultSolverVelocityIterations() const { return mDefaultSolverVelocityIterations; }
   inline float getDefaultContactOffset() const { return mDefaultContactOffset; }
 
-  std::map<physx_id_t, std::string> mRenderId2VisualName;
-
 private:
   std::string mName;
   Simulation *mSimulation;             // sapien simulation
@@ -178,6 +176,8 @@ public:
                  Renderer::PxrMaterial const &renderMaterial = {});
 
   inline PxMaterial *getDefaultMaterial() { return mDefaultMaterial; }
+
+  std::map<physx_id_t, std::string> findRenderId2VisualName() const;
 
 private:
   // std::vector<SContact> mContacts;

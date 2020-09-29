@@ -13,6 +13,7 @@ class OptifuserRenderer;
 class OptifuserScene;
 
 class OptifuserRigidbody : public IPxrRigidbody {
+  std::string mName{};
   OptifuserScene *mParentScene = nullptr;
   physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
   std::vector<Optifuser::Object *> mObjects;
@@ -25,6 +26,9 @@ public:
   OptifuserRigidbody(OptifuserRigidbody const &other) = delete;
 
   OptifuserRigidbody &operator=(OptifuserRigidbody const &other) = delete;
+
+  inline void setName(std::string const &name) override { mName = name; };
+  std::string getName() const override { return mName; };
 
   void setUniqueId(uint32_t uniqueId) override;
   uint32_t getUniqueId() const override;

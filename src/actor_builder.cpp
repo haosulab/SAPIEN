@@ -302,7 +302,7 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
       body->setInitialPose(r.pose);
       renderBodies.push_back(body);
 
-      mScene->mRenderId2VisualName[newId] = r.name;
+      body->setName(r.name);
     }
   }
 }

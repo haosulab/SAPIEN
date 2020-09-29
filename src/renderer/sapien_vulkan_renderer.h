@@ -17,6 +17,7 @@ class SapienVulkanScene;
 class SapienVulkanCamera;
 
 class SapienVulkanRigidbody : public IPxrRigidbody {
+  std::string mName{};
   SapienVulkanScene *mParentScene = nullptr;
   physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
   std::vector<svulkan::Object *> mObjects;
@@ -29,6 +30,9 @@ public:
   SapienVulkanRigidbody(SapienVulkanRigidbody const &other) = delete;
 
   SapienVulkanRigidbody &operator=(SapienVulkanRigidbody const &other) = delete;
+
+  inline void setName(std::string const &name) override { mName = name; };
+  std::string getName() const override { return mName; };
 
   void setUniqueId(uint32_t uniqueId) override;
   uint32_t getUniqueId() const override;

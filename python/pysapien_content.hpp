@@ -628,7 +628,7 @@ void buildSapien(py::module &m) {
       // drive, constrains, and joints
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
            py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
-      .def_readonly("render_id_to_visual_name", &SScene::mRenderId2VisualName);
+      .def_property_readonly("render_id_to_visual_name", &SScene::findRenderId2VisualName);
 
   //======= Drive =======//
   PyDrive
@@ -1390,7 +1390,9 @@ void buildSapien(py::module &m) {
 
 #endif
 
-  PyRenderBody.def("get_unique_id", &Renderer::IPxrRigidbody::getUniqueId)
+  PyRenderBody.def("get_name", &Renderer::IPxrRigidbody::getName)
+      .def("set_name", &Renderer::IPxrRigidbody::setName, py::arg("name"))
+      .def("get_unique_id", &Renderer::IPxrRigidbody::getUniqueId)
       .def("get_segmentation_id", &Renderer::IPxrRigidbody::getSegmentationId)
       .def("set_custom_data", &Renderer::IPxrRigidbody::setSegmentationCustomData,
            py::arg("custom_data"))

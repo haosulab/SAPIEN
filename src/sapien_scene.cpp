@@ -126,7 +126,6 @@ void SScene::removeActor(SActorBase *actor) {
 
   // remove render bodies
   for (auto body : actor->getRenderBodies()) {
-    mRenderId2VisualName.erase(body->getUniqueId());
     body->destroy();
   }
 
@@ -165,7 +164,6 @@ void SScene::removeArticulation(SArticulation *articulation) {
 
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
-      mRenderId2VisualName.erase(body->getUniqueId());
       body->destroy();
     }
 
@@ -211,7 +209,6 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
 
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
-      mRenderId2VisualName.erase(body->getUniqueId());
       body->destroy();
     }
 
@@ -548,6 +545,30 @@ std::vector<SArticulationBase *> SScene::getAllArticulations() const {
     output.push_back(articulation.get());
   }
   return output;
+}
+
+std::map<physx_id_t, std::string> SScene::findRenderId2VisualName() const {
+  std::map<physx_id_t, std::string> result;
+  for (auto &actor : mActors) {
+    for (auto &v : actor->getRenderBodies()) {
+      result[v->getUniqueId()] = v->getName();
+    }
+  }
+  for (auto &articulation : mArticulations) {
+    for (auto &actor : articulation->getBaseLinks()) {
+      for (auto &v : actor->getRenderBodies()) {
+        result[v->getUniqueId()] = v->getName();
+      }
+    }
+  }
+  for (auto &articulation : mKinematicArticulations) {
+    for (auto &actor : articulation->getBaseLinks()) {
+      for (auto &v : actor->getRenderBodies()) {
+        result[v->getUniqueId()] = v->getName();
+      }
+    }
+  }
+  return result;
 }
 
 }; // namespace sapien
