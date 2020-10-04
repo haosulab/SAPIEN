@@ -345,6 +345,8 @@ OptifuserRenderer::OptifuserRenderer(const std::string &glslDir, const std::stri
   mContext->renderer.enablePicking();
 
   setLogLevel("warn");
+  spdlog::get("Optifuser")
+      ->warn("OptifuserRenderer will be deprecated, please consider switching to VulkanRenderer");
 }
 
 IPxrScene *OptifuserRenderer::createScene(std::string const &name) {
