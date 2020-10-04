@@ -1,0 +1,12 @@
+[submodule "3rd_party/optifuser"]
+	path = 3rd_party/optifuser
+	url = https://github.com/fbxiang/optifuser.git
+[submodule "3rd_party/pybind11"]
+	path = 3rd_party/pybind11
+	url = https://github.com/pybind/pybind11.git
+[submodule "3rd_party/tinyxml2"]
+	path = 3rd_party/tinyxml2
+	url = https://github.com/leethomason/tinyxml2.git
+[submodule "3rd_party/sapien-vulkan"]
+	path = 3rd_party/sapien-vulkan
+	url = https://github.com/fbxiang/sapien-vulkan.git

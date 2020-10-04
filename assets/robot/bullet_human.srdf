@@ -1,0 +1,9 @@
+<?xml version="1.0" ?>
+<robot name="">
+  <disable_collisions link1="left_upper_arm" link2="left_lower_arm" reason="default"/>
+  <disable_collisions link1="right_upper_arm" link2="right_lower_arm" reason="default"/>
+  <disable_collisions link1="pelvis" link2="left_thigh" reason="default"/>
+  <disable_collisions link1="pelvis" link2="right_thigh" reason="default"/>
+  <disable_collisions link1="left_thigh" link2="left_shin" reason="default"/>
+  <disable_collisions link1="right_thigh" link2="right_shin" reason="default"/>
+</robot>

@@ -1,0 +1,6 @@
+builtin_interfaces/Time stamp
+string[] name
+float32[] velocity
+bool continuous false
+---
+bool success

@@ -1,0 +1,11 @@
+<launch>
+
+  <!-- specify the planning pipeline -->
+  <arg name="robot" default="movo"/>
+  <!-- Given the published joint states, publish tf for the robot links -->
+  <node name="moveit_commander_cmdline" pkg="moveit_commander" type="moveit_commander_cmdline.py" respawn="true"
+        output="screen">
+    <remap from="/joint_states" to="/sapien/$(arg robot)/joint_states"/>
+  </node>
+
+</launch>
