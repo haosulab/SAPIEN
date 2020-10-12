@@ -39,7 +39,11 @@ PYBIND11_MODULE(pysapien_ros1, m) {
            py::arg("scene_name"), py::arg("num_thread") = 4)
       .def("start", &SceneManager::start)
       .def("stop", &SceneManager::stop)
-      .def("start_all_ros_camera", &SceneManager::startAllCamera, py::arg("frequency"))
+      .def("start_all_ros_camera", &SceneManager::startAllCamera, py::arg("frequency"),
+           py::arg("mean") = -0.005, py::arg("std") = 0.008, py::arg("cloud_cutoff") = 0.25,
+           py::arg("cloud_cutoff_max") = 10)
+      .def("start_get_model_service", &SceneManager::startGetModelService, py::arg("service_name"),
+           py::arg("actors"))
       .def("create_robot_loader", &SceneManager::createRobotLoader);
 
   PyRobotManager

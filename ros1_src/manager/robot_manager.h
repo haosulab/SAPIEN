@@ -55,7 +55,9 @@ public:
 
 protected:
   // Step function when simulator step once
-  void step(bool timeStepChange = false, float newTimeStep = 0){};
+  void step(){
+
+  };
 
   inline void start() { mRobotHW.start(); }
 };

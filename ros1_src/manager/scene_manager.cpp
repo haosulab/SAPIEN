@@ -49,6 +49,10 @@ void SceneManager::onEvent(sapien::EventStep &event) {
   for (auto &j : mCameraPub) {
     j->update();
   }
+
+  for (auto &j : mRobotManagers){
+    j->step();
+  }
 }
 RobotManager *SceneManager::buildRobotManager(SArticulation *articulation, ros::NodeHandlePtr node,
                                               const std::string &robotName, double frequency) {
