@@ -467,9 +467,10 @@ void SScene::addGround(PxReal altitude, bool render, PxMaterial *material,
 void SScene::updateContact(PxShape *shape1, PxShape *shape2, std::unique_ptr<SContact> contact) {
   auto pair = std::make_pair(shape1, shape2);
   if (contact->starts) {
-    if (mContacts.find(pair) != mContacts.end()) {
-      spdlog::get("SAPIEN")->error("Error adding contact pair: it already exists");
-    }
+    // NOTE: contact actually can start twice
+    // if (mContacts.find(pair) != mContacts.end()) {
+    //   spdlog::get("SAPIEN")->error("Error adding contact pair: it already exists");
+    // }
     mContacts[pair] = std::move(contact);
   } else if (contact->persists) {
     auto it = mContacts.find(pair);
@@ -480,7 +481,7 @@ void SScene::updateContact(PxShape *shape1, PxShape *shape2, std::unique_ptr<SCo
   } else if (contact->ends) {
     auto it = mContacts.find(pair);
     if (it == mContacts.end()) {
-      spdlog::get("SAPIEN")->error("Error updating contact pair: it has not started");
+      spdlog::get("SAPIEN")->error("Error ending contact pair: it has not started");
       return;
     }
     mContacts.erase(it);
