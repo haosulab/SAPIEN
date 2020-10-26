@@ -158,7 +158,7 @@ void buildSapien(py::module &m) {
   auto PyPose = py::class_<PxTransform>(m, "Pose");
   auto PyRenderMaterial = py::class_<Renderer::PxrMaterial>(m, "PxrMaterial");
   py::class_<Renderer::IPxrRenderer>(m, "IPxrRenderer");
-  py::class_<Renderer::IPxrScene>(m, "IPxrScene");
+  auto PyRenderScene = py::class_<Renderer::IPxrScene>(m, "RenderScene");
   auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
   auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
   auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
@@ -628,7 +628,11 @@ void buildSapien(py::module &m) {
       // drive, constrains, and joints
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
            py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
-      .def_property_readonly("render_id_to_visual_name", &SScene::findRenderId2VisualName);
+      .def_property_readonly("render_id_to_visual_name", &SScene::findRenderId2VisualName)
+
+      // renderer
+      .def("get_render_scene", &SScene::getRendererScene, py::return_value_policy::reference)
+      .def("generate_unique_render_id", &SScene::generateUniqueRenderId);
 
   //======= Drive =======//
   PyDrive
@@ -1390,13 +1394,45 @@ void buildSapien(py::module &m) {
 
 #endif
 
+  PyRenderScene
+      .def(
+          "add_mesh_from_file",
+          [](Renderer::IPxrScene &scene, std::string const &meshFile, py::array_t<float> scale) {
+            return scene.addRigidbody(meshFile, array2vec3(scale));
+          },
+          py::arg("mesh_file"), py::arg("scale"), py::return_value_policy::reference)
+      .def(
+          "add_primitive_mesh",
+          [](Renderer::IPxrScene &scene, std::string const &type, py::array_t<float> scale,
+             Renderer::PxrMaterial const &material) {
+            physx::PxGeometryType::Enum ptype;
+            if (type == "box") {
+              ptype = physx::PxGeometryType::eBOX;
+            } else if (type == "sphere") {
+              ptype = physx::PxGeometryType::eSPHERE;
+            } else if (type == "capsule") {
+              ptype = physx::PxGeometryType::eCAPSULE;
+            } else if (type == "plane") {
+              ptype = physx::PxGeometryType::ePLANE;
+            } else {
+              throw std::invalid_argument("Unknown type " + type);
+            }
+            return scene.addRigidbody(ptype, array2vec3(scale), material);
+          },
+          py::arg("type"), py::arg("scale") = make_array<float>({1.f, 1.f, 1.f}),
+          py::arg("material") = Renderer::PxrMaterial(), py::return_value_policy::reference)
+      // TODO: add mesh from vertices
+      .def("remove_mesh", &Renderer::IPxrScene::removeRigidbody, py::arg("mesh"));
+
   PyRenderBody.def("get_name", &Renderer::IPxrRigidbody::getName)
       .def("set_name", &Renderer::IPxrRigidbody::setName, py::arg("name"))
+      .def("set_unique_id", &Renderer::IPxrRigidbody::setUniqueId, py::arg("id"))
       .def("get_unique_id", &Renderer::IPxrRigidbody::getUniqueId)
       .def("get_segmentation_id", &Renderer::IPxrRigidbody::getSegmentationId)
       .def("set_custom_data", &Renderer::IPxrRigidbody::setSegmentationCustomData,
            py::arg("custom_data"))
-      .def("get_render_shapes", &Renderer::IPxrRigidbody::getRenderShapes);
+      .def("get_render_shapes", &Renderer::IPxrRigidbody::getRenderShapes)
+      .def("set_pose", &Renderer::IPxrRigidbody::update, py::arg("pose"));
 
   PyRenderShape.def_readonly("type", &Renderer::RenderShape::type)
       .def_readonly("pose", &Renderer::RenderShape::pose)

@@ -132,6 +132,7 @@ public:
   SDrive *createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
                       PxTransform const &pose2);
 
+  inline physx_id_t generateUniqueRenderId() { return mRenderIdGenerator.next(); };
 public:
   SActorBase *findActorById(physx_id_t id) const;
   SLinkBase *findArticulationLinkById(physx_id_t id) const;

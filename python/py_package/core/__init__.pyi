@@ -24,7 +24,6 @@ from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
 from sapien.core.pysapien import ICamera
 from sapien.core.pysapien import IPxrRenderer
-from sapien.core.pysapien import IPxrScene
 from sapien.core.pysapien import ISensor
 from sapien.core.pysapien import Input
 from sapien.core.pysapien import Joint
@@ -51,6 +50,7 @@ from sapien.core.pysapien import PxMaterial
 from sapien.core.pysapien import PxrMaterial
 from sapien.core.pysapien import RenderBody
 from sapien.core.pysapien import RenderGeometry
+from sapien.core.pysapien import RenderScene
 from sapien.core.pysapien import RenderShape
 from sapien.core.pysapien import Scene
 from sapien.core.pysapien import SceneConfig
@@ -95,7 +95,6 @@ __all__ = [
     "GL_SHADER_ROOT",
     "ICamera",
     "IPxrRenderer",
-    "IPxrScene",
     "ISensor",
     "Input",
     "Joint",
@@ -129,6 +128,7 @@ __all__ = [
     "REVOLUTE",
     "RenderBody",
     "RenderGeometry",
+    "RenderScene",
     "RenderShape",
     "SPHERICAL",
     "SPV_ROOT",
