@@ -7,7 +7,7 @@ Custom shaders
    :linenothreshold: 5
 
 .. note::
-   If you haven't already done so, make sure you've completed the steps in :ref:`basic_index` before starting tutorial of the robotics part. This tutorial will be based on :ref:`render`.
+   If you haven't already done so, make sure you've completed the steps in :ref:`basic_index` before starting this tutorial. This tutorial will be based on :ref:`render`.
 
 Setup
 --------------------------------------------------------------------------------

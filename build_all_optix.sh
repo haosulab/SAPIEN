@@ -38,8 +38,8 @@ function build_manylinux14_wheel() {
   eval "$WHEEL_COMMAND"
 }
 
-build_manylinux14_wheel 35
-build_manylinux14_wheel 36
-build_manylinux14_wheel 37
+#build_manylinux14_wheel 35
+#build_manylinux14_wheel 36
+#build_manylinux14_wheel 37
 build_manylinux14_wheel 38
 rm -rf build

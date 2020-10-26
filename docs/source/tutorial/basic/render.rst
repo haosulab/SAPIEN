@@ -63,7 +63,7 @@ Before any rendering, you need to check several things.
 2. Make sure your Vulkan icd file is present by looking at ``ls /usr/share/vulkan/icd.d``. For example, if you are using Nvidia, you should see ``nvidia_icd.json`` in this directory. If not, you need to install a
    Vulkan-compatible GPU driver. If you are using AMD or Intel GPU, you will see similar icd files.
 
-3. Set the environment variable to tell Vulkan to use a proper GPU. For example, to tell Vulkan to use your Nvidia GPU, run ``export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json`` in your shell environment.
+3. Set the environment variable to tell Vulkan to use a proper GPU. For example, to tell Vulkan to use your Nvidia GPU, run ``export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/nvidia_icd.json`` in your shell environment. You may consider adding this line to your ``.bashrc`` or ``.zshrc`` file.
 
 
 
@@ -78,9 +78,10 @@ Before creating a camera, make some preparation like before.
 
 We use ``sapien.VulkanRenderer(offscree_only)`` to create the Vulkan-based
 renderer. Passing in ``True`` for the argument will disable on-screen display,
-and it will work without a window server such as an x-server.
+and it will work without a window server such as an x-server. You can forget
+about all the difficulties working with x-server and OpenGL!
 
-Next, you need to create a camera and place it at the right place as follow:
+Next, you need to create a camera and place it at the right place as follows:
 
 .. literalinclude:: ../../../../example/basic/render_sapien_assets.py
    :lineno-start: 24
@@ -105,7 +106,7 @@ by ``pip install pillow``.
    :lineno-start: 53
    :lines: 53-60
 
-This will save a ``color.png`` in your workspace as follow:
+This will save a ``color.png`` in your workspace as follows:
 
 .. figure:: assets/color.png
    :width: 1080px
