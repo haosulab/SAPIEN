@@ -40,8 +40,7 @@ void HudSettings::draw(SScene *scene) {
     ImGui::Text("Bounce threshold: %.4g", scene->getPxScene()->getBounceThresholdVelocity());
     ImGui::Text("Sleep threshold: %.4g", scene->getDefaultSleepThreshold());
     ImGui::Text("Solver iterations: %d", scene->getDefaultSolverIterations());
-    ImGui::Text("Solver velocity iterations: %d",
-                scene->getDefaultSolverVelocityIterations());
+    ImGui::Text("Solver velocity iterations: %d", scene->getDefaultSolverVelocityIterations());
   }
 }
 
@@ -319,7 +318,7 @@ void HudArticulation::draw(SArticulationBase *articulation, SActorBase *actor) {
     }
 
     if (ImGui::TreeNode("Joints")) {
-      static bool articulationDetails;
+      static bool articulationDetails{false};
       ImGui::Checkbox("Details", &articulationDetails);
 
       std::vector<SJoint *> activeJoints;
@@ -333,6 +332,7 @@ void HudArticulation::draw(SArticulationBase *articulation, SActorBase *actor) {
         }
       }
 
+      static float PD[2] = {0, 0};
       int i = 0;
       for (auto &joint : jointValues) {
         ImGui::Text("joint: %s", joint.name.c_str());
@@ -353,9 +353,24 @@ void HudArticulation::draw(SArticulationBase *articulation, SActorBase *actor) {
           float maxForce = j->getDriveForceLimit();
           float target = j->getDriveTarget();
           float vtarget = j->getDriveVelocityTarget();
+          ImGui::Text("Drive target: ");
+          if (ImGui::SliderFloat(("##drive" + std::to_string(i)).c_str(), &target,
+                                 std::max(joint.limits[0], -10.f),
+                                 std::min(joint.limits[1], 10.f))) {
+            j->setDriveTarget(target);
+          }
+          if (ImGui::InputFloat2(("##PD" + std::to_string(i)).c_str(), PD, 3,
+                                 ImGuiInputTextFlags_EnterReturnsTrue)) {
+            j->setDriveProperty(PD[0], PD[1]);
+          }
+          if (ImGui::Button(("Set PD##" + std::to_string(i)).c_str())) {
+            j->setDriveProperty(PD[0], PD[1]);
+          }
+
           ImGui::Text("Friction: %.4g", friction);
           ImGui::Text("Damping: %.4g", damping);
           ImGui::Text("Stiffness: %.4g", stiffness);
+
           if (maxForce > 1e6) {
             ImGui::Text("Max Force: >1e6");
           } else {
@@ -506,7 +521,8 @@ void HudWorld::draw(SScene *scene, physx_id_t selectedId) {
             auto &point = contacts[i]->points[j];
             ImGui::Text("Contact point %d", j);
             ImGui::Text("Separation: %.4g", point.separation);
-            ImGui::Text("Impulse: %.4g %.4g %.4g", point.impulse.x, point.impulse.y, point.impulse.z);
+            ImGui::Text("Impulse: %.4g %.4g %.4g", point.impulse.x, point.impulse.y,
+                        point.impulse.z);
           }
 
           ImGui::TreePop();
