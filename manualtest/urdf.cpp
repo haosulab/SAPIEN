@@ -4,14 +4,14 @@
 #include "articulation/sapien_kinematic_joint.h"
 #include "articulation/sapien_link.h"
 #include "articulation/urdf_loader.h"
-#include "renderer/optifuser_controller.h"
-#include "renderer/optifuser_renderer.h"
+#include "renderer/sapien_vulkan_controller.h"
+#include "renderer/sapien_vulkan_renderer.h"
 #include "sapien_scene.h"
 #include "simulation.h"
 #include <iostream>
 
-#include <pinocchio/algorithm/kinematics-derivatives.hpp>
 #include <chrono>
+#include <pinocchio/algorithm/kinematics-derivatives.hpp>
 
 using namespace sapien;
 
@@ -151,11 +151,9 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
 
 int main() {
   Simulation sim;
-  Renderer::OptifuserRenderer renderer;
+  Renderer::SapienVulkanRenderer renderer;
   sim.setRenderer(&renderer);
-  Renderer::OptifuserController controller(&renderer);
-
-  controller.showWindow();
+  Renderer::SapienVulkanController controller(&renderer);
 
   auto s0 = sim.createScene();
   s0->setTimestep(1 / 480.f);
@@ -164,14 +162,22 @@ int main() {
 
   auto loader = s0->createURDFLoader();
   loader->fixRootLink = 1;
-  auto a = loader->loadKinematic("../assets/shadow/kinova_shadow.urdf");
-  // auto a = loader->load("../assets_local/robot/tmp.urdf");
+  // auto a = loader->loadKinematic("../assets/shadow/kinova_shadow.urdf");
+  auto a = loader->load("../assets_local/robot/panda.urdf");
   // auto a = loader->loadKinematic("../assets_local/old_kinova/old_kinova_parallel.urdf");
   // auto b = loader->loadKinematic("../assets/tmp.urdf");
 
   // std::cout << a->exportKinematicsChainAsURDF(true) << std::endl;
 
-  // std::vector<float> q = {0, 0, 0, -1.5, 0, 1.5, 0.7, 0.01, 0.01};
+  std::vector<float> q = {0, 0, 0, -1.5, 0, 1.5, 0.7, 0.01, 0.01};
+  a->setQpos(q);
+  a->setRootPose({1,0,0});
+  a->setDriveTarget(q);
+  for (auto j : a->getSJoints()) {
+    if (j->getDof()) {
+      j->setDriveProperty(1000, 100);
+    }
+  }
   // a->setQpos(q);
   // s0->step();
   // q = a->getQpos();
@@ -207,23 +213,25 @@ int main() {
   //   }
   // }
 
-  // s0->setAmbientLight({0.3, 0.3, 0.3});
-  // s0->setShadowLight({1, -1, -1}, {.5, .5, 0.4});
-  // controller.setCurrentScene(s0.get());
+  s0->setAmbientLight({0.3, 0.3, 0.3});
+  s0->setShadowLight({1, -1, -1}, {.5, .5, 0.4});
+  controller.setScene(s0.get());
 
   // pm->computeFullJacobian(q2);
-  
-  // auto start = std::chrono::high_resolution_clock::now(); 
+
+  // auto start = std::chrono::high_resolution_clock::now();
   // for (uint32_t i = 0; i < 1000; ++i) {
   //   pinocchio::computeJointKinematicHessians(model, data);
   //   Eigen::Tensor<double, 3> tensor;
   //   tensor.resize(9, 6, 9);
-  //   pinocchio::getJointKinematicHessian(model, data, 5, pinocchio::ReferenceFrame::WORLD, tensor);
+  //   pinocchio::getJointKinematicHessian(model, data, 5, pinocchio::ReferenceFrame::WORLD,
+  //   tensor);
   // }
-  // auto end = std::chrono::high_resolution_clock::now(); 
-  // std::cout << "ms: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << std::endl;
+  // auto end = std::chrono::high_resolution_clock::now();
+  // std::cout << "ms: " <<
+  // std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << std::endl;
 
-  while (!controller.shouldQuit()) {
+  while (!controller.isClosed()) {
     for (int i = 0; i < 8; ++i) {
       // auto qpos = a->getQpos();
       // auto qvel = a->getQvel();

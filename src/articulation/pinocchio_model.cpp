@@ -202,8 +202,16 @@ Eigen::VectorXd PinocchioModel::computeForwardDynamics(const Eigen::VectorXd &qp
 
 std::tuple<Eigen::VectorXd, bool, Eigen::Matrix<double, 6, 1>>
 PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform const &pose,
-                                         double eps, int maxIter, double dt, double damp) {
+                                         Eigen::VectorXd const &initialQpos, double eps,
+                                         int maxIter, double dt, double damp) {
   ASSERT(linkIdx < linkIdx2FrameIdx.size(), "link index out of bound");
+  Eigen::VectorXd q;
+  if (initialQpos.size() == 0) {
+    q = pinocchio::neutral(model);
+  } else {
+    q = posS2P(initialQpos);
+  }
+
   auto frameIdx = linkIdx2FrameIdx[linkIdx];
   auto jointIdx = model.frames[frameIdx].parent;
   pinocchio::SE3 l2w;
@@ -211,8 +219,6 @@ PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform co
   l2w.rotation(Eigen::Quaterniond(pose.q.w, pose.q.x, pose.q.y, pose.q.z).toRotationMatrix());
   auto l2j = model.frames[frameIdx].placement;
   pinocchio::SE3 oMdes = l2w * l2j.inverse();
-
-  Eigen::VectorXd q = pinocchio::neutral(model);
 
   pinocchio::Data::Matrix6x J(6, model.nv);
   J.setZero();

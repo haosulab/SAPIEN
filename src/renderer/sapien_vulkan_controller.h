@@ -2,18 +2,22 @@
 #ifdef ON_SCREEN
 #pragma once
 
-#include "sapien_vulkan_renderer.h"
 #include "sapien_vulkan/camera_controller.h"
+#include "sapien_vulkan_renderer.h"
 
 #include "sapien_vulkan/gui/gui.h"
 
 #include "hud/hud_control_window.h"
 #include "hud/hud_object_window.h"
 
+#include "articulation/pinocchio_model.h"
+
 namespace sapien {
 class Simulation;
 class SScene;
 class SActorBase;
+class SLinkBase;
+class PinocchioModel;
 
 namespace Renderer {
 
@@ -35,10 +39,10 @@ class SapienVulkanController {
   vk::UniqueSemaphore mSemaphore;
   vk::UniqueCommandBuffer mCommandBuffer;
 
- public:
+public:
   explicit SapienVulkanController(SapienVulkanRenderer *renderer);
   void render();
-  inline void setScene(SScene * scene) { mScene = scene; }
+  inline void setScene(SScene *scene) { mScene = scene; }
   inline bool isClosed() const { return mWindow->isClosed(); };
 
   void selectActor(physx_id_t actorId);
@@ -56,26 +60,40 @@ class SapienVulkanController {
 
   void close();
 
- private:
-  bool mDefaultMouseClickBehavior {true};
-  bool mDefaultKeyPressBehavior {true};
+private:
+  bool mControlWindow{true}, mObjectWindow{true}, mGizmoWindow{}, mContactWindow{};
 
-  physx_id_t mSelectedId {0};
-  physx_id_t mFocusedId {0};
-  uint32_t mCameraView {0};
+  bool mDefaultMouseClickBehavior{true};
+  bool mDefaultKeyPressBehavior{true};
+
+  physx_id_t mSelectedId{0};
+  physx_id_t mFocusedId{0};
+  uint32_t mCameraView{0};
 
   // ImGui Modules
   HudControlWindow mHudControlWindow;
   HudObjectWindow mHudObjectWindow;
 
-  glm::mat4 mGizmoTransform {1};
-  std::vector<IPxrRigidbody*> mGizmoBody {};
+  glm::mat4 mGizmoTransform{1};
+  std::vector<IPxrRigidbody *> mGizmoBody{};
   void editGizmoTransform();
   void createGizmoVisual(SActorBase *actor);
+  bool mAutoGizmoMode{};
+
+#ifdef _USE_PINOCCHIO
+  std::vector<std::vector<IPxrRigidbody *>> mIKBodies{};
+  SArticulationBase *mIKArticulation{};
+  std::unique_ptr<PinocchioModel> mPinocchioModel{};
+  void createIKVisual(SArticulationBase *articulation);
+  bool mAutoIKMode{};
+  Eigen::VectorXd mLastIKResult;
+  bool mLastIKSuccess;
+  void computeIK(SLinkBase *actor, physx::PxTransform const &pose);
+#endif
 
   void editContactVisualization();
 
- public:
+public:
   // input
   bool keyPressed(char k);
   bool keyDown(char k);
@@ -85,7 +103,6 @@ class SapienVulkanController {
   std::tuple<int, int> getMousePos();
   std::tuple<float, float> getMouseDelta();
   std::tuple<float, float> getMouseWheelDelta();
-
 };
 
 } // namespace Renderer

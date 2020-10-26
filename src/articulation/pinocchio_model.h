@@ -108,7 +108,8 @@ public:
    *
    */
   std::tuple<Eigen::VectorXd, bool, Eigen::Matrix<double, 6, 1>>
-  computeInverseKinematics(uint32_t linkIdx, physx::PxTransform const &pose, double eps = 1e-4,
+  computeInverseKinematics(uint32_t linkIdx, physx::PxTransform const &pose,
+                           Eigen::VectorXd const &initialQpos = {}, double eps = 1e-4,
                            int maxIter = 1000, double dt = 1e-1, double damp = 1e-6);
 };
 

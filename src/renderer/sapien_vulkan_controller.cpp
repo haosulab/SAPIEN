@@ -39,9 +39,6 @@ void SapienVulkanController::editGizmoTransform() {
   static bool boundSizing = false;
   static bool boundSizingSnap = false;
 
-  // ImGui::SetNextWindowPos(ImVec2(imguiWindowSize, 0));
-  // ImGui::SetNextWindowSize(ImVec2(mRenderer->mContext->getWidth() - 2 * imguiWindowSize, 0));
-
   ImGui::Begin("Gizmo");
   if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
     mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
@@ -87,6 +84,15 @@ void SapienVulkanController::editGizmoTransform() {
     if (!actor) {
       actor = mScene->findArticulationLinkById(mSelectedId);
     }
+
+#ifdef _USE_PINOCCHIO
+    if (mAutoIKMode && actor &&
+        (actor->getType() == EActorType::ARTICULATION_LINK ||
+         actor->getType() == EActorType::KINEMATIC_ARTICULATION_LINK)) {
+      computeIK(static_cast<SLinkBase *>(actor), pose);
+    }
+#endif
+
     if (actor &&
         (actor->getType() == EActorType::DYNAMIC || actor->getType() == EActorType::KINEMATIC)) {
       ImGui::SameLine();
@@ -117,10 +123,29 @@ void SapienVulkanController::editGizmoTransform() {
       }
     }
 
+#ifdef _USE_PINOCCHIO
+    if (actor && (actor->getType() == EActorType::ARTICULATION_LINK ||
+                  actor->getType() == EActorType::KINEMATIC_ARTICULATION_LINK)) {
+      ImGui::SameLine();
+      if (ImGui::Button("Compute IK")) {
+        computeIK(static_cast<SLinkBase *>(actor), pose);
+      }
+    }
+#endif
+
     if (actor) {
-      if (ImGui::Button("Gizmo to actor")) {
-        mGizmoTransform = PxTransform2Mat4(actor->getPose());
-        createGizmoVisual(actor);
+      ImGui::Checkbox("Auto Gizmo mode", &mAutoGizmoMode);
+#ifdef _USE_PINOCCHIO
+      if (mAutoGizmoMode) {
+        ImGui::Checkbox("Auto IK mode", &mAutoIKMode);
+      }
+#endif
+      if (!mAutoGizmoMode) {
+        ImGui::SameLine();
+        if (ImGui::Button("Gizmo to actor")) {
+          mGizmoTransform = PxTransform2Mat4(actor->getPose());
+          createGizmoVisual(actor);
+        }
       }
     }
   }
@@ -134,6 +159,33 @@ void SapienVulkanController::editGizmoTransform() {
                        &mGizmoTransform[0][0], NULL, useSnap ? &snap[0] : NULL,
                        boundSizing ? bounds : NULL, boundSizingSnap ? boundsSnap : NULL);
   ImGui::End();
+}
+
+void SapienVulkanController::computeIK(SLinkBase *actor, PxTransform const &pose) {
+  auto articulation = actor->getArticulation();
+  auto idx = (actor)->getIndex();
+  if (mIKArticulation != articulation) {
+    mPinocchioModel = articulation->createPinocchioModel();
+    createIKVisual(articulation);
+  }
+  auto qpos = articulation->getQpos();
+  Eigen::VectorXd q2(qpos.size());
+  for (uint32_t i = 0; i < qpos.size(); ++i) {
+    q2[i] = qpos[i];
+  }
+  auto rootPose = articulation->getRootPose();
+  auto [ikqpos, success, err] =
+      mPinocchioModel->computeInverseKinematics(idx, rootPose.getInverse() * pose, q2, 1e-4, 100);
+  mLastIKResult = ikqpos;
+  mLastIKSuccess = success;
+  spdlog::get("SAPIEN")->warn("Solving IK {}", success ? "succeeded" : "failed");
+  mPinocchioModel->computeForwardKinematics(ikqpos);
+  for (uint32_t i = 0; i < articulation->getBaseLinks().size(); ++i) {
+    auto ikLinkPose = mPinocchioModel->getLinkPose(i);
+    for (auto b : mIKBodies[i]) {
+      b->update(rootPose * ikLinkPose);
+    }
+  }
 }
 
 void SapienVulkanController::editContactVisualization() {
@@ -204,7 +256,6 @@ void SapienVulkanController::editContactVisualization() {
                   .c_str());
           if (ImGui::IsItemHovered()) {
             hovered = true;
-            // if (showContacts)
             {
               glm::mat4 s(1);
               s[0][0] = s[1][1] = s[2][2] = scale;
@@ -230,7 +281,6 @@ void SapienVulkanController::editContactVisualization() {
               transform[3][3] = 1.f;
               mVulkanRenderer->addAxes(transform);
             }
-            // if (showImpulses)
             {
               glm::mat4 s(1);
               glm::vec3 v = {point.impulse.x, point.impulse.y, point.impulse.z};
@@ -362,6 +412,33 @@ void SapienVulkanController::createGizmoVisual(SActorBase *actor) {
     b2->setVisibility(0.5);
     mGizmoBody.push_back(b2);
     mGizmoBody.back()->setUniqueId(0);
+    mGizmoBody.back()->setSegmentationId(actor->getId());
+  }
+}
+
+void SapienVulkanController::createIKVisual(SArticulationBase *articulation) {
+  if (!mScene) {
+    return;
+  }
+  for (auto &l : mIKBodies) {
+    for (auto b : l) {
+      b->destroy();
+    }
+  }
+  mIKBodies.clear();
+  if (!articulation) {
+    return;
+  }
+  for (auto l : articulation->getBaseLinks()) {
+    mIKBodies.emplace_back();
+    for (auto b : l->getRenderBodies()) {
+      auto b2 = static_cast<SapienVulkanScene *>(mScene->getRendererScene())
+                    ->cloneRigidbody(static_cast<SapienVulkanRigidbody *>(b));
+      b2->setVisibility(0.5);
+      b2->setUniqueId(0);
+      b2->setSegmentationId(b->getSegmentationId());
+      mIKBodies.back().push_back(b2);
+    }
   }
 }
 
@@ -439,17 +516,16 @@ void SapienVulkanController::render() {
       ImGui::SetNextWindowPos(ImVec2(0, 0));
       ImGui::SetNextWindowSize(ImVec2(mWidth, 60));
       ImGui::Begin("Menu");
-      static bool control{true}, object{true}, gizmo{}, contact{};
-      ImGui::Checkbox("Control", &control);
+      ImGui::Checkbox("Control", &mControlWindow);
       ImGui::SameLine();
-      ImGui::Checkbox("Object", &object);
+      ImGui::Checkbox("Object", &mObjectWindow);
       ImGui::SameLine();
-      ImGui::Checkbox("Gizmo", &gizmo);
+      ImGui::Checkbox("Gizmo", &mGizmoWindow);
       ImGui::SameLine();
-      ImGui::Checkbox("Contact", &contact);
+      ImGui::Checkbox("Contact", &mContactWindow);
       ImGui::End();
 
-      if (gizmo) {
+      if (mGizmoWindow) {
         editGizmoTransform();
       } else {
         if (mGizmoBody.size()) {
@@ -457,15 +533,15 @@ void SapienVulkanController::render() {
         }
       }
 
-      if (control) {
+      if (mControlWindow) {
         mHudControlWindow.draw();
       }
 
-      if (object) {
+      if (mObjectWindow) {
         mHudObjectWindow.draw(mScene, mSelectedId);
       }
 
-      if (contact) {
+      if (mContactWindow) {
         editContactVisualization();
       }
 
@@ -673,7 +749,23 @@ void SapienVulkanController::render() {
   } while (mHudControlWindow.mHudControl.mPause && !mHudControlWindow.mHudControl.mStepped);
 }
 
-void SapienVulkanController::selectActor(physx_id_t actorId) { mSelectedId = actorId; }
+void SapienVulkanController::selectActor(physx_id_t actorId) {
+  if (mSelectedId != actorId) {
+    mSelectedId = actorId;
+
+    // auto gizmo mode
+    auto actor = mScene->findActorById(actorId);
+    if (!actor) {
+      actor = mScene->findArticulationLinkById(actorId);
+    }
+    if (actor) {
+      if (mGizmoWindow && mAutoGizmoMode) {
+        mGizmoTransform = PxTransform2Mat4(actor->getPose());
+        createGizmoVisual(actor);
+      }
+    }
+  }
+}
 
 void SapienVulkanController::focusActor(physx_id_t actorId) {
   if (mFocusedId != actorId) {
