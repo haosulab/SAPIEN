@@ -177,6 +177,7 @@ void SJoint::setDriveVelocityTarget(std::vector<PxReal> const &v) {
   for (uint32_t i = 0, s = v.size(); i < s; ++i) {
     mPxJoint->setDriveVelocity(axes[i], v[i]);
   }
+  mArticulation->getPxArticulation()->wakeUp();
 }
 
 void SJoint::setDriveVelocityTarget(PxReal v) { setDriveVelocityTarget(std::vector{v}); }
@@ -190,6 +191,7 @@ void SJoint::setDriveTarget(std::vector<PxReal> const &p) {
   for (uint32_t i = 0, s = p.size(); i < s; ++i) {
     mPxJoint->setDriveTarget(axes[i], p[i]);
   }
+  mArticulation->getPxArticulation()->wakeUp();
 }
 void SJoint::setDriveTarget(PxReal p) { setDriveTarget(std::vector{p}); }
 

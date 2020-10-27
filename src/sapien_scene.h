@@ -34,6 +34,12 @@ namespace URDF {
 class URDFLoader;
 }
 
+struct SceneData {
+  std::map<physx_id_t, std::vector<PxReal>> mActorData;
+  std::map<physx_id_t, std::vector<PxReal>> mArticulationData;
+  std::map<physx_id_t, std::vector<PxReal>> mArticulationDriveData;
+};
+
 using namespace physx;
 
 class SScene : public EventEmitter<EventStep> {
@@ -52,7 +58,9 @@ private:
 public:
   inline float getDefaultSleepThreshold() const { return mDefaultSleepThreshold; }
   inline uint32_t getDefaultSolverIterations() const { return mDefaultSolverIterations; }
-  inline uint32_t getDefaultSolverVelocityIterations() const { return mDefaultSolverVelocityIterations; }
+  inline uint32_t getDefaultSolverVelocityIterations() const {
+    return mDefaultSolverVelocityIterations;
+  }
   inline float getDefaultContactOffset() const { return mDefaultContactOffset; }
 
 private:
@@ -81,7 +89,7 @@ private:
 
   std::vector<std::unique_ptr<SDrive>> mDrives;
 
- private:
+private:
   bool mRequiresRemoveCleanUp;
 
   /**
@@ -133,6 +141,7 @@ public:
                       PxTransform const &pose2);
 
   inline physx_id_t generateUniqueRenderId() { return mRenderIdGenerator.next(); };
+
 public:
   SActorBase *findActorById(physx_id_t id) const;
   SLinkBase *findArticulationLinkById(physx_id_t id) const;
@@ -182,12 +191,15 @@ public:
 
 private:
   // std::vector<SContact> mContacts;
-  std::map<std::pair<PxShape*, PxShape*>, std::unique_ptr<SContact>> mContacts;
+  std::map<std::pair<PxShape *, PxShape *>, std::unique_ptr<SContact>> mContacts;
 
   void removeMountedCameraByMount(SActorBase *actor);
 
 public:
-  void updateContact(PxShape *shape1, PxShape * shape2, std::unique_ptr<SContact> contact);
+  void updateContact(PxShape *shape1, PxShape *shape2, std::unique_ptr<SContact> contact);
   std::vector<SContact *> getContacts() const;
+
+  SceneData packScene();
+  void unpackScene(SceneData const &data);
 };
 } // namespace sapien

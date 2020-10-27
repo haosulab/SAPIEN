@@ -572,4 +572,52 @@ std::map<physx_id_t, std::string> SScene::findRenderId2VisualName() const {
   return result;
 }
 
+SceneData SScene::packScene() {
+  SceneData data;
+  for (auto &actor : mActors) {
+    data.mActorData[actor->getId()] = actor->packData();
+  }
+  for (auto &articulation : mArticulations) {
+    data.mArticulationData[articulation->getRootLink()->getId()] = articulation->packData();
+    data.mArticulationDriveData[articulation->getRootLink()->getId()] = articulation->packDrive();
+  }
+  for (auto &articulation : mKinematicArticulations) {
+    for (auto actor : articulation->getBaseLinks()) {
+      data.mActorData[actor->getId()] = actor->packData();
+    }
+  }
+  return data;
+}
+
+void SScene::unpackScene(SceneData const &data) {
+  for (auto &actor : mActors) {
+    auto it = data.mActorData.find(actor->getId());
+    if (it != data.mActorData.end()) {
+      actor->unpackData(it->second);
+    }
+  }
+  for (auto &articulation : mArticulations) {
+    {
+      auto it = data.mArticulationData.find(articulation->getRootLink()->getId());
+      if (it != data.mArticulationData.end()) {
+        articulation->unpackData(it->second);
+      }
+    }
+    {
+      auto it = data.mArticulationDriveData.find(articulation->getRootLink()->getId());
+      if (it != data.mArticulationDriveData.end()) {
+        articulation->unpackDrive(it->second);
+      }
+    }
+  }
+  for (auto &articulation : mKinematicArticulations) {
+    for (auto actor : articulation->getBaseLinks()) {
+      auto it = data.mActorData.find(actor->getId());
+      if (it != data.mActorData.end()) {
+        actor->unpackData(it->second);
+      }
+    }
+  }
+}
+
 }; // namespace sapien

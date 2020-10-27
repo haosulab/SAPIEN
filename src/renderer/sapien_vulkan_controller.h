@@ -15,6 +15,7 @@
 namespace sapien {
 class Simulation;
 class SScene;
+class SceneData;
 class SActorBase;
 class SLinkBase;
 class PinocchioModel;
@@ -61,7 +62,7 @@ public:
   void close();
 
 private:
-  bool mControlWindow{true}, mObjectWindow{true}, mGizmoWindow{}, mContactWindow{};
+  bool mControlWindow{true}, mObjectWindow{true}, mGizmoWindow{}, mContactWindow{}, mSaveWindow{};
 
   bool mDefaultMouseClickBehavior{true};
   bool mDefaultKeyPressBehavior{true};
@@ -84,14 +85,17 @@ private:
   std::vector<std::vector<IPxrRigidbody *>> mIKBodies{};
   SArticulationBase *mIKArticulation{};
   std::unique_ptr<PinocchioModel> mPinocchioModel{};
-  void createIKVisual(SArticulationBase *articulation);
   bool mAutoIKMode{};
   Eigen::VectorXd mLastIKResult;
   bool mLastIKSuccess;
+  void createIKVisual(SArticulationBase *articulation);
   void computeIK(SLinkBase *actor, physx::PxTransform const &pose);
+  void clearIK();
 #endif
 
   void editContactVisualization();
+  std::vector<SceneData> mSaveData;
+  void saveWindow();
 
 public:
   // input

@@ -107,6 +107,9 @@ public:
   std::vector<PxReal> packData();
   void unpackData(std::vector<PxReal> const &data);
 
+  std::vector<PxReal> packDrive();
+  void unpackDrive(std::vector<PxReal> const &data);
+
 private:
   SArticulation(SScene *scene);
   SArticulation(SArticulation const &other) = delete;

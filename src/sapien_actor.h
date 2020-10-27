@@ -33,8 +33,8 @@ public:
   EActorType getType() const override;
   void destroy();
 
-  std::vector<PxReal> packData();
-  void unpackData(std::vector<PxReal> const &data);
+  std::vector<PxReal> packData() override;
+  void unpackData(std::vector<PxReal> const &data) override;
 
 private:
   /* Only actor builder can create actor */
@@ -54,8 +54,8 @@ public:
   inline EActorType getType() const override { return EActorType::STATIC; }
   void setPose(PxTransform const &pose);
 
-  std::vector<PxReal> packData();
-  void unpackData(std::vector<PxReal> const &data);
+  std::vector<PxReal> packData() override;
+  void unpackData(std::vector<PxReal> const &data) override;
 
 public:
   void destroy();

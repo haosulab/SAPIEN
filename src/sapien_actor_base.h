@@ -92,6 +92,9 @@ public:
 
   inline bool isBeingDestroyed() const { return mBeingDestroyed; }
 
+  inline virtual std::vector<PxReal> packData() { return {}; };
+  inline virtual void unpackData(std::vector<PxReal> const &data){};
+
 protected:
   SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,
              std::vector<Renderer::IPxrRigidbody *> collisionBodies);

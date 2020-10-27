@@ -74,6 +74,7 @@ void SapienVulkanController::editGizmoTransform() {
   if (ImGui::Button("Reset")) {
     mGizmoTransform = glm::mat4(1);
     createGizmoVisual(nullptr);
+    
   }
   auto pose = Mat42PxTransform(mGizmoTransform);
   for (auto b : mGizmoBody) {
@@ -155,7 +156,7 @@ void SapienVulkanController::editGizmoTransform() {
       if (articulation == mIKArticulation) {
         if (mLastIKResult.size()) {
           ImGui::Text("IK %s", mLastIKSuccess ? "succeeded" : "failed");
-          if (mLastIKSuccess) {
+          {
             ImGui::SameLine();
             if (ImGui::Button("Teleport##ik_teleport")) {
               std::vector<PxReal> q;
@@ -171,7 +172,7 @@ void SapienVulkanController::editGizmoTransform() {
                 for (uint32_t i = 0; i < mLastIKResult.size(); ++i) {
                   q.push_back(mLastIKResult[i]);
                 }
-                static_cast<SArticulation*>(articulation)->setDriveTarget(q);
+                static_cast<SArticulation *>(articulation)->setDriveTarget(q);
               }
             }
           }
@@ -210,7 +211,6 @@ void SapienVulkanController::computeIK(SLinkBase *actor, PxTransform const &pose
       mPinocchioModel->computeInverseKinematics(idx, rootPose.getInverse() * pose, q2, 1e-4, 100);
   mLastIKResult = ikqpos;
   mLastIKSuccess = success;
-  spdlog::get("SAPIEN")->warn("Solving IK {}", success ? "succeeded" : "failed");
   mPinocchioModel->computeForwardKinematics(ikqpos);
   for (uint32_t i = 0; i < articulation->getBaseLinks().size(); ++i) {
     auto ikLinkPose = mPinocchioModel->getLinkPose(i);
@@ -218,6 +218,13 @@ void SapienVulkanController::computeIK(SLinkBase *actor, PxTransform const &pose
       b->update(rootPose * ikLinkPose);
     }
   }
+}
+void SapienVulkanController::clearIK() {
+  mIKBodies = {};
+  mIKArticulation = nullptr;
+  mPinocchioModel = nullptr;
+  mLastIKSuccess = false;
+  mLastIKResult = {};
 }
 
 void SapienVulkanController::editContactVisualization() {
@@ -448,6 +455,7 @@ void SapienVulkanController::createGizmoVisual(SActorBase *actor) {
   }
 }
 
+#ifdef _USE_PINOCCHIO
 void SapienVulkanController::createIKVisual(SArticulationBase *articulation) {
   if (!mScene) {
     return;
@@ -472,6 +480,28 @@ void SapienVulkanController::createIKVisual(SArticulationBase *articulation) {
       mIKBodies.back().push_back(b2);
     }
   }
+}
+#endif
+
+void SapienVulkanController::saveWindow() {
+  ImGui::Begin("Save/Load");
+  for (uint32_t i = 0; i < mSaveData.size(); ++i) {
+    ImGui::Text("%04d", i);
+    ImGui::SameLine();
+    if (ImGui::Button(("Load##" + std::to_string(i)).c_str())) {
+      mScene->unpackScene(mSaveData[i]);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(("Delete##" + std::to_string(i)).c_str())) {
+      mSaveData.erase(mSaveData.begin() + i);
+    }
+  }
+  if (ImGui::Button("Save")) {
+    if (mScene) {
+      mSaveData.push_back(mScene->packScene());
+    }
+  }
+  ImGui::End();
 }
 
 SapienVulkanController::SapienVulkanController(SapienVulkanRenderer *renderer)
@@ -555,6 +585,8 @@ void SapienVulkanController::render() {
       ImGui::Checkbox("Gizmo", &mGizmoWindow);
       ImGui::SameLine();
       ImGui::Checkbox("Contact", &mContactWindow);
+      ImGui::SameLine();
+      ImGui::Checkbox("S/L", &mSaveWindow);
       ImGui::End();
 
       if (mGizmoWindow) {
@@ -575,6 +607,10 @@ void SapienVulkanController::render() {
 
       if (mContactWindow) {
         editContactVisualization();
+      }
+
+      if (mSaveWindow) {
+        saveWindow();
       }
 
       ImGui::Render();

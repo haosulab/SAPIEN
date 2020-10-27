@@ -522,6 +522,61 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eALL);
 }
 
+std::vector<PxReal> SArticulation::packDrive() {
+  std::vector<PxReal> data;
+  std::vector<PxReal> driveTarget;
+  std::vector<PxReal> driveVel;
+  std::vector<PxReal> driveP;
+  std::vector<PxReal> driveD;
+  std::vector<PxReal> driveMaxForce;
+  uint32_t i = 0;
+  for (auto &j : mJoints) {
+    for (auto axis : j->getAxes()) {
+      driveTarget.push_back(j->getPxJoint()->getDriveTarget(axis));
+      driveVel.push_back(j->getPxJoint()->getDriveVelocity(axis));
+      PxReal stiffness, damping, maxForce;
+      PxArticulationDriveType::Enum driveType;
+      j->getPxJoint()->getDrive(axis, stiffness, damping, maxForce, driveType);
+      driveP.push_back(stiffness);
+      driveD.push_back(damping);
+      driveMaxForce.push_back(maxForce);
+      i += 1;
+    }
+  }
+  data.insert(data.end(), driveTarget.begin(), driveTarget.end());
+  data.insert(data.end(), driveVel.begin(), driveVel.end());
+  data.insert(data.end(), driveP.begin(), driveP.end());
+  data.insert(data.end(), driveD.begin(), driveD.end());
+  data.insert(data.end(), driveMaxForce.begin(), driveMaxForce.end());
+  return data;
+}
+
+void SArticulation::unpackDrive(std::vector<PxReal> const &data) {
+  if (data.size() != dof() * 5) {
+    throw std::runtime_error("Invalid data passed to unpackDrive");
+  }
+  auto it = data.begin();
+  std::vector<PxReal> driveTarget(it, it + dof());
+  it += dof();
+  std::vector<PxReal> driveVel(it, it + dof());
+  it += dof();
+  std::vector<PxReal> driveP(it, it + dof());
+  it += dof();
+  std::vector<PxReal> driveD(it, it + dof());
+  it += dof();
+  std::vector<PxReal> driveMaxForce(it, it + dof());
+
+  uint32_t i = 0;
+  for (auto &j : mJoints) {
+    for (auto axis : j->getAxes()) {
+      j->getPxJoint()->setDriveTarget(axis, driveTarget[i]);
+      j->getPxJoint()->setDriveVelocity(axis, driveVel[i]);
+      j->getPxJoint()->setDrive(axis, driveP[i], driveD[i], driveMaxForce[i]);
+      i += 1;
+    }
+  }
+}
+
 Matrix<PxReal, Dynamic, 1>
 SArticulation::computeTwistDiffIK(const Eigen::Matrix<PxReal, 6, 1> &spatialTwist,
                                   uint32_t commandedLinkId,
@@ -630,7 +685,7 @@ SArticulation::computeRelativeTransformation(SLink *sourceFrame, SLink *targetFr
       Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>::Identity(4, 4);
   Eigen::Quaternionf quat(relative.q.w, relative.q.x, relative.q.y, relative.q.z);
   mat44.block<3, 3>(0, 0) = quat.normalized().toRotationMatrix();
-  mat44.block<3, 1>(0, 3) = Eigen::Matrix<PxReal, 3,1>(relative.p.x, relative.p.y, relative.p.z);
+  mat44.block<3, 1>(0, 3) = Eigen::Matrix<PxReal, 3, 1>(relative.p.x, relative.p.y, relative.p.z);
   return mat44;
 }
 Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor>
