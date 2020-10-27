@@ -135,11 +135,6 @@ void SapienVulkanController::editGizmoTransform() {
 
     if (actor) {
       ImGui::Checkbox("Auto Gizmo mode", &mAutoGizmoMode);
-#ifdef _USE_PINOCCHIO
-      if (mAutoGizmoMode) {
-        ImGui::Checkbox("Auto IK mode", &mAutoIKMode);
-      }
-#endif
       if (!mAutoGizmoMode) {
         ImGui::SameLine();
         if (ImGui::Button("Gizmo to actor")) {
@@ -147,7 +142,43 @@ void SapienVulkanController::editGizmoTransform() {
           createGizmoVisual(actor);
         }
       }
+#ifdef _USE_PINOCCHIO
+      if (mAutoGizmoMode) {
+        ImGui::Checkbox("Auto IK mode", &mAutoIKMode);
+      }
+#endif
     }
+#ifdef _USE_PINOCCHIO
+    if (actor && (actor->getType() == EActorType::ARTICULATION_LINK ||
+                  actor->getType() == EActorType::KINEMATIC_ARTICULATION_LINK)) {
+      auto articulation = static_cast<SLinkBase *>(actor)->getArticulation();
+      if (articulation == mIKArticulation) {
+        if (mLastIKResult.size()) {
+          ImGui::Text("IK %s", mLastIKSuccess ? "succeeded" : "failed");
+          if (mLastIKSuccess) {
+            ImGui::SameLine();
+            if (ImGui::Button("Teleport##ik_teleport")) {
+              std::vector<PxReal> q;
+              for (uint32_t i = 0; i < mLastIKResult.size(); ++i) {
+                q.push_back(mLastIKResult[i]);
+              }
+              articulation->setQpos(q);
+            }
+            if (actor->getType() == EActorType::ARTICULATION_LINK) {
+              ImGui::SameLine();
+              if (ImGui::Button("Drive##ik_drive")) {
+                std::vector<PxReal> q;
+                for (uint32_t i = 0; i < mLastIKResult.size(); ++i) {
+                  q.push_back(mLastIKResult[i]);
+                }
+                static_cast<SArticulation*>(articulation)->setDriveTarget(q);
+              }
+            }
+          }
+        }
+      }
+    }
+#endif
   }
 
   ImGuiIO &io = ImGui::GetIO();
@@ -166,6 +197,7 @@ void SapienVulkanController::computeIK(SLinkBase *actor, PxTransform const &pose
   auto idx = (actor)->getIndex();
   if (mIKArticulation != articulation) {
     mPinocchioModel = articulation->createPinocchioModel();
+    mIKArticulation = articulation;
     createIKVisual(articulation);
   }
   auto qpos = articulation->getQpos();

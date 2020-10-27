@@ -124,7 +124,6 @@ void SArticulation::setQlimits(std::vector<std::array<physx::PxReal, 2>> const &
   }
 }
 
-// FIXME needs testing
 void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
 
@@ -135,6 +134,7 @@ void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
       i += 1;
     }
   }
+  mPxArticulation->wakeUp();
 }
 
 void SArticulation::setRootPose(physx::PxTransform const &T) {
