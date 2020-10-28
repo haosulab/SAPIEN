@@ -135,7 +135,7 @@ project_python_home_dir = os.path.join("python", "py_package")
 sapien_data = ["glsl_shader/*/*"]
 package_data = {
     "sapien": sapien_data,
-    "sapien.core": ["__init__.pyi"]
+    "sapien.core": ["__init__.pyi", "pysapien/__init__.pyi"]
 }
 
 setup(name="sapien",
