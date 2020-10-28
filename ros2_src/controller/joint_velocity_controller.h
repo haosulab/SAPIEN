@@ -31,7 +31,7 @@ public:
   JointVelocityController(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
                           sapien::ros2::SControllableArticulationWrapper *wrapper,
                           const std::vector<std::string> &jointNames,
-                          const std::string &serviceName, double latency);
+                          const std::string &serviceName="", double latency=0);
 
   void moveJoint(const std::vector<float> &velocity, bool continuous = false);
 

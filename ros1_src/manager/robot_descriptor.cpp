@@ -1,5 +1,6 @@
 #include <experimental/filesystem>
 #include <fstream>
+#include <ros/ros.h>
 #include <tinyxml2.h>
 
 #include "articulation/sapien_articulation.h"
@@ -9,11 +10,11 @@
 
 namespace fs = std::experimental::filesystem;
 
-namespace sapien::ros2 {
+namespace sapien::ros1 {
 
 RobotDescriptor::RobotDescriptor(const std::string &URDF, const std::string &SRDF,
                                  const std::string &substitutePath) {
-  auto logger = spdlog::get("SAPIEN_ROS2");
+  auto logger = spdlog::get("SAPIEN_ROS1");
   std::string urdf(URDF), srdf(SRDF);
   if (urdf.empty()) {
     logger->error("URDF String is empty, urdf parsing fail");
@@ -26,13 +27,21 @@ RobotDescriptor::RobotDescriptor(const std::string &URDF, const std::string &SRD
   mSRDFString = srdf;
 }
 
-std::unique_ptr<RobotDescriptor> RobotDescriptor::fromPath(const std::string &URDF,
-                                                           const std::string &SRDF) {
-  auto logger = spdlog::get("SAPIEN_ROS2");
-  std::string urdf, srdf(SRDF);
+RobotDescriptor RobotDescriptor::fromROSPackage(const std::string &ROSPackageName,
+                                                const std::string &URDFRelativePath,
+                                                const std::string &SRDFRelativePath) {
+  auto paths = getFilePath(ROSPackageName, URDFRelativePath, SRDFRelativePath);
+  auto logger = spdlog::get("SAPIEN_ROS1");
+  logger->info("Get robot descriptor from ROS package");
+  return RobotDescriptor::fromPath(paths[0], paths[1]);
+}
+
+RobotDescriptor RobotDescriptor::fromPath(const std::string &URDF, const std::string &SRDF,
+                                          const std::string &substitutePath) {
+  auto logger = spdlog::get("SAPIEN_ROS1");
   std::string srdfPath = URDF;
   srdfPath = SRDF.empty() ? srdfPath.replace(srdfPath.end() - 4, srdfPath.end(), "srdf") : SRDF;
-  srdf = fs::is_regular_file(srdfPath) ? readFile(srdfPath) : "";
+  std::string srdf = fs::is_regular_file(srdfPath) ? readFile(srdfPath) : "";
 
   if (!fs::is_regular_file(URDF)) {
     logger->error("Path {} do not exist, urdf parsing fail", URDF);
@@ -43,25 +52,17 @@ std::unique_ptr<RobotDescriptor> RobotDescriptor::fromPath(const std::string &UR
     throw std::runtime_error("URDF Path Not Valid");
   }
   logger->info("Get robot descriptor from local path");
-  urdf = readFile(URDF);
+  auto urdf = readFile(URDF);
   urdf = substituteROSPath(urdf);
-
-  return std::make_unique<RobotDescriptor>(urdf, srdf, URDF);
-};
-
-std::unique_ptr<RobotDescriptor> RobotDescriptor::fromROS(const std::string &ROSPackageName,
-                                 const std::string &URDFRelativePath,
-                                 const std::string &SRDFRelativePath) {
-  auto paths = getFilePath(ROSPackageName, URDFRelativePath, SRDFRelativePath);
-  auto logger = spdlog::get("SAPIEN_ROS2");
-  logger->info("Get robot descriptor from ROS package");
-  return fromPath(paths[0], paths[1]);
+  urdf = substitutePath.empty() ? substituteRelativePath(urdf, URDF)
+                                : substituteRelativePath(urdf, substitutePath);
+  return RobotDescriptor(urdf, srdf, substitutePath);
 }
 
 std::array<std::string, 2> RobotDescriptor::getFilePath(const std::string &packageName,
                                                         const std::string &URDFRelativePath,
                                                         const std::string &SRDFRelativePath) {
-  auto packagePath = ament_index_cpp::get_package_share_directory(packageName);
+  auto packagePath = ros::package::getPath(packageName);
   auto URDFPath = packagePath + "/" + URDFRelativePath;
   if (!std::experimental::filesystem::exists(URDFPath)) {
     throw std::runtime_error("URDF path does not exist!");
@@ -97,7 +98,7 @@ std::string RobotDescriptor::substituteROSPath(const std::string &URDFString) {
   while (pos != std::string::npos) {
     size_t packageEndPos = modifiedURDFString.find('/', pos + 10);
     auto packageName = modifiedURDFString.substr(pos + 10, packageEndPos - pos - 10);
-    auto packagePath = ament_index_cpp::get_package_share_directory(packageName);
+    auto packagePath = ros::package::getPath(packageName);
     modifiedURDFString.replace(pos, replace.size() + packageName.size() + 1, packagePath);
     pos = modifiedURDFString.find(replace, packageEndPos);
   }
@@ -135,10 +136,20 @@ std::string RobotDescriptor::substituteRelativePath(const std::string &URDFStrin
 
   return modifiedURDFString;
 }
+RobotDescriptor RobotDescriptor::fromParameterServer(ros::NodeHandlePtr node,
+                                                    const std::string &URDFParamName,
+                                                    const std::string &SRDFParamName) {
+  auto logger = spdlog::get("SAPIEN_ROS1");
+  std::string urdf, srdf;
+  if (!node->getParam(URDFParamName, urdf)) {
+    logger->error("URDF name is not set as: name {}", URDFParamName);
+    assert(!urdf.empty());
+  }
+  if (!node->getParam(SRDFParamName, srdf)) {
+    logger->warn("SRDF name is not set as: name {}", SRDFParamName);
+    srdf = "";
+  }
+  return RobotDescriptor(urdf, srdf);
+}
 
-} // namespace sapien::ros2
-
-// sapien::SArticulation* sapien::URDF::URDFLoader::loadFromRobotDescription(
-//    ros2::RobotDescriptor *descriptor, physx::PxMaterial *material) {
-//  loadFromXML(descriptor->getURDF(), descriptor->getSRDF(), material, false);
-//}
+} // namespace sapien::ros1

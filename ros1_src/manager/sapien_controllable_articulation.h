@@ -1,9 +1,8 @@
 #pragma once
 
-#include <PxPhysicsAPI.h>
 #include "event_system/event_system.h"
 #include "utils/thread_safe_structure.hpp"
-#include <rclcpp/rclcpp.hpp>
+#include <ros/time.h>
 #include <utility>
 #include <vector>
 
@@ -11,12 +10,14 @@ namespace sapien {
 class SArticulation;
 class SJoint;
 } // namespace sapien
-namespace sapien::ros2 {
+namespace sapien::ros1 {
 
 class RobotManager;
+class SRobotHW;
 
 class SControllableArticulationWrapper : public IEventListener<EventStep> {
   friend RobotManager;
+  friend SRobotHW;
 
 protected:
   SArticulation *mArticulation;
@@ -25,7 +26,6 @@ protected:
   std::vector<std::string> mQNames;
   std::vector<SJoint *> mJoints;
   float mTimeStep = 0;
-  rclcpp::Clock::SharedPtr mClock = nullptr;
 
 public:
   // State
@@ -40,31 +40,30 @@ public:
   std::vector<std::vector<uint32_t>> mVelocityCommandsIndex;
   std::vector<std::vector<uint32_t>> mContinuousVelocityCommandsIndex;
 
-  std::vector<ThreadSafeQueue<rclcpp::Time> *> mPositionCommandsTimer;
-  std::vector<ThreadSafeQueue<rclcpp::Time> *> mVelocityCommandsTimer;
-  std::vector<ThreadSafeQueue<rclcpp::Time> *> mContinuousVelocityCommandsTimer;
+  std::vector<ThreadSafeQueue<ros::Time> *> mPositionCommandsTimer;
+  std::vector<ThreadSafeQueue<ros::Time> *> mVelocityCommandsTimer;
+  std::vector<ThreadSafeQueue<ros::Time> *> mContinuousVelocityCommandsTimer;
 
 public:
-  explicit SControllableArticulationWrapper(SArticulation *articulation,
-                                            rclcpp::Clock::SharedPtr clock);
+  explicit SControllableArticulationWrapper(SArticulation *articulation);
 
   inline std::vector<std::string> getDriveJointNames() { return mQNames; }
 
   bool registerPositionCommands(ThreadSafeQueue<std::vector<float>> *command,
                                 const std::vector<std::string> &commandedJointNames,
-                                ThreadSafeQueue<rclcpp::Time> *commandTimer);
+                                ThreadSafeQueue<ros::Time> *commandTimer);
 
   bool registerVelocityCommands(ThreadSafeQueue<std::vector<float>> *command,
                                 const std::vector<std::string> &commandedJointNames,
-                                ThreadSafeQueue<rclcpp::Time> *commandTimer);
+                                ThreadSafeQueue<ros::Time> *commandTimer);
 
   bool registerContinuousVelocityCommands(ThreadSafeVector<float> *command,
                                           const std::vector<std::string> &commandedJointNames,
-                                          ThreadSafeQueue<rclcpp::Time> *commandTimer);
+                                          ThreadSafeQueue<ros::Time> *commandTimer);
 
 protected:
   void onEvent(EventStep &event) override;
 
 public:
 };
-} // namespace sapien::ros2
+} // namespace sapien::ros1

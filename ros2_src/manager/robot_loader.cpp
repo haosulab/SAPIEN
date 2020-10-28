@@ -13,8 +13,7 @@ using namespace sapien::ros2;
 
 sapien::ros2::RobotLoader::RobotLoader(sapien::ros2::SceneManager *manager)
     : mNode(manager->mNode), mManager(manager), mLoader(mManager->mScene->createURDFLoader()),
-      fixRootLink(mLoader->fixRootLink), defaultDensity(mLoader->defaultDensity),
-      collisionIsVisual(mLoader->collisionIsVisual) {
+      fixRootLink(mLoader->fixRootLink), collisionIsVisual(mLoader->collisionIsVisual) {
   // The general standard: if no srdf, srdf path should be empty
   // If no urdf, directly raise error and exit;
   auto logger = spdlog::get("SAPIEN_ROS2");
@@ -31,13 +30,13 @@ void RobotLoader::publishRobotDescription(rclcpp::Node::SharedPtr &node,
 
 std::tuple<sapien::SArticulation *, RobotManager *>
 RobotLoader::loadRobotAndManager(RobotDescriptor &descriptor, const std::string &name,
-                                 physx::PxMaterial *material) {
+                                 const URDF::URDFConfig &config) {
   auto logger = spdlog::get("SAPIEN_ROS2");
   const std::string &urdf = descriptor.getURDF();
   const std::string &srdf = descriptor.getSRDF();
 
   // Load robot
-  auto robot = mLoader->loadFromXML(urdf, srdf, material);
+  auto robot = mLoader->loadFromXML(urdf, srdf, config);
   if (not robot) {
     logger->error("Robot {} loading fail", name);
     return {nullptr, nullptr};

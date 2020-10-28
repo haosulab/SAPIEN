@@ -1,5 +1,6 @@
 #include "cartesian_velocity_controller.h"
 
+#include "articulation/sapien_articulation.h"
 #include "sapien_controllable_articulation.h"
 #include <utility>
 
@@ -21,14 +22,17 @@ sapien::ros2::CartesianVelocityController::CartesianVelocityController(
               mEEName.c_str(), mBaseName.c_str());
 
   // Create ROS service
-  auto serverName = std::string(mNode->get_name()) + "/" + serviceName;
-  mService = mNode->create_service<sapien_ros2_communication_interface::srv::CartesianVelocity>(
-      serverName,
-      [this](const std::shared_ptr<
-                 sapien_ros2_communication_interface::srv::CartesianVelocity_Request>
-                 req,
-             std::shared_ptr<sapien_ros2_communication_interface::srv::CartesianVelocity_Response>
-                 res) -> void { this->handleService(req, std::move(res)); });
+  if (!serviceName.empty()) {
+    auto serverName = std::string(mNode->get_name()) + "/" + serviceName;
+    mService = mNode->create_service<sapien_ros2_communication_interface::srv::CartesianVelocity>(
+        serverName,
+        [this](
+            const std::shared_ptr<
+                sapien_ros2_communication_interface::srv::CartesianVelocity_Request>
+                req,
+            std::shared_ptr<sapien_ros2_communication_interface::srv::CartesianVelocity_Response>
+                res) -> void { this->handleService(req, std::move(res)); });
+  }
 
   // Register
   wrapper->registerVelocityCommands(&mVelocityCommand, mJointNames, &(mCommandTimer[0]));
@@ -142,7 +146,7 @@ void sapien::ros2::CartesianVelocityController::handleService(
   Eigen::VectorXd jointVelocity;
   bool foundIK = true;
   mLocalRobotState.computeVariableVelocity(mJointModelGroup, jointVelocity, twist,
-                                       mJointModelGroup->getLinkModel(mEEName));
+                                           mJointModelGroup->getLinkModel(mEEName));
   std::vector<float> stepVelocity(jointVelocity.data(),
                                   jointVelocity.data() + mJointModelGroup->getVariableCount());
   for (int i = 0; i < numStep; ++i) {

@@ -8,6 +8,20 @@ set(PROFILE FALSE CACHE BOOL "Whether to use Profiler")
 set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
 set(BUILD_WITH_VULKAN_SUPPORT TRUE CACHE BOOL "Build the SAPIEN Vulkan renderer")
+set(BUILD_WITH_VULKAN_SUPPORT TRUE CACHE BOOL "Build the SAPIEN Vulkan renderer")
+
+set(ROS2_VERSION "dashing" "eloquent")
+set(ROS1_VERSION "melodic")
+set(ROS $ENV{ROS_DISTRO})
+if (ROS)
+    list(FIND ROS2_VERSION ${ROS} _index_ros2)
+    list(FIND ROS1_VERSION ${ROS} _index_ros1)
+    if (_index_ros1 GREATER -1)
+        message("PINOCCHIO and ROS1 have conflict boost dependency, disable PINOCCHIO at this time.")
+        set(BUILD_WITH_PINOCCHIO_SUPPORT FALSE)
+    endif ()
+endif ()
+
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
@@ -98,8 +112,8 @@ else ()
             "/usr/local/lib")
 endif ()
 
-set(ON_SCREEN TRUE CACHE BOOL "Vulkan renderer with on screen rendering") 
-if (${ON_SCREEN}) 
+set(ON_SCREEN TRUE CACHE BOOL "Vulkan renderer with on screen rendering")
+if (${ON_SCREEN})
     add_definitions(-DON_SCREEN)
 endif()
 
@@ -204,16 +218,13 @@ add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtes
 
 
 # Below are the ROS2 specified cmake
-set(SUPPORTED_ROS_VERSION "dashing" "eloquent")
-set(OLD_ROS_VERSION "crystal" "bouncy" "ardent" "melodic" "kinetic")
-set(ROS $ENV{ROS_DISTRO})
 if (ROS)
-    list(FIND SUPPORTED_ROS_VERSION ${ROS} _index)
-    if (_index GREATER -1)
-        message("Your ROS Distribution is ${ROS}")
+    message("Your ROS Distribution is ${ROS}")
+    if (_index_ros2 GREATER -1)
         if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             add_compile_options(-Wall -Wextra -Wpedantic)
         endif ()
+        message("Enable ROS2 Support")
         find_package(ament_cmake REQUIRED)
         find_package(rclcpp REQUIRED)
         find_package(sensor_msgs REQUIRED)
@@ -229,13 +240,13 @@ if (ROS)
         )
 
         file(GLOB_RECURSE SAPIEN_ROBOT_SRC "ros2_src/controller/*.cpp" "ros2_src/sensor/*.cpp" "ros2_src/utils/*.hpp" "ros2_src/device/*.cpp")
-        add_library(sapien_controller ${SAPIEN_ROBOT_SRC})
+        add_library(sapien_controller STATIC ${SAPIEN_ROBOT_SRC})
         target_link_libraries(sapien_controller sapien)
         ament_target_dependencies(sapien_controller rclcpp sensor_msgs sapien_ros2_communication_interface Boost
                 moveit_core moveit_ros_planning_interface)
 
         file(GLOB_RECURSE SAPIEN_ROBOT_MANAGER_SRC "ros2_src/manager/*.cpp")
-        add_library(sapien_robot_handle ${SAPIEN_ROBOT_MANAGER_SRC})
+        add_library(sapien_robot_handle STATIC ${SAPIEN_ROBOT_MANAGER_SRC})
         target_link_libraries(sapien_robot_handle tinyxml2 sapien_controller)
         ament_target_dependencies(sapien_robot_handle ament_index_cpp)
 
@@ -255,9 +266,36 @@ if (ROS)
         target_link_libraries(pysapien_ros2 PRIVATE sapien_robot_handle)
 
         ament_package()
-    elseif (${ROS} IN_LIST OLD_ROS_VERSION)
-        message("Your ROS version not supported. Please update to kinetic or above.")
+    elseif (_index_ros1 GREATER -1)
+        message("Enable ROS1 Support")
+        find_package(catkin REQUIRED COMPONENTS
+                hardware_interface
+                controller_manager
+                roslaunch
+                moveit_core
+                moveit_ros_planning
+                moveit_ros_planning_interface
+                actionlib
+                actionlib_msgs
+                roscpp)
+
+        include_directories(
+                ${catkin_INCLUDE_DIRS}
+                "ros1_src"
+        )
+
+        file(GLOB_RECURSE SAPIEN_ROBOT_MANAGER_SRC_ROS1 "ros1_src/manager/*.cpp")
+        message(${SAPIEN_ROBOT_MANAGER_SRC_ROS1})
+        add_library(sapien_robot_handle_ros1 STATIC ${SAPIEN_ROBOT_MANAGER_SRC_ROS1})
+        target_link_libraries(sapien_robot_handle_ros1 ${catkin_LIBRARIES} sapien)
+
+        add_executable(test_ros1_robot_handle ros1_src/test/handle.cpp)
+        target_link_libraries(test_ros1_robot_handle sapien_robot_handle_ros1)
+
+        set_target_properties(sapien_robot_handle_ros1 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+        pybind11_add_module(pysapien_ros1 python/pysapien-ros1.cpp NO_EXTRAS)
+        target_link_libraries(pysapien_ros1 PRIVATE sapien_robot_handle_ros1)
     endif ()
 else ()
-    message(WARNING "No ROS Found, will not compile source in ros2_src")
+    message(WARNING "No ROS Found, will not compile source in ros2_src and ros1_src")
 endif ()

@@ -3,6 +3,9 @@
 #include "sapien_link.h"
 #include "sapien_scene.h"
 #include <eigen3/Eigen/Eigen>
+#ifdef _USE_PINOCCHIO
+#include "pinocchio_model.h"
+#endif
 
 namespace sapien {
 

@@ -240,9 +240,9 @@ std::vector<SJoint *> SArticulation::getSJoints() {
 }
 
 std::vector<SJoint *> SArticulation::getActiveJoints() {
-  std::vector<SJoint *> activeJoints(dof());
+  std::vector<SJoint *> activeJoints = {};
   for (auto &j : mJoints) {
-    for (size_t i = 0; i < j->getAxes().size(); ++i) {
+    for (size_t i = 0; i < j->getDof(); ++i) {
       activeJoints.push_back(j.get());
     }
   }

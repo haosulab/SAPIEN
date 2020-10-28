@@ -1,12 +1,13 @@
 #include "sapien_controllable_articulation.h"
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_joint.h"
+#include <spdlog/spdlog.h>
 #include <vector>
-namespace sapien::ros2 {
+namespace sapien::ros1 {
 
 SControllableArticulationWrapper::SControllableArticulationWrapper(
-    sapien::SArticulation *articulation, rclcpp::Clock::SharedPtr clock)
-    : mArticulation(articulation), mClock(std::move(clock)), mJointPositions(articulation->dof()),
+    sapien::SArticulation *articulation)
+    : mArticulation(articulation), mJointPositions(articulation->dof()),
       mJointVelocities(articulation->dof()) {
   auto joints = mArticulation->getSJoints();
   for (auto &joint : joints) {
@@ -21,12 +22,13 @@ SControllableArticulationWrapper::SControllableArticulationWrapper(
 bool SControllableArticulationWrapper::registerPositionCommands(
     ThreadSafeQueue<std::vector<float>> *command,
     const std::vector<std::string> &commandedJointNames,
-    ThreadSafeQueue<rclcpp::Time> *commandTimer) {
+    ThreadSafeQueue<ros::Time> *commandTimer) {
   std::vector<uint32_t> controllerIndex = {};
   for (const auto &qName : commandedJointNames) {
     auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
     if (iterator == mQNames.end()) {
-      spdlog::warn("Joint name given not found in articulation %s \n", qName.c_str());
+      auto logger = spdlog::get("SAPIEN_ROS1");
+      logger->warn("Joint name given not found in articulation %s \n", qName.c_str());
       return false;
     }
     auto index = iterator - mQNames.begin();
@@ -42,12 +44,13 @@ bool SControllableArticulationWrapper::registerPositionCommands(
 bool SControllableArticulationWrapper::registerVelocityCommands(
     ThreadSafeQueue<std::vector<float>> *command,
     const std::vector<std::string> &commandedJointNames,
-    ThreadSafeQueue<rclcpp::Time> *commandTimer) {
+    ThreadSafeQueue<ros::Time> *commandTimer) {
   std::vector<uint32_t> controllerIndex = {};
   for (const auto &qName : commandedJointNames) {
     auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
     if (iterator == mQNames.end()) {
-      spdlog::warn("Joint name given not found in articulation %s \n", qName.c_str());
+      auto logger = spdlog::get("SAPIEN_ROS1");
+      logger->warn("Joint name given not found in articulation %s \n", qName.c_str());
       return false;
     }
     auto index = iterator - mQNames.begin();
@@ -62,12 +65,13 @@ bool SControllableArticulationWrapper::registerVelocityCommands(
 }
 bool SControllableArticulationWrapper::registerContinuousVelocityCommands(
     ThreadSafeVector<float> *command, const std::vector<std::string> &commandedJointNames,
-    ThreadSafeQueue<rclcpp::Time> *commandTimer) {
+    ThreadSafeQueue<ros::Time> *commandTimer) {
   std::vector<uint32_t> controllerIndex = {};
   for (const auto &qName : commandedJointNames) {
     auto iterator = std::find(mQNames.begin(), mQNames.end(), qName);
     if (iterator == mQNames.end()) {
-      spdlog::warn("Joint name given not found in articulation %s \n", qName.c_str());
+      auto logger = spdlog::get("SAPIEN_ROS1");
+      logger->warn("Joint name given not found in articulation %s \n", qName.c_str());
       return false;
     }
     auto index = iterator - mQNames.begin();
@@ -85,7 +89,7 @@ void SControllableArticulationWrapper::onEvent(sapien::EventStep &event) {
   mJointPositions.write(mArticulation->getQpos());
   mJointVelocities.write(mArticulation->getQvel());
   mTimeStep = event.timeStep;
-  auto current = mClock->now();
+  auto current = ros::Time::now();
 
   // Aggregate position commands information
   std::vector<float> currentPositionCommands(mArticulation->dof(), -2000);
@@ -171,4 +175,4 @@ void SControllableArticulationWrapper::onEvent(sapien::EventStep &event) {
     }
   }
 }
-} // namespace sapien::ros2
+} // namespace sapien::ros1

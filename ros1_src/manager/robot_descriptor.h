@@ -1,7 +1,9 @@
 #pragma once
 
-#include "ament_index_cpp/get_package_share_directory.hpp"
 #include <PxMaterial.h>
+#include <moveit/robot_model/robot_model.h>
+#include <ros/package.h>
+#include <string>
 
 namespace sapien {
 class SArticulation;
@@ -11,21 +13,23 @@ namespace URDF {
 class URDFLoader;
 }
 
-namespace ros2 {
-class SceneManager;
-class RobotLoader;
+namespace ros1 {
+// class SceneManager;
+// class RobotLoader;
 
 class RobotDescriptor {
-  friend SceneManager;
-  friend RobotLoader;
+  //  friend SceneManager;
+  //  friend RobotLoader;
 
 protected:
   /* Robot Description String, URDF in SAPIEN convention */
   std::string mURDFString;
   std::string mSRDFString;
 
-  /* Articulation Reference */
-  SArticulation *mArticulation = nullptr;
+  /* tag from urdf loader*/
+  bool fixRootLink = true;
+  float defaultDensity = 1000.f;
+  bool collisionIsVisual = false;
 
   /* ROS Param Setting */
   std::string ROBOT_PARAM_NAME = "robot_description";
@@ -42,15 +46,18 @@ protected:
                                                 const std::string &SRDFRelativePath = "");
 
 public:
-  /* Constructor */
-  RobotDescriptor(const std::string &URDF, const std::string &SRDF,
+  RobotDescriptor(const std::string &URDF, const std::string &SRDF = "",
                   const std::string &substitutePath = "");
 
-  static std::unique_ptr<RobotDescriptor> fromPath(const std::string &URDFPath,
-                                                   const std::string &SRDFPath);
-  static std::unique_ptr<RobotDescriptor> fromROS(const std::string &ROSPackageName,
-                                                  const std::string &URDFRelativePath,
-                                                  const std::string &SRDFRelativePath);
+  static RobotDescriptor fromROSPackage(const std::string &ROSPackageName,
+                                        const std::string &URDFRelativePath,
+                                        const std::string &SRDFRelativePath);
+  static RobotDescriptor fromPath(const std::string &URDF, const std::string &SRDF = "",
+                                  const std::string &substitutePath = "");
+  static RobotDescriptor
+  fromParameterServer(ros::NodeHandlePtr node,
+                     const std::string &URDFParamName = "robot_description",
+                     const std::string &SRDFParamName = "robot_description_semantic");
 
   /* util function for urdf modification */
   static std::string fromSAPIENConvention(const std::string &URDFString);
@@ -62,5 +69,5 @@ public:
   inline std::string getStandardURDF() { return fromSAPIENConvention(mURDFString); }
   inline std::string getSRDF() { return mSRDFString; };
 };
-} // namespace ros2
+} // namespace ros1
 } // namespace sapien

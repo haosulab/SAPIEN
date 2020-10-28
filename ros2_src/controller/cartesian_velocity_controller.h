@@ -5,7 +5,6 @@
 #include "moveit/robot_state/robot_state.h"
 #include "rclcpp/rclcpp.hpp"
 
-#include "articulation/sapien_articulation.h"
 #include "sapien_ros2_communication_interface/srv/cartesian_velocity.hpp"
 #include "utils/delayed_controller_base.hpp"
 
@@ -23,7 +22,8 @@
     }                                                                                             \
   }
 
-namespace sapien::ros2 {
+namespace sapien {
+namespace ros2 {
 class SControllableArticulationWrapper;
 class RobotManager;
 
@@ -68,7 +68,7 @@ public:
   CartesianVelocityController(rclcpp::Node::SharedPtr node, rclcpp::Clock::SharedPtr clock,
                               SControllableArticulationWrapper *wrapper,
                               robot_state::RobotState *robotState, const std::string &groupName,
-                              const std::string &serviceName, double latency);
+                              const std::string &serviceName="", double latency=0);
 
   void moveCartesian(const std::array<double, 3> &vec, MoveType type);
   void moveTwist(const std::array<double, 6> &vec, MoveType type);
@@ -92,4 +92,5 @@ protected:
     return hatMatrix;
   };
 };
-} // namespace sapien::ros2
+} // namespace ros2
+} // namespace sapien

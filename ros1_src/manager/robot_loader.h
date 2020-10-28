@@ -1,14 +1,16 @@
 #pragma once
 
+#include "articulation/sapien_articulation.h"
+#include "articulation/articulation_builder.h"
 #include "articulation/urdf_loader.h"
-#include "rclcpp/rclcpp.hpp"
+#include <ros/ros.h>
 
 #include <tuple>
 
 namespace sapien {
 class SArticulation;
 
-namespace ros2 {
+namespace ros1 {
 class SceneManager;
 class RobotManager;
 class RobotDescriptor;
@@ -19,26 +21,26 @@ protected:
   const std::string ROBOT_PARAM_NAME = "robot_description";
   const std::string SEMANTIC_PARAM_NAME = "robot_description_semantic";
 
-  /* ROS side variable */
-  rclcpp::Node::SharedPtr mNode;
+  // Basic handle
+  ros::NodeHandlePtr mNode;
   SceneManager *mManager;
 
-  /* URDF loader side variable */
+  // URDF Loader variable
   std::unique_ptr<URDF::URDFLoader> mLoader = nullptr;
   bool &fixRootLink;
   bool &collisionIsVisual;
 
 public:
 protected:
-  void publishRobotDescription(rclcpp::Node::SharedPtr &node, const std::string &URDFString,
-                               const std::string &SRDFString);
+  //  void publishRobotDescription(const std::string &URDFString, const std::string &SRDFString);
 
 public:
   explicit RobotLoader(SceneManager *manager);
 
   std::tuple<SArticulation *, RobotManager *>
-  loadRobotAndManager(RobotDescriptor &descriptor, const std::string &name,
-                      const URDF::URDFConfig &config = {});
+  loadFromParameterServer(const std::string &robotName, const URDF::URDFConfig &config,
+                          double frequency, const std::string &URDFParamName = "",
+                          const std::string &SRDFName = "");
 
   /* Setter and getter */
   inline void setFixRootLink(bool value) { fixRootLink = value; }
@@ -48,5 +50,5 @@ public:
   inline bool getCollisionIsVisual() { return collisionIsVisual; }
 
 }; // end class ROS_urdf_Loader
-} // namespace ros2
+} // namespace ros1
 } // namespace sapien
