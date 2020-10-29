@@ -74,7 +74,6 @@ void SapienVulkanController::editGizmoTransform() {
   if (ImGui::Button("Reset")) {
     mGizmoTransform = glm::mat4(1);
     createGizmoVisual(nullptr);
-    
   }
   auto pose = Mat42PxTransform(mGizmoTransform);
   for (auto b : mGizmoBody) {
@@ -193,6 +192,7 @@ void SapienVulkanController::editGizmoTransform() {
   ImGui::End();
 }
 
+#ifdef _USE_PINOCCHIO
 void SapienVulkanController::computeIK(SLinkBase *actor, PxTransform const &pose) {
   auto articulation = actor->getArticulation();
   auto idx = (actor)->getIndex();
@@ -226,6 +226,7 @@ void SapienVulkanController::clearIK() {
   mLastIKSuccess = false;
   mLastIKResult = {};
 }
+#endif
 
 void SapienVulkanController::editContactVisualization() {
   if (!mScene) {
