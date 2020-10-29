@@ -193,6 +193,7 @@ void SapienVulkanController::editGizmoTransform() {
   ImGui::End();
 }
 
+#ifdef _USE_PINOCCHIO
 void SapienVulkanController::computeIK(SLinkBase *actor, PxTransform const &pose) {
   auto articulation = actor->getArticulation();
   auto idx = (actor)->getIndex();
@@ -226,6 +227,7 @@ void SapienVulkanController::clearIK() {
   mLastIKSuccess = false;
   mLastIKResult = {};
 }
+#endif
 
 void SapienVulkanController::editContactVisualization() {
   if (!mScene) {
