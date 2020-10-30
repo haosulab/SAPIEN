@@ -439,18 +439,24 @@ void SScene::updateRender() {
     return;
   }
   for (auto &actor : mActors) {
-    actor->updateRender(actor->getPxActor()->getGlobalPose());
+    if (!actor->isBeingDestroyed()) {
+      actor->updateRender(actor->getPxActor()->getGlobalPose());
+    }
   }
 
   for (auto &articulation : mArticulations) {
     for (auto &link : articulation->getBaseLinks()) {
-      link->updateRender(link->getPxActor()->getGlobalPose());
+      if (!articulation->isBeingDestroyed()) {
+        link->updateRender(link->getPxActor()->getGlobalPose());
+      }
     }
   }
 
   for (auto &articulation : mKinematicArticulations) {
     for (auto &link : articulation->getBaseLinks()) {
-      link->updateRender(link->getPxActor()->getGlobalPose());
+      if (!articulation->isBeingDestroyed()) {
+        link->updateRender(link->getPxActor()->getGlobalPose());
+      }
     }
   }
 

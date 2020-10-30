@@ -12,6 +12,7 @@ namespace sapien {
 physx::PxTransform SArticulationBase::getRootPose() { return getRootLink()->getPose(); }
 
 void SArticulationBase::markDestroyed() {
+  mBeingDestroyed = true;
   for (auto l : getBaseLinks()) {
     l->markDestroyed();
   }
