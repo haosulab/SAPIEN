@@ -465,9 +465,9 @@ void SScene::updateRender() {
   }
 }
 
-void SScene::addGround(PxReal altitude, bool render, PxMaterial *material,
-                       Renderer::PxrMaterial const &renderMaterial) {
-  createActorBuilder()->buildGround(altitude, render, material, renderMaterial, "ground");
+SActorStatic *SScene::addGround(PxReal altitude, bool render, PxMaterial *material,
+                                Renderer::PxrMaterial const &renderMaterial) {
+  return createActorBuilder()->buildGround(altitude, render, material, renderMaterial, "ground");
 }
 
 void SScene::updateContact(PxShape *shape1, PxShape *shape2, std::unique_ptr<SContact> contact) {

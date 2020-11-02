@@ -93,8 +93,12 @@ void SapienVulkanController::editGizmoTransform() {
     }
 #endif
 
+    ;
+
     if (actor &&
-        (actor->getType() == EActorType::DYNAMIC || actor->getType() == EActorType::KINEMATIC)) {
+        (actor->getType() == EActorType::DYNAMIC || actor->getType() == EActorType::KINEMATIC ||
+         (actor->getType() == EActorType::ARTICULATION_LINK &&
+          static_cast<SLink *>(actor)->getArticulation()->getRootLink() == actor))) {
       ImGui::SameLine();
       if (ImGui::Button("Teleport Actor")) {
         static_cast<SActor *>(actor)->setPose(pose);

@@ -13,6 +13,7 @@
 
 namespace sapien {
 class SActor;
+class SActorStatic;
 class SLink;
 class SLinkBase;
 class SActorBase;
@@ -182,8 +183,8 @@ public:
   void stepWait();
 
   void updateRender(); // call to sync physics world to render world
-  void addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr,
-                 Renderer::PxrMaterial const &renderMaterial = {});
+  SActorStatic *addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr,
+                          Renderer::PxrMaterial const &renderMaterial = {});
 
   inline PxMaterial *getDefaultMaterial() { return mDefaultMaterial; }
 
