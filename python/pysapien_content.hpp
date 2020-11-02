@@ -593,7 +593,8 @@ void buildSapien(py::module &m) {
       .def("step_wait", &SScene::stepWait)
       .def("update_render", &SScene::updateRender)
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
-           py::arg("material") = nullptr, py::arg("render_material") = Renderer::PxrMaterial())
+           py::arg("material") = nullptr, py::arg("render_material") = Renderer::PxrMaterial(),
+           py::return_value_policy::reference)
       .def("get_contacts", &SScene::getContacts, py::return_value_policy::reference)
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
       .def("get_all_articulations", &SScene::getAllArticulations,
@@ -623,7 +624,6 @@ void buildSapien(py::module &m) {
             s.addDirectionalLight(array2vec3(direction), array2vec3(color));
           },
           py::arg("direction"), py::arg("color"))
-      .def("get_renderer_scene", &SScene::getRendererScene)
 
       // drive, constrains, and joints
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
@@ -1325,7 +1325,9 @@ void buildSapien(py::module &m) {
 #ifdef _USE_VULKAN
   PySapienVulkanRenderer.def(py::init<bool>(), py::arg("offscreen_only") = false)
       .def_static("set_shader_dir", &svulkan::VulkanContext::setDefaultShaderDir,
-                  py::arg("spv_dir"));
+                  py::arg("spv_dir"))
+      .def("set_log_level", &Renderer::SapienVulkanRenderer::setLogLevel, py::arg("level"));
+
   PySapienVulkanCamera
       .def("get_position_rgba",
            [](Renderer::SapienVulkanCamera &cam) {
