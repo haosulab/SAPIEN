@@ -167,6 +167,11 @@ void SScene::removeArticulation(SArticulation *articulation) {
       body->destroy();
     }
 
+    // remove collision bodies
+    for (auto body : link->getCollisionBodies()) {
+      body->destroy();
+    }
+
     // remove reference
     mLinkId2Link.erase(link->getId());
   }
@@ -209,6 +214,10 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
 
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
+      body->destroy();
+    }
+
+    for (auto body : link->getCollisionBodies()) {
       body->destroy();
     }
 
