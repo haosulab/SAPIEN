@@ -41,7 +41,7 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext):
         original_full_path = self.get_ext_fullpath(ext.name)
         extdir = os.path.abspath(os.path.dirname(original_full_path))
-        extdir = os.path.join(extdir, self.distribution.get_name(), "core")
+        extdir = os.path.join(extdir, ext.name, "core")
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
 
         if args.optix_home:
@@ -51,10 +51,7 @@ class CMakeBuild(build_ext):
         if args.cuda_include_path:
             cmake_args.append('-DCUDA_INCLUDE_PATH=' + args.cuda_include_path)
 
-        if args.debug:
-            cfg = 'Debug'
-        else:
-            cfg = 'Release'
+        cfg = 'Release'
         build_args = ['--config', cfg]
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
@@ -67,7 +64,7 @@ class CMakeBuild(build_ext):
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.', "--target", "pysapien"] + build_args, cwd=self.build_temp)
+        subprocess.check_call(['cmake', '--build', '.', "--target", "pysapien_ros1"] + build_args, cwd=self.build_temp)
 
         glsl_target_path = os.path.join(self.build_lib, 'sapien', 'glsl_shader')
         if os.path.exists(glsl_target_path):
@@ -90,6 +87,11 @@ class CMakeBuild(build_ext):
 
 
 def check_version_info():
+    if "ROS_DISTRO" in os.environ:
+        print("Build ROS1 support with version {}".format(os.environ["ROS_DISTRO"]))
+    else:
+        print("No ROS1 detected, do you forget to source the setup file?")
+
     try:
         git_revision = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").split("\n")[0]
         git_branch = subprocess.check_output(["git", "rev-parse", "--abbrev-ref",
@@ -126,14 +128,15 @@ def read_requirements():
 
 
 # Data files for packaging
-project_python_home_dir = os.path.join("python", "py_package")
+project_python_home_dir = os.path.join("python", "py_ros1_package")
 sapien_data = ["glsl_shader/*/*"]
 package_data = {
     "sapien": sapien_data,
-    "sapien.core": ["__init__.pyi", "pysapien/__init__.pyi"]
+    "sapien.core": ["__init__.pyi", "pysapien/__init__.pyi"],
+    # "sapien.ros1": ["__init__.pyi", "motion_planning/*"],
 }
 
-setup(name="sapien",
+setup(name="sapien_ros1",
       version=check_version_info()[3],
       author='Sapien',
       python_requires='>=3.6',
@@ -162,7 +165,7 @@ setup(name="sapien",
       long_description=open("readme.md").read(),
       cmdclass=dict(build_ext=CMakeBuild),
       zip_safe=False,
-      packages=["sapien", "sapien.core", "sapien.asset", "sapien.example"],
+      packages=["sapien", "sapien.core", "sapien.asset", "sapien.ros1"],
       keywords="robotics simulator dataset articulation partnet",
       url="https://sapien.ucsd.edu",
       project_urls={"Documentation": "https://sapien.ucsd.edu/docs"},
