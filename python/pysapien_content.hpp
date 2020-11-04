@@ -632,7 +632,39 @@ void buildSapien(py::module &m) {
 
       // renderer
       .def("get_render_scene", &SScene::getRendererScene, py::return_value_policy::reference)
-      .def("generate_unique_render_id", &SScene::generateUniqueRenderId);
+      .def("generate_unique_render_id", &SScene::generateUniqueRenderId)
+      .def("pack",
+           [](SScene &scene) {
+             auto data = scene.packScene();
+             std::map<std::string, std::map<physx_id_t, std::vector<PxReal>>> output;
+             output["actor"] = data.mActorData;
+             output["articulation"] = data.mArticulationData;
+             output["articulation_drive"] = data.mArticulationDriveData;
+             return output;
+           })
+      .def(
+          "unpack",
+          [](SScene &scene,
+             std::map<std::string, std::map<physx_id_t, std::vector<PxReal>>> const &input) {
+            SceneData data;
+            auto t1 = input.find("actor");
+            auto t2 = input.find("articulation");
+            auto t3 = input.find("articulation_drive");
+            if (t1 == input.end()) {
+              throw std::invalid_argument("unpack missing key: actor");
+            }
+            if (t2 == input.end()) {
+              throw std::invalid_argument("unpack missing key: articulation");
+            }
+            if (t3 == input.end()) {
+              throw std::invalid_argument("unpack missing key: articulation_drive");
+            }
+            data.mActorData = t1->second;
+            data.mArticulationData = t2->second;
+            data.mArticulationDriveData = t3->second;
+            scene.unpackScene(data);
+          },
+          py::arg("data"));
 
   //======= Drive =======//
   PyDrive
