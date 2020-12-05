@@ -1,1 +1,2 @@
 numpy >= 1.17
+requests >= 2.22

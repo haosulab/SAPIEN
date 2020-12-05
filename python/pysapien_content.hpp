@@ -1467,7 +1467,8 @@ void buildSapien(py::module &m) {
       .def("set_custom_data", &Renderer::IPxrRigidbody::setSegmentationCustomData,
            py::arg("custom_data"))
       .def("get_render_shapes", &Renderer::IPxrRigidbody::getRenderShapes)
-      .def("set_pose", &Renderer::IPxrRigidbody::update, py::arg("pose"));
+      .def("set_pose", &Renderer::IPxrRigidbody::update, py::arg("pose"))
+      .def("set_visibility", &Renderer::IPxrRigidbody::setVisibility, py::arg("visibility"));
 
   PyRenderShape.def_readonly("type", &Renderer::RenderShape::type)
       .def_readonly("pose", &Renderer::RenderShape::pose)

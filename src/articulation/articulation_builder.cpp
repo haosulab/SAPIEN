@@ -440,6 +440,10 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
   result->mPxArticulation->setSolverIterationCounts(mScene->mDefaultSolverIterations,
                                                     mScene->mDefaultSolverVelocityIterations);
 
+  // make sure qvel is 0
+  std::vector<PxReal> qvel(result->dof(), 0);
+  result->setQvel(qvel);
+
   return result;
 }
 
