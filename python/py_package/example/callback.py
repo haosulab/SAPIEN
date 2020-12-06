@@ -21,9 +21,9 @@ def contact_callback(self, other, contact):
 
 def add_box(z):
     builder = scene.create_actor_builder()
-    builder.add_box_shape()
+    builder.add_box_shape(is_trigger=True)
     builder.add_box_visual()
-    box = builder.build()
+    box = builder.build(True)
     box.set_name("box")
     box.set_pose(Pose([0, 0, z]))
     return box
@@ -39,20 +39,24 @@ def add_ball(z):
     return ball
 
 
-add_box(0)
-add_box(2)
-add_box(4)
+b1 = add_box(0)
+b2 = add_box(2)
+b3 = add_box(4)
 ball = add_ball(8)
 
 
-def contact(self: sapien.ActorBase, other: sapien.ActorBase, contact: sapien.Contact):
-    if other.name == "box" and any(
-        [abs(x) > 1e-6 for p in contact.points for x in p.impulse]
-    ):
-        scene.remove_actor(other)
+def step(self, dt):
+    print(type(self))
 
 
-ball.on_contact(contact)
+def trigger(self, other, trigger):
+    if other.name == "ball":
+        scene.remove_actor(self)
+
+
+b1.on_trigger(trigger)
+b2.on_trigger(trigger)
+b3.on_trigger(trigger)
 
 
 controller.set_free_camera_position(-10, 0, 0)

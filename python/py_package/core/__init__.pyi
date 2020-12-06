@@ -57,6 +57,7 @@ from sapien.core.pysapien import SceneConfig
 from sapien.core.pysapien import ShapeRecord
 from sapien.core.pysapien import SolverType
 from sapien.core.pysapien import SphereGeometry
+from sapien.core.pysapien import Trigger
 from sapien.core.pysapien import URDFLoader
 from sapien.core.pysapien import VisualRecord
 from sapien.core.pysapien import VulkanCamera
@@ -139,6 +140,7 @@ __all__ = [
     "SolverType",
     "SphereGeometry",
     "TGS",
+    "Trigger",
     "UNDEFINED",
     "URDFLoader",
     "VisualRecord",

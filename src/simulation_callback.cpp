@@ -2,6 +2,7 @@
 #include "sapien_actor_base.h"
 #include "sapien_contact.h"
 #include "sapien_scene.h"
+#include "sapien_trigger.h"
 #include <iostream>
 
 namespace sapien {
@@ -45,7 +46,23 @@ void DefaultEventCallback::onAdvance(const PxRigidBody *const *bodyBuffer,
 void DefaultEventCallback::onWake(PxActor **actors, PxU32 count) {}
 void DefaultEventCallback::onSleep(PxActor **actors, PxU32 count) {}
 void DefaultEventCallback::onConstraintBreak(PxConstraintInfo *constraints, PxU32 count) {}
-void DefaultEventCallback::onTrigger(PxTriggerPair *pairs, PxU32 count) {}
+void DefaultEventCallback::onTrigger(PxTriggerPair *pairs, PxU32 count) {
+  for (PxU32 i = 0; i < count; i++) {
+    // ignore pairs when shapes have been deleted
+    if (pairs[i].flags &
+        (PxTriggerPairFlag::eREMOVED_SHAPE_TRIGGER | PxTriggerPairFlag::eREMOVED_SHAPE_OTHER))
+      continue;
+
+    std::unique_ptr<STrigger> trigger = std::make_unique<STrigger>();
+
+    trigger->triggerActor = static_cast<SActorBase *>(pairs[i].triggerActor->userData);
+    trigger->otherActor = static_cast<SActorBase *>(pairs[i].otherActor->userData);
+    trigger->starts = pairs[i].status & PxPairFlag::eNOTIFY_TOUCH_FOUND;
+    trigger->ends = pairs[i].status & PxPairFlag::eNOTIFY_TOUCH_LOST;
+
+    trigger->triggerActor->notifyTrigger(*trigger->otherActor, *trigger);
+  }
+}
 
 DefaultEventCallback::DefaultEventCallback(SScene *scene) : mScene(scene) {}
 

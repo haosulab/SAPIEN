@@ -77,6 +77,12 @@ void SActorBase::notifyContact(SActorBase &other, SContact const &contact) {
   }
 }
 
+void SActorBase::notifyTrigger(SActorBase &other, STrigger const &trigger) {
+  for (auto f : mOnTriggerCallback) {
+    f(this, &other, trigger);
+  }
+}
+
 void SActorBase::notifyStep() {
   for (auto f : mOnStepCallback) {
     f(this, mParentScene->getTimestep());

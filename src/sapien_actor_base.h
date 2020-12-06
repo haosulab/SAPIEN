@@ -2,6 +2,7 @@
 #include "event_system/event_system.h"
 #include "id_generator.h"
 #include "sapien_contact.h"
+#include "sapien_trigger.h"
 #include "sapien_shape.h"
 #include <PxPhysicsAPI.h>
 #include <functional>
@@ -29,6 +30,8 @@ enum class EActorType {
 using StepCallback = std::function<void(SActorBase *actor, float timestep)>;
 using ContactCallback =
     std::function<void(SActorBase *actor, SActorBase *other, SContact const &contact)>;
+using TriggerCallback =
+    std::function<void(SActorBase *triggerActor, SActorBase *otherActor, STrigger const &trigger)>;
 
 class SActorBase : public EventEmitter<EventActorPreDestroy>, public EventEmitter<EventActorStep> {
 protected:
@@ -52,6 +55,7 @@ protected:
 
   std::vector<StepCallback> mOnStepCallback;
   std::vector<ContactCallback> mOnContactCallback;
+  std::vector<TriggerCallback> mOnTriggerCallback;
 
 public:
   void renderCollisionBodies(bool collision);
@@ -118,8 +122,11 @@ public:
   inline void onContact(ContactCallback callback) { mOnContactCallback = {callback}; }
   inline void unregisterOnStep() { mOnStepCallback = {}; }
   inline void onStep(StepCallback callback) { mOnStepCallback = {callback}; }
+  inline void unregisterOnTrigger() { mOnTriggerCallback = {}; }
+  inline void onTrigger(TriggerCallback callback) { mOnTriggerCallback = {callback}; }
 
   void notifyContact(SActorBase &other, SContact const &contact);
+  void notifyTrigger(SActorBase &other, STrigger const &trigger);
   void notifyStep();
 
 protected:

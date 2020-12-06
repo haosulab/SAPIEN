@@ -1,10 +1,10 @@
 #pragma once
 #include <pybind11/eigen.h>
+#include <pybind11/functional.h>
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11/functional.h>
 
 #include "actor_builder.h"
 #include "renderer/render_interface.h"
@@ -197,6 +197,7 @@ void buildSapien(py::module &m) {
   auto PyArticulation = py::class_<SArticulation, SArticulationDrivable>(m, "Articulation");
   py::class_<SKArticulation, SArticulationDrivable>(m, "KinematicArticulation");
   auto PyContact = py::class_<SContact>(m, "Contact");
+  auto PyTrigger = py::class_<STrigger>(m, "Trigger");
   auto PyContactPoint = py::class_<SContactPoint>(m, "ContactPoint");
 
   auto PyActorBuilder = py::class_<ActorBuilder>(m, "ActorBuilder");
@@ -723,6 +724,7 @@ void buildSapien(py::module &m) {
       .def("is_hiding_visual", &SActorBase::isHidingVisual)
       .def("on_step", &SActorBase::onStep, py::arg("func"))
       .def("on_contact", &SActorBase::onContact, py::arg("func"))
+      .def("on_trigger", &SActorBase::onTrigger, py::arg("func"))
       .def("unregister_on_step", &SActorBase::unregisterOnStep)
       .def("unregister_on_contact", &SActorBase::unregisterOnContact);
 
@@ -1025,6 +1027,22 @@ void buildSapien(py::module &m) {
         return oss.str();
       });
 
+  PyTrigger
+      .def_property_readonly(
+          "actor_trigger", [](STrigger &trigger) { return trigger.triggerActor; },
+          py::return_value_policy::reference)
+      .def_property_readonly(
+          "actor_other", [](STrigger &trigger) { return trigger.otherActor; },
+          py::return_value_policy::reference)
+      .def_readonly("starts", &STrigger::starts)
+      .def_readonly("ends", &STrigger::ends)
+      .def("__repr__", [](STrigger const &trigger) {
+        std::ostringstream oss;
+        oss << "Trigger(actor_trigger=" << trigger.triggerActor->getName()
+            << ", actor_other=" << trigger.otherActor->getName() << ")";
+        return oss.str();
+      });
+
   PyContactPoint
       .def_property_readonly(
           "position",
@@ -1050,44 +1068,47 @@ void buildSapien(py::module &m) {
           "add_convex_shape_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density,
-             PxReal patchRadius, PxReal minPatchRadius) {
+             PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
             a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density,
-                                     patchRadius, minPatchRadius);
+                                     patchRadius, minPatchRadius, isTrigger);
           },
           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
-          py::arg("min_patch_radius") = 0.f)
+          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
           "add_multiple_convex_shapes_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density,
-             PxReal patchRadius, PxReal minPatchRadius) {
+             PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
             a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material, density,
-                                              patchRadius, minPatchRadius);
+                                              patchRadius, minPatchRadius, isTrigger);
           },
           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
-          py::arg("min_patch_radius") = 0.f)
+          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
           "add_box_shape",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
-             PxMaterial *material, PxReal density, PxReal patchRadius, PxReal minPatchRadius) {
-            a.addBoxShape(pose, array2vec3(size), material, density, patchRadius, minPatchRadius);
+             PxMaterial *material, PxReal density, PxReal patchRadius, PxReal minPatchRadius,
+             bool isTrigger) {
+            a.addBoxShape(pose, array2vec3(size), material, density, patchRadius, minPatchRadius,
+                          isTrigger);
           },
           py::arg("pose") = PxTransform(PxIdentity),
           py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
-          py::arg("min_patch_radius") = 0.f)
+          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def("add_capsule_shape", &ActorBuilder::addCapsuleShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000,
-           py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f)
+           py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f,
+           py::arg("is_trigger") = false)
       .def("add_sphere_shape", &ActorBuilder::addSphereShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
-           py::arg("min_patch_radius") = 0.f)
+           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
 
       .def(
           "add_box_visual",

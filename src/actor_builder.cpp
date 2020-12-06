@@ -28,7 +28,7 @@ void ActorBuilder::removeVisualAt(uint32_t index) {
 void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
                                           const PxVec3 &scale, PxMaterial *material,
                                           PxReal density, PxReal patchRadius,
-                                          PxReal minPatchRadius) {
+                                          PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::SingleMesh;
   r.filename = filename;
@@ -38,6 +38,7 @@ void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxT
   r.density = density;
   r.patchRadius = patchRadius;
   r.minPatchRadius = minPatchRadius;
+  r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
 }
@@ -45,7 +46,8 @@ void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxT
 void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
                                                    const PxTransform &pose, const PxVec3 &scale,
                                                    PxMaterial *material, PxReal density,
-                                                   PxReal patchRadius, PxReal minPatchRadius) {
+                                                   PxReal patchRadius, PxReal minPatchRadius,
+                                                   bool isTrigger) {
 
   ShapeRecord r;
   r.type = ShapeRecord::Type::MultipleMeshes;
@@ -56,12 +58,14 @@ void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
   r.density = density;
   r.patchRadius = patchRadius;
   r.minPatchRadius = minPatchRadius;
+  r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
 }
 
 void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMaterial *material,
-                               PxReal density, PxReal patchRadius, PxReal minPatchRadius) {
+                               PxReal density, PxReal patchRadius, PxReal minPatchRadius,
+                               bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Box;
   r.pose = pose;
@@ -70,13 +74,14 @@ void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMa
   r.density = density;
   r.patchRadius = patchRadius;
   r.minPatchRadius = minPatchRadius;
+  r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
 }
 
 void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxReal halfLength,
                                    PxMaterial *material, PxReal density, PxReal patchRadius,
-                                   PxReal minPatchRadius) {
+                                   PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Capsule;
   r.pose = pose;
@@ -86,12 +91,14 @@ void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxRea
   r.density = density;
   r.patchRadius = patchRadius;
   r.minPatchRadius = minPatchRadius;
+  r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
 }
 
 void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMaterial *material,
-                                  PxReal density, PxReal patchRadius, PxReal minPatchRadius) {
+                                  PxReal density, PxReal patchRadius, PxReal minPatchRadius,
+                                  bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Sphere;
   r.pose = pose;
@@ -100,6 +107,7 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMate
   r.density = density;
   r.patchRadius = patchRadius;
   r.minPatchRadius = minPatchRadius;
+  r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
 }
@@ -188,6 +196,10 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       shape->setLocalPose(r.pose);
       shape->setTorsionalPatchRadius(r.patchRadius);
       shape->setMinTorsionalPatchRadius(r.minPatchRadius);
+      if (r.isTrigger) {
+        shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
+        shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+      }
       shapes.push_back(shape);
       densities.push_back(r.density);
       break;
@@ -210,6 +222,10 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
         shape->setLocalPose(r.pose);
         shape->setTorsionalPatchRadius(r.patchRadius);
         shape->setMinTorsionalPatchRadius(r.minPatchRadius);
+        if (r.isTrigger) {
+          shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
+          shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+        }
         shapes.push_back(shape);
         densities.push_back(r.density);
       }
@@ -228,6 +244,10 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       shape->setLocalPose(r.pose);
       shape->setTorsionalPatchRadius(r.patchRadius);
       shape->setMinTorsionalPatchRadius(r.minPatchRadius);
+      if (r.isTrigger) {
+        shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
+        shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+      }
       shapes.push_back(shape);
       densities.push_back(r.density);
       break;
@@ -245,6 +265,10 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       shape->setLocalPose(r.pose);
       shape->setTorsionalPatchRadius(r.patchRadius);
       shape->setMinTorsionalPatchRadius(r.minPatchRadius);
+      if (r.isTrigger) {
+        shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
+        shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+      }
       shapes.push_back(shape);
       densities.push_back(r.density);
       break;
@@ -261,6 +285,10 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       shape->setLocalPose(r.pose);
       shape->setTorsionalPatchRadius(r.patchRadius);
       shape->setMinTorsionalPatchRadius(r.minPatchRadius);
+      if (r.isTrigger) {
+        shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
+        shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+      }
       shapes.push_back(shape);
       densities.push_back(r.density);
       break;
@@ -344,8 +372,7 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
     case PxGeometryType::eBOX: {
       PxBoxGeometry geom;
       shape->getBoxGeometry(geom);
-      cBody = rendererScene->addRigidbody(PxGeometryType::eBOX, geom.halfExtents,
-                                                   PxVec3{0, 0, 1});
+      cBody = rendererScene->addRigidbody(PxGeometryType::eBOX, geom.halfExtents, PxVec3{0, 0, 1});
       break;
     }
     case PxGeometryType::eSPHERE: {
@@ -394,7 +421,7 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
         offset += face.mNbVerts;
       }
       cBody = rendererScene->addRigidbody(vertices, normals, triangles, geom.scale.scale,
-                                                   PxVec3{0, 1, 0});
+                                          PxVec3{0, 1, 0});
       break;
     }
     default:
