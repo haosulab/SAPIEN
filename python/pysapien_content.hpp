@@ -1381,7 +1381,9 @@ void buildSapien(py::module &m) {
 #endif
 
 #ifdef _USE_VULKAN
-  PySapienVulkanRenderer.def(py::init<bool>(), py::arg("offscreen_only") = false)
+  PySapienVulkanRenderer
+      .def(py::init<bool, uint32_t>(), py::arg("offscreen_only") = false,
+           py::arg("object_buffer_size") = 1000)
       .def_static("set_shader_dir", &svulkan::VulkanContext::setDefaultShaderDir,
                   py::arg("spv_dir"))
       .def("set_log_level", &Renderer::SapienVulkanRenderer::setLogLevel, py::arg("level"));

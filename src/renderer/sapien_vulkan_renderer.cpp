@@ -4,8 +4,8 @@
 namespace sapien {
 namespace Renderer {
 
-SapienVulkanRenderer::SapienVulkanRenderer(bool offscreenOnly) {
-  mContext = std::make_unique<svulkan::VulkanContext>(!offscreenOnly);
+SapienVulkanRenderer::SapienVulkanRenderer(bool offscreenOnly, uint32_t objectBufferSize) {
+  mContext = std::make_unique<svulkan::VulkanContext>(!offscreenOnly, objectBufferSize);
   setLogLevel("warn");
 }
 

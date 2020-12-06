@@ -115,7 +115,7 @@ class SapienVulkanRenderer : public IPxrRenderer {
 
 public:
   std::unique_ptr<svulkan::VulkanContext> mContext = nullptr;
-  SapienVulkanRenderer(bool offscreenOnly = false);
+  SapienVulkanRenderer(bool offscreenOnly = false, uint32_t objectBufferSize=1000);
 
   // IPxrRenderer
   SapienVulkanScene *createScene(std::string const &name) override;
