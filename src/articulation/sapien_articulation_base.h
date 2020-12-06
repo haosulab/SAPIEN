@@ -21,7 +21,7 @@ class SArticulationBase : public EventEmitter<EventArticulationPreDestroy>,
                           public EventEmitter<EventArticulationStep> {
   std::string mName;
 
-  bool mBeingDestroyed {false};
+  int mDestroyedState {0};
 public:
   inline void setName(std::string const &name) { mName = name; }
   inline std::string getName() { return mName; }
@@ -59,10 +59,13 @@ public:
 
   std::string exportKinematicsChainAsURDF(bool fixRoot);
 
-  // internal use only
+  /** internal use only, actors marked as destroyed will be removed in the next step */
   void markDestroyed();
-
-  inline bool isBeingDestroyed() const { return mBeingDestroyed; }
+  inline bool isBeingDestroyed() const { return mDestroyedState != 0; }
+  /** internal use only, destroy has several stages, set the stage */
+  inline void setDestroyedState(int state) { mDestroyedState = state; }
+  /** internal use only, destroy has several stages, check which stage it is in */
+  inline int getDestroyedState() const { return mDestroyedState; }
 
   #ifdef _USE_PINOCCHIO
   std::unique_ptr<PinocchioModel> createPinocchioModel();

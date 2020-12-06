@@ -1,8 +1,8 @@
 #include "simulation_callback.h"
+#include "sapien_actor_base.h"
 #include "sapien_contact.h"
 #include "sapien_scene.h"
 #include <iostream>
-#include "sapien_actor_base.h"
 
 namespace sapien {
 
@@ -32,13 +32,10 @@ void DefaultEventCallback::onContact(const PxContactPairHeader &pairHeader,
     pairs[i].extractContacts(points.data(), pairs[i].contactCount);
 
     for (auto &p : points) {
-      contact->points.push_back({
-          p.position,
-          p.normal,
-          p.impulse,
-          p.separation
-        });
+      contact->points.push_back({p.position, p.normal, p.impulse, p.separation});
     }
+    contact->actors[0]->notifyContact(*contact->actors[1], *contact);
+    contact->actors[1]->notifyContact(*contact->actors[0], *contact);
     mScene->updateContact(pairs[i].shapes[0], pairs[i].shapes[1], std::move(contact));
   }
 }

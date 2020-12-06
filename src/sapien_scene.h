@@ -91,13 +91,15 @@ private:
   std::vector<std::unique_ptr<SDrive>> mDrives;
 
 private:
-  bool mRequiresRemoveCleanUp;
+  bool mRequiresRemoveCleanUp1 {false};
+  bool mRequiresRemoveCleanUp2 {false};
 
   /**
    *  call to clean up actors and articulations in being destroyed states
    *  Should be called after a step call has finished
    */
-  void removeCleanUp();
+  void removeCleanUp1();
+  void removeCleanUp2();
 
 public:
   SScene(Simulation *sim, PxScene *scene, SceneConfig const &config);

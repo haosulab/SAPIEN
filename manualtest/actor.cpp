@@ -23,13 +23,25 @@ int main() {
   s1->addGround(-1);
 
   auto builder = s0->createActorBuilder();
+  builder->addBoxShape();
+  builder->addBoxVisual();
+  builder->build(false, "box");
+
+  builder = s0->createActorBuilder();
   builder->addConvexShapeFromFile("/home/fx/source/sapien/assets/bottle/model.obj");
   builder->addVisualFromFile("/home/fx/source/sapien/assets/bottle/model.obj");
   auto actor = builder->build();
-  actor->setPose({{0, 0, 2}, PxIdentity});
+
+  actor->onContact([](SActorBase *self, SActorBase *other, SContact const &contact) {
+    if (other->getName() == "box") {
+      self->getScene()->removeActor(other);
+    }
+  });
+
+  actor->setPose({{0, 0, 4}, PxIdentity});
   auto shapes = actor->getCollisionShapes();
   for (auto &s : shapes) {
-    auto scale = static_cast<SConvexMeshGeometry*>(s->geometry.get())->scale;
+    auto scale = static_cast<SConvexMeshGeometry *>(s->geometry.get())->scale;
     std::cout << scale.x << " " << scale.y << " " << scale.z << std::endl;
   }
 

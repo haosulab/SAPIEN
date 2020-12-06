@@ -1,8 +1,10 @@
 #pragma once
 #include "event_system/event_system.h"
 #include "id_generator.h"
+#include "sapien_contact.h"
 #include "sapien_shape.h"
 #include <PxPhysicsAPI.h>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -24,6 +26,10 @@ enum class EActorType {
   KINEMATIC_ARTICULATION_LINK
 };
 
+using StepCallback = std::function<void(SActorBase *actor, float timestep)>;
+using ContactCallback =
+    std::function<void(SActorBase *actor, SActorBase *other, SContact const &contact)>;
+
 class SActorBase : public EventEmitter<EventActorPreDestroy>, public EventEmitter<EventActorStep> {
 protected:
   std::string mName{""};
@@ -42,7 +48,10 @@ protected:
   bool mHidden{false};
   float mDisplayVisibility{1.f};
 
-  bool mBeingDestroyed{false};
+  int mDestroyedState{0};
+
+  std::vector<StepCallback> mOnStepCallback;
+  std::vector<ContactCallback> mOnContactCallback;
 
 public:
   void renderCollisionBodies(bool collision);
@@ -88,12 +97,30 @@ public:
   float getDisplayVisibility() const;
 
   /** internal use only, actors marked as destroyed will be removed in the next step */
-  inline void markDestroyed() { mBeingDestroyed = true; }
+  inline void markDestroyed() {
+    if (mDestroyedState == 0) {
+      mDestroyedState = 1;
+    }
+  }
+  /** check whether the object is in the process of being destroyed */
+  inline bool isBeingDestroyed() const { return mDestroyedState != 0; }
 
-  inline bool isBeingDestroyed() const { return mBeingDestroyed; }
+  /** internal use only, destroy has several stages, set the stage */
+  inline void setDestroyedState(int state) { mDestroyedState = state; }
+  /** internal use only, destroy has several stages, check which stage it is in */
+  inline int getDestroyedState() const { return mDestroyedState; }
 
   inline virtual std::vector<PxReal> packData() { return {}; };
   inline virtual void unpackData(std::vector<PxReal> const &data){};
+
+  // callback from python
+  inline void unregisterOnContact() { mOnContactCallback = {}; }
+  inline void onContact(ContactCallback callback) { mOnContactCallback = {callback}; }
+  inline void unregisterOnStep() { mOnStepCallback = {}; }
+  inline void onStep(StepCallback callback) { mOnStepCallback = {callback}; }
+
+  void notifyContact(SActorBase &other, SContact const &contact);
+  void notifyStep();
 
 protected:
   SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,

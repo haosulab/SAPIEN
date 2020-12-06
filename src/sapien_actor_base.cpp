@@ -15,9 +15,7 @@ void SActorBase::setDisplayVisibility(float visibility) {
   }
 }
 
-float SActorBase::getDisplayVisibility() const {
-  return mDisplayVisibility;
-}
+float SActorBase::getDisplayVisibility() const { return mDisplayVisibility; }
 
 std::vector<Renderer::IPxrRigidbody *> SActorBase::getRenderBodies() { return mRenderBodies; }
 std::vector<Renderer::IPxrRigidbody *> SActorBase::getCollisionBodies() {
@@ -49,15 +47,14 @@ void SActorBase::unhideVisual() {
     body->setVisibility(mDisplayVisibility);
   }
 }
-bool SActorBase::isHidingVisual() const {
-  return mHidden;
-}
+bool SActorBase::isHidingVisual() const { return mHidden; }
 
 void SActorBase::prestep() {
   EventActorStep s;
   s.actor = this;
   s.time = mParentScene->getTimestep();
   EventEmitter<EventActorStep>::emit(s);
+  notifyStep();
 }
 
 void SActorBase::updateRender(PxTransform const &pose) {
@@ -72,6 +69,18 @@ void SActorBase::updateRender(PxTransform const &pose) {
 void SActorBase::addDrive(SDrive *drive) { mDrives.push_back(drive); }
 void SActorBase::removeDrive(SDrive *drive) {
   mDrives.erase(std::remove(mDrives.begin(), mDrives.end(), drive), mDrives.end());
+}
+
+void SActorBase::notifyContact(SActorBase &other, SContact const &contact) {
+  for (auto f : mOnContactCallback) {
+    f(this, &other, contact);
+  }
+}
+
+void SActorBase::notifyStep() {
+  for (auto f : mOnStepCallback) {
+    f(this, mParentScene->getTimestep());
+  }
 }
 
 std::vector<std::unique_ptr<SShape>> SActorBase::getCollisionShapes() {

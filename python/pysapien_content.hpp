@@ -4,6 +4,7 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 
 #include "actor_builder.h"
 #include "renderer/render_interface.h"
@@ -719,7 +720,11 @@ void buildSapien(py::module &m) {
       .def("render_collision", &SActorBase::renderCollisionBodies, py::arg("render") = true)
       .def("hide_visual", &SActorBase::hideVisual)
       .def("unhide_visual", &SActorBase::unhideVisual)
-      .def("is_hiding_visual", &SActorBase::isHidingVisual);
+      .def("is_hiding_visual", &SActorBase::isHidingVisual)
+      .def("on_step", &SActorBase::onStep, py::arg("func"))
+      .def("on_contact", &SActorBase::onContact, py::arg("func"))
+      .def("unregister_on_step", &SActorBase::unregisterOnStep)
+      .def("unregister_on_contact", &SActorBase::unregisterOnContact);
 
   PyActorDynamicBase
       .def_property_readonly("velocity",
