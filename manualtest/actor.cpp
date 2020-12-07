@@ -32,11 +32,11 @@ int main() {
   builder->addVisualFromFile("/home/fx/source/sapien/assets/bottle/model.obj");
   auto actor = builder->build();
 
-  actor->onContact([](SActorBase *self, SActorBase *other, SContact const &contact) {
-    if (other->getName() == "box") {
-      self->getScene()->removeActor(other);
-    }
-  });
+  // actor->onContact([](SActorBase *self, SActorBase *other, SContact const &contact) {
+  //   if (other->getName() == "box") {
+  //     self->getScene()->removeActor(other);
+  //   }
+  // });
 
   actor->setPose({{0, 0, 4}, PxIdentity});
   auto shapes = actor->getCollisionShapes();

@@ -3,8 +3,8 @@
 
 namespace sapien {
 
-class EventStep : public Event {
-public:
+struct EventSceneStep : public Event {
+  class SScene* scene;
   float timeStep;
 };
 } // namespace sapien

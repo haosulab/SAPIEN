@@ -5,15 +5,27 @@ namespace sapien {
 
 class SActorBase;
 
-class EventActorPreDestroy : public Event {
-public:
+struct EventActorPreDestroy : public Event {
   SActorBase *actor;
 };
 
-class EventActorStep : public Event {
-public:
+struct EventActorStep : public Event {
   SActorBase *actor;
   float time;
+};
+
+struct EventActorContact : public Event {
+public:
+  SActorBase *self;
+  SActorBase *other;
+  class SContact const *contact;
+};
+
+struct EventActorTrigger : public Event {
+public:
+  SActorBase *triggerActor;
+  SActorBase *otherActor;
+  class STrigger const *trigger;
 };
 
 } // namespace sapien

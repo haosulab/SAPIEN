@@ -43,7 +43,7 @@ struct SceneData {
 
 using namespace physx;
 
-class SScene : public EventEmitter<EventStep> {
+class SScene : public EventEmitter<EventSceneStep> {
   friend ActorBuilder;
   friend LinkBuilder;
   friend ArticulationBuilder;

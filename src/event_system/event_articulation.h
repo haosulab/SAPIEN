@@ -5,13 +5,11 @@ namespace sapien {
 
 class SArticulationBase;
 
-class EventArticulationPreDestroy : public Event {
-public:
+struct EventArticulationPreDestroy : public Event {
   SArticulationBase *articulation;
 };
 
-class EventArticulationStep : public Event {
-public:
+struct EventArticulationStep : public Event {
   SArticulationBase *articulation;
   float time;
 };

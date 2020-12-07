@@ -54,7 +54,6 @@ void SActorBase::prestep() {
   s.actor = this;
   s.time = mParentScene->getTimestep();
   EventEmitter<EventActorStep>::emit(s);
-  notifyStep();
 }
 
 void SActorBase::updateRender(PxTransform const &pose) {
@@ -71,22 +70,20 @@ void SActorBase::removeDrive(SDrive *drive) {
   mDrives.erase(std::remove(mDrives.begin(), mDrives.end(), drive), mDrives.end());
 }
 
-void SActorBase::notifyContact(SActorBase &other, SContact const &contact) {
-  for (auto f : mOnContactCallback) {
-    f(this, &other, contact);
-  }
+void SActorBase::onContact(ContactCallback callback) {
+  EventEmitter<EventActorContact>::registerCallback(
+      [=](EventActorContact &event) { callback(event.self, event.other, event.contact); });
 }
 
-void SActorBase::notifyTrigger(SActorBase &other, STrigger const &trigger) {
-  for (auto f : mOnTriggerCallback) {
-    f(this, &other, trigger);
-  }
+void SActorBase::onStep(StepCallback callback) {
+  EventEmitter<EventActorStep>::registerCallback(
+      [=](EventActorStep &event) { callback(event.actor, event.time); });
 }
 
-void SActorBase::notifyStep() {
-  for (auto f : mOnStepCallback) {
-    f(this, mParentScene->getTimestep());
-  }
+void SActorBase::onTrigger(TriggerCallback callback) {
+  EventEmitter<EventActorTrigger>::registerCallback([=](EventActorTrigger &event) {
+    callback(event.triggerActor, event.otherActor, event.trigger);
+  });
 }
 
 std::vector<std::unique_ptr<SShape>> SActorBase::getCollisionShapes() {

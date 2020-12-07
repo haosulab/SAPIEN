@@ -23,6 +23,7 @@
 #include "articulation/sapien_kinematic_joint.h"
 #include "articulation/sapien_link.h"
 #include "articulation/urdf_loader.h"
+#include "event_system/event_system.h"
 
 #ifdef _USE_PINOCCHIO
 #include "articulation/pinocchio_model.h"
@@ -209,6 +210,8 @@ void buildSapien(py::module &m) {
 
   auto PyRenderShape = py::class_<Renderer::RenderShape>(m, "RenderShape");
   auto PyRenderMeshGeometry = py::class_<Renderer::RenderMeshGeometry>(m, "RenderGeometry");
+
+  auto PySubscription = py::class_<Subscription>(m, "Subscription");
 
 #ifdef _USE_VULKAN
   auto PySapienVulkanRenderer =
@@ -724,9 +727,7 @@ void buildSapien(py::module &m) {
       .def("is_hiding_visual", &SActorBase::isHidingVisual)
       .def("on_step", &SActorBase::onStep, py::arg("func"))
       .def("on_contact", &SActorBase::onContact, py::arg("func"))
-      .def("on_trigger", &SActorBase::onTrigger, py::arg("func"))
-      .def("unregister_on_step", &SActorBase::unregisterOnStep)
-      .def("unregister_on_contact", &SActorBase::unregisterOnContact);
+      .def("on_trigger", &SActorBase::onTrigger, py::arg("func"));
 
   PyActorDynamicBase
       .def_property_readonly("velocity",
@@ -1354,6 +1355,8 @@ void buildSapien(py::module &m) {
             return loader.loadFileAsArticulationBuilder(filename, config);
           },
           py::return_value_policy::reference, py::arg("filename"), py::arg("config") = py::dict());
+
+  PySubscription.def("unsubscribe", &Subscription::unsubscribe);
 
 #ifdef _USE_PINOCCHIO
   PyPinocchioModel

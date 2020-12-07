@@ -134,10 +134,10 @@ void SScene::removeCleanUp2() {
         }
       }
     }
-    mKinematicArticulations.erase(std::remove_if(mKinematicArticulations.begin(),
-                                                 mKinematicArticulations.end(),
-                                                 [](auto &a) { return a->getDestroyedState() == 2; }),
-                                  mKinematicArticulations.end());
+    mKinematicArticulations.erase(
+        std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
+                       [](auto &a) { return a->getDestroyedState() == 2; }),
+        mKinematicArticulations.end());
   }
 }
 
@@ -441,7 +441,8 @@ void SScene::step() {
   // do removal of marked objects
   removeCleanUp2();
 
-  EventStep event;
+  EventSceneStep event;
+  event.scene = this;
   event.timeStep = getTimestep();
   emit(event);
 }
@@ -469,7 +470,8 @@ void SScene::stepWait() {
 
   removeCleanUp2();
 
-  EventStep event;
+  EventSceneStep event;
+  event.scene = this;
   event.timeStep = getTimestep();
   emit(event);
 }

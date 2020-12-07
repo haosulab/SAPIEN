@@ -72,6 +72,7 @@ __all__ = [
     "ShapeRecord",
     "SolverType",
     "SphereGeometry",
+    "Subscription",
     "TGS",
     "Trigger",
     "UNDEFINED",
@@ -99,8 +100,6 @@ class ActorBase():
     def render_collision(self, render: bool = True) -> None: ...
     def set_name(self, name: str) -> None: ...
     def unhide_visual(self) -> None: ...
-    def unregister_on_contact(self) -> None: ...
-    def unregister_on_step(self) -> None: ...
     @property
     def col1(self) -> int:
         """
@@ -1208,6 +1207,9 @@ class SphereGeometry(CollisionGeometry):
         """
         :type: float
         """
+    pass
+class Subscription():
+    def unsubscribe(self) -> None: ...
     pass
 class Trigger():
     def __repr__(self) -> str: ...

@@ -2,8 +2,8 @@
 #include "event_system/event_system.h"
 #include "id_generator.h"
 #include "sapien_contact.h"
-#include "sapien_trigger.h"
 #include "sapien_shape.h"
+#include "sapien_trigger.h"
 #include <PxPhysicsAPI.h>
 #include <functional>
 #include <string>
@@ -29,11 +29,14 @@ enum class EActorType {
 
 using StepCallback = std::function<void(SActorBase *actor, float timestep)>;
 using ContactCallback =
-    std::function<void(SActorBase *actor, SActorBase *other, SContact const &contact)>;
+    std::function<void(SActorBase *actor, SActorBase *other, SContact const *contact)>;
 using TriggerCallback =
-    std::function<void(SActorBase *triggerActor, SActorBase *otherActor, STrigger const &trigger)>;
+    std::function<void(SActorBase *triggerActor, SActorBase *otherActor, STrigger const *trigger)>;
 
-class SActorBase : public EventEmitter<EventActorPreDestroy>, public EventEmitter<EventActorStep> {
+class SActorBase : public EventEmitter<EventActorPreDestroy>,
+                   public EventEmitter<EventActorStep>,
+                   public EventEmitter<EventActorContact>,
+                   public EventEmitter<EventActorTrigger> {
 protected:
   std::string mName{""};
   physx_id_t mId{0};
@@ -118,16 +121,13 @@ public:
   inline virtual void unpackData(std::vector<PxReal> const &data){};
 
   // callback from python
-  inline void unregisterOnContact() { mOnContactCallback = {}; }
-  inline void onContact(ContactCallback callback) { mOnContactCallback = {callback}; }
-  inline void unregisterOnStep() { mOnStepCallback = {}; }
-  inline void onStep(StepCallback callback) { mOnStepCallback = {callback}; }
-  inline void unregisterOnTrigger() { mOnTriggerCallback = {}; }
-  inline void onTrigger(TriggerCallback callback) { mOnTriggerCallback = {callback}; }
+  void onContact(ContactCallback callback);
+  void onStep(StepCallback callback);
+  void onTrigger(TriggerCallback callback);
 
-  void notifyContact(SActorBase &other, SContact const &contact);
-  void notifyTrigger(SActorBase &other, STrigger const &trigger);
-  void notifyStep();
+  // void notifyContact(SActorBase &other, SContact const &contact);
+  // void notifyTrigger(SActorBase &other, STrigger const &trigger);
+  // void notifyStep();
 
 protected:
   SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,

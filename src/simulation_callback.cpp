@@ -35,8 +35,14 @@ void DefaultEventCallback::onContact(const PxContactPairHeader &pairHeader,
     for (auto &p : points) {
       contact->points.push_back({p.position, p.normal, p.impulse, p.separation});
     }
-    contact->actors[0]->notifyContact(*contact->actors[1], *contact);
-    contact->actors[1]->notifyContact(*contact->actors[0], *contact);
+    EventActorContact event;
+    event.self = contact->actors[0];
+    event.self = contact->actors[1];
+    event.contact = contact.get();
+    contact->actors[0]->EventEmitter<EventActorContact>::emit(event);
+    event.self = contact->actors[1];
+    event.self = contact->actors[0];
+    contact->actors[1]->EventEmitter<EventActorContact>::emit(event);
     mScene->updateContact(pairs[i].shapes[0], pairs[i].shapes[1], std::move(contact));
   }
 }
@@ -60,7 +66,11 @@ void DefaultEventCallback::onTrigger(PxTriggerPair *pairs, PxU32 count) {
     trigger->starts = pairs[i].status & PxPairFlag::eNOTIFY_TOUCH_FOUND;
     trigger->ends = pairs[i].status & PxPairFlag::eNOTIFY_TOUCH_LOST;
 
-    trigger->triggerActor->notifyTrigger(*trigger->otherActor, *trigger);
+    EventActorTrigger event;
+    event.triggerActor = trigger->triggerActor;
+    event.otherActor = trigger->otherActor;
+    event.trigger = trigger.get();
+    trigger->triggerActor->EventEmitter<EventActorTrigger>::emit(event);
   }
 }
 
