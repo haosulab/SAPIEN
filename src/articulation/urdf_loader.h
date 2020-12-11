@@ -701,6 +701,8 @@ struct SensorRecord {
   uint32_t height;
   float fovx;
   float fovy;
+  float near;
+  float far;
 };
 
 class URDFLoader {

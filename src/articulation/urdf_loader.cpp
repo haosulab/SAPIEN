@@ -105,13 +105,11 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
     std::string parent = joint->parent->link;
     std::string child = joint->child->link;
     if (linkName2treeNode.find(parent) == linkName2treeNode.end()) {
-      spdlog::get("SAPIEN")->error(
-          "Failed to load URDF: parent of joint {} does not exist", name);
+      spdlog::get("SAPIEN")->error("Failed to load URDF: parent of joint {} does not exist", name);
       return {nullptr, std::vector<SensorRecord>()};
     }
     if (linkName2treeNode.find(child) == linkName2treeNode.end()) {
-      spdlog::get("SAPIEN")->error(
-          "Failed to load URDF: child of joint {} does not exist", name);
+      spdlog::get("SAPIEN")->error("Failed to load URDF: child of joint {} does not exist", name);
       return {nullptr, std::vector<SensorRecord>()};
     }
 
@@ -438,13 +436,6 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
     spdlog::get("SAPIEN")->info("SRDF: ignored {} pairs", groupCount);
   }
 
-  // SArticulationBase *articulation;
-  // if (isKinematic) {
-  //   articulation = builder->buildKinematic();
-  // } else {
-  //   articulation = builder->build(fixRootLink);
-  // }
-
   std::vector<SensorRecord> sensorRecords;
 
   for (auto &gazebo : robot->gazebo_array) {
@@ -456,25 +447,10 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
       case Sensor::Type::CAMERA:
       case Sensor::Type::DEPTH:
 
-        // std::vector<SLinkBase *> links = articulation->getBaseLinks();
-
-        // auto it = std::find_if(links.begin(), links.end(), [&](SLinkBase *link) {
-        //   return link->getName() == gazebo->reference;
-        // });
-
-        // if (it == links.end()) {
-        //   spdlog::get("SAPIEN")->error("Failed to find the link to mount camera: ",
-        //                                gazebo->reference);
-        //   continue;
-        // }
-
-        sensorRecords.push_back(SensorRecord{"camera", sensor->name, gazebo->reference,
-                                             poseFromOrigin(*sensor->origin, scale),
-                                             sensor->camera->width, sensor->camera->height,
-                                             sensor->camera->fovx, sensor->camera->fovy});
-        // mScene->addMountedCamera(sensor->name, *it, poseFromOrigin(*sensor->origin, scale),
-        //                          sensor->camera->width, sensor->camera->height,
-        //                          sensor->camera->fovx, sensor->camera->fovy);
+        sensorRecords.push_back(SensorRecord{
+            "camera", sensor->name, gazebo->reference, poseFromOrigin(*sensor->origin, scale),
+            sensor->camera->width, sensor->camera->height, sensor->camera->fovx,
+            sensor->camera->fovy, sensor->camera->near, sensor->camera->far});
       }
     }
   }
@@ -518,7 +494,7 @@ SArticulation *URDFLoader::load(const std::string &filename, URDFConfig const &c
       }
 
       mScene->addMountedCamera(record.name, *it, record.localPose, record.width, record.height,
-                               record.fovx, record.fovy);
+                               record.fovx, record.fovy, record.near, record.far);
     }
   }
 
@@ -562,7 +538,7 @@ SKArticulation *URDFLoader::loadKinematic(const std::string &filename, URDFConfi
       }
 
       mScene->addMountedCamera(record.name, *it, record.localPose, record.width, record.height,
-                               record.fovx, record.fovy);
+                               record.fovx, record.fovy, record.near, record.far);
     }
   }
 
@@ -627,7 +603,7 @@ SArticulation *URDFLoader::loadFromXML(const std::string &URDFString,
       }
 
       mScene->addMountedCamera(record.name, *it, record.localPose, record.width, record.height,
-                               record.fovx, record.fovy);
+                               record.fovx, record.fovy, record.near, record.far);
     }
   }
 
