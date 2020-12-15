@@ -1,5 +1,4 @@
 import sapien.core as sapien
-import argparse
 import numpy as np
 
 
@@ -25,7 +24,7 @@ def main(filename):
 
     loader = sim.create_urdf_loader()
     loader.fix_root_link = True
-    loader.load(filename)
+    robot = loader.load(filename)
 
     print("Press q to quit......")
 
@@ -34,9 +33,12 @@ def main(filename):
         sim.update_render()
         controller.render()
 
+    sim = None
+
 
 if __name__ == '__main__':
+    import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("filename", type=str, help="Filename of the urdf you would like load.")
     args = parser.parse_args()
-    main(args.filename)

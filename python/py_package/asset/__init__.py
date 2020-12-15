@@ -7,11 +7,6 @@ url = 'https://sapien.ucsd.edu/api/download/compressed/{}.zip?token={}'
 
 
 def download_partnet_mobility(model_id, token=None, directory=None):
-    if token is None:
-        if 'SAPIEN_ACCESS_TOKEN' not in os.environ:
-            raise Exception('To download the model, you need to provide the token or set the SAPIEN_ACCESS_TOKEN environment variable.')
-        token = os.environ['SAPIEN_ACCESS_TOKEN']
-
     if not directory:
         directory = 'partnet-mobility-dataset'
     urdf_file = os.path.join(directory, str(model_id), 'mobility.urdf')
@@ -19,6 +14,12 @@ def download_partnet_mobility(model_id, token=None, directory=None):
     # return if file exists
     if os.path.exists(urdf_file):
         return urdf_file
+
+    if token is None:
+        if 'SAPIEN_ACCESS_TOKEN' not in os.environ:
+            raise Exception(
+                'To download the model, you need to provide the token or set the SAPIEN_ACCESS_TOKEN environment variable.')
+        token = os.environ['SAPIEN_ACCESS_TOKEN']
 
     # download file
     print('downloading from', url.format(model_id, token))
