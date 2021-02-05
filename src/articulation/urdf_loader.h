@@ -15,6 +15,7 @@ class SArticulation;
 class SKArticulation;
 class SArticulationBase;
 class ArticulationBuilder;
+class SPhysicalMaterial;
 
 namespace URDF {
 using namespace tinyxml2;
@@ -671,14 +672,14 @@ struct Robot : DomBase {
 
 struct URDFConfig {
   struct ShapeConfig {
-    physx::PxMaterial *material = nullptr;
+    std::shared_ptr<SPhysicalMaterial> material = nullptr;
     float patchRadius = 0.f;
     float minPatchRadius = 0.f;
     float density = 1000.f;
   };
   struct LinkConfig {
     // default material for a link
-    physx::PxMaterial *material = nullptr;
+    std::shared_ptr<SPhysicalMaterial> material = nullptr;
     std::map<int, ShapeConfig> shape;
     // patch radius for the whole link
     float patchRadius = 0.f;
@@ -688,7 +689,7 @@ struct URDFConfig {
   };
   std::map<std::string, LinkConfig> link = {};
 
-  physx::PxMaterial *material = nullptr;
+  std::shared_ptr<SPhysicalMaterial> material = nullptr;
   float density = 1000.f;
 };
 

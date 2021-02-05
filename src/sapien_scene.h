@@ -2,6 +2,7 @@
 #include "event_system/event_system.h"
 #include "id_generator.h"
 #include "renderer/render_interface.h"
+#include "sapien_material.h"
 #include "sapien_scene_config.h"
 #include "simulation_callback.h"
 #include <PxPhysicsAPI.h>
@@ -50,7 +51,7 @@ class SScene : public EventEmitter<EventSceneStep> {
 
 private:
   // defaults
-  PxMaterial *mDefaultMaterial;
+  std::shared_ptr<SPhysicalMaterial> mDefaultMaterial;
   float mDefaultSleepThreshold;
   float mDefaultContactOffset;
   uint32_t mDefaultSolverIterations;
@@ -91,8 +92,8 @@ private:
   std::vector<std::unique_ptr<SDrive>> mDrives;
 
 private:
-  bool mRequiresRemoveCleanUp1 {false};
-  bool mRequiresRemoveCleanUp2 {false};
+  bool mRequiresRemoveCleanUp1{false};
+  bool mRequiresRemoveCleanUp2{false};
 
   /**
    *  call to clean up actors and articulations in being destroyed states
@@ -185,10 +186,11 @@ public:
   void stepWait();
 
   void updateRender(); // call to sync physics world to render world
-  SActorStatic *addGround(PxReal altitude, bool render = true, PxMaterial *material = nullptr,
+  SActorStatic *addGround(PxReal altitude, bool render = true,
+                          std::shared_ptr<SPhysicalMaterial> material = nullptr,
                           Renderer::PxrMaterial const &renderMaterial = {});
 
-  inline PxMaterial *getDefaultMaterial() { return mDefaultMaterial; }
+  inline std::shared_ptr<SPhysicalMaterial> getDefaultMaterial() { return mDefaultMaterial; }
 
   std::map<physx_id_t, std::string> findRenderId2VisualName() const;
 

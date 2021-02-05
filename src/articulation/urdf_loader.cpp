@@ -267,7 +267,7 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
          ++collision_idx) {
       const auto &collision = current->link->collision_array[collision_idx];
 
-      physx::PxMaterial *material;
+      std::shared_ptr<SPhysicalMaterial> material;
       float patchRadius;
       float minPatchRadius;
       float density;

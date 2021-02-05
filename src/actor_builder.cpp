@@ -26,7 +26,8 @@ void ActorBuilder::removeVisualAt(uint32_t index) {
 }
 
 void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
-                                          const PxVec3 &scale, PxMaterial *material,
+                                          const PxVec3 &scale,
+                                          std::shared_ptr<SPhysicalMaterial> material,
                                           PxReal density, PxReal patchRadius,
                                           PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
@@ -45,9 +46,9 @@ void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxT
 
 void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
                                                    const PxTransform &pose, const PxVec3 &scale,
-                                                   PxMaterial *material, PxReal density,
-                                                   PxReal patchRadius, PxReal minPatchRadius,
-                                                   bool isTrigger) {
+                                                   std::shared_ptr<SPhysicalMaterial> material,
+                                                   PxReal density, PxReal patchRadius,
+                                                   PxReal minPatchRadius, bool isTrigger) {
 
   ShapeRecord r;
   r.type = ShapeRecord::Type::MultipleMeshes;
@@ -63,9 +64,9 @@ void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
   mShapeRecord.push_back(r);
 }
 
-void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMaterial *material,
-                               PxReal density, PxReal patchRadius, PxReal minPatchRadius,
-                               bool isTrigger) {
+void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size,
+                               std::shared_ptr<SPhysicalMaterial> material, PxReal density,
+                               PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Box;
   r.pose = pose;
@@ -80,8 +81,8 @@ void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size, PxMa
 }
 
 void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxReal halfLength,
-                                   PxMaterial *material, PxReal density, PxReal patchRadius,
-                                   PxReal minPatchRadius, bool isTrigger) {
+                                   std::shared_ptr<SPhysicalMaterial> material, PxReal density,
+                                   PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Capsule;
   r.pose = pose;
@@ -96,9 +97,9 @@ void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxRea
   mShapeRecord.push_back(r);
 }
 
-void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius, PxMaterial *material,
-                                  PxReal density, PxReal patchRadius, PxReal minPatchRadius,
-                                  bool isTrigger) {
+void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius,
+                                  std::shared_ptr<SPhysicalMaterial> material, PxReal density,
+                                  PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Sphere;
   r.pose = pose;
@@ -187,7 +188,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
         continue;
       }
       PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
-          PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material, true);
+          PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material->getPxMaterial(), true);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to create shape");
@@ -213,7 +214,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
           continue;
         }
         PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
-            PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material, true);
+            PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material->getPxMaterial(), true);
         shape->setContactOffset(mScene->mDefaultContactOffset);
         if (!shape) {
           spdlog::get("SAPIEN")->critical("Failed to create shape");
@@ -233,8 +234,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     }
 
     case ShapeRecord::Type::Box: {
-      PxShape *shape =
-          getSimulation()->mPhysicsSDK->createShape(PxBoxGeometry(r.scale), *material, true);
+      PxShape *shape = getSimulation()->mPhysicsSDK->createShape(PxBoxGeometry(r.scale),
+                                                                 *material->getPxMaterial(), true);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to build box with scale {}, {}, {}", r.scale.x,
@@ -255,7 +256,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
 
     case ShapeRecord::Type::Capsule: {
       PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
-          PxCapsuleGeometry(r.radius, r.length), *material, true);
+          PxCapsuleGeometry(r.radius, r.length), *material->getPxMaterial(), true);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to build capsule with radius {}, length {}",
@@ -275,8 +276,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     }
 
     case ShapeRecord::Type::Sphere: {
-      PxShape *shape =
-          getSimulation()->mPhysicsSDK->createShape(PxSphereGeometry(r.radius), *material, true);
+      PxShape *shape = getSimulation()->mPhysicsSDK->createShape(PxSphereGeometry(r.radius),
+                                                                 *material->getPxMaterial(), true);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to build sphere with radius {}", r.radius);
@@ -550,13 +551,15 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   return result;
 }
 
-SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render, PxMaterial *material,
+SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
+                                        std::shared_ptr<SPhysicalMaterial> material,
                                         Renderer::PxrMaterial const &renderMaterial,
                                         std::string const &name) {
   physx_id_t linkId = mScene->mLinkIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
   PxRigidStatic *ground =
-      PxCreatePlane(*getSimulation()->mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude), *material);
+      PxCreatePlane(*getSimulation()->mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude),
+                    *material->getPxMaterial());
   PxShape *shape;
   ground->getShapes(&shape, 1);
 

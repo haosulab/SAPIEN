@@ -12,6 +12,7 @@
 #include "sapien_actor_base.h"
 #include "sapien_contact.h"
 #include "sapien_drive.h"
+#include "sapien_material.h"
 #include "sapien_scene.h"
 #include "simulation.h"
 
@@ -47,60 +48,51 @@ namespace py = pybind11;
 URDF::URDFConfig parseURDFConfig(py::dict &dict) {
   URDF::URDFConfig config;
   if (dict.contains("material")) {
-    std::cout << "found material" << std::endl;
-    config.material = dict["material"].cast<PxMaterial *>();
+    config.material = dict["material"].cast<std::shared_ptr<SPhysicalMaterial>>();
   }
   if (dict.contains("density")) {
-    std::cout << "found density" << std::endl;
     config.density = dict["density"].cast<float>();
   }
   if (dict.contains("link")) {
-    std::cout << "found link" << std::endl;
 
     auto linkDict = dict["link"].cast<py::dict>();
     for (auto kv : linkDict) {
       auto name = kv.first.cast<std::string>();
       auto dict2 = kv.second.cast<py::dict>();
       if (dict2.contains("material")) {
-        std::cout << "found link material" << std::endl;
-        config.link[name].material = dict2["material"].cast<PxMaterial *>();
+        config.link[name].material = dict2["material"].cast<std::shared_ptr<SPhysicalMaterial>>();
       } else {
         config.link[name].material = config.material;
       }
       if (dict2.contains("density")) {
-        std::cout << "found link density" << std::endl;
         config.link[name].density = dict2["density"].cast<float>();
       } else {
         config.link[name].density = config.density;
       }
       if (dict2.contains("patch_radius")) {
-        std::cout << "found link patch" << std::endl;
         config.link[name].patchRadius = dict2["patch_radius"].cast<float>();
       }
       if (dict2.contains("min_patch_radius")) {
         config.link[name].minPatchRadius = dict2["min_patch_radius"].cast<float>();
       }
       if (dict2.contains("shape")) {
-        std::cout << "found shape" << std::endl;
         auto shapeDict = dict2["shape"].cast<py::dict>();
         for (auto kv2 : shapeDict) {
           auto idx = kv2.first.cast<int>();
           auto dict3 = kv2.second.cast<py::dict>();
 
           if (dict3.contains("material")) {
-            std::cout << "found shape material" << std::endl;
-            config.link[name].shape[idx].material = dict3["material"].cast<PxMaterial *>();
+            config.link[name].shape[idx].material =
+                dict3["material"].cast<std::shared_ptr<SPhysicalMaterial>>();
           } else {
             config.link[name].shape[idx].material = config.link[name].material;
           }
           if (dict3.contains("density")) {
-            std::cout << "found shape density" << std::endl;
             config.link[name].shape[idx].density = dict3["density"].cast<float>();
           } else {
             config.link[name].shape[idx].density = config.link[name].density;
           }
           if (dict3.contains("patch_radius")) {
-            std::cout << "found shape patch" << std::endl;
             config.link[name].shape[idx].patchRadius = dict3["patch_radius"].cast<float>();
           } else {
             config.link[name].shape[idx].patchRadius = config.link[name].patchRadius;
@@ -155,8 +147,10 @@ void buildSapien(py::module &m) {
   auto PyArticulationType = py::enum_<EArticulationType>(m, "ArticulationType");
 
   auto PyURDFLoader = py::class_<URDF::URDFLoader>(m, "URDFLoader");
-  auto PyPxMaterial =
-      py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial");
+  // auto PyPxMaterial =
+  //     py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial");
+  auto PyPhysicalMaterial =
+      py::class_<SPhysicalMaterial, std::shared_ptr<SPhysicalMaterial>>(m, "PhysicalMaterial");
   auto PyPose = py::class_<PxTransform>(m, "Pose");
   auto PyRenderMaterial = py::class_<Renderer::PxrMaterial>(m, "PxrMaterial");
   py::class_<Renderer::IPxrRenderer>(m, "IPxrRenderer");
@@ -238,12 +232,12 @@ void buildSapien(py::module &m) {
       .value("UNDEFINED", PxArticulationJointType::eUNDEFINED)
       .export_values();
 
-  PyPxMaterial.def("get_static_friction", &PxMaterial::getStaticFriction)
-      .def("get_dynamic_friction", &PxMaterial::getDynamicFriction)
-      .def("get_restitution", &PxMaterial::getRestitution)
-      .def("set_static_friction", &PxMaterial::setStaticFriction, py::arg("coef"))
-      .def("set_dynamic_friction", &PxMaterial::setDynamicFriction, py::arg("coef"))
-      .def("set_restitution", &PxMaterial::setRestitution, py::arg("coef"));
+  PyPhysicalMaterial.def("get_static_friction", &SPhysicalMaterial::getStaticFriction)
+      .def("get_dynamic_friction", &SPhysicalMaterial::getDynamicFriction)
+      .def("get_restitution", &SPhysicalMaterial::getRestitution)
+      .def("set_static_friction", &SPhysicalMaterial::setStaticFriction, py::arg("coef"))
+      .def("set_dynamic_friction", &SPhysicalMaterial::setDynamicFriction, py::arg("coef"))
+      .def("set_restitution", &SPhysicalMaterial::setRestitution, py::arg("coef"));
 
   PyPose
       .def(py::init([](py::array_t<PxReal> p, py::array_t<PxReal> q) {
@@ -1068,8 +1062,8 @@ void buildSapien(py::module &m) {
       .def(
           "add_convex_shape_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density,
-             PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+             py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
+             PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
             a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density,
                                      patchRadius, minPatchRadius, isTrigger);
           },
@@ -1080,8 +1074,8 @@ void buildSapien(py::module &m) {
       .def(
           "add_multiple_convex_shapes_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> const &scale, PxMaterial *material, PxReal density,
-             PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+             py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
+             PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
             a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material, density,
                                               patchRadius, minPatchRadius, isTrigger);
           },
@@ -1092,8 +1086,8 @@ void buildSapien(py::module &m) {
       .def(
           "add_box_shape",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
-             PxMaterial *material, PxReal density, PxReal patchRadius, PxReal minPatchRadius,
-             bool isTrigger) {
+             std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
+             PxReal minPatchRadius, bool isTrigger) {
             a.addBoxShape(pose, array2vec3(size), material, density, patchRadius, minPatchRadius,
                           isTrigger);
           },

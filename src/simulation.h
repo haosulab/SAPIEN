@@ -3,6 +3,7 @@
 #include "id_generator.h"
 #include "mesh_manager.h"
 #include "render_interface.h"
+#include "sapien_material.h"
 #include "sapien_scene_config.h"
 #include <PxPhysicsAPI.h>
 #include <extensions/PxDefaultAllocator.h>
@@ -67,8 +68,8 @@ public:
   inline Renderer::IPxrRenderer *getRenderer() { return mRenderer; }
   void setLogLevel(std::string const &level);
 
-  PxMaterial *createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction,
-                                     PxReal restitution) const;
+  std::shared_ptr<SPhysicalMaterial>
+  createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction, PxReal restitution) const;
 };
 
 } // namespace sapien

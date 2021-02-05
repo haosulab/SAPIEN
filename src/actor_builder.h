@@ -1,6 +1,7 @@
 #pragma once
 #include "id_generator.h"
 #include "render_interface.h"
+#include "sapien_material.h"
 #include <PxPhysicsAPI.h>
 #include <memory>
 #include <vector>
@@ -30,7 +31,7 @@ public:
     PxReal length;
 
     // common
-    PxMaterial *material;
+    std::shared_ptr<SPhysicalMaterial> material;
     PxTransform pose;
     PxReal density;
 
@@ -85,31 +86,33 @@ public:
 
   void addConvexShapeFromFile(const std::string &filename,
                               const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                              const PxVec3 &scale = {1, 1, 1}, PxMaterial *material = nullptr,
+                              const PxVec3 &scale = {1, 1, 1},
+                              std::shared_ptr<SPhysicalMaterial> material = nullptr,
                               PxReal density = 1000.f, PxReal patchRadius = 0.f,
                               PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
   void addMultipleConvexShapesFromFile(const std::string &filename,
                                        const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                        const PxVec3 &scale = {1, 1, 1},
-                                       PxMaterial *material = nullptr, PxReal density = 1000.f,
-                                       PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f,
-                                       bool isTrigger = false);
+                                       std::shared_ptr<SPhysicalMaterial> material = nullptr,
+                                       PxReal density = 1000.f, PxReal patchRadius = 0.f,
+                                       PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
   void addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                   const PxVec3 &size = {1, 1, 1}, PxMaterial *material = nullptr,
-                   PxReal density = 1000.f, PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f,
-                   bool isTrigger = false);
+                   const PxVec3 &size = {1, 1, 1},
+                   std::shared_ptr<SPhysicalMaterial> material = nullptr, PxReal density = 1000.f,
+                   PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
   void addCapsuleShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                       PxReal halfLength = 1, PxMaterial *material = nullptr,
+                       PxReal halfLength = 1,
+                       std::shared_ptr<SPhysicalMaterial> material = nullptr,
                        PxReal density = 1000.f, PxReal patchRadius = 0.f,
                        PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
   void addSphereShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                      PxMaterial *material = nullptr, PxReal density = 1000.f,
-                      PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f,
-                      bool isTrigger = false);
+                      std::shared_ptr<SPhysicalMaterial> material = nullptr,
+                      PxReal density = 1000.f, PxReal patchRadius = 0.f,
+                      PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
   /* Visual functions */
   void addBoxVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
@@ -158,7 +161,8 @@ public:
   SActor *build(bool isKinematic = false, std::string const &name = "") const;
   SActorStatic *buildStatic(std::string const &name = "") const;
 
-  SActorStatic *buildGround(PxReal altitude, bool render, PxMaterial *material,
+  SActorStatic *buildGround(PxReal altitude, bool render,
+                            std::shared_ptr<SPhysicalMaterial> material,
                             Renderer::PxrMaterial const &renderMaterial = {},
                             std::string const &name = "");
 

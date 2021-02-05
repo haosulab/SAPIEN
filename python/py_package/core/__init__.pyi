@@ -43,10 +43,10 @@ from sapien.core.pysapien import OptifuserCamera
 from sapien.core.pysapien import OptifuserConfig
 from sapien.core.pysapien import OptifuserController
 from sapien.core.pysapien import OptifuserRenderer
+from sapien.core.pysapien import PhysicalMaterial
 from sapien.core.pysapien import PinocchioModel
 from sapien.core.pysapien import PlaneGeometry
 from sapien.core.pysapien import Pose
-from sapien.core.pysapien import PxMaterial
 from sapien.core.pysapien import PxrMaterial
 from sapien.core.pysapien import RenderBody
 from sapien.core.pysapien import RenderGeometry
@@ -122,10 +122,10 @@ __all__ = [
     "PGS",
     "PRISMATIC",
     "PTX_ROOT",
+    "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
     "Pose",
-    "PxMaterial",
     "PxrMaterial",
     "REVOLUTE",
     "RenderBody",

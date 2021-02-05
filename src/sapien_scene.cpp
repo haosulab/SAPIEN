@@ -38,7 +38,7 @@ SScene::SScene(Simulation *sim, PxScene *scene, SceneConfig const &config)
 }
 
 SScene::~SScene() {
-  mDefaultMaterial->release();
+  mDefaultMaterial.reset();
   if (mRendererScene) {
     mSimulation->getRenderer()->removeScene(mRendererScene);
   }
@@ -511,7 +511,7 @@ void SScene::updateRender() {
   }
 }
 
-SActorStatic *SScene::addGround(PxReal altitude, bool render, PxMaterial *material,
+SActorStatic *SScene::addGround(PxReal altitude, bool render, std::shared_ptr<SPhysicalMaterial> material,
                                 Renderer::PxrMaterial const &renderMaterial) {
   return createActorBuilder()->buildGround(altitude, render, material, renderMaterial, "ground");
 }
