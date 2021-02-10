@@ -1497,6 +1497,7 @@ void buildSapien(py::module &m) {
 
   PyRenderShape.def_readonly("type", &Renderer::RenderShape::type)
       .def_readonly("pose", &Renderer::RenderShape::pose)
+      .def_readonly("obj_id", &Renderer::RenderShape::objId)
       .def_property_readonly("scale",
                              [](Renderer::RenderShape &shape) { return vec32array(shape.scale); })
       .def_property_readonly(

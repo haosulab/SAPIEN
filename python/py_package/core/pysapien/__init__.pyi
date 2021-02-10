@@ -953,6 +953,11 @@ class RenderShape():
         :type: RenderGeometry
         """
     @property
+    def obj_id(self) -> int:
+        """
+        :type: int
+        """
+    @property
     def pose(self) -> Pose:
         """
         :type: Pose

@@ -99,6 +99,7 @@ std::vector<std::unique_ptr<RenderShape>> SapienVulkanRigidbody::getRenderShapes
         obj->mTransform.scale.y,
         obj->mTransform.scale.z,
     };
+    shape->objId = obj->getObjectId();
 
     auto vertices = obj->getVulkanObject()->mMesh->downloadVertices(
         context->getPhysicalDevice(), context->getDevice(), context->getCommandPool(),

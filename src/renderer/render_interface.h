@@ -30,6 +30,7 @@ struct RenderShape {
   physx::PxVec3 scale = {0, 0, 0};
   physx::PxTransform pose = physx::PxTransform(physx::PxIdentity);
   std::unique_ptr<RenderMeshGeometry> geometry = nullptr;
+  uint32_t objId = 0;
 
   inline RenderShape(){};
   RenderShape(RenderShape const &) = delete;
