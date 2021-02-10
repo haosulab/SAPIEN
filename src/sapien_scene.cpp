@@ -43,6 +43,20 @@ SScene::~SScene() {
     mSimulation->getRenderer()->removeScene(mRendererScene);
   }
   if (mPxScene) {
+    for (auto &actor : mActors) {
+      actor->getPxActor()->release();
+    }
+    for (auto &articulation : mArticulations) {
+      articulation->getPxArticulation()->release();
+    }
+    for (auto &ka : mKinematicArticulations) {
+      for (auto &link : ka->getBaseLinks()) {
+        link->getPxActor()->release();
+      }
+    }
+    for (auto &drive : mDrives) {
+      drive.release();
+    }
     mPxScene->release();
   }
 }
@@ -254,7 +268,6 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
 
     // remove actor
     mPxScene->removeActor(*link->getPxActor());
-    // link->getPxActor()->release();
   }
 
   articulation->markDestroyed();
@@ -511,7 +524,8 @@ void SScene::updateRender() {
   }
 }
 
-SActorStatic *SScene::addGround(PxReal altitude, bool render, std::shared_ptr<SPhysicalMaterial> material,
+SActorStatic *SScene::addGround(PxReal altitude, bool render,
+                                std::shared_ptr<SPhysicalMaterial> material,
                                 Renderer::PxrMaterial const &renderMaterial) {
   return createActorBuilder()->buildGround(altitude, render, material, renderMaterial, "ground");
 }
