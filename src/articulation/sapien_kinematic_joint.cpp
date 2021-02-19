@@ -6,6 +6,8 @@ namespace sapien {
 SKJoint::SKJoint(SKArticulation *articulation, SKLink *parent, SKLink *child)
     : SJointBase(parent, child), mArticulatoin(articulation) {}
 
+SArticulationBase *SKJoint::getArticulation() const { return mArticulatoin; }
+
 void SKJointSingleDof::setLimits(const std::vector<std::array<PxReal, 2>> &limits) {
   if (limits.size() != 1) {
     spdlog::get("SAPIEN")->error("setLimits failed: argument does not match joint DOF");
@@ -47,7 +49,8 @@ void SKJointSingleDof::setDriveTarget(std::vector<PxReal> const &p) {
 }
 void SKJointSingleDof::setDriveVelocityTarget(std::vector<PxReal> const &v) {
   if (v.size() != 1) {
-    spdlog::get("SAPIEN")->error("setDriveVelocityTarget failed: argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error(
+        "setDriveVelocityTarget failed: argument does not match joint DOF");
   }
   targetVel = v[0];
 }

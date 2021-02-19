@@ -824,7 +824,9 @@ void buildSapien(py::module &m) {
             }
             j.setLimits(l);
           },
-          py::arg("limits"));
+          py::arg("limits"))
+      .def_property_readonly("articulation", &SJointBase::getArticulation,
+                             py::return_value_policy::reference);
 
   PyJoint.def("set_friction", &SJoint::setFriction, py::arg("friction"))
       .def_property_readonly("friction", &SJoint::getFriction)

@@ -276,4 +276,8 @@ PxArticulationJointType::Enum SJoint::getType() const {
   return PxArticulationJointType::eUNDEFINED;
 }
 
+SArticulationBase *SJoint::getArticulation() const {
+  return mArticulation;
+}
+
 } // namespace sapien

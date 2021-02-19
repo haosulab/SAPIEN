@@ -37,6 +37,7 @@ public:
 
   // update pos by vel
   virtual void updatePos(PxReal dt) = 0;
+  SArticulationBase *getArticulation() const override;
 
 public:
   using SJointBase::SJointBase;
