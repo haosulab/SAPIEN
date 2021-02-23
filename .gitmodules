@@ -10,3 +10,6 @@
 [submodule "3rd_party/sapien-vulkan"]
 	path = 3rd_party/sapien-vulkan
 	url = https://github.com/fbxiang/sapien-vulkan.git
+[submodule "3rd_party/sapien-vulkan-2"]
+	path = 3rd_party/sapien-vulkan-2
+	url = git@github.com:haosulab/sapien-vulkan-2.git

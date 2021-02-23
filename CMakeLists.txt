@@ -149,6 +149,10 @@ if (${BUILD_WITH_VULKAN_SUPPORT})
     target_link_libraries(manual_vulkan_perf sapien)
 
     set_target_properties(sapien-vulkan PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
+    add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
+    include_directories("3rd_party/sapien-vulkan-2/include")
+    set_target_properties(svulkan2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 endif()
 
 
@@ -189,7 +193,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw3 GLEW ${ASSIMP_LIBRARIES} dl optifuser
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} sapien-vulkan)
+            ${PINOCCHIO_LIBRARY} sapien-vulkan svulkan2)
 endif ()
 
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
