@@ -70,13 +70,13 @@ public:
                                       const physx::PxVec3 &scale) override;
 
   virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                                      const PxrMaterial &material) override;
+                                      std::shared_ptr<IPxrMaterial> material) override;
 
   virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                       std::vector<physx::PxVec3> const &normals,
                                       std::vector<uint32_t> const &indices,
                                       const physx::PxVec3 &scale,
-                                      const PxrMaterial &material) override;
+                                      std::shared_ptr<IPxrMaterial> material) override;
   virtual IPxrRigidbody *cloneRigidbody(OptifuserRigidbody *other);
 
   virtual void removeRigidbody(IPxrRigidbody *body) override;
@@ -128,6 +128,10 @@ public:
   static void setDefaultShaderConfig(std::string const &glslDir, std::string const &glslVersion);
 
   void setLogLevel(std::string const &level);
+
+  inline std::shared_ptr<IPxrMaterial> createMaterial() override {
+    return std::make_shared<PxrMaterial>();
+  };
 
 #ifdef _USE_OPTIX
   static std::string gPtxDir;

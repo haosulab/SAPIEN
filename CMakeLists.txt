@@ -8,7 +8,6 @@ set(PROFILE FALSE CACHE BOOL "Whether to use Profiler")
 set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
 set(BUILD_WITH_VULKAN_SUPPORT TRUE CACHE BOOL "Build the SAPIEN Vulkan renderer")
-set(BUILD_WITH_VULKAN_SUPPORT TRUE CACHE BOOL "Build the SAPIEN Vulkan renderer")
 
 set(ROS2_VERSION "dashing" "eloquent")
 set(ROS1_VERSION "melodic")
@@ -80,9 +79,9 @@ endif ()
 ## include headers inside the project
 include_directories(
         "3rd_party/optifuser/include"
-        "3rd_party/optifuser/3rd_party/imgui"
-        "3rd_party/optifuser/3rd_party/imgui/examples"
-        "3rd_party/optifuser/3rd_party/ImGuizmo"
+        # "3rd_party/optifuser/3rd_party/imgui"
+        # "3rd_party/optifuser/3rd_party/imgui/examples"
+        # "3rd_party/optifuser/3rd_party/ImGuizmo"
         "src"
         "src/renderer")
 
@@ -139,20 +138,24 @@ add_subdirectory("3rd_party/tinyxml2")
 include_directories("3rd_party/pybind11/include")
 
 if (${BUILD_WITH_VULKAN_SUPPORT})
-    add_definitions(-D_USE_VULKAN)
-    add_subdirectory("3rd_party/sapien-vulkan" EXCLUDE_FROM_ALL)
-    include_directories("3rd_party/sapien-vulkan/include")
-    include_directories("$ENV{VULKAN_SDK}/include")
-    add_executable(manual_vulkan manualtest/vulkan.cpp)
-    target_link_libraries(manual_vulkan sapien)
-    add_executable(manual_vulkan_perf manualtest/vulkan_performance.cpp)
-    target_link_libraries(manual_vulkan_perf sapien)
-
-    set_target_properties(sapien-vulkan PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-
     add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
     include_directories("3rd_party/sapien-vulkan-2/include")
+    include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
+    include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui")
+    include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
+    include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
+    include_directories("$ENV{VULKAN_SDK}/include")
+    link_directories("$ENV{VULKAN_SDK}/lib")
     set_target_properties(svulkan2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
+    # add_definitions(-D_USE_VULKAN)
+    # add_subdirectory("3rd_party/sapien-vulkan" EXCLUDE_FROM_ALL)
+    # include_directories("3rd_party/sapien-vulkan/include")
+    # add_executable(manual_vulkan manualtest/vulkan.cpp)
+    # target_link_libraries(manual_vulkan sapien)
+    # add_executable(manual_vulkan_perf manualtest/vulkan_performance.cpp)
+    # target_link_libraries(manual_vulkan_perf sapien)
+    # set_target_properties(sapien-vulkan PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 endif()
 
 
@@ -193,7 +196,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw3 GLEW ${ASSIMP_LIBRARIES} dl optifuser
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} sapien-vulkan svulkan2)
+            ${PINOCCHIO_LIBRARY} svulkan2)
 endif ()
 
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

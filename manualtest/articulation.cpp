@@ -1,8 +1,10 @@
 #include "articulation/articulation_builder.h"
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_link.h"
-#include "renderer/optifuser_controller.h"
-#include "renderer/optifuser_renderer.h"
+// #include "renderer/sapien_vulkan_controller.h"
+// #include "renderer/sapien_vulkan_renderer.h"
+#include "renderer/svulkan2_renderer.h"
+#include "renderer/svulkan2_window.h"
 #include "sapien_actor.h"
 #include "sapien_drive.h"
 #include "sapien_scene.h"
@@ -13,13 +15,8 @@
 
 using namespace sapien;
 
-std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
-  Renderer::PxrMaterial copper = {};
-  copper.base_color = {0.975, 0.453, 0.221, 1};
-  copper.metallic = 1.f;
-  copper.roughness = 0.7f;
-  copper.specular = 0.5f;
-
+std::unique_ptr<ArticulationBuilder>
+createAntBuilder(SScene &scene, std::shared_ptr<Renderer::IPxrMaterial> copper) {
   auto builder = scene.createArticulationBuilder();
   auto body = builder->createLinkBuilder();
   body->addSphereShape({{0, 0, 0}, PxIdentity}, 0.25);
@@ -113,35 +110,37 @@ std::unique_ptr<ArticulationBuilder> createAntBuilder(SScene &scene) {
 
 int main() {
   Simulation sim;
-  Renderer::OptifuserRenderer renderer;
+  // Renderer::SapienVulkanRenderer renderer;
+  Renderer::SVulkan2Renderer renderer(false, 1000, 1000, 4);
   sim.setRenderer(&renderer);
-  Renderer::OptifuserController controller(&renderer);
-
-  controller.showWindow();
+  Renderer::SVulkan2Window window(renderer);
 
   auto s0 = sim.createScene();
   s0->setTimestep(1 / 60.f);
   s0->addGround(-1);
 
-  auto builder = createAntBuilder(*s0);
+  auto copper = renderer.createMaterial();
+  copper->setBaseColor({0.975, 0.453, 0.221, 1});
+  copper->setMetallic(1.f);
+  copper->setRoughness(0.7f);
+  copper->setSpecular(0.5f);
+
+  auto builder = createAntBuilder(*s0, copper);
 
   auto ant0 = builder->build(false);
   ant0->setName("ant0");
   ant0->setRootPose({{0, 0, 2}, PxIdentity});
 
-  auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
-  r0->setAmbientLight({0, 0, 0});
-  r0->setShadowLight({0, -1, -1}, {1, 1, 1});
+  auto r0 = static_cast<Renderer::SVulkan2Scene *>(s0->getRendererScene());
+  r0->setAmbientLight({0.5, 0.5, 0.5});
+  r0->addDirectionalLight({0, -1, -1}, {1, 1, 1});
 
-  controller.setCameraPosition(-5, 0, 0);
-
-  controller.setCurrentScene(s0.get());
-  // controller.focus(ant0->getRootLink());
+  window.setScene(r0);
 
   int count = 0;
   SDrive *drive;
   std::vector<float> d;
-  while (!controller.shouldQuit()) {
+  while (1) {
     if (++count == 120) {
       d = ant0->packData();
       drive = s0->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, ant0->getRootLink(),
@@ -152,7 +151,11 @@ int main() {
 
     s0->updateRender();
     s0->step();
-    controller.render();
+    window.render();
+    if (window.windowCloseRequested()) {
+      window.close();
+      break;
+    }
   }
 
   return 0;

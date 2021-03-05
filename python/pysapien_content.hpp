@@ -152,7 +152,9 @@ void buildSapien(py::module &m) {
   auto PyPhysicalMaterial =
       py::class_<SPhysicalMaterial, std::shared_ptr<SPhysicalMaterial>>(m, "PhysicalMaterial");
   auto PyPose = py::class_<PxTransform>(m, "Pose");
-  auto PyRenderMaterial = py::class_<Renderer::PxrMaterial>(m, "PxrMaterial");
+  auto PyRenderMaterial =
+      py::class_<Renderer::IPxrMaterial, std::shared_ptr<Renderer::IPxrMaterial>>(
+          m, "RenderMaterial");
   py::class_<Renderer::IPxrRenderer>(m, "IPxrRenderer");
   auto PyRenderScene = py::class_<Renderer::IPxrScene>(m, "RenderScene");
   auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
@@ -353,28 +355,28 @@ void buildSapien(py::module &m) {
           py::return_value_policy::reference);
 
   //======== Render Interface ========//
-  PyRenderMaterial.def(py::init<>())
-      .def(
-          "set_base_color",
-          [](Renderer::PxrMaterial &mat, py::array_t<float> color) {
-            mat.base_color = {color.at(0), color.at(1), color.at(2), color.at(3)};
-          },
-          py::arg("rgba"))
-      .def_property_readonly("base_color",
-                             [](Renderer::PxrMaterial &mat) {
-                               return make_array<float>({mat.base_color[0], mat.base_color[1],
-                                                         mat.base_color[2], mat.base_color[3]});
-                             })
-      .def_readwrite("specular", &Renderer::PxrMaterial::specular)
-      .def_readwrite("roughness", &Renderer::PxrMaterial::roughness)
-      .def_readwrite("metallic", &Renderer::PxrMaterial::metallic)
-      .def("__repr__", [](Renderer::PxrMaterial &m) { return "PxrMaterial()"; })
+  // PyRenderMaterial.def(py::init<>())
+  //     .def(
+  //         "set_base_color",
+  //         [](Renderer::PxrMaterial &mat, py::array_t<float> color) {
+  //           mat.base_color = {color.at(0), color.at(1), color.at(2), color.at(3)};
+  //         },
+  //         py::arg("rgba"))
+  //     .def_property_readonly("base_color",
+  //                            [](Renderer::PxrMaterial &mat) {
+  //                              return make_array<float>({mat.base_color[0], mat.base_color[1],
+  //                                                        mat.base_color[2], mat.base_color[3]});
+  //                            })
+  //     .def_readwrite("specular", &Renderer::PxrMaterial::specular)
+  //     .def_readwrite("roughness", &Renderer::PxrMaterial::roughness)
+  //     .def_readwrite("metallic", &Renderer::PxrMaterial::metallic)
+  //     .def("__repr__", [](Renderer::PxrMaterial &m) { return "PxrMaterial()"; })
 
-      // TODO: implement those together with UV
-      // .def_readwrite("color_texture", &Renderer::PxrMaterial::color_texture)
-      // .def_readwrite("specular_texture", &Renderer::PxrMaterial::specular_texture)
-      // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture)
-      ;
+  //     // TODO: implement those together with UV
+  //     // .def_readwrite("color_texture", &Renderer::PxrMaterial::color_texture)
+  //     // .def_readwrite("specular_texture", &Renderer::PxrMaterial::specular_texture)
+  //     // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture)
+  //     ;
 
   PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
       .def("get_pose", &Renderer::ISensor::getPose)
@@ -592,7 +594,7 @@ void buildSapien(py::module &m) {
       .def("step_wait", &SScene::stepWait)
       .def("update_render", &SScene::updateRender)
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
-           py::arg("material") = nullptr, py::arg("render_material") = Renderer::PxrMaterial(),
+           py::arg("material") = nullptr, py::arg("render_material") = nullptr,
            py::return_value_policy::reference)
       .def("get_contacts", &SScene::getContacts, py::return_value_policy::reference)
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
@@ -1107,54 +1109,54 @@ void buildSapien(py::module &m) {
            py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
            py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
 
-      .def(
-          "add_box_visual",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
-             py::array_t<PxReal> color, std::string const &name) {
-            a.addBoxVisual(pose, array2vec3(size), array2vec3(color), name);
-          },
-          py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("size") = make_array<PxReal>({1, 1, 1}),
-          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+      // .def(
+      //     "add_box_visual",
+      //     [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
+      //        py::array_t<PxReal> color, std::string const &name) {
+      //       a.addBoxVisual(pose, array2vec3(size), array2vec3(color), name);
+      //     },
+      //     py::arg("pose") = PxTransform(PxIdentity),
+      //     py::arg("size") = make_array<PxReal>({1, 1, 1}),
+      //     py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def(
           "add_box_visual_complex",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
-             const Renderer::PxrMaterial &mat, std::string const &name) {
+             std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
             a.addBoxVisualWithMaterial(pose, array2vec3(size), mat, name);
           },
           py::arg("pose") = PxTransform(PxIdentity),
           py::arg("size") = make_array<PxReal>({1, 1, 1}),
           py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
-      .def(
-          "add_capsule_visual",
-          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
-             py::array_t<PxReal> color, std::string const &name) {
-            a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
-          },
-          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("half_length") = 1, py::arg("color") = make_array<PxReal>({1, 1, 1}),
-          py::arg("name") = "")
+      // .def(
+      //     "add_capsule_visual",
+      //     [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
+      //        py::array_t<PxReal> color, std::string const &name) {
+      //       a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
+      //     },
+      //     py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+      //     py::arg("half_length") = 1, py::arg("color") = make_array<PxReal>({1, 1, 1}),
+      //     py::arg("name") = "")
       .def(
           "add_capsule_visual_complex",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
-             const Renderer::PxrMaterial &mat, std::string const &name) {
+             std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
             a.addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
           },
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("half_length") = 1, py::arg("material") = Renderer::PxrMaterial(),
           py::arg("name") = "")
-      .def(
-          "add_sphere_visual",
-          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
-             std::string const &name) {
-            a.addSphereVisual(pose, radius, array2vec3(color), name);
-          },
-          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+      // .def(
+      //     "add_sphere_visual",
+      //     [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
+      //        std::string const &name) {
+      //       a.addSphereVisual(pose, radius, array2vec3(color), name);
+      //     },
+      //     py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+      //     py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def(
           "add_sphere_visual_complex",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
-             const Renderer::PxrMaterial &mat,
+             std::shared_ptr<Renderer::IPxrMaterial> &mat,
              std::string const &name) { a.addSphereVisualWithMaterial(pose, radius, mat, name); },
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
@@ -1466,7 +1468,7 @@ void buildSapien(py::module &m) {
       .def(
           "add_primitive_mesh",
           [](Renderer::IPxrScene &scene, std::string const &type, py::array_t<float> scale,
-             Renderer::PxrMaterial const &material) {
+             std::shared_ptr<Renderer::IPxrMaterial> &material) {
             physx::PxGeometryType::Enum ptype;
             if (type == "box") {
               ptype = physx::PxGeometryType::eBOX;

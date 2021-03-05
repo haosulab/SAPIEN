@@ -114,8 +114,11 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius,
 }
 
 void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &size,
-                                            const Renderer::PxrMaterial &material,
+                                            std::shared_ptr<Renderer::IPxrMaterial> material,
                                             std::string const &name) {
+  if (!material) {
+    material = mScene->getEngine()->getRenderer()->createMaterial();
+  }
   VisualRecord r;
   r.type = VisualRecord::Type::Box;
   r.pose = pose;
@@ -126,10 +129,20 @@ void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec
   mVisualRecord.push_back(r);
 }
 
+void ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size, const PxVec3 &color,
+                                std::string const &name) {
+  auto mat = mScene->getEngine()->getRenderer()->createMaterial();
+  mat->setBaseColor({color.x, color.y, color.z, 1.f});
+  addBoxVisualWithMaterial(pose, size, mat, name);
+}
+
 void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal radius,
                                                 PxReal halfLength,
-                                                const Renderer::PxrMaterial &material,
+                                                std::shared_ptr<Renderer::IPxrMaterial> material,
                                                 std::string const &name) {
+  if (!material) {
+    material = mScene->getEngine()->getRenderer()->createMaterial();
+  }
   VisualRecord r;
   r.type = VisualRecord::Type::Capsule;
   r.pose = pose;
@@ -141,9 +154,19 @@ void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal 
   mVisualRecord.push_back(r);
 }
 
+void ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal halfLength,
+                                    const PxVec3 &color, std::string const &name) {
+  auto mat = mScene->getEngine()->getRenderer()->createMaterial();
+  mat->setBaseColor({color.x, color.y, color.z, 1.f});
+  addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
+}
+
 void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal radius,
-                                               const Renderer::PxrMaterial &material,
+                                               std::shared_ptr<Renderer::IPxrMaterial> material,
                                                std::string const &name) {
+  if (!material) {
+    material = mScene->getEngine()->getRenderer()->createMaterial();
+  }
   VisualRecord r;
   r.type = VisualRecord::Type::Sphere;
   r.pose = pose;
@@ -152,6 +175,13 @@ void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal r
   r.name = name;
 
   mVisualRecord.push_back(r);
+}
+
+void ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius, const PxVec3 &color,
+                                   std::string const &name) {
+  auto mat = mScene->getEngine()->getRenderer()->createMaterial();
+  mat->setBaseColor({color.x, color.y, color.z, 1.f});
+  addSphereVisualWithMaterial(pose, radius, mat, name);
 }
 
 void ActorBuilder::addVisualFromFile(const std::string &filename, const PxTransform &pose,
@@ -553,8 +583,11 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
 
 SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
                                         std::shared_ptr<SPhysicalMaterial> material,
-                                        Renderer::PxrMaterial const &renderMaterial,
+                                        std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
                                         std::string const &name) {
+  if (!renderMaterial) {
+    renderMaterial = mScene->getEngine()->getRenderer()->createMaterial();
+  }
   physx_id_t linkId = mScene->mLinkIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
   PxRigidStatic *ground =

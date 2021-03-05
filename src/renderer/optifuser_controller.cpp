@@ -77,8 +77,8 @@ void OptifuserController::editTransform() {
   float matrixTranslation[3], matrixRotation[3], matrixScale[3] = {1, 1, 1};
   ImGuizmo::DecomposeMatrixToComponents(&gizmoTransform[0][0], matrixTranslation, matrixRotation,
                                         matrixScale);
-  ImGui::InputFloat3("Tr", matrixTranslation, 3);
-  ImGui::InputFloat3("Rt", matrixRotation, 3);
+  ImGui::InputFloat3("Tr", matrixTranslation);
+  ImGui::InputFloat3("Rt", matrixRotation);
   ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale,
                                           &gizmoTransform[0][0]);
 

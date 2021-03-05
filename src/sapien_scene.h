@@ -188,7 +188,7 @@ public:
   void updateRender(); // call to sync physics world to render world
   SActorStatic *addGround(PxReal altitude, bool render = true,
                           std::shared_ptr<SPhysicalMaterial> material = nullptr,
-                          Renderer::PxrMaterial const &renderMaterial = {});
+                          std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = nullptr);
 
   inline std::shared_ptr<SPhysicalMaterial> getDefaultMaterial() { return mDefaultMaterial; }
 

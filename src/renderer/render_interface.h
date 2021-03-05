@@ -40,7 +40,17 @@ struct RenderShape {
   ~RenderShape() = default;
 };
 
-struct PxrMaterial {
+class IPxrMaterial {
+public:
+  virtual void setBaseColor(std::array<float, 4> color) = 0;
+  virtual void setRoughness(float roughness) = 0;
+  virtual void setSpecular(float specular) = 0;
+  virtual void setMetallic(float metallic) = 0;
+  virtual ~IPxrMaterial() = default;
+};
+
+class PxrMaterial : public IPxrMaterial {
+public:
   std::array<float, 4> base_color = {1, 1, 1, 1};
   float specular = 0.f;
   float roughness = 0.85f;
@@ -48,6 +58,11 @@ struct PxrMaterial {
   std::string color_texture = "";
   std::string specular_texture = "";
   std::string normal_texture = "";
+
+  inline void setBaseColor(std::array<float, 4> color) override { base_color = color; }
+  inline void setRoughness(float value) override { roughness = value; }
+  inline void setSpecular(float value) override { specular = value; }
+  inline void setMetallic(float value) override { metallic = value; }
 };
 
 class ISensor {
@@ -108,22 +123,28 @@ public:
   virtual IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) = 0;
 
   virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                                      const PxrMaterial &material) = 0;
-  inline IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                                     const physx::PxVec3 &color) {
-    return addRigidbody(type, scale, PxrMaterial{{color.x, color.y, color.z, 1.f}});
+                                      std::shared_ptr<IPxrMaterial> material) = 0;
+  inline virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type,
+                                             const physx::PxVec3 &scale,
+                                             const physx::PxVec3 &color) {
+    auto mat = std::make_shared<PxrMaterial>();
+    mat->setBaseColor({color.x, color.y, color.z, 1.f});
+    return addRigidbody(type, scale, mat);
   };
 
   virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                       std::vector<physx::PxVec3> const &normals,
                                       std::vector<uint32_t> const &indices,
-                                      const physx::PxVec3 &scale, const PxrMaterial &material) = 0;
-  inline IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                                     std::vector<physx::PxVec3> const &normals,
-                                     std::vector<uint32_t> const &indices,
-                                     const physx::PxVec3 &scale, const physx::PxVec3 &color) {
-    return addRigidbody(vertices, normals, indices, scale,
-                        PxrMaterial{{color.x, color.y, color.z, 1.f}});
+                                      const physx::PxVec3 &scale,
+                                      std::shared_ptr<IPxrMaterial> material) = 0;
+  inline virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+                                             std::vector<physx::PxVec3> const &normals,
+                                             std::vector<uint32_t> const &indices,
+                                             const physx::PxVec3 &scale,
+                                             const physx::PxVec3 &color) {
+    auto mat = std::make_shared<PxrMaterial>();
+    mat->setBaseColor({color.x, color.y, color.z, 1.f});
+    return addRigidbody(vertices, normals, indices, scale, mat);
   }
 
   virtual void removeRigidbody(IPxrRigidbody *body) = 0;
@@ -152,6 +173,7 @@ class IPxrRenderer {
 public:
   virtual IPxrScene *createScene(std::string const &name = "") = 0;
   virtual void removeScene(IPxrScene *scene) = 0;
+  virtual std::shared_ptr<IPxrMaterial> createMaterial() = 0;
 
   virtual ~IPxrRenderer() = default;
 };

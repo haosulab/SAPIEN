@@ -1,0 +1,205 @@
+#include "svulkan2_renderer.h"
+
+namespace sapien {
+namespace Renderer {
+
+SVulkan2Scene::SVulkan2Scene(SVulkan2Renderer *renderer, std::string const &name)
+    : mParentRenderer(renderer), mName(name) {
+  mScene = std::make_unique<svulkan2::scene::Scene>();
+}
+
+void SVulkan2Scene::setAmbientLight(std::array<float, 3> const &color) {
+  mScene->setAmbientLight({color[0], color[1], color[2], 1.f});
+}
+
+void SVulkan2Scene::addPointLight(std::array<float, 3> const &position,
+                                  std::array<float, 3> const &color) {
+  auto &light = mScene->addPointLight();
+  light.setColor({color[0], color[1], color[2], 1.f});
+  light.setTransform({.position = glm::vec4(position[0], position[1], position[2], 1.f)});
+}
+
+void SVulkan2Scene::addDirectionalLight(std::array<float, 3> const &direction,
+                                        std::array<float, 3> const &color) {
+  auto &light = mScene->addDirectionalLight();
+  light.setDirection({direction[0], direction[1], direction[2]});
+  light.setColor({color[0], color[1], color[2], 1.f});
+}
+
+void SVulkan2Scene::setShadowLight(std::array<float, 3> const &direction,
+                                   std::array<float, 3> const &color) {
+  throw std::runtime_error("Any light can cast shadow now. Shadow light is no longer used.");
+}
+
+void SVulkan2Scene::destroy() { mParentRenderer->removeScene(this); }
+
+IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
+                                           const physx::PxVec3 &scale) {
+  auto model = mParentRenderer->mContext->getResourceManager().CreateModelFromFile(meshFile);
+  std::vector<svulkan2::scene::Object *> objects2;
+  objects2.push_back(&mScene->addObject(model));
+  mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(this, objects2));
+  return mBodies.back().get();
+}
+
+IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
+                                           const physx::PxVec3 &scale,
+                                           const physx::PxVec3 &color) {
+  auto material = std::make_shared<svulkan2::resource::SVMetallicMaterial>(
+      glm::vec4{color.x, color.y, color.z, 1.f});
+  return addRigidbody(type, scale, std::make_shared<SVulkan2Material>(material));
+}
+
+IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
+                                           const physx::PxVec3 &scale,
+                                           std::shared_ptr<IPxrMaterial> material) {
+  auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
+  if (!mat) {
+    throw std::runtime_error("rendering material not specified.");
+  }
+  svulkan2::scene::Object *object;
+  switch (type) {
+  case physx::PxGeometryType::eBOX: {
+    auto mesh = svulkan2::resource::SVMesh::CreateCube();
+    auto shape = svulkan2::resource::SVShape::Create(mesh, mat->getMaterial());
+    auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData({shape}));
+    obj.setScale({scale.x, scale.y, scale.z});
+    object = &obj;
+    break;
+  }
+  case physx::PxGeometryType::eSPHERE: {
+    auto mesh = svulkan2::resource::SVMesh::CreateUVSphere(32, 16);
+    auto shape = svulkan2::resource::SVShape::Create(mesh, mat->getMaterial());
+    auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData({shape}));
+    obj.setScale({scale.x, scale.y, scale.z});
+    object = &obj;
+    break;
+  }
+  case physx::PxGeometryType::ePLANE: {
+    auto mesh = svulkan2::resource::SVMesh::CreateYZPlane();
+    auto shape = svulkan2::resource::SVShape::Create(mesh, mat->getMaterial());
+    auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData({shape}));
+    obj.setScale({scale.x, scale.y, scale.z});
+    object = &obj;
+    break;
+  }
+  case physx::PxGeometryType::eCAPSULE: {
+    auto mesh = svulkan2::resource::SVMesh::CreateCapsule(scale.y, scale.x, 32, 8);
+    auto shape = svulkan2::resource::SVShape::Create(mesh, mat->getMaterial());
+    auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData({shape}));
+    obj.setScale({1, 1, 1});
+    object = &obj;
+    break;
+  }
+  default:
+    throw std::runtime_error("Failed to ad rigidbody: unsupported render body type");
+  }
+
+  mBodies.push_back(
+      std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{object}));
+  return mBodies.back().get();
+}
+
+IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &vertices,
+                                           std::vector<physx::PxVec3> const &normals,
+                                           std::vector<uint32_t> const &indices,
+                                           const physx::PxVec3 &scale,
+                                           const physx::PxVec3 &color) {
+  auto material = std::make_shared<svulkan2::resource::SVMetallicMaterial>(
+      glm::vec4{color.x, color.y, color.z, 1.f});
+  return addRigidbody(vertices, normals, indices, scale,
+                      std::make_shared<SVulkan2Material>(material));
+}
+
+IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &vertices,
+                                           std::vector<physx::PxVec3> const &normals,
+                                           std::vector<uint32_t> const &indices,
+                                           const physx::PxVec3 &scale,
+                                           std::shared_ptr<IPxrMaterial> material) {
+  auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
+  if (!mat) {
+    throw std::runtime_error("rendering material not specified.");
+  }
+
+  std::vector<float> vertices_;
+  std::vector<float> normals_;
+  for (auto &v : vertices) {
+    vertices_.push_back(v.x);
+    vertices_.push_back(v.y);
+    vertices_.push_back(v.z);
+  }
+  for (auto &n : normals) {
+    normals_.push_back(n.x);
+    normals_.push_back(n.y);
+    normals_.push_back(n.z);
+  }
+
+  auto mesh = svulkan2::resource::SVMesh::Create(vertices_, indices);
+  mesh->setVertexAttribute("normal", normals_);
+  auto shape = svulkan2::resource::SVShape::Create(mesh, mat->getMaterial());
+  auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData({shape}));
+  obj.setScale({scale.x, scale.y, scale.z});
+
+  mBodies.push_back(
+      std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{&obj}));
+  return mBodies.back().get();
+}
+
+IPxrRigidbody *SVulkan2Scene::cloneRigidbody(SVulkan2Rigidbody *other) {
+  auto &otherObjs = other->getVisualObjects();
+  std::vector<svulkan2::scene::Object *> objs;
+  for (auto &obj : otherObjs) {
+    objs.push_back(&getScene()->addObject(obj->getParent(), obj->getModel()));
+    objs.back()->setTransform(obj->getTransform());
+  }
+  mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(this, objs));
+  auto body = mBodies.back().get();
+  body->setInitialPose(other->getInitialPose());
+  return body;
+}
+
+void SVulkan2Scene::removeRigidbody(IPxrRigidbody *body) {
+  for (auto it = mBodies.begin(); it != mBodies.end(); ++it) {
+    if (it->get() == body) {
+      it->get()->destroyVisualObjects();
+      mBodies.erase(it);
+      return;
+    }
+  }
+}
+
+ICamera *SVulkan2Scene::addCamera(std::string const &name, uint32_t width, uint32_t height,
+                                  float fovx, float fovy, float near, float far,
+                                  std::string const &shaderDir) {
+  if (fovx != 0) {
+    spdlog::get("SAPIEN")->warn(
+        "Current camera implementation does not support non-square"
+        "pixels, and fovy will be used. Set fovx to 0 to suppress this warning");
+  }
+  auto cam =
+      std::make_unique<SVulkan2Camera>(name, width, height, fovy, near, far, this, shaderDir);
+  mCameras.push_back(std::move(cam));
+  return mCameras.back().get();
+}
+
+void SVulkan2Scene::removeCamera(ICamera *camera) {
+  auto cam = dynamic_cast<SVulkan2Camera *>(camera);
+  if (!cam) {
+    return;
+  }
+  mScene->removeNode(*cam->getCamera());
+  mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
+                                [camera](auto &c) { return camera == c.get(); }),
+                 mCameras.end());
+}
+
+std::vector<ICamera *> SVulkan2Scene::getCameras() {
+  std::vector<ICamera *> cams;
+  for (auto &cam : mCameras) {
+    cams.push_back(cam.get());
+  }
+  return cams;
+}
+
+} // namespace Renderer
+} // namespace sapien

@@ -143,21 +143,26 @@ IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &po
                                             std::vector<physx::PxVec3> const &normals,
                                             std::vector<uint32_t> const &indices,
                                             const physx::PxVec3 &scale,
-                                            const PxrMaterial &material) {
+                                            std::shared_ptr<IPxrMaterial> material) {
   std::vector<Optifuser::Vertex> vertices;
   for (uint32_t i = 0; i < points.size(); ++i) {
     vertices.push_back(
         {{points[i].x, points[i].y, points[i].z}, {normals[i].x, normals[i].y, normals[i].z}});
   }
 
+  auto pxrmat = std::dynamic_pointer_cast<PxrMaterial>(material);
+  if (!pxrmat) {
+    throw std::runtime_error("Invalid render material");
+  }
+
   auto obj = Optifuser::NewObject<Optifuser::Object>(
       std::make_shared<Optifuser::TriangleMesh>(vertices, indices, false));
   {
-    obj->pbrMaterial->kd = {material.base_color[0], material.base_color[1], material.base_color[2],
-                            material.base_color[3]};
-    obj->pbrMaterial->ks = material.specular;
-    obj->pbrMaterial->roughness = material.roughness;
-    obj->pbrMaterial->metallic = material.metallic;
+    obj->pbrMaterial->kd = {pxrmat->base_color[0], pxrmat->base_color[1], pxrmat->base_color[2],
+                            pxrmat->base_color[3]};
+    obj->pbrMaterial->ks = pxrmat->specular;
+    obj->pbrMaterial->roughness = pxrmat->roughness;
+    obj->pbrMaterial->metallic = pxrmat->metallic;
   }
 
   obj->scale = {scale.x, scale.y, scale.z};
@@ -171,7 +176,7 @@ IPxrRigidbody *OptifuserScene::addRigidbody(std::vector<physx::PxVec3> const &po
 
 IPxrRigidbody *OptifuserScene::addRigidbody(physx::PxGeometryType::Enum type,
                                             const physx::PxVec3 &scale,
-                                            const PxrMaterial &material) {
+                                            std::shared_ptr<IPxrMaterial> material) {
   std::unique_ptr<Optifuser::Object> obj;
   switch (type) {
   case physx::PxGeometryType::eBOX: {
@@ -199,12 +204,17 @@ IPxrRigidbody *OptifuserScene::addRigidbody(physx::PxGeometryType::Enum type,
     return nullptr;
   }
 
+  auto pxrmat = std::dynamic_pointer_cast<PxrMaterial>(material);
+  if (!pxrmat) {
+    throw std::runtime_error("Invalid render material");
+  }
+
   {
-    obj->pbrMaterial->kd = {material.base_color[0], material.base_color[1], material.base_color[2],
-                            material.base_color[3]};
-    obj->pbrMaterial->ks = material.specular;
-    obj->pbrMaterial->roughness = material.roughness;
-    obj->pbrMaterial->metallic = material.metallic;
+    obj->pbrMaterial->kd = {pxrmat->base_color[0], pxrmat->base_color[1], pxrmat->base_color[2],
+                            pxrmat->base_color[3]};
+    obj->pbrMaterial->ks = pxrmat->specular;
+    obj->pbrMaterial->roughness = pxrmat->roughness;
+    obj->pbrMaterial->metallic = pxrmat->metallic;
   }
 
   mBodies.push_back(std::make_unique<OptifuserRigidbody>(this, std::vector{obj.get()}));

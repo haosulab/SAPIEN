@@ -49,7 +49,7 @@ public:
     PxReal radius;
     PxReal length;
 
-    Renderer::PxrMaterial material;
+    std::shared_ptr<Renderer::IPxrMaterial> material;
 
     PxTransform pose;
     std::string name;
@@ -117,31 +117,26 @@ public:
   /* Visual functions */
   void addBoxVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                 const PxVec3 &size = {1, 1, 1},
-                                const Renderer::PxrMaterial &material = {},
+                                std::shared_ptr<Renderer::IPxrMaterial> material = {},
                                 std::string const &name = "");
-  inline void addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+  void addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                            const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
-                           std::string const &name = "") {
-    addBoxVisualWithMaterial(pose, size, {{color.x, color.y, color.z, 1}}, name);
-  }
+                           std::string const &name = "");
 
   void addCapsuleVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                     PxReal radius = 1, PxReal halfLength = 1,
-                                    const Renderer::PxrMaterial &material = {},
+                                    std::shared_ptr<Renderer::IPxrMaterial> material = {},
                                     std::string const &name = "");
-  inline void addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+  void addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                PxReal radius = 1, PxReal halfLength = 1,
-                               const PxVec3 &color = {1, 1, 1}, std::string const &name = "") {
-    addCapsuleVisualWithMaterial(pose, radius, halfLength, {{color.x, color.y, color.z, 1}}, name);
-  }
+                               const PxVec3 &color = {1, 1, 1}, std::string const &name = "");
 
   void addSphereVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                                   PxReal radius = 1, const Renderer::PxrMaterial &material = {},
+                                   PxReal radius = 1,
+                                   std::shared_ptr<Renderer::IPxrMaterial> material = {},
                                    std::string const &name = "");
-  inline void addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                              const PxVec3 &color = {1, 1, 1}, std::string const &name = "") {
-    addSphereVisualWithMaterial(pose, radius, {{color.x, color.y, color.z, 1}}, name);
-  }
+  void addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                              const PxVec3 &color = {1, 1, 1}, std::string const &name = "");
 
   void addVisualFromFile(const std::string &filename,
                          const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
@@ -163,7 +158,7 @@ public:
 
   SActorStatic *buildGround(PxReal altitude, bool render,
                             std::shared_ptr<SPhysicalMaterial> material,
-                            Renderer::PxrMaterial const &renderMaterial = {},
+                            std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = {},
                             std::string const &name = "");
 
 protected:
