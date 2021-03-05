@@ -122,6 +122,14 @@ public:
   void setShadowLight(std::array<float, 3> const &direction,
                       std::array<float, 3> const &color) override;
 
+  //======== Lights more parameters ========//
+  void addPointLight(std::array<float, 3> const &position, std::array<float, 3> const &color,
+                     bool enableShadow, float shadowNear = 0.1f, float shadowFar = 5.f);
+  void addDirectionalLight(std::array<float, 3> const &direction,
+                           std::array<float, 3> const &color, bool enableShadow,
+                           std::array<float, 3> const &position = {0.f, 0.f, 0.f}, float shadowScale = 10.f,
+                           float shadowNear = -5.f, float shadowFar = 5.f);
+
   inline SVulkan2Renderer *getParentRenderer() const { return mParentRenderer; }
 };
 
@@ -199,7 +207,6 @@ public:
   bool isOrthographic() const;
 
   svulkan2::scene::Camera *getCamera() const { return mCamera; }
-
 };
 
 } // namespace Renderer

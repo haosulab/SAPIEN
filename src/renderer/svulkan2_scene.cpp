@@ -19,11 +19,37 @@ void SVulkan2Scene::addPointLight(std::array<float, 3> const &position,
   light.setTransform({.position = glm::vec4(position[0], position[1], position[2], 1.f)});
 }
 
+void SVulkan2Scene::addPointLight(std::array<float, 3> const &position,
+                                  std::array<float, 3> const &color, bool enableShadow,
+                                  float shadowNear, float shadowFar) {
+  auto &light = mScene->addPointLight();
+  light.setColor({color[0], color[1], color[2], 1.f});
+  light.setTransform({.position = glm::vec4(position[0], position[1], position[2], 1.f)});
+  if (enableShadow) {
+    light.enableShadow(true);
+    light.setShadowParameters(shadowNear, shadowFar);
+  }
+}
+
 void SVulkan2Scene::addDirectionalLight(std::array<float, 3> const &direction,
                                         std::array<float, 3> const &color) {
   auto &light = mScene->addDirectionalLight();
   light.setDirection({direction[0], direction[1], direction[2]});
   light.setColor({color[0], color[1], color[2], 1.f});
+}
+
+void SVulkan2Scene::addDirectionalLight(std::array<float, 3> const &direction,
+                                        std::array<float, 3> const &color, bool enableShadow,
+                                        std::array<float, 3> const &position, float shadowScale,
+                                        float shadowNear, float shadowFar) {
+  auto &light = mScene->addDirectionalLight();
+  light.setDirection({direction[0], direction[1], direction[2]});
+  light.setColor({color[0], color[1], color[2], 1.f});
+  if (enableShadow) {
+    light.enableShadow(true);
+    light.setPosition({position[0], position[1], position[2]});
+    light.setShadowParameters(shadowNear, shadowFar, shadowScale);
+  }
 }
 
 void SVulkan2Scene::setShadowLight(std::array<float, 3> const &direction,

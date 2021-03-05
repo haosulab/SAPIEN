@@ -102,8 +102,7 @@ void SVulkan2Window::render() {
     camera = &mScene->getScene()->addCamera();
     camera->setPerspectiveParameters(0.1, 10, 1, 800.f / 600.f);
     camera->setName("_controller");
-    camera->setRotation({-0.5, 0.5, 0.5, -0.5});
-    camera->setPosition({-1, 0, 0.1});
+    camera->setPosition({-5, 0, 0});
   }
 
   mWindow->newFrame();
@@ -137,6 +136,7 @@ void SVulkan2Window::render() {
   if (!mCameraController) {
     mCameraController =
         std::make_unique<FPSCameraController>(*camera, glm::vec3{1, 0, 0}, glm::vec3{0, 0, 1});
+    mCameraController->move(0, 0, 0);
   }
   float r = 1e-1;
   if (mWindow->isMouseKeyDown(1)) {

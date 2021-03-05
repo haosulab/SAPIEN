@@ -47,8 +47,10 @@ void SVulkan2Renderer::setLogLevel(std::string const &level) {
 }
 
 std::shared_ptr<IPxrMaterial> SVulkan2Renderer::createMaterial() {
-  return std::make_shared<SVulkan2Material>(
+  auto mat = std::make_shared<SVulkan2Material>(
       std::make_shared<svulkan2::resource::SVMetallicMaterial>());
+  mat->setBaseColor({0.8, 0.8, 0.8, 1});
+  return mat;
 }
 
 } // namespace Renderer
