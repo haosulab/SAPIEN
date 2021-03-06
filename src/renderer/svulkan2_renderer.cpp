@@ -4,6 +4,9 @@
 namespace sapien {
 namespace Renderer {
 
+std::string gDefaultShaderDirectory = "";
+void setDefaultShaderDirectory(std::string const &dir) { gDefaultShaderDirectory = dir; }
+
 SVulkan2Material::SVulkan2Material(
     std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material)
     : mMaterial(material) {}

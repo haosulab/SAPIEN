@@ -12,6 +12,9 @@ class SVulkan2Rigidbody;
 class SVulkan2Camera;
 class SVulkan2Scene;
 
+extern std::string gDefaultShaderDirectory;
+void setDefaultShaderDirectory(std::string const& dir);
+
 class SVulkan2Material : public IPxrMaterial {
   std::shared_ptr<svulkan2::resource::SVMetallicMaterial> mMaterial;
 
@@ -127,8 +130,9 @@ public:
                      bool enableShadow, float shadowNear = 0.1f, float shadowFar = 5.f);
   void addDirectionalLight(std::array<float, 3> const &direction,
                            std::array<float, 3> const &color, bool enableShadow,
-                           std::array<float, 3> const &position = {0.f, 0.f, 0.f}, float shadowScale = 10.f,
-                           float shadowNear = -5.f, float shadowFar = 5.f);
+                           std::array<float, 3> const &position = {0.f, 0.f, 0.f},
+                           float shadowScale = 10.f, float shadowNear = -5.f,
+                           float shadowFar = 5.f);
 
   inline SVulkan2Renderer *getParentRenderer() const { return mParentRenderer; }
 };

@@ -1,4 +1,7 @@
 #pragma once
+#include "renderer/optifuser_controller.h"
+#include "renderer/optifuser_renderer.h"
+
 #include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
@@ -26,21 +29,14 @@
 #include "articulation/urdf_loader.h"
 #include "event_system/event_system.h"
 
+#include "renderer/svulkan2_renderer.h"
+#include "renderer/svulkan2_window.h"
+
 #ifdef _USE_PINOCCHIO
 #include "articulation/pinocchio_model.h"
 #endif
 
-#include "renderer/optifuser_controller.h"
-#include "renderer/optifuser_renderer.h"
-
 #include "utils/pose.hpp"
-
-#ifdef _USE_VULKAN
-#include "renderer/sapien_vulkan_renderer.h"
-#ifdef ON_SCREEN
-#include "renderer/sapien_vulkan_controller.h"
-#endif
-#endif
 
 using namespace sapien;
 namespace py = pybind11;
@@ -209,20 +205,14 @@ void buildSapien(py::module &m) {
 
   auto PySubscription = py::class_<Subscription>(m, "Subscription");
 
-#ifdef _USE_VULKAN
-  auto PySapienVulkanRenderer =
-      py::class_<Renderer::SapienVulkanRenderer, Renderer::IPxrRenderer>(m, "VulkanRenderer");
-  auto PySapienVulkanCamera =
-      py::class_<Renderer::SapienVulkanCamera, Renderer::ICamera>(m, "VulkanCamera");
-#ifdef ON_SCREEN
-  auto PySapienVulkanController =
-      py::class_<Renderer::SapienVulkanController>(m, "VulkanController");
-#endif
-#endif
-
 #ifdef _USE_PINOCCHIO
   auto PyPinocchioModel = py::class_<PinocchioModel>(m, "PinocchioModel");
 #endif
+
+  auto PyVulkanRenderer =
+      py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer>(m, "VulkanRenderer");
+  auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m, "VulkanCamera");
+  auto PyVulkanWindow = py::class_<Renderer::SVulkan2Window>(m, "VulkanWindow");
 
   //======== Internal ========//
   PySolverType.value("PGS", PxSolverType::ePGS).value("TGS", PxSolverType::eTGS).export_values();
@@ -1381,82 +1371,141 @@ void buildSapien(py::module &m) {
            py::arg("qpos"), py::arg("link_index"));
 #endif
 
-#ifdef _USE_VULKAN
-  PySapienVulkanRenderer
-      .def(py::init<bool, uint32_t>(), py::arg("offscreen_only") = false,
-           py::arg("object_buffer_size") = 1000)
-      .def_static("set_shader_dir", &svulkan::VulkanContext::setDefaultShaderDir,
-                  py::arg("spv_dir"))
-      .def("set_log_level", &Renderer::SapienVulkanRenderer::setLogLevel, py::arg("level"));
+  // #ifdef _USE_VULKAN
+  //   PySapienVulkanRenderer
+  //       .def(py::init<bool, uint32_t>(), py::arg("offscreen_only") = false,
+  //            py::arg("object_buffer_size") = 1000)
+  //       .def_static("set_shader_dir", &svulkan::VulkanContext::setDefaultShaderDir,
+  //                   py::arg("spv_dir"))
+  //       .def("set_log_level", &Renderer::SapienVulkanRenderer::setLogLevel, py::arg("level"));
 
-  PySapienVulkanCamera
-      .def("get_position_rgba",
-           [](Renderer::SapienVulkanCamera &cam) {
-             return py::array_t<float>(
-                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                 cam.getPositionRGBA().data());
-           })
-      .def("get_custom_rgba",
-           [](Renderer::SapienVulkanCamera &cam) {
-             return py::array_t<float>(
-                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                 cam.getCustomRGBA().data());
-           })
+  //   PySapienVulkanCamera
+  //       .def("get_position_rgba",
+  //            [](Renderer::SapienVulkanCamera &cam) {
+  //              return py::array_t<float>(
+  //                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+  //                  cam.getPositionRGBA().data());
+  //            })
+  //       .def("get_custom_rgba",
+  //            [](Renderer::SapienVulkanCamera &cam) {
+  //              return py::array_t<float>(
+  //                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+  //                  cam.getCustomRGBA().data());
+  //            })
+  //       .def("get_camera_matrix",
+  //            [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getCameraMatrix()); })
+  //       .def("get_model_matrix",
+  //            [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getModelMatrix()); })
+  //       .def("get_projection_matrix",
+  //            [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getProjectionMatrix());
+  //            })
+  //       .def("set_mode_orthographic", &Renderer::SapienVulkanCamera::changeModeToOrthographic,
+  //            py::arg("scaling") = 1.f)
+  //       .def("set_mode_perspective", &Renderer::SapienVulkanCamera::changeModeToPerspective,
+  //            py::arg("fovy") = glm::radians(35.f));
+
+  //   PySapienVulkanController.def(py::init<Renderer::SapienVulkanRenderer *>(),
+  //   py::arg("renderer"))
+  //       .def_property_readonly("is_closed", &Renderer::SapienVulkanController::isClosed)
+  //       .def("render", &Renderer::SapienVulkanController::render)
+  //       .def("set_current_scene", &Renderer::SapienVulkanController::setScene, py::arg("scene"))
+
+  //       // UI control
+  //       .def(
+  //           "select_actor",
+  //           [](Renderer::SapienVulkanController &c, SActorBase *actor) {
+  //             c.selectActor(actor->getId());
+  //           },
+  //           py::arg("actor"))
+  //       .def(
+  //           "focus_actor",
+  //           [](Renderer::SapienVulkanController &c, SActorBase *actor) {
+  //             c.focusActor(actor->getId());
+  //           },
+  //           py::arg("actor"))
+  //       .def(
+  //           "view_from_camera",
+  //           [](Renderer::SapienVulkanController &c, uint32_t camera_index) {
+  //             c.viewFromCamera(camera_index);
+  //           },
+  //           py::arg("camera_index"))
+  //       .def("pause", &Renderer::SapienVulkanController::pause, py::arg("p") = true)
+  //       .def("set_free_camera_position",
+  //       &Renderer::SapienVulkanController::setFreeCameraPosition,
+  //            py::arg("x"), py::arg("y"), py::arg("z"))
+  //       .def("set_free_camera_rotation",
+  //       &Renderer::SapienVulkanController::setFreeCameraRotation,
+  //            py::arg("yaw"), py::arg("pitch"), py::arg("roll"))
+  //       .def("set_default_control", &Renderer::SapienVulkanController::setDefaultControl,
+  //            py::arg("mouse"), py::arg("keyboard"))
+  //       .def("close", &Renderer::SapienVulkanController::close)
+
+  //       // input
+  //       .def("mouse_down", &Renderer::SapienVulkanController::mouseDown, py::arg("key_code") =
+  //       0) .def("mouse_click", &Renderer::SapienVulkanController::mouseClick,
+  //       py::arg("key_code") = 0) .def("key_down", &Renderer::SapienVulkanController::keyDown,
+  //       py::arg("key")) .def("key_press", &Renderer::SapienVulkanController::keyPressed,
+  //       py::arg("key")) .def_property_readonly("mouse_pos",
+  //       &Renderer::SapienVulkanController::getMousePos) .def_property_readonly("mouse_delta",
+  //       &Renderer::SapienVulkanController::getMouseDelta) .def_property_readonly("wheel_delta",
+  //       &Renderer::SapienVulkanController::getMouseWheelDelta);
+
+  // #endif
+
+  PyVulkanRenderer
+      .def(py::init<bool, uint32_t, uint32_t, uint32_t>(), py::arg("offscreen_only"),
+           py::arg("max_num_materials"), py::arg("max_num_textures"),
+           py::arg("default_mipmap_levels"))
+      .def_static("set_shader_dir", &Renderer::setDefaultShaderDirectory, py::arg("shader_dir"))
+      .def("set_log_lvel", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
+      .def(
+          "create_window",
+          [](Renderer::SVulkan2Renderer &renderer, std::string const &shaderDir) {
+            return new Renderer::SVulkan2Window(renderer, shaderDir);
+          },
+          py::arg("shader_dir") = "");
+  PyVulkanCamera
+      .def(
+          "get_float_texture",
+          [](Renderer::SVulkan2Camera &cam, std::string const &name) {
+            auto [image, sizes] = cam.getFloatTexture(name);
+            if (sizes[2] == 1) {
+              return py::array_t<float>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1])},
+                                        image.data());
+            } else {
+              return py::array_t<float>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
+                                         static_cast<int>(sizes[2])},
+                                        image.data());
+            }
+          },
+          py::arg("texture_name"))
+      .def(
+          "get_uint32_texture",
+          [](Renderer::SVulkan2Camera &cam, std::string const &name) {
+            auto [image, sizes] = cam.getUint32Texture(name);
+            if (sizes[2] == 1) {
+              return py::array_t<uint32_t>(
+                  {static_cast<int>(sizes[0]), static_cast<int>(sizes[1])}, image.data());
+            } else {
+              return py::array_t<uint32_t>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
+                                            static_cast<int>(sizes[2])},
+                                           image.data());
+            }
+          },
+          py::arg("texture_name"))
       .def("get_camera_matrix",
-           [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getCameraMatrix()); })
+           [](Renderer::SVulkan2Camera &c) { return mat42array(c.getCameraMatrix()); })
       .def("get_model_matrix",
-           [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getModelMatrix()); })
+           [](Renderer::SVulkan2Camera &c) { return mat42array(c.getModelMatrix()); })
       .def("get_projection_matrix",
-           [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getProjectionMatrix()); })
-      .def("set_mode_orthographic", &Renderer::SapienVulkanCamera::changeModeToOrthographic,
-           py::arg("scaling") = 1.f)
-      .def("set_mode_perspective", &Renderer::SapienVulkanCamera::changeModeToPerspective,
-           py::arg("fovy") = glm::radians(35.f));
+           [](Renderer::SVulkan2Camera &c) { return mat42array(c.getProjectionMatrix()); })
+      .def("set_mode_orthographic", &Renderer::SVulkan2Camera::changeModeToOrthographic,
+           py::arg("scale"))
+      .def("set_mode_perspective", &Renderer::SVulkan2Camera::changeModeToPerspective,
+           py::arg("fovy"));
 
-#ifdef ON_SCREEN
-  PySapienVulkanController.def(py::init<Renderer::SapienVulkanRenderer *>(), py::arg("renderer"))
-      .def_property_readonly("is_closed", &Renderer::SapienVulkanController::isClosed)
-      .def("render", &Renderer::SapienVulkanController::render)
-      .def("set_current_scene", &Renderer::SapienVulkanController::setScene, py::arg("scene"))
-
-      // UI control
-      .def(
-          "select_actor",
-          [](Renderer::SapienVulkanController &c, SActorBase *actor) {
-            c.selectActor(actor->getId());
-          },
-          py::arg("actor"))
-      .def(
-          "focus_actor",
-          [](Renderer::SapienVulkanController &c, SActorBase *actor) {
-            c.focusActor(actor->getId());
-          },
-          py::arg("actor"))
-      .def(
-          "view_from_camera",
-          [](Renderer::SapienVulkanController &c, uint32_t camera_index) {
-            c.viewFromCamera(camera_index);
-          },
-          py::arg("camera_index"))
-      .def("pause", &Renderer::SapienVulkanController::pause, py::arg("p") = true)
-      .def("set_free_camera_position", &Renderer::SapienVulkanController::setFreeCameraPosition,
-           py::arg("x"), py::arg("y"), py::arg("z"))
-      .def("set_free_camera_rotation", &Renderer::SapienVulkanController::setFreeCameraRotation,
-           py::arg("yaw"), py::arg("pitch"), py::arg("roll"))
-      .def("set_default_control", &Renderer::SapienVulkanController::setDefaultControl,
-           py::arg("mouse"), py::arg("keyboard"))
-      .def("close", &Renderer::SapienVulkanController::close)
-
-      // input
-      .def("mouse_down", &Renderer::SapienVulkanController::mouseDown, py::arg("key_code") = 0)
-      .def("mouse_click", &Renderer::SapienVulkanController::mouseClick, py::arg("key_code") = 0)
-      .def("key_down", &Renderer::SapienVulkanController::keyDown, py::arg("key"))
-      .def("key_press", &Renderer::SapienVulkanController::keyPressed, py::arg("key"))
-      .def_property_readonly("mouse_pos", &Renderer::SapienVulkanController::getMousePos)
-      .def_property_readonly("mouse_delta", &Renderer::SapienVulkanController::getMouseDelta)
-      .def_property_readonly("wheel_delta", &Renderer::SapienVulkanController::getMouseWheelDelta);
-
-#endif
+  PyVulkanWindow.def("render", &Renderer::SVulkan2Window::render,
+                     py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>());
 
   PyRenderScene
       .def(
@@ -1507,6 +1556,7 @@ void buildSapien(py::module &m) {
       .def_property_readonly(
           "mesh", [](Renderer::RenderShape &shape) { return shape.geometry.get(); },
           py::return_value_policy::reference);
+
   PyRenderMeshGeometry
       .def_property_readonly("vertices",
                              [](Renderer::RenderMeshGeometry &geom) {
@@ -1540,6 +1590,4 @@ void buildSapien(py::module &m) {
                              })
       .def_property_readonly(
           "indices", [](Renderer::RenderMeshGeometry &geom) { return make_array(geom.indices); });
-
-#endif
 }

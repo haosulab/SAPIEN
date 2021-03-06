@@ -1,8 +1,6 @@
 #include "articulation/articulation_builder.h"
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_link.h"
-// #include "renderer/sapien_vulkan_controller.h"
-// #include "renderer/sapien_vulkan_renderer.h"
 #include "renderer/svulkan2_renderer.h"
 #include "renderer/svulkan2_window.h"
 #include "sapien_actor.h"

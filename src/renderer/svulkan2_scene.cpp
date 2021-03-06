@@ -202,8 +202,8 @@ ICamera *SVulkan2Scene::addCamera(std::string const &name, uint32_t width, uint3
         "Current camera implementation does not support non-square"
         "pixels, and fovy will be used. Set fovx to 0 to suppress this warning");
   }
-  auto cam =
-      std::make_unique<SVulkan2Camera>(name, width, height, fovy, near, far, this, shaderDir);
+  std::string shader = shaderDir.length() ? shaderDir : gDefaultShaderDirectory;
+  auto cam = std::make_unique<SVulkan2Camera>(name, width, height, fovy, near, far, this, shader);
   mCameras.push_back(std::move(cam));
   return mCameras.back().get();
 }

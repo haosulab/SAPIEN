@@ -1,12 +1,12 @@
 #pragma once
-
+#include "svulkan2/ui/ui.h"
 #include "svulkan2_renderer.h"
 
 namespace sapien {
 namespace Renderer {
 
 #ifdef _DEBUG
-class FPSCameraController {
+class FPSCameraControllerDebug {
   svulkan2::scene::Node *mCamera;
   glm::vec3 mRPY{0, 0, 0};
   glm::vec3 mXYZ{0, 0, 0};
@@ -20,7 +20,7 @@ class FPSCameraController {
   void update();
 
 public:
-  FPSCameraController(svulkan2::scene::Node &node, glm::vec3 const &forward, glm::vec3 const &up);
+  FPSCameraControllerDebug(svulkan2::scene::Node &node, glm::vec3 const &forward, glm::vec3 const &up);
 
   void setRPY(float roll, float pitch, float yaw);
   void setXYZ(float x, float y, float z);
@@ -35,6 +35,7 @@ public:
 
 class SVulkan2Window {
   SVulkan2Renderer *mRenderer{};
+  std::string mShaderDir{};
   std::unique_ptr<svulkan2::renderer::Renderer> mSVulkanRenderer{};
   SVulkan2Scene *mScene{};
 
@@ -47,14 +48,14 @@ class SVulkan2Window {
   bool mClosed{};
 
 #ifdef _DEBUG
-  std::unique_ptr<FPSCameraController> mCameraController{};
+  std::unique_ptr<FPSCameraControllerDebug> mCameraController{};
 #endif
 public:
-  explicit SVulkan2Window(SVulkan2Renderer &renderer);
+  SVulkan2Window(SVulkan2Renderer &renderer, std::string const &shaderDir);
   ~SVulkan2Window();
   void setScene(SVulkan2Scene *scene);
 
-  void render();
+  void render(std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows = {});
   void show();
   void hide();
 

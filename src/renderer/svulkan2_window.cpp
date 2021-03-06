@@ -4,36 +4,36 @@ namespace sapien {
 namespace Renderer {
 
 #ifdef _DEBUG
-FPSCameraController::FPSCameraController(svulkan2::scene::Node &node, glm::vec3 const &forward,
+FPSCameraControllerDebug::FPSCameraControllerDebug(svulkan2::scene::Node &node, glm::vec3 const &forward,
                                          glm::vec3 const &up)
     : mCamera(&node), mForward(glm::normalize(forward)), mUp(glm::normalize(up)),
       mLeft(glm::cross(mUp, mForward)) {
   mInitialRotation = glm::mat3(-mLeft, mUp, -mForward);
 }
 
-void FPSCameraController::setRPY(float roll, float pitch, float yaw) {
+void FPSCameraControllerDebug::setRPY(float roll, float pitch, float yaw) {
   mRPY = {roll, pitch, yaw};
   update();
 }
 
-void FPSCameraController::setXYZ(float x, float y, float z) {
+void FPSCameraControllerDebug::setXYZ(float x, float y, float z) {
   mXYZ = {x, y, z};
   update();
 }
 
-void FPSCameraController::move(float forward, float left, float up) {
+void FPSCameraControllerDebug::move(float forward, float left, float up) {
   auto pose = glm::angleAxis(mRPY.z, mUp) * glm::angleAxis(-mRPY.y, mLeft) *
               glm::angleAxis(mRPY.x, mForward);
   mXYZ += pose * mForward * forward + pose * mLeft * left + pose * mUp * up;
   update();
 }
 
-void FPSCameraController::rotate(float roll, float pitch, float yaw) {
+void FPSCameraControllerDebug::rotate(float roll, float pitch, float yaw) {
   mRPY += glm::vec3{roll, pitch, yaw};
   update();
 }
 
-void FPSCameraController::update() {
+void FPSCameraControllerDebug::update() {
   mRPY.y = std::clamp(mRPY.y, -1.57f, 1.57f);
   if (mRPY.z >= 3.15) {
     mRPY.z -= 2 * glm::pi<float>();
@@ -47,9 +47,10 @@ void FPSCameraController::update() {
 }
 #endif
 
-SVulkan2Window::SVulkan2Window(SVulkan2Renderer &renderer) : mRenderer(&renderer) {
+SVulkan2Window::SVulkan2Window(SVulkan2Renderer &renderer, std::string const &shaderDir)
+    : mRenderer(&renderer), mShaderDir(shaderDir) {
   auto config = std::make_shared<svulkan2::RendererConfig>();
-  config->shaderDir = "../shader/full";
+  config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultShaderDirectory;
   config->colorFormat = vk::Format::eR32G32B32A32Sfloat;
   mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(*mRenderer->mContext, config);
 
@@ -86,7 +87,7 @@ void SVulkan2Window::show() { glfwShowWindow(mWindow->getGLFWWindow()); }
 
 void SVulkan2Window::setScene(SVulkan2Scene *scene) { mScene = scene; }
 
-void SVulkan2Window::render() {
+void SVulkan2Window::render(std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows) {
   if (!mScene) {
     return;
   }
@@ -107,7 +108,10 @@ void SVulkan2Window::render() {
 
   mWindow->newFrame();
   ImGui::NewFrame();
-  ImGui::ShowDemoWindow();
+  // ImGui::ShowDemoWindow();
+  for (auto w : uiWindows) {
+    w->build();
+  }
   ImGui::Render();
   mRenderer->mContext->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE, UINT64_MAX);
   mRenderer->mContext->getDevice().resetFences(mSceneRenderFence.get());
@@ -135,7 +139,7 @@ void SVulkan2Window::render() {
 #ifdef _DEBUG
   if (!mCameraController) {
     mCameraController =
-        std::make_unique<FPSCameraController>(*camera, glm::vec3{1, 0, 0}, glm::vec3{0, 0, 1});
+        std::make_unique<FPSCameraControllerDebug>(*camera, glm::vec3{1, 0, 0}, glm::vec3{0, 0, 1});
     mCameraController->move(0, 0, 0);
   }
   float r = 1e-1;
