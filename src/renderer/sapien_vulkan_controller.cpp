@@ -561,6 +561,7 @@ void SapienVulkanController::render() {
       return;
     }
 
+    // Set the current camera information to HUD
     mHudControlWindow.mHudCameraInfo.mPosition = mCamera->position;
     mHudControlWindow.mHudCameraInfo.mRotation = mCamera->rotation;
     mHudControlWindow.mHudCameraInfo.mNear = mCamera->near;
@@ -662,18 +663,20 @@ void SapienVulkanController::render() {
       if (mWindow->isKeyDown('q')) {
         mWindow->close();
       }
-      float r = frameRate > 0 ? std::clamp(1 / frameRate, 0.f, 1.f) : 0.f;
 
+      float r = frameRate > 0 ? std::clamp(1 / frameRate, 0.f, 1.f) : 0.f;
       r *= mHudControlWindow.mHudControl.mMoveSpeed;
+      
+      // Move camera by w/s/a/d
       if (mWindow->isKeyDown('w')) {
         viewFromCamera(0);
         focusActor(0);
-        mFPSController->move(r, 0, 0);
+        mFPSController->move(0, 0, r);
       }
       if (mWindow->isKeyDown('s')) {
         viewFromCamera(0);
         focusActor(0);
-        mFPSController->move(-r, 0, 0);
+        mFPSController->move(0, 0, -r);
       }
       if (mWindow->isKeyDown('a')) {
         viewFromCamera(0);
@@ -685,6 +688,30 @@ void SapienVulkanController::render() {
         focusActor(0);
         mFPSController->move(0, -r, 0);
       }
+
+      // Move camera by up/down/left/right arrow
+      if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_UpArrow))) {
+        viewFromCamera(0);
+        focusActor(0);
+        mFPSController->move(r, 0, 0);
+      }
+      if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_DownArrow))) {
+        viewFromCamera(0);
+        focusActor(0);
+        mFPSController->move(-r, 0, 0);
+      }
+      if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_LeftArrow))) {
+        viewFromCamera(0);
+        focusActor(0);
+        mFPSController->move(0, r, 0);
+      }
+      if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_RightArrow))) {
+        viewFromCamera(0);
+        focusActor(0);
+        mFPSController->move(0, -r, 0);
+      }
+
+      // Focus on the selected object
       if (mWindow->isKeyPressed('f')) {
         viewFromCamera(0);
         focusActor(0);
@@ -708,10 +735,14 @@ void SapienVulkanController::render() {
 
         auto p = focusedActor->getPose().p;
         mArcRotateController->setCenter(p.x, p.y, p.z);
-
         mArcRotateController->zoom(mWindow->getMouseWheelDelta().x);
+      } else {
+        // If not focus, move forward or backward.
+        auto forward_step = mWindow->getMouseWheelDelta().x * (r * mHudControlWindow.mHudControl.mMoveSpeed);
+        mFPSController->move(forward_step, 0, 0);
       }
 
+      // Right-click
       if (mWindow->isMouseKeyDown(1)) {
         viewFromCamera(0);
         auto [x, y] = mWindow->getMouseDelta();
@@ -727,6 +758,7 @@ void SapienVulkanController::render() {
         }
       }
 
+      // Left click
       if (mWindow->isMouseKeyDown(0)) {
         auto [x, y] = mWindow->getMousePosition();
 #ifdef _USE_MACOSX
