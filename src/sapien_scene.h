@@ -190,7 +190,8 @@ public:
                           std::shared_ptr<SPhysicalMaterial> material = nullptr,
                           Renderer::PxrMaterial const &renderMaterial = {});
 
-  inline std::shared_ptr<SPhysicalMaterial> getDefaultMaterial() { return mDefaultMaterial; }
+  inline std::shared_ptr<SPhysicalMaterial> getDefaultMaterial() const { return mDefaultMaterial; }
+  inline void setDefaultMaterial(std::shared_ptr<SPhysicalMaterial> material) { mDefaultMaterial = material; }
 
   std::map<physx_id_t, std::string> findRenderId2VisualName() const;
 

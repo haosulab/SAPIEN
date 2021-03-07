@@ -1024,6 +1024,14 @@ class Scene():
     @timestep.setter
     def timestep(self, arg1: float) -> None:
         pass
+    @property
+    def default_physical_material(self) -> PhysicalMaterial:
+        """
+        :type: PhysicalMaterial
+        """
+    @default_physical_material.setter
+    def default_physical_material(self, arg0: PhysicalMaterial) -> None:
+        pass
     pass
 class SceneConfig():
     def __init__(self) -> None: ...

@@ -567,6 +567,7 @@ void buildSapien(py::module &m) {
       .def("set_timestep", &SScene::setTimestep, py::arg("second"))
       .def("get_timestep", &SScene::getTimestep)
       .def_property("timestep", &SScene::getTimestep, &SScene::setTimestep)
+      .def_property("default_physical_material", &SScene::getDefaultMaterial, &SScene::setDefaultMaterial)
       .def("create_actor_builder", &SScene::createActorBuilder)
       .def("create_articulation_builder", &SScene::createArticulationBuilder)
       .def("create_urdf_loader", &SScene::createURDFLoader)
