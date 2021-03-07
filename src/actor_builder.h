@@ -99,7 +99,7 @@ public:
                                        PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
   void addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                   const PxVec3 &size = {1, 1, 1},
+                   const PxVec3 &halfSize = {1, 1, 1},
                    std::shared_ptr<SPhysicalMaterial> material = nullptr, PxReal density = 1000.f,
                    PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
@@ -116,13 +116,13 @@ public:
 
   /* Visual functions */
   void addBoxVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                                const PxVec3 &size = {1, 1, 1},
+                                const PxVec3 &halfSize = {1, 1, 1},
                                 const Renderer::PxrMaterial &material = {},
                                 std::string const &name = "");
   inline void addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                           const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
+                           const PxVec3 &halfSize = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
                            std::string const &name = "") {
-    addBoxVisualWithMaterial(pose, size, {{color.x, color.y, color.z, 1}}, name);
+    addBoxVisualWithMaterial(pose, halfSize, {{color.x, color.y, color.z, 1}}, name);
   }
 
   void addCapsuleVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},

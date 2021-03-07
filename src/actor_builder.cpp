@@ -64,13 +64,13 @@ void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
   mShapeRecord.push_back(r);
 }
 
-void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size,
+void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &halfSize,
                                std::shared_ptr<SPhysicalMaterial> material, PxReal density,
                                PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Box;
   r.pose = pose;
-  r.scale = size;
+  r.scale = halfSize;
   r.material = material;
   r.density = density;
   r.patchRadius = patchRadius;
@@ -113,13 +113,13 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius,
   mShapeRecord.push_back(r);
 }
 
-void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &size,
+void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &halfSize,
                                             const Renderer::PxrMaterial &material,
                                             std::string const &name) {
   VisualRecord r;
   r.type = VisualRecord::Type::Box;
   r.pose = pose;
-  r.scale = size;
+  r.scale = halfSize;
   r.material = material;
   r.name = name;
 

@@ -1087,14 +1087,15 @@ void buildSapien(py::module &m) {
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
           "add_box_shape",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
+          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
              PxReal minPatchRadius, bool isTrigger) {
-            a.addBoxShape(pose, array2vec3(size), material, density, patchRadius, minPatchRadius,
+            a.addBoxShape(pose, array2vec3(halfSize), material, density, patchRadius, minPatchRadius,
                           isTrigger);
           },
           py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("half_size") = make_array<PxReal>({1, 1, 1}), 
+          py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def("add_capsule_shape", &ActorBuilder::addCapsuleShape,
@@ -1106,24 +1107,24 @@ void buildSapien(py::module &m) {
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
            py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
-
       .def(
           "add_box_visual",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
+          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              py::array_t<PxReal> color, std::string const &name) {
-            a.addBoxVisual(pose, array2vec3(size), array2vec3(color), name);
+            a.addBoxVisual(pose, array2vec3(halfSize), array2vec3(color), name);
           },
           py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("size") = make_array<PxReal>({1, 1, 1}),
-          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+          py::arg("half_size") = make_array<PxReal>({1, 1, 1}),
+          py::arg("color") = make_array<PxReal>({1, 1, 1}), 
+          py::arg("name") = "")
       .def(
           "add_box_visual_complex",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
+          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              const Renderer::PxrMaterial &mat, std::string const &name) {
-            a.addBoxVisualWithMaterial(pose, array2vec3(size), mat, name);
+            a.addBoxVisualWithMaterial(pose, array2vec3(halfSize), mat, name);
           },
           py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("size") = make_array<PxReal>({1, 1, 1}),
+          py::arg("half_size") = make_array<PxReal>({1, 1, 1}),
           py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
       .def(
           "add_capsule_visual",
