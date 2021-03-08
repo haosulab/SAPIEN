@@ -44,6 +44,7 @@ private:
   uint32_t mThreadCount = 0;
   Renderer::IPxrRenderer *mRenderer = nullptr;
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
+  std::vector<SScene*> mScenes;
 
 private:
   MeshManager mMeshManager;
@@ -53,6 +54,7 @@ public:
 
 public:
   std::unique_ptr<SScene> createScene(SceneConfig const &config = {});
+  void removeScene(SScene *mScene);
 
 #ifdef _PVD
   PxPvd *mPvd = nullptr;

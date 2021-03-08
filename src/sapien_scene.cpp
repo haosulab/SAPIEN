@@ -59,6 +59,7 @@ SScene::~SScene() {
     }
     mPxScene->release();
   }
+  mSimulation->removeScene(this);
 }
 
 void SScene::addActor(std::unique_ptr<SActorBase> actor) {

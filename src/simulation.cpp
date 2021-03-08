@@ -94,6 +94,12 @@ Simulation::~Simulation() {
   mCooking->release();
   PxCloseExtensions();
   mPhysicsSDK->release();
+
+  // Make sure that when the engine is deleted, all the scenes are closed first.
+  for (auto mScene: mScenes) {
+    delete mScene;
+  }
+  mScenes.clear();
 #ifdef _PVD
   if (mPvd && mTransport) {
     mTransport->disconnect();
@@ -150,8 +156,20 @@ std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
   sceneDesc.cpuDispatcher = mCpuDispatcher;
 
   PxScene *pxScene = mPhysicsSDK->createScene(sceneDesc);
+  std::unique_ptr<SScene> mScene = std::make_unique<SScene>(this, pxScene, config);
+  // TODO(jigu): alternative to not use raw pointer
+  mScenes.push_back(mScene.get());
 
-  return std::make_unique<SScene>(this, pxScene, config);
+  return mScene;
+}
+
+void Simulation::removeScene(SScene *mScene) {
+  for (auto iter = mScenes.begin(); iter < mScenes.end(); ++iter) {
+    if (*iter == mScene) {
+      mScenes.erase(iter);
+      break;
+    }
+  }
 }
 
 void Simulation::setLogLevel(std::string const &level) {
