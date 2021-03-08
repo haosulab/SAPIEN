@@ -7,5 +7,7 @@
 using namespace sapien;
 namespace py = pybind11;
 
-PYBIND11_MODULE(pysapien_renderer, m) { buildRenderer(m); }
-PYBIND11_MODULE(pysapien, m) { buildSapien(m); }
+PYBIND11_MODULE(pysapien, m) {
+  buildRenderer(m);
+  buildSapien(m);
+}

@@ -4,8 +4,8 @@ namespace sapien {
 namespace Renderer {
 
 #ifdef _DEBUG
-FPSCameraControllerDebug::FPSCameraControllerDebug(svulkan2::scene::Node &node, glm::vec3 const &forward,
-                                         glm::vec3 const &up)
+FPSCameraControllerDebug::FPSCameraControllerDebug(svulkan2::scene::Node &node,
+                                                   glm::vec3 const &forward, glm::vec3 const &up)
     : mCamera(&node), mForward(glm::normalize(forward)), mUp(glm::normalize(up)),
       mLeft(glm::cross(mUp, mForward)) {
   mInitialRotation = glm::mat3(-mLeft, mUp, -mForward);
@@ -87,24 +87,24 @@ void SVulkan2Window::show() { glfwShowWindow(mWindow->getGLFWWindow()); }
 
 void SVulkan2Window::setScene(SVulkan2Scene *scene) { mScene = scene; }
 
-void SVulkan2Window::render(std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows) {
+void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {
+  getCamera()->setPerspectiveParameters(
+      near, far, fovy, static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
+}
+void SVulkan2Window::setCameraPosition(glm::vec3 const &pos) { getCamera()->setPosition(pos); }
+void SVulkan2Window::setCameraRotation(glm::quat const &rot) { getCamera()->setRotation(rot); }
+
+std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
+  return mSVulkanRenderer->getDisplayTargetNames();
+}
+
+void SVulkan2Window::render(std::string const &targetName,
+                            std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows) {
   if (!mScene) {
     return;
   }
 
-  auto cams = mScene->getScene()->getCameras();
-  svulkan2::scene::Camera *camera{};
-  for (auto cam : cams) {
-    if (cam->getName() == "_controller") {
-      camera = cam;
-    }
-  }
-  if (!camera) {
-    camera = &mScene->getScene()->addCamera();
-    camera->setPerspectiveParameters(0.1, 10, 1, 800.f / 600.f);
-    camera->setName("_controller");
-    camera->setPosition({-5, 0, 0});
-  }
+  svulkan2::scene::Camera *camera = getCamera();
 
   mWindow->newFrame();
   ImGui::NewFrame();
@@ -120,7 +120,7 @@ void SVulkan2Window::render(std::vector<std::shared_ptr<svulkan2::ui::Window>> u
     // draw
     mCommandBuffer->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
     mSVulkanRenderer->render(mCommandBuffer.get(), *mScene->getScene(), *camera);
-    mSVulkanRenderer->display(mCommandBuffer.get(), "Color", mWindow->getBackbuffer(),
+    mSVulkanRenderer->display(mCommandBuffer.get(), targetName, mWindow->getBackbuffer(),
                               mWindow->getBackBufferFormat(), mWindow->getWidth(),
                               mWindow->getHeight());
     mCommandBuffer->end();
@@ -138,8 +138,8 @@ void SVulkan2Window::render(std::vector<std::shared_ptr<svulkan2::ui::Window>> u
 
 #ifdef _DEBUG
   if (!mCameraController) {
-    mCameraController =
-        std::make_unique<FPSCameraControllerDebug>(*camera, glm::vec3{1, 0, 0}, glm::vec3{0, 0, 1});
+    mCameraController = std::make_unique<FPSCameraControllerDebug>(*camera, glm::vec3{1, 0, 0},
+                                                                   glm::vec3{0, 0, 1});
     mCameraController->move(0, 0, 0);
   }
   float r = 1e-1;
@@ -147,19 +147,19 @@ void SVulkan2Window::render(std::vector<std::shared_ptr<svulkan2::ui::Window>> u
     auto [x, y] = mWindow->getMouseDelta();
     mCameraController->rotate(0, -0.01 * y, -0.01 * x);
   }
-  if (mWindow->isKeyDown('w')) {
+  if (mWindow->isKeyDown("w")) {
     mCameraController->move(r, 0, 0);
   }
-  if (mWindow->isKeyDown('s')) {
+  if (mWindow->isKeyDown("s")) {
     mCameraController->move(-r, 0, 0);
   }
-  if (mWindow->isKeyDown('a')) {
+  if (mWindow->isKeyDown("a")) {
     mCameraController->move(0, r, 0);
   }
-  if (mWindow->isKeyDown('d')) {
+  if (mWindow->isKeyDown("d")) {
     mCameraController->move(0, -r, 0);
   }
-  if (mWindow->isKeyDown('q')) {
+  if (mWindow->isKeyDown("q")) {
     glfwSetWindowShouldClose(mWindow->getGLFWWindow(), 1);
   }
 #endif
@@ -167,6 +167,95 @@ void SVulkan2Window::render(std::vector<std::shared_ptr<svulkan2::ui::Window>> u
 
 bool SVulkan2Window::windowCloseRequested() {
   return glfwWindowShouldClose(mWindow->getGLFWWindow());
+}
+
+svulkan2::scene::Camera *SVulkan2Window::getCamera() {
+  if (!mScene) {
+    throw std::runtime_error("failed to operate camera, you need to set scene first.");
+  }
+  auto cams = mScene->getScene()->getCameras();
+  for (auto cam : cams) {
+    if (cam->getName() == "_controller") {
+      return cam;
+    }
+  }
+  auto camera = &mScene->getScene()->addCamera();
+  camera->setPerspectiveParameters(0.1, 10, 1,
+                                   static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
+  camera->setName("_controller");
+  camera->setPosition({0, 0, 0});
+  return camera;
+}
+
+std::tuple<std::vector<float>, std::array<uint32_t, 3>>
+SVulkan2Window::downloadFloatTarget(std::string const &name) {
+  auto format = mSVulkanRenderer->getRenderTarget(name)->getFormat();
+  if (format != vk::Format::eR32G32B32A32Sfloat && format != vk::Format::eD32Sfloat) {
+    throw std::runtime_error("failed to download: " + name + " is not a float render target.");
+  }
+  return mSVulkanRenderer->download<float>(name);
+}
+
+std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>
+SVulkan2Window::downloadUint32Target(std::string const &name) {
+  if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR32G32B32A32Uint) {
+    throw std::runtime_error("failed to download: " + name + " is not a uint32 render target.");
+  }
+  return mSVulkanRenderer->download<uint32_t>(name);
+}
+
+std::tuple<std::vector<uint8_t>, std::array<uint32_t, 3>>
+SVulkan2Window::downloadUint8Target(std::string const &name) {
+  if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR8G8B8A8Unorm) {
+    throw std::runtime_error("failed to download: " + name + " is not a uint8 render target.");
+  }
+  return mSVulkanRenderer->download<uint8_t>(name);
+}
+
+std::vector<float> SVulkan2Window::downloadFloatTargetPixel(std::string const &name, uint32_t x,
+                                                            uint32_t y) {
+  auto format = mSVulkanRenderer->getRenderTarget(name)->getFormat();
+  if (format != vk::Format::eR32G32B32A32Sfloat && format != vk::Format::eD32Sfloat) {
+    throw std::runtime_error("failed to download: " + name + " is not a float render target.");
+  }
+  return std::get<0>(mSVulkanRenderer->downloadRegion<float>(
+      name, vk::Offset2D{static_cast<int>(x), static_cast<int>(y)}, vk::Extent2D{1, 1}));
+}
+
+std::vector<uint32_t> SVulkan2Window::downloadUint32TargetPixel(std::string const &name,
+                                                                uint32_t x, uint32_t y) {
+  if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR32G32B32A32Uint) {
+    throw std::runtime_error("failed to download: " + name + " is not a uint32 render target.");
+  }
+  return std::get<0>(mSVulkanRenderer->downloadRegion<uint32_t>(
+      name, vk::Offset2D{static_cast<int>(x), static_cast<int>(y)}, vk::Extent2D{1, 1}));
+}
+
+std::vector<uint8_t> SVulkan2Window::downloadUint8TargetPixel(std::string const &name, uint32_t x,
+                                                              uint32_t y) {
+  if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR8G8B8A8Unorm) {
+    throw std::runtime_error("failed to download: " + name + " is not a uint8 render target.");
+  }
+  return std::get<0>(mSVulkanRenderer->downloadRegion<uint8_t>(
+      name, vk::Offset2D{static_cast<int>(x), static_cast<int>(y)}, vk::Extent2D{1, 1}));
+}
+
+bool SVulkan2Window::isKeyDown(std::string const &key) { return mWindow->isKeyDown(key); }
+bool SVulkan2Window::isKeyPressed(std::string const &key) { return mWindow->isKeyPressed(key); }
+bool SVulkan2Window::isMouseKeyDown(int key) { return mWindow->isMouseKeyDown(key); }
+bool SVulkan2Window::isMouseKeyClicked(int key) { return mWindow->isMouseKeyClicked(key); }
+
+std::array<float, 2> SVulkan2Window::getMousePosition() {
+  auto [x, y] = mWindow->getMousePosition();
+  return {x, y};
+}
+std::array<float, 2> SVulkan2Window::getMouseDelta() {
+  auto [x, y] = mWindow->getMouseDelta();
+  return {x, y};
+}
+std::array<float, 2> SVulkan2Window::getMouseWheelDelta() {
+  auto [x, y] = mWindow->getMouseDelta();
+  return {x, y};
 }
 
 } // namespace Renderer

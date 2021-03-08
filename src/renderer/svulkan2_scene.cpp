@@ -81,7 +81,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
                                            std::shared_ptr<IPxrMaterial> material) {
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
   if (!mat) {
-    throw std::runtime_error("rendering material not specified.");
+    mat = std::static_pointer_cast<SVulkan2Material>(mParentRenderer->createMaterial());
   }
   svulkan2::scene::Object *object;
   switch (type) {
@@ -144,7 +144,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &ver
                                            std::shared_ptr<IPxrMaterial> material) {
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
   if (!mat) {
-    throw std::runtime_error("rendering material not specified.");
+    mat = std::static_pointer_cast<SVulkan2Material>(mParentRenderer->createMaterial());
   }
 
   std::vector<float> vertices_;

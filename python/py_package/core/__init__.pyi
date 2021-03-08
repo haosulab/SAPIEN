@@ -42,14 +42,15 @@ from sapien.core.pysapien import LinkBuilder
 from sapien.core.pysapien import OptifuserCamera
 from sapien.core.pysapien import OptifuserConfig
 from sapien.core.pysapien import OptifuserController
+from sapien.core.pysapien import OptifuserMaterial
 from sapien.core.pysapien import OptifuserRenderer
 from sapien.core.pysapien import PhysicalMaterial
 from sapien.core.pysapien import PinocchioModel
 from sapien.core.pysapien import PlaneGeometry
 from sapien.core.pysapien import Pose
-from sapien.core.pysapien import PxrMaterial
 from sapien.core.pysapien import RenderBody
 from sapien.core.pysapien import RenderGeometry
+from sapien.core.pysapien import RenderMaterial
 from sapien.core.pysapien import RenderScene
 from sapien.core.pysapien import RenderShape
 from sapien.core.pysapien import Scene
@@ -62,11 +63,13 @@ from sapien.core.pysapien import Trigger
 from sapien.core.pysapien import URDFLoader
 from sapien.core.pysapien import VisualRecord
 from sapien.core.pysapien import VulkanCamera
-from sapien.core.pysapien import VulkanController
+from sapien.core.pysapien import VulkanMaterial
 from sapien.core.pysapien import VulkanRenderer
+from sapien.core.pysapien import VulkanWindow
 import os
 import pkg_resources
 import sapien.core.pysapien
+import sapien.core.pysapien.renderer
 import sys
 
 __all__ = [
@@ -118,6 +121,7 @@ __all__ = [
     "OptifuserCamera",
     "OptifuserConfig",
     "OptifuserController",
+    "OptifuserMaterial",
     "OptifuserRenderer",
     "PGS",
     "PRISMATIC",
@@ -126,10 +130,10 @@ __all__ = [
     "PinocchioModel",
     "PlaneGeometry",
     "Pose",
-    "PxrMaterial",
     "REVOLUTE",
     "RenderBody",
     "RenderGeometry",
+    "RenderMaterial",
     "RenderScene",
     "RenderShape",
     "SPHERICAL",
@@ -147,29 +151,31 @@ __all__ = [
     "URDFLoader",
     "VisualRecord",
     "VulkanCamera",
-    "VulkanController",
+    "VulkanMaterial",
     "VulkanRenderer",
+    "VulkanWindow",
     "enable_default_gl3",
     "enable_default_gl4",
     "os",
     "pkg_resources",
     "pysapien",
+    "renderer",
     "sys"
 ]
 
 
 DYNAMIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.DYNAMIC
 FIX: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.FIX
-GL_SHADER_ROOT = ''
+GL_SHADER_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/glsl_shader'
 KINEMATIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.KINEMATIC
 KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = ActorType.KINEMATIC_LINK
 LINK: sapien.core.pysapien.ActorType # value = ActorType.LINK
 PGS: sapien.core.pysapien.SolverType # value = SolverType.PGS
 PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.PRISMATIC
-PTX_ROOT = ''
+PTX_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/ptx'
 REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.REVOLUTE
 SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.SPHERICAL
-SPV_ROOT = ''
+SPV_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/spv'
 STATIC: sapien.core.pysapien.ActorType # value = ActorType.STATIC
 TGS: sapien.core.pysapien.SolverType # value = SolverType.TGS
 UNDEFINED: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.UNDEFINED

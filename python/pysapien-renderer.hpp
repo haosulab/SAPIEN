@@ -10,8 +10,8 @@ namespace py = pybind11;
 
 using namespace svulkan2;
 
-void buildRenderer(py::module &m) {
-  m.doc() = "SAPIEN Vulkan renderer module";
+void buildRenderer(py::module &parent) {
+  py::module m = parent.def_submodule("renderer");
 
   auto PyContext = py::class_<core::Context>(m, "Context");
   auto PySceneNode = py::class_<scene::Node>(m, "Node");
@@ -21,11 +21,16 @@ void buildRenderer(py::module &m) {
   auto PyModel = py::class_<resource::SVModel, std::shared_ptr<resource::SVModel>>(m, "Model");
   auto PyShape = py::class_<resource::SVShape, std::shared_ptr<resource::SVShape>>(m, "Shape");
   auto PyMesh = py::class_<resource::SVMesh, std::shared_ptr<resource::SVMesh>>(m, "Mesh");
+  auto PyTexture =
+      py::class_<resource::SVTexture, std::shared_ptr<resource::SVTexture>>(m, "Texture");
 
   auto PyUIWidget = py::class_<ui::Widget, std::shared_ptr<ui::Widget>>(m, "UIWidget");
   auto PyUIWindow = py::class_<ui::Window, ui::Widget, std::shared_ptr<ui::Window>>(m, "UIWindow");
   auto PyUICheckbox =
       py::class_<ui::Checkbox, ui::Widget, std::shared_ptr<ui::Checkbox>>(m, "UICheckbox");
+  auto PyUIRadioButtonGroup =
+      py::class_<ui::RadioButtonGroup, ui::Widget, std::shared_ptr<ui::RadioButtonGroup>>(
+          m, "UIRadioButtonGroup");
 
   auto PyUIDisplayText = py::class_<ui::DisplayText, ui::Widget, std::shared_ptr<ui::DisplayText>>(
       m, "UIDisplayText");
@@ -45,27 +50,44 @@ void buildRenderer(py::module &m) {
   auto PyUISliderAngle = py::class_<ui::SliderAngle, ui::Widget, std::shared_ptr<ui::SliderAngle>>(
       m, "UISliderAngle");
 
+  PyUIWidget.def("remove", &ui::Widget::remove);
   // UI
-  PyUIWindow.def("Name", &ui::Window::Name, py::arg("name"))
+  PyUIWindow.def("Label", &ui::Window::Label, py::arg("Label"))
       .def(py::init<>())
       .def(
           "Pos",
           [](ui::Window &window, float x, float y) {
-            window.Pos({x, y});
+            return window.Pos({x, y});
           },
           py::arg("x"), py::arg("y"))
       .def(
           "Size",
           [](ui::Window &window, float x, float y) {
-            window.Size({x, y});
+            return window.Size({x, y});
           },
-          py::arg("x"), py::arg("y"));
+          py::arg("x"), py::arg("y"))
+      .def("append", [](ui::Window &window, py::args args) {
+        if (args.size() == 0) {
+          throw std::runtime_error("append must take 1 or more arguments");
+        }
+        std::shared_ptr<ui::Window> result;
+        for (auto &arg : args) {
+          auto widget = arg.cast<std::shared_ptr<ui::Widget>>();
+          result = window.append(widget);
+        }
+        return result;
+      });
 
   PyUICheckbox.def(py::init<>())
       .def("Label", &ui::Checkbox::Label, py::arg("label"))
       .def("Checked", &ui::Checkbox::Checked, py::arg("checked"))
       .def("Callback", &ui::Checkbox::Callback, py::arg("func"))
       .def_property_readonly("checked", &ui::Checkbox::get);
+  PyUIRadioButtonGroup.def(py::init<>())
+      .def("Labels", &ui::RadioButtonGroup::Labels, py::arg("labels"))
+      .def("Callback", &ui::RadioButtonGroup::Callback, py::arg("func"))
+      .def_property_readonly("value", &ui::RadioButtonGroup::get)
+      .def_property_readonly("index", &ui::RadioButtonGroup::getIndex);
 
   PyUIDisplayText.def(py::init<>()).def("Text", &ui::DisplayText::Text, py::arg("text"));
 
@@ -150,8 +172,6 @@ void buildRenderer(py::module &m) {
                  {baseColor.at(0), baseColor.at(1), baseColor.at(2), baseColor.at(3)}, fresnel,
                  roughness, metallic, 0.f);
            })
-      .def("get_resource_manager", &core::Context::getResourceManager,
-           py::return_value_policy::reference)
       .def(
           "create_model_from_file",
           [](core::Context &context, std::string const &filename) {

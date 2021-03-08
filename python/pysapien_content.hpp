@@ -151,7 +151,10 @@ void buildSapien(py::module &m) {
   auto PyRenderMaterial =
       py::class_<Renderer::IPxrMaterial, std::shared_ptr<Renderer::IPxrMaterial>>(
           m, "RenderMaterial");
-  py::class_<Renderer::IPxrRenderer>(m, "IPxrRenderer");
+  auto PyOptifuserMaterial =
+      py::class_<Renderer::PxrMaterial, Renderer::IPxrMaterial,
+                 std::shared_ptr<Renderer::PxrMaterial>>(m, "OptifuserMaterial");
+  auto PyRenderer = py::class_<Renderer::IPxrRenderer>(m, "IPxrRenderer");
   auto PyRenderScene = py::class_<Renderer::IPxrScene>(m, "RenderScene");
   auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
   auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
@@ -211,6 +214,9 @@ void buildSapien(py::module &m) {
 
   auto PyVulkanRenderer =
       py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer>(m, "VulkanRenderer");
+  auto PyVulkanMaterial =
+      py::class_<Renderer::SVulkan2Material, Renderer::IPxrMaterial,
+                 std::shared_ptr<Renderer::SVulkan2Material>>(m, "VulkanMaterial");
   auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m, "VulkanCamera");
   auto PyVulkanWindow = py::class_<Renderer::SVulkan2Window>(m, "VulkanWindow");
 
@@ -345,22 +351,16 @@ void buildSapien(py::module &m) {
           py::return_value_policy::reference);
 
   //======== Render Interface ========//
-  // PyRenderMaterial.def(py::init<>())
-  //     .def(
-  //         "set_base_color",
-  //         [](Renderer::PxrMaterial &mat, py::array_t<float> color) {
-  //           mat.base_color = {color.at(0), color.at(1), color.at(2), color.at(3)};
-  //         },
-  //         py::arg("rgba"))
-  //     .def_property_readonly("base_color",
-  //                            [](Renderer::PxrMaterial &mat) {
-  //                              return make_array<float>({mat.base_color[0], mat.base_color[1],
-  //                                                        mat.base_color[2], mat.base_color[3]});
-  //                            })
-  //     .def_readwrite("specular", &Renderer::PxrMaterial::specular)
-  //     .def_readwrite("roughness", &Renderer::PxrMaterial::roughness)
-  //     .def_readwrite("metallic", &Renderer::PxrMaterial::metallic)
-  //     .def("__repr__", [](Renderer::PxrMaterial &m) { return "PxrMaterial()"; })
+  PyRenderMaterial
+      .def(
+          "set_base_color",
+          [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+            mat.setBaseColor({color.at(0), color.at(1), color.at(2), color.at(3)});
+          },
+          py::arg("rgba"))
+      .def("set_specular", &Renderer::IPxrMaterial::setSpecular, py::arg("specular"))
+      .def("set_metallic", &Renderer::IPxrMaterial::setMetallic, py::arg("metallic"))
+      .def("set_roughness", &Renderer::IPxrMaterial::setRoughness, py::arg("roughness"));
 
   //     // TODO: implement those together with UV
   //     // .def_readwrite("color_texture", &Renderer::PxrMaterial::color_texture)
@@ -1115,8 +1115,8 @@ void buildSapien(py::module &m) {
             a.addBoxVisualWithMaterial(pose, array2vec3(size), mat, name);
           },
           py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("size") = make_array<PxReal>({1, 1, 1}),
-          py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
+          py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("name") = "")
       // .def(
       //     "add_capsule_visual",
       //     [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
@@ -1133,8 +1133,7 @@ void buildSapien(py::module &m) {
             a.addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
           },
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("half_length") = 1, py::arg("material") = Renderer::PxrMaterial(),
-          py::arg("name") = "")
+          py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("name") = "")
       // .def(
       //     "add_sphere_visual",
       //     [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
@@ -1149,7 +1148,7 @@ void buildSapien(py::module &m) {
              std::shared_ptr<Renderer::IPxrMaterial> &mat,
              std::string const &name) { a.addSphereVisualWithMaterial(pose, radius, mat, name); },
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("material") = Renderer::PxrMaterial(), py::arg("name") = "")
+          py::arg("material") = nullptr, py::arg("name") = "")
       .def(
           "add_visual_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
@@ -1453,9 +1452,9 @@ void buildSapien(py::module &m) {
   // #endif
 
   PyVulkanRenderer
-      .def(py::init<bool, uint32_t, uint32_t, uint32_t>(), py::arg("offscreen_only"),
-           py::arg("max_num_materials"), py::arg("max_num_textures"),
-           py::arg("default_mipmap_levels"))
+      .def(py::init<bool, uint32_t, uint32_t, uint32_t>(), py::arg("offscreen_only") = false,
+           py::arg("max_num_materials") = 5000, py::arg("max_num_textures") = 5000,
+           py::arg("default_mipmap_levels") = 1)
       .def_static("set_shader_dir", &Renderer::setDefaultShaderDirectory, py::arg("shader_dir"))
       .def("set_log_lvel", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
       .def(
@@ -1504,8 +1503,109 @@ void buildSapien(py::module &m) {
       .def("set_mode_perspective", &Renderer::SVulkan2Camera::changeModeToPerspective,
            py::arg("fovy"));
 
-  PyVulkanWindow.def("render", &Renderer::SVulkan2Window::render,
-                     py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>());
+  PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
+      .def("hide", &Renderer::SVulkan2Window::hide)
+      .def("set_camera_parameters", &Renderer::SVulkan2Window::setCameraParameters,
+           py::arg("near"), py::arg("far"), py::arg("fovy"))
+      .def(
+          "set_camera_position",
+          [](Renderer::SVulkan2Window &window, py::array_t<float> position) {
+            window.setCameraPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def(
+          "set_camera_rotation",
+          [](Renderer::SVulkan2Window &window, py::array_t<float> quat) {
+            window.setCameraRotation({quat.at(0), quat.at(1), quat.at(2), quat.at(3)});
+          },
+          py::arg("quat"))
+      .def(
+          "set_scene",
+          [](Renderer::SVulkan2Window &window, SScene *scene) {
+            if (!scene) {
+              window.setScene(nullptr);
+            }
+            auto rs = dynamic_cast<Renderer::SVulkan2Scene *>(scene->getRendererScene());
+            window.setScene(rs);
+          },
+          py::arg("scene"))
+      .def_property_readonly("target_names", &Renderer::SVulkan2Window::getDisplayTargetNames)
+      .def("render", &Renderer::SVulkan2Window::render, py::arg("target_name"),
+           py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>())
+
+      // Download images from window
+      .def(
+          "download_float_target",
+          [](Renderer::SVulkan2Window &window, std::string const &name) {
+            auto [image, sizes] = window.downloadFloatTarget(name);
+            if (sizes[2] == 1) {
+              return py::array_t<float>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1])},
+                                        image.data());
+            } else {
+              return py::array_t<float>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
+                                         static_cast<int>(sizes[2])},
+                                        image.data());
+            }
+          },
+          py::arg("name"))
+      .def(
+          "download_uint32_target",
+          [](Renderer::SVulkan2Window &window, std::string const &name) {
+            auto [image, sizes] = window.downloadUint32Target(name);
+            if (sizes[2] == 1) {
+              return py::array_t<uint32_t>(
+                  {static_cast<int>(sizes[0]), static_cast<int>(sizes[1])}, image.data());
+            } else {
+              return py::array_t<uint32_t>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
+                                            static_cast<int>(sizes[2])},
+                                           image.data());
+            }
+          },
+          py::arg("name"))
+      .def(
+          "download_uint8_target",
+          [](Renderer::SVulkan2Window &window, std::string const &name) {
+            auto [image, sizes] = window.downloadUint8Target(name);
+            if (sizes[2] == 1) {
+              return py::array_t<uint8_t>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1])},
+                                          image.data());
+            } else {
+              return py::array_t<uint8_t>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
+                                           static_cast<int>(sizes[2])},
+                                          image.data());
+            }
+          },
+          py::arg("name"))
+      .def(
+          "download_float_target_pixel",
+          [](Renderer::SVulkan2Window &window, std::string const &name, uint32_t x, uint32_t y) {
+            auto v = window.downloadFloatTargetPixel(name, x, y);
+            return py::array_t<float>(static_cast<int>(v.size()), v.data());
+          },
+          py::arg("name"), py::arg("x"), py::arg("y"))
+      .def(
+          "download_uint32_target_pixel",
+          [](Renderer::SVulkan2Window &window, std::string const &name, uint32_t x, uint32_t y) {
+            auto v = window.downloadUint32TargetPixel(name, x, y);
+            return py::array_t<uint32_t>(static_cast<int>(v.size()), v.data());
+          },
+          py::arg("name"), py::arg("x"), py::arg("y"))
+      .def(
+          "download_uint8_target_pixel",
+          [](Renderer::SVulkan2Window &window, std::string const &name, uint32_t x, uint32_t y) {
+            auto v = window.downloadUint8TargetPixel(name, x, y);
+            return py::array_t<uint8_t>(static_cast<int>(v.size()), v.data());
+          },
+          py::arg("name"), py::arg("x"), py::arg("y"))
+      .def("key_down", &Renderer::SVulkan2Window::isKeyDown, py::arg("key"))
+      .def("key_press", &Renderer::SVulkan2Window::isKeyPressed, py::arg("key"))
+      .def("mouse_down", &Renderer::SVulkan2Window::isMouseKeyDown, py::arg("key"))
+      .def("mouse_click", &Renderer::SVulkan2Window::isMouseKeyClicked, py::arg("key"))
+      .def_property_readonly("mouse_position", &Renderer::SVulkan2Window::getMousePosition)
+      .def_property_readonly("mouse_delta", &Renderer::SVulkan2Window::getMouseDelta)
+      .def_property_readonly("mouse_wheel_delta", &Renderer::SVulkan2Window::getMouseWheelDelta);
+
+  PyRenderer.def("create_material", &Renderer::IPxrRenderer::createMaterial);
 
   PyRenderScene
       .def(
@@ -1533,7 +1633,7 @@ void buildSapien(py::module &m) {
             return scene.addRigidbody(ptype, array2vec3(scale), material);
           },
           py::arg("type"), py::arg("scale") = make_array<float>({1.f, 1.f, 1.f}),
-          py::arg("material") = Renderer::PxrMaterial(), py::return_value_policy::reference)
+          py::arg("material") = nullptr, py::return_value_policy::reference)
       // TODO: add mesh from vertices
       .def("remove_mesh", &Renderer::IPxrScene::removeRigidbody, py::arg("mesh"));
 

@@ -111,7 +111,7 @@ int main() {
   // Renderer::SapienVulkanRenderer renderer;
   Renderer::SVulkan2Renderer renderer(false, 1000, 1000, 4);
   sim.setRenderer(&renderer);
-  Renderer::SVulkan2Window window(renderer);
+  Renderer::SVulkan2Window window(renderer, "../shader/full");
 
   auto s0 = sim.createScene();
   s0->setTimestep(1 / 60.f);
@@ -153,7 +153,7 @@ int main() {
 
     s0->updateRender();
     s0->step();
-    window.render();
+    window.render("Color");
     if (window.windowCloseRequested()) {
       window.close();
       break;

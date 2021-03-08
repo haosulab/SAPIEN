@@ -61,7 +61,7 @@ vec4 world2camera(vec4 pos) {
 }
 
 vec3 getBackgroundColor(vec3 texcoord) {
-  return vec3(1,1,1);
+  return vec3(0,0,0);
 }
 
 float diffuse(float NoL) {
