@@ -9,7 +9,7 @@ import sapien.core.pysapien.renderer as R
 sim = sapien.Engine()
 renderer = sapien.VulkanRenderer()
 sim.set_renderer(renderer)
-window = renderer.create_window("../shader/full")
+window = renderer.create_window("../shader/forward")
 
 copper = renderer.create_material()
 copper.set_base_color([0.875, 0.553, 0.221, 1])
