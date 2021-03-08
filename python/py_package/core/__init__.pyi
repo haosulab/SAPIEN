@@ -65,6 +65,7 @@ from sapien.core.pysapien import VisualRecord
 from sapien.core.pysapien import VulkanCamera
 from sapien.core.pysapien import VulkanMaterial
 from sapien.core.pysapien import VulkanRenderer
+from sapien.core.pysapien import VulkanScene
 from sapien.core.pysapien import VulkanWindow
 import os
 import pkg_resources
@@ -153,6 +154,7 @@ __all__ = [
     "VulkanCamera",
     "VulkanMaterial",
     "VulkanRenderer",
+    "VulkanScene",
     "VulkanWindow",
     "enable_default_gl3",
     "enable_default_gl4",

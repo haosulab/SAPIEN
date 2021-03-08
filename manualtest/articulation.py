@@ -9,12 +9,12 @@ import sapien.core.pysapien.renderer as R
 sim = sapien.Engine()
 renderer = sapien.VulkanRenderer()
 sim.set_renderer(renderer)
-window = renderer.create_window("../shader/forward")
+window = renderer.create_window("../shader/full")
 
 copper = renderer.create_material()
 copper.set_base_color([0.875, 0.553, 0.221, 1])
 copper.set_metallic(1)
-copper.set_roughness(0.2)
+copper.set_roughness(0.4)
 
 
 def create_ant_builder(scene):
@@ -143,31 +143,39 @@ def create_ant_builder(scene):
     return builder
 
 
-s0 = sim.create_scene()
-s0.add_ground(-3)
-s0.set_timestep(1 / 240)
+scene = sim.create_scene()
+scene.add_ground(-3)
+scene.set_timestep(1 / 240)
 
-s0.set_ambient_light([0.5, 0.5, 0.5])
-s0.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
-
-ant_builder = create_ant_builder(s0)
+ant_builder = create_ant_builder(scene)
 
 ant = ant_builder.build()
 ant.set_root_pose(Pose([0, 0, 2]))
 
-window.set_scene(s0)
+window.set_scene(scene)
 print("here1")
 
 for j in ant.get_joints():
     j.set_friction(0)
 
-s0.step()
+scene.step()
 ant.set_qpos([0, 0, 0, 0, 0.7, 0.7, 0.7, 0.7])
 ant.set_qvel([0] * 8)
 f = [0.1] * 8
 acc = ant.compute_forward_dynamics([0.1] * 8)
 ant.set_qf(f)
-s0.step()
+scene.step()
+
+rs = scene.get_render_scene()
+rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
+rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
+
+rs.add_shadow_point_light([0, 1, 1], [1, 2, 2])
+# rs.add_shadow_point_light([0, -1, 1], [2, 1, 2])
+# rs.add_shadow_point_light([0, 1, -1], [2, 2, 1])
+
+window.set_camera_position([-5, 0, -2])
+window.set_camera_rotation([-0.5, -0.5, 0.5, 0.5])
 
 
 target_name = "Color"
@@ -193,14 +201,12 @@ ui1 = (
     )
 )
 
-window.set_camera_position([-5, 0, -0.5])
-window.set_camera_rotation([-0.5, -0.5, 0.5, 0.5])
 
 count = 0
 while True:
-    s0.update_render()
+    scene.update_render()
     for i in range(4):
-        s0.step()
+        scene.step()
     window.render(target_name, [ui1])
     mx, my = window.mouse_position
     if window.mouse_click(0):
@@ -210,4 +216,4 @@ while True:
         break
 
 window = None
-s0 = None
+scene = None

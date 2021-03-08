@@ -83,6 +83,7 @@ __all__ = [
     "VulkanCamera",
     "VulkanMaterial",
     "VulkanRenderer",
+    "VulkanScene",
     "VulkanWindow",
     "renderer"
 ]
@@ -1321,6 +1322,10 @@ class VulkanRenderer(IPxrRenderer):
     def set_log_lvel(self, level: str) -> None: ...
     @staticmethod
     def set_shader_dir(shader_dir: str) -> None: ...
+    pass
+class VulkanScene(RenderScene):
+    def add_shadow_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0) -> None: ...
+    def add_shadow_point_light(self, position: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], near: float = 0.1, far: float = 10) -> None: ...
     pass
 class VulkanWindow():
     def download_float_target(self, name: str) -> numpy.ndarray[numpy.float32]: ...

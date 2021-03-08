@@ -17,8 +17,8 @@ struct DirectionalLight {
 
 layout(set = 0, binding = 0) uniform SceneBuffer {
   vec4 ambientLight;
-  DirectionalLight directionalLights[NUM_DIRECTIONAL_LIGHTS > 0 ? NUM_DIRECTIONAL_LIGHTS : 1];
-  PointLight pointLights[NUM_POINT_LIGHTS > 0 ? NUM_POINT_LIGHTS : 1];
+  DirectionalLight directionalLights[3];
+  PointLight pointLights[10];
 } sceneBuffer;
 
 struct LightBuffer {
@@ -29,9 +29,9 @@ struct LightBuffer {
 };
 
 layout(set = 0, binding = 1) uniform ShadowBuffer {
-  LightBuffer directionalLightBuffers[NUM_DIRECTIONAL_LIGHT_SHADOWS > 0 ? NUM_DIRECTIONAL_LIGHT_SHADOWS : 1];
-  LightBuffer pointLightBuffers[6 * (NUM_POINT_LIGHT_SHADOWS > 0 ? NUM_POINT_LIGHT_SHADOWS : 1)];
-  LightBuffer customLightBuffers[NUM_CUSTOM_LIGHT_SHADOWS > 0 ? NUM_CUSTOM_LIGHT_SHADOWS : 1];
+  LightBuffer directionalLightBuffers[3];
+  LightBuffer pointLightBuffers[60];
+  LightBuffer customLightBuffers[1];
 } shadowBuffer;
 
 layout(set = 0, binding = 2) uniform samplerCubeArray samplerPointLightDepths;
