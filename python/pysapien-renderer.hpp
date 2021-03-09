@@ -299,6 +299,8 @@ void buildRenderer(py::module &parent) {
           },
           py::arg("quat"));
 
-  PySceneObject.def_property("shading_mode", &scene::Object::getShadingMode,
-                             &scene::Object::setShadingMode);
+  PySceneObject
+      .def_property("shading_mode", &scene::Object::getShadingMode, &scene::Object::setShadingMode)
+      .def_property("transparency", &scene::Object::getTransparency,
+                    &scene::Object::getTransparency);
 }

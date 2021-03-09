@@ -108,6 +108,45 @@ layout(location = 0) out vec4 outLighting1;
 layout(location = 1) out vec4 outNormal1;
 layout(location = 2) out uvec4 outSegmentation1;
 
+vec3 computeDirectionalLight(int index, vec3 normal, vec3 camDir, vec3 diffuseAlbedo, float roughness, vec3 fresnel) {
+  vec3 lightDir = -normalize((cameraBuffer.viewMatrix *
+                              vec4(sceneBuffer.directionalLights[index].direction.xyz, 0)).xyz);
+
+  vec3 H = lightDir + camDir;
+  float H2 = dot(H, H);
+  H = H2 < 1e-6 ? vec3(0) : normalize(H);
+  float NoH = clamp(dot(normal, H), 1e-6, 1);
+  float VoH = clamp(dot(camDir, H), 1e-6, 1);
+  float NoL = clamp(dot(normal, lightDir), 0, 1);
+  float NoV = clamp(dot(normal, camDir), 1e-6, 1);
+
+  vec3 color = diffuseAlbedo * sceneBuffer.directionalLights[index].emission.rgb * diffuse(NoL);
+  color += sceneBuffer.directionalLights[index].emission.rgb * ggx(NoL, NoV, NoH, VoH, roughness, fresnel);
+  return color;
+}
+
+vec3 computePointLight(vec3 emission, vec3 l, vec3 normal, vec3 camDir, vec3 diffuseAlbedo, float roughness, vec3 fresnel) {
+  float d = max(length(l), 0.0001);
+
+  if (length(l) == 0) {
+    return vec3(0.f);
+  }
+
+  vec3 lightDir = normalize(l);
+
+  vec3 H = lightDir + camDir;
+  float H2 = dot(H, H);
+  H = H2 < 1e-6 ? vec3(0) : normalize(H);
+  float NoH = clamp(dot(normal, H), 1e-6, 1);
+  float VoH = clamp(dot(camDir, H), 1e-6, 1);
+  float NoL = clamp(dot(normal, lightDir), 0, 1);
+  float NoV = clamp(dot(normal, camDir), 1e-6, 1);
+
+  vec3 color = diffuseAlbedo * emission * diffuse(NoL) / d / d;
+  color += emission * ggx(NoL, NoV, NoH, VoH, roughness, fresnel) / d / d;
+  return color;
+}
+
 void main() {
   outSegmentation1 = inSegmentation;
 
@@ -151,7 +190,7 @@ void main() {
   float roughness = frm.y;
   float metallic = frm.z;
 
-  vec3 normal = outNormal1.xyz;
+  vec3 normal = outNormal1.xyz * 2 - 1;
   vec4 csPosition = inPosition;
   csPosition /= csPosition.w;
 
@@ -164,44 +203,13 @@ void main() {
   for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
     vec3 pos = world2camera(vec4(sceneBuffer.pointLights[i].position.xyz, 1.f)).xyz;
     vec3 l = pos - csPosition.xyz;
-    float d = max(length(l), 0.0001);
-
-    if (length(l) == 0) {
-      continue;
-    }
-
-    vec3 lightDir = normalize(l);
-
-    vec3 H = lightDir + camDir;
-    float H2 = dot(H, H);
-    H = H2 < 1e-6 ? vec3(0) : normalize(H);
-    float NoH = dot(normal, H);
-    float VoH = dot(camDir, H);
-    float NoL = dot(normal, lightDir);
-    float NoV = dot(normal, camDir);
-
-    color += diffuseAlbedo * sceneBuffer.pointLights[i].emission.rgb * diffuse(NoL) / d / d;
-    color += sceneBuffer.pointLights[i].emission.rgb * ggx(NoL, NoV, NoH, VoH, roughness, fresnel) / d / d;
+    color += computePointLight(
+        sceneBuffer.pointLights[i].emission.rgb,
+        l, normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
 
   for (int i = 0; i < NUM_DIRECTIONAL_LIGHTS; ++i) {
-    if (length(sceneBuffer.directionalLights[i].direction.xyz) == 0) {
-      continue;
-    }
-
-    vec3 lightDir = -normalize((cameraBuffer.viewMatrix *
-                                vec4(sceneBuffer.directionalLights[i].direction.xyz, 0)).xyz);
-
-    vec3 H = lightDir + camDir;
-    float H2 = dot(H, H);
-    H = H2 < 1e-6 ? vec3(0) : normalize(H);
-    float NoH = dot(normal, H);
-    float VoH = dot(camDir, H);
-    float NoL = dot(normal, lightDir);
-    float NoV = dot(normal, camDir);
-
-    color += diffuseAlbedo * sceneBuffer.directionalLights[i].emission.rgb * diffuse(NoL);
-    color += sceneBuffer.directionalLights[i].emission.rgb * ggx(NoL, NoV, NoH, VoH, roughness, fresnel);
+    color += computeDirectionalLight(i, normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
 
   color += sceneBuffer.ambientLight.rgb * albedo.rgb;

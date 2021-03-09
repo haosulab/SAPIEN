@@ -63,6 +63,14 @@ class Object(Node):
     @shading_mode.setter
     def shading_mode(self, arg1: int) -> None:
         pass
+    @property
+    def transparency(self) -> float:
+        """
+        :type: float
+        """
+    @transparency.setter
+    def transparency(self) -> None:
+        pass
     pass
 class Scene():
     def add_node(self, parent: Node = None) -> Node: ...

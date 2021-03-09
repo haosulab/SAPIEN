@@ -284,7 +284,8 @@ def create_axes():
     return node
 
 
-create_axes()
+axes = create_axes()
+axes.set_position([0, 0, -1])
 
 
 target_name = "Color"
@@ -316,6 +317,57 @@ ui1 = (
     )
 )
 
+
+def find_actor(id):
+    actors = scene.get_all_actors()
+    for actor in actors:
+        if actor.id == id:
+            return actor
+    for a in scene.get_all_articulations():
+        for link in a.get_links():
+            if link.id == id:
+                return link
+
+
+# renderer.set_shader_dir("../shader/full")
+# near, far = 0.1, 100
+# camera_mount_actor = scene.create_actor_builder().build(is_kinematic=True)
+# camera = scene.add_mounted_camera(
+#     "first_camera",
+#     camera_mount_actor,
+#     Pose(),
+#     640,
+#     480,
+#     np.deg2rad(35),
+#     np.deg2rad(35),
+#     near,
+#     far,
+# )
+
+# pos = np.array([3, -2, 3])
+# forward = -pos / np.linalg.norm(pos)
+# left = np.cross([0, 0, 1], forward)
+# left = left / np.linalg.norm(left)
+# up = np.cross(forward, left)
+# mat44 = np.eye(4)
+# mat44[:3, :3] = np.linalg.inv(np.array([forward, left, up]))
+# mat44[:3, 3] = pos
+# camera_mount_actor.set_pose(Pose.from_transformation_matrix(mat44))
+
+# scene.step()
+# scene.update_render()
+# camera.take_picture()
+
+# from PIL import Image
+
+# rgba = camera.get_float_texture("Color")
+# rgba = (rgba * 255).clip(0, 255).astype("uint8")
+# rgba = Image.fromarray(rgba)
+# rgba.save("color.png")
+
+
+selected_actor = None
+
 count = 0
 while True:
     scene.update_render()
@@ -330,7 +382,27 @@ while True:
             pixel = window.download_uint32_target_pixel(
                 "Segmentation", int(mx), int(my)
             )
-            print(pixel)
+            actor = find_actor(pixel[1])
+            if actor:
+                if selected_actor:
+                    for v in selected_actor.get_visual_bodies():
+                        v.set_visibility(1)
+                selected_actor = actor
+                for v in selected_actor.get_visual_bodies():
+                    v.set_visibility(0.8)
+            else:
+                if selected_actor:
+                    for v in selected_actor.get_visual_bodies():
+                        v.set_visibility(1)
+                selected_actor = None
+                axes.set_position([0, 0, 0])
+                axes.set_rotation([0, 0, 0, 1])
+                axes.set_scale([0.3, 0.3, 0.3])
+
+        if selected_actor:
+            axes.set_scale([0.3, 0.3, 0.3])
+            axes.set_position(selected_actor.pose.p)
+            axes.set_rotation(selected_actor.pose.q)
 
         if window.key_down("w"):
             cc.move(0.1, 0, 0)
