@@ -1463,7 +1463,12 @@ void buildSapien(py::module &m) {
           [](Renderer::SVulkan2Renderer &renderer, std::string const &shaderDir) {
             return new Renderer::SVulkan2Window(renderer, shaderDir);
           },
-          py::arg("shader_dir") = "");
+          py::arg("shader_dir") = "")
+      .def_property_readonly(
+          "_internal_context",
+          [](Renderer::SVulkan2Renderer &renderer) { return renderer.mContext.get(); },
+          py::return_value_policy::reference);
+
   PyVulkanCamera
       .def(
           "get_float_texture",
@@ -1606,28 +1611,31 @@ void buildSapien(py::module &m) {
       .def_property_readonly("mouse_delta", &Renderer::SVulkan2Window::getMouseDelta)
       .def_property_readonly("mouse_wheel_delta", &Renderer::SVulkan2Window::getMouseWheelDelta);
 
-  PyVulkanScene.def(
-      "add_shadow_point_light",
-      [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &position,
-         py::array_t<float> const &color, float near, float far) {
-        scene.addPointLight({position.at(0), position.at(1), position.at(2)},
-                            {color.at(0), color.at(1), color.at(2)}, true, near, far);
-      },
-      py::arg("position"), py::arg("color"), py::arg("near") = 0.1, py::arg("far") = 10);
-
-  PyVulkanScene.def(
-      "add_shadow_directional_light",
-      [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &direction,
-         py::array_t<float> const &color, py::array_t<float> const &position, float scale,
-         float near, float far) {
-        scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
-                                  {color.at(0), color.at(1), color.at(2)}, true,
-                                  {position.at(0), position.at(1), position.at(2)}, scale, near,
-                                  far);
-      },
-      py::arg("direction"), py::arg("color"),
-      py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
-      py::arg("near") = -10.f, py::arg("far") = 10.f);
+  PyVulkanScene
+      .def(
+          "add_shadow_point_light",
+          [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &position,
+             py::array_t<float> const &color, float near, float far) {
+            scene.addPointLight({position.at(0), position.at(1), position.at(2)},
+                                {color.at(0), color.at(1), color.at(2)}, true, near, far);
+          },
+          py::arg("position"), py::arg("color"), py::arg("near") = 0.1, py::arg("far") = 10)
+      .def(
+          "add_shadow_directional_light",
+          [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &direction,
+             py::array_t<float> const &color, py::array_t<float> const &position, float scale,
+             float near, float far) {
+            scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
+                                      {color.at(0), color.at(1), color.at(2)}, true,
+                                      {position.at(0), position.at(1), position.at(2)}, scale,
+                                      near, far);
+          },
+          py::arg("direction"), py::arg("color"),
+          py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
+          py::arg("near") = -10.f, py::arg("far") = 10.f)
+      .def_property_readonly(
+          "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); },
+          py::return_value_policy::reference);
 
   PyRenderer.def("create_material", &Renderer::IPxrRenderer::createMaterial);
 

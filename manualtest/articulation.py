@@ -2,19 +2,76 @@ import sapien.core as sapien
 import numpy as np
 from sapien.core import Pose
 from transforms3d.quaternions import axangle2quat as aa
+from transforms3d.quaternions import qmult, mat2quat, rotate_vector
 
 import sapien.core.pysapien.renderer as R
 
 
+class FPSCameraController:
+    def __init__(self, window: sapien.VulkanWindow):
+        self.window = window
+        self.forward = np.array([1, 0, 0])
+        self.up = np.array([0, 0, 1])
+        self.left = np.cross(self.up, self.forward)
+        self.initial_rotation = mat2quat(
+            np.array([-self.left, self.up, -self.forward]).T
+        )
+        self.xyz = np.zeros(3)
+        self.rpy = np.zeros(3)
+
+    def setRPY(self, roll, pitch, yaw):
+        self.rpy = np.array([roll, pitch, yaw])
+        self.update()
+
+    def setXYZ(self, x, y, z):
+        self.xyz = np.array([x, y, z])
+        self.update()
+
+    def move(self, forward, left, up):
+        q = qmult(
+            qmult(aa(self.up, self.rpy[2]), aa(self.left, -self.rpy[1])),
+            aa(self.forward, self.rpy[0]),
+        )
+        self.xyz = self.xyz + (
+            rotate_vector(self.forward, q) * forward
+            + rotate_vector(self.left, q) * left
+            + rotate_vector(self.up, q) * up
+        )
+        self.update()
+
+    def rotate(self, roll, pitch, yaw):
+        self.rpy = self.rpy + np.array([roll, pitch, yaw])
+        self.update()
+
+    def update(self):
+        self.rpy[1] = np.clip(self.rpy[1], -1.57, 1.57)
+        if self.rpy[2] >= 3.15:
+            self.rpy[2] = self.rpy[2] - 2 * np.pi
+        elif self.rpy[2] <= -3.15:
+            self.rpy[2] = self.rpy[2] + 2 * np.pi
+
+        rot = qmult(
+            qmult(
+                qmult(aa(self.up, self.rpy[2]), aa(self.left, -self.rpy[1])),
+                aa(self.forward, self.rpy[0]),
+            ),
+            self.initial_rotation,
+        )
+        self.window.set_camera_rotation(rot)
+        self.window.set_camera_position(self.xyz)
+
+
 sim = sapien.Engine()
 renderer = sapien.VulkanRenderer()
+renderer_context: R.Context = renderer._internal_context
 sim.set_renderer(renderer)
-window = renderer.create_window("../shader/full")
 
 copper = renderer.create_material()
 copper.set_base_color([0.875, 0.553, 0.221, 1])
 copper.set_metallic(1)
 copper.set_roughness(0.4)
+
+window = renderer.create_window("../shader/full")
 
 
 def create_ant_builder(scene):
@@ -153,7 +210,7 @@ ant = ant_builder.build()
 ant.set_root_pose(Pose([0, 0, 2]))
 
 window.set_scene(scene)
-print("here1")
+window.set_camera_parameters(0.5, 20, 1)
 
 for j in ant.get_joints():
     j.set_friction(0)
@@ -171,19 +228,77 @@ rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
 rs.add_shadow_point_light([0, 1, 1], [1, 2, 2])
-# rs.add_shadow_point_light([0, -1, 1], [2, 1, 2])
-# rs.add_shadow_point_light([0, 1, -1], [2, 2, 1])
+rs.add_shadow_point_light([0, -1, 1], [2, 1, 2])
+rs.add_shadow_point_light([0, 1, -1], [2, 2, 1])
 
-window.set_camera_position([-5, 0, -2])
-window.set_camera_rotation([-0.5, -0.5, 0.5, 0.5])
+cc = FPSCameraController(window)
+cc.setXYZ(-5, 0, 2)
+
+render_scene: R.Scene = rs._internal_scene
+
+
+cone = renderer_context.create_cone_mesh(16)
+capsule = renderer_context.create_capsule_mesh(0.1, 0.5, 16, 4)
+mat_red = renderer_context.create_material([1, 0, 0, 1], 0, 0, 0)
+mat_green = renderer_context.create_material([0, 1, 0, 1], 0, 0, 0)
+mat_blue = renderer_context.create_material([0, 0, 1, 1], 0, 0, 0)
+red_cone = renderer_context.create_model([cone], [mat_red])
+green_cone = renderer_context.create_model([cone], [mat_green])
+blue_cone = renderer_context.create_model([cone], [mat_blue])
+red_capsule = renderer_context.create_model([capsule], [mat_red])
+green_capsule = renderer_context.create_model([capsule], [mat_green])
+blue_capsule = renderer_context.create_model([capsule], [mat_blue])
+
+
+def create_axes():
+    node = render_scene.add_node()
+    obj = render_scene.add_object(red_cone, node)
+    obj.set_scale([0.5, 0.2, 0.2])
+    obj.set_position([1, 0, 0])
+    obj.shading_mode = 2
+    obj = render_scene.add_object(red_capsule, node)
+    obj.set_position([0.5, 0, 0])
+    obj.set_scale([1.02, 1.02, 1.02])
+    obj.shading_mode = 2
+
+    obj = render_scene.add_object(green_cone, node)
+    obj.set_scale([0.5, 0.2, 0.2])
+    obj.set_position([0, 1, 0])
+    obj.set_rotation([0.7071068, 0, 0, 0.7071068])
+    obj.shading_mode = 2
+    obj = render_scene.add_object(green_capsule, node)
+    obj.set_position([0, 0.5, 0])
+    obj.set_rotation([0.7071068, 0, 0, 0.7071068])
+    obj.shading_mode = 2
+
+    obj = render_scene.add_object(blue_cone, node)
+    obj.set_scale([0.5, 0.2, 0.2])
+    obj.set_position([0, 0, 1])
+    obj.set_rotation([0, 0.7071068, 0, 0.7071068])
+    obj.shading_mode = 2
+    obj = render_scene.add_object(blue_capsule, node)
+    obj.set_position([0, 0, 0.5])
+    obj.set_rotation([0, 0.7071068, 0, 0.7071068])
+    obj.shading_mode = 2
+
+    return node
+
+
+create_axes()
 
 
 target_name = "Color"
+pause = False
 
 
 def set_target(name):
     global target_name
     target_name = name
+
+
+def toggle_pause(p):
+    global pause
+    pause = p
 
 
 ui1 = (
@@ -193,7 +308,7 @@ ui1 = (
     .Size(200, 400)
     .append(
         R.UIDisplayText().Text("display text"),
-        R.UICheckbox().Label("Checkbox0").Callback(lambda p: (print(p.checked))),
+        R.UICheckbox().Label("Pause").Callback(lambda p: toggle_pause(p.checked)),
         R.UICheckbox().Label("Checkbox1").Callback(lambda p: (print(p.checked))),
         R.UIRadioButtonGroup()
         .Labels(window.target_names)
@@ -201,17 +316,39 @@ ui1 = (
     )
 )
 
-
 count = 0
 while True:
     scene.update_render()
     for i in range(4):
+        ant.set_qf(np.random.randn(8) * 500)
         scene.step()
-    window.render(target_name, [ui1])
-    mx, my = window.mouse_position
-    if window.mouse_click(0):
-        pixel = window.download_uint32_target_pixel("Segmentation", int(mx), int(my))
-        print(pixel)
+
+    while True:
+        window.render(target_name, [ui1])
+        mx, my = window.mouse_position
+        if window.mouse_click(0):
+            pixel = window.download_uint32_target_pixel(
+                "Segmentation", int(mx), int(my)
+            )
+            print(pixel)
+
+        if window.key_down("w"):
+            cc.move(0.1, 0, 0)
+        if window.key_down("s"):
+            cc.move(-0.1, 0, 0)
+        if window.key_down("a"):
+            cc.move(0, 0.1, 0)
+        if window.key_down("d"):
+            cc.move(0, -0.1, 0)
+        if window.mouse_down(1):
+            x, y = window.mouse_delta
+            cc.rotate(0, -0.005 * y, -0.005 * x)
+
+        if not pause:
+            break
+
+        if window.key_down("q"):
+            break
     if window.key_down("q"):
         break
 

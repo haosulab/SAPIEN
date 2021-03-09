@@ -14,7 +14,9 @@ void buildRenderer(py::module &parent) {
   py::module m = parent.def_submodule("renderer");
 
   auto PyContext = py::class_<core::Context>(m, "Context");
+  auto PyScene = py::class_<scene::Scene>(m, "Scene");
   auto PySceneNode = py::class_<scene::Node>(m, "Node");
+  auto PySceneObject = py::class_<scene::Object, scene::Node>(m, "Object");
   auto PyMaterial =
       py::class_<resource::SVMetallicMaterial, std::shared_ptr<resource::SVMetallicMaterial>>(
           m, "Material");
@@ -165,13 +167,15 @@ void buildRenderer(py::module &parent) {
            }),
            py::return_value_policy::automatic, py::arg("max_num_materials") = 5000,
            py::arg("max_num_textures") = 5000, py::arg("default_mipmap_levels") = 1)
-      .def("create_material",
-           [](core::Context &context, py::array_t<float> baseColor, float fresnel, float roughness,
-              float metallic) {
-             return context.createMetallicMaterial(
-                 {baseColor.at(0), baseColor.at(1), baseColor.at(2), baseColor.at(3)}, fresnel,
-                 roughness, metallic, 0.f);
-           })
+      .def(
+          "create_material",
+          [](core::Context &context, py::array_t<float> baseColor, float fresnel, float roughness,
+             float metallic) {
+            return context.createMetallicMaterial(
+                {baseColor.at(0), baseColor.at(1), baseColor.at(2), baseColor.at(3)}, fresnel,
+                roughness, metallic, 0.f);
+          },
+          py::arg("base_colorf"), py::arg("specular"), py::arg("roughness"), py::arg("metallic"))
       .def(
           "create_model_from_file",
           [](core::Context &context, std::string const &filename) {
@@ -206,5 +210,95 @@ void buildRenderer(py::module &parent) {
                 filename, mipmapLevels, vkFilter, vkFilter, vkAddressMode, vkAddressMode);
           },
           py::arg("filename"), py::arg("mipmap_levels"), py::arg("filter") = "linear",
-          py::arg("address_mode") = "repeat");
+          py::arg("address_mode") = "repeat")
+      .def(
+          "create_capsule_mesh",
+          [](core::Context &, float radius, float halfLength, int segments, int halfRings) {
+            return resource::SVMesh::CreateCapsule(radius, halfLength, segments, halfRings);
+          },
+          py::arg("radius"), py::arg("half_length"), py::arg("segments") = 32,
+          py::arg("half_rings") = 8)
+      .def(
+          "create_uvsphere_mesh",
+          [](core::Context &, int segments, int rings) {
+            return resource::SVMesh::CreateUVSphere(segments, rings);
+          },
+          py::arg("segments") = 32, py::arg("half_rings") = 16)
+      .def("create_box_mesh", [](core::Context &) { return resource::SVMesh::CreateCube(); })
+      .def(
+          "create_cone_mesh",
+          [](core::Context &, int segments) { return resource::SVMesh::CreateCone(segments); },
+          py::arg("segments") = 32)
+      .def(
+          "create_model",
+          [](core::Context &context, std::vector<std::shared_ptr<resource::SVMesh>> const &meshes,
+             std::vector<std::shared_ptr<resource::SVMetallicMaterial>> const &materials) {
+            std::vector<std::shared_ptr<resource::SVMaterial>> mats;
+            mats.insert(mats.end(), materials.begin(), materials.end());
+            return context.createModel(meshes, mats);
+          },
+          py::arg("meshes"), py::arg("materials"));
+
+  PyMaterial
+      .def(
+          "set_base_color",
+          [](resource::SVMetallicMaterial &mat, py::array_t<float> color) {
+            mat.setBaseColor({color.at(0), color.at(1), color.at(2), color.at(3)});
+          },
+          py::arg("rgba"))
+      .def("set_specular", &resource::SVMetallicMaterial::setFresnel, py::arg("specular"))
+      .def("set_metallic", &resource::SVMetallicMaterial::setMetallic, py::arg("metallic"))
+      .def("set_roughness", &resource::SVMetallicMaterial::setRoughness, py::arg("roughness"));
+  // .def("set_textures", &resource::SVMetallicMaterial::setTextures,
+  //      py::arg("base_color_map") = nullptr, py::arg("roughness_map") = nullptr,
+  //      py::arg("normal_map") = nullptr, py::arg("metallic_map") = nullptr);
+
+  PyScene
+      .def(
+          "add_node",
+          [](scene::Scene &scene, scene::Node *parent) {
+            if (parent) {
+              return &scene.addNode(*parent);
+            } else {
+              return &scene.addNode();
+            }
+          },
+          py::return_value_policy::reference, py::arg("parent") = nullptr)
+      .def(
+          "add_object",
+          [](scene::Scene &scene, std::shared_ptr<resource::SVModel> model, scene::Node *parent) {
+            if (!model) {
+              throw std::runtime_error("add object failed: model must not be None");
+            }
+            if (parent) {
+              return &scene.addObject(*parent, model);
+            } else {
+              return &scene.addObject(model);
+            }
+          },
+          py::return_value_policy::reference, py::arg("model"), py::arg("parent") = nullptr)
+      .def("remove_node", &scene::Scene::removeNode, py::arg("node"));
+
+  PySceneNode
+      .def(
+          "set_scale",
+          [](scene::Node &node, py::array_t<float> scale) {
+            node.setScale({scale.at(0), scale.at(1), scale.at(2)});
+          },
+          py::arg("scale"))
+      .def(
+          "set_position",
+          [](scene::Node &node, py::array_t<float> position) {
+            node.setPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def(
+          "set_rotation",
+          [](scene::Node &node, py::array_t<float> rotation) {
+            node.setRotation({rotation.at(0), rotation.at(1), rotation.at(2), rotation.at(3)});
+          },
+          py::arg("quat"));
+
+  PySceneObject.def_property("shading_mode", &scene::Object::getShadingMode,
+                             &scene::Object::setShadingMode);
 }

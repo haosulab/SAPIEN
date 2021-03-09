@@ -166,19 +166,19 @@ __all__ = [
 ]
 
 
-DYNAMIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.DYNAMIC
-FIX: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.FIX
+DYNAMIC: sapien.core.pysapien.ArticulationType # value = <ArticulationType.DYNAMIC: 0>
+FIX: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.FIX: 3>
 GL_SHADER_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/glsl_shader'
-KINEMATIC: sapien.core.pysapien.ArticulationType # value = ArticulationType.KINEMATIC
-KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = ActorType.KINEMATIC_LINK
-LINK: sapien.core.pysapien.ActorType # value = ActorType.LINK
-PGS: sapien.core.pysapien.SolverType # value = SolverType.PGS
-PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.PRISMATIC
+KINEMATIC: sapien.core.pysapien.ArticulationType # value = <ArticulationType.KINEMATIC: 1>
+KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = <ActorType.KINEMATIC_LINK: 4>
+LINK: sapien.core.pysapien.ActorType # value = <ActorType.LINK: 3>
+PGS: sapien.core.pysapien.SolverType # value = <SolverType.PGS: 0>
+PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.PRISMATIC: 0>
 PTX_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/ptx'
-REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.REVOLUTE
-SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.SPHERICAL
+REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.REVOLUTE: 1>
+SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.SPHERICAL: 2>
 SPV_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/spv'
-STATIC: sapien.core.pysapien.ActorType # value = ActorType.STATIC
-TGS: sapien.core.pysapien.SolverType # value = SolverType.TGS
-UNDEFINED: sapien.core.pysapien.ArticulationJointType # value = ArticulationJointType.UNDEFINED
+STATIC: sapien.core.pysapien.ActorType # value = <ActorType.STATIC: 0>
+TGS: sapien.core.pysapien.SolverType # value = <SolverType.TGS: 1>
+UNDEFINED: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.UNDEFINED: 4>
 __GL_VERSION_DICT = {3: '130', 4: '410'}
