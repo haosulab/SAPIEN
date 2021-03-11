@@ -1376,6 +1376,16 @@ class VulkanWindow():
     def set_scene(self, scene: Scene) -> None: ...
     def show(self) -> None: ...
     @property
+    def alt(self) -> bool:
+        """
+        :type: bool
+        """
+    @property
+    def ctrl(self) -> bool:
+        """
+        :type: bool
+        """
+    @property
     def mouse_delta(self) -> typing.List[float[2]]:
         """
         :type: typing.List[float[2]]
@@ -1389,6 +1399,16 @@ class VulkanWindow():
     def mouse_wheel_delta(self) -> typing.List[float[2]]:
         """
         :type: typing.List[float[2]]
+        """
+    @property
+    def shift(self) -> bool:
+        """
+        :type: bool
+        """
+    @property
+    def super(self) -> bool:
+        """
+        :type: bool
         """
     @property
     def target_names(self) -> typing.List[str]:

@@ -1099,16 +1099,6 @@ void buildSapien(py::module &m) {
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
            py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
-
-      // .def(
-      //     "add_box_visual",
-      //     [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
-      //        py::array_t<PxReal> color, std::string const &name) {
-      //       a.addBoxVisual(pose, array2vec3(size), array2vec3(color), name);
-      //     },
-      //     py::arg("pose") = PxTransform(PxIdentity),
-      //     py::arg("size") = make_array<PxReal>({1, 1, 1}),
-      //     py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def(
           "add_box_visual_complex",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
@@ -1118,15 +1108,6 @@ void buildSapien(py::module &m) {
           py::arg("pose") = PxTransform(PxIdentity),
           py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("name") = "")
-      // .def(
-      //     "add_capsule_visual",
-      //     [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
-      //        py::array_t<PxReal> color, std::string const &name) {
-      //       a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
-      //     },
-      //     py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-      //     py::arg("half_length") = 1, py::arg("color") = make_array<PxReal>({1, 1, 1}),
-      //     py::arg("name") = "")
       .def(
           "add_capsule_visual_complex",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
@@ -1135,14 +1116,6 @@ void buildSapien(py::module &m) {
           },
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("name") = "")
-      // .def(
-      //     "add_sphere_visual",
-      //     [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
-      //        std::string const &name) {
-      //       a.addSphereVisual(pose, radius, array2vec3(color), name);
-      //     },
-      //     py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-      //     py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def(
           "add_sphere_visual_complex",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
@@ -1603,6 +1576,12 @@ void buildSapien(py::module &m) {
             return py::array_t<uint8_t>(static_cast<int>(v.size()), v.data());
           },
           py::arg("name"), py::arg("x"), py::arg("y"))
+
+      .def_property_readonly("shift", &Renderer::SVulkan2Window::isShiftDown)
+      .def_property_readonly("alt", &Renderer::SVulkan2Window::isAltDown)
+      .def_property_readonly("ctrl", &Renderer::SVulkan2Window::isCtrlDown)
+      .def_property_readonly("super", &Renderer::SVulkan2Window::isSuperDown)
+
       .def("key_down", &Renderer::SVulkan2Window::isKeyDown, py::arg("key"))
       .def("key_press", &Renderer::SVulkan2Window::isKeyPressed, py::arg("key"))
       .def("mouse_down", &Renderer::SVulkan2Window::isMouseKeyDown, py::arg("key"))

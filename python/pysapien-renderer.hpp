@@ -1,7 +1,10 @@
 #pragma once
+#include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
+#include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 #include <svulkan2/core/context.h>
 #include <svulkan2/scene/scene.h>
 #include <svulkan2/ui/ui.h>
@@ -30,6 +33,8 @@ void buildRenderer(py::module &parent) {
   auto PyUIWindow = py::class_<ui::Window, ui::Widget, std::shared_ptr<ui::Window>>(m, "UIWindow");
   auto PyUICheckbox =
       py::class_<ui::Checkbox, ui::Widget, std::shared_ptr<ui::Checkbox>>(m, "UICheckbox");
+  auto PyUIButton =
+      py::class_<ui::Button, ui::Widget, std::shared_ptr<ui::Button>>(m, "UIButton");
   auto PyUIRadioButtonGroup =
       py::class_<ui::RadioButtonGroup, ui::Widget, std::shared_ptr<ui::RadioButtonGroup>>(
           m, "UIRadioButtonGroup");
@@ -52,9 +57,12 @@ void buildRenderer(py::module &parent) {
   auto PyUISliderAngle = py::class_<ui::SliderAngle, ui::Widget, std::shared_ptr<ui::SliderAngle>>(
       m, "UISliderAngle");
 
+  auto PyUISection =
+      py::class_<ui::Section, ui::Widget, std::shared_ptr<ui::Section>>(m, "UISection");
+
   PyUIWidget.def("remove", &ui::Widget::remove);
   // UI
-  PyUIWindow.def("Label", &ui::Window::Label, py::arg("Label"))
+  PyUIWindow.def("Label", &ui::Window::Label, py::arg("label"))
       .def(py::init<>())
       .def(
           "Pos",
@@ -79,6 +87,25 @@ void buildRenderer(py::module &parent) {
         }
         return result;
       });
+  PyUISection
+      .def(py::init<>())
+      .def("Label", &ui::Section::Label, py::arg("label"))
+      .def("Expanded", &ui::Section::Expanded, py::arg("expanded"))
+      .def("append", [](ui::Section &section, py::args args) {
+        if (args.size() == 0) {
+          throw std::runtime_error("append must take 1 or more arguments");
+        }
+        std::shared_ptr<ui::Section> result;
+        for (auto &arg : args) {
+          auto widget = arg.cast<std::shared_ptr<ui::Widget>>();
+          result = section.append(widget);
+        }
+        return result;
+      });
+
+  PyUIButton.def(py::init<>())
+      .def("Label", &ui::Button::Label, py::arg("label"))
+      .def("Callback", &ui::Button::Callback, py::arg("func"));
 
   PyUICheckbox.def(py::init<>())
       .def("Label", &ui::Checkbox::Label, py::arg("label"))
@@ -240,6 +267,9 @@ void buildRenderer(py::module &parent) {
           py::arg("meshes"), py::arg("materials"));
 
   PyMaterial
+      // .def("set_textures", &resource::SVMetallicMaterial::setTextures,
+      //      py::arg("base_color_map") = nullptr, py::arg("roughness_map") = nullptr,
+      //      py::arg("normal_map") = nullptr, py::arg("metallic_map") = nullptr)
       .def(
           "set_base_color",
           [](resource::SVMetallicMaterial &mat, py::array_t<float> color) {
@@ -249,9 +279,6 @@ void buildRenderer(py::module &parent) {
       .def("set_specular", &resource::SVMetallicMaterial::setFresnel, py::arg("specular"))
       .def("set_metallic", &resource::SVMetallicMaterial::setMetallic, py::arg("metallic"))
       .def("set_roughness", &resource::SVMetallicMaterial::setRoughness, py::arg("roughness"));
-  // .def("set_textures", &resource::SVMetallicMaterial::setTextures,
-  //      py::arg("base_color_map") = nullptr, py::arg("roughness_map") = nullptr,
-  //      py::arg("normal_map") = nullptr, py::arg("metallic_map") = nullptr);
 
   PyScene
       .def(

@@ -240,6 +240,11 @@ std::vector<uint8_t> SVulkan2Window::downloadUint8TargetPixel(std::string const 
       name, vk::Offset2D{static_cast<int>(x), static_cast<int>(y)}, vk::Extent2D{1, 1}));
 }
 
+bool SVulkan2Window::isShiftDown() { return mWindow->isShiftDown(); }
+bool SVulkan2Window::isCtrlDown() { return mWindow->isCtrlDown(); }
+bool SVulkan2Window::isAltDown() { return mWindow->isAltDown(); }
+bool SVulkan2Window::isSuperDown() { return mWindow->isSuperDown(); }
+
 bool SVulkan2Window::isKeyDown(std::string const &key) { return mWindow->isKeyDown(key); }
 bool SVulkan2Window::isKeyPressed(std::string const &key) { return mWindow->isKeyPressed(key); }
 bool SVulkan2Window::isMouseKeyDown(int key) { return mWindow->isMouseKeyDown(key); }
@@ -254,7 +259,7 @@ std::array<float, 2> SVulkan2Window::getMouseDelta() {
   return {x, y};
 }
 std::array<float, 2> SVulkan2Window::getMouseWheelDelta() {
-  auto [x, y] = mWindow->getMouseDelta();
+  auto [x, y] = mWindow->getMouseWheelDelta();
   return {x, y};
 }
 
