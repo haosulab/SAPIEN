@@ -47,22 +47,21 @@ void FPSCameraControllerDebug::update() {
 }
 #endif
 
-SVulkan2Window::SVulkan2Window(SVulkan2Renderer &renderer, std::string const &shaderDir)
+SVulkan2Window::SVulkan2Window(SVulkan2Renderer &renderer, int width, int height,
+                               std::string const &shaderDir)
     : mRenderer(&renderer), mShaderDir(shaderDir) {
   auto config = std::make_shared<svulkan2::RendererConfig>();
   config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultShaderDirectory;
   config->colorFormat = vk::Format::eR32G32B32A32Sfloat;
   mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(*mRenderer->mContext, config);
 
-  mWindow = renderer.mContext->createWindow(800, 600);
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  mWindow = renderer.mContext->createWindow(width, height);
   mWindow->initImgui();
   renderer.mContext->getDevice().waitIdle();
 
-  mSceneRenderSemaphore = renderer.mContext->getDevice().createSemaphoreUnique({});
-  mSceneRenderFence =
-      renderer.mContext->getDevice().createFenceUnique({vk::FenceCreateFlagBits::eSignaled});
-  mCommandBuffer = renderer.mContext->createCommandBuffer();
-  mSVulkanRenderer->resize(800, 600);
+  mViewportWidth = width;
+  mViewportHeight = height;
 
 #ifdef _DEBUG
 #endif
@@ -98,15 +97,44 @@ std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
   return mSVulkanRenderer->getDisplayTargetNames();
 }
 
+void SVulkan2Window::rebuild() {
+  mRenderer->mContext->getDevice().waitIdle();
+  do {
+    glfwGetWindowSize(mWindow->getGLFWWindow(), &mViewportWidth, &mViewportHeight);
+  } while (!mWindow->updateSize(mViewportWidth, mViewportHeight));
+  mSceneRenderSemaphore = mRenderer->mContext->getDevice().createSemaphoreUnique({});
+  mSceneRenderFence =
+      mRenderer->mContext->getDevice().createFenceUnique({vk::FenceCreateFlagBits::eSignaled});
+  mCommandBuffer = mRenderer->mContext->createCommandBuffer();
+  mSVulkanRenderer->resize(mViewportWidth, mViewportHeight);
+  mRenderer->mContext->getDevice().waitIdle();
+  mRequiresRebuild = false;
+
+  if (mScene) {
+    auto cam = getCamera();
+    cam->setPerspectiveParameters(cam->getNear(), cam->getFar(), cam->getFovy(),
+                                  static_cast<float>(mViewportWidth) / mViewportHeight);
+  }
+}
+
 void SVulkan2Window::render(std::string const &targetName,
                             std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows) {
   if (!mScene) {
     return;
   }
+  if (mRequiresRebuild) {
+    rebuild();
+  }
 
   svulkan2::scene::Camera *camera = getCamera();
 
-  mWindow->newFrame();
+  try {
+    mWindow->newFrame();
+  } catch (vk::OutOfDateKHRError &e) {
+    mRequiresRebuild = true;
+    return;
+  }
+
   ImGui::NewFrame();
   // ImGui::ShowDemoWindow();
   for (auto w : uiWindows) {
@@ -134,7 +162,12 @@ void SVulkan2Window::render(std::string const &targetName,
   auto swapchain = mWindow->getSwapchain();
   auto fidx = mWindow->getFrameIndex();
   vk::PresentInfoKHR info(1, &mSceneRenderSemaphore.get(), 1, &swapchain, &fidx);
-  mWindow->presentFrameWithImgui(mSceneRenderSemaphore.get(), mSceneRenderFence.get());
+  try {
+    mWindow->presentFrameWithImgui(mSceneRenderSemaphore.get(), mSceneRenderFence.get());
+  } catch (vk::OutOfDateKHRError &e) {
+    mRequiresRebuild = true;
+    return;
+  }
 
 #ifdef _DEBUG
   if (!mCameraController) {

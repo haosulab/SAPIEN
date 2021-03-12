@@ -46,13 +46,17 @@ class SVulkan2Window {
   vk::UniqueFence mSceneRenderFence;
   vk::UniqueCommandBuffer mCommandBuffer;
 
+  int mViewportWidth{};
+  int mViewportHeight{};
+
+  bool mRequiresRebuild{true};
   bool mClosed{};
 
 #ifdef _DEBUG
   std::unique_ptr<FPSCameraControllerDebug> mCameraController{};
 #endif
 public:
-  SVulkan2Window(SVulkan2Renderer &renderer, std::string const &shaderDir);
+  SVulkan2Window(SVulkan2Renderer &renderer, int width, int height, std::string const &shaderDir);
   ~SVulkan2Window();
   void setScene(SVulkan2Scene *scene);
   void setCameraParameters(float near, float far, float fovy);
@@ -64,6 +68,8 @@ public:
               std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows = {});
   void show();
   void hide();
+
+  void rebuild();
 
   void close();
 

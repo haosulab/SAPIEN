@@ -160,7 +160,7 @@ ant.set_root_pose(Pose([0, 0, 2]))
 
 controller.set_scene(scene)
 controller.set_camera_xyz(-1, 0, 0)
-controller.window.set_camera_parameters(0.01, 1000, 1)
+controller.window.set_camera_parameters(0.001, 1000, 1)
 
 scene.step()
 ant.set_qpos([0, 0, 0, 0, 0.7, 0.7, 0.7, 0.7])

@@ -58,7 +58,7 @@ class CMakeBuild(build_ext):
         build_args = ['--config', cfg]
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-        # cmake_args += ['-DCMAKE_MODULE_PATH=/workspace/pinocchio/cmake/find-external/CppAD']
+        cmake_args += ['-DCMAKE_MODULE_PATH=/workspace/pinocchio/cmake/find-external/CppAD']
         # cmake_args += ['-DCMAKE_C_COMPILER=/root/GCC-9.3.0/bin/gcc']
         # cmake_args += ['-DCMAKE_CXX_COMPILER=/root/GCC-9.3.0/bin/g++']
         build_args += ['--', '-j8']

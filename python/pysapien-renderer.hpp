@@ -20,21 +20,20 @@ void buildRenderer(py::module &parent) {
   auto PyScene = py::class_<scene::Scene>(m, "Scene");
   auto PySceneNode = py::class_<scene::Node>(m, "Node");
   auto PySceneObject = py::class_<scene::Object, scene::Node>(m, "Object");
+  auto PyTexture =
+      py::class_<resource::SVTexture, std::shared_ptr<resource::SVTexture>>(m, "Texture");
   auto PyMaterial =
       py::class_<resource::SVMetallicMaterial, std::shared_ptr<resource::SVMetallicMaterial>>(
           m, "Material");
   auto PyModel = py::class_<resource::SVModel, std::shared_ptr<resource::SVModel>>(m, "Model");
   auto PyShape = py::class_<resource::SVShape, std::shared_ptr<resource::SVShape>>(m, "Shape");
   auto PyMesh = py::class_<resource::SVMesh, std::shared_ptr<resource::SVMesh>>(m, "Mesh");
-  auto PyTexture =
-      py::class_<resource::SVTexture, std::shared_ptr<resource::SVTexture>>(m, "Texture");
 
   auto PyUIWidget = py::class_<ui::Widget, std::shared_ptr<ui::Widget>>(m, "UIWidget");
   auto PyUIWindow = py::class_<ui::Window, ui::Widget, std::shared_ptr<ui::Window>>(m, "UIWindow");
   auto PyUICheckbox =
       py::class_<ui::Checkbox, ui::Widget, std::shared_ptr<ui::Checkbox>>(m, "UICheckbox");
-  auto PyUIButton =
-      py::class_<ui::Button, ui::Widget, std::shared_ptr<ui::Button>>(m, "UIButton");
+  auto PyUIButton = py::class_<ui::Button, ui::Widget, std::shared_ptr<ui::Button>>(m, "UIButton");
   auto PyUIRadioButtonGroup =
       py::class_<ui::RadioButtonGroup, ui::Widget, std::shared_ptr<ui::RadioButtonGroup>>(
           m, "UIRadioButtonGroup");
@@ -87,8 +86,7 @@ void buildRenderer(py::module &parent) {
         }
         return result;
       });
-  PyUISection
-      .def(py::init<>())
+  PyUISection.def(py::init<>())
       .def("Label", &ui::Section::Label, py::arg("label"))
       .def("Expanded", &ui::Section::Expanded, py::arg("expanded"))
       .def("append", [](ui::Section &section, py::args args) {
@@ -113,6 +111,7 @@ void buildRenderer(py::module &parent) {
       .def("Callback", &ui::Checkbox::Callback, py::arg("func"))
       .def_property_readonly("checked", &ui::Checkbox::get);
   PyUIRadioButtonGroup.def(py::init<>())
+      .def("Index", &ui::RadioButtonGroup::Index, py::arg("index"))
       .def("Labels", &ui::RadioButtonGroup::Labels, py::arg("labels"))
       .def("Callback", &ui::RadioButtonGroup::Callback, py::arg("func"))
       .def_property_readonly("value", &ui::RadioButtonGroup::get)
@@ -267,9 +266,7 @@ void buildRenderer(py::module &parent) {
           py::arg("meshes"), py::arg("materials"));
 
   PyMaterial
-      // .def("set_textures", &resource::SVMetallicMaterial::setTextures,
-      //      py::arg("base_color_map") = nullptr, py::arg("roughness_map") = nullptr,
-      //      py::arg("normal_map") = nullptr, py::arg("metallic_map") = nullptr)
+      // .def("set_textures", &resource::SVMetallicMaterial::setTextures)
       .def(
           "set_base_color",
           [](resource::SVMetallicMaterial &mat, py::array_t<float> color) {

@@ -111,7 +111,7 @@ int main() {
   // Renderer::SapienVulkanRenderer renderer;
   Renderer::SVulkan2Renderer renderer(false, 1000, 1000, 4);
   sim.setRenderer(&renderer);
-  Renderer::SVulkan2Window window(renderer, "../shader/full");
+  Renderer::SVulkan2Window window(renderer, 1024, 768, "../shader/full");
 
   auto s0 = sim.createScene();
   s0->setTimestep(1 / 60.f);

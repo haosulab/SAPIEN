@@ -1433,10 +1433,11 @@ void buildSapien(py::module &m) {
       .def("set_log_lvel", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
       .def(
           "create_window",
-          [](Renderer::SVulkan2Renderer &renderer, std::string const &shaderDir) {
-            return new Renderer::SVulkan2Window(renderer, shaderDir);
+          [](Renderer::SVulkan2Renderer &renderer, int width, int height,
+             std::string const &shaderDir) {
+            return new Renderer::SVulkan2Window(renderer, width, height, shaderDir);
           },
-          py::arg("shader_dir") = "")
+          py::arg("width") = 800, py::arg("height") = 600, py::arg("shader_dir") = "")
       .def_property_readonly(
           "_internal_context",
           [](Renderer::SVulkan2Renderer &renderer) { return renderer.mContext.get(); },

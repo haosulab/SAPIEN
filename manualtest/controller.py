@@ -63,7 +63,7 @@ class RenderController(object):
     def __init__(self, renderer: VulkanRenderer, shader_dir=""):
         self.renderer = renderer
         self.renderer_context: R.Context = renderer._internal_context
-        self.window = renderer.create_window(shader_dir)
+        self.window = renderer.create_window(1024, 768, shader_dir)
 
         self.cone = self.renderer_context.create_cone_mesh(16)
         self.capsule = self.renderer_context.create_capsule_mesh(0.1, 0.5, 16, 4)
@@ -111,6 +111,7 @@ class RenderController(object):
                 .Label("Display")
                 .append(
                     R.UIRadioButtonGroup()
+                    .Index(0)
                     .Labels(
                         ["Color"]
                         + [x for x in self.window.target_names if x != "Color"]
