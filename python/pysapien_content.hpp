@@ -697,7 +697,22 @@ void buildSapien(py::module &m) {
            })
       .def("get_name", &SActorBase::getName)
       .def("set_name", &SActorBase::setName, py::arg("name"))
-      .def_property_readonly("type", &SActorBase::getType)
+      .def_property_readonly("type",
+                             [](SActorBase &actor) {
+                               switch (actor.getType()) {
+                               case EActorType::STATIC:
+                                 return "static";
+                               case EActorType::KINEMATIC:
+                                 return "kinematic";
+                               case EActorType::DYNAMIC:
+                                 return "dynamic";
+                               case EActorType::ARTICULATION_LINK:
+                                 return "link";
+                               case EActorType::KINEMATIC_ARTICULATION_LINK:
+                                 return "kinematic_link";
+                               }
+                             })
+
       .def_property_readonly("id", &SActorBase::getId)
       .def("get_id", &SActorBase::getId)
       .def("get_scene", &SActorBase::getScene, py::return_value_policy::reference)
@@ -1430,7 +1445,7 @@ void buildSapien(py::module &m) {
            py::arg("max_num_materials") = 5000, py::arg("max_num_textures") = 5000,
            py::arg("default_mipmap_levels") = 1)
       .def_static("set_shader_dir", &Renderer::setDefaultShaderDirectory, py::arg("shader_dir"))
-      .def("set_log_lvel", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
+      .def("set_log_level", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
       .def(
           "create_window",
           [](Renderer::SVulkan2Renderer &renderer, int width, int height,
@@ -1499,6 +1514,16 @@ void buildSapien(py::module &m) {
             window.setCameraRotation({quat.at(0), quat.at(1), quat.at(2), quat.at(3)});
           },
           py::arg("quat"))
+      .def("get_camera_position",
+           [](Renderer::SVulkan2Window &window) {
+             auto pos = window.getCameraPosition();
+             return make_array<float>({pos.x, pos.y, pos.z});
+           })
+      .def("get_camera_rotation",
+           [](Renderer::SVulkan2Window &window) {
+             auto quat = window.getCameraRotation();
+             return make_array<float>({quat.w, quat.x, quat.y, quat.z});
+           })
       .def(
           "set_scene",
           [](Renderer::SVulkan2Window &window, SScene *scene) {
@@ -1512,6 +1537,7 @@ void buildSapien(py::module &m) {
       .def_property_readonly("target_names", &Renderer::SVulkan2Window::getDisplayTargetNames)
       .def("render", &Renderer::SVulkan2Window::render, py::arg("target_name"),
            py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>())
+      .def("resize", &Renderer::SVulkan2Window::resize, py::arg("width"), py::arg("height"))
 
       // Download images from window
       .def(

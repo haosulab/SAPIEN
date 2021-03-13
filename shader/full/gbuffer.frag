@@ -24,12 +24,12 @@ layout(location = 0) out vec4 outAlbedo;
 layout(location = 1) out vec4 outPosition;
 layout(location = 2) out vec4 outSpecular;
 layout(location = 3) out vec4 outNormal;
-layout(location = 4) out uvec4 outSegmentation;
+layout(location = 4) out uvec4 outSegmentation0;
 layout(location = 5) out vec4 outCustom;
 
 void main() {
   outCustom = vec4(objectCoord, 1);
-  outSegmentation = inSegmentation;
+  outSegmentation0 = inSegmentation;
 
   outPosition = inPosition;
   if ((materialBuffer.textureMask & 1) != 0) {

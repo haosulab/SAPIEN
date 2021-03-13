@@ -63,12 +63,16 @@ public:
   void setCameraPosition(glm::vec3 const &pos);
   void setCameraRotation(glm::quat const &rot);
 
+  glm::vec3 getCameraPosition();
+  glm::quat getCameraRotation();
+
   std::vector<std::string> getDisplayTargetNames() const;
   void render(std::string const &targetName,
               std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows = {});
   void show();
   void hide();
 
+  void resize(int width, int height);
   void rebuild();
 
   void close();

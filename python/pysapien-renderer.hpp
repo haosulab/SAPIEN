@@ -31,12 +31,18 @@ void buildRenderer(py::module &parent) {
 
   auto PyUIWidget = py::class_<ui::Widget, std::shared_ptr<ui::Widget>>(m, "UIWidget");
   auto PyUIWindow = py::class_<ui::Window, ui::Widget, std::shared_ptr<ui::Window>>(m, "UIWindow");
+  auto PyUITreeNode =
+      py::class_<ui::TreeNode, ui::Widget, std::shared_ptr<ui::TreeNode>>(m, "UITreeNode");
+  auto PyUISection =
+      py::class_<ui::Section, ui::Widget, std::shared_ptr<ui::Section>>(m, "UISection");
+
   auto PyUICheckbox =
       py::class_<ui::Checkbox, ui::Widget, std::shared_ptr<ui::Checkbox>>(m, "UICheckbox");
   auto PyUIButton = py::class_<ui::Button, ui::Widget, std::shared_ptr<ui::Button>>(m, "UIButton");
-  auto PyUIRadioButtonGroup =
-      py::class_<ui::RadioButtonGroup, ui::Widget, std::shared_ptr<ui::RadioButtonGroup>>(
-          m, "UIRadioButtonGroup");
+  auto PyUISelectable =
+      py::class_<ui::Selectable, ui::Widget, std::shared_ptr<ui::Selectable>>(m, "UISelectable");
+  auto PyUIOptions =
+      py::class_<ui::Options, ui::Widget, std::shared_ptr<ui::Options>>(m, "UIOptions");
 
   auto PyUIDisplayText = py::class_<ui::DisplayText, ui::Widget, std::shared_ptr<ui::DisplayText>>(
       m, "UIDisplayText");
@@ -56,10 +62,9 @@ void buildRenderer(py::module &parent) {
   auto PyUISliderAngle = py::class_<ui::SliderAngle, ui::Widget, std::shared_ptr<ui::SliderAngle>>(
       m, "UISliderAngle");
 
-  auto PyUISection =
-      py::class_<ui::Section, ui::Widget, std::shared_ptr<ui::Section>>(m, "UISection");
-
-  PyUIWidget.def("remove", &ui::Widget::remove);
+  PyUIWidget.def("remove", &ui::Widget::remove)
+      .def("remove_children", &ui::Widget::removeChildren)
+      .def("get_children", &ui::Widget::getChildren);
   // UI
   PyUIWindow.def("Label", &ui::Window::Label, py::arg("label"))
       .def(py::init<>())
@@ -86,6 +91,20 @@ void buildRenderer(py::module &parent) {
         }
         return result;
       });
+  PyUITreeNode.def(py::init<>())
+      .def("Label", &ui::TreeNode::Label, py::arg("label"))
+      .def("append", [](ui::TreeNode &node, py::args args) {
+        if (args.size() == 0) {
+          throw std::runtime_error("append must take 1 or more arguments");
+        }
+        std::shared_ptr<ui::TreeNode> result;
+        for (auto &arg : args) {
+          auto widget = arg.cast<std::shared_ptr<ui::Widget>>();
+          result = node.append(widget);
+        }
+        return result;
+      });
+
   PyUISection.def(py::init<>())
       .def("Label", &ui::Section::Label, py::arg("label"))
       .def("Expanded", &ui::Section::Expanded, py::arg("expanded"))
@@ -105,17 +124,25 @@ void buildRenderer(py::module &parent) {
       .def("Label", &ui::Button::Label, py::arg("label"))
       .def("Callback", &ui::Button::Callback, py::arg("func"));
 
+  PyUISelectable.def(py::init<>())
+      .def("Label", &ui::Selectable::Label, py::arg("label"))
+      .def("Selected", &ui::Selectable::Selected, py::arg("selected"))
+      .def("Callback", &ui::Selectable::Callback, py::arg("func"))
+      .def_property_readonly("value", &ui::Selectable::getSelected);
+
   PyUICheckbox.def(py::init<>())
       .def("Label", &ui::Checkbox::Label, py::arg("label"))
       .def("Checked", &ui::Checkbox::Checked, py::arg("checked"))
       .def("Callback", &ui::Checkbox::Callback, py::arg("func"))
       .def_property_readonly("checked", &ui::Checkbox::get);
-  PyUIRadioButtonGroup.def(py::init<>())
-      .def("Index", &ui::RadioButtonGroup::Index, py::arg("index"))
-      .def("Labels", &ui::RadioButtonGroup::Labels, py::arg("labels"))
-      .def("Callback", &ui::RadioButtonGroup::Callback, py::arg("func"))
-      .def_property_readonly("value", &ui::RadioButtonGroup::get)
-      .def_property_readonly("index", &ui::RadioButtonGroup::getIndex);
+  PyUIOptions.def(py::init<>())
+      .def("Style", &ui::Options::Style, py::arg("style"))
+      .def("Label", &ui::Options::Label, py::arg("label"))
+      .def("Index", &ui::Options::Index, py::arg("index"))
+      .def("Items", &ui::Options::Items, py::arg("items"))
+      .def("Callback", &ui::Options::Callback, py::arg("func"))
+      .def_property_readonly("value", &ui::Options::get)
+      .def_property_readonly("index", &ui::Options::getIndex);
 
   PyUIDisplayText.def(py::init<>()).def("Text", &ui::DisplayText::Text, py::arg("text"));
 
@@ -127,7 +154,7 @@ void buildRenderer(py::module &parent) {
       .def("Label", &ui::InputFloat::Label, py::arg("label"))
       .def(
           "Value", [](ui::InputFloat &input, float x) { return input.Value(x); }, py::arg("value"))
-      .def("get", [](ui::InputFloat &input) { return input.get(); });
+      .def_property_readonly("value", [](ui::InputFloat &input) { return input.get(); });
 
   PyUIInputFloat2.def(py::init<>())
       .def("Label", &ui::InputFloat2::Label, py::arg("label"))
@@ -137,7 +164,7 @@ void buildRenderer(py::module &parent) {
             return input.Value({x.at(0), x.at(1)});
           },
           py::arg("value"))
-      .def("get", [](ui::InputFloat2 &input) {
+      .def_property_readonly("value", [](ui::InputFloat2 &input) {
         glm::vec2 v = input.get();
         return py::array_t<float>(2u, &v[0]);
       });
@@ -150,7 +177,7 @@ void buildRenderer(py::module &parent) {
             return input.Value({x.at(0), x.at(1), x.at(2)});
           },
           py::arg("value"))
-      .def("get", [](ui::InputFloat3 &input) {
+      .def_property_readonly("value", [](ui::InputFloat3 &input) {
         glm::vec3 v = input.get();
         return py::array_t<float>(3u, &v[0]);
       });
@@ -163,26 +190,28 @@ void buildRenderer(py::module &parent) {
             return input.Value({x.at(0), x.at(1), x.at(2), x.at(3)});
           },
           py::arg("value"))
-      .def("get", [](ui::InputFloat4 &input) {
+      .def_property_readonly("value", [](ui::InputFloat4 &input) {
         glm::vec4 v = input.get();
         return py::array_t<float>(4u, &v[0]);
       });
 
   PyUISliderFloat.def(py::init<>())
+      .def("Width", &ui::SliderFloat::Width, py::arg("width"))
       .def("Label", &ui::SliderFloat::Label, py::arg("label"))
       .def("Min", &ui::SliderFloat::Min, py::arg("min"))
       .def("Max", &ui::SliderFloat::Max, py::arg("max"))
       .def("Value", &ui::SliderFloat::Value, py::arg("value"))
       .def("Callback", &ui::SliderFloat::Callback, py::arg("func"))
-      .def("get", &ui::SliderFloat::get);
+      .def_property_readonly("value", &ui::SliderFloat::get);
 
   PyUISliderAngle.def(py::init<>())
+      .def("Width", &ui::SliderAngle::Width, py::arg("width"))
       .def("Label", &ui::SliderAngle::Label, py::arg("label"))
       .def("Min", &ui::SliderAngle::Min, py::arg("min"))
       .def("Max", &ui::SliderAngle::Max, py::arg("max"))
       .def("Value", &ui::SliderAngle::Value, py::arg("value"))
       .def("Callback", &ui::SliderAngle::Callback, py::arg("func"))
-      .def("get", &ui::SliderAngle::get);
+      .def_property_readonly("value", &ui::SliderAngle::get);
   // end UI
 
   PyContext

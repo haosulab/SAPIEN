@@ -93,6 +93,9 @@ void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {
 void SVulkan2Window::setCameraPosition(glm::vec3 const &pos) { getCamera()->setPosition(pos); }
 void SVulkan2Window::setCameraRotation(glm::quat const &rot) { getCamera()->setRotation(rot); }
 
+glm::vec3 SVulkan2Window::getCameraPosition() { return getCamera()->getPosition(); }
+glm::quat SVulkan2Window::getCameraRotation() { return getCamera()->getRotation(); }
+
 std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
   return mSVulkanRenderer->getDisplayTargetNames();
 }
@@ -117,6 +120,11 @@ void SVulkan2Window::rebuild() {
   }
 }
 
+void SVulkan2Window::resize(int width, int height) {
+  glfwSetWindowSize(mWindow->getGLFWWindow(), width, height);
+  mRequiresRebuild = true;
+}
+
 void SVulkan2Window::render(std::string const &targetName,
                             std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows) {
   if (!mScene) {
@@ -138,6 +146,9 @@ void SVulkan2Window::render(std::string const &targetName,
   ImGui::NewFrame();
   // ImGui::ShowDemoWindow();
   for (auto w : uiWindows) {
+    if (!w) {
+      throw std::runtime_error("failed to render UI windows: a windows is null");
+    }
     w->build();
   }
   ImGui::Render();

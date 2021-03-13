@@ -5,11 +5,12 @@ from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector
 
 import sapien.core.pysapien.renderer as R
-from controller import RenderController
+from controller import Viewer
 
 
 sim = sapien.Engine()
 renderer = sapien.VulkanRenderer()
+renderer.set_log_level("info")
 renderer_context: R.Context = renderer._internal_context
 sim.set_renderer(renderer)
 
@@ -18,7 +19,7 @@ copper.set_base_color([0.875, 0.553, 0.221, 1])
 copper.set_metallic(1)
 copper.set_roughness(0.4)
 
-controller = RenderController(renderer, "../shader/full")
+viewer = Viewer(renderer, "../shader/full")
 
 
 def create_ant_builder(scene):
@@ -158,9 +159,9 @@ ant = ant_builder.build()
 ant.set_root_pose(Pose([0, 0, 2]))
 
 
-controller.set_scene(scene)
-controller.set_camera_xyz(-1, 0, 0)
-controller.window.set_camera_parameters(0.001, 1000, 1)
+viewer.set_scene(scene)
+viewer.set_camera_xyz(-1, 0, 0)
+viewer.window.set_camera_parameters(0.001, 1000, 1)
 
 scene.step()
 ant.set_qpos([0, 0, 0, 0, 0.7, 0.7, 0.7, 0.7])
@@ -183,10 +184,10 @@ rs.add_shadow_point_light([0, 1, -1], [2, 2, 1])
 selected_actor = None
 
 count = 0
-while not controller.closed:
+while not viewer.closed:
     scene.update_render()
     scene.step()
-    controller.render()
+    viewer.render()
 
-controller.close()
+viewer.close()
 scene = None
