@@ -127,6 +127,7 @@ void SVulkan2Window::resize(int width, int height) {
 
 void SVulkan2Window::render(std::string const &targetName,
                             std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows) {
+
   if (!mScene) {
     return;
   }
@@ -144,7 +145,33 @@ void SVulkan2Window::render(std::string const &targetName,
   }
 
   ImGui::NewFrame();
-  // ImGui::ShowDemoWindow();
+
+  // setup docking window
+  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar;
+  flags |= ImGuiWindowFlags_NoDocking;
+  ImGuiViewport *viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->Pos);
+  ImGui::SetNextWindowSize(viewport->Size);
+  ImGui::SetNextWindowViewport(viewport->ID);
+  ImGui::SetNextWindowBgAlpha(0.f);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+  flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
+           ImGuiWindowFlags_NoMove;
+  flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+  ImGui::Begin("DockSpace Demo", 0, flags);
+  ImGui::PopStyleVar();
+
+  ImGui::DockSpace(ImGui::GetID("Dockspace"), ImVec2(0, 0),
+                   ImGuiDockNodeFlags_PassthruCentralNode |
+                       ImGuiDockNodeFlags_NoDockingInCentralNode);
+  ImGui::End();
+  ImGui::PopStyleVar();
+
+  if (uiWindows.size() == 0) {
+    ImGui::ShowDemoWindow();
+  }
   for (auto w : uiWindows) {
     if (!w) {
       throw std::runtime_error("failed to render UI windows: a windows is null");
@@ -306,6 +333,8 @@ std::array<float, 2> SVulkan2Window::getMouseWheelDelta() {
   auto [x, y] = mWindow->getMouseWheelDelta();
   return {x, y};
 }
+
+float SVulkan2Window::getFPS() { return ImGui::GetIO().Framerate; }
 
 } // namespace Renderer
 } // namespace sapien

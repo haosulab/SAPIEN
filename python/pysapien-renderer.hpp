@@ -31,6 +31,8 @@ void buildRenderer(py::module &parent) {
 
   auto PyUIWidget = py::class_<ui::Widget, std::shared_ptr<ui::Widget>>(m, "UIWidget");
   auto PyUIWindow = py::class_<ui::Window, ui::Widget, std::shared_ptr<ui::Window>>(m, "UIWindow");
+  auto PyUISameLine =
+      py::class_<ui::SameLine, ui::Widget, std::shared_ptr<ui::SameLine>>(m, "UISameLine");
   auto PyUITreeNode =
       py::class_<ui::TreeNode, ui::Widget, std::shared_ptr<ui::TreeNode>>(m, "UITreeNode");
   auto PyUISection =
@@ -91,6 +93,23 @@ void buildRenderer(py::module &parent) {
         }
         return result;
       });
+
+  PyUISameLine.def(py::init<>())
+      .def("append",
+           [](ui::SameLine &node, py::args args) {
+             if (args.size() == 0) {
+               throw std::runtime_error("append must take 1 or more arguments");
+             }
+             std::shared_ptr<ui::SameLine> result;
+             for (auto &arg : args) {
+               auto widget = arg.cast<std::shared_ptr<ui::Widget>>();
+               result = node.append(widget);
+             }
+             return result;
+           })
+      .def("Offset", &ui::SameLine::Offset, py::arg("offset"))
+      .def("Spacing", &ui::SameLine::Spacing, py::arg("spacing"));
+
   PyUITreeNode.def(py::init<>())
       .def("Label", &ui::TreeNode::Label, py::arg("label"))
       .def("append", [](ui::TreeNode &node, py::args args) {
@@ -148,13 +167,15 @@ void buildRenderer(py::module &parent) {
 
   PyUIInputText.def(py::init<>())
       .def("Label", &ui::InputText::Label, py::arg("label"))
-      .def("Size", &ui::InputText::Size, py::arg("size"));
+      .def("Size", &ui::InputText::Size, py::arg("size"))
+      .def("ReadOnly", &ui::InputText::ReadOnly, py::arg("read_only"));
 
   PyUIInputFloat.def(py::init<>())
       .def("Label", &ui::InputFloat::Label, py::arg("label"))
       .def(
           "Value", [](ui::InputFloat &input, float x) { return input.Value(x); }, py::arg("value"))
-      .def_property_readonly("value", [](ui::InputFloat &input) { return input.get(); });
+      .def_property_readonly("value", [](ui::InputFloat &input) { return input.get(); })
+      .def("ReadOnly", &ui::InputFloat::ReadOnly, py::arg("read_only"));
 
   PyUIInputFloat2.def(py::init<>())
       .def("Label", &ui::InputFloat2::Label, py::arg("label"))
@@ -164,10 +185,12 @@ void buildRenderer(py::module &parent) {
             return input.Value({x.at(0), x.at(1)});
           },
           py::arg("value"))
-      .def_property_readonly("value", [](ui::InputFloat2 &input) {
-        glm::vec2 v = input.get();
-        return py::array_t<float>(2u, &v[0]);
-      });
+      .def_property_readonly("value",
+                             [](ui::InputFloat2 &input) {
+                               glm::vec2 v = input.get();
+                               return py::array_t<float>(2u, &v[0]);
+                             })
+      .def("ReadOnly", &ui::InputFloat2::ReadOnly, py::arg("read_only"));
 
   PyUIInputFloat3.def(py::init<>())
       .def("Label", &ui::InputFloat3::Label, py::arg("label"))
@@ -177,10 +200,12 @@ void buildRenderer(py::module &parent) {
             return input.Value({x.at(0), x.at(1), x.at(2)});
           },
           py::arg("value"))
-      .def_property_readonly("value", [](ui::InputFloat3 &input) {
-        glm::vec3 v = input.get();
-        return py::array_t<float>(3u, &v[0]);
-      });
+      .def_property_readonly("value",
+                             [](ui::InputFloat3 &input) {
+                               glm::vec3 v = input.get();
+                               return py::array_t<float>(3u, &v[0]);
+                             })
+      .def("ReadOnly", &ui::InputFloat3::ReadOnly, py::arg("read_only"));
 
   PyUIInputFloat4.def(py::init<>())
       .def("Label", &ui::InputFloat4::Label, py::arg("label"))
@@ -190,10 +215,12 @@ void buildRenderer(py::module &parent) {
             return input.Value({x.at(0), x.at(1), x.at(2), x.at(3)});
           },
           py::arg("value"))
-      .def_property_readonly("value", [](ui::InputFloat4 &input) {
-        glm::vec4 v = input.get();
-        return py::array_t<float>(4u, &v[0]);
-      });
+      .def_property_readonly("value",
+                             [](ui::InputFloat4 &input) {
+                               glm::vec4 v = input.get();
+                               return py::array_t<float>(4u, &v[0]);
+                             })
+      .def("ReadOnly", &ui::InputFloat4::ReadOnly, py::arg("read_only"));
 
   PyUISliderFloat.def(py::init<>())
       .def("Width", &ui::SliderFloat::Width, py::arg("width"))

@@ -103,6 +103,8 @@ public:
   std::array<float, 2> getMouseDelta();
   std::array<float, 2> getMouseWheelDelta();
 
+  float getFPS();
+
 private:
   svulkan2::scene::Camera *getCamera();
 };

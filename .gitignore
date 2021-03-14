@@ -18,3 +18,4 @@ imgui.ini
 /ros2_ws/install/
 /dist/
 *.convex.*
+/.clangd/

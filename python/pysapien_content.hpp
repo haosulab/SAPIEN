@@ -711,6 +711,7 @@ void buildSapien(py::module &m) {
                                case EActorType::KINEMATIC_ARTICULATION_LINK:
                                  return "kinematic_link";
                                }
+                               throw std::runtime_error("actor has invalid type");
                              })
 
       .def_property_readonly("id", &SActorBase::getId)
@@ -723,6 +724,8 @@ void buildSapien(py::module &m) {
       .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
       .def("get_collision_shapes", &SActorBase::getCollisionShapes)
       .def("get_visual_bodies", &SActorBase::getRenderBodies, py::return_value_policy::reference)
+      .def("get_collision_visual_bodies", &SActorBase::getCollisionBodies,
+           py::return_value_policy::reference)
       .def("render_collision", &SActorBase::renderCollisionBodies, py::arg("render") = true)
       .def("hide_visual", &SActorBase::hideVisual)
       .def("unhide_visual", &SActorBase::unhideVisual)
@@ -861,10 +864,18 @@ void buildSapien(py::module &m) {
   PyArticulationBase.def_property("name", &SArticulationBase::getName, &SArticulationBase::setName)
       .def("get_name", &SArticulationBase::getName)
       .def("set_name", &SArticulationBase::setName, py::arg("name"))
-      .def("get_base_links", &SArticulationBase::getBaseLinks, py::return_value_policy::reference)
-      .def("get_base_joints", &SArticulationBase::getBaseJoints,
-           py::return_value_policy::reference)
-      .def_property_readonly("type", &SArticulationBase::getType)
+      .def("get_links", &SArticulationBase::getBaseLinks, py::return_value_policy::reference)
+      .def("get_joints", &SArticulationBase::getBaseJoints, py::return_value_policy::reference)
+      .def_property_readonly("type",
+                             [](SArticulationBase &art) {
+                               switch (art.getType()) {
+                               case EArticulationType::DYNAMIC:
+                                 return "dynamic";
+                               case EArticulationType::KINEMATIC:
+                                 return "kinematic";
+                               }
+                               throw std::runtime_error("invalid articulation type");
+                             })
       .def_property_readonly("dof", &SArticulationBase::dof)
       .def("get_qpos",
            [](SArticulationBase &a) {
@@ -959,8 +970,9 @@ void buildSapien(py::module &m) {
           },
           py::arg("drive_target"));
 
-  PyArticulation.def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
-      .def("get_joints", &SArticulation::getSJoints, py::return_value_policy::reference)
+  PyArticulation //.def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
+                 //.def("get_joints", &SArticulation::getSJoints,
+                 // py::return_value_policy::reference)
       .def("get_active_joints", &SArticulation::getActiveJoints,
            py::return_value_policy::reference)
       .def(
@@ -1538,6 +1550,7 @@ void buildSapien(py::module &m) {
       .def("render", &Renderer::SVulkan2Window::render, py::arg("target_name"),
            py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>())
       .def("resize", &Renderer::SVulkan2Window::resize, py::arg("width"), py::arg("height"))
+      .def_property_readonly("fps", &Renderer::SVulkan2Window::getFPS)
 
       // Download images from window
       .def(
