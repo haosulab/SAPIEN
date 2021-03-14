@@ -647,11 +647,6 @@ class JointBase():
         """
         :type: ArticulationJointType
         """
-    @property
-    def articulation() -> ArticulationBase:
-        """
-        :type: ArticulationBase
-        """
     pass
 class Joint(JointBase):
     def get_global_pose(self) -> Pose: ...
