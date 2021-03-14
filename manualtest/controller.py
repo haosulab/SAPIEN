@@ -156,8 +156,9 @@ class Viewer(object):
         self.target_name = "Color"
         self.single_step = False
 
-        self.move_speed = 0.01
+        self.move_speed = 0.05
         self.rotate_speed = 0.005
+        self.scroll_speed = 0.5
         self.selection_opacity = 0.7
 
         self.scene_window = None
@@ -193,15 +194,21 @@ class Viewer(object):
                     R.UISliderFloat()
                     .Min(0.01)
                     .Max(1)
-                    .Value(0.1)
+                    .Value(self.move_speed)
                     .Label("Move")
                     .Callback(lambda w: self.set_move_speed(w.value)),
                     R.UISliderFloat()
                     .Min(0.001)
                     .Max(0.01)
-                    .Value(0.005)
+                    .Value(self.rotate_speed)
                     .Label("Rotate")
                     .Callback(lambda w: self.set_rotate_speed(w.value)),
+                    R.UISliderFloat()
+                    .Min(0.1)
+                    .Max(1)
+                    .Value(self.scroll_speed)
+                    .Label("Scroll")
+                    .Callback(lambda w: self.set_scroll_speed(w.value)),
                     R.UIDisplayText().Text("Display Settings"),
                     R.UIOptions()
                     .Style("select")
@@ -218,7 +225,6 @@ class Viewer(object):
                     .Index(0)
                     .Items(["{}x{}".format(r[0], r[1]) for r in self.resolutions])
                     .Callback(lambda p: self.set_resolution(p.index)),
-
                     R.UIDisplayText().Text("Actor Selection"),
                     R.UICheckbox()
                     .Label("Coordinate Axes")
@@ -230,11 +236,12 @@ class Viewer(object):
                     .Max(1)
                     .Value(self.selection_opacity)
                     .Callback(lambda p: self.set_selection_opacity(p.value)),
-
                     R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps)),
                 )
             )
-        self.control_window.get_children()[-1].Text("FPS: {:.2f}".format(self.window.fps))
+        self.control_window.get_children()[-1].Text(
+            "FPS: {:.2f}".format(self.window.fps)
+        )
 
     def set_selection_opacity(self, opacity):
         self.selection_opacity = opacity
@@ -375,26 +382,51 @@ class Viewer(object):
             )
             if art.type == "dynamic":
                 j: Joint
+
                 line.append(
                     R.UITreeNode()
                     .Label("##joint_expand_{}".format(i))
                     .append(
+                        R.UISliderFloat()
+                        .Label("Drive Target##{}".format(i))
+                        .Min(max(j.get_limits()[0][0], -20))
+                        .Max(min(j.get_limits()[0][1], 20))
+                        .Value(j.get_drive_target())
+                        .Callback((lambda j: lambda p: j.set_drive_target(p.value))(j)),
                         R.UIInputFloat()
                         .Label("Damping##{}".format(i))
                         .Value(j.damping)
-                        .ReadOnly(True),
+                        .Callback(
+                            (
+                                lambda j: lambda p: j.set_drive_property(
+                                    j.stiffness, p.value, j.force_limit
+                                )
+                            )(j)
+                        ),
                         R.UIInputFloat()
                         .Label("Stiffness##{}".format(i))
                         .Value(j.stiffness)
-                        .ReadOnly(True),
+                        .Callback(
+                            (
+                                lambda j: lambda p: j.set_drive_property(
+                                    p.value, j.damping, j.force_limit
+                                )
+                            )(j)
+                        ),
                         R.UIInputFloat()
                         .Label("Force Limit##{}".format(i))
                         .Value(j.force_limit)
-                        .ReadOnly(True),
+                        .Callback(
+                            (
+                                lambda j: lambda p: j.set_drive_property(
+                                    j.stiffness, j.damping, p.value
+                                )
+                            )(j)
+                        ),
                         R.UIInputFloat()
                         .Label("Friction##{}".format(i))
                         .Value(j.friction)
-                        .ReadOnly(True),
+                        .Callback((lambda j: lambda p: j.set_friction(p.value))(j)),
                     )
                 )
             uijoints.append(line)
@@ -420,6 +452,9 @@ class Viewer(object):
 
     def set_rotate_speed(self, x):
         self.rotate_speed = x
+
+    def set_scroll_speed(self, x):
+        self.scroll_speed = x
 
     def step_button(self):
         if self.paused:
@@ -612,7 +647,10 @@ class Viewer(object):
             if self.window.mouse_down(1):
                 x, y = self.window.mouse_delta
                 if self.focused_actor:
-                    self.arc_camera_controller.rotate_yaw_pitch(-0.01 * x, 0.01 * y)
+                    self.arc_camera_controller.rotate_yaw_pitch(
+                        -self.rotate_speed * speed_mod * x,
+                        self.rotate_speed * speed_mod * y,
+                    )
                 else:
                     self.fps_camera_controller.rotate(
                         0,
@@ -632,9 +670,11 @@ class Viewer(object):
             wx, wy = self.window.mouse_wheel_delta
             if wx != 0:
                 if self.focused_actor:
-                    self.arc_camera_controller.zoom(0.1 * wx)
+                    self.arc_camera_controller.zoom(self.scroll_speed * speed_mod * wx)
                 else:
-                    self.fps_camera_controller.move(0.1 * speed_mod * wx, 0, 0)
+                    self.fps_camera_controller.move(
+                        self.scroll_speed * speed_mod * wx, 0, 0
+                    )
 
             if self.focused_actor:
                 self.arc_camera_controller.set_center(self.focused_actor.pose.p)

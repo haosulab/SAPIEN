@@ -849,8 +849,10 @@ void buildSapien(py::module &m) {
       .def(
           "set_drive_velocity_target", [](SJoint &j, PxReal v) { j.setDriveVelocityTarget(v); },
           py::arg("velocity"))
+      .def("get_drive_velocity_target", [](SJoint &j) { return j.getDriveVelocityTarget(); })
       .def(
           "set_drive_target", [](SJoint &j, PxReal p) { j.setDriveTarget(p); }, py::arg("target"))
+      .def("get_drive_target", [](SJoint &j) { return j.getDriveTarget(); })
       // TODO wrapper for array-valued targets
       .def("get_global_pose", &SJoint::getGlobalPose);
 

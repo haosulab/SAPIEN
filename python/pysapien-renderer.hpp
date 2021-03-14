@@ -168,14 +168,16 @@ void buildRenderer(py::module &parent) {
   PyUIInputText.def(py::init<>())
       .def("Label", &ui::InputText::Label, py::arg("label"))
       .def("Size", &ui::InputText::Size, py::arg("size"))
-      .def("ReadOnly", &ui::InputText::ReadOnly, py::arg("read_only"));
+      .def("ReadOnly", &ui::InputText::ReadOnly, py::arg("read_only"))
+      .def("Callback", &ui::InputText::Callback, py::arg("func"));
 
   PyUIInputFloat.def(py::init<>())
       .def("Label", &ui::InputFloat::Label, py::arg("label"))
       .def(
           "Value", [](ui::InputFloat &input, float x) { return input.Value(x); }, py::arg("value"))
       .def_property_readonly("value", [](ui::InputFloat &input) { return input.get(); })
-      .def("ReadOnly", &ui::InputFloat::ReadOnly, py::arg("read_only"));
+      .def("ReadOnly", &ui::InputFloat::ReadOnly, py::arg("read_only"))
+      .def("Callback", &ui::InputFloat::Callback, py::arg("func"));
 
   PyUIInputFloat2.def(py::init<>())
       .def("Label", &ui::InputFloat2::Label, py::arg("label"))
@@ -190,7 +192,8 @@ void buildRenderer(py::module &parent) {
                                glm::vec2 v = input.get();
                                return py::array_t<float>(2u, &v[0]);
                              })
-      .def("ReadOnly", &ui::InputFloat2::ReadOnly, py::arg("read_only"));
+      .def("ReadOnly", &ui::InputFloat2::ReadOnly, py::arg("read_only"))
+      .def("Callback", &ui::InputFloat2::Callback, py::arg("func"));
 
   PyUIInputFloat3.def(py::init<>())
       .def("Label", &ui::InputFloat3::Label, py::arg("label"))
@@ -205,7 +208,8 @@ void buildRenderer(py::module &parent) {
                                glm::vec3 v = input.get();
                                return py::array_t<float>(3u, &v[0]);
                              })
-      .def("ReadOnly", &ui::InputFloat3::ReadOnly, py::arg("read_only"));
+      .def("ReadOnly", &ui::InputFloat3::ReadOnly, py::arg("read_only"))
+      .def("Callback", &ui::InputFloat3::Callback, py::arg("func"));
 
   PyUIInputFloat4.def(py::init<>())
       .def("Label", &ui::InputFloat4::Label, py::arg("label"))
@@ -220,7 +224,8 @@ void buildRenderer(py::module &parent) {
                                glm::vec4 v = input.get();
                                return py::array_t<float>(4u, &v[0]);
                              })
-      .def("ReadOnly", &ui::InputFloat4::ReadOnly, py::arg("read_only"));
+      .def("ReadOnly", &ui::InputFloat4::ReadOnly, py::arg("read_only"))
+      .def("Callback", &ui::InputFloat4::Callback, py::arg("func"));
 
   PyUISliderFloat.def(py::init<>())
       .def("Width", &ui::SliderFloat::Width, py::arg("width"))
