@@ -9,6 +9,7 @@
 #include <iostream>
 #include <spdlog/spdlog.h>
 #include <sstream>
+#include <set>
 
 namespace sapien {
 namespace fs = std::experimental::filesystem;
@@ -58,22 +59,33 @@ static void exportMeshToFile(PxConvexMesh *pxMesh, const std::string &filename) 
     scene.mMeshes[0]->mVertices[i] = aiVector3D(vertices[i].x, vertices[i].y, vertices[i].z);
   }
 
+  // TODO(jigu): The following codes might be written as a helper function.
   uint32_t nbfaces = pxMesh->getNbPolygons();
+  // Convert into triangles
+  std::vector<uint32_t> triangles;
+  const uint8_t *indexBuffer = pxMesh->getIndexBuffer();
+  for (uint32_t i = 0; i < nbfaces; i++) {
+    PxHullPolygon polygon;
+    pxMesh->getPolygonData(i, polygon);
+    for (uint32_t j = 2; j < polygon.mNbVerts; j++) {
+      triangles.push_back(indexBuffer[polygon.mIndexBase]);
+      triangles.push_back(indexBuffer[polygon.mIndexBase + j - 1]);
+      triangles.push_back(indexBuffer[polygon.mIndexBase + j]);
+    }
+  }
+
+  nbfaces = triangles.size() / 3;
   scene.mMeshes[0]->mNumFaces = nbfaces;
   scene.mMeshes[0]->mFaces = new aiFace[nbfaces];
 
-  const uint8_t *indexBuffer = pxMesh->getIndexBuffer();
-
   for (uint32_t i = 0; i < nbfaces; ++i) {
-    PxHullPolygon polygon;
-    pxMesh->getPolygonData(i, polygon);
-    scene.mMeshes[0]->mFaces[i].mNumIndices = polygon.mNbVerts;
-    scene.mMeshes[0]->mFaces[i].mIndices = new uint32_t[polygon.mNbVerts];
-    uint16_t offset = polygon.mIndexBase;
-    for (uint32_t j = 0; j < polygon.mNbVerts; ++j) {
-      scene.mMeshes[0]->mFaces[i].mIndices[j] = indexBuffer[offset + j];
-    }
+    scene.mMeshes[0]->mFaces[i].mNumIndices = 3;
+    scene.mMeshes[0]->mFaces[i].mIndices = new uint32_t[3];
+    scene.mMeshes[0]->mFaces[i].mIndices[0] = triangles[i * 3 + 0];
+    scene.mMeshes[0]->mFaces[i].mIndices[1] = triangles[i * 3 + 1];
+    scene.mMeshes[0]->mFaces[i].mIndices[2] = triangles[i * 3 + 2];
   }
+
   exporter.Export(&scene, stlId, filename);
 
   // memory freed by aiScene destructor
