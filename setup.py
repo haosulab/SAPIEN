@@ -59,8 +59,6 @@ class CMakeBuild(build_ext):
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
         cmake_args += ['-DCMAKE_MODULE_PATH=/workspace/pinocchio/cmake/find-external/CppAD']
-        # cmake_args += ['-DCMAKE_C_COMPILER=/root/GCC-9.3.0/bin/gcc']
-        # cmake_args += ['-DCMAKE_CXX_COMPILER=/root/GCC-9.3.0/bin/g++']
         build_args += ['--', '-j8']
 
         env = os.environ.copy()
@@ -84,12 +82,19 @@ class CMakeBuild(build_ext):
                 shutil.rmtree(ptx_target_path)
             shutil.copytree(os.path.join(self.build_temp, 'ptx'), ptx_target_path)
 
-        spv_path = os.path.join(self.build_lib, 'sapien', 'spv')
-        spv_build_path = os.path.join(self.build_temp, 'spv')
-        if os.path.exists(spv_path):
-            shutil.rmtree(spv_path)
-        if os.path.exists(spv_build_path):
-            shutil.copytree(spv_build_path, spv_path)
+        vulkan_shader_path = os.path.join(self.build_lib, 'sapien', 'vulkan_shader')
+        source_path = os.path.join(ext.sourcedir, 'vulkan_shader')
+        if os.path.exists(vulkan_shader_path):
+            shutil.rmtree(vulkan_shader_path)
+        assert os.path.exists(source_path)
+        shutil.copytree(source_path, vulkan_shader_path)
+
+        vulkan_icd_path = os.path.join(self.build_lib, 'sapien', 'vulkan_icd')
+        source_path = os.path.join(ext.sourcedir, 'vulkan_icd')
+        if os.path.exists(vulkan_icd_path):
+            shutil.rmtree(vulkan_icd_path)
+        assert os.path.exists(source_path)
+        shutil.copytree(source_path, vulkan_icd_path)
 
 
 def check_version_info():
@@ -165,7 +170,7 @@ setup(name="sapien",
       long_description=open("readme.md").read(),
       cmdclass=dict(build_ext=CMakeBuild),
       zip_safe=False,
-      packages=["sapien", "sapien.core", "sapien.asset", "sapien.example"],
+      packages=["sapien", "sapien.core", "sapien.asset", "sapien.example", "sapien.utils"],
       keywords="robotics simulator dataset articulation partnet",
       url="https://sapien.ucsd.edu",
       project_urls={"Documentation": "https://sapien.ucsd.edu/docs"},

@@ -117,6 +117,10 @@ std::vector<std::unique_ptr<RenderShape>> SVulkan2Rigidbody::getRenderShapes() c
       }
       mesh->indices = index;
       renderShape->geometry = std::move(mesh);
+
+      auto mat = std::make_shared<SVulkan2Material>(
+          std::static_pointer_cast<svulkan2::resource::SVMetallicMaterial>(shape->material));
+      renderShape->material = mat;
     }
   }
   return result;

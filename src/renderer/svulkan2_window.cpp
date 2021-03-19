@@ -179,7 +179,9 @@ void SVulkan2Window::render(std::string const &targetName,
     w->build();
   }
   ImGui::Render();
-  mRenderer->mContext->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE, UINT64_MAX);
+  if (mRenderer->mContext->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+    throw std::runtime_error("failed on wait for fence.");
+  }
   mRenderer->mContext->getDevice().resetFences(mSceneRenderFence.get());
 
   {

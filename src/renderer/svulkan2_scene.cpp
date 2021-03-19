@@ -227,5 +227,9 @@ std::vector<ICamera *> SVulkan2Scene::getCameras() {
   return cams;
 }
 
+void SVulkan2Scene::updateRender() {
+  mScene->updateModelMatrices();
+}
+
 } // namespace Renderer
 } // namespace sapien

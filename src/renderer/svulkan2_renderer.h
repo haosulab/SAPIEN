@@ -13,7 +13,7 @@ class SVulkan2Camera;
 class SVulkan2Scene;
 
 extern std::string gDefaultShaderDirectory;
-void setDefaultShaderDirectory(std::string const& dir);
+void setDefaultShaderDirectory(std::string const &dir);
 
 class SVulkan2Material : public IPxrMaterial {
   std::shared_ptr<svulkan2::resource::SVMetallicMaterial> mMaterial;
@@ -113,6 +113,7 @@ public:
 
   void removeCamera(ICamera *camera) override;
   std::vector<ICamera *> getCameras() override;
+  void updateRender() override;
 
   void destroy() override;
 
@@ -205,12 +206,13 @@ public:
   void setInitialPose(physx::PxTransform const &pose) override;
   void setPose(physx::PxTransform const &pose) override;
 
-  void changeModeToOrthographic(float scaling);
-  void changeModeToPerspective(float fovy);
-
-  bool isOrthographic() const;
+  void setPerspectiveParameters(float near, float far, float fovy, float aspect);
+  void setFullPerspectiveParameters(float near, float far, float fx, float fy, float cx, float cy,
+                                    float width, float height, float skew);
+  void setOrthographicParameters(float near, float far, float aspect, float scaling);
 
   svulkan2::scene::Camera *getCamera() const { return mCamera; }
+  std::string getMode() const;
 };
 
 } // namespace Renderer

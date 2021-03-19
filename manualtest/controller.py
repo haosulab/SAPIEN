@@ -399,7 +399,10 @@ class Viewer(object):
                         .Callback(
                             (
                                 lambda j: lambda p: j.set_drive_property(
-                                    j.stiffness, p.value, j.force_limit
+                                    j.stiffness,
+                                    p.value,
+                                    j.force_limit,
+                                    j.drive_mode,
                                 )
                             )(j)
                         ),
@@ -409,7 +412,10 @@ class Viewer(object):
                         .Callback(
                             (
                                 lambda j: lambda p: j.set_drive_property(
-                                    p.value, j.damping, j.force_limit
+                                    p.value,
+                                    j.damping,
+                                    j.force_limit,
+                                    j.drive_mode,
                                 )
                             )(j)
                         ),
@@ -419,7 +425,10 @@ class Viewer(object):
                         .Callback(
                             (
                                 lambda j: lambda p: j.set_drive_property(
-                                    j.stiffness, j.damping, p.value
+                                    j.stiffness,
+                                    j.damping,
+                                    p.value,
+                                    j.drive_mode,
                                 )
                             )(j)
                         ),
@@ -427,6 +436,19 @@ class Viewer(object):
                         .Label("Friction##{}".format(i))
                         .Value(j.friction)
                         .Callback((lambda j: lambda p: j.set_friction(p.value))(j)),
+                        R.UICheckbox()
+                        .Label("Acceleration##{}".format(i))
+                        .Checked(j.drive_mode == "acceleration")
+                        .Callback(
+                            (
+                                lambda j: lambda p: j.set_drive_property(
+                                    j.stiffness,
+                                    j.damping,
+                                    j.force_limit,
+                                    "acceleration" if p.checked else "force",
+                                )
+                            )(j)
+                        ),
                     )
                 )
             uijoints.append(line)

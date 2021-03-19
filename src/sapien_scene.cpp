@@ -522,6 +522,8 @@ void SScene::updateRender() {
   for (auto &cam : mCameras) {
     cam.camera->setPose(cam.actor->getPxActor()->getGlobalPose());
   }
+
+  getRendererScene()->updateRender();
 }
 
 SActorStatic *SScene::addGround(PxReal altitude, bool render,

@@ -185,7 +185,14 @@ public:
   void stepAsync();
   void stepWait();
 
-  void updateRender(); // call to sync physics world to render world
+  /** syncs physical scene with renderer scene, and tell the renderer scene that
+   * it is a new time frame.
+   *
+   * when optical flow or motion blur is desired, you need to call this function
+   * every frame even if you do not render the frame to update the model
+   * matrices of objects.
+   */
+  void updateRender();
   SActorStatic *addGround(PxReal altitude, bool render = true,
                           std::shared_ptr<SPhysicalMaterial> material = nullptr,
                           std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = nullptr);

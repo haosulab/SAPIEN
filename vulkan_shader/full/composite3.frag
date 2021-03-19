@@ -1,6 +1,6 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform sampler2D samplerLighting;
+layout(set = 0, binding = 0) uniform sampler2D samplerLightingSSR;
 layout(set = 0, binding = 1) uniform sampler2D samplerLighting1;
 layout(set = 0, binding = 2) uniform sampler2D samplerAlbedo2;
 layout(set = 0, binding = 3) uniform sampler2D samplerGbufferDepth;
@@ -8,10 +8,11 @@ layout(set = 0, binding = 4) uniform sampler2D samplerGbuffer1Depth;
 layout(set = 0, binding = 5) uniform sampler2D samplerGbuffer2Depth;
 layout(set = 0, binding = 6) uniform usampler2D samplerSegmentation0;
 layout(set = 0, binding = 7) uniform usampler2D samplerSegmentation1;
+layout(set = 0, binding = 8) uniform sampler2D samplerMotionDirection;
 
 layout(location = 0) in vec2 inUV;
 layout(location = 0) out vec4 outColor;
-layout(location = 1) out vec4 outDepthView;
+layout(location = 1) out vec4 outDepthLinear;
 layout(location = 2) out uvec4 outSegmentation;
 layout(location = 3) out vec4 outSegmentationView0;
 layout(location = 4) out vec4 outSegmentationView1;
@@ -21,6 +22,10 @@ layout(set = 1, binding = 0) uniform CameraBuffer {
   mat4 projectionMatrix;
   mat4 viewMatrixInverse;
   mat4 projectionMatrixInverse;
+  mat4 prevViewMatrix;
+  mat4 prevViewMatrixInverse;
+  float width;
+  float height;
 } cameraBuffer;
 
 vec4 colors[60] = {
@@ -87,12 +92,22 @@ vec4 colors[60] = {
 };
 
 
+const float N_MOTION_BLUR_SAMPLES = 10.;
+
 void main() {
   float d0 = texture(samplerGbufferDepth, inUV).x;
   float d1 = texture(samplerGbuffer1Depth, inUV).x;
   float d2 = texture(samplerGbuffer2Depth, inUV).x;
 
-  vec4 outColor0 = texture(samplerLighting, inUV);
+  vec2 dir = texture(samplerMotionDirection, inUV).xy;
+
+  // apply motion blur
+  vec4 outColor0 = vec4(0.);
+  for (float i = 0; i < N_MOTION_BLUR_SAMPLES; ++i) {
+    outColor0 += texture(samplerLightingSSR, inUV + dir * ((i + 0.5) / N_MOTION_BLUR_SAMPLES - 0.5));
+  }
+  outColor0 /= N_MOTION_BLUR_SAMPLES;
+
   vec4 outColor1 = texture(samplerLighting1, inUV);
   vec4 outColor2 = texture(samplerAlbedo2, inUV);
 
@@ -108,7 +123,7 @@ void main() {
   outColor = pow(outColor, vec4(1/2.2, 1/2.2, 1/2.2, 1));
 
   vec4 csPosition = cameraBuffer.projectionMatrixInverse * (vec4(inUV * 2 - 1, min(d0, d1), 1));
-  outDepthView = vec4(vec3(-csPosition.z / csPosition.w / 10.), 1.);
+  outDepthLinear = vec4(vec3(-csPosition.z / csPosition.w), 1.);
 
   uvec4 seg0 = texture(samplerSegmentation0, inUV);
   uvec4 seg1 = texture(samplerSegmentation1, inUV);

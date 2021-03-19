@@ -841,11 +841,22 @@ void buildSapien(py::module &m) {
 
   PyJoint.def("set_friction", &SJoint::setFriction, py::arg("friction"))
       .def_property_readonly("friction", &SJoint::getFriction)
-      .def("set_drive_property", &SJoint::setDriveProperty, py::arg("stiffness"),
-           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32)
+      .def(
+          "set_drive_property",
+          [](SJoint &joint, float stiffness, float damping, float forceLimit, std::string mode) {
+            if (mode != "force" && mode != "acceleration") {
+              throw std::runtime_error("drive mode must be either force or acceleration");
+            }
+            joint.setDriveProperty(stiffness, damping, forceLimit, mode == "force" ? false : true);
+          },
+          py::arg("stiffness"), py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+          py::arg("mode") = "force")
       .def_property_readonly("stiffness", &SJoint::getDriveStiffness)
       .def_property_readonly("damping", &SJoint::getDriveDamping)
       .def_property_readonly("force_limit", &SJoint::getDriveForceLimit)
+      .def_property_readonly(
+          "drive_mode",
+          [](SJoint &j) { return j.getDriveIsAcceleration() ? "acceleration" : "force"; })
       .def(
           "set_drive_velocity_target", [](SJoint &j, PxReal v) { j.setDriveVelocityTarget(v); },
           py::arg("velocity"))
@@ -1507,10 +1518,15 @@ void buildSapien(py::module &m) {
            [](Renderer::SVulkan2Camera &c) { return mat42array(c.getModelMatrix()); })
       .def("get_projection_matrix",
            [](Renderer::SVulkan2Camera &c) { return mat42array(c.getProjectionMatrix()); })
-      .def("set_mode_orthographic", &Renderer::SVulkan2Camera::changeModeToOrthographic,
-           py::arg("scale"))
-      .def("set_mode_perspective", &Renderer::SVulkan2Camera::changeModeToPerspective,
-           py::arg("fovy"));
+
+      .def("set_orthographic", &Renderer::SVulkan2Camera::setOrthographicParameters,
+           py::arg("near"), py::arg("far"), py::arg("aspect"), py::arg("scale"))
+      .def("set_perspective", &Renderer::SVulkan2Camera::setPerspectiveParameters, py::arg("near"),
+           py::arg("far"), py::arg("fovy"), py::arg("aspect"))
+      .def("set_full_perspective", &Renderer::SVulkan2Camera::setFullPerspectiveParameters,
+           py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
+           py::arg("cy"), py::arg("width"), py::arg("height"), py::arg("skew"))
+      .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode);
 
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
       .def("hide", &Renderer::SVulkan2Window::hide)
@@ -1708,7 +1724,8 @@ void buildSapien(py::module &m) {
                              [](Renderer::RenderShape &shape) { return vec32array(shape.scale); })
       .def_property_readonly(
           "mesh", [](Renderer::RenderShape &shape) { return shape.geometry.get(); },
-          py::return_value_policy::reference);
+          py::return_value_policy::reference)
+      .def_readonly("material", &Renderer::RenderShape::material);
 
   PyRenderMeshGeometry
       .def_property_readonly("vertices",

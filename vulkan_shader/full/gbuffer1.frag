@@ -5,10 +5,15 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 projectionMatrix;
   mat4 viewMatrixInverse;
   mat4 projectionMatrixInverse;
+  mat4 prevViewMatrix;
+  mat4 prevViewMatrixInverse;
+  float width;
+  float height;
 } cameraBuffer;
 
 layout(set = 1, binding = 0) uniform ObjectBuffer {
   mat4 modelMatrix;
+  mat4 prevModelMatrix;
   uvec4 segmentation;
   float transparency;
 } objectBuffer;
@@ -212,7 +217,7 @@ void main() {
     color += computeDirectionalLight(i, normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
 
-  color += sceneBuffer.ambientLight.rgb * albedo.rgb;
+  color += sceneBuffer.ambientLight.rgb * diffuseAlbedo;
 
   outLighting1 = vec4(color, albedo.a);
 }

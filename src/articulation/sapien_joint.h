@@ -42,6 +42,7 @@ public:
   virtual SArticulationBase *getArticulation() const = 0;
 
   virtual ~SJointBase() = default;
+
 protected:
   SJointBase(SLinkBase *parent, SLinkBase *child);
 };
@@ -61,7 +62,8 @@ public:
   std::vector<PxArticulationAxis::Enum> getAxes() const;
 
   void setFriction(PxReal coef);
-  void setDriveProperty(PxReal stiffness, PxReal damping, PxReal forceLimit = PX_MAX_F32);
+  void setDriveProperty(PxReal stiffness, PxReal damping, PxReal forceLimit = PX_MAX_F32,
+                        bool useAcceleration = false);
 
   PxReal getFriction() const;
   PxReal getDriveStiffness() const;
@@ -69,6 +71,7 @@ public:
   PxReal getDriveForceLimit() const;
   PxReal getDriveTarget() const;
   PxReal getDriveVelocityTarget() const;
+  bool getDriveIsAcceleration() const;
 
   void setDriveVelocityTarget(std::vector<PxReal> const &v);
   void setDriveVelocityTarget(PxReal v);

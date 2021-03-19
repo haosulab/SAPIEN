@@ -25,11 +25,21 @@ struct RenderMeshGeometry {
   std::vector<uint32_t> indices;
 };
 
+class IPxrMaterial {
+public:
+  virtual void setBaseColor(std::array<float, 4> color) = 0;
+  virtual void setRoughness(float roughness) = 0;
+  virtual void setSpecular(float specular) = 0;
+  virtual void setMetallic(float metallic) = 0;
+  virtual ~IPxrMaterial() = default;
+};
+
 struct RenderShape {
   std::string type = "invalid";
   physx::PxVec3 scale = {0, 0, 0};
   physx::PxTransform pose = physx::PxTransform(physx::PxIdentity);
   std::unique_ptr<RenderMeshGeometry> geometry = nullptr;
+  std::shared_ptr<IPxrMaterial> material;
   uint32_t objId = 0;
 
   inline RenderShape(){};
@@ -38,15 +48,6 @@ struct RenderShape {
   RenderShape &operator=(RenderShape const &) = delete;
   RenderShape &operator=(RenderShape &&) = default;
   ~RenderShape() = default;
-};
-
-class IPxrMaterial {
-public:
-  virtual void setBaseColor(std::array<float, 4> color) = 0;
-  virtual void setRoughness(float roughness) = 0;
-  virtual void setSpecular(float specular) = 0;
-  virtual void setMetallic(float metallic) = 0;
-  virtual ~IPxrMaterial() = default;
 };
 
 class PxrMaterial : public IPxrMaterial {
@@ -163,6 +164,9 @@ public:
   virtual void setAmbientLight(std::array<float, 3> const &color) = 0;
   virtual void addDirectionalLight(std::array<float, 3> const &direction,
                                    std::array<float, 3> const &color) = 0;
+
+  /** call this function before every rendering time frame */
+  inline virtual void updateRender(){};
 
   virtual void destroy() = 0;
 

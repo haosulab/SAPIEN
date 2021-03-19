@@ -5,7 +5,9 @@ from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector
 
 import sapien.core.pysapien.renderer as R
-from controller import Viewer
+
+# from controller import Viewer
+from sapien.utils import Viewer
 
 
 sim = sapien.Engine()
@@ -19,7 +21,7 @@ copper.set_base_color([0.875, 0.553, 0.221, 1])
 copper.set_metallic(1)
 copper.set_roughness(0.4)
 
-viewer = Viewer(renderer, "../shader/full")
+viewer = Viewer(renderer)
 
 
 def create_ant_builder(scene):
@@ -160,7 +162,7 @@ ant.set_root_pose(Pose([0, 0, 2]))
 
 
 viewer.set_scene(scene)
-viewer.set_camera_xyz(-1, 0, 0)
+viewer.set_camera_xyz(-4, 0, -0.5)
 viewer.window.set_camera_parameters(0.001, 1000, 1)
 
 scene.step()
@@ -175,7 +177,6 @@ scene.step()
 scene.set_ambient_light([0.5, 0.5, 0.5])
 rs = scene.get_render_scene()
 rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
-rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
 rs.add_shadow_point_light([0, 1, 1], [1, 2, 2])
 rs.add_shadow_point_light([0, -1, 1], [2, 1, 2])
@@ -183,10 +184,13 @@ rs.add_shadow_point_light([0, 1, -1], [2, 2, 1])
 
 selected_actor = None
 
+scene.update_render()
+
 count = 0
 while not viewer.closed:
+    for i in range(4):
+        scene.step()
     scene.update_render()
-    scene.step()
     viewer.render()
 
 viewer.close()

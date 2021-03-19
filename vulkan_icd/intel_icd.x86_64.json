@@ -1,0 +1,7 @@
+{
+    "ICD": {
+        "api_version": "1.2.145",
+        "library_path": "/usr/lib/x86_64-linux-gnu/libvulkan_intel.so"
+    },
+    "file_format_version": "1.0.0"
+}

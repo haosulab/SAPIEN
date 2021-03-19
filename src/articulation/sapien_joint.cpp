@@ -76,7 +76,8 @@ void SJoint::setLimits(std::vector<std::array<physx::PxReal, 2>> const &limits) 
   }
 
   if (limits.size() != getDof()) {
-    spdlog::get("SAPIEN")->error("Failed to set joint limits: dimensions of argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error(
+        "Failed to set joint limits: dimensions of argument does not match joint DOF");
     return;
   }
   switch (mPxJoint->getJointType()) {
@@ -162,15 +163,32 @@ PxTransform SJoint::getGlobalPose() const {
   return mChildLink->getPose() * mPxJoint->getChildPose();
 }
 
-void SJoint::setDriveProperty(PxReal stiffness, PxReal damping, PxReal forceLimit) {
+void SJoint::setDriveProperty(PxReal stiffness, PxReal damping, PxReal forceLimit,
+                              bool useAcceleration) {
   for (auto axis : getAxes()) {
-    mPxJoint->setDrive(axis, stiffness, damping, forceLimit);
+    mPxJoint->setDrive(axis, stiffness, damping, forceLimit,
+                       useAcceleration ? PxArticulationDriveType::eACCELERATION
+                                       : PxArticulationDriveType::eFORCE);
   }
+}
+
+bool SJoint::getDriveIsAcceleration() const {
+  auto ax = getAxes();
+  if (ax.size()) {
+    PxReal stiffness, damping, maxForce;
+    PxArticulationDriveType::Enum type;
+    mPxJoint->getDrive(ax[0], stiffness, damping, maxForce, type);
+    if (type == PxArticulationDriveType::eACCELERATION) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void SJoint::setDriveVelocityTarget(std::vector<PxReal> const &v) {
   if (v.size() != getDof()) {
-    spdlog::get("SAPIEN")->error("Failed to set drive: dimensions of argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error(
+        "Failed to set drive: dimensions of argument does not match joint DOF");
     return;
   }
   auto axes = getAxes();
@@ -184,7 +202,8 @@ void SJoint::setDriveVelocityTarget(PxReal v) { setDriveVelocityTarget(std::vect
 
 void SJoint::setDriveTarget(std::vector<PxReal> const &p) {
   if (p.size() != getDof()) {
-    spdlog::get("SAPIEN")->error("Failed to set drive: dimensions of argument does not match joint DOF");
+    spdlog::get("SAPIEN")->error(
+        "Failed to set drive: dimensions of argument does not match joint DOF");
     return;
   }
   auto axes = getAxes();
@@ -276,8 +295,6 @@ PxArticulationJointType::Enum SJoint::getType() const {
   return PxArticulationJointType::eUNDEFINED;
 }
 
-SArticulationBase *SJoint::getArticulation() const {
-  return mArticulation;
-}
+SArticulationBase *SJoint::getArticulation() const { return mArticulation; }
 
 } // namespace sapien

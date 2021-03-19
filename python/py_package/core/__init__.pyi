@@ -138,7 +138,6 @@ __all__ = [
     "RenderScene",
     "RenderShape",
     "SPHERICAL",
-    "SPV_ROOT",
     "STATIC",
     "Scene",
     "SceneConfig",
@@ -150,6 +149,8 @@ __all__ = [
     "Trigger",
     "UNDEFINED",
     "URDFLoader",
+    "VULKAN_ICD_ROOT",
+    "VULKAN_SHADER_ROOT",
     "VisualRecord",
     "VulkanCamera",
     "VulkanMaterial",
@@ -158,6 +159,7 @@ __all__ = [
     "VulkanWindow",
     "enable_default_gl3",
     "enable_default_gl4",
+    "ensure_icd",
     "os",
     "pkg_resources",
     "pysapien",
@@ -177,8 +179,9 @@ PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJoi
 PTX_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/ptx'
 REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.REVOLUTE: 1>
 SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.SPHERICAL: 2>
-SPV_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/spv'
 STATIC: sapien.core.pysapien.ActorType # value = <ActorType.STATIC: 0>
 TGS: sapien.core.pysapien.SolverType # value = <SolverType.TGS: 1>
 UNDEFINED: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.UNDEFINED: 4>
+VULKAN_ICD_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/vulkan_icd'
+VULKAN_SHADER_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/vulkan_shader/full'
 __GL_VERSION_DICT = {3: '130', 4: '410'}

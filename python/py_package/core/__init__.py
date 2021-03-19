@@ -5,9 +5,10 @@ import os
 import sys
 
 GL_SHADER_ROOT = pkg_resources.resource_filename("sapien", "glsl_shader")
-PTX_ROOT = pkg_resources.resource_filename("sapien", 'ptx')
+PTX_ROOT = pkg_resources.resource_filename("sapien", "ptx")
 __GL_VERSION_DICT = {3: "130", 4: "410"}
-SPV_ROOT = pkg_resources.resource_filename("sapien", 'spv')
+VULKAN_SHADER_ROOT = pkg_resources.resource_filename("sapien", "vulkan_shader/full")
+VULKAN_ICD_ROOT = pkg_resources.resource_filename("sapien", "vulkan_icd")
 
 
 def __enable_ptx():
@@ -19,13 +20,25 @@ def __enable_gl(num: int):
     assert num in [3, 4]
     __GL_VERSION = num
     _GL_SHADER_PATH = os.path.join(GL_SHADER_ROOT, __GL_VERSION_DICT[__GL_VERSION])
-    OptifuserRenderer.set_default_shader_config(_GL_SHADER_PATH, __GL_VERSION_DICT[__GL_VERSION])
-    print("Using default glsl path {}".format(_GL_SHADER_PATH))
+    OptifuserRenderer.set_default_shader_config(
+        _GL_SHADER_PATH, __GL_VERSION_DICT[__GL_VERSION]
+    )
+
+
+def ensure_icd():
+    icd_filenames = os.environ.get("VK_ICD_FILENAMES")
+    if icd_filenames is None:
+        icd_filenames = ""
+    icd_filenames = "{0}/nvidia_icd.json:{0}/radeon_icd.x86_64.json:{0}/intel_icd.x86_64.json:{1}".format(
+        VULKAN_ICD_ROOT, icd_filenames
+    )
+    os.environ["VK_ICD_FILENAMES"] = icd_filenames
 
 
 def __enable_vulkan():
-    assert os.path.exists(SPV_ROOT)
-    VulkanRenderer.set_shader_dir(SPV_ROOT)
+    assert os.path.exists(VULKAN_SHADER_ROOT)
+    VulkanRenderer.set_shader_dir(VULKAN_SHADER_ROOT)
+    ensure_icd()
 
 
 def enable_default_gl3():
@@ -43,13 +56,8 @@ else:
 
 try:
     __enable_ptx()
-    sys.stderr.write('ray tracing enabled\n')
 except:
     pass
 
 
-try:
-    __enable_vulkan()
-    sys.stderr.write('Vulkan enabled\n')
-except:
-    pass
+__enable_vulkan()
