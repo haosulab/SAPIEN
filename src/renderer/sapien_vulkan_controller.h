@@ -23,7 +23,8 @@ class PinocchioModel;
 namespace Renderer {
 
 class SapienVulkanController {
-  SapienVulkanRenderer *mRenderer{};
+  std::shared_ptr<SapienVulkanRenderer> mRendererShared;
+  SapienVulkanRenderer *mRenderer = nullptr;
   SScene *mScene{};
   // SapienVulkanScene *mScene{};
 
@@ -41,7 +42,7 @@ class SapienVulkanController {
   vk::UniqueCommandBuffer mCommandBuffer;
 
 public:
-  explicit SapienVulkanController(SapienVulkanRenderer *renderer);
+  explicit SapienVulkanController(std::shared_ptr<SapienVulkanRenderer> renderer);
   void render();
   inline void setScene(SScene *scene) { mScene = scene; }
   inline bool isClosed() const { return mWindow->isClosed(); };

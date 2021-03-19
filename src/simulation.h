@@ -43,8 +43,8 @@ public:
 
   std::unique_ptr<SScene> createScene(SceneConfig const &config = {});
 
-  inline Renderer::IPxrRenderer *getRenderer() { return mRenderer; }
-  inline void setRenderer(Renderer::IPxrRenderer *renderer) { mRenderer = renderer; }
+  inline std::shared_ptr<Renderer::IPxrRenderer> getRenderer() const { return mRenderer; }
+  inline void setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer) { mRenderer = renderer; }
 
   inline MeshManager &getMeshManager() { return mMeshManager; }
   void setLogLevel(std::string const &level);
@@ -63,7 +63,7 @@ private:
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
   SapienErrorCallback mErrorCallback;
 
-  Renderer::IPxrRenderer *mRenderer = nullptr;
+  std::shared_ptr<Renderer::IPxrRenderer> mRenderer;
 
   MeshManager mMeshManager;
 };

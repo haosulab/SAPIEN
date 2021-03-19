@@ -47,7 +47,6 @@ SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig cons
 SScene::~SScene() {
   // TODO(jigu): check whether we can only release PxScene
   mDefaultMaterial.reset();
-  std::cout << "release mDefaultMaterial" << std::endl;
   for (auto &actor : mActors) {
     actor->getPxActor()->release();
   }
@@ -63,10 +62,7 @@ SScene::~SScene() {
     drive.release();
   }
   mPxScene->release();
-  std::cout << "release PxScene" << std::endl;
 
-  // TODO(jigu): require to guarantee that the renderer is not deleted yet.
-  // TODO(jigu): and it can not be commented even.
   if (mRendererScene) {
     mSimulation->getRenderer()->removeScene(mRendererScene);
   }

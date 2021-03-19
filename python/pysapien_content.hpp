@@ -153,14 +153,14 @@ void buildSapien(py::module &m) {
       py::class_<SPhysicalMaterial, std::shared_ptr<SPhysicalMaterial>>(m, "PhysicalMaterial");
   auto PyPose = py::class_<PxTransform>(m, "Pose");
   auto PyRenderMaterial = py::class_<Renderer::PxrMaterial>(m, "PxrMaterial");
-  py::class_<Renderer::IPxrRenderer>(m, "IPxrRenderer");
+  py::class_<Renderer::IPxrRenderer, std::shared_ptr<Renderer::IPxrRenderer>>(m, "IPxrRenderer");
   auto PyRenderScene = py::class_<Renderer::IPxrScene>(m, "RenderScene");
   auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
   auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
   auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
 
   auto PyOptifuserRenderer =
-      py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer>(m, "OptifuserRenderer");
+      py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer, std::shared_ptr<Renderer::OptifuserRenderer>>(m, "OptifuserRenderer");
   auto PyOptifuserConfig = py::class_<Renderer::OptifuserConfig>(m, "OptifuserConfig");
   auto PyInput = py::class_<Optifuser::Input>(m, "Input");
   auto PyOptifuserController = py::class_<Renderer::OptifuserController>(m, "OptifuserController");
@@ -209,7 +209,8 @@ void buildSapien(py::module &m) {
 
 #ifdef _USE_VULKAN
   auto PySapienVulkanRenderer =
-      py::class_<Renderer::SapienVulkanRenderer, Renderer::IPxrRenderer>(m, "VulkanRenderer");
+      py::class_<Renderer::SapienVulkanRenderer, Renderer::IPxrRenderer,
+                 std::shared_ptr<Renderer::SapienVulkanRenderer>>(m, "VulkanRenderer");
   auto PySapienVulkanCamera =
       py::class_<Renderer::SapienVulkanCamera, Renderer::ICamera>(m, "VulkanCamera");
 #ifdef ON_SCREEN
@@ -1412,7 +1413,7 @@ void buildSapien(py::module &m) {
            py::arg("fovy") = glm::radians(35.f));
 
 #ifdef ON_SCREEN
-  PySapienVulkanController.def(py::init<Renderer::SapienVulkanRenderer *>(), py::arg("renderer"))
+  PySapienVulkanController.def(py::init<std::shared_ptr<Renderer::SapienVulkanRenderer>>(), py::arg("renderer"))
       .def_property_readonly("is_closed", &Renderer::SapienVulkanController::isClosed)
       .def("render", &Renderer::SapienVulkanController::render)
       .def("set_current_scene", &Renderer::SapienVulkanController::setScene, py::arg("scene"))

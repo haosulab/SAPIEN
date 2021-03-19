@@ -509,8 +509,8 @@ void SapienVulkanController::saveWindow() {
   ImGui::End();
 }
 
-SapienVulkanController::SapienVulkanController(SapienVulkanRenderer *renderer)
-    : mRenderer(renderer), mWidth(0), mHeight(0) {
+SapienVulkanController::SapienVulkanController(std::shared_ptr<SapienVulkanRenderer> renderer)
+    : mRendererShared(renderer), mRenderer(renderer.get()), mWidth(0), mHeight(0) {
   mCamera = mRenderer->mContext->createCamera();
   svulkan::VulkanRendererConfig config;
   config.customTextureCount = 1;

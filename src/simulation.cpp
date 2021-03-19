@@ -99,6 +99,10 @@ Simulation::~Simulation() {
   }
 #endif
   mFoundation->release();
+
+  if (mRenderer) {
+    mRenderer.reset();
+  }
 }
 
 std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
