@@ -11,7 +11,7 @@ SDrive::SDrive(SScene *scene, SActorBase *actor1, PxTransform const &pose1, SAct
   PxRigidActor *pxa1 = actor1 ? actor1->getPxActor() : nullptr;
   PxRigidActor *pxa2 = actor2 ? actor2->getPxActor() : nullptr;
 
-  mJoint = PxD6JointCreate(*scene->getEngine()->mPhysicsSDK, pxa1, pose1, pxa2, pose2);
+  mJoint = PxD6JointCreate(*scene->getSimulation()->mPhysicsSDK, pxa1, pose1, pxa2, pose2);
   mJoint->setMotion(PxD6Axis::eX, PxD6Motion::eFREE);
   mJoint->setMotion(PxD6Axis::eY, PxD6Motion::eFREE);
   mJoint->setMotion(PxD6Axis::eZ, PxD6Motion::eFREE);

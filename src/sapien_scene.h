@@ -1,16 +1,32 @@
+/**
+ * Sapien class for PxScene.
+ *
+ * Notes:
+ * 1. SScene maintains a shared pointer to Simulation, in case Simulation is deleted before itself.
+ * 2. Removing an actor or articulation is tricky.
+ * Since PhysX contact info can contain objects removed in the current step,
+ * we need to enable a cache to avoid losing the mapping between PhysX objects and Sapien objects.
+ *
+ * References:
+ * https://documentation.help/NVIDIA-PhysX-SDK-Guide/ScenesAndActors.html#scenesandactors (PhysX 3)
+ */
+
 #pragma once
+
+#include <map>
+#include <memory>
+#include <string>
+#include <thread>
+#include <vector>
+
+#include <PxPhysicsAPI.h>
+
 #include "event_system/event_system.h"
 #include "id_generator.h"
 #include "renderer/render_interface.h"
 #include "sapien_material.h"
 #include "sapien_scene_config.h"
 #include "simulation_callback.h"
-#include <PxPhysicsAPI.h>
-#include <map>
-#include <memory>
-#include <string>
-#include <thread>
-#include <vector>
 
 namespace sapien {
 class SActor;
@@ -34,7 +50,9 @@ class ICamera;
 
 namespace URDF {
 class URDFLoader;
-}
+} // namespace URDF
+
+using namespace physx;
 
 struct SceneData {
   std::map<physx_id_t, std::vector<PxReal>> mActorData;
@@ -42,22 +60,27 @@ struct SceneData {
   std::map<physx_id_t, std::vector<PxReal>> mArticulationDriveData;
 };
 
-using namespace physx;
-
 class SScene : public EventEmitter<EventSceneStep> {
   friend ActorBuilder;
   friend LinkBuilder;
   friend ArticulationBuilder;
 
-private:
-  // defaults
-  std::shared_ptr<SPhysicalMaterial> mDefaultMaterial;
-  float mDefaultSleepThreshold;
-  float mDefaultContactOffset;
-  uint32_t mDefaultSolverIterations;
-  uint32_t mDefaultSolverVelocityIterations;
-
+  /************************************************
+   * Basic
+   ***********************************************/
 public:
+  SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig const &config);
+  SScene(SScene const &other) = delete;
+  SScene(SScene &&other) = delete;
+  ~SScene();
+  SScene &operator=(SScene const &other) = delete;
+
+  inline Simulation *getSimulation() const { return mSimulation; }
+  inline PxScene *getPxScene() { return mPxScene; }
+
+  inline Renderer::IPxrScene *getRendererScene() { return mRendererScene; }
+
+  // default parameters of simulation solver
   inline float getDefaultSleepThreshold() const { return mDefaultSleepThreshold; }
   inline uint32_t getDefaultSolverIterations() const { return mDefaultSolverIterations; }
   inline uint32_t getDefaultSolverVelocityIterations() const {
@@ -65,54 +88,47 @@ public:
   }
   inline float getDefaultContactOffset() const { return mDefaultContactOffset; }
 
+  // default physical material
+  inline std::shared_ptr<SPhysicalMaterial> getDefaultMaterial() const { return mDefaultMaterial; }
+  inline void setDefaultMaterial(std::shared_ptr<SPhysicalMaterial> material) {
+    mDefaultMaterial = material;
+  }
+
 private:
-  std::string mName;
-  Simulation *mSimulation;             // sapien simulation
-  PxScene *mPxScene;                   // physx scene
+  std::shared_ptr<Simulation> mSimulationShared; // shared pointer to sapien simulation
+  Simulation *mSimulation;                       // sapien simulation
+  PxScene *mPxScene;                             // physx scene
+  DefaultEventCallback mSimulationCallback;      // physx scene's simulation callback
+
   Renderer::IPxrScene *mRendererScene; // renderer scene
 
-  IDGenerator mLinkIdGenerator;   // assign 1 link id to each actor
-  IDGenerator mRenderIdGenerator; //  assign 1 link id to each visual
-
-  std::map<physx_id_t, SActorBase *> mLinkId2Actor;
-  std::map<physx_id_t, SLinkBase *> mLinkId2Link;
-
-  std::vector<std::unique_ptr<SActorBase>> mActors; // manages all actors
-  std::vector<std::unique_ptr<SArticulation>> mArticulations;
-  std::vector<std::unique_ptr<SKArticulation>> mKinematicArticulations;
-
-  DefaultEventCallback mSimulationCallback;
-
-  void addActor(std::unique_ptr<SActorBase> actor); // called by actor builder
-  void
-  addArticulation(std::unique_ptr<SArticulation> articulation); // called by articulation builder
-  void addKinematicArticulation(
-      std::unique_ptr<SKArticulation> articulation); // called by articulation builder
-
-  std::vector<std::unique_ptr<SDrive>> mDrives;
-
-private:
-  bool mRequiresRemoveCleanUp1{false};
-  bool mRequiresRemoveCleanUp2{false};
-
-  /**
-   *  call to clean up actors and articulations in being destroyed states
-   *  Should be called after a step call has finished
-   */
-  void removeCleanUp1();
-  void removeCleanUp2();
+  // defaults
+  float mDefaultSleepThreshold;
+  float mDefaultContactOffset;
+  uint32_t mDefaultSolverIterations;
+  uint32_t mDefaultSolverVelocityIterations;
+  std::shared_ptr<SPhysicalMaterial> mDefaultMaterial;
 
 public:
-  SScene(Simulation *sim, PxScene *scene, SceneConfig const &config);
-  SScene(SScene const &other) = delete;
-  SScene(SScene &&other) = delete;
-  ~SScene();
-  SScene &operator=(SScene const &other) = delete;
+  inline void setName(std::string const &name) { mName = name; }
+  inline std::string getName() { return mName; }
+  inline void setTimestep(PxReal step) { mTimestep = step; }
+  inline PxReal getTimestep() { return mTimestep; }
 
-  inline Simulation *getEngine() const { return mSimulation; }
+  void step(); // advance time by TimeStep
+  void stepAsync();
+  void stepWait();
 
-  inline Renderer::IPxrScene *getRendererScene() { return mRendererScene; }
-  inline PxScene *getPxScene() { return mPxScene; }
+private:
+  PxReal mTimestep = 1 / 500.f;
+  std::string mName;
+
+  /************************************************
+   * Physical Objects
+   ***********************************************/
+public:
+  std::shared_ptr<SPhysicalMaterial>
+  createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction, PxReal restitution) const;
 
   std::unique_ptr<ActorBuilder> createActorBuilder();
   std::unique_ptr<ArticulationBuilder> createArticulationBuilder();
@@ -138,33 +154,49 @@ public:
    */
   void removeKinematicArticulation(SKArticulation *articulation);
 
+  SDrive *createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+                      PxTransform const &pose2);
   /** Remove a drive immediately */
   void removeDrive(SDrive *drive);
 
-  SDrive *createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
-                      PxTransform const &pose2);
-
-  inline physx_id_t generateUniqueRenderId() { return mRenderIdGenerator.next(); };
-
-public:
   SActorBase *findActorById(physx_id_t id) const;
   SLinkBase *findArticulationLinkById(physx_id_t id) const;
+  inline physx_id_t generateUniqueRenderId() { return mRenderIdGenerator.next(); };
 
 private:
-  PxReal mTimestep = 1 / 500.f;
+  void addActor(std::unique_ptr<SActorBase> actor); // called by actor builder
+  void
+  addArticulation(std::unique_ptr<SArticulation> articulation); // called by articulation builder
+  void addKinematicArticulation(
+      std::unique_ptr<SKArticulation> articulation); // called by articulation builder
 
-  struct MountedCamera {
-    SActorBase *actor;
-    Renderer::ICamera *camera;
-  };
-  std::vector<MountedCamera> mCameras;
+  bool mRequiresRemoveCleanUp1{false};
+  bool mRequiresRemoveCleanUp2{false};
 
+  /**
+   *  call to clean up actors and articulations in being destroyed states
+   *  Should be called after a step call has finished
+   */
+  void removeCleanUp1();
+  void removeCleanUp2();
+
+  IDGenerator mActorIdGenerator;  // unique id generator for actors (including links)
+  IDGenerator mRenderIdGenerator; //  unique id generator for visuals
+
+  std::map<physx_id_t, SActorBase *> mActorId2Actor;
+  std::map<physx_id_t, SLinkBase *> mActorId2Link;
+
+  std::vector<std::unique_ptr<SActorBase>> mActors; // manages all actors
+  std::vector<std::unique_ptr<SArticulation>> mArticulations;
+  std::vector<std::unique_ptr<SKArticulation>> mKinematicArticulations;
+
+  std::vector<std::unique_ptr<SDrive>> mDrives;
+
+  /************************************************
+   * Sensor
+   ***********************************************/
+private:
 public:
-  inline void setName(std::string const &name) { mName = name; }
-  inline std::string getName() { return mName; }
-  inline void setTimestep(PxReal step) { mTimestep = step; }
-  inline PxReal getTimestep() { return mTimestep; }
-
   Renderer::ICamera *addMountedCamera(std::string const &name, SActorBase *actor,
                                       PxTransform const &pose, uint32_t width, uint32_t height,
                                       float fovx, float fovy, float near = 0.1, float far = 100);
@@ -181,31 +213,34 @@ public:
   void setAmbientLight(PxVec3 const &color);
   void addDirectionalLight(PxVec3 const &direction, PxVec3 const &color);
 
-  void step(); // advance time by TimeStep
-  void stepAsync();
-  void stepWait();
-
   void updateRender(); // call to sync physics world to render world
   SActorStatic *addGround(PxReal altitude, bool render = true,
                           std::shared_ptr<SPhysicalMaterial> material = nullptr,
                           Renderer::PxrMaterial const &renderMaterial = {});
 
-  inline std::shared_ptr<SPhysicalMaterial> getDefaultMaterial() const { return mDefaultMaterial; }
-  inline void setDefaultMaterial(std::shared_ptr<SPhysicalMaterial> material) { mDefaultMaterial = material; }
-
   std::map<physx_id_t, std::string> findRenderId2VisualName() const;
 
 private:
-  // std::vector<SContact> mContacts;
-  std::map<std::pair<PxShape *, PxShape *>, std::unique_ptr<SContact>> mContacts;
-
   void removeMountedCameraByMount(SActorBase *actor);
 
+  struct MountedCamera {
+    SActorBase *actor;
+    Renderer::ICamera *camera;
+  };
+  std::vector<MountedCamera> mCameras;
+
+  /************************************************
+   * Contact
+   ***********************************************/
 public:
   void updateContact(PxShape *shape1, PxShape *shape2, std::unique_ptr<SContact> contact);
   std::vector<SContact *> getContacts() const;
 
   SceneData packScene();
   void unpackScene(SceneData const &data);
+
+private:
+  // std::vector<SContact> mContacts;
+  std::map<std::pair<PxShape *, PxShape *>, std::unique_ptr<SContact>> mContacts;
 };
 } // namespace sapien

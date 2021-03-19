@@ -168,7 +168,7 @@ void buildSapien(py::module &m) {
   auto PyOptifuserCamera =
       py::class_<Renderer::OptifuserCamera, Renderer::ICamera>(m, "OptifuserCamera");
 
-  auto PyEngine = py::class_<Simulation>(m, "Engine");
+  auto PyEngine = py::class_<Simulation, std::shared_ptr<Simulation>>(m, "Engine");
   auto PySceneConfig = py::class_<SceneConfig>(m, "SceneConfig");
   auto PyScene = py::class_<SScene>(m, "Scene");
   auto PyDrive = py::class_<SDrive>(m, "Drive");
@@ -536,15 +536,12 @@ void buildSapien(py::module &m) {
 
   //======== Simulation ========//
   PyEngine
-      .def(py::init<uint32_t, PxReal, PxReal>(), py::arg("n_thread") = 0,
-           py::arg("tolerance_length") = 0.1f, py::arg("tolerance_speed") = 0.2f)
-      .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
+      .def(py::init<PxReal, PxReal>(), py::arg("tolerance_length") = 0.1f,
+           py::arg("tolerance_speed") = 0.2f)
+      .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig())
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
-      .def("create_physical_material", &Simulation::createPhysicalMaterial,
-           py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"),
-           py::return_value_policy::reference)
-      .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
-      .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig());
+      .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
+      .def("set_log_level", &Simulation::setLogLevel, py::arg("level"));
 
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)
@@ -567,10 +564,13 @@ void buildSapien(py::module &m) {
       .def("set_timestep", &SScene::setTimestep, py::arg("second"))
       .def("get_timestep", &SScene::getTimestep)
       .def_property("timestep", &SScene::getTimestep, &SScene::setTimestep)
-      .def_property("default_physical_material", &SScene::getDefaultMaterial, &SScene::setDefaultMaterial)
+      .def_property("default_physical_material", &SScene::getDefaultMaterial,
+                    &SScene::setDefaultMaterial)
       .def("create_actor_builder", &SScene::createActorBuilder)
       .def("create_articulation_builder", &SScene::createArticulationBuilder)
       .def("create_urdf_loader", &SScene::createURDFLoader)
+      .def("create_physical_material", &SScene::createPhysicalMaterial, py::arg("static_friction"),
+           py::arg("dynamic_friction"), py::arg("restitution"), py::return_value_policy::reference)
       .def("remove_actor", &SScene::removeActor, py::arg("actor"))
       .def("remove_articulation", &SScene::removeArticulation, py::arg("articulation"))
       .def("remove_kinematic_articulation", &SScene::removeKinematicArticulation,
@@ -1091,12 +1091,11 @@ void buildSapien(py::module &m) {
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
              PxReal minPatchRadius, bool isTrigger) {
-            a.addBoxShape(pose, array2vec3(halfSize), material, density, patchRadius, minPatchRadius,
-                          isTrigger);
+            a.addBoxShape(pose, array2vec3(halfSize), material, density, patchRadius,
+                          minPatchRadius, isTrigger);
           },
           py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("half_size") = make_array<PxReal>({1, 1, 1}), 
-          py::arg("material") = nullptr,
+          py::arg("half_size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def("add_capsule_shape", &ActorBuilder::addCapsuleShape,
@@ -1116,8 +1115,7 @@ void buildSapien(py::module &m) {
           },
           py::arg("pose") = PxTransform(PxIdentity),
           py::arg("half_size") = make_array<PxReal>({1, 1, 1}),
-          py::arg("color") = make_array<PxReal>({1, 1, 1}), 
-          py::arg("name") = "")
+          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def(
           "add_box_visual_complex",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,

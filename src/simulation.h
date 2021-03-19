@@ -1,27 +1,31 @@
+/**
+ * Sapien class for physical simulation.
+ *
+ * Notes:
+ * 1. The physical simulation in Sapien is synchronous,
+ * even if PhysX supports asynchronous simulation.
+ * 2. Simulation should be maintained by std::shared_ptr.
+ * Other global unique objects (like renderer) should also follow this rule.
+ * The reason is to avoid being deleted before some local objects (like scene).
+ *
+ * References:
+ * https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Startup.html
+ */
+
 #pragma once
-#include "filter_shader.h"
-#include "id_generator.h"
+
+#include <memory>
+
+#include <PxPhysicsAPI.h>
+
+// TODO(jigu): check whether to replace with forward declaration
 #include "mesh_manager.h"
 #include "render_interface.h"
-#include "sapien_material.h"
+#include "sapien_scene.h"
 #include "sapien_scene_config.h"
-#include <PxPhysicsAPI.h>
-#include <extensions/PxDefaultAllocator.h>
-#include <extensions/PxDefaultCpuDispatcher.h>
-#include <extensions/PxDefaultErrorCallback.h>
-#include <extensions/PxDefaultSimulationFilterShader.h>
-#include <extensions/PxExtensionsAPI.h>
-#include <extensions/PxShapeExt.h>
-#include <extensions/PxSimpleFactory.h>
-#include <foundation/PxMat33.h>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <vector>
 
 namespace sapien {
 using namespace physx;
-class SScene;
 
 class SapienErrorCallback : public PxErrorCallback {
   PxErrorCode::Enum mLastErrorCode = PxErrorCode::eNO_ERROR;
@@ -32,44 +36,36 @@ public:
   PxErrorCode::Enum getLastErrorCode();
 };
 
-class Simulation {
+class Simulation : public std::enable_shared_from_this<Simulation> {
 public:
-  PxPhysics *mPhysicsSDK = nullptr;
-  PxFoundation *mFoundation = nullptr;
-  PxCooking *mCooking = nullptr;
+  explicit Simulation(PxReal toleranceLength = 0.1f, PxReal toleranceSpeed = 0.2f);
+  ~Simulation();
 
-  SapienErrorCallback mErrorCallback;
-
-private:
-  uint32_t mThreadCount = 0;
-  Renderer::IPxrRenderer *mRenderer = nullptr;
-  PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
-
-private:
-  MeshManager mMeshManager;
-
-public:
-  inline MeshManager &getMeshManager() { return mMeshManager; }
-
-public:
   std::unique_ptr<SScene> createScene(SceneConfig const &config = {});
+
+  inline Renderer::IPxrRenderer *getRenderer() { return mRenderer; }
+  inline void setRenderer(Renderer::IPxrRenderer *renderer) { mRenderer = renderer; }
+
+  inline MeshManager &getMeshManager() { return mMeshManager; }
+  void setLogLevel(std::string const &level);
 
 #ifdef _PVD
   PxPvd *mPvd = nullptr;
   PxPvdTransport *mTransport = nullptr;
 #endif
 
-public:
-  explicit Simulation(uint32_t nthread = 0, PxReal toleranceLength = 0.1f,
-                      PxReal toleranceSpeed = 0.2f);
-  ~Simulation();
+  PxPhysics *mPhysicsSDK = nullptr;
+  PxCooking *mCooking = nullptr;
 
-  void setRenderer(Renderer::IPxrRenderer *renderer);
-  inline Renderer::IPxrRenderer *getRenderer() { return mRenderer; }
-  void setLogLevel(std::string const &level);
+private:
+  // PhysX objects
+  PxFoundation *mFoundation = nullptr;
+  PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
+  SapienErrorCallback mErrorCallback;
 
-  std::shared_ptr<SPhysicalMaterial>
-  createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction, PxReal restitution) const;
+  Renderer::IPxrRenderer *mRenderer = nullptr;
+
+  MeshManager mMeshManager;
 };
 
 } // namespace sapien

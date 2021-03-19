@@ -441,7 +441,7 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
 }
 
 SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
-  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+  physx_id_t actorId = mScene->mActorIdGenerator.next();
 
   std::vector<PxShape *> shapes;
   std::vector<PxReal> densities;
@@ -451,13 +451,13 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   std::vector<Renderer::IPxrRigidbody *> renderBodies;
   buildVisuals(renderBodies, renderIds);
   for (auto body : renderBodies) {
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
   }
 
   std::vector<Renderer::IPxrRigidbody *> collisionBodies;
   buildCollisionVisuals(collisionBodies, shapes);
   for (auto body : collisionBodies) {
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
   }
 
   PxFilterData data;
@@ -483,7 +483,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   }
 
   auto sActor =
-      std::unique_ptr<SActor>(new SActor(actor, linkId, mScene, renderBodies, collisionBodies));
+      std::unique_ptr<SActor>(new SActor(actor, actorId, mScene, renderBodies, collisionBodies));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
@@ -503,7 +503,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
 }
 
 SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
-  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+  physx_id_t actorId = mScene->mActorIdGenerator.next();
 
   std::vector<PxShape *> shapes;
   std::vector<PxReal> densities;
@@ -513,13 +513,13 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   std::vector<Renderer::IPxrRigidbody *> renderBodies;
   buildVisuals(renderBodies, renderIds);
   for (auto body : renderBodies) {
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
   }
 
   std::vector<Renderer::IPxrRigidbody *> collisionBodies;
   buildCollisionVisuals(collisionBodies, shapes);
   for (auto body : collisionBodies) {
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
   }
 
   PxFilterData data;
@@ -536,7 +536,7 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   }
 
   auto sActor = std::unique_ptr<SActorStatic>(
-      new SActorStatic(actor, linkId, mScene, renderBodies, collisionBodies));
+      new SActorStatic(actor, actorId, mScene, renderBodies, collisionBodies));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
@@ -555,7 +555,7 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
                                         std::shared_ptr<SPhysicalMaterial> material,
                                         Renderer::PxrMaterial const &renderMaterial,
                                         std::string const &name) {
-  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+  physx_id_t actorId = mScene->mActorIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
   PxRigidStatic *ground =
       PxCreatePlane(*getSimulation()->mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude),
@@ -579,12 +579,12 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
     renderBodies.push_back(body);
 
     physx_id_t newId = mScene->mRenderIdGenerator.next();
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
     body->setUniqueId(newId);
   }
 
   auto sActor =
-      std::unique_ptr<SActorStatic>(new SActorStatic(ground, linkId, mScene, renderBodies, {}));
+      std::unique_ptr<SActorStatic>(new SActorStatic(ground, actorId, mScene, renderBodies, {}));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
