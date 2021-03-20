@@ -4,22 +4,22 @@ import pkg_resources
 import os
 import sys
 
-GL_SHADER_ROOT = pkg_resources.resource_filename("sapien", "glsl_shader")
-PTX_ROOT = pkg_resources.resource_filename("sapien", "ptx")
+__GL_SHADER_ROOT = pkg_resources.resource_filename("sapien", "glsl_shader")
+__PTX_ROOT = pkg_resources.resource_filename("sapien", "ptx")
 __GL_VERSION_DICT = {3: "130", 4: "410"}
-VULKAN_SHADER_ROOT = pkg_resources.resource_filename("sapien", "vulkan_shader/full")
-VULKAN_ICD_ROOT = pkg_resources.resource_filename("sapien", "vulkan_icd")
+__VULKAN_SHADER_ROOT = pkg_resources.resource_filename("sapien", "vulkan_shader/full")
+__VULKAN_ICD_ROOT = pkg_resources.resource_filename("sapien", "vulkan_icd")
 
 
 def __enable_ptx():
-    assert os.path.exists(PTX_ROOT)
-    OptifuserRenderer.set_optix_config(PTX_ROOT)
+    assert os.path.exists(__PTX_ROOT)
+    OptifuserRenderer.set_optix_config(__PTX_ROOT)
 
 
 def __enable_gl(num: int):
     assert num in [3, 4]
     __GL_VERSION = num
-    _GL_SHADER_PATH = os.path.join(GL_SHADER_ROOT, __GL_VERSION_DICT[__GL_VERSION])
+    _GL_SHADER_PATH = os.path.join(__GL_SHADER_ROOT, __GL_VERSION_DICT[__GL_VERSION])
     OptifuserRenderer.set_default_shader_config(
         _GL_SHADER_PATH, __GL_VERSION_DICT[__GL_VERSION]
     )
@@ -27,17 +27,18 @@ def __enable_gl(num: int):
 
 def ensure_icd():
     icd_filenames = os.environ.get("VK_ICD_FILENAMES")
+
+    # if VK_ICD_FILENAMES is not provided, we try to provide it
     if icd_filenames is None:
-        icd_filenames = ""
-    icd_filenames = "{0}/nvidia_icd.json:{0}/radeon_icd.x86_64.json:{0}/intel_icd.x86_64.json:{1}".format(
-        VULKAN_ICD_ROOT, icd_filenames
-    )
-    os.environ["VK_ICD_FILENAMES"] = icd_filenames
+        icd_filenames = "{0}/nvidia_icd.json:{0}/radeon_icd.x86_64.json:{0}/intel_icd.x86_64.json:{1}".format(
+            __VULKAN_ICD_ROOT, icd_filenames
+        )
+        os.environ["VK_ICD_FILENAMES"] = icd_filenames
 
 
 def __enable_vulkan():
-    assert os.path.exists(VULKAN_SHADER_ROOT)
-    VulkanRenderer.set_shader_dir(VULKAN_SHADER_ROOT)
+    assert os.path.exists(__VULKAN_SHADER_ROOT)
+    VulkanRenderer.set_shader_dir(__VULKAN_SHADER_ROOT)
     ensure_icd()
 
 

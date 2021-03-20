@@ -7,6 +7,20 @@ namespace Renderer {
 std::string gDefaultShaderDirectory = "";
 void setDefaultShaderDirectory(std::string const &dir) { gDefaultShaderDirectory = dir; }
 
+void SVulkan2Renderer::setLogLevel(std::string const &level) {
+  if (level == "debug") {
+    svulkan2::log::getLogger()->set_level(spdlog::level::debug);
+  } else if (level == "info") {
+    svulkan2::log::getLogger()->set_level(spdlog::level::info);
+  } else if (level == "warn" || level == "warning") {
+    svulkan2::log::getLogger()->set_level(spdlog::level::warn);
+  } else if (level == "err" || level == "error") {
+    svulkan2::log::getLogger()->set_level(spdlog::level::err);
+  } else {
+    svulkan2::log::getLogger()->error("Invalid log level \"{}\"", level);
+  }
+}
+
 SVulkan2Material::SVulkan2Material(
     std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material)
     : mMaterial(material) {}
@@ -33,20 +47,6 @@ void SVulkan2Renderer::removeScene(IPxrScene *scene) {
   mScenes.erase(std::remove_if(mScenes.begin(), mScenes.end(),
                                [scene](auto &s) { return scene == s.get(); }),
                 mScenes.end());
-}
-
-void SVulkan2Renderer::setLogLevel(std::string const &level) {
-  if (level == "debug") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::debug);
-  } else if (level == "info") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::info);
-  } else if (level == "warn" || level == "warning") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::warn);
-  } else if (level == "err" || level == "error") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::err);
-  } else {
-    svulkan2::log::getLogger()->error("Invalid log level \"{}\"", level);
-  }
 }
 
 std::shared_ptr<IPxrMaterial> SVulkan2Renderer::createMaterial() {

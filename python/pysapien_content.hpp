@@ -1466,11 +1466,11 @@ void buildSapien(py::module &m) {
   // #endif
 
   PyVulkanRenderer
+      .def_static("set_log_level", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
       .def(py::init<bool, uint32_t, uint32_t, uint32_t>(), py::arg("offscreen_only") = false,
            py::arg("max_num_materials") = 5000, py::arg("max_num_textures") = 5000,
            py::arg("default_mipmap_levels") = 1)
       .def_static("set_shader_dir", &Renderer::setDefaultShaderDirectory, py::arg("shader_dir"))
-      .def("set_log_level", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
       .def(
           "create_window",
           [](Renderer::SVulkan2Renderer &renderer, int width, int height,

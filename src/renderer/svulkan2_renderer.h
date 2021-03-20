@@ -77,6 +77,10 @@ class SVulkan2Scene : public IPxrScene {
   std::vector<std::unique_ptr<SVulkan2Camera>> mCameras;
   std::string mName;
 
+  std::shared_ptr<svulkan2::resource::SVMesh> mCubeMesh{};
+  std::shared_ptr<svulkan2::resource::SVMesh> mSphereMesh{};
+  std::shared_ptr<svulkan2::resource::SVMesh> mPlaneMesh{};
+
 public:
   SVulkan2Scene(SVulkan2Renderer *parent, std::string const &name);
 
@@ -143,12 +147,13 @@ class SVulkan2Renderer : public IPxrRenderer {
   std::vector<std::unique_ptr<SVulkan2Scene>> mScenes;
 
 public:
+  static void setLogLevel(std::string const &level);
+
   std::unique_ptr<svulkan2::core::Context> mContext = nullptr;
   SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
                    uint32_t defaultMipLevels);
   SVulkan2Scene *createScene(std::string const &name) override;
   void removeScene(IPxrScene *scene) override;
-  void setLogLevel(std::string const &level);
 
   std::shared_ptr<IPxrMaterial> createMaterial() override;
 };

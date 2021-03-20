@@ -9,10 +9,10 @@ import sapien.core.pysapien.renderer as R
 # from controller import Viewer
 from sapien.utils import Viewer
 
+sapien.VulkanRenderer.set_log_level("info")
 
 sim = sapien.Engine()
 renderer = sapien.VulkanRenderer()
-renderer.set_log_level("info")
 renderer_context: R.Context = renderer._internal_context
 sim.set_renderer(renderer)
 

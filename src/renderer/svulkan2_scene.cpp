@@ -86,24 +86,30 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
   svulkan2::scene::Object *object;
   switch (type) {
   case physx::PxGeometryType::eBOX: {
-    auto mesh = svulkan2::resource::SVMesh::CreateCube();
-    auto shape = svulkan2::resource::SVShape::Create(mesh, mat->getMaterial());
+    if (!mCubeMesh) {
+      mCubeMesh = svulkan2::resource::SVMesh::CreateCube();
+    }
+    auto shape = svulkan2::resource::SVShape::Create(mCubeMesh, mat->getMaterial());
     auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData({shape}));
     obj.setScale({scale.x, scale.y, scale.z});
     object = &obj;
     break;
   }
   case physx::PxGeometryType::eSPHERE: {
-    auto mesh = svulkan2::resource::SVMesh::CreateUVSphere(32, 16);
-    auto shape = svulkan2::resource::SVShape::Create(mesh, mat->getMaterial());
+    if (!mSphereMesh) {
+      mSphereMesh = svulkan2::resource::SVMesh::CreateUVSphere(32, 16);
+    }
+    auto shape = svulkan2::resource::SVShape::Create(mSphereMesh, mat->getMaterial());
     auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData({shape}));
     obj.setScale({scale.x, scale.y, scale.z});
     object = &obj;
     break;
   }
   case physx::PxGeometryType::ePLANE: {
-    auto mesh = svulkan2::resource::SVMesh::CreateYZPlane();
-    auto shape = svulkan2::resource::SVShape::Create(mesh, mat->getMaterial());
+    if (!mPlaneMesh) {
+      mPlaneMesh = svulkan2::resource::SVMesh::CreateYZPlane();
+    }
+    auto shape = svulkan2::resource::SVShape::Create(mPlaneMesh, mat->getMaterial());
     auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData({shape}));
     obj.setScale({scale.x, scale.y, scale.z});
     object = &obj;
@@ -227,9 +233,7 @@ std::vector<ICamera *> SVulkan2Scene::getCameras() {
   return cams;
 }
 
-void SVulkan2Scene::updateRender() {
-  mScene->updateModelMatrices();
-}
+void SVulkan2Scene::updateRender() { mScene->updateModelMatrices(); }
 
 } // namespace Renderer
 } // namespace sapien
