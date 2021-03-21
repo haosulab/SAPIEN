@@ -21,55 +21,112 @@
 
 namespace sapien {
 
-SScene::SScene(Simulation *sim, PxScene *scene, SceneConfig const &config)
-    : mSimulation(sim), mPxScene(scene), mRendererScene(nullptr), mSimulationCallback(this) {
-  mDefaultMaterial = sim->createPhysicalMaterial(config.static_friction, config.dynamic_friction,
-                                                 config.restitution);
+/************************************************
+ * Basic
+ ***********************************************/
+SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig const &config)
+    : mSimulationShared(sim), mSimulation(sim.get()), mPxScene(scene), mSimulationCallback(this),
+      mRendererScene(nullptr) {
+
+  // default parameters for physical materials, contact solver, etc.
+  mDefaultMaterial =
+      createPhysicalMaterial(config.static_friction, config.dynamic_friction, config.restitution);
   mDefaultContactOffset = config.contactOffset;
   mDefaultSleepThreshold = config.sleepThreshold;
   mDefaultSolverIterations = config.solverIterations;
   mDefaultSolverVelocityIterations = config.solverVelocityIterations;
 
+  mPxScene->setSimulationEventCallback(&mSimulationCallback);
+
   auto renderer = sim->getRenderer();
   if (renderer) {
     mRendererScene = renderer->createScene();
   }
-  mPxScene->setSimulationEventCallback(&mSimulationCallback);
 }
 
 SScene::~SScene() {
+  // TODO(jigu): check whether we can only release PxScene
   mDefaultMaterial.reset();
+  for (auto &actor : mActors) {
+    actor->getPxActor()->release();
+  }
+  for (auto &articulation : mArticulations) {
+    articulation->getPxArticulation()->release();
+  }
+  for (auto &ka : mKinematicArticulations) {
+    for (auto &link : ka->getBaseLinks()) {
+      link->getPxActor()->release();
+    }
+  }
+  for (auto &drive : mDrives) {
+    drive.release();
+  }
+  mPxScene->release();
+
   if (mRendererScene) {
     mSimulation->getRenderer()->removeScene(mRendererScene);
   }
-  if (mPxScene) {
-    for (auto &actor : mActors) {
-      actor->getPxActor()->release();
+
+  // Finally, release the shared pointer to simulation
+  mSimulationShared.reset();
+}
+
+/************************************************
+ * Create objects
+ ***********************************************/
+std::shared_ptr<SPhysicalMaterial> SScene::createPhysicalMaterial(PxReal staticFriction,
+                                                                  PxReal dynamicFriction,
+                                                                  PxReal restitution) const {
+  auto mat =
+      mSimulation->mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
+  mat->setFlag(PxMaterialFlag::eIMPROVED_PATCH_FRICTION, true);
+  return std::make_shared<SPhysicalMaterial>(mat);
+}
+
+std::unique_ptr<ActorBuilder> SScene::createActorBuilder() {
+  return std::make_unique<ActorBuilder>(this);
+}
+
+std::unique_ptr<ArticulationBuilder> SScene::createArticulationBuilder() {
+  return std::make_unique<ArticulationBuilder>(this);
+}
+
+std::unique_ptr<URDF::URDFLoader> SScene::createURDFLoader() {
+  return std::make_unique<URDF::URDFLoader>(this);
+}
+
+SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+                            PxTransform const &pose2) {
+  mDrives.push_back(std::unique_ptr<SDrive>(new SDrive(this, actor1, pose1, actor2, pose2)));
+  auto drive = mDrives.back().get();
+  if (actor1) {
+    actor1->addDrive(drive);
+    if (actor1->getType() == EActorType::DYNAMIC) {
+      static_cast<PxRigidDynamic *>(actor1->getPxActor())->wakeUp();
+    } else if (actor1->getType() == EActorType::ARTICULATION_LINK) {
+      static_cast<PxArticulationLink *>(actor1->getPxActor())->getArticulation().wakeUp();
     }
-    for (auto &articulation : mArticulations) {
-      articulation->getPxArticulation()->release();
-    }
-    for (auto &ka : mKinematicArticulations) {
-      for (auto &link : ka->getBaseLinks()) {
-        link->getPxActor()->release();
-      }
-    }
-    for (auto &drive : mDrives) {
-      drive.release();
-    }
-    mPxScene->release();
   }
+  if (actor2) {
+    actor2->addDrive(drive);
+    if (actor2->getType() == EActorType::DYNAMIC) {
+      static_cast<PxRigidDynamic *>(actor2->getPxActor())->wakeUp();
+    } else if (actor2->getType() == EActorType::ARTICULATION_LINK) {
+      static_cast<PxArticulationLink *>(actor2->getPxActor())->getArticulation().wakeUp();
+    }
+  }
+  return drive;
 }
 
 void SScene::addActor(std::unique_ptr<SActorBase> actor) {
   mPxScene->addActor(*actor->getPxActor());
-  mLinkId2Actor[actor->getId()] = actor.get();
+  mActorId2Actor[actor->getId()] = actor.get();
   mActors.push_back(std::move(actor));
 }
 
 void SScene::addArticulation(std::unique_ptr<SArticulation> articulation) {
   for (auto link : articulation->getBaseLinks()) {
-    mLinkId2Link[link->getId()] = link;
+    mActorId2Link[link->getId()] = link;
   }
   mPxScene->addArticulation(*articulation->getPxArticulation());
   mArticulations.push_back(std::move(articulation));
@@ -77,7 +134,7 @@ void SScene::addArticulation(std::unique_ptr<SArticulation> articulation) {
 
 void SScene::addKinematicArticulation(std::unique_ptr<SKArticulation> articulation) {
   for (auto link : articulation->getBaseLinks()) {
-    mLinkId2Link[link->getId()] = link;
+    mActorId2Link[link->getId()] = link;
     mPxScene->addActor(*link->getPxActor());
   }
   mKinematicArticulations.push_back(std::move(articulation));
@@ -165,7 +222,7 @@ void SScene::removeActor(SActorBase *actor) {
   e.actor = actor;
   actor->EventEmitter<EventActorPreDestroy>::emit(e);
 
-  mLinkId2Actor.erase(actor->getId());
+  mActorId2Actor.erase(actor->getId());
 
   // remove drives
   for (auto drive : actor->getDrives()) {
@@ -223,7 +280,7 @@ void SScene::removeArticulation(SArticulation *articulation) {
     }
 
     // remove reference
-    mLinkId2Link.erase(link->getId());
+    mActorId2Link.erase(link->getId());
   }
 
   // mark removed
@@ -264,7 +321,7 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
     }
 
     // remove reference
-    mLinkId2Link.erase(link->getId());
+    mActorId2Link.erase(link->getId());
 
     // remove actor
     mPxScene->removeActor(*link->getPxActor());
@@ -308,31 +365,19 @@ void SScene::removeDrive(SDrive *drive) {
 }
 
 SActorBase *SScene::findActorById(physx_id_t id) const {
-  auto it = mLinkId2Actor.find(id);
-  if (it == mLinkId2Actor.end()) {
+  auto it = mActorId2Actor.find(id);
+  if (it == mActorId2Actor.end()) {
     return nullptr;
   }
   return it->second;
 }
 
 SLinkBase *SScene::findArticulationLinkById(physx_id_t id) const {
-  auto it = mLinkId2Link.find(id);
-  if (it == mLinkId2Link.end()) {
+  auto it = mActorId2Link.find(id);
+  if (it == mActorId2Link.end()) {
     return nullptr;
   }
   return it->second;
-}
-
-std::unique_ptr<ActorBuilder> SScene::createActorBuilder() {
-  return std::make_unique<ActorBuilder>(this);
-}
-
-std::unique_ptr<ArticulationBuilder> SScene::createArticulationBuilder() {
-  return std::make_unique<ArticulationBuilder>(this);
-}
-
-std::unique_ptr<URDF::URDFLoader> SScene::createURDFLoader() {
-  return std::make_unique<URDF::URDFLoader>(this);
 }
 
 std::vector<Renderer::ICamera *> SScene::getMountedCameras() {
@@ -562,29 +607,6 @@ std::vector<SContact *> SScene::getContacts() const {
     contacts.push_back(it.second.get());
   }
   return contacts;
-}
-
-SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
-                            PxTransform const &pose2) {
-  mDrives.push_back(std::unique_ptr<SDrive>(new SDrive(this, actor1, pose1, actor2, pose2)));
-  auto drive = mDrives.back().get();
-  if (actor1) {
-    actor1->addDrive(drive);
-    if (actor1->getType() == EActorType::DYNAMIC) {
-      static_cast<PxRigidDynamic *>(actor1->getPxActor())->wakeUp();
-    } else if (actor1->getType() == EActorType::ARTICULATION_LINK) {
-      static_cast<PxArticulationLink *>(actor1->getPxActor())->getArticulation().wakeUp();
-    }
-  }
-  if (actor2) {
-    actor2->addDrive(drive);
-    if (actor2->getType() == EActorType::DYNAMIC) {
-      static_cast<PxRigidDynamic *>(actor2->getPxActor())->wakeUp();
-    } else if (actor2->getType() == EActorType::ARTICULATION_LINK) {
-      static_cast<PxArticulationLink *>(actor2->getPxActor())->getArticulation().wakeUp();
-    }
-  }
-  return drive;
 }
 
 void SScene::removeMountedCameraByMount(SActorBase *actor) {

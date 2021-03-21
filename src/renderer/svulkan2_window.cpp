@@ -47,18 +47,18 @@ void FPSCameraControllerDebug::update() {
 }
 #endif
 
-SVulkan2Window::SVulkan2Window(SVulkan2Renderer &renderer, int width, int height,
+SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int width, int height,
                                std::string const &shaderDir)
-    : mRenderer(&renderer), mShaderDir(shaderDir) {
+    : mRenderer(renderer), mShaderDir(shaderDir) {
   auto config = std::make_shared<svulkan2::RendererConfig>();
   config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultShaderDirectory;
   config->colorFormat = vk::Format::eR32G32B32A32Sfloat;
   mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(*mRenderer->mContext, config);
 
   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  mWindow = renderer.mContext->createWindow(width, height);
+  mWindow = renderer->mContext->createWindow(width, height);
   mWindow->initImgui();
-  renderer.mContext->getDevice().waitIdle();
+  renderer->mContext->getDevice().waitIdle();
 
   mViewportWidth = width;
   mViewportHeight = height;
@@ -179,7 +179,8 @@ void SVulkan2Window::render(std::string const &targetName,
     w->build();
   }
   ImGui::Render();
-  if (mRenderer->mContext->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE, UINT64_MAX) != vk::Result::eSuccess) {
+  if (mRenderer->mContext->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE,
+                                                     UINT64_MAX) != vk::Result::eSuccess) {
     throw std::runtime_error("failed on wait for fence.");
   }
   mRenderer->mContext->getDevice().resetFences(mSceneRenderFence.get());

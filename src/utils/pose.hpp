@@ -8,15 +8,23 @@ namespace sapien::utils {
 using namespace physx;
 namespace py = pybind11;
 
+/**
+ * Note that the conversion from quaternion to rotation matrix requires additional attention.
+ * Thus, here we directly use Eigen implementation.
+ * https://gitlab.com/libeigen/eigen/-/blob/master/Eigen/src/Geometry/Quaternion.h
+ */
 PxTransform *fromTransFormationMatrix(const py::array_t<PxReal> &mat) {
   assert(mat.size() == 16 && mat.shape()[0] == 4);
   auto um = mat.unchecked<2>();
-  float w = 0.5 * std::sqrt(1.0 + um(0, 0) + um(1, 1) + um(2, 2));
-  float over_w = 0.25 / w;
-  float x = (um(2, 1) - um(1, 2)) * over_w;
-  float y = (um(0, 2) - um(2, 0)) * over_w;
-  float z = (um(1, 0) - um(0, 1)) * over_w;
-  return new PxTransform({um(0, 3), um(1, 3), um(2, 3)}, {x, y, z, w});
+  Eigen::Matrix3f rotMat;  // TODO(jigu): Maybe there exists an easier way to write it
+  #pragma unroll
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+        rotMat(i, j) = um(i, j);
+    }
+  }
+  Eigen::Quaternionf q(rotMat);
+  return new PxTransform({um(0, 3), um(1, 3), um(2, 3)}, {q.x(), q.y(), q.z(), q.w()});
 }
 
 Eigen::Matrix<PxReal, 4, 4, Eigen::RowMajor> toTransformationMatrix(PxTransform &t) {

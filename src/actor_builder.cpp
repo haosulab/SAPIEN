@@ -64,13 +64,13 @@ void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
   mShapeRecord.push_back(r);
 }
 
-void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &size,
+void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &halfSize,
                                std::shared_ptr<SPhysicalMaterial> material, PxReal density,
                                PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Box;
   r.pose = pose;
-  r.scale = size;
+  r.scale = halfSize;
   r.material = material;
   r.density = density;
   r.patchRadius = patchRadius;
@@ -113,16 +113,16 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius,
   mShapeRecord.push_back(r);
 }
 
-void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &size,
+void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &halfSize,
                                             std::shared_ptr<Renderer::IPxrMaterial> material,
                                             std::string const &name) {
   if (!material) {
-    material = mScene->getEngine()->getRenderer()->createMaterial();
+    material = mScene->getSimulation()->getRenderer()->createMaterial();
   }
   VisualRecord r;
   r.type = VisualRecord::Type::Box;
   r.pose = pose;
-  r.scale = size;
+  r.scale = halfSize;
   r.material = material;
   r.name = name;
 
@@ -131,7 +131,7 @@ void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec
 
 void ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size, const PxVec3 &color,
                                 std::string const &name) {
-  auto mat = mScene->getEngine()->getRenderer()->createMaterial();
+  auto mat = mScene->getSimulation()->getRenderer()->createMaterial();
   mat->setBaseColor({color.x, color.y, color.z, 1.f});
   addBoxVisualWithMaterial(pose, size, mat, name);
 }
@@ -141,7 +141,7 @@ void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal 
                                                 std::shared_ptr<Renderer::IPxrMaterial> material,
                                                 std::string const &name) {
   if (!material) {
-    material = mScene->getEngine()->getRenderer()->createMaterial();
+    material = mScene->getSimulation()->getRenderer()->createMaterial();
   }
   VisualRecord r;
   r.type = VisualRecord::Type::Capsule;
@@ -156,7 +156,7 @@ void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal 
 
 void ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal halfLength,
                                     const PxVec3 &color, std::string const &name) {
-  auto mat = mScene->getEngine()->getRenderer()->createMaterial();
+  auto mat = mScene->getSimulation()->getRenderer()->createMaterial();
   mat->setBaseColor({color.x, color.y, color.z, 1.f});
   addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
 }
@@ -165,7 +165,7 @@ void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal r
                                                std::shared_ptr<Renderer::IPxrMaterial> material,
                                                std::string const &name) {
   if (!material) {
-    material = mScene->getEngine()->getRenderer()->createMaterial();
+    material = mScene->getSimulation()->getRenderer()->createMaterial();
   }
   VisualRecord r;
   r.type = VisualRecord::Type::Sphere;
@@ -179,7 +179,7 @@ void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal r
 
 void ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius, const PxVec3 &color,
                                    std::string const &name) {
-  auto mat = mScene->getEngine()->getRenderer()->createMaterial();
+  auto mat = mScene->getSimulation()->getRenderer()->createMaterial();
   mat->setBaseColor({color.x, color.y, color.z, 1.f});
   addSphereVisualWithMaterial(pose, radius, mat, name);
 }
@@ -471,7 +471,7 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
 }
 
 SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
-  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+  physx_id_t actorId = mScene->mActorIdGenerator.next();
 
   std::vector<PxShape *> shapes;
   std::vector<PxReal> densities;
@@ -481,13 +481,13 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   std::vector<Renderer::IPxrRigidbody *> renderBodies;
   buildVisuals(renderBodies, renderIds);
   for (auto body : renderBodies) {
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
   }
 
   std::vector<Renderer::IPxrRigidbody *> collisionBodies;
   buildCollisionVisuals(collisionBodies, shapes);
   for (auto body : collisionBodies) {
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
   }
 
   PxFilterData data;
@@ -513,7 +513,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   }
 
   auto sActor =
-      std::unique_ptr<SActor>(new SActor(actor, linkId, mScene, renderBodies, collisionBodies));
+      std::unique_ptr<SActor>(new SActor(actor, actorId, mScene, renderBodies, collisionBodies));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
@@ -533,7 +533,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
 }
 
 SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
-  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+  physx_id_t actorId = mScene->mActorIdGenerator.next();
 
   std::vector<PxShape *> shapes;
   std::vector<PxReal> densities;
@@ -543,13 +543,13 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   std::vector<Renderer::IPxrRigidbody *> renderBodies;
   buildVisuals(renderBodies, renderIds);
   for (auto body : renderBodies) {
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
   }
 
   std::vector<Renderer::IPxrRigidbody *> collisionBodies;
   buildCollisionVisuals(collisionBodies, shapes);
   for (auto body : collisionBodies) {
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
   }
 
   PxFilterData data;
@@ -566,7 +566,7 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   }
 
   auto sActor = std::unique_ptr<SActorStatic>(
-      new SActorStatic(actor, linkId, mScene, renderBodies, collisionBodies));
+      new SActorStatic(actor, actorId, mScene, renderBodies, collisionBodies));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
@@ -586,9 +586,9 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
                                         std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
                                         std::string const &name) {
   if (!renderMaterial) {
-    renderMaterial = mScene->getEngine()->getRenderer()->createMaterial();
+    renderMaterial = mScene->getSimulation()->getRenderer()->createMaterial();
   }
-  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+  physx_id_t actorId = mScene->mActorIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
   PxRigidStatic *ground =
       PxCreatePlane(*getSimulation()->mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude),
@@ -612,12 +612,12 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
     renderBodies.push_back(body);
 
     physx_id_t newId = mScene->mRenderIdGenerator.next();
-    body->setSegmentationId(linkId);
+    body->setSegmentationId(actorId);
     body->setUniqueId(newId);
   }
 
   auto sActor =
-      std::unique_ptr<SActorStatic>(new SActorStatic(ground, linkId, mScene, renderBodies, {}));
+      std::unique_ptr<SActorStatic>(new SActorStatic(ground, actorId, mScene, renderBodies, {}));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;

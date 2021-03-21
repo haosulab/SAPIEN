@@ -107,17 +107,16 @@ createAntBuilder(SScene &scene, std::shared_ptr<Renderer::IPxrMaterial> copper) 
 }
 
 int main() {
-  Simulation sim;
-  // Renderer::SapienVulkanRenderer renderer;
-  Renderer::SVulkan2Renderer renderer(false, 1000, 1000, 4);
-  sim.setRenderer(&renderer);
-  Renderer::SVulkan2Window window(renderer, 1024, 768, "../shader/full");
+  auto sim = std::make_shared<Simulation>();
+  auto renderer = std::make_shared<Renderer::SVulkan2Renderer>(false, 1000, 1000, 4);
+  sim->setRenderer(renderer);
+  Renderer::SVulkan2Window window(renderer, 1024, 768, "../vulkan_shader/full");
 
-  auto s0 = sim.createScene();
+  auto s0 = sim->createScene();
   s0->setTimestep(1 / 60.f);
   s0->addGround(-1);
 
-  auto copper = renderer.createMaterial();
+  auto copper = renderer->createMaterial();
   copper->setBaseColor({0.975, 0.453, 0.221, 1});
   copper->setMetallic(1.f);
   copper->setRoughness(0.7f);
@@ -131,7 +130,7 @@ int main() {
 
   auto r0 = static_cast<Renderer::SVulkan2Scene *>(s0->getRendererScene());
   // r0->setAmbientLight({0.5, 0.5, 0.5});
-  r0->addDirectionalLight({0, -1, -1}, {1, 1, 1}, true, {0,0,0}, 20.f, -20.f, 20.f);
+  r0->addDirectionalLight({0, -1, -1}, {1, 1, 1}, true, {0, 0, 0}, 20.f, -20.f, 20.f);
 
   r0->addPointLight({1, 1, 2}, {10, 0, 0}, true, 0.1, 20);
   r0->addPointLight({-1, 1, 2}, {0, 10, 0}, true, 0.1, 20);

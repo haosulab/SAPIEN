@@ -18,7 +18,7 @@ struct EventActorContact : public Event {
 public:
   SActorBase *self;
   SActorBase *other;
-  class SContact const *contact;
+  struct SContact const *contact;
 };
 
 struct EventActorTrigger : public Event {

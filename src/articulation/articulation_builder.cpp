@@ -133,7 +133,7 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   auto &joints = articulation.mJoints;
 
   // create link
-  physx_id_t linkId = mArticulationBuilder->getScene()->mLinkIdGenerator.next();
+  physx_id_t linkId = mArticulationBuilder->getScene()->mActorIdGenerator.next();
   PxArticulationLink *pxLink = pxArticulation->createLink(
       mParent >= 0 ? links[mParent]->getPxActor() : nullptr, {{0, 0, 0}, PxIdentity});
 
@@ -211,7 +211,7 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
   auto &links = articulation.mLinks;
   auto &joints = articulation.mJoints;
 
-  physx_id_t linkId = mScene->mLinkIdGenerator.next();
+  physx_id_t linkId = mScene->mActorIdGenerator.next();
 
   std::vector<PxShape *> shapes;
   std::vector<PxReal> densities;

@@ -1,9 +1,5 @@
 #pragma once
 #include <PxFiltering.h>
-#include <algorithm>
-#include <iostream>
-#include <map>
-#include <set>
 
 namespace sapien {
 using namespace physx;

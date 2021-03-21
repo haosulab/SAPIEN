@@ -1,12 +1,11 @@
-#include "simulation.h"
-#include "actor_builder.h"
-#include "sapien_scene.h"
+#include <PxPhysicsAPI.h>
+#include <extensions/PxExtensionsAPI.h>
+
 #include "spdlog/sinks/stdout_color_sinks.h"
-#include <cassert>
-#include <fstream>
-#include <memory>
 #include <spdlog/spdlog.h>
-#include <sstream>
+
+#include "filter_shader.h"
+#include "simulation.h"
 
 #ifdef _PROFILE
 #include <easy/profiler.h>
@@ -33,8 +32,7 @@ PxErrorCode::Enum SapienErrorCallback::getLastErrorCode() {
   return code;
 }
 
-Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranceSpeed)
-    : mThreadCount(nthread), mMeshManager(this) {
+Simulation::Simulation(PxReal toleranceLength, PxReal toleranceSpeed) : mMeshManager(this) {
   if (!spdlog::get("SAPIEN")) {
     auto logger = spdlog::stderr_color_mt("SAPIEN");
     setLogLevel("warn");
@@ -45,8 +43,8 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
   spdlog::get("SAPIEN")->info("Profiling enabled");
 #endif
 
+  // TODO(fanbo): figure out what "track allocation" means in the PhysX doc
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, mErrorCallback);
-  // FIXME: figure out the what "track allocation" means
 
 #ifdef _PVD
   spdlog::get("SAPIEN")->info("Connecting to PVD...");
@@ -87,7 +85,6 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
 }
 
 Simulation::~Simulation() {
-  // mDefaultMaterial->release();
   if (mCpuDispatcher) {
     mCpuDispatcher->release();
   }
@@ -102,16 +99,10 @@ Simulation::~Simulation() {
   }
 #endif
   mFoundation->release();
-}
 
-void Simulation::setRenderer(Renderer::IPxrRenderer *renderer) { mRenderer = renderer; }
-
-std::shared_ptr<SPhysicalMaterial> Simulation::createPhysicalMaterial(PxReal staticFriction,
-                                                                      PxReal dynamicFriction,
-                                                                      PxReal restitution) const {
-  auto mat = mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
-  mat->setFlag(PxMaterialFlag::eIMPROVED_PATCH_FRICTION, true);
-  return std::make_shared<SPhysicalMaterial>(mat);
+  if (mRenderer) {
+    mRenderer.reset();
+  }
 }
 
 std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
@@ -121,6 +112,7 @@ std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
   sceneDesc.filterShader = TypeAffinityIgnoreFilterShader;
   sceneDesc.solverType = config.enableTGS ? PxSolverType::eTGS : PxSolverType::ePGS;
   sceneDesc.bounceThresholdVelocity = config.bounceThreshold;
+
   PxSceneFlags sceneFlags;
   if (config.enableEnhancedDeterminism) {
     sceneFlags |= PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
@@ -137,11 +129,11 @@ std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
   if (config.enableAdaptiveForce) {
     sceneFlags |= PxSceneFlag::eADAPTIVE_FORCE;
   }
-
   sceneDesc.flags = sceneFlags;
 
   if (!mCpuDispatcher) {
-    mCpuDispatcher = PxDefaultCpuDispatcherCreate(mThreadCount);
+    // Note that the simulation in Sapien is synchronous
+    mCpuDispatcher = PxDefaultCpuDispatcherCreate(0);
     if (!mCpuDispatcher) {
       spdlog::get("SAPIEN")->critical("Failed to create PhysX CPU dispatcher");
       throw std::runtime_error("Scene Creation Failed");
@@ -151,7 +143,7 @@ std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
 
   PxScene *pxScene = mPhysicsSDK->createScene(sceneDesc);
 
-  return std::make_unique<SScene>(this, pxScene, config);
+  return std::make_unique<SScene>(this->shared_from_this(), pxScene, config);
 }
 
 void Simulation::setLogLevel(std::string const &level) {

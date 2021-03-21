@@ -143,8 +143,6 @@ void buildSapien(py::module &m) {
   auto PyArticulationType = py::enum_<EArticulationType>(m, "ArticulationType");
 
   auto PyURDFLoader = py::class_<URDF::URDFLoader>(m, "URDFLoader");
-  // auto PyPxMaterial =
-  //     py::class_<PxMaterial, std::unique_ptr<PxMaterial, py::nodelete>>(m, "PxMaterial");
   auto PyPhysicalMaterial =
       py::class_<SPhysicalMaterial, std::shared_ptr<SPhysicalMaterial>>(m, "PhysicalMaterial");
   auto PyPose = py::class_<PxTransform>(m, "Pose");
@@ -154,14 +152,16 @@ void buildSapien(py::module &m) {
   auto PyOptifuserMaterial =
       py::class_<Renderer::PxrMaterial, Renderer::IPxrMaterial,
                  std::shared_ptr<Renderer::PxrMaterial>>(m, "OptifuserMaterial");
-  auto PyRenderer = py::class_<Renderer::IPxrRenderer>(m, "IPxrRenderer");
+  auto PyRenderer = py::class_<Renderer::IPxrRenderer, std::shared_ptr<Renderer::IPxrRenderer>>(
+      m, "IPxrRenderer");
   auto PyRenderScene = py::class_<Renderer::IPxrScene>(m, "RenderScene");
   auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
   auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
   auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
 
   auto PyOptifuserRenderer =
-      py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer>(m, "OptifuserRenderer");
+      py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer,
+                 std::shared_ptr<Renderer::OptifuserRenderer>>(m, "OptifuserRenderer");
   auto PyOptifuserConfig = py::class_<Renderer::OptifuserConfig>(m, "OptifuserConfig");
   auto PyInput = py::class_<Optifuser::Input>(m, "Input");
   auto PyOptifuserController = py::class_<Renderer::OptifuserController>(m, "OptifuserController");
@@ -169,7 +169,7 @@ void buildSapien(py::module &m) {
   auto PyOptifuserCamera =
       py::class_<Renderer::OptifuserCamera, Renderer::ICamera>(m, "OptifuserCamera");
 
-  auto PyEngine = py::class_<Simulation>(m, "Engine");
+  auto PyEngine = py::class_<Simulation, std::shared_ptr<Simulation>>(m, "Engine");
   auto PySceneConfig = py::class_<SceneConfig>(m, "SceneConfig");
   auto PyScene = py::class_<SScene>(m, "Scene");
   auto PyDrive = py::class_<SDrive>(m, "Drive");
@@ -213,7 +213,8 @@ void buildSapien(py::module &m) {
 #endif
 
   auto PyVulkanRenderer =
-      py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer>(m, "VulkanRenderer");
+      py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer,
+                 std::shared_ptr<Renderer::SVulkan2Renderer>>(m, "VulkanRenderer");
   auto PyVulkanMaterial =
       py::class_<Renderer::SVulkan2Material, Renderer::IPxrMaterial,
                  std::shared_ptr<Renderer::SVulkan2Material>>(m, "VulkanMaterial");
@@ -529,15 +530,12 @@ void buildSapien(py::module &m) {
 
   //======== Simulation ========//
   PyEngine
-      .def(py::init<uint32_t, PxReal, PxReal>(), py::arg("n_thread") = 0,
-           py::arg("tolerance_length") = 0.1f, py::arg("tolerance_speed") = 0.2f)
-      .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
+      .def(py::init<PxReal, PxReal>(), py::arg("tolerance_length") = 0.1f,
+           py::arg("tolerance_speed") = 0.2f)
+      .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig())
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
-      .def("create_physical_material", &Simulation::createPhysicalMaterial,
-           py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"),
-           py::return_value_policy::reference)
-      .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
-      .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig());
+      .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
+      .def("set_log_level", &Simulation::setLogLevel, py::arg("level"));
 
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)
@@ -560,9 +558,13 @@ void buildSapien(py::module &m) {
       .def("set_timestep", &SScene::setTimestep, py::arg("second"))
       .def("get_timestep", &SScene::getTimestep)
       .def_property("timestep", &SScene::getTimestep, &SScene::setTimestep)
+      .def_property("default_physical_material", &SScene::getDefaultMaterial,
+                    &SScene::setDefaultMaterial)
       .def("create_actor_builder", &SScene::createActorBuilder)
       .def("create_articulation_builder", &SScene::createArticulationBuilder)
       .def("create_urdf_loader", &SScene::createURDFLoader)
+      .def("create_physical_material", &SScene::createPhysicalMaterial, py::arg("static_friction"),
+           py::arg("dynamic_friction"), py::arg("restitution"), py::return_value_policy::reference)
       .def("remove_actor", &SScene::removeActor, py::arg("actor"))
       .def("remove_articulation", &SScene::removeArticulation, py::arg("articulation"))
       .def("remove_kinematic_articulation", &SScene::removeKinematicArticulation,
@@ -1120,14 +1122,14 @@ void buildSapien(py::module &m) {
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
           "add_box_shape",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
+          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
              PxReal minPatchRadius, bool isTrigger) {
-            a.addBoxShape(pose, array2vec3(size), material, density, patchRadius, minPatchRadius,
-                          isTrigger);
+            a.addBoxShape(pose, array2vec3(halfSize), material, density, patchRadius,
+                          minPatchRadius, isTrigger);
           },
           py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("half_size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def("add_capsule_shape", &ActorBuilder::addCapsuleShape,
@@ -1140,13 +1142,31 @@ void buildSapien(py::module &m) {
            py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
            py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
-          "add_box_visual_complex",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &size,
-             std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
-            a.addBoxVisualWithMaterial(pose, array2vec3(size), mat, name);
+          "add_box_visual",
+          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
+             py::array_t<PxReal> color, std::string const &name) {
+            a.addBoxVisual(pose, array2vec3(halfSize), array2vec3(color), name);
           },
           py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("half_size") = make_array<PxReal>({1, 1, 1}),
+          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+      .def(
+          "add_box_visual_complex",
+          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
+             std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
+            a.addBoxVisualWithMaterial(pose, array2vec3(halfSize), mat, name);
+          },
+          py::arg("pose") = PxTransform(PxIdentity),
+          py::arg("half_size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("name") = "")
+      .def(
+          "add_capsule_visual",
+          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
+             py::array_t<PxReal> color, std::string const &name) {
+            a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
+          },
+          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+          py::arg("half_length") = 1, py::arg("color") = make_array<PxReal>({1, 1, 1}),
           py::arg("name") = "")
       .def(
           "add_capsule_visual_complex",
@@ -1156,6 +1176,14 @@ void buildSapien(py::module &m) {
           },
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("name") = "")
+      .def(
+          "add_sphere_visual",
+          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
+             std::string const &name) {
+            a.addSphereVisual(pose, radius, array2vec3(color), name);
+          },
+          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+          py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def(
           "add_sphere_visual_complex",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
@@ -1177,7 +1205,6 @@ void buildSapien(py::module &m) {
       .def("remove_visual_at", &ActorBuilder::removeVisualAt, py::arg("index"))
       .def("get_shapes", &ActorBuilder::getShapes, py::return_value_policy::reference)
       .def("get_visuals", &ActorBuilder::getVisuals, py::return_value_policy::reference)
-
       .def("set_collision_group", &ActorBuilder::setCollisionGroup)
       .def("add_collision_group", &ActorBuilder::addCollisionGroup)
       .def("reset_collision_group", &ActorBuilder::resetCollisionGroup)
@@ -1384,87 +1411,6 @@ void buildSapien(py::module &m) {
            py::arg("qpos"), py::arg("link_index"));
 #endif
 
-  // #ifdef _USE_VULKAN
-  //   PySapienVulkanRenderer
-  //       .def(py::init<bool, uint32_t>(), py::arg("offscreen_only") = false,
-  //            py::arg("object_buffer_size") = 1000)
-  //       .def_static("set_shader_dir", &svulkan::VulkanContext::setDefaultShaderDir,
-  //                   py::arg("spv_dir"))
-  //       .def("set_log_level", &Renderer::SapienVulkanRenderer::setLogLevel, py::arg("level"));
-
-  //   PySapienVulkanCamera
-  //       .def("get_position_rgba",
-  //            [](Renderer::SapienVulkanCamera &cam) {
-  //              return py::array_t<float>(
-  //                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-  //                  cam.getPositionRGBA().data());
-  //            })
-  //       .def("get_custom_rgba",
-  //            [](Renderer::SapienVulkanCamera &cam) {
-  //              return py::array_t<float>(
-  //                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-  //                  cam.getCustomRGBA().data());
-  //            })
-  //       .def("get_camera_matrix",
-  //            [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getCameraMatrix()); })
-  //       .def("get_model_matrix",
-  //            [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getModelMatrix()); })
-  //       .def("get_projection_matrix",
-  //            [](Renderer::SapienVulkanCamera &c) { return mat42array(c.getProjectionMatrix());
-  //            })
-  //       .def("set_mode_orthographic", &Renderer::SapienVulkanCamera::changeModeToOrthographic,
-  //            py::arg("scaling") = 1.f)
-  //       .def("set_mode_perspective", &Renderer::SapienVulkanCamera::changeModeToPerspective,
-  //            py::arg("fovy") = glm::radians(35.f));
-
-  //   PySapienVulkanController.def(py::init<Renderer::SapienVulkanRenderer *>(),
-  //   py::arg("renderer"))
-  //       .def_property_readonly("is_closed", &Renderer::SapienVulkanController::isClosed)
-  //       .def("render", &Renderer::SapienVulkanController::render)
-  //       .def("set_current_scene", &Renderer::SapienVulkanController::setScene, py::arg("scene"))
-
-  //       // UI control
-  //       .def(
-  //           "select_actor",
-  //           [](Renderer::SapienVulkanController &c, SActorBase *actor) {
-  //             c.selectActor(actor->getId());
-  //           },
-  //           py::arg("actor"))
-  //       .def(
-  //           "focus_actor",
-  //           [](Renderer::SapienVulkanController &c, SActorBase *actor) {
-  //             c.focusActor(actor->getId());
-  //           },
-  //           py::arg("actor"))
-  //       .def(
-  //           "view_from_camera",
-  //           [](Renderer::SapienVulkanController &c, uint32_t camera_index) {
-  //             c.viewFromCamera(camera_index);
-  //           },
-  //           py::arg("camera_index"))
-  //       .def("pause", &Renderer::SapienVulkanController::pause, py::arg("p") = true)
-  //       .def("set_free_camera_position",
-  //       &Renderer::SapienVulkanController::setFreeCameraPosition,
-  //            py::arg("x"), py::arg("y"), py::arg("z"))
-  //       .def("set_free_camera_rotation",
-  //       &Renderer::SapienVulkanController::setFreeCameraRotation,
-  //            py::arg("yaw"), py::arg("pitch"), py::arg("roll"))
-  //       .def("set_default_control", &Renderer::SapienVulkanController::setDefaultControl,
-  //            py::arg("mouse"), py::arg("keyboard"))
-  //       .def("close", &Renderer::SapienVulkanController::close)
-
-  //       // input
-  //       .def("mouse_down", &Renderer::SapienVulkanController::mouseDown, py::arg("key_code") =
-  //       0) .def("mouse_click", &Renderer::SapienVulkanController::mouseClick,
-  //       py::arg("key_code") = 0) .def("key_down", &Renderer::SapienVulkanController::keyDown,
-  //       py::arg("key")) .def("key_press", &Renderer::SapienVulkanController::keyPressed,
-  //       py::arg("key")) .def_property_readonly("mouse_pos",
-  //       &Renderer::SapienVulkanController::getMousePos) .def_property_readonly("mouse_delta",
-  //       &Renderer::SapienVulkanController::getMouseDelta) .def_property_readonly("wheel_delta",
-  //       &Renderer::SapienVulkanController::getMouseWheelDelta);
-
-  // #endif
-
   PyVulkanRenderer
       .def_static("set_log_level", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
       .def(py::init<bool, uint32_t, uint32_t, uint32_t>(), py::arg("offscreen_only") = false,
@@ -1473,7 +1419,7 @@ void buildSapien(py::module &m) {
       .def_static("set_shader_dir", &Renderer::setDefaultShaderDirectory, py::arg("shader_dir"))
       .def(
           "create_window",
-          [](Renderer::SVulkan2Renderer &renderer, int width, int height,
+          [](std::shared_ptr<Renderer::SVulkan2Renderer> renderer, int width, int height,
              std::string const &shaderDir) {
             return new Renderer::SVulkan2Window(renderer, width, height, shaderDir);
           },

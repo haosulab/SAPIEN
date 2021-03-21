@@ -35,7 +35,7 @@ public:
 #endif
 
 class SVulkan2Window {
-  SVulkan2Renderer *mRenderer{};
+  std::shared_ptr<SVulkan2Renderer> mRenderer{};
   std::string mShaderDir{};
   std::unique_ptr<svulkan2::renderer::Renderer> mSVulkanRenderer{};
   SVulkan2Scene *mScene{};
@@ -56,7 +56,8 @@ class SVulkan2Window {
   std::unique_ptr<FPSCameraControllerDebug> mCameraController{};
 #endif
 public:
-  SVulkan2Window(SVulkan2Renderer &renderer, int width, int height, std::string const &shaderDir);
+  SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int width, int height,
+                 std::string const &shaderDir);
   ~SVulkan2Window();
   void setScene(SVulkan2Scene *scene);
   void setCameraParameters(float near, float far, float fovy);
