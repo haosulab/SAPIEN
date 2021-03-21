@@ -67,6 +67,9 @@ else ()
 endif ()
 
 if (${BUILD_WITH_PINOCCHIO_SUPPORT})
+    # Pinocchio uses its own FindCppAD but does not provide it
+    set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/CppAD")
+
     find_package(Boost COMPONENTS system REQUIRED)
     find_package(pinocchio REQUIRED)
     set(PINOCCHIO_LIBRARY ${pinocchio_LIBRARIES} ${Boost_LIBRARIES} urdfdom_model)

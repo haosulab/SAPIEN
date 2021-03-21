@@ -58,7 +58,6 @@ class CMakeBuild(build_ext):
         build_args = ['--config', cfg]
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
-        cmake_args += ['-DCMAKE_MODULE_PATH=/workspace/pinocchio/cmake/find-external/CppAD']
         build_args += ['--', '-j8']
 
         env = os.environ.copy()
