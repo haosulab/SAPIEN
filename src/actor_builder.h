@@ -162,8 +162,6 @@ public:
                             std::string const &name = "");
 
 protected:
-  Simulation *getSimulation() const;
-
   void buildShapes(std::vector<PxShape *> &shapes, std::vector<PxReal> &densities) const;
   void buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBodies,
                     std::vector<physx_id_t> &renderIds) const;

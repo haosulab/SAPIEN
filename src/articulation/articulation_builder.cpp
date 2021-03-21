@@ -237,7 +237,7 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
   data.word3 = 0;
 
   PxRigidDynamic *actor =
-      getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
+      mScene->getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
   actor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
   for (size_t i = 0; i < shapes.size(); ++i) {
     actor->attachShape(*shapes[i]);
@@ -371,7 +371,7 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
 
   auto sArticulation = std::unique_ptr<SArticulation>(new SArticulation(mScene));
   sArticulation->mPxArticulation =
-      mScene->mSimulation->mPhysicsSDK->createArticulationReducedCoordinate();
+      mScene->getSimulation()->mPhysicsSDK->createArticulationReducedCoordinate();
   sArticulation->mPxArticulation->setArticulationFlag(PxArticulationFlag::eFIX_BASE, fixBase);
 
   sArticulation->mLinks.resize(mLinkBuilders.size());

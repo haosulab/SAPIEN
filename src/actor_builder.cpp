@@ -6,8 +6,6 @@
 
 namespace sapien {
 
-Simulation *ActorBuilder::getSimulation() const { return mScene->mSimulation; }
-
 ActorBuilder::ActorBuilder(SScene *scene) : mScene(scene) {}
 
 void ActorBuilder::removeAllShapes() { mShapeRecord.clear(); }
@@ -212,12 +210,12 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
 
     switch (r.type) {
     case ShapeRecord::Type::SingleMesh: {
-      PxConvexMesh *mesh = getSimulation()->getMeshManager().loadMesh(r.filename);
+      PxConvexMesh *mesh = mScene->getSimulation()->getMeshManager().loadMesh(r.filename);
       if (!mesh) {
         spdlog::get("SAPIEN")->error("Failed to load convex mesh for actor");
         continue;
       }
-      PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
+      PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
           PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material->getPxMaterial(), true);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
@@ -237,13 +235,13 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     }
 
     case ShapeRecord::Type::MultipleMeshes: {
-      auto meshes = getSimulation()->getMeshManager().loadMeshGroup(r.filename);
+      auto meshes = mScene->getSimulation()->getMeshManager().loadMeshGroup(r.filename);
       for (auto mesh : meshes) {
         if (!mesh) {
           spdlog::get("SAPIEN")->error("Failed to load part of the convex mesh for actor");
           continue;
         }
-        PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
+        PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
             PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material->getPxMaterial(), true);
         shape->setContactOffset(mScene->mDefaultContactOffset);
         if (!shape) {
@@ -264,8 +262,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     }
 
     case ShapeRecord::Type::Box: {
-      PxShape *shape = getSimulation()->mPhysicsSDK->createShape(PxBoxGeometry(r.scale),
-                                                                 *material->getPxMaterial(), true);
+      PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
+          PxBoxGeometry(r.scale), *material->getPxMaterial(), true);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to build box with scale {}, {}, {}", r.scale.x,
@@ -285,7 +283,7 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     }
 
     case ShapeRecord::Type::Capsule: {
-      PxShape *shape = getSimulation()->mPhysicsSDK->createShape(
+      PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
           PxCapsuleGeometry(r.radius, r.length), *material->getPxMaterial(), true);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
@@ -306,8 +304,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
     }
 
     case ShapeRecord::Type::Sphere: {
-      PxShape *shape = getSimulation()->mPhysicsSDK->createShape(PxSphereGeometry(r.radius),
-                                                                 *material->getPxMaterial(), true);
+      PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
+          PxSphereGeometry(r.radius), *material->getPxMaterial(), true);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to build sphere with radius {}", r.radius);
@@ -497,7 +495,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   data.word3 = 0;
 
   PxRigidDynamic *actor =
-      getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
+      mScene->getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
   actor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, isKinematic);
   for (size_t i = 0; i < shapes.size(); ++i) {
     actor->attachShape(*shapes[i]);
@@ -558,7 +556,8 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   data.word2 = mCollisionGroup.w2;
   data.word3 = 0;
 
-  PxRigidStatic *actor = getSimulation()->mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
+  PxRigidStatic *actor =
+      mScene->getSimulation()->mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
   for (size_t i = 0; i < shapes.size(); ++i) {
     actor->attachShape(*shapes[i]);
     shapes[i]->setSimulationFilterData(data);
@@ -591,7 +590,7 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
   physx_id_t actorId = mScene->mActorIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
   PxRigidStatic *ground =
-      PxCreatePlane(*getSimulation()->mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude),
+      PxCreatePlane(*mScene->getSimulation()->mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude),
                     *material->getPxMaterial());
   PxShape *shape;
   ground->getShapes(&shape, 1);

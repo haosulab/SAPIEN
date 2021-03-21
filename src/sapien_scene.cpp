@@ -25,8 +25,7 @@ namespace sapien {
  * Basic
  ***********************************************/
 SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig const &config)
-    : mSimulationShared(sim), mSimulation(sim.get()), mPxScene(scene), mSimulationCallback(this),
-      mRendererScene(nullptr) {
+    : mSimulationShared(sim), mPxScene(scene), mSimulationCallback(this), mRendererScene(nullptr) {
 
   // default parameters for physical materials, contact solver, etc.
   mDefaultMaterial =
@@ -64,7 +63,7 @@ SScene::~SScene() {
   mPxScene->release();
 
   if (mRendererScene) {
-    mSimulation->getRenderer()->removeScene(mRendererScene);
+    mSimulationShared->getRenderer()->removeScene(mRendererScene);
   }
 
   // Finally, release the shared pointer to simulation
@@ -78,7 +77,7 @@ std::shared_ptr<SPhysicalMaterial> SScene::createPhysicalMaterial(PxReal staticF
                                                                   PxReal dynamicFriction,
                                                                   PxReal restitution) const {
   auto mat =
-      mSimulation->mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
+      mSimulationShared->mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
   mat->setFlag(PxMaterialFlag::eIMPROVED_PATCH_FRICTION, true);
   return std::make_shared<SPhysicalMaterial>(mat);
 }

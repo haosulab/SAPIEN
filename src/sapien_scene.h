@@ -75,7 +75,7 @@ public:
   ~SScene();
   SScene &operator=(SScene const &other) = delete;
 
-  inline Simulation *getSimulation() const { return mSimulation; }
+  inline std::shared_ptr<Simulation> getSimulation() const { return mSimulationShared; }
   inline PxScene *getPxScene() { return mPxScene; }
 
   inline Renderer::IPxrScene *getRendererScene() { return mRendererScene; }
@@ -96,7 +96,6 @@ public:
 
 private:
   std::shared_ptr<Simulation> mSimulationShared; // shared pointer to sapien simulation
-  Simulation *mSimulation;                       // sapien simulation
   PxScene *mPxScene;                             // physx scene
   DefaultEventCallback mSimulationCallback;      // physx scene's simulation callback
 
