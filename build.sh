@@ -45,7 +45,7 @@ function build_manylinux14_wheel() {
   echo "Using include path ${INCLUDE_PATH}"
 
   export CPLUS_INCLUDE_PATH=$INCLUDE_PATH
-  [ $DEBUG == true ] && COMMAND="${BIN} setup.py bdist_wheel" || COMMAND="${BIN} setup.py bdist_wheel --debug"
+  [ $DEBUG == true ] && COMMAND="${BIN} setup.py bdist_wheel --debug" || COMMAND="${BIN} setup.py bdist_wheel"
   echo "Running command ${COMMNAD}"
   eval "$COMMAND"
 
