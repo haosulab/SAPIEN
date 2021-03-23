@@ -1,6 +1,7 @@
 #include "sapien_shape.h"
 #include "sapien_material.h"
 #include <stdexcept>
+#include <array>
 
 using namespace physx;
 

@@ -25,7 +25,7 @@ struct EventActorTrigger : public Event {
 public:
   SActorBase *triggerActor;
   SActorBase *otherActor;
-  class STrigger const *trigger;
+  struct STrigger const *trigger;
 };
 
 } // namespace sapien

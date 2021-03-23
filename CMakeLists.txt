@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -fsized-deallocation -Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation -Wno-deprecated-declarations")
 
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Do not try to build shared libraries")
+
 set(PROFILE FALSE CACHE BOOL "Whether to use Profiler")
 set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
@@ -40,8 +42,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message("Complie source code on Mac OSX")
+	add_definitions(-D_USE_MACOSX)
     set(MACOSX TRUE)
-    add_definitions(-D_USE_MACOSX)
+	set(CMAKE_MACOSX_RPATH FALSE)
 endif ()
 
 find_package(OpenGL REQUIRED)
@@ -95,6 +98,7 @@ include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
 if (MACOSX)
     include_directories("/usr/local/include" "/usr/local/opt/glew/include"
             "/usr/local/include/eigen3")
+    link_directories(/usr/local/lib/)
 endif ()
 
 ## Link directory inside the project
@@ -177,7 +181,7 @@ if (MACOSX)
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
             pthread ${OPENGL_LIBRARY} glfw3 GLEW ${ASSIMP_LIBRARIES} dl optifuser
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY})
+			${PINOCCHIO_LIBRARY} svulkan2 "-framework Cocoa -framework IOKit")
 else ()
     target_link_libraries(sapien -Wl,--start-group
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -195,11 +199,6 @@ set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 pybind11_add_module(pysapien "python/pysapien.cpp")
 target_link_libraries(pysapien PRIVATE sapien)
-
-# set_target_properties(SPIRV PROPERTIES LINK_FLAGS "-static-libstdc++")
-# set_target_properties(glslang PROPERTIES LINK_FLAGS "-static-libstdc++")
-# set_target_properties(tinyxml2 PROPERTIES LINK_FLAGS "-static-libstdc++")
-# set_target_properties(pysapien PROPERTIES LINK_FLAGS "-static-libstdc++")
 
 file(GLOB_RECURSE UNITTEST_SRC unittest/*.cpp)
 
