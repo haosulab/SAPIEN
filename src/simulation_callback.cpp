@@ -9,19 +9,10 @@ namespace sapien {
 
 void DefaultEventCallback::onContact(const PxContactPairHeader &pairHeader,
                                      const PxContactPair *pairs, PxU32 nbPairs) {
-  // PxContactPairExtraDataIterator iter(pairHeader.extraDataStream,
-  //                                     pairHeader.extraDataStreamSize);
-  // while(iter.nextItemSet())
-  // {
-  //   if (iter.postSolverVelocity)
-  //   {
-  //     PxVec3 linearVelocityActor0 = iter.postSolverVelocity->linearVelocity[0];
-  //     PxVec3 linearVelocityActor1 = iter.postSolverVelocity->linearVelocity[1];
-  //   }
-  // }
-
   for (uint32_t i = 0; i < nbPairs; ++i) {
     std::unique_ptr<SContact> contact = std::make_unique<SContact>();
+    contact->collisionShapes[0] = static_cast<SCollisionShape *>(pairs[i].shapes[0]->userData);
+    contact->collisionShapes[1] = static_cast<SCollisionShape *>(pairs[i].shapes[1]->userData);
     contact->actors[0] = static_cast<SActorBase *>(pairHeader.actors[0]->userData);
     contact->actors[1] = static_cast<SActorBase *>(pairHeader.actors[1]->userData);
 
@@ -43,7 +34,7 @@ void DefaultEventCallback::onContact(const PxContactPairHeader &pairHeader,
     event.self = contact->actors[1];
     event.self = contact->actors[0];
     contact->actors[1]->EventEmitter<EventActorContact>::emit(event);
-    mScene->updateContact(pairs[i].shapes[0], pairs[i].shapes[1], std::move(contact));
+    mScene->updateContact(std::move(contact));
   }
 }
 

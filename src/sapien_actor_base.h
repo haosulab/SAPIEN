@@ -43,6 +43,7 @@ protected:
   SScene *mParentScene{};
   std::vector<Renderer::IPxrRigidbody *> mRenderBodies{};
   std::vector<Renderer::IPxrRigidbody *> mCollisionBodies{};
+  std::vector<std::unique_ptr<SCollisionShape>> mCollisionShapes{};
 
   std::vector<SDrive *> mDrives{};
 
@@ -86,7 +87,8 @@ public:
   inline uint32_t getCollisionGroup2() { return mCol2; }
   inline uint32_t getCollisionGroup3() { return mCol3; }
 
-  std::vector<std::unique_ptr<SShape>> getCollisionShapes();
+  void attachShape(std::unique_ptr<SCollisionShape> shape);
+  std::vector<SCollisionShape *> getCollisionShapes() const;
 
   // render
   std::vector<Renderer::IPxrRigidbody *> getRenderBodies();
@@ -125,9 +127,10 @@ public:
   void onStep(StepCallback callback);
   void onTrigger(TriggerCallback callback);
 
-  // void notifyContact(SActorBase &other, SContact const &contact);
-  // void notifyTrigger(SActorBase &other, STrigger const &trigger);
-  // void notifyStep();
+  SActorBase &operator=(SActorBase const &other) = delete;
+  SActorBase &operator=(SActorBase &&other) = delete;
+  SActorBase(SActorBase const &other) = delete;
+  SActorBase(SActorBase &&other) = delete;
 
 protected:
   SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,

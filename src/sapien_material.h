@@ -1,9 +1,10 @@
 #pragma once
 #include <PxPhysicsAPI.h>
+#include <memory>
 
 namespace sapien {
 
-class SPhysicalMaterial {
+class SPhysicalMaterial : public std::enable_shared_from_this<SPhysicalMaterial> {
   physx::PxMaterial *mMaterial;
 
 public:

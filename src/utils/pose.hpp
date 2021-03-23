@@ -17,7 +17,6 @@ PxTransform *fromTransFormationMatrix(const py::array_t<PxReal> &mat) {
   assert(mat.size() == 16 && mat.shape()[0] == 4);
   auto um = mat.unchecked<2>();
   Eigen::Matrix3f rotMat;  // TODO(jigu): Maybe there exists an easier way to write it
-  #pragma unroll
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
         rotMat(i, j) = um(i, j);

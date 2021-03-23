@@ -21,8 +21,10 @@
 // TODO(jigu): check whether to replace with forward declaration
 #include "mesh_manager.h"
 #include "render_interface.h"
+#include "sapien_material.h"
 #include "sapien_scene.h"
 #include "sapien_scene_config.h"
+#include "sapien_shape.h"
 
 namespace sapien {
 using namespace physx;
@@ -42,9 +44,13 @@ public:
   ~Simulation();
 
   std::unique_ptr<SScene> createScene(SceneConfig const &config = {});
+  std::unique_ptr<SCollisionShape>
+  createCollisionShape(PxGeometry const &geometry, std::shared_ptr<SPhysicalMaterial> material);
 
   inline std::shared_ptr<Renderer::IPxrRenderer> getRenderer() const { return mRenderer; }
-  inline void setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer) { mRenderer = renderer; }
+  inline void setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer) {
+    mRenderer = renderer;
+  }
 
   inline MeshManager &getMeshManager() { return mMeshManager; }
   void setLogLevel(std::string const &level);

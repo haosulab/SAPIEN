@@ -239,14 +239,13 @@ private:
    * Contact
    ***********************************************/
 public:
-  void updateContact(PxShape *shape1, PxShape *shape2, std::unique_ptr<SContact> contact);
+  void updateContact(std::unique_ptr<SContact> contact);
   std::vector<SContact *> getContacts() const;
 
   SceneData packScene();
   void unpackScene(SceneData const &data);
 
 private:
-  // std::vector<SContact> mContacts;
   std::map<std::pair<PxShape *, PxShape *>, std::unique_ptr<SContact>> mContacts;
 };
 } // namespace sapien

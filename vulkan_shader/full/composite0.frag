@@ -124,7 +124,6 @@ void main()
   float metallic = frm.z;
   vec3 fresnel = specular * (1 - metallic) + albedo * metallic;
 
-  // outLightingSSR = texture(samplerLighting, inUV);
   if(fresnel.x < 0.1 && fresnel.y < 0.1 && fresnel.z < 0.1)
   {
     outLightingSSR = vec4(0.);

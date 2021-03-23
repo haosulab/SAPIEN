@@ -146,6 +146,15 @@ std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
   return std::make_unique<SScene>(this->shared_from_this(), pxScene, config);
 }
 
+std::unique_ptr<SCollisionShape>
+Simulation::createCollisionShape(PxGeometry const &geometry,
+                                 std::shared_ptr<SPhysicalMaterial> material) {
+  auto shape = mPhysicsSDK->createShape(geometry, *material->getPxMaterial(), true);
+  auto result = std::make_unique<SCollisionShape>(shape);
+  result->setPhysicalMaterial(material);
+  return result;
+}
+
 void Simulation::setLogLevel(std::string const &level) {
   if (level == "debug") {
     spdlog::get("SAPIEN")->set_level(spdlog::level::debug);

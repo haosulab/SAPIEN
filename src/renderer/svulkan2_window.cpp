@@ -3,7 +3,7 @@
 namespace sapien {
 namespace Renderer {
 
-#ifdef _DEBUG
+#ifdef _DEBUG_VIEWER
 FPSCameraControllerDebug::FPSCameraControllerDebug(svulkan2::scene::Node &node,
                                                    glm::vec3 const &forward, glm::vec3 const &up)
     : mCamera(&node), mForward(glm::normalize(forward)), mUp(glm::normalize(up)),
@@ -63,7 +63,7 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
   mViewportWidth = width;
   mViewportHeight = height;
 
-#ifdef _DEBUG
+#ifdef _DEBUG_VIEWER
 #endif
 }
 
@@ -87,8 +87,10 @@ void SVulkan2Window::show() { glfwShowWindow(mWindow->getGLFWWindow()); }
 void SVulkan2Window::setScene(SVulkan2Scene *scene) { mScene = scene; }
 
 void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {
-  getCamera()->setPerspectiveParameters(
-      near, far, fovy, static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
+  float aspect = mWindow->getHeight() == 0
+                     ? 1.f
+                     : (static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
+  getCamera()->setPerspectiveParameters(near, far, fovy, aspect);
 }
 void SVulkan2Window::setCameraPosition(glm::vec3 const &pos) { getCamera()->setPosition(pos); }
 void SVulkan2Window::setCameraRotation(glm::quat const &rot) { getCamera()->setRotation(rot); }
@@ -115,8 +117,10 @@ void SVulkan2Window::rebuild() {
 
   if (mScene) {
     auto cam = getCamera();
-    cam->setPerspectiveParameters(cam->getNear(), cam->getFar(), cam->getFovy(),
-                                  static_cast<float>(mViewportWidth) / mViewportHeight);
+    float aspect = mWindow->getHeight() == 0
+                       ? 1.f
+                       : (static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
+    cam->setPerspectiveParameters(cam->getNear(), cam->getFar(), cam->getFovy(), aspect);
   }
 }
 
@@ -210,7 +214,7 @@ void SVulkan2Window::render(std::string const &targetName,
     return;
   }
 
-#ifdef _DEBUG
+#ifdef _DEBUG_VIEWER
   if (!mCameraController) {
     mCameraController = std::make_unique<FPSCameraControllerDebug>(*camera, glm::vec3{1, 0, 0},
                                                                    glm::vec3{0, 0, 1});
@@ -254,8 +258,11 @@ svulkan2::scene::Camera *SVulkan2Window::getCamera() {
     }
   }
   auto camera = &mScene->getScene()->addCamera();
-  camera->setPerspectiveParameters(0.1, 10, 1,
-                                   static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
+
+  float aspect = mWindow->getHeight() == 0
+                     ? 1.f
+                     : (static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
+  camera->setPerspectiveParameters(0.1, 10, 1, aspect);
   camera->setName("_controller");
   camera->setPosition({0, 0, 0});
   return camera;

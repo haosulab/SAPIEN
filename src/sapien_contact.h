@@ -1,11 +1,12 @@
 #pragma once
-#include <vector>
 #include <PxPhysicsAPI.h>
+#include <vector>
 
 namespace sapien {
 using namespace physx;
 
 class SActorBase;
+class SCollisionShape;
 
 struct SContactPoint {
   PxVec3 position;
@@ -16,6 +17,7 @@ struct SContactPoint {
 
 struct SContact {
   SActorBase *actors[2];
+  SCollisionShape *collisionShapes[2];
   bool starts;
   bool ends;
   bool persists;

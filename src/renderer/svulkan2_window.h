@@ -5,7 +5,7 @@
 namespace sapien {
 namespace Renderer {
 
-#ifdef _DEBUG
+#ifdef _DEBUG_VIEWER
 class FPSCameraControllerDebug {
   svulkan2::scene::Node *mCamera;
   glm::vec3 mRPY{0, 0, 0};
@@ -52,7 +52,7 @@ class SVulkan2Window {
   bool mRequiresRebuild{true};
   bool mClosed{};
 
-#ifdef _DEBUG
+#ifdef _DEBUG_VIEWER
   std::unique_ptr<FPSCameraControllerDebug> mCameraController{};
 #endif
 public:

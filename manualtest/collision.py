@@ -2,13 +2,8 @@ import sapien.core as sapien
 import numpy as np
 from sapien.core import Pose
 from transforms3d.quaternions import axangle2quat as aa
-from transforms3d.quaternions import qmult, mat2quat, rotate_vector
-
 import sapien.core.pysapien.renderer as R
-
-from controller import Viewer
-
-# from sapien.utils import Viewer
+from sapien.utils import Viewer
 
 sapien.VulkanRenderer.set_log_level("info")
 
@@ -22,7 +17,7 @@ copper.set_base_color([0.875, 0.553, 0.221, 1])
 copper.set_metallic(1)
 copper.set_roughness(0.4)
 
-viewer = Viewer(renderer, "../vulkan_shader/full")
+viewer = Viewer(renderer)
 
 
 def create_ant_builder(scene):
@@ -160,16 +155,6 @@ scene.set_timestep(1 / 240)
 ant_builder = create_ant_builder(scene)
 ant = ant_builder.build()
 ant.set_root_pose(Pose([0, 0, 2]))
-
-builder = scene.create_actor_builder()
-builder.add_box_shape()
-builder.add_box_visual()
-box = builder.build()
-box.set_pose(Pose([10, 0, 0]))
-
-loader = scene.create_urdf_loader()
-loader.fix_root_link = True
-loader.load("../assets/robot/sapien_gripper.urdf")
 
 
 viewer.set_scene(scene)

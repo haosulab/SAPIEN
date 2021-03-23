@@ -8,7 +8,9 @@ namespace sapien {
 SActor::SActor(PxRigidDynamic *actor, physx_id_t id, SScene *scene,
                std::vector<Renderer::IPxrRigidbody *> renderBodies,
                std::vector<Renderer::IPxrRigidbody *> collisionBodies)
-    : SActorDynamicBase(id, scene, renderBodies, collisionBodies), mActor(actor) {}
+    : SActorDynamicBase(id, scene, renderBodies, collisionBodies), mActor(actor) {
+  actor->userData = this;
+}
 
 PxRigidDynamic *SActor::getPxActor() { return mActor; }
 
@@ -100,7 +102,9 @@ void SActor::unpackData(std::vector<PxReal> const &data) {
 SActorStatic::SActorStatic(PxRigidStatic *actor, physx_id_t id, SScene *scene,
                            std::vector<Renderer::IPxrRigidbody *> renderBodies,
                            std::vector<Renderer::IPxrRigidbody *> collisionBodies)
-    : SActorBase(id, scene, renderBodies, collisionBodies), mActor(actor) {}
+    : SActorBase(id, scene, renderBodies, collisionBodies), mActor(actor) {
+  actor->userData = this;
+}
 
 PxRigidActor *SActorStatic::getPxActor() { return mActor; }
 

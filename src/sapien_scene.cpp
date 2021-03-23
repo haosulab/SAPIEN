@@ -576,13 +576,11 @@ SActorStatic *SScene::addGround(PxReal altitude, bool render,
   return createActorBuilder()->buildGround(altitude, render, material, renderMaterial, "ground");
 }
 
-void SScene::updateContact(PxShape *shape1, PxShape *shape2, std::unique_ptr<SContact> contact) {
-  auto pair = std::make_pair(shape1, shape2);
+void SScene::updateContact(std::unique_ptr<SContact> contact) {
+  auto pair = std::make_pair(contact->collisionShapes[0]->getPxShape(),
+                             contact->collisionShapes[1]->getPxShape());
   if (contact->starts) {
     // NOTE: contact actually can start twice
-    // if (mContacts.find(pair) != mContacts.end()) {
-    //   spdlog::get("SAPIEN")->error("Error adding contact pair: it already exists");
-    // }
     mContacts[pair] = std::move(contact);
   } else if (contact->persists) {
     auto it = mContacts.find(pair);

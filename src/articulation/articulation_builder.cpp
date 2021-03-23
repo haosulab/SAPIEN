@@ -137,7 +137,7 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   PxArticulationLink *pxLink = pxArticulation->createLink(
       mParent >= 0 ? links[mParent]->getPxActor() : nullptr, {{0, 0, 0}, PxIdentity});
 
-  std::vector<PxShape *> shapes;
+  std::vector<std::unique_ptr<SCollisionShape>> shapes;
   std::vector<PxReal> densities;
   buildShapes(shapes, densities);
 
@@ -160,11 +160,17 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   data.word2 = mCollisionGroup.w2;
   data.word3 = 0;
 
+  // wrap link
+  links[mIndex] = std::unique_ptr<SLink>(new SLink(pxLink, &articulation, linkId,
+                                                   mArticulationBuilder->getScene(), renderBodies,
+                                                   collisionBodies));
+
   for (size_t i = 0; i < shapes.size(); ++i) {
-    pxLink->attachShape(*shapes[i]);
-    shapes[i]->setSimulationFilterData(data);
-    shapes[i]->release(); // this shape is reference counted by link
+    shapes[i]->setCollisionGroups(mCollisionGroup.w0, mCollisionGroup.w1, mCollisionGroup.w2,
+                                  mCollisionGroup.w3);
+    links[mIndex]->attachShape(std::move(shapes[i]));
   }
+
   if (shapes.size() && mUseDensity) {
     PxRigidBodyExt::updateMassAndInertia(*pxLink, densities.data(), shapes.size());
   } else {
@@ -173,10 +179,6 @@ bool LinkBuilder::build(SArticulation &articulation) const {
     pxLink->setMassSpaceInertiaTensor(mInertia);
   }
 
-  // wrap link
-  links[mIndex] = std::unique_ptr<SLink>(new SLink(pxLink, &articulation, linkId,
-                                                   mArticulationBuilder->getScene(), renderBodies,
-                                                   collisionBodies));
   links[mIndex]->setName(mName);
 
   links[mIndex]->mCol1 = mCollisionGroup.w0;
@@ -213,7 +215,7 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
 
   physx_id_t linkId = mScene->mActorIdGenerator.next();
 
-  std::vector<PxShape *> shapes;
+  std::vector<std::unique_ptr<SCollisionShape>> shapes;
   std::vector<PxReal> densities;
   buildShapes(shapes, densities);
 
@@ -239,11 +241,15 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
   PxRigidDynamic *actor =
       mScene->getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
   actor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, true);
+  links[mIndex] = std::unique_ptr<SKLink>(new SKLink(actor, &articulation, linkId,
+                                                     mArticulationBuilder->getScene(),
+                                                     renderBodies, collisionBodies));
   for (size_t i = 0; i < shapes.size(); ++i) {
-    actor->attachShape(*shapes[i]);
-    shapes[i]->setSimulationFilterData(data);
-    shapes[i]->release(); // this shape is now reference counted by the actor
+    shapes[i]->setCollisionGroups(mCollisionGroup.w0, mCollisionGroup.w1, mCollisionGroup.w2,
+                                  mCollisionGroup.w3);
+    links[mIndex]->attachShape(std::move(shapes[i]));
   }
+
   if (shapes.size() && mUseDensity) {
     PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
   } else {
@@ -252,9 +258,6 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
     actor->setMassSpaceInertiaTensor(mInertia);
   }
 
-  links[mIndex] = std::unique_ptr<SKLink>(new SKLink(actor, &articulation, linkId,
-                                                     mArticulationBuilder->getScene(),
-                                                     renderBodies, collisionBodies));
   links[mIndex]->setName(mName);
 
   links[mIndex]->mCol1 = mCollisionGroup.w0;

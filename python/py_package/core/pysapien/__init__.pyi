@@ -484,36 +484,62 @@ class BoxGeometry(CollisionGeometry):
         """
     pass
 class CollisionShape():
+    def get_collision_groups(self) -> typing.List[int[4]]: ...
+    def get_local_pose(self) -> Pose: ...
+    def get_physical_material(self) -> PhysicalMaterial: ...
+    def set_collision_groups(self, group0: int, group1: int, group2: int, group3: int) -> None: ...
+    def set_local_pose(self, pose: Pose) -> None: ...
+    def set_physical_material(self, material: PhysicalMaterial) -> None: ...
     @property
-    def box_geometry(self) -> BoxGeometry:
+    def actor(self) -> ActorBase:
         """
-        :type: BoxGeometry
-        """
-    @property
-    def capsule_geometry(self) -> CapsuleGeometry:
-        """
-        :type: CapsuleGeometry
-        """
-    @property
-    def convex_mesh_geometry(self) -> ConvexMeshGeometry:
-        """
-        :type: ConvexMeshGeometry
+        :type: ActorBase
         """
     @property
-    def plane_geometry(self) -> PlaneGeometry:
+    def contact_offset(self) -> float:
         """
-        :type: PlaneGeometry
+        :type: float
+        """
+    @contact_offset.setter
+    def contact_offset(self, arg1: float) -> None:
+        pass
+    @property
+    def geometry(self) -> CollisionGeometry:
+        """
+        :type: CollisionGeometry
         """
     @property
-    def pose(self) -> Pose:
+    def is_trigger(self) -> bool:
         """
-        :type: Pose
+        :type: bool
         """
+    @is_trigger.setter
+    def is_trigger(self, arg1: bool) -> None:
+        pass
     @property
-    def sphere_geometry(self) -> SphereGeometry:
+    def min_patch_radius(self) -> float:
         """
-        :type: SphereGeometry
+        :type: float
         """
+    @min_patch_radius.setter
+    def min_patch_radius(self, arg1: float) -> None:
+        pass
+    @property
+    def patch_radius(self) -> float:
+        """
+        :type: float
+        """
+    @patch_radius.setter
+    def patch_radius(self, arg1: float) -> None:
+        pass
+    @property
+    def rest_offset(self) -> float:
+        """
+        :type: float
+        """
+    @rest_offset.setter
+    def rest_offset(self, arg1: float) -> None:
+        pass
     @property
     def type(self) -> str:
         """

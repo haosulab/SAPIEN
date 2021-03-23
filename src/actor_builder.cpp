@@ -203,7 +203,7 @@ void ActorBuilder::setMassAndInertia(PxReal mass, PxTransform const &cMassPose,
   mInertia = inertia;
 }
 
-void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
+void ActorBuilder::buildShapes(std::vector<std::unique_ptr<SCollisionShape>> &shapes,
                                std::vector<PxReal> &densities) const {
   for (auto &r : mShapeRecord) {
     auto material = r.material ? r.material : mScene->getDefaultMaterial();
@@ -215,8 +215,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
         spdlog::get("SAPIEN")->error("Failed to load convex mesh for actor");
         continue;
       }
-      PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
-          PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material->getPxMaterial(), true);
+      auto shape = mScene->getSimulation()->createCollisionShape(
+          PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), material);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to create shape");
@@ -226,10 +226,9 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       shape->setTorsionalPatchRadius(r.patchRadius);
       shape->setMinTorsionalPatchRadius(r.minPatchRadius);
       if (r.isTrigger) {
-        shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
-        shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+        shape->setIsTrigger(true);
       }
-      shapes.push_back(shape);
+      shapes.push_back(std::move(shape));
       densities.push_back(r.density);
       break;
     }
@@ -241,8 +240,8 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
           spdlog::get("SAPIEN")->error("Failed to load part of the convex mesh for actor");
           continue;
         }
-        PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
-            PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), *material->getPxMaterial(), true);
+        auto shape = mScene->getSimulation()->createCollisionShape(
+            PxConvexMeshGeometry(mesh, PxMeshScale(r.scale)), material);
         shape->setContactOffset(mScene->mDefaultContactOffset);
         if (!shape) {
           spdlog::get("SAPIEN")->critical("Failed to create shape");
@@ -252,18 +251,16 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
         shape->setTorsionalPatchRadius(r.patchRadius);
         shape->setMinTorsionalPatchRadius(r.minPatchRadius);
         if (r.isTrigger) {
-          shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
-          shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+          shape->setIsTrigger(true);
         }
-        shapes.push_back(shape);
+        shapes.push_back(std::move(shape));
         densities.push_back(r.density);
       }
       break;
     }
 
     case ShapeRecord::Type::Box: {
-      PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
-          PxBoxGeometry(r.scale), *material->getPxMaterial(), true);
+      auto shape = mScene->getSimulation()->createCollisionShape(PxBoxGeometry(r.scale), material);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to build box with scale {}, {}, {}", r.scale.x,
@@ -274,17 +271,16 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       shape->setTorsionalPatchRadius(r.patchRadius);
       shape->setMinTorsionalPatchRadius(r.minPatchRadius);
       if (r.isTrigger) {
-        shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
-        shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+        shape->setIsTrigger(true);
       }
-      shapes.push_back(shape);
+      shapes.push_back(std::move(shape));
       densities.push_back(r.density);
       break;
     }
 
     case ShapeRecord::Type::Capsule: {
-      PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
-          PxCapsuleGeometry(r.radius, r.length), *material->getPxMaterial(), true);
+      auto shape = mScene->getSimulation()->createCollisionShape(
+          PxCapsuleGeometry(r.radius, r.length), material);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to build capsule with radius {}, length {}",
@@ -295,17 +291,16 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       shape->setTorsionalPatchRadius(r.patchRadius);
       shape->setMinTorsionalPatchRadius(r.minPatchRadius);
       if (r.isTrigger) {
-        shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
-        shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+        shape->setIsTrigger(true);
       }
-      shapes.push_back(shape);
+      shapes.push_back(std::move(shape));
       densities.push_back(r.density);
       break;
     }
 
     case ShapeRecord::Type::Sphere: {
-      PxShape *shape = mScene->getSimulation()->mPhysicsSDK->createShape(
-          PxSphereGeometry(r.radius), *material->getPxMaterial(), true);
+      auto shape =
+          mScene->getSimulation()->createCollisionShape(PxSphereGeometry(r.radius), material);
       shape->setContactOffset(mScene->mDefaultContactOffset);
       if (!shape) {
         spdlog::get("SAPIEN")->critical("Failed to build sphere with radius {}", r.radius);
@@ -315,10 +310,9 @@ void ActorBuilder::buildShapes(std::vector<PxShape *> &shapes,
       shape->setTorsionalPatchRadius(r.patchRadius);
       shape->setMinTorsionalPatchRadius(r.minPatchRadius);
       if (r.isTrigger) {
-        shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
-        shape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
+        shape->setIsTrigger(true);
       }
-      shapes.push_back(shape);
+      shapes.push_back(std::move(shape));
       densities.push_back(r.density);
       break;
     }
@@ -389,38 +383,39 @@ void ActorBuilder::resetCollisionGroup() {
   mCollisionGroup.w3 = 0;
 }
 
-void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> &collisionBodies,
-                                         std::vector<PxShape *> &shapes) const {
+void ActorBuilder::buildCollisionVisuals(
+    std::vector<Renderer::IPxrRigidbody *> &collisionBodies,
+    std::vector<std::unique_ptr<SCollisionShape>> &shapes) const {
   auto rendererScene = mScene->getRendererScene();
   if (!rendererScene) {
     return;
   }
-  for (auto shape : shapes) {
+  for (auto &shape : shapes) {
     Renderer::IPxrRigidbody *cBody;
-    switch (shape->getGeometryType()) {
+    switch (shape->getPxShape()->getGeometryType()) {
     case PxGeometryType::eBOX: {
       PxBoxGeometry geom;
-      shape->getBoxGeometry(geom);
+      shape->getPxShape()->getBoxGeometry(geom);
       cBody = rendererScene->addRigidbody(PxGeometryType::eBOX, geom.halfExtents, PxVec3{0, 0, 1});
       break;
     }
     case PxGeometryType::eSPHERE: {
       PxSphereGeometry geom;
-      shape->getSphereGeometry(geom);
+      shape->getPxShape()->getSphereGeometry(geom);
       cBody = rendererScene->addRigidbody(
           PxGeometryType::eSPHERE, {geom.radius, geom.radius, geom.radius}, PxVec3{0, 0, 1});
       break;
     }
     case PxGeometryType::eCAPSULE: {
       PxCapsuleGeometry geom;
-      shape->getCapsuleGeometry(geom);
+      shape->getPxShape()->getCapsuleGeometry(geom);
       cBody = rendererScene->addRigidbody(
           PxGeometryType::eCAPSULE, {geom.halfHeight, geom.radius, geom.radius}, PxVec3{0, 0, 1});
       break;
     }
     case PxGeometryType::eCONVEXMESH: {
       PxConvexMeshGeometry geom;
-      shape->getConvexMeshGeometry(geom);
+      shape->getPxShape()->getConvexMeshGeometry(geom);
 
       std::vector<PxVec3> vertices;
       std::vector<PxVec3> normals;
@@ -471,7 +466,7 @@ void ActorBuilder::buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> 
 SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   physx_id_t actorId = mScene->mActorIdGenerator.next();
 
-  std::vector<PxShape *> shapes;
+  std::vector<std::unique_ptr<SCollisionShape>> shapes;
   std::vector<PxReal> densities;
   buildShapes(shapes, densities);
 
@@ -488,19 +483,16 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
     body->setSegmentationId(actorId);
   }
 
-  PxFilterData data;
-  data.word0 = mCollisionGroup.w0;
-  data.word1 = mCollisionGroup.w1;
-  data.word2 = mCollisionGroup.w2;
-  data.word3 = 0;
-
   PxRigidDynamic *actor =
       mScene->getSimulation()->mPhysicsSDK->createRigidDynamic(PxTransform(PxIdentity));
+  auto sActor =
+      std::unique_ptr<SActor>(new SActor(actor, actorId, mScene, renderBodies, collisionBodies));
+
   actor->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, isKinematic);
   for (size_t i = 0; i < shapes.size(); ++i) {
-    actor->attachShape(*shapes[i]);
-    shapes[i]->setSimulationFilterData(data);
-    shapes[i]->release(); // this shape is now reference counted by the actor
+    shapes[i]->setCollisionGroups(mCollisionGroup.w0, mCollisionGroup.w1, mCollisionGroup.w2,
+                                  mCollisionGroup.w3);
+    sActor->attachShape(std::move(shapes[i]));
   }
   if (shapes.size() && mUseDensity) {
     PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
@@ -510,8 +502,6 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
     actor->setMassSpaceInertiaTensor(mInertia);
   }
 
-  auto sActor =
-      std::unique_ptr<SActor>(new SActor(actor, actorId, mScene, renderBodies, collisionBodies));
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
@@ -533,7 +523,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
 SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   physx_id_t actorId = mScene->mActorIdGenerator.next();
 
-  std::vector<PxShape *> shapes;
+  std::vector<std::unique_ptr<SCollisionShape>> shapes;
   std::vector<PxReal> densities;
   buildShapes(shapes, densities);
 
@@ -558,14 +548,14 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
 
   PxRigidStatic *actor =
       mScene->getSimulation()->mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
-  for (size_t i = 0; i < shapes.size(); ++i) {
-    actor->attachShape(*shapes[i]);
-    shapes[i]->setSimulationFilterData(data);
-    shapes[i]->release(); // this shape is now reference counted by the actor
-  }
-
   auto sActor = std::unique_ptr<SActorStatic>(
       new SActorStatic(actor, actorId, mScene, renderBodies, collisionBodies));
+  for (size_t i = 0; i < shapes.size(); ++i) {
+    sActor->attachShape(std::move(shapes[i]));
+    shapes[i]->setCollisionGroups(mCollisionGroup.w0, mCollisionGroup.w1, mCollisionGroup.w2,
+                                  mCollisionGroup.w3);
+  }
+
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;
@@ -589,25 +579,18 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
   }
   physx_id_t actorId = mScene->mActorIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
-  PxRigidStatic *ground =
-      PxCreatePlane(*mScene->getSimulation()->mPhysicsSDK, PxPlane(0.f, 0.f, 1.f, -altitude),
-                    *material->getPxMaterial());
-  PxShape *shape;
-  ground->getShapes(&shape, 1);
 
-  PxFilterData data;
-  data.word0 = mCollisionGroup.w0;
-  data.word1 = mCollisionGroup.w1;
-  data.word2 = mCollisionGroup.w2;
-  data.word3 = 0;
-
-  shape->setSimulationFilterData(data);
+  auto shape = mScene->getSimulation()->createCollisionShape(PxPlaneGeometry(), material);
+  auto pose = PxTransformFromPlaneEquation(PxPlane(0.f, 0.f, 1.f, -altitude));
+  shape->setLocalPose(pose);
+  shape->setCollisionGroups(mCollisionGroup.w0, mCollisionGroup.w1, mCollisionGroup.w2,
+                            mCollisionGroup.w3);
 
   std::vector<Renderer::IPxrRigidbody *> renderBodies;
   if (render && mScene->getRendererScene()) {
     auto body =
         mScene->mRendererScene->addRigidbody(PxGeometryType::ePLANE, {10, 10, 10}, renderMaterial);
-    body->setInitialPose(PxTransform({0, 0, altitude}, PxIdentity));
+    body->setInitialPose(pose);
     renderBodies.push_back(body);
 
     physx_id_t newId = mScene->mRenderIdGenerator.next();
@@ -615,10 +598,13 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
     body->setUniqueId(newId);
   }
 
+  PxRigidStatic *ground =
+      mScene->getSimulation()->mPhysicsSDK->createRigidStatic(PxTransform(PxIdentity));
   auto sActor =
       std::unique_ptr<SActorStatic>(new SActorStatic(ground, actorId, mScene, renderBodies, {}));
-  sActor->setName(name);
+  sActor->attachShape(std::move(shape));
 
+  sActor->setName(name);
   sActor->mCol1 = mCollisionGroup.w0;
   sActor->mCol2 = mCollisionGroup.w1;
   sActor->mCol3 = mCollisionGroup.w2;

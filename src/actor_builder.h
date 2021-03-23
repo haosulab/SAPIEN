@@ -13,6 +13,7 @@ class SScene;
 class Simulation;
 class SActor;
 class SActorStatic;
+class SCollisionShape;
 
 namespace Renderer {
 class IPxrRididbody;
@@ -162,11 +163,12 @@ public:
                             std::string const &name = "");
 
 protected:
-  void buildShapes(std::vector<PxShape *> &shapes, std::vector<PxReal> &densities) const;
+  void buildShapes(std::vector<std::unique_ptr<SCollisionShape>> &shapes,
+                   std::vector<PxReal> &densities) const;
   void buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBodies,
                     std::vector<physx_id_t> &renderIds) const;
   void buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> &collisionBodies,
-                             std::vector<PxShape *> &shapes) const;
+                             std::vector<std::unique_ptr<SCollisionShape>> &shapes) const;
 };
 
 } // namespace sapien

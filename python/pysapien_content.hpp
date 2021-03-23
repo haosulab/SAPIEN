@@ -133,7 +133,8 @@ void buildSapien(py::module &m) {
   auto PyCapsuleGeometry = py::class_<SCapsuleGeometry, SGeometry>(m, "CapsuleGeometry");
   auto PyPlaneGeometry = py::class_<SPlaneGeometry, SGeometry>(m, "PlaneGeometry");
   auto PyConvexMeshGeometry = py::class_<SConvexMeshGeometry, SGeometry>(m, "ConvexMeshGeometry");
-  auto PyShape = py::class_<SShape>(m, "CollisionShape");
+  // auto PyShape = py::class_<SShape>(m, "CollisionShape");
+  auto PyCollisionShape = py::class_<SCollisionShape>(m, "CollisionShape");
 
   // enums
   auto PySolverType = py::enum_<PxSolverType::Enum>(m, "SolverType");
@@ -304,53 +305,77 @@ void buildSapien(py::module &m) {
       .def_property_readonly(
           "indices", [](SConvexMeshGeometry &g) { return make_array<uint32_t>(g.indices); });
 
-  PyShape.def_readonly("type", &SShape::type)
-      .def_readonly("pose", &SShape::pose)
-      .def_property_readonly(
-          "box_geometry",
-          [](SShape &s) {
-            if (s.type == "box") {
-              return static_cast<SBoxGeometry *>(s.geometry.get());
-            }
-            return static_cast<SBoxGeometry *>(nullptr);
-          },
-          py::return_value_policy::reference)
-      .def_property_readonly(
-          "sphere_geometry",
-          [](SShape &s) {
-            if (s.type == "sphere") {
-              return static_cast<SSphereGeometry *>(s.geometry.get());
-            }
-            return static_cast<SSphereGeometry *>(nullptr);
-          },
-          py::return_value_policy::reference)
-      .def_property_readonly(
-          "capsule_geometry",
-          [](SShape &s) {
-            if (s.type == "capsule") {
-              return static_cast<SCapsuleGeometry *>(s.geometry.get());
-            }
-            return static_cast<SCapsuleGeometry *>(nullptr);
-          },
-          py::return_value_policy::reference)
-      .def_property_readonly(
-          "plane_geometry",
-          [](SShape &s) {
-            if (s.type == "plane") {
-              return static_cast<SPlaneGeometry *>(s.geometry.get());
-            }
-            return static_cast<SPlaneGeometry *>(nullptr);
-          },
-          py::return_value_policy::reference)
-      .def_property_readonly(
-          "convex_mesh_geometry",
-          [](SShape &s) {
-            if (s.type == "convex_mesh") {
-              return static_cast<SConvexMeshGeometry *>(s.geometry.get());
-            }
-            return static_cast<SConvexMeshGeometry *>(nullptr);
-          },
-          py::return_value_policy::reference);
+  PyCollisionShape
+      .def_property_readonly("actor", &SCollisionShape::getActor,
+                             py::return_value_policy::reference)
+
+      .def("get_collision_groups", &SCollisionShape::getCollisionGroups)
+      .def("set_collision_groups", &SCollisionShape::setCollisionGroups, py::arg("group0"),
+           py::arg("group1"), py::arg("group2"), py::arg("group3"))
+      .def_property("rest_offset", &SCollisionShape::getRestOffset,
+                    &SCollisionShape::setRestOffset)
+      .def_property("contact_offset", &SCollisionShape::getContactOffset,
+                    &SCollisionShape::setContactOffset)
+      .def_property("patch_radius", &SCollisionShape::getTorsionalPatchRadius,
+                    &SCollisionShape::setTorsionalPatchRadius)
+      .def_property("min_patch_radius", &SCollisionShape::getMinTorsionalPatchRadius,
+                    &SCollisionShape::setMinTorsionalPatchRadius)
+      .def_property("is_trigger", &SCollisionShape::isTrigger, &SCollisionShape::setIsTrigger)
+      .def("get_local_pose", &SCollisionShape::getLocalPose)
+      .def("set_local_pose", &SCollisionShape::setLocalPose, py::arg("pose"))
+      .def("set_physical_material", &SCollisionShape::setPhysicalMaterial, py::arg("material"))
+      .def("get_physical_material", &SCollisionShape::getPhysicalMaterial)
+
+      .def_property_readonly("type", &SCollisionShape::getType)
+      .def_property_readonly("geometry", &SCollisionShape::getGeometry);
+
+  // PyShape.def_readonly("type", &SShape::type)
+  //     .def_readonly("pose", &SShape::pose)
+  //     .def_property_readonly(
+  //         "box_geometry"
+  //         [](SShape &s) {
+  //           if (s.type == "box") {
+  //             return static_cast<SBoxGeometry *>(s.geometry.get());
+  //           }
+  //           return static_cast<SBoxGeometry *>(nullptr);
+  //         },
+  //         py::return_value_policy::reference)
+  //     .def_property_readonly(
+  //         "sphere_geometry",
+  //         [](SShape &s) {
+  //           if (s.type == "sphere") {
+  //             return static_cast<SSphereGeometry *>(s.geometry.get());
+  //           }
+  //           return static_cast<SSphereGeometry *>(nullptr);
+  //         },
+  //         py::return_value_policy::reference)
+  //     .def_property_readonly(
+  //         "capsule_geometry",
+  //         [](SShape &s) {
+  //           if (s.type == "capsule") {
+  //             return static_cast<SCapsuleGeometry *>(s.geometry.get());
+  //           }
+  //           return static_cast<SCapsuleGeometry *>(nullptr);
+  //         },
+  //         py::return_value_policy::reference)
+  //     .def_property_readonly(
+  //         "plane_geometry",
+  //         [](SShape &s) {
+  //           if (s.type == "plane") {
+  //             return static_cast<SPlaneGeometry *>(s.geometry.get());
+  //           }
+  //           return static_cast<SPlaneGeometry *>(nullptr);
+  //         },
+  //         py::return_value_policy::reference)
+  //     .def_property_readonly(
+  //         "convex_mesh_geometry",
+  //         [](SShape &s) {
+  //           if (s.type == "convex_mesh") {
+  //             return static_cast<SConvexMeshGeometry *>(s.geometry.get());
+  //           }
+  //           return static_cast<SConvexMeshGeometry *>(nullptr);
+  //         },
+  //         py::return_value_policy::reference);
 
   //======== Render Interface ========//
   PyRenderMaterial
@@ -724,7 +749,8 @@ void buildSapien(py::module &m) {
       .def_property_readonly("col1", &SActorBase::getCollisionGroup1)
       .def_property_readonly("col2", &SActorBase::getCollisionGroup2)
       .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
-      .def("get_collision_shapes", &SActorBase::getCollisionShapes)
+      .def("get_collision_shapes", &SActorBase::getCollisionShapes,
+           py::return_value_policy::reference)
       .def("get_visual_bodies", &SActorBase::getRenderBodies, py::return_value_policy::reference)
       .def("get_collision_visual_bodies", &SActorBase::getCollisionBodies,
            py::return_value_policy::reference)

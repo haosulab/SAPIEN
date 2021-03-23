@@ -193,7 +193,6 @@ endif ()
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-# pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
 pybind11_add_module(pysapien "python/pysapien.cpp")
 target_link_libraries(pysapien PRIVATE sapien)
 
