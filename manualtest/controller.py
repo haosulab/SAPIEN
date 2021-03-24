@@ -120,11 +120,15 @@ class Viewer(object):
         self,
         renderer: VulkanRenderer,
         shader_dir="",
-        resolutions=[(1024, 768), (800, 600), (1920, 1080)],
+        resolutions=((1024, 768), (800, 600), (1920, 1080)),
     ):
         self.shader_dir = shader_dir
         self.renderer = renderer
         self.renderer_context: R.Context = renderer._internal_context
+
+        self.window = None
+        self.resolution = None
+        self.resolutions = None
         self.set_window_resolutions(resolutions)
 
         self.cone = self.renderer_context.create_cone_mesh(16)
@@ -173,6 +177,7 @@ class Viewer(object):
         self.window = self.renderer.create_window(
             resolutions[0][0], resolutions[0][1], self.shader_dir
         )
+        self.resolution = resolutions[0]
         self.resolutions = resolutions
 
     def build_control_window(self):
@@ -254,8 +259,8 @@ class Viewer(object):
         self.selection_opacity = opacity
 
     def set_resolution(self, index):
-        width, height = self.resolutions[index]
-        self.window.resize(width, height)
+        self.resolution = self.resolutions[index]
+        self.window.resize(*self.resolution)
 
     def build_scene_window(self):
         assert self.scene
@@ -742,9 +747,12 @@ class Viewer(object):
                     self.articulation_window,
                 ],
             )
-            mx, my = self.window.mouse_position
 
             if self.window.mouse_click(0):
+                mx, my = self.window.mouse_position
+                if not self.is_mouse_available(mx, my):
+                    continue
+
                 pixel = self.window.download_uint32_target_pixel(
                     "Segmentation", int(mx), int(my)
                 )
@@ -813,3 +821,9 @@ class Viewer(object):
             if not self.paused or (self.paused and self.single_step):
                 self.single_step = False
                 break
+
+    def is_mouse_available(self, mx, my):
+        # TODO: maintain window resolution somewhere else
+        w, h = self.resolution
+        print('mousePose:', mx, my)
+        return 0 <= mx < w and 0 <= my < h

@@ -44,7 +44,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message("Complie source code on Mac OSX")
 	add_definitions(-D_USE_MACOSX)
     set(MACOSX TRUE)
-	set(CMAKE_MACOSX_RPATH FALSE)
+	set(CMAKE_MACOSX_RPATH OFF CACHE BOOL "Do not use rpath for MacOS")
 endif ()
 
 find_package(OpenGL REQUIRED)

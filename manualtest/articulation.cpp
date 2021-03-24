@@ -110,7 +110,7 @@ int main() {
   auto sim = std::make_shared<Simulation>();
   auto renderer = std::make_shared<Renderer::SVulkan2Renderer>(false, 1000, 1000, 4);
   sim->setRenderer(renderer);
-  Renderer::SVulkan2Window window(renderer, 1024, 768, "../vulkan_shader/full");
+  Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/full");
 
   auto s0 = sim->createScene();
   s0->setTimestep(1 / 60.f);
@@ -157,6 +157,12 @@ int main() {
       window.close();
       break;
     }
+
+    if (count == 300) {
+      spdlog::get("SAPIEN")->info("Trying to resize at step 300.");
+      window.resize(400, 300);
+    }
+
   }
 
   return 0;
