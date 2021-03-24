@@ -8,7 +8,7 @@
 #define CHECK_SIZE(v)                                                                             \
   {                                                                                               \
     if ((v).size() != dof()) {                                                                    \
-      spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");                      \
+      throw std::runtime_error("Input vector size does not match DOF of articulation");           \
       return;                                                                                     \
     }                                                                                             \
   }
