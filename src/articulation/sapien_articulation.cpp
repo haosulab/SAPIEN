@@ -4,11 +4,12 @@
 #include "sapien_scene.h"
 #include <numeric>
 #include <spdlog/spdlog.h>
+#include <stdexcept>
 
 #define CHECK_SIZE(v)                                                                             \
   {                                                                                               \
     if ((v).size() != dof()) {                                                                    \
-      spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");       \
+      throw std::runtime_error("Input vector size does not match DOF of articulation");           \
       return;                                                                                     \
     }                                                                                             \
   }
@@ -288,7 +289,7 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
 
 std::vector<physx::PxReal> SArticulation::computeForwardDynamics(const std::vector<PxReal> &qf) {
   if (qf.size() != dof()) {
-    spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");
+    throw std::runtime_error("Input vector size does not match DOF of articulation");
     std::vector(dof(), 0);
   }
 
@@ -306,7 +307,7 @@ std::vector<physx::PxReal> SArticulation::computeForwardDynamics(const std::vect
 
 std::vector<physx::PxReal> SArticulation::computeInverseDynamics(const std::vector<PxReal> &qacc) {
   if (qacc.size() != dof()) {
-    spdlog::get("SAPIEN")->error("Input vector size does not match DOF of articulation");
+    throw std::runtime_error("Input vector size does not match DOF of articulation");
     std::vector(dof(), 0);
   }
 
@@ -469,9 +470,9 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
                          + nlinks * 12 // link size
                          + 19          // root size
   ) {
-    spdlog::get("SAPIEN")->error(
-        "Failed to unpack articulation data: {} numbers expected but {} provided",
-        ndof * 4 + nlinks * 12 + 19, data.size());
+    throw std::runtime_error(
+        "Failed to unpack articulation data: " + std::to_string(ndof * 4 + nlinks * 12 + 19) +
+        " numbers expected but " + std::to_string(data.size()) + " provided");
     return;
   }
 
