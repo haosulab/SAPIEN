@@ -63,7 +63,9 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
                                            const physx::PxVec3 &scale) {
   auto model = mParentRenderer->mContext->getResourceManager().CreateModelFromFile(meshFile);
   std::vector<svulkan2::scene::Object *> objects2;
-  objects2.push_back(&mScene->addObject(model));
+  auto &obj = mScene->addObject(model);
+  obj.setScale({scale.x, scale.y, scale.z});
+  objects2.push_back(&obj);
   mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(this, objects2));
   return mBodies.back().get();
 }
