@@ -64,16 +64,27 @@ std::vector<int> SVulkan2Camera::getObjSegmentation() {
                            "get{Uint32/Uint8/Float}Texture(\"textureName\") instead.");
 }
 
+void SVulkan2Camera:: waitForFence() {
+  auto result = mScene->getParentRenderer()->mContext->getDevice().waitForFences(
+      mFence.get(), VK_TRUE, UINT64_MAX);
+  if (result != vk::Result::eSuccess) {
+    throw std::runtime_error("take picture failed: wait for fence failed");
+  }
+}
+
 std::tuple<std::vector<float>, std::array<uint32_t, 3>>
 SVulkan2Camera::getFloatTexture(std::string const &textureName) {
+  waitForFence();
   return mRenderer->download<float>(textureName);
 }
 std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>
 SVulkan2Camera::getUint32Texture(std::string const &textureName) {
+  waitForFence();
   return mRenderer->download<uint32_t>(textureName);
 }
 std::tuple<std::vector<uint8_t>, std::array<uint32_t, 3>>
 SVulkan2Camera::getUint8Texture(std::string const &textureName) {
+  waitForFence();
   return mRenderer->download<uint8_t>(textureName);
 }
 
