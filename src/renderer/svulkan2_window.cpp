@@ -55,7 +55,7 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
   config->colorFormat = vk::Format::eR32G32B32A32Sfloat;
   mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(*mRenderer->mContext, config);
 
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+  // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   mWindow = renderer->mContext->createWindow(width, height);
   mWindow->initImgui();
   renderer->mContext->getDevice().waitIdle();
@@ -105,7 +105,7 @@ std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
 void SVulkan2Window::rebuild() {
   mRenderer->mContext->getDevice().waitIdle();
   do {
-    glfwGetWindowSize(mWindow->getGLFWWindow(), &mViewportWidth, &mViewportHeight);
+    glfwGetFramebufferSize(mWindow->getGLFWWindow(), &mViewportWidth, &mViewportHeight);
   } while (!mWindow->updateSize(mViewportWidth, mViewportHeight));
   mSceneRenderSemaphore = mRenderer->mContext->getDevice().createSemaphoreUnique({});
   mSceneRenderFence =

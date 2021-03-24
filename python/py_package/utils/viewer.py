@@ -150,6 +150,7 @@ class Viewer(object):
         )
 
         self.axes = None
+        self.axes_scale = 0.3
         self.selected_actor = None
         self.focused_actor = None
         self.paused = False
@@ -230,6 +231,12 @@ class Viewer(object):
                     .Label("Coordinate Axes")
                     .Checked(True)
                     .Callback(lambda p: self.toggle_axes(p.checked)),
+                    R.UISliderFloat()
+                    .Label("Axes Scale")
+                    .Min(0)
+                    .Max(1)
+                    .Value(self.axes_scale)
+                    .Callback(lambda p: self.update_axes_scale(p.value)),
                     R.UISliderFloat()
                     .Label("Opacity")
                     .Min(0)
@@ -335,6 +342,108 @@ class Viewer(object):
                 R.UIDisplayText().Text("Collision"),
             ),
         )
+
+        shape_section = R.UISection().Label("Collision Shapes")
+        self.actor_window.append(shape_section)
+        shapes = actor.get_collision_shapes()
+        for shape_idx, shape in enumerate(shapes):
+            c0, c1, c2, c3 = shape.get_collision_groups()
+            shape_pose = shape.get_local_pose()
+            mat = shape.get_physical_material()
+
+            shape_info = (
+                R.UITreeNode()
+                .Label("{}##{}".format(shape.type, shape_idx))
+                .append(
+                    R.UIDisplayText().Text(
+                        "Contact offset: {:.3g}".format(shape.contact_offset)
+                    ),
+                    R.UIDisplayText().Text(
+                        "Rest offset: {:.3g}".format(shape.rest_offset)
+                    ),
+                    R.UIDisplayText().Text(
+                        "Patch radius: {:.3g}".format(shape.patch_radius)
+                    ),
+                    R.UIDisplayText().Text(
+                        "Min path radius: {:.3g}".format(shape.min_patch_radius)
+                    ),
+                    R.UICheckbox().Label("Is trigger").Checked(shape.is_trigger),
+                    R.UIDisplayText().Text(
+                        "Static friction: {:.3g}".format(mat.get_static_friction())
+                    ),
+                    R.UIDisplayText().Text(
+                        "Dynamic friction: {:.3g}".format(mat.get_dynamic_friction())
+                    ),
+                    R.UIDisplayText().Text(
+                        "Restitution: {:.3g}".format(mat.get_restitution())
+                    ),
+                    R.UIDisplayText().Text("Collision groups:"),
+                    R.UIDisplayText().Text("  0x{:08x}  0x{:08x}".format(c0, c1)),
+                    R.UIDisplayText().Text("  0x{:08x}  0x{:08x}".format(c2, c3)),
+                    R.UIDisplayText().Text("Local position"),
+                    R.UIInputFloat()
+                    .Label("x##actorpx")
+                    .Value(shape_pose.p[0])
+                    .ReadOnly(True),
+                    R.UIInputFloat()
+                    .Label("y##actorpy")
+                    .Value(shape_pose.p[1])
+                    .ReadOnly(True),
+                    R.UIInputFloat()
+                    .Label("z##actorpz")
+                    .Value(shape_pose.p[2])
+                    .ReadOnly(True),
+                    R.UIDisplayText().Text("Local rotation"),
+                    R.UIInputFloat()
+                    .Label("w##actorqw")
+                    .Value(shape_pose.q[0])
+                    .ReadOnly(True),
+                    R.UIInputFloat()
+                    .Label("x##actorqx")
+                    .Value(shape_pose.q[1])
+                    .ReadOnly(True),
+                    R.UIInputFloat()
+                    .Label("y##actorqy")
+                    .Value(shape_pose.q[2])
+                    .ReadOnly(True),
+                    R.UIInputFloat()
+                    .Label("z##actorqz")
+                    .Value(shape_pose.q[3])
+                    .ReadOnly(True),
+                )
+            )
+
+            shape_section.append(shape_info)
+
+            if shape.type == "sphere":
+                shape_info.append(
+                    R.UIDisplayText().Text(
+                        "Sphere radius: {:.3g}".format(shape.geometry.radius)
+                    )
+                )
+            elif shape.type == "capsule":
+                shape_info.append(
+                    R.UIDisplayText().Text(
+                        "Capsule radius: {:.3g}".format(shape.geometry.radius)
+                    ),
+                    R.UIDisplayText().Text(
+                        "Capsule half length: {:.3g}".format(shape.geometry.half_length)
+                    ),
+                )
+            elif shape.type == "box":
+                x, y, z = shape.geometry.half_lengths
+                shape_info.append(
+                    R.UIDisplayText().Text(
+                        "Box half lengths: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                    )
+                )
+            elif shape.type == "convex_mesh":
+                x, y, z = shape.geometry.scale
+                shape_info.append(
+                    R.UIDisplayText().Text(
+                        "Mesh scale: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                    )
+                )
 
     def build_articulation_window(self):
         self.articulation_window = R.UIWindow().Label("Articulation")
@@ -530,7 +639,7 @@ class Viewer(object):
     def toggle_axes(self, show):
         if show:
             self.axes = self.create_axes()
-            self.axes.set_scale([0.3, 0.3, 0.3])
+            self.axes.set_scale([self.axes_scale] * 3)
             if self.selected_actor:
                 self.axes.set_position(self.selected_actor.pose.p)
                 self.axes.set_rotation(self.selected_actor.pose.q)
@@ -605,10 +714,15 @@ class Viewer(object):
                 self.axes.set_position([0, 0, 0])
                 self.axes.set_rotation([0, 0, 0, 1])
 
+    def update_axes_scale(self, scale):
+        self.axes_scale = scale
+        self.update_axes()
+
     def update_axes(self):
         if self.selected_actor and self.axes:
             self.axes.set_position(self.selected_actor.pose.p)
             self.axes.set_rotation(self.selected_actor.pose.q)
+            self.axes.set_scale([self.axes_scale] * 3)
 
     def render(self):
         if self.closed:

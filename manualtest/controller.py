@@ -236,7 +236,7 @@ class Viewer(object):
                     .Min(0)
                     .Max(1)
                     .Value(self.axes_scale)
-                    .Callback(lambda p: self.update_axes_scale),
+                    .Callback(lambda p: self.update_axes_scale(p.value)),
                     R.UISliderFloat()
                     .Label("Opacity")
                     .Min(0)
