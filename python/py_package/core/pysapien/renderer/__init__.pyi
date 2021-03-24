@@ -74,7 +74,7 @@ class Object(Node):
         :type: float
         """
     @transparency.setter
-    def transparency(self) -> None:
+    def transparency(self, arg1: float) -> None:
         pass
     pass
 class Scene():

@@ -1,4 +1,5 @@
 import sapien.core.pysapien.renderer as R
+import sapien.core as sc
 from sapien.core import (
     Pose,
     VulkanRenderer,
@@ -134,6 +135,9 @@ class Viewer(object):
         self.cone = self.renderer_context.create_cone_mesh(16)
         self.capsule = self.renderer_context.create_capsule_mesh(0.1, 0.5, 16, 4)
         self.mat_red = self.renderer_context.create_material([1, 0, 0, 1], 0, 0, 0)
+        self.mat_joint_axis = self.renderer_context.create_material(
+            [1, 0, 1, 1], 0, 0, 0
+        )
         self.mat_green = self.renderer_context.create_material([0, 1, 0, 1], 0, 0, 0)
         self.mat_blue = self.renderer_context.create_material([0, 0, 1, 1], 0, 0, 0)
         self.red_cone = self.renderer_context.create_model([self.cone], [self.mat_red])
@@ -146,6 +150,9 @@ class Viewer(object):
         self.red_capsule = self.renderer_context.create_model(
             [self.capsule], [self.mat_red]
         )
+        self.joint_axis_capsule = self.renderer_context.create_model(
+            [self.capsule], [self.mat_joint_axis]
+        )
         self.green_capsule = self.renderer_context.create_model(
             [self.capsule], [self.mat_green]
         )
@@ -155,6 +162,8 @@ class Viewer(object):
 
         self.axes = None
         self.axes_scale = 0.3
+        self.joint_axis = None
+
         self.selected_actor = None
         self.focused_actor = None
         self.paused = False
@@ -624,6 +633,19 @@ class Viewer(object):
 
         return node
 
+    def create_joint_axis(self):
+        assert self.scene is not None
+        rs = self.scene.get_render_scene()
+        render_scene: R.Scene = rs._internal_scene
+
+        obj = render_scene.add_object(self.joint_axis_capsule)
+        obj.set_position([0, 0, 0])
+        obj.set_scale([5, 0.1, 0.1])
+        obj.transparency = 1
+        obj.shading_mode = 2
+
+        return obj
+
     def set_scene(self, scene: Scene):
         self.axes = None
         self.scene = scene
@@ -651,11 +673,14 @@ class Viewer(object):
             else:
                 self.axes.set_position([0, 0, 0])
                 self.axes.set_rotation([0, 0, 0, 1])
+            self.joint_axis = self.create_joint_axis()
         elif self.scene:
             rs = self.scene.get_render_scene()
             render_scene: R.Scene = rs._internal_scene
             render_scene.remove_node(self.axes)
+            render_scene.remove_node(self.joint_axis)
             self.axes = None
+            self.joint_axis = None
 
     def set_target(self, name):
         self.target_name = name
@@ -729,6 +754,30 @@ class Viewer(object):
             self.axes.set_rotation(self.selected_actor.pose.q)
             self.axes.set_scale([self.axes_scale] * 3)
 
+    def update_joint_axis(self):
+        if not self.joint_axis:
+            return
+
+        if self.selected_actor and "link" in self.selected_actor.type:
+            link: sc.LinkBase = self.selected_actor
+            j = link.get_articulation().get_joints()[link.get_index()]
+            if j.type not in ["revolute", "prismatic"]:
+                self.joint_axis.transparency = 1
+                return
+            j2c = j.get_pose_in_child_frame()
+            c2w = link.get_pose()
+            j2w = c2w * j2c
+            if j.type == "prismatic":
+                self.mat_joint_axis.set_base_color([0, 1, 1, 1])
+                j2w.set_p(c2w.p)
+            else:
+                self.mat_joint_axis.set_base_color([1, 0, 1, 1])
+            self.joint_axis.set_position(j2w.p)
+            self.joint_axis.set_rotation(j2w.q)
+            self.joint_axis.transparency = 0
+        else:
+            self.joint_axis.transparency = 1
+
     def render(self):
         if self.closed:
             return
@@ -760,6 +809,7 @@ class Viewer(object):
                 self.select_actor(actor)
 
             self.update_axes()
+            self.update_joint_axis()
 
             speed_mod = 1
             if self.window.shift:
@@ -825,5 +875,5 @@ class Viewer(object):
     def is_mouse_available(self, mx, my):
         # TODO: maintain window resolution somewhere else
         w, h = self.resolution
-        print('mousePose:', mx, my)
+        print("mousePose:", mx, my)
         return 0 <= mx < w and 0 <= my < h
