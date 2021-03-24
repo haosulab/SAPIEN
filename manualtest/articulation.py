@@ -48,7 +48,7 @@ def create_ant_builder(scene):
     l1.set_name("l1")
     l1.set_joint_name("j1")
     l1.set_joint_properties(
-        sapien.ArticulationJointType.REVOLUTE,
+        "revolute",
         [[-0.5236, 0.5236]],
         Pose([0.282, 0, 0], [0.7071068, 0, 0.7071068, 0]),
         Pose([0.141, 0, 0], [-0.7071068, 0, 0.7071068, 0]),
@@ -61,7 +61,7 @@ def create_ant_builder(scene):
     l2.set_name("l2")
     l2.set_joint_name("j2")
     l2.set_joint_properties(
-        sapien.ArticulationJointType.REVOLUTE,
+        "revolute",
         [[-0.5236, 0.5236]],
         Pose([-0.282, 0, 0], [0, -0.7071068, 0, 0.7071068]),
         Pose([0.141, 0, 0], [-0.7071068, 0, 0.7071068, 0]),
@@ -74,7 +74,7 @@ def create_ant_builder(scene):
     l3.set_name("l3")
     l3.set_joint_name("j3")
     l3.set_joint_properties(
-        sapien.ArticulationJointType.REVOLUTE,
+        "revolute",
         [[-0.5236, 0.5236]],
         Pose([0, 0.282, 0], [0.5, -0.5, 0.5, 0.5]),
         Pose([0.141, 0, 0], [0.7071068, 0, -0.7071068, 0]),
@@ -87,7 +87,7 @@ def create_ant_builder(scene):
     l4.set_name("l4")
     l4.set_joint_name("j4")
     l4.set_joint_properties(
-        sapien.ArticulationJointType.REVOLUTE,
+        "revolute",
         [[-0.5236, 0.5236]],
         Pose([0, -0.282, 0], [0.5, 0.5, 0.5, -0.5]),
         Pose([0.141, 0, 0], [0.7071068, 0, -0.7071068, 0]),
@@ -100,7 +100,7 @@ def create_ant_builder(scene):
     f1.set_name("f1")
     f1.set_joint_name("j11")
     f1.set_joint_properties(
-        sapien.ArticulationJointType.REVOLUTE,
+        "revolute",
         [[0.5236, 1.222]],
         Pose([-0.141, 0, 0], [0, 0.7071068, 0.7071068, 0]),
         Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
@@ -113,7 +113,7 @@ def create_ant_builder(scene):
     f2.set_name("f2")
     f2.set_joint_name("j21")
     f2.set_joint_properties(
-        sapien.ArticulationJointType.REVOLUTE,
+        "revolute",
         [[0.5236, 1.222]],
         Pose([-0.141, 0, 0], [0, 0.7071068, 0.7071068, 0]),
         Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
@@ -126,7 +126,7 @@ def create_ant_builder(scene):
     f3.set_name("f3")
     f3.set_joint_name("j31")
     f3.set_joint_properties(
-        sapien.ArticulationJointType.REVOLUTE,
+        "revolute",
         [[0.5236, 1.222]],
         Pose([-0.141, 0, 0], [0, 0.7071068, 0.7071068, 0]),
         Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
@@ -139,7 +139,7 @@ def create_ant_builder(scene):
     f4.set_name("f4")
     f4.set_joint_name("j41")
     f4.set_joint_properties(
-        sapien.ArticulationJointType.REVOLUTE,
+        "revolute",
         [[0.5236, 1.222]],
         Pose([-0.141, 0, 0], [0, 0.7071068, 0.7071068, 0]),
         Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),

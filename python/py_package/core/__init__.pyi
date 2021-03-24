@@ -5,13 +5,10 @@ from sapien.core.pysapien import ActorBase
 from sapien.core.pysapien import ActorBuilder
 from sapien.core.pysapien import ActorDynamicBase
 from sapien.core.pysapien import ActorStatic
-from sapien.core.pysapien import ActorType
 from sapien.core.pysapien import Articulation
 from sapien.core.pysapien import ArticulationBase
 from sapien.core.pysapien import ArticulationBuilder
 from sapien.core.pysapien import ArticulationDrivable
-from sapien.core.pysapien import ArticulationJointType
-from sapien.core.pysapien import ArticulationType
 from sapien.core.pysapien import BoxGeometry
 from sapien.core.pysapien import CameraSpec
 from sapien.core.pysapien import CapsuleGeometry
@@ -56,7 +53,6 @@ from sapien.core.pysapien import RenderShape
 from sapien.core.pysapien import Scene
 from sapien.core.pysapien import SceneConfig
 from sapien.core.pysapien import ShapeRecord
-from sapien.core.pysapien import SolverType
 from sapien.core.pysapien import SphereGeometry
 from sapien.core.pysapien import Subscription
 from sapien.core.pysapien import Trigger
@@ -69,7 +65,6 @@ from sapien.core.pysapien import VulkanScene
 from sapien.core.pysapien import VulkanWindow
 import os
 import pkg_resources
-import sapien.core.pysapien
 import sapien.core.pysapien.renderer
 import sys
 
@@ -79,13 +74,10 @@ __all__ = [
     "ActorBuilder",
     "ActorDynamicBase",
     "ActorStatic",
-    "ActorType",
     "Articulation",
     "ArticulationBase",
     "ArticulationBuilder",
     "ArticulationDrivable",
-    "ArticulationJointType",
-    "ArticulationType",
     "BoxGeometry",
     "CameraSpec",
     "CapsuleGeometry",
@@ -94,10 +86,8 @@ __all__ = [
     "Contact",
     "ContactPoint",
     "ConvexMeshGeometry",
-    "DYNAMIC",
     "Drive",
     "Engine",
-    "FIX",
     "ICamera",
     "IPxrRenderer",
     "ISensor",
@@ -105,8 +95,6 @@ __all__ = [
     "Joint",
     "JointBase",
     "JointRecord",
-    "KINEMATIC",
-    "KINEMATIC_LINK",
     "KinematicArticulation",
     "KinematicJoint",
     "KinematicJointFixed",
@@ -114,7 +102,6 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
-    "LINK",
     "Link",
     "LinkBase",
     "LinkBuilder",
@@ -123,29 +110,21 @@ __all__ = [
     "OptifuserController",
     "OptifuserMaterial",
     "OptifuserRenderer",
-    "PGS",
-    "PRISMATIC",
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
     "Pose",
-    "REVOLUTE",
     "RenderBody",
     "RenderGeometry",
     "RenderMaterial",
     "RenderScene",
     "RenderShape",
-    "SPHERICAL",
-    "STATIC",
     "Scene",
     "SceneConfig",
     "ShapeRecord",
-    "SolverType",
     "SphereGeometry",
     "Subscription",
-    "TGS",
     "Trigger",
-    "UNDEFINED",
     "URDFLoader",
     "VisualRecord",
     "VulkanCamera",
@@ -164,18 +143,6 @@ __all__ = [
 ]
 
 
-DYNAMIC: sapien.core.pysapien.ArticulationType # value = <ArticulationType.DYNAMIC: 0>
-FIX: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.FIX: 3>
-KINEMATIC: sapien.core.pysapien.ArticulationType # value = <ArticulationType.KINEMATIC: 1>
-KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = <ActorType.KINEMATIC_LINK: 4>
-LINK: sapien.core.pysapien.ActorType # value = <ActorType.LINK: 3>
-PGS: sapien.core.pysapien.SolverType # value = <SolverType.PGS: 0>
-PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.PRISMATIC: 0>
-REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.REVOLUTE: 1>
-SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.SPHERICAL: 2>
-STATIC: sapien.core.pysapien.ActorType # value = <ActorType.STATIC: 0>
-TGS: sapien.core.pysapien.SolverType # value = <SolverType.TGS: 1>
-UNDEFINED: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.UNDEFINED: 4>
 __GL_SHADER_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/glsl_shader'
 __GL_VERSION_DICT = {3: '130', 4: '410'}
 __PTX_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/ptx'

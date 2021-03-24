@@ -136,13 +136,6 @@ void buildSapien(py::module &m) {
   // auto PyShape = py::class_<SShape>(m, "CollisionShape");
   auto PyCollisionShape = py::class_<SCollisionShape>(m, "CollisionShape");
 
-  // enums
-  auto PySolverType = py::enum_<PxSolverType::Enum>(m, "SolverType");
-  auto PyActorType = py::enum_<EActorType>(m, "ActorType");
-  auto PyArticulationJointType =
-      py::enum_<PxArticulationJointType::Enum>(m, "ArticulationJointType");
-  auto PyArticulationType = py::enum_<EArticulationType>(m, "ArticulationType");
-
   auto PyURDFLoader = py::class_<URDF::URDFLoader>(m, "URDFLoader");
   auto PyPhysicalMaterial =
       py::class_<SPhysicalMaterial, std::shared_ptr<SPhysicalMaterial>>(m, "PhysicalMaterial");
@@ -224,14 +217,6 @@ void buildSapien(py::module &m) {
   auto PyVulkanScene = py::class_<Renderer::SVulkan2Scene, Renderer::IPxrScene>(m, "VulkanScene");
 
   //======== Internal ========//
-  PySolverType.value("PGS", PxSolverType::ePGS).value("TGS", PxSolverType::eTGS).export_values();
-
-  PyArticulationJointType.value("PRISMATIC", PxArticulationJointType::ePRISMATIC)
-      .value("REVOLUTE", PxArticulationJointType::eREVOLUTE)
-      .value("SPHERICAL", PxArticulationJointType::eSPHERICAL)
-      .value("FIX", PxArticulationJointType::eFIX)
-      .value("UNDEFINED", PxArticulationJointType::eUNDEFINED)
-      .export_values();
 
   PyPhysicalMaterial.def("get_static_friction", &SPhysicalMaterial::getStaticFriction)
       .def("get_dynamic_friction", &SPhysicalMaterial::getDynamicFriction)
@@ -707,14 +692,6 @@ void buildSapien(py::module &m) {
       .def("destroy", &SDrive::destroy);
 
   //======== Actor ========//
-
-  PyActorType.value("STATIC", EActorType::STATIC)
-      .value("KINEMATIC", EActorType::KINEMATIC)
-      .value("DYNAMIC", EActorType::DYNAMIC)
-      .value("LINK", EActorType::ARTICULATION_LINK)
-      .value("KINEMATIC_LINK", EActorType::KINEMATIC_ARTICULATION_LINK)
-      .export_values();
-
   PyActorBase.def_property("name", &SActorBase::getName, &SActorBase::setName)
       .def("__repr__",
            [](SActorBase &actor) {
@@ -826,7 +803,21 @@ void buildSapien(py::module &m) {
 
   //======== Joint ========//
   PyJointBase.def_property("name", &SJointBase::getName, &SJointBase::setName)
-      .def_property_readonly("type", &SJointBase::getType)
+      .def_property_readonly("type",
+                             [](SJointBase &joint) {
+                               switch (joint.getType()) {
+                               case physx::PxArticulationJointType::eFIX:
+                                 return "fixed";
+                               case physx::PxArticulationJointType::eREVOLUTE:
+                                 return "revolute";
+                               case physx::PxArticulationJointType::ePRISMATIC:
+                                 return "prismatic";
+                               case physx::PxArticulationJointType::eUNDEFINED:
+                                 return "unknown";
+                               default:
+                                 return "unknown";
+                               }
+                             })
       .def("__repr__ ",
            [](SJointBase &joint) {
              std::ostringstream oss;
@@ -896,11 +887,6 @@ void buildSapien(py::module &m) {
       .def("get_global_pose", &SJoint::getGlobalPose);
 
   //======== End Joint ========//
-
-  //======== Articulation ========//
-  PyArticulationType.value("DYNAMIC", EArticulationType::DYNAMIC)
-      .value("KINEMATIC", EArticulationType::KINEMATIC)
-      .export_values();
 
   PyArticulationBase.def_property("name", &SArticulationBase::getName, &SArticulationBase::setName)
       .def("get_name", &SArticulationBase::getName)
@@ -1302,9 +1288,9 @@ void buildSapien(py::module &m) {
       .def("set_joint_name", &LinkBuilder::setJointName)
       .def(
           "set_joint_properties",
-          [](LinkBuilder &b, PxArticulationJointType::Enum jointType,
-             py::array_t<PxReal> const &limits, PxTransform const &parentPose,
-             PxTransform const &childPose, PxReal friction, PxReal damping) {
+          [](LinkBuilder &b, std::string const &jointType, py::array_t<PxReal> const &limits,
+             PxTransform const &parentPose, PxTransform const &childPose, PxReal friction,
+             PxReal damping) {
             std::vector<std::array<PxReal, 2>> l;
             if (limits.ndim() == 2) {
               if (limits.shape(1) != 2) {
@@ -1316,7 +1302,20 @@ void buildSapien(py::module &m) {
             } else if (limits.ndim() != 1) {
               throw std::runtime_error("Joint limit must be 2D array");
             }
-            b.setJointProperties(jointType, l, parentPose, childPose, friction, damping);
+
+            PxArticulationJointType::Enum t;
+            if (jointType == "revolute" || jointType == "hinge") {
+              t = PxArticulationJointType::Enum::eREVOLUTE;
+            } else if (jointType == "prismatic" || jointType == "slider") {
+              t = PxArticulationJointType::Enum::ePRISMATIC;
+            } else if (jointType == "fixed") {
+              t = PxArticulationJointType::Enum::eFIX;
+            } else {
+              throw std::runtime_error("Unsupported joint type: " + jointType +
+                                       "; supported types are: revolute, prismatic, fixed.");
+            }
+
+            b.setJointProperties(t, l, parentPose, childPose, friction, damping);
           },
           py::arg("joint_type"), py::arg("limits"),
           py::arg("parent_pose") = PxTransform(PxIdentity),
@@ -1336,9 +1335,9 @@ void buildSapien(py::module &m) {
                                case physx::PxArticulationJointType::ePRISMATIC:
                                  return "prismatic";
                                case physx::PxArticulationJointType::eUNDEFINED:
-                                 return "undefined";
+                                 return "unknown";
                                default:
-                                 return "undefined";
+                                 return "unknown";
                                }
                              })
       .def_readonly("parent_pose", &LinkBuilder::JointRecord::parentPose)

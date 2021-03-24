@@ -11,13 +11,10 @@ __all__ = [
     "ActorBuilder",
     "ActorDynamicBase",
     "ActorStatic",
-    "ActorType",
     "Articulation",
     "ArticulationBase",
     "ArticulationBuilder",
     "ArticulationDrivable",
-    "ArticulationJointType",
-    "ArticulationType",
     "BoxGeometry",
     "CameraSpec",
     "CapsuleGeometry",
@@ -26,10 +23,8 @@ __all__ = [
     "Contact",
     "ContactPoint",
     "ConvexMeshGeometry",
-    "DYNAMIC",
     "Drive",
     "Engine",
-    "FIX",
     "ICamera",
     "IPxrRenderer",
     "ISensor",
@@ -37,8 +32,6 @@ __all__ = [
     "Joint",
     "JointBase",
     "JointRecord",
-    "KINEMATIC",
-    "KINEMATIC_LINK",
     "KinematicArticulation",
     "KinematicJoint",
     "KinematicJointFixed",
@@ -46,7 +39,6 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
-    "LINK",
     "Link",
     "LinkBase",
     "LinkBuilder",
@@ -55,29 +47,21 @@ __all__ = [
     "OptifuserController",
     "OptifuserMaterial",
     "OptifuserRenderer",
-    "PGS",
-    "PRISMATIC",
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
     "Pose",
-    "REVOLUTE",
     "RenderBody",
     "RenderGeometry",
     "RenderMaterial",
     "RenderScene",
     "RenderShape",
-    "SPHERICAL",
-    "STATIC",
     "Scene",
     "SceneConfig",
     "ShapeRecord",
-    "SolverType",
     "SphereGeometry",
     "Subscription",
-    "TGS",
     "Trigger",
-    "UNDEFINED",
     "URDFLoader",
     "VisualRecord",
     "VulkanCamera",
@@ -221,46 +205,6 @@ class ActorStatic(ActorBase):
     def set_pose(self, pose: Pose) -> None: ...
     def unpack(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
     pass
-class ActorType():
-    """
-    Members:
-
-      STATIC
-
-      KINEMATIC
-
-      DYNAMIC
-
-      LINK
-
-      KINEMATIC_LINK
-    """
-    def __eq__(self, other: object) -> bool: ...
-    def __getstate__(self) -> int: ...
-    def __hash__(self) -> int: ...
-    def __index__(self) -> int: ...
-    def __init__(self, value: int) -> None: ...
-    def __int__(self) -> int: ...
-    def __ne__(self, other: object) -> bool: ...
-    def __repr__(self) -> str: ...
-    def __setstate__(self, state: int) -> None: ...
-    @property
-    def name(self) -> str:
-        """
-        :type: str
-        """
-    @property
-    def value(self) -> int:
-        """
-        :type: int
-        """
-    DYNAMIC: sapien.core.pysapien.ActorType # value = <ActorType.DYNAMIC: 2>
-    KINEMATIC: sapien.core.pysapien.ActorType # value = <ActorType.KINEMATIC: 1>
-    KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = <ActorType.KINEMATIC_LINK: 4>
-    LINK: sapien.core.pysapien.ActorType # value = <ActorType.LINK: 3>
-    STATIC: sapien.core.pysapien.ActorType # value = <ActorType.STATIC: 0>
-    __members__: dict # value = {'STATIC': <ActorType.STATIC: 0>, 'KINEMATIC': <ActorType.KINEMATIC: 1>, 'DYNAMIC': <ActorType.DYNAMIC: 2>, 'LINK': <ActorType.LINK: 3>, 'KINEMATIC_LINK': <ActorType.KINEMATIC_LINK: 4>}
-    pass
 class ArticulationBase():
     def create_pinocchio_model(self) -> PinocchioModel: ...
     def get_joints(self) -> typing.List[JointBase]: ...
@@ -341,77 +285,6 @@ class Articulation(ArticulationDrivable, ArticulationBase):
     def set_root_angular_velocity(self, vel: numpy.ndarray[numpy.float32]) -> None: ...
     def set_root_velocity(self, vel: numpy.ndarray[numpy.float32]) -> None: ...
     def unpack(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
-    pass
-class ArticulationJointType():
-    """
-    Members:
-
-      PRISMATIC
-
-      REVOLUTE
-
-      SPHERICAL
-
-      FIX
-
-      UNDEFINED
-    """
-    def __eq__(self, other: object) -> bool: ...
-    def __getstate__(self) -> int: ...
-    def __hash__(self) -> int: ...
-    def __index__(self) -> int: ...
-    def __init__(self, value: int) -> None: ...
-    def __int__(self) -> int: ...
-    def __ne__(self, other: object) -> bool: ...
-    def __repr__(self) -> str: ...
-    def __setstate__(self, state: int) -> None: ...
-    @property
-    def name(self) -> str:
-        """
-        :type: str
-        """
-    @property
-    def value(self) -> int:
-        """
-        :type: int
-        """
-    FIX: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.FIX: 3>
-    PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.PRISMATIC: 0>
-    REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.REVOLUTE: 1>
-    SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.SPHERICAL: 2>
-    UNDEFINED: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.UNDEFINED: 4>
-    __members__: dict # value = {'PRISMATIC': <ArticulationJointType.PRISMATIC: 0>, 'REVOLUTE': <ArticulationJointType.REVOLUTE: 1>, 'SPHERICAL': <ArticulationJointType.SPHERICAL: 2>, 'FIX': <ArticulationJointType.FIX: 3>, 'UNDEFINED': <ArticulationJointType.UNDEFINED: 4>}
-    pass
-class ArticulationType():
-    """
-    Members:
-
-      DYNAMIC
-
-      KINEMATIC
-    """
-    def __eq__(self, other: object) -> bool: ...
-    def __getstate__(self) -> int: ...
-    def __hash__(self) -> int: ...
-    def __index__(self) -> int: ...
-    def __init__(self, value: int) -> None: ...
-    def __int__(self) -> int: ...
-    def __ne__(self, other: object) -> bool: ...
-    def __repr__(self) -> str: ...
-    def __setstate__(self, state: int) -> None: ...
-    @property
-    def name(self) -> str:
-        """
-        :type: str
-        """
-    @property
-    def value(self) -> int:
-        """
-        :type: int
-        """
-    DYNAMIC: sapien.core.pysapien.ArticulationType # value = <ArticulationType.DYNAMIC: 0>
-    KINEMATIC: sapien.core.pysapien.ArticulationType # value = <ArticulationType.KINEMATIC: 1>
-    __members__: dict # value = {'DYNAMIC': <ArticulationType.DYNAMIC: 0>, 'KINEMATIC': <ArticulationType.KINEMATIC: 1>}
     pass
 class CollisionGeometry():
     pass
@@ -693,9 +566,9 @@ class JointBase():
     def name(self, arg1: str) -> None:
         pass
     @property
-    def type(self) -> ArticulationJointType:
+    def type(self) -> str:
         """
-        :type: ArticulationJointType
+        :type: str
         """
     pass
 class Joint(JointBase):
@@ -797,7 +670,7 @@ class LinkBuilder(ActorBuilder):
     def get_name(self) -> str: ...
     def get_parent(self) -> int: ...
     def set_joint_name(self, arg0: str) -> None: ...
-    def set_joint_properties(self, joint_type: ArticulationJointType, limits: numpy.ndarray[numpy.float32], parent_pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), child_pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), friction: float = 0, damping: float = 0) -> None: ...
+    def set_joint_properties(self, joint_type: str, limits: numpy.ndarray[numpy.float32], parent_pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), child_pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), friction: float = 0, damping: float = 0) -> None: ...
     def set_name(self, arg0: str) -> None: ...
     def set_parent(self, arg0: int) -> None: ...
     pass
@@ -1222,37 +1095,6 @@ class ShapeRecord():
         :type: numpy.ndarray[numpy.float32]
         """
     pass
-class SolverType():
-    """
-    Members:
-
-      PGS
-
-      TGS
-    """
-    def __eq__(self, other: object) -> bool: ...
-    def __getstate__(self) -> int: ...
-    def __hash__(self) -> int: ...
-    def __index__(self) -> int: ...
-    def __init__(self, value: int) -> None: ...
-    def __int__(self) -> int: ...
-    def __ne__(self, other: object) -> bool: ...
-    def __repr__(self) -> str: ...
-    def __setstate__(self, state: int) -> None: ...
-    @property
-    def name(self) -> str:
-        """
-        :type: str
-        """
-    @property
-    def value(self) -> int:
-        """
-        :type: int
-        """
-    PGS: sapien.core.pysapien.SolverType # value = <SolverType.PGS: 0>
-    TGS: sapien.core.pysapien.SolverType # value = <SolverType.TGS: 1>
-    __members__: dict # value = {'PGS': <SolverType.PGS: 0>, 'TGS': <SolverType.TGS: 1>}
-    pass
 class SphereGeometry(CollisionGeometry):
     @property
     def radius(self) -> float:
@@ -1476,15 +1318,3 @@ class VulkanWindow():
         :type: typing.List[str]
         """
     pass
-DYNAMIC: sapien.core.pysapien.ArticulationType # value = <ArticulationType.DYNAMIC: 0>
-FIX: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.FIX: 3>
-KINEMATIC: sapien.core.pysapien.ArticulationType # value = <ArticulationType.KINEMATIC: 1>
-KINEMATIC_LINK: sapien.core.pysapien.ActorType # value = <ActorType.KINEMATIC_LINK: 4>
-LINK: sapien.core.pysapien.ActorType # value = <ActorType.LINK: 3>
-PGS: sapien.core.pysapien.SolverType # value = <SolverType.PGS: 0>
-PRISMATIC: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.PRISMATIC: 0>
-REVOLUTE: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.REVOLUTE: 1>
-SPHERICAL: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.SPHERICAL: 2>
-STATIC: sapien.core.pysapien.ActorType # value = <ActorType.STATIC: 0>
-TGS: sapien.core.pysapien.SolverType # value = <SolverType.TGS: 1>
-UNDEFINED: sapien.core.pysapien.ArticulationJointType # value = <ArticulationJointType.UNDEFINED: 4>
