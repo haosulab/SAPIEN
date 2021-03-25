@@ -800,6 +800,7 @@ class Viewer(object):
             if self.window.mouse_click(0):
                 mx, my = self.window.mouse_position
                 if not self.is_mouse_available(mx, my):
+                    print('[W] Mouse not available')
                     continue
 
                 pixel = self.window.download_uint32_target_pixel(
@@ -873,7 +874,7 @@ class Viewer(object):
                 break
 
     def is_mouse_available(self, mx, my):
-        # TODO: maintain window resolution somewhere else
-        w, h = self.resolution
-        print("mousePose:", mx, my)
+        w, h = self.window.size
+        print("[I] actualWindowSize:", w, h)
+        print("[I] mousePose:", mx, my)
         return 0 <= mx < w and 0 <= my < h

@@ -344,6 +344,14 @@ std::array<float, 2> SVulkan2Window::getMouseWheelDelta() {
   return {x, y};
 }
 
+std::array<float, 2> SVulkan2Window::getActualWindowSize() {
+  float scale = mWindow->getContentScale();
+  return {
+      static_cast<float>(mViewportWidth) / scale,
+      static_cast<float>(mViewportHeight) / scale
+  };
+}
+
 float SVulkan2Window::getFPS() { return ImGui::GetIO().Framerate; }
 
 } // namespace Renderer
