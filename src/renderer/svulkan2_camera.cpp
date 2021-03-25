@@ -65,11 +65,12 @@ std::vector<int> SVulkan2Camera::getObjSegmentation() {
 }
 
 void SVulkan2Camera:: waitForFence() {
-  auto result = mScene->getParentRenderer()->mContext->getDevice().waitForFences(
-      mFence.get(), VK_TRUE, UINT64_MAX);
-  if (result != vk::Result::eSuccess) {
-    throw std::runtime_error("take picture failed: wait for fence failed");
-  }
+  // auto result = mScene->getParentRenderer()->mContext->getDevice().waitForFences(
+  //     mFence.get(), VK_TRUE, UINT64_MAX);
+  mScene->getParentRenderer()->mContext->getDevice().waitIdle();
+  // if (result != vk::Result::eSuccess) {
+  //   throw std::runtime_error("take picture failed: wait for fence failed");
+  // }
 }
 
 std::tuple<std::vector<float>, std::array<uint32_t, 3>>

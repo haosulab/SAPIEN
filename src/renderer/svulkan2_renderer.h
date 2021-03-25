@@ -12,8 +12,11 @@ class SVulkan2Rigidbody;
 class SVulkan2Camera;
 class SVulkan2Scene;
 
-extern std::string gDefaultShaderDirectory;
-void setDefaultShaderDirectory(std::string const &dir);
+extern std::string gDefaultViewerShaderDirectory;
+void setDefaultViewerShaderDirectory(std::string const &dir);
+
+extern std::string gDefaultCameraShaderDirectory;
+void setDefaultCameraShaderDirectory(std::string const &dir);
 
 class SVulkan2Material : public IPxrMaterial {
   std::shared_ptr<svulkan2::resource::SVMetallicMaterial> mMaterial;

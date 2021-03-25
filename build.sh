@@ -2,9 +2,11 @@
 
 VERSION=""
 DEBUG=false
+PROFILE=false
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --debug) DEBUG=true;;
+        --profile) PROFILE=true;;
         35) VERSION="35";;
         36) VERSION="36";;
         37) VERSION="37";;
@@ -15,8 +17,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 [ -z $VERSION ] && echo "invalid version" && exit || echo "Compile for Python ${VERSION}"
-[ $DEBUG == true ] && echo "Debug Mode" || echo "Release Mode"
-
+[ $DEBUG == true ] && echo "Debug Mode" || [ $PROFILE == true ] && echo "Profile Mode"  || echo "Release Mode"
 
 function build_manylinux14_wheel() {
   PY_VERSION=$1
@@ -45,7 +46,9 @@ function build_manylinux14_wheel() {
   echo "Using include path ${INCLUDE_PATH}"
 
   export CPLUS_INCLUDE_PATH=$INCLUDE_PATH
-  [ $DEBUG == true ] && COMMAND="${BIN} setup.py bdist_wheel --debug" || COMMAND="${BIN} setup.py bdist_wheel"
+  COMMAND="${BIN} setup.py bdist_wheel"
+  [ $PROFILE == true ] && COMMAND="${BIN} setup.py bdist_wheel --profile"
+  [ $DEBUG == true ] && COMMAND="${BIN} setup.py bdist_wheel --debug"
   echo "Running command ${COMMNAD}"
   eval "$COMMAND"
 

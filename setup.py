@@ -15,8 +15,8 @@ from distutils.version import LooseVersion
 parser = argparse.ArgumentParser()
 parser.add_argument('--optix-home', type=str, default=None)
 parser.add_argument('--cuda-include-path', type=str, default=None)
-parser.add_argument('--profile', action='store_true')
 parser.add_argument('--debug', action='store_true')
+parser.add_argument('--profile_render', action='store_true')
 args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
 
@@ -56,6 +56,8 @@ class CMakeBuild(build_ext):
         else:
             cfg = 'Release'
         build_args = ['--config', cfg]
+        if args.profile_render:
+            cmake_args += ['-DSVULKAN2_PROFILE=ON']
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
         build_args += ['--', '-j8']
