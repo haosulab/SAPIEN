@@ -1540,7 +1540,7 @@ void buildSapien(py::module &m) {
            py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>())
       .def("resize", &Renderer::SVulkan2Window::resize, py::arg("width"), py::arg("height"))
       .def_property_readonly("fps", &Renderer::SVulkan2Window::getFPS)
-      .def_property_readonly("size", &Renderer::SVulkan2Window::getActualWindowSize)
+      .def_property_readonly("size", &Renderer::SVulkan2Window::getWindowSize)
 
       // Download images from window
       .def(

@@ -875,6 +875,5 @@ class Viewer(object):
 
     def is_mouse_available(self, mx, my):
         w, h = self.window.size
-        print("[I] actualWindowSize:", w, h)
-        print("[I] mousePose:", mx, my)
-        return 0 <= mx < w and 0 <= my < h
+        print(f"[I] windowSize: {w, h}; mousePose: {mx, my}")
+        return mx >= 0 and my >= 0

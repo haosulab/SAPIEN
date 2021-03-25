@@ -104,7 +104,7 @@ public:
   std::array<float, 2> getMouseDelta();
   std::array<float, 2> getMouseWheelDelta();
 
-  std::array<float, 2> getActualWindowSize();
+  std::array<int, 2> getWindowSize();
 
   float getFPS();
 
