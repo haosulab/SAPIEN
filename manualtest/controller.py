@@ -1,5 +1,4 @@
 import sapien.core.pysapien.renderer as R
-import sapien.core as sc
 from sapien.core import (
     Pose,
     VulkanRenderer,
@@ -8,6 +7,7 @@ from sapien.core import (
     ArticulationBase,
     Articulation,
     Joint,
+    LinkBase
 )
 from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector
@@ -672,7 +672,7 @@ class Viewer(object):
                 self.axes.set_rotation(self.selected_actor.pose.q)
             else:
                 self.axes.set_position([0, 0, 0])
-                self.axes.set_rotation([0, 0, 0, 1])
+                self.axes.set_rotation([1, 0, 0, 0])
             self.joint_axis = self.create_joint_axis()
         elif self.scene:
             rs = self.scene.get_render_scene()
@@ -742,7 +742,7 @@ class Viewer(object):
             self.selected_actor = None
             if self.axes:
                 self.axes.set_position([0, 0, 0])
-                self.axes.set_rotation([0, 0, 0, 1])
+                self.axes.set_rotation([1, 0, 0, 0])
 
     def update_axes_scale(self, scale):
         self.axes_scale = scale
@@ -759,7 +759,7 @@ class Viewer(object):
             return
 
         if self.selected_actor and "link" in self.selected_actor.type:
-            link: sc.LinkBase = self.selected_actor
+            link: LinkBase = self.selected_actor
             j = link.get_articulation().get_joints()[link.get_index()]
             if j.type not in ["revolute", "prismatic"]:
                 self.joint_axis.transparency = 1
@@ -800,9 +800,13 @@ class Viewer(object):
             if self.window.mouse_click(0):
                 mx, my = self.window.mouse_position
                 if not self.is_mouse_available(mx, my):
-                    print('[W] Mouse not available')
+                    print("[W] Mouse not available")
                     continue
 
+                ww, wh = self.window.size
+                tw, th = self.window.get_target_size("Segmentation")
+                mx = mx * tw / ww
+                my = my * th / wh
                 pixel = self.window.download_uint32_target_pixel(
                     "Segmentation", int(mx), int(my)
                 )

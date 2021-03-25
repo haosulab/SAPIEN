@@ -277,6 +277,11 @@ SVulkan2Window::downloadFloatTarget(std::string const &name) {
   return mSVulkanRenderer->download<float>(name);
 }
 
+std::array<uint32_t, 2> SVulkan2Window::getRenderTargetSize(std::string const &name) const {
+  auto target = mSVulkanRenderer->getRenderTarget(name);
+  return {target->getWidth(), target->getHeight()};
+}
+
 std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>
 SVulkan2Window::downloadUint32Target(std::string const &name) {
   if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR32G32B32A32Uint) {

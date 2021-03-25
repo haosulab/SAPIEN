@@ -1539,6 +1539,8 @@ void buildSapien(py::module &m) {
           },
           py::arg("scene"))
       .def_property_readonly("target_names", &Renderer::SVulkan2Window::getDisplayTargetNames)
+      .def("get_target_size", &Renderer::SVulkan2Window::getRenderTargetSize,
+                             py::arg("name"))
       .def("render", &Renderer::SVulkan2Window::render, py::arg("target_name"),
            py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>())
       .def("resize", &Renderer::SVulkan2Window::resize, py::arg("width"), py::arg("height"))
