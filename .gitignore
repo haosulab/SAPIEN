@@ -13,6 +13,10 @@ __pycache__
 /wheelhouse
 imgui.ini
 .mypy_cache
+.DS_Store
+/.idea
+/CMakeFiles
+/CMakeCache.txt
 
 /ros2_ws/log/
 /ros2_ws/install/

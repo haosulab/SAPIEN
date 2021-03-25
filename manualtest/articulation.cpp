@@ -158,9 +158,9 @@ int main() {
       break;
     }
 
-    if (count == 300) {
-      spdlog::get("SAPIEN")->info("Trying to resize at step 300.");
-      window.resize(400, 300);
+    if (count == 180) {
+      spdlog::get("SAPIEN")->info("Trying to resize at step 180.");
+      window.resize(300, 600);
     }
 
   }
