@@ -40,7 +40,10 @@ public:
 
 class Simulation : public std::enable_shared_from_this<Simulation> {
 public:
-  explicit Simulation(PxReal toleranceLength = 0.1f, PxReal toleranceSpeed = 0.2f);
+  Simulation(PxReal toleranceLength = 0.1f, PxReal toleranceSpeed = 0.2f);
+  static std::shared_ptr<Simulation> getInstance(PxReal toleranceLength = 0.1f,
+                                                 PxReal toleranceSpeed = 0.2f);
+
   ~Simulation();
 
   std::unique_ptr<SScene> createScene(SceneConfig const &config = {});

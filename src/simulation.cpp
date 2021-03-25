@@ -169,4 +169,15 @@ void Simulation::setLogLevel(std::string const &level) {
   }
 }
 
+std::shared_ptr<Simulation> Simulation::getInstance(PxReal toleranceLength,
+                                                    PxReal toleranceSpeed) {
+  static std::shared_ptr<Simulation> _instance = nullptr;
+  if (_instance) {
+    spdlog::get("SAPIEN")->warn("Only one engine is allowed per process, using the previously created engine.");
+    return _instance;
+  }
+  _instance = std::make_shared<Simulation>(toleranceLength, toleranceSpeed);
+  return _instance;
+}
+
 } // namespace sapien

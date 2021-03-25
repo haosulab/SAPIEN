@@ -540,8 +540,10 @@ void buildSapien(py::module &m) {
 
   //======== Simulation ========//
   PyEngine
-      .def(py::init<PxReal, PxReal>(), py::arg("tolerance_length") = 0.1f,
-           py::arg("tolerance_speed") = 0.2f)
+      .def(py::init([](PxReal toleranceLength, PxReal toleranceSpeed) {
+             return Simulation::getInstance(toleranceLength, toleranceSpeed);
+           }),
+           py::arg("tolerance_length") = 0.1f, py::arg("tolerance_speed") = 0.2f)
       .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig())
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
       .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
@@ -1539,8 +1541,7 @@ void buildSapien(py::module &m) {
           },
           py::arg("scene"))
       .def_property_readonly("target_names", &Renderer::SVulkan2Window::getDisplayTargetNames)
-      .def("get_target_size", &Renderer::SVulkan2Window::getRenderTargetSize,
-                             py::arg("name"))
+      .def("get_target_size", &Renderer::SVulkan2Window::getRenderTargetSize, py::arg("name"))
       .def("render", &Renderer::SVulkan2Window::render, py::arg("target_name"),
            py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>())
       .def("resize", &Renderer::SVulkan2Window::resize, py::arg("width"), py::arg("height"))
