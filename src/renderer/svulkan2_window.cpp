@@ -345,7 +345,14 @@ std::array<float, 2> SVulkan2Window::getMouseWheelDelta() {
 }
 
 std::array<float, 2> SVulkan2Window::getActualWindowSize() {
+  // FIXME:
+  //   on Linux: (mViewportWidth, mViewportHeight) is the actual window size
+  //   on macOS: should be divided by scale
+#if defined(__APPLE__)
   float scale = mWindow->getContentScale();
+#else
+  float scale = 1.f;
+#endif
   return {
       static_cast<float>(mViewportWidth) / scale,
       static_cast<float>(mViewportHeight) / scale
