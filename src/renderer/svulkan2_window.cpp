@@ -84,7 +84,10 @@ void SVulkan2Window::hide() { glfwHideWindow(mWindow->getGLFWWindow()); }
 
 void SVulkan2Window::show() { glfwShowWindow(mWindow->getGLFWWindow()); }
 
-void SVulkan2Window::setScene(SVulkan2Scene *scene) { mScene = scene; }
+void SVulkan2Window::setScene(SVulkan2Scene *scene) {
+  mScene = scene;
+  mSVulkanRenderer->setScene(*mScene->getScene());
+}
 
 void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {
   float aspect = mWindow->getHeight() == 0
@@ -191,17 +194,12 @@ void SVulkan2Window::render(std::string const &targetName,
 
   {
     // draw
-    mCommandBuffer->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-    mSVulkanRenderer->render(mCommandBuffer.get(), *mScene->getScene(), *camera);
-    mSVulkanRenderer->display(mCommandBuffer.get(), targetName, mWindow->getBackbuffer(),
-                              mWindow->getBackBufferFormat(), mWindow->getWidth(),
-                              mWindow->getHeight());
-    mCommandBuffer->end();
+    mSVulkanRenderer->render(*camera, {}, {}, {}, {});
     auto imageAcquiredSemaphore = mWindow->getImageAcquiredSemaphore();
-    vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-    vk::SubmitInfo info(1, &imageAcquiredSemaphore, &waitStage, 1, &mCommandBuffer.get(), 1,
-                        &mSceneRenderSemaphore.get());
-    mRenderer->mContext->getQueue().submit(info, {});
+    mSVulkanRenderer->display(targetName, mWindow->getBackbuffer(), mWindow->getBackBufferFormat(),
+                              mWindow->getWidth(), mWindow->getHeight(), {imageAcquiredSemaphore},
+                              {vk::PipelineStageFlagBits::eColorAttachmentOutput},
+                              {mSceneRenderSemaphore.get()}, {});
   }
 
   auto swapchain = mWindow->getSwapchain();
