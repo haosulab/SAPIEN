@@ -129,12 +129,14 @@ int main() {
   ant0->setRootPose({{0, 0, 2}, PxIdentity});
 
   auto r0 = static_cast<Renderer::SVulkan2Scene *>(s0->getRendererScene());
-  // r0->setAmbientLight({0.5, 0.5, 0.5});
-  r0->addDirectionalLight({0, -1, -1}, {1, 1, 1}, true, {0, 0, 0}, 20.f, -20.f, 20.f);
+  auto enableShadow = true;
 
-  r0->addPointLight({1, 1, 2}, {10, 0, 0}, true, 0.1, 20);
-  r0->addPointLight({-1, 1, 2}, {0, 10, 0}, true, 0.1, 20);
-  r0->addPointLight({1, -1, 2}, {0, 0, 10}, true, 0.1, 20);
+  // r0->setAmbientLight({0.5, 0.5, 0.5});
+  r0->addDirectionalLight({0, -1, -1}, {1, 1, 1}, enableShadow, {0, 0, 0}, 20.f, -20.f, 20.f);
+
+  r0->addPointLight({1, 1, 2}, {10, 0, 0}, enableShadow, 0.1, 20);
+  r0->addPointLight({-1, 1, 2}, {0, 10, 0}, enableShadow, 0.1, 20);
+  r0->addPointLight({1, -1, 2}, {0, 0, 10}, enableShadow, 0.1, 20);
 
   window.setScene(r0);
 
