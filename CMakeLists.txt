@@ -194,6 +194,7 @@ else ()
             ${PINOCCHIO_LIBRARY} svulkan2)
 endif ()
 
+set_target_properties(easy_profiler PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 

@@ -51,7 +51,7 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
                                std::string const &shaderDir)
     : mRenderer(renderer), mShaderDir(shaderDir) {
   auto config = std::make_shared<svulkan2::RendererConfig>();
-  config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultShaderDirectory;
+  config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultViewerShaderDirectory;
   config->colorFormat = vk::Format::eR32G32B32A32Sfloat;
   mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(*mRenderer->mContext, config);
 
@@ -275,6 +275,11 @@ SVulkan2Window::downloadFloatTarget(std::string const &name) {
     throw std::runtime_error("failed to download: " + name + " is not a float render target.");
   }
   return mSVulkanRenderer->download<float>(name);
+}
+
+std::array<uint32_t, 2> SVulkan2Window::getRenderTargetSize(std::string const &name) const {
+  auto target = mSVulkanRenderer->getRenderTarget(name);
+  return {target->getWidth(), target->getHeight()};
 }
 
 std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>

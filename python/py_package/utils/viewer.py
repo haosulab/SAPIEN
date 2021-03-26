@@ -670,7 +670,7 @@ class Viewer(object):
                 self.axes.set_rotation(self.selected_actor.pose.q)
             else:
                 self.axes.set_position([0, 0, 0])
-                self.axes.set_rotation([0, 0, 0, 1])
+                self.axes.set_rotation([1, 0, 0, 0])
             self.joint_axis = self.create_joint_axis()
         elif self.scene:
             rs = self.scene.get_render_scene()
@@ -740,7 +740,7 @@ class Viewer(object):
             self.selected_actor = None
             if self.axes:
                 self.axes.set_position([0, 0, 0])
-                self.axes.set_rotation([0, 0, 0, 1])
+                self.axes.set_rotation([1, 0, 0, 0])
 
     def update_axes_scale(self, scale):
         self.axes_scale = scale
@@ -798,8 +798,13 @@ class Viewer(object):
             if self.window.mouse_click(0):
                 mx, my = self.window.mouse_position
                 if not self.is_mouse_available(mx, my):
+                    print("[W] Mouse not available")
                     continue
 
+                ww, wh = self.window.size
+                tw, th = self.window.get_target_size("Segmentation")
+                mx = mx * tw / ww
+                my = my * th / wh
                 pixel = self.window.download_uint32_target_pixel(
                     "Segmentation", int(mx), int(my)
                 )
@@ -871,7 +876,7 @@ class Viewer(object):
                 break
 
     def is_mouse_available(self, mx, my):
-        # TODO: maintain window resolution somewhere else
-        w, h = self.resolution
-        print("mousePose:", mx, my)
+        w, h = self.window.size
+        print("[I] actualWindowSize:", w, h)
+        print("[I] mousePose:", mx, my)
         return 0 <= mx < w and 0 <= my < h
