@@ -58,6 +58,7 @@ class CMakeBuild(build_ext):
         build_args = ['--config', cfg]
         if args.profile_render:
             cmake_args += ['-DSVULKAN2_PROFILE=ON']
+            cmake_args += ['-DSAPIEN_PROFILE=ON']
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
         build_args += ['--', '-j8']

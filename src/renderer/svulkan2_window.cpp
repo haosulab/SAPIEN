@@ -1,4 +1,7 @@
 #include "svulkan2_window.h"
+#ifdef _PROFILE
+#include <easy/profiler.h>
+#endif
 
 namespace sapien {
 namespace Renderer {
@@ -192,6 +195,25 @@ void SVulkan2Window::render(std::string const &targetName,
   }
   mRenderer->mContext->getDevice().resetFences(mSceneRenderFence.get());
 
+#ifdef _PROFILE
+  {
+    EASY_BLOCK("Rendering CPU+GPU");
+    auto fence = mRenderer->mContext->getDevice().createFenceUnique({});
+    // draw
+    mSVulkanRenderer->render(*camera, {}, {}, {}, {});
+    auto imageAcquiredSemaphore = mWindow->getImageAcquiredSemaphore();
+    mSVulkanRenderer->display(targetName, mWindow->getBackbuffer(), mWindow->getBackBufferFormat(),
+                              mWindow->getWidth(), mWindow->getHeight(), {imageAcquiredSemaphore},
+                              {vk::PipelineStageFlagBits::eColorAttachmentOutput},
+                              {mSceneRenderSemaphore.get()}, fence.get());
+
+    if (mRenderer->mContext->getDevice().waitForFences(fence.get(), VK_TRUE, UINT64_MAX) !=
+        vk::Result::eSuccess) {
+      throw std::runtime_error("failed on wait for fence.");
+    }
+    mRenderer->mContext->getDevice().resetFences(fence.get());
+  }
+#else
   {
     // draw
     mSVulkanRenderer->render(*camera, {}, {}, {}, {});
@@ -201,6 +223,7 @@ void SVulkan2Window::render(std::string const &targetName,
                               {vk::PipelineStageFlagBits::eColorAttachmentOutput},
                               {mSceneRenderSemaphore.get()}, {});
   }
+#endif
 
   auto swapchain = mWindow->getSwapchain();
   auto fidx = mWindow->getFrameIndex();

@@ -6,7 +6,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation -Wno-deprecated-
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Do not try to build shared libraries")
 
-set(PROFILE FALSE CACHE BOOL "Whether to use Profiler")
+set(SAPIEN_PROFILE FALSE CACHE BOOL "Whether to use Profiler")
 set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
 
@@ -30,6 +30,16 @@ endif ()
 set(CMAKE_DEBUG_POSTFIX "")
 set(OpenGL_GL_PREFERENCE "LEGACY")
 
+if (${SAPIEN_PROFILE})
+    set(SVULKAN2_PROFILE TRUE)
+	include_directories("3rd_party/sapien-vulkan-2/3rd_party/easy_profiler/easy_profiler_core/include")
+    add_definitions(-D_PROFILE)
+    set(EASY_PROFILER_LIBRARY easy_profiler)
+    message("-- Profiler On")
+else ()
+    message("-- Profiler Off")
+endif ()
+
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("-- DEBUG Build")
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
@@ -49,7 +59,7 @@ endif ()
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(ASSIMP REQUIRED)
+find_package(assimp REQUIRED)
 find_package(spdlog REQUIRED)
 
 if (EXISTS ${CUDA_INCLUDE_PATH})
@@ -154,6 +164,10 @@ link_directories("$ENV{VULKAN_SDK}/lib")
 set_target_properties(svulkan2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(spirv-cross-core PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
+if (${SAPIEN_PROFILE})
+    set_target_properties(easy_profiler PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+endif ()
+
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})
 add_library(sapien STATIC ${PROJECT_SRC})
@@ -163,16 +177,6 @@ if (EXISTS ${OPTIX_HOME})
     add_dependencies(sapien ptx_dir)
 endif ()
 
-if (${PROFILE})
-	include_directories("3rd_party/sapien-vulkan-2/3rd_party/easy_profiler/easy_profiler_core/include")
-    add_subdirectory("3rd_party/sapien-vulkan-2/3rd_party/easy_profiler")
-	add_definitions(-D_PROFILE)
-    set(EASY_PROFILER_LIBRARY easy_profiler)
-	set_target_properties(easy_profiler PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-    message("-- Profiler On")
-else ()
-    message("-- Profiler Off")
-endif ()
 
 if (MACOSX)
     target_link_libraries(sapien
