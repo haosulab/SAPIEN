@@ -540,10 +540,11 @@ void buildSapien(py::module &m) {
 
   //======== Simulation ========//
   PyEngine
-      .def(py::init([](PxReal toleranceLength, PxReal toleranceSpeed) {
-             return Simulation::getInstance(toleranceLength, toleranceSpeed);
+      .def(py::init([](uint32_t nthread, PxReal toleranceLength, PxReal toleranceSpeed) {
+             return Simulation::getInstance(nthread, toleranceLength, toleranceSpeed);
            }),
-           py::arg("tolerance_length") = 0.1f, py::arg("tolerance_speed") = 0.2f)
+           py::arg("thread_count") = 0, py::arg("tolerance_length") = 0.1f,
+           py::arg("tolerance_speed") = 0.2f)
       .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig())
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
       .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
