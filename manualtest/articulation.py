@@ -23,7 +23,8 @@ copper.set_base_color([0.875, 0.553, 0.221, 1])
 copper.set_metallic(1)
 copper.set_roughness(0.4)
 
-viewer = Viewer(renderer, "../vulkan_shader/full")
+# viewer = Viewer(renderer, "../vulkan_shader/full")
+viewer = Viewer(renderer, "../vulkan_shader/default_camera")
 
 
 def create_ant_builder(scene):

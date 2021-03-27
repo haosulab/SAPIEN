@@ -147,17 +147,16 @@ void main() {
   }
 
   if ((materialBuffer.textureMask & 4) != 0) {
-    outNormal = vec4(normalize(inTbn * texture(normalTexture, inUV).xyz), 1);
+    outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 1);
   } else {
     outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 1);
   }
-  outNormal = outNormal * 0.5 + 0.5;
 
   float specular = frm.x;
   float roughness = frm.y;
   float metallic = frm.z;
 
-  vec3 normal = outNormal.xyz * 2 - 1;
+  vec3 normal = outNormal.xyz;
   vec4 csPosition = inPosition;
   csPosition /= csPosition.w;
 
