@@ -1,4 +1,4 @@
-#version 450 
+#version 450
 
 layout (constant_id = 0) const int NUM_DIRECTIONAL_LIGHTS = 3;
 layout (constant_id = 1) const int NUM_POINT_LIGHTS = 10;
@@ -37,7 +37,6 @@ layout(set = 0, binding = 1) uniform ShadowBuffer {
 layout(set = 0, binding = 2) uniform samplerCubeArray samplerPointLightDepths;
 layout(set = 0, binding = 3) uniform sampler2DArray samplerDirectionalLightDepths;
 layout(set = 0, binding = 4) uniform sampler2DArray samplerCustomLightDepths;
-// layout(set = 0, binding = 5) uniform sampler2D samplerLightMap;
 
 layout(set = 1, binding = 0) uniform CameraBuffer {
   mat4 viewMatrix;
@@ -136,7 +135,7 @@ void main() {
   float roughness = frm.y;
   float metallic = frm.z;
 
-  vec3 normal = normalize(texture(samplerNormal, inUV).xyz * 2 - 1);
+  vec3 normal = normalize(texture(samplerNormal, inUV).xyz);
   float depth = texture(samplerGbufferDepth, inUV).x;
   vec4 csPosition = cameraBuffer.projectionMatrixInverse * (vec4(inUV * 2 - 1, depth, 1));
   csPosition /= csPosition.w;

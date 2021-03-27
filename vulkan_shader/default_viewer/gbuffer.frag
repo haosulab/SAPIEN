@@ -85,5 +85,5 @@ void main() {
   } else {
     outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
   }
-  outNormal = outNormal * 0.5 + 0.5;
+  outNormal = outNormal;
 }

@@ -189,13 +189,13 @@ void main() {
   } else {
     outNormal1 = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
   }
-  outNormal1 = outNormal1 * 0.5 + 0.5;
+  outNormal1 = outNormal1;
 
   float specular = frm.x;
   float roughness = frm.y;
   float metallic = frm.z;
 
-  vec3 normal = outNormal1.xyz * 2 - 1;
+  vec3 normal = outNormal1.xyz;
   vec4 csPosition = inPosition;
   csPosition /= csPosition.w;
 

@@ -26,6 +26,7 @@ layout(set = 2, binding = 0) uniform MaterialBuffer {
   float transparency;
   int textureMask;
 } materialBuffer;
+
 layout(set = 2, binding = 1) uniform sampler2D colorTexture;
 layout(set = 2, binding = 2) uniform sampler2D roughnessTexture;
 layout(set = 2, binding = 3) uniform sampler2D normalTexture;
@@ -33,8 +34,8 @@ layout(set = 2, binding = 4) uniform sampler2D metallicTexture;
 
 layout (constant_id = 0) const int NUM_DIRECTIONAL_LIGHTS = 3;
 layout (constant_id = 1) const int NUM_POINT_LIGHTS = 10;
-layout (constant_id = 2) const int NUM_DIRECTIONAL_LIGHT_SHADOWS = 3;
-layout (constant_id = 3) const int NUM_POINT_LIGHT_SHADOWS = 10;
+layout (constant_id = 2) const int NUM_DIRECTIONAL_LIGHT_SHADOWS = 1;
+layout (constant_id = 3) const int NUM_POINT_LIGHT_SHADOWS = 3;
 layout (constant_id = 4) const int NUM_CUSTOM_LIGHT_SHADOWS = 1;
 
 struct PointLight {
@@ -189,13 +190,13 @@ void main() {
   } else {
     outNormal1 = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
   }
-  outNormal1 = outNormal1 * 0.5 + 0.5;
+  outNormal1 = outNormal1;
 
   float specular = frm.x;
   float roughness = frm.y;
   float metallic = frm.z;
 
-  vec3 normal = outNormal1.xyz * 2 - 1;
+  vec3 normal = outNormal1.xyz;
   vec4 csPosition = inPosition;
   csPosition /= csPosition.w;
 

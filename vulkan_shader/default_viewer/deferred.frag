@@ -136,7 +136,7 @@ void main() {
   float roughness = frm.y;
   float metallic = frm.z;
 
-  vec3 normal = normalize(texture(samplerNormal, inUV).xyz * 2 - 1);
+  vec3 normal = normalize(texture(samplerNormal, inUV).xyz);
   float depth = texture(samplerGbufferDepth, inUV).x;
   vec4 csPosition = cameraBuffer.projectionMatrixInverse * (vec4(inUV * 2 - 1, depth, 1));
   csPosition /= csPosition.w;
