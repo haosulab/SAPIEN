@@ -22,7 +22,6 @@ if (ROS)
     endif ()
 endif ()
 
-
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif ()
@@ -161,11 +160,8 @@ include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
 include_directories("$ENV{VULKAN_SDK}/include")
 link_directories("$ENV{VULKAN_SDK}/lib")
-set_target_properties(svulkan2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-set_target_properties(spirv-cross-core PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 if (${SAPIEN_PROFILE})
-    set_target_properties(easy_profiler PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 endif ()
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
