@@ -152,12 +152,14 @@ def create_ant_builder(scene):
 
     return builder
 
-
 config = sapien.SceneConfig()
 scene = sim.create_scene(config)
 scene.add_ground(-3)
 scene.set_timestep(1 / 240)
 
+mount = scene.create_actor_builder().build(True)
+mount.set_pose(Pose([-1, 0, -2]))
+cam = scene.add_mounted_camera("cam", mount, Pose(), 512, 512, 0, 1, 0.1, 100)
 
 ant_builder = create_ant_builder(scene)
 ant = ant_builder.build()
@@ -207,6 +209,23 @@ while not viewer.closed:
         scene.step()
     scene.update_render()
     viewer.render()
+
+    import time
+    start = time.time()
+    cam.take_picture()
+    img = cam.get_torch_tensor("Color")
+    depth = cam.get_torch_tensor("GbufferDepth")
+    segmentation = cam.get_torch_tensor("Segmentation")
+    dur = time.time() - start
+    print("Render to tensor FPS: ", 1 / dur)
+    import matplotlib.pyplot as plt
+    plt.imshow(img.cpu().data)
+    plt.show()
+
+    del img
+    del depth
+    del segmentation
+
 
 viewer.close()
 scene = None

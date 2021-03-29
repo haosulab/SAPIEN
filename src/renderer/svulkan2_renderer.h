@@ -203,6 +203,11 @@ public:
   std::tuple<std::vector<uint8_t>, std::array<uint32_t, 3>>
   getUint8Texture(std::string const &textureName);
 
+#ifdef SAPIEN_TORCH_INTEROP
+  std::tuple<std::unique_ptr<svulkan2::core::CudaBuffer>, std::array<uint32_t, 2>, vk::Format>
+  getCudaBuffer(std::string const &textureName);
+#endif
+
   inline IPxrScene *getScene() override { return mScene; }
 
   glm::mat4 getModelMatrix() const;

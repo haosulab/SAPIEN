@@ -58,8 +58,18 @@ function build_manylinux14_wheel() {
   if test -f "$WHEEL_NAME"; then
     echo "$FILE exist, begin audit and repair"
   fi
-  WHEEL_COMMAND="auditwheel repair ${WHEEL_NAME}"
-  eval "$WHEEL_COMMAND"
+  auditwheel repair ${WHEEL_NAME}
+
+  echo "adding libtorch_python to pysapien"
+  REPAIRED_WHEEL_NAME="sapien-${PACKAGE_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}${EXT}-manylinux2014_x86_64.whl"
+  rm -rf "./wheelhouse/temp"
+  unzip ./wheelhouse/${REPAIRED_WHEEL_NAME} -d "./wheelhouse/temp"
+  SO_NAME="./wheelhouse/temp/sapien/core/pysapien.cpython-${PY_VERSION}${EXT}-x86_64-linux-gnu.so"
+  patchelf --add-needed libtorch_python.so ${SO_NAME}
+  cd ./wheelhouse/temp
+  zip ../${REPAIRED_WHEEL_NAME} -r *
+  cd ..
+  rm -rf temp
 }
 
 build_manylinux14_wheel $VERSION

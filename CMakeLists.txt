@@ -7,6 +7,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation -Wno-deprecated-
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Do not try to build shared libraries")
 
 set(SAPIEN_PROFILE FALSE CACHE BOOL "Whether to use Profiler")
+set(SAPIEN_TORCH_INTEROP TRUE CACHE BOOL "Whether to use render to tensor")
 set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
 
@@ -21,6 +22,8 @@ if (ROS)
         set(BUILD_WITH_PINOCCHIO_SUPPORT FALSE)
     endif ()
 endif ()
+
+add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
@@ -108,6 +111,16 @@ if (MACOSX)
     include_directories("/usr/local/include" "/usr/local/opt/glew/include"
             "/usr/local/include/eigen3")
     link_directories(/usr/local/lib/)
+else()
+    if (${SAPIEN_TORCH_INTEROP})
+        include_directories(
+            "3rd_party/torch_include"
+            "3rd_party/torch_include/torch/csrc/api/include"
+            "3rd_party/cuda_include")
+
+        add_definitions(-DSAPIEN_TORCH_INTEROP)
+        add_definitions(-DCUDA_INTEROP)
+    endif ()
 endif ()
 
 ## Link directory inside the project
@@ -160,9 +173,6 @@ include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
 include_directories("$ENV{VULKAN_SDK}/include")
 link_directories("$ENV{VULKAN_SDK}/lib")
-
-if (${SAPIEN_PROFILE})
-endif ()
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})

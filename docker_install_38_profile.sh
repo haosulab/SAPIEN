@@ -1,7 +1,7 @@
 #!/bin/bash
 docker run -v `pwd`:/workspace/SAPIEN -it --rm \
        -u $(id -u ${USER}):$(id -g ${USER}) \
-       fxiangucsd/sapien-build-env:1.5 bash -c "cd /workspace/SAPIEN && ./build.sh 38 --profile"
+       fxiangucsd/sapien-build-env:1.6 bash -c "cd /workspace/SAPIEN && ./build.sh 38 --profile"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 

@@ -60,6 +60,8 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DSVULKAN2_PROFILE=ON']
             cmake_args += ['-DSAPIEN_PROFILE=ON']
 
+        cmake_args += ['-DSAPIEN_TORCH_INTEROP=ON']
+
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
         build_args += ['--', '-j8']
 
@@ -69,8 +71,8 @@ class CMakeBuild(build_ext):
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.', "--target", "pysapien"] + build_args, cwd=self.build_temp)
+            subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+            subprocess.check_call(['cmake', '--build', '.', "--target", "pysapien"] + build_args, cwd=self.build_temp)
 
         glsl_target_path = os.path.join(self.build_lib, 'sapien', 'glsl_shader')
         if os.path.exists(glsl_target_path):

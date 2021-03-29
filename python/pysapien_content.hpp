@@ -1,4 +1,6 @@
 #pragma once
+#include "utils/torch_tensor.hpp"
+
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 
@@ -1489,6 +1491,19 @@ void buildSapien(py::module &m) {
             }
           },
           py::arg("texture_name"))
+#ifdef SAPIEN_TORCH_INTEROP
+      .def(
+          "get_torch_tensor",
+          [](Renderer::SVulkan2Camera &cam, std::string const &name) {
+            auto [buffer, sizes, format] = cam.getCudaBuffer(name);
+            std::vector<long> dim;
+            for (auto s : sizes) {
+              dim.push_back(s);
+            }
+            return TorchTensorFromCudaBuffer(std::move(buffer), dim, format);
+          },
+          py::arg("texture_name"))
+#endif
       .def("get_camera_matrix",
            [](Renderer::SVulkan2Camera &c) { return mat42array(c.getCameraMatrix()); })
       .def("get_model_matrix",
