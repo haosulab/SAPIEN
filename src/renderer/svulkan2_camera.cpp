@@ -84,7 +84,7 @@ SVulkan2Camera::getUint8Texture(std::string const &textureName) {
 }
 
 #ifdef SAPIEN_TORCH_INTEROP
-std::tuple<std::unique_ptr<svulkan2::core::CudaBuffer>, std::array<uint32_t, 2>, vk::Format>
+std::tuple<std::shared_ptr<svulkan2::core::CudaBuffer>, std::array<uint32_t, 2>, vk::Format>
 SVulkan2Camera::getCudaBuffer(std::string const &textureName) {
   // wait for fence is not needed
   return mRenderer->transferToCuda(textureName);

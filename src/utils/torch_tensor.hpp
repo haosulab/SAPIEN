@@ -7,7 +7,7 @@
 #include <torch/extension.h>
 #include <vector>
 
-torch::Tensor TorchTensorFromCudaBuffer(std::unique_ptr<svulkan2::core::CudaBuffer> buffer,
+torch::Tensor TorchTensorFromCudaBuffer(std::shared_ptr<svulkan2::core::CudaBuffer> buffer,
                                         std::vector<long> const &sizes, vk::Format format) {
   long size = 1;
   for (auto s : sizes) {
@@ -36,25 +36,12 @@ torch::Tensor TorchTensorFromCudaBuffer(std::unique_ptr<svulkan2::core::CudaBuff
 
   assert(buffer->getSize() == size * 4);
 
-  // auto options = torch::TensorOptions().device(torch::kCUDA).dtype(dtype);
-  // auto ref = torch::IntArrayRef(sizes2);
   void *pointer = buffer->getCudaPointer();
 
-  // float p[4];
-
-  // auto tensor = torch::empty(sizes2, torch::TensorOptions().device(torch::kCUDA).dtype(dtype));
-  // cudaMemcpy(tensor.data_ptr(), pointer, size * 4, cudaMemcpyDeviceToDevice);
-
-  auto buf = buffer.release();
   auto tensor = torch::from_blob(
-      pointer, sizes2, [buf](void *) { delete buf; },
+      pointer, sizes2, [buffer](void *) {},
       torch::TensorOptions().device(torch::kCUDA).dtype(dtype));
 
-  // float *data = (float *)tensor.cpu().data_ptr();
-  // std::cerr << data[0] << " " << data[1] << " " << data[2] << " " << data[3] << " " <<
-  // std::endl;
-
-  // return tensor;
   return tensor;
 }
 

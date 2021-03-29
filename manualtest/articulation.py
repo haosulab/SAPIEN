@@ -159,7 +159,7 @@ scene.set_timestep(1 / 240)
 
 mount = scene.create_actor_builder().build(True)
 mount.set_pose(Pose([-1, 0, -2]))
-cam = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
+cam = scene.add_mounted_camera("cam", mount, Pose(), 512, 512, 0, 1, 0.1, 100)
 
 ant_builder = create_ant_builder(scene)
 ant = ant_builder.build()
@@ -216,18 +216,13 @@ while not viewer.closed:
     start = time.time()
     cam.take_picture()
     img = cam.get_torch_tensor("Color")
-    # depth = cam.get_torch_tensor("GbufferDepth")
-    # segmentation = cam.get_torch_tensor("Segmentation")
     dur = time.time() - start
     print("Render to tensor FPS: ", 1 / dur)
-    # del img
-    # del depth
-    # del segmentation
 
     # import time
     # start = time.time()
-    # img = cam.get_float_texture("Color")
     # cam.take_picture()
+    # img = cam.get_float_texture("Color")
     # torch.tensor(img, device="cuda")
     # dur = time.time() - start
     # print("Torch CPU round trip FPS: ", 1 / dur)
