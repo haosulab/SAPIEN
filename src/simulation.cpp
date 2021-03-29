@@ -7,9 +7,7 @@
 #include "filter_shader.h"
 #include "simulation.h"
 
-#ifdef _PROFILE
 #include <easy/profiler.h>
-#endif
 
 namespace sapien {
 static PxDefaultAllocator gDefaultAllocatorCallback;
@@ -39,10 +37,7 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
     setLogLevel("warn");
   }
 
-#ifdef _PROFILE
   profiler::startListen();
-  spdlog::get("SAPIEN")->info("Profiling enabled");
-#endif
 
   // TODO(fanbo): figure out what "track allocation" means in the PhysX doc
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, mErrorCallback);

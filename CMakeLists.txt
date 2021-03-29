@@ -32,15 +32,15 @@ endif ()
 set(CMAKE_DEBUG_POSTFIX "")
 set(OpenGL_GL_PREFERENCE "LEGACY")
 
+include_directories("3rd_party/sapien-vulkan-2/3rd_party/easy_profiler/easy_profiler_core/include")
 if (${SAPIEN_PROFILE})
-    set(SVULKAN2_PROFILE TRUE)
-	include_directories("3rd_party/sapien-vulkan-2/3rd_party/easy_profiler/easy_profiler_core/include")
-    add_definitions(-D_PROFILE)
+    add_definitions(-DBUILD_WITH_EASY_PROFILER)
     set(EASY_PROFILER_LIBRARY easy_profiler)
     message("-- Profiler On")
 else ()
     message("-- Profiler Off")
 endif ()
+
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("-- DEBUG Build")

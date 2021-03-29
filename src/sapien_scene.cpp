@@ -15,9 +15,7 @@
 #include <algorithm>
 #include <spdlog/spdlog.h>
 
-#ifdef _PROFILE
 #include <easy/profiler.h>
-#endif
 
 namespace sapien {
 
@@ -460,9 +458,7 @@ void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
 }
 
 void SScene::step() {
-#ifdef _PROFILE
   EASY_BLOCK("Pre-step processing", profiler::colors::Blue);
-#endif
 
   for (auto &a : mActors) {
     if (!a->isBeingDestroyed())
@@ -480,10 +476,8 @@ void SScene::step() {
   // confirm removal of marked objects
   removeCleanUp1();
 
-#ifdef _PROFILE
   EASY_END_BLOCK;
   EASY_BLOCK("PhysX scene Step", profiler::colors::Red);
-#endif
 
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
@@ -491,9 +485,7 @@ void SScene::step() {
     // the callbacks may remove objects, which are not actually removed in this step
   }
 
-#ifdef _PROFILE
   EASY_END_BLOCK;
-#endif
 
   // do removal of marked objects
   removeCleanUp2();
@@ -534,9 +526,8 @@ void SScene::stepWait() {
 }
 
 void SScene::updateRender() {
-#ifdef _PROFILE
   EASY_FUNCTION("Update Render", profiler::colors::Magenta);
-#endif
+
   if (!mRendererScene) {
     spdlog::get("SAPIEN")->error("Failed to update render: renderer is not added.");
     return;

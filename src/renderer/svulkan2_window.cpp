@@ -1,7 +1,5 @@
 #include "svulkan2_window.h"
-#ifdef _PROFILE
 #include <easy/profiler.h>
-#endif
 
 namespace sapien {
 namespace Renderer {
@@ -195,7 +193,7 @@ void SVulkan2Window::render(std::string const &targetName,
   }
   mRenderer->mContext->getDevice().resetFences(mSceneRenderFence.get());
 
-#ifdef _PROFILE
+#ifdef BUILD_WITH_EASY_PROFILER
   {
     EASY_BLOCK("Rendering CPU+GPU");
     auto fence = mRenderer->mContext->getDevice().createFenceUnique({});

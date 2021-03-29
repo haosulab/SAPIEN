@@ -71,8 +71,8 @@ class CMakeBuild(build_ext):
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-            subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-            subprocess.check_call(['cmake', '--build', '.', "--target", "pysapien"] + build_args, cwd=self.build_temp)
+        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
+        subprocess.check_call(['cmake', '--build', '.', "--target", "pysapien"] + build_args, cwd=self.build_temp)
 
         glsl_target_path = os.path.join(self.build_lib, 'sapien', 'glsl_shader')
         if os.path.exists(glsl_target_path):

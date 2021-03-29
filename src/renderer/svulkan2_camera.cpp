@@ -60,12 +60,11 @@ std::vector<int> SVulkan2Camera::getObjSegmentation() {
 }
 
 void SVulkan2Camera::waitForFence() {
-  // auto result = mScene->getParentRenderer()->mContext->getDevice().waitForFences(
-  //     mFence.get(), VK_TRUE, UINT64_MAX);
-  mScene->getParentRenderer()->mContext->getDevice().waitIdle();
-  // if (result != vk::Result::eSuccess) {
-  //   throw std::runtime_error("take picture failed: wait for fence failed");
-  // }
+  auto result = mScene->getParentRenderer()->mContext->getDevice().waitForFences(
+      mFence.get(), VK_TRUE, UINT64_MAX);
+  if (result != vk::Result::eSuccess) {
+    throw std::runtime_error("take picture failed: wait for fence failed");
+  }
 }
 
 std::tuple<std::vector<float>, std::array<uint32_t, 3>>
@@ -87,7 +86,7 @@ SVulkan2Camera::getUint8Texture(std::string const &textureName) {
 #ifdef SAPIEN_TORCH_INTEROP
 std::tuple<std::unique_ptr<svulkan2::core::CudaBuffer>, std::array<uint32_t, 2>, vk::Format>
 SVulkan2Camera::getCudaBuffer(std::string const &textureName) {
-  waitForFence();
+  // wait for fence is not needed
   return mRenderer->transferToCuda(textureName);
 }
 #endif
