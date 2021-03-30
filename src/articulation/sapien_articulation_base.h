@@ -21,7 +21,8 @@ class SArticulationBase : public EventEmitter<EventArticulationPreDestroy>,
                           public EventEmitter<EventArticulationStep> {
   std::string mName;
 
-  int mDestroyedState {0};
+  int mDestroyedState{0};
+
 public:
   inline void setName(std::string const &name) { mName = name; }
   inline std::string getName() { return mName; }
@@ -53,11 +54,12 @@ public:
 
   virtual void prestep() = 0;
 
-  virtual SScene* getScene() const = 0;
+  virtual SScene *getScene() const = 0;
 
   virtual ~SArticulationBase() = default;
 
   std::string exportKinematicsChainAsURDF(bool fixRoot);
+  std::string exportURDF();
 
   /** internal use only, actors marked as destroyed will be removed in the next step */
   void markDestroyed();
@@ -67,9 +69,13 @@ public:
   /** internal use only, destroy has several stages, check which stage it is in */
   inline int getDestroyedState() const { return mDestroyedState; }
 
-  #ifdef _USE_PINOCCHIO
+#ifdef _USE_PINOCCHIO
   std::unique_ptr<PinocchioModel> createPinocchioModel();
-  #endif
+#endif
+
+private:
+  std::string exportTreeURDF(SLinkBase *link, physx::PxTransform extraTransform,
+                             bool exportVisual = true);
 };
 
 class SArticulationDrivable : public SArticulationBase {

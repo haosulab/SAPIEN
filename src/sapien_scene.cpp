@@ -42,7 +42,6 @@ SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig cons
 }
 
 SScene::~SScene() {
-  // TODO(jigu): check whether we can only release PxScene
   mDefaultMaterial.reset();
   for (auto &actor : mActors) {
     actor->getPxActor()->release();
@@ -59,6 +58,11 @@ SScene::~SScene() {
     drive.release();
   }
   mPxScene->release();
+  
+  // TODO: check whether we implement mXXX.release() to replace the workaround
+  mActors.clear();
+  mArticulations.clear();
+  mKinematicArticulations.clear();
 
   if (mRendererScene) {
     mSimulationShared->getRenderer()->removeScene(mRendererScene);

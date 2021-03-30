@@ -147,6 +147,147 @@ std::string SArticulationBase::exportKinematicsChainAsURDF(bool fixRoot) {
   return output;
 }
 
+std::string SArticulationBase::exportURDF() {
+  std::string output = "<?xml version=\"1.0\"?>\n";
+  output += "<robot name=\"\" >\n";
+
+  auto *rootLink = getRootLink();
+  output += exportTreeURDF(rootLink, PxTransform(PxIDENTITY()));
+
+  output += "\n</robot>";
+  return output;
+}
+
+static std::string exportLinkURDF(SLinkBase *link, physx::PxTransform extraTransform,
+                                  bool returnVisual = false) {
+  std::stringstream ss;
+  std::string name = std::to_string(link->getIndex());
+
+  auto mCollisionShapes = link->getCollisionShapes();
+  for (auto mCollisionShape : mCollisionShapes) {
+    ss << (returnVisual ? "<visual>" : "<collision>");
+
+    PxTransform localPose = mCollisionShape->getLocalPose();
+    PxTransform URDFPose = extraTransform * localPose; // TODO: check order
+    Eigen::Quaternionf q;
+    q.w() = URDFPose.q.w;
+    q.x() = URDFPose.q.x;
+    q.y() = URDFPose.q.y;
+    q.z() = URDFPose.q.z;
+    auto eulerAngles = q.toRotationMatrix().eulerAngles(2, 1, 0); // TODO: maybe simplified
+    ss << "<origin xyz=\"" << URDFPose.p.x << " " << URDFPose.p.y << " " << URDFPose.p.z << "\" rpy=\""
+       << eulerAngles[2] << " " << eulerAngles[1] << " " << eulerAngles[0] << "\" />";
+
+    ss << "<geometry>";
+    auto mPxShape = mCollisionShape->getPxShape();
+    switch (mPxShape->getGeometryType()) {
+    case PxGeometryType::eBOX: {
+      PxBoxGeometry g;
+      mPxShape->getBoxGeometry(g);
+      auto x = g.halfExtents.x, y = g.halfExtents.y, z = g.halfExtents.z;
+      x *= 2.0; y *= 2.0; z *= 2.0;
+      ss << "<box size=\"" << x << " " << y << " " << z << "\" />";
+      break;
+    }
+    case PxGeometryType::eSPHERE: {
+      PxSphereGeometry g;
+      mPxShape->getSphereGeometry(g);
+      ss << "<sphere radius=\"" << g.radius << "\" />";
+      break;
+    }
+    case PxGeometryType::eCAPSULE: {
+      PxCapsuleGeometry g;
+      mPxShape->getCapsuleGeometry(g);
+      ss << "<capsule radius=\"" << g.radius << "\"length=\"" << g.halfHeight * 2.0 << "\" />";
+      break;
+    }
+    default:
+      std::cerr << "Currently not supported URDF geometry type: " << mPxShape->getGeometryType()
+                << std::endl;
+      exit(1);
+      break;
+    }
+    ss << "</geometry>";
+    ss << (returnVisual ? "</visual>" : "</collision>");
+  }
+
+  return ss.str();
+}
+
+static std::string exportJointURDF(SJointBase *joint, physx::PxTransform extraParentTransform,
+                                   physx::PxTransform &extraChildTransform) {
+  std::stringstream ss;
+
+  std::string type;
+  switch (joint->getType()) {
+  case PxArticulationJointType::eFIX:
+    type = "fixed";
+    break;
+  case PxArticulationJointType::ePRISMATIC:
+    type = "prismatic";
+    break;
+  case PxArticulationJointType::eREVOLUTE:
+    if (joint->getLimits()[0][0] < -10) {
+      type = "continuous";
+    } else {
+      type = "revolute";
+    }
+    break;
+  default:
+    throw std::runtime_error("unknown joint type");
+  }
+
+  PxTransform j2p = extraParentTransform * joint->getParentPose();
+  PxTransform j2c = joint->getChildPose();
+  PxTransform c2j = j2c.getInverse();
+
+  Eigen::Quaternionf q;
+  q.w() = j2p.q.w;
+  q.x() = j2p.q.x;
+  q.y() = j2p.q.y;
+  q.z() = j2p.q.z;
+  auto pEulerAngles = q.toRotationMatrix().eulerAngles(2, 1, 0); // TODO: maybe simplified
+  extraChildTransform = c2j;
+
+  ss << "<joint name=\"joint_" << joint->getChildLink()->getIndex() << "\" type=\"" << type
+     << "\">";
+  ss << "<origin xyz=\"" << j2p.p.x << " " << j2p.p.y << " " << j2p.p.z << "\" rpy=\""
+     << pEulerAngles[2] << " " << pEulerAngles[1] << " " << pEulerAngles[0] << "\" />";
+  ss << "<parent link=\"link_" << joint->getParentLink()->getIndex() << "\" />";
+  ss << "<child link=\"link_" << joint->getChildLink()->getIndex() << "\" />";
+  if (type == "prismatic" || type == "revolute") {
+    ss << "<limit effort=\"0\" velocity=\"0\" lower=\"" << joint->getLimits()[0][0]
+       << "\" upper=\"" << joint->getLimits()[0][1] << "\" />";
+  }
+  ss << "</joint>";
+
+  return ss.str();
+}
+
+std::string SArticulationBase::exportTreeURDF(SLinkBase *link, physx::PxTransform extraTransform,
+                                              bool exportVisual) {
+  std::stringstream ss;
+  std::string name = std::to_string(link->getIndex());
+
+  /* Link */
+  ss << "<link name=\"link_" << link->getIndex() << "\">";
+  ss << exportLinkURDF(link, extraTransform); // collision
+  if (exportVisual)
+    ss << exportLinkURDF(link, extraTransform, true); // visual
+  ss << "</link>";
+
+  /* Joint */
+  for (auto joint : getBaseJoints()) {
+    if (joint->getParentLink() == link) {
+      PxTransform extraChildTransform;
+      ss << exportJointURDF(joint, extraTransform, extraChildTransform);
+      ss << exportTreeURDF(joint->getChildLink(), extraChildTransform, exportVisual); // recursive
+    }
+  }
+
+  return ss.str();
+}
+
 #ifdef _USE_PINOCCHIO
 std::unique_ptr<PinocchioModel> SArticulationBase::createPinocchioModel() {
   PxVec3 gravity = getScene()->getPxScene()->getGravity();
