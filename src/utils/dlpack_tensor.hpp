@@ -60,7 +60,7 @@ DLManagedTensor *DLTensorFromCudaBuffer(std::shared_ptr<svulkan2::core::CudaBuff
   }
 
   tensor->dl_tensor.data = pointer;
-  tensor->dl_tensor.device = {DLDeviceType::kDLGPU, 0};
+  tensor->dl_tensor.device = {DLDeviceType::kDLGPU, buffer->getCudaDeviceId()};
   tensor->dl_tensor.ndim = static_cast<int>(sizes2.size());
   tensor->dl_tensor.dtype = {dtype, 32, 1};
   tensor->dl_tensor.shape = shape;
