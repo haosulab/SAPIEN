@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation -Wno-deprecated-
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Do not try to build shared libraries")
 
 set(SAPIEN_PROFILE FALSE CACHE BOOL "Whether to use Profiler")
-set(SAPIEN_TORCH_INTEROP TRUE CACHE BOOL "Whether to use render to tensor")
+set(SAPIEN_DLPACK_INTEROP TRUE CACHE BOOL "Whether to use render to tensor")
 set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
 
@@ -40,7 +40,6 @@ if (${SAPIEN_PROFILE})
 else ()
     message("-- Profiler Off")
 endif ()
-
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("-- DEBUG Build")
@@ -112,13 +111,12 @@ if (MACOSX)
             "/usr/local/include/eigen3")
     link_directories(/usr/local/lib/)
 else()
-    if (${SAPIEN_TORCH_INTEROP})
-        include_directories(
-            "3rd_party/torch_include"
-            "3rd_party/torch_include/torch/csrc/api/include"
-            "3rd_party/cuda_include")
+    include_directories("3rd_party/dlpack/include")
 
-        add_definitions(-DSAPIEN_TORCH_INTEROP)
+    if (${SAPIEN_DLPACK_INTEROP})
+        include_directories("3rd_party/cuda_include")
+
+        add_definitions(-DSAPIEN_DLPACK_INTEROP)
         add_definitions(-DCUDA_INTEROP)
     endif ()
 endif ()
@@ -211,6 +209,11 @@ set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 pybind11_add_module(pysapien "python/pysapien.cpp")
 target_link_libraries(pysapien PRIVATE sapien)
+
+if ((NOT MACOSX) AND (${SAPIEN_DLPACK_INTEROP}))
+    target_link_libraries(pysapien PRIVATE "${CMAKE_SOURCE_DIR}/3rd_party/cuda_lib/libcudart_static.a")
+endif ()
+
 
 file(GLOB_RECURSE UNITTEST_SRC unittest/*.cpp)
 

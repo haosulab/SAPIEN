@@ -1,5 +1,6 @@
 #pragma once
-#include "utils/torch_tensor.hpp"
+// #include "utils/torch_tensor.hpp"
+#include "utils/dlpack_tensor.hpp"
 
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
@@ -1491,16 +1492,25 @@ void buildSapien(py::module &m) {
             }
           },
           py::arg("texture_name"))
-#ifdef SAPIEN_TORCH_INTEROP
+#ifdef SAPIEN_DLPACK_INTEROP
       .def(
-          "get_torch_tensor",
+          "get_dl_tensor",
           [](Renderer::SVulkan2Camera &cam, std::string const &name) {
             auto [buffer, sizes, format] = cam.getCudaBuffer(name);
             std::vector<long> dim;
             for (auto s : sizes) {
               dim.push_back(s);
             }
-            return TorchTensorFromCudaBuffer(std::move(buffer), dim, format);
+            DLManagedTensor *tensor = DLTensorFromCudaBuffer(std::move(buffer), dim, format);
+            auto capsule_destructor = [](PyObject *data) {
+              DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
+              if (tensor) {
+                tensor->deleter(const_cast<DLManagedTensor *>(tensor));
+              } else {
+                PyErr_Clear();
+              }
+            };
+            return py::capsule(tensor, "dltensor", capsule_destructor);
           },
           py::arg("texture_name"))
 #endif

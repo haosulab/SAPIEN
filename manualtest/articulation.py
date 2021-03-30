@@ -152,6 +152,7 @@ def create_ant_builder(scene):
 
     return builder
 
+
 config = sapien.SceneConfig()
 scene = sim.create_scene(config)
 scene.add_ground(-3)
@@ -159,7 +160,7 @@ scene.set_timestep(1 / 240)
 
 mount = scene.create_actor_builder().build(True)
 mount.set_pose(Pose([-1, 0, -2]))
-cam = scene.add_mounted_camera("cam", mount, Pose(), 512, 512, 0, 1, 0.1, 100)
+cam = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
 
 ant_builder = create_ant_builder(scene)
 ant = ant_builder.build()
@@ -204,18 +205,20 @@ selected_actor = None
 scene.update_render()
 
 import torch
+import torch.utils.dlpack
 
 count = 0
 while not viewer.closed:
     for i in range(4):
         scene.step()
     scene.update_render()
-    # viewer.render()
+    viewer.render()
 
     import time
     start = time.time()
     cam.take_picture()
-    img = cam.get_torch_tensor("Color")
+    img = cam.get_dl_tensor("Color")
+    img = torch.utils.dlpack.from_dlpack(img)
     dur = time.time() - start
     print("Render to tensor FPS: ", 1 / dur)
 
