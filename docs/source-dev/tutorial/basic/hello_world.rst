@@ -35,7 +35,7 @@ One engine per process is allowed.
 ``Scene`` is an instance of the simulation world.
 Multiple scenes can be created through ``create_scene()``, and run independently.
 ``VulkanRenderer`` is the rendering engine connected to our `vulkan-based <https://www.khronos.org/vulkan/>`_ renderer.
-The renderer should be bound with an engine, and all the scenes created by the engine will be bound with the renderer.
+The renderer should be bound with an engine, and then all the scenes created by the engine will be bound with the renderer.
 
 Add rigid bodies
 -------------------
@@ -53,19 +53,21 @@ Viewer
 -------------------------------------------
 
 ``Viewer`` creates a window (GUI) to render the simulation world.
-How to use the GUI and how to add lighting will be elaborated later.
+How to use the GUI will be elaborated later.
 
 .. literalinclude:: ../../../../examples/basic/hello_world.py
    :dedent: 0
    :lines: 35-49
 
 .. note::
-   In fact, the visualization is not necessary when you only need physical simulation, e.g. collecting experiences for policy learning.
+   The GUI is not necessary when you only need physical simulation, e.g. collecting experiences for policy learning.
 
 Simulation loop
 ---------------
 
-After setting up the simulation world, the actual simulation happens in a loop. For each iteration, the scene simulates for one step and updates the world to the renderer. The viewer calls ``render()`` to update the results on the screen.
+After setting up the simulation world, the actual simulation happens in a loop.
+For each iteration, the scene simulates for one step and updates the world to the renderer.
+The viewer calls ``render()`` to update the results on the screen.
 
 .. literalinclude:: ../../../../examples/basic/hello_world.py
    :dedent: 0

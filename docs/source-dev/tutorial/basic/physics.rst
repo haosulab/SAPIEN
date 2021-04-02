@@ -15,7 +15,8 @@ In this tutorial, you will learn the following:
 * Enable damping for actors
 * Get kinematic quantities (pose, velocity, angular velocity) of an actor
 
-The example illustrates an object sliding down the slope. You can run the script with different arguments.
+The example illustrates an object sliding down the slope.
+You can run the script with different arguments.
 ``transforms3d`` is required to install (through pip) to compute poses.
 
 .. figure:: assets/physics.gif
@@ -62,7 +63,9 @@ Some other physical properties, like density, are directly provided to collision
 Create a kinematic actor
 -------------------------------------
 
-Now, let's create a slope. The slope should be a **kinematic** object, rather than a **dynamic** object. In other words, it can not be affected by external forces.
+Now, let's create a slope.
+The slope should be a **kinematic** object, rather than a **dynamic** object.
+In other words, it can not be affected by external forces.
 We can set ``is_kinematic=True`` when building the actor.
 
 .. literalinclude:: ../../../../examples/basic/physics.py

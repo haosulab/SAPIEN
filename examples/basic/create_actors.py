@@ -6,8 +6,9 @@ Note that an actor can have multiple collision and visual shapes,
 and they do not need to correspond.
 
 Concepts:
-    1. Create sapien.Actor by primitives (box, sphere, capsule)
-    2. sapien.Pose
+    - Create sapien.Actor by primitives (box, sphere, capsule)
+    - Create sapien.Actor by mesh files
+    - sapien.Pose
 """
 
 import sapien.core as sapien
@@ -177,7 +178,6 @@ def main():
         scene.update_render()
         viewer.render()
 
-    del scene
 
 if __name__ == '__main__':
     main()

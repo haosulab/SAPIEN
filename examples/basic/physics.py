@@ -198,7 +198,7 @@ def main():
     pause = True
     while not viewer.closed:
         if viewer.window.key_down('c'):  # press c to start
-            pause = not pause
+            pause = False
         if not pause:
             scene.step()
         scene.update_render()
@@ -208,9 +208,6 @@ def main():
             print('Velocity', actor.get_velocity())
             print('Angular velocity', actor.get_angular_velocity())
         steps += 1
-
-    del physical_material
-    del scene
 
 
 if __name__ == '__main__':

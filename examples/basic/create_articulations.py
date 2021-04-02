@@ -5,7 +5,7 @@ The robot is an instance of articulation.
 
 Concepts:
     1. Create an articulation
-    2. Control the articulation basically (torque or builtin velocity controller)
+    2. Control the articulation basically (builtin position and velocity controller)
         sapien.Articulation.set_qf, sapien.Joint.set_drive_velocity_target
     3. sapien.Articulation.get_qpos, sapien.Articulation.get_qvel
 """
@@ -83,7 +83,7 @@ def create_car(
     # front wheels
     front_wheels = builder.create_link_builder(front_shaft)
     front_wheels.set_name('front_wheels')
-    front_wheels.set_joint_name('front_rack')
+    front_wheels.set_joint_name('front_gear')
     # rack
     front_wheels.add_box_shape(half_size=rack_half_size, density=density)
     front_wheels.add_box_visual(half_size=rack_half_size, color=[0.8, 0.4, 0.6])
@@ -118,7 +118,7 @@ def create_car(
     # back wheels
     back_wheels = builder.create_link_builder(back_shaft)
     back_wheels.set_name('back_wheels')
-    back_wheels.set_joint_name('back_rack')
+    back_wheels.set_joint_name('back_gear')
     # rack
     back_wheels.add_box_shape(half_size=rack_half_size, density=density)
     back_wheels.add_box_visual(half_size=rack_half_size, color=[0.8, 0.4, 0.6])
@@ -153,6 +153,13 @@ def create_car(
     car = builder.build()
     car.set_name('car')
     return car
+
+
+def get_joints_dict(articulation: sapien.Articulation):
+    joints = articulation.get_joints()
+    joint_names =  [joint.name for joint in joints]
+    assert len(joint_names) == len(set(joint_names)), 'Joint names are assumed to be unique.'
+    return {joint.name: joint for joint in joints}
 
 
 def parse_args():
@@ -208,37 +215,37 @@ def main():
     # ---------------------------------------------------------------------------- #
     # Control a toy car
     # ---------------------------------------------------------------------------- #
-    active_joints = car.get_active_joints()
-    print([x.name for x in active_joints])
-    active_joints[0].set_drive_property(stiffness=1000.0, damping=0.0)  # front shaft
-    active_joints[1].set_drive_property(0.0, 1000.0)  # front rack
-    active_joints[2].set_drive_property(0.0, 0.0)  # back rack
+    joints = get_joints_dict(car)
+    print(joints.keys())
+    joints['front_shaft_joint'].set_drive_property(stiffness=1000.0, damping=0.0)  # front shaft
+    joints['front_gear'].set_drive_property(0.0, 1000.0)  # front gear
+    joints['back_gear'].set_drive_property(0.0, 0.0)  # back gear
 
+    position = 0.0  # position target of joints
     velocity = 0.0  # velocity target of joints
-    position = 0.0  # velocity position of joints
     steps = 0
     while not viewer.closed:
-        if viewer.window.key_down('i'):
-            velocity += 5.0
+        if viewer.window.key_down('i'):  # accelerate
+            velocity += 2.0
             print('velocity increases:', velocity)
-            active_joints[1].set_drive_velocity_target(velocity)
-        elif viewer.window.key_down('k'):
-            velocity -= 5.0
+            joints['front_gear'].set_drive_velocity_target(velocity)
+        elif viewer.window.key_down('k'):  # brake
+            velocity -= 2.0
             print('velocity decreases:', velocity)
-            active_joints[1].set_drive_velocity_target(velocity)
-        elif viewer.window.key_down('j'):
+            joints['front_gear'].set_drive_velocity_target(velocity)
+        elif viewer.window.key_down('j'):  # left turn
             position += 1
-            active_joints[0].set_drive_target(np.deg2rad(position))
+            joints['front_shaft_joint'].set_drive_target(np.deg2rad(position))
             print('position increases:', position)
-        elif viewer.window.key_down('l'):
+        elif viewer.window.key_down('l'):  # right turn
             position -= 1
             print('position decreases:', position)
-            active_joints[0].set_drive_target(np.deg2rad(position))
-        elif viewer.window.key_down('r'):
+            joints['front_shaft_joint'].set_drive_target(np.deg2rad(position))
+        elif viewer.window.key_down('r'):  # reset
             position = 0
             velocity = 0.0
-            active_joints[0].set_drive_target(position)
-            active_joints[1].set_drive_velocity_target(velocity)
+            joints['front_shaft_joint'].set_drive_target(position)
+            joints['front_gear'].set_drive_velocity_target(velocity)
 
         car.set_qf(car.compute_passive_force(True, True, False))
         scene.step()

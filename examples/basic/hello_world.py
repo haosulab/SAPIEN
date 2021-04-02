@@ -1,12 +1,12 @@
 """Hello world for Sapien.
 
 Concepts:
-    1. Engine and scene
-    2. Renderer, viewer, lighting
-    3. Run a simulation loop
+    - Engine and scene
+    - Renderer, viewer, lighting
+    - Run a simulation loop
 
 Notes:
-    1. For one process, you can only create one engine and one renderer.
+    - For one process, you can only create one engine and one renderer.
 """
 
 import sapien.core as sapien
@@ -52,8 +52,6 @@ def main():
         scene.step()  # Simulate the world
         scene.update_render()  # Update the world to the renderer
         viewer.render()
-    
-    del scene
 
 
 if __name__ == '__main__':
