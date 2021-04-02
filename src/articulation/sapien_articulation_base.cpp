@@ -1,8 +1,14 @@
+#include <filesystem>
+#include <map>
+
+#include <eigen3/Eigen/Eigen>
+#include <spdlog/spdlog.h>
+
 #include "sapien_articulation_base.h"
 #include "sapien_joint.h"
 #include "sapien_link.h"
 #include "sapien_scene.h"
-#include <eigen3/Eigen/Eigen>
+
 #ifdef _USE_PINOCCHIO
 #include "pinocchio_model.h"
 #endif
@@ -20,6 +26,9 @@ void SArticulationBase::markDestroyed() {
   }
 }
 
+/************************************************
+ * Export URDF for Forward/Inverse Kinematics
+ ***********************************************/
 static std::string exportLink(SLinkBase *link) {
   std::stringstream ss;
   std::string name = std::to_string(link->getIndex());
@@ -147,25 +156,61 @@ std::string SArticulationBase::exportKinematicsChainAsURDF(bool fixRoot) {
   return output;
 }
 
-std::string SArticulationBase::exportURDF() {
+/************************************************
+ * Export URDF for Motion Planning
+ ***********************************************/
+namespace fs = std::filesystem;
+
+std::string SArticulationBase::exportURDF(const std::string &cacheDir) {
   std::string output = "<?xml version=\"1.0\"?>\n";
-  output += "<robot name=\"\" >\n";
+  output += "<robot name=\"" + this->getName() + "\" >\n";
+
+  // Check whether each link name is unique
+  std::map<std::string, SLinkBase *> uniqueLinkNames;
+  auto baseLinks = this->getBaseLinks();
+  for (auto iter = baseLinks.begin(); iter != baseLinks.end(); ++iter) {
+    std::string linkName = (*iter)->getName();
+    auto res = uniqueLinkNames.find(linkName);
+    if (res == uniqueLinkNames.end()) {
+      uniqueLinkNames.insert(std::make_pair(linkName, *iter));
+    } else {
+      throw std::runtime_error("Not unique link name:" + linkName);
+    }
+  }
+
+  // Check whether each joint name is unique
+  std::map<std::string, SJointBase *> uniqueJointNames;
+  auto baseJoints = this->getBaseJoints();
+  for (auto iter = baseJoints.begin(); iter != baseJoints.end(); ++iter) {
+    auto jointName = (*iter)->getName();
+    auto res = uniqueJointNames.find(jointName);
+    if (res == uniqueJointNames.end()) {
+      uniqueJointNames.insert(std::make_pair(jointName, *iter));
+    } else {
+      throw std::runtime_error("Not unique joint name:" + jointName);
+    }
+  }
+
+  // Check cache directory
+  if (!fs::exists(fs::path(cacheDir))) {
+    spdlog::get("SAPIEN")->warn("The cache directory to export meshes does not exist: {}",
+                                cacheDir);
+  }
 
   auto *rootLink = getRootLink();
-  output += exportTreeURDF(rootLink, PxTransform(PxIDENTITY()));
+  output += exportTreeURDF(rootLink, PxTransform(PxIDENTITY()), cacheDir);
 
   output += "\n</robot>";
   return output;
 }
 
 static std::string exportLinkURDF(SLinkBase *link, physx::PxTransform extraTransform,
-                                  bool returnVisual = false) {
+                                  const std::string &cacheDir) {
   std::stringstream ss;
-  std::string name = std::to_string(link->getIndex());
 
   auto mCollisionShapes = link->getCollisionShapes();
   for (auto mCollisionShape : mCollisionShapes) {
-    ss << (returnVisual ? "<visual>" : "<collision>");
+    ss << "<collision>";
 
     PxTransform localPose = mCollisionShape->getLocalPose();
     PxTransform URDFPose = extraTransform * localPose; // TODO: check order
@@ -175,17 +220,21 @@ static std::string exportLinkURDF(SLinkBase *link, physx::PxTransform extraTrans
     q.y() = URDFPose.q.y;
     q.z() = URDFPose.q.z;
     auto eulerAngles = q.toRotationMatrix().eulerAngles(2, 1, 0); // TODO: maybe simplified
-    ss << "<origin xyz=\"" << URDFPose.p.x << " " << URDFPose.p.y << " " << URDFPose.p.z << "\" rpy=\""
-       << eulerAngles[2] << " " << eulerAngles[1] << " " << eulerAngles[0] << "\" />";
+    ss << "<origin xyz=\"" << URDFPose.p.x << " " << URDFPose.p.y << " " << URDFPose.p.z
+       << "\" rpy=\"" << eulerAngles[2] << " " << eulerAngles[1] << " " << eulerAngles[0]
+       << "\" />";
 
     ss << "<geometry>";
+
     auto mPxShape = mCollisionShape->getPxShape();
     switch (mPxShape->getGeometryType()) {
     case PxGeometryType::eBOX: {
       PxBoxGeometry g;
       mPxShape->getBoxGeometry(g);
       auto x = g.halfExtents.x, y = g.halfExtents.y, z = g.halfExtents.z;
-      x *= 2.0; y *= 2.0; z *= 2.0;
+      x *= 2.0;
+      y *= 2.0;
+      z *= 2.0;
       ss << "<box size=\"" << x << " " << y << " " << z << "\" />";
       break;
     }
@@ -201,14 +250,26 @@ static std::string exportLinkURDF(SLinkBase *link, physx::PxTransform extraTrans
       ss << "<capsule radius=\"" << g.radius << "\"length=\"" << g.halfHeight * 2.0 << "\" />";
       break;
     }
+    case PxGeometryType::eCONVEXMESH: {
+      std::string baseName = link->getName() + ".convex.stl";
+      fs::path fullPath = fs::path(cacheDir) / fs::path(baseName);
+      PxConvexMeshGeometry g;
+      mPxShape->getConvexMeshGeometry(g);
+      /* mesh_manager.cpp */
+      void exportMeshToFile(PxConvexMesh * pxMesh, const std::string &filename);
+      exportMeshToFile(g.convexMesh, fullPath.string());
+      ss << "<mesh filename=\"" << baseName << "\" />";
+      break;
+    }
     default:
-      std::cerr << "Currently not supported URDF geometry type: " << mPxShape->getGeometryType()
-                << std::endl;
+      std::cerr << "The geometry type " << mPxShape->getGeometryType()
+                << " is not supported when exporting URDF." << std::endl;
       exit(1);
       break;
     }
+
     ss << "</geometry>";
-    ss << (returnVisual ? "</visual>" : "</collision>");
+    ss << "</collision>";
   }
 
   return ss.str();
@@ -249,12 +310,11 @@ static std::string exportJointURDF(SJointBase *joint, physx::PxTransform extraPa
   auto pEulerAngles = q.toRotationMatrix().eulerAngles(2, 1, 0); // TODO: maybe simplified
   extraChildTransform = c2j;
 
-  ss << "<joint name=\"joint_" << joint->getChildLink()->getIndex() << "\" type=\"" << type
-     << "\">";
+  ss << "<joint name=\"" << joint->getName() << "\" type=\"" << type << "\">";
   ss << "<origin xyz=\"" << j2p.p.x << " " << j2p.p.y << " " << j2p.p.z << "\" rpy=\""
      << pEulerAngles[2] << " " << pEulerAngles[1] << " " << pEulerAngles[0] << "\" />";
-  ss << "<parent link=\"link_" << joint->getParentLink()->getIndex() << "\" />";
-  ss << "<child link=\"link_" << joint->getChildLink()->getIndex() << "\" />";
+  ss << "<parent link=\"" << joint->getParentLink()->getName() << "\" />";
+  ss << "<child link=\"" << joint->getChildLink()->getName() << "\" />";
   if (type == "prismatic" || type == "revolute") {
     ss << "<limit effort=\"0\" velocity=\"0\" lower=\"" << joint->getLimits()[0][0]
        << "\" upper=\"" << joint->getLimits()[0][1] << "\" />";
@@ -264,16 +324,29 @@ static std::string exportJointURDF(SJointBase *joint, physx::PxTransform extraPa
   return ss.str();
 }
 
+static void replaceAll(std::string &str, const std::string &from, const std::string &to) {
+  if (from.empty())
+    return;
+  size_t start_pos = 0;
+  while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    str.replace(start_pos, from.length(), to);
+    start_pos += to.length(); // In case 'to' contains 'from', like replacing 'x' with 'yx'
+  }
+}
+
 std::string SArticulationBase::exportTreeURDF(SLinkBase *link, physx::PxTransform extraTransform,
-                                              bool exportVisual) {
+                                              const std::string &cacheDir, bool exportVisual) {
   std::stringstream ss;
-  std::string name = std::to_string(link->getIndex());
 
   /* Link */
-  ss << "<link name=\"link_" << link->getIndex() << "\">";
-  ss << exportLinkURDF(link, extraTransform); // collision
-  if (exportVisual)
-    ss << exportLinkURDF(link, extraTransform, true); // visual
+  ss << "<link name=\"" << link->getName() << "\">";
+  std::string collision_str = exportLinkURDF(link, extraTransform, cacheDir);
+  ss << collision_str; // collision
+  if (exportVisual) {
+    std::string visual_str = collision_str;
+    replaceAll(visual_str, "collision>", "visual>");
+    ss << visual_str; // visual
+  }
   ss << "</link>";
 
   /* Joint */
@@ -281,7 +354,8 @@ std::string SArticulationBase::exportTreeURDF(SLinkBase *link, physx::PxTransfor
     if (joint->getParentLink() == link) {
       PxTransform extraChildTransform;
       ss << exportJointURDF(joint, extraTransform, extraChildTransform);
-      ss << exportTreeURDF(joint->getChildLink(), extraChildTransform, exportVisual); // recursive
+      // recursively parse the tree
+      ss << exportTreeURDF(joint->getChildLink(), extraChildTransform, cacheDir, exportVisual);
     }
   }
 

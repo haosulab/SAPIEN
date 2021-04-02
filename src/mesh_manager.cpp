@@ -14,7 +14,7 @@
 namespace sapien {
 namespace fs = std::experimental::filesystem;
 
-static void exportMeshToFile(PxConvexMesh *pxMesh, const std::string &filename) {
+void exportMeshToFile(PxConvexMesh *pxMesh, const std::string &filename) {
   // check stl supported
   int formatCount = aiGetExportFormatCount();
   const char *stlId = nullptr;

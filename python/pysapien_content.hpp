@@ -988,7 +988,7 @@ void buildSapien(py::module &m) {
 #ifdef _USE_PINOCCHIO
       .def("create_pinocchio_model", &SArticulationBase::createPinocchioModel)
 #endif
-      .def("export_urdf", &SArticulationBase::exportURDF)
+      .def("export_urdf", &SArticulationBase::exportURDF, py::arg("cache_dir") = std::string())
       ;
 
   PyArticulationDrivable

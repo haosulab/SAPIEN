@@ -59,7 +59,7 @@ public:
   virtual ~SArticulationBase() = default;
 
   std::string exportKinematicsChainAsURDF(bool fixRoot);
-  std::string exportURDF();
+  std::string exportURDF(const std::string &cacheDir);
 
   /** internal use only, actors marked as destroyed will be removed in the next step */
   void markDestroyed();
@@ -75,7 +75,7 @@ public:
 
 private:
   std::string exportTreeURDF(SLinkBase *link, physx::PxTransform extraTransform,
-                             bool exportVisual = true);
+                             const std::string &cacheDir, bool exportVisual = true);
 };
 
 class SArticulationDrivable : public SArticulationBase {
