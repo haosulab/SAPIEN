@@ -7,9 +7,7 @@
 #include "filter_shader.h"
 #include "simulation.h"
 
-#ifdef _PROFILE
 #include <easy/profiler.h>
-#endif
 
 namespace sapien {
 static PxDefaultAllocator gDefaultAllocatorCallback;
@@ -32,16 +30,14 @@ PxErrorCode::Enum SapienErrorCallback::getLastErrorCode() {
   return code;
 }
 
-Simulation::Simulation(PxReal toleranceLength, PxReal toleranceSpeed) : mMeshManager(this) {
+Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranceSpeed)
+    : mThreadCount(nthread), mMeshManager(this) {
   if (!spdlog::get("SAPIEN")) {
     auto logger = spdlog::stderr_color_mt("SAPIEN");
     setLogLevel("warn");
   }
 
-#ifdef _PROFILE
   profiler::startListen();
-  spdlog::get("SAPIEN")->info("Profiling enabled");
-#endif
 
   // TODO(fanbo): figure out what "track allocation" means in the PhysX doc
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, mErrorCallback);
@@ -132,8 +128,7 @@ std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
   sceneDesc.flags = sceneFlags;
 
   if (!mCpuDispatcher) {
-    // Note that the simulation in Sapien is synchronous
-    mCpuDispatcher = PxDefaultCpuDispatcherCreate(0);
+    mCpuDispatcher = PxDefaultCpuDispatcherCreate(mThreadCount);
     if (!mCpuDispatcher) {
       spdlog::get("SAPIEN")->critical("Failed to create PhysX CPU dispatcher");
       throw std::runtime_error("Scene Creation Failed");
@@ -167,6 +162,18 @@ void Simulation::setLogLevel(std::string const &level) {
   } else {
     spdlog::error("Invalid log level \"{}\"", level);
   }
+}
+
+std::shared_ptr<Simulation> Simulation::getInstance(uint32_t nthread, PxReal toleranceLength,
+                                                    PxReal toleranceSpeed) {
+  static std::shared_ptr<Simulation> _instance = nullptr;
+  if (_instance) {
+    spdlog::get("SAPIEN")->warn(
+        "Only one engine is allowed per process, using the previously created engine.");
+    return _instance;
+  }
+  _instance = std::make_shared<Simulation>(nthread, toleranceLength, toleranceSpeed);
+  return _instance;
 }
 
 } // namespace sapien

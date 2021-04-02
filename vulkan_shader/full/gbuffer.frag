@@ -81,7 +81,7 @@ void main() {
   }
 
   if ((materialBuffer.textureMask & 4) != 0) {
-    outNormal = vec4(normalize(inTbn * texture(normalTexture, inUV).xyz), 0);
+    outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
   } else {
     outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
   }

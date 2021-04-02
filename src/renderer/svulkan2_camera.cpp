@@ -20,6 +20,7 @@ SVulkan2Camera::SVulkan2Camera(std::string const &name, uint32_t width, uint32_t
   mCamera->setPerspectiveParameters(near, far, fovy, width / static_cast<float>(height));
   mCommandBuffer = context->createCommandBuffer();
   mFence = context->getDevice().createFenceUnique({vk::FenceCreateFlagBits::eSignaled});
+  mRenderer->setScene(*scene->getScene());
 }
 
 void SVulkan2Camera::takePicture() {
@@ -29,13 +30,7 @@ void SVulkan2Camera::takePicture() {
     throw std::runtime_error("take picture failed: wait for fence failed");
   }
   context->getDevice().resetFences(mFence.get());
-  mCommandBuffer->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-  mRenderer->render(mCommandBuffer.get(), *mScene->getScene(), *mCamera);
-  mCommandBuffer->end();
-
-  vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-  vk::SubmitInfo info(0, nullptr, &waitStage, 1, &mCommandBuffer.get(), 0, nullptr);
-  context->getQueue().submit(info, mFence.get());
+  mRenderer->render(*mCamera, {}, {}, {}, mFence.get());
 }
 
 std::vector<float> SVulkan2Camera::getColorRGBA() {
@@ -64,18 +59,37 @@ std::vector<int> SVulkan2Camera::getObjSegmentation() {
                            "get{Uint32/Uint8/Float}Texture(\"textureName\") instead.");
 }
 
+void SVulkan2Camera::waitForFence() {
+  auto result = mScene->getParentRenderer()->mContext->getDevice().waitForFences(
+      mFence.get(), VK_TRUE, UINT64_MAX);
+  if (result != vk::Result::eSuccess) {
+    throw std::runtime_error("take picture failed: wait for fence failed");
+  }
+}
+
 std::tuple<std::vector<float>, std::array<uint32_t, 3>>
 SVulkan2Camera::getFloatTexture(std::string const &textureName) {
+  waitForFence();
   return mRenderer->download<float>(textureName);
 }
 std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>
 SVulkan2Camera::getUint32Texture(std::string const &textureName) {
+  waitForFence();
   return mRenderer->download<uint32_t>(textureName);
 }
 std::tuple<std::vector<uint8_t>, std::array<uint32_t, 3>>
 SVulkan2Camera::getUint8Texture(std::string const &textureName) {
+  waitForFence();
   return mRenderer->download<uint8_t>(textureName);
 }
+
+#ifdef SAPIEN_DLPACK_INTEROP
+std::tuple<std::shared_ptr<svulkan2::core::CudaBuffer>, std::array<uint32_t, 2>, vk::Format>
+SVulkan2Camera::getCudaBuffer(std::string const &textureName) {
+  // wait for fence is not needed
+  return mRenderer->transferToCuda(textureName);
+}
+#endif
 
 glm::mat4 SVulkan2Camera::getModelMatrix() const { return mCamera->computeWorldModelMatrix(); }
 glm::mat4 SVulkan2Camera::getProjectionMatrix() const { return mCamera->getProjectionMatrix(); }

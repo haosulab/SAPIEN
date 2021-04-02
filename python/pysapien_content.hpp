@@ -1,4 +1,7 @@
 #pragma once
+// #include "utils/torch_tensor.hpp"
+#include "utils/dlpack_tensor.hpp"
+
 #include "renderer/optifuser_controller.h"
 #include "renderer/optifuser_renderer.h"
 
@@ -540,7 +543,10 @@ void buildSapien(py::module &m) {
 
   //======== Simulation ========//
   PyEngine
-      .def(py::init<PxReal, PxReal>(), py::arg("tolerance_length") = 0.1f,
+      .def(py::init([](uint32_t nthread, PxReal toleranceLength, PxReal toleranceSpeed) {
+             return Simulation::getInstance(nthread, toleranceLength, toleranceSpeed);
+           }),
+           py::arg("thread_count") = 0, py::arg("tolerance_length") = 0.1f,
            py::arg("tolerance_speed") = 0.2f)
       .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig())
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
@@ -982,6 +988,7 @@ void buildSapien(py::module &m) {
 #ifdef _USE_PINOCCHIO
       .def("create_pinocchio_model", &SArticulationBase::createPinocchioModel)
 #endif
+      .def("export_urdf", &SArticulationBase::exportURDF, py::arg("cache_dir") = std::string())
       ;
 
   PyArticulationDrivable
@@ -1441,7 +1448,10 @@ void buildSapien(py::module &m) {
       .def(py::init<bool, uint32_t, uint32_t, uint32_t>(), py::arg("offscreen_only") = false,
            py::arg("max_num_materials") = 5000, py::arg("max_num_textures") = 5000,
            py::arg("default_mipmap_levels") = 1)
-      .def_static("set_shader_dir", &Renderer::setDefaultShaderDirectory, py::arg("shader_dir"))
+      .def_static("set_viewer_shader_dir", &Renderer::setDefaultViewerShaderDirectory,
+                  py::arg("shader_dir"))
+      .def_static("set_camera_shader_dir", &Renderer::setDefaultCameraShaderDirectory,
+                  py::arg("shader_dir"))
       .def(
           "create_window",
           [](std::shared_ptr<Renderer::SVulkan2Renderer> renderer, int width, int height,
@@ -1483,6 +1493,28 @@ void buildSapien(py::module &m) {
             }
           },
           py::arg("texture_name"))
+#ifdef SAPIEN_DLPACK_INTEROP
+      .def(
+          "get_dl_tensor",
+          [](Renderer::SVulkan2Camera &cam, std::string const &name) {
+            auto [buffer, sizes, format] = cam.getCudaBuffer(name);
+            std::vector<long> dim;
+            for (auto s : sizes) {
+              dim.push_back(s);
+            }
+            DLManagedTensor *tensor = DLTensorFromCudaBuffer(std::move(buffer), dim, format);
+            auto capsule_destructor = [](PyObject *data) {
+              DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
+              if (tensor) {
+                tensor->deleter(const_cast<DLManagedTensor *>(tensor));
+              } else {
+                PyErr_Clear();
+              }
+            };
+            return py::capsule(tensor, "dltensor", capsule_destructor);
+          },
+          py::arg("texture_name"))
+#endif
       .def("get_camera_matrix",
            [](Renderer::SVulkan2Camera &c) { return mat42array(c.getCameraMatrix()); })
       .def("get_model_matrix",
@@ -1536,11 +1568,12 @@ void buildSapien(py::module &m) {
           },
           py::arg("scene"))
       .def_property_readonly("target_names", &Renderer::SVulkan2Window::getDisplayTargetNames)
+      .def("get_target_size", &Renderer::SVulkan2Window::getRenderTargetSize, py::arg("name"))
       .def("render", &Renderer::SVulkan2Window::render, py::arg("target_name"),
            py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>())
       .def("resize", &Renderer::SVulkan2Window::resize, py::arg("width"), py::arg("height"))
       .def_property_readonly("fps", &Renderer::SVulkan2Window::getFPS)
-      .def_property_readonly("size", &Renderer::SVulkan2Window::getActualWindowSize)
+      .def_property_readonly("size", &Renderer::SVulkan2Window::getWindowSize)
 
       // Download images from window
       .def(

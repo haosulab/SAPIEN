@@ -12,8 +12,11 @@ class SVulkan2Rigidbody;
 class SVulkan2Camera;
 class SVulkan2Scene;
 
-extern std::string gDefaultShaderDirectory;
-void setDefaultShaderDirectory(std::string const &dir);
+extern std::string gDefaultViewerShaderDirectory;
+void setDefaultViewerShaderDirectory(std::string const &dir);
+
+extern std::string gDefaultCameraShaderDirectory;
+void setDefaultCameraShaderDirectory(std::string const &dir);
 
 class SVulkan2Material : public IPxrMaterial {
   std::shared_ptr<svulkan2::resource::SVMetallicMaterial> mMaterial;
@@ -199,6 +202,11 @@ public:
 
   std::tuple<std::vector<uint8_t>, std::array<uint32_t, 3>>
   getUint8Texture(std::string const &textureName);
+
+#ifdef SAPIEN_DLPACK_INTEROP
+  std::tuple<std::shared_ptr<svulkan2::core::CudaBuffer>, std::array<uint32_t, 2>, vk::Format>
+  getCudaBuffer(std::string const &textureName);
+#endif
 
   inline IPxrScene *getScene() override { return mScene; }
 

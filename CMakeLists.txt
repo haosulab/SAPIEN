@@ -6,7 +6,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -fsized-deallocation -Wno-deprecated-
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Do not try to build shared libraries")
 
-set(PROFILE FALSE CACHE BOOL "Whether to use Profiler")
+set(SAPIEN_PROFILE FALSE CACHE BOOL "Whether to use Profiler")
+set(SAPIEN_DLPACK_INTEROP TRUE CACHE BOOL "Whether to use render to tensor")
 set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
 
@@ -22,6 +23,7 @@ if (ROS)
     endif ()
 endif ()
 
+add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
@@ -29,6 +31,15 @@ endif ()
 
 set(CMAKE_DEBUG_POSTFIX "")
 set(OpenGL_GL_PREFERENCE "LEGACY")
+
+include_directories("3rd_party/sapien-vulkan-2/3rd_party/easy_profiler/easy_profiler_core/include")
+if (${SAPIEN_PROFILE})
+    add_definitions(-DBUILD_WITH_EASY_PROFILER)
+    set(EASY_PROFILER_LIBRARY easy_profiler)
+    message("-- Profiler On")
+else ()
+    message("-- Profiler Off")
+endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("-- DEBUG Build")
@@ -49,7 +60,7 @@ endif ()
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(ASSIMP REQUIRED)
+find_package(assimp REQUIRED)
 find_package(spdlog REQUIRED)
 
 if (EXISTS ${CUDA_INCLUDE_PATH})
@@ -99,6 +110,15 @@ if (MACOSX)
     include_directories("/usr/local/include" "/usr/local/opt/glew/include"
             "/usr/local/include/eigen3")
     link_directories(/usr/local/lib/)
+else()
+    include_directories("3rd_party/dlpack/include")
+
+    if (${SAPIEN_DLPACK_INTEROP})
+        include_directories("3rd_party/cuda_include")
+
+        add_definitions(-DSAPIEN_DLPACK_INTEROP)
+        add_definitions(-DCUDA_INTEROP)
+    endif ()
 endif ()
 
 ## Link directory inside the project
@@ -151,8 +171,6 @@ include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
 include_directories("$ENV{VULKAN_SDK}/include")
 link_directories("$ENV{VULKAN_SDK}/lib")
-set_target_properties(svulkan2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-set_target_properties(spirv-cross-core PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})
@@ -163,14 +181,6 @@ if (EXISTS ${OPTIX_HOME})
     add_dependencies(sapien ptx_dir)
 endif ()
 
-if (${PROFILE})
-    find_package(easy_profiler REQUIRED)
-    add_definitions(-D_PROFILE)
-    set(EASY_PROFILER_LIBRARY easy_profiler)
-    message("-- Profiler On")
-else ()
-    message("-- Profiler Off")
-endif ()
 
 if (MACOSX)
     target_link_libraries(sapien
@@ -199,6 +209,11 @@ set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 pybind11_add_module(pysapien "python/pysapien.cpp")
 target_link_libraries(pysapien PRIVATE sapien)
+
+if ((NOT MACOSX) AND (${SAPIEN_DLPACK_INTEROP}))
+    target_link_libraries(pysapien PRIVATE "${CMAKE_SOURCE_DIR}/3rd_party/cuda_lib/libcudart_static.a")
+endif ()
+
 
 file(GLOB_RECURSE UNITTEST_SRC unittest/*.cpp)
 

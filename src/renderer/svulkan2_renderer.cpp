@@ -4,8 +4,11 @@
 namespace sapien {
 namespace Renderer {
 
-std::string gDefaultShaderDirectory = "";
-void setDefaultShaderDirectory(std::string const &dir) { gDefaultShaderDirectory = dir; }
+std::string gDefaultViewerShaderDirectory = "";
+void setDefaultViewerShaderDirectory(std::string const &dir) { gDefaultViewerShaderDirectory = dir; }
+
+std::string gDefaultCameraShaderDirectory = "";
+void setDefaultCameraShaderDirectory(std::string const &dir) { gDefaultCameraShaderDirectory = dir; }
 
 void SVulkan2Renderer::setLogLevel(std::string const &level) {
   if (level == "debug") {

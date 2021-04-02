@@ -1,4 +1,5 @@
 #include "svulkan2_window.h"
+#include <easy/profiler.h>
 
 namespace sapien {
 namespace Renderer {
@@ -51,7 +52,7 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
                                std::string const &shaderDir)
     : mRenderer(renderer), mShaderDir(shaderDir) {
   auto config = std::make_shared<svulkan2::RendererConfig>();
-  config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultShaderDirectory;
+  config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultViewerShaderDirectory;
   config->colorFormat = vk::Format::eR32G32B32A32Sfloat;
   mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(*mRenderer->mContext, config);
 
@@ -84,7 +85,10 @@ void SVulkan2Window::hide() { glfwHideWindow(mWindow->getGLFWWindow()); }
 
 void SVulkan2Window::show() { glfwShowWindow(mWindow->getGLFWWindow()); }
 
-void SVulkan2Window::setScene(SVulkan2Scene *scene) { mScene = scene; }
+void SVulkan2Window::setScene(SVulkan2Scene *scene) {
+  mScene = scene;
+  mSVulkanRenderer->setScene(*mScene->getScene());
+}
 
 void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {
   float aspect = mWindow->getHeight() == 0
@@ -189,20 +193,35 @@ void SVulkan2Window::render(std::string const &targetName,
   }
   mRenderer->mContext->getDevice().resetFences(mSceneRenderFence.get());
 
+#ifdef BUILD_WITH_EASY_PROFILER
+  {
+    EASY_BLOCK("Rendering CPU+GPU");
+    auto fence = mRenderer->mContext->getDevice().createFenceUnique({});
+    // draw
+    mSVulkanRenderer->render(*camera, {}, {}, {}, {});
+    auto imageAcquiredSemaphore = mWindow->getImageAcquiredSemaphore();
+    mSVulkanRenderer->display(targetName, mWindow->getBackbuffer(), mWindow->getBackBufferFormat(),
+                              mWindow->getWidth(), mWindow->getHeight(), {imageAcquiredSemaphore},
+                              {vk::PipelineStageFlagBits::eColorAttachmentOutput},
+                              {mSceneRenderSemaphore.get()}, fence.get());
+
+    if (mRenderer->mContext->getDevice().waitForFences(fence.get(), VK_TRUE, UINT64_MAX) !=
+        vk::Result::eSuccess) {
+      throw std::runtime_error("failed on wait for fence.");
+    }
+    mRenderer->mContext->getDevice().resetFences(fence.get());
+  }
+#else
   {
     // draw
-    mCommandBuffer->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-    mSVulkanRenderer->render(mCommandBuffer.get(), *mScene->getScene(), *camera);
-    mSVulkanRenderer->display(mCommandBuffer.get(), targetName, mWindow->getBackbuffer(),
-                              mWindow->getBackBufferFormat(), mWindow->getWidth(),
-                              mWindow->getHeight());
-    mCommandBuffer->end();
+    mSVulkanRenderer->render(*camera, {}, {}, {}, {});
     auto imageAcquiredSemaphore = mWindow->getImageAcquiredSemaphore();
-    vk::PipelineStageFlags waitStage = vk::PipelineStageFlagBits::eColorAttachmentOutput;
-    vk::SubmitInfo info(1, &imageAcquiredSemaphore, &waitStage, 1, &mCommandBuffer.get(), 1,
-                        &mSceneRenderSemaphore.get());
-    mRenderer->mContext->getQueue().submit(info, {});
+    mSVulkanRenderer->display(targetName, mWindow->getBackbuffer(), mWindow->getBackBufferFormat(),
+                              mWindow->getWidth(), mWindow->getHeight(), {imageAcquiredSemaphore},
+                              {vk::PipelineStageFlagBits::eColorAttachmentOutput},
+                              {mSceneRenderSemaphore.get()}, {});
   }
+#endif
 
   auto swapchain = mWindow->getSwapchain();
   auto fidx = mWindow->getFrameIndex();
@@ -277,6 +296,11 @@ SVulkan2Window::downloadFloatTarget(std::string const &name) {
   return mSVulkanRenderer->download<float>(name);
 }
 
+std::array<uint32_t, 2> SVulkan2Window::getRenderTargetSize(std::string const &name) const {
+  auto target = mSVulkanRenderer->getRenderTarget(name);
+  return {target->getWidth(), target->getHeight()};
+}
+
 std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>
 SVulkan2Window::downloadUint32Target(std::string const &name) {
   if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR32G32B32A32Uint) {
@@ -344,19 +368,10 @@ std::array<float, 2> SVulkan2Window::getMouseWheelDelta() {
   return {x, y};
 }
 
-std::array<float, 2> SVulkan2Window::getActualWindowSize() {
-  // FIXME:
-  //   on Linux: (mViewportWidth, mViewportHeight) is the actual window size
-  //   on macOS: should be divided by scale
-#if defined(__APPLE__)
-  float scale = mWindow->getContentScale();
-#else
-  float scale = 1.f;
-#endif
-  return {
-      static_cast<float>(mViewportWidth) / scale,
-      static_cast<float>(mViewportHeight) / scale
-  };
+std::array<int, 2> SVulkan2Window::getWindowSize() {
+  int width, height;
+  glfwGetWindowSize(mWindow->getGLFWWindow(), &width, &height);
+  return {width, height};
 }
 
 float SVulkan2Window::getFPS() { return ImGui::GetIO().Framerate; }
