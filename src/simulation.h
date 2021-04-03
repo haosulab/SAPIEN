@@ -47,6 +47,10 @@ public:
   ~Simulation();
 
   std::unique_ptr<SScene> createScene(SceneConfig const &config = {});
+
+  std::shared_ptr<SPhysicalMaterial>
+  createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction, PxReal restitution) const;
+
   std::unique_ptr<SCollisionShape>
   createCollisionShape(PxGeometry const &geometry, std::shared_ptr<SPhysicalMaterial> material);
 

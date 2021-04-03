@@ -551,7 +551,10 @@ void buildSapien(py::module &m) {
       .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig())
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
       .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
-      .def("set_log_level", &Simulation::setLogLevel, py::arg("level"));
+      .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
+      .def("create_physical_material", &Simulation::createPhysicalMaterial, py::arg("static_friction"),
+           py::arg("dynamic_friction"), py::arg("restitution"))
+      ;
 
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)
@@ -580,7 +583,7 @@ void buildSapien(py::module &m) {
       .def("create_articulation_builder", &SScene::createArticulationBuilder)
       .def("create_urdf_loader", &SScene::createURDFLoader)
       .def("create_physical_material", &SScene::createPhysicalMaterial, py::arg("static_friction"),
-           py::arg("dynamic_friction"), py::arg("restitution"), py::return_value_policy::reference)
+           py::arg("dynamic_friction"), py::arg("restitution"))
       .def("remove_actor", &SScene::removeActor, py::arg("actor"))
       .def("remove_articulation", &SScene::removeArticulation, py::arg("articulation"))
       .def("remove_kinematic_articulation", &SScene::removeKinematicArticulation,

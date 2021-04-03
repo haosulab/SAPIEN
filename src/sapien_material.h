@@ -6,9 +6,10 @@ namespace sapien {
 
 class SPhysicalMaterial : public std::enable_shared_from_this<SPhysicalMaterial> {
   physx::PxMaterial *mMaterial;
+  std::shared_ptr<class Simulation const> mSimulation;
 
 public:
-  SPhysicalMaterial(physx::PxMaterial *material);
+  SPhysicalMaterial(std::shared_ptr<class Simulation const> simulation, physx::PxMaterial *material);
 
   SPhysicalMaterial(SPhysicalMaterial const &other) = delete;
   SPhysicalMaterial &operator=(SPhysicalMaterial const &other) = delete;

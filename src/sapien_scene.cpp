@@ -58,7 +58,7 @@ SScene::~SScene() {
     drive.release();
   }
   mPxScene->release();
-  
+
   // TODO: check whether we implement mXXX.release() to replace the workaround
   mActors.clear();
   mArticulations.clear();
@@ -78,10 +78,7 @@ SScene::~SScene() {
 std::shared_ptr<SPhysicalMaterial> SScene::createPhysicalMaterial(PxReal staticFriction,
                                                                   PxReal dynamicFriction,
                                                                   PxReal restitution) const {
-  auto mat =
-      mSimulationShared->mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
-  mat->setFlag(PxMaterialFlag::eIMPROVED_PATCH_FRICTION, true);
-  return std::make_shared<SPhysicalMaterial>(mat);
+  return mSimulationShared->createPhysicalMaterial(staticFriction, dynamicFriction, restitution);
 }
 
 std::unique_ptr<ActorBuilder> SScene::createActorBuilder() {
