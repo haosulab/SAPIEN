@@ -4,10 +4,10 @@ Each actor in the articulation is also called link.
 The robot is an instance of articulation.
 
 Concepts:
-    1. Create an articulation
-    2. Control the articulation basically (builtin position and velocity controller)
+    - Create an articulation
+    - Control the articulation basically (builtin position and velocity controller)
         sapien.Articulation.set_qf, sapien.Joint.set_drive_velocity_target
-    3. sapien.Articulation.get_qpos, sapien.Articulation.get_qvel
+    - sapien.Articulation.get_qpos, sapien.Articulation.get_qvel
 """
 
 import sapien.core as sapien

@@ -6,11 +6,11 @@ The default physical properties can be modified through sapien.SceneConfig.
 The physical material can be specified before each actor is built.
 
 Concepts:
-    1. sapien.SceneConfig containing default physical parameters
-    2. sapien.PhysicalMaterial (created by sapien.Scene only)
-    3. kinematic actors
-    4. sapien.Actor.set_damping
-    5. Get kinematic quantities through
+    - sapien.SceneConfig containing default physical parameters
+    - sapien.PhysicalMaterial (created by sapien.Scene only)
+    - kinematic actors
+    - sapien.Actor.set_damping
+    - Get kinematic quantities through
         sapien.Actor.get_pose(), sapien.Actor.get_velocity(), sapien.Actor.get_angular_velocity()
 """
 
