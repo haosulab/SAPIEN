@@ -155,8 +155,8 @@ def main():
 
     # add a mesh
     builder = scene.create_actor_builder()
-    builder.add_convex_shape_from_file(filename='banana/collision_meshes/collision.obj')
-    builder.add_visual_from_file(filename='banana/visual_meshes/visual.dae')
+    builder.add_convex_shape_from_file(filename='../assets/banana/collision_meshes/collision.obj')
+    builder.add_visual_from_file(filename='../assets/banana/visual_meshes/visual.dae')
     mesh = builder.build(name='mesh')
     mesh.set_pose(sapien.Pose(p=[-0.2, 0, 1.0 + 0.05]))
 

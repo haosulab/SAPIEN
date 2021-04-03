@@ -6,6 +6,7 @@ Welcome to sapien's documentation!
    :caption: Tutorial
 
    tutorial/basic/index
+   tutorial/rendering/index
 
 Indices and tables
 ==================
