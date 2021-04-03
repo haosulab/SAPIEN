@@ -262,9 +262,7 @@ static std::string exportLinkURDF(SLinkBase *link, physx::PxTransform extraTrans
       break;
     }
     default:
-      std::cerr << "The geometry type " << mPxShape->getGeometryType()
-                << " is not supported when exporting URDF." << std::endl;
-      exit(1);
+      throw std::runtime_error("Currently only capsule, sphere and box are supported in URDF");
       break;
     }
 

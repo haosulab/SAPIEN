@@ -23,8 +23,6 @@ if (ROS)
     endif ()
 endif ()
 
-add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif ()
@@ -115,6 +113,7 @@ else()
 
     if (${SAPIEN_DLPACK_INTEROP})
         include_directories("3rd_party/cuda_include")
+        link_directories("${CMAKE_SOURCE_DIR}/3rd_party/cuda_lib")
 
         add_definitions(-DSAPIEN_DLPACK_INTEROP)
         add_definitions(-DCUDA_INTEROP)
