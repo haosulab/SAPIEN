@@ -206,7 +206,7 @@ endif ()
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-pybind11_add_module(pysapien "python/pysapien.cpp")
+pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
 target_link_libraries(pysapien PRIVATE sapien)
 
 if ((NOT MACOSX) AND (${SAPIEN_DLPACK_INTEROP}))
