@@ -5,10 +5,14 @@ namespace sapien {
 namespace Renderer {
 
 std::string gDefaultViewerShaderDirectory = "";
-void setDefaultViewerShaderDirectory(std::string const &dir) { gDefaultViewerShaderDirectory = dir; }
+void setDefaultViewerShaderDirectory(std::string const &dir) {
+  gDefaultViewerShaderDirectory = dir;
+}
 
 std::string gDefaultCameraShaderDirectory = "";
-void setDefaultCameraShaderDirectory(std::string const &dir) { gDefaultCameraShaderDirectory = dir; }
+void setDefaultCameraShaderDirectory(std::string const &dir) {
+  gDefaultCameraShaderDirectory = dir;
+}
 
 void SVulkan2Renderer::setLogLevel(std::string const &level) {
   if (level == "debug") {
@@ -36,8 +40,9 @@ void SVulkan2Material::setMetallic(float metallic) { mMaterial->setMetallic(meta
 
 SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
                                    uint32_t maxNumTextures, uint32_t defaultMipLevels) {
-  mContext = std::make_unique<svulkan2::core::Context>(
+  mContext = std::make_shared<svulkan2::core::Context>(
       VK_API_VERSION_1_1, !offscreenOnly, maxNumMaterials, maxNumTextures, defaultMipLevels);
+  mResourceManager = mContext->createResourceManager();
 }
 
 SVulkan2Scene *SVulkan2Renderer::createScene(std::string const &name) {

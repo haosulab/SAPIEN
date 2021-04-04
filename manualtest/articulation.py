@@ -23,8 +23,7 @@ copper.set_base_color([0.875, 0.553, 0.221, 1])
 copper.set_metallic(1)
 copper.set_roughness(0.4)
 
-# viewer = Viewer(renderer, "../vulkan_shader/full")
-viewer = Viewer(renderer, "../vulkan_shader/default_camera")
+# viewer = Viewer(renderer, "../vulkan_shader/default_camera")
 
 
 def create_ant_builder(scene):
@@ -162,74 +161,80 @@ mount = scene.create_actor_builder().build(True)
 mount.set_pose(Pose([-1, 0, -2]))
 cam = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
 
-ant_builder = create_ant_builder(scene)
-ant = ant_builder.build()
-ant.set_root_pose(Pose([0, 0, 2]))
+# ant_builder = create_ant_builder(scene)
+# ant = ant_builder.build()
+# ant.set_root_pose(Pose([0, 0, 2]))
 
-urdf = download_partnet_mobility(
-    41083,
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjI0LjQzLjEyMy42OCIsInByaXZpbGVnZSI6MTAsImlhdCI6MTYxNjY0MDk2OCwiZXhwIjoxNjQ4MTc2OTY4fQ.B6Sa_S2-QNkauKSZu3Tg37OiaxSoWG-TLIVwTcrX46Q",
-)
-loader = scene.create_urdf_loader()
-loader.fix_root_link = True
-cabinet = loader.load(urdf)
-cabinet.set_pose(Pose([1, 0, -2]))
+# urdf = download_partnet_mobility(
+#     41083,
+#     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjI0LjQzLjEyMy42OCIsInByaXZpbGVnZSI6MTAsImlhdCI6MTYxNjY0MDk2OCwiZXhwIjoxNjQ4MTc2OTY4fQ.B6Sa_S2-QNkauKSZu3Tg37OiaxSoWG-TLIVwTcrX46Q",
+# )
+# loader = scene.create_urdf_loader()
+# loader.fix_root_link = True
+# cabinet = loader.load(urdf)
+# cabinet.set_pose(Pose([1, 0, -2]))
 
-for link in cabinet.get_links():
-    for s in link.get_collision_shapes():
-        s.set_collision_groups(1, 1, 1, 0)
+# for link in cabinet.get_links():
+#     for s in link.get_collision_shapes():
+#         s.set_collision_groups(1, 1, 1, 0)
 
-viewer.set_scene(scene)
-viewer.set_camera_xyz(-4, 0, -0.5)
-viewer.window.set_camera_parameters(0.1, 1000, 1)
+# viewer.set_scene(scene)
+# viewer.set_camera_xyz(-4, 0, -0.5)
+# viewer.window.set_camera_parameters(0.1, 1000, 1)
 
-scene.step()
-ant.set_qpos([0, 0, 0, 0, 0.7, 0.7, 0.7, 0.7])
-ant.set_qvel([0] * 8)
-f = [0.1] * 8
-acc = ant.compute_forward_dynamics([0.1] * 8)
-ant.set_qf(f)
-scene.step()
-
-
-scene.set_ambient_light([0.5, 0.5, 0.5])
-rs = scene.get_render_scene()
-rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
-
-rs.add_shadow_point_light([0, 1, 1], [1, 2, 2])
-rs.add_shadow_point_light([0, -1, 1], [2, 1, 2])
-rs.add_shadow_point_light([0, 1, -1], [2, 2, 1])
-
-selected_actor = None
-
-scene.update_render()
-
-import torch
-import torch.utils.dlpack
-
-count = 0
-while not viewer.closed:
-    for i in range(4):
-        scene.step()
-    scene.update_render()
-    viewer.render()
-
-    import time
-    start = time.time()
-    cam.take_picture()
-    img = cam.get_dl_tensor("Color")
-    img = torch.utils.dlpack.from_dlpack(img)
-    dur = time.time() - start
-    print("Render to tensor FPS: ", 1 / dur)
-
-    # import time
-    # start = time.time()
-    # cam.take_picture()
-    # img = cam.get_float_texture("Color")
-    # torch.tensor(img, device="cuda")
-    # dur = time.time() - start
-    # print("Torch CPU round trip FPS: ", 1 / dur)
+# scene.step()
+# ant.set_qpos([0, 0, 0, 0, 0.7, 0.7, 0.7, 0.7])
+# ant.set_qvel([0] * 8)
+# f = [0.1] * 8
+# acc = ant.compute_forward_dynamics([0.1] * 8)
+# ant.set_qf(f)
+# scene.step()
 
 
-viewer.close()
+# scene.set_ambient_light([0.5, 0.5, 0.5])
+# rs = scene.get_render_scene()
+# rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
+
+# rs.add_shadow_point_light([0, 1, 1], [1, 2, 2])
+# rs.add_shadow_point_light([0, -1, 1], [2, 1, 2])
+# rs.add_shadow_point_light([0, 1, -1], [2, 2, 1])
+
+# selected_actor = None
+
+# scene.update_render()
+
+# import torch
+# import torch.utils.dlpack
+
+# count = 0
+# while not viewer.closed:
+#     for i in range(4):
+#         scene.step()
+#     scene.update_render()
+#     viewer.render()
+
+#     # import time
+#     # start = time.time()
+#     # cam.take_picture()
+#     # img = cam.get_dl_tensor("Color")
+#     # img = torch.utils.dlpack.from_dlpack(img)
+#     # dur = time.time() - start
+#     # print("Render to tensor FPS: ", 1 / dur)
+
+#     # import time
+#     # start = time.time()
+#     # cam.take_picture()
+#     # img = cam.get_float_texture("Color")
+#     # depth = cam.get_float_texture("GbufferDepth")
+#     # normal = cam.get_float_texture("Normal")
+#     # torch.tensor(img, device="cuda")
+#     # dur = time.time() - start
+#     # print("Torch CPU round trip FPS: ", 1 / dur)
+
+
+# viewer.close()
+# scene.update_render()
+cam.take_picture()
+img = cam.get_float_texture("Color")
+
 scene = None

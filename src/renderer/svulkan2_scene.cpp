@@ -61,7 +61,7 @@ void SVulkan2Scene::destroy() { mParentRenderer->removeScene(this); }
 
 IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
                                            const physx::PxVec3 &scale) {
-  auto model = mParentRenderer->mContext->getResourceManager().CreateModelFromFile(meshFile);
+  auto model = mParentRenderer->mContext->getResourceManager()->CreateModelFromFile(meshFile);
   std::vector<svulkan2::scene::Object *> objects2;
   auto &obj = mScene->addObject(model);
   obj.setScale({scale.x, scale.y, scale.z});

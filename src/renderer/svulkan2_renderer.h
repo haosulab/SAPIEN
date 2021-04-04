@@ -147,7 +147,8 @@ public:
 
 class SVulkan2Renderer : public IPxrRenderer {
 public:
-  std::unique_ptr<svulkan2::core::Context> mContext = nullptr;
+  std::shared_ptr<svulkan2::core::Context> mContext{};
+  std::shared_ptr<svulkan2::resource::SVResourceManager> mResourceManager{};
 
 private:
   static std::string gDefaultSpvDir;
