@@ -8,7 +8,6 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Do not try to build shared libraries")
 
 set(SAPIEN_PROFILE FALSE CACHE BOOL "Whether to use Profiler")
 set(SAPIEN_DLPACK_INTEROP TRUE CACHE BOOL "Whether to use render to tensor")
-set(CUDA_INCLUDE_PATH "" CACHE FILEPATH "Path to CUDA include directory")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
 
 set(ROS2_VERSION "dashing" "eloquent")
@@ -61,10 +60,6 @@ find_package(GLEW REQUIRED)
 find_package(assimp REQUIRED)
 find_package(spdlog REQUIRED)
 
-if (EXISTS ${CUDA_INCLUDE_PATH})
-    include_directories(${CUDA_INCLUDE_PATH})
-endif ()
-
 include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
         "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
         "src/renderer"
@@ -112,9 +107,6 @@ else()
     include_directories("3rd_party/dlpack/include")
 
     if (${SAPIEN_DLPACK_INTEROP})
-        include_directories("3rd_party/cuda_include")
-        link_directories("${CMAKE_SOURCE_DIR}/3rd_party/cuda_lib")
-
         add_definitions(-DSAPIEN_DLPACK_INTEROP)
         add_definitions(-DCUDA_INTEROP)
     endif ()
@@ -165,11 +157,13 @@ include_directories("3rd_party/pybind11/include")
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
 include_directories("3rd_party/sapien-vulkan-2/include")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
+include_directories("3rd_party/sapien-vulkan-2/3rd_party/cuda_include")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
 include_directories("$ENV{VULKAN_SDK}/include")
 link_directories("$ENV{VULKAN_SDK}/lib")
+link_directories("3rd_party/sapien-vulkan-2/3rd_party/cuda_lib")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})
@@ -208,11 +202,6 @@ set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
 target_link_libraries(pysapien PRIVATE sapien)
-
-if ((NOT MACOSX) AND (${SAPIEN_DLPACK_INTEROP}))
-    target_link_libraries(pysapien PRIVATE "${CMAKE_SOURCE_DIR}/3rd_party/cuda_lib/libcudart_static.a")
-endif ()
-
 
 file(GLOB_RECURSE UNITTEST_SRC unittest/*.cpp)
 
