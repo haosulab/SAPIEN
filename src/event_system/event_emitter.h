@@ -12,6 +12,7 @@ template <typename T> class EventEmitter;
 class Subscription {
 public:
   virtual void unsubscribe() = 0;
+  virtual ~Subscription() = default;
 };
 
 template <typename T> class ListenerSubscription : public Subscription {

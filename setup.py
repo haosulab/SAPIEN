@@ -14,9 +14,8 @@ from distutils.version import LooseVersion
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--optix-home', type=str, default=None)
-parser.add_argument('--cuda-include-path', type=str, default=None)
 parser.add_argument('--debug', action='store_true')
-parser.add_argument('--profile_render', action='store_true')
+parser.add_argument('--profile', action='store_true')
 args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
 
@@ -48,19 +47,16 @@ class CMakeBuild(build_ext):
             cmake_args.append('-DOPTIX_HOME=' + args.optix_home)
             cmake_args.append('-DUSE_PRECOMPILED_PTX=ON')
 
-        if args.cuda_include_path:
-            cmake_args.append('-DCUDA_INCLUDE_PATH=' + args.cuda_include_path)
-
         if args.debug:
             cfg = 'Debug'
         else:
             cfg = 'Release'
         build_args = ['--config', cfg]
-        if args.profile_render:
+        if args.profile:
             cmake_args += ['-DSVULKAN2_PROFILE=ON']
             cmake_args += ['-DSAPIEN_PROFILE=ON']
 
-        cmake_args += ['-DSAPIEN_TORCH_INTEROP=ON']
+        cmake_args += ['-DSAPIEN_DLPACK_INTEROP=ON', '-DSVULKAN2_CUDA_INTEROP=ON']
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
         build_args += ['--', '-j8']

@@ -17,7 +17,7 @@ using namespace svulkan2;
 void buildRenderer(py::module &parent) {
   py::module m = parent.def_submodule("renderer");
 
-  auto PyContext = py::class_<core::Context>(m, "Context");
+  auto PyContext = py::class_<core::Context, std::shared_ptr<core::Context>>(m, "Context");
   auto PyScene = py::class_<scene::Scene>(m, "Scene");
   auto PySceneNode = py::class_<scene::Node>(m, "Node");
   auto PySceneObject = py::class_<scene::Object, scene::Node>(m, "Object");
@@ -248,13 +248,13 @@ void buildRenderer(py::module &parent) {
   // end UI
 
   PyContext
-      .def(py::init([](uint32_t maxNumMaterials, uint32_t maxNumTextures,
-                       uint32_t defaultMipmapLevels) {
-             return new core::Context(VK_API_VERSION_1_1, true, maxNumMaterials, maxNumTextures,
-                                      defaultMipmapLevels);
-           }),
-           py::return_value_policy::automatic, py::arg("max_num_materials") = 5000,
-           py::arg("max_num_textures") = 5000, py::arg("default_mipmap_levels") = 1)
+      // .def(py::init([](uint32_t maxNumMaterials, uint32_t maxNumTextures,
+      //                  uint32_t defaultMipmapLevels) {
+      //        return std::make_shared<core::Context>(VK_API_VERSION_1_1, true, maxNumMaterials,
+      //                                               maxNumTextures, defaultMipmapLevels);
+      //      }),
+      //      py::arg("max_num_materials") = 5000, py::arg("max_num_textures") = 5000,
+      //      py::arg("default_mipmap_levels") = 1)
       .def(
           "create_material",
           [](core::Context &context, py::array_t<float> baseColor, float fresnel, float roughness,
@@ -267,7 +267,7 @@ void buildRenderer(py::module &parent) {
       .def(
           "create_model_from_file",
           [](core::Context &context, std::string const &filename) {
-            context.getResourceManager().CreateModelFromFile(filename);
+            context.getResourceManager()->CreateModelFromFile(filename);
           },
           py::arg("filename"))
       .def(
@@ -294,7 +294,7 @@ void buildRenderer(py::module &parent) {
               throw std::runtime_error("unknown address mode: " + filter +
                                        ". should be one of repeat, border, or edge.");
             }
-            return context.getResourceManager().CreateTextureFromFile(
+            return context.getResourceManager()->CreateTextureFromFile(
                 filename, mipmapLevels, vkFilter, vkFilter, vkAddressMode, vkAddressMode);
           },
           py::arg("filename"), py::arg("mipmap_levels"), py::arg("filter") = "linear",

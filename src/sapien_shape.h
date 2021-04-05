@@ -10,6 +10,7 @@ class SActorBase;
 class SPhysicalMaterial;
 struct SGeometry {
   virtual std::string getType() const = 0;
+  virtual ~SGeometry() = default;
 };
 
 struct SBoxGeometry : public SGeometry {

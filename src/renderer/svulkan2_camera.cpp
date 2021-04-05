@@ -7,13 +7,13 @@ SVulkan2Camera::SVulkan2Camera(std::string const &name, uint32_t width, uint32_t
                                float fovy, float near, float far, SVulkan2Scene *scene,
                                std::string const &shaderDir)
     : mName(name), mWidth(width), mHeight(height), mScene(scene) {
-  auto &context = mScene->getParentRenderer()->mContext;
+  auto context = mScene->getParentRenderer()->mContext;
   auto config = std::make_shared<svulkan2::RendererConfig>();
   config->colorFormat = vk::Format::eR32G32B32A32Sfloat;
   config->depthFormat = vk::Format::eD32Sfloat;
   config->shaderDir = shaderDir;
 
-  mRenderer = std::make_unique<svulkan2::renderer::Renderer>(*context, config);
+  mRenderer = std::make_unique<svulkan2::renderer::Renderer>(context, config);
   mRenderer->resize(width, height);
 
   mCamera = &mScene->getScene()->addCamera();
@@ -24,7 +24,7 @@ SVulkan2Camera::SVulkan2Camera(std::string const &name, uint32_t width, uint32_t
 }
 
 void SVulkan2Camera::takePicture() {
-  auto &context = mScene->getParentRenderer()->mContext;
+  auto context = mScene->getParentRenderer()->mContext;
   auto result = context->getDevice().waitForFences(mFence.get(), VK_TRUE, UINT64_MAX);
   if (result != vk::Result::eSuccess) {
     throw std::runtime_error("take picture failed: wait for fence failed");

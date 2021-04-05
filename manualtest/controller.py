@@ -7,7 +7,7 @@ from sapien.core import (
     ArticulationBase,
     Articulation,
     Joint,
-    LinkBase
+    LinkBase,
 )
 from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector
@@ -704,6 +704,10 @@ class Viewer(object):
         self.scene = None
         self.fps_camera_controller = None
         self.window = None
+        self.control_window = None
+        self.scene_window = None
+        self.actor_window = None
+        self.articulation_window = None
 
     def focus_actor(self, actor):
         if actor == self.focused_actor:
@@ -787,6 +791,7 @@ class Viewer(object):
             self.build_scene_window()
             self.build_actor_window()
             self.build_articulation_window()
+
             self.window.render(
                 self.target_name,
                 [
@@ -881,3 +886,4 @@ class Viewer(object):
         w, h = self.window.size
         print(f"[I] windowSize: {w, h}; mousePose: {mx, my}")
         return mx >= 0 and my >= 0
+

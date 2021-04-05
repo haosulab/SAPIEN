@@ -146,13 +146,17 @@ public:
 };
 
 class SVulkan2Renderer : public IPxrRenderer {
+public:
+  std::shared_ptr<svulkan2::core::Context> mContext{};
+  std::shared_ptr<svulkan2::resource::SVResourceManager> mResourceManager{};
+
+private:
   static std::string gDefaultSpvDir;
   std::vector<std::unique_ptr<SVulkan2Scene>> mScenes;
 
 public:
   static void setLogLevel(std::string const &level);
 
-  std::unique_ptr<svulkan2::core::Context> mContext = nullptr;
   SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
                    uint32_t defaultMipLevels);
   SVulkan2Scene *createScene(std::string const &name) override;

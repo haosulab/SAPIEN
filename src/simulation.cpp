@@ -141,6 +141,14 @@ std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
   return std::make_unique<SScene>(this->shared_from_this(), pxScene, config);
 }
 
+std::shared_ptr<SPhysicalMaterial> Simulation::createPhysicalMaterial(PxReal staticFriction,
+                                                                      PxReal dynamicFriction,
+                                                                      PxReal restitution) const {
+  auto mat = mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
+  mat->setFlag(PxMaterialFlag::eIMPROVED_PATCH_FRICTION, true);
+  return std::make_shared<SPhysicalMaterial>(shared_from_this(), mat);
+}
+
 std::unique_ptr<SCollisionShape>
 Simulation::createCollisionShape(PxGeometry const &geometry,
                                  std::shared_ptr<SPhysicalMaterial> material) {
@@ -166,14 +174,15 @@ void Simulation::setLogLevel(std::string const &level) {
 
 std::shared_ptr<Simulation> Simulation::getInstance(uint32_t nthread, PxReal toleranceLength,
                                                     PxReal toleranceSpeed) {
-  static std::shared_ptr<Simulation> _instance = nullptr;
-  if (_instance) {
+  static std::weak_ptr<Simulation> _instance;
+  if (!_instance.expired()) {
     spdlog::get("SAPIEN")->warn(
         "Only one engine is allowed per process, using the previously created engine.");
-    return _instance;
+    return _instance.lock();
   }
-  _instance = std::make_shared<Simulation>(nthread, toleranceLength, toleranceSpeed);
-  return _instance;
+  auto sim = std::make_shared<Simulation>(nthread, toleranceLength, toleranceSpeed);
+  _instance = sim;
+  return sim;
 }
 
 } // namespace sapien
