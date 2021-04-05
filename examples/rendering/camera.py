@@ -83,9 +83,13 @@ def main():
     # OpenGL/Blender: y up and -z forward
     points_opengl = position[..., :3][position[..., 3] > 0]
     points_color = rgba[position[..., 3] > 0][..., :3]
+    # Model matrix is the transformation from OpenGL camera space to SAPIEN world space
+    # camera.get_model_matrix() must be called after scene.update_render()!
+    model_matrix = camera.get_model_matrix()
+    points_world = points_opengl @ model_matrix[:3, :3].T + model_matrix[:3, 3]
+    
     # SAPIEN CAMERA: z up and x forward
-    points_camera = points_opengl[..., [2, 0, 1]] * [-1, -1, 1]
-    points_world = points_camera @ mat44[:3, :3].T + mat44[:3, 3]
+    # points_camera = points_opengl[..., [2, 0, 1]] * [-1, -1, 1]
 
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points_world)

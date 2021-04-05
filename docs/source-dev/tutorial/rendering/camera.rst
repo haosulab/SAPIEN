@@ -36,10 +36,6 @@ Camera should be mounted on an ``Actor``.
 If the mounted actor is kinematic (and static), then the camera is fixed.
 Otherwise, the camera moves along with the actor on which it mounts.
 
-.. warning::
-    The camera extrinsic is defined by both the poses of the mounted camera and the camera.
-    Thus, we could set the pose of the camera by specifying the pose of the mounted actor.
-
 .. note::
     Note that the axes conventions for SAPIEN follow the conventions for robotics,
     while they are different from those for many graphics softwares (like OpenGL and Blender).
@@ -74,14 +70,19 @@ The following code showcases how to acquire the point cloud in SAPIEN.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 80-88
+    :lines: 80-81
 
 We acquire a "position" image with 4 channels.
 The first 3 channels represent the 3D position of each pixel in the OpenGL camera space,
 and the last channel is a flag indicating whether the position is beyond the camera frustrum far plane.
 
+.. literalinclude:: ../../../../examples/rendering/camera.py
+    :dedent: 0
+    :lines: 83-89
+
 Note that the position is represented in the OpenGL camera space, where the negative z-axis points forward and the y-axis is upward.
-Thus, if you want to acquire a point cloud in the SAPIEN camera space or world space (x forward and z up), some convertions are required.
+Thus, to acquire a point cloud in the SAPIEN world space (x forward and z up), 
+we provide ``get_model_matrix()``, which returns the transformation from the OpenGL camera space to the SAPIEN world space.
 
 We visualize the point cloud by `Open3D <http://www.open3d.org/>`_, which can be installed by ``pip install open3d``.
 
@@ -93,7 +94,7 @@ Besides, the depth map can be obtained as well.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 97-100
+    :lines: 101-104
 
 .. figure:: assets/depth.png
    :width: 1080px
@@ -106,7 +107,7 @@ SAPIEN provides the interfaces to acquire object-level segmentation.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 105-116
+    :lines: 111-120
 
 There are two levels of segmentation.
 One is mesh-level, and the other one is actor-level.
