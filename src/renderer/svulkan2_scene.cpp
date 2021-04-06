@@ -52,6 +52,21 @@ void SVulkan2Scene::addDirectionalLight(std::array<float, 3> const &direction,
   }
 }
 
+void SVulkan2Scene::addSpotLight(std::array<float, 3> const &position,
+                                 std::array<float, 3> const &direction, float fov,
+                                 std::array<float, 3> const &color, bool enableShadow,
+                                 float shadowNear, float shadowFar) {
+  auto &light = mScene->addSpotLight();
+  light.setPosition({position[0], position[1], position[2]});
+  light.setDirection({direction[0], direction[1], direction[2]});
+  light.setFov(fov);
+  light.setColor({color[0], color[1], color[2], 1.f});
+  if (enableShadow) {
+    light.enableShadow(true);
+    light.setShadowParameters(shadowNear, shadowFar);
+  }
+}
+
 void SVulkan2Scene::setShadowLight(std::array<float, 3> const &direction,
                                    std::array<float, 3> const &color) {
   throw std::runtime_error("Any light can cast shadow now. Shadow light is no longer used.");

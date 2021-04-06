@@ -552,9 +552,8 @@ void buildSapien(py::module &m) {
       .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
       .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
       .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
-      .def("create_physical_material", &Simulation::createPhysicalMaterial, py::arg("static_friction"),
-           py::arg("dynamic_friction"), py::arg("restitution"))
-      ;
+      .def("create_physical_material", &Simulation::createPhysicalMaterial,
+           py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"));
 
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)
@@ -991,8 +990,7 @@ void buildSapien(py::module &m) {
 #ifdef _USE_PINOCCHIO
       .def("create_pinocchio_model", &SArticulationBase::createPinocchioModel)
 #endif
-      .def("export_urdf", &SArticulationBase::exportURDF, py::arg("cache_dir") = std::string())
-      ;
+      .def("export_urdf", &SArticulationBase::exportURDF, py::arg("cache_dir") = std::string());
 
   PyArticulationDrivable
       .def("get_drive_target",
@@ -1678,6 +1676,17 @@ void buildSapien(py::module &m) {
           py::arg("direction"), py::arg("color"),
           py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
           py::arg("near") = -10.f, py::arg("far") = 10.f)
+      .def(
+          "add_shadow_spot_light",
+          [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &position,
+             py::array_t<float> const &direction, float fov, py::array_t<float> const &color,
+             float near, float far) {
+            scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
+                               {direction.at(0), direction.at(1), direction.at(2)}, fov,
+                               {color.at(0), color.at(1), color.at(2)}, true, near, far);
+          },
+          py::arg("position"), py::arg("direction"), py::arg("fov"), py::arg("color"),
+          py::arg("near") = 0.1f, py::arg("far") = 10.f)
       .def_property_readonly(
           "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); },
           py::return_value_policy::reference);

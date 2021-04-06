@@ -111,7 +111,7 @@ int main() {
   auto sim = std::make_shared<Simulation>();
   auto renderer = std::make_shared<Renderer::SVulkan2Renderer>(false, 1000, 1000, 4);
   sim->setRenderer(renderer);
-  // Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/full");
+  Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/default_camera");
 
   auto s0 = sim->createScene();
   s0->setTimestep(1 / 60.f);
@@ -132,52 +132,38 @@ int main() {
   auto mount = s0->createActorBuilder()->build(true);
   mount->setPose(PxTransform({-1, 0, -2}, PxIdentity));
   Renderer::setDefaultCameraShaderDirectory("../vulkan_shader/default_camera");
-  auto cam = s0->addMountedCamera("cam", mount, PxTransform(physx::PxIdentity), 1920, 1080, 0, 1, 0.1, 100);
 
-  s0->updateRender();
-  cam->takePicture();
-  s0.reset();
-  copper.reset();
+  auto r0 = static_cast<Renderer::SVulkan2Scene *>(s0->getRendererScene());
+  r0->addDirectionalLight({0, 1, -1}, {1, 1, 1}, true);
+  window.setScene(static_cast<Renderer::SVulkan2Scene *>(s0->getRendererScene()));
 
-  auto context = renderer->mContext;
+  window.setCameraPosition({-1,0,1});
 
-  sim.reset();
-  renderer.reset();
+  int count = 0;
+  SDrive *drive;
+  std::vector<float> d;
+  while (1) {
+    // if (++count == 120) {
+    //   d = ant0->packData();
+    //   drive = s0->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, ant0->getRootLink(),
+    //                           {{0, 0, 0}, PxIdentity});
+    //   drive->setProperties(2000, 4000, PX_MAX_F32, true);
+    //   drive->setTarget({{0, 0, 1}, PxQuat(1, {0, 1, 0})});
+    // }
 
-  // builder.reset();
+    s0->updateRender();
+    s0->step();
+    window.render("Color");
+    if (window.windowCloseRequested()) {
+      window.close();
+      break;
+    }
 
-
-
-
-
-
-  // window.setScene(r0);
-
-  // int count = 0;
-  // SDrive *drive;
-  // std::vector<float> d;
-  // while (1) {
-  //   if (++count == 120) {
-  //     d = ant0->packData();
-  //     drive = s0->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, ant0->getRootLink(),
-  //                             {{0, 0, 0}, PxIdentity});
-  //     drive->setProperties(2000, 4000, PX_MAX_F32, true);
-  //     drive->setTarget({{0, 0, 1}, PxQuat(1, {0, 1, 0})});
-  //   }
-
-  //   s0->updateRender();
-  //   s0->step();
-  //   window.render("Color");
-  //   if (window.windowCloseRequested()) {
-  //     window.close();
-  //     break;
-  //   }
-
-  //   if (count == 180) {
-  //     spdlog::get("SAPIEN")->info("Trying to resize at step 180.");
-  //     window.resize(300, 600);
-  //   }
-  // }
+    if (count == 180) {
+      spdlog::get("SAPIEN")->info("Trying to resize at step 180.");
+      window.resize(300, 600);
+    }
+  }
 
   return 0;
 }
