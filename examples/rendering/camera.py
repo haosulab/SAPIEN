@@ -112,8 +112,8 @@ def main():
     color_palette = np.array([ImageColor.getrgb(color)
                              for color in ImageColor.colormap.keys()], 
                              dtype=np.uint8)
-    label0_image = seg_labels[..., 0].astype(np.uint8)
-    label1_image = seg_labels[..., 1].astype(np.uint8)
+    label0_image = seg_labels[..., 0].astype(np.uint8)  # mesh-level
+    label1_image = seg_labels[..., 1].astype(np.uint8)  # actor-level
     label0_pil = Image.fromarray(color_palette[label0_image])
     label0_pil.save('label0.png')
     label1_pil = Image.fromarray(color_palette[label1_image])

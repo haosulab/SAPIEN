@@ -110,7 +110,7 @@ SAPIEN provides the interfaces to acquire object-level segmentation.
     :lines: 111-120
 
 There are two levels of segmentation.
-One is mesh-level, and the other one is actor-level.
+The first one is mesh-level, and the other one is actor-level.
 The examples are illustrated below.
 
 .. figure:: assets/label0.png
