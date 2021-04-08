@@ -7,6 +7,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <svulkan2/core/context.h>
+#include <svulkan2/renderer/renderer.h>
 #include <svulkan2/scene/scene.h>
 #include <svulkan2/ui/ui.h>
 
@@ -29,6 +30,7 @@ void buildRenderer(py::module &parent) {
   auto PyModel = py::class_<resource::SVModel, std::shared_ptr<resource::SVModel>>(m, "Model");
   auto PyShape = py::class_<resource::SVShape, std::shared_ptr<resource::SVShape>>(m, "Shape");
   auto PyMesh = py::class_<resource::SVMesh, std::shared_ptr<resource::SVMesh>>(m, "Mesh");
+  auto PyRenderer = py::class_<renderer::Renderer>(m, "Renderer");
 
   auto PyUIWidget = py::class_<ui::Widget, std::shared_ptr<ui::Widget>>(m, "UIWidget");
   auto PyUIWindow = py::class_<ui::Window, ui::Widget, std::shared_ptr<ui::Window>>(m, "UIWindow");
@@ -248,13 +250,6 @@ void buildRenderer(py::module &parent) {
   // end UI
 
   PyContext
-      // .def(py::init([](uint32_t maxNumMaterials, uint32_t maxNumTextures,
-      //                  uint32_t defaultMipmapLevels) {
-      //        return std::make_shared<core::Context>(VK_API_VERSION_1_1, true, maxNumMaterials,
-      //                                               maxNumTextures, defaultMipmapLevels);
-      //      }),
-      //      py::arg("max_num_materials") = 5000, py::arg("max_num_textures") = 5000,
-      //      py::arg("default_mipmap_levels") = 1)
       .def(
           "create_material",
           [](core::Context &context, py::array_t<float> baseColor, float fresnel, float roughness,
@@ -328,7 +323,9 @@ void buildRenderer(py::module &parent) {
           py::arg("meshes"), py::arg("materials"));
 
   PyMaterial
-      // .def("set_textures", &resource::SVMetallicMaterial::setTextures)
+      .def("set_textures", &resource::SVMetallicMaterial::setTextures,
+           py::arg("base_color") = nullptr, py::arg("roughness") = nullptr,
+           py::arg("normal") = nullptr, py::arg("metallic") = nullptr)
       .def(
           "set_base_color",
           [](resource::SVMetallicMaterial &mat, py::array_t<float> color) {
@@ -388,5 +385,15 @@ void buildRenderer(py::module &parent) {
   PySceneObject
       .def_property("shading_mode", &scene::Object::getShadingMode, &scene::Object::setShadingMode)
       .def_property("transparency", &scene::Object::getTransparency,
-                    &scene::Object::setTransparency);
+                    &scene::Object::setTransparency)
+      .def_property("cast_shadow", &scene::Object::getCastShadow, &scene::Object::setCastShadow);
+
+  PyRenderer.def("set_custom_texture", &renderer::Renderer::setCustomTexture, py::arg("name"),
+                 py::arg("texture"));
+  PyRenderer.def("set_specialization_constant_int",
+                 &renderer::Renderer::setSpecializationConstantInt, py::arg("name"),
+                 py::arg("value"));
+  PyRenderer.def("set_specialization_constant_float",
+                 &renderer::Renderer::setSpecializationConstantFloat, py::arg("name"),
+                 py::arg("value"));
 }

@@ -7,9 +7,8 @@ from transforms3d.quaternions import qmult, mat2quat, rotate_vector
 import sapien.core.pysapien.renderer as R
 from sapien.asset import download_partnet_mobility
 
-from controller import Viewer
-
-# from sapien.utils import Viewer
+# from controller import Viewer
+from sapien.utils import Viewer
 
 
 def create_table(
@@ -238,7 +237,7 @@ def main():
     scene.set_ambient_light([0.5, 0.5, 0.5])
     rs = scene.get_render_scene()
     # rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
-    rs.add_shadow_spot_light([0, 0, 2], [0, 0, -1], 3.14 / 2, [2, 1, 1])
+    spot_light = rs.add_shadow_spot_light([0, 0, 2], [0, 0, -1], 3.14 / 2, [2, 1, 1])
 
     # rs.add_shadow_point_light([0, 1, 1], [1, 2, 2])
     # rs.add_shadow_point_light([0, -1, 1], [2, 1, 2])
@@ -253,6 +252,7 @@ def main():
             scene.step()
         scene.update_render()
         viewer.render()
+        count += 1
 
         # import time
         # start = time.time()

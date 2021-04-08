@@ -219,6 +219,19 @@ void buildSapien(py::module &m) {
   auto PyVulkanWindow = py::class_<Renderer::SVulkan2Window>(m, "VulkanWindow");
   auto PyVulkanScene = py::class_<Renderer::SVulkan2Scene, Renderer::IPxrScene>(m, "VulkanScene");
 
+  auto PyLight = py::class_<Renderer::ILight>(m, "Light");
+  auto PyPointLight = py::class_<Renderer::IPointLight, Renderer::ILight>(m, "PointLight");
+  auto PyDirectionalLight =
+      py::class_<Renderer::IDirectionalLight, Renderer::ILight>(m, "DirectionalLight");
+  auto PySpotLight = py::class_<Renderer::ISpotLight, Renderer::ILight>(m, "SpotLight");
+  auto PyVulkanPointLight =
+      py::class_<Renderer::SVulkan2PointLight, Renderer::IPointLight>(m, "VulkanPointLight");
+  auto PyVulkanDirectionalLight =
+      py::class_<Renderer::SVulkan2DirectionalLight, Renderer::IDirectionalLight>(
+          m, "VulkanDirectionalLight");
+  auto PyVulkanSpotLight =
+      py::class_<Renderer::SVulkan2SpotLight, Renderer::ISpotLight>(m, "VulkanSpotLight");
+
   //======== Internal ========//
 
   PyPhysicalMaterial.def("get_static_friction", &SPhysicalMaterial::getStaticFriction)
@@ -541,20 +554,6 @@ void buildSapien(py::module &m) {
 #endif
       ;
 
-  //======== Simulation ========//
-  PyEngine
-      .def(py::init([](uint32_t nthread, PxReal toleranceLength, PxReal toleranceSpeed) {
-             return Simulation::getInstance(nthread, toleranceLength, toleranceSpeed);
-           }),
-           py::arg("thread_count") = 0, py::arg("tolerance_length") = 0.1f,
-           py::arg("tolerance_speed") = 0.2f)
-      .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig())
-      .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
-      .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
-      .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
-      .def("create_physical_material", &Simulation::createPhysicalMaterial,
-           py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"));
-
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)
       .def_readwrite("default_static_friction", &SceneConfig::static_friction)
@@ -570,7 +569,22 @@ void buildSapien(py::module &m) {
       .def_readwrite("enable_ccd", &SceneConfig::enableCCD)
       .def_readwrite("enable_enhanced_determinism", &SceneConfig::enableEnhancedDeterminism)
       .def_readwrite("enable_friction_every_iteration", &SceneConfig::enableFrictionEveryIteration)
-      .def_readwrite("enable_adaptive_force", &SceneConfig::enableAdaptiveForce);
+      .def_readwrite("enable_adaptive_force", &SceneConfig::enableAdaptiveForce)
+      .def("__repr__", [](SceneConfig &) { return "SceneConfig()"; });
+
+  //======== Simulation ========//
+  PyEngine
+      .def(py::init([](uint32_t nthread, PxReal toleranceLength, PxReal toleranceSpeed) {
+             return Simulation::getInstance(nthread, toleranceLength, toleranceSpeed);
+           }),
+           py::arg("thread_count") = 0, py::arg("tolerance_length") = 0.1f,
+           py::arg("tolerance_speed") = 0.2f)
+      .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig())
+      .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
+      .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
+      .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
+      .def("create_physical_material", &Simulation::createPhysicalMaterial,
+           py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"));
 
   PyScene.def_property_readonly("name", &SScene::getName)
       .def("set_timestep", &SScene::setTimestep, py::arg("second"))
@@ -1532,6 +1546,66 @@ void buildSapien(py::module &m) {
            py::arg("cy"), py::arg("width"), py::arg("height"), py::arg("skew"))
       .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode);
 
+  PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
+      .def_property_readonly("pose", &Renderer::ILight::getPose)
+      .def(
+          "set_color",
+          [](Renderer::ILight &light, py::array_t<float> color) {
+            light.setColor({color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("color"))
+      .def_property_readonly("color",
+                             [](Renderer::ILight &light) { return vec32array(light.getColor()); })
+
+      .def_property("shadow", &Renderer::ILight::getShadowEnabled,
+                    &Renderer::ILight::setShadowEnabled);
+
+  PyPointLight
+      .def(
+          "set_position",
+          [](Renderer::IPointLight &light, py::array_t<float> position) {
+            light.setPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def_property_readonly(
+          "position", [](Renderer::IPointLight &light) { return vec32array(light.getPosition()); })
+      .def("set_shadow_parameters", &Renderer::IPointLight::setShadowParameters, py ::arg("near"),
+           py::arg("far"));
+
+  PyDirectionalLight
+      .def(
+          "set_direction",
+          [](Renderer::IDirectionalLight &light, py::array_t<float> direction) {
+            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+          },
+          py::arg("direction"))
+      .def_property_readonly(
+          "direction",
+          [](Renderer::IDirectionalLight &light) { return vec32array(light.getDirection()); })
+      .def("set_shadow_parameters", &Renderer::IDirectionalLight::setShadowParameters,
+           py::arg("half_size"), py ::arg("near"), py::arg("far"));
+
+  PySpotLight
+      .def(
+          "set_position",
+          [](Renderer::ISpotLight &light, py::array_t<float> position) {
+            light.setPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def_property_readonly(
+          "position", [](Renderer::ISpotLight &light) { return vec32array(light.getPosition()); })
+      .def(
+          "set_direction",
+          [](Renderer::ISpotLight &light, py::array_t<float> direction) {
+            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+          },
+          py::arg("direction"))
+      .def_property_readonly(
+          "direction",
+          [](Renderer::ISpotLight &light) { return vec32array(light.getDirection()); })
+      .def("set_shadow_parameters", &Renderer::ISpotLight::setShadowParameters, py ::arg("near"),
+           py::arg("far"));
+
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
       .def("hide", &Renderer::SVulkan2Window::hide)
       .def("set_camera_parameters", &Renderer::SVulkan2Window::setCameraParameters,
@@ -1659,34 +1733,35 @@ void buildSapien(py::module &m) {
           "add_shadow_point_light",
           [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &position,
              py::array_t<float> const &color, float near, float far) {
-            scene.addPointLight({position.at(0), position.at(1), position.at(2)},
-                                {color.at(0), color.at(1), color.at(2)}, true, near, far);
+            return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
+                                       {color.at(0), color.at(1), color.at(2)}, true, near, far);
           },
-          py::arg("position"), py::arg("color"), py::arg("near") = 0.1, py::arg("far") = 10)
+          py::arg("position"), py::arg("color"), py::arg("near") = 0.1, py::arg("far") = 10,
+          py::return_value_policy::reference)
       .def(
           "add_shadow_directional_light",
           [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &direction,
              py::array_t<float> const &color, py::array_t<float> const &position, float scale,
              float near, float far) {
-            scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
-                                      {color.at(0), color.at(1), color.at(2)}, true,
-                                      {position.at(0), position.at(1), position.at(2)}, scale,
-                                      near, far);
+            return scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
+                                             {color.at(0), color.at(1), color.at(2)}, true,
+                                             {position.at(0), position.at(1), position.at(2)},
+                                             scale, near, far);
           },
           py::arg("direction"), py::arg("color"),
           py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
-          py::arg("near") = -10.f, py::arg("far") = 10.f)
+          py::arg("near") = -10.f, py::arg("far") = 10.f, py::return_value_policy::reference)
       .def(
           "add_shadow_spot_light",
           [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &position,
              py::array_t<float> const &direction, float fov, py::array_t<float> const &color,
              float near, float far) {
-            scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
-                               {direction.at(0), direction.at(1), direction.at(2)}, fov,
-                               {color.at(0), color.at(1), color.at(2)}, true, near, far);
+            return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
+                                      {direction.at(0), direction.at(1), direction.at(2)}, fov,
+                                      {color.at(0), color.at(1), color.at(2)}, true, near, far);
           },
           py::arg("position"), py::arg("direction"), py::arg("fov"), py::arg("color"),
-          py::arg("near") = 0.1f, py::arg("far") = 10.f)
+          py::arg("near") = 0.1f, py::arg("far") = 10.f, py::return_value_policy::reference)
       .def_property_readonly(
           "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); },
           py::return_value_policy::reference);

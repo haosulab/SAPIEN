@@ -604,30 +604,39 @@ class Viewer(object):
         obj.set_scale([0.5, 0.2, 0.2])
         obj.set_position([1, 0, 0])
         obj.shading_mode = 2
+        obj.cast_shadow = False
+
         obj = render_scene.add_object(self.red_capsule, node)
         obj.set_position([0.5, 0, 0])
         obj.set_scale([1.02, 1.02, 1.02])
         obj.shading_mode = 2
+        obj.cast_shadow = False
 
         obj = render_scene.add_object(self.green_cone, node)
         obj.set_scale([0.5, 0.2, 0.2])
         obj.set_position([0, 1, 0])
         obj.set_rotation([0.7071068, 0, 0, 0.7071068])
         obj.shading_mode = 2
+        obj.cast_shadow = False
+
         obj = render_scene.add_object(self.green_capsule, node)
         obj.set_position([0, 0.5, 0])
         obj.set_rotation([0.7071068, 0, 0, 0.7071068])
         obj.shading_mode = 2
+        obj.cast_shadow = False
 
         obj = render_scene.add_object(self.blue_cone, node)
         obj.set_scale([0.5, 0.2, 0.2])
         obj.set_position([0, 0, 1])
         obj.set_rotation([0, 0.7071068, 0, 0.7071068])
         obj.shading_mode = 2
+        obj.cast_shadow = False
+
         obj = render_scene.add_object(self.blue_capsule, node)
         obj.set_position([0, 0, 0.5])
         obj.set_rotation([0, 0.7071068, 0, 0.7071068])
         obj.shading_mode = 2
+        obj.cast_shadow = False
 
         return node
 
@@ -641,6 +650,7 @@ class Viewer(object):
         obj.set_scale([5, 0.1, 0.1])
         obj.transparency = 1
         obj.shading_mode = 2
+        obj.cast_shadow = False
 
         return obj
 

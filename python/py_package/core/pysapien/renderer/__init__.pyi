@@ -10,6 +10,7 @@ __all__ = [
     "Model",
     "Node",
     "Object",
+    "Renderer",
     "Scene",
     "Shape",
     "Texture",
@@ -48,6 +49,7 @@ class Material():
     def set_metallic(self, metallic: float) -> None: ...
     def set_roughness(self, roughness: float) -> None: ...
     def set_specular(self, specular: float) -> None: ...
+    def set_textures(self, base_color: Texture = None, roughness: Texture = None, normal: Texture = None, metallic: Texture = None) -> None: ...
     pass
 class Mesh():
     pass
@@ -59,6 +61,14 @@ class Node():
     def set_scale(self, scale: numpy.ndarray[numpy.float32]) -> None: ...
     pass
 class Object(Node):
+    @property
+    def cast_shadow(self) -> bool:
+        """
+        :type: bool
+        """
+    @cast_shadow.setter
+    def cast_shadow(self, arg1: bool) -> None:
+        pass
     @property
     def shading_mode(self) -> int:
         """
@@ -75,6 +85,11 @@ class Object(Node):
     @transparency.setter
     def transparency(self, arg1: float) -> None:
         pass
+    pass
+class Renderer():
+    def set_custom_texture(self, name: str, texture: Texture) -> None: ...
+    def set_specialization_constant_float(self, name: str, value: float) -> None: ...
+    def set_specialization_constant_int(self, name: str, value: int) -> None: ...
     pass
 class Scene():
     def add_node(self, parent: Node = None) -> Node: ...
