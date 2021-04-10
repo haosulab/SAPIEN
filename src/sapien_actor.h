@@ -30,6 +30,8 @@ public:
   void setSolverIterations(uint32_t position, uint32_t velocity = 1);
 
 public:
+  void prestep() override;
+
   EActorType getType() const override;
   void destroy();
 
