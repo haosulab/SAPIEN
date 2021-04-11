@@ -67,6 +67,7 @@ from sapien.core.pysapien import VulkanDirectionalLight
 from sapien.core.pysapien import VulkanMaterial
 from sapien.core.pysapien import VulkanPointLight
 from sapien.core.pysapien import VulkanRenderer
+from sapien.core.pysapien import VulkanRigidbody
 from sapien.core.pysapien import VulkanScene
 from sapien.core.pysapien import VulkanSpotLight
 from sapien.core.pysapien import VulkanWindow
@@ -143,6 +144,7 @@ __all__ = [
     "VulkanMaterial",
     "VulkanPointLight",
     "VulkanRenderer",
+    "VulkanRigidbody",
     "VulkanScene",
     "VulkanSpotLight",
     "VulkanWindow",

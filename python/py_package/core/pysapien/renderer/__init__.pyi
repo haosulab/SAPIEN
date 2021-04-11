@@ -59,6 +59,26 @@ class Node():
     def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
     def set_rotation(self, quat: numpy.ndarray[numpy.float32]) -> None: ...
     def set_scale(self, scale: numpy.ndarray[numpy.float32]) -> None: ...
+    @property
+    def children(self) -> typing.List[Node]:
+        """
+        :type: typing.List[Node]
+        """
+    @property
+    def position(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def rotation(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def scale(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
     pass
 class Object(Node):
     @property
@@ -69,6 +89,11 @@ class Object(Node):
     @cast_shadow.setter
     def cast_shadow(self, arg1: bool) -> None:
         pass
+    @property
+    def model(self) -> Model:
+        """
+        :type: Model
+        """
     @property
     def shading_mode(self) -> int:
         """

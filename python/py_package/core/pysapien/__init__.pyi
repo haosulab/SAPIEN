@@ -73,6 +73,7 @@ __all__ = [
     "VulkanMaterial",
     "VulkanPointLight",
     "VulkanRenderer",
+    "VulkanRigidbody",
     "VulkanScene",
     "VulkanSpotLight",
     "VulkanWindow",
@@ -1314,6 +1315,13 @@ class VulkanRenderer(IPxrRenderer):
         :type: renderer.Context
         """
     pass
+class VulkanRigidbody(RenderBody):
+    @property
+    def _internal_objects(self) -> typing.List[renderer.Object]:
+        """
+        :type: typing.List[renderer.Object]
+        """
+    pass
 class VulkanScene(RenderScene):
     def add_shadow_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0) -> VulkanDirectionalLight: ...
     def add_shadow_point_light(self, position: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], near: float = 0.1, far: float = 10) -> VulkanPointLight: ...
@@ -1358,6 +1366,14 @@ class VulkanWindow():
         """
         :type: bool
         """
+    @property
+    def cursor(self) -> bool:
+        """
+        :type: bool
+        """
+    @cursor.setter
+    def cursor(self, arg1: bool) -> None:
+        pass
     @property
     def fps(self) -> float:
         """

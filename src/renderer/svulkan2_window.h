@@ -107,6 +107,9 @@ public:
 
   std::array<int, 2> getWindowSize();
 
+  void setCursorEnabled(bool enabled);
+  bool getCursorEnabled() const;
+
   float getFPS();
 
 private:

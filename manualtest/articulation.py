@@ -7,8 +7,8 @@ from transforms3d.quaternions import qmult, mat2quat, rotate_vector
 import sapien.core.pysapien.renderer as R
 from sapien.asset import download_partnet_mobility
 
-# from controller import Viewer
-from sapien.utils import Viewer
+from controller import Viewer
+# from sapien.utils import Viewer
 
 
 def create_table(
@@ -200,6 +200,8 @@ def main():
     scene = sim.create_scene(config)
     scene.add_ground(0)
     scene.set_timestep(1 / 240)
+
+    test_mat = scene.create_physical_material(0.7, 0.7, 0.5)
 
     # mount = scene.create_actor_builder().build(True)
     # mount.set_pose(Pose([-1, 0, -2]))

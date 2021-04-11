@@ -369,24 +369,43 @@ void buildRenderer(py::module &parent) {
             node.setScale({scale.at(0), scale.at(1), scale.at(2)});
           },
           py::arg("scale"))
+      .def_property_readonly("scale",
+                             [](scene::Node &node) {
+                               auto scale = node.getScale();
+                               return py::array_t<float>(3, &scale.x);
+                             })
       .def(
           "set_position",
           [](scene::Node &node, py::array_t<float> position) {
             node.setPosition({position.at(0), position.at(1), position.at(2)});
           },
           py::arg("position"))
+      .def_property_readonly("position",
+                             [](scene::Node &node) {
+                               auto pos = node.getPosition();
+                               return py::array_t<float>(3, &pos.x);
+                             })
       .def(
           "set_rotation",
           [](scene::Node &node, py::array_t<float> rotation) {
             node.setRotation({rotation.at(0), rotation.at(1), rotation.at(2), rotation.at(3)});
           },
-          py::arg("quat"));
+          py::arg("quat"))
+      .def_property_readonly("rotation",
+                             [](scene::Node &node) {
+                               auto quat = node.getRotation();
+                               std::vector<float> q = {quat.w, quat.x, quat.y, quat.z};
+                               return py::array_t<float>(4, q.data());
+                             })
+      .def_property_readonly("children", &scene::Node::getChildren,
+                             py::return_value_policy::reference);
 
   PySceneObject
       .def_property("shading_mode", &scene::Object::getShadingMode, &scene::Object::setShadingMode)
       .def_property("transparency", &scene::Object::getTransparency,
                     &scene::Object::setTransparency)
-      .def_property("cast_shadow", &scene::Object::getCastShadow, &scene::Object::setCastShadow);
+      .def_property("cast_shadow", &scene::Object::getCastShadow, &scene::Object::setCastShadow)
+      .def_property_readonly("model", &scene::Object::getModel);
 
   PyRenderer.def("set_custom_texture", &renderer::Renderer::setCustomTexture, py::arg("name"),
                  py::arg("texture"));

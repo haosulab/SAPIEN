@@ -209,6 +209,8 @@ void buildSapien(py::module &m) {
   auto PyPinocchioModel = py::class_<PinocchioModel>(m, "PinocchioModel");
 #endif
 
+  auto PyVulkanRigidbody =
+      py::class_<Renderer::SVulkan2Rigidbody, Renderer::IPxrRigidbody>(m, "VulkanRigidbody");
   auto PyVulkanRenderer =
       py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer,
                  std::shared_ptr<Renderer::SVulkan2Renderer>>(m, "VulkanRenderer");
@@ -1479,6 +1481,10 @@ void buildSapien(py::module &m) {
           [](Renderer::SVulkan2Renderer &renderer) { return renderer.mContext.get(); },
           py::return_value_policy::reference);
 
+  PyVulkanRigidbody.def_property_readonly("_internal_objects",
+                                          &Renderer::SVulkan2Rigidbody::getVisualObjects,
+                                          py::return_value_policy::reference);
+
   PyVulkanCamera
       .def(
           "get_float_texture",
@@ -1649,6 +1655,8 @@ void buildSapien(py::module &m) {
       .def("resize", &Renderer::SVulkan2Window::resize, py::arg("width"), py::arg("height"))
       .def_property_readonly("fps", &Renderer::SVulkan2Window::getFPS)
       .def_property_readonly("size", &Renderer::SVulkan2Window::getWindowSize)
+      .def_property("cursor", &Renderer::SVulkan2Window::getCursorEnabled,
+                    &Renderer::SVulkan2Window::setCursorEnabled)
 
       // Download images from window
       .def(

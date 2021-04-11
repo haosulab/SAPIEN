@@ -376,5 +376,9 @@ std::array<int, 2> SVulkan2Window::getWindowSize() {
 
 float SVulkan2Window::getFPS() { return ImGui::GetIO().Framerate; }
 
+void SVulkan2Window::setCursorEnabled(bool enabled) { mWindow->setCursorEnabled(enabled); }
+
+bool SVulkan2Window::getCursorEnabled() const { return mWindow->getCursorEnabled(); }
+
 } // namespace Renderer
 } // namespace sapien

@@ -1,62 +1,143 @@
-#include "actor_builder.h"
-#include "renderer/optifuser_controller.h"
-#include "renderer/optifuser_renderer.h"
+#include "articulation/articulation_builder.h"
+#include "articulation/sapien_articulation.h"
+#include "articulation/sapien_link.h"
+#include "renderer/svulkan2_renderer.h"
+#include "renderer/svulkan2_window.h"
 #include "sapien_actor.h"
+#include "sapien_drive.h"
 #include "sapien_scene.h"
 #include "simulation.h"
+#include <iostream>
+
+#define PI (3.141592653589793238462643383279502884f)
 
 using namespace sapien;
 
+std::unique_ptr<ArticulationBuilder>
+createAntBuilder(SScene &scene, std::shared_ptr<Renderer::IPxrMaterial> copper) {
+  auto builder = scene.createArticulationBuilder();
+  auto body = builder->createLinkBuilder();
+  body->addSphereShape({{0, 0, 0}, PxIdentity}, 0.25);
+  body->addSphereVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.25, copper);
+  body->addCapsuleShape({{0.141, 0, 0}, PxIdentity}, 0.08, 0.141);
+  body->addCapsuleVisualWithMaterial({{0.141, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
+  body->addCapsuleShape({{-0.141, 0, 0}, PxIdentity}, 0.08, 0.141);
+  body->addCapsuleVisualWithMaterial({{-0.141, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
+  body->addCapsuleShape({{0, 0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141);
+  body->addCapsuleVisualWithMaterial({{0, 0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08,
+                                     0.141, copper);
+  body->addCapsuleShape({{0, -0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08, 0.141);
+  body->addCapsuleVisualWithMaterial({{0, -0.141, 0}, physx::PxQuat(PI / 2, {0, 0, 1})}, 0.08,
+                                     0.141, copper);
+  body->setName("body");
+
+  auto l1 = builder->createLinkBuilder(body);
+  l1->setName("l1");
+  l1->setJointName("j1");
+  l1->setJointProperties(PxArticulationJointType::eREVOLUTE, {{-0.5236, 0.5236}},
+                         {{0.282, 0, 0}, {0, 0.7071068, 0, 0.7071068}},
+                         {{0.141, 0, 0}, {0, -0.7071068, 0, 0.7071068}});
+  l1->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
+  l1->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
+
+  auto l2 = builder->createLinkBuilder(body);
+  l2->setName("l2");
+  l2->setJointName("j2");
+  l2->setJointProperties(PxArticulationJointType::eREVOLUTE, {{-0.5236, 0.5236}},
+                         {{-0.282, 0, 0}, {0.7071068, 0, -0.7071068, 0}},
+                         {{0.141, 0, 0}, {0, -0.7071068, 0, 0.7071068}});
+  l2->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
+  l2->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
+
+  auto l3 = builder->createLinkBuilder(body);
+  l3->setName("l3");
+  l3->setJointName("j3");
+  l3->setJointProperties(PxArticulationJointType::eREVOLUTE, {{-0.5236, 0.5236}},
+                         {{0, 0.282, 0}, {-0.5, 0.5, 0.5, 0.5}},
+                         {{0.141, 0, 0}, {0, -0.7071068, 0, 0.7071068}});
+  l3->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
+  l3->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
+
+  auto l4 = builder->createLinkBuilder(body);
+  l4->setName("l4");
+  l4->setJointName("j4");
+  l4->setJointProperties(PxArticulationJointType::eREVOLUTE, {{-0.5236, 0.5236}},
+                         {{0, -0.282, 0}, {0.5, 0.5, -0.5, 0.5}},
+                         {{0.141, 0, 0}, {0, -0.7071068, 0, 0.7071068}});
+  l4->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.141);
+  l4->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.141, copper);
+
+  auto f1 = builder->createLinkBuilder(l1);
+  f1->setName("f1");
+  f1->setJointName("j11");
+  f1->setJointProperties(PxArticulationJointType::eREVOLUTE, {{0.5236, 1.222}},
+                         {{-0.141, 0, 0}, {0.7071068, 0.7071068, 0, 0}},
+                         {{0.282, 0, 0}, {0.7071068, 0.7071068, 0, 0}});
+  f1->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
+  f1->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.282, copper);
+
+  auto f2 = builder->createLinkBuilder(l2);
+  f2->setName("f2");
+  f2->setJointName("j21");
+  f2->setJointProperties(PxArticulationJointType::eREVOLUTE, {{0.5236, 1.222}},
+                         {{-0.141, 0, 0}, {0.7071068, 0.7071068, 0, 0}},
+                         {{0.282, 0, 0}, {0.7071068, 0.7071068, 0, 0}});
+  f2->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
+  f2->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.282, copper);
+
+  auto f3 = builder->createLinkBuilder(l3);
+  f3->setName("f3");
+  f3->setJointName("j31");
+  f3->setJointProperties(PxArticulationJointType::eREVOLUTE, {{0.5236, 1.222}},
+                         {{-0.141, 0, 0}, {0.7071068, 0.7071068, 0, 0}},
+                         {{0.282, 0, 0}, {0.7071068, 0.7071068, 0, 0}});
+  f3->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
+  f3->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.282, copper);
+
+  auto f4 = builder->createLinkBuilder(l4);
+  f4->setName("f4");
+  f4->setJointName("j41");
+  f4->setJointProperties(PxArticulationJointType::eREVOLUTE, {{0.5236, 1.222}},
+                         {{-0.141, 0, 0}, {0.7071068, 0.7071068, 0, 0}},
+                         {{0.282, 0, 0}, {0.7071068, 0.7071068, 0, 0}});
+  f4->addCapsuleShape({{0, 0, 0}, PxIdentity}, 0.08, 0.282);
+  f4->addCapsuleVisualWithMaterial({{0, 0, 0}, PxIdentity}, 0.08, 0.282, copper);
+
+  return builder;
+}
+
 int main() {
-  Simulation sim;
-  Renderer::OptifuserRenderer renderer;
-  sim.setRenderer(&renderer);
-  Renderer::OptifuserController controller(&renderer);
+  Renderer::SVulkan2Renderer::setLogLevel("info");
+  auto sim = std::make_shared<Simulation>();
+  auto renderer = std::make_shared<Renderer::SVulkan2Renderer>(false, 1000, 1000, 4);
+  sim->setRenderer(renderer);
+  Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/default_camera");
 
-  controller.showWindow();
+  SceneConfig config;
+  config.gravity = {0, 0, 0};
 
-  auto s0 = sim.createScene();
-  s0->addGround(-1);
-  s0->setTimestep(1 / 60.f);
-
-  auto s1 = sim.createScene();
-  s1->addGround(-1);
+  auto s0 = sim->createScene(config);
+  window.setScene(static_cast<Renderer::SVulkan2Scene *>(s0->getRendererScene()));
+  window.setCameraPosition({-2, 0, 0});
 
   auto builder = s0->createActorBuilder();
-  builder->addBoxShape();
-  builder->addBoxVisual();
-  builder->build(false, "box");
+  builder->addBoxShape({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
+  builder->addBoxVisual({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
+  auto box = builder->build();
 
-  builder = s0->createActorBuilder();
-  builder->addConvexShapeFromFile("/home/fx/source/sapien/assets/bottle/model.obj");
-  builder->addVisualFromFile("/home/fx/source/sapien/assets/bottle/model.obj");
-  auto actor = builder->build();
+  box->setAngularVelocity({0, 0, 10});
 
-  // actor->onContact([](SActorBase *self, SActorBase *other, SContact const &contact) {
-  //   if (other->getName() == "box") {
-  //     self->getScene()->removeActor(other);
-  //   }
-  // });
-
-  actor->setPose({{0, 0, 4}, PxIdentity});
-  auto shapes = actor->getCollisionShapes();
-  for (auto &s : shapes) {
-    auto scale = static_cast<SConvexMeshGeometry *>(s->geometry.get())->scale;
-    std::cout << scale.x << " " << scale.y << " " << scale.z << std::endl;
-  }
-
-  auto r0 = static_cast<Renderer::OptifuserScene *>(s0->getRendererScene());
-  r0->setAmbientLight({0.3, 0.3, 0.3});
-  r0->setShadowLight({0, -1, -1}, {.5, .5, 0.4});
-  controller.setCameraPosition(-5, 0, 0);
-
-  controller.setCurrentScene(s0.get());
-
-  while (!controller.shouldQuit()) {
+  window.setCameraPosition({-2, 0, 0});
+  int count = 0;
+  while (1) {
+    // box->addForceTorque({0, 0, 0}, {0, 0, 1});
     s0->updateRender();
     s0->step();
-
-    controller.render();
+    window.render("Color");
+    if (window.windowCloseRequested()) {
+      window.close();
+      break;
+    }
   }
 
   return 0;
