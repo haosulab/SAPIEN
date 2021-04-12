@@ -1638,6 +1638,11 @@ void buildSapien(py::module &m) {
              auto quat = window.getCameraRotation();
              return make_array<float>({quat.w, quat.x, quat.y, quat.z});
            })
+      .def("get_camera_projection_matrix",
+           [](Renderer::SVulkan2Window &window) {
+             glm::mat4 proj = glm::transpose(window.getCameraProjectionMatrix());
+             return py::array_t<float>({4, 4}, &proj[0][0]);
+           })
       .def(
           "set_scene",
           [](Renderer::SVulkan2Window &window, SScene *scene) {

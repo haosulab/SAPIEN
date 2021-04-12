@@ -66,6 +66,7 @@ public:
 
   glm::vec3 getCameraPosition();
   glm::quat getCameraRotation();
+  glm::mat4 getCameraProjectionMatrix();
 
   std::vector<std::string> getDisplayTargetNames() const;
   void render(std::string const &targetName,
@@ -90,7 +91,7 @@ public:
   std::vector<float> downloadFloatTargetPixel(std::string const &name, uint32_t x, uint32_t y);
   std::vector<uint32_t> downloadUint32TargetPixel(std::string const &name, uint32_t x, uint32_t y);
   std::vector<uint8_t> downloadUint8TargetPixel(std::string const &name, uint32_t x, uint32_t y);
-  std::array<uint32_t, 2> getRenderTargetSize(std::string const& name) const;
+  std::array<uint32_t, 2> getRenderTargetSize(std::string const &name) const;
 
   bool isShiftDown();
   bool isCtrlDown();

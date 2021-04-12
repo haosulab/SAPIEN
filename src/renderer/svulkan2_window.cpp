@@ -101,6 +101,9 @@ void SVulkan2Window::setCameraRotation(glm::quat const &rot) { getCamera()->setR
 
 glm::vec3 SVulkan2Window::getCameraPosition() { return getCamera()->getPosition(); }
 glm::quat SVulkan2Window::getCameraRotation() { return getCamera()->getRotation(); }
+glm::mat4 SVulkan2Window::getCameraProjectionMatrix() {
+  return getCamera()->getProjectionMatrix();
+}
 
 std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
   return mSVulkanRenderer->getDisplayTargetNames();
