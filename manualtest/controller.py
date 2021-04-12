@@ -1354,6 +1354,7 @@ class Viewer(object):
         self.scene_window = None
         self.actor_window = None
         self.articulation_window = None
+        self.info_window = None
 
     def focus_actor(self, actor):
         if actor == self.focused_actor:
@@ -1603,7 +1604,7 @@ class Viewer(object):
                 if self.focused_actor:
                     self.arc_camera_controller.set_center(self.focused_actor.pose.p)
 
-            if self.window.key_down("q"):
+            if self.window.key_down("q") or self.window.should_close:
                 self.close()
                 return
 

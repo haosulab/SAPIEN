@@ -639,7 +639,7 @@ void buildSapien(py::module &m) {
           [](SScene &s, py::array_t<PxReal> const &color) {
             s.setAmbientLight(array2vec3(color));
           },
-          py::arg("clor"))
+          py::arg("color"))
       .def(
           "add_point_light",
           [](SScene &s, py::array_t<PxReal> const &position, py::array_t<PxReal> const &color) {
@@ -1614,6 +1614,7 @@ void buildSapien(py::module &m) {
 
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
       .def("hide", &Renderer::SVulkan2Window::hide)
+      .def_property_readonly("should_close", &Renderer::SVulkan2Window::windowCloseRequested)
       .def("set_camera_parameters", &Renderer::SVulkan2Window::setCameraParameters,
            py::arg("near"), py::arg("far"), py::arg("fovy"))
       .def(
