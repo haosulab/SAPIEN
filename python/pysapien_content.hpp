@@ -1744,6 +1744,12 @@ void buildSapien(py::module &m) {
 
   PyVulkanScene
       .def(
+          "set_ambient_light",
+          [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &color) {
+            scene.setAmbientLight({color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("color"))
+      .def(
           "add_shadow_point_light",
           [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &position,
              py::array_t<float> const &color, float near, float far) {

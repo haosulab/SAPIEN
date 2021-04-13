@@ -51,8 +51,8 @@ PxReal SCollisionShape::getMinTorsionalPatchRadius() const {
 
 void SCollisionShape::setIsTrigger(bool trigger) {
   if (trigger) {
-    mPxShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
     mPxShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, false);
+    mPxShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, true);
   } else {
     mPxShape->setFlag(PxShapeFlag::eTRIGGER_SHAPE, false);
     mPxShape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);

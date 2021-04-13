@@ -1,18 +1,21 @@
 import sapien.core as sapien
 from sapien.core import Pose
+from sapien.utils import Viewer
 
 engine = sapien.Engine()
 renderer = sapien.VulkanRenderer()
 engine.set_renderer(renderer)
-controller = sapien.VulkanController(renderer)
+viewer = Viewer(renderer)
 
 scene = engine.create_scene()
-controller.set_current_scene(scene)
+viewer.set_scene(scene)
 scene.add_ground(-1)
 scene.set_timestep(1 / 60)
 
 scene.set_ambient_light([0.5, 0.5, 0.5])
-scene.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
+
+rs: sapien.VulkanScene = scene.get_render_scene()
+light = rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
 
 def contact_callback(self, other, contact):
@@ -45,10 +48,6 @@ b3 = add_box(4)
 ball = add_ball(8)
 
 
-def step(self, dt):
-    print(type(self))
-
-
 def trigger(self, other, trigger):
     if other.name == "ball":
         scene.remove_actor(self)
@@ -59,9 +58,14 @@ b2.on_trigger(trigger)
 b3.on_trigger(trigger)
 
 
-controller.set_free_camera_position(-10, 0, 0)
+viewer.set_camera_xyz(-10, 0, 0)
+viewer.window.set_camera_parameters(0.1, 1000, 1)
 
-while not controller.is_closed:
+scene.update_render()
+scene.step()
+viewer.render()
+
+while not viewer.closed:
     scene.update_render()
     scene.step()
-    controller.render()
+    viewer.render()

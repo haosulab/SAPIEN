@@ -160,7 +160,6 @@ __all__ = [
 
 
 __GL_SHADER_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/glsl_shader'
-__GL_VERSION_DICT = {3: '130', 4: '410'}
 __PTX_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/ptx'
 __VULKAN_CAMERA_SHADER_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/vulkan_shader/default_camera'
 __VULKAN_ICD_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/vulkan_icd'
