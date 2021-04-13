@@ -1,6 +1,0 @@
-builtin_interfaces/Time time_stamp
-string frame_id
-geometry_msgs/Twist twist
-builtin_interfaces/Duration duration
----
-bool success
