@@ -23,7 +23,7 @@ def create_ant_builder(scene):
     l1 = builder.create_link_builder(body)
     l1.set_name("l1")
     l1.set_joint_name("hip_1")
-    l1.set_joint_properties(sapien.ArticulationJointType.REVOLUTE, [[-0.5236, 0.5236]],
+    l1.set_joint_properties("revolute", [[-0.5236, 0.5236]],
                             Pose([0.282, 0, 0], [0.7071068, 0, 0.7071068, 0]),
                             Pose([0.141, 0, 0], [-0.7071068, 0, 0.7071068, 0]), 0.1)
     l1.add_capsule_shape(Pose(), 0.08, 0.141)
@@ -32,7 +32,7 @@ def create_ant_builder(scene):
     l2 = builder.create_link_builder(body)
     l2.set_name("l2")
     l2.set_joint_name("hip_2")
-    l2.set_joint_properties(sapien.ArticulationJointType.REVOLUTE, [[-0.5236, 0.5236]],
+    l2.set_joint_properties("revolute", [[-0.5236, 0.5236]],
                             Pose([-0.282, 0, 0], [0, -0.7071068, 0, 0.7071068]),
                             Pose([0.141, 0, 0], [-0.7071068, 0, 0.7071068, 0]), 0.1)
     l2.add_capsule_shape(Pose(), 0.08, 0.141)
@@ -41,7 +41,7 @@ def create_ant_builder(scene):
     l3 = builder.create_link_builder(body)
     l3.set_name("l3")
     l3.set_joint_name("hip_3")
-    l3.set_joint_properties(sapien.ArticulationJointType.REVOLUTE, [[-0.5236, 0.5236]],
+    l3.set_joint_properties("revolute", [[-0.5236, 0.5236]],
                             Pose([0, 0.282, 0], [0.5, -0.5, 0.5, 0.5]),
                             Pose([0.141, 0, 0], [0.7071068, 0, -0.7071068, 0]), 0.1)
     l3.add_capsule_shape(Pose(), 0.08, 0.141)
@@ -50,7 +50,7 @@ def create_ant_builder(scene):
     l4 = builder.create_link_builder(body)
     l4.set_name("l4")
     l4.set_joint_name("hip_4")
-    l4.set_joint_properties(sapien.ArticulationJointType.REVOLUTE, [[-0.5236, 0.5236]],
+    l4.set_joint_properties("revolute", [[-0.5236, 0.5236]],
                             Pose([0, -0.282, 0], [0.5, 0.5, 0.5, -0.5]),
                             Pose([0.141, 0, 0], [0.7071068, 0, -0.7071068, 0]), 0.1)
     l4.add_capsule_shape(Pose(), 0.08, 0.141)
@@ -59,7 +59,7 @@ def create_ant_builder(scene):
     f1 = builder.create_link_builder(l1)
     f1.set_name("f1")
     f1.set_joint_name("ankle_1")
-    f1.set_joint_properties(sapien.ArticulationJointType.REVOLUTE, [[0.5236, 1.222]],
+    f1.set_joint_properties("revolute", [[0.5236, 1.222]],
                             Pose([-0.141, 0, 0], [0, 0.7071068, 0.7071068, 0]),
                             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]), 0.1)
     f1.add_capsule_shape(Pose(), 0.08, 0.282)
@@ -68,7 +68,7 @@ def create_ant_builder(scene):
     f2 = builder.create_link_builder(l2)
     f2.set_name("f2")
     f2.set_joint_name("ankle_2")
-    f2.set_joint_properties(sapien.ArticulationJointType.REVOLUTE, [[0.5236, 1.222]],
+    f2.set_joint_properties("revolute", [[0.5236, 1.222]],
                             Pose([-0.141, 0, 0], [0, 0.7071068, 0.7071068, 0]),
                             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]), 0.1)
     f2.add_capsule_shape(Pose(), 0.08, 0.282)
@@ -77,7 +77,7 @@ def create_ant_builder(scene):
     f3 = builder.create_link_builder(l3)
     f3.set_name("f3")
     f3.set_joint_name("ankle_3")
-    f3.set_joint_properties(sapien.ArticulationJointType.REVOLUTE, [[0.5236, 1.222]],
+    f3.set_joint_properties("revolute", [[0.5236, 1.222]],
                             Pose([-0.141, 0, 0], [0, 0.7071068, 0.7071068, 0]),
                             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]), 0.1)
     f3.add_capsule_shape(Pose(), 0.08, 0.282)
@@ -86,7 +86,7 @@ def create_ant_builder(scene):
     f4 = builder.create_link_builder(l4)
     f4.set_name("f4")
     f4.set_joint_name("ankle_4")
-    f4.set_joint_properties(sapien.ArticulationJointType.REVOLUTE, [[0.5236, 1.222]],
+    f4.set_joint_properties("revolute", [[0.5236, 1.222]],
                             Pose([-0.141, 0, 0], [0, 0.7071068, 0.7071068, 0]),
                             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]), 0.1)
     f4.add_capsule_shape(Pose(), 0.08, 0.282)
