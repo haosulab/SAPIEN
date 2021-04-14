@@ -10,10 +10,9 @@ SAPIEN Engine provides physical simulation for articulated objects. It powers
 reinforcement learning and robotics with its pure Python interface.
 
 ## SAPIEN Renderer
-SAPIEN Renderer renders scenes with OpenGL rasterizer and optionally Nvidia
-OptiX ray-tracer. It provides visualization/realistic rendering for the SAPIEN
-environment. Currently, the ray-tracing support is only available via building
-from source.
+SAPIEN provides rasterized and ray traced (available soon) rendering with
+Vulkan. For machines without Vulkan support, we provide a OpenGL renderer as a
+second option.
 
 ## PartNet-Mobility
 SAPIEN releases PartNet-Mobility dataset, which is a collection of 2K
@@ -25,19 +24,24 @@ SAPIEN Website: [https://sapien.ucsd.edu/](https://sapien.ucsd.edu/). SAPIEN
 Documentation:
 [https://sapien.ucsd.edu/docs/index.html](https://sapien.ucsd.edu/docs/index.html).
 
-## Before build
-`git submodule update --init --recursive`
+## Build from source
+### Before build
+Make sure all submodules are initialized `git submodule update --init --recursive`.
 
-## Build with Docker
-`./docker_build_wheels.sh`
+### Build with Docker
+To build SAPIEN, simply run `./docker_build_wheels.sh`. It is not recommended to
+build outside of our provided docker.
 
-## CMake build
-```bash
-mkdir build
-cd build
-cmake -DCMake_BUILD_TYPE=Release ..
-make
-```
+For reference, the Dockerfile is provided [here](/docker/Dockerfile). Note that
+PhysX needs to be compiled with clang-9 into static libraries before building
+the Docker image.
+
+### Build without Docker
+It can be tricky to setup all dependencies outside of a Docker environment. You
+need to install all dependencies according to the [Docker
+environment](/docker/Dockerfile). If all dependencies set up correctly, run
+`python setup.py bdist_wheel` to build the wheel.
+
 ## Cite SAPIEN
 If you use SAPIEN and its assets, please cite the following works.
 ```
