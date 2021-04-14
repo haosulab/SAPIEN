@@ -551,9 +551,9 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   auto sActor = std::unique_ptr<SActorStatic>(
       new SActorStatic(actor, actorId, mScene, renderBodies, collisionBodies));
   for (size_t i = 0; i < shapes.size(); ++i) {
-    sActor->attachShape(std::move(shapes[i]));
     shapes[i]->setCollisionGroups(mCollisionGroup.w0, mCollisionGroup.w1, mCollisionGroup.w2,
                                   mCollisionGroup.w3);
+    sActor->attachShape(std::move(shapes[i]));
   }
 
   sActor->setName(name);
