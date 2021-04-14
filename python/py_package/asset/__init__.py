@@ -8,7 +8,9 @@ url = 'https://sapien.ucsd.edu/api/download/compressed/{}.zip?token={}'
 
 def download_partnet_mobility(model_id, token=None, directory=None):
     if not directory:
-        directory = 'partnet-mobility-dataset'
+        directory = os.environ.get("PARTNET_MOBILITY_DATASET")
+        if not directory:
+            directory = 'partnet-mobility-dataset'
     urdf_file = os.path.join(directory, str(model_id), 'mobility.urdf')
 
     # return if file exists

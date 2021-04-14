@@ -31,12 +31,9 @@ def ensure_icd():
     icd_filenames = os.environ.get("VK_ICD_FILENAMES")
 
     # if VK_ICD_FILENAMES is not provided, we try to provide it
-    if icd_filenames is None:
-        icd_filenames = (
-            "{0}/nvidia_icd.json:{0}/radeon_icd.x86_64.json:"
-            "{0}/intel_icd.x86_64.json:{0}/MoltenVK_icd.json:{1}".format(
-                __VULKAN_ICD_ROOT, icd_filenames
-            )
+    if not icd_filenames:
+        icd_filenames = "{0}/intel_icd.x86_64.json:{0}/nvidia_icd.json:{0}/radeon_icd.x86_64.json:{0}/MoltenVK_icd.json:{1}".format(
+            __VULKAN_ICD_ROOT, icd_filenames
         )
         os.environ["VK_ICD_FILENAMES"] = icd_filenames
 
