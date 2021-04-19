@@ -16,6 +16,11 @@ class IPxrScene;
 class IPxrRigidbody;
 class IPxrRenderer;
 
+class ILight;
+class IPointLight;
+class ISpotLight;
+class IDirectionalLight;
+
 struct RenderMeshGeometry {
   std::vector<float> vertices;
   std::vector<float> normals;
@@ -92,6 +97,40 @@ public:
   virtual std::vector<float> getDepth() = 0;
   virtual std::vector<int> getSegmentation() = 0;
   virtual std::vector<int> getObjSegmentation() = 0;
+};
+
+class ILight {
+public:
+  virtual physx::PxTransform getPose() const = 0;
+  virtual void setPose(physx::PxTransform const &transform) = 0;
+  virtual physx::PxVec3 getColor() const = 0;
+  virtual void setColor(physx::PxVec3 color) = 0;
+  virtual bool getShadowEnabled() const = 0;
+  virtual void setShadowEnabled(bool enabled) = 0;
+  virtual ~ILight() = default;
+};
+
+class IPointLight : public ILight {
+public:
+  virtual physx::PxVec3 getPosition() const = 0;
+  virtual void setPosition(physx::PxVec3 position) = 0;
+  virtual void setShadowParameters(float near, float far) = 0;
+};
+
+class IDirectionalLight : public ILight {
+public:
+  virtual physx::PxVec3 getDirection() const = 0;
+  virtual void setDirection(physx::PxVec3 direction) = 0;
+  virtual void setShadowParameters(float halfSize, float near, float far) = 0;
+};
+
+class ISpotLight : public ILight {
+public:
+  virtual physx::PxVec3 getPosition() const = 0;
+  virtual void setPosition(physx::PxVec3 position) = 0;
+  virtual physx::PxVec3 getDirection() const = 0;
+  virtual void setDirection(physx::PxVec3 direction) = 0;
+  virtual void setShadowParameters(float near, float far) = 0;
 };
 
 class IPxrRigidbody {

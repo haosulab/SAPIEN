@@ -101,6 +101,9 @@ void SVulkan2Window::setCameraRotation(glm::quat const &rot) { getCamera()->setR
 
 glm::vec3 SVulkan2Window::getCameraPosition() { return getCamera()->getPosition(); }
 glm::quat SVulkan2Window::getCameraRotation() { return getCamera()->getRotation(); }
+glm::mat4 SVulkan2Window::getCameraProjectionMatrix() {
+  return getCamera()->getProjectionMatrix();
+}
 
 std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
   return mSVulkanRenderer->getDisplayTargetNames();
@@ -375,6 +378,10 @@ std::array<int, 2> SVulkan2Window::getWindowSize() {
 }
 
 float SVulkan2Window::getFPS() { return ImGui::GetIO().Framerate; }
+
+void SVulkan2Window::setCursorEnabled(bool enabled) { mWindow->setCursorEnabled(enabled); }
+
+bool SVulkan2Window::getCursorEnabled() const { return mWindow->getCursorEnabled(); }
 
 } // namespace Renderer
 } // namespace sapien

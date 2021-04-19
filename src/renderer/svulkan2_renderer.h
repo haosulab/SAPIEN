@@ -1,5 +1,6 @@
 #pragma once
 #include "renderer/render_interface.h"
+#include "svulkan2_light.h"
 #include <memory>
 #include <svulkan2/core/context.h>
 #include <svulkan2/renderer/renderer.h>
@@ -78,6 +79,7 @@ class SVulkan2Scene : public IPxrScene {
   std::unique_ptr<svulkan2::scene::Scene> mScene;
   std::vector<std::unique_ptr<SVulkan2Rigidbody>> mBodies;
   std::vector<std::unique_ptr<SVulkan2Camera>> mCameras;
+  std::vector<std::unique_ptr<ILight>> mLights;
   std::string mName;
 
   std::shared_ptr<svulkan2::resource::SVMesh> mCubeMesh{};
@@ -134,13 +136,17 @@ public:
                       std::array<float, 3> const &color) override;
 
   //======== Lights more parameters ========//
-  void addPointLight(std::array<float, 3> const &position, std::array<float, 3> const &color,
-                     bool enableShadow, float shadowNear = 0.1f, float shadowFar = 5.f);
-  void addDirectionalLight(std::array<float, 3> const &direction,
-                           std::array<float, 3> const &color, bool enableShadow,
-                           std::array<float, 3> const &position = {0.f, 0.f, 0.f},
-                           float shadowScale = 10.f, float shadowNear = -5.f,
-                           float shadowFar = 5.f);
+  SVulkan2PointLight *addPointLight(std::array<float, 3> const &position,
+                                    std::array<float, 3> const &color, bool enableShadow,
+                                    float shadowNear = 0.1f, float shadowFar = 5.f);
+  SVulkan2DirectionalLight *
+  addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color,
+                      bool enableShadow, std::array<float, 3> const &position = {0.f, 0.f, 0.f},
+                      float shadowScale = 10.f, float shadowNear = -5.f, float shadowFar = 5.f);
+  SVulkan2SpotLight *addSpotLight(std::array<float, 3> const &position,
+                                  std::array<float, 3> const &direction, float fov,
+                                  std::array<float, 3> const &color, bool enableShadow,
+                                  float shadowNear = 0.1f, float shadowFar = 5.f);
 
   inline SVulkan2Renderer *getParentRenderer() const { return mParentRenderer; }
 };

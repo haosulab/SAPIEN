@@ -18,7 +18,7 @@ scene.set_shadow_light([0, 1, -1], [0.5, 0.5, 0.5])
 
 loader = scene.create_urdf_loader()
 loader.fix_root_link = 1
-robot = loader.load("assets/robot/jaco2.urdf")
+robot = loader.load("assets/robot/jaco2/jaco2.urdf")
 
 actor_builder: sapien.ActorBuilder = scene.create_actor_builder()
 actor_builder.add_sphere_visual(Pose(), 0.02, [1, 0, 0], "anchor")
@@ -41,10 +41,11 @@ drive.set_properties(4000, 8000)
 drive.set_target(Pose())
 
 arm_init_qpos = [4.71, 2.84, 0, 0.75, 4.62, 4.48, 4.88]
-gripper_init_qpos = [0.] * 6
+gripper_init_qpos = [0.] * 2
 init_qpos = arm_init_qpos + gripper_init_qpos
+print(robot.dof)
 robot.set_qpos(init_qpos)
-robot.set_qvel([0] * 13)
+robot.set_qvel([0] * 9)
 
 while not render_controller.should_quit:
     if render_controller.input.get_key_state(ord('I')):

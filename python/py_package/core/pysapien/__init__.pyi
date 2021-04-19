@@ -23,6 +23,7 @@ __all__ = [
     "Contact",
     "ContactPoint",
     "ConvexMeshGeometry",
+    "DirectionalLight",
     "Drive",
     "Engine",
     "ICamera",
@@ -39,6 +40,7 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
+    "Light",
     "Link",
     "LinkBase",
     "LinkBuilder",
@@ -50,6 +52,7 @@ __all__ = [
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
+    "PointLight",
     "Pose",
     "RenderBody",
     "RenderGeometry",
@@ -60,14 +63,19 @@ __all__ = [
     "SceneConfig",
     "ShapeRecord",
     "SphereGeometry",
+    "SpotLight",
     "Subscription",
     "Trigger",
     "URDFLoader",
     "VisualRecord",
     "VulkanCamera",
+    "VulkanDirectionalLight",
     "VulkanMaterial",
+    "VulkanPointLight",
     "VulkanRenderer",
+    "VulkanRigidbody",
     "VulkanScene",
+    "VulkanSpotLight",
     "VulkanWindow",
     "renderer"
 ]
@@ -497,6 +505,28 @@ class ConvexMeshGeometry(CollisionGeometry):
         :type: numpy.ndarray[numpy.float32]
         """
     pass
+class Light():
+    def set_color(self, color: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_pose(self, pose: Pose) -> None: ...
+    @property
+    def color(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def shadow(self) -> bool:
+        """
+        :type: bool
+        """
+    @shadow.setter
+    def shadow(self, arg1: bool) -> None:
+        pass
+    pass
 class Drive():
     def destroy(self) -> None: ...
     def lock_motion(self, tx: bool, ty: bool, tz: bool, rx: bool, ry: bool, rz: bool) -> None: ...
@@ -510,7 +540,7 @@ class Drive():
 class Engine():
     def __init__(self, thread_count: int = 0, tolerance_length: float = 0.10000000149011612, tolerance_speed: float = 0.20000000298023224) -> None: ...
     def create_physical_material(self, static_friction: float, dynamic_friction: float, restitution: float) -> PhysicalMaterial: ...
-    def create_scene(self, config: SceneConfig = ...) -> Scene: ...
+    def create_scene(self, config: SceneConfig = SceneConfig()) -> Scene: ...
     def get_renderer(self) -> IPxrRenderer: ...
     def set_log_level(self, level: str) -> None: ...
     def set_renderer(self, renderer: IPxrRenderer) -> None: ...
@@ -660,6 +690,15 @@ class LinkBase(ActorDynamicBase, ActorBase):
     def get_articulation(self) -> ArticulationBase: ...
     def get_index(self) -> int: ...
     pass
+class DirectionalLight(Light):
+    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
+    @property
+    def direction(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    pass
 class Link(LinkBase, ActorDynamicBase, ActorBase):
     def get_articulation(self) -> Articulation: ...
     pass
@@ -775,6 +814,15 @@ class PinocchioModel():
     def get_link_pose(self, link_index: int) -> Pose: ...
     pass
 class PlaneGeometry(CollisionGeometry):
+    pass
+class PointLight(Light):
+    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_shadow_parameters(self, near: float, far: float) -> None: ...
+    @property
+    def position(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
     pass
 class Pose():
     def __init__(self, p: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), q: numpy.ndarray[numpy.float32] = array([1., 0., 0., 0.], dtype=float32)) -> None: ...
@@ -907,7 +955,7 @@ class Scene():
     def remove_articulation(self, articulation: Articulation) -> None: ...
     def remove_kinematic_articulation(self, kinematic_articulation: KinematicArticulation) -> None: ...
     def remove_mounted_camera(self, camera: ICamera) -> None: ...
-    def set_ambient_light(self, clor: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_ambient_light(self, color: numpy.ndarray[numpy.float32]) -> None: ...
     def set_shadow_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32]) -> None: ...
     def set_timestep(self, second: float) -> None: ...
     def step(self) -> None: ...
@@ -944,6 +992,7 @@ class Scene():
     pass
 class SceneConfig():
     def __init__(self) -> None: ...
+    def __repr__(self) -> str: ...
     @property
     def bounce_threshold(self) -> float:
         """
@@ -1104,6 +1153,21 @@ class SphereGeometry(CollisionGeometry):
         :type: float
         """
     pass
+class SpotLight(Light):
+    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_shadow_parameters(self, near: float, far: float) -> None: ...
+    @property
+    def direction(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def position(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    pass
 class Subscription():
     def unsubscribe(self) -> None: ...
     pass
@@ -1230,7 +1294,11 @@ class VulkanCamera(ICamera, ISensor):
         :type: str
         """
     pass
+class VulkanDirectionalLight(DirectionalLight, Light):
+    pass
 class VulkanMaterial(RenderMaterial):
+    pass
+class VulkanPointLight(PointLight, Light):
     pass
 class VulkanRenderer(IPxrRenderer):
     def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1) -> None: ...
@@ -1247,14 +1315,25 @@ class VulkanRenderer(IPxrRenderer):
         :type: renderer.Context
         """
     pass
+class VulkanRigidbody(RenderBody):
+    @property
+    def _internal_objects(self) -> typing.List[renderer.Object]:
+        """
+        :type: typing.List[renderer.Object]
+        """
+    pass
 class VulkanScene(RenderScene):
-    def add_shadow_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0) -> None: ...
-    def add_shadow_point_light(self, position: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], near: float = 0.1, far: float = 10) -> None: ...
+    def add_shadow_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0) -> VulkanDirectionalLight: ...
+    def add_shadow_point_light(self, position: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], near: float = 0.1, far: float = 10) -> VulkanPointLight: ...
+    def add_shadow_spot_light(self, position: numpy.ndarray[numpy.float32], direction: numpy.ndarray[numpy.float32], fov: float, color: numpy.ndarray[numpy.float32], near: float = 0.10000000149011612, far: float = 10.0) -> VulkanSpotLight: ...
+    def set_ambient_light(self, color: numpy.ndarray[numpy.float32]) -> None: ...
     @property
     def _internal_scene(self) -> renderer.Scene:
         """
         :type: renderer.Scene
         """
+    pass
+class VulkanSpotLight(SpotLight, Light):
     pass
 class VulkanWindow():
     def download_float_target(self, name: str) -> numpy.ndarray[numpy.float32]: ...
@@ -1264,6 +1343,7 @@ class VulkanWindow():
     def download_uint8_target(self, name: str) -> numpy.ndarray[numpy.uint8]: ...
     def download_uint8_target_pixel(self, name: str, x: int, y: int) -> numpy.ndarray[numpy.uint8]: ...
     def get_camera_position(self) -> numpy.ndarray[numpy.float32]: ...
+    def get_camera_projection_matrix(self) -> numpy.ndarray[numpy.float32]: ...
     def get_camera_rotation(self) -> numpy.ndarray[numpy.float32]: ...
     def get_target_size(self, name: str) -> typing.List[int[2]]: ...
     def hide(self) -> None: ...
@@ -1289,6 +1369,14 @@ class VulkanWindow():
         :type: bool
         """
     @property
+    def cursor(self) -> bool:
+        """
+        :type: bool
+        """
+    @cursor.setter
+    def cursor(self, arg1: bool) -> None:
+        pass
+    @property
     def fps(self) -> float:
         """
         :type: float
@@ -1310,6 +1398,11 @@ class VulkanWindow():
         """
     @property
     def shift(self) -> bool:
+        """
+        :type: bool
+        """
+    @property
+    def should_close(self) -> bool:
         """
         :type: bool
         """

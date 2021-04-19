@@ -17,6 +17,7 @@ from sapien.core.pysapien import CollisionShape
 from sapien.core.pysapien import Contact
 from sapien.core.pysapien import ContactPoint
 from sapien.core.pysapien import ConvexMeshGeometry
+from sapien.core.pysapien import DirectionalLight
 from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
 from sapien.core.pysapien import ICamera
@@ -33,6 +34,7 @@ from sapien.core.pysapien import KinematicJointPrismatic
 from sapien.core.pysapien import KinematicJointRevolute
 from sapien.core.pysapien import KinematicJointSingleDof
 from sapien.core.pysapien import KinematicLink
+from sapien.core.pysapien import Light
 from sapien.core.pysapien import Link
 from sapien.core.pysapien import LinkBase
 from sapien.core.pysapien import LinkBuilder
@@ -44,6 +46,7 @@ from sapien.core.pysapien import OptifuserRenderer
 from sapien.core.pysapien import PhysicalMaterial
 from sapien.core.pysapien import PinocchioModel
 from sapien.core.pysapien import PlaneGeometry
+from sapien.core.pysapien import PointLight
 from sapien.core.pysapien import Pose
 from sapien.core.pysapien import RenderBody
 from sapien.core.pysapien import RenderGeometry
@@ -54,14 +57,19 @@ from sapien.core.pysapien import Scene
 from sapien.core.pysapien import SceneConfig
 from sapien.core.pysapien import ShapeRecord
 from sapien.core.pysapien import SphereGeometry
+from sapien.core.pysapien import SpotLight
 from sapien.core.pysapien import Subscription
 from sapien.core.pysapien import Trigger
 from sapien.core.pysapien import URDFLoader
 from sapien.core.pysapien import VisualRecord
 from sapien.core.pysapien import VulkanCamera
+from sapien.core.pysapien import VulkanDirectionalLight
 from sapien.core.pysapien import VulkanMaterial
+from sapien.core.pysapien import VulkanPointLight
 from sapien.core.pysapien import VulkanRenderer
+from sapien.core.pysapien import VulkanRigidbody
 from sapien.core.pysapien import VulkanScene
+from sapien.core.pysapien import VulkanSpotLight
 from sapien.core.pysapien import VulkanWindow
 import os
 import pkg_resources
@@ -86,6 +94,7 @@ __all__ = [
     "Contact",
     "ContactPoint",
     "ConvexMeshGeometry",
+    "DirectionalLight",
     "Drive",
     "Engine",
     "ICamera",
@@ -102,6 +111,7 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
+    "Light",
     "Link",
     "LinkBase",
     "LinkBuilder",
@@ -113,6 +123,7 @@ __all__ = [
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
+    "PointLight",
     "Pose",
     "RenderBody",
     "RenderGeometry",
@@ -123,14 +134,19 @@ __all__ = [
     "SceneConfig",
     "ShapeRecord",
     "SphereGeometry",
+    "SpotLight",
     "Subscription",
     "Trigger",
     "URDFLoader",
     "VisualRecord",
     "VulkanCamera",
+    "VulkanDirectionalLight",
     "VulkanMaterial",
+    "VulkanPointLight",
     "VulkanRenderer",
+    "VulkanRigidbody",
     "VulkanScene",
+    "VulkanSpotLight",
     "VulkanWindow",
     "enable_default_gl3",
     "enable_default_gl4",
@@ -144,7 +160,6 @@ __all__ = [
 
 
 __GL_SHADER_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/glsl_shader'
-__GL_VERSION_DICT = {3: '130', 4: '410'}
 __PTX_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/ptx'
 __VULKAN_CAMERA_SHADER_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/vulkan_shader/default_camera'
 __VULKAN_ICD_ROOT = '/home/fx/.local/lib/python3.8/site-packages/sapien/vulkan_icd'

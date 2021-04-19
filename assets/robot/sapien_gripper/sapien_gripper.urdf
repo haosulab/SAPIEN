@@ -1,0 +1,76 @@
+<?xml version="1.0" ?>
+<robot name="sapien_gripper">
+  <link name="base_link"/>
+  <link name="gripper_body">
+    <collision>
+      <geometry>
+        <mesh filename="meshes/gripper_base.stl"/>
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <mesh filename="meshes/gripper_body.stl"/>
+      </geometry>
+    </collision>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gripper_body.dae"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="base_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_link"/>
+    <child link="gripper_body"/>
+  </joint>
+  <link name="finger_left">
+    <collision>
+      <geometry>
+        <mesh filename="meshes/gripper_finger.stl"/>
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <mesh filename="meshes/gripper_finger_tip.stl"/>
+      </geometry>
+    </collision>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gripper_finger.dae"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="left_finger" type="prismatic">
+    <origin rpy="0 0 0" xyz="-0.03 0 0.1"/>
+    <parent link="gripper_body"/>
+    <child link="finger_left"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="1000" lower="0.0" upper="0.02"/>
+    <dynamics damping="0.0" friction="0.2"/>
+  </joint>
+  <link name="finger_right">
+    <collision>
+      <geometry>
+        <mesh filename="meshes/gripper_finger.stl"/>
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <mesh filename="meshes/gripper_finger_tip.stl"/>
+      </geometry>
+    </collision>
+    <visual>
+      <geometry>
+        <mesh filename="meshes/gripper_finger.dae"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="right_finger" type="prismatic">
+    <origin rpy="0 0 3.1415926535897" xyz="0.03 0 0.1"/>
+    <parent link="gripper_body"/>
+    <child link="finger_right"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="1000" lower="0.0" upper="0.02"/>
+    <dynamics damping="0.0" friction="0.2"/>
+  </joint>
+</robot>

@@ -1,0 +1,72 @@
+<?xml version="1.0" ?>
+<!--This does not replace URDF, and is not an extension of URDF.
+    This is a format for representing semantic information about the robot structure.
+    A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
+-->
+<robot name="single_lwr_robot">
+    <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
+    <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
+    <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
+    <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
+    <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
+    <group name="arm">
+        <joint name="lwr_1_joint" />
+        <joint name="lwr_2_joint" />
+        <joint name="lwr_1_joint" />
+        <joint name="lwr_3_joint" />
+        <joint name="lwr_4_joint" />
+        <joint name="lwr_5_joint" />
+        <joint name="lwr_6_joint" />
+        <chain base_link="lwr_0_link" tip_link="lwr_7_link" />
+    </group>
+    <group_state name="full_lwr_bend" group="full_lwr">
+        <joint name="lwr_a1_joint" value="0" />
+        <joint name="lwr_a2_joint" value="-0.6687" />
+        <joint name="lwr_e1_joint" value="0" />
+        <joint name="lwr_a3_joint" value="-1.2511" />
+        <joint name="lwr_a4_joint" value="0" />
+        <joint name="lwr_a5_joint" value="-0.4746" />
+        <joint name="lwr_a6_joint" value="0" />
+    </group_state>
+    <group_state name="full_lwr_front" group="full_lwr">
+        <joint name="lwr_a1_joint" value="0" />
+        <joint name="lwr_a2_joint" value="0.8197" />
+        <joint name="lwr_e1_joint" value="0" />
+        <joint name="lwr_a3_joint" value="-1.2511" />
+        <joint name="lwr_a4_joint" value="0" />
+        <joint name="lwr_a5_joint" value="-0.4746" />
+        <joint name="lwr_a6_joint" value="0" />
+    </group_state>
+    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="lwr_1_link" link2="lwr_2_link" reason="Adjacent" />
+    <disable_collisions link1="lwr_1_link" link2="lwr_3_link" reason="Never" />
+    <disable_collisions link1="lwr_1_link" link2="lwr_4_link" reason="Never" />
+    <disable_collisions link1="lwr_1_link" link2="lwr_5_link" reason="Never" />
+    <disable_collisions link1="lwr_1_link" link2="lwr_6_link" reason="Never" />
+    <disable_collisions link1="lwr_1_link" link2="lwr_7_link" reason="Never" />
+    <disable_collisions link1="lwr_1_link" link2="lwr_0_link" reason="Adjacent" />
+    <disable_collisions link1="lwr_2_link" link2="lwr_3_link" reason="Adjacent" />
+    <disable_collisions link1="lwr_2_link" link2="lwr_4_link" reason="Never" />
+    <disable_collisions link1="lwr_2_link" link2="lwr_5_link" reason="Never" />
+    <disable_collisions link1="lwr_2_link" link2="lwr_6_link" reason="Never" />
+    <disable_collisions link1="lwr_2_link" link2="lwr_7_link" reason="Never" />
+    <disable_collisions link1="lwr_2_link" link2="lwr_0_link" reason="Never" />
+    <disable_collisions link1="lwr_3_link" link2="lwr_4_link" reason="Adjacent" />
+    <disable_collisions link1="lwr_3_link" link2="lwr_5_link" reason="Never" />
+    <disable_collisions link1="lwr_3_link" link2="lwr_6_link" reason="Never" />
+    <disable_collisions link1="lwr_3_link" link2="lwr_7_link" reason="Never" />
+    <disable_collisions link1="lwr_3_link" link2="lwr_0_link" reason="Never" />
+    <disable_collisions link1="lwr_4_link" link2="lwr_5_link" reason="Adjacent" />
+    <disable_collisions link1="lwr_4_link" link2="lwr_6_link" reason="Never" />
+    <disable_collisions link1="lwr_4_link" link2="lwr_7_link" reason="Never" />
+    <disable_collisions link1="lwr_4_link" link2="lwr_0_link" reason="Never" />
+    <disable_collisions link1="lwr_5_link" link2="lwr_6_link" reason="Adjacent" />
+    <disable_collisions link1="lwr_5_link" link2="lwr_7_link" reason="Default" />
+    <disable_collisions link1="lwr_5_link" link2="lwr_0_link" reason="Never" />
+    <disable_collisions link1="lwr_6_link" link2="lwr_7_link" reason="Adjacent" />
+    <disable_collisions link1="lwr_6_link" link2="lwr_0_link" reason="Never" />
+    <disable_collisions link1="lwr_7_link" link2="lwr_0_link" reason="Never" />
+    <disable_collisions link1="lwr_6_link" link2="lwr_hand_link" reason="Default" />
+    <disable_collisions link1="lwr_5_link" link2="lwr_hand_link" reason="Default" />
+    <disable_collisions link1="panda_hand" link2="lwr_7_link" reason="Default" />
+</robot>
