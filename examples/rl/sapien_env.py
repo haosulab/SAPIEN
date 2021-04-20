@@ -50,11 +50,20 @@ class SapienEnv(gym.Env):
     # ---------------------------------------------------------------------------- #
     # Utilities
     # ---------------------------------------------------------------------------- #
+    def get_actor(self, name) -> sapien.ArticulationBase:
+        all_actors = self._scene.get_all_actors()
+        actor = [x for x in all_actors if x.name == name]
+        if len(actor) > 1:
+            raise RuntimeError(f'Not a unique name for actor: {name}')
+        elif len(actor) == 0:
+            raise RuntimeError(f'Actor not found: {name}')
+        return actor[0]
+
     def get_articulation(self, name) -> sapien.ArticulationBase:
         all_articulations = self._scene.get_all_articulations()
         articulation = [x for x in all_articulations if x.name == name]
         if len(articulation) > 1:
-            raise RuntimeError('Not a unique name for articulation')
+            raise RuntimeError(f'Not a unique name for articulation: {name}')
         elif len(articulation) == 0:
             raise RuntimeError(f'Articulation not found: {name}')
         return articulation[0]

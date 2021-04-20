@@ -1,4 +1,4 @@
-.. _gym_index:
+.. _gym:
 
 Build Gym-style Interface
 ==========================
@@ -33,8 +33,6 @@ Similar to `MujocoEnv <https://github.com/openai/gym/blob/master/gym/envs/mujoco
 The full code of the base class can be downloaded here :download:`sapien_env.py <../../../../examples/rl/sapien_env.py>`
 
 .. literalinclude:: ../../../../examples/rl/sapien_env.py
-   :dedent: 0
-   :lines: 1-64
 
 In the constructor, we first set up the engine, scene and renderer.
 Then, we call ``self._build_world()`` to build the simulation world.
@@ -51,11 +49,12 @@ AntEnv: environment
 Based on ``SapienEnv``, we can create a gym-style environment ``AntEnv``.
 First, we need to update the constructor and implement ``_build_world`` to build the simulation world.
 It creates the ground and an ant articulation.
+The implementation of ``create_ant`` is not shown here.
 The initial state of the actuator (ant) is stored, which will be restored every time the environment is reset.
 
 .. literalinclude:: ../../../../examples/rl/ant.py
    :dedent: 0
-   :lines: 20-45
+   :lines: 20-49
    :emphasize-lines: 7
 
 Furthermore, we need to implement two important virtual functions of ``gym.Env``, ``step`` and ``reset``.
