@@ -126,6 +126,9 @@ py::array_t<PxReal> mat42array(glm::mat4 const &mat) {
   return py::array_t<PxReal>({4, 4}, arr);
 }
 
+#define DEPRECATE_WARN(OLD, NEW)                                                                  \
+  PyErr_WarnEx(PyExc_DeprecationWarning, #OLD " is deprecated, use " #NEW " instead.", 1)
+
 void buildSapien(py::module &m) {
   m.doc() = "SAPIEN core module";
 
@@ -1157,7 +1160,7 @@ void buildSapien(py::module &m) {
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
-          "add_box_shape",
+          "add_box_collision",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
              PxReal minPatchRadius, bool isTrigger) {
@@ -1168,15 +1171,53 @@ void buildSapien(py::module &m) {
           py::arg("half_size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
-      .def("add_capsule_shape", &ActorBuilder::addCapsuleShape,
+      .def(
+          "add_box_shape",
+          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
+             std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
+             PxReal minPatchRadius, bool isTrigger) {
+            DEPRECATE_WARN(add_box_shape, add_box_collision);
+            a.addBoxShape(pose, array2vec3(halfSize), material, density, patchRadius,
+                          minPatchRadius, isTrigger);
+          },
+          py::arg("pose") = PxTransform(PxIdentity),
+          py::arg("half_size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
+          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
+      .def("add_capsule_collision", &ActorBuilder::addCapsuleShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000,
            py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f,
            py::arg("is_trigger") = false)
-      .def("add_sphere_shape", &ActorBuilder::addSphereShape,
+      .def(
+          "add_capsule_shape",
+          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfSize,
+             std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
+             PxReal minPatchRadius, bool isTrigger) {
+            DEPRECATE_WARN(add_capsule_shape, add_capsule_collision);
+            a.addCapsuleShape(pose, radius, halfSize, material, density, patchRadius,
+                                          minPatchRadius, isTrigger);
+          },
+          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+          py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000,
+          py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f,
+          py::arg("is_trigger") = false)
+      .def("add_sphere_collision", &ActorBuilder::addSphereShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
            py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
+      .def(
+          "add_sphere_shape",
+          [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
+             std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
+             PxReal minPatchRadius, bool isTrigger) {
+            DEPRECATE_WARN(add_sphere_shape, add_sphere_collision);
+            a.addSphereShape(pose, radius, material, density, patchRadius, minPatchRadius,
+                             isTrigger);
+          },
+          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
+          py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
+          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
           "add_box_visual",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,

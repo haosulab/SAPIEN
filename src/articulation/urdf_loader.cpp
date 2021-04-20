@@ -402,8 +402,9 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
       }
     }
 
-    for (auto c : current->children) {
-      stack.push_back(c);
+    // Reverse iterate over children and push into the stack
+    for (auto c = current->children.rbegin(); c != current->children.rend(); c++) {
+      stack.push_back(*c);
     }
   }
 
