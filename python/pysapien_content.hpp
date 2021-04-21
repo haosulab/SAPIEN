@@ -236,7 +236,11 @@ void buildSapien(py::module &m) {
 
   //======== Internal ========//
 
-  PyPhysicalMaterial.def("get_static_friction", &SPhysicalMaterial::getStaticFriction)
+  PyPhysicalMaterial
+      .def_property_readonly("static_friction", &SPhysicalMaterial::getStaticFriction)
+      .def_property_readonly("dynamic_friction", &SPhysicalMaterial::getDynamicFriction)
+      .def_property_readonly("restitution", &SPhysicalMaterial::getRestitution)
+      .def("get_static_friction", &SPhysicalMaterial::getStaticFriction)
       .def("get_dynamic_friction", &SPhysicalMaterial::getDynamicFriction)
       .def("get_restitution", &SPhysicalMaterial::getRestitution)
       .def("set_static_friction", &SPhysicalMaterial::setStaticFriction, py::arg("coef"))
@@ -332,54 +336,6 @@ void buildSapien(py::module &m) {
       .def_property_readonly("type", &SCollisionShape::getType)
       .def_property_readonly("geometry", &SCollisionShape::getGeometry);
 
-  // PyShape.def_readonly("type", &SShape::type)
-  //     .def_readonly("pose", &SShape::pose)
-  //     .def_property_readonly(
-  //         "box_geometry"
-  //         [](SShape &s) {
-  //           if (s.type == "box") {
-  //             return static_cast<SBoxGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SBoxGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference)
-  //     .def_property_readonly(
-  //         "sphere_geometry",
-  //         [](SShape &s) {
-  //           if (s.type == "sphere") {
-  //             return static_cast<SSphereGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SSphereGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference)
-  //     .def_property_readonly(
-  //         "capsule_geometry",
-  //         [](SShape &s) {
-  //           if (s.type == "capsule") {
-  //             return static_cast<SCapsuleGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SCapsuleGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference)
-  //     .def_property_readonly(
-  //         "plane_geometry",
-  //         [](SShape &s) {
-  //           if (s.type == "plane") {
-  //             return static_cast<SPlaneGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SPlaneGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference)
-  //     .def_property_readonly(
-  //         "convex_mesh_geometry",
-  //         [](SShape &s) {
-  //           if (s.type == "convex_mesh") {
-  //             return static_cast<SConvexMeshGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SConvexMeshGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference);
-
   //======== Render Interface ========//
   PyRenderMaterial
       .def(
@@ -397,6 +353,22 @@ void buildSapien(py::module &m) {
   //     // .def_readwrite("specular_texture", &Renderer::PxrMaterial::specular_texture)
   //     // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture)
   //     ;
+
+  PyVulkanMaterial
+      .def_property_readonly("base_color",
+                             [](Renderer::SVulkan2Material &mat) {
+                               auto color = mat.getMaterial()->getBaseColor();
+                               return py::array_t<float>(4, &color[0]);
+                             })
+      .def_property_readonly(
+          "specular",
+          [](Renderer::SVulkan2Material &mat) { return mat.getMaterial()->getFresnel(); })
+      .def_property_readonly(
+          "metallic",
+          [](Renderer::SVulkan2Material &mat) { return mat.getMaterial()->getMetallic(); })
+      .def_property_readonly("roughness", [](Renderer::SVulkan2Material &mat) {
+        return mat.getMaterial()->getRoughness();
+      });
 
   PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
       .def("get_pose", &Renderer::ISensor::getPose)

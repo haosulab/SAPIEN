@@ -5,6 +5,22 @@ interaction tasks that require detailed part-level understanding. SAPIEN is a
 collaborative effort between researchers at UCSD, Stanford and SFU. The dataset
 is a continuation of ShapeNet and PartNet.
 
+## Change Log
+### 1.0
+- Replace the old Vulkan based renderer completely
+  - See `sapien.core.renderer` for details
+- Expose GUI functionalities to Python
+- Reimplement Vulkan viewer in Python 
+- Expose PhysX shape wrapper to Python. For example,
+  - Collision shapes can be retrieved through `actor.get_collision_shapes`
+  - Collision groups on a shape can be set by `CollisionShape.set_collision_groups`
+  - Shapes are now also available in `Contact`.
+- API changes
+  - Render material creation is now `renderer.create_material()`
+  - in actor builder: `add_xxx_shape` is replaced with `add_xxx_collision`.
+- Add centrifugal and Coriolis force.
+- Change default physical parameters for better stability.
+
 ## SAPIEN Engine
 SAPIEN Engine provides physical simulation for articulated objects. It powers
 reinforcement learning and robotics with its pure Python interface.
