@@ -24,6 +24,8 @@ void buildRenderer(py::module &parent) {
   auto PySceneObject = py::class_<scene::Object, scene::Node>(m, "Object");
   auto PyTexture =
       py::class_<resource::SVTexture, std::shared_ptr<resource::SVTexture>>(m, "Texture");
+  auto PyCubemap =
+      py::class_<resource::SVCubemap, std::shared_ptr<resource::SVCubemap>>(m, "Cubemap");
   auto PyMaterial =
       py::class_<resource::SVMetallicMaterial, std::shared_ptr<resource::SVMetallicMaterial>>(
           m, "Material");
@@ -294,6 +296,17 @@ void buildRenderer(py::module &parent) {
           },
           py::arg("filename"), py::arg("mipmap_levels"), py::arg("filter") = "linear",
           py::arg("address_mode") = "repeat")
+      .def("create_cubemap_from_files",
+           [](core::Context &context, std::array<std::string, 6> const &filenames,
+              uint32_t mipmapLevels) {
+             return context.getResourceManager()->CreateCubemapFromFiles(filenames, mipmapLevels);
+           })
+      .def(
+          "create_brdf_lut",
+          [](std::shared_ptr<core::Context> context, uint32_t size) {
+            return context->getResourceManager()->generateBRDFLUT(context, size);
+          },
+          py::arg("size") = 128)
       .def(
           "create_capsule_mesh",
           [](core::Context &, float radius, float halfLength, int segments, int halfRings) {
@@ -407,12 +420,13 @@ void buildRenderer(py::module &parent) {
       .def_property("cast_shadow", &scene::Object::getCastShadow, &scene::Object::setCastShadow)
       .def_property_readonly("model", &scene::Object::getModel);
 
-  PyRenderer.def("set_custom_texture", &renderer::Renderer::setCustomTexture, py::arg("name"),
-                 py::arg("texture"));
-  PyRenderer.def("set_specialization_constant_int",
-                 &renderer::Renderer::setSpecializationConstantInt, py::arg("name"),
-                 py::arg("value"));
-  PyRenderer.def("set_specialization_constant_float",
-                 &renderer::Renderer::setSpecializationConstantFloat, py::arg("name"),
-                 py::arg("value"));
+  PyRenderer
+      .def("set_custom_texture", &renderer::Renderer::setCustomTexture, py::arg("name"),
+           py::arg("texture"))
+      .def("set_custom_cubemap", &renderer::Renderer::setCustomCubemap, py::arg("name"),
+           py::arg("texture"))
+      .def("set_specialization_constant_int", &renderer::Renderer::setSpecializationConstantInt,
+           py::arg("name"), py::arg("value"))
+      .def("set_specialization_constant_float",
+           &renderer::Renderer::setSpecializationConstantFloat, py::arg("name"), py::arg("value"));
 }

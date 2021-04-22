@@ -179,7 +179,6 @@ class ActorBuilder():
     def add_capsule_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     def add_capsule_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, color: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: ...
     def add_capsule_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: RenderMaterial = None, name: str = '') -> None: ...
-    def add_collision_group(self, arg0: int, arg1: int, arg2: int) -> None: ...
     def add_convex_shape_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     def add_multiple_convex_shapes_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     def add_sphere_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
@@ -195,7 +194,7 @@ class ActorBuilder():
     def remove_shape_at(self, index: int) -> None: ...
     def remove_visual_at(self, index: int) -> None: ...
     def reset_collision_group(self) -> None: ...
-    def set_collision_group(self, arg0: int, arg1: int, arg2: int) -> None: ...
+    def set_collision_group(self, group0: int, group1: int, group2: int, group3: int) -> None: ...
     def set_mass_and_inertia(self, arg0: float, arg1: Pose, arg2: numpy.ndarray[numpy.float32]) -> None: ...
     def set_scene(self, arg0: Scene) -> None: ...
     pass
@@ -800,6 +799,21 @@ class PhysicalMaterial():
     def set_dynamic_friction(self, coef: float) -> None: ...
     def set_restitution(self, coef: float) -> None: ...
     def set_static_friction(self, coef: float) -> None: ...
+    @property
+    def dynamic_friction(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def restitution(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def static_friction(self) -> float:
+        """
+        :type: float
+        """
     pass
 class PinocchioModel():
     def compute_coriolis_matrix(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], qvel: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, n]]: ...
@@ -1289,6 +1303,11 @@ class VulkanCamera(ICamera, ISensor):
     def set_orthographic(self, near: float, far: float, aspect: float, scale: float) -> None: ...
     def set_perspective(self, near: float, far: float, fovy: float, aspect: float) -> None: ...
     @property
+    def _internal_renderer(self) -> renderer.Renderer:
+        """
+        :type: renderer.Renderer
+        """
+    @property
     def mode(self) -> str:
         """
         :type: str
@@ -1297,6 +1316,26 @@ class VulkanCamera(ICamera, ISensor):
 class VulkanDirectionalLight(DirectionalLight, Light):
     pass
 class VulkanMaterial(RenderMaterial):
+    @property
+    def base_color(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def metallic(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def roughness(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def specular(self) -> float:
+        """
+        :type: float
+        """
     pass
 class VulkanPointLight(PointLight, Light):
     pass
@@ -1358,6 +1397,11 @@ class VulkanWindow():
     def set_camera_rotation(self, quat: numpy.ndarray[numpy.float32]) -> None: ...
     def set_scene(self, scene: Scene) -> None: ...
     def show(self) -> None: ...
+    @property
+    def _internal_renderer(self) -> renderer.Renderer:
+        """
+        :type: renderer.Renderer
+        """
     @property
     def alt(self) -> bool:
         """

@@ -62,10 +62,22 @@ def main():
     copper = renderer.create_material()
     copper.set_base_color([0.875, 0.553, 0.221, 1])
     copper.set_metallic(1)
-    copper.set_roughness(0.4)
+    copper.set_roughness(0.2)
 
     # viewer = Viewer(renderer, "../vulkan_shader/full")
-    viewer = Viewer(renderer, "../vulkan_shader/default_viewer")
+    viewer = Viewer(renderer, "../vulkan_shader/ibl")
+
+    brdf_lut = renderer_context.create_brdf_lut()
+    cubemap = renderer_context.create_cubemap_from_files(
+        ["../assets/images/cube/px2.png",
+         "../assets/images/cube/nx2.png",
+         "../assets/images/cube/py2.png",
+         "../assets/images/cube/ny2.png",
+         "../assets/images/cube/pz2.png",
+         "../assets/images/cube/nz2.png",
+         ], 6)
+    viewer.window._internal_renderer.set_custom_cubemap("Environment", cubemap)
+    viewer.window._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
 
     def create_ant_builder(scene):
         builder = scene.create_articulation_builder()

@@ -1213,8 +1213,7 @@ void buildSapien(py::module &m) {
       .def("remove_visual_at", &ActorBuilder::removeVisualAt, py::arg("index"))
       .def("get_shapes", &ActorBuilder::getShapes, py::return_value_policy::reference)
       .def("get_visuals", &ActorBuilder::getVisuals, py::return_value_policy::reference)
-      .def("set_collision_group", &ActorBuilder::setCollisionGroup)
-      .def("add_collision_group", &ActorBuilder::addCollisionGroup)
+      .def("set_collision_group", &ActorBuilder::setCollisionGroup, py::arg("group0"), py::arg("group1"), py::arg("group2"), py::arg("group3"))
       .def("reset_collision_group", &ActorBuilder::resetCollisionGroup)
       .def("set_mass_and_inertia",
            [](ActorBuilder &a, PxReal mass, PxTransform const &cMassPose,
@@ -1522,7 +1521,10 @@ void buildSapien(py::module &m) {
       .def("set_full_perspective", &Renderer::SVulkan2Camera::setFullPerspectiveParameters,
            py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
            py::arg("cy"), py::arg("width"), py::arg("height"), py::arg("skew"))
-      .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode);
+      .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode)
+      .def_property_readonly("_internal_renderer", [](Renderer::SVulkan2Camera &camera) {
+        return camera.getInternalRenderer();
+      }, py::return_value_policy::reference);
 
   PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
       .def_property_readonly("pose", &Renderer::ILight::getPose)
@@ -1616,6 +1618,9 @@ void buildSapien(py::module &m) {
              glm::mat4 proj = glm::transpose(window.getCameraProjectionMatrix());
              return py::array_t<float>({4, 4}, &proj[0][0]);
            })
+      .def_property_readonly("_internal_renderer", [](Renderer::SVulkan2Window &window) {
+        return window.getInternalRenderer();
+      }, py::return_value_policy::reference)
       .def(
           "set_scene",
           [](Renderer::SVulkan2Window &window, SScene *scene) {

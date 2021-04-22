@@ -113,6 +113,10 @@ public:
 
   float getFPS();
 
+  inline svulkan2::renderer::Renderer *getInternalRenderer() const {
+    return mSVulkanRenderer.get();
+  }
+
 private:
   svulkan2::scene::Camera *getCamera();
 };
