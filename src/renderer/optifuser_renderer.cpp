@@ -292,21 +292,31 @@ void OptifuserScene::setAmbientLight(std::array<float, 3> const &color) {
   mScene->setAmbientLight({color[0], color[1], color[2]});
 }
 
-void OptifuserScene::setShadowLight(std::array<float, 3> const &direction,
-                                    std::array<float, 3> const &color) {
-  mScene->setShadowLight(
-      {{direction[0], direction[1], direction[2]}, {color[0], color[1], color[2]}});
+std::array<float, 3> OptifuserScene::getAmbientLight() const {
+  auto light = mScene->getAmbientLight();
+  return {light.x, light.y, light.z};
 }
 
-void OptifuserScene::addPointLight(std::array<float, 3> const &position,
-                                   std::array<float, 3> const &color) {
+IPointLight *OptifuserScene::addPointLight(std::array<float, 3> const &position,
+                                           std::array<float, 3> const &color, bool enableShadow,
+                                           float shadowNear, float shadowFar) {
   mScene->addPointLight({{position[0], position[1], position[2]}, {color[0], color[1], color[2]}});
+  return nullptr;
 }
 
-void OptifuserScene::addDirectionalLight(std::array<float, 3> const &direction,
-                                         std::array<float, 3> const &color) {
+IDirectionalLight *OptifuserScene::addDirectionalLight(
+    std::array<float, 3> const &direction, std::array<float, 3> const &color, bool enableShadow,
+    std::array<float, 3> const &position, float shadowScale, float shadowNear, float shadowFar) {
   mScene->addDirectionalLight(
       {{direction[0], direction[1], direction[2]}, {color[0], color[1], color[2]}});
+  return nullptr;
+}
+
+ISpotLight *OptifuserScene::addSpotLight(std::array<float, 3> const &position,
+                                         std::array<float, 3> const &direction, float fov,
+                                         std::array<float, 3> const &color, bool enableShadow,
+                                         float shadowNear, float shadowFar) {
+  throw std::runtime_error("Spot light is not supported for OptifuserRenderer");
 }
 
 //======== End Scene ========//

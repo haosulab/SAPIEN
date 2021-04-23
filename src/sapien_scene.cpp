@@ -427,36 +427,36 @@ Renderer::ICamera *SScene::findMountedCamera(std::string const &name, SActorBase
   }
 }
 
-void SScene::setShadowLight(PxVec3 const &direction, PxVec3 const &color) {
-  if (!mRendererScene) {
-    spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
-    return;
-  }
-  mRendererScene->setShadowLight({direction.x, direction.y, direction.z},
-                                 {color.x, color.y, color.z});
-}
-void SScene::addPointLight(PxVec3 const &position, PxVec3 const &color) {
-  if (!mRendererScene) {
-    spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
-    return;
-  }
-  mRendererScene->addPointLight({position.x, position.y, position.z}, {color.x, color.y, color.z});
-}
-void SScene::setAmbientLight(PxVec3 const &color) {
-  if (!mRendererScene) {
-    spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
-    return;
-  }
-  mRendererScene->setAmbientLight({color.x, color.y, color.z});
-}
-void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
-  if (!mRendererScene) {
-    spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
-    return;
-  }
-  mRendererScene->addDirectionalLight({direction.x, direction.y, direction.z},
-                                      {color.x, color.y, color.z});
-}
+// void SScene::setShadowLight(PxVec3 const &direction, PxVec3 const &color) {
+//   if (!mRendererScene) {
+//     spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
+//     return;
+//   }
+//   mRendererScene->setShadowLight({direction.x, direction.y, direction.z},
+//                                  {color.x, color.y, color.z});
+// }
+// void SScene::addPointLight(PxVec3 const &position, PxVec3 const &color) {
+//   if (!mRendererScene) {
+//     spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
+//     return;
+//   }
+//   mRendererScene->addPointLight({position.x, position.y, position.z}, {color.x, color.y, color.z});
+// }
+// void SScene::setAmbientLight(PxVec3 const &color) {
+//   if (!mRendererScene) {
+//     spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
+//     return;
+//   }
+//   mRendererScene->setAmbientLight({color.x, color.y, color.z});
+// }
+// void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
+//   if (!mRendererScene) {
+//     spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
+//     return;
+//   }
+//   mRendererScene->addDirectionalLight({direction.x, direction.y, direction.z},
+//                                       {color.x, color.y, color.z});
+// }
 
 void SScene::step() {
   EASY_BLOCK("Pre-step processing", profiler::colors::Blue);

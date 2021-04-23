@@ -607,39 +607,15 @@ void buildSapien(py::module &m) {
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
       .def("get_all_articulations", &SScene::getAllArticulations,
            py::return_value_policy::reference)
-
-      .def(
-          "set_shadow_light",
-          [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
-            s.setShadowLight(array2vec3(direction), array2vec3(color));
-          },
-          py::arg("direction"), py::arg("color"))
-      .def(
-          "set_ambient_light",
-          [](SScene &s, py::array_t<PxReal> const &color) {
-            s.setAmbientLight(array2vec3(color));
-          },
-          py::arg("color"))
-      .def(
-          "add_point_light",
-          [](SScene &s, py::array_t<PxReal> const &position, py::array_t<PxReal> const &color) {
-            s.addPointLight(array2vec3(position), array2vec3(color));
-          },
-          py::arg("position"), py::arg("color"))
-      .def(
-          "add_directional_light",
-          [](SScene &s, py::array_t<PxReal> const &direction, py::array_t<PxReal> const &color) {
-            s.addDirectionalLight(array2vec3(direction), array2vec3(color));
-          },
-          py::arg("direction"), py::arg("color"))
-
       // drive, constrains, and joints
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
            py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
       .def_property_readonly("render_id_to_visual_name", &SScene::findRenderId2VisualName)
 
       // renderer
-      .def("get_render_scene", &SScene::getRendererScene, py::return_value_policy::reference)
+      .def_property_readonly("renderer_scene", &SScene::getRendererScene,
+                             py::return_value_policy::reference)
+      .def("get_renderer_scene", &SScene::getRendererScene, py::return_value_policy::reference)
       .def("generate_unique_render_id", &SScene::generateUniqueRenderId)
       .def("pack",
            [](SScene &scene) {
@@ -1160,7 +1136,8 @@ Different from @add_collision_from_file, all connected components in the file wi
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
              PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
-            DEPRECATE_WARN(add_multiple_convex_shapes_from_file, add_multiple_collisions_from_file);
+            DEPRECATE_WARN(add_multiple_convex_shapes_from_file,
+                           add_multiple_collisions_from_file);
             a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material, density,
                                               patchRadius, minPatchRadius, isTrigger);
           },
@@ -1206,7 +1183,7 @@ Different from @add_collision_from_file, all connected components in the file wi
              PxReal minPatchRadius, bool isTrigger) {
             DEPRECATE_WARN(add_capsule_shape, add_capsule_collision);
             a.addCapsuleShape(pose, radius, halfSize, material, density, patchRadius,
-                                          minPatchRadius, isTrigger);
+                              minPatchRadius, isTrigger);
           },
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000,
@@ -1474,7 +1451,8 @@ Args:
 
   PyURDFLoader.def(py::init<SScene *>(), py::arg("scene"))
       .def_readwrite("fix_root_link", &URDF::URDFLoader::fixRootLink)
-      .def_readwrite("load_multiple_collisions_from_file", &URDF::URDFLoader::multipleMeshesInOneFile)
+      .def_readwrite("load_multiple_collisions_from_file",
+                     &URDF::URDFLoader::multipleMeshesInOneFile)
       .def_readwrite("collision_is_visual", &URDF::URDFLoader::collisionIsVisual)
       .def_readwrite("scale", &URDF::URDFLoader::scale)
       .def(
@@ -1483,7 +1461,7 @@ Args:
             auto config = parseURDFConfig(dict);
             return loader.load(filename, config);
           },
-R"doc(
+          R"doc(
 Load articulation from URDF.
 
 Args:
@@ -1648,9 +1626,10 @@ Args:
            py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
            py::arg("cy"), py::arg("width"), py::arg("height"), py::arg("skew"))
       .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode)
-      .def_property_readonly("_internal_renderer", [](Renderer::SVulkan2Camera &camera) {
-        return camera.getInternalRenderer();
-      }, py::return_value_policy::reference);
+      .def_property_readonly(
+          "_internal_renderer",
+          [](Renderer::SVulkan2Camera &camera) { return camera.getInternalRenderer(); },
+          py::return_value_policy::reference);
 
   PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
       .def_property_readonly("pose", &Renderer::ILight::getPose)
@@ -1744,9 +1723,10 @@ Args:
              glm::mat4 proj = glm::transpose(window.getCameraProjectionMatrix());
              return py::array_t<float>({4, 4}, &proj[0][0]);
            })
-      .def_property_readonly("_internal_renderer", [](Renderer::SVulkan2Window &window) {
-        return window.getInternalRenderer();
-      }, py::return_value_policy::reference)
+      .def_property_readonly(
+          "_internal_renderer",
+          [](Renderer::SVulkan2Window &window) { return window.getInternalRenderer(); },
+          py::return_value_policy::reference)
       .def(
           "set_scene",
           [](Renderer::SVulkan2Window &window, SScene *scene) {
@@ -1845,53 +1825,59 @@ Args:
       .def_property_readonly("mouse_delta", &Renderer::SVulkan2Window::getMouseDelta)
       .def_property_readonly("mouse_wheel_delta", &Renderer::SVulkan2Window::getMouseWheelDelta);
 
-  PyVulkanScene
-      .def(
-          "set_ambient_light",
-          [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &color) {
-            scene.setAmbientLight({color.at(0), color.at(1), color.at(2)});
-          },
-          py::arg("color"))
-      .def(
-          "add_shadow_point_light",
-          [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &position,
-             py::array_t<float> const &color, float near, float far) {
-            return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
-                                       {color.at(0), color.at(1), color.at(2)}, true, near, far);
-          },
-          py::arg("position"), py::arg("color"), py::arg("near") = 0.1, py::arg("far") = 10,
-          py::return_value_policy::reference)
-      .def(
-          "add_shadow_directional_light",
-          [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &direction,
-             py::array_t<float> const &color, py::array_t<float> const &position, float scale,
-             float near, float far) {
-            return scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
-                                             {color.at(0), color.at(1), color.at(2)}, true,
-                                             {position.at(0), position.at(1), position.at(2)},
-                                             scale, near, far);
-          },
-          py::arg("direction"), py::arg("color"),
-          py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
-          py::arg("near") = -10.f, py::arg("far") = 10.f, py::return_value_policy::reference)
-      .def(
-          "add_shadow_spot_light",
-          [](Renderer::SVulkan2Scene &scene, py::array_t<float> const &position,
-             py::array_t<float> const &direction, float fov, py::array_t<float> const &color,
-             float near, float far) {
-            return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
-                                      {direction.at(0), direction.at(1), direction.at(2)}, fov,
-                                      {color.at(0), color.at(1), color.at(2)}, true, near, far);
-          },
-          py::arg("position"), py::arg("direction"), py::arg("fov"), py::arg("color"),
-          py::arg("near") = 0.1f, py::arg("far") = 10.f, py::return_value_policy::reference)
-      .def_property_readonly(
-          "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); },
-          py::return_value_policy::reference);
+  PyVulkanScene.def_property_readonly(
+      "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); },
+      py::return_value_policy::reference);
 
   PyRenderer.def("create_material", &Renderer::IPxrRenderer::createMaterial);
 
   PyRenderScene
+      .def_property_readonly("ambient_light",
+                             [](Renderer::IPxrScene &scene) {
+                               auto light = scene.getAmbientLight();
+                               return make_array(std::vector<float>{light[0], light[1], light[2]});
+                             })
+      .def(
+          "set_ambient_light",
+          [](Renderer::IPxrScene &scene, py::array_t<float> const &color) {
+            scene.setAmbientLight({color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("color"))
+      .def(
+          "add_point_light",
+          [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
+             py::array_t<float> const &color, bool shadow, float near, float far) {
+            return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
+                                       {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+          },
+          py::arg("position"), py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1,
+          py::arg("far") = 10, py::return_value_policy::reference)
+      .def(
+          "add_directional_light",
+          [](Renderer::IPxrScene &scene, py::array_t<float> const &direction,
+             py::array_t<float> const &color, bool shadow, py::array_t<float> const &position,
+             float scale, float near, float far) {
+            return scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
+                                             {color.at(0), color.at(1), color.at(2)}, shadow,
+                                             {position.at(0), position.at(1), position.at(2)},
+                                             scale, near, far);
+          },
+          py::arg("direction"), py::arg("color"), py::arg("shadow") = false,
+          py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
+          py::arg("near") = -10.f, py::arg("far") = 10.f, py::return_value_policy::reference)
+      .def(
+          "add_spot_light",
+          [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
+             py::array_t<float> const &direction, float fov, py::array_t<float> const &color,
+             bool shadow, float near, float far) {
+            return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
+                                      {direction.at(0), direction.at(1), direction.at(2)}, fov,
+                                      {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+          },
+          py::arg("position"), py::arg("direction"), py::arg("fov"), py::arg("color"),
+          py::arg("shadow") = false, py::arg("near") = 0.1f, py::arg("far") = 10.f,
+          py::return_value_policy::reference)
+
       .def(
           "add_mesh_from_file",
           [](Renderer::IPxrScene &scene, std::string const &meshFile, py::array_t<float> scale) {

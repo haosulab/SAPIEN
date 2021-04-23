@@ -196,13 +196,22 @@ public:
 
   virtual std::vector<ICamera *> getCameras() = 0;
 
-  virtual void setShadowLight(std::array<float, 3> const &direction,
-                              std::array<float, 3> const &color) = 0;
-  virtual void addPointLight(std::array<float, 3> const &position,
-                             std::array<float, 3> const &color) = 0;
   virtual void setAmbientLight(std::array<float, 3> const &color) = 0;
-  virtual void addDirectionalLight(std::array<float, 3> const &direction,
-                                   std::array<float, 3> const &color) = 0;
+  virtual std::array<float, 3> getAmbientLight() const = 0;
+
+  virtual IPointLight *addPointLight(std::array<float, 3> const &position,
+                                     std::array<float, 3> const &color, bool enableShadow,
+                                     float shadowNear, float shadowFar) = 0;
+
+  virtual IDirectionalLight *
+  addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color,
+                      bool enableShadow, std::array<float, 3> const &position, float shadowScale,
+                      float shadowNear, float shadowFar) = 0;
+
+  virtual ISpotLight *addSpotLight(std::array<float, 3> const &position,
+                                   std::array<float, 3> const &direction, float fov,
+                                   std::array<float, 3> const &color, bool enableShadow,
+                                   float shadowNear, float shadowFar) = 0;
 
   /** call this function before every rendering time frame */
   inline virtual void updateRender(){};

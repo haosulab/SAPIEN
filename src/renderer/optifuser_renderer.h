@@ -90,20 +90,34 @@ public:
   void destroy() override;
   //======== Lights ========//
 
-  /* For OpenGL only */
   void setAmbientLight(std::array<float, 3> const &color) override;
+  std::array<float, 3> getAmbientLight() const override;
+  IPointLight *addPointLight(std::array<float, 3> const &position,
+                                     std::array<float, 3> const &color, bool enableShadow,
+                                     float shadowNear, float shadowFar) override;
+   IDirectionalLight *
+  addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color,
+                      bool enableShadow, std::array<float, 3> const &position, float shadowScale,
+                      float shadowNear, float shadowFar) override;
+   ISpotLight *addSpotLight(std::array<float, 3> const &position,
+                                   std::array<float, 3> const &direction, float fov,
+                                   std::array<float, 3> const &color, bool enableShadow,
+                                   float shadowNear, float shadowFar) override;
 
-  /* For OpenGL only */
-  void setShadowLight(std::array<float, 3> const &direction,
-                      std::array<float, 3> const &color) override;
+  // /* For OpenGL only */
+  // void setAmbientLight(std::array<float, 3> const &color) override;
 
-  /* For both OpenGL and OptiX */
-  void addPointLight(std::array<float, 3> const &position,
-                     std::array<float, 3> const &color) override;
+  // /* For OpenGL only */
+  // void setShadowLight(std::array<float, 3> const &direction,
+  //                     std::array<float, 3> const &color) override;
 
-  /* For OptiX Only */
-  void addDirectionalLight(std::array<float, 3> const &direction,
-                           std::array<float, 3> const &color) override;
+  // /* For both OpenGL and OptiX */
+  // void addPointLight(std::array<float, 3> const &position,
+  //                    std::array<float, 3> const &color) override;
+
+  // /* For OptiX Only */
+  // void addDirectionalLight(std::array<float, 3> const &direction,
+  //                          std::array<float, 3> const &color) override;
 };
 
 class OptifuserRenderer : public IPxrRenderer {

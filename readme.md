@@ -18,6 +18,7 @@ is a continuation of ShapeNet and PartNet.
 - API changes
   - Render material creation is now `renderer.create_material()`
   - in actor builder: `add_xxx_shape` is replaced with `add_xxx_collision`.
+  - move light functions from scene to scene.renderer_scene
 - Add centrifugal and Coriolis force.
 - Change default physical parameters for better stability.
 
