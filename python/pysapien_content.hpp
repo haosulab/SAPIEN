@@ -75,7 +75,10 @@ URDF::URDFConfig parseURDFConfig(py::dict &dict) {
         config.link[name].minPatchRadius = dict2["min_patch_radius"].cast<float>();
       }
       if (dict2.contains("shape")) {
-        auto shapeDict = dict2["shape"].cast<py::dict>();
+        throw std::runtime_error("Please use collision rather than shape!");
+      }
+      if (dict2.contains("collision")) {
+        auto shapeDict = dict2["collision"].cast<py::dict>();
         for (auto kv2 : shapeDict) {
           auto idx = kv2.first.cast<int>();
           auto dict3 = kv2.second.cast<py::dict>();
@@ -585,13 +588,15 @@ void buildSapien(py::module &m) {
            py::arg("thread_count") = 0, py::arg("tolerance_length") = 0.1f,
            py::arg("tolerance_speed") = 0.2f)
       .def("create_scene", &Simulation::createScene, py::arg("config") = SceneConfig())
-      .def("get_renderer", &Simulation::getRenderer, py::return_value_policy::reference)
+      .def_property("renderer", &Simulation::getRenderer, &Simulation::setRenderer)
+      .def("get_renderer", &Simulation::getRenderer)
       .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
       .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
       .def("create_physical_material", &Simulation::createPhysicalMaterial,
            py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"));
 
   PyScene.def_property_readonly("name", &SScene::getName)
+      .def_property_readonly("engine", &SScene::getSimulation)
       .def("set_timestep", &SScene::setTimestep, py::arg("second"))
       .def("get_timestep", &SScene::getTimestep)
       .def_property("timestep", &SScene::getTimestep, &SScene::setTimestep)
@@ -858,8 +863,8 @@ void buildSapien(py::module &m) {
       .def("get_parent_link", &SJointBase::getParentLink, py::return_value_policy::reference)
       .def("get_child_link", &SJointBase::getChildLink, py::return_value_policy::reference)
       .def("get_dof", &SJointBase::getDof)
-      .def("get_pose_in_parent_frame", &SJointBase::getParentPose)
-      .def("get_pose_in_child_frame", &SJointBase::getChildPose)
+      .def("get_pose_in_parent", &SJointBase::getParentPose)
+      .def("get_pose_in_child", &SJointBase::getChildPose)
       .def("get_limits",
            [](SJointBase &j) {
              auto limits = j.getLimits();
@@ -1136,13 +1141,44 @@ void buildSapien(py::module &m) {
 
   PyActorBuilder
       .def(
-          "add_convex_shape_from_file",
+          "add_collision_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
              PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
             a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density,
                                      patchRadius, minPatchRadius, isTrigger);
           },
+          R"doc(
+Add a collision shape from file (see assimp for supported formats).
+If the shape in the file is not convex, it will be converted by the PhysX backend.)doc",
+          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
+          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
+      .def(
+          "add_convex_shape_from_file",
+          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
+             py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
+             PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+            DEPRECATE_WARN(add_convex_shape_from_file, add_collision_from_file);
+            a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density,
+                                     patchRadius, minPatchRadius, isTrigger);
+          },
+          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
+          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
+      .def(
+          "add_multiple_collisions_from_file",
+          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
+             py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
+             PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+            a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material, density,
+                                              patchRadius, minPatchRadius, isTrigger);
+          },
+          R"doc(
+Add multiple collisions shapes from files. Also see @add_collision_from_file.
+Different from @add_collision_from_file, all connected components in the file will be converted to be convex.)doc",
           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
@@ -1152,6 +1188,7 @@ void buildSapien(py::module &m) {
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
              PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+            DEPRECATE_WARN(add_multiple_convex_shapes_from_file, add_multiple_collisions_from_file);
             a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material, density,
                                               patchRadius, minPatchRadius, isTrigger);
           },
@@ -1185,6 +1222,7 @@ void buildSapien(py::module &m) {
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def("add_capsule_collision", &ActorBuilder::addCapsuleShape,
+           "Add a capsule collision shape. The height is along the x-axis.",
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000,
            py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f,
@@ -1228,7 +1266,7 @@ void buildSapien(py::module &m) {
           py::arg("half_size") = make_array<PxReal>({1, 1, 1}),
           py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def(
-          "add_box_visual_complex",
+          "add_box_visual",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
             a.addBoxVisualWithMaterial(pose, array2vec3(halfSize), mat, name);
@@ -1242,15 +1280,17 @@ void buildSapien(py::module &m) {
              py::array_t<PxReal> color, std::string const &name) {
             a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
           },
+          "Add a capsule visual shape. The height is along the x-axis.",
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("half_length") = 1, py::arg("color") = make_array<PxReal>({1, 1, 1}),
           py::arg("name") = "")
       .def(
-          "add_capsule_visual_complex",
+          "add_capsule_visual",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
              std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
             a.addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
           },
+          "Add a capsule visual shape. The height is along the x-axis.",
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("name") = "")
       .def(
@@ -1262,7 +1302,7 @@ void buildSapien(py::module &m) {
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
       .def(
-          "add_sphere_visual_complex",
+          "add_sphere_visual",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
              std::shared_ptr<Renderer::IPxrMaterial> &mat,
              std::string const &name) { a.addSphereVisualWithMaterial(pose, radius, mat, name); },
@@ -1276,28 +1316,44 @@ void buildSapien(py::module &m) {
           },
           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
-      .def("remove_all_shapes", &ActorBuilder::removeAllShapes)
+      .def("remove_all_collisions", &ActorBuilder::removeAllShapes)
       .def("remove_all_visuals", &ActorBuilder::removeAllVisuals)
-      .def("remove_shape_at", &ActorBuilder::removeShapeAt, py::arg("index"))
+      .def("remove_collision_at", &ActorBuilder::removeShapeAt, py::arg("index"))
       .def("remove_visual_at", &ActorBuilder::removeVisualAt, py::arg("index"))
-      .def("get_shapes", &ActorBuilder::getShapes, py::return_value_policy::reference)
+      .def("get_collisions", &ActorBuilder::getShapes, py::return_value_policy::reference)
       .def("get_visuals", &ActorBuilder::getVisuals, py::return_value_policy::reference)
-      .def("set_collision_group", &ActorBuilder::setCollisionGroup)
-      .def("add_collision_group", &ActorBuilder::addCollisionGroup)
-      .def("reset_collision_group", &ActorBuilder::resetCollisionGroup)
-      .def("set_mass_and_inertia",
-           [](ActorBuilder &a, PxReal mass, PxTransform const &cMassPose,
-              py::array_t<PxReal> inertia) {
-             a.setMassAndInertia(mass, cMassPose, array2vec3(inertia));
-           })
-      .def("set_scene", &ActorBuilder::setScene)
-      .def("build", &ActorBuilder::build, py::arg("is_kinematic") = false, py::arg("name") = "",
-           py::return_value_policy::reference)
+      .def(
+          "set_mass_and_inertia",
+          [](ActorBuilder &a, PxReal mass, PxTransform const &cMassPose,
+             py::array_t<PxReal> inertia) {
+            a.setMassAndInertia(mass, cMassPose, array2vec3(inertia));
+          },
+          R"doc(
+Set the mass and inertia.
+
+Args:
+  mass: the (scalar) mass of the actor
+  inertia_pose: 
+    the position is the center of mass;
+    the rotation (quaternion) is the principle axis of inertia, relative to actor frame
+  inertia: principle moments of inertia (a 3D vector)
+
+References:
+  https://en.wikipedia.org/wiki/Moment_of_inertia#Principal_axes
+)doc",
+          py::arg("mass"), py::arg("inertia_pose"), py::arg("inertia"), )
+      .def(
+          "build", [](ActorBuilder &a, std::string const &name) { return a.build(false); },
+          py::arg("name") = "", py::return_value_policy::reference)
+      .def(
+          "build_kinematic",
+          [](ActorBuilder &a, std::string const &name) { return a.build(true); },
+          py::arg("name") = "", py::return_value_policy::reference)
       .def("build_static", &ActorBuilder::buildStatic, py::return_value_policy::reference,
            py::arg("name") = "");
 
   PyShapeRecord.def_readonly("filename", &ActorBuilder::ShapeRecord::filename)
-      .def_property_readonly("density",
+      .def_property_readonly("type",
                              [](ActorBuilder::ShapeRecord const &r) {
                                switch (r.type) {
                                case sapien::ActorBuilder::ShapeRecord::SingleMesh:
@@ -1316,14 +1372,14 @@ void buildSapien(py::module &m) {
       .def_property_readonly(
           "scale", [](ActorBuilder::ShapeRecord const &r) { return vec32array(r.scale); })
       .def_readonly("radius", &ActorBuilder::ShapeRecord::radius)
-      .def_readonly("radius", &ActorBuilder::ShapeRecord::length)
+      .def_readonly("length", &ActorBuilder::ShapeRecord::length)
       .def_readonly("pose", &ActorBuilder::ShapeRecord::pose)
       .def_readonly("density", &ActorBuilder::ShapeRecord::density)
       .def_readonly("material", &ActorBuilder::ShapeRecord::material,
                     py::return_value_policy::reference);
 
   PyVisualRecord.def_readonly("filename", &ActorBuilder::VisualRecord::filename)
-      .def_property_readonly("density",
+      .def_property_readonly("type",
                              [](ActorBuilder::VisualRecord const &r) {
                                switch (r.type) {
                                case sapien::ActorBuilder::VisualRecord::Mesh:
@@ -1382,12 +1438,23 @@ void buildSapien(py::module &m) {
 
             b.setJointProperties(t, l, parentPose, childPose, friction, damping);
           },
-          py::arg("joint_type"), py::arg("limits"),
-          py::arg("parent_pose") = PxTransform(PxIdentity),
-          py::arg("child_pose") = PxTransform(PxIdentity), py::arg("friction") = 0,
-          py::arg("damping") = 0)
+          R"doc(
+Set the properties of the joint.
 
-      .def("get_joints", &LinkBuilder::getJoint, py::return_value_policy::reference);
+Args:
+  joint_type: ["revolute", "prismatic", "fixed"]
+  limits: [[min1, max1], ...], the length is the DoF
+  pose_in_parent: joint pose in parent frame. 
+    The x-axis is the rotation axis for revolute, or the translation axis for prismatic.
+  pose_in_child: joint pose in child frame. See also @pose_in_parent.
+  friction: joint friction
+  damping: joint damping
+)doc",
+          py::arg("joint_type"), py::arg("limits"),
+          py::arg("pose_in_parent") = PxTransform(PxIdentity),
+          py::arg("pose_in_child") = PxTransform(PxIdentity), py::arg("friction") = 0,
+          py::arg("damping") = 0)
+      .def("get_joint", &LinkBuilder::getJoint, py::return_value_policy::reference);
 
   PyJointRecord
       .def_property_readonly("joint_type",
@@ -1405,8 +1472,8 @@ void buildSapien(py::module &m) {
                                  return "unknown";
                                }
                              })
-      .def_readonly("parent_pose", &LinkBuilder::JointRecord::parentPose)
-      .def_readonly("child_pose", &LinkBuilder::JointRecord::childPose)
+      .def_readonly("pose_in_parent", &LinkBuilder::JointRecord::parentPose)
+      .def_readonly("pose_in_child", &LinkBuilder::JointRecord::childPose)
       .def_readonly("friction", &LinkBuilder::JointRecord::friction)
       .def_readonly("damping", &LinkBuilder::JointRecord::damping)
       .def_readonly("name", &LinkBuilder::JointRecord::name)
@@ -1423,7 +1490,7 @@ void buildSapien(py::module &m) {
           "create_link_builder",
           [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
           py::arg("parent") = nullptr, py::return_value_policy::reference)
-      .def("build", &ArticulationBuilder::build, py::arg("fix_base") = false,
+      .def("build", &ArticulationBuilder::build, py::arg("fix_root_link") = false,
            py::return_value_policy::reference)
       .def("build_kinematic", &ArticulationBuilder::buildKinematic,
            py::return_value_policy::reference)
@@ -1432,23 +1499,37 @@ void buildSapien(py::module &m) {
 
   PyURDFLoader.def(py::init<SScene *>(), py::arg("scene"))
       .def_readwrite("fix_root_link", &URDF::URDFLoader::fixRootLink)
-      .def_readwrite("load_multiple_shapes_from_file", &URDF::URDFLoader::multipleMeshesInOneFile)
+      .def_readwrite("load_multiple_collisions_from_file", &URDF::URDFLoader::multipleMeshesInOneFile)
       .def_readwrite("collision_is_visual", &URDF::URDFLoader::collisionIsVisual)
       .def_readwrite("scale", &URDF::URDFLoader::scale)
-      .def_property(
-          "default_density",
-          [](URDF::URDFLoader &) {
-            throw std::runtime_error("default_density is moved to URDF config");
-          },
-          [](URDF::URDFLoader &) {
-            throw std::runtime_error("default_density is moved to URDF config");
-          })
       .def(
           "load",
           [](URDF::URDFLoader &loader, std::string const &filename, py::dict &dict) {
             auto config = parseURDFConfig(dict);
             return loader.load(filename, config);
           },
+R"doc(
+Load articulation from URDF.
+
+Args:
+  filename: path to URDF
+  config: a dict to specify any on-the-fly modification of articulation
+    It follows the following schema (the inner parameter overrides the outer one):
+    - material: PhysicalMaterial
+    - density: float
+    - link: dict[str, dict]
+      - ${link_name}: dict
+        - material: PhysicalMaterial
+        - density: float
+        - patch_radius: float
+        - min_patch_radius: float
+        - collision: dict[int, dict]
+          - ${collision_index}: dict
+            - material: PhysicalMaterial
+            - density: float
+            - patch_radius: float
+            - min_patch_radius: float
+)doc",
           py::return_value_policy::reference, py::arg("filename"), py::arg("config") = py::dict())
       .def(
           "load_kinematic",
