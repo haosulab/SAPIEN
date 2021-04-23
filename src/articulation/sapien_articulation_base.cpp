@@ -211,9 +211,13 @@ static std::string exportLinkURDF(SLinkBase *link, physx::PxTransform extraTrans
   auto mCollisionShapes = link->getCollisionShapes();
   for (auto mCollisionShape : mCollisionShapes) {
     ss << "<collision>";
+    auto mPxShape = mCollisionShape->getPxShape();
 
     PxTransform localPose = mCollisionShape->getLocalPose();
     PxTransform URDFPose = extraTransform * localPose; // TODO: check order
+    if (mPxShape->getGeometryType() == PxGeometryType::eCAPSULE) {
+      URDFPose = URDFPose * PxTransform({{0, 0, 0}, PxQuat(-1.57079633, {0, 1, 0})});
+    }
     Eigen::Quaternionf q;
     q.w() = URDFPose.q.w;
     q.x() = URDFPose.q.x;
@@ -225,8 +229,7 @@ static std::string exportLinkURDF(SLinkBase *link, physx::PxTransform extraTrans
        << "\" />";
 
     ss << "<geometry>";
-
-    auto mPxShape = mCollisionShape->getPxShape();
+    
     switch (mPxShape->getGeometryType()) {
     case PxGeometryType::eBOX: {
       PxBoxGeometry g;
