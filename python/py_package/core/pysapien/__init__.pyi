@@ -173,31 +173,70 @@ class ActorDynamicBase(ActorBase):
         """
     pass
 class ActorBuilder():
+    def add_box_collision(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), half_size: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     def add_box_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), half_size: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
+    @typing.overload
     def add_box_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), half_size: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), color: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: ...
-    def add_box_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), half_size: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: RenderMaterial = None, name: str = '') -> None: ...
+    @typing.overload
+    def add_box_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), half_size: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: RenderMaterial = None, name: str = '') -> None: ...
+    def add_capsule_collision(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: 
+        """
+        Add a capsule collision shape. The height is along the x-axis.
+        """
     def add_capsule_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
-    def add_capsule_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, color: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: ...
-    def add_capsule_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: RenderMaterial = None, name: str = '') -> None: ...
-    def add_collision_group(self, arg0: int, arg1: int, arg2: int) -> None: ...
+    @typing.overload
+    def add_capsule_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, color: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: 
+        """
+        Add a capsule visual shape. The height is along the x-axis.
+
+        Add a capsule visual shape. The height is along the x-axis.
+        """
+    @typing.overload
+    def add_capsule_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: RenderMaterial = None, name: str = '') -> None: ...
+    def add_collision_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: 
+        """
+        Add a collision shape from file (see assimp for supported formats).
+        If the shape in the file is not convex, it will be converted by the PhysX backend.
+        """
     def add_convex_shape_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
+    def add_multiple_collisions_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: 
+        """
+        Add multiple collisions shapes from files. Also see @add_collision_from_file.
+        Different from @add_collision_from_file, all connected components in the file will be converted to be convex.
+        """
     def add_multiple_convex_shapes_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
+    def add_sphere_collision(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     def add_sphere_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
+    @typing.overload
     def add_sphere_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, color: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: ...
-    def add_sphere_visual_complex(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: RenderMaterial = None, name: str = '') -> None: ...
+    @typing.overload
+    def add_sphere_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: RenderMaterial = None, name: str = '') -> None: ...
     def add_visual_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: ...
-    def build(self, is_kinematic: bool = False, name: str = '') -> Actor: ...
+    def build(self, name: str = '') -> Actor: ...
+    def build_kinematic(self, name: str = '') -> Actor: ...
     def build_static(self, name: str = '') -> ActorStatic: ...
-    def get_shapes(self) -> typing.List[ShapeRecord]: ...
+    def get_collisions(self) -> typing.List[ShapeRecord]: ...
     def get_visuals(self) -> typing.List[VisualRecord]: ...
-    def remove_all_shapes(self) -> None: ...
+    def remove_all_collisions(self) -> None: ...
     def remove_all_visuals(self) -> None: ...
-    def remove_shape_at(self, index: int) -> None: ...
+    def remove_collision_at(self, index: int) -> None: ...
     def remove_visual_at(self, index: int) -> None: ...
     def reset_collision_group(self) -> None: ...
-    def set_collision_group(self, arg0: int, arg1: int, arg2: int) -> None: ...
-    def set_mass_and_inertia(self, arg0: float, arg1: Pose, arg2: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_scene(self, arg0: Scene) -> None: ...
+    def set_collision_group(self, group0: int, group1: int, group2: int, group3: int) -> None: ...
+    def set_mass_and_inertia(self, mass: float, inertia_pose: Pose, inertia: numpy.ndarray[numpy.float32]) -> None: 
+        """
+        Set the mass and inertia.
+
+        Args:
+          mass: the (scalar) mass of the actor
+          inertia_pose: 
+            the position is the center of mass;
+            the rotation (quaternion) is the principle axis of inertia, relative to actor frame
+          inertia: principle moments of inertia (a 3D vector)
+
+        References:
+          https://en.wikipedia.org/wiki/Moment_of_inertia#Principal_axes
+        """
     pass
 class Actor(ActorDynamicBase, ActorBase):
     def lock_motion(self, x: bool = True, y: bool = True, z: bool = True, rx: bool = True, ry: bool = True, rz: bool = True) -> None: ...
@@ -271,7 +310,7 @@ class ArticulationDrivable(ArticulationBase):
     def set_drive_target(self, drive_target: numpy.ndarray[numpy.float32]) -> None: ...
     pass
 class ArticulationBuilder():
-    def build(self, fix_base: bool = False) -> Articulation: ...
+    def build(self, fix_root_link: bool = False) -> Articulation: ...
     def build_kinematic(self) -> KinematicArticulation: ...
     def create_link_builder(self, parent: LinkBuilder = None) -> LinkBuilder: ...
     def get_link_builders(self) -> typing.List[LinkBuilder]: ...
@@ -544,6 +583,14 @@ class Engine():
     def get_renderer(self) -> IPxrRenderer: ...
     def set_log_level(self, level: str) -> None: ...
     def set_renderer(self, renderer: IPxrRenderer) -> None: ...
+    @property
+    def renderer(self) -> IPxrRenderer:
+        """
+        :type: IPxrRenderer
+        """
+    @renderer.setter
+    def renderer(self, arg1: IPxrRenderer) -> None:
+        pass
     pass
 class ISensor():
     def get_pose(self) -> Pose: ...
@@ -580,8 +627,8 @@ class JointBase():
     def get_limits(self) -> numpy.ndarray[numpy.float32]: ...
     def get_name(self) -> str: ...
     def get_parent_link(self) -> LinkBase: ...
-    def get_pose_in_child_frame(self) -> Pose: ...
-    def get_pose_in_parent_frame(self) -> Pose: ...
+    def get_pose_in_child(self) -> Pose: ...
+    def get_pose_in_parent(self) -> Pose: ...
     def set_limits(self, limits: numpy.ndarray[numpy.float32]) -> None: ...
     def set_name(self, name: str) -> None: ...
     @property
@@ -639,11 +686,6 @@ class Joint(JointBase):
     pass
 class JointRecord():
     @property
-    def child_pose(self) -> Pose:
-        """
-        :type: Pose
-        """
-    @property
     def damping(self) -> float:
         """
         :type: float
@@ -669,7 +711,12 @@ class JointRecord():
         :type: str
         """
     @property
-    def parent_pose(self) -> Pose:
+    def pose_in_child(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def pose_in_parent(self) -> Pose:
         """
         :type: Pose
         """
@@ -707,11 +754,23 @@ class KinematicLink(LinkBase, ActorDynamicBase, ActorBase):
     pass
 class LinkBuilder(ActorBuilder):
     def get_index(self) -> int: ...
-    def get_joints(self) -> JointRecord: ...
+    def get_joint(self) -> JointRecord: ...
     def get_name(self) -> str: ...
     def get_parent(self) -> int: ...
     def set_joint_name(self, arg0: str) -> None: ...
-    def set_joint_properties(self, joint_type: str, limits: numpy.ndarray[numpy.float32], parent_pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), child_pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), friction: float = 0, damping: float = 0) -> None: ...
+    def set_joint_properties(self, joint_type: str, limits: numpy.ndarray[numpy.float32], pose_in_parent: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), pose_in_child: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), friction: float = 0, damping: float = 0) -> None: 
+        """
+        Set the properties of the joint.
+
+        Args:
+          joint_type: ["revolute", "prismatic", "fixed"]
+          limits: [[min1, max1], ...], the length is the DoF
+          pose_in_parent: joint pose in parent frame. 
+            The x-axis is the rotation axis for revolute, or the translation axis for prismatic.
+          pose_in_child: joint pose in child frame. See also @pose_in_parent.
+          friction: joint friction
+          damping: joint damping
+        """
     def set_name(self, arg0: str) -> None: ...
     def set_parent(self, arg0: int) -> None: ...
     pass
@@ -800,6 +859,21 @@ class PhysicalMaterial():
     def set_dynamic_friction(self, coef: float) -> None: ...
     def set_restitution(self, coef: float) -> None: ...
     def set_static_friction(self, coef: float) -> None: ...
+    @property
+    def dynamic_friction(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def restitution(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def static_friction(self) -> float:
+        """
+        :type: float
+        """
     pass
 class PinocchioModel():
     def compute_coriolis_matrix(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], qvel: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, n]]: ...
@@ -972,6 +1046,11 @@ class Scene():
     def default_physical_material(self, arg1: PhysicalMaterial) -> None:
         pass
     @property
+    def engine(self) -> Engine:
+        """
+        :type: Engine
+        """
+    @property
     def name(self) -> str:
         """
         :type: str
@@ -1126,6 +1205,11 @@ class ShapeRecord():
         :type: str
         """
     @property
+    def length(self) -> float:
+        """
+        :type: float
+        """
+    @property
     def material(self) -> PhysicalMaterial:
         """
         :type: PhysicalMaterial
@@ -1144,6 +1228,11 @@ class ShapeRecord():
     def scale(self) -> numpy.ndarray[numpy.float32]:
         """
         :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def type(self) -> str:
+        """
+        :type: str
         """
     pass
 class SphereGeometry(CollisionGeometry):
@@ -1196,7 +1285,29 @@ class Trigger():
     pass
 class URDFLoader():
     def __init__(self, scene: Scene) -> None: ...
-    def load(self, filename: str, config: dict = {}) -> Articulation: ...
+    def load(self, filename: str, config: dict = {}) -> Articulation: 
+        """
+        Load articulation from URDF.
+
+        Args:
+          filename: path to URDF
+          config: a dict to specify any on-the-fly modification of articulation
+            It follows the following schema (the inner parameter overrides the outer one):
+            - material: PhysicalMaterial
+            - density: float
+            - link: dict[str, dict]
+              - ${link_name}: dict
+                - material: PhysicalMaterial
+                - density: float
+                - patch_radius: float
+                - min_patch_radius: float
+                - collision: dict[int, dict]
+                  - ${collision_index}: dict
+                    - material: PhysicalMaterial
+                    - density: float
+                    - patch_radius: float
+                    - min_patch_radius: float
+        """
     def load_file_as_articulation_builder(self, filename: str, config: dict = {}) -> ArticulationBuilder: ...
     def load_from_string(self, urdf_string: str, srdf_string: str, config: dict = {}) -> Articulation: ...
     def load_kinematic(self, filename: str, config: dict = {}) -> KinematicArticulation: ...
@@ -1209,14 +1320,6 @@ class URDFLoader():
     def collision_is_visual(self, arg0: bool) -> None:
         pass
     @property
-    def default_density(self) -> None:
-        """
-        :type: None
-        """
-    @default_density.setter
-    def default_density(self) -> None:
-        pass
-    @property
     def fix_root_link(self) -> bool:
         """
         :type: bool
@@ -1225,12 +1328,12 @@ class URDFLoader():
     def fix_root_link(self, arg0: bool) -> None:
         pass
     @property
-    def load_multiple_shapes_from_file(self) -> bool:
+    def load_multiple_collisions_from_file(self) -> bool:
         """
         :type: bool
         """
-    @load_multiple_shapes_from_file.setter
-    def load_multiple_shapes_from_file(self, arg0: bool) -> None:
+    @load_multiple_collisions_from_file.setter
+    def load_multiple_collisions_from_file(self, arg0: bool) -> None:
         pass
     @property
     def scale(self) -> float:
@@ -1242,11 +1345,6 @@ class URDFLoader():
         pass
     pass
 class VisualRecord():
-    @property
-    def density(self) -> str:
-        """
-        :type: str
-        """
     @property
     def filename(self) -> str:
         """
@@ -1277,6 +1375,11 @@ class VisualRecord():
         """
         :type: numpy.ndarray[numpy.float32]
         """
+    @property
+    def type(self) -> str:
+        """
+        :type: str
+        """
     pass
 class VulkanCamera(ICamera, ISensor):
     def get_camera_matrix(self) -> numpy.ndarray[numpy.float32]: ...
@@ -1289,6 +1392,11 @@ class VulkanCamera(ICamera, ISensor):
     def set_orthographic(self, near: float, far: float, aspect: float, scale: float) -> None: ...
     def set_perspective(self, near: float, far: float, fovy: float, aspect: float) -> None: ...
     @property
+    def _internal_renderer(self) -> renderer.Renderer:
+        """
+        :type: renderer.Renderer
+        """
+    @property
     def mode(self) -> str:
         """
         :type: str
@@ -1297,6 +1405,26 @@ class VulkanCamera(ICamera, ISensor):
 class VulkanDirectionalLight(DirectionalLight, Light):
     pass
 class VulkanMaterial(RenderMaterial):
+    @property
+    def base_color(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def metallic(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def roughness(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def specular(self) -> float:
+        """
+        :type: float
+        """
     pass
 class VulkanPointLight(PointLight, Light):
     pass
@@ -1358,6 +1486,11 @@ class VulkanWindow():
     def set_camera_rotation(self, quat: numpy.ndarray[numpy.float32]) -> None: ...
     def set_scene(self, scene: Scene) -> None: ...
     def show(self) -> None: ...
+    @property
+    def _internal_renderer(self) -> renderer.Renderer:
+        """
+        :type: renderer.Renderer
+        """
     @property
     def alt(self) -> bool:
         """

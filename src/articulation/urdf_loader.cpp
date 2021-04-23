@@ -430,8 +430,8 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
           spdlog::get("SAPIEN")->critical("Collision group exhausted, please simplify the SRDF");
           throw std::runtime_error("Too many collision groups");
         }
-        l1->linkBuilder->addCollisionGroup(0, 0, groupCount);
-        l2->linkBuilder->addCollisionGroup(0, 0, groupCount);
+        l1->linkBuilder->addCollisionGroup(0, 0, groupCount, 0);
+        l2->linkBuilder->addCollisionGroup(0, 0, groupCount, 0);
       }
     }
     spdlog::get("SAPIEN")->info("SRDF: ignored {} pairs", groupCount);

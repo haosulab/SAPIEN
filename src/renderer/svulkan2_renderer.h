@@ -236,6 +236,8 @@ public:
 
   svulkan2::scene::Camera *getCamera() const { return mCamera; }
   std::string getMode() const;
+
+  inline svulkan2::renderer::Renderer *getInternalRenderer() const { return mRenderer.get(); }
 };
 
 } // namespace Renderer

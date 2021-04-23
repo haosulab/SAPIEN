@@ -358,18 +358,22 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
   }
 }
 
-void ActorBuilder::setCollisionGroup(uint32_t g1, uint32_t g2, uint32_t g3) {
-  mCollisionGroup.w0 = g1;
-  mCollisionGroup.w1 = g2;
-  mCollisionGroup.w2 = g3;
+void ActorBuilder::setCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3) {
+  mCollisionGroup.w0 = g0;
+  mCollisionGroup.w1 = g1;
+  mCollisionGroup.w2 = g2;
+  mCollisionGroup.w3 = g3;
 }
 
-void ActorBuilder::addCollisionGroup(uint32_t g1, uint32_t g2, uint32_t g3) {
+void ActorBuilder::addCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3) {
+  if (g0) {
+    mCollisionGroup.w0 |= 1 << (g0 - 1);
+  }
   if (g1) {
-    mCollisionGroup.w0 |= 1 << (g1 - 1);
+    mCollisionGroup.w1 |= 1 << (g1 - 1);
   }
   if (g2) {
-    mCollisionGroup.w1 |= 1 << (g2 - 1);
+    mCollisionGroup.w2 |= 1 << (g2 - 1);
   }
   if (g3) {
     mCollisionGroup.w2 |= 1 << (g3 - 1);

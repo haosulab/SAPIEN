@@ -242,7 +242,11 @@ void buildSapien(py::module &m) {
 
   //======== Internal ========//
 
-  PyPhysicalMaterial.def("get_static_friction", &SPhysicalMaterial::getStaticFriction)
+  PyPhysicalMaterial
+      .def_property_readonly("static_friction", &SPhysicalMaterial::getStaticFriction)
+      .def_property_readonly("dynamic_friction", &SPhysicalMaterial::getDynamicFriction)
+      .def_property_readonly("restitution", &SPhysicalMaterial::getRestitution)
+      .def("get_static_friction", &SPhysicalMaterial::getStaticFriction)
       .def("get_dynamic_friction", &SPhysicalMaterial::getDynamicFriction)
       .def("get_restitution", &SPhysicalMaterial::getRestitution)
       .def("set_static_friction", &SPhysicalMaterial::setStaticFriction, py::arg("coef"))
@@ -338,54 +342,6 @@ void buildSapien(py::module &m) {
       .def_property_readonly("type", &SCollisionShape::getType)
       .def_property_readonly("geometry", &SCollisionShape::getGeometry);
 
-  // PyShape.def_readonly("type", &SShape::type)
-  //     .def_readonly("pose", &SShape::pose)
-  //     .def_property_readonly(
-  //         "box_geometry"
-  //         [](SShape &s) {
-  //           if (s.type == "box") {
-  //             return static_cast<SBoxGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SBoxGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference)
-  //     .def_property_readonly(
-  //         "sphere_geometry",
-  //         [](SShape &s) {
-  //           if (s.type == "sphere") {
-  //             return static_cast<SSphereGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SSphereGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference)
-  //     .def_property_readonly(
-  //         "capsule_geometry",
-  //         [](SShape &s) {
-  //           if (s.type == "capsule") {
-  //             return static_cast<SCapsuleGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SCapsuleGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference)
-  //     .def_property_readonly(
-  //         "plane_geometry",
-  //         [](SShape &s) {
-  //           if (s.type == "plane") {
-  //             return static_cast<SPlaneGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SPlaneGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference)
-  //     .def_property_readonly(
-  //         "convex_mesh_geometry",
-  //         [](SShape &s) {
-  //           if (s.type == "convex_mesh") {
-  //             return static_cast<SConvexMeshGeometry *>(s.geometry.get());
-  //           }
-  //           return static_cast<SConvexMeshGeometry *>(nullptr);
-  //         },
-  //         py::return_value_policy::reference);
-
   //======== Render Interface ========//
   PyRenderMaterial
       .def(
@@ -403,6 +359,22 @@ void buildSapien(py::module &m) {
   //     // .def_readwrite("specular_texture", &Renderer::PxrMaterial::specular_texture)
   //     // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture)
   //     ;
+
+  PyVulkanMaterial
+      .def_property_readonly("base_color",
+                             [](Renderer::SVulkan2Material &mat) {
+                               auto color = mat.getMaterial()->getBaseColor();
+                               return py::array_t<float>(4, &color[0]);
+                             })
+      .def_property_readonly(
+          "specular",
+          [](Renderer::SVulkan2Material &mat) { return mat.getMaterial()->getFresnel(); })
+      .def_property_readonly(
+          "metallic",
+          [](Renderer::SVulkan2Material &mat) { return mat.getMaterial()->getMetallic(); })
+      .def_property_readonly("roughness", [](Renderer::SVulkan2Material &mat) {
+        return mat.getMaterial()->getRoughness();
+      });
 
   PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
       .def("get_pose", &Renderer::ISensor::getPose)
@@ -1341,7 +1313,10 @@ Args:
 References:
   https://en.wikipedia.org/wiki/Moment_of_inertia#Principal_axes
 )doc",
-          py::arg("mass"), py::arg("inertia_pose"), py::arg("inertia"), )
+          py::arg("mass"), py::arg("inertia_pose"), py::arg("inertia"))
+      .def("set_collision_group", &ActorBuilder::setCollisionGroup, py::arg("group0"),
+           py::arg("group1"), py::arg("group2"), py::arg("group3"))
+      .def("reset_collision_group", &ActorBuilder::resetCollisionGroup)
       .def(
           "build", [](ActorBuilder &a, std::string const &name) { return a.build(false); },
           py::arg("name") = "", py::return_value_policy::reference)
@@ -1672,7 +1647,10 @@ Args:
       .def("set_full_perspective", &Renderer::SVulkan2Camera::setFullPerspectiveParameters,
            py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
            py::arg("cy"), py::arg("width"), py::arg("height"), py::arg("skew"))
-      .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode);
+      .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode)
+      .def_property_readonly("_internal_renderer", [](Renderer::SVulkan2Camera &camera) {
+        return camera.getInternalRenderer();
+      }, py::return_value_policy::reference);
 
   PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
       .def_property_readonly("pose", &Renderer::ILight::getPose)
@@ -1766,6 +1744,9 @@ Args:
              glm::mat4 proj = glm::transpose(window.getCameraProjectionMatrix());
              return py::array_t<float>({4, 4}, &proj[0][0]);
            })
+      .def_property_readonly("_internal_renderer", [](Renderer::SVulkan2Window &window) {
+        return window.getInternalRenderer();
+      }, py::return_value_policy::reference)
       .def(
           "set_scene",
           [](Renderer::SVulkan2Window &window, SScene *scene) {
