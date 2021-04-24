@@ -1,5 +1,4 @@
 #pragma once
-// #include "utils/torch_tensor.hpp"
 #include "utils/dlpack_tensor.hpp"
 
 #include "renderer/optifuser_controller.h"

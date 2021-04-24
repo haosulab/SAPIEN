@@ -296,16 +296,21 @@ void buildRenderer(py::module &parent) {
           },
           py::arg("filename"), py::arg("mipmap_levels"), py::arg("filter") = "linear",
           py::arg("address_mode") = "repeat")
-      .def("create_cubemap_from_files",
-           [](core::Context &context, std::array<std::string, 6> const &filenames,
-              uint32_t mipmapLevels) {
-             return context.getResourceManager()->CreateCubemapFromFiles(filenames, mipmapLevels);
-           })
+      .def(
+          "create_cubemap_from_files",
+          [](core::Context &context, std::array<std::string, 6> const &filenames,
+             uint32_t mipmapLevels) {
+            return context.getResourceManager()->CreateCubemapFromFiles(filenames, mipmapLevels);
+          },
+          "Load cube map, its mipmaps are generated based on roughness, details see "
+          "https://learnopengl.com/PBR/IBL/Specular-IBL",
+          py::arg("filenames"), py::arg("mipmap_levels"))
       .def(
           "create_brdf_lut",
           [](std::shared_ptr<core::Context> context, uint32_t size) {
             return context->getResourceManager()->generateBRDFLUT(context, size);
           },
+          "Generate BRDF LUT texture, see https://learnopengl.com/PBR/IBL/Specular-IBL",
           py::arg("size") = 128)
       .def(
           "create_capsule_mesh",

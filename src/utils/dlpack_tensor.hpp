@@ -40,7 +40,7 @@ DLManagedTensor *DLTensorFromCudaBuffer(std::shared_ptr<svulkan2::core::CudaBuff
     throw std::runtime_error("Failed to get tensor from cuda buffer: unsupported buffer format");
   }
 
-  assert(buffer->getSize() == size * 4);
+  assert(static_cast<long>(buffer->getSize()) == size * 4);
 
   void *pointer = buffer->getCudaPointer();
 
