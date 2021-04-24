@@ -40,7 +40,7 @@ layout(set = 2, binding = 2) uniform sampler2D roughnessTexture;
 layout(set = 2, binding = 3) uniform sampler2D normalTexture;
 layout(set = 2, binding = 4) uniform sampler2D metallicTexture;
 
-
+#include "../common/shadow.glsl"
 #include "../common/lights.glsl"
 
 layout(set = 3, binding = 0) uniform SceneBuffer {
@@ -68,7 +68,7 @@ layout(set = 3, binding = 2) uniform samplerCubeArray samplerPointLightDepths;
 layout(set = 3, binding = 3) uniform sampler2DArray samplerDirectionalLightDepths;
 layout(set = 3, binding = 4) uniform sampler2DArray samplerCustomLightDepths;
 layout(set = 3, binding = 5) uniform sampler2DArray samplerSpotLightDepths;
-
+layout(set = 3, binding = 6) uniform sampler2D samplerLightMap;
 
 vec4 world2camera(vec4 pos) {
   return cameraBuffer.viewMatrix * pos;
@@ -105,6 +105,7 @@ vec3 computeDirectionalLight(int index, vec3 normal, vec3 camDir, vec3 diffuseAl
   return color;
 }
 
+const float eps = 1e-2;
 void main() {
   outSegmentation1 = inSegmentation;
 
@@ -170,11 +171,36 @@ void main() {
     color += computeDirectionalLight(i, normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
 
-  for (int i = 0; i < NUM_SPOT_LIGHTS; ++i) {
+  // for (int i = 0; i < NUM_SPOT_LIGHTS; ++i) {
+  //   vec3 pos = world2camera(vec4(sceneBuffer.spotLights[i].position.xyz, 1.f)).xyz;
+  //   vec3 l = pos - csPosition.xyz;
+  //   vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
+  //   color += computeSpotLight(
+  //       sceneBuffer.spotLights[i].direction.a,
+  //       centerDir,
+  //       sceneBuffer.spotLights[i].emission.rgb,
+  //       l, normal, camDir, diffuseAlbedo, roughness, fresnel);
+  // }
+
+  for (int i = 0; i < NUM_SPOT_LIGHT_SHADOWS; ++i) {
+    mat4 shadowView = shadowBuffer.spotLightBuffers[i].viewMatrix;
+    mat4 shadowProj = shadowBuffer.spotLightBuffers[i].projectionMatrix;
+
+    vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz + normal * eps), 1);
+    vec4 shadowMapCoord = shadowProj * ssPosition;
+    shadowMapCoord /= shadowMapCoord.w;
+    shadowMapCoord.xy = shadowMapCoord.xy * 0.5 + 0.5;
+
+    float lightMapVisibility = pow(texture(samplerLightMap, shadowMapCoord.xy).r, 2.2);
+
+    float resolution = textureSize(samplerSpotLightDepths, 0).x;
+    float visibility = ShadowMapPCF(
+        samplerSpotLightDepths, i, shadowMapCoord.xyz, resolution, 1 / resolution, 1);
+
     vec3 pos = world2camera(vec4(sceneBuffer.spotLights[i].position.xyz, 1.f)).xyz;
-    vec3 l = pos - csPosition.xyz;
     vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
-    color += computeSpotLight(
+    vec3 l = pos - csPosition.xyz;
+    color += lightMapVisibility * visibility * computeSpotLight2(
         sceneBuffer.spotLights[i].direction.a,
         centerDir,
         sceneBuffer.spotLights[i].emission.rgb,
