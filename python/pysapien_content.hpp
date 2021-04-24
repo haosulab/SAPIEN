@@ -1539,9 +1539,9 @@ Args:
       .def(py::init<bool, uint32_t, uint32_t, uint32_t>(), py::arg("offscreen_only") = false,
            py::arg("max_num_materials") = 5000, py::arg("max_num_textures") = 5000,
            py::arg("default_mipmap_levels") = 1)
-      .def_static("set_viewer_shader_dir", &Renderer::setDefaultViewerShaderDirectory,
+      .def_static("_set_viewer_shader_dir", &Renderer::setDefaultViewerShaderDirectory,
                   py::arg("shader_dir"))
-      .def_static("set_camera_shader_dir", &Renderer::setDefaultCameraShaderDirectory,
+      .def_static("_set_camera_shader_dir", &Renderer::setDefaultCameraShaderDirectory,
                   py::arg("shader_dir"))
       .def(
           "create_window",
