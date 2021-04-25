@@ -66,7 +66,7 @@ The definitions follow `PhysX <https://gameworksdocs.nvidia.com/PhysX/4.1/docume
 * **prismatic**: a prismatic joint (also called a slider) keeps the orientations identical, but allows the origin of each frame to slide freely along the common x-axis.
 * **fixed**: a fixed joint locks the orientations and origins rigidly together
 
-The location of the joint is defined by the transformtation ``parent_pose`` from the parent frame to the joint frame, and the transformtation ``child_pose`` from the child frame to the joint frame.
+The location of the joint is defined by the joint pose in the parent frame ``pose_in_parent``, and the joint pose in the child frame ``pose_in_child``.
 
 Other properties of a joint, like joint friction and joint damping, can also be set through ``set_joint_properties(...)``.
 
@@ -105,7 +105,7 @@ We can implement different behaviors when different keys are pressed.
 
 .. literalinclude:: ../../../../examples/basic/create_articulations.py
    :dedent: 0
-   :lines: 224-248
+   :lines: 225-257
 
 Get kinematic quantities of the articulation
 ------------------------------------------------------------
@@ -118,4 +118,4 @@ The order is the same as ``get_joints()``.
 
 .. literalinclude:: ../../../../examples/basic/create_articulations.py
    :dedent: 0
-   :lines: 256-258
+   :lines: 266-268

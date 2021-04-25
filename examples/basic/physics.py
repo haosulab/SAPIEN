@@ -17,7 +17,7 @@ Concepts:
 import sapien.core as sapien
 from sapien.utils.viewer import Viewer
 import numpy as np
-import transforms3d
+from  transforms3d.quaternions import axangle2quat
 
 
 def create_box(
@@ -47,9 +47,12 @@ def create_box(
     """
     half_size = np.array(half_size)
     builder = scene.create_actor_builder()
-    builder.add_box_shape(half_size=half_size, material=physical_material, density=density)  # Add collision shape
+    builder.add_box_collision(half_size=half_size, material=physical_material, density=density)  # Add collision shape
     builder.add_box_visual(half_size=half_size, color=color)  # Add visual shape
-    box = builder.build(name=name, is_kinematic=is_kinematic)
+    if is_kinematic:
+        box = builder.build_kinematic(name=name)
+    else:
+        box = builder.build(name=name)
     box.set_pose(pose)
     return box
 
@@ -65,7 +68,7 @@ def create_sphere(
 ) -> sapien.Actor:
     """Create a sphere."""
     builder = scene.create_actor_builder()
-    builder.add_sphere_shape(radius=radius, material=physical_material, density=density)
+    builder.add_sphere_collision(radius=radius, material=physical_material, density=density)
     builder.add_sphere_visual(radius=radius, color=color)
     sphere = builder.build(name=name)
     sphere.set_pose(pose)
@@ -127,7 +130,7 @@ def main():
     angle = np.deg2rad(args.angle)
     slope_pose = sapien.Pose(
         p=[0, 0, half_size[1] * np.sin(angle) + half_size[2] * np.cos(angle) + z_offset],
-        q=transforms3d.quaternions.axangle2quat([1.0, 0.0, 0.0], angle),
+        q=axangle2quat([1.0, 0.0, 0.0], angle),
     )
     slope = create_box(
         scene,
@@ -142,13 +145,12 @@ def main():
     if args.object == 'box':
         box_half_size = 0.05
         box_pose = sapien.Pose(
-            p=[
-                0,
-                half_size[1] * np.cos(angle) - half_size[2] * np.sin(angle) - 2 * box_half_size * np.cos(angle),
-                2 * (half_size[1] * np.sin(angle) + half_size[2] * np.cos(angle)) + box_half_size * np.sin(
-                    angle) + z_offset
-            ],
-            q=transforms3d.quaternions.axangle2quat([1.0, 0.0, 0.0], angle),
+            p=[0,
+               (half_size[1] - box_half_size) * np.cos(angle) -
+                (half_size[2] + box_half_size) * np.sin(angle),
+                (half_size[1] - box_half_size) * np.sin(angle) +
+                (half_size[2] + box_half_size) * np.cos(angle) + slope_pose.p[2]],
+            q=axangle2quat([1.0, 0.0, 0.0], angle),
         )
         actor = create_box(
             scene,
@@ -163,11 +165,11 @@ def main():
         # However, you can set actor's damping, like air resistance.
         radius = 0.05
         sphere_pose = sapien.Pose(
-            p=[
-                0,
-                half_size[1] * np.cos(angle) - half_size[2] * np.sin(angle) - radius * np.cos(angle),
-                2 * (half_size[1] * np.sin(angle) + half_size[2] * np.cos(angle)) + radius * np.sin(angle) + z_offset
-            ],
+            p=[0,
+               (half_size[1] - radius) * np.cos(angle) -
+                (half_size[2] + radius) * np.sin(angle),
+                (half_size[1] - radius) * np.sin(angle) +
+                (half_size[2] + radius) * np.cos(angle) + slope_pose.p[2]],
         )
         actor = create_sphere(
             scene,
@@ -190,9 +192,9 @@ def main():
     viewer.set_camera_rpy(y=0, p=-np.arctan2(2, 2), r=0)
     viewer.window.set_camera_parameters(near=0.001, far=100, fovy=1)
 
-    scene.set_ambient_light([0.5, 0.5, 0.5])
-    rscene = scene.get_render_scene()
-    rscene.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
+    rscene = scene.get_renderer_scene()
+    rscene.set_ambient_light([0.5, 0.5, 0.5])
+    rscene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
     steps = 0
     pause = True
@@ -203,7 +205,8 @@ def main():
             scene.step()
         scene.update_render()
         viewer.render()
-        if steps % 100 == 0:
+        if steps % 500 == 0:
+            print('step:', steps)
             print('Pose', actor.get_pose())
             print('Velocity', actor.get_velocity())
             print('Angular velocity', actor.get_angular_velocity())

@@ -25,8 +25,8 @@ def main():
     # NOTE: How to build actors (rigid bodies) is elaborated in create_actors.py
     scene.add_ground(altitude=0)  # Add a ground
     actor_builder = scene.create_actor_builder()
-    actor_builder.add_box_shape(pose=sapien.Pose(p=[0, 0, 0.5]),
-                                half_size=[0.5, 0.5, 0.5])
+    actor_builder.add_box_collision(pose=sapien.Pose(p=[0, 0, 0.5]),
+                                    half_size=[0.5, 0.5, 0.5])
     actor_builder.add_box_visual(pose=sapien.Pose(p=[0, 0, 0.5]),
                                  half_size=[0.5, 0.5, 0.5],
                                  color=[1., 0., 0.])
@@ -38,15 +38,15 @@ def main():
     # The coordinate frame in Sapien is: x(forward), y(left), z(upward)
     # The principle axis of the camera is the x-axis
     viewer.set_camera_xyz(x=-4, y=0, z=2)
-    # The rotation of the free camera is represented as [yaw(z), pitch(y), roll(x)]
+    # The rotation of the free camera is represented as [roll(x), pitch(y), yaw(z)]
     # The camera now looks at the origin
-    viewer.set_camera_rpy(y=0, p=-np.arctan2(2, 4), r=0)
+    viewer.set_camera_rpy(r=0, p=-np.arctan2(2, 4), y=0)
     viewer.window.set_camera_parameters(near=0.001, far=100, fovy=1)
 
     # Add some lights so that you can observe the scene
-    scene.set_ambient_light([0.5, 0.5, 0.5])
-    rscene = scene.get_render_scene()
-    rscene.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
+    rscene = scene.get_renderer_scene()
+    rscene.set_ambient_light([0.5, 0.5, 0.5])
+    rscene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
     while not viewer.closed:  # Press key q to quit
         scene.step()  # Simulate the world

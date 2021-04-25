@@ -25,19 +25,19 @@ def main():
     asset = loader.load_kinematic(urdf_path)  # load as a kinematic articulation
     assert asset, 'URDF not loaded.'
 
-    scene.set_ambient_light([0.5, 0.5, 0.5])
-    rscene = scene.get_render_scene()
-    rscene.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
-    rscene.add_shadow_point_light([1, 2, 2], [1, 1, 1])
-    rscene.add_shadow_point_light([1, -2, 2], [1, 1, 1])
-    rscene.add_shadow_point_light([-1, 0, 1], [1, 1, 1])
+    rscene = scene.get_renderer_scene()
+    rscene.set_ambient_light([0.5, 0.5, 0.5])
+    rscene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5], shadow=True)
+    rscene.add_point_light([1, 2, 2], [1, 1, 1], shadow=True)
+    rscene.add_point_light([1, -2, 2], [1, 1, 1], shadow=True)
+    rscene.add_point_light([-1, 0, 1], [1, 1, 1], shadow=True)
 
     # ---------------------------------------------------------------------------- #
     # Camera
     # ---------------------------------------------------------------------------- #
     near, far = 0.1, 100
     width, height = 640, 480
-    camera_mount_actor = scene.create_actor_builder().build(is_kinematic=True)
+    camera_mount_actor = scene.create_actor_builder().build_kinematic()
     camera = scene.add_mounted_camera(
         name="camera",
         actor=camera_mount_actor,
@@ -109,8 +109,9 @@ def main():
     # Each pixel is (visual_id, actor_id/link_id, 0, 0)
     # visual_id is the unique id of each visual shape
     seg_labels = camera.get_uint32_texture('Segmentation')  # [H, W, 4]
+    colormap = sorted(set(ImageColor.colormap.values()))
     color_palette = np.array([ImageColor.getrgb(color)
-                             for color in ImageColor.colormap.keys()], 
+                             for color in colormap], 
                              dtype=np.uint8)
     label0_image = seg_labels[..., 0].astype(np.uint8)  # mesh-level
     label1_image = seg_labels[..., 1].astype(np.uint8)  # actor-level

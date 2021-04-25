@@ -34,7 +34,7 @@ Examples to create a sphere and a capsule can found in the code provided.
 
 ``Actor`` (or rigid body) is created through ``ActorBuilder`` in SAPIEN.
 An actor consists of both collision shapes (used for physical simulation) and visual shapes (used for rendering).
-You can call ``add_box_shape`` and ``add_box_visual`` to add collision and visual shapes of an box respectively.
+You can call ``add_box_collision`` and ``add_box_visual`` to add collision and visual shapes of an box respectively.
 
 .. note::
    Collision shapes do not necessarily correspond to visual shapes. 
@@ -58,7 +58,7 @@ Next, we show an example to create an actor (table) by multiple boxes (a tableto
    :dedent: 0
    :lines: 82-112
 
-We can call ``add_box_shape(pose=Pose(...), ...)`` to set the pose of a collision shape in **the actor frame**.
+We can call ``add_box_collision(pose=Pose(...), ...)`` to set the pose of a collision shape in **the actor frame**.
 Similarly, we can call ``add_box_visual(pose=Pose(...), ...)`` for a visual shape.
 Note that ``table.set_pose(pose)`` sets the pose of the actor in **the world frame**.
 

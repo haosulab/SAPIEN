@@ -1103,19 +1103,6 @@ If the shape in the file is not convex, it will be converted by the PhysX backen
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
-          "add_convex_shape_from_file",
-          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
-             PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
-            DEPRECATE_WARN(add_convex_shape_from_file, add_collision_from_file);
-            a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density,
-                                     patchRadius, minPatchRadius, isTrigger);
-          },
-          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-          py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
-          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
-      .def(
           "add_multiple_collisions_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
@@ -1126,20 +1113,6 @@ If the shape in the file is not convex, it will be converted by the PhysX backen
           R"doc(
 Add multiple collisions shapes from files. Also see @add_collision_from_file.
 Different from @add_collision_from_file, all connected components in the file will be converted to be convex.)doc",
-          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-          py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
-          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
-      .def(
-          "add_multiple_convex_shapes_from_file",
-          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
-             PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
-            DEPRECATE_WARN(add_multiple_convex_shapes_from_file,
-                           add_multiple_collisions_from_file);
-            a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material, density,
-                                              patchRadius, minPatchRadius, isTrigger);
-          },
           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
@@ -1156,54 +1129,16 @@ Different from @add_collision_from_file, all connected components in the file wi
           py::arg("half_size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
-      .def(
-          "add_box_shape",
-          [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
-             std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
-             PxReal minPatchRadius, bool isTrigger) {
-            DEPRECATE_WARN(add_box_shape, add_box_collision);
-            a.addBoxShape(pose, array2vec3(halfSize), material, density, patchRadius,
-                          minPatchRadius, isTrigger);
-          },
-          py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("half_size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
-          py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
-          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def("add_capsule_collision", &ActorBuilder::addCapsuleShape,
            "Add a capsule collision shape. The height is along the x-axis.",
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000,
            py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f,
            py::arg("is_trigger") = false)
-      .def(
-          "add_capsule_shape",
-          [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfSize,
-             std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
-             PxReal minPatchRadius, bool isTrigger) {
-            DEPRECATE_WARN(add_capsule_shape, add_capsule_collision);
-            a.addCapsuleShape(pose, radius, halfSize, material, density, patchRadius,
-                              minPatchRadius, isTrigger);
-          },
-          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("half_length") = 1, py::arg("material") = nullptr, py::arg("density") = 1000,
-          py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f,
-          py::arg("is_trigger") = false)
       .def("add_sphere_collision", &ActorBuilder::addSphereShape,
            py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
            py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
            py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
-      .def(
-          "add_sphere_shape",
-          [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
-             std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
-             PxReal minPatchRadius, bool isTrigger) {
-            DEPRECATE_WARN(add_sphere_shape, add_sphere_collision);
-            a.addSphereShape(pose, radius, material, density, patchRadius, minPatchRadius,
-                             isTrigger);
-          },
-          py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
-          py::arg("material") = nullptr, py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
-          py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
           "add_box_visual",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
@@ -1294,11 +1229,11 @@ References:
            py::arg("group1"), py::arg("group2"), py::arg("group3"))
       .def("reset_collision_group", &ActorBuilder::resetCollisionGroup)
       .def(
-          "build", [](ActorBuilder &a, std::string const &name) { return a.build(false); },
+          "build", [](ActorBuilder &a, std::string const &name) { return a.build(false, name); },
           py::arg("name") = "", py::return_value_policy::reference)
       .def(
           "build_kinematic",
-          [](ActorBuilder &a, std::string const &name) { return a.build(true); },
+          [](ActorBuilder &a, std::string const &name) { return a.build(true, name); },
           py::arg("name") = "", py::return_value_policy::reference)
       .def("build_static", &ActorBuilder::buildStatic, py::return_value_policy::reference,
            py::arg("name") = "");

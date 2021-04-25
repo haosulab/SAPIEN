@@ -107,7 +107,7 @@ SAPIEN provides the interfaces to acquire object-level segmentation.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 111-120
+    :lines: 111-121
 
 There are two levels of segmentation.
 The first one is mesh-level, and the other one is actor-level.

@@ -45,14 +45,14 @@ class LiftEnv(SapienEnv):
 
         # table top
         builder = self._scene.create_actor_builder()
-        builder.add_box_shape(half_size=[0.4, 0.4, 0.025])
+        builder.add_box_collision(half_size=[0.4, 0.4, 0.025])
         builder.add_box_visual(half_size=[0.4, 0.4, 0.025])
-        table = builder.build(is_kinematic=True, name='table')
+        table = builder.build_kinematic(name='table')
         table.set_pose(Pose([0, 0, self.table_height - 0.025]))
 
         # cube
         builder = self._scene.create_actor_builder()
-        builder.add_box_shape(half_size=[0.02, 0.02, 0.02])
+        builder.add_box_collision(half_size=[0.02, 0.02, 0.02])
         builder.add_box_visual(half_size=[0.02, 0.02, 0.02], color=[1, 0, 0])
         cube = builder.build(name='cube')
         cube.set_pose(Pose([0, 0, self.table_height + 0.02]))
@@ -121,10 +121,10 @@ class LiftEnv(SapienEnv):
     # Visualization
     # ---------------------------------------------------------------------------- #
     def _setup_lighting(self):
-        self._scene.set_ambient_light([.4, .4, .4])
-        rscene = self._scene.get_render_scene()
-        rscene.add_shadow_directional_light([1, -1, -1], [0.3, 0.3, 0.3])
-        rscene.add_shadow_directional_light([0, 0, -1], [1, 1, 1])
+        rscene = self._scene.get_renderer_scene()
+        rscene.set_ambient_light([.4, .4, .4])
+        rscene.add_directional_light([1, -1, -1], [0.3, 0.3, 0.3])
+        rscene.add_directional_light([0, 0, -1], [1, 1, 1])
 
     def _setup_viewer(self):
         self._setup_lighting()

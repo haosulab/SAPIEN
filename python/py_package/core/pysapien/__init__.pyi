@@ -174,7 +174,6 @@ class ActorDynamicBase(ActorBase):
     pass
 class ActorBuilder():
     def add_box_collision(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), half_size: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
-    def add_box_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), half_size: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     @typing.overload
     def add_box_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), half_size: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), color: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: ...
     @typing.overload
@@ -183,7 +182,6 @@ class ActorBuilder():
         """
         Add a capsule collision shape. The height is along the x-axis.
         """
-    def add_capsule_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     @typing.overload
     def add_capsule_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, half_length: float = 1, color: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: 
         """
@@ -198,15 +196,12 @@ class ActorBuilder():
         Add a collision shape from file (see assimp for supported formats).
         If the shape in the file is not convex, it will be converted by the PhysX backend.
         """
-    def add_convex_shape_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     def add_multiple_collisions_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: 
         """
         Add multiple collisions shapes from files. Also see @add_collision_from_file.
         Different from @add_collision_from_file, all connected components in the file will be converted to be convex.
         """
-    def add_multiple_convex_shapes_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     def add_sphere_collision(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
-    def add_sphere_shape(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     @typing.overload
     def add_sphere_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, color: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: ...
     @typing.overload

@@ -52,21 +52,21 @@ class AntEnv(SapienEnv):
         # torso
         torso = builder.create_link_builder()
         torso.set_name('torso')
-        torso.add_sphere_shape(Pose(), 0.25, density=density)
+        torso.add_sphere_collision(Pose(), 0.25, density=density)
         torso.add_sphere_visual(Pose(), 0.25, color=color)
-        torso.add_capsule_shape(Pose([0.141, 0, 0]), 0.08, 0.141, density=density)
+        torso.add_capsule_collision(Pose([0.141, 0, 0]), 0.08, 0.141, density=density)
         torso.add_capsule_visual(Pose([0.141, 0, 0]), 0.08, 0.141, color=color)
-        torso.add_capsule_shape(Pose([-0.141, 0, 0]), 0.08, 0.141, density=density)
+        torso.add_capsule_collision(Pose([-0.141, 0, 0]), 0.08, 0.141, density=density)
         torso.add_capsule_visual(Pose([-0.141, 0, 0]), 0.08, 0.141, color=color)
         rot_z90 = axangle2quat([0, 0, 1], np.pi / 2)
-        torso.add_capsule_shape(Pose([0, 0.141, 0], rot_z90), 0.08, 0.141, density=density)
+        torso.add_capsule_collision(Pose([0, 0.141, 0], rot_z90), 0.08, 0.141, density=density)
         torso.add_capsule_visual(Pose([0, 0.141, 0], rot_z90), 0.08, 0.141, color=color)
-        torso.add_capsule_shape(Pose([0, -0.141, 0], rot_z90), 0.08, 0.141, density=density)
+        torso.add_capsule_collision(Pose([0, -0.141, 0], rot_z90), 0.08, 0.141, density=density)
         torso.add_capsule_visual(Pose([0, -0.141, 0], rot_z90), 0.08, 0.141, color=color)
 
         thigh_1 = builder.create_link_builder(torso)
         thigh_1.set_name('thigh_1')
-        thigh_1.add_capsule_shape(Pose(), 0.08, 0.141, density=density)
+        thigh_1.add_capsule_collision(Pose(), 0.08, 0.141, density=density)
         thigh_1.add_capsule_visual(Pose(), 0.08, 0.141, color=color)
         thigh_1.set_joint_name('hip_1')
         thigh_1.set_joint_properties(
@@ -87,7 +87,7 @@ class AntEnv(SapienEnv):
             Pose([0.141, 0, 0], [-0.7071068, 0, 0.7071068, 0]),
             friction=friction, damping=damping,
         )
-        thigh_2.add_capsule_shape(Pose(), 0.08, 0.141, density=density)
+        thigh_2.add_capsule_collision(Pose(), 0.08, 0.141, density=density)
         thigh_2.add_capsule_visual(Pose(), 0.08, 0.141, color=color)
 
         thigh_3 = builder.create_link_builder(torso)
@@ -100,7 +100,7 @@ class AntEnv(SapienEnv):
             Pose([0.141, 0, 0], [0.7071068, 0, -0.7071068, 0]),
             friction=friction, damping=damping,
         )
-        thigh_3.add_capsule_shape(Pose(), 0.08, 0.141, density=density)
+        thigh_3.add_capsule_collision(Pose(), 0.08, 0.141, density=density)
         thigh_3.add_capsule_visual(Pose(), 0.08, 0.141, color=color)
 
         thigh_4 = builder.create_link_builder(torso)
@@ -113,7 +113,7 @@ class AntEnv(SapienEnv):
             Pose([0.141, 0, 0], [0.7071068, 0, -0.7071068, 0]),
             friction=friction, damping=damping,
         )
-        thigh_4.add_capsule_shape(Pose(), 0.08, 0.141, density=density)
+        thigh_4.add_capsule_collision(Pose(), 0.08, 0.141, density=density)
         thigh_4.add_capsule_visual(Pose(), 0.08, 0.141, color=color)
 
         calf_1 = builder.create_link_builder(thigh_1)
@@ -126,7 +126,7 @@ class AntEnv(SapienEnv):
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             friction=friction, damping=damping,
         )
-        calf_1.add_capsule_shape(Pose(), 0.08, 0.282, density=density)
+        calf_1.add_capsule_collision(Pose(), 0.08, 0.282, density=density)
         calf_1.add_capsule_visual(Pose(), 0.08, 0.282, color=color)
 
         calf_2 = builder.create_link_builder(thigh_2)
@@ -139,7 +139,7 @@ class AntEnv(SapienEnv):
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             friction=friction, damping=damping,
         )
-        calf_2.add_capsule_shape(Pose(), 0.08, 0.282, density=density)
+        calf_2.add_capsule_collision(Pose(), 0.08, 0.282, density=density)
         calf_2.add_capsule_visual(Pose(), 0.08, 0.282, color=color)
 
         calf_3 = builder.create_link_builder(thigh_3)
@@ -152,7 +152,7 @@ class AntEnv(SapienEnv):
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             friction=friction, damping=damping,
         )
-        calf_3.add_capsule_shape(Pose(), 0.08, 0.282, density=density)
+        calf_3.add_capsule_collision(Pose(), 0.08, 0.282, density=density)
         calf_3.add_capsule_visual(Pose(), 0.08, 0.282, color=color)
 
         calf_4 = builder.create_link_builder(thigh_4)
@@ -165,10 +165,10 @@ class AntEnv(SapienEnv):
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             friction=friction, damping=damping,
         )
-        calf_4.add_capsule_shape(Pose(), 0.08, 0.282, density=density)
+        calf_4.add_capsule_collision(Pose(), 0.08, 0.282, density=density)
         calf_4.add_capsule_visual(Pose(), 0.08, 0.282, color=color)
 
-        ant = builder.build(fix_base=False)
+        ant = builder.build(fix_root_link=False)
         ant.set_name('ant')
 
         return ant
@@ -237,11 +237,11 @@ class AntEnv(SapienEnv):
     # Visualization
     # ---------------------------------------------------------------------------- #
     def _setup_lighting(self):
-        self._scene.set_ambient_light([.4, .4, .4])
-        rscene = self._scene.get_render_scene()
-        rscene.add_shadow_point_light([2, 2, 2], [1, 1, 1])
-        rscene.add_shadow_point_light([2, -2, 2], [1, 1, 1])
-        rscene.add_shadow_point_light([-2, 0, 2], [1, 1, 1])
+        rscene = self._scene.get_renderer_scene()
+        rscene.set_ambient_light([.4, .4, .4])
+        rscene.add_point_light([2, 2, 2], [1, 1, 1])
+        rscene.add_point_light([2, -2, 2], [1, 1, 1])
+        rscene.add_point_light([-2, 0, 2], [1, 1, 1])
 
     def _setup_viewer(self):
         self._setup_lighting()

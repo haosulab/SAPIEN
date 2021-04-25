@@ -37,7 +37,7 @@ def create_box(
     """
     half_size = np.array(half_size)
     builder: sapien.ActorBuilder = scene.create_actor_builder()
-    builder.add_box_shape(half_size=half_size)  # Add collision shape
+    builder.add_box_collision(half_size=half_size)  # Add collision shape
     builder.add_box_visual(half_size=half_size, color=color)  # Add visual shape
     box: sapien.Actor = builder.build(name=name)
     # Or you can set_name after building the actor
@@ -55,7 +55,7 @@ def create_sphere(
 ) -> sapien.Actor:
     """Create a sphere. See create_box."""
     builder = scene.create_actor_builder()
-    builder.add_sphere_shape(radius=radius)
+    builder.add_sphere_collision(radius=radius)
     builder.add_sphere_visual(radius=radius, color=color)
     sphere = builder.build(name=name)
     sphere.set_pose(pose)
@@ -72,7 +72,7 @@ def create_capsule(
 ) -> sapien.Actor:
     """Create a capsule (x-axis <-> half_length). See create_box."""
     builder = scene.create_actor_builder()
-    builder.add_capsule_shape(radius=radius, half_length=half_length)
+    builder.add_capsule_collision(radius=radius, half_length=half_length)
     builder.add_capsule_visual(radius=radius, half_length=half_length, color=color)
     capsule = builder.build(name=name)
     capsule.set_pose(pose)
@@ -94,7 +94,7 @@ def create_table(
     # Tabletop
     tabletop_pose = sapien.Pose([0., 0., -thickness / 2])  # Make the top surface's z equal to 0
     tabletop_half_size = [size / 2, size / 2, thickness / 2]
-    builder.add_box_shape(pose=tabletop_pose, half_size=tabletop_half_size)
+    builder.add_box_collision(pose=tabletop_pose, half_size=tabletop_half_size)
     builder.add_box_visual(pose=tabletop_pose, half_size=tabletop_half_size, color=color)
     
     # Table legs (x4)
@@ -104,7 +104,7 @@ def create_table(
             y = j * (size - thickness) / 2
             table_leg_pose = sapien.Pose([x, y, -height / 2])
             table_leg_half_size = [thickness / 2, thickness / 2, height / 2]
-            builder.add_box_shape(pose=table_leg_pose, half_size=table_leg_half_size)
+            builder.add_box_collision(pose=table_leg_pose, half_size=table_leg_half_size)
             builder.add_box_visual(pose=table_leg_pose, half_size=table_leg_half_size, color=color)
 
     table = builder.build(name=name)
@@ -155,7 +155,7 @@ def main():
 
     # add a mesh
     builder = scene.create_actor_builder()
-    builder.add_convex_shape_from_file(filename='../assets/banana/collision_meshes/collision.obj')
+    builder.add_collision_from_file(filename='../assets/banana/collision_meshes/collision.obj')
     builder.add_visual_from_file(filename='../assets/banana/visual_meshes/visual.dae')
     mesh = builder.build(name='mesh')
     mesh.set_pose(sapien.Pose(p=[-0.2, 0, 1.0 + 0.05]))
@@ -169,9 +169,9 @@ def main():
     viewer.set_camera_rpy(y=0, p=-np.arctan2(2, 2), r=0)
     viewer.window.set_camera_parameters(near=0.001, far=100, fovy=1)
 
-    scene.set_ambient_light([0.5, 0.5, 0.5])
-    rscene = scene.get_render_scene()
-    rscene.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
+    rscene = scene.get_renderer_scene()
+    rscene.set_ambient_light([0.5, 0.5, 0.5])
+    rscene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
     while not viewer.closed:
         scene.step()
