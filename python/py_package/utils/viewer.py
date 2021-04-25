@@ -13,6 +13,57 @@ from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.euler import quat2euler
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector, qinverse
 import numpy as np
+import os
+
+imgui_ini = '''
+[Window][DockSpace Demo]
+Pos=0,0
+Size=1024,768
+Collapsed=0
+
+[Window][Actor]
+Pos=807,23
+Size=217,389
+Collapsed=0
+DockId=0x00000007,0
+
+[Window][Control]
+Pos=0,23
+Size=248,368
+Collapsed=0
+DockId=0x00000003,0
+
+[Window][Scene Hierarchy]
+Pos=0,393
+Size=248,314
+Collapsed=0
+DockId=0x00000004,0
+
+[Window][Articulation]
+Pos=807,414
+Size=217,293
+Collapsed=0
+DockId=0x00000008,0
+
+[Window][Info]
+Pos=0,709
+Size=1024,59
+Collapsed=0
+DockId=0x0000000A,0
+
+[Docking][Data]
+DockSpace         ID=0x4BBE4C7A Window=0x4647B76E Pos=0,23 Size=1024,745 Split=Y
+  DockNode        ID=0x00000009 Parent=0x4BBE4C7A SizeRef=1024,684 Split=X
+    DockNode      ID=0x00000005 Parent=0x00000009 SizeRef=805,747 Split=X
+      DockNode    ID=0x00000001 Parent=0x00000005 SizeRef=248,747 Split=Y Selected=0x9A68760C
+        DockNode  ID=0x00000003 Parent=0x00000001 SizeRef=399,368 Selected=0x226615D7
+        DockNode  ID=0x00000004 Parent=0x00000001 SizeRef=399,314 Selected=0x9A68760C
+      DockNode    ID=0x00000002 Parent=0x00000005 SizeRef=555,747 CentralNode=1
+    DockNode      ID=0x00000006 Parent=0x00000009 SizeRef=217,747 Split=Y Selected=0x85B479FD
+      DockNode    ID=0x00000007 Parent=0x00000006 SizeRef=121,389 Selected=0x85B479FD
+      DockNode    ID=0x00000008 Parent=0x00000006 SizeRef=121,293 Selected=0xA95BF184
+  DockNode        ID=0x0000000A Parent=0x4BBE4C7A SizeRef=1024,59 Selected=0x6BBB9E69
+'''
 
 
 class FPSCameraController:
@@ -124,6 +175,10 @@ class Viewer(object):
         shader_dir="",
         resolutions=((1024, 768), (800, 600), (1920, 1080)),
     ):
+        if not os.path.exists('imgui.ini'):
+            with open('imgui.ini', 'w') as f:
+                f.write(imgui_ini)
+
         self.shader_dir = shader_dir
         self.renderer = renderer
         self.renderer_context: R.Context = renderer._internal_context
