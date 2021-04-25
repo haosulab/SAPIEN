@@ -88,7 +88,7 @@ class FPSCameraController:
 
     def move(self, forward, left, up):
         q = qmult(
-            qmult(aa(self.up, self.rpy[2]), aa(self.left, -self.rpy[1])),
+            qmult(aa(self.up, -self.rpy[2]), aa(self.left, -self.rpy[1])),
             aa(self.forward, self.rpy[0]),
         )
         self.xyz = self.xyz + (
@@ -111,7 +111,7 @@ class FPSCameraController:
 
         rot = qmult(
             qmult(
-                qmult(aa(self.up, self.rpy[2]), aa(self.left, -self.rpy[1])),
+                qmult(aa(self.up, -self.rpy[2]), aa(self.left, -self.rpy[1])),
                 aa(self.forward, self.rpy[0]),
             ),
             self.initial_rotation,
@@ -1452,15 +1452,15 @@ class Viewer(object):
             pos = self.window.get_camera_position()
             rot = self.window.get_camera_rotation()
             x, y, z = rotate_vector([0, 0, -1], rot)
-            yaw = np.arctan2(y, x)
+            yaw = -np.arctan2(y, x)
             pitch = np.arctan2(z, np.linalg.norm([x, y]))
-            self.arc_camera_controller.set_yaw_pitch(yaw, -pitch)
+            self.arc_camera_controller.set_yaw_pitch(-yaw, -pitch)
             self.arc_camera_controller.set_center(actor.pose.p)
             self.arc_camera_controller.set_zoom(np.linalg.norm(actor.pose.p - pos))
         else:
             rot = self.window.get_camera_rotation()
             x, y, z = rotate_vector([0, 0, -1], rot)
-            yaw = np.arctan2(y, x)
+            yaw = -np.arctan2(y, x)
             pitch = np.arctan2(z, np.linalg.norm([x, y]))
             self.fps_camera_controller.setXYZ(*self.window.get_camera_position())
             self.fps_camera_controller.setRPY(0, pitch, yaw)
@@ -1501,9 +1501,6 @@ class Viewer(object):
         self.focused_camera = camera
         if self.focused_camera is not None:
             self.focus_actor(None)
-            cam_pose = self.get_camera_pose(self.focused_camera)
-            self.set_camera_xyz(*cam_pose.p)
-            self.set_camera_rpy(*quat2euler(cam_pose.q))
 
         if self.camera_ui is not None:
             # Lazy check if any camera has changed
@@ -1694,7 +1691,7 @@ class Viewer(object):
                         self.fps_camera_controller.rotate(
                             0,
                             -self.rotate_speed * speed_mod * y,
-                            -self.rotate_speed * speed_mod * x,
+                            self.rotate_speed * speed_mod * x,
                         )
 
                 if self.window.mouse_down(2):
@@ -1721,8 +1718,9 @@ class Viewer(object):
                     self.arc_camera_controller.set_center(self.focused_actor.pose.p)
                 elif self.focused_camera:
                     cam_pose = self.get_camera_pose(self.focused_camera)
+                    rpy = quat2euler(cam_pose.q)
                     self.set_camera_xyz(*cam_pose.p)
-                    self.set_camera_rpy(*quat2euler(cam_pose.q))
+                    self.set_camera_rpy(rpy[0], -rpy[1], -rpy[2])
 
             if self.window.key_down("q") or self.window.should_close:
                 self.close()
