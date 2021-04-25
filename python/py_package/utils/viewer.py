@@ -936,6 +936,10 @@ class Viewer(object):
         if key in self.key_down_action_map:
             self.key_down_action_map[key]()
 
+    def set_fovy(self, fovy):
+        self.fovy = fovy
+        self.window.set_camera_parameters(0.1, 100, fovy)
+
     def set_window_resolutions(self, resolutions):
         assert len(resolutions)
         for r in resolutions:
@@ -951,7 +955,7 @@ class Viewer(object):
         if not self.control_window:
             self.cameras = self.scene.get_mounted_cameras()
             self.camera_ui = (
-                R.UIOptions().Style("select").Label("")
+                R.UIOptions().Style("select").Label("Name##camera_name")
                 .Index(0 if self.focused_camera is None else self.cameras.index(self.focused_camera) + 1)
                 .Items(['None'] + [x.get_name() for x in self.cameras])
                 .Callback(lambda p: self.focus_camera(self.cameras[p.index - 1] if p.index > 0 else None))
@@ -993,6 +997,12 @@ class Viewer(object):
                     R.UIDisplayText().Text("Camera"),
                     self.camera_ui,
                     R.UIDisplayText().Text("Display Settings"),
+                    R.UISliderAngle()
+                    .Min(1)
+                    .Max(179)
+                    .Value(self.fovy)
+                    .Label("Fov Y")
+                    .Callback(lambda w: self.set_fovy(w.value)),
                     R.UIOptions()
                     .Style("select")
                     .Label("Render Target")

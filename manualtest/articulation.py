@@ -82,19 +82,19 @@ def main():
     def create_ant_builder(scene):
         builder = scene.create_articulation_builder()
         body = builder.create_link_builder()
-        body.add_sphere_shape(Pose(), 0.25)
+        body.add_sphere_collision(Pose(), 0.25)
         body.add_sphere_visual(Pose(), 0.25, copper)
-        body.add_capsule_shape(Pose([0.141, 0, 0]), 0.08, 0.141)
+        body.add_capsule_collision(Pose([0.141, 0, 0]), 0.08, 0.141)
         body.add_capsule_visual(Pose([0.141, 0, 0]), 0.08, 0.141, copper)
-        body.add_capsule_shape(Pose([-0.141, 0, 0]), 0.08, 0.141)
+        body.add_capsule_collision(Pose([-0.141, 0, 0]), 0.08, 0.141)
         body.add_capsule_visual(Pose([-0.141, 0, 0]), 0.08, 0.141, copper)
-        body.add_capsule_shape(
+        body.add_capsule_collision(
             Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141
         )
         body.add_capsule_visual(
             Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141, copper
         )
-        body.add_capsule_shape(
+        body.add_capsule_collision(
             Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141
         )
         body.add_capsule_visual(
@@ -112,7 +112,7 @@ def main():
             Pose([0.141, 0, 0], [-0.7071068, 0, 0.7071068, 0]),
             0.1,
         )
-        l1.add_capsule_shape(Pose(), 0.08, 0.141)
+        l1.add_capsule_collision(Pose(), 0.08, 0.141)
         l1.add_capsule_visual(Pose(), 0.08, 0.141, copper)
 
         l2 = builder.create_link_builder(body)
@@ -125,7 +125,7 @@ def main():
             Pose([0.141, 0, 0], [-0.7071068, 0, 0.7071068, 0]),
             0.1,
         )
-        l2.add_capsule_shape(Pose(), 0.08, 0.141)
+        l2.add_capsule_collision(Pose(), 0.08, 0.141)
         l2.add_capsule_visual(Pose(), 0.08, 0.141, copper)
 
         l3 = builder.create_link_builder(body)
@@ -138,7 +138,7 @@ def main():
             Pose([0.141, 0, 0], [0.7071068, 0, -0.7071068, 0]),
             0.1,
         )
-        l3.add_capsule_shape(Pose(), 0.08, 0.141)
+        l3.add_capsule_collision(Pose(), 0.08, 0.141)
         l3.add_capsule_visual(Pose(), 0.08, 0.141, copper)
 
         l4 = builder.create_link_builder(body)
@@ -151,7 +151,7 @@ def main():
             Pose([0.141, 0, 0], [0.7071068, 0, -0.7071068, 0]),
             0.1,
         )
-        l4.add_capsule_shape(Pose(), 0.08, 0.141)
+        l4.add_capsule_collision(Pose(), 0.08, 0.141)
         l4.add_capsule_visual(Pose(), 0.08, 0.141, copper)
 
         f1 = builder.create_link_builder(l1)
@@ -164,7 +164,7 @@ def main():
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             0.1,
         )
-        f1.add_capsule_shape(Pose(), 0.08, 0.282)
+        f1.add_capsule_collision(Pose(), 0.08, 0.282)
         f1.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         f2 = builder.create_link_builder(l2)
@@ -177,7 +177,7 @@ def main():
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             0.1,
         )
-        f2.add_capsule_shape(Pose(), 0.08, 0.282)
+        f2.add_capsule_collision(Pose(), 0.08, 0.282)
         f2.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         f3 = builder.create_link_builder(l3)
@@ -190,7 +190,7 @@ def main():
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             0.1,
         )
-        f3.add_capsule_shape(Pose(), 0.08, 0.282)
+        f2.add_capsule_collision(Pose(), 0.08, 0.282)
         f3.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         f4 = builder.create_link_builder(l4)
@@ -203,7 +203,7 @@ def main():
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             0.1,
         )
-        f4.add_capsule_shape(Pose(), 0.08, 0.282)
+        f2.add_capsule_collision(Pose(), 0.08, 0.282)
         f4.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         return builder

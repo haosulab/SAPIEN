@@ -7,8 +7,10 @@ from sapien.core import (
     ArticulationBase,
     Joint,
     LinkBase,
+    VulkanCamera,
 )
 from transforms3d.quaternions import axangle2quat as aa
+from transforms3d.euler import quat2euler
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector, qinverse
 import numpy as np
 import os
@@ -62,7 +64,6 @@ DockSpace         ID=0x4BBE4C7A Window=0x4647B76E Pos=0,23 Size=1024,745 Split=Y
       DockNode    ID=0x00000008 Parent=0x00000006 SizeRef=121,293 Selected=0xA95BF184
   DockNode        ID=0x0000000A Parent=0x4BBE4C7A SizeRef=1024,59 Selected=0x6BBB9E69
 '''
-
 
 
 class FPSCameraController:
@@ -197,6 +198,10 @@ class Viewer(object):
         self.paused = False
         self.target_name = "Color"
         self.single_step = False
+
+        self.focused_camera = None
+        self.cameras = None
+        self.camera_ui = None
 
         self.move_speed = 0.05
         self.rotate_speed = 0.005
@@ -882,6 +887,7 @@ class Viewer(object):
             self.enter_mode("normal")
             speed_mod = 0.1 if self.window.shift else 1
             self.focus_actor(None)
+            self.focus_camera(None)
             self.fps_camera_controller.move(self.move_speed * speed_mod, 0, 0)
             self.key_stack = ""
 
@@ -889,6 +895,7 @@ class Viewer(object):
             self.enter_mode("normal")
             speed_mod = 0.1 if self.window.shift else 1
             self.focus_actor(None)
+            self.focus_camera(None)
             self.fps_camera_controller.move(-self.move_speed * speed_mod, 0, 0)
             self.key_stack = ""
 
@@ -896,6 +903,7 @@ class Viewer(object):
             self.enter_mode("normal")
             speed_mod = 0.1 if self.window.shift else 1
             self.focus_actor(None)
+            self.focus_camera(None)
             self.fps_camera_controller.move(0, self.move_speed * speed_mod, 0)
             self.key_stack = ""
 
@@ -903,6 +911,7 @@ class Viewer(object):
             self.enter_mode("normal")
             speed_mod = 0.1 if self.window.shift else 1
             self.focus_actor(None)
+            self.focus_camera(None)
             self.fps_camera_controller.move(0, -self.move_speed * speed_mod, 0)
             self.key_stack = ""
 
@@ -927,6 +936,10 @@ class Viewer(object):
         if key in self.key_down_action_map:
             self.key_down_action_map[key]()
 
+    def set_fovy(self, fovy):
+        self.fovy = fovy
+        self.window.set_camera_parameters(0.1, 100, fovy)
+
     def set_window_resolutions(self, resolutions):
         assert len(resolutions)
         for r in resolutions:
@@ -940,6 +953,14 @@ class Viewer(object):
 
     def build_control_window(self):
         if not self.control_window:
+            self.cameras = self.scene.get_mounted_cameras()
+            self.camera_ui = (
+                R.UIOptions().Style("select").Label("Name##camera_name")
+                .Index(0 if self.focused_camera is None else self.cameras.index(self.focused_camera) + 1)
+                .Items(['None'] + [x.get_name() for x in self.cameras])
+                .Callback(lambda p: self.focus_camera(self.cameras[p.index - 1] if p.index > 0 else None))
+            )
+
             self.control_window = (
                 R.UIWindow()
                 .Label("Control")
@@ -973,7 +994,15 @@ class Viewer(object):
                     .Value(self.scroll_speed)
                     .Label("Scroll")
                     .Callback(lambda w: self.set_scroll_speed(w.value)),
+                    R.UIDisplayText().Text("Camera"),
+                    self.camera_ui,
                     R.UIDisplayText().Text("Display Settings"),
+                    R.UISliderAngle()
+                    .Min(1)
+                    .Max(179)
+                    .Value(self.fovy)
+                    .Label("Fov Y")
+                    .Callback(lambda w: self.set_fovy(w.value)),
                     R.UIOptions()
                     .Style("select")
                     .Label("Render Target")
@@ -1363,6 +1392,7 @@ class Viewer(object):
         self.arc_camera_controller = ArcRotateCameraController(self.window)
         self.create_visual_objects()
         self.toggle_axes(True)
+        self.set_fovy(np.pi/2)
 
     def set_camera_xyz(self, x, y, z):
         self.fps_camera_controller.setXYZ(x, y, z)
@@ -1417,7 +1447,8 @@ class Viewer(object):
             return
 
         self.focused_actor = actor
-        if actor:
+        if self.focused_actor is not None:
+            self.focus_camera(None)
             pos = self.window.get_camera_position()
             rot = self.window.get_camera_rotation()
             x, y, z = rotate_vector([0, 0, -1], rot)
@@ -1450,6 +1481,35 @@ class Viewer(object):
                     v.set_visibility(1)
             self.selected_actor = None
             self.update_coordinate_axes()
+
+    @staticmethod
+    def get_camera_pose(camera: VulkanCamera):
+        """Get the camera pose in the Sapien world."""
+        opengl_pose = camera.get_model_matrix()  # opengl camera-> sapien world
+        # sapien camera -> opengl camera
+        sapien2opengl = np.array([[0., -1., 0., 0.],
+                                  [0., 0., 1., 0.],
+                                  [-1, 0., 0., 0.],
+                                  [0., 0., 0., 1.]])
+        cam_pose = Pose.from_transformation_matrix(opengl_pose @ sapien2opengl)
+        return cam_pose
+
+    def focus_camera(self, camera: VulkanCamera):
+        if self.focused_camera == camera:
+            return
+
+        self.focused_camera = camera
+        if self.focused_camera is not None:
+            self.focus_actor(None)
+            cam_pose = self.get_camera_pose(self.focused_camera)
+            self.set_camera_xyz(*cam_pose.p)
+            self.set_camera_rpy(*quat2euler(cam_pose.q))
+
+        if self.camera_ui is not None:
+            # Lazy check if any camera has changed
+            assert self.cameras == self.scene.get_mounted_cameras(), 'Cameras have changed'
+            index = (self.cameras.index(camera) + 1) if camera is not None else 0
+            self.camera_ui.Index(index)
 
     def update_coordinate_axes_scale(self, scale):
         self.axes_scale = scale
@@ -1544,7 +1604,7 @@ class Viewer(object):
 
                     self.enter_mode("normal")
 
-            if self.mode == "rotate":
+            elif self.mode == "rotate":
                 if self.window.mouse_click(0):
                     new_pose = Pose(
                         self.display_object.position, self.display_object.rotation
@@ -1659,6 +1719,10 @@ class Viewer(object):
 
                 if self.focused_actor:
                     self.arc_camera_controller.set_center(self.focused_actor.pose.p)
+                elif self.focused_camera:
+                    cam_pose = self.get_camera_pose(self.focused_camera)
+                    self.set_camera_xyz(*cam_pose.p)
+                    self.set_camera_rpy(*quat2euler(cam_pose.q))
 
             if self.window.key_down("q") or self.window.should_close:
                 self.close()
