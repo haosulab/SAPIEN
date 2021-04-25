@@ -222,51 +222,70 @@ def main():
     joints['back_gear'].set_drive_property(0.0, 0.0)  # back gear
     limits = np.rad2deg(joints['front_shaft_joint'].get_limits()[0])
 
+    camera, cam_mount_actor = create_camera(scene, [-12, 0, 14], [0, -np.arctan2(2, 2), 0])
+    import imageio
+    images = []
+    car_body = car.get_links()[0]
+
     position = 0.0  # position target of joints
     velocity = 0.0  # velocity target of joints
     steps = 0
-    last_step = -4
-    while not viewer.closed:
-        if steps - last_step < 4:
-            pass  # prevent multiple changes for one key press
-        else:
-            last_step = steps
-            if viewer.window.key_down('i'):  # accelerate
-                velocity += 5.0
-                print('velocity increases:', velocity)
-                joints['front_gear'].set_drive_velocity_target(velocity)
-            elif viewer.window.key_down('k'):  # brake
-                velocity -= 5.0
-                print('velocity decreases:', velocity)
-                joints['front_gear'].set_drive_velocity_target(velocity)
-            elif viewer.window.key_down('j'):  # left turn
-                position += 2
-                position = np.clip(position, *limits)
-                joints['front_shaft_joint'].set_drive_target(np.deg2rad(position))
-                print('position increases:', position)
-            elif viewer.window.key_down('l'):  # right turn
-                position -= 2
-                position = np.clip(position, *limits)
-                print('position decreases:', position)
-                joints['front_shaft_joint'].set_drive_target(np.deg2rad(position))
-            elif viewer.window.key_down('r'):  # reset
-                position = 0
-                velocity = 0.0
-                print('reset')
-                joints['front_shaft_joint'].set_drive_target(position)
-                joints['front_gear'].set_drive_velocity_target(velocity)
+    while steps < 400:
+        if steps < 100 and velocity < 25.0:
+            velocity += 0.25
+            joints['front_gear'].set_drive_velocity_target(velocity)
+        if steps < 100 and position < 15.0:
+            position += 0.15
+            joints['front_shaft_joint'].set_drive_target(np.deg2rad(position))
+        if 100 <= steps < 200 and position > 0.0:
+            position -= 0.15
+            joints['front_shaft_joint'].set_drive_target(np.deg2rad(position))
+        if steps == 200:
+            position = 0
+            velocity = 0.0
+            joints['front_shaft_joint'].set_drive_target(position)
+            joints['front_gear'].set_drive_velocity_target(velocity)
 
         car.set_qf(car.compute_passive_force(True, True, False))
         scene.step()
+        cam_mount_actor.set_pose(sapien.Pose(car_body.pose.p))
         scene.update_render()
         viewer.render()
 
-        if steps % 500 == 0:
-            print('step:', steps)
-            print('Pose', car.get_pose())
-            print('Joint positions', car.get_qpos())
-            print('Joint velocities', car.get_qvel())
+        if steps % 4 == 0:
+            camera.take_picture()
+            rgba = camera.get_float_texture('Color')  # [H, W, 4]
+            rgba_img = (rgba * 255).clip(0, 255).astype("uint8")
+            images.append(rgba_img)
+
         steps += 1
+    
+    viewer.close()
+    imageio.mimsave('create_articulations.gif', images, fps=25)
+    from pygifsicle import optimize
+    optimize('create_articulations.gif')
+
+
+def create_camera(scene, xyz, rpy, actor=None):
+    from sapien.core import Pose
+    from transforms3d.euler import euler2quat
+    if actor is None:
+        cam_mount_actor = scene.create_actor_builder().build_kinematic('recorder')
+    else:
+        cam_mount_actor = actor
+    cam_pose = Pose(xyz, euler2quat(rpy[0], -rpy[1], -rpy[2]))
+    camera = scene.add_mounted_camera(
+        'recorder',
+        cam_mount_actor,
+        cam_pose,
+        width=1280,
+        height=720,
+        fovx=1.0,
+        fovy=1.0,
+        near=0.001,
+        far=100,
+    )
+    return camera, cam_mount_actor
 
 
 if __name__ == '__main__':

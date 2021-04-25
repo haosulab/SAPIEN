@@ -49,10 +49,12 @@ We can set the pose of its root link through ``set_root_pose(...)``.
 If you run the example with ``demo(fix_root_link=False, balance_passive_force=False)``, it is expected that you will observe the following "falling-down" robot arm.
 We will see how to keep the robot at a certain pose later.
 
-.. figure:: assets/robot_fall.png
+.. figure:: assets/robot_fall.gif
     :width: 640px
     :align: center
     :figclass: align-center
+
+    The robot arm falls down.
 
 .. note::
    When a robot is already loaded, changing the flag of the URDF loader will not take effect.
@@ -78,6 +80,13 @@ Compensate passive forces (e.g. gravity)
 You may find that even if you run the example with ``fix_root_link=True``, the robot still can not maintain its initial joint positions.
 It is due to gravitational force and other possible passive forces, like Coriolis and Centrifugal force.
 
+.. figure:: assets/robot_fix.gif
+    :width: 640px
+    :align: center
+    :figclass: align-center
+
+    The root link (base) of the robot is fixed, but it still falls down due to passive forces.
+
 For a real robot, gravity compensation is done by an internal controller hardware.
 So it is usually desirable to skip this troublesome calculation of how to compensate gravity.
 SAPIEN provides ``compute_passive_force`` to compute desired forces or torques on joints to compensate passive forces.
@@ -96,10 +105,13 @@ You can call ``robot.get_qf()`` to acquire its current value.
 Now, if you run the example with ``demo(fix_root_link=True, balance_passive_force=True)``, it is observed that the robot can stay at the target pose for a short period.
 However, it will then deviate from this pose gradually due to numerical error.
 
-.. figure:: assets/robot_right_position.png
+.. figure:: assets/robot_fix_balance.gif
     :width: 640px
     :align: center
     :figclass: align-center
+
+    The robot arm is able to stay at the target pose, but might deviate gradually due to numerical error.
+    The animation is accelerated.
 
 .. note::
    To avoid deviating from the target pose gradually,

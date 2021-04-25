@@ -90,8 +90,15 @@ def demo(use_internal_drive, use_external_pid):
         for i, joint in enumerate(active_joints):
             pids.append(SimplePID(*pid_parameters[i]))
 
-    while not viewer.closed:
-        for _ in range(4):  # render every 4 steps
+    camera = create_camera(scene, [-2, 0, 1], [0, -0.3, 0])
+    import imageio
+    images = []
+
+    steps = 0
+    total_steps = 4000 if use_internal_drive else 4000
+    render_freq = 4 * 5
+    while steps < total_steps:
+        for _ in range(render_freq):
             qf = robot.compute_passive_force(
                 gravity=True,
                 coriolis_and_centrifugal=True,
@@ -106,8 +113,48 @@ def demo(use_internal_drive, use_external_pid):
                 qf += pid_qf
             robot.set_qf(qf)
             scene.step()
+            steps += 1
+
         scene.update_render()
         viewer.render()
+
+        camera.take_picture()
+        rgba = camera.get_float_texture('Color')  # [H, W, 4]
+        rgba_img = (rgba * 255).clip(0, 255).astype("uint8")
+        images.append(rgba_img)
+
+        if steps % 100 == 0:
+            print(steps)
+
+    viewer.close()
+    if use_internal_drive:
+        filename = 'pid_internal.gif'
+    elif use_external_pid:
+        filename = 'pid_external.gif'
+    else:
+        raise NotImplementedError()
+    imageio.mimsave(filename, images, fps=25)
+    from pygifsicle import optimize
+    optimize(filename)
+
+
+def create_camera(scene, xyz, rpy):
+    from sapien.core import Pose
+    from transforms3d.euler import euler2quat
+    cam_mount_actor = scene.create_actor_builder().build_kinematic()
+    cam_pose = Pose(xyz, euler2quat(rpy[0], -rpy[1], -rpy[2]))
+    camera = scene.add_mounted_camera(
+        'recorder',
+        cam_mount_actor,
+        cam_pose,
+        width=1280,
+        height=720,
+        fovx=1.0,
+        fovy=1.0,
+        near=0.001,
+        far=100,
+    )
+    return camera
 
 
 def main():

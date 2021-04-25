@@ -196,21 +196,46 @@ def main():
     viewer.set_camera_rpy(r=0, p=-np.arctan2(2, 2), y=0)
     viewer.window.set_camera_parameters(near=0.001, far=100, fovy=1)
 
+    camera = create_camera(scene, [-2, 0, 2.5], [0, -np.arctan2(2, 2), 0])
+    import imageio
+    images = []
+
     steps = 0
-    pause = True
-    while not viewer.closed:
-        if viewer.window.key_down('c'):  # press c to start
-            pause = False
-        if not pause:
-            scene.step()
+    while steps < 200:
+        scene.step()
         scene.update_render()
         viewer.render()
-        if steps % 500 == 0:
-            print('step:', steps)
-            print('Pose', actor.get_pose())
-            print('Velocity', actor.get_velocity())
-            print('Angular velocity', actor.get_angular_velocity())
+        if steps % 4 == 0:
+            camera.take_picture()
+            rgba = camera.get_float_texture('Color')  # [H, W, 4]
+            rgba_img = (rgba * 255).clip(0, 255).astype("uint8")
+            images.append(rgba_img)
         steps += 1
+    
+    viewer.close()
+    imageio.mimsave('physics.gif', images, fps=25)
+    from pygifsicle import optimize
+    optimize('physics.gif')
+    
+
+
+def create_camera(scene, xyz, rpy):
+    from sapien.core import Pose
+    from transforms3d.euler import euler2quat
+    cam_mount_actor = scene.create_actor_builder().build_kinematic()
+    cam_pose = Pose(xyz, euler2quat(rpy[0], -rpy[1], -rpy[2]))
+    camera = scene.add_mounted_camera(
+        'recorder',
+        cam_mount_actor,
+        cam_pose,
+        width=1280,
+        height=720,
+        fovx=1.0,
+        fovy=1.0,
+        near=0.001,
+        far=100,
+    )
+    return camera
 
 
 if __name__ == '__main__':
