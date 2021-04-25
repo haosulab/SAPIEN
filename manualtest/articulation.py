@@ -62,30 +62,42 @@ def main():
     copper = renderer.create_material()
     copper.set_base_color([0.875, 0.553, 0.221, 1])
     copper.set_metallic(1)
-    copper.set_roughness(0.4)
+    copper.set_roughness(0.2)
 
     # viewer = Viewer(renderer, "../vulkan_shader/full")
-    viewer = Viewer(renderer, "../vulkan_shader/default_viewer")
+    viewer = Viewer(renderer, "../vulkan_shader/ibl")
+
+    brdf_lut = renderer_context.create_brdf_lut()
+    cubemap = renderer_context.create_cubemap_from_files(
+        ["../assets/images/cube/px2.png",
+         "../assets/images/cube/nx2.png",
+         "../assets/images/cube/py2.png",
+         "../assets/images/cube/ny2.png",
+         "../assets/images/cube/pz2.png",
+         "../assets/images/cube/nz2.png",
+         ], 6)
+    viewer.window._internal_renderer.set_custom_cubemap("Environment", cubemap)
+    viewer.window._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
 
     def create_ant_builder(scene):
         builder = scene.create_articulation_builder()
         body = builder.create_link_builder()
         body.add_sphere_shape(Pose(), 0.25)
-        body.add_sphere_visual_complex(Pose(), 0.25, copper)
+        body.add_sphere_visual(Pose(), 0.25, copper)
         body.add_capsule_shape(Pose([0.141, 0, 0]), 0.08, 0.141)
-        body.add_capsule_visual_complex(Pose([0.141, 0, 0]), 0.08, 0.141, copper)
+        body.add_capsule_visual(Pose([0.141, 0, 0]), 0.08, 0.141, copper)
         body.add_capsule_shape(Pose([-0.141, 0, 0]), 0.08, 0.141)
-        body.add_capsule_visual_complex(Pose([-0.141, 0, 0]), 0.08, 0.141, copper)
+        body.add_capsule_visual(Pose([-0.141, 0, 0]), 0.08, 0.141, copper)
         body.add_capsule_shape(
             Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141
         )
-        body.add_capsule_visual_complex(
+        body.add_capsule_visual(
             Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141, copper
         )
         body.add_capsule_shape(
             Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141
         )
-        body.add_capsule_visual_complex(
+        body.add_capsule_visual(
             Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141, copper
         )
         body.set_name("body")
@@ -101,7 +113,7 @@ def main():
             0.1,
         )
         l1.add_capsule_shape(Pose(), 0.08, 0.141)
-        l1.add_capsule_visual_complex(Pose(), 0.08, 0.141, copper)
+        l1.add_capsule_visual(Pose(), 0.08, 0.141, copper)
 
         l2 = builder.create_link_builder(body)
         l2.set_name("l2")
@@ -114,7 +126,7 @@ def main():
             0.1,
         )
         l2.add_capsule_shape(Pose(), 0.08, 0.141)
-        l2.add_capsule_visual_complex(Pose(), 0.08, 0.141, copper)
+        l2.add_capsule_visual(Pose(), 0.08, 0.141, copper)
 
         l3 = builder.create_link_builder(body)
         l3.set_name("l3")
@@ -127,7 +139,7 @@ def main():
             0.1,
         )
         l3.add_capsule_shape(Pose(), 0.08, 0.141)
-        l3.add_capsule_visual_complex(Pose(), 0.08, 0.141, copper)
+        l3.add_capsule_visual(Pose(), 0.08, 0.141, copper)
 
         l4 = builder.create_link_builder(body)
         l4.set_name("l4")
@@ -140,7 +152,7 @@ def main():
             0.1,
         )
         l4.add_capsule_shape(Pose(), 0.08, 0.141)
-        l4.add_capsule_visual_complex(Pose(), 0.08, 0.141, copper)
+        l4.add_capsule_visual(Pose(), 0.08, 0.141, copper)
 
         f1 = builder.create_link_builder(l1)
         f1.set_name("f1")
@@ -153,7 +165,7 @@ def main():
             0.1,
         )
         f1.add_capsule_shape(Pose(), 0.08, 0.282)
-        f1.add_capsule_visual_complex(Pose(), 0.08, 0.282, copper)
+        f1.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         f2 = builder.create_link_builder(l2)
         f2.set_name("f2")
@@ -166,7 +178,7 @@ def main():
             0.1,
         )
         f2.add_capsule_shape(Pose(), 0.08, 0.282)
-        f2.add_capsule_visual_complex(Pose(), 0.08, 0.282, copper)
+        f2.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         f3 = builder.create_link_builder(l3)
         f3.set_name("f3")
@@ -179,7 +191,7 @@ def main():
             0.1,
         )
         f3.add_capsule_shape(Pose(), 0.08, 0.282)
-        f3.add_capsule_visual_complex(Pose(), 0.08, 0.282, copper)
+        f3.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         f4 = builder.create_link_builder(l4)
         f4.set_name("f4")
@@ -192,7 +204,7 @@ def main():
             0.1,
         )
         f4.add_capsule_shape(Pose(), 0.08, 0.282)
-        f4.add_capsule_visual_complex(Pose(), 0.08, 0.282, copper)
+        f4.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         return builder
 
@@ -236,14 +248,14 @@ def main():
     ant.set_qf(f)
     scene.step()
 
-    scene.set_ambient_light([0.5, 0.5, 0.5])
-    rs = scene.get_render_scene()
-    # rs.add_shadow_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
-    spot_light = rs.add_shadow_spot_light([0, 0, 2], [0, 0, -1], 3.14 / 2, [2, 1, 1])
-
-    # rs.add_shadow_point_light([0, 1, 1], [1, 2, 2])
-    # rs.add_shadow_point_light([0, -1, 1], [2, 1, 2])
-    # rs.add_shadow_point_light([0, 1, -1], [2, 2, 1])
+    scene.renderer_scene.set_ambient_light([0, 0, 0])
+    scene.renderer_scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5], True)
+    scene.renderer_scene.add_point_light([0, 1, 1], [1, 2, 2], True)
+    scene.renderer_scene.add_spot_light(
+        [0, 0, 2], [0, 0, -1], 3.14 / 2, [1, 1, 1], True
+    )
+    # scene.renderer_scene.add_point_light([0, -1, 1], [2, 1, 2])
+    # scene.renderer_scene.add_point_light([0, 1, -1], [2, 2, 1])
 
     import torch
     import torch.utils.dlpack

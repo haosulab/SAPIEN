@@ -12,11 +12,9 @@ void SVulkan2Scene::setAmbientLight(std::array<float, 3> const &color) {
   mScene->setAmbientLight({color[0], color[1], color[2], 1.f});
 }
 
-void SVulkan2Scene::addPointLight(std::array<float, 3> const &position,
-                                  std::array<float, 3> const &color) {
-  auto &light = mScene->addPointLight();
-  light.setColor({color[0], color[1], color[2], 1.f});
-  light.setTransform({.position = glm::vec4(position[0], position[1], position[2], 1.f)});
+std::array<float, 3> SVulkan2Scene::getAmbientLight() const {
+  auto light = mScene->getAmbientLight();
+  return {light.x, light.y, light.z};
 }
 
 SVulkan2PointLight *SVulkan2Scene::addPointLight(std::array<float, 3> const &position,
@@ -34,13 +32,6 @@ SVulkan2PointLight *SVulkan2Scene::addPointLight(std::array<float, 3> const &pos
   auto result = l.get();
   mLights.push_back(std::move(l));
   return result;
-}
-
-void SVulkan2Scene::addDirectionalLight(std::array<float, 3> const &direction,
-                                        std::array<float, 3> const &color) {
-  auto &light = mScene->addDirectionalLight();
-  light.setDirection({direction[0], direction[1], direction[2]});
-  light.setColor({color[0], color[1], color[2], 1.f});
 }
 
 SVulkan2DirectionalLight *SVulkan2Scene::addDirectionalLight(
@@ -78,11 +69,6 @@ SVulkan2SpotLight *SVulkan2Scene::addSpotLight(std::array<float, 3> const &posit
   auto result = l.get();
   mLights.push_back(std::move(l));
   return result;
-}
-
-void SVulkan2Scene::setShadowLight(std::array<float, 3> const &direction,
-                                   std::array<float, 3> const &color) {
-  throw std::runtime_error("Any light can cast shadow now. Shadow light is no longer used.");
 }
 
 void SVulkan2Scene::destroy() { mParentRenderer->removeScene(this); }

@@ -195,7 +195,7 @@ class Viewer(object):
 
     def _create_coordinate_axes(self):
         assert self.scene is not None
-        rs = self.scene.get_render_scene()
+        rs = self.scene.renderer_scene
         render_scene: R.Scene = rs._internal_scene
 
         node = render_scene.add_node()
@@ -247,7 +247,7 @@ class Viewer(object):
 
     def _create_grab_axes(self):
         assert self.scene is not None
-        rs = self.scene.get_render_scene()
+        rs = self.scene.renderer_scene
         render_scene: R.Scene = rs._internal_scene
 
         self.grab_objects = [
@@ -264,7 +264,7 @@ class Viewer(object):
 
     def _create_joint_axes(self):
         assert self.scene is not None
-        rs = self.scene.get_render_scene()
+        rs = self.scene.renderer_scene
         render_scene: R.Scene = rs._internal_scene
 
         joint_axes = [
@@ -299,7 +299,7 @@ class Viewer(object):
             for obj in self.grab_objects:
                 obj.transparency = 1
             if self.display_object:
-                rs = self.scene.get_render_scene()
+                rs = self.scene.renderer_scene
                 render_scene: R.Scene = rs._internal_scene
                 render_scene.remove_node(self.display_object)
                 self.display_object = None
@@ -307,13 +307,13 @@ class Viewer(object):
             for obj in self.grab_objects:
                 obj.transparency = 1
             if self.display_object:
-                rs = self.scene.get_render_scene()
+                rs = self.scene.renderer_scene
                 render_scene: R.Scene = rs._internal_scene
                 render_scene.remove_node(self.display_object)
                 self.display_object = None
 
     def add_display_object(self, actor):
-        rs = self.scene.get_render_scene()
+        rs = self.scene.renderer_scene
         render_scene: R.Scene = rs._internal_scene
         if self.display_object:
             render_scene.remove_node(self.display_object)
@@ -1432,7 +1432,7 @@ class Viewer(object):
                 for x in self.joint_axes:
                     x.transparency = 1
 
-            j2c = j.get_pose_in_child_frame()
+            j2c = j.get_pose_in_child()
             c2w = link.get_pose()
             j2w = c2w * j2c
             if j.type == "prismatic":

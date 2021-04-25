@@ -126,27 +126,20 @@ public:
 
   void destroy() override;
 
-  //======== Lights old way ========//
   void setAmbientLight(std::array<float, 3> const &color) override;
-  void addPointLight(std::array<float, 3> const &position,
-                     std::array<float, 3> const &color) override;
-  void addDirectionalLight(std::array<float, 3> const &direction,
-                           std::array<float, 3> const &color) override;
-  void setShadowLight(std::array<float, 3> const &direction,
-                      std::array<float, 3> const &color) override;
-
-  //======== Lights more parameters ========//
+  std::array<float, 3> getAmbientLight() const override;
   SVulkan2PointLight *addPointLight(std::array<float, 3> const &position,
                                     std::array<float, 3> const &color, bool enableShadow,
-                                    float shadowNear = 0.1f, float shadowFar = 5.f);
+                                    float shadowNear = 0.1f, float shadowFar = 5.f) override;
   SVulkan2DirectionalLight *
   addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color,
                       bool enableShadow, std::array<float, 3> const &position = {0.f, 0.f, 0.f},
-                      float shadowScale = 10.f, float shadowNear = -5.f, float shadowFar = 5.f);
+                      float shadowScale = 10.f, float shadowNear = -5.f,
+                      float shadowFar = 5.f) override;
   SVulkan2SpotLight *addSpotLight(std::array<float, 3> const &position,
                                   std::array<float, 3> const &direction, float fov,
                                   std::array<float, 3> const &color, bool enableShadow,
-                                  float shadowNear = 0.1f, float shadowFar = 5.f);
+                                  float shadowNear = 0.1f, float shadowFar = 5.f) override;
 
   inline SVulkan2Renderer *getParentRenderer() const { return mParentRenderer; }
 };
@@ -236,6 +229,8 @@ public:
 
   svulkan2::scene::Camera *getCamera() const { return mCamera; }
   std::string getMode() const;
+
+  inline svulkan2::renderer::Renderer *getInternalRenderer() const { return mRenderer.get(); }
 };
 
 } // namespace Renderer

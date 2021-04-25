@@ -402,8 +402,9 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
       }
     }
 
-    for (auto c : current->children) {
-      stack.push_back(c);
+    // Reverse iterate over children and push into the stack
+    for (auto c = current->children.rbegin(); c != current->children.rend(); c++) {
+      stack.push_back(*c);
     }
   }
 
@@ -429,8 +430,8 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
           spdlog::get("SAPIEN")->critical("Collision group exhausted, please simplify the SRDF");
           throw std::runtime_error("Too many collision groups");
         }
-        l1->linkBuilder->addCollisionGroup(0, 0, groupCount);
-        l2->linkBuilder->addCollisionGroup(0, 0, groupCount);
+        l1->linkBuilder->addCollisionGroup(0, 0, groupCount, 0);
+        l2->linkBuilder->addCollisionGroup(0, 0, groupCount, 0);
       }
     }
     spdlog::get("SAPIEN")->info("SRDF: ignored {} pairs", groupCount);

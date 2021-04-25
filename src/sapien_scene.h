@@ -207,10 +207,10 @@ public:
   std::vector<SActorBase *> getAllActors() const;
   std::vector<SArticulationBase *> getAllArticulations() const;
 
-  void setShadowLight(PxVec3 const &direction, PxVec3 const &color);
-  void addPointLight(PxVec3 const &position, PxVec3 const &color);
-  void setAmbientLight(PxVec3 const &color);
-  void addDirectionalLight(PxVec3 const &direction, PxVec3 const &color);
+  // void setShadowLight(PxVec3 const &direction, PxVec3 const &color);
+  // void addPointLight(PxVec3 const &position, PxVec3 const &color);
+  // void setAmbientLight(PxVec3 const &color);
+  // void addDirectionalLight(PxVec3 const &direction, PxVec3 const &color);
 
   /** syncs physical scene with renderer scene, and tell the renderer scene that
    * it is a new time frame.

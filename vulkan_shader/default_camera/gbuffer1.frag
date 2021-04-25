@@ -67,7 +67,7 @@ layout(set = 3, binding = 1) uniform ShadowBuffer {
 layout(set = 3, binding = 2) uniform samplerCubeArray samplerPointLightDepths;
 layout(set = 3, binding = 3) uniform sampler2DArray samplerDirectionalLightDepths;
 layout(set = 3, binding = 4) uniform sampler2DArray samplerCustomLightDepths;
-layout(set = 0, binding = 5) uniform sampler2DArray samplerSpotLightDepths;
+layout(set = 3, binding = 5) uniform sampler2DArray samplerSpotLightDepths;
 
 
 vec4 world2camera(vec4 pos) {

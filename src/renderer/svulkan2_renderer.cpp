@@ -60,7 +60,7 @@ void SVulkan2Renderer::removeScene(IPxrScene *scene) {
 std::shared_ptr<IPxrMaterial> SVulkan2Renderer::createMaterial() {
   auto mat = std::make_shared<SVulkan2Material>(
       std::make_shared<svulkan2::resource::SVMetallicMaterial>());
-  mat->setBaseColor({0.8, 0.8, 0.8, 1});
+  mat->setBaseColor({1.0, 1.0, 1.0, 1});
   return mat;
 }
 
