@@ -1392,6 +1392,7 @@ class Viewer(object):
         self.arc_camera_controller = ArcRotateCameraController(self.window)
         self.create_visual_objects()
         self.toggle_axes(True)
+        self.set_fovy(np.pi/2)
 
     def set_camera_xyz(self, x, y, z):
         self.fps_camera_controller.setXYZ(x, y, z)
