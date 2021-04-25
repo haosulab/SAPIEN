@@ -3,12 +3,16 @@ Welcome to sapien's documentation!
 
 .. toctree::
    :maxdepth: 3
-   :caption: Tutorial
+   :caption: Basic SAPIEN Python API
 
    tutorial/basic/index
-   tutorial/rendering/index
+   tutorial/render/index
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Robotics in SAPIEN
+
    tutorial/robotics/index
-   tutorial/rl/index
 
 Indices and tables
 ==================

@@ -3,11 +3,11 @@
 Basic
 ===================================================================
 
-This tutorial focuses on the basic usage of SAPIEN Python Api.
+This tutorial focuses on the basic usage of SAPIEN Python APIs.
 
 .. toctree::
 
-   minimal
-   render
-   gym
-
+   hello_world
+   create_actors
+   physics
+   create_articulations
