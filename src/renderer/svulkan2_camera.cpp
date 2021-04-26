@@ -67,6 +67,10 @@ void SVulkan2Camera::waitForFence() {
   }
 }
 
+std::vector<std::string> SVulkan2Camera::getRenderTargetNames() {
+  return mRenderer->getRenderTargetNames();
+}
+
 std::tuple<std::vector<float>, std::array<uint32_t, 3>>
 SVulkan2Camera::getFloatTexture(std::string const &textureName) {
   waitForFence();

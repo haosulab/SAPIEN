@@ -1495,6 +1495,7 @@ Args:
                                           py::return_value_policy::reference);
 
   PyVulkanCamera
+      .def_property_readonly("render_targets", &Renderer::SVulkan2Camera::getRenderTargetNames)
       .def(
           "get_float_texture",
           [](Renderer::SVulkan2Camera &cam, std::string const &name) {

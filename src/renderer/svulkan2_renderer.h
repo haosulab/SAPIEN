@@ -197,6 +197,8 @@ public:
   std::vector<int> getSegmentation() override;
   std::vector<int> getObjSegmentation() override;
 
+  std::vector<std::string> getRenderTargetNames();
+
   std::tuple<std::vector<float>, std::array<uint32_t, 3>>
   getFloatTexture(std::string const &textureName);
 
