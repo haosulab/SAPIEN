@@ -11,3 +11,4 @@ This tutorial focuses on the basic usage of SAPIEN Python APIs.
    create_actors
    physics
    create_articulations
+   viewer
