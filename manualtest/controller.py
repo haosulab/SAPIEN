@@ -1085,7 +1085,7 @@ class Viewer(object):
                     "{}##actor{}".format(actor.name if actor.name else "(no name)", i)
                 )
                 .Selected(self.selected_actor == actor)
-                .Callback(lambda _: self.select_actor(actor))
+                .Callback((lambda link: lambda _: self.select_actor(link))(actor))
             )
 
         for i, art in enumerate(self.scene.get_all_articulations()):
