@@ -1034,10 +1034,10 @@ void buildSapien(py::module &m) {
 
   PyContact
       .def_property_readonly(
-          "actor1", [](SContact &contact) { return contact.actors[0]; },
+          "actor0", [](SContact &contact) { return contact.actors[0]; },
           py::return_value_policy::reference)
       .def_property_readonly(
-          "actor2", [](SContact &contact) { return contact.actors[1]; },
+          "actor1", [](SContact &contact) { return contact.actors[1]; },
           py::return_value_policy::reference)
       .def_readonly("starts", &SContact::starts)
       .def_readonly("persists", &SContact::persists)

@@ -578,9 +578,6 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
                                         std::shared_ptr<SPhysicalMaterial> material,
                                         std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
                                         std::string const &name) {
-  if (!renderMaterial) {
-    renderMaterial = mScene->getSimulation()->getRenderer()->createMaterial();
-  }
   physx_id_t actorId = mScene->mActorIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
 
@@ -592,6 +589,9 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
 
   std::vector<Renderer::IPxrRigidbody *> renderBodies;
   if (render && mScene->getRendererScene()) {
+    if (!renderMaterial) {
+      renderMaterial = mScene->getSimulation()->getRenderer()->createMaterial();
+    }
     auto body =
         mScene->mRendererScene->addRigidbody(PxGeometryType::ePLANE, {10, 10, 10}, renderMaterial);
     body->setInitialPose(pose);
