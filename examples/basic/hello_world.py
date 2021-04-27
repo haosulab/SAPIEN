@@ -25,12 +25,10 @@ def main():
     # NOTE: How to build actors (rigid bodies) is elaborated in create_actors.py
     scene.add_ground(altitude=0)  # Add a ground
     actor_builder = scene.create_actor_builder()
-    actor_builder.add_box_collision(pose=sapien.Pose(p=[0, 0, 0.5]),
-                                    half_size=[0.5, 0.5, 0.5])
-    actor_builder.add_box_visual(pose=sapien.Pose(p=[0, 0, 0.5]),
-                                 half_size=[0.5, 0.5, 0.5],
-                                 color=[1., 0., 0.])
+    actor_builder.add_box_collision(half_size=[0.5, 0.5, 0.5])
+    actor_builder.add_box_visual(half_size=[0.5, 0.5, 0.5], color=[1., 0., 0.])
     box = actor_builder.build(name='box')  # Add a box
+    box.set_pose(sapien.Pose(p=[0, 0, 0.5]))
 
     # Add some lights so that you can observe the scene
     rscene = scene.get_renderer_scene()

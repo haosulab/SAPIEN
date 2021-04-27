@@ -12,3 +12,4 @@ This tutorial focuses on the basic usage of SAPIEN Python APIs.
    physics
    create_articulations
    viewer
+   contact

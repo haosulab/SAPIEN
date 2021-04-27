@@ -33,7 +33,7 @@ To simulate with SAPIEN, you need to first create a simulation engine, and then 
 ``Engine`` is the physical simulation engine connected to the `PhysX <https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Index.html>`_ backend.
 One engine per process is allowed.
 ``Scene`` is an instance of the simulation world.
-Multiple scenes can be created through ``create_scene()``, and run independently.
+Multiple scenes can be created through ``create_scene``, and run independently.
 ``VulkanRenderer`` is the rendering engine connected to our `vulkan-based <https://www.khronos.org/vulkan/>`_ renderer.
 The renderer should be bound with an engine, and then all the scenes created by the engine will be bound with the renderer.
 
@@ -47,17 +47,17 @@ How to create actors will be elaborated in :ref:`create_actors`.
 
 .. literalinclude:: ../../../../examples/basic/hello_world.py
    :dedent: 0
-   :lines: 26-33
+   :lines: 26-31
 
 Viewer
 -------------------------------------------
 
 ``Viewer`` creates a window (GUI) to render the simulation world.
-How to use the GUI will be elaborated later.
+How to use the GUI will be elaborated in :ref:`viewer`.
 
 .. literalinclude:: ../../../../examples/basic/hello_world.py
    :dedent: 0
-   :lines: 35-49
+   :lines: 33-47
 
 .. note::
    The GUI is not necessary when you only need physical simulation, e.g. collecting experiences for policy learning.
@@ -67,11 +67,11 @@ Simulation loop
 
 After setting up the simulation world, the actual simulation happens in a loop.
 For each iteration, the scene simulates for one step and updates the world to the renderer.
-The viewer calls ``render()`` to update the results on the screen.
+The viewer calls ``render`` to update the results on the screen.
 
 .. literalinclude:: ../../../../examples/basic/hello_world.py
    :dedent: 0
-   :lines: 51-54
+   :lines: 49-52
 
 Full script
 ----------------
