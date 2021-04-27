@@ -1039,6 +1039,12 @@ void buildSapien(py::module &m) {
       .def_property_readonly(
           "actor1", [](SContact &contact) { return contact.actors[1]; },
           py::return_value_policy::reference)
+      .def_property_readonly(
+          "collision_shape0", [](SContact &contact) { return contact.collisionShapes[0]; },
+          py::return_value_policy::reference)
+      .def_property_readonly(
+          "collision_shape1", [](SContact &contact) { return contact.collisionShapes[1]; },
+          py::return_value_policy::reference)
       .def_readonly("starts", &SContact::starts)
       .def_readonly("persists", &SContact::persists)
       .def_readonly("ends", &SContact::ends)

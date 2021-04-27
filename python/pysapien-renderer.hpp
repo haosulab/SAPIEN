@@ -264,7 +264,7 @@ void buildRenderer(py::module &parent) {
       .def(
           "create_model_from_file",
           [](core::Context &context, std::string const &filename) {
-            context.getResourceManager()->CreateModelFromFile(filename);
+            return context.getResourceManager()->CreateModelFromFile(filename);
           },
           py::arg("filename"))
       .def(
