@@ -5,9 +5,10 @@ layout (constant_id = 1) const int NUM_POINT_LIGHTS = 10;
 layout (constant_id = 2) const int NUM_DIRECTIONAL_LIGHT_SHADOWS = 1;
 layout (constant_id = 3) const int NUM_POINT_LIGHT_SHADOWS = 3;
 layout (constant_id = 4) const int NUM_CUSTOM_LIGHT_SHADOWS = 1;
-layout (constant_id = 6) const int NUM_SPOT_LIGHTS = 10;
 layout (constant_id = 5) const int NUM_SPOT_LIGHT_SHADOWS = 10;
+layout (constant_id = 6) const int NUM_SPOT_LIGHTS = 10;
 
+#include "../common/view.glsl"
 #include "../common/lights.glsl"
 #include "../common/shadow.glsl"
 
@@ -86,7 +87,6 @@ vec3 specularIBL(vec3 fresnel, float roughness, vec3 N, vec3 V) {
   return color * (fresnel * envBRDF.x + envBRDF.y);
 }
 
-const float eps = 1e-2;
 void main() {
   vec3 albedo = texture(samplerAlbedo, inUV).xyz;
   vec3 frm = texture(samplerSpecular, inUV).xyz;
@@ -96,6 +96,7 @@ void main() {
 
   vec3 normal = normalize(texture(samplerNormal, inUV).xyz);
   float depth = texture(samplerGbufferDepth, inUV).x;
+
   vec4 csPosition = cameraBuffer.projectionMatrixInverse * (vec4(inUV * 2 - 1, depth, 1));
   csPosition /= csPosition.w;
 
@@ -109,13 +110,14 @@ void main() {
   // point light
   for (int i = 0; i < NUM_POINT_LIGHT_SHADOWS; ++i) {
     vec3 pos = world2camera(vec4(sceneBuffer.pointLights[i].position.xyz, 1.f)).xyz;
-    vec3 l = pos - csPosition.xyz;
-
-    vec3 wsl = vec3(cameraBuffer.viewMatrixInverse * vec4(l - normal * eps, 0));
-
     mat4 shadowProj = shadowBuffer.pointLightBuffers[6 * i].projectionMatrix;
+
+    vec3 l = pos - csPosition.xyz;
+    vec3 wsl = vec3(cameraBuffer.viewMatrixInverse * vec4(l, 0));
+    float bias = max(0.05 * (1.0 - 1 / length(wsl)), 0.005);
+
     vec3 v = abs(wsl);
-    vec4 p = shadowProj * vec4(0, 0, -max(max(v.x, v.y), v.z), 1);
+    vec4 p = shadowProj * vec4(0, 0, -max(max(v.x, v.y), v.z) + bias, 1);
     float pixelDepth = p.z / p.w;
     float shadowDepth = texture(samplerPointLightDepths, vec4(-wsl, i)).x;
 
@@ -138,7 +140,11 @@ void main() {
     mat4 shadowView = shadowBuffer.directionalLightBuffers[i].viewMatrix;
     mat4 shadowProj = shadowBuffer.directionalLightBuffers[i].projectionMatrix;
 
-    vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz + normal * eps), 1);
+    vec3 lightDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.directionalLights[i].direction.xyz;
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+
+    vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz), 1);
+    ssPosition.z += bias;
     vec4 shadowMapCoord = shadowProj * ssPosition;
     shadowMapCoord /= shadowMapCoord.w;
     shadowMapCoord.xy = shadowMapCoord.xy * 0.5 + 0.5;
@@ -148,7 +154,7 @@ void main() {
         samplerDirectionalLightDepths, i, shadowMapCoord.xyz, resolution, 1 / resolution, 1);
 
     color += visibility * computeDirectionalLight(
-        mat3(cameraBuffer.viewMatrix) * sceneBuffer.directionalLights[i].direction.xyz,
+        lightDir,
         sceneBuffer.directionalLights[i].emission.rgb,
         normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
@@ -165,7 +171,11 @@ void main() {
     mat4 shadowView = shadowBuffer.spotLightBuffers[i].viewMatrix;
     mat4 shadowProj = shadowBuffer.spotLightBuffers[i].projectionMatrix;
 
-    vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz + normal * eps), 1);
+    vec3 lightDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
+    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+
+    vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz), 1);
+    ssPosition.z -= bias;
     vec4 shadowMapCoord = shadowProj * ssPosition;
     shadowMapCoord /= shadowMapCoord.w;
     shadowMapCoord.xy = shadowMapCoord.xy * 0.5 + 0.5;
@@ -200,7 +210,7 @@ void main() {
     mat4 shadowView = shadowBuffer.customLightBuffers[i].viewMatrix;
     mat4 shadowProj = shadowBuffer.customLightBuffers[i].projectionMatrix;
 
-    vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz + normal * eps), 1);
+    vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4(csPosition.xyz, 1);
     vec4 shadowMapCoord = shadowProj * ssPosition;
     shadowMapCoord /= shadowMapCoord.w;
     shadowMapCoord.xy = shadowMapCoord.xy * 0.5 + 0.5;

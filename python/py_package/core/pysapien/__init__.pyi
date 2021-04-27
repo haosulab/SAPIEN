@@ -465,14 +465,24 @@ class CollisionShape():
 class Contact():
     def __repr__(self) -> str: ...
     @property
+    def actor0(self) -> ActorBase:
+        """
+        :type: ActorBase
+        """
+    @property
     def actor1(self) -> ActorBase:
         """
         :type: ActorBase
         """
     @property
-    def actor2(self) -> ActorBase:
+    def collision_shape0(self) -> CollisionShape:
         """
-        :type: ActorBase
+        :type: CollisionShape
+        """
+    @property
+    def collision_shape1(self) -> CollisionShape:
+        """
+        :type: CollisionShape
         """
     @property
     def ends(self) -> bool:
@@ -1393,7 +1403,6 @@ class VulkanCamera(ICamera, ISensor):
     def get_model_matrix(self) -> numpy.ndarray[numpy.float32]: ...
     def get_projection_matrix(self) -> numpy.ndarray[numpy.float32]: ...
     def get_uint32_texture(self, texture_name: str) -> numpy.ndarray[numpy.uint32]: ...
-    def render_targets(self) -> typing.List[str]: ...
     def set_full_perspective(self, near: float, far: float, fx: float, fy: float, cx: float, cy: float, width: float, height: float, skew: float) -> None: ...
     def set_orthographic(self, near: float, far: float, aspect: float, scale: float) -> None: ...
     def set_perspective(self, near: float, far: float, fovy: float, aspect: float) -> None: ...
@@ -1406,6 +1415,11 @@ class VulkanCamera(ICamera, ISensor):
     def mode(self) -> str:
         """
         :type: str
+        """
+    @property
+    def render_targets(self) -> typing.List[str]:
+        """
+        :type: typing.List[str]
         """
     pass
 class VulkanDirectionalLight(DirectionalLight, Light):

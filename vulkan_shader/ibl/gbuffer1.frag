@@ -5,8 +5,8 @@ layout (constant_id = 1) const int NUM_POINT_LIGHTS = 10;
 layout (constant_id = 2) const int NUM_DIRECTIONAL_LIGHT_SHADOWS = 1;
 layout (constant_id = 3) const int NUM_POINT_LIGHT_SHADOWS = 3;
 layout (constant_id = 4) const int NUM_CUSTOM_LIGHT_SHADOWS = 1;
-layout (constant_id = 6) const int NUM_SPOT_LIGHTS = 10;
 layout (constant_id = 5) const int NUM_SPOT_LIGHT_SHADOWS = 10;
+layout (constant_id = 6) const int NUM_SPOT_LIGHTS = 10;
 
 layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 viewMatrix;
@@ -39,7 +39,6 @@ layout(set = 2, binding = 1) uniform sampler2D colorTexture;
 layout(set = 2, binding = 2) uniform sampler2D roughnessTexture;
 layout(set = 2, binding = 3) uniform sampler2D normalTexture;
 layout(set = 2, binding = 4) uniform sampler2D metallicTexture;
-
 
 #include "../common/lights.glsl"
 

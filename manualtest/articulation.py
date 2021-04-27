@@ -3,11 +3,13 @@ import numpy as np
 from sapien.core import Pose
 from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector
+import time
 
 import sapien.core.pysapien.renderer as R
 from sapien.asset import download_partnet_mobility
 
 from controller import Viewer
+
 # from sapien.utils import Viewer
 
 
@@ -64,20 +66,27 @@ def main():
     copper.set_metallic(1)
     copper.set_roughness(0.2)
 
-    # viewer = Viewer(renderer, "../vulkan_shader/full")
-    viewer = Viewer(renderer, "../vulkan_shader/ibl")
+    sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
+    viewer = Viewer(renderer)
 
     brdf_lut = renderer_context.create_brdf_lut()
     cubemap = renderer_context.create_cubemap_from_files(
-        ["../assets/images/cube/px2.png",
-         "../assets/images/cube/nx2.png",
-         "../assets/images/cube/py2.png",
-         "../assets/images/cube/ny2.png",
-         "../assets/images/cube/pz2.png",
-         "../assets/images/cube/nz2.png",
-         ], 6)
+        [
+            "../assets/images/cube/px2.png",
+            "../assets/images/cube/nx2.png",
+            "../assets/images/cube/py2.png",
+            "../assets/images/cube/ny2.png",
+            "../assets/images/cube/pz2.png",
+            "../assets/images/cube/nz2.png",
+        ],
+        6,
+    )
+    lightmap = renderer_context.create_texture_from_file(
+        "../assets/images/flashlight.jpg", 1, address_mode="border"
+    )
     viewer.window._internal_renderer.set_custom_cubemap("Environment", cubemap)
     viewer.window._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
+    viewer.window._internal_renderer.set_custom_texture("LightMap", lightmap)
 
     def create_ant_builder(scene):
         builder = scene.create_articulation_builder()
@@ -213,11 +222,22 @@ def main():
     scene.add_ground(0)
     scene.set_timestep(1 / 240)
 
-    test_mat = scene.create_physical_material(0.7, 0.7, 0.5)
+    sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/default_camera")
 
-    # mount = scene.create_actor_builder().build(True)
-    # mount.set_pose(Pose([-1, 0, -2]))
-    # cam = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
+    mount = scene.create_actor_builder().build_kinematic()
+    mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
+    cam1 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
+    print(cam1.render_targets)
+
+    sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/active_light")
+
+    mount = scene.create_actor_builder().build_kinematic()
+    mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
+    cam2 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
+    cam2._internal_renderer.set_custom_cubemap("Environment", cubemap)
+    cam2._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
+    cam2._internal_renderer.set_custom_texture("LightMap", lightmap)
+
 
     ant_builder = create_ant_builder(scene)
     ant = ant_builder.build()
@@ -248,13 +268,25 @@ def main():
     ant.set_qf(f)
     scene.step()
 
-    scene.renderer_scene.set_ambient_light([0, 0, 0])
-    scene.renderer_scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5], True)
-    scene.renderer_scene.add_point_light([0, 1, 1], [1, 2, 2], True)
-    scene.renderer_scene.add_spot_light(
-        [0, 0, 2], [0, 0, -1], 3.14 / 2, [1, 1, 1], True
-    )
-    # scene.renderer_scene.add_point_light([0, -1, 1], [2, 1, 2])
+    # scene.renderer_scene.set_ambient_light([0, 0, 0])
+
+    # scene.renderer_scene.add_directional_light([0, 0, -1], [10, 10, 10], True)
+
+    # scene.renderer_scene.add_point_light([0, 1, 1], [1, 2, 2], True)
+
+    # light = scene.renderer_scene.add_spot_light(
+    #     [0, 0, 2], [0, 0, -1], np.pi / 2, [1, 1, 1], True
+    # )
+
+    # light.set_position([0, 0, 0.1])
+    # light.set_direction([0, -100, -1])
+    # light.set_color([100, 100, 100])
+    # light.set_shadow_parameters(1, 100)
+
+    # light.set_position([0, 0, 5])
+    # light.set_direction([0, -1, -1])
+
+    scene.renderer_scene.add_point_light([0, -1, 1], [2, 1, 2], True)
     # scene.renderer_scene.add_point_light([0, 1, -1], [2, 2, 1])
 
     import torch
@@ -268,13 +300,28 @@ def main():
         viewer.render()
         count += 1
 
-        # import time
-        # start = time.time()
-        # cam.take_picture()
-        # img = cam.get_dl_tensor("Color")
-        # img = torch.utils.dlpack.from_dlpack(img)
-        # dur = time.time() - start
-        # print("Render to tensor FPS: ", 1 / dur)
+        # if count == 120:
+        #     start = time.time()
+        #     cam1.take_picture()
+        #     img = cam1.get_dl_tensor("Color")
+        #     img = torch.utils.dlpack.from_dlpack(img)
+        #     dur = time.time() - start
+        #     print("Render to tensor FPS: ", 1 / dur)
+
+        #     import matplotlib.pyplot as plt
+        #     plt.imshow(img.cpu().numpy())
+        #     plt.show()
+
+        #     start = time.time()
+        #     cam2.take_picture()
+        #     img = cam2.get_dl_tensor("Color")
+        #     img = torch.utils.dlpack.from_dlpack(img)
+        #     dur = time.time() - start
+        #     print("Render to tensor FPS: ", 1 / dur)
+
+        #     import matplotlib.pyplot as plt
+        #     plt.imshow(img.cpu().numpy())
+        #     plt.show()
 
         # import time
         # start = time.time()
@@ -288,3 +335,5 @@ def main():
 
 
 main()
+
+# TODO: get targets on camera
