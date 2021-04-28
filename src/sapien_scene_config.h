@@ -11,9 +11,9 @@ struct SceneConfig {
   float bounceThreshold = 2.f;             // relative velocity below this will not bounce
   float sleepThreshold = 0.005f;           // put to sleep if (kinetic energy/(mass) falls below
   float contactOffset = 0.01f;             // how close should contacts be generated
-  uint32_t solverIterations = 6;           // solver position iterations, helps reduce jittering
-  uint32_t solverVelocityIterations = 1.f; // solver velocity iterations
-  bool enablePCM = true;                   // Use persistent contact manifold solver for contact
+  uint32_t solverIterations = 10;          // solver position iterations, helps reduce jittering
+  uint32_t solverVelocityIterations = 1;   // solver velocity iterations
+  bool enablePCM = false;                  // Use persistent contact manifold solver for contact
   bool enableTGS = false;                  // use TGS solver
   bool enableCCD = false;                  // use continuous collision detection
   bool enableEnhancedDeterminism = false;  // improve determinism
