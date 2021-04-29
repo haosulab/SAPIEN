@@ -15,7 +15,8 @@ TypeAffinityIgnoreFilterShader(PxFilterObjectAttributes attributes0, PxFilterDat
     return PxFilterFlag::eDEFAULT;
   }
 
-  if ((filterData0.word2 & filterData1.word2) && (filterData0.word3 == filterData1.word3)) {
+  if ((filterData0.word2 & filterData1.word2) &&
+      ((filterData0.word3 & 0xffff) == (filterData1.word3 & 0xffff))) {
     return PxFilterFlag::eKILL;
   }
 
