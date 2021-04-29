@@ -322,7 +322,16 @@ void buildSapien(py::module &m) {
                              py::return_value_policy::reference)
 
       .def("get_collision_groups", &SCollisionShape::getCollisionGroups)
-      .def("set_collision_groups", &SCollisionShape::setCollisionGroups, py::arg("group0"),
+      .def("set_collision_groups", &SCollisionShape::setCollisionGroups,
+           R"doc(
+collision groups determine the collision behavior of objects. Let A.gx denote the collision group x of collision shape A. Collision shape A and B will collide iff the following condition holds:
+
+((A.g0 & B.g1) or (A.g1 & B.g0)) and (not ((A.g2 & B.g2) and ((A.g3 & 0xffff) == (B.g3 & 0xffff))))
+
+Here is some explanation: g2 is the "ignore group" and g3 is the "id group". The only the lower 16 bits of the id group is used since the upper 16 bits are reserved for other purposes in the future. When 2 collision shapes have the same ID (g3), then if any of their g2 bits match, their collisions are definitely ignored.
+
+If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g0 is the "contact type group" and g1 is the "contact affinity group". Collision shapes collide only when a bit in the contact type of the first shape matches a bit in the contact affinity of the second shape.)doc",
+           py::arg("group0"),
            py::arg("group1"), py::arg("group2"), py::arg("group3"))
       .def_property("rest_offset", &SCollisionShape::getRestOffset,
                     &SCollisionShape::setRestOffset)

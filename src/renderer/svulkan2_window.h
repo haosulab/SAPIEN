@@ -52,10 +52,11 @@ class SVulkan2Window {
   bool mRequiresRebuild{true};
   bool mClosed{};
 
+public:
 #ifdef _DEBUG_VIEWER
   std::unique_ptr<FPSCameraControllerDebug> mCameraController{};
 #endif
-public:
+
   SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int width, int height,
                  std::string const &shaderDir);
   ~SVulkan2Window();

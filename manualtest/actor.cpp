@@ -114,25 +114,30 @@ int main() {
   Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/default_camera");
 
   SceneConfig config;
-  config.gravity = {0, 0, 0};
+  // config.gravity = {0, 0, 0};
 
-  auto s0 = sim->createScene(config);
-  window.setScene(static_cast<Renderer::SVulkan2Scene *>(s0->getRendererScene()));
-  window.setCameraPosition({-2, 0, 0});
+  auto scene = sim->createScene(config);
+  window.setScene(static_cast<Renderer::SVulkan2Scene *>(scene->getRendererScene()));
+  window.setCameraParameters(0.1, 100, 1);
 
-  auto builder = s0->createActorBuilder();
+  scene->addGround(0);
+  scene->getRendererScene()->setAmbientLight({0.3, 0.3, 0.3});
+  scene->getRendererScene()->addDirectionalLight({0, 1, -1}, {0.5, 0.5, 0.5}, true, {0, 0, 0}, 10,
+                                                 -10, 10);
+
+  auto builder = scene->createActorBuilder();
   builder->addBoxShape({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
   builder->addBoxVisual({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
   auto box = builder->build();
+  box->setPose({{0, 0, 2}, PxIdentity});
 
-  box->setAngularVelocity({0, 0, 10});
-
-  window.setCameraPosition({-2, 0, 0});
-  int count = 0;
+  scene->updateRender();
+  scene->step();
+  window.render("Color");
+  window.mCameraController->setXYZ(-4, 0, 0.5);
   while (1) {
-    // box->addForceTorque({0, 0, 0}, {0, 0, 1});
-    s0->updateRender();
-    s0->step();
+    scene->updateRender();
+    scene->step();
     window.render("Color");
     if (window.windowCloseRequested()) {
       window.close();
