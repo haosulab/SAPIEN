@@ -1240,9 +1240,11 @@ References:
   https://en.wikipedia.org/wiki/Moment_of_inertia#Principal_axes
 )doc",
           py::arg("mass"), py::arg("inertia_pose"), py::arg("inertia"))
-      .def("set_collision_group", &ActorBuilder::setCollisionGroup, py::arg("group0"),
+      .def("set_collision_groups", &ActorBuilder::setCollisionGroup,
+           "see CollisionShape.set_collision_groups",
+           py::arg("group0"),
            py::arg("group1"), py::arg("group2"), py::arg("group3"))
-      .def("reset_collision_group", &ActorBuilder::resetCollisionGroup)
+      .def("reset_collision_groups", &ActorBuilder::resetCollisionGroup)
       .def(
           "build", [](ActorBuilder &a, std::string const &name) { return a.build(false, name); },
           py::arg("name") = "", py::return_value_policy::reference)
