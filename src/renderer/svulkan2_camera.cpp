@@ -33,30 +33,36 @@ void SVulkan2Camera::takePicture() {
   mRenderer->render(*mCamera, {}, {}, {}, mFence.get());
 }
 
-std::vector<float> SVulkan2Camera::getColorRGBA() {
-  throw std::runtime_error("This method is no longer supported, use "
-                           "get{Uint32/Uint8/Float}Texture(\"textureName\") instead.");
-}
+std::vector<float> SVulkan2Camera::getColorRGBA() { return std::get<0>(getFloatTexture("Color")); }
 
 std::vector<float> SVulkan2Camera::getAlbedoRGBA() {
-  throw std::runtime_error("This method is no longer supported, use "
-                           "get{Uint32/Uint8/Float}Texture(\"textureName\") instead.");
+  return std::get<0>(getFloatTexture("Albedo"));
 }
+
 std::vector<float> SVulkan2Camera::getNormalRGBA() {
-  throw std::runtime_error("This method is no longer supported, use "
-                           "get{Uint32/Uint8/Float}Texture(\"textureName\") instead.");
+  return std::get<0>(getFloatTexture("Normal"));
 }
-std::vector<float> SVulkan2Camera::getDepth() {
-  throw std::runtime_error("This method is no longer supported, use "
-                           "get{Uint32/Uint8/Float}Texture(\"textureName\") instead.");
-}
+
+std::vector<float> SVulkan2Camera::getDepth() { return std::get<0>(getFloatTexture("Depth")); }
+
 std::vector<int> SVulkan2Camera::getSegmentation() {
-  throw std::runtime_error("This method is no longer supported, use "
-                           "get{Uint32/Uint8/Float}Texture(\"textureName\") instead.");
+  auto tex = std::get<0>(getUint32Texture("Segmentation"));
+  std::vector<int> result;
+  result.reserve(tex.size() / 4);
+  for (uint32_t i = 0; i < tex.size() / 4; ++i) {
+    result.push_back(tex[i * 4 + 1]);
+  }
+  return result;
 }
+
 std::vector<int> SVulkan2Camera::getObjSegmentation() {
-  throw std::runtime_error("This method is no longer supported, use "
-                           "get{Uint32/Uint8/Float}Texture(\"textureName\") instead.");
+  auto tex = std::get<0>(getUint32Texture("Segmentation"));
+  std::vector<int> result;
+  result.reserve(tex.size() / 4);
+  for (uint32_t i = 0; i < tex.size() / 4; ++i) {
+    result.push_back(tex[i * 4]);
+  }
+  return result;
 }
 
 void SVulkan2Camera::waitForFence() {

@@ -410,13 +410,13 @@ void buildSapien(py::module &m) {
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
                  cam.getDepth().data());
            })
-      .def("get_segmentation",
+      .def("get_actor_segmentation",
            [](Renderer::ICamera &cam) {
              return py::array_t<int>(
                  {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
                  cam.getSegmentation().data());
            })
-      .def("get_obj_segmentation", [](Renderer::ICamera &cam) {
+      .def("get_visual_segmentation", [](Renderer::ICamera &cam) {
         return py::array_t<int>(
             {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
             cam.getObjSegmentation().data());
