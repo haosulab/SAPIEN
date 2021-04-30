@@ -1481,7 +1481,7 @@ Args:
            py::arg("damp") = 1e-6)
       .def("compute_forward_dynamics", &PinocchioModel::computeForwardDynamics, py::arg("qpos"),
            py::arg("qvel"), py::arg("qf"))
-      .def("compute_inverse_dynamics", &PinocchioModel::computeForwardDynamics, py::arg("qpos"),
+      .def("compute_inverse_dynamics", &PinocchioModel::computeInverseDynamics, py::arg("qpos"),
            py::arg("qvel"), py::arg("qacc"))
       .def("compute_generalized_mass_matrix", &PinocchioModel::computeGeneralizedMassMatrix,
            py::arg("qpos"))
