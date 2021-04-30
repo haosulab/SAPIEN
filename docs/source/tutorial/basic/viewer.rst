@@ -159,7 +159,7 @@ shapes for the entire articulation.
 Move Objects
 -------------------------------------------
 
-When any object is selected. You may press ``g`` to enter ``Grab Mode`` or ``r``
+When any object is selected, you may press ``g`` to enter ``Grab Mode`` or ``r``
 to enter ``Rotate Mode``. These functions are analogous to the blender ``g`` and
 ``r`` features. Basically these allows you to move and rotate objects with mouse
 move. To gain finer control, you may additionally press ``x``, ``y``, or ``z``

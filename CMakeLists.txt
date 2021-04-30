@@ -9,6 +9,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Do not try to build shared libraries")
 set(SAPIEN_PROFILE FALSE CACHE BOOL "Whether to use Profiler")
 set(SAPIEN_DLPACK_INTEROP TRUE CACHE BOOL "Whether to use render to tensor")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
+set(BUILD_DEBUG_VIEWER FALSE CACHE BOOL "For C++ debug only")
 
 set(ROS2_VERSION "dashing" "eloquent")
 set(ROS1_VERSION "melodic")
@@ -83,6 +84,10 @@ if (${BUILD_WITH_PINOCCHIO_SUPPORT})
     add_definitions(-DPINOCCHIO_URDFDOM_TYPEDEF_SHARED_PTR)
     add_definitions(-DPINOCCHIO_WITH_URDFDOM)
     add_definitions(-D_USE_PINOCCHIO)
+endif ()
+
+if (${BUILD_DEBUG_VIEWER})
+    add_definitions(-D_DEBUG_VIEWER)
 endif ()
 
 ## include headers inside the project
