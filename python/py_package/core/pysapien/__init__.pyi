@@ -99,21 +99,6 @@ class ActorBase():
     def set_name(self, name: str) -> None: ...
     def unhide_visual(self) -> None: ...
     @property
-    def col1(self) -> int:
-        """
-        :type: int
-        """
-    @property
-    def col2(self) -> int:
-        """
-        :type: int
-        """
-    @property
-    def col3(self) -> int:
-        """
-        :type: int
-        """
-    @property
     def id(self) -> int:
         """
         :type: int
@@ -134,6 +119,8 @@ class ActorBase():
     @property
     def type(self) -> str:
         """
+        One of "static", "kinematic", "dynamic", "link", "kinematic_link"
+
         :type: str
         """
     pass
@@ -251,7 +238,10 @@ class ActorStatic(ActorBase):
     def unpack(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
     pass
 class ArticulationBase():
-    def create_pinocchio_model(self) -> PinocchioModel: ...
+    def create_pinocchio_model(self) -> PinocchioModel: 
+        """
+        Create the kinematic and dynamic model of this articulation implemented by the Pinocchio library. Allowing computing forward/inverse kinematics/dynamics.
+        """
     def export_urdf(self, cache_dir: str = '') -> str: ...
     def get_joints(self) -> typing.List[JointBase]: ...
     def get_links(self) -> typing.List[LinkBase]: ...
@@ -293,7 +283,7 @@ class ArticulationBase():
     @property
     def pose(self) -> Pose:
         """
-        same as get_root_pose()
+        same as get_root_pose
 
         :type: Pose
         """
@@ -895,14 +885,36 @@ class PhysicalMaterial():
 class PinocchioModel():
     def compute_coriolis_matrix(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], qvel: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, n]]: ...
     def compute_forward_dynamics(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], qvel: numpy.ndarray[numpy.float64, _Shape[m, 1]], qf: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
-    def compute_forward_kinematics(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: ...
-    def compute_full_jacobian(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: ...
+    def compute_forward_kinematics(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: 
+        """
+        Compute and cache forward kinematics. After computation, use get_link_pose to retrieve the computed pose for a specific link.
+        """
+    def compute_full_jacobian(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: 
+        """
+        Compute and cache Jacobian for all links
+        """
     def compute_generalized_mass_matrix(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, n]]: ...
     def compute_inverse_dynamics(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], qvel: numpy.ndarray[numpy.float64, _Shape[m, 1]], qacc: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
-    def compute_inverse_kinematics(self, link_index: int, pose: Pose, initial_qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]] = array([], dtype=float64), eps: float = 0.0001, max_iterations: int = 1000, dt: float = 0.1, damp: float = 1e-06) -> typing.Tuple[numpy.ndarray[numpy.float64, _Shape[m, 1]], bool, numpy.ndarray[numpy.float64, _Shape[6, 1]]]: ...
-    def compute_single_link_local_jacobian(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], link_index: int) -> numpy.ndarray[numpy.float64, _Shape[6, n]]: ...
-    def get_link_jacobian(self, link_index: int, local: bool = False) -> numpy.ndarray[numpy.float64, _Shape[6, n]]: ...
-    def get_link_pose(self, link_index: int) -> Pose: ...
+    def compute_inverse_kinematics(self, link_index: int, pose: Pose, initial_qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]] = array([], dtype=float64), eps: float = 0.0001, max_iterations: int = 1000, dt: float = 0.1, damp: float = 1e-06) -> typing.Tuple[numpy.ndarray[numpy.float64, _Shape[m, 1]], bool, numpy.ndarray[numpy.float64, _Shape[6, 1]]]: 
+        """
+        Compute inverse kinematics with CLIK algorithm. Details see https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_i-inverse-kinematics.html
+        """
+    def compute_single_link_local_jacobian(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], link_index: int) -> numpy.ndarray[numpy.float64, _Shape[6, n]]: 
+        """
+        Compute the link(body) Jacobian for a single link. It is faster than compute_full_jacobian followed by get_link_jacobian
+        """
+    def get_link_jacobian(self, link_index: int, local: bool = False) -> numpy.ndarray[numpy.float64, _Shape[6, n]]: 
+        """
+        Given link index, get the Jacobian. Must be called after compute_full_jacobian.
+
+        Args:
+          link_index: index of the link
+          local: True for world(spatial) frame; False for link(body) frame
+        """
+    def get_link_pose(self, link_index: int) -> Pose: 
+        """
+        Given link index, get link pose from forward kinematics. Must be called after compute_forward_kinematics.
+        """
     pass
 class PlaneGeometry(CollisionGeometry):
     pass
@@ -939,15 +951,30 @@ class Pose():
         """
     pass
 class RenderBody():
+    def get_actor_id(self) -> int: ...
     def get_name(self) -> str: ...
     def get_render_shapes(self) -> typing.List[RenderShape]: ...
-    def get_segmentation_id(self) -> int: ...
-    def get_unique_id(self) -> int: ...
+    def get_visual_id(self) -> int: ...
     def set_custom_data(self, custom_data: typing.List[float]) -> None: ...
     def set_name(self, name: str) -> None: ...
     def set_pose(self, pose: Pose) -> None: ...
-    def set_unique_id(self, id: int) -> None: ...
     def set_visibility(self, visibility: float) -> None: ...
+    def set_visual_id(self, id: int) -> None: ...
+    @property
+    def actor_id(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def name(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def visual_id(self) -> int:
+        """
+        :type: int
+        """
     pass
 class RenderGeometry():
     @property
@@ -1009,11 +1036,6 @@ class RenderShape():
         :type: RenderGeometry
         """
     @property
-    def obj_id(self) -> int:
-        """
-        :type: int
-        """
-    @property
     def pose(self) -> Pose:
         """
         :type: Pose
@@ -1027,6 +1049,11 @@ class RenderShape():
     def type(self) -> str:
         """
         :type: str
+        """
+    @property
+    def visual_id(self) -> int:
+        """
+        :type: int
         """
     pass
 class Scene():
@@ -1315,6 +1342,7 @@ class URDFLoader():
     def load(self, filename: str, config: dict = {}) -> Articulation: 
         """
         Load articulation from URDF.
+        Gazebo cameras are also loaded.
 
         Args:
           filename: path to URDF
@@ -1409,15 +1437,36 @@ class VisualRecord():
         """
     pass
 class VulkanCamera(ICamera, ISensor):
-    def get_camera_matrix(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_dl_tensor(self, texture_name: str) -> capsule: ...
+    def get_camera_matrix(self) -> numpy.ndarray[numpy.float32]: 
+        """
+        Get intrinsic camera matrix in OpenCV format.
+        """
+    def get_dl_tensor(self, texture_name: str) -> capsule: 
+        """
+        Get raw GPU memory for a render target in the dl format. It can be wrapped into PyTorch or Tensorflow using their API
+        """
     def get_float_texture(self, texture_name: str) -> numpy.ndarray[numpy.float32]: ...
-    def get_model_matrix(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_projection_matrix(self) -> numpy.ndarray[numpy.float32]: ...
+    def get_model_matrix(self) -> numpy.ndarray[numpy.float32]: 
+        """
+        Get OpenGL model matrix (inverse of extrinsic matrix)
+        """
+    def get_projection_matrix(self) -> numpy.ndarray[numpy.float32]: 
+        """
+        Get OpenGL projection matrix
+        """
     def get_uint32_texture(self, texture_name: str) -> numpy.ndarray[numpy.uint32]: ...
-    def set_full_perspective(self, near: float, far: float, fx: float, fy: float, cx: float, cy: float, width: float, height: float, skew: float) -> None: ...
-    def set_orthographic(self, near: float, far: float, aspect: float, scale: float) -> None: ...
-    def set_perspective(self, near: float, far: float, fovy: float, aspect: float) -> None: ...
+    def set_full_perspective(self, near: float, far: float, fx: float, fy: float, cx: float, cy: float, width: float, height: float, skew: float) -> None: 
+        """
+        Set camera into perspective projection mode with full camera parameters
+        """
+    def set_orthographic(self, near: float, far: float, aspect: float, scale: float) -> None: 
+        """
+        Set camera into orthographic projection mode
+        """
+    def set_perspective(self, near: float, far: float, fovy: float, aspect: float) -> None: 
+        """
+        Set camera into standard perspective projection mode
+        """
     @property
     def _internal_renderer(self) -> renderer.Renderer:
         """
@@ -1426,11 +1475,15 @@ class VulkanCamera(ICamera, ISensor):
     @property
     def mode(self) -> str:
         """
+        One of "perspective", "full_perspective", "orthographic".
+
         :type: str
         """
     @property
     def render_targets(self) -> typing.List[str]:
         """
+        Names for available render targets to retrieve through get_[float/uint32]_texture or get_dl_tensor
+
         :type: typing.List[str]
         """
     pass

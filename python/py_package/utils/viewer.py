@@ -1141,9 +1141,10 @@ class Viewer(object):
             ),
         )
 
-        self.actor_window.append(
-            R.UIInputFloat().Label("Mass").Value(actor.mass).ReadOnly(True),
-        )
+        if actor.type in ["dynamic", "link"]:
+            self.actor_window.append(
+                R.UIInputFloat().Label("Mass").Value(actor.mass).ReadOnly(True)
+            )
 
         shape_section = R.UISection().Label("Collision Shapes")
         self.actor_window.append(shape_section)

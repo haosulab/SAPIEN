@@ -768,9 +768,9 @@ void OptifuserController::render() {
             ImGui::Text("Quat (wxyz): %.2f %.2f %.2f %.2f", pose.q.w, pose.q.x, pose.q.y,
                         pose.q.z);
 
-            ImGui::Text("col1: #%08x, col2: #%08x", mSelectedActor->getCollisionGroup1(),
-                        mSelectedActor->getCollisionGroup2());
-            ImGui::Text("col3: #%08x", mSelectedActor->getCollisionGroup3());
+            // ImGui::Text("col1: #%08x, col2: #%08x", mSelectedActor->getCollisionGroup1(),
+            //             mSelectedActor->getCollisionGroup2());
+            // ImGui::Text("col3: #%08x", mSelectedActor->getCollisionGroup3());
 
             if (ImGui::Button("Gizmo to Actor")) {
               gizmo = true;

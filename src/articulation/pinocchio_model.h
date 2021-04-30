@@ -50,7 +50,7 @@ public:
   /** generate a random qpos */
   Eigen::MatrixXd getRandomConfiguration();
 
-  /** compute and cache the forward dynamics */
+  /** compute and cache the forward kinematics */
   void computeForwardKinematics(const Eigen::VectorXd &qpos);
 
   /** get link pose

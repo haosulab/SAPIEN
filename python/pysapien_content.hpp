@@ -331,8 +331,7 @@ collision groups determine the collision behavior of objects. Let A.gx denote th
 Here is some explanation: g2 is the "ignore group" and g3 is the "id group". The only the lower 16 bits of the id group is used since the upper 16 bits are reserved for other purposes in the future. When 2 collision shapes have the same ID (g3), then if any of their g2 bits match, their collisions are definitely ignored.
 
 If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g0 is the "contact type group" and g1 is the "contact affinity group". Collision shapes collide only when a bit in the contact type of the first shape matches a bit in the contact affinity of the second shape.)doc",
-           py::arg("group0"),
-           py::arg("group1"), py::arg("group2"), py::arg("group3"))
+           py::arg("group0"), py::arg("group1"), py::arg("group2"), py::arg("group3"))
       .def_property("rest_offset", &SCollisionShape::getRestOffset,
                     &SCollisionShape::setRestOffset)
       .def_property("contact_offset", &SCollisionShape::getContactOffset,
@@ -680,40 +679,40 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("destroy", &SDrive::destroy);
 
   //======== Actor ========//
-  PyActorBase.def_property("name", &SActorBase::getName, &SActorBase::setName)
+  PyActorBase
       .def("__repr__",
            [](SActorBase &actor) {
              std::ostringstream oss;
-             oss << "Actor [" << actor.getName() << "] with id number [" << actor.getId() << "]\n";
+             oss << "Actor(name=\"" << actor.getName() << "\", id=\"" << actor.getId() << "\")";
              return oss.str();
            })
+      .def_property("name", &SActorBase::getName, &SActorBase::setName)
       .def("get_name", &SActorBase::getName)
       .def("set_name", &SActorBase::setName, py::arg("name"))
-      .def_property_readonly("type",
-                             [](SActorBase &actor) {
-                               switch (actor.getType()) {
-                               case EActorType::STATIC:
-                                 return "static";
-                               case EActorType::KINEMATIC:
-                                 return "kinematic";
-                               case EActorType::DYNAMIC:
-                                 return "dynamic";
-                               case EActorType::ARTICULATION_LINK:
-                                 return "link";
-                               case EActorType::KINEMATIC_ARTICULATION_LINK:
-                                 return "kinematic_link";
-                               }
-                               throw std::runtime_error("actor has invalid type");
-                             })
+      .def_property_readonly(
+          "type",
+          [](SActorBase &actor) {
+            switch (actor.getType()) {
+            case EActorType::STATIC:
+              return "static";
+            case EActorType::KINEMATIC:
+              return "kinematic";
+            case EActorType::DYNAMIC:
+              return "dynamic";
+            case EActorType::ARTICULATION_LINK:
+              return "link";
+            case EActorType::KINEMATIC_ARTICULATION_LINK:
+              return "kinematic_link";
+            }
+            throw std::runtime_error("actor has invalid type");
+          },
+          "One of \"static\", \"kinematic\", \"dynamic\", \"link\", \"kinematic_link\"")
 
       .def_property_readonly("id", &SActorBase::getId)
       .def("get_id", &SActorBase::getId)
       .def("get_scene", &SActorBase::getScene, py::return_value_policy::reference)
       .def_property_readonly("pose", &SActorBase::getPose)
       .def("get_pose", &SActorBase::getPose)
-      .def_property_readonly("col1", &SActorBase::getCollisionGroup1)
-      .def_property_readonly("col2", &SActorBase::getCollisionGroup2)
-      .def_property_readonly("col3", &SActorBase::getCollisionGroup3)
       .def("get_collision_shapes", &SActorBase::getCollisionShapes,
            py::return_value_policy::reference)
       .def("get_visual_bodies", &SActorBase::getRenderBodies, py::return_value_policy::reference)
@@ -961,14 +960,16 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("qlimits"))
 
-      .def_property_readonly("pose", &SArticulationBase::getRootPose, "same as get_root_pose()")
+      .def_property_readonly("pose", &SArticulationBase::getRootPose, "same as get_root_pose")
       .def("get_root_pose", &SArticulationBase::getRootPose)
       .def("get_pose", &SArticulationBase::getRootPose, "same as get_root_pose")
 
       .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"))
       .def("set_pose", &SArticulationBase::setRootPose, py::arg("pose"), "same as set_root_pose")
 #ifdef _USE_PINOCCHIO
-      .def("create_pinocchio_model", &SArticulationBase::createPinocchioModel)
+      .def("create_pinocchio_model", &SArticulationBase::createPinocchioModel,
+           "Create the kinematic and dynamic model of this articulation implemented by the "
+           "Pinocchio library. Allowing computing forward/inverse kinematics/dynamics.")
 #endif
       .def("export_urdf", &SArticulationBase::exportURDF, py::arg("cache_dir") = std::string());
 
@@ -1241,9 +1242,8 @@ References:
 )doc",
           py::arg("mass"), py::arg("inertia_pose"), py::arg("inertia"))
       .def("set_collision_groups", &ActorBuilder::setCollisionGroup,
-           "see CollisionShape.set_collision_groups",
-           py::arg("group0"),
-           py::arg("group1"), py::arg("group2"), py::arg("group3"))
+           "see CollisionShape.set_collision_groups", py::arg("group0"), py::arg("group1"),
+           py::arg("group2"), py::arg("group3"))
       .def("reset_collision_groups", &ActorBuilder::resetCollisionGroup)
       .def(
           "build", [](ActorBuilder &a, std::string const &name) { return a.build(false, name); },
@@ -1414,6 +1414,7 @@ Args:
           },
           R"doc(
 Load articulation from URDF.
+Gazebo cameras are also loaded.
 
 Args:
   filename: path to URDF
@@ -1464,9 +1465,17 @@ Args:
 #ifdef _USE_PINOCCHIO
   PyPinocchioModel
       .def("compute_forward_kinematics", &PinocchioModel::computeForwardKinematics,
+           "Compute and cache forward kinematics. After computation, use get_link_pose to "
+           "retrieve the computed pose for a specific link.",
            py::arg("qpos"))
-      .def("get_link_pose", &PinocchioModel::getLinkPose, py::arg("link_index"))
+      .def("get_link_pose", &PinocchioModel::getLinkPose,
+           "Given link index, get link pose from forward kinematics. Must be called after "
+           "compute_forward_kinematics.",
+           py::arg("link_index"))
       .def("compute_inverse_kinematics", &PinocchioModel::computeInverseKinematics,
+           "Compute inverse kinematics with CLIK algorithm. Details see "
+           "https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/"
+           "md_doc_b-examples_i-inverse-kinematics.html",
            py::arg("link_index"), py::arg("pose"), py::arg("initial_qpos") = Eigen::VectorXd{},
            py::arg("eps") = 1e-4, py::arg("max_iterations") = 1000, py::arg("dt") = 0.1,
            py::arg("damp") = 1e-6)
@@ -1479,10 +1488,20 @@ Args:
       .def("compute_coriolis_matrix", &PinocchioModel::computeCoriolisMatrix, py::arg("qpos"),
            py::arg("qvel"))
 
-      .def("compute_full_jacobian", &PinocchioModel::computeFullJacobian, py::arg("qpos"))
-      .def("get_link_jacobian", &PinocchioModel::getLinkJacobian, py::arg("link_index"),
-           py::arg("local") = false)
+      .def("compute_full_jacobian", &PinocchioModel::computeFullJacobian,
+           "Compute and cache Jacobian for all links", py::arg("qpos"))
+      .def("get_link_jacobian", &PinocchioModel::getLinkJacobian,
+           R"doc(
+Given link index, get the Jacobian. Must be called after compute_full_jacobian.
+
+Args:
+  link_index: index of the link
+  local: True for world(spatial) frame; False for link(body) frame
+)doc",
+           py::arg("link_index"), py::arg("local") = false)
       .def("compute_single_link_local_jacobian", &PinocchioModel::computeSingleLinkLocalJacobian,
+           "Compute the link(body) Jacobian for a single link. It is faster than "
+           "compute_full_jacobian followed by get_link_jacobian",
            py::arg("qpos"), py::arg("link_index"));
 #endif
 
@@ -1512,7 +1531,9 @@ Args:
                                           py::return_value_policy::reference);
 
   PyVulkanCamera
-      .def_property_readonly("render_targets", &Renderer::SVulkan2Camera::getRenderTargetNames)
+      .def_property_readonly("render_targets", &Renderer::SVulkan2Camera::getRenderTargetNames,
+                             "Names for available render targets to retrieve through "
+                             "get_[float/uint32]_texture or get_dl_tensor")
       .def(
           "get_float_texture",
           [](Renderer::SVulkan2Camera &cam, std::string const &name) {
@@ -1561,23 +1582,34 @@ Args:
             };
             return py::capsule(tensor, "dltensor", capsule_destructor);
           },
+          "Get raw GPU memory for a render target in the dl format. It can be wrapped into "
+          "PyTorch or Tensorflow using their API",
           py::arg("texture_name"))
 #endif
-      .def("get_camera_matrix",
-           [](Renderer::SVulkan2Camera &c) { return mat42array(c.getCameraMatrix()); })
-      .def("get_model_matrix",
-           [](Renderer::SVulkan2Camera &c) { return mat42array(c.getModelMatrix()); })
-      .def("get_projection_matrix",
-           [](Renderer::SVulkan2Camera &c) { return mat42array(c.getProjectionMatrix()); })
-
+      .def(
+          "get_camera_matrix",
+          [](Renderer::SVulkan2Camera &c) { return mat42array(c.getCameraMatrix()); },
+          "Get intrinsic camera matrix in OpenCV format.")
+      .def(
+          "get_model_matrix",
+          [](Renderer::SVulkan2Camera &c) { return mat42array(c.getModelMatrix()); },
+          "Get OpenGL model matrix (inverse of extrinsic matrix)")
+      .def(
+          "get_projection_matrix",
+          [](Renderer::SVulkan2Camera &c) { return mat42array(c.getProjectionMatrix()); },
+          "Get OpenGL projection matrix")
       .def("set_orthographic", &Renderer::SVulkan2Camera::setOrthographicParameters,
-           py::arg("near"), py::arg("far"), py::arg("aspect"), py::arg("scale"))
+           "Set camera into orthographic projection mode", py::arg("near"), py::arg("far"),
+           py::arg("aspect"), py::arg("scale"))
       .def("set_perspective", &Renderer::SVulkan2Camera::setPerspectiveParameters, py::arg("near"),
-           py::arg("far"), py::arg("fovy"), py::arg("aspect"))
+           "Set camera into standard perspective projection mode", py::arg("far"), py::arg("fovy"),
+           py::arg("aspect"))
       .def("set_full_perspective", &Renderer::SVulkan2Camera::setFullPerspectiveParameters,
+           "Set camera into perspective projection mode with full camera parameters",
            py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
            py::arg("cy"), py::arg("width"), py::arg("height"), py::arg("skew"))
-      .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode)
+      .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode,
+                             "One of \"perspective\", \"full_perspective\", \"orthographic\".")
       .def_property_readonly(
           "_internal_renderer",
           [](Renderer::SVulkan2Camera &camera) { return camera.getInternalRenderer(); },
@@ -1859,11 +1891,14 @@ Args:
       // TODO: add mesh from vertices
       .def("remove_mesh", &Renderer::IPxrScene::removeRigidbody, py::arg("mesh"));
 
-  PyRenderBody.def("get_name", &Renderer::IPxrRigidbody::getName)
+  PyRenderBody.def_property_readonly("name", &Renderer::IPxrRigidbody::getName)
+      .def_property_readonly("visual_id", &Renderer::IPxrRigidbody::getUniqueId)
+      .def_property_readonly("actor_id", &Renderer::IPxrRigidbody::getSegmentationId)
+      .def("get_name", &Renderer::IPxrRigidbody::getName)
       .def("set_name", &Renderer::IPxrRigidbody::setName, py::arg("name"))
-      .def("set_unique_id", &Renderer::IPxrRigidbody::setUniqueId, py::arg("id"))
-      .def("get_unique_id", &Renderer::IPxrRigidbody::getUniqueId)
-      .def("get_segmentation_id", &Renderer::IPxrRigidbody::getSegmentationId)
+      .def("set_visual_id", &Renderer::IPxrRigidbody::setUniqueId, py::arg("id"))
+      .def("get_visual_id", &Renderer::IPxrRigidbody::getUniqueId)
+      .def("get_actor_id", &Renderer::IPxrRigidbody::getSegmentationId)
       .def("set_custom_data", &Renderer::IPxrRigidbody::setSegmentationCustomData,
            py::arg("custom_data"))
       .def("get_render_shapes", &Renderer::IPxrRigidbody::getRenderShapes)
@@ -1872,7 +1907,7 @@ Args:
 
   PyRenderShape.def_readonly("type", &Renderer::RenderShape::type)
       .def_readonly("pose", &Renderer::RenderShape::pose)
-      .def_readonly("obj_id", &Renderer::RenderShape::objId)
+      .def_readonly("visual_id", &Renderer::RenderShape::objId)
       .def_property_readonly("scale",
                              [](Renderer::RenderShape &shape) { return vec32array(shape.scale); })
       .def_property_readonly(

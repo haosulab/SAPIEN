@@ -83,9 +83,9 @@ public:
   inline SScene *getScene() { return mParentScene; }
 
   PxTransform getPose();
-  inline uint32_t getCollisionGroup1() { return mCol1; }
-  inline uint32_t getCollisionGroup2() { return mCol2; }
-  inline uint32_t getCollisionGroup3() { return mCol3; }
+  // inline uint32_t getCollisionGroup1() { return mCol1; }
+  // inline uint32_t getCollisionGroup2() { return mCol2; }
+  // inline uint32_t getCollisionGroup3() { return mCol3; }
 
   void attachShape(std::unique_ptr<SCollisionShape> shape);
   std::vector<SCollisionShape *> getCollisionShapes() const;
