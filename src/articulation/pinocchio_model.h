@@ -10,8 +10,8 @@
 namespace sapien {
 
 class PinocchioModel {
-  pinocchio::Model model;
-  pinocchio::Data data;
+  pinocchio::Model model{};
+  pinocchio::Data data{};
 
   /** pinocchio_qpos = indexS2P * sapien_qpos
    * Left multiplication permutes rows of SAPIEN order to Pinocchio order
