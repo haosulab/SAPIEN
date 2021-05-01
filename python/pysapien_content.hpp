@@ -1531,7 +1531,8 @@ Args:
                                           py::return_value_policy::reference);
 
   PyVulkanCamera
-      .def_property_readonly("render_targets", &Renderer::SVulkan2Camera::getRenderTargetNames,
+      .def_property_readonly("render_target_names",
+                             &Renderer::SVulkan2Camera::getRenderTargetNames,
                              "Names for available render targets to retrieve through "
                              "get_[float/uint32]_texture or get_dl_tensor")
       .def(
@@ -1721,7 +1722,10 @@ Args:
             window.setScene(rs);
           },
           py::arg("scene"))
-      .def_property_readonly("target_names", &Renderer::SVulkan2Window::getDisplayTargetNames)
+      .def_property_readonly("display_target_names",
+                             &Renderer::SVulkan2Window::getDisplayTargetNames,
+                             "Names for available display targets that can be displayed "
+                             "in the render function")
       .def("get_target_size", &Renderer::SVulkan2Window::getRenderTargetSize, py::arg("name"))
       .def("render", &Renderer::SVulkan2Window::render, py::arg("target_name"),
            py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>())
@@ -1733,7 +1737,7 @@ Args:
 
       // Download images from window
       .def(
-          "download_float_target",
+          "get_float_texture",
           [](Renderer::SVulkan2Window &window, std::string const &name) {
             auto [image, sizes] = window.downloadFloatTarget(name);
             if (sizes[2] == 1) {
@@ -1747,7 +1751,7 @@ Args:
           },
           py::arg("name"))
       .def(
-          "download_uint32_target",
+          "get_uint32_texture",
           [](Renderer::SVulkan2Window &window, std::string const &name) {
             auto [image, sizes] = window.downloadUint32Target(name);
             if (sizes[2] == 1) {

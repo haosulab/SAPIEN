@@ -1009,7 +1009,7 @@ class Viewer(object):
                     .Index(0)
                     .Items(
                         ["Color"]
-                        + [x for x in self.window.target_names if x != "Color"]
+                        + [x for x in self.window.display_target_names if x != "Color"]
                     )
                     .Callback(lambda p: self.set_target(p.value)),
                     R.UIOptions()

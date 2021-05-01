@@ -1480,7 +1480,7 @@ class VulkanCamera(ICamera, ISensor):
         :type: str
         """
     @property
-    def render_targets(self) -> typing.List[str]:
+    def render_target_names(self) -> typing.List[str]:
         """
         Names for available render targets to retrieve through get_[float/uint32]_texture or get_dl_tensor
 
@@ -1545,16 +1545,16 @@ class VulkanScene(RenderScene):
 class VulkanSpotLight(SpotLight, Light):
     pass
 class VulkanWindow():
-    def download_float_target(self, name: str) -> numpy.ndarray[numpy.float32]: ...
     def download_float_target_pixel(self, name: str, x: int, y: int) -> numpy.ndarray[numpy.float32]: ...
-    def download_uint32_target(self, name: str) -> numpy.ndarray[numpy.uint32]: ...
     def download_uint32_target_pixel(self, name: str, x: int, y: int) -> numpy.ndarray[numpy.uint32]: ...
     def download_uint8_target(self, name: str) -> numpy.ndarray[numpy.uint8]: ...
     def download_uint8_target_pixel(self, name: str, x: int, y: int) -> numpy.ndarray[numpy.uint8]: ...
     def get_camera_position(self) -> numpy.ndarray[numpy.float32]: ...
     def get_camera_projection_matrix(self) -> numpy.ndarray[numpy.float32]: ...
     def get_camera_rotation(self) -> numpy.ndarray[numpy.float32]: ...
+    def get_float_texture(self, name: str) -> numpy.ndarray[numpy.float32]: ...
     def get_target_size(self, name: str) -> typing.List[int[2]]: ...
+    def get_uint32_texture(self, name: str) -> numpy.ndarray[numpy.uint32]: ...
     def hide(self) -> None: ...
     def key_down(self, key: str) -> bool: ...
     def key_press(self, key: str) -> bool: ...
@@ -1590,6 +1590,13 @@ class VulkanWindow():
     @cursor.setter
     def cursor(self, arg1: bool) -> None:
         pass
+    @property
+    def display_target_names(self) -> typing.List[str]:
+        """
+        Names for available display targets that can be displayed in the render function
+
+        :type: typing.List[str]
+        """
     @property
     def fps(self) -> float:
         """
@@ -1629,10 +1636,5 @@ class VulkanWindow():
     def super(self) -> bool:
         """
         :type: bool
-        """
-    @property
-    def target_names(self) -> typing.List[str]:
-        """
-        :type: typing.List[str]
         """
     pass

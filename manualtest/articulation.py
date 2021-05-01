@@ -227,7 +227,7 @@ def main():
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
     cam1 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
-    print(cam1.render_targets)
+    print(cam1.render_target_names)
 
     sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/active_light")
 
