@@ -1446,6 +1446,10 @@ class Viewer(object):
         self.actor_window = None
         self.articulation_window = None
         self.info_window = None
+        # necessary to release resources
+        self.camera_ui = None
+        self.key_down_action_map = None
+        self.key_press_action_map = None
 
     def focus_actor(self, actor):
         if actor == self.focused_actor:
@@ -1486,18 +1490,6 @@ class Viewer(object):
                     v.set_visibility(1)
             self.selected_actor = None
             self.update_coordinate_axes()
-
-    @staticmethod
-    def get_camera_pose(camera: VulkanCamera):
-        """Get the camera pose in the Sapien world."""
-        opengl_pose = camera.get_model_matrix()  # opengl camera-> sapien world
-        # sapien camera -> opengl camera
-        sapien2opengl = np.array([[0., -1., 0., 0.],
-                                  [0., 0., 1., 0.],
-                                  [-1, 0., 0., 0.],
-                                  [0., 0., 0., 1.]])
-        cam_pose = Pose.from_transformation_matrix(opengl_pose @ sapien2opengl)
-        return cam_pose
 
     def focus_camera(self, camera: VulkanCamera):
         if self.focused_camera == camera:
@@ -1722,7 +1714,7 @@ class Viewer(object):
                 if self.focused_actor:
                     self.arc_camera_controller.set_center(self.focused_actor.pose.p)
                 elif self.focused_camera:
-                    cam_pose = self.get_camera_pose(self.focused_camera)
+                    cam_pose = get_camera_pose(self.focused_camera)
                     rpy = quat2euler(cam_pose.q)
                     self.set_camera_xyz(*cam_pose.p)
                     self.set_camera_rpy(rpy[0], -rpy[1], -rpy[2])
@@ -1765,3 +1757,15 @@ class Viewer(object):
         q = self.window.get_camera_rotation()
         point = rotate_vector(point, q) + self.window.get_camera_position()
         return point
+
+
+def get_camera_pose(camera: VulkanCamera):
+    """Get the camera pose (model matrix) in the sapien world."""
+    opengl_pose = camera.get_model_matrix()  # opengl camera-> sapien world
+    # sapien camera -> opengl camera
+    sapien2opengl = np.array([[0., -1., 0., 0.],
+                                [0., 0., 1., 0.],
+                                [-1, 0., 0., 0.],
+                                [0., 0., 0., 1.]])
+    cam_pose = Pose.from_transformation_matrix(opengl_pose @ sapien2opengl)
+    return cam_pose
