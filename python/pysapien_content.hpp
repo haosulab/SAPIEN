@@ -1765,41 +1765,19 @@ Args:
           },
           py::arg("name"))
       .def(
-          "download_uint8_target",
-          [](Renderer::SVulkan2Window &window, std::string const &name) {
-            auto [image, sizes] = window.downloadUint8Target(name);
-            if (sizes[2] == 1) {
-              return py::array_t<uint8_t>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1])},
-                                          image.data());
-            } else {
-              return py::array_t<uint8_t>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
-                                           static_cast<int>(sizes[2])},
-                                          image.data());
-            }
-          },
-          py::arg("name"))
-      .def(
-          "download_float_target_pixel",
+          "get_float_texture_pixel",
           [](Renderer::SVulkan2Window &window, std::string const &name, uint32_t x, uint32_t y) {
             auto v = window.downloadFloatTargetPixel(name, x, y);
             return py::array_t<float>(static_cast<int>(v.size()), v.data());
           },
           py::arg("name"), py::arg("x"), py::arg("y"))
       .def(
-          "download_uint32_target_pixel",
+          "get_uint32_texture_pixel",
           [](Renderer::SVulkan2Window &window, std::string const &name, uint32_t x, uint32_t y) {
             auto v = window.downloadUint32TargetPixel(name, x, y);
             return py::array_t<uint32_t>(static_cast<int>(v.size()), v.data());
           },
           py::arg("name"), py::arg("x"), py::arg("y"))
-      .def(
-          "download_uint8_target_pixel",
-          [](Renderer::SVulkan2Window &window, std::string const &name, uint32_t x, uint32_t y) {
-            auto v = window.downloadUint8TargetPixel(name, x, y);
-            return py::array_t<uint8_t>(static_cast<int>(v.size()), v.data());
-          },
-          py::arg("name"), py::arg("x"), py::arg("y"))
-
       .def_property_readonly("shift", &Renderer::SVulkan2Window::isShiftDown)
       .def_property_readonly("alt", &Renderer::SVulkan2Window::isAltDown)
       .def_property_readonly("ctrl", &Renderer::SVulkan2Window::isCtrlDown)

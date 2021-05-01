@@ -1441,6 +1441,7 @@ class Viewer(object):
         self.scene = None
         self.fps_camera_controller = None
         self.window = None
+        self.camera_ui = None
         self.control_window = None
         self.scene_window = None
         self.actor_window = None
@@ -1631,7 +1632,7 @@ class Viewer(object):
                     tw, th = self.window.get_target_size("Segmentation")
                     mx = mx * tw / ww
                     my = my * th / wh
-                    pixel = self.window.download_uint32_target_pixel(
+                    pixel = self.window.get_uint32_texture_pixel(
                         "Segmentation", int(mx), int(my)
                     )
                     actor = self.find_actor(pixel[1])

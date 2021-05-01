@@ -1631,7 +1631,7 @@ class Viewer(object):
                     tw, th = self.window.get_target_size("Segmentation")
                     mx = mx * tw / ww
                     my = my * th / wh
-                    pixel = self.window.download_uint32_target_pixel(
+                    pixel = self.window.get_uint32_texture_pixel(
                         "Segmentation", int(mx), int(my)
                     )
                     actor = self.find_actor(pixel[1])
