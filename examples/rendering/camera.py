@@ -9,11 +9,13 @@ import sapien.core as sapien
 import numpy as np
 from PIL import Image, ImageColor
 import open3d as o3d
+from sapien.utils.viewer import Viewer
+from transforms3d.euler import mat2euler
 
 
 def main():
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer(offscreen_only=True)
+    renderer = sapien.VulkanRenderer()
     engine.set_renderer(renderer)
 
     scene = engine.create_scene()
@@ -22,7 +24,8 @@ def main():
     loader = scene.create_urdf_loader()
     loader.fix_root_link = True
     urdf_path = '../assets/179/mobility.urdf'
-    asset = loader.load_kinematic(urdf_path)  # load as a kinematic articulation
+    # load as a kinematic articulation
+    asset = loader.load_kinematic(urdf_path)
     assert asset, 'URDF not loaded.'
 
     rscene = scene.get_renderer_scene()
@@ -87,7 +90,7 @@ def main():
     # camera.get_model_matrix() must be called after scene.update_render()!
     model_matrix = camera.get_model_matrix()
     points_world = points_opengl @ model_matrix[:3, :3].T + model_matrix[:3, 3]
-    
+
     # SAPIEN CAMERA: z up and x forward
     # points_camera = points_opengl[..., [2, 0, 1]] * [-1, -1, 1]
 
@@ -110,8 +113,7 @@ def main():
     # visual_id is the unique id of each visual shape
     seg_labels = camera.get_uint32_texture('Segmentation')  # [H, W, 4]
     colormap = sorted(set(ImageColor.colormap.values()))
-    color_palette = np.array([ImageColor.getrgb(color)
-                             for color in colormap], 
+    color_palette = np.array([ImageColor.getrgb(color) for color in colormap],
                              dtype=np.uint8)
     label0_image = seg_labels[..., 0].astype(np.uint8)  # mesh-level
     label1_image = seg_labels[..., 1].astype(np.uint8)  # actor-level
@@ -119,6 +121,32 @@ def main():
     label0_pil.save('label0.png')
     label1_pil = Image.fromarray(color_palette[label1_image])
     label1_pil.save('label1.png')
+
+    # ---------------------------------------------------------------------------- #
+    # Take picture from the viewer
+    # ---------------------------------------------------------------------------- #
+    viewer = Viewer(renderer)
+    viewer.set_scene(scene)
+    # We show how to set the viewer according to the pose of a camera
+    # opengl camera -> sapien world
+    model_matrix = camera.get_model_matrix()
+    # sapien camera -> sapien world
+    # You can also infer it from the camera pose
+    model_matrix = model_matrix[:, [2, 0, 1, 3]] * np.array([-1, -1, 1, 1])
+    # The rotation of the viewer camera is represented as [roll(x), pitch(-y), yaw(-z)]
+    rpy = mat2euler(model_matrix[:3, :3]) * np.array([1, -1, -1])
+    viewer.set_camera_xyz(*model_matrix[0:3, 3])
+    viewer.set_camera_rpy(*rpy)
+    viewer.window.set_camera_parameters(near=0.001, far=100, fovy=1)
+    while not viewer.closed:
+        if viewer.window.key_down('p'):  # Press 'p' to take the screenshot
+            rgba = viewer.window.get_float_texture('Color')
+            rgba_img = (rgba * 255).clip(0, 255).astype("uint8")
+            rgba_pil = Image.fromarray(rgba_img)
+            rgba_pil.save('screenshot.png')
+        scene.step()
+        scene.update_render()
+        viewer.render()
 
 
 if __name__ == '__main__':

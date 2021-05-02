@@ -19,7 +19,7 @@ First of all, let's set up the engine, renderer, scene, lighting, and load a URD
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
    :dedent: 0
-   :lines: 15-33
+   :lines: 17-36
 
 We create a Vulkan-based renderer by calling ``sapien.VulkanRenderer(offscreen_only=...)``.
 If ``offscreen_only=True``, the on-screen display is disabled. 
@@ -30,7 +30,7 @@ Next, you can create a camera and mount it somewhere as follows:
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 38-63
+    :lines: 41-66
 
 Camera should be mounted on an ``Actor``.
 If the mounted actor is kinematic (and static), then the camera is fixed.
@@ -49,14 +49,14 @@ Then, you should call ``take_picture()`` to actually render.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 65-67
+    :lines: 68-70
 
 Now, we can acquire the RGB image rendered by the camera.
 To save the image, we use `pillow <https://pillow.readthedocs.io/en/stable/>`_ here, which can be installed by ``pip install pillow``.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 72-75
+    :lines: 75-78
 
 .. figure:: assets/color.png
    :width: 1080px
@@ -70,7 +70,7 @@ The following code showcases how to acquire the point cloud in SAPIEN.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 80-81
+    :lines: 83-84
 
 We acquire a "position" image with 4 channels.
 The first 3 channels represent the 3D position of each pixel in the OpenGL camera space,
@@ -78,7 +78,7 @@ and the last channel is a flag indicating whether the position is beyond the cam
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 83-89
+    :lines: 86-92
 
 Note that the position is represented in the OpenGL camera space, where the negative z-axis points forward and the y-axis is upward.
 Thus, to acquire a point cloud in the SAPIEN world space (x forward and z up), 
@@ -94,7 +94,7 @@ Besides, the depth map can be obtained as well.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 101-104
+    :lines: 104-107
 
 .. figure:: assets/depth.png
    :width: 1080px
@@ -107,7 +107,7 @@ SAPIEN provides the interfaces to acquire object-level segmentation.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 111-121
+    :lines: 114-123
 
 There are two levels of segmentation.
 The first one is mesh-level, and the other one is actor-level.
@@ -124,3 +124,18 @@ The examples are illustrated below.
    :align: center
 
    Actor-level segmentation
+
+Take a screenshot from the viewer
+------------------------------------------------------------
+
+The ``Window`` of the viewer also provides the same interfaces as `Camera`, ``get_float_texture`` and ``get_uint32_texture``.
+Thus, you could take a screenshot by calling them.
+Notice the definition of ``rpy`` (roll, yaw, pitch) when you set the viewer camera.
+
+.. literalinclude:: ../../../../examples/rendering/camera.py
+    :dedent: 0
+    :lines: 128-149
+
+.. figure:: assets/screenshot.png
+    :width: 1080px
+    :align: center
