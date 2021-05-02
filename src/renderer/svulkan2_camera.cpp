@@ -43,7 +43,7 @@ std::vector<float> SVulkan2Camera::getNormalRGBA() {
   return std::get<0>(getFloatTexture("Normal"));
 }
 
-std::vector<float> SVulkan2Camera::getDepth() { return std::get<0>(getFloatTexture("Depth")); }
+std::vector<float> SVulkan2Camera::getDepth() { return std::get<0>(getFloatTexture("GbufferDepth")); }
 
 std::vector<int> SVulkan2Camera::getSegmentation() {
   auto tex = std::get<0>(getUint32Texture("Segmentation"));
