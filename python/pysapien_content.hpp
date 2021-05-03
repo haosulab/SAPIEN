@@ -174,7 +174,8 @@ void buildSapien(py::module &m) {
   auto PyEngine = py::class_<Simulation, std::shared_ptr<Simulation>>(m, "Engine");
   auto PySceneConfig = py::class_<SceneConfig>(m, "SceneConfig");
   auto PyScene = py::class_<SScene>(m, "Scene");
-  auto PyDrive = py::class_<SDrive>(m, "Drive");
+  auto PyConstraint = py::class_<SDrive>(m, "Constraint");
+  auto PyDrive = py::class_<SDrive6D, SDrive>(m, "Drive");
   auto PyActorBase = py::class_<SActorBase>(m, "ActorBase");
   auto PyActorDynamicBase = py::class_<SActorDynamicBase, SActorBase>(m, "ActorDynamicBase");
   auto PyActorStatic = py::class_<SActorStatic, SActorBase>(m, "ActorStatic");
@@ -658,25 +659,40 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("data"));
 
   //======= Drive =======//
-  PyDrive
-      .def("set_properties", &SDrive::setProperties, py::arg("stiffness"), py::arg("damping"),
+  PyDrive.def("set_x_limit", &SDrive6D::setXLimit, py::arg("low"), py::arg("high"))
+      .def("set_y_limit", &SDrive6D::setYLimit, py::arg("low"), py::arg("high"))
+      .def("set_z_limit", &SDrive6D::setZLimit, py::arg("low"), py::arg("high"))
+      .def("set_x_twist_limit", &SDrive6D::setXTwistLimit, py::arg("low"), py::arg("high"))
+      .def("set_yz_cone_limit", &SDrive6D::setYZConeLimit, py::arg("y"), py::arg("z"))
+      .def("set_yz_pyramid_limit", &SDrive6D::setYZPyramidLimit, py::arg("ylow"), py::arg("yhigh"),
+           py::arg("zlow"), py::arg("zhigh"))
+      .def("set_distance_limit", &SDrive6D::setDistanceLimit, py::arg("distance"))
+      .def("set_x_twist_properties", &SDrive6D::setXTwistDriveProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("is_acceleration") = true)
+      .def("set_yz_swing_properties", &SDrive6D::setYZSwingDriveProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("is_acceleration") = true)
+      .def("set_slerp_properties", &SDrive6D::setSlerpProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("is_acceleration") = true)
+      .def("set_x_properties", &SDrive6D::setXProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("set_x_properties", &SDrive::setXProperties, py::arg("stiffness"), py::arg("damping"),
+      .def("set_y_properties", &SDrive6D::setYProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("set_y_properties", &SDrive::setYProperties, py::arg("stiffness"), py::arg("damping"),
+      .def("set_z_properties", &SDrive6D::setZProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("set_z_properties", &SDrive::setZProperties, py::arg("stiffness"), py::arg("damping"),
-           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("lock_motion", &SDrive::lockMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
+      .def("lock_motion", &SDrive6D::lockMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
            py::arg("rx"), py::arg("ry"), py::arg("rz"))
-      .def("set_target", &SDrive::setTarget, py::arg("pose"))
+      .def("free_motion", &SDrive6D::freeMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
+           py::arg("rx"), py::arg("ry"), py::arg("rz"))
+      .def("set_target", &SDrive6D::setTarget, py::arg("pose"))
       .def(
           "set_target_velocity",
-          [](SDrive &d, py::array_t<PxReal> const &linear, py::array_t<PxReal> const &angular) {
+          [](SDrive6D &d, py::array_t<PxReal> const &linear, py::array_t<PxReal> const &angular) {
             d.setTargetVelocity(array2vec3(linear), array2vec3(angular));
           },
-          py::arg("linear"), py::arg("angular"))
-      .def("destroy", &SDrive::destroy);
+          py::arg("linear"), py::arg("angular"));
 
   //======== Actor ========//
   PyActorBase

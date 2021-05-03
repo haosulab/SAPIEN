@@ -71,10 +71,10 @@ public:
 
   inline std::vector<SDrive *> getDrives() const { return mDrives; }
 
-  // should not be called by users
+  // let the actor know that it is part of this drive, should not be called by users
   void addDrive(SDrive *drive);
 
-  // should not be called by users
+  // let the actor know that this drive is removed, should not be called by users
   void removeDrive(SDrive *drive);
 
   inline std::string getName() { return mName; };

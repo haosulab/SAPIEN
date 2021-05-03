@@ -40,6 +40,7 @@ class Simulation;
 class ActorBuilder;
 class LinkBuilder;
 class ArticulationBuilder;
+class SDrive6D;
 class SDrive;
 struct SContact;
 
@@ -153,8 +154,8 @@ public:
    */
   void removeKinematicArticulation(SKArticulation *articulation);
 
-  SDrive *createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
-                      PxTransform const &pose2);
+  SDrive6D *createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+                        PxTransform const &pose2);
   /** Remove a drive immediately */
   void removeDrive(SDrive *drive);
 

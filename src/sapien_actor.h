@@ -8,7 +8,7 @@
 namespace sapien {
 using namespace physx;
 
-class SDrive;
+class SDrive6D;
 class SScene;
 class ActorBuilder;
 namespace Renderer {

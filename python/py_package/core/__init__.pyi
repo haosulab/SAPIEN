@@ -14,6 +14,7 @@ from sapien.core.pysapien import CameraSpec
 from sapien.core.pysapien import CapsuleGeometry
 from sapien.core.pysapien import CollisionGeometry
 from sapien.core.pysapien import CollisionShape
+from sapien.core.pysapien import Constraint
 from sapien.core.pysapien import Contact
 from sapien.core.pysapien import ContactPoint
 from sapien.core.pysapien import ConvexMeshGeometry
@@ -91,6 +92,7 @@ __all__ = [
     "CapsuleGeometry",
     "CollisionGeometry",
     "CollisionShape",
+    "Constraint",
     "Contact",
     "ContactPoint",
     "ConvexMeshGeometry",

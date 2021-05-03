@@ -93,9 +93,9 @@ std::unique_ptr<URDF::URDFLoader> SScene::createURDFLoader() {
   return std::make_unique<URDF::URDFLoader>(this);
 }
 
-SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
-                            PxTransform const &pose2) {
-  mDrives.push_back(std::unique_ptr<SDrive>(new SDrive(this, actor1, pose1, actor2, pose2)));
+SDrive6D *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+                              PxTransform const &pose2) {
+  mDrives.push_back(std::unique_ptr<SDrive6D>(new SDrive6D(this, actor1, pose1, actor2, pose2)));
   auto drive = mDrives.back().get();
   if (actor1) {
     actor1->addDrive(drive);
@@ -113,7 +113,7 @@ SDrive *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SActor
       static_cast<PxArticulationLink *>(actor2->getPxActor())->getArticulation().wakeUp();
     }
   }
-  return drive;
+  return static_cast<SDrive6D *>(drive);
 }
 
 void SScene::addActor(std::unique_ptr<SActorBase> actor) {
@@ -224,7 +224,7 @@ void SScene::removeActor(SActorBase *actor) {
 
   // remove drives
   for (auto drive : actor->getDrives()) {
-    drive->destroy();
+    removeDrive(drive);
   }
 
   // remove camera
@@ -261,7 +261,7 @@ void SScene::removeArticulation(SArticulation *articulation) {
 
     // remove drives
     for (auto drive : link->getDrives()) {
-      drive->destroy();
+      removeDrive(drive);
     }
 
     // remove camera
@@ -303,7 +303,7 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
 
     // remove drives
     for (auto drive : link->getDrives()) {
-      drive->destroy();
+      removeDrive(drive);
     }
 
     // remove camera
@@ -336,7 +336,7 @@ void SScene::removeDrive(SDrive *drive) {
   if (drive->mScene != this) {
     spdlog::get("SAPIEN")->error("Failed to remove drive: drive is not in this scene.");
   }
-  drive->mJoint->release();
+  drive->getPxJoint()->release();
   if (drive->mActor1) {
     drive->mActor1->removeDrive(drive);
     if (drive->mActor1->getType() == EActorType::DYNAMIC) {
@@ -440,7 +440,8 @@ Renderer::ICamera *SScene::findMountedCamera(std::string const &name, SActorBase
 //     spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
 //     return;
 //   }
-//   mRendererScene->addPointLight({position.x, position.y, position.z}, {color.x, color.y, color.z});
+//   mRendererScene->addPointLight({position.x, position.y, position.z}, {color.x, color.y,
+//   color.z});
 // }
 // void SScene::setAmbientLight(PxVec3 const &color) {
 //   if (!mRendererScene) {
