@@ -73,6 +73,8 @@ def main():
     # RGBA
     # ---------------------------------------------------------------------------- #
     rgba = camera.get_float_texture('Color')  # [H, W, 4]
+    # An alias is also provided
+    # rgba = camera.get_color_rgba()  # [H, W, 4]
     rgba_img = (rgba * 255).clip(0, 255).astype("uint8")
     rgba_pil = Image.fromarray(rgba_img)
     rgba_pil.save('color.png')
@@ -117,6 +119,9 @@ def main():
                              dtype=np.uint8)
     label0_image = seg_labels[..., 0].astype(np.uint8)  # mesh-level
     label1_image = seg_labels[..., 1].astype(np.uint8)  # actor-level
+    # Or you can use aliases below
+    # label0_image = camera.get_visual_segmentation()
+    # label1_image = camera.get_actor_segmentation()
     label0_pil = Image.fromarray(color_palette[label0_image])
     label0_pil.save('label0.png')
     label1_pil = Image.fromarray(color_palette[label1_image])
@@ -137,7 +142,7 @@ def main():
     rpy = mat2euler(model_matrix[:3, :3]) * np.array([1, -1, -1])
     viewer.set_camera_xyz(*model_matrix[0:3, 3])
     viewer.set_camera_rpy(*rpy)
-    viewer.window.set_camera_parameters(near=0.001, far=100, fovy=1)
+    viewer.window.set_camera_parameters(near=0.05, far=100, fovy=1)
     while not viewer.closed:
         if viewer.window.key_down('p'):  # Press 'p' to take the screenshot
             rgba = viewer.window.get_float_texture('Color')

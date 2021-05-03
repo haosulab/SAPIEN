@@ -56,7 +56,7 @@ To save the image, we use `pillow <https://pillow.readthedocs.io/en/stable/>`_ h
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 75-78
+    :lines: 75-80
 
 .. figure:: assets/color.png
    :width: 1080px
@@ -70,7 +70,7 @@ The following code showcases how to acquire the point cloud in SAPIEN.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 83-84
+    :lines: 85-86
 
 We acquire a "position" image with 4 channels.
 The first 3 channels represent the 3D position of each pixel in the OpenGL camera space,
@@ -78,7 +78,7 @@ and the last channel is a flag indicating whether the position is beyond the cam
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 86-92
+    :lines: 88-94
 
 Note that the position is represented in the OpenGL camera space, where the negative z-axis points forward and the y-axis is upward.
 Thus, to acquire a point cloud in the SAPIEN world space (x forward and z up), 
@@ -94,7 +94,7 @@ Besides, the depth map can be obtained as well.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 104-107
+    :lines: 106-109
 
 .. figure:: assets/depth.png
    :width: 1080px
@@ -107,7 +107,7 @@ SAPIEN provides the interfaces to acquire object-level segmentation.
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 114-123
+    :lines: 116-128
 
 There are two levels of segmentation.
 The first one is mesh-level, and the other one is actor-level.
@@ -134,7 +134,7 @@ Notice the definition of ``rpy`` (roll, yaw, pitch) when you set the viewer came
 
 .. literalinclude:: ../../../../examples/rendering/camera.py
     :dedent: 0
-    :lines: 128-149
+    :lines: 133-154
 
 .. figure:: assets/screenshot.png
     :width: 1080px

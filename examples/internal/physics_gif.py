@@ -194,7 +194,7 @@ def main():
 
     viewer.set_camera_xyz(x=-2, y=0, z=2.5)
     viewer.set_camera_rpy(r=0, p=-np.arctan2(2, 2), y=0)
-    viewer.window.set_camera_parameters(near=0.001, far=100, fovy=1)
+    viewer.window.set_camera_parameters(near=0.05, far=100, fovy=1)
 
     camera = create_camera(scene, [-2, 0, 2.5], [0, -np.arctan2(2, 2), 0])
     import imageio
