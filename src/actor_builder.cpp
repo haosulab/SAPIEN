@@ -499,11 +499,16 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
     sActor->attachShape(std::move(shapes[i]));
   }
   if (shapes.size() && mUseDensity) {
+    bool zero = true;
     for (float density : densities) {
-      if (density < 1e-8) {
-        throw std::runtime_error(
-            "Failed to build actor: one collision shape density is too small");
+      if (density > 1e-8) {
+        zero = false;
+        break;
       }
+    }
+    if (zero && !isKinematic) {
+      spdlog::get("SAPIEN")->warn(
+          "All shapes have 0 density. This will result in unexpected mass and inertia.");
     }
     PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
   } else {

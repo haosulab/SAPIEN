@@ -172,10 +172,16 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   }
 
   if (shapes.size() && mUseDensity) {
+    bool zero = true;
     for (float density : densities) {
-      if (density < 1e-8) {
-        throw std::runtime_error("Failed to build link: one collision shape density is too small");
+      if (density > 1e-8) {
+        zero = false;
+        break;
       }
+    }
+    if (zero) {
+      spdlog::get("SAPIEN")->warn(
+          "All shapes have 0 density. This will result in unexpected mass and inertia.");
     }
     PxRigidBodyExt::updateMassAndInertia(*pxLink, densities.data(), shapes.size());
   } else {
