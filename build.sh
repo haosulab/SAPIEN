@@ -53,7 +53,7 @@ function build_manylinux14_wheel() {
   eval "$COMMAND"
 
   PACKAGE_VERSION=$(<./python/VERSION)
-  echo "SAPIEN verion ${PACKAGE_VERSION}"
+  echo "SAPIEN version ${PACKAGE_VERSION}"
   WHEEL_NAME="./dist/sapien-${PACKAGE_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}${EXT}-linux_x86_64.whl"
   if test -f "$WHEEL_NAME"; then
     echo "$FILE exist, begin audit and repair"

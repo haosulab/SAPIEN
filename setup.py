@@ -55,7 +55,8 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DSVULKAN2_PROFILE=ON']
             cmake_args += ['-DSAPIEN_PROFILE=ON']
 
-        cmake_args += ['-DSAPIEN_DLPACK_INTEROP=ON', '-DSVULKAN2_CUDA_INTEROP=ON']
+        if platform.system() != 'Darwin':
+            cmake_args += ['-DSAPIEN_DLPACK_INTEROP=ON', '-DSVULKAN2_CUDA_INTEROP=ON']
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
         build_args += ['--', '-j8']
