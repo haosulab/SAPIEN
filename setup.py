@@ -10,7 +10,6 @@ import argparse
 
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
-from distutils.version import LooseVersion
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--optix-home', type=str, default=None)
@@ -168,6 +167,7 @@ setup(name="sapien",
       ext_modules=[CMakeExtension('sapien')],
       install_requires=read_requirements(),
       long_description=open("readme.md").read(),
+      long_description_content_type="text/markdown",
       cmdclass=dict(build_ext=CMakeBuild),
       zip_safe=False,
       packages=["sapien", "sapien.core", "sapien.asset", "sapien.example", "sapien.utils"],
