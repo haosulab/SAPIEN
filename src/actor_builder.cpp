@@ -499,18 +499,25 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
     sActor->attachShape(std::move(shapes[i]));
   }
   if (shapes.size() && mUseDensity) {
+    for (float density : densities) {
+      if (density < 1e-8) {
+        throw std::runtime_error(
+            "Failed to build actor: one collision shape density is too small");
+      }
+    }
     PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
   } else {
-    actor->setMass(mMass);
-    actor->setCMassLocalPose(mCMassPose);
-    actor->setMassSpaceInertiaTensor(mInertia);
-  }
-
-  if (actor->getMass() < 1e-8 || actor->getMassSpaceInertiaTensor().x < 1e-8 ||
-      actor->getMassSpaceInertiaTensor().y < 1e-8 || actor->getMassSpaceInertiaTensor().z < 1e-8) {
-    spdlog::get("SAPIEN")->warn("Actor mass or inertia contains 0. This is not allowed.");
-    actor->setMass(1e-6);
-    actor->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
+    if (actor->getMass() < 1e-8 || actor->getMassSpaceInertiaTensor().x < 1e-8 ||
+        actor->getMassSpaceInertiaTensor().y < 1e-8 ||
+        actor->getMassSpaceInertiaTensor().z < 1e-8) {
+      spdlog::get("SAPIEN")->warn("Actor mass or inertia contains 0. This is not allowed.");
+      actor->setMass(1e-6);
+      actor->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
+    } else {
+      actor->setMass(mMass);
+      actor->setCMassLocalPose(mCMassPose);
+      actor->setMassSpaceInertiaTensor(mInertia);
+    }
   }
 
   sActor->setName(name);

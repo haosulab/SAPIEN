@@ -172,19 +172,24 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   }
 
   if (shapes.size() && mUseDensity) {
+    for (float density : densities) {
+      if (density < 1e-8) {
+        throw std::runtime_error("Failed to build link: one collision shape density is too small");
+      }
+    }
     PxRigidBodyExt::updateMassAndInertia(*pxLink, densities.data(), shapes.size());
   } else {
-    pxLink->setMass(mMass);
-    pxLink->setCMassLocalPose(mCMassPose);
-    pxLink->setMassSpaceInertiaTensor(mInertia);
-  }
-
-  if (pxLink->getMass() < 1e-8 || pxLink->getMassSpaceInertiaTensor().x < 1e-8 ||
-      pxLink->getMassSpaceInertiaTensor().y < 1e-8 ||
-      pxLink->getMassSpaceInertiaTensor().z < 1e-8) {
-    spdlog::get("SAPIEN")->warn("Link mass or inertia contains 0. This is not allowed.");
-    pxLink->setMass(1e-6);
-    pxLink->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
+    if (pxLink->getMass() < 1e-8 || pxLink->getMassSpaceInertiaTensor().x < 1e-8 ||
+        pxLink->getMassSpaceInertiaTensor().y < 1e-8 ||
+        pxLink->getMassSpaceInertiaTensor().z < 1e-8) {
+      spdlog::get("SAPIEN")->warn("Link mass or inertia contains 0. This is not allowed.");
+      pxLink->setMass(1e-6);
+      pxLink->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
+    } else {
+      pxLink->setMass(mMass);
+      pxLink->setCMassLocalPose(mCMassPose);
+      pxLink->setMassSpaceInertiaTensor(mInertia);
+    }
   }
 
   links[mIndex]->setName(mName);
@@ -261,16 +266,17 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
   if (shapes.size() && mUseDensity) {
     PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
   } else {
-    actor->setMass(mMass);
-    actor->setCMassLocalPose(mCMassPose);
-    actor->setMassSpaceInertiaTensor(mInertia);
-  }
-
-  if (actor->getMass() < 1e-8 || actor->getMassSpaceInertiaTensor().x < 1e-8 ||
-      actor->getMassSpaceInertiaTensor().y < 1e-8 || actor->getMassSpaceInertiaTensor().z < 1e-8) {
-    spdlog::get("SAPIEN")->warn("Link mass or inertia contains 0. This is not allowed.");
-    actor->setMass(1e-6);
-    actor->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
+    if (actor->getMass() < 1e-8 || actor->getMassSpaceInertiaTensor().x < 1e-8 ||
+        actor->getMassSpaceInertiaTensor().y < 1e-8 ||
+        actor->getMassSpaceInertiaTensor().z < 1e-8) {
+      spdlog::get("SAPIEN")->warn("Link mass or inertia contains 0. This is not allowed.");
+      actor->setMass(1e-6);
+      actor->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
+    } else {
+      actor->setMass(mMass);
+      actor->setCMassLocalPose(mCMassPose);
+      actor->setMassSpaceInertiaTensor(mInertia);
+    }
   }
 
   links[mIndex]->setName(mName);
