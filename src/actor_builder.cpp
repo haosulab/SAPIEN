@@ -506,6 +506,13 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
     actor->setMassSpaceInertiaTensor(mInertia);
   }
 
+  if (actor->getMass() < 1e-8 || actor->getMassSpaceInertiaTensor().x < 1e-8 ||
+      actor->getMassSpaceInertiaTensor().y < 1e-8 || actor->getMassSpaceInertiaTensor().z < 1e-8) {
+    spdlog::get("SAPIEN")->warn("Actor mass or inertia contains 0. This is not allowed.");
+    actor->setMass(1e-6);
+    actor->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
+  }
+
   sActor->setName(name);
 
   sActor->mCol1 = mCollisionGroup.w0;

@@ -8,17 +8,17 @@ is a continuation of ShapeNet and PartNet.
 ## Change Log
 ### 1.0
 - Replace the old Vulkan based renderer completely
-    - See `sapien.core.renderer` for details
+  - See `sapien.core.renderer` for details
 - Expose GUI functionalities to Python
 - Reimplement Vulkan viewer in Python 
 - Expose PhysX shape wrapper to Python. For example,
-    - Collision shapes can be retrieved through `actor.get_collision_shapes`
-    - Collision groups on a shape can be set by `CollisionShape.set_collision_groups`
-    - Shapes are now also available in `Contact`.
+  - Collision shapes can be retrieved through `actor.get_collision_shapes`
+  - Collision groups on a shape can be set by `CollisionShape.set_collision_groups`
+  - Shapes are now also available in `Contact`.
 - API changes
-    - Render material creation is now `renderer.create_material()`
-    - in actor builder: `add_xxx_shape` is replaced with `add_xxx_collision`.
-    - move light functions from scene to `scene.renderer_scene`
+  - Render material creation is now `renderer.create_material()`
+  - in actor builder: `add_xxx_shape` is replaced with `add_xxx_collision`.
+  - move light functions from scene to `scene.renderer_scene`
 - Add centrifugal and Coriolis force.
 - Change default physical parameters for better stability.
 

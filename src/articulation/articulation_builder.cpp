@@ -179,6 +179,14 @@ bool LinkBuilder::build(SArticulation &articulation) const {
     pxLink->setMassSpaceInertiaTensor(mInertia);
   }
 
+  if (pxLink->getMass() < 1e-8 || pxLink->getMassSpaceInertiaTensor().x < 1e-8 ||
+      pxLink->getMassSpaceInertiaTensor().y < 1e-8 ||
+      pxLink->getMassSpaceInertiaTensor().z < 1e-8) {
+    spdlog::get("SAPIEN")->warn("Link mass or inertia contains 0. This is not allowed.");
+    pxLink->setMass(1e-6);
+    pxLink->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
+  }
+
   links[mIndex]->setName(mName);
 
   links[mIndex]->mCol1 = mCollisionGroup.w0;
@@ -256,6 +264,13 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
     actor->setMass(mMass);
     actor->setCMassLocalPose(mCMassPose);
     actor->setMassSpaceInertiaTensor(mInertia);
+  }
+
+  if (actor->getMass() < 1e-8 || actor->getMassSpaceInertiaTensor().x < 1e-8 ||
+      actor->getMassSpaceInertiaTensor().y < 1e-8 || actor->getMassSpaceInertiaTensor().z < 1e-8) {
+    spdlog::get("SAPIEN")->warn("Link mass or inertia contains 0. This is not allowed.");
+    actor->setMass(1e-6);
+    actor->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
   }
 
   links[mIndex]->setName(mName);
