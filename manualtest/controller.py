@@ -1247,6 +1247,13 @@ class Viewer(object):
                         "Mesh scale: {:.3g} {:.3g} {:.3g}".format(x, y, z)
                     )
                 )
+            elif shape.type == "nonconvex_mesh":
+                x, y, z = shape.geometry.scale
+                shape_info.append(
+                    R.UIDisplayText().Text(
+                        "Mesh scale: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                    )
+                )
 
     def build_articulation_window(self):
         self.articulation_window = R.UIWindow().Label("Articulation")

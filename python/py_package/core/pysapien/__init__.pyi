@@ -45,6 +45,7 @@ __all__ = [
     "Link",
     "LinkBase",
     "LinkBuilder",
+    "NonconvexMeshGeometry",
     "OptifuserCamera",
     "OptifuserConfig",
     "OptifuserController",
@@ -188,6 +189,10 @@ class ActorBuilder():
         """
         Add multiple collisions shapes from files. Also see @add_collision_from_file.
         Different from @add_collision_from_file, all connected components in the file will be converted to be convex.
+        """
+    def add_nonconvex_collision_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: PhysicalMaterial = None, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: 
+        """
+        Add a nonconvex collision shape from a file. If it is not a trigger, then it is only valid for static and kinematic actors.
         """
     def add_sphere_collision(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: PhysicalMaterial = None, density: float = 1000, patch_radius: float = 0.0, min_patch_radius: float = 0.0, is_trigger: bool = False) -> None: ...
     @typing.overload
@@ -792,6 +797,28 @@ class LinkBuilder(ActorBuilder):
         """
     def set_name(self, arg0: str) -> None: ...
     def set_parent(self, arg0: int) -> None: ...
+    pass
+class NonconvexMeshGeometry(CollisionGeometry):
+    @property
+    def indices(self) -> numpy.ndarray[numpy.uint32]:
+        """
+        :type: numpy.ndarray[numpy.uint32]
+        """
+    @property
+    def rotation(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def scale(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def vertices(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
     pass
 class OptifuserCamera(ICamera, ISensor):
     def get_camera_matrix(self) -> numpy.ndarray[numpy.float32]: ...

@@ -141,7 +141,9 @@ void buildSapien(py::module &m) {
   auto PyCapsuleGeometry = py::class_<SCapsuleGeometry, SGeometry>(m, "CapsuleGeometry");
   auto PyPlaneGeometry = py::class_<SPlaneGeometry, SGeometry>(m, "PlaneGeometry");
   auto PyConvexMeshGeometry = py::class_<SConvexMeshGeometry, SGeometry>(m, "ConvexMeshGeometry");
-  // auto PyShape = py::class_<SShape>(m, "CollisionShape");
+  auto PyNonconvexMeshGeometry =
+      py::class_<SNonconvexMeshGeometry, SGeometry>(m, "NonconvexMeshGeometry");
+
   auto PyCollisionShape = py::class_<SCollisionShape>(m, "CollisionShape");
 
   auto PyURDFLoader = py::class_<URDF::URDFLoader>(m, "URDFLoader");
@@ -317,6 +319,24 @@ void buildSapien(py::module &m) {
                              })
       .def_property_readonly(
           "indices", [](SConvexMeshGeometry &g) { return make_array<uint32_t>(g.indices); });
+  PyNonconvexMeshGeometry
+      .def_property_readonly("scale",
+                             [](SNonconvexMeshGeometry &g) { return vec32array(g.scale); })
+      .def_property_readonly(
+          "rotation",
+          [](SNonconvexMeshGeometry &g) {
+            return make_array<PxReal>({g.rotation.w, g.rotation.x, g.rotation.y, g.rotation.z});
+          })
+      .def_property_readonly("vertices",
+                             [](SNonconvexMeshGeometry &g) {
+                               int nRows = g.vertices.size() / 3;
+                               int nCols = 3;
+                               return py::array_t<PxReal>({nRows, nCols},
+                                                          {sizeof(PxReal) * nCols, sizeof(PxReal)},
+                                                          g.vertices.data());
+                             })
+      .def_property_readonly(
+          "indices", [](SNonconvexMeshGeometry &g) { return make_array<uint32_t>(g.indices); });
 
   PyCollisionShape
       .def_property_readonly("actor", &SCollisionShape::getActor,
@@ -1135,6 +1155,19 @@ If the shape in the file is not convex, it will be converted by the PhysX backen
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
       .def(
+          "add_nonconvex_collision_from_file",
+          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
+             py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
+             PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+            a.addNonConvexShapeFromFile(filename, pose, array2vec3(scale), material, patchRadius,
+                                        minPatchRadius, isTrigger);
+          },
+          R"doc(Add a nonconvex collision shape from a file. If it is not a trigger, then it is only valid for static and kinematic actors.)doc",
+          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f,
+          py::arg("is_trigger") = false)
+      .def(
           "add_multiple_collisions_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
@@ -1285,6 +1318,8 @@ References:
                                  return "Capsule";
                                case sapien::ActorBuilder::ShapeRecord::Sphere:
                                  return "Sphere";
+                               case sapien::ActorBuilder::ShapeRecord::NonConvexMesh:
+                                 return "Nonconvex";
                                }
                                return "";
                              })

@@ -37,6 +37,14 @@ struct SConvexMeshGeometry : public SGeometry {
   inline virtual std::string getType() const { return "convex_mesh"; };
 };
 
+struct SNonconvexMeshGeometry : public SGeometry {
+  physx::PxVec3 scale;
+  physx::PxQuat rotation;
+  std::vector<physx::PxReal> vertices;
+  std::vector<uint32_t> indices;
+  inline virtual std::string getType() const { return "nonconvex_mesh"; };
+};
+
 struct SPlaneGeometry : public SGeometry {
   inline virtual std::string getType() const { return "plane"; };
 };

@@ -39,6 +39,7 @@ from sapien.core.pysapien import Light
 from sapien.core.pysapien import Link
 from sapien.core.pysapien import LinkBase
 from sapien.core.pysapien import LinkBuilder
+from sapien.core.pysapien import NonconvexMeshGeometry
 from sapien.core.pysapien import OptifuserCamera
 from sapien.core.pysapien import OptifuserConfig
 from sapien.core.pysapien import OptifuserController
@@ -117,6 +118,7 @@ __all__ = [
     "Link",
     "LinkBase",
     "LinkBuilder",
+    "NonconvexMeshGeometry",
     "OptifuserCamera",
     "OptifuserConfig",
     "OptifuserController",

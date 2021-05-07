@@ -1,4 +1,6 @@
 #!/bin/bash
+echo 1.0.dev_$(date +"%m_%d_%y") > python/VERSION
+
 docker run -v `pwd`:/workspace/SAPIEN -it --rm \
        -u $(id -u ${USER}):$(id -g ${USER}) \
        fxiangucsd/sapien-build-env:1.6 bash -c "cd /workspace/SAPIEN && ./build.sh 38 --debug"
