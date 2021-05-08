@@ -185,9 +185,7 @@ bool LinkBuilder::build(SArticulation &articulation) const {
     }
     PxRigidBodyExt::updateMassAndInertia(*pxLink, densities.data(), shapes.size());
   } else {
-    if (pxLink->getMass() < 1e-8 || pxLink->getMassSpaceInertiaTensor().x < 1e-8 ||
-        pxLink->getMassSpaceInertiaTensor().y < 1e-8 ||
-        pxLink->getMassSpaceInertiaTensor().z < 1e-8) {
+    if (mMass < 1e-8 || mInertia.x < 1e-8 || mInertia.y < 1e-8 || mInertia.z < 1e-8) {
       spdlog::get("SAPIEN")->warn("Link mass or inertia contains 0. This is not allowed.");
       pxLink->setMass(1e-6);
       pxLink->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
@@ -272,10 +270,7 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
   if (shapes.size() && mUseDensity) {
     PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
   } else {
-    if (actor->getMass() < 1e-8 || actor->getMassSpaceInertiaTensor().x < 1e-8 ||
-        actor->getMassSpaceInertiaTensor().y < 1e-8 ||
-        actor->getMassSpaceInertiaTensor().z < 1e-8) {
-      spdlog::get("SAPIEN")->warn("Link mass or inertia contains 0. This is not allowed.");
+    if (mMass < 1e-8 || mInertia.x < 1e-8 || mInertia.y < 1e-8 || mInertia.z < 1e-8) {
       actor->setMass(1e-6);
       actor->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
     } else {

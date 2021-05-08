@@ -616,9 +616,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
       PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
     }
   } else {
-    if (actor->getMass() < 1e-8 || actor->getMassSpaceInertiaTensor().x < 1e-8 ||
-        actor->getMassSpaceInertiaTensor().y < 1e-8 ||
-        actor->getMassSpaceInertiaTensor().z < 1e-8) {
+    if (mMass < 1e-8 || mInertia.x < 1e-8 || mInertia.y < 1e-8 || mInertia.z < 1e-8) {
       spdlog::get("SAPIEN")->warn("Actor mass or inertia contains 0. This is not allowed.");
       actor->setMass(1e-6);
       actor->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
