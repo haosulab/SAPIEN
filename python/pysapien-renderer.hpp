@@ -331,6 +331,34 @@ void buildRenderer(py::module &parent) {
           [](core::Context &, int segments) { return resource::SVMesh::CreateCone(segments); },
           py::arg("segments") = 32)
       .def(
+          "create_mesh_from_array",
+          [](core::Context &, const py::array_t<float> &vertices,
+             const py::array_t<uint32_t> &indices, const py::array_t<float> &normals,
+             const py::array_t<float> &uvs) {
+            auto mesh = svulkan2::resource::SVMesh::Create(
+                std::vector<float>(vertices.data(), vertices.data() + vertices.size()),
+                std::vector<uint32_t>(indices.data(), indices.data() + indices.size()));
+            if (normals.size() != 0) {
+              if (normals.size() != vertices.size()) {
+                throw std::runtime_error(
+                    "create mesh fail: the size of normals does not match with vertices");
+              }
+              mesh->setVertexAttribute(
+                  "normal", std::vector<float>(normals.data(), normals.data() + normals.size()));
+            }
+            if (uvs.size() != 0) {
+              if (uvs.size() != vertices.size()) {
+                throw std::runtime_error(
+                    "create mesh fail: the size of uvs does not match with vertices");
+              }
+              mesh->setVertexAttribute("uv",
+                                       std::vector<float>(uvs.data(), uvs.data() + uvs.size()));
+            }
+            return mesh;
+          },
+          py::arg("vertices"), py::arg("indices"), py::arg("normals") = py::array_t<float>(),
+          py::arg("uvs") = py::array_t<float>())
+      .def(
           "create_model",
           [](core::Context &context, std::vector<std::shared_ptr<resource::SVMesh>> const &meshes,
              std::vector<std::shared_ptr<resource::SVMetallicMaterial>> const &materials) {
