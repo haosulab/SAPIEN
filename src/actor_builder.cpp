@@ -617,9 +617,12 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
     }
   } else {
     if (mMass < 1e-8 || mInertia.x < 1e-8 || mInertia.y < 1e-8 || mInertia.z < 1e-8) {
-      spdlog::get("SAPIEN")->warn("Actor mass or inertia contains 0. This is not allowed.");
+      spdlog::get("SAPIEN")->warn(
+          "Mass or inertia contains very small number, this is not allowed. "
+          "Mass will be set to 1e-6 and inertia will be set to 1e-8 for stability. Actor: {0}",
+          name);
       actor->setMass(1e-6);
-      actor->setMassSpaceInertiaTensor({1e-6, 1e-6, 1e-6});
+      actor->setMassSpaceInertiaTensor({1e-8, 1e-8, 1e-8});
     } else {
       actor->setMass(mMass);
       actor->setCMassLocalPose(mCMassPose);
