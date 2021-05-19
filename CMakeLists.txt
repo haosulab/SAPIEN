@@ -39,9 +39,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message("Complie source code on Mac OSX")
-	add_definitions(-D_USE_MACOSX)
+    add_definitions(-D_USE_MACOSX)
     set(MACOSX TRUE)
-	set(CMAKE_MACOSX_RPATH OFF CACHE BOOL "Do not use rpath for MacOS")
+    set(CMAKE_MACOSX_RPATH OFF CACHE BOOL "Do not use rpath for MacOS")
 endif ()
 
 find_package(OpenGL REQUIRED)
@@ -49,22 +49,22 @@ find_package(GLEW REQUIRED)
 find_package(assimp REQUIRED)
 find_package(spdlog REQUIRED)
 
-include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
-        "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
         "src/renderer"
         )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
+    link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
             "3rd_party/optifuser/build/lib")
 else ()
-    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release"
+    link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release"
             "3rd_party/optifuser/build/lib")
 endif ()
 
 if (${BUILD_WITH_PINOCCHIO_SUPPORT})
     # Pinocchio uses its own FindCppAD but does not provide it
-    set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/CppAD")
+    set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppAD")
 
     find_package(Boost COMPONENTS system REQUIRED)
     find_package(pinocchio REQUIRED)
@@ -79,26 +79,14 @@ if (${BUILD_DEBUG_VIEWER})
 endif ()
 
 ## include headers inside the project
-include_directories(
-        "3rd_party/optifuser/include"
-        # "3rd_party/optifuser/3rd_party/imgui"
-        # "3rd_party/optifuser/3rd_party/imgui/examples"
-        # "3rd_party/optifuser/3rd_party/ImGuizmo"
-        "src"
-        "src/renderer")
-
-## include headers outside the project
-include_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/include"
-        "${CMAKE_SOURCE_DIR}/../PhysX/pxshared/include"
-        "/usr/include/eigen3")
+include_directories("3rd_party/optifuser/include" "src" "src/renderer" "/usr/include/eigen3")
 
 if (MACOSX)
     include_directories("/usr/local/include" "/usr/local/opt/glew/include"
             "/usr/local/include/eigen3")
     link_directories(/usr/local/lib/)
-else()
+else ()
     include_directories("3rd_party/dlpack/include")
-
     if (${SAPIEN_DLPACK_INTEROP})
         add_definitions(-DSAPIEN_DLPACK_INTEROP)
         add_definitions(-DCUDA_INTEROP)
@@ -111,12 +99,12 @@ link_directories("${CMAKE_CURRENT_BINARY_DIR}/3rd_party/optifuser/lib")
 ## Link directory outside the project
 if (NOT MACOSX)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked")
+        link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked")
     else ()
-        link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release")
+        link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release")
     endif ()
 else ()
-    link_directories("${CMAKE_SOURCE_DIR}/../PhysX/physx/bin/mac.x86_64/release")
+    link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/mac.x86_64/release")
     link_directories("/usr/local/opt/glm/lib" "/usr/local/opt/glew/lib"
             "/usr/local/lib")
 endif ()
@@ -156,7 +144,7 @@ include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
 include_directories("$ENV{VULKAN_SDK}/include")
 link_directories("$ENV{VULKAN_SDK}/lib")
-link_directories("3rd_party/sapien-vulkan-2/3rd_party/cuda_lib")
+link_directories("${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/sapien-vulkan-2/3rd_party/cuda_lib")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})
@@ -166,7 +154,6 @@ add_dependencies(sapien shader)
 if (EXISTS ${OPTIX_HOME})
     add_dependencies(sapien ptx_dir)
 endif ()
-
 
 if (MACOSX)
     target_link_libraries(sapien
