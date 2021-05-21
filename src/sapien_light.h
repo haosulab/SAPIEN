@@ -30,6 +30,8 @@ public:
   inline void setShadowParameters(float near, float far) {
     getRendererLight()->setShadowParameters(near, far);
   }
+  inline float getShadowNear() const { return getRendererLight()->getShadowNear(); }
+  inline float getShadowFar() const { return getRendererLight()->getShadowFar(); }
 
   inline SPointLight(SScene *scene, Renderer::IPointLight *light) : SLight(scene), mLight(light) {}
 
@@ -48,6 +50,10 @@ public:
     getRendererLight()->setShadowParameters(halfSize, near, far);
   }
 
+  inline float getShadowHalfSize() const { return getRendererLight()->getShadowHalfSize(); }
+  inline float getShadowNear() const { return getRendererLight()->getShadowNear(); }
+  inline float getShadowFar() const { return getRendererLight()->getShadowFar(); }
+
   inline SDirectionalLight(SScene *scene, Renderer::IDirectionalLight *light)
       : SLight(scene), mLight(light) {}
 
@@ -64,9 +70,14 @@ public:
   inline void setDirection(physx::PxVec3 direction) {
     getRendererLight()->setDirection(direction);
   }
+  inline void setFov(float fov) const { getRendererLight()->setFov(fov); }
+  inline float getFov() const { return getRendererLight()->getFov(); }
+
   inline void setShadowParameters(float near, float far) {
     getRendererLight()->setShadowParameters(near, far);
   }
+  inline float getShadowNear() const { return getRendererLight()->getShadowNear(); }
+  inline float getShadowFar() const { return getRendererLight()->getShadowFar(); }
 
   inline SSpotLight(SScene *scene, Renderer::ISpotLight *light) : SLight(scene), mLight(light) {}
 

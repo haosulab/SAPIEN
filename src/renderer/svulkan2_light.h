@@ -67,6 +67,9 @@ public:
   void setDirection(physx::PxVec3 position) override;
   void setShadowParameters(float near, float far) override;
 
+  void setFov(float fov) override;
+  float getFov() const override;
+
   float getShadowNear() const override;
   float getShadowFar() const override;
 

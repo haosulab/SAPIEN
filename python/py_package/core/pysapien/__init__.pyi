@@ -93,6 +93,11 @@ class Entity():
     def get_pose(self) -> Pose: ...
     def set_name(self, name: str) -> None: ...
     @property
+    def classname(self) -> None:
+        """
+        :type: None
+        """
+    @property
     def name(self) -> str:
         """
         :type: str
@@ -786,6 +791,21 @@ class DirectionalLightEntity(LightEntity, Entity):
         """
         :type: numpy.ndarray[numpy.float32]
         """
+    @property
+    def shadow_far(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def shadow_half_size(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def shadow_near(self) -> float:
+        """
+        :type: float
+        """
     pass
 class Link(LinkBase, ActorDynamicBase, ActorBase, Entity):
     def get_articulation(self) -> Articulation: ...
@@ -990,6 +1010,16 @@ class PointLightEntity(LightEntity, Entity):
     def position(self) -> numpy.ndarray[numpy.float32]:
         """
         :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def shadow_far(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def shadow_near(self) -> float:
+        """
+        :type: float
         """
     pass
 class Pose():
@@ -1400,6 +1430,16 @@ class SpotLightEntity(LightEntity, Entity):
     def position(self) -> numpy.ndarray[numpy.float32]:
         """
         :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def shadow_far(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def shadow_near(self) -> float:
+        """
+        :type: float
         """
     pass
 class Subscription():

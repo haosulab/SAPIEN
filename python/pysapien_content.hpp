@@ -1741,7 +1741,9 @@ Args:
       .def_property_readonly("position",
                              [](SPointLight &light) { return vec32array(light.getPosition()); })
       .def("set_shadow_parameters", &SPointLight::setShadowParameters, py ::arg("near"),
-           py::arg("far"));
+           py::arg("far"))
+      .def_property_readonly("shadow_near", &SPointLight::getShadowNear)
+      .def_property_readonly("shadow_far", &SPointLight::getShadowFar);
 
   PyDirectionalLightEntity
       .def(
@@ -1753,7 +1755,10 @@ Args:
       .def_property_readonly(
           "direction", [](SDirectionalLight &light) { return vec32array(light.getDirection()); })
       .def("set_shadow_parameters", &SDirectionalLight::setShadowParameters, py::arg("half_size"),
-           py ::arg("near"), py::arg("far"));
+           py ::arg("near"), py::arg("far"))
+      .def_property_readonly("shadow_near", &SDirectionalLight::getShadowNear)
+      .def_property_readonly("shadow_far", &SDirectionalLight::getShadowFar)
+      .def_property_readonly("shadow_half_size", &SDirectionalLight::getShadowHalfSize);
 
   PySpotLightEntity
       .def(
@@ -1773,7 +1778,9 @@ Args:
       .def_property_readonly("direction",
                              [](SSpotLight &light) { return vec32array(light.getDirection()); })
       .def("set_shadow_parameters", &SSpotLight::setShadowParameters, py ::arg("near"),
-           py::arg("far"));
+           py::arg("far"))
+      .def_property_readonly("shadow_near", &SSpotLight::getShadowNear)
+      .def_property_readonly("shadow_far", &SSpotLight::getShadowFar);
 
   // Renderer Light (will be deprecated)
   PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))

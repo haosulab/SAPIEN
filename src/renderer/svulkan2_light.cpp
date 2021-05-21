@@ -143,5 +143,8 @@ void SVulkan2SpotLight::setDirection(physx::PxVec3 direction) {
   mLight->setDirection({direction[0], direction[1], direction[2]});
 }
 
+void SVulkan2SpotLight::setFov(float fov) { mLight->setFov(fov); }
+float SVulkan2SpotLight::getFov() const { return mLight->getFov(); }
+
 } // namespace Renderer
 } // namespace sapien

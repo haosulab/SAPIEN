@@ -301,9 +301,9 @@ def main():
         viewer.render()
         count += 1
 
-        if count == 120:
-            for light in scene.get_all_lights():
-                scene.remove_light(light)
+        # if count == 120:
+        #     for light in scene.get_all_lights():
+        #         scene.remove_light(light)
 
         # if count == 120:
         #     start = time.time()

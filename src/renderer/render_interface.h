@@ -139,6 +139,9 @@ public:
   virtual void setDirection(physx::PxVec3 direction) = 0;
   virtual void setShadowParameters(float near, float far) = 0;
 
+  virtual void setFov(float fov) = 0;
+  virtual float getFov() const = 0;
+
   virtual float getShadowNear() const = 0;
   virtual float getShadowFar() const = 0;
 };
