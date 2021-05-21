@@ -19,6 +19,11 @@ public:
   physx::PxVec3 getPosition() const override;
   void setPosition(physx::PxVec3 position) override;
   void setShadowParameters(float near, float far) override;
+
+  float getShadowNear() const override;
+  float getShadowFar() const override;
+
+  inline svulkan2::scene::PointLight *getInternalLight() const { return mLight; }
 };
 
 class SVulkan2DirectionalLight : public IDirectionalLight {
@@ -36,6 +41,12 @@ public:
   physx::PxVec3 getDirection() const override;
   void setDirection(physx::PxVec3 position) override;
   void setShadowParameters(float halfSize, float near, float far) override;
+
+  float getShadowHalfSize() const override;
+  float getShadowNear() const override;
+  float getShadowFar() const override;
+
+  inline svulkan2::scene::DirectionalLight *getInternalLight() const { return mLight; }
 };
 
 class SVulkan2SpotLight : public ISpotLight {
@@ -55,6 +66,11 @@ public:
   physx::PxVec3 getDirection() const override;
   void setDirection(physx::PxVec3 position) override;
   void setShadowParameters(float near, float far) override;
+
+  float getShadowNear() const override;
+  float getShadowFar() const override;
+
+  inline svulkan2::scene::SpotLight *getInternalLight() const { return mLight; }
 };
 
 } // namespace Renderer

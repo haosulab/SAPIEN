@@ -628,6 +628,14 @@ std::vector<SArticulationBase *> SScene::getAllArticulations() const {
   return output;
 }
 
+std::vector<SLight *> SScene::getAllLights() const {
+  std::vector<SLight *> output;
+  for (auto &light : mLights) {
+    output.push_back(light.get());
+  }
+  return output;
+}
+
 std::map<physx_id_t, std::string> SScene::findRenderId2VisualName() const {
   std::map<physx_id_t, std::string> result;
   for (auto &actor : mActors) {
@@ -698,6 +706,60 @@ void SScene::unpackScene(SceneData const &data) {
       }
     }
   }
+}
+
+void SScene::setAmbientLight(PxVec3 const &color) {
+  mRendererScene->setAmbientLight({color.x, color.y, color.z});
+}
+
+PxVec3 SScene::getAmbientLight() const {
+  auto light = mRendererScene->getAmbientLight();
+  return {light[0], light[1], light[2]};
+}
+
+SPointLight *SScene::addPointLight(PxVec3 const &position, PxVec3 const &color, bool enableShadow,
+                                   float shadowNear, float shadowFar) {
+  auto light = mRendererScene->addPointLight({position.x, position.y, position.z},
+                                             {color.x, color.y, color.z}, enableShadow, shadowNear,
+                                             shadowFar);
+  auto sl = std::make_unique<SPointLight>(this, light);
+  auto ret = sl.get();
+  mLights.push_back(std::move(sl));
+  return ret;
+}
+
+SDirectionalLight *SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color,
+                                               bool enableShadow, PxVec3 const &position,
+                                               float shadowScale, float shadowNear,
+                                               float shadowFar) {
+  auto light = mRendererScene->addDirectionalLight(
+      {direction.x, direction.y, direction.z}, {color.x, color.y, color.z}, enableShadow,
+      {position.x, position.y, position.z}, shadowScale, shadowNear, shadowFar);
+  auto sl = std::make_unique<SDirectionalLight>(this, light);
+  auto ret = sl.get();
+  mLights.push_back(std::move(sl));
+  return ret;
+}
+
+SSpotLight *SScene::addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fov,
+                                 PxVec3 const &color, bool enableShadow, float shadowNear,
+                                 float shadowFar) {
+  auto light = mRendererScene->addSpotLight(
+      {position.x, position.y, position.z}, {direction.x, direction.y, direction.z}, fov,
+      {color.x, color.y, color.z}, enableShadow, shadowNear, shadowFar);
+  auto sl = std::make_unique<SSpotLight>(this, light);
+  auto ret = sl.get();
+  mLights.push_back(std::move(sl));
+  return ret;
+}
+
+void SScene::removeLight(SLight *light) {
+  if (light && light->getRendererLight()) {
+    mRendererScene->removeLight(light->getRendererLight());
+  }
+  mLights.erase(
+      std::remove_if(mLights.begin(), mLights.end(), [=](auto &l) { return l.get() == light; }),
+      mLights.end());
 }
 
 }; // namespace sapien

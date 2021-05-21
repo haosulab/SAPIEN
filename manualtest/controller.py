@@ -1416,7 +1416,6 @@ class Viewer(object):
         self.paused = paused
 
     def toggle_axes(self, show):
-        print("toggle", show)
         for c in self.coordinate_axes.children:
             if show:
                 c.transparency = 0
@@ -1745,7 +1744,7 @@ class Viewer(object):
 
     def is_mouse_available(self, mx, my):
         w, h = self.window.size
-        print(f"[I] windowSize: {w, h}; mousePose: {mx, my}")
+        # print(f"[I] windowSize: {w, h}; mousePose: {mx, my}")
         return mx >= 0 and my >= 0
 
     def camera_space_to_world_space(self, vec):

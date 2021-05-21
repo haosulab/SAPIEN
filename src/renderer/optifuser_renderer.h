@@ -93,16 +93,20 @@ public:
   void setAmbientLight(std::array<float, 3> const &color) override;
   std::array<float, 3> getAmbientLight() const override;
   IPointLight *addPointLight(std::array<float, 3> const &position,
-                                     std::array<float, 3> const &color, bool enableShadow,
-                                     float shadowNear, float shadowFar) override;
-   IDirectionalLight *
-  addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color,
-                      bool enableShadow, std::array<float, 3> const &position, float shadowScale,
-                      float shadowNear, float shadowFar) override;
-   ISpotLight *addSpotLight(std::array<float, 3> const &position,
-                                   std::array<float, 3> const &direction, float fov,
-                                   std::array<float, 3> const &color, bool enableShadow,
-                                   float shadowNear, float shadowFar) override;
+                             std::array<float, 3> const &color, bool enableShadow,
+                             float shadowNear, float shadowFar) override;
+  IDirectionalLight *addDirectionalLight(std::array<float, 3> const &direction,
+                                         std::array<float, 3> const &color, bool enableShadow,
+                                         std::array<float, 3> const &position, float shadowScale,
+                                         float shadowNear, float shadowFar) override;
+  ISpotLight *addSpotLight(std::array<float, 3> const &position,
+                           std::array<float, 3> const &direction, float fov,
+                           std::array<float, 3> const &color, bool enableShadow, float shadowNear,
+                           float shadowFar) override;
+
+  inline void removeLight(ILight *light) override {
+    return; // not supported
+  }
 
   // /* For OpenGL only */
   // void setAmbientLight(std::array<float, 3> const &color) override;

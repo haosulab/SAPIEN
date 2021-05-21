@@ -22,7 +22,7 @@ private:
   PxRigidDynamic *mActor = nullptr;
 
 public:
-  PxRigidDynamic *getPxActor() override;
+  PxRigidDynamic *getPxActor() const override;
   void setPose(PxTransform const &pose);
   void setVelocity(PxVec3 const &v);
   void setAngularVelocity(PxVec3 const &v);
@@ -52,7 +52,7 @@ private:
   PxRigidStatic *mActor = nullptr;
 
 public:
-  PxRigidActor *getPxActor() override;
+  PxRigidActor *getPxActor() const override;
   inline EActorType getType() const override { return EActorType::STATIC; }
   void setPose(PxTransform const &pose);
 

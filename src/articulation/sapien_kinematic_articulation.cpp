@@ -33,7 +33,7 @@ std::vector<SJointBase *> SKArticulation::getBaseJoints() {
   return result;
 }
 
-SLinkBase *SKArticulation::getRootLink() { return mRootLink; }
+SLinkBase *SKArticulation::getRootLink() const { return mRootLink; }
 
 EArticulationType SKArticulation::getType() const { return EArticulationType::KINEMATIC; }
 
@@ -125,7 +125,7 @@ std::vector<physx::PxReal> SKArticulation::getDriveTarget() const {
 }
 
 void SKArticulation::prestep() {
-  auto time = mScene->getTimestep();
+  auto time = mParentScene->getTimestep();
   EventArticulationStep s;
   s.articulation = this;
   s.time = time;
@@ -143,14 +143,14 @@ void SKArticulation::prestep() {
 
   for (uint32_t n = 1; n < mSortedIndices.size(); ++n) {
     uint32_t idx = mSortedIndices[n];
-    mJoints[idx]->updatePos(mScene->getTimestep());
+    mJoints[idx]->updatePos(mParentScene->getTimestep());
     poses[idx] = poses[mJoints[idx]->getParentLink()->getIndex()] *
                  mJoints[idx]->getChild2ParentTransform();
     mLinks[idx]->getPxActor()->setKinematicTarget(poses[idx]);
   }
 }
 
-SKArticulation::SKArticulation(SScene *scene) : mScene(scene) {}
+SKArticulation::SKArticulation(SScene *scene) : SArticulationDrivable(scene) {}
 
 } // namespace sapien
 

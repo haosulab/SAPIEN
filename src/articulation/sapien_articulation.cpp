@@ -150,9 +150,9 @@ void SArticulation::setRootAngularVelocity(physx::PxVec3 const &omega) {
   mRootLink->getPxActor()->setAngularVelocity(omega);
 }
 
-SLinkBase *SArticulation::getRootLink() { return mRootLink; }
+SLinkBase *SArticulation::getRootLink() const { return mRootLink; }
 
-SArticulation::SArticulation(SScene *scene) : mScene(scene) {}
+SArticulation::SArticulation(SScene *scene) : SArticulationDrivable(scene) {}
 
 std::vector<PxReal> SArticulation::E2I(std::vector<PxReal> ev) const {
   std::vector<PxReal> iv(ev.size());
@@ -339,7 +339,7 @@ SArticulation::computeManipulatorInertiaMatrix() {
 }
 
 void SArticulation::prestep() {
-  auto time = mScene->getTimestep();
+  auto time = mParentScene->getTimestep();
   EventArticulationStep s;
   s.articulation = this;
   s.time = time;

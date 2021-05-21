@@ -71,6 +71,19 @@ SVulkan2SpotLight *SVulkan2Scene::addSpotLight(std::array<float, 3> const &posit
   return result;
 }
 
+void SVulkan2Scene::removeLight(ILight *light) {
+  if (auto l = dynamic_cast<SVulkan2DirectionalLight *>(light)) {
+    mScene->removeNode(*l->getInternalLight());
+  } else if (auto l = dynamic_cast<SVulkan2PointLight *>(light)) {
+    mScene->removeNode(*l->getInternalLight());
+  } else if (auto l = dynamic_cast<SVulkan2SpotLight *>(light)) {
+    mScene->removeNode(*l->getInternalLight());
+  }
+  mLights.erase(std::remove_if(mLights.begin(), mLights.end(),
+                               [light](auto &l) { return light == l.get(); }),
+                mLights.end());
+}
+
 void SVulkan2Scene::destroy() { mParentRenderer->removeScene(this); }
 
 IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,

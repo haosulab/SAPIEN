@@ -178,7 +178,9 @@ void buildSapien(py::module &m) {
   auto PyScene = py::class_<SScene>(m, "Scene");
   auto PyConstraint = py::class_<SDrive>(m, "Constraint");
   auto PyDrive = py::class_<SDrive6D, SDrive>(m, "Drive");
-  auto PyActorBase = py::class_<SActorBase>(m, "ActorBase");
+
+  auto PyEntity = py::class_<SEntity>(m, "Entity");
+  auto PyActorBase = py::class_<SActorBase, SEntity>(m, "ActorBase");
   auto PyActorDynamicBase = py::class_<SActorDynamicBase, SActorBase>(m, "ActorDynamicBase");
   auto PyActorStatic = py::class_<SActorStatic, SActorBase>(m, "ActorStatic");
   auto PyActor = py::class_<SActor, SActorDynamicBase>(m, "Actor");
@@ -192,11 +194,12 @@ void buildSapien(py::module &m) {
   py::class_<SKJointSingleDof, SKJoint>(m, "KinematicJointSingleDof");
   py::class_<SKJointPrismatic, SKJointSingleDof>(m, "KinematicJointPrismatic");
   py::class_<SKJointRevolute, SKJointSingleDof>(m, "KinematicJointRevolute");
-  auto PyArticulationBase = py::class_<SArticulationBase>(m, "ArticulationBase");
+  auto PyArticulationBase = py::class_<SArticulationBase, SEntity>(m, "ArticulationBase");
   auto PyArticulationDrivable =
       py::class_<SArticulationDrivable, SArticulationBase>(m, "ArticulationDrivable");
   auto PyArticulation = py::class_<SArticulation, SArticulationDrivable>(m, "Articulation");
   py::class_<SKArticulation, SArticulationDrivable>(m, "KinematicArticulation");
+
   auto PyContact = py::class_<SContact>(m, "Contact");
   auto PyTrigger = py::class_<STrigger>(m, "Trigger");
   auto PyContactPoint = py::class_<SContactPoint>(m, "ContactPoint");
@@ -228,6 +231,12 @@ void buildSapien(py::module &m) {
   auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m, "VulkanCamera");
   auto PyVulkanWindow = py::class_<Renderer::SVulkan2Window>(m, "VulkanWindow");
   auto PyVulkanScene = py::class_<Renderer::SVulkan2Scene, Renderer::IPxrScene>(m, "VulkanScene");
+
+  auto PyLightEntity = py::class_<SLight, SEntity>(m, "LightEntity");
+  auto PyPointLightEntity = py::class_<SPointLight, SLight>(m, "PointLightEntity");
+  auto PyDirectionalLightEntity =
+      py::class_<SDirectionalLight, SLight>(m, "DirectionalLightEntity");
+  auto PySpotLightEntity = py::class_<SSpotLight, SLight>(m, "SpotLightEntity");
 
   auto PyLight = py::class_<Renderer::ILight>(m, "Light");
   auto PyPointLight = py::class_<Renderer::IPointLight, Renderer::ILight>(m, "PointLight");
@@ -635,6 +644,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
       .def("get_all_articulations", &SScene::getAllArticulations,
            py::return_value_policy::reference)
+      .def("get_all_lights", &SScene::getAllLights, py::return_value_policy::reference)
       // drive, constrains, and joints
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
            py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
@@ -645,6 +655,53 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
                              py::return_value_policy::reference)
       .def("get_renderer_scene", &SScene::getRendererScene, py::return_value_policy::reference)
       .def("generate_unique_render_id", &SScene::generateUniqueRenderId)
+      // lights
+      .def_property_readonly("ambient_light",
+                             [](SScene &scene) {
+                               auto light = scene.getAmbientLight();
+                               return make_array(std::vector<float>{light[0], light[1], light[2]});
+                             })
+      .def(
+          "set_ambient_light",
+          [](SScene &scene, py::array_t<float> const &color) {
+            scene.setAmbientLight({color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("color"))
+      .def(
+          "add_point_light",
+          [](SScene &scene, py::array_t<float> const &position, py::array_t<float> const &color,
+             bool shadow, float near, float far) {
+            return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
+                                       {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+          },
+          py::arg("position"), py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1,
+          py::arg("far") = 10, py::return_value_policy::reference)
+      .def(
+          "add_directional_light",
+          [](SScene &scene, py::array_t<float> const &direction, py::array_t<float> const &color,
+             bool shadow, py::array_t<float> const &position, float scale, float near, float far) {
+            return scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
+                                             {color.at(0), color.at(1), color.at(2)}, shadow,
+                                             {position.at(0), position.at(1), position.at(2)},
+                                             scale, near, far);
+          },
+          py::arg("direction"), py::arg("color"), py::arg("shadow") = false,
+          py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
+          py::arg("near") = -10.f, py::arg("far") = 10.f, py::return_value_policy::reference)
+      .def(
+          "add_spot_light",
+          [](SScene &scene, py::array_t<float> const &position,
+             py::array_t<float> const &direction, float fov, py::array_t<float> const &color,
+             bool shadow, float near, float far) {
+            return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
+                                      {direction.at(0), direction.at(1), direction.at(2)}, fov,
+                                      {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+          },
+          py::arg("position"), py::arg("direction"), py::arg("fov"), py::arg("color"),
+          py::arg("shadow") = false, py::arg("near") = 0.1f, py::arg("far") = 10.f,
+          py::return_value_policy::reference)
+      .def("remove_light", &SScene::removeLight, py::arg("light"))
+      // save
       .def("pack",
            [](SScene &scene) {
              auto data = scene.packScene();
@@ -714,6 +771,12 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("linear"), py::arg("angular"));
 
+  PyEntity.def_property("name", &SEntity::getName, &SEntity::setName)
+      .def("get_name", &SEntity::getName)
+      .def("set_name", &SEntity::setName, py::arg("name"))
+      .def_property_readonly("pose", &SEntity::getPose)
+      .def("get_pose", &SEntity::getPose);
+
   //======== Actor ========//
   PyActorBase
       .def("__repr__",
@@ -722,9 +785,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
              oss << "Actor(name=\"" << actor.getName() << "\", id=\"" << actor.getId() << "\")";
              return oss.str();
            })
-      .def_property("name", &SActorBase::getName, &SActorBase::setName)
-      .def("get_name", &SActorBase::getName)
-      .def("set_name", &SActorBase::setName, py::arg("name"))
       .def_property_readonly(
           "type",
           [](SActorBase &actor) {
@@ -747,8 +807,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_property_readonly("id", &SActorBase::getId)
       .def("get_id", &SActorBase::getId)
       .def("get_scene", &SActorBase::getScene, py::return_value_policy::reference)
-      .def_property_readonly("pose", &SActorBase::getPose)
-      .def("get_pose", &SActorBase::getPose)
       .def("get_collision_shapes", &SActorBase::getCollisionShapes,
            py::return_value_policy::reference)
       .def("get_visual_bodies", &SActorBase::getRenderBodies, py::return_value_policy::reference)
@@ -911,9 +969,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
 
   //======== End Joint ========//
 
-  PyArticulationBase.def_property("name", &SArticulationBase::getName, &SArticulationBase::setName)
-      .def("get_name", &SArticulationBase::getName)
-      .def("set_name", &SArticulationBase::setName, py::arg("name"))
+  PyArticulationBase
       .def("get_links", &SArticulationBase::getBaseLinks, py::return_value_policy::reference)
       .def("get_joints", &SArticulationBase::getBaseJoints, py::return_value_policy::reference)
       .def_property_readonly("type",
@@ -995,11 +1051,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
             a.setQlimits(l);
           },
           py::arg("qlimits"))
-
-      .def_property_readonly("pose", &SArticulationBase::getRootPose, "same as get_root_pose")
       .def("get_root_pose", &SArticulationBase::getRootPose)
-      .def("get_pose", &SArticulationBase::getRootPose, "same as get_root_pose")
-
       .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"))
       .def("set_pose", &SArticulationBase::setRootPose, py::arg("pose"), "same as set_root_pose")
 #ifdef _USE_PINOCCHIO
@@ -1667,6 +1719,63 @@ Args:
           [](Renderer::SVulkan2Camera &camera) { return camera.getInternalRenderer(); },
           py::return_value_policy::reference);
 
+  PyLightEntity.def("set_pose", &SLight::setPose, py::arg("pose"))
+      .def_property_readonly("pose", &SLight::getPose)
+      .def(
+          "set_color",
+          [](SLight &light, py::array_t<float> color) {
+            light.setColor({color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("color"))
+      .def_property_readonly("color", [](SLight &light) { return vec32array(light.getColor()); })
+      .def_property("shadow", &SLight::getShadowEnabled, &SLight::setShadowEnabled);
+
+  // Light Entity
+  PyPointLightEntity
+      .def(
+          "set_position",
+          [](SPointLight &light, py::array_t<float> position) {
+            light.setPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def_property_readonly("position",
+                             [](SPointLight &light) { return vec32array(light.getPosition()); })
+      .def("set_shadow_parameters", &SPointLight::setShadowParameters, py ::arg("near"),
+           py::arg("far"));
+
+  PyDirectionalLightEntity
+      .def(
+          "set_direction",
+          [](SDirectionalLight &light, py::array_t<float> direction) {
+            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+          },
+          py::arg("direction"))
+      .def_property_readonly(
+          "direction", [](SDirectionalLight &light) { return vec32array(light.getDirection()); })
+      .def("set_shadow_parameters", &SDirectionalLight::setShadowParameters, py::arg("half_size"),
+           py ::arg("near"), py::arg("far"));
+
+  PySpotLightEntity
+      .def(
+          "set_position",
+          [](SSpotLight &light, py::array_t<float> position) {
+            light.setPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def_property_readonly("position",
+                             [](SSpotLight &light) { return vec32array(light.getPosition()); })
+      .def(
+          "set_direction",
+          [](SSpotLight &light, py::array_t<float> direction) {
+            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+          },
+          py::arg("direction"))
+      .def_property_readonly("direction",
+                             [](SSpotLight &light) { return vec32array(light.getDirection()); })
+      .def("set_shadow_parameters", &SSpotLight::setShadowParameters, py ::arg("near"),
+           py::arg("far"));
+
+  // Renderer Light (will be deprecated)
   PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
       .def_property_readonly("pose", &Renderer::ILight::getPose)
       .def(

@@ -2,6 +2,7 @@
 #include "event_system/event_system.h"
 #include "id_generator.h"
 #include "sapien_contact.h"
+#include "sapien_entity.h"
 #include "sapien_shape.h"
 #include "sapien_trigger.h"
 #include <PxPhysicsAPI.h>
@@ -33,12 +34,13 @@ using ContactCallback =
 using TriggerCallback =
     std::function<void(SActorBase *triggerActor, SActorBase *otherActor, STrigger const *trigger)>;
 
-class SActorBase : public EventEmitter<EventActorPreDestroy>,
+class SActorBase : public SEntity,
+                   public EventEmitter<EventActorPreDestroy>,
                    public EventEmitter<EventActorStep>,
                    public EventEmitter<EventActorContact>,
                    public EventEmitter<EventActorTrigger> {
 protected:
-  std::string mName{""};
+  // std::string mName{""};
   physx_id_t mId{0};
   SScene *mParentScene{};
   std::vector<Renderer::IPxrRigidbody *> mRenderBodies{};
@@ -77,15 +79,8 @@ public:
   // let the actor know that this drive is removed, should not be called by users
   void removeDrive(SDrive *drive);
 
-  inline std::string getName() { return mName; };
-  inline void setName(const std::string &name) { mName = name; }
   inline physx_id_t getId() { return mId; }
-  inline SScene *getScene() { return mParentScene; }
-
-  PxTransform getPose();
-  // inline uint32_t getCollisionGroup1() { return mCol1; }
-  // inline uint32_t getCollisionGroup2() { return mCol2; }
-  // inline uint32_t getCollisionGroup3() { return mCol3; }
+  PxTransform getPose() const override;
 
   void attachShape(std::unique_ptr<SCollisionShape> shape);
   std::vector<SCollisionShape *> getCollisionShapes() const;
@@ -95,7 +90,7 @@ public:
   std::vector<Renderer::IPxrRigidbody *> getCollisionBodies();
   void updateRender(PxTransform const &pose);
 
-  virtual PxRigidActor *getPxActor() = 0;
+  virtual PxRigidActor *getPxActor() const = 0;
   virtual EActorType getType() const = 0;
   virtual ~SActorBase() = default;
 
@@ -146,7 +141,7 @@ public:
   PxVec3 getInertia();
   PxTransform getCMassLocalPose();
 
-  PxRigidBody *getPxActor() override = 0;
+  PxRigidBody *getPxActor() const override = 0;
   virtual void addForceAtPoint(PxVec3 const &force, PxVec3 const &pos);
   virtual void addForceTorque(PxVec3 const &force, PxVec3 const &torque);
   void setDamping(PxReal linear, PxReal angular);

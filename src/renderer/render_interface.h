@@ -115,6 +115,9 @@ public:
   virtual physx::PxVec3 getPosition() const = 0;
   virtual void setPosition(physx::PxVec3 position) = 0;
   virtual void setShadowParameters(float near, float far) = 0;
+
+  virtual float getShadowNear() const = 0;
+  virtual float getShadowFar() const = 0;
 };
 
 class IDirectionalLight : public ILight {
@@ -122,6 +125,10 @@ public:
   virtual physx::PxVec3 getDirection() const = 0;
   virtual void setDirection(physx::PxVec3 direction) = 0;
   virtual void setShadowParameters(float halfSize, float near, float far) = 0;
+
+  virtual float getShadowHalfSize() const = 0;
+  virtual float getShadowNear() const = 0;
+  virtual float getShadowFar() const = 0;
 };
 
 class ISpotLight : public ILight {
@@ -131,6 +138,9 @@ public:
   virtual physx::PxVec3 getDirection() const = 0;
   virtual void setDirection(physx::PxVec3 direction) = 0;
   virtual void setShadowParameters(float near, float far) = 0;
+
+  virtual float getShadowNear() const = 0;
+  virtual float getShadowFar() const = 0;
 };
 
 class IPxrRigidbody {
@@ -212,6 +222,8 @@ public:
                                    std::array<float, 3> const &direction, float fov,
                                    std::array<float, 3> const &color, bool enableShadow,
                                    float shadowNear, float shadowFar) = 0;
+
+  virtual void removeLight(ILight *light) = 0;
 
   /** call this function before every rendering time frame */
   inline virtual void updateRender(){};

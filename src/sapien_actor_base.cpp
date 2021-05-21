@@ -189,10 +189,10 @@ std::vector<SCollisionShape *> SActorBase::getCollisionShapes() const {
 SActorBase::SActorBase(physx_id_t id, SScene *scene,
                        std::vector<Renderer::IPxrRigidbody *> renderBodies,
                        std::vector<Renderer::IPxrRigidbody *> collisionBodies)
-    : mId(id), mParentScene(scene), mRenderBodies(renderBodies),
+    : SEntity(scene), mId(id), mParentScene(scene), mRenderBodies(renderBodies),
       mCollisionBodies(collisionBodies) {}
 
-PxTransform SActorBase::getPose() { return getPxActor()->getGlobalPose(); }
+PxTransform SActorBase::getPose() const { return getPxActor()->getGlobalPose(); }
 
 PxVec3 SActorDynamicBase::getVelocity() { return getPxActor()->getLinearVelocity(); }
 

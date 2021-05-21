@@ -1,4 +1,5 @@
 #!/bin/bash
+rm wheelhouse/*.whl
 echo 1.0.dev_$(date +"%m_%d_%y") > python/VERSION
 
 docker run -v `pwd`:/workspace/SAPIEN -it --rm \

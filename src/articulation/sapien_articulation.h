@@ -15,8 +15,6 @@ class SArticulation : public SArticulationDrivable {
   friend class ArticulationBuilder;
   friend class LinkBuilder;
 
-  SScene *mScene;
-
   PxArticulationReducedCoordinate *mPxArticulation = nullptr;
   PxArticulationCache *mCache = nullptr;
 
@@ -64,11 +62,9 @@ public:
   void setRootVelocity(physx::PxVec3 const &v);
   void setRootAngularVelocity(physx::PxVec3 const &omega);
 
-  SScene *getScene() const override { return mScene; }
-
   void prestep() override;
 
-  SLinkBase *getRootLink() override;
+  SLinkBase *getRootLink() const override;
 
   inline PxArticulationReducedCoordinate *getPxArticulation() { return mPxArticulation; }
 
