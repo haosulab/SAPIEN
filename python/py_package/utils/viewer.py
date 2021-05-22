@@ -1588,6 +1588,7 @@ class Viewer(object):
         self.axes = None
         self.scene = None
         self.fps_camera_controller = None
+        self.arc_camera_controller = None
         self.window = None
         self.camera_ui = None
         self.control_window = None
