@@ -1,4 +1,4 @@
-from ..core.pysapien import renderer as R
+from ..core import renderer as R
 from ..core import (
     ActorBase,
     Pose,
