@@ -58,6 +58,9 @@ public:
   std::vector<physx::PxReal> getDriveTarget() const override;
   void setDriveTarget(std::vector<physx::PxReal> const &v) override;
 
+  std::vector<physx::PxReal> getDriveVelocityTarget() const;
+  void setDriveVelocityTarget(std::vector<physx::PxReal> const &v);
+
   void setRootPose(physx::PxTransform const &T) override;
   void setRootVelocity(physx::PxVec3 const &v);
   void setRootAngularVelocity(physx::PxVec3 const &omega);

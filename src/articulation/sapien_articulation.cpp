@@ -222,6 +222,29 @@ std::vector<PxReal> SArticulation::getDriveTarget() const {
   return driveTarget;
 }
 
+std::vector<physx::PxReal> SArticulation::getDriveVelocityTarget() const {
+  std::vector<PxReal> velTarget;
+  for (auto &j : mJoints) {
+    for (auto axis : j->getAxes()) {
+      velTarget.push_back(j->getPxJoint()->getDriveVelocity(axis));
+    }
+  }
+  return velTarget;
+}
+
+void SArticulation::setDriveVelocityTarget(std::vector<physx::PxReal> const &v) {
+  CHECK_SIZE(v);
+
+  uint32_t i = 0;
+  for (auto &j : mJoints) {
+    for (auto axis : j->getAxes()) {
+      j->getPxJoint()->setDriveVelocity(axis, v[i]);
+      i += 1;
+    }
+  }
+  mPxArticulation->wakeUp();
+}
+
 std::vector<SLink *> SArticulation::getSLinks() {
   std::vector<SLink *> result;
   result.reserve(mLinks.size());

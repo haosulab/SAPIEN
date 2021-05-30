@@ -691,15 +691,16 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def(
           "add_spot_light",
           [](SScene &scene, py::array_t<float> const &position,
-             py::array_t<float> const &direction, float fov, py::array_t<float> const &color,
-             bool shadow, float near, float far) {
+             py::array_t<float> const &direction, float fovInner, float fovOuter,
+             py::array_t<float> const &color, bool shadow, float near, float far) {
             return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
-                                      {direction.at(0), direction.at(1), direction.at(2)}, fov,
-                                      {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+                                      {direction.at(0), direction.at(1), direction.at(2)},
+                                      fovInner, fovOuter, {color.at(0), color.at(1), color.at(2)},
+                                      shadow, near, far);
           },
-          py::arg("position"), py::arg("direction"), py::arg("fov"), py::arg("color"),
-          py::arg("shadow") = false, py::arg("near") = 0.1f, py::arg("far") = 10.f,
-          py::return_value_policy::reference)
+          py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
+          py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
+          py::arg("far") = 10.f, py::return_value_policy::reference)
       .def("remove_light", &SScene::removeLight, py::arg("light"))
       // save
       .def("pack",
@@ -1077,6 +1078,19 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
   PyArticulation //.def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
                  //.def("get_joints", &SArticulation::getSJoints,
                  // py::return_value_policy::reference)
+
+      .def("get_drive_velocity_target",
+           [](SArticulation &a) {
+             auto target = a.getDriveVelocityTarget();
+             return py::array_t<PxReal>(target.size(), target.data());
+           })
+      .def(
+          "set_drive_velocity_target",
+          [](SArticulation &a, const py::array_t<PxReal> &arr) {
+            a.setDriveVelocityTarget(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+          },
+          py::arg("drive_velocity_target"))
+
       .def("get_active_joints", &SArticulation::getActiveJoints,
            py::return_value_policy::reference)
       .def(
@@ -2001,15 +2015,16 @@ Args:
       .def(
           "add_spot_light",
           [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
-             py::array_t<float> const &direction, float fov, py::array_t<float> const &color,
-             bool shadow, float near, float far) {
+             py::array_t<float> const &direction, float fovInner, float fovOuter,
+             py::array_t<float> const &color, bool shadow, float near, float far) {
             return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
-                                      {direction.at(0), direction.at(1), direction.at(2)}, fov,
-                                      {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+                                      {direction.at(0), direction.at(1), direction.at(2)},
+                                      fovInner, fovOuter, {color.at(0), color.at(1), color.at(2)},
+                                      shadow, near, far);
           },
-          py::arg("position"), py::arg("direction"), py::arg("fov"), py::arg("color"),
-          py::arg("shadow") = false, py::arg("near") = 0.1f, py::arg("far") = 10.f,
-          py::return_value_policy::reference)
+          py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
+          py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
+          py::arg("far") = 10.f, py::return_value_policy::reference)
 
       .def(
           "add_mesh_from_file",
