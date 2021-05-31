@@ -24,6 +24,7 @@ layout(location = 0) out vec4 outAlbedo2;
 void main() {
   if ((materialBuffer.textureMask & 1) != 0) {
     outAlbedo2 = texture(colorTexture, inUV);
+    outAlbedo2.rgb = pow(outAlbedo2.rgb, vec3(2.2));  // sRGB to linear
   } else {
     outAlbedo2 = materialBuffer.baseColor;
   }

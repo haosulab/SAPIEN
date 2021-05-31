@@ -222,9 +222,9 @@ public:
                       float shadowNear, float shadowFar) = 0;
 
   virtual ISpotLight *addSpotLight(std::array<float, 3> const &position,
-                                   std::array<float, 3> const &direction, float fov,
-                                   std::array<float, 3> const &color, bool enableShadow,
-                                   float shadowNear, float shadowFar) = 0;
+                                   std::array<float, 3> const &direction, float fovInner,
+                                   float fovOuter, std::array<float, 3> const &color,
+                                   bool enableShadow, float shadowNear, float shadowFar) = 0;
 
   virtual void removeLight(ILight *light) = 0;
 

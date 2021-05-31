@@ -100,7 +100,7 @@ public:
                                          std::array<float, 3> const &position, float shadowScale,
                                          float shadowNear, float shadowFar) override;
   ISpotLight *addSpotLight(std::array<float, 3> const &position,
-                           std::array<float, 3> const &direction, float fov,
+                           std::array<float, 3> const &direction, float fovInner, float fovOuter,
                            std::array<float, 3> const &color, bool enableShadow, float shadowNear,
                            float shadowFar) override;
 

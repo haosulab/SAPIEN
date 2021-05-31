@@ -175,6 +175,7 @@ void main() {
     vec3 l = pos - csPosition.xyz;
     vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
     color += computeSpotLight(
+        sceneBuffer.spotLights[i].emission.a,
         sceneBuffer.spotLights[i].direction.a,
         centerDir,
         sceneBuffer.spotLights[i].emission.rgb,

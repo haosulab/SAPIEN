@@ -24,7 +24,7 @@ physx::PxVec3 SVulkan2PointLight::getColor() const {
 }
 
 void SVulkan2PointLight::setColor(physx::PxVec3 color) {
-  mLight->setColor({color.x, color.y, color.z, 1.f});
+  mLight->setColor({color.x, color.y, color.z});
 }
 
 bool SVulkan2PointLight::getShadowEnabled() const { return mLight->isShadowEnabled(); }
@@ -68,7 +68,7 @@ physx::PxVec3 SVulkan2DirectionalLight::getColor() const {
 }
 
 void SVulkan2DirectionalLight::setColor(physx::PxVec3 color) {
-  mLight->setColor({color.x, color.y, color.z, 1.f});
+  mLight->setColor({color.x, color.y, color.z});
 }
 
 bool SVulkan2DirectionalLight::getShadowEnabled() const { return mLight->isShadowEnabled(); }
@@ -112,7 +112,7 @@ physx::PxVec3 SVulkan2SpotLight::getColor() const {
 }
 
 void SVulkan2SpotLight::setColor(physx::PxVec3 color) {
-  mLight->setColor({color.x, color.y, color.z, 1.f});
+  mLight->setColor({color.x, color.y, color.z});
 }
 
 bool SVulkan2SpotLight::getShadowEnabled() const { return mLight->isShadowEnabled(); }

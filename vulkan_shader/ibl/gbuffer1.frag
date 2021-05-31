@@ -112,6 +112,7 @@ void main() {
 
   if ((materialBuffer.textureMask & 1) != 0) {
     albedo = texture(colorTexture, inUV);
+    albedo.rgb = pow(albedo.rgb, vec3(2.2));  // sRGB to linear
   } else {
     albedo = materialBuffer.baseColor;
   }
@@ -174,6 +175,7 @@ void main() {
     vec3 l = pos - csPosition.xyz;
     vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
     color += computeSpotLight(
+        sceneBuffer.spotLights[i].emission.a,
         sceneBuffer.spotLights[i].direction.a,
         centerDir,
         sceneBuffer.spotLights[i].emission.rgb,

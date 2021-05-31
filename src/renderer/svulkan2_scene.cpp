@@ -22,7 +22,7 @@ SVulkan2PointLight *SVulkan2Scene::addPointLight(std::array<float, 3> const &pos
                                                  bool enableShadow, float shadowNear,
                                                  float shadowFar) {
   auto &light = mScene->addPointLight();
-  light.setColor({color[0], color[1], color[2], 1.f});
+  light.setColor({color[0], color[1], color[2]});
   light.setTransform({.position = glm::vec4(position[0], position[1], position[2], 1.f)});
   if (enableShadow) {
     light.enableShadow(true);
@@ -39,7 +39,7 @@ SVulkan2DirectionalLight *SVulkan2Scene::addDirectionalLight(
     std::array<float, 3> const &position, float shadowScale, float shadowNear, float shadowFar) {
   auto &light = mScene->addDirectionalLight();
   light.setDirection({direction[0], direction[1], direction[2]});
-  light.setColor({color[0], color[1], color[2], 1.f});
+  light.setColor({color[0], color[1], color[2]});
   if (enableShadow) {
     light.enableShadow(true);
     light.setPosition({position[0], position[1], position[2]});
@@ -52,15 +52,17 @@ SVulkan2DirectionalLight *SVulkan2Scene::addDirectionalLight(
 }
 
 SVulkan2SpotLight *SVulkan2Scene::addSpotLight(std::array<float, 3> const &position,
-                                               std::array<float, 3> const &direction, float fov,
+                                               std::array<float, 3> const &direction,
+                                               float fovInner, float fovOuter,
                                                std::array<float, 3> const &color,
                                                bool enableShadow, float shadowNear,
                                                float shadowFar) {
   auto &light = mScene->addSpotLight();
   light.setPosition({position[0], position[1], position[2]});
   light.setDirection({direction[0], direction[1], direction[2]});
-  light.setFov(fov);
-  light.setColor({color[0], color[1], color[2], 1.f});
+  light.setFov(fovOuter);
+  light.setFovSmall(fovInner);
+  light.setColor({color[0], color[1], color[2]});
   if (enableShadow) {
     light.enableShadow(true);
     light.setShadowParameters(shadowNear, shadowFar);

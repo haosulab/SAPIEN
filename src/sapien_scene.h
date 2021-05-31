@@ -219,10 +219,14 @@ public:
   SDirectionalLight *addDirectionalLight(PxVec3 const &direction, PxVec3 const &color,
                                          bool enableShadow, PxVec3 const &position,
                                          float shadowScale, float shadowNear, float shadowFar);
-  SSpotLight *addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fov,
-                           PxVec3 const &color, bool enableShadow, float shadowNear,
-                           float shadowFar);
-  void removeLight(SLight* light);
+  // SSpotLight *addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fov,
+  //                          PxVec3 const &color, bool enableShadow, float shadowNear,
+  //                          float shadowFar);
+  SSpotLight *addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fovInner,
+                           float fovOuter, PxVec3 const &color, bool enableShadow,
+                           float shadowNear, float shadowFar);
+
+  void removeLight(SLight *light);
 
   /** syncs physical scene with renderer scene, and tell the renderer scene that
    * it is a new time frame.
