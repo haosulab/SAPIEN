@@ -317,17 +317,18 @@ class Viewer(object):
         rs = self.scene.renderer_scene
         render_scene: R.Scene = rs._internal_scene
 
-        self.grab_objects = [
+        grab_axes = [
             render_scene.add_object(model)
             for model in [self.red_capsule, self.green_capsule, self.blue_capsule]
         ]
 
-        for obj in self.grab_objects:
+        for obj in grab_axes:
             obj.set_position([0, 0, 0])
             obj.set_scale([100, 0.1, 0.1])
             obj.shading_mode = 2
             obj.cast_shadow = False
             obj.transparency = 1
+        return grab_axes
 
     def _create_joint_axes(self):
         assert self.scene is not None
@@ -347,6 +348,13 @@ class Viewer(object):
         return joint_axes
 
     def create_visual_objects(self):
+        if hasattr(self, "coordinate_axes") and self.coordinate_axes:
+            self.scene.renderer_scene._internal_scene.remove_node(self.coordinate_axes)
+            for n in self.grab_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(n)
+            for n in self.joint_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(n)
+
         self.coordinate_axes = self._create_coordinate_axes()
         self.grab_axes = self._create_grab_axes()
         self.joint_axes = self._create_joint_axes()
@@ -363,7 +371,7 @@ class Viewer(object):
 
     def leave_mode(self, name):
         if name == "grab":
-            for obj in self.grab_objects:
+            for obj in self.grab_axes:
                 obj.transparency = 1
             if self.display_object:
                 rs = self.scene.renderer_scene
@@ -371,7 +379,7 @@ class Viewer(object):
                 render_scene.remove_node(self.display_object)
                 self.display_object = None
         elif name == "rotate":
-            for obj in self.grab_objects:
+            for obj in self.grab_axes:
                 obj.transparency = 1
             if self.display_object:
                 rs = self.scene.renderer_scene
@@ -420,9 +428,9 @@ class Viewer(object):
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
             self.add_display_object()
 
             point = self.world_space_to_screen_space(self.selected_entity.pose.p)
@@ -444,11 +452,11 @@ class Viewer(object):
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_entity.pose.p)
-            self.grab_objects[0].set_rotation([1, 0, 0, 0])
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation([1, 0, 0, 0])
             self.add_display_object()
             self.rotate_axis = np.array([1, 0, 0])
 
@@ -474,11 +482,11 @@ class Viewer(object):
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_entity.pose.p)
-            self.grab_objects[0].set_rotation(self.selected_entity.pose.q)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation(self.selected_entity.pose.q)
             self.add_display_object()
             self.rotate_axis = np.array(
                 rotate_vector([1, 0, 0], self.selected_entity.pose.q)
@@ -510,11 +518,11 @@ class Viewer(object):
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[1].set_position(self.selected_entity.pose.p)
-            self.grab_objects[1].set_rotation(x2y)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(x2y)
             self.add_display_object()
             self.rotate_axis = np.array([0, 1, 0])
 
@@ -540,11 +548,11 @@ class Viewer(object):
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[1].set_position(self.selected_entity.pose.p)
-            self.grab_objects[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
             self.add_display_object()
             self.rotate_axis = np.array(
                 rotate_vector([0, 1, 0], self.selected_entity.pose.q)
@@ -576,11 +584,11 @@ class Viewer(object):
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[2].set_position(self.selected_entity.pose.p)
-            self.grab_objects[2].set_rotation(x2z)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(x2z)
             self.add_display_object()
             self.rotate_axis = np.array([0, 0, 1])
 
@@ -606,11 +614,11 @@ class Viewer(object):
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[2].set_position(self.selected_entity.pose.p)
-            self.grab_objects[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
             self.add_display_object()
             self.rotate_axis = np.array(
                 rotate_vector([0, 0, 1], self.selected_entity.pose.q)
@@ -641,9 +649,9 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
             self.add_display_object()
             self.grab_axis = None
             self.grab_plane = None
@@ -653,11 +661,11 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_entity.pose.p)
-            self.grab_objects[0].set_rotation([1, 0, 0, 0])
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation([1, 0, 0, 0])
             self.add_display_object()
             self.grab_axis = np.array([1, 0, 0])
             self.grab_plane = None
@@ -667,11 +675,11 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_entity.pose.p)
-            self.grab_objects[0].set_rotation(self.selected_entity.pose.q)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation(self.selected_entity.pose.q)
             self.add_display_object()
             self.grab_axis = rotate_vector([1, 0, 0], self.selected_entity.pose.q)
             self.grab_plane = None
@@ -685,13 +693,13 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[1].set_position(self.selected_entity.pose.p)
-            self.grab_objects[1].set_rotation(x2y)
-            self.grab_objects[2].set_position(self.selected_entity.pose.p)
-            self.grab_objects[2].set_rotation(x2z)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(x2y)
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(x2z)
             self.add_display_object()
             self.grab_axis = None
             self.grab_plane = np.array([1, 0, 0])
@@ -701,13 +709,13 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[1].set_position(self.selected_entity.pose.p)
-            self.grab_objects[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
-            self.grab_objects[2].set_position(self.selected_entity.pose.p)
-            self.grab_objects[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
             self.add_display_object()
             self.grab_axis = None
             self.grab_plane = rotate_vector(
@@ -723,11 +731,11 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[1].set_position(self.selected_entity.pose.p)
-            self.grab_objects[1].set_rotation(x2y)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(x2y)
             self.add_display_object()
             self.grab_axis = np.array([0, 1, 0])
             self.grab_plane = None
@@ -737,11 +745,11 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[1].set_position(self.selected_entity.pose.p)
-            self.grab_objects[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
             self.add_display_object()
             self.grab_axis = rotate_vector([0, 1, 0], self.selected_entity.pose.q)
             self.grab_plane = None
@@ -755,13 +763,13 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[0].set_position(self.selected_entity.pose.p)
-            self.grab_objects[0].set_rotation([1, 0, 0, 0])
-            self.grab_objects[2].set_position(self.selected_entity.pose.p)
-            self.grab_objects[2].set_rotation(x2z)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation([1, 0, 0, 0])
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(x2z)
             self.add_display_object()
             self.grab_axis = None
             self.grab_plane = np.array([0, 1, 0])
@@ -771,15 +779,15 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[0].set_position(self.selected_entity.pose.p)
-            self.grab_objects[0].set_rotation(
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation(
                 qmult(self.selected_entity.pose.q, [1, 0, 0, 0])
             )
-            self.grab_objects[2].set_position(self.selected_entity.pose.p)
-            self.grab_objects[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
             self.add_display_object()
             self.grab_axis = None
             self.grab_plane = rotate_vector(
@@ -795,11 +803,11 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[2].set_position(self.selected_entity.pose.p)
-            self.grab_objects[2].set_rotation(x2z)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(x2z)
             self.add_display_object()
             self.grab_axis = np.array([0, 0, 1])
             self.grab_plane = None
@@ -809,11 +817,11 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[2].set_position(self.selected_entity.pose.p)
-            self.grab_objects[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
             self.add_display_object()
             self.grab_axis = rotate_vector([0, 0, 1], self.selected_entity.pose.q)
             self.grab_plane = None
@@ -827,13 +835,13 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_entity.pose.p)
-            self.grab_objects[0].set_rotation([1, 0, 0, 0])
-            self.grab_objects[1].set_position(self.selected_entity.pose.p)
-            self.grab_objects[1].set_rotation(x2y)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation([1, 0, 0, 0])
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(x2y)
             self.add_display_object()
             self.grab_axis = None
             self.grab_plane = np.array([0, 0, 1])
@@ -843,15 +851,15 @@ class Viewer(object):
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_entity.pose.p)
-            self.grab_objects[0].set_rotation(
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation(
                 qmult(self.selected_entity.pose.q, [1, 0, 0, 0])
             )
-            self.grab_objects[1].set_position(self.selected_entity.pose.p)
-            self.grab_objects[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
             self.add_display_object()
             self.grab_axis = None
             self.grab_plane = rotate_vector(
@@ -1585,6 +1593,17 @@ class Viewer(object):
         return self.window is None
 
     def close(self):
+        if hasattr(self, "coordinate_axes") and self.coordinate_axes:
+            self.scene.renderer_scene._internal_scene.remove_node(self.coordinate_axes)
+            for n in self.grab_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(n)
+            for n in self.joint_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(n)
+
+            self.coordinate_axes = None
+            self.grab_axes = None
+            self.joint_axes = None
+
         self.axes = None
         self.scene = None
         self.fps_camera_controller = None
