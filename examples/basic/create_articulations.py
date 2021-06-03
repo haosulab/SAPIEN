@@ -206,7 +206,7 @@ def main():
     viewer.set_camera_xyz(x=-12, y=0, z=15)
     viewer.set_camera_rpy(r=0, p=-np.arctan2(2, 2), y=0)
     viewer.window.set_camera_parameters(near=0.05, far=100, fovy=1)
-    viewer.focus_actor(car)
+    viewer.focus_entity(car)
 
     rscene = scene.get_renderer_scene()
     rscene.set_ambient_light([0.5, 0.5, 0.5])
