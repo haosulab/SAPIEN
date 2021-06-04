@@ -6,6 +6,17 @@ collaborative effort between researchers at UCSD, Stanford and SFU. The dataset
 is a continuation of ShapeNet and PartNet.
 
 ## Change Log
+### 1.1
+- Support nonconvex static/kinematic collision shape
+- Add warning for small mass/inertia
+- Introduce Entity as the base class of Actors
+- Add Light classes inherited from entity, allowing manipulate light objects in sapien scene
+- Updates to the viewer
+  - rename actor to entity when appropriate
+- Partial support the material tag in URDF loader (primitive shape, single color)
+- Bug fixes for the renderer
+- Support inner and outer FOV for spotlight
+
 ### 1.0
 - Replace the old Vulkan based renderer completely
   - See `sapien.core.renderer` for details
