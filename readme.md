@@ -23,7 +23,7 @@ powers research for generalizable computer vision and manipulation.
 ## Website and Documentation
 SAPIEN Website: [https://sapien.ucsd.edu/](https://sapien.ucsd.edu/). SAPIEN
 Documentation:
-[https://sapien.ucsd.edu/docs/index.html](https://sapien.ucsd.edu/docs/index.html).
+[https://sapien.ucsd.edu/docs/latest/index.html](https://sapien.ucsd.edu/docs/latest/index.html).
 
 ## Before build
 `git submodule update --init --recursive`
