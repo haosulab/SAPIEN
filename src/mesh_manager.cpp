@@ -459,6 +459,8 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
       meshes.push_back(convexMesh);
     }
   }
+
+  mMeshGroupRegistry[fullPath] = {fullPath, meshes};
   return meshes;
 }
 
