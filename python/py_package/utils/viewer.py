@@ -1548,6 +1548,19 @@ class Viewer(object):
             self.single_step = True
 
     def set_scene(self, scene: Scene):
+        if hasattr(self, "scene") and self.scene:
+            if hasattr(self, "coordinate_axes") and self.coordinate_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(
+                    self.coordinate_axes
+                )
+                for n in self.grab_axes:
+                    self.scene.renderer_scene._internal_scene.remove_node(n)
+                for n in self.joint_axes:
+                    self.scene.renderer_scene._internal_scene.remove_node(n)
+            self.coordinate_axes = None
+            self.grab_axes = None
+            self.joint_axes = None
+
         self.scene = scene
         self.window.set_scene(scene)
         self.fps_camera_controller = FPSCameraController(self.window)
