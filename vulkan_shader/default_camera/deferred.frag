@@ -48,7 +48,7 @@ layout(set = 1, binding = 0) uniform CameraBuffer {
 } cameraBuffer;
 
 layout(set = 2, binding = 0) uniform sampler2D samplerAlbedo;
-layout(set = 2, binding = 1) uniform sampler2D samplerPosition;
+layout(set = 2, binding = 1) uniform sampler2D samplerPosition0;
 layout(set = 2, binding = 2) uniform sampler2D samplerSpecular;
 layout(set = 2, binding = 3) uniform sampler2D samplerNormal;
 layout(set = 2, binding = 4) uniform sampler2D samplerGbufferDepth;
