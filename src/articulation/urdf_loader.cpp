@@ -570,7 +570,7 @@ SKArticulation *URDFLoader::loadKinematic(const std::string &filename, URDFConfi
     return nullptr;
   }
 
-  auto [builder, records] = parseRobotDescription(urdfDoc, srdfDoc.get(), filename, false, config);
+  auto [builder, records] = parseRobotDescription(urdfDoc, srdfDoc.get(), filename, true, config);
   auto articulation = builder->buildKinematic();
 
   for (auto &record : records) {
@@ -615,7 +615,7 @@ URDFLoader::loadFileAsArticulationBuilder(const std::string &filename, URDFConfi
     return nullptr;
   }
   return std::move(
-      std::get<0>(parseRobotDescription(urdfDoc, srdfDoc.get(), filename, false, config)));
+      std::get<0>(parseRobotDescription(urdfDoc, srdfDoc.get(), filename, true, config)));
 }
 
 SArticulation *URDFLoader::loadFromXML(const std::string &URDFString,
