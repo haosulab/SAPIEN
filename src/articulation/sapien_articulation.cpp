@@ -125,19 +125,6 @@ void SArticulation::setQlimits(std::vector<std::array<physx::PxReal, 2>> const &
   }
 }
 
-void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
-  CHECK_SIZE(v);
-
-  uint32_t i = 0;
-  for (auto &j : mJoints) {
-    for (auto axis : j->getAxes()) {
-      j->getPxJoint()->setDriveTarget(axis, v[i]);
-      i += 1;
-    }
-  }
-  mPxArticulation->wakeUp();
-}
-
 void SArticulation::setRootPose(physx::PxTransform const &T) {
   mPxArticulation->teleportRootLink(T, true);
 }
@@ -212,24 +199,27 @@ SArticulation::buildRowPermutation() {
   return permutation;
 }
 
+void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
+  CHECK_SIZE(v);
+
+  uint32_t i = 0;
+  for (auto &j : mJoints) {
+    if (j->getAxes().size() == 1) {
+      j->setDriveTarget(v[i]);
+      i += 1;
+    }
+  }
+  mPxArticulation->wakeUp();
+}
+
 std::vector<PxReal> SArticulation::getDriveTarget() const {
   std::vector<PxReal> driveTarget;
   for (auto &j : mJoints) {
-    for (auto axis : j->getAxes()) {
-      driveTarget.push_back(j->getPxJoint()->getDriveTarget(axis));
+    if (j->getAxes().size() == 1) {
+      driveTarget.push_back(j->getDriveTarget());
     }
   }
   return driveTarget;
-}
-
-std::vector<physx::PxReal> SArticulation::getDriveVelocityTarget() const {
-  std::vector<PxReal> velTarget;
-  for (auto &j : mJoints) {
-    for (auto axis : j->getAxes()) {
-      velTarget.push_back(j->getPxJoint()->getDriveVelocity(axis));
-    }
-  }
-  return velTarget;
 }
 
 void SArticulation::setDriveVelocityTarget(std::vector<physx::PxReal> const &v) {
@@ -237,12 +227,22 @@ void SArticulation::setDriveVelocityTarget(std::vector<physx::PxReal> const &v) 
 
   uint32_t i = 0;
   for (auto &j : mJoints) {
-    for (auto axis : j->getAxes()) {
-      j->getPxJoint()->setDriveVelocity(axis, v[i]);
+    if (j->getAxes().size() == 1) {
+      j->setDriveVelocityTarget(v[i]);
       i += 1;
     }
   }
   mPxArticulation->wakeUp();
+}
+
+std::vector<PxReal> SArticulation::getDriveVelocityTarget() const {
+  std::vector<PxReal> driveTarget;
+  for (auto &j : mJoints) {
+    if (j->getAxes().size() == 1) {
+      driveTarget.push_back(j->getDriveVelocityTarget());
+    }
+  }
+  return driveTarget;
 }
 
 std::vector<SLink *> SArticulation::getSLinks() {
