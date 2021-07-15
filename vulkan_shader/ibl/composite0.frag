@@ -8,6 +8,10 @@ layout(set = 0, binding = 4) uniform sampler2D samplerGbuffer1Depth;
 layout(set = 0, binding = 5) uniform sampler2D samplerGbuffer2Depth;
 layout(set = 0, binding = 6) uniform usampler2D samplerSegmentation0;
 layout(set = 0, binding = 7) uniform usampler2D samplerSegmentation1;
+layout(set = 0, binding = 8) uniform sampler2D samplerLineDepth;
+layout(set = 0, binding = 9) uniform sampler2D samplerLine;
+layout(set = 0, binding = 10) uniform sampler2D samplerPointDepth;
+layout(set = 0, binding = 11) uniform sampler2D samplerPoint;
 
 layout(location = 0) in vec2 inUV;
 layout(location = 0) out vec4 outColor;
@@ -100,6 +104,7 @@ void main() {
   vec4 outColor1 = texture(samplerLighting1, inUV);
   vec4 outColor2 = texture(samplerAlbedo2, inUV);
 
+
   // depth composite for 0 and 2
   float factor = step(d0, d2);
   outColor0 = outColor0 * factor + outColor2 * (1 - factor);
@@ -120,4 +125,15 @@ void main() {
 
   outSegmentationView0 = mix(vec4(0,0,0,1), colors[outSegmentation.x % 60], sign(outSegmentation.x));
   outSegmentationView1 = mix(vec4(0,0,0,1), colors[outSegmentation.y % 60], sign(outSegmentation.y));
+
+
+  vec4 lineColor = texture(samplerLine, inUV);
+  if (texture(samplerLineDepth, inUV).x < 1) {
+    outColor = vec4(lineColor.xyz, 1);
+  }
+
+  vec4 pointColor = texture(samplerPoint, inUV);
+  if (texture(samplerPointDepth, inUV).x < 1) {
+    outColor = vec4(pointColor.xyz, 1);
+  }
 }

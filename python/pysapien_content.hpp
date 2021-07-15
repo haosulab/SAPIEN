@@ -1641,7 +1641,10 @@ Args:
       .def_property_readonly(
           "_internal_context",
           [](Renderer::SVulkan2Renderer &renderer) { return renderer.mContext.get(); },
-          py::return_value_policy::reference);
+          py::return_value_policy::reference)
+      .def("clear_cached_resources", [](Renderer::SVulkan2Renderer &renderer) {
+        renderer.mContext->getResourceManager()->clearCachedResources();
+      });
 
   PyVulkanRigidbody.def_property_readonly("_internal_objects",
                                           &Renderer::SVulkan2Rigidbody::getVisualObjects,

@@ -190,6 +190,7 @@ class Viewer(object):
 
         self.create_visual_models()
 
+        self.scene = None
         self.window = None
         self.resolution = None
         self.resolutions = None
@@ -226,6 +227,40 @@ class Viewer(object):
         self.coordinate_axes_mode = "Origin"
         self.immediate_mode = False
 
+        self.camera_linesets = []
+
+    def _clear_camera_linesets(self):
+        if self.scene is None:
+            return
+
+        rs = self.scene.renderer_scene
+        for n in self.camera_linesets:
+            rs._internal_scene.remove_node(n)
+        self.camera_linesets = []
+
+    def _update_camera_linesets(self):
+        if self.scene is None:
+            return
+        rs = self.scene.renderer_scene
+        render_scene: R.Scene = rs._internal_scene
+
+        cameras = self.scene.get_mounted_cameras()
+        if len(self.camera_linesets) != len(cameras):
+            self._clear_camera_linesets()
+            for c in self.cameras:
+                self.camera_linesets.append(
+                    render_scene.add_line_set(self.camera_lineset)
+                )
+        for lineset, camera in zip(self.camera_linesets, cameras):
+            lineset: R.LineSetObject
+            mat = camera.get_model_matrix()
+            lineset.set_position(mat[:3, 3])
+            lineset.set_rotation(mat2quat(mat[:3, :3]))
+
+            scaley = np.tan(camera.get_fovy() / 2)
+            scalex = scaley / camera.get_height() * camera.get_width()
+            lineset.set_scale(np.array([scalex, scaley, 1]) * 0.3)
+
     def create_visual_models(self):
         self.cone = self.renderer_context.create_cone_mesh(16)
         self.capsule = self.renderer_context.create_capsule_mesh(0.1, 0.5, 16, 4)
@@ -258,6 +293,24 @@ class Viewer(object):
         )
         self.magenta_capsule = self.renderer_context.create_model(
             [self.capsule], [self.mat_magenta]
+        )
+
+        self.camera_lineset = self.renderer_context.create_line_set(
+            [
+                0, 0, 0, 1, 1, -1,
+                0, 0, 0, -1, 1, -1,
+                0, 0, 0, 1, -1, -1,
+                0, 0, 0, -1, -1, -1,
+                1, 1, -1, 1, -1, -1,
+                1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, 1, -1,
+                -1, 1, -1, 1, 1, -1,
+
+                1, 1.2, -1, 0, 2, -1,
+                0, 2, -1, -1, 1.2, -1,
+                -1, 1.2, -1, 1, 1.2, -1,
+            ],
+            [0.9254901960784314, 0.5764705882352941, 0.18823529411764706, 1] * 22
         )
 
     def _create_coordinate_axes(self):
@@ -983,7 +1036,10 @@ class Viewer(object):
                     if self.focused_camera is None
                     else self.cameras.index(self.focused_camera) + 1
                 )
-                .Items(["None"] + [x.get_name() for x in self.cameras])
+                .Items(
+                    ["None"]
+                    + [x.get_name() + f"##{i}" for i, x in enumerate(self.cameras)]
+                )
                 .Callback(
                     lambda p: self.focus_camera(
                         self.cameras[p.index - 1] if p.index > 0 else None
@@ -1075,7 +1131,7 @@ class Viewer(object):
                     .Label("Immediate Move")
                     .Checked(self.immediate_mode)
                     .Callback(lambda p: self.set_immediate_move(p.checked)),
-                    R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps))
+                    R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps)),
                 )
             )
         self.control_window.get_children()[-1].Text(
@@ -1380,14 +1436,8 @@ class Viewer(object):
                 .ReadOnly(True),
             )
             self.actor_window.append(
-                R.UIInputFloat()
-                .Label("Near")
-                .Value(light.shadow_near)
-                .ReadOnly(True),
-                R.UIInputFloat()
-                .Label("Far")
-                .Value(light.shadow_far)
-                .ReadOnly(True),
+                R.UIInputFloat().Label("Near").Value(light.shadow_near).ReadOnly(True),
+                R.UIInputFloat().Label("Far").Value(light.shadow_far).ReadOnly(True),
             )
 
             if light.classname == "PointLightEntity":
@@ -1561,6 +1611,8 @@ class Viewer(object):
             self.grab_axes = None
             self.joint_axes = None
 
+        self._clear_camera_linesets()
+
         self.scene = scene
         self.window.set_scene(scene)
         self.fps_camera_controller = FPSCameraController(self.window)
@@ -1616,6 +1668,8 @@ class Viewer(object):
             self.coordinate_axes = None
             self.grab_axes = None
             self.joint_axes = None
+
+        self._clear_camera_linesets()
 
         self.axes = None
         self.scene = None
@@ -1840,6 +1894,8 @@ class Viewer(object):
 
             self.update_coordinate_axes()
             self.update_joint_axis()
+
+            self._update_camera_linesets()
 
             speed_mod = 1
             if self.window.shift:
