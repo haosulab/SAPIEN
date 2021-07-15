@@ -6,6 +6,15 @@ collaborative effort between researchers at UCSD, Stanford and SFU. The dataset
 is a continuation of ShapeNet and PartNet.
 
 ## Change Log
+### 1.2
+- Shader change: 4th component in default camera shader now gives the 0-1 depth value.
+- Add "critical" and "off" log levels.
+- Add support for pointcloud and line rendering (for visualizing camera and point cloud)
+- Performance: the same shader only compile once per process
+- Bug fix
+  - Articulation setDriveTarget was now correctly reversed for prismatic joint (joint setDriveTarget is not affected)
+  - Fix kinematic articulation loader
+
 ### 1.1
 - Support nonconvex static/kinematic collision shape
 - Add warning for small mass/inertia
