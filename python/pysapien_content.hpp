@@ -34,6 +34,8 @@
 #include "renderer/svulkan2_renderer.h"
 #include "renderer/svulkan2_window.h"
 
+#include "renderer/kuafu_renderer.hpp"
+
 #ifdef _USE_PINOCCHIO
 #include "articulation/pinocchio_model.h"
 #endif
@@ -160,6 +162,11 @@ void buildSapien(py::module &m) {
   auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
   auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
   auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
+
+  auto PyKuafuRenderer =
+      py::class_<Renderer::KuafuRenderer, Renderer::IPxrRenderer,
+  std::shared_ptr<Renderer::KuafuRenderer>>(m, "KuafuRenderer");
+  PyKuafuRenderer.def(py::init<>());
 
   auto PyOptifuserRenderer =
       py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer,

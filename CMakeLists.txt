@@ -150,6 +150,7 @@ include_directories("3rd_party/pybind11/include")
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
 include_directories("3rd_party/sapien-vulkan-2/include")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
+include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/cuda_include")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
@@ -157,6 +158,11 @@ include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
 include_directories("$ENV{VULKAN_SDK}/include")
 link_directories("$ENV{VULKAN_SDK}/lib")
 link_directories("3rd_party/sapien-vulkan-2/3rd_party/cuda_lib")
+
+add_subdirectory("3rd_party/kuafu" EXCLUDE_FROM_ALL)
+include_directories("3rd_party/kuafu/include")
+include_directories("3rd_party/kuafu/include/external")
+link_directories("3rd_party/kuafu/external_libs/KTX")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})
@@ -177,7 +183,7 @@ if (MACOSX)
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
             pthread ${OPENGL_LIBRARY} glfw3 GLEW ${ASSIMP_LIBRARIES} dl optifuser
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-			${PINOCCHIO_LIBRARY} svulkan2 "-framework Cocoa -framework IOKit")
+			${PINOCCHIO_LIBRARY} svulkan2 kuafu "-framework Cocoa -framework IOKit")
 else ()
     target_link_libraries(sapien -Wl,--start-group
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -187,7 +193,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw3 GLEW ${ASSIMP_LIBRARIES} dl optifuser
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} svulkan2)
+            ${PINOCCHIO_LIBRARY} svulkan2 kuafu)
 endif ()
 
 set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
