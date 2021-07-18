@@ -228,6 +228,7 @@ class Viewer(object):
         self.immediate_mode = False
 
         self.camera_linesets = []
+        self._show_camera_linesets = True
 
     def _clear_camera_linesets(self):
         if self.scene is None:
@@ -305,7 +306,6 @@ class Viewer(object):
                 1, -1, -1, -1, -1, -1,
                 -1, -1, -1, -1, 1, -1,
                 -1, 1, -1, 1, 1, -1,
-
                 1, 1.2, -1, 0, 2, -1,
                 0, 2, -1, -1, 1.2, -1,
                 -1, 1.2, -1, 1, 1.2, -1,
@@ -1109,6 +1109,10 @@ class Viewer(object):
                     .Label("Coordinate Axes")
                     .Checked(True)
                     .Callback(lambda p: self.toggle_axes(p.checked)),
+                    R.UICheckbox()
+                    .Label("Camera Display")
+                    .Checked(True)
+                    .Callback(lambda p: self.toggle_camera_lines(p.checked)),
                     R.UIOptions()
                     .Style("select")
                     .Label("Axes Mode")
@@ -1637,6 +1641,11 @@ class Viewer(object):
             else:
                 c.transparency = 1
 
+    def toggle_camera_lines(self, show):
+        self._show_camera_linesets = show
+        if not show:
+            self._clear_camera_linesets()
+
     def set_coordinate_axes_mode(self, mode):
         self.coordinate_axes_mode = mode
 
@@ -1895,7 +1904,8 @@ class Viewer(object):
             self.update_coordinate_axes()
             self.update_joint_axis()
 
-            self._update_camera_linesets()
+            if self._show_camera_linesets:
+                self._update_camera_linesets()
 
             speed_mod = 1
             if self.window.shift:
