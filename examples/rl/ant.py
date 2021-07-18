@@ -249,7 +249,7 @@ class AntEnv(SapienEnv):
         self.viewer.set_scene(self._scene)
         self.viewer.set_camera_xyz(x=0, y=-3, z=0.3)
         self.viewer.set_camera_rpy(y=1.57, p=0.0, r=0)
-        self.viewer.focus_actor(self.actuator)
+        self.viewer.focus_entity(self.actuator)
 
 
 def main():

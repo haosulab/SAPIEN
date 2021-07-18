@@ -44,7 +44,7 @@ def main():
     # The rotation of the free camera is represented as [roll(x), pitch(-y), yaw(-z)]
     # The camera now looks at the origin
     viewer.set_camera_rpy(r=0, p=-np.arctan2(2, 4), y=0)
-    viewer.window.set_camera_parameters(near=0.001, far=100, fovy=1)
+    viewer.window.set_camera_parameters(near=0.05, far=100, fovy=1)
 
     while not viewer.closed:  # Press key q to quit
         scene.step()  # Simulate the world

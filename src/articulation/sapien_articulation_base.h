@@ -1,6 +1,7 @@
 #pragma once
 #include "event_system/event_system.h"
 #include "id_generator.h"
+#include "sapien_entity.h"
 #include <PxPhysicsAPI.h>
 #include <array>
 #include <string>
@@ -17,19 +18,15 @@ class SScene;
 
 enum EArticulationType { DYNAMIC, KINEMATIC };
 
-class SArticulationBase : public EventEmitter<EventArticulationPreDestroy>,
+class SArticulationBase : public SEntity,
+                          public EventEmitter<EventArticulationPreDestroy>,
                           public EventEmitter<EventArticulationStep> {
-  std::string mName;
-
   int mDestroyedState{0};
 
 public:
-  inline void setName(std::string const &name) { mName = name; }
-  inline std::string getName() { return mName; }
-
   virtual std::vector<SLinkBase *> getBaseLinks() = 0;
   virtual std::vector<SJointBase *> getBaseJoints() = 0;
-  virtual SLinkBase *getRootLink() = 0;
+  virtual SLinkBase *getRootLink() const = 0;
 
   virtual EArticulationType getType() const = 0;
   virtual uint32_t dof() const = 0;
@@ -46,15 +43,14 @@ public:
   virtual std::vector<physx::PxReal> getQf() const = 0;
   virtual void setQf(const std::vector<physx::PxReal> &v) = 0;
 
-  virtual physx::PxTransform getRootPose();
+  inline physx::PxTransform getPose() const override { return getRootPose(); };
+  virtual physx::PxTransform getRootPose() const;
   virtual void setRootPose(const physx::PxTransform &T) = 0;
 
   virtual std::vector<std::array<physx::PxReal, 2>> getQlimits() const = 0;
   virtual void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const = 0;
 
   virtual void prestep() = 0;
-
-  virtual SScene *getScene() const = 0;
 
   virtual ~SArticulationBase() = default;
 
@@ -69,6 +65,7 @@ public:
   /** internal use only, destroy has several stages, check which stage it is in */
   inline int getDestroyedState() const { return mDestroyedState; }
 
+  using SEntity::SEntity;
 #ifdef _USE_PINOCCHIO
   std::unique_ptr<PinocchioModel> createPinocchioModel();
 #endif
@@ -82,6 +79,7 @@ class SArticulationDrivable : public SArticulationBase {
 public:
   virtual void setDriveTarget(const std::vector<physx::PxReal> &v) = 0;
   virtual std::vector<physx::PxReal> getDriveTarget() const = 0;
+  using SArticulationBase::SArticulationBase;
 };
 
 } // namespace sapien

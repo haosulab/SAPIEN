@@ -1,7 +1,7 @@
 #include "sapien_shape.h"
 #include "sapien_material.h"
-#include <stdexcept>
 #include <array>
+#include <stdexcept>
 
 using namespace physx;
 
@@ -83,6 +83,8 @@ std::string SCollisionShape::getType() const {
     return "plane";
   case PxGeometryType::eCONVEXMESH:
     return "convex_mesh";
+  case PxGeometryType::eTRIANGLEMESH:
+    return "nonconvex_mesh";
   default:
     throw std::runtime_error("unsupported shape type");
   }
@@ -147,6 +149,43 @@ std::unique_ptr<SGeometry> SCollisionShape::getGeometry() const {
     }
     return sg;
   }
+  case PxGeometryType::eTRIANGLEMESH: {
+    PxTriangleMeshGeometry g;
+    mPxShape->getTriangleMeshGeometry(g);
+    auto sg = std::make_unique<SNonconvexMeshGeometry>();
+    sg->scale = g.scale.scale;
+    sg->rotation = g.scale.rotation;
+
+    // fill vertices
+    sg->vertices.reserve(3 * g.triangleMesh->getNbVertices());
+    auto vertices = g.triangleMesh->getVertices();
+    for (uint32_t i = 0; i < g.triangleMesh->getNbVertices(); ++i) {
+      sg->vertices.push_back(vertices[i].x);
+      sg->vertices.push_back(vertices[i].y);
+      sg->vertices.push_back(vertices[i].z);
+    }
+
+    // fill indices
+    sg->indices.reserve(3 * g.triangleMesh->getNbTriangles());
+
+    if (g.triangleMesh->getTriangleMeshFlags() & PxTriangleMeshFlag::e16_BIT_INDICES) {
+      auto indices = static_cast<const uint16_t *>(g.triangleMesh->getTriangles());
+      for (uint32_t i = 0; i < g.triangleMesh->getNbTriangles(); ++i) {
+        sg->indices.push_back(indices[3 * i]);
+        sg->indices.push_back(indices[3 * i + 1]);
+        sg->indices.push_back(indices[3 * i + 2]);
+      }
+    } else {
+      auto indices = static_cast<const uint32_t *>(g.triangleMesh->getTriangles());
+      for (uint32_t i = 0; i < g.triangleMesh->getNbTriangles(); ++i) {
+        sg->indices.push_back(indices[3 * i]);
+        sg->indices.push_back(indices[3 * i + 1]);
+        sg->indices.push_back(indices[3 * i + 2]);
+      }
+    }
+    return sg;
+  }
+
   default:
     throw std::runtime_error("unsupported shape type");
   }

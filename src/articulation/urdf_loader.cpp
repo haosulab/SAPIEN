@@ -237,22 +237,44 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
 
     // visual
     for (const auto &visual : current->link->visual_array) {
+      PxVec3 color = {1, 1, 1};
+      if (visual->material) {
+        if (visual->material->color) {
+          color = {visual->material->color->rgba.x, visual->material->color->rgba.y,
+                   visual->material->color->rgba.z};
+        } else {
+          for (auto &m : robot->material_array) {
+            if (m->name == visual->material->name) {
+              color = {m->color->rgba.x, m->color->rgba.y, m->color->rgba.z};
+              break;
+            }
+          }
+        }
+      }
       const PxTransform tVisual2Link = poseFromOrigin(*visual->origin, scale);
       switch (visual->geometry->type) {
       case Geometry::BOX:
-        currentLinkBuilder->addBoxVisual(tVisual2Link, visual->geometry->size * scale / 2.f,
-                                         PxVec3{1, 1, 1}, visual->name);
+        currentLinkBuilder->addBoxVisual(tVisual2Link, visual->geometry->size * scale / 2.f, color,
+                                         visual->name);
         break;
       case Geometry::CYLINDER:
+        spdlog::get("SAPIEN")->error("Cylinder visual is not supported. Replaced with a capsule");
+        currentLinkBuilder->addCapsuleVisual(
+            tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
+            visual->geometry->radius * scale,
+            std::max(0.f,
+                     visual->geometry->length * scale / 2.f - visual->geometry->radius * scale),
+            color, visual->name);
+        break;
       case Geometry::CAPSULE:
         currentLinkBuilder->addCapsuleVisual(
             tVisual2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
-            visual->geometry->radius * scale, visual->geometry->length * scale / 2.f,
-            PxVec3{1, 1, 1}, visual->name);
+            visual->geometry->radius * scale, visual->geometry->length * scale / 2.f, color,
+            visual->name);
         break;
       case Geometry::SPHERE:
-        currentLinkBuilder->addSphereVisual(tVisual2Link, visual->geometry->radius * scale,
-                                            PxVec3{1, 1, 1}, visual->name);
+        currentLinkBuilder->addSphereVisual(tVisual2Link, visual->geometry->radius * scale, color,
+                                            visual->name);
         break;
       case Geometry::MESH:
         currentLinkBuilder->addVisualFromFile(getAbsPath(urdfFilename, visual->geometry->filename),
@@ -304,6 +326,31 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
         }
         break;
       case Geometry::CYLINDER:
+        if (collision->geometry->length / 2.0f - collision->geometry->radius < 1e-4) {
+          spdlog::get("SAPIEN")->error(
+              "Cylinder collision is not supported. Replaced with a sphere");
+          currentLinkBuilder->addSphereShape(
+              tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
+              collision->geometry->radius * scale, material, density, patchRadius, minPatchRadius);
+        } else {
+          spdlog::get("SAPIEN")->error(
+              "Cylinder collision is not supported. Replaced with a capsule");
+          currentLinkBuilder->addCapsuleShape(
+              tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
+              collision->geometry->radius * scale,
+              std::max(0.f, collision->geometry->length * scale / 2.0f -
+                                collision->geometry->radius * scale),
+              material, density, patchRadius, minPatchRadius);
+        }
+        if (collisionIsVisual) {
+          currentLinkBuilder->addCapsuleVisual(
+              tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
+              collision->geometry->radius * scale,
+              std::max(0.f, collision->geometry->length * scale / 2.0f -
+                                collision->geometry->radius * scale),
+              PxVec3{1, 1, 1}, "");
+        }
+
       case Geometry::CAPSULE:
         currentLinkBuilder->addCapsuleShape(
             tCollision2Link * PxTransform({{0, 0, 0}, PxQuat(1.57079633, {0, 1, 0})}),
@@ -523,7 +570,7 @@ SKArticulation *URDFLoader::loadKinematic(const std::string &filename, URDFConfi
     return nullptr;
   }
 
-  auto [builder, records] = parseRobotDescription(urdfDoc, srdfDoc.get(), filename, false, config);
+  auto [builder, records] = parseRobotDescription(urdfDoc, srdfDoc.get(), filename, true, config);
   auto articulation = builder->buildKinematic();
 
   for (auto &record : records) {
@@ -568,7 +615,7 @@ URDFLoader::loadFileAsArticulationBuilder(const std::string &filename, URDFConfi
     return nullptr;
   }
   return std::move(
-      std::get<0>(parseRobotDescription(urdfDoc, srdfDoc.get(), filename, false, config)));
+      std::get<0>(parseRobotDescription(urdfDoc, srdfDoc.get(), filename, true, config)));
 }
 
 SArticulation *URDFLoader::loadFromXML(const std::string &URDFString,

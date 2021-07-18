@@ -125,19 +125,6 @@ void SArticulation::setQlimits(std::vector<std::array<physx::PxReal, 2>> const &
   }
 }
 
-void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
-  CHECK_SIZE(v);
-
-  uint32_t i = 0;
-  for (auto &j : mJoints) {
-    for (auto axis : j->getAxes()) {
-      j->getPxJoint()->setDriveTarget(axis, v[i]);
-      i += 1;
-    }
-  }
-  mPxArticulation->wakeUp();
-}
-
 void SArticulation::setRootPose(physx::PxTransform const &T) {
   mPxArticulation->teleportRootLink(T, true);
 }
@@ -150,9 +137,9 @@ void SArticulation::setRootAngularVelocity(physx::PxVec3 const &omega) {
   mRootLink->getPxActor()->setAngularVelocity(omega);
 }
 
-SLinkBase *SArticulation::getRootLink() { return mRootLink; }
+SLinkBase *SArticulation::getRootLink() const { return mRootLink; }
 
-SArticulation::SArticulation(SScene *scene) : mScene(scene) {}
+SArticulation::SArticulation(SScene *scene) : SArticulationDrivable(scene) {}
 
 std::vector<PxReal> SArticulation::E2I(std::vector<PxReal> ev) const {
   std::vector<PxReal> iv(ev.size());
@@ -212,11 +199,47 @@ SArticulation::buildRowPermutation() {
   return permutation;
 }
 
+void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
+  CHECK_SIZE(v);
+
+  uint32_t i = 0;
+  for (auto &j : mJoints) {
+    if (j->getAxes().size() == 1) {
+      j->setDriveTarget(v[i]);
+      i += 1;
+    }
+  }
+  mPxArticulation->wakeUp();
+}
+
 std::vector<PxReal> SArticulation::getDriveTarget() const {
   std::vector<PxReal> driveTarget;
   for (auto &j : mJoints) {
-    for (auto axis : j->getAxes()) {
-      driveTarget.push_back(j->getPxJoint()->getDriveTarget(axis));
+    if (j->getAxes().size() == 1) {
+      driveTarget.push_back(j->getDriveTarget());
+    }
+  }
+  return driveTarget;
+}
+
+void SArticulation::setDriveVelocityTarget(std::vector<physx::PxReal> const &v) {
+  CHECK_SIZE(v);
+
+  uint32_t i = 0;
+  for (auto &j : mJoints) {
+    if (j->getAxes().size() == 1) {
+      j->setDriveVelocityTarget(v[i]);
+      i += 1;
+    }
+  }
+  mPxArticulation->wakeUp();
+}
+
+std::vector<PxReal> SArticulation::getDriveVelocityTarget() const {
+  std::vector<PxReal> driveTarget;
+  for (auto &j : mJoints) {
+    if (j->getAxes().size() == 1) {
+      driveTarget.push_back(j->getDriveVelocityTarget());
     }
   }
   return driveTarget;
@@ -339,7 +362,7 @@ SArticulation::computeManipulatorInertiaMatrix() {
 }
 
 void SArticulation::prestep() {
-  auto time = mScene->getTimestep();
+  auto time = mParentScene->getTimestep();
   EventArticulationStep s;
   s.articulation = this;
   s.time = time;

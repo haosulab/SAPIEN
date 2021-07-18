@@ -7,12 +7,77 @@
 #include <experimental/filesystem>
 #include <fstream>
 #include <iostream>
+#include <set>
 #include <spdlog/spdlog.h>
 #include <sstream>
-#include <set>
 
 namespace sapien {
 namespace fs = std::experimental::filesystem;
+
+void exportNonConvexMeshToFile(PxTriangleMesh *pxMesh, const std::string &filename) {
+  // check stl supported
+  int formatCount = aiGetExportFormatCount();
+  const char *stlId = nullptr;
+  for (int i = 0; i < formatCount; ++i) {
+    const aiExportFormatDesc *formatDesc = aiGetExportFormatDescription(i);
+    if (std::string(formatDesc->fileExtension) == "stl") {
+      stlId = formatDesc->id;
+      break;
+    }
+  }
+  if (!stlId) {
+    spdlog::get("SAPIEN")->critical(
+        "Export failed: you need to build Assimp with .stl export support.");
+    throw std::runtime_error("Assimp is not built with .stl support.");
+  }
+
+  Assimp::Exporter exporter;
+  aiScene scene;
+  scene.mRootNode = new aiNode();
+
+  // create empty material
+  scene.mMaterials = new aiMaterial *[1];
+  scene.mMaterials[0] = new aiMaterial;
+  scene.mNumMaterials = 1;
+
+  // create mesh
+  scene.mMeshes = new aiMesh *[1];
+  scene.mMeshes[0] = new aiMesh;
+  scene.mNumMeshes = 1;
+  scene.mMeshes[0]->mMaterialIndex = 0;
+
+  // add mesh to root
+  scene.mRootNode->mMeshes = new uint32_t[1];
+  scene.mRootNode->mMeshes[0] = 0;
+  scene.mRootNode->mNumMeshes = 1;
+
+  uint32_t nbvertices = pxMesh->getNbVertices();
+  scene.mMeshes[0]->mNumVertices = nbvertices;
+  scene.mMeshes[0]->mNormals = new aiVector3D[nbvertices];
+  scene.mMeshes[0]->mVertices = new aiVector3D[nbvertices];
+  const PxVec3 *vertices = pxMesh->getVertices();
+  for (uint32_t i = 0; i < nbvertices; ++i) {
+    scene.mMeshes[0]->mVertices[i] = aiVector3D(vertices[i].x, vertices[i].y, vertices[i].z);
+  }
+
+  uint32_t nbfaces = pxMesh->getNbTriangles();
+  scene.mMeshes[0]->mNumFaces = nbfaces;
+  scene.mMeshes[0]->mFaces = new aiFace[nbfaces];
+
+  if (pxMesh->getTriangleMeshFlags() & PxTriangleMeshFlag::e16_BIT_INDICES) {
+    auto triangle_begin = static_cast<const uint16_t *>(pxMesh->getTriangles());
+    std::vector<uint16_t> triangles(triangle_begin, triangle_begin + 3 * nbfaces);
+    for (uint32_t i = 0; i < nbfaces; ++i) {
+      scene.mMeshes[0]->mFaces[i].mNumIndices = 3;
+      scene.mMeshes[0]->mFaces[i].mIndices = new uint32_t[3];
+      scene.mMeshes[0]->mFaces[i].mIndices[0] = triangles[i * 3 + 0];
+      scene.mMeshes[0]->mFaces[i].mIndices[1] = triangles[i * 3 + 1];
+      scene.mMeshes[0]->mFaces[i].mIndices[2] = triangles[i * 3 + 2];
+    }
+  }
+  exporter.Export(&scene, stlId, filename);
+  // memory freed by aiScene destructor
+}
 
 void exportMeshToFile(PxConvexMesh *pxMesh, const std::string &filename) {
   // check stl supported
@@ -26,7 +91,8 @@ void exportMeshToFile(PxConvexMesh *pxMesh, const std::string &filename) {
     }
   }
   if (!stlId) {
-    spdlog::get("SAPIEN")->critical("Export failed: you need to build Assimp with .stl export support.");
+    spdlog::get("SAPIEN")->critical(
+        "Export failed: you need to build Assimp with .stl export support.");
     throw std::runtime_error("Assimp is not built with .stl support.");
   }
 
@@ -114,6 +180,40 @@ static std::vector<PxVec3> getVerticesFromMeshFile(const std::string &filename) 
   return vertices;
 }
 
+static std::tuple<std::vector<PxVec3>, std::vector<PxU32>>
+getVerticesAndTrianglesFromMeshFile(const std::string &filename) {
+  std::vector<PxVec3> vertices;
+  std::vector<PxU32> triangles;
+  Assimp::Importer importer;
+  uint32_t flags = aiProcess_Triangulate | aiProcess_PreTransformVertices;
+  importer.SetPropertyInteger(AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION, 1);
+
+  const aiScene *scene = importer.ReadFile(filename, flags);
+
+  if (!scene) {
+    spdlog::get("SAPIEN")->error(importer.GetErrorString());
+    return {};
+  }
+
+  uint32_t vertexCount = 0;
+  for (uint32_t i = 0; i < scene->mNumMeshes; ++i) {
+    auto mesh = scene->mMeshes[i];
+    for (uint32_t v = 0; v < mesh->mNumVertices; ++v) {
+      auto vertex = mesh->mVertices[v];
+      vertices.push_back({vertex.x, vertex.y, vertex.z});
+    }
+    for (uint32_t f = 0; f < mesh->mNumFaces; ++f) {
+      for (uint32_t j = 0; j + 2 < mesh->mFaces[f].mNumIndices; ++j) {
+        triangles.push_back(mesh->mFaces[f].mIndices[j] + vertexCount);
+        triangles.push_back(mesh->mFaces[f].mIndices[j + 1] + vertexCount);
+        triangles.push_back(mesh->mFaces[f].mIndices[j + 2] + vertexCount);
+      }
+    }
+    vertexCount += mesh->mNumVertices;
+  }
+  return {vertices, triangles};
+}
+
 MeshManager::MeshManager(Simulation *simulation) : mSimulation(simulation) {}
 
 void MeshManager::setCacheSuffix(const std::string &filename) {
@@ -123,8 +223,73 @@ void MeshManager::setCacheSuffix(const std::string &filename) {
   mCacheSuffix = filename;
 }
 
+std::string MeshManager::getCachedFilenameNonConvex(const std::string &filename) {
+  return filename + mCacheSuffixNonConvex;
+}
+
 std::string MeshManager::getCachedFilename(const std::string &filename) {
   return filename + mCacheSuffix;
+}
+
+physx::PxTriangleMesh *MeshManager::loadNonConvexMesh(const std::string &filename, bool useCache,
+                                                      bool saveCache) {
+
+  if (!fs::is_regular_file(filename)) {
+    spdlog::get("SAPIEN")->error("File not found: {}", filename);
+    return nullptr;
+  }
+
+  std::string fullPath = fs::canonical(filename);
+  auto it = mNonConvexMeshRegistry.find(fullPath);
+  if (it != mNonConvexMeshRegistry.end()) {
+    spdlog::get("SAPIEN")->info("Using loaded mesh: {}", filename);
+    return it->second.mesh;
+  }
+
+  bool cacheDidLoad = false;
+  std::string fileToLoad = filename;
+  if (useCache) {
+    std::string cachedFilename = getCachedFilenameNonConvex(filename);
+    if (fs::is_regular_file(cachedFilename)) {
+      fileToLoad = cachedFilename;
+      saveCache = false; // no need to save cache if it is loaded
+      cacheDidLoad = true;
+    }
+  }
+
+  PxTriangleMeshDesc meshDesc;
+  auto [vertices, triangles] = getVerticesAndTrianglesFromMeshFile(fileToLoad);
+  meshDesc.points.count = vertices.size();
+  meshDesc.points.stride = sizeof(PxVec3);
+  meshDesc.points.data = vertices.data();
+
+  meshDesc.triangles.count = triangles.size() / 3;
+  meshDesc.triangles.stride = 3 * sizeof(PxU32);
+  meshDesc.triangles.data = triangles.data();
+
+  PxDefaultMemoryOutputStream writeBuffer;
+  PxTriangleMeshCookingResult::Enum result;
+  if (!mSimulation->mCooking->cookTriangleMesh(meshDesc, writeBuffer, &result)) {
+    spdlog::get("SAPIEN")->error("Failed to cook non-convex mesh: {}", filename);
+    return nullptr;
+  }
+  PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
+  PxTriangleMesh *mesh = mSimulation->mPhysicsSDK->createTriangleMesh(readBuffer);
+
+  spdlog::get("SAPIEN")->info("Created {} vertices and {} faces from: {}", mesh->getNbVertices(),
+                              mesh->getNbTriangles(), filename);
+
+  if (saveCache) {
+    std::string cachedFilename = getCachedFilenameNonConvex(filename);
+    exportNonConvexMeshToFile(mesh, cachedFilename);
+    spdlog::get("SAPIEN")->info("Saved non-convex cache file: {}", cachedFilename);
+  }
+
+  mNonConvexMeshRegistry[fullPath] = {/* cached */ cacheDidLoad || saveCache,
+                                      /* filename */ fullPath,
+                                      /* mesh */ mesh};
+
+  return mesh;
 }
 
 physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool useCache,
@@ -170,8 +335,8 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
   PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
   PxConvexMesh *convexMesh = mSimulation->mPhysicsSDK->createConvexMesh(input);
 
-  spdlog::get("SAPIEN")->info("Created {} vertices from: {}", std::to_string(convexMesh->getNbVertices()),
-               filename);
+  spdlog::get("SAPIEN")->info("Created {} vertices from: {}",
+                              std::to_string(convexMesh->getNbVertices()), filename);
 
   if (saveCache) {
     std::string cachedFilename = getCachedFilename(filename);
@@ -250,14 +415,12 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
   // import obj using assimp
   Assimp::Importer importer;
   importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
-                              aiComponent_NORMALS |
-                              aiComponent_TEXCOORDS |
-                              aiComponent_COLORS |
-                              aiComponent_TANGENTS_AND_BITANGENTS | 
-                              aiComponent_MATERIALS |
-                              aiComponent_TEXTURES);
+                              aiComponent_NORMALS | aiComponent_TEXCOORDS | aiComponent_COLORS |
+                                  aiComponent_TANGENTS_AND_BITANGENTS | aiComponent_MATERIALS |
+                                  aiComponent_TEXTURES);
 
-  uint32_t flags = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_RemoveComponent;
+  uint32_t flags =
+      aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_RemoveComponent;
 
   const aiScene *scene = importer.ReadFile(filename, flags);
   if (!scene) {
@@ -270,7 +433,8 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
     auto mesh = scene->mMeshes[i];
     auto vertexGroups = splitMesh(mesh);
 
-    spdlog::get("SAPIEN")->info("Decomposed mesh {} into {} components", i + 1, vertexGroups.size());
+    spdlog::get("SAPIEN")->info("Decomposed mesh {} into {} components", i + 1,
+                                vertexGroups.size());
     for (auto &g : vertexGroups) {
       spdlog::get("SAPIEN")->info("vertex count: {}", g.size());
       std::vector<PxVec3> vertices;
@@ -295,6 +459,8 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
       meshes.push_back(convexMesh);
     }
   }
+
+  mMeshGroupRegistry[fullPath] = {fullPath, meshes};
   return meshes;
 }
 

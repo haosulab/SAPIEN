@@ -238,14 +238,13 @@ def main():
     cam2._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
     cam2._internal_renderer.set_custom_texture("LightMap", lightmap)
 
-
     ant_builder = create_ant_builder(scene)
     ant = ant_builder.build()
     ant.set_root_pose(Pose([0, 0, 5]))
 
     # urdf = download_partnet_mobility(
-    #     41083,
-    #     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjI0LjQzLjEyMy42OCIsInByaXZpbGVnZSI6MTAsImlhdCI6MTYxNjY0MDk2OCwiZXhwIjoxNjQ4MTc2OTY4fQ.B6Sa_S2-QNkauKSZu3Tg37OiaxSoWG-TLIVwTcrX46Q",
+    #     2780,
+    #     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjE3Mi4xOS4wLjEiLCJwcml2aWxlZ2UiOjEwLCJpYXQiOjE2MjEwMjQ3MDMsImV4cCI6MTY1MjU2MDcwM30.0HrNNhEhDI38sl-1g444y2Mn7PC9v-_Glu-UgTFf-QM",
     # )
     # loader = scene.create_urdf_loader()
     # loader.fix_root_link = True
@@ -270,7 +269,7 @@ def main():
 
     # scene.renderer_scene.set_ambient_light([0, 0, 0])
 
-    # scene.renderer_scene.add_directional_light([0, 0, -1], [10, 10, 10], True)
+    dirlight = scene.add_directional_light([0, 0, -1], [0.3, 0.3, 0.3], True)
 
     # scene.renderer_scene.add_point_light([0, 1, 1], [1, 2, 2], True)
 
@@ -286,8 +285,10 @@ def main():
     # light.set_position([0, 0, 5])
     # light.set_direction([0, -1, -1])
 
-    scene.renderer_scene.add_point_light([0, -1, 1], [2, 1, 2], True)
+    plight = scene.add_point_light([0, -1, 1], [2, 1, 2], True)
     # scene.renderer_scene.add_point_light([0, 1, -1], [2, 2, 1])
+
+    print(scene.get_all_lights())
 
     import torch
     import torch.utils.dlpack
@@ -299,6 +300,10 @@ def main():
         scene.update_render()
         viewer.render()
         count += 1
+
+        # if count == 120:
+        #     for light in scene.get_all_lights():
+        #         scene.remove_light(light)
 
         # if count == 120:
         #     start = time.time()

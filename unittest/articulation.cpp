@@ -139,7 +139,7 @@ TEST_CASE("Testing Ant runs without error", "[articulation]") {
   controller.setCurrentScene(s0.get());
 
   int count = 0;
-  SDrive *drive;
+  SDrive6D *drive;
   std::vector<float> d;
   while (count < 10) {
     if (++count == 5) {

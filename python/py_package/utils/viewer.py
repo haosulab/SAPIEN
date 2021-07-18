@@ -1,5 +1,6 @@
-from ..core.pysapien import renderer as R
+from ..core import renderer as R
 from ..core import (
+    ActorBase,
     Pose,
     VulkanRenderer,
     Scene,
@@ -8,6 +9,10 @@ from ..core import (
     Joint,
     LinkBase,
     VulkanCamera,
+    LightEntity,
+    PointLightEntity,
+    DirectionalLightEntity,
+    SpotLightEntity,
 )
 from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.euler import quat2euler
@@ -15,13 +20,13 @@ from transforms3d.quaternions import qmult, mat2quat, rotate_vector, qinverse
 import numpy as np
 import os
 
-imgui_ini = '''
+imgui_ini = """
 [Window][DockSpace Demo]
 Pos=0,0
 Size=1024,768
 Collapsed=0
 
-[Window][Actor]
+[Window][Actor/Entity]
 Pos=807,23
 Size=217,389
 Collapsed=0
@@ -63,7 +68,7 @@ DockSpace         ID=0x4BBE4C7A Window=0x4647B76E Pos=0,23 Size=1024,745 Split=Y
       DockNode    ID=0x00000007 Parent=0x00000006 SizeRef=121,389 Selected=0x85B479FD
       DockNode    ID=0x00000008 Parent=0x00000006 SizeRef=121,293 Selected=0xA95BF184
   DockNode        ID=0x0000000A Parent=0x4BBE4C7A SizeRef=1024,59 Selected=0x6BBB9E69
-'''
+"""
 
 
 class FPSCameraController:
@@ -175,8 +180,8 @@ class Viewer(object):
         shader_dir="",
         resolutions=((1024, 768), (800, 600), (1920, 1080)),
     ):
-        if not os.path.exists('imgui.ini'):
-            with open('imgui.ini', 'w') as f:
+        if not os.path.exists("imgui.ini"):
+            with open("imgui.ini", "w") as f:
                 f.write(imgui_ini)
 
         self.shader_dir = shader_dir
@@ -185,6 +190,7 @@ class Viewer(object):
 
         self.create_visual_models()
 
+        self.scene = None
         self.window = None
         self.resolution = None
         self.resolutions = None
@@ -193,8 +199,8 @@ class Viewer(object):
         self.axes = None
         self.axes_scale = 0.3
 
-        self.selected_actor = None
-        self.focused_actor = None
+        self.selected_entity = None
+        self.focused_entity = None
         self.paused = False
         self.target_name = "Color"
         self.single_step = False
@@ -219,6 +225,41 @@ class Viewer(object):
 
         self.display_object = None
         self.coordinate_axes_mode = "Origin"
+        self.immediate_mode = False
+
+        self.camera_linesets = []
+
+    def _clear_camera_linesets(self):
+        if self.scene is None:
+            return
+
+        rs = self.scene.renderer_scene
+        for n in self.camera_linesets:
+            rs._internal_scene.remove_node(n)
+        self.camera_linesets = []
+
+    def _update_camera_linesets(self):
+        if self.scene is None:
+            return
+        rs = self.scene.renderer_scene
+        render_scene: R.Scene = rs._internal_scene
+
+        cameras = self.scene.get_mounted_cameras()
+        if len(self.camera_linesets) != len(cameras):
+            self._clear_camera_linesets()
+            for c in self.cameras:
+                self.camera_linesets.append(
+                    render_scene.add_line_set(self.camera_lineset)
+                )
+        for lineset, camera in zip(self.camera_linesets, cameras):
+            lineset: R.LineSetObject
+            mat = camera.get_model_matrix()
+            lineset.set_position(mat[:3, 3])
+            lineset.set_rotation(mat2quat(mat[:3, :3]))
+
+            scaley = np.tan(camera.get_fovy() / 2)
+            scalex = scaley / camera.get_height() * camera.get_width()
+            lineset.set_scale(np.array([scalex, scaley, 1]) * 0.3)
 
     def create_visual_models(self):
         self.cone = self.renderer_context.create_cone_mesh(16)
@@ -252,6 +293,24 @@ class Viewer(object):
         )
         self.magenta_capsule = self.renderer_context.create_model(
             [self.capsule], [self.mat_magenta]
+        )
+
+        self.camera_lineset = self.renderer_context.create_line_set(
+            [
+                0, 0, 0, 1, 1, -1,
+                0, 0, 0, -1, 1, -1,
+                0, 0, 0, 1, -1, -1,
+                0, 0, 0, -1, -1, -1,
+                1, 1, -1, 1, -1, -1,
+                1, -1, -1, -1, -1, -1,
+                -1, -1, -1, -1, 1, -1,
+                -1, 1, -1, 1, 1, -1,
+
+                1, 1.2, -1, 0, 2, -1,
+                0, 2, -1, -1, 1.2, -1,
+                -1, 1.2, -1, 1, 1.2, -1,
+            ],
+            [0.9254901960784314, 0.5764705882352941, 0.18823529411764706, 1] * 22
         )
 
     def _create_coordinate_axes(self):
@@ -311,17 +370,18 @@ class Viewer(object):
         rs = self.scene.renderer_scene
         render_scene: R.Scene = rs._internal_scene
 
-        self.grab_objects = [
+        grab_axes = [
             render_scene.add_object(model)
             for model in [self.red_capsule, self.green_capsule, self.blue_capsule]
         ]
 
-        for obj in self.grab_objects:
+        for obj in grab_axes:
             obj.set_position([0, 0, 0])
             obj.set_scale([100, 0.1, 0.1])
             obj.shading_mode = 2
             obj.cast_shadow = False
             obj.transparency = 1
+        return grab_axes
 
     def _create_joint_axes(self):
         assert self.scene is not None
@@ -341,6 +401,13 @@ class Viewer(object):
         return joint_axes
 
     def create_visual_objects(self):
+        if hasattr(self, "coordinate_axes") and self.coordinate_axes:
+            self.scene.renderer_scene._internal_scene.remove_node(self.coordinate_axes)
+            for n in self.grab_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(n)
+            for n in self.joint_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(n)
+
         self.coordinate_axes = self._create_coordinate_axes()
         self.grab_axes = self._create_grab_axes()
         self.joint_axes = self._create_joint_axes()
@@ -357,7 +424,7 @@ class Viewer(object):
 
     def leave_mode(self, name):
         if name == "grab":
-            for obj in self.grab_objects:
+            for obj in self.grab_axes:
                 obj.transparency = 1
             if self.display_object:
                 rs = self.scene.renderer_scene
@@ -365,7 +432,7 @@ class Viewer(object):
                 render_scene.remove_node(self.display_object)
                 self.display_object = None
         elif name == "rotate":
-            for obj in self.grab_objects:
+            for obj in self.grab_axes:
                 obj.transparency = 1
             if self.display_object:
                 rs = self.scene.renderer_scene
@@ -373,15 +440,21 @@ class Viewer(object):
                 render_scene.remove_node(self.display_object)
                 self.display_object = None
 
-    def add_display_object(self, actor):
+    def add_display_object(self):
         rs = self.scene.renderer_scene
         render_scene: R.Scene = rs._internal_scene
+        if not isinstance(self.selected_entity, ActorBase):
+            self.display_object = render_scene.add_node()
+            self.display_object.set_position(self.selected_entity.pose.p)
+            self.display_object.set_rotation(self.selected_entity.pose.q)
+            return
+
         if self.display_object:
             render_scene.remove_node(self.display_object)
             self.display_object = None
         self.display_object = render_scene.add_node()
-        selected2world = self.selected_actor.pose
-        for body in self.selected_actor.get_visual_bodies():
+        selected2world = self.selected_entity.pose
+        for body in self.selected_entity.get_visual_bodies():
             for obj in body._internal_objects:
                 scale = obj.scale
                 obj2world = Pose(obj.position, obj.rotation)
@@ -399,21 +472,21 @@ class Viewer(object):
         x2z = np.array([0.7071068, 0, 0.7071068, 0])
 
         def f():
-            if self.selected_actor:
-                self.focus_actor(self.selected_actor)
+            if self.selected_entity:
+                self.focus_entity(self.selected_entity)
 
         def r():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.add_display_object()
 
-            point = self.world_space_to_screen_space(self.selected_actor.pose.p)
+            point = self.world_space_to_screen_space(self.selected_entity.pose.p)
             axis = self.screen_space_to_world_space(
                 [point[0], point[1], 1]
             ) - self.screen_space_to_world_space([point[0], point[1], 0])
@@ -421,29 +494,29 @@ class Viewer(object):
             self.rotate_axis = np.array(axis)
             self.rotate_direction = 1
             self.rotate_initial_mouse_position = np.array(self.window.mouse_position)
-            self.rotate_initial_rotation = np.array(self.selected_actor.pose.q)
+            self.rotate_initial_rotation = np.array(self.selected_entity.pose.q)
             self.rotate_screen_center = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             )[:2]
 
         def rx():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_actor.pose.p)
-            self.grab_objects[0].set_rotation([1, 0, 0, 0])
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation([1, 0, 0, 0])
+            self.add_display_object()
             self.rotate_axis = np.array([1, 0, 0])
 
             screen_vector = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             ) - self.world_space_to_screen_space(
-                self.selected_actor.pose.p + self.rotate_axis
+                self.selected_entity.pose.p + self.rotate_axis
             )
             if screen_vector[2] <= 0:
                 self.rotate_direction = 1
@@ -451,31 +524,31 @@ class Viewer(object):
                 self.rotate_direction = -1
 
             self.rotate_initial_mouse_position = np.array(self.window.mouse_position)
-            self.rotate_initial_rotation = np.array(self.selected_actor.pose.q)
+            self.rotate_initial_rotation = np.array(self.selected_entity.pose.q)
             self.rotate_screen_center = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             )[:2]
 
         def rxx():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_actor.pose.p)
-            self.grab_objects[0].set_rotation(self.selected_actor.pose.q)
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation(self.selected_entity.pose.q)
+            self.add_display_object()
             self.rotate_axis = np.array(
-                rotate_vector([1, 0, 0], self.selected_actor.pose.q)
+                rotate_vector([1, 0, 0], self.selected_entity.pose.q)
             )
 
             screen_vector = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             ) - self.world_space_to_screen_space(
-                self.selected_actor.pose.p + self.rotate_axis
+                self.selected_entity.pose.p + self.rotate_axis
             )
             if screen_vector[2] <= 0:
                 self.rotate_direction = 1
@@ -483,9 +556,9 @@ class Viewer(object):
                 self.rotate_direction = -1
 
             self.rotate_initial_mouse_position = np.array(self.window.mouse_position)
-            self.rotate_initial_rotation = np.array(self.selected_actor.pose.q)
+            self.rotate_initial_rotation = np.array(self.selected_entity.pose.q)
             self.rotate_screen_center = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             )[:2]
 
         def rxxx():
@@ -493,23 +566,23 @@ class Viewer(object):
             r()
 
         def ry():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[1].set_position(self.selected_actor.pose.p)
-            self.grab_objects[1].set_rotation(x2y)
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(x2y)
+            self.add_display_object()
             self.rotate_axis = np.array([0, 1, 0])
 
             screen_vector = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             ) - self.world_space_to_screen_space(
-                self.selected_actor.pose.p + self.rotate_axis
+                self.selected_entity.pose.p + self.rotate_axis
             )
             if screen_vector[2] <= 0:
                 self.rotate_direction = 1
@@ -517,31 +590,31 @@ class Viewer(object):
                 self.rotate_direction = -1
 
             self.rotate_initial_mouse_position = np.array(self.window.mouse_position)
-            self.rotate_initial_rotation = np.array(self.selected_actor.pose.q)
+            self.rotate_initial_rotation = np.array(self.selected_entity.pose.q)
             self.rotate_screen_center = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             )[:2]
 
         def ryy():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[1].set_position(self.selected_actor.pose.p)
-            self.grab_objects[1].set_rotation(qmult(self.selected_actor.pose.q, x2y))
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
+            self.add_display_object()
             self.rotate_axis = np.array(
-                rotate_vector([0, 1, 0], self.selected_actor.pose.q)
+                rotate_vector([0, 1, 0], self.selected_entity.pose.q)
             )
 
             screen_vector = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             ) - self.world_space_to_screen_space(
-                self.selected_actor.pose.p + self.rotate_axis
+                self.selected_entity.pose.p + self.rotate_axis
             )
             if screen_vector[2] <= 0:
                 self.rotate_direction = 1
@@ -549,9 +622,9 @@ class Viewer(object):
                 self.rotate_direction = -1
 
             self.rotate_initial_mouse_position = np.array(self.window.mouse_position)
-            self.rotate_initial_rotation = np.array(self.selected_actor.pose.q)
+            self.rotate_initial_rotation = np.array(self.selected_entity.pose.q)
             self.rotate_screen_center = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             )[:2]
 
         def ryyy():
@@ -559,23 +632,23 @@ class Viewer(object):
             r()
 
         def rz():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[2].set_position(self.selected_actor.pose.p)
-            self.grab_objects[2].set_rotation(x2z)
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(x2z)
+            self.add_display_object()
             self.rotate_axis = np.array([0, 0, 1])
 
             screen_vector = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             ) - self.world_space_to_screen_space(
-                self.selected_actor.pose.p + self.rotate_axis
+                self.selected_entity.pose.p + self.rotate_axis
             )
             if screen_vector[2] <= 0:
                 self.rotate_direction = 1
@@ -583,31 +656,31 @@ class Viewer(object):
                 self.rotate_direction = -1
 
             self.rotate_initial_mouse_position = np.array(self.window.mouse_position)
-            self.rotate_initial_rotation = np.array(self.selected_actor.pose.q)
+            self.rotate_initial_rotation = np.array(self.selected_entity.pose.q)
             self.rotate_screen_center = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             )[:2]
 
         def rzz():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
 
             self.enter_mode("rotate")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[2].set_position(self.selected_actor.pose.p)
-            self.grab_objects[2].set_rotation(qmult(self.selected_actor.pose.q, x2z))
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
+            self.add_display_object()
             self.rotate_axis = np.array(
-                rotate_vector([0, 0, 1], self.selected_actor.pose.q)
+                rotate_vector([0, 0, 1], self.selected_entity.pose.q)
             )
 
             screen_vector = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             ) - self.world_space_to_screen_space(
-                self.selected_actor.pose.p + self.rotate_axis
+                self.selected_entity.pose.p + self.rotate_axis
             )
             if screen_vector[2] <= 0:
                 self.rotate_direction = 1
@@ -615,9 +688,9 @@ class Viewer(object):
                 self.rotate_direction = -1
 
             self.rotate_initial_mouse_position = np.array(self.window.mouse_position)
-            self.rotate_initial_rotation = np.array(self.selected_actor.pose.q)
+            self.rotate_initial_rotation = np.array(self.selected_entity.pose.q)
             self.rotate_screen_center = self.world_space_to_screen_space(
-                self.selected_actor.pose.p
+                self.selected_entity.pose.p
             )[:2]
 
         def rzzz():
@@ -625,43 +698,43 @@ class Viewer(object):
             r()
 
         def g():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.add_display_object()
             self.grab_axis = None
             self.grab_plane = None
 
         def gx():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_actor.pose.p)
-            self.grab_objects[0].set_rotation([1, 0, 0, 0])
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation([1, 0, 0, 0])
+            self.add_display_object()
             self.grab_axis = np.array([1, 0, 0])
             self.grab_plane = None
 
         def gxx():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_actor.pose.p)
-            self.grab_objects[0].set_rotation(self.selected_actor.pose.q)
-            self.add_display_object(self.select_actor)
-            self.grab_axis = rotate_vector([1, 0, 0], self.selected_actor.pose.q)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation(self.selected_entity.pose.q)
+            self.add_display_object()
+            self.grab_axis = rotate_vector([1, 0, 0], self.selected_entity.pose.q)
             self.grab_plane = None
 
         def gxxx():
@@ -669,37 +742,37 @@ class Viewer(object):
             g()
 
         def gX():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[1].set_position(self.selected_actor.pose.p)
-            self.grab_objects[1].set_rotation(x2y)
-            self.grab_objects[2].set_position(self.selected_actor.pose.p)
-            self.grab_objects[2].set_rotation(x2z)
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(x2y)
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(x2z)
+            self.add_display_object()
             self.grab_axis = None
             self.grab_plane = np.array([1, 0, 0])
 
         def gXX():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[1].set_position(self.selected_actor.pose.p)
-            self.grab_objects[1].set_rotation(qmult(self.selected_actor.pose.q, x2y))
-            self.grab_objects[2].set_position(self.selected_actor.pose.p)
-            self.grab_objects[2].set_rotation(qmult(self.selected_actor.pose.q, x2z))
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
+            self.add_display_object()
             self.grab_axis = None
             self.grab_plane = rotate_vector(
-                np.array([1, 0, 0]), self.selected_actor.pose.q
+                np.array([1, 0, 0]), self.selected_entity.pose.q
             )
 
         def gXXX():
@@ -707,31 +780,31 @@ class Viewer(object):
             g()
 
         def gy():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[1].set_position(self.selected_actor.pose.p)
-            self.grab_objects[1].set_rotation(x2y)
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(x2y)
+            self.add_display_object()
             self.grab_axis = np.array([0, 1, 0])
             self.grab_plane = None
 
         def gyy():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[1].set_position(self.selected_actor.pose.p)
-            self.grab_objects[1].set_rotation(qmult(self.selected_actor.pose.q, x2y))
-            self.add_display_object(self.select_actor)
-            self.grab_axis = rotate_vector([0, 1, 0], self.selected_actor.pose.q)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
+            self.add_display_object()
+            self.grab_axis = rotate_vector([0, 1, 0], self.selected_entity.pose.q)
             self.grab_plane = None
 
         def gyyy():
@@ -739,39 +812,39 @@ class Viewer(object):
             g()
 
         def gY():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[0].set_position(self.selected_actor.pose.p)
-            self.grab_objects[0].set_rotation([1, 0, 0, 0])
-            self.grab_objects[2].set_position(self.selected_actor.pose.p)
-            self.grab_objects[2].set_rotation(x2z)
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation([1, 0, 0, 0])
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(x2z)
+            self.add_display_object()
             self.grab_axis = None
             self.grab_plane = np.array([0, 1, 0])
 
         def gYY():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[0].set_position(self.selected_actor.pose.p)
-            self.grab_objects[0].set_rotation(
-                qmult(self.selected_actor.pose.q, [1, 0, 0, 0])
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation(
+                qmult(self.selected_entity.pose.q, [1, 0, 0, 0])
             )
-            self.grab_objects[2].set_position(self.selected_actor.pose.p)
-            self.grab_objects[2].set_rotation(qmult(self.selected_actor.pose.q, x2z))
-            self.add_display_object(self.select_actor)
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
+            self.add_display_object()
             self.grab_axis = None
             self.grab_plane = rotate_vector(
-                np.array([0, 1, 0]), self.selected_actor.pose.q
+                np.array([0, 1, 0]), self.selected_entity.pose.q
             )
 
         def gYYY():
@@ -779,31 +852,31 @@ class Viewer(object):
             g()
 
         def gz():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[2].set_position(self.selected_actor.pose.p)
-            self.grab_objects[2].set_rotation(x2z)
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(x2z)
+            self.add_display_object()
             self.grab_axis = np.array([0, 0, 1])
             self.grab_plane = None
 
         def gzz():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 1
-            self.grab_objects[1].transparency = 1
-            self.grab_objects[2].transparency = 0
-            self.grab_objects[2].set_position(self.selected_actor.pose.p)
-            self.grab_objects[2].set_rotation(qmult(self.selected_actor.pose.q, x2z))
-            self.add_display_object(self.select_actor)
-            self.grab_axis = rotate_vector([0, 0, 1], self.selected_actor.pose.q)
+            self.grab_axes[0].transparency = 1
+            self.grab_axes[1].transparency = 1
+            self.grab_axes[2].transparency = 0
+            self.grab_axes[2].set_position(self.selected_entity.pose.p)
+            self.grab_axes[2].set_rotation(qmult(self.selected_entity.pose.q, x2z))
+            self.add_display_object()
+            self.grab_axis = rotate_vector([0, 0, 1], self.selected_entity.pose.q)
             self.grab_plane = None
 
         def gzzz():
@@ -811,39 +884,39 @@ class Viewer(object):
             g()
 
         def gZ():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_actor.pose.p)
-            self.grab_objects[0].set_rotation([1, 0, 0, 0])
-            self.grab_objects[1].set_position(self.selected_actor.pose.p)
-            self.grab_objects[1].set_rotation(x2y)
-            self.add_display_object(self.select_actor)
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation([1, 0, 0, 0])
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(x2y)
+            self.add_display_object()
             self.grab_axis = None
             self.grab_plane = np.array([0, 0, 1])
 
         def gZZ():
-            if not self.selected_actor:
+            if not self.selected_entity:
                 self.key_stack = ""
                 return
             self.enter_mode("grab")
-            self.grab_objects[0].transparency = 0
-            self.grab_objects[1].transparency = 0
-            self.grab_objects[2].transparency = 1
-            self.grab_objects[0].set_position(self.selected_actor.pose.p)
-            self.grab_objects[0].set_rotation(
-                qmult(self.selected_actor.pose.q, [1, 0, 0, 0])
+            self.grab_axes[0].transparency = 0
+            self.grab_axes[1].transparency = 0
+            self.grab_axes[2].transparency = 1
+            self.grab_axes[0].set_position(self.selected_entity.pose.p)
+            self.grab_axes[0].set_rotation(
+                qmult(self.selected_entity.pose.q, [1, 0, 0, 0])
             )
-            self.grab_objects[1].set_position(self.selected_actor.pose.p)
-            self.grab_objects[1].set_rotation(qmult(self.selected_actor.pose.q, x2y))
-            self.add_display_object(self.select_actor)
+            self.grab_axes[1].set_position(self.selected_entity.pose.p)
+            self.grab_axes[1].set_rotation(qmult(self.selected_entity.pose.q, x2y))
+            self.add_display_object()
             self.grab_axis = None
             self.grab_plane = rotate_vector(
-                np.array([0, 0, 1]), self.selected_actor.pose.q
+                np.array([0, 0, 1]), self.selected_entity.pose.q
             )
 
         def gZZZ():
@@ -886,7 +959,7 @@ class Viewer(object):
         def w():
             self.enter_mode("normal")
             speed_mod = 0.1 if self.window.shift else 1
-            self.focus_actor(None)
+            self.focus_entity(None)
             self.focus_camera(None)
             self.fps_camera_controller.move(self.move_speed * speed_mod, 0, 0)
             self.key_stack = ""
@@ -894,7 +967,7 @@ class Viewer(object):
         def s():
             self.enter_mode("normal")
             speed_mod = 0.1 if self.window.shift else 1
-            self.focus_actor(None)
+            self.focus_entity(None)
             self.focus_camera(None)
             self.fps_camera_controller.move(-self.move_speed * speed_mod, 0, 0)
             self.key_stack = ""
@@ -902,7 +975,7 @@ class Viewer(object):
         def a():
             self.enter_mode("normal")
             speed_mod = 0.1 if self.window.shift else 1
-            self.focus_actor(None)
+            self.focus_entity(None)
             self.focus_camera(None)
             self.fps_camera_controller.move(0, self.move_speed * speed_mod, 0)
             self.key_stack = ""
@@ -910,7 +983,7 @@ class Viewer(object):
         def d():
             self.enter_mode("normal")
             speed_mod = 0.1 if self.window.shift else 1
-            self.focus_actor(None)
+            self.focus_entity(None)
             self.focus_camera(None)
             self.fps_camera_controller.move(0, -self.move_speed * speed_mod, 0)
             self.key_stack = ""
@@ -955,10 +1028,23 @@ class Viewer(object):
         if not self.control_window:
             self.cameras = self.scene.get_mounted_cameras()
             self.camera_ui = (
-                R.UIOptions().Style("select").Label("Name##camera_name")
-                .Index(0 if self.focused_camera is None else self.cameras.index(self.focused_camera) + 1)
-                .Items(['None'] + [x.get_name() for x in self.cameras])
-                .Callback(lambda p: self.focus_camera(self.cameras[p.index - 1] if p.index > 0 else None))
+                R.UIOptions()
+                .Style("select")
+                .Label("Name##camera_name")
+                .Index(
+                    0
+                    if self.focused_camera is None
+                    else self.cameras.index(self.focused_camera) + 1
+                )
+                .Items(
+                    ["None"]
+                    + [x.get_name() + f"##{i}" for i, x in enumerate(self.cameras)]
+                )
+                .Callback(
+                    lambda p: self.focus_camera(
+                        self.cameras[p.index - 1] if p.index > 0 else None
+                    )
+                )
             )
 
             self.control_window = (
@@ -1041,12 +1127,19 @@ class Viewer(object):
                     .Max(1)
                     .Value(self.selection_opacity)
                     .Callback(lambda p: self.set_selection_opacity(p.value)),
+                    R.UICheckbox()
+                    .Label("Immediate Move")
+                    .Checked(self.immediate_mode)
+                    .Callback(lambda p: self.set_immediate_move(p.checked)),
                     R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps)),
                 )
             )
         self.control_window.get_children()[-1].Text(
             "FPS: {:.2f}".format(self.window.fps)
         )
+
+    def set_immediate_move(self, enabled):
+        self.immediate_mode = enabled
 
     def set_selection_opacity(self, opacity):
         self.selection_opacity = opacity
@@ -1069,23 +1162,26 @@ class Viewer(object):
                     .append(
                         R.UITreeNode().Label("Actors"),
                         R.UITreeNode().Label("Articulations"),
+                        R.UITreeNode().Label("Lights"),
                     ),
                 )
             )
 
-        atree, arttree = self.scene_window.get_children()[0].get_children()
+        atree, arttree, ltree = self.scene_window.get_children()[0].get_children()
         atree: R.UITreeNode
         arttree: R.UITreeNode
+        ltree: R.UITreeNode
         atree.remove_children()
         arttree.remove_children()
+        ltree.remove_children()
         for i, actor in enumerate(self.scene.get_all_actors()):
             atree.append(
                 R.UISelectable()
                 .Label(
                     "{}##actor{}".format(actor.name if actor.name else "(no name)", i)
                 )
-                .Selected(self.selected_actor == actor)
-                .Callback((lambda link: lambda _: self.select_actor(link))(actor))
+                .Selected(self.selected_entity == actor)
+                .Callback((lambda link: lambda _: self.select_entity(link))(actor))
             )
 
         for i, art in enumerate(self.scene.get_all_articulations()):
@@ -1098,174 +1194,285 @@ class Viewer(object):
                     .Label(
                         "{}##link{}".format(link.name if link.name else "(no name)", j)
                     )
-                    .Selected(self.selected_actor == link)
-                    .Callback((lambda link: lambda _: self.select_actor(link))(link))
+                    .Selected(self.selected_entity == link)
+                    .Callback((lambda link: lambda _: self.select_entity(link))(link))
                 )
             arttree.append(art_node)
 
+        for i, light in enumerate(self.scene.get_all_lights()):
+            ltree.append(
+                R.UISelectable()
+                .Label(
+                    "{}##light{}".format(light.name if light.name else "(no name)", i)
+                )
+                .Selected(self.selected_entity == light)
+                .Callback((lambda light: lambda _: self.select_entity(light))(light))
+            )
+
     def build_actor_window(self):
-        self.actor_window = R.UIWindow().Label("Actor")
-        if not self.selected_actor:
-            self.actor_window.append(R.UIDisplayText().Text("No actor selected."))
-            return
-
-        actor = self.selected_actor
-
-        self.actor_window.append(
-            R.UIDisplayText().Text("Name: {}".format(actor.name)),
-            R.UIDisplayText().Text("Type: {}".format(actor.type)),
-            R.UIDisplayText().Text("Id: {}".format(actor.id)),
-        )
-        self.actor_window.append(
-            R.UIDisplayText().Text("Position"),
-            R.UIInputFloat().Label("x##actorpx").Value(actor.pose.p[0]).ReadOnly(True),
-            R.UIInputFloat().Label("y##actorpy").Value(actor.pose.p[1]).ReadOnly(True),
-            R.UIInputFloat().Label("z##actorpz").Value(actor.pose.p[2]).ReadOnly(True),
-            R.UIDisplayText().Text("Rotation"),
-            R.UIInputFloat().Label("w##actorqw").Value(actor.pose.q[0]).ReadOnly(True),
-            R.UIInputFloat().Label("x##actorqx").Value(actor.pose.q[1]).ReadOnly(True),
-            R.UIInputFloat().Label("y##actorqy").Value(actor.pose.q[2]).ReadOnly(True),
-            R.UIInputFloat().Label("z##actorqz").Value(actor.pose.q[3]).ReadOnly(True),
-            R.UISameLine().append(
-                R.UIButton()
-                .Label("Show")
-                .Callback(
-                    (lambda actor: lambda _: actor.render_collision(True))(actor)
-                ),
-                R.UIButton()
-                .Label("Hide")
-                .Callback(
-                    (lambda actor: lambda _: actor.render_collision(False))(actor)
-                ),
-                R.UIDisplayText().Text("Collision"),
-            ),
-        )
-
-        if actor.type in ["dynamic", "link"]:
+        self.actor_window = R.UIWindow().Label("Actor/Entity")
+        if not self.selected_entity:
             self.actor_window.append(
-                R.UIInputFloat().Label("Mass").Value(actor.mass).ReadOnly(True)
+                R.UIDisplayText().Text("No actor/entity selected.")
+            )
+            return
+        if isinstance(self.selected_entity, ActorBase):
+            actor = self.selected_entity
+            self.actor_window.append(
+                R.UIDisplayText().Text("Name: {}".format(actor.name)),
+                R.UIDisplayText().Text("Class: {}".format(actor.classname)),
+                R.UIDisplayText().Text("Id: {}".format(actor.id)),
+            )
+            self.actor_window.append(
+                R.UIDisplayText().Text("Position"),
+                R.UIInputFloat()
+                .Label("x##actorpx")
+                .Value(actor.pose.p[0])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("y##actorpy")
+                .Value(actor.pose.p[1])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("z##actorpz")
+                .Value(actor.pose.p[2])
+                .ReadOnly(True),
+                R.UIDisplayText().Text("Rotation"),
+                R.UIInputFloat()
+                .Label("w##actorqw")
+                .Value(actor.pose.q[0])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("x##actorqx")
+                .Value(actor.pose.q[1])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("y##actorqy")
+                .Value(actor.pose.q[2])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("z##actorqz")
+                .Value(actor.pose.q[3])
+                .ReadOnly(True),
+                R.UISameLine().append(
+                    R.UIButton()
+                    .Label("Show")
+                    .Callback(
+                        (lambda actor: lambda _: actor.render_collision(True))(actor)
+                    ),
+                    R.UIButton()
+                    .Label("Hide")
+                    .Callback(
+                        (lambda actor: lambda _: actor.render_collision(False))(actor)
+                    ),
+                    R.UIDisplayText().Text("Collision"),
+                ),
             )
 
-        shape_section = R.UISection().Label("Collision Shapes")
-        self.actor_window.append(shape_section)
-        shapes = actor.get_collision_shapes()
-        for shape_idx, shape in enumerate(shapes):
-            c0, c1, c2, c3 = shape.get_collision_groups()
-            shape_pose = shape.get_local_pose()
-            mat = shape.get_physical_material()
-
-            shape_info = (
-                R.UITreeNode()
-                .Label("{}##{}".format(shape.type, shape_idx))
-                .append(
-                    R.UIDisplayText().Text(
-                        "Contact offset: {:.3g}".format(shape.contact_offset)
-                    ),
-                    R.UIDisplayText().Text(
-                        "Rest offset: {:.3g}".format(shape.rest_offset)
-                    ),
-                    R.UIDisplayText().Text(
-                        "Patch radius: {:.3g}".format(shape.patch_radius)
-                    ),
-                    R.UIDisplayText().Text(
-                        "Min path radius: {:.3g}".format(shape.min_patch_radius)
-                    ),
-                    R.UICheckbox().Label("Is trigger").Checked(shape.is_trigger),
-                    R.UIDisplayText().Text(
-                        "Static friction: {:.3g}".format(mat.get_static_friction())
-                    ),
-                    R.UIDisplayText().Text(
-                        "Dynamic friction: {:.3g}".format(mat.get_dynamic_friction())
-                    ),
-                    R.UIDisplayText().Text(
-                        "Restitution: {:.3g}".format(mat.get_restitution())
-                    ),
-                    R.UIDisplayText().Text("Collision groups:"),
-                    R.UIDisplayText().Text("  0x{:08x}  0x{:08x}".format(c0, c1)),
-                    R.UIDisplayText().Text("  0x{:08x}  0x{:08x}".format(c2, c3)),
-                    R.UIDisplayText().Text("Local position"),
-                    R.UIInputFloat()
-                    .Label("x##actorpx")
-                    .Value(shape_pose.p[0])
-                    .ReadOnly(True),
-                    R.UIInputFloat()
-                    .Label("y##actorpy")
-                    .Value(shape_pose.p[1])
-                    .ReadOnly(True),
-                    R.UIInputFloat()
-                    .Label("z##actorpz")
-                    .Value(shape_pose.p[2])
-                    .ReadOnly(True),
-                    R.UIDisplayText().Text("Local rotation"),
-                    R.UIInputFloat()
-                    .Label("w##actorqw")
-                    .Value(shape_pose.q[0])
-                    .ReadOnly(True),
-                    R.UIInputFloat()
-                    .Label("x##actorqx")
-                    .Value(shape_pose.q[1])
-                    .ReadOnly(True),
-                    R.UIInputFloat()
-                    .Label("y##actorqy")
-                    .Value(shape_pose.q[2])
-                    .ReadOnly(True),
-                    R.UIInputFloat()
-                    .Label("z##actorqz")
-                    .Value(shape_pose.q[3])
-                    .ReadOnly(True),
+            if actor.classname in ["Actor", "Link"]:
+                self.actor_window.append(
+                    R.UIInputFloat().Label("Mass").Value(actor.mass).ReadOnly(True)
                 )
+
+            shape_section = R.UISection().Label("Collision Shapes")
+            self.actor_window.append(shape_section)
+            shapes = actor.get_collision_shapes()
+            for shape_idx, shape in enumerate(shapes):
+                c0, c1, c2, c3 = shape.get_collision_groups()
+                shape_pose = shape.get_local_pose()
+                mat = shape.get_physical_material()
+
+                shape_info = (
+                    R.UITreeNode()
+                    .Label("{}##{}".format(shape.type, shape_idx))
+                    .append(
+                        R.UIDisplayText().Text(
+                            "Contact offset: {:.3g}".format(shape.contact_offset)
+                        ),
+                        R.UIDisplayText().Text(
+                            "Rest offset: {:.3g}".format(shape.rest_offset)
+                        ),
+                        R.UIDisplayText().Text(
+                            "Patch radius: {:.3g}".format(shape.patch_radius)
+                        ),
+                        R.UIDisplayText().Text(
+                            "Min path radius: {:.3g}".format(shape.min_patch_radius)
+                        ),
+                        R.UICheckbox().Label("Is trigger").Checked(shape.is_trigger),
+                        R.UIDisplayText().Text(
+                            "Static friction: {:.3g}".format(mat.get_static_friction())
+                        ),
+                        R.UIDisplayText().Text(
+                            "Dynamic friction: {:.3g}".format(
+                                mat.get_dynamic_friction()
+                            )
+                        ),
+                        R.UIDisplayText().Text(
+                            "Restitution: {:.3g}".format(mat.get_restitution())
+                        ),
+                        R.UIDisplayText().Text("Collision groups:"),
+                        R.UIDisplayText().Text("  0x{:08x}  0x{:08x}".format(c0, c1)),
+                        R.UIDisplayText().Text("  0x{:08x}  0x{:08x}".format(c2, c3)),
+                        R.UIDisplayText().Text("Local position"),
+                        R.UIInputFloat()
+                        .Label("x##actorpx")
+                        .Value(shape_pose.p[0])
+                        .ReadOnly(True),
+                        R.UIInputFloat()
+                        .Label("y##actorpy")
+                        .Value(shape_pose.p[1])
+                        .ReadOnly(True),
+                        R.UIInputFloat()
+                        .Label("z##actorpz")
+                        .Value(shape_pose.p[2])
+                        .ReadOnly(True),
+                        R.UIDisplayText().Text("Local rotation"),
+                        R.UIInputFloat()
+                        .Label("w##actorqw")
+                        .Value(shape_pose.q[0])
+                        .ReadOnly(True),
+                        R.UIInputFloat()
+                        .Label("x##actorqx")
+                        .Value(shape_pose.q[1])
+                        .ReadOnly(True),
+                        R.UIInputFloat()
+                        .Label("y##actorqy")
+                        .Value(shape_pose.q[2])
+                        .ReadOnly(True),
+                        R.UIInputFloat()
+                        .Label("z##actorqz")
+                        .Value(shape_pose.q[3])
+                        .ReadOnly(True),
+                    )
+                )
+
+                shape_section.append(shape_info)
+
+                if shape.type == "sphere":
+                    shape_info.append(
+                        R.UIDisplayText().Text(
+                            "Sphere radius: {:.3g}".format(shape.geometry.radius)
+                        )
+                    )
+                elif shape.type == "capsule":
+                    shape_info.append(
+                        R.UIDisplayText().Text(
+                            "Capsule radius: {:.3g}".format(shape.geometry.radius)
+                        ),
+                        R.UIDisplayText().Text(
+                            "Capsule half length: {:.3g}".format(
+                                shape.geometry.half_length
+                            )
+                        ),
+                    )
+                elif shape.type == "box":
+                    x, y, z = shape.geometry.half_lengths
+                    shape_info.append(
+                        R.UIDisplayText().Text(
+                            "Box half lengths: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                        )
+                    )
+                elif shape.type == "convex_mesh":
+                    x, y, z = shape.geometry.scale
+                    shape_info.append(
+                        R.UIDisplayText().Text(
+                            "Mesh scale: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                        )
+                    )
+                elif shape.type == "nonconvex_mesh":
+                    x, y, z = shape.geometry.scale
+                    shape_info.append(
+                        R.UIDisplayText().Text(
+                            "Mesh scale: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                        )
+                    )
+        if isinstance(self.selected_entity, LightEntity):
+            light = self.selected_entity
+            self.actor_window.append(
+                R.UIDisplayText().Text("Name: {}".format(light.name)),
+                R.UIDisplayText().Text("Class: {}".format(light.classname)),
             )
 
-            shape_section.append(shape_info)
+            def set_shadow(light, enable):
+                light.shadow = enable
 
-            if shape.type == "sphere":
-                shape_info.append(
-                    R.UIDisplayText().Text(
-                        "Sphere radius: {:.3g}".format(shape.geometry.radius)
-                    )
+            self.actor_window.append(
+                R.UICheckbox()
+                .Label("Shadow")
+                .Checked(light.shadow)
+                .Callback((lambda light: lambda p: set_shadow(light, p.checked))(light))
+            )
+
+            self.actor_window.append(
+                R.UIDisplayText().Text("Position"),
+                R.UIInputFloat()
+                .Label("x##actorpx")
+                .Value(light.pose.p[0])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("y##actorpy")
+                .Value(light.pose.p[1])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("z##actorpz")
+                .Value(light.pose.p[2])
+                .ReadOnly(True),
+                R.UIDisplayText().Text("Rotation"),
+                R.UIInputFloat()
+                .Label("w##actorqw")
+                .Value(light.pose.q[0])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("x##actorqx")
+                .Value(light.pose.q[1])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("y##actorqy")
+                .Value(light.pose.q[2])
+                .ReadOnly(True),
+                R.UIInputFloat()
+                .Label("z##actorqz")
+                .Value(light.pose.q[3])
+                .ReadOnly(True),
+            )
+            self.actor_window.append(
+                R.UIInputFloat().Label("Near").Value(light.shadow_near).ReadOnly(True),
+                R.UIInputFloat().Label("Far").Value(light.shadow_far).ReadOnly(True),
+            )
+
+            if light.classname == "PointLightEntity":
+                light: PointLightEntity
+                pass
+            elif light.classname == "DirectionalLightEntity":
+                self.actor_window.append(
+                    R.UIInputFloat()
+                    .Label("Half Size")
+                    .Value(light.shadow_half_size)
+                    .ReadOnly(True),
                 )
-            elif shape.type == "capsule":
-                shape_info.append(
-                    R.UIDisplayText().Text(
-                        "Capsule radius: {:.3g}".format(shape.geometry.radius)
-                    ),
-                    R.UIDisplayText().Text(
-                        "Capsule half length: {:.3g}".format(shape.geometry.half_length)
-                    ),
-                )
-            elif shape.type == "box":
-                x, y, z = shape.geometry.half_lengths
-                shape_info.append(
-                    R.UIDisplayText().Text(
-                        "Box half lengths: {:.3g} {:.3g} {:.3g}".format(x, y, z)
-                    )
-                )
-            elif shape.type == "convex_mesh":
-                x, y, z = shape.geometry.scale
-                shape_info.append(
-                    R.UIDisplayText().Text(
-                        "Mesh scale: {:.3g} {:.3g} {:.3g}".format(x, y, z)
-                    )
-                )
+                pass
+            elif light.classname == "SpotLightEntity":
+                pass
 
     def build_articulation_window(self):
         self.articulation_window = R.UIWindow().Label("Articulation")
-        if not self.selected_actor or self.selected_actor.type not in [
-            "link",
-            "kinematic_link",
-        ]:
+        if (
+            not self.selected_entity
+            or not isinstance(self.selected_entity, ActorBase)
+            or self.selected_entity.classname not in ["Link", "KinematicLink"]
+        ):
             self.articulation_window.append(
                 R.UIDisplayText().Text("No articulation selected.")
             )
             return
 
-        art = self.selected_actor.get_articulation()
+        art = self.selected_entity.get_articulation()
         art: ArticulationBase
         self.articulation_window.append(
             R.UIDisplayText().Text(
                 "Name: {}".format(art.name if art.name else "(no name)")
             ),
-            R.UIDisplayText().Text("Type: {}".format(art.type)),
+            R.UIDisplayText().Text("Class: {}".format(art.classname)),
             R.UIDisplayText().Text("Base Link Id: {}".format(art.get_links()[0].id)),
         )
         uijoints = R.UISection().Label("Joints")
@@ -1292,7 +1499,7 @@ class Viewer(object):
                 .Value(q)
                 .Callback(wrapper(art, i, qpos)),
             )
-            if art.type == "dynamic":
+            if art.classname == "Articulation":
                 j: Joint
 
                 line.append(
@@ -1391,13 +1598,28 @@ class Viewer(object):
             self.single_step = True
 
     def set_scene(self, scene: Scene):
+        if hasattr(self, "scene") and self.scene:
+            if hasattr(self, "coordinate_axes") and self.coordinate_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(
+                    self.coordinate_axes
+                )
+                for n in self.grab_axes:
+                    self.scene.renderer_scene._internal_scene.remove_node(n)
+                for n in self.joint_axes:
+                    self.scene.renderer_scene._internal_scene.remove_node(n)
+            self.coordinate_axes = None
+            self.grab_axes = None
+            self.joint_axes = None
+
+        self._clear_camera_linesets()
+
         self.scene = scene
         self.window.set_scene(scene)
         self.fps_camera_controller = FPSCameraController(self.window)
         self.arc_camera_controller = ArcRotateCameraController(self.window)
         self.create_visual_objects()
         self.toggle_axes(True)
-        self.set_fovy(np.pi/2)
+        self.set_fovy(np.pi / 2)
 
     def set_camera_xyz(self, x, y, z):
         self.fps_camera_controller.setXYZ(x, y, z)
@@ -1409,7 +1631,6 @@ class Viewer(object):
         self.paused = paused
 
     def toggle_axes(self, show):
-        print("toggle", show)
         for c in self.coordinate_axes.children:
             if show:
                 c.transparency = 0
@@ -1437,26 +1658,37 @@ class Viewer(object):
         return self.window is None
 
     def close(self):
+        if hasattr(self, "coordinate_axes") and self.coordinate_axes:
+            self.scene.renderer_scene._internal_scene.remove_node(self.coordinate_axes)
+            for n in self.grab_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(n)
+            for n in self.joint_axes:
+                self.scene.renderer_scene._internal_scene.remove_node(n)
+
+            self.coordinate_axes = None
+            self.grab_axes = None
+            self.joint_axes = None
+
+        self._clear_camera_linesets()
+
         self.axes = None
         self.scene = None
         self.fps_camera_controller = None
+        self.arc_camera_controller = None
         self.window = None
+        self.camera_ui = None
         self.control_window = None
         self.scene_window = None
         self.actor_window = None
         self.articulation_window = None
         self.info_window = None
-        # necessary to release resources
-        self.camera_ui = None
-        self.key_down_action_map = None
-        self.key_press_action_map = None
 
-    def focus_actor(self, actor):
-        if actor == self.focused_actor:
+    def focus_entity(self, actor):
+        if actor == self.focused_entity:
             return
 
-        self.focused_actor = actor
-        if self.focused_actor is not None:
+        self.focused_entity = actor
+        if self.focused_entity is not None:
             self.focus_camera(None)
             pos = self.window.get_camera_position()
             rot = self.window.get_camera_rotation()
@@ -1474,22 +1706,39 @@ class Viewer(object):
             self.fps_camera_controller.setXYZ(*self.window.get_camera_position())
             self.fps_camera_controller.setRPY(0, pitch, yaw)
 
-    def select_actor(self, actor):
+    def select_entity(self, entity):
         self.enter_mode("normal")
         self.key_stack = ""
-        if actor:
-            if self.selected_actor:
-                for v in self.selected_actor.get_visual_bodies():
+        if entity:
+            if self.selected_entity and isinstance(self.selected_entity, ActorBase):
+                for v in self.selected_entity.get_visual_bodies():
                     v.set_visibility(1)
-            self.selected_actor = actor
-            for v in self.selected_actor.get_visual_bodies():
-                v.set_visibility(self.selection_opacity)
+            self.selected_entity = entity
+            if isinstance(self.selected_entity, ActorBase):
+                for v in entity.get_visual_bodies():
+                    v.set_visibility(self.selection_opacity)
         else:
-            if self.selected_actor:
-                for v in self.selected_actor.get_visual_bodies():
+            if self.selected_entity and isinstance(self.selected_entity, ActorBase):
+                for v in self.selected_entity.get_visual_bodies():
                     v.set_visibility(1)
-            self.selected_actor = None
+            self.selected_entity = None
             self.update_coordinate_axes()
+
+    @staticmethod
+    def get_camera_pose(camera: VulkanCamera):
+        """Get the camera pose in the Sapien world."""
+        opengl_pose = camera.get_model_matrix()  # opengl camera-> sapien world
+        # sapien camera -> opengl camera
+        sapien2opengl = np.array(
+            [
+                [0.0, -1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [-1, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ]
+        )
+        cam_pose = Pose.from_transformation_matrix(opengl_pose @ sapien2opengl)
+        return cam_pose
 
     def focus_camera(self, camera: VulkanCamera):
         if self.focused_camera == camera:
@@ -1497,11 +1746,13 @@ class Viewer(object):
 
         self.focused_camera = camera
         if self.focused_camera is not None:
-            self.focus_actor(None)
+            self.focus_entity(None)
 
         if self.camera_ui is not None:
             # Lazy check if any camera has changed
-            assert self.cameras == self.scene.get_mounted_cameras(), 'Cameras have changed'
+            assert (
+                self.cameras == self.scene.get_mounted_cameras()
+            ), "Cameras have changed"
             index = (self.cameras.index(camera) + 1) if camera is not None else 0
             self.camera_ui.Index(index)
 
@@ -1510,23 +1761,25 @@ class Viewer(object):
         self.update_coordinate_axes()
 
     def update_coordinate_axes(self):
-        if self.selected_actor:
+        if self.selected_entity:
             self.coordinate_axes.set_scale([self.axes_scale] * 3)
             if self.coordinate_axes_mode == "Origin":
-                self.coordinate_axes.set_position(self.selected_actor.pose.p)
-                self.coordinate_axes.set_rotation(self.selected_actor.pose.q)
+                self.coordinate_axes.set_position(self.selected_entity.pose.p)
+                self.coordinate_axes.set_rotation(self.selected_entity.pose.q)
             elif self.coordinate_axes_mode == "Center of Mass":
-                if self.selected_actor.type in [
-                    "dynamic",
-                    "kinematic",
-                    "link",
-                    "kinematic_link",
+                if isinstance(
+                    self.selected_entity, ActorBase
+                ) and self.selected_entity.classname in [
+                    "Actor",
+                    "Link",
+                    "KinematicLink",
                 ]:
                     pose = (
-                        self.selected_actor.pose * self.selected_actor.cmass_local_pose
+                        self.selected_entity.pose
+                        * self.selected_entity.cmass_local_pose
                     )
                 else:
-                    pose = self.selected_actor.pose
+                    pose = self.selected_entity.pose
                 self.coordinate_axes.set_position(pose.p)
                 self.coordinate_axes.set_rotation(pose.q)
         else:
@@ -1535,8 +1788,12 @@ class Viewer(object):
             self.coordinate_axes.set_scale([self.axes_scale] * 3)
 
     def update_joint_axis(self):
-        if self.selected_actor and "link" in self.selected_actor.type:
-            link: LinkBase = self.selected_actor
+        if (
+            self.selected_entity
+            and isinstance(self.selected_entity, ActorBase)
+            and "Link" in self.selected_entity.classname
+        ):
+            link: LinkBase = self.selected_entity
             j = link.get_articulation().get_joints()[link.get_index()]
             if j.type not in ["revolute", "prismatic"]:
                 for x in self.joint_axes:
@@ -1585,31 +1842,37 @@ class Viewer(object):
             )
 
             if self.mode == "grab":
-                if self.window.mouse_click(0):
+                if self.window.mouse_click(0) or self.immediate_mode:
                     new_pose = Pose(
                         self.display_object.position, self.display_object.rotation
                     )
-                    if self.selected_actor.type in ["dynamic", "kinematic"]:
-                        self.selected_actor.set_pose(new_pose)
-                    elif self.selected_actor.type in ["link", "kinematic_link"]:
-                        old_pose = self.selected_actor.pose
-                        a = self.selected_actor.get_articulation()
+                    if isinstance(self.selected_entity, LightEntity):
+                        self.selected_entity.set_pose(new_pose)
+                    elif self.selected_entity.classname == "Actor":
+                        self.selected_entity.set_pose(new_pose)
+                    elif self.selected_entity.classname in ["Link", "KinematicLink"]:
+                        old_pose = self.selected_entity.pose
+                        a = self.selected_entity.get_articulation()
                         a.set_root_pose(new_pose * old_pose.inv() * a.get_root_pose())
 
+                if self.window.mouse_click(0):
                     self.enter_mode("normal")
 
             elif self.mode == "rotate":
-                if self.window.mouse_click(0):
+                if self.window.mouse_click(0) or self.immediate_mode:
                     new_pose = Pose(
                         self.display_object.position, self.display_object.rotation
                     )
-                    if self.selected_actor.type in ["dynamic", "kinematic"]:
-                        self.selected_actor.set_pose(new_pose)
-                    elif self.selected_actor.type in ["link", "kinematic_link"]:
-                        old_pose = self.selected_actor.pose
-                        a = self.selected_actor.get_articulation()
+                    if isinstance(self.selected_entity, LightEntity):
+                        self.selected_entity.set_pose(new_pose)
+                    if self.selected_entity.classname == "Actor":
+                        self.selected_entity.set_pose(new_pose)
+                    elif self.selected_entity.classname in ["Link", "KinematicLink"]:
+                        old_pose = self.selected_entity.pose
+                        a = self.selected_entity.get_articulation()
                         a.set_root_pose(new_pose * old_pose.inv() * a.get_root_pose())
 
+                if self.window.mouse_click(0):
                     self.enter_mode("normal")
 
             elif self.mode == "normal":
@@ -1627,10 +1890,12 @@ class Viewer(object):
                         "Segmentation", int(mx), int(my)
                     )
                     actor = self.find_actor(pixel[1])
-                    self.select_actor(actor)
+                    self.select_entity(actor)
 
             self.update_coordinate_axes()
             self.update_joint_axis()
+
+            self._update_camera_linesets()
 
             speed_mod = 1
             if self.window.shift:
@@ -1660,6 +1925,8 @@ class Viewer(object):
                 self.display_object.set_position(
                     self.display_object.position + vec * 0.01
                 )
+                self.coordinate_axes.set_position(self.display_object.position)
+                self.coordinate_axes.set_rotation(self.display_object.rotation)
 
             if self.mode == "rotate":
                 mouse_position = np.array(self.window.mouse_position)
@@ -1675,11 +1942,13 @@ class Viewer(object):
                 self.display_object.set_rotation(
                     qmult(aa(self.rotate_axis, angle), self.rotate_initial_rotation)
                 )
+                self.coordinate_axes.set_position(self.display_object.position)
+                self.coordinate_axes.set_rotation(self.display_object.rotation)
 
             if self.mode == "normal":
                 if self.window.mouse_down(1):
                     x, y = self.window.mouse_delta
-                    if self.focused_actor:
+                    if self.focused_entity:
                         self.arc_camera_controller.rotate_yaw_pitch(
                             -self.rotate_speed * speed_mod * x,
                             self.rotate_speed * speed_mod * y,
@@ -1693,7 +1962,7 @@ class Viewer(object):
 
                 if self.window.mouse_down(2):
                     x, y = self.window.mouse_delta
-                    self.focus_actor(None)
+                    self.focus_entity(None)
                     self.fps_camera_controller.move(
                         0,
                         self.rotate_speed * speed_mod * x,
@@ -1702,7 +1971,7 @@ class Viewer(object):
 
                 wx, wy = self.window.mouse_wheel_delta
                 if wx != 0:
-                    if self.focused_actor:
+                    if self.focused_entity:
                         self.arc_camera_controller.zoom(
                             self.scroll_speed * speed_mod * wx
                         )
@@ -1711,10 +1980,10 @@ class Viewer(object):
                             self.scroll_speed * speed_mod * wx, 0, 0
                         )
 
-                if self.focused_actor:
-                    self.arc_camera_controller.set_center(self.focused_actor.pose.p)
+                if self.focused_entity:
+                    self.arc_camera_controller.set_center(self.focused_entity.pose.p)
                 elif self.focused_camera:
-                    cam_pose = get_camera_pose(self.focused_camera)
+                    cam_pose = self.get_camera_pose(self.focused_camera)
                     rpy = quat2euler(cam_pose.q)
                     self.set_camera_xyz(*cam_pose.p)
                     self.set_camera_rpy(rpy[0], -rpy[1], -rpy[2])
@@ -1729,7 +1998,7 @@ class Viewer(object):
 
     def is_mouse_available(self, mx, my):
         w, h = self.window.size
-        print(f"[I] windowSize: {w, h}; mousePose: {mx, my}")
+        # print(f"[I] windowSize: {w, h}; mousePose: {mx, my}")
         return mx >= 0 and my >= 0
 
     def camera_space_to_world_space(self, vec):
@@ -1757,15 +2026,3 @@ class Viewer(object):
         q = self.window.get_camera_rotation()
         point = rotate_vector(point, q) + self.window.get_camera_position()
         return point
-
-
-def get_camera_pose(camera: VulkanCamera):
-    """Get the camera pose (model matrix) in the sapien world."""
-    opengl_pose = camera.get_model_matrix()  # opengl camera-> sapien world
-    # sapien camera -> opengl camera
-    sapien2opengl = np.array([[0., -1., 0., 0.],
-                                [0., 0., 1., 0.],
-                                [-1, 0., 0., 0.],
-                                [0., 0., 0., 1.]])
-    cam_pose = Pose.from_transformation_matrix(opengl_pose @ sapien2opengl)
-    return cam_pose

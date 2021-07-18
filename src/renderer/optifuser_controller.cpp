@@ -122,19 +122,23 @@ void OptifuserController::editTransform() {
                   actor->getType() == EActorType::ARTICULATION_LINK)) {
       ImGui::SameLine();
       if (ImGui::Button("Drive Actor")) {
-        SDrive *validDrive = nullptr;
+        SDrive6D *validDrive = nullptr;
         auto drives = actor->getDrives();
         for (SDrive *d : drives) {
-          if (d->getActor1() == nullptr &&
+          auto d2 = dynamic_cast<SDrive6D *>(d);
+          if (d2 && d->getActor1() == nullptr &&
               d->getLocalPose1() == PxTransform({{0, 0, 0}, PxIdentity}) &&
               d->getLocalPose2() == PxTransform({{0, 0, 0}, PxIdentity})) {
-            validDrive = d;
+            validDrive = d2;
           }
         }
         if (!validDrive) {
           validDrive = mScene->createDrive(nullptr, {{0, 0, 0}, PxIdentity}, actor,
                                            {{0, 0, 0}, PxIdentity});
-          validDrive->setProperties(10000, 10000, PX_MAX_F32, false);
+          validDrive->setSlerpProperties(10000, 10000, PX_MAX_F32, false);
+          validDrive->setXProperties(10000, 10000, PX_MAX_F32, false);
+          validDrive->setYProperties(10000, 10000, PX_MAX_F32, false);
+          validDrive->setZProperties(10000, 10000, PX_MAX_F32, false);
         }
         validDrive->setTarget(pose);
       }
@@ -944,9 +948,10 @@ void OptifuserController::render() {
                   }
                   ImGui::NewLine();
 
+                  if (auto d = dynamic_cast<SDrive6D*>(drives[i]))
                   {
-                    auto target = drives[i]->getTarget();
-                    auto [v, w] = drives[i]->getTargetVelocity();
+                    auto target = d->getTarget();
+                    auto [v, w] = d->getTargetVelocity();
 
                     ImGui::Text("Drive target");
                     ImGui::Text("Position: %.2f %.2f %.2f", target.p.x, target.p.y, target.p.z);
@@ -960,7 +965,7 @@ void OptifuserController::render() {
                     ImGui::Text("Angular Velocity: %.2f %.2f %.2f", w.x, w.y, w.z);
 
                     if (ImGui::Button(("Remove Drive##" + std::to_string(i)).c_str())) {
-                      drives[i]->destroy();
+                      mScene->removeDrive(d);
                     }
                     ImGui::Text("Caution: Accessing a removed drive");
                     ImGui::Text("will cause crash");

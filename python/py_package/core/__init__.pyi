@@ -14,12 +14,15 @@ from sapien.core.pysapien import CameraSpec
 from sapien.core.pysapien import CapsuleGeometry
 from sapien.core.pysapien import CollisionGeometry
 from sapien.core.pysapien import CollisionShape
+from sapien.core.pysapien import Constraint
 from sapien.core.pysapien import Contact
 from sapien.core.pysapien import ContactPoint
 from sapien.core.pysapien import ConvexMeshGeometry
 from sapien.core.pysapien import DirectionalLight
+from sapien.core.pysapien import DirectionalLightEntity
 from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
+from sapien.core.pysapien import Entity
 from sapien.core.pysapien import ICamera
 from sapien.core.pysapien import IPxrRenderer
 from sapien.core.pysapien import ISensor
@@ -35,9 +38,11 @@ from sapien.core.pysapien import KinematicJointRevolute
 from sapien.core.pysapien import KinematicJointSingleDof
 from sapien.core.pysapien import KinematicLink
 from sapien.core.pysapien import Light
+from sapien.core.pysapien import LightEntity
 from sapien.core.pysapien import Link
 from sapien.core.pysapien import LinkBase
 from sapien.core.pysapien import LinkBuilder
+from sapien.core.pysapien import NonconvexMeshGeometry
 from sapien.core.pysapien import OptifuserCamera
 from sapien.core.pysapien import OptifuserConfig
 from sapien.core.pysapien import OptifuserController
@@ -47,6 +52,7 @@ from sapien.core.pysapien import PhysicalMaterial
 from sapien.core.pysapien import PinocchioModel
 from sapien.core.pysapien import PlaneGeometry
 from sapien.core.pysapien import PointLight
+from sapien.core.pysapien import PointLightEntity
 from sapien.core.pysapien import Pose
 from sapien.core.pysapien import RenderBody
 from sapien.core.pysapien import RenderGeometry
@@ -58,6 +64,7 @@ from sapien.core.pysapien import SceneConfig
 from sapien.core.pysapien import ShapeRecord
 from sapien.core.pysapien import SphereGeometry
 from sapien.core.pysapien import SpotLight
+from sapien.core.pysapien import SpotLightEntity
 from sapien.core.pysapien import Subscription
 from sapien.core.pysapien import Trigger
 from sapien.core.pysapien import URDFLoader
@@ -91,12 +98,15 @@ __all__ = [
     "CapsuleGeometry",
     "CollisionGeometry",
     "CollisionShape",
+    "Constraint",
     "Contact",
     "ContactPoint",
     "ConvexMeshGeometry",
     "DirectionalLight",
+    "DirectionalLightEntity",
     "Drive",
     "Engine",
+    "Entity",
     "ICamera",
     "IPxrRenderer",
     "ISensor",
@@ -112,9 +122,11 @@ __all__ = [
     "KinematicJointSingleDof",
     "KinematicLink",
     "Light",
+    "LightEntity",
     "Link",
     "LinkBase",
     "LinkBuilder",
+    "NonconvexMeshGeometry",
     "OptifuserCamera",
     "OptifuserConfig",
     "OptifuserController",
@@ -124,6 +136,7 @@ __all__ = [
     "PinocchioModel",
     "PlaneGeometry",
     "PointLight",
+    "PointLightEntity",
     "Pose",
     "RenderBody",
     "RenderGeometry",
@@ -135,6 +148,7 @@ __all__ = [
     "ShapeRecord",
     "SphereGeometry",
     "SpotLight",
+    "SpotLightEntity",
     "Subscription",
     "Trigger",
     "URDFLoader",

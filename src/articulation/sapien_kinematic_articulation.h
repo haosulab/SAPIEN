@@ -12,7 +12,6 @@ class SKArticulation : public SArticulationDrivable {
   friend class ArticulationBuilder;
   friend class LinkBuilder;
 
-  SScene *mScene;
   std::vector<std::unique_ptr<SKLink>> mLinks;
   std::vector<std::unique_ptr<SKJoint>> mJoints;
   SKLink *mRootLink;
@@ -24,7 +23,7 @@ class SKArticulation : public SArticulationDrivable {
 public:
   virtual std::vector<SLinkBase *> getBaseLinks() override;
   virtual std::vector<SJointBase *> getBaseJoints() override;
-  virtual SLinkBase *getRootLink() override;
+  virtual SLinkBase *getRootLink() const override;
 
   virtual EArticulationType getType() const override;
   virtual uint32_t dof() const override;
@@ -47,8 +46,6 @@ public:
 
   virtual void setDriveTarget(std::vector<physx::PxReal> const &v) override;
   virtual std::vector<physx::PxReal> getDriveTarget() const override;
-
-  SScene *getScene() const override { return mScene; }
 
   void prestep() override;
 

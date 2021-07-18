@@ -1,12 +1,18 @@
 #pragma once
 #include <PxPhysicsAPI.h>
-#include <string>
 #include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace sapien {
 class Simulation;
+
+struct NonConvexMeshRecord {
+  bool cached;
+  std::string filename;
+  physx::PxTriangleMesh *mesh;
+};
 
 struct MeshRecord {
   bool cached;
@@ -22,13 +28,18 @@ struct MeshGroupRecord {
 class MeshManager {
 private:
   std::string mCacheSuffix = ".convex.stl";
+  std::string mCacheSuffixNonConvex = ".nonconvex.stl";
 
   Simulation *mSimulation;
+  std::map<std::string, NonConvexMeshRecord> mNonConvexMeshRegistry;
   std::map<std::string, MeshRecord> mMeshRegistry;
   std::map<std::string, MeshGroupRecord> mMeshGroupRegistry;
 
 public:
   explicit MeshManager(Simulation *simulation);
+
+  physx::PxTriangleMesh *loadNonConvexMesh(const std::string &filename, bool useCache = true,
+                                           bool saveCache = true);
 
   physx::PxConvexMesh *loadMesh(const std::string &filename, bool useCache = true,
                                 bool saveCache = true);
@@ -40,5 +51,6 @@ public:
 
   void setCacheSuffix(const std::string &filename);
   std::string getCachedFilename(const std::string &filename);
+  std::string getCachedFilenameNonConvex(const std::string &filename);
 };
 } // namespace sapien

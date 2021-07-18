@@ -24,6 +24,7 @@
 #include "event_system/event_system.h"
 #include "id_generator.h"
 #include "renderer/render_interface.h"
+#include "sapien_light.h"
 #include "sapien_material.h"
 #include "sapien_scene_config.h"
 #include "simulation_callback.h"
@@ -40,6 +41,7 @@ class Simulation;
 class ActorBuilder;
 class LinkBuilder;
 class ArticulationBuilder;
+class SDrive6D;
 class SDrive;
 struct SContact;
 
@@ -153,8 +155,8 @@ public:
    */
   void removeKinematicArticulation(SKArticulation *articulation);
 
-  SDrive *createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
-                      PxTransform const &pose2);
+  SDrive6D *createDrive(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+                        PxTransform const &pose2);
   /** Remove a drive immediately */
   void removeDrive(SDrive *drive);
 
@@ -189,6 +191,8 @@ private:
   std::vector<std::unique_ptr<SArticulation>> mArticulations;
   std::vector<std::unique_ptr<SKArticulation>> mKinematicArticulations;
 
+  std::vector<std::unique_ptr<SLight>> mLights;
+
   std::vector<std::unique_ptr<SDrive>> mDrives;
 
   /************************************************
@@ -206,11 +210,23 @@ public:
 
   std::vector<SActorBase *> getAllActors() const;
   std::vector<SArticulationBase *> getAllArticulations() const;
+  std::vector<SLight *> getAllLights() const;
 
-  // void setShadowLight(PxVec3 const &direction, PxVec3 const &color);
-  // void addPointLight(PxVec3 const &position, PxVec3 const &color);
-  // void setAmbientLight(PxVec3 const &color);
-  // void addDirectionalLight(PxVec3 const &direction, PxVec3 const &color);
+  void setAmbientLight(PxVec3 const &color);
+  PxVec3 getAmbientLight() const;
+  SPointLight *addPointLight(PxVec3 const &position, PxVec3 const &color, bool enableShadow,
+                             float shadowNear, float shadowFar);
+  SDirectionalLight *addDirectionalLight(PxVec3 const &direction, PxVec3 const &color,
+                                         bool enableShadow, PxVec3 const &position,
+                                         float shadowScale, float shadowNear, float shadowFar);
+  // SSpotLight *addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fov,
+  //                          PxVec3 const &color, bool enableShadow, float shadowNear,
+  //                          float shadowFar);
+  SSpotLight *addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fovInner,
+                           float fovOuter, PxVec3 const &color, bool enableShadow,
+                           float shadowNear, float shadowFar);
+
+  void removeLight(SLight *light);
 
   /** syncs physical scene with renderer scene, and tell the renderer scene that
    * it is a new time frame.

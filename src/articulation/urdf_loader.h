@@ -129,6 +129,13 @@ template <> inline physx::PxVec3 DomBase::_read_attr<physx::PxVec3>(const std::s
   return {x, y, z};
 }
 
+template <> inline physx::PxVec4 DomBase::_read_attr<physx::PxVec4>(const std::string &str) {
+  float x, y, z, w;
+  std::istringstream iss(str);
+  iss >> x >> y >> z >> w;
+  return {x, y, z, w};
+}
+
 template <> inline physx::PxReal DomBase::_read_attr<physx::PxReal>(const std::string &str) {
   return std::atof(str.c_str());
 }
@@ -335,16 +342,48 @@ struct Geometry : DomBase {
   }
 };
 
+struct MaterialColor : DomBase {
+  DECLARE_CONSTRUCTOR(MaterialColor)
+  DECLARE_ATTR(physx::PxVec4, rgba)
+
+  LOAD_ATTR_BEGIN()
+  LOAD_ATTR_OPTIONAL(physx::PxVec4, rgba, physx::PxVec4(1,1,1,1))
+  LOAD_ATTR_END()
+};
+
+// texture not supported
+struct RenderMaterial : DomBase {
+  DECLARE_CONSTRUCTOR(RenderMaterial)
+  DECLARE_ATTR(std::string, name)
+  DECLARE_CHILD_UNIQUE(MaterialColor, color)
+
+  LOAD_ATTR_BEGIN()
+  LOAD_ATTR(std::string, name)
+  LOAD_ATTR_END()
+
+  LOAD_CHILD_BEGIN()
+  LOAD_CHILD_UNIQUE(MaterialColor, color)
+  LOAD_CHILD_END()
+
+  CHECK_CHILD_BEGIN()
+  CHECK_CHILD_UNIQUE_SET_DEFAULT(color, {
+    color = nullptr;
+  })
+  CHECK_CHILD_END()
+};
+
 // We do not care about material for now
 struct Visual : DomBase {
   DECLARE_CONSTRUCTOR(Visual)
   DECLARE_ATTR(std::string, name)
   DECLARE_CHILD_UNIQUE(Origin, origin)
   DECLARE_CHILD_UNIQUE(Geometry, geometry)
+  DECLARE_CHILD_UNIQUE(RenderMaterial, material)
 
   LOAD_CHILD_BEGIN()
   LOAD_CHILD_UNIQUE(Origin, origin)
   LOAD_CHILD_UNIQUE(Geometry, geometry)
+  LOAD_CHILD_UNIQUE(RenderMaterial, material)
   LOAD_CHILD_END()
 
   LOAD_ATTR_BEGIN()
@@ -357,6 +396,9 @@ struct Visual : DomBase {
     origin->xyz = {0, 0, 0};
     origin->rpy = {0, 0, 0};
   })
+  CHECK_CHILD_UNIQUE_SET_DEFAULT(material, {
+    material = nullptr;
+  });
   CHECK_CHILD_UNIQUE(geometry)
   CHECK_CHILD_END()
 };
@@ -662,10 +704,12 @@ struct Robot : DomBase {
   DECLARE_CONSTRUCTOR(Robot)
   DECLARE_CHILD(Link, link)
   DECLARE_CHILD(Joint, joint)
+  DECLARE_CHILD(RenderMaterial, material)
   DECLARE_CHILD(Gazebo, gazebo)
   LOAD_CHILD_BEGIN()
   LOAD_CHILD(Link, link);
   LOAD_CHILD(Joint, joint);
+  LOAD_CHILD(RenderMaterial, material)
   LOAD_CHILD(Gazebo, gazebo)
   LOAD_CHILD_END()
 };

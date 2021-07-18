@@ -22,6 +22,9 @@ void buildRenderer(py::module &parent) {
   auto PyScene = py::class_<scene::Scene>(m, "Scene");
   auto PySceneNode = py::class_<scene::Node>(m, "Node");
   auto PySceneObject = py::class_<scene::Object, scene::Node>(m, "Object");
+  auto PyLineSetObject = py::class_<scene::LineObject, scene::Node>(m, "LineSetObject");
+  auto PyPointSetObject = py::class_<scene::PointObject, scene::Node>(m, "PointSetObject");
+
   auto PyTexture =
       py::class_<resource::SVTexture, std::shared_ptr<resource::SVTexture>>(m, "Texture");
   auto PyCubemap =
@@ -32,6 +35,10 @@ void buildRenderer(py::module &parent) {
   auto PyModel = py::class_<resource::SVModel, std::shared_ptr<resource::SVModel>>(m, "Model");
   auto PyShape = py::class_<resource::SVShape, std::shared_ptr<resource::SVShape>>(m, "Shape");
   auto PyMesh = py::class_<resource::SVMesh, std::shared_ptr<resource::SVMesh>>(m, "Mesh");
+  auto PyPrimitiveSet =
+      py::class_<resource::SVPrimitiveSet, std::shared_ptr<resource::SVPrimitiveSet>>(
+          m, "PrimitiveSet");
+
   auto PyRenderer = py::class_<renderer::Renderer>(m, "Renderer");
 
   auto PyUIWidget = py::class_<ui::Widget, std::shared_ptr<ui::Widget>>(m, "UIWidget");
@@ -331,6 +338,34 @@ void buildRenderer(py::module &parent) {
           [](core::Context &, int segments) { return resource::SVMesh::CreateCone(segments); },
           py::arg("segments") = 32)
       .def(
+          "create_mesh_from_array",
+          [](core::Context &, const py::array_t<float> &vertices,
+             const py::array_t<uint32_t> &indices, const py::array_t<float> &normals,
+             const py::array_t<float> &uvs) {
+            auto mesh = svulkan2::resource::SVMesh::Create(
+                std::vector<float>(vertices.data(), vertices.data() + vertices.size()),
+                std::vector<uint32_t>(indices.data(), indices.data() + indices.size()));
+            if (normals.size() != 0) {
+              if (normals.size() != vertices.size()) {
+                throw std::runtime_error(
+                    "create mesh fail: the size of normals does not match with vertices");
+              }
+              mesh->setVertexAttribute(
+                  "normal", std::vector<float>(normals.data(), normals.data() + normals.size()));
+            }
+            if (uvs.size() != 0) {
+              if (uvs.size() != vertices.size()) {
+                throw std::runtime_error(
+                    "create mesh fail: the size of uvs does not match with vertices");
+              }
+              mesh->setVertexAttribute("uv",
+                                       std::vector<float>(uvs.data(), uvs.data() + uvs.size()));
+            }
+            return mesh;
+          },
+          py::arg("vertices"), py::arg("indices"), py::arg("normals") = py::array_t<float>(),
+          py::arg("uvs") = py::array_t<float>())
+      .def(
           "create_model",
           [](core::Context &context, std::vector<std::shared_ptr<resource::SVMesh>> const &meshes,
              std::vector<std::shared_ptr<resource::SVMetallicMaterial>> const &materials) {
@@ -338,7 +373,31 @@ void buildRenderer(py::module &parent) {
             mats.insert(mats.end(), materials.begin(), materials.end());
             return context.createModel(meshes, mats);
           },
-          py::arg("meshes"), py::arg("materials"));
+          py::arg("meshes"), py::arg("materials"))
+      .def(
+          "create_line_set",
+          [](core::Context &, const py::array_t<float> &vertices,
+             const py::array_t<float> &colors) {
+            auto lineset = std::make_shared<resource::SVLineSet>();
+            std::vector<float> vs(vertices.data(), vertices.data() + vertices.size());
+            std::vector<float> cs(colors.data(), colors.data() + colors.size());
+            lineset->setVertexAttribute("position", vs);
+            lineset->setVertexAttribute("color", cs);
+            return lineset;
+          },
+          py::arg("vertices"), py::arg("colors"))
+      .def(
+          "create_point_set",
+          [](core::Context &, const py::array_t<float> &vertices,
+             const py::array_t<float> &colors) {
+            auto pointset = std::make_shared<resource::SVPointSet>();
+            std::vector<float> vs(vertices.data(), vertices.data() + vertices.size());
+            std::vector<float> cs(colors.data(), colors.data() + colors.size());
+            pointset->setVertexAttribute("position", vs);
+            pointset->setVertexAttribute("color", cs);
+            return pointset;
+          },
+          py::arg("vertices"), py::arg("colors"));
 
   PyMaterial
       .def("set_textures", &resource::SVMetallicMaterial::setTextures,
@@ -378,6 +437,34 @@ void buildRenderer(py::module &parent) {
             }
           },
           py::return_value_policy::reference, py::arg("model"), py::arg("parent") = nullptr)
+      .def(
+          "add_line_set",
+          [](scene::Scene &scene, std::shared_ptr<resource::SVLineSet> lineset,
+             scene::Node *parent) {
+            if (!lineset) {
+              throw std::runtime_error("add line set failed: it must not be None");
+            }
+            if (parent) {
+              return &scene.addLineObject(*parent, lineset);
+            } else {
+              return &scene.addLineObject(lineset);
+            }
+          },
+          py::return_value_policy::reference, py::arg("line_set"), py::arg("parent") = nullptr)
+      .def(
+          "add_point_set",
+          [](scene::Scene &scene, std::shared_ptr<resource::SVPointSet> pointset,
+             scene::Node *parent) {
+            if (!pointset) {
+              throw std::runtime_error("add point set failed: it must not be None");
+            }
+            if (parent) {
+              return &scene.addPointObject(*parent, pointset);
+            } else {
+              return &scene.addPointObject(pointset);
+            }
+          },
+          py::return_value_policy::reference, py::arg("point_set"), py::arg("parent") = nullptr)
       .def("remove_node", &scene::Scene::removeNode, py::arg("node"));
 
   PySceneNode

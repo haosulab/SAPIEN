@@ -34,7 +34,7 @@ private:
 public:
   SArticulation *getArticulation() override;
   inline EActorType getType() const override { return EActorType::ARTICULATION_LINK; }
-  PxArticulationLink *getPxActor() override;
+  PxArticulationLink *getPxActor() const override;
 
 private:
   SLink(PxArticulationLink *actor, SArticulation *articulation, physx_id_t id, SScene *scene,
@@ -52,7 +52,7 @@ private:
 public:
   virtual SKArticulation *getArticulation() override;
   inline EActorType getType() const override { return EActorType::KINEMATIC_ARTICULATION_LINK; }
-  virtual PxRigidDynamic *getPxActor() override;
+  virtual PxRigidDynamic *getPxActor() const override;
 
   SKLink(SKLink const &) = delete;
   SKLink &operator=(SKLink const &) = delete;

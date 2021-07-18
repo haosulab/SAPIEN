@@ -23,6 +23,25 @@ void ActorBuilder::removeVisualAt(uint32_t index) {
   }
 }
 
+void ActorBuilder::addNonConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
+                                             const PxVec3 &scale,
+                                             std::shared_ptr<SPhysicalMaterial> material,
+                                             PxReal patchRadius, PxReal minPatchRadius,
+                                             bool isTrigger) {
+  ShapeRecord r;
+  r.type = ShapeRecord::Type::NonConvexMesh;
+  r.filename = filename;
+  r.pose = pose;
+  r.scale = scale;
+  r.material = material;
+  r.density = 0.f;
+  r.patchRadius = patchRadius;
+  r.minPatchRadius = minPatchRadius;
+  r.isTrigger = isTrigger;
+
+  mShapeRecord.push_back(r);
+}
+
 void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
                                           const PxVec3 &scale,
                                           std::shared_ptr<SPhysicalMaterial> material,
@@ -209,6 +228,29 @@ void ActorBuilder::buildShapes(std::vector<std::unique_ptr<SCollisionShape>> &sh
     auto material = r.material ? r.material : mScene->getDefaultMaterial();
 
     switch (r.type) {
+    case ShapeRecord::Type::NonConvexMesh: {
+      PxTriangleMesh *mesh =
+          mScene->getSimulation()->getMeshManager().loadNonConvexMesh(r.filename);
+      if (!mesh) {
+        spdlog::get("SAPIEN")->error("Failed to load non-convex mesh for actor");
+        continue;
+      }
+      auto shape = mScene->getSimulation()->createCollisionShape(
+          PxTriangleMeshGeometry(mesh, PxMeshScale(r.scale)), material);
+      if (!shape) {
+        throw std::runtime_error("Failed to create non-convex shape");
+      }
+      shape->setLocalPose(r.pose);
+      shape->setTorsionalPatchRadius(r.patchRadius);
+      shape->setMinTorsionalPatchRadius(r.minPatchRadius);
+      if (r.isTrigger) {
+        shape->setIsTrigger(true);
+      }
+      shapes.push_back(std::move(shape));
+      densities.push_back(0);
+      break;
+    }
+
     case ShapeRecord::Type::SingleMesh: {
       PxConvexMesh *mesh = mScene->getSimulation()->getMeshManager().loadMesh(r.filename);
       if (!mesh) {
@@ -452,6 +494,66 @@ void ActorBuilder::buildCollisionVisuals(
                                           PxVec3{0, 1, 0});
       break;
     }
+    case PxGeometryType::eTRIANGLEMESH: {
+      PxTriangleMeshGeometry geom;
+      shape->getPxShape()->getTriangleMeshGeometry(geom);
+
+      std::vector<PxVec3> vertices;
+      std::vector<PxVec3> normals;
+      std::vector<uint32_t> triangles;
+
+      PxTriangleMesh *mesh = geom.triangleMesh;
+      const PxVec3 *verts = mesh->getVertices();
+
+      if (mesh->getTriangleMeshFlags() & PxTriangleMeshFlag::e16_BIT_INDICES) {
+        auto indices = static_cast<const PxU16 *>(mesh->getTriangles());
+        for (PxU32 i = 0; i < mesh->getNbTriangles(); i++) {
+          uint32_t i0 = indices[3 * i];
+          uint32_t i1 = indices[3 * i + 1];
+          uint32_t i2 = indices[3 * i + 2];
+          vertices.push_back(verts[i0]);
+          vertices.push_back(verts[i1]);
+          vertices.push_back(verts[i2]);
+          PxVec3 normal = (verts[i1] - verts[i0]).cross(verts[i2] - verts[i0]);
+          normal.normalize();
+          normals.push_back(normal);
+          normals.push_back(normal);
+          normals.push_back(normal);
+
+          triangles.push_back(3 * i);
+          triangles.push_back(3 * i + 1);
+          triangles.push_back(3 * i + 2);
+          triangles.push_back(3 * i);
+          triangles.push_back(3 * i + 2);
+          triangles.push_back(3 * i + 1);
+        }
+      } else {
+        auto indices = static_cast<const PxU32 *>(mesh->getTriangles());
+        for (PxU32 i = 0; i < mesh->getNbTriangles(); i++) {
+          uint32_t i0 = indices[3 * i];
+          uint32_t i1 = indices[3 * i + 1];
+          uint32_t i2 = indices[3 * i + 2];
+          vertices.push_back(verts[i0]);
+          vertices.push_back(verts[i1]);
+          vertices.push_back(verts[i2]);
+          PxVec3 normal = (verts[i1] - verts[i0]).cross(verts[i2] - verts[i0]);
+          normal.normalize();
+          normals.push_back(normal);
+          normals.push_back(normal);
+          normals.push_back(normal);
+
+          triangles.push_back(3 * i);
+          triangles.push_back(3 * i + 1);
+          triangles.push_back(3 * i + 2);
+          triangles.push_back(3 * i);
+          triangles.push_back(3 * i + 2);
+          triangles.push_back(3 * i + 1);
+        }
+      }
+      cBody = rendererScene->addRigidbody(vertices, normals, triangles, geom.scale.scale,
+                                          PxVec3{1, 0, 0});
+      break;
+    }
     default:
       spdlog::get("SAPIEN")->error(
           "Failed to create collision shape rendering: unrecognized geometry type.");
@@ -499,11 +601,33 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
     sActor->attachShape(std::move(shapes[i]));
   }
   if (shapes.size() && mUseDensity) {
-    PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
+    bool zero = true;
+    for (float density : densities) {
+      if (density > 1e-8) {
+        zero = false;
+        break;
+      }
+    }
+    if (zero && !isKinematic) {
+      spdlog::get("SAPIEN")->warn(
+          "All shapes have 0 density. This will result in unexpected mass and inertia.");
+    }
+    if (!isKinematic) {
+      PxRigidBodyExt::updateMassAndInertia(*actor, densities.data(), shapes.size());
+    }
   } else {
-    actor->setMass(mMass);
-    actor->setCMassLocalPose(mCMassPose);
-    actor->setMassSpaceInertiaTensor(mInertia);
+    if (mMass < 1e-8 || mInertia.x < 1e-8 || mInertia.y < 1e-8 || mInertia.z < 1e-8) {
+      spdlog::get("SAPIEN")->warn(
+          "Mass or inertia contains very small number, this is not allowed. "
+          "Mass will be set to 1e-6 and inertia will be set to 1e-8 for stability. Actor: {0}",
+          name);
+      actor->setMass(1e-6);
+      actor->setMassSpaceInertiaTensor({1e-8, 1e-8, 1e-8});
+    } else {
+      actor->setMass(mMass);
+      actor->setCMassLocalPose(mCMassPose);
+      actor->setMassSpaceInertiaTensor(mInertia);
+    }
   }
 
   sActor->setName(name);

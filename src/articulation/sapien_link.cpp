@@ -3,7 +3,7 @@
 
 namespace sapien {
 
-PxArticulationLink *SLink::getPxActor() { return mActor; }
+PxArticulationLink *SLink::getPxActor() const { return mActor; }
 SArticulation *SLink::getArticulation() { return mArticulation; }
 
 SLink::SLink(PxArticulationLink *actor, SArticulation *articulation, physx_id_t id, SScene *scene,
@@ -18,7 +18,7 @@ SKLink::SKLink(PxRigidDynamic *actor, SKArticulation *articulation, physx_id_t i
     : SLinkBase(id, scene, renderBodies, collisionBodies), mActor(actor),
       mArticulation(articulation) {}
 
-PxRigidDynamic *SKLink::getPxActor() { return mActor; }
+PxRigidDynamic *SKLink::getPxActor() const { return mActor; }
 SKArticulation *SKLink::getArticulation() { return mArticulation; }
 
 } // namespace sapien

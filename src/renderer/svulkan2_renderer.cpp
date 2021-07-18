@@ -23,6 +23,10 @@ void SVulkan2Renderer::setLogLevel(std::string const &level) {
     svulkan2::log::getLogger()->set_level(spdlog::level::warn);
   } else if (level == "err" || level == "error") {
     svulkan2::log::getLogger()->set_level(spdlog::level::err);
+  } else if (level == "critical") {
+    svulkan2::log::getLogger()->set_level(spdlog::level::critical);
+  } else if (level == "off") {
+    svulkan2::log::getLogger()->set_level(spdlog::level::off);
   } else {
     svulkan2::log::getLogger()->error("Invalid log level \"{}\"", level);
   }

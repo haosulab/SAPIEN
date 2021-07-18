@@ -48,7 +48,7 @@ layout(set = 1, binding = 0) uniform CameraBuffer {
 } cameraBuffer;
 
 layout(set = 2, binding = 0) uniform sampler2D samplerAlbedo;
-layout(set = 2, binding = 1) uniform sampler2D samplerPosition;
+layout(set = 2, binding = 1) uniform sampler2D samplerPosition0;
 layout(set = 2, binding = 2) uniform sampler2D samplerSpecular;
 layout(set = 2, binding = 3) uniform sampler2D samplerNormal;
 layout(set = 2, binding = 4) uniform sampler2D samplerGbufferDepth;
@@ -153,6 +153,7 @@ void main() {
     vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
     vec3 l = pos - csPosition.xyz;
     color += visibility * computeSpotLight(
+        sceneBuffer.spotLights[i].emission.a,
         sceneBuffer.spotLights[i].direction.a,
         centerDir,
         sceneBuffer.spotLights[i].emission.rgb,
@@ -164,6 +165,7 @@ void main() {
     vec3 l = pos - csPosition.xyz;
     vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
     color += computeSpotLight(
+        sceneBuffer.spotLights[i].emission.a,
         sceneBuffer.spotLights[i].direction.a,
         centerDir,
         sceneBuffer.spotLights[i].emission.rgb,

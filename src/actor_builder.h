@@ -22,7 +22,7 @@ class IPxrRididbody;
 class ActorBuilder {
 public:
   struct ShapeRecord {
-    enum Type { SingleMesh, MultipleMeshes, Box, Capsule, Sphere } type;
+    enum Type { SingleMesh, MultipleMeshes, NonConvexMesh, Box, Capsule, Sphere } type;
     // mesh, scale also for box
     std::string filename;
     PxVec3 scale;
@@ -63,9 +63,9 @@ protected:
   SScene *mScene;
 
   bool mUseDensity = true;
-  PxReal mMass = 1e-6;
+  PxReal mMass = 0;
   PxTransform mCMassPose = {{0, 0, 0}, PxIdentity};
-  PxVec3 mInertia = {1e-6, 1e-6, 1e-6};
+  PxVec3 mInertia = {0, 0, 0};
 
   struct {
     uint32_t w0 = 1, w1 = 1, w2 = 0, w3 = 0;
@@ -84,6 +84,13 @@ public:
   void removeVisualAt(uint32_t index);
   inline std::vector<ShapeRecord> const &getShapes() const { return mShapeRecord; }
   inline std::vector<VisualRecord> const &getVisuals() const { return mVisualRecord; }
+
+  void addNonConvexShapeFromFile(const std::string &filename,
+                                 const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                 const PxVec3 &scale = {1, 1, 1},
+                                 std::shared_ptr<SPhysicalMaterial> material = nullptr,
+                                 PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f,
+                                 bool isTrigger = false);
 
   void addConvexShapeFromFile(const std::string &filename,
                               const PxTransform &pose = {{0, 0, 0}, PxIdentity},

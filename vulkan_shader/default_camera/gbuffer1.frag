@@ -87,6 +87,7 @@ layout(location = 4) in mat3 inTbn;
 layout(location = 0) out vec4 outLighting1;
 layout(location = 1) out vec4 outNormal1;
 layout(location = 2) out uvec4 outSegmentation1;
+layout(location = 3) out vec4 outPosition1;
 
 vec3 computeDirectionalLight(int index, vec3 normal, vec3 camDir, vec3 diffuseAlbedo, float roughness, vec3 fresnel) {
   vec3 lightDir = -normalize((cameraBuffer.viewMatrix *
@@ -150,6 +151,7 @@ void main() {
 
   vec3 normal = outNormal1.xyz;
   vec4 csPosition = inPosition;
+  outPosition1 = inPosition;
   csPosition /= csPosition.w;
 
   vec3 camDir = -normalize(csPosition.xyz);
@@ -175,6 +177,7 @@ void main() {
     vec3 l = pos - csPosition.xyz;
     vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
     color += computeSpotLight(
+        sceneBuffer.spotLights[i].emission.a,
         sceneBuffer.spotLights[i].direction.a,
         centerDir,
         sceneBuffer.spotLights[i].emission.rgb,

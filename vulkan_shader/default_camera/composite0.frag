@@ -6,11 +6,14 @@ layout(set = 0, binding = 2) uniform sampler2D samplerGbufferDepth;
 layout(set = 0, binding = 3) uniform sampler2D samplerGbuffer1Depth;
 layout(set = 0, binding = 4) uniform usampler2D samplerSegmentation0;
 layout(set = 0, binding = 5) uniform usampler2D samplerSegmentation1;
+layout(set = 0, binding = 6) uniform sampler2D samplerPosition0;
+layout(set = 0, binding = 7) uniform sampler2D samplerPosition1;
 
 layout(location = 0) in vec2 inUV;
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outDepthLinear;
 layout(location = 2) out uvec4 outSegmentation;
+layout(location = 3) out vec4 outPosition;
 
 layout(set = 1, binding = 0) uniform CameraBuffer {
   mat4 viewMatrix;
@@ -107,4 +110,8 @@ void main() {
   uvec4 seg0 = texture(samplerSegmentation0, inUV);
   uvec4 seg1 = texture(samplerSegmentation1, inUV);
   outSegmentation = d0 < d1 ? seg0 : seg1;
+
+  vec4 pos0 = vec4(texture(samplerPosition0, inUV).xyz, d0);
+  vec4 pos1 = vec4(texture(samplerPosition1, inUV).xyz, d1);
+  outPosition = d0 < d1 ? pos0 : pos1;
 }

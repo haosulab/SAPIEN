@@ -137,9 +137,10 @@ public:
                       float shadowScale = 10.f, float shadowNear = -5.f,
                       float shadowFar = 5.f) override;
   SVulkan2SpotLight *addSpotLight(std::array<float, 3> const &position,
-                                  std::array<float, 3> const &direction, float fov,
-                                  std::array<float, 3> const &color, bool enableShadow,
-                                  float shadowNear = 0.1f, float shadowFar = 5.f) override;
+                                  std::array<float, 3> const &direction, float fovInner,
+                                  float fovOuter, std::array<float, 3> const &color,
+                                  bool enableShadow, float shadowNear, float shadowFar) override;
+  void removeLight(ILight *light) override;
 
   inline SVulkan2Renderer *getParentRenderer() const { return mParentRenderer; }
 };

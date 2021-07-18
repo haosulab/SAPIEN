@@ -22,7 +22,7 @@ SVulkan2PointLight *SVulkan2Scene::addPointLight(std::array<float, 3> const &pos
                                                  bool enableShadow, float shadowNear,
                                                  float shadowFar) {
   auto &light = mScene->addPointLight();
-  light.setColor({color[0], color[1], color[2], 1.f});
+  light.setColor({color[0], color[1], color[2]});
   light.setTransform({.position = glm::vec4(position[0], position[1], position[2], 1.f)});
   if (enableShadow) {
     light.enableShadow(true);
@@ -39,7 +39,7 @@ SVulkan2DirectionalLight *SVulkan2Scene::addDirectionalLight(
     std::array<float, 3> const &position, float shadowScale, float shadowNear, float shadowFar) {
   auto &light = mScene->addDirectionalLight();
   light.setDirection({direction[0], direction[1], direction[2]});
-  light.setColor({color[0], color[1], color[2], 1.f});
+  light.setColor({color[0], color[1], color[2]});
   if (enableShadow) {
     light.enableShadow(true);
     light.setPosition({position[0], position[1], position[2]});
@@ -52,15 +52,17 @@ SVulkan2DirectionalLight *SVulkan2Scene::addDirectionalLight(
 }
 
 SVulkan2SpotLight *SVulkan2Scene::addSpotLight(std::array<float, 3> const &position,
-                                               std::array<float, 3> const &direction, float fov,
+                                               std::array<float, 3> const &direction,
+                                               float fovInner, float fovOuter,
                                                std::array<float, 3> const &color,
                                                bool enableShadow, float shadowNear,
                                                float shadowFar) {
   auto &light = mScene->addSpotLight();
   light.setPosition({position[0], position[1], position[2]});
   light.setDirection({direction[0], direction[1], direction[2]});
-  light.setFov(fov);
-  light.setColor({color[0], color[1], color[2], 1.f});
+  light.setFov(fovOuter);
+  light.setFovSmall(fovInner);
+  light.setColor({color[0], color[1], color[2]});
   if (enableShadow) {
     light.enableShadow(true);
     light.setShadowParameters(shadowNear, shadowFar);
@@ -71,10 +73,29 @@ SVulkan2SpotLight *SVulkan2Scene::addSpotLight(std::array<float, 3> const &posit
   return result;
 }
 
+void SVulkan2Scene::removeLight(ILight *light) {
+  if (auto l = dynamic_cast<SVulkan2DirectionalLight *>(light)) {
+    mScene->removeNode(*l->getInternalLight());
+  } else if (auto l = dynamic_cast<SVulkan2PointLight *>(light)) {
+    mScene->removeNode(*l->getInternalLight());
+  } else if (auto l = dynamic_cast<SVulkan2SpotLight *>(light)) {
+    mScene->removeNode(*l->getInternalLight());
+  }
+  mLights.erase(std::remove_if(mLights.begin(), mLights.end(),
+                               [light](auto &l) { return light == l.get(); }),
+                mLights.end());
+}
+
 void SVulkan2Scene::destroy() { mParentRenderer->removeScene(this); }
 
 IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
                                            const physx::PxVec3 &scale) {
+  if (!std::filesystem::exists(meshFile)) {
+    mBodies.push_back(
+        std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{}));
+    return mBodies.back().get();
+  }
+
   auto model = mParentRenderer->mContext->getResourceManager()->CreateModelFromFile(meshFile);
   std::vector<svulkan2::scene::Object *> objects2;
   auto &obj = mScene->addObject(model);

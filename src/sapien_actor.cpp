@@ -12,7 +12,7 @@ SActor::SActor(PxRigidDynamic *actor, physx_id_t id, SScene *scene,
   actor->userData = this;
 }
 
-PxRigidDynamic *SActor::getPxActor() { return mActor; }
+PxRigidDynamic *SActor::getPxActor() const { return mActor; }
 
 void SActor::destroy() { mParentScene->removeActor(this); }
 
@@ -117,7 +117,7 @@ SActorStatic::SActorStatic(PxRigidStatic *actor, physx_id_t id, SScene *scene,
   actor->userData = this;
 }
 
-PxRigidActor *SActorStatic::getPxActor() { return mActor; }
+PxRigidActor *SActorStatic::getPxActor() const { return mActor; }
 
 void SActorStatic::destroy() { mParentScene->removeActor(this); }
 

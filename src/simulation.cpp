@@ -167,6 +167,10 @@ void Simulation::setLogLevel(std::string const &level) {
     spdlog::get("SAPIEN")->set_level(spdlog::level::warn);
   } else if (level == "err" || level == "error") {
     spdlog::get("SAPIEN")->set_level(spdlog::level::err);
+  } else if (level == "critical") {
+    spdlog::get("SAPIEN")->set_level(spdlog::level::critical);
+  } else if (level == "off") {
+    spdlog::get("SAPIEN")->set_level(spdlog::level::off);
   } else {
     spdlog::error("Invalid log level \"{}\"", level);
   }

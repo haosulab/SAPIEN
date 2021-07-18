@@ -24,11 +24,14 @@ physx::PxVec3 SVulkan2PointLight::getColor() const {
 }
 
 void SVulkan2PointLight::setColor(physx::PxVec3 color) {
-  mLight->setColor({color.x, color.y, color.z, 1.f});
+  mLight->setColor({color.x, color.y, color.z});
 }
 
 bool SVulkan2PointLight::getShadowEnabled() const { return mLight->isShadowEnabled(); }
 void SVulkan2PointLight::setShadowEnabled(bool enabled) { mLight->enableShadow(enabled); }
+
+float SVulkan2PointLight::getShadowNear() const { return mLight->getShadowNear(); }
+float SVulkan2PointLight::getShadowFar() const { return mLight->getShadowNear(); }
 
 physx::PxVec3 SVulkan2PointLight::getPosition() const {
   auto p = mLight->getPosition();
@@ -65,11 +68,15 @@ physx::PxVec3 SVulkan2DirectionalLight::getColor() const {
 }
 
 void SVulkan2DirectionalLight::setColor(physx::PxVec3 color) {
-  mLight->setColor({color.x, color.y, color.z, 1.f});
+  mLight->setColor({color.x, color.y, color.z});
 }
 
 bool SVulkan2DirectionalLight::getShadowEnabled() const { return mLight->isShadowEnabled(); }
 void SVulkan2DirectionalLight::setShadowEnabled(bool enabled) { mLight->enableShadow(enabled); }
+
+float SVulkan2DirectionalLight::getShadowHalfSize() const { return mLight->getShadowScaling(); }
+float SVulkan2DirectionalLight::getShadowNear() const { return mLight->getShadowNear(); }
+float SVulkan2DirectionalLight::getShadowFar() const { return mLight->getShadowNear(); }
 
 physx::PxVec3 SVulkan2DirectionalLight::getDirection() const {
   auto p = mLight->getDirection();
@@ -105,11 +112,14 @@ physx::PxVec3 SVulkan2SpotLight::getColor() const {
 }
 
 void SVulkan2SpotLight::setColor(physx::PxVec3 color) {
-  mLight->setColor({color.x, color.y, color.z, 1.f});
+  mLight->setColor({color.x, color.y, color.z});
 }
 
 bool SVulkan2SpotLight::getShadowEnabled() const { return mLight->isShadowEnabled(); }
 void SVulkan2SpotLight::setShadowEnabled(bool enabled) { mLight->enableShadow(enabled); }
+
+float SVulkan2SpotLight::getShadowNear() const { return mLight->getShadowNear(); }
+float SVulkan2SpotLight::getShadowFar() const { return mLight->getShadowNear(); }
 
 physx::PxVec3 SVulkan2SpotLight::getPosition() const {
   auto p = mLight->getPosition();
@@ -132,6 +142,9 @@ physx::PxVec3 SVulkan2SpotLight::getDirection() const {
 void SVulkan2SpotLight::setDirection(physx::PxVec3 direction) {
   mLight->setDirection({direction[0], direction[1], direction[2]});
 }
+
+void SVulkan2SpotLight::setFov(float fov) { mLight->setFov(fov); }
+float SVulkan2SpotLight::getFov() const { return mLight->getFov(); }
 
 } // namespace Renderer
 } // namespace sapien

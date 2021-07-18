@@ -143,7 +143,9 @@ void buildSapien(py::module &m) {
   auto PyCapsuleGeometry = py::class_<SCapsuleGeometry, SGeometry>(m, "CapsuleGeometry");
   auto PyPlaneGeometry = py::class_<SPlaneGeometry, SGeometry>(m, "PlaneGeometry");
   auto PyConvexMeshGeometry = py::class_<SConvexMeshGeometry, SGeometry>(m, "ConvexMeshGeometry");
-  // auto PyShape = py::class_<SShape>(m, "CollisionShape");
+  auto PyNonconvexMeshGeometry =
+      py::class_<SNonconvexMeshGeometry, SGeometry>(m, "NonconvexMeshGeometry");
+
   auto PyCollisionShape = py::class_<SCollisionShape>(m, "CollisionShape");
 
   auto PyURDFLoader = py::class_<URDF::URDFLoader>(m, "URDFLoader");
@@ -181,8 +183,11 @@ void buildSapien(py::module &m) {
   auto PyEngine = py::class_<Simulation, std::shared_ptr<Simulation>>(m, "Engine");
   auto PySceneConfig = py::class_<SceneConfig>(m, "SceneConfig");
   auto PyScene = py::class_<SScene>(m, "Scene");
-  auto PyDrive = py::class_<SDrive>(m, "Drive");
-  auto PyActorBase = py::class_<SActorBase>(m, "ActorBase");
+  auto PyConstraint = py::class_<SDrive>(m, "Constraint");
+  auto PyDrive = py::class_<SDrive6D, SDrive>(m, "Drive");
+
+  auto PyEntity = py::class_<SEntity>(m, "Entity");
+  auto PyActorBase = py::class_<SActorBase, SEntity>(m, "ActorBase");
   auto PyActorDynamicBase = py::class_<SActorDynamicBase, SActorBase>(m, "ActorDynamicBase");
   auto PyActorStatic = py::class_<SActorStatic, SActorBase>(m, "ActorStatic");
   auto PyActor = py::class_<SActor, SActorDynamicBase>(m, "Actor");
@@ -196,11 +201,12 @@ void buildSapien(py::module &m) {
   py::class_<SKJointSingleDof, SKJoint>(m, "KinematicJointSingleDof");
   py::class_<SKJointPrismatic, SKJointSingleDof>(m, "KinematicJointPrismatic");
   py::class_<SKJointRevolute, SKJointSingleDof>(m, "KinematicJointRevolute");
-  auto PyArticulationBase = py::class_<SArticulationBase>(m, "ArticulationBase");
+  auto PyArticulationBase = py::class_<SArticulationBase, SEntity>(m, "ArticulationBase");
   auto PyArticulationDrivable =
       py::class_<SArticulationDrivable, SArticulationBase>(m, "ArticulationDrivable");
   auto PyArticulation = py::class_<SArticulation, SArticulationDrivable>(m, "Articulation");
   py::class_<SKArticulation, SArticulationDrivable>(m, "KinematicArticulation");
+
   auto PyContact = py::class_<SContact>(m, "Contact");
   auto PyTrigger = py::class_<STrigger>(m, "Trigger");
   auto PyContactPoint = py::class_<SContactPoint>(m, "ContactPoint");
@@ -232,6 +238,12 @@ void buildSapien(py::module &m) {
   auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m, "VulkanCamera");
   auto PyVulkanWindow = py::class_<Renderer::SVulkan2Window>(m, "VulkanWindow");
   auto PyVulkanScene = py::class_<Renderer::SVulkan2Scene, Renderer::IPxrScene>(m, "VulkanScene");
+
+  auto PyLightEntity = py::class_<SLight, SEntity>(m, "LightEntity");
+  auto PyPointLightEntity = py::class_<SPointLight, SLight>(m, "PointLightEntity");
+  auto PyDirectionalLightEntity =
+      py::class_<SDirectionalLight, SLight>(m, "DirectionalLightEntity");
+  auto PySpotLightEntity = py::class_<SSpotLight, SLight>(m, "SpotLightEntity");
 
   auto PyLight = py::class_<Renderer::ILight>(m, "Light");
   auto PyPointLight = py::class_<Renderer::IPointLight, Renderer::ILight>(m, "PointLight");
@@ -323,6 +335,24 @@ void buildSapien(py::module &m) {
                              })
       .def_property_readonly(
           "indices", [](SConvexMeshGeometry &g) { return make_array<uint32_t>(g.indices); });
+  PyNonconvexMeshGeometry
+      .def_property_readonly("scale",
+                             [](SNonconvexMeshGeometry &g) { return vec32array(g.scale); })
+      .def_property_readonly(
+          "rotation",
+          [](SNonconvexMeshGeometry &g) {
+            return make_array<PxReal>({g.rotation.w, g.rotation.x, g.rotation.y, g.rotation.z});
+          })
+      .def_property_readonly("vertices",
+                             [](SNonconvexMeshGeometry &g) {
+                               int nRows = g.vertices.size() / 3;
+                               int nCols = 3;
+                               return py::array_t<PxReal>({nRows, nCols},
+                                                          {sizeof(PxReal) * nCols, sizeof(PxReal)},
+                                                          g.vertices.data());
+                             })
+      .def_property_readonly(
+          "indices", [](SNonconvexMeshGeometry &g) { return make_array<uint32_t>(g.indices); });
 
   PyCollisionShape
       .def_property_readonly("actor", &SCollisionShape::getActor,
@@ -621,6 +651,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
       .def("get_all_articulations", &SScene::getAllArticulations,
            py::return_value_policy::reference)
+      .def("get_all_lights", &SScene::getAllLights, py::return_value_policy::reference)
       // drive, constrains, and joints
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
            py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
@@ -631,6 +662,54 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
                              py::return_value_policy::reference)
       .def("get_renderer_scene", &SScene::getRendererScene, py::return_value_policy::reference)
       .def("generate_unique_render_id", &SScene::generateUniqueRenderId)
+      // lights
+      .def_property_readonly("ambient_light",
+                             [](SScene &scene) {
+                               auto light = scene.getAmbientLight();
+                               return make_array(std::vector<float>{light[0], light[1], light[2]});
+                             })
+      .def(
+          "set_ambient_light",
+          [](SScene &scene, py::array_t<float> const &color) {
+            scene.setAmbientLight({color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("color"))
+      .def(
+          "add_point_light",
+          [](SScene &scene, py::array_t<float> const &position, py::array_t<float> const &color,
+             bool shadow, float near, float far) {
+            return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
+                                       {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+          },
+          py::arg("position"), py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1,
+          py::arg("far") = 10, py::return_value_policy::reference)
+      .def(
+          "add_directional_light",
+          [](SScene &scene, py::array_t<float> const &direction, py::array_t<float> const &color,
+             bool shadow, py::array_t<float> const &position, float scale, float near, float far) {
+            return scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
+                                             {color.at(0), color.at(1), color.at(2)}, shadow,
+                                             {position.at(0), position.at(1), position.at(2)},
+                                             scale, near, far);
+          },
+          py::arg("direction"), py::arg("color"), py::arg("shadow") = false,
+          py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
+          py::arg("near") = -10.f, py::arg("far") = 10.f, py::return_value_policy::reference)
+      .def(
+          "add_spot_light",
+          [](SScene &scene, py::array_t<float> const &position,
+             py::array_t<float> const &direction, float fovInner, float fovOuter,
+             py::array_t<float> const &color, bool shadow, float near, float far) {
+            return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
+                                      {direction.at(0), direction.at(1), direction.at(2)},
+                                      fovInner, fovOuter, {color.at(0), color.at(1), color.at(2)},
+                                      shadow, near, far);
+          },
+          py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
+          py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
+          py::arg("far") = 10.f, py::return_value_policy::reference)
+      .def("remove_light", &SScene::removeLight, py::arg("light"))
+      // save
       .def("pack",
            [](SScene &scene) {
              auto data = scene.packScene();
@@ -665,25 +744,46 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("data"));
 
   //======= Drive =======//
-  PyDrive
-      .def("set_properties", &SDrive::setProperties, py::arg("stiffness"), py::arg("damping"),
+  PyDrive.def("set_x_limit", &SDrive6D::setXLimit, py::arg("low"), py::arg("high"))
+      .def("set_y_limit", &SDrive6D::setYLimit, py::arg("low"), py::arg("high"))
+      .def("set_z_limit", &SDrive6D::setZLimit, py::arg("low"), py::arg("high"))
+      .def("set_x_twist_limit", &SDrive6D::setXTwistLimit, py::arg("low"), py::arg("high"))
+      .def("set_yz_cone_limit", &SDrive6D::setYZConeLimit, py::arg("y"), py::arg("z"))
+      .def("set_yz_pyramid_limit", &SDrive6D::setYZPyramidLimit, py::arg("ylow"), py::arg("yhigh"),
+           py::arg("zlow"), py::arg("zhigh"))
+      .def("set_distance_limit", &SDrive6D::setDistanceLimit, py::arg("distance"))
+      .def("set_x_twist_properties", &SDrive6D::setXTwistDriveProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("is_acceleration") = true)
+      .def("set_yz_swing_properties", &SDrive6D::setYZSwingDriveProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("is_acceleration") = true)
+      .def("set_slerp_properties", &SDrive6D::setSlerpProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("is_acceleration") = true)
+      .def("set_x_properties", &SDrive6D::setXProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("set_x_properties", &SDrive::setXProperties, py::arg("stiffness"), py::arg("damping"),
+      .def("set_y_properties", &SDrive6D::setYProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("set_y_properties", &SDrive::setYProperties, py::arg("stiffness"), py::arg("damping"),
+      .def("set_z_properties", &SDrive6D::setZProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("set_z_properties", &SDrive::setZProperties, py::arg("stiffness"), py::arg("damping"),
-           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("lock_motion", &SDrive::lockMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
+      .def("lock_motion", &SDrive6D::lockMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
            py::arg("rx"), py::arg("ry"), py::arg("rz"))
-      .def("set_target", &SDrive::setTarget, py::arg("pose"))
+      .def("free_motion", &SDrive6D::freeMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
+           py::arg("rx"), py::arg("ry"), py::arg("rz"))
+      .def("set_target", &SDrive6D::setTarget, py::arg("pose"))
       .def(
           "set_target_velocity",
-          [](SDrive &d, py::array_t<PxReal> const &linear, py::array_t<PxReal> const &angular) {
+          [](SDrive6D &d, py::array_t<PxReal> const &linear, py::array_t<PxReal> const &angular) {
             d.setTargetVelocity(array2vec3(linear), array2vec3(angular));
           },
-          py::arg("linear"), py::arg("angular"))
-      .def("destroy", &SDrive::destroy);
+          py::arg("linear"), py::arg("angular"));
+
+  PyEntity.def_property("name", &SEntity::getName, &SEntity::setName)
+      .def("get_name", &SEntity::getName)
+      .def("set_name", &SEntity::setName, py::arg("name"))
+      .def_property_readonly("pose", &SEntity::getPose)
+      .def("get_pose", &SEntity::getPose);
 
   //======== Actor ========//
   PyActorBase
@@ -693,9 +793,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
              oss << "Actor(name=\"" << actor.getName() << "\", id=\"" << actor.getId() << "\")";
              return oss.str();
            })
-      .def_property("name", &SActorBase::getName, &SActorBase::setName)
-      .def("get_name", &SActorBase::getName)
-      .def("set_name", &SActorBase::setName, py::arg("name"))
       .def_property_readonly(
           "type",
           [](SActorBase &actor) {
@@ -718,8 +815,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_property_readonly("id", &SActorBase::getId)
       .def("get_id", &SActorBase::getId)
       .def("get_scene", &SActorBase::getScene, py::return_value_policy::reference)
-      .def_property_readonly("pose", &SActorBase::getPose)
-      .def("get_pose", &SActorBase::getPose)
       .def("get_collision_shapes", &SActorBase::getCollisionShapes,
            py::return_value_policy::reference)
       .def("get_visual_bodies", &SActorBase::getRenderBodies, py::return_value_policy::reference)
@@ -882,9 +977,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
 
   //======== End Joint ========//
 
-  PyArticulationBase.def_property("name", &SArticulationBase::getName, &SArticulationBase::setName)
-      .def("get_name", &SArticulationBase::getName)
-      .def("set_name", &SArticulationBase::setName, py::arg("name"))
+  PyArticulationBase
       .def("get_links", &SArticulationBase::getBaseLinks, py::return_value_policy::reference)
       .def("get_joints", &SArticulationBase::getBaseJoints, py::return_value_policy::reference)
       .def_property_readonly("type",
@@ -966,11 +1059,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
             a.setQlimits(l);
           },
           py::arg("qlimits"))
-
-      .def_property_readonly("pose", &SArticulationBase::getRootPose, "same as get_root_pose")
       .def("get_root_pose", &SArticulationBase::getRootPose)
-      .def("get_pose", &SArticulationBase::getRootPose, "same as get_root_pose")
-
       .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"))
       .def("set_pose", &SArticulationBase::setRootPose, py::arg("pose"), "same as set_root_pose")
 #ifdef _USE_PINOCCHIO
@@ -996,6 +1085,19 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
   PyArticulation //.def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
                  //.def("get_joints", &SArticulation::getSJoints,
                  // py::return_value_policy::reference)
+
+      .def("get_drive_velocity_target",
+           [](SArticulation &a) {
+             auto target = a.getDriveVelocityTarget();
+             return py::array_t<PxReal>(target.size(), target.data());
+           })
+      .def(
+          "set_drive_velocity_target",
+          [](SArticulation &a, const py::array_t<PxReal> &arr) {
+            a.setDriveVelocityTarget(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+          },
+          py::arg("drive_velocity_target"))
+
       .def("get_active_joints", &SArticulation::getActiveJoints,
            py::return_value_policy::reference)
       .def(
@@ -1125,6 +1227,19 @@ If the shape in the file is not convex, it will be converted by the PhysX backen
           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("density") = 1000, py::arg("patch_radius") = 0.f,
           py::arg("min_patch_radius") = 0.f, py::arg("is_trigger") = false)
+      .def(
+          "add_nonconvex_collision_from_file",
+          [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
+             py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
+             PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+            a.addNonConvexShapeFromFile(filename, pose, array2vec3(scale), material, patchRadius,
+                                        minPatchRadius, isTrigger);
+          },
+          R"doc(Add a nonconvex collision shape from a file. If it is not a trigger, then it is only valid for static and kinematic actors.)doc",
+          py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
+          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("patch_radius") = 0.f, py::arg("min_patch_radius") = 0.f,
+          py::arg("is_trigger") = false)
       .def(
           "add_multiple_collisions_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
@@ -1276,6 +1391,8 @@ References:
                                  return "Capsule";
                                case sapien::ActorBuilder::ShapeRecord::Sphere:
                                  return "Sphere";
+                               case sapien::ActorBuilder::ShapeRecord::NonConvexMesh:
+                                 return "Nonconvex";
                                }
                                return "";
                              })
@@ -1531,7 +1648,10 @@ Args:
       .def_property_readonly(
           "_internal_context",
           [](Renderer::SVulkan2Renderer &renderer) { return renderer.mContext.get(); },
-          py::return_value_policy::reference);
+          py::return_value_policy::reference)
+      .def("clear_cached_resources", [](Renderer::SVulkan2Renderer &renderer) {
+        renderer.mContext->getResourceManager()->clearCachedResources();
+      });
 
   PyVulkanRigidbody.def_property_readonly("_internal_objects",
                                           &Renderer::SVulkan2Rigidbody::getVisualObjects,
@@ -1623,6 +1743,70 @@ Args:
           [](Renderer::SVulkan2Camera &camera) { return camera.getInternalRenderer(); },
           py::return_value_policy::reference);
 
+  PyLightEntity.def("set_pose", &SLight::setPose, py::arg("pose"))
+      .def_property_readonly("pose", &SLight::getPose)
+      .def(
+          "set_color",
+          [](SLight &light, py::array_t<float> color) {
+            light.setColor({color.at(0), color.at(1), color.at(2)});
+          },
+          py::arg("color"))
+      .def_property_readonly("color", [](SLight &light) { return vec32array(light.getColor()); })
+      .def_property("shadow", &SLight::getShadowEnabled, &SLight::setShadowEnabled);
+
+  // Light Entity
+  PyPointLightEntity
+      .def(
+          "set_position",
+          [](SPointLight &light, py::array_t<float> position) {
+            light.setPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def_property_readonly("position",
+                             [](SPointLight &light) { return vec32array(light.getPosition()); })
+      .def("set_shadow_parameters", &SPointLight::setShadowParameters, py ::arg("near"),
+           py::arg("far"))
+      .def_property_readonly("shadow_near", &SPointLight::getShadowNear)
+      .def_property_readonly("shadow_far", &SPointLight::getShadowFar);
+
+  PyDirectionalLightEntity
+      .def(
+          "set_direction",
+          [](SDirectionalLight &light, py::array_t<float> direction) {
+            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+          },
+          py::arg("direction"))
+      .def_property_readonly(
+          "direction", [](SDirectionalLight &light) { return vec32array(light.getDirection()); })
+      .def("set_shadow_parameters", &SDirectionalLight::setShadowParameters, py::arg("half_size"),
+           py ::arg("near"), py::arg("far"))
+      .def_property_readonly("shadow_near", &SDirectionalLight::getShadowNear)
+      .def_property_readonly("shadow_far", &SDirectionalLight::getShadowFar)
+      .def_property_readonly("shadow_half_size", &SDirectionalLight::getShadowHalfSize);
+
+  PySpotLightEntity
+      .def(
+          "set_position",
+          [](SSpotLight &light, py::array_t<float> position) {
+            light.setPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def_property_readonly("position",
+                             [](SSpotLight &light) { return vec32array(light.getPosition()); })
+      .def(
+          "set_direction",
+          [](SSpotLight &light, py::array_t<float> direction) {
+            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+          },
+          py::arg("direction"))
+      .def_property_readonly("direction",
+                             [](SSpotLight &light) { return vec32array(light.getDirection()); })
+      .def("set_shadow_parameters", &SSpotLight::setShadowParameters, py ::arg("near"),
+           py::arg("far"))
+      .def_property_readonly("shadow_near", &SSpotLight::getShadowNear)
+      .def_property_readonly("shadow_far", &SSpotLight::getShadowFar);
+
+  // Renderer Light (will be deprecated)
   PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
       .def_property_readonly("pose", &Renderer::ILight::getPose)
       .def(
@@ -1841,15 +2025,16 @@ Args:
       .def(
           "add_spot_light",
           [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
-             py::array_t<float> const &direction, float fov, py::array_t<float> const &color,
-             bool shadow, float near, float far) {
+             py::array_t<float> const &direction, float fovInner, float fovOuter,
+             py::array_t<float> const &color, bool shadow, float near, float far) {
             return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
-                                      {direction.at(0), direction.at(1), direction.at(2)}, fov,
-                                      {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+                                      {direction.at(0), direction.at(1), direction.at(2)},
+                                      fovInner, fovOuter, {color.at(0), color.at(1), color.at(2)},
+                                      shadow, near, far);
           },
-          py::arg("position"), py::arg("direction"), py::arg("fov"), py::arg("color"),
-          py::arg("shadow") = false, py::arg("near") = 0.1f, py::arg("far") = 10.f,
-          py::return_value_policy::reference)
+          py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
+          py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
+          py::arg("far") = 10.f, py::return_value_policy::reference)
 
       .def(
           "add_mesh_from_file",

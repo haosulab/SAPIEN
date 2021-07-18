@@ -6,6 +6,26 @@ collaborative effort between researchers at UCSD, Stanford and SFU. The dataset
 is a continuation of ShapeNet and PartNet.
 
 ## Change Log
+### 1.2
+- Shader change: 4th component in default camera shader now gives the 0-1 depth value.
+- Add "critical" and "off" log levels.
+- Add support for pointcloud and line rendering (for visualizing camera and point cloud)
+- Performance: the same shader only compile once per process
+- Bug fix
+  - Articulation setDriveTarget was now correctly reversed for prismatic joint (joint setDriveTarget is not affected)
+  - Fix kinematic articulation loader
+
+### 1.1
+- Support nonconvex static/kinematic collision shape
+- Add warning for small mass/inertia
+- Introduce Entity as the base class of Actors
+- Add Light classes inherited from entity, allowing manipulate light objects in sapien scene
+- Updates to the viewer
+  - rename actor to entity when appropriate
+- Partial support the material tag in URDF loader (primitive shape, single color)
+- Bug fixes for the renderer
+- Support inner and outer FOV for spotlight
+
 ### 1.0
 - Replace the old Vulkan based renderer completely
   - See `sapien.core.renderer` for details
@@ -18,7 +38,7 @@ is a continuation of ShapeNet and PartNet.
 - API changes
   - Render material creation is now `renderer.create_material()`
   - in actor builder: `add_xxx_shape` is replaced with `add_xxx_collision`.
-  - move light functions from scene to scene.renderer_scene
+  - move light functions from scene to `scene.renderer_scene`
 - Add centrifugal and Coriolis force.
 - Change default physical parameters for better stability.
 

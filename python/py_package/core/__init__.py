@@ -91,3 +91,4 @@ def __set_camera_shader_dir(shader_dir):
 
 VulkanRenderer.set_viewer_shader_dir = __set_viewer_shader_dir
 VulkanRenderer.set_camera_shader_dir = __set_camera_shader_dir
+Entity.classname = property(lambda e: e.__class__.__name__)

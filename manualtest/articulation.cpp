@@ -140,7 +140,7 @@ int main() {
   window.setCameraPosition({-1,0,1});
 
   int count = 0;
-  SDrive *drive;
+  SDrive6D *drive;
   std::vector<float> d;
   while (1) {
     // if (++count == 120) {
