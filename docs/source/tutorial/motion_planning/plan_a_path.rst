@@ -5,7 +5,7 @@ Plan a Path
 
 .. highlight:: python
 
-In this tutorial, we will talk about how to plan paths for the agent. As shown in the demo, the robot needs to move the three boxes a bit forward. The full script can be downloaded here :download:`demo.py <../../../../examples/motionplanning/demo.py>`.
+In this tutorial, we will talk about how to plan paths for the agent. As shown in the demo, the robot needs to move the three boxes a bit forward. The full script can be downloaded here :download:`demo.py <../../../../examples/motion_planning/demo.py>`.
 
 .. figure:: assets/RRT.gif
     :width: 320px
@@ -29,12 +29,12 @@ Plan with sampling-based algorithms
 
 ``mplib`` supports state-of-the-art sampling-based motion planning algorithms by leveraging `OMPL <https://github.com/ompl/ompl>`_. You can call ``planner.plan()`` to plan a path for moving the ``move_group`` link to a target pose: 
 
-.. literalinclude:: ../../../../examples/motionplanning/demo.py
+.. literalinclude:: ../../../../examples/motion_planning/demo.py
    :dedent: 0
    :lines: 127-133
    :emphasize-lines: 2
 
-Specifically, ``planner.plan()`` takes two required arguments as input. The first one is the target pose of the ``move_group`` link. It's a 7-dim list, where the first three elements describe the position part, and the remaining four elements describe the quaternion (wxyz) for the rotation part. The second argument is the current joint positions of all the active joints (e.g., given by SAPIEN). The ``planner.plan()`` function first solves the inverse kinematics to get the joint positions for the target pose. It then calls the RRTConnect algorithm to find a path in the joint space. Finally, it parameterizes the path to generate time, velocity, and acceleration information.
+Specifically, ``planner.plan()`` takes two required arguments as input. The first one is the target pose of the ``move_group`` link. It's a 7-dim list, where the first three elements describe the position part, and the remaining four elements describe the quaternion (wxyz) for the rotation part. **Note that the pose is relative to the frame of the robot's root link**. The second argument is the current joint positions of all the active joints (e.g., given by SAPIEN). The ``planner.plan()`` function first solves the inverse kinematics to get the joint positions for the target pose. It then calls the RRTConnect algorithm to find a path in the joint space. Finally, it parameterizes the path to generate time, velocity, and acceleration information.
 
 ``planner.plan()`` returns a dict which includes:   
 
@@ -67,13 +67,13 @@ Follow a path
 
 In this demo, we use the PhysX internal PD controller. We first need to set the drive properties of the active joints at the very beginning:
 
-.. literalinclude:: ../../../../examples/motionplanning/demo.py
+.. literalinclude:: ../../../../examples/motion_planning/demo.py
    :dedent: 0
    :lines: 43-44
 
 To follow a path, at each time step, we set the target position and target velocity according to the returned path. Please note that since we aligned the time step of the returned path with the SAPIEN time step, we don’t need to interpolate the returned path.
 
-.. literalinclude:: ../../../../examples/motionplanning/demo.py
+.. literalinclude:: ../../../../examples/motion_planning/demo.py
    :dedent: 0
    :lines: 86-99
    :emphasize-lines: 8-10
@@ -98,7 +98,7 @@ Compared to the sampling-based algorithms, planning with screw motion has the fo
 
 You can call ``planner.plan_screw()`` to plan a path with screw motion. Similar to ``planner.plan()``, it also takes two required arguments: target pose and current joint positions, and returns a dict containing the same set of elements. 
 
-.. literalinclude:: ../../../../examples/motionplanning/demo.py
+.. literalinclude:: ../../../../examples/motion_planning/demo.py
    :dedent: 0
    :lines: 135-143
    :emphasize-lines: 2
@@ -113,13 +113,13 @@ Move the boxes
 
 In this example, we manually mark some landmark poses to move the boxes:
 
-.. literalinclude:: ../../../../examples/motionplanning/demo.py
+.. literalinclude:: ../../../../examples/motion_planning/demo.py
    :dedent: 0
    :lines: 151-172
 
 To control the gripper, we use ``set_drive_target()`` to set target positions for the two gripper joints:
 
-.. literalinclude:: ../../../../examples/motionplanning/demo.py
+.. literalinclude:: ../../../../examples/motion_planning/demo.py
    :dedent: 0
    :lines: 101-125
    :emphasize-lines: 3, 16

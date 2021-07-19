@@ -6,7 +6,7 @@ Collision Avoidance
 
 In :ref:`plan_a_path`, we talked about how to plan paths for the robot. However, in that tutorial, we didn't take the environment model into account. The robot will avoid self-collisions (i.e., collisions between the robot links), but may collide with the environment.
 
-This tutorial will introduce two ways two ways to avoid collisions: add environment point clouds and attach a box. As shown in the right figure, the robot needs to move the red box to the place of the green box while avoiding collision with the blue box. The full script can be downloaded here :download:`demo.py <../../../../examples/motionplanning/collision_avoidance.py>`.
+This tutorial will introduce two ways two ways to avoid collisions: add environment point clouds and attach a box. As shown in the right figure, the robot needs to move the red box to the place of the green box while avoiding collision with the blue box. The full script can be downloaded here :download:`demo.py <../../../../examples/motion_planning/collision_avoidance.py>`.
 
 .. image:: assets/collision1.gif
    :width: 32%
@@ -26,16 +26,16 @@ Add environment point clouds
 
 One way to model the environment and avoid collision is through point clouds. The point cloud may come from the sensor observations or be sampled from the mesh surfaces. For example, we can add a point cloud for the blue box with ``planner.update_point_cloud()``:
 
-.. literalinclude:: ../../../../examples/motionplanning/collision_avoidance.py
+.. literalinclude:: ../../../../examples/motion_planning/collision_avoidance.py
    :dedent: 0
    :lines: 127-133
    :emphasize-lines: 6
 
-``planner.update_point_cloud()`` takes two arguments. The first one is a NumPy array of shape :math:`(n \times 3)`, which describes the coordinates of the points. The coordinates should be represented in the frame of the robot arm's root link. The second (optional) argument is ``resolution = 1e-3``, which describes the resolution of each point. 
+``planner.update_point_cloud()`` takes two arguments. The first one is a NumPy array of shape :math:`(n \times 3)`, which describes the coordinates of the points. **The coordinates should be represented in the frame of the robot arm's root link**. The second (optional) argument is ``resolution = 1e-3``, which describes the resolution of each point. 
 
 After adding the point cloud, we can avoid collisions between the robot and the point cloud by setting ``use_point_cloud`` to be True. Both ``planner.plan()`` and ``planner.plan_screw()`` support this flag:
 
-.. literalinclude:: ../../../../examples/motionplanning/collision_avoidance.py
+.. literalinclude:: ../../../../examples/motion_planning/collision_avoidance.py
    :dedent: 0
    :lines: 135-145
    :emphasize-lines: 3, 6
@@ -49,7 +49,7 @@ Attach a box
 --------------------------------------
 As shown in the above figure (middle one), after adding the point cloud of the blue box, the robot will not collide with it. However, the red box moves with the robot, and it may still collide with the blue box. To address this issue, we can attach a box to the robot, so that we can avoid the collision between the attached box and the environment point cloud:
 
-.. literalinclude:: ../../../../examples/motionplanning/collision_avoidance.py
+.. literalinclude:: ../../../../examples/motion_planning/collision_avoidance.py
    :dedent: 0
    :lines: 166
 

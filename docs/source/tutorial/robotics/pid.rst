@@ -60,7 +60,7 @@ You can call ``joint.set_drive_target(...)`` to set the target position of a joi
 Similarly, you can also call ``set_drive_velocity_target(...)`` to set the target velocity.
 
 .. note::
-   If you do not balance the passive force, e.g. gravity, the robot can never reach the desired pose given in ``set_drive_target`` due to steady-state-error.
+   If you do not balance the passive force, e.g. gravity, the robot can never reach the desired pose (but maybe a close pose) given in ``set_drive_target`` due to steady-state-error.
 
 Write your own PID controller
 -----------------------------
@@ -91,3 +91,6 @@ You can try to add extra tricks for integration or error propagation, to improve
 .. note::
    In most cases, it is recommended to use the internal drive rather than your own PID.
    The PhysX internal drive is much more efficient and stable when the parameters are not carefully tuned.
+
+.. warning::
+   The parameters (``stiffness`` and ``damping``) for the internal drive in this example can not be directly used for downstream tasks like manipulation. 
