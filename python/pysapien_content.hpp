@@ -620,6 +620,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("remove_articulation", &SScene::removeArticulation, py::arg("articulation"))
       .def("remove_kinematic_articulation", &SScene::removeKinematicArticulation,
            py::arg("kinematic_articulation"))
+      .def("remove_drive", &SScene::removeDrive, py::arg("drive"))
       .def("find_actor_by_id", &SScene::findActorById, py::arg("id"),
            py::return_value_policy::reference)
       .def("find_articulation_link_by_link_id", &SScene::findArticulationLinkById, py::arg("id"),
