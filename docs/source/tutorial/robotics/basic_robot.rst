@@ -7,7 +7,7 @@ Getting Started with Robot
 
 .. note::
    Please first complete :ref:`basic_index` before continuing this tutorial.
-   The assets (robot) used in this tutorial can be found `here <https://github.com/haosulab/SAPIEN-Release/tree/master/example/assets>`_.
+   The assets (robot) used in this tutorial can be found `here <https://github.com/haosulab/SAPIEN-Release/tree/master/examples/assets>`_.
 
 In this tutorial, you will learn the following:
 
