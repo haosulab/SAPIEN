@@ -165,11 +165,6 @@ void buildSapien(py::module &m) {
   auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
   auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
 
-  auto PyKuafuRenderer =
-      py::class_<Renderer::KuafuRenderer, Renderer::IPxrRenderer,
-  std::shared_ptr<Renderer::KuafuRenderer>>(m, "KuafuRenderer");
-  PyKuafuRenderer.def(py::init<>());
-
   auto PyOptifuserRenderer =
       py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer,
                  std::shared_ptr<Renderer::OptifuserRenderer>>(m, "OptifuserRenderer");
@@ -257,6 +252,17 @@ void buildSapien(py::module &m) {
           m, "VulkanDirectionalLight");
   auto PyVulkanSpotLight =
       py::class_<Renderer::SVulkan2SpotLight, Renderer::ISpotLight>(m, "VulkanSpotLight");
+
+
+  //======== Kuafu ========//
+  auto PyKuafuRenderer =
+      py::class_<Renderer::KuafuRenderer, Renderer::IPxrRenderer,
+  std::shared_ptr<Renderer::KuafuRenderer>>(m, "KuafuRenderer");
+  PyKuafuRenderer
+      .def(py::init<>())
+      .def("set_assets_path", &Renderer::KuafuRenderer::setAssetsPath)
+      .def("init", &Renderer::KuafuRenderer::init);
+
 
   //======== Internal ========//
 

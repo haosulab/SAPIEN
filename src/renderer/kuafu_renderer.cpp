@@ -10,10 +10,26 @@
 
 namespace sapien::Renderer {
 
-KuafuRenderer::KuafuRenderer() { mInternalRenderer.init(); }
+void KuafuRenderer::setAssetsPath(std::string const &path) {
+  mKRenderer.getConfig().setAssetsPath(path);
+}
 
-IPxrScene *KuafuRenderer::createScene(std::string const &name) { return static_cast<KuafuScene*>(nullptr); };
-void KuafuRenderer::removeScene(IPxrScene *scene) {};
-std::shared_ptr<IPxrMaterial> KuafuRenderer::createMaterial() { return std::make_shared<PxrMaterial>(); };
+void KuafuRenderer::init() {
+  mKRenderer.init();
+}
+
+IPxrScene *KuafuRenderer::createScene(std::string const &name) {
+  mScene.mKRenderer = &mKRenderer;
+  return &mScene;
+};
+
+void KuafuRenderer::removeScene(IPxrScene *scene) {
+  assert(false); // not implemented
+};
+
+std::shared_ptr<IPxrMaterial> KuafuRenderer::createMaterial() {
+  assert(false); // not implemented
+  return std::make_shared<PxrMaterial>();
+};
 
 }

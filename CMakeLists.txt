@@ -66,6 +66,12 @@ if (${BUILD_WITH_PINOCCHIO_SUPPORT})
     # Pinocchio uses its own FindCppAD but does not provide it
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppAD")
 
+#    # local changes by jet for clion
+#    set(pinocchio_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/pinocchio/")
+#    set(eigenpy_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/eigenpy/")
+#    set(hpp-fcl_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/hpp-fcl/")
+#    set(octomap_DIR "/zdata/anaconda3/envs/sapien/share/octomap/")
+
     find_package(Boost COMPONENTS system REQUIRED)
     find_package(pinocchio REQUIRED)
     set(PINOCCHIO_LIBRARY ${pinocchio_LIBRARIES} ${Boost_LIBRARIES} urdfdom_model)
