@@ -9,6 +9,7 @@ Welcome to sapien's documentation!
    tutorial/rendering/index
    tutorial/robotics/index
    tutorial/rl/index
+   tutorial/motion_planning/index
 
 Indices and tables
 ==================
