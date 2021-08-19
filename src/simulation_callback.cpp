@@ -28,11 +28,11 @@ void DefaultEventCallback::onContact(const PxContactPairHeader &pairHeader,
     }
     EventActorContact event;
     event.self = contact->actors[0];
-    event.self = contact->actors[1];
+    event.other = contact->actors[1];
     event.contact = contact.get();
     contact->actors[0]->EventEmitter<EventActorContact>::emit(event);
     event.self = contact->actors[1];
-    event.self = contact->actors[0];
+    event.other = contact->actors[0];
     contact->actors[1]->EventEmitter<EventActorContact>::emit(event);
     mScene->updateContact(std::move(contact));
   }
