@@ -63,6 +63,8 @@ protected:
   std::vector<ContactCallback> mOnContactCallback;
   std::vector<TriggerCallback> mOnTriggerCallback;
 
+  std::shared_ptr<class ActorBuilder const> mBuilder{};
+
 public:
   void renderCollisionBodies(bool collision);
   bool isRenderingCollision() const;
@@ -116,6 +118,8 @@ public:
 
   inline virtual std::vector<PxReal> packData() { return {}; };
   inline virtual void unpackData(std::vector<PxReal> const &data){};
+
+  inline std::shared_ptr<ActorBuilder const> getBuilder() const { return mBuilder; }
 
   // callback from python
   void onContact(ContactCallback callback);

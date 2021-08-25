@@ -131,8 +131,8 @@ public:
   std::shared_ptr<SPhysicalMaterial>
   createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction, PxReal restitution) const;
 
-  std::unique_ptr<ActorBuilder> createActorBuilder();
-  std::unique_ptr<ArticulationBuilder> createArticulationBuilder();
+  std::shared_ptr<ActorBuilder> createActorBuilder();
+  std::shared_ptr<ArticulationBuilder> createArticulationBuilder();
   std::unique_ptr<URDF::URDFLoader> createURDFLoader();
 
   /** Mark an actor in a destroyed state

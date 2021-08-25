@@ -645,6 +645,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   auto result = sActor.get();
   mScene->addActor(std::move(sActor));
 
+  result->mBuilder = shared_from_this();
   return result;
 }
 
@@ -695,6 +696,7 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   auto result = sActor.get();
   mScene->addActor(std::move(sActor));
 
+  result->mBuilder = shared_from_this();
   return result;
 }
 
