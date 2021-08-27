@@ -16,6 +16,7 @@ def main():
 
     def create_ant_builder(scene):
         copper = renderer.create_material()
+        copper.set_translucent(True, 1.4)
         copper.set_base_color([0.875, 0.553, 0.221, 1])
         copper.set_metallic(1)
         copper.set_roughness(0.2)
@@ -150,18 +151,54 @@ def main():
 
     config = sapien.SceneConfig()
     scene = sim.create_scene(config)
-    scene.add_ground(0)
+    material = renderer.create_material()
+    material.set_base_color([1.0, 0.9, 0.7, 1.0])
+    scene.add_ground(0, render_material=material)
     scene.set_timestep(1 / 240)
 
     mount = scene.create_actor_builder().build_kinematic()
-    mount.set_pose(Pose([0, 0, 3], qmult(aa([0, 0, 1], 0.0), aa([0, 1, 0], 0.0))))
-    cam1 = scene.add_mounted_camera("cam", mount, Pose([0, 0, 3]), 1920, 1080, 0, 1, 0.1, 100)
+    mount.set_pose(Pose([-3, -3, 4]))
+    cam1 = scene.add_mounted_camera("cam", mount, Pose([0, 0, 0]), 1920, 1080, 0, 1, 0.1, 100)
 
     # print(cam1.render_target_names)
 
     ant_builder = create_ant_builder(scene)
     ant = ant_builder.build()
     ant.set_root_pose(Pose([0, 0, 5]))
+
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_base_color([0.2, 0.2, 0.8, 1.0])
+    material.set_roughness(1000.0)
+    material.set_specular(0.0)
+    builder.add_sphere_visual(radius=0.6, material=material)
+    builder.add_sphere_collision(radius=0.6)
+    sphere1 = builder.build()
+    sphere1.set_pose(Pose(p=[0, -1.5, 8]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_translucent(True, 1.4)
+    material.set_base_color([0.2, 0.8, 0.2, 1.0])
+    material.set_roughness(1000.0)
+    builder.add_sphere_visual(radius=0.6, material=material)
+    builder.add_sphere_collision(radius=0.6)
+    sphere2 = builder.build()
+    sphere2.set_pose(Pose(p=[0, 1.5, 8]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_base_color([0.8, 0.2, 0.2, 1.0])
+    material.set_roughness(0.0)
+    material.set_specular(1.0)
+    # material.set_roughness(0.0)
+    material.set_specular(0.0)
+    builder.add_box_visual(half_size=[0.6, 0.6, 0.6], material=material)
+    builder.add_box_collision(half_size=[0.6, 0.6, 0.6])
+    box = builder.build()
+    box.set_pose(Pose(p=[1.5, 1.5, 8]))
+
 
     # viewer.set_scene(scene)
     # viewer.set_camera_xyz(-4, 0, 0.3)
@@ -175,9 +212,9 @@ def main():
     ant.set_qf(f)
     scene.step()
 
-    # scene.renderer_scene.set_ambient_light([0, 0, 0])
+    scene.renderer_scene.set_ambient_light([0.4, 0.4, 0.4])
 
-    dirlight = scene.add_directional_light([0, 0, -1], [0.3, 0.3, 0.3], True)
+    # dirlight = scene.add_directional_light([0, 0, -1], [0.3, 0.3, 0.3], True)
 
     # scene.renderer_scene.add_point_light([0, 1, 1], [1, 2, 2], True)
 
@@ -193,12 +230,14 @@ def main():
     # light.set_position([0, 0, 5])
     # light.set_direction([0, -1, -1])
 
-    plight = scene.add_point_light([0, -1, 1], [2, 1, 2], True)
+    # plight = scene.add_point_light([0, -1, 1], [2, 1, 2], True)
     # scene.renderer_scene.add_point_light([0, 1, -1], [2, 2, 1])
 
-    print(scene.get_all_lights())
+    # print(scene.get_all_lights())
 
     while True:
+        scene.step()
+        scene.update_render()
         cam1.take_picture()
 
     # count = 0
