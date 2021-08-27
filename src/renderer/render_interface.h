@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <spdlog/spdlog.h>
 
 namespace sapien {
 namespace Renderer {
@@ -37,8 +38,12 @@ public:
   virtual void setSpecular(float specular) = 0;
   virtual void setMetallic(float metallic) = 0;
 
-  virtual void setTranslucent(bool isTranslucent, float ni) {};
-  virtual void setMaterialType(uint32_t type) {};
+  virtual void setTransparent(bool isTransparent, float ior) {
+    spdlog::get("SAPIEN")->warn("transparent material is not supported");
+  };
+  virtual void setMaterialType(uint32_t type) {
+    spdlog::get("SAPIEN")->warn("material type is not supported");
+  };
 
   virtual ~IPxrMaterial() = default;
 };

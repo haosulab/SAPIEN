@@ -257,6 +257,19 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
                                         const std::vector<uint32_t> &indices,
                                         const physx::PxVec3 &scale,
                                         std::shared_ptr<IPxrMaterial> material) {
+  std::shared_ptr<kuafu::Geometry> g;
+  g->path = "";
+  g->geometryIndex = kuafu::global::geometryIndex++;
+  g->dynamic = true;
+  g->subMeshCount = 1;
+
+  if (indices.size() % 3 != 0)
+    spdlog::get("SAPIEN")->error("invalid geometry");
+
+  size_t totalAmountOfTriangles = indices.size() / 3;
+
+
+
   spdlog::get("SAPIEN")->error("addRigidbody3 not implemented yet");
 }
 

@@ -403,7 +403,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("set_specular", &Renderer::IPxrMaterial::setSpecular, py::arg("specular"))
       .def("set_metallic", &Renderer::IPxrMaterial::setMetallic, py::arg("metallic"))
       .def("set_roughness", &Renderer::IPxrMaterial::setRoughness, py::arg("roughness"))
-      .def("set_translucent", &Renderer::IPxrMaterial::setTranslucent, py::arg("is_translucent"), py::arg("ni"))
+      .def("set_transparent", &Renderer::IPxrMaterial::setTransparent, py::arg("is_transparent"), py::arg("ior"))
       .def("set_material_type", &Renderer::IPxrMaterial::setMaterialType, py::arg("type"));
 
   //     // TODO: implement those together with UV

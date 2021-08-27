@@ -20,7 +20,7 @@ public:
   void setSpecular(float specular) override;
   void setMetallic(float metallic) override;
 
-  void setTranslucent(bool isTranslucent, float _ni = 1.4) override;
+  void setTransparent(bool isTransparent, float ior = 1.4) override;
   void setMaterialType(uint32_t type) override;
   inline auto getKMaterial() { return mKMaterial; }
 };

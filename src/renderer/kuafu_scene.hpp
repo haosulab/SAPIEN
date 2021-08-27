@@ -7,6 +7,8 @@
 #include "kuafu.hpp"
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 namespace sapien::Renderer {
 
 class KuafuScene;
@@ -17,9 +19,9 @@ class KCamera : public kuafu::Camera {
 
 public:
   KCamera() = delete;
-  KCamera(std::string const& name, int width, int height)
-      : kuafu::Camera(width, height), mName(name) {}
-  const std::string& getName() const { return mName; }
+  KCamera(std::string name, int width, int height)
+      : kuafu::Camera(width, height), mName(std::move(name)) {}
+  [[nodiscard]] const std::string& getName() const { return mName; }
 };
 
 class KuafuCamera : public ICamera {
@@ -43,12 +45,12 @@ public:
     mKCamera->setFov(glm::degrees(fovy));
   }
 
-  inline const std::string &getName() const override { return mKCamera->getName(); };
-  inline uint32_t getWidth() const override { return mKCamera->getWidth(); };
-  inline uint32_t getHeight() const override { return mKCamera->getHeight(); };
-  inline float getFovy() const override { return glm::radians(mKCamera->getFov()); };
-  inline float getNear() const override { return 0.1; /*TODO: kuafu_urgent*/ };
-  inline float getFar() const override { return 100.0; /*TODO: kuafu_urgent*/ };
+  [[nodiscard]] inline const std::string &getName() const override { return mKCamera->getName(); };
+  [[nodiscard]] inline uint32_t getWidth() const override { return mKCamera->getWidth(); };
+  [[nodiscard]] inline uint32_t getHeight() const override { return mKCamera->getHeight(); };
+  [[nodiscard]] inline float getFovy() const override { return glm::radians(mKCamera->getFov()); };
+  [[nodiscard]] inline float getNear() const override { return 0.1; };
+  [[nodiscard]] inline float getFar() const override { return 100.0; };
 
   void takePicture() override;
   inline std::vector<float> getColorRGBA() override {

@@ -51,7 +51,7 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_translucent(True, 1.4)
+    material.set_transparent(True, 1.4)
     material.set_base_color([0.2, 0.8, 0.2, 1.0])
     material.set_roughness(1000.0)
     # material.set_roughness(0.0)

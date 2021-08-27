@@ -66,12 +66,12 @@ else ()
             "3rd_party/optifuser/build/lib")
 endif ()
 
-# local changes by jet for clion
-set(pinocchio_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/pinocchio/")
-set(eigenpy_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/eigenpy/")
-set(hpp-fcl_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/hpp-fcl/")
-set(octomap_DIR "/zdata/anaconda3/envs/sapien/share/octomap/")
-include_directories("/zdata/anaconda3/envs/sapien/include/")
+## local changes by jet for clion
+#set(pinocchio_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/pinocchio/")
+#set(eigenpy_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/eigenpy/")
+#set(hpp-fcl_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/hpp-fcl/")
+#set(octomap_DIR "/zdata/anaconda3/envs/sapien/share/octomap/")
+#include_directories("/zdata/anaconda3/envs/sapien/include/")
 
 if (${BUILD_WITH_PINOCCHIO_SUPPORT})
     # Pinocchio uses its own FindCppAD but does not provide it

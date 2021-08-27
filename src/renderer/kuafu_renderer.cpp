@@ -18,7 +18,7 @@ void KuafuMaterial::setBaseColor(std::array<float, 4> color) {
 }
 
 void KuafuMaterial::setRoughness(float roughness) {
-  mKMaterial->fuzziness = roughness;
+  mKMaterial->roughness = roughness;
 }
 
 void KuafuMaterial::setSpecular(float specular) {
@@ -28,13 +28,13 @@ void KuafuMaterial::setSpecular(float specular) {
 void KuafuMaterial::setMetallic(float metallic) {
   if (metallic < 0.001)
     metallic = 0.001;
-  mKMaterial->fuzziness = 0.1F / metallic;
+  mKMaterial->roughness = 0.1F / metallic;
   mKMaterial->ns = metallic;
 }
 
-void KuafuMaterial::setTranslucent(bool isTranslucent, float _ni) {
-  mKMaterial->illum = isTranslucent ? 1 : 2;
-  mKMaterial->ni = _ni;
+void KuafuMaterial::setTransparent(bool isTransparent, float ior) {
+  mKMaterial->illum = isTransparent ? 1 : 2;
+  mKMaterial->ior = ior;
 }
 
 void KuafuMaterial::setMaterialType(uint32_t type) {
