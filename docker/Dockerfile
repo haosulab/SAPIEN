@@ -56,7 +56,7 @@ RUN yum install -y libXrandr-devel libXinerama-devel libXcursor-devel libXi-deve
 RUN git clone --single-branch -b 3.3.3 --depth 1 https://github.com/glfw/glfw.git
 RUN mkdir /workspace/glfw/build
 WORKDIR /workspace/glfw/build
-RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_VULKAN_STATIC=ON && make -j && make install
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_VULKAN_STATIC=OFF -DBUILD_SHARED_LIBS=ON && make -j && make install
 
 WORKDIR /workspace
 RUN curl -O https://sdk.lunarg.com/sdk/download/1.2.170.0/linux/vulkan_sdk.tar.gz && tar -xf vulkan_sdk.tar.gz && rm -f vulkan_sdk.tar.gz

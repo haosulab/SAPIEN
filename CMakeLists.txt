@@ -179,7 +179,7 @@ if (MACOSX)
             libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
-            pthread ${OPENGL_LIBRARY} glfw3 GLEW ${ASSIMP_LIBRARIES} dl optifuser
+            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
 			${PINOCCHIO_LIBRARY} svulkan2 kuafu "-framework Cocoa -framework IOKit")
 else ()
@@ -189,7 +189,7 @@ else ()
             libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
-            pthread ${OPENGL_LIBRARY} glfw3 GLEW ${ASSIMP_LIBRARIES} dl optifuser
+            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
             ${PINOCCHIO_LIBRARY} svulkan2 kuafu)
 endif ()
