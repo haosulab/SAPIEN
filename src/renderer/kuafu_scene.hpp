@@ -5,15 +5,91 @@
 #pragma once
 #include "render_interface.h"
 #include "kuafu.hpp"
-
+#include <spdlog/spdlog.h>
 
 namespace sapien::Renderer {
 
 class KuafuScene;
 
+class KCamera : public kuafu::Camera {
+  std::string mName;
+  void processKeyboard() override;
+
+public:
+  KCamera() = delete;
+  KCamera(std::string const& name, int width, int height)
+      : kuafu::Camera(width, height), mName(name) {}
+  const std::string& getName() const { return mName; }
+};
+
+class KuafuCamera : public ICamera {
+  friend class KuafuScene;
+
+  physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
+  KuafuScene *pParentScene = nullptr;
+  std::shared_ptr<KCamera> mKCamera;
+
+  void setPxPose(const physx::PxTransform &pose);
+
+public:
+  // ICamera
+
+  KuafuCamera(std::string const& name, int width, int height,
+              float fovy, KuafuScene *scene){
+    pParentScene = scene;
+    mKCamera = std::make_shared<KCamera>(name, width, height);
+    mKCamera->reset();
+    mKCamera->setSize(width, height);
+    mKCamera->setFov(glm::degrees(fovy));
+  }
+
+  inline const std::string &getName() const override { return mKCamera->getName(); };
+  inline uint32_t getWidth() const override { return mKCamera->getWidth(); };
+  inline uint32_t getHeight() const override { return mKCamera->getHeight(); };
+  inline float getFovy() const override { return glm::radians(mKCamera->getFov()); };
+  inline float getNear() const override { return 0.1; /*TODO: kuafu_urgent*/ };
+  inline float getFar() const override { return 100.0; /*TODO: kuafu_urgent*/ };
+
+  void takePicture() override;
+  inline std::vector<float> getColorRGBA() override {
+    spdlog::get("SAPIEN")->warn("getColorRGBA not implemented yet");
+    return {};
+  };
+  inline std::vector<float> getAlbedoRGBA() override {
+    spdlog::get("SAPIEN")->warn("getAlbedoRGBA not implemented yet");
+    return {};
+  };
+  inline std::vector<float> getNormalRGBA() override {
+    spdlog::get("SAPIEN")->warn("getNormalRGBA not implemented yet");
+    return {};
+  };
+  inline std::vector<float> getDepth() override {
+    spdlog::get("SAPIEN")->warn("getDepth not implemented yet");
+    return {};
+  };
+  inline std::vector<int> getSegmentation() override {
+    spdlog::get("SAPIEN")->warn("getSegmentation not implemented yet");
+    return {};
+  };
+  inline std::vector<int> getObjSegmentation() override {
+    spdlog::get("SAPIEN")->warn("getObjSegmentation not implemented yet");
+    return {};
+  };
+
+  // ISensor
+
+  void setInitialPose(physx::PxTransform const &pose) override;
+  physx::PxTransform getPose() const override;
+  void setPose(physx::PxTransform const &pose) override;
+  IPxrScene *getScene() override;
+
+//  virtual ~ISensor() = default;
+};
+
 class KuafuRigidBody : public IPxrRigidbody {
   std::string mName{};
   KuafuScene *mParentScene = nullptr;
+  physx::PxVec3 mScale = {1.0, 1.0, 1.0};
   physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
 //  kuafu::GeometryInstance *mKObject;
 
@@ -21,8 +97,11 @@ class KuafuRigidBody : public IPxrRigidbody {
 
   uint32_t mUniqueId = 0;
   uint32_t mSegmentationId = 0;
+
+  bool mHaveSetInvisible = false;
+
 public:
-  KuafuRigidBody(KuafuScene *scene, size_t kGeometryInstanceIdx);
+  KuafuRigidBody(KuafuScene *scene, size_t kGeometryInstanceIdx, physx::PxVec3 scale = {1.0, 1.0, 1.0});
   KuafuRigidBody(KuafuRigidBody const &other) = delete;
   KuafuRigidBody &operator=(KuafuRigidBody const &other) = delete;
 
@@ -49,33 +128,36 @@ public:
 };
 
 class KuafuScene : public IPxrScene {
+  friend class KuafuCamera;
   friend class KuafuRenderer;
   friend class KuafuRigidBody;
 
-  kuafu::Kuafu* mKRenderer;
+  kuafu::Kuafu *pKRenderer;
   std::vector<std::unique_ptr<KuafuRigidBody>> mBodies;
+  std::vector<std::unique_ptr<KuafuCamera>> mCameras;
+
+  bool mUseViewer = false;
 
 public:
+  IPxrRigidbody *addRigidbodyWithNewMaterial(
+      const std::string &meshFile, const physx::PxVec3 &scale, std::shared_ptr<IPxrMaterial> material = nullptr);
+
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
   IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
                                       std::shared_ptr<IPxrMaterial> material) override;
-  inline IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type,
+  IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type,
                                              const physx::PxVec3 &scale,
-                                             const physx::PxVec3 &color) override {
-      assert(false); // not implemented yet
-  };
+                                             const physx::PxVec3 &color) override;
   IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                       std::vector<physx::PxVec3> const &normals,
                                       std::vector<uint32_t> const &indices,
                                       const physx::PxVec3 &scale,
                                       std::shared_ptr<IPxrMaterial> material) override;
-  inline IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+  IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                              std::vector<physx::PxVec3> const &normals,
                                              std::vector<uint32_t> const &indices,
                                              const physx::PxVec3 &scale,
-                                             const physx::PxVec3 &color) override {
-    assert(false); // not implemented yet
-  }
+                                             const physx::PxVec3 &color) override;
 
   void removeRigidbody(IPxrRigidbody *body) override;
 
@@ -106,7 +188,11 @@ public:
   void removeLight(ILight *light) override;
 
   /** call this function before every rendering time frame */
-  inline void updateRender() { assert(false); /* not implemented yet */ };
+  inline void updateRender() {
+//    spdlog::get("SAPIEN")->error("updateRender not implemented yet");
+  };
+
+  inline auto& getKScene() { return pKRenderer->getScene(); }
 
   void destroy() override;
 };

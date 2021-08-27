@@ -36,6 +36,10 @@ public:
   virtual void setRoughness(float roughness) = 0;
   virtual void setSpecular(float specular) = 0;
   virtual void setMetallic(float metallic) = 0;
+
+  virtual void setTranslucent(bool isTranslucent, float ni) {};
+  virtual void setMaterialType(uint32_t type) {};
+
   virtual ~IPxrMaterial() = default;
 };
 

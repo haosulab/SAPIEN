@@ -11,6 +11,10 @@ set(SAPIEN_DLPACK_INTEROP TRUE CACHE BOOL "Whether to use render to tensor")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
 set(BUILD_DEBUG_VIEWER FALSE CACHE BOOL "For C++ debug only")
 
+if (${SAPIEN_DLPACK_INTEROP})
+    set(SVULKAN2_CUDA_INTEROP TRUE)
+endif()
+
 if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
 endif ()
@@ -62,15 +66,16 @@ else ()
             "3rd_party/optifuser/build/lib")
 endif ()
 
+# local changes by jet for clion
+set(pinocchio_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/pinocchio/")
+set(eigenpy_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/eigenpy/")
+set(hpp-fcl_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/hpp-fcl/")
+set(octomap_DIR "/zdata/anaconda3/envs/sapien/share/octomap/")
+include_directories("/zdata/anaconda3/envs/sapien/include/")
+
 if (${BUILD_WITH_PINOCCHIO_SUPPORT})
     # Pinocchio uses its own FindCppAD but does not provide it
     set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppAD")
-
-#    # local changes by jet for clion
-#    set(pinocchio_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/pinocchio/")
-#    set(eigenpy_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/eigenpy/")
-#    set(hpp-fcl_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/hpp-fcl/")
-#    set(octomap_DIR "/zdata/anaconda3/envs/sapien/share/octomap/")
 
     find_package(Boost COMPONENTS system REQUIRED)
     find_package(pinocchio REQUIRED)
@@ -208,6 +213,8 @@ add_executable(manual_urdf manualtest/urdf.cpp)
 target_link_libraries(manual_urdf sapien ${PINOCCHIO_LIBRARY})
 add_executable(manual_kinematics manualtest/kinematics.cpp)
 target_link_libraries(manual_kinematics sapien)
+add_executable(manual_kuafu_minimal manualtest/kuafu_minimal.cpp)
+target_link_libraries(manual_kuafu_minimal sapien)
 
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtest/*.py ${CMAKE_CURRENT_BINARY_DIR})
