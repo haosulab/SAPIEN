@@ -1,5 +1,5 @@
-FROM quay.io/pypa/manylinux2014_x86_64
-RUN yum update && mkdir /workspace
+FROM quay.io/pypa/manylinux2014_x86_64:2021-03-12-76cb5c3
+RUN yum update -y && mkdir /workspace
 
 WORKDIR /workspace
 COPY PhysX /workspace/PhysX
@@ -77,5 +77,17 @@ WORKDIR /workspace/easy_profiler/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
 
 RUN yum install -y zip
+
+WORKDIR /workspace
+RUN git clone https://github.com/KhronosGroup/KTX-Software.git
+RUN mkdir /workspace/KTX-Software/build
+WORKDIR /workspace/KTX-Software/build
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
+
+WORKDIR /workspace
+RUN git clone https://github.com/libsdl-org/SDL.git
+RUN mkdir /workspace/SDL/build
+WORKDIR /workspace/SDL/build
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
 
 WORKDIR /workspace
