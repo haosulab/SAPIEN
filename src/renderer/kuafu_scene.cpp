@@ -202,7 +202,6 @@ IPxrRigidbody *KuafuScene::addRigidbodyWithNewMaterial(
     size_t rigidBodyIdx = getKScene().getGeometryInstanceCount() - 1;
     mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIdx, scale));
     return mBodies.back().get();
-
   } catch (const std::exception &) {
     spdlog::get("SAPIEN")->error("fail to load object");
     return nullptr;
@@ -216,40 +215,41 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::string &meshFile, const physx
 IPxrRigidbody *KuafuScene::addRigidbody(physx::PxGeometryType::Enum type,
                                         const physx::PxVec3 &scale,
                                         std::shared_ptr<IPxrMaterial> material) {
-//  kuafu::Geometry geometry;
+  std::shared_ptr<kuafu::Geometry> geometry;
+  auto mat = std::dynamic_pointer_cast<KuafuMaterial>(material);
+  if (!mat)
+    mat = std::make_shared<KuafuMaterial>();
+  auto kMat = mat->getKMaterial();
+  glm::vec3 new_scale = {scale.x, scale.y, scale.z};
+
   switch (type) {
-  case physx::PxGeometryType::eBOX: {
-    auto ret = addRigidbodyWithNewMaterial(
-        "/zdata/anaconda3/envs/sapien/lib/python3.7/site-packages/sapien/kuafu_assets/models/cube.obj", scale, material);
-    spdlog::get("SAPIEN")->warn("eBOX: tmp impl");
-    return ret;
+  case physx::PxGeometryType::eBOX:
+    geometry = kuafu::createCube(true, kMat);
     break;
-  }
-  case physx::PxGeometryType::eSPHERE: {
-    auto ret = addRigidbodyWithNewMaterial(
-        "/zdata/anaconda3/envs/sapien/lib/python3.7/site-packages/sapien/kuafu_assets/models/sphere.obj", scale, material);
-    spdlog::get("SAPIEN")->warn("eSPHERE: tmp impl");
-    return ret;
+  case physx::PxGeometryType::eSPHERE:
+    geometry = kuafu::createSphere(true, kMat);
     break;
-  }
-  case physx::PxGeometryType::ePLANE: {
-    auto ret = addRigidbodyWithNewMaterial(
-        "/zdata/anaconda3/envs/sapien/lib/python3.7/site-packages/sapien/kuafu_assets/models/plane.obj", scale, material);
-    spdlog::get("SAPIEN")->warn("ePLANE: tmp impl");
-    return ret;
+  case physx::PxGeometryType::ePLANE:
+    geometry = kuafu::createYZPlane(true, kMat);
     break;
-  }
-  case physx::PxGeometryType::eCAPSULE: {
-    auto ret = addRigidbodyWithNewMaterial(
-        "/zdata/anaconda3/envs/sapien/lib/python3.7/site-packages/sapien/kuafu_assets/models/cube.obj",  scale, material);
-    spdlog::get("SAPIEN")->warn("eCAPSULE: tmp impl, incorrect");
-    return ret;
+  case physx::PxGeometryType::eCAPSULE:
+//    geometry = kuafu::createCapsule(scale.x, scale.y, true, kMat);
+//    new_scale = {1., 1., 1.};
+    geometry = kuafu::createCube(true, kMat);
     break;
-  }
   default:
     spdlog::get("SAPIEN")->error("Failed to add Rididbody: unimplemented shape");
     return nullptr;
   }
+
+  auto transform = glm::scale(glm::mat4(1.0F), new_scale);
+  getKScene().submitGeometry(geometry);
+  getKScene().submitGeometryInstance(
+      kuafu::instance(geometry, transform));
+
+  size_t rigidBodyIdx = getKScene().getGeometryInstanceCount() - 1;
+  mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIdx, scale));
+  return mBodies.back().get();
 }
 
 IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertices,
@@ -258,19 +258,45 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
                                         const physx::PxVec3 &scale,
                                         std::shared_ptr<IPxrMaterial> material) {
   std::shared_ptr<kuafu::Geometry> g;
+  g->initialized = false;
   g->path = "";
   g->geometryIndex = kuafu::global::geometryIndex++;
   g->dynamic = true;
   g->subMeshCount = 1;
 
   if (indices.size() % 3 != 0)
-    spdlog::get("SAPIEN")->error("invalid geometry");
+    spdlog::get("SAPIEN")->error("invalid geometry: indices");
 
   size_t totalAmountOfTriangles = indices.size() / 3;
 
+  auto kMat = std::dynamic_pointer_cast<KuafuMaterial>(material)->getKMaterial();
+  kuafu::global::materials.push_back(*kMat);  // copy
+  ++kuafu::global::materialIndex;             // TODO: check existing dup mat
 
+  g->isOpaque = (kMat->d >= 1.0F);
+  g->matIndex = std::vector<uint32_t>(totalAmountOfTriangles, kuafu::global::materialIndex - 1);
 
-  spdlog::get("SAPIEN")->error("addRigidbody3 not implemented yet");
+  g->indices = indices;
+
+  // TODO: check duplicate v?
+  if (vertices.size() != normals.size())
+    spdlog::get("SAPIEN")->error("invalid geometry: normal");
+
+  g->vertices.resize(vertices.size());
+  for (size_t i = 0; i < vertices.size(); i++) {
+    kuafu::Vertex& vertex = g->vertices[i];
+    vertex.pos = {vertices[i][0], vertices[i][1], vertices[i][2]};
+    vertex.normal = {normals[i][0], normals[i][1], normals[i][2]};
+  }
+
+  auto transform = glm::scale(glm::mat4(1.0F), glm::vec3(scale.x, scale.y, scale.z));
+  getKScene().submitGeometry(g);
+  getKScene().submitGeometryInstance(
+      kuafu::instance(g, transform));
+
+  size_t rigidBodyIdx = getKScene().getGeometryInstanceCount() - 1;
+  mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIdx, scale));
+  return mBodies.back().get();
 }
 
 IPxrRigidbody *KuafuScene::addRigidbody(physx::PxGeometryType::Enum type,
@@ -330,37 +356,38 @@ std::array<float, 3> KuafuScene::getAmbientLight() const {
 IPointLight *KuafuScene::addPointLight(const std::array<float, 3> &position,
                                        const std::array<float, 3> &color, bool enableShadow,
                                        float shadowNear, float shadowFar) {
-  auto lightSphere = kuafu::loadObj("/zdata/anaconda3/envs/sapien/lib/python3.7/site-packages/sapien/kuafu_assets/models/sphere.obj");
-  kuafu::Material lightMaterial;
-  lightMaterial.emission = glm::vec3({color[0], color[1], color[2]});
-  lightSphere->setMaterial(lightMaterial);
+  auto lightMaterial = std::make_shared<kuafu::Material>();
+  lightMaterial->emission = glm::vec3({color[0], color[1], color[2]});
+  auto lightSphere = kuafu::createSphere(true, lightMaterial);
 
-  auto transform = glm::scale(glm::mat4(1.0F), glm::vec3(0.05F));
-  transform = glm::translate(transform, {position[0], position[1], position[2]});
+  auto transform = glm::translate(glm::mat4(1.0F), {position[0], position[1], position[2]});
+  transform = glm::scale(transform, glm::vec3(0.05F));
 
   getKScene().submitGeometry(lightSphere);
   getKScene().submitGeometryInstance(
       kuafu::instance(lightSphere, transform));
 
   spdlog::get("SAPIEN")->warn("addPointLight: incorrect tmp impl");
+  return nullptr;
 }
 
 IDirectionalLight *KuafuScene::addDirectionalLight(
     const std::array<float, 3> &direction, const std::array<float, 3> &color, bool enableShadow,
     const std::array<float, 3> &position, float shadowScale, float shadowNear, float shadowFar) {
-  auto lightPlane = kuafu::loadObj("/zdata/anaconda3/envs/sapien/lib/python3.7/site-packages/sapien/kuafu_assets/models/plane.obj");
-  kuafu::Material lightMaterial;
-  lightMaterial.emission = glm::vec3({color[0], color[1], color[2]});
-  lightPlane->setMaterial(lightMaterial);
+  auto lightMaterial = std::make_shared<kuafu::Material>();
+  lightMaterial->emission = glm::vec3({color[0], color[1], color[2]});
+  auto lightPlane = kuafu::createYZPlane(true, lightMaterial);
 
-  auto transform = glm::rotate(glm::mat4(1.0F), glm::radians(180.F), {0, 1, 0});
-  transform = glm::translate(transform, {position[0], position[1], position[2]});
+  auto transform = glm::translate(glm::mat4(1.0F), {position[0], position[1], position[2]});
+  transform = glm::rotate(transform, glm::radians(90.F), {0, 1, 0});
+  transform = glm::scale(transform, glm::vec3(4.F));
 
   getKScene().submitGeometry(lightPlane);
   getKScene().submitGeometryInstance(
       kuafu::instance(lightPlane, transform));
 
   spdlog::get("SAPIEN")->warn("addDirectionalLight: incorrect tmp impl");
+  return nullptr;
 }
 
 ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
@@ -368,6 +395,7 @@ ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
                                      float fovOuter, const std::array<float, 3> &color,
                                      bool enableShadow, float shadowNear, float shadowFar) {
   spdlog::get("SAPIEN")->error("addSpotLight not implemented yet");
+  return nullptr;
 }
 
 void KuafuScene::removeLight(ILight *light) {

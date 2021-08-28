@@ -44,7 +44,7 @@ int main() {
   copper->setBaseColor({0.7, 0.6, 0.2, 1});
 //  copper->setMetallic(1.f);
   copper->setRoughness(5.f);
-  copper->setSpecular(1.f);
+  copper->setMetallic(1.f);
 
   auto sphere_builder = scene->createActorBuilder();
   sphere_builder->addSphereVisualWithMaterial(

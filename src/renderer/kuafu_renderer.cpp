@@ -22,14 +22,12 @@ void KuafuMaterial::setRoughness(float roughness) {
 }
 
 void KuafuMaterial::setSpecular(float specular) {
-  mKMaterial->ns = specular;
+//  mKMaterial->ns = specular;
+  spdlog::get("SAPIEN")->warn("specular adjustment not supported");
 }
 
 void KuafuMaterial::setMetallic(float metallic) {
-  if (metallic < 0.001)
-    metallic = 0.001;
-  mKMaterial->roughness = 0.1F / metallic;
-  mKMaterial->ns = metallic;
+  mKMaterial->shininess = metallic;
 }
 
 void KuafuMaterial::setTransparent(bool isTransparent, float ior) {
@@ -59,14 +57,17 @@ void KuafuRenderer::init() {
     mKRenderer.getScene().setCamera(cam);
   }
 
-  mKRenderer.init();
-  mKRenderer.reset();
   auto& config = mKRenderer.getConfig();
+//  spdlog::get("SAPIEN")->warn((size_t)&config);
   config.setGeometryLimit(1000);
   config.setGeometryInstanceLimit(10000);
   config.setTextureLimit(1000);
   config.setAccumulatingFrames(false);
   config.setClearColor(glm::vec4(0, 0, 0, 1));
+  config.setPerPixelSampleRate(64);
+  mKRenderer.init();
+//  mKRenderer.reset();
+
   mKRenderer.getScene().removeEnvironmentMap();
   mKRenderer.getScene().setGeometries({});
   mKRenderer.getScene().setGeometryInstances({});
@@ -78,7 +79,7 @@ IPxrScene *KuafuRenderer::createScene(std::string const &name) {
 };
 
 void KuafuRenderer::removeScene(IPxrScene *scene) {
-  spdlog::get("SAPIEN")->error("removeScene not implemented yet");
+  spdlog::get("SAPIEN")->warn("removeScene not implemented yet");
 };
 
 std::shared_ptr<IPxrMaterial> KuafuRenderer::createMaterial() {
