@@ -220,7 +220,7 @@ IPxrRigidbody *KuafuScene::addRigidbody(physx::PxGeometryType::Enum type,
   if (!mat)
     mat = std::make_shared<KuafuMaterial>();
   auto kMat = mat->getKMaterial();
-  glm::vec3 new_scale = {scale.x, scale.y, scale.z};
+  auto new_scale = scale;
 
   switch (type) {
   case physx::PxGeometryType::eBOX:
@@ -233,22 +233,22 @@ IPxrRigidbody *KuafuScene::addRigidbody(physx::PxGeometryType::Enum type,
     geometry = kuafu::createYZPlane(true, kMat);
     break;
   case physx::PxGeometryType::eCAPSULE:
-//    geometry = kuafu::createCapsule(scale.x, scale.y, true, kMat);
-//    new_scale = {1., 1., 1.};
-    geometry = kuafu::createCube(true, kMat);
+    geometry = kuafu::createCapsule(scale.x, scale.y, true, kMat);
+    new_scale = {1.F, 1.F, 1.F};
+//    geometry = kuafu::createCube(true, kMat);
     break;
   default:
     spdlog::get("SAPIEN")->error("Failed to add Rididbody: unimplemented shape");
     return nullptr;
   }
 
-  auto transform = glm::scale(glm::mat4(1.0F), new_scale);
+  auto transform = glm::scale(glm::mat4(1.0F), {new_scale.x, new_scale.y, new_scale.z});
   getKScene().submitGeometry(geometry);
   getKScene().submitGeometryInstance(
       kuafu::instance(geometry, transform));
 
   size_t rigidBodyIdx = getKScene().getGeometryInstanceCount() - 1;
-  mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIdx, scale));
+  mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIdx, new_scale));
   return mBodies.back().get();
 }
 
@@ -257,7 +257,7 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
                                         const std::vector<uint32_t> &indices,
                                         const physx::PxVec3 &scale,
                                         std::shared_ptr<IPxrMaterial> material) {
-  std::shared_ptr<kuafu::Geometry> g;
+  auto g = std::make_shared<kuafu::Geometry>();
   g->initialized = false;
   g->path = "";
   g->geometryIndex = kuafu::global::geometryIndex++;

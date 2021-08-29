@@ -29,18 +29,10 @@ def main():
         body.add_capsule_visual(Pose([0.141, 0, 0]), 0.08, 0.141, copper)
         body.add_capsule_collision(Pose([-0.141, 0, 0]), 0.08, 0.141)
         body.add_capsule_visual(Pose([-0.141, 0, 0]), 0.08, 0.141, copper)
-        body.add_capsule_collision(
-            Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141
-        )
-        body.add_capsule_visual(
-            Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141, copper
-        )
-        body.add_capsule_collision(
-            Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141
-        )
-        body.add_capsule_visual(
-            Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141, copper
-        )
+        body.add_capsule_collision(Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141)
+        body.add_capsule_visual(Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141, copper)
+        body.add_capsule_collision(Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141)
+        body.add_capsule_visual(Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141, copper)
         body.set_name("body")
 
         l1 = builder.create_link_builder(body)
@@ -207,6 +199,16 @@ def main():
     builder.add_box_collision(half_size=[0.7, 0.7, 0.7])
     box = builder.build()
     box.set_pose(Pose(p=[0, 2, 4]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_base_color([0.8, 0.2, 0.2, 1.0])
+    material.set_roughness(0.0)
+    material.set_metallic(1.0)
+    builder.add_capsule_visual(radius=0.08, half_length=0.141, material=material)
+    builder.add_capsule_collision(radius=0.08, half_length=0.141)
+    cap = builder.build()
+    cap.set_pose(Pose(p=[0, 2, 5]))
 
     # builder = scene.create_actor_builder()
     # material = renderer.create_material()
