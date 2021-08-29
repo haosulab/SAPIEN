@@ -25,15 +25,15 @@ def main():
     scene.set_timestep(1 / 60)
 
     mount = scene.create_actor_builder().build_static()
-    mount.set_pose(Pose([-12, 0, 12]))
     cam1 = scene.add_mounted_camera(
         "cam", mount, Pose(), 800, 600, 0, 1.0, 0.1, 100)
+    mount.set_pose(Pose([-12, 0, 1]))
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
     material.set_base_color([0.2, 0.2, 0.8, 1.0])
     material.set_roughness(1000.0)
-    material.set_specular(0.0)
+    material.set_metallic(0.0)
     builder.add_sphere_visual(material=material)
     builder.add_sphere_collision()
     sphere1 = builder.build()
@@ -43,7 +43,7 @@ def main():
     material = renderer.create_material()
     material.set_base_color([0.8, 0.2, 0.2, 1.0])
     material.set_roughness(0.0)
-    material.set_specular(1.0)
+    material.set_metallic(1.0)
     builder.add_sphere_visual(material=material)
     builder.add_sphere_collision()
     sphere2 = builder.build()

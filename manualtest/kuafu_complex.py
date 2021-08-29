@@ -149,7 +149,7 @@ def main():
     scene.set_timestep(1 / 240)
 
     mount = scene.create_actor_builder().build_kinematic()
-    mount.set_pose(Pose([-3, -3, 4]))
+    mount.set_pose(Pose([-3, -3, 4], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
     cam1 = scene.add_mounted_camera("cam", mount, Pose([0, 0, 0]), 1920, 1080, 0, 1, 0.1, 100)
 
     # print(cam1.render_target_names)

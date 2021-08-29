@@ -92,6 +92,10 @@ public:
           kuafu::global::keys::eZ = true;
           break;
 
+        case SDLK_SPACE:
+          kuafu::global::keys::eSpace = true;
+          break;
+
         case SDLK_ESCAPE:
           return false;
         }
@@ -137,19 +141,22 @@ public:
         case SDLK_z:
           kuafu::global::keys::eZ = false;
           break;
+
+        case SDLK_SPACE:
+          kuafu::global::keys::eSpace = false;
+          break;
+
         }
         break;
       }
 
-      case SDL_MOUSEMOTION: {
-        if (!mMouseVisible) {
-          int x;
-          int y;
+      case SDL_MOUSEMOTION:
+        if (kuafu::global::keys::eSpace) {
+          int x, y;
           SDL_GetRelativeMouseState(&x, &y);
           pScene->getCamera()->processMouse(x, -y);
           break;
         }
-      }
       }
     }
     return true;
@@ -157,6 +164,5 @@ public:
 
 private:
   kuafu::Scene *pScene;
-  bool mMouseVisible = true;
 };
 }

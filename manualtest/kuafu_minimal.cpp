@@ -11,7 +11,7 @@ using namespace sapien;
 
 int main() {
   auto sim = std::make_shared<Simulation>();
-  auto renderer = std::make_shared<Renderer::KuafuRenderer>(true);
+  auto renderer = std::make_shared<Renderer::KuafuRenderer>(false);
   renderer->setAssetsPath("../3rd_party/kuafu/resources");
   sim->setRenderer(renderer);
   renderer->init();
@@ -25,6 +25,19 @@ int main() {
 //  ground_material->setSpecular(0.0f);
   scene->addGround(0, true, nullptr, ground_material);
 
+
+  // axes
+  auto axes_builder = scene->createActorBuilder();
+  axes_builder->addBoxVisual(
+      {{1, 0, 0.}, PxIdentity}, {1, 0.1, 0.1}, {1.0, 0.0, 0.0});
+  axes_builder->addBoxVisual(
+      {{0, 1, 0.}, PxIdentity}, {0.1, 1, 0.1}, {0.0, 1.0, 0.0});
+  axes_builder->addBoxVisual(
+      {{0, 0, 1}, PxIdentity}, {0.1, 0.1, 1}, {0.0, 0.0, 1.0});
+  auto axes = axes_builder->build(true);
+  axes->setPose({{0, 0, 0.05}, PxIdentity});
+
+
 //  auto copper = renderer->createMaterial();
 //  copper->setBaseColor({0.2, 0.4, 0.1, 1});
 ////  copper->setMetallic(1.f);
@@ -36,7 +49,8 @@ int main() {
 //  scene->addSpotLight({-2, 0, 2}, {0, 0, 0}, 0, 0, {1000., 1000., 1000.}, false, 0, 0);
 
   auto mount = scene->createActorBuilder()->build(true);
-  mount->setPose(PxTransform({0, -8, 3}, PxIdentity));
+//  mount->setPose(PxTransform({-5, 0.6, 0.5}, {}));
+  mount->setPose(PxTransform({0.6, 5, 0.5}, {0, 0, -0.7071068, 0.7071068}));
   auto cam = scene->addMountedCamera(
       "cam", mount, PxTransform({0, 0, 0}, PxIdentity), 800, 600, 0, 1.0);
 
@@ -126,6 +140,5 @@ int main() {
     scene->step();
     scene->updateRender();
     cam->takePicture();
-//    _K.run();
   }
 }

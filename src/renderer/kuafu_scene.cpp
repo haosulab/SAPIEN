@@ -43,39 +43,30 @@ void KCamera::processKeyboard() {
   }
 
   if (kuafu::global::keys::eA) {
-    mPosition -= mDirRight * finalSpeed;
-    mViewNeedsUpdate = true;
-  }
-
-  if (kuafu::global::keys::eD) {
     mPosition += mDirRight * finalSpeed;
     mViewNeedsUpdate = true;
   }
 
+  if (kuafu::global::keys::eD) {
+    mPosition -= mDirRight * finalSpeed;
+    mViewNeedsUpdate = true;
+  }
+
   if (kuafu::global::keys::eQ) {
-    mPosition -= _up * finalSpeed;
+    mPosition -= mDirUp * finalSpeed;
     mViewNeedsUpdate = true;
   }
 
   if (kuafu::global::keys::eE) {
-    mPosition += _up * finalSpeed;
+    mPosition += mDirUp * finalSpeed;
     mViewNeedsUpdate = true;
   }
-
-
 }
 
 //========= KuafuCamera =========//
 
 void KuafuCamera::setPxPose(const physx::PxTransform &pose) {
-  mKCamera->setPosition({pose.p.x, pose.p.y, pose.p.z});
-  mKCamera->setFront({-pose.p.x, -pose.p.y, -pose.p.z});
-//  mKCamera->setFront({1, 0, 0});
-//  auto t = physx::PxMat44(pose);
-//  mKCamera->setFront({t[0][1], t[1][1], t[2][1]});
-
-  // TODO: kuafu_urgent fix this func
-//  spdlog::get("SAPIEN")->warn("check setPxPose");
+  mKCamera->setPose(toGlmMat4(physx::PxMat44(pose)));
 }
 
 void KuafuCamera::takePicture() {
@@ -85,20 +76,14 @@ void KuafuCamera::takePicture() {
 };
 
 void KuafuCamera::setInitialPose(const physx::PxTransform &pose) {
-//  auto cam = mParentscene->getKScene().getCamera();
-//  cam->setPosition({-12.6F, 1.1F, 19.4F});
-//  cam->setFront({0.67F, 0.0F, -0.8F});
-
   mInitialPose = pose;
   setPxPose(pose);
 }
 
 physx::PxTransform KuafuCamera::getPose() const {
-  auto view = mKCamera->getViewInverseMatrix();
-  // TODO: kuafu_urgent inverse?
-  spdlog::get("SAPIEN")->warn("check getPose");
-
-  return physx::PxTransform(toPxMat44(view));
+  spdlog::get("SAPIEN")->warn(
+      "Camera::getPose: maybe you need mount.getPose");
+  return physx::PxTransform(toPxMat44(mKCamera->getPose()));
 }
 
 void KuafuCamera::setPose(physx::PxTransform const &pose) {
