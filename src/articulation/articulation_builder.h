@@ -77,7 +77,12 @@ class ArticulationBuilder : public std::enable_shared_from_this<ArticulationBuil
 public:
   ArticulationBuilder(SScene *scene = nullptr);
 
-  inline void setScene(SScene *scene) { mScene = scene; }
+  inline void setScene(SScene *scene) {
+    mScene = scene;
+    for (auto lb : mLinkBuilders) {
+      lb->setScene(scene);
+    }
+  }
   inline SScene *getScene() { return mScene; }
 
   std::shared_ptr<LinkBuilder> createLinkBuilder(std::shared_ptr<LinkBuilder> parent = nullptr);
