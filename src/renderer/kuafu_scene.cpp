@@ -97,8 +97,8 @@ IPxrScene *KuafuCamera::getScene() { return pParentScene; }
 //========= KuafuRigidBody =========//
 
 KuafuRigidBody::KuafuRigidBody(
-    KuafuScene *scene,  size_t idx, physx::PxVec3 scale)
-    : mParentScene(scene), mScale(scale), mKGeometryInstanceIdx(idx) {}
+    KuafuScene *scene,  std::vector<size_t> indices, physx::PxVec3 scale)
+    : mParentScene(scene), mScale(scale), mKGeometryInstanceIndices(std::move(indices)) {}
 
 void KuafuRigidBody::setInitialPose(const physx::PxTransform &transform) {
   mInitialPose = transform;
@@ -108,37 +108,41 @@ void KuafuRigidBody::setInitialPose(const physx::PxTransform &transform) {
 void KuafuRigidBody::update(const physx::PxTransform &transform) {
   auto t = toGlmMat4(physx::PxMat44(transform * mInitialPose));
   t = glm::scale(t, {mScale.x, mScale.y, mScale.z});
-  auto obj = mParentScene->getKScene().getGeometryInstance(mKGeometryInstanceIdx);
-  obj->setTransform(t);
+  for (auto idx: mKGeometryInstanceIndices) {
+    auto obj = mParentScene->getKScene().getGeometryInstance(idx);
+    obj->setTransform(t);
+  }
 }
 
 void KuafuRigidBody::setVisibility(float visibility) {
   spdlog::get("SAPIEN")->error("setVisibility not supported by rt pipeline");
 }
 void KuafuRigidBody::setVisible(bool visible) {
-  auto instance = mParentScene->getKScene().getGeometryInstance(mKGeometryInstanceIdx);
-  auto geometry = mParentScene->getKScene().getGeometryByGlobalIndex(instance->geometryIndex);
-  auto matIdx = geometry->matIndex.front();  // TODO: kuafu_urgent
-  if (visible && mHaveSetInvisible) {
-    spdlog::get("SAPIEN")->warn("The object may have lost original material");
-    auto mat = kuafu::global::materials[matIdx];
-    mat.d = 1.0f;
-    geometry->setMaterial(mat);
-    geometry->initialized = false;
-    mParentScene->getKScene().markGeometriesChanged();
-    mParentScene->getKScene().markGeometryInstancesChanged();
-    mHaveSetInvisible = false;
-  }
+  for (auto idx: mKGeometryInstanceIndices) {
+    auto instance = mParentScene->getKScene().getGeometryInstance(idx);
+    auto geometry = mParentScene->getKScene().getGeometryByGlobalIndex(instance->geometryIndex);
+    auto matIdx = geometry->matIndex.front();  // TODO: kuafu_urgent
+    if (visible && mHaveSetInvisible) {
+      spdlog::get("SAPIEN")->warn("The object may have lost original material");
+      auto mat = kuafu::global::materials[matIdx];
+      mat.d = 1.0f;
+      geometry->setMaterial(mat);
+      geometry->initialized = false;
+      mParentScene->getKScene().markGeometriesChanged();
+      mParentScene->getKScene().markGeometryInstancesChanged();
+      mHaveSetInvisible = false;
+    }
 
-  if (!visible && ! mHaveSetInvisible) {
-    spdlog::get("SAPIEN")->warn("The object may lost material if set invisible");
-    auto mat = kuafu::global::materials[matIdx];
-    mat.d = 0.0f;
-    geometry->setMaterial(mat);
-    geometry->initialized = false;
-    mParentScene->getKScene().markGeometriesChanged();
-    mParentScene->getKScene().markGeometryInstancesChanged();
-    mHaveSetInvisible = true;
+    if (!visible && ! mHaveSetInvisible) {
+      spdlog::get("SAPIEN")->warn("The object may lost material if set invisible");
+      auto mat = kuafu::global::materials[matIdx];
+      mat.d = 0.0f;
+      geometry->setMaterial(mat);
+      geometry->initialized = false;
+      mParentScene->getKScene().markGeometriesChanged();
+      mParentScene->getKScene().markGeometryInstancesChanged();
+      mHaveSetInvisible = true;
+    }
   }
 }
 void KuafuRigidBody::setRenderMode(uint32_t mode) {
@@ -157,35 +161,45 @@ void KuafuRigidBody::setRenderMode(uint32_t mode) {
 
 void KuafuRigidBody::destroy() {
   /* TODO:kuafu_urgent rewrite this */
-  auto obj = mParentScene->getKScene().getGeometryInstance(mKGeometryInstanceIdx);
+  for (auto idx: mKGeometryInstanceIndices) {
+    auto obj = mParentScene->getKScene().getGeometryInstance(idx);
 
-  // An out-of-sight t
-  glm::mat4 t;
-  for (int i = 0; i < 4; i++)
-    for (int j = 0; j < 4; j++)
-      t[i][j] = 0;
+    // An out-of-sight t
+    glm::mat4 t;
+    for (int i = 0; i < 4; i++)
+      for (int j = 0; j < 4; j++)
+        t[i][j] = 0;
 
-  t[0][0] = t[1][1] = t[2][2] = 0.001f;
-  t[3][0] = t[3][1] = t[3][2] = 1000.f;
-  t[3][3] = 1.f;
+    t[0][0] = t[1][1] = t[2][2] = 0.001f;
+    t[3][0] = t[3][1] = t[3][2] = 1000.f;
+    t[3][3] = 1.f;
 
-  obj->setTransform(t);
+    obj->setTransform(t);
+  }
 //  pParentScene->removeRigidbody(this);
 }
 
 IPxrRigidbody *KuafuScene::addRigidbodyWithNewMaterial(
     const std::string &meshFile, const physx::PxVec3 &scale, std::shared_ptr<IPxrMaterial> material) {
   try {
-    auto obj = kuafu::loadObj(meshFile, true);
+    auto obj = kuafu::loadScene(meshFile, true);
     if (material)
-      obj->setMaterial(*dynamic_cast<KuafuMaterial*>(material.get())->getKMaterial());  // TODO: kuafu_urgent: bind this material
-    auto transform = glm::scale(glm::mat4(1.0F), glm::vec3(scale.x, scale.y, scale.z));
-    getKScene().submitGeometry(obj);
-    getKScene().submitGeometryInstance(
-        kuafu::instance(obj, transform));
+      for (auto &o: obj)
+        o->setMaterial(*std::dynamic_pointer_cast<KuafuMaterial>(material)->getKMaterial());
 
-    size_t rigidBodyIdx = getKScene().getGeometryInstanceCount() - 1;
-    mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIdx, scale));
+    auto transform = glm::scale(glm::mat4(1.0F), glm::vec3(scale.x, scale.y, scale.z));
+    std::vector<size_t> rigidBodyIndices;
+
+    auto orgGeoCnt = getKScene().getGeometryInstanceCount();
+
+    for (size_t i = 0; i < obj.size(); i++) {
+      getKScene().submitGeometry(obj[i]);
+      getKScene().submitGeometryInstance(
+          kuafu::instance(obj[i], transform));
+      rigidBodyIndices.push_back(orgGeoCnt + i);
+    }
+
+    mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIndices, scale));
     return mBodies.back().get();
   } catch (const std::exception &) {
     spdlog::get("SAPIEN")->error("fail to load object");
@@ -233,7 +247,8 @@ IPxrRigidbody *KuafuScene::addRigidbody(physx::PxGeometryType::Enum type,
       kuafu::instance(geometry, transform));
 
   size_t rigidBodyIdx = getKScene().getGeometryInstanceCount() - 1;
-  mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIdx, new_scale));
+  mBodies.push_back(std::make_unique<KuafuRigidBody>(
+      this, std::vector<size_t>{rigidBodyIdx}, new_scale));
   return mBodies.back().get();
 }
 
@@ -280,7 +295,8 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
       kuafu::instance(g, transform));
 
   size_t rigidBodyIdx = getKScene().getGeometryInstanceCount() - 1;
-  mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIdx, scale));
+  mBodies.push_back(std::make_unique<KuafuRigidBody>(
+      this, std::vector<size_t>{rigidBodyIdx}, scale));
   return mBodies.back().get();
 }
 

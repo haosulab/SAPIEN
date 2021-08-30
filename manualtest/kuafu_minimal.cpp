@@ -11,7 +11,7 @@ using namespace sapien;
 
 int main() {
   auto sim = std::make_shared<Simulation>();
-  auto renderer = std::make_shared<Renderer::KuafuRenderer>(false);
+  auto renderer = std::make_shared<Renderer::KuafuRenderer>(true);
   renderer->setAssetsPath("../3rd_party/kuafu/resources");
   sim->setRenderer(renderer);
   renderer->init();
@@ -26,16 +26,16 @@ int main() {
   scene->addGround(0, true, nullptr, ground_material);
 
 
-  // axes
-  auto axes_builder = scene->createActorBuilder();
-  axes_builder->addBoxVisual(
-      {{1, 0, 0.}, PxIdentity}, {1, 0.1, 0.1}, {1.0, 0.0, 0.0});
-  axes_builder->addBoxVisual(
-      {{0, 1, 0.}, PxIdentity}, {0.1, 1, 0.1}, {0.0, 1.0, 0.0});
-  axes_builder->addBoxVisual(
-      {{0, 0, 1}, PxIdentity}, {0.1, 0.1, 1}, {0.0, 0.0, 1.0});
-  auto axes = axes_builder->build(true);
-  axes->setPose({{0, 0, 0.05}, PxIdentity});
+//  // axes
+//  auto axes_builder = scene->createActorBuilder();
+//  axes_builder->addBoxVisual(
+//      {{1, 0, 0.}, PxIdentity}, {1, 0.1, 0.1}, {1.0, 0.0, 0.0});
+//  axes_builder->addBoxVisual(
+//      {{0, 1, 0.}, PxIdentity}, {0.1, 1, 0.1}, {0.0, 1.0, 0.0});
+//  axes_builder->addBoxVisual(
+//      {{0, 0, 1}, PxIdentity}, {0.1, 0.1, 1}, {0.0, 0.0, 1.0});
+//  auto axes = axes_builder->build(true);
+//  axes->setPose({{0, 0, 0.05}, PxIdentity});
 
 
 //  auto copper = renderer->createMaterial();
@@ -69,21 +69,21 @@ int main() {
 //  sphere->setPose({{0, 4, 4.}, PxIdentity});
 ////  sphere->lockMotion(false, false, false, false, false, false);
 
-//  auto obj_builder = scene->createActorBuilder();
-//  obj_builder->addVisualFromFile(
-//      "/zdata/ssource/ICCV2021_Diagnosis/ocrtoc_materials/models/camera/visual_mesh.obj");
-//  obj_builder->addMultipleConvexShapesFromFile(
-//      "/zdata/ssource/ICCV2021_Diagnosis/ocrtoc_materials/models/camera/collision_mesh.obj");
-//  auto obj = obj_builder->build(false);
-//  obj->setPose({{0, 0, 3.}, PxIdentity});
+  auto obj_builder = scene->createActorBuilder();
+  obj_builder->addVisualFromFile(
+      "/zdata/ssource/ICCV2021_Diagnosis/ocrtoc_materials/models/camera/visual_mesh.obj");
+  obj_builder->addMultipleConvexShapesFromFile(
+      "/zdata/ssource/ICCV2021_Diagnosis/ocrtoc_materials/models/camera/collision_mesh.obj");
+  auto obj = obj_builder->build(false);
+  obj->setPose({{0, 0, 3.}, PxIdentity});
 
-  auto cap_builder = scene->createActorBuilder();
-  cap_builder->addCapsuleVisual(
-      {{0, 0, 0.}, PxIdentity}, 0.3, 0.3, {1.0, 0.4, 0.2});
-  cap_builder->addCapsuleShape(
-      {{0, 0, 0.}, PxIdentity}, 0.3, 0.3);
-  auto cap = cap_builder->build(false);
-  cap->setPose({{0, 0, 2.}, PxIdentity});
+//  auto cap_builder = scene->createActorBuilder();
+//  cap_builder->addCapsuleVisual(
+//      {{0, 0, 0.}, PxIdentity}, 0.3, 0.3, {1.0, 0.4, 0.2});
+//  cap_builder->addCapsuleShape(
+//      {{0, 0, 0.}, PxIdentity}, 0.3, 0.3);
+//  auto cap = cap_builder->build(false);
+//  cap->setPose({{0, 0, 2.}, PxIdentity});
 
   auto cube_builder = scene->createActorBuilder();
   cube_builder->addBoxVisual(
@@ -91,7 +91,7 @@ int main() {
   cube_builder->addBoxShape(
       {{0, 0, 0.}, PxIdentity}, {0.1, 0.1, 0.1});
   auto cube = cube_builder->build(false);
-  cube->setPose({{0, 0, 0.1}, PxIdentity});
+  cube->setPose({{0, 0, 5}, PxIdentity});
 
 
 //  auto& _K = renderer->_getK();

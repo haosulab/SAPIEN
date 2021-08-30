@@ -52,8 +52,8 @@ void KuafuRenderer::init() {
     mScene.mUseViewer = mUseViewer;
 
     auto cam = std::make_shared<KCamera>("view_cam", 800, 600);
-    cam->setPosition({-4, 0, 2});
-    cam->setFront({1, 0, -0.6});
+    cam->setPosition({-1, 0, 1});
+    cam->setFront({1, 0, -1});
     mKRenderer.getScene().setCamera(cam);
   }
 

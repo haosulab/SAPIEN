@@ -95,7 +95,7 @@ class KuafuRigidBody : public IPxrRigidbody {
   physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
 //  kuafu::GeometryInstance *mKObject;
 
-  size_t mKGeometryInstanceIdx;
+  std::vector<size_t> mKGeometryInstanceIndices;
 
   uint32_t mUniqueId = 0;
   uint32_t mSegmentationId = 0;
@@ -103,13 +103,13 @@ class KuafuRigidBody : public IPxrRigidbody {
   bool mHaveSetInvisible = false;
 
 public:
-  KuafuRigidBody(KuafuScene *scene, size_t kGeometryInstanceIdx, physx::PxVec3 scale = {1.0, 1.0, 1.0});
+  KuafuRigidBody(KuafuScene *scene, std::vector<size_t> indices, physx::PxVec3 scale = {1.0, 1.0, 1.0});
   KuafuRigidBody(KuafuRigidBody const &other) = delete;
   KuafuRigidBody &operator=(KuafuRigidBody const &other) = delete;
 
   inline void setName(std::string const &name) override { mName = name; };
   inline std::string getName() const override { return mName; };
-  inline auto getKGeometryInstanceIdx() const { return mKGeometryInstanceIdx; };
+  inline auto getKGeometryInstanceIndices() const { return mKGeometryInstanceIndices; };
 
   inline void setUniqueId(uint32_t uniqueId) override { /* TODO:kuafu_urgent */ };
   inline uint32_t getUniqueId() const override { return mUniqueId; };
@@ -126,7 +126,10 @@ public:
 
   void destroy() override;
 
-  std::vector<std::unique_ptr<RenderShape>> getRenderShapes() const { return {}; };
+  std::vector<std::unique_ptr<RenderShape> > getRenderShapes() const {
+    spdlog::get("SAPIEN")->error("getRenderShapes not implemented yet");
+    return {};
+  };
 };
 
 class KuafuScene : public IPxrScene {
