@@ -39,6 +39,7 @@ public:
   std::shared_ptr<IPxrMaterial> createMaterial() override;
 
   void setAssetsPath(std::string const &path);
+  static void setDefaultAssetsPath(std::string path);
   void init();
 
   // TODO: remove these

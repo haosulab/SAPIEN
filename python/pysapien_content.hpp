@@ -260,7 +260,9 @@ void buildSapien(py::module &m) {
   std::shared_ptr<Renderer::KuafuRenderer>>(m, "KuafuRenderer");
   PyKuafuRenderer
       .def(py::init<bool>(), py::arg("use_viewer") = false)
-      .def("set_assets_path", &Renderer::KuafuRenderer::setAssetsPath)
+      .def_static("_set_default_assets_path", &Renderer::KuafuRenderer::setDefaultAssetsPath,
+                  py::arg("assets_path"))
+//      .def("set_assets_path", &Renderer::KuafuRenderer::setAssetsPath)
       .def("init", &Renderer::KuafuRenderer::init);
 
 

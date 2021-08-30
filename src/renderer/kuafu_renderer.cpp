@@ -44,6 +44,10 @@ void KuafuRenderer::setAssetsPath(std::string const &path) {
   mKRenderer.getConfig().setAssetsPath(path);
 }
 
+void KuafuRenderer::setDefaultAssetsPath(std::string path) {
+    kuafu::Config::setDefaultAssetsPath(std::move(path));
+}
+
 void KuafuRenderer::init() {
   // TODO: kuafu_urgent (window?)
   if (mUseViewer) {

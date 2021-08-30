@@ -21,8 +21,6 @@ def main():
 
     sim = sapien.Engine()
     renderer = sapien.KuafuRenderer()
-    renderer.set_assets_path(
-        '/zdata/anaconda3/envs/sapien/lib/python3.7/site-packages/sapien/kuafu_assets')
     sim.set_renderer(renderer)
 
     renderer.init()
