@@ -75,6 +75,20 @@ void KuafuCamera::takePicture() {
   pParentScene->pKRenderer->run();
 };
 
+std::vector<float> KuafuCamera::getColorRGBA() {
+  const auto& rgba = pParentScene->pKRenderer->downloadLatestFrame();
+  size_t size = rgba.size();
+  std::vector<float> ret(size);
+  // Kuafu is BGRA
+  for (size_t i = 0; i < size / 4; i++) {
+    ret[4 * i + 0] = static_cast<float>(rgba[4 * i + 2]) / 255;
+    ret[4 * i + 1] = static_cast<float>(rgba[4 * i + 1]) / 255;
+    ret[4 * i + 2] = static_cast<float>(rgba[4 * i + 0]) / 255;
+    ret[4 * i + 3] = static_cast<float>(rgba[4 * i + 3]) / 255;
+  }
+  return ret;
+};
+
 void KuafuCamera::setInitialPose(const physx::PxTransform &pose) {
   mInitialPose = pose;
   setPxPose(pose);

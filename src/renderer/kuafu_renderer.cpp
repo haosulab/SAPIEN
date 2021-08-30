@@ -30,6 +30,10 @@ void KuafuMaterial::setMetallic(float metallic) {
   mKMaterial->shininess = metallic;
 }
 
+void KuafuMaterial::setEmission(std::array<float, 4> color) {
+  mKMaterial->emission = glm::vec3(color[0], color[1], color[2]) * color[3];
+}
+
 void KuafuMaterial::setTransparent(bool isTransparent, float ior) {
   mKMaterial->illum = isTransparent ? 1 : 2;
   mKMaterial->ior = ior;

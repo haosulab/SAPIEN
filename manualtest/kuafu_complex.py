@@ -1,9 +1,15 @@
+# An example of using KuafuRenderer
+# Objects (and materials) are randomly generated and
+# added into the scene.
+#
+# TODO: fix ErrorOutOfHostMemory by resource managing
+#
+# By Jet <i@jetd.me>
+#
 import sapien.core as sapien
 import numpy as np
 from sapien.core import Pose
 from transforms3d.quaternions import axangle2quat as aa
-from transforms3d.quaternions import qmult, mat2quat, rotate_vector
-import time
 
 
 def main():
@@ -13,13 +19,7 @@ def main():
 
     renderer.init()
 
-    def create_ant_builder(scene):
-        copper = renderer.create_material()
-        copper.set_transparent(False, 1.4)
-        copper.set_base_color([0.875, 0.553, 0.221, 1])
-        copper.set_metallic(0)
-        copper.set_roughness(0)
-
+    def create_ant_builder(scene, copper):
         builder = scene.create_articulation_builder()
         body = builder.create_link_builder()
         body.add_sphere_collision(Pose(), 0.25)
@@ -145,18 +145,21 @@ def main():
     material = renderer.create_material()
     material.set_base_color([1.0, 0.9, 0.7, 1.0])
     scene.add_ground(0, render_material=material)
-    scene.set_timestep(1 / 240)
+    scene.set_timestep(1 / 60)
 
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, -3, 4], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
     cam1 = scene.add_mounted_camera("cam", mount, Pose([0, 0, 0]), 1920, 1080, 0, 1, 0.1, 100)
 
     # print(cam1.render_target_names)
-
-    ant_builder = create_ant_builder(scene)
+    copper = renderer.create_material()
+    copper.set_transparent(False, 1.4)
+    copper.set_base_color([0.875, 0.553, 0.221, 1])
+    copper.set_metallic(0)
+    copper.set_roughness(0)
+    ant_builder = create_ant_builder(scene, copper)
     ant = ant_builder.build()
     ant.set_root_pose(Pose([1, 0, 8]))
-
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
@@ -187,7 +190,7 @@ def main():
     builder.add_sphere_visual(radius=0.4, material=material)
     builder.add_sphere_collision(radius=0.4)
     sphere3 = builder.build()
-    sphere3.set_pose(Pose(p=[-0.5, 0, 15]))
+    sphere3.set_pose(Pose(p=[-0.5, 0, 10]))
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
@@ -209,71 +212,119 @@ def main():
     cap = builder.build()
     cap.set_pose(Pose(p=[0, 2, 5]))
 
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_base_color([0.8, 0.1, 0.9, 1.0])
+    material.set_roughness(0.0)
+    material.set_metallic(1.0)
+    builder.add_capsule_visual(radius=0.2, half_length=0.3, material=material)
+    builder.add_capsule_collision(radius=0.2, half_length=0.3)
+    cap = builder.build()
+    cap.set_pose(Pose(p=[0, 2, 12]))
+
+    for i in range(5):
+        builder = scene.create_actor_builder()
+        material = renderer.create_material()
+        material.set_transparent(
+            np.random.rand() > 0.5, 1 + np.random.rand() * 1.5)
+        material.set_base_color([
+            np.random.rand(),
+            np.random.rand(),
+            np.random.rand(), 1.0])
+        material.set_roughness(np.random.rand() * 10)
+        material.set_metallic(np.random.rand() * 10)
+        r = 0.2 + np.random.rand() * 0.5
+        builder.add_sphere_visual(radius=r, material=material)
+        builder.add_sphere_collision(radius=r)
+        s = builder.build()
+        s.set_pose(Pose(p=[
+            np.random.rand(), np.random.rand(), 12 + 6 * i + np.random.rand()]))
+
+        builder = scene.create_actor_builder()
+        material.set_transparent(
+            np.random.rand() > 0.5, 1 + np.random.rand() * 1.5)
+        material.set_base_color([
+            np.random.rand(),
+            np.random.rand(),
+            np.random.rand(), 1.0])
+        material.set_roughness(np.random.rand() * 10)
+        material.set_metallic(np.random.rand() * 10)
+        r = 0.1 + np.random.rand() * 0.4
+        l = 0.2 + np.random.rand() * 0.5
+        builder.add_capsule_visual(radius=r, half_length=l, material=material)
+        builder.add_capsule_collision(radius=r, half_length=l)
+        s = builder.build()
+        s.set_pose(Pose(p=[
+            np.random.rand(), np.random.rand(), 14 + 6 * i + np.random.rand()]))
+
+        builder = scene.create_actor_builder()
+        material.set_transparent(
+            np.random.rand() > 0.5, 1 + np.random.rand() * 1.5)
+        material.set_base_color([
+            np.random.rand(),
+            np.random.rand(),
+            np.random.rand(), 1.0])
+        material.set_roughness(np.random.rand() * 10)
+        material.set_metallic(np.random.rand() * 10)
+        r = np.random.rand() * 0.9
+        builder.add_box_visual(half_size=[r, r, r], material=material)
+        builder.add_box_collision(half_size=[r, r, r])
+        s = builder.build()
+        s.set_pose(Pose(p=[
+            np.random.rand(), np.random.rand(), 16 + 6 * i + np.random.rand()]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_base_color([1.0, 1.0, 1.0, 1.0])
+    material.set_transparent(False, 1.4)
+    material.set_roughness(1000.0)
+    material.set_metallic(0.0)
+    builder.add_box_visual(half_size=[0.1, 10, 4], material=material)
+    builder.add_box_collision(half_size=[0.1, 10, 4])
+    w1 = builder.build_static()
+    w1.set_pose(Pose(p=[4, 0, 0]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_base_color([1.0, 1.0, 1.0, 1.0])
+    material.set_transparent(False, 1.4)
+    material.set_roughness(1000.0)
+    material.set_metallic(0.0)
+    builder.add_box_visual(half_size=[0.1, 10, 4], material=material)
+    builder.add_box_collision(half_size=[0.1, 10, 4])
+    w2 = builder.build_static()
+    w2.set_pose(Pose(p=[-4, 0, 0]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_base_color([1.0, 1.0, 1.0, 1.0])
+    material.set_transparent(False, 1.4)
+    material.set_roughness(1000.0)
+    material.set_metallic(0.0)
+    builder.add_box_visual(half_size=[10, 0.1, 4], material=material)
+    builder.add_box_collision(half_size=[10, 0.1, 4])
+    w3 = builder.build_static()
+    w3.set_pose(Pose(p=[0, 4, 0]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_base_color([1.0, 1.0, 1.0, 1.0])
+    material.set_transparent(False, 1.4)
+    material.set_roughness(1000.0)
+    material.set_metallic(0.0)
+    builder.add_box_visual(half_size=[10, 0.1, 4], material=material)
+    builder.add_box_collision(half_size=[10, 0.1, 4])
+    w4 = builder.build_static()
+    w4.set_pose(Pose(p=[0, -4, 0]))
+
     # builder = scene.create_actor_builder()
     # material = renderer.create_material()
     # material.set_base_color([1.0, 1.0, 1.0, 1.0])
     # material.set_transparent(False, 1.4)
     # material.set_roughness(1000.0)
-    # material.set_specular(0.0)
-    # builder.add_box_visual(half_size=[5, 5, 5], material=material)
-    # # builder.add_box_collision(half_size=[5, 5, 5])
-    # room = builder.build_static()
-    # room.set_pose(Pose(p=[0, 0, 0]))
-    #
-    # builder = scene.create_actor_builder()
-    # material = renderer.create_material()
-    # material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    # material.set_transparent(False, 1.4)
-    # material.set_roughness(1000.0)
-    # material.set_specular(0.0)
-    # builder.add_box_visual(half_size=[0.1, 10, 10], material=material)
-    # # builder.add_box_collision(half_size=[5, 5, 5])
-    # w1 = builder.build_static()
-    # w1.set_pose(Pose(p=[4, 0, 0]))
-    #
-    # builder = scene.create_actor_builder()
-    # material = renderer.create_material()
-    # material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    # material.set_transparent(False, 1.4)
-    # material.set_roughness(1000.0)
-    # material.set_specular(0.0)
-    # builder.add_box_visual(half_size=[0.1, 10, 10], material=material)
-    # # builder.add_box_collision(half_size=[5, 5, 5])
-    # w2 = builder.build_static()
-    # w2.set_pose(Pose(p=[-4, 0, 0]))
-    #
-    # builder = scene.create_actor_builder()
-    # material = renderer.create_material()
-    # material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    # material.set_transparent(False, 1.4)
-    # material.set_roughness(1000.0)
-    # material.set_specular(0.0)
-    # builder.add_box_visual(half_size=[10, 0.1, 10], material=material)
-    # # builder.add_box_collision(half_size=[5, 5, 5])
-    # w3 = builder.build_static()
-    # w3.set_pose(Pose(p=[0, 4, 0]))
-    #
-    # builder = scene.create_actor_builder()
-    # material = renderer.create_material()
-    # material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    # material.set_transparent(False, 1.4)
-    # material.set_roughness(1000.0)
-    # material.set_specular(0.0)
-    # builder.add_box_visual(half_size=[10, 0.1, 10], material=material)
-    # # builder.add_box_collision(half_size=[5, 5, 5])
-    # w4 = builder.build_static()
-    # w4.set_pose(Pose(p=[0, -4, 0]))
-    #
-    # builder = scene.create_actor_builder()
-    # material = renderer.create_material()
-    # material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    # material.set_transparent(False, 1.4)
-    # material.set_roughness(1000.0)
-    # material.set_specular(0.0)
-    # builder.add_box_visual(half_size=[10, 10, 0.1], material=material)
-    # # builder.add_box_collision(half_size=[5, 5, 5])
+    # builder.add_box_visual(half_size=[5, 5, 0.1], material=material)
     # w5 = builder.build_static()
-    # w5.set_pose(Pose(p=[0, 0, 6]))
+    # w5.set_pose(Pose(p=[0, 0, 8], q=[0.5771257, 0.4940158, 0.4940158, 0.4228743]))
 
     scene.step()
     ant.set_qpos([0, 0, 0, 0, 0.7, 0.7, 0.7, 0.7])
@@ -283,7 +334,7 @@ def main():
     ant.set_qf(f)
     scene.step()
 
-    scene.renderer_scene.set_ambient_light([0.4, 0.4, 0.4])
+    scene.renderer_scene.set_ambient_light([0.7, 0.7, 0.65])
 
     # dirlight = scene.add_directional_light([0, 0, 0], [5, 1, 1], position=[0, 0, 4])
 
@@ -306,11 +357,16 @@ def main():
 
     # print(scene.get_all_lights())
 
+    cnt = 0
     while True:
         scene.step()
         scene.update_render()
         cam1.take_picture()
-
+        cnt += 1
+        if cnt % 100 == 0:
+            p = cam1.get_color_rgba()
+            import matplotlib.pyplot as plt
+            plt.imsave(f'{cnt:04d}.png', p)
 
 main()
 

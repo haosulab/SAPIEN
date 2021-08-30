@@ -53,10 +53,7 @@ public:
   [[nodiscard]] inline float getFar() const override { return 100.0; };
 
   void takePicture() override;
-  inline std::vector<float> getColorRGBA() override {
-    spdlog::get("SAPIEN")->warn("getColorRGBA not implemented yet");
-    return {};
-  };
+  std::vector<float> getColorRGBA() override;
   inline std::vector<float> getAlbedoRGBA() override {
     spdlog::get("SAPIEN")->warn("getAlbedoRGBA not implemented yet");
     return {};

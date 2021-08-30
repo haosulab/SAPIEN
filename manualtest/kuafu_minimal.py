@@ -1,9 +1,9 @@
+# A minimal example of using KuafuRenderer
+#
+# By Jet <i@jetd.me>
+#
 import sapien.core as sapien
-import numpy as np
 from sapien.core import Pose
-from transforms3d.quaternions import axangle2quat as aa
-from transforms3d.quaternions import qmult, mat2quat, rotate_vector
-import time
 
 
 def main():
@@ -26,7 +26,7 @@ def main():
     mount = scene.create_actor_builder().build_static()
     cam1 = scene.add_mounted_camera(
         "cam", mount, Pose(), 800, 600, 0, 1.0, 0.1, 100)
-    mount.set_pose(Pose([-12, 0, 1]))
+    mount.set_pose(Pose([-12, 0, 1.8]))
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
@@ -60,13 +60,13 @@ def main():
     box = builder.build()
     box.set_pose(Pose(p=[0, 0, 8]))
 
-    scene.set_ambient_light([0.2, 0.2, 0.2])
+    scene.set_ambient_light([0.5, 0.5, 0.5])
     # dirlight = scene.add_directional_light(
     #     [0, 0, 0], color=[5.0, 0.0, 1.0], position=[-5, 0, 0]
     # )
     # plight = scene.add_point_light([0, 0, 0.1], [1000.0, 1000.0, 1000.0])
 
-    cnt = 0;
+    cnt = 0
 
     while True:
         scene.step()

@@ -263,8 +263,9 @@ void buildSapien(py::module &m) {
       .def_static("_set_default_assets_path", &Renderer::KuafuRenderer::setDefaultAssetsPath,
                   py::arg("assets_path"))
 //      .def("set_assets_path", &Renderer::KuafuRenderer::setAssetsPath)
-      .def("init", &Renderer::KuafuRenderer::init);
-
+      .def("init", &Renderer::KuafuRenderer::init)
+      .def("set_environment_map", &Renderer::KuafuRenderer::setEnvironmentMap,
+           py::arg("env_map_path"));
 
   //======== Internal ========//
 
@@ -402,6 +403,11 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
             mat.setBaseColor({color.at(0), color.at(1), color.at(2), color.at(3)});
           },
           py::arg("rgba"))
+      .def("set_emission",
+           [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+             mat.setEmission({color.at(0), color.at(1), color.at(2), color.at(3)});
+           },
+           py::arg("rgbs"))
       .def("set_specular", &Renderer::IPxrMaterial::setSpecular, py::arg("specular"))
       .def("set_metallic", &Renderer::IPxrMaterial::setMetallic, py::arg("metallic"))
       .def("set_roughness", &Renderer::IPxrMaterial::setRoughness, py::arg("roughness"))

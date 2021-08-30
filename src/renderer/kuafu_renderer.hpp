@@ -20,6 +20,7 @@ public:
   void setSpecular(float specular) override;
   void setMetallic(float metallic) override;
 
+  void setEmission(std::array<float, 4> color) override;
   void setTransparent(bool isTransparent, float ior = 1.4) override;
   void setMaterialType(uint32_t type) override;
   inline auto getKMaterial() { return mKMaterial; }
@@ -41,6 +42,9 @@ public:
   void setAssetsPath(std::string const &path);
   static void setDefaultAssetsPath(std::string path);
   void init();
+
+  // TODO: move this function
+  void setEnvironmentMap(std::string_view path) { mKRenderer.getScene().setEnvironmentMap(path); };
 
   // TODO: remove these
   inline auto& _getK() { return mKRenderer; }

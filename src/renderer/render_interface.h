@@ -38,6 +38,9 @@ public:
   virtual void setSpecular(float specular) = 0;
   virtual void setMetallic(float metallic) = 0;
 
+  virtual void setEmission(std::array<float, 4> color) {
+    spdlog::get("SAPIEN")->warn("emissive material is not supported");
+  };
   virtual void setTransparent(bool isTransparent, float ior) {
     spdlog::get("SAPIEN")->warn("transparent material is not supported");
   };

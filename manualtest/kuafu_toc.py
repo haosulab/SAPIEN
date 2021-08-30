@@ -1,10 +1,15 @@
+# In this demo, we will render a TOC scene using Kuafu backend.
+# Images will be save to local menu every 400 frames.
+# You will need to clone https://github.com/haosulab/ICCV2021_Diagnosis/
+# and set `materials_root` to run this demo.
+#
+# By Jet <i@jetd.me>
+#
 import os
 import sapien.core as sapien
 import numpy as np
 from sapien.core import Pose
-from transforms3d.quaternions import axangle2quat as aa
-from transforms3d.quaternions import qmult, mat2quat, rotate_vector
-import time
+
 
 def load_obj(scene, materials_root, obj_name, pose=Pose()):
     builder = scene.create_actor_builder()
@@ -20,10 +25,11 @@ def main():
     materials_root = '/zdata/ssource/ICCV2021_Diagnosis/ocrtoc_materials/'
 
     sim = sapien.Engine()
-    renderer = sapien.KuafuRenderer()
+    renderer = sapien.KuafuRenderer()  # viewer is always on for now
     sim.set_renderer(renderer)
 
     renderer.init()
+    # renderer.set_environment_map('/home/jet/Downloads/cocacola.jpg')
 
     scene_config = sapien.SceneConfig()
     scene_config.solver_iterations = 25
@@ -85,35 +91,17 @@ def main():
 
     scene.step()
 
-    scene.renderer_scene.set_ambient_light([0.5, 0.5, 0.5])
+    scene.renderer_scene.set_ambient_light([0.6, 0.6, 0.6])
 
-    # dirlight = scene.add_directional_light([0, 0, 0], [5, 1, 1], position=[0, 0, 4])
-
-    # plight = scene.add_point_light(position=[0, 0, 4], color=[5000000, 0, 0])
-
-    # light = scene.renderer_scene.add_spot_light(
-    #     [0, 0, 2], [0, 0, -1], np.pi / 2, [1, 1, 1], True
-    # )
-
-    # light.set_position([0, 0, 0.1])
-    # light.set_direction([0, -100, -1])
-    # light.set_color([100, 100, 100])
-    # light.set_shadow_parameters(1, 100)
-
-    # light.set_position([0, 0, 5])
-    # light.set_direction([0, -1, -1])
-
-    # plight = scene.add_point_light([0, -1, 1], [2, 1, 2], True)
-    # scene.renderer_scene.add_point_light([0, 1, -1], [2, 2, 1])
-
-    # print(scene.get_all_lights())
-
+    cnt = 0
     while True:
         scene.step()
         scene.update_render()
-        cam.take_picture()
-
+        cam.take_picture()     # will update viewer and download rgba for now (sync)
+        cnt += 1
+        if cnt % 400 == 0:
+            p = cam.get_color_rgba()
+            import matplotlib.pyplot as plt
+            plt.imsave(f'{cnt:04d}.png', p)
 
 main()
-
-# TODO: get targets on camera

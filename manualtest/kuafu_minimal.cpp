@@ -94,51 +94,11 @@ int main() {
   cube->setPose({{0, 0, 5}, PxIdentity});
 
 
-//  auto& _K = renderer->_getK();
-//  auto& _KScene = _K.getScene();
-//
-//  _KScene.setCamera(std::make_shared<Renderer::KCamera>("cam", 800, 600));
-//  auto _KCamera = _KScene.getCamera();
-//  _KCamera->setPosition(glm::vec3(-5.0F, 0.5F, 10.0F));
-//  _KCamera->setFront(glm::vec3(0.67F, 0.0F, -0.8F));
-
-
-//  // add light
-//  auto lightPlane = kuafu::loadObj("../3rd_party/kuafu/resources/models/plane.obj");
-//  kuafu::Material lightMaterial;
-//  lightMaterial.emission = glm::vec3(10.0F);
-//  lightPlane->setMaterial(lightMaterial);
-//  auto transform = glm::translate(glm::mat4(1.0F), glm::vec3(0.0F, 0.0F, 80.0F));
-//  transform = glm::scale(transform, {10, 10, 10});
-//  auto lightPlaneInstance = kuafu::instance(lightPlane, transform);
-//  _KScene.submitGeometry(lightPlane);
-//  _KScene.submitGeometryInstance(lightPlaneInstance);
-
-//  // add ground
-//  auto ground = kuafu::loadObj("../3rd_party/kuafu/resources/models/plane.obj");
-//  kuafu::Material groundMaterial;
-//  groundMaterial.kd = glm::vec3(1.0F);
-//  ground->setMaterial(groundMaterial);
-//  transform = glm::scale(glm::mat4(1.0F), {10, 10, 10});
-////  transform = glm::mat4(1.0F);
-//  auto groundInstance = kuafu::instance(ground, transform);
-//  _KScene.submitGeometry(ground);
-//  _KScene.submitGeometryInstance(groundInstance);
-
-//  // add sphere
-//  auto sphere = kuafu::loadObj("../3rd_party/kuafu/resources/models/sphere.obj");
-//  kuafu::Material sphereMaterial;
-//  sphereMaterial.kd = glm::vec3(glm::vec3(0.2F, 0.4F, 1.0F));
-//  sphere->setMaterial(sphereMaterial);
-//  auto transform = glm::mat4(1.0F);
-//  transform = glm::translate(transform, {0, 0.0, 0.0});
-//  auto sphereInstance = kuafu::instance(sphere, transform);
-//  _KScene.submitGeometry(sphere);
-//  _KScene.submitGeometryInstance(sphereInstance);
-
   while (true) {
     scene->step();
     scene->updateRender();
     cam->takePicture();
+    auto a = cam->getColorRGBA();
+    std::cout << a[640*320+320] << std::endl;
   }
 }
