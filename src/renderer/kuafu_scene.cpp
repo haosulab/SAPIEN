@@ -201,8 +201,8 @@ IPxrRigidbody *KuafuScene::addRigidbodyWithNewMaterial(
 
     mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIndices, scale));
     return mBodies.back().get();
-  } catch (const std::exception &) {
-    spdlog::get("SAPIEN")->error("fail to load object");
+  } catch (const std::exception &e) {
+    spdlog::get("SAPIEN")->error("fail to load object: " + std::string(e.what()));
     return nullptr;
   }
 }
