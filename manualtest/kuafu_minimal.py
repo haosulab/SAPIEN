@@ -8,10 +8,13 @@ from sapien.core import Pose
 
 def main():
     sim = sapien.Engine()
-    renderer = sapien.KuafuRenderer(False)
+
+    render_config = sapien.KuafuConfig()
+    render_config.spp = 10
+
+    renderer = sapien.KuafuRenderer(render_config)
     sim.set_renderer(renderer)
 
-    renderer.init()
     config = sapien.SceneConfig()
     scene = sim.create_scene(config)
 

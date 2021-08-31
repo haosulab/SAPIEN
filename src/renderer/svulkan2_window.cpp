@@ -7,7 +7,7 @@ namespace Renderer {
 #ifdef _DEBUG_VIEWER
 FPSCameraControllerDebug::FPSCameraControllerDebug(svulkan2::scene::Node &node,
                                                    glm::vec3 const &forward, glm::vec3 const &up)
-    : mCamera(&node), mForward(glm::normalize(forward)), mUp(glm::normalize(up)),
+    : pCamera(&node), mForward(glm::normalize(forward)), mUp(glm::normalize(up)),
       mLeft(glm::cross(mUp, mForward)) {
   mInitialRotation = glm::mat3(-mLeft, mUp, -mForward);
 }
@@ -44,7 +44,7 @@ void FPSCameraControllerDebug::update() {
 
   auto rotation = glm::angleAxis(mRPY.z, mUp) * glm::angleAxis(-mRPY.y, mLeft) *
                   glm::angleAxis(mRPY.x, mForward) * mInitialRotation;
-  mCamera->setTransform({.position = mXYZ, .rotation = rotation});
+  pCamera->setTransform({.position = mXYZ, .rotation = rotation});
 }
 #endif
 
@@ -202,9 +202,9 @@ void SVulkan2Window::render(std::string const &targetName,
     auto fence = mRenderer->mContext->getDevice().createFenceUnique({});
     // draw
     mSVulkanRenderer->render(*camera, {}, {}, {}, {});
-    auto imageAcquiredSemaphore = mWindow->getImageAcquiredSemaphore();
-    mSVulkanRenderer->display(targetName, mWindow->getBackbuffer(), mWindow->getBackBufferFormat(),
-                              mWindow->getWidth(), mWindow->getHeight(), {imageAcquiredSemaphore},
+    auto imageAcquiredSemaphore = pWindow->getImageAcquiredSemaphore();
+    mSVulkanRenderer->display(targetName, pWindow->getBackbuffer(), pWindow->getBackBufferFormat(),
+                              pWindow->getWidth(), pWindow->getHeight(), {imageAcquiredSemaphore},
                               {vk::PipelineStageFlagBits::eColorAttachmentOutput},
                               {mSceneRenderSemaphore.get()}, fence.get());
 
@@ -243,24 +243,24 @@ void SVulkan2Window::render(std::string const &targetName,
     mCameraController->move(0, 0, 0);
   }
   float r = 1e-1;
-  if (mWindow->isMouseKeyDown(1)) {
-    auto [x, y] = mWindow->getMouseDelta();
+  if (pWindow->isMouseKeyDown(1)) {
+    auto [x, y] = pWindow->getMouseDelta();
     mCameraController->rotate(0, -0.01 * y, -0.01 * x);
   }
-  if (mWindow->isKeyDown("w")) {
+  if (pWindow->isKeyDown("w")) {
     mCameraController->move(r, 0, 0);
   }
-  if (mWindow->isKeyDown("s")) {
+  if (pWindow->isKeyDown("s")) {
     mCameraController->move(-r, 0, 0);
   }
-  if (mWindow->isKeyDown("a")) {
+  if (pWindow->isKeyDown("a")) {
     mCameraController->move(0, r, 0);
   }
-  if (mWindow->isKeyDown("d")) {
+  if (pWindow->isKeyDown("d")) {
     mCameraController->move(0, -r, 0);
   }
-  if (mWindow->isKeyDown("q")) {
-    glfwSetWindowShouldClose(mWindow->getGLFWWindow(), 1);
+  if (pWindow->isKeyDown("q")) {
+    glfwSetWindowShouldClose(pWindow->getGLFWWindow(), 1);
   }
 #endif
 }

@@ -255,15 +255,23 @@ void buildSapien(py::module &m) {
 
 
   //======== Kuafu ========//
+  auto PyKuafuConfig = py::class_<Renderer::KuafuConfig>(m, "KuafuConfig");
+  PyKuafuConfig.def(py::init<>())
+      .def_readwrite("use_viewer", &Renderer::KuafuConfig::mUseViewer)
+      .def_readwrite("width", &Renderer::KuafuConfig::mWidth)
+      .def_readwrite("height", &Renderer::KuafuConfig::mHeight)
+      .def_readwrite("assets_path", &Renderer::KuafuConfig::mAssetsPath)
+      .def_readwrite("clear_color", &Renderer::KuafuConfig::mClearColor)
+      .def_readwrite("spp", &Renderer::KuafuConfig::mPerPixelSampleRate)
+      .def_readwrite("accumulate_frames", &Renderer::KuafuConfig::mAccumulateFrames);
+
   auto PyKuafuRenderer =
       py::class_<Renderer::KuafuRenderer, Renderer::IPxrRenderer,
   std::shared_ptr<Renderer::KuafuRenderer>>(m, "KuafuRenderer");
   PyKuafuRenderer
-      .def(py::init<bool>(), py::arg("use_viewer") = false)
+      .def(py::init<Renderer::KuafuConfig>(), py::arg("config") = Renderer::KuafuConfig())
       .def_static("_set_default_assets_path", &Renderer::KuafuRenderer::setDefaultAssetsPath,
                   py::arg("assets_path"))
-//      .def("set_assets_path", &Renderer::KuafuRenderer::setAssetsPath)
-      .def("init", &Renderer::KuafuRenderer::init)
       .def("set_environment_map", &Renderer::KuafuRenderer::setEnvironmentMap,
            py::arg("env_map_path"));
 

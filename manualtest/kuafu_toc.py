@@ -25,10 +25,15 @@ def main():
     materials_root = '/zdata/ssource/ICCV2021_Diagnosis/ocrtoc_materials/'
 
     sim = sapien.Engine()
-    renderer = sapien.KuafuRenderer()  # viewer is always on for now
-    sim.set_renderer(renderer)
 
-    renderer.init()
+    render_config = sapien.KuafuConfig()
+    render_config.use_viewer = False
+    render_config.spp = 16
+    render_config.width = 960
+    render_config.height = 540
+
+    renderer = sapien.KuafuRenderer(render_config)
+    sim.set_renderer(renderer)
     # renderer.set_environment_map('/home/jet/Downloads/cocacola.jpg')
 
     scene_config = sapien.SceneConfig()
@@ -82,6 +87,12 @@ def main():
     load_obj(scene, materials_root, 'steel_ball', Pose(p=[0.4, -0.2, 4]))
     load_obj(scene, materials_root, 'tennis_ball', Pose(p=[0.3, -0.2, 4]))
     load_obj(scene, materials_root, 'coca_cola', Pose(p=[0.2, 0.3, 4]))
+
+    builder = scene.create_actor_builder()
+    builder.add_visual_from_file(
+        '/home/jet/sapien_dev/new/SAPIEN/3rd_party/kuafu/resources/all_models/CornellBox.obj')
+    obj = builder.build_kinematic()
+    obj.set_pose(Pose(p=[0, -1, 0]))
 
     builder = scene.create_actor_builder()
     cam_mount = builder.build_kinematic(name='real_camera')

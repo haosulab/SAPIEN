@@ -44,45 +44,38 @@ void KuafuMaterial::setMaterialType(uint32_t type) {
 }
 
 
-void KuafuRenderer::setAssetsPath(std::string const &path) {
-  mKRenderer.getConfig().setAssetsPath(path);
-}
 
 void KuafuRenderer::setDefaultAssetsPath(std::string path) {
     kuafu::Config::setDefaultAssetsPath(std::move(path));
 }
 
-void KuafuRenderer::init() {
-  // TODO: kuafu_urgent (window?)
-  if (mUseViewer) {
-    mKRenderer.setWindow(std::make_shared<KWindow>(
-        800, 600, "Viewer", SDL_WINDOW_RESIZABLE, &mKRenderer.getScene()));
-    mScene.mUseViewer = mUseViewer;
 
-    auto cam = std::make_shared<KCamera>("view_cam", 800, 600);
-    cam->setPosition({-1, 0, 1});
-    cam->setFront({1, 0, -1});
-    mKRenderer.getScene().setCamera(cam);
+KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
+  auto config = conf.generate();
+
+  std::shared_ptr<kuafu::Camera> camera = nullptr;
+  std::shared_ptr<kuafu::Window> window = nullptr;
+
+  // TODO: kuafu_urgent (window?)
+  if (conf.mUseViewer) {
+    camera = std::make_shared<KCamera>(
+        "viewer_cam", conf.mWidth, conf.mHeight);
+    camera->setPosition({-1, 0, 1});
+    camera->setFront({1, 0, -1});
+
+    window = std::make_shared<KWindow>(
+        conf.mWidth, conf.mHeight, "Viewer", SDL_WINDOW_RESIZABLE);
   }
 
-  auto& config = mKRenderer.getConfig();
-//  spdlog::get("SAPIEN")->warn((size_t)&config);
-  config.setGeometryLimit(1000);
-  config.setGeometryInstanceLimit(10000);
-  config.setTextureLimit(1000);
-  config.setAccumulatingFrames(false);
-  config.setClearColor(glm::vec4(0, 0, 0, 1));
-  config.setPerPixelSampleRate(64);
-  mKRenderer.init();
-//  mKRenderer.reset();
+  pKRenderer = std::make_shared<kuafu::Kuafu>(config, window, camera, nullptr);
 
-  mKRenderer.getScene().removeEnvironmentMap();
-  mKRenderer.getScene().setGeometries({});
-  mKRenderer.getScene().setGeometryInstances({});
+  pKRenderer->getScene().removeEnvironmentMap();
+  pKRenderer->getScene().setGeometries({});
+  pKRenderer->getScene().setGeometryInstances({});
 }
 
 IPxrScene *KuafuRenderer::createScene(std::string const &name) {
-  mScene.pKRenderer = &mKRenderer;
+  mScene.pKRenderer = pKRenderer;
   return &mScene;
 };
 

@@ -134,7 +134,7 @@ class KuafuScene : public IPxrScene {
   friend class KuafuRenderer;
   friend class KuafuRigidBody;
 
-  kuafu::Kuafu *pKRenderer;
+  std::shared_ptr<kuafu::Kuafu> pKRenderer;
   std::vector<std::unique_ptr<KuafuRigidBody>> mBodies;
   std::vector<std::unique_ptr<KuafuCamera>> mCameras;
 

@@ -14,10 +14,12 @@ from transforms3d.quaternions import axangle2quat as aa
 
 def main():
     sim = sapien.Engine()
-    renderer = sapien.KuafuRenderer()
-    sim.set_renderer(renderer)
 
-    renderer.init()
+    render_config = sapien.KuafuConfig()
+    render_config.spp = 10
+
+    renderer = sapien.KuafuRenderer(render_config)
+    sim.set_renderer(renderer)
 
     def create_ant_builder(scene, copper):
         builder = scene.create_articulation_builder()

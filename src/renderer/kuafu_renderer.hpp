@@ -3,9 +3,10 @@
 //
 
 #pragma once
-#include "render_interface.h"
-#include "kuafu_scene.hpp"
 #include "kuafu.hpp"
+#include "kuafu_config.hpp"
+#include "kuafu_scene.hpp"
+#include "render_interface.h"
 
 namespace sapien::Renderer {
 
@@ -27,26 +28,20 @@ public:
 };
 
 class KuafuRenderer : public IPxrRenderer {
-  kuafu::Kuafu mKRenderer;
+  std::shared_ptr<kuafu::Kuafu> pKRenderer = nullptr;
   KuafuScene mScene;
 
-  bool mUseViewer;
-
 public:
-  explicit KuafuRenderer(bool useViewer = false): mUseViewer(useViewer) {};
+  explicit KuafuRenderer(KuafuConfig config = KuafuConfig());
 
   IPxrScene *createScene(std::string const &name = "") override;
   void removeScene(IPxrScene *scene) override;
   std::shared_ptr<IPxrMaterial> createMaterial() override;
 
-  void setAssetsPath(std::string const &path);
   static void setDefaultAssetsPath(std::string path);
-  void init();
 
   // TODO: move this function
-  void setEnvironmentMap(std::string_view path) { mKRenderer.getScene().setEnvironmentMap(path); };
-
-  // TODO: remove these
-  inline auto& _getK() { return mKRenderer; }
+  void setEnvironmentMap(std::string_view path) {
+    pKRenderer->getScene().setEnvironmentMap(path); };
 };
 }

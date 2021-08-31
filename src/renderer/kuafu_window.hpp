@@ -9,8 +9,8 @@ namespace sapien::Renderer {
 
 class KWindow : public kuafu::Window {
 public:
-  KWindow(int width, int height, const char *title, uint32_t flags, kuafu::Scene *scene) :
-      kuafu::Window(width, height, title, flags), pScene(scene) {}
+  KWindow(int width, int height, const char *title, uint32_t flags) :
+      kuafu::Window(width, height, title, flags) {}
 
   auto init() -> bool override {
     if (!kuafu::Window::init()) {
@@ -26,7 +26,7 @@ public:
       return false;
     }
 
-    pScene->getCamera()->setSize(mWidth, mHeight);
+//    pScene->getCamera()->setSize(mWidth, mHeight);
 
     SDL_Event event;
 
@@ -154,7 +154,7 @@ public:
         if (kuafu::global::keys::eSpace) {
           int x, y;
           SDL_GetRelativeMouseState(&x, &y);
-          pScene->getCamera()->processMouse(x, -y);
+//          pScene->getCamera()->processMouse(x, -y);
           break;
         }
       }
@@ -163,6 +163,6 @@ public:
   }
 
 private:
-  kuafu::Scene *pScene;
+//  kuafu::Scene *pScene;
 };
 }
