@@ -371,18 +371,13 @@ std::array<float, 3> KuafuScene::getAmbientLight() const {
 IPointLight *KuafuScene::addPointLight(const std::array<float, 3> &position,
                                        const std::array<float, 3> &color, bool enableShadow,
                                        float shadowNear, float shadowFar) {
-  auto lightMaterial = std::make_shared<kuafu::NiceMaterial>();
-  lightMaterial->emission = glm::vec3({color[0], color[1], color[2]});
-  auto lightSphere = kuafu::createSphere(true, lightMaterial);
-
-  auto transform = glm::translate(glm::mat4(1.0F), {position[0], position[1], position[2]});
-  transform = glm::scale(transform, glm::vec3(0.05F));
-
-  getKScene().submitGeometry(lightSphere);
-  getKScene().submitGeometryInstance(
-      kuafu::instance(lightSphere, transform));
-
-  spdlog::get("SAPIEN")->warn("addPointLight: incorrect tmp impl");
+  auto light = std::make_shared<kuafu::PointLight>();
+  light->position = {position[0], position[1], position[2]};
+  light->color = {color[0], color[1], color[2]};
+  light->strength = 1.0;
+  light->radius = 0.1;    // TODO: expose this
+  getKScene().addPointLight(light);
+  spdlog::get("SAPIEN")->warn("addPointLight: tmp impl");
   return nullptr;
 }
 

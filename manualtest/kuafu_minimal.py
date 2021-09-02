@@ -63,11 +63,12 @@ def main():
     box = builder.build()
     box.set_pose(Pose(p=[0, 0, 4]))
 
-    scene.set_ambient_light([0.5, 0.5, 0.5])
+    scene.set_ambient_light([0.1, 0.1, 0.1])
     dirlight = scene.add_directional_light(
-        [0, 0.5, -1], color=[5.0, 5.0, 5.0]
+        [0, 0, -1], color=[2.0, 2.0, 2.0]
     )
-    # plight = scene.add_point_light([0, 0, 0.1], [1000.0, 1000.0, 1000.0])
+    plight = scene.add_point_light([-3, 0, 3], [5.0, 5.0, 5.0])
+    plight = scene.add_point_light([3, 0, 3], [5.0, 5.0, 5.0])
 
     cnt = 0
 

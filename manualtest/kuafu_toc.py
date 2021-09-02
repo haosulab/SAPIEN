@@ -27,8 +27,9 @@ def main():
     sim = sapien.Engine()
 
     render_config = sapien.KuafuConfig()
-    render_config.use_viewer = False
-    render_config.spp = 16
+    render_config.use_viewer = True
+    render_config.spp = 64
+    render_config.max_bounces = 6
     render_config.width = 960
     render_config.height = 540
 
@@ -88,11 +89,11 @@ def main():
     load_obj(scene, materials_root, 'tennis_ball', Pose(p=[0.3, -0.2, 4]))
     load_obj(scene, materials_root, 'coca_cola', Pose(p=[0.2, 0.3, 4]))
 
-    builder = scene.create_actor_builder()
-    builder.add_visual_from_file(
-        '/home/jet/sapien_dev/new/SAPIEN/3rd_party/kuafu/resources/all_models/CornellBox.obj')
-    obj = builder.build_kinematic()
-    obj.set_pose(Pose(p=[0, -1, 0]))
+    # builder = scene.create_actor_builder()
+    # builder.add_visual_from_file(
+    #     '/home/jet/sapien_dev/new/SAPIEN/3rd_party/kuafu/resources/all_models/CornellBox.obj')
+    # obj = builder.build_kinematic()
+    # obj.set_pose(Pose(p=[0, -1, 0]))
 
     builder = scene.create_actor_builder()
     cam_mount = builder.build_kinematic(name='real_camera')
@@ -102,7 +103,30 @@ def main():
 
     scene.step()
 
-    scene.renderer_scene.set_ambient_light([0.6, 0.6, 0.6])
+    scene.renderer_scene.set_ambient_light([0.1, 0.1, 0.1])
+    dirlight = scene.add_directional_light(
+        [0, 0.5, -1], color=[5.0, 5.0, 5.0]
+    )
+
+    # plight = scene.add_point_light(
+    #     [0, 0, 2], [3, 3, 3]
+    # )
+    #
+    # plight = scene.add_point_light(
+    #     [-2, -2, 2], [3, 3, 3]
+    # )
+    #
+    # plight = scene.add_point_light(
+    #     [-2, 2, 2], [3, 3, 3]
+    # )
+    #
+    # plight = scene.add_point_light(
+    #     [2, -2, 2], [3, 3, 3]
+    # )
+    #
+    # plight = scene.add_point_light(
+    #     [2, 2, 2], [3, 3, 3]
+    # )
 
     cnt = 0
     while True:

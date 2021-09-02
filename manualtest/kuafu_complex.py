@@ -19,10 +19,10 @@ def main():
     sim = sapien.Engine()
 
     render_config = sapien.KuafuConfig()
-    render_config.spp = 16
-    render_config.max_bounces = 5
+    render_config.spp = 32
+    render_config.max_bounces = 4
     render_config.use_viewer = True
-    render_config.width = 800
+    render_config.width = 600
     render_config.height = 600
 
     renderer = sapien.KuafuRenderer(render_config)
@@ -234,7 +234,7 @@ def main():
     cap = builder.build()
     cap.set_pose(Pose(p=[0, 2, 12]))
 
-    for i in range(3):
+    for i in range(15):
         builder = scene.create_actor_builder()
         material = renderer.create_material()
         material.set_transmission(np.random.rand() > 0.2)
@@ -286,26 +286,26 @@ def main():
             np.random.rand(), np.random.rand(), 16 + 6 * i + np.random.rand()]))
 
     builder = scene.create_actor_builder()
-    builder.add_box_visual(half_size=[0.1, 10, 4])
-    builder.add_box_collision(half_size=[0.1, 10, 4])
+    builder.add_box_visual(half_size=[0.1, 10, 5])
+    builder.add_box_collision(half_size=[0.1, 10, 5])
     w1 = builder.build_static()
     w1.set_pose(Pose(p=[4, 0, 0]))
 
     builder = scene.create_actor_builder()
-    builder.add_box_visual(half_size=[0.1, 10, 4])
-    builder.add_box_collision(half_size=[0.1, 10, 4])
+    builder.add_box_visual(half_size=[0.1, 10, 5])
+    builder.add_box_collision(half_size=[0.1, 10, 5])
     w2 = builder.build_static()
     w2.set_pose(Pose(p=[-4, 0, 0]))
 
     builder = scene.create_actor_builder()
-    builder.add_box_visual(half_size=[10, 0.1, 4])
-    builder.add_box_collision(half_size=[10, 0.1, 4])
+    builder.add_box_visual(half_size=[10, 0.1, 5])
+    builder.add_box_collision(half_size=[10, 0.1, 5])
     w3 = builder.build_static()
     w3.set_pose(Pose(p=[0, 4, 0]))
 
     builder = scene.create_actor_builder()
-    builder.add_box_visual(half_size=[10, 0.1, 4])
-    builder.add_box_collision(half_size=[10, 0.1, 4])
+    builder.add_box_visual(half_size=[10, 0.1, 5])
+    builder.add_box_collision(half_size=[10, 0.1, 5])
     w4 = builder.build_static()
     w4.set_pose(Pose(p=[0, -4, 0]))
 
@@ -327,11 +327,11 @@ def main():
     ant.set_qf(f)
     scene.step()
 
-    scene.renderer_scene.set_ambient_light([0.7, 0.7, 0.65])
+    scene.renderer_scene.set_ambient_light([0.2, 0.2, 0.15])
 
-    scene.add_directional_light([0.4, 0.4, -1], [4, 4, 4])
+    scene.add_directional_light([0.4, 0.4, -1], [2, 2, 2])
 
-    # plight = scene.add_point_light(position=[0, 0, 4], color=[5000000, 0, 0])
+    plight = scene.add_point_light(position=[0, 0, 3], color=[8, 8, 8])
 
     # light = scene.renderer_scene.add_spot_light(
     #     [0, 0, 2], [0, 0, -1], np.pi / 2, [1, 1, 1], True
