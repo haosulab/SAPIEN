@@ -9,8 +9,9 @@ namespace sapien::Renderer {
 
 class KWindow : public kuafu::Window {
 public:
-  KWindow(int width, int height, const char *title, uint32_t flags) :
-      kuafu::Window(width, height, title, flags) {}
+  KWindow(int width, int height, const char *title, uint32_t flags,
+          std::shared_ptr<kuafu::Camera> camera):
+  kuafu::Window(width, height, title, flags), pCamera(camera) {}
 
   auto init() -> bool override {
     if (!kuafu::Window::init()) {
@@ -92,9 +93,20 @@ public:
           kuafu::global::keys::eZ = true;
           break;
 
-        case SDLK_SPACE:
+
+        case SDLK_SPACE: {
           kuafu::global::keys::eSpace = true;
+          if (mMouseVisible) {
+            mMouseVisible = false;
+            SDL_SetRelativeMouseMode(SDL_TRUE);
+            SDL_GetRelativeMouseState(nullptr, nullptr); // Magic fix!
+          } else {
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+            mMouseVisible = true;
+          }
+
           break;
+        }
 
         case SDLK_ESCAPE:
           return false;
@@ -154,7 +166,7 @@ public:
         if (kuafu::global::keys::eSpace) {
           int x, y;
           SDL_GetRelativeMouseState(&x, &y);
-//          pScene->getCamera()->processMouse(x, -y);
+          pCamera->processMouse(x, -y);
           break;
         }
       }
@@ -163,6 +175,7 @@ public:
   }
 
 private:
-//  kuafu::Scene *pScene;
+  bool mMouseVisible = true;
+  std::shared_ptr<kuafu::Camera> pCamera;
 };
 }

@@ -139,7 +139,7 @@ void KuafuRigidBody::setVisible(bool visible) {
     if (visible && mHaveSetInvisible) {
       spdlog::get("SAPIEN")->warn("The object may have lost original material");
       auto mat = kuafu::global::materials[matIdx];
-      mat.d = 1.0f;
+      mat.alpha = 1.0f;
       geometry->setMaterial(mat);
       geometry->initialized = false;
       mParentScene->getKScene().markGeometriesChanged();
@@ -150,7 +150,7 @@ void KuafuRigidBody::setVisible(bool visible) {
     if (!visible && ! mHaveSetInvisible) {
       spdlog::get("SAPIEN")->warn("The object may lost material if set invisible");
       auto mat = kuafu::global::materials[matIdx];
-      mat.d = 0.0f;
+      mat.alpha = 0.0f;
       geometry->setMaterial(mat);
       geometry->initialized = false;
       mParentScene->getKScene().markGeometriesChanged();
@@ -287,7 +287,7 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
   kuafu::global::materials.push_back(*kMat);  // copy
   ++kuafu::global::materialIndex;             // TODO: check existing dup mat
 
-  g->isOpaque = (kMat->d >= 1.0F);
+  g->isOpaque = (kMat->alpha >= 1.0F);
   g->matIndex = std::vector<uint32_t>(totalAmountOfTriangles, kuafu::global::materialIndex - 1);
 
   g->indices = indices;
@@ -371,7 +371,7 @@ std::array<float, 3> KuafuScene::getAmbientLight() const {
 IPointLight *KuafuScene::addPointLight(const std::array<float, 3> &position,
                                        const std::array<float, 3> &color, bool enableShadow,
                                        float shadowNear, float shadowFar) {
-  auto lightMaterial = std::make_shared<kuafu::Material>();
+  auto lightMaterial = std::make_shared<kuafu::NiceMaterial>();
   lightMaterial->emission = glm::vec3({color[0], color[1], color[2]});
   auto lightSphere = kuafu::createSphere(true, lightMaterial);
 
@@ -389,19 +389,13 @@ IPointLight *KuafuScene::addPointLight(const std::array<float, 3> &position,
 IDirectionalLight *KuafuScene::addDirectionalLight(
     const std::array<float, 3> &direction, const std::array<float, 3> &color, bool enableShadow,
     const std::array<float, 3> &position, float shadowScale, float shadowNear, float shadowFar) {
-  auto lightMaterial = std::make_shared<kuafu::Material>();
-  lightMaterial->emission = glm::vec3({color[0], color[1], color[2]});
-  auto lightPlane = kuafu::createYZPlane(true, lightMaterial);
-
-  auto transform = glm::translate(glm::mat4(1.0F), {position[0], position[1], position[2]});
-  transform = glm::rotate(transform, glm::radians(90.F), {0, 1, 0});
-  transform = glm::scale(transform, glm::vec3(4.F));
-
-  getKScene().submitGeometry(lightPlane);
-  getKScene().submitGeometryInstance(
-      kuafu::instance(lightPlane, transform));
-
-  spdlog::get("SAPIEN")->warn("addDirectionalLight: incorrect tmp impl");
+  auto light = std::make_shared<kuafu::DirectionalLight>();
+  light->direction = {direction[0], direction[1], direction[2]};
+  light->color = {color[0], color[1], color[2]};
+  light->strength = 1.0;
+  light->softness = 0.1;    // TODO: expose this
+  getKScene().setDirectionalLight(light);
+  spdlog::get("SAPIEN")->warn("addDirectionalLight: tmp impl");
   return nullptr;
 }
 

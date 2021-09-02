@@ -10,7 +10,8 @@ def main():
     sim = sapien.Engine()
 
     render_config = sapien.KuafuConfig()
-    render_config.spp = 10
+    render_config.spp = 64
+    render_config.max_bounces = 6
 
     renderer = sapien.KuafuRenderer(render_config)
     sim.set_renderer(renderer)
@@ -20,9 +21,7 @@ def main():
 
     material = renderer.create_material()
     material.set_base_color([1.0, 0.5, 0.5, 1.0])
-    # material.set_base_color([0.2, 0.4, 1.0, 1.0])
-    # material.set_roughness(1000.0)
-    # material.set_metallic(0.0)
+    material.set_roughness(1.0)
     scene.add_ground(0, render_material=material)
     scene.set_timestep(1 / 60)
 
@@ -34,39 +33,40 @@ def main():
     builder = scene.create_actor_builder()
     material = renderer.create_material()
     material.set_base_color([0.2, 0.2, 0.8, 1.0])
-    material.set_roughness(1000.0)
+    material.set_roughness(0.5)
     material.set_metallic(0.0)
     builder.add_sphere_visual(material=material)
     builder.add_sphere_collision()
     sphere1 = builder.build()
-    sphere1.set_pose(Pose(p=[0, -3, 8]))
+    sphere1.set_pose(Pose(p=[0, -3, 4]))
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
     material.set_base_color([0.8, 0.2, 0.2, 1.0])
-    material.set_roughness(0.0)
+    material.set_roughness(0.05)
     material.set_metallic(1.0)
     builder.add_sphere_visual(material=material)
     builder.add_sphere_collision()
     sphere2 = builder.build()
-    sphere2.set_pose(Pose(p=[0, 3, 8]))
+    sphere2.set_pose(Pose(p=[0, 3, 4]))
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_transparent(True, 1.4)
+    material.set_transmission(1.0)
+    material.set_ior(1.45)
     material.set_base_color([0.2, 0.8, 0.2, 1.0])
-    material.set_roughness(1000.0)
-    # material.set_roughness(0.0)
+    # material.set_roughness(1.0)
+    material.set_roughness(0.0)
     material.set_specular(0.0)
     builder.add_box_visual(material=material)
     builder.add_box_collision()
     box = builder.build()
-    box.set_pose(Pose(p=[0, 0, 8]))
+    box.set_pose(Pose(p=[0, 0, 4]))
 
     scene.set_ambient_light([0.5, 0.5, 0.5])
-    # dirlight = scene.add_directional_light(
-    #     [0, 0, 0], color=[5.0, 0.0, 1.0], position=[-5, 0, 0]
-    # )
+    dirlight = scene.add_directional_light(
+        [0, 0.5, -1], color=[5.0, 5.0, 5.0]
+    )
     # plight = scene.add_point_light([0, 0, 0.1], [1000.0, 1000.0, 1000.0])
 
     cnt = 0

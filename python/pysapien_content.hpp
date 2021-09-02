@@ -263,6 +263,7 @@ void buildSapien(py::module &m) {
       .def_readwrite("assets_path", &Renderer::KuafuConfig::mAssetsPath)
       .def_readwrite("clear_color", &Renderer::KuafuConfig::mClearColor)
       .def_readwrite("spp", &Renderer::KuafuConfig::mPerPixelSampleRate)
+      .def_readwrite("max_bounces", &Renderer::KuafuConfig::mPathDepth)
       .def_readwrite("accumulate_frames", &Renderer::KuafuConfig::mAccumulateFrames);
 
   auto PyKuafuRenderer =
@@ -419,8 +420,9 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("set_specular", &Renderer::IPxrMaterial::setSpecular, py::arg("specular"))
       .def("set_metallic", &Renderer::IPxrMaterial::setMetallic, py::arg("metallic"))
       .def("set_roughness", &Renderer::IPxrMaterial::setRoughness, py::arg("roughness"))
-      .def("set_transparent", &Renderer::IPxrMaterial::setTransparent, py::arg("is_transparent"), py::arg("ior"))
-      .def("set_material_type", &Renderer::IPxrMaterial::setMaterialType, py::arg("type"));
+      .def("set_transmission", &Renderer::IPxrMaterial::setTransmission, py::arg("transmission"))
+      .def("set_ior", &Renderer::IPxrMaterial::setIOR, py::arg("ior"))
+      .def("set_diffuse_tex", &Renderer::IPxrMaterial::setDiffuseTex, py::arg("path"));
 
   //     // TODO: implement those together with UV
   //     // .def_readwrite("color_texture", &Renderer::PxrMaterial::color_texture)

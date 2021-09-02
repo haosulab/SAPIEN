@@ -2,7 +2,10 @@
 # Objects (and materials) are randomly generated and
 # added into the scene.
 #
-# TODO: fix ErrorOutOfHostMemory by resource managing
+# TODO:
+#  1. fix ErrorOutOfHostMemory by resource managing
+#  2. fix segfault when use viewer and resize
+#  3. close window
 #
 # By Jet <i@jetd.me>
 #
@@ -16,7 +19,11 @@ def main():
     sim = sapien.Engine()
 
     render_config = sapien.KuafuConfig()
-    render_config.spp = 10
+    render_config.spp = 16
+    render_config.max_bounces = 5
+    render_config.use_viewer = True
+    render_config.width = 800
+    render_config.height = 600
 
     renderer = sapien.KuafuRenderer(render_config)
     sim.set_renderer(renderer)
@@ -155,10 +162,11 @@ def main():
 
     # print(cam1.render_target_names)
     copper = renderer.create_material()
-    copper.set_transparent(False, 1.4)
+    copper.set_ior(1.4)
+    copper.set_transmission(0.0)
     copper.set_base_color([0.875, 0.553, 0.221, 1])
-    copper.set_metallic(0)
-    copper.set_roughness(0)
+    copper.set_metallic(1.0)
+    copper.set_roughness(0.2)
     ant_builder = create_ant_builder(scene, copper)
     ant = ant_builder.build()
     ant.set_root_pose(Pose([1, 0, 8]))
@@ -166,7 +174,7 @@ def main():
     builder = scene.create_actor_builder()
     material = renderer.create_material()
     material.set_base_color([0.2, 0.2, 0.8, 1.0])
-    material.set_roughness(1000.0)
+    material.set_roughness(0.5)
     material.set_metallic(0.0)
     builder.add_sphere_visual(radius=0.6, material=material)
     builder.add_sphere_collision(radius=0.6)
@@ -175,10 +183,11 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_transparent(True, 1.4)
+    material.set_ior(1.4)
+    material.set_transmission(1.0)
     material.set_base_color([0.2, 0.8, 0.2, 1.0])
     material.set_roughness(0.0)
-    material.set_metallic(100.0)
+    material.set_metallic(0.1)
     builder.add_sphere_visual(radius=0.7, material=material)
     builder.add_sphere_collision(radius=0.7)
     sphere2 = builder.build()
@@ -186,7 +195,8 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_transparent(True, 1.4)
+    material.set_ior(1.4)
+    material.set_transmission(1.0)
     material.set_base_color([0.2, 0.9, 0.7, 1.0])
     material.set_metallic(0.0)
     builder.add_sphere_visual(radius=0.4, material=material)
@@ -224,17 +234,17 @@ def main():
     cap = builder.build()
     cap.set_pose(Pose(p=[0, 2, 12]))
 
-    for i in range(5):
+    for i in range(3):
         builder = scene.create_actor_builder()
         material = renderer.create_material()
-        material.set_transparent(
-            np.random.rand() > 0.5, 1 + np.random.rand() * 1.5)
+        material.set_transmission(np.random.rand() > 0.2)
+        material.set_ior(1 + np.random.rand())
         material.set_base_color([
             np.random.rand(),
             np.random.rand(),
             np.random.rand(), 1.0])
-        material.set_roughness(np.random.rand() * 10)
-        material.set_metallic(np.random.rand() * 10)
+        material.set_roughness(np.random.rand())
+        material.set_metallic(np.random.rand())
         r = 0.2 + np.random.rand() * 0.5
         builder.add_sphere_visual(radius=r, material=material)
         builder.add_sphere_collision(radius=r)
@@ -243,14 +253,14 @@ def main():
             np.random.rand(), np.random.rand(), 12 + 6 * i + np.random.rand()]))
 
         builder = scene.create_actor_builder()
-        material.set_transparent(
-            np.random.rand() > 0.5, 1 + np.random.rand() * 1.5)
+        material.set_transmission(np.random.rand() > 0.2)
+        material.set_ior(1 + np.random.rand())
         material.set_base_color([
             np.random.rand(),
             np.random.rand(),
             np.random.rand(), 1.0])
-        material.set_roughness(np.random.rand() * 10)
-        material.set_metallic(np.random.rand() * 10)
+        material.set_roughness(np.random.rand())
+        material.set_metallic(np.random.rand())
         r = 0.1 + np.random.rand() * 0.4
         l = 0.2 + np.random.rand() * 0.5
         builder.add_capsule_visual(radius=r, half_length=l, material=material)
@@ -260,14 +270,14 @@ def main():
             np.random.rand(), np.random.rand(), 14 + 6 * i + np.random.rand()]))
 
         builder = scene.create_actor_builder()
-        material.set_transparent(
-            np.random.rand() > 0.5, 1 + np.random.rand() * 1.5)
+        material.set_transmission(np.random.rand() > 0.2)
+        material.set_ior(1 + np.random.rand())
         material.set_base_color([
             np.random.rand(),
             np.random.rand(),
             np.random.rand(), 1.0])
-        material.set_roughness(np.random.rand() * 10)
-        material.set_metallic(np.random.rand() * 10)
+        material.set_roughness(np.random.rand())
+        material.set_metallic(np.random.rand())
         r = np.random.rand() * 0.9
         builder.add_box_visual(half_size=[r, r, r], material=material)
         builder.add_box_collision(half_size=[r, r, r])
@@ -276,45 +286,25 @@ def main():
             np.random.rand(), np.random.rand(), 16 + 6 * i + np.random.rand()]))
 
     builder = scene.create_actor_builder()
-    material = renderer.create_material()
-    material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    material.set_transparent(False, 1.4)
-    material.set_roughness(1000.0)
-    material.set_metallic(0.0)
-    builder.add_box_visual(half_size=[0.1, 10, 4], material=material)
+    builder.add_box_visual(half_size=[0.1, 10, 4])
     builder.add_box_collision(half_size=[0.1, 10, 4])
     w1 = builder.build_static()
     w1.set_pose(Pose(p=[4, 0, 0]))
 
     builder = scene.create_actor_builder()
-    material = renderer.create_material()
-    material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    material.set_transparent(False, 1.4)
-    material.set_roughness(1000.0)
-    material.set_metallic(0.0)
-    builder.add_box_visual(half_size=[0.1, 10, 4], material=material)
+    builder.add_box_visual(half_size=[0.1, 10, 4])
     builder.add_box_collision(half_size=[0.1, 10, 4])
     w2 = builder.build_static()
     w2.set_pose(Pose(p=[-4, 0, 0]))
 
     builder = scene.create_actor_builder()
-    material = renderer.create_material()
-    material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    material.set_transparent(False, 1.4)
-    material.set_roughness(1000.0)
-    material.set_metallic(0.0)
-    builder.add_box_visual(half_size=[10, 0.1, 4], material=material)
+    builder.add_box_visual(half_size=[10, 0.1, 4])
     builder.add_box_collision(half_size=[10, 0.1, 4])
     w3 = builder.build_static()
     w3.set_pose(Pose(p=[0, 4, 0]))
 
     builder = scene.create_actor_builder()
-    material = renderer.create_material()
-    material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    material.set_transparent(False, 1.4)
-    material.set_roughness(1000.0)
-    material.set_metallic(0.0)
-    builder.add_box_visual(half_size=[10, 0.1, 4], material=material)
+    builder.add_box_visual(half_size=[10, 0.1, 4])
     builder.add_box_collision(half_size=[10, 0.1, 4])
     w4 = builder.build_static()
     w4.set_pose(Pose(p=[0, -4, 0]))
@@ -322,7 +312,8 @@ def main():
     # builder = scene.create_actor_builder()
     # material = renderer.create_material()
     # material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    # material.set_transparent(False, 1.4)
+    # material.set_ior(1.4)
+    # material.set_transmission(0.0)
     # material.set_roughness(1000.0)
     # builder.add_box_visual(half_size=[5, 5, 0.1], material=material)
     # w5 = builder.build_static()
@@ -338,7 +329,7 @@ def main():
 
     scene.renderer_scene.set_ambient_light([0.7, 0.7, 0.65])
 
-    # dirlight = scene.add_directional_light([0, 0, 0], [5, 1, 1], position=[0, 0, 4])
+    scene.add_directional_light([0.4, 0.4, -1], [4, 4, 4])
 
     # plight = scene.add_point_light(position=[0, 0, 4], color=[5000000, 0, 0])
 

@@ -12,18 +12,20 @@ namespace sapien::Renderer {
 
 // Based on Wavefront MTL
 class KuafuMaterial : public IPxrMaterial {
-  std::shared_ptr<kuafu::Material> mKMaterial = nullptr;
+  std::shared_ptr<kuafu::NiceMaterial> mKMaterial = nullptr;
 
 public:
-  KuafuMaterial() { mKMaterial = std::make_shared<kuafu::Material>(); }
+  KuafuMaterial() { mKMaterial = std::make_shared<kuafu::NiceMaterial>(); }
   void setBaseColor(std::array<float, 4> color) override;
   void setRoughness(float roughness) override;
   void setSpecular(float specular) override;
   void setMetallic(float metallic) override;
 
   void setEmission(std::array<float, 4> color) override;
-  void setTransparent(bool isTransparent, float ior = 1.4) override;
-  void setMaterialType(uint32_t type) override;
+  void setIOR(float ior) override;
+  void setTransmission(float transmission) override;
+  void setDiffuseTex(std::string_view path) override;
+
   inline auto getKMaterial() { return mKMaterial; }
 };
 

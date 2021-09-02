@@ -20,9 +20,11 @@ struct KuafuConfig {
 
   uint32_t mPerPixelSampleRate = 64;
   bool mAccumulateFrames = false;
-//
+
+  uint32_t mPathDepth = 5;
+
 //  uint32_t mMaxPathDepth = 10;
-//  uint32_t mPathDepth = 5;
+//  bool mRussianRoulette = true;
 //  uint32_t mRussianRouletteMinBounces = 3;
 //
 //  bool mUseDenoiser = false;  // todo
@@ -33,7 +35,6 @@ struct KuafuConfig {
 //  float mVariance = 0.0F;
 //  bool mUpdateVariance = false;
 //
-//  bool mRussianRoulette = true;
 
 
   std::shared_ptr<kuafu::Config> generate() {
@@ -45,6 +46,7 @@ struct KuafuConfig {
     ret->setClearColor(mClearColor);
     ret->setPerPixelSampleRate(mPerPixelSampleRate);
     ret->setAccumulatingFrames(mAccumulateFrames);
+    ret->setPathDepth(mPathDepth);
     return ret;
   }
 };

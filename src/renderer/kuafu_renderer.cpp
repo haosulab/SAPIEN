@@ -13,8 +13,8 @@
 namespace sapien::Renderer {
 
 void KuafuMaterial::setBaseColor(std::array<float, 4> color) {
-  mKMaterial->kd = glm::vec3(color[0], color[1], color[2]);
-  mKMaterial->d = color[3];
+  mKMaterial->diffuseColor = glm::vec3(color[0], color[1], color[2]);
+  mKMaterial->alpha = color[3];
 }
 
 void KuafuMaterial::setRoughness(float roughness) {
@@ -22,28 +22,29 @@ void KuafuMaterial::setRoughness(float roughness) {
 }
 
 void KuafuMaterial::setSpecular(float specular) {
-//  mKMaterial->ns = specular;
-  spdlog::get("SAPIEN")->warn("specular adjustment not supported");
+  mKMaterial->specular = specular;
 }
 
 void KuafuMaterial::setMetallic(float metallic) {
-  mKMaterial->shininess = metallic;
+  mKMaterial->metallic = metallic;
 }
 
 void KuafuMaterial::setEmission(std::array<float, 4> color) {
-  mKMaterial->emission = glm::vec3(color[0], color[1], color[2]) * color[3];
+  mKMaterial->emission = glm::vec3(color[0], color[1], color[2]);
+  mKMaterial->emissionStrength = color[3];
 }
 
-void KuafuMaterial::setTransparent(bool isTransparent, float ior) {
-  mKMaterial->illum = isTransparent ? 1 : 2;
+void KuafuMaterial::setIOR(float ior) {
   mKMaterial->ior = ior;
 }
 
-void KuafuMaterial::setMaterialType(uint32_t type) {
-  mKMaterial->illum = type;
+void KuafuMaterial::setTransmission(float transmission) {
+    mKMaterial->transmission = transmission;
 }
 
-
+void KuafuMaterial::setDiffuseTex(std::string_view path) {
+  mKMaterial->diffuseTexPath = path;
+}
 
 void KuafuRenderer::setDefaultAssetsPath(std::string path) {
     kuafu::Config::setDefaultAssetsPath(std::move(path));
@@ -64,7 +65,7 @@ KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
     camera->setFront({1, 0, -1});
 
     window = std::make_shared<KWindow>(
-        conf.mWidth, conf.mHeight, "Viewer", SDL_WINDOW_RESIZABLE);
+        conf.mWidth, conf.mHeight, "Viewer", SDL_WINDOW_RESIZABLE, camera);
   }
 
   pKRenderer = std::make_shared<kuafu::Kuafu>(config, window, camera, nullptr);

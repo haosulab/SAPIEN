@@ -11,10 +11,10 @@ using namespace sapien;
 
 int main() {
   auto sim = std::make_shared<Simulation>();
-  auto renderer = std::make_shared<Renderer::KuafuRenderer>(true);
-  renderer->setAssetsPath("../3rd_party/kuafu/resources");
+
+  kuafu::Config::setDefaultAssetsPath("../3rd_party/kuafu/resources");
+  auto renderer = std::make_shared<Renderer::KuafuRenderer>();
   sim->setRenderer(renderer);
-  renderer->init();
 
   auto scene = sim->createScene();
   scene->setTimestep(1 / 60.f);

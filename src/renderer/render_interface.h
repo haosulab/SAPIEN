@@ -39,13 +39,16 @@ public:
   virtual void setMetallic(float metallic) = 0;
 
   virtual void setEmission(std::array<float, 4> color) {
-    spdlog::get("SAPIEN")->warn("emissive material is not supported");
+    spdlog::get("SAPIEN")->warn("emissive is not supported");
   };
-  virtual void setTransparent(bool isTransparent, float ior) {
-    spdlog::get("SAPIEN")->warn("transparent material is not supported");
+  virtual void setIOR(float ior) {
+    spdlog::get("SAPIEN")->warn("ior is not supported");
   };
-  virtual void setMaterialType(uint32_t type) {
-    spdlog::get("SAPIEN")->warn("material type is not supported");
+  virtual void setTransmission(float transmission) {
+    spdlog::get("SAPIEN")->warn("transmission is not supported");
+  };
+  virtual void setDiffuseTex(std::string_view path) {
+    spdlog::get("SAPIEN")->warn("diffuse tex is not supported");
   };
 
   virtual ~IPxrMaterial() = default;
