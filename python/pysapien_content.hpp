@@ -239,12 +239,14 @@ void buildSapien(py::module &m) {
   auto PyDirectionalLightEntity =
       py::class_<SDirectionalLight, SLight>(m, "DirectionalLightEntity");
   auto PySpotLightEntity = py::class_<SSpotLight, SLight>(m, "SpotLightEntity");
+  auto PyActiveLightEntity = py::class_<SActiveLight, SLight>(m, "ActiveLightEntity");
 
   auto PyLight = py::class_<Renderer::ILight>(m, "Light");
   auto PyPointLight = py::class_<Renderer::IPointLight, Renderer::ILight>(m, "PointLight");
   auto PyDirectionalLight =
       py::class_<Renderer::IDirectionalLight, Renderer::ILight>(m, "DirectionalLight");
   auto PySpotLight = py::class_<Renderer::ISpotLight, Renderer::ILight>(m, "SpotLight");
+  auto PyActiveLight = py::class_<Renderer::IActiveLight, Renderer::ILight>(m, "ActiveLight");
   auto PyVulkanPointLight =
       py::class_<Renderer::SVulkan2PointLight, Renderer::IPointLight>(m, "VulkanPointLight");
   auto PyVulkanDirectionalLight =
@@ -274,7 +276,8 @@ void buildSapien(py::module &m) {
       .def_static("_set_default_assets_path", &Renderer::KuafuRenderer::setDefaultAssetsPath,
                   py::arg("assets_path"))
       .def("set_environment_map", &Renderer::KuafuRenderer::setEnvironmentMap,
-           py::arg("env_map_path"));
+           py::arg("env_map_path"))
+      .def_property_readonly("is_running", &Renderer::KuafuRenderer::isRunning);
 
   //======== Internal ========//
 
@@ -735,6 +738,12 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
           py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
           py::arg("far") = 10.f, py::return_value_policy::reference)
+      .def(
+          "add_active_light",
+          [](SScene &scene, PxTransform const &pose,
+             py::array_t<float> const &color, float fov, std::string const &path) {
+            return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov, path);
+          }, py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"))
       .def("remove_light", &SScene::removeLight, py::arg("light"))
       // save
       .def("pack",
@@ -2062,6 +2071,15 @@ Args:
           py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
           py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
           py::arg("far") = 10.f, py::return_value_policy::reference)
+      .def(
+          "add_active_light",
+          [](Renderer::IPxrScene &scene, PxTransform const &pose,
+             py::array_t<float> const &color, float fov, std::string const &path) {
+            return scene.addActiveLight(pose,
+                                        {color.at(0), color.at(1), color.at(2)},
+                                        fov, path);
+          },
+          py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"))
 
       .def(
           "add_mesh_from_file",

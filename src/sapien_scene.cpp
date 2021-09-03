@@ -753,6 +753,16 @@ SSpotLight *SScene::addSpotLight(PxVec3 const &position, PxVec3 const &direction
   return ret;
 }
 
+SActiveLight *SScene::addActiveLight(PxTransform const &pose, PxVec3 const &color, float fov,
+                                     std::string_view texPath) {
+  auto light = mRendererScene->addActiveLight(
+      pose, {color.x, color.y, color.z}, fov, texPath);
+  auto sl = std::make_unique<SActiveLight>(this, light);
+  auto ret = sl.get();
+  mLights.push_back(std::move(sl));
+  return ret;
+}
+
 void SScene::removeLight(SLight *light) {
   if (light && light->getRendererLight()) {
     mRendererScene->removeLight(light->getRendererLight());

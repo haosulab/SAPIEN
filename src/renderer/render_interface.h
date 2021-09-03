@@ -161,6 +161,14 @@ public:
   virtual float getShadowFar() const = 0;
 };
 
+class IActiveLight : public ILight {
+public:
+  virtual void setFov(float fov) = 0;
+  virtual float getFov() const = 0;
+
+  virtual void setTexture(std::string_view path) = 0;
+};
+
 class IPxrRigidbody {
 public:
   virtual void setName(std::string const &name) = 0;
@@ -240,6 +248,14 @@ public:
                                    std::array<float, 3> const &direction, float fovInner,
                                    float fovOuter, std::array<float, 3> const &color,
                                    bool enableShadow, float shadowNear, float shadowFar) = 0;
+
+  virtual IActiveLight *addActiveLight(physx::PxTransform const &pose,
+                                       std::array<float, 3> const &color,
+                                       float fov, std::string_view texPath) {
+      spdlog::get("SAPIEN")->warn("Active light not supported!");
+      return nullptr;
+  };
+
 
   virtual void removeLight(ILight *light) = 0;
 

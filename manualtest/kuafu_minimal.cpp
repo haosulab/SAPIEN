@@ -94,7 +94,7 @@ int main() {
   cube->setPose({{0, 0, 5}, PxIdentity});
 
 
-  while (true) {
+  while (renderer->isRunning()) {
     scene->step();
     scene->updateRender();
     cam->takePicture();

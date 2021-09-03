@@ -41,6 +41,7 @@ public:
   std::shared_ptr<IPxrMaterial> createMaterial() override;
 
   static void setDefaultAssetsPath(std::string path);
+  inline bool isRunning() { return pKRenderer->isRunning(); }
 
   // TODO: move this function
   void setEnvironmentMap(std::string_view path) {

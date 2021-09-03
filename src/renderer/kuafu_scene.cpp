@@ -2,10 +2,11 @@
 // Created by jet on 7/18/21.
 //
 
+#include "kuafu_utils.hpp"
 #include "kuafu_scene.hpp"
 #include "kuafu_renderer.hpp"
-#include <core/geometry.hpp>
 #include <core/context/global.hpp>
+#include <core/geometry.hpp>
 #include <spdlog/spdlog.h>
 
 namespace sapien::Renderer {
@@ -398,9 +399,37 @@ ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
                                      const std::array<float, 3> &direction, float fovInner,
                                      float fovOuter, const std::array<float, 3> &color,
                                      bool enableShadow, float shadowNear, float shadowFar) {
-  spdlog::get("SAPIEN")->error("addSpotLight not implemented yet");
+  auto light = std::make_shared<kuafu::ActiveLight>();
+  glm::vec3 p = {position[0], position[1], position[2]};
+  glm::vec3 dir = {direction[0], direction[1], direction[2]};
+  light->viewMat = glm::lookAt(p, p + dir, kuafu::utils::getPerpendicular(dir));
+  light->color = {color[0], color[1], color[2]};
+  light->strength = 1.0;
+  light->softness = 0.1;    // TODO: expose this
+  light->texPath = "";
+  light->fov = fovInner;
+  if (fovInner != fovOuter)
+    spdlog::get("SAPIEN")->warn("addSpotLight: fovInner != fovOuter api not exposed");
+  getKScene().addActiveLight(light);
+  spdlog::get("SAPIEN")->warn("addSpotLight: tmp impl");
   return nullptr;
 }
+
+IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
+                                         std::array<float, 3> const &color,
+                                         float fov, std::string_view texPath) {
+  auto light = std::make_shared<kuafu::ActiveLight>();
+  light->viewMat = glm::inverse(toGlmMat4(pose));
+  light->color = {color[0], color[1], color[2]};
+  light->strength = 1.0;
+  light->softness = 0.0;    // TODO: expose this
+  light->texPath = texPath;
+  light->fov = fov;
+
+  getKScene().addActiveLight(light);
+  spdlog::get("SAPIEN")->warn("addActiveLight: tmp impl");
+  return nullptr;
+};
 
 void KuafuScene::removeLight(ILight *light) {
   spdlog::get("SAPIEN")->error("removeLight not implemented yet");

@@ -72,7 +72,7 @@ def main():
 
     cnt = 0
 
-    while True:
+    while renderer.is_running:
         scene.step()
         scene.update_render()
         cam1.take_picture()

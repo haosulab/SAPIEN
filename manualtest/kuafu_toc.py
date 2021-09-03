@@ -28,7 +28,7 @@ def main():
 
     render_config = sapien.KuafuConfig()
     render_config.use_viewer = True
-    render_config.spp = 64
+    render_config.spp = 128
     render_config.max_bounces = 6
     render_config.width = 960
     render_config.height = 540
@@ -104,14 +104,30 @@ def main():
     scene.step()
 
     scene.renderer_scene.set_ambient_light([0.1, 0.1, 0.1])
-    dirlight = scene.add_directional_light(
-        [0, 0.5, -1], color=[5.0, 5.0, 5.0]
+    # dirlight = scene.add_directional_light(
+    #     [0, 0.5, -1], color=[5.0, 5.0, 5.0]
+    # )
+
+    # slight = scene.add_spot_light(
+    #     position=[0, 0, 1],
+    #     direction=[0, 0, -1],
+    #     inner_fov=0.5,
+    #     outer_fov=0.5,
+    #     color=[5.0, 5.0, 5.0]
+    # )
+
+    alight = scene.add_active_light(
+        # cam_mount.get_pose(),
+        Pose([0, 0, 1]),
+        [100, 0, 0],
+        1.57,
+        "../3rd_party/kuafu/resources/d415-pattern-sq.png"
     )
 
     # plight = scene.add_point_light(
     #     [0, 0, 2], [3, 3, 3]
     # )
-    #
+    # #
     # plight = scene.add_point_light(
     #     [-2, -2, 2], [3, 3, 3]
     # )
@@ -129,7 +145,7 @@ def main():
     # )
 
     cnt = 0
-    while True:
+    while renderer.is_running:
         scene.step()
         scene.update_render()
         cam.take_picture()     # will update viewer and download rgba for now (sync)

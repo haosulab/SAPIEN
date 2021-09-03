@@ -187,6 +187,10 @@ public:
                                    float fovOuter, std::array<float, 3> const &color,
                                    bool enableShadow, float shadowNear, float shadowFar) override;
 
+  IActiveLight *addActiveLight(physx::PxTransform const &pose,
+                               std::array<float, 3> const &color,
+                               float fov, std::string_view texPath) override;
+
   void removeLight(ILight *light) override;
 
   /** call this function before every rendering time frame */
