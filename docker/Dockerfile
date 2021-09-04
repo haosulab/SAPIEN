@@ -89,4 +89,7 @@ RUN mkdir /workspace/assimp/build
 WORKDIR /workspace/assimp/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
 
+RUN rpm -i http://mirror.ghettoforge.org/distributions/gf/el/7/gf/x86_64/gcc10-libstdc++-10.2.1-7.gf.el7.x86_64.rpm
+ENV LD_LIBRARY_PATH=/opt/gcc-10.2.1/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/opt/rh/devtoolset-9/root/usr/lib64/dyninst:/opt/rh/devtoolset-9/root/usr/lib/dyninst:/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/workspace/1.2.170.0/x86_64/lib PCP_DIR=/opt/rh/devtoolset-9/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-9/root MANPATH=/opt/rh/devtoolset-9/root/usr/share/man: PATH=/opt/rh/devtoolset-9/root/usr/bin:/workspace/1.2.170.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
 WORKDIR /workspace
