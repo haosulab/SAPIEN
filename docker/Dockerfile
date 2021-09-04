@@ -5,13 +5,6 @@ WORKDIR /workspace
 COPY PhysX /workspace/PhysX
 
 WORKDIR /workspace
-RUN git clone --single-branch -b v5.0.1 --depth 1 https://github.com/assimp/assimp.git
-WORKDIR /workspace/assimp
-RUN mkdir /workspace/assimp/build
-WORKDIR /workspace/assimp/build
-RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
-
-WORKDIR /workspace
 RUN git clone --single-branch -b 20210000.6 --depth 1 https://github.com/coin-or/CppAD.git
 WORKDIR /workspace/CppAD
 RUN mkdir /workspace/CppAD/build
@@ -79,15 +72,21 @@ RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
 RUN yum install -y zip
 
 WORKDIR /workspace
-RUN git clone https://github.com/KhronosGroup/KTX-Software.git
+RUN git clone --single-branch -b v4.0.0 --depth 1 https://github.com/KhronosGroup/KTX-Software.git
 RUN mkdir /workspace/KTX-Software/build
 WORKDIR /workspace/KTX-Software/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
 
 WORKDIR /workspace
-RUN git clone https://github.com/libsdl-org/SDL.git
+RUN git clone --single-branch -b release-2.0.16 --depth 1 https://github.com/libsdl-org/SDL.git
 RUN mkdir /workspace/SDL/build
 WORKDIR /workspace/SDL/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
+
+WORKDIR /workspace
+RUN git clone --single-branch -b sapien --depth 1 https://github.com/jetd1/assimp.git
+RUN mkdir /workspace/assimp/build
+WORKDIR /workspace/assimp/build
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
 
 WORKDIR /workspace
