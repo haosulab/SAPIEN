@@ -5,7 +5,6 @@
 # TODO:
 #  1. fix ErrorOutOfHostMemory by resource managing
 #  2. fix segfault when use viewer and resize
-#  3. close window
 #
 # By Jet <i@jetd.me>
 #
@@ -152,7 +151,7 @@ def main():
     config = sapien.SceneConfig()
     scene = sim.create_scene(config)
     material = renderer.create_material()
-    material.set_base_color([1.0, 0.9, 0.7, 1.0])
+    material.base_color = [1.0, 0.9, 0.7, 1.0]
     scene.add_ground(0, render_material=material)
     scene.set_timestep(1 / 60)
 
@@ -162,20 +161,20 @@ def main():
 
     # print(cam1.render_target_names)
     copper = renderer.create_material()
-    copper.set_ior(1.4)
-    copper.set_transmission(0.0)
-    copper.set_base_color([0.875, 0.553, 0.221, 1])
-    copper.set_metallic(1.0)
-    copper.set_roughness(0.2)
+    copper.ior = 1.4
+    copper.transmission = 0.0
+    copper.base_color = [0.875, 0.553, 0.221, 1]
+    copper.metallic = 1.0
+    copper.roughness = 0.2
     ant_builder = create_ant_builder(scene, copper)
     ant = ant_builder.build()
     ant.set_root_pose(Pose([1, 0, 8]))
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_base_color([0.2, 0.2, 0.8, 1.0])
-    material.set_roughness(0.5)
-    material.set_metallic(0.0)
+    material.base_color = [0.2, 0.2, 0.8, 1.0]
+    material.roughness = 0.5
+    material.metallic = 0.0
     builder.add_sphere_visual(radius=0.6, material=material)
     builder.add_sphere_collision(radius=0.6)
     sphere1 = builder.build()
@@ -183,11 +182,11 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_ior(1.4)
-    material.set_transmission(1.0)
-    material.set_base_color([0.2, 0.8, 0.2, 1.0])
-    material.set_roughness(0.0)
-    material.set_metallic(0.1)
+    material.ior = 1.4
+    material.transmission = 1.0
+    material.base_color = [0.2, 0.8, 0.2, 1.0]
+    material.roughness = 0.0
+    material.metallic = 0.1
     builder.add_sphere_visual(radius=0.7, material=material)
     builder.add_sphere_collision(radius=0.7)
     sphere2 = builder.build()
@@ -195,10 +194,10 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_ior(1.4)
-    material.set_transmission(1.0)
-    material.set_base_color([0.2, 0.9, 0.7, 1.0])
-    material.set_metallic(0.0)
+    material.ior = 1.4
+    material.transmission = 1.0
+    material.base_color = [0.2, 0.9, 0.7, 1.0]
+    material.metallic = 0.0
     builder.add_sphere_visual(radius=0.4, material=material)
     builder.add_sphere_collision(radius=0.4)
     sphere3 = builder.build()
@@ -206,9 +205,9 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_base_color([0.8, 0.2, 0.2, 1.0])
-    material.set_roughness(0.0)
-    material.set_metallic(1.0)
+    material.base_color = [0.8, 0.2, 0.2, 1.0]
+    material.roughness = 0.0
+    material.metallic = 1.0
     builder.add_box_visual(half_size=[0.7, 0.7, 0.7], material=material)
     builder.add_box_collision(half_size=[0.7, 0.7, 0.7])
     box = builder.build()
@@ -216,9 +215,9 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_base_color([0.8, 0.2, 0.2, 1.0])
-    material.set_roughness(0.0)
-    material.set_metallic(1.0)
+    material.base_color = [0.8, 0.2, 0.2, 1.0]
+    material.roughness = 0.0
+    material.metallic = 1.0
     builder.add_capsule_visual(radius=0.08, half_length=0.141, material=material)
     builder.add_capsule_collision(radius=0.08, half_length=0.141)
     cap = builder.build()
@@ -226,9 +225,9 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_base_color([0.8, 0.1, 0.9, 1.0])
-    material.set_roughness(0.0)
-    material.set_metallic(1.0)
+    material.base_color = [0.8, 0.1, 0.9, 1.0]
+    material.roughness = 0.0
+    material.metallic = 1.0
     builder.add_capsule_visual(radius=0.2, half_length=0.3, material=material)
     builder.add_capsule_collision(radius=0.2, half_length=0.3)
     cap = builder.build()
@@ -237,14 +236,14 @@ def main():
     for i in range(15):
         builder = scene.create_actor_builder()
         material = renderer.create_material()
-        material.set_transmission(np.random.rand() > 0.2)
-        material.set_ior(1 + np.random.rand())
-        material.set_base_color([
+        material.transmission = (np.random.rand() > 0.2)
+        material.ior = 1 + np.random.rand()
+        material.base_color = [
             np.random.rand(),
             np.random.rand(),
-            np.random.rand(), 1.0])
-        material.set_roughness(np.random.rand())
-        # material.set_metallic(np.random.rand())
+            np.random.rand(), 1.0]
+        material.roughness = np.random.rand()
+        material.metallic = np.random.rand()
         r = 0.2 + np.random.rand() * 0.5
         builder.add_sphere_visual(radius=r, material=material)
         builder.add_sphere_collision(radius=r)
@@ -253,14 +252,14 @@ def main():
             np.random.rand(), np.random.rand(), 12 + 6 * i + np.random.rand()]))
 
         builder = scene.create_actor_builder()
-        material.set_transmission(np.random.rand() > 0.2)
-        material.set_ior(1 + np.random.rand())
-        material.set_base_color([
+        material.transmission = (np.random.rand() > 0.2)
+        material.ior = 1 + np.random.rand()
+        material.base_color = [
             np.random.rand(),
             np.random.rand(),
-            np.random.rand(), 1.0])
-        material.set_roughness(np.random.rand())
-        # material.set_metallic(np.random.rand())
+            np.random.rand(), 1.0]
+        material.roughness = np.random.rand()
+        material.metallic = np.random.rand()
         r = 0.1 + np.random.rand() * 0.4
         l = 0.2 + np.random.rand() * 0.5
         builder.add_capsule_visual(radius=r, half_length=l, material=material)
@@ -270,14 +269,14 @@ def main():
             np.random.rand(), np.random.rand(), 14 + 6 * i + np.random.rand()]))
 
         builder = scene.create_actor_builder()
-        material.set_transmission(np.random.rand() > 0.2)
-        material.set_ior(1 + np.random.rand())
-        material.set_base_color([
+        material.transmission = (np.random.rand() > 0.2)
+        material.ior = 1 + np.random.rand()
+        material.base_color = [
             np.random.rand(),
             np.random.rand(),
-            np.random.rand(), 1.0])
-        material.set_roughness(np.random.rand())
-        material.set_metallic(np.random.rand())
+            np.random.rand(), 1.0]
+        material.roughness = np.random.rand()
+        material.metallic = np.random.rand()
         r = np.random.rand() * 0.9
         builder.add_box_visual(half_size=[r, r, r], material=material)
         builder.add_box_collision(half_size=[r, r, r])
@@ -287,8 +286,8 @@ def main():
 
     builder = scene.create_actor_builder()
     wall_material = renderer.create_material()
-    wall_material.set_base_color([1, 0, 0, 1])
-    wall_material.set_emission([1, 0, 0, 0.3])
+    wall_material.base_color = [1, 0, 0, 1]
+    wall_material.emission = [1, 0, 0, 0.3]
     builder.add_box_visual(half_size=[0.1, 10, 5], material=wall_material)
     builder.add_box_collision(half_size=[0.1, 10, 5])
     w1 = builder.build_static()
@@ -296,8 +295,8 @@ def main():
 
     builder = scene.create_actor_builder()
     wall_material = renderer.create_material()
-    wall_material.set_base_color([1, 0, 0, 1])
-    wall_material.set_emission([0, 1, 0, 0.3])
+    wall_material.base_color = [1, 0, 0, 1]
+    wall_material.emission = [0, 1, 0, 0.3]
     builder.add_box_visual(half_size=[10, 0.1, 5], material=wall_material)
     builder.add_box_collision(half_size=[10, 0.1, 5])
     w4 = builder.build_static()
@@ -305,8 +304,8 @@ def main():
 
     builder = scene.create_actor_builder()
     wall_material = renderer.create_material()
-    wall_material.set_base_color([0, 0, 1, 1])
-    wall_material.set_emission([0, 0, 1, 0.3])
+    wall_material.base_color = [0, 0, 1, 1]
+    wall_material.emission = [0, 0, 1, 0.3]
     builder.add_box_visual(half_size=[10, 0.1, 5], material=wall_material)
     builder.add_box_collision(half_size=[10, 0.1, 5])
     w3 = builder.build_static()
@@ -314,21 +313,19 @@ def main():
 
     builder = scene.create_actor_builder()
     wall_material = renderer.create_material()
-    wall_material.set_base_color([1, 1, 1, 1])
-    wall_material.set_emission([1, 1, 1, 0.3])
+    wall_material.base_color = [1, 1, 1, 1]
+    wall_material.emission = [1, 1, 1, 0.3]
     builder.add_box_visual(half_size=[0.1, 10, 5], material=wall_material)
     builder.add_box_collision(half_size=[0.1, 10, 5])
     w2 = builder.build_static()
     w2.set_pose(Pose(p=[-4, 0, 0]))
 
-
-
     # builder = scene.create_actor_builder()
     # material = renderer.create_material()
-    # material.set_base_color([1.0, 1.0, 1.0, 1.0])
-    # material.set_ior(1.4)
-    # material.set_transmission(0.0)
-    # material.set_roughness(1000.0)
+    # material.base_color = [1.0, 1.0, 1.0, 1.0]
+    # material.ior = 1.4
+    # material.transmission = 0.0
+    # material.roughness = 1000.0
     # builder.add_box_visual(half_size=[5, 5, 0.1], material=material)
     # w5 = builder.build_static()
     # w5.set_pose(Pose(p=[0, 0, 8], q=[0.5771257, 0.4940158, 0.4940158, 0.4228743]))

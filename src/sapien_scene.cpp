@@ -37,7 +37,7 @@ SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig cons
 
   auto renderer = sim->getRenderer();
   if (renderer) {
-    mRendererScene = renderer->createScene();
+    mRendererScene = renderer->createScene("");          // FIXME: pass scene name here
   }
 }
 

@@ -48,12 +48,10 @@ def main():
     scene = sim.create_scene(scene_config)
 
     ground_material = renderer.create_material()
-    ground_color = np.array([202, 164, 114, 256]) / 256
-    ground_material.set_base_color(ground_color)
-    ground_material.set_specular(0.5)
+    ground_material.base_color = np.array([202, 164, 114, 256]) / 256
+    ground_material.specular = 0.5
     scene.add_ground(-0.8, render_material=ground_material)
     scene.set_timestep(1 / 240)
-
 
     loader = scene.create_urdf_loader()
     loader.fix_root_link = True
@@ -93,8 +91,8 @@ def main():
     # ceiling light
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_base_color([1, 1, 1, 1])
-    material.set_emission([1, 1, 1, 2.0])
+    material.base_color = [1., 1., 1., 1.]
+    material.emission = [1., 1., 1., 2.]
     builder.add_box_visual(half_size=[5, 5, 0.1], material=material)
     builder.add_box_collision(half_size=[5, 5, 0.1])
     ceil_light = builder.build_static()

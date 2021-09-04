@@ -107,7 +107,7 @@ public:
 
   inline void setName(std::string const &name) override { mName = name; };
   [[nodiscard]] inline std::string getName() const override { return mName; };
-  [[nodiscard]] inline auto getKGeometryInstanceIndices() const { return mKGeometryInstanceIndices; };
+  [[maybe_unused]] [[nodiscard]] inline auto getKGeometryInstanceIndices() const { return mKGeometryInstanceIndices; };
 
   inline void setUniqueId(uint32_t uniqueId) override { /* TODO:kuafu_urgent */ };
   [[nodiscard]] inline uint32_t getUniqueId() const override { return mUniqueId; };
@@ -173,7 +173,7 @@ public:
 
   ICamera *addCamera(std::string const &name, uint32_t width, uint32_t height, float fovx,
                              float fovy, float near, float far,
-                             std::string const &shaderDir = "") override;
+                             std::string const &shaderDir) override;
   void removeCamera(ICamera *camera) override;
 
   std::vector<ICamera *> getCameras() override;

@@ -20,8 +20,8 @@ def main():
     scene = sim.create_scene(config)
 
     material = renderer.create_material()
-    material.set_base_color([1.0, 0.5, 0.5, 1.0])
-    material.set_roughness(1.0)
+    material.base_color = [1.0, 0.5, 0.5, 1.0]
+    material.roughness = 1.0
     scene.add_ground(0, render_material=material)
     scene.set_timestep(1 / 60)
 
@@ -32,9 +32,9 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_base_color([0.2, 0.2, 0.8, 1.0])
-    material.set_roughness(0.5)
-    material.set_metallic(0.0)
+    material.base_color = [0.2, 0.2, 0.8, 1.0]
+    material.roughness = 0.5
+    material.metallic = 0.0
     builder.add_sphere_visual(material=material)
     builder.add_sphere_collision()
     sphere1 = builder.build()
@@ -42,9 +42,9 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_base_color([0.8, 0.2, 0.2, 1.0])
-    material.set_roughness(0.05)
-    material.set_metallic(1.0)
+    material.base_color = [0.8, 0.2, 0.2, 1.0]
+    material.roughness = 0.05
+    material.metallic = 1.0
     builder.add_sphere_visual(material=material)
     builder.add_sphere_collision()
     sphere2 = builder.build()
@@ -52,12 +52,12 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.set_transmission(1.0)
-    material.set_ior(1.45)
-    material.set_base_color([0.2, 0.8, 0.2, 1.0])
-    # material.set_roughness(1.0)
-    material.set_roughness(0.0)
-    material.set_specular(0.0)
+    material.transmission = 1.0
+    material.ior = 1.45
+    material.base_color = [0.2, 0.8, 0.2, 1.0]
+    # material.roughness = 1.0
+    material.roughness = 0.0
+    material.specular = 0.0
     builder.add_box_visual(material=material)
     builder.add_box_collision()
     box = builder.build()
@@ -91,6 +91,7 @@ def main():
         box.set_angular_velocity([0, 0, 1])
         # print(a.pose)
         # print(cam1.get_pose())
+
 
 main()
 

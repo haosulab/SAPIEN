@@ -12,44 +12,9 @@
 
 namespace sapien::Renderer {
 
-void KuafuMaterial::setBaseColor(std::array<float, 4> color) {
-  mKMaterial->diffuseColor = glm::vec3(color[0], color[1], color[2]);
-  mKMaterial->alpha = color[3];
-}
-
-void KuafuMaterial::setRoughness(float roughness) {
-  mKMaterial->roughness = roughness;
-}
-
-void KuafuMaterial::setSpecular(float specular) {
-  mKMaterial->specular = specular;
-}
-
-void KuafuMaterial::setMetallic(float metallic) {
-  mKMaterial->metallic = metallic;
-}
-
-void KuafuMaterial::setEmission(std::array<float, 4> color) {
-  mKMaterial->emission = glm::vec3(color[0], color[1], color[2]);
-  mKMaterial->emissionStrength = color[3];
-}
-
-void KuafuMaterial::setIOR(float ior) {
-  mKMaterial->ior = ior;
-}
-
-void KuafuMaterial::setTransmission(float transmission) {
-    mKMaterial->transmission = transmission;
-}
-
-void KuafuMaterial::setDiffuseTex(std::string_view path) {
-  mKMaterial->diffuseTexPath = path;
-}
-
 void KuafuRenderer::setDefaultAssetsPath(std::string path) {
     kuafu::Config::setDefaultAssetsPath(std::move(path));
 }
-
 
 KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
   auto config = conf.generate();

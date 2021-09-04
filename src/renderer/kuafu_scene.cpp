@@ -121,7 +121,7 @@ void KuafuRigidBody::setVisible(bool visible) {
   for (auto idx: mKGeometryInstanceIndices) {
     auto instance = mParentScene->getKScene().getGeometryInstance(idx);
     auto geometry = mParentScene->getKScene().getGeometryByGlobalIndex(instance->geometryIndex);
-    auto matIdx = geometry->matIndex.front();  // TODO: kuafu_urgent
+    auto matIdx = geometry->matIndex.front();    // TODO: kuafu_urgent: may loss material
     if (visible && mHaveSetInvisible) {
       spdlog::get("SAPIEN")->warn("Fix Me: KF: The object may have "
                                   "lost the original material due to previously setInvisible.");
@@ -135,10 +135,9 @@ void KuafuRigidBody::setVisible(bool visible) {
     }
 
     if (!visible && ! mHaveSetInvisible) {
-//      spdlog::get("SAPIEN")->warn("The object may lost material if set invisible");
       auto mat = kuafu::global::materials[matIdx];
       mat.alpha = 0.0f;
-      geometry->setMaterial(mat);
+      geometry->setMaterial(mat);                // TODO: kuafu_urgent: may loss material
       geometry->initialized = false;
       mParentScene->getKScene().markGeometriesChanged();
       mParentScene->getKScene().markGeometryInstancesChanged();
@@ -161,7 +160,8 @@ void KuafuRigidBody::setRenderMode(uint32_t mode) {
 }
 
 void KuafuRigidBody::destroy() {
-  /* TODO:kuafu_urgent rewrite this */
+  // TODO: kuafu_urgent
+  spdlog::get("SAPIEN")->warn("KuafuRigidBody::destroy: FIXME, tmp impl");
   for (auto idx: mKGeometryInstanceIndices) {
     auto obj = mParentScene->getKScene().getGeometryInstance(idx);
 
@@ -171,8 +171,8 @@ void KuafuRigidBody::destroy() {
       for (int j = 0; j < 4; j++)
         t[i][j] = 0;
 
-    t[0][0] = t[1][1] = t[2][2] = 0.001f;
-    t[3][0] = t[3][1] = t[3][2] = 1000.f;
+    t[0][0] = t[1][1] = t[2][2] = 0.0001f;
+    t[3][0] = t[3][1] = t[3][2] = 10000.f;
     t[3][3] = 1.f;
 
     obj->setTransform(t);
@@ -187,7 +187,7 @@ IPxrRigidbody *KuafuScene::addRigidbodyWithNewMaterial(
     auto obj = kuafu::loadScene(meshFile, true);
     if (material)
       for (auto &o: obj)
-        o->setMaterial(*std::dynamic_pointer_cast<KuafuMaterial>(material)->getKMaterial());
+        o->setMaterial(std::dynamic_pointer_cast<KuafuMaterial>(material)->getKMaterial());
 
     auto transform = glm::scale(glm::mat4(1.0F), glm::vec3(scale.x, scale.y, scale.z));
     std::vector<size_t> rigidBodyIndices;
@@ -239,7 +239,7 @@ IPxrRigidbody *KuafuScene::addRigidbody(physx::PxGeometryType::Enum type,
 //    geometry = kuafu::createCube(true, kMat);
     break;
   default:
-    spdlog::get("SAPIEN")->error("Failed to add Rididbody: unimplemented shape");
+    spdlog::get("SAPIEN")->error("Failed to add Rigidbody: unimplemented shape");
     return nullptr;
   }
 
@@ -264,18 +264,17 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
   g->path = "";
   g->geometryIndex = kuafu::global::geometryIndex++;
   g->dynamic = true;
-  g->subMeshCount = 1;
 
   if (indices.size() % 3 != 0)
     spdlog::get("SAPIEN")->error("invalid geometry: indices");
 
   size_t totalAmountOfTriangles = indices.size() / 3;
 
-  auto kMat = std::dynamic_pointer_cast<KuafuMaterial>(material)->getKMaterial();
-  kuafu::global::materials.push_back(*kMat);  // copy
+  kuafu::global::materials.push_back(
+      std::dynamic_pointer_cast<KuafuMaterial>(material)->getKMaterial());
   ++kuafu::global::materialIndex;             // TODO: check existing dup mat
 
-  g->isOpaque = (kMat->alpha >= 1.0F);
+  g->isOpaque = (material->getBaseColor()[3] >= 1.0F);
   g->matIndex = std::vector<uint32_t>(totalAmountOfTriangles, kuafu::global::materialIndex - 1);
 
   g->indices = indices;
@@ -329,6 +328,10 @@ ICamera *KuafuScene::addCamera(const std::string &name, uint32_t width, uint32_t
     spdlog::get("SAPIEN")->warn(
         "Current camera implementation does not support non-square"
         "pixels, and fovy will be used. Set fovx to 0 to suppress this warning");
+  }
+  if (!shaderDir.empty()) {
+    spdlog::get("SAPIEN")->warn(
+        "KF: user-specified shader not supported");
   }
   auto cam = std::make_unique<KuafuCamera>(name, width, height, fovy, this);
   mCameras.push_back(std::move(cam));

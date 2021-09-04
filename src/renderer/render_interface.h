@@ -34,21 +34,41 @@ struct RenderMeshGeometry {
 class IPxrMaterial {
 public:
   virtual void setBaseColor(std::array<float, 4> color) = 0;
+  [[nodiscard]] virtual std::array<float, 4> getBaseColor() const = 0;
   virtual void setRoughness(float roughness) = 0;
+  [[nodiscard]] virtual float getRoughness() const = 0;
   virtual void setSpecular(float specular) = 0;
+  [[nodiscard]] virtual float getSpecular() const = 0;
   virtual void setMetallic(float metallic) = 0;
+  [[nodiscard]] virtual float getMetallic() const = 0;
 
   virtual void setEmission(std::array<float, 4> color) {
-    spdlog::get("SAPIEN")->warn("emissive is not supported");
+    spdlog::get("SAPIEN")->warn("setEmission is not supported");
+  };
+  [[nodiscard]] virtual std::array<float, 4> getEmission() const {
+    spdlog::get("SAPIEN")->warn("getEmission is not supported");
+    return {};
   };
   virtual void setIOR(float ior) {
-    spdlog::get("SAPIEN")->warn("ior is not supported");
+    spdlog::get("SAPIEN")->warn("setIOR is not supported");
+  };
+  [[nodiscard]] virtual float getIOR() const {
+    spdlog::get("SAPIEN")->warn("getIOR is not supported");
+    return 0.0;
   };
   virtual void setTransmission(float transmission) {
-    spdlog::get("SAPIEN")->warn("transmission is not supported");
+    spdlog::get("SAPIEN")->warn("setTransmission is not supported");
+  };
+  [[nodiscard]] virtual float getTransmission() const {
+    spdlog::get("SAPIEN")->warn("getTransmission is not supported");
+    return 0.0;
   };
   virtual void setDiffuseTex(std::string_view path) {
-    spdlog::get("SAPIEN")->warn("diffuse tex is not supported");
+    spdlog::get("SAPIEN")->warn("setDiffuseTex tex is not supported");
+  };
+  [[nodiscard]] virtual std::string getDiffuseTex() const {
+    spdlog::get("SAPIEN")->warn("getDiffuseTex is not supported");
+    return "";
   };
 
   virtual ~IPxrMaterial() = default;
@@ -62,7 +82,7 @@ struct RenderShape {
   std::shared_ptr<IPxrMaterial> material;
   uint32_t objId = 0;
 
-  inline RenderShape(){};
+  inline RenderShape() = default;
   RenderShape(RenderShape const &) = delete;
   RenderShape(RenderShape &&) = default;
   RenderShape &operator=(RenderShape const &) = delete;
@@ -76,20 +96,24 @@ public:
   float specular = 0.f;
   float roughness = 0.85f;
   float metallic = 0.f;
-  std::string color_texture = "";
-  std::string specular_texture = "";
-  std::string normal_texture = "";
+  std::string color_texture;
+  std::string specular_texture;
+  std::string normal_texture;
 
   inline void setBaseColor(std::array<float, 4> color) override { base_color = color; }
+  [[nodiscard]] inline std::array<float, 4> getBaseColor() const override { return base_color; }
   inline void setRoughness(float value) override { roughness = value; }
+  [[nodiscard]] inline float getRoughness() const override { return roughness; }
   inline void setSpecular(float value) override { specular = value; }
+  [[nodiscard]] inline float getSpecular() const override { return specular; }
   inline void setMetallic(float value) override { metallic = value; }
+  [[nodiscard]] inline float getMetallic() const override { return metallic; }
 };
 
 class ISensor {
 public:
   virtual void setInitialPose(physx::PxTransform const &pose) = 0;
-  virtual physx::PxTransform getPose() const = 0;
+  [[nodiscard]] virtual physx::PxTransform getPose() const = 0;
   virtual void setPose(physx::PxTransform const &pose) = 0;
   virtual IPxrScene *getScene() = 0;
 
@@ -272,7 +296,7 @@ public:
 
 class IPxrRenderer {
 public:
-  virtual IPxrScene *createScene(std::string const &name = "") = 0;
+  virtual IPxrScene *createScene(std::string const &name) = 0;
   virtual void removeScene(IPxrScene *scene) = 0;
   virtual std::shared_ptr<IPxrMaterial> createMaterial() = 0;
 

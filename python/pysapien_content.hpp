@@ -408,7 +408,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_property_readonly("geometry", &SCollisionShape::getGeometry);
 
   //======== Render Interface ========//
-  PyRenderMaterial
+  PyRenderMaterial   // TODO: jet: I suggest deprecate the original set_xxx and
+                     //            change to python style property read/write interface
       .def(
           "set_base_color",
           [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
@@ -425,7 +426,22 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("set_roughness", &Renderer::IPxrMaterial::setRoughness, py::arg("roughness"))
       .def("set_transmission", &Renderer::IPxrMaterial::setTransmission, py::arg("transmission"))
       .def("set_ior", &Renderer::IPxrMaterial::setIOR, py::arg("ior"))
-      .def("set_diffuse_tex", &Renderer::IPxrMaterial::setDiffuseTex, py::arg("path"));
+      .def("set_diffuse_tex", &Renderer::IPxrMaterial::setDiffuseTex, py::arg("path"))
+
+      .def_property("base_color",
+                    &Renderer::IPxrMaterial::getBaseColor,
+                    [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+                      mat.setBaseColor({color.at(0), color.at(1), color.at(2), color.at(3)}); })
+      .def_property("emission",
+                    &Renderer::IPxrMaterial::getEmission,
+                    [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+                      mat.setEmission({color.at(0), color.at(1), color.at(2), color.at(3)}); })
+      .def_property("specular", &Renderer::IPxrMaterial::getSpecular, &Renderer::IPxrMaterial::setSpecular)
+      .def_property("metallic", &Renderer::IPxrMaterial::getMetallic, &Renderer::IPxrMaterial::setMetallic)
+      .def_property("roughness", &Renderer::IPxrMaterial::getRoughness, &Renderer::IPxrMaterial::setRoughness)
+      .def_property("transmission", &Renderer::IPxrMaterial::getTransmission, &Renderer::IPxrMaterial::setTransmission)
+      .def_property("ior", &Renderer::IPxrMaterial::getIOR, &Renderer::IPxrMaterial::setIOR)
+      .def_property("diffuse_tex", &Renderer::IPxrMaterial::getDiffuseTex, &Renderer::IPxrMaterial::setDiffuseTex);
 
   //     // TODO: implement those together with UV
   //     // .def_readwrite("color_texture", &Renderer::PxrMaterial::color_texture)
