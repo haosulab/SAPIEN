@@ -13,7 +13,7 @@ public:
           std::shared_ptr<kuafu::Camera> camera):
   kuafu::Window(width, height, title, flags), pCamera(camera) {}
 
-  auto init() -> bool override {
+  bool init() override {
     if (!kuafu::Window::init()) {
       return false;
     }
@@ -176,6 +176,6 @@ public:
 
 private:
   bool mMouseVisible = true;
-  std::shared_ptr<kuafu::Camera> pCamera;
+  std::shared_ptr<kuafu::Camera> pCamera {};
 };
 }

@@ -88,6 +88,8 @@ private:
 
 class SActiveLight : public SLight {
 public:
+  inline physx::PxVec3 getPosition() const { return getRendererLight()->getPosition(); }
+  inline void setPosition(physx::PxVec3 position) { getRendererLight()->setPosition(position); }
   inline void setFov(float fov) const { getRendererLight()->setFov(fov); }
   inline float getFov() const { return getRendererLight()->getFov(); }
 

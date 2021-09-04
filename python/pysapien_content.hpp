@@ -1840,7 +1840,22 @@ Args:
       .def("set_shadow_parameters", &SSpotLight::setShadowParameters, py ::arg("near"),
            py::arg("far"))
       .def_property_readonly("shadow_near", &SSpotLight::getShadowNear)
-      .def_property_readonly("shadow_far", &SSpotLight::getShadowFar);
+      .def_property_readonly("shadow_far", &SSpotLight::getShadowFar)
+      .def("set_fov", &SSpotLight::setFov)
+      .def_property_readonly("fov", &SSpotLight::getFov);
+
+  PyActiveLightEntity
+      .def(
+          "set_position",
+          [](SActiveLight &light, py::array_t<float> position) {
+            light.setPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def_property_readonly("position",
+                             [](SActiveLight &light) { return vec32array(light.getPosition()); })
+      .def("set_fov", &SActiveLight::setFov)
+      .def_property_readonly("fov", &SActiveLight::getFov);
+
 
   // Renderer Light (will be deprecated)
   PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
@@ -2079,8 +2094,8 @@ Args:
                                         {color.at(0), color.at(1), color.at(2)},
                                         fov, path);
           },
-          py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"))
-
+          py::arg("pose"), py::arg("tex_path"),
+          py::arg("color") = make_array<float>({1.f, 1.f, 1.f}), py::arg("fov") = 1.57)
       .def(
           "add_mesh_from_file",
           [](Renderer::IPxrScene &scene, std::string const &meshFile, py::array_t<float> scale) {

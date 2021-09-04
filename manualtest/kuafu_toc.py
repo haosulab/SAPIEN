@@ -1,7 +1,7 @@
 # In this demo, we will render a TOC scene using Kuafu backend.
 # Images will be save to local menu every 400 frames.
 # You will need to clone https://github.com/haosulab/ICCV2021_Diagnosis/
-# and set `materials_root` to run this demo.
+# and set `repo_root` to run this demo.
 #
 # By Jet <i@jetd.me>
 #
@@ -22,13 +22,14 @@ def load_obj(scene, materials_root, obj_name, pose=Pose()):
 
 
 def main():
-    materials_root = '/zdata/ssource/ICCV2021_Diagnosis/ocrtoc_materials/'
+    repo_root = '/zdata/ssource/ICCV2021_Diagnosis/'
+    materials_root = os.path.join(repo_root, 'ocrtoc_materials')
 
     sim = sapien.Engine()
 
     render_config = sapien.KuafuConfig()
     render_config.use_viewer = True
-    render_config.spp = 128
+    render_config.spp = 16
     render_config.max_bounces = 6
     render_config.width = 960
     render_config.height = 540
@@ -70,7 +71,7 @@ def main():
                 "min_patch_radius": 0.005
             }}}
 
-    robot = loader.load('/zdata/ssource/ICCV2021_Diagnosis/sapien_simulator/urdf/xarm7_sapien.urdf', urdf_config)
+    robot = loader.load(os.path.join(repo_root, 'sapien_simulator/urdf/xarm7_sapien.urdf'), urdf_config)
     init_qpos = np.array([0, -0.5235, 0, 0.5235, 0, 1.0470, -0.78539, 0, 0, 0, 0, 0, 0])
 
     robot.set_qpos(init_qpos)
@@ -83,11 +84,21 @@ def main():
         elif jidx in range(11, 13):
             joint.set_drive_property(1000, 200, 1000)
 
-    load_obj(scene, materials_root, 'camera', Pose(p=[-0.2, 0, 4]))
-    load_obj(scene, materials_root, 'voss', Pose(p=[0.3, 0.2, 4]))
-    load_obj(scene, materials_root, 'steel_ball', Pose(p=[0.4, -0.2, 4]))
-    load_obj(scene, materials_root, 'tennis_ball', Pose(p=[0.3, -0.2, 4]))
-    load_obj(scene, materials_root, 'coca_cola', Pose(p=[0.2, 0.3, 4]))
+    load_obj(scene, materials_root, 'camera', Pose(p=[0.7, 0, 1]))
+    load_obj(scene, materials_root, 'voss', Pose(p=[0.3, 0.2, 1]))
+    load_obj(scene, materials_root, 'steel_ball', Pose(p=[0.4, -0.2, 1]))
+    load_obj(scene, materials_root, 'tennis_ball', Pose(p=[0.3, -0.2, 1]))
+    load_obj(scene, materials_root, 'coca_cola', Pose(p=[0.2, 0.3, 1]))
+
+    # ceiling light
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.set_base_color([1, 1, 1, 1])
+    material.set_emission([1, 1, 1, 2.0])
+    builder.add_box_visual(half_size=[5, 5, 0.1], material=material)
+    builder.add_box_collision(half_size=[5, 5, 0.1])
+    ceil_light = builder.build_static()
+    ceil_light.set_pose(Pose(p=[0, 0, 3]))
 
     # builder = scene.create_actor_builder()
     # builder.add_visual_from_file(
@@ -103,7 +114,7 @@ def main():
 
     scene.step()
 
-    scene.renderer_scene.set_ambient_light([0.1, 0.1, 0.1])
+    scene.renderer_scene.set_ambient_light([0.003, 0.003, 0.003])
     # dirlight = scene.add_directional_light(
     #     [0, 0.5, -1], color=[5.0, 5.0, 5.0]
     # )
@@ -117,11 +128,11 @@ def main():
     # )
 
     alight = scene.add_active_light(
-        # cam_mount.get_pose(),
-        Pose([0, 0, 1]),
-        [100, 0, 0],
-        1.57,
-        "../3rd_party/kuafu/resources/d415-pattern-sq.png"
+        pose=Pose([0, 0, 0.8]),
+        # pose=cam_mount.get_pose(),
+        color=[0, 0, 0],
+        fov=1.57,
+        tex_path="../3rd_party/kuafu/resources/d415-pattern-sq.png"
     )
 
     # plight = scene.add_point_light(
@@ -150,9 +161,19 @@ def main():
         scene.update_render()
         cam.take_picture()     # will update viewer and download rgba for now (sync)
         cnt += 1
+
         if cnt % 400 == 0:
+            ceil_light.set_pose(Pose(p=[0, 0, 3]))
+            alight.set_color([0, 0, 0])
+
+        if cnt % 400 == 200:
+            ceil_light.set_pose(Pose(p=[100, 100, 3]))
+            alight.set_color([1, 0, 0])
+
+        if cnt % 400 == 300:
             p = cam.get_color_rgba()
             import matplotlib.pyplot as plt
             plt.imsave(f'{cnt:04d}.png', p)
+
 
 main()

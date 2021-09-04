@@ -163,10 +163,13 @@ public:
 
 class IActiveLight : public ILight {
 public:
+  virtual physx::PxVec3 getPosition() const = 0;
+  virtual void setPosition(physx::PxVec3 position) = 0;
   virtual void setFov(float fov) = 0;
   virtual float getFov() const = 0;
 
   virtual void setTexture(std::string_view path) = 0;
+  virtual std::string_view getTexture() = 0;
 };
 
 class IPxrRigidbody {

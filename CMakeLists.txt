@@ -11,6 +11,8 @@ set(SAPIEN_DLPACK_INTEROP TRUE CACHE BOOL "Whether to use render to tensor")
 set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
 set(BUILD_DEBUG_VIEWER FALSE CACHE BOOL "For C++ debug only")
 
+add_definitions(-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC)
+
 if (${SAPIEN_DLPACK_INTEROP})
     set(SVULKAN2_CUDA_INTEROP TRUE)
 endif()
@@ -68,12 +70,6 @@ else ()
             "3rd_party/optifuser/build/lib")
 endif ()
 
-## local changes by jet for clion
-#set(pinocchio_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/pinocchio/")
-#set(eigenpy_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/eigenpy/")
-#set(hpp-fcl_DIR "/zdata/anaconda3/envs/sapien/lib/cmake/hpp-fcl/")
-#set(octomap_DIR "/zdata/anaconda3/envs/sapien/share/octomap/")
-#include_directories("/zdata/anaconda3/envs/sapien/include/")
 
 if (${BUILD_WITH_PINOCCHIO_SUPPORT})
     # Pinocchio uses its own FindCppAD but does not provide it

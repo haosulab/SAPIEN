@@ -4,28 +4,13 @@
 
 #include "kuafu_utils.hpp"
 #include "kuafu_scene.hpp"
+#include "kuafu_light.hpp"
 #include "kuafu_renderer.hpp"
 #include <core/context/global.hpp>
 #include <core/geometry.hpp>
 #include <spdlog/spdlog.h>
 
 namespace sapien::Renderer {
-
-glm::mat4 toGlmMat4(physx::PxMat44 mat) {
-  glm::mat4 ret;
-  for (int i = 0; i < 4; i++)
-    for (int j = 0; j < 4; j++)
-      ret[i][j] = mat[i][j];
-  return ret;
-}
-
-physx::PxMat44 toPxMat44(glm::mat4 mat) {
-  physx::PxMat44 ret;
-  for (int i = 0; i < 4; i++)
-    for (int j = 0; j < 4; j++)
-      ret[i][j] = mat[i][j];
-  return ret;
-}
 
 //========= KCamera =========//
 void KCamera::processKeyboard() {
@@ -112,7 +97,7 @@ IPxrScene *KuafuCamera::getScene() { return pParentScene; }
 //========= KuafuRigidBody =========//
 
 KuafuRigidBody::KuafuRigidBody(
-    KuafuScene *scene,  std::vector<size_t> indices, physx::PxVec3 scale)
+    KuafuScene *scene,  std::vector<size_t> indices, const physx::PxVec3& scale)
     : mParentScene(scene), mScale(scale), mKGeometryInstanceIndices(std::move(indices)) {}
 
 void KuafuRigidBody::setInitialPose(const physx::PxTransform &transform) {
@@ -138,7 +123,8 @@ void KuafuRigidBody::setVisible(bool visible) {
     auto geometry = mParentScene->getKScene().getGeometryByGlobalIndex(instance->geometryIndex);
     auto matIdx = geometry->matIndex.front();  // TODO: kuafu_urgent
     if (visible && mHaveSetInvisible) {
-      spdlog::get("SAPIEN")->warn("The object may have lost original material");
+      spdlog::get("SAPIEN")->warn("Fix Me: KF: The object may have "
+                                  "lost the original material due to previously setInvisible.");
       auto mat = kuafu::global::materials[matIdx];
       mat.alpha = 1.0f;
       geometry->setMaterial(mat);
@@ -149,7 +135,7 @@ void KuafuRigidBody::setVisible(bool visible) {
     }
 
     if (!visible && ! mHaveSetInvisible) {
-      spdlog::get("SAPIEN")->warn("The object may lost material if set invisible");
+//      spdlog::get("SAPIEN")->warn("The object may lost material if set invisible");
       auto mat = kuafu::global::materials[matIdx];
       mat.alpha = 0.0f;
       geometry->setMaterial(mat);
@@ -195,7 +181,8 @@ void KuafuRigidBody::destroy() {
 }
 
 IPxrRigidbody *KuafuScene::addRigidbodyWithNewMaterial(
-    const std::string &meshFile, const physx::PxVec3 &scale, std::shared_ptr<IPxrMaterial> material) {
+    const std::string &meshFile, const physx::PxVec3 &scale,
+    const std::shared_ptr<IPxrMaterial>& material) {
   try {
     auto obj = kuafu::loadScene(meshFile, true);
     if (material)
@@ -377,9 +364,10 @@ IPointLight *KuafuScene::addPointLight(const std::array<float, 3> &position,
   light->color = {color[0], color[1], color[2]};
   light->strength = 1.0;
   light->radius = 0.1;    // TODO: expose this
-  getKScene().addPointLight(light);
-  spdlog::get("SAPIEN")->warn("addPointLight: tmp impl");
-  return nullptr;
+
+  getKScene().addPointLight(light);          // TODO: check if success
+  mPointLights.push_back(std::make_shared<KuafuPointLight>(light));
+  return mPointLights.back().get();
 }
 
 IDirectionalLight *KuafuScene::addDirectionalLight(
@@ -390,9 +378,10 @@ IDirectionalLight *KuafuScene::addDirectionalLight(
   light->color = {color[0], color[1], color[2]};
   light->strength = 1.0;
   light->softness = 0.1;    // TODO: expose this
-  getKScene().setDirectionalLight(light);
-  spdlog::get("SAPIEN")->warn("addDirectionalLight: tmp impl");
-  return nullptr;
+
+  getKScene().setDirectionalLight(light);       // TODO: check if success
+  mDirectionalLights.push_back(std::make_shared<KuafuDirectionalLight>(light));
+  return mDirectionalLights.back().get();
 }
 
 ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
@@ -410,9 +399,10 @@ ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
   light->fov = fovInner;
   if (fovInner != fovOuter)
     spdlog::get("SAPIEN")->warn("addSpotLight: fovInner != fovOuter api not exposed");
-  getKScene().addActiveLight(light);
-  spdlog::get("SAPIEN")->warn("addSpotLight: tmp impl");
-  return nullptr;
+
+  getKScene().addActiveLight(light);       // TODO: check if success
+  mSpotLights.push_back(std::make_shared<KuafuSpotLight>(light));
+  return mSpotLights.back().get();
 }
 
 IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
@@ -426,9 +416,9 @@ IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
   light->texPath = texPath;
   light->fov = fov;
 
-  getKScene().addActiveLight(light);
-  spdlog::get("SAPIEN")->warn("addActiveLight: tmp impl");
-  return nullptr;
+  getKScene().addActiveLight(light);        // TODO: check if success
+  mActiveLights.push_back(std::make_shared<KuafuActiveLight>(light));
+  return mActiveLights.back().get();
 };
 
 void KuafuScene::removeLight(ILight *light) {

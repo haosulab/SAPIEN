@@ -3,10 +3,10 @@
 //
 
 #pragma once
-#include "render_interface.h"
 #include "kuafu.hpp"
+#include "kuafu_light.hpp"
+#include "render_interface.h"
 #include <spdlog/spdlog.h>
-
 #include <utility>
 
 namespace sapien::Renderer {
@@ -78,7 +78,7 @@ public:
   // ISensor
 
   void setInitialPose(physx::PxTransform const &pose) override;
-  physx::PxTransform getPose() const override;
+  [[nodiscard]] physx::PxTransform getPose() const override;
   void setPose(physx::PxTransform const &pose) override;
   IPxrScene *getScene() override;
 
@@ -100,21 +100,22 @@ class KuafuRigidBody : public IPxrRigidbody {
   bool mHaveSetInvisible = false;
 
 public:
-  KuafuRigidBody(KuafuScene *scene, std::vector<size_t> indices, physx::PxVec3 scale = {1.0, 1.0, 1.0});
+  KuafuRigidBody(KuafuScene *scene, std::vector<size_t> indices,
+                 const physx::PxVec3& scale = {1.0, 1.0, 1.0});
   KuafuRigidBody(KuafuRigidBody const &other) = delete;
   KuafuRigidBody &operator=(KuafuRigidBody const &other) = delete;
 
   inline void setName(std::string const &name) override { mName = name; };
-  inline std::string getName() const override { return mName; };
-  inline auto getKGeometryInstanceIndices() const { return mKGeometryInstanceIndices; };
+  [[nodiscard]] inline std::string getName() const override { return mName; };
+  [[nodiscard]] inline auto getKGeometryInstanceIndices() const { return mKGeometryInstanceIndices; };
 
   inline void setUniqueId(uint32_t uniqueId) override { /* TODO:kuafu_urgent */ };
-  inline uint32_t getUniqueId() const override { return mUniqueId; };
+  [[nodiscard]] inline uint32_t getUniqueId() const override { return mUniqueId; };
   inline void setSegmentationId(uint32_t segmentationId) override { /* TODO:kuafu_urgent */ };
-  inline uint32_t getSegmentationId() const override { return mSegmentationId; };
+  [[nodiscard]] inline uint32_t getSegmentationId() const override { return mSegmentationId; };
   inline void setSegmentationCustomData(std::vector<float> const &customData) override { /* TODO:kuafu_urgent */ };
   void setInitialPose(const physx::PxTransform &transform) override;
-  inline physx::PxTransform getInitialPose() const { return mInitialPose; };
+  [[nodiscard]] inline physx::PxTransform getInitialPose() const { return mInitialPose; };
   void update(const physx::PxTransform &transform) override;
 
   void setVisibility(float visibility) override;
@@ -123,7 +124,7 @@ public:
 
   void destroy() override;
 
-  std::vector<std::unique_ptr<RenderShape> > getRenderShapes() const {
+  [[nodiscard]] std::vector<std::unique_ptr<RenderShape> > getRenderShapes() const override {
     spdlog::get("SAPIEN")->error("getRenderShapes not implemented yet");
     return {};
   };
@@ -138,11 +139,18 @@ class KuafuScene : public IPxrScene {
   std::vector<std::unique_ptr<KuafuRigidBody>> mBodies;
   std::vector<std::unique_ptr<KuafuCamera>> mCameras;
 
+  std::vector<std::shared_ptr<KuafuPointLight>> mPointLights;
+  std::vector<std::shared_ptr<KuafuDirectionalLight>> mDirectionalLights;
+  std::vector<std::shared_ptr<KuafuSpotLight>> mSpotLights;
+  std::vector<std::shared_ptr<KuafuActiveLight>> mActiveLights;
+
+
   bool mUseViewer = false;
 
 public:
   IPxrRigidbody *addRigidbodyWithNewMaterial(
-      const std::string &meshFile, const physx::PxVec3 &scale, std::shared_ptr<IPxrMaterial> material = nullptr);
+      const std::string &meshFile, const physx::PxVec3 &scale,
+      const std::shared_ptr<IPxrMaterial>& material = nullptr);   // to make clang happy
 
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
   IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
@@ -171,7 +179,7 @@ public:
   std::vector<ICamera *> getCameras() override;
 
   void setAmbientLight(std::array<float, 3> const &color) override;
-  std::array<float, 3> getAmbientLight() const override;
+  [[nodiscard]] std::array<float, 3> getAmbientLight() const override;
 
   IPointLight *addPointLight(std::array<float, 3> const &position,
                                      std::array<float, 3> const &color, bool enableShadow,
@@ -194,7 +202,7 @@ public:
   void removeLight(ILight *light) override;
 
   /** call this function before every rendering time frame */
-  inline void updateRender() {
+  inline void updateRender() override {
 //    spdlog::get("SAPIEN")->error("updateRender not implemented yet");
   };
 

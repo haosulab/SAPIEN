@@ -19,11 +19,11 @@ def main():
     sim = sapien.Engine()
 
     render_config = sapien.KuafuConfig()
-    render_config.spp = 32
-    render_config.max_bounces = 4
+    render_config.spp = 64
+    render_config.max_bounces = 6
     render_config.use_viewer = True
-    render_config.width = 600
-    render_config.height = 600
+    render_config.width = 400
+    render_config.height = 400
 
     renderer = sapien.KuafuRenderer(render_config)
     sim.set_renderer(renderer)
@@ -157,7 +157,7 @@ def main():
     scene.set_timestep(1 / 60)
 
     mount = scene.create_actor_builder().build_kinematic()
-    mount.set_pose(Pose([-3, -3, 4], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
+    mount.set_pose(Pose([-3.2, -3.2, 4.5], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
     cam1 = scene.add_mounted_camera("cam", mount, Pose([0, 0, 0]), 1920, 1080, 0, 1, 0.1, 100)
 
     # print(cam1.render_target_names)
@@ -244,7 +244,7 @@ def main():
             np.random.rand(),
             np.random.rand(), 1.0])
         material.set_roughness(np.random.rand())
-        material.set_metallic(np.random.rand())
+        # material.set_metallic(np.random.rand())
         r = 0.2 + np.random.rand() * 0.5
         builder.add_sphere_visual(radius=r, material=material)
         builder.add_sphere_collision(radius=r)
@@ -260,7 +260,7 @@ def main():
             np.random.rand(),
             np.random.rand(), 1.0])
         material.set_roughness(np.random.rand())
-        material.set_metallic(np.random.rand())
+        # material.set_metallic(np.random.rand())
         r = 0.1 + np.random.rand() * 0.4
         l = 0.2 + np.random.rand() * 0.5
         builder.add_capsule_visual(radius=r, half_length=l, material=material)
@@ -286,28 +286,42 @@ def main():
             np.random.rand(), np.random.rand(), 16 + 6 * i + np.random.rand()]))
 
     builder = scene.create_actor_builder()
-    builder.add_box_visual(half_size=[0.1, 10, 5])
+    wall_material = renderer.create_material()
+    wall_material.set_base_color([1, 0, 0, 1])
+    wall_material.set_emission([1, 0, 0, 0.3])
+    builder.add_box_visual(half_size=[0.1, 10, 5], material=wall_material)
     builder.add_box_collision(half_size=[0.1, 10, 5])
     w1 = builder.build_static()
     w1.set_pose(Pose(p=[4, 0, 0]))
 
     builder = scene.create_actor_builder()
-    builder.add_box_visual(half_size=[0.1, 10, 5])
-    builder.add_box_collision(half_size=[0.1, 10, 5])
-    w2 = builder.build_static()
-    w2.set_pose(Pose(p=[-4, 0, 0]))
+    wall_material = renderer.create_material()
+    wall_material.set_base_color([1, 0, 0, 1])
+    wall_material.set_emission([0, 1, 0, 0.3])
+    builder.add_box_visual(half_size=[10, 0.1, 5], material=wall_material)
+    builder.add_box_collision(half_size=[10, 0.1, 5])
+    w4 = builder.build_static()
+    w4.set_pose(Pose(p=[0, -4, 0]))
 
     builder = scene.create_actor_builder()
-    builder.add_box_visual(half_size=[10, 0.1, 5])
+    wall_material = renderer.create_material()
+    wall_material.set_base_color([0, 0, 1, 1])
+    wall_material.set_emission([0, 0, 1, 0.3])
+    builder.add_box_visual(half_size=[10, 0.1, 5], material=wall_material)
     builder.add_box_collision(half_size=[10, 0.1, 5])
     w3 = builder.build_static()
     w3.set_pose(Pose(p=[0, 4, 0]))
 
     builder = scene.create_actor_builder()
-    builder.add_box_visual(half_size=[10, 0.1, 5])
-    builder.add_box_collision(half_size=[10, 0.1, 5])
-    w4 = builder.build_static()
-    w4.set_pose(Pose(p=[0, -4, 0]))
+    wall_material = renderer.create_material()
+    wall_material.set_base_color([1, 1, 1, 1])
+    wall_material.set_emission([1, 1, 1, 0.3])
+    builder.add_box_visual(half_size=[0.1, 10, 5], material=wall_material)
+    builder.add_box_collision(half_size=[0.1, 10, 5])
+    w2 = builder.build_static()
+    w2.set_pose(Pose(p=[-4, 0, 0]))
+
+
 
     # builder = scene.create_actor_builder()
     # material = renderer.create_material()
@@ -329,9 +343,9 @@ def main():
 
     scene.renderer_scene.set_ambient_light([0.2, 0.2, 0.15])
 
-    scene.add_directional_light([0.4, 0.4, -1], [2, 2, 2])
+    dlight = scene.add_directional_light([0.4, 0.4, -1], [3, 3, 3])
 
-    plight = scene.add_point_light(position=[0, 0, 3], color=[8, 8, 8])
+    plight = scene.add_point_light(position=[0, 0, 3], color=[10, 10, 10])
 
     # light = scene.renderer_scene.add_spot_light(
     #     [0, 0, 2], [0, 0, -1], np.pi / 2, [1, 1, 1], True
@@ -356,10 +370,10 @@ def main():
         scene.update_render()
         cam1.take_picture()
         cnt += 1
-        if cnt % 100 == 0:
-            p = cam1.get_color_rgba()
-            import matplotlib.pyplot as plt
-            plt.imsave(f'{cnt:04d}.png', p)
+        # if cnt % 100 == 0:
+        #     p = cam1.get_color_rgba()
+        #     import matplotlib.pyplot as plt
+        #     plt.imsave(f'{cnt:04d}.png', p)
 
 main()
 

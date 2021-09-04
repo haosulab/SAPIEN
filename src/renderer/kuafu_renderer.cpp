@@ -70,7 +70,6 @@ KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
 
   pKRenderer = std::make_shared<kuafu::Kuafu>(config, window, camera, nullptr);
 
-  pKRenderer->getScene().removeEnvironmentMap();
   pKRenderer->getScene().setGeometries({});
   pKRenderer->getScene().setGeometryInstances({});
 }
