@@ -27,6 +27,8 @@ def main():
 
     sim = sapien.Engine()
 
+    sapien.KuafuRenderer.set_log_level('debug')
+
     render_config = sapien.KuafuConfig()
     render_config.use_viewer = True
     render_config.spp = 16

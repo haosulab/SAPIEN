@@ -227,9 +227,6 @@ void buildSapien(py::module &m) {
   auto PyVulkanRenderer =
       py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer,
                  std::shared_ptr<Renderer::SVulkan2Renderer>>(m, "VulkanRenderer");
-  auto PyVulkanMaterial =
-      py::class_<Renderer::SVulkan2Material, Renderer::IPxrMaterial,
-                 std::shared_ptr<Renderer::SVulkan2Material>>(m, "VulkanMaterial");
   auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m, "VulkanCamera");
   auto PyVulkanWindow = py::class_<Renderer::SVulkan2Window>(m, "VulkanWindow");
   auto PyVulkanScene = py::class_<Renderer::SVulkan2Scene, Renderer::IPxrScene>(m, "VulkanScene");
@@ -266,7 +263,8 @@ void buildSapien(py::module &m) {
       .def_readwrite("clear_color", &Renderer::KuafuConfig::mClearColor)
       .def_readwrite("spp", &Renderer::KuafuConfig::mPerPixelSampleRate)
       .def_readwrite("max_bounces", &Renderer::KuafuConfig::mPathDepth)
-      .def_readwrite("accumulate_frames", &Renderer::KuafuConfig::mAccumulateFrames);
+      .def_readwrite("accumulate_frames", &Renderer::KuafuConfig::mAccumulateFrames)
+      .def_readwrite("use_denoiser", &Renderer::KuafuConfig::mUseDenoiser);
 
   auto PyKuafuRenderer =
       py::class_<Renderer::KuafuRenderer, Renderer::IPxrRenderer,
@@ -275,6 +273,7 @@ void buildSapien(py::module &m) {
       .def(py::init<Renderer::KuafuConfig>(), py::arg("config") = Renderer::KuafuConfig())
       .def_static("_set_default_assets_path", &Renderer::KuafuRenderer::setDefaultAssetsPath,
                   py::arg("assets_path"))
+      .def_static("set_log_level", &Renderer::KuafuRenderer::setLogLevel, py::arg("level"))
       .def("set_environment_map", &Renderer::KuafuRenderer::setEnvironmentMap,
            py::arg("env_map_path"))
       .def_property_readonly("is_running", &Renderer::KuafuRenderer::isRunning);
@@ -408,8 +407,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_property_readonly("geometry", &SCollisionShape::getGeometry);
 
   //======== Render Interface ========//
-  PyRenderMaterial   // TODO: jet: I suggest deprecate the original set_xxx and
-                     //            change to python style property read/write interface
+  PyRenderMaterial
       .def(
           "set_base_color",
           [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
@@ -444,26 +442,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_property("diffuse_tex", &Renderer::IPxrMaterial::getDiffuseTex, &Renderer::IPxrMaterial::setDiffuseTex);
 
   //     // TODO: implement those together with UV
-  //     // .def_readwrite("color_texture", &Renderer::PxrMaterial::color_texture)
   //     // .def_readwrite("specular_texture", &Renderer::PxrMaterial::specular_texture)
-  //     // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture)
-  //     ;
-
-  PyVulkanMaterial
-      .def_property_readonly("base_color",
-                             [](Renderer::SVulkan2Material &mat) {
-                               auto color = mat.getMaterial()->getBaseColor();
-                               return py::array_t<float>(4, &color[0]);
-                             })
-      .def_property_readonly(
-          "specular",
-          [](Renderer::SVulkan2Material &mat) { return mat.getMaterial()->getFresnel(); })
-      .def_property_readonly(
-          "metallic",
-          [](Renderer::SVulkan2Material &mat) { return mat.getMaterial()->getMetallic(); })
-      .def_property_readonly("roughness", [](Renderer::SVulkan2Material &mat) {
-        return mat.getMaterial()->getRoughness();
-      });
+  //     // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture);
 
   PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
       .def("get_pose", &Renderer::ISensor::getPose)

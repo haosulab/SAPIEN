@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 project(sapien LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -Wnon-virtual-dtor -fsized-deallocation -Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -Wnon-virtual-dtor  -fsized-deallocation -Wno-deprecated-declarations")
 
@@ -54,8 +54,8 @@ endif ()
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(assimp REQUIRED)
 find_package(spdlog REQUIRED)
+find_package(assimp REQUIRED)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/include"
         "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"

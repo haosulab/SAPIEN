@@ -44,8 +44,27 @@ IPxrScene *KuafuRenderer::createScene(std::string const &name) {
   return &mScene;
 };
 
+void KuafuRenderer::setLogLevel(std::string_view level) {
+  auto eq = kuafu::utils::iequals;
+  if (eq(level, "debug") || eq(level, "all"))
+    kuafu::global::logger->set_level(spdlog::level::debug);
+  else if (eq(level, "info"))
+    kuafu::global::logger->set_level(spdlog::level::info);
+  else if (eq(level, "warn") || eq(level, "warning"))
+    kuafu::global::logger->set_level(spdlog::level::warn);
+  else if (eq(level, "error") || eq(level, "err"))
+    kuafu::global::logger->set_level(spdlog::level::err);
+  else if (eq(level, "critical") || eq(level, "fatal"))
+    kuafu::global::logger->set_level(spdlog::level::critical);
+  else if (eq(level, "off"))
+    kuafu::global::logger->set_level(spdlog::level::off);
+  else
+    kuafu::global::logger->error("Invalid log level \"{}\"", level);
+}
+
+
 void KuafuRenderer::removeScene(IPxrScene *scene) {
-  spdlog::get("SAPIEN")->warn("removeScene not implemented yet");
+  spdlog::get("SAPIEN")->warn("KF: removeScene not implemented yet");
 };
 
 std::shared_ptr<IPxrMaterial> KuafuRenderer::createMaterial() {

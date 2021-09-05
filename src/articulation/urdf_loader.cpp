@@ -11,7 +11,7 @@ namespace sapien {
 namespace URDF {
 using namespace tinyxml2;
 using namespace physx;
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 static PxTransform poseFromOrigin(const Origin &origin, float scale = 1.f) {
   PxQuat q = PxQuat(origin.rpy.z, {0, 0, 1}) * PxQuat(origin.rpy.y, {0, 1, 0}) *

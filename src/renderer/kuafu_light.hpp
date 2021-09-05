@@ -10,7 +10,7 @@
 namespace sapien::Renderer {
 
 inline void kf_warn_feature_not_available(const std::string& feature) {
-  spdlog::get("SAPIEN")->warn(feature + " not available for Kuafu");
+  spdlog::get("SAPIEN")->warn("KF: " + feature + " not available");
 }
 
 inline glm::mat4 toGlmMat4(physx::PxMat44 mat) {

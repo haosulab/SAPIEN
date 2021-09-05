@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <spdlog/spdlog.h>
 
 namespace sapien::Renderer {
 struct KuafuConfig {
@@ -18,16 +19,16 @@ struct KuafuConfig {
 
   glm::vec4 mClearColor = glm::vec4(0.F, 0.F, 0.F, 1.F);
 
-  uint32_t mPerPixelSampleRate = 64;
+  uint32_t mPerPixelSampleRate = 32;
   bool mAccumulateFrames = false;
 
   uint32_t mPathDepth = 5;
+  bool mUseDenoiser = false;  // todo
 
 //  uint32_t mMaxPathDepth = 10;
 //  bool mRussianRoulette = true;
 //  uint32_t mRussianRouletteMinBounces = 3;
 //
-//  bool mUseDenoiser = false;  // todo
 //
 //  bool mNextEventEstimation = false;
 //  uint32_t mNextEventEstimationMinBounces = 0; // temporary for debugging
@@ -35,7 +36,6 @@ struct KuafuConfig {
 //  float mVariance = 0.0F;
 //  bool mUpdateVariance = false;
 //
-
 
   std::shared_ptr<kuafu::Config> generate() {
     auto ret = std::make_shared<kuafu::Config>();
@@ -47,6 +47,11 @@ struct KuafuConfig {
     ret->setPerPixelSampleRate(mPerPixelSampleRate);
     ret->setAccumulatingFrames(mAccumulateFrames);
     ret->setPathDepth(mPathDepth);
+    ret->setUseDenoiser(mUseDenoiser);
+    if (mUseDenoiser)
+      spdlog::get("SAPIEN")->warn(
+          "KF: Denoiser not supported yet");
+
     return ret;
   }
 };

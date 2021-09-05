@@ -55,23 +55,23 @@ public:
   void takePicture() override;
   std::vector<float> getColorRGBA() override;
   inline std::vector<float> getAlbedoRGBA() override {
-    spdlog::get("SAPIEN")->warn("getAlbedoRGBA not implemented yet");
+    spdlog::get("SAPIEN")->warn("KF: getAlbedoRGBA not implemented yet");
     return {};
   };
   inline std::vector<float> getNormalRGBA() override {
-    spdlog::get("SAPIEN")->warn("getNormalRGBA not implemented yet");
+    spdlog::get("SAPIEN")->warn("KF: getNormalRGBA not implemented yet");
     return {};
   };
   inline std::vector<float> getDepth() override {
-    spdlog::get("SAPIEN")->warn("getDepth not implemented yet");
+    spdlog::get("SAPIEN")->warn("KF: getDepth not implemented yet");
     return {};
   };
   inline std::vector<int> getSegmentation() override {
-    spdlog::get("SAPIEN")->warn("getSegmentation not implemented yet");
+    spdlog::get("SAPIEN")->warn("KF: getSegmentation not implemented yet");
     return {};
   };
   inline std::vector<int> getObjSegmentation() override {
-    spdlog::get("SAPIEN")->warn("getObjSegmentation not implemented yet");
+    spdlog::get("SAPIEN")->warn("KF: getObjSegmentation not implemented yet");
     return {};
   };
 
@@ -125,7 +125,7 @@ public:
   void destroy() override;
 
   [[nodiscard]] std::vector<std::unique_ptr<RenderShape> > getRenderShapes() const override {
-    spdlog::get("SAPIEN")->error("getRenderShapes not implemented yet");
+    spdlog::get("SAPIEN")->error("KF: getRenderShapes not implemented yet");
     return {};
   };
 };
@@ -203,7 +203,7 @@ public:
 
   /** call this function before every rendering time frame */
   inline void updateRender() override {
-//    spdlog::get("SAPIEN")->error("updateRender not implemented yet");
+//    spdlog::get("SAPIEN")->warn("KF: updateRender not implemented yet");
   };
 
   inline auto& getKScene() { return pKRenderer->getScene(); }

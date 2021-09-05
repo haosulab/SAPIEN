@@ -24,6 +24,7 @@ def main():
     render_config.width = 400
     render_config.height = 400
 
+    sapien.KuafuRenderer.set_log_level("debug")
     renderer = sapien.KuafuRenderer(render_config)
     sim.set_renderer(renderer)
 

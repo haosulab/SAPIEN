@@ -82,7 +82,7 @@ void KuafuCamera::setInitialPose(const physx::PxTransform &pose) {
 
 physx::PxTransform KuafuCamera::getPose() const {
   spdlog::get("SAPIEN")->warn(
-      "Camera::getPose: maybe you need mount.getPose");
+      "KF: Camera::getPose does not make sense, maybe you need mount.getPose?");
   return physx::PxTransform(toPxMat44(mKCamera->getPose()));
 }
 
@@ -115,7 +115,7 @@ void KuafuRigidBody::update(const physx::PxTransform &transform) {
 }
 
 void KuafuRigidBody::setVisibility(float visibility) {
-  spdlog::get("SAPIEN")->error("setVisibility not supported by rt pipeline");
+  spdlog::get("SAPIEN")->error("KF: setVisibility not supported yet");
 }
 void KuafuRigidBody::setVisible(bool visible) {
   for (auto idx: mKGeometryInstanceIndices) {
@@ -123,7 +123,7 @@ void KuafuRigidBody::setVisible(bool visible) {
     auto geometry = mParentScene->getKScene().getGeometryByGlobalIndex(instance->geometryIndex);
     auto matIdx = geometry->matIndex.front();    // TODO: kuafu_urgent: may loss material
     if (visible && mHaveSetInvisible) {
-      spdlog::get("SAPIEN")->warn("Fix Me: KF: The object may have "
+      spdlog::get("SAPIEN")->warn("KF: Fix Me: KF: The object may have "
                                   "lost the original material due to previously setInvisible.");
       auto mat = kuafu::global::materials[matIdx];
       mat.alpha = 1.0f;
@@ -155,13 +155,13 @@ void KuafuRigidBody::setRenderMode(uint32_t mode) {
     return;
   }
   if (mode == 2) {
-    spdlog::get("SAPIEN")->error("setRenderMode(2) not supported by rt pipeline");
+    spdlog::get("SAPIEN")->error("KF: setRenderMode(2) not supported yet");
   }
 }
 
 void KuafuRigidBody::destroy() {
   // TODO: kuafu_urgent
-  spdlog::get("SAPIEN")->warn("KuafuRigidBody::destroy: FIXME, tmp impl");
+  spdlog::get("SAPIEN")->warn("KF: FIXME: KuafuRigidBody::destroy");
   for (auto idx: mKGeometryInstanceIndices) {
     auto obj = mParentScene->getKScene().getGeometryInstance(idx);
 
@@ -204,7 +204,7 @@ IPxrRigidbody *KuafuScene::addRigidbodyWithNewMaterial(
     mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIndices, scale));
     return mBodies.back().get();
   } catch (const std::exception &e) {
-    spdlog::get("SAPIEN")->error("fail to load object: " + std::string(e.what()));
+    spdlog::get("SAPIEN")->error("KF: Fail to load object: " + std::string(e.what()));
     return nullptr;
   }
 }
@@ -239,7 +239,7 @@ IPxrRigidbody *KuafuScene::addRigidbody(physx::PxGeometryType::Enum type,
 //    geometry = kuafu::createCube(true, kMat);
     break;
   default:
-    spdlog::get("SAPIEN")->error("Failed to add Rigidbody: unimplemented shape");
+    spdlog::get("SAPIEN")->error("KF: Failed to add Rigidbody: unimplemented shape");
     return nullptr;
   }
 
@@ -266,7 +266,7 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
   g->dynamic = true;
 
   if (indices.size() % 3 != 0)
-    spdlog::get("SAPIEN")->error("invalid geometry: indices");
+    spdlog::get("SAPIEN")->error("KF: invalid geometry - indices");
 
   size_t totalAmountOfTriangles = indices.size() / 3;
 
@@ -281,7 +281,7 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
 
   // TODO: check duplicate v?
   if (vertices.size() != normals.size())
-    spdlog::get("SAPIEN")->error("invalid geometry: normal");
+    spdlog::get("SAPIEN")->error("KF: invalid geometry - normals");
 
   g->vertices.resize(vertices.size());
   for (size_t i = 0; i < vertices.size(); i++) {
@@ -326,7 +326,7 @@ ICamera *KuafuScene::addCamera(const std::string &name, uint32_t width, uint32_t
                                const std::string &shaderDir) {
   if (fovx != 0) {
     spdlog::get("SAPIEN")->warn(
-        "Current camera implementation does not support non-square"
+        "KF: Current camera implementation does not support non-square"
         "pixels, and fovy will be used. Set fovx to 0 to suppress this warning");
   }
   if (!shaderDir.empty()) {
@@ -339,7 +339,7 @@ ICamera *KuafuScene::addCamera(const std::string &name, uint32_t width, uint32_t
 }
 
 void KuafuScene::removeCamera(ICamera *camera) {
-  spdlog::get("SAPIEN")->error("removeCamera not implemented yet");
+  spdlog::get("SAPIEN")->error("KF: removeCamera not implemented yet");
 }
 
 std::vector<ICamera *> KuafuScene::getCameras() {
@@ -401,7 +401,7 @@ ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
   light->texPath = "";
   light->fov = fovInner;
   if (fovInner != fovOuter)
-    spdlog::get("SAPIEN")->warn("addSpotLight: fovInner != fovOuter api not exposed");
+    spdlog::get("SAPIEN")->warn("KF: fovInner != fovOuter does not take effect");
 
   getKScene().addActiveLight(light);       // TODO: check if success
   mSpotLights.push_back(std::make_shared<KuafuSpotLight>(light));
@@ -425,10 +425,10 @@ IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
 };
 
 void KuafuScene::removeLight(ILight *light) {
-  spdlog::get("SAPIEN")->error("removeLight not implemented yet");
+  spdlog::get("SAPIEN")->error("KF: removeLight not implemented yet");
 }
 
 void KuafuScene::destroy() {
-  spdlog::get("SAPIEN")->error("destroy not implemented yet");
+  spdlog::get("SAPIEN")->error("KF: destroy not implemented yet");
 }
 }

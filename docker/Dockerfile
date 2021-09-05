@@ -84,7 +84,7 @@ WORKDIR /workspace/SDL/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
 
 WORKDIR /workspace
-RUN git clone --single-branch -b sapien --depth 1 https://github.com/jetd1/assimp.git
+RUN git clone --single-branch -b v5.0.1 --depth 1 https://github.com/assimp/assimp.git
 RUN mkdir /workspace/assimp/build
 WORKDIR /workspace/assimp/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
