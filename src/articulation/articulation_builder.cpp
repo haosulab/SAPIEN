@@ -324,13 +324,13 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
 
 ArticulationBuilder::ArticulationBuilder(SScene *scene) : mScene(scene) {}
 
-LinkBuilder *ArticulationBuilder::createLinkBuilder(LinkBuilder *parent) {
+std::shared_ptr<LinkBuilder> ArticulationBuilder::createLinkBuilder(std::shared_ptr<LinkBuilder> parent) {
   return createLinkBuilder(parent ? parent->mIndex : -1);
 }
 
-LinkBuilder *ArticulationBuilder::createLinkBuilder(int parentIdx) {
-  mLinkBuilders.push_back(std::make_unique<LinkBuilder>(this, mLinkBuilders.size(), parentIdx));
-  return mLinkBuilders.back().get();
+std::shared_ptr<LinkBuilder> ArticulationBuilder::createLinkBuilder(int parentIdx) {
+  mLinkBuilders.push_back(std::make_shared<LinkBuilder>(this, mLinkBuilders.size(), parentIdx));
+  return mLinkBuilders.back();
 }
 
 std::string ArticulationBuilder::summary() const {
@@ -472,6 +472,8 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
   std::vector<PxReal> qvel(result->dof(), 0);
   result->setQvel(qvel);
 
+  result->mBuilder = shared_from_this();
+
   return result;
 }
 
@@ -513,6 +515,8 @@ SKArticulation *ArticulationBuilder::buildKinematic() const {
   result->mSortedIndices = sorted;
 
   result->mRootLink = static_cast<SKLink *>(result->mJoints[sorted[0]]->getChildLink());
+
+  result->mBuilder = shared_from_this();
 
   return result;
 }

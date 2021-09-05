@@ -19,7 +19,7 @@ namespace Renderer {
 class IPxrRididbody;
 }
 
-class ActorBuilder {
+class ActorBuilder : public std::enable_shared_from_this<ActorBuilder> {
 public:
   struct ShapeRecord {
     enum Type { SingleMesh, MultipleMeshes, NonConvexMesh, Box, Capsule, Sphere } type;
@@ -169,6 +169,7 @@ public:
                             std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = {},
                             std::string const &name = "");
 
+  virtual ~ActorBuilder() = default;
 protected:
   void buildShapes(std::vector<std::unique_ptr<SCollisionShape>> &shapes,
                    std::vector<PxReal> &densities) const;

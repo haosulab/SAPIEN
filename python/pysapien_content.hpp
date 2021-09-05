@@ -206,12 +206,12 @@ void buildSapien(py::module &m) {
   auto PyTrigger = py::class_<STrigger>(m, "Trigger");
   auto PyContactPoint = py::class_<SContactPoint>(m, "ContactPoint");
 
-  auto PyActorBuilder = py::class_<ActorBuilder>(m, "ActorBuilder");
+  auto PyActorBuilder = py::class_<ActorBuilder, std::shared_ptr<ActorBuilder>>(m, "ActorBuilder");
   auto PyShapeRecord = py::class_<ActorBuilder::ShapeRecord>(m, "ShapeRecord");
   auto PyVisualRecord = py::class_<ActorBuilder::VisualRecord>(m, "VisualRecord");
-  auto PyLinkBuilder = py::class_<LinkBuilder, ActorBuilder>(m, "LinkBuilder");
+  auto PyLinkBuilder = py::class_<LinkBuilder, ActorBuilder, std::shared_ptr<LinkBuilder>>(m, "LinkBuilder");
   auto PyJointRecord = py::class_<LinkBuilder::JointRecord>(m, "JointRecord");
-  auto PyArticulationBuilder = py::class_<ArticulationBuilder>(m, "ArticulationBuilder");
+  auto PyArticulationBuilder = py::class_<ArticulationBuilder, std::shared_ptr<ArticulationBuilder>>(m, "ArticulationBuilder");
 
   auto PyRenderShape = py::class_<Renderer::RenderShape>(m, "RenderShape");
   auto PyRenderMeshGeometry = py::class_<Renderer::RenderMeshGeometry>(m, "RenderGeometry");
@@ -858,7 +858,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("is_hiding_visual", &SActorBase::isHidingVisual)
       .def("on_step", &SActorBase::onStep, py::arg("func"))
       .def("on_contact", &SActorBase::onContact, py::arg("func"))
-      .def("on_trigger", &SActorBase::onTrigger, py::arg("func"));
+      .def("on_trigger", &SActorBase::onTrigger, py::arg("func"))
+      .def("get_builder", &SActorBase::getBuilder);
 
   PyActorDynamicBase
       .def_property_readonly("velocity",
@@ -1099,7 +1100,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            "Create the kinematic and dynamic model of this articulation implemented by the "
            "Pinocchio library. Allowing computing forward/inverse kinematics/dynamics.")
 #endif
-      .def("export_urdf", &SArticulationBase::exportURDF, py::arg("cache_dir") = std::string());
+      .def("export_urdf", &SArticulationBase::exportURDF, py::arg("cache_dir") = std::string())
+      .def("get_builder", &SArticulationBase::getBuilder);
 
   PyArticulationDrivable
       .def("get_drive_target",
@@ -1244,6 +1246,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
   //======== Builders ========
 
   PyActorBuilder
+      .def("set_scene", &ActorBuilder::setScene)
       .def(
           "add_collision_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
@@ -1547,7 +1550,7 @@ Args:
       .def("get_scene", &ArticulationBuilder::getScene)
       .def(
           "create_link_builder",
-          [](ArticulationBuilder &b, LinkBuilder *parent) { return b.createLinkBuilder(parent); },
+          [](ArticulationBuilder &b, std::shared_ptr<LinkBuilder> parent) { return b.createLinkBuilder(parent); },
           py::arg("parent") = nullptr, py::return_value_policy::reference)
       .def("build", &ArticulationBuilder::build, py::arg("fix_root_link") = false,
            py::return_value_policy::reference)

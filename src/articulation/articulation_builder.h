@@ -68,20 +68,25 @@ private:
   bool checkJointProperties() const;
 };
 
-class ArticulationBuilder {
+class ArticulationBuilder : public std::enable_shared_from_this<ArticulationBuilder>{
 
-  std::vector<std::unique_ptr<LinkBuilder>> mLinkBuilders;
+  std::vector<std::shared_ptr<LinkBuilder>> mLinkBuilders;
 
   SScene *mScene;
 
 public:
   ArticulationBuilder(SScene *scene = nullptr);
 
-  inline void setScene(SScene *scene) { mScene = scene; }
+  inline void setScene(SScene *scene) {
+    mScene = scene;
+    for (auto lb : mLinkBuilders) {
+      lb->setScene(scene);
+    }
+  }
   inline SScene *getScene() { return mScene; }
 
-  LinkBuilder *createLinkBuilder(LinkBuilder *parent = nullptr);
-  LinkBuilder *createLinkBuilder(int parentIdx);
+  std::shared_ptr<LinkBuilder> createLinkBuilder(std::shared_ptr<LinkBuilder> parent = nullptr);
+  std::shared_ptr<LinkBuilder> createLinkBuilder(int parentIdx);
 
   SArticulation *build(bool fixBase = false) const;
   SKArticulation *buildKinematic() const;

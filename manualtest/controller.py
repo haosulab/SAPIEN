@@ -1135,12 +1135,25 @@ class Viewer(object):
                     .Label("Immediate Move")
                     .Checked(self.immediate_mode)
                     .Callback(lambda p: self.set_immediate_move(p.checked)),
-                    R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps)),
+                    R.UIButton()
+                    .Label("Take Screenshot")
+                    .Callback(self.take_screenshot),
+                    R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps))
                 )
             )
         self.control_window.get_children()[-1].Text(
             "FPS: {:.2f}".format(self.window.fps)
         )
+
+    def take_screenshot(self, _):
+        picture = self.window.get_float_texture("Color")
+        for i in range(100000000):
+            n = f"sapien_screenshot_{i}.png"
+            if os.path.exists(n):
+                continue
+            from PIL import Image
+            Image.fromarray((picture.clip(0, 1) * 255).astype(np.uint8)).save(n)
+            break
 
     def set_immediate_move(self, enabled):
         self.immediate_mode = enabled

@@ -783,11 +783,11 @@ public:
   SArticulation *loadFromXML(const std::string &URDFString, const std::string &SRDFString = "",
                              URDFConfig const &config = {});
 
-  std::unique_ptr<ArticulationBuilder>
+  std::shared_ptr<ArticulationBuilder>
   loadFileAsArticulationBuilder(const std::string &filename, URDFConfig const &config = {});
 
 private:
-  std::tuple<std::unique_ptr<ArticulationBuilder>, std::vector<SensorRecord>>
+  std::tuple<std::shared_ptr<ArticulationBuilder>, std::vector<SensorRecord>>
   parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const *srdfDoc,
                         const std::string &urdfFilename, bool isKinematic,
                         URDFConfig const &config);

@@ -81,12 +81,12 @@ std::shared_ptr<SPhysicalMaterial> SScene::createPhysicalMaterial(PxReal staticF
   return mSimulationShared->createPhysicalMaterial(staticFriction, dynamicFriction, restitution);
 }
 
-std::unique_ptr<ActorBuilder> SScene::createActorBuilder() {
-  return std::make_unique<ActorBuilder>(this);
+std::shared_ptr<ActorBuilder> SScene::createActorBuilder() {
+  return std::make_shared<ActorBuilder>(this);
 }
 
-std::unique_ptr<ArticulationBuilder> SScene::createArticulationBuilder() {
-  return std::make_unique<ArticulationBuilder>(this);
+std::shared_ptr<ArticulationBuilder> SScene::createArticulationBuilder() {
+  return std::make_shared<ArticulationBuilder>(this);
 }
 
 std::unique_ptr<URDF::URDFLoader> SScene::createURDFLoader() {

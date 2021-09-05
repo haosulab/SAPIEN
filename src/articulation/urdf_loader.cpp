@@ -50,10 +50,10 @@ struct LinkTreeNode {
   Joint *joint;
   LinkTreeNode *parent;
   std::vector<LinkTreeNode *> children;
-  LinkBuilder *linkBuilder = nullptr;
+  std::shared_ptr<LinkBuilder> linkBuilder = nullptr;
 };
 
-std::tuple<std::unique_ptr<ArticulationBuilder>, std::vector<SensorRecord>>
+std::tuple<std::shared_ptr<ArticulationBuilder>, std::vector<SensorRecord>>
 URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const *srdfDoc,
                                   const std::string &urdfFilename, bool isKinematic,
                                   URDFConfig const &config) {
@@ -593,7 +593,7 @@ SKArticulation *URDFLoader::loadKinematic(const std::string &filename, URDFConfi
   return articulation;
 }
 
-std::unique_ptr<ArticulationBuilder>
+std::shared_ptr<ArticulationBuilder>
 URDFLoader::loadFileAsArticulationBuilder(const std::string &filename, URDFConfig const &config) {
   if (filename.substr(filename.length() - 4) != std::string("urdf")) {
     throw std::invalid_argument("Non-URDF file passed to URDF loader");

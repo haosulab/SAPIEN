@@ -23,6 +23,8 @@ class SArticulationBase : public SEntity,
                           public EventEmitter<EventArticulationStep> {
   int mDestroyedState{0};
 
+  std::shared_ptr<class ArticulationBuilder const> mBuilder{};
+
 public:
   virtual std::vector<SLinkBase *> getBaseLinks() = 0;
   virtual std::vector<SJointBase *> getBaseJoints() = 0;
@@ -65,6 +67,8 @@ public:
   /** internal use only, destroy has several stages, check which stage it is in */
   inline int getDestroyedState() const { return mDestroyedState; }
 
+  inline std::shared_ptr<ArticulationBuilder const> getBuilder() const { return mBuilder; }
+
   using SEntity::SEntity;
 #ifdef _USE_PINOCCHIO
   std::unique_ptr<PinocchioModel> createPinocchioModel();
@@ -73,6 +77,7 @@ public:
 private:
   std::string exportTreeURDF(SLinkBase *link, physx::PxTransform extraTransform,
                              const std::string &cacheDir, bool exportVisual = true);
+  friend class ArticulationBuilder;
 };
 
 class SArticulationDrivable : public SArticulationBase {
