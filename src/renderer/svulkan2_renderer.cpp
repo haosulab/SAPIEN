@@ -38,9 +38,16 @@ SVulkan2Material::SVulkan2Material(
 void SVulkan2Material::setBaseColor(std::array<float, 4> color) {
   mMaterial->setBaseColor({color[0], color[1], color[2], color[3]});
 }
+std::array<float, 4> SVulkan2Material::getBaseColor() const {
+  auto color = mMaterial->getBaseColor();
+  return {color.r, color.g, color.b, color.a};
+}
 void SVulkan2Material::setRoughness(float roughness) { mMaterial->setRoughness(roughness); }
+float SVulkan2Material::getRoughness() const { return mMaterial->getRoughness(); }
 void SVulkan2Material::setSpecular(float specular) { mMaterial->setFresnel(specular); }
+float SVulkan2Material::getSpecular() const { return mMaterial->getFresnel(); }
 void SVulkan2Material::setMetallic(float metallic) { mMaterial->setMetallic(metallic); }
+float SVulkan2Material::getMetallic() const { return mMaterial->getMetallic(); }
 
 SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
                                    uint32_t maxNumTextures, uint32_t defaultMipLevels) {

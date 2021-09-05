@@ -7,7 +7,7 @@ namespace Renderer {
 
 #ifdef _DEBUG_VIEWER
 class FPSCameraControllerDebug {
-  svulkan2::scene::Node *mCamera;
+  svulkan2::scene::Node *pCamera;
   glm::vec3 mRPY{0, 0, 0};
   glm::vec3 mXYZ{0, 0, 0};
 

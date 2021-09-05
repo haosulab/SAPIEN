@@ -34,6 +34,8 @@
 #include "renderer/svulkan2_renderer.h"
 #include "renderer/svulkan2_window.h"
 
+#include "renderer/kuafu_renderer.hpp"
+
 #ifdef _USE_PINOCCHIO
 #include "articulation/pinocchio_model.h"
 #endif
@@ -225,9 +227,6 @@ void buildSapien(py::module &m) {
   auto PyVulkanRenderer =
       py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer,
                  std::shared_ptr<Renderer::SVulkan2Renderer>>(m, "VulkanRenderer");
-  auto PyVulkanMaterial =
-      py::class_<Renderer::SVulkan2Material, Renderer::IPxrMaterial,
-                 std::shared_ptr<Renderer::SVulkan2Material>>(m, "VulkanMaterial");
   auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m, "VulkanCamera");
   auto PyVulkanWindow = py::class_<Renderer::SVulkan2Window>(m, "VulkanWindow");
   auto PyVulkanScene = py::class_<Renderer::SVulkan2Scene, Renderer::IPxrScene>(m, "VulkanScene");
@@ -237,12 +236,14 @@ void buildSapien(py::module &m) {
   auto PyDirectionalLightEntity =
       py::class_<SDirectionalLight, SLight>(m, "DirectionalLightEntity");
   auto PySpotLightEntity = py::class_<SSpotLight, SLight>(m, "SpotLightEntity");
+  auto PyActiveLightEntity = py::class_<SActiveLight, SLight>(m, "ActiveLightEntity");
 
   auto PyLight = py::class_<Renderer::ILight>(m, "Light");
   auto PyPointLight = py::class_<Renderer::IPointLight, Renderer::ILight>(m, "PointLight");
   auto PyDirectionalLight =
       py::class_<Renderer::IDirectionalLight, Renderer::ILight>(m, "DirectionalLight");
   auto PySpotLight = py::class_<Renderer::ISpotLight, Renderer::ILight>(m, "SpotLight");
+  auto PyActiveLight = py::class_<Renderer::IActiveLight, Renderer::ILight>(m, "ActiveLight");
   auto PyVulkanPointLight =
       py::class_<Renderer::SVulkan2PointLight, Renderer::IPointLight>(m, "VulkanPointLight");
   auto PyVulkanDirectionalLight =
@@ -250,6 +251,32 @@ void buildSapien(py::module &m) {
           m, "VulkanDirectionalLight");
   auto PyVulkanSpotLight =
       py::class_<Renderer::SVulkan2SpotLight, Renderer::ISpotLight>(m, "VulkanSpotLight");
+
+
+  //======== Kuafu ========//
+  auto PyKuafuConfig = py::class_<Renderer::KuafuConfig>(m, "KuafuConfig");
+  PyKuafuConfig.def(py::init<>())
+      .def_readwrite("use_viewer", &Renderer::KuafuConfig::mUseViewer)
+      .def_readwrite("width", &Renderer::KuafuConfig::mWidth)
+      .def_readwrite("height", &Renderer::KuafuConfig::mHeight)
+      .def_readwrite("assets_path", &Renderer::KuafuConfig::mAssetsPath)
+      .def_readwrite("clear_color", &Renderer::KuafuConfig::mClearColor)
+      .def_readwrite("spp", &Renderer::KuafuConfig::mPerPixelSampleRate)
+      .def_readwrite("max_bounces", &Renderer::KuafuConfig::mPathDepth)
+      .def_readwrite("accumulate_frames", &Renderer::KuafuConfig::mAccumulateFrames)
+      .def_readwrite("use_denoiser", &Renderer::KuafuConfig::mUseDenoiser);
+
+  auto PyKuafuRenderer =
+      py::class_<Renderer::KuafuRenderer, Renderer::IPxrRenderer,
+  std::shared_ptr<Renderer::KuafuRenderer>>(m, "KuafuRenderer");
+  PyKuafuRenderer
+      .def(py::init<Renderer::KuafuConfig>(), py::arg("config") = Renderer::KuafuConfig())
+      .def_static("_set_default_assets_path", &Renderer::KuafuRenderer::setDefaultAssetsPath,
+                  py::arg("assets_path"))
+      .def_static("set_log_level", &Renderer::KuafuRenderer::setLogLevel, py::arg("level"))
+      .def("set_environment_map", &Renderer::KuafuRenderer::setEnvironmentMap,
+           py::arg("env_map_path"))
+      .def_property_readonly("is_running", &Renderer::KuafuRenderer::isRunning);
 
   //======== Internal ========//
 
@@ -387,31 +414,36 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
             mat.setBaseColor({color.at(0), color.at(1), color.at(2), color.at(3)});
           },
           py::arg("rgba"))
+      .def("set_emission",
+           [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+             mat.setEmission({color.at(0), color.at(1), color.at(2), color.at(3)});
+           },
+           py::arg("rgbs"))
       .def("set_specular", &Renderer::IPxrMaterial::setSpecular, py::arg("specular"))
       .def("set_metallic", &Renderer::IPxrMaterial::setMetallic, py::arg("metallic"))
-      .def("set_roughness", &Renderer::IPxrMaterial::setRoughness, py::arg("roughness"));
+      .def("set_roughness", &Renderer::IPxrMaterial::setRoughness, py::arg("roughness"))
+      .def("set_transmission", &Renderer::IPxrMaterial::setTransmission, py::arg("transmission"))
+      .def("set_ior", &Renderer::IPxrMaterial::setIOR, py::arg("ior"))
+      .def("set_diffuse_tex", &Renderer::IPxrMaterial::setDiffuseTex, py::arg("path"))
+
+      .def_property("base_color",
+                    &Renderer::IPxrMaterial::getBaseColor,
+                    [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+                      mat.setBaseColor({color.at(0), color.at(1), color.at(2), color.at(3)}); })
+      .def_property("emission",
+                    &Renderer::IPxrMaterial::getEmission,
+                    [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+                      mat.setEmission({color.at(0), color.at(1), color.at(2), color.at(3)}); })
+      .def_property("specular", &Renderer::IPxrMaterial::getSpecular, &Renderer::IPxrMaterial::setSpecular)
+      .def_property("metallic", &Renderer::IPxrMaterial::getMetallic, &Renderer::IPxrMaterial::setMetallic)
+      .def_property("roughness", &Renderer::IPxrMaterial::getRoughness, &Renderer::IPxrMaterial::setRoughness)
+      .def_property("transmission", &Renderer::IPxrMaterial::getTransmission, &Renderer::IPxrMaterial::setTransmission)
+      .def_property("ior", &Renderer::IPxrMaterial::getIOR, &Renderer::IPxrMaterial::setIOR)
+      .def_property("diffuse_tex", &Renderer::IPxrMaterial::getDiffuseTex, &Renderer::IPxrMaterial::setDiffuseTex);
 
   //     // TODO: implement those together with UV
-  //     // .def_readwrite("color_texture", &Renderer::PxrMaterial::color_texture)
   //     // .def_readwrite("specular_texture", &Renderer::PxrMaterial::specular_texture)
-  //     // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture)
-  //     ;
-
-  PyVulkanMaterial
-      .def_property_readonly("base_color",
-                             [](Renderer::SVulkan2Material &mat) {
-                               auto color = mat.getMaterial()->getBaseColor();
-                               return py::array_t<float>(4, &color[0]);
-                             })
-      .def_property_readonly(
-          "specular",
-          [](Renderer::SVulkan2Material &mat) { return mat.getMaterial()->getFresnel(); })
-      .def_property_readonly(
-          "metallic",
-          [](Renderer::SVulkan2Material &mat) { return mat.getMaterial()->getMetallic(); })
-      .def_property_readonly("roughness", [](Renderer::SVulkan2Material &mat) {
-        return mat.getMaterial()->getRoughness();
-      });
+  //     // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture);
 
   PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
       .def("get_pose", &Renderer::ISensor::getPose)
@@ -702,6 +734,12 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
           py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
           py::arg("far") = 10.f, py::return_value_policy::reference)
+      .def(
+          "add_active_light",
+          [](SScene &scene, PxTransform const &pose,
+             py::array_t<float> const &color, float fov, std::string const &path) {
+            return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov, path);
+          }, py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"))
       .def("remove_light", &SScene::removeLight, py::arg("light"))
       // save
       .def("pack",
@@ -1801,7 +1839,22 @@ Args:
       .def("set_shadow_parameters", &SSpotLight::setShadowParameters, py ::arg("near"),
            py::arg("far"))
       .def_property_readonly("shadow_near", &SSpotLight::getShadowNear)
-      .def_property_readonly("shadow_far", &SSpotLight::getShadowFar);
+      .def_property_readonly("shadow_far", &SSpotLight::getShadowFar)
+      .def("set_fov", &SSpotLight::setFov)
+      .def_property_readonly("fov", &SSpotLight::getFov);
+
+  PyActiveLightEntity
+      .def(
+          "set_position",
+          [](SActiveLight &light, py::array_t<float> position) {
+            light.setPosition({position.at(0), position.at(1), position.at(2)});
+          },
+          py::arg("position"))
+      .def_property_readonly("position",
+                             [](SActiveLight &light) { return vec32array(light.getPosition()); })
+      .def("set_fov", &SActiveLight::setFov)
+      .def_property_readonly("fov", &SActiveLight::getFov);
+
 
   // Renderer Light (will be deprecated)
   PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
@@ -2032,7 +2085,16 @@ Args:
           py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
           py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
           py::arg("far") = 10.f, py::return_value_policy::reference)
-
+      .def(
+          "add_active_light",
+          [](Renderer::IPxrScene &scene, PxTransform const &pose,
+             py::array_t<float> const &color, float fov, std::string const &path) {
+            return scene.addActiveLight(pose,
+                                        {color.at(0), color.at(1), color.at(2)},
+                                        fov, path);
+          },
+          py::arg("pose"), py::arg("tex_path"),
+          py::arg("color") = make_array<float>({1.f, 1.f, 1.f}), py::arg("fov") = 1.57)
       .def(
           "add_mesh_from_file",
           [](Renderer::IPxrScene &scene, std::string const &meshFile, py::array_t<float> scale) {

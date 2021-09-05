@@ -96,6 +96,20 @@ class CMakeBuild(build_ext):
         assert os.path.exists(source_path)
         shutil.copytree(source_path, vulkan_icd_path)
 
+        kuafu_shader_path = os.path.join(self.build_lib, 'sapien', 'kuafu_assets', 'shaders')
+        source_path = os.path.join(ext.sourcedir, '3rd_party/kuafu/resources/shaders')
+        if os.path.exists(kuafu_shader_path):
+            shutil.rmtree(kuafu_shader_path)
+        assert os.path.exists(source_path)
+        shutil.copytree(source_path, kuafu_shader_path)
+
+        # kuafu_models_path = os.path.join(self.build_lib, 'sapien', 'kuafu_assets', 'models')
+        # source_path = os.path.join(ext.sourcedir, '3rd_party/kuafu/resources/models')
+        # if os.path.exists(kuafu_models_path):
+        #     shutil.rmtree(kuafu_models_path)
+        # assert os.path.exists(source_path)
+        # shutil.copytree(source_path, kuafu_models_path)
+
 
 def check_version_info():
     try:

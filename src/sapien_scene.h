@@ -225,6 +225,8 @@ public:
   SSpotLight *addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fovInner,
                            float fovOuter, PxVec3 const &color, bool enableShadow,
                            float shadowNear, float shadowFar);
+  SActiveLight *addActiveLight(PxTransform const &pose, PxVec3 const &color, float fov,
+                               std::string_view texPath);
 
   void removeLight(SLight *light);
 

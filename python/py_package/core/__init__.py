@@ -38,10 +38,15 @@ def __enable_vulkan():
     __VULKAN_CAMERA_SHADER_ROOT = pkg_resources.resource_filename(
         "sapien", "vulkan_shader/default_camera"
     )
+    __KUAFU_ASSETS_ROOT = pkg_resources.resource_filename(
+        "sapien", "kuafu_assets"
+    )
     assert os.path.exists(__VULKAN_VIEWER_SHADER_ROOT)
     assert os.path.exists(__VULKAN_CAMERA_SHADER_ROOT)
+    assert os.path.exists(__KUAFU_ASSETS_ROOT)
     VulkanRenderer._set_viewer_shader_dir(__VULKAN_VIEWER_SHADER_ROOT)
     VulkanRenderer._set_camera_shader_dir(__VULKAN_CAMERA_SHADER_ROOT)
+    KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
     ensure_icd()
 
 

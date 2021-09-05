@@ -1,15 +1,8 @@
-FROM quay.io/pypa/manylinux2014_x86_64
-RUN yum update && mkdir /workspace
+FROM quay.io/pypa/manylinux2014_x86_64:2021-03-12-76cb5c3
+RUN yum update -y && mkdir /workspace
 
 WORKDIR /workspace
 COPY PhysX /workspace/PhysX
-
-WORKDIR /workspace
-RUN git clone --single-branch -b v5.0.1 --depth 1 https://github.com/assimp/assimp.git
-WORKDIR /workspace/assimp
-RUN mkdir /workspace/assimp/build
-WORKDIR /workspace/assimp/build
-RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
 
 WORKDIR /workspace
 RUN git clone --single-branch -b 20210000.6 --depth 1 https://github.com/coin-or/CppAD.git
@@ -56,7 +49,7 @@ RUN yum install -y libXrandr-devel libXinerama-devel libXcursor-devel libXi-deve
 RUN git clone --single-branch -b 3.3.3 --depth 1 https://github.com/glfw/glfw.git
 RUN mkdir /workspace/glfw/build
 WORKDIR /workspace/glfw/build
-RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_VULKAN_STATIC=ON && make -j && make install
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_VULKAN_STATIC=OFF -DBUILD_SHARED_LIBS=ON && make -j && make install
 
 WORKDIR /workspace
 RUN curl -O https://sdk.lunarg.com/sdk/download/1.2.170.0/linux/vulkan_sdk.tar.gz && tar -xf vulkan_sdk.tar.gz && rm -f vulkan_sdk.tar.gz
@@ -77,5 +70,26 @@ WORKDIR /workspace/easy_profiler/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
 
 RUN yum install -y zip
+
+WORKDIR /workspace
+RUN git clone --single-branch -b v4.0.0 --depth 1 https://github.com/KhronosGroup/KTX-Software.git
+RUN mkdir /workspace/KTX-Software/build
+WORKDIR /workspace/KTX-Software/build
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
+
+WORKDIR /workspace
+RUN git clone --single-branch -b release-2.0.16 --depth 1 https://github.com/libsdl-org/SDL.git
+RUN mkdir /workspace/SDL/build
+WORKDIR /workspace/SDL/build
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
+
+WORKDIR /workspace
+RUN git clone --single-branch -b v5.0.1 --depth 1 https://github.com/assimp/assimp.git
+RUN mkdir /workspace/assimp/build
+WORKDIR /workspace/assimp/build
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
+
+RUN rpm -i http://mirror.ghettoforge.org/distributions/gf/el/7/gf/x86_64/gcc10-libstdc++-10.2.1-7.gf.el7.x86_64.rpm
+ENV LD_LIBRARY_PATH=/opt/gcc-10.2.1/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/opt/rh/devtoolset-9/root/usr/lib64/dyninst:/opt/rh/devtoolset-9/root/usr/lib/dyninst:/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/workspace/1.2.170.0/x86_64/lib PCP_DIR=/opt/rh/devtoolset-9/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-9/root MANPATH=/opt/rh/devtoolset-9/root/usr/share/man: PATH=/opt/rh/devtoolset-9/root/usr/bin:/workspace/1.2.170.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 WORKDIR /workspace

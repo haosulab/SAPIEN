@@ -23,12 +23,16 @@ class SVulkan2Material : public IPxrMaterial {
   std::shared_ptr<svulkan2::resource::SVMetallicMaterial> mMaterial;
 
 public:
-  SVulkan2Material(std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material);
+  explicit SVulkan2Material(std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material);
   void setBaseColor(std::array<float, 4> color) override;
+  [[nodiscard]] std::array<float, 4> getBaseColor() const override;
   void setRoughness(float roughness) override;
+  [[nodiscard]] float getRoughness() const override;
   void setSpecular(float specular) override;
+  [[nodiscard]] float getSpecular() const override;
   void setMetallic(float metallic) override;
-  std::shared_ptr<svulkan2::resource::SVMetallicMaterial> getMaterial() const { return mMaterial; }
+  [[nodiscard]] float getMetallic() const override;
+  [[nodiscard]] std::shared_ptr<svulkan2::resource::SVMetallicMaterial> getMaterial() const { return mMaterial; }
 };
 
 class SVulkan2Rigidbody : public IPxrRigidbody {

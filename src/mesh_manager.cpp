@@ -12,7 +12,7 @@
 #include <sstream>
 
 namespace sapien {
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 
 void exportNonConvexMeshToFile(PxTriangleMesh *pxMesh, const std::string &filename) {
   // check stl supported

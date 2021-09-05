@@ -23,3 +23,6 @@ imgui.ini
 /dist/
 *.convex.*
 /.clangd/
+
+/python/VERSION
+/docker/PhysX/

@@ -37,7 +37,7 @@ SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig cons
 
   auto renderer = sim->getRenderer();
   if (renderer) {
-    mRendererScene = renderer->createScene();
+    mRendererScene = renderer->createScene("");          // FIXME: pass scene name here
   }
 }
 
@@ -748,6 +748,16 @@ SSpotLight *SScene::addSpotLight(PxVec3 const &position, PxVec3 const &direction
       {position.x, position.y, position.z}, {direction.x, direction.y, direction.z}, fovInner,
       fovOuter, {color.x, color.y, color.z}, enableShadow, shadowNear, shadowFar);
   auto sl = std::make_unique<SSpotLight>(this, light);
+  auto ret = sl.get();
+  mLights.push_back(std::move(sl));
+  return ret;
+}
+
+SActiveLight *SScene::addActiveLight(PxTransform const &pose, PxVec3 const &color, float fov,
+                                     std::string_view texPath) {
+  auto light = mRendererScene->addActiveLight(
+      pose, {color.x, color.y, color.z}, fov, texPath);
+  auto sl = std::make_unique<SActiveLight>(this, light);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));
   return ret;

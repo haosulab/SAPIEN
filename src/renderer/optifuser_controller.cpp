@@ -409,7 +409,7 @@ void OptifuserController::render() {
         // path tracer
         pathTracer->numRays = 4;
         pathTracer->max_iterations = 100000;
-        pathTracer->renderScene(*currentScene->getScene(), *mCamera);
+        pathTracer->renderScene(*currentScene->getScene(), *pCamera);
         pathTracer->display();
 #endif
       } else {
