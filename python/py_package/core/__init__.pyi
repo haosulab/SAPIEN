@@ -1,5 +1,7 @@
 import sapien.core
 import typing
+from sapien.core.pysapien import ActiveLight
+from sapien.core.pysapien import ActiveLightEntity
 from sapien.core.pysapien import Actor
 from sapien.core.pysapien import ActorBase
 from sapien.core.pysapien import ActorBuilder
@@ -37,6 +39,8 @@ from sapien.core.pysapien import KinematicJointPrismatic
 from sapien.core.pysapien import KinematicJointRevolute
 from sapien.core.pysapien import KinematicJointSingleDof
 from sapien.core.pysapien import KinematicLink
+from sapien.core.pysapien import KuafuConfig
+from sapien.core.pysapien import KuafuRenderer
 from sapien.core.pysapien import Light
 from sapien.core.pysapien import LightEntity
 from sapien.core.pysapien import Link
@@ -71,7 +75,6 @@ from sapien.core.pysapien import URDFLoader
 from sapien.core.pysapien import VisualRecord
 from sapien.core.pysapien import VulkanCamera
 from sapien.core.pysapien import VulkanDirectionalLight
-from sapien.core.pysapien import VulkanMaterial
 from sapien.core.pysapien import VulkanPointLight
 from sapien.core.pysapien import VulkanRenderer
 from sapien.core.pysapien import VulkanRigidbody
@@ -84,6 +87,8 @@ import sapien.core.pysapien.renderer
 import sys
 
 __all__ = [
+    "ActiveLight",
+    "ActiveLightEntity",
     "Actor",
     "ActorBase",
     "ActorBuilder",
@@ -121,6 +126,8 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
+    "KuafuConfig",
+    "KuafuRenderer",
     "Light",
     "LightEntity",
     "Link",
@@ -155,7 +162,6 @@ __all__ = [
     "VisualRecord",
     "VulkanCamera",
     "VulkanDirectionalLight",
-    "VulkanMaterial",
     "VulkanPointLight",
     "VulkanRenderer",
     "VulkanRigidbody",

@@ -202,9 +202,9 @@ void SVulkan2Window::render(std::string const &targetName,
     auto fence = mRenderer->mContext->getDevice().createFenceUnique({});
     // draw
     mSVulkanRenderer->render(*camera, {}, {}, {}, {});
-    auto imageAcquiredSemaphore = pWindow->getImageAcquiredSemaphore();
-    mSVulkanRenderer->display(targetName, pWindow->getBackbuffer(), pWindow->getBackBufferFormat(),
-                              pWindow->getWidth(), pWindow->getHeight(), {imageAcquiredSemaphore},
+    auto imageAcquiredSemaphore = mWindow->getImageAcquiredSemaphore();
+    mSVulkanRenderer->display(targetName, mWindow->getBackbuffer(), mWindow->getBackBufferFormat(),
+                              mWindow->getWidth(), mWindow->getHeight(), {imageAcquiredSemaphore},
                               {vk::PipelineStageFlagBits::eColorAttachmentOutput},
                               {mSceneRenderSemaphore.get()}, fence.get());
 
@@ -243,24 +243,24 @@ void SVulkan2Window::render(std::string const &targetName,
     mCameraController->move(0, 0, 0);
   }
   float r = 1e-1;
-  if (pWindow->isMouseKeyDown(1)) {
-    auto [x, y] = pWindow->getMouseDelta();
+  if (mWindow->isMouseKeyDown(1)) {
+    auto [x, y] = mWindow->getMouseDelta();
     mCameraController->rotate(0, -0.01 * y, -0.01 * x);
   }
-  if (pWindow->isKeyDown("w")) {
+  if (mWindow->isKeyDown("w")) {
     mCameraController->move(r, 0, 0);
   }
-  if (pWindow->isKeyDown("s")) {
+  if (mWindow->isKeyDown("s")) {
     mCameraController->move(-r, 0, 0);
   }
-  if (pWindow->isKeyDown("a")) {
+  if (mWindow->isKeyDown("a")) {
     mCameraController->move(0, r, 0);
   }
-  if (pWindow->isKeyDown("d")) {
+  if (mWindow->isKeyDown("d")) {
     mCameraController->move(0, -r, 0);
   }
-  if (pWindow->isKeyDown("q")) {
-    glfwSetWindowShouldClose(pWindow->getGLFWWindow(), 1);
+  if (mWindow->isKeyDown("q")) {
+    glfwSetWindowShouldClose(mWindow->getGLFWWindow(), 1);
   }
 #endif
 }

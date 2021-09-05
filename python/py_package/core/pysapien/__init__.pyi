@@ -6,6 +6,8 @@ import renderer
 _Shape = typing.Tuple[int, ...]
 
 __all__ = [
+    "ActiveLight",
+    "ActiveLightEntity",
     "Actor",
     "ActorBase",
     "ActorBuilder",
@@ -43,6 +45,8 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
+    "KuafuConfig",
+    "KuafuRenderer",
     "Light",
     "LightEntity",
     "Link",
@@ -77,7 +81,6 @@ __all__ = [
     "VisualRecord",
     "VulkanCamera",
     "VulkanDirectionalLight",
-    "VulkanMaterial",
     "VulkanPointLight",
     "VulkanRenderer",
     "VulkanRigidbody",
@@ -88,6 +91,28 @@ __all__ = [
 ]
 
 
+class Light():
+    def set_color(self, color: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_pose(self, pose: Pose) -> None: ...
+    @property
+    def color(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def shadow(self) -> bool:
+        """
+        :type: bool
+        """
+    @shadow.setter
+    def shadow(self, arg1: bool) -> None:
+        pass
+    pass
 class Entity():
     def get_name(self) -> str: ...
     def get_pose(self) -> Pose: ...
@@ -137,6 +162,41 @@ class ActorBase(Entity):
         One of "static", "kinematic", "dynamic", "link", "kinematic_link"
 
         :type: str
+        """
+    pass
+class ActorDynamicBase(ActorBase, Entity):
+    def add_force_at_point(self, force: numpy.ndarray[numpy.float32], point: numpy.ndarray[numpy.float32]) -> None: ...
+    def add_force_torque(self, force: numpy.ndarray[numpy.float32], torque: numpy.ndarray[numpy.float32]) -> None: ...
+    def get_angular_velocity(self) -> numpy.ndarray[numpy.float32]: ...
+    def get_cmass_local_pose(self) -> Pose: ...
+    def get_inertia(self) -> numpy.ndarray[numpy.float32]: ...
+    def get_mass(self) -> float: ...
+    def get_velocity(self) -> numpy.ndarray[numpy.float32]: ...
+    def set_damping(self, linear: float, angular: float) -> None: ...
+    @property
+    def angular_velocity(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def cmass_local_pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def inertia(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def mass(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def velocity(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
         """
     pass
 class ActorBuilder():
@@ -206,41 +266,16 @@ class ActorBuilder():
         References:
           https://en.wikipedia.org/wiki/Moment_of_inertia#Principal_axes
         """
+    def set_scene(self, arg0: Scene) -> None: ...
     pass
-class ActorDynamicBase(ActorBase, Entity):
-    def add_force_at_point(self, force: numpy.ndarray[numpy.float32], point: numpy.ndarray[numpy.float32]) -> None: ...
-    def add_force_torque(self, force: numpy.ndarray[numpy.float32], torque: numpy.ndarray[numpy.float32]) -> None: ...
-    def get_angular_velocity(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_cmass_local_pose(self) -> Pose: ...
-    def get_inertia(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_mass(self) -> float: ...
-    def get_velocity(self) -> numpy.ndarray[numpy.float32]: ...
-    def set_damping(self, linear: float, angular: float) -> None: ...
-    @property
-    def angular_velocity(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def cmass_local_pose(self) -> Pose:
-        """
-        :type: Pose
-        """
-    @property
-    def inertia(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def mass(self) -> float:
-        """
-        :type: float
-        """
-    @property
-    def velocity(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
+class Actor(ActorDynamicBase, ActorBase, Entity):
+    def lock_motion(self, x: bool = True, y: bool = True, z: bool = True, rx: bool = True, ry: bool = True, rz: bool = True) -> None: ...
+    def pack(self) -> typing.List[float]: ...
+    def set_angular_velocity(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_pose(self, pose: Pose) -> None: ...
+    def set_solver_iterations(self, position: int, velocity: int = 1) -> None: ...
+    def set_velocity(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
+    def unpack(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
     pass
 class ActorStatic(ActorBase, Entity):
     def pack(self) -> typing.List[float]: ...
@@ -545,27 +580,14 @@ class ConvexMeshGeometry(CollisionGeometry):
         :type: numpy.ndarray[numpy.float32]
         """
     pass
-class Light():
-    def set_color(self, color: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_pose(self, pose: Pose) -> None: ...
+class DirectionalLight(Light):
+    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
     @property
-    def color(self) -> numpy.ndarray[numpy.float32]:
+    def direction(self) -> numpy.ndarray[numpy.float32]:
         """
         :type: numpy.ndarray[numpy.float32]
         """
-    @property
-    def pose(self) -> Pose:
-        """
-        :type: Pose
-        """
-    @property
-    def shadow(self) -> bool:
-        """
-        :type: bool
-        """
-    @shadow.setter
-    def shadow(self, arg1: bool) -> None:
-        pass
     pass
 class LightEntity(Entity):
     def set_color(self, color: numpy.ndarray[numpy.float32]) -> None: ...
@@ -624,14 +646,19 @@ class Engine():
     def renderer(self, arg1: IPxrRenderer) -> None:
         pass
     pass
-class Actor(ActorDynamicBase, ActorBase, Entity):
-    def lock_motion(self, x: bool = True, y: bool = True, z: bool = True, rx: bool = True, ry: bool = True, rz: bool = True) -> None: ...
-    def pack(self) -> typing.List[float]: ...
-    def set_angular_velocity(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_pose(self, pose: Pose) -> None: ...
-    def set_solver_iterations(self, position: int, velocity: int = 1) -> None: ...
-    def set_velocity(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
-    def unpack(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
+class ActiveLightEntity(LightEntity, Entity):
+    def set_fov(self, arg0: float) -> None: ...
+    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
+    @property
+    def fov(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def position(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
     pass
 class ISensor():
     def get_pose(self) -> Pose: ...
@@ -778,14 +805,92 @@ class LinkBase(ActorDynamicBase, ActorBase, Entity):
     def get_articulation(self) -> ArticulationBase: ...
     def get_index(self) -> int: ...
     pass
-class DirectionalLight(Light):
-    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
+class KuafuConfig():
+    def __init__(self) -> None: ...
     @property
-    def direction(self) -> numpy.ndarray[numpy.float32]:
+    def accumulate_frames(self) -> bool:
         """
-        :type: numpy.ndarray[numpy.float32]
+        :type: bool
         """
+    @accumulate_frames.setter
+    def accumulate_frames(self, arg0: bool) -> None:
+        pass
+    @property
+    def assets_path(self) -> str:
+        """
+        :type: str
+        """
+    @assets_path.setter
+    def assets_path(self, arg0: str) -> None:
+        pass
+    @property
+    def clear_color(self) -> glm::vec<4, float, :
+        """
+        :type: glm::vec<4, float, 
+        """
+    @property
+    def height(self) -> int:
+        """
+        :type: int
+        """
+    @height.setter
+    def height(self, arg0: int) -> None:
+        pass
+    @property
+    def max_bounces(self) -> int:
+        """
+        :type: int
+        """
+    @max_bounces.setter
+    def max_bounces(self, arg0: int) -> None:
+        pass
+    @property
+    def spp(self) -> int:
+        """
+        :type: int
+        """
+    @spp.setter
+    def spp(self, arg0: int) -> None:
+        pass
+    @property
+    def use_denoiser(self) -> bool:
+        """
+        :type: bool
+        """
+    @use_denoiser.setter
+    def use_denoiser(self, arg0: bool) -> None:
+        pass
+    @property
+    def use_viewer(self) -> bool:
+        """
+        :type: bool
+        """
+    @use_viewer.setter
+    def use_viewer(self, arg0: bool) -> None:
+        pass
+    @property
+    def width(self) -> int:
+        """
+        :type: int
+        """
+    @width.setter
+    def width(self, arg0: int) -> None:
+        pass
+    pass
+class KuafuRenderer(IPxrRenderer):
+    def __init__(self, config: KuafuConfig = ...) -> None: ...
+    @staticmethod
+    def _set_default_assets_path(assets_path: str) -> None: ...
+    def set_environment_map(self, env_map_path: str) -> None: ...
+    @staticmethod
+    def set_log_level(level: str) -> None: ...
+    @property
+    def is_running(self) -> bool:
+        """
+        :type: bool
+        """
+    pass
+class ActiveLight(Light):
     pass
 class DirectionalLightEntity(LightEntity, Entity):
     def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
@@ -928,9 +1033,77 @@ class OptifuserController():
     pass
 class RenderMaterial():
     def set_base_color(self, rgba: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_diffuse_tex(self, path: str) -> None: ...
+    def set_emission(self, rgbs: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_ior(self, ior: float) -> None: ...
     def set_metallic(self, metallic: float) -> None: ...
     def set_roughness(self, roughness: float) -> None: ...
     def set_specular(self, specular: float) -> None: ...
+    def set_transmission(self, transmission: float) -> None: ...
+    @property
+    def base_color(self) -> typing.List[float[4]]:
+        """
+        :type: typing.List[float[4]]
+        """
+    @base_color.setter
+    def base_color(self, arg1: numpy.ndarray[numpy.float32]) -> None:
+        pass
+    @property
+    def diffuse_tex(self) -> str:
+        """
+        :type: str
+        """
+    @diffuse_tex.setter
+    def diffuse_tex(self, arg1: str) -> None:
+        pass
+    @property
+    def emission(self) -> typing.List[float[4]]:
+        """
+        :type: typing.List[float[4]]
+        """
+    @emission.setter
+    def emission(self, arg1: numpy.ndarray[numpy.float32]) -> None:
+        pass
+    @property
+    def ior(self) -> float:
+        """
+        :type: float
+        """
+    @ior.setter
+    def ior(self, arg1: float) -> None:
+        pass
+    @property
+    def metallic(self) -> float:
+        """
+        :type: float
+        """
+    @metallic.setter
+    def metallic(self, arg1: float) -> None:
+        pass
+    @property
+    def roughness(self) -> float:
+        """
+        :type: float
+        """
+    @roughness.setter
+    def roughness(self, arg1: float) -> None:
+        pass
+    @property
+    def specular(self) -> float:
+        """
+        :type: float
+        """
+    @specular.setter
+    def specular(self, arg1: float) -> None:
+        pass
+    @property
+    def transmission(self) -> float:
+        """
+        :type: float
+        """
+    @transmission.setter
+    def transmission(self, arg1: float) -> None:
+        pass
     pass
 class OptifuserRenderer(IPxrRenderer):
     def __init__(self, glsl_dir: str = '', glsl_version: str = '', config: OptifuserConfig = ...) -> None: ...
@@ -1110,6 +1283,7 @@ class RenderGeometry():
 class OptifuserMaterial(RenderMaterial):
     pass
 class RenderScene():
+    def add_active_light(self, pose: Pose, tex_path: numpy.ndarray[numpy.float32], color: float = array([1., 1., 1.], dtype=float32), fov: str = 1.57) -> ActiveLight: ...
     def add_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0) -> DirectionalLight: ...
     def add_mesh_from_file(self, mesh_file: str, scale: numpy.ndarray[numpy.float32]) -> RenderBody: ...
     def add_point_light(self, position: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, near: float = 0.1, far: float = 10) -> PointLight: ...
@@ -1156,6 +1330,7 @@ class RenderShape():
         """
     pass
 class Scene():
+    def add_active_light(self, pose: Pose, color: numpy.ndarray[numpy.float32], fov: float, tex_path: str) -> ActiveLightEntity: ...
     def add_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0) -> DirectionalLightEntity: ...
     def add_ground(self, altitude: float, render: bool = True, material: PhysicalMaterial = None, render_material: RenderMaterial = None) -> ActorStatic: ...
     def add_mounted_camera(self, name: str, actor: ActorBase, pose: Pose, width: int, height: int, fovx: float, fovy: float, near: float, far: float) -> ICamera: ...
@@ -1424,12 +1599,18 @@ class SpotLight(Light):
     pass
 class SpotLightEntity(LightEntity, Entity):
     def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_fov(self, arg0: float) -> None: ...
     def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
     def set_shadow_parameters(self, near: float, far: float) -> None: ...
     @property
     def direction(self) -> numpy.ndarray[numpy.float32]:
         """
         :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def fov(self) -> float:
+        """
+        :type: float
         """
     @property
     def position(self) -> numpy.ndarray[numpy.float32]:
@@ -1624,28 +1805,6 @@ class VulkanCamera(ICamera, ISensor):
         """
     pass
 class VulkanDirectionalLight(DirectionalLight, Light):
-    pass
-class VulkanMaterial(RenderMaterial):
-    @property
-    def base_color(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def metallic(self) -> float:
-        """
-        :type: float
-        """
-    @property
-    def roughness(self) -> float:
-        """
-        :type: float
-        """
-    @property
-    def specular(self) -> float:
-        """
-        :type: float
-        """
     pass
 class VulkanPointLight(PointLight, Light):
     pass
