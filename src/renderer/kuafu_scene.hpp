@@ -90,14 +90,11 @@ class KuafuRigidBody : public IPxrRigidbody {
   KuafuScene *mParentScene = nullptr;
   physx::PxVec3 mScale = {1.0, 1.0, 1.0};
   physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
-//  kuafu::GeometryInstance *mKObject;
 
   std::vector<size_t> mKGeometryInstanceIndices;
 
   uint32_t mUniqueId = 0;
   uint32_t mSegmentationId = 0;
-
-  bool mHaveSetInvisible = false;
 
 public:
   KuafuRigidBody(KuafuScene *scene, std::vector<size_t> indices,

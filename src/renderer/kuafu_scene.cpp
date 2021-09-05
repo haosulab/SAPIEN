@@ -117,31 +117,23 @@ void KuafuRigidBody::update(const physx::PxTransform &transform) {
 void KuafuRigidBody::setVisibility(float visibility) {
   spdlog::get("SAPIEN")->error("KF: setVisibility not supported yet");
 }
-void KuafuRigidBody::setVisible(bool visible) {
-  for (auto idx: mKGeometryInstanceIndices) {
-    auto instance = mParentScene->getKScene().getGeometryInstance(idx);
-    auto geometry = mParentScene->getKScene().getGeometryByGlobalIndex(instance->geometryIndex);
-    auto matIdx = geometry->matIndex.front();    // TODO: kuafu_urgent: may loss material
-    if (visible && mHaveSetInvisible) {
-      spdlog::get("SAPIEN")->warn("KF: Fix Me: KF: The object may have "
-                                  "lost the original material due to previously setInvisible.");
-      auto mat = kuafu::global::materials[matIdx];
-      mat.alpha = 1.0f;
-      geometry->setMaterial(mat);
-      geometry->initialized = false;
-      mParentScene->getKScene().markGeometriesChanged();
-      mParentScene->getKScene().markGeometryInstancesChanged();
-      mHaveSetInvisible = false;
+void KuafuRigidBody::setVisible(bool visible) {       // The correctness of the function
+  for (auto idx: mKGeometryInstanceIndices) {         // relies on the fact that sapien does not
+    auto& scene = mParentScene->getKScene();          // use geometry instancing at all
+    auto instance = scene.getGeometryInstance(idx);
+    auto geometry = scene.getGeometryByGlobalIndex(instance->geometryIndex);
+    if (visible && geometry->hideRender) {
+      geometry->hideRender = false;
+      scene.markGeometriesChanged();
+      scene.markGeometryInstancesChanged();
+      kuafu::global::frameCount = -1;
     }
 
-    if (!visible && ! mHaveSetInvisible) {
-      auto mat = kuafu::global::materials[matIdx];
-      mat.alpha = 0.0f;
-      geometry->setMaterial(mat);                // TODO: kuafu_urgent: may loss material
-      geometry->initialized = false;
-      mParentScene->getKScene().markGeometriesChanged();
-      mParentScene->getKScene().markGeometryInstancesChanged();
-      mHaveSetInvisible = true;
+    if (!visible && !geometry->hideRender) {
+      geometry->hideRender = true;
+      scene.markGeometriesChanged();
+      scene.markGeometryInstancesChanged();
+      kuafu::global::frameCount = -1;
     }
   }
 }
@@ -397,7 +389,7 @@ ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
   light->viewMat = glm::lookAt(p, p + dir, kuafu::utils::getPerpendicular(dir));
   light->color = {color[0], color[1], color[2]};
   light->strength = 1.0;
-  light->softness = 0.1;    // TODO: expose this
+  light->softness = 0.0;
   light->texPath = "";
   light->fov = fovInner;
   if (fovInner != fovOuter)
@@ -415,7 +407,7 @@ IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
   light->viewMat = glm::inverse(toGlmMat4(pose));
   light->color = {color[0], color[1], color[2]};
   light->strength = 1.0;
-  light->softness = 0.0;    // TODO: expose this
+  light->softness = 0.0;
   light->texPath = texPath;
   light->fov = fov;
 

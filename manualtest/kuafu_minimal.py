@@ -58,9 +58,9 @@ def main():
     box = builder.build()
     box.set_pose(Pose(p=[0, 0, 4]))
 
-    scene.set_ambient_light([0.1, 0.1, 0.1])
+    scene.set_ambient_light([0.4, 0.4, 0.4])
     dirlight = scene.add_directional_light(
-        [0, 0, -1], color=[2.0, 2.0, 2.0]
+        [-1, -1, -1], color=[3.0, 3.0, 3.0]
     )
 
     while renderer.is_running:

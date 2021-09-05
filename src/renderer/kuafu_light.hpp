@@ -193,8 +193,8 @@ public:
   [[nodiscard]] inline float getFov() const override { return mLight->fov; };
 
   // ---------- Non-override ---------- //
-  [[maybe_unused]] [[maybe_unused]] [[nodiscard]] inline float getSoftness() const { return mLight->softness; }
-  [[maybe_unused]] [[maybe_unused]] inline void setSoftness(float s) { mLight->softness = s; }
+//  [[maybe_unused]] [[maybe_unused]] [[nodiscard]] inline float getSoftness() const { return mLight->softness; }
+//  [[maybe_unused]] [[maybe_unused]] inline void setSoftness(float s) { mLight->softness = s; }
 };
 
 class KuafuActiveLight : public IActiveLight {
@@ -242,8 +242,8 @@ public:
   inline std::string_view getTexture() override { return mLight->texPath; }
 
   // ---------- Non-override ---------- //
-  [[maybe_unused]] [[nodiscard]] inline float getSoftness() const { return mLight->softness; }
-  [[maybe_unused]] inline void setSoftness(float s) { mLight->softness = s; }
+//  [[maybe_unused]] [[nodiscard]] inline float getSoftness() const { return mLight->softness; }
+//  [[maybe_unused]] inline void setSoftness(float s) { mLight->softness = s; }
 };
 
 } // namespace sapien::Renderer
