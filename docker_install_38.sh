@@ -7,7 +7,7 @@ docker run -v `pwd`:/workspace/SAPIEN -it --rm \
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-pip3 uninstall sapien -y && cd wheelhouse && pip3 install *
+cd wheelhouse && pip3 uninstall -y sapien && pip3 install *
 cd /tmp && rm stubs -rf && pybind11-stubgen sapien.core --ignore-invalid all
 cp /tmp/stubs/sapien/core-stubs/__init__.pyi $DIR/python/py_package/core
 cp -r /tmp/stubs/sapien/core-stubs/pysapien $DIR/python/py_package/core

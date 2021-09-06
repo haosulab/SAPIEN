@@ -1809,7 +1809,21 @@ class VulkanDirectionalLight(DirectionalLight, Light):
 class VulkanPointLight(PointLight, Light):
     pass
 class VulkanRenderer(IPxrRenderer):
-    def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1) -> None: ...
+    def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '') -> None: 
+        """
+        Create the VulkanRenderer for rasterization-based rendering.
+
+        Args:
+          offscreen_only: tell the renderer the user does not need to present onto a screen. The renderer will not try to select a GPU with present abilities.
+          max_num_materials: tell the maximum number of materials that will exist at the same time. Increase this number if descriptor pool is out of memory.
+          max_num_textures: specify the maximum number of textures that will exist at the same time. Increase this number if descriptor pool is out of memory.
+          default_mipmap_levels: set the mip map levels for loaded textures.
+          device: One the the following:
+            'cuda:x' where x is a decimal number, the renderer tries to render using this cuda device. Present request is ignored
+            'cuda', the renderer tries to render using a cuda-visible device. If present is requested, it will be prioritized
+            'pci:x', where x is a hexadecimal number, the renderer picks the device with given PCI bus number
+            '', if present is requested, first try to find cuda+present, next present only, and then turn off present. If present is turned off, first try to find cuda, next any graphics device.
+        """
     @staticmethod
     def _set_camera_shader_dir(shader_dir: str) -> None: ...
     @staticmethod

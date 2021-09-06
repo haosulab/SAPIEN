@@ -50,9 +50,9 @@ void SVulkan2Material::setMetallic(float metallic) { mMaterial->setMetallic(meta
 float SVulkan2Material::getMetallic() const { return mMaterial->getMetallic(); }
 
 SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
-                                   uint32_t maxNumTextures, uint32_t defaultMipLevels) {
+                                   uint32_t maxNumTextures, uint32_t defaultMipLevels, std::string device) {
   mContext = std::make_shared<svulkan2::core::Context>(!offscreenOnly, maxNumMaterials,
-                                                       maxNumTextures, defaultMipLevels);
+                                                       maxNumTextures, defaultMipLevels, device);
   mResourceManager = mContext->createResourceManager();
 }
 
