@@ -92,4 +92,12 @@ RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && m
 RUN rpm -i http://mirror.ghettoforge.org/distributions/gf/el/7/gf/x86_64/gcc10-libstdc++-10.2.1-7.gf.el7.x86_64.rpm
 ENV LD_LIBRARY_PATH=/opt/gcc-10.2.1/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/opt/rh/devtoolset-9/root/usr/lib64/dyninst:/opt/rh/devtoolset-9/root/usr/lib/dyninst:/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/workspace/1.2.170.0/x86_64/lib PCP_DIR=/opt/rh/devtoolset-9/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-9/root MANPATH=/opt/rh/devtoolset-9/root/usr/share/man: PATH=/opt/rh/devtoolset-9/root/usr/bin:/workspace/1.2.170.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
+RUN /opt/python/cp38-cp38/bin/pip install git+https://github.com/fbxiang/auditwheel.git@3a723fa01f87b04b5ce4a8e7f81f6a142ac3044f
+RUN echo "#!/opt/python/cp38-cp38/bin/python" > /usr/local/bin/auditwheel \
+ && echo "import re, sys" >> /usr/local/bin/auditwheel \
+ && echo "from auditwheel.main import main" >> /usr/local/bin/auditwheel \
+ && echo "if __name__ == '__main__':" >> /usr/local/bin/auditwheel \
+ && echo "    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])" >> /usr/local/bin/auditwheel \
+ && echo "    sys.exit(main())" >> /usr/local/bin/auditwheel
+
 WORKDIR /workspace
