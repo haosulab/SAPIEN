@@ -290,8 +290,6 @@ def main():
 
     print(scene.get_all_lights())
 
-    import torch
-    import torch.utils.dlpack
 
     count = 0
     while not viewer.closed:

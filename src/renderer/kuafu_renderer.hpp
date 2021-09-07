@@ -44,6 +44,12 @@ public:
   [[nodiscard]] inline float getTransmission() const override { return mKMaterial.transmission; }
   inline void setDiffuseTex(std::string_view path) override { mKMaterial.diffuseTexPath = path; }
   [[nodiscard]] inline std::string getDiffuseTex() const override { return mKMaterial.diffuseTexPath; }
+  inline void setMetallicTex(std::string_view path) override { mKMaterial.metallicTexPath = path; }
+  [[nodiscard]] inline std::string getMetallicTex() const override { return mKMaterial.metallicTexPath; }
+  inline void setRoughnessTex(std::string_view path) override { mKMaterial.roughnessTexPath = path; }
+  [[nodiscard]] inline std::string getRoughnessTex() const override { return mKMaterial.roughnessTexPath; }
+  inline void setTransmissionTex(std::string_view path) override { mKMaterial.transmissionTexPath = path; }
+  [[nodiscard]] inline std::string getTransmissionTex() const override { return mKMaterial.transmissionTexPath; }
 
   [[nodiscard]] inline const kuafu::NiceMaterial& getKMaterial() const { return mKMaterial; }
 };

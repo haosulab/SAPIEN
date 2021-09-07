@@ -31,10 +31,10 @@ def main():
 
     render_config = sapien.KuafuConfig()
     render_config.use_viewer = True
+    render_config.viewer_width = 960
+    render_config.viewer_height = 540
     render_config.spp = 16
     render_config.max_bounces = 6
-    render_config.width = 960
-    render_config.height = 540
 
     renderer = sapien.KuafuRenderer(render_config)
     sim.set_renderer(renderer)
@@ -110,7 +110,7 @@ def main():
     cam_mount = builder.build_kinematic(name='real_camera')
     cam_mount.set_pose(sapien.Pose(
         [0.79111, 0.247229, 0.703505], [0.13942, 0.452553, 0.0629925, -0.878516]))
-    cam = scene.add_mounted_camera("cam", cam_mount, Pose([0, 0, 0]), 1920, 1080, 0, 1, 0.1, 100)
+    cam = scene.add_mounted_camera("cam", cam_mount, Pose([0, 0, 0]), 1280, 720, 0, 1, 0.1, 100)
 
     scene.step()
 

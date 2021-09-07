@@ -202,12 +202,15 @@ void ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius, const
 }
 
 void ActorBuilder::addVisualFromFile(const std::string &filename, const PxTransform &pose,
-                                     const PxVec3 &scale, std::string const &name) {
+                                     const PxVec3 &scale,
+                                     std::shared_ptr<Renderer::IPxrMaterial> material,
+                                     std::string const &name) {
 
   VisualRecord r;
   r.type = VisualRecord::Type::Mesh;
   r.pose = pose;
   r.scale = scale;
+  r.material = material;
   r.filename = filename;
   r.name = name;
 
@@ -384,7 +387,7 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
                                   r.material);
       break;
     case VisualRecord::Type::Mesh:
-      body = rScene->addRigidbody(r.filename, r.scale);
+      body = rScene->addRigidbody(r.filename, r.scale, r.material);
       break;
     }
     if (body) {

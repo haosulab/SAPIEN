@@ -29,7 +29,7 @@ class KuafuCamera : public ICamera {
 
   physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
   KuafuScene *pParentScene = nullptr;
-  std::shared_ptr<KCamera> mKCamera;
+  std::shared_ptr<KCamera> pKCamera;
 
   void setPxPose(const physx::PxTransform &pose);
 
@@ -39,16 +39,16 @@ public:
   KuafuCamera(std::string const& name, int width, int height,
               float fovy, KuafuScene *scene){
     pParentScene = scene;
-    mKCamera = std::make_shared<KCamera>(name, width, height);
-    mKCamera->reset();
-    mKCamera->setSize(width, height);
-    mKCamera->setFov(glm::degrees(fovy));
+    pKCamera = std::make_shared<KCamera>(name, width, height);
+    pKCamera->reset();
+    pKCamera->setSize(width, height);
+    pKCamera->setFov(glm::degrees(fovy));
   }
 
-  [[nodiscard]] inline const std::string &getName() const override { return mKCamera->getName(); };
-  [[nodiscard]] inline uint32_t getWidth() const override { return mKCamera->getWidth(); };
-  [[nodiscard]] inline uint32_t getHeight() const override { return mKCamera->getHeight(); };
-  [[nodiscard]] inline float getFovy() const override { return glm::radians(mKCamera->getFov()); };
+  [[nodiscard]] inline const std::string &getName() const override { return pKCamera->getName(); };
+  [[nodiscard]] inline uint32_t getWidth() const override { return pKCamera->getWidth(); };
+  [[nodiscard]] inline uint32_t getHeight() const override { return pKCamera->getHeight(); };
+  [[nodiscard]] inline float getFovy() const override { return glm::radians(pKCamera->getFov()); };
   [[nodiscard]] inline float getNear() const override { return 0.1; };
   [[nodiscard]] inline float getFar() const override { return 100.0; };
 
@@ -140,9 +140,6 @@ class KuafuScene : public IPxrScene {
   std::vector<std::shared_ptr<KuafuDirectionalLight>> mDirectionalLights;
   std::vector<std::shared_ptr<KuafuSpotLight>> mSpotLights;
   std::vector<std::shared_ptr<KuafuActiveLight>> mActiveLights;
-
-
-  bool mUseViewer = false;
 
 public:
   IPxrRigidbody *addRigidbodyWithNewMaterial(

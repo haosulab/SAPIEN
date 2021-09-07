@@ -22,6 +22,12 @@ class IPointLight;
 class ISpotLight;
 class IDirectionalLight;
 
+
+static inline void _warn_mat_func_not_supported(std::string_view func_name) {
+  // gcc9 do not have source_location
+  spdlog::get("SAPIEN")->warn("{} is not supported for the renderer", func_name);
+}
+
 struct RenderMeshGeometry {
   std::vector<float> vertices;
   std::vector<float> normals;
@@ -43,31 +49,52 @@ public:
   [[nodiscard]] virtual float getMetallic() const = 0;
 
   virtual void setEmission(std::array<float, 4> color) {
-    spdlog::get("SAPIEN")->warn("setEmission is not supported");
+    _warn_mat_func_not_supported(__func__);
   };
   [[nodiscard]] virtual std::array<float, 4> getEmission() const {
-    spdlog::get("SAPIEN")->warn("getEmission is not supported");
+    _warn_mat_func_not_supported(__func__);
     return {};
   };
   virtual void setIOR(float ior) {
-    spdlog::get("SAPIEN")->warn("setIOR is not supported");
+    _warn_mat_func_not_supported(__func__);
   };
   [[nodiscard]] virtual float getIOR() const {
-    spdlog::get("SAPIEN")->warn("getIOR is not supported");
+    _warn_mat_func_not_supported(__func__);
     return 0.0;
   };
   virtual void setTransmission(float transmission) {
-    spdlog::get("SAPIEN")->warn("setTransmission is not supported");
+    _warn_mat_func_not_supported(__func__);
   };
   [[nodiscard]] virtual float getTransmission() const {
-    spdlog::get("SAPIEN")->warn("getTransmission is not supported");
+    _warn_mat_func_not_supported(__func__);
     return 0.0;
   };
   virtual void setDiffuseTex(std::string_view path) {
-    spdlog::get("SAPIEN")->warn("setDiffuseTex tex is not supported");
+    _warn_mat_func_not_supported(__func__);
   };
   [[nodiscard]] virtual std::string getDiffuseTex() const {
-    spdlog::get("SAPIEN")->warn("getDiffuseTex is not supported");
+    _warn_mat_func_not_supported(__func__);
+    return "";
+  };
+  virtual void setMetallicTex(std::string_view path) {
+    _warn_mat_func_not_supported(__func__);
+  };
+  [[nodiscard]] virtual std::string getMetallicTex() const {
+    _warn_mat_func_not_supported(__func__);
+    return "";
+  };
+  virtual void setRoughnessTex(std::string_view path) {
+    _warn_mat_func_not_supported(__func__);
+  };
+  [[nodiscard]] virtual std::string getRoughnessTex() const {
+    _warn_mat_func_not_supported(__func__);
+    return "";
+  };
+  virtual void setTransmissionTex(std::string_view path) {
+    _warn_mat_func_not_supported(__func__);
+  };
+  [[nodiscard]] virtual std::string getTransmissionTex() const {
+    _warn_mat_func_not_supported(__func__);
     return "";
   };
 
@@ -224,6 +251,15 @@ class IPxrScene {
 
 public:
   virtual IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) = 0;
+  inline virtual IPxrRigidbody *addRigidbody(
+      const std::string &meshFile, const physx::PxVec3 &scale,
+      std::shared_ptr<IPxrMaterial> material) {                      // add and replace material
+    if (material)
+      spdlog::get("SAPIEN")->warn("Add rigid body and substitute material is "
+                                  "not supported on this rendering backend. Material in the mesh "
+                                  "file will be used!");
+    return addRigidbody(meshFile, scale);
+  }
 
   virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
                                       std::shared_ptr<IPxrMaterial> material) = 0;

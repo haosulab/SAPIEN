@@ -8,8 +8,8 @@
 namespace sapien::Renderer {
 struct KuafuConfig {
   bool mUseViewer = false;
-  size_t mWidth = 640;
-  size_t mHeight = 640;
+  size_t mViewerWidth = 640;
+  size_t mViewerHeight = 640;
 
   size_t mMaxGeometry = 256;
   size_t mMaxGeometryInstances = 256;

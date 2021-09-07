@@ -25,12 +25,12 @@ KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
   // TODO: kuafu_urgent (window?)
   if (conf.mUseViewer) {
     camera = std::make_shared<KCamera>(
-        "viewer_cam", conf.mWidth, conf.mHeight);
+        "viewer_cam", conf.mViewerWidth, conf.mViewerHeight);
     camera->setPosition({-1, 0, 1});
     camera->setFront({1, 0, -1});
 
     window = std::make_shared<KWindow>(
-        conf.mWidth, conf.mHeight, "Viewer", SDL_WINDOW_RESIZABLE, camera);
+        conf.mViewerWidth, conf.mViewerHeight, "Viewer", SDL_WINDOW_RESIZABLE, camera);
   }
 
   pKRenderer = std::make_shared<kuafu::Kuafu>(config, window, camera, nullptr);

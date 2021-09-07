@@ -202,11 +202,11 @@ def main():
 
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
-    cam1 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
+    cam1 = scene.add_mounted_camera("cam", mount, Pose(), 800, 600, 0, 1, 0.1, 100)
 
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
-    cam2 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
+    cam2 = scene.add_mounted_camera("cam", mount, Pose(), 800, 600, 0, 1, 0.1, 100)
 
     ant_builder = create_ant_builder(scene)
     ant = ant_builder.build()

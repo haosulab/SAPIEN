@@ -148,7 +148,9 @@ public:
 
   void addVisualFromFile(const std::string &filename,
                          const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                         const PxVec3 &scale = {1, 1, 1}, std::string const &name = "");
+                         const PxVec3 &scale = {1, 1, 1},
+                         std::shared_ptr<Renderer::IPxrMaterial> material = nullptr,
+                         std::string const &name = "");
 
   /* when a.g1 & b.g2 != 0, the collision is ignored
    * by default g1 = g2 = 1

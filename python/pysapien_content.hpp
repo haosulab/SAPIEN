@@ -257,8 +257,8 @@ void buildSapien(py::module &m) {
   auto PyKuafuConfig = py::class_<Renderer::KuafuConfig>(m, "KuafuConfig");
   PyKuafuConfig.def(py::init<>())
       .def_readwrite("use_viewer", &Renderer::KuafuConfig::mUseViewer)
-      .def_readwrite("width", &Renderer::KuafuConfig::mWidth)
-      .def_readwrite("height", &Renderer::KuafuConfig::mHeight)
+      .def_readwrite("viewer_width", &Renderer::KuafuConfig::mViewerWidth)
+      .def_readwrite("viewer_height", &Renderer::KuafuConfig::mViewerHeight)
       .def_readwrite("assets_path", &Renderer::KuafuConfig::mAssetsPath)
       .def_readwrite("clear_color", &Renderer::KuafuConfig::mClearColor)
       .def_readwrite("spp", &Renderer::KuafuConfig::mPerPixelSampleRate)
@@ -425,6 +425,9 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("set_transmission", &Renderer::IPxrMaterial::setTransmission, py::arg("transmission"))
       .def("set_ior", &Renderer::IPxrMaterial::setIOR, py::arg("ior"))
       .def("set_diffuse_tex", &Renderer::IPxrMaterial::setDiffuseTex, py::arg("path"))
+      .def("set_metallic_tex", &Renderer::IPxrMaterial::setMetallicTex, py::arg("path"))
+      .def("set_roughness_tex", &Renderer::IPxrMaterial::setRoughnessTex, py::arg("path"))
+      .def("set_transmission_tex", &Renderer::IPxrMaterial::setTransmissionTex, py::arg("path"))
 
       .def_property("base_color",
                     &Renderer::IPxrMaterial::getBaseColor,
@@ -439,7 +442,10 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_property("roughness", &Renderer::IPxrMaterial::getRoughness, &Renderer::IPxrMaterial::setRoughness)
       .def_property("transmission", &Renderer::IPxrMaterial::getTransmission, &Renderer::IPxrMaterial::setTransmission)
       .def_property("ior", &Renderer::IPxrMaterial::getIOR, &Renderer::IPxrMaterial::setIOR)
-      .def_property("diffuse_tex", &Renderer::IPxrMaterial::getDiffuseTex, &Renderer::IPxrMaterial::setDiffuseTex);
+      .def_property("diffuse_tex", &Renderer::IPxrMaterial::getDiffuseTex, &Renderer::IPxrMaterial::setDiffuseTex)
+      .def_property("metallic_tex", &Renderer::IPxrMaterial::getMetallicTex, &Renderer::IPxrMaterial::setMetallicTex)
+      .def_property("roughness_tex", &Renderer::IPxrMaterial::getRoughnessTex, &Renderer::IPxrMaterial::setRoughnessTex)
+      .def_property("transmission_tex", &Renderer::IPxrMaterial::getTransmissionTex, &Renderer::IPxrMaterial::setTransmissionTex);
 
   //     // TODO: implement those together with UV
   //     // .def_readwrite("specular_texture", &Renderer::PxrMaterial::specular_texture)
@@ -1367,11 +1373,13 @@ Different from @add_collision_from_file, all connected components in the file wi
       .def(
           "add_visual_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> scale, std::string const &name) {
-            a.addVisualFromFile(filename, pose, array2vec3(scale), name);
+             py::array_t<PxReal> scale, std::shared_ptr<Renderer::IPxrMaterial> &mat,
+             std::string const &name) {
+            a.addVisualFromFile(filename, pose, array2vec3(scale), mat, name);
           },
           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
-          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
+          py::arg("scale") = make_array<PxReal>({1, 1, 1}),
+          py::arg("material") = nullptr, py::arg("name") = "")
       .def("remove_all_collisions", &ActorBuilder::removeAllShapes)
       .def("remove_all_visuals", &ActorBuilder::removeAllVisuals)
       .def("remove_collision_at", &ActorBuilder::removeShapeAt, py::arg("index"))

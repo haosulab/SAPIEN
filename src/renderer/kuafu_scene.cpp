@@ -52,12 +52,18 @@ void KCamera::processKeyboard() {
 //========= KuafuCamera =========//
 
 void KuafuCamera::setPxPose(const physx::PxTransform &pose) {
-  mKCamera->setPose(toGlmMat4(physx::PxMat44(pose)));
+  pKCamera->setPose(toGlmMat4(physx::PxMat44(pose)));
 }
 
 void KuafuCamera::takePicture() {
-  if (!pParentScene->mUseViewer)
-    pParentScene->getKScene().setCamera(mKCamera);
+  auto &scene = pParentScene->getKScene();
+  auto window = pParentScene->pKRenderer->getWindow();
+  if (scene.getCamera() != pKCamera) {
+    spdlog::get("SAPIEN")->warn(
+        "KF: Rendering on a different size of the viewer, trying to resize!");
+    window->resize(pKCamera->getWidth(), pKCamera->getHeight());
+    scene.setCamera(pKCamera);
+  }
   pParentScene->pKRenderer->run();
 };
 
@@ -83,7 +89,7 @@ void KuafuCamera::setInitialPose(const physx::PxTransform &pose) {
 physx::PxTransform KuafuCamera::getPose() const {
   spdlog::get("SAPIEN")->warn(
       "KF: Camera::getPose does not make sense, maybe you need mount.getPose?");
-  return physx::PxTransform(toPxMat44(mKCamera->getPose()));
+  return physx::PxTransform(toPxMat44(pKCamera->getPose()));
 }
 
 void KuafuCamera::setPose(physx::PxTransform const &pose) {

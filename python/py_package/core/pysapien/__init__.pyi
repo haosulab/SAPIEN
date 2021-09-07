@@ -237,7 +237,7 @@ class ActorBuilder():
     def add_sphere_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, color: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: ...
     @typing.overload
     def add_sphere_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: RenderMaterial = None, name: str = '') -> None: ...
-    def add_visual_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), name: str = '') -> None: ...
+    def add_visual_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: RenderMaterial = None, name: str = '') -> None: ...
     def build(self, name: str = '') -> Actor: ...
     def build_kinematic(self, name: str = '') -> Actor: ...
     def build_static(self, name: str = '') -> ActorStatic: ...
@@ -829,14 +829,6 @@ class KuafuConfig():
         :type: glm::vec<4, float, 
         """
     @property
-    def height(self) -> int:
-        """
-        :type: int
-        """
-    @height.setter
-    def height(self, arg0: int) -> None:
-        pass
-    @property
     def max_bounces(self) -> int:
         """
         :type: int
@@ -869,12 +861,20 @@ class KuafuConfig():
     def use_viewer(self, arg0: bool) -> None:
         pass
     @property
-    def width(self) -> int:
+    def viewer_height(self) -> int:
         """
         :type: int
         """
-    @width.setter
-    def width(self, arg0: int) -> None:
+    @viewer_height.setter
+    def viewer_height(self, arg0: int) -> None:
+        pass
+    @property
+    def viewer_width(self) -> int:
+        """
+        :type: int
+        """
+    @viewer_width.setter
+    def viewer_width(self, arg0: int) -> None:
         pass
     pass
 class KuafuRenderer(IPxrRenderer):
@@ -1037,9 +1037,12 @@ class RenderMaterial():
     def set_emission(self, rgbs: numpy.ndarray[numpy.float32]) -> None: ...
     def set_ior(self, ior: float) -> None: ...
     def set_metallic(self, metallic: float) -> None: ...
+    def set_metallic_tex(self, path: str) -> None: ...
     def set_roughness(self, roughness: float) -> None: ...
+    def set_roughness_tex(self, path: str) -> None: ...
     def set_specular(self, specular: float) -> None: ...
     def set_transmission(self, transmission: float) -> None: ...
+    def set_transmission_tex(self, path: str) -> None: ...
     @property
     def base_color(self) -> typing.List[float[4]]:
         """
@@ -1081,12 +1084,28 @@ class RenderMaterial():
     def metallic(self, arg1: float) -> None:
         pass
     @property
+    def metallic_tex(self) -> str:
+        """
+        :type: str
+        """
+    @metallic_tex.setter
+    def metallic_tex(self, arg1: str) -> None:
+        pass
+    @property
     def roughness(self) -> float:
         """
         :type: float
         """
     @roughness.setter
     def roughness(self, arg1: float) -> None:
+        pass
+    @property
+    def roughness_tex(self) -> str:
+        """
+        :type: str
+        """
+    @roughness_tex.setter
+    def roughness_tex(self, arg1: str) -> None:
         pass
     @property
     def specular(self) -> float:
@@ -1103,6 +1122,14 @@ class RenderMaterial():
         """
     @transmission.setter
     def transmission(self, arg1: float) -> None:
+        pass
+    @property
+    def transmission_tex(self) -> str:
+        """
+        :type: str
+        """
+    @transmission_tex.setter
+    def transmission_tex(self, arg1: str) -> None:
         pass
     pass
 class OptifuserRenderer(IPxrRenderer):

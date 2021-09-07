@@ -279,7 +279,7 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
       case Geometry::MESH:
         currentLinkBuilder->addVisualFromFile(getAbsPath(urdfFilename, visual->geometry->filename),
                                               tVisual2Link, visual->geometry->scale * scale,
-                                              visual->name);
+                                              nullptr, visual->name);
         break;
       }
     }
@@ -384,7 +384,7 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
         if (collisionIsVisual) {
           currentLinkBuilder->addVisualFromFile(
               getAbsPath(urdfFilename, collision->geometry->filename), tCollision2Link,
-              collision->geometry->scale * scale, "");
+              collision->geometry->scale * scale, nullptr, "");
         }
         break;
       }

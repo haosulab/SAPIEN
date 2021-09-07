@@ -21,8 +21,8 @@ def main():
     render_config.spp = 64
     render_config.max_bounces = 6
     render_config.use_viewer = True
-    render_config.width = 400
-    render_config.height = 400
+    render_config.viewer_width = 400
+    render_config.viewer_height = 400
 
     sapien.KuafuRenderer.set_log_level("debug")
     renderer = sapien.KuafuRenderer(render_config)
@@ -158,7 +158,7 @@ def main():
 
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3.2, -3.2, 4.5], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
-    cam1 = scene.add_mounted_camera("cam", mount, Pose([0, 0, 0]), 1920, 1080, 0, 1, 0.1, 100)
+    cam1 = scene.add_mounted_camera("cam", mount, Pose([0, 0, 0]), 400, 400, 0, 1, 0.1, 100)
 
     # print(cam1.render_target_names)
     copper = renderer.create_material()
