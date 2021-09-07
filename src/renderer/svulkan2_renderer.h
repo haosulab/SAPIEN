@@ -162,7 +162,7 @@ public:
   static void setLogLevel(std::string const &level);
 
   SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
-                   uint32_t defaultMipLevels);
+                   uint32_t defaultMipLevels, std::string device);
   SVulkan2Scene *createScene(std::string const &name) override;
   void removeScene(IPxrScene *scene) override;
 

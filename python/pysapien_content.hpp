@@ -1674,9 +1674,22 @@ Args:
 
   PyVulkanRenderer
       .def_static("set_log_level", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
-      .def(py::init<bool, uint32_t, uint32_t, uint32_t>(), py::arg("offscreen_only") = false,
+      .def(py::init<bool, uint32_t, uint32_t, uint32_t, std::string>(), py::arg("offscreen_only") = false,
            py::arg("max_num_materials") = 5000, py::arg("max_num_textures") = 5000,
-           py::arg("default_mipmap_levels") = 1)
+           py::arg("default_mipmap_levels") = 1, py::arg("device")="", R"doc(
+Create the VulkanRenderer for rasterization-based rendering.
+
+Args:
+  offscreen_only: tell the renderer the user does not need to present onto a screen. The renderer will not try to select a GPU with present abilities.
+  max_num_materials: tell the maximum number of materials that will exist at the same time. Increase this number if descriptor pool is out of memory.
+  max_num_textures: specify the maximum number of textures that will exist at the same time. Increase this number if descriptor pool is out of memory.
+  default_mipmap_levels: set the mip map levels for loaded textures.
+  device: One the the following:
+    'cuda:x' where x is a decimal number, the renderer tries to render using this cuda device. Present request is ignored
+    'cuda', the renderer tries to render using a cuda-visible device. If present is requested, it will be prioritized
+    'pci:x', where x is a hexadecimal number, the renderer picks the device with given PCI bus number
+    '', if present is requested, first try to find cuda+present, next present only, and then turn off present. If present is turned off, first try to find cuda, next any graphics device.)doc"
+           )
       .def_static("_set_viewer_shader_dir", &Renderer::setDefaultViewerShaderDirectory,
                   py::arg("shader_dir"))
       .def_static("_set_camera_shader_dir", &Renderer::setDefaultCameraShaderDirectory,
