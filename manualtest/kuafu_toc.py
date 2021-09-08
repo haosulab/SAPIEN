@@ -11,10 +11,10 @@ import numpy as np
 from sapien.core import Pose
 
 
-def load_obj(scene, materials_root, obj_name, pose=Pose()):
+def load_obj(scene, materials_root, obj_name, pose=Pose(), material=None):
     builder = scene.create_actor_builder()
     builder.add_visual_from_file(
-        os.path.join(materials_root, 'models', obj_name, 'visual_mesh.obj'))
+        os.path.join(materials_root, 'models', obj_name, 'visual_mesh.obj'), material=material)
     builder.add_multiple_collisions_from_file(
         os.path.join(materials_root, 'models', obj_name, 'collision_mesh.obj'))
     obj = builder.build()
@@ -84,8 +84,14 @@ def main():
         elif jidx in range(11, 13):
             joint.set_drive_property(1000, 200, 1000)
 
+    voss_material = renderer.create_material()
+    voss_material.base_color = [1, 1, 1, 1]
+    voss_material.roughness = 0.0
+    voss_material.metallic = 0.0
+    voss_material.transmission = 1.0
+
     load_obj(scene, materials_root, 'camera', Pose(p=[0.7, 0, 1]))
-    load_obj(scene, materials_root, 'voss', Pose(p=[0.3, 0.2, 1]))
+    load_obj(scene, materials_root, 'voss', Pose(p=[0.3, 0.2, 1]), material=voss_material)
     load_obj(scene, materials_root, 'steel_ball', Pose(p=[0.4, -0.2, 1]))
     load_obj(scene, materials_root, 'tennis_ball', Pose(p=[0.3, -0.2, 1]))
     load_obj(scene, materials_root, 'coca_cola', Pose(p=[0.2, 0.3, 1]))

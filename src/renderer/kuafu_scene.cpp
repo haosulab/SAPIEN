@@ -178,9 +178,9 @@ void KuafuRigidBody::destroy() {
 //  pParentScene->removeRigidbody(this);
 }
 
-IPxrRigidbody *KuafuScene::addRigidbodyWithNewMaterial(
+IPxrRigidbody *KuafuScene::addRigidbody(
     const std::string &meshFile, const physx::PxVec3 &scale,
-    const std::shared_ptr<IPxrMaterial>& material) {
+    std::shared_ptr<IPxrMaterial> material) {
   try {
     auto obj = kuafu::loadScene(meshFile, true);
     if (material)
@@ -208,7 +208,7 @@ IPxrRigidbody *KuafuScene::addRigidbodyWithNewMaterial(
 }
 
 IPxrRigidbody *KuafuScene::addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) {
-  return addRigidbodyWithNewMaterial(meshFile, scale, nullptr);
+  return addRigidbody(meshFile, scale, nullptr);
 }
 
 IPxrRigidbody *KuafuScene::addRigidbody(physx::PxGeometryType::Enum type,

@@ -142,11 +142,9 @@ class KuafuScene : public IPxrScene {
   std::vector<std::shared_ptr<KuafuActiveLight>> mActiveLights;
 
 public:
-  IPxrRigidbody *addRigidbodyWithNewMaterial(
-      const std::string &meshFile, const physx::PxVec3 &scale,
-      const std::shared_ptr<IPxrMaterial>& material = nullptr);   // to make clang happy
-
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
+  IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
+                              std::shared_ptr<IPxrMaterial> material) override;
   IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
                                       std::shared_ptr<IPxrMaterial> material) override;
   IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type,
