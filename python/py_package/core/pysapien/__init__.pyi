@@ -45,6 +45,7 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
+    "KuafuCamera",
     "KuafuConfig",
     "KuafuRenderer",
     "Light",
@@ -805,6 +806,12 @@ class LinkBase(ActorDynamicBase, ActorBase, Entity):
     def get_articulation(self) -> ArticulationBase: ...
     def get_index(self) -> int: ...
     pass
+class KuafuCamera(ICamera, ISensor):
+    def set_full_perspective(self, fx: float, fy: float, cx: float, cy: float, width: float, height: float, skew: float) -> None: 
+        """
+        Set camera into perspective projection mode with full camera parameters
+        """
+    pass
 class KuafuConfig():
     def __init__(self) -> None: ...
     @property
@@ -835,6 +842,14 @@ class KuafuConfig():
         """
     @max_bounces.setter
     def max_bounces(self, arg0: int) -> None:
+        pass
+    @property
+    def max_textures(self) -> int:
+        """
+        :type: int
+        """
+    @max_textures.setter
+    def max_textures(self, arg0: int) -> None:
         pass
     @property
     def spp(self) -> int:

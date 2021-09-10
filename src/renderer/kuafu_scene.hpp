@@ -37,7 +37,7 @@ public:
   // ICamera
 
   KuafuCamera(std::string const& name, int width, int height,
-              float fovy, KuafuScene *scene){
+              float fovy, KuafuScene *scene) {
     pParentScene = scene;
     pKCamera = std::make_shared<KCamera>(name, width, height);
     pKCamera->reset();
@@ -83,6 +83,13 @@ public:
   IPxrScene *getScene() override;
 
 //  virtual ~ISensor() = default;
+
+  // Non-override
+  inline void setFullPerspective(
+      float fx, float fy, float cx, float cy,
+      float width, float height, float skew) {
+    pKCamera->setFullPerspective(fx, fy, cx, cy, width, height, skew);
+  }
 };
 
 class KuafuRigidBody : public IPxrRigidbody {

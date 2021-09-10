@@ -39,6 +39,7 @@ from sapien.core.pysapien import KinematicJointPrismatic
 from sapien.core.pysapien import KinematicJointRevolute
 from sapien.core.pysapien import KinematicJointSingleDof
 from sapien.core.pysapien import KinematicLink
+from sapien.core.pysapien import KuafuCamera
 from sapien.core.pysapien import KuafuConfig
 from sapien.core.pysapien import KuafuRenderer
 from sapien.core.pysapien import Light
@@ -126,6 +127,7 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
+    "KuafuCamera",
     "KuafuConfig",
     "KuafuRenderer",
     "Light",

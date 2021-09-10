@@ -264,7 +264,8 @@ void buildSapien(py::module &m) {
       .def_readwrite("spp", &Renderer::KuafuConfig::mPerPixelSampleRate)
       .def_readwrite("max_bounces", &Renderer::KuafuConfig::mPathDepth)
       .def_readwrite("accumulate_frames", &Renderer::KuafuConfig::mAccumulateFrames)
-      .def_readwrite("use_denoiser", &Renderer::KuafuConfig::mUseDenoiser);
+      .def_readwrite("use_denoiser", &Renderer::KuafuConfig::mUseDenoiser)
+      .def_readwrite("max_textures", &Renderer::KuafuConfig::mMaxTextures);
 
   auto PyKuafuRenderer =
       py::class_<Renderer::KuafuRenderer, Renderer::IPxrRenderer,
@@ -277,6 +278,14 @@ void buildSapien(py::module &m) {
       .def("set_environment_map", &Renderer::KuafuRenderer::setEnvironmentMap,
            py::arg("env_map_path"))
       .def_property_readonly("is_running", &Renderer::KuafuRenderer::isRunning);
+
+  auto PyKuafuCamera = py::class_<Renderer::KuafuCamera, Renderer::ICamera>(m, "KuafuCamera");
+  PyKuafuCamera
+      .def("set_full_perspective", &Renderer::KuafuCamera::setFullPerspective,
+           "Set camera into perspective projection mode with full camera parameters",
+           py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"),
+           py::arg("width"), py::arg("height"), py::arg("skew"));
+
 
   //======== Internal ========//
 
