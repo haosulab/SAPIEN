@@ -2166,7 +2166,8 @@ Args:
            py::arg("custom_data"))
       .def("get_render_shapes", &Renderer::IPxrRigidbody::getRenderShapes)
       .def("set_pose", &Renderer::IPxrRigidbody::update, py::arg("pose"))
-      .def("set_visibility", &Renderer::IPxrRigidbody::setVisibility, py::arg("visibility"));
+      .def("set_visibility", &Renderer::IPxrRigidbody::setVisibility, py::arg("visibility"))
+      .def("set_visible", &Renderer::IPxrRigidbody::setVisible, py::arg("is_visible"));
 
   PyRenderShape.def_readonly("type", &Renderer::RenderShape::type)
       .def_readonly("pose", &Renderer::RenderShape::pose)

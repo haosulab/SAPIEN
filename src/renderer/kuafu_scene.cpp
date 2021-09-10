@@ -121,8 +121,15 @@ void KuafuRigidBody::update(const physx::PxTransform &transform) {
 }
 
 void KuafuRigidBody::setVisibility(float visibility) {
-  spdlog::get("SAPIEN")->error("KF: setVisibility not supported yet");
+  if (visibility == 0.0)
+    setVisible(false);
+  else if (visibility == 1.0)
+    setVisible(true);
+  else
+    spdlog::get("SAPIEN")->error(
+        "KF: setVisibility with non-1/0 visibility is not supported yet");
 }
+
 void KuafuRigidBody::setVisible(bool visible) {       // The correctness of the function
   for (auto idx: mKGeometryInstanceIndices) {         // relies on the fact that sapien does not
     auto& scene = mParentScene->getKScene();          // use geometry instancing at all
