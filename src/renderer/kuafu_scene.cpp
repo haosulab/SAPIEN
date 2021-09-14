@@ -58,12 +58,22 @@ void KuafuCamera::setPxPose(const physx::PxTransform &pose) {
 void KuafuCamera::takePicture() {
   auto &scene = pParentScene->getKScene();
   auto window = pParentScene->pKRenderer->getWindow();
-  if (scene.getCamera() != pKCamera) {
-    spdlog::get("SAPIEN")->warn(
-        "KF: Rendering on a different size of the viewer, trying to resize!");
-    window->resize(pKCamera->getWidth(), pKCamera->getHeight());
+  if (scene.getCamera() != pKCamera) {                          // Camera changed!
+    spdlog::get("SAPIEN")->info(
+        "KF: Camera is different from last render! Reduce of frame rate is expected.");
+    vk::Extent2D extent = window->getSize();
+    auto w = pKCamera->getWidth();
+    auto h = pKCamera->getHeight();
+    if (static_cast<int>(extent.width) != w || static_cast<int>(extent.height) != h) {
+      spdlog::get("SAPIEN")->info(
+          "KF: Rendering on a different size of the viewer, "
+          "trying to resize the window!");
+      window->resize(w, h);
+    }
     scene.setCamera(pKCamera);
-  }
+    pParentScene->pKRenderer->run();
+    pParentScene->pKRenderer->run();               // FIXME: do this internally in kuafu;
+  }                                                //        may be in downloadLatestFrame?
   pParentScene->pKRenderer->run();
 };
 
