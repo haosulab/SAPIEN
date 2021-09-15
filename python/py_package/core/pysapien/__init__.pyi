@@ -1267,6 +1267,46 @@ class RenderShape():
         """
     pass
 class RenderTexture():
+    @property
+    def address_mode(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def channels(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def dtype(self) -> detail::accessor<detail::accessor_policies::str_attr>:
+        """
+        :type: detail::accessor<detail::accessor_policies::str_attr>
+        """
+    @property
+    def filename(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def filter_mode(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def height(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def mipmap_levels(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def width(self) -> int:
+        """
+        :type: int
+        """
     pass
 class Scene():
     def add_active_light(self, pose: Pose, color: numpy.ndarray[numpy.float32], fov: float, tex_path: str) -> ActiveLightEntity: ...

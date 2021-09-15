@@ -62,15 +62,15 @@ std::shared_ptr<IPxrMaterial> SVulkan2Renderer::createMaterial() {
 
 std::shared_ptr<IPxrTexture>
 SVulkan2Renderer::createTexture(std::string_view filename, uint32_t mipLevels,
-                                IPxrTexture::FilterMode filterMode,
-                                IPxrTexture::AddressMode addressMode) {
+                                IPxrTexture::FilterMode::Enum filterMode,
+                                IPxrTexture::AddressMode::Enum addressMode) {
   vk::Filter vkf;
   vk::SamplerAddressMode vka;
   switch (filterMode) {
-  case IPxrTexture::eNEAREST:
+  case IPxrTexture::FilterMode::eNEAREST:
     vkf = vk::Filter::eNearest;
     break;
-  case IPxrTexture::eLINEAR:
+  case IPxrTexture::FilterMode::eLINEAR:
     vkf = vk::Filter::eLinear;
     break;
   }

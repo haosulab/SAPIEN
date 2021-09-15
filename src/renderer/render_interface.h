@@ -43,9 +43,15 @@ struct RenderMeshGeometry {
 
 class IPxrTexture {
 public:
-  enum FilterMode { eNEAREST, eLINEAR };
-  enum AddressMode { eREPEAT, eBORDER, eEDGE, eMIRROR };
-  enum Type { eBYTE, eINT, eHALF, eFLOAT, eOTHER };
+  struct FilterMode {
+    enum Enum { eNEAREST, eLINEAR };
+  };
+  struct AddressMode {
+    enum Enum { eREPEAT, eBORDER, eEDGE, eMIRROR };
+  };
+  struct Type {
+    enum Enum { eBYTE, eINT, eHALF, eFLOAT, eOTHER };
+  };
 
   [[nodiscard]] virtual int getWidth() const = 0;
   [[nodiscard]] virtual int getHeight() const = 0;
@@ -56,17 +62,17 @@ public:
     return 0;
   };
 
-  [[nodiscard]] virtual Type getType() const {
+  [[nodiscard]] virtual Type::Enum getType() const {
     _warn_texture_func_not_supported(__func__);
-    return eOTHER;
+    return Type::eOTHER;
   }
-  [[nodiscard]] virtual AddressMode getAddressMode() const {
+  [[nodiscard]] virtual AddressMode::Enum getAddressMode() const {
     _warn_texture_func_not_supported(__func__);
-    return eREPEAT;
+    return AddressMode::eREPEAT;
   };
-  [[nodiscard]] virtual FilterMode getFilterMode() const {
+  [[nodiscard]] virtual FilterMode::Enum getFilterMode() const {
     _warn_texture_func_not_supported(__func__);
-    return eNEAREST;
+    return FilterMode::eNEAREST;
   };
   [[nodiscard]] virtual std::string getFilename() const { return ""; };
   virtual ~IPxrTexture() = default;
@@ -190,35 +196,11 @@ public:
   virtual ~IPxrMaterial() = default;
 };
 
-// struct RenderShape {
-//   std::string type = "invalid";
-//   physx::PxVec3 scale = {0, 0, 0};
-//   physx::PxTransform pose = physx::PxTransform(physx::PxIdentity);
-//   std::unique_ptr<RenderMeshGeometry> geometry = nullptr;
-//   std::shared_ptr<IPxrMaterial> material;
-//   uint32_t objId = 0;
-
-//   inline RenderShape() = default;
-//   RenderShape(RenderShape const &) = delete;
-//   RenderShape(RenderShape &&) = default;
-//   RenderShape &operator=(RenderShape const &) = delete;
-//   RenderShape &operator=(RenderShape &&) = default;
-//   ~RenderShape() = default;
-// };
-
 class IPxrRenderShape {
 public:
   [[nodiscard]] virtual std::shared_ptr<RenderMeshGeometry> getGeometry() const { return {}; }
   [[nodiscard]] virtual std::shared_ptr<IPxrMaterial> getMaterial() const { return nullptr; }
   virtual ~IPxrRenderShape() = default;
-
-  // TODO: these are deprecated
-  // [[nodiscard]] virtual std::string getType() const { return "invalid"; }
-  // [[nodiscard]] virtual physx::PxVec3 getScale() const { return {0, 0, 0}; }
-  // [[nodiscard]] virtual physx::PxTransform getPose() const {
-  //   return physx::PxTransform{physx::PxIdentity};
-  // }
-  // [[nodiscard]] virtual uint32_t getId() const { return 0; }
 };
 
 class PxrMaterial : public IPxrMaterial {
@@ -345,10 +327,6 @@ public:
 
   virtual void destroy() = 0;
 
-  // virtual std::vector<std::unique_ptr<RenderShape>> getRenderShapes() const = 0;
-
-  // virtual std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() const = 0;
-
   virtual ~IPxrRigidbody() = default;
 
   // TODO: implement
@@ -461,10 +439,10 @@ public:
   virtual IPxrScene *createScene(std::string const &name) = 0;
   virtual void removeScene(IPxrScene *scene) = 0;
   virtual std::shared_ptr<IPxrMaterial> createMaterial() = 0;
-  virtual std::shared_ptr<IPxrTexture> createTexture(std::string_view filename,
-                                                     uint32_t mipLevels = 1,
-                                                     IPxrTexture::FilterMode filterMode = {},
-                                                     IPxrTexture::AddressMode addressMode = {}) {
+  virtual std::shared_ptr<IPxrTexture>
+  createTexture(std::string_view filename, uint32_t mipLevels = 1,
+                IPxrTexture::FilterMode::Enum filterMode = {},
+                IPxrTexture::AddressMode::Enum addressMode = {}) {
     throw std::runtime_error("Texture creation is not supported.");
   }
 

@@ -501,6 +501,53 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
   //     // .def_readwrite("specular_texture", &Renderer::PxrMaterial::specular_texture)
   //     // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture);
 
+  PyRenderTexture.def_property_readonly("width", &Renderer::IPxrTexture::getWidth)
+      .def_property_readonly("height", &Renderer::IPxrTexture::getHeight)
+      .def_property_readonly("channels", &Renderer::IPxrTexture::getChannels)
+      .def_property_readonly("mipmap_levels", &Renderer::IPxrTexture::getMipmapLevels)
+      .def_property_readonly("dtype",
+                             [](Renderer::IPxrTexture &tex) {
+                               py::module np = py::module::import("numpy");
+                               switch (tex.getType()) {
+                               case Renderer::IPxrTexture::Type::eBYTE:
+                                 return np.attr("uint8");
+                               case Renderer::IPxrTexture::Type::eINT:
+                                 return np.attr("int32");
+                               case Renderer::IPxrTexture::Type::eHALF:
+                                 return np.attr("float16");
+                               case Renderer::IPxrTexture::Type::eFLOAT:
+                                 return np.attr("float32");
+                               case Renderer::IPxrTexture::Type::eOTHER:
+                                 return np.attr("object");
+                               }
+                               return np.attr("object");
+                             })
+      .def_property_readonly("address_mode",
+                             [](Renderer::IPxrTexture &tex) {
+                               switch (tex.getAddressMode()) {
+                               case Renderer::IPxrTexture::AddressMode::eREPEAT:
+                                 return "repeat";
+                               case Renderer::IPxrTexture::AddressMode::eBORDER:
+                                 return "border";
+                               case Renderer::IPxrTexture::AddressMode::eEDGE:
+                                 return "edge";
+                               case Renderer::IPxrTexture::AddressMode::eMIRROR:
+                                 return "mirror";
+                               }
+                               return "unknown";
+                             })
+      .def_property_readonly("filter_mode", [](Renderer::IPxrTexture &tex) {
+        switch (tex.getFilterMode()) {
+          case Renderer::IPxrTexture::FilterMode::eLINEAR:
+            return "linear";
+          case Renderer::IPxrTexture::FilterMode::eNEAREST:
+            return "nearest";
+        }
+        return "unknown";
+      })
+      .def_property_readonly("filename", &Renderer::IPxrTexture::getFilename);
+  ;
+
   PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
       .def("get_pose", &Renderer::ISensor::getPose)
       .def("set_pose", &Renderer::ISensor::setPose, py::arg("pose"));
@@ -1827,7 +1874,8 @@ Args:
   //         },
   //         py::arg("color"))
   //     .def_property_readonly("color",
-  //                            [](Renderer::ILight &light) { return vec32array(light.getColor()); })
+  //                            [](Renderer::ILight &light) { return vec32array(light.getColor());
+  //                            })
 
   //     .def_property("shadow", &Renderer::ILight::getShadowEnabled,
   //                   &Renderer::ILight::setShadowEnabled);
@@ -1840,8 +1888,10 @@ Args:
   //         },
   //         py::arg("position"))
   //     .def_property_readonly(
-  //         "position", [](Renderer::IPointLight &light) { return vec32array(light.getPosition()); })
-  //     .def("set_shadow_parameters", &Renderer::IPointLight::setShadowParameters, py ::arg("near"),
+  //         "position", [](Renderer::IPointLight &light) { return vec32array(light.getPosition());
+  //         })
+  //     .def("set_shadow_parameters", &Renderer::IPointLight::setShadowParameters, py
+  //     ::arg("near"),
   //          py::arg("far"));
 
   // PyDirectionalLight
@@ -1865,7 +1915,8 @@ Args:
   //         },
   //         py::arg("position"))
   //     .def_property_readonly(
-  //         "position", [](Renderer::ISpotLight &light) { return vec32array(light.getPosition()); })
+  //         "position", [](Renderer::ISpotLight &light) { return vec32array(light.getPosition());
+  //         })
   //     .def(
   //         "set_direction",
   //         [](Renderer::ISpotLight &light, py::array_t<float> direction) {
@@ -1875,7 +1926,8 @@ Args:
   //     .def_property_readonly(
   //         "direction",
   //         [](Renderer::ISpotLight &light) { return vec32array(light.getDirection()); })
-  //     .def("set_shadow_parameters", &Renderer::ISpotLight::setShadowParameters, py ::arg("near"),
+  //     .def("set_shadow_parameters", &Renderer::ISpotLight::setShadowParameters, py
+  //     ::arg("near"),
   //          py::arg("far"));
 
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
@@ -2002,8 +2054,8 @@ Args:
           "create_texture_from_file",
           [](Renderer::IPxrRenderer &renderer, std::string const &filename, uint32_t mipLevels,
              std::string const &filterMode, std::string const &addressMode) {
-            Renderer::IPxrTexture::FilterMode fm;
-            Renderer::IPxrTexture::AddressMode am;
+            Renderer::IPxrTexture::FilterMode::Enum fm;
+            Renderer::IPxrTexture::AddressMode::Enum am;
             if (filterMode == "linear") {
               fm = Renderer::IPxrTexture::FilterMode::eLINEAR;
             } else if (filterMode == "nearest") {
@@ -2043,16 +2095,18 @@ Args:
       //     [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
       //        py::array_t<float> const &color, bool shadow, float near, float far) {
       //       return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
-      //                                  {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+      //                                  {color.at(0), color.at(1), color.at(2)}, shadow, near,
+      //                                  far);
       //     },
-      //     py::arg("position"), py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1,
-      //     py::arg("far") = 10, py::return_value_policy::reference)
+      //     py::arg("position"), py::arg("color"), py::arg("shadow") = false, py::arg("near") =
+      //     0.1, py::arg("far") = 10, py::return_value_policy::reference)
       // .def(
       //     "add_directional_light",
       //     [](Renderer::IPxrScene &scene, py::array_t<float> const &direction,
       //        py::array_t<float> const &color, bool shadow, py::array_t<float> const &position,
       //        float scale, float near, float far) {
-      //       return scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
+      //       return scene.addDirectionalLight({direction.at(0), direction.at(1),
+      //       direction.at(2)},
       //                                        {color.at(0), color.at(1), color.at(2)}, shadow,
       //                                        {position.at(0), position.at(1), position.at(2)},
       //                                        scale, near, far);
@@ -2067,17 +2121,19 @@ Args:
       //        py::array_t<float> const &color, bool shadow, float near, float far) {
       //       return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
       //                                 {direction.at(0), direction.at(1), direction.at(2)},
-      //                                 fovInner, fovOuter, {color.at(0), color.at(1), color.at(2)},
-      //                                 shadow, near, far);
+      //                                 fovInner, fovOuter, {color.at(0), color.at(1),
+      //                                 color.at(2)}, shadow, near, far);
       //     },
       //     py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
       //     py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
       //     py::arg("far") = 10.f, py::return_value_policy::reference)
       // .def(
       //     "add_active_light",
-      //     [](Renderer::IPxrScene &scene, PxTransform const &pose, py::array_t<float> const &color,
+      //     [](Renderer::IPxrScene &scene, PxTransform const &pose, py::array_t<float> const
+      //     &color,
       //        float fov, std::string const &path) {
-      //       return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov, path);
+      //       return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov,
+      //       path);
       //     },
       //     py::arg("pose"), py::arg("tex_path"),
       //     py::arg("color") = make_array<float>({1.f, 1.f, 1.f}), py::arg("fov") = 1.57)
@@ -2144,11 +2200,11 @@ Args:
 
       // attribute access for different types
       .def_property_readonly("scale",
-                             [](Renderer::IPxrRigidbody &body) { return body.getScale(); })
+                             [](Renderer::IPxrRigidbody &body) { return vec32array(body.getScale()); })
       .def_property_readonly("radius",
                              [](Renderer::IPxrRigidbody &body) { return body.getScale().y; })
       .def_property_readonly("half_lengths",
-                             [](Renderer::IPxrRigidbody &body) { return body.getScale(); })
+                             [](Renderer::IPxrRigidbody &body) { return vec32array(body.getScale()); })
       .def_property_readonly("half_length",
                              [](Renderer::IPxrRigidbody &body) { return body.getScale().x; });
 

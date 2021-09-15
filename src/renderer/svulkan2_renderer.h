@@ -159,9 +159,10 @@ public:
   void removeScene(IPxrScene *scene) override;
 
   std::shared_ptr<IPxrMaterial> createMaterial() override;
-  std::shared_ptr<IPxrTexture> createTexture(std::string_view filename, uint32_t mipLevels = 1,
-                                             IPxrTexture::FilterMode filterMode = {},
-                                             IPxrTexture::AddressMode addressMode = {}) override;
+  std::shared_ptr<IPxrTexture>
+  createTexture(std::string_view filename, uint32_t mipLevels = 1,
+                IPxrTexture::FilterMode::Enum filterMode = {},
+                IPxrTexture::AddressMode::Enum addressMode = {}) override;
 };
 
 class SVulkan2Camera : public ICamera {

@@ -242,14 +242,14 @@ def main():
     ant = ant_builder.build()
     ant.set_root_pose(Pose([0, 0, 5]))
 
-    # urdf = download_partnet_mobility(
-    #     2780,
-    #     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjE3Mi4xOS4wLjEiLCJwcml2aWxlZ2UiOjEwLCJpYXQiOjE2MjEwMjQ3MDMsImV4cCI6MTY1MjU2MDcwM30.0HrNNhEhDI38sl-1g444y2Mn7PC9v-_Glu-UgTFf-QM",
-    # )
-    # loader = scene.create_urdf_loader()
-    # loader.fix_root_link = True
-    # cabinet = loader.load(urdf)
-    # cabinet.set_pose(Pose([1, 0, -2]))
+    urdf = download_partnet_mobility(
+        2780,
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjE3Mi4xOS4wLjEiLCJwcml2aWxlZ2UiOjEwLCJpYXQiOjE2MjEwMjQ3MDMsImV4cCI6MTY1MjU2MDcwM30.0HrNNhEhDI38sl-1g444y2Mn7PC9v-_Glu-UgTFf-QM",
+    )
+    loader = scene.create_urdf_loader()
+    loader.fix_root_link = True
+    cabinet = loader.load(urdf)
+    cabinet.set_pose(Pose([0, 0, 1]))
 
     # for link in cabinet.get_links():
     #     for s in link.get_collision_shapes():

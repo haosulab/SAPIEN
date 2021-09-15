@@ -29,7 +29,7 @@ int SVulkan2Texture::getChannels() const {
   return mTexture->getImage()->getChannels();
 }
 
-IPxrTexture::Type SVulkan2Texture::getType() const {
+IPxrTexture::Type::Enum SVulkan2Texture::getType() const {
   switch (mTexture->getDescription().format) {
   case svulkan2::resource::SVTextureDescription::Format::eUINT8:
     return Type::eBYTE;
@@ -38,10 +38,10 @@ IPxrTexture::Type SVulkan2Texture::getType() const {
   default:
     return Type::eOTHER;
   }
-  return eOTHER;
+  return Type::eOTHER;
 }
 
-IPxrTexture::AddressMode SVulkan2Texture::getAddressMode() const {
+IPxrTexture::AddressMode::Enum SVulkan2Texture::getAddressMode() const {
   switch (mTexture->getDescription().addressModeU) {
   case vk::SamplerAddressMode::eRepeat:
     return AddressMode::eREPEAT;
@@ -55,7 +55,7 @@ IPxrTexture::AddressMode SVulkan2Texture::getAddressMode() const {
   return AddressMode::eREPEAT;
 };
 
-IPxrTexture::FilterMode SVulkan2Texture::getFilterMode() const {
+IPxrTexture::FilterMode::Enum SVulkan2Texture::getFilterMode() const {
   switch (mTexture->getDescription().magFilter) {
   case vk::Filter::eNearest:
     return FilterMode::eNEAREST;

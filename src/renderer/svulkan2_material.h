@@ -16,9 +16,9 @@ public:
   [[nodiscard]] virtual int getWidth() const override;
   [[nodiscard]] virtual int getHeight() const override;
   [[nodiscard]] virtual int getChannels() const override;
-  [[nodiscard]] virtual IPxrTexture::Type getType() const override;
-  [[nodiscard]] virtual AddressMode getAddressMode() const override;
-  [[nodiscard]] virtual FilterMode getFilterMode() const override;
+  [[nodiscard]] virtual Type::Enum getType() const override;
+  [[nodiscard]] virtual AddressMode::Enum getAddressMode() const override;
+  [[nodiscard]] virtual FilterMode::Enum getFilterMode() const override;
   [[nodiscard]] virtual std::string getFilename() const override;
 
   [[nodiscard]] inline std::shared_ptr<svulkan2::resource::SVTexture> getTexture() const {
