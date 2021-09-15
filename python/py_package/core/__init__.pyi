@@ -1,6 +1,5 @@
 import sapien.core
 import typing
-from sapien.core.pysapien import ActiveLight
 from sapien.core.pysapien import ActiveLightEntity
 from sapien.core.pysapien import Actor
 from sapien.core.pysapien import ActorBase
@@ -19,7 +18,6 @@ from sapien.core.pysapien import Constraint
 from sapien.core.pysapien import Contact
 from sapien.core.pysapien import ContactPoint
 from sapien.core.pysapien import ConvexMeshGeometry
-from sapien.core.pysapien import DirectionalLight
 from sapien.core.pysapien import DirectionalLightEntity
 from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
@@ -40,7 +38,6 @@ from sapien.core.pysapien import KinematicLink
 from sapien.core.pysapien import KuafuCamera
 from sapien.core.pysapien import KuafuConfig
 from sapien.core.pysapien import KuafuRenderer
-from sapien.core.pysapien import Light
 from sapien.core.pysapien import LightEntity
 from sapien.core.pysapien import Link
 from sapien.core.pysapien import LinkBase
@@ -49,7 +46,6 @@ from sapien.core.pysapien import NonconvexMeshGeometry
 from sapien.core.pysapien import PhysicalMaterial
 from sapien.core.pysapien import PinocchioModel
 from sapien.core.pysapien import PlaneGeometry
-from sapien.core.pysapien import PointLight
 from sapien.core.pysapien import PointLightEntity
 from sapien.core.pysapien import Pose
 from sapien.core.pysapien import RenderBody
@@ -62,19 +58,15 @@ from sapien.core.pysapien import Scene
 from sapien.core.pysapien import SceneConfig
 from sapien.core.pysapien import ShapeRecord
 from sapien.core.pysapien import SphereGeometry
-from sapien.core.pysapien import SpotLight
 from sapien.core.pysapien import SpotLightEntity
 from sapien.core.pysapien import Subscription
 from sapien.core.pysapien import Trigger
 from sapien.core.pysapien import URDFLoader
 from sapien.core.pysapien import VisualRecord
 from sapien.core.pysapien import VulkanCamera
-from sapien.core.pysapien import VulkanDirectionalLight
-from sapien.core.pysapien import VulkanPointLight
 from sapien.core.pysapien import VulkanRenderer
 from sapien.core.pysapien import VulkanRigidbody
 from sapien.core.pysapien import VulkanScene
-from sapien.core.pysapien import VulkanSpotLight
 from sapien.core.pysapien import VulkanWindow
 import os
 import pkg_resources
@@ -82,7 +74,6 @@ import sapien.core.pysapien.renderer
 import sys
 
 __all__ = [
-    "ActiveLight",
     "ActiveLightEntity",
     "Actor",
     "ActorBase",
@@ -101,7 +92,6 @@ __all__ = [
     "Contact",
     "ContactPoint",
     "ConvexMeshGeometry",
-    "DirectionalLight",
     "DirectionalLightEntity",
     "Drive",
     "Engine",
@@ -122,7 +112,6 @@ __all__ = [
     "KuafuCamera",
     "KuafuConfig",
     "KuafuRenderer",
-    "Light",
     "LightEntity",
     "Link",
     "LinkBase",
@@ -131,7 +120,6 @@ __all__ = [
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
-    "PointLight",
     "PointLightEntity",
     "Pose",
     "RenderBody",
@@ -144,19 +132,15 @@ __all__ = [
     "SceneConfig",
     "ShapeRecord",
     "SphereGeometry",
-    "SpotLight",
     "SpotLightEntity",
     "Subscription",
     "Trigger",
     "URDFLoader",
     "VisualRecord",
     "VulkanCamera",
-    "VulkanDirectionalLight",
-    "VulkanPointLight",
     "VulkanRenderer",
     "VulkanRigidbody",
     "VulkanScene",
-    "VulkanSpotLight",
     "VulkanWindow",
     "ensure_icd",
     "os",

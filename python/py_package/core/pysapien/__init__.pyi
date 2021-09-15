@@ -6,7 +6,6 @@ import renderer
 _Shape = typing.Tuple[int, ...]
 
 __all__ = [
-    "ActiveLight",
     "ActiveLightEntity",
     "Actor",
     "ActorBase",
@@ -25,7 +24,6 @@ __all__ = [
     "Contact",
     "ContactPoint",
     "ConvexMeshGeometry",
-    "DirectionalLight",
     "DirectionalLightEntity",
     "Drive",
     "Engine",
@@ -46,7 +44,6 @@ __all__ = [
     "KuafuCamera",
     "KuafuConfig",
     "KuafuRenderer",
-    "Light",
     "LightEntity",
     "Link",
     "LinkBase",
@@ -55,7 +52,6 @@ __all__ = [
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
-    "PointLight",
     "PointLightEntity",
     "Pose",
     "RenderBody",
@@ -68,46 +64,20 @@ __all__ = [
     "SceneConfig",
     "ShapeRecord",
     "SphereGeometry",
-    "SpotLight",
     "SpotLightEntity",
     "Subscription",
     "Trigger",
     "URDFLoader",
     "VisualRecord",
     "VulkanCamera",
-    "VulkanDirectionalLight",
-    "VulkanPointLight",
     "VulkanRenderer",
     "VulkanRigidbody",
     "VulkanScene",
-    "VulkanSpotLight",
     "VulkanWindow",
     "renderer"
 ]
 
 
-class Light():
-    def set_color(self, color: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_pose(self, pose: Pose) -> None: ...
-    @property
-    def color(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def pose(self) -> Pose:
-        """
-        :type: Pose
-        """
-    @property
-    def shadow(self) -> bool:
-        """
-        :type: bool
-        """
-    @shadow.setter
-    def shadow(self, arg1: bool) -> None:
-        pass
-    pass
 class Entity():
     def get_name(self) -> str: ...
     def get_pose(self) -> Pose: ...
@@ -526,15 +496,6 @@ class ConvexMeshGeometry(CollisionGeometry):
         :type: numpy.ndarray[numpy.float32]
         """
     pass
-class DirectionalLight(Light):
-    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
-    @property
-    def direction(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    pass
 class LightEntity(Entity):
     def set_color(self, color: numpy.ndarray[numpy.float32]) -> None: ...
     def set_pose(self, pose: Pose) -> None: ...
@@ -846,8 +807,6 @@ class KuafuRenderer(IPxrRenderer):
         :type: bool
         """
     pass
-class ActiveLight(Light):
-    pass
 class DirectionalLightEntity(LightEntity, Entity):
     def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
     def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
@@ -980,15 +939,6 @@ class PinocchioModel():
         """
     pass
 class PlaneGeometry(CollisionGeometry):
-    pass
-class PointLight(Light):
-    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_shadow_parameters(self, near: float, far: float) -> None: ...
-    @property
-    def position(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
     pass
 class PointLightEntity(LightEntity, Entity):
     def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
@@ -1295,14 +1245,9 @@ class RenderMaterial():
         pass
     pass
 class RenderScene():
-    def add_active_light(self, pose: Pose, tex_path: numpy.ndarray[numpy.float32], color: float = array([1., 1., 1.], dtype=float32), fov: str = 1.57) -> ActiveLight: ...
-    def add_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0) -> DirectionalLight: ...
     def add_mesh_from_file(self, mesh_file: str, scale: numpy.ndarray[numpy.float32]) -> RenderBody: ...
-    def add_point_light(self, position: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, near: float = 0.1, far: float = 10) -> PointLight: ...
     def add_primitive_mesh(self, type: str, scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: RenderMaterial = None) -> RenderBody: ...
-    def add_spot_light(self, position: numpy.ndarray[numpy.float32], direction: numpy.ndarray[numpy.float32], inner_fov: float, outer_fov: float, color: numpy.ndarray[numpy.float32], shadow: bool = False, near: float = 0.10000000149011612, far: float = 10.0) -> SpotLight: ...
     def remove_mesh(self, mesh: RenderBody) -> None: ...
-    def set_ambient_light(self, color: numpy.ndarray[numpy.float32]) -> None: ...
     @property
     def ambient_light(self) -> numpy.ndarray[numpy.float32]:
         """
@@ -1576,21 +1521,6 @@ class SphereGeometry(CollisionGeometry):
         :type: float
         """
     pass
-class SpotLight(Light):
-    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_shadow_parameters(self, near: float, far: float) -> None: ...
-    @property
-    def direction(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def position(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    pass
 class SpotLightEntity(LightEntity, Entity):
     def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
     def set_fov(self, arg0: float) -> None: ...
@@ -1798,10 +1728,6 @@ class VulkanCamera(ICamera, ISensor):
         :type: typing.List[str]
         """
     pass
-class VulkanDirectionalLight(DirectionalLight, Light):
-    pass
-class VulkanPointLight(PointLight, Light):
-    pass
 class VulkanRenderer(IPxrRenderer):
     def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '') -> None: 
         """
@@ -1845,8 +1771,6 @@ class VulkanScene(RenderScene):
         """
         :type: renderer.Scene
         """
-    pass
-class VulkanSpotLight(SpotLight, Light):
     pass
 class VulkanWindow():
     def get_camera_position(self) -> numpy.ndarray[numpy.float32]: ...

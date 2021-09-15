@@ -231,19 +231,19 @@ void buildSapien(py::module &m) {
   auto PySpotLightEntity = py::class_<SSpotLight, SLight>(m, "SpotLightEntity");
   auto PyActiveLightEntity = py::class_<SActiveLight, SLight>(m, "ActiveLightEntity");
 
-  auto PyLight = py::class_<Renderer::ILight>(m, "Light");
-  auto PyPointLight = py::class_<Renderer::IPointLight, Renderer::ILight>(m, "PointLight");
-  auto PyDirectionalLight =
-      py::class_<Renderer::IDirectionalLight, Renderer::ILight>(m, "DirectionalLight");
-  auto PySpotLight = py::class_<Renderer::ISpotLight, Renderer::ILight>(m, "SpotLight");
-  auto PyActiveLight = py::class_<Renderer::IActiveLight, Renderer::ILight>(m, "ActiveLight");
-  auto PyVulkanPointLight =
-      py::class_<Renderer::SVulkan2PointLight, Renderer::IPointLight>(m, "VulkanPointLight");
-  auto PyVulkanDirectionalLight =
-      py::class_<Renderer::SVulkan2DirectionalLight, Renderer::IDirectionalLight>(
-          m, "VulkanDirectionalLight");
-  auto PyVulkanSpotLight =
-      py::class_<Renderer::SVulkan2SpotLight, Renderer::ISpotLight>(m, "VulkanSpotLight");
+  // auto PyLight = py::class_<Renderer::ILight>(m, "Light");
+  // auto PyPointLight = py::class_<Renderer::IPointLight, Renderer::ILight>(m, "PointLight");
+  // auto PyDirectionalLight =
+  //     py::class_<Renderer::IDirectionalLight, Renderer::ILight>(m, "DirectionalLight");
+  // auto PySpotLight = py::class_<Renderer::ISpotLight, Renderer::ILight>(m, "SpotLight");
+  // auto PyActiveLight = py::class_<Renderer::IActiveLight, Renderer::ILight>(m, "ActiveLight");
+  // auto PyVulkanPointLight =
+  //     py::class_<Renderer::SVulkan2PointLight, Renderer::IPointLight>(m, "VulkanPointLight");
+  // auto PyVulkanDirectionalLight =
+  //     py::class_<Renderer::SVulkan2DirectionalLight, Renderer::IDirectionalLight>(
+  //         m, "VulkanDirectionalLight");
+  // auto PyVulkanSpotLight =
+  //     py::class_<Renderer::SVulkan2SpotLight, Renderer::ISpotLight>(m, "VulkanSpotLight");
 
   //======== Kuafu ========//
   auto PyKuafuConfig = py::class_<Renderer::KuafuConfig>(m, "KuafuConfig");
@@ -1817,66 +1817,66 @@ Args:
       .def("set_fov", &SActiveLight::setFov)
       .def_property_readonly("fov", &SActiveLight::getFov);
 
-  // Renderer Light (will be deprecated)
-  PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
-      .def_property_readonly("pose", &Renderer::ILight::getPose)
-      .def(
-          "set_color",
-          [](Renderer::ILight &light, py::array_t<float> color) {
-            light.setColor({color.at(0), color.at(1), color.at(2)});
-          },
-          py::arg("color"))
-      .def_property_readonly("color",
-                             [](Renderer::ILight &light) { return vec32array(light.getColor()); })
+  // // Renderer Light (will be deprecated)
+  // PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
+  //     .def_property_readonly("pose", &Renderer::ILight::getPose)
+  //     .def(
+  //         "set_color",
+  //         [](Renderer::ILight &light, py::array_t<float> color) {
+  //           light.setColor({color.at(0), color.at(1), color.at(2)});
+  //         },
+  //         py::arg("color"))
+  //     .def_property_readonly("color",
+  //                            [](Renderer::ILight &light) { return vec32array(light.getColor()); })
 
-      .def_property("shadow", &Renderer::ILight::getShadowEnabled,
-                    &Renderer::ILight::setShadowEnabled);
+  //     .def_property("shadow", &Renderer::ILight::getShadowEnabled,
+  //                   &Renderer::ILight::setShadowEnabled);
 
-  PyPointLight
-      .def(
-          "set_position",
-          [](Renderer::IPointLight &light, py::array_t<float> position) {
-            light.setPosition({position.at(0), position.at(1), position.at(2)});
-          },
-          py::arg("position"))
-      .def_property_readonly(
-          "position", [](Renderer::IPointLight &light) { return vec32array(light.getPosition()); })
-      .def("set_shadow_parameters", &Renderer::IPointLight::setShadowParameters, py ::arg("near"),
-           py::arg("far"));
+  // PyPointLight
+  //     .def(
+  //         "set_position",
+  //         [](Renderer::IPointLight &light, py::array_t<float> position) {
+  //           light.setPosition({position.at(0), position.at(1), position.at(2)});
+  //         },
+  //         py::arg("position"))
+  //     .def_property_readonly(
+  //         "position", [](Renderer::IPointLight &light) { return vec32array(light.getPosition()); })
+  //     .def("set_shadow_parameters", &Renderer::IPointLight::setShadowParameters, py ::arg("near"),
+  //          py::arg("far"));
 
-  PyDirectionalLight
-      .def(
-          "set_direction",
-          [](Renderer::IDirectionalLight &light, py::array_t<float> direction) {
-            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
-          },
-          py::arg("direction"))
-      .def_property_readonly(
-          "direction",
-          [](Renderer::IDirectionalLight &light) { return vec32array(light.getDirection()); })
-      .def("set_shadow_parameters", &Renderer::IDirectionalLight::setShadowParameters,
-           py::arg("half_size"), py ::arg("near"), py::arg("far"));
+  // PyDirectionalLight
+  //     .def(
+  //         "set_direction",
+  //         [](Renderer::IDirectionalLight &light, py::array_t<float> direction) {
+  //           light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+  //         },
+  //         py::arg("direction"))
+  //     .def_property_readonly(
+  //         "direction",
+  //         [](Renderer::IDirectionalLight &light) { return vec32array(light.getDirection()); })
+  //     .def("set_shadow_parameters", &Renderer::IDirectionalLight::setShadowParameters,
+  //          py::arg("half_size"), py ::arg("near"), py::arg("far"));
 
-  PySpotLight
-      .def(
-          "set_position",
-          [](Renderer::ISpotLight &light, py::array_t<float> position) {
-            light.setPosition({position.at(0), position.at(1), position.at(2)});
-          },
-          py::arg("position"))
-      .def_property_readonly(
-          "position", [](Renderer::ISpotLight &light) { return vec32array(light.getPosition()); })
-      .def(
-          "set_direction",
-          [](Renderer::ISpotLight &light, py::array_t<float> direction) {
-            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
-          },
-          py::arg("direction"))
-      .def_property_readonly(
-          "direction",
-          [](Renderer::ISpotLight &light) { return vec32array(light.getDirection()); })
-      .def("set_shadow_parameters", &Renderer::ISpotLight::setShadowParameters, py ::arg("near"),
-           py::arg("far"));
+  // PySpotLight
+  //     .def(
+  //         "set_position",
+  //         [](Renderer::ISpotLight &light, py::array_t<float> position) {
+  //           light.setPosition({position.at(0), position.at(1), position.at(2)});
+  //         },
+  //         py::arg("position"))
+  //     .def_property_readonly(
+  //         "position", [](Renderer::ISpotLight &light) { return vec32array(light.getPosition()); })
+  //     .def(
+  //         "set_direction",
+  //         [](Renderer::ISpotLight &light, py::array_t<float> direction) {
+  //           light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+  //         },
+  //         py::arg("direction"))
+  //     .def_property_readonly(
+  //         "direction",
+  //         [](Renderer::ISpotLight &light) { return vec32array(light.getDirection()); })
+  //     .def("set_shadow_parameters", &Renderer::ISpotLight::setShadowParameters, py ::arg("near"),
+  //          py::arg("far"));
 
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
       .def("hide", &Renderer::SVulkan2Window::hide)
@@ -2032,55 +2032,55 @@ Args:
                                auto light = scene.getAmbientLight();
                                return make_array(std::vector<float>{light[0], light[1], light[2]});
                              })
-      .def(
-          "set_ambient_light",
-          [](Renderer::IPxrScene &scene, py::array_t<float> const &color) {
-            scene.setAmbientLight({color.at(0), color.at(1), color.at(2)});
-          },
-          py::arg("color"))
-      .def(
-          "add_point_light",
-          [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
-             py::array_t<float> const &color, bool shadow, float near, float far) {
-            return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
-                                       {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
-          },
-          py::arg("position"), py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1,
-          py::arg("far") = 10, py::return_value_policy::reference)
-      .def(
-          "add_directional_light",
-          [](Renderer::IPxrScene &scene, py::array_t<float> const &direction,
-             py::array_t<float> const &color, bool shadow, py::array_t<float> const &position,
-             float scale, float near, float far) {
-            return scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
-                                             {color.at(0), color.at(1), color.at(2)}, shadow,
-                                             {position.at(0), position.at(1), position.at(2)},
-                                             scale, near, far);
-          },
-          py::arg("direction"), py::arg("color"), py::arg("shadow") = false,
-          py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
-          py::arg("near") = -10.f, py::arg("far") = 10.f, py::return_value_policy::reference)
-      .def(
-          "add_spot_light",
-          [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
-             py::array_t<float> const &direction, float fovInner, float fovOuter,
-             py::array_t<float> const &color, bool shadow, float near, float far) {
-            return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
-                                      {direction.at(0), direction.at(1), direction.at(2)},
-                                      fovInner, fovOuter, {color.at(0), color.at(1), color.at(2)},
-                                      shadow, near, far);
-          },
-          py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
-          py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
-          py::arg("far") = 10.f, py::return_value_policy::reference)
-      .def(
-          "add_active_light",
-          [](Renderer::IPxrScene &scene, PxTransform const &pose, py::array_t<float> const &color,
-             float fov, std::string const &path) {
-            return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov, path);
-          },
-          py::arg("pose"), py::arg("tex_path"),
-          py::arg("color") = make_array<float>({1.f, 1.f, 1.f}), py::arg("fov") = 1.57)
+      // .def(
+      //     "set_ambient_light",
+      //     [](Renderer::IPxrScene &scene, py::array_t<float> const &color) {
+      //       scene.setAmbientLight({color.at(0), color.at(1), color.at(2)});
+      //     },
+      //     py::arg("color"))
+      // .def(
+      //     "add_point_light",
+      //     [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
+      //        py::array_t<float> const &color, bool shadow, float near, float far) {
+      //       return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
+      //                                  {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+      //     },
+      //     py::arg("position"), py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1,
+      //     py::arg("far") = 10, py::return_value_policy::reference)
+      // .def(
+      //     "add_directional_light",
+      //     [](Renderer::IPxrScene &scene, py::array_t<float> const &direction,
+      //        py::array_t<float> const &color, bool shadow, py::array_t<float> const &position,
+      //        float scale, float near, float far) {
+      //       return scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
+      //                                        {color.at(0), color.at(1), color.at(2)}, shadow,
+      //                                        {position.at(0), position.at(1), position.at(2)},
+      //                                        scale, near, far);
+      //     },
+      //     py::arg("direction"), py::arg("color"), py::arg("shadow") = false,
+      //     py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
+      //     py::arg("near") = -10.f, py::arg("far") = 10.f, py::return_value_policy::reference)
+      // .def(
+      //     "add_spot_light",
+      //     [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
+      //        py::array_t<float> const &direction, float fovInner, float fovOuter,
+      //        py::array_t<float> const &color, bool shadow, float near, float far) {
+      //       return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
+      //                                 {direction.at(0), direction.at(1), direction.at(2)},
+      //                                 fovInner, fovOuter, {color.at(0), color.at(1), color.at(2)},
+      //                                 shadow, near, far);
+      //     },
+      //     py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
+      //     py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
+      //     py::arg("far") = 10.f, py::return_value_policy::reference)
+      // .def(
+      //     "add_active_light",
+      //     [](Renderer::IPxrScene &scene, PxTransform const &pose, py::array_t<float> const &color,
+      //        float fov, std::string const &path) {
+      //       return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov, path);
+      //     },
+      //     py::arg("pose"), py::arg("tex_path"),
+      //     py::arg("color") = make_array<float>({1.f, 1.f, 1.f}), py::arg("fov") = 1.57)
       .def(
           "add_mesh_from_file",
           [](Renderer::IPxrScene &scene, std::string const &meshFile, py::array_t<float> scale) {
