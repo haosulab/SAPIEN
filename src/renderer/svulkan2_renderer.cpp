@@ -1,4 +1,5 @@
 #include "svulkan2_renderer.h"
+#include "svulkan2_material.h"
 #include <svulkan2/resource/material.h>
 
 namespace sapien {
@@ -32,25 +33,9 @@ void SVulkan2Renderer::setLogLevel(std::string const &level) {
   }
 }
 
-SVulkan2Material::SVulkan2Material(
-    std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material)
-    : mMaterial(material) {}
-void SVulkan2Material::setBaseColor(std::array<float, 4> color) {
-  mMaterial->setBaseColor({color[0], color[1], color[2], color[3]});
-}
-std::array<float, 4> SVulkan2Material::getBaseColor() const {
-  auto color = mMaterial->getBaseColor();
-  return {color.r, color.g, color.b, color.a};
-}
-void SVulkan2Material::setRoughness(float roughness) { mMaterial->setRoughness(roughness); }
-float SVulkan2Material::getRoughness() const { return mMaterial->getRoughness(); }
-void SVulkan2Material::setSpecular(float specular) { mMaterial->setFresnel(specular); }
-float SVulkan2Material::getSpecular() const { return mMaterial->getFresnel(); }
-void SVulkan2Material::setMetallic(float metallic) { mMaterial->setMetallic(metallic); }
-float SVulkan2Material::getMetallic() const { return mMaterial->getMetallic(); }
-
 SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
-                                   uint32_t maxNumTextures, uint32_t defaultMipLevels, std::string device) {
+                                   uint32_t maxNumTextures, uint32_t defaultMipLevels,
+                                   std::string device) {
   mContext = std::make_shared<svulkan2::core::Context>(!offscreenOnly, maxNumMaterials,
                                                        maxNumTextures, defaultMipLevels, device);
   mResourceManager = mContext->createResourceManager();
@@ -73,6 +58,41 @@ std::shared_ptr<IPxrMaterial> SVulkan2Renderer::createMaterial() {
       std::make_shared<svulkan2::resource::SVMetallicMaterial>());
   mat->setBaseColor({1.0, 1.0, 1.0, 1});
   return mat;
+}
+
+std::shared_ptr<IPxrTexture>
+SVulkan2Renderer::createTexture(std::string_view filename, uint32_t mipLevels,
+                                IPxrTexture::FilterMode filterMode,
+                                IPxrTexture::AddressMode addressMode) {
+  vk::Filter vkf;
+  vk::SamplerAddressMode vka;
+  switch (filterMode) {
+  case IPxrTexture::eNEAREST:
+    vkf = vk::Filter::eNearest;
+    break;
+  case IPxrTexture::eLINEAR:
+    vkf = vk::Filter::eLinear;
+    break;
+  }
+
+  switch (addressMode) {
+  case IPxrTexture::AddressMode::eREPEAT:
+    vka = vk::SamplerAddressMode::eRepeat;
+    break;
+  case IPxrTexture::AddressMode::eBORDER:
+    vka = vk::SamplerAddressMode::eClampToBorder;
+    break;
+  case IPxrTexture::AddressMode::eEDGE:
+    vka = vk::SamplerAddressMode::eClampToEdge;
+    break;
+  case IPxrTexture::AddressMode::eMIRROR:
+    vka = vk::SamplerAddressMode::eMirroredRepeat;
+    break;
+  }
+
+  auto texture = svulkan2::resource::SVTexture::FromFile({filename.begin(), filename.end()},
+                                                         mipLevels, vkf, vkf, vka, vka);
+  return std::make_shared<SVulkan2Texture>(texture);
 }
 
 } // namespace Renderer

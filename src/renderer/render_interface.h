@@ -4,9 +4,9 @@
 #include <foundation/PxTransform.h>
 #include <functional>
 #include <memory>
+#include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
-#include <spdlog/spdlog.h>
 
 namespace sapien {
 namespace Renderer {
@@ -22,8 +22,12 @@ class IPointLight;
 class ISpotLight;
 class IDirectionalLight;
 
-
 static inline void _warn_mat_func_not_supported(std::string_view func_name) {
+  // gcc9 do not have source_location
+  spdlog::get("SAPIEN")->warn("{} is not supported for the renderer", func_name);
+}
+
+static inline void _warn_texture_func_not_supported(std::string_view func_name) {
   // gcc9 do not have source_location
   spdlog::get("SAPIEN")->warn("{} is not supported for the renderer", func_name);
 }
@@ -37,6 +41,37 @@ struct RenderMeshGeometry {
   std::vector<uint32_t> indices;
 };
 
+class IPxrTexture {
+public:
+  enum FilterMode { eNEAREST, eLINEAR };
+  enum AddressMode { eREPEAT, eBORDER, eEDGE, eMIRROR };
+  enum Type { eBYTE, eINT, eHALF, eFLOAT, eOTHER };
+
+  [[nodiscard]] virtual int getWidth() const = 0;
+  [[nodiscard]] virtual int getHeight() const = 0;
+  [[nodiscard]] virtual int getChannels() const = 0;
+
+  [[nodiscard]] virtual int getMipmapLevels() const {
+    _warn_texture_func_not_supported(__func__);
+    return 0;
+  };
+
+  [[nodiscard]] virtual Type getType() const {
+    _warn_texture_func_not_supported(__func__);
+    return eOTHER;
+  }
+  [[nodiscard]] virtual AddressMode getAddressMode() const {
+    _warn_texture_func_not_supported(__func__);
+    return eREPEAT;
+  };
+  [[nodiscard]] virtual FilterMode getFilterMode() const {
+    _warn_texture_func_not_supported(__func__);
+    return eNEAREST;
+  };
+  [[nodiscard]] virtual std::string getFilename() const { return ""; };
+  virtual ~IPxrTexture() = default;
+};
+
 class IPxrMaterial {
 public:
   virtual void setBaseColor(std::array<float, 4> color) = 0;
@@ -48,52 +83,106 @@ public:
   virtual void setMetallic(float metallic) = 0;
   [[nodiscard]] virtual float getMetallic() const = 0;
 
-  virtual void setEmission(std::array<float, 4> color) {
-    _warn_mat_func_not_supported(__func__);
-  };
+  virtual void setEmission(std::array<float, 4> color) { _warn_mat_func_not_supported(__func__); };
   [[nodiscard]] virtual std::array<float, 4> getEmission() const {
     _warn_mat_func_not_supported(__func__);
     return {};
   };
-  virtual void setIOR(float ior) {
-    _warn_mat_func_not_supported(__func__);
-  };
+  virtual void setIOR(float ior) { _warn_mat_func_not_supported(__func__); };
   [[nodiscard]] virtual float getIOR() const {
     _warn_mat_func_not_supported(__func__);
     return 0.0;
   };
-  virtual void setTransmission(float transmission) {
-    _warn_mat_func_not_supported(__func__);
-  };
+  virtual void setTransmission(float transmission) { _warn_mat_func_not_supported(__func__); };
   [[nodiscard]] virtual float getTransmission() const {
     _warn_mat_func_not_supported(__func__);
     return 0.0;
   };
-  virtual void setDiffuseTex(std::string_view path) {
+
+  // texture functions
+  virtual void setEmissionTexture(std::shared_ptr<IPxrTexture> texture) {
+    _warn_mat_func_not_supported(__func__);
+  }
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getEmissionTexture() const {
+    _warn_mat_func_not_supported(__func__);
+    return nullptr;
+  }
+  virtual void setDiffuseTexture(std::shared_ptr<IPxrTexture> texture) {
+    _warn_mat_func_not_supported(__func__);
+  }
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getDiffuseTexture() const {
+    _warn_mat_func_not_supported(__func__);
+    return nullptr;
+  }
+  virtual void setMetallicTexture(std::shared_ptr<IPxrTexture> texture) {
+    _warn_mat_func_not_supported(__func__);
+  }
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getMetallicTexture() const {
+    _warn_mat_func_not_supported(__func__);
+    return nullptr;
+  }
+  virtual void setRoughnessTexture(std::shared_ptr<IPxrTexture> texture) {
+    _warn_mat_func_not_supported(__func__);
+  }
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getRoughnessTexture() const {
+    _warn_mat_func_not_supported(__func__);
+    return nullptr;
+  }
+  virtual void setNormalTexture(std::shared_ptr<IPxrTexture> texture) {
+    _warn_mat_func_not_supported(__func__);
+  }
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getNormalTexture() const {
+    _warn_mat_func_not_supported(__func__);
+    return nullptr;
+  }
+  virtual void setTransmissionTexture(std::shared_ptr<IPxrTexture> texture) {
+    _warn_mat_func_not_supported(__func__);
+  }
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getTransmissionTexture() const {
+    _warn_mat_func_not_supported(__func__);
+    return nullptr;
+  }
+
+  // texture filename functions
+  virtual void setEmissionTextureFromFilename(std::string_view path) {
     _warn_mat_func_not_supported(__func__);
   };
-  [[nodiscard]] virtual std::string getDiffuseTex() const {
+  [[nodiscard]] virtual std::string getEmissionTextureFilename() const {
     _warn_mat_func_not_supported(__func__);
     return "";
   };
-  virtual void setMetallicTex(std::string_view path) {
+  virtual void setDiffuseTextureFromFilename(std::string_view path) {
     _warn_mat_func_not_supported(__func__);
   };
-  [[nodiscard]] virtual std::string getMetallicTex() const {
-    _warn_mat_func_not_supported(__func__);
-    return "";
-  };
-  virtual void setRoughnessTex(std::string_view path) {
-    _warn_mat_func_not_supported(__func__);
-  };
-  [[nodiscard]] virtual std::string getRoughnessTex() const {
+  [[nodiscard]] virtual std::string getDiffuseTextureFilename() const {
     _warn_mat_func_not_supported(__func__);
     return "";
   };
-  virtual void setTransmissionTex(std::string_view path) {
+  virtual void setMetallicTextureFromFilename(std::string_view path) {
     _warn_mat_func_not_supported(__func__);
   };
-  [[nodiscard]] virtual std::string getTransmissionTex() const {
+  [[nodiscard]] virtual std::string getMetallicTextureFilename() const {
+    _warn_mat_func_not_supported(__func__);
+    return "";
+  };
+  virtual void setRoughnessTextureFromFilename(std::string_view path) {
+    _warn_mat_func_not_supported(__func__);
+  };
+  [[nodiscard]] virtual std::string getRoughnessTextureFilename() const {
+    _warn_mat_func_not_supported(__func__);
+    return "";
+  };
+  virtual void setNormalTextureFromFilename(std::string_view path) {
+    _warn_mat_func_not_supported(__func__);
+  };
+  [[nodiscard]] virtual std::string getNormalTextureFilename() const {
+    _warn_mat_func_not_supported(__func__);
+    return "";
+  };
+  virtual void setTransmissionTextureFromFilename(std::string_view path) {
+    _warn_mat_func_not_supported(__func__);
+  };
+  [[nodiscard]] virtual std::string getTransmissionTextureFilename() const {
     _warn_mat_func_not_supported(__func__);
     return "";
   };
@@ -101,20 +190,35 @@ public:
   virtual ~IPxrMaterial() = default;
 };
 
-struct RenderShape {
-  std::string type = "invalid";
-  physx::PxVec3 scale = {0, 0, 0};
-  physx::PxTransform pose = physx::PxTransform(physx::PxIdentity);
-  std::unique_ptr<RenderMeshGeometry> geometry = nullptr;
-  std::shared_ptr<IPxrMaterial> material;
-  uint32_t objId = 0;
+// struct RenderShape {
+//   std::string type = "invalid";
+//   physx::PxVec3 scale = {0, 0, 0};
+//   physx::PxTransform pose = physx::PxTransform(physx::PxIdentity);
+//   std::unique_ptr<RenderMeshGeometry> geometry = nullptr;
+//   std::shared_ptr<IPxrMaterial> material;
+//   uint32_t objId = 0;
 
-  inline RenderShape() = default;
-  RenderShape(RenderShape const &) = delete;
-  RenderShape(RenderShape &&) = default;
-  RenderShape &operator=(RenderShape const &) = delete;
-  RenderShape &operator=(RenderShape &&) = default;
-  ~RenderShape() = default;
+//   inline RenderShape() = default;
+//   RenderShape(RenderShape const &) = delete;
+//   RenderShape(RenderShape &&) = default;
+//   RenderShape &operator=(RenderShape const &) = delete;
+//   RenderShape &operator=(RenderShape &&) = default;
+//   ~RenderShape() = default;
+// };
+
+class IPxrRenderShape {
+public:
+  [[nodiscard]] virtual std::shared_ptr<RenderMeshGeometry> getGeometry() const { return {}; }
+  [[nodiscard]] virtual std::shared_ptr<IPxrMaterial> getMaterial() const { return nullptr; }
+  virtual ~IPxrRenderShape() = default;
+
+  // TODO: these are deprecated
+  // [[nodiscard]] virtual std::string getType() const { return "invalid"; }
+  // [[nodiscard]] virtual physx::PxVec3 getScale() const { return {0, 0, 0}; }
+  // [[nodiscard]] virtual physx::PxTransform getPose() const {
+  //   return physx::PxTransform{physx::PxIdentity};
+  // }
+  // [[nodiscard]] virtual uint32_t getId() const { return 0; }
 };
 
 class PxrMaterial : public IPxrMaterial {
@@ -235,25 +339,48 @@ public:
   virtual void setSegmentationCustomData(std::vector<float> const &customData) = 0;
   virtual void setInitialPose(const physx::PxTransform &transform) = 0;
   virtual void update(const physx::PxTransform &transform) = 0;
-
   virtual void setVisibility(float visibility) = 0;
   virtual void setVisible(bool visible) = 0;
   virtual void setRenderMode(uint32_t mode) = 0;
 
   virtual void destroy() = 0;
 
-  virtual std::vector<std::unique_ptr<RenderShape>> getRenderShapes() const = 0;
+  // virtual std::vector<std::unique_ptr<RenderShape>> getRenderShapes() const = 0;
+
+  // virtual std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() const = 0;
 
   virtual ~IPxrRigidbody() = default;
+
+  // TODO: implement
+  // return one of "box", "sphere", "capsule", "mesh"
+  virtual physx::PxGeometryType::Enum getType() const {
+    throw std::runtime_error("getType is not implemented");
+  }
+
+  // TODO: implement
+  virtual physx::PxTransform getInitialPose() const {
+    throw std::runtime_error("getInitialPose is not implemented");
+  }
+
+  // TODO: implement
+  virtual std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() const {
+    throw std::runtime_error("getRenderShapes is not implemented");
+  }
+
+  // TODO: implement
+  // for capsule, it should return [half_length, radius, radius]
+  virtual physx::PxVec3 getScale() const {
+    throw std::runtime_error("getScale is not implemented");
+  }
 };
 
 class IPxrScene {
 
 public:
   virtual IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) = 0;
-  inline virtual IPxrRigidbody *addRigidbody(
-      const std::string &meshFile, const physx::PxVec3 &scale,
-      std::shared_ptr<IPxrMaterial> material) {                      // add and replace material
+  inline virtual IPxrRigidbody *
+  addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
+               std::shared_ptr<IPxrMaterial> material) { // add and replace material
     if (material)
       spdlog::get("SAPIEN")->warn("Add rigid body and substitute material is "
                                   "not supported on this rendering backend. Material in the mesh "
@@ -313,12 +440,11 @@ public:
                                    bool enableShadow, float shadowNear, float shadowFar) = 0;
 
   virtual IActiveLight *addActiveLight(physx::PxTransform const &pose,
-                                       std::array<float, 3> const &color,
-                                       float fov, std::string_view texPath) {
-      spdlog::get("SAPIEN")->warn("Active light not supported!");
-      return nullptr;
+                                       std::array<float, 3> const &color, float fov,
+                                       std::string_view texPath) {
+    spdlog::get("SAPIEN")->warn("Active light not supported!");
+    return nullptr;
   };
-
 
   virtual void removeLight(ILight *light) = 0;
 
@@ -335,6 +461,12 @@ public:
   virtual IPxrScene *createScene(std::string const &name) = 0;
   virtual void removeScene(IPxrScene *scene) = 0;
   virtual std::shared_ptr<IPxrMaterial> createMaterial() = 0;
+  virtual std::shared_ptr<IPxrTexture> createTexture(std::string_view filename,
+                                                     uint32_t mipLevels = 1,
+                                                     IPxrTexture::FilterMode filterMode = {},
+                                                     IPxrTexture::AddressMode addressMode = {}) {
+    throw std::runtime_error("Texture creation is not supported.");
+  }
 
   virtual ~IPxrRenderer() = default;
 };

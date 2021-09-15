@@ -64,6 +64,7 @@ from sapien.core.pysapien import RenderGeometry
 from sapien.core.pysapien import RenderMaterial
 from sapien.core.pysapien import RenderScene
 from sapien.core.pysapien import RenderShape
+from sapien.core.pysapien import RenderTexture
 from sapien.core.pysapien import Scene
 from sapien.core.pysapien import SceneConfig
 from sapien.core.pysapien import ShapeRecord
@@ -152,6 +153,7 @@ __all__ = [
     "RenderMaterial",
     "RenderScene",
     "RenderShape",
+    "RenderTexture",
     "Scene",
     "SceneConfig",
     "ShapeRecord",

@@ -298,19 +298,74 @@ class Viewer(object):
 
         self.camera_lineset = self.renderer_context.create_line_set(
             [
-                0, 0, 0, 1, 1, -1,
-                0, 0, 0, -1, 1, -1,
-                0, 0, 0, 1, -1, -1,
-                0, 0, 0, -1, -1, -1,
-                1, 1, -1, 1, -1, -1,
-                1, -1, -1, -1, -1, -1,
-                -1, -1, -1, -1, 1, -1,
-                -1, 1, -1, 1, 1, -1,
-                1, 1.2, -1, 0, 2, -1,
-                0, 2, -1, -1, 1.2, -1,
-                -1, 1.2, -1, 1, 1.2, -1,
+                0,
+                0,
+                0,
+                1,
+                1,
+                -1,
+                0,
+                0,
+                0,
+                -1,
+                1,
+                -1,
+                0,
+                0,
+                0,
+                1,
+                -1,
+                -1,
+                0,
+                0,
+                0,
+                -1,
+                -1,
+                -1,
+                1,
+                1,
+                -1,
+                1,
+                -1,
+                -1,
+                1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                -1,
+                1,
+                -1,
+                -1,
+                1,
+                -1,
+                1,
+                1,
+                -1,
+                1,
+                1.2,
+                -1,
+                0,
+                2,
+                -1,
+                0,
+                2,
+                -1,
+                -1,
+                1.2,
+                -1,
+                -1,
+                1.2,
+                -1,
+                1,
+                1.2,
+                -1,
             ],
-            [0.9254901960784314, 0.5764705882352941, 0.18823529411764706, 1] * 22
+            [0.9254901960784314, 0.5764705882352941, 0.18823529411764706, 1] * 22,
         )
 
     def _create_coordinate_axes(self):
@@ -1138,7 +1193,7 @@ class Viewer(object):
                     R.UIButton()
                     .Label("Take Screenshot")
                     .Callback(self.take_screenshot),
-                    R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps))
+                    R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps)),
                 )
             )
         self.control_window.get_children()[-1].Text(
@@ -1152,6 +1207,7 @@ class Viewer(object):
             if os.path.exists(n):
                 continue
             from PIL import Image
+
             Image.fromarray((picture.clip(0, 1) * 255).astype(np.uint8)).save(n)
             break
 
@@ -1291,6 +1347,7 @@ class Viewer(object):
                     R.UIInputFloat().Label("Mass").Value(actor.mass).ReadOnly(True)
                 )
 
+            # collision shapes
             shape_section = R.UISection().Label("Collision Shapes")
             self.actor_window.append(shape_section)
             shapes = actor.get_collision_shapes()
@@ -1403,6 +1460,104 @@ class Viewer(object):
                             "Mesh scale: {:.3g} {:.3g} {:.3g}".format(x, y, z)
                         )
                     )
+
+            # render shapes
+            body_section = R.UISection().Label("Visual Bodies")
+            self.actor_window.append(body_section)
+            bodies = actor.get_visual_bodies()
+            for body_idx, body in enumerate(bodies):
+                body_info = R.UITreeNode().Label("{}##{}".format(body.type, body_idx))
+                body_section.append(body_info)
+
+                if body.type == "sphere":
+                    body_info.append(
+                        R.UIDisplayText().Text("Radius: {:.3g}".format(body.radius))
+                    )
+                elif body.type == "capsule":
+                    body_info.append(
+                        R.UIDisplayText().Text("Radius: {:.3g}".format(body.radius)),
+                        R.UIDisplayText().Text(
+                            "Half length: {:.3g}".format(body.half_length)
+                        ),
+                    )
+                elif body.type == "box":
+                    x, y, z = body.half_lengths
+                    body_info.append(
+                        R.UIDisplayText().Text(
+                            "Half extents: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                        )
+                    )
+                elif body.type == "mesh":
+                    x, y, z = body.scale
+                    body_info.append(
+                        R.UIDisplayText().Text(
+                            "Scale: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                        )
+                    )
+                body_info.append(
+                    R.UIDisplayText().Text("Visual id: {}".format(body.visual_id))
+                )
+                shapes = body.get_render_shapes()
+                for shape_idx, shape in enumerate(shapes):
+                    mat = shape.material
+                    dtex = (
+                        (mat.diffuse_texture_filename or "(has texture)")
+                        if mat.diffuse_texture
+                        else "(no texture)"
+                    )
+                    rtex = (
+                        (mat.roughness_texture_filename or "(has texture)")
+                        if mat.roughness_texture
+                        else "(no texture)"
+                    )
+                    mtex = (
+                        (mat.metallic_texture_filename or "(has texture)")
+                        if mat.metallic_texture
+                        else "(no texture)"
+                    )
+                    ntex = (
+                        (mat.normal_texture_filename or "(has texture)")
+                        if mat.normal_texture
+                        else "(no texture)"
+                    )
+                    etex = (
+                        (mat.emission_texture_filename or "(has texture)")
+                        if mat.emission_texture
+                        else "(no texture)"
+                    )
+
+                    body_info.append(
+                        R.UITreeNode()
+                        .Label("material {}##{}".format(shape_idx, body_idx))
+                        .append(
+                            R.UIInputFloat4()
+                            .Label("Diffuse")
+                            .ReadOnly(True)
+                            .Value(mat.base_color),
+                            R.UIDisplayText().Text(dtex),
+                            R.UIInputFloat4()
+                            .Label("Emission")
+                            .ReadOnly(True)
+                            .Value(mat.emission),
+                            R.UIDisplayText().Text(etex),
+                            R.UIInputFloat()
+                            .Label("Roughness")
+                            .ReadOnly(True)
+                            .Value(mat.roughness),
+                            R.UIDisplayText().Text(rtex),
+                            R.UIInputFloat()
+                            .Label("Metallic")
+                            .ReadOnly(True)
+                            .Value(mat.metallic),
+                            R.UIDisplayText().Text(mtex),
+                            R.UIInputFloat()
+                            .Label("Specular")
+                            .ReadOnly(True)
+                            .Value(mat.specular),
+                            R.UIDisplayText().Text("Normal: " + mtex),
+                        )
+                    )
+
         if isinstance(self.selected_entity, LightEntity):
             light = self.selected_entity
             self.actor_window.append(

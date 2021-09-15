@@ -42,14 +42,14 @@ public:
   [[nodiscard]] inline float getIOR() const override { return mKMaterial.ior; }
   inline void setTransmission(float t) override { mKMaterial.transmission = t; }
   [[nodiscard]] inline float getTransmission() const override { return mKMaterial.transmission; }
-  inline void setDiffuseTex(std::string_view path) override { mKMaterial.diffuseTexPath = path; }
-  [[nodiscard]] inline std::string getDiffuseTex() const override { return mKMaterial.diffuseTexPath; }
-  inline void setMetallicTex(std::string_view path) override { mKMaterial.metallicTexPath = path; }
-  [[nodiscard]] inline std::string getMetallicTex() const override { return mKMaterial.metallicTexPath; }
-  inline void setRoughnessTex(std::string_view path) override { mKMaterial.roughnessTexPath = path; }
-  [[nodiscard]] inline std::string getRoughnessTex() const override { return mKMaterial.roughnessTexPath; }
-  inline void setTransmissionTex(std::string_view path) override { mKMaterial.transmissionTexPath = path; }
-  [[nodiscard]] inline std::string getTransmissionTex() const override { return mKMaterial.transmissionTexPath; }
+  inline void setDiffuseTextureFromFilename(std::string_view path) override { mKMaterial.diffuseTexPath = path; }
+  [[nodiscard]] inline std::string getDiffuseTextureFilename() const override { return mKMaterial.diffuseTexPath; }
+  inline void setMetallicTextureFromFilename(std::string_view path) override { mKMaterial.metallicTexPath = path; }
+  [[nodiscard]] inline std::string getMetallicTextureFilename() const override { return mKMaterial.metallicTexPath; }
+  inline void setRoughnessTextureFromFilename(std::string_view path) override { mKMaterial.roughnessTexPath = path; }
+  [[nodiscard]] inline std::string getRoughnessTextureFilename() const override { return mKMaterial.roughnessTexPath; }
+  inline void setTransmissionTextureFromFilename(std::string_view path) override { mKMaterial.transmissionTexPath = path; }
+  [[nodiscard]] inline std::string getTransmissionTextureFilename() const override { return mKMaterial.transmissionTexPath; }
 
   [[nodiscard]] inline const kuafu::NiceMaterial& getKMaterial() const { return mKMaterial; }
 };

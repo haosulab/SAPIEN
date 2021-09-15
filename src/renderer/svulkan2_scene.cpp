@@ -92,7 +92,8 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
                                            const physx::PxVec3 &scale) {
   if (!std::filesystem::exists(meshFile)) {
     mBodies.push_back(
-        std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{}));
+        std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{},
+                                            physx::PxGeometryType::eTRIANGLEMESH, scale));
     return mBodies.back().get();
   }
 
@@ -101,7 +102,8 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
   auto &obj = mScene->addObject(model);
   obj.setScale({scale.x, scale.y, scale.z});
   objects2.push_back(&obj);
-  mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(this, objects2));
+  mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(
+      this, objects2, physx::PxGeometryType::eTRIANGLEMESH, scale));
   return mBodies.back().get();
 }
 
@@ -164,8 +166,8 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
     throw std::runtime_error("Failed to ad rigidbody: unsupported render body type");
   }
 
-  mBodies.push_back(
-      std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{object}));
+  mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(
+      this, std::vector<svulkan2::scene::Object *>{object}, type, scale));
   return mBodies.back().get();
 }
 
@@ -210,7 +212,8 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &ver
   obj.setScale({scale.x, scale.y, scale.z});
 
   mBodies.push_back(
-      std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{&obj}));
+      std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{&obj},
+                                          physx::PxGeometryType::eTRIANGLEMESH, scale));
   return mBodies.back().get();
 }
 
@@ -221,7 +224,8 @@ IPxrRigidbody *SVulkan2Scene::cloneRigidbody(SVulkan2Rigidbody *other) {
     objs.push_back(&getScene()->addObject(obj->getParent(), obj->getModel()));
     objs.back()->setTransform(obj->getTransform());
   }
-  mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(this, objs));
+  mBodies.push_back(
+      std::make_unique<SVulkan2Rigidbody>(this, objs, other->getType(), other->getScale()));
   auto body = mBodies.back().get();
   body->setInitialPose(other->getInitialPose());
   return body;

@@ -127,11 +127,6 @@ public:
   void setRenderMode(uint32_t mode) override;
 
   void destroy() override;
-
-  [[nodiscard]] std::vector<std::unique_ptr<RenderShape> > getRenderShapes() const override {
-    spdlog::get("SAPIEN")->error("KF: getRenderShapes not implemented yet");
-    return {};
-  };
 };
 
 class KuafuScene : public IPxrScene {

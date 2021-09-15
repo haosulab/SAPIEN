@@ -1,6 +1,7 @@
 #pragma once
 #include "renderer/render_interface.h"
 #include "svulkan2_light.h"
+#include "svulkan2_material.h"
 #include <memory>
 #include <svulkan2/core/context.h>
 #include <svulkan2/renderer/renderer.h>
@@ -19,22 +20,6 @@ void setDefaultViewerShaderDirectory(std::string const &dir);
 extern std::string gDefaultCameraShaderDirectory;
 void setDefaultCameraShaderDirectory(std::string const &dir);
 
-class SVulkan2Material : public IPxrMaterial {
-  std::shared_ptr<svulkan2::resource::SVMetallicMaterial> mMaterial;
-
-public:
-  explicit SVulkan2Material(std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material);
-  void setBaseColor(std::array<float, 4> color) override;
-  [[nodiscard]] std::array<float, 4> getBaseColor() const override;
-  void setRoughness(float roughness) override;
-  [[nodiscard]] float getRoughness() const override;
-  void setSpecular(float specular) override;
-  [[nodiscard]] float getSpecular() const override;
-  void setMetallic(float metallic) override;
-  [[nodiscard]] float getMetallic() const override;
-  [[nodiscard]] std::shared_ptr<svulkan2::resource::SVMetallicMaterial> getMaterial() const { return mMaterial; }
-};
-
 class SVulkan2Rigidbody : public IPxrRigidbody {
   std::string mName{};
   SVulkan2Scene *mParentScene = nullptr;
@@ -44,8 +29,12 @@ class SVulkan2Rigidbody : public IPxrRigidbody {
   uint32_t mUniqueId{0};
   uint32_t mSegmentationId{0};
 
+  physx::PxGeometryType::Enum mType;
+  physx::PxVec3 mScale;
+
 public:
-  SVulkan2Rigidbody(SVulkan2Scene *scene, std::vector<svulkan2::scene::Object *> const &objects);
+  SVulkan2Rigidbody(SVulkan2Scene *scene, std::vector<svulkan2::scene::Object *> const &objects,
+                    physx::PxGeometryType::Enum type, physx::PxVec3 scale);
   SVulkan2Rigidbody(SVulkan2Rigidbody const &other) = delete;
 
   SVulkan2Rigidbody &operator=(SVulkan2Rigidbody const &other) = delete;
@@ -59,7 +48,7 @@ public:
   uint32_t getSegmentationId() const override;
   void setSegmentationCustomData(const std::vector<float> &customData) override;
   void setInitialPose(const physx::PxTransform &transform) override;
-  inline physx::PxTransform getInitialPose() const { return mInitialPose; };
+  inline physx::PxTransform getInitialPose() const override { return mInitialPose; };
   void update(const physx::PxTransform &transform) override;
 
   void setVisibility(float visibility) override;
@@ -68,6 +57,9 @@ public:
 
   void destroy() override;
 
+  physx::PxGeometryType::Enum getType() const override { return mType; }
+  physx::PxVec3 getScale() const override;
+
   /** internal use only */
   void destroyVisualObjects();
   /** internal use only */
@@ -75,7 +67,7 @@ public:
     return mObjects;
   }
 
-  std::vector<std::unique_ptr<RenderShape>> getRenderShapes() const override;
+  std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() const override;
 };
 
 class SVulkan2Scene : public IPxrScene {
@@ -167,6 +159,9 @@ public:
   void removeScene(IPxrScene *scene) override;
 
   std::shared_ptr<IPxrMaterial> createMaterial() override;
+  std::shared_ptr<IPxrTexture> createTexture(std::string_view filename, uint32_t mipLevels = 1,
+                                             IPxrTexture::FilterMode filterMode = {},
+                                             IPxrTexture::AddressMode addressMode = {}) override;
 };
 
 class SVulkan2Camera : public ICamera {
