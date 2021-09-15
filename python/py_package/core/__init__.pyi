@@ -12,7 +12,6 @@ from sapien.core.pysapien import ArticulationBase
 from sapien.core.pysapien import ArticulationBuilder
 from sapien.core.pysapien import ArticulationDrivable
 from sapien.core.pysapien import BoxGeometry
-from sapien.core.pysapien import CameraSpec
 from sapien.core.pysapien import CapsuleGeometry
 from sapien.core.pysapien import CollisionGeometry
 from sapien.core.pysapien import CollisionShape
@@ -28,7 +27,6 @@ from sapien.core.pysapien import Entity
 from sapien.core.pysapien import ICamera
 from sapien.core.pysapien import IPxrRenderer
 from sapien.core.pysapien import ISensor
-from sapien.core.pysapien import Input
 from sapien.core.pysapien import Joint
 from sapien.core.pysapien import JointBase
 from sapien.core.pysapien import JointRecord
@@ -48,11 +46,6 @@ from sapien.core.pysapien import Link
 from sapien.core.pysapien import LinkBase
 from sapien.core.pysapien import LinkBuilder
 from sapien.core.pysapien import NonconvexMeshGeometry
-from sapien.core.pysapien import OptifuserCamera
-from sapien.core.pysapien import OptifuserConfig
-from sapien.core.pysapien import OptifuserController
-from sapien.core.pysapien import OptifuserMaterial
-from sapien.core.pysapien import OptifuserRenderer
 from sapien.core.pysapien import PhysicalMaterial
 from sapien.core.pysapien import PinocchioModel
 from sapien.core.pysapien import PlaneGeometry
@@ -101,7 +94,6 @@ __all__ = [
     "ArticulationBuilder",
     "ArticulationDrivable",
     "BoxGeometry",
-    "CameraSpec",
     "CapsuleGeometry",
     "CollisionGeometry",
     "CollisionShape",
@@ -117,7 +109,6 @@ __all__ = [
     "ICamera",
     "IPxrRenderer",
     "ISensor",
-    "Input",
     "Joint",
     "JointBase",
     "JointRecord",
@@ -137,11 +128,6 @@ __all__ = [
     "LinkBase",
     "LinkBuilder",
     "NonconvexMeshGeometry",
-    "OptifuserCamera",
-    "OptifuserConfig",
-    "OptifuserController",
-    "OptifuserMaterial",
-    "OptifuserRenderer",
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
@@ -172,8 +158,6 @@ __all__ = [
     "VulkanScene",
     "VulkanSpotLight",
     "VulkanWindow",
-    "enable_default_gl3",
-    "enable_default_gl4",
     "ensure_icd",
     "os",
     "pkg_resources",

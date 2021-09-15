@@ -12,7 +12,6 @@ from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--optix-home', type=str, default=None)
 parser.add_argument('--debug', action='store_true')
 parser.add_argument('--profile', action='store_true')
 args, unknown = parser.parse_known_args()
@@ -42,10 +41,6 @@ class CMakeBuild(build_ext):
         extdir = os.path.join(extdir, self.distribution.get_name(), "core")
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir, '-DPYTHON_EXECUTABLE=' + sys.executable]
 
-        if args.optix_home:
-            cmake_args.append('-DOPTIX_HOME=' + args.optix_home)
-            cmake_args.append('-DUSE_PRECOMPILED_PTX=ON')
-
         if args.debug:
             cfg = 'Debug'
         else:
@@ -69,18 +64,6 @@ class CMakeBuild(build_ext):
             os.makedirs(self.build_temp)
         subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.', "--target", "pysapien"] + build_args, cwd=self.build_temp)
-
-        glsl_target_path = os.path.join(self.build_lib, 'sapien', 'glsl_shader')
-        if os.path.exists(glsl_target_path):
-            shutil.rmtree(glsl_target_path)
-        shutil.copytree(os.path.join(self.build_temp, 'glsl_shader'), glsl_target_path)
-
-        if args.optix_home:
-            ptx_target_path = os.path.join(self.build_lib, 'sapien', 'ptx')
-            print(ptx_target_path)
-            if os.path.exists(ptx_target_path):
-                shutil.rmtree(ptx_target_path)
-            shutil.copytree(os.path.join(self.build_temp, 'ptx'), ptx_target_path)
 
         vulkan_shader_path = os.path.join(self.build_lib, 'sapien', 'vulkan_shader')
         source_path = os.path.join(ext.sourcedir, 'vulkan_shader')

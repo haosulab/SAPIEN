@@ -5,20 +5,6 @@ import os
 import sys
 
 
-def __enable_ptx():
-    __PTX_ROOT = pkg_resources.resource_filename("sapien", "ptx")
-    assert os.path.exists(__PTX_ROOT)
-    OptifuserRenderer.set_optix_config(__PTX_ROOT)
-
-
-def __enable_gl(num: int):
-    assert num in [3, 4]
-    __GL_VERSION = num
-    __GL_SHADER_ROOT = pkg_resources.resource_filename("sapien", "glsl_shader")
-    _GL_SHADER_PATH = os.path.join(__GL_SHADER_ROOT, "130")
-    OptifuserRenderer.set_default_shader_config(_GL_SHADER_PATH, "130")
-
-
 def ensure_icd():
     __VULKAN_ICD_ROOT = pkg_resources.resource_filename("sapien", "vulkan_icd")
     icd_filenames = os.environ.get("VK_ICD_FILENAMES")
@@ -48,25 +34,6 @@ def __enable_vulkan():
     VulkanRenderer._set_camera_shader_dir(__VULKAN_CAMERA_SHADER_ROOT)
     KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
     ensure_icd()
-
-
-def enable_default_gl3():
-    __enable_gl(3)
-
-
-def enable_default_gl4():
-    __enable_gl(4)
-
-
-if sys.platform.startswith("darwin"):
-    enable_default_gl4()
-else:
-    enable_default_gl3()
-
-try:
-    __enable_ptx()
-except:
-    pass
 
 
 __enable_vulkan()

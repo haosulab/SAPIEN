@@ -18,7 +18,6 @@ __all__ = [
     "ArticulationBuilder",
     "ArticulationDrivable",
     "BoxGeometry",
-    "CameraSpec",
     "CapsuleGeometry",
     "CollisionGeometry",
     "CollisionShape",
@@ -34,7 +33,6 @@ __all__ = [
     "ICamera",
     "IPxrRenderer",
     "ISensor",
-    "Input",
     "Joint",
     "JointBase",
     "JointRecord",
@@ -54,11 +52,6 @@ __all__ = [
     "LinkBase",
     "LinkBuilder",
     "NonconvexMeshGeometry",
-    "OptifuserCamera",
-    "OptifuserConfig",
-    "OptifuserController",
-    "OptifuserMaterial",
-    "OptifuserRenderer",
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
@@ -353,55 +346,6 @@ class Articulation(ArticulationDrivable, ArticulationBase, Entity):
     pass
 class CollisionGeometry():
     pass
-class CameraSpec():
-    def get_model_matrix(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_projection_matrix(self) -> numpy.ndarray[numpy.float32]: ...
-    def lookAt(self, direction: numpy.ndarray[numpy.float32], up: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_rotation(self, rotation: numpy.ndarray[numpy.float32]) -> None: ...
-    @property
-    def aspect(self) -> float:
-        """
-        :type: float
-        """
-    @aspect.setter
-    def aspect(self, arg0: float) -> None:
-        pass
-    @property
-    def far(self) -> float:
-        """
-        :type: float
-        """
-    @far.setter
-    def far(self, arg0: float) -> None:
-        pass
-    @property
-    def name(self) -> str:
-        """
-        :type: str
-        """
-    @name.setter
-    def name(self, arg0: str) -> None:
-        pass
-    @property
-    def near(self) -> float:
-        """
-        :type: float
-        """
-    @near.setter
-    def near(self, arg0: float) -> None:
-        pass
-    @property
-    def position(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def rotation(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    pass
 class CapsuleGeometry(CollisionGeometry):
     @property
     def half_length(self) -> float:
@@ -685,11 +629,6 @@ class ICamera(ISensor):
     def get_visual_segmentation(self) -> numpy.ndarray[numpy.int32]: ...
     def get_width(self) -> int: ...
     def take_picture(self) -> None: ...
-    pass
-class Input():
-    def get_key_down(self, arg0: int) -> int: ...
-    def get_key_mods(self, arg0: int) -> int: ...
-    def get_key_state(self, arg0: int) -> int: ...
     pass
 class JointBase():
     def __repr__ (self) -> str: ...
@@ -983,251 +922,6 @@ class NonconvexMeshGeometry(CollisionGeometry):
         :type: numpy.ndarray[numpy.float32]
         """
     pass
-class OptifuserCamera(ICamera, ISensor):
-    def get_camera_matrix(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_custom_rgba(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_model_matrix(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_projection_matrix(self) -> numpy.ndarray[numpy.float32]: ...
-    def set_mode_orthographic(self, scaling: float = 1.0) -> None: ...
-    def set_mode_perspective(self, fovy: float = 0.6108652353286743) -> None: ...
-    pass
-class OptifuserConfig():
-    def __init__(self) -> None: ...
-    @property
-    def shadow_frustum_size(self) -> float:
-        """
-        :type: float
-        """
-    @shadow_frustum_size.setter
-    def shadow_frustum_size(self, arg0: float) -> None:
-        pass
-    @property
-    def shadow_map_size(self) -> int:
-        """
-        :type: int
-        """
-    @shadow_map_size.setter
-    def shadow_map_size(self, arg0: int) -> None:
-        pass
-    @property
-    def use_ao(self) -> bool:
-        """
-        :type: bool
-        """
-    @use_ao.setter
-    def use_ao(self, arg0: bool) -> None:
-        pass
-    @property
-    def use_shadow(self) -> bool:
-        """
-        :type: bool
-        """
-    @use_shadow.setter
-    def use_shadow(self, arg0: bool) -> None:
-        pass
-    pass
-class OptifuserController():
-    def __init__(self, renderer: OptifuserRenderer) -> None: ...
-    def focus(self, actor: ActorBase) -> None: ...
-    def get_camera_pose(self) -> Pose: ...
-    def get_selected_actor(self) -> ActorBase: ...
-    def hide_window(self) -> None: ...
-    def render(self) -> None: ...
-    def set_camera_position(self, x: float, y: float, z: float) -> None: ...
-    def set_camera_rotation(self, yaw: float, pitch: float) -> None: ...
-    def set_current_scene(self, scene: Scene) -> None: ...
-    def show_window(self) -> None: ...
-    @property
-    def input(self) -> Input:
-        """
-        :type: Input
-        """
-    @property
-    def should_quit(self) -> bool:
-        """
-        :type: bool
-        """
-    pass
-class RenderMaterial():
-    def set_base_color(self, rgba: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_diffuse_texture(self, texture: RenderTexture) -> None: ...
-    def set_diffuse_texture_from_file(self, path: str) -> None: ...
-    def set_emission(self, rgbs: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_emission_texture(self, texture: RenderTexture) -> None: ...
-    def set_emission_texture_from_file(self, path: str) -> None: ...
-    def set_ior(self, ior: float) -> None: ...
-    def set_metallic(self, metallic: float) -> None: ...
-    def set_metallic_texture(self, texture: RenderTexture) -> None: ...
-    def set_metallic_texture_from_file(self, path: str) -> None: ...
-    def set_normal_texture(self, texture: RenderTexture) -> None: ...
-    def set_normal_texture_from_file(self, path: str) -> None: ...
-    def set_roughness(self, roughness: float) -> None: ...
-    def set_roughness_texture(self, texture: RenderTexture) -> None: ...
-    def set_roughness_texture_from_file(self, path: str) -> None: ...
-    def set_specular(self, specular: float) -> None: ...
-    def set_transmission(self, transmission: float) -> None: ...
-    def set_transmission_texture(self, texture: RenderTexture) -> None: ...
-    def set_transmission_texture_from_file(self, path: str) -> None: ...
-    @property
-    def base_color(self) -> typing.List[float[4]]:
-        """
-        :type: typing.List[float[4]]
-        """
-    @base_color.setter
-    def base_color(self, arg1: numpy.ndarray[numpy.float32]) -> None:
-        pass
-    @property
-    def diffuse_texture(self) -> RenderTexture:
-        """
-        :type: RenderTexture
-        """
-    @diffuse_texture.setter
-    def diffuse_texture(self, arg1: RenderTexture) -> None:
-        pass
-    @property
-    def diffuse_texture_filename(self) -> str:
-        """
-        :type: str
-        """
-    @diffuse_texture_filename.setter
-    def diffuse_texture_filename(self, arg1: str) -> None:
-        pass
-    @property
-    def emission(self) -> typing.List[float[4]]:
-        """
-        :type: typing.List[float[4]]
-        """
-    @emission.setter
-    def emission(self, arg1: numpy.ndarray[numpy.float32]) -> None:
-        pass
-    @property
-    def emission_texture(self) -> RenderTexture:
-        """
-        :type: RenderTexture
-        """
-    @emission_texture.setter
-    def emission_texture(self, arg1: RenderTexture) -> None:
-        pass
-    @property
-    def emission_texture_filename(self) -> str:
-        """
-        :type: str
-        """
-    @emission_texture_filename.setter
-    def emission_texture_filename(self, arg1: str) -> None:
-        pass
-    @property
-    def ior(self) -> float:
-        """
-        :type: float
-        """
-    @ior.setter
-    def ior(self, arg1: float) -> None:
-        pass
-    @property
-    def metallic(self) -> float:
-        """
-        :type: float
-        """
-    @metallic.setter
-    def metallic(self, arg1: float) -> None:
-        pass
-    @property
-    def metallic_texture(self) -> RenderTexture:
-        """
-        :type: RenderTexture
-        """
-    @metallic_texture.setter
-    def metallic_texture(self, arg1: RenderTexture) -> None:
-        pass
-    @property
-    def metallic_texture_filename(self) -> str:
-        """
-        :type: str
-        """
-    @metallic_texture_filename.setter
-    def metallic_texture_filename(self, arg1: str) -> None:
-        pass
-    @property
-    def normal_texture(self) -> RenderTexture:
-        """
-        :type: RenderTexture
-        """
-    @normal_texture.setter
-    def normal_texture(self, arg1: RenderTexture) -> None:
-        pass
-    @property
-    def normal_texture_filename(self) -> str:
-        """
-        :type: str
-        """
-    @normal_texture_filename.setter
-    def normal_texture_filename(self, arg1: str) -> None:
-        pass
-    @property
-    def roughness(self) -> float:
-        """
-        :type: float
-        """
-    @roughness.setter
-    def roughness(self, arg1: float) -> None:
-        pass
-    @property
-    def roughness_texture(self) -> RenderTexture:
-        """
-        :type: RenderTexture
-        """
-    @roughness_texture.setter
-    def roughness_texture(self, arg1: RenderTexture) -> None:
-        pass
-    @property
-    def roughness_texture_filename(self) -> str:
-        """
-        :type: str
-        """
-    @roughness_texture_filename.setter
-    def roughness_texture_filename(self, arg1: str) -> None:
-        pass
-    @property
-    def specular(self) -> float:
-        """
-        :type: float
-        """
-    @specular.setter
-    def specular(self, arg1: float) -> None:
-        pass
-    @property
-    def transmission(self) -> float:
-        """
-        :type: float
-        """
-    @transmission.setter
-    def transmission(self, arg1: float) -> None:
-        pass
-    @property
-    def transmission_texture(self) -> RenderTexture:
-        """
-        :type: RenderTexture
-        """
-    @transmission_texture.setter
-    def transmission_texture(self, arg1: RenderTexture) -> None:
-        pass
-    @property
-    def transmission_texture_filename(self) -> str:
-        """
-        :type: str
-        """
-    @transmission_texture_filename.setter
-    def transmission_texture_filename(self, arg1: str) -> None:
-        pass
-    pass
-class OptifuserRenderer(IPxrRenderer):
-    def __init__(self, glsl_dir: str = '', glsl_version: str = '', config: OptifuserConfig = ...) -> None: ...
-    def enable_global_axes(self, enable: bool = True) -> None: ...
-    @staticmethod
-    def set_default_shader_config(glsl_dir: str, glsl_version: str) -> None: ...
-    def set_log_level(self, level: str) -> None: ...
-    pass
 class PhysicalMaterial():
     def get_dynamic_friction(self) -> float: ...
     def get_restitution(self) -> float: ...
@@ -1427,7 +1121,178 @@ class RenderGeometry():
         :type: numpy.ndarray[numpy.float32]
         """
     pass
-class OptifuserMaterial(RenderMaterial):
+class RenderMaterial():
+    def set_base_color(self, rgba: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_diffuse_texture(self, texture: RenderTexture) -> None: ...
+    def set_diffuse_texture_from_file(self, path: str) -> None: ...
+    def set_emission(self, rgbs: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_emission_texture(self, texture: RenderTexture) -> None: ...
+    def set_emission_texture_from_file(self, path: str) -> None: ...
+    def set_ior(self, ior: float) -> None: ...
+    def set_metallic(self, metallic: float) -> None: ...
+    def set_metallic_texture(self, texture: RenderTexture) -> None: ...
+    def set_metallic_texture_from_file(self, path: str) -> None: ...
+    def set_normal_texture(self, texture: RenderTexture) -> None: ...
+    def set_normal_texture_from_file(self, path: str) -> None: ...
+    def set_roughness(self, roughness: float) -> None: ...
+    def set_roughness_texture(self, texture: RenderTexture) -> None: ...
+    def set_roughness_texture_from_file(self, path: str) -> None: ...
+    def set_specular(self, specular: float) -> None: ...
+    def set_transmission(self, transmission: float) -> None: ...
+    def set_transmission_texture(self, texture: RenderTexture) -> None: ...
+    def set_transmission_texture_from_file(self, path: str) -> None: ...
+    @property
+    def base_color(self) -> typing.List[float[4]]:
+        """
+        :type: typing.List[float[4]]
+        """
+    @base_color.setter
+    def base_color(self, arg1: numpy.ndarray[numpy.float32]) -> None:
+        pass
+    @property
+    def diffuse_texture(self) -> RenderTexture:
+        """
+        :type: RenderTexture
+        """
+    @diffuse_texture.setter
+    def diffuse_texture(self, arg1: RenderTexture) -> None:
+        pass
+    @property
+    def diffuse_texture_filename(self) -> str:
+        """
+        :type: str
+        """
+    @diffuse_texture_filename.setter
+    def diffuse_texture_filename(self, arg1: str) -> None:
+        pass
+    @property
+    def emission(self) -> typing.List[float[4]]:
+        """
+        :type: typing.List[float[4]]
+        """
+    @emission.setter
+    def emission(self, arg1: numpy.ndarray[numpy.float32]) -> None:
+        pass
+    @property
+    def emission_texture(self) -> RenderTexture:
+        """
+        :type: RenderTexture
+        """
+    @emission_texture.setter
+    def emission_texture(self, arg1: RenderTexture) -> None:
+        pass
+    @property
+    def emission_texture_filename(self) -> str:
+        """
+        :type: str
+        """
+    @emission_texture_filename.setter
+    def emission_texture_filename(self, arg1: str) -> None:
+        pass
+    @property
+    def ior(self) -> float:
+        """
+        :type: float
+        """
+    @ior.setter
+    def ior(self, arg1: float) -> None:
+        pass
+    @property
+    def metallic(self) -> float:
+        """
+        :type: float
+        """
+    @metallic.setter
+    def metallic(self, arg1: float) -> None:
+        pass
+    @property
+    def metallic_texture(self) -> RenderTexture:
+        """
+        :type: RenderTexture
+        """
+    @metallic_texture.setter
+    def metallic_texture(self, arg1: RenderTexture) -> None:
+        pass
+    @property
+    def metallic_texture_filename(self) -> str:
+        """
+        :type: str
+        """
+    @metallic_texture_filename.setter
+    def metallic_texture_filename(self, arg1: str) -> None:
+        pass
+    @property
+    def normal_texture(self) -> RenderTexture:
+        """
+        :type: RenderTexture
+        """
+    @normal_texture.setter
+    def normal_texture(self, arg1: RenderTexture) -> None:
+        pass
+    @property
+    def normal_texture_filename(self) -> str:
+        """
+        :type: str
+        """
+    @normal_texture_filename.setter
+    def normal_texture_filename(self, arg1: str) -> None:
+        pass
+    @property
+    def roughness(self) -> float:
+        """
+        :type: float
+        """
+    @roughness.setter
+    def roughness(self, arg1: float) -> None:
+        pass
+    @property
+    def roughness_texture(self) -> RenderTexture:
+        """
+        :type: RenderTexture
+        """
+    @roughness_texture.setter
+    def roughness_texture(self, arg1: RenderTexture) -> None:
+        pass
+    @property
+    def roughness_texture_filename(self) -> str:
+        """
+        :type: str
+        """
+    @roughness_texture_filename.setter
+    def roughness_texture_filename(self, arg1: str) -> None:
+        pass
+    @property
+    def specular(self) -> float:
+        """
+        :type: float
+        """
+    @specular.setter
+    def specular(self, arg1: float) -> None:
+        pass
+    @property
+    def transmission(self) -> float:
+        """
+        :type: float
+        """
+    @transmission.setter
+    def transmission(self, arg1: float) -> None:
+        pass
+    @property
+    def transmission_texture(self) -> RenderTexture:
+        """
+        :type: RenderTexture
+        """
+    @transmission_texture.setter
+    def transmission_texture(self, arg1: RenderTexture) -> None:
+        pass
+    @property
+    def transmission_texture_filename(self) -> str:
+        """
+        :type: str
+        """
+    @transmission_texture_filename.setter
+    def transmission_texture_filename(self, arg1: str) -> None:
+        pass
     pass
 class RenderScene():
     def add_active_light(self, pose: Pose, tex_path: numpy.ndarray[numpy.float32], color: float = array([1., 1., 1.], dtype=float32), fov: str = 1.57) -> ActiveLight: ...

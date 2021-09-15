@@ -1,9 +1,6 @@
 #pragma once
 #include "utils/dlpack_tensor.hpp"
 
-#include "renderer/optifuser_controller.h"
-#include "renderer/optifuser_renderer.h"
-
 #include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
@@ -162,25 +159,12 @@ void buildSapien(py::module &m) {
       py::class_<Renderer::IPxrRenderShape, std::shared_ptr<Renderer::IPxrRenderShape>>(
           m, "RenderShape");
 
-  auto PyOptifuserMaterial =
-      py::class_<Renderer::PxrMaterial, Renderer::IPxrMaterial,
-                 std::shared_ptr<Renderer::PxrMaterial>>(m, "OptifuserMaterial");
   auto PyRenderer = py::class_<Renderer::IPxrRenderer, std::shared_ptr<Renderer::IPxrRenderer>>(
       m, "IPxrRenderer");
   auto PyRenderScene = py::class_<Renderer::IPxrScene>(m, "RenderScene");
   auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
   auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
   auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
-
-  auto PyOptifuserRenderer =
-      py::class_<Renderer::OptifuserRenderer, Renderer::IPxrRenderer,
-                 std::shared_ptr<Renderer::OptifuserRenderer>>(m, "OptifuserRenderer");
-  auto PyOptifuserConfig = py::class_<Renderer::OptifuserConfig>(m, "OptifuserConfig");
-  auto PyInput = py::class_<Optifuser::Input>(m, "Input");
-  auto PyOptifuserController = py::class_<Renderer::OptifuserController>(m, "OptifuserController");
-  auto PyCameraSpec = py::class_<Optifuser::CameraSpec>(m, "CameraSpec");
-  auto PyOptifuserCamera =
-      py::class_<Renderer::OptifuserCamera, Renderer::ICamera>(m, "OptifuserCamera");
 
   auto PyEngine = py::class_<Simulation, std::shared_ptr<Simulation>>(m, "Engine");
   auto PySceneConfig = py::class_<SceneConfig>(m, "SceneConfig");
@@ -563,117 +547,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
             {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
             cam.getObjSegmentation().data());
       });
-
-  PyOptifuserConfig.def(py::init<>())
-      .def_readwrite("use_shadow", &Renderer::OptifuserConfig::useShadow)
-      .def_readwrite("use_ao", &Renderer::OptifuserConfig::useAo)
-      .def_readwrite("shadow_map_size", &Renderer::OptifuserConfig::shadowMapSize)
-      .def_readwrite("shadow_frustum_size", &Renderer::OptifuserConfig::shadowFrustumSize);
-
-  PyOptifuserRenderer
-      .def("enable_global_axes", &Renderer::OptifuserRenderer::enableGlobalAxes,
-           py::arg("enable") = true)
-      .def_static("set_default_shader_config", Renderer::OptifuserRenderer::setDefaultShaderConfig,
-                  py::arg("glsl_dir"), py::arg("glsl_version"))
-#ifdef _USE_OPTIX
-      .def_static("set_optix_config", Renderer::OptifuserRenderer::setOptixConfig,
-                  py::arg("ptx_dir"))
-#endif
-      .def(py::init<std::string const &, std::string const &, Renderer::OptifuserConfig const &>(),
-           py::arg("glsl_dir") = "", py::arg("glsl_version") = "",
-           py::arg("config") = Renderer::OptifuserConfig())
-      .def("set_log_level", &Renderer::OptifuserRenderer::setLogLevel, py::arg("level"));
-
-  PyInput.def("get_key_state", &Optifuser::Input::getKeyState)
-      .def("get_key_down", &Optifuser::Input::getKeyDown)
-      .def("get_key_mods", &Optifuser::Input::getKeyMods);
-
-  PyOptifuserController.def(py::init<Renderer::OptifuserRenderer *>(), py::arg("renderer"))
-      .def("show_window", &Renderer::OptifuserController::showWindow)
-      .def("hide_window", &Renderer::OptifuserController::hideWindow)
-      .def("set_current_scene", &Renderer::OptifuserController::setCurrentScene, py::arg("scene"))
-      .def("render", &Renderer::OptifuserController::render)
-      .def("set_camera_position", &Renderer::OptifuserController::setCameraPosition, py::arg("x"),
-           py::arg("y"), py::arg("z"))
-      .def("set_camera_rotation", &Renderer::OptifuserController::setCameraRotation,
-           py::arg("yaw"), py::arg("pitch"))
-      .def("get_camera_pose", &Renderer::OptifuserController::getCameraPose)
-      .def("focus", &Renderer::OptifuserController::focus, py::arg("actor"))
-      .def_property_readonly("should_quit", &Renderer::OptifuserController::shouldQuit)
-      .def_property_readonly(
-          "input", [](Renderer::OptifuserController &) { return Optifuser::getInput(); },
-          py::return_value_policy::reference)
-      .def("get_selected_actor", &Renderer::OptifuserController::getSelectedActor,
-           py::return_value_policy::reference);
-
-  PyCameraSpec.def_readwrite("name", &Optifuser::CameraSpec::name)
-      .def(
-          "set_position",
-          [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
-            c.position = {arr.at(0), arr.at(1), arr.at(2)};
-          },
-          py::arg("position"))
-      .def(
-          "set_rotation",
-          [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &arr) {
-            c.setRotation({arr.at(0), arr.at(1), arr.at(2), arr.at(3)});
-          },
-          py::arg("rotation"))
-      .def_property_readonly(
-          "position",
-          [](Optifuser::CameraSpec &c) { return py::array_t<PxReal>(3, (float *)(&c.position)); })
-      .def_property_readonly("rotation",
-                             [](Optifuser::CameraSpec &c) {
-                               auto rot = c.getRotation();
-                               return make_array<float>({rot.w, rot.x, rot.y, rot.z});
-                             })
-      .def_readwrite("near", &Optifuser::CameraSpec::near)
-      .def_readwrite("far", &Optifuser::CameraSpec::far)
-      .def_readwrite("aspect", &Optifuser::CameraSpec::aspect)
-      .def(
-          "lookAt",
-          [](Optifuser::CameraSpec &c, const py::array_t<PxReal> &dir,
-             const py::array_t<PxReal> &up) {
-            c.lookAt({dir.at(0), dir.at(1), dir.at(2)}, {up.at(0), up.at(1), up.at(2)});
-          },
-          py::arg("direction"), py::arg("up"))
-      .def("get_model_matrix",
-           [](Optifuser::CameraSpec &c) { return mat42array(c.getModelMat()); })
-      .def("get_projection_matrix",
-           [](Optifuser::CameraSpec &c) { return mat42array(c.getProjectionMat()); });
-
-  PyOptifuserCamera
-      .def("get_camera_matrix",
-           [](Renderer::OptifuserCamera &c) { return mat42array(c.getCameraMatrix()); })
-      .def("get_model_matrix",
-           [](Renderer::OptifuserCamera &c) { return mat42array(c.mCameraSpec->getModelMat()); })
-      .def("get_projection_matrix",
-           [](Renderer::OptifuserCamera &c) {
-             return mat42array(c.mCameraSpec->getProjectionMat());
-           })
-      .def("set_mode_orthographic", &Renderer::OptifuserCamera::changeModeToOrthographic,
-           py::arg("scaling") = 1.f)
-      .def("set_mode_perspective", &Renderer::OptifuserCamera::changeModeToPerspective,
-           py::arg("fovy") = glm::radians(35.f))
-      .def("get_custom_rgba",
-           [](Renderer::OptifuserCamera &c) {
-             return py::array_t<float>(
-                 {static_cast<int>(c.getHeight()), static_cast<int>(c.getWidth()), 4},
-                 c.getCustomRGBA().data());
-           })
-#ifdef _USE_OPTIX
-      .def(
-          "take_raytraced_picture",
-          [](Renderer::OptifuserCamera &cam, uint32_t samplesPerPixel, uint32_t reflectionCount,
-             bool denoise) {
-            return py::array_t<PxReal>(
-                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                cam.takeRaytracedPicture(samplesPerPixel, reflectionCount, denoise).data());
-          },
-          py::arg("samples_per_pixel") = 128, py::arg("reflection_count") = 4,
-          py::arg("use_denoiser") = true)
-#endif
-      ;
 
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)

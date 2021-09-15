@@ -58,16 +58,14 @@ find_package(spdlog REQUIRED)
 find_package(assimp REQUIRED)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/pxshared/include" "3rd_party/optifuser/include"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/pxshared/include" 
         "src/renderer"
         )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked"
-            "3rd_party/optifuser/build/lib")
+    link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked")
 else ()
-    link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release"
-            "3rd_party/optifuser/build/lib")
+    link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release")
 endif ()
 
 
@@ -88,7 +86,7 @@ if (${BUILD_DEBUG_VIEWER})
 endif ()
 
 ## include headers inside the project
-include_directories("3rd_party/optifuser/include" "src" "src/renderer" "/usr/include/eigen3")
+include_directories("src" "src/renderer" "/usr/include/eigen3")
 
 if (MACOSX)
     include_directories("/usr/local/include" "/usr/local/opt/glew/include"
@@ -101,9 +99,6 @@ else ()
         add_definitions(-DCUDA_INTEROP)
     endif ()
 endif ()
-
-## Link directory inside the project
-link_directories("${CMAKE_CURRENT_BINARY_DIR}/3rd_party/optifuser/lib")
 
 ## Link directory outside the project
 if (NOT MACOSX)
@@ -139,7 +134,6 @@ else ()
     add_definitions(-DNDEBUG)
 endif ()
 
-add_subdirectory("3rd_party/optifuser" EXCLUDE_FROM_ALL)
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
 include_directories("3rd_party/pybind11/include")
@@ -162,9 +156,7 @@ include_directories("3rd_party/kuafu/3rd_party/SDL/include")
 include_directories("3rd_party/kuafu/3rd_party/KTX-Software/include")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
-add_custom_target(shader COMMAND cp -r ${CMAKE_CURRENT_SOURCE_DIR}/glsl_shader ${CMAKE_CURRENT_BINARY_DIR})
 add_library(sapien STATIC ${PROJECT_SRC})
-add_dependencies(sapien shader)
 
 if (EXISTS ${OPTIX_HOME})
     add_dependencies(sapien ptx_dir)
@@ -177,7 +169,7 @@ if (MACOSX)
             libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
-            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
+            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
 			${PINOCCHIO_LIBRARY} svulkan2 kuafu "-framework Cocoa -framework IOKit")
 else ()
@@ -187,21 +179,15 @@ else ()
             libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
-            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl optifuser
+            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
             ${PINOCCHIO_LIBRARY} svulkan2 kuafu)
 endif ()
 
-set_target_properties(optifuser PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
 target_link_libraries(pysapien PRIVATE sapien)
-
-file(GLOB_RECURSE UNITTEST_SRC unittest/*.cpp)
-
-add_executable(unittest ${UNITTEST_SRC})
-target_link_libraries(unittest sapien)
 
 add_executable(manual_actor manualtest/actor.cpp python/pysapien_content.hpp)
 target_link_libraries(manual_actor sapien)
