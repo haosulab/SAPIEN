@@ -30,7 +30,7 @@ def main():
     sapien.KuafuRenderer.set_log_level('debug')
 
     render_config = sapien.KuafuConfig()
-    render_config.use_viewer = True
+    render_config.use_viewer = False
     render_config.viewer_width = 960
     render_config.viewer_height = 540
     render_config.spp = 16
@@ -121,11 +121,21 @@ def main():
     cam.set_full_perspective(1920, 1080, 1.387511840820312500e+03, 1.386223266601562500e+03,
                              9.825937500000000000e+02, 5.653156127929687500e+02, 0)
 
+
+    builder = scene.create_actor_builder()
+    cam_mount = builder.build_kinematic(name='real_camera1')
+    cam_mount.set_pose(sapien.Pose(
+        [0.79111, 0.247229, 0.703505], [0.13942, 0.452553, 0.0629925, -0.878516]))
+    cam1 = scene.add_mounted_camera("cam1", cam_mount, Pose([0, 0, 0]), 1280, 720, 0, 1, 0.1, 100)
+
+    cam1.set_full_perspective(960, 540, 1.387511840820312500e+03 / 2, 1.386223266601562500e+03 / 2,
+                              9.825937500000000000e+02 / 2, 5.653156127929687500e+02 / 2, 0)
+
     scene.step()
 
     scene.renderer_scene.set_ambient_light([0.003, 0.003, 0.003])
     # dirlight = scene.add_directional_light(
-    #     [0, 0.5, -1], color=[2.0, 2.0, 2.0]
+    #     [0, 0.5, -1], color=[5.0, 5.0, 5.0]
     # )
 
     # slight = scene.add_spot_light(
@@ -168,7 +178,17 @@ def main():
     while renderer.is_running:
         scene.step()
         scene.update_render()
+
+        if cnt % 100 == 0:
+            cam, cam1 = cam1, cam
+
         cam.take_picture()     # will update viewer and download rgba for now (sync)
+
+        if cnt % 20 == 0:
+            import matplotlib.pyplot as plt
+            p = cam.get_color_rgba()
+            plt.imsave(f'{cnt:04d}.png', p)
+
         cnt += 1
 
         if cnt % 400 == 0:
@@ -180,9 +200,8 @@ def main():
             alight.set_color([1, 0, 0])
 
         if cnt % 400 == 300:
-            p = cam.get_color_rgba()
-            import matplotlib.pyplot as plt
-            plt.imsave(f'{cnt:04d}.png', p)
+            pass
+
 
 
 main()

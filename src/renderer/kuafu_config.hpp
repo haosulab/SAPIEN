@@ -48,6 +48,7 @@ struct KuafuConfig {
     ret->setAccumulatingFrames(mAccumulateFrames);
     ret->setPathDepth(mPathDepth);
     ret->setUseDenoiser(mUseDenoiser);
+    ret->setPresent(mUseViewer);
     if (mUseDenoiser)
       spdlog::get("SAPIEN")->warn(
           "KF: Denoiser not supported yet");
