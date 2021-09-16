@@ -1534,27 +1534,43 @@ class Viewer(object):
                             .Label("Diffuse")
                             .ReadOnly(True)
                             .Value(mat.base_color),
-                            R.UIDisplayText().Text(dtex),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(dtex)
+                            .Label("##dtex{}_{}".format(shape_idx, body_idx)),
                             R.UIInputFloat4()
                             .Label("Emission")
                             .ReadOnly(True)
                             .Value(mat.emission),
-                            R.UIDisplayText().Text(etex),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(etex)
+                            .Label("##etex{}_{}".format(shape_idx, body_idx)),
                             R.UIInputFloat()
                             .Label("Roughness")
                             .ReadOnly(True)
                             .Value(mat.roughness),
-                            R.UIDisplayText().Text(rtex),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(rtex)
+                            .Label("##rtex{}_{}".format(shape_idx, body_idx)),
                             R.UIInputFloat()
                             .Label("Metallic")
                             .ReadOnly(True)
                             .Value(mat.metallic),
-                            R.UIDisplayText().Text(mtex),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(mtex)
+                            .Label("##mtex{}_{}".format(shape_idx, body_idx)),
                             R.UIInputFloat()
                             .Label("Specular")
                             .ReadOnly(True)
                             .Value(mat.specular),
-                            R.UIDisplayText().Text("Normal: " + mtex),
+                            R.UIDisplayText().Text("Normal map"),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(ntex)
+                            .Label("##ntex{}_{}".format(shape_idx, body_idx)),
                         )
                     )
 

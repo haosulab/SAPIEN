@@ -179,6 +179,8 @@ void buildRenderer(py::module &parent) {
 
   PyUIInputText.def(py::init<>())
       .def("Label", &ui::InputText::Label, py::arg("label"))
+      .def("Value", &ui::InputText::Value, py::arg("value"))
+      .def_property_readonly("value", &ui::InputText::get)
       .def("Size", &ui::InputText::Size, py::arg("size"))
       .def("ReadOnly", &ui::InputText::ReadOnly, py::arg("read_only"))
       .def("Callback", &ui::InputText::Callback, py::arg("func"));

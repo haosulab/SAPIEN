@@ -243,8 +243,8 @@ def main():
     ant.set_root_pose(Pose([0, 0, 5]))
 
     urdf = download_partnet_mobility(
-        2780,
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjE3Mi4xOS4wLjEiLCJwcml2aWxlZ2UiOjEwLCJpYXQiOjE2MjEwMjQ3MDMsImV4cCI6MTY1MjU2MDcwM30.0HrNNhEhDI38sl-1g444y2Mn7PC9v-_Glu-UgTFf-QM",
+        40147,
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjE3Mi4yMC4wLjEiLCJwcml2aWxlZ2UiOjEwLCJpYXQiOjE2MzE3NDUzMjYsImV4cCI6MTY2MzI4MTMyNn0.ET7f80-ork2UrbTj9XtTa_qn7pilxG_8omyV6ffE51o",
     )
     loader = scene.create_urdf_loader()
     loader.fix_root_link = True

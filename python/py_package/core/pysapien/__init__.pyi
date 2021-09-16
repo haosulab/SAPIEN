@@ -1004,9 +1004,9 @@ class RenderBody():
         :type: float
         """
     @property
-    def half_lengths(self) -> physx::PxVec3:
+    def half_lengths(self) -> numpy.ndarray[numpy.float32]:
         """
-        :type: physx::PxVec3
+        :type: numpy.ndarray[numpy.float32]
         """
     @property
     def local_pose(self) -> Pose:
@@ -1024,9 +1024,9 @@ class RenderBody():
         :type: float
         """
     @property
-    def scale(self) -> physx::PxVec3:
+    def scale(self) -> numpy.ndarray[numpy.float32]:
         """
-        :type: physx::PxVec3
+        :type: numpy.ndarray[numpy.float32]
         """
     @property
     def type(self) -> str:

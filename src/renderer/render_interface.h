@@ -154,15 +154,15 @@ public:
     _warn_mat_func_not_supported(__func__);
   };
   [[nodiscard]] virtual std::string getEmissionTextureFilename() const {
-    _warn_mat_func_not_supported(__func__);
-    return "";
+    auto tex = getEmissionTexture();
+    return tex ? tex->getFilename() : "";
   };
   virtual void setDiffuseTextureFromFilename(std::string_view path) {
     _warn_mat_func_not_supported(__func__);
   };
   [[nodiscard]] virtual std::string getDiffuseTextureFilename() const {
-    _warn_mat_func_not_supported(__func__);
-    return "";
+    auto tex = getDiffuseTexture();
+    return tex ? tex->getFilename() : "";
   };
   virtual void setMetallicTextureFromFilename(std::string_view path) {
     _warn_mat_func_not_supported(__func__);
@@ -175,22 +175,22 @@ public:
     _warn_mat_func_not_supported(__func__);
   };
   [[nodiscard]] virtual std::string getRoughnessTextureFilename() const {
-    _warn_mat_func_not_supported(__func__);
-    return "";
+    auto tex = getRoughnessTexture();
+    return tex ? tex->getFilename() : "";
   };
   virtual void setNormalTextureFromFilename(std::string_view path) {
     _warn_mat_func_not_supported(__func__);
   };
   [[nodiscard]] virtual std::string getNormalTextureFilename() const {
-    _warn_mat_func_not_supported(__func__);
-    return "";
+    auto tex = getNormalTexture();
+    return tex ? tex->getFilename() : "";
   };
   virtual void setTransmissionTextureFromFilename(std::string_view path) {
     _warn_mat_func_not_supported(__func__);
   };
   [[nodiscard]] virtual std::string getTransmissionTextureFilename() const {
-    _warn_mat_func_not_supported(__func__);
-    return "";
+    auto tex = getTransmissionTexture();
+    return tex ? tex->getFilename() : "";
   };
 
   virtual ~IPxrMaterial() = default;
