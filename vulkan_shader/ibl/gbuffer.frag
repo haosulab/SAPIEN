@@ -58,7 +58,7 @@ void main() {
 
   if ((materialBuffer.textureMask & 1) != 0) {
     outAlbedo = texture(colorTexture, inUV);
-    outAlbedo.rgb = pow(outAlbedo.rgb, vec3(2.2));  // sRGB to linear
+    outAlbedo.rgb = outAlbedo.rgb;
   } else {
     outAlbedo = materialBuffer.baseColor;
   }

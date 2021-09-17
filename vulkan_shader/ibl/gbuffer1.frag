@@ -112,7 +112,7 @@ void main() {
 
   if ((materialBuffer.textureMask & 1) != 0) {
     albedo = texture(colorTexture, inUV);
-    albedo.rgb = pow(albedo.rgb, vec3(2.2));  // sRGB to linear
+    albedo.rgb = albedo.rgb;
   } else {
     albedo = materialBuffer.baseColor;
   }
