@@ -57,7 +57,7 @@ def main():
     sapien.VulkanRenderer.set_log_level("info")
 
     sim = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = sapien.VulkanRenderer(default_mipmap_levels=4)
     renderer_context: R.Context = renderer._internal_context
     sim.set_renderer(renderer)
 
