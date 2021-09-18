@@ -66,27 +66,25 @@ def main():
     copper.set_metallic(1)
     copper.set_roughness(0.2)
 
-    sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
+    # sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
     viewer = Viewer(renderer)
 
-    brdf_lut = renderer_context.create_brdf_lut()
-    cubemap = renderer_context.create_cubemap_from_files(
-        [
-            "../assets/images/cube/px2.png",
-            "../assets/images/cube/nx2.png",
-            "../assets/images/cube/py2.png",
-            "../assets/images/cube/ny2.png",
-            "../assets/images/cube/pz2.png",
-            "../assets/images/cube/nz2.png",
-        ],
-        6,
-    )
-    lightmap = renderer_context.create_texture_from_file(
-        "../assets/images/flashlight.jpg", 1, address_mode="border"
-    )
-    viewer.window._internal_renderer.set_custom_cubemap("Environment", cubemap)
-    viewer.window._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
-    viewer.window._internal_renderer.set_custom_texture("LightMap", lightmap)
+    # cubemap = renderer_context.create_cubemap_from_files(
+    #     [
+    #         "../assets/images/cube/px2.png",
+    #         "../assets/images/cube/nx2.png",
+    #         "../assets/images/cube/py2.png",
+    #         "../assets/images/cube/ny2.png",
+    #         "../assets/images/cube/pz2.png",
+    #         "../assets/images/cube/nz2.png",
+    #     ],
+    #     6,
+    # )
+    # lightmap = renderer_context.create_texture_from_file(
+    #     "../assets/images/flashlight.jpg", 1, address_mode="border"
+    # )
+    # viewer.window._internal_renderer.set_custom_cubemap("Environment", cubemap)
+    # viewer.window._internal_renderer.set_custom_texture("LightMap", lightmap)
 
     def create_ant_builder(scene):
         builder = scene.create_articulation_builder()
@@ -222,21 +220,23 @@ def main():
     scene.add_ground(0)
     scene.set_timestep(1 / 240)
 
-    sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/default_camera")
+    scene.set_environment_map("input.ktx")
+
+    # sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/default_camera")
 
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
     cam1 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
     print(cam1.render_target_names)
 
-    sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/active_light")
+    # sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/active_light")
 
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
     cam2 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
-    cam2._internal_renderer.set_custom_cubemap("Environment", cubemap)
-    cam2._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
-    cam2._internal_renderer.set_custom_texture("LightMap", lightmap)
+    # cam2._internal_renderer.set_custom_cubemap("Environment", cubemap)
+    # cam2._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
+    # cam2._internal_renderer.set_custom_texture("LightMap", lightmap)
 
     ant_builder = create_ant_builder(scene)
     ant = ant_builder.build()

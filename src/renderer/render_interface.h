@@ -429,6 +429,10 @@ public:
   /** call this function before every rendering time frame */
   inline virtual void updateRender(){};
 
+  virtual void setEnvironmentMap(std::string_view path) {
+    spdlog::get("SAPIEN")->warn("Environment map is not supported!");
+  };
+
   virtual void destroy() = 0;
 
   virtual ~IPxrScene() = default;

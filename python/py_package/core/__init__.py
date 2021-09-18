@@ -19,10 +19,10 @@ def ensure_icd():
 
 def __enable_vulkan():
     __VULKAN_VIEWER_SHADER_ROOT = pkg_resources.resource_filename(
-        "sapien", "vulkan_shader/default_viewer"
+        "sapien", "vulkan_shader/ibl"
     )
     __VULKAN_CAMERA_SHADER_ROOT = pkg_resources.resource_filename(
-        "sapien", "vulkan_shader/default_camera"
+        "sapien", "vulkan_shader/ibl"
     )
     __KUAFU_ASSETS_ROOT = pkg_resources.resource_filename(
         "sapien", "kuafu_assets"

@@ -276,5 +276,11 @@ std::vector<ICamera *> SVulkan2Scene::getCameras() {
 
 void SVulkan2Scene::updateRender() { mScene->updateModelMatrices(); }
 
+void SVulkan2Scene::setEnvironmentMap(std::string_view path) {
+  auto tex =
+      mParentRenderer->mContext->getResourceManager()->CreateCubemapFromKTX(std::string(path), 5);
+  mScene->setEnvironmentMap(tex);
+}
+
 } // namespace Renderer
 } // namespace sapien

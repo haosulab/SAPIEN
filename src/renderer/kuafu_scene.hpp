@@ -203,5 +203,8 @@ public:
   inline auto& getKScene() { return pKRenderer->getScene(); }
 
   void destroy() override;
+
+  inline void setEnvironmentMap(std::string_view path) override {
+    pKRenderer->getScene().setEnvironmentMap(path); };
 };
 }

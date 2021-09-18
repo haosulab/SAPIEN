@@ -269,8 +269,6 @@ void buildSapien(py::module &m) {
       .def_static("_set_default_assets_path", &Renderer::KuafuRenderer::setDefaultAssetsPath,
                   py::arg("assets_path"))
       .def_static("set_log_level", &Renderer::KuafuRenderer::setLogLevel, py::arg("level"))
-      .def("set_environment_map", &Renderer::KuafuRenderer::setEnvironmentMap,
-           py::arg("env_map_path"))
       .def_property_readonly("is_running", &Renderer::KuafuRenderer::isRunning);
 
   auto PyKuafuCamera = py::class_<Renderer::KuafuCamera, Renderer::ICamera>(m, "KuafuCamera");
@@ -734,6 +732,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"))
       .def("remove_light", &SScene::removeLight, py::arg("light"))
+      .def("set_environment_map", &SScene::setEnvironmentMap, py::arg("filename"))
+
       // save
       .def("pack",
            [](SScene &scene) {

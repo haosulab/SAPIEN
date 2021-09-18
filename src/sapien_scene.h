@@ -228,6 +228,8 @@ public:
   SActiveLight *addActiveLight(PxTransform const &pose, PxVec3 const &color, float fov,
                                std::string_view texPath);
 
+  void setEnvironmentMap(std::string_view filename);
+
   void removeLight(SLight *light);
 
   /** syncs physical scene with renderer scene, and tell the renderer scene that

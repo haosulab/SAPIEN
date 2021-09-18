@@ -22,7 +22,7 @@ def load_obj(scene, materials_root, obj_name, pose=Pose(), material=None):
 
 
 def main():
-    repo_root = '/zdata/ssource/ICCV2021_Diagnosis/'
+    repo_root = '/home/fx/source/ICCV2021_Diagnosis/'
     materials_root = os.path.join(repo_root, 'ocrtoc_materials')
 
     sim = sapien.Engine()
@@ -118,12 +118,12 @@ def main():
         [0.79111, 0.247229, 0.703505], [0.13942, 0.452553, 0.0629925, -0.878516]))
     cam = scene.add_mounted_camera("cam", cam_mount, Pose([0, 0, 0]), 1280, 720, 0, 1, 0.1, 100)
 
-    cam.set_full_perspective(1920, 1080, 1.387511840820312500e+03, 1.386223266601562500e+03,
-                             9.825937500000000000e+02, 5.653156127929687500e+02, 0)
+    # cam.set_full_perspective(1920, 1080, 1.387511840820312500e+03, 1.386223266601562500e+03,
+    #                          9.825937500000000000e+02, 5.653156127929687500e+02, 0)
 
     scene.step()
 
-    scene.renderer_scene.set_ambient_light([0.003, 0.003, 0.003])
+    scene.set_ambient_light([0.003, 0.003, 0.003])
     # dirlight = scene.add_directional_light(
     #     [0, 0.5, -1], color=[2.0, 2.0, 2.0]
     # )
@@ -175,14 +175,13 @@ def main():
             ceil_light.set_pose(Pose(p=[0, 0, 3]))
             alight.set_color([0, 0, 0])
 
-        if cnt % 400 == 200:
-            ceil_light.set_pose(Pose(p=[100, 100, 3]))
-            alight.set_color([1, 0, 0])
+        # if cnt % 400 == 200:
+        #     ceil_light.set_pose(Pose(p=[100, 100, 3]))
+        #     alight.set_color([1, 0, 0])
+        #     p = cam.get_color_rgba()
 
-        if cnt % 400 == 300:
-            p = cam.get_color_rgba()
-            import matplotlib.pyplot as plt
-            plt.imsave(f'{cnt:04d}.png', p)
+        # if cnt % 400 == 300:
+        #     p = cam.get_color_rgba()
 
 
 main()

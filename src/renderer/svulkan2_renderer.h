@@ -138,6 +138,8 @@ public:
                                   bool enableShadow, float shadowNear, float shadowFar) override;
   void removeLight(ILight *light) override;
 
+  void setEnvironmentMap(std::string_view path) override;
+
   inline SVulkan2Renderer *getParentRenderer() const { return mParentRenderer; }
 };
 

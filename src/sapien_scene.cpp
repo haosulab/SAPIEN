@@ -37,7 +37,7 @@ SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig cons
 
   auto renderer = sim->getRenderer();
   if (renderer) {
-    mRendererScene = renderer->createScene("");          // FIXME: pass scene name here
+    mRendererScene = renderer->createScene(""); // FIXME: pass scene name here
   }
 }
 
@@ -755,8 +755,7 @@ SSpotLight *SScene::addSpotLight(PxVec3 const &position, PxVec3 const &direction
 
 SActiveLight *SScene::addActiveLight(PxTransform const &pose, PxVec3 const &color, float fov,
                                      std::string_view texPath) {
-  auto light = mRendererScene->addActiveLight(
-      pose, {color.x, color.y, color.z}, fov, texPath);
+  auto light = mRendererScene->addActiveLight(pose, {color.x, color.y, color.z}, fov, texPath);
   auto sl = std::make_unique<SActiveLight>(this, light);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));
@@ -770,6 +769,10 @@ void SScene::removeLight(SLight *light) {
   mLights.erase(
       std::remove_if(mLights.begin(), mLights.end(), [=](auto &l) { return l.get() == light; }),
       mLights.end());
+}
+
+void SScene::setEnvironmentMap(std::string_view filename) {
+  mRendererScene->setEnvironmentMap(filename);
 }
 
 }; // namespace sapien
