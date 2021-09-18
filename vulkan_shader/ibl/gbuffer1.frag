@@ -86,6 +86,7 @@ layout(location = 4) in mat3 inTbn;
 layout(location = 0) out vec4 outLighting1;
 layout(location = 1) out vec4 outNormal1;
 layout(location = 2) out uvec4 outSegmentation1;
+layout(location = 3) out vec4 outPosition1;
 
 vec3 computeDirectionalLight(int index, vec3 normal, vec3 camDir, vec3 diffuseAlbedo, float roughness, vec3 fresnel) {
   vec3 lightDir = -normalize((cameraBuffer.viewMatrix *
@@ -143,6 +144,8 @@ void main() {
     outNormal1 = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
   }
   outNormal1 = outNormal1;
+
+  outPosition1 = inPosition;
 
   float specular = frm.x;
   float roughness = frm.y;

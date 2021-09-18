@@ -66,7 +66,7 @@ def main():
     copper.set_metallic(1)
     copper.set_roughness(0.2)
 
-    # sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
+    sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
     viewer = Viewer(renderer)
 
     # cubemap = renderer_context.create_cubemap_from_files(

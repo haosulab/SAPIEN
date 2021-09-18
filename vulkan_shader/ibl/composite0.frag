@@ -13,12 +13,18 @@ layout(set = 0, binding = 9) uniform sampler2D samplerLine;
 layout(set = 0, binding = 10) uniform sampler2D samplerPointDepth;
 layout(set = 0, binding = 11) uniform sampler2D samplerPoint;
 
+layout(set = 0, binding = 12) uniform sampler2D samplerPosition0;
+layout(set = 0, binding = 13) uniform sampler2D samplerPosition1;
+
+
 layout(location = 0) in vec2 inUV;
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outDepthLinear;
 layout(location = 2) out uvec4 outSegmentation;
 layout(location = 3) out vec4 outSegmentationView0;
 layout(location = 4) out vec4 outSegmentationView1;
+layout(location = 5) out vec4 outPosition;
+
 
 layout(set = 1, binding = 0) uniform CameraBuffer {
   mat4 viewMatrix;
@@ -104,6 +110,8 @@ void main() {
   vec4 outColor1 = texture(samplerLighting1, inUV);
   vec4 outColor2 = texture(samplerAlbedo2, inUV);
 
+  vec4 outPos0 = vec4(texture(samplerPosition0, inUV).xyz, d0);
+  vec4 outPos1 = vec4(texture(samplerPosition1, inUV).xyz, d1);
 
   // depth composite for 0 and 2
   float factor = step(d0, d2);
@@ -114,10 +122,13 @@ void main() {
   factor = step(min(d0, d2), d1);
   outColor = vec4((1 - factor)* blend + factor * outColor0.rgb, 1.f);
 
+  factor = step(d0, d1);
+  outPosition = outPos0 * factor + outPos1 * (1 - factor);
+
   outColor = pow(outColor, vec4(1/2.2, 1/2.2, 1/2.2, 1));
 
-  vec4 csPosition = cameraBuffer.projectionMatrixInverse * (vec4(inUV * 2 - 1, min(d0, d1), 1));
-  outDepthLinear = vec4(vec3(-csPosition.z / csPosition.w), 1.);
+  // vec4 csPosition = cameraBuffer.projectionMatrixInverse * (vec4(inUV * 2 - 1, min(d0, d1), 1));
+  outDepthLinear = vec4(vec3(-outPosition.z), 1.);
 
   uvec4 seg0 = texture(samplerSegmentation0, inUV);
   uvec4 seg1 = texture(samplerSegmentation1, inUV);
@@ -125,7 +136,6 @@ void main() {
 
   outSegmentationView0 = mix(vec4(0,0,0,1), colors[outSegmentation.x % 60], sign(outSegmentation.x));
   outSegmentationView1 = mix(vec4(0,0,0,1), colors[outSegmentation.y % 60], sign(outSegmentation.y));
-
 
   vec4 lineColor = texture(samplerLine, inUV);
   if (texture(samplerLineDepth, inUV).x < 1) {
