@@ -1769,7 +1769,7 @@ class VulkanCamera(ICamera, ISensor):
         """
     pass
 class VulkanRenderer(IPxrRenderer):
-    def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '') -> None: 
+    def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '', culling: str = 'back') -> None: 
         """
         Create the VulkanRenderer for rasterization-based rendering.
 

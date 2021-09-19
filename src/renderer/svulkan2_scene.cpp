@@ -111,7 +111,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
                                            const physx::PxVec3 &scale,
                                            const physx::PxVec3 &color) {
   auto material = std::make_shared<svulkan2::resource::SVMetallicMaterial>(
-      glm::vec4{color.x, color.y, color.z, 1.f});
+      glm::vec4{0.f, 0.f, 0.f, 1.f}, glm::vec4{color.x, color.y, color.z, 1.f});
   return addRigidbody(type, scale, std::make_shared<SVulkan2Material>(material));
 }
 
@@ -177,7 +177,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &ver
                                            const physx::PxVec3 &scale,
                                            const physx::PxVec3 &color) {
   auto material = std::make_shared<svulkan2::resource::SVMetallicMaterial>(
-      glm::vec4{color.x, color.y, color.z, 1.f});
+      glm::vec4{0.f, 0.f, 0.f, 1.0f}, glm::vec4{color.x, color.y, color.z, 1.f});
   return addRigidbody(vertices, normals, indices, scale,
                       std::make_shared<SVulkan2Material>(material));
 }

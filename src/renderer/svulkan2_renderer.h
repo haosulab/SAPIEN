@@ -147,6 +147,7 @@ class SVulkan2Renderer : public IPxrRenderer {
 public:
   std::shared_ptr<svulkan2::core::Context> mContext{};
   std::shared_ptr<svulkan2::resource::SVResourceManager> mResourceManager{};
+  vk::CullModeFlagBits mCullMode;
 
 private:
   static std::string gDefaultSpvDir;
@@ -156,7 +157,8 @@ public:
   static void setLogLevel(std::string const &level);
 
   SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
-                   uint32_t defaultMipLevels, std::string device);
+                   uint32_t defaultMipLevels, std::string const &device,
+                   std::string const &culling);
   SVulkan2Scene *createScene(std::string const &name) override;
   void removeScene(IPxrScene *scene) override;
 

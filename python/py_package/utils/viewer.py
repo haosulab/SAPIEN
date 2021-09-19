@@ -266,12 +266,12 @@ class Viewer(object):
         self.cone = self.renderer_context.create_cone_mesh(16)
         self.capsule = self.renderer_context.create_capsule_mesh(0.1, 0.5, 16, 4)
 
-        self.mat_red = self.renderer_context.create_material([1, 0, 0, 1], 0, 0, 0)
-        self.mat_green = self.renderer_context.create_material([0, 1, 0, 1], 0, 0, 0)
-        self.mat_blue = self.renderer_context.create_material([0, 0, 1, 1], 0, 0, 0)
+        self.mat_red = self.renderer_context.create_material([0,0,0,1],[1, 0, 0, 1], 0, 0, 0)
+        self.mat_green = self.renderer_context.create_material([0,0,0,1],[0, 1, 0, 1], 0, 0, 0)
+        self.mat_blue = self.renderer_context.create_material([0,0,0,1],[0, 0, 1, 1], 0, 0, 0)
 
-        self.mat_cyan = self.renderer_context.create_material([0, 1, 1, 1], 0, 0, 0)
-        self.mat_magenta = self.renderer_context.create_material([1, 0, 1, 1], 0, 0, 0)
+        self.mat_cyan = self.renderer_context.create_material([0,0,0,1],[0, 1, 1, 1], 0, 0, 0)
+        self.mat_magenta = self.renderer_context.create_material([0,0,0,1],[1, 0, 1, 1], 0, 0, 0)
 
         self.red_cone = self.renderer_context.create_model([self.cone], [self.mat_red])
         self.green_cone = self.renderer_context.create_model(
@@ -1534,27 +1534,43 @@ class Viewer(object):
                             .Label("Diffuse")
                             .ReadOnly(True)
                             .Value(mat.base_color),
-                            R.UIDisplayText().Text(dtex),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(dtex)
+                            .Label("##dtex{}_{}".format(shape_idx, body_idx)),
                             R.UIInputFloat4()
                             .Label("Emission")
                             .ReadOnly(True)
                             .Value(mat.emission),
-                            R.UIDisplayText().Text(etex),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(etex)
+                            .Label("##etex{}_{}".format(shape_idx, body_idx)),
                             R.UIInputFloat()
                             .Label("Roughness")
                             .ReadOnly(True)
                             .Value(mat.roughness),
-                            R.UIDisplayText().Text(rtex),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(rtex)
+                            .Label("##rtex{}_{}".format(shape_idx, body_idx)),
                             R.UIInputFloat()
                             .Label("Metallic")
                             .ReadOnly(True)
                             .Value(mat.metallic),
-                            R.UIDisplayText().Text(mtex),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(mtex)
+                            .Label("##mtex{}_{}".format(shape_idx, body_idx)),
                             R.UIInputFloat()
                             .Label("Specular")
                             .ReadOnly(True)
                             .Value(mat.specular),
-                            R.UIDisplayText().Text("Normal: " + mtex),
+                            R.UIDisplayText().Text("Normal map"),
+                            R.UIInputText()
+                            .ReadOnly(True)
+                            .Value(ntex)
+                            .Label("##ntex{}_{}".format(shape_idx, body_idx)),
                         )
                     )
 

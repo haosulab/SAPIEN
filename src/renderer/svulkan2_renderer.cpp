@@ -35,10 +35,21 @@ void SVulkan2Renderer::setLogLevel(std::string const &level) {
 
 SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
                                    uint32_t maxNumTextures, uint32_t defaultMipLevels,
-                                   std::string device) {
+                                   std::string const &device, std::string const &culling) {
   mContext = std::make_shared<svulkan2::core::Context>(!offscreenOnly, maxNumMaterials,
                                                        maxNumTextures, defaultMipLevels, device);
   mResourceManager = mContext->createResourceManager();
+  if (culling == "back") {
+    mCullMode = vk::CullModeFlagBits::eBack;
+  } else if (culling == "front") {
+    mCullMode = vk::CullModeFlagBits::eFront;
+  } else if (culling == "front_and_back" || culling == "both") {
+    mCullMode = vk::CullModeFlagBits::eFrontAndBack;
+  } else if (culling == "none") {
+    mCullMode = vk::CullModeFlagBits::eNone;
+  } else {
+    throw std::runtime_error("culling mode must be one of back, front, both, or none");
+  }
 }
 
 SVulkan2Scene *SVulkan2Renderer::createScene(std::string const &name) {

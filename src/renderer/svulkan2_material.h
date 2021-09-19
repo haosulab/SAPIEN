@@ -31,6 +31,8 @@ class SVulkan2Material : public IPxrMaterial {
 
 public:
   explicit SVulkan2Material(std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material);
+  void setEmission(std::array<float, 4> color) override;
+  [[nodiscard]] std::array<float, 4> getEmission() const override;
   void setBaseColor(std::array<float, 4> color) override;
   [[nodiscard]] std::array<float, 4> getBaseColor() const override;
   void setRoughness(float roughness) override;
@@ -40,6 +42,8 @@ public:
   void setMetallic(float metallic) override;
   [[nodiscard]] float getMetallic() const override;
 
+  void setEmissionTexture(std::shared_ptr<IPxrTexture> texture) override;
+  [[nodiscard]] std::shared_ptr<IPxrTexture> getEmissionTexture() const override;
   void setDiffuseTexture(std::shared_ptr<IPxrTexture> texture) override;
   [[nodiscard]] std::shared_ptr<IPxrTexture> getDiffuseTexture() const override;
   void setRoughnessTexture(std::shared_ptr<IPxrTexture> texture) override;

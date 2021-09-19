@@ -27,6 +27,7 @@ layout(set = 1, binding = 0) uniform ObjectBuffer {
 } objectBuffer;
 
 layout(set = 2, binding = 0) uniform MaterialBuffer {
+  vec4 emission;
   vec4 baseColor;
   float fresnel;
   float roughness;
@@ -39,6 +40,7 @@ layout(set = 2, binding = 1) uniform sampler2D colorTexture;
 layout(set = 2, binding = 2) uniform sampler2D roughnessTexture;
 layout(set = 2, binding = 3) uniform sampler2D normalTexture;
 layout(set = 2, binding = 4) uniform sampler2D metallicTexture;
+layout(set = 2, binding = 5) uniform sampler2D emissionTexture;
 
 #include "../common/lights.glsl"
 
@@ -108,12 +110,18 @@ vec3 computeDirectionalLight(int index, vec3 normal, vec3 camDir, vec3 diffuseAl
 void main() {
   outSegmentation1 = inSegmentation;
 
+  vec4 emission;
   vec4 albedo;
   vec4 frm;
 
+  if ((materialBuffer.textureMask & 16) != 0) {
+    emission = texture(emissionTexture, inUV);
+  } else {
+    emission = materialBuffer.emission;
+  }
+
   if ((materialBuffer.textureMask & 1) != 0) {
     albedo = texture(colorTexture, inUV);
-    albedo.rgb = albedo.rgb;
   } else {
     albedo = materialBuffer.baseColor;
   }
@@ -160,7 +168,7 @@ void main() {
   vec3 diffuseAlbedo = albedo.rgb * (1 - metallic);
   vec3 fresnel = specular * (1 - metallic) + albedo.rgb * metallic;
 
-  vec3 color = vec3(0.f);
+  vec3 color = emission.rgb;
   for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
     vec3 pos = world2camera(vec4(sceneBuffer.pointLights[i].position.xyz, 1.f)).xyz;
     vec3 l = pos - csPosition.xyz;

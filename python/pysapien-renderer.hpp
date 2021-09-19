@@ -263,13 +263,15 @@ void buildRenderer(py::module &parent) {
   PyContext
       .def(
           "create_material",
-          [](core::Context &context, py::array_t<float> baseColor, float fresnel, float roughness,
-             float metallic) {
+          [](core::Context &context, py::array_t<float> emission, py::array_t<float> baseColor,
+             float fresnel, float roughness, float metallic) {
             return context.createMetallicMaterial(
+                {emission.at(0), emission.at(1), emission.at(2), emission.at(3)},
                 {baseColor.at(0), baseColor.at(1), baseColor.at(2), baseColor.at(3)}, fresnel,
                 roughness, metallic, 0.f);
           },
-          py::arg("base_colorf"), py::arg("specular"), py::arg("roughness"), py::arg("metallic"))
+          py::arg("emission"), py::arg("base_color"), py::arg("specular"), py::arg("roughness"),
+          py::arg("metallic"))
       .def(
           "create_model_from_file",
           [](core::Context &context, std::string const &filename) {
@@ -404,7 +406,7 @@ void buildRenderer(py::module &parent) {
   PyMaterial
       .def("set_textures", &resource::SVMetallicMaterial::setTextures,
            py::arg("base_color") = nullptr, py::arg("roughness") = nullptr,
-           py::arg("normal") = nullptr, py::arg("metallic") = nullptr)
+           py::arg("normal") = nullptr, py::arg("metallic") = nullptr, py::arg("emission") = nullptr)
       .def(
           "set_base_color",
           [](resource::SVMetallicMaterial &mat, py::array_t<float> color) {

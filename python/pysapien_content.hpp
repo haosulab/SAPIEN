@@ -1662,10 +1662,10 @@ Args:
 
   PyVulkanRenderer
       .def_static("set_log_level", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
-      .def(py::init<bool, uint32_t, uint32_t, uint32_t, std::string>(),
+      .def(py::init<bool, uint32_t, uint32_t, uint32_t, std::string, std::string>(),
            py::arg("offscreen_only") = false, py::arg("max_num_materials") = 5000,
            py::arg("max_num_textures") = 5000, py::arg("default_mipmap_levels") = 1,
-           py::arg("device") = "", R"doc(
+           py::arg("device") = "", py::arg("culling") = "back", R"doc(
 Create the VulkanRenderer for rasterization-based rendering.
 
 Args:

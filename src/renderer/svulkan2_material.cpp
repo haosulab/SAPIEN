@@ -78,6 +78,15 @@ std::string SVulkan2Texture::getFilename() const {
 SVulkan2Material::SVulkan2Material(
     std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material)
     : mMaterial(material) {}
+
+void SVulkan2Material::setEmission(std::array<float, 4> color) {
+  mMaterial->setEmission({color[0], color[1], color[2], color[3]});
+}
+std::array<float, 4> SVulkan2Material::getEmission() const {
+  auto color = mMaterial->getEmission();
+  return {color.r, color.g, color.b, color.a};
+}
+
 void SVulkan2Material::setBaseColor(std::array<float, 4> color) {
   mMaterial->setBaseColor({color[0], color[1], color[2], color[3]});
 }
@@ -85,12 +94,25 @@ std::array<float, 4> SVulkan2Material::getBaseColor() const {
   auto color = mMaterial->getBaseColor();
   return {color.r, color.g, color.b, color.a};
 }
+
 void SVulkan2Material::setRoughness(float roughness) { mMaterial->setRoughness(roughness); }
 float SVulkan2Material::getRoughness() const { return mMaterial->getRoughness(); }
 void SVulkan2Material::setSpecular(float specular) { mMaterial->setFresnel(specular); }
 float SVulkan2Material::getSpecular() const { return mMaterial->getFresnel(); }
 void SVulkan2Material::setMetallic(float metallic) { mMaterial->setMetallic(metallic); }
 float SVulkan2Material::getMetallic() const { return mMaterial->getMetallic(); }
+
+void SVulkan2Material::setEmissionTexture(std::shared_ptr<IPxrTexture> texture) {
+  if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
+    mMaterial->setEmissionTexture(tex->getTexture());
+  } else {
+    mMaterial->setEmissionTexture(nullptr);
+  }
+}
+std::shared_ptr<IPxrTexture> SVulkan2Material::getEmissionTexture() const {
+  auto tex = mMaterial->getEmissionTexture();
+  return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
+}
 
 void SVulkan2Material::setDiffuseTexture(std::shared_ptr<IPxrTexture> texture) {
   if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {

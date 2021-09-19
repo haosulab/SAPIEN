@@ -53,12 +53,13 @@ layout(set = 2, binding = 0) uniform sampler2D samplerAlbedo;
 layout(set = 2, binding = 1) uniform sampler2D samplerPosition0;
 layout(set = 2, binding = 2) uniform sampler2D samplerSpecular;
 layout(set = 2, binding = 3) uniform sampler2D samplerNormal;
-layout(set = 2, binding = 4) uniform sampler2D samplerGbufferDepth;
-layout(set = 2, binding = 5) uniform sampler2D samplerCustom;
+layout(set = 2, binding = 4) uniform sampler2D samplerEmission;
+layout(set = 2, binding = 5) uniform sampler2D samplerGbufferDepth;
+layout(set = 2, binding = 6) uniform sampler2D samplerCustom;
 
 // IBL
-layout(set = 2, binding = 6) uniform samplerCube samplerEnvironment;
-layout(set = 2, binding = 7) uniform sampler2D samplerBRDFLUT;
+layout(set = 2, binding = 7) uniform samplerCube samplerEnvironment;
+layout(set = 2, binding = 8) uniform sampler2D samplerBRDFLUT;
 
 layout(location = 0) in vec2 inUV;
 layout(location = 0) out vec4 outLighting;
@@ -105,7 +106,7 @@ void main() {
   vec3 diffuseAlbedo = albedo * (1 - metallic);
   vec3 fresnel = specular * (1 - metallic) + albedo * metallic;
 
-  vec3 color = vec3(0.f);
+  vec3 color = texture(samplerEmission, inUV).rgb;
 
   // point light
   for (int i = 0; i < NUM_POINT_LIGHT_SHADOWS; ++i) {

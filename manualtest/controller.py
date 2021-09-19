@@ -266,12 +266,12 @@ class Viewer(object):
         self.cone = self.renderer_context.create_cone_mesh(16)
         self.capsule = self.renderer_context.create_capsule_mesh(0.1, 0.5, 16, 4)
 
-        self.mat_red = self.renderer_context.create_material([1, 0, 0, 1], 0, 0, 0)
-        self.mat_green = self.renderer_context.create_material([0, 1, 0, 1], 0, 0, 0)
-        self.mat_blue = self.renderer_context.create_material([0, 0, 1, 1], 0, 0, 0)
+        self.mat_red = self.renderer_context.create_material([0,0,0,1],[1, 0, 0, 1], 0, 0, 0)
+        self.mat_green = self.renderer_context.create_material([0,0,0,1],[0, 1, 0, 1], 0, 0, 0)
+        self.mat_blue = self.renderer_context.create_material([0,0,0,1],[0, 0, 1, 1], 0, 0, 0)
 
-        self.mat_cyan = self.renderer_context.create_material([0, 1, 1, 1], 0, 0, 0)
-        self.mat_magenta = self.renderer_context.create_material([1, 0, 1, 1], 0, 0, 0)
+        self.mat_cyan = self.renderer_context.create_material([0,0,0,1],[0, 1, 1, 1], 0, 0, 0)
+        self.mat_magenta = self.renderer_context.create_material([0,0,0,1],[1, 0, 1, 1], 0, 0, 0)
 
         self.red_cone = self.renderer_context.create_model([self.cone], [self.mat_red])
         self.green_cone = self.renderer_context.create_model(

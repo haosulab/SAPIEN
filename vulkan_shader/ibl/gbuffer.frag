@@ -12,6 +12,7 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
 } cameraBuffer;
 
 layout(set = 2, binding = 0) uniform MaterialBuffer {
+  vec4 emission;
   vec4 baseColor;
   float fresnel;
   float roughness;
@@ -24,6 +25,7 @@ layout(set = 2, binding = 1) uniform sampler2D colorTexture;
 layout(set = 2, binding = 2) uniform sampler2D roughnessTexture;
 layout(set = 2, binding = 3) uniform sampler2D normalTexture;
 layout(set = 2, binding = 4) uniform sampler2D metallicTexture;
+layout(set = 2, binding = 5) uniform sampler2D emissionTexture;
 
 layout(location = 0) in vec4 inPosition;
 layout(location = 1) in vec4 inPrevPosition;
@@ -39,6 +41,7 @@ layout(location = 3) out vec4 outNormal;
 layout(location = 4) out uvec4 outSegmentation0;
 layout(location = 5) out vec4 outCustom;
 layout(location = 6) out vec4 outMotionDirection;
+layout(location = 7) out vec4 outEmission;
 
 void main() {
   outCustom = vec4(objectCoord, 1);
@@ -56,9 +59,14 @@ void main() {
 
   outMotionDirection = vec4((p1s - p2s)*0.5, 0, 1);
 
+  if ((materialBuffer.textureMask & 16) != 0) {
+    outEmission = texture(emissionTexture, inUV);
+  } else {
+    outEmission = materialBuffer.emission;
+  }
+
   if ((materialBuffer.textureMask & 1) != 0) {
     outAlbedo = texture(colorTexture, inUV);
-    outAlbedo.rgb = outAlbedo.rgb;
   } else {
     outAlbedo = materialBuffer.baseColor;
   }

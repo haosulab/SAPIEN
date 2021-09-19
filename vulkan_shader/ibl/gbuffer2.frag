@@ -3,6 +3,7 @@
 #extension GL_ARB_shading_language_420pack : enable
 
 layout(set = 2, binding = 0) uniform MaterialBuffer {
+  vec4 emission;
   vec4 baseColor;
   float fresnel;
   float roughness;
