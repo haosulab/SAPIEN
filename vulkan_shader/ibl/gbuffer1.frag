@@ -132,7 +132,7 @@ void main() {
     discard;
   }
 
-  frm.r = materialBuffer.fresnel;
+  frm.r = materialBuffer.fresnel * 0.08;
 
   if ((materialBuffer.textureMask & 2) != 0) {
     frm.g = texture(roughnessTexture, inUV).r;

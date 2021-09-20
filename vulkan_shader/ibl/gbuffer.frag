@@ -75,7 +75,7 @@ void main() {
     discard;
   }
 
-  outSpecular.r = materialBuffer.fresnel;
+  outSpecular.r = materialBuffer.fresnel * 0.08;
 
   if ((materialBuffer.textureMask & 2) != 0) {
     outSpecular.g = texture(roughnessTexture, inUV).r;
@@ -94,5 +94,4 @@ void main() {
   } else {
     outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
   }
-  outNormal = outNormal;
 }
