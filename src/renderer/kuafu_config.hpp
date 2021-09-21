@@ -11,9 +11,10 @@ struct KuafuConfig {
   size_t mViewerWidth = 640;
   size_t mViewerHeight = 640;
 
-  size_t mMaxGeometry = 256;
-  size_t mMaxGeometryInstances = 256;
-  size_t mMaxTextures = 256;
+  size_t mMaxGeometry = 1024;
+  size_t mMaxGeometryInstances = 1024;
+  size_t mMaxTextures = 1024;
+  size_t mMaxMaterials = 1024;
 
   std::string mAssetsPath;
 
@@ -42,6 +43,7 @@ struct KuafuConfig {
     ret->setGeometryLimit(mMaxGeometry);
     ret->setGeometryInstanceLimit(mMaxGeometryInstances);
     ret->setTextureLimit(mMaxTextures);
+    ret->setMaterialLimit(mMaxMaterials);
     ret->setAssetsPath(mAssetsPath);
     ret->setClearColor(mClearColor);
     ret->setPerPixelSampleRate(mPerPixelSampleRate);

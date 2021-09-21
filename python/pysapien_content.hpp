@@ -265,7 +265,10 @@ void buildSapien(py::module &m) {
       .def_readwrite("max_bounces", &Renderer::KuafuConfig::mPathDepth)
       .def_readwrite("accumulate_frames", &Renderer::KuafuConfig::mAccumulateFrames)
       .def_readwrite("use_denoiser", &Renderer::KuafuConfig::mUseDenoiser)
-      .def_readwrite("max_textures", &Renderer::KuafuConfig::mMaxTextures);
+      .def_readwrite("max_textures", &Renderer::KuafuConfig::mMaxTextures)
+      .def_readwrite("max_materials", &Renderer::KuafuConfig::mMaxMaterials)
+      .def_readwrite("max_geometries", &Renderer::KuafuConfig::mMaxGeometry)
+      .def_readwrite("max_geometry_instances", &Renderer::KuafuConfig::mMaxGeometryInstances);
 
   auto PyKuafuRenderer =
       py::class_<Renderer::KuafuRenderer, Renderer::IPxrRenderer,

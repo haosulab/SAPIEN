@@ -85,6 +85,7 @@ RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
 
 WORKDIR /workspace
 RUN git clone --single-branch -b v5.0.1 --depth 1 https://github.com/assimp/assimp.git
+RUN awk '{sub("-g ","")}1' /workspace/assimp/CMakeLists.txt > /tmp/CMakeLists.txt && mv /tmp/CMakeLists.txt /workspace/assimp/CMakeLists.txt
 RUN mkdir /workspace/assimp/build
 WORKDIR /workspace/assimp/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
