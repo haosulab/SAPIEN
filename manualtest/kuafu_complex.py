@@ -2,10 +2,6 @@
 # Objects (and materials) are randomly generated and
 # added into the scene.
 #
-# TODO:
-#  1. fix ErrorOutOfHostMemory by resource managing
-#  2. fix segfault when use viewer and resize
-#
 # By Jet <i@jetd.me>
 #
 import sapien.core as sapien
@@ -18,9 +14,10 @@ def main():
     sim = sapien.Engine()
 
     render_config = sapien.KuafuConfig()
-    render_config.spp = 64
+    render_config.spp = 16
     render_config.max_bounces = 6
     render_config.use_viewer = True
+    render_config.use_denoiser = False
     render_config.viewer_width = 400
     render_config.viewer_height = 400
 

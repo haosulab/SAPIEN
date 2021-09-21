@@ -14,7 +14,6 @@ def main():
     kuafu_config = sapien.KuafuConfig()
     kuafu_config.use_denoiser = True
     kuafu_config.use_viewer = True
-
     renderer = sapien.KuafuRenderer(kuafu_config)
 
     sim.set_renderer(renderer)
