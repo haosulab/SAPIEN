@@ -23,7 +23,7 @@ struct KuafuConfig {
   bool mAccumulateFrames = false;
 
   uint32_t mPathDepth = 5;
-  bool mUseDenoiser = false;  // todo
+  bool mUseDenoiser = false;
 
 //  uint32_t mMaxPathDepth = 10;
 //  bool mRussianRoulette = true;
@@ -49,10 +49,6 @@ struct KuafuConfig {
     ret->setPathDepth(mPathDepth);
     ret->setUseDenoiser(mUseDenoiser);
     ret->setPresent(mUseViewer);
-    if (mUseDenoiser)
-      spdlog::get("SAPIEN")->warn(
-          "KF: Denoiser not supported yet");
-
     return ret;
   }
 };
