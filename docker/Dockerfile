@@ -103,6 +103,6 @@ RUN echo "#!/opt/python/cp38-cp38/bin/python" > /usr/local/bin/auditwheel \
 
 WORKDIR /workspace
 COPY cuda-11.4 /workspace/cuda
-ENV CUDAToolkit_ROOT=/workspace/cuda
+ENV CUDA_PATH=/workspace/cuda
 
 WORKDIR /workspace

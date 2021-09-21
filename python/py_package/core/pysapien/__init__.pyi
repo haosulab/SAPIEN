@@ -746,6 +746,30 @@ class KuafuConfig():
     def max_bounces(self, arg0: int) -> None:
         pass
     @property
+    def max_geometries(self) -> int:
+        """
+        :type: int
+        """
+    @max_geometries.setter
+    def max_geometries(self, arg0: int) -> None:
+        pass
+    @property
+    def max_geometry_instances(self) -> int:
+        """
+        :type: int
+        """
+    @max_geometry_instances.setter
+    def max_geometry_instances(self, arg0: int) -> None:
+        pass
+    @property
+    def max_materials(self) -> int:
+        """
+        :type: int
+        """
+    @max_materials.setter
+    def max_materials(self, arg0: int) -> None:
+        pass
+    @property
     def max_textures(self) -> int:
         """
         :type: int

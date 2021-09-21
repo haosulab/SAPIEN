@@ -97,6 +97,7 @@ else ()
     if (${SAPIEN_DLPACK_INTEROP})
         add_definitions(-DSAPIEN_DLPACK_INTEROP)
         add_definitions(-DCUDA_INTEROP)
+        include_directories("$ENV{CUDA_PATH}/include")
     endif ()
 endif ()
 
@@ -153,8 +154,6 @@ include_directories("3rd_party/kuafu/include/external")
 include_directories("3rd_party/kuafu/3rd_party/SDL/include")
 include_directories("3rd_party/kuafu/3rd_party/KTX-Software/include")
 include_directories("3rd_party/kuafu/3rd_party/OptiX7SDK/include")
-
-find_package(CUDAToolkit REQUIRED)   # TODO: make optional
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_library(sapien STATIC ${PROJECT_SRC})

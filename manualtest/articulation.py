@@ -220,7 +220,7 @@ def main():
     scene.add_ground(0)
     scene.set_timestep(1 / 240)
 
-    scene.set_environment_map("input.ktx")
+    scene.set_environment_map("env.ktx")
 
     # sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/default_camera")
 
@@ -299,40 +299,17 @@ def main():
         viewer.render()
         count += 1
 
-        # if count == 120:
-        #     for light in scene.get_all_lights():
-        #         scene.remove_light(light)
+        import matplotlib.pyplot as plt
+        import torch.utils.dlpack
 
-        # if count == 120:
-        #     start = time.time()
-        #     cam1.take_picture()
-        #     img = cam1.get_dl_tensor("Color")
-        #     img = torch.utils.dlpack.from_dlpack(img)
-        #     dur = time.time() - start
-        #     print("Render to tensor FPS: ", 1 / dur)
-
-        #     import matplotlib.pyplot as plt
-        #     plt.imshow(img.cpu().numpy())
-        #     plt.show()
-
-        #     start = time.time()
-        #     cam2.take_picture()
-        #     img = cam2.get_dl_tensor("Color")
-        #     img = torch.utils.dlpack.from_dlpack(img)
-        #     dur = time.time() - start
-        #     print("Render to tensor FPS: ", 1 / dur)
-
-        #     import matplotlib.pyplot as plt
-        #     plt.imshow(img.cpu().numpy())
-        #     plt.show()
-
-        # import time
-        # start = time.time()
-        # cam.take_picture()
-        # img = cam.get_float_texture("Color")
-        # torch.tensor(img, device="cuda")
-        # dur = time.time() - start
-        # print("Torch CPU round trip FPS: ", 1 / dur)
+        start = time.time()
+        cam2.take_picture()
+        img = cam2.get_dl_tensor("Color")
+        img = torch.utils.dlpack.from_dlpack(img)
+        plt.imshow(img.cpu().numpy())
+        plt.show()
+        dur = time.time() - start
+        print("Render to tensor FPS: ", 1 / dur)
 
     # viewer.close()
 
