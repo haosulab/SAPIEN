@@ -1,33 +1,52 @@
-# A minimal example of using KuafuRenderer
-#
-# By Jet <i@jetd.me>
-#
 import sapien.core as sapien
+import numpy as np
 from sapien.core import Pose
+from transforms3d.quaternions import axangle2quat as aa
+from transforms3d.quaternions import qmult, mat2quat, rotate_vector
+import time
+
+import sapien.core.pysapien.renderer as R
+from sapien.asset import download_partnet_mobility
+
+from sapien.utils.viewer import Viewer
+
+
+kuafu = True
+
+sapien.VulkanRenderer.set_log_level("info")
+sapien.KuafuRenderer.set_log_level("info")
 
 
 def main():
     sim = sapien.Engine()
 
-    sapien.KuafuRenderer.set_log_level("debug")
-
-    config = sapien.KuafuConfig()
-    config.use_viewer = True
-    config.spp = 1
-    config.max_materials = 32
-    config.max_textures = 32
-    config.max_geometries = 256
-    config.max_geometry_instances = 256
-
-    renderer = sapien.KuafuRenderer(config)
-
+    if kuafu:
+        config = sapien.KuafuConfig()
+        config.use_viewer = True
+        config.use_denoiser = True
+        config.spp = 1
+        config.max_textures = 20000
+        renderer = sapien.KuafuRenderer(config)
+    else:
+        renderer = sapien.VulkanRenderer(default_mipmap_levels=4, culling="none")
+        viewer = Viewer(renderer)
     sim.set_renderer(renderer)
 
     config = sapien.SceneConfig()
     scene = sim.create_scene(config)
+    scene.set_timestep(1 / 240)
 
-    scene.add_ground(0)
-    scene.set_timestep(1 / 60)
+    if not kuafu:
+        viewer.set_scene(scene)
+        viewer.set_camera_xyz(0.152801, 0.303823, 1.193)
+        viewer.set_camera_rpy(0, 0, 2)
+
+    mount = scene.create_actor_builder().build_kinematic()
+    mount.set_pose(
+        Pose([0.152801, 0.303823, 1.193], qmult(aa([0, 0, 1], -2), aa([0, 1, 0], 0)))
+    )
+    cam1 = scene.add_mounted_camera("cam", mount, Pose(), 400, 400, 0, 1, 0.1, 100)
+
     prefix = '/home/jet/Downloads/fbtest/objects/'
 
     builder = scene.create_actor_builder()
@@ -73,16 +92,25 @@ def main():
     plate = builder.build()
     plate.set_pose(Pose([-1.359, -1.361, 0.940], [-0.651, -0.654, -0.181, 0.340]))
 
-    scene.set_ambient_light([1.0, 1.0, 1.0, 1.0])
+    strength = np.array([1, 0.9, 0.6]) * 0.5
+    plight = scene.add_point_light([-0.05, -1.22, 1.67], strength, True, 0.01, 10)
+    plight = scene.add_point_light([-0.05, -1.8, 1.5], strength, True, 0.01, 10)
+    scene.set_ambient_light([0.1, 0.1, 0.1])
+    # scene.set_environment_map("env.ktx")
 
-    mount = scene.create_actor_builder().build_kinematic()
-    mount.set_pose(Pose([-3, -3, 1.5]))
-    cam = scene.add_mounted_camera("cam", mount, Pose([0, 0, 0]), 400, 400, 0, 1, 0.1, 100)
+    scene.update_render()
+    count = 0
+    while True:
+        if kuafu:
+            cam1.take_picture()
+        else:
+            scene.update_render()
+            viewer.render()
 
-    while renderer.is_running:
-        scene.step()
-        scene.update_render()
-        cam.take_picture()
+        for i in range(4):
+            scene.step()
+
+        count += 1
 
 
 main()
