@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -Wnon-virtual-dtor -fsized-deallocation -Wno-deprecated-declarations")
@@ -141,19 +141,20 @@ include_directories("3rd_party/pybind11/include")
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
 include_directories("3rd_party/sapien-vulkan-2/include")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
-include_directories("3rd_party/sapien-vulkan-2/3rd_party/cuda_include")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
 include_directories("$ENV{VULKAN_SDK}/include")
 link_directories("$ENV{VULKAN_SDK}/lib")
-link_directories("${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/sapien-vulkan-2/3rd_party/cuda_lib")
 
 add_subdirectory("3rd_party/kuafu" EXCLUDE_FROM_ALL)
 include_directories("3rd_party/kuafu/include")
 include_directories("3rd_party/kuafu/include/external")
 include_directories("3rd_party/kuafu/3rd_party/SDL/include")
 include_directories("3rd_party/kuafu/3rd_party/KTX-Software/include")
+include_directories("3rd_party/kuafu/3rd_party/OptiX7SDK/include")
+
+find_package(CUDAToolkit REQUIRED)   # TODO: make optional
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_library(sapien STATIC ${PROJECT_SRC})

@@ -33,7 +33,12 @@ KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
         conf.mViewerWidth, conf.mViewerHeight, "Viewer", SDL_WINDOW_RESIZABLE, camera);
   }
 
-  pKRenderer = std::make_shared<kuafu::Kuafu>(config, window, camera, nullptr);
+  try {
+    pKRenderer = std::make_shared<kuafu::Kuafu>(config, window, camera, nullptr);
+  } catch (std::exception& e) {
+    kuafu::global::logger->critical(e.what());
+    throw std::runtime_error(e.what());
+  }
 
   pKRenderer->getScene().setGeometries({});
   pKRenderer->getScene().setGeometryInstances({});

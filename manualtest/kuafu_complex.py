@@ -2,10 +2,6 @@
 # Objects (and materials) are randomly generated and
 # added into the scene.
 #
-# TODO:
-#  1. fix ErrorOutOfHostMemory by resource managing
-#  2. fix segfault when use viewer and resize
-#
 # By Jet <i@jetd.me>
 #
 import sapien.core as sapien
@@ -18,15 +14,12 @@ def main():
     sim = sapien.Engine()
 
     render_config = sapien.KuafuConfig()
-    render_config.spp = 1
-    render_config.max_bounces = 3
+    render_config.spp = 16
+    render_config.max_bounces = 6
     render_config.use_viewer = True
+    render_config.use_denoiser = False
     render_config.viewer_width = 400
     render_config.viewer_height = 400
-    render_config.max_geometries = 2000
-    render_config.max_geometry_instances = 2000
-    render_config.max_textures = 10000
-    render_config.max_materials = 10000
 
     sapien.KuafuRenderer.set_log_level("debug")
     renderer = sapien.KuafuRenderer(render_config)
@@ -238,66 +231,56 @@ def main():
     cap = builder.build()
     cap.set_pose(Pose(p=[0, 2, 12]))
 
-    for i in range(30):
-        # builder = scene.create_actor_builder()
-        # material = renderer.create_material()
-        # material.transmission = (np.random.rand() > 0.2)
-        # material.ior = 1 + np.random.rand()
-        # material.base_color = [
-        #     np.random.rand(),
-        #     np.random.rand(),
-        #     np.random.rand(), 1.0]
-        # material.roughness = np.random.rand()
-        # material.metallic = np.random.rand()
-        # r = 0.2 + np.random.rand() * 0.5
-        # builder.add_sphere_visual(radius=r, material=material)
-        # builder.add_sphere_collision(radius=r)
-        # s = builder.build()
-        # s.set_pose(Pose(p=[
-        #     np.random.rand(), np.random.rand(), 12 + 6 * i + np.random.rand()]))
-        #
-        # builder = scene.create_actor_builder()
-        # material.transmission = (np.random.rand() > 0.2)
-        # material.ior = 1 + np.random.rand()
-        # material.base_color = [
-        #     np.random.rand(),
-        #     np.random.rand(),
-        #     np.random.rand(), 1.0]
-        # material.roughness = np.random.rand()
-        # material.metallic = np.random.rand()
-        # r = 0.1 + np.random.rand() * 0.4
-        # l = 0.2 + np.random.rand() * 0.5
-        # builder.add_capsule_visual(radius=r, half_length=l, material=material)
-        # builder.add_capsule_collision(radius=r, half_length=l)
-        # s = builder.build()
-        # s.set_pose(Pose(p=[
-        #     np.random.rand(), np.random.rand(), 14 + 6 * i + np.random.rand()]))
-        #
-        # builder = scene.create_actor_builder()
-        # material.transmission = (np.random.rand() > 0.2)
-        # material.ior = 1 + np.random.rand()
-        # material.base_color = [
-        #     np.random.rand(),
-        #     np.random.rand(),
-        #     np.random.rand(), 1.0]
-        # material.roughness = np.random.rand()
-        # material.metallic = np.random.rand()
-        # r = np.random.rand() * 0.9
-        # builder.add_box_visual(half_size=[r, r, r], material=material)
-        # builder.add_box_collision(half_size=[r, r, r])
-        # s = builder.build()
-        # s.set_pose(Pose(p=[
-        #     np.random.rand(), np.random.rand(), 16 + 6 * i + np.random.rand()]))
+    for i in range(15):
+        builder = scene.create_actor_builder()
+        material = renderer.create_material()
+        material.transmission = (np.random.rand() > 0.2)
+        material.ior = 1 + np.random.rand()
+        material.base_color = [
+            np.random.rand(),
+            np.random.rand(),
+            np.random.rand(), 1.0]
+        material.roughness = np.random.rand()
+        material.metallic = np.random.rand()
+        r = 0.2 + np.random.rand() * 0.5
+        builder.add_sphere_visual(radius=r, material=material)
+        builder.add_sphere_collision(radius=r)
+        s = builder.build()
+        s.set_pose(Pose(p=[
+            np.random.rand(), np.random.rand(), 12 + 6 * i + np.random.rand()]))
 
-        copper = renderer.create_material()
-        copper.ior = 1 + np.random.rand()
-        copper.transmission = 0.0
-        copper.base_color = [np.random.rand(), np.random.rand(), np.random.rand(), 1]
-        copper.metallic = np.random.rand()
-        copper.roughness = np.random.rand()
-        ant_builder = create_ant_builder(scene, copper)
-        ant = ant_builder.build()
-        ant.set_root_pose(Pose([np.random.rand(), np.random.rand(), 16 + 7 * i + np.random.rand()]))
+        builder = scene.create_actor_builder()
+        material.transmission = (np.random.rand() > 0.2)
+        material.ior = 1 + np.random.rand()
+        material.base_color = [
+            np.random.rand(),
+            np.random.rand(),
+            np.random.rand(), 1.0]
+        material.roughness = np.random.rand()
+        material.metallic = np.random.rand()
+        r = 0.1 + np.random.rand() * 0.4
+        l = 0.2 + np.random.rand() * 0.5
+        builder.add_capsule_visual(radius=r, half_length=l, material=material)
+        builder.add_capsule_collision(radius=r, half_length=l)
+        s = builder.build()
+        s.set_pose(Pose(p=[
+            np.random.rand(), np.random.rand(), 14 + 6 * i + np.random.rand()]))
+
+        builder = scene.create_actor_builder()
+        material.transmission = (np.random.rand() > 0.2)
+        material.ior = 1 + np.random.rand()
+        material.base_color = [
+            np.random.rand(),
+            np.random.rand(),
+            np.random.rand(), 1.0]
+        material.roughness = np.random.rand()
+        material.metallic = np.random.rand()
+        r = np.random.rand() * 0.9
+        builder.add_box_visual(half_size=[r, r, r], material=material)
+        builder.add_box_collision(half_size=[r, r, r])
+        s = builder.build()
+        s.set_pose(Pose(p=[
+            np.random.rand(), np.random.rand(), 16 + 6 * i + np.random.rand()]))
 
     builder = scene.create_actor_builder()
     wall_material = renderer.create_material()
