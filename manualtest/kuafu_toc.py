@@ -35,6 +35,7 @@ def main():
     render_config.viewer_height = 540
     render_config.spp = 16
     render_config.max_bounces = 6
+    render_config.use_denoiser = True
 
     renderer = sapien.KuafuRenderer(render_config)
     sim.set_renderer(renderer)
