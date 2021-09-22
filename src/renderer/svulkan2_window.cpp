@@ -92,10 +92,9 @@ void SVulkan2Window::setScene(SVulkan2Scene *scene) {
 }
 
 void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {
-  float aspect = mWindow->getHeight() == 0
-                     ? 1.f
-                     : (static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
-  getCamera()->setPerspectiveParameters(near, far, fovy, aspect);
+  uint32_t width = std::max(mWindow->getWidth(), 1u);
+  uint32_t height = std::max(mWindow->getHeight(), 1u);
+  getCamera()->setPerspectiveParameters(near, far, fovy, width, height);
 }
 void SVulkan2Window::setCameraPosition(glm::vec3 const &pos) { getCamera()->setPosition(pos); }
 void SVulkan2Window::setCameraRotation(glm::quat const &rot) { getCamera()->setRotation(rot); }
@@ -125,10 +124,9 @@ void SVulkan2Window::rebuild() {
 
   if (mScene) {
     auto cam = getCamera();
-    float aspect = mWindow->getHeight() == 0
-                       ? 1.f
-                       : (static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
-    cam->setPerspectiveParameters(cam->getNear(), cam->getFar(), cam->getFovy(), aspect);
+    uint32_t width = std::max(mWindow->getWidth(), 1u);
+    uint32_t height = std::max(mWindow->getHeight(), 1u);
+    cam->setPerspectiveParameters(cam->getNear(), cam->getFar(), cam->getFovy(), width, height);
   }
 }
 
@@ -282,10 +280,10 @@ svulkan2::scene::Camera *SVulkan2Window::getCamera() {
   }
   auto camera = &mScene->getScene()->addCamera();
 
-  float aspect = mWindow->getHeight() == 0
-                     ? 1.f
-                     : (static_cast<float>(mWindow->getWidth()) / mWindow->getHeight());
-  camera->setPerspectiveParameters(0.1, 10, 1, aspect);
+  uint32_t width = std::max(mWindow->getWidth(), 1u);
+  uint32_t height = std::max(mWindow->getHeight(), 1u);
+
+  camera->setPerspectiveParameters(0.1, 10, 1, width, height);
   camera->setName("_controller");
   camera->setPosition({0, 0, 0});
   return camera;

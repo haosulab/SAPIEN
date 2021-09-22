@@ -8,11 +8,11 @@ from sapien.core import (
     ArticulationBase,
     Joint,
     LinkBase,
-    VulkanCamera,
     LightEntity,
     PointLightEntity,
     DirectionalLightEntity,
     SpotLightEntity,
+    CameraEntity
 )
 from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.euler import quat2euler
@@ -245,7 +245,7 @@ class Viewer(object):
         rs = self.scene.renderer_scene
         render_scene: R.Scene = rs._internal_scene
 
-        cameras = self.scene.get_mounted_cameras()
+        cameras = self.scene.get_cameras()
         if len(self.camera_linesets) != len(cameras):
             self._clear_camera_linesets()
             for c in self.cameras:
@@ -258,8 +258,8 @@ class Viewer(object):
             lineset.set_position(mat[:3, 3])
             lineset.set_rotation(mat2quat(mat[:3, :3]))
 
-            scaley = np.tan(camera.get_fovy() / 2)
-            scalex = scaley / camera.get_height() * camera.get_width()
+            scaley = np.tan(camera.fovy / 2)
+            scalex = np.tan(camera.fovx / 2)
             lineset.set_scale(np.array([scalex, scaley, 1]) * 0.3)
 
     def create_visual_models(self):
@@ -1081,7 +1081,7 @@ class Viewer(object):
 
     def build_control_window(self):
         if not self.control_window:
-            self.cameras = self.scene.get_mounted_cameras()
+            self.cameras = self.scene.get_cameras()
             self.camera_ui = (
                 R.UIOptions()
                 .Style("select")
@@ -1918,7 +1918,7 @@ class Viewer(object):
             self.update_coordinate_axes()
 
     @staticmethod
-    def get_camera_pose(camera: VulkanCamera):
+    def get_camera_pose(camera: CameraEntity):
         """Get the camera pose in the Sapien world."""
         opengl_pose = camera.get_model_matrix()  # opengl camera-> sapien world
         # sapien camera -> opengl camera
@@ -1933,7 +1933,7 @@ class Viewer(object):
         cam_pose = Pose.from_transformation_matrix(opengl_pose @ sapien2opengl)
         return cam_pose
 
-    def focus_camera(self, camera: VulkanCamera):
+    def focus_camera(self, camera: CameraEntity):
         if self.focused_camera == camera:
             return
 
@@ -1944,7 +1944,7 @@ class Viewer(object):
         if self.camera_ui is not None:
             # Lazy check if any camera has changed
             assert (
-                self.cameras == self.scene.get_mounted_cameras()
+                self.cameras == self.scene.get_cameras()
             ), "Cameras have changed"
             index = (self.cameras.index(camera) + 1) if camera is not None else 0
             self.camera_ui.Index(index)
@@ -2013,6 +2013,8 @@ class Viewer(object):
     def render(self):
         if self.closed:
             return
+
+        self.set_fovy(self.fovy)
 
         while True:
             self.scene.update_render()

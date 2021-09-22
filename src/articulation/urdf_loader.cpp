@@ -541,8 +541,12 @@ SArticulation *URDFLoader::load(const std::string &filename, URDFConfig const &c
         continue;
       }
 
-      mScene->addMountedCamera(record.name, *it, record.localPose, record.width, record.height,
-                               record.fovx, record.fovy, record.near, record.far);
+      auto cam = mScene->addCamera(record.name, record.width, record.height, record.fovy,
+                                   record.near, record.far);
+      cam->setParent(*it);
+      cam->setLocalPose(record.localPose);
+      // mScene->addMountedCamera(record.name, *it, record.localPose, record.width, record.height,
+      //                          record.fovx, record.fovy, record.near, record.far);
     }
   }
 
@@ -585,8 +589,10 @@ SKArticulation *URDFLoader::loadKinematic(const std::string &filename, URDFConfi
         continue;
       }
 
-      mScene->addMountedCamera(record.name, *it, record.localPose, record.width, record.height,
-                               record.fovx, record.fovy, record.near, record.far);
+      auto cam = mScene->addCamera(record.name, record.width, record.height, record.fovy,
+                                   record.near, record.far);
+      cam->setParent(*it);
+      cam->setLocalPose(record.localPose);
     }
   }
 
@@ -650,8 +656,10 @@ SArticulation *URDFLoader::loadFromXML(const std::string &URDFString,
         continue;
       }
 
-      mScene->addMountedCamera(record.name, *it, record.localPose, record.width, record.height,
-                               record.fovx, record.fovy, record.near, record.far);
+      auto cam = mScene->addCamera(record.name, record.width, record.height, record.fovy,
+                                   record.near, record.far);
+      cam->setParent(*it);
+      cam->setLocalPose(record.localPose);
     }
   }
 

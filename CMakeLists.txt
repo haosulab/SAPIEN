@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS_DEBUG "-o0 -g3 -Wall -Wnon-virtual-dtor -fsized-deallocation -Wno-deprecated-declarations")
-set(CMAKE_CXX_FLAGS_RELEASE "-o3 -g0 -Wall -Wnon-virtual-dtor  -fsized-deallocation -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -Wnon-virtual-dtor -fsized-deallocation -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -Wnon-virtual-dtor  -fsized-deallocation -Wno-deprecated-declarations")
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Do not try to build shared libraries")
 
@@ -86,7 +86,7 @@ if (${BUILD_DEBUG_VIEWER})
 endif ()
 
 ## include headers inside the project
-include_directories("src" "src/renderer" "/usr/include/eigen3")
+include_directories("src" "src/renderer" "/usr/include/eigen3" "/usr/local/include/eigen3")
 
 if (MACOSX)
     include_directories("/usr/local/include" "/usr/local/opt/glew/include"
@@ -94,11 +94,8 @@ if (MACOSX)
     link_directories(/usr/local/lib/)
 else ()
     include_directories("3rd_party/dlpack/include")
-    if (${SAPIEN_DLPACK_INTEROP})
-        add_definitions(-DSAPIEN_DLPACK_INTEROP)
-        add_definitions(-DCUDA_INTEROP)
-        include_directories("$ENV{CUDA_PATH}/include")
-    endif ()
+    add_definitions(-DCUDA_INTEROP)
+    include_directories("$ENV{CUDA_PATH}/include")
 endif ()
 
 ## Link directory outside the project

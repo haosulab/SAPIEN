@@ -1,5 +1,4 @@
 #pragma once
-#include "utils/dlpack_tensor.hpp"
 
 #include <pybind11/eigen.h>
 #include <pybind11/functional.h>
@@ -41,6 +40,30 @@
 
 using namespace sapien;
 namespace py = pybind11;
+
+py::array_t<float> getFloatImageFromCamera(SCamera &cam, std::string const &name) {
+  uint32_t width = cam.getWidth();
+  uint32_t height = cam.getHeight();
+  auto image = cam.getRendererCamera()->getFloatImage(name);
+  uint32_t channel = image.size() / (width * height);
+  if (channel == 1) {
+    return py::array_t<float>({height, width}, image.data());
+  } else {
+    return py::array_t<float>({height, width, channel}, image.data());
+  }
+}
+
+py::array_t<uint32_t> getUintImageFromCamera(SCamera &cam, std::string const &name) {
+  uint32_t width = cam.getWidth();
+  uint32_t height = cam.getHeight();
+  auto image = cam.getRendererCamera()->getUintImage(name);
+  uint32_t channel = image.size() / (width * height);
+  if (channel == 1) {
+    return py::array_t<uint32_t>({height, width}, image.data());
+  } else {
+    return py::array_t<uint32_t>({height, width, channel}, image.data());
+  }
+}
 
 URDF::URDFConfig parseURDFConfig(py::dict &dict) {
   URDF::URDFConfig config;
@@ -163,8 +186,9 @@ void buildSapien(py::module &m) {
       m, "IPxrRenderer");
   auto PyRenderScene = py::class_<Renderer::IPxrScene>(m, "RenderScene");
   auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
-  auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
-  auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
+
+  // auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
+  // auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
 
   auto PyEngine = py::class_<Simulation, std::shared_ptr<Simulation>>(m, "Engine");
   auto PySceneConfig = py::class_<SceneConfig>(m, "SceneConfig");
@@ -220,7 +244,10 @@ void buildSapien(py::module &m) {
   auto PyVulkanRenderer =
       py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer,
                  std::shared_ptr<Renderer::SVulkan2Renderer>>(m, "VulkanRenderer");
-  auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m, "VulkanCamera");
+
+  // auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m,
+  // "VulkanCamera");
+
   auto PyVulkanWindow = py::class_<Renderer::SVulkan2Window>(m, "VulkanWindow");
   auto PyVulkanScene = py::class_<Renderer::SVulkan2Scene, Renderer::IPxrScene>(m, "VulkanScene");
 
@@ -230,6 +257,8 @@ void buildSapien(py::module &m) {
       py::class_<SDirectionalLight, SLight>(m, "DirectionalLightEntity");
   auto PySpotLightEntity = py::class_<SSpotLight, SLight>(m, "SpotLightEntity");
   auto PyActiveLightEntity = py::class_<SActiveLight, SLight>(m, "ActiveLightEntity");
+
+  auto PyCameraEntity = py::class_<SCamera, SEntity>(m, "CameraEntity");
 
   // auto PyLight = py::class_<Renderer::ILight>(m, "Light");
   // auto PyPointLight = py::class_<Renderer::IPointLight, Renderer::ILight>(m, "PointLight");
@@ -271,11 +300,11 @@ void buildSapien(py::module &m) {
       .def_static("set_log_level", &Renderer::KuafuRenderer::setLogLevel, py::arg("level"))
       .def_property_readonly("is_running", &Renderer::KuafuRenderer::isRunning);
 
-  auto PyKuafuCamera = py::class_<Renderer::KuafuCamera, Renderer::ICamera>(m, "KuafuCamera");
-  PyKuafuCamera.def("set_full_perspective", &Renderer::KuafuCamera::setFullPerspective,
-                    "Set camera into perspective projection mode with full camera parameters",
-                    py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"), py::arg("width"),
-                    py::arg("height"), py::arg("skew"));
+  // auto PyKuafuCamera = py::class_<Renderer::KuafuCamera, Renderer::ICamera>(m, "KuafuCamera");
+  // PyKuafuCamera.def("set_full_perspective", &Renderer::KuafuCamera::setFullPerspective,
+  //                   "Set camera into perspective projection mode with full camera parameters",
+  //                   py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"),
+  //                   py::arg("width"), py::arg("height"), py::arg("skew"));
 
   //======== Internal ========//
 
@@ -534,64 +563,64 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
                                }
                                return "unknown";
                              })
-      .def_property_readonly("filter_mode", [](Renderer::IPxrTexture &tex) {
-        switch (tex.getFilterMode()) {
-          case Renderer::IPxrTexture::FilterMode::eLINEAR:
-            return "linear";
-          case Renderer::IPxrTexture::FilterMode::eNEAREST:
-            return "nearest";
-        }
-        return "unknown";
-      })
+      .def_property_readonly("filter_mode",
+                             [](Renderer::IPxrTexture &tex) {
+                               switch (tex.getFilterMode()) {
+                               case Renderer::IPxrTexture::FilterMode::eLINEAR:
+                                 return "linear";
+                               case Renderer::IPxrTexture::FilterMode::eNEAREST:
+                                 return "nearest";
+                               }
+                               return "unknown";
+                             })
       .def_property_readonly("filename", &Renderer::IPxrTexture::getFilename);
-  ;
 
-  PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
-      .def("get_pose", &Renderer::ISensor::getPose)
-      .def("set_pose", &Renderer::ISensor::setPose, py::arg("pose"));
+  // PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
+  //     .def("get_pose", &Renderer::ISensor::getPose)
+  //     .def("set_pose", &Renderer::ISensor::setPose, py::arg("pose"));
 
-  PyICamera.def("get_name", &Renderer::ICamera::getName)
-      .def("get_width", &Renderer::ICamera::getWidth)
-      .def("get_height", &Renderer::ICamera::getHeight)
-      .def("get_fovy", &Renderer::ICamera::getFovy)
-      .def("get_near", &Renderer::ICamera::getNear)
-      .def("get_far", &Renderer::ICamera::getFar)
-      .def("take_picture", &Renderer::ICamera::takePicture)
-      .def("get_color_rgba",
-           [](Renderer::ICamera &cam) {
-             return py::array_t<float>(
-                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                 cam.getColorRGBA().data());
-           })
-      .def("get_albedo_rgba",
-           [](Renderer::ICamera &cam) {
-             return py::array_t<float>(
-                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                 cam.getAlbedoRGBA().data());
-           })
-      .def("get_normal_rgba",
-           [](Renderer::ICamera &cam) {
-             return py::array_t<float>(
-                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-                 cam.getNormalRGBA().data());
-           })
-      .def("get_depth",
-           [](Renderer::ICamera &cam) {
-             return py::array_t<float>(
-                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
-                 cam.getDepth().data());
-           })
-      .def("get_actor_segmentation",
-           [](Renderer::ICamera &cam) {
-             return py::array_t<int>(
-                 {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
-                 cam.getSegmentation().data());
-           })
-      .def("get_visual_segmentation", [](Renderer::ICamera &cam) {
-        return py::array_t<int>(
-            {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
-            cam.getObjSegmentation().data());
-      });
+  // PyICamera.def("get_name", &Renderer::ICamera::getName)
+  //     .def("get_width", &Renderer::ICamera::getWidth)
+  //     .def("get_height", &Renderer::ICamera::getHeight)
+  //     .def("get_fovy", &Renderer::ICamera::getFovy)
+  //     .def("get_near", &Renderer::ICamera::getNear)
+  //     .def("get_far", &Renderer::ICamera::getFar)
+  //     .def("take_picture", &Renderer::ICamera::takePicture)
+  //     .def("get_color_rgba",
+  //          [](Renderer::ICamera &cam) {
+  //            return py::array_t<float>(
+  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+  //                cam.getColorRGBA().data());
+  //          })
+  //     .def("get_albedo_rgba",
+  //          [](Renderer::ICamera &cam) {
+  //            return py::array_t<float>(
+  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+  //                cam.getAlbedoRGBA().data());
+  //          })
+  //     .def("get_normal_rgba",
+  //          [](Renderer::ICamera &cam) {
+  //            return py::array_t<float>(
+  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
+  //                cam.getNormalRGBA().data());
+  //          })
+  //     .def("get_depth",
+  //          [](Renderer::ICamera &cam) {
+  //            return py::array_t<float>(
+  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
+  //                cam.getDepth().data());
+  //          })
+  //     .def("get_actor_segmentation",
+  //          [](Renderer::ICamera &cam) {
+  //            return py::array_t<int>(
+  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
+  //                cam.getSegmentation().data());
+  //          })
+  //     .def("get_visual_segmentation", [](Renderer::ICamera &cam) {
+  //       return py::array_t<int>(
+  //           {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
+  //           cam.getObjSegmentation().data());
+  //     });
 
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)
@@ -647,14 +676,51 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            py::return_value_policy::reference)
       .def("find_articulation_link_by_link_id", &SScene::findArticulationLinkById, py::arg("id"),
            py::return_value_policy::reference)
-      .def("add_mounted_camera", &SScene::addMountedCamera, py::arg("name"), py::arg("actor"),
-           py::arg("pose"), py::arg("width"), py::arg("height"), py::arg("fovx"), py::arg("fovy"),
-           py::arg("near"), py::arg("far"), py::return_value_policy::reference)
-      .def("get_mounted_cameras", &SScene::getMountedCameras, py::return_value_policy::reference)
-      .def("get_mounted_actors", &SScene::getMountedActors, py::return_value_policy::reference)
-      .def("remove_mounted_camera", &SScene::removeMountedCamera, py::arg("camera"))
-      .def("find_mounted_camera", &SScene::findMountedCamera, py::arg("name"),
-           py::arg("actor") = nullptr, py::return_value_policy::reference)
+
+      .def("add_camera", &SScene::addCamera, py::arg("name"), py::arg("width"), py::arg("height"),
+           py::arg("fovy"), py::arg("near"), py::arg("far"), py::return_value_policy::reference)
+      .def(
+          "add_mounted_camera",
+          [](SScene &scene, std::string const &name, SActorBase *actor, PxTransform const &pose,
+             uint32_t width, uint32_t height, float fovy, float near, float far) {
+            auto cam = scene.addCamera(name, width, height, fovy, near, far);
+            cam->setParent(actor);
+            cam->setLocalPose(pose);
+            return cam;
+          },
+          py::arg("name"), py::arg("actor"), py::arg("pose"), py::arg("width"), py::arg("height"),
+          py::arg("fovy"), py::arg("near"), py::arg("far"), py::return_value_policy::reference)
+      .def(
+          "add_mounted_camera",
+          [](SScene &scene, std::string const &name, SActorBase *actor, PxTransform const &pose,
+             uint32_t width, uint32_t height, float fovx, float fovy, float near, float far) {
+            spdlog::get("SAPIEN")->warn(
+                "add_mounted_camera with fovx has been deprecated and will be "
+                "removed in the next release.");
+            auto cam = scene.addCamera(name, width, height, fovy, near, far);
+            cam->setParent(actor);
+            cam->setLocalPose(pose);
+            return cam;
+          },
+          py::arg("name"), py::arg("actor"), py::arg("pose"), py::arg("width"), py::arg("height"),
+          py::arg("fovx"), py::arg("fovy"), py::arg("near"), py::arg("far"),
+          py::return_value_policy::reference)
+      .def("get_cameras", &SScene::getCameras, py::return_value_policy::reference)
+      .def(
+          "get_mounted_cameras",
+          [](SScene &scene) {
+            spdlog::get("SAPIEN")->warn(
+                "get_mounted_cameras has been deprecated and will be removed in the next release, "
+                "please use equivalent function get_cameras instead.");
+            return scene.getCameras();
+          },
+          py::return_value_policy::reference)
+      .def("remove_camera", &SScene::removeCamera, py::arg("camera"))
+
+      // .def("remove_mounted_camera", &SScene::removeMountedCamera, py::arg("camera"))
+      // .def("get_mounted_actors", &SScene::getMountedActors, py::return_value_policy::reference)
+      // .def("find_mounted_camera", &SScene::findMountedCamera, py::arg("name"),
+      // py::arg("actor") = nullptr, py::return_value_policy::reference)
 
       .def("step", &SScene::step)
       .def("step_async", &SScene::stepAsync)
@@ -733,6 +799,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"))
       .def("remove_light", &SScene::removeLight, py::arg("light"))
       .def("set_environment_map", &SScene::setEnvironmentMap, py::arg("filename"))
+      .def("set_environment_map_from_files", &SScene::setEnvironmentMapFromFiles, py::arg("px"),
+           py::arg("nx"), py::arg("py"), py::arg("ny"), py::arg("pz"), py::arg("nz"))
 
       // save
       .def("pack",
@@ -1701,91 +1769,95 @@ Args:
                                           &Renderer::SVulkan2Rigidbody::getVisualObjects,
                                           py::return_value_policy::reference);
 
-  PyVulkanCamera
-      .def_property_readonly("render_target_names",
-                             &Renderer::SVulkan2Camera::getRenderTargetNames,
-                             "Names for available render targets to retrieve through "
-                             "get_[float/uint32]_texture or get_dl_tensor")
-      .def(
-          "get_float_texture",
-          [](Renderer::SVulkan2Camera &cam, std::string const &name) {
-            auto [image, sizes] = cam.getFloatTexture(name);
-            if (sizes[2] == 1) {
-              return py::array_t<float>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1])},
-                                        image.data());
-            } else {
-              return py::array_t<float>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
-                                         static_cast<int>(sizes[2])},
-                                        image.data());
-            }
-          },
-          py::arg("texture_name"))
-      .def(
-          "get_uint32_texture",
-          [](Renderer::SVulkan2Camera &cam, std::string const &name) {
-            auto [image, sizes] = cam.getUint32Texture(name);
-            if (sizes[2] == 1) {
-              return py::array_t<uint32_t>(
-                  {static_cast<int>(sizes[0]), static_cast<int>(sizes[1])}, image.data());
-            } else {
-              return py::array_t<uint32_t>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
-                                            static_cast<int>(sizes[2])},
-                                           image.data());
-            }
-          },
-          py::arg("texture_name"))
-#ifdef SAPIEN_DLPACK_INTEROP
-      .def(
-          "get_dl_tensor",
-          [](Renderer::SVulkan2Camera &cam, std::string const &name) {
-            auto [buffer, sizes, format] = cam.getCudaBuffer(name);
-            std::vector<long> dim;
-            for (auto s : sizes) {
-              dim.push_back(s);
-            }
-            DLManagedTensor *tensor = DLTensorFromCudaBuffer(std::move(buffer), dim, format);
-            auto capsule_destructor = [](PyObject *data) {
-              DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
-              if (tensor) {
-                tensor->deleter(const_cast<DLManagedTensor *>(tensor));
-              } else {
-                PyErr_Clear();
-              }
-            };
-            return py::capsule(tensor, "dltensor", capsule_destructor);
-          },
-          "Get raw GPU memory for a render target in the dl format. It can be wrapped into "
-          "PyTorch or Tensorflow using their API",
-          py::arg("texture_name"))
-#endif
-      .def(
-          "get_camera_matrix",
-          [](Renderer::SVulkan2Camera &c) { return mat42array(c.getCameraMatrix()); },
-          "Get intrinsic camera matrix in OpenCV format.")
-      .def(
-          "get_model_matrix",
-          [](Renderer::SVulkan2Camera &c) { return mat42array(c.getModelMatrix()); },
-          "Get OpenGL model matrix (inverse of extrinsic matrix)")
-      .def(
-          "get_projection_matrix",
-          [](Renderer::SVulkan2Camera &c) { return mat42array(c.getProjectionMatrix()); },
-          "Get OpenGL projection matrix")
-      .def("set_orthographic", &Renderer::SVulkan2Camera::setOrthographicParameters,
-           "Set camera into orthographic projection mode", py::arg("near"), py::arg("far"),
-           py::arg("aspect"), py::arg("scale"))
-      .def("set_perspective", &Renderer::SVulkan2Camera::setPerspectiveParameters, py::arg("near"),
-           "Set camera into standard perspective projection mode", py::arg("far"), py::arg("fovy"),
-           py::arg("aspect"))
-      .def("set_full_perspective", &Renderer::SVulkan2Camera::setFullPerspectiveParameters,
-           "Set camera into perspective projection mode with full camera parameters",
-           py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
-           py::arg("cy"), py::arg("width"), py::arg("height"), py::arg("skew"))
-      .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode,
-                             "One of \"perspective\", \"full_perspective\", \"orthographic\".")
-      .def_property_readonly(
-          "_internal_renderer",
-          [](Renderer::SVulkan2Camera &camera) { return camera.getInternalRenderer(); },
-          py::return_value_policy::reference);
+  // PyVulkanCamera
+  //     .def_property_readonly("render_target_names",
+  //                            &Renderer::SVulkan2Camera::getRenderTargetNames,
+  //                            "Names for available render targets to retrieve through "
+  //                            "get_[float/uint32]_texture or get_dl_tensor")
+  //     .def(
+  //         "get_float_texture",
+  //         [](Renderer::SVulkan2Camera &cam, std::string const &name) {
+  //           auto [image, sizes] = cam.getFloatTexture(name);
+  //           if (sizes[2] == 1) {
+  //             return py::array_t<float>({static_cast<int>(sizes[0]),
+  //             static_cast<int>(sizes[1])},
+  //                                       image.data());
+  //           } else {
+  //             return py::array_t<float>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
+  //                                        static_cast<int>(sizes[2])},
+  //                                       image.data());
+  //           }
+  //         },
+  //         py::arg("texture_name"))
+  //     .def(
+  //         "get_uint32_texture",
+  //         [](Renderer::SVulkan2Camera &cam, std::string const &name) {
+  //           auto [image, sizes] = cam.getUint32Texture(name);
+  //           if (sizes[2] == 1) {
+  //             return py::array_t<uint32_t>(
+  //                 {static_cast<int>(sizes[0]), static_cast<int>(sizes[1])}, image.data());
+  //           } else {
+  //             return py::array_t<uint32_t>({static_cast<int>(sizes[0]),
+  //             static_cast<int>(sizes[1]),
+  //                                           static_cast<int>(sizes[2])},
+  //                                          image.data());
+  //           }
+  //         },
+  //         py::arg("texture_name"))
+  //     .def(
+  //         "get_dl_tensor",
+  //         [](Renderer::SVulkan2Camera &cam, std::string const &name) {
+  //           auto [buffer, sizes, format] = cam.getCudaBuffer(name);
+  //           std::vector<long> dim;
+  //           for (auto s : sizes) {
+  //             dim.push_back(s);
+  //           }
+  //           DLManagedTensor *tensor = DLTensorFromCudaBuffer(std::move(buffer), dim, format);
+  //           auto capsule_destructor = [](PyObject *data) {
+  //             DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data,
+  //             "dltensor"); if (tensor) {
+  //               tensor->deleter(const_cast<DLManagedTensor *>(tensor));
+  //             } else {
+  //               PyErr_Clear();
+  //             }
+  //           };
+  //           return py::capsule(tensor, "dltensor", capsule_destructor);
+  //         },
+  //         "Get raw GPU memory for a render target in the dl format. It can be wrapped into "
+  //         "PyTorch or Tensorflow using their API",
+  //         py::arg("texture_name"))
+
+  //     .def(
+  //         "get_camera_matrix",
+  //         [](Renderer::SVulkan2Camera &c) { return mat42array(c.getCameraMatrix()); },
+  //         "Get intrinsic camera matrix in OpenCV format.")
+  //     .def(
+  //         "get_model_matrix",
+  //         [](Renderer::SVulkan2Camera &c) { return mat42array(c.getModelMatrix()); },
+  //         "Get OpenGL model matrix (inverse of extrinsic matrix)")
+  //     .def(
+  //         "get_projection_matrix",
+  //         [](Renderer::SVulkan2Camera &c) { return mat42array(c.getProjectionMatrix()); },
+  //         "Get OpenGL projection matrix")
+
+  //     .def("set_orthographic", &Renderer::SVulkan2Camera::setOrthographicParameters,
+  //          "Set camera into orthographic projection mode", py::arg("near"), py::arg("far"),
+  //          py::arg("aspect"), py::arg("scale"))
+  //     .def("set_perspective", &Renderer::SVulkan2Camera::setPerspectiveParameters,
+  //     py::arg("near"),
+  //          "Set camera into standard perspective projection mode", py::arg("far"),
+  //          py::arg("fovy"), py::arg("aspect"))
+  //     .def("set_full_perspective", &Renderer::SVulkan2Camera::setFullPerspectiveParameters,
+  //          "Set camera into perspective projection mode with full camera parameters",
+  //          py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
+  //          py::arg("cy"), py::arg("width"), py::arg("height"), py::arg("skew"))
+
+  //     .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode,
+  //                            "One of \"perspective\", \"full_perspective\", \"orthographic\".")
+  //     .def_property_readonly(
+  //         "_internal_renderer",
+  //         [](Renderer::SVulkan2Camera &camera) { return camera.getInternalRenderer(); },
+  //         py::return_value_policy::reference);
 
   PyLightEntity.def("set_pose", &SLight::setPose, py::arg("pose"))
       .def_property_readonly("pose", &SLight::getPose)
@@ -1864,71 +1936,74 @@ Args:
       .def("set_fov", &SActiveLight::setFov)
       .def_property_readonly("fov", &SActiveLight::getFov);
 
-  // // Renderer Light (will be deprecated)
-  // PyLight.def("set_pose", &Renderer::ILight::setPose, py::arg("pose"))
-  //     .def_property_readonly("pose", &Renderer::ILight::getPose)
-  //     .def(
-  //         "set_color",
-  //         [](Renderer::ILight &light, py::array_t<float> color) {
-  //           light.setColor({color.at(0), color.at(1), color.at(2)});
-  //         },
-  //         py::arg("color"))
-  //     .def_property_readonly("color",
-  //                            [](Renderer::ILight &light) { return vec32array(light.getColor());
-  //                            })
+  PyCameraEntity.def_property("parent", &SCamera::setParent, &SCamera::getParent)
+      .def("set_parent", &SCamera::setParent, py::arg("parent"), py::arg("keep_pose"))
+      .def("set_local_pose", &SCamera::setLocalPose, py::arg("pose"))
+      .def_property_readonly("local_pose", &SCamera::getLocalPose)
 
-  //     .def_property("shadow", &Renderer::ILight::getShadowEnabled,
-  //                   &Renderer::ILight::setShadowEnabled);
+      .def_property_readonly("width", &SCamera::getWidth)
+      .def_property_readonly("height", &SCamera::getHeight)
 
-  // PyPointLight
-  //     .def(
-  //         "set_position",
-  //         [](Renderer::IPointLight &light, py::array_t<float> position) {
-  //           light.setPosition({position.at(0), position.at(1), position.at(2)});
-  //         },
-  //         py::arg("position"))
-  //     .def_property_readonly(
-  //         "position", [](Renderer::IPointLight &light) { return vec32array(light.getPosition());
-  //         })
-  //     .def("set_shadow_parameters", &Renderer::IPointLight::setShadowParameters, py
-  //     ::arg("near"),
-  //          py::arg("far"));
+      .def_property("near", &SCamera::getNear, &SCamera::setNear)
+      .def_property("far", &SCamera::getFar, &SCamera::setFar)
 
-  // PyDirectionalLight
-  //     .def(
-  //         "set_direction",
-  //         [](Renderer::IDirectionalLight &light, py::array_t<float> direction) {
-  //           light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
-  //         },
-  //         py::arg("direction"))
-  //     .def_property_readonly(
-  //         "direction",
-  //         [](Renderer::IDirectionalLight &light) { return vec32array(light.getDirection()); })
-  //     .def("set_shadow_parameters", &Renderer::IDirectionalLight::setShadowParameters,
-  //          py::arg("half_size"), py ::arg("near"), py::arg("far"));
+      .def_property_readonly("fovx", &SCamera::getFovX)
+      .def_property_readonly("fovy", &SCamera::getFovY)
+      .def("set_fovx", &SCamera::setFovX, py::arg("fov"), py::arg("compute_y") = true)
+      .def("set_fovy", &SCamera::setFovY, py::arg("fov"), py::arg("compute_x") = true)
 
-  // PySpotLight
-  //     .def(
-  //         "set_position",
-  //         [](Renderer::ISpotLight &light, py::array_t<float> position) {
-  //           light.setPosition({position.at(0), position.at(1), position.at(2)});
-  //         },
-  //         py::arg("position"))
-  //     .def_property_readonly(
-  //         "position", [](Renderer::ISpotLight &light) { return vec32array(light.getPosition());
-  //         })
-  //     .def(
-  //         "set_direction",
-  //         [](Renderer::ISpotLight &light, py::array_t<float> direction) {
-  //           light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
-  //         },
-  //         py::arg("direction"))
-  //     .def_property_readonly(
-  //         "direction",
-  //         [](Renderer::ISpotLight &light) { return vec32array(light.getDirection()); })
-  //     .def("set_shadow_parameters", &Renderer::ISpotLight::setShadowParameters, py
-  //     ::arg("near"),
-  //          py::arg("far"));
+      .def_property_readonly("fx", &SCamera::getFocalLengthX)
+      .def_property_readonly("fy", &SCamera::getFocalLengthY)
+      .def("set_focal_lengths", &SCamera::setFocalLengths, py::arg("fx"), py::arg("fy"))
+
+      .def_property_readonly("cx", &SCamera::getPrincipalPointX)
+      .def_property_readonly("cy", &SCamera::getPrincipalPointY)
+      .def("set_principal_point", &SCamera::setPrincipalPoint, py::arg("cx"), py::arg("cy"))
+
+      .def("set_perspective_parameters", &SCamera::setPerspectiveParameters, py::arg("near"),
+           py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"),
+           py::arg("skew"))
+
+      .def_property("skew", &SCamera::getSkew, &SCamera::setSkew)
+
+      .def("take_picture", &SCamera::takePicture)
+      .def("get_float_texture", &getFloatImageFromCamera, py::arg("texture_name"))
+      .def("get_uint32_texture", &getUintImageFromCamera, py::arg("texture_name"))
+
+      .def("get_color_rgba", [](SCamera &c) { return getFloatImageFromCamera(c, "Color"); })
+      .def("get_position_rgba", [](SCamera &c) { return getFloatImageFromCamera(c, "Position"); })
+      .def("get_albedo_rgba", [](SCamera &c) { return getFloatImageFromCamera(c, "Albedo"); })
+      .def("get_normal_rgba", [](SCamera &c) { return getFloatImageFromCamera(c, "Normal"); })
+      .def("get_visual_actor_segmentation",
+           [](SCamera &c) { return getUintImageFromCamera(c, "Segmentation"); })
+
+      .def(
+          "get_dl_tensor",
+          [](SCamera &cam, std::string const &name) {
+            DLManagedTensor *tensor = cam.getRendererCamera()->getDLImage(name);
+            auto capsule_destructor = [](PyObject *data) {
+              DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
+              if (tensor) {
+                tensor->deleter(const_cast<DLManagedTensor *>(tensor));
+              } else {
+                PyErr_Clear();
+              }
+            };
+            return py::capsule(tensor, "dltensor", capsule_destructor);
+          },
+          "Get raw GPU memory for a render target in the dl format. It can be wrapped into "
+          "PyTorch or Tensorflow using their API",
+          py::arg("texture_name"))
+      .def(
+          "get_camera_matrix", [](SCamera &c) { return mat42array(c.getCameraMatrix()); },
+          "Get intrinsic camera matrix in OpenCV format.")
+      .def(
+          "get_model_matrix", [](SCamera &c) { return mat42array(c.getModelMatrix()); },
+          "Get model matrix (inverse of extrinsic matrix) used in rendering (Y up, Z back)")
+      .def(
+          "get_projection_matrix", [](SCamera &c) { return mat42array(c.getProjectionMatrix()); },
+          "Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and [0,1] "
+          "Z)");
 
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
       .def("hide", &Renderer::SVulkan2Window::hide)
@@ -2199,12 +2274,13 @@ Args:
       .def_property_readonly("local_pose", &Renderer::IPxrRigidbody::getInitialPose)
 
       // attribute access for different types
-      .def_property_readonly("scale",
-                             [](Renderer::IPxrRigidbody &body) { return vec32array(body.getScale()); })
+      .def_property_readonly(
+          "scale", [](Renderer::IPxrRigidbody &body) { return vec32array(body.getScale()); })
       .def_property_readonly("radius",
                              [](Renderer::IPxrRigidbody &body) { return body.getScale().y; })
-      .def_property_readonly("half_lengths",
-                             [](Renderer::IPxrRigidbody &body) { return vec32array(body.getScale()); })
+      .def_property_readonly(
+          "half_lengths",
+          [](Renderer::IPxrRigidbody &body) { return vec32array(body.getScale()); })
       .def_property_readonly("half_length",
                              [](Renderer::IPxrRigidbody &body) { return body.getScale().x; });
 

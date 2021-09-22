@@ -23,13 +23,12 @@ def main():
     box.set_pose(sapien.Pose(p=[0, 0, 0.5]))
 
     # Add some lights so that you can observe the scene
-    rscene = scene.get_renderer_scene()
-    rscene.set_ambient_light([0.5, 0.5, 0.5])
-    rscene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
+    scene.set_ambient_light([0.5, 0.5, 0.5])
+    scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
     actor = scene.create_actor_builder().build_kinematic()
     actor.set_pose(sapien.Pose([-3, 0, 0.5]))
-    cam = scene.add_mounted_camera('', actor, sapien.Pose(), 128, 128, 0, 1, 0.01, 10)
+    cam = scene.add_mounted_camera('', actor, sapien.Pose(), 128, 128, 1, 0.01, 10)
 
     scene.update_render()
     cam.take_picture()

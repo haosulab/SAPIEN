@@ -3,10 +3,9 @@
 namespace sapien {
 namespace Renderer {
 
-SVulkan2Camera::SVulkan2Camera(std::string const &name, uint32_t width, uint32_t height,
-                               float fovy, float near, float far, SVulkan2Scene *scene,
-                               std::string const &shaderDir)
-    : mName(name), mWidth(width), mHeight(height), mScene(scene) {
+SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, float near, float far,
+                               SVulkan2Scene *scene, std::string const &shaderDir)
+    : mWidth(width), mHeight(height), mScene(scene) {
   auto context = mScene->getParentRenderer()->mContext;
   auto config = std::make_shared<svulkan2::RendererConfig>();
   config->culling = mScene->getParentRenderer()->mCullMode;
@@ -18,10 +17,25 @@ SVulkan2Camera::SVulkan2Camera(std::string const &name, uint32_t width, uint32_t
   mRenderer->resize(width, height);
 
   mCamera = &mScene->getScene()->addCamera();
-  mCamera->setPerspectiveParameters(near, far, fovy, width / static_cast<float>(height));
+  mCamera->setPerspectiveParameters(near, far, fovy, width, height);
   mCommandBuffer = context->createCommandBuffer();
   mFence = context->getDevice().createFenceUnique({vk::FenceCreateFlagBits::eSignaled});
   mRenderer->setScene(*scene->getScene());
+}
+
+float SVulkan2Camera::getPrincipalPointX() const { return mCamera->getCx(); }
+float SVulkan2Camera::getPrincipalPointY() const { return mCamera->getCy(); }
+float SVulkan2Camera::getFocalX() const { return mCamera->getFx(); }
+float SVulkan2Camera::getFocalY() const { return mCamera->getFy(); }
+float SVulkan2Camera::getFovX() const { return mCamera->getFovx(); }
+float SVulkan2Camera::getFovY() const { return mCamera->getFovy(); }
+float SVulkan2Camera::getNear() const { return mCamera->getNear(); }
+float SVulkan2Camera::getFar() const { return mCamera->getFar(); }
+float SVulkan2Camera::getSkew() const { return mCamera->getSkew(); }
+
+void SVulkan2Camera::setPerspectiveCameraParameters(float near, float far, float fx, float fy,
+                                                    float cx, float cy, float skew) {
+  mCamera->setPerspectiveParameters(near, far, fx, fy, cx, cy, mWidth, mHeight, skew);
 }
 
 void SVulkan2Camera::takePicture() {
@@ -32,38 +46,6 @@ void SVulkan2Camera::takePicture() {
   }
   context->getDevice().resetFences(mFence.get());
   mRenderer->render(*mCamera, {}, {}, {}, mFence.get());
-}
-
-std::vector<float> SVulkan2Camera::getColorRGBA() { return std::get<0>(getFloatTexture("Color")); }
-
-std::vector<float> SVulkan2Camera::getAlbedoRGBA() {
-  return std::get<0>(getFloatTexture("Albedo"));
-}
-
-std::vector<float> SVulkan2Camera::getNormalRGBA() {
-  return std::get<0>(getFloatTexture("Normal"));
-}
-
-std::vector<float> SVulkan2Camera::getDepth() { return std::get<0>(getFloatTexture("GbufferDepth")); }
-
-std::vector<int> SVulkan2Camera::getSegmentation() {
-  auto tex = std::get<0>(getUint32Texture("Segmentation"));
-  std::vector<int> result;
-  result.reserve(tex.size() / 4);
-  for (uint32_t i = 0; i < tex.size() / 4; ++i) {
-    result.push_back(tex[i * 4 + 1]);
-  }
-  return result;
-}
-
-std::vector<int> SVulkan2Camera::getObjSegmentation() {
-  auto tex = std::get<0>(getUint32Texture("Segmentation"));
-  std::vector<int> result;
-  result.reserve(tex.size() / 4);
-  for (uint32_t i = 0; i < tex.size() / 4; ++i) {
-    result.push_back(tex[i * 4]);
-  }
-  return result;
 }
 
 void SVulkan2Camera::waitForFence() {
@@ -78,44 +60,85 @@ std::vector<std::string> SVulkan2Camera::getRenderTargetNames() {
   return mRenderer->getRenderTargetNames();
 }
 
-std::tuple<std::vector<float>, std::array<uint32_t, 3>>
-SVulkan2Camera::getFloatTexture(std::string const &textureName) {
+std::vector<float> SVulkan2Camera::getFloatImage(std::string const &name) {
   waitForFence();
-  return mRenderer->download<float>(textureName);
-}
-std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>
-SVulkan2Camera::getUint32Texture(std::string const &textureName) {
-  waitForFence();
-  return mRenderer->download<uint32_t>(textureName);
-}
-std::tuple<std::vector<uint8_t>, std::array<uint32_t, 3>>
-SVulkan2Camera::getUint8Texture(std::string const &textureName) {
-  waitForFence();
-  return mRenderer->download<uint8_t>(textureName);
+  return std::get<0>(mRenderer->download<float>(name));
 }
 
-#ifdef SAPIEN_DLPACK_INTEROP
-std::tuple<std::shared_ptr<svulkan2::core::CudaBuffer>, std::array<uint32_t, 2>, vk::Format>
-SVulkan2Camera::getCudaBuffer(std::string const &textureName) {
-  // wait for fence is not needed
-  return mRenderer->transferToCuda(textureName);
+std::vector<uint32_t> SVulkan2Camera::getUintImage(std::string const &textureName) {
+  waitForFence();
+  return std::get<0>(mRenderer->download<uint32_t>(textureName));
 }
-#endif
+
+// DLPack deleter
+static void deleter(DLManagedTensor *self) {
+  delete[] self->dl_tensor.shape;
+  delete static_cast<std::shared_ptr<svulkan2::core::CudaBuffer> *>(self->manager_ctx);
+}
+
+DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
+  auto [buffer, sizes, format] = mRenderer->transferToCuda(name);
+
+  long size = sizes[0] * sizes[1];
+  std::vector<long> sizes2 = {sizes[0], sizes[1]};
+
+  uint8_t dtype;
+  switch (format) {
+  case vk::Format::eR32G32B32A32Sfloat:
+    dtype = DLDataTypeCode::kDLFloat;
+    size *= 4;
+    sizes2.push_back(4);
+    break;
+  case vk::Format::eD32Sfloat:
+    dtype = DLDataTypeCode::kDLFloat;
+    break;
+  case vk::Format::eR32G32B32A32Uint:
+    size *= 4;
+    dtype = DLDataTypeCode::kDLUInt;
+    sizes2.push_back(4);
+    break;
+  default:
+    throw std::runtime_error("Failed to get tensor from cuda buffer: unsupported buffer format");
+  }
+
+  assert(static_cast<long>(buffer->getSize()) == size * 4);
+
+  void *pointer = buffer->getCudaPointer();
+
+  DLManagedTensor *tensor = new DLManagedTensor();
+
+  auto container = new std::shared_ptr<svulkan2::core::CudaBuffer>(buffer);
+
+  int64_t *shape = new int64_t[sizes2.size()];
+  for (size_t i = 0; i < sizes2.size(); ++i) {
+    shape[i] = sizes2[i];
+  }
+
+  if (sizes2.size() >= 2) {
+    int64_t t = shape[0];
+    shape[0] = shape[1];
+    shape[1] = t;
+  }
+
+  tensor->dl_tensor.data = pointer;
+  tensor->dl_tensor.device = {DLDeviceType::kDLGPU, buffer->getCudaDeviceId()};
+  tensor->dl_tensor.ndim = static_cast<int>(sizes2.size());
+  tensor->dl_tensor.dtype = {dtype, 32, 1};
+  tensor->dl_tensor.shape = shape;
+  tensor->dl_tensor.strides = nullptr;
+  tensor->dl_tensor.byte_offset = 0;
+
+  tensor->manager_ctx = container;
+  tensor->deleter = deleter;
+
+  return tensor;
+}
 
 glm::mat4 SVulkan2Camera::getModelMatrix() const { return mCamera->computeWorldModelMatrix(); }
 glm::mat4 SVulkan2Camera::getProjectionMatrix() const { return mCamera->getProjectionMatrix(); }
 
 glm::mat4 SVulkan2Camera::getCameraMatrix() const {
   if (mCamera->getCameraType() == svulkan2::scene::Camera::Type::ePerspective) {
-    float fovy = mCamera->getFovy();
-    float f = static_cast<float>(mHeight) / std::tan(fovy / 2) / 2;
-    auto matrix = glm::mat4(1.0);
-    matrix[0][0] = f;
-    matrix[2][0] = static_cast<float>(mWidth) / 2;
-    matrix[1][1] = f;
-    matrix[2][1] = static_cast<float>(mHeight) / 2;
-    return matrix;
-  } else if (mCamera->getCameraType() == svulkan2::scene::Camera::Type::eFullPerspective) {
     auto matrix = glm::mat4(1.0);
     matrix[0][0] = mCamera->getFx();
     matrix[1][1] = mCamera->getFy();
@@ -134,30 +157,15 @@ physx::PxTransform SVulkan2Camera::getPose() const {
   return physx::PxTransform({p.x, p.y, p.z}, physx::PxQuat(q.x, q.y, q.z, q.w));
 }
 
-void SVulkan2Camera::setInitialPose(physx::PxTransform const &pose) {
-  mInitialPose = pose;
-  mCamera->setTransform({.position = {pose.p.x, pose.p.y, pose.p.z},
-                         .rotation = {pose.q.w, pose.q.x, pose.q.y, pose.q.z}});
-}
 void SVulkan2Camera::setPose(physx::PxTransform const &pose) {
-  auto p = pose * mInitialPose;
+  auto p = pose;
   mCamera->setTransform(
       {.position = {p.p.x, p.p.y, p.p.z}, .rotation = {p.q.w, p.q.x, p.q.y, p.q.z}});
 }
 
-void SVulkan2Camera::setPerspectiveParameters(float near, float far, float fovy, float aspect) {
-  mCamera->setPerspectiveParameters(near, far, fovy, aspect);
-}
-
-void SVulkan2Camera::setFullPerspectiveParameters(float near, float far, float fx, float fy,
-                                                  float cx, float cy, float width, float height,
-                                                  float skew) {
-  mCamera->setFullPerspectiveParameters(near, far, fx, fy, cx, cy, width, height, skew);
-}
-
-void SVulkan2Camera::setOrthographicParameters(float near, float far, float aspect,
-                                               float scaling) {
-  mCamera->setOrthographicParameters(near, far, aspect, scaling);
+void SVulkan2Camera::setOrthographicParameters(float near, float far, float scaling, float width,
+                                               float height) {
+  mCamera->setOrthographicParameters(near, far, scaling, mWidth, mHeight);
 }
 
 std::string SVulkan2Camera::getMode() const {
@@ -166,8 +174,6 @@ std::string SVulkan2Camera::getMode() const {
     return "unknown";
   case svulkan2::scene::Camera::Type::ePerspective:
     return "perspective";
-  case svulkan2::scene::Camera::Type::eFullPerspective:
-    return "full_perspective";
   case svulkan2::scene::Camera::Type::eOrthographic:
     return "orthographic";
   case svulkan2::scene::Camera::Type::eMatrix:

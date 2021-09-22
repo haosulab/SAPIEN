@@ -17,6 +17,7 @@ __all__ = [
     "ArticulationBuilder",
     "ArticulationDrivable",
     "BoxGeometry",
+    "CameraEntity",
     "CapsuleGeometry",
     "CollisionGeometry",
     "CollisionShape",
@@ -28,9 +29,7 @@ __all__ = [
     "Drive",
     "Engine",
     "Entity",
-    "ICamera",
     "IPxrRenderer",
-    "ISensor",
     "Joint",
     "JointBase",
     "JointRecord",
@@ -41,7 +40,6 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
-    "KuafuCamera",
     "KuafuConfig",
     "KuafuRenderer",
     "LightEntity",
@@ -69,7 +67,6 @@ __all__ = [
     "Trigger",
     "URDFLoader",
     "VisualRecord",
-    "VulkanCamera",
     "VulkanRenderer",
     "VulkanRigidbody",
     "VulkanScene",
@@ -315,6 +312,116 @@ class Articulation(ArticulationDrivable, ArticulationBase, Entity):
     def unpack(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
     pass
 class CollisionGeometry():
+    pass
+class CameraEntity(Entity):
+    def get_albedo_rgba(self) -> numpy.ndarray[numpy.float32]: ...
+    def get_camera_matrix(self) -> numpy.ndarray[numpy.float32]: 
+        """
+        Get intrinsic camera matrix in OpenCV format.
+        """
+    def get_color_rgba(self) -> numpy.ndarray[numpy.float32]: ...
+    def get_dl_tensor(self, texture_name: str) -> capsule: 
+        """
+        Get raw GPU memory for a render target in the dl format. It can be wrapped into PyTorch or Tensorflow using their API
+        """
+    def get_float_texture(self, texture_name: str) -> numpy.ndarray[numpy.float32]: ...
+    def get_model_matrix(self) -> numpy.ndarray[numpy.float32]: 
+        """
+        Get model matrix (inverse of extrinsic matrix) used in rendering (Y up, Z back)
+        """
+    def get_normal_rgba(self) -> numpy.ndarray[numpy.float32]: ...
+    def get_position_rgba(self) -> numpy.ndarray[numpy.float32]: ...
+    def get_projection_matrix(self) -> numpy.ndarray[numpy.float32]: 
+        """
+        Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and [0,1] Z)
+        """
+    def get_uint32_texture(self, texture_name: str) -> numpy.ndarray[numpy.uint32]: ...
+    def get_visual_actor_segmentation(self) -> numpy.ndarray[numpy.uint32]: ...
+    def set_focal_lengths(self, fx: float, fy: float) -> None: ...
+    def set_fovx(self, fov: float, compute_y: bool = True) -> None: ...
+    def set_fovy(self, fov: float, compute_x: bool = True) -> None: ...
+    def set_local_pose(self, pose: Pose) -> None: ...
+    def set_parent(self, parent: ActorBase, keep_pose: bool) -> None: ...
+    def set_perspective_parameters(self, near: float, far: float, fx: float, fy: float, cx: float, cy: float, skew: float) -> None: ...
+    def set_principal_point(self, cx: float, cy: float) -> None: ...
+    def take_picture(self) -> None: ...
+    @property
+    def cx(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def cy(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def far(self) -> float:
+        """
+        :type: float
+        """
+    @far.setter
+    def far(self, arg1: float) -> None:
+        pass
+    @property
+    def fovx(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def fovy(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def fx(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def fy(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def height(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def local_pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def near(self) -> float:
+        """
+        :type: float
+        """
+    @near.setter
+    def near(self, arg1: float) -> None:
+        pass
+    @property
+    def parent(self) -> None:
+        """
+        :type: None
+        """
+    @parent.setter
+    def parent(self) -> None:
+        pass
+    @property
+    def skew(self) -> float:
+        """
+        :type: float
+        """
+    @skew.setter
+    def skew(self, arg1: float) -> None:
+        pass
+    @property
+    def width(self) -> int:
+        """
+        :type: int
+        """
     pass
 class CapsuleGeometry(CollisionGeometry):
     @property
@@ -567,29 +674,9 @@ class ActiveLightEntity(LightEntity, Entity):
         :type: numpy.ndarray[numpy.float32]
         """
     pass
-class ISensor():
-    def get_pose(self) -> Pose: ...
-    def set_initial_pose(self, pose: Pose) -> None: ...
-    def set_pose(self, pose: Pose) -> None: ...
-    pass
 class IPxrRenderer():
     def create_material(self) -> RenderMaterial: ...
     def create_texture_from_file(self, filename: str, mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat') -> None: ...
-    pass
-class ICamera(ISensor):
-    def get_actor_segmentation(self) -> numpy.ndarray[numpy.int32]: ...
-    def get_albedo_rgba(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_color_rgba(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_depth(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_far(self) -> float: ...
-    def get_fovy(self) -> float: ...
-    def get_height(self) -> int: ...
-    def get_name(self) -> str: ...
-    def get_near(self) -> float: ...
-    def get_normal_rgba(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_visual_segmentation(self) -> numpy.ndarray[numpy.int32]: ...
-    def get_width(self) -> int: ...
-    def take_picture(self) -> None: ...
     pass
 class JointBase():
     def __repr__ (self) -> str: ...
@@ -707,12 +794,6 @@ class KinematicJointPrismatic(KinematicJointSingleDof, KinematicJoint, JointBase
 class LinkBase(ActorDynamicBase, ActorBase, Entity):
     def get_articulation(self) -> ArticulationBase: ...
     def get_index(self) -> int: ...
-    pass
-class KuafuCamera(ICamera, ISensor):
-    def set_full_perspective(self, fx: float, fy: float, cx: float, cy: float, width: float, height: float, skew: float) -> None: 
-        """
-        Set camera into perspective projection mode with full camera parameters
-        """
     pass
 class KuafuConfig():
     def __init__(self) -> None: ...
@@ -1333,9 +1414,13 @@ class RenderTexture():
     pass
 class Scene():
     def add_active_light(self, pose: Pose, color: numpy.ndarray[numpy.float32], fov: float, tex_path: str) -> ActiveLightEntity: ...
+    def add_camera(self, name: str, width: int, height: int, fovy: float, near: float, far: float) -> CameraEntity: ...
     def add_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0) -> DirectionalLightEntity: ...
     def add_ground(self, altitude: float, render: bool = True, material: PhysicalMaterial = None, render_material: RenderMaterial = None) -> ActorStatic: ...
-    def add_mounted_camera(self, name: str, actor: ActorBase, pose: Pose, width: int, height: int, fovx: float, fovy: float, near: float, far: float) -> ICamera: ...
+    @typing.overload
+    def add_mounted_camera(self, name: str, actor: ActorBase, pose: Pose, width: int, height: int, fovx: float, fovy: float, near: float, far: float) -> CameraEntity: ...
+    @typing.overload
+    def add_mounted_camera(self, name: str, actor: ActorBase, pose: Pose, width: int, height: int, fovy: float, near: float, far: float) -> CameraEntity: ...
     def add_point_light(self, position: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, near: float = 0.1, far: float = 10) -> PointLightEntity: ...
     def add_spot_light(self, position: numpy.ndarray[numpy.float32], direction: numpy.ndarray[numpy.float32], inner_fov: float, outer_fov: float, color: numpy.ndarray[numpy.float32], shadow: bool = False, near: float = 0.10000000149011612, far: float = 10.0) -> SpotLightEntity: ...
     def create_actor_builder(self) -> ActorBuilder: ...
@@ -1345,25 +1430,25 @@ class Scene():
     def create_urdf_loader(self) -> URDFLoader: ...
     def find_actor_by_id(self, id: int) -> ActorBase: ...
     def find_articulation_link_by_link_id(self, id: int) -> LinkBase: ...
-    def find_mounted_camera(self, name: str, actor: ActorBase = None) -> ICamera: ...
     def generate_unique_render_id(self) -> int: ...
     def get_all_actors(self) -> typing.List[ActorBase]: ...
     def get_all_articulations(self) -> typing.List[ArticulationBase]: ...
     def get_all_lights(self) -> typing.List[LightEntity]: ...
+    def get_cameras(self) -> typing.List[CameraEntity]: ...
     def get_contacts(self) -> typing.List[Contact]: ...
-    def get_mounted_actors(self) -> typing.List[ActorBase]: ...
-    def get_mounted_cameras(self) -> typing.List[ICamera]: ...
+    def get_mounted_cameras(self) -> typing.List[CameraEntity]: ...
     def get_renderer_scene(self) -> RenderScene: ...
     def get_timestep(self) -> float: ...
     def pack(self) -> typing.Dict[str, typing.Dict[int, typing.List[float]]]: ...
     def remove_actor(self, actor: ActorBase) -> None: ...
     def remove_articulation(self, articulation: Articulation) -> None: ...
+    def remove_camera(self, camera: CameraEntity) -> None: ...
     def remove_drive(self, drive: Constraint) -> None: ...
     def remove_kinematic_articulation(self, kinematic_articulation: KinematicArticulation) -> None: ...
     def remove_light(self, light: LightEntity) -> None: ...
-    def remove_mounted_camera(self, camera: ICamera) -> None: ...
     def set_ambient_light(self, color: numpy.ndarray[numpy.float32]) -> None: ...
     def set_environment_map(self, filename: str) -> None: ...
+    def set_environment_map_from_files(self, px: str, nx: str, py: str, ny: str, pz: str, nz: str) -> None: ...
     def set_timestep(self, second: float) -> None: ...
     def step(self) -> None: ...
     def step_async(self) -> None: ...
@@ -1739,57 +1824,6 @@ class VisualRecord():
     def type(self) -> str:
         """
         :type: str
-        """
-    pass
-class VulkanCamera(ICamera, ISensor):
-    def get_camera_matrix(self) -> numpy.ndarray[numpy.float32]: 
-        """
-        Get intrinsic camera matrix in OpenCV format.
-        """
-    def get_dl_tensor(self, texture_name: str) -> capsule: 
-        """
-        Get raw GPU memory for a render target in the dl format. It can be wrapped into PyTorch or Tensorflow using their API
-        """
-    def get_float_texture(self, texture_name: str) -> numpy.ndarray[numpy.float32]: ...
-    def get_model_matrix(self) -> numpy.ndarray[numpy.float32]: 
-        """
-        Get OpenGL model matrix (inverse of extrinsic matrix)
-        """
-    def get_projection_matrix(self) -> numpy.ndarray[numpy.float32]: 
-        """
-        Get OpenGL projection matrix
-        """
-    def get_uint32_texture(self, texture_name: str) -> numpy.ndarray[numpy.uint32]: ...
-    def set_full_perspective(self, near: float, far: float, fx: float, fy: float, cx: float, cy: float, width: float, height: float, skew: float) -> None: 
-        """
-        Set camera into perspective projection mode with full camera parameters
-        """
-    def set_orthographic(self, near: float, far: float, aspect: float, scale: float) -> None: 
-        """
-        Set camera into orthographic projection mode
-        """
-    def set_perspective(self, near: float, far: float, fovy: float, aspect: float) -> None: 
-        """
-        Set camera into standard perspective projection mode
-        """
-    @property
-    def _internal_renderer(self) -> renderer.Renderer:
-        """
-        :type: renderer.Renderer
-        """
-    @property
-    def mode(self) -> str:
-        """
-        One of "perspective", "full_perspective", "orthographic".
-
-        :type: str
-        """
-    @property
-    def render_target_names(self) -> typing.List[str]:
-        """
-        Names for available render targets to retrieve through get_[float/uint32]_texture or get_dl_tensor
-
-        :type: typing.List[str]
         """
     pass
 class VulkanRenderer(IPxrRenderer):

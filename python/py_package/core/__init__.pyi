@@ -11,6 +11,7 @@ from sapien.core.pysapien import ArticulationBase
 from sapien.core.pysapien import ArticulationBuilder
 from sapien.core.pysapien import ArticulationDrivable
 from sapien.core.pysapien import BoxGeometry
+from sapien.core.pysapien import CameraEntity
 from sapien.core.pysapien import CapsuleGeometry
 from sapien.core.pysapien import CollisionGeometry
 from sapien.core.pysapien import CollisionShape
@@ -22,9 +23,7 @@ from sapien.core.pysapien import DirectionalLightEntity
 from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
 from sapien.core.pysapien import Entity
-from sapien.core.pysapien import ICamera
 from sapien.core.pysapien import IPxrRenderer
-from sapien.core.pysapien import ISensor
 from sapien.core.pysapien import Joint
 from sapien.core.pysapien import JointBase
 from sapien.core.pysapien import JointRecord
@@ -35,7 +34,6 @@ from sapien.core.pysapien import KinematicJointPrismatic
 from sapien.core.pysapien import KinematicJointRevolute
 from sapien.core.pysapien import KinematicJointSingleDof
 from sapien.core.pysapien import KinematicLink
-from sapien.core.pysapien import KuafuCamera
 from sapien.core.pysapien import KuafuConfig
 from sapien.core.pysapien import KuafuRenderer
 from sapien.core.pysapien import LightEntity
@@ -63,7 +61,6 @@ from sapien.core.pysapien import Subscription
 from sapien.core.pysapien import Trigger
 from sapien.core.pysapien import URDFLoader
 from sapien.core.pysapien import VisualRecord
-from sapien.core.pysapien import VulkanCamera
 from sapien.core.pysapien import VulkanRenderer
 from sapien.core.pysapien import VulkanRigidbody
 from sapien.core.pysapien import VulkanScene
@@ -85,6 +82,7 @@ __all__ = [
     "ArticulationBuilder",
     "ArticulationDrivable",
     "BoxGeometry",
+    "CameraEntity",
     "CapsuleGeometry",
     "CollisionGeometry",
     "CollisionShape",
@@ -96,9 +94,7 @@ __all__ = [
     "Drive",
     "Engine",
     "Entity",
-    "ICamera",
     "IPxrRenderer",
-    "ISensor",
     "Joint",
     "JointBase",
     "JointRecord",
@@ -109,7 +105,6 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
-    "KuafuCamera",
     "KuafuConfig",
     "KuafuRenderer",
     "LightEntity",
@@ -137,7 +132,6 @@ __all__ = [
     "Trigger",
     "URDFLoader",
     "VisualRecord",
-    "VulkanCamera",
     "VulkanRenderer",
     "VulkanRigidbody",
     "VulkanScene",

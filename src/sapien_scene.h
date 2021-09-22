@@ -24,6 +24,7 @@
 #include "event_system/event_system.h"
 #include "id_generator.h"
 #include "renderer/render_interface.h"
+#include "sapien_camera.h"
 #include "sapien_light.h"
 #include "sapien_material.h"
 #include "sapien_scene_config.h"
@@ -47,7 +48,6 @@ struct SContact;
 
 namespace Renderer {
 class IPxrScene;
-class ICamera;
 } // namespace Renderer
 
 namespace URDF {
@@ -200,13 +200,14 @@ private:
    ***********************************************/
 private:
 public:
-  Renderer::ICamera *addMountedCamera(std::string const &name, SActorBase *actor,
-                                      PxTransform const &pose, uint32_t width, uint32_t height,
-                                      float fovx, float fovy, float near = 0.1, float far = 100);
-  void removeMountedCamera(Renderer::ICamera *cam);
-  Renderer::ICamera *findMountedCamera(std::string const &name, SActorBase const *actor = nullptr);
-  std::vector<Renderer::ICamera *> getMountedCameras();
-  std::vector<SActorBase *> getMountedActors();
+  SCamera *addCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
+                     float near = 0.1, float far = 100);
+  void removeCamera(SCamera *cam);
+
+  // SCamera *findMountedCamera(std::string const &name, SActorBase const *actor = nullptr);
+
+  std::vector<SCamera *> getCameras();
+  // std::vector<SActorBase *> getMountedActors();
 
   std::vector<SActorBase *> getAllActors() const;
   std::vector<SArticulationBase *> getAllArticulations() const;
@@ -219,9 +220,6 @@ public:
   SDirectionalLight *addDirectionalLight(PxVec3 const &direction, PxVec3 const &color,
                                          bool enableShadow, PxVec3 const &position,
                                          float shadowScale, float shadowNear, float shadowFar);
-  // SSpotLight *addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fov,
-  //                          PxVec3 const &color, bool enableShadow, float shadowNear,
-  //                          float shadowFar);
   SSpotLight *addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fovInner,
                            float fovOuter, PxVec3 const &color, bool enableShadow,
                            float shadowNear, float shadowFar);
@@ -229,6 +227,8 @@ public:
                                std::string_view texPath);
 
   void setEnvironmentMap(std::string_view filename);
+  void setEnvironmentMapFromFiles(std::string_view px, std::string_view nx, std::string_view py,
+                                  std::string_view ny, std::string_view pz, std::string_view nz);
 
   void removeLight(SLight *light);
 
@@ -247,13 +247,9 @@ public:
   std::map<physx_id_t, std::string> findRenderId2VisualName() const;
 
 private:
-  void removeMountedCameraByMount(SActorBase *actor);
+  void removeCameraByParent(SActorBase *actor);
 
-  struct MountedCamera {
-    SActorBase *actor;
-    Renderer::ICamera *camera;
-  };
-  std::vector<MountedCamera> mCameras;
+  std::vector<std::unique_ptr<SCamera>> mCameras;
 
   /************************************************
    * Contact

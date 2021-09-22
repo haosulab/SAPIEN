@@ -6,6 +6,30 @@ collaborative effort between researchers at UCSD, Stanford and SFU. The dataset
 is a continuation of ShapeNet and PartNet.
 
 ## Change Log
+
+### 1 to 2 migration guide
+- replace `scene.renderer_scene.add_xxx_light` with `scene.add_xxx_light`
+- replace `scene.remove_mounted_camera` with `scene.remove_camera`
+- optionally, remove `fovx` from `scene.add_mounted_camera`.
+
+### 2.0
+- Refactor light system
+  - Remove light functions on scene.renderer_scene
+- Refactor camera system
+  - Cameras no longer require mounts
+  - Camera can change its mount and mounted pose by `camera.set_parent` and
+    `camera.set_local_pose`.
+  - When camera is not mounted, setting local pose is setting its global pose.
+  - Add functions `scene.add_camera` and `scene.remove_camera`
+  - `add_mounted_camera` can be replaced with `add_camera` followed by
+    `camera.set_parent` and `camera.set_local_pose`. `add_mounted_camera` is
+    still provided but fovx should not longer be provided.
+  - Remove functions related to mount, including `find_camera_by_mount`.
+  - Cameras now support full camera parameters through `camera.near`,
+    `camera.far`, `camera.set_fovx`, `camera.set_fovy`,
+    `camera.set_focal_lengths`, `camera.set_principal_point`, `camera.skew`, and
+    the all-in-one method `camera.set_perspective_parameters`.
+
 ### 1.2
 - Shader change: 4th component in default camera shader now gives the 0-1 depth value.
 - Add "critical" and "off" log levels.

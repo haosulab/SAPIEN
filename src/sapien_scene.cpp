@@ -43,6 +43,8 @@ SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig cons
 
 SScene::~SScene() {
   mDefaultMaterial.reset();
+  mCameras.clear();
+
   for (auto &actor : mActors) {
     actor->getPxActor()->release();
   }
@@ -228,7 +230,7 @@ void SScene::removeActor(SActorBase *actor) {
   }
 
   // remove camera
-  removeMountedCameraByMount(actor);
+  removeCameraByParent(actor);
 
   // remove render bodies
   for (auto body : actor->getRenderBodies()) {
@@ -265,7 +267,7 @@ void SScene::removeArticulation(SArticulation *articulation) {
     }
 
     // remove camera
-    removeMountedCameraByMount(link);
+    removeCameraByParent(link);
 
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
@@ -307,7 +309,7 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
     }
 
     // remove camera
-    removeMountedCameraByMount(link);
+    removeCameraByParent(link);
 
     // remove render bodies
     for (auto body : link->getRenderBodies()) {
@@ -326,10 +328,6 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
   }
 
   articulation->markDestroyed();
-  // mKinematicArticulations.erase(
-  //     std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
-  //                    [articulation](auto &a) { return a.get() == articulation; }),
-  //     mKinematicArticulations.end());
 }
 
 void SScene::removeDrive(SDrive *drive) {
@@ -378,86 +376,34 @@ SLinkBase *SScene::findArticulationLinkById(physx_id_t id) const {
   return it->second;
 }
 
-std::vector<Renderer::ICamera *> SScene::getMountedCameras() {
-  std::vector<Renderer::ICamera *> cameras;
+std::vector<SCamera *> SScene::getCameras() {
+  std::vector<SCamera *> cameras;
   cameras.reserve(mCameras.size());
-  for (auto &mCamera : mCameras) {
-    cameras.push_back(mCamera.camera);
+  for (auto &cam : mCameras) {
+    cameras.push_back(cam.get());
   }
   return cameras;
 }
 
-std::vector<SActorBase *> SScene::getMountedActors() {
-  std::vector<SActorBase *> actors;
-  actors.reserve(mCameras.size());
-  for (auto &mCamera : mCameras) {
-    actors.push_back(mCamera.actor);
-  }
-  return actors;
-}
-Renderer::ICamera *SScene::addMountedCamera(std::string const &name, SActorBase *actor,
-                                            PxTransform const &pose, uint32_t width,
-                                            uint32_t height, float fovx, float fovy, float near,
-                                            float far) {
+SCamera *SScene::addCamera(std::string const &name, uint32_t width, uint32_t height, float fovy,
+                           float near, float far) {
   if (!mRendererScene) {
     spdlog::get("SAPIEN")->error("Failed to add camera: renderer is not added to simulation.");
     return nullptr;
   }
-  auto cam = mRendererScene->addCamera(name, width, height, fovx, fovy, near, far);
-  cam->setInitialPose(pose * PxTransform({0, 0, 0}, {-0.5, 0.5, 0.5, -0.5}));
-  mCameras.push_back({actor, cam});
-  return cam;
+  auto cam = std::make_unique<SCamera>(this, width, height);
+  cam->setFovY(fovy, true);
+  cam->setNear(near);
+  cam->setFar(far);
+  mCameras.push_back(std::move(cam));
+  return mCameras.back().get();
 }
 
-void SScene::removeMountedCamera(Renderer::ICamera *cam) {
-  mRendererScene->removeCamera(cam);
+void SScene::removeCamera(SCamera *cam) {
   mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
-                                [cam](MountedCamera &mc) { return mc.camera == cam; }),
+                                [cam](std::unique_ptr<SCamera> &mc) { return mc.get() == cam; }),
                  mCameras.end());
 }
-
-Renderer::ICamera *SScene::findMountedCamera(std::string const &name, SActorBase const *actor) {
-  auto it = std::find_if(mCameras.begin(), mCameras.end(), [name, actor](MountedCamera &cam) {
-    return (actor == nullptr || cam.actor == actor) && cam.camera->getName() == name;
-  });
-  if (it != mCameras.end()) {
-    return it->camera;
-  } else {
-    return nullptr;
-  }
-}
-
-// void SScene::setShadowLight(PxVec3 const &direction, PxVec3 const &color) {
-//   if (!mRendererScene) {
-//     spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
-//     return;
-//   }
-//   mRendererScene->setShadowLight({direction.x, direction.y, direction.z},
-//                                  {color.x, color.y, color.z});
-// }
-// void SScene::addPointLight(PxVec3 const &position, PxVec3 const &color) {
-//   if (!mRendererScene) {
-//     spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
-//     return;
-//   }
-//   mRendererScene->addPointLight({position.x, position.y, position.z}, {color.x, color.y,
-//   color.z});
-// }
-// void SScene::setAmbientLight(PxVec3 const &color) {
-//   if (!mRendererScene) {
-//     spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
-//     return;
-//   }
-//   mRendererScene->setAmbientLight({color.x, color.y, color.z});
-// }
-// void SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color) {
-//   if (!mRendererScene) {
-//     spdlog::get("SAPIEN")->error("Failed to add light: renderer is not added to simulation.");
-//     return;
-//   }
-//   mRendererScene->addDirectionalLight({direction.x, direction.y, direction.z},
-//                                       {color.x, color.y, color.z});
-// }
 
 void SScene::step() {
   EASY_BLOCK("Pre-step processing", profiler::colors::Blue);
@@ -557,7 +503,7 @@ void SScene::updateRender() {
   }
 
   for (auto &cam : mCameras) {
-    cam.camera->setPose(cam.actor->getPxActor()->getGlobalPose());
+    cam->update();
   }
 
   getRendererScene()->updateRender();
@@ -597,17 +543,6 @@ std::vector<SContact *> SScene::getContacts() const {
     contacts.push_back(it.second.get());
   }
   return contacts;
-}
-
-void SScene::removeMountedCameraByMount(SActorBase *actor) {
-  for (auto &cam : mCameras) {
-    if (cam.actor == actor) {
-      mRendererScene->removeCamera(cam.camera);
-    }
-  }
-  mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
-                                [actor](MountedCamera &mc) { return mc.actor == actor; }),
-                 mCameras.end());
 }
 
 std::vector<SActorBase *> SScene::getAllActors() const {
@@ -773,6 +708,19 @@ void SScene::removeLight(SLight *light) {
 
 void SScene::setEnvironmentMap(std::string_view filename) {
   mRendererScene->setEnvironmentMap(filename);
+}
+
+void SScene::setEnvironmentMapFromFiles(std::string_view px, std::string_view nx,
+                                        std::string_view py, std::string_view ny,
+                                        std::string_view pz, std::string_view nz) {
+  mRendererScene->setEnvironmentMap({px, nx, py, ny, pz, nz});
+}
+
+void SScene::removeCameraByParent(SActorBase *actor) {
+  mCameras.erase(
+      std::remove_if(mCameras.begin(), mCameras.end(),
+                     [actor](std::unique_ptr<SCamera> &mc) { return mc->getParent() == actor; }),
+      mCameras.end());
 }
 
 }; // namespace sapien

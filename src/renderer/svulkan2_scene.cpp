@@ -241,16 +241,10 @@ void SVulkan2Scene::removeRigidbody(IPxrRigidbody *body) {
   }
 }
 
-ICamera *SVulkan2Scene::addCamera(std::string const &name, uint32_t width, uint32_t height,
-                                  float fovx, float fovy, float near, float far,
-                                  std::string const &shaderDir) {
-  if (fovx != 0) {
-    spdlog::get("SAPIEN")->warn(
-        "Current camera implementation does not support non-square"
-        "pixels, and fovy will be used. Set fovx to 0 to suppress this warning");
-  }
+ICamera *SVulkan2Scene::addCamera(uint32_t width, uint32_t height, float fovy, float near,
+                                  float far, std::string const &shaderDir) {
   std::string shader = shaderDir.length() ? shaderDir : gDefaultCameraShaderDirectory;
-  auto cam = std::make_unique<SVulkan2Camera>(name, width, height, fovy, near, far, this, shader);
+  auto cam = std::make_unique<SVulkan2Camera>(width, height, fovy, near, far, this, shader);
   mCameras.push_back(std::move(cam));
   return mCameras.back().get();
 }
@@ -279,6 +273,20 @@ void SVulkan2Scene::updateRender() { mScene->updateModelMatrices(); }
 void SVulkan2Scene::setEnvironmentMap(std::string_view path) {
   auto tex =
       mParentRenderer->mContext->getResourceManager()->CreateCubemapFromKTX(std::string(path), 5);
+  mScene->setEnvironmentMap(tex);
+}
+
+void SVulkan2Scene::setEnvironmentMap(std::array<std::string_view, 6> paths) {
+  auto tex = mParentRenderer->mContext->getResourceManager()->CreateCubemapFromFiles(
+      {
+          std::string(paths[0]),
+          std::string(paths[1]),
+          std::string(paths[2]),
+          std::string(paths[3]),
+          std::string(paths[4]),
+          std::string(paths[5]),
+      },
+      5);
   mScene->setEnvironmentMap(tex);
 }
 

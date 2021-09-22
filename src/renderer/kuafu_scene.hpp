@@ -21,13 +21,12 @@ public:
   KCamera() = delete;
   KCamera(std::string name, int width, int height)
       : kuafu::Camera(width, height), mName(std::move(name)) {}
-  [[nodiscard]] const std::string& getName() const { return mName; }
+  [[nodiscard]] const std::string &getName() const { return mName; }
 };
 
 class KuafuCamera : public ICamera {
   friend class KuafuScene;
 
-  physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
   KuafuScene *pParentScene = nullptr;
   std::shared_ptr<KCamera> pKCamera;
 
@@ -36,58 +35,46 @@ class KuafuCamera : public ICamera {
 public:
   // ICamera
 
-  KuafuCamera(std::string const& name, int width, int height,
-              float fovy, KuafuScene *scene) {
+  KuafuCamera(int width, int height, float fovy, KuafuScene *scene) {
     pParentScene = scene;
-    pKCamera = std::make_shared<KCamera>(name, width, height);
+    pKCamera = std::make_shared<KCamera>("", width, height);
     pKCamera->reset();
     pKCamera->setSize(width, height);
     pKCamera->setFov(glm::degrees(fovy));
   }
 
-  [[nodiscard]] inline const std::string &getName() const override { return pKCamera->getName(); };
-  [[nodiscard]] inline uint32_t getWidth() const override { return pKCamera->getWidth(); };
-  [[nodiscard]] inline uint32_t getHeight() const override { return pKCamera->getHeight(); };
-  [[nodiscard]] inline float getFovy() const override { return glm::radians(pKCamera->getFov()); };
-  [[nodiscard]] inline float getNear() const override { return 0.1; };
-  [[nodiscard]] inline float getFar() const override { return 100.0; };
+  inline uint32_t getWidth() const override { return pKCamera->getWidth(); }
+  inline uint32_t getHeight() const override { return pKCamera->getHeight(); }
+
+  [[nodiscard]] virtual float getPrincipalPointX() const override;
+  [[nodiscard]] virtual float getPrincipalPointY() const override;
+  [[nodiscard]] virtual float getFocalX() const override;
+  [[nodiscard]] virtual float getFocalY() const override;
+  [[nodiscard]] virtual float getFovX() const override;
+  [[nodiscard]] virtual float getFovY() const override;
+  [[nodiscard]] virtual float getNear() const override;
+  [[nodiscard]] virtual float getFar() const override;
+  [[nodiscard]] virtual float getSkew() const override;
+
+  void setPerspectiveCameraParameters(float near, float far, float fx, float fy, float cx,
+                                      float cy, float skew) override;
 
   void takePicture() override;
-  std::vector<float> getColorRGBA() override;
-  inline std::vector<float> getAlbedoRGBA() override {
-    spdlog::get("SAPIEN")->warn("KF: getAlbedoRGBA not implemented yet");
-    return {};
-  };
-  inline std::vector<float> getNormalRGBA() override {
-    spdlog::get("SAPIEN")->warn("KF: getNormalRGBA not implemented yet");
-    return {};
-  };
-  inline std::vector<float> getDepth() override {
-    spdlog::get("SAPIEN")->warn("KF: getDepth not implemented yet");
-    return {};
-  };
-  inline std::vector<int> getSegmentation() override {
-    spdlog::get("SAPIEN")->warn("KF: getSegmentation not implemented yet");
-    return {};
-  };
-  inline std::vector<int> getObjSegmentation() override {
-    spdlog::get("SAPIEN")->warn("KF: getObjSegmentation not implemented yet");
-    return {};
-  };
+
+  std::vector<float> getFloatImage(std::string const &name) override;
+  std::vector<uint32_t> getUintImage(std::string const &name) override;
 
   // ISensor
 
-  void setInitialPose(physx::PxTransform const &pose) override;
   [[nodiscard]] physx::PxTransform getPose() const override;
   void setPose(physx::PxTransform const &pose) override;
   IPxrScene *getScene() override;
 
-//  virtual ~ISensor() = default;
+  //  virtual ~ISensor() = default;
 
   // Non-override
-  inline void setFullPerspective(
-      float fx, float fy, float cx, float cy,
-      float width, float height, float skew) {
+  inline void setFullPerspective(float fx, float fy, float cx, float cy, float width, float height,
+                                 float skew) {
     pKCamera->setFullPerspective(fx, fy, cx, cy, width, height, skew);
   }
 };
@@ -105,19 +92,22 @@ class KuafuRigidBody : public IPxrRigidbody {
 
 public:
   KuafuRigidBody(KuafuScene *scene, std::vector<size_t> indices,
-                 const physx::PxVec3& scale = {1.0, 1.0, 1.0});
+                 const physx::PxVec3 &scale = {1.0, 1.0, 1.0});
   KuafuRigidBody(KuafuRigidBody const &other) = delete;
   KuafuRigidBody &operator=(KuafuRigidBody const &other) = delete;
 
   inline void setName(std::string const &name) override { mName = name; };
   [[nodiscard]] inline std::string getName() const override { return mName; };
-  [[maybe_unused]] [[nodiscard]] inline auto getKGeometryInstanceIndices() const { return mKGeometryInstanceIndices; };
+  [[maybe_unused]] [[nodiscard]] inline auto getKGeometryInstanceIndices() const {
+    return mKGeometryInstanceIndices;
+  };
 
-  inline void setUniqueId(uint32_t uniqueId) override { /* TODO:kuafu_urgent */ };
+  inline void setUniqueId(uint32_t uniqueId) override{/* TODO:kuafu_urgent */};
   [[nodiscard]] inline uint32_t getUniqueId() const override { return mUniqueId; };
-  inline void setSegmentationId(uint32_t segmentationId) override { /* TODO:kuafu_urgent */ };
+  inline void setSegmentationId(uint32_t segmentationId) override{/* TODO:kuafu_urgent */};
   [[nodiscard]] inline uint32_t getSegmentationId() const override { return mSegmentationId; };
-  inline void setSegmentationCustomData(std::vector<float> const &customData) override { /* TODO:kuafu_urgent */ };
+  inline void setSegmentationCustomData(std::vector<float> const &customData) override{
+      /* TODO:kuafu_urgent */};
   void setInitialPose(const physx::PxTransform &transform) override;
   [[nodiscard]] inline physx::PxTransform getInitialPose() const { return mInitialPose; };
   void update(const physx::PxTransform &transform) override;
@@ -148,26 +138,23 @@ public:
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
                               std::shared_ptr<IPxrMaterial> material) override;
   IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                                      std::shared_ptr<IPxrMaterial> material) override;
-  IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type,
-                                             const physx::PxVec3 &scale,
-                                             const physx::PxVec3 &color) override;
+                              std::shared_ptr<IPxrMaterial> material) override;
+  IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+                              const physx::PxVec3 &color) override;
   IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                                      std::vector<physx::PxVec3> const &normals,
-                                      std::vector<uint32_t> const &indices,
-                                      const physx::PxVec3 &scale,
-                                      std::shared_ptr<IPxrMaterial> material) override;
+                              std::vector<physx::PxVec3> const &normals,
+                              std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
+                              std::shared_ptr<IPxrMaterial> material) override;
   IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                                             std::vector<physx::PxVec3> const &normals,
-                                             std::vector<uint32_t> const &indices,
-                                             const physx::PxVec3 &scale,
-                                             const physx::PxVec3 &color) override;
+                              std::vector<physx::PxVec3> const &normals,
+                              std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
+                              const physx::PxVec3 &color) override;
 
   void removeRigidbody(IPxrRigidbody *body) override;
 
-  ICamera *addCamera(std::string const &name, uint32_t width, uint32_t height, float fovx,
-                             float fovy, float near, float far,
-                             std::string const &shaderDir) override;
+  ICamera *addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,
+                     std::string const &shaderDir) override;
+
   void removeCamera(ICamera *camera) override;
 
   std::vector<ICamera *> getCameras() override;
@@ -176,35 +163,35 @@ public:
   [[nodiscard]] std::array<float, 3> getAmbientLight() const override;
 
   IPointLight *addPointLight(std::array<float, 3> const &position,
-                                     std::array<float, 3> const &color, bool enableShadow,
-                                     float shadowNear, float shadowFar) override;
+                             std::array<float, 3> const &color, bool enableShadow,
+                             float shadowNear, float shadowFar) override;
 
-  IDirectionalLight *
-  addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color,
-                      bool enableShadow, std::array<float, 3> const &position, float shadowScale,
-                      float shadowNear, float shadowFar) override;
+  IDirectionalLight *addDirectionalLight(std::array<float, 3> const &direction,
+                                         std::array<float, 3> const &color, bool enableShadow,
+                                         std::array<float, 3> const &position, float shadowScale,
+                                         float shadowNear, float shadowFar) override;
 
   ISpotLight *addSpotLight(std::array<float, 3> const &position,
-                                   std::array<float, 3> const &direction, float fovInner,
-                                   float fovOuter, std::array<float, 3> const &color,
-                                   bool enableShadow, float shadowNear, float shadowFar) override;
+                           std::array<float, 3> const &direction, float fovInner, float fovOuter,
+                           std::array<float, 3> const &color, bool enableShadow, float shadowNear,
+                           float shadowFar) override;
 
-  IActiveLight *addActiveLight(physx::PxTransform const &pose,
-                               std::array<float, 3> const &color,
+  IActiveLight *addActiveLight(physx::PxTransform const &pose, std::array<float, 3> const &color,
                                float fov, std::string_view texPath) override;
 
   void removeLight(ILight *light) override;
 
   /** call this function before every rendering time frame */
-  inline void updateRender() override {
-//    spdlog::get("SAPIEN")->warn("KF: updateRender not implemented yet");
+  inline void updateRender() override{
+      //    spdlog::get("SAPIEN")->warn("KF: updateRender not implemented yet");
   };
 
-  inline auto& getKScene() { return pKRenderer->getScene(); }
+  inline auto &getKScene() { return pKRenderer->getScene(); }
 
   void destroy() override;
 
   inline void setEnvironmentMap(std::string_view path) override {
-    pKRenderer->getScene().setEnvironmentMap(path); };
+    pKRenderer->getScene().setEnvironmentMap(path);
+  };
 };
-}
+} // namespace sapien::Renderer

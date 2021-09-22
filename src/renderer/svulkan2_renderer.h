@@ -112,8 +112,7 @@ public:
 
   void removeRigidbody(IPxrRigidbody *body) override;
 
-  ICamera *addCamera(std::string const &name, uint32_t width, uint32_t height, float fovx,
-                     float fovy, float near, float far,
+  ICamera *addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,
                      std::string const &shaderDir = "") override;
 
   void removeCamera(ICamera *camera) override;
@@ -139,6 +138,7 @@ public:
   void removeLight(ILight *light) override;
 
   void setEnvironmentMap(std::string_view path) override;
+  void setEnvironmentMap(std::array<std::string_view, 6> paths) override;
 
   inline SVulkan2Renderer *getParentRenderer() const { return mParentRenderer; }
 };
@@ -170,11 +170,10 @@ public:
 };
 
 class SVulkan2Camera : public ICamera {
-  std::string mName;
   uint32_t mWidth, mHeight;
   SVulkan2Scene *mScene;
   std::unique_ptr<svulkan2::renderer::Renderer> mRenderer;
-  physx::PxTransform mInitialPose;
+  // physx::PxTransform mInitialPose;
   svulkan2::scene::Camera *mCamera;
 
   vk::UniqueCommandBuffer mCommandBuffer;
@@ -183,40 +182,32 @@ class SVulkan2Camera : public ICamera {
   void waitForFence();
 
 public:
-  inline std::string const &getName() const override { return mName; }
   inline uint32_t getWidth() const override { return mWidth; };
   inline uint32_t getHeight() const override { return mHeight; };
 
-  inline float getFovy() const override { return mCamera->getFovy(); }
-  inline float getNear() const override { return mCamera->getNear(); }
-  inline float getFar() const override { return mCamera->getFar(); }
+  [[nodiscard]] float getPrincipalPointX() const override;
+  [[nodiscard]] float getPrincipalPointY() const override;
+  [[nodiscard]] float getFocalX() const override;
+  [[nodiscard]] float getFocalY() const override;
+  [[nodiscard]] float getFovX() const override;
+  [[nodiscard]] float getFovY() const override;
+  [[nodiscard]] float getNear() const override;
+  [[nodiscard]] float getFar() const override;
+  [[nodiscard]] float getSkew() const override;
 
-  SVulkan2Camera(std::string const &name, uint32_t width, uint32_t height, float fovy, float near,
-                 float far, SVulkan2Scene *scene, std::string const &shaderDir);
+  void setPerspectiveCameraParameters(float near, float far, float fx, float fy, float cx,
+                                      float cy, float skew) override;
+
+  SVulkan2Camera(uint32_t width, uint32_t height, float fovy, float near, float far,
+                 SVulkan2Scene *scene, std::string const &shaderDir);
 
   void takePicture() override;
-  std::vector<float> getColorRGBA() override;
-  std::vector<float> getAlbedoRGBA() override;
-  std::vector<float> getNormalRGBA() override;
-  std::vector<float> getDepth() override;
-  std::vector<int> getSegmentation() override;
-  std::vector<int> getObjSegmentation() override;
 
   std::vector<std::string> getRenderTargetNames();
 
-  std::tuple<std::vector<float>, std::array<uint32_t, 3>>
-  getFloatTexture(std::string const &textureName);
-
-  std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>
-  getUint32Texture(std::string const &textureName);
-
-  std::tuple<std::vector<uint8_t>, std::array<uint32_t, 3>>
-  getUint8Texture(std::string const &textureName);
-
-#ifdef SAPIEN_DLPACK_INTEROP
-  std::tuple<std::shared_ptr<svulkan2::core::CudaBuffer>, std::array<uint32_t, 2>, vk::Format>
-  getCudaBuffer(std::string const &textureName);
-#endif
+  std::vector<float> getFloatImage(std::string const &name) override;
+  std::vector<uint32_t> getUintImage(std::string const &name) override;
+  DLManagedTensor *getDLImage(std::string const &name) override;
 
   inline IPxrScene *getScene() override { return mScene; }
 
@@ -226,13 +217,9 @@ public:
 
   // ISensor
   physx::PxTransform getPose() const override;
-  void setInitialPose(physx::PxTransform const &pose) override;
   void setPose(physx::PxTransform const &pose) override;
 
-  void setPerspectiveParameters(float near, float far, float fovy, float aspect);
-  void setFullPerspectiveParameters(float near, float far, float fx, float fy, float cx, float cy,
-                                    float width, float height, float skew);
-  void setOrthographicParameters(float near, float far, float aspect, float scaling);
+  void setOrthographicParameters(float near, float far, float scaling, float width, float height);
 
   svulkan2::scene::Camera *getCamera() const { return mCamera; }
   std::string getMode() const;

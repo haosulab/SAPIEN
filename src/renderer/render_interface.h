@@ -1,6 +1,7 @@
 #pragma once
 #include <PxPhysicsAPI.h>
 #include <array>
+#include <dlpack/dlpack.h>
 #include <foundation/PxTransform.h>
 #include <functional>
 #include <memory>
@@ -225,7 +226,7 @@ public:
 
 class ISensor {
 public:
-  virtual void setInitialPose(physx::PxTransform const &pose) = 0;
+  // virtual void setInitialPose(physx::PxTransform const &pose) = 0;
   [[nodiscard]] virtual physx::PxTransform getPose() const = 0;
   virtual void setPose(physx::PxTransform const &pose) = 0;
   virtual IPxrScene *getScene() = 0;
@@ -235,20 +236,39 @@ public:
 
 class ICamera : public ISensor {
 public:
-  virtual const std::string &getName() const = 0;
   virtual uint32_t getWidth() const = 0;
   virtual uint32_t getHeight() const = 0;
-  virtual float getFovy() const = 0;
-  virtual float getNear() const = 0;
-  virtual float getFar() const = 0;
+
+  [[nodiscard]] virtual float getPrincipalPointX() const = 0;
+  [[nodiscard]] virtual float getPrincipalPointY() const = 0;
+  [[nodiscard]] virtual float getFocalX() const = 0;
+  [[nodiscard]] virtual float getFocalY() const = 0;
+  [[nodiscard]] virtual float getNear() const = 0;
+  [[nodiscard]] virtual float getFar() const = 0;
+  [[nodiscard]] virtual float getSkew() const = 0;
+
+  [[nodiscard]] virtual float getFovX() const { return std::atan(getWidth() / getFocalX()) * 2.f; }
+  [[nodiscard]] virtual float getFovY() const {
+    return std::atan(getHeight() / getFocalY()) * 2.f;
+  }
+
+  virtual void setPerspectiveCameraParameters(float near, float far, float fx, float fy, float cx,
+                                              float cy, float skew) = 0;
+
+  /** Texture names that must be implemented
+   *  Color (RGBA)
+   *  Position (XYZ-D)
+   *  Segmentation (visual-actor-0-0)
+   */
+  virtual std::vector<float> getFloatImage(std::string const &name) = 0;
+  virtual std::vector<uint32_t> getUintImage(std::string const &name) = 0;
+
+  // return new DLManagedTensor
+  virtual DLManagedTensor *getDLImage(std::string const &name) {
+    throw std::runtime_error("dlpack is not implemented in this renderer");
+  };
 
   virtual void takePicture() = 0;
-  virtual std::vector<float> getColorRGBA() = 0;
-  virtual std::vector<float> getAlbedoRGBA() = 0;
-  virtual std::vector<float> getNormalRGBA() = 0;
-  virtual std::vector<float> getDepth() = 0;
-  virtual std::vector<int> getSegmentation() = 0;
-  virtual std::vector<int> getObjSegmentation() = 0;
 };
 
 class ILight {
@@ -393,9 +413,9 @@ public:
 
   virtual void removeRigidbody(IPxrRigidbody *body) = 0;
 
-  virtual ICamera *addCamera(std::string const &name, uint32_t width, uint32_t height, float fovx,
-                             float fovy, float near, float far,
+  virtual ICamera *addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,
                              std::string const &shaderDir = "") = 0;
+
   virtual void removeCamera(ICamera *camera) = 0;
 
   virtual std::vector<ICamera *> getCameras() = 0;
@@ -430,6 +450,10 @@ public:
   inline virtual void updateRender(){};
 
   virtual void setEnvironmentMap(std::string_view path) {
+    spdlog::get("SAPIEN")->warn("Environment map is not supported!");
+  };
+
+  virtual void setEnvironmentMap(std::array<std::string_view, 6> paths) {
     spdlog::get("SAPIEN")->warn("Environment map is not supported!");
   };
 

@@ -3,14 +3,13 @@ import numpy as np
 from sapien.core import Pose
 from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector
-import time
 
 import sapien.core.pysapien.renderer as R
 from sapien.asset import download_partnet_mobility
 
-from controller import Viewer
+# from controller import Viewer
 
-# from sapien.utils import Viewer
+from sapien.utils import Viewer
 
 
 def create_table(
@@ -66,7 +65,7 @@ def main():
     copper.set_metallic(1)
     copper.set_roughness(0.2)
 
-    sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
+    # sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
     viewer = Viewer(renderer)
 
     # cubemap = renderer_context.create_cubemap_from_files(
@@ -227,7 +226,8 @@ def main():
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
     cam1 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
-    print(cam1.render_target_names)
+
+    print(cam1.get_projection_matrix())
 
     # sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/active_light")
 
@@ -290,7 +290,6 @@ def main():
 
     print(scene.get_all_lights())
 
-
     count = 0
     while not viewer.closed:
         for i in range(4):
@@ -302,16 +301,14 @@ def main():
         import matplotlib.pyplot as plt
         import torch.utils.dlpack
 
-        start = time.time()
         cam2.take_picture()
-        img = cam2.get_dl_tensor("Color")
-        img = torch.utils.dlpack.from_dlpack(img)
-        plt.imshow(img.cpu().numpy())
+        img = cam2.get_float_texture("Color")
+        # img = cam2.get_dl_tensor("Color")
+        # img = torch.utils.dlpack.from_dlpack(img).cpu().numpy()
+        plt.imshow(img)
         plt.show()
-        dur = time.time() - start
-        print("Render to tensor FPS: ", 1 / dur)
 
-    # viewer.close()
+    viewer.close()
 
 
 main()
