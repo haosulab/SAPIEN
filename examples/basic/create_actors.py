@@ -162,9 +162,9 @@ def main():
 
     # ---------------------------------------------------------------------------- #
 
-    rscene = scene.get_renderer_scene()
-    rscene.set_ambient_light([0.5, 0.5, 0.5])
-    rscene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
+
+    scene.set_ambient_light([0.5, 0.5, 0.5])
+    scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
     viewer = Viewer(renderer)
     viewer.set_scene(scene)

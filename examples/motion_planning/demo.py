@@ -16,12 +16,12 @@ class PlanningDemo():
         physical_material = self.scene.create_physical_material(1, 1, 0.0)
         self.scene.default_physical_material = physical_material
 
-        self.rscene = self.scene.get_renderer_scene()
-        self.rscene.set_ambient_light([0.5, 0.5, 0.5])
-        self.rscene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5], shadow=True)
-        self.rscene.add_point_light([1, 2, 2], [1, 1, 1], shadow=True)
-        self.rscene.add_point_light([1, -2, 2], [1, 1, 1], shadow=True)
-        self.rscene.add_point_light([-1, 0, 1], [1, 1, 1], shadow=True)
+
+        self.scene.set_ambient_light([0.5, 0.5, 0.5])
+        self.scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5], shadow=True)
+        self.scene.add_point_light([1, 2, 2], [1, 1, 1], shadow=True)
+        self.scene.add_point_light([1, -2, 2], [1, 1, 1], shadow=True)
+        self.scene.add_point_light([-1, 0, 1], [1, 1, 1], shadow=True)
 
         self.viewer = Viewer(self.renderer)
         self.viewer.set_scene(self.scene)

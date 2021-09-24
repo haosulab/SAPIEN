@@ -237,11 +237,11 @@ class AntEnv(SapienEnv):
     # Visualization
     # ---------------------------------------------------------------------------- #
     def _setup_lighting(self):
-        rscene = self._scene.get_renderer_scene()
-        rscene.set_ambient_light([.4, .4, .4])
-        rscene.add_point_light([2, 2, 2], [1, 1, 1])
-        rscene.add_point_light([2, -2, 2], [1, 1, 1])
-        rscene.add_point_light([-2, 0, 2], [1, 1, 1])
+
+        self._scene.set_ambient_light([.4, .4, .4])
+        self._scene.add_point_light([2, 2, 2], [1, 1, 1])
+        self._scene.add_point_light([2, -2, 2], [1, 1, 1])
+        self._scene.add_point_light([-2, 0, 2], [1, 1, 1])
 
     def _setup_viewer(self):
         self._setup_lighting()

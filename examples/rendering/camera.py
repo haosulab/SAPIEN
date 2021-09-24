@@ -28,12 +28,12 @@ def main():
     asset = loader.load_kinematic(urdf_path)
     assert asset, 'URDF not loaded.'
 
-    rscene = scene.get_renderer_scene()
-    rscene.set_ambient_light([0.5, 0.5, 0.5])
-    rscene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5], shadow=True)
-    rscene.add_point_light([1, 2, 2], [1, 1, 1], shadow=True)
-    rscene.add_point_light([1, -2, 2], [1, 1, 1], shadow=True)
-    rscene.add_point_light([-1, 0, 1], [1, 1, 1], shadow=True)
+
+    scene.set_ambient_light([0.5, 0.5, 0.5])
+    scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5], shadow=True)
+    scene.add_point_light([1, 2, 2], [1, 1, 1], shadow=True)
+    scene.add_point_light([1, -2, 2], [1, 1, 1], shadow=True)
+    scene.add_point_light([-1, 0, 1], [1, 1, 1], shadow=True)
 
     # ---------------------------------------------------------------------------- #
     # Camera
@@ -47,11 +47,11 @@ def main():
         pose=sapien.Pose(),  # relative to the mounted actor
         width=width,
         height=height,
-        fovx=np.deg2rad(35),
         fovy=np.deg2rad(35),
         near=near,
         far=far,
     )
+
     print('Intrinsic matrix\n', camera.get_camera_matrix())
 
     # Compute the camera pose by specifying forward(x), left(y) and up(z)
