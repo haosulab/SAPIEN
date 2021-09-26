@@ -27,8 +27,6 @@ float SVulkan2Camera::getPrincipalPointX() const { return mCamera->getCx(); }
 float SVulkan2Camera::getPrincipalPointY() const { return mCamera->getCy(); }
 float SVulkan2Camera::getFocalX() const { return mCamera->getFx(); }
 float SVulkan2Camera::getFocalY() const { return mCamera->getFy(); }
-float SVulkan2Camera::getFovX() const { return mCamera->getFovx(); }
-float SVulkan2Camera::getFovY() const { return mCamera->getFovy(); }
 float SVulkan2Camera::getNear() const { return mCamera->getNear(); }
 float SVulkan2Camera::getFar() const { return mCamera->getFar(); }
 float SVulkan2Camera::getSkew() const { return mCamera->getSkew(); }

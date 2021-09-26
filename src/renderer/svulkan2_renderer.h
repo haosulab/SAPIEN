@@ -189,8 +189,6 @@ public:
   [[nodiscard]] float getPrincipalPointY() const override;
   [[nodiscard]] float getFocalX() const override;
   [[nodiscard]] float getFocalY() const override;
-  [[nodiscard]] float getFovX() const override;
-  [[nodiscard]] float getFovY() const override;
   [[nodiscard]] float getNear() const override;
   [[nodiscard]] float getFar() const override;
   [[nodiscard]] float getSkew() const override;

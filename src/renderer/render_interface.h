@@ -247,9 +247,9 @@ public:
   [[nodiscard]] virtual float getFar() const = 0;
   [[nodiscard]] virtual float getSkew() const = 0;
 
-  [[nodiscard]] virtual float getFovX() const { return std::atan(getWidth() / getFocalX()) * 2.f; }
+  [[nodiscard]] virtual float getFovX() const { return std::atan(getWidth() / 2.f / getFocalX()) * 2.f; }
   [[nodiscard]] virtual float getFovY() const {
-    return std::atan(getHeight() / getFocalY()) * 2.f;
+    return std::atan(getHeight() / 2.f / getFocalY()) * 2.f;
   }
 
   virtual void setPerspectiveCameraParameters(float near, float far, float fx, float fy, float cx,
