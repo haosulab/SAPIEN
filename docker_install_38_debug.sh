@@ -1,7 +1,13 @@
 #!/bin/bash
 rm -r sapien.egg-info
 rm wheelhouse/*.whl
-echo 1.0.dev_$(date +"%m_%d_%y") > python/VERSION
+if [ -z ${VERSION} ]
+then
+    echo VERSION variable is not specified
+    VERSION=2.0.0.dev$(date +"%Y%m%d")
+    echo VERSION defatuls to ${VERSION}
+    sleep 3
+fi
 
 docker run -v `pwd`:/workspace/SAPIEN -it --rm \
        -u $(id -u ${USER}):$(id -g ${USER}) \

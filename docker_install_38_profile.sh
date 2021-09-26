@@ -1,5 +1,13 @@
 #!/bin/bash
-echo 1.0.dev_$(date +"%m_%d_%y") > python/VERSION
+rm -rf sapien.egg-info
+rm -f wheelhouse/*.whl
+if [ -z ${VERSION} ]
+then
+    echo VERSION variable is not specified
+    VERSION=2.0.0.dev$(date +"%Y%m%d")
+    echo VERSION defatuls to ${VERSION}
+    sleep 3
+fi
 
 docker run -v `pwd`:/workspace/SAPIEN -it --rm \
        -u $(id -u ${USER}):$(id -g ${USER}) \
@@ -7,7 +15,10 @@ docker run -v `pwd`:/workspace/SAPIEN -it --rm \
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-pip3 uninstall sapien -y && cd wheelhouse && pip3 install *
+cd wheelhouse
+pip3 uninstall -y sapien
+pip3 install *
+
 cd /tmp && rm stubs -rf && pybind11-stubgen sapien.core --ignore-invalid all
 cp /tmp/stubs/sapien/core-stubs/__init__.pyi $DIR/python/py_package/core
 cp -r /tmp/stubs/sapien/core-stubs/pysapien $DIR/python/py_package/core
