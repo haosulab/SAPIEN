@@ -55,15 +55,14 @@ void KuafuCamera::setPxPose(const physx::PxTransform &pose) {
   pKCamera->setPose(toGlmMat4(physx::PxMat44(pose)));
 }
 
-float KuafuCamera::getPrincipalPointX() const {};
-float KuafuCamera::getPrincipalPointY() const {};
-float KuafuCamera::getFocalX() const {};
-float KuafuCamera::getFocalY() const {};
-float KuafuCamera::getFovX() const {};
-float KuafuCamera::getFovY() const {};
-float KuafuCamera::getNear() const { return 0.f; };
-float KuafuCamera::getFar() const { return 0.f; };
-float KuafuCamera::getSkew() const {};
+float KuafuCamera::getPrincipalPointX() const { return pKCamera->getPrincipalPointX(); };
+
+float KuafuCamera::getPrincipalPointY() const { return pKCamera->getPrincipalPointY(); };
+float KuafuCamera::getFocalX() const { return pKCamera->getFocalX(); };
+float KuafuCamera::getFocalY() const { return pKCamera->getFocalY(); };
+float KuafuCamera::getNear() const { return pKCamera->getNear(); };
+float KuafuCamera::getFar() const { return pKCamera->getFar(); };
+float KuafuCamera::getSkew() const { return pKCamera->getSkew(); };
 
 void KuafuCamera::setPerspectiveCameraParameters(float near, float far, float fx, float fy,
                                                  float cx, float cy, float skew) {
@@ -120,9 +119,7 @@ physx::PxTransform KuafuCamera::getPose() const {
   return physx::PxTransform(toPxMat44(pKCamera->getPose()));
 }
 
-void KuafuCamera::setPose(physx::PxTransform const &pose) {
-  setPxPose(pose);
-};
+void KuafuCamera::setPose(physx::PxTransform const &pose) { setPxPose(pose); };
 
 IPxrScene *KuafuCamera::getScene() { return pParentScene; }
 

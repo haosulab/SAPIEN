@@ -38,9 +38,9 @@ public:
   KuafuCamera(int width, int height, float fovy, KuafuScene *scene) {
     pParentScene = scene;
     pKCamera = std::make_shared<KCamera>("", width, height);
-    pKCamera->reset();
     pKCamera->setSize(width, height);
-    pKCamera->setFov(glm::degrees(fovy));
+    float fy = height / 2.f / std::tan(fovy / 2.f);
+    setPerspectiveCameraParameters(0.0, 0.0, fy, fy, width / 2.f, height / 2.f, 0.f);
   }
 
   inline uint32_t getWidth() const override { return pKCamera->getWidth(); }
@@ -50,8 +50,6 @@ public:
   [[nodiscard]] virtual float getPrincipalPointY() const override;
   [[nodiscard]] virtual float getFocalX() const override;
   [[nodiscard]] virtual float getFocalY() const override;
-  [[nodiscard]] virtual float getFovX() const override;
-  [[nodiscard]] virtual float getFovY() const override;
   [[nodiscard]] virtual float getNear() const override;
   [[nodiscard]] virtual float getFar() const override;
   [[nodiscard]] virtual float getSkew() const override;
@@ -75,7 +73,7 @@ public:
   // Non-override
   inline void setFullPerspective(float fx, float fy, float cx, float cy, float width, float height,
                                  float skew) {
-    pKCamera->setFullPerspective(fx, fy, cx, cy, width, height, skew);
+    pKCamera->setFullPerspective(width, height, fx, fy, cx, cy, skew);
   }
 };
 
