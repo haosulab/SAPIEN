@@ -2088,7 +2088,9 @@ class Viewer(object):
             self.ik_errpr = error
             self.pinocchio_model.compute_forward_kinematics(result)
             for idx, obj in enumerate(self.ik_display_objects):
-                pose = self.pinocchio_model.get_link_pose(idx)
+                pose = self.selected_entity.get_articulation().pose * self.pinocchio_model.get_link_pose(
+                    idx
+                )
                 obj.set_position(pose.p)
                 obj.set_rotation(pose.q)
 
@@ -2104,9 +2106,13 @@ class Viewer(object):
                 [self.move_group_selection[j] for j in self.move_group_joints]
             ).astype(int)
 
-            pose = Pose.from_transformation_matrix(self.gizmo.matrix)
+            pose = a.pose.inv() * Pose.from_transformation_matrix(self.gizmo.matrix)
             result, success, error = self.pinocchio_model.compute_inverse_kinematics(
-                link_idx, pose, initial_qpos=a.get_qpos(), active_qmask=mask, max_iterations=100
+                link_idx,
+                pose,
+                initial_qpos=a.get_qpos(),
+                active_qmask=mask,
+                max_iterations=100,
             )
             return result, success, error
 
@@ -2125,7 +2131,6 @@ class Viewer(object):
                 target = self.ik_result * mask + target * (1 - mask)
                 # self.selected_entity.get_articulation().set_qpos(target)
                 self.selected_entity.get_articulation().set_drive_target(target)
-
 
     @staticmethod
     def get_camera_pose(camera: CameraEntity):

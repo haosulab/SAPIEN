@@ -57,10 +57,15 @@ Collapsed=0
 DockId=0x0000000A,0
 
 [Window][IK]
-Pos=726,23
-Size=298,335
+Pos=726,360
+Size=298,347
 Collapsed=0
-DockId=0x00000007,1
+DockId=0x00000008,1
+
+[Window][Debug##Default]
+Pos=60,60
+Size=400,400
+Collapsed=0
 
 [Docking][Data]
 DockSpace         ID=0x4BBE4C7A Window=0x4647B76E Pos=0,23 Size=1024,745 Split=Y
@@ -71,8 +76,8 @@ DockSpace         ID=0x4BBE4C7A Window=0x4647B76E Pos=0,23 Size=1024,745 Split=Y
         DockNode  ID=0x00000004 Parent=0x00000001 SizeRef=399,314 Selected=0x9A68760C
       DockNode    ID=0x00000002 Parent=0x00000005 SizeRef=474,747 CentralNode=1
     DockNode      ID=0x00000006 Parent=0x00000009 SizeRef=298,747 Split=Y Selected=0x85B479FD
-      DockNode    ID=0x00000007 Parent=0x00000006 SizeRef=121,335 Selected=0x816C7EAB
-      DockNode    ID=0x00000008 Parent=0x00000006 SizeRef=121,347 Selected=0xA95BF184
+      DockNode    ID=0x00000007 Parent=0x00000006 SizeRef=121,335 Selected=0x0A9B993B
+      DockNode    ID=0x00000008 Parent=0x00000006 SizeRef=121,347 Selected=0x816C7EAB
   DockNode        ID=0x0000000A Parent=0x4BBE4C7A SizeRef=1024,59 Selected=0x6BBB9E69
 """
 
@@ -2083,7 +2088,9 @@ class Viewer(object):
             self.ik_errpr = error
             self.pinocchio_model.compute_forward_kinematics(result)
             for idx, obj in enumerate(self.ik_display_objects):
-                pose = self.pinocchio_model.get_link_pose(idx)
+                pose = self.selected_entity.get_articulation().pose * self.pinocchio_model.get_link_pose(
+                    idx
+                )
                 obj.set_position(pose.p)
                 obj.set_rotation(pose.q)
 
@@ -2099,9 +2106,13 @@ class Viewer(object):
                 [self.move_group_selection[j] for j in self.move_group_joints]
             ).astype(int)
 
-            pose = Pose.from_transformation_matrix(self.gizmo.matrix)
+            pose = a.pose.inv() * Pose.from_transformation_matrix(self.gizmo.matrix)
             result, success, error = self.pinocchio_model.compute_inverse_kinematics(
-                link_idx, pose, initial_qpos=a.get_qpos(), active_qmask=mask, max_iterations=100
+                link_idx,
+                pose,
+                initial_qpos=a.get_qpos(),
+                active_qmask=mask,
+                max_iterations=100,
             )
             return result, success, error
 
@@ -2120,7 +2131,6 @@ class Viewer(object):
                 target = self.ik_result * mask + target * (1 - mask)
                 # self.selected_entity.get_articulation().set_qpos(target)
                 self.selected_entity.get_articulation().set_drive_target(target)
-
 
     @staticmethod
     def get_camera_pose(camera: CameraEntity):
