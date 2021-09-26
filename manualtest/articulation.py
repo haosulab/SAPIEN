@@ -7,9 +7,7 @@ from transforms3d.quaternions import qmult, mat2quat, rotate_vector
 import sapien.core.pysapien.renderer as R
 from sapien.asset import download_partnet_mobility
 
-# from controller import Viewer
-
-from sapien.utils import Viewer
+from controller import Viewer
 
 
 def create_table(
@@ -196,7 +194,7 @@ def main():
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             0.1,
         )
-        f2.add_capsule_collision(Pose(), 0.08, 0.282)
+        f3.add_capsule_collision(Pose(), 0.08, 0.282)
         f3.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         f4 = builder.create_link_builder(l4)
@@ -209,7 +207,7 @@ def main():
             Pose([0.282, 0, 0], [0, 0.7071068, 0.7071068, 0]),
             0.1,
         )
-        f2.add_capsule_collision(Pose(), 0.08, 0.282)
+        f4.add_capsule_collision(Pose(), 0.08, 0.282)
         f4.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         return builder
@@ -242,18 +240,22 @@ def main():
     ant = ant_builder.build()
     ant.set_root_pose(Pose([0, 0, 5]))
 
-    urdf = download_partnet_mobility(
-        40147,
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjE3Mi4yMC4wLjEiLCJwcml2aWxlZ2UiOjEwLCJpYXQiOjE2MzE3NDUzMjYsImV4cCI6MTY2MzI4MTMyNn0.ET7f80-ork2UrbTj9XtTa_qn7pilxG_8omyV6ffE51o",
-    )
+    # urdf = download_partnet_mobility(
+    #     40147,
+    #     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImZ4aWFuZ0BlbmcudWNzZC5lZHUiLCJpcCI6IjE3Mi4yMC4wLjEiLCJwcml2aWxlZ2UiOjEwLCJpYXQiOjE2MzE3NDUzMjYsImV4cCI6MTY2MzI4MTMyNn0.ET7f80-ork2UrbTj9XtTa_qn7pilxG_8omyV6ffE51o",
+    # )
+    # loader = scene.create_urdf_loader()
+    # loader.fix_root_link = True
+    # cabinet = loader.load(urdf)
+    # cabinet.set_pose(Pose([0, 0, 1]))
+
     loader = scene.create_urdf_loader()
     loader.fix_root_link = True
-    cabinet = loader.load(urdf)
-    cabinet.set_pose(Pose([0, 0, 1]))
-
-    # for link in cabinet.get_links():
-    #     for s in link.get_collision_shapes():
-    #         s.set_collision_groups(1, 1, 1, 0)
+    robot = loader.load("../assets/robot/jaco2/jaco2.urdf")
+    for j in robot.get_active_joints():
+        j.set_drive_property(1000, 200)
+    robot.set_qpos([4.71, 2.84, 0.0, 0.75, 4.62, 4.48, 4.88, 0, 0])
+    robot.set_drive_target([4.71, 2.84, 0.0, 0.75, 4.62, 4.48, 4.88, 0, 0])
 
     viewer.set_scene(scene)
     viewer.set_camera_xyz(-4, 0, 0.3)
@@ -298,15 +300,15 @@ def main():
         viewer.render()
         count += 1
 
-        import matplotlib.pyplot as plt
-        import torch.utils.dlpack
+        # import matplotlib.pyplot as plt
+        # import torch.utils.dlpack
 
-        cam2.take_picture()
-        img = cam2.get_float_texture("Color")
+        # cam2.take_picture()
+        # img = cam2.get_float_texture("Color")
         # img = cam2.get_dl_tensor("Color")
         # img = torch.utils.dlpack.from_dlpack(img).cpu().numpy()
-        plt.imshow(img)
-        plt.show()
+        # plt.imshow(img)
+        # plt.show()
 
     viewer.close()
 

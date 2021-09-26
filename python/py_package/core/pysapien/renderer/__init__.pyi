@@ -21,6 +21,7 @@ __all__ = [
     "UIButton",
     "UICheckbox",
     "UIDisplayText",
+    "UIGizmo",
     "UIInputFloat",
     "UIInputFloat2",
     "UIInputFloat3",
@@ -170,6 +171,16 @@ class UICheckbox(UIWidget):
 class UIDisplayText(UIWidget):
     def Text(self, text: str) -> UIDisplayText: ...
     def __init__(self) -> None: ...
+    pass
+class UIGizmo(UIWidget):
+    def CameraMatrices(self, arg0: numpy.ndarray[numpy.float32], arg1: numpy.ndarray[numpy.float32]) -> None: ...
+    def Matrix(self, matrix: numpy.ndarray[numpy.float32]) -> UIGizmo: ...
+    def __init__(self) -> None: ...
+    @property
+    def matrix(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
     pass
 class UIInputFloat(UIWidget):
     def Callback(self, func: typing.Callable[[UIInputFloat], None]) -> UIInputFloat: ...

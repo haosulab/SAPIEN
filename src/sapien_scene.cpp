@@ -392,6 +392,7 @@ SCamera *SScene::addCamera(std::string const &name, uint32_t width, uint32_t hei
     return nullptr;
   }
   auto cam = std::make_unique<SCamera>(this, width, height);
+  cam->setName(name);
   cam->setFovY(fovy, true);
   cam->setNear(near);
   cam->setFar(far);

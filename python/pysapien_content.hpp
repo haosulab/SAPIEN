@@ -1700,6 +1700,7 @@ Args:
            "https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/"
            "md_doc_b-examples_i-inverse-kinematics.html",
            py::arg("link_index"), py::arg("pose"), py::arg("initial_qpos") = Eigen::VectorXd{},
+           py::arg("active_qmask") = Eigen::VectorXi{},
            py::arg("eps") = 1e-4, py::arg("max_iterations") = 1000, py::arg("dt") = 0.1,
            py::arg("damp") = 1e-6)
       .def("compute_forward_dynamics", &PinocchioModel::computeForwardDynamics, py::arg("qpos"),

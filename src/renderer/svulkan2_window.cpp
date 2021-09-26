@@ -155,6 +155,7 @@ void SVulkan2Window::render(std::string const &targetName,
   }
 
   ImGui::NewFrame();
+  ImGuizmo::BeginFrame();
 
   // setup docking window
   ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar;

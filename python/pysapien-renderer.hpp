@@ -75,6 +75,7 @@ void buildRenderer(py::module &parent) {
       m, "UISliderFloat");
   auto PyUISliderAngle = py::class_<ui::SliderAngle, ui::Widget, std::shared_ptr<ui::SliderAngle>>(
       m, "UISliderAngle");
+  auto PyUIGizmo = py::class_<ui::Gizmo, ui::Widget, std::shared_ptr<ui::Gizmo>>(m, "UIGizmo");
 
   PyUIWidget.def("remove", &ui::Widget::remove)
       .def("remove_children", &ui::Widget::removeChildren)
@@ -258,6 +259,39 @@ void buildRenderer(py::module &parent) {
       .def("Value", &ui::SliderAngle::Value, py::arg("value"))
       .def("Callback", &ui::SliderAngle::Callback, py::arg("func"))
       .def_property_readonly("value", &ui::SliderAngle::get);
+
+  PyUIGizmo.def(py::init<>())
+      .def(
+          "Matrix",
+          [](ui::Gizmo &gizmo, py::array_t<float> matrix) {
+            glm::mat4 m(matrix.at(0, 0), matrix.at(1, 0), matrix.at(2, 0), matrix.at(3, 0),
+                        matrix.at(0, 1), matrix.at(1, 1), matrix.at(2, 1), matrix.at(3, 1),
+                        matrix.at(0, 2), matrix.at(1, 2), matrix.at(2, 2), matrix.at(3, 2),
+                        matrix.at(0, 3), matrix.at(1, 3), matrix.at(2, 3), matrix.at(3, 3));
+            return gizmo.Matrix(m);
+          },
+          py::arg("matrix"))
+      .def_property_readonly("matrix",
+                             [](ui::Gizmo &gizmo) {
+                               glm::mat4 mat = gizmo.getMatrix();
+                               float arr[] = {mat[0][0], mat[1][0], mat[2][0], mat[3][0],
+                                              mat[0][1], mat[1][1], mat[2][1], mat[3][1],
+                                              mat[0][2], mat[1][2], mat[2][2], mat[3][2],
+                                              mat[0][3], mat[1][3], mat[2][3], mat[3][3]};
+                               return py::array_t<float>({4, 4}, arr);
+                             })
+      .def("CameraMatrices",
+           [](ui::Gizmo &gizmo, py::array_t<float> view, py::array_t<float> proj) {
+             glm::mat4 v(view.at(0, 0), view.at(1, 0), view.at(2, 0), view.at(3, 0), view.at(0, 1),
+                         view.at(1, 1), view.at(2, 1), view.at(3, 1), view.at(0, 2), view.at(1, 2),
+                         view.at(2, 2), view.at(3, 2), view.at(0, 3), view.at(1, 3), view.at(2, 3),
+                         view.at(3, 3));
+             glm::mat4 p(proj.at(0, 0), proj.at(1, 0), proj.at(2, 0), proj.at(3, 0),
+                         proj.at(0, 1), -proj.at(1, 1), -proj.at(2, 1), proj.at(3, 1),
+                         proj.at(0, 2), proj.at(1, 2), proj.at(2, 2), proj.at(3, 2),
+                         proj.at(0, 3), proj.at(1, 3), proj.at(2, 3), proj.at(3, 3));
+             gizmo.setCameraParameters(v, p);
+           });
   // end UI
 
   PyContext
@@ -406,7 +440,8 @@ void buildRenderer(py::module &parent) {
   PyMaterial
       .def("set_textures", &resource::SVMetallicMaterial::setTextures,
            py::arg("base_color") = nullptr, py::arg("roughness") = nullptr,
-           py::arg("normal") = nullptr, py::arg("metallic") = nullptr, py::arg("emission") = nullptr)
+           py::arg("normal") = nullptr, py::arg("metallic") = nullptr,
+           py::arg("emission") = nullptr)
       .def(
           "set_base_color",
           [](resource::SVMetallicMaterial &mat, py::array_t<float> color) {

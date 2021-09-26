@@ -27,8 +27,8 @@ Size=1024,768
 Collapsed=0
 
 [Window][Actor/Entity]
-Pos=807,23
-Size=217,389
+Pos=726,23
+Size=298,335
 Collapsed=0
 DockId=0x00000007,0
 
@@ -45,8 +45,8 @@ Collapsed=0
 DockId=0x00000004,0
 
 [Window][Articulation]
-Pos=807,414
-Size=217,293
+Pos=726,360
+Size=298,347
 Collapsed=0
 DockId=0x00000008,0
 
@@ -56,17 +56,23 @@ Size=1024,59
 Collapsed=0
 DockId=0x0000000A,0
 
+[Window][IK]
+Pos=726,23
+Size=298,335
+Collapsed=0
+DockId=0x00000007,1
+
 [Docking][Data]
 DockSpace         ID=0x4BBE4C7A Window=0x4647B76E Pos=0,23 Size=1024,745 Split=Y
   DockNode        ID=0x00000009 Parent=0x4BBE4C7A SizeRef=1024,684 Split=X
-    DockNode      ID=0x00000005 Parent=0x00000009 SizeRef=805,747 Split=X
+    DockNode      ID=0x00000005 Parent=0x00000009 SizeRef=724,747 Split=X
       DockNode    ID=0x00000001 Parent=0x00000005 SizeRef=248,747 Split=Y Selected=0x9A68760C
         DockNode  ID=0x00000003 Parent=0x00000001 SizeRef=399,368 Selected=0x226615D7
         DockNode  ID=0x00000004 Parent=0x00000001 SizeRef=399,314 Selected=0x9A68760C
-      DockNode    ID=0x00000002 Parent=0x00000005 SizeRef=555,747 CentralNode=1
-    DockNode      ID=0x00000006 Parent=0x00000009 SizeRef=217,747 Split=Y Selected=0x85B479FD
-      DockNode    ID=0x00000007 Parent=0x00000006 SizeRef=121,389 Selected=0x85B479FD
-      DockNode    ID=0x00000008 Parent=0x00000006 SizeRef=121,293 Selected=0xA95BF184
+      DockNode    ID=0x00000002 Parent=0x00000005 SizeRef=474,747 CentralNode=1
+    DockNode      ID=0x00000006 Parent=0x00000009 SizeRef=298,747 Split=Y Selected=0x85B479FD
+      DockNode    ID=0x00000007 Parent=0x00000006 SizeRef=121,335 Selected=0x816C7EAB
+      DockNode    ID=0x00000008 Parent=0x00000006 SizeRef=121,347 Selected=0xA95BF184
   DockNode        ID=0x0000000A Parent=0x4BBE4C7A SizeRef=1024,59 Selected=0x6BBB9E69
 """
 
@@ -197,7 +203,8 @@ class Viewer(object):
         self.set_window_resolutions(resolutions)
 
         self.axes = None
-        self.axes_scale = 0.3
+        self.show_axes = True
+        self.axes_scale = 0.1
 
         self.selected_entity = None
         self.focused_entity = None
@@ -217,6 +224,13 @@ class Viewer(object):
         self.scene_window = None
         self.control_window = None
         self.info_window = None
+        self.ik_window = None
+        self.gizmo = None
+        self.ik_enabled = False
+        self.ik_display_objects = []
+
+        self.move_group_joints = []
+        self.move_group_selection = {}
 
         self.key_stack = ""
         self.initialize_key_action_map()
@@ -266,12 +280,22 @@ class Viewer(object):
         self.cone = self.renderer_context.create_cone_mesh(16)
         self.capsule = self.renderer_context.create_capsule_mesh(0.1, 0.5, 16, 4)
 
-        self.mat_red = self.renderer_context.create_material([0,0,0,1],[1, 0, 0, 1], 0, 0, 0)
-        self.mat_green = self.renderer_context.create_material([0,0,0,1],[0, 1, 0, 1], 0, 0, 0)
-        self.mat_blue = self.renderer_context.create_material([0,0,0,1],[0, 0, 1, 1], 0, 0, 0)
+        self.mat_red = self.renderer_context.create_material(
+            [0, 0, 0, 1], [1, 0, 0, 1], 0, 0, 0
+        )
+        self.mat_green = self.renderer_context.create_material(
+            [0, 0, 0, 1], [0, 1, 0, 1], 0, 0, 0
+        )
+        self.mat_blue = self.renderer_context.create_material(
+            [0, 0, 0, 1], [0, 0, 1, 1], 0, 0, 0
+        )
 
-        self.mat_cyan = self.renderer_context.create_material([0,0,0,1],[0, 1, 1, 1], 0, 0, 0)
-        self.mat_magenta = self.renderer_context.create_material([0,0,0,1],[1, 0, 1, 1], 0, 0, 0)
+        self.mat_cyan = self.renderer_context.create_material(
+            [0, 0, 0, 1], [0, 1, 1, 1], 0, 0, 0
+        )
+        self.mat_magenta = self.renderer_context.create_material(
+            [0, 0, 0, 1], [1, 0, 1, 1], 0, 0, 0
+        )
 
         self.red_cone = self.renderer_context.create_model([self.cone], [self.mat_red])
         self.green_cone = self.renderer_context.create_model(
@@ -1200,6 +1224,51 @@ class Viewer(object):
             "FPS: {:.2f}".format(self.window.fps)
         )
 
+    def enable_ik(self, enable):
+        self.ik_enabled = enable
+        self.refresh_ik()
+        self.refresh_ik_display_objects()
+
+    def build_ik_window(self):
+        if not self.ik_window:
+            self.gizmo = R.UIGizmo().Matrix(np.eye(4))
+            self.move_group = R.UISection().Label("Move Group")
+            self.ik_window = (
+                R.UIWindow()
+                .Label("IK")
+                .Pos(10, 10)
+                .Size(400, 400)
+                .append(
+                    R.UISameLine().append(
+                        R.UICheckbox()
+                        .Label("Enable IK")
+                        .Callback(lambda c: self.enable_ik(c.checked)),
+                        R.UIButton().Label("Go!").Callback(self.execute_ik),
+                    ),
+                    self.move_group,
+                )
+            )
+
+        if self.ik_enabled:
+            if self.ik_window.get_children()[-1] != self.gizmo:
+                self.ik_window.append(self.gizmo)
+        elif self.ik_window.get_children()[-1] == self.gizmo:
+            self.ik_window = (
+                R.UIWindow()
+                .Label("IK")
+                .Pos(10, 10)
+                .Size(400, 400)
+                .append(
+                    R.UISameLine().append(
+                        R.UICheckbox()
+                        .Label("Enable IK")
+                        .Callback(lambda c: self.enable_ik(c.checked)),
+                        R.UIButton().Label("Go!").Callback(self.execute_ik),
+                    ),
+                    self.move_group,
+                )
+            )
+
     def take_screenshot(self, _):
         picture = self.window.get_float_texture("Color")
         for i in range(100000000):
@@ -1819,6 +1888,7 @@ class Viewer(object):
         self.paused = paused
 
     def toggle_axes(self, show):
+        self.show_axes = show
         for c in self.coordinate_axes.children:
             if show:
                 c.transparency = 0
@@ -1851,6 +1921,8 @@ class Viewer(object):
         return self.window is None
 
     def close(self):
+        self.gizmo = None
+        self.move_group = None
         if hasattr(self, "coordinate_axes") and self.coordinate_axes:
             self.scene.renderer_scene._internal_scene.remove_node(self.coordinate_axes)
             for n in self.grab_axes:
@@ -1875,6 +1947,7 @@ class Viewer(object):
         self.actor_window = None
         self.articulation_window = None
         self.info_window = None
+        self.ik_window = None
 
     def focus_entity(self, actor):
         if actor == self.focused_entity:
@@ -1917,6 +1990,138 @@ class Viewer(object):
             self.selected_entity = None
             self.update_coordinate_axes()
 
+        self.refresh_ik()
+        self.refresh_ik_display_objects()
+
+    def refresh_ik(self):
+        if (
+            self.selected_entity
+            and isinstance(self.selected_entity, LinkBase)
+            and self.ik_enabled
+        ):
+            self.pinocchio_model = (
+                self.selected_entity.get_articulation().create_pinocchio_model()
+            )
+            self.gizmo.Matrix(self.selected_entity.pose.to_transformation_matrix())
+            self.move_group_joints = [
+                j.name
+                for j in self.selected_entity.get_articulation().get_joints()
+                if j.get_dof() != 0
+            ]
+            for n in self.move_group_joints:
+                if n not in self.move_group_selection:
+                    self.move_group_selection[n] = True
+
+            self.move_group.remove_children()
+
+            def select_move_group(name, select):
+                self.move_group_selection[name] = select
+
+            for n in self.move_group_joints:
+                self.move_group.append(
+                    R.UICheckbox()
+                    .Label(n)
+                    .Checked(self.move_group_selection[n])
+                    .Callback((lambda n: lambda c: select_move_group(n, c.checked))(n))
+                )
+        else:
+            self.pinocchio_model = None
+            self.move_group.remove_children()
+
+    def clear_ik_display_objects(self):
+        rs = self.scene.renderer_scene
+        render_scene: R.Scene = rs._internal_scene
+        for obj in self.ik_display_objects:
+            render_scene.remove_node(obj)
+        self.ik_display_objects = []
+
+    def refresh_ik_display_objects(self):
+        rs = self.scene.renderer_scene
+        render_scene: R.Scene = rs._internal_scene
+
+        self.clear_ik_display_objects()
+        if (
+            self.selected_entity is not None
+            and self.ik_enabled
+            and isinstance(self.selected_entity, LinkBase)
+        ):
+            for link in self.selected_entity.get_articulation().get_links():
+                link2world = link.pose
+                display_obj = render_scene.add_node()
+                for body in link.get_visual_bodies():
+                    for obj in body._internal_objects:
+                        scale = obj.scale
+                        obj2world = Pose(obj.position, obj.rotation)
+                        obj2selected = link2world.inv() * obj2world
+                        new_obj = render_scene.add_object(obj.model, display_obj)
+                        new_obj.set_position(obj2selected.p)
+                        new_obj.set_rotation(obj2selected.q)
+                        new_obj.set_scale(scale)
+                        new_obj.transparency = 0.1
+                display_obj.set_position(link.pose.p)
+                display_obj.set_rotation(link.pose.q)
+                self.ik_display_objects.append(display_obj)
+
+    def update_ik_display_objects(self):
+        if (
+            self.selected_entity is not None
+            and self.ik_enabled
+            and isinstance(self.selected_entity, LinkBase)
+        ):
+            link_idx = (
+                self.selected_entity.get_articulation()
+                .get_links()
+                .index(self.selected_entity)
+            )
+            pose = Pose.from_transformation_matrix(self.gizmo.matrix)
+            self.ik_display_objects[link_idx].set_position(pose.p)
+            self.ik_display_objects[link_idx].set_rotation(pose.q)
+
+            result, success, error = self.compute_ik()
+            self.ik_result = result
+            self.ik_success = success
+            self.ik_errpr = error
+            self.pinocchio_model.compute_forward_kinematics(result)
+            for idx, obj in enumerate(self.ik_display_objects):
+                pose = self.pinocchio_model.get_link_pose(idx)
+                obj.set_position(pose.p)
+                obj.set_rotation(pose.q)
+
+    def compute_ik(self):
+        if (
+            self.selected_entity is not None
+            and self.ik_enabled
+            and isinstance(self.selected_entity, LinkBase)
+        ):
+            a = self.selected_entity.get_articulation()
+            link_idx = a.get_links().index(self.selected_entity)
+            mask = np.array(
+                [self.move_group_selection[j] for j in self.move_group_joints]
+            ).astype(int)
+
+            pose = Pose.from_transformation_matrix(self.gizmo.matrix)
+            result, success, error = self.pinocchio_model.compute_inverse_kinematics(
+                link_idx, pose, initial_qpos=a.get_qpos(), active_qmask=mask, max_iterations=100
+            )
+            return result, success, error
+
+    def execute_ik(self, _):
+        if (
+            self.selected_entity is not None
+            and self.ik_enabled
+            and isinstance(self.selected_entity, LinkBase)
+        ):
+            if hasattr(self, "ik_result"):
+                mask = np.array(
+                    [self.move_group_selection[j] for j in self.move_group_joints]
+                ).astype(int)
+                a = self.selected_entity.get_articulation()
+                target = a.get_drive_target()
+                target = self.ik_result * mask + target * (1 - mask)
+                # self.selected_entity.get_articulation().set_qpos(target)
+                self.selected_entity.get_articulation().set_drive_target(target)
+
+
     @staticmethod
     def get_camera_pose(camera: CameraEntity):
         """Get the camera pose in the Sapien world."""
@@ -1943,9 +2148,7 @@ class Viewer(object):
 
         if self.camera_ui is not None:
             # Lazy check if any camera has changed
-            assert (
-                self.cameras == self.scene.get_cameras()
-            ), "Cameras have changed"
+            assert self.cameras == self.scene.get_cameras(), "Cameras have changed"
             index = (self.cameras.index(camera) + 1) if camera is not None else 0
             self.camera_ui.Index(index)
 
@@ -1999,12 +2202,12 @@ class Viewer(object):
                 j2w.set_p(c2w.p)
                 self.joint_axes[1].set_position(j2w.p)
                 self.joint_axes[1].set_rotation(j2w.q)
-                self.joint_axes[1].transparency = 0
+                self.joint_axes[1].transparency = 0 if self.show_axes else 1
                 self.joint_axes[0].transparency = 1
             elif j.type == "revolute":
                 self.joint_axes[0].set_position(j2w.p)
                 self.joint_axes[0].set_rotation(j2w.q)
-                self.joint_axes[0].transparency = 0
+                self.joint_axes[0].transparency = 0 if self.show_axes else 1
                 self.joint_axes[1].transparency = 1
         else:
             self.joint_axes[0].transparency = 1
@@ -2024,6 +2227,17 @@ class Viewer(object):
             self.build_actor_window()
             self.build_articulation_window()
             self.build_info_window()
+            self.build_ik_window()
+
+            proj = self.window.get_camera_projection_matrix()
+            view = (
+                Pose(
+                    self.window.get_camera_position(), self.window.get_camera_rotation()
+                )
+                .inv()
+                .to_transformation_matrix()
+            )
+            self.gizmo.CameraMatrices(view, proj)
 
             self.window.render(
                 self.target_name,
@@ -2033,6 +2247,7 @@ class Viewer(object):
                     self.actor_window,
                     self.articulation_window,
                     self.info_window,
+                    self.ik_window,
                 ],
             )
 
@@ -2089,6 +2304,7 @@ class Viewer(object):
 
             self.update_coordinate_axes()
             self.update_joint_axis()
+            self.update_ik_display_objects()
 
             if self._show_camera_linesets:
                 self._update_camera_linesets()

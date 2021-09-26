@@ -20,9 +20,6 @@ public:
   void setLocalPose(PxTransform const &pose);
   void setParent(SActorBase *actor, bool keepPose = false);
 
-  inline void setName(std::string const &name) { mName = name; }
-  inline std::string getName() const { return mName; }
-
   uint32_t getWidth() const;
   uint32_t getHeight() const;
 
@@ -57,7 +54,6 @@ public:
   ~SCamera();
 
 private:
-  std::string mName{};
   float mWidth{};
   float mHeight{};
   PxTransform mPose{PxIdentity};

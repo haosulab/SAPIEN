@@ -24,7 +24,7 @@ std::unique_ptr<PinocchioModel> PinocchioModel::fromURDFXML(std::string const &u
 Eigen::VectorXd PinocchioModel::posS2P(const Eigen::VectorXd &qext) {
   Eigen::VectorXd qint(model.nq);
   uint32_t count = 0;
-  for (size_t N = 0; N < QIDX.size(); ++N) {
+  for (Eigen::Index N = 0; N < QIDX.size(); ++N) {
     auto start_idx = QIDX[N];
     switch (NQ[N]) {
     case 0:
@@ -49,8 +49,8 @@ Eigen::VectorXd PinocchioModel::posS2P(const Eigen::VectorXd &qext) {
 Eigen::VectorXd PinocchioModel::posP2S(const Eigen::VectorXd &qint) {
   Eigen::VectorXd qext(model.nv);
 
-  uint32_t count = 0;
-  for (size_t N = 0; N < QIDX.size(); ++N) {
+  int count = 0;
+  for (Eigen::Index N = 0; N < QIDX.size(); ++N) {
     auto start_idx = QIDX[N];
     switch (NQ[N]) {
     case 0:
@@ -73,10 +73,10 @@ Eigen::VectorXd PinocchioModel::posP2S(const Eigen::VectorXd &qint) {
 
 void PinocchioModel::setJointOrder(std::vector<std::string> names) {
   Eigen::VectorXi v(model.nv);
-  size_t count = 0;
+  int count = 0;
   for (auto &name : names) {
     auto i = model.getJointId(name);
-    if (i == model.njoints) {
+    if (i == static_cast<pinocchio::JointIndex>(model.njoints)) {
       throw std::invalid_argument("invalid names in setJointOrder");
     }
     auto size = model.nvs[i];
@@ -93,7 +93,7 @@ void PinocchioModel::setJointOrder(std::vector<std::string> names) {
   NV = Eigen::VectorXi(names.size());
   for (size_t N = 0; N < names.size(); ++N) {
     auto i = model.getJointId(names[N]);
-    if (i == model.njoints) {
+    if (i == static_cast<pinocchio::JointIndex>(model.njoints)) {
       throw std::invalid_argument("invalid names in setJointOrder");
     }
     NQ[N] = model.nqs[i];
@@ -107,7 +107,7 @@ void PinocchioModel::setLinkOrder(std::vector<std::string> names) {
   Eigen::VectorXi v(names.size());
   for (auto &name : names) {
     auto i = model.getFrameId(name, pinocchio::BODY);
-    if (i == model.nframes) {
+    if (i == static_cast<pinocchio::FrameIndex>(model.nframes)) {
       throw std::invalid_argument("invalid names in setLinkOrder");
     }
     linkIdx2FrameIdx.push_back(i);
@@ -202,7 +202,8 @@ Eigen::VectorXd PinocchioModel::computeForwardDynamics(const Eigen::VectorXd &qp
 
 std::tuple<Eigen::VectorXd, bool, Eigen::Matrix<double, 6, 1>>
 PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform const &pose,
-                                         Eigen::VectorXd const &initialQpos, double eps,
+                                         Eigen::VectorXd const &initialQpos,
+                                         Eigen::VectorXi const &activeQMask, double eps,
                                          int maxIter, double dt, double damp) {
   ASSERT(linkIdx < linkIdx2FrameIdx.size(), "link index out of bound");
   Eigen::VectorXd q;
@@ -210,6 +211,13 @@ PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform co
     q = pinocchio::neutral(model);
   } else {
     q = posS2P(initialQpos);
+  }
+
+  Eigen::VectorXd mask;
+  if (activeQMask.size() > 0) {
+    mask = indexS2P * activeQMask.cast<double>();
+  } else {
+    mask = Eigen::VectorXd(model.nv, 1);
   }
 
   auto frameIdx = linkIdx2FrameIdx[linkIdx];
@@ -227,11 +235,20 @@ PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform co
   Vector6d err;
   Eigen::VectorXd v(model.nv);
 
+  double minError = 1e10;
+  Eigen::VectorXd bestQ = q;
+  Vector6d bestErr;
   for (int i = 0;; i++) {
     pinocchio::forwardKinematics(model, data, q);
     const pinocchio::SE3 dMi = oMdes.actInv(data.oMi[jointIdx]);
     err = pinocchio::log6(dMi).toVector();
-    if (err.norm() < eps) {
+    double errNorm = err.norm();
+    if (errNorm < minError) {
+      minError = errNorm;
+      bestQ = q;
+      bestErr = err;
+    }
+    if (errNorm < eps) {
       success = true;
       break;
     }
@@ -240,13 +257,15 @@ PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform co
       break;
     }
     pinocchio::computeJointJacobian(model, data, q, jointIdx, J);
+    J = J * mask.asDiagonal();
+
     pinocchio::Data::Matrix6 JJt;
     JJt.noalias() = J * J.transpose();
     JJt.diagonal().array() += damp;
     v.noalias() = -J.transpose() * JJt.ldlt().solve(err);
     q = pinocchio::integrate(model, q, v * dt);
   }
-  return {posP2S(q), success, err};
+  return {posP2S(bestQ), success, bestErr};
 }
 
 } // namespace sapien
