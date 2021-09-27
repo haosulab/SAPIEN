@@ -57,7 +57,10 @@ def main():
     sapien.KuafuRenderer.set_log_level('debug')
 
     sim = sapien.Engine()
-    renderer = sapien.KuafuRenderer()
+
+    config = sapien.KuafuConfig()
+    config.use_viewer = True
+    renderer = sapien.KuafuRenderer(config)
     sim.set_renderer(renderer)
 
     copper = renderer.create_material()
