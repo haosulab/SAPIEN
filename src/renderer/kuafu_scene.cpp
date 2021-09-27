@@ -86,9 +86,8 @@ void KuafuCamera::takePicture() {
       }
     }
     scene.setCamera(pKCamera);
-    pParentScene->pKRenderer->run();
-    pParentScene->pKRenderer->run(); // FIXME: do this internally in kuafu;
-  }                                  //        may be in downloadLatestFrame?
+    pParentScene->pKRenderer->run();         // FIXME: keep frame indicators in camera
+  }
   pParentScene->pKRenderer->run();
 };
 
