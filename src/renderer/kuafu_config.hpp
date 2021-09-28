@@ -23,7 +23,7 @@ struct KuafuConfig {
   uint32_t mPerPixelSampleRate = 32;
   bool mAccumulateFrames = false;
 
-  uint32_t mPathDepth = 5;
+  uint32_t mPathDepth = 8;
   bool mUseDenoiser = false;
 
 //  uint32_t mMaxPathDepth = 10;
