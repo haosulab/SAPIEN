@@ -39,20 +39,22 @@ public:
     pParentScene = scene;
     pKCamera = std::make_shared<KCamera>("", width, height);
     pKCamera->setSize(width, height);
-    float fy = height / 2.f / std::tan(fovy / 2.f);
-    setPerspectiveCameraParameters(0.0, 0.0, fy, fy, width / 2.f, height / 2.f, 0.f);
+    auto widthF = static_cast<float>(width);
+    auto heightF = static_cast<float>(height);
+    float fy = heightF / 2.f / std::tan(fovy / 2.f);
+    setPerspectiveCameraParameters(0.0, 0.0, fy, fy, widthF / 2.f, heightF / 2.f, 0.f);
   }
 
-  inline uint32_t getWidth() const override { return pKCamera->getWidth(); }
-  inline uint32_t getHeight() const override { return pKCamera->getHeight(); }
+  [[nodiscard]] inline uint32_t getWidth() const override { return pKCamera->getWidth(); }
+  [[nodiscard]] inline uint32_t getHeight() const override { return pKCamera->getHeight(); }
 
-  [[nodiscard]] virtual float getPrincipalPointX() const override;
-  [[nodiscard]] virtual float getPrincipalPointY() const override;
-  [[nodiscard]] virtual float getFocalX() const override;
-  [[nodiscard]] virtual float getFocalY() const override;
-  [[nodiscard]] virtual float getNear() const override;
-  [[nodiscard]] virtual float getFar() const override;
-  [[nodiscard]] virtual float getSkew() const override;
+  [[nodiscard]] float getPrincipalPointX() const override;
+  [[nodiscard]] float getPrincipalPointY() const override;
+  [[nodiscard]] float getFocalX() const override;
+  [[nodiscard]] float getFocalY() const override;
+  [[nodiscard]] float getNear() const override;
+  [[nodiscard]] float getFar() const override;
+  [[nodiscard]] float getSkew() const override;
 
   void setPerspectiveCameraParameters(float near, float far, float fx, float fy, float cx,
                                       float cy, float skew) override;
@@ -100,14 +102,19 @@ public:
     return mKGeometryInstanceIndices;
   };
 
-  inline void setUniqueId(uint32_t uniqueId) override{/* TODO:kuafu_urgent */};
+  inline void setUniqueId(uint32_t uniqueId) override{
+      /* TODO:kuafu_urgent */
+  };
   [[nodiscard]] inline uint32_t getUniqueId() const override { return mUniqueId; };
-  inline void setSegmentationId(uint32_t segmentationId) override{/* TODO:kuafu_urgent */};
+  inline void setSegmentationId(uint32_t segmentationId) override{
+      /* TODO:kuafu_urgent */
+  };
   [[nodiscard]] inline uint32_t getSegmentationId() const override { return mSegmentationId; };
   inline void setSegmentationCustomData(std::vector<float> const &customData) override{
-      /* TODO:kuafu_urgent */};
+      /* TODO:kuafu_urgent */
+  };
   void setInitialPose(const physx::PxTransform &transform) override;
-  [[nodiscard]] inline physx::PxTransform getInitialPose() const { return mInitialPose; };
+  [[nodiscard]] inline physx::PxTransform getInitialPose() const override { return mInitialPose; };
   void update(const physx::PxTransform &transform) override;
 
   void setVisibility(float visibility) override;

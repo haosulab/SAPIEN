@@ -66,22 +66,24 @@ float KuafuCamera::getSkew() const { return pKCamera->getSkew(); };
 
 void KuafuCamera::setPerspectiveCameraParameters(float near, float far, float fx, float fy,
                                                  float cx, float cy, float skew) {
-  setFullPerspective(fx, fy, cx, cy, pKCamera->getWidth(), pKCamera->getHeight(), skew);
+  setFullPerspective(fx, fy, cx, cy,
+                     static_cast<float>(pKCamera->getWidth()),
+                     static_cast<float>(pKCamera->getHeight()), skew);
 }
 
 void KuafuCamera::takePicture() {
   auto &scene = pParentScene->getKScene();
   if (scene.getCamera() != pKCamera) { // Camera changed!
     spdlog::get("SAPIEN")->info(
-        "KF: Camera is different from last render! Reduce of frame rate is expected.");
+        "KF: Camera is different from last render! Reduced frame rate is expected.");
     if (pParentScene->pKRenderer->getConfig().getPresent()) {
       auto window = pParentScene->pKRenderer->getWindow();
       vk::Extent2D extent = window->getSize();
       auto w = pKCamera->getWidth();
       auto h = pKCamera->getHeight();
       if (static_cast<int>(extent.width) != w || static_cast<int>(extent.height) != h) {
-        spdlog::get("SAPIEN")->info("KF: Rendering on a different size of the viewer, "
-                                    "trying to resize the window!");
+        spdlog::get("SAPIEN")->info(
+            "KF: Rendering on a different size of the viewer, trying to resize the window!");
         window->resize(w, h);
       }
     }
@@ -148,12 +150,13 @@ void KuafuRigidBody::setVisibility(float visibility) {
   else if (visibility == 1.0)
     setVisible(true);
   else
-    spdlog::get("SAPIEN")->error("KF: setVisibility with non-1/0 visibility is not supported yet");
+    spdlog::get("SAPIEN")->error(
+        "KF: setVisibility with non-1/0 visibility is not supported yet");
 }
 
-void KuafuRigidBody::setVisible(bool visible) { // The correctness of the function
-  for (auto idx : mKGeometryInstanceIndices) {  // relies on the fact that sapien does not
-    auto &scene = mParentScene->getKScene();    // use geometry instancing at all
+void KuafuRigidBody::setVisible(bool visible) { // FIXME: The correctness of the function
+  for (auto idx : mKGeometryInstanceIndices) {  //   relies on the fact that sapien does not
+    auto &scene = mParentScene->getKScene();    //   use geometry instancing at all
     auto instance = scene.getGeometryInstance(idx);
     auto geometry = scene.getGeometryByGlobalIndex(instance->geometryIndex);
     if (visible && geometry->hideRender) {
@@ -353,7 +356,9 @@ ICamera *KuafuScene::addCamera(uint32_t width, uint32_t height, float fovy, floa
 }
 
 void KuafuScene::removeCamera(ICamera *camera) {
-  spdlog::get("SAPIEN")->error("KF: removeCamera not implemented yet");
+  mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
+                                [camera](auto &c) { return camera == c.get(); }),
+                 mCameras.end());
 }
 
 std::vector<ICamera *> KuafuScene::getCameras() {

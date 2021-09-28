@@ -29,14 +29,6 @@ struct KuafuConfig {
 //  uint32_t mMaxPathDepth = 10;
 //  bool mRussianRoulette = true;
 //  uint32_t mRussianRouletteMinBounces = 3;
-//
-//
-//  bool mNextEventEstimation = false;
-//  uint32_t mNextEventEstimationMinBounces = 0; // temporary for debugging
-//
-//  float mVariance = 0.0F;
-//  bool mUpdateVariance = false;
-//
 
   std::shared_ptr<kuafu::Config> generate() {
     auto ret = std::make_shared<kuafu::Config>();

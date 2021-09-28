@@ -22,7 +22,6 @@ KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
   std::shared_ptr<kuafu::Camera> camera = nullptr;
   std::shared_ptr<kuafu::Window> window = nullptr;
 
-  // TODO: kuafu_urgent (window?)
   if (conf.mUseViewer) {
     camera = std::make_shared<KCamera>(
         "viewer_cam", conf.mViewerWidth, conf.mViewerHeight);
@@ -66,7 +65,6 @@ void KuafuRenderer::setLogLevel(std::string_view level) {
   else
     kuafu::global::logger->error("Invalid log level \"{}\"", level);
 }
-
 
 void KuafuRenderer::removeScene(IPxrScene *scene) {
   spdlog::get("SAPIEN")->warn("KF: removeScene not implemented yet");
