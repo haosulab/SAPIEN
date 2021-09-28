@@ -55,9 +55,7 @@ public:
   createCollisionShape(PxGeometry const &geometry, std::shared_ptr<SPhysicalMaterial> material);
 
   inline std::shared_ptr<Renderer::IPxrRenderer> getRenderer() const { return mRenderer; }
-  inline void setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer) {
-    mRenderer = renderer;
-  }
+  void setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer);
 
   inline MeshManager &getMeshManager() { return mMeshManager; }
   void setLogLevel(std::string const &level);

@@ -158,6 +158,11 @@ Simulation::createCollisionShape(PxGeometry const &geometry,
   return result;
 }
 
+void Simulation::setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer) {
+  spdlog::get("SAPIEN")->warn("Setting renderer twice is in general not allowed, unless all scenes have been deleted.");
+  mRenderer = renderer;
+}
+
 void Simulation::setLogLevel(std::string const &level) {
   if (level == "debug") {
     spdlog::get("SAPIEN")->set_level(spdlog::level::debug);
