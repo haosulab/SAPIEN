@@ -71,9 +71,7 @@ SAPIEN Engine provides physical simulation for articulated objects. It powers
 reinforcement learning and robotics with its pure Python interface.
 
 ## SAPIEN Renderer
-SAPIEN provides rasterized and ray traced (available soon) rendering with
-Vulkan. For machines without Vulkan support, we provide a OpenGL renderer as a
-second option.
+SAPIEN provides rasterized and ray traced rendering with Vulkan.
 
 ## PartNet-Mobility
 SAPIEN releases PartNet-Mobility dataset, which is a collection of 2K
@@ -83,7 +81,7 @@ powers research for generalizable computer vision and manipulation.
 ## Website and Documentation
 SAPIEN Website: [https://sapien.ucsd.edu/](https://sapien.ucsd.edu/). SAPIEN
 Documentation:
-[https://sapien.ucsd.edu/docs/index.html](https://sapien.ucsd.edu/docs/index.html).
+[https://sapien.ucsd.edu/docs/latest/index.html](https://sapien.ucsd.edu/docs/latest/index.html).
 
 ## Build from source
 ### Before build
