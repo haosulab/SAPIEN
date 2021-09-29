@@ -24,16 +24,25 @@ KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
     kuafu::global::logger->critical(e.what());
     throw std::runtime_error(e.what());
   }
-
-  pKRenderer->getScene()->setGeometries({});
-  pKRenderer->getScene()->setGeometryInstances({});
 }
 
 IPxrScene *KuafuRenderer::createScene(std::string const &name) {
-  mScene.pKRenderer = pKRenderer;
-  mScene.pKScene = pKRenderer->createScene();
-//  pKRenderer->setScene(mScene.pKScene);
-  return &mScene;
+  static bool first = true;
+  if (first)
+    if (!mScenes.empty())
+      throw std::runtime_error("???");
+
+  mScenes.emplace_back(new KuafuScene);
+  auto newScene = mScenes.back().get();
+  newScene->pKRenderer = pKRenderer;
+
+  if (first) {
+    newScene->pKScene = pKRenderer->getScene();
+    first = false;
+  } else
+    newScene->pKScene = pKRenderer->createScene();
+
+  return newScene;
 };
 
 void KuafuRenderer::setLogLevel(std::string_view level) {
@@ -55,7 +64,10 @@ void KuafuRenderer::setLogLevel(std::string_view level) {
 }
 
 void KuafuRenderer::removeScene(IPxrScene *scene) {
-  scene->destroy();             /* TODO: kuafu_urgent: multiple scenes */
+  scene->destroy();
+  mScenes.erase(std::remove_if(mScenes.begin(), mScenes.end(),
+                               [scene](auto& s) { return s.get() == scene; }),
+                mScenes.end());
 };
 
 std::shared_ptr<IPxrMaterial> KuafuRenderer::createMaterial() {

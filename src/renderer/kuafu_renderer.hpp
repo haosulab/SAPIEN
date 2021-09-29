@@ -56,7 +56,7 @@ public:
 
 class KuafuRenderer : public IPxrRenderer {
   std::shared_ptr<kuafu::Kuafu> pKRenderer = nullptr;
-  KuafuScene mScene;
+  std::vector<std::unique_ptr<KuafuScene>> mScenes;
 
 public:
   explicit KuafuRenderer(KuafuConfig config = KuafuConfig());

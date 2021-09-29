@@ -19,7 +19,7 @@ class KuafuCamera : public ICamera {
   friend class KuafuScene;
 
   KuafuScene *pParentScene = nullptr;
-  kuafu::Camera* pKCamera;
+  kuafu::Camera* pKCamera = nullptr;
 
   void setPxPose(const physx::PxTransform &pose);
 

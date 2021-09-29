@@ -125,9 +125,9 @@ void KuafuRigidBody::setVisibility(float visibility) {
 }
 
 void KuafuRigidBody::setVisible(bool visible) { // FIXME: The correctness of the function
-  for (auto& ins : pKGeometryInstances) {        //   relies on the fact that sapien does not
-    auto scene = pParentScene->getKScene();    //   use geometry instancing at all
-    auto geometry = scene->getGeometryByGlobalIndex(ins->geometryIndex);
+  for (auto& ins : pKGeometryInstances) {       //   relies on the fact that sapien does not
+    auto scene = pParentScene->getKScene();     //   use geometry instancing at all
+    auto geometry = ins->geometry;
     if (visible && geometry->hideRender) {
       geometry->hideRender = false;
       scene->markGeometriesChanged();
@@ -240,7 +240,6 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
   auto g = std::make_shared<kuafu::Geometry>();
   g->initialized = false;
   g->path = "";
-  g->geometryIndex = kuafu::global::geometryIndex++;
   g->dynamic = true;
 
   if (indices.size() % 3 != 0)
@@ -406,16 +405,13 @@ IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
 };
 
 void KuafuScene::removeLight(ILight *light) {
-  dynamic_cast<IKuafuLight*>(light)->_kfRemoveFromScene(pKRenderer->getScene());
+  dynamic_cast<IKuafuLight*>(light)->_kfRemoveFromScene(pKScene);
   mLights.erase(std::remove_if(mLights.begin(), mLights.end(),
                                [light](auto &l) { return light == l.get(); }),
                 mLights.end());
 }
 
 void KuafuScene::destroy() {
-  pKRenderer->getScene()->clearGeometries();
-  pKRenderer->getScene()->clearGeometryInstances();
-
   while (!mBodies.empty()) {       // Warning: b->destroy() will change the container!
     auto& b = mBodies.back();
     b->destroy();
@@ -430,5 +426,7 @@ void KuafuScene::destroy() {
     auto& l = mLights.back();
     removeLight(l.get());
   }
+
+  pKRenderer->removeScene(pKScene);
 }
 } // namespace sapien::Renderer
