@@ -75,7 +75,7 @@ private:
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
   SapienErrorCallback mErrorCallback;
 
-  std::shared_ptr<Renderer::IPxrRenderer> mRenderer;
+  std::shared_ptr<Renderer::IPxrRenderer> mRenderer = nullptr;
 
   MeshManager mMeshManager;
 };
