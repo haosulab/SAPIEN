@@ -796,7 +796,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
              std::string const &path) {
             return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov, path);
           },
-          py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"))
+          py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"),
+          py::return_value_policy::reference)
       .def("remove_light", &SScene::removeLight, py::arg("light"))
       .def("set_environment_map", &SScene::setEnvironmentMap, py::arg("filename"))
       .def("set_environment_map_from_files", &SScene::setEnvironmentMapFromFiles, py::arg("px"),
