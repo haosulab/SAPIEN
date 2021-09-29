@@ -100,7 +100,7 @@ def main():
 
     scene.update_render()
     count = 0
-    while True:
+    while renderer.is_running:
         if kuafu:
             cam1.take_picture()
         else:

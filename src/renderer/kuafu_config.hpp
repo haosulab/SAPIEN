@@ -32,6 +32,8 @@ struct KuafuConfig {
 
   std::shared_ptr<kuafu::Config> generate() {
     auto ret = std::make_shared<kuafu::Config>();
+    ret->setInitialWidth(mViewerWidth);
+    ret->setInitialHeight(mViewerHeight);
     ret->setGeometryLimit(mMaxGeometry);
     ret->setGeometryInstanceLimit(mMaxGeometryInstances);
     ret->setTextureLimit(mMaxTextures);

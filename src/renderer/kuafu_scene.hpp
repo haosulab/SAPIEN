@@ -11,39 +11,21 @@
 
 namespace sapien::Renderer {
 
+typedef std::vector<std::shared_ptr<kuafu::GeometryInstance>> KuafuGeometryInstances;
+
 class KuafuScene;
-
-class KCamera : public kuafu::Camera {
-  std::string mName;
-  void processKeyboard() override;
-
-public:
-  KCamera() = delete;
-  KCamera(std::string name, int width, int height)
-      : kuafu::Camera(width, height), mName(std::move(name)) {}
-  [[nodiscard]] const std::string &getName() const { return mName; }
-};
 
 class KuafuCamera : public ICamera {
   friend class KuafuScene;
 
   KuafuScene *pParentScene = nullptr;
-  std::shared_ptr<KCamera> pKCamera;
+  kuafu::Camera* pKCamera;
 
   void setPxPose(const physx::PxTransform &pose);
 
 public:
   // ICamera
-
-  KuafuCamera(int width, int height, float fovy, KuafuScene *scene) {
-    pParentScene = scene;
-    pKCamera = std::make_shared<KCamera>("", width, height);
-    pKCamera->setSize(width, height);
-    auto widthF = static_cast<float>(width);
-    auto heightF = static_cast<float>(height);
-    float fy = heightF / 2.f / std::tan(fovy / 2.f);
-    setPerspectiveCameraParameters(0.0, 0.0, fy, fy, widthF / 2.f, heightF / 2.f, 0.f);
-  }
+  KuafuCamera(int width, int height, float fovy, KuafuScene *scene);
 
   [[nodiscard]] inline uint32_t getWidth() const override { return pKCamera->getWidth(); }
   [[nodiscard]] inline uint32_t getHeight() const override { return pKCamera->getHeight(); }
@@ -81,26 +63,24 @@ public:
 
 class KuafuRigidBody : public IPxrRigidbody {
   std::string mName{};
-  KuafuScene *mParentScene = nullptr;
+  KuafuScene *pParentScene = nullptr;
   physx::PxVec3 mScale = {1.0, 1.0, 1.0};
   physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
 
-  std::vector<size_t> mKGeometryInstanceIndices;
+  KuafuGeometryInstances pKGeometryInstances;
 
   uint32_t mUniqueId = 0;
   uint32_t mSegmentationId = 0;
 
 public:
-  KuafuRigidBody(KuafuScene *scene, std::vector<size_t> indices,
+  KuafuRigidBody(KuafuScene *scene,
+                 KuafuGeometryInstances instances,
                  const physx::PxVec3 &scale = {1.0, 1.0, 1.0});
   KuafuRigidBody(KuafuRigidBody const &other) = delete;
   KuafuRigidBody &operator=(KuafuRigidBody const &other) = delete;
 
   inline void setName(std::string const &name) override { mName = name; };
   [[nodiscard]] inline std::string getName() const override { return mName; };
-  [[maybe_unused]] [[nodiscard]] inline auto getKGeometryInstanceIndices() const {
-    return mKGeometryInstanceIndices;
-  };
 
   inline void setUniqueId(uint32_t uniqueId) override{
       /* TODO:kuafu_urgent */
@@ -133,10 +113,7 @@ class KuafuScene : public IPxrScene {
   std::vector<std::unique_ptr<KuafuRigidBody>> mBodies;
   std::vector<std::unique_ptr<KuafuCamera>> mCameras;
 
-  std::vector<std::shared_ptr<KuafuPointLight>> mPointLights;
-  std::vector<std::shared_ptr<KuafuDirectionalLight>> mDirectionalLights;
-  std::vector<std::shared_ptr<KuafuSpotLight>> mSpotLights;
-  std::vector<std::shared_ptr<KuafuActiveLight>> mActiveLights;
+  std::vector<std::shared_ptr<ILight>> mLights;
 
 public:
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
@@ -191,9 +168,11 @@ public:
       //    spdlog::get("SAPIEN")->warn("KF: updateRender not implemented yet");
   };
 
-  inline auto &getKScene() { return pKRenderer->getScene(); }
-
   void destroy() override;
+
+
+  // non override
+  inline auto &getKScene() { return pKRenderer->getScene(); }
 
   inline void setEnvironmentMap(std::string_view path) override {
     pKRenderer->getScene().setEnvironmentMap(path);

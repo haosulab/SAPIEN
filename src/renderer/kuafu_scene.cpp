@@ -11,45 +11,16 @@
 #include <spdlog/spdlog.h>
 
 namespace sapien::Renderer {
-
-//========= KCamera =========//
-void KCamera::processKeyboard() {
-  const float defaultSpeed = 2.5F;
-  static float currentSpeed = defaultSpeed;
-  float finalSpeed = currentSpeed * kuafu::Time::getDeltaTime();
-
-  if (kuafu::global::keys::eW) {
-    mPosition += mDirFront * finalSpeed;
-    mViewNeedsUpdate = true;
-  }
-
-  if (kuafu::global::keys::eS) {
-    mPosition -= mDirFront * finalSpeed;
-    mViewNeedsUpdate = true;
-  }
-
-  if (kuafu::global::keys::eA) {
-    mPosition += mDirRight * finalSpeed;
-    mViewNeedsUpdate = true;
-  }
-
-  if (kuafu::global::keys::eD) {
-    mPosition -= mDirRight * finalSpeed;
-    mViewNeedsUpdate = true;
-  }
-
-  if (kuafu::global::keys::eQ) {
-    mPosition -= mDirUp * finalSpeed;
-    mViewNeedsUpdate = true;
-  }
-
-  if (kuafu::global::keys::eE) {
-    mPosition += mDirUp * finalSpeed;
-    mViewNeedsUpdate = true;
-  }
-}
-
 //========= KuafuCamera =========//
+KuafuCamera::KuafuCamera(int width, int height, float fovy, KuafuScene *scene) {
+    pParentScene = scene;
+    pKCamera = pParentScene->getKScene().createCamera(width, height);
+    auto widthF = static_cast<float>(width);
+    auto heightF = static_cast<float>(height);
+    float fy = heightF / 2.f / std::tan(fovy / 2.f);
+    setPerspectiveCameraParameters(
+        0.0, 0.0, fy, fy, widthF / 2.f, heightF / 2.f, 0.f);
+}
 
 void KuafuCamera::setPxPose(const physx::PxTransform &pose) {
   pKCamera->setPose(toGlmMat4(physx::PxMat44(pose)));
@@ -126,9 +97,9 @@ IPxrScene *KuafuCamera::getScene() { return pParentScene; }
 
 //========= KuafuRigidBody =========//
 
-KuafuRigidBody::KuafuRigidBody(KuafuScene *scene, std::vector<size_t> indices,
-                               const physx::PxVec3 &scale)
-    : mParentScene(scene), mScale(scale), mKGeometryInstanceIndices(std::move(indices)) {}
+KuafuRigidBody::KuafuRigidBody(
+    KuafuScene *scene, KuafuGeometryInstances instances, const physx::PxVec3 &scale)
+    : pParentScene(scene), mScale(scale), pKGeometryInstances(std::move(instances)) {}
 
 void KuafuRigidBody::setInitialPose(const physx::PxTransform &transform) {
   mInitialPose = transform;
@@ -138,10 +109,8 @@ void KuafuRigidBody::setInitialPose(const physx::PxTransform &transform) {
 void KuafuRigidBody::update(const physx::PxTransform &transform) {
   auto t = toGlmMat4(physx::PxMat44(transform * mInitialPose));
   t = glm::scale(t, {mScale.x, mScale.y, mScale.z});
-  for (auto idx : mKGeometryInstanceIndices) {
-    auto obj = mParentScene->getKScene().getGeometryInstance(idx);
-    obj->setTransform(t);
-  }
+  for (auto& ins : pKGeometryInstances)
+    ins->setTransform(t);
 }
 
 void KuafuRigidBody::setVisibility(float visibility) {
@@ -155,10 +124,9 @@ void KuafuRigidBody::setVisibility(float visibility) {
 }
 
 void KuafuRigidBody::setVisible(bool visible) { // FIXME: The correctness of the function
-  for (auto idx : mKGeometryInstanceIndices) {  //   relies on the fact that sapien does not
-    auto &scene = mParentScene->getKScene();    //   use geometry instancing at all
-    auto instance = scene.getGeometryInstance(idx);
-    auto geometry = scene.getGeometryByGlobalIndex(instance->geometryIndex);
+  for (auto& ins : pKGeometryInstances) {        //   relies on the fact that sapien does not
+    auto &scene = pParentScene->getKScene();    //   use geometry instancing at all
+    auto geometry = scene.getGeometryByGlobalIndex(ins->geometryIndex);
     if (visible && geometry->hideRender) {
       geometry->hideRender = false;
       scene.markGeometriesChanged();
@@ -189,24 +157,8 @@ void KuafuRigidBody::setRenderMode(uint32_t mode) {
 }
 
 void KuafuRigidBody::destroy() {
-  // TODO: kuafu_urgent
-  spdlog::get("SAPIEN")->warn("KF: FIXME: KuafuRigidBody::destroy");
-  for (auto idx : mKGeometryInstanceIndices) {
-    auto obj = mParentScene->getKScene().getGeometryInstance(idx);
-
-    // An out-of-sight t
-    glm::mat4 t;
-    for (int i = 0; i < 4; i++)
-      for (int j = 0; j < 4; j++)
-        t[i][j] = 0;
-
-    t[0][0] = t[1][1] = t[2][2] = 0.0001f;
-    t[3][0] = t[3][1] = t[3][2] = 10000.f;
-    t[3][3] = 1.f;
-
-    obj->setTransform(t);
-  }
-  //  pParentScene->removeRigidbody(this);
+  pParentScene->getKScene().removeGeometryInstances(pKGeometryInstances);
+  pParentScene->removeRigidbody(this);
 }
 
 IPxrRigidbody *KuafuScene::addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
@@ -214,21 +166,20 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::string &meshFile, const physx
   try {
     auto obj = kuafu::loadScene(meshFile, true);
     if (material)
-      for (auto &o : obj)
+      for (auto &o: obj)
         o->setMaterial(std::dynamic_pointer_cast<KuafuMaterial>(material)->getKMaterial());
 
     auto transform = glm::scale(glm::mat4(1.0F), glm::vec3(scale.x, scale.y, scale.z));
-    std::vector<size_t> rigidBodyIndices;
+    KuafuGeometryInstances rigidBodyInstances;
 
-    auto orgGeoCnt = getKScene().getGeometryInstanceCount();
-
-    for (size_t i = 0; i < obj.size(); i++) {
-      getKScene().submitGeometry(obj[i]);
-      getKScene().submitGeometryInstance(kuafu::instance(obj[i], transform));
-      rigidBodyIndices.push_back(orgGeoCnt + i);
+    for (auto& o: obj) {
+      getKScene().submitGeometry(o);
+      auto ins = kuafu::instance(o, transform);
+      getKScene().submitGeometryInstance(ins);
+      rigidBodyInstances.push_back(ins);
     }
 
-    mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyIndices, scale));
+    mBodies.push_back(std::make_unique<KuafuRigidBody>(this, rigidBodyInstances, scale));
     return mBodies.back().get();
   } catch (const std::exception &e) {
     spdlog::get("SAPIEN")->error("KF: Fail to load object: " + std::string(e.what()));
@@ -272,11 +223,11 @@ IPxrRigidbody *KuafuScene::addRigidbody(physx::PxGeometryType::Enum type,
 
   auto transform = glm::scale(glm::mat4(1.0F), {new_scale.x, new_scale.y, new_scale.z});
   getKScene().submitGeometry(geometry);
-  getKScene().submitGeometryInstance(kuafu::instance(geometry, transform));
+  auto ins = kuafu::instance(geometry, transform);
+  getKScene().submitGeometryInstance(ins);
 
-  size_t rigidBodyIdx = getKScene().getGeometryInstanceCount() - 1;
   mBodies.push_back(
-      std::make_unique<KuafuRigidBody>(this, std::vector<size_t>{rigidBodyIdx}, new_scale));
+      std::make_unique<KuafuRigidBody>(this, KuafuGeometryInstances{ins}, new_scale));
   return mBodies.back().get();
 }
 
@@ -318,11 +269,11 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
 
   auto transform = glm::scale(glm::mat4(1.0F), glm::vec3(scale.x, scale.y, scale.z));
   getKScene().submitGeometry(g);
-  getKScene().submitGeometryInstance(kuafu::instance(g, transform));
+  auto ins = kuafu::instance(g, transform);
+  getKScene().submitGeometryInstance(ins);
 
-  size_t rigidBodyIdx = getKScene().getGeometryInstanceCount() - 1;
   mBodies.push_back(
-      std::make_unique<KuafuRigidBody>(this, std::vector<size_t>{rigidBodyIdx}, scale));
+      std::make_unique<KuafuRigidBody>(this, KuafuGeometryInstances{ins}, scale));
   return mBodies.back().get();
 }
 
@@ -342,7 +293,12 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
   return addRigidbody(vertices, normals, indices, scale, material);
 }
 
-void KuafuScene::removeRigidbody(IPxrRigidbody *body) { /*TODO:kuafu_urgent check this impl*/
+void KuafuScene::removeRigidbody(IPxrRigidbody *body) {
+  for (auto it = mBodies.begin(); it != mBodies.end(); ++it)
+    if (it->get() == body) {
+      mBodies.erase(it);
+      return;
+    }
 }
 
 ICamera *KuafuScene::addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,
@@ -356,6 +312,7 @@ ICamera *KuafuScene::addCamera(uint32_t width, uint32_t height, float fovy, floa
 }
 
 void KuafuScene::removeCamera(ICamera *camera) {
+  getKScene().removeCamera(dynamic_cast<KuafuCamera*>(camera)->pKCamera);
   mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
                                 [camera](auto &c) { return camera == c.get(); }),
                  mCameras.end());
@@ -388,8 +345,10 @@ IPointLight *KuafuScene::addPointLight(const std::array<float, 3> &position,
   light->radius = 0.1; // TODO: expose this
 
   getKScene().addPointLight(light); // TODO: check if success
-  mPointLights.push_back(std::make_shared<KuafuPointLight>(light));
-  return mPointLights.back().get();
+
+  auto ret = std::dynamic_pointer_cast<IPointLight>(std::make_shared<KuafuPointLight>(light));
+  mLights.push_back(ret);
+  return ret.get();
 }
 
 IDirectionalLight *KuafuScene::addDirectionalLight(
@@ -402,8 +361,11 @@ IDirectionalLight *KuafuScene::addDirectionalLight(
   light->softness = 0.1; // TODO: expose this
 
   getKScene().setDirectionalLight(light); // TODO: check if success
-  mDirectionalLights.push_back(std::make_shared<KuafuDirectionalLight>(light));
-  return mDirectionalLights.back().get();
+
+  auto ret = std::dynamic_pointer_cast<IDirectionalLight>(
+      std::make_shared<KuafuDirectionalLight>(light));
+  mLights.push_back(ret);
+  return ret.get();
 }
 
 ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
@@ -423,8 +385,10 @@ ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
     spdlog::get("SAPIEN")->warn("KF: fovInner != fovOuter does not take effect");
 
   getKScene().addActiveLight(light); // TODO: check if success
-  mSpotLights.push_back(std::make_shared<KuafuSpotLight>(light));
-  return mSpotLights.back().get();
+
+  auto ret = std::dynamic_pointer_cast<ISpotLight>(std::make_shared<KuafuSpotLight>(light));
+  mLights.push_back(ret);
+  return ret.get();
 }
 
 IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
@@ -438,14 +402,36 @@ IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
   light->texPath = texPath;
   light->fov = fov;
 
-  getKScene().addActiveLight(light); // TODO: check if success
-  mActiveLights.push_back(std::make_shared<KuafuActiveLight>(light));
-  return mActiveLights.back().get();
+  auto ret = std::dynamic_pointer_cast<IActiveLight>(std::make_shared<KuafuActiveLight>(light));
+  mLights.push_back(ret);
+  return ret.get();
 };
 
 void KuafuScene::removeLight(ILight *light) {
-  spdlog::get("SAPIEN")->error("KF: removeLight not implemented yet");
+  dynamic_cast<IKuafuLight*>(light)->_kfRemoveFromScene(&pKRenderer->getScene());
+  mLights.erase(std::remove_if(mLights.begin(), mLights.end(),
+                               [light](auto &l) { return light == l.get(); }),
+                mLights.end());
 }
 
-void KuafuScene::destroy() { spdlog::get("SAPIEN")->error("KF: destroy not implemented yet"); }
+void KuafuScene::destroy() {
+  pKRenderer->getScene().clearGeometries();
+  pKRenderer->getScene().clearGeometryInstances();
+
+  for (auto &b : mBodies)
+    b->destroy();
+  if (!mBodies.empty())
+    spdlog::get("SAPIEN")->critical("KF: mBodies not cleared!");
+
+  for (auto &c :mCameras)
+    removeCamera(c.get());
+  if (!mCameras.empty())
+    spdlog::get("SAPIEN")->critical("KF: mCameras not cleared!");
+
+  for (auto& p: mLights)
+    removeLight(p.get());
+  if (!mLights.empty())
+    spdlog::get("SAPIEN")->critical("KF: mLights not cleared!");
+
+}
 } // namespace sapien::Renderer

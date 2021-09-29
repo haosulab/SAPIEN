@@ -9,6 +9,7 @@ import os
 import sapien.core as sapien
 import numpy as np
 from sapien.core import Pose
+import matplotlib.pyplot as plt
 
 
 def load_obj(scene, materials_root, obj_name, pose=Pose(), material=None):
@@ -22,7 +23,7 @@ def load_obj(scene, materials_root, obj_name, pose=Pose(), material=None):
 
 
 def main():
-    repo_root = '/home/fx/source/ICCV2021_Diagnosis/'
+    repo_root = '/zdata/ssource/ICCV2021_Diagnosis/'
     materials_root = os.path.join(repo_root, 'ocrtoc_materials')
 
     sim = sapien.Engine()
@@ -30,10 +31,10 @@ def main():
     sapien.KuafuRenderer.set_log_level('debug')
 
     render_config = sapien.KuafuConfig()
-    render_config.use_viewer = True
+    render_config.use_viewer = False
     render_config.viewer_width = 960
     render_config.viewer_height = 540
-    render_config.spp = 16
+    render_config.spp = 32
     render_config.max_bounces = 6
     render_config.use_denoiser = True
 
@@ -114,13 +115,19 @@ def main():
     # obj.set_pose(Pose(p=[0, -1, 0]))
 
     builder = scene.create_actor_builder()
-    cam_mount = builder.build_kinematic(name='real_camera')
+    cam_mount = builder.build_kinematic(name='real_camera1')
     cam_mount.set_pose(sapien.Pose(
         [0.79111, 0.247229, 0.703505], [0.13942, 0.452553, 0.0629925, -0.878516]))
-    cam = scene.add_mounted_camera("cam", cam_mount, Pose([0, 0, 0]), 1280, 720, 0, 1, 0.1, 100)
+    cam1 = scene.add_mounted_camera("cam1", cam_mount, Pose([0, 0, 0]), 1920, 1080, 0, 1, 0.1, 100)
+    cam1.set_perspective_parameters(0.1, 100, 1.387511840820312500e+03, 1.386223266601562500e+03,
+                                    9.825937500000000000e+02, 5.653156127929687500e+02, 0)
 
-    # cam.set_full_perspective(1920, 1080, 1.387511840820312500e+03, 1.386223266601562500e+03,
-    #                          9.825937500000000000e+02, 5.653156127929687500e+02, 0)
+    cam_mount = builder.build_kinematic(name='real_camera2')
+    cam_mount.set_pose(sapien.Pose(
+        [0.79111, 0.247229, 0.803505], [0.13942, 0.452553, 0.0629925, -0.878516]))
+    cam2 = scene.add_mounted_camera("cam1", cam_mount, Pose([0, 0, 0]), 960, 540, 0, 1, 0.1, 100)
+    cam2.set_perspective_parameters(0.1, 100, 1.387511840820312500e+03 / 2, 1.386223266601562500e+03 / 2,
+                                    9.825937500000000000e+02 / 2, 5.653156127929687500e+02 / 2, 0)
 
     scene.step()
 
@@ -169,12 +176,20 @@ def main():
     while renderer.is_running:
         scene.step()
         scene.update_render()
-        cam.take_picture()     # will update viewer and download rgba for now (sync)
+
+        cam1.take_picture()
+        a = cam1.get_color_rgba()
+        plt.imsave(f'{cnt:05d}a.png', a)
+
+        cam2.take_picture()
+        b = cam2.get_color_rgba()
+        plt.imsave(f'{cnt:05d}b.png', b)
+
         cnt += 1
 
-        if cnt % 400 == 0:
-            ceil_light.set_pose(Pose(p=[0, 0, 3]))
-            alight.set_color([0, 0, 0])
+        # if cnt % 400 == 0:
+        #     ceil_light.set_pose(Pose(p=[0, 0, 3]))
+        #     alight.set_color([0, 0, 0])
 
         # if cnt % 400 == 200:
         #     ceil_light.set_pose(Pose(p=[100, 100, 3]))

@@ -29,7 +29,13 @@ inline physx::PxMat44 toPxMat44(glm::mat4 mat) {
   return ret;
 }
 
-class KuafuPointLight : public IPointLight {
+
+class IKuafuLight : public ILight {
+public:
+  inline virtual void _kfRemoveFromScene(void*) = 0;
+};
+
+class KuafuPointLight : public IKuafuLight, public IPointLight {
   std::shared_ptr<kuafu::PointLight> mLight;
 
 public:
@@ -75,12 +81,17 @@ public:
     return 0;
   };
 
+  void _kfRemoveFromScene(void* scene) override {
+    auto kfScene = static_cast<kuafu::Scene*>(scene);
+    kfScene->removePointLight(mLight);
+  }
+
   // ---------- Non-override ---------- //
   [[maybe_unused]] [[nodiscard]] inline float getSoftness() const { return mLight->radius; }
   [[maybe_unused]] inline void setSoftness(float s) { mLight->radius = s; }
 };
 
-class KuafuDirectionalLight : public IDirectionalLight {
+class KuafuDirectionalLight : public IKuafuLight, public IDirectionalLight {
   std::shared_ptr<kuafu::DirectionalLight> mLight;
 
 public:
@@ -131,12 +142,17 @@ public:
     return 0;
   };
 
+  void _kfRemoveFromScene(void* scene) override {
+    auto kfScene = static_cast<kuafu::Scene*>(scene);
+    kfScene->removeDirectionalLight();
+  }
+
   // ---------- Non-override ---------- //
   [[maybe_unused]] [[nodiscard]] inline float getSoftness() const { return mLight->softness; }
   [[maybe_unused]] inline void setSoftness(float s) { mLight->softness = s; }
 };
 
-class KuafuSpotLight : public ISpotLight {
+class KuafuSpotLight : public IKuafuLight, public ISpotLight {
   std::shared_ptr<kuafu::ActiveLight> mLight;
 
 public:
@@ -192,12 +208,17 @@ public:
   inline void setFov(float fov) override { mLight->fov = fov; };
   [[nodiscard]] inline float getFov() const override { return mLight->fov; };
 
+  void _kfRemoveFromScene(void* scene) override {
+    auto kfScene = static_cast<kuafu::Scene*>(scene);
+    kfScene->removeActiveLight(mLight);
+  }
+
   // ---------- Non-override ---------- //
 //  [[maybe_unused]] [[maybe_unused]] [[nodiscard]] inline float getSoftness() const { return mLight->softness; }
 //  [[maybe_unused]] [[maybe_unused]] inline void setSoftness(float s) { mLight->softness = s; }
 };
 
-class KuafuActiveLight : public IActiveLight {
+class KuafuActiveLight : public IKuafuLight, public IActiveLight {
   std::shared_ptr<kuafu::ActiveLight> mLight;
 
 public:
@@ -240,6 +261,11 @@ public:
     // mLight->texPath = path;
   };
   inline std::string_view getTexture() override { return mLight->texPath; }
+
+  void _kfRemoveFromScene(void* scene) override {
+    auto kfScene = static_cast<kuafu::Scene*>(scene);
+    kfScene->removeActiveLight(mLight);
+  }
 
   // ---------- Non-override ---------- //
 //  [[maybe_unused]] [[nodiscard]] inline float getSoftness() const { return mLight->softness; }

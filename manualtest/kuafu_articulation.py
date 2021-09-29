@@ -263,7 +263,7 @@ def main():
 #    import torch.utils.dlpack
 
     count = 0
-    while True:
+    while renderer.is_running:
         for i in range(4):
             scene.step()
         scene.update_render()

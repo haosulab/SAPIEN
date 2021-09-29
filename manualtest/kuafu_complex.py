@@ -336,7 +336,7 @@ def main():
     ant.set_qf(f)
     scene.step()
 
-    scene.renderer_scene.set_ambient_light([0.2, 0.2, 0.15])
+    scene.set_ambient_light([0.2, 0.2, 0.15])
 
     dlight = scene.add_directional_light([0.4, 0.4, -1], [3, 3, 3])
 

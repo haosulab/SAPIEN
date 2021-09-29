@@ -4,7 +4,6 @@
 
 #include "kuafu_renderer.hpp"
 #include "kuafu_scene.hpp"
-#include "kuafu_window.hpp"
 
 #include <kuafu.hpp>
 #include <spdlog/spdlog.h>
@@ -21,19 +20,8 @@ KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
 
   std::shared_ptr<kuafu::Camera> camera = nullptr;
   std::shared_ptr<kuafu::Window> window = nullptr;
-
-  if (conf.mUseViewer) {
-    camera = std::make_shared<KCamera>(
-        "viewer_cam", conf.mViewerWidth, conf.mViewerHeight);
-    camera->setPosition({-1, 0, 1});
-    camera->setFront({1, 0, -1});
-
-    window = std::make_shared<KWindow>(
-        conf.mViewerWidth, conf.mViewerHeight, "Viewer", SDL_WINDOW_RESIZABLE, camera);
-  }
-
   try {
-    pKRenderer = std::make_shared<kuafu::Kuafu>(config, window, camera, nullptr);
+    pKRenderer = std::make_shared<kuafu::Kuafu>(config);
   } catch (std::exception& e) {
     kuafu::global::logger->critical(e.what());
     throw std::runtime_error(e.what());
@@ -67,7 +55,7 @@ void KuafuRenderer::setLogLevel(std::string_view level) {
 }
 
 void KuafuRenderer::removeScene(IPxrScene *scene) {
-  spdlog::get("SAPIEN")->warn("KF: removeScene not implemented yet");
+  scene->destroy();             /* TODO: kuafu_urgent: multiple scenes */
 };
 
 std::shared_ptr<IPxrMaterial> KuafuRenderer::createMaterial() {
