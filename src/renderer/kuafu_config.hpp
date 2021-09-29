@@ -18,8 +18,6 @@ struct KuafuConfig {
 
   std::string mAssetsPath;
 
-  glm::vec4 mClearColor = glm::vec4(0.F, 0.F, 0.F, 1.F);
-
   uint32_t mPerPixelSampleRate = 32;
   bool mAccumulateFrames = false;
 
@@ -39,7 +37,6 @@ struct KuafuConfig {
     ret->setTextureLimit(mMaxTextures);
     ret->setMaterialLimit(mMaxMaterials);
     ret->setAssetsPath(mAssetsPath);
-    ret->setClearColor(mClearColor);
     ret->setPerPixelSampleRate(mPerPixelSampleRate);
     ret->setAccumulatingFrames(mAccumulateFrames);
     ret->setPathDepth(mPathDepth);

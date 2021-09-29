@@ -281,7 +281,6 @@ void buildSapien(py::module &m) {
       .def_readwrite("viewer_width", &Renderer::KuafuConfig::mViewerWidth)
       .def_readwrite("viewer_height", &Renderer::KuafuConfig::mViewerHeight)
       .def_readwrite("assets_path", &Renderer::KuafuConfig::mAssetsPath)
-      .def_readwrite("clear_color", &Renderer::KuafuConfig::mClearColor)
       .def_readwrite("spp", &Renderer::KuafuConfig::mPerPixelSampleRate)
       .def_readwrite("max_bounces", &Renderer::KuafuConfig::mPathDepth)
       .def_readwrite("accumulate_frames", &Renderer::KuafuConfig::mAccumulateFrames)

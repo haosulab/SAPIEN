@@ -109,6 +109,7 @@ class KuafuScene : public IPxrScene {
   friend class KuafuRenderer;
   friend class KuafuRigidBody;
 
+  kuafu::Scene* pKScene;
   std::shared_ptr<kuafu::Kuafu> pKRenderer;
   std::vector<std::unique_ptr<KuafuRigidBody>> mBodies;
   std::vector<std::unique_ptr<KuafuCamera>> mCameras;
@@ -163,18 +164,16 @@ public:
   void removeLight(ILight *light) override;
 
   /** call this function before every rendering time frame */
-  inline void updateRender() override{
-      //    spdlog::get("SAPIEN")->warn("KF: updateRender not implemented yet");
-  };
+  inline void updateRender() override { };
 
   void destroy() override;
 
 
   // non override
-  inline auto &getKScene() { return pKRenderer->getScene(); }
+  inline auto getKScene() const { return pKScene; };
 
   inline void setEnvironmentMap(std::string_view path) override {
-    pKRenderer->getScene().setEnvironmentMap(path);
+    getKScene()->setEnvironmentMap(path);
   };
 };
 } // namespace sapien::Renderer

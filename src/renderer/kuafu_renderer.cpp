@@ -18,8 +18,6 @@ void KuafuRenderer::setDefaultAssetsPath(std::string path) {
 KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
   auto config = conf.generate();
 
-  std::shared_ptr<kuafu::Camera> camera = nullptr;
-  std::shared_ptr<kuafu::Window> window = nullptr;
   try {
     pKRenderer = std::make_shared<kuafu::Kuafu>(config);
   } catch (std::exception& e) {
@@ -27,12 +25,14 @@ KuafuRenderer::KuafuRenderer(KuafuConfig conf) {
     throw std::runtime_error(e.what());
   }
 
-  pKRenderer->getScene().setGeometries({});
-  pKRenderer->getScene().setGeometryInstances({});
+  pKRenderer->getScene()->setGeometries({});
+  pKRenderer->getScene()->setGeometryInstances({});
 }
 
 IPxrScene *KuafuRenderer::createScene(std::string const &name) {
   mScene.pKRenderer = pKRenderer;
+  mScene.pKScene = pKRenderer->createScene();
+//  pKRenderer->setScene(mScene.pKScene);
   return &mScene;
 };
 
