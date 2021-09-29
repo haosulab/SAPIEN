@@ -173,7 +173,7 @@ def main():
     # )
 
     cnt = 0
-    while renderer.is_running:
+    while cnt < 5:
         scene.step()
         scene.update_render()
 

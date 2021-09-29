@@ -112,8 +112,7 @@ class KuafuScene : public IPxrScene {
   std::shared_ptr<kuafu::Kuafu> pKRenderer;
   std::vector<std::unique_ptr<KuafuRigidBody>> mBodies;
   std::vector<std::unique_ptr<KuafuCamera>> mCameras;
-
-  std::vector<std::shared_ptr<ILight>> mLights;
+  std::vector<std::unique_ptr<IKuafuLight>> mLights;
 
 public:
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;

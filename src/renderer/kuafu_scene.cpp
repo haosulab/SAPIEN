@@ -346,9 +346,8 @@ IPointLight *KuafuScene::addPointLight(const std::array<float, 3> &position,
 
   getKScene().addPointLight(light); // TODO: check if success
 
-  auto ret = std::dynamic_pointer_cast<IPointLight>(std::make_shared<KuafuPointLight>(light));
-  mLights.push_back(ret);
-  return ret.get();
+  mLights.push_back(std::make_unique<KuafuPointLight>(light));
+  return dynamic_cast<IPointLight*>(mLights.back().get());
 }
 
 IDirectionalLight *KuafuScene::addDirectionalLight(
@@ -362,10 +361,8 @@ IDirectionalLight *KuafuScene::addDirectionalLight(
 
   getKScene().setDirectionalLight(light); // TODO: check if success
 
-  auto ret = std::dynamic_pointer_cast<IDirectionalLight>(
-      std::make_shared<KuafuDirectionalLight>(light));
-  mLights.push_back(ret);
-  return ret.get();
+  mLights.push_back(std::make_unique<KuafuDirectionalLight>(light));
+  return dynamic_cast<IDirectionalLight*>(mLights.back().get());
 }
 
 ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
@@ -386,9 +383,8 @@ ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
 
   getKScene().addActiveLight(light); // TODO: check if success
 
-  auto ret = std::dynamic_pointer_cast<ISpotLight>(std::make_shared<KuafuSpotLight>(light));
-  mLights.push_back(ret);
-  return ret.get();
+  mLights.push_back(std::make_unique<KuafuSpotLight>(light));
+  return dynamic_cast<ISpotLight*>(mLights.back().get());
 }
 
 IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
@@ -402,9 +398,8 @@ IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
   light->texPath = texPath;
   light->fov = fov;
 
-  auto ret = std::dynamic_pointer_cast<IActiveLight>(std::make_shared<KuafuActiveLight>(light));
-  mLights.push_back(ret);
-  return ret.get();
+  mLights.push_back(std::make_unique<KuafuActiveLight>(light));
+  return dynamic_cast<IActiveLight*>(mLights.back().get());
 };
 
 void KuafuScene::removeLight(ILight *light) {
@@ -418,20 +413,19 @@ void KuafuScene::destroy() {
   pKRenderer->getScene().clearGeometries();
   pKRenderer->getScene().clearGeometryInstances();
 
-  for (auto &b : mBodies)
+  while (!mBodies.empty()) {       // Warning: b->destroy() will change the container!
+    auto& b = mBodies.back();
     b->destroy();
-  if (!mBodies.empty())
-    spdlog::get("SAPIEN")->critical("KF: mBodies not cleared!");
+  }
 
-  for (auto &c :mCameras)
+  while (!mCameras.empty()) {
+    auto& c = mCameras.back();
     removeCamera(c.get());
-  if (!mCameras.empty())
-    spdlog::get("SAPIEN")->critical("KF: mCameras not cleared!");
+  }
 
-  for (auto& p: mLights)
-    removeLight(p.get());
-  if (!mLights.empty())
-    spdlog::get("SAPIEN")->critical("KF: mLights not cleared!");
-
+  while (!mLights.empty()) {
+    auto& l = mLights.back();
+    removeLight(l.get());
+  }
 }
 } // namespace sapien::Renderer
