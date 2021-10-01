@@ -8,7 +8,7 @@ namespace Renderer {
 std::shared_ptr<RenderMeshGeometry> SVulkan2RenderShape::getGeometry() const {
   auto position = mShape->mesh->getVertexAttribute("position");
   auto index = mShape->mesh->getIndices();
-  auto mesh = std::make_unique<RenderMeshGeometry>();
+  auto mesh = std::make_shared<RenderMeshGeometry>();
   mesh->vertices = position;
 
   if (mShape->mesh->hasVertexAttribute("normal")) {
