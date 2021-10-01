@@ -55,19 +55,19 @@ void KuafuCamera::takePicture() {
       auto h = pKCamera->getHeight();
       if (static_cast<int>(extent.width) != w || static_cast<int>(extent.height) != h) {
         spdlog::get("SAPIEN")->info(
-            "KF: Rendering on a different size of the viewer, trying to resize the window!");
+            "KF: Rendering on a different size of the viewer. Trying to resize the window!");
         window->resize(w, h);
       }
     }
     scene->setCamera(pKCamera);
-    pParentScene->pKRenderer->run();         // FIXME: keep frame indicators in camera
+    pParentScene->pKRenderer->run();
   }
   pParentScene->pKRenderer->run();
 };
 
 std::vector<float> KuafuCamera::getFloatImage(std::string const &name) {
   if (name == "Color") {
-    const auto &rgba = pParentScene->pKRenderer->downloadLatestFrame();
+    auto rgba = pParentScene->pKRenderer->downloadLatestFrame(pKCamera);
     size_t size = rgba.size();
     std::vector<float> ret(size);
     // Kuafu is BGRA

@@ -23,8 +23,8 @@ def main():
     if kuafu:
         config = sapien.KuafuConfig()
         config.use_viewer = True
-        config.use_denoiser = True
-        config.spp = 1
+        config.use_denoiser = False
+        config.spp = 16
         config.max_textures = 20000
         renderer = sapien.KuafuRenderer(config)
     else:
@@ -45,7 +45,7 @@ def main():
     mount.set_pose(
         Pose([0.152801, 0.303823, 1.193], qmult(aa([0, 0, 1], -2), aa([0, 1, 0], 0)))
     )
-    cam1 = scene.add_mounted_camera("cam", mount, Pose(), 1280, 720, 0, 1, 0.1, 100)
+    cam1 = scene.add_mounted_camera("cam", mount, Pose(), 960, 540, 0, 1, 0.1, 100)
 
     prefix = '/home/jet/Downloads/fbtest/objects/'
 
