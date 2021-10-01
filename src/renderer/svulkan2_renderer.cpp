@@ -66,7 +66,7 @@ void SVulkan2Renderer::removeScene(IPxrScene *scene) {
 
 std::shared_ptr<IPxrMaterial> SVulkan2Renderer::createMaterial() {
   auto mat = std::make_shared<SVulkan2Material>(
-      std::make_shared<svulkan2::resource::SVMetallicMaterial>());
+      std::make_shared<svulkan2::resource::SVMetallicMaterial>(), this);
   mat->setBaseColor({1.0, 1.0, 1.0, 1});
   return mat;
 }
@@ -101,8 +101,9 @@ SVulkan2Renderer::createTexture(std::string_view filename, uint32_t mipLevels,
     break;
   }
 
-  auto texture = svulkan2::resource::SVTexture::FromFile({filename.begin(), filename.end()},
-                                                         mipLevels, vkf, vkf, vka, vka);
+  auto texture = mContext->getResourceManager()->CreateTextureFromFile(
+      {filename.begin(), filename.end()}, mipLevels, vkf, vkf, vka, vka);
+  texture->loadAsync().get();
   return std::make_shared<SVulkan2Texture>(texture);
 }
 

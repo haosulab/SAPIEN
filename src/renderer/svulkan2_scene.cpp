@@ -107,12 +107,43 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
   return mBodies.back().get();
 }
 
+IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
+                                           std::shared_ptr<IPxrMaterial> material) {
+  if (!material) {
+    return addRigidbody(meshFile, scale);
+  }
+
+  auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
+
+  if (!std::filesystem::exists(meshFile)) {
+    mBodies.push_back(
+        std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{},
+                                            physx::PxGeometryType::eTRIANGLEMESH, scale));
+    return mBodies.back().get();
+  }
+  auto model = mParentRenderer->mContext->getResourceManager()->CreateModelFromFile(meshFile);
+  model->loadAsync().get();
+
+  std::vector<std::shared_ptr<svulkan2::resource::SVShape>> shapes;
+  for (auto s : model->getShapes()) {
+    auto shape = svulkan2::resource::SVShape::Create(s->mesh, mat->getMaterial());
+    shapes.push_back(shape);
+  }
+  auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData(shapes));
+  obj.setScale({scale.x, scale.y, scale.z});
+  std::vector<svulkan2::scene::Object *> objects2;
+  objects2.push_back(&obj);
+  mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(
+      this, objects2, physx::PxGeometryType::eTRIANGLEMESH, scale));
+  return mBodies.back().get();
+}
+
 IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
                                            const physx::PxVec3 &scale,
                                            const physx::PxVec3 &color) {
   auto material = std::make_shared<svulkan2::resource::SVMetallicMaterial>(
       glm::vec4{0.f, 0.f, 0.f, 1.f}, glm::vec4{color.x, color.y, color.z, 1.f});
-  return addRigidbody(type, scale, std::make_shared<SVulkan2Material>(material));
+  return addRigidbody(type, scale, std::make_shared<SVulkan2Material>(material, mParentRenderer));
 }
 
 IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
@@ -179,7 +210,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &ver
   auto material = std::make_shared<svulkan2::resource::SVMetallicMaterial>(
       glm::vec4{0.f, 0.f, 0.f, 1.0f}, glm::vec4{color.x, color.y, color.z, 1.f});
   return addRigidbody(vertices, normals, indices, scale,
-                      std::make_shared<SVulkan2Material>(material));
+                      std::make_shared<SVulkan2Material>(material, getParentRenderer()));
 }
 
 IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &vertices,

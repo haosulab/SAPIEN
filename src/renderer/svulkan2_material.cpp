@@ -1,4 +1,5 @@
 #include "svulkan2_material.h"
+#include "svulkan2_renderer.h"
 
 namespace sapien {
 namespace Renderer {
@@ -76,8 +77,8 @@ std::string SVulkan2Texture::getFilename() const {
 }
 
 SVulkan2Material::SVulkan2Material(
-    std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material)
-    : mMaterial(material) {}
+    std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material, SVulkan2Renderer *renderer)
+    : mMaterial(material), mParentRenderer(renderer) {}
 
 void SVulkan2Material::setEmission(std::array<float, 4> color) {
   mMaterial->setEmission({color[0], color[1], color[2], color[3]});
@@ -109,6 +110,7 @@ void SVulkan2Material::setEmissionTexture(std::shared_ptr<IPxrTexture> texture) 
     mMaterial->setEmissionTexture(nullptr);
   }
 }
+
 std::shared_ptr<IPxrTexture> SVulkan2Material::getEmissionTexture() const {
   auto tex = mMaterial->getEmissionTexture();
   return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
@@ -160,6 +162,22 @@ void SVulkan2Material::setMetallicTexture(std::shared_ptr<IPxrTexture> texture) 
 std::shared_ptr<IPxrTexture> SVulkan2Material::getMetallicTexture() const {
   auto tex = mMaterial->getMetallicTexture();
   return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
+}
+
+void SVulkan2Material::setEmissionTextureFromFilename(std::string_view filename) {
+  setEmissionTexture(mParentRenderer->createTexture(filename));
+}
+void SVulkan2Material::setDiffuseTextureFromFilename(std::string_view filename) {
+  setDiffuseTexture(mParentRenderer->createTexture(filename));
+}
+void SVulkan2Material::setNormalTextureFromFilename(std::string_view filename) {
+  setNormalTexture(mParentRenderer->createTexture(filename));
+}
+void SVulkan2Material::setMetallicTextureFromFilename(std::string_view filename) {
+  setMetallicTexture(mParentRenderer->createTexture(filename));
+}
+void SVulkan2Material::setRoughnessTextureFromFilename(std::string_view filename) {
+  setRoughnessTexture(mParentRenderer->createTexture(filename));
 }
 
 } // namespace Renderer

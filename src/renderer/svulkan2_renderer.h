@@ -67,7 +67,9 @@ public:
     return mObjects;
   }
 
-  std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() const override;
+  std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() override;
+
+  inline SVulkan2Scene *getScene() const { return mParentScene; }
 };
 
 class SVulkan2Scene : public IPxrScene {
@@ -91,6 +93,9 @@ public:
 
   // IPxrScene
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
+
+  IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
+                              std::shared_ptr<IPxrMaterial> material) override;
 
   IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
                               std::shared_ptr<IPxrMaterial> material) override;

@@ -1,6 +1,7 @@
 #include "svulkan2_shape.h"
 #include "svulkan2/resource/shape.h"
 #include "svulkan2_material.h"
+#include "svulkan2_renderer.h"
 
 namespace sapien {
 namespace Renderer {
@@ -32,7 +33,7 @@ std::shared_ptr<IPxrMaterial> SVulkan2RenderShape::getMaterial() const {
   if (!mat) {
     throw std::runtime_error("invalid material");
   }
-  return std::make_shared<SVulkan2Material>(mat);
+  return std::make_shared<SVulkan2Material>(mat, mParentBody->getScene()->getParentRenderer());
 }
 
 } // namespace Renderer

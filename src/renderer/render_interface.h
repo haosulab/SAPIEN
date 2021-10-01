@@ -247,7 +247,9 @@ public:
   [[nodiscard]] virtual float getFar() const = 0;
   [[nodiscard]] virtual float getSkew() const = 0;
 
-  [[nodiscard]] virtual float getFovX() const { return std::atan(getWidth() / 2.f / getFocalX()) * 2.f; }
+  [[nodiscard]] virtual float getFovX() const {
+    return std::atan(getWidth() / 2.f / getFocalX()) * 2.f;
+  }
   [[nodiscard]] virtual float getFovY() const {
     return std::atan(getHeight() / 2.f / getFocalY()) * 2.f;
   }
@@ -361,7 +363,7 @@ public:
   }
 
   // TODO: implement
-  virtual std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() const {
+  virtual std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() {
     throw std::runtime_error("getRenderShapes is not implemented");
   }
 

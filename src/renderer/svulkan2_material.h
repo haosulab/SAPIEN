@@ -28,9 +28,11 @@ public:
 
 class SVulkan2Material : public IPxrMaterial {
   std::shared_ptr<svulkan2::resource::SVMetallicMaterial> mMaterial;
+  class SVulkan2Renderer *mParentRenderer;
 
 public:
-  explicit SVulkan2Material(std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material);
+  explicit SVulkan2Material(std::shared_ptr<svulkan2::resource::SVMetallicMaterial> material,
+                            SVulkan2Renderer *renderer);
   void setEmission(std::array<float, 4> color) override;
   [[nodiscard]] std::array<float, 4> getEmission() const override;
   void setBaseColor(std::array<float, 4> color) override;
@@ -43,14 +45,19 @@ public:
   [[nodiscard]] float getMetallic() const override;
 
   void setEmissionTexture(std::shared_ptr<IPxrTexture> texture) override;
+  void setEmissionTextureFromFilename(std::string_view filename) override;
   [[nodiscard]] std::shared_ptr<IPxrTexture> getEmissionTexture() const override;
   void setDiffuseTexture(std::shared_ptr<IPxrTexture> texture) override;
+  void setDiffuseTextureFromFilename(std::string_view filename) override;
   [[nodiscard]] std::shared_ptr<IPxrTexture> getDiffuseTexture() const override;
   void setRoughnessTexture(std::shared_ptr<IPxrTexture> texture) override;
+  void setRoughnessTextureFromFilename(std::string_view filename) override;
   [[nodiscard]] std::shared_ptr<IPxrTexture> getRoughnessTexture() const override;
   void setMetallicTexture(std::shared_ptr<IPxrTexture> texture) override;
+  void setMetallicTextureFromFilename(std::string_view filename) override;
   [[nodiscard]] std::shared_ptr<IPxrTexture> getMetallicTexture() const override;
   void setNormalTexture(std::shared_ptr<IPxrTexture> texture) override;
+  void setNormalTextureFromFilename(std::string_view filename) override;
   [[nodiscard]] std::shared_ptr<IPxrTexture> getNormalTexture() const override;
 
   [[nodiscard]] std::shared_ptr<svulkan2::resource::SVMetallicMaterial> getMaterial() const {

@@ -89,54 +89,17 @@ void SVulkan2Rigidbody::setRenderMode(uint32_t mode) {
 
 physx::PxVec3 SVulkan2Rigidbody::getScale() const { return mScale; }
 
-std::vector<std::shared_ptr<IPxrRenderShape>> SVulkan2Rigidbody::getRenderShapes() const {
+std::vector<std::shared_ptr<IPxrRenderShape>> SVulkan2Rigidbody::getRenderShapes() {
   auto objects = getVisualObjects();
   std::vector<std::shared_ptr<IPxrRenderShape>> result;
 
   for (auto obj : objects) {
     for (auto &shape : obj->getModel()->getShapes()) {
-      result.push_back(std::make_shared<SVulkan2RenderShape>(shape));
+      result.push_back(std::make_shared<SVulkan2RenderShape>(shape, this));
     }
   }
 
   return result;
-
-  // for (auto obj : objects) {
-  //   for (auto &shape : obj->getModel()->getShapes()) {
-  //     result.emplace_back(std::make_unique<RenderShape>());
-  //     RenderShape *renderShape = result.back().get();
-  //     renderShape->type = "mesh";
-  //     renderShape->pose = getInitialPose();
-  //     auto &T = obj->getTransform();
-  //     renderShape->scale = {T.scale.x, T.scale.y, T.scale.z};
-  //     renderShape->objId = obj->getSegmentation()[0];
-
-  //     auto position = shape->mesh->getVertexAttribute("position");
-  //     auto index = shape->mesh->getIndices();
-  //     auto mesh = std::make_unique<RenderMeshGeometry>();
-  //     mesh->vertices = position;
-
-  //     if (shape->mesh->hasVertexAttribute("normal")) {
-  //       mesh->normals = shape->mesh->getVertexAttribute("normal");
-  //     }
-  //     if (shape->mesh->hasVertexAttribute("tangent")) {
-  //       mesh->tangents = shape->mesh->getVertexAttribute("tangent");
-  //     }
-  //     if (shape->mesh->hasVertexAttribute("bitangent")) {
-  //       mesh->bitangents = shape->mesh->getVertexAttribute("bitangent");
-  //     }
-  //     if (shape->mesh->hasVertexAttribute("uv")) {
-  //       mesh->bitangents = shape->mesh->getVertexAttribute("uv");
-  //     }
-  //     mesh->indices = index;
-  //     renderShape->geometry = std::move(mesh);
-
-  //     auto mat = std::make_shared<SVulkan2Material>(
-  //         std::static_pointer_cast<svulkan2::resource::SVMetallicMaterial>(shape->material));
-  //     renderShape->material = mat;
-  //   }
-  // }
-  // return result;
 }
 
 } // namespace Renderer

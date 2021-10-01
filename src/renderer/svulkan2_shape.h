@@ -8,9 +8,12 @@ namespace Renderer {
 
 class SVulkan2RenderShape : public IPxrRenderShape {
   std::shared_ptr<svulkan2::resource::SVShape> mShape;
+  class SVulkan2Rigidbody *mParentBody;
 
 public:
-  inline SVulkan2RenderShape(std::shared_ptr<svulkan2::resource::SVShape> shape) : mShape(shape) {}
+  inline SVulkan2RenderShape(std::shared_ptr<svulkan2::resource::SVShape> shape,
+                             SVulkan2Rigidbody *body)
+      : mShape(shape), mParentBody(body) {}
   [[nodiscard]] virtual std::shared_ptr<RenderMeshGeometry> getGeometry() const;
   [[nodiscard]] virtual std::shared_ptr<IPxrMaterial> getMaterial() const;
 };

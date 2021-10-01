@@ -2278,15 +2278,38 @@ Args:
       .def_property_readonly("local_pose", &Renderer::IPxrRigidbody::getInitialPose)
 
       // attribute access for different types
-      .def_property_readonly(
-          "scale", [](Renderer::IPxrRigidbody &body) { return vec32array(body.getScale()); })
+      .def_property_readonly("scale",
+                             [](Renderer::IPxrRigidbody &body) {
+                               if (body.getType() != physx::PxGeometryType::eTRIANGLEMESH &&
+                                   body.getType() != physx::PxGeometryType::eCONVEXMESH) {
+                                 throw std::runtime_error(
+                                     "Visual body scale is only valid for mesh.");
+                               }
+                               return vec32array(body.getScale());
+                             })
       .def_property_readonly("radius",
-                             [](Renderer::IPxrRigidbody &body) { return body.getScale().y; })
-      .def_property_readonly(
-          "half_lengths",
-          [](Renderer::IPxrRigidbody &body) { return vec32array(body.getScale()); })
-      .def_property_readonly("half_length",
-                             [](Renderer::IPxrRigidbody &body) { return body.getScale().x; });
+                             [](Renderer::IPxrRigidbody &body) {
+                               if (body.getType() != physx::PxGeometryType::eSPHERE &&
+                                   body.getType() != physx::PxGeometryType::eCAPSULE) {
+                                 throw std::runtime_error(
+                                     "Visual body radius is only valid for sphere or capsule.");
+                               }
+                               return body.getScale().y;
+                             })
+      .def_property_readonly("half_lengths",
+                             [](Renderer::IPxrRigidbody &body) {
+                               if (body.getType() != physx::PxGeometryType::eBOX) {
+                                 throw std::runtime_error(
+                                     "Visual body half_lengths is only valid for box.");
+                               }
+                               return vec32array(body.getScale());
+                             })
+      .def_property_readonly("half_length", [](Renderer::IPxrRigidbody &body) {
+        if (body.getType() != physx::PxGeometryType::eCAPSULE) {
+          throw std::runtime_error("Visual body half_length is only valid for capsule.");
+        }
+        return body.getScale().x;
+      });
 
   PyRenderShape
       // .def_readonly("type", &Renderer::RenderShape::type)
