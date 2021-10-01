@@ -231,7 +231,9 @@ void buildSapien(py::module &m) {
       py::class_<ArticulationBuilder, std::shared_ptr<ArticulationBuilder>>(m,
                                                                             "ArticulationBuilder");
 
-  auto PyRenderMeshGeometry = py::class_<Renderer::RenderMeshGeometry>(m, "RenderGeometry");
+  auto PyRenderMeshGeometry =
+      py::class_<Renderer::RenderMeshGeometry, std::shared_ptr<Renderer::RenderMeshGeometry>>(
+          m, "RenderGeometry");
 
   auto PySubscription = py::class_<Subscription>(m, "Subscription");
 
@@ -1700,9 +1702,8 @@ Args:
            "https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/"
            "md_doc_b-examples_i-inverse-kinematics.html",
            py::arg("link_index"), py::arg("pose"), py::arg("initial_qpos") = Eigen::VectorXd{},
-           py::arg("active_qmask") = Eigen::VectorXi{},
-           py::arg("eps") = 1e-4, py::arg("max_iterations") = 1000, py::arg("dt") = 0.1,
-           py::arg("damp") = 1e-6)
+           py::arg("active_qmask") = Eigen::VectorXi{}, py::arg("eps") = 1e-4,
+           py::arg("max_iterations") = 1000, py::arg("dt") = 0.1, py::arg("damp") = 1e-6)
       .def("compute_forward_dynamics", &PinocchioModel::computeForwardDynamics, py::arg("qpos"),
            py::arg("qvel"), py::arg("qf"))
       .def("compute_inverse_dynamics", &PinocchioModel::computeInverseDynamics, py::arg("qpos"),
@@ -2245,6 +2246,8 @@ Args:
   PyRenderBody.def_property_readonly("name", &Renderer::IPxrRigidbody::getName)
       .def_property_readonly("visual_id", &Renderer::IPxrRigidbody::getUniqueId)
       .def_property_readonly("actor_id", &Renderer::IPxrRigidbody::getSegmentationId)
+      .def_property_readonly("local_pose", &Renderer::IPxrRigidbody::getInitialPose,
+                             "Local pose is pre-multiplied when calling set_pose")
       .def("get_name", &Renderer::IPxrRigidbody::getName)
       .def("set_name", &Renderer::IPxrRigidbody::setName, py::arg("name"))
       .def("set_visual_id", &Renderer::IPxrRigidbody::setUniqueId, py::arg("id"))

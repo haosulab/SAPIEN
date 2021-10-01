@@ -29,6 +29,14 @@ is a continuation of ShapeNet and PartNet.
     `camera.far`, `camera.set_fovx`, `camera.set_fovy`,
     `camera.set_focal_lengths`, `camera.set_principal_point`, `camera.skew`, and
     the all-in-one method `camera.set_perspective_parameters`.
+- Refactor render shape system
+  - Originally, after `actor.get_visual_bodies()` and
+    `visual_body.get_render_shapes()`, users typically do `shape.scale` and
+    `shape.pose`. These are no longer valid. It is required to check
+    `visual_body.type`. When `type` is `mesh`, `shape.scale` is replaced with
+    `visual_body.scale` and `shape.pose` is replaced by
+    `visual_body.local_pose`. These changes are made to match `add_visual_shape`
+    functions when building the actor.
 
 ### 1.2
 - Shader change: 4th component in default camera shader now gives the 0-1 depth value.
