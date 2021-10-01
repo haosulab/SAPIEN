@@ -172,11 +172,14 @@ void main() {
     mat4 shadowView = shadowBuffer.spotLightBuffers[i].viewMatrix;
     mat4 shadowProj = shadowBuffer.spotLightBuffers[i].projectionMatrix;
 
-    vec3 lightDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
+    vec3 pos = world2camera(vec4(sceneBuffer.spotLights[i].position.xyz, 1.f)).xyz;
+    vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
+    vec3 l = pos - csPosition.xyz;
+
+    float bias = max(0.05 * (1.0 - length(l)), 0.005);
 
     vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz), 1);
-    ssPosition.z -= bias;
+    ssPosition.z += bias;
     vec4 shadowMapCoord = shadowProj * ssPosition;
     shadowMapCoord /= shadowMapCoord.w;
     shadowMapCoord.xy = shadowMapCoord.xy * 0.5 + 0.5;
@@ -185,9 +188,6 @@ void main() {
     float visibility = ShadowMapPCF(
         samplerSpotLightDepths, i, shadowMapCoord.xyz, resolution, 1 / resolution, 1);
 
-    vec3 pos = world2camera(vec4(sceneBuffer.spotLights[i].position.xyz, 1.f)).xyz;
-    vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
-    vec3 l = pos - csPosition.xyz;
     color += visibility * computeSpotLight(
         sceneBuffer.spotLights[i].emission.a,
         sceneBuffer.spotLights[i].direction.a,
