@@ -24,7 +24,7 @@ public:
   SEntity(SEntity &&other) = delete;
 
 protected:
-  std::string mName{""};
+  std::string mName{};
   SScene *mParentScene{};
 };
 

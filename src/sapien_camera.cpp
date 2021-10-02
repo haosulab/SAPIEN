@@ -99,9 +99,9 @@ void SCamera::setPerspectiveParameters(float near, float far, float fx, float fy
 }
 
 SCamera::~SCamera() {
-  if (mCamera) {
-    mParentScene->getRendererScene()->removeCamera(mCamera);
-  }
+  // if (mCamera && mParentScene && mParentScene->getRendererScene()) {
+  //   mParentScene->getRendererScene()->removeCamera(mCamera);
+  // }
 }
 
 PxTransform SCamera::getParentPose() const {

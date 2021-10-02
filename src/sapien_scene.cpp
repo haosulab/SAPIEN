@@ -43,7 +43,6 @@ SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig cons
 
 SScene::~SScene() {
   mDefaultMaterial.reset();
-  mCameras.clear();
 
   for (auto &actor : mActors) {
     actor->getPxActor()->release();
@@ -401,6 +400,9 @@ SCamera *SScene::addCamera(std::string const &name, uint32_t width, uint32_t hei
 }
 
 void SScene::removeCamera(SCamera *cam) {
+  if (mRendererScene) {
+    mRendererScene->removeCamera(cam->getRendererCamera());
+  }
   mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
                                 [cam](std::unique_ptr<SCamera> &mc) { return mc.get() == cam; }),
                  mCameras.end());
@@ -718,10 +720,13 @@ void SScene::setEnvironmentMapFromFiles(std::string_view px, std::string_view nx
 }
 
 void SScene::removeCameraByParent(SActorBase *actor) {
-  mCameras.erase(
+  auto start =
       std::remove_if(mCameras.begin(), mCameras.end(),
-                     [actor](std::unique_ptr<SCamera> &mc) { return mc->getParent() == actor; }),
-      mCameras.end());
+                     [actor](std::unique_ptr<SCamera> &mc) { return mc->getParent() == actor; });
+  for (auto it = start; it != mCameras.end(); ++it) {
+    mRendererScene->removeCamera((*it)->getRendererCamera());
+  }
+  mCameras.erase(start, mCameras.end());
 }
 
 }; // namespace sapien

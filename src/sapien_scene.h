@@ -97,11 +97,11 @@ public:
   }
 
 private:
-  std::shared_ptr<Simulation> mSimulationShared; // shared pointer to sapien simulation
-  PxScene *mPxScene;                             // physx scene
-  DefaultEventCallback mSimulationCallback;      // physx scene's simulation callback
+  std::shared_ptr<Simulation> mSimulationShared{}; // shared pointer to sapien simulation
+  PxScene *mPxScene{};                             // physx scene
+  DefaultEventCallback mSimulationCallback;        // physx scene's simulation callback
 
-  Renderer::IPxrScene *mRendererScene; // renderer scene
+  Renderer::IPxrScene *mRendererScene{}; // renderer scene
 
   // defaults
   float mDefaultSleepThreshold;
