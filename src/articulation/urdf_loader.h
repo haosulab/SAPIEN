@@ -123,25 +123,66 @@ template <> inline std::string DomBase::_read_attr<std::string>(const std::strin
 }
 
 template <> inline physx::PxVec3 DomBase::_read_attr<physx::PxVec3>(const std::string &str) {
-  float x, y, z;
-  std::istringstream iss(str);
-  iss >> x >> y >> z;
+  std::string str2 = str;
+  std::replace(str2.begin(), str2.end(), ',', ' ');
+
+  std::string sx;
+  std::string sy;
+  std::string sz;
+  std::istringstream iss(str2);
+  iss >> sx >> sy >> sz;
+  float x = 0, y = 0, z = 0;
+  try {
+    x = std::stof(sx);
+  } catch (std::invalid_argument const&) {
+  }
+  try {
+    y = std::stof(sy);
+  } catch (std::invalid_argument const&) {
+  }
+  try {
+    z = std::stof(sz);
+  } catch (std::invalid_argument const&) {
+  }
   return {x, y, z};
 }
 
 template <> inline physx::PxVec4 DomBase::_read_attr<physx::PxVec4>(const std::string &str) {
-  float x, y, z, w;
-  std::istringstream iss(str);
-  iss >> x >> y >> z >> w;
+  std::string str2 = str;
+  std::replace(str2.begin(), str2.end(), ',', ' ');
+
+  std::string sx;
+  std::string sy;
+  std::string sz;
+  std::string sw;
+  std::istringstream iss(str2);
+  iss >> sx >> sy >> sz >> sw;
+  float x = 0, y = 0, z = 0, w = 0;
+  try {
+    x = std::stof(sx);
+  } catch (std::invalid_argument const&) {
+  }
+  try {
+    y = std::stof(sy);
+  } catch (std::invalid_argument const&) {
+  }
+  try {
+    z = std::stof(sz);
+  } catch (std::invalid_argument const&) {
+  }
+  try {
+    w = std::stof(sw);
+  } catch (std::invalid_argument const&) {
+  }
   return {x, y, z, w};
 }
 
 template <> inline physx::PxReal DomBase::_read_attr<physx::PxReal>(const std::string &str) {
-  return std::atof(str.c_str());
+  return std::stof(str);
 }
 
 template <> inline int DomBase::_read_attr<int>(const std::string &str) {
-  return std::atoi(str.c_str());
+  return std::stoi(str);
 }
 
 namespace SRDF {
@@ -347,7 +388,7 @@ struct MaterialColor : DomBase {
   DECLARE_ATTR(physx::PxVec4, rgba)
 
   LOAD_ATTR_BEGIN()
-  LOAD_ATTR_OPTIONAL(physx::PxVec4, rgba, physx::PxVec4(1,1,1,1))
+  LOAD_ATTR_OPTIONAL(physx::PxVec4, rgba, physx::PxVec4(1, 1, 1, 1))
   LOAD_ATTR_END()
 };
 
@@ -366,9 +407,7 @@ struct RenderMaterial : DomBase {
   LOAD_CHILD_END()
 
   CHECK_CHILD_BEGIN()
-  CHECK_CHILD_UNIQUE_SET_DEFAULT(color, {
-    color = nullptr;
-  })
+  CHECK_CHILD_UNIQUE_SET_DEFAULT(color, { color = nullptr; })
   CHECK_CHILD_END()
 };
 
@@ -396,9 +435,7 @@ struct Visual : DomBase {
     origin->xyz = {0, 0, 0};
     origin->rpy = {0, 0, 0};
   })
-  CHECK_CHILD_UNIQUE_SET_DEFAULT(material, {
-    material = nullptr;
-  });
+  CHECK_CHILD_UNIQUE_SET_DEFAULT(material, { material = nullptr; });
   CHECK_CHILD_UNIQUE(geometry)
   CHECK_CHILD_END()
 };
