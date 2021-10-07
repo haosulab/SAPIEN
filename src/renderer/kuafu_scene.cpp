@@ -60,7 +60,6 @@ void KuafuCamera::takePicture() {
       }
     }
     scene->setCamera(pKCamera);
-    pParentScene->pKRenderer->run();
   }
   pParentScene->pKRenderer->run();
 };
