@@ -76,3 +76,10 @@ Apart from primitives, actors can also be created from mesh files.
    To this end, a mesh will be "cooked" into a convex mesh before being used in the simulation.
    The converted convex mesh is cached at the same directory of the original mesh file.
    Thus, if the mesh file is changed, please remove the cache.
+
+Remove an actor
+-------------------------------------------
+
+After an actor is built with ``actor = builder.build()``, You can call
+``scene.remove_actor(actor)`` to remove it. Using a removed actor will result in
+undefined behavior (usually a crash).

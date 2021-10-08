@@ -119,3 +119,10 @@ The order is the same as ``get_joints()``.
 .. literalinclude:: ../../../../examples/basic/create_articulations.py
    :dedent: 0
    :lines: 266-268
+
+Remove an articulation
+-------------------------------------------
+
+Similar to removing an actor, ``scene.remove_articulation(articulation)`` will
+remove it from the scene. Using the articulation or any of its links or joints
+after removal will result in undefined behavior (usually a crash).
