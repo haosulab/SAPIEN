@@ -17,7 +17,7 @@ def main():
     render_config.spp = 8
     render_config.max_bounces = 6
     render_config.use_viewer = True
-    render_config.use_denoiser = False
+    render_config.use_denoiser = True
     render_config.viewer_width = 600
     render_config.viewer_height = 600
 

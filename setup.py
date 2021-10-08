@@ -86,13 +86,6 @@ class CMakeBuild(build_ext):
         assert os.path.exists(source_path)
         shutil.copytree(source_path, kuafu_shader_path)
 
-        # kuafu_models_path = os.path.join(self.build_lib, 'sapien', 'kuafu_assets', 'models')
-        # source_path = os.path.join(ext.sourcedir, '3rd_party/kuafu/resources/models')
-        # if os.path.exists(kuafu_models_path):
-        #     shutil.rmtree(kuafu_models_path)
-        # assert os.path.exists(source_path)
-        # shutil.copytree(source_path, kuafu_models_path)
-
 
 def check_version_info():
     try:
@@ -141,7 +134,7 @@ package_data = {
 setup(name="sapien",
       version=check_version_info()[3],
       author='Sapien',
-      python_requires='>=3.6',
+      python_requires='>=3.7',
       author_email='sapienaicontact@gmail.com',
       description=['SAPIEN: A SimulAted Parted based Interactive ENvironment'],
       classifiers=[
@@ -168,7 +161,7 @@ setup(name="sapien",
       long_description_content_type="text/markdown",
       cmdclass=dict(build_ext=CMakeBuild),
       zip_safe=False,
-      packages=["sapien", "sapien.core", "sapien.asset", "sapien.example", "sapien.utils"],
+      packages=["sapien", "sapien.core", "sapien.asset", "sapien.example", "sapien.utils", "sapien.sensor"],
       keywords="robotics simulator dataset articulation partnet",
       url="https://sapien.ucsd.edu",
       project_urls={"Documentation": "https://sapien.ucsd.edu/docs"},

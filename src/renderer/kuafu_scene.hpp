@@ -20,12 +20,13 @@ class KuafuCamera : public ICamera {
 
   KuafuScene *pParentScene = nullptr;
   kuafu::Camera* pKCamera = nullptr;
+  size_t mIdx;
 
   void setPxPose(const physx::PxTransform &pose);
 
 public:
   // ICamera
-  KuafuCamera(int width, int height, float fovy, KuafuScene *scene);
+  KuafuCamera(int width, int height, float fovy, KuafuScene *scene, size_t idx);
 
   [[nodiscard]] inline uint32_t getWidth() const override { return pKCamera->getWidth(); }
   [[nodiscard]] inline uint32_t getHeight() const override { return pKCamera->getHeight(); }
@@ -114,6 +115,9 @@ class KuafuScene : public IPxrScene {
   std::vector<std::unique_ptr<KuafuRigidBody>> mBodies;
   std::vector<std::unique_ptr<KuafuCamera>> mCameras;
   std::vector<std::unique_ptr<IKuafuLight>> mLights;
+
+  size_t nextCameraIdx = 1;
+  size_t lastCameraIdx = 0;
 
 public:
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;

@@ -12,7 +12,8 @@
 
 namespace sapien::Renderer {
 //========= KuafuCamera =========//
-KuafuCamera::KuafuCamera(int width, int height, float fovy, KuafuScene *scene) {
+KuafuCamera::KuafuCamera(int width, int height, float fovy, KuafuScene *scene, size_t idx) {
+    mIdx = idx;
     pParentScene = scene;
     pKCamera = pParentScene->getKScene()->createCamera(width, height);
     auto widthF = static_cast<float>(width);
@@ -45,7 +46,7 @@ void KuafuCamera::setPerspectiveCameraParameters(float near, float far, float fx
 void KuafuCamera::takePicture() {
   auto scene = pParentScene->getKScene();
   pParentScene->pKRenderer->setScene(scene);
-  if (scene->getCamera() != pKCamera) { // Camera changed!
+  if (pParentScene->lastCameraIdx != mIdx) {     // Camera changed!
     spdlog::get("SAPIEN")->info(
         "KF: Camera is different from last render! Reduced frame rate is expected.");
     if (pParentScene->pKRenderer->getConfig().getPresent()) {
@@ -60,6 +61,7 @@ void KuafuCamera::takePicture() {
       }
     }
     scene->setCamera(pKCamera);
+    pParentScene->lastCameraIdx = mIdx;
   }
   pParentScene->pKRenderer->run();
 };
@@ -305,12 +307,13 @@ ICamera *KuafuScene::addCamera(uint32_t width, uint32_t height, float fovy, floa
   if (!shaderDir.empty()) {
     spdlog::get("SAPIEN")->warn("KF: user-specified shader not supported");
   }
-  auto cam = std::make_unique<KuafuCamera>(width, height, fovy, this);
+  auto cam = std::make_unique<KuafuCamera>(width, height, fovy, this, nextCameraIdx++);
   mCameras.push_back(std::move(cam));
   return mCameras.back().get();
 }
 
 void KuafuScene::removeCamera(ICamera *camera) {
+//  KF_WARN("KF: removeCamera called on {}, idx={}", long(camera), dynamic_cast<KuafuCamera*>(camera)->mIdx);
   getKScene()->removeCamera(dynamic_cast<KuafuCamera*>(camera)->pKCamera);
   mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
                                 [camera](auto &c) { return camera == c.get(); }),
@@ -411,6 +414,7 @@ void KuafuScene::removeLight(ILight *light) {
 }
 
 void KuafuScene::destroy() {
+//  spdlog::get("SAPIEN")->warn("KF: KuafuScene::destroy called!");
   while (!mBodies.empty()) {       // Warning: b->destroy() will change the container!
     auto& b = mBodies.back();
     b->destroy();

@@ -23,8 +23,8 @@ def main():
     if kuafu:
         config = sapien.KuafuConfig()
         config.use_viewer = True
-        config.use_denoiser = False
-        config.spp = 16
+        config.use_denoiser = True
+        config.spp = 256
         config.max_textures = 20000
         renderer = sapien.KuafuRenderer(config)
     else:
