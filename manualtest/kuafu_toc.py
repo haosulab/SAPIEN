@@ -149,7 +149,7 @@ def main():
         # pose=cam_mount.get_pose(),
         color=[0, 0, 0],
         fov=1.57,
-        tex_path="../3rd_party/kuafu/resources/d415-pattern-sq.png"
+        tex_path="../3rd_party/kuafu/resources/j415.png"
     )
 
     # plight = scene.add_point_light(

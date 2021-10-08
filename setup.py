@@ -86,6 +86,13 @@ class CMakeBuild(build_ext):
         assert os.path.exists(source_path)
         shutil.copytree(source_path, kuafu_shader_path)
 
+        sensor_assets_path = os.path.join(self.build_lib, 'sapien', 'sensor', 'assets')
+        source_patterns_path = os.path.join(ext.sourcedir, '3rd_party/kuafu/resources/patterns')
+        if os.path.exists(sensor_assets_path):
+            shutil.rmtree(sensor_assets_path)
+        os.makedirs(sensor_assets_path)
+        shutil.copytree(source_patterns_path, os.path.join(sensor_assets_path, 'patterns'))
+
 
 def check_version_info():
     try:

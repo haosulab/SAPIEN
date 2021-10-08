@@ -186,7 +186,7 @@ bool LinkBuilder::build(SArticulation &articulation) const {
     PxRigidBodyExt::updateMassAndInertia(*pxLink, densities.data(), shapes.size());
   } else {
     if (mMass < 1e-6 || mInertia.x < 1e-8 || mInertia.y < 1e-8 || mInertia.z < 1e-8) {
-      spdlog::get("SAPIEN")->warn(
+      spdlog::get("SAPIEN")->info(
           "Mass or inertia contains very small number, this is not allowed. "
           "Mass will be set to 1e-6 and inertia will be set to 1e-8 for stability. Link: {0}",
           mName);

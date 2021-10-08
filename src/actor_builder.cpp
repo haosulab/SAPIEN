@@ -626,7 +626,7 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
     }
   } else {
     if (mMass < 1e-8 || mInertia.x < 1e-8 || mInertia.y < 1e-8 || mInertia.z < 1e-8) {
-      spdlog::get("SAPIEN")->warn(
+      spdlog::get("SAPIEN")->info(
           "Mass or inertia contains very small number, this is not allowed. "
           "Mass will be set to 1e-6 and inertia will be set to 1e-8 for stability. Actor: {0}",
           name);

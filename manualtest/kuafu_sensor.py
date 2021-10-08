@@ -10,7 +10,9 @@ import sapien.core as sapien
 import numpy as np
 from sapien.core import Pose
 from sapien.sensor import ActiveLightSensor
+import PIL.Image as im
 import matplotlib.pyplot as plt
+import open3d as o3d
 
 
 def load_obj(scene, materials_root, obj_name, pose=Pose(), material=None):
@@ -28,16 +30,14 @@ def main():
     materials_root = os.path.join(repo_root, 'ocrtoc_materials')
 
     sim = sapien.Engine()
-
-    sapien.KuafuRenderer.set_log_level('debug')
+    sim.set_log_level('warning')
+    sapien.KuafuRenderer.set_log_level('warning')
 
     render_config = sapien.KuafuConfig()
     render_config.use_viewer = False
-    render_config.viewer_width = 960
-    render_config.viewer_height = 540
-    render_config.spp = 32
-    render_config.max_bounces = 6
-    render_config.use_denoiser = True
+    render_config.spp = 64
+    render_config.max_bounces = 8
+    render_config.use_denoiser = False
 
     renderer = sapien.KuafuRenderer(render_config)
     sim.set_renderer(renderer)
@@ -100,52 +100,59 @@ def main():
     load_obj(scene, materials_root, 'tennis_ball', Pose(p=[0.3, -0.2, 1]))
     load_obj(scene, materials_root, 'coca_cola', Pose(p=[0.2, 0.3, 1]))
 
-    # ceiling light
-    builder = scene.create_actor_builder()
-    material = renderer.create_material()
-    material.base_color = [1., 1., 1., 1.]
-    material.emission = [1., 1., 1., 2.]
-    builder.add_box_visual(half_size=[5, 5, 0.1], material=material)
-    builder.add_box_collision(half_size=[5, 5, 0.1])
-    ceil_light = builder.build_static()
-    ceil_light.set_pose(Pose(p=[0, 0, 3]))
+    for i in range(1000):
+        scene.step()
 
-    scene.step()
+    scene.set_ambient_light([0.3, 0.3, 0.3])
+    scene.add_directional_light(
+        [0, 0.5, -1], color=[2.0, 2.0, 2.0]
+    )
+    scene.add_spot_light(
+        position=[0, 0, 1],
+        direction=[0, 0, -1],
+        inner_fov=0.5,
+        outer_fov=0.5,
+        color=[5.0, 5.0, 5.0]
+    )
 
-    scene.set_ambient_light([0.003, 0.003, 0.003])
-    # dirlight = scene.add_directional_light(
-    #     [0, 0.5, -1], color=[2.0, 2.0, 2.0]
-    # )
+    sensor = ActiveLightSensor(
+        'sensor', renderer, scene, sensor_type='fakesense_j415')
 
-    # slight = scene.add_spot_light(
-    #     position=[0, 0, 1],
-    #     direction=[0, 0, -1],
-    #     inner_fov=0.5,
-    #     outer_fov=0.5,
-    #     color=[5.0, 5.0, 5.0]
-    # )
-
-    sensor = ActiveLightSensor('sensor', renderer, scene, 'fakesense_j415')
     sensor.set_pose(sapien.Pose(
-        [0.79111, 0.247229, 0.803505], [0.13942, 0.452553, 0.0629925, -0.878516]))
+        [0.79111, 0.247229, 0.803505],
+        [0.13942, 0.452553, 0.0629925, -0.878516]))
 
-    scene.step()
-    scene.update_render()
-    sensor.take_picture()
+    for _ in range(2):
+        scene.step()
+        scene.update_render()
+        sensor.take_picture()
 
-    # rgb = sensor.get_rgb()
-    # plt.imshow(rgb)
-    # plt.show()
-    # ir = sensor.get_ir()
-    # plt.imshow(ir[0])
-    # plt.show()
-    # plt.imshow(ir[1])
-    # plt.show()
+        rgb = sensor.get_rgb()
+        im.fromarray(rgb).show()
 
-    d = sensor.get_depth()
-    plt.imshow(d)
-    plt.show()
-    d
+        ir_l, ir_r = sensor.get_ir()
+        im.fromarray(ir_l).show()
+        im.fromarray(ir_r).show()
+
+        depth = sensor.get_depth()
+        plt.imshow(depth)
+        plt.show()
+        # im.fromarray(depth).show()
+
+        pc = sensor.get_pointcloud(frame='world', with_rgb=True)
+        pc1 = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(pc[..., :3]))
+        pc1.colors = o3d.utility.Vector3dVector(pc[..., 3:] / 255)
+        o3d.visualization.draw_geometries([pc1])
+
+        sensor.set_pose(sapien.Pose(
+            [0.69111, 0.207229, 1.103505],
+            [0.13942, 0.452553, 0.0629925, -0.878516]))
+
+    while True:
+        pass
+
+
+    # rgb, ir_l, ir_r, depth, pc
 
 
 main()

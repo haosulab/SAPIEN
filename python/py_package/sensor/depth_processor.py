@@ -1,5 +1,5 @@
 # by Xiaoshuai Jet Zhang <i@jetd.me>, Jan 2021
-# v2021.10.07
+# v2021.10.08
 #
 # Depth simulation toolkit.
 #
@@ -280,6 +280,7 @@ def calc_main_depth_from_left_right_ir(
         use_census: bool = True,
         lr_consistency: bool = False,
         register_depth: bool = True,
+        register_blur_ksize: int = 5,
         main_cam_size=(1920, 1080),
         census_wsize=7,
         **kwargs
@@ -342,6 +343,7 @@ def calc_main_depth_from_left_right_ir(
         depth[np.isnan(depth)] = 0
         depth[np.isinf(depth)] = 0
         depth[depth < 0] = 0
-        depth = cv2.medianBlur(depth, 5)
+        if register_blur_ksize > 0:
+            depth = cv2.medianBlur(depth, register_blur_ksize)
 
     return depth
