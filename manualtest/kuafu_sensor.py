@@ -1,11 +1,8 @@
-# In this demo, we will render a TOC scene using Kuafu backend.
-# Images will be save to local menu every 400 frames.
-# You will need to clone https://github.com/haosulab/ICCV2021_Diagnosis/
-# and set `repo_root` to run this demo.
+# In this demo, we will build a simple scene and create
+# an active light depth sensor to obtain realistic depth.
 #
 # By Jet <i@jetd.me>
 #
-import os
 import sapien.core as sapien
 import numpy as np
 import transforms3d.euler
@@ -105,11 +102,11 @@ def main():
     sensor.take_picture()
 
     rgb = sensor.get_rgb()
-    im.fromarray(rgb).show()
+    im.fromarray((rgb * 255).astype(np.uint8)).show()
 
     ir_l, ir_r = sensor.get_ir()
-    im.fromarray(ir_l).show()
-    im.fromarray(ir_r).show()
+    im.fromarray((ir_l * 255).astype(np.uint8)).show()
+    im.fromarray((ir_r * 255).astype(np.uint8)).show()
 
     depth = sensor.get_depth()
     plt.imshow(depth)
@@ -118,7 +115,7 @@ def main():
 
     pc = sensor.get_pointcloud(frame='world', with_rgb=True)
     pc1 = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(pc[..., :3]))
-    pc1.colors = o3d.utility.Vector3dVector(pc[..., 3:] / 255)
+    pc1.colors = o3d.utility.Vector3dVector(pc[..., 3:])
     o3d.visualization.draw_geometries([pc1])
 
 

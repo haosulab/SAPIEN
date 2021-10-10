@@ -16,7 +16,6 @@ from copy import deepcopy as copy
 import os
 
 import numpy as np
-from numpy.typing import NDArray
 
 import transforms3d as t3d
 
@@ -29,13 +28,13 @@ class ActiveLightSensor(SensorEntity):
                  sensor_type: Optional[str] = 'fakesense_j415',
                  rgb_resolution: Tuple[int, int] = None,
                  ir_resolution: Tuple[int, int] = None,
-                 rgb_intrinsic: Optional[NDArray] = None,
-                 ir_intrinsic: Optional[NDArray] = None,
+                 rgb_intrinsic: Optional[np.ndarray] = None,
+                 ir_intrinsic: Optional[np.ndarray] = None,
                  trans_pose_l: Optional[Pose] = None,
                  trans_pose_r: Optional[Pose] = None,
                  light_pattern: Optional[str] = None,
-                 max_depth: float = 3.0,
-                 min_depth: float = 0.5,
+                 max_depth: float = 8.0,
+                 min_depth: float = 0.3,
                  ir_ambient_strength: float = 0.002):
         """
 
@@ -60,8 +59,8 @@ class ActiveLightSensor(SensorEntity):
         super().__init__()
 
         from warnings import warn
-        warn('Current implementation of ActiveLightSensor is incompatible with emissive objects. Please avoid using '
-             'material.emission in the scene.')
+        warn('Current implementation of ActiveLightSensor is incompatible with emissive objects.')
+        warn('Current implementation of ActiveLightSensor is incompatible with environment maps.')
 
         self.name = sensor_name
         # super().set_name(sensor_name)
@@ -156,7 +155,8 @@ class ActiveLightSensor(SensorEntity):
             ex_main = self._pose2cv2ex(Pose())
 
             depth = calc_main_depth_from_left_right_ir(
-                self._ir_l, self._ir_r,
+                self._float2uint8(self._ir_l),
+                self._float2uint8(self._ir_r),
                 ex_l, ex_r, ex_main,
                 self.ir_intrinsic, self.ir_intrinsic, self.rgb_intrinsic,
                 lr_consistency=False, main_cam_size=(self.rgb_w, self.rgb_h),
@@ -199,8 +199,8 @@ class ActiveLightSensor(SensorEntity):
             self.trans_pose_l = Pose([0, -0.0175, 0])
             self.trans_pose_r = Pose([0, -0.0720, 0])
             self.light_pattern = os.path.join(os.path.dirname(__file__), 'assets/patterns/fakesense_j415.png')
-            self.max_depth = 3.5
-            self.min_depth = 0.4
+            self.max_depth = 10.0
+            self.min_depth = 0.2
         else:
             assert False, f"Unsupported sensor type: {sensor_type}"
 
@@ -263,13 +263,13 @@ class ActiveLightSensor(SensorEntity):
     def _fetch(self, mod):
         if mod == 'rgb':
             if self._rgb is None:
-                self._rgb = self._float2uint8(self.cam_rgb.get_color_rgba()[..., :3])
+                self._rgb = self.cam_rgb.get_color_rgba()[..., :3].clip(0, 1)
         elif mod == 'ir_l':
             if self._ir_l is None:
-                self._ir_l = self._float2uint8(self.cam_ir_l.get_color_rgba()[..., 0])
+                self._ir_l = self.cam_ir_l.get_color_rgba()[..., 0].clip(0, 1)
         elif mod == 'ir_r':
             if self._ir_r is None:
-                self._ir_r = self._float2uint8(self.cam_ir_r.get_color_rgba()[..., 0])
+                self._ir_r = self.cam_ir_r.get_color_rgba()[..., 0].clip(0, 1)
 
     @staticmethod
     def _pose2cv2ex(pose):
