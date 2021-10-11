@@ -38,7 +38,7 @@ is a continuation of ShapeNet and PartNet.
     `visual_body.local_pose`. These changes are made to match `add_visual_shape`
     functions when building the actor.
 
-### 1.2
+### pre2.0
 - Shader change: 4th component in default camera shader now gives the 0-1 depth value.
 - Add "critical" and "off" log levels.
 - Add support for pointcloud and line rendering (for visualizing camera and point cloud)
