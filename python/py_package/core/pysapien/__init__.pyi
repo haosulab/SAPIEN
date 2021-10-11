@@ -814,11 +814,6 @@ class KuafuConfig():
     def assets_path(self, arg0: str) -> None:
         pass
     @property
-    def clear_color(self) -> glm::vec<4, float, :
-        """
-        :type: glm::vec<4, float, 
-        """
-    @property
     def max_bounces(self) -> int:
         """
         :type: int
