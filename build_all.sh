@@ -29,6 +29,9 @@ function build_manylinux14_wheel() {
   elif [ "$PY_VERSION" -eq 39 ]; then
       PY_DOT=3.9
       EXT=""
+  elif [ "$PY_VERSION" -eq 310 ]; then
+      PY_DOT=3.10
+      EXT=""
   else
     echo "Error, python version not found!"
   fi
@@ -58,4 +61,5 @@ function build_manylinux14_wheel() {
 build_manylinux14_wheel 37
 build_manylinux14_wheel 38
 build_manylinux14_wheel 39
+build_manylinux14_wheel 310
 rm -rf build

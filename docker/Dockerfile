@@ -1,8 +1,10 @@
-FROM quay.io/pypa/manylinux2014_x86_64:2021-03-12-76cb5c3
+FROM quay.io/pypa/manylinux2014_x86_64:2021-10-11-14ac00e
 RUN yum update -y && mkdir /workspace
 
 WORKDIR /workspace
 COPY PhysX /workspace/PhysX
+
+ENV CC=/opt/rh/devtoolset-10/root/usr/bin/cc CXX=/opt/rh/devtoolset-10/root/usr/bin/c++
 
 WORKDIR /workspace
 RUN git clone --single-branch -b 20210000.6 --depth 1 https://github.com/coin-or/CppAD.git
@@ -31,7 +33,13 @@ WORKDIR /workspace/urdfdom/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
 
 WORKDIR /workspace
-RUN yum install -y eigen3-devel urdfdom-devel boost-devel
+RUN git clone --single-branch -b 3.4.0 --depth 1 https://gitlab.com/libeigen/eigen.git
+RUN mkdir /workspace/eigen/build
+WORKDIR /workspace/eigen/build
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
+
+WORKDIR /workspace
+RUN yum install -y urdfdom-devel boost-devel
 RUN git clone --single-branch -b v2.5.6 --depth 1 https://github.com/stack-of-tasks/pinocchio.git
 WORKDIR /workspace/pinocchio
 RUN git submodule update --init --recursive && mkdir /workspace/pinocchio/build
@@ -61,7 +69,7 @@ WORKDIR /workspace/glm
 RUN cp -r glm /usr/local/include
 
 RUN yum install -y glew-devel
-ENV LD_LIBRARY_PATH=/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/opt/rh/devtoolset-9/root/usr/lib64/dyninst:/opt/rh/devtoolset-9/root/usr/lib/dyninst:/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/workspace/1.2.189.0/x86_64/lib PCP_DIR=/opt/rh/devtoolset-9/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-9/root MANPATH=/opt/rh/devtoolset-9/root/usr/share/man: PATH=/opt/rh/devtoolset-9/root/usr/bin:/workspace/1.2.189.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV LD_LIBRARY_PATH=/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/opt/rh/devtoolset-10/root/usr/lib64/dyninst:/opt/rh/devtoolset-10/root/usr/lib/dyninst:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/workspace/1.2.189.0/x86_64/lib PCP_DIR=/opt/rh/devtoolset-10/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-10/root MANPATH=/opt/rh/devtoolset-10/root/usr/share/man: PATH=/opt/rh/devtoolset-10/root/usr/bin:/workspace/1.2.189.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 WORKDIR /workspace
 RUN git clone --single-branch -b v2.1.0 --depth 1 https://github.com/yse/easy_profiler.git
@@ -91,7 +99,7 @@ WORKDIR /workspace/assimp/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
 
 RUN rpm -i http://mirror.ghettoforge.org/distributions/gf/el/7/gf/x86_64/gcc10-libstdc++-10.2.1-7.gf.el7.x86_64.rpm
-ENV LD_LIBRARY_PATH=/opt/gcc-10.2.1/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/opt/rh/devtoolset-9/root/usr/lib64/dyninst:/opt/rh/devtoolset-9/root/usr/lib/dyninst:/opt/rh/devtoolset-9/root/usr/lib64:/opt/rh/devtoolset-9/root/usr/lib:/workspace/1.2.189.0/x86_64/lib:/workspace/cuda/lib64:/workspace/cuda/lib64/stubs/ PCP_DIR=/opt/rh/devtoolset-9/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-9/root MANPATH=/opt/rh/devtoolset-9/root/usr/share/man: PATH=/opt/rh/devtoolset-9/root/usr/bin:/workspace/1.2.189.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV LD_LIBRARY_PATH=/opt/gcc-10.2.1/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/opt/rh/devtoolset-10/root/usr/lib64/dyninst:/opt/rh/devtoolset-10/root/usr/lib/dyninst:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/workspace/1.2.189.0/x86_64/lib:/workspace/cuda/lib64:/workspace/cuda/lib64/stubs/ PCP_DIR=/opt/rh/devtoolset-10/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-10/root MANPATH=/opt/rh/devtoolset-10/root/usr/share/man: PATH=/opt/rh/devtoolset-10/root/usr/bin:/workspace/1.2.189.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 RUN /opt/python/cp38-cp38/bin/pip install git+https://github.com/fbxiang/auditwheel.git@3a723fa01f87b04b5ce4a8e7f81f6a142ac3044f
 RUN echo "#!/opt/python/cp38-cp38/bin/python" > /usr/local/bin/auditwheel \

@@ -12,6 +12,7 @@ while [[ "$#" -gt 0 ]]; do
         37) VERSION="37";;
         38) VERSION="38";;
         39) VERSION="39";;
+        310) VERSION="310";;
     esac
     shift
 done
@@ -35,6 +36,9 @@ function build_manylinux14_wheel() {
       EXT=""
   elif [ "$PY_VERSION" -eq 39 ]; then
       PY_DOT=3.9
+      EXT=""
+  elif [ "$PY_VERSION" -eq 310 ]; then
+      PY_DOT=3.10
       EXT=""
   else
     echo "Error, python version not found!"
