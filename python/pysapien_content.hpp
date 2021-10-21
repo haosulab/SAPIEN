@@ -2319,7 +2319,8 @@ Args:
       //                        [](Renderer::RenderShape &shape) { return vec32array(shape.scale);
       //                        })
       .def_property_readonly("mesh", &Renderer::IPxrRenderShape::getGeometry)
-      .def_property_readonly("material", &Renderer::IPxrRenderShape::getMaterial);
+      .def_property_readonly("material", &Renderer::IPxrRenderShape::getMaterial)
+      .def("set_material", &Renderer::IPxrRenderShape::setMaterial, py::arg("material"));
 
   PyRenderMeshGeometry
       .def_property_readonly("vertices",
