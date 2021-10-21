@@ -201,6 +201,9 @@ class IPxrRenderShape {
 public:
   [[nodiscard]] virtual std::shared_ptr<RenderMeshGeometry> getGeometry() const { return {}; }
   [[nodiscard]] virtual std::shared_ptr<IPxrMaterial> getMaterial() const { return nullptr; }
+  virtual void setMaterial(std::shared_ptr<IPxrMaterial>) {
+    throw std::runtime_error("setMaterial is not implemented");
+  }
   virtual ~IPxrRenderShape() = default;
 };
 
