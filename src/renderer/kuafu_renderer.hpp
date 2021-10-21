@@ -15,6 +15,7 @@ class KuafuMaterial : public IPxrMaterial {
   kuafu::NiceMaterial mKMaterial;
 
 public:
+  KuafuMaterial(kuafu::NiceMaterial m = {}): mKMaterial(std::move(m)) {}
   inline void setBaseColor(std::array<float, 4> color) override {
     mKMaterial.diffuseColor = glm::vec3(color[0], color[1], color[2]);
     mKMaterial.alpha = color[3];

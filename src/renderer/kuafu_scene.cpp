@@ -97,6 +97,24 @@ void KuafuCamera::setPose(physx::PxTransform const &pose) { setPxPose(pose); };
 
 IPxrScene *KuafuCamera::getScene() { return pParentScene; }
 
+//========= KuafuRenderShape =======//
+
+std::shared_ptr<IPxrMaterial> KuafuRenderShape::getMaterial() const {
+  auto matIndex = pKInstance->geometry->matIndex.front();
+  auto kMat = kuafu::global::materials[matIndex];
+  auto mat = std::make_shared<KuafuMaterial>(kMat);
+  return mat;
+}
+
+inline void KuafuRenderShape::setMaterial(std::shared_ptr<IPxrMaterial> m) {
+  // FIXME: relies on non-instancing
+  auto mat = std::dynamic_pointer_cast<KuafuMaterial>(m)->getKMaterial();
+  pKInstance->geometry->setMaterial(mat);
+  pKInstance->geometry->initialized = false;
+  pParentScene->getKScene()->markGeometriesChanged();
+  pParentScene->getKScene()->markGeometryInstancesChanged();
+}
+
 //========= KuafuRigidBody =========//
 
 KuafuRigidBody::KuafuRigidBody(

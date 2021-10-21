@@ -62,6 +62,21 @@ public:
   }
 };
 
+class KuafuRenderShape: public IPxrRenderShape {
+  std::shared_ptr<kuafu::GeometryInstance> pKInstance;
+  KuafuScene *pParentScene = nullptr;
+public:
+  KuafuRenderShape(const std::shared_ptr<kuafu::GeometryInstance>& ins, KuafuScene *p)
+      : pKInstance(ins), pParentScene(p) {}
+  [[nodiscard]] inline std::shared_ptr<RenderMeshGeometry> getGeometry() const override {
+    spdlog::get("SAPIEN")->error("KuafuRenderShape::getGeometry not implemented");
+    return {};
+  }
+  [[nodiscard]] std::shared_ptr<IPxrMaterial> getMaterial() const override;
+  void setMaterial(std::shared_ptr<IPxrMaterial> m) override;
+  //  virtual ~KuafuRenderShape() = default;
+};
+
 class KuafuRigidBody : public IPxrRigidbody {
   std::string mName{};
   KuafuScene *pParentScene = nullptr;
@@ -101,6 +116,13 @@ public:
   void setVisibility(float visibility) override;
   void setVisible(bool visible) override;
   void setRenderMode(uint32_t mode) override;
+
+  std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() override {
+    std::vector<std::shared_ptr<IPxrRenderShape>> ret;
+    for (const auto& p: pKGeometryInstances)
+      ret.push_back(std::make_shared<KuafuRenderShape>(p, pParentScene));
+    return ret;
+  }
 
   void destroy() override;
 };
