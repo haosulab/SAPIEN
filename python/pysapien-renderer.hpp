@@ -353,7 +353,7 @@ void buildRenderer(py::module &parent) {
       .def(
           "create_brdf_lut",
           [](std::shared_ptr<core::Context> context, uint32_t size) {
-            return context->getResourceManager()->generateBRDFLUT(context, size);
+            return context->getResourceManager()->generateBRDFLUT(size);
           },
           "Generate BRDF LUT texture, see https://learnopengl.com/PBR/IBL/Specular-IBL",
           py::arg("size") = 128)

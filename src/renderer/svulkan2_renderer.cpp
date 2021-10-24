@@ -5,6 +5,9 @@
 namespace sapien {
 namespace Renderer {
 
+static std::weak_ptr<svulkan2::core::Context> gContext;
+static std::weak_ptr<svulkan2::resource::SVResourceManager> gResourceManager;
+
 std::string gDefaultViewerShaderDirectory = "";
 void setDefaultViewerShaderDirectory(std::string const &dir) {
   gDefaultViewerShaderDirectory = dir;
@@ -36,9 +39,16 @@ void SVulkan2Renderer::setLogLevel(std::string const &level) {
 SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
                                    uint32_t maxNumTextures, uint32_t defaultMipLevels,
                                    std::string const &device, std::string const &culling) {
-  mContext = std::make_shared<svulkan2::core::Context>(!offscreenOnly, maxNumMaterials,
-                                                       maxNumTextures, defaultMipLevels, device);
-  mResourceManager = mContext->createResourceManager();
+  if (!gContext.expired()) {
+    mContext = gContext.lock();
+    mResourceManager = gResourceManager.lock();
+    spdlog::get("SAPIEN")->warn("A second renderer will share the same internal context with the "
+                                "first one. Arguments passed to constructor will be ignored.");
+  } else {
+    gContext = mContext = svulkan2::core::Context::Create(
+        !offscreenOnly, maxNumMaterials, maxNumTextures, defaultMipLevels, device);
+    gResourceManager = mResourceManager = mContext->createResourceManager();
+  }
   if (culling == "back") {
     mCullMode = vk::CullModeFlagBits::eBack;
   } else if (culling == "front") {

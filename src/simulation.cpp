@@ -160,8 +160,7 @@ Simulation::createCollisionShape(PxGeometry const &geometry,
 
 void Simulation::setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer) {
   if (mRenderer)
-    spdlog::get("SAPIEN")->warn(
-        "Setting renderer twice is in general not allowed, unless all scenes have been deleted.");
+    spdlog::get("SAPIEN")->warn("Setting renderer more than once should be avoided.");
   mRenderer = renderer;
 }
 
@@ -187,8 +186,8 @@ std::shared_ptr<Simulation> Simulation::getInstance(uint32_t nthread, PxReal tol
                                                     PxReal toleranceSpeed) {
   static std::weak_ptr<Simulation> _instance;
   if (!_instance.expired()) {
-    spdlog::get("SAPIEN")->warn(
-        "Only one engine is allowed per process, using the previously created engine.");
+    spdlog::get("SAPIEN")->warn("A second engine will shared the same internal structures with "
+                                "the first one. Arguments passed to constructor will be ignored.");
     return _instance.lock();
   }
   auto sim = std::make_shared<Simulation>(nthread, toleranceLength, toleranceSpeed);

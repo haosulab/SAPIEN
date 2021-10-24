@@ -13,7 +13,7 @@ SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, floa
   config->depthFormat = vk::Format::eD32Sfloat;
   config->shaderDir = shaderDir;
 
-  mRenderer = std::make_unique<svulkan2::renderer::Renderer>(context, config);
+  mRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
   mRenderer->resize(width, height);
 
   mCamera = &mScene->getScene()->addCamera();

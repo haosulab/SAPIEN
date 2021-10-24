@@ -206,6 +206,7 @@ class Viewer(object):
         self.resolution = None
         self.resolutions = None
         self.set_window_resolutions(resolutions)
+        self.fovy = np.pi / 2
 
         self.axes = None
         self.show_axes = True

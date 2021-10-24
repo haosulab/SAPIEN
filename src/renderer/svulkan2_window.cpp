@@ -55,7 +55,7 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
   config->culling = renderer->mCullMode;
   config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultViewerShaderDirectory;
   config->colorFormat = vk::Format::eR32G32B32A32Sfloat;
-  mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(mRenderer->mContext, config);
+  mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
 
   // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   mWindow = renderer->mContext->createWindow(width, height);

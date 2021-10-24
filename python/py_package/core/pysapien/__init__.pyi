@@ -1354,6 +1354,7 @@ class RenderScene():
         """
     pass
 class RenderShape():
+    def set_material(self, material: RenderMaterial) -> None: ...
     @property
     def material(self) -> RenderMaterial:
         """
