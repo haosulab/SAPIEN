@@ -36,5 +36,13 @@ std::shared_ptr<IPxrMaterial> SVulkan2RenderShape::getMaterial() const {
   return std::make_shared<SVulkan2Material>(mat, mParentBody->getScene()->getParentRenderer());
 }
 
+void SVulkan2RenderShape::setMaterial(std::shared_ptr<IPxrMaterial> material) {
+  auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
+  if (!mat) {
+    throw std::runtime_error("invalid material");
+  }
+  mShape->material = mat->getMaterial();
+}
+
 } // namespace Renderer
 } // namespace sapien
