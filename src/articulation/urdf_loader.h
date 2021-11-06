@@ -72,14 +72,14 @@ using namespace tinyxml2;
 /* Error if a unique child is not set */
 #define CHECK_CHILD_UNIQUE(name)                                                                  \
   if (!name) {                                                                                    \
-    spdlog::get("sapien")->critical("Missing required child <{}>", #name);                        \
+    spdlog::get("SAPIEN")->critical("Missing required child <{}>", #name);                        \
     throw std::runtime_error("Missing required child");                                           \
   }
 
 /* Error if a child array is empty */
 #define CHECK_CHILD(name)                                                                         \
   if (name##_array.empty()) {                                                                     \
-    spdlog::get("sapien")->critical("Missing required children <{}>", #name);                     \
+    spdlog::get("SAPIEN")->critical("Missing required children <{}>", #name);                     \
     throw std::runtime_error("Missing required child");                                           \
   }
 
@@ -103,7 +103,7 @@ struct DomBase {
     if (result) {
       return _read_attr<T>(result);
     }
-    spdlog::get("sapien")->critical("Attribute {} does not exist on {}, at line {}.", name,
+    spdlog::get("SAPIEN")->critical("Attribute {} does not exist on {}, at line {}.", name,
                                     elem.Name(), elem.GetLineNum());
     throw std::runtime_error("Missing attribute");
   }
@@ -330,7 +330,7 @@ struct Geometry : DomBase {
   Geometry(const XMLElement &elem) {
     const XMLElement *child = elem.FirstChildElement();
     if (!child) {
-      spdlog::get("sapien")->critical("<geometry> contains no child, at line {}",
+      spdlog::get("SAPIEN")->critical("<geometry> contains no child, at line {}",
                                       elem.GetLineNum());
       throw std::runtime_error("<geometry> contains no child");
     }
