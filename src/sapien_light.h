@@ -93,7 +93,14 @@ public:
   inline void setFov(float fov) const { getRendererLight()->setFov(fov); }
   inline float getFov() const { return getRendererLight()->getFov(); }
 
-  inline SActiveLight(SScene *scene, Renderer::IActiveLight *light) : SLight(scene), mLight(light) {}
+  inline void setShadowParameters(float near, float far) {
+    getRendererLight()->setShadowParameters(near, far);
+  }
+  inline float getShadowNear() const { return getRendererLight()->getShadowNear(); }
+  inline float getShadowFar() const { return getRendererLight()->getShadowFar(); }
+
+  inline SActiveLight(SScene *scene, Renderer::IActiveLight *light)
+      : SLight(scene), mLight(light) {}
 
 private:
   Renderer::IActiveLight *getRendererLight() const override { return mLight; }

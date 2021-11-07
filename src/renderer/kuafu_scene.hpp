@@ -19,7 +19,7 @@ class KuafuCamera : public ICamera {
   friend class KuafuScene;
 
   KuafuScene *pParentScene = nullptr;
-  kuafu::Camera* pKCamera = nullptr;
+  kuafu::Camera *pKCamera = nullptr;
   size_t mIdx;
 
   void setPxPose(const physx::PxTransform &pose);
@@ -62,11 +62,12 @@ public:
   }
 };
 
-class KuafuRenderShape: public IPxrRenderShape {
+class KuafuRenderShape : public IPxrRenderShape {
   std::shared_ptr<kuafu::GeometryInstance> pKInstance;
   KuafuScene *pParentScene = nullptr;
+
 public:
-  KuafuRenderShape(const std::shared_ptr<kuafu::GeometryInstance>& ins, KuafuScene *p)
+  KuafuRenderShape(const std::shared_ptr<kuafu::GeometryInstance> &ins, KuafuScene *p)
       : pKInstance(ins), pParentScene(p) {}
   [[nodiscard]] inline std::shared_ptr<RenderMeshGeometry> getGeometry() const override {
     spdlog::get("SAPIEN")->error("KuafuRenderShape::getGeometry not implemented");
@@ -89,8 +90,7 @@ class KuafuRigidBody : public IPxrRigidbody {
   uint32_t mSegmentationId = 0;
 
 public:
-  KuafuRigidBody(KuafuScene *scene,
-                 KuafuGeometryInstances instances,
+  KuafuRigidBody(KuafuScene *scene, KuafuGeometryInstances instances,
                  const physx::PxVec3 &scale = {1.0, 1.0, 1.0});
   KuafuRigidBody(KuafuRigidBody const &other) = delete;
   KuafuRigidBody &operator=(KuafuRigidBody const &other) = delete;
@@ -119,7 +119,7 @@ public:
 
   std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() override {
     std::vector<std::shared_ptr<IPxrRenderShape>> ret;
-    for (const auto& p: pKGeometryInstances)
+    for (const auto &p : pKGeometryInstances)
       ret.push_back(std::make_shared<KuafuRenderShape>(p, pParentScene));
     return ret;
   }
@@ -132,7 +132,7 @@ class KuafuScene : public IPxrScene {
   friend class KuafuRenderer;
   friend class KuafuRigidBody;
 
-  kuafu::Scene* pKScene;
+  kuafu::Scene *pKScene;
   std::shared_ptr<kuafu::Kuafu> pKRenderer;
   std::vector<std::unique_ptr<KuafuRigidBody>> mBodies;
   std::vector<std::unique_ptr<KuafuCamera>> mCameras;
@@ -172,28 +172,29 @@ public:
 
   IPointLight *addPointLight(std::array<float, 3> const &position,
                              std::array<float, 3> const &color, bool enableShadow,
-                             float shadowNear, float shadowFar) override;
+                             float shadowNear, float shadowFar, uint32_t shadowMapSize) override;
 
   IDirectionalLight *addDirectionalLight(std::array<float, 3> const &direction,
                                          std::array<float, 3> const &color, bool enableShadow,
                                          std::array<float, 3> const &position, float shadowScale,
-                                         float shadowNear, float shadowFar) override;
+                                         float shadowNear, float shadowFar,
+                                         uint32_t shadowMapSize) override;
 
   ISpotLight *addSpotLight(std::array<float, 3> const &position,
                            std::array<float, 3> const &direction, float fovInner, float fovOuter,
                            std::array<float, 3> const &color, bool enableShadow, float shadowNear,
-                           float shadowFar) override;
+                           float shadowFar, uint32_t shadowMapSize) override;
 
   IActiveLight *addActiveLight(physx::PxTransform const &pose, std::array<float, 3> const &color,
-                               float fov, std::string_view texPath) override;
+                               float fov, std::string_view texPath, float shadowNear,
+                               float shadowFar, uint32_t shadowMapSize) override;
 
   void removeLight(ILight *light) override;
 
   /** call this function before every rendering time frame */
-  inline void updateRender() override { };
+  inline void updateRender() override{};
 
   void destroy() override;
-
 
   // non override
   inline auto getKScene() const { return pKScene; };

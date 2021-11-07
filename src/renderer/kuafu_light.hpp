@@ -262,6 +262,18 @@ public:
   };
   inline std::string_view getTexture() override { return mLight->texPath; }
 
+  inline void setShadowParameters(float near, float far) override {
+    kf_warn_feature_not_available("KuafuActiveLight::setShadowParameters");
+  };
+  [[nodiscard]] inline float getShadowNear() const override {
+    kf_warn_feature_not_available("KuafuActiveLight::getShadowNear");
+    return 0;
+  };
+  [[nodiscard]] inline float getShadowFar() const override {
+    kf_warn_feature_not_available("KuafuActiveLight::getShadowFar");
+    return 0;
+  };
+
   void _kfRemoveFromScene(void* scene) override {
     auto kfScene = static_cast<kuafu::Scene*>(scene);
     kfScene->removeActiveLight(mLight);

@@ -216,15 +216,17 @@ public:
   void setAmbientLight(PxVec3 const &color);
   PxVec3 getAmbientLight() const;
   SPointLight *addPointLight(PxVec3 const &position, PxVec3 const &color, bool enableShadow,
-                             float shadowNear, float shadowFar);
+                             float shadowNear, float shadowFar, uint32_t shadowMapSize);
   SDirectionalLight *addDirectionalLight(PxVec3 const &direction, PxVec3 const &color,
                                          bool enableShadow, PxVec3 const &position,
-                                         float shadowScale, float shadowNear, float shadowFar);
+                                         float shadowScale, float shadowNear, float shadowFar,
+                                         uint32_t shadowMapSize);
   SSpotLight *addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fovInner,
                            float fovOuter, PxVec3 const &color, bool enableShadow,
-                           float shadowNear, float shadowFar);
+                           float shadowNear, float shadowFar, uint32_t shadowMapSize);
   SActiveLight *addActiveLight(PxTransform const &pose, PxVec3 const &color, float fov,
-                               std::string_view texPath);
+                               std::string_view texPath, float shadowNear, float shadowFar,
+                               uint32_t shadowMapSize);
 
   void setEnvironmentMap(std::string_view filename);
   void setEnvironmentMapFromFiles(std::string_view px, std::string_view nx, std::string_view py,

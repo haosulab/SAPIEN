@@ -43,7 +43,7 @@ void SVulkan2PointLight::setPosition(physx::PxVec3 position) {
 }
 
 void SVulkan2PointLight::setShadowParameters(float near, float far) {
-  mLight->setShadowParameters(near, far);
+  mLight->setShadowParameters(near, far, mLight->getShadowMapSize());
 }
 
 // directional light
@@ -88,7 +88,7 @@ void SVulkan2DirectionalLight::setDirection(physx::PxVec3 direction) {
 }
 
 void SVulkan2DirectionalLight::setShadowParameters(float halfSize, float near, float far) {
-  mLight->setShadowParameters(halfSize, near, far);
+  mLight->setShadowParameters(halfSize, near, far, mLight->getShadowMapSize());
 }
 
 // spot light
@@ -131,7 +131,7 @@ void SVulkan2SpotLight::setPosition(physx::PxVec3 position) {
 }
 
 void SVulkan2SpotLight::setShadowParameters(float near, float far) {
-  mLight->setShadowParameters(near, far);
+  mLight->setShadowParameters(near, far, mLight->getShadowMapSize());
 }
 
 physx::PxVec3 SVulkan2SpotLight::getDirection() const {
@@ -145,6 +145,64 @@ void SVulkan2SpotLight::setDirection(physx::PxVec3 direction) {
 
 void SVulkan2SpotLight::setFov(float fov) { mLight->setFov(fov); }
 float SVulkan2SpotLight::getFov() const { return mLight->getFov(); }
+
+// active light
+SVulkan2ActiveLight::SVulkan2ActiveLight(svulkan2::scene::TexturedLight &light) : mLight(&light) {}
+
+physx::PxTransform SVulkan2ActiveLight::getPose() const {
+  auto pose = mLight->getTransform();
+  return {{pose.position.x, pose.position.y, pose.position.z},
+          {pose.rotation.x, pose.rotation.y, pose.rotation.z, pose.rotation.w}};
+}
+
+void SVulkan2ActiveLight::setPose(physx::PxTransform const &transform) {
+  mLight->setTransform(svulkan2::scene::Transform{
+      .position = glm::vec3(transform.p.x, transform.p.y, transform.p.z),
+      .rotation = glm::quat(transform.q.w, transform.q.x, transform.q.y, transform.q.z)});
+}
+
+physx::PxVec3 SVulkan2ActiveLight::getColor() const {
+  auto color = mLight->getColor();
+  return {color.x, color.y, color.z};
+}
+
+void SVulkan2ActiveLight::setColor(physx::PxVec3 color) {
+  mLight->setColor({color.x, color.y, color.z});
+}
+
+bool SVulkan2ActiveLight::getShadowEnabled() const { return mLight->isShadowEnabled(); }
+void SVulkan2ActiveLight::setShadowEnabled(bool enabled) { mLight->enableShadow(enabled); }
+
+float SVulkan2ActiveLight::getShadowNear() const { return mLight->getShadowNear(); }
+float SVulkan2ActiveLight::getShadowFar() const { return mLight->getShadowNear(); }
+
+physx::PxVec3 SVulkan2ActiveLight::getPosition() const {
+  auto p = mLight->getPosition();
+  return {p.x, p.y, p.z};
+}
+
+void SVulkan2ActiveLight::setPosition(physx::PxVec3 position) {
+  mLight->setPosition({position[0], position[1], position[2]});
+}
+
+void SVulkan2ActiveLight::setShadowParameters(float near, float far) {
+  mLight->setShadowParameters(near, far, mLight->getShadowMapSize());
+}
+
+void SVulkan2ActiveLight::setFov(float fov) {
+  mLight->setFov(fov);
+  mLight->setFovSmall(fov);
+}
+
+float SVulkan2ActiveLight::getFov() const { return mLight->getFov(); }
+
+void SVulkan2ActiveLight::setTexture(std::string_view path) {
+  throw std::runtime_error("This function is not implemented and will soon be removed.");
+}
+
+std::string_view SVulkan2ActiveLight::getTexture() {
+  throw std::runtime_error("This function is not implemented and will soon be removed.");
+}
 
 } // namespace Renderer
 } // namespace sapien

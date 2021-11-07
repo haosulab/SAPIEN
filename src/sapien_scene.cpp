@@ -656,10 +656,10 @@ PxVec3 SScene::getAmbientLight() const {
 }
 
 SPointLight *SScene::addPointLight(PxVec3 const &position, PxVec3 const &color, bool enableShadow,
-                                   float shadowNear, float shadowFar) {
+                                   float shadowNear, float shadowFar, uint32_t shadowMapSize) {
   auto light = mRendererScene->addPointLight({position.x, position.y, position.z},
                                              {color.x, color.y, color.z}, enableShadow, shadowNear,
-                                             shadowFar);
+                                             shadowFar, shadowMapSize);
   auto sl = std::make_unique<SPointLight>(this, light);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));
@@ -669,10 +669,10 @@ SPointLight *SScene::addPointLight(PxVec3 const &position, PxVec3 const &color, 
 SDirectionalLight *SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 const &color,
                                                bool enableShadow, PxVec3 const &position,
                                                float shadowScale, float shadowNear,
-                                               float shadowFar) {
+                                               float shadowFar, uint32_t shadowMapSize) {
   auto light = mRendererScene->addDirectionalLight(
       {direction.x, direction.y, direction.z}, {color.x, color.y, color.z}, enableShadow,
-      {position.x, position.y, position.z}, shadowScale, shadowNear, shadowFar);
+      {position.x, position.y, position.z}, shadowScale, shadowNear, shadowFar, shadowMapSize);
   auto sl = std::make_unique<SDirectionalLight>(this, light);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));
@@ -681,10 +681,10 @@ SDirectionalLight *SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 c
 
 SSpotLight *SScene::addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fovInner,
                                  float fovOuter, PxVec3 const &color, bool enableShadow,
-                                 float shadowNear, float shadowFar) {
+                                 float shadowNear, float shadowFar, uint32_t shadowMapSize) {
   auto light = mRendererScene->addSpotLight(
       {position.x, position.y, position.z}, {direction.x, direction.y, direction.z}, fovInner,
-      fovOuter, {color.x, color.y, color.z}, enableShadow, shadowNear, shadowFar);
+      fovOuter, {color.x, color.y, color.z}, enableShadow, shadowNear, shadowFar, shadowMapSize);
   auto sl = std::make_unique<SSpotLight>(this, light);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));
@@ -692,8 +692,10 @@ SSpotLight *SScene::addSpotLight(PxVec3 const &position, PxVec3 const &direction
 }
 
 SActiveLight *SScene::addActiveLight(PxTransform const &pose, PxVec3 const &color, float fov,
-                                     std::string_view texPath) {
-  auto light = mRendererScene->addActiveLight(pose, {color.x, color.y, color.z}, fov, texPath);
+                                     std::string_view texPath, float shadowNear, float shadowFar,
+                                     uint32_t shadowMapSize) {
+  auto light = mRendererScene->addActiveLight(pose, {color.x, color.y, color.z}, fov, texPath,
+                                              shadowNear, shadowFar, shadowMapSize);
   auto sl = std::make_unique<SActiveLight>(this, light);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));

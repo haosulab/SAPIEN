@@ -329,9 +329,14 @@ public:
   virtual void setPosition(physx::PxVec3 position) = 0;
   virtual void setFov(float fov) = 0;
   virtual float getFov() const = 0;
+  virtual void setShadowParameters(float near, float far) = 0;
 
+  // TODO replace with SAPIEN texture
   virtual void setTexture(std::string_view path) = 0;
   virtual std::string_view getTexture() = 0;
+
+  virtual float getShadowNear() const = 0;
+  virtual float getShadowFar() const = 0;
 };
 
 class IPxrRigidbody {
@@ -430,24 +435,24 @@ public:
 
   virtual IPointLight *addPointLight(std::array<float, 3> const &position,
                                      std::array<float, 3> const &color, bool enableShadow,
-                                     float shadowNear, float shadowFar) = 0;
+                                     float shadowNear, float shadowFar,
+                                     uint32_t shadowMapSize) = 0;
 
   virtual IDirectionalLight *
   addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color,
                       bool enableShadow, std::array<float, 3> const &position, float shadowScale,
-                      float shadowNear, float shadowFar) = 0;
+                      float shadowNear, float shadowFar, uint32_t shadowMapSize) = 0;
 
   virtual ISpotLight *addSpotLight(std::array<float, 3> const &position,
                                    std::array<float, 3> const &direction, float fovInner,
                                    float fovOuter, std::array<float, 3> const &color,
-                                   bool enableShadow, float shadowNear, float shadowFar) = 0;
+                                   bool enableShadow, float shadowNear, float shadowFar,
+                                   uint32_t shadowMapSize) = 0;
 
   virtual IActiveLight *addActiveLight(physx::PxTransform const &pose,
                                        std::array<float, 3> const &color, float fov,
-                                       std::string_view texPath) {
-    spdlog::get("SAPIEN")->warn("Active light not supported!");
-    return nullptr;
-  };
+                                       std::string_view texPath, float shadowNear, float shadowFar,
+                                       uint32_t shadowMapSize) = 0;
 
   virtual void removeLight(ILight *light) = 0;
 

@@ -130,16 +130,21 @@ public:
   std::array<float, 3> getAmbientLight() const override;
   SVulkan2PointLight *addPointLight(std::array<float, 3> const &position,
                                     std::array<float, 3> const &color, bool enableShadow,
-                                    float shadowNear = 0.1f, float shadowFar = 5.f) override;
+                                    float shadowNear, float shadowFar,
+                                    uint32_t shadowMapSize) override;
   SVulkan2DirectionalLight *
   addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color,
-                      bool enableShadow, std::array<float, 3> const &position = {0.f, 0.f, 0.f},
-                      float shadowScale = 10.f, float shadowNear = -5.f,
-                      float shadowFar = 5.f) override;
+                      bool enableShadow, std::array<float, 3> const &position, float shadowScale,
+                      float shadowNear, float shadowFar, uint32_t shadowMapSize) override;
   SVulkan2SpotLight *addSpotLight(std::array<float, 3> const &position,
                                   std::array<float, 3> const &direction, float fovInner,
                                   float fovOuter, std::array<float, 3> const &color,
-                                  bool enableShadow, float shadowNear, float shadowFar) override;
+                                  bool enableShadow, float shadowNear, float shadowFar,
+                                  uint32_t shadowMapSize) override;
+  IActiveLight *addActiveLight(physx::PxTransform const &pose, std::array<float, 3> const &color,
+                               float fov, std::string_view texPath, float shadowNear,
+                               float shadowFar, uint32_t shadowMapSize) override;
+
   void removeLight(ILight *light) override;
 
   void setEnvironmentMap(std::string_view path) override;

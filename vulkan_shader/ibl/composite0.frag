@@ -146,4 +146,6 @@ void main() {
   if (texture(samplerPointDepth, inUV).x < 1) {
     outColor = vec4(pointColor.xyz, 1);
   }
+
+  outColor = clamp(outColor, vec4(0), vec4(1));
 }

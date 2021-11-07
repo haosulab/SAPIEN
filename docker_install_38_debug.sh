@@ -1,6 +1,6 @@
 #!/bin/bash
-rm -r sapien.egg-info
-rm wheelhouse/*.whl
+rm -rf sapien.egg-info
+rm -f wheelhouse/*.whl
 if [ -z ${VERSION} ]
 then
     echo VERSION variable is not specified
@@ -8,6 +8,9 @@ then
     echo VERSION defatuls to ${VERSION}
     sleep 3
 fi
+
+echo ${VERSION} > python/VERSION
+echo __version__=\"${VERSION}\" > python/py_package/version.py
 
 docker run -v `pwd`:/workspace/SAPIEN -it --rm \
        -u $(id -u ${USER}):$(id -g ${USER}) \

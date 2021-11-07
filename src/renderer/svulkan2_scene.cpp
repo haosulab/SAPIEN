@@ -20,13 +20,13 @@ std::array<float, 3> SVulkan2Scene::getAmbientLight() const {
 SVulkan2PointLight *SVulkan2Scene::addPointLight(std::array<float, 3> const &position,
                                                  std::array<float, 3> const &color,
                                                  bool enableShadow, float shadowNear,
-                                                 float shadowFar) {
+                                                 float shadowFar, uint32_t shadowMapSize) {
   auto &light = mScene->addPointLight();
   light.setColor({color[0], color[1], color[2]});
   light.setTransform({.position = glm::vec4(position[0], position[1], position[2], 1.f)});
   if (enableShadow) {
     light.enableShadow(true);
-    light.setShadowParameters(shadowNear, shadowFar);
+    light.setShadowParameters(shadowNear, shadowFar, shadowMapSize);
   }
   auto l = std::make_unique<SVulkan2PointLight>(light);
   auto result = l.get();
@@ -34,16 +34,18 @@ SVulkan2PointLight *SVulkan2Scene::addPointLight(std::array<float, 3> const &pos
   return result;
 }
 
-SVulkan2DirectionalLight *SVulkan2Scene::addDirectionalLight(
-    std::array<float, 3> const &direction, std::array<float, 3> const &color, bool enableShadow,
-    std::array<float, 3> const &position, float shadowScale, float shadowNear, float shadowFar) {
+SVulkan2DirectionalLight *
+SVulkan2Scene::addDirectionalLight(std::array<float, 3> const &direction,
+                                   std::array<float, 3> const &color, bool enableShadow,
+                                   std::array<float, 3> const &position, float shadowScale,
+                                   float shadowNear, float shadowFar, uint32_t shadowMapSize) {
   auto &light = mScene->addDirectionalLight();
   light.setDirection({direction[0], direction[1], direction[2]});
   light.setColor({color[0], color[1], color[2]});
   if (enableShadow) {
     light.enableShadow(true);
     light.setPosition({position[0], position[1], position[2]});
-    light.setShadowParameters(shadowNear, shadowFar, shadowScale);
+    light.setShadowParameters(shadowNear, shadowFar, shadowScale, shadowMapSize);
   }
   auto l = std::make_unique<SVulkan2DirectionalLight>(light);
   auto result = l.get();
@@ -56,7 +58,7 @@ SVulkan2SpotLight *SVulkan2Scene::addSpotLight(std::array<float, 3> const &posit
                                                float fovInner, float fovOuter,
                                                std::array<float, 3> const &color,
                                                bool enableShadow, float shadowNear,
-                                               float shadowFar) {
+                                               float shadowFar, uint32_t shadowMapSize) {
   auto &light = mScene->addSpotLight();
   light.setPosition({position[0], position[1], position[2]});
   light.setDirection({direction[0], direction[1], direction[2]});
@@ -65,9 +67,31 @@ SVulkan2SpotLight *SVulkan2Scene::addSpotLight(std::array<float, 3> const &posit
   light.setColor({color[0], color[1], color[2]});
   if (enableShadow) {
     light.enableShadow(true);
-    light.setShadowParameters(shadowNear, shadowFar);
+    light.setShadowParameters(shadowNear, shadowFar, shadowMapSize);
   }
   auto l = std::make_unique<SVulkan2SpotLight>(light);
+  auto result = l.get();
+  mLights.push_back(std::move(l));
+  return result;
+}
+
+IActiveLight *SVulkan2Scene::addActiveLight(physx::PxTransform const &pose,
+                                            std::array<float, 3> const &color, float fov,
+                                            std::string_view texPath, float shadowNear,
+                                            float shadowFar, uint32_t shadowMapSize) {
+  auto &light = mScene->addTexturedLight();
+  light.setPosition({pose.p.x, pose.p.y, pose.p.z});
+  light.setRotation({pose.q.w, pose.q.x, pose.q.y, pose.q.z});
+  light.setFov(fov);
+  light.setFovSmall(fov);
+  light.setColor({1, 1, 1});
+  light.enableShadow(true);
+  light.setShadowParameters(shadowNear, shadowFar, shadowMapSize);
+  auto tex = mParentRenderer->mContext->getResourceManager()->CreateTextureFromFile(
+      std::string(texPath), 1, vk::Filter::eLinear, vk::Filter::eLinear,
+      vk::SamplerAddressMode::eClampToBorder, vk::SamplerAddressMode::eClampToBorder, true);
+  light.setTexture(tex);
+  auto l = std::make_unique<SVulkan2ActiveLight>(light);
   auto result = l.get();
   mLights.push_back(std::move(l));
   return result;
@@ -79,6 +103,8 @@ void SVulkan2Scene::removeLight(ILight *light) {
   } else if (auto l = dynamic_cast<SVulkan2PointLight *>(light)) {
     mScene->removeNode(*l->getInternalLight());
   } else if (auto l = dynamic_cast<SVulkan2SpotLight *>(light)) {
+    mScene->removeNode(*l->getInternalLight());
+  } else if (auto l = dynamic_cast<SVulkan2ActiveLight *>(light)) {
     mScene->removeNode(*l->getInternalLight());
   }
   mLights.erase(std::remove_if(mLights.begin(), mLights.end(),

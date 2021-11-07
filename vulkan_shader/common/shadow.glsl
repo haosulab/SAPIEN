@@ -13,17 +13,14 @@ vec2 PCF_Samples[PCF_SampleCount] = {
 };
 
 float ShadowMapPCF(
-    sampler2DArray shadowTex, int shadowIndex,
-    vec3 projCoord, float resolution, float searchUV, float filterSize)
+    sampler2D shadowTex, vec3 projCoord, float resolution, float searchUV, float filterSize)
 {
 	float shadow = 0.0f;
 	vec2 grad = fract(projCoord.xy * resolution + 0.5f);
 
 	for (int i = 0; i < PCF_SampleCount; i++)
 	{
-    vec4 tmp = textureGather(shadowTex, vec3(projCoord.xy +
-                                             filterSize * PCF_Samples[i] * searchUV,
-                                             shadowIndex));
+    vec4 tmp = textureGather(shadowTex, projCoord.xy + filterSize * PCF_Samples[i] * searchUV);
     tmp.x = tmp.x < projCoord.z ? 0.0f : 1.0f;
     tmp.y = tmp.y < projCoord.z ? 0.0f : 1.0f;
     tmp.z = tmp.z < projCoord.z ? 0.0f : 1.0f;

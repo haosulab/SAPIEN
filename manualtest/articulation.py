@@ -11,26 +11,25 @@ from controller import Viewer
 
 
 def create_table(
-    scene: sapien.Scene,
-    pose: sapien.Pose,
-    size,
-    height,
-    thickness=0.1,
-    color=(0.8, 0.6, 0.4),
-    name="table",
+        scene: sapien.Scene,
+        pose: sapien.Pose,
+        size,
+        height,
+        thickness=0.1,
+        color=(0.8, 0.6, 0.4),
+        name="table",
 ) -> sapien.Actor:
     """Create a table (a collection of collision and visual shapes)."""
     builder = scene.create_actor_builder()
 
     # Tabletop
-    tabletop_pose = sapien.Pose(
-        [0.0, 0.0, -thickness / 2]
-    )  # Make the top surface's z equal to 0
+    tabletop_pose = sapien.Pose([0.0, 0.0, -thickness / 2
+                                 ])  # Make the top surface's z equal to 0
     tabletop_half_size = [size / 2, size / 2, thickness / 2]
     builder.add_box_shape(pose=tabletop_pose, half_size=tabletop_half_size)
-    builder.add_box_visual(
-        pose=tabletop_pose, half_size=tabletop_half_size, color=color
-    )
+    builder.add_box_visual(pose=tabletop_pose,
+                           half_size=tabletop_half_size,
+                           color=color)
 
     # Table legs (x4)
     for i in [-1, 1]:
@@ -39,10 +38,11 @@ def create_table(
             y = j * (size - thickness) / 2
             table_leg_pose = sapien.Pose([x, y, -height / 2])
             table_leg_half_size = [thickness / 2, thickness / 2, height / 2]
-            builder.add_box_shape(pose=table_leg_pose, half_size=table_leg_half_size)
-            builder.add_box_visual(
-                pose=table_leg_pose, half_size=table_leg_half_size, color=color
-            )
+            builder.add_box_shape(pose=table_leg_pose,
+                                  half_size=table_leg_half_size)
+            builder.add_box_visual(pose=table_leg_pose,
+                                   half_size=table_leg_half_size,
+                                   color=color)
 
     table = builder.build(name=name)
     table.set_pose(pose)
@@ -63,7 +63,8 @@ def main():
     copper.set_metallic(1)
     copper.set_roughness(0.2)
 
-    # sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
+    sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
+    sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/ibl")
     viewer = Viewer(renderer)
 
     # cubemap = renderer_context.create_cubemap_from_files(
@@ -93,17 +94,13 @@ def main():
         body.add_capsule_collision(Pose([-0.141, 0, 0]), 0.08, 0.141)
         body.add_capsule_visual(Pose([-0.141, 0, 0]), 0.08, 0.141, copper)
         body.add_capsule_collision(
-            Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141
-        )
-        body.add_capsule_visual(
-            Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141, copper
-        )
+            Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141)
+        body.add_capsule_visual(Pose([0, 0.141, 0], aa([0, 0, 1], np.pi / 2)),
+                                0.08, 0.141, copper)
         body.add_capsule_collision(
-            Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141
-        )
-        body.add_capsule_visual(
-            Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141, copper
-        )
+            Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)), 0.08, 0.141)
+        body.add_capsule_visual(Pose([0, -0.141, 0], aa([0, 0, 1], np.pi / 2)),
+                                0.08, 0.141, copper)
         body.set_name("body")
 
         l1 = builder.create_link_builder(body)
@@ -222,16 +219,20 @@ def main():
     # sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/default_camera")
 
     mount = scene.create_actor_builder().build_kinematic()
-    mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
-    cam1 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
+    mount.set_pose(
+        Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
+    cam1 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1,
+                                    100)
 
     print(cam1.get_projection_matrix())
 
     # sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/active_light")
 
     mount = scene.create_actor_builder().build_kinematic()
-    mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
-    cam2 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
+    mount.set_pose(
+        Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
+    cam2 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1,
+                                    100)
     # cam2._internal_renderer.set_custom_cubemap("Environment", cubemap)
     # cam2._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
     # cam2._internal_renderer.set_custom_texture("LightMap", lightmap)
@@ -278,6 +279,13 @@ def main():
     # light = scene.renderer_scene.add_spot_light(
     #     [0, 0, 2], [0, 0, -1], np.pi / 2, [1, 1, 1], True
     # )
+
+    light = scene.add_active_light(
+        Pose([0, 0, 1]), [1, 1, 1], np.pi / 2,
+        "../3rd_party/sapien-vulkan-2/test/assets/image/flashlight.jpg")
+
+    # light = scene.add_spot_light([0, 0, 1], [0, 0, -1], np.pi / 2, np.pi / 2,
+    #                              [1, 1, 1], True)
 
     # light.set_position([0, 0, 0.1])
     # light.set_direction([0, -100, -1])

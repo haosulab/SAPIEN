@@ -4,7 +4,7 @@ layout (constant_id = 0) const int NUM_DIRECTIONAL_LIGHTS = 3;
 layout (constant_id = 1) const int NUM_POINT_LIGHTS = 10;
 layout (constant_id = 2) const int NUM_DIRECTIONAL_LIGHT_SHADOWS = 1;
 layout (constant_id = 3) const int NUM_POINT_LIGHT_SHADOWS = 3;
-layout (constant_id = 4) const int NUM_CUSTOM_LIGHT_SHADOWS = 1;
+layout (constant_id = 4) const int NUM_TEXTURED_LIGHT_SHADOWS = 1;
 layout (constant_id = 5) const int NUM_SPOT_LIGHT_SHADOWS = 10;
 layout (constant_id = 6) const int NUM_SPOT_LIGHTS = 10;
 
@@ -49,6 +49,7 @@ layout(set = 3, binding = 0) uniform SceneBuffer {
   DirectionalLight directionalLights[3];
   SpotLight spotLights[10];
   PointLight pointLights[10];
+  SpotLight texturedLights[1];
 } sceneBuffer;
 
 struct LightBuffer {
@@ -62,14 +63,14 @@ layout(set = 3, binding = 1) uniform ShadowBuffer {
   LightBuffer directionalLightBuffers[3];
   LightBuffer spotLightBuffers[10];
   LightBuffer pointLightBuffers[60];
-  LightBuffer customLightBuffers[1];
+  LightBuffer texturedLightBuffers[1];
 } shadowBuffer;
 
-layout(set = 3, binding = 2) uniform samplerCubeArray samplerPointLightDepths;
-layout(set = 3, binding = 3) uniform sampler2DArray samplerDirectionalLightDepths;
-layout(set = 3, binding = 4) uniform sampler2DArray samplerCustomLightDepths;
-layout(set = 3, binding = 5) uniform sampler2DArray samplerSpotLightDepths;
-
+layout(set = 3, binding = 2) uniform samplerCube samplerPointLightDepths[3];
+layout(set = 3, binding = 3) uniform sampler2D samplerDirectionalLightDepths[1];
+layout(set = 3, binding = 4) uniform sampler2D samplerTexturedLightDepths[1];
+layout(set = 3, binding = 5) uniform sampler2D samplerSpotLightDepths[10];
+layout(set = 3, binding = 6) uniform sampler2D samplerTexturedLightTextures[1];
 
 vec4 world2camera(vec4 pos) {
   return cameraBuffer.viewMatrix * pos;
@@ -89,23 +90,6 @@ layout(location = 0) out vec4 outLighting1;
 layout(location = 1) out vec4 outNormal1;
 layout(location = 2) out uvec4 outSegmentation1;
 layout(location = 3) out vec4 outPosition1;
-
-vec3 computeDirectionalLight(int index, vec3 normal, vec3 camDir, vec3 diffuseAlbedo, float roughness, vec3 fresnel) {
-  vec3 lightDir = -normalize((cameraBuffer.viewMatrix *
-                              vec4(sceneBuffer.directionalLights[index].direction.xyz, 0)).xyz);
-
-  vec3 H = lightDir + camDir;
-  float H2 = dot(H, H);
-  H = H2 < 1e-6 ? vec3(0) : normalize(H);
-  float NoH = clamp(dot(normal, H), 1e-6, 1);
-  float VoH = clamp(dot(camDir, H), 1e-6, 1);
-  float NoL = clamp(dot(normal, lightDir), 0, 1);
-  float NoV = clamp(dot(normal, camDir), 1e-6, 1);
-
-  vec3 color = diffuseAlbedo * sceneBuffer.directionalLights[index].emission.rgb * diffuse(NoL);
-  color += sceneBuffer.directionalLights[index].emission.rgb * ggx(NoL, NoV, NoH, VoH, roughness, fresnel);
-  return color;
-}
 
 void main() {
   outSegmentation1 = inSegmentation;
@@ -169,6 +153,7 @@ void main() {
   vec3 fresnel = specular * (1 - metallic) + albedo.rgb * metallic;
 
   vec3 color = emission.rgb;
+
   for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
     vec3 pos = world2camera(vec4(sceneBuffer.pointLights[i].position.xyz, 1.f)).xyz;
     vec3 l = pos - csPosition.xyz;
@@ -178,7 +163,10 @@ void main() {
   }
 
   for (int i = 0; i < NUM_DIRECTIONAL_LIGHTS; ++i) {
-    color += computeDirectionalLight(i, normal, camDir, diffuseAlbedo, roughness, fresnel);
+    color += computeDirectionalLight(
+        mat3(cameraBuffer.viewMatrix) * sceneBuffer.directionalLights[i].direction.xyz,
+        sceneBuffer.directionalLights[i].emission.rgb,
+        normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
 
   for (int i = 0; i < NUM_SPOT_LIGHTS; ++i) {
@@ -190,6 +178,33 @@ void main() {
         sceneBuffer.spotLights[i].direction.a,
         centerDir,
         sceneBuffer.spotLights[i].emission.rgb,
+        l, normal, camDir, diffuseAlbedo, roughness, fresnel);
+  }
+
+  for (int i = 0; i < NUM_TEXTURED_LIGHT_SHADOWS; ++i) {
+    mat4 shadowView = shadowBuffer.texturedLightBuffers[i].viewMatrix;
+    mat4 shadowProj = shadowBuffer.texturedLightBuffers[i].projectionMatrix;
+
+    vec3 pos = world2camera(vec4(sceneBuffer.texturedLights[i].position.xyz, 1.f)).xyz;
+    vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.texturedLights[i].direction.xyz;
+    vec3 l = pos - csPosition.xyz;
+
+    float bias = max(0.05 * (1.0 - length(l)), 0.005);
+
+    vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz), 1);
+    ssPosition.z += bias;
+    vec4 shadowMapCoord = shadowProj * ssPosition;
+    shadowMapCoord /= shadowMapCoord.w;
+    shadowMapCoord.xy = shadowMapCoord.xy * 0.5 + 0.5;
+
+    float resolution = textureSize(samplerTexturedLightDepths[i], 0).x;
+    float visibility = texture(samplerTexturedLightTextures[i], shadowMapCoord.xy).x;
+
+    color += visibility * computeSpotLight(
+        sceneBuffer.texturedLights[i].emission.a,
+        sceneBuffer.texturedLights[i].direction.a,
+        centerDir,
+        sceneBuffer.texturedLights[i].emission.rgb,
         l, normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
 

@@ -13,14 +13,13 @@
 namespace sapien::Renderer {
 //========= KuafuCamera =========//
 KuafuCamera::KuafuCamera(int width, int height, float fovy, KuafuScene *scene, size_t idx) {
-    mIdx = idx;
-    pParentScene = scene;
-    pKCamera = pParentScene->getKScene()->createCamera(width, height);
-    auto widthF = static_cast<float>(width);
-    auto heightF = static_cast<float>(height);
-    float fy = heightF / 2.f / std::tan(fovy / 2.f);
-    setPerspectiveCameraParameters(
-        0.0, 0.0, fy, fy, widthF / 2.f, heightF / 2.f, 0.f);
+  mIdx = idx;
+  pParentScene = scene;
+  pKCamera = pParentScene->getKScene()->createCamera(width, height);
+  auto widthF = static_cast<float>(width);
+  auto heightF = static_cast<float>(height);
+  float fy = heightF / 2.f / std::tan(fovy / 2.f);
+  setPerspectiveCameraParameters(0.0, 0.0, fy, fy, widthF / 2.f, heightF / 2.f, 0.f);
 }
 
 void KuafuCamera::setPxPose(const physx::PxTransform &pose) {
@@ -38,15 +37,14 @@ float KuafuCamera::getSkew() const { return pKCamera->getSkew(); };
 
 void KuafuCamera::setPerspectiveCameraParameters(float near, float far, float fx, float fy,
                                                  float cx, float cy, float skew) {
-  setFullPerspective(fx, fy, cx, cy,
-                     static_cast<float>(pKCamera->getWidth()),
+  setFullPerspective(fx, fy, cx, cy, static_cast<float>(pKCamera->getWidth()),
                      static_cast<float>(pKCamera->getHeight()), skew);
 }
 
 void KuafuCamera::takePicture() {
   auto scene = pParentScene->getKScene();
   pParentScene->pKRenderer->setScene(scene);
-  if (pParentScene->lastCameraIdx != mIdx) {     // Camera changed!
+  if (pParentScene->lastCameraIdx != mIdx) { // Camera changed!
     spdlog::get("SAPIEN")->info(
         "KF: Camera is different from last render! Reduced frame rate is expected.");
     if (pParentScene->pKRenderer->getConfig().getPresent()) {
@@ -117,8 +115,8 @@ inline void KuafuRenderShape::setMaterial(std::shared_ptr<IPxrMaterial> m) {
 
 //========= KuafuRigidBody =========//
 
-KuafuRigidBody::KuafuRigidBody(
-    KuafuScene *scene, KuafuGeometryInstances instances, const physx::PxVec3 &scale)
+KuafuRigidBody::KuafuRigidBody(KuafuScene *scene, KuafuGeometryInstances instances,
+                               const physx::PxVec3 &scale)
     : pParentScene(scene), mScale(scale), pKGeometryInstances(std::move(instances)) {}
 
 void KuafuRigidBody::setInitialPose(const physx::PxTransform &transform) {
@@ -129,7 +127,7 @@ void KuafuRigidBody::setInitialPose(const physx::PxTransform &transform) {
 void KuafuRigidBody::update(const physx::PxTransform &transform) {
   auto t = toGlmMat4(physx::PxMat44(transform * mInitialPose));
   t = glm::scale(t, {mScale.x, mScale.y, mScale.z});
-  for (auto& ins : pKGeometryInstances)
+  for (auto &ins : pKGeometryInstances)
     ins->setTransform(t);
 }
 
@@ -139,12 +137,11 @@ void KuafuRigidBody::setVisibility(float visibility) {
   else if (visibility == 1.0)
     setVisible(true);
   else
-    spdlog::get("SAPIEN")->error(
-        "KF: setVisibility with non-1/0 visibility is not supported yet");
+    spdlog::get("SAPIEN")->error("KF: setVisibility with non-1/0 visibility is not supported yet");
 }
 
 void KuafuRigidBody::setVisible(bool visible) { // FIXME: The correctness of the function
-  for (auto& ins : pKGeometryInstances) {       //   relies on the fact that sapien does not
+  for (auto &ins : pKGeometryInstances) {       //   relies on the fact that sapien does not
     auto scene = pParentScene->getKScene();     //   use geometry instancing at all
     auto geometry = ins->geometry;
     if (visible && geometry->hideRender) {
@@ -186,13 +183,13 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::string &meshFile, const physx
   try {
     auto obj = kuafu::loadScene(meshFile, true);
     if (material)
-      for (auto &o: obj)
+      for (auto &o : obj)
         o->setMaterial(std::dynamic_pointer_cast<KuafuMaterial>(material)->getKMaterial());
 
     auto transform = glm::scale(glm::mat4(1.0F), glm::vec3(scale.x, scale.y, scale.z));
     KuafuGeometryInstances rigidBodyInstances;
 
-    for (auto& o: obj) {
+    for (auto &o : obj) {
       getKScene()->submitGeometry(o);
       auto ins = kuafu::instance(o, transform);
       getKScene()->submitGeometryInstance(ins);
@@ -291,8 +288,7 @@ IPxrRigidbody *KuafuScene::addRigidbody(const std::vector<physx::PxVec3> &vertic
   auto ins = kuafu::instance(g, transform);
   getKScene()->submitGeometryInstance(ins);
 
-  mBodies.push_back(
-      std::make_unique<KuafuRigidBody>(this, KuafuGeometryInstances{ins}, scale));
+  mBodies.push_back(std::make_unique<KuafuRigidBody>(this, KuafuGeometryInstances{ins}, scale));
   return mBodies.back().get();
 }
 
@@ -331,8 +327,9 @@ ICamera *KuafuScene::addCamera(uint32_t width, uint32_t height, float fovy, floa
 }
 
 void KuafuScene::removeCamera(ICamera *camera) {
-//  KF_WARN("KF: removeCamera called on {}, idx={}", long(camera), dynamic_cast<KuafuCamera*>(camera)->mIdx);
-  getKScene()->removeCamera(dynamic_cast<KuafuCamera*>(camera)->pKCamera);
+  //  KF_WARN("KF: removeCamera called on {}, idx={}", long(camera),
+  //  dynamic_cast<KuafuCamera*>(camera)->mIdx);
+  getKScene()->removeCamera(dynamic_cast<KuafuCamera *>(camera)->pKCamera);
   mCameras.erase(std::remove_if(mCameras.begin(), mCameras.end(),
                                 [camera](auto &c) { return camera == c.get(); }),
                  mCameras.end());
@@ -355,9 +352,9 @@ std::array<float, 3> KuafuScene::getAmbientLight() const {
   return {clearColor[0], clearColor[1], clearColor[2]};
 }
 
-IPointLight *KuafuScene::addPointLight(const std::array<float, 3> &position,
-                                       const std::array<float, 3> &color, bool enableShadow,
-                                       float shadowNear, float shadowFar) {
+IPointLight *KuafuScene::addPointLight(std::array<float, 3> const &position,
+                                       std::array<float, 3> const &color, bool enableShadow,
+                                       float shadowNear, float shadowFar, uint32_t shadowMapSize) {
   auto light = std::make_shared<kuafu::PointLight>();
   light->position = {position[0], position[1], position[2]};
   light->color = {color[0], color[1], color[2]};
@@ -367,12 +364,15 @@ IPointLight *KuafuScene::addPointLight(const std::array<float, 3> &position,
   getKScene()->addPointLight(light); // TODO: check if success
 
   mLights.push_back(std::make_unique<KuafuPointLight>(light));
-  return dynamic_cast<IPointLight*>(mLights.back().get());
+  return dynamic_cast<IPointLight *>(mLights.back().get());
 }
 
-IDirectionalLight *KuafuScene::addDirectionalLight(
-    const std::array<float, 3> &direction, const std::array<float, 3> &color, bool enableShadow,
-    const std::array<float, 3> &position, float shadowScale, float shadowNear, float shadowFar) {
+IDirectionalLight *KuafuScene::addDirectionalLight(std::array<float, 3> const &direction,
+                                                   std::array<float, 3> const &color,
+                                                   bool enableShadow,
+                                                   std::array<float, 3> const &position,
+                                                   float shadowScale, float shadowNear,
+                                                   float shadowFar, uint32_t shadowMapSize) {
   auto light = std::make_shared<kuafu::DirectionalLight>();
   light->direction = {direction[0], direction[1], direction[2]};
   light->color = {color[0], color[1], color[2]};
@@ -382,13 +382,14 @@ IDirectionalLight *KuafuScene::addDirectionalLight(
   getKScene()->setDirectionalLight(light); // TODO: check if success
 
   mLights.push_back(std::make_unique<KuafuDirectionalLight>(light));
-  return dynamic_cast<IDirectionalLight*>(mLights.back().get());
+  return dynamic_cast<IDirectionalLight *>(mLights.back().get());
 }
 
-ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
-                                     const std::array<float, 3> &direction, float fovInner,
-                                     float fovOuter, const std::array<float, 3> &color,
-                                     bool enableShadow, float shadowNear, float shadowFar) {
+ISpotLight *KuafuScene::addSpotLight(std::array<float, 3> const &position,
+                                     std::array<float, 3> const &direction, float fovInner,
+                                     float fovOuter, std::array<float, 3> const &color,
+                                     bool enableShadow, float shadowNear, float shadowFar,
+                                     uint32_t shadowMapSize) {
   auto light = std::make_shared<kuafu::ActiveLight>();
   glm::vec3 p = {position[0], position[1], position[2]};
   glm::vec3 dir = {direction[0], direction[1], direction[2]};
@@ -404,12 +405,13 @@ ISpotLight *KuafuScene::addSpotLight(const std::array<float, 3> &position,
   getKScene()->addActiveLight(light); // TODO: check if success
 
   mLights.push_back(std::make_unique<KuafuSpotLight>(light));
-  return dynamic_cast<ISpotLight*>(mLights.back().get());
+  return dynamic_cast<ISpotLight *>(mLights.back().get());
 }
 
 IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
                                          std::array<float, 3> const &color, float fov,
-                                         std::string_view texPath) {
+                                         std::string_view texPath, float shadowNear,
+                                         float shadowFar, uint32_t shadowMapSize) {
   auto light = std::make_shared<kuafu::ActiveLight>();
   light->viewMat = glm::inverse(toGlmMat4(pose));
   light->color = {color[0], color[1], color[2]};
@@ -421,30 +423,30 @@ IActiveLight *KuafuScene::addActiveLight(physx::PxTransform const &pose,
   getKScene()->addActiveLight(light); // TODO: check if success
 
   mLights.push_back(std::make_unique<KuafuActiveLight>(light));
-  return dynamic_cast<IActiveLight*>(mLights.back().get());
+  return dynamic_cast<IActiveLight *>(mLights.back().get());
 };
 
 void KuafuScene::removeLight(ILight *light) {
-  dynamic_cast<IKuafuLight*>(light)->_kfRemoveFromScene(pKScene);
+  dynamic_cast<IKuafuLight *>(light)->_kfRemoveFromScene(pKScene);
   mLights.erase(std::remove_if(mLights.begin(), mLights.end(),
                                [light](auto &l) { return light == l.get(); }),
                 mLights.end());
 }
 
 void KuafuScene::destroy() {
-//  spdlog::get("SAPIEN")->warn("KF: KuafuScene::destroy called!");
-  while (!mBodies.empty()) {       // Warning: b->destroy() will change the container!
-    auto& b = mBodies.back();
+  //  spdlog::get("SAPIEN")->warn("KF: KuafuScene::destroy called!");
+  while (!mBodies.empty()) { // Warning: b->destroy() will change the container!
+    auto &b = mBodies.back();
     b->destroy();
   }
 
   while (!mCameras.empty()) {
-    auto& c = mCameras.back();
+    auto &c = mCameras.back();
     removeCamera(c.get());
   }
 
   while (!mLights.empty()) {
-    auto& l = mLights.back();
+    auto &l = mLights.back();
     removeLight(l.get());
   }
 

@@ -760,44 +760,52 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def(
           "add_point_light",
           [](SScene &scene, py::array_t<float> const &position, py::array_t<float> const &color,
-             bool shadow, float near, float far) {
+             bool shadow, float near, float far, uint32_t shadowMapSize) {
             return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
-                                       {color.at(0), color.at(1), color.at(2)}, shadow, near, far);
+                                       {color.at(0), color.at(1), color.at(2)}, shadow, near, far,
+                                       shadowMapSize);
           },
           py::arg("position"), py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1,
-          py::arg("far") = 10, py::return_value_policy::reference)
+          py::arg("far") = 10, py::arg("shadow_map_size") = 2048,
+          py::return_value_policy::reference)
       .def(
           "add_directional_light",
           [](SScene &scene, py::array_t<float> const &direction, py::array_t<float> const &color,
-             bool shadow, py::array_t<float> const &position, float scale, float near, float far) {
+             bool shadow, py::array_t<float> const &position, float scale, float near, float far,
+             uint32_t shadowMapSize) {
             return scene.addDirectionalLight({direction.at(0), direction.at(1), direction.at(2)},
                                              {color.at(0), color.at(1), color.at(2)}, shadow,
                                              {position.at(0), position.at(1), position.at(2)},
-                                             scale, near, far);
+                                             scale, near, far, shadowMapSize);
           },
           py::arg("direction"), py::arg("color"), py::arg("shadow") = false,
           py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
-          py::arg("near") = -10.f, py::arg("far") = 10.f, py::return_value_policy::reference)
+          py::arg("near") = -10.f, py::arg("far") = 10.f, py::arg("shadow_map_size") = 2048,
+          py::return_value_policy::reference)
       .def(
           "add_spot_light",
           [](SScene &scene, py::array_t<float> const &position,
              py::array_t<float> const &direction, float fovInner, float fovOuter,
-             py::array_t<float> const &color, bool shadow, float near, float far) {
+             py::array_t<float> const &color, bool shadow, float near, float far,
+             uint32_t shadowMapSize) {
             return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
                                       {direction.at(0), direction.at(1), direction.at(2)},
                                       fovInner, fovOuter, {color.at(0), color.at(1), color.at(2)},
-                                      shadow, near, far);
+                                      shadow, near, far, shadowMapSize);
           },
           py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
           py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
-          py::arg("far") = 10.f, py::return_value_policy::reference)
+          py::arg("far") = 10.f, py::arg("shadow_map_size") = 2048,
+          py::return_value_policy::reference)
       .def(
           "add_active_light",
           [](SScene &scene, PxTransform const &pose, py::array_t<float> const &color, float fov,
-             std::string const &path) {
-            return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov, path);
+             std::string const &path, float shadowNear, float shadowFar, uint32_t shadowMapSize) {
+            return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov, path,
+                                        shadowNear, shadowFar, shadowMapSize);
           },
           py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"),
+          py::arg("near") = 0.1f, py::arg("far") = 10.f, py::arg("shadow_map_size") = 2048,
           py::return_value_policy::reference)
       .def("remove_light", &SScene::removeLight, py::arg("light"))
       .def("set_environment_map", &SScene::setEnvironmentMap, py::arg("filename"))
@@ -1936,7 +1944,11 @@ Args:
       .def_property_readonly("position",
                              [](SActiveLight &light) { return vec32array(light.getPosition()); })
       .def("set_fov", &SActiveLight::setFov)
-      .def_property_readonly("fov", &SActiveLight::getFov);
+      .def_property_readonly("fov", &SActiveLight::getFov)
+      .def("set_shadow_parameters", &SActiveLight::setShadowParameters, py ::arg("near"),
+           py::arg("far"))
+      .def_property_readonly("shadow_near", &SActiveLight::getShadowNear)
+      .def_property_readonly("shadow_far", &SActiveLight::getShadowFar);
 
   PyCameraEntity.def_property("parent", &SCamera::setParent, &SCamera::getParent)
       .def("set_parent", &SCamera::setParent, py::arg("parent"), py::arg("keep_pose"))
