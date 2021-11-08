@@ -54,8 +54,6 @@ class ActiveLightSensor(SensorEntity):
                               Use rgb modality if set to None.
         """
 
-        assert isinstance(renderer, KuafuRenderer), \
-            "KuafuRenderer is required for active light sensor simulation"
         super().__init__()
 
         from warnings import warn
