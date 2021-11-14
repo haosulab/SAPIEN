@@ -1,5 +1,6 @@
 #include "svulkan2_renderer.h"
 #include "svulkan2_material.h"
+#include "svulkan2_shape.h"
 #include <svulkan2/resource/material.h>
 
 namespace sapien {
@@ -79,6 +80,12 @@ std::shared_ptr<IPxrMaterial> SVulkan2Renderer::createMaterial() {
       std::make_shared<svulkan2::resource::SVMetallicMaterial>(), this);
   mat->setBaseColor({1.0, 1.0, 1.0, 1});
   return mat;
+}
+
+std::shared_ptr<IRenderMesh> SVulkan2Renderer::createMesh(std::vector<float> const &vertices,
+                                                          std::vector<uint32_t> const &indices) {
+  auto mesh = svulkan2::resource::SVMesh::Create(vertices, indices);
+  return std::make_shared<SVulkan2Mesh>(mesh);
 }
 
 std::shared_ptr<IPxrTexture>

@@ -69,7 +69,7 @@ class KuafuRenderShape : public IPxrRenderShape {
 public:
   KuafuRenderShape(const std::shared_ptr<kuafu::GeometryInstance> &ins, KuafuScene *p)
       : pKInstance(ins), pParentScene(p) {}
-  [[nodiscard]] inline std::shared_ptr<RenderMeshGeometry> getGeometry() const override {
+  [[nodiscard]] inline std::shared_ptr<IRenderMesh> getGeometry() const override {
     spdlog::get("SAPIEN")->error("KuafuRenderShape::getGeometry not implemented");
     return {};
   }
@@ -159,6 +159,12 @@ public:
                               std::vector<physx::PxVec3> const &normals,
                               std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
                               const physx::PxVec3 &color) override;
+   IPxrRigidbody *addRigidbody(std::shared_ptr<IRenderMesh> mesh,
+                                      const physx::PxVec3 &scale,
+                               std::shared_ptr<IPxrMaterial> material) override {
+     throw std::runtime_error("KuafuScene::addRigidbody from mesh is not implemented");
+   }
+
 
   void removeRigidbody(IPxrRigidbody *body) override;
 

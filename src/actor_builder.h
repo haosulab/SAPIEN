@@ -42,7 +42,7 @@ public:
   };
 
   struct VisualRecord {
-    enum Type { Mesh, Box, Capsule, Sphere } type;
+    enum Type { File, Box, Capsule, Sphere, Mesh } type;
 
     std::string filename;
     PxVec3 scale;
@@ -50,6 +50,7 @@ public:
     PxReal radius;
     PxReal length;
 
+    std::shared_ptr<Renderer::IRenderMesh> mesh;
     std::shared_ptr<Renderer::IPxrMaterial> material;
 
     PxTransform pose;
@@ -152,6 +153,12 @@ public:
                          std::shared_ptr<Renderer::IPxrMaterial> material = nullptr,
                          std::string const &name = "");
 
+  void addVisualFromMeshWithMaterial(std::shared_ptr<Renderer::IRenderMesh> mesh,
+                                     const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
+                                     const PxVec3 &scale = {1, 1, 1},
+                                     std::shared_ptr<Renderer::IPxrMaterial> material = nullptr,
+                                     std::string const &name = "");
+
   /* when a.g1 & b.g2 != 0, the collision is ignored
    * by default g1 = g2 = 1
    */
@@ -172,6 +179,7 @@ public:
                             std::string const &name = "");
 
   virtual ~ActorBuilder() = default;
+
 protected:
   void buildShapes(std::vector<std::unique_ptr<SCollisionShape>> &shapes,
                    std::vector<PxReal> &densities) const;

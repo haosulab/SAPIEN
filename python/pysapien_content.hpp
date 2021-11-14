@@ -231,9 +231,8 @@ void buildSapien(py::module &m) {
       py::class_<ArticulationBuilder, std::shared_ptr<ArticulationBuilder>>(m,
                                                                             "ArticulationBuilder");
 
-  auto PyRenderMeshGeometry =
-      py::class_<Renderer::RenderMeshGeometry, std::shared_ptr<Renderer::RenderMeshGeometry>>(
-          m, "RenderGeometry");
+  auto PyRenderMesh = py::class_<Renderer::IRenderMesh, std::shared_ptr<Renderer::IRenderMesh>>(
+      m, "RenderMesh");
 
   auto PySubscription = py::class_<Subscription>(m, "Subscription");
 
@@ -1444,6 +1443,17 @@ Different from @add_collision_from_file, all connected components in the file wi
           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
           py::arg("name") = "")
+      .def(
+          "add_visual_from_mesh",
+          [](ActorBuilder &a, std::shared_ptr<Renderer::IRenderMesh> mesh, PxTransform const &pose,
+             py::array_t<PxReal> scale, std::shared_ptr<Renderer::IPxrMaterial> &mat,
+             std::string const &name) {
+            a.addVisualFromMeshWithMaterial(mesh, pose, array2vec3(scale), mat, name);
+          },
+          py::arg("mesh"), py::arg("pose") = PxTransform(PxIdentity),
+          py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
+          py::arg("name") = "")
+
       .def("remove_all_collisions", &ActorBuilder::removeAllShapes)
       .def("remove_all_visuals", &ActorBuilder::removeAllVisuals)
       .def("remove_collision_at", &ActorBuilder::removeShapeAt, py::arg("index"))
@@ -1516,14 +1526,16 @@ References:
       .def_property_readonly("type",
                              [](ActorBuilder::VisualRecord const &r) {
                                switch (r.type) {
-                               case sapien::ActorBuilder::VisualRecord::Mesh:
-                                 return "Mesh";
+                               case sapien::ActorBuilder::VisualRecord::File:
+                                 return "File";
                                case sapien::ActorBuilder::VisualRecord::Box:
                                  return "Box";
                                case sapien::ActorBuilder::VisualRecord::Capsule:
                                  return "Capsule";
                                case sapien::ActorBuilder::VisualRecord::Sphere:
                                  return "Sphere";
+                               case sapien::ActorBuilder::VisualRecord::Mesh:
+                                 return "Mesh";
                                }
                                return "";
                              })
@@ -2140,6 +2152,16 @@ Args:
 
   PyRenderer.def("create_material", &Renderer::IPxrRenderer::createMaterial)
       .def(
+          "create_mesh",
+          [](Renderer::IPxrRenderer &renderer,
+             Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices,
+             Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &indices) {
+            return renderer.createMesh(
+                std::vector<float>(vertices.data(), vertices.data() + vertices.size()),
+                std::vector<uint32_t>(indices.data(), indices.data() + indices.size()));
+          },
+          py::arg("vertices"), py::arg("indices"))
+      .def(
           "create_texture_from_file",
           [](Renderer::IPxrRenderer &renderer, std::string const &filename, uint32_t mipLevels,
              std::string const &filterMode, std::string const &addressMode) {
@@ -2336,56 +2358,60 @@ Args:
       .def_property_readonly("material", &Renderer::IPxrRenderShape::getMaterial)
       .def("set_material", &Renderer::IPxrRenderShape::setMaterial, py::arg("material"));
 
-  PyRenderMeshGeometry
+  PyRenderMesh
       .def_property_readonly("vertices",
-                             [](Renderer::RenderMeshGeometry &geom) {
+                             [](Renderer::IRenderMesh &geom) {
                                auto vertices = geom.getVertices();
                                return py::array_t<float>(
                                    {static_cast<int>(vertices.size() / 3), 3},
                                    {sizeof(float) * 3, sizeof(float)}, vertices.data());
                              })
       .def_property_readonly("normals",
-                             [](Renderer::RenderMeshGeometry &geom) {
+                             [](Renderer::IRenderMesh &geom) {
                                auto normals = geom.getNormals();
                                return py::array_t<float>({static_cast<int>(normals.size() / 3), 3},
                                                          {sizeof(float) * 3, sizeof(float)},
                                                          normals.data());
                              })
       .def_property_readonly("uvs",
-                             [](Renderer::RenderMeshGeometry &geom) {
+                             [](Renderer::IRenderMesh &geom) {
                                auto uvs = geom.getUVs();
                                return py::array_t<float>({static_cast<int>(uvs.size() / 2), 2},
                                                          {sizeof(float) * 2, sizeof(float)},
                                                          uvs.data());
                              })
       .def_property_readonly("tangents",
-                             [](Renderer::RenderMeshGeometry &geom) {
+                             [](Renderer::IRenderMesh &geom) {
                                auto tangents = geom.getTangents();
                                return py::array_t<float>(
                                    {static_cast<int>(tangents.size() / 3), 3},
                                    {sizeof(float) * 3, sizeof(float)}, tangents.data());
                              })
       .def_property_readonly("bitangents",
-                             [](Renderer::RenderMeshGeometry &geom) {
+                             [](Renderer::IRenderMesh &geom) {
                                auto bitangents = geom.getBitangents();
                                return py::array_t<float>(
                                    {static_cast<int>(bitangents.size() / 3), 3},
                                    {sizeof(float) * 3, sizeof(float)}, bitangents.data());
                              })
       .def_property_readonly(
-          "indices",
-          [](Renderer::RenderMeshGeometry &geom) { return make_array(geom.getIndices()); })
+          "indices", [](Renderer::IRenderMesh &geom) { return make_array(geom.getIndices()); })
       .def("set_vertices",
-           [](Renderer::RenderMeshGeometry &geom,
+           [](Renderer::IRenderMesh &geom,
               Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> vertices) {
              geom.setVertices(std::vector(vertices.data(), vertices.data() + vertices.size()));
            })
+      .def("set_indices",
+           [](Renderer::IRenderMesh &geom,
+              Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> indices) {
+             geom.setIndices(std::vector(indices.data(), indices.data() + indices.size()));
+           })
       .def("set_normals",
-           [](Renderer::RenderMeshGeometry &geom,
+           [](Renderer::IRenderMesh &geom,
               Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> normals) {
              geom.setNormals(std::vector(normals.data(), normals.data() + normals.size()));
            })
-      .def("set_uvs", [](Renderer::RenderMeshGeometry &geom,
+      .def("set_uvs", [](Renderer::IRenderMesh &geom,
                          Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> uvs) {
         geom.setUVs(std::vector(uvs.data(), uvs.data() + uvs.size()));
       });

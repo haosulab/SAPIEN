@@ -1,4 +1,5 @@
 #include "svulkan2_renderer.h"
+#include "svulkan2_shape.h"
 
 namespace sapien {
 namespace Renderer {
@@ -161,6 +162,19 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const ph
   objects2.push_back(&obj);
   mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(
       this, objects2, physx::PxGeometryType::eTRIANGLEMESH, scale));
+  return mBodies.back().get();
+}
+
+IPxrRigidbody *SVulkan2Scene::addRigidbody(std::shared_ptr<IRenderMesh> mesh,
+                                           const physx::PxVec3 &scale,
+                                           std::shared_ptr<IPxrMaterial> material) {
+  auto rmesh = std::dynamic_pointer_cast<SVulkan2Mesh>(mesh);
+  auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
+  auto shape = svulkan2::resource::SVShape::Create(rmesh->getMesh(), mat->getMaterial());
+  auto &obj = mScene->addObject(svulkan2::resource::SVModel::FromData({shape}));
+  obj.setScale({scale.x, scale.y, scale.z});
+  mBodies.push_back(std::make_unique<SVulkan2Rigidbody>(
+      this, std::vector({&obj}), physx::PxGeometryType::eTRIANGLEMESH, scale));
   return mBodies.back().get();
 }
 

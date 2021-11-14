@@ -99,6 +99,9 @@ public:
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
                               std::shared_ptr<IPxrMaterial> material) override;
 
+  IPxrRigidbody *addRigidbody(std::shared_ptr<IRenderMesh> mesh, const physx::PxVec3 &scale,
+                              std::shared_ptr<IPxrMaterial> material) override;
+
   IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
                               std::shared_ptr<IPxrMaterial> material) override;
 
@@ -179,6 +182,8 @@ public:
   createTexture(std::string_view filename, uint32_t mipLevels = 1,
                 IPxrTexture::FilterMode::Enum filterMode = {},
                 IPxrTexture::AddressMode::Enum addressMode = {}) override;
+  std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
+                                          std::vector<uint32_t> const &indices) override;
 };
 
 class SVulkan2Camera : public ICamera {

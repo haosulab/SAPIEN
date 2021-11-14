@@ -211,15 +211,32 @@ void ActorBuilder::addVisualFromFile(const std::string &filename, const PxTransf
                                      const PxVec3 &scale,
                                      std::shared_ptr<Renderer::IPxrMaterial> material,
                                      std::string const &name) {
-
   VisualRecord r;
-  r.type = VisualRecord::Type::Mesh;
+  r.type = VisualRecord::Type::File;
   r.pose = pose;
   r.scale = scale;
   r.material = material;
   r.filename = filename;
   r.name = name;
 
+  mVisualRecord.push_back(r);
+}
+
+void ActorBuilder::addVisualFromMeshWithMaterial(std::shared_ptr<Renderer::IRenderMesh> mesh,
+                                                 const PxTransform &pose, const PxVec3 &scale,
+                                                 std::shared_ptr<Renderer::IPxrMaterial> material,
+                                                 std::string const &name) {
+  auto renderer = mScene->getSimulation()->getRenderer();
+  if (!material && renderer) {
+    material = mScene->getSimulation()->getRenderer()->createMaterial();
+  }
+  VisualRecord r;
+  r.type = VisualRecord::Type::Mesh;
+  r.pose = pose;
+  r.scale = scale;
+  r.material = material;
+  r.mesh = mesh;
+  r.name = name;
   mVisualRecord.push_back(r);
 }
 
@@ -392,8 +409,11 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
       body = rScene->addRigidbody(PxGeometryType::eCAPSULE, {r.length, r.radius, r.radius},
                                   r.material);
       break;
-    case VisualRecord::Type::Mesh:
+    case VisualRecord::Type::File:
       body = rScene->addRigidbody(r.filename, r.scale, r.material);
+      break;
+    case VisualRecord::Type::Mesh:
+      body = rScene->addRigidbody(r.mesh, r.scale, r.material);
       break;
     }
     if (body) {

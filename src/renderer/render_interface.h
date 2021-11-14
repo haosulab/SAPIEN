@@ -33,16 +33,7 @@ static inline void _warn_texture_func_not_supported(std::string_view func_name) 
   spdlog::get("SAPIEN")->warn("{} is not supported for the renderer", func_name);
 }
 
-// struct RenderMeshGeometry {
-//   std::vector<float> vertices;
-//   std::vector<float> normals;
-//   std::vector<float> uvs;
-//   std::vector<float> tangents;
-//   std::vector<float> bitangents;
-//   std::vector<uint32_t> indices;
-// };
-
-class RenderMeshGeometry {
+class IRenderMesh {
 public:
   virtual std::vector<float> getVertices() = 0;
   virtual std::vector<float> getNormals() = 0;
@@ -58,7 +49,7 @@ public:
   virtual void setBitangents(std::vector<float> const &) = 0;
   virtual void setIndices(std::vector<uint32_t> const &) = 0;
 
-  virtual ~RenderMeshGeometry() = default;
+  virtual ~IRenderMesh() = default;
 };
 
 class IPxrTexture {
@@ -218,7 +209,7 @@ public:
 
 class IPxrRenderShape {
 public:
-  [[nodiscard]] virtual std::shared_ptr<RenderMeshGeometry> getGeometry() const { return {}; }
+  [[nodiscard]] virtual std::shared_ptr<IRenderMesh> getGeometry() const { return {}; }
   [[nodiscard]] virtual std::shared_ptr<IPxrMaterial> getMaterial() const { return nullptr; }
   virtual void setMaterial(std::shared_ptr<IPxrMaterial>) {
     throw std::runtime_error("setMaterial is not implemented");
@@ -417,6 +408,10 @@ public:
     return addRigidbody(meshFile, scale);
   }
 
+  virtual IPxrRigidbody *addRigidbody(std::shared_ptr<IRenderMesh> mesh,
+                                      const physx::PxVec3 &scale,
+                                      std::shared_ptr<IPxrMaterial> material) = 0;
+
   virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
                                       std::shared_ptr<IPxrMaterial> material) = 0;
   inline virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type,
@@ -498,6 +493,8 @@ public:
   virtual IPxrScene *createScene(std::string const &name) = 0;
   virtual void removeScene(IPxrScene *scene) = 0;
   virtual std::shared_ptr<IPxrMaterial> createMaterial() = 0;
+  virtual std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
+                                                  std::vector<uint32_t> const &indices) = 0;
   virtual std::shared_ptr<IPxrTexture>
   createTexture(std::string_view filename, uint32_t mipLevels = 1,
                 IPxrTexture::FilterMode::Enum filterMode = {},

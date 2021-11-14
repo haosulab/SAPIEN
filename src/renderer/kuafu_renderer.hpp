@@ -15,14 +15,14 @@ class KuafuMaterial : public IPxrMaterial {
   kuafu::NiceMaterial mKMaterial;
 
 public:
-  KuafuMaterial(kuafu::NiceMaterial m = {}): mKMaterial(std::move(m)) {}
+  KuafuMaterial(kuafu::NiceMaterial m = {}) : mKMaterial(std::move(m)) {}
   inline void setBaseColor(std::array<float, 4> color) override {
     mKMaterial.diffuseColor = glm::vec3(color[0], color[1], color[2]);
     mKMaterial.alpha = color[3];
   }
   [[nodiscard]] inline std::array<float, 4> getBaseColor() const override {
-    return { mKMaterial.diffuseColor.r, mKMaterial.diffuseColor.g,
-             mKMaterial.diffuseColor.b, mKMaterial.alpha };
+    return {mKMaterial.diffuseColor.r, mKMaterial.diffuseColor.g, mKMaterial.diffuseColor.b,
+            mKMaterial.alpha};
   }
   inline void setRoughness(float roughness) override { mKMaterial.roughness = roughness; }
   [[nodiscard]] inline float getRoughness() const override { return mKMaterial.roughness; }
@@ -36,23 +36,39 @@ public:
     mKMaterial.emissionStrength = color[3];
   }
   [[nodiscard]] inline std::array<float, 4> getEmission() const override {
-    return { mKMaterial.emission.r, mKMaterial.emission.g,
-             mKMaterial.emission.b, mKMaterial.emissionStrength };
+    return {mKMaterial.emission.r, mKMaterial.emission.g, mKMaterial.emission.b,
+            mKMaterial.emissionStrength};
   }
   inline void setIOR(float ior) override { mKMaterial.ior = ior; }
   [[nodiscard]] inline float getIOR() const override { return mKMaterial.ior; }
   inline void setTransmission(float t) override { mKMaterial.transmission = t; }
   [[nodiscard]] inline float getTransmission() const override { return mKMaterial.transmission; }
-  inline void setDiffuseTextureFromFilename(std::string_view path) override { mKMaterial.diffuseTexPath = path; }
-  [[nodiscard]] inline std::string getDiffuseTextureFilename() const override { return mKMaterial.diffuseTexPath; }
-  inline void setMetallicTextureFromFilename(std::string_view path) override { mKMaterial.metallicTexPath = path; }
-  [[nodiscard]] inline std::string getMetallicTextureFilename() const override { return mKMaterial.metallicTexPath; }
-  inline void setRoughnessTextureFromFilename(std::string_view path) override { mKMaterial.roughnessTexPath = path; }
-  [[nodiscard]] inline std::string getRoughnessTextureFilename() const override { return mKMaterial.roughnessTexPath; }
-  inline void setTransmissionTextureFromFilename(std::string_view path) override { mKMaterial.transmissionTexPath = path; }
-  [[nodiscard]] inline std::string getTransmissionTextureFilename() const override { return mKMaterial.transmissionTexPath; }
+  inline void setDiffuseTextureFromFilename(std::string_view path) override {
+    mKMaterial.diffuseTexPath = path;
+  }
+  [[nodiscard]] inline std::string getDiffuseTextureFilename() const override {
+    return mKMaterial.diffuseTexPath;
+  }
+  inline void setMetallicTextureFromFilename(std::string_view path) override {
+    mKMaterial.metallicTexPath = path;
+  }
+  [[nodiscard]] inline std::string getMetallicTextureFilename() const override {
+    return mKMaterial.metallicTexPath;
+  }
+  inline void setRoughnessTextureFromFilename(std::string_view path) override {
+    mKMaterial.roughnessTexPath = path;
+  }
+  [[nodiscard]] inline std::string getRoughnessTextureFilename() const override {
+    return mKMaterial.roughnessTexPath;
+  }
+  inline void setTransmissionTextureFromFilename(std::string_view path) override {
+    mKMaterial.transmissionTexPath = path;
+  }
+  [[nodiscard]] inline std::string getTransmissionTextureFilename() const override {
+    return mKMaterial.transmissionTexPath;
+  }
 
-  [[nodiscard]] inline const kuafu::NiceMaterial& getKMaterial() const { return mKMaterial; }
+  [[nodiscard]] inline const kuafu::NiceMaterial &getKMaterial() const { return mKMaterial; }
 };
 
 class KuafuRenderer : public IPxrRenderer {
@@ -65,9 +81,13 @@ public:
   IPxrScene *createScene(std::string const &name) override;
   void removeScene(IPxrScene *scene) override;
   std::shared_ptr<IPxrMaterial> createMaterial() override;
+  std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
+                                          std::vector<uint32_t> const &indices) override {
+    throw std::runtime_error("KuafuRenderer::createMesh is not implemented");
+  }
 
   static void setDefaultAssetsPath(std::string path);
   static void setLogLevel(std::string_view level);
   inline bool isRunning() { return pKRenderer->isRunning(); }
 };
-}
+} // namespace sapien::Renderer

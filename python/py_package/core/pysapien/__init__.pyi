@@ -53,8 +53,8 @@ __all__ = [
     "PointLightEntity",
     "Pose",
     "RenderBody",
-    "RenderGeometry",
     "RenderMaterial",
+    "RenderMesh",
     "RenderScene",
     "RenderShape",
     "RenderTexture",
@@ -200,6 +200,7 @@ class ActorBuilder():
     @typing.overload
     def add_sphere_visual(self, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), radius: float = 1, material: RenderMaterial = None, name: str = '') -> None: ...
     def add_visual_from_file(self, filename: str, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: RenderMaterial = None, name: str = '') -> None: ...
+    def add_visual_from_mesh(self, mesh: RenderMesh, pose: Pose = Pose([0, 0, 0], [1, 0, 0, 0]), scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: RenderMaterial = None, name: str = '') -> None: ...
     def build(self, name: str = '') -> Actor: ...
     def build_kinematic(self, name: str = '') -> Actor: ...
     def build_static(self, name: str = '') -> ActorStatic: ...
@@ -687,6 +688,7 @@ class ActiveLightEntity(LightEntity, Entity):
     pass
 class IPxrRenderer():
     def create_material(self) -> RenderMaterial: ...
+    def create_mesh(self, vertices: numpy.ndarray[numpy.float32, _Shape[m, 3]], indices: numpy.ndarray[numpy.uint32, _Shape[m, 3]]) -> RenderMesh: ...
     def create_texture_from_file(self, filename: str, mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat') -> None: ...
     pass
 class JointBase():
@@ -1157,41 +1159,6 @@ class RenderBody():
         :type: int
         """
     pass
-class RenderGeometry():
-    def set_normals(self, arg0: numpy.ndarray[numpy.float32, _Shape[m, 3]]) -> None: ...
-    def set_uvs(self, arg0: numpy.ndarray[numpy.float32, _Shape[m, 2]]) -> None: ...
-    def set_vertices(self, arg0: numpy.ndarray[numpy.float32, _Shape[m, 3]]) -> None: ...
-    @property
-    def bitangents(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def indices(self) -> numpy.ndarray[numpy.uint32]:
-        """
-        :type: numpy.ndarray[numpy.uint32]
-        """
-    @property
-    def normals(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def tangents(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def uvs(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def vertices(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    pass
 class RenderMaterial():
     def set_base_color(self, rgba: numpy.ndarray[numpy.float32]) -> None: ...
     def set_diffuse_texture(self, texture: RenderTexture) -> None: ...
@@ -1365,6 +1332,42 @@ class RenderMaterial():
     def transmission_texture_filename(self, arg1: str) -> None:
         pass
     pass
+class RenderMesh():
+    def set_indices(self, arg0: numpy.ndarray[numpy.uint32, _Shape[m, 3]]) -> None: ...
+    def set_normals(self, arg0: numpy.ndarray[numpy.float32, _Shape[m, 3]]) -> None: ...
+    def set_uvs(self, arg0: numpy.ndarray[numpy.float32, _Shape[m, 2]]) -> None: ...
+    def set_vertices(self, arg0: numpy.ndarray[numpy.float32, _Shape[m, 3]]) -> None: ...
+    @property
+    def bitangents(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def indices(self) -> numpy.ndarray[numpy.uint32]:
+        """
+        :type: numpy.ndarray[numpy.uint32]
+        """
+    @property
+    def normals(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def tangents(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def uvs(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def vertices(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    pass
 class RenderScene():
     def add_mesh_from_file(self, mesh_file: str, scale: numpy.ndarray[numpy.float32]) -> RenderBody: ...
     def add_primitive_mesh(self, type: str, scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: RenderMaterial = None) -> RenderBody: ...
@@ -1383,9 +1386,9 @@ class RenderShape():
         :type: RenderMaterial
         """
     @property
-    def mesh(self) -> RenderGeometry:
+    def mesh(self) -> RenderMesh:
         """
-        :type: RenderGeometry
+        :type: RenderMesh
         """
     pass
 class RenderTexture():

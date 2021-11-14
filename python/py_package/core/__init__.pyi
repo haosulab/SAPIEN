@@ -47,8 +47,8 @@ from sapien.core.pysapien import PlaneGeometry
 from sapien.core.pysapien import PointLightEntity
 from sapien.core.pysapien import Pose
 from sapien.core.pysapien import RenderBody
-from sapien.core.pysapien import RenderGeometry
 from sapien.core.pysapien import RenderMaterial
+from sapien.core.pysapien import RenderMesh
 from sapien.core.pysapien import RenderScene
 from sapien.core.pysapien import RenderShape
 from sapien.core.pysapien import RenderTexture
@@ -118,8 +118,8 @@ __all__ = [
     "PointLightEntity",
     "Pose",
     "RenderBody",
-    "RenderGeometry",
     "RenderMaterial",
+    "RenderMesh",
     "RenderScene",
     "RenderShape",
     "RenderTexture",

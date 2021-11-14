@@ -6,11 +6,11 @@
 namespace sapien {
 namespace Renderer {
 
-class SVulkan2Geometry : public RenderMeshGeometry {
+class SVulkan2Mesh : public IRenderMesh {
   std::shared_ptr<svulkan2::resource::SVMesh> mMesh;
 
 public:
-  SVulkan2Geometry(std::shared_ptr<svulkan2::resource::SVMesh> mesh);
+  SVulkan2Mesh(std::shared_ptr<svulkan2::resource::SVMesh> mesh);
 
   std::vector<float> getVertices() override;
   std::vector<float> getNormals() override;
@@ -24,6 +24,8 @@ public:
   void setTangents(std::vector<float> const &) override;
   void setBitangents(std::vector<float> const &) override;
   void setIndices(std::vector<uint32_t> const &) override;
+
+  inline std::shared_ptr<svulkan2::resource::SVMesh> getMesh() const { return mMesh; }
 };
 
 class SVulkan2RenderShape : public IPxrRenderShape {
@@ -34,7 +36,7 @@ public:
   inline SVulkan2RenderShape(std::shared_ptr<svulkan2::resource::SVShape> shape,
                              SVulkan2Rigidbody *body)
       : mShape(shape), mParentBody(body) {}
-  [[nodiscard]] std::shared_ptr<RenderMeshGeometry> getGeometry() const override;
+  [[nodiscard]] std::shared_ptr<IRenderMesh> getGeometry() const override;
   [[nodiscard]] std::shared_ptr<IPxrMaterial> getMaterial() const override;
   void setMaterial(std::shared_ptr<IPxrMaterial> material) override;
 };
