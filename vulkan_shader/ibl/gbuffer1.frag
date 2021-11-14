@@ -24,6 +24,7 @@ layout(set = 1, binding = 0) uniform ObjectBuffer {
   mat4 prevModelMatrix;
   uvec4 segmentation;
   float transparency;
+  int shadeFlat;
 } objectBuffer;
 
 layout(set = 2, binding = 0) uniform MaterialBuffer {
@@ -130,12 +131,18 @@ void main() {
     frm.b = materialBuffer.metallic;
   }
 
-  if ((materialBuffer.textureMask & 4) != 0) {
-    outNormal1 = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
+  if (objectBuffer.shadeFlat == 0) {
+    if ((materialBuffer.textureMask & 4) != 0) {
+      outNormal1 = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
+    } else {
+      outNormal1 = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
+    }
   } else {
-    outNormal1 = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
+    vec4 fdx = dFdx(inPosition);
+    vec4 fdy = dFdy(inPosition);
+    vec3 normal = -normalize(cross(fdx.xyz, fdy.xyz));
+    outNormal1 = vec4(normal, 0);
   }
-  outNormal1 = outNormal1;
 
   outPosition1 = inPosition;
 

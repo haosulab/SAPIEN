@@ -116,6 +116,8 @@ public:
   void setVisibility(float visibility) override;
   void setVisible(bool visible) override;
   void setRenderMode(uint32_t mode) override;
+  void setShadeFlat(bool shadeFlat) override;
+  bool getShadeFlat() override;
 
   std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() override {
     std::vector<std::shared_ptr<IPxrRenderShape>> ret;

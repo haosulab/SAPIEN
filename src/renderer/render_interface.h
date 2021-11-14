@@ -33,13 +33,32 @@ static inline void _warn_texture_func_not_supported(std::string_view func_name) 
   spdlog::get("SAPIEN")->warn("{} is not supported for the renderer", func_name);
 }
 
-struct RenderMeshGeometry {
-  std::vector<float> vertices;
-  std::vector<float> normals;
-  std::vector<float> uvs;
-  std::vector<float> tangents;
-  std::vector<float> bitangents;
-  std::vector<uint32_t> indices;
+// struct RenderMeshGeometry {
+//   std::vector<float> vertices;
+//   std::vector<float> normals;
+//   std::vector<float> uvs;
+//   std::vector<float> tangents;
+//   std::vector<float> bitangents;
+//   std::vector<uint32_t> indices;
+// };
+
+class RenderMeshGeometry {
+public:
+  virtual std::vector<float> getVertices() = 0;
+  virtual std::vector<float> getNormals() = 0;
+  virtual std::vector<float> getUVs() = 0;
+  virtual std::vector<float> getTangents() = 0;
+  virtual std::vector<float> getBitangents() = 0;
+  virtual std::vector<uint32_t> getIndices() = 0;
+
+  virtual void setVertices(std::vector<float> const &) = 0;
+  virtual void setNormals(std::vector<float> const &) = 0;
+  virtual void setUVs(std::vector<float> const &) = 0;
+  virtual void setTangents(std::vector<float> const &) = 0;
+  virtual void setBitangents(std::vector<float> const &) = 0;
+  virtual void setIndices(std::vector<uint32_t> const &) = 0;
+
+  virtual ~RenderMeshGeometry() = default;
 };
 
 class IPxrTexture {
@@ -354,6 +373,8 @@ public:
   virtual void setVisibility(float visibility) = 0;
   virtual void setVisible(bool visible) = 0;
   virtual void setRenderMode(uint32_t mode) = 0;
+  virtual void setShadeFlat(bool shadeFlat) = 0;
+  virtual bool getShadeFlat() = 0;
 
   virtual void destroy() = 0;
 

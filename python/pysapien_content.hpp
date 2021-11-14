@@ -2271,6 +2271,8 @@ Args:
       .def("set_pose", &Renderer::IPxrRigidbody::update, py::arg("pose"))
       .def("set_visibility", &Renderer::IPxrRigidbody::setVisibility, py::arg("visibility"))
       .def("set_visible", &Renderer::IPxrRigidbody::setVisible, py::arg("is_visible"))
+      .def_property("shade_flat", &Renderer::IPxrRigidbody::getShadeFlat,
+                    &Renderer::IPxrRigidbody::setShadeFlat)
 
       .def_property_readonly("type",
                              [](Renderer::IPxrRigidbody &body) {
@@ -2337,34 +2339,54 @@ Args:
   PyRenderMeshGeometry
       .def_property_readonly("vertices",
                              [](Renderer::RenderMeshGeometry &geom) {
+                               auto vertices = geom.getVertices();
                                return py::array_t<float>(
-                                   {static_cast<int>(geom.vertices.size() / 3), 3},
-                                   {sizeof(float) * 3, sizeof(float)}, geom.vertices.data());
+                                   {static_cast<int>(vertices.size() / 3), 3},
+                                   {sizeof(float) * 3, sizeof(float)}, vertices.data());
                              })
       .def_property_readonly("normals",
                              [](Renderer::RenderMeshGeometry &geom) {
-                               return py::array_t<float>(
-                                   {static_cast<int>(geom.normals.size() / 3), 3},
-                                   {sizeof(float) * 3, sizeof(float)}, geom.normals.data());
+                               auto normals = geom.getNormals();
+                               return py::array_t<float>({static_cast<int>(normals.size() / 3), 3},
+                                                         {sizeof(float) * 3, sizeof(float)},
+                                                         normals.data());
                              })
       .def_property_readonly("uvs",
                              [](Renderer::RenderMeshGeometry &geom) {
-                               return py::array_t<float>(
-                                   {static_cast<int>(geom.uvs.size() / 2), 2},
-                                   {sizeof(float) * 2, sizeof(float)}, geom.uvs.data());
+                               auto uvs = geom.getUVs();
+                               return py::array_t<float>({static_cast<int>(uvs.size() / 2), 2},
+                                                         {sizeof(float) * 2, sizeof(float)},
+                                                         uvs.data());
                              })
       .def_property_readonly("tangents",
                              [](Renderer::RenderMeshGeometry &geom) {
+                               auto tangents = geom.getTangents();
                                return py::array_t<float>(
-                                   {static_cast<int>(geom.tangents.size() / 3), 3},
-                                   {sizeof(float) * 3, sizeof(float)}, geom.tangents.data());
+                                   {static_cast<int>(tangents.size() / 3), 3},
+                                   {sizeof(float) * 3, sizeof(float)}, tangents.data());
                              })
       .def_property_readonly("bitangents",
                              [](Renderer::RenderMeshGeometry &geom) {
+                               auto bitangents = geom.getBitangents();
                                return py::array_t<float>(
-                                   {static_cast<int>(geom.bitangents.size() / 3), 3},
-                                   {sizeof(float) * 3, sizeof(float)}, geom.bitangents.data());
+                                   {static_cast<int>(bitangents.size() / 3), 3},
+                                   {sizeof(float) * 3, sizeof(float)}, bitangents.data());
                              })
       .def_property_readonly(
-          "indices", [](Renderer::RenderMeshGeometry &geom) { return make_array(geom.indices); });
+          "indices",
+          [](Renderer::RenderMeshGeometry &geom) { return make_array(geom.getIndices()); })
+      .def("set_vertices",
+           [](Renderer::RenderMeshGeometry &geom,
+              Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> vertices) {
+             geom.setVertices(std::vector(vertices.data(), vertices.data() + vertices.size()));
+           })
+      .def("set_normals",
+           [](Renderer::RenderMeshGeometry &geom,
+              Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> normals) {
+             geom.setNormals(std::vector(normals.data(), normals.data() + normals.size()));
+           })
+      .def("set_uvs", [](Renderer::RenderMeshGeometry &geom,
+                         Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> uvs) {
+        geom.setUVs(std::vector(uvs.data(), uvs.data() + uvs.size()));
+      });
 }

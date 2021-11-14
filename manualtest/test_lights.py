@@ -2,10 +2,13 @@ import sapien.core as sapien
 import numpy as np
 from PIL import Image
 
+# Renderer = sapien.VulkanRenderer
+Renderer = sapien.KuafuRenderer
+
 
 def test_point_light():
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = Renderer()
     engine.set_renderer(renderer)
 
     mat = renderer.create_material()
@@ -48,7 +51,7 @@ def test_point_light():
 
 def test_dir_light():
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = Renderer()
     engine.set_renderer(renderer)
 
     mat = renderer.create_material()
@@ -97,7 +100,7 @@ def test_dir_light():
 
 def test_spot_light():
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = Renderer()
     engine.set_renderer(renderer)
 
     mat = renderer.create_material()
@@ -137,16 +140,10 @@ def test_spot_light():
     Image.fromarray(
         (img * 255).astype(np.uint8)).save("test_spot_light_shadow.png")
 
-    from sapien.utils.viewer import Viewer
-    viewer = Viewer(renderer)
-    viewer.set_scene(scene)
-    while True:
-        viewer.render()
-
 
 def test_active_light():
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = Renderer()
     engine.set_renderer(renderer)
 
     mat = renderer.create_material()
@@ -172,7 +169,7 @@ def test_active_light():
     Image.fromarray((img * 255).astype(np.uint8)).save("test_active_light.png")
 
 
-test_point_light()
-test_dir_light()
-test_spot_light()
-test_active_light()
+# test_point_light()
+# test_dir_light()
+# test_spot_light()
+# test_active_light()

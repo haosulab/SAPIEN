@@ -240,6 +240,8 @@ def main():
     ant_builder = create_ant_builder(scene)
     ant = ant_builder.build()
     ant.set_root_pose(Pose([0, 0, 5]))
+    for v in ant.get_links()[0].get_visual_bodies():
+        v.shade_flat = True
 
     # urdf = download_partnet_mobility(
     #     40147,
@@ -308,6 +310,9 @@ def main():
         viewer.render()
         count += 1
 
+        if count == 1:
+            viewer.window.resize(1024, 768)
+
         # import matplotlib.pyplot as plt
         # import torch.utils.dlpack
 
@@ -317,6 +322,14 @@ def main():
         # img = torch.utils.dlpack.from_dlpack(img).cpu().numpy()
         # plt.imshow(img)
         # plt.show()
+
+        for v in ant.get_links()[0].get_visual_bodies():
+            for shape in v.get_render_shapes():
+                vertices = shape.mesh.vertices
+                shape.mesh.set_vertices(vertices * 0.99)
+                print(shape.mesh.vertices.max())
+        print()
+
 
     viewer.close()
 

@@ -14,6 +14,7 @@ layout(set = 1, binding = 0) uniform ObjectBuffer {
   mat4 prevModelMatrix;
   uvec4 segmentation;
   float transparency;
+  int shadeFlat;
 } objectBuffer;
 
 layout(location = 0) in vec3 position;

@@ -11,6 +11,14 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   float height;
 } cameraBuffer;
 
+layout(set = 1, binding = 0) uniform ObjectBuffer {
+  mat4 modelMatrix;
+  mat4 prevModelMatrix;
+  uvec4 segmentation;
+  float transparency;
+  int shadeFlat;
+} objectBuffer;
+
 layout(set = 2, binding = 0) uniform MaterialBuffer {
   vec4 emission;
   vec4 baseColor;
@@ -89,9 +97,16 @@ void main() {
     outSpecular.b = materialBuffer.metallic;
   }
 
-  if ((materialBuffer.textureMask & 4) != 0) {
-    outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
+  if (objectBuffer.shadeFlat == 0) {
+    if ((materialBuffer.textureMask & 4) != 0) {
+      outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
+    } else {
+      outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
+    }
   } else {
-    outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
+    vec4 fdx = dFdx(inPosition);
+    vec4 fdy = dFdy(inPosition);
+    vec3 normal = -normalize(cross(fdx.xyz, fdy.xyz));
+    outNormal = vec4(normal, 0);
   }
 }

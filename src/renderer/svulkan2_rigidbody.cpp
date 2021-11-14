@@ -87,6 +87,13 @@ void SVulkan2Rigidbody::setRenderMode(uint32_t mode) {
   }
 }
 
+void SVulkan2Rigidbody::setShadeFlat(bool shadeFlat) {
+  for (auto obj : mObjects) {
+    obj->setShadeFlat(shadeFlat);
+  }
+}
+bool SVulkan2Rigidbody::getShadeFlat() { return mObjects.at(0)->getShadeFlat(); }
+
 physx::PxVec3 SVulkan2Rigidbody::getScale() const { return mScale; }
 
 std::vector<std::shared_ptr<IPxrRenderShape>> SVulkan2Rigidbody::getRenderShapes() {

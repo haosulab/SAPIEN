@@ -6,6 +6,26 @@
 namespace sapien {
 namespace Renderer {
 
+class SVulkan2Geometry : public RenderMeshGeometry {
+  std::shared_ptr<svulkan2::resource::SVMesh> mMesh;
+
+public:
+  SVulkan2Geometry(std::shared_ptr<svulkan2::resource::SVMesh> mesh);
+
+  std::vector<float> getVertices() override;
+  std::vector<float> getNormals() override;
+  std::vector<float> getUVs() override;
+  std::vector<float> getTangents() override;
+  std::vector<float> getBitangents() override;
+  std::vector<uint32_t> getIndices() override;
+  void setVertices(std::vector<float> const &) override;
+  void setNormals(std::vector<float> const &) override;
+  void setUVs(std::vector<float> const &) override;
+  void setTangents(std::vector<float> const &) override;
+  void setBitangents(std::vector<float> const &) override;
+  void setIndices(std::vector<uint32_t> const &) override;
+};
+
 class SVulkan2RenderShape : public IPxrRenderShape {
   std::shared_ptr<svulkan2::resource::SVShape> mShape;
   class SVulkan2Rigidbody *mParentBody;

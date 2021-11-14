@@ -173,6 +173,14 @@ void KuafuRigidBody::setRenderMode(uint32_t mode) {
   }
 }
 
+void KuafuRigidBody::setShadeFlat(bool shadeFlat) {
+  spdlog::get("SAPIEN")->error("KF: shadeFlat not supported yet");
+}
+bool KuafuRigidBody::getShadeFlat() {
+  spdlog::get("SAPIEN")->error("KF: shadeFlat not supported yet");
+  return false;
+}
+
 void KuafuRigidBody::destroy() {
   pParentScene->getKScene()->removeGeometryInstances(pKGeometryInstances);
   pParentScene->removeRigidbody(this);

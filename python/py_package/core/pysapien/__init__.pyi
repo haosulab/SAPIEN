@@ -1139,6 +1139,14 @@ class RenderBody():
         :type: numpy.ndarray[numpy.float32]
         """
     @property
+    def shade_flat(self) -> bool:
+        """
+        :type: bool
+        """
+    @shade_flat.setter
+    def shade_flat(self, arg1: bool) -> None:
+        pass
+    @property
     def type(self) -> str:
         """
         :type: str
@@ -1150,6 +1158,9 @@ class RenderBody():
         """
     pass
 class RenderGeometry():
+    def set_normals(self, arg0: numpy.ndarray[numpy.float32, _Shape[m, 3]]) -> None: ...
+    def set_uvs(self, arg0: numpy.ndarray[numpy.float32, _Shape[m, 2]]) -> None: ...
+    def set_vertices(self, arg0: numpy.ndarray[numpy.float32, _Shape[m, 3]]) -> None: ...
     @property
     def bitangents(self) -> numpy.ndarray[numpy.float32]:
         """

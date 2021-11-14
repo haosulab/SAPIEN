@@ -6,26 +6,41 @@
 namespace sapien {
 namespace Renderer {
 
-std::shared_ptr<RenderMeshGeometry> SVulkan2RenderShape::getGeometry() const {
-  auto position = mShape->mesh->getVertexAttribute("position");
-  auto index = mShape->mesh->getIndices();
-  auto mesh = std::make_shared<RenderMeshGeometry>();
-  mesh->vertices = position;
+SVulkan2Geometry::SVulkan2Geometry(std::shared_ptr<svulkan2::resource::SVMesh> mesh)
+    : mMesh(mesh) {}
 
-  if (mShape->mesh->hasVertexAttribute("normal")) {
-    mesh->normals = mShape->mesh->getVertexAttribute("normal");
-  }
-  if (mShape->mesh->hasVertexAttribute("tangent")) {
-    mesh->tangents = mShape->mesh->getVertexAttribute("tangent");
-  }
-  if (mShape->mesh->hasVertexAttribute("bitangent")) {
-    mesh->bitangents = mShape->mesh->getVertexAttribute("bitangent");
-  }
-  if (mShape->mesh->hasVertexAttribute("uv")) {
-    mesh->bitangents = mShape->mesh->getVertexAttribute("uv");
-  }
-  mesh->indices = index;
-  return mesh;
+std::vector<float> SVulkan2Geometry::getVertices() {
+  return mMesh->getVertexAttribute("position");
+}
+std::vector<float> SVulkan2Geometry::getNormals() { return mMesh->getVertexAttribute("normal"); }
+std::vector<float> SVulkan2Geometry::getUVs() { return mMesh->getVertexAttribute("uv"); }
+std::vector<float> SVulkan2Geometry::getTangents() { return mMesh->getVertexAttribute("tangent"); }
+std::vector<float> SVulkan2Geometry::getBitangents() {
+  return mMesh->getVertexAttribute("bitangent");
+}
+std::vector<uint32_t> SVulkan2Geometry::getIndices() { return mMesh->getIndices(); }
+
+void SVulkan2Geometry::setVertices(std::vector<float> const &vertices) {
+  mMesh->setVertexAttribute("position", vertices, true);
+}
+void SVulkan2Geometry::setNormals(std::vector<float> const &normals) {
+  mMesh->setVertexAttribute("normal", normals, true);
+}
+void SVulkan2Geometry::setUVs(std::vector<float> const &uvs) {
+  mMesh->setVertexAttribute("uv", uvs, true);
+}
+void SVulkan2Geometry::setTangents(std::vector<float> const &tangents) {
+  mMesh->setVertexAttribute("tangent", tangents, true);
+}
+void SVulkan2Geometry::setBitangents(std::vector<float> const &bitangents) {
+  mMesh->setVertexAttribute("bitangents", bitangents, true);
+}
+void SVulkan2Geometry::setIndices(std::vector<uint32_t> const &indices) {
+  mMesh->setIndices(indices);
+}
+
+std::shared_ptr<RenderMeshGeometry> SVulkan2RenderShape::getGeometry() const {
+  return std::make_shared<SVulkan2Geometry>(mShape->mesh);
 }
 
 std::shared_ptr<IPxrMaterial> SVulkan2RenderShape::getMaterial() const {
