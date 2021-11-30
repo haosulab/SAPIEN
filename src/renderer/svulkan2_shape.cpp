@@ -1,4 +1,5 @@
 #include "svulkan2_shape.h"
+#include "dlpack.hpp"
 #include "svulkan2/resource/shape.h"
 #include "svulkan2_material.h"
 #include "svulkan2_renderer.h"
@@ -6,18 +7,13 @@
 namespace sapien {
 namespace Renderer {
 
-SVulkan2Mesh::SVulkan2Mesh(std::shared_ptr<svulkan2::resource::SVMesh> mesh)
-    : mMesh(mesh) {}
+SVulkan2Mesh::SVulkan2Mesh(std::shared_ptr<svulkan2::resource::SVMesh> mesh) : mMesh(mesh) {}
 
-std::vector<float> SVulkan2Mesh::getVertices() {
-  return mMesh->getVertexAttribute("position");
-}
+std::vector<float> SVulkan2Mesh::getVertices() { return mMesh->getVertexAttribute("position"); }
 std::vector<float> SVulkan2Mesh::getNormals() { return mMesh->getVertexAttribute("normal"); }
 std::vector<float> SVulkan2Mesh::getUVs() { return mMesh->getVertexAttribute("uv"); }
 std::vector<float> SVulkan2Mesh::getTangents() { return mMesh->getVertexAttribute("tangent"); }
-std::vector<float> SVulkan2Mesh::getBitangents() {
-  return mMesh->getVertexAttribute("bitangent");
-}
+std::vector<float> SVulkan2Mesh::getBitangents() { return mMesh->getVertexAttribute("bitangent"); }
 std::vector<uint32_t> SVulkan2Mesh::getIndices() { return mMesh->getIndices(); }
 
 void SVulkan2Mesh::setVertices(std::vector<float> const &vertices) {
@@ -35,8 +31,40 @@ void SVulkan2Mesh::setTangents(std::vector<float> const &tangents) {
 void SVulkan2Mesh::setBitangents(std::vector<float> const &bitangents) {
   mMesh->setVertexAttribute("bitangents", bitangents, true);
 }
-void SVulkan2Mesh::setIndices(std::vector<uint32_t> const &indices) {
-  mMesh->setIndices(indices);
+void SVulkan2Mesh::setIndices(std::vector<uint32_t> const &indices) { mMesh->setIndices(indices); }
+
+// // DLPack deleter
+// static void deleter(DLManagedTensor *self) {
+//   delete[] self->dl_tensor.shape;
+//   delete static_cast<std::shared_ptr<svulkan2::resource::SVMesh> *>(self->manager_ctx);
+// }
+
+DLManagedTensor *SVulkan2Mesh::getDLVertices() {
+  auto &buffer = mMesh->getVertexBuffer();
+  void *ptr = buffer.getCudaPtr();
+  int id = buffer.getCudaDeviceId();
+
+  int64_t vertexCount = mMesh->getVertexCount();
+  int64_t vertexSize = mMesh->getVertexSize();
+
+  return dl_wrapper<svulkan2::resource::SVMesh>(mMesh, ptr, id, {vertexCount, vertexSize / 4},
+                                                {DLDataTypeCode::kDLFloat, 32, 1});
+  // DLManagedTensor *tensor = new DLManagedTensor();
+  // auto container = new std::shared_ptr<svulkan2::resource::SVMesh>(mMesh);
+  // int64_t *shape = new int64_t[2];
+  // shape[0] = vertexCount;
+  // shape[1] = vertexSize / 4;
+
+  // tensor->dl_tensor.data = ptr;
+  // tensor->dl_tensor.device = {DLDeviceType::kDLGPU, id};
+  // tensor->dl_tensor.ndim = 2;
+  // tensor->dl_tensor.dtype = {DLDataTypeCode::kDLFloat, 32, 1};
+  // tensor->dl_tensor.shape = shape;
+  // tensor->dl_tensor.strides = nullptr;
+  // tensor->dl_tensor.byte_offset = 0;
+
+  // tensor->manager_ctx = container;
+  // tensor->deleter = deleter;
 }
 
 std::shared_ptr<IRenderMesh> SVulkan2RenderShape::getGeometry() const {

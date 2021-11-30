@@ -1,3 +1,4 @@
+#include "dlpack.hpp"
 #include "svulkan2_renderer.h"
 
 namespace sapien {
@@ -68,14 +69,14 @@ std::vector<uint32_t> SVulkan2Camera::getUintImage(std::string const &textureNam
   return std::get<0>(mRenderer->download<uint32_t>(textureName));
 }
 
-// DLPack deleter
-static void deleter(DLManagedTensor *self) {
-  delete[] self->dl_tensor.shape;
-  delete static_cast<std::shared_ptr<svulkan2::core::CudaBuffer> *>(self->manager_ctx);
-}
+// // DLPack deleter
+// static void deleter(DLManagedTensor *self) {
+//   delete[] self->dl_tensor.shape;
+//   delete static_cast<std::shared_ptr<svulkan2::core::Buffer> *>(self->manager_ctx);
+// }
 
 DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
-  auto [buffer, sizes, format] = mRenderer->transferToCuda(name);
+  auto [buffer, sizes, format] = mRenderer->transferToBuffer(name);
 
   long size = sizes[0] * sizes[1];
   std::vector<long> sizes2 = {sizes[0], sizes[1]};
@@ -101,35 +102,13 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
 
   assert(static_cast<long>(buffer->getSize()) == size * 4);
 
-  void *pointer = buffer->getCudaPointer();
-
-  DLManagedTensor *tensor = new DLManagedTensor();
-
-  auto container = new std::shared_ptr<svulkan2::core::CudaBuffer>(buffer);
-
-  int64_t *shape = new int64_t[sizes2.size()];
-  for (size_t i = 0; i < sizes2.size(); ++i) {
-    shape[i] = sizes2[i];
-  }
-
+  // swap width and height
   if (sizes2.size() >= 2) {
-    int64_t t = shape[0];
-    shape[0] = shape[1];
-    shape[1] = t;
+    std::swap(sizes2[0], sizes2[1]);
   }
 
-  tensor->dl_tensor.data = pointer;
-  tensor->dl_tensor.device = {DLDeviceType::kDLGPU, buffer->getCudaDeviceId()};
-  tensor->dl_tensor.ndim = static_cast<int>(sizes2.size());
-  tensor->dl_tensor.dtype = {dtype, 32, 1};
-  tensor->dl_tensor.shape = shape;
-  tensor->dl_tensor.strides = nullptr;
-  tensor->dl_tensor.byte_offset = 0;
-
-  tensor->manager_ctx = container;
-  tensor->deleter = deleter;
-
-  return tensor;
+  return dl_wrapper(buffer, buffer->getCudaPtr(), buffer->getCudaDeviceId(), sizes2,
+                    {dtype, 32, 1});
 }
 
 glm::mat4 SVulkan2Camera::getModelMatrix() const { return mCamera->computeWorldModelMatrix(); }

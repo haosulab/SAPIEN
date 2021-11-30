@@ -8,6 +8,17 @@ layout(location = 2) in vec4 inColor;
 
 layout(location = 0) out vec4 outPoint;
 
+layout(set = 0, binding = 0) uniform CameraBuffer {
+  mat4 viewMatrix;
+  mat4 projectionMatrix;
+  mat4 viewMatrixInverse;
+  mat4 projectionMatrixInverse;
+  mat4 prevViewMatrix;
+  mat4 prevViewMatrixInverse;
+  float width;
+  float height;
+} cameraBuffer;
+
 void main() {
   outPoint = inColor;
 }

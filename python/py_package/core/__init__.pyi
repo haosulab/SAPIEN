@@ -61,6 +61,7 @@ from sapien.core.pysapien import Subscription
 from sapien.core.pysapien import Trigger
 from sapien.core.pysapien import URDFLoader
 from sapien.core.pysapien import VisualRecord
+from sapien.core.pysapien import VulkanRenderMesh
 from sapien.core.pysapien import VulkanRenderer
 from sapien.core.pysapien import VulkanRigidbody
 from sapien.core.pysapien import VulkanScene
@@ -132,6 +133,7 @@ __all__ = [
     "Trigger",
     "URDFLoader",
     "VisualRecord",
+    "VulkanRenderMesh",
     "VulkanRenderer",
     "VulkanRigidbody",
     "VulkanScene",

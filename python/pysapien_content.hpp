@@ -28,6 +28,7 @@
 #include "event_system/event_system.h"
 
 #include "renderer/svulkan2_renderer.h"
+#include "renderer/svulkan2_shape.h"
 #include "renderer/svulkan2_window.h"
 
 #include "renderer/kuafu_renderer.hpp"
@@ -230,9 +231,11 @@ void buildSapien(py::module &m) {
   auto PyArticulationBuilder =
       py::class_<ArticulationBuilder, std::shared_ptr<ArticulationBuilder>>(m,
                                                                             "ArticulationBuilder");
-
-  auto PyRenderMesh = py::class_<Renderer::IRenderMesh, std::shared_ptr<Renderer::IRenderMesh>>(
-      m, "RenderMesh");
+  auto PyRenderMesh =
+      py::class_<Renderer::IRenderMesh, std::shared_ptr<Renderer::IRenderMesh>>(m, "RenderMesh");
+  auto PyVulkanRenderMesh =
+      py::class_<Renderer::SVulkan2Mesh, Renderer::IRenderMesh,
+                 std::shared_ptr<Renderer::SVulkan2Mesh>>(m, "VulkanRenderMesh");
 
   auto PySubscription = py::class_<Subscription>(m, "Subscription");
 
@@ -260,20 +263,6 @@ void buildSapien(py::module &m) {
   auto PyActiveLightEntity = py::class_<SActiveLight, SLight>(m, "ActiveLightEntity");
 
   auto PyCameraEntity = py::class_<SCamera, SEntity>(m, "CameraEntity");
-
-  // auto PyLight = py::class_<Renderer::ILight>(m, "Light");
-  // auto PyPointLight = py::class_<Renderer::IPointLight, Renderer::ILight>(m, "PointLight");
-  // auto PyDirectionalLight =
-  //     py::class_<Renderer::IDirectionalLight, Renderer::ILight>(m, "DirectionalLight");
-  // auto PySpotLight = py::class_<Renderer::ISpotLight, Renderer::ILight>(m, "SpotLight");
-  // auto PyActiveLight = py::class_<Renderer::IActiveLight, Renderer::ILight>(m, "ActiveLight");
-  // auto PyVulkanPointLight =
-  //     py::class_<Renderer::SVulkan2PointLight, Renderer::IPointLight>(m, "VulkanPointLight");
-  // auto PyVulkanDirectionalLight =
-  //     py::class_<Renderer::SVulkan2DirectionalLight, Renderer::IDirectionalLight>(
-  //         m, "VulkanDirectionalLight");
-  // auto PyVulkanSpotLight =
-  //     py::class_<Renderer::SVulkan2SpotLight, Renderer::ISpotLight>(m, "VulkanSpotLight");
 
   //======== Kuafu ========//
   auto PyKuafuConfig = py::class_<Renderer::KuafuConfig>(m, "KuafuConfig");
@@ -1791,96 +1780,6 @@ Args:
                                           &Renderer::SVulkan2Rigidbody::getVisualObjects,
                                           py::return_value_policy::reference);
 
-  // PyVulkanCamera
-  //     .def_property_readonly("render_target_names",
-  //                            &Renderer::SVulkan2Camera::getRenderTargetNames,
-  //                            "Names for available render targets to retrieve through "
-  //                            "get_[float/uint32]_texture or get_dl_tensor")
-  //     .def(
-  //         "get_float_texture",
-  //         [](Renderer::SVulkan2Camera &cam, std::string const &name) {
-  //           auto [image, sizes] = cam.getFloatTexture(name);
-  //           if (sizes[2] == 1) {
-  //             return py::array_t<float>({static_cast<int>(sizes[0]),
-  //             static_cast<int>(sizes[1])},
-  //                                       image.data());
-  //           } else {
-  //             return py::array_t<float>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
-  //                                        static_cast<int>(sizes[2])},
-  //                                       image.data());
-  //           }
-  //         },
-  //         py::arg("texture_name"))
-  //     .def(
-  //         "get_uint32_texture",
-  //         [](Renderer::SVulkan2Camera &cam, std::string const &name) {
-  //           auto [image, sizes] = cam.getUint32Texture(name);
-  //           if (sizes[2] == 1) {
-  //             return py::array_t<uint32_t>(
-  //                 {static_cast<int>(sizes[0]), static_cast<int>(sizes[1])}, image.data());
-  //           } else {
-  //             return py::array_t<uint32_t>({static_cast<int>(sizes[0]),
-  //             static_cast<int>(sizes[1]),
-  //                                           static_cast<int>(sizes[2])},
-  //                                          image.data());
-  //           }
-  //         },
-  //         py::arg("texture_name"))
-  //     .def(
-  //         "get_dl_tensor",
-  //         [](Renderer::SVulkan2Camera &cam, std::string const &name) {
-  //           auto [buffer, sizes, format] = cam.getCudaBuffer(name);
-  //           std::vector<long> dim;
-  //           for (auto s : sizes) {
-  //             dim.push_back(s);
-  //           }
-  //           DLManagedTensor *tensor = DLTensorFromCudaBuffer(std::move(buffer), dim, format);
-  //           auto capsule_destructor = [](PyObject *data) {
-  //             DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data,
-  //             "dltensor"); if (tensor) {
-  //               tensor->deleter(const_cast<DLManagedTensor *>(tensor));
-  //             } else {
-  //               PyErr_Clear();
-  //             }
-  //           };
-  //           return py::capsule(tensor, "dltensor", capsule_destructor);
-  //         },
-  //         "Get raw GPU memory for a render target in the dl format. It can be wrapped into "
-  //         "PyTorch or Tensorflow using their API",
-  //         py::arg("texture_name"))
-
-  //     .def(
-  //         "get_camera_matrix",
-  //         [](Renderer::SVulkan2Camera &c) { return mat42array(c.getCameraMatrix()); },
-  //         "Get intrinsic camera matrix in OpenCV format.")
-  //     .def(
-  //         "get_model_matrix",
-  //         [](Renderer::SVulkan2Camera &c) { return mat42array(c.getModelMatrix()); },
-  //         "Get OpenGL model matrix (inverse of extrinsic matrix)")
-  //     .def(
-  //         "get_projection_matrix",
-  //         [](Renderer::SVulkan2Camera &c) { return mat42array(c.getProjectionMatrix()); },
-  //         "Get OpenGL projection matrix")
-
-  //     .def("set_orthographic", &Renderer::SVulkan2Camera::setOrthographicParameters,
-  //          "Set camera into orthographic projection mode", py::arg("near"), py::arg("far"),
-  //          py::arg("aspect"), py::arg("scale"))
-  //     .def("set_perspective", &Renderer::SVulkan2Camera::setPerspectiveParameters,
-  //     py::arg("near"),
-  //          "Set camera into standard perspective projection mode", py::arg("far"),
-  //          py::arg("fovy"), py::arg("aspect"))
-  //     .def("set_full_perspective", &Renderer::SVulkan2Camera::setFullPerspectiveParameters,
-  //          "Set camera into perspective projection mode with full camera parameters",
-  //          py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
-  //          py::arg("cy"), py::arg("width"), py::arg("height"), py::arg("skew"))
-
-  //     .def_property_readonly("mode", &Renderer::SVulkan2Camera::getMode,
-  //                            "One of \"perspective\", \"full_perspective\", \"orthographic\".")
-  //     .def_property_readonly(
-  //         "_internal_renderer",
-  //         [](Renderer::SVulkan2Camera &camera) { return camera.getInternalRenderer(); },
-  //         py::return_value_policy::reference);
-
   PyLightEntity.def("set_pose", &SLight::setPose, py::arg("pose"))
       .def_property_readonly("pose", &SLight::getPose)
       .def(
@@ -2195,59 +2094,6 @@ Args:
                                auto light = scene.getAmbientLight();
                                return make_array(std::vector<float>{light[0], light[1], light[2]});
                              })
-      // .def(
-      //     "set_ambient_light",
-      //     [](Renderer::IPxrScene &scene, py::array_t<float> const &color) {
-      //       scene.setAmbientLight({color.at(0), color.at(1), color.at(2)});
-      //     },
-      //     py::arg("color"))
-      // .def(
-      //     "add_point_light",
-      //     [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
-      //        py::array_t<float> const &color, bool shadow, float near, float far) {
-      //       return scene.addPointLight({position.at(0), position.at(1), position.at(2)},
-      //                                  {color.at(0), color.at(1), color.at(2)}, shadow, near,
-      //                                  far);
-      //     },
-      //     py::arg("position"), py::arg("color"), py::arg("shadow") = false, py::arg("near") =
-      //     0.1, py::arg("far") = 10, py::return_value_policy::reference)
-      // .def(
-      //     "add_directional_light",
-      //     [](Renderer::IPxrScene &scene, py::array_t<float> const &direction,
-      //        py::array_t<float> const &color, bool shadow, py::array_t<float> const &position,
-      //        float scale, float near, float far) {
-      //       return scene.addDirectionalLight({direction.at(0), direction.at(1),
-      //       direction.at(2)},
-      //                                        {color.at(0), color.at(1), color.at(2)}, shadow,
-      //                                        {position.at(0), position.at(1), position.at(2)},
-      //                                        scale, near, far);
-      //     },
-      //     py::arg("direction"), py::arg("color"), py::arg("shadow") = false,
-      //     py::arg("position") = make_array<float>({0.f, 0.f, 0.f}), py::arg("scale") = 10.f,
-      //     py::arg("near") = -10.f, py::arg("far") = 10.f, py::return_value_policy::reference)
-      // .def(
-      //     "add_spot_light",
-      //     [](Renderer::IPxrScene &scene, py::array_t<float> const &position,
-      //        py::array_t<float> const &direction, float fovInner, float fovOuter,
-      //        py::array_t<float> const &color, bool shadow, float near, float far) {
-      //       return scene.addSpotLight({position.at(0), position.at(1), position.at(2)},
-      //                                 {direction.at(0), direction.at(1), direction.at(2)},
-      //                                 fovInner, fovOuter, {color.at(0), color.at(1),
-      //                                 color.at(2)}, shadow, near, far);
-      //     },
-      //     py::arg("position"), py::arg("direction"), py::arg("inner_fov"), py::arg("outer_fov"),
-      //     py::arg("color"), py::arg("shadow") = false, py::arg("near") = 0.1f,
-      //     py::arg("far") = 10.f, py::return_value_policy::reference)
-      // .def(
-      //     "add_active_light",
-      //     [](Renderer::IPxrScene &scene, PxTransform const &pose, py::array_t<float> const
-      //     &color,
-      //        float fov, std::string const &path) {
-      //       return scene.addActiveLight(pose, {color.at(0), color.at(1), color.at(2)}, fov,
-      //       path);
-      //     },
-      //     py::arg("pose"), py::arg("tex_path"),
-      //     py::arg("color") = make_array<float>({1.f, 1.f, 1.f}), py::arg("fov") = 1.57)
       .def(
           "add_mesh_from_file",
           [](Renderer::IPxrScene &scene, std::string const &meshFile, py::array_t<float> scale) {
@@ -2415,4 +2261,16 @@ Args:
                          Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> uvs) {
         geom.setUVs(std::vector(uvs.data(), uvs.data() + uvs.size()));
       });
+  PyVulkanRenderMesh.def_property_readonly("dl_vertices", [](Renderer::SVulkan2Mesh &mesh) {
+    DLManagedTensor *tensor = mesh.getDLVertices();
+    auto capsule_destructor = [](PyObject *data) {
+      DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
+      if (tensor) {
+        tensor->deleter(const_cast<DLManagedTensor *>(tensor));
+      } else {
+        PyErr_Clear();
+      }
+    };
+    return py::capsule(tensor, "dltensor", capsule_destructor);
+  });
 }

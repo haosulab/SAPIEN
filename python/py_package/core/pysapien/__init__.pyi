@@ -67,6 +67,7 @@ __all__ = [
     "Trigger",
     "URDFLoader",
     "VisualRecord",
+    "VulkanRenderMesh",
     "VulkanRenderer",
     "VulkanRigidbody",
     "VulkanScene",
@@ -1845,6 +1846,13 @@ class VisualRecord():
     def type(self) -> str:
         """
         :type: str
+        """
+    pass
+class VulkanRenderMesh(RenderMesh):
+    @property
+    def dl_vertices(self) -> capsule:
+        """
+        :type: capsule
         """
     pass
 class VulkanRenderer(IPxrRenderer):
