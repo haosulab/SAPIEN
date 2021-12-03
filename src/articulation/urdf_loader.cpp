@@ -231,8 +231,9 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
       }
 
       float scale3 = scale * scale * scale;
+      float scale5 = scale3 * scale * scale;
       currentLinkBuilder->setMassAndInertia(currentInertial.mass->value * scale3, tInertia2Link,
-                                            {scale3 * eigs.x, scale3 * eigs.y, scale * eigs.z});
+                                            {scale5 * eigs.x, scale5 * eigs.y, scale5 * eigs.z});
     }
 
     // visual
