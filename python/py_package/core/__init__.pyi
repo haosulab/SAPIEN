@@ -41,6 +41,7 @@ from sapien.core.pysapien import Link
 from sapien.core.pysapien import LinkBase
 from sapien.core.pysapien import LinkBuilder
 from sapien.core.pysapien import NonconvexMeshGeometry
+from sapien.core.pysapien import ParticleEntity
 from sapien.core.pysapien import PhysicalMaterial
 from sapien.core.pysapien import PinocchioModel
 from sapien.core.pysapien import PlaneGeometry
@@ -49,6 +50,7 @@ from sapien.core.pysapien import Pose
 from sapien.core.pysapien import RenderBody
 from sapien.core.pysapien import RenderMaterial
 from sapien.core.pysapien import RenderMesh
+from sapien.core.pysapien import RenderParticleBody
 from sapien.core.pysapien import RenderScene
 from sapien.core.pysapien import RenderShape
 from sapien.core.pysapien import RenderTexture
@@ -61,6 +63,7 @@ from sapien.core.pysapien import Subscription
 from sapien.core.pysapien import Trigger
 from sapien.core.pysapien import URDFLoader
 from sapien.core.pysapien import VisualRecord
+from sapien.core.pysapien import VulkanParticleBody
 from sapien.core.pysapien import VulkanRenderMesh
 from sapien.core.pysapien import VulkanRenderer
 from sapien.core.pysapien import VulkanRigidbody
@@ -113,6 +116,7 @@ __all__ = [
     "LinkBase",
     "LinkBuilder",
     "NonconvexMeshGeometry",
+    "ParticleEntity",
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
@@ -121,6 +125,7 @@ __all__ = [
     "RenderBody",
     "RenderMaterial",
     "RenderMesh",
+    "RenderParticleBody",
     "RenderScene",
     "RenderShape",
     "RenderTexture",
@@ -133,6 +138,7 @@ __all__ = [
     "Trigger",
     "URDFLoader",
     "VisualRecord",
+    "VulkanParticleBody",
     "VulkanRenderMesh",
     "VulkanRenderer",
     "VulkanRigidbody",

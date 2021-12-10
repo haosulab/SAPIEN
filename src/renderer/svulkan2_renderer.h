@@ -2,6 +2,7 @@
 #include "renderer/render_interface.h"
 #include "svulkan2_light.h"
 #include "svulkan2_material.h"
+#include "svulkan2_scene.h"
 #include <memory>
 #include <svulkan2/core/context.h>
 #include <svulkan2/renderer/renderer.h>
@@ -20,144 +21,6 @@ void setDefaultViewerShaderDirectory(std::string const &dir);
 extern std::string gDefaultCameraShaderDirectory;
 void setDefaultCameraShaderDirectory(std::string const &dir);
 
-class SVulkan2Rigidbody : public IPxrRigidbody {
-  std::string mName{};
-  SVulkan2Scene *mParentScene = nullptr;
-  physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
-  std::vector<svulkan2::scene::Object *> mObjects;
-
-  uint32_t mUniqueId{0};
-  uint32_t mSegmentationId{0};
-
-  physx::PxGeometryType::Enum mType;
-  physx::PxVec3 mScale;
-
-public:
-  SVulkan2Rigidbody(SVulkan2Scene *scene, std::vector<svulkan2::scene::Object *> const &objects,
-                    physx::PxGeometryType::Enum type, physx::PxVec3 scale);
-  SVulkan2Rigidbody(SVulkan2Rigidbody const &other) = delete;
-
-  SVulkan2Rigidbody &operator=(SVulkan2Rigidbody const &other) = delete;
-
-  inline void setName(std::string const &name) override { mName = name; };
-  std::string getName() const override { return mName; };
-
-  void setUniqueId(uint32_t uniqueId) override;
-  uint32_t getUniqueId() const override;
-  void setSegmentationId(uint32_t segmentationId) override;
-  uint32_t getSegmentationId() const override;
-  void setSegmentationCustomData(const std::vector<float> &customData) override;
-  void setInitialPose(const physx::PxTransform &transform) override;
-  inline physx::PxTransform getInitialPose() const override { return mInitialPose; };
-  void update(const physx::PxTransform &transform) override;
-
-  void setVisibility(float visibility) override;
-  void setVisible(bool visible) override;
-  void setRenderMode(uint32_t mode) override;
-  void setShadeFlat(bool shadeFlat) override;
-  bool getShadeFlat() override;
-
-  void destroy() override;
-
-  physx::PxGeometryType::Enum getType() const override { return mType; }
-  physx::PxVec3 getScale() const override;
-
-  /** internal use only */
-  void destroyVisualObjects();
-  /** internal use only */
-  inline std::vector<svulkan2::scene::Object *> const &getVisualObjects() const {
-    return mObjects;
-  }
-
-  std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() override;
-
-  inline SVulkan2Scene *getScene() const { return mParentScene; }
-};
-
-class SVulkan2Scene : public IPxrScene {
-  SVulkan2Renderer *mParentRenderer;
-  std::unique_ptr<svulkan2::scene::Scene> mScene;
-  std::vector<std::unique_ptr<SVulkan2Rigidbody>> mBodies;
-  std::vector<std::unique_ptr<SVulkan2Camera>> mCameras;
-  std::vector<std::unique_ptr<ILight>> mLights;
-  std::string mName;
-
-  std::shared_ptr<svulkan2::resource::SVMesh> mCubeMesh{};
-  std::shared_ptr<svulkan2::resource::SVMesh> mSphereMesh{};
-  std::shared_ptr<svulkan2::resource::SVMesh> mPlaneMesh{};
-
-public:
-  SVulkan2Scene(SVulkan2Renderer *parent, std::string const &name);
-
-  inline std::string getName() { return mName; }
-
-  inline svulkan2::scene::Scene *getScene() { return mScene.get(); };
-
-  // IPxrScene
-  IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
-
-  IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override;
-
-  IPxrRigidbody *addRigidbody(std::shared_ptr<IRenderMesh> mesh, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override;
-
-  IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override;
-
-  IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                              const physx::PxVec3 &color) override;
-
-  IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                              std::vector<physx::PxVec3> const &normals,
-                              std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override;
-
-  IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                              std::vector<physx::PxVec3> const &normals,
-                              std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
-                              const physx::PxVec3 &color) override;
-
-  IPxrRigidbody *cloneRigidbody(SVulkan2Rigidbody *other);
-
-  void removeRigidbody(IPxrRigidbody *body) override;
-
-  ICamera *addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,
-                     std::string const &shaderDir = "") override;
-
-  void removeCamera(ICamera *camera) override;
-  std::vector<ICamera *> getCameras() override;
-  void updateRender() override;
-
-  void destroy() override;
-
-  void setAmbientLight(std::array<float, 3> const &color) override;
-  std::array<float, 3> getAmbientLight() const override;
-  SVulkan2PointLight *addPointLight(std::array<float, 3> const &position,
-                                    std::array<float, 3> const &color, bool enableShadow,
-                                    float shadowNear, float shadowFar,
-                                    uint32_t shadowMapSize) override;
-  SVulkan2DirectionalLight *
-  addDirectionalLight(std::array<float, 3> const &direction, std::array<float, 3> const &color,
-                      bool enableShadow, std::array<float, 3> const &position, float shadowScale,
-                      float shadowNear, float shadowFar, uint32_t shadowMapSize) override;
-  SVulkan2SpotLight *addSpotLight(std::array<float, 3> const &position,
-                                  std::array<float, 3> const &direction, float fovInner,
-                                  float fovOuter, std::array<float, 3> const &color,
-                                  bool enableShadow, float shadowNear, float shadowFar,
-                                  uint32_t shadowMapSize) override;
-  IActiveLight *addActiveLight(physx::PxTransform const &pose, std::array<float, 3> const &color,
-                               float fov, std::string_view texPath, float shadowNear,
-                               float shadowFar, uint32_t shadowMapSize) override;
-
-  void removeLight(ILight *light) override;
-
-  void setEnvironmentMap(std::string_view path) override;
-  void setEnvironmentMap(std::array<std::string_view, 6> paths) override;
-
-  inline SVulkan2Renderer *getParentRenderer() const { return mParentRenderer; }
-};
-
 class SVulkan2Renderer : public IPxrRenderer {
 public:
   std::shared_ptr<svulkan2::core::Context> mContext{};
@@ -174,7 +37,7 @@ public:
   SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
                    uint32_t defaultMipLevels, std::string const &device,
                    std::string const &culling);
-  SVulkan2Scene *createScene(std::string const &name) override;
+  IPxrScene *createScene(std::string const &name) override;
   void removeScene(IPxrScene *scene) override;
 
   std::shared_ptr<IPxrMaterial> createMaterial() override;

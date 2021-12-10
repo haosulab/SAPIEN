@@ -11,6 +11,7 @@
 #include "sapien_actor.h"
 #include "sapien_contact.h"
 #include "sapien_drive.h"
+#include "sapien_entity_particle.h"
 #include "simulation.h"
 #include <algorithm>
 #include <spdlog/spdlog.h>
@@ -729,6 +730,23 @@ void SScene::removeCameraByParent(SActorBase *actor) {
     mRendererScene->removeCamera((*it)->getRendererCamera());
   }
   mCameras.erase(start, mCameras.end());
+}
+
+SEntityParticle *SScene::addParticleEntity(
+    Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>> positions) {
+  auto body = mRendererScene->addPointBody(positions);
+  mParticlesEntities.push_back(std::make_unique<SEntityParticle>(this, body));
+  return mParticlesEntities.back().get();
+}
+
+void SScene::removeParticleEntity(SEntityParticle *entity) {
+  auto start =
+      std::remove_if(mParticlesEntities.begin(), mParticlesEntities.end(),
+                     [=](std::unique_ptr<SEntityParticle> &e) { return e.get() == entity; });
+  for (auto it = start; it != mParticlesEntities.end(); ++it) {
+    mRendererScene->removePointBody(entity->getVisualBody());
+  }
+  mParticlesEntities.erase(start, mParticlesEntities.end());
 }
 
 }; // namespace sapien

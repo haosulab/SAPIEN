@@ -1,5 +1,7 @@
 #include "svulkan2_renderer.h"
 #include "svulkan2_material.h"
+#include "svulkan2_rigidbody.h"
+#include "svulkan2_scene.h"
 #include "svulkan2_shape.h"
 #include <svulkan2/resource/material.h>
 
@@ -63,7 +65,7 @@ SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
   }
 }
 
-SVulkan2Scene *SVulkan2Renderer::createScene(std::string const &name) {
+IPxrScene *SVulkan2Renderer::createScene(std::string const &name) {
   mScenes.push_back(std::make_unique<SVulkan2Scene>(this, name));
   return mScenes.back().get();
 }

@@ -13,6 +13,7 @@
 #include "sapien_actor_base.h"
 #include "sapien_contact.h"
 #include "sapien_drive.h"
+#include "sapien_entity_particle.h"
 #include "sapien_material.h"
 #include "sapien_scene.h"
 #include "simulation.h"
@@ -27,7 +28,10 @@
 #include "articulation/urdf_loader.h"
 #include "event_system/event_system.h"
 
+#include "renderer/svulkan2_pointbody.h"
 #include "renderer/svulkan2_renderer.h"
+#include "renderer/svulkan2_rigidbody.h"
+#include "renderer/svulkan2_scene.h"
 #include "renderer/svulkan2_shape.h"
 #include "renderer/svulkan2_window.h"
 
@@ -41,6 +45,18 @@
 
 using namespace sapien;
 namespace py = pybind11;
+
+static py::capsule wrapDLTensor(DLManagedTensor *tensor) {
+  auto capsule_destructor = [](PyObject *data) {
+    DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
+    if (tensor) {
+      tensor->deleter(const_cast<DLManagedTensor *>(tensor));
+    } else {
+      PyErr_Clear();
+    }
+  };
+  return py::capsule(tensor, "dltensor", capsule_destructor);
+}
 
 py::array_t<float> getFloatImageFromCamera(SCamera &cam, std::string const &name) {
   uint32_t width = cam.getWidth();
@@ -187,6 +203,9 @@ void buildSapien(py::module &m) {
       m, "IPxrRenderer");
   auto PyRenderScene = py::class_<Renderer::IPxrScene>(m, "RenderScene");
   auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
+  auto PyRenderParticleBody = py::class_<Renderer::IPxrPointBody>(m, "RenderParticleBody");
+  auto PyVulkanParticleBody =
+      py::class_<Renderer::SVulkan2PointBody, Renderer::IPxrPointBody>(m, "VulkanParticleBody");
 
   // auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
   // auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
@@ -262,6 +281,7 @@ void buildSapien(py::module &m) {
   auto PySpotLightEntity = py::class_<SSpotLight, SLight>(m, "SpotLightEntity");
   auto PyActiveLightEntity = py::class_<SActiveLight, SLight>(m, "ActiveLightEntity");
 
+  auto PyParticleEntity = py::class_<SEntityParticle, SEntity>(m, "ParticleEntity");
   auto PyCameraEntity = py::class_<SCamera, SEntity>(m, "CameraEntity");
 
   //======== Kuafu ========//
@@ -799,6 +819,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("set_environment_map", &SScene::setEnvironmentMap, py::arg("filename"))
       .def("set_environment_map_from_files", &SScene::setEnvironmentMapFromFiles, py::arg("px"),
            py::arg("nx"), py::arg("py"), py::arg("ny"), py::arg("pz"), py::arg("nz"))
+      .def("add_particle_entity", &SScene::addParticleEntity, py::arg("positions"),
+           py::return_value_policy::reference)
 
       // save
       .def("pack",
@@ -1861,6 +1883,9 @@ Args:
       .def_property_readonly("shadow_near", &SActiveLight::getShadowNear)
       .def_property_readonly("shadow_far", &SActiveLight::getShadowFar);
 
+  PyParticleEntity.def_property_readonly("visual_body",
+                                         [](SEntityParticle &p) { return p.getVisualBody(); });
+
   PyCameraEntity.def_property("parent", &SCamera::setParent, &SCamera::getParent)
       .def("set_parent", &SCamera::setParent, py::arg("parent"), py::arg("keep_pose"))
       .def("set_local_pose", &SCamera::setLocalPose, py::arg("pose"))
@@ -1905,16 +1930,7 @@ Args:
       .def(
           "get_dl_tensor",
           [](SCamera &cam, std::string const &name) {
-            DLManagedTensor *tensor = cam.getRendererCamera()->getDLImage(name);
-            auto capsule_destructor = [](PyObject *data) {
-              DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
-              if (tensor) {
-                tensor->deleter(const_cast<DLManagedTensor *>(tensor));
-              } else {
-                PyErr_Clear();
-              }
-            };
-            return py::capsule(tensor, "dltensor", capsule_destructor);
+            return wrapDLTensor(cam.getRendererCamera()->getDLImage(name));
           },
           "Get raw GPU memory for a render target in the dl format. It can be wrapped into "
           "PyTorch or Tensorflow using their API",
@@ -2123,6 +2139,16 @@ Args:
       // TODO: add mesh from vertices
       .def("remove_mesh", &Renderer::IPxrScene::removeRigidbody, py::arg("mesh"));
 
+  PyRenderParticleBody
+      .def("set_visibility", &Renderer::IPxrPointBody::setVisibility, py::arg("visibility"))
+      .def("set_shading_mode", &Renderer::IPxrPointBody::setRenderMode, py::arg("mode"))
+      .def("set_attribute", &Renderer::IPxrPointBody::setAttribute, py::arg("name"),
+           py::arg("value"));
+
+  PyVulkanParticleBody.def_property_readonly("dl_vertices", [](Renderer::SVulkan2PointBody &b) {
+    return wrapDLTensor(b.getDLVertices());
+  });
+
   PyRenderBody.def_property_readonly("name", &Renderer::IPxrRigidbody::getName)
       .def_property_readonly("visual_id", &Renderer::IPxrRigidbody::getUniqueId)
       .def_property_readonly("actor_id", &Renderer::IPxrRigidbody::getSegmentationId)
@@ -2262,15 +2288,6 @@ Args:
         geom.setUVs(std::vector(uvs.data(), uvs.data() + uvs.size()));
       });
   PyVulkanRenderMesh.def_property_readonly("dl_vertices", [](Renderer::SVulkan2Mesh &mesh) {
-    DLManagedTensor *tensor = mesh.getDLVertices();
-    auto capsule_destructor = [](PyObject *data) {
-      DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
-      if (tensor) {
-        tensor->deleter(const_cast<DLManagedTensor *>(tensor));
-      } else {
-        PyErr_Clear();
-      }
-    };
-    return py::capsule(tensor, "dltensor", capsule_destructor);
+    return wrapDLTensor(mesh.getDLVertices());
   });
 }

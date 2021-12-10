@@ -2,6 +2,7 @@
 #include <PxPhysicsAPI.h>
 #include <array>
 #include <dlpack/dlpack.h>
+#include <eigen3/Eigen/Eigen>
 #include <foundation/PxTransform.h>
 #include <functional>
 #include <memory>
@@ -349,6 +350,20 @@ public:
   virtual float getShadowFar() const = 0;
 };
 
+class IPxrPointBody {
+public:
+  virtual void setName(std::string const &name) = 0;
+  virtual std::string getName() const = 0;
+  virtual void setRenderMode(uint32_t mode) = 0;
+  virtual void setVisibility(float visibility) = 0;
+
+  virtual void setAttribute(
+      std::string_view name,
+      Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>) = 0;
+
+  virtual ~IPxrPointBody() = default;
+};
+
 class IPxrRigidbody {
 public:
   virtual void setName(std::string const &name) = 0;
@@ -437,7 +452,15 @@ public:
     return addRigidbody(vertices, normals, indices, scale, mat);
   }
 
+  virtual IPxrPointBody *
+  addPointBody(Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>> positions) {
+    throw std::runtime_error("PointBody is not implemented in this renderer");
+  };
+
   virtual void removeRigidbody(IPxrRigidbody *body) = 0;
+  virtual void removePointBody(IPxrPointBody *body) {
+    throw std::runtime_error("PointBody is not implemented in this renderer");
+  };
 
   virtual ICamera *addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,
                              std::string const &shaderDir = "") = 0;

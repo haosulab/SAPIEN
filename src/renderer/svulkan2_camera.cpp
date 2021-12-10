@@ -10,7 +10,7 @@ SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, floa
   auto context = mScene->getParentRenderer()->mContext;
   auto config = std::make_shared<svulkan2::RendererConfig>();
   config->culling = mScene->getParentRenderer()->mCullMode;
-  config->colorFormat = vk::Format::eR32G32B32A32Sfloat;
+  config->colorFormat4 = vk::Format::eR32G32B32A32Sfloat;
   config->depthFormat = vk::Format::eD32Sfloat;
   config->shaderDir = shaderDir;
 

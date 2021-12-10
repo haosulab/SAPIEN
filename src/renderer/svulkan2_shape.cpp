@@ -3,6 +3,7 @@
 #include "svulkan2/resource/shape.h"
 #include "svulkan2_material.h"
 #include "svulkan2_renderer.h"
+#include "svulkan2_rigidbody.h"
 
 namespace sapien {
 namespace Renderer {
@@ -33,12 +34,6 @@ void SVulkan2Mesh::setBitangents(std::vector<float> const &bitangents) {
 }
 void SVulkan2Mesh::setIndices(std::vector<uint32_t> const &indices) { mMesh->setIndices(indices); }
 
-// // DLPack deleter
-// static void deleter(DLManagedTensor *self) {
-//   delete[] self->dl_tensor.shape;
-//   delete static_cast<std::shared_ptr<svulkan2::resource::SVMesh> *>(self->manager_ctx);
-// }
-
 DLManagedTensor *SVulkan2Mesh::getDLVertices() {
   auto &buffer = mMesh->getVertexBuffer();
   void *ptr = buffer.getCudaPtr();
@@ -49,22 +44,6 @@ DLManagedTensor *SVulkan2Mesh::getDLVertices() {
 
   return dl_wrapper<svulkan2::resource::SVMesh>(mMesh, ptr, id, {vertexCount, vertexSize / 4},
                                                 {DLDataTypeCode::kDLFloat, 32, 1});
-  // DLManagedTensor *tensor = new DLManagedTensor();
-  // auto container = new std::shared_ptr<svulkan2::resource::SVMesh>(mMesh);
-  // int64_t *shape = new int64_t[2];
-  // shape[0] = vertexCount;
-  // shape[1] = vertexSize / 4;
-
-  // tensor->dl_tensor.data = ptr;
-  // tensor->dl_tensor.device = {DLDeviceType::kDLGPU, id};
-  // tensor->dl_tensor.ndim = 2;
-  // tensor->dl_tensor.dtype = {DLDataTypeCode::kDLFloat, 32, 1};
-  // tensor->dl_tensor.shape = shape;
-  // tensor->dl_tensor.strides = nullptr;
-  // tensor->dl_tensor.byte_offset = 0;
-
-  // tensor->manager_ctx = container;
-  // tensor->deleter = deleter;
 }
 
 std::shared_ptr<IRenderMesh> SVulkan2RenderShape::getGeometry() const {

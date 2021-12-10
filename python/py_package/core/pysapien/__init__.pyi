@@ -47,6 +47,7 @@ __all__ = [
     "LinkBase",
     "LinkBuilder",
     "NonconvexMeshGeometry",
+    "ParticleEntity",
     "PhysicalMaterial",
     "PinocchioModel",
     "PlaneGeometry",
@@ -55,6 +56,7 @@ __all__ = [
     "RenderBody",
     "RenderMaterial",
     "RenderMesh",
+    "RenderParticleBody",
     "RenderScene",
     "RenderShape",
     "RenderTexture",
@@ -67,6 +69,7 @@ __all__ = [
     "Trigger",
     "URDFLoader",
     "VisualRecord",
+    "VulkanParticleBody",
     "VulkanRenderMesh",
     "VulkanRenderer",
     "VulkanRigidbody",
@@ -994,6 +997,13 @@ class NonconvexMeshGeometry(CollisionGeometry):
         :type: numpy.ndarray[numpy.float32]
         """
     pass
+class ParticleEntity(Entity):
+    @property
+    def visual_body(self) -> RenderParticleBody:
+        """
+        :type: RenderParticleBody
+        """
+    pass
 class PhysicalMaterial():
     def get_dynamic_friction(self) -> float: ...
     def get_restitution(self) -> float: ...
@@ -1369,6 +1379,11 @@ class RenderMesh():
         :type: numpy.ndarray[numpy.float32]
         """
     pass
+class RenderParticleBody():
+    def set_attribute(self, name: str, value: numpy.ndarray[numpy.float32, _Shape[m, n]]) -> None: ...
+    def set_shading_mode(self, mode: int) -> None: ...
+    def set_visibility(self, visibility: float) -> None: ...
+    pass
 class RenderScene():
     def add_mesh_from_file(self, mesh_file: str, scale: numpy.ndarray[numpy.float32]) -> RenderBody: ...
     def add_primitive_mesh(self, type: str, scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), material: RenderMaterial = None) -> RenderBody: ...
@@ -1443,6 +1458,7 @@ class Scene():
     def add_mounted_camera(self, name: str, actor: ActorBase, pose: Pose, width: int, height: int, fovx: float, fovy: float, near: float, far: float) -> CameraEntity: ...
     @typing.overload
     def add_mounted_camera(self, name: str, actor: ActorBase, pose: Pose, width: int, height: int, fovy: float, near: float, far: float) -> CameraEntity: ...
+    def add_particle_entity(self, positions: numpy.ndarray[numpy.float32, _Shape[m, 3]]) -> ParticleEntity: ...
     def add_point_light(self, position: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, near: float = 0.1, far: float = 10, shadow_map_size: int = 2048) -> PointLightEntity: ...
     def add_spot_light(self, position: numpy.ndarray[numpy.float32], direction: numpy.ndarray[numpy.float32], inner_fov: float, outer_fov: float, color: numpy.ndarray[numpy.float32], shadow: bool = False, near: float = 0.10000000149011612, far: float = 10.0, shadow_map_size: int = 2048) -> SpotLightEntity: ...
     def create_actor_builder(self) -> ActorBuilder: ...
@@ -1846,6 +1862,13 @@ class VisualRecord():
     def type(self) -> str:
         """
         :type: str
+        """
+    pass
+class VulkanParticleBody(RenderParticleBody):
+    @property
+    def dl_vertices(self) -> capsule:
+        """
+        :type: capsule
         """
     pass
 class VulkanRenderMesh(RenderMesh):

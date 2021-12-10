@@ -1,3 +1,4 @@
+#include "svulkan2_rigidbody.h"
 #include "svulkan2_renderer.h"
 #include "svulkan2_shape.h"
 #include <iostream>

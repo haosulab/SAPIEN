@@ -36,6 +36,7 @@ class SActorStatic;
 class SLink;
 class SLinkBase;
 class SActorBase;
+class SEntityParticle;
 class SArticulation;
 class SKArticulation;
 class Simulation;
@@ -135,6 +136,12 @@ public:
   std::shared_ptr<ArticulationBuilder> createArticulationBuilder();
   std::unique_ptr<URDF::URDFLoader> createURDFLoader();
 
+  /** create a point-cloud based visual entity */
+  SEntityParticle *addParticleEntity(
+      Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>> positions);
+
+  void removeParticleEntity(SEntityParticle *entity);
+
   /** Mark an actor in a destroyed state
    *  Actors in destroyed state do not emit events
    *  The actors are truly removed at the end of this current frame
@@ -190,6 +197,7 @@ private:
   std::vector<std::unique_ptr<SActorBase>> mActors; // manages all actors
   std::vector<std::unique_ptr<SArticulation>> mArticulations;
   std::vector<std::unique_ptr<SKArticulation>> mKinematicArticulations;
+  std::vector<std::unique_ptr<SEntityParticle>> mParticlesEntities;
 
   std::vector<std::unique_ptr<SLight>> mLights;
 
@@ -204,10 +212,7 @@ public:
                      float near = 0.1, float far = 100);
   void removeCamera(SCamera *cam);
 
-  // SCamera *findMountedCamera(std::string const &name, SActorBase const *actor = nullptr);
-
   std::vector<SCamera *> getCameras();
-  // std::vector<SActorBase *> getMountedActors();
 
   std::vector<SActorBase *> getAllActors() const;
   std::vector<SArticulationBase *> getAllArticulations() const;

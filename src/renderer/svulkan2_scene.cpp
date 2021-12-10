@@ -1,4 +1,6 @@
+#include "svulkan2_scene.h"
 #include "svulkan2_renderer.h"
+#include "svulkan2_rigidbody.h"
 #include "svulkan2_shape.h"
 
 namespace sapien {
@@ -302,11 +304,31 @@ IPxrRigidbody *SVulkan2Scene::cloneRigidbody(SVulkan2Rigidbody *other) {
   return body;
 }
 
+IPxrPointBody *SVulkan2Scene::addPointBody(
+    Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>> positions) {
+  auto pointset = std::make_shared<svulkan2::resource::SVPointSet>();
+  pointset->setVertexAttribute(
+      "position", std::vector<float>(positions.data(), positions.data() + positions.size()));
+  auto &obj = mScene->addPointObject(pointset);
+  mPointBodies.push_back(std::make_unique<SVulkan2PointBody>(this, &obj));
+  return mPointBodies.back().get();
+}
+
 void SVulkan2Scene::removeRigidbody(IPxrRigidbody *body) {
   for (auto it = mBodies.begin(); it != mBodies.end(); ++it) {
     if (it->get() == body) {
       it->get()->destroyVisualObjects();
       mBodies.erase(it);
+      return;
+    }
+  }
+}
+
+void SVulkan2Scene::removePointBody(IPxrPointBody *body) {
+  for (auto it = mPointBodies.begin(); it != mPointBodies.end(); ++it) {
+    if (it->get() == body) {
+      it->get()->destroyVisualObject();
+      mPointBodies.erase(it);
       return;
     }
   }
