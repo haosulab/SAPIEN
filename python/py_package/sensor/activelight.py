@@ -35,7 +35,9 @@ class ActiveLightSensor(SensorEntity):
                  light_pattern: Optional[str] = None,
                  max_depth: float = 8.0,
                  min_depth: float = 0.3,
-                 ir_ambient_strength: float = 0.002):
+                 ir_ambient_strength: float = 0.002,
+                 ir_light_dim_factor : float = 0.05,
+                 ):
         """
 
         :param sensor_name: Name of the sensor
@@ -52,6 +54,7 @@ class ActiveLightSensor(SensorEntity):
         :param trans_pose_r:
         :param light_pattern: Path to active light pattern file.
                               Use rgb modality if set to None.
+        :param light_dim_factor: normal light strength set to ir_light_dim_factor * original
         """
 
         super().__init__()
@@ -90,6 +93,7 @@ class ActiveLightSensor(SensorEntity):
             tex_path=self.light_pattern,
         )
         self.ir_ambient_strength = ir_ambient_strength
+        self.ir_light_dim_factor = ir_light_dim_factor
 
         self.set_pose(Pose())
 
@@ -239,7 +243,7 @@ class ActiveLightSensor(SensorEntity):
             self._light_d = {}
             for l in self.scene.get_all_lights():
                 self._light_d[l] = l.color
-                l.set_color([0, 0, 0])
+                l.set_color(l.color * self.ir_light_dim_factor)
 
             self._light_a = self.scene.ambient_light
             self.scene.set_ambient_light([self.ir_ambient_strength, 0, 0])
