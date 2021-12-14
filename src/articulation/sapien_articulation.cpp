@@ -10,7 +10,6 @@
   {                                                                                               \
     if ((v).size() != dof()) {                                                                    \
       throw std::runtime_error("Input vector size does not match DOF of articulation");           \
-      return;                                                                                     \
     }                                                                                             \
   }
 
@@ -310,10 +309,26 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
   return I2E(passiveForce);
 }
 
+std::vector<physx::PxReal>
+SArticulation::computeGeneralizedExternalForce(std::vector<PxVec3> const &force,
+                                               std::vector<PxVec3> const &torque) {
+  if (mPxArticulation->getNbLinks() != force.size() ||
+      mPxArticulation->getNbLinks() != torque.size()) {
+    throw std::runtime_error("Input force and torque does not match number of links.");
+  }
+  mPxArticulation->commonInit();
+  for (uint32_t i = 0; i < force.size(); ++i) {
+    mCache->externalForces[i].force = force[i];
+    mCache->externalForces[i].torque = torque[i];
+  }
+  mPxArticulation->computeGeneralizedExternalForce(*mCache);
+  std::vector<physx::PxReal> externalForce(mCache->jointForce, mCache->jointForce + dof());
+  return I2E(externalForce);
+}
+
 std::vector<physx::PxReal> SArticulation::computeForwardDynamics(const std::vector<PxReal> &qf) {
   if (qf.size() != dof()) {
     throw std::runtime_error("Input vector size does not match DOF of articulation");
-    std::vector(dof(), 0);
   }
 
   std::vector<PxReal> internalQf = E2I(qf);
@@ -331,7 +346,6 @@ std::vector<physx::PxReal> SArticulation::computeForwardDynamics(const std::vect
 std::vector<physx::PxReal> SArticulation::computeInverseDynamics(const std::vector<PxReal> &qacc) {
   if (qacc.size() != dof()) {
     throw std::runtime_error("Input vector size does not match DOF of articulation");
-    std::vector(dof(), 0);
   }
 
   std::vector<PxReal> internalQacc = E2I(qacc);
@@ -496,7 +510,6 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
     throw std::runtime_error(
         "Failed to unpack articulation data: " + std::to_string(ndof * 4 + nlinks * 12 + 19) +
         " numbers expected but " + std::to_string(data.size()) + " provided");
-    return;
   }
 
   mPxArticulation->zeroCache(*mCache);

@@ -1231,6 +1231,24 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("gravity") = true, py::arg("coriolis_and_centrifugal") = true,
           py::arg("external") = true)
+
+      .def(
+          "compute_generalized_external_force",
+          [](SArticulation &a, Eigen::Matrix<PxReal, Eigen::Dynamic, 3, Eigen::RowMajor> f,
+             Eigen::Matrix<PxReal, Eigen::Dynamic, 3, Eigen::RowMajor> t) {
+            std::vector<physx::PxVec3> force;
+            std::vector<physx::PxVec3> torque;
+            for (uint32_t i = 0; i < f.rows(); ++i) {
+              force.push_back(physx::PxVec3{f(i, 0), f(i, 1), f(i, 2)});
+            }
+            for (uint32_t i = 0; i < t.rows(); ++i) {
+              torque.push_back(physx::PxVec3{t(i, 0), t(i, 1), t(i, 2)});
+            }
+            auto qf = a.computeGeneralizedExternalForce(force, torque);
+            return py::array_t<PxReal>(qf.size(), qf.data());
+          },
+          py::arg("forces"), py::arg("torques"))
+
       .def("compute_inverse_dynamics",
            [](SArticulation &a, const py::array_t<PxReal> &arr) {
              assert(arr.size() == a.dof());

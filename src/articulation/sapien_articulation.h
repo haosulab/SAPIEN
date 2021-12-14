@@ -77,6 +77,10 @@ public:
   std::vector<physx::PxReal> computePassiveForce(bool gravity = true,
                                                  bool coriolisAndCentrifugal = true,
                                                  bool external = true);
+
+  std::vector<physx::PxReal> computeGeneralizedExternalForce(std::vector<PxVec3> const &force,
+                                                             std::vector<PxVec3> const &torque);
+
   std::vector<physx::PxReal> computeInverseDynamics(const std::vector<PxReal> &qacc);
   std::vector<physx::PxReal> computeForwardDynamics(const std::vector<PxReal> &qf);
   Matrix<PxReal, Dynamic, Dynamic, RowMajor> computeManipulatorInertiaMatrix();
