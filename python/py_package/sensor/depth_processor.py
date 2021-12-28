@@ -16,11 +16,6 @@ from typing import Optional, Tuple
 
 import numpy as np
 try:
-    import open3d as o3d
-except ImportError:
-    print('Please install open3d with `pip3 install open3d`')
-    raise
-try:
     import scipy.signal
 except ImportError:
     print('Please install scipy with `pip3 install scipy`')
@@ -235,7 +230,7 @@ def calc_rectified_stereo_pair(
 def calc_depth_and_pointcloud(
         disparity: np.ndarray, mask: np.ndarray, q: np.ndarray,
         no_pointcloud: bool = False
-) -> Tuple[np.ndarray, o3d.geometry.PointCloud]:
+) -> Tuple[np.ndarray, object]:  # object is o3d.geometry.PointCloud
     """
     Calculate depth and pointcloud.
 
@@ -246,6 +241,12 @@ def calc_depth_and_pointcloud(
     :return depth: Depth
     :return pointcloud: Pointcloud
     """
+    try:
+        import open3d as o3d
+    except ImportError:
+        print('Please install open3d with `pip3 install open3d`')
+        raise
+
     _3d_image = cv2.reprojectImageTo3D(disparity, q)
     depth = _3d_image[..., 2]
     depth[~mask] = 0
