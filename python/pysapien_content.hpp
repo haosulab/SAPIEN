@@ -1808,6 +1808,18 @@ Args:
             return new Renderer::SVulkan2Window(renderer, width, height, shaderDir);
           },
           py::arg("width") = 800, py::arg("height") = 600, py::arg("shader_dir") = "")
+      .def(
+          "create_ktx_environment_map",
+          [](Renderer::SVulkan2Renderer &renderer, std::string px, std::string nx, std::string py,
+             std::string ny, std::string pz, std::string nz, std::string out) {
+            auto cubemap = renderer.mContext->getResourceManager()->CreateCubemapFromFiles(
+                {px, nx, py, ny, pz, nz}, 5);
+            cubemap->load();
+            cubemap->uploadToDevice();
+            cubemap->exportKTX(out);
+          },
+          py::arg("px"), py::arg("nx"), py::arg("py"), py::arg("ny"), py::arg("pz"), py::arg("nz"),
+          py::arg("out"))
       .def_property_readonly(
           "_internal_context",
           [](Renderer::SVulkan2Renderer &renderer) { return renderer.mContext.get(); },
