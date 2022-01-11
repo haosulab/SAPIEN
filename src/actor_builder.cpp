@@ -134,7 +134,10 @@ void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec
                                             std::shared_ptr<Renderer::IPxrMaterial> material,
                                             std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
-  if (!material && renderer) {
+  if (!renderer) {
+    return;
+  }
+  if (!material) {
     material = mScene->getSimulation()->getRenderer()->createMaterial();
   }
   VisualRecord r;
@@ -150,9 +153,11 @@ void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec
 void ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size, const PxVec3 &color,
                                 std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
-  auto mat = renderer ? renderer->createMaterial() : nullptr;
-  mat->setBaseColor({color.x, color.y, color.z, 1.f});
-  addBoxVisualWithMaterial(pose, size, mat, name);
+  if (renderer) {
+    auto mat = renderer->createMaterial();
+    mat->setBaseColor({color.x, color.y, color.z, 1.f});
+    addBoxVisualWithMaterial(pose, size, mat, name);
+  }
 }
 
 void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal radius,
@@ -160,7 +165,10 @@ void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal 
                                                 std::shared_ptr<Renderer::IPxrMaterial> material,
                                                 std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
-  if (!material && renderer) {
+  if (!renderer) {
+    return;
+  }
+  if (!material) {
     material = mScene->getSimulation()->getRenderer()->createMaterial();
   }
   VisualRecord r;
@@ -177,16 +185,18 @@ void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal 
 void ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal halfLength,
                                     const PxVec3 &color, std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
-  auto mat = renderer ? renderer->createMaterial() : nullptr;
-  mat->setBaseColor({color.x, color.y, color.z, 1.f});
-  addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
+  if (renderer) {
+    auto mat = renderer ? renderer->createMaterial() : nullptr;
+    mat->setBaseColor({color.x, color.y, color.z, 1.f});
+    addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
+  }
 }
 
 void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal radius,
                                                std::shared_ptr<Renderer::IPxrMaterial> material,
                                                std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
-  if (!material && renderer) {
+  if (!material) {
     material = mScene->getSimulation()->getRenderer()->createMaterial();
   }
   VisualRecord r;
@@ -202,9 +212,11 @@ void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal r
 void ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius, const PxVec3 &color,
                                    std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
-  auto mat = renderer ? renderer->createMaterial() : nullptr;
-  mat->setBaseColor({color.x, color.y, color.z, 1.f});
-  addSphereVisualWithMaterial(pose, radius, mat, name);
+  if (renderer) {
+    auto mat = renderer ? renderer->createMaterial() : nullptr;
+    mat->setBaseColor({color.x, color.y, color.z, 1.f});
+    addSphereVisualWithMaterial(pose, radius, mat, name);
+  }
 }
 
 void ActorBuilder::addVisualFromFile(const std::string &filename, const PxTransform &pose,
@@ -227,7 +239,7 @@ void ActorBuilder::addVisualFromMeshWithMaterial(std::shared_ptr<Renderer::IRend
                                                  std::shared_ptr<Renderer::IPxrMaterial> material,
                                                  std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
-  if (!material && renderer) {
+  if (!material) {
     material = mScene->getSimulation()->getRenderer()->createMaterial();
   }
   VisualRecord r;
