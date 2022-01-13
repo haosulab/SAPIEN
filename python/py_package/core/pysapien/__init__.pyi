@@ -1895,6 +1895,10 @@ class VulkanRenderer(IPxrRenderer):
             'pci:x', where x is a hexadecimal number, the renderer picks the device with given PCI bus number
             '', if present is requested, first try to find cuda+present, next present only, and then turn off present. If present is turned off, first try to find cuda, next any graphics device.
         """
+    def _release_gpu_memory_unsafe(self) -> None: 
+        """
+        A very unsafe way to release cached gpu (but not CPU) resources. It MUST be called when no rendering is running, and all cameras and windows become invalid after calling this function.
+        """
     @staticmethod
     def _set_camera_shader_dir(shader_dir: str) -> None: ...
     @staticmethod
