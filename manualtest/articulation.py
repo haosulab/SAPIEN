@@ -5,7 +5,7 @@ from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector
 
 import sapien.core.pysapien.renderer as R
-from sapien.asset import download_partnet_mobility
+from sapien.asset import download_partnet_mobility, create_dome_envmap
 
 from controller import Viewer
 
@@ -214,7 +214,7 @@ def main():
     scene.add_ground(0)
     scene.set_timestep(1 / 240)
 
-    scene.set_environment_map("env.ktx")
+    scene.set_environment_map(create_dome_envmap())
 
     # sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/default_camera")
 
@@ -259,6 +259,26 @@ def main():
         j.set_drive_property(1000, 200)
     robot.set_qpos([4.71, 2.84, 0.0, 0.75, 4.62, 4.48, 4.88, 0, 0])
     robot.set_drive_target([4.71, 2.84, 0.0, 0.75, 4.62, 4.48, 4.88, 0, 0])
+
+    # import tempfile
+    # with tempfile.TemporaryDirectory(prefix="sapien") as d:
+    #     import os
+    #     import mplib
+    #     link_names = [link.get_name() for link in robot.get_links()]
+    #     joint_names = [joint.get_name() for joint in robot.get_active_joints()]
+    #     urdf = robot.export_urdf(d)
+    #     urdf_file = os.path.join(d, 'robot.urdf')
+    #     with open(urdf_file, 'w') as f:
+    #         f.write(urdf)
+    #     planner = mplib.Planner(
+    #         urdf_file,
+    #         link_names,
+    #         joint_names,
+    #         "j2s7s300_end_effector",
+    #         np.ones(7) * 10,
+    #         np.ones(7) * 10,
+    #     )
+    #     import ipdb; ipdb.set_trace()
 
     viewer.set_scene(scene)
     viewer.set_camera_xyz(-4, 0, 0.3)
@@ -329,7 +349,6 @@ def main():
                 shape.mesh.set_vertices(vertices * 0.99)
                 print(shape.mesh.vertices.max())
         print()
-
 
     viewer.close()
 
