@@ -324,7 +324,8 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
 
 ArticulationBuilder::ArticulationBuilder(SScene *scene) : mScene(scene) {}
 
-std::shared_ptr<LinkBuilder> ArticulationBuilder::createLinkBuilder(std::shared_ptr<LinkBuilder> parent) {
+std::shared_ptr<LinkBuilder>
+ArticulationBuilder::createLinkBuilder(std::shared_ptr<LinkBuilder> parent) {
   return createLinkBuilder(parent ? parent->mIndex : -1);
 }
 
@@ -467,6 +468,8 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
   result->mPxArticulation->setSleepThreshold(mScene->mDefaultSleepThreshold);
   result->mPxArticulation->setSolverIterationCounts(mScene->mDefaultSolverIterations,
                                                     mScene->mDefaultSolverVelocityIterations);
+
+  result->mPxArticulation->setArticulationFlag(PxArticulationFlag::eDRIVE_LIMITS_ARE_FORCES, true);
 
   // make sure qvel is 0
   std::vector<PxReal> qvel(result->dof(), 0);
