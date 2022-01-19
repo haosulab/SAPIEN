@@ -167,6 +167,12 @@ py::array_t<PxReal> mat42array(glm::mat4 const &mat) {
   return py::array_t<PxReal>({4, 4}, arr);
 }
 
+py::array_t<PxReal> mat32array(glm::mat3 const &mat) {
+  float arr[] = {mat[0][0], mat[1][0], mat[2][0], mat[0][1], mat[1][1],
+                 mat[2][1], mat[0][2], mat[1][2], mat[2][2]};
+  return py::array_t<PxReal>({3, 3}, arr);
+}
+
 #define DEPRECATE_WARN(OLD, NEW)                                                                  \
   PyErr_WarnEx(PyExc_DeprecationWarning, #OLD " is deprecated, use " #NEW " instead.", 1)
 
@@ -1976,7 +1982,15 @@ Args:
           py::arg("texture_name"))
       .def(
           "get_camera_matrix", [](SCamera &c) { return mat42array(c.getCameraMatrix()); },
-          "Get intrinsic camera matrix in OpenCV format.")
+          "Get 4x4 intrinsic camera matrix in OpenCV format.")
+
+      .def(
+          "get_intrinsic_matrix", [](SCamera &c) { return mat32array(c.getIntrinsicMatrix()); },
+          "Get 3x3 intrinsic camera matrix in OpenCV format.")
+      .def(
+          "get_extrinsic_matrix", [](SCamera &c) { return mat42array(c.getExtrinsicMatrix()); },
+          "Get 4x4 extrinsic camera matrix in OpenCV format.")
+
       .def(
           "get_model_matrix", [](SCamera &c) { return mat42array(c.getModelMatrix()); },
           "Get model matrix (inverse of extrinsic matrix) used in rendering (Y up, Z back)")

@@ -323,14 +323,22 @@ class CameraEntity(Entity):
     def get_albedo_rgba(self) -> numpy.ndarray[numpy.float32]: ...
     def get_camera_matrix(self) -> numpy.ndarray[numpy.float32]: 
         """
-        Get intrinsic camera matrix in OpenCV format.
+        Get 4x4 intrinsic camera matrix in OpenCV format.
         """
     def get_color_rgba(self) -> numpy.ndarray[numpy.float32]: ...
     def get_dl_tensor(self, texture_name: str) -> capsule: 
         """
         Get raw GPU memory for a render target in the dl format. It can be wrapped into PyTorch or Tensorflow using their API
         """
+    def get_extrinsic_matrix(self) -> numpy.ndarray[numpy.float32]: 
+        """
+        Get 4x4 extrinsic camera matrix in OpenCV format.
+        """
     def get_float_texture(self, texture_name: str) -> numpy.ndarray[numpy.float32]: ...
+    def get_intrinsic_matrix(self) -> numpy.ndarray[numpy.float32]: 
+        """
+        Get 3x3 intrinsic camera matrix in OpenCV format.
+        """
     def get_model_matrix(self) -> numpy.ndarray[numpy.float32]: 
         """
         Get model matrix (inverse of extrinsic matrix) used in rendering (Y up, Z back)

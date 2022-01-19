@@ -108,7 +108,6 @@ PxTransform SCamera::getParentPose() const {
   return mParent ? mParent->getPose() : PxTransform(PxIdentity);
 }
 
-// TODO: test
 glm::mat4 SCamera::getProjectionMatrix() const {
   glm::mat4 mat(1.f);
   float fx = getFocalLengthX();
@@ -133,8 +132,8 @@ glm::mat4 SCamera::getProjectionMatrix() const {
   return mat;
 }
 
-// TODO: test
 glm::mat4 SCamera::getCameraMatrix() const {
+  spdlog::get("SAPIEN")->warn("getCameraMatrix is deprecated, use getIntrinsicMatrix instead");
   auto matrix = glm::mat4(1.f);
   matrix[0][0] = getFocalLengthX();
   matrix[1][1] = getFocalLengthY();
@@ -144,7 +143,25 @@ glm::mat4 SCamera::getCameraMatrix() const {
   return matrix;
 }
 
-// TODO: test
+glm::mat3 SCamera::getIntrinsicMatrix() const {
+  auto matrix = glm::mat3(1.f);
+  matrix[0][0] = getFocalLengthX();
+  matrix[1][1] = getFocalLengthY();
+  matrix[2][0] = getPrincipalPointX();
+  matrix[2][1] = getPrincipalPointY();
+  matrix[1][0] = getSkew();
+  return matrix;
+}
+
+glm::mat4 SCamera::getExtrinsicMatrix() const {
+  auto pose = getPose().getInverse(); // world2ros
+  glm::quat q(pose.q.w, pose.q.x, pose.q.y, pose.q.z);
+  glm::vec3 p(pose.p.x, pose.p.y, pose.p.z);
+  auto world2ros = glm::translate(glm::mat4(1.0f), p) * glm::toMat4(q);
+  const glm::mat4 ros2opencv{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1};
+  return ros2opencv * world2ros;
+}
+
 glm::mat4 SCamera::getModelMatrix() const {
   auto pose = mCamera->getPose();
   glm::quat q(pose.q.w, pose.q.x, pose.q.y, pose.q.z);

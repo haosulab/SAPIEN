@@ -3,6 +3,21 @@ import sapien.core as sapien
 import numpy as np
 
 
+def sapien_pose_to_opencv_extrinsic(sapien_pose_matrix: np.ndarray) -> np.ndarray:
+    sapien2opencv = np.array(
+        [
+            [0.0, -1.0, 0.0, 0.0],
+            [0.0, 0.0, -1.0, 0.0],
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ],
+        dtype=np.float32,
+    )
+    ex = sapien2opencv @ np.linalg.inv(sapien_pose_matrix)  # world -> camera
+
+    return ex
+
+
 class TestCamera(unittest.TestCase):
     def test_free_camera(self):
         engine = sapien.Engine()
@@ -56,6 +71,12 @@ class TestCamera(unittest.TestCase):
                 np.array(
                     [[fx, skew, cx, 0], [0, fy, cy, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
                 ),
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                cam.get_intrinsic_matrix(),
+                np.array([[fx, skew, cx], [0, fy, cy], [0, 0, 1]]),
             )
         )
         self.assertTrue(
@@ -115,6 +136,7 @@ class TestCamera(unittest.TestCase):
         scene.update_render()
         model = cam.get_model_matrix()
         proj = cam.get_projection_matrix()
+        extrinsic = cam.get_extrinsic_matrix()
         gt_model = [
             [-0.25517476, 0.01123044, 0.9668297, 0.4855722],
             [-0.41660327, -0.90363145, -0.0994575, 1.0099831],
@@ -127,5 +149,13 @@ class TestCamera(unittest.TestCase):
             [0.0, 0.0, -1.004003, -0.04216813],
             [0.0, 0.0, -1.0, 0.0],
         ]
+        gt_extrinsic = [
+            [-0.25517473, -0.41660324, 0.8725409, 0.49105754],
+            [-0.0112305, 0.90363157, 0.42816344, -0.9335064],
+            [-0.96682966, 0.09945743, -0.2352626, 0.38347024],
+            [0.0, 0.0, 0.0, 1.0],
+        ]
+
         self.assertTrue(np.allclose(model, gt_model))
         self.assertTrue(np.allclose(proj, gt_proj))
+        self.assertTrue(np.allclose(extrinsic, gt_extrinsic))

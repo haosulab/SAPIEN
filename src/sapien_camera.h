@@ -48,6 +48,9 @@ public:
   glm::mat4 getCameraMatrix() const;
   glm::mat4 getModelMatrix() const;
 
+  glm::mat3 getIntrinsicMatrix() const;
+  glm::mat4 getExtrinsicMatrix() const;
+
   void takePicture();
   Renderer::ICamera *getRendererCamera() const { return mCamera; }
 
