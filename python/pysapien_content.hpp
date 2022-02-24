@@ -372,7 +372,19 @@ void buildSapien(py::module &m) {
              float z = um(1, 0) - um(0, 1) * over_w;
              t.q = {x, y, z, w};
            })
-      .def(py::self * py::self);
+      .def(py::self * py::self)
+      .def(py::pickle(
+          [](const PxTransform &p) {
+            return py::make_tuple(p.p.x, p.p.y, p.p.z, p.q.x, p.q.y, p.q.z, p.q.w);
+          },
+          [](py::tuple t) {
+            if (t.size() != 7) {
+              throw std::runtime_error("Invalid state!");
+            }
+            return PxTransform(
+                {t[0].cast<float>(), t[1].cast<float>(), t[2].cast<float>()},
+                {t[3].cast<float>(), t[4].cast<float>(), t[5].cast<float>(), t[6].cast<float>()});
+          }));
 
   //======== Geometry ========//
 
