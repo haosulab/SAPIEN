@@ -58,6 +58,8 @@ struct LightBuffer {
   mat4 viewMatrixInverse;
   mat4 projectionMatrix;
   mat4 projectionMatrixInverse;
+  int width;
+  int height;
 };
 
 layout(set = 3, binding = 1) uniform ShadowBuffer {
@@ -196,7 +198,7 @@ void main() {
     vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.texturedLights[i].direction.xyz;
     vec3 l = pos - csPosition.xyz;
 
-    float bias = max(0.05 * (1.0 - length(l)), 0.005);
+    float bias = 0;
 
     vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz), 1);
     ssPosition.z += bias;

@@ -25,6 +25,8 @@ struct LightBuffer {
   mat4 viewMatrixInverse;
   mat4 projectionMatrix;
   mat4 projectionMatrixInverse;
+  int width;
+  int height;
 };
 
 layout(set = 0, binding = 1) uniform ShadowBuffer {
@@ -117,10 +119,9 @@ void main() {
 
     vec3 l = pos - csPosition.xyz;
     vec3 wsl = vec3(cameraBuffer.viewMatrixInverse * vec4(l, 0));
-    float bias = max(0.05 * (1.0 - 1 / length(wsl)), 0.005);
 
     vec3 v = abs(wsl);
-    vec4 p = shadowProj * vec4(0, 0, -max(max(v.x, v.y), v.z) + bias, 1);
+    vec4 p = shadowProj * vec4(0, 0, -max(max(v.x, v.y), v.z), 1);
     float pixelDepth = p.z / p.w;
     float shadowDepth = texture(samplerPointLightDepths[i], -wsl).x;
 
@@ -144,10 +145,8 @@ void main() {
     mat4 shadowProj = shadowBuffer.directionalLightBuffers[i].projectionMatrix;
 
     vec3 lightDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.directionalLights[i].direction.xyz;
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
 
     vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz), 1);
-    ssPosition.z += bias;
     vec4 shadowMapCoord = shadowProj * ssPosition;
     shadowMapCoord /= shadowMapCoord.w;
     shadowMapCoord.xy = shadowMapCoord.xy * 0.5 + 0.5;
@@ -178,10 +177,7 @@ void main() {
     vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.spotLights[i].direction.xyz;
     vec3 l = pos - csPosition.xyz;
 
-    float bias = max(0.05 * (1.0 - length(l)), 0.005);
-
     vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz), 1);
-    ssPosition.z += bias;
     vec4 shadowMapCoord = shadowProj * ssPosition;
     shadowMapCoord /= shadowMapCoord.w;
     shadowMapCoord.xy = shadowMapCoord.xy * 0.5 + 0.5;
@@ -219,10 +215,7 @@ void main() {
     vec3 centerDir = mat3(cameraBuffer.viewMatrix) * sceneBuffer.texturedLights[i].direction.xyz;
     vec3 l = pos - csPosition.xyz;
 
-    float bias = max(0.05 * (1.0 - length(l)), 0.005);
-
     vec4 ssPosition = shadowView * cameraBuffer.viewMatrixInverse * vec4((csPosition.xyz), 1);
-    ssPosition.z += bias;
     vec4 shadowMapCoord = shadowProj * ssPosition;
     shadowMapCoord /= shadowMapCoord.w;
     shadowMapCoord.xy = shadowMapCoord.xy * 0.5 + 0.5;

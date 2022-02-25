@@ -10,7 +10,6 @@ layout(set = 0, binding = 6) uniform usampler2D samplerSegmentation0;
 layout(set = 0, binding = 7) uniform usampler2D samplerSegmentation1;
 layout(set = 0, binding = 8) uniform sampler2D samplerLineDepth;
 layout(set = 0, binding = 9) uniform sampler2D samplerLine;
-// layout(set = 0, binding = 10) uniform sampler2D samplerPointDepth;
 layout(set = 0, binding = 10) uniform sampler2D samplerSmoothedDepthLinear;
 layout(set = 0, binding = 11) uniform sampler2D samplerPoint;
 

@@ -20,11 +20,20 @@ layout(set = 1, binding = 0) uniform ObjectBuffer {
 } objectBuffer;
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normal;
-layout(location = 2) in vec2 uv;
-layout(location = 3) in vec3 tangent;
-layout(location = 4) in vec3 bitangent;
+layout(location = 1) in float scale;
+layout(location = 2) in vec4 color;
+
+layout(location = 0) out vec4 outPosition;
+layout(location = 1) out flat vec4 outNdcRadius;
 
 void main() {
-  gl_Position = lightBuffer.projectionMatrix * lightBuffer.viewMatrix * objectBuffer.modelMatrix * vec4(position, 1.f);
+  mat4 modelView = lightBuffer.viewMatrix * objectBuffer.modelMatrix;
+  outPosition = modelView * vec4(position, 1);
+
+  float radius = scale;
+
+  gl_PointSize = lightBuffer.projectionMatrix[0][0] * lightBuffer.width * radius;
+
+  gl_Position = lightBuffer.projectionMatrix * outPosition;
+  outNdcRadius = vec4(gl_Position.xyz / gl_Position.w, radius);
 }
