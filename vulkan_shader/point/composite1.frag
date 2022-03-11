@@ -150,7 +150,7 @@ void main() {
     vec3 v = abs(wsl);
     vec4 p = shadowProj * vec4(0, 0, -max(max(v.x, v.y), v.z), 1);
     float pixelDepth = p.z / p.w;
-    float shadowDepth = texture(samplerPointLightDepths[i], -wsl).x;
+    float shadowDepth = texture(samplerPointLightDepths[i], wsl).x;
 
     float visibility = step(pixelDepth - shadowDepth, 0);
     color += visibility * computePointLight(
