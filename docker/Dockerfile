@@ -92,8 +92,8 @@ WORKDIR /workspace/SDL/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install
 
 WORKDIR /workspace
-RUN git clone --single-branch -b v5.0.1 --depth 1 https://github.com/assimp/assimp.git
-RUN awk '{sub("-g ","")}1' /workspace/assimp/CMakeLists.txt > /tmp/CMakeLists.txt && mv /tmp/CMakeLists.txt /workspace/assimp/CMakeLists.txt
+RUN git clone --single-branch -b v5.2.3 --depth 1 https://github.com/assimp/assimp.git
+RUN sh -c 'printf "@@ -198,3 +198,5 @@\n     mapping.zopen_file = (open_file_func)open;\n+#ifdef ZOPENDISK64\n     mapping.zopendisk_file = (opendisk_file_func)opendisk;\n+#endif\n     mapping.zread_file = (read_file_func)read;" | patch -ulbf /workspace/assimp/code/Common/ZipArchiveIOSystem.cpp'
 RUN mkdir /workspace/assimp/build
 WORKDIR /workspace/assimp/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
