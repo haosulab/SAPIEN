@@ -42,6 +42,10 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
   // TODO(fanbo): figure out what "track allocation" means in the PhysX doc
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, mErrorCallback);
 
+  PxTolerancesScale toleranceScale;
+  toleranceScale.length = toleranceLength;
+  toleranceScale.speed = toleranceSpeed;
+
 #ifdef _PVD
   spdlog::get("SAPIEN")->info("Connecting to PVD...");
   mTransport = PxDefaultPvdSocketTransportCreate(PVD_HOST, 5425, 1000);
@@ -49,18 +53,14 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
   mPvd->connect(*mTransport, PxPvdInstrumentationFlag::eDEBUG);
   if (!mPvd->isConnected()) {
     spdlog::get("SAPIEN")->warn("Failed to connect to PVD");
-    mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true);
+    mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, toleranceScale, false);
   } else {
     spdlog::get("SAPIEN")->info("PVD connected");
-    mPhysicsSDK =
-        PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, PxTolerancesScale(), true, mPvd);
+    mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, toleranceScale, true, mPvd);
   }
 #else
-  PxTolerancesScale toleranceScale;
-  toleranceScale.length = toleranceLength;
-  toleranceScale.speed = toleranceSpeed;
 
-  mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, toleranceScale, true);
+  mPhysicsSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *mFoundation, toleranceScale);
 #endif
 
   if (!mPhysicsSDK) {
