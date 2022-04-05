@@ -37,6 +37,8 @@
 
 #include "renderer/kuafu_renderer.hpp"
 
+#include "profiler.hpp"
+
 #ifdef _USE_PINOCCHIO
 #include "articulation/pinocchio_model.h"
 #endif
@@ -2355,4 +2357,6 @@ Args:
   PyVulkanRenderMesh.def_property_readonly("dl_vertices", [](Renderer::SVulkan2Mesh &mesh) {
     return wrapDLTensor(mesh.getDLVertices());
   });
+
+  m.def("add_profiler_event", &AddProfilerEvent, py::arg("name"));
 }

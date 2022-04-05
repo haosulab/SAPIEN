@@ -144,6 +144,7 @@ __all__ = [
     "VulkanRigidbody",
     "VulkanScene",
     "VulkanWindow",
+    "add_profiler_event",
     "ensure_icd",
     "os",
     "pkg_resources",
@@ -153,3 +154,5 @@ __all__ = [
 ]
 
 
+def add_profiler_event(name: str) -> None:
+    pass

@@ -37,7 +37,9 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
     setLogLevel("warn");
   }
 
-  profiler::startListen();
+  if (!profiler::isListening()) {
+    profiler::startListen();
+  }
 
   // TODO(fanbo): figure out what "track allocation" means in the PhysX doc
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, mErrorCallback);
@@ -186,7 +188,7 @@ std::shared_ptr<Simulation> Simulation::getInstance(uint32_t nthread, PxReal tol
                                                     PxReal toleranceSpeed) {
   static std::weak_ptr<Simulation> _instance;
   if (!_instance.expired()) {
-    spdlog::get("SAPIEN")->warn("A second engine will shared the same internal structures with "
+    spdlog::get("SAPIEN")->warn("A second engine will share the same internal structures with "
                                 "the first one. Arguments passed to constructor will be ignored.");
     return _instance.lock();
   }

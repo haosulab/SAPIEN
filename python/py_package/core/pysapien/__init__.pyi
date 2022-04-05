@@ -75,6 +75,7 @@ __all__ = [
     "VulkanRigidbody",
     "VulkanScene",
     "VulkanWindow",
+    "add_profiler_event",
     "renderer"
 ]
 
@@ -2029,4 +2030,6 @@ class VulkanWindow():
         """
         :type: bool
         """
+    pass
+def add_profiler_event(name: str) -> None:
     pass
