@@ -161,7 +161,7 @@ static std::vector<PxVec3> getVerticesFromMeshFile(const std::string &filename) 
   std::vector<PxVec3> vertices;
   Assimp::Importer importer;
   uint32_t flags = aiProcess_Triangulate | aiProcess_PreTransformVertices;
-  importer.SetPropertyInteger(AI_CONFIG_PP_PTV_ADD_ROOT_TRANSFORMATION, 1);
+  importer.SetPropertyBool(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION, true);
 
   const aiScene *scene = importer.ReadFile(filename, flags);
 
