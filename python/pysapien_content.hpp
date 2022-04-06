@@ -48,6 +48,25 @@
 using namespace sapien;
 namespace py = pybind11;
 
+template <typename ResultType>
+class Awaitable : public std::enable_shared_from_this<Awaitable<ResultType>> {
+public:
+  Awaitable(std::future<ResultType> &&future) : mFuture(std::move(future)) {}
+  ResultType await() { return mFuture.get(); }
+  bool ready() { return mFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
+
+private:
+  std::future<ResultType> mFuture;
+};
+
+template <typename T> void declare_future(py::module &m, std::string const &typestr) {
+  using Class = Awaitable<T>;
+  std::string pyclass_name = std::string("Future") + typestr;
+  py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str())
+      .def("wait", &Class::await)
+      .def("ready", &Class::ready);
+}
+
 static py::capsule wrapDLTensor(DLManagedTensor *tensor) {
   auto capsule_destructor = [](PyObject *data) {
     DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
@@ -180,6 +199,8 @@ py::array_t<PxReal> mat32array(glm::mat3 const &mat) {
 
 void buildSapien(py::module &m) {
   m.doc() = "SAPIEN core module";
+
+  declare_future<void>(m, "FutureVoid");
 
   // collision geometry and shape
   auto PyGeometry = py::class_<SGeometry>(m, "CollisionGeometry");
@@ -752,8 +773,10 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       // py::arg("actor") = nullptr, py::return_value_policy::reference)
 
       .def("step", &SScene::step)
-      .def("step_async", &SScene::stepAsync)
-      .def("step_wait", &SScene::stepWait)
+      .def("step_async",
+           [](SScene &scene) { return std::make_shared<Awaitable<void>>(scene.stepAsync()); })
+      // .def("step_wait", &SScene::stepWait)
+
       .def("update_render", &SScene::updateRender)
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr, py::arg("render_material") = nullptr,
@@ -2359,4 +2382,12 @@ Args:
   });
 
   m.def("add_profiler_event", &AddProfilerEvent, py::arg("name"));
+  m.def("parse_dl_tensor", [](py::capsule data) {
+    DLManagedTensor *tensor = (DLManagedTensor *)data.get_pointer();
+    auto dict = py::dict();
+    dict["pointer"] = (intptr_t)tensor->dl_tensor.data;
+    dict["shape"] = std::vector<int64_t>(tensor->dl_tensor.shape,
+                                         tensor->dl_tensor.shape + tensor->dl_tensor.ndim);
+    return dict;
+  });
 }

@@ -448,34 +448,56 @@ void SScene::step() {
   emit(event);
 }
 
-void SScene::stepAsync() {
-  for (auto &a : mActors) {
-    if (!a->isBeingDestroyed())
-      a->prestep();
+std::future<void> SScene::stepAsync() {
+  if (!mRunnerThread.running()) {
+    mRunnerThread.init();
   }
-  for (auto &a : mArticulations) {
-    if (!a->isBeingDestroyed())
-      a->prestep();
-  }
-  for (auto &a : mKinematicArticulations) {
-    if (!a->isBeingDestroyed())
-      a->prestep();
-  }
-  removeCleanUp1();
-  mPxScene->simulate(mTimestep);
+
+  return mRunnerThread.submit([this]() {
+
+    EASY_BLOCK("Scene preprocess")
+      for (auto &a : mActors) {
+        if (!a->isBeingDestroyed())
+          a->prestep();
+      }
+    for (auto &a : mArticulations) {
+      if (!a->isBeingDestroyed())
+        a->prestep();
+    }
+    for (auto &a : mKinematicArticulations) {
+      if (!a->isBeingDestroyed())
+        a->prestep();
+    }
+    removeCleanUp1();
+    EASY_END_BLOCK
+
+
+
+    EASY_BLOCK("PhysX scene simulate", profiler::colors::Red);
+    mPxScene->simulate(mTimestep);
+    EASY_END_BLOCK
+
+    EASY_BLOCK("PhysX scene fetch", profiler::colors::Red);
+    while (!mPxScene->fetchResults(true)) {}
+    EASY_END_BLOCK
+
+    EASY_BLOCK("Scene postprocess");
+    removeCleanUp2();
+
+    EventSceneStep event;
+    event.scene = this;
+    event.timeStep = getTimestep();
+    emit(event);
+    EASY_END_BLOCK
+
+  });
 }
 
-void SScene::stepWait() {
-  while (!mPxScene->fetchResults(true)) {
-  }
-
-  removeCleanUp2();
-
-  EventSceneStep event;
-  event.scene = this;
-  event.timeStep = getTimestep();
-  emit(event);
-}
+// void SScene::stepWait() {
+//   // while (!mPxScene->fetchResults(true)) {
+//   // }
+//   mStep.get();
+// }
 
 void SScene::updateRender() {
   EASY_FUNCTION("Update Render", profiler::colors::Magenta);

@@ -167,7 +167,7 @@ if (MACOSX)
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-			${PINOCCHIO_LIBRARY} svulkan2 kuafu "-framework Cocoa -framework IOKit")
+			${PINOCCHIO_LIBRARY} svulkan2 kuafu rt "-framework Cocoa -framework IOKit")
 else ()
     target_link_libraries(sapien -Wl,--start-group
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -177,7 +177,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} svulkan2 kuafu)
+            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt)
 endif ()
 
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

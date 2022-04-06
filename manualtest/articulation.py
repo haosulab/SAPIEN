@@ -336,7 +336,11 @@ def main():
         # import matplotlib.pyplot as plt
         # import torch.utils.dlpack
 
-        # cam2.take_picture()
+        cam2.take_picture()
+        img = cam2.get_dl_tensor("Color")
+        info = sapien.parse_dl_tensor(img)
+        import ipdb; ipdb.set_trace()
+
         # img = cam2.get_float_texture("Color")
         # img = cam2.get_dl_tensor("Color")
         # img = torch.utils.dlpack.from_dlpack(img).cpu().numpy()

@@ -19,6 +19,8 @@
 #include <thread>
 #include <vector>
 
+#include <future>
+
 #include <PxPhysicsAPI.h>
 
 #include "event_system/event_system.h"
@@ -29,6 +31,8 @@
 #include "sapien_material.h"
 #include "sapien_scene_config.h"
 #include "simulation_callback.h"
+
+#include "thread_pool.hpp"
 
 namespace sapien {
 class SActor;
@@ -64,6 +68,7 @@ struct SceneData {
 };
 
 class SScene : public EventEmitter<EventSceneStep> {
+
   friend ActorBuilder;
   friend LinkBuilder;
   friend ArticulationBuilder;
@@ -118,8 +123,8 @@ public:
   inline PxReal getTimestep() { return mTimestep; }
 
   void step(); // advance time by TimeStep
-  void stepAsync();
-  void stepWait();
+  std::future<void> stepAsync();
+  // void stepWait();
 
 private:
   PxReal mTimestep = 1 / 500.f;
@@ -270,5 +275,8 @@ public:
 
 private:
   std::map<std::pair<PxShape *, PxShape *>, std::unique_ptr<SContact>> mContacts;
+
+  // std::future<void> mStep;
+  ThreadPool mRunnerThread{1};
 };
 } // namespace sapien

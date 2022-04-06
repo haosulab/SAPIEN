@@ -2,6 +2,7 @@
 #include "articulation/sapien_articulation.h"
 #include "articulation/sapien_link.h"
 #include "renderer/svulkan2_renderer.h"
+#include "renderer/svulkan2_rigidbody.h"
 #include "renderer/svulkan2_window.h"
 #include "sapien_actor.h"
 #include "sapien_drive.h"
@@ -13,7 +14,7 @@
 
 using namespace sapien;
 
-std::unique_ptr<ArticulationBuilder>
+std::shared_ptr<ArticulationBuilder>
 createAntBuilder(SScene &scene, std::shared_ptr<Renderer::IPxrMaterial> copper) {
   auto builder = scene.createArticulationBuilder();
   auto body = builder->createLinkBuilder();
@@ -109,9 +110,9 @@ createAntBuilder(SScene &scene, std::shared_ptr<Renderer::IPxrMaterial> copper) 
 int main() {
   Renderer::SVulkan2Renderer::setLogLevel("info");
   auto sim = std::make_shared<Simulation>();
-  auto renderer = std::make_shared<Renderer::SVulkan2Renderer>(false, 1000, 1000, 4);
+  auto renderer = std::make_shared<Renderer::SVulkan2Renderer>(false, 1000, 1000, 4, "", "back");
   sim->setRenderer(renderer);
-  Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/default_camera");
+  Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/ibl");
 
   auto s0 = sim->createScene();
   s0->setTimestep(1 / 60.f);
@@ -131,13 +132,25 @@ int main() {
 
   auto mount = s0->createActorBuilder()->build(true);
   mount->setPose(PxTransform({-1, 0, -2}, PxIdentity));
-  Renderer::setDefaultCameraShaderDirectory("../vulkan_shader/default_camera");
+  Renderer::setDefaultCameraShaderDirectory("../vulkan_shader/ibl");
 
   auto r0 = static_cast<Renderer::SVulkan2Scene *>(s0->getRendererScene());
-  r0->addDirectionalLight({0, 1, -1}, {1, 1, 1}, true);
+  r0->addDirectionalLight({0, 1, -1}, {1, 1, 1}, true, {0, 0, 0}, 2, 0.01, 5, 2048);
   window.setScene(static_cast<Renderer::SVulkan2Scene *>(s0->getRendererScene()));
 
-  window.setCameraPosition({-1,0,1});
+  window.setCameraPosition({-1, 0, 1});
+
+  auto cam = s0->addCamera("", 512, 512, 1);
+
+  s0->step();
+  s0->updateRender();
+
+  cam->takePicture();
+
+  if (auto rcam = dynamic_cast<Renderer::SVulkan2Camera *>(cam->getRendererCamera())) {
+    auto image = rcam->getFloatImageAsync("Color").get();
+    std::cout << image.size() << std::endl;
+  }
 
   int count = 0;
   SDrive6D *drive;
