@@ -36,7 +36,7 @@ public:
 
   SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
                    uint32_t defaultMipLevels, std::string const &device,
-                   std::string const &culling);
+                   std::string const &culling, bool doNotLoadTexture);
   IPxrScene *createScene(std::string const &name) override;
   void removeScene(IPxrScene *scene) override;
 

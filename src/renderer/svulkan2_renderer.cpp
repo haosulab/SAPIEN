@@ -41,7 +41,8 @@ void SVulkan2Renderer::setLogLevel(std::string const &level) {
 
 SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
                                    uint32_t maxNumTextures, uint32_t defaultMipLevels,
-                                   std::string const &device, std::string const &culling) {
+                                   std::string const &device, std::string const &culling,
+                                   bool doNotLoadTexture) {
   if (!gContext.expired()) {
     mContext = gContext.lock();
     mResourceManager = gResourceManager.lock();
@@ -49,7 +50,7 @@ SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
                                 "first one. Arguments passed to constructor will be ignored.");
   } else {
     gContext = mContext = svulkan2::core::Context::Create(
-        !offscreenOnly, maxNumMaterials, maxNumTextures, defaultMipLevels, device);
+        !offscreenOnly, maxNumMaterials, maxNumTextures, defaultMipLevels, doNotLoadTexture, device);
     gResourceManager = mResourceManager = mContext->createResourceManager();
   }
   if (culling == "back") {

@@ -200,7 +200,7 @@ py::array_t<PxReal> mat32array(glm::mat3 const &mat) {
 void buildSapien(py::module &m) {
   m.doc() = "SAPIEN core module";
 
-  declare_future<void>(m, "FutureVoid");
+  declare_future<void>(m, "Void");
 
   // collision geometry and shape
   auto PyGeometry = py::class_<SGeometry>(m, "CollisionGeometry");
@@ -775,7 +775,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("step", &SScene::step)
       .def("step_async",
            [](SScene &scene) { return std::make_shared<Awaitable<void>>(scene.stepAsync()); })
-      // .def("step_wait", &SScene::stepWait)
 
       .def("update_render", &SScene::updateRender)
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
@@ -1824,10 +1823,12 @@ Args:
 
   PyVulkanRenderer
       .def_static("set_log_level", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
-      .def(py::init<bool, uint32_t, uint32_t, uint32_t, std::string, std::string>(),
+      .def(py::init<bool, uint32_t, uint32_t, uint32_t, std::string, std::string, bool>(),
            py::arg("offscreen_only") = false, py::arg("max_num_materials") = 5000,
            py::arg("max_num_textures") = 5000, py::arg("default_mipmap_levels") = 1,
-           py::arg("device") = "", py::arg("culling") = "back", R"doc(
+           py::arg("device") = "", py::arg("culling") = "back",
+           py::arg("do_not_load_texture") = false,
+           R"doc(
 Create the VulkanRenderer for rasterization-based rendering.
 
 Args:
