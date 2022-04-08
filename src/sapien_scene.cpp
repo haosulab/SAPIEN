@@ -454,12 +454,11 @@ std::future<void> SScene::stepAsync() {
   }
 
   return mRunnerThread.submit([this]() {
-
     EASY_BLOCK("Scene preprocess")
-      for (auto &a : mActors) {
-        if (!a->isBeingDestroyed())
-          a->prestep();
-      }
+    for (auto &a : mActors) {
+      if (!a->isBeingDestroyed())
+        a->prestep();
+    }
     for (auto &a : mArticulations) {
       if (!a->isBeingDestroyed())
         a->prestep();
@@ -471,14 +470,13 @@ std::future<void> SScene::stepAsync() {
     removeCleanUp1();
     EASY_END_BLOCK
 
-
-
     EASY_BLOCK("PhysX scene simulate", profiler::colors::Red);
     mPxScene->simulate(mTimestep);
     EASY_END_BLOCK
 
     EASY_BLOCK("PhysX scene fetch", profiler::colors::Red);
-    while (!mPxScene->fetchResults(true)) {}
+    while (!mPxScene->fetchResults(true)) {
+    }
     EASY_END_BLOCK
 
     EASY_BLOCK("Scene postprocess");
@@ -489,7 +487,6 @@ std::future<void> SScene::stepAsync() {
     event.timeStep = getTimestep();
     emit(event);
     EASY_END_BLOCK
-
   });
 }
 
@@ -533,6 +530,10 @@ void SScene::updateRender() {
   }
 
   getRendererScene()->updateRender();
+}
+
+std::future<void> SScene::updateRenderAsync() {
+  return mRunnerThread.submit([this]() { this->updateRender(); });
 }
 
 SActorStatic *SScene::addGround(PxReal altitude, bool render,

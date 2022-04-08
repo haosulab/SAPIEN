@@ -252,6 +252,7 @@ public:
    * matrices of objects.
    */
   void updateRender();
+  std::future<void> updateRenderAsync();
   SActorStatic *addGround(PxReal altitude, bool render = true,
                           std::shared_ptr<SPhysicalMaterial> material = nullptr,
                           std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = nullptr);

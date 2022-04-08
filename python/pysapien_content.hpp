@@ -48,6 +48,17 @@
 using namespace sapien;
 namespace py = pybind11;
 
+class ProfilerBlock {
+  std::string mName;
+
+public:
+  ProfilerBlock(std::string const &name) : mName(name) {}
+  void enter() { EASY_NONSCOPED_BLOCK(mName); }
+  void exit(const py::object &type, const py::object &value, const py::object &traceback) {
+    EASY_END_BLOCK;
+  }
+};
+
 template <typename ResultType>
 class Awaitable : public std::enable_shared_from_this<Awaitable<ResultType>> {
 public:
@@ -759,18 +770,19 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def(
           "get_mounted_cameras",
           [](SScene &scene) {
-            spdlog::get("SAPIEN")->warn(
-                "get_mounted_cameras has been deprecated and will be removed in the next release, "
-                "please use equivalent function get_cameras instead.");
+            spdlog::get("SAPIEN")->warn("get_mounted_cameras has been deprecated and will be "
+                                        "removed in the next release, "
+                                        "please use equivalent function get_cameras instead.");
             return scene.getCameras();
           },
           py::return_value_policy::reference)
       .def("remove_camera", &SScene::removeCamera, py::arg("camera"))
 
       // .def("remove_mounted_camera", &SScene::removeMountedCamera, py::arg("camera"))
-      // .def("get_mounted_actors", &SScene::getMountedActors, py::return_value_policy::reference)
-      // .def("find_mounted_camera", &SScene::findMountedCamera, py::arg("name"),
-      // py::arg("actor") = nullptr, py::return_value_policy::reference)
+      // .def("get_mounted_actors", &SScene::getMountedActors,
+      // py::return_value_policy::reference) .def("find_mounted_camera",
+      // &SScene::findMountedCamera, py::arg("name"), py::arg("actor") = nullptr,
+      // py::return_value_policy::reference)
 
       .def("step", &SScene::step)
       .def("step_async",
@@ -1239,8 +1251,9 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("drive_target"));
 
-  PyArticulation //.def("get_links", &SArticulation::getSLinks, py::return_value_policy::reference)
-                 //.def("get_joints", &SArticulation::getSJoints,
+  PyArticulation //.def("get_links", &SArticulation::getSLinks,
+                 // py::return_value_policy::reference) .def("get_joints",
+                 //&SArticulation::getSJoints,
                  // py::return_value_policy::reference)
 
       .def("get_drive_velocity_target",
@@ -1878,7 +1891,8 @@ Args:
             renderer.mContext->getResourceManager()->releaseGPUResourcesUnsafe();
           },
           "A very unsafe way to release cached gpu (but not CPU) resources. It MUST be called "
-          "when no rendering is running, and all cameras and windows become invalid after calling "
+          "when no rendering is running, and all cameras and windows become invalid after "
+          "calling "
           "this function.");
 
   PyVulkanRigidbody.def_property_readonly("_internal_objects",
@@ -2034,7 +2048,8 @@ Args:
           "Get model matrix (inverse of extrinsic matrix) used in rendering (Y up, Z back)")
       .def(
           "get_projection_matrix", [](SCamera &c) { return mat42array(c.getProjectionMatrix()); },
-          "Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and [0,1] "
+          "Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and "
+          "[0,1] "
           "Z)");
 
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
@@ -2315,7 +2330,8 @@ Args:
       // .def_readonly("pose", &Renderer::RenderShape::pose)
       // .def_readonly("visual_id", &Renderer::RenderShape::objId)
       // .def_property_readonly("scale",
-      //                        [](Renderer::RenderShape &shape) { return vec32array(shape.scale);
+      //                        [](Renderer::RenderShape &shape) { return
+      //                        vec32array(shape.scale);
       //                        })
       .def_property_readonly("mesh", &Renderer::IPxrRenderShape::getGeometry)
       .def_property_readonly("material", &Renderer::IPxrRenderShape::getMaterial)
@@ -2383,12 +2399,33 @@ Args:
   });
 
   m.def("add_profiler_event", &AddProfilerEvent, py::arg("name"));
-  m.def("parse_dl_tensor", [](py::capsule data) {
+  py::class_<ProfilerBlock>(m, "ProfilerBlock")
+      .def(py::init<std::string>(), py::arg("name"))
+      .def("__enter__", &ProfilerBlock::enter)
+      .def("__exit__", &ProfilerBlock::exit);
+
+  auto dlpack = m.def_submodule("dlpack");
+
+  dlpack.def("dl_shape", [](py::capsule data) {
     DLManagedTensor *tensor = (DLManagedTensor *)data.get_pointer();
-    auto dict = py::dict();
-    dict["pointer"] = (intptr_t)tensor->dl_tensor.data;
-    dict["shape"] = std::vector<int64_t>(tensor->dl_tensor.shape,
-                                         tensor->dl_tensor.shape + tensor->dl_tensor.ndim);
-    return dict;
+    return std::vector<int64_t>(tensor->dl_tensor.shape,
+                                tensor->dl_tensor.shape + tensor->dl_tensor.ndim);
   });
+
+  dlpack.def(
+      "dl_to_numpy_cuda_async_unchecked",
+      [](py::capsule data, py::array_t<float> array) {
+        DLManagedTensor *tensor = (DLManagedTensor *)data.get_pointer();
+        int64_t size = 1;
+        for (uint32_t i = 0; i < tensor->dl_tensor.ndim; ++i) {
+          size *= tensor->dl_tensor.shape[i];
+        };
+        int64_t bytes = size * (tensor->dl_tensor.dtype.bits / 8);
+        cudaMemcpyAsync(py::detail::array_proxy(array.ptr())->data, tensor->dl_tensor.data, bytes,
+                        cudaMemcpyDeviceToHost);
+      },
+      py::arg("dl_tensor"), py::arg("result").noconvert());
+
+  dlpack.def("dl_cuda_sync", []() { cudaStreamSynchronize(0); });
+
 }

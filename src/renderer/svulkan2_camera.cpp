@@ -69,12 +69,6 @@ std::vector<uint32_t> SVulkan2Camera::getUintImage(std::string const &textureNam
   return std::get<0>(mRenderer->download<uint32_t>(textureName));
 }
 
-// // DLPack deleter
-// static void deleter(DLManagedTensor *self) {
-//   delete[] self->dl_tensor.shape;
-//   delete static_cast<std::shared_ptr<svulkan2::core::Buffer> *>(self->manager_ctx);
-// }
-
 DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   auto [buffer, sizes, format] = mRenderer->transferToBuffer(name);
 
