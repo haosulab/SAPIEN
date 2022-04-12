@@ -8,6 +8,7 @@
 #include <pybind11/stl.h>
 
 #include "actor_builder.h"
+#include "awaitable.hpp"
 #include "renderer/render_interface.h"
 #include "sapien_actor.h"
 #include "sapien_actor_base.h"
@@ -71,17 +72,14 @@ static py::capsule wrapDLTensor(DLManagedTensor *tensor) {
   return py::capsule(tensor, "dltensor", capsule_destructor);
 }
 
-template <typename ResultType> class Awaitable;
-
 using dl_vector = std::vector<DLManagedTensor *>;
-
-template <>
-class Awaitable<dl_vector> : public std::enable_shared_from_this<Awaitable<dl_vector>> {
+class AwaitableDLVectorWrapper : public std::enable_shared_from_this<AwaitableDLVectorWrapper> {
 
 public:
-  Awaitable(std::future<dl_vector> &&future) : mFuture(std::move(future)) {}
-  std::vector<py::capsule> await() {
-    auto ts = mFuture.get();
+  AwaitableDLVectorWrapper(std::shared_ptr<IAwaitable<dl_vector>> awaitable)
+      : mAwaitable(awaitable) {}
+  std::vector<py::capsule> wait() {
+    auto ts = mAwaitable->wait();
     std::vector<py::capsule> result;
     result.reserve(ts.size());
     for (auto t : ts) {
@@ -89,28 +87,29 @@ public:
     }
     return result;
   }
-  bool ready() { return mFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
+  bool ready() { return mAwaitable->ready(); }
 
 private:
-  std::future<dl_vector> mFuture;
+  std::shared_ptr<IAwaitable<dl_vector>> mAwaitable;
 };
 
-template <typename ResultType>
-class Awaitable : public std::enable_shared_from_this<Awaitable<ResultType>> {
-public:
-  Awaitable(std::future<ResultType> &&future) : mFuture(std::move(future)) {}
-  ResultType await() { return mFuture.get(); }
-  bool ready() { return mFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
+// template <typename ResultType>
+// class Awaitable : public std::enable_shared_from_this<Awaitable<ResultType>> {
+// public:
+//   Awaitable(std::future<ResultType> &&future) : mFuture(std::move(future)) {}
+//   ResultType await() { return mFuture.get(); }
+//   bool ready() { return mFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+//   }
 
-private:
-  std::future<ResultType> mFuture;
-};
+// private:
+//   std::future<ResultType> mFuture;
+// };
 
-template <typename T> void declare_future(py::module &m, std::string const &typestr) {
-  using Class = Awaitable<T>;
-  std::string pyclass_name = std::string("Future") + typestr;
+template <typename T> void declare_awaitable(py::module &m, std::string const &typestr) {
+  using Class = IAwaitable<T>;
+  std::string pyclass_name = std::string("Awaitable") + typestr;
   py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str())
-      .def("wait", &Class::await)
+      .def("wait", &Class::wait)
       .def("ready", &Class::ready);
 }
 
@@ -235,8 +234,11 @@ py::array_t<PxReal> mat32array(glm::mat3 const &mat) {
 void buildSapien(py::module &m) {
   m.doc() = "SAPIEN core module";
 
-  declare_future<void>(m, "Void");
-  declare_future<dl_vector>(m, "DLArray");
+  declare_awaitable<void>(m, "Void");
+  py::class_<AwaitableDLVectorWrapper, std::shared_ptr<AwaitableDLVectorWrapper>>(
+      m, "AwaitableDLList")
+      .def("wait", &AwaitableDLVectorWrapper::wait)
+      .def("ready", &AwaitableDLVectorWrapper::wait);
 
   // collision geometry and shape
   auto PyGeometry = py::class_<SGeometry>(m, "CollisionGeometry");
@@ -811,12 +813,15 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
 
       .def("step", &SScene::step)
       .def("step_async",
-           [](SScene &scene) { return std::make_shared<Awaitable<void>>(scene.stepAsync()); })
-
+           [](SScene &scene) {
+             return std::static_pointer_cast<IAwaitable<void>>(
+                 std::make_shared<AwaitableFuture<void>>(scene.stepAsync()));
+           })
       .def("update_render", &SScene::updateRender)
       .def("update_render_async",
            [](SScene &scene) {
-             return std::make_shared<Awaitable<void>>(scene.updateRenderAsync());
+             return std::static_pointer_cast<IAwaitable<void>>(
+                 std::make_shared<AwaitableFuture<void>>(scene.updateRenderAsync()));
            })
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr, py::arg("render_material") = nullptr,
@@ -2046,7 +2051,7 @@ Args:
       .def(
           "take_picture_and_get_dl_tensors_async",
           [](SCamera &cam, std::vector<std::string> const &names) {
-            return std::make_shared<Awaitable<dl_vector>>(
+            return std::make_shared<AwaitableDLVectorWrapper>(
                 cam.takePictureAndGetDLTensorsAsync(names));
           },
           py::arg("names"))

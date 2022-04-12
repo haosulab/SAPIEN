@@ -1,4 +1,5 @@
 #pragma once
+#include "awaitable.hpp"
 #include "thread_pool.hpp"
 #include <PxPhysicsAPI.h>
 #include <array>
@@ -286,7 +287,7 @@ public:
   };
 
   virtual void takePicture() = 0;
-  virtual std::future<std::vector<DLManagedTensor *>>
+  virtual std::shared_ptr<IAwaitable<std::vector<DLManagedTensor *>>>
   takePictureAndGetDLTensorsAsync(ThreadPool &thread, std::vector<std::string> const &names) {
     throw std::runtime_error("async take picture is not implemented");
   };

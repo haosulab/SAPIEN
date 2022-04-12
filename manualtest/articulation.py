@@ -331,18 +331,19 @@ def main():
         # count += 1
 
         scene.update_render_async()
-        cam2.take_picture()
-        img = cam2.get_dl_tensor("Color")
-        shape = sapien.dlpack.dl_shape(img)
-        output = np.zeros(shape, dtype=np.float32)
-        sapien.dlpack.dl_to_numpy_cuda_async_unchecked(img, output)
-        sapien.dlpack.dl_cuda_sync()
 
-        # imgs = cam2.take_picture_and_get_dl_tensors_async(["Color"]).wait()
-        # shape = sapien.dlpack.dl_shape(imgs[0])
+        # cam2.take_picture()
+        # img = cam2.get_dl_tensor("Color")
+        # shape = sapien.dlpack.dl_shape(img)
         # output = np.zeros(shape, dtype=np.float32)
-        # sapien.dlpack.dl_to_numpy_cuda_async_unchecked(imgs[0], output)
+        # sapien.dlpack.dl_to_numpy_cuda_async_unchecked(img, output)
         # sapien.dlpack.dl_cuda_sync()
+
+        imgs = cam2.take_picture_and_get_dl_tensors_async(["Color"]).wait()
+        shape = sapien.dlpack.dl_shape(imgs[0])
+        output = np.zeros(shape, dtype=np.float32)
+        sapien.dlpack.dl_to_numpy_cuda_async_unchecked(imgs[0], output)
+        sapien.dlpack.dl_cuda_sync()
 
         import matplotlib.pyplot as plt
         plt.imshow(output)

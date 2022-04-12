@@ -21,6 +21,29 @@ void setDefaultViewerShaderDirectory(std::string const &dir);
 extern std::string gDefaultCameraShaderDirectory;
 void setDefaultCameraShaderDirectory(std::string const &dir);
 
+template <typename Res> class AwaitableSemaphore : public IAwaitable<Res> {
+  std::function<Res()> mCallback;
+  vk::Semaphore mSemaphore;
+  uint64_t mValue;
+  vk::Device mDevice;
+
+public:
+  AwaitableSemaphore(std::function<Res()> callback, vk::Semaphore sem, uint64_t value,
+                     vk::Device device)
+      : mCallback(callback), mSemaphore(sem), mValue(value), mDevice(device) {}
+  Res wait() override {
+    if (mDevice.waitSemaphores(vk::SemaphoreWaitInfo({}, mSemaphore, mValue), UINT64_MAX) !=
+        vk::Result::eSuccess) {
+      throw std::runtime_error("failed to wait for semaphore");
+    }
+    return mCallback();
+  }
+  bool ready() override {
+    return mDevice.waitSemaphores(vk::SemaphoreWaitInfo({}, mSemaphore, mValue), 0) ==
+           vk::Result::eSuccess;
+  }
+};
+
 class SVulkan2Renderer : public IPxrRenderer {
 public:
   std::shared_ptr<svulkan2::core::Context> mContext{};
@@ -57,6 +80,8 @@ class SVulkan2Camera : public ICamera {
   vk::UniqueSemaphore mSemaphore;
   uint64_t mFrameCounter{0};
   std::unordered_map<std::string, std::shared_ptr<svulkan2::core::Buffer>> mImageBuffers;
+  std::unique_ptr<svulkan2::core::CommandPool> mCommandPool;
+  vk::UniqueCommandBuffer mCommandBuffer;
 
   void waitForRender();
 
@@ -79,7 +104,7 @@ public:
                  SVulkan2Scene *scene, std::string const &shaderDir);
 
   void takePicture() override;
-  std::future<std::vector<DLManagedTensor *>>
+  std::shared_ptr<IAwaitable<std::vector<DLManagedTensor *>>>
   takePictureAndGetDLTensorsAsync(ThreadPool &thread,
                                   std::vector<std::string> const &names) override;
 

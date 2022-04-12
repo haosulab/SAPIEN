@@ -171,7 +171,7 @@ glm::mat4 SCamera::getModelMatrix() const {
 
 void SCamera::takePicture() { mCamera->takePicture(); }
 
-std::future<std::vector<DLManagedTensor *>>
+std::shared_ptr<IAwaitable<std::vector<DLManagedTensor *>>>
 SCamera::takePictureAndGetDLTensorsAsync(std::vector<std::string> const &names) {
   return mCamera->takePictureAndGetDLTensorsAsync(mParentScene->getThread(), names);
 }

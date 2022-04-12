@@ -10,6 +10,8 @@ from sapien.core.pysapien import Articulation
 from sapien.core.pysapien import ArticulationBase
 from sapien.core.pysapien import ArticulationBuilder
 from sapien.core.pysapien import ArticulationDrivable
+from sapien.core.pysapien import AwaitableDLList
+from sapien.core.pysapien import AwaitableVoid
 from sapien.core.pysapien import BoxGeometry
 from sapien.core.pysapien import CameraEntity
 from sapien.core.pysapien import CapsuleGeometry
@@ -23,8 +25,6 @@ from sapien.core.pysapien import DirectionalLightEntity
 from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
 from sapien.core.pysapien import Entity
-from sapien.core.pysapien import FutureDLArray
-from sapien.core.pysapien import FutureVoid
 from sapien.core.pysapien import IPxrRenderer
 from sapien.core.pysapien import Joint
 from sapien.core.pysapien import JointBase
@@ -89,6 +89,8 @@ __all__ = [
     "ArticulationBase",
     "ArticulationBuilder",
     "ArticulationDrivable",
+    "AwaitableDLList",
+    "AwaitableVoid",
     "BoxGeometry",
     "CameraEntity",
     "CapsuleGeometry",
@@ -102,8 +104,6 @@ __all__ = [
     "Drive",
     "Engine",
     "Entity",
-    "FutureDLArray",
-    "FutureVoid",
     "IPxrRenderer",
     "Joint",
     "JointBase",

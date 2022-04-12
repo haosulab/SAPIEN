@@ -44,24 +44,26 @@ void SVulkan2Camera::takePicture() {
   mRenderer->render(*mCamera, {}, {}, {}, mSemaphore.get(), mFrameCounter);
 }
 
-std::future<std::vector<DLManagedTensor *>>
+std::shared_ptr<IAwaitable<std::vector<DLManagedTensor *>>>
 SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
                                                 std::vector<std::string> const &names) {
   auto context = mScene->getParentRenderer()->mContext;
   mFrameCounter++;
-  return thread.submit([context, frame = mFrameCounter, this, names = std::move(names)]() {
+  thread.submit([context, frame = mFrameCounter, this, names = std::move(names)]() {
     uint64_t waitFrame = frame - 1;
     auto result = context->getDevice().waitSemaphores(
         vk::SemaphoreWaitInfo({}, mSemaphore.get(), waitFrame), UINT64_MAX);
     if (result != vk::Result::eSuccess) {
       throw std::runtime_error("take picture failed: wait failed");
     }
-    auto pool = context->createCommandPool();
-    auto cb = pool->allocateCommandBuffer();
-    cb->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+    if (!mCommandPool) {
+      mCommandPool = context->createCommandPool();
+      mCommandBuffer = mCommandPool->allocateCommandBuffer();
+    }
+    mCommandBuffer->reset();
+    mCommandBuffer->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
     mRenderer->render(*mCamera, {}, {}, {}, {});
 
-    std::vector<DLManagedTensor *> tensors;
     for (auto &name : names) {
       auto target = mRenderer->getRenderTarget(name);
       auto extent = target->getImage().getExtent();
@@ -74,35 +76,45 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
             VMA_MEMORY_USAGE_GPU_ONLY);
       }
       auto buffer = mImageBuffers.at(name);
-      target->getImage().recordCopyToBuffer(cb.get(), buffer->getVulkanBuffer(), size, {0, 0, 0},
-                                            extent);
-      std::vector<long> sizes2 = {extent.height, extent.width};
-      uint8_t dtype;
-      switch (format) {
-      case vk::Format::eR32G32B32A32Sfloat:
-        dtype = DLDataTypeCode::kDLFloat;
-        sizes2.push_back(4);
-        break;
-      case vk::Format::eD32Sfloat:
-        dtype = DLDataTypeCode::kDLFloat;
-        break;
-      case vk::Format::eR32G32B32A32Uint:
-        dtype = DLDataTypeCode::kDLUInt;
-        sizes2.push_back(4);
-        break;
-      default:
-        throw std::runtime_error(
-            "Failed to get tensor from cuda buffer: unsupported buffer format");
-      }
-      tensors.push_back(dl_wrapper(buffer, buffer->getCudaPtr(), buffer->getCudaDeviceId(), sizes2,
-                                   {dtype, 32, 1}));
+      target->getImage().recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), size,
+                                            {0, 0, 0}, extent);
     }
-    cb->end();
-    context->getQueue().submit(cb.get(), {}, {}, {}, mSemaphore.get(), frame, {});
-    context->getDevice().waitSemaphores(vk::SemaphoreWaitInfo({}, mSemaphore.get(), frame),
-                                        UINT64_MAX);
-    return tensors;
+    mCommandBuffer->end();
+    context->getQueue().submit(mCommandBuffer.get(), {}, {}, {}, mSemaphore.get(), frame, {});
   });
+
+  return std::make_shared<AwaitableSemaphore<std::vector<DLManagedTensor *>>>(
+      [this, names]() {
+        std::vector<DLManagedTensor *> tensors;
+        for (auto &name : names) {
+          auto target = mRenderer->getRenderTarget(name);
+          auto extent = target->getImage().getExtent();
+          vk::Format format = target->getFormat();
+          auto buffer = mImageBuffers.at(name);
+          std::vector<long> sizes2 = {extent.height, extent.width};
+          uint8_t dtype;
+          switch (format) {
+          case vk::Format::eR32G32B32A32Sfloat:
+            dtype = DLDataTypeCode::kDLFloat;
+            sizes2.push_back(4);
+            break;
+          case vk::Format::eD32Sfloat:
+            dtype = DLDataTypeCode::kDLFloat;
+            break;
+          case vk::Format::eR32G32B32A32Uint:
+            dtype = DLDataTypeCode::kDLUInt;
+            sizes2.push_back(4);
+            break;
+          default:
+            throw std::runtime_error(
+                "Failed to get tensor from cuda buffer: unsupported buffer format");
+          }
+          tensors.push_back(dl_wrapper(buffer, buffer->getCudaPtr(), buffer->getCudaDeviceId(),
+                                       sizes2, {dtype, 32, 1}));
+        }
+        return tensors;
+      },
+      mSemaphore.get(), mFrameCounter, context->getDevice());
 }
 
 void SVulkan2Camera::waitForRender() {
@@ -132,8 +144,11 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   waitForRender();
 
   auto context = mScene->getParentRenderer()->mContext;
-  auto pool = context->createCommandPool();
-  auto cb = pool->allocateCommandBuffer();
+  if (!mCommandPool) {
+    mCommandPool = context->createCommandPool();
+  }
+
+  auto cb = mCommandPool->allocateCommandBuffer();
   cb->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
   mRenderer->render(*mCamera, {}, {}, {}, {});
 
