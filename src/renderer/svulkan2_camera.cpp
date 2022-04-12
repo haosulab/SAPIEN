@@ -102,7 +102,8 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
             dtype = DLDataTypeCode::kDLFloat;
             break;
           case vk::Format::eR32G32B32A32Uint:
-            dtype = DLDataTypeCode::kDLUInt;
+            // dtype = DLDataTypeCode::kDLUInt;
+            dtype = DLDataTypeCode::kDLInt;
             sizes2.push_back(4);
             break;
           default:
@@ -176,7 +177,8 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
     dtype = DLDataTypeCode::kDLFloat;
     break;
   case vk::Format::eR32G32B32A32Uint:
-    dtype = DLDataTypeCode::kDLUInt;
+    // dtype = DLDataTypeCode::kDLUInt;
+    dtype = DLDataTypeCode::kDLInt;
     sizes2.push_back(4);
     break;
   default:
