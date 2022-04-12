@@ -29,6 +29,8 @@ __all__ = [
     "Drive",
     "Engine",
     "Entity",
+    "FutureDLArray",
+    "FutureVoid",
     "IPxrRenderer",
     "Joint",
     "JointBase",
@@ -53,6 +55,7 @@ __all__ = [
     "PlaneGeometry",
     "PointLightEntity",
     "Pose",
+    "ProfilerBlock",
     "RenderBody",
     "RenderMaterial",
     "RenderMesh",
@@ -76,6 +79,7 @@ __all__ = [
     "VulkanScene",
     "VulkanWindow",
     "add_profiler_event",
+    "dlpack",
     "renderer"
 ]
 
@@ -360,6 +364,7 @@ class CameraEntity(Entity):
     def set_perspective_parameters(self, near: float, far: float, fx: float, fy: float, cx: float, cy: float, skew: float) -> None: ...
     def set_principal_point(self, cx: float, cy: float) -> None: ...
     def take_picture(self) -> None: ...
+    def take_picture_and_get_dl_tensors_async(self, names: typing.List[str]) -> FutureDLArray: ...
     @property
     def cx(self) -> float:
         """
@@ -699,6 +704,14 @@ class ActiveLightEntity(LightEntity, Entity):
         """
         :type: float
         """
+    pass
+class FutureDLArray():
+    def ready(self) -> bool: ...
+    def wait(self) -> typing.List[capsule]: ...
+    pass
+class FutureVoid():
+    def ready(self) -> bool: ...
+    def wait(self) -> None: ...
     pass
 class IPxrRenderer():
     def create_material(self) -> RenderMaterial: ...
@@ -1117,6 +1130,11 @@ class Pose():
         :type: numpy.ndarray[numpy.float32, _Shape[4, 1]]
         """
     pass
+class ProfilerBlock():
+    def __enter__(self) -> None: ...
+    def __exit__(self, arg0: object, arg1: object, arg2: object) -> None: ...
+    def __init__(self, name: str) -> None: ...
+    pass
 class RenderBody():
     def get_actor_id(self) -> int: ...
     def get_name(self) -> str: ...
@@ -1501,10 +1519,10 @@ class Scene():
     def set_environment_map_from_files(self, px: str, nx: str, py: str, ny: str, pz: str, nz: str) -> None: ...
     def set_timestep(self, second: float) -> None: ...
     def step(self) -> None: ...
-    def step_async(self) -> None: ...
-    def step_wait(self) -> None: ...
+    def step_async(self) -> FutureVoid: ...
     def unpack(self, data: typing.Dict[str, typing.Dict[int, typing.List[float]]]) -> None: ...
     def update_render(self) -> None: ...
+    def update_render_async(self) -> FutureVoid: ...
     @property
     def ambient_light(self) -> numpy.ndarray[numpy.float32]:
         """
@@ -1891,7 +1909,7 @@ class VulkanRenderMesh(RenderMesh):
         """
     pass
 class VulkanRenderer(IPxrRenderer):
-    def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '', culling: str = 'back') -> None: 
+    def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '', culling: str = 'back', do_not_load_texture: bool = False) -> None: 
         """
         Create the VulkanRenderer for rasterization-based rendering.
 

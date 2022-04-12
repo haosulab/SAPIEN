@@ -44,7 +44,6 @@ class SVulkan2Window {
 
   vk::UniqueSemaphore mSceneRenderSemaphore;
   vk::UniqueFence mSceneRenderFence;
-  vk::UniqueCommandBuffer mCommandBuffer;
 
   int mViewportWidth{};
   int mViewportHeight{};

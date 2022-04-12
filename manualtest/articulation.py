@@ -233,9 +233,6 @@ def main():
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
     cam2 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
-    # cam2._internal_renderer.set_custom_cubemap("Environment", cubemap)
-    # cam2._internal_renderer.set_custom_texture("BRDFLUT", brdf_lut)
-    # cam2._internal_renderer.set_custom_texture("LightMap", lightmap)
 
     ant_builder = create_ant_builder(scene)
     ant = ant_builder.build()
@@ -328,25 +325,34 @@ def main():
     count = 0
     while not viewer.closed:
         for i in range(4):
-            scene.step()
-        scene.update_render()
-        viewer.render()
-        count += 1
+            scene.step_async()
+        # scene.update_render()
+        # viewer.render()
+        # count += 1
 
-        if count == 1:
-            viewer.window.resize(1024, 768)
-
-        # import matplotlib.pyplot as plt
-        # import torch.utils.dlpack
-
-        import time
-
+        scene.update_render_async()
         cam2.take_picture()
         img = cam2.get_dl_tensor("Color")
         shape = sapien.dlpack.dl_shape(img)
         output = np.zeros(shape, dtype=np.float32)
         sapien.dlpack.dl_to_numpy_cuda_async_unchecked(img, output)
         sapien.dlpack.dl_cuda_sync()
+
+        # imgs = cam2.take_picture_and_get_dl_tensors_async(["Color"]).wait()
+        # shape = sapien.dlpack.dl_shape(imgs[0])
+        # output = np.zeros(shape, dtype=np.float32)
+        # sapien.dlpack.dl_to_numpy_cuda_async_unchecked(imgs[0], output)
+        # sapien.dlpack.dl_cuda_sync()
+
+        import matplotlib.pyplot as plt
+        plt.imshow(output)
+        plt.show()
+
+        if count == 1:
+            viewer.window.resize(1024, 768)
+
+        # import torch.utils.dlpack
+
 
         # info = sapien.parse_dl_tensor(img)
         # img = cam2.get_float_texture("Color")

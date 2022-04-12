@@ -53,13 +53,12 @@ class SVulkan2Camera : public ICamera {
   uint32_t mWidth, mHeight;
   SVulkan2Scene *mScene;
   std::unique_ptr<svulkan2::renderer::Renderer> mRenderer;
-  // physx::PxTransform mInitialPose;
   svulkan2::scene::Camera *mCamera;
+  vk::UniqueSemaphore mSemaphore;
+  uint64_t mFrameCounter{0};
+  std::unordered_map<std::string, std::shared_ptr<svulkan2::core::Buffer>> mImageBuffers;
 
-  vk::UniqueCommandBuffer mCommandBuffer;
-  vk::UniqueFence mFence;
-
-  void waitForFence();
+  void waitForRender();
 
 public:
   inline uint32_t getWidth() const override { return mWidth; };
@@ -80,6 +79,9 @@ public:
                  SVulkan2Scene *scene, std::string const &shaderDir);
 
   void takePicture() override;
+  std::future<std::vector<DLManagedTensor *>>
+  takePictureAndGetDLTensorsAsync(ThreadPool &thread,
+                                  std::vector<std::string> const &names) override;
 
   std::vector<std::string> getRenderTargetNames();
 

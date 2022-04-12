@@ -23,6 +23,8 @@ from sapien.core.pysapien import DirectionalLightEntity
 from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
 from sapien.core.pysapien import Entity
+from sapien.core.pysapien import FutureDLArray
+from sapien.core.pysapien import FutureVoid
 from sapien.core.pysapien import IPxrRenderer
 from sapien.core.pysapien import Joint
 from sapien.core.pysapien import JointBase
@@ -47,6 +49,7 @@ from sapien.core.pysapien import PinocchioModel
 from sapien.core.pysapien import PlaneGeometry
 from sapien.core.pysapien import PointLightEntity
 from sapien.core.pysapien import Pose
+from sapien.core.pysapien import ProfilerBlock
 from sapien.core.pysapien import RenderBody
 from sapien.core.pysapien import RenderMaterial
 from sapien.core.pysapien import RenderMesh
@@ -71,6 +74,7 @@ from sapien.core.pysapien import VulkanScene
 from sapien.core.pysapien import VulkanWindow
 import os
 import pkg_resources
+import sapien.core.pysapien.dlpack
 import sapien.core.pysapien.renderer
 import sys
 
@@ -98,6 +102,8 @@ __all__ = [
     "Drive",
     "Engine",
     "Entity",
+    "FutureDLArray",
+    "FutureVoid",
     "IPxrRenderer",
     "Joint",
     "JointBase",
@@ -122,6 +128,7 @@ __all__ = [
     "PlaneGeometry",
     "PointLightEntity",
     "Pose",
+    "ProfilerBlock",
     "RenderBody",
     "RenderMaterial",
     "RenderMesh",
@@ -145,6 +152,7 @@ __all__ = [
     "VulkanScene",
     "VulkanWindow",
     "add_profiler_event",
+    "dlpack",
     "ensure_icd",
     "os",
     "pkg_resources",

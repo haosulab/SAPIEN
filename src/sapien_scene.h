@@ -259,6 +259,8 @@ public:
 
   std::map<physx_id_t, std::string> findRenderId2VisualName() const;
 
+  ThreadPool &getThread();
+
 private:
   void removeCameraByParent(SActorBase *actor);
 
@@ -277,7 +279,7 @@ public:
 private:
   std::map<std::pair<PxShape *, PxShape *>, std::unique_ptr<SContact>> mContacts;
 
-  // std::future<void> mStep;
   ThreadPool mRunnerThread{1};
+  std::mutex mUpdateRenderMutex;
 };
 } // namespace sapien

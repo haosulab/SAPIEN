@@ -2,6 +2,7 @@
 #include "renderer/render_interface.h"
 #include "sapien_actor_base.h"
 #include "sapien_entity.h"
+#include <future>
 #include <glm/glm.hpp>
 
 namespace sapien {
@@ -52,6 +53,10 @@ public:
   glm::mat4 getExtrinsicMatrix() const;
 
   void takePicture();
+
+  std::future<std::vector<DLManagedTensor *>>
+  takePictureAndGetDLTensorsAsync(std::vector<std::string> const &names);
+
   Renderer::ICamera *getRendererCamera() const { return mCamera; }
 
   ~SCamera();

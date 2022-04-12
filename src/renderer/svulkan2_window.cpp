@@ -117,7 +117,6 @@ void SVulkan2Window::rebuild() {
   mSceneRenderSemaphore = mRenderer->mContext->getDevice().createSemaphoreUnique({});
   mSceneRenderFence =
       mRenderer->mContext->getDevice().createFenceUnique({vk::FenceCreateFlagBits::eSignaled});
-  mCommandBuffer = mRenderer->mContext->createCommandBuffer();
   mSVulkanRenderer->resize(mViewportWidth, mViewportHeight);
   mRenderer->mContext->getDevice().waitIdle();
   mRequiresRebuild = false;

@@ -449,11 +449,7 @@ void SScene::step() {
 }
 
 std::future<void> SScene::stepAsync() {
-  if (!mRunnerThread.running()) {
-    mRunnerThread.init();
-  }
-
-  return mRunnerThread.submit([this]() {
+  return getThread().submit([this]() {
     EASY_BLOCK("Scene preprocess")
     for (auto &a : mActors) {
       if (!a->isBeingDestroyed())
@@ -498,6 +494,7 @@ std::future<void> SScene::stepAsync() {
 
 void SScene::updateRender() {
   EASY_FUNCTION("Update Render", profiler::colors::Magenta);
+  std::lock_guard lock(mUpdateRenderMutex);
 
   if (!mRendererScene) {
     spdlog::get("SAPIEN")->error("Failed to update render: renderer is not added.");
@@ -533,7 +530,7 @@ void SScene::updateRender() {
 }
 
 std::future<void> SScene::updateRenderAsync() {
-  return mRunnerThread.submit([this]() { this->updateRender(); });
+  return getThread().submit([this]() { updateRender(); });
 }
 
 SActorStatic *SScene::addGround(PxReal altitude, bool render,
@@ -770,6 +767,13 @@ void SScene::removeParticleEntity(SEntityParticle *entity) {
     mRendererScene->removePointBody(entity->getVisualBody());
   }
   mParticlesEntities.erase(start, mParticlesEntities.end());
+}
+
+ThreadPool &SScene::getThread() {
+  if (!mRunnerThread.running()) {
+    mRunnerThread.init();
+  }
+  return mRunnerThread;
 }
 
 }; // namespace sapien

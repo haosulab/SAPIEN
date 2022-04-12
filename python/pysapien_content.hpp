@@ -59,6 +59,42 @@ public:
   }
 };
 
+static py::capsule wrapDLTensor(DLManagedTensor *tensor) {
+  auto capsule_destructor = [](PyObject *data) {
+    DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
+    if (tensor) {
+      tensor->deleter(const_cast<DLManagedTensor *>(tensor));
+    } else {
+      PyErr_Clear();
+    }
+  };
+  return py::capsule(tensor, "dltensor", capsule_destructor);
+}
+
+template <typename ResultType> class Awaitable;
+
+using dl_vector = std::vector<DLManagedTensor *>;
+
+template <>
+class Awaitable<dl_vector> : public std::enable_shared_from_this<Awaitable<dl_vector>> {
+
+public:
+  Awaitable(std::future<dl_vector> &&future) : mFuture(std::move(future)) {}
+  std::vector<py::capsule> await() {
+    auto ts = mFuture.get();
+    std::vector<py::capsule> result;
+    result.reserve(ts.size());
+    for (auto t : ts) {
+      result.push_back(wrapDLTensor(t));
+    }
+    return result;
+  }
+  bool ready() { return mFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
+
+private:
+  std::future<dl_vector> mFuture;
+};
+
 template <typename ResultType>
 class Awaitable : public std::enable_shared_from_this<Awaitable<ResultType>> {
 public:
@@ -76,18 +112,6 @@ template <typename T> void declare_future(py::module &m, std::string const &type
   py::class_<Class, std::shared_ptr<Class>>(m, pyclass_name.c_str())
       .def("wait", &Class::await)
       .def("ready", &Class::ready);
-}
-
-static py::capsule wrapDLTensor(DLManagedTensor *tensor) {
-  auto capsule_destructor = [](PyObject *data) {
-    DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
-    if (tensor) {
-      tensor->deleter(const_cast<DLManagedTensor *>(tensor));
-    } else {
-      PyErr_Clear();
-    }
-  };
-  return py::capsule(tensor, "dltensor", capsule_destructor);
 }
 
 py::array_t<float> getFloatImageFromCamera(SCamera &cam, std::string const &name) {
@@ -212,6 +236,7 @@ void buildSapien(py::module &m) {
   m.doc() = "SAPIEN core module";
 
   declare_future<void>(m, "Void");
+  declare_future<dl_vector>(m, "DLArray");
 
   // collision geometry and shape
   auto PyGeometry = py::class_<SGeometry>(m, "CollisionGeometry");
@@ -789,6 +814,10 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            [](SScene &scene) { return std::make_shared<Awaitable<void>>(scene.stepAsync()); })
 
       .def("update_render", &SScene::updateRender)
+      .def("update_render_async",
+           [](SScene &scene) {
+             return std::make_shared<Awaitable<void>>(scene.updateRenderAsync());
+           })
       .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
            py::arg("material") = nullptr, py::arg("render_material") = nullptr,
            py::return_value_policy::reference)
@@ -2014,6 +2043,13 @@ Args:
       .def_property("skew", &SCamera::getSkew, &SCamera::setSkew)
 
       .def("take_picture", &SCamera::takePicture)
+      .def(
+          "take_picture_and_get_dl_tensors_async",
+          [](SCamera &cam, std::vector<std::string> const &names) {
+            return std::make_shared<Awaitable<dl_vector>>(
+                cam.takePictureAndGetDLTensorsAsync(names));
+          },
+          py::arg("names"))
       .def("get_float_texture", &getFloatImageFromCamera, py::arg("texture_name"))
       .def("get_uint32_texture", &getUintImageFromCamera, py::arg("texture_name"))
 
@@ -2427,5 +2463,4 @@ Args:
       py::arg("dl_tensor"), py::arg("result").noconvert());
 
   dlpack.def("dl_cuda_sync", []() { cudaStreamSynchronize(0); });
-
 }

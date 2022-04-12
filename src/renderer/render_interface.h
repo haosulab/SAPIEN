@@ -1,4 +1,5 @@
 #pragma once
+#include "thread_pool.hpp"
 #include <PxPhysicsAPI.h>
 #include <array>
 #include <dlpack/dlpack.h>
@@ -285,6 +286,10 @@ public:
   };
 
   virtual void takePicture() = 0;
+  virtual std::future<std::vector<DLManagedTensor *>>
+  takePictureAndGetDLTensorsAsync(ThreadPool &thread, std::vector<std::string> const &names) {
+    throw std::runtime_error("async take picture is not implemented");
+  };
 };
 
 class ILight {
