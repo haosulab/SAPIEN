@@ -420,6 +420,8 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
   {
     uint32_t totalLinkCount = result->mLinks.size();
     std::vector<uint32_t> dofStarts(totalLinkCount); // link dof starts, internal order
+
+    // compute prefix sum to find where dof starts
     dofStarts[0] = 0;
     for (auto &link : result->mLinks) {
       auto pxLink = link->getPxActor();
@@ -428,7 +430,6 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
         dofStarts[idx] = pxLink->getInboundJointDof();
       }
     }
-
     uint32_t count = 0;
     for (uint32_t i = 1; i < totalLinkCount; ++i) {
       uint32_t dofs = dofStarts[i];
@@ -436,24 +437,41 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
       count += dofs;
     }
 
-    std::vector<uint32_t> E2I;
+    std::vector<int> jointE2I;
     count = 0;
     for (uint32_t i = 0; i < totalLinkCount; ++i) {
       uint32_t dof = result->getBaseJoints()[i]->getDof();
       uint32_t start = dofStarts[result->mLinks[i]->getPxActor()->getLinkIndex()];
       for (uint32_t d = 0; d < dof; ++d) {
-        E2I.push_back(start + d);
+        jointE2I.push_back(start + d);
       }
     }
 
-    std::vector<uint32_t> I2E(E2I.size());
-    for (uint32_t i = 0; i < E2I.size(); ++i) {
-      I2E[E2I[i]] = i;
+    uint32_t rootExternalIndex = UINT32_MAX;
+    for (auto &link : result->mLinks) {
+      auto internalIndex = link->getPxActor()->getLinkIndex();
+      if (internalIndex == 0) {
+        rootExternalIndex = link->getIndex();
+        break;
+      }
     }
-    result->mIndexE2I = E2I;
-    result->mIndexI2E = I2E;
-    result->mColumnPermutationI2E = sapien::SArticulation::buildColumnPermutation(I2E);
-    result->mRowPermutationI2E = result->buildRowPermutation();
+    assert(rootExternalIndex != UINT32_MAX);
+
+    std::vector<int> rowE2I(6 * (totalLinkCount - 1));
+    for (size_t k = 0; k < totalLinkCount; ++k) {
+      if (k == rootExternalIndex)
+        continue;
+      auto internalIndex = result->mLinks[k]->getPxActor()->getLinkIndex() - 1;
+      auto externalIndex = k < rootExternalIndex ? k : k - 1;
+      for (int j = 0; j < 6; ++j) {
+        rowE2I[6 * externalIndex + j] = 6 * internalIndex + j;
+      }
+    }
+
+    result->mPermutationE2I = Eigen::PermutationMatrix<Eigen::Dynamic>(
+        Eigen::Map<Eigen::VectorXi>(jointE2I.data(), jointE2I.size()));
+    result->mLinkPermutationE2I = Eigen::PermutationMatrix<Eigen::Dynamic>(
+        Eigen::Map<Eigen::VectorXi>(rowE2I.data(), rowE2I.size()));
   }
 
   for (auto &j : result->mJoints) {

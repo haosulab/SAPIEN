@@ -1,0 +1,654 @@
+<?xml version="1.0" ?>
+<robot name="movo" xmlns:xacro="http://ros.org/wiki/xacro">
+  <link name="base_link"/>
+  <gazebo reference="base_link">
+    <mu1>0.0</mu1>
+  </gazebo>
+  <joint name="base_chassis_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.0762"/>
+    <parent link="base_link"/>
+    <child link="base_chassis_link"/>
+  </joint>
+  <link name="base_chassis_link">
+    <inertial>
+      <mass value="44.2877"/>
+      <origin xyz="-0.009506 -0.013039 0.032319"/>
+      <inertia ixx="0.000165" ixy="0" ixz="0" iyx="0" iyy="0.000559" iyz="0" izx="0" izy="0" izz="0.000714"/>
+    </inertial>
+  </link>
+  <gazebo reference="base_chassis_link">
+    <mu1>0.0</mu1>
+  </gazebo>
+  <joint name="linear_actuator_fixed_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_chassis_link"/>
+    <child link="linear_actuator_fixed_link"/>
+  </joint>
+  <link name="linear_actuator_fixed_link">
+    <inertial>
+      <mass value="15.877331"/>
+      <origin xyz="0.013724 0.000002 0.509500"/>
+      <inertia ixx="0.962473" ixy="0.000047" ixz="0.053722" iyx="0.000047" iyy="0.968691" iyz="-0.000058" izx="0.053722" izy="-0.000058" izz="0.098853"/>
+    </inertial>
+  </link>
+  <joint name="linear_joint" type="prismatic">
+    <parent link="linear_actuator_fixed_link"/>
+    <child link="linear_actuator_link"/>
+    <origin rpy="0 0 0" xyz="0.0771402 0 0.3938763"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1000" lower="0.0" upper="0.472" stepSize="0.20"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+  <link name="linear_actuator_link">
+    <inertial>
+      <mass value="12.926242"/>
+      <origin xyz="-0.075467 -0.004693 0.397754"/>
+      <inertia ixx="0.300410" ixy="-0.010043" ixz="-0.054146" iyx="-0.010043" iyy="0.296460" iyz="-0.024977" izx="-0.054146" izy="-0.024977" izz="0.294778"/>
+    </inertial>
+  </link>
+  <transmission name="linear_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="linear_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="linear_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <link name="sic_imu_frame"/>
+  <joint name="sic_imu_joint" type="fixed">
+    <origin rpy="3.14159 0 1.570795" xyz="0.0326421 0.0899448 0.0082008"/>
+    <parent link="base_chassis_link"/>
+    <child link="sic_imu_frame"/>
+  </joint>
+  <gazebo>
+    <plugin filename="libhector_gazebo_ros_imu.so" name="sic_imu_controller">
+      <alwaysOn>1</alwaysOn>
+      <updateRate>50.0</updateRate>
+      <bodyName>sic_imu_frame</bodyName>
+      <topicName>/movo/feedback/sic_imu</topicName>
+      <accelDrift>0.0005 0.0005 0.0005</accelDrift>
+      <accelGaussianNoise>0.0005 0.0005 0.0005</accelGaussianNoise>
+      <rateDrift>0.0005 0.0005 0.0005</rateDrift>
+      <rateGaussianNoise>0.00005 0.00005 0.00005 </rateGaussianNoise>
+      <headingDrift>0.00005</headingDrift>
+      <headingGaussianNoise>0.00005</headingGaussianNoise>
+    </plugin>
+  </gazebo>
+  <joint name="pan_base_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0.19735 0 0.3449888"/>
+    <parent link="linear_actuator_link"/>
+    <child link="pan_base_link"/>
+  </joint>
+  <link name="pan_base_link">
+    <inertial>
+      <mass value="0.271282"/>
+      <origin xyz="0.000098 -0.000007 0.034804"/>
+      <inertia ixx="0.000158" ixy="0.000000" ixz="-0.000001" iyx="0.000000" iyy="0.000151" iyz="0.000000" izx="-0.000001" izy="0.000000" izz="0.000150"/>
+    </inertial>
+  </link>
+  <joint name="pan_joint" type="revolute">
+    <origin rpy="3.14159 0 0" xyz="0 0 0.05525"/>
+    <axis xyz="0 0 1"/>
+    <parent link="pan_base_link"/>
+    <child link="pan_link"/>
+    <limit effort="7.0" lower="-1.570796326794897" upper="1.570796326794897" stepSize="0.907571211"/>
+  </joint>
+  <transmission name="pan_trans" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="pan_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="pan_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <link name="pan_link">
+    <inertial>
+      <mass value="0.470548"/>
+      <origin xyz="-0.000036 0.021015 -0.052191"/>
+      <inertia ixx="0.000957" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000805" iyz="-0.000328" izx="0.000000" izy="-0.000328" izz="0.000353"/>
+    </inertial>
+  </link>
+  <joint name="tilt_joint" type="revolute">
+    <origin rpy="-1.570795 1.570795 0" xyz="0 0.026 -0.09075"/>
+    <axis xyz="0 0 1"/>
+    <parent link="pan_link"/>
+    <child link="tilt_link"/>
+    <limit effort="7.0" lower="-1.570796326794897" upper="1.570796326794897" stepSize="0.907571211"/>
+  </joint>
+  <transmission name="tilt_trans" type="SimpleTransmission">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="tilt_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="tilt_actuator">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <link name="tilt_link">
+    <inertial>
+      <mass value="0.434513"/>
+      <origin xyz="0.037380 0.005753 -0.019367"/>
+      <inertia ixx="0.000418" ixy="0.000123" ixz="-0.000065" iyx="0.000123" iyy="0.001134" iyz="-0.000003" izx="-0.000065" izy="-0.000003" izz="0.000967"/>
+    </inertial>
+  </link>
+  <joint name="kinect2_joint" type="fixed">
+    <origin rpy="-1.570795 0 -1.570795" xyz="0.05825 -0.0105875 -0.026"/>
+    <parent link="tilt_link"/>
+    <child link="kinect2_link"/>
+  </joint>
+  <link name="kinect2_link">
+    <inertial>
+      <mass value="1.4"/>
+      <origin xyz="-0.000036 0.021015 -0.052191"/>
+      <inertia ixx="0.0006835" ixy="-0.000042" ixz="0.000010" iyx="-0.000042" iyy="0.001197" iyz="0.000006" izx="0.000010" izy="0.000006" izz="0.007020"/>
+    </inertial>
+  </link>
+  <link name="kinect2_ir_frame"/>
+  <joint name="kinect2_ir_joint" type="fixed">
+    <parent link="kinect2_link"/>
+    <child link="kinect2_ir_frame"/>
+    <origin rpy="0 0 0" xyz="0.0245 -0.03325  0.04201"/>
+  </joint>
+  <link name="kinect2_ir_optical_frame"/>
+  <joint name="kinect2_ir_optical_frame_joint" type="fixed">
+    <origin rpy="-1.570795 0 -1.570795" xyz="0 0 0"/>
+    <parent link="kinect2_ir_frame"/>
+    <child link="kinect2_ir_optical_frame"/>
+  </joint>
+  <link name="kinect2_color_frame"/>
+  <joint name="kinect2_color_joint" type="fixed">
+    <parent link="kinect2_ir_frame"/>
+    <child link="kinect2_color_frame"/>
+    <origin rpy="0 0 0" xyz="0 -0.06175  0"/>
+  </joint>
+  <link name="kinect2_color_optical_frame"/>
+  <joint name="kinect2_color_optical_joint" type="fixed">
+    <parent link="kinect2_color_frame"/>
+    <child link="kinect2_color_optical_frame"/>
+    <origin rpy="-1.570795 0 -1.570795" xyz="0 0 0"/>
+  </joint>
+  <gazebo reference="kinect2_ir_frame">
+    <sensor name="kinect2_ir_sensor" type="depth">
+      <always_on>true</always_on>
+      <update_rate>30.0</update_rate>
+      <camera>
+        <horizontal_fov>1.22172944444</horizontal_fov>
+        <image>
+          <format>L8</format>
+          <width>512</width>
+          <height>424</height>
+        </image>
+        <clip>
+          <near>0.01</near>
+          <far>100</far>
+        </clip>
+      </camera>
+      <plugin filename="libgazebo_ros_openni_kinect.so" name="kinect2_ir_link_controller">
+        <baseline>0.2</baseline>
+        <alwaysOn>true</alwaysOn>
+        <updateRate>1.0</updateRate>
+        <cameraName>kinect2/sd/image_ir</cameraName>
+        <imageTopicName>/kinect2/sd/image_ir</imageTopicName>
+        <cameraInfoTopicName>/kinect2/sd/camera_info</cameraInfoTopicName>
+        <depthImageTopicName>/kinect2/sd/image_depth</depthImageTopicName>
+        <depthImageCameraInfoTopicName>/kinect2/sd/depth/camera_info</depthImageCameraInfoTopicName>
+        <pointCloudTopicName>/kinect2/sd/points</pointCloudTopicName>
+        <frameName>kinect2_ir_optical_frame</frameName>
+        <pointCloudCutoff>0.1</pointCloudCutoff>
+        <pointCloudCutoffMax>12.0</pointCloudCutoffMax>
+        <distortionK1>0.0</distortionK1>
+        <distortionK2>0.0</distortionK2>
+        <distortionK3>0.0</distortionK3>
+        <distortionT1>0.0</distortionT1>
+        <distortionT2>0.0</distortionT2>
+        <CxPrime>0</CxPrime>
+        <Cx>0</Cx>
+        <Cy>0</Cy>
+        <focalLength>0</focalLength>
+        <hackBaseline>0</hackBaseline>
+      </plugin>
+    </sensor>
+    <material value="Gazebo/Red"/>
+  </gazebo>
+  <joint name="right_kinova_joint" type="fixed">
+    <parent link="linear_actuator_link"/>
+    <child link="right_base_link"/>
+    <origin rpy="-1.570796325 0 -1.570796325" xyz="0.0261046 -0.13335 0.2799937"/>
+  </joint>
+  <link name="right_base_link">
+    <inertial>
+      <mass value="0.649618"/>
+      <origin xyz="-0.000146 0.0 0.031039"/>
+      <inertia ixx="0.000652" ixy="-0.000000" ixz="0.000001" iyx="0.000000" iyy="0.000646" iyz="0.000000" izx="0.000001" izy="0.000000" izz="0.000480"/>
+    </inertial>
+  </link>
+  <joint name="lower_body_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="base_chassis_link"/>
+    <child link="lower_body_link"/>
+  </joint>
+  <link name="lower_body_link">
+    <inertial>
+      <mass value="7.753378"/>
+      <origin xyz="0.000143 0.000727 0.188079"/>
+      <inertia ixx="0.339365" ixy="0.000325" ixz="0.000146" iyx="0.000325" iyy="0.590290" iyz="-0.001078" izx="0.000146" izy="-0.001078" izz="0.588946"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_base_link">
+    <implicitSpringDamper>1</implicitSpringDamper>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <maxVel>100.0</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <joint name="right_shoulder_pan_joint" type="continuous">
+    <parent link="right_base_link"/>
+    <child link="right_shoulder_link"/>
+    <origin rpy="0 3.14159265 0" xyz="0 0 0.0625"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="18000.0" lower="-3.14159265" upper="3.14159265" stepSize="0.691150384"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+  <link name="right_shoulder_link">
+    <inertial>
+      <mass value="0.824524"/>
+      <origin xyz="0.000018 -0.004667 -0.060609"/>
+      <inertia ixx="0.002561" ixy="0.000000" ixz="0.000001" iyx="0.000000" iyy="0.002653" iyz="0.000212" izx="0.000001" izy="0.000212" izz="0.000524"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_shoulder_link">
+    <implicitSpringDamper>1</implicitSpringDamper>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <maxVel>100.0</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <joint name="right_shoulder_lift_joint" type="continuous">
+    <parent link="right_shoulder_link"/>
+    <child link="right_arm_half_1_link"/>
+    <origin rpy="1.570796325 0 0" xyz="0 0 -0.11875"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="30000.5" lower="-2.238" upper="2.238" stepSize="0.691150384"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+  <link name="right_arm_half_1_link">
+    <inertial>
+      <mass value="0.8447"/>
+      <origin xyz="0 -0.103563213 0"/>
+      <inertia ixx="0.000435" ixy="0.000002" ixz="0.000231" iyx="0.000002" iyy="0.034947" iyz="0.000000" izx="0.000231" izy="0.000000" izz="0.035198"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_arm_half_1_link">
+    <implicitSpringDamper>1</implicitSpringDamper>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <maxVel>100.0</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <joint name="right_arm_half_joint" type="continuous">
+    <parent link="right_arm_half_1_link"/>
+    <child link="right_arm_half_2_link"/>
+    <origin rpy="-1.570796325 0 0" xyz="0 -0.205 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="30000.5" lower="-3.14159265" upper="3.14159265" stepSize="0.691150384"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+  <link name="right_arm_half_2_link">
+    <inertial>
+      <mass value="0.8447"/>
+      <origin xyz="0 0 -0.1022447445"/>
+      <inertia ixx="0.000435" ixy="0.000002" ixz="0.000231" iyx="0.000002" iyy="0.034947" iyz="0.000000" izx="0.000231" izy="0.000000" izz="0.035198"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_arm_half_2_link">
+    <implicitSpringDamper>1</implicitSpringDamper>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <maxVel>100.0</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <joint name="right_elbow_joint" type="continuous">
+    <parent link="right_arm_half_2_link"/>
+    <child link="right_forearm_link"/>
+    <origin rpy="-1.570796325 0 0" xyz="0 0 -0.205"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="18000.0" lower="-2.809" upper="2.809" stepSize="0.691150384"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+  <link name="right_forearm_link">
+    <inertial>
+      <mass value="0.674254"/>
+      <origin xyz="0 0.081 -0.0086"/>
+      <inertia ixx="0.005453" ixy="0.000003" ixz="0.000000" iyx="0.000003" iyy="0.000305" iyz="0.000087" izx="0.000000" izy="0.000087" izz="0.005578"/>
+    </inertial>
+  </link>
+  <joint name="right_wrist_spherical_1_joint" type="continuous">
+    <parent link="right_forearm_link"/>
+    <child link="right_wrist_spherical_1_link"/>
+    <!--  <origin xyz="0 0.20725 0 " rpy="${wrist_spherical_1_joint_rpy}" /> -->
+    <origin rpy="1.570796325 3.14159265 0" xyz="0 0.2073 -0.0114"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="60000.8" lower="-3.14159265" upper="3.14159265" stepSize="0.921533845"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+  <link name="right_wrist_spherical_1_link">
+    <inertial>
+      <mass value="0.463"/>
+      <origin xyz="0 0.0028848942 -0.0541932613"/>
+      <inertia ixx="0.000392" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000347" iyz="0.000101" izx="0.000000" izy="0.000101" izz="0.000233"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_wrist_spherical_1_link">
+    <implicitSpringDamper>1</implicitSpringDamper>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <maxVel>100.0</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <joint name="right_wrist_spherical_2_joint" type="continuous">
+    <parent link="right_wrist_spherical_1_link"/>
+    <child link="right_wrist_spherical_2_link"/>
+    <origin rpy="-1.570796325 0 0" xyz="0 0 -0.10375 "/>
+    <axis xyz="0 0 1"/>
+    <limit effort="60000.8" lower="-2.78" upper="2.78" stepSize="0.921533845"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+  <link name="right_wrist_spherical_2_link">
+    <inertial>
+      <mass value="0.463"/>
+      <origin xyz="0 0.0497208855 -0.0028562765"/>
+      <inertia ixx="0.000392" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000347" iyz="0.000101" izx="0.000000" izy="0.000101" izz="0.000233"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_wrist_spherical_2_link">
+    <implicitSpringDamper>1</implicitSpringDamper>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <maxVel>100.0</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <joint name="right_wrist_3_joint" type="continuous">
+    <parent link="right_wrist_spherical_2_link"/>
+    <child link="right_wrist_3_link"/>
+    <origin rpy="1.570796325 3.14159265 0" xyz="0 0.10375 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="60000.8" lower="-3.14159265" upper="3.14159265" stepSize="0.921533845"/>
+    <dynamics damping="0.01" friction="0.0"/>
+  </joint>
+  <link name="right_wrist_3_link">
+    <inertial>
+      <mass value="0.190782"/>
+      <origin xyz="-0.00082 0.000048 -0.216121"/>
+      <inertia ixx="0.000048" ixy="0.000000" ixz="0.000000" iyx="0.000000" iyy="0.000049" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000072"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_wrist_3_link">
+    <implicitSpringDamper>1</implicitSpringDamper>
+    <kp>1000000.0</kp>
+    <kd>100.0</kd>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <maxVel>100.0</maxVel>
+    <minDepth>0.001</minDepth>
+  </gazebo>
+  <joint name="right_ee_fixed_joint" type="fixed">
+    <parent link="right_wrist_3_link"/>
+    <child link="right_ee_link"/>
+    <origin rpy="3.14159265 1.570796325 0" xyz="0 0 -0.1600"/>
+  </joint>
+  <link name="right_ee_link"/>
+  <transmission name="right_shoulder_pan_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_shoulder_pan_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_shoulder_pan_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_shoulder_lift_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_shoulder_lift_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_shoulder_lift_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_half_arm_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_arm_half_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_arm_half_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_elbow_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_elbow_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_elbow_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_wrist_spherical_1_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_wrist_spherical_1_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_wrist_spherical_1_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_wrist_spherical_2_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_wrist_spherical_2_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_wrist_spherical_2_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <transmission name="right_wrist_3_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_wrist_3_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_wrist_3_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  <joint name="right_gripper_base_joint" type="fixed">
+    <parent link="right_ee_link"/>
+    <child link="right_gripper_base_link"/>
+    <origin rpy="-3.14159265 1.570796325 0" xyz="-0.16 0 0"/>
+  </joint>
+  <link name="right_gripper_base_link">
+    <inertial>
+      <mass value="0.799312"/>
+      <origin xyz="0.000007 -0.005175 -0.067280"/>
+      <inertia ixx="0.000790" ixy="0.000000" ixz="0.000004" iyx="0.000000" iyy="0.000650" iyz="0.000003" izx="0.000004" izy="0.000003" izz="0.000823"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_gripper_base_link">
+    <!--implicitSpringDamper>1</implicitSpringDamper-->
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
+    <minDepth>0.0001</minDepth>
+  </gazebo>
+  <joint name="right_gripper_finger1_joint" type="revolute">
+    <parent link="right_gripper_base_link"/>
+    <child link="right_gripper_finger1_knuckle_link"/>
+    <axis xyz="0 0 1"/>
+    <origin rpy="1.4676 -0.0092813 -1.7501" xyz="-0.0027954 0.031318 -0.11464"/>
+    <limit damping="0.005" effort="3.0" friction="0.005" lower="0.0" upper="0.986111027" stepSize="1.0"/>
+  </joint>
+  <link name="right_gripper_finger1_knuckle_link">
+    <inertial>
+      <mass value="0.009127"/>
+      <origin xyz="-0.016752 -0.013874 0.0"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_gripper_finger1_knuckle_link">
+    <!--implicitSpringDamper>1</implicitSpringDamper-->
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
+    <minDepth>0.0001</minDepth>
+  </gazebo>
+  <joint name="right_gripper_finger2_joint" type="revolute">
+    <parent link="right_gripper_base_link"/>
+    <child link="right_gripper_finger2_knuckle_link"/>
+    <axis xyz="0 0 1"/>
+    <origin rpy="1.570796325 0 1.7555" xyz="0.022289 -0.027253 -0.11471"/>
+    <limit damping="0.005" effort="3.0" friction="0.005" lower="0.0" upper="0.986111027" stepSize="1.0"/>
+    <mimic joint="right_gripper_finger1_joint"/>
+  </joint>
+  <link name="right_gripper_finger2_knuckle_link">
+    <inertial>
+      <mass value="0.009127"/>
+      <origin xyz="-0.016752 -0.013874 0.0"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_gripper_finger2_knuckle_link">
+    <!--implicitSpringDamper>1</implicitSpringDamper-->
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
+    <minDepth>0.0001</minDepth>
+  </gazebo>
+  <joint name="right_gripper_finger3_joint" type="revolute">
+    <parent link="right_gripper_base_link"/>
+    <child link="right_gripper_finger3_knuckle_link"/>
+    <axis xyz="0 0 1"/>
+    <origin rpy="1.570796325 0 1.3861" xyz="-0.022284 -0.027223 -0.11473"/>
+    <limit damping="0.005" effort="3.0" friction="0.005" lower="0.0" upper="0.986111027" stepSize="1.0"/>
+    <mimic joint="right_gripper_finger1_joint"/>
+  </joint>
+  <link name="right_gripper_finger3_knuckle_link">
+    <inertial>
+      <mass value="0.009127"/>
+      <origin xyz="-0.016752 -0.013874 0.0"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_gripper_finger3_knuckle_link">
+    <!--implicitSpringDamper>1</implicitSpringDamper-->
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
+    <minDepth>0.0001</minDepth>
+  </gazebo>
+  <joint name="right_gripper_finger1_finger_tip_joint" type="fixed">
+    <parent link="right_gripper_finger1_knuckle_link"/>
+    <child link="right_gripper_finger1_finger_tip_link"/>
+    <origin rpy="0 0 0" xyz="-0.0245981 -0.036051 0.0"/>
+  </joint>
+  <link name="right_gripper_finger1_finger_tip_link">
+    <inertial>
+      <mass value="0.012690"/>
+      <origin xyz="-0.011926 -0.009701 0.0"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_gripper_finger1_finger_tip_link">
+    <!--implicitSpringDamper>1</implicitSpringDamper-->
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
+    <minDepth>0.0001</minDepth>
+  </gazebo>
+  <joint name="right_gripper_finger2_finger_tip_joint" type="fixed">
+    <parent link="right_gripper_finger2_knuckle_link"/>
+    <child link="right_gripper_finger2_finger_tip_link"/>
+    <origin rpy="0 0 0" xyz="-0.0245981 -0.036051 0.0"/>
+  </joint>
+  <link name="right_gripper_finger2_finger_tip_link">
+    <inertial>
+      <mass value="0.012690"/>
+      <origin xyz="-0.011926 -0.009701 0.0"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_gripper_finger2_finger_tip_link">
+    <!--implicitSpringDamper>1</implicitSpringDamper-->
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
+    <minDepth>0.0001</minDepth>
+  </gazebo>
+  <joint name="right_gripper_finger3_finger_tip_joint" type="fixed">
+    <parent link="right_gripper_finger3_knuckle_link"/>
+    <child link="right_gripper_finger3_finger_tip_link"/>
+    <origin rpy="0 0 0" xyz="-0.0245981 -0.036051 0.0"/>
+  </joint>
+  <link name="right_gripper_finger3_finger_tip_link">
+    <inertial>
+      <mass value="0.012690"/>
+      <origin xyz="-0.011926 -0.009701 0.0"/>
+      <inertia ixx="0.000002" ixy="0.000001" ixz="0.000000" iyx="0.000001" iyy="0.000001" iyz="0.000000" izx="0.000000" izy="0.000000" izz="0.000002"/>
+    </inertial>
+  </link>
+  <gazebo reference="right_gripper_finger3_finger_tip_link">
+    <!--implicitSpringDamper>1</implicitSpringDamper-->
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
+    <minDepth>0.0001</minDepth>
+  </gazebo>
+  <transmission name="right_gripper_finger1_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="right_gripper_finger1_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="right_gripper_finger1_motor">
+      <mechanicalReduction>1</mechanicalReduction>
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </actuator>
+  </transmission>
+  <gazebo>
+    <!-- loading plugin: mimic joints works in gazebo now -->
+    <plugin filename="libroboticsgroup_gazebo_mimic_joint_plugin.so" name="right_mimic_finger_1_2">
+      <joint>right_gripper_finger1_joint</joint>
+      <mimicJoint>right_gripper_finger2_joint</mimicJoint>
+    </plugin>
+    <!-- loading plugin: mimic joints works in gazebo now -->
+    <plugin filename="libroboticsgroup_gazebo_mimic_joint_plugin.so" name="right_mimic_finger_1_3">
+      <joint>right_gripper_finger1_joint</joint>
+      <mimicJoint>right_gripper_finger3_joint</mimicJoint>
+    </plugin>
+  </gazebo>
+</robot>

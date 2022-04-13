@@ -2,6 +2,7 @@
 #include "sapien_joint.h"
 #include "sapien_link.h"
 #include "sapien_scene.h"
+#include <easy/profiler.h>
 #include <numeric>
 #include <spdlog/spdlog.h>
 #include <stdexcept>
@@ -44,61 +45,78 @@ EArticulationType SArticulation::getType() const { return EArticulationType::DYN
 uint32_t SArticulation::dof() const { return mPxArticulation->getDofs(); }
 
 std::vector<physx::PxReal> SArticulation::getQpos() const {
+  EASY_FUNCTION();
+  EASY_BLOCK("copy internal state")
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
-  return I2E(std::vector<physx::PxReal>(mCache->jointPosition, mCache->jointPosition + dof()));
+  EASY_END_BLOCK;
+  auto n = dof();
+  std::vector<physx::PxReal> result(n);
+  Eigen::Map<Eigen::VectorXf>(result.data(), n) =
+      mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointPosition, n);
+  return result;
 }
 
 void SArticulation::setQpos(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
 
-  auto v2 = E2I(v);
-  for (size_t i = 0; i < v.size(); ++i) {
-    mCache->jointPosition[i] = v2[i];
-  }
+  auto n = dof();
+  Eigen::Map<Eigen::VectorXf>(mCache->jointPosition, n) =
+      mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(v.data(), n);
   mPxArticulation->applyCache(*mCache, PxArticulationCache::ePOSITION);
 }
 
 std::vector<physx::PxReal> SArticulation::getQvel() const {
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
-  return I2E(std::vector<physx::PxReal>(mCache->jointVelocity, mCache->jointVelocity + dof()));
+
+  auto n = dof();
+  std::vector<physx::PxReal> result(n);
+  Eigen::Map<Eigen::VectorXf>(result.data(), n) =
+      mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointVelocity, n);
+  return result;
 }
+
 void SArticulation::setQvel(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
 
-  auto v2 = E2I(v);
-  for (size_t i = 0; i < v.size(); ++i) {
-    mCache->jointVelocity[i] = v2[i];
-  }
+  auto n = dof();
+  Eigen::Map<Eigen::VectorXf>(mCache->jointVelocity, n) =
+      mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(v.data(), n);
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eVELOCITY);
 }
 
 std::vector<physx::PxReal> SArticulation::getQacc() const {
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eACCELERATION);
-  return I2E(
-      std::vector<physx::PxReal>(mCache->jointAcceleration, mCache->jointAcceleration + dof()));
+  auto n = dof();
+  std::vector<physx::PxReal> result(n);
+  Eigen::Map<Eigen::VectorXf>(result.data(), n) =
+      mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, n);
+  return result;
 }
 
 void SArticulation::setQacc(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
 
-  auto v2 = E2I(v);
-  for (size_t i = 0; i < v.size(); ++i) {
-    mCache->jointAcceleration[i] = v2[i];
-  }
+  auto n = dof();
+  Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, n) =
+      mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(v.data(), n);
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eACCELERATION);
 }
 
 std::vector<physx::PxReal> SArticulation::getQf() const {
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eFORCE);
-  return I2E(std::vector<physx::PxReal>(mCache->jointForce, mCache->jointForce + dof()));
+  auto n = dof();
+  std::vector<physx::PxReal> result(n);
+  Eigen::Map<Eigen::VectorXf>(result.data(), n) =
+      mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n);
+  return result;
 }
+
 void SArticulation::setQf(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
 
-  auto v2 = E2I(v);
-  for (size_t i = 0; i < v.size(); ++i) {
-    mCache->jointForce[i] = v2[i];
-  }
+  auto n = dof();
+  Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n) =
+      mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(v.data(), n);
   mPxArticulation->applyCache(*mCache, PxArticulationCache::eFORCE);
 }
 
@@ -139,64 +157,6 @@ void SArticulation::setRootAngularVelocity(physx::PxVec3 const &omega) {
 SLinkBase *SArticulation::getRootLink() const { return mRootLink; }
 
 SArticulation::SArticulation(SScene *scene) : SArticulationDrivable(scene) {}
-
-std::vector<PxReal> SArticulation::E2I(std::vector<PxReal> ev) const {
-  std::vector<PxReal> iv(ev.size());
-  for (uint32_t i = 0; i < ev.size(); ++i) {
-    iv[i] = ev[mIndexI2E[i]];
-  }
-  return iv;
-}
-
-std::vector<PxReal> SArticulation::I2E(std::vector<PxReal> iv) const {
-  std::vector<PxReal> ev(iv.size());
-  for (uint32_t i = 0; i < iv.size(); ++i) {
-    ev[i] = iv[mIndexE2I[i]];
-  }
-  return ev;
-}
-
-Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-SArticulation::buildColumnPermutation(const std::vector<uint32_t> &indexI2E) {
-  auto size = indexI2E.size();
-  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> permutation(size, size);
-  permutation.block(0, 0, size, size) = Eigen::MatrixXf::Constant(size, size, 0);
-  for (size_t i = 0; i < size; ++i) {
-    permutation(i, indexI2E[i]) = 1;
-  }
-  return permutation;
-}
-
-Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
-SArticulation::buildRowPermutation() {
-  uint32_t nValidLinks = getPxArticulation()->getNbLinks() - 1;
-  uint32_t size = nValidLinks * 6;
-  Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> permutation(size, size);
-  permutation.block(0, 0, size, size) = Eigen::MatrixXf::Constant(size, size, 0);
-
-  // Find the index of root link for external order (SLinks), normally it is 0
-  uint32_t rootExternalIndex = -1;
-  for (auto &link : getSLinks()) {
-    auto internalIndex = link->getPxActor()->getLinkIndex();
-    if (internalIndex == 0) {
-      rootExternalIndex = link->getIndex();
-      break;
-    }
-  }
-  assert(rootExternalIndex >= 0);
-
-  for (size_t k = 0; k < nValidLinks + 1; ++k) {
-    if (k == rootExternalIndex)
-      continue;
-    auto internalIndex = getSLinks()[k]->getPxActor()->getLinkIndex() - 1;
-    auto externalIndex = k < rootExternalIndex ? k : k - 1;
-    for (int j = 0; j < 6; ++j) {
-      permutation(externalIndex * 6 + j, internalIndex * 6 + j) = 1;
-    }
-  }
-
-  return permutation;
-}
 
 void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
@@ -279,34 +239,31 @@ void SArticulation::resetCache() {
 std::vector<physx::PxReal>
 SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bool external) {
   mPxArticulation->commonInit();
-  std::vector<physx::PxReal> passiveForce(dof(), 0);
+  auto n = dof();
+
+  std::vector<physx::PxReal> passiveForce(n, 0);
+  Eigen::Map<Eigen::VectorXf> passiveForceVector(passiveForce.data(), n);
 
   if (coriolisAndCentrifugal) {
     mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
     mPxArticulation->computeCoriolisAndCentrifugalForce(*mCache);
-    std::vector<physx::PxReal> coriolisForce(mCache->jointForce, mCache->jointForce + dof());
-    for (size_t j = 0; j < dof(); ++j) {
-      passiveForce[j] += coriolisForce[j];
-    }
+    passiveForceVector += Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n);
   }
 
   if (gravity) {
     mPxArticulation->computeGeneralizedGravityForce(*mCache);
-    std::vector<physx::PxReal> gravityForce(mCache->jointForce, mCache->jointForce + dof());
-    for (size_t j = 0; j < dof(); ++j) {
-      passiveForce[j] += gravityForce[j];
-    }
+    passiveForceVector += Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n);
   }
 
   if (external) {
-    mPxArticulation->computeGeneralizedExternalForce(*mCache);
-    std::vector<physx::PxReal> externalForce(mCache->jointForce, mCache->jointForce + dof());
-    for (size_t j = 0; j < dof(); ++j) {
-      passiveForce[j] += externalForce[j];
-    }
+    spdlog::get("SAPIEN")->warn(
+        "external force is deprecated and ignored in passive force computation.");
   }
 
-  return I2E(passiveForce);
+  std::vector<physx::PxReal> result(n);
+  Eigen::Map<Eigen::VectorXf>(result.data(), n) =
+      mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(passiveForce.data(), n);
+  return result;
 }
 
 std::vector<physx::PxReal>
@@ -316,49 +273,56 @@ SArticulation::computeGeneralizedExternalForce(std::vector<PxVec3> const &force,
       mPxArticulation->getNbLinks() != torque.size()) {
     throw std::runtime_error("Input force and torque does not match number of links.");
   }
+  auto n = dof();
+
   mPxArticulation->commonInit();
   for (uint32_t i = 0; i < force.size(); ++i) {
     mCache->externalForces[i].force = force[i];
     mCache->externalForces[i].torque = torque[i];
   }
   mPxArticulation->computeGeneralizedExternalForce(*mCache);
-  std::vector<physx::PxReal> externalForce(mCache->jointForce, mCache->jointForce + dof());
-  return I2E(externalForce);
+  std::vector<physx::PxReal> result(n);
+  Eigen::Map<Eigen::VectorXf>(result.data(), n) =
+      mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointForce, dof());
+  return result;
 }
 
 std::vector<physx::PxReal> SArticulation::computeForwardDynamics(const std::vector<PxReal> &qf) {
   if (qf.size() != dof()) {
     throw std::runtime_error("Input vector size does not match DOF of articulation");
   }
+  auto n = dof();
 
-  std::vector<PxReal> internalQf = E2I(qf);
   mPxArticulation->commonInit();
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
-  for (size_t i = 0; i < dof(); ++i) {
-    mCache->jointForce[i] = internalQf[i];
-  }
+  Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n) =
+      mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(qf.data(), n);
   mPxArticulation->computeJointAcceleration(*mCache);
-  std::vector<physx::PxReal> result(mCache->jointAcceleration, mCache->jointAcceleration + dof());
-  return I2E(result);
+
+  std::vector<physx::PxReal> result(n);
+  Eigen::Map<Eigen::VectorXf>(result.data(), n) =
+      mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, n);
+  return result;
 }
 
 std::vector<physx::PxReal> SArticulation::computeInverseDynamics(const std::vector<PxReal> &qacc) {
   if (qacc.size() != dof()) {
     throw std::runtime_error("Input vector size does not match DOF of articulation");
   }
+  auto n = dof();
 
-  std::vector<PxReal> internalQacc = E2I(qacc);
   mPxArticulation->commonInit();
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
-
-  for (size_t i = 0; i < dof(); ++i) {
-    mCache->jointAcceleration[i] = internalQacc[i];
-  }
+  Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, n) =
+      mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(qacc.data(), n);
   mPxArticulation->computeJointForce(*mCache);
-  std::vector<physx::PxReal> result(mCache->jointForce, mCache->jointForce + dof());
-  return I2E(result);
+
+  std::vector<physx::PxReal> result(n);
+  Eigen::Map<Eigen::VectorXf>(result.data(), n) =
+      mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n);
+  return result;
 }
 
 Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
@@ -372,7 +336,7 @@ SArticulation::computeManipulatorInertiaMatrix() {
   Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor> originMass =
       Map<Matrix<PxReal, Dynamic, Dynamic, Eigen::RowMajor>>(mCache->massMatrix, mDof, mDof);
 
-  return mColumnPermutationI2E.transpose() * originMass * mColumnPermutationI2E;
+  return mPermutationE2I.inverse() * originMass * mPermutationE2I;
 }
 
 void SArticulation::prestep() {
@@ -419,10 +383,10 @@ SArticulation::computeSpatialTwistJacobianMatrix() {
   eliminatedJacobian = vel2twist * eliminatedJacobian;
 
   // Switch joint(column) order from internal to external
-  eliminatedJacobian = eliminatedJacobian * mColumnPermutationI2E;
+  eliminatedJacobian = eliminatedJacobian * mPermutationE2I;
 
   // Switch link(row) order from internal to external
-  return mRowPermutationI2E * eliminatedJacobian;
+  return mLinkPermutationE2I.inverse() * eliminatedJacobian;
 }
 
 Eigen::Matrix<PxReal, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>
@@ -440,10 +404,10 @@ SArticulation::computeWorldCartesianJacobianMatrix() {
       originJacobian.block(freeBase, freeBase, nRows - freeBase, nCols - freeBase));
 
   // Switch joint(column) order from internal to external
-  eliminatedJacobian = eliminatedJacobian * mColumnPermutationI2E;
+  eliminatedJacobian = eliminatedJacobian * mPermutationE2I;
 
   // Switch link(row) order from internal to external
-  return mRowPermutationI2E * eliminatedJacobian;
+  return mLinkPermutationE2I.inverse() * eliminatedJacobian;
 }
 
 #define PUSH_QUAT(data, q)                                                                        \

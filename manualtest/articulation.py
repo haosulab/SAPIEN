@@ -251,11 +251,12 @@ def main():
 
     loader = scene.create_urdf_loader()
     loader.fix_root_link = True
-    robot = loader.load("../assets/robot/jaco2/jaco2.urdf")
-    for j in robot.get_active_joints():
-        j.set_drive_property(1000, 200)
-    robot.set_qpos([4.71, 2.84, 0.0, 0.75, 4.62, 4.48, 4.88, 0, 0])
-    robot.set_drive_target([4.71, 2.84, 0.0, 0.75, 4.62, 4.48, 4.88, 0, 0])
+    robot = loader.load("../assets/robot/movo/movo.urdf")
+    robot.get_qpos()
+    # for j in robot.get_active_joints():
+    #     j.set_drive_property(1000, 200)
+    # robot.set_qpos([4.71, 2.84, 0.0, 0.75, 4.62, 4.48, 4.88, 0, 0])
+    # robot.set_drive_target([4.71, 2.84, 0.0, 0.75, 4.62, 4.48, 4.88, 0, 0])
 
     # import tempfile
     # with tempfile.TemporaryDirectory(prefix="sapien") as d:
@@ -326,11 +327,11 @@ def main():
     while not viewer.closed:
         for i in range(4):
             scene.step_async()
-        # scene.update_render()
-        # viewer.render()
-        # count += 1
+        scene.update_render()
+        viewer.render()
+        count += 1
 
-        scene.update_render_async()
+        # scene.update_render_async()
 
         # cam2.take_picture()
         # img = cam2.get_dl_tensor("Color")
@@ -339,16 +340,17 @@ def main():
         # sapien.dlpack.dl_to_numpy_cuda_async_unchecked(img, output)
         # sapien.dlpack.dl_cuda_sync()
 
-        imgs = cam2.take_picture_and_get_dl_tensors_async(["Color"]).wait()
-        shape = sapien.dlpack.dl_shape(imgs[0])
-        output = np.zeros(shape, dtype=np.float32)
-        sapien.dlpack.dl_to_numpy_cuda_async_unchecked(imgs[0], output)
-        sapien.dlpack.dl_cuda_sync()
+        # imgs = cam2.take_picture_and_get_dl_tensors_async(["Color"]).wait()
+        # shape = sapien.dlpack.dl_shape(imgs[0])
+        # output = np.zeros(shape, dtype=np.float32)
+        # sapien.dlpack.dl_to_numpy_cuda_async_unchecked(imgs[0], output)
+        # sapien.dlpack.dl_cuda_sync()
 
-        import matplotlib.pyplot as plt
-        plt.imshow(output)
-        plt.show()
+        # import matplotlib.pyplot as plt
+        # plt.imshow(output)
+        # plt.show()
 
+        robot.get_qpos()
         if count == 1:
             viewer.window.resize(1024, 768)
 
