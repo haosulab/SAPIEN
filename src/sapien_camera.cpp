@@ -1,5 +1,5 @@
-#include "sapien_camera.h"
-#include "sapien_scene.h"
+#include "sapien/sapien_camera.h"
+#include "sapien/sapien_scene.h"
 #include <glm/gtx/quaternion.hpp>
 
 namespace sapien {

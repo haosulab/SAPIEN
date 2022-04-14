@@ -1,8 +1,6 @@
 #include <pybind11/pybind11.h>
-
 #include "pysapien_content.hpp"
-
-#include "pysapien-renderer.hpp"
+#include "pysapien_renderer.hpp"
 
 using namespace sapien;
 namespace py = pybind11;

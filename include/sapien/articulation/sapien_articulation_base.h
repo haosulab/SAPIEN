@@ -1,7 +1,7 @@
 #pragma once
-#include "event_system/event_system.h"
-#include "id_generator.h"
-#include "sapien_entity.h"
+#include "sapien/event_system/event_system.h"
+#include "sapien/id_generator.h"
+#include "sapien/sapien_entity.h"
 #include <PxPhysicsAPI.h>
 #include <array>
 #include <string>

@@ -20,7 +20,7 @@
 
 // TODO(jigu): check whether to replace with forward declaration
 #include "mesh_manager.h"
-#include "render_interface.h"
+#include "renderer/render_interface.h"
 #include "sapien_material.h"
 #include "sapien_scene.h"
 #include "sapien_scene_config.h"

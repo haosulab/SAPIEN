@@ -1,9 +1,9 @@
-#include "svulkan2_shape.h"
-#include "dlpack.hpp"
-#include "svulkan2/resource/shape.h"
-#include "svulkan2_material.h"
-#include "svulkan2_renderer.h"
-#include "svulkan2_rigidbody.h"
+#include "sapien/renderer/svulkan2_shape.h"
+#include "sapien/renderer/dlpack.hpp"
+#include <svulkan2/resource/shape.h>
+#include "sapien/renderer/svulkan2_material.h"
+#include "sapien/renderer/svulkan2_renderer.h"
+#include "sapien/renderer/svulkan2_rigidbody.h"
 
 namespace sapien {
 namespace Renderer {

@@ -1,5 +1,5 @@
-#include "svulkan2_material.h"
-#include "svulkan2_renderer.h"
+#include "sapien/renderer/svulkan2_material.h"
+#include "sapien/renderer/svulkan2_renderer.h"
 
 namespace sapien {
 namespace Renderer {

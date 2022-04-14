@@ -1,5 +1,5 @@
-#include "dlpack.hpp"
-#include "svulkan2_renderer.h"
+#include "sapien/renderer/dlpack.hpp"
+#include "sapien/renderer/svulkan2_renderer.h"
 
 namespace sapien {
 namespace Renderer {

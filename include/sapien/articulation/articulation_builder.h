@@ -1,5 +1,5 @@
 #pragma once
-#include "actor_builder.h"
+#include "sapien/actor_builder.h"
 #include <PxPhysicsAPI.h>
 #include <memory>
 #include <sstream>

@@ -1,6 +1,6 @@
 #pragma once
 #include "id_generator.h"
-#include "render_interface.h"
+#include "renderer/render_interface.h"
 #include "sapien_material.h"
 #include <PxPhysicsAPI.h>
 #include <memory>

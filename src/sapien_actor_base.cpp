@@ -1,6 +1,6 @@
-#include "sapien_actor_base.h"
-#include "renderer/render_interface.h"
-#include "sapien_scene.h"
+#include "sapien/sapien_actor_base.h"
+#include "sapien/renderer/render_interface.h"
+#include "sapien/sapien_scene.h"
 #include <spdlog/spdlog.h>
 
 namespace sapien {

@@ -1,5 +1,5 @@
-#include "sapien_shape.h"
-#include "sapien_material.h"
+#include "sapien/sapien_shape.h"
+#include "sapien/sapien_material.h"
 #include <array>
 #include <stdexcept>
 

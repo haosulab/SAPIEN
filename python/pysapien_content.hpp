@@ -7,44 +7,43 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "actor_builder.h"
-#include "awaitable.hpp"
-#include "renderer/render_interface.h"
-#include "sapien_actor.h"
-#include "sapien_actor_base.h"
-#include "sapien_contact.h"
-#include "sapien_drive.h"
-#include "sapien_entity_particle.h"
-#include "sapien_material.h"
-#include "sapien_scene.h"
-#include "simulation.h"
+#include "sapien/actor_builder.h"
+#include "sapien/awaitable.hpp"
+#include "sapien/renderer/render_interface.h"
+#include "sapien/sapien_actor.h"
+#include "sapien/sapien_actor_base.h"
+#include "sapien/sapien_contact.h"
+#include "sapien/sapien_drive.h"
+#include "sapien/sapien_entity_particle.h"
+#include "sapien/sapien_material.h"
+#include "sapien/sapien_scene.h"
+#include "sapien/simulation.h"
 
-#include "articulation/articulation_builder.h"
-#include "articulation/sapien_articulation.h"
-#include "articulation/sapien_articulation_base.h"
-#include "articulation/sapien_joint.h"
-#include "articulation/sapien_kinematic_articulation.h"
-#include "articulation/sapien_kinematic_joint.h"
-#include "articulation/sapien_link.h"
-#include "articulation/urdf_loader.h"
-#include "event_system/event_system.h"
+#include "sapien/articulation/articulation_builder.h"
+#include "sapien/articulation/sapien_articulation.h"
+#include "sapien/articulation/sapien_articulation_base.h"
+#include "sapien/articulation/sapien_joint.h"
+#include "sapien/articulation/sapien_kinematic_articulation.h"
+#include "sapien/articulation/sapien_kinematic_joint.h"
+#include "sapien/articulation/sapien_link.h"
+#include "sapien/articulation/urdf_loader.h"
+#include "sapien/event_system/event_system.h"
 
-#include "renderer/svulkan2_pointbody.h"
-#include "renderer/svulkan2_renderer.h"
-#include "renderer/svulkan2_rigidbody.h"
-#include "renderer/svulkan2_scene.h"
-#include "renderer/svulkan2_shape.h"
-#include "renderer/svulkan2_window.h"
+#include "sapien/renderer/svulkan2_pointbody.h"
+#include "sapien/renderer/svulkan2_renderer.h"
+#include "sapien/renderer/svulkan2_rigidbody.h"
+#include "sapien/renderer/svulkan2_scene.h"
+#include "sapien/renderer/svulkan2_shape.h"
+#include "sapien/renderer/svulkan2_window.h"
+#include "sapien/renderer/kuafu_renderer.hpp"
 
-#include "renderer/kuafu_renderer.hpp"
-
-#include "profiler.hpp"
+#include "sapien/profiler.hpp"
 
 #ifdef _USE_PINOCCHIO
-#include "articulation/pinocchio_model.h"
+#include "sapien/articulation/pinocchio_model.h"
 #endif
 
-#include "utils/pose.hpp"
+#include "sapien/utils/pose.hpp"
 
 using namespace sapien;
 namespace py = pybind11;

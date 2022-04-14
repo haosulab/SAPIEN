@@ -1,7 +1,7 @@
-#include "sapien_articulation.h"
-#include "sapien_joint.h"
-#include "sapien_link.h"
-#include "sapien_scene.h"
+#include "sapien/articulation/sapien_articulation.h"
+#include "sapien/articulation/sapien_joint.h"
+#include "sapien/articulation/sapien_link.h"
+#include "sapien/sapien_scene.h"
 #include <easy/profiler.h>
 #include <numeric>
 #include <spdlog/spdlog.h>

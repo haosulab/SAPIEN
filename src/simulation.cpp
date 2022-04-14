@@ -1,11 +1,11 @@
 #include <PxPhysicsAPI.h>
 #include <extensions/PxExtensionsAPI.h>
 
-#include "spdlog/sinks/stdout_color_sinks.h"
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
-#include "filter_shader.h"
-#include "simulation.h"
+#include "sapien/filter_shader.h"
+#include "sapien/simulation.h"
 
 #include <easy/profiler.h>
 

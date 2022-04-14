@@ -1,5 +1,5 @@
 #pragma once
-#include "renderer/render_interface.h"
+#include "render_interface.h"
 #include "svulkan2_light.h"
 #include "svulkan2_material.h"
 #include "svulkan2_scene.h"

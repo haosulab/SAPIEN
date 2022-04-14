@@ -1,7 +1,7 @@
-#include "svulkan2_scene.h"
-#include "svulkan2_renderer.h"
-#include "svulkan2_rigidbody.h"
-#include "svulkan2_shape.h"
+#include "sapien/renderer/svulkan2_scene.h"
+#include "sapien/renderer/svulkan2_renderer.h"
+#include "sapien/renderer/svulkan2_rigidbody.h"
+#include "sapien/renderer/svulkan2_shape.h"
 
 namespace sapien {
 namespace Renderer {

@@ -1,8 +1,8 @@
-#include "simulation_callback.h"
-#include "sapien_actor_base.h"
-#include "sapien_contact.h"
-#include "sapien_scene.h"
-#include "sapien_trigger.h"
+#include "sapien/simulation_callback.h"
+#include "sapien/sapien_actor_base.h"
+#include "sapien/sapien_contact.h"
+#include "sapien/sapien_scene.h"
+#include "sapien/sapien_trigger.h"
 #include <iostream>
 
 namespace sapien {

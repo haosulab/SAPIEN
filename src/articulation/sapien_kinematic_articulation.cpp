@@ -1,8 +1,8 @@
-#include "sapien_kinematic_articulation.h"
-#include "sapien_joint.h"
-#include "sapien_kinematic_joint.h"
-#include "sapien_link.h"
-#include "sapien_scene.h"
+#include "sapien/articulation/sapien_kinematic_articulation.h"
+#include "sapien/articulation/sapien_joint.h"
+#include "sapien/articulation/sapien_kinematic_joint.h"
+#include "sapien/articulation/sapien_link.h"
+#include "sapien/sapien_scene.h"
 #include <spdlog/spdlog.h>
 
 #define CHECK_SIZE(v)                                                                             \

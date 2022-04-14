@@ -1,6 +1,6 @@
 #pragma once
-#include "id_generator.h"
-#include "sapien_actor_base.h"
+#include "sapien/id_generator.h"
+#include "sapien/sapien_actor_base.h"
 #include "sapien_articulation.h"
 #include "sapien_kinematic_articulation.h"
 #include <PxPhysicsAPI.h>

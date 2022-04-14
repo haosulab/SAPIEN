@@ -1,7 +1,7 @@
-#include "actor_builder.h"
-#include "sapien_actor.h"
-#include "sapien_scene.h"
-#include "simulation.h"
+#include "sapien/actor_builder.h"
+#include "sapien/sapien_actor.h"
+#include "sapien/sapien_scene.h"
+#include "sapien/simulation.h"
 #include <spdlog/spdlog.h>
 
 namespace sapien {

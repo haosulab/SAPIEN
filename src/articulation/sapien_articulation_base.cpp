@@ -4,13 +4,13 @@
 #include <eigen3/Eigen/Eigen>
 #include <spdlog/spdlog.h>
 
-#include "sapien_articulation_base.h"
-#include "sapien_joint.h"
-#include "sapien_link.h"
-#include "sapien_scene.h"
+#include "sapien/articulation/sapien_articulation_base.h"
+#include "sapien/articulation/sapien_joint.h"
+#include "sapien/articulation/sapien_link.h"
+#include "sapien/sapien_scene.h"
 
 #ifdef _USE_PINOCCHIO
-#include "pinocchio_model.h"
+#include "sapien/articulation/pinocchio_model.h"
 #endif
 
 namespace sapien {

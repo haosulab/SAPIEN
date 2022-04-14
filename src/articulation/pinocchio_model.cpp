@@ -1,5 +1,5 @@
 #ifdef _USE_PINOCCHIO
-#include "pinocchio_model.h"
+#include "sapien/articulation/pinocchio_model.h"
 #include <pinocchio/algorithm/aba.hpp>
 #include <pinocchio/algorithm/crba.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>

@@ -2,9 +2,9 @@
 // Created by jet on 7/18/21.
 //
 
-#include "kuafu_scene.hpp"
-#include "kuafu_light.hpp"
-#include "kuafu_renderer.hpp"
+#include "sapien/renderer/kuafu_scene.hpp"
+#include "sapien/renderer/kuafu_light.hpp"
+#include "sapien/renderer/kuafu_renderer.hpp"
 #include "kuafu_utils.hpp"
 #include <core/context/global.hpp>
 #include <core/geometry.hpp>

@@ -56,10 +56,12 @@ find_package(GLEW REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(assimp REQUIRED)
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/include"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/pxshared/include" 
-        "src/renderer"
-        )
+include_directories(
+    "include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/pxshared/include"
+    "src/renderer"
+    )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked")

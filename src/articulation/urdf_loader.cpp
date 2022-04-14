@@ -1,9 +1,9 @@
-#include "urdf_loader.h"
-#include "articulation_builder.h"
-#include "sapien_articulation.h"
-#include "sapien_kinematic_articulation.h"
-#include "sapien_link.h"
-#include "sapien_scene.h"
+#include "sapien/articulation/urdf_loader.h"
+#include "sapien/articulation/articulation_builder.h"
+#include "sapien/articulation/sapien_articulation.h"
+#include "sapien/articulation/sapien_kinematic_articulation.h"
+#include "sapien/articulation/sapien_link.h"
+#include "sapien/sapien_scene.h"
 #include <eigen3/Eigen/Eigenvalues>
 #include <experimental/filesystem>
 

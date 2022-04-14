@@ -1,5 +1,5 @@
-#include "sapien_material.h"
-#include "simulation.h"
+#include "sapien/sapien_material.h"
+#include "sapien/simulation.h"
 
 namespace sapien {
 SPhysicalMaterial::SPhysicalMaterial(std::shared_ptr<Simulation const> simulation,

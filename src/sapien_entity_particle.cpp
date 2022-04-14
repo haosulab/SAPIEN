@@ -1,4 +1,4 @@
-#include "sapien_entity_particle.h"
+#include "sapien/sapien_entity_particle.h"
 
 namespace sapien {
 SEntityParticle::SEntityParticle(SScene *scene, Renderer::IPxrPointBody *renderBody)

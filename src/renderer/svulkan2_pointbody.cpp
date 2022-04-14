@@ -1,6 +1,6 @@
-#include "svulkan2_pointbody.h"
-#include "dlpack.hpp"
-#include "svulkan2_scene.h"
+#include "sapien/renderer/svulkan2_pointbody.h"
+#include "sapien/renderer/dlpack.hpp"
+#include "sapien/renderer/svulkan2_scene.h"
 
 namespace sapien {
 namespace Renderer {

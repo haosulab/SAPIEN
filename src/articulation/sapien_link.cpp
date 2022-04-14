@@ -1,5 +1,5 @@
-#include "sapien_link.h"
-#include "sapien_articulation.h"
+#include "sapien/articulation/sapien_link.h"
+#include "sapien/articulation/sapien_articulation.h"
 
 namespace sapien {
 

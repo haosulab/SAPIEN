@@ -1,5 +1,5 @@
-#include "mesh_manager.h"
-#include "simulation.h"
+#include "sapien/mesh_manager.h"
+#include "sapien/simulation.h"
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

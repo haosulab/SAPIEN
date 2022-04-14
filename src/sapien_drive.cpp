@@ -1,7 +1,7 @@
-#include "sapien_drive.h"
-#include "sapien_actor.h"
-#include "sapien_scene.h"
-#include "simulation.h"
+#include "sapien/sapien_drive.h"
+#include "sapien/sapien_actor.h"
+#include "sapien/sapien_scene.h"
+#include "sapien/simulation.h"
 
 namespace sapien {
 

@@ -1,5 +1,5 @@
-#include "sapien_entity.h"
-#include "sapien_scene.h"
+#include "sapien/sapien_entity.h"
+#include "sapien/sapien_scene.h"
 
 namespace sapien {
 

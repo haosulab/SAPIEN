@@ -1,6 +1,6 @@
 #pragma once
-#include "awaitable.hpp"
-#include "thread_pool.hpp"
+#include "sapien/awaitable.hpp"
+#include "sapien/thread_pool.hpp"
 #include <PxPhysicsAPI.h>
 #include <array>
 #include <dlpack/dlpack.h>

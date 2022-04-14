@@ -1,11 +1,11 @@
-#include "articulation_builder.h"
-#include "sapien_articulation.h"
-#include "sapien_joint.h"
-#include "sapien_kinematic_articulation.h"
-#include "sapien_kinematic_joint.h"
-#include "sapien_link.h"
-#include "sapien_scene.h"
-#include "simulation.h"
+#include "sapien/articulation/articulation_builder.h"
+#include "sapien/articulation/sapien_articulation.h"
+#include "sapien/articulation/sapien_joint.h"
+#include "sapien/articulation/sapien_kinematic_articulation.h"
+#include "sapien/articulation/sapien_kinematic_joint.h"
+#include "sapien/articulation/sapien_link.h"
+#include "sapien/sapien_scene.h"
+#include "sapien/simulation.h"
 #include <spdlog/spdlog.h>
 
 namespace sapien {

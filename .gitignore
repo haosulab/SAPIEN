@@ -28,3 +28,6 @@ imgui.ini
 /docker/PhysX/
 /docker/cuda-11.4/
 /python/py_package/version.py
+
+apidoc
+/cmake
