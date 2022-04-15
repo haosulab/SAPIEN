@@ -43,7 +43,7 @@ SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
                                    uint32_t maxNumTextures, uint32_t defaultMipLevels,
                                    std::string const &device, std::string const &culling,
                                    bool doNotLoadTexture) {
-  if (!gContext.expired()) {
+  if (!gContext.expired() && !gResourceManager.expired()) {
     mContext = gContext.lock();
     mResourceManager = gResourceManager.lock();
     spdlog::get("SAPIEN")->warn("A second renderer will share the same internal context with the "

@@ -1,6 +1,12 @@
 #pragma once
 #include "sapien_articulation_base.h"
+
+#if __has_include(<Eigen/Dense>)
 #include <Eigen/Dense>
+#else
+#include <eigen3/Eigen/Dense>
+#endif
+
 #include <memory>
 
 namespace sapien {
@@ -24,6 +30,12 @@ class SArticulation : public SArticulationDrivable {
 
   Eigen::PermutationMatrix<Eigen::Dynamic> mPermutationE2I;
   Eigen::PermutationMatrix<Eigen::Dynamic> mLinkPermutationE2I;
+
+  // helper cache, external order
+  std::vector<PxArticulationJointReducedCoordinate *> mActiveJoints;
+  std::vector<PxArticulationAxis::Enum> mDriveAxes;
+  std::vector<float>
+      mDriveMultiplier; // due to physx bug, some drive target needs to be multiplied -1
 
 public:
   std::vector<SLinkBase *> getBaseLinks() override;
@@ -113,14 +125,6 @@ private:
   SArticulation(SScene *scene);
   SArticulation(SArticulation const &other) = delete;
   SArticulation &operator=(SArticulation const &other) = delete;
-
-  // std::vector<PxReal> E2I(std::vector<PxReal> ev) const;
-  // std::vector<PxReal> I2E(std::vector<PxReal> iv) const;
-
-  /* Functions for building permutation matrix for Jacobian calculation */
-  static Matrix<PxReal, Dynamic, Dynamic, RowMajor>
-  buildColumnPermutation(const std::vector<int> &indexI2E);
-  Matrix<PxReal, Dynamic, Dynamic, RowMajor> buildRowPermutation();
 };
 
 } // namespace sapien

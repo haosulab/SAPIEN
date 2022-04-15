@@ -472,6 +472,26 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
         Eigen::Map<Eigen::VectorXi>(jointE2I.data(), jointE2I.size()));
     result->mLinkPermutationE2I = Eigen::PermutationMatrix<Eigen::Dynamic>(
         Eigen::Map<Eigen::VectorXi>(rowE2I.data(), rowE2I.size()));
+
+    std::vector<PxArticulationJointReducedCoordinate *> activeJoints;
+    std::vector<PxArticulationAxis::Enum> driveAxes;
+    std::vector<float> driveMultiplier;
+
+    for (auto &j : result->mJoints) {
+      if (j->getDof() == 1) {
+        activeJoints.push_back(j->getPxJoint());
+        auto axis = j->getAxes()[0];
+        driveAxes.push_back(axis);
+        if (axis == PxArticulationAxis::eX) {
+          driveMultiplier.push_back(-1);
+        } else {
+          driveMultiplier.push_back(1);
+        }
+      }
+    }
+    result->mActiveJoints = activeJoints;
+    result->mDriveAxes = driveAxes;
+    result->mDriveMultiplier = driveMultiplier;
   }
 
   for (auto &j : result->mJoints) {

@@ -65,6 +65,7 @@ __all__ = [
     "RenderTexture",
     "Scene",
     "SceneConfig",
+    "SceneMultistepCallback",
     "ShapeRecord",
     "SphereGeometry",
     "SpotLightEntity",
@@ -88,6 +89,11 @@ class Entity():
     def get_name(self) -> str: ...
     def get_pose(self) -> Pose: ...
     def set_name(self, name: str) -> None: ...
+    @property
+    def _ptr(self) -> capsule:
+        """
+        :type: capsule
+        """
     @property
     def classname(self) -> None:
         """
@@ -1507,6 +1513,7 @@ class Scene():
     def get_mounted_cameras(self) -> typing.List[CameraEntity]: ...
     def get_renderer_scene(self) -> RenderScene: ...
     def get_timestep(self) -> float: ...
+    def multistep_async(self, arg0: int, arg1: capsule) -> AwaitableVoid: ...
     def pack(self) -> typing.Dict[str, typing.Dict[int, typing.List[float]]]: ...
     def remove_actor(self, actor: ActorBase) -> None: ...
     def remove_articulation(self, articulation: Articulation) -> None: ...
@@ -1523,6 +1530,11 @@ class Scene():
     def unpack(self, data: typing.Dict[str, typing.Dict[int, typing.List[float]]]) -> None: ...
     def update_render(self) -> None: ...
     def update_render_async(self) -> AwaitableVoid: ...
+    @property
+    def _ptr(self) -> capsule:
+        """
+        :type: capsule
+        """
     @property
     def ambient_light(self) -> numpy.ndarray[numpy.float32]:
         """
@@ -1688,6 +1700,8 @@ class SceneConfig():
     @solver_velocity_iterations.setter
     def solver_velocity_iterations(self, arg0: int) -> None:
         pass
+    pass
+class SceneMultistepCallback():
     pass
 class ShapeRecord():
     @property

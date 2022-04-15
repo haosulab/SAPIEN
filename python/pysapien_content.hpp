@@ -29,13 +29,13 @@
 #include "sapien/articulation/urdf_loader.h"
 #include "sapien/event_system/event_system.h"
 
+#include "sapien/renderer/kuafu_renderer.hpp"
 #include "sapien/renderer/svulkan2_pointbody.h"
 #include "sapien/renderer/svulkan2_renderer.h"
 #include "sapien/renderer/svulkan2_rigidbody.h"
 #include "sapien/renderer/svulkan2_scene.h"
 #include "sapien/renderer/svulkan2_shape.h"
 #include "sapien/renderer/svulkan2_window.h"
-#include "sapien/renderer/kuafu_renderer.hpp"
 
 #include "sapien/profiler.hpp"
 
@@ -91,18 +91,6 @@ public:
 private:
   std::shared_ptr<IAwaitable<dl_vector>> mAwaitable;
 };
-
-// template <typename ResultType>
-// class Awaitable : public std::enable_shared_from_this<Awaitable<ResultType>> {
-// public:
-//   Awaitable(std::future<ResultType> &&future) : mFuture(std::move(future)) {}
-//   ResultType await() { return mFuture.get(); }
-//   bool ready() { return mFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
-//   }
-
-// private:
-//   std::future<ResultType> mFuture;
-// };
 
 template <typename T> void declare_awaitable(py::module &m, std::string const &typestr) {
   using Class = IAwaitable<T>;
@@ -238,6 +226,8 @@ void buildSapien(py::module &m) {
       m, "AwaitableDLList")
       .def("wait", &AwaitableDLVectorWrapper::wait)
       .def("ready", &AwaitableDLVectorWrapper::wait);
+
+  auto PyMultistepCallback = py::class_<SceneMultistepCallback>(m, "SceneMultistepCallback");
 
   // collision geometry and shape
   auto PyGeometry = py::class_<SGeometry>(m, "CollisionGeometry");
@@ -742,7 +732,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("create_physical_material", &Simulation::createPhysicalMaterial,
            py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"));
 
-  PyScene.def_property_readonly("name", &SScene::getName)
+  PyScene.def_property_readonly("_ptr", [](SScene &s) { return (void *)&s; })
+      .def_property_readonly("name", &SScene::getName)
       .def_property_readonly("engine", &SScene::getSimulation)
       .def("set_timestep", &SScene::setTimestep, py::arg("second"))
       .def("get_timestep", &SScene::getTimestep)
@@ -815,6 +806,12 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            [](SScene &scene) {
              return std::static_pointer_cast<IAwaitable<void>>(
                  std::make_shared<AwaitableFuture<void>>(scene.stepAsync()));
+           })
+      .def("multistep_async",
+           [](SScene &scene, int steps, void *callback) {
+             return std::static_pointer_cast<IAwaitable<void>>(
+                 std::make_shared<AwaitableFuture<void>>(
+                     scene.multistepAsync(steps, (SceneMultistepCallback *)callback)));
            })
       .def("update_render", &SScene::updateRender)
       .def("update_render_async",
@@ -979,7 +976,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("linear"), py::arg("angular"));
 
-  PyEntity.def_property("name", &SEntity::getName, &SEntity::setName)
+  PyEntity.def_property_readonly("_ptr", [](SEntity &e) { return (void *)&e; })
+      .def_property("name", &SEntity::getName, &SEntity::setName)
       .def("get_name", &SEntity::getName)
       .def("set_name", &SEntity::setName, py::arg("name"))
       .def_property_readonly("pose", &SEntity::getPose)

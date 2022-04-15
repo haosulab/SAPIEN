@@ -486,6 +486,70 @@ std::future<void> SScene::stepAsync() {
   });
 }
 
+std::future<void> SScene::multistepAsync(int steps, SceneMultistepCallback *callback) {
+  return getThread().submit([this, steps, callback]() {
+    {
+      EASY_BLOCK("BeforeMultistep")
+      callback->beforeMultistep();
+    }
+
+    for (int s = 0; s < steps; ++s) {
+      {
+        EASY_BLOCK("BeforeStep")
+        callback->beforeStep(s);
+      }
+
+      {
+        EASY_BLOCK("Scene preprocess")
+        for (auto &a : mActors) {
+          if (!a->isBeingDestroyed())
+            a->prestep();
+        }
+        for (auto &a : mArticulations) {
+          if (!a->isBeingDestroyed())
+            a->prestep();
+        }
+        for (auto &a : mKinematicArticulations) {
+          if (!a->isBeingDestroyed())
+            a->prestep();
+        }
+        removeCleanUp1();
+      }
+
+      {
+        EASY_BLOCK("PhysX scene simulate", profiler::colors::Red);
+        mPxScene->simulate(mTimestep);
+      }
+
+      {
+        EASY_BLOCK("PhysX scene fetch", profiler::colors::Red);
+        while (!mPxScene->fetchResults(true)) {
+        }
+      }
+
+      {
+        EASY_BLOCK("Scene postprocess");
+        removeCleanUp2();
+      }
+
+      {
+        EASY_BLOCK("AfterStep")
+        callback->afterStep(s);
+      }
+    }
+    {
+      EASY_BLOCK("AfterMultistep")
+      callback->afterMultistep();
+    }
+
+    EventSceneStep event;
+    event.scene = this;
+    event.timeStep = getTimestep();
+    emit(event);
+    EASY_END_BLOCK
+  });
+}
+
 // void SScene::stepWait() {
 //   // while (!mPxScene->fetchResults(true)) {
 //   // }

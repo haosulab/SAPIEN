@@ -93,6 +93,48 @@ class CMakeBuild(build_ext):
         os.makedirs(sensor_assets_path)
         shutil.copytree(source_patterns_path, os.path.join(sensor_assets_path, 'patterns'))
 
+        include_path = os.path.join(self.build_lib, 'sapien', 'include')
+        source_include_path = os.path.join(ext.sourcedir, 'include')
+        if os.path.exists(include_path):
+            shutil.rmtree(include_path)
+        shutil.copytree(source_include_path, include_path)
+
+        include_path = os.path.join(self.build_lib, 'sapien', 'include', 'pybind11')
+        source_include_path = os.path.join(ext.sourcedir, '3rd_party', 'pybind11', 'include', 'pybind11')
+        if os.path.exists(include_path):
+            shutil.rmtree(include_path)
+        shutil.copytree(source_include_path, include_path)
+
+        include_path = os.path.join(self.build_lib, 'sapien', 'include', 'dlpack')
+        source_include_path = os.path.join(ext.sourcedir, '3rd_party', 'dlpack', 'include', 'dlpack')
+        if os.path.exists(include_path):
+            shutil.rmtree(include_path)
+        shutil.copytree(source_include_path, include_path)
+
+        include_path = os.path.join(self.build_lib, 'sapien', 'include', 'svulkan2')
+        source_include_path = os.path.join(ext.sourcedir, '3rd_party', 'sapien-vulkan-2', 'include', 'svulkan2')
+        if os.path.exists(include_path):
+            shutil.rmtree(include_path)
+        shutil.copytree(source_include_path, include_path)
+
+        include_path = os.path.join(self.build_lib, 'sapien', 'include', 'kuafu')
+        source_include_path = os.path.join(ext.sourcedir, '3rd_party', 'kuafu', 'include')
+        if os.path.exists(include_path):
+            shutil.rmtree(include_path)
+        shutil.copytree(source_include_path, include_path)
+
+        include_path = os.path.join(self.build_lib, 'sapien', 'include', 'physx')
+        source_include_path = os.path.join(ext.sourcedir, '..', 'PhysX', 'physx', 'include')
+        if os.path.exists(include_path):
+            shutil.rmtree(include_path)
+        shutil.copytree(source_include_path, include_path)
+
+        include_path = os.path.join(self.build_lib, 'sapien', 'include', 'pxshared')
+        source_include_path = os.path.join(ext.sourcedir, '..', 'PhysX', 'pxshared', 'include')
+        if os.path.exists(include_path):
+            shutil.rmtree(include_path)
+        shutil.copytree(source_include_path, include_path)
+
 
 def check_version_info():
     try:
@@ -132,9 +174,7 @@ def read_requirements():
 
 # Data files for packaging
 project_python_home_dir = os.path.join("python", "py_package")
-sapien_data = ["glsl_shader/*/*"]
 package_data = {
-    "sapien": sapien_data,
     "sapien.core": ["__init__.pyi", "pysapien/__init__.pyi", "pysapien/renderer/__init__.pyi"]
 }
 
@@ -155,8 +195,10 @@ setup(name="sapien",
           "Framework :: Robot Framework :: Tool",
           "Topic :: Games/Entertainment :: Simulation",
           "Programming Language :: C++",
-          "Programming Language :: Python :: 3.6",
           "Programming Language :: Python :: 3.7",
+          "Programming Language :: Python :: 3.8",
+          "Programming Language :: Python :: 3.9",
+          "Programming Language :: Python :: 3.10",
           "Topic :: Education",
           "Topic :: Software Development :: Libraries :: Python Modules",
           "Topic :: Utilities",

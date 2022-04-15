@@ -59,6 +59,7 @@ from sapien.core.pysapien import RenderShape
 from sapien.core.pysapien import RenderTexture
 from sapien.core.pysapien import Scene
 from sapien.core.pysapien import SceneConfig
+from sapien.core.pysapien import SceneMultistepCallback
 from sapien.core.pysapien import ShapeRecord
 from sapien.core.pysapien import SphereGeometry
 from sapien.core.pysapien import SpotLightEntity
@@ -138,6 +139,7 @@ __all__ = [
     "RenderTexture",
     "Scene",
     "SceneConfig",
+    "SceneMultistepCallback",
     "ShapeRecord",
     "SphereGeometry",
     "SpotLightEntity",

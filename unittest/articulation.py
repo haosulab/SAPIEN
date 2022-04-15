@@ -5,6 +5,61 @@ import os
 
 
 class TestArticulation(unittest.TestCase):
+    def test_drive(self):
+        engine = sapien.Engine()
+        renderer = sapien.VulkanRenderer(True)
+        engine.set_renderer(renderer)
+        scene = engine.create_scene()
+        loader = scene.create_urdf_loader()
+        robot = loader.load(os.path.join(os.path.dirname(__file__), "movo_simple.urdf"))
+
+        q = [
+            -0.3283431,
+            0.39793425,
+            -0.81116733,
+            0.14926876,
+            -0.67020133,
+            -0.17215485,
+            -0.6565735,
+            0.84940983,
+            0.40675576,
+            0.73837611,
+            -0.93073463,
+            -0.7414073,
+            0.71490287,
+        ]
+        for j, v in zip(robot.get_active_joints(), q):
+            j.set_drive_velocity_target(v)
+        self.assertTrue(np.allclose(robot.get_drive_velocity_target(), q))
+
+        for j, v in zip(robot.get_active_joints(), q):
+            j.set_drive_target(v)
+        self.assertTrue(np.allclose(robot.get_drive_target(), q))
+
+        q = [
+            -0.40973236,
+            -0.98915534,
+            0.26142718,
+            0.06049832,
+            -0.09558783,
+            0.95664137,
+            -0.54178463,
+            -0.31803418,
+            -0.71099538,
+            -0.21318428,
+            0.93574955,
+            0.22036707,
+            -0.87040736,
+        ]
+
+        robot.set_drive_velocity_target(q)
+        for j, v in zip(robot.get_active_joints(), q):
+            self.assertTrue(np.allclose(j.get_drive_velocity_target(), v))
+        robot.set_drive_target(q)
+        for j, v in zip(robot.get_active_joints(), q):
+            self.assertTrue(np.allclose(j.get_drive_target(), v))
+
+
     def test_urdf_loader(self):
         engine = sapien.Engine()
         renderer = sapien.VulkanRenderer(True)

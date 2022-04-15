@@ -160,47 +160,66 @@ SArticulation::SArticulation(SScene *scene) : SArticulationDrivable(scene) {}
 
 void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
-
-  uint32_t i = 0;
-  for (auto &j : mJoints) {
-    if (j->getAxes().size() == 1) {
-      j->setDriveTarget(v[i]);
-      i += 1;
-    }
+  auto n = dof();
+  for (uint32_t i = 0; i < n; ++i) {
+    mActiveJoints[i]->setDriveTarget(mDriveAxes[i], v[i]);
   }
+
+  // uint32_t i = 0;
+  // for (auto &j : mJoints) {
+  //   if (j->getAxes().size() == 1) {
+  //     j->setDriveTarget(v[i]);
+  //     i += 1;
+  //   }
+  // }
   mPxArticulation->wakeUp();
 }
 
 std::vector<PxReal> SArticulation::getDriveTarget() const {
-  std::vector<PxReal> driveTarget;
-  for (auto &j : mJoints) {
-    if (j->getAxes().size() == 1) {
-      driveTarget.push_back(j->getDriveTarget());
-    }
+  auto n = dof();
+  std::vector<PxReal> driveTarget(n);
+  for (uint32_t i = 0; i < n; ++i) {
+    driveTarget[i] = mActiveJoints[i]->getDriveTarget(mDriveAxes[i]);
   }
+
+  // for (auto &j : mJoints) {
+  //   if (j->getAxes().size() == 1) {
+  //     driveTarget.push_back(j->getDriveTarget());
+  //   }
+  // }
   return driveTarget;
 }
 
 void SArticulation::setDriveVelocityTarget(std::vector<physx::PxReal> const &v) {
   CHECK_SIZE(v);
 
-  uint32_t i = 0;
-  for (auto &j : mJoints) {
-    if (j->getAxes().size() == 1) {
-      j->setDriveVelocityTarget(v[i]);
-      i += 1;
-    }
+  auto n = dof();
+  for (uint32_t i = 0; i < n; ++i) {
+    mActiveJoints[i]->setDriveVelocity(mDriveAxes[i], v[i] * mDriveMultiplier[i]);
   }
+
+  // uint32_t i = 0;
+  // for (auto &j : mJoints) {
+  //   if (j->getAxes().size() == 1) {
+  //     j->setDriveVelocityTarget(v[i]);
+  //     i += 1;
+  //   }
+  // }
   mPxArticulation->wakeUp();
 }
 
 std::vector<PxReal> SArticulation::getDriveVelocityTarget() const {
-  std::vector<PxReal> driveTarget;
-  for (auto &j : mJoints) {
-    if (j->getAxes().size() == 1) {
-      driveTarget.push_back(j->getDriveVelocityTarget());
-    }
+  auto n = dof();
+  std::vector<PxReal> driveTarget(n);
+  for (uint32_t i = 0; i < n; ++i) {
+    driveTarget[i] = mActiveJoints[i]->getDriveVelocity(mDriveAxes[i]) * mDriveMultiplier[i];
   }
+
+  // for (auto &j : mJoints) {
+  //   if (j->getAxes().size() == 1) {
+  //     driveTarget.push_back(j->getDriveVelocityTarget());
+  //   }
+  // }
   return driveTarget;
 }
 

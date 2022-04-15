@@ -24,6 +24,7 @@
 #include <PxPhysicsAPI.h>
 
 #include "event_system/event_system.h"
+#include "extension.h"
 #include "id_generator.h"
 #include "renderer/render_interface.h"
 #include "sapien_camera.h"
@@ -124,7 +125,7 @@ public:
 
   void step(); // advance time by TimeStep
   std::future<void> stepAsync();
-  // void stepWait();
+  std::future<void> multistepAsync(int steps, SceneMultistepCallback *callback);
 
 private:
   PxReal mTimestep = 1 / 500.f;
