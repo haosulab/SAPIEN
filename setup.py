@@ -123,6 +123,9 @@ class CMakeBuild(build_ext):
             shutil.rmtree(include_path)
         shutil.copytree(source_include_path, include_path)
 
+        shutil.copy(os.path.join(ext.sourcedir, '3rd_party', 'tinyxml2', 'tinyxml2.h'),
+                    os.path.join(self.build_lib, 'sapien', 'include', 'tinyxml2.h'))
+
         include_path = os.path.join(self.build_lib, 'sapien', 'include', 'physx')
         source_include_path = os.path.join(ext.sourcedir, '..', 'PhysX', 'physx', 'include')
         if os.path.exists(include_path):
@@ -134,6 +137,21 @@ class CMakeBuild(build_ext):
         if os.path.exists(include_path):
             shutil.rmtree(include_path)
         shutil.copytree(source_include_path, include_path)
+
+        def copy_system_library(name):
+            system_include_path = ['/usr/local/include', '/usr/include']
+            for p in system_include_path:
+                source_include_path = os.path.join(p, name)
+                if os.path.isdir(p):
+                    break
+            else:
+                raise ValueError(f'cannot find library {name}')
+            include_path = os.path.join(self.build_lib, 'sapien', 'include', 'spdlog')
+            if os.path.exists(include_path):
+                shutil.rmtree(include_path)
+            shutil.copytree(source_include_path, include_path)
+
+        copy_system_library('spdlog')
 
 
 def check_version_info():

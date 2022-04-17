@@ -652,53 +652,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
                              })
       .def_property_readonly("filename", &Renderer::IPxrTexture::getFilename);
 
-  // PyISensor.def("set_initial_pose", &Renderer::ISensor::setInitialPose, py::arg("pose"))
-  //     .def("get_pose", &Renderer::ISensor::getPose)
-  //     .def("set_pose", &Renderer::ISensor::setPose, py::arg("pose"));
-
-  // PyICamera.def("get_name", &Renderer::ICamera::getName)
-  //     .def("get_width", &Renderer::ICamera::getWidth)
-  //     .def("get_height", &Renderer::ICamera::getHeight)
-  //     .def("get_fovy", &Renderer::ICamera::getFovy)
-  //     .def("get_near", &Renderer::ICamera::getNear)
-  //     .def("get_far", &Renderer::ICamera::getFar)
-  //     .def("take_picture", &Renderer::ICamera::takePicture)
-  //     .def("get_color_rgba",
-  //          [](Renderer::ICamera &cam) {
-  //            return py::array_t<float>(
-  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-  //                cam.getColorRGBA().data());
-  //          })
-  //     .def("get_albedo_rgba",
-  //          [](Renderer::ICamera &cam) {
-  //            return py::array_t<float>(
-  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-  //                cam.getAlbedoRGBA().data());
-  //          })
-  //     .def("get_normal_rgba",
-  //          [](Renderer::ICamera &cam) {
-  //            return py::array_t<float>(
-  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth()), 4},
-  //                cam.getNormalRGBA().data());
-  //          })
-  //     .def("get_depth",
-  //          [](Renderer::ICamera &cam) {
-  //            return py::array_t<float>(
-  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
-  //                cam.getDepth().data());
-  //          })
-  //     .def("get_actor_segmentation",
-  //          [](Renderer::ICamera &cam) {
-  //            return py::array_t<int>(
-  //                {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
-  //                cam.getSegmentation().data());
-  //          })
-  //     .def("get_visual_segmentation", [](Renderer::ICamera &cam) {
-  //       return py::array_t<int>(
-  //           {static_cast<int>(cam.getHeight()), static_cast<int>(cam.getWidth())},
-  //           cam.getObjSegmentation().data());
-  //     });
-
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)
       .def_readwrite("default_static_friction", &SceneConfig::static_friction)

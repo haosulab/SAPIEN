@@ -1,28 +1,4 @@
-/**
-MIT License
-
-Copyright (c) 2016 Mariano Trebino
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-// taken from https://github.com/mtrebi/thread-pool
+// adapted from https://github.com/mtrebi/thread-pool with bug fixes
 #pragma once
 
 #include <mutex>
@@ -36,49 +12,6 @@ SOFTWARE.
 
 namespace sapien {
 
-// Thread safe implementation of a Queue using an std::queue
-template <typename T> class SafeQueue {
-private:
-  std::queue<T> m_queue;
-  std::mutex m_mutex;
-
-public:
-  SafeQueue() {}
-
-  SafeQueue(SafeQueue &other) {
-    // TODO:
-  }
-
-  ~SafeQueue() {}
-
-  bool empty() {
-    std::unique_lock<std::mutex> lock(m_mutex);
-    return m_queue.empty();
-  }
-
-  int size() {
-    std::unique_lock<std::mutex> lock(m_mutex);
-    return m_queue.size();
-  }
-
-  void enqueue(T &t) {
-    std::unique_lock<std::mutex> lock(m_mutex);
-    m_queue.push(t);
-  }
-
-  bool dequeue(T &t) {
-    std::unique_lock<std::mutex> lock(m_mutex);
-
-    if (m_queue.empty()) {
-      return false;
-    }
-    t = std::move(m_queue.front());
-
-    m_queue.pop();
-    return true;
-  }
-};
-
 class ThreadPool {
 private:
   class ThreadWorker {
@@ -91,32 +24,33 @@ private:
 
     void operator()() {
       std::function<void()> func;
-      bool dequeued;
       while (!m_pool->m_shutdown) {
         {
-          std::unique_lock<std::mutex> lock(m_pool->m_conditional_mutex);
+          std::unique_lock<std::mutex> lock(m_pool->m_mutex);
           if (m_pool->m_queue.empty()) {
             m_pool->m_conditional_lock.wait(lock);
+            if (m_pool->m_shutdown) {
+              return;
+            }
           }
-          dequeued = m_pool->m_queue.dequeue(func);
+          func = std::move(m_pool->m_queue.front());
+          m_pool->m_queue.pop();
         }
-        if (dequeued) {
-          func();
-        }
+        func();
       }
     }
   };
 
   bool m_init;
   bool m_shutdown;
-  SafeQueue<std::function<void()>> m_queue;
-  std::vector<std::thread> m_threads;
-  std::mutex m_conditional_mutex;
+  std::queue<std::function<void()>> m_queue;
+  std::mutex m_mutex;
   std::condition_variable m_conditional_lock;
+  std::vector<std::thread> m_threads;
 
 public:
   ThreadPool(const int n_threads)
-      : m_threads(std::vector<std::thread>(n_threads)), m_shutdown(false), m_init(false) {}
+      : m_init(false), m_shutdown(false), m_threads(std::vector<std::thread>(n_threads)) {}
 
   ThreadPool(const ThreadPool &) = delete;
   ThreadPool(ThreadPool &&) = delete;
@@ -124,9 +58,7 @@ public:
   ThreadPool &operator=(const ThreadPool &) = delete;
   ThreadPool &operator=(ThreadPool &&) = delete;
 
-  ~ThreadPool() {
-    shutdown();
-  }
+  ~ThreadPool() { shutdown(); }
 
   // Inits thread pool
   void init() {
@@ -161,7 +93,10 @@ public:
     std::function<void()> wrapper_func = [task_ptr]() { (*task_ptr)(); };
 
     // Enqueue generic wrapper function
-    m_queue.enqueue(wrapper_func);
+    {
+      std::lock_guard lock(m_mutex);
+      m_queue.push(std::move(wrapper_func));
+    }
 
     // Wake up one thread if its waiting
     m_conditional_lock.notify_one();

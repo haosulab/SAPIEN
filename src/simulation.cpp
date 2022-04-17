@@ -104,43 +104,7 @@ Simulation::~Simulation() {
 }
 
 std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
-
-  PxSceneDesc sceneDesc(mPhysicsSDK->getTolerancesScale());
-  sceneDesc.gravity = PxVec3({config.gravity.x(), config.gravity.y(), config.gravity.z()});
-  sceneDesc.filterShader = TypeAffinityIgnoreFilterShader;
-  sceneDesc.solverType = config.enableTGS ? PxSolverType::eTGS : PxSolverType::ePGS;
-  sceneDesc.bounceThresholdVelocity = config.bounceThreshold;
-
-  PxSceneFlags sceneFlags;
-  if (config.enableEnhancedDeterminism) {
-    sceneFlags |= PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
-  }
-  if (config.enablePCM) {
-    sceneFlags |= PxSceneFlag::eENABLE_PCM;
-  }
-  if (config.enableCCD) {
-    sceneFlags |= PxSceneFlag::eENABLE_CCD;
-  }
-  if (config.enableFrictionEveryIteration) {
-    sceneFlags |= PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
-  }
-  if (config.enableAdaptiveForce) {
-    sceneFlags |= PxSceneFlag::eADAPTIVE_FORCE;
-  }
-  sceneDesc.flags = sceneFlags;
-
-  if (!mCpuDispatcher) {
-    mCpuDispatcher = PxDefaultCpuDispatcherCreate(mThreadCount);
-    if (!mCpuDispatcher) {
-      spdlog::get("SAPIEN")->critical("Failed to create PhysX CPU dispatcher");
-      throw std::runtime_error("Scene Creation Failed");
-    }
-  }
-  sceneDesc.cpuDispatcher = mCpuDispatcher;
-
-  PxScene *pxScene = mPhysicsSDK->createScene(sceneDesc);
-
-  return std::make_unique<SScene>(this->shared_from_this(), pxScene, config);
+  return std::make_unique<SScene>(this->shared_from_this(), config);
 }
 
 std::shared_ptr<SPhysicalMaterial> Simulation::createPhysicalMaterial(PxReal staticFriction,

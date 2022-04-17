@@ -78,7 +78,7 @@ class SScene : public EventEmitter<EventSceneStep> {
    * Basic
    ***********************************************/
 public:
-  SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig const &config);
+  SScene(std::shared_ptr<Simulation> sim, SceneConfig const &config);
   SScene(SScene const &other) = delete;
   SScene(SScene &&other) = delete;
   ~SScene();
@@ -282,5 +282,7 @@ private:
 
   ThreadPool mRunnerThread{1};
   std::mutex mUpdateRenderMutex;
+
+  PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
 };
 } // namespace sapien

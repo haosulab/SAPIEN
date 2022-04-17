@@ -7,6 +7,7 @@
 #include "sapien/articulation/sapien_kinematic_joint.h"
 #include "sapien/articulation/sapien_link.h"
 #include "sapien/articulation/urdf_loader.h"
+#include "sapien/filter_shader.h"
 #include "sapien/renderer/render_interface.h"
 #include "sapien/sapien_actor.h"
 #include "sapien/sapien_contact.h"
@@ -23,8 +24,41 @@ namespace sapien {
 /************************************************
  * Basic
  ***********************************************/
-SScene::SScene(std::shared_ptr<Simulation> sim, PxScene *scene, SceneConfig const &config)
-    : mSimulationShared(sim), mPxScene(scene), mSimulationCallback(this), mRendererScene(nullptr) {
+SScene::SScene(std::shared_ptr<Simulation> sim, SceneConfig const &config)
+    : mSimulationShared(sim), mSimulationCallback(this), mRendererScene(nullptr) {
+
+  PxSceneDesc sceneDesc(sim->mPhysicsSDK->getTolerancesScale());
+  sceneDesc.gravity = PxVec3({config.gravity.x(), config.gravity.y(), config.gravity.z()});
+  sceneDesc.filterShader = TypeAffinityIgnoreFilterShader;
+  sceneDesc.solverType = config.enableTGS ? PxSolverType::eTGS : PxSolverType::ePGS;
+  sceneDesc.bounceThresholdVelocity = config.bounceThreshold;
+
+  PxSceneFlags sceneFlags;
+  if (config.enableEnhancedDeterminism) {
+    sceneFlags |= PxSceneFlag::eENABLE_ENHANCED_DETERMINISM;
+  }
+  if (config.enablePCM) {
+    sceneFlags |= PxSceneFlag::eENABLE_PCM;
+  }
+  if (config.enableCCD) {
+    sceneFlags |= PxSceneFlag::eENABLE_CCD;
+  }
+  if (config.enableFrictionEveryIteration) {
+    sceneFlags |= PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
+  }
+  if (config.enableAdaptiveForce) {
+    sceneFlags |= PxSceneFlag::eADAPTIVE_FORCE;
+  }
+  sceneDesc.flags = sceneFlags;
+
+  mCpuDispatcher = PxDefaultCpuDispatcherCreate(0);
+  if (!mCpuDispatcher) {
+    spdlog::get("SAPIEN")->critical("Failed to create PhysX CPU dispatcher");
+    throw std::runtime_error("Scene Creation Failed");
+  }
+  sceneDesc.cpuDispatcher = mCpuDispatcher;
+
+  mPxScene = mSimulationShared->mPhysicsSDK->createScene(sceneDesc);
 
   // default parameters for physical materials, contact solver, etc.
   mDefaultMaterial =
@@ -70,6 +104,7 @@ SScene::~SScene() {
     mSimulationShared->getRenderer()->removeScene(mRendererScene);
   }
 
+  mCpuDispatcher->release();
   // Finally, release the shared pointer to simulation
   mSimulationShared.reset();
 }
