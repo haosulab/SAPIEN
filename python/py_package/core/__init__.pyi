@@ -1,3 +1,4 @@
+from __future__ import annotations
 import sapien.core
 import typing
 from sapien.core.pysapien import ActiveLightEntity

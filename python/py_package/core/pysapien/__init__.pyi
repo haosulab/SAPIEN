@@ -1,8 +1,8 @@
 """SAPIEN core module"""
+from __future__ import annotations
 import sapien.core.pysapien
 import typing
 import numpy
-import renderer
 _Shape = typing.Tuple[int, ...]
 
 __all__ = [

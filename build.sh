@@ -62,7 +62,7 @@ function build_manylinux14_wheel() {
   if test -f "$WHEEL_NAME"; then
     echo "$FILE exist, begin audit and repair"
   fi
-  auditwheel repair ${WHEEL_NAME} --exclude libvulkan
+  auditwheel repair ${WHEEL_NAME} --exclude libvulkan --internal libsapien
 }
 
 build_manylinux14_wheel $VERSION

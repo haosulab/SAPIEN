@@ -154,7 +154,7 @@ include_directories("3rd_party/kuafu/3rd_party/KTX-Software/include")
 include_directories("3rd_party/kuafu/3rd_party/OptiX7SDK/include")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
-add_library(sapien STATIC ${PROJECT_SRC})
+add_library(sapien SHARED ${PROJECT_SRC})
 
 if (EXISTS ${OPTIX_HOME})
     add_dependencies(sapien ptx_dir)
@@ -183,6 +183,7 @@ else ()
 endif ()
 
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+set_target_properties(sapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
 target_link_libraries(pysapien PRIVATE sapien)

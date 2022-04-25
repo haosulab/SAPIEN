@@ -1,3 +1,4 @@
+from __future__ import annotations
 import sapien.core.pysapien.renderer
 import typing
 import numpy

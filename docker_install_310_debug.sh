@@ -14,7 +14,7 @@ echo __version__=\"${VERSION}\" > python/py_package/version.py
 
 docker run -v `pwd`:/workspace/SAPIEN -it --rm \
        -u $(id -u ${USER}):$(id -g ${USER}) \
-       fxiangucsd/sapien-build-env:latest bash -c "cd /workspace/SAPIEN && ./build.sh 38 --profile"
+       fxiangucsd/sapien-build-env:latest bash -c "cd /workspace/SAPIEN && ./build.sh 310 --debug"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
