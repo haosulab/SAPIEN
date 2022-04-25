@@ -147,10 +147,10 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   auto context = mScene->getParentRenderer()->mContext;
   if (!mCommandPool) {
     mCommandPool = context->createCommandPool();
+    mCommandBuffer = mCommandPool->allocateCommandBuffer();
   }
-
-  auto cb = mCommandPool->allocateCommandBuffer();
-  cb->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+  mCommandBuffer->reset();
+  mCommandBuffer->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
   mRenderer->render(*mCamera, {}, {}, {}, {});
 
   auto target = mRenderer->getRenderTarget(name);
@@ -164,7 +164,7 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
         VMA_MEMORY_USAGE_GPU_ONLY);
   }
   auto buffer = mImageBuffers.at(name);
-  target->getImage().recordCopyToBuffer(cb.get(), buffer->getVulkanBuffer(), size, {0, 0, 0},
+  target->getImage().recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), size, {0, 0, 0},
                                         extent);
   std::vector<long> sizes2 = {extent.height, extent.width};
   uint8_t dtype;
@@ -184,8 +184,8 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   default:
     throw std::runtime_error("Failed to get tensor from cuda buffer: unsupported buffer format");
   }
-  cb->end();
-  context->getQueue().submitAndWait(cb.get());
+  mCommandBuffer->end();
+  context->getQueue().submitAndWait(mCommandBuffer.get());
   return dl_wrapper(buffer, buffer->getCudaPtr(), buffer->getCudaDeviceId(), sizes2,
                     {dtype, 32, 1});
 }
