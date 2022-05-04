@@ -193,7 +193,7 @@ def read_requirements():
 # Data files for packaging
 project_python_home_dir = os.path.join("python", "py_package")
 package_data = {
-    "sapien.core": ["__init__.pyi", "pysapien/__init__.pyi", "pysapien/renderer/__init__.pyi"]
+    "sapien.core": ["__init__.pyi", "pysapien/__init__.pyi", "pysapien/renderer/__init__.pyi", "pysapien/dlpack/__init__.pyi"]
 }
 
 setup(name="sapien",

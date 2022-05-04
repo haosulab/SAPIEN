@@ -2403,6 +2403,11 @@ Args:
                                 tensor->dl_tensor.shape + tensor->dl_tensor.ndim);
   });
 
+  dlpack.def("dl_ptr", [](py::capsule data) {
+    DLManagedTensor *tensor = (DLManagedTensor *)data.get_pointer();
+    return (intptr_t)tensor->dl_tensor.data;
+  });
+
   dlpack.def(
       "dl_to_numpy_cuda_async_unchecked",
       [](py::capsule data, py::array_t<float> array) {

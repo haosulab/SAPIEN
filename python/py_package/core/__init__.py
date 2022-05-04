@@ -1,5 +1,6 @@
 from .pysapien import *
 from .pysapien import renderer
+from .pysapien import dlpack
 import pkg_resources
 import os
 import sys
