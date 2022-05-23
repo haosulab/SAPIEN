@@ -20,7 +20,7 @@ private:
     ThreadPool *m_pool;
 
   public:
-    ThreadWorker(ThreadPool *pool, const int id) : m_pool(pool), m_id(id) {}
+    ThreadWorker(ThreadPool *pool, const int id) : m_id(id), m_pool(pool) {}
 
     void operator()() {
       std::function<void()> func;
@@ -63,7 +63,7 @@ public:
   // Inits thread pool
   void init() {
     m_init = true;
-    for (int i = 0; i < m_threads.size(); ++i) {
+    for (uint32_t i = 0; i < m_threads.size(); ++i) {
       m_threads[i] = std::thread(ThreadWorker(this, i));
     }
   }
@@ -73,7 +73,7 @@ public:
     m_shutdown = true;
     m_conditional_lock.notify_all();
 
-    for (int i = 0; i < m_threads.size(); ++i) {
+    for (uint32_t i = 0; i < m_threads.size(); ++i) {
       if (m_threads[i].joinable()) {
         m_threads[i].join();
       }
@@ -82,7 +82,7 @@ public:
 
   // Submit a function to be executed asynchronously by the pool
   template <typename F, typename... Args>
-  auto submit(F &&f, Args &&... args) -> std::future<decltype(f(args...))> {
+  auto submit(F &&f, Args &&...args) -> std::future<decltype(f(args...))> {
     // Create a function with bounded parameters ready to execute
     std::function<decltype(f(args...))()> func =
         std::bind(std::forward<F>(f), std::forward<Args>(args)...);

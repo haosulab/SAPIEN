@@ -88,7 +88,7 @@ public:
     }
   }
 
-  ~EventEmitter<T>() {
+  ~EventEmitter() {
     for (auto &l : mListenerSubscriptions) {
       l->disable();
     }
