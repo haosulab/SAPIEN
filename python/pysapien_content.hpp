@@ -858,6 +858,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            py::arg("nx"), py::arg("py"), py::arg("ny"), py::arg("pz"), py::arg("nz"))
       .def("add_particle_entity", &SScene::addParticleEntity, py::arg("positions"),
            py::return_value_policy::reference)
+      .def("remove_particle_entity", &SScene::removeParticleEntity, py::arg("entity"))
 
       // save
       .def("pack",
