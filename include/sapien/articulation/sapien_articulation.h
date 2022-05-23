@@ -121,6 +121,8 @@ public:
   std::vector<PxReal> packDrive();
   void unpackDrive(std::vector<PxReal> const &data);
 
+  bool isBaseFixed() const;
+
 private:
   SArticulation(SScene *scene);
   SArticulation(SArticulation const &other) = delete;

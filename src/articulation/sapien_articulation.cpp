@@ -251,6 +251,10 @@ std::vector<SJoint *> SArticulation::getActiveJoints() {
   return activeJoints;
 }
 
+bool SArticulation::isBaseFixed() const {
+  return mPxArticulation->getArticulationFlags() & PxArticulationFlag::eFIX_BASE;
+}
+
 void SArticulation::resetCache() {
   mPxArticulation->releaseCache(*mCache);
   mCache = mPxArticulation->createCache();

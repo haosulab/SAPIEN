@@ -1236,11 +1236,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("drive_target"));
 
-  PyArticulation //.def("get_links", &SArticulation::getSLinks,
-                 // py::return_value_policy::reference) .def("get_joints",
-                 //&SArticulation::getSJoints,
-                 // py::return_value_policy::reference)
-
+  PyArticulation
+      .def_property_readonly("fixed", &SArticulation::isBaseFixed)
       .def("get_drive_velocity_target",
            [](SArticulation &a) {
              auto target = a.getDriveVelocityTarget();
