@@ -10,11 +10,17 @@ namespace sapien {
 void DefaultEventCallback::onContact(const PxContactPairHeader &pairHeader,
                                      const PxContactPair *pairs, PxU32 nbPairs) {
   for (uint32_t i = 0; i < nbPairs; ++i) {
+    void *a0 = pairHeader.actors[0]->userData;
+    void *a1 = pairHeader.actors[1]->userData;
+    if (!a0 || !a1) {
+      continue;
+    }
+
     std::unique_ptr<SContact> contact = std::make_unique<SContact>();
+    contact->actors[0] = static_cast<SActorBase *>(a0);
+    contact->actors[1] = static_cast<SActorBase *>(a1);
     contact->collisionShapes[0] = static_cast<SCollisionShape *>(pairs[i].shapes[0]->userData);
     contact->collisionShapes[1] = static_cast<SCollisionShape *>(pairs[i].shapes[1]->userData);
-    contact->actors[0] = static_cast<SActorBase *>(pairHeader.actors[0]->userData);
-    contact->actors[1] = static_cast<SActorBase *>(pairHeader.actors[1]->userData);
 
     contact->starts = pairs[i].events & PxPairFlag::eNOTIFY_TOUCH_FOUND;
     contact->ends = pairs[i].events & PxPairFlag::eNOTIFY_TOUCH_LOST;

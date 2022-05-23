@@ -1,19 +1,20 @@
-#include "articulation/articulation_builder.h"
-#include "articulation/sapien_articulation.h"
-#include "articulation/sapien_link.h"
-#include "renderer/svulkan2_renderer.h"
-#include "renderer/svulkan2_window.h"
-#include "sapien_actor.h"
-#include "sapien_drive.h"
-#include "sapien_scene.h"
-#include "simulation.h"
+#include "sapien/articulation/articulation_builder.h"
+#include "sapien/articulation/sapien_articulation.h"
+#include "sapien/articulation/sapien_link.h"
+#include "sapien/renderer/svulkan2_renderer.h"
+#include "sapien/renderer/svulkan2_rigidbody.h"
+#include "sapien/renderer/svulkan2_window.h"
+#include "sapien/sapien_actor.h"
+#include "sapien/sapien_drive.h"
+#include "sapien/sapien_scene.h"
+#include "sapien/simulation.h"
 #include <iostream>
 
 #define PI (3.141592653589793238462643383279502884f)
 
 using namespace sapien;
 
-std::unique_ptr<ArticulationBuilder>
+std::shared_ptr<ArticulationBuilder>
 createAntBuilder(SScene &scene, std::shared_ptr<Renderer::IPxrMaterial> copper) {
   auto builder = scene.createArticulationBuilder();
   auto body = builder->createLinkBuilder();
@@ -109,9 +110,10 @@ createAntBuilder(SScene &scene, std::shared_ptr<Renderer::IPxrMaterial> copper) 
 int main() {
   Renderer::SVulkan2Renderer::setLogLevel("info");
   auto sim = std::make_shared<Simulation>();
-  auto renderer = std::make_shared<Renderer::SVulkan2Renderer>(false, 1000, 1000, 4);
+  auto renderer =
+      std::make_shared<Renderer::SVulkan2Renderer>(false, 1000, 1000, 4, "", "back", false);
   sim->setRenderer(renderer);
-  Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/default_camera");
+  Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/ibl");
 
   SceneConfig config;
   // config.gravity = {0, 0, 0};
@@ -123,26 +125,43 @@ int main() {
   scene->addGround(0);
   scene->getRendererScene()->setAmbientLight({0.3, 0.3, 0.3});
   scene->getRendererScene()->addDirectionalLight({0, 1, -1}, {0.5, 0.5, 0.5}, true, {0, 0, 0}, 10,
-                                                 -10, 10);
+                                                 -10, 10, 1024);
 
   auto builder = scene->createActorBuilder();
   builder->addBoxShape({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
   builder->addBoxVisual({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
   auto box = builder->build();
   box->setPose({{0, 0, 2}, PxIdentity});
+  box->setName("box");
 
   scene->updateRender();
   scene->step();
   window.render("Color");
   window.mCameraController->setXYZ(-4, 0, 0.5);
+  int iter = 0;
   while (1) {
     scene->updateRender();
     scene->step();
-    window.render("Color");
-    if (window.windowCloseRequested()) {
-      window.close();
-      break;
+
+    for (auto c : scene->getContacts()) {
+      std::cout << iter << " " << c->actors[0]->getName() << " " << c->actors[1]->getName()
+                << std::endl;
     }
+
+    if (iter==300) {
+      scene->removeActor(box);
+    }
+
+    if (iter == 305) {
+      return 0;
+    }
+
+    // window.render("Color");
+    // if (window.windowCloseRequested()) {
+    //   window.close();
+    //   break;
+    // }
+    iter++;
   }
 
   return 0;

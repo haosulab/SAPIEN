@@ -184,15 +184,9 @@ private:
   void addKinematicArticulation(
       std::unique_ptr<SKArticulation> articulation); // called by articulation builder
 
-  bool mRequiresRemoveCleanUp1{false};
-  bool mRequiresRemoveCleanUp2{false};
+  bool mRequiresRemoveCleanUp{false};
 
-  /**
-   *  call to clean up actors and articulations in being destroyed states
-   *  Should be called after a step call has finished
-   */
-  void removeCleanUp1();
-  void removeCleanUp2();
+  void removeCleanUp();
 
   IDGenerator mActorIdGenerator;  // unique id generator for actors (including links)
   IDGenerator mRenderIdGenerator; //  unique id generator for visuals

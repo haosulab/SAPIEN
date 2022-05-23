@@ -175,83 +175,114 @@ void SScene::addKinematicArticulation(std::unique_ptr<SKArticulation> articulati
   mKinematicArticulations.push_back(std::move(articulation));
 }
 
-void SScene::removeCleanUp1() {
+void SScene::removeCleanUp() {
   // advance the destroyed stage to 2
 
-  if (mRequiresRemoveCleanUp1) {
-    mRequiresRemoveCleanUp1 = false;
-    mRequiresRemoveCleanUp2 = true;
+  if (mRequiresRemoveCleanUp) {
+    mRequiresRemoveCleanUp = false;
+
+    // clear contacts
+    std::erase_if(mContacts, [](const auto &item) {
+      auto const &[key, value] = item;
+      return value->actors[0]->isBeingDestroyed() || value->actors[1]->isBeingDestroyed();
+    });
+
     // release actors
     for (auto &a : mActors) {
       if (a->getDestroyedState() == 1) {
+        a->getPxActor()->userData = nullptr;
         mPxScene->removeActor(*a->getPxActor());
-        a->setDestroyedState(2);
-      }
-    }
-
-    // release articulation
-    for (auto &a : mArticulations) {
-      if (a->getDestroyedState() == 1) {
-        mPxScene->removeArticulation(*a->getPxArticulation());
-        a->setDestroyedState(2);
-      }
-    }
-
-    // release kinematic articulation
-    for (auto &a : mKinematicArticulations) {
-      if (a->getDestroyedState() == 1) {
-        for (auto l : a->getBaseLinks()) {
-          mPxScene->removeActor(*l->getPxActor());
-          l->setDestroyedState(2);
-        }
-      }
-    }
-  }
-}
-
-void SScene::removeCleanUp2() {
-  if (mRequiresRemoveCleanUp2) {
-    mRequiresRemoveCleanUp2 = false;
-    // release actors
-    for (auto &a : mActors) {
-      if (a->getDestroyedState() == 2) {
+        // a->setDestroyedState(2);
         a->getPxActor()->release();
       }
     }
-    mActors.erase(std::remove_if(mActors.begin(), mActors.end(),
-                                 [](auto &a) { return a->getDestroyedState() == 2; }),
-                  mActors.end());
 
     // release articulation
     for (auto &a : mArticulations) {
-      if (a->getDestroyedState() == 2) {
+      if (a->getDestroyedState() == 1) {
+
+        for (auto l : a->getSLinks()) {
+          l->getPxActor()->userData = nullptr;
+        }
+        a->getPxArticulation()->userData = nullptr;
+
+        mPxScene->removeArticulation(*a->getPxArticulation());
+        // a->setDestroyedState(2);
+
         a->getPxArticulation()->release();
       }
     }
-    mArticulations.erase(std::remove_if(mArticulations.begin(), mArticulations.end(),
-                                        [](auto &a) { return a->getDestroyedState() == 2; }),
-                         mArticulations.end());
 
     // release kinematic articulation
     for (auto &a : mKinematicArticulations) {
-      if (a->getDestroyedState() == 2) {
+      if (a->getDestroyedState() == 1) {
         for (auto l : a->getBaseLinks()) {
+          l->getPxActor()->userData = nullptr;
+          mPxScene->removeActor(*l->getPxActor());
+          // l->setDestroyedState(2);
+
           l->getPxActor()->release();
         }
       }
     }
-    mKinematicArticulations.erase(
-        std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
-                       [](auto &a) { return a->getDestroyedState() == 2; }),
-        mKinematicArticulations.end());
+
+    mActors.erase(std::remove_if(mActors.begin(), mActors.end(),
+                                 [](auto &a) { return a->isBeingDestroyed(); }),
+                  mActors.end());
+    mArticulations.erase(std::remove_if(mArticulations.begin(), mArticulations.end(),
+                                        [](auto &a) { return a->isBeingDestroyed(); }),
+                         mArticulations.end());
+    mKinematicArticulations.erase(std::remove_if(mKinematicArticulations.begin(),
+                                                 mKinematicArticulations.end(),
+                                                 [](auto &a) { return a->isBeingDestroyed(); }),
+                                  mKinematicArticulations.end());
   }
 }
+
+// void SScene::removeCleanUp2() {
+//   if (mRequiresRemoveCleanUp2) {
+//     mRequiresRemoveCleanUp2 = false;
+
+    // release actors
+    // for (auto &a : mActors) {
+    //   if (a->getDestroyedState() == 2) {
+    //     a->getPxActor()->release();
+    //   }
+    // }
+    // mActors.erase(std::remove_if(mActors.begin(), mActors.end(),
+    //                              [](auto &a) { return a->getDestroyedState() == 2; }),
+    //               mActors.end());
+
+    // // release articulation
+    // for (auto &a : mArticulations) {
+    //   if (a->getDestroyedState() == 2) {
+    //     a->getPxArticulation()->release();
+    //   }
+    // }
+    // mArticulations.erase(std::remove_if(mArticulations.begin(), mArticulations.end(),
+    //                                     [](auto &a) { return a->getDestroyedState() == 2; }),
+    //                      mArticulations.end());
+
+    // // release kinematic articulation
+    // for (auto &a : mKinematicArticulations) {
+    //   if (a->getDestroyedState() == 2) {
+    //     for (auto l : a->getBaseLinks()) {
+    //       l->getPxActor()->release();
+    //     }
+    //   }
+    // }
+    // mKinematicArticulations.erase(
+    //     std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
+    //                    [](auto &a) { return a->getDestroyedState() == 2; }),
+    //     mKinematicArticulations.end());
+//   }
+// }
 
 void SScene::removeActor(SActorBase *actor) {
   if (actor->isBeingDestroyed()) {
     return;
   }
-  mRequiresRemoveCleanUp1 = true;
+  mRequiresRemoveCleanUp = true;
   // predestroy event
   EventActorPreDestroy e;
   e.actor = actor;
@@ -284,7 +315,7 @@ void SScene::removeArticulation(SArticulation *articulation) {
   if (articulation->isBeingDestroyed()) {
     return;
   }
-  mRequiresRemoveCleanUp1 = true;
+  mRequiresRemoveCleanUp = true;
 
   EventArticulationPreDestroy e;
   e.articulation = articulation;
@@ -326,7 +357,7 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
   if (articulation->isBeingDestroyed()) {
     return;
   }
-  mRequiresRemoveCleanUp1 = true;
+  mRequiresRemoveCleanUp = true;
 
   EventArticulationPreDestroy e;
   e.articulation = articulation;
@@ -461,7 +492,7 @@ void SScene::step() {
   }
 
   // confirm removal of marked objects
-  removeCleanUp1();
+  removeCleanUp();
 
   EASY_END_BLOCK;
   EASY_BLOCK("PhysX scene Step", profiler::colors::Red);
@@ -473,9 +504,6 @@ void SScene::step() {
   }
 
   EASY_END_BLOCK;
-
-  // do removal of marked objects
-  removeCleanUp2();
 
   EventSceneStep event;
   event.scene = this;
@@ -498,7 +526,7 @@ std::future<void> SScene::stepAsync() {
       if (!a->isBeingDestroyed())
         a->prestep();
     }
-    removeCleanUp1();
+    removeCleanUp();
     EASY_END_BLOCK
 
     EASY_BLOCK("PhysX scene simulate", profiler::colors::Red);
@@ -511,7 +539,7 @@ std::future<void> SScene::stepAsync() {
     EASY_END_BLOCK
 
     EASY_BLOCK("Scene postprocess");
-    removeCleanUp2();
+    // removeCleanUp2();
 
     EventSceneStep event;
     event.scene = this;
@@ -548,7 +576,7 @@ std::future<void> SScene::multistepAsync(int steps, SceneMultistepCallback *call
           if (!a->isBeingDestroyed())
             a->prestep();
         }
-        removeCleanUp1();
+        removeCleanUp();
       }
 
       {
@@ -560,11 +588,6 @@ std::future<void> SScene::multistepAsync(int steps, SceneMultistepCallback *call
         EASY_BLOCK("PhysX scene fetch", profiler::colors::Red);
         while (!mPxScene->fetchResults(true)) {
         }
-      }
-
-      {
-        EASY_BLOCK("Scene postprocess");
-        removeCleanUp2();
       }
 
       {
