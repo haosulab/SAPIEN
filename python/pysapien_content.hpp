@@ -225,7 +225,7 @@ void buildSapien(py::module &m) {
   py::class_<AwaitableDLVectorWrapper, std::shared_ptr<AwaitableDLVectorWrapper>>(
       m, "AwaitableDLList")
       .def("wait", &AwaitableDLVectorWrapper::wait)
-      .def("ready", &AwaitableDLVectorWrapper::wait);
+      .def("ready", &AwaitableDLVectorWrapper::ready);
 
   auto PyMultistepCallback = py::class_<SceneMultistepCallback>(m, "SceneMultistepCallback");
 
