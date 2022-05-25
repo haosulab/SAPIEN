@@ -27,7 +27,7 @@ private:
       while (!m_pool->m_shutdown) {
         {
           std::unique_lock<std::mutex> lock(m_pool->m_mutex);
-          if (m_pool->m_queue.empty()) {
+          while (m_pool->m_queue.empty()) {
             m_pool->m_conditional_lock.wait(lock);
             if (m_pool->m_shutdown) {
               return;
