@@ -131,4 +131,12 @@ PxReal SActorDynamicBase::getMass() { return getPxActor()->getMass(); }
 PxVec3 SActorDynamicBase::getInertia() { return getPxActor()->getMassSpaceInertiaTensor(); }
 PxTransform SActorDynamicBase::getCMassLocalPose() { return getPxActor()->getCMassLocalPose(); }
 
+void SActorDynamicBase::setCCDEnabled(bool enable) {
+  return getPxActor()->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD, enable);
+}
+
+bool SActorDynamicBase::getCCDEnabled() const {
+  return getPxActor()->getRigidBodyFlags() | PxRigidBodyFlag::eENABLE_CCD;
+}
+
 } // namespace sapien

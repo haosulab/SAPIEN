@@ -149,6 +149,8 @@ public:
   virtual void addForceAtPoint(PxVec3 const &force, PxVec3 const &pos);
   virtual void addForceTorque(PxVec3 const &force, PxVec3 const &torque);
   void setDamping(PxReal linear, PxReal angular);
+  void setCCDEnabled(bool enable);
+  bool getCCDEnabled() const;
 
 protected:
   using SActorBase::SActorBase;

@@ -24,7 +24,7 @@ TypeAffinityIgnoreFilterShader(PxFilterObjectAttributes attributes0, PxFilterDat
     pairFlags = PxPairFlag::eCONTACT_DEFAULT | PxPairFlag::eNOTIFY_CONTACT_POINTS |
                 PxPairFlag::eNOTIFY_TOUCH_PERSISTS | PxPairFlag::eNOTIFY_TOUCH_FOUND |
                 PxPairFlag::eNOTIFY_TOUCH_LOST | PxPairFlag::ePRE_SOLVER_VELOCITY |
-                PxPairFlag::ePOST_SOLVER_VELOCITY;
+                PxPairFlag::ePOST_SOLVER_VELOCITY | PxPairFlag::eDETECT_CCD_CONTACT;
 
     return PxFilterFlag::eDEFAULT;
   }

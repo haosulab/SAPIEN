@@ -149,12 +149,21 @@ class ActorDynamicBase(ActorBase, Entity):
     def get_inertia(self) -> numpy.ndarray[numpy.float32]: ...
     def get_mass(self) -> float: ...
     def get_velocity(self) -> numpy.ndarray[numpy.float32]: ...
+    def set_ccd(self, enable: bool) -> None: ...
     def set_damping(self, linear: float, angular: float) -> None: ...
     @property
     def angular_velocity(self) -> numpy.ndarray[numpy.float32]:
         """
         :type: numpy.ndarray[numpy.float32]
         """
+    @property
+    def ccd(self) -> bool:
+        """
+        :type: bool
+        """
+    @ccd.setter
+    def ccd(self, arg1: bool) -> None:
+        pass
     @property
     def cmass_local_pose(self) -> Pose:
         """

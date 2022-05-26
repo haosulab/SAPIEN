@@ -1012,7 +1012,9 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
             a.addForceTorque(array2vec3(force), array2vec3(torque));
           },
           py::arg("force"), py::arg("torque"))
-      .def("set_damping", &SActorDynamicBase::setDamping, py::arg("linear"), py::arg("angular"));
+      .def("set_damping", &SActorDynamicBase::setDamping, py::arg("linear"), py::arg("angular"))
+      .def("set_ccd", &SActorDynamicBase::setCCDEnabled, py::arg("enable"))
+      .def_property("ccd", &SActorDynamicBase::getCCDEnabled, &SActorDynamicBase::setCCDEnabled);
 
   PyActorStatic.def("set_pose", &SActorStatic::setPose, py::arg("pose"))
       .def("pack", &SActorStatic::packData)
