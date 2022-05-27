@@ -1878,6 +1878,14 @@ class URDFLoader():
     def load_multiple_collisions_from_file(self, arg0: bool) -> None:
         pass
     @property
+    def package_dir(self) -> str:
+        """
+        :type: str
+        """
+    @package_dir.setter
+    def package_dir(self, arg0: str) -> None:
+        pass
+    @property
     def scale(self) -> float:
         """
         :type: float

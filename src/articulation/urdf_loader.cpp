@@ -20,19 +20,33 @@ static PxTransform poseFromOrigin(const Origin &origin, float scale = 1.f) {
   return PxTransform(origin.xyz * scale, q);
 }
 
-static std::string getAbsPath(const std::string &urdfPath, const std::string &filePath) {
-  if (urdfPath.empty()) {
-    return filePath;
+static std::string getAbsPath(const std::string &urdfPath, const std::string &filePath,
+                              const std::string &packagePath = "") {
+
+  std::string filename = filePath;
+  if (filePath.starts_with("package://")) {
+    filename = filePath.substr(10);
   }
-  if (filePath.length() == 0) {
-    fprintf(stderr, "Empty file path in URDF\n");
-    exit(1);
+  if (filename.starts_with("/")) {
+    return filename;
   }
-  if (filePath[0] == '/') {
-    return filePath;
+  if (filename.empty()) {
+    throw std::runtime_error("Empty file path in URDF");
   }
-  auto path = fs::path(urdfPath);
-  return fs::canonical(path).remove_filename().string() + filePath;
+
+  std::string basePath = "";
+  if (filePath.starts_with("package://") && (!packagePath.empty())) {
+    basePath = packagePath;
+  } else if (!urdfPath.empty()) {
+    basePath = fs::canonical(fs::path(urdfPath)).remove_filename().string();
+  }
+  if (basePath.empty()) {
+    basePath = ".";
+  }
+  if (!basePath.ends_with('/')) {
+    basePath += "/";
+  }
+  return basePath + filename;
 }
 
 std::optional<std::string> findSRDF(const std::string &urdfName) {
@@ -278,7 +292,7 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
                                             visual->name);
         break;
       case Geometry::MESH:
-        currentLinkBuilder->addVisualFromFile(getAbsPath(urdfFilename, visual->geometry->filename),
+        currentLinkBuilder->addVisualFromFile(getAbsPath(urdfFilename, visual->geometry->filename, packageDir),
                                               tVisual2Link, visual->geometry->scale * scale,
                                               nullptr, visual->name);
         break;
@@ -375,16 +389,16 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
       case Geometry::MESH:
         if (multipleMeshesInOneFile) {
           currentLinkBuilder->addMultipleConvexShapesFromFile(
-              getAbsPath(urdfFilename, collision->geometry->filename), tCollision2Link,
+              getAbsPath(urdfFilename, collision->geometry->filename, packageDir), tCollision2Link,
               collision->geometry->scale * scale, material, density, patchRadius, minPatchRadius);
         } else {
           currentLinkBuilder->addConvexShapeFromFile(
-              getAbsPath(urdfFilename, collision->geometry->filename), tCollision2Link,
+              getAbsPath(urdfFilename, collision->geometry->filename, packageDir), tCollision2Link,
               collision->geometry->scale * scale, material, density, patchRadius, minPatchRadius);
         }
         if (collisionIsVisual) {
           currentLinkBuilder->addVisualFromFile(
-              getAbsPath(urdfFilename, collision->geometry->filename), tCollision2Link,
+              getAbsPath(urdfFilename, collision->geometry->filename, packageDir), tCollision2Link,
               collision->geometry->scale * scale, nullptr, "");
         }
         break;

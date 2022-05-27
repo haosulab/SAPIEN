@@ -134,15 +134,15 @@ template <> inline physx::PxVec3 DomBase::_read_attr<physx::PxVec3>(const std::s
   float x = 0, y = 0, z = 0;
   try {
     x = std::stof(sx);
-  } catch (std::invalid_argument const&) {
+  } catch (std::invalid_argument const &) {
   }
   try {
     y = std::stof(sy);
-  } catch (std::invalid_argument const&) {
+  } catch (std::invalid_argument const &) {
   }
   try {
     z = std::stof(sz);
-  } catch (std::invalid_argument const&) {
+  } catch (std::invalid_argument const &) {
   }
   return {x, y, z};
 }
@@ -160,19 +160,19 @@ template <> inline physx::PxVec4 DomBase::_read_attr<physx::PxVec4>(const std::s
   float x = 0, y = 0, z = 0, w = 0;
   try {
     x = std::stof(sx);
-  } catch (std::invalid_argument const&) {
+  } catch (std::invalid_argument const &) {
   }
   try {
     y = std::stof(sy);
-  } catch (std::invalid_argument const&) {
+  } catch (std::invalid_argument const &) {
   }
   try {
     z = std::stof(sz);
-  } catch (std::invalid_argument const&) {
+  } catch (std::invalid_argument const &) {
   }
   try {
     w = std::stof(sw);
-  } catch (std::invalid_argument const&) {
+  } catch (std::invalid_argument const &) {
   }
   return {x, y, z, w};
 }
@@ -181,9 +181,7 @@ template <> inline physx::PxReal DomBase::_read_attr<physx::PxReal>(const std::s
   return std::stof(str);
 }
 
-template <> inline int DomBase::_read_attr<int>(const std::string &str) {
-  return std::stoi(str);
-}
+template <> inline int DomBase::_read_attr<int>(const std::string &str) { return std::stoi(str); }
 
 namespace SRDF {
 
@@ -796,10 +794,6 @@ public:
   bool fixRootLink = true;
 
   bool multipleMeshesInOneFile = false;
-  /* The loaded articulation will use inverse dynamics to balance passive forces,
-   * it will act as if there is no gravity, etc.
-   */
-  // bool balancePassiveForce = false;
 
   /* Load the articulation at a different scale.
    * It will scale mass and inertia accordingly
@@ -808,6 +802,9 @@ public:
 
   /* collision will be rendered along with visual */
   bool collisionIsVisual = false;
+
+  /* directory for package:// */
+  std::string packageDir = "";
 
   explicit URDFLoader(SScene *scene);
 

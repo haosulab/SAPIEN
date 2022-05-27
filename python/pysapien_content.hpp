@@ -1719,6 +1719,7 @@ Args:
                      &URDF::URDFLoader::multipleMeshesInOneFile)
       .def_readwrite("collision_is_visual", &URDF::URDFLoader::collisionIsVisual)
       .def_readwrite("scale", &URDF::URDFLoader::scale)
+      .def_readwrite("package_dir", &URDF::URDFLoader::packageDir)
       .def(
           "load",
           [](URDF::URDFLoader &loader, std::string const &filename, py::dict &dict) {
