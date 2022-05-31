@@ -386,8 +386,14 @@ void buildSapien(py::module &m) {
 
   PyPose
       .def(py::init([](py::array_t<PxReal> p, py::array_t<PxReal> q) {
-             return new PxTransform({p.at(0), p.at(1), p.at(2)},
-                                    {q.at(1), q.at(2), q.at(3), q.at(0)});
+             if (p.size() == 16) {
+               return utils::fromTransFormationMatrix(p);
+             }
+             if (p.size() == 3 && q.size() == 4) {
+               return new PxTransform({p.at(0), p.at(1), p.at(2)},
+                                      {q.at(1), q.at(2), q.at(3), q.at(0)});
+             }
+             throw std::invalid_argument("failed to create Pose: invalid array size");
            }),
            py::return_value_policy::automatic, py::arg("p") = make_array<float>({0, 0, 0}),
            py::arg("q") = make_array<float>({1, 0, 0, 0}))
@@ -1238,8 +1244,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("drive_target"));
 
-  PyArticulation
-      .def_property_readonly("fixed", &SArticulation::isBaseFixed)
+  PyArticulation.def_property_readonly("fixed", &SArticulation::isBaseFixed)
       .def("get_drive_velocity_target",
            [](SArticulation &a) {
              auto target = a.getDriveVelocityTarget();
