@@ -106,6 +106,10 @@ void main() {
   float d1 = texture(samplerGbuffer1Depth, inUV).x;
   float d2 = texture(samplerGbuffer2Depth, inUV).x;
 
+  float pointDepth = texture(samplerSmoothedDepthLinear, inUV).x;
+  float dp = (cameraBuffer.projectionMatrix[2][2] * pointDepth + cameraBuffer.projectionMatrix[3][2]) / (-pointDepth);
+  vec4 pointColor = texture(samplerPoint, inUV);
+
   vec4 outColor0 = texture(samplerLighting, inUV);
   vec4 outColor1 = texture(samplerLighting1, inUV);
   vec4 outColor2 = texture(samplerAlbedo2, inUV);
@@ -115,21 +119,28 @@ void main() {
 
   // depth composite for 0 and 2
   float factor = step(d0, d2);
-  outColor0 = outColor0 * factor + outColor2 * (1 - factor);
+  float d = min(d0, d2);
+  outColor = outColor0 * factor + outColor2 * (1 - factor);
 
-  // blend for 02 and 1
-  vec3 blend = outColor1.a * outColor1.rgb + (1 - outColor1.a) * outColor0.rgb;
-  factor = step(min(d0, d2), d1);
-  outColor = vec4((1 - factor)* blend + factor * outColor0.rgb, 1.f);
-
-  factor = step(d0, d1);
-  outPosition = outPos0 * factor + outPos1 * (1 - factor);
-
-  vec4 pointColor = texture(samplerPoint, inUV);
-  float pointDepth = texture(samplerSmoothedDepthLinear, inUV).x;
-  if (pointDepth < 0 && (pointDepth > outPosition.z || outPosition.z == 0)) {
-    outColor = vec4(pointColor.xyz, 1);
+  // depth composite for 02 and p
+  if (pointDepth < 0) {
+    factor = step(d, dp);
+    d = min(d, dp);
+    outColor = outColor * factor + pointColor * (1 - factor);
   }
+
+  // blend for 02p and 1
+  vec3 blend = outColor1.a * outColor1.rgb + (1 - outColor1.a) * outColor.rgb;
+  factor = step(d, d1);
+  outColor = vec4((1 - factor) * blend + factor * outColor.rgb, 1.f);
+
+  outPosition = outPos0 * factor + outPos1 * (1 - factor);
+  // TODO: position for points
+
+  // float pointDepth = texture(samplerSmoothedDepthLinear, inUV).x;
+  // if (pointDepth < 0 && (pointDepth > outPosition.z || outPosition.z == 0)) {
+  //   outColor = vec4(pointColor.xyz, 1);
+  // }
 
   outColor = pow(outColor, vec4(1/2.2, 1/2.2, 1/2.2, 1));
 
