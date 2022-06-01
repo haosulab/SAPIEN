@@ -1973,7 +1973,7 @@ Args:
   PyParticleEntity.def_property_readonly("visual_body",
                                          [](SEntityParticle &p) { return p.getVisualBody(); });
 
-  PyCameraEntity.def_property("parent", &SCamera::setParent, &SCamera::getParent)
+  PyCameraEntity.def_property("parent", &SCamera::getParent, &SCamera::setParent)
       .def("set_parent", &SCamera::setParent, py::arg("parent"), py::arg("keep_pose"))
       .def("set_local_pose", &SCamera::setLocalPose, py::arg("pose"))
       .def_property_readonly("local_pose", &SCamera::getLocalPose)
