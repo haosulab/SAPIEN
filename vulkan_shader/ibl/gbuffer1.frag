@@ -75,12 +75,30 @@ layout(set = 3, binding = 4) uniform sampler2D samplerTexturedLightDepths[1];
 layout(set = 3, binding = 5) uniform sampler2D samplerSpotLightDepths[10];
 layout(set = 3, binding = 6) uniform sampler2D samplerTexturedLightTextures[1];
 
+layout(set = 3, binding = 7) uniform samplerCube samplerEnvironment;
+layout(set = 3, binding = 8) uniform sampler2D samplerBRDFLUT;
+
 vec4 world2camera(vec4 pos) {
   return cameraBuffer.viewMatrix * pos;
 }
 
 vec3 getBackgroundColor(vec3 texcoord) {
   return vec3(1,1,1);
+}
+
+vec3 diffuseIBL(vec3 albedo, vec3 N) {
+  N = vec3(-N.y, N.z, -N.x);
+  vec3 color = textureLod(samplerEnvironment, N, 5).rgb;
+  return color * albedo;
+}
+
+vec3 specularIBL(vec3 fresnel, float roughness, vec3 N, vec3 V) {
+  float dotNV = max(dot(N, V), 0);
+  vec3 R = 2 * dot(N, V) * N - V;
+  R = vec3(-R.y, R.z, -R.x);
+  vec3 color = textureLod(samplerEnvironment, R, roughness * 5).rgb;
+  vec2 envBRDF = texture(samplerBRDFLUT, vec2(roughness, dotNV)).xy;
+  return color * (fresnel * envBRDF.x + envBRDF.y);
 }
 
 layout(location = 0) in vec4 inPosition;
@@ -216,6 +234,12 @@ void main() {
         sceneBuffer.texturedLights[i].emission.rgb,
         l, normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
+
+  vec3 wnormal = mat3(cameraBuffer.viewMatrixInverse) * normal;
+  color += diffuseIBL(diffuseAlbedo, wnormal);
+  color += specularIBL(fresnel, roughness,
+                       wnormal,
+                       mat3(cameraBuffer.viewMatrixInverse) * camDir);
 
   color += sceneBuffer.ambientLight.rgb * diffuseAlbedo;
 
