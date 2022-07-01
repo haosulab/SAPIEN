@@ -26,6 +26,7 @@ from sapien.core.pysapien import DirectionalLightEntity
 from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
 from sapien.core.pysapien import Entity
+from sapien.core.pysapien import Gear
 from sapien.core.pysapien import IPxrRenderer
 from sapien.core.pysapien import Joint
 from sapien.core.pysapien import JointBase
@@ -106,6 +107,7 @@ __all__ = [
     "Drive",
     "Engine",
     "Entity",
+    "Gear",
     "IPxrRenderer",
     "Joint",
     "JointBase",

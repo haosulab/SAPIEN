@@ -50,6 +50,7 @@ class LinkBuilder;
 class ArticulationBuilder;
 class SDrive6D;
 class SDrive;
+class SGear;
 struct SContact;
 
 namespace Renderer {
@@ -173,9 +174,15 @@ public:
   /** Remove a drive immediately */
   void removeDrive(SDrive *drive);
 
+  SGear *createGear(SActorDynamicBase *actor1, PxTransform const &pose1, SActorDynamicBase *actor2,
+                    PxTransform const &pose2);
+  void removeGear(SGear *gear);
+
   SActorBase *findActorById(physx_id_t id) const;
   SLinkBase *findArticulationLinkById(physx_id_t id) const;
   inline physx_id_t generateUniqueRenderId() { return mRenderIdGenerator.next(); };
+
+  void wakeUpActor(SActorBase *actor);
 
 private:
   void addActor(std::unique_ptr<SActorBase> actor); // called by actor builder
@@ -202,6 +209,7 @@ private:
   std::vector<std::unique_ptr<SLight>> mLights;
 
   std::vector<std::unique_ptr<SDrive>> mDrives;
+  std::vector<std::unique_ptr<SGear>> mGears;
 
   /************************************************
    * Sensor

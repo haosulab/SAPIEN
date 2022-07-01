@@ -253,6 +253,7 @@ def main():
     loader.fix_root_link = True
     robot = loader.load("../assets/robot/movo/movo.urdf")
     robot.get_qpos()
+    import ipdb; ipdb.set_trace()
     # for j in robot.get_active_joints():
     #     j.set_drive_property(1000, 200)
     # robot.set_qpos([4.71, 2.84, 0.0, 0.75, 4.62, 4.48, 4.88, 0, 0])
@@ -326,29 +327,30 @@ def main():
     count = 0
     while not viewer.closed:
         for i in range(4):
-            scene.step_async()
+            f = scene.step_async()
+        f.wait()
         scene.update_render()
         viewer.render()
         count += 1
 
-        # scene.update_render_async()
+        cam2.take_picture()
+        img = cam2.get_dl_tensor("Color")
+        shape = sapien.dlpack.dl_shape(img)
+        output = np.zeros(shape, dtype=np.float32)
+        sapien.dlpack.dl_to_numpy_cuda_async_unchecked(img, output)
+        sapien.dlpack.dl_cuda_sync()
 
-        # cam2.take_picture()
-        # img = cam2.get_dl_tensor("Color")
-        # shape = sapien.dlpack.dl_shape(img)
-        # output = np.zeros(shape, dtype=np.float32)
-        # sapien.dlpack.dl_to_numpy_cuda_async_unchecked(img, output)
-        # sapien.dlpack.dl_cuda_sync()
+        imgs = cam2.take_picture_and_get_dl_tensors_async(["Color"]).wait()
+        shape = sapien.dlpack.dl_shape(imgs[0])
+        output = np.zeros(shape, dtype=np.float32)
+        sapien.dlpack.dl_to_numpy_cuda_async_unchecked(imgs[0], output)
+        sapien.dlpack.dl_cuda_sync()
 
-        # imgs = cam2.take_picture_and_get_dl_tensors_async(["Color"]).wait()
-        # shape = sapien.dlpack.dl_shape(imgs[0])
-        # output = np.zeros(shape, dtype=np.float32)
-        # sapien.dlpack.dl_to_numpy_cuda_async_unchecked(imgs[0], output)
-        # sapien.dlpack.dl_cuda_sync()
-
-        # import matplotlib.pyplot as plt
-        # plt.imshow(output)
-        # plt.show()
+        print('here1')
+        import matplotlib.pyplot as plt
+        plt.imshow(output)
+        plt.show()
+        print('here2')
 
         robot.get_qpos()
         if count == 1:

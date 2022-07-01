@@ -47,8 +47,6 @@ protected:
   std::vector<Renderer::IPxrRigidbody *> mCollisionBodies{};
   std::vector<std::unique_ptr<SCollisionShape>> mCollisionShapes{};
 
-  std::vector<SDrive *> mDrives{};
-
   uint32_t mCol1{0};
   uint32_t mCol2{0};
   uint32_t mCol3{0};
@@ -72,14 +70,6 @@ public:
   void hideVisual();
   void unhideVisual();
   bool isHidingVisual() const;
-
-  inline std::vector<SDrive *> getDrives() const { return mDrives; }
-
-  // let the actor know that it is part of this drive, should not be called by users
-  void addDrive(SDrive *drive);
-
-  // let the actor know that this drive is removed, should not be called by users
-  void removeDrive(SDrive *drive);
 
   inline physx_id_t getId() { return mId; }
   PxTransform getPose() const override;

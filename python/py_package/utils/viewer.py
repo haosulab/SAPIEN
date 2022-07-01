@@ -12,7 +12,7 @@ from ..core import (
     PointLightEntity,
     DirectionalLightEntity,
     SpotLightEntity,
-    CameraEntity
+    CameraEntity,
 )
 from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.euler import quat2euler
@@ -1132,6 +1132,13 @@ class Viewer(object):
                 )
             )
 
+            self.ui_pause_checkbox = (
+                R.UICheckbox()
+                .Label("Pause")
+                .Checked(self.paused)
+                .Callback(lambda p: self.toggle_pause(p.checked))
+            )
+
             self.control_window = (
                 R.UIWindow()
                 .Label("Control")
@@ -1139,9 +1146,7 @@ class Viewer(object):
                 .Size(400, 400)
                 .append(
                     R.UISameLine().append(
-                        R.UICheckbox()
-                        .Label("Pause")
-                        .Callback(lambda p: self.toggle_pause(p.checked)),
+                        self.ui_pause_checkbox,
                         R.UIButton()
                         .Label("Single Step")
                         .Callback(lambda p: self.step_button()),
@@ -1781,7 +1786,10 @@ class Viewer(object):
                         .Callback(
                             (
                                 lambda j: lambda p: j.set_drive_property(
-                                    j.stiffness, p.value, j.force_limit, j.drive_mode,
+                                    j.stiffness,
+                                    p.value,
+                                    j.force_limit,
+                                    j.drive_mode,
                                 )
                             )(j)
                         ),
@@ -1791,7 +1799,10 @@ class Viewer(object):
                         .Callback(
                             (
                                 lambda j: lambda p: j.set_drive_property(
-                                    p.value, j.damping, j.force_limit, j.drive_mode,
+                                    p.value,
+                                    j.damping,
+                                    j.force_limit,
+                                    j.drive_mode,
                                 )
                             )(j)
                         ),
@@ -1801,7 +1812,10 @@ class Viewer(object):
                         .Callback(
                             (
                                 lambda j: lambda p: j.set_drive_property(
-                                    j.stiffness, j.damping, p.value, j.drive_mode,
+                                    j.stiffness,
+                                    j.damping,
+                                    p.value,
+                                    j.drive_mode,
                                 )
                             )(j)
                         ),
@@ -1826,6 +1840,19 @@ class Viewer(object):
                 )
             uijoints.append(line)
         self.articulation_window.append(uijoints)
+
+        def wrapper(art):
+            def copy_to_clipboard(_):
+                import pyperclip
+
+                pyperclip.copy(
+                    f"[{', '.join([str(x) for x in art.get_qpos()])}]"
+                )
+            return copy_to_clipboard
+
+        self.articulation_window.append(
+            R.UIButton().Label("Copy Joint Positions").Callback(wrapper(art))
+        )
 
         def wrapper(art, show):
             def show_link_collision(_):
@@ -1892,6 +1919,8 @@ class Viewer(object):
 
     def toggle_pause(self, paused):
         self.paused = paused
+        if hasattr(self, "ui_pause_checkbox"):
+            self.ui_pause_checkbox.Checked(paused)
 
     def toggle_axes(self, show):
         self.show_axes = show
@@ -2089,8 +2118,9 @@ class Viewer(object):
             self.ik_errpr = error
             self.pinocchio_model.compute_forward_kinematics(result)
             for idx, obj in enumerate(self.ik_display_objects):
-                pose = self.selected_entity.get_articulation().pose * self.pinocchio_model.get_link_pose(
-                    idx
+                pose = (
+                    self.selected_entity.get_articulation().pose
+                    * self.pinocchio_model.get_link_pose(idx)
                 )
                 obj.set_position(pose.p)
                 obj.set_rotation(pose.q)

@@ -188,7 +188,9 @@ set_target_properties(sapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURREN
 pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
 target_link_libraries(pysapien PRIVATE sapien)
 
-add_executable(manual_actor manualtest/actor.cpp python/pysapien_content.hpp)
+add_executable(manual_gear manualtest/gear.cpp)
+target_link_libraries(manual_gear sapien)
+add_executable(manual_actor manualtest/actor.cpp)
 target_link_libraries(manual_actor sapien)
 add_executable(manual_articulation manualtest/articulation.cpp)
 target_link_libraries(manual_articulation sapien)

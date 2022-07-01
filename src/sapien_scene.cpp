@@ -13,6 +13,7 @@
 #include "sapien/sapien_contact.h"
 #include "sapien/sapien_drive.h"
 #include "sapien/sapien_entity_particle.h"
+#include "sapien/sapien_gear.h"
 #include "sapien/simulation.h"
 #include <algorithm>
 #include <spdlog/spdlog.h>
@@ -91,7 +92,10 @@ SScene::~SScene() {
     }
   }
   for (auto &drive : mDrives) {
-    drive.release();
+    drive->getPxJoint()->release();
+  }
+  for (auto &gear : mGears) {
+    gear->mGearJoint->release();
   }
   mPxScene->release();
 
@@ -134,23 +138,15 @@ SDrive6D *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SAct
                               PxTransform const &pose2) {
   mDrives.push_back(std::unique_ptr<SDrive6D>(new SDrive6D(this, actor1, pose1, actor2, pose2)));
   auto drive = mDrives.back().get();
-  if (actor1) {
-    actor1->addDrive(drive);
-    if (actor1->getType() == EActorType::DYNAMIC) {
-      static_cast<PxRigidDynamic *>(actor1->getPxActor())->wakeUp();
-    } else if (actor1->getType() == EActorType::ARTICULATION_LINK) {
-      static_cast<PxArticulationLink *>(actor1->getPxActor())->getArticulation().wakeUp();
-    }
-  }
-  if (actor2) {
-    actor2->addDrive(drive);
-    if (actor2->getType() == EActorType::DYNAMIC) {
-      static_cast<PxRigidDynamic *>(actor2->getPxActor())->wakeUp();
-    } else if (actor2->getType() == EActorType::ARTICULATION_LINK) {
-      static_cast<PxArticulationLink *>(actor2->getPxActor())->getArticulation().wakeUp();
-    }
-  }
+  wakeUpActor(actor1);
+  wakeUpActor(actor2);
   return static_cast<SDrive6D *>(drive);
+}
+
+SGear *SScene::createGear(SActorDynamicBase *actor1, PxTransform const &pose1,
+                          SActorDynamicBase *actor2, PxTransform const &pose2) {
+  mGears.push_back(std::make_unique<SGear>(this, actor1, pose1, actor2, pose2));
+  return mGears.back().get();
 }
 
 void SScene::addActor(std::unique_ptr<SActorBase> actor) {
@@ -239,45 +235,6 @@ void SScene::removeCleanUp() {
   }
 }
 
-// void SScene::removeCleanUp2() {
-//   if (mRequiresRemoveCleanUp2) {
-//     mRequiresRemoveCleanUp2 = false;
-
-    // release actors
-    // for (auto &a : mActors) {
-    //   if (a->getDestroyedState() == 2) {
-    //     a->getPxActor()->release();
-    //   }
-    // }
-    // mActors.erase(std::remove_if(mActors.begin(), mActors.end(),
-    //                              [](auto &a) { return a->getDestroyedState() == 2; }),
-    //               mActors.end());
-
-    // // release articulation
-    // for (auto &a : mArticulations) {
-    //   if (a->getDestroyedState() == 2) {
-    //     a->getPxArticulation()->release();
-    //   }
-    // }
-    // mArticulations.erase(std::remove_if(mArticulations.begin(), mArticulations.end(),
-    //                                     [](auto &a) { return a->getDestroyedState() == 2; }),
-    //                      mArticulations.end());
-
-    // // release kinematic articulation
-    // for (auto &a : mKinematicArticulations) {
-    //   if (a->getDestroyedState() == 2) {
-    //     for (auto l : a->getBaseLinks()) {
-    //       l->getPxActor()->release();
-    //     }
-    //   }
-    // }
-    // mKinematicArticulations.erase(
-    //     std::remove_if(mKinematicArticulations.begin(), mKinematicArticulations.end(),
-    //                    [](auto &a) { return a->getDestroyedState() == 2; }),
-    //     mKinematicArticulations.end());
-//   }
-// }
-
 void SScene::removeActor(SActorBase *actor) {
   if (actor->isBeingDestroyed()) {
     return;
@@ -291,8 +248,26 @@ void SScene::removeActor(SActorBase *actor) {
   mActorId2Actor.erase(actor->getId());
 
   // remove drives
-  for (auto drive : actor->getDrives()) {
-    removeDrive(drive);
+  for (auto it = mDrives.begin(); it != mDrives.end();) {
+    if ((*it)->getActor1() == actor || (*it)->getActor2() == actor) {
+      wakeUpActor((*it)->getActor1());
+      wakeUpActor((*it)->getActor2());
+      (*it)->getPxJoint()->release();
+      it = mDrives.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  for (auto it = mGears.begin(); it != mGears.end();) {
+    if ((*it)->getActor1() == actor || (*it)->getActor2() == actor) {
+      wakeUpActor((*it)->getActor1());
+      wakeUpActor((*it)->getActor2());
+      (*it)->getGearJoint()->release();
+      it = mGears.erase(it);
+    } else {
+      ++it;
+    }
   }
 
   // remove camera
@@ -328,8 +303,25 @@ void SScene::removeArticulation(SArticulation *articulation) {
     link->EventEmitter<EventActorPreDestroy>::emit(e);
 
     // remove drives
-    for (auto drive : link->getDrives()) {
-      removeDrive(drive);
+    for (auto it = mDrives.begin(); it != mDrives.end();) {
+      if ((*it)->getActor1() == link || (*it)->getActor2() == link) {
+        wakeUpActor((*it)->getActor1());
+        wakeUpActor((*it)->getActor2());
+        (*it)->getPxJoint()->release();
+        it = mDrives.erase(it);
+      } else {
+        ++it;
+      }
+    }
+    for (auto it = mGears.begin(); it != mGears.end();) {
+      if ((*it)->getActor1() == link || (*it)->getActor2() == link) {
+        wakeUpActor((*it)->getActor1());
+        wakeUpActor((*it)->getActor2());
+        (*it)->getGearJoint()->release();
+        it = mGears.erase(it);
+      } else {
+        ++it;
+      }
     }
 
     // remove camera
@@ -370,8 +362,26 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
     link->EventEmitter<EventActorPreDestroy>::emit(e);
 
     // remove drives
-    for (auto drive : link->getDrives()) {
-      removeDrive(drive);
+    for (auto it = mDrives.begin(); it != mDrives.end();) {
+      if ((*it)->getActor1() == link || (*it)->getActor2() == link) {
+        wakeUpActor((*it)->getActor1());
+        wakeUpActor((*it)->getActor2());
+        (*it)->getPxJoint()->release();
+        it = mDrives.erase(it);
+      } else {
+        ++it;
+      }
+    }
+
+    for (auto it = mGears.begin(); it != mGears.end();) {
+      if ((*it)->getActor1() == link || (*it)->getActor2() == link) {
+        wakeUpActor((*it)->getActor1());
+        wakeUpActor((*it)->getActor2());
+        (*it)->getGearJoint()->release();
+        it = mGears.erase(it);
+      } else {
+        ++it;
+      }
     }
 
     // remove camera
@@ -400,30 +410,21 @@ void SScene::removeDrive(SDrive *drive) {
   if (drive->mScene != this) {
     spdlog::get("SAPIEN")->error("Failed to remove drive: drive is not in this scene.");
   }
+
+  wakeUpActor(drive->getActor1());
+  wakeUpActor(drive->getActor2());
   drive->getPxJoint()->release();
-  if (drive->mActor1) {
-    drive->mActor1->removeDrive(drive);
-    if (drive->mActor1->getType() == EActorType::DYNAMIC) {
-      static_cast<PxRigidDynamic *>(drive->getActor1()->getPxActor())->wakeUp();
-    } else if (drive->mActor1->getType() == EActorType::ARTICULATION_LINK) {
-      static_cast<PxArticulationLink *>(drive->getActor1()->getPxActor())
-          ->getArticulation()
-          .wakeUp();
-    }
+  std::erase_if(mDrives, [drive](auto &d) { return d.get() == drive; });
+}
+
+void SScene::removeGear(SGear *gear) {
+  if (gear->mScene != this) {
+    spdlog::get("SAPIEN")->error("Failed to remove gear: gear is not in this scene.");
   }
-  if (drive->mActor2) {
-    drive->mActor2->removeDrive(drive);
-    if (drive->mActor2->getType() == EActorType::DYNAMIC) {
-      static_cast<PxRigidDynamic *>(drive->getActor2()->getPxActor())->wakeUp();
-    } else if (drive->mActor2->getType() == EActorType::ARTICULATION_LINK) {
-      static_cast<PxArticulationLink *>(drive->getActor2()->getPxActor())
-          ->getArticulation()
-          .wakeUp();
-    }
-  }
-  mDrives.erase(std::remove_if(mDrives.begin(), mDrives.end(),
-                               [drive](auto &d) { return d.get() == drive; }),
-                mDrives.end());
+  wakeUpActor(gear->getActor1());
+  wakeUpActor(gear->getActor2());
+  gear->getGearJoint()->release();
+  std::erase_if(mGears, [=](auto const &g) { return g.get() == gear; });
 }
 
 SActorBase *SScene::findActorById(physx_id_t id) const {
@@ -440,6 +441,17 @@ SLinkBase *SScene::findArticulationLinkById(physx_id_t id) const {
     return nullptr;
   }
   return it->second;
+}
+
+void SScene::wakeUpActor(SActorBase *actor) {
+  if (auto a = dynamic_cast<SActor *>(actor)) {
+    a->getPxActor()->wakeUp();
+    return;
+  }
+  if (auto a = dynamic_cast<SLink *>(actor)) {
+    a->getArticulation()->getPxArticulation()->wakeUp();
+    return;
+  }
 }
 
 std::vector<SCamera *> SScene::getCameras() {
@@ -897,5 +909,4 @@ ThreadPool &SScene::getThread() {
   }
   return mRunnerThread;
 }
-
 }; // namespace sapien

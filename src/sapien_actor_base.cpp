@@ -65,11 +65,6 @@ void SActorBase::updateRender(PxTransform const &pose) {
   }
 }
 
-void SActorBase::addDrive(SDrive *drive) { mDrives.push_back(drive); }
-void SActorBase::removeDrive(SDrive *drive) {
-  mDrives.erase(std::remove(mDrives.begin(), mDrives.end(), drive), mDrives.end());
-}
-
 void SActorBase::onContact(ContactCallback callback) {
   EventEmitter<EventActorContact>::registerCallback(
       [=](EventActorContact &event) { callback(event.self, event.other, event.contact); });

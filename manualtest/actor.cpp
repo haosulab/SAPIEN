@@ -112,57 +112,84 @@ int main() {
   auto sim = std::make_shared<Simulation>();
   auto renderer =
       std::make_shared<Renderer::SVulkan2Renderer>(false, 1000, 1000, 4, "", "back", false);
+  Renderer::setDefaultCameraShaderDirectory("../vulkan_shader/ibl");
   sim->setRenderer(renderer);
-  Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/ibl");
+  // Renderer::SVulkan2Window window(renderer, 800, 600, "../vulkan_shader/ibl");
 
   SceneConfig config;
   // config.gravity = {0, 0, 0};
 
-  auto scene = sim->createScene(config);
-  window.setScene(static_cast<Renderer::SVulkan2Scene *>(scene->getRendererScene()));
-  window.setCameraParameters(0.1, 100, 1);
+  auto scene1 = sim->createScene(config);
 
-  scene->addGround(0);
-  scene->getRendererScene()->setAmbientLight({0.3, 0.3, 0.3});
-  scene->getRendererScene()->addDirectionalLight({0, 1, -1}, {0.5, 0.5, 0.5}, true, {0, 0, 0}, 10,
+  scene1->addGround(0);
+  scene1->getRendererScene()->setAmbientLight({0.3, 0.3, 0.3});
+  scene1->getRendererScene()->addDirectionalLight({0, 1, -1}, {0.5, 0.5, 0.5}, true, {0, 0, 0}, 10,
                                                  -10, 10, 1024);
 
-  auto builder = scene->createActorBuilder();
+  auto builder = scene1->createActorBuilder();
   builder->addBoxShape({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
   builder->addBoxVisual({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
   auto box = builder->build();
   box->setPose({{0, 0, 2}, PxIdentity});
   box->setName("box");
+  auto cam1 = scene1->addCamera("", 64, 64, 1);
 
-  scene->updateRender();
-  scene->step();
-  window.render("Color");
-  window.mCameraController->setXYZ(-4, 0, 0.5);
-  int iter = 0;
-  while (1) {
-    scene->updateRender();
-    scene->step();
+  scene1->updateRender();
+  scene1->step();
 
-    for (auto c : scene->getContacts()) {
-      std::cout << iter << " " << c->actors[0]->getName() << " " << c->actors[1]->getName()
-                << std::endl;
-    }
+  auto scene2 = sim->createScene(config);
 
-    if (iter==300) {
-      scene->removeActor(box);
-    }
+  scene2->addGround(0);
+  scene2->getRendererScene()->setAmbientLight({0.3, 0.3, 0.3});
+  scene2->getRendererScene()->addDirectionalLight({0, 1, -1}, {0.5, 0.5, 0.5}, true, {0, 0, 0}, 10,
+                                                 -10, 10, 1024);
 
-    if (iter == 305) {
-      return 0;
-    }
+  auto builder2 = scene2->createActorBuilder();
+  builder2->addBoxShape({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
+  builder2->addBoxVisual({{0, 0, 0}, {0.3305881, 0.1652941, 0.0991764, 0.9238795}});
+  auto box2 = builder2->build();
+  box2->setPose({{0, 0, 2}, PxIdentity});
+  box2->setName("box2");
+  auto cam2 = scene2->addCamera("", 64, 64, 1);
 
-    // window.render("Color");
-    // if (window.windowCloseRequested()) {
-    //   window.close();
-    //   break;
-    // }
-    iter++;
+  scene2->updateRender();
+  scene2->step();
+
+  {
+    auto w1 = cam1->takePictureAndGetDLTensorsAsync({"Color"});
+    auto w2 = cam2->takePictureAndGetDLTensorsAsync({"Color"});
+    w1->wait();
+    w2->wait();
   }
+
+
+  // window.render("Color");
+  // window.mCameraController->setXYZ(-4, 0, 0.5);
+  // int iter = 0;
+  // while (1) {
+  //   scene->updateRender();
+  //   scene->step();
+
+  //   for (auto c : scene->getContacts()) {
+  //     std::cout << iter << " " << c->actors[0]->getName() << " " << c->actors[1]->getName()
+  //               << std::endl;
+  //   }
+
+  //   if (iter==300) {
+  //     scene->removeActor(box2);
+  //   }
+
+  //   if (iter == 305) {
+  //     return 0;
+  //   }
+
+  //   // window.render("Color");
+  //   // if (window.windowCloseRequested()) {
+  //   //   window.close();
+  //   //   break;
+  //   // }
+  //   iter++;
+  // }
 
   return 0;
 }
