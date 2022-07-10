@@ -241,7 +241,7 @@ void main() {
                        wnormal,
                        mat3(cameraBuffer.viewMatrixInverse) * camDir);
 
-  color += sceneBuffer.ambientLight.rgb * diffuseAlbedo;
+  color += sceneBuffer.ambientLight.rgb * albedo.rgb;
 
   outLighting1 = vec4(color, albedo.a);
 }

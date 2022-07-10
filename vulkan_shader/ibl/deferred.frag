@@ -249,7 +249,7 @@ void main() {
                        wnormal,
                        mat3(cameraBuffer.viewMatrixInverse) * camDir);
 
-  color += sceneBuffer.ambientLight.rgb * diffuseAlbedo;
+  color += sceneBuffer.ambientLight.rgb * albedo.rgb;
 
   if (depth == 1) {
     outLighting = vec4(getBackgroundColor((cameraBuffer.viewMatrixInverse * csPosition).xyz), 1.f);

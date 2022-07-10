@@ -217,7 +217,7 @@ void main() {
         l, normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
 
-  color += sceneBuffer.ambientLight.rgb * diffuseAlbedo;
+  color += sceneBuffer.ambientLight.rgb * albedo.rgb;
 
   outLighting1 = vec4(color, albedo.a);
 }
