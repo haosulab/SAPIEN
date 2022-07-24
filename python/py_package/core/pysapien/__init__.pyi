@@ -1442,8 +1442,17 @@ class RenderMesh():
     pass
 class RenderParticleBody():
     def set_attribute(self, name: str, value: numpy.ndarray[numpy.float32, _Shape[m, n]]) -> None: ...
+    def set_rendered_point_count(self, n: int) -> None: ...
     def set_shading_mode(self, mode: int) -> None: ...
     def set_visibility(self, visibility: float) -> None: ...
+    @property
+    def rendered_point_count(self) -> int:
+        """
+        :type: int
+        """
+    @rendered_point_count.setter
+    def rendered_point_count(self, arg1: int) -> None:
+        pass
     pass
 class RenderScene():
     def add_mesh_from_file(self, mesh_file: str, scale: numpy.ndarray[numpy.float32]) -> RenderBody: ...

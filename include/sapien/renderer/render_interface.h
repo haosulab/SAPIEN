@@ -363,6 +363,9 @@ public:
   virtual void setRenderMode(uint32_t mode) = 0;
   virtual void setVisibility(float visibility) = 0;
 
+  virtual void setRenderedVertexCount(uint32_t count) = 0;
+  virtual uint32_t getRenderedVertexCount() = 0;
+
   virtual void setAttribute(
       std::string_view name,
       Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>) = 0;

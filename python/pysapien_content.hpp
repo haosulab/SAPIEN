@@ -2252,7 +2252,11 @@ Args:
       .def("set_visibility", &Renderer::IPxrPointBody::setVisibility, py::arg("visibility"))
       .def("set_shading_mode", &Renderer::IPxrPointBody::setRenderMode, py::arg("mode"))
       .def("set_attribute", &Renderer::IPxrPointBody::setAttribute, py::arg("name"),
-           py::arg("value"));
+           py::arg("value"))
+      .def("set_rendered_point_count", &Renderer::IPxrPointBody::setRenderedVertexCount,
+           py::arg("n"))
+      .def_property("rendered_point_count", &Renderer::IPxrPointBody::getRenderedVertexCount,
+                    &Renderer::IPxrPointBody::setRenderedVertexCount);
 
   PyVulkanParticleBody.def_property_readonly("dl_vertices", [](Renderer::SVulkan2PointBody &b) {
     return wrapDLTensor(b.getDLVertices());

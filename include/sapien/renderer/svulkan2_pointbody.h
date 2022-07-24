@@ -23,6 +23,10 @@ public:
 
   void setVisibility(float visibility) override;
   void setRenderMode(uint32_t mode) override;
+
+  void setRenderedVertexCount(uint32_t count) override;
+  uint32_t getRenderedVertexCount() override;
+
   void setAttribute(
       std::string_view name,
       Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>) override;

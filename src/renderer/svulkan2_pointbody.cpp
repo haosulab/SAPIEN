@@ -14,6 +14,9 @@ void SVulkan2PointBody::setVisibility(float visibility) {
 void SVulkan2PointBody::setRenderMode(uint32_t mode) { mObject->setShadingMode(mode); }
 void SVulkan2PointBody::destroyVisualObject() { mParentScene->getScene()->removeNode(*mObject); }
 
+void SVulkan2PointBody::setRenderedVertexCount(uint32_t count) { mObject->setVertexCount(count); }
+uint32_t SVulkan2PointBody::getRenderedVertexCount() { return mObject->getVertexCount(); }
+
 void SVulkan2PointBody::setAttribute(
     std::string_view name,
     Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> value) {
