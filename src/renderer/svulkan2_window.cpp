@@ -105,6 +105,10 @@ glm::mat4 SVulkan2Window::getCameraProjectionMatrix() {
   return getCamera()->getProjectionMatrix();
 }
 
+float SVulkan2Window::getCameraNear() { return getCamera()->getNear(); }
+float SVulkan2Window::getCameraFar() { return getCamera()->getFar(); }
+float SVulkan2Window::getCameraFovy() {return getCamera()->getFovy(); };
+
 std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
   return mSVulkanRenderer->getDisplayTargetNames();
 }

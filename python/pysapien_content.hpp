@@ -2111,6 +2111,9 @@ Args:
       .def("resize", &Renderer::SVulkan2Window::resize, py::arg("width"), py::arg("height"))
       .def_property_readonly("fps", &Renderer::SVulkan2Window::getFPS)
       .def_property_readonly("size", &Renderer::SVulkan2Window::getWindowSize)
+      .def_property_readonly("fovy", &Renderer::SVulkan2Window::getCameraFovy)
+      .def_property_readonly("near", &Renderer::SVulkan2Window::getCameraNear)
+      .def_property_readonly("far", &Renderer::SVulkan2Window::getCameraFar)
       .def_property("cursor", &Renderer::SVulkan2Window::getCursorEnabled,
                     &Renderer::SVulkan2Window::setCursorEnabled)
 

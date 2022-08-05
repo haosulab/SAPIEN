@@ -71,6 +71,15 @@ void buildRenderer(py::module &parent) {
   auto PyUIInputFloat4 = py::class_<ui::InputFloat4, ui::Widget, std::shared_ptr<ui::InputFloat4>>(
       m, "UIInputFloat4");
 
+  auto PyUIInputInt =
+      py::class_<ui::InputInt, ui::Widget, std::shared_ptr<ui::InputInt>>(m, "UIInputInt");
+  auto PyUIInputInt2 =
+      py::class_<ui::InputInt2, ui::Widget, std::shared_ptr<ui::InputInt2>>(m, "UIInputInt2");
+  auto PyUIInputInt3 =
+      py::class_<ui::InputInt3, ui::Widget, std::shared_ptr<ui::InputInt3>>(m, "UIInputInt3");
+  auto PyUIInputInt4 =
+      py::class_<ui::InputInt4, ui::Widget, std::shared_ptr<ui::InputInt4>>(m, "UIInputInt4");
+
   auto PyUISliderFloat = py::class_<ui::SliderFloat, ui::Widget, std::shared_ptr<ui::SliderFloat>>(
       m, "UISliderFloat");
   auto PyUISliderAngle = py::class_<ui::SliderAngle, ui::Widget, std::shared_ptr<ui::SliderAngle>>(
@@ -242,6 +251,62 @@ void buildRenderer(py::module &parent) {
       .def("ReadOnly", &ui::InputFloat4::ReadOnly, py::arg("read_only"))
       .def("Callback", &ui::InputFloat4::Callback, py::arg("func"));
 
+  PyUIInputInt.def(py::init<>())
+      .def("Label", &ui::InputInt::Label, py::arg("label"))
+      .def(
+          "Value", [](ui::InputInt &input, int x) { return input.Value(x); }, py::arg("value"))
+      .def_property_readonly("value", [](ui::InputInt &input) { return input.get(); })
+      .def("ReadOnly", &ui::InputInt::ReadOnly, py::arg("read_only"))
+      .def("Callback", &ui::InputInt::Callback, py::arg("func"));
+
+  PyUIInputInt2.def(py::init<>())
+      .def("Label", &ui::InputInt2::Label, py::arg("label"))
+      .def(
+          "Value",
+          [](ui::InputInt2 &input, py::array_t<int> x) {
+            return input.Value({x.at(0), x.at(1)});
+          },
+          py::arg("value"))
+      .def_property_readonly("value",
+                             [](ui::InputInt2 &input) {
+                               glm::ivec2 v = input.get();
+                               return py::array_t<int>(2u, &v[0]);
+                             })
+      .def("ReadOnly", &ui::InputInt2::ReadOnly, py::arg("read_only"))
+      .def("Callback", &ui::InputInt2::Callback, py::arg("func"));
+
+  PyUIInputInt3.def(py::init<>())
+      .def("Label", &ui::InputInt3::Label, py::arg("label"))
+      .def(
+          "Value",
+          [](ui::InputInt3 &input, py::array_t<int> x) {
+            return input.Value({x.at(0), x.at(1), x.at(2)});
+          },
+          py::arg("value"))
+      .def_property_readonly("value",
+                             [](ui::InputInt3 &input) {
+                               glm::ivec3 v = input.get();
+                               return py::array_t<int>(3u, &v[0]);
+                             })
+      .def("ReadOnly", &ui::InputInt3::ReadOnly, py::arg("read_only"))
+      .def("Callback", &ui::InputInt3::Callback, py::arg("func"));
+
+  PyUIInputInt4.def(py::init<>())
+      .def("Label", &ui::InputInt4::Label, py::arg("label"))
+      .def(
+          "Value",
+          [](ui::InputInt4 &input, py::array_t<int> x) {
+            return input.Value({x.at(0), x.at(1), x.at(2), x.at(3)});
+          },
+          py::arg("value"))
+      .def_property_readonly("value",
+                             [](ui::InputInt4 &input) {
+                               glm::ivec4 v = input.get();
+                               return py::array_t<int>(4u, &v[0]);
+                             })
+      .def("ReadOnly", &ui::InputInt4::ReadOnly, py::arg("read_only"))
+      .def("Callback", &ui::InputInt4::Callback, py::arg("func"));
+
   PyUISliderFloat.def(py::init<>())
       .def("Width", &ui::SliderFloat::Width, py::arg("width"))
       .def("Label", &ui::SliderFloat::Label, py::arg("label"))
@@ -286,10 +351,10 @@ void buildRenderer(py::module &parent) {
                          view.at(1, 1), view.at(2, 1), view.at(3, 1), view.at(0, 2), view.at(1, 2),
                          view.at(2, 2), view.at(3, 2), view.at(0, 3), view.at(1, 3), view.at(2, 3),
                          view.at(3, 3));
-             glm::mat4 p(proj.at(0, 0), proj.at(1, 0), proj.at(2, 0), proj.at(3, 0),
-                         proj.at(0, 1), -proj.at(1, 1), -proj.at(2, 1), proj.at(3, 1),
-                         proj.at(0, 2), proj.at(1, 2), proj.at(2, 2), proj.at(3, 2),
-                         proj.at(0, 3), proj.at(1, 3), proj.at(2, 3), proj.at(3, 3));
+             glm::mat4 p(proj.at(0, 0), proj.at(1, 0), proj.at(2, 0), proj.at(3, 0), proj.at(0, 1),
+                         -proj.at(1, 1), -proj.at(2, 1), proj.at(3, 1), proj.at(0, 2),
+                         proj.at(1, 2), proj.at(2, 2), proj.at(3, 2), proj.at(0, 3), proj.at(1, 3),
+                         proj.at(2, 3), proj.at(3, 3));
              gizmo.setCameraParameters(v, p);
            });
   // end UI

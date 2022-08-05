@@ -2067,6 +2067,16 @@ class VulkanWindow():
         :type: typing.List[str]
         """
     @property
+    def far(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def fovy(self) -> float:
+        """
+        :type: float
+        """
+    @property
     def fps(self) -> float:
         """
         :type: float
@@ -2085,6 +2095,11 @@ class VulkanWindow():
     def mouse_wheel_delta(self) -> typing.List[float[2]]:
         """
         :type: typing.List[float[2]]
+        """
+    @property
+    def near(self) -> float:
+        """
+        :type: float
         """
     @property
     def shift(self) -> bool:

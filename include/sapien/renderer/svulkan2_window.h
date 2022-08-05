@@ -64,6 +64,10 @@ public:
   void setCameraPosition(glm::vec3 const &pos);
   void setCameraRotation(glm::quat const &rot);
 
+  float getCameraNear();
+  float getCameraFar();
+  float getCameraFovy();
+
   glm::vec3 getCameraPosition();
   glm::quat getCameraRotation();
   glm::mat4 getCameraProjectionMatrix();

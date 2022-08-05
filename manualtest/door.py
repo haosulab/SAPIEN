@@ -4,7 +4,7 @@ import sapien.core.pysapien.renderer as R
 from transforms3d.quaternions import axangle2quat as aa
 import numpy as np
 
-from controller import Viewer
+from sapien.utils import Viewer
 
 
 sapien.VulkanRenderer.set_log_level("info")

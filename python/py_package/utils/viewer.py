@@ -1,5 +1,5 @@
-from ..core import renderer as R
-from ..core import (
+from sapien.core import renderer as R
+from sapien.core import (
     ActorBase,
     Pose,
     VulkanRenderer,
@@ -189,7 +189,7 @@ class Viewer(object):
         self,
         renderer: VulkanRenderer,
         shader_dir="",
-        resolutions=((1024, 768), (800, 600), (1920, 1080)),
+        resolutions=(1024, 768),
     ):
         if not os.path.exists("imgui.ini"):
             with open("imgui.ini", "w") as f:
@@ -202,10 +202,12 @@ class Viewer(object):
         self.create_visual_models()
 
         self.scene = None
-        self.window = None
-        self.resolution = None
-        self.resolutions = None
-        self.set_window_resolutions(resolutions)
+
+        self.resolution = np.array(resolutions).flatten()[:2]
+        self.window = self.renderer.create_window(
+            resolutions[0], resolutions[1], self.shader_dir
+        )
+
         self.fovy = np.pi / 2
 
         self.axes = None
@@ -1098,16 +1100,16 @@ class Viewer(object):
         self.fovy = fovy
         self.window.set_camera_parameters(0.1, 100, fovy)
 
-    def set_window_resolutions(self, resolutions):
-        assert len(resolutions)
-        for r in resolutions:
-            assert len(r) == 2
+    # def set_window_resolutions(self, resolutions):
+    #     assert len(resolutions)
+    #     for r in resolutions:
+    #         assert len(r) == 2
 
-        self.window = self.renderer.create_window(
-            resolutions[0][0], resolutions[0][1], self.shader_dir
-        )
-        self.resolution = resolutions[0]
-        self.resolutions = resolutions
+    #     self.window = self.renderer.create_window(
+    #         resolutions[0][0], resolutions[0][1], self.shader_dir
+    #     )
+    #     self.resolution = resolutions[0]
+    #     self.resolutions = resolutions
 
     def build_control_window(self):
         if not self.control_window:
@@ -1172,6 +1174,9 @@ class Viewer(object):
                     .Callback(lambda w: self.set_scroll_speed(w.value)),
                     R.UIDisplayText().Text("Camera"),
                     self.camera_ui,
+                    R.UIButton()
+                    .Label("Copy Camera Settings")
+                    .Callback(lambda c: self.copy_camera_settings()),
                     R.UIDisplayText().Text("Display Settings"),
                     R.UISliderAngle()
                     .Min(1)
@@ -1188,12 +1193,10 @@ class Viewer(object):
                         + [x for x in self.window.display_target_names if x != "Color"]
                     )
                     .Callback(lambda p: self.set_target(p.value)),
-                    R.UIOptions()
-                    .Style("select")
+                    R.UIInputInt2()
                     .Label("Resolution")
-                    .Index(0)
-                    .Items(["{}x{}".format(r[0], r[1]) for r in self.resolutions])
-                    .Callback(lambda p: self.set_resolution(p.index)),
+                    .Value(self.resolution)
+                    .Callback(lambda c: self.set_resolution(c.value)),
                     R.UIDisplayText().Text("Actor Selection"),
                     R.UICheckbox()
                     .Label("Coordinate Axes")
@@ -1233,6 +1236,20 @@ class Viewer(object):
             )
         self.control_window.get_children()[-1].Text(
             "FPS: {:.2f}".format(self.window.fps)
+        )
+
+    def copy_camera_settings(self):
+        p = self.window.get_camera_position()
+        q = qmult(self.window.get_camera_rotation(), [0.5, -0.5, 0.5, 0.5])
+        width, height = self.window.size
+        fovy = self.window.fovy
+        near = self.window.near
+        far = self.window.far
+        import pyperclip
+
+        pyperclip.copy(
+            f'camera = add_camera(name="", width={width}, height={height}, fovy={fovy:.3g}, near={near:.3g}, far={far:.3g})\n'
+            f"camera.set_local_pose({Pose(p, q).__repr__()})"
         )
 
     def enable_ik(self, enable):
@@ -1297,9 +1314,14 @@ class Viewer(object):
     def set_selection_opacity(self, opacity):
         self.selection_opacity = opacity
 
-    def set_resolution(self, index):
-        self.resolution = self.resolutions[index]
-        self.window.resize(*self.resolution)
+    # def set_resolution(self, index):
+    #     self.resolution = self.resolutions[index]
+    #     self.window.resize(*self.resolution)
+
+    def set_resolution(self, res):
+        if res[0] > 0 and res[1] > 0:
+            self.resolution = res
+            self.window.resize(*res)
 
     def build_scene_window(self):
         assert self.scene
@@ -1845,9 +1867,8 @@ class Viewer(object):
             def copy_to_clipboard(_):
                 import pyperclip
 
-                pyperclip.copy(
-                    f"[{', '.join([str(x) for x in art.get_qpos()])}]"
-                )
+                pyperclip.copy(f"[{', '.join([str(x) for x in art.get_qpos()])}]")
+
             return copy_to_clipboard
 
         self.articulation_window.append(
