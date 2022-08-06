@@ -533,6 +533,12 @@ public:
                 IPxrTexture::AddressMode::Enum addressMode = {}) {
     throw std::runtime_error("Texture creation is not supported.");
   }
+  virtual std::shared_ptr<IPxrTexture>
+  createTexture(std::vector<uint8_t> const &data, int width, int height, uint32_t mipLevels = 1,
+                IPxrTexture::FilterMode::Enum filterMode = {},
+                IPxrTexture::AddressMode::Enum addressMode = {}, bool srgb = true) {
+    throw std::runtime_error("Texture creation is not supported.");
+  }
 
   virtual ~IPxrRenderer() = default;
 };

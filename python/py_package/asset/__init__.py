@@ -3,6 +3,9 @@ import zipfile
 import io
 import os
 from pathlib import Path
+import numpy as np
+import sapien
+from typing import Tuple
 
 url = "https://sapien.ucsd.edu/api/download/compressed/{}.zip?token={}"
 
@@ -85,3 +88,44 @@ def create_dome_envmap(
             fother, fother, fpy, fny, fother, fother, filename
         )
     return filename
+
+
+def create_checkerboard(
+    renderer: sapien.core.IPxrRenderer,
+    shape: tuple,
+    length=0.1,
+    color1=[1, 1, 1, 1],
+    color2=[0, 0, 0, 1],
+) -> Tuple[sapien.core.RenderMesh, sapien.core.RenderMaterial]:
+    array = np.zeros([*shape, 4])
+    checker = np.indices(shape).sum(axis=0) % 2
+    array[checker == 0] = color1
+    array[checker == 1] = color2
+
+    array = (array * 255).clip(0, 255).astype(np.uint8)
+
+    texture = renderer.create_texture_from_array(array, filter_mode="nearest")
+    mat = renderer.create_material()
+    mat.set_diffuse_texture(texture)
+    mat.set_base_color([1, 0, 1, 1])
+
+    width = length * shape[0]
+    height = length * shape[1]
+    mesh = renderer.create_mesh(
+        np.array(
+            [
+                [0, 0, 0],
+                [width, 0, 0],
+                [width, height, 0],
+                [0, height, 0],
+            ],
+            dtype=np.float32,
+        ),
+        np.array([[0, 1, 2], [0, 2, 3]], dtype=np.uint32),
+    )
+    mesh.set_uvs(np.array([[0, 0], [0, 1], [1, 1], [1, 0]], dtype=np.float32))
+    mesh.set_normals(
+        np.array([[0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1]], dtype=np.float32)
+    )
+
+    return mesh, mat

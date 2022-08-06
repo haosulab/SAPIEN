@@ -49,8 +49,9 @@ SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
     spdlog::get("SAPIEN")->warn("A second renderer will share the same internal context with the "
                                 "first one. Arguments passed to constructor will be ignored.");
   } else {
-    gContext = mContext = svulkan2::core::Context::Create(
-        !offscreenOnly, maxNumMaterials, maxNumTextures, defaultMipLevels, doNotLoadTexture, device);
+    gContext = mContext =
+        svulkan2::core::Context::Create(!offscreenOnly, maxNumMaterials, maxNumTextures,
+                                        defaultMipLevels, doNotLoadTexture, device);
     gResourceManager = mResourceManager = mContext->createResourceManager();
   }
   if (culling == "back") {
@@ -124,6 +125,49 @@ SVulkan2Renderer::createTexture(std::string_view filename, uint32_t mipLevels,
   auto texture = mContext->getResourceManager()->CreateTextureFromFile(
       {filename.begin(), filename.end()}, mipLevels, vkf, vkf, vka, vka);
   texture->loadAsync().get();
+  return std::make_shared<SVulkan2Texture>(texture);
+}
+
+std::shared_ptr<IPxrTexture>
+SVulkan2Renderer::createTexture(std::vector<uint8_t> const &data, int width, int height,
+                                uint32_t mipLevels, IPxrTexture::FilterMode::Enum filterMode,
+                                IPxrTexture::AddressMode::Enum addressMode, bool srgb) {
+  vk::Filter vkf;
+  vk::SamplerAddressMode vka;
+  switch (filterMode) {
+  case IPxrTexture::FilterMode::eNEAREST:
+    vkf = vk::Filter::eNearest;
+    break;
+  case IPxrTexture::FilterMode::eLINEAR:
+    vkf = vk::Filter::eLinear;
+    break;
+  }
+
+  switch (addressMode) {
+  case IPxrTexture::AddressMode::eREPEAT:
+    vka = vk::SamplerAddressMode::eRepeat;
+    break;
+  case IPxrTexture::AddressMode::eBORDER:
+    vka = vk::SamplerAddressMode::eClampToBorder;
+    break;
+  case IPxrTexture::AddressMode::eEDGE:
+    vka = vk::SamplerAddressMode::eClampToEdge;
+    break;
+  case IPxrTexture::AddressMode::eMIRROR:
+    vka = vk::SamplerAddressMode::eMirroredRepeat;
+    break;
+  }
+
+  int channels = data.size() / width / height;
+  if (channels * width * height != data.size()) {
+    throw std::runtime_error("failed to create texture: incompatible data and size.");
+  }
+  if (channels > 4) {
+    throw std::runtime_error("failed to create texture: channel size must be <= 4");
+  }
+
+  auto texture = svulkan2::resource::SVTexture::FromData(width, height, channels, data, mipLevels,
+                                                         vkf, vkf, vka, vka, srgb);
   return std::make_shared<SVulkan2Texture>(texture);
 }
 

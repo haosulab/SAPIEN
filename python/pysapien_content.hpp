@@ -216,6 +216,27 @@ py::array_t<PxReal> mat32array(glm::mat3 const &mat) {
   return py::array_t<PxReal>({3, 3}, arr);
 }
 
+static auto getFilterMode(std::string mode) {
+  if (mode == "linear") {
+    return Renderer::IPxrTexture::FilterMode::eLINEAR;
+  } else if (mode == "nearest") {
+    return Renderer::IPxrTexture::FilterMode::eNEAREST;
+  }
+  throw std::invalid_argument("Unknown filter mode " + mode);
+}
+
+static auto getAddressMode(std::string mode) {
+  if (mode == "repeat") {
+    return Renderer::IPxrTexture::AddressMode::eREPEAT;
+  } else if (mode == "border") {
+    return Renderer::IPxrTexture::AddressMode::eBORDER;
+  } else if (mode == "edge") {
+    return Renderer::IPxrTexture::AddressMode::eEDGE;
+  } else {
+    throw std::invalid_argument("Unknown address mode " + mode);
+  }
+}
+
 #define DEPRECATE_WARN(OLD, NEW)                                                                  \
   PyErr_WarnEx(PyExc_DeprecationWarning, #OLD " is deprecated, use " #NEW " instead.", 1)
 
@@ -2192,28 +2213,30 @@ Args:
           "create_texture_from_file",
           [](Renderer::IPxrRenderer &renderer, std::string const &filename, uint32_t mipLevels,
              std::string const &filterMode, std::string const &addressMode) {
-            Renderer::IPxrTexture::FilterMode::Enum fm;
-            Renderer::IPxrTexture::AddressMode::Enum am;
-            if (filterMode == "linear") {
-              fm = Renderer::IPxrTexture::FilterMode::eLINEAR;
-            } else if (filterMode == "nearest") {
-              fm = Renderer::IPxrTexture::FilterMode::eNEAREST;
-            } else {
-              throw std::invalid_argument("Unknown filter mode " + filterMode);
-            }
-
-            if (filterMode == "repeat") {
-              am = Renderer::IPxrTexture::AddressMode::eREPEAT;
-            } else if (filterMode == "border") {
-              am = Renderer::IPxrTexture::AddressMode::eBORDER;
-            } else if (filterMode == "edge") {
-              am = Renderer::IPxrTexture::AddressMode::eEDGE;
-            } else {
-              throw std::invalid_argument("Unknown address mode " + filterMode);
-            }
-            renderer.createTexture(filename, mipLevels, fm, am);
+            Renderer::IPxrTexture::FilterMode::Enum fm = getFilterMode(filterMode);
+            Renderer::IPxrTexture::AddressMode::Enum am = getAddressMode(addressMode);
+            return renderer.createTexture(filename, mipLevels, fm, am);
           },
           py::arg("filename"), py::arg("mipmap_levels") = 1, py::arg("filter_mode") = "linear",
+          py::arg("address_mode") = "repeat")
+      .def(
+          "create_texture_from_array",
+          [](Renderer::IPxrRenderer &renderer, py::array_t<uint8_t> array, uint32_t mipLevels,
+             std::string const &filterMode, std::string const &addressMode) {
+            Renderer::IPxrTexture::FilterMode::Enum fm = getFilterMode(filterMode);
+            Renderer::IPxrTexture::AddressMode::Enum am = getAddressMode(addressMode);
+            if (array.ndim() != 2 && array.ndim() != 3) {
+              throw std::runtime_error(
+                  "failed to create texture: array shape must be [h, w, c] or [h, w]");
+            }
+            int height = array.shape(0);
+            int width = array.shape(1);
+
+            return renderer.createTexture(
+                std::vector<uint8_t>(array.data(), array.data() + array.size()), width, height,
+                mipLevels, fm, am);
+          },
+          py::arg("array"), py::arg("mipmap_levels") = 1, py::arg("filter_mode") = "linear",
           py::arg("address_mode") = "repeat");
 
   PyRenderScene

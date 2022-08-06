@@ -68,6 +68,13 @@ public:
   createTexture(std::string_view filename, uint32_t mipLevels = 1,
                 IPxrTexture::FilterMode::Enum filterMode = {},
                 IPxrTexture::AddressMode::Enum addressMode = {}) override;
+
+  std::shared_ptr<IPxrTexture> createTexture(std::vector<uint8_t> const &data, int width,
+                                             int height, uint32_t mipLevels = 1,
+                                             IPxrTexture::FilterMode::Enum filterMode = {},
+                                             IPxrTexture::AddressMode::Enum addressMode = {},
+                                             bool srgb = true) override;
+
   std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
                                           std::vector<uint32_t> const &indices) override;
 };

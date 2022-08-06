@@ -13,6 +13,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from python.py_package.utils.viewer import Viewer
+from python.py_package.asset import create_checkerboard
 
 
 def create_table(
@@ -241,6 +242,11 @@ def main():
     viewer.set_scene(scene)
     viewer.set_camera_xyz(-4, 0, 0.3)
     viewer.window.set_camera_parameters(0.1, 1000, 1)
+
+    mesh, material = create_checkerboard(renderer, (4, 3))
+    builder = scene.create_actor_builder()
+    builder.add_visual_from_mesh(mesh, material=material)
+    builder.build_kinematic()
 
     scene.step()
 
