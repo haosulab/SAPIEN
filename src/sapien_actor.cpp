@@ -23,6 +23,16 @@ EActorType SActor::getType() const {
 
 void SActor::setPose(PxTransform const &pose) { getPxActor()->setGlobalPose(pose); }
 
+void SActor::setKinematicTarget(PxTransform const &pose) { mActor->setKinematicTarget(pose); }
+PxTransform SActor::getKinematicTarget() const {
+  PxTransform target;
+  if (mActor->getKinematicTarget(target)) {
+    return target;
+  }
+  throw std::runtime_error(
+      "Failed to get kinematic target. No target set or actor is not kinematic.");
+}
+
 void SActor::setVelocity(PxVec3 const &v) { getPxActor()->setLinearVelocity(v); }
 void SActor::setAngularVelocity(PxVec3 const &v) { getPxActor()->setAngularVelocity(v); }
 void SActor::lockMotion(bool x, bool y, bool z, bool ax, bool ay, bool az) {

@@ -29,6 +29,9 @@ public:
   void lockMotion(bool x, bool y, bool z, bool ax, bool ay, bool az);
   void setSolverIterations(uint32_t position, uint32_t velocity = 1);
 
+  void setKinematicTarget(PxTransform const &pose);
+  PxTransform getKinematicTarget() const;
+
 public:
   void prestep() override;
 
