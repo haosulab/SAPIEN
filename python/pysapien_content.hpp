@@ -1421,8 +1421,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
              PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
-            a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density,
-                                     patchRadius, minPatchRadius, isTrigger);
+            return a.addConvexShapeFromFile(filename, pose, array2vec3(scale), material, density,
+                                            patchRadius, minPatchRadius, isTrigger);
           },
           R"doc(
 Add a collision shape from file (see assimp for supported formats).
@@ -1436,8 +1436,8 @@ If the shape in the file is not convex, it will be converted by the PhysX backen
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
              PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
-            a.addNonConvexShapeFromFile(filename, pose, array2vec3(scale), material, patchRadius,
-                                        minPatchRadius, isTrigger);
+            return a.addNonConvexShapeFromFile(filename, pose, array2vec3(scale), material,
+                                               patchRadius, minPatchRadius, isTrigger);
           },
           R"doc(Add a nonconvex collision shape from a file. If it is not a trigger, then it is only valid for static and kinematic actors.)doc",
           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
@@ -1449,8 +1449,9 @@ If the shape in the file is not convex, it will be converted by the PhysX backen
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> const &scale, std::shared_ptr<SPhysicalMaterial> material,
              PxReal density, PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
-            a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material, density,
-                                              patchRadius, minPatchRadius, isTrigger);
+            return a.addMultipleConvexShapesFromFile(filename, pose, array2vec3(scale), material,
+                                                     density, patchRadius, minPatchRadius,
+                                                     isTrigger);
           },
           R"doc(
 Add multiple collisions shapes from files. Also see @add_collision_from_file.
@@ -1464,8 +1465,8 @@ Different from @add_collision_from_file, all connected components in the file wi
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
              PxReal minPatchRadius, bool isTrigger) {
-            a.addBoxShape(pose, array2vec3(halfSize), material, density, patchRadius,
-                          minPatchRadius, isTrigger);
+            return a.addBoxShape(pose, array2vec3(halfSize), material, density, patchRadius,
+                                 minPatchRadius, isTrigger);
           },
           py::arg("pose") = PxTransform(PxIdentity),
           py::arg("half_size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
@@ -1485,7 +1486,7 @@ Different from @add_collision_from_file, all connected components in the file wi
           "add_box_visual",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              py::array_t<PxReal> color, std::string const &name) {
-            a.addBoxVisual(pose, array2vec3(halfSize), array2vec3(color), name);
+            return a.addBoxVisual(pose, array2vec3(halfSize), array2vec3(color), name);
           },
           py::arg("pose") = PxTransform(PxIdentity),
           py::arg("half_size") = make_array<PxReal>({1, 1, 1}),
@@ -1494,7 +1495,7 @@ Different from @add_collision_from_file, all connected components in the file wi
           "add_box_visual",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
              std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
-            a.addBoxVisualWithMaterial(pose, array2vec3(halfSize), mat, name);
+            return a.addBoxVisualWithMaterial(pose, array2vec3(halfSize), mat, name);
           },
           py::arg("pose") = PxTransform(PxIdentity),
           py::arg("half_size") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
@@ -1503,7 +1504,7 @@ Different from @add_collision_from_file, all connected components in the file wi
           "add_capsule_visual",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
              py::array_t<PxReal> color, std::string const &name) {
-            a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
+            return a.addCapsuleVisual(pose, radius, halfLength, array2vec3(color), name);
           },
           "Add a capsule visual shape. The height is along the x-axis.",
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
@@ -1513,7 +1514,7 @@ Different from @add_collision_from_file, all connected components in the file wi
           "add_capsule_visual",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
              std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
-            a.addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
+            return a.addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
           },
           "Add a capsule visual shape. The height is along the x-axis.",
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
@@ -1522,7 +1523,7 @@ Different from @add_collision_from_file, all connected components in the file wi
           "add_sphere_visual",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius, py::array_t<PxReal> color,
              std::string const &name) {
-            a.addSphereVisual(pose, radius, array2vec3(color), name);
+            return a.addSphereVisual(pose, radius, array2vec3(color), name);
           },
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("color") = make_array<PxReal>({1, 1, 1}), py::arg("name") = "")
@@ -1538,7 +1539,7 @@ Different from @add_collision_from_file, all connected components in the file wi
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
              py::array_t<PxReal> scale, std::shared_ptr<Renderer::IPxrMaterial> &mat,
              std::string const &name) {
-            a.addVisualFromFile(filename, pose, array2vec3(scale), mat, name);
+            return a.addVisualFromFile(filename, pose, array2vec3(scale), mat, name);
           },
           py::arg("filename"), py::arg("pose") = PxTransform(PxIdentity),
           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
@@ -1548,7 +1549,7 @@ Different from @add_collision_from_file, all connected components in the file wi
           [](ActorBuilder &a, std::shared_ptr<Renderer::IRenderMesh> mesh, PxTransform const &pose,
              py::array_t<PxReal> scale, std::shared_ptr<Renderer::IPxrMaterial> &mat,
              std::string const &name) {
-            a.addVisualFromMeshWithMaterial(mesh, pose, array2vec3(scale), mat, name);
+            return a.addVisualFromMeshWithMaterial(mesh, pose, array2vec3(scale), mat, name);
           },
           py::arg("mesh"), py::arg("pose") = PxTransform(PxIdentity),
           py::arg("scale") = make_array<PxReal>({1, 1, 1}), py::arg("material") = nullptr,
@@ -1564,7 +1565,7 @@ Different from @add_collision_from_file, all connected components in the file wi
           "set_mass_and_inertia",
           [](ActorBuilder &a, PxReal mass, PxTransform const &cMassPose,
              py::array_t<PxReal> inertia) {
-            a.setMassAndInertia(mass, cMassPose, array2vec3(inertia));
+            return a.setMassAndInertia(mass, cMassPose, array2vec3(inertia));
           },
           R"doc(
 Set the mass and inertia.
@@ -2081,6 +2082,9 @@ Args:
       .def_property_readonly("should_close", &Renderer::SVulkan2Window::windowCloseRequested)
       .def("set_camera_parameters", &Renderer::SVulkan2Window::setCameraParameters,
            py::arg("near"), py::arg("far"), py::arg("fovy"))
+      .def("set_intrinsic_parameters", &Renderer::SVulkan2Window::setCameraIntrinsicParameters,
+           py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
+           py::arg("cy"), py::arg("skew"))
       .def(
           "set_camera_position",
           [](Renderer::SVulkan2Window &window, py::array_t<float> position) {

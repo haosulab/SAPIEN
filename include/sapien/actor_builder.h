@@ -77,98 +77,99 @@ public:
   ActorBuilder(ActorBuilder const &other) = delete;
   ActorBuilder &operator=(ActorBuilder const &other) = delete;
 
-  void removeAllShapes();
-  void removeAllVisuals();
+  std::shared_ptr<ActorBuilder> removeAllShapes();
+  std::shared_ptr<ActorBuilder> removeAllVisuals();
   int getShapeCount() const;
   int getVisualCount() const;
-  void removeShapeAt(uint32_t index);
-  void removeVisualAt(uint32_t index);
+  std::shared_ptr<ActorBuilder> removeShapeAt(uint32_t index);
+  std::shared_ptr<ActorBuilder> removeVisualAt(uint32_t index);
   inline std::vector<ShapeRecord> const &getShapes() const { return mShapeRecord; }
   inline std::vector<VisualRecord> const &getVisuals() const { return mVisualRecord; }
 
-  void addNonConvexShapeFromFile(const std::string &filename,
-                                 const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                                 const PxVec3 &scale = {1, 1, 1},
-                                 std::shared_ptr<SPhysicalMaterial> material = nullptr,
-                                 PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f,
-                                 bool isTrigger = false);
+  std::shared_ptr<ActorBuilder> addNonConvexShapeFromFile(
+      const std::string &filename, const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+      const PxVec3 &scale = {1, 1, 1}, std::shared_ptr<SPhysicalMaterial> material = nullptr,
+      PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
-  void addConvexShapeFromFile(const std::string &filename,
-                              const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                              const PxVec3 &scale = {1, 1, 1},
-                              std::shared_ptr<SPhysicalMaterial> material = nullptr,
-                              PxReal density = 1000.f, PxReal patchRadius = 0.f,
-                              PxReal minPatchRadius = 0.f, bool isTrigger = false);
+  std::shared_ptr<ActorBuilder> addConvexShapeFromFile(
+      const std::string &filename, const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+      const PxVec3 &scale = {1, 1, 1}, std::shared_ptr<SPhysicalMaterial> material = nullptr,
+      PxReal density = 1000.f, PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f,
+      bool isTrigger = false);
 
-  void addMultipleConvexShapesFromFile(const std::string &filename,
-                                       const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                                       const PxVec3 &scale = {1, 1, 1},
-                                       std::shared_ptr<SPhysicalMaterial> material = nullptr,
-                                       PxReal density = 1000.f, PxReal patchRadius = 0.f,
-                                       PxReal minPatchRadius = 0.f, bool isTrigger = false);
+  std::shared_ptr<ActorBuilder> addMultipleConvexShapesFromFile(
+      const std::string &filename, const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+      const PxVec3 &scale = {1, 1, 1}, std::shared_ptr<SPhysicalMaterial> material = nullptr,
+      PxReal density = 1000.f, PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f,
+      bool isTrigger = false);
 
-  void addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                   const PxVec3 &halfSize = {1, 1, 1},
-                   std::shared_ptr<SPhysicalMaterial> material = nullptr, PxReal density = 1000.f,
-                   PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f, bool isTrigger = false);
+  std::shared_ptr<ActorBuilder> addBoxShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                            const PxVec3 &halfSize = {1, 1, 1},
+                                            std::shared_ptr<SPhysicalMaterial> material = nullptr,
+                                            PxReal density = 1000.f, PxReal patchRadius = 0.f,
+                                            PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
-  void addCapsuleShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                       PxReal halfLength = 1,
-                       std::shared_ptr<SPhysicalMaterial> material = nullptr,
-                       PxReal density = 1000.f, PxReal patchRadius = 0.f,
-                       PxReal minPatchRadius = 0.f, bool isTrigger = false);
+  std::shared_ptr<ActorBuilder>
+  addCapsuleShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                  PxReal halfLength = 1, std::shared_ptr<SPhysicalMaterial> material = nullptr,
+                  PxReal density = 1000.f, PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f,
+                  bool isTrigger = false);
 
-  void addSphereShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                      std::shared_ptr<SPhysicalMaterial> material = nullptr,
-                      PxReal density = 1000.f, PxReal patchRadius = 0.f,
-                      PxReal minPatchRadius = 0.f, bool isTrigger = false);
+  std::shared_ptr<ActorBuilder>
+  addSphereShape(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                 std::shared_ptr<SPhysicalMaterial> material = nullptr, PxReal density = 1000.f,
+                 PxReal patchRadius = 0.f, PxReal minPatchRadius = 0.f, bool isTrigger = false);
 
   /* Visual functions */
-  void addBoxVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                                const PxVec3 &halfSize = {1, 1, 1},
-                                std::shared_ptr<Renderer::IPxrMaterial> material = {},
+  std::shared_ptr<ActorBuilder> addBoxVisualWithMaterial(
+      const PxTransform &pose = {{0, 0, 0}, PxIdentity}, const PxVec3 &halfSize = {1, 1, 1},
+      std::shared_ptr<Renderer::IPxrMaterial> material = {}, std::string const &name = "");
+  std::shared_ptr<ActorBuilder> addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                             const PxVec3 &size = {1, 1, 1},
+                                             const PxVec3 &color = {1, 1, 1},
+                                             std::string const &name = "");
+
+  std::shared_ptr<ActorBuilder> addCapsuleVisualWithMaterial(
+      const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1, PxReal halfLength = 1,
+      std::shared_ptr<Renderer::IPxrMaterial> material = {}, std::string const &name = "");
+  std::shared_ptr<ActorBuilder> addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                                 PxReal radius = 1, PxReal halfLength = 1,
+                                                 const PxVec3 &color = {1, 1, 1},
+                                                 std::string const &name = "");
+
+  std::shared_ptr<ActorBuilder>
+  addSphereVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
+                              std::shared_ptr<Renderer::IPxrMaterial> material = {},
+                              std::string const &name = "");
+  std::shared_ptr<ActorBuilder> addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
+                                                PxReal radius = 1, const PxVec3 &color = {1, 1, 1},
+                                                std::string const &name = "");
+
+  std::shared_ptr<ActorBuilder> addVisualFromFile(
+      const std::string &filename, const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
+      const PxVec3 &scale = {1, 1, 1}, std::shared_ptr<Renderer::IPxrMaterial> material = nullptr,
+      std::string const &name = "");
+
+  std::shared_ptr<ActorBuilder>
+  addVisualFromMeshWithMaterial(std::shared_ptr<Renderer::IRenderMesh> mesh,
+                                const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
+                                const PxVec3 &scale = {1, 1, 1},
+                                std::shared_ptr<Renderer::IPxrMaterial> material = nullptr,
                                 std::string const &name = "");
-  void addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                    const PxVec3 &size = {1, 1, 1}, const PxVec3 &color = {1, 1, 1},
-                    std::string const &name = "");
-
-  void addCapsuleVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                                    PxReal radius = 1, PxReal halfLength = 1,
-                                    std::shared_ptr<Renderer::IPxrMaterial> material = {},
-                                    std::string const &name = "");
-  void addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                        PxReal halfLength = 1, const PxVec3 &color = {1, 1, 1},
-                        std::string const &name = "");
-
-  void addSphereVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
-                                   PxReal radius = 1,
-                                   std::shared_ptr<Renderer::IPxrMaterial> material = {},
-                                   std::string const &name = "");
-  void addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                       const PxVec3 &color = {1, 1, 1}, std::string const &name = "");
-
-  void addVisualFromFile(const std::string &filename,
-                         const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                         const PxVec3 &scale = {1, 1, 1},
-                         std::shared_ptr<Renderer::IPxrMaterial> material = nullptr,
-                         std::string const &name = "");
-
-  void addVisualFromMeshWithMaterial(std::shared_ptr<Renderer::IRenderMesh> mesh,
-                                     const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-                                     const PxVec3 &scale = {1, 1, 1},
-                                     std::shared_ptr<Renderer::IPxrMaterial> material = nullptr,
-                                     std::string const &name = "");
 
   /* when a.g1 & b.g2 != 0, the collision is ignored
    * by default g1 = g2 = 1
    */
-  void setCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3);
-  void addCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3);
-  void resetCollisionGroup();
+  std::shared_ptr<ActorBuilder> setCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2,
+                                                  uint32_t g3);
+  std::shared_ptr<ActorBuilder> addCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2,
+                                                  uint32_t g3);
+  std::shared_ptr<ActorBuilder> resetCollisionGroup();
 
   // calling this function will overwrite the densities
-  void setMassAndInertia(PxReal mass, PxTransform const &cMassPose, PxVec3 const &inertia);
-  inline void setScene(SScene *scene) { mScene = scene; }
+  std::shared_ptr<ActorBuilder> setMassAndInertia(PxReal mass, PxTransform const &cMassPose,
+                                                  PxVec3 const &inertia);
+  std::shared_ptr<ActorBuilder> setScene(SScene *scene);
 
   SActor *build(bool isKinematic = false, std::string const &name = "") const;
   SActorStatic *buildStatic(std::string const &name = "") const;

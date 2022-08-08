@@ -8,26 +8,33 @@ namespace sapien {
 
 ActorBuilder::ActorBuilder(SScene *scene) : mScene(scene) {}
 
-void ActorBuilder::removeAllShapes() { mShapeRecord.clear(); }
-void ActorBuilder::removeAllVisuals() { mVisualRecord.clear(); }
+std::shared_ptr<ActorBuilder> ActorBuilder::removeAllShapes() {
+  mShapeRecord.clear();
+  return shared_from_this();
+}
+std::shared_ptr<ActorBuilder> ActorBuilder::removeAllVisuals() {
+  mVisualRecord.clear();
+  return shared_from_this();
+}
 int ActorBuilder::getShapeCount() const { return mShapeRecord.size(); }
 int ActorBuilder::getVisualCount() const { return mVisualRecord.size(); }
-void ActorBuilder::removeShapeAt(uint32_t index) {
+std::shared_ptr<ActorBuilder> ActorBuilder::removeShapeAt(uint32_t index) {
   if (index < mShapeRecord.size()) {
     mShapeRecord.erase(mShapeRecord.begin() + index);
   }
+  return shared_from_this();
 }
-void ActorBuilder::removeVisualAt(uint32_t index) {
+std::shared_ptr<ActorBuilder> ActorBuilder::removeVisualAt(uint32_t index) {
   if (index < mVisualRecord.size()) {
     mVisualRecord.erase(mVisualRecord.begin() + index);
   }
+  return shared_from_this();
 }
 
-void ActorBuilder::addNonConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
-                                             const PxVec3 &scale,
-                                             std::shared_ptr<SPhysicalMaterial> material,
-                                             PxReal patchRadius, PxReal minPatchRadius,
-                                             bool isTrigger) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addNonConvexShapeFromFile(
+    const std::string &filename, const PxTransform &pose, const PxVec3 &scale,
+    std::shared_ptr<SPhysicalMaterial> material, PxReal patchRadius, PxReal minPatchRadius,
+    bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::NonConvexMesh;
   r.filename = filename;
@@ -40,13 +47,15 @@ void ActorBuilder::addNonConvexShapeFromFile(const std::string &filename, const 
   r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
-                                          const PxVec3 &scale,
-                                          std::shared_ptr<SPhysicalMaterial> material,
-                                          PxReal density, PxReal patchRadius,
-                                          PxReal minPatchRadius, bool isTrigger) {
+std::shared_ptr<ActorBuilder>
+ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxTransform &pose,
+                                     const PxVec3 &scale,
+                                     std::shared_ptr<SPhysicalMaterial> material, PxReal density,
+                                     PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::SingleMesh;
   r.filename = filename;
@@ -59,13 +68,14 @@ void ActorBuilder::addConvexShapeFromFile(const std::string &filename, const PxT
   r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
-                                                   const PxTransform &pose, const PxVec3 &scale,
-                                                   std::shared_ptr<SPhysicalMaterial> material,
-                                                   PxReal density, PxReal patchRadius,
-                                                   PxReal minPatchRadius, bool isTrigger) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addMultipleConvexShapesFromFile(
+    const std::string &filename, const PxTransform &pose, const PxVec3 &scale,
+    std::shared_ptr<SPhysicalMaterial> material, PxReal density, PxReal patchRadius,
+    PxReal minPatchRadius, bool isTrigger) {
 
   ShapeRecord r;
   r.type = ShapeRecord::Type::MultipleMeshes;
@@ -79,11 +89,14 @@ void ActorBuilder::addMultipleConvexShapesFromFile(const std::string &filename,
   r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &halfSize,
-                               std::shared_ptr<SPhysicalMaterial> material, PxReal density,
-                               PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+std::shared_ptr<ActorBuilder>
+ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &halfSize,
+                          std::shared_ptr<SPhysicalMaterial> material, PxReal density,
+                          PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Box;
   r.pose = pose;
@@ -95,11 +108,14 @@ void ActorBuilder::addBoxShape(const PxTransform &pose, const PxVec3 &halfSize,
   r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxReal halfLength,
-                                   std::shared_ptr<SPhysicalMaterial> material, PxReal density,
-                                   PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+std::shared_ptr<ActorBuilder>
+ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxReal halfLength,
+                              std::shared_ptr<SPhysicalMaterial> material, PxReal density,
+                              PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Capsule;
   r.pose = pose;
@@ -112,11 +128,14 @@ void ActorBuilder::addCapsuleShape(const PxTransform &pose, PxReal radius, PxRea
   r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius,
-                                  std::shared_ptr<SPhysicalMaterial> material, PxReal density,
-                                  PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
+std::shared_ptr<ActorBuilder>
+ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius,
+                             std::shared_ptr<SPhysicalMaterial> material, PxReal density,
+                             PxReal patchRadius, PxReal minPatchRadius, bool isTrigger) {
   ShapeRecord r;
   r.type = ShapeRecord::Type::Sphere;
   r.pose = pose;
@@ -128,14 +147,17 @@ void ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius,
   r.isTrigger = isTrigger;
 
   mShapeRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &halfSize,
-                                            std::shared_ptr<Renderer::IPxrMaterial> material,
-                                            std::string const &name) {
+std::shared_ptr<ActorBuilder>
+ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &halfSize,
+                                       std::shared_ptr<Renderer::IPxrMaterial> material,
+                                       std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (!renderer) {
-    return;
+    return shared_from_this();
   }
   if (!material) {
     material = mScene->getSimulation()->getRenderer()->createMaterial();
@@ -148,25 +170,28 @@ void ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec
   r.name = name;
 
   mVisualRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addBoxVisual(const PxTransform &pose, const PxVec3 &size, const PxVec3 &color,
-                                std::string const &name) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addBoxVisual(const PxTransform &pose,
+                                                         const PxVec3 &size, const PxVec3 &color,
+                                                         std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (renderer) {
     auto mat = renderer->createMaterial();
     mat->setBaseColor({color.x, color.y, color.z, 1.f});
     addBoxVisualWithMaterial(pose, size, mat, name);
   }
+  return shared_from_this();
 }
 
-void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal radius,
-                                                PxReal halfLength,
-                                                std::shared_ptr<Renderer::IPxrMaterial> material,
-                                                std::string const &name) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addCapsuleVisualWithMaterial(
+    const PxTransform &pose, PxReal radius, PxReal halfLength,
+    std::shared_ptr<Renderer::IPxrMaterial> material, std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (!renderer) {
-    return;
+    return shared_from_this();
   }
   if (!material) {
     material = mScene->getSimulation()->getRenderer()->createMaterial();
@@ -180,21 +205,28 @@ void ActorBuilder::addCapsuleVisualWithMaterial(const PxTransform &pose, PxReal 
   r.name = name;
 
   mVisualRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addCapsuleVisual(const PxTransform &pose, PxReal radius, PxReal halfLength,
-                                    const PxVec3 &color, std::string const &name) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addCapsuleVisual(const PxTransform &pose,
+                                                             PxReal radius, PxReal halfLength,
+                                                             const PxVec3 &color,
+                                                             std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (renderer) {
     auto mat = renderer ? renderer->createMaterial() : nullptr;
     mat->setBaseColor({color.x, color.y, color.z, 1.f});
     addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
   }
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal radius,
-                                               std::shared_ptr<Renderer::IPxrMaterial> material,
-                                               std::string const &name) {
+std::shared_ptr<ActorBuilder>
+ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal radius,
+                                          std::shared_ptr<Renderer::IPxrMaterial> material,
+                                          std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (!material) {
     material = mScene->getSimulation()->getRenderer()->createMaterial();
@@ -207,22 +239,26 @@ void ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal r
   r.name = name;
 
   mVisualRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius, const PxVec3 &color,
-                                   std::string const &name) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addSphereVisual(const PxTransform &pose, PxReal radius,
+                                                            const PxVec3 &color,
+                                                            std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (renderer) {
     auto mat = renderer ? renderer->createMaterial() : nullptr;
     mat->setBaseColor({color.x, color.y, color.z, 1.f});
     addSphereVisualWithMaterial(pose, radius, mat, name);
   }
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addVisualFromFile(const std::string &filename, const PxTransform &pose,
-                                     const PxVec3 &scale,
-                                     std::shared_ptr<Renderer::IPxrMaterial> material,
-                                     std::string const &name) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addVisualFromFile(
+    const std::string &filename, const PxTransform &pose, const PxVec3 &scale,
+    std::shared_ptr<Renderer::IPxrMaterial> material, std::string const &name) {
   VisualRecord r;
   r.type = VisualRecord::Type::File;
   r.pose = pose;
@@ -232,12 +268,13 @@ void ActorBuilder::addVisualFromFile(const std::string &filename, const PxTransf
   r.name = name;
 
   mVisualRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addVisualFromMeshWithMaterial(std::shared_ptr<Renderer::IRenderMesh> mesh,
-                                                 const PxTransform &pose, const PxVec3 &scale,
-                                                 std::shared_ptr<Renderer::IPxrMaterial> material,
-                                                 std::string const &name) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addVisualFromMeshWithMaterial(
+    std::shared_ptr<Renderer::IRenderMesh> mesh, const PxTransform &pose, const PxVec3 &scale,
+    std::shared_ptr<Renderer::IPxrMaterial> material, std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (!material) {
     material = mScene->getSimulation()->getRenderer()->createMaterial();
@@ -250,14 +287,23 @@ void ActorBuilder::addVisualFromMeshWithMaterial(std::shared_ptr<Renderer::IRend
   r.mesh = mesh;
   r.name = name;
   mVisualRecord.push_back(r);
+
+  return shared_from_this();
 }
 
-void ActorBuilder::setMassAndInertia(PxReal mass, PxTransform const &cMassPose,
-                                     PxVec3 const &inertia) {
+std::shared_ptr<ActorBuilder>
+ActorBuilder::setMassAndInertia(PxReal mass, PxTransform const &cMassPose, PxVec3 const &inertia) {
   mUseDensity = false;
   mMass = mass;
   mCMassPose = cMassPose;
   mInertia = inertia;
+
+  return shared_from_this();
+}
+
+std::shared_ptr<ActorBuilder> ActorBuilder::setScene(SScene *scene) {
+  mScene = scene;
+  return shared_from_this();
 }
 
 void ActorBuilder::buildShapes(std::vector<std::unique_ptr<SCollisionShape>> &shapes,
@@ -441,14 +487,16 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
   }
 }
 
-void ActorBuilder::setCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3) {
+std::shared_ptr<ActorBuilder> ActorBuilder::setCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3) {
   mCollisionGroup.w0 = g0;
   mCollisionGroup.w1 = g1;
   mCollisionGroup.w2 = g2;
   mCollisionGroup.w3 = g3;
+
+  return shared_from_this();
 }
 
-void ActorBuilder::addCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3) {
   if (g0) {
     mCollisionGroup.w0 |= 1 << (g0 - 1);
   }
@@ -461,13 +509,15 @@ void ActorBuilder::addCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint
   if (g3) {
     mCollisionGroup.w2 |= 1 << (g3 - 1);
   }
+  return shared_from_this();
 }
 
-void ActorBuilder::resetCollisionGroup() {
+std::shared_ptr<ActorBuilder> ActorBuilder::resetCollisionGroup() {
   mCollisionGroup.w0 = 1;
   mCollisionGroup.w1 = 1;
   mCollisionGroup.w2 = 0;
   mCollisionGroup.w3 = 0;
+  return shared_from_this();
 }
 
 void ActorBuilder::buildCollisionVisuals(

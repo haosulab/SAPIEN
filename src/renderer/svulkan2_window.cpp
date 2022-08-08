@@ -96,6 +96,13 @@ void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {
   uint32_t height = std::max(mWindow->getHeight(), 1u);
   getCamera()->setPerspectiveParameters(near, far, fovy, width, height);
 }
+void SVulkan2Window::setCameraIntrinsicParameters(float near, float far, float fx, float fy, float cx,
+                                         float cy, float skew) {
+  uint32_t width = std::max(mWindow->getWidth(), 1u);
+  uint32_t height = std::max(mWindow->getHeight(), 1u);
+  getCamera()->setPerspectiveParameters(near, far, fx, fy, cx, cy, width, height, skew);
+}
+
 void SVulkan2Window::setCameraPosition(glm::vec3 const &pos) { getCamera()->setPosition(pos); }
 void SVulkan2Window::setCameraRotation(glm::quat const &rot) { getCamera()->setRotation(rot); }
 
@@ -107,7 +114,7 @@ glm::mat4 SVulkan2Window::getCameraProjectionMatrix() {
 
 float SVulkan2Window::getCameraNear() { return getCamera()->getNear(); }
 float SVulkan2Window::getCameraFar() { return getCamera()->getFar(); }
-float SVulkan2Window::getCameraFovy() {return getCamera()->getFovy(); };
+float SVulkan2Window::getCameraFovy() { return getCamera()->getFovy(); };
 
 std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
   return mSVulkanRenderer->getDisplayTargetNames();

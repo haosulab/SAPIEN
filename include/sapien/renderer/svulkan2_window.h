@@ -61,6 +61,8 @@ public:
   ~SVulkan2Window();
   void setScene(SVulkan2Scene *scene);
   void setCameraParameters(float near, float far, float fovy);
+  void setCameraIntrinsicParameters(float near, float far, float fx, float fy, float cx, float cy, float skew);
+
   void setCameraPosition(glm::vec3 const &pos);
   void setCameraRotation(glm::quat const &rot);
 
