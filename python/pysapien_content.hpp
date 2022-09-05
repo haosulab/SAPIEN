@@ -1816,13 +1816,26 @@ Args:
            "retrieve the computed pose for a specific link.",
            py::arg("qpos"))
       .def("get_link_pose", &PinocchioModel::getLinkPose,
-           "Given link index, get link pose from forward kinematics. Must be called after "
-           "compute_forward_kinematics.",
+           "Given link index, get link pose (in articulation base frame) from forward kinematics. "
+           "Must be called after compute_forward_kinematics.",
            py::arg("link_index"))
       .def("compute_inverse_kinematics", &PinocchioModel::computeInverseKinematics,
-           "Compute inverse kinematics with CLIK algorithm. Details see "
-           "https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/"
-           "md_doc_b-examples_i-inverse-kinematics.html",
+           R"doc(
+Compute inverse kinematics with CLIK algorithm.
+Details see https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_i-inverse-kinematics.html
+Args:
+    link_index: index of the link
+    pose: target pose of the link in articulation base frame
+    initial_qpos: initial qpos to start CLIK
+    active_mask: dof sized integer array, 1 to indicate active joints and 0 for inactive joints
+    max_iterations: number of iterations steps
+    dt: iteration step "speed"
+    damp: iteration step "damping"
+Returns:
+    result: qpos from IK
+    success: whether IK is successful
+    error: se3 norm error
+)doc",
            py::arg("link_index"), py::arg("pose"), py::arg("initial_qpos") = Eigen::VectorXd{},
            py::arg("active_qmask") = Eigen::VectorXi{}, py::arg("eps") = 1e-4,
            py::arg("max_iterations") = 1000, py::arg("dt") = 0.1, py::arg("damp") = 1e-6)
