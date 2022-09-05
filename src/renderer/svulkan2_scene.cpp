@@ -120,6 +120,7 @@ void SVulkan2Scene::destroy() { mParentRenderer->removeScene(this); }
 IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
                                            const physx::PxVec3 &scale) {
   if (!std::filesystem::exists(meshFile)) {
+    spdlog::get("SAPIEN")->error("Failed to load visual mesh: " + meshFile);
     mBodies.push_back(
         std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{},
                                             physx::PxGeometryType::eTRIANGLEMESH, scale));
@@ -145,6 +146,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const ph
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
 
   if (!std::filesystem::exists(meshFile)) {
+    spdlog::get("SAPIEN")->error("Failed to load visual mesh: " + meshFile);
     mBodies.push_back(
         std::make_unique<SVulkan2Rigidbody>(this, std::vector<svulkan2::scene::Object *>{},
                                             physx::PxGeometryType::eTRIANGLEMESH, scale));
