@@ -160,7 +160,10 @@ void SJoint::setFriction(PxReal coef) {
 }
 
 PxTransform SJoint::getGlobalPose() const {
-  return mChildLink->getPose() * mPxJoint->getChildPose();
+  if (mPxJoint) {
+    return mChildLink->getPose() * mPxJoint->getChildPose();
+  }
+  return mChildLink->getPose();
 }
 
 void SJoint::setDriveProperty(PxReal stiffness, PxReal damping, PxReal forceLimit,
