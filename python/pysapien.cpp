@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include "pysapien_content.hpp"
 #include "pysapien_renderer.hpp"
+#include "pysimsense.hpp"
 
 using namespace sapien;
 namespace py = pybind11;
@@ -8,4 +9,5 @@ namespace py = pybind11;
 PYBIND11_MODULE(pysapien, m) {
   buildRenderer(m);
   buildSapien(m);
+  buildSimsense(m);
 }

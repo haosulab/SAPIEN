@@ -8,7 +8,11 @@ from ..core import (
     CameraEntity,
 )
 
-from .depth_processor import calc_main_depth_from_left_right_ir
+from .depth_processor import (
+    calc_main_depth_from_left_right_ir,
+    init_rectify_stereo,
+    SimSense
+)
 from .sensor_base import SensorEntity
 
 from typing import Optional, Tuple
@@ -39,7 +43,6 @@ class ActiveLightSensor(SensorEntity):
                  ir_light_dim_factor : float = 0.05,
                  ):
         """
-
         :param sensor_name: Name of the sensor
         :param renderer:
         :param scene:
@@ -103,6 +106,36 @@ class ActiveLightSensor(SensorEntity):
         self._depth = None
         self._pc = None
 
+        # CPU Depth Sensor Initialization
+        ex_l = self._pose2cv2ex(self.trans_pose_l)
+        ex_r = self._pose2cv2ex(self.trans_pose_r)
+        ex_main = self._pose2cv2ex(Pose())
+        self._l2r = ex_r @ np.linalg.inv(ex_l)
+        self._l2rgb = ex_main @ np.linalg.inv(ex_l)
+        self._map1, self._map2, self._q = init_rectify_stereo(
+            self.ir_w, self.ir_h, self.ir_intrinsic.astype(np.float),
+            self.ir_intrinsic.astype(np.float), self._l2r.astype(np.float)
+        )
+
+        # GPU Depth Sensor Initialization
+        self._depth_sensor_gpu = SimSense(
+            (self.ir_w, self.ir_h),
+            self.ir_intrinsic.astype(np.float),
+            self.ir_intrinsic.astype(np.float),
+            self._l2r.astype(np.float),
+            (self.rgb_w, self.rgb_h),
+            self.rgb_intrinsic.astype(np.float),
+            self._l2rgb.astype(np.float),
+            self.min_depth,
+            self.max_depth,
+            census_width=7,
+            census_height=7,
+            block_width=7,
+            block_height=7,
+            uniqueness_ratio=15,
+            depth_dilation=True
+        )
+
     def clear_cache(self):
         self._rgb = None
         self._ir_l = None
@@ -152,23 +185,37 @@ class ActiveLightSensor(SensorEntity):
             self._fetch('ir_l')
             self._fetch('ir_r')
 
-            ex_l = self._pose2cv2ex(self.trans_pose_l)
-            ex_r = self._pose2cv2ex(self.trans_pose_r)
-            ex_main = self._pose2cv2ex(Pose())
-
             depth = calc_main_depth_from_left_right_ir(
                 self._float2uint8(self._ir_l),
                 self._float2uint8(self._ir_r),
-                ex_l, ex_r, ex_main,
+                self._l2r, self._l2rgb,
                 self.ir_intrinsic, self.ir_intrinsic, self.rgb_intrinsic,
-                lr_consistency=False, main_cam_size=(self.rgb_w, self.rgb_h),
+                self._map1, self._map2, self._q,
+                main_cam_size=(self.rgb_w, self.rgb_h),
                 ndisp=128, use_census=True, register_depth=True, census_wsize=7,
-                use_noise=False)
+                use_noise=False
+            )
             depth[depth > self.max_depth] = 0
             depth[depth < self.min_depth] = 0
             self._depth = depth
 
         return copy(self._depth)
+
+    def get_depth_gpu(self):
+        if self._depth is None:
+            self._fetch('ir_l')
+            self._fetch('ir_r')
+
+            depth = self._depth_sensor_gpu.compute(
+                self._float2uint8(self._ir_l),
+                self._float2uint8(self._ir_r)
+            )
+            self._depth = depth
+
+        return copy(self._depth)
+    
+    def close_gpu(self):
+        self._depth_sensor_gpu.close()
 
     def get_pointcloud(self, frame='camera', with_rgb=False):
         assert frame in ['camera', 'world']

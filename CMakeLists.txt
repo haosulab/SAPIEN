@@ -153,6 +153,9 @@ include_directories("3rd_party/kuafu/3rd_party/SDL/include")
 include_directories("3rd_party/kuafu/3rd_party/KTX-Software/include")
 include_directories("3rd_party/kuafu/3rd_party/OptiX7SDK/include")
 
+add_subdirectory("3rd_party/simsense" EXCLUDE_FROM_ALL)
+include_directories("3rd_party/simsense/include")
+
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_library(sapien SHARED ${PROJECT_SRC})
 
@@ -179,7 +182,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt)
+            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt simsense)
 endif ()
 
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
@@ -203,4 +206,3 @@ target_link_libraries(manual_kuafu_minimal sapien)
 
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtest/*.py ${CMAKE_CURRENT_BINARY_DIR})
-
