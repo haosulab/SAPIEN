@@ -9,6 +9,7 @@ except ImportError:
 import pkg_resources
 import os
 import sys
+from typing import List
 
 
 def ensure_icd():
@@ -35,12 +36,11 @@ def __enable_vulkan():
     __VULKAN_CAMERA_SHADER_ROOT = pkg_resources.resource_filename(
         "sapien", "vulkan_shader/ibl"
     )
-    __KUAFU_ASSETS_ROOT = pkg_resources.resource_filename(
-        "sapien", "kuafu_assets"
-    )
+    __KUAFU_ASSETS_ROOT = pkg_resources.resource_filename("sapien", "kuafu_assets")
     assert os.path.exists(__VULKAN_VIEWER_SHADER_ROOT)
     assert os.path.exists(__VULKAN_CAMERA_SHADER_ROOT)
     assert os.path.exists(__KUAFU_ASSETS_ROOT)
+    RenderServer._set_shader_dir(__VULKAN_CAMERA_SHADER_ROOT)
     VulkanRenderer._set_viewer_shader_dir(__VULKAN_VIEWER_SHADER_ROOT)
     VulkanRenderer._set_camera_shader_dir(__VULKAN_CAMERA_SHADER_ROOT)
     KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
@@ -54,7 +54,9 @@ def __set_viewer_shader_dir(shader_dir):
     if os.path.exists(shader_dir):
         VulkanRenderer._set_viewer_shader_dir(shader_dir)
         return
-    shader_dir = pkg_resources.resource_filename("sapien", "vulkan_shader/{}".format(shader_dir))
+    shader_dir = pkg_resources.resource_filename(
+        "sapien", "vulkan_shader/{}".format(shader_dir)
+    )
     if os.path.exists(shader_dir):
         VulkanRenderer._set_viewer_shader_dir(shader_dir)
         return
@@ -65,7 +67,9 @@ def __set_camera_shader_dir(shader_dir):
     if os.path.exists(shader_dir):
         VulkanRenderer._set_camera_shader_dir(shader_dir)
         return
-    shader_dir = pkg_resources.resource_filename("sapien", "vulkan_shader/{}".format(shader_dir))
+    shader_dir = pkg_resources.resource_filename(
+        "sapien", "vulkan_shader/{}".format(shader_dir)
+    )
     if os.path.exists(shader_dir):
         VulkanRenderer._set_camera_shader_dir(shader_dir)
         return
@@ -75,3 +79,12 @@ def __set_camera_shader_dir(shader_dir):
 VulkanRenderer.set_viewer_shader_dir = __set_viewer_shader_dir
 VulkanRenderer.set_camera_shader_dir = __set_camera_shader_dir
 Entity.classname = property(lambda e: e.__class__.__name__)
+
+
+def _auto_allocate_torch_tensors(self: RenderServer, render_targets: List[str]):
+    import torch
+
+    return [torch.as_tensor(x) for x in self.auto_allocate_buffers(render_targets)]
+
+
+RenderServer.auto_allocate_torch_tensors = _auto_allocate_torch_tensors

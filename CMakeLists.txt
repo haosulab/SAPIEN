@@ -71,6 +71,9 @@ set(PINOCCHIO_LIBRARY ${pinocchio_LIBRARIES} ${Boost_LIBRARIES} urdfdom_model)
 add_definitions(-DPINOCCHIO_URDFDOM_TYPEDEF_SHARED_PTR)
 add_definitions(-DPINOCCHIO_WITH_URDFDOM)
 
+find_package(protobuf REQUIRED)
+find_package(gRPC REQUIRED)
+
 if (${BUILD_DEBUG_VIEWER})
     add_definitions(-D_DEBUG_VIEWER)
 endif ()
@@ -129,7 +132,7 @@ endif ()
 
 link_directories("$ENV{VULKAN_SDK}/lib")
 
-file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
+file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp" "src/*.cc")
 add_library(sapien SHARED ${PROJECT_SRC})
 
 if (MACOSX)
@@ -141,7 +144,7 @@ if (MACOSX)
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-			${PINOCCHIO_LIBRARY} svulkan2 kuafu rt "-framework Cocoa -framework IOKit")
+            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt gRPC::grpc++ "-framework Cocoa -framework IOKit")
 else ()
     target_link_libraries(sapien -Wl,--start-group
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -151,7 +154,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt ${SIMSENSE_LIBRARY})
+            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt ${SIMSENSE_LIBRARY} gRPC::grpc++)
 endif ()
 
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
@@ -172,6 +175,11 @@ add_executable(manual_kinematics manualtest/kinematics.cpp)
 target_link_libraries(manual_kinematics sapien)
 add_executable(manual_kuafu_minimal manualtest/kuafu_minimal.cpp)
 target_link_libraries(manual_kuafu_minimal sapien)
+
+add_executable(render_server manualtest/render_server.cpp)
+target_link_libraries(render_server sapien)
+add_executable(render_client manualtest/render_client.cpp)
+target_link_libraries(render_client sapien)
 
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtest/*.py ${CMAKE_CURRENT_BINARY_DIR})

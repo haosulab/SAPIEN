@@ -220,26 +220,6 @@ public:
   virtual ~IPxrRenderShape() = default;
 };
 
-class PxrMaterial : public IPxrMaterial {
-public:
-  std::array<float, 4> base_color = {1, 1, 1, 1};
-  float specular = 0.f;
-  float roughness = 0.85f;
-  float metallic = 0.f;
-  std::string color_texture;
-  std::string specular_texture;
-  std::string normal_texture;
-
-  inline void setBaseColor(std::array<float, 4> color) override { base_color = color; }
-  [[nodiscard]] inline std::array<float, 4> getBaseColor() const override { return base_color; }
-  inline void setRoughness(float value) override { roughness = value; }
-  [[nodiscard]] inline float getRoughness() const override { return roughness; }
-  inline void setSpecular(float value) override { specular = value; }
-  [[nodiscard]] inline float getSpecular() const override { return specular; }
-  inline void setMetallic(float value) override { metallic = value; }
-  [[nodiscard]] inline float getMetallic() const override { return metallic; }
-};
-
 class ISensor {
 public:
   // virtual void setInitialPose(physx::PxTransform const &pose) = 0;
@@ -445,11 +425,7 @@ public:
                                       std::shared_ptr<IPxrMaterial> material) = 0;
   inline virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type,
                                              const physx::PxVec3 &scale,
-                                             const physx::PxVec3 &color) {
-    auto mat = std::make_shared<PxrMaterial>();
-    mat->setBaseColor({color.x, color.y, color.z, 1.f});
-    return addRigidbody(type, scale, mat);
-  };
+                                             const physx::PxVec3 &color) = 0;
 
   virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                       std::vector<physx::PxVec3> const &normals,
@@ -460,11 +436,7 @@ public:
                                              std::vector<physx::PxVec3> const &normals,
                                              std::vector<uint32_t> const &indices,
                                              const physx::PxVec3 &scale,
-                                             const physx::PxVec3 &color) {
-    auto mat = std::make_shared<PxrMaterial>();
-    mat->setBaseColor({color.x, color.y, color.z, 1.f});
-    return addRigidbody(vertices, normals, indices, scale, mat);
-  }
+                                             const physx::PxVec3 &color) = 0;
 
   virtual IPxrPointBody *
   addPointBody(Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>> positions) {

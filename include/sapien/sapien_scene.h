@@ -286,5 +286,6 @@ private:
   std::mutex mUpdateRenderMutex;
 
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
+  bool mDisableCollisionVisual{};
 };
 } // namespace sapien

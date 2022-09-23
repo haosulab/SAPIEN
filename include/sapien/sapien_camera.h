@@ -9,7 +9,8 @@ namespace sapien {
 
 class SCamera : public SEntity {
 public:
-  SCamera(SScene *scene, uint32_t width, uint32_t height);
+  SCamera(SScene *scene, uint32_t width, uint32_t height, float fovy = 1.5708, float near = 0.01f,
+          float far = 100.f);
 
   /** call update to sync camera pose to renderer */
   void update();

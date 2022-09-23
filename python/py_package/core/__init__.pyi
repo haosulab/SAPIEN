@@ -53,10 +53,13 @@ from sapien.core.pysapien import PointLightEntity
 from sapien.core.pysapien import Pose
 from sapien.core.pysapien import ProfilerBlock
 from sapien.core.pysapien import RenderBody
+from sapien.core.pysapien import RenderClient
 from sapien.core.pysapien import RenderMaterial
 from sapien.core.pysapien import RenderMesh
 from sapien.core.pysapien import RenderParticleBody
 from sapien.core.pysapien import RenderScene
+from sapien.core.pysapien import RenderServer
+from sapien.core.pysapien import RenderServerBuffer
 from sapien.core.pysapien import RenderShape
 from sapien.core.pysapien import RenderTexture
 from sapien.core.pysapien import Scene
@@ -126,6 +129,7 @@ __all__ = [
     "Link",
     "LinkBase",
     "LinkBuilder",
+    "List",
     "NonconvexMeshGeometry",
     "ParticleEntity",
     "PhysicalMaterial",
@@ -135,10 +139,13 @@ __all__ = [
     "Pose",
     "ProfilerBlock",
     "RenderBody",
+    "RenderClient",
     "RenderMaterial",
     "RenderMesh",
     "RenderParticleBody",
     "RenderScene",
+    "RenderServer",
+    "RenderServerBuffer",
     "RenderShape",
     "RenderTexture",
     "Scene",
@@ -171,3 +178,4 @@ __all__ = [
 
 def add_profiler_event(name: str) -> None:
     pass
+List: typing._SpecialGenericAlias # value = typing.List

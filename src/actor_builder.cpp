@@ -487,7 +487,8 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
   }
 }
 
-std::shared_ptr<ActorBuilder> ActorBuilder::setCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3) {
+std::shared_ptr<ActorBuilder> ActorBuilder::setCollisionGroup(uint32_t g0, uint32_t g1,
+                                                              uint32_t g2, uint32_t g3) {
   mCollisionGroup.w0 = g0;
   mCollisionGroup.w1 = g1;
   mCollisionGroup.w2 = g2;
@@ -496,7 +497,8 @@ std::shared_ptr<ActorBuilder> ActorBuilder::setCollisionGroup(uint32_t g0, uint3
   return shared_from_this();
 }
 
-std::shared_ptr<ActorBuilder> ActorBuilder::addCollisionGroup(uint32_t g0, uint32_t g1, uint32_t g2, uint32_t g3) {
+std::shared_ptr<ActorBuilder> ActorBuilder::addCollisionGroup(uint32_t g0, uint32_t g1,
+                                                              uint32_t g2, uint32_t g3) {
   if (g0) {
     mCollisionGroup.w0 |= 1 << (g0 - 1);
   }
@@ -523,6 +525,10 @@ std::shared_ptr<ActorBuilder> ActorBuilder::resetCollisionGroup() {
 void ActorBuilder::buildCollisionVisuals(
     std::vector<Renderer::IPxrRigidbody *> &collisionBodies,
     std::vector<std::unique_ptr<SCollisionShape>> &shapes) const {
+  if (mScene->mDisableCollisionVisual) {
+    return;
+  }
+
   auto rendererScene = mScene->getRendererScene();
   if (!rendererScene) {
     return;

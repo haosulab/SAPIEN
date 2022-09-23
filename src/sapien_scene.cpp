@@ -75,6 +75,7 @@ SScene::SScene(std::shared_ptr<Simulation> sim, SceneConfig const &config)
   if (renderer) {
     mRendererScene = renderer->createScene(""); // FIXME: pass scene name here
   }
+  mDisableCollisionVisual = config.disableCollisionVisual;
 }
 
 SScene::~SScene() {
@@ -469,11 +470,11 @@ SCamera *SScene::addCamera(std::string const &name, uint32_t width, uint32_t hei
     spdlog::get("SAPIEN")->error("Failed to add camera: renderer is not added to simulation.");
     return nullptr;
   }
-  auto cam = std::make_unique<SCamera>(this, width, height);
+  auto cam = std::make_unique<SCamera>(this, width, height, fovy, near, far);
   cam->setName(name);
-  cam->setFovY(fovy, true);
-  cam->setNear(near);
-  cam->setFar(far);
+  // cam->setFovY(fovy, true);
+  // cam->setNear(near);
+  // cam->setFar(far);
   mCameras.push_back(std::move(cam));
   return mCameras.back().get();
 }

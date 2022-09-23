@@ -38,11 +38,15 @@
 #include "sapien/renderer/svulkan2_shape.h"
 #include "sapien/renderer/svulkan2_window.h"
 
+#include "sapien/renderer/server/client.h"
+#include "sapien/renderer/server/server.h"
+
 #include "sapien/articulation/pinocchio_model.h"
 #include "sapien/profiler.hpp"
 
 #include "sapien/utils/pose.hpp"
 
+using namespace pybind11::literals;
 using namespace sapien;
 namespace py = pybind11;
 
@@ -395,6 +399,40 @@ void buildSapien(py::module &m) {
   //                   py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"),
   //                   py::arg("width"), py::arg("height"), py::arg("skew"));
 
+  auto PyRenderClient =
+      py::class_<Renderer::server::ClientRenderer, Renderer::IPxrRenderer,
+                 std::shared_ptr<Renderer::server::ClientRenderer>>(m, "RenderClient");
+  auto PyRenderServer = py::class_<Renderer::server::RenderServer>(m, "RenderServer");
+  auto PyRenderServerBuffer =
+      py::class_<Renderer::server::VulkanCudaBuffer>(m, "RenderServerBuffer");
+
+  PyRenderClient.def(py::init<std::string, uint64_t>(), py::arg("address"),
+                     py::arg("process_index"));
+
+  PyRenderServer
+      .def_static("_set_shader_dir", &Renderer::server::setDefaultShaderDirectory,
+                  py::arg("shader_dir"))
+      .def(py::init<uint32_t, uint32_t, uint32_t, std::string, bool>(),
+           py::arg("max_num_materials") = 5000, py::arg("max_num_textures") = 5000,
+           py::arg("default_mipmap_levels") = 1, py::arg("device") = "",
+           py::arg("do_not_load_texture") = false)
+      .def("start", &Renderer::server::RenderServer::start, py::arg("address"))
+      .def("stop", &Renderer::server::RenderServer::stop)
+      .def("wait_all", &Renderer::server::RenderServer::waitAll)
+      .def("allocate_buffer", &Renderer::server::RenderServer::allocateBuffer, py::arg("type"),
+           py::arg("shape"), py::return_value_policy::reference)
+      .def("auto_allocate_buffers", &Renderer::server::RenderServer::autoAllocateBuffers,
+           py::arg("render_targets"), py::return_value_policy::reference);
+
+  PyRenderServerBuffer.def_property_readonly(
+      "__cuda_array_interface__", [](Renderer::server::VulkanCudaBuffer &buffer) {
+        py::tuple shape = py::cast(buffer.getShape());
+        return py::dict(
+            "shape"_a = shape, "typestr"_a = buffer.getType(),
+            "data"_a = py::make_tuple(reinterpret_cast<uintptr_t>(buffer.getCudaPtr()), false),
+            "version"_a = 0);
+      });
+
   //======== Internal ========//
 
   PyPhysicalMaterial
@@ -698,6 +736,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_readwrite("enable_enhanced_determinism", &SceneConfig::enableEnhancedDeterminism)
       .def_readwrite("enable_friction_every_iteration", &SceneConfig::enableFrictionEveryIteration)
       .def_readwrite("enable_adaptive_force", &SceneConfig::enableAdaptiveForce)
+      .def_readwrite("disable_collision_visual", &SceneConfig::disableCollisionVisual)
       .def("__repr__", [](SceneConfig &) { return "SceneConfig()"; });
 
   //======== Simulation ========//

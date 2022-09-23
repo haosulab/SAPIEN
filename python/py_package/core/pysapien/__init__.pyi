@@ -58,10 +58,13 @@ __all__ = [
     "Pose",
     "ProfilerBlock",
     "RenderBody",
+    "RenderClient",
     "RenderMaterial",
     "RenderMesh",
     "RenderParticleBody",
     "RenderScene",
+    "RenderServer",
+    "RenderServerBuffer",
     "RenderShape",
     "RenderTexture",
     "Scene",
@@ -1246,6 +1249,9 @@ class RenderBody():
         :type: int
         """
     pass
+class RenderClient(IPxrRenderer):
+    def __init__(self, address: str, process_index: int) -> None: ...
+    pass
 class RenderMaterial():
     def set_base_color(self, rgba: numpy.ndarray[numpy.float32]) -> None: ...
     def set_diffuse_texture(self, texture: RenderTexture) -> None: ...
@@ -1479,6 +1485,23 @@ class RenderScene():
         :type: numpy.ndarray[numpy.float32]
         """
     pass
+class RenderServer():
+    def __init__(self, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '', do_not_load_texture: bool = False) -> None: ...
+    @staticmethod
+    def _set_shader_dir(shader_dir: str) -> None: ...
+    def allocate_buffer(self, type: str, shape: typing.List[int]) -> RenderServerBuffer: ...
+    def auto_allocate_buffers(self, render_targets: typing.List[str]) -> typing.List[RenderServerBuffer]: ...
+    def start(self, address: str) -> None: ...
+    def stop(self) -> None: ...
+    def wait_all(self) -> None: ...
+    pass
+class RenderServerBuffer():
+    @property
+    def __cuda_array_interface__(self) -> dict:
+        """
+        :type: dict
+        """
+    pass
 class RenderShape():
     def set_material(self, material: RenderMaterial) -> None: ...
     @property
@@ -1670,6 +1693,14 @@ class SceneConfig():
         """
     @default_static_friction.setter
     def default_static_friction(self, arg0: float) -> None:
+        pass
+    @property
+    def disable_collision_visual(self) -> bool:
+        """
+        :type: bool
+        """
+    @disable_collision_visual.setter
+    def disable_collision_visual(self, arg0: bool) -> None:
         pass
     @property
     def enable_adaptive_force(self) -> bool:

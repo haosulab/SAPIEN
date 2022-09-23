@@ -20,5 +20,6 @@ struct SceneConfig {
   bool enableFrictionEveryIteration =
       true;                         // better friction calculation, recommended for robotics
   bool enableAdaptiveForce = false; // improve solver convergence
+  bool disableCollisionVisual = false;   // do not create visual shapes for collisions
 };
 } // namespace sapien

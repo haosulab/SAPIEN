@@ -4,12 +4,12 @@
 
 namespace sapien {
 
-SCamera::SCamera(SScene *scene, uint32_t width, uint32_t height)
+SCamera::SCamera(SScene *scene, uint32_t width, uint32_t height, float fovy, float near, float far)
     : SEntity(scene), mWidth(width), mHeight(height) {
   if (!scene || !scene->getRendererScene()) {
     throw std::runtime_error("failed to create camera: renderer is not attached");
   }
-  mCamera = scene->getRendererScene()->addCamera(width, height, 1, 0.01, 100);
+  mCamera = scene->getRendererScene()->addCamera(width, height, fovy, near, far);
 }
 
 void SCamera::setLocalPose(PxTransform const &pose) {

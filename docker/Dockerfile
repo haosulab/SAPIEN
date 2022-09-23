@@ -98,6 +98,13 @@ RUN mkdir /workspace/assimp/build
 WORKDIR /workspace/assimp/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j4 && make install
 
+WORKDIR /workspace
+RUN git clone --single-branch -b v1.30.x --depth 1 https://github.com/grpc/grpc.git
+WORKDIR /workspace/grpc
+RUN git submodule update --init --recursive && mkdir -p cmake/build
+WORKDIR /workspace/grpc/cmake/build
+RUN cmake ../.. -DCMAKE_INSTALL_PREFIX=/opt/grpc && make -j8 && make install
+
 RUN rpm -i http://mirror.ghettoforge.org/distributions/gf/el/7/gf/x86_64/gcc10-libstdc++-10.2.1-7.gf.el7.x86_64.rpm
 ENV LD_LIBRARY_PATH=/opt/gcc-10.2.1/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/opt/rh/devtoolset-10/root/usr/lib64/dyninst:/opt/rh/devtoolset-10/root/usr/lib/dyninst:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/workspace/1.3.224.1/x86_64/lib:/workspace/cuda/lib64:/workspace/cuda/lib64/stubs/ PCP_DIR=/opt/rh/devtoolset-10/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-10/root MANPATH=/opt/rh/devtoolset-10/root/usr/share/man: PATH=/opt/rh/devtoolset-10/root/usr/bin:/workspace/1.3.224.1/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
