@@ -164,14 +164,6 @@ void SArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
   for (uint32_t i = 0; i < n; ++i) {
     mActiveJoints[i]->setDriveTarget(mDriveAxes[i], v[i]);
   }
-
-  // uint32_t i = 0;
-  // for (auto &j : mJoints) {
-  //   if (j->getAxes().size() == 1) {
-  //     j->setDriveTarget(v[i]);
-  //     i += 1;
-  //   }
-  // }
   mPxArticulation->wakeUp();
 }
 

@@ -1097,7 +1097,20 @@ class PinocchioModel():
     def compute_inverse_dynamics(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], qvel: numpy.ndarray[numpy.float64, _Shape[m, 1]], qacc: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
     def compute_inverse_kinematics(self, link_index: int, pose: Pose, initial_qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]] = array([], dtype=float64), active_qmask: numpy.ndarray[numpy.int32, _Shape[m, 1]] = array([], dtype=int32), eps: float = 0.0001, max_iterations: int = 1000, dt: float = 0.1, damp: float = 1e-06) -> typing.Tuple[numpy.ndarray[numpy.float64, _Shape[m, 1]], bool, numpy.ndarray[numpy.float64, _Shape[6, 1]]]: 
         """
-        Compute inverse kinematics with CLIK algorithm. Details see https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_i-inverse-kinematics.html
+        Compute inverse kinematics with CLIK algorithm.
+        Details see https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_i-inverse-kinematics.html
+        Args:
+            link_index: index of the link
+            pose: target pose of the link in articulation base frame
+            initial_qpos: initial qpos to start CLIK
+            active_mask: dof sized integer array, 1 to indicate active joints and 0 for inactive joints
+            max_iterations: number of iterations steps
+            dt: iteration step "speed"
+            damp: iteration step "damping"
+        Returns:
+            result: qpos from IK
+            success: whether IK is successful
+            error: se3 norm error
         """
     def compute_single_link_local_jacobian(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], link_index: int) -> numpy.ndarray[numpy.float64, _Shape[6, n]]: 
         """
@@ -1113,7 +1126,7 @@ class PinocchioModel():
         """
     def get_link_pose(self, link_index: int) -> Pose: 
         """
-        Given link index, get link pose from forward kinematics. Must be called after compute_forward_kinematics.
+        Given link index, get link pose (in articulation base frame) from forward kinematics. Must be called after compute_forward_kinematics.
         """
     pass
 class PlaneGeometry(CollisionGeometry):
