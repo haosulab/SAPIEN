@@ -1,6 +1,7 @@
 #pragma once
 #include "common.h"
 #include "renderer/server/protos/render_server.grpc.pb.h"
+#include "safe_map.h"
 #include "sapien/thread_pool.hpp"
 #include <grpc/grpc.h>
 #include <grpcpp/grpcpp.h>
@@ -24,6 +25,10 @@ using grpc::ServerContext;
 using grpc::Status;
 
 class RenderServiceImpl final : public proto::RenderService::Service {
+
+  // NOTE: Important assumption
+  // Functions to modify the same scene are not called concurrently!
+
   // ========== Renderer ==========//
   Status CreateScene(ServerContext *c, const proto::Index *req, proto::Id *res) override;
   Status RemoveScene(ServerContext *c, const proto::Id *req, proto::Empty *res) override;
@@ -88,28 +93,33 @@ private:
 
   struct SceneInfo {
     uint64_t sceneIndex;
+    uint64_t sceneId;
     std::unique_ptr<svulkan2::scene::Scene> scene;
 
-    std::shared_mutex nodeMutex;
+    std::unordered_map<id_t, std::shared_ptr<CameraInfo>> cameraMap;
+    std::vector<std::shared_ptr<CameraInfo>> cameraList;
 
-    std::unordered_map<id_t, CameraInfo> cameraMap;
     std::unordered_map<id_t, svulkan2::scene::Object *> objectMap;
 
+    // ordered objects and cameras for pose update
     std::vector<svulkan2::scene::Object *> orderedObjects;
     std::vector<svulkan2::scene::Camera *> orderedCameras;
 
     std::unique_ptr<ThreadPool> threadRunner;
-
-    std::vector<CameraInfo *> mCameraList;
   };
 
-  std::shared_mutex mMaterialMutex;
-  std::unordered_map<id_t, std::shared_ptr<svulkan2::resource::SVMetallicMaterial>> mMaterialMap;
+  // std::shared_mutex mMaterialMutex;
+  // std::unordered_map<id_t, std::shared_ptr<svulkan2::resource::SVMetallicMaterial>>
+  // mMaterialMap;
+  ts_unordered_map<id_t, std::shared_ptr<svulkan2::resource::SVMetallicMaterial>> mMaterialMap;
 
-  std::shared_mutex mSceneMutex;
-  std::unordered_map<id_t, SceneInfo> mSceneMap;
+  // std::shared_mutex mSceneMutex;
+  // std::unordered_map<id_t, SceneInfo> mSceneMap;
 
-  std::vector<SceneInfo *> mSceneList;
+  ts_unordered_map<id_t, std::shared_ptr<SceneInfo>> mSceneMap;
+
+  std::shared_mutex mSceneListLock;
+  std::vector<std::shared_ptr<SceneInfo>> mSceneList;
 
   std::shared_ptr<svulkan2::resource::SVMesh> mCubeMesh;
   std::shared_ptr<svulkan2::resource::SVMesh> mSphereMesh;
@@ -156,9 +166,13 @@ public:
   VulkanCudaBuffer *allocateBuffer(std::string const &type, std::vector<int> const &shape);
 
   // attempt to allocate buffers based on current scenes and cameras
+  // NOTE: it must be not be called concurrently with child processes running
   std::vector<VulkanCudaBuffer *> autoAllocateBuffers(std::vector<std::string> render_targets);
 
-  void waitAll();
+  bool waitAll(uint64_t timeout);
+  bool waitScenes(std::vector<int> const &list, uint64_t timeout);
+
+  std::string summary() const;
 
 private:
   std::unique_ptr<RenderServiceImpl> mService;
