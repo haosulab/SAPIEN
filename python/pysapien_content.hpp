@@ -433,7 +433,7 @@ void buildSapien(py::module &m) {
         return py::dict(
             "shape"_a = shape, "typestr"_a = buffer.getType(),
             "data"_a = py::make_tuple(reinterpret_cast<uintptr_t>(buffer.getCudaPtr()), false),
-            "version"_a = 0);
+            "version"_a = 2);
       });
 
   //======== Internal ========//

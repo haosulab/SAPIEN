@@ -84,7 +84,7 @@ Entity.classname = property(lambda e: e.__class__.__name__)
 def _auto_allocate_torch_tensors(self: RenderServer, render_targets: List[str]):
     import torch
 
-    return [torch.as_tensor(x) for x in self.auto_allocate_buffers(render_targets)]
+    return [torch.as_tensor(x, device="cuda") for x in self.auto_allocate_buffers(render_targets)]
 
 
 RenderServer.auto_allocate_torch_tensors = _auto_allocate_torch_tensors
