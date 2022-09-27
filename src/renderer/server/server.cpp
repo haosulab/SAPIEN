@@ -231,6 +231,8 @@ Status RenderServiceImpl::AddCamera(ServerContext *c, const proto::AddCameraReq 
     camInfo->commandPool = mContext->createCommandPool();
     camInfo->commandBuffer = camInfo->commandPool->allocateCommandBuffer();
 
+    camInfo->fillInfo = getCameraFillInfo(sceneInfo->sceneIndex, camInfo->cameraIndex);
+
     res->set_id(id);
     log::info("Camera Added {}", id);
   } catch (const std::exception &e) {
@@ -596,7 +598,7 @@ VulkanCudaBuffer *RenderServer::allocateBuffer(std::string const &type,
 }
 
 std::vector<VulkanCudaBuffer *>
-RenderServer::autoAllocateBuffers(std::vector<std::string> render_targets) {
+RenderServer::autoAllocateBuffers(std::vector<std::string> renderTargets) {
   int maxSceneIndex = 0;
 
   int minCameraCount = INT32_MAX;
@@ -652,7 +654,8 @@ RenderServer::autoAllocateBuffers(std::vector<std::string> render_targets) {
   int channels, formatSize;
 
   std::vector<VulkanCudaBuffer *> buffers;
-  for (std::string target : render_targets) {
+  std::vector<size_t> strides;
+  for (std::string target : renderTargets) {
     VulkanCudaBuffer *buffer;
     if (target == "color" || target == "Color") {
       target = "Color";
@@ -678,6 +681,7 @@ RenderServer::autoAllocateBuffers(std::vector<std::string> render_targets) {
     buffers.push_back(buffer);
 
     size_t stride = maxCameraWidth * maxCameraHeight * channels * formatSize;
+    strides.push_back(stride);
 
     for (auto &kv : mService->mSceneMap.flat()) {
       auto sceneIndex = kv.second->sceneIndex;
@@ -688,6 +692,16 @@ RenderServer::autoAllocateBuffers(std::vector<std::string> render_targets) {
       }
     }
   }
+
+  std::vector<vk::Buffer> vkBuffers;
+  for (auto buffer : buffers) {
+    vkBuffers.push_back(buffer->getBuffer());
+  }
+
+  mService->mMaxCameraCount = maxCameraCount;
+  mService->mRenderTargets = renderTargets;
+  mService->mRenderTargetBuffers = vkBuffers;
+  mService->mRenderTargetStrides = strides;
 
   return buffers;
 }

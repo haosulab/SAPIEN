@@ -421,8 +421,8 @@ void buildSapien(py::module &m) {
       .def("wait_all", &Renderer::server::RenderServer::waitAll, py::arg("timeout") = UINT64_MAX)
       .def("wait_scenes", &Renderer::server::RenderServer::waitScenes, py::arg("scenes"),
            py::arg("timeout") = UINT64_MAX)
-      .def("allocate_buffer", &Renderer::server::RenderServer::allocateBuffer, py::arg("type"),
-           py::arg("shape"), py::return_value_policy::reference)
+      // .def("allocate_buffer", &Renderer::server::RenderServer::allocateBuffer, py::arg("type"),
+      //      py::arg("shape"), py::return_value_policy::reference)
       .def("auto_allocate_buffers", &Renderer::server::RenderServer::autoAllocateBuffers,
            py::arg("render_targets"), py::return_value_policy::reference)
       .def("summary", &Renderer::server::RenderServer::summary);

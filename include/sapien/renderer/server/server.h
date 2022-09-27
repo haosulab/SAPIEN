@@ -49,7 +49,8 @@ class RenderServiceImpl final : public proto::RenderService::Service {
                         proto::Empty *res) override;
   Status UpdateRender(ServerContext *c, const proto::UpdateRenderReq *req,
                       proto::Empty *res) override;
-  Status UpdateRenderAndTakePictures(ServerContext *c, const proto::UpdateRenderAndTakePicturesReq *req,
+  Status UpdateRenderAndTakePictures(ServerContext *c,
+                                     const proto::UpdateRenderAndTakePicturesReq *req,
                                      proto::Empty *res) override;
   // ========== Material ==========//
   Status SetBaseColor(ServerContext *c, const proto::IdVec4 *req, proto::Empty *res) override;
@@ -126,6 +127,25 @@ private:
   std::shared_ptr<svulkan2::resource::SVMesh> mCubeMesh;
   std::shared_ptr<svulkan2::resource::SVMesh> mSphereMesh;
   std::shared_ptr<svulkan2::resource::SVMesh> mPlaneMesh;
+
+  // HACK: store info for filling camera fill info
+  std::vector<std::tuple<std::string, vk::Buffer, size_t>>
+  getCameraFillInfo(uint64_t sceneIndex, uint64_t cameraIndex) {
+    std::vector<std::tuple<std::string, vk::Buffer, size_t>> result;
+    for (size_t i = 0; i < mRenderTargets.size(); ++i) {
+      std::string target = mRenderTargets.at(i);
+      vk::Buffer buffer = mRenderTargetBuffers.at(i);
+      size_t stride = mRenderTargetStrides.at(i);
+      size_t offset = (sceneIndex * mMaxCameraCount + cameraIndex) * stride;
+      result.push_back({target, buffer, offset});
+    }
+    return result;
+  }
+  size_t mMaxCameraCount{};
+  std::vector<std::string> mRenderTargets;
+  std::vector<vk::Buffer> mRenderTargetBuffers;
+  std::vector<size_t> mRenderTargetStrides{};
+  // HACK end
 };
 
 class VulkanCudaBuffer {
@@ -167,11 +187,9 @@ public:
   void start(std::string const &address);
   void stop();
 
-  VulkanCudaBuffer *allocateBuffer(std::string const &type, std::vector<int> const &shape);
-
   // attempt to allocate buffers based on current scenes and cameras
-  // NOTE: it must be not be called concurrently with child processes running
-  std::vector<VulkanCudaBuffer *> autoAllocateBuffers(std::vector<std::string> render_targets);
+  // NOTE: it must be not be called concurrently with child processes running!
+  std::vector<VulkanCudaBuffer *> autoAllocateBuffers(std::vector<std::string> renderTargets);
 
   bool waitAll(uint64_t timeout);
   bool waitScenes(std::vector<int> const &list, uint64_t timeout);
@@ -179,6 +197,8 @@ public:
   std::string summary() const;
 
 private:
+  VulkanCudaBuffer *allocateBuffer(std::string const &type, std::vector<int> const &shape);
+
   std::unique_ptr<RenderServiceImpl> mService;
   std::unique_ptr<grpc::Server> mServer;
 
