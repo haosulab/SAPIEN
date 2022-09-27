@@ -312,6 +312,7 @@ void ClientScene::setAmbientLight(std::array<float, 3> const &color) {
   proto::IdVec3 req;
   proto::Empty res;
 
+  req.set_id(mId);
   req.mutable_data()->set_x(color[0]);
   req.mutable_data()->set_y(color[1]);
   req.mutable_data()->set_z(color[2]);
