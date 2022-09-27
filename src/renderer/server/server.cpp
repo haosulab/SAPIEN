@@ -696,11 +696,11 @@ std::string RenderServer::summary() const {
   int sceneSize, materialSize;
   {
     auto lock = mService->mSceneMap.lockRead();
-    mService->mSceneMap.getMap().size();
+    sceneSize = mService->mSceneMap.getMap().size();
   }
   {
     auto lock = mService->mMaterialMap.lockRead();
-    mService->mMaterialMap.getMap().size();
+    materialSize = mService->mMaterialMap.getMap().size();
   }
 
   std::stringstream ss;
@@ -724,6 +724,7 @@ VulkanCudaBuffer::VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physica
   for (uint32_t i = 0; i < shape.size(); ++i) {
     mSize *= shape[i];
   }
+  mSize = std::max(mSize, static_cast<vk::DeviceSize>(1024 * 1024));
   if (mSize <= 0) {
     throw std::runtime_error("empty buffer is not allowed");
   }
