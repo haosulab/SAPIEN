@@ -312,6 +312,10 @@ void ClientScene::setAmbientLight(std::array<float, 3> const &color) {
   proto::IdVec3 req;
   proto::Empty res;
 
+  req.mutable_data()->set_x(color[0]);
+  req.mutable_data()->set_x(color[1]);
+  req.mutable_data()->set_x(color[2]);
+
   Status status = mRenderer->getStub().SetAmbientLight(&context, req, &res);
   if (!status.ok()) {
     throw std::runtime_error(status.error_message());
