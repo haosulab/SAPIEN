@@ -599,6 +599,10 @@ VulkanCudaBuffer *RenderServer::allocateBuffer(std::string const &type,
 
 std::vector<VulkanCudaBuffer *>
 RenderServer::autoAllocateBuffers(std::vector<std::string> renderTargets) {
+  if (mBuffers.size()) {
+    throw std::runtime_error("auto allocate buffers must to be called twice");
+  }
+
   int maxSceneIndex = 0;
 
   int minCameraCount = INT32_MAX;
