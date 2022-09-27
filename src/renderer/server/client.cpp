@@ -20,9 +20,9 @@ void ClientMaterial::setBaseColor(std::array<float, 4> color) {
 
   req.set_id(mId);
   req.mutable_data()->set_x(color[0]);
-  req.mutable_data()->set_y(color[0]);
-  req.mutable_data()->set_z(color[0]);
-  req.mutable_data()->set_w(color[0]);
+  req.mutable_data()->set_y(color[1]);
+  req.mutable_data()->set_z(color[2]);
+  req.mutable_data()->set_w(color[3]);
 
   Status status = mRenderer->getStub().SetBaseColor(&context, req, &res);
   if (!status.ok()) {
