@@ -664,6 +664,46 @@ void SScene::updateRender() {
   getRendererScene()->updateRender();
 }
 
+void SScene::updateRenderAndTakePictures(std::vector<SCamera*> const &cameras) {
+  std::lock_guard lock(mUpdateRenderMutex);
+
+  if (!mRendererScene) {
+    spdlog::get("SAPIEN")->error("Failed to update render: renderer is not added.");
+    return;
+  }
+  for (auto &actor : mActors) {
+    if (!actor->isBeingDestroyed()) {
+      actor->updateRender(actor->getPxActor()->getGlobalPose());
+    }
+  }
+
+  for (auto &articulation : mArticulations) {
+    for (auto &link : articulation->getBaseLinks()) {
+      if (!articulation->isBeingDestroyed()) {
+        link->updateRender(link->getPxActor()->getGlobalPose());
+      }
+    }
+  }
+
+  for (auto &articulation : mKinematicArticulations) {
+    for (auto &link : articulation->getBaseLinks()) {
+      if (!articulation->isBeingDestroyed()) {
+        link->updateRender(link->getPxActor()->getGlobalPose());
+      }
+    }
+  }
+
+  for (auto &cam : mCameras) {
+    cam->update();
+  }
+
+  std::vector<Renderer::ICamera *> rcams;
+  for (auto cam : cameras) {
+    rcams.push_back(cam->getRendererCamera());
+  }
+  getRendererScene()->updateRenderAndTakePictures(rcams);
+}
+
 std::future<void> SScene::updateRenderAsync() {
   return getThread().submit([this]() { updateRender(); });
 }

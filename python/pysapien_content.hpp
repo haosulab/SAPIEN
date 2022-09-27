@@ -427,14 +427,26 @@ void buildSapien(py::module &m) {
            py::arg("render_targets"), py::return_value_policy::reference)
       .def("summary", &Renderer::server::RenderServer::summary);
 
-  PyRenderServerBuffer.def_property_readonly(
-      "__cuda_array_interface__", [](Renderer::server::VulkanCudaBuffer &buffer) {
-        py::tuple shape = py::cast(buffer.getShape());
-        return py::dict(
-            "shape"_a = shape, "typestr"_a = buffer.getType(),
-            "data"_a = py::make_tuple(reinterpret_cast<uintptr_t>(buffer.getCudaPtr()), false),
-            "version"_a = 2);
-      });
+  PyRenderServerBuffer
+      .def_property_readonly("nbytes", &Renderer::server::VulkanCudaBuffer::getSize)
+      .def_property_readonly("type", &Renderer::server::VulkanCudaBuffer::getType)
+      .def_property_readonly("shape",
+                             [](Renderer::server::VulkanCudaBuffer &buffer) {
+                               py::tuple shape = py::cast(buffer.getShape());
+                               return shape;
+                             })
+      .def_property_readonly("pointer",
+                             [](Renderer::server::VulkanCudaBuffer &buffer) {
+                               return reinterpret_cast<uintptr_t>(buffer.getCudaPtr());
+                             })
+      .def_property_readonly(
+          "__cuda_array_interface__", [](Renderer::server::VulkanCudaBuffer &buffer) {
+            py::tuple shape = py::cast(buffer.getShape());
+            return py::dict(
+                "shape"_a = shape, "typestr"_a = buffer.getType(),
+                "data"_a = py::make_tuple(reinterpret_cast<uintptr_t>(buffer.getCudaPtr()), false),
+                "version"_a = 2);
+          });
 
   //======== Internal ========//
 
@@ -839,6 +851,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
                      scene.multistepAsync(steps, (SceneMultistepCallback *)callback)));
            })
       .def("update_render", &SScene::updateRender)
+      .def("_update_render_and_take_pictures", &SScene::updateRenderAndTakePictures)
       .def("update_render_async",
            [](SScene &scene) {
              return std::static_pointer_cast<IAwaitable<void>>(

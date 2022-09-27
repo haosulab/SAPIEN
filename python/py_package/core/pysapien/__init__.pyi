@@ -1503,6 +1503,26 @@ class RenderServerBuffer():
         """
         :type: dict
         """
+    @property
+    def nbytes(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def pointer(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def shape(self) -> tuple:
+        """
+        :type: tuple
+        """
+    @property
+    def type(self) -> str:
+        """
+        :type: str
+        """
     pass
 class RenderShape():
     def set_material(self, material: RenderMaterial) -> None: ...
@@ -1560,6 +1580,7 @@ class RenderTexture():
         """
     pass
 class Scene():
+    def _update_render_and_take_pictures(self, arg0: typing.List[CameraEntity]) -> None: ...
     def add_active_light(self, pose: Pose, color: numpy.ndarray[numpy.float32], fov: float, tex_path: str, near: float = 0.10000000149011612, far: float = 10.0, shadow_map_size: int = 2048) -> ActiveLightEntity: ...
     def add_camera(self, name: str, width: int, height: int, fovy: float, near: float, far: float) -> CameraEntity: ...
     def add_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0, shadow_map_size: int = 2048) -> DirectionalLightEntity: ...

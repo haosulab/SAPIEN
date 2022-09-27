@@ -38,6 +38,7 @@ static const char* RenderService_method_names[] = {
   "/sapien.Renderer.server.proto.RenderService/AddDirectionalLight",
   "/sapien.Renderer.server.proto.RenderService/SetEntityOrder",
   "/sapien.Renderer.server.proto.RenderService/UpdateRender",
+  "/sapien.Renderer.server.proto.RenderService/UpdateRenderAndTakePictures",
   "/sapien.Renderer.server.proto.RenderService/SetBaseColor",
   "/sapien.Renderer.server.proto.RenderService/SetRoughness",
   "/sapien.Renderer.server.proto.RenderService/SetSpecular",
@@ -68,14 +69,15 @@ RenderService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& chan
   , rpcmethod_AddDirectionalLight_(RenderService_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SetEntityOrder_(RenderService_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_UpdateRender_(RenderService_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetBaseColor_(RenderService_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetRoughness_(RenderService_method_names[14], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetSpecular_(RenderService_method_names[15], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetMetallic_(RenderService_method_names[16], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetUniqueId_(RenderService_method_names[17], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetSegmentationId_(RenderService_method_names[18], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_TakePicture_(RenderService_method_names[19], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetCameraParameters_(RenderService_method_names[20], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UpdateRenderAndTakePictures_(RenderService_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetBaseColor_(RenderService_method_names[14], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetRoughness_(RenderService_method_names[15], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetSpecular_(RenderService_method_names[16], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetMetallic_(RenderService_method_names[17], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetUniqueId_(RenderService_method_names[18], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetSegmentationId_(RenderService_method_names[19], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_TakePicture_(RenderService_method_names[20], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetCameraParameters_(RenderService_method_names[21], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status RenderService::Stub::CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::sapien::Renderer::server::proto::Id* response) {
@@ -442,6 +444,34 @@ void RenderService::Stub::experimental_async::UpdateRender(::grpc::ClientContext
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_UpdateRender_, context, request, false);
 }
 
+::grpc::Status RenderService::Stub::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::sapien::Renderer::server::proto::Empty* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_UpdateRenderAndTakePictures_, context, request, response);
+}
+
+void RenderService::Stub::experimental_async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, std::move(f));
+}
+
+void RenderService::Stub::experimental_async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, std::move(f));
+}
+
+void RenderService::Stub::experimental_async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, reactor);
+}
+
+void RenderService::Stub::experimental_async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncUpdateRenderAndTakePicturesRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_UpdateRenderAndTakePictures_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncUpdateRenderAndTakePicturesRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_UpdateRenderAndTakePictures_, context, request, false);
+}
+
 ::grpc::Status RenderService::Stub::SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::sapien::Renderer::server::proto::Empty* response) {
   return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetBaseColor_, context, request, response);
 }
@@ -800,22 +830,22 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[13],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>(
+          [](RenderService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* req,
+             ::sapien::Renderer::server::proto::Empty* resp) {
+               return service->UpdateRenderAndTakePictures(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      RenderService_method_names[14],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>(
           [](RenderService::Service* service,
              ::grpc_impl::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::IdVec4* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetBaseColor(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      RenderService_method_names[14],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
-          [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
-             const ::sapien::Renderer::server::proto::IdFloat* req,
-             ::sapien::Renderer::server::proto::Empty* resp) {
-               return service->SetRoughness(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[15],
@@ -825,7 +855,7 @@ RenderService::Service::Service() {
              ::grpc_impl::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::IdFloat* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
-               return service->SetSpecular(ctx, req, resp);
+               return service->SetRoughness(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[16],
@@ -835,17 +865,17 @@ RenderService::Service::Service() {
              ::grpc_impl::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::IdFloat* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
-               return service->SetMetallic(ctx, req, resp);
+               return service->SetSpecular(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[17],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
           [](RenderService::Service* service,
              ::grpc_impl::ServerContext* ctx,
-             const ::sapien::Renderer::server::proto::BodyIdReq* req,
+             const ::sapien::Renderer::server::proto::IdFloat* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
-               return service->SetUniqueId(ctx, req, resp);
+               return service->SetMetallic(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[18],
@@ -855,10 +885,20 @@ RenderService::Service::Service() {
              ::grpc_impl::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::BodyIdReq* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
-               return service->SetSegmentationId(ctx, req, resp);
+               return service->SetUniqueId(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[19],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
+          [](RenderService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::sapien::Renderer::server::proto::BodyIdReq* req,
+             ::sapien::Renderer::server::proto::Empty* resp) {
+               return service->SetSegmentationId(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      RenderService_method_names[20],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>(
           [](RenderService::Service* service,
@@ -868,7 +908,7 @@ RenderService::Service::Service() {
                return service->TakePicture(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      RenderService_method_names[20],
+      RenderService_method_names[21],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>(
           [](RenderService::Service* service,
@@ -967,6 +1007,13 @@ RenderService::Service::~Service() {
 }
 
 ::grpc::Status RenderService::Service::UpdateRender(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status RenderService::Service::UpdateRenderAndTakePictures(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response) {
   (void) context;
   (void) request;
   (void) response;

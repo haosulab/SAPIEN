@@ -49,6 +49,8 @@ class RenderServiceImpl final : public proto::RenderService::Service {
                         proto::Empty *res) override;
   Status UpdateRender(ServerContext *c, const proto::UpdateRenderReq *req,
                       proto::Empty *res) override;
+  Status UpdateRenderAndTakePictures(ServerContext *c, const proto::UpdateRenderAndTakePicturesReq *req,
+                                     proto::Empty *res) override;
   // ========== Material ==========//
   Status SetBaseColor(ServerContext *c, const proto::IdVec4 *req, proto::Empty *res) override;
   Status SetRoughness(ServerContext *c, const proto::IdFloat *req, proto::Empty *res) override;
@@ -137,6 +139,8 @@ public:
   inline std::string getType() const { return mType; }
   inline void *getCudaPtr() const { return mCudaPtr; }
   inline vk::Buffer getBuffer() const { return mBuffer.get(); }
+
+  vk::DeviceSize getSize() const { return mSize; }
 
 private:
   uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);

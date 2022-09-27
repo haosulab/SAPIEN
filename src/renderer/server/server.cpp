@@ -338,6 +338,66 @@ Status RenderServiceImpl::UpdateRender(ServerContext *c, const proto::UpdateRend
   return Status::OK;
 }
 
+Status RenderServiceImpl::UpdateRenderAndTakePictures(
+    ServerContext *c, const proto::UpdateRenderAndTakePicturesReq *req, proto::Empty *res) {
+  auto sceneInfo = mSceneMap.get(req->scene_id());
+
+  for (int i = 0; i < req->body_poses_size(); ++i) {
+    glm::vec3 p{req->body_poses(i).p().x(), req->body_poses(i).p().y(),
+                req->body_poses(i).p().z()};
+    glm::quat q{req->body_poses(i).q().w(), req->body_poses(i).q().x(), req->body_poses(i).q().y(),
+                req->body_poses(i).q().z()};
+    sceneInfo->orderedObjects[i]->setPosition(p);
+    sceneInfo->orderedObjects[i]->setRotation(q);
+  }
+
+  for (int i = 0; i < req->camera_poses_size(); ++i) {
+    glm::vec3 p{req->camera_poses(i).p().x(), req->camera_poses(i).p().y(),
+                req->camera_poses(i).p().z()};
+    glm::quat q{req->camera_poses(i).q().w(), req->camera_poses(i).q().x(),
+                req->camera_poses(i).q().y(), req->camera_poses(i).q().z()};
+    sceneInfo->orderedCameras[i]->setPosition(p);
+    sceneInfo->orderedCameras[i]->setRotation(q);
+  }
+
+  sceneInfo->scene->getRootNode().updateGlobalModelMatrixRecursive(); // TODO: check this
+
+  for (int i = 0; i < req->camera_ids_size(); ++i) {
+    uint64_t camera_id = req->camera_ids(i);
+    auto camInfo = sceneInfo->cameraMap.at(camera_id);
+    camInfo->frameCounter++;
+
+    sceneInfo->threadRunner->submit(
+        [context = mContext, sem = camInfo->semaphore.get(), cb = camInfo->commandBuffer.get(),
+         renderer = camInfo->renderer.get(), cam = camInfo->camera, fillInfo = camInfo->fillInfo,
+         frame = camInfo->frameCounter]() {
+          uint64_t waitFrame = frame - 1;
+          auto result = context->getDevice().waitSemaphores(
+              vk::SemaphoreWaitInfo({}, sem, waitFrame), UINT64_MAX);
+          if (result != vk::Result::eSuccess) {
+            throw std::runtime_error("take picture failed: wait failed");
+          }
+          cb.reset();
+          cb.begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+          renderer->render(*cam, {}, {}, {}, {});
+
+          for (auto &entry : fillInfo) {
+            auto [name, buffer, offset] = entry;
+            auto target = renderer->getRenderTarget(name);
+            auto extent = target->getImage().getExtent();
+            vk::Format format = target->getFormat();
+            vk::DeviceSize size =
+                extent.width * extent.height * extent.depth * svulkan2::getFormatSize(format);
+            target->getImage().recordCopyToBuffer(cb, buffer, offset, size, vk::Offset3D{0, 0, 0},
+                                                  extent);
+          }
+          cb.end();
+          context->getQueue().submit(cb, {}, {}, {}, sem, frame, {});
+        });
+  }
+  return Status::OK;
+}
+
 // ========== Material ==========//
 Status RenderServiceImpl::SetBaseColor(ServerContext *c, const proto::IdVec4 *req,
                                        proto::Empty *res) {

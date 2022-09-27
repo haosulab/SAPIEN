@@ -482,7 +482,12 @@ public:
   virtual void removeLight(ILight *light) = 0;
 
   /** call this function before every rendering time frame */
-  inline virtual void updateRender(){};
+  virtual void updateRender(){};
+
+  virtual void updateRenderAndTakePictures(std::vector<ICamera *> const &cameras) {
+    throw std::runtime_error("This function is not implemented! Please call update render and "
+                             "take pictures separately");
+  }
 
   virtual void setEnvironmentMap(std::string_view path) {
     spdlog::get("SAPIEN")->warn("Environment map is not supported!");

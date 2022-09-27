@@ -48,7 +48,7 @@ struct TableStruct_render_5fserver_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[23]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[24]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -119,6 +119,9 @@ extern RemoveLightReqDefaultTypeInternal _RemoveLightReq_default_instance_;
 class TakePictureReq;
 class TakePictureReqDefaultTypeInternal;
 extern TakePictureReqDefaultTypeInternal _TakePictureReq_default_instance_;
+class UpdateRenderAndTakePicturesReq;
+class UpdateRenderAndTakePicturesReqDefaultTypeInternal;
+extern UpdateRenderAndTakePicturesReqDefaultTypeInternal _UpdateRenderAndTakePicturesReq_default_instance_;
 class UpdateRenderReq;
 class UpdateRenderReqDefaultTypeInternal;
 extern UpdateRenderReqDefaultTypeInternal _UpdateRenderReq_default_instance_;
@@ -153,6 +156,7 @@ template<> ::sapien::Renderer::server::proto::RemoveBodyReq* Arena::CreateMaybeM
 template<> ::sapien::Renderer::server::proto::RemoveCameraReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::RemoveCameraReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::RemoveLightReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::RemoveLightReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::TakePictureReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::TakePictureReq>(Arena*);
+template<> ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::UpdateRenderReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::UpdateRenderReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::Vec3* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::Vec3>(Arena*);
 template<> ::sapien::Renderer::server::proto::Vec4* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::Vec4>(Arena*);
@@ -3886,6 +3890,208 @@ class TakePictureReq PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class UpdateRenderAndTakePicturesReq PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq) */ {
+ public:
+  inline UpdateRenderAndTakePicturesReq() : UpdateRenderAndTakePicturesReq(nullptr) {};
+  virtual ~UpdateRenderAndTakePicturesReq();
+
+  UpdateRenderAndTakePicturesReq(const UpdateRenderAndTakePicturesReq& from);
+  UpdateRenderAndTakePicturesReq(UpdateRenderAndTakePicturesReq&& from) noexcept
+    : UpdateRenderAndTakePicturesReq() {
+    *this = ::std::move(from);
+  }
+
+  inline UpdateRenderAndTakePicturesReq& operator=(const UpdateRenderAndTakePicturesReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UpdateRenderAndTakePicturesReq& operator=(UpdateRenderAndTakePicturesReq&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const UpdateRenderAndTakePicturesReq& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const UpdateRenderAndTakePicturesReq* internal_default_instance() {
+    return reinterpret_cast<const UpdateRenderAndTakePicturesReq*>(
+               &_UpdateRenderAndTakePicturesReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    22;
+
+  friend void swap(UpdateRenderAndTakePicturesReq& a, UpdateRenderAndTakePicturesReq& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(UpdateRenderAndTakePicturesReq* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UpdateRenderAndTakePicturesReq* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline UpdateRenderAndTakePicturesReq* New() const final {
+    return CreateMaybeMessage<UpdateRenderAndTakePicturesReq>(nullptr);
+  }
+
+  UpdateRenderAndTakePicturesReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<UpdateRenderAndTakePicturesReq>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const UpdateRenderAndTakePicturesReq& from);
+  void MergeFrom(const UpdateRenderAndTakePicturesReq& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(UpdateRenderAndTakePicturesReq* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq";
+  }
+  protected:
+  explicit UpdateRenderAndTakePicturesReq(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_render_5fserver_2eproto);
+    return ::descriptor_table_render_5fserver_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kBodyPosesFieldNumber = 2,
+    kCameraPosesFieldNumber = 3,
+    kCameraIdsFieldNumber = 4,
+    kSceneIdFieldNumber = 1,
+  };
+  // repeated .sapien.Renderer.server.proto.Pose body_poses = 2;
+  int body_poses_size() const;
+  private:
+  int _internal_body_poses_size() const;
+  public:
+  void clear_body_poses();
+  ::sapien::Renderer::server::proto::Pose* mutable_body_poses(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose >*
+      mutable_body_poses();
+  private:
+  const ::sapien::Renderer::server::proto::Pose& _internal_body_poses(int index) const;
+  ::sapien::Renderer::server::proto::Pose* _internal_add_body_poses();
+  public:
+  const ::sapien::Renderer::server::proto::Pose& body_poses(int index) const;
+  ::sapien::Renderer::server::proto::Pose* add_body_poses();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose >&
+      body_poses() const;
+
+  // repeated .sapien.Renderer.server.proto.Pose camera_poses = 3;
+  int camera_poses_size() const;
+  private:
+  int _internal_camera_poses_size() const;
+  public:
+  void clear_camera_poses();
+  ::sapien::Renderer::server::proto::Pose* mutable_camera_poses(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose >*
+      mutable_camera_poses();
+  private:
+  const ::sapien::Renderer::server::proto::Pose& _internal_camera_poses(int index) const;
+  ::sapien::Renderer::server::proto::Pose* _internal_add_camera_poses();
+  public:
+  const ::sapien::Renderer::server::proto::Pose& camera_poses(int index) const;
+  ::sapien::Renderer::server::proto::Pose* add_camera_poses();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose >&
+      camera_poses() const;
+
+  // repeated uint64 camera_ids = 4 [packed = true];
+  int camera_ids_size() const;
+  private:
+  int _internal_camera_ids_size() const;
+  public:
+  void clear_camera_ids();
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_camera_ids(int index) const;
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      _internal_camera_ids() const;
+  void _internal_add_camera_ids(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      _internal_mutable_camera_ids();
+  public:
+  ::PROTOBUF_NAMESPACE_ID::uint64 camera_ids(int index) const;
+  void set_camera_ids(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value);
+  void add_camera_ids(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+      camera_ids() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+      mutable_camera_ids();
+
+  // uint64 scene_id = 1;
+  void clear_scene_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 scene_id() const;
+  void set_scene_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_scene_id() const;
+  void _internal_set_scene_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose > body_poses_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose > camera_poses_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 > camera_ids_;
+  mutable std::atomic<int> _camera_ids_cached_byte_size_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 scene_id_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_render_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CameraParamsReq PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:sapien.Renderer.server.proto.CameraParamsReq) */ {
  public:
@@ -3928,7 +4134,7 @@ class CameraParamsReq PROTOBUF_FINAL :
                &_CameraParamsReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    23;
 
   friend void swap(CameraParamsReq& a, CameraParamsReq& b) {
     a.Swap(&b);
@@ -6451,6 +6657,155 @@ inline void TakePictureReq::set_camera_id(::PROTOBUF_NAMESPACE_ID::uint64 value)
 
 // -------------------------------------------------------------------
 
+// UpdateRenderAndTakePicturesReq
+
+// uint64 scene_id = 1;
+inline void UpdateRenderAndTakePicturesReq::clear_scene_id() {
+  scene_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 UpdateRenderAndTakePicturesReq::_internal_scene_id() const {
+  return scene_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 UpdateRenderAndTakePicturesReq::scene_id() const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.scene_id)
+  return _internal_scene_id();
+}
+inline void UpdateRenderAndTakePicturesReq::_internal_set_scene_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  scene_id_ = value;
+}
+inline void UpdateRenderAndTakePicturesReq::set_scene_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_scene_id(value);
+  // @@protoc_insertion_point(field_set:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.scene_id)
+}
+
+// repeated .sapien.Renderer.server.proto.Pose body_poses = 2;
+inline int UpdateRenderAndTakePicturesReq::_internal_body_poses_size() const {
+  return body_poses_.size();
+}
+inline int UpdateRenderAndTakePicturesReq::body_poses_size() const {
+  return _internal_body_poses_size();
+}
+inline void UpdateRenderAndTakePicturesReq::clear_body_poses() {
+  body_poses_.Clear();
+}
+inline ::sapien::Renderer::server::proto::Pose* UpdateRenderAndTakePicturesReq::mutable_body_poses(int index) {
+  // @@protoc_insertion_point(field_mutable:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.body_poses)
+  return body_poses_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose >*
+UpdateRenderAndTakePicturesReq::mutable_body_poses() {
+  // @@protoc_insertion_point(field_mutable_list:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.body_poses)
+  return &body_poses_;
+}
+inline const ::sapien::Renderer::server::proto::Pose& UpdateRenderAndTakePicturesReq::_internal_body_poses(int index) const {
+  return body_poses_.Get(index);
+}
+inline const ::sapien::Renderer::server::proto::Pose& UpdateRenderAndTakePicturesReq::body_poses(int index) const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.body_poses)
+  return _internal_body_poses(index);
+}
+inline ::sapien::Renderer::server::proto::Pose* UpdateRenderAndTakePicturesReq::_internal_add_body_poses() {
+  return body_poses_.Add();
+}
+inline ::sapien::Renderer::server::proto::Pose* UpdateRenderAndTakePicturesReq::add_body_poses() {
+  // @@protoc_insertion_point(field_add:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.body_poses)
+  return _internal_add_body_poses();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose >&
+UpdateRenderAndTakePicturesReq::body_poses() const {
+  // @@protoc_insertion_point(field_list:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.body_poses)
+  return body_poses_;
+}
+
+// repeated .sapien.Renderer.server.proto.Pose camera_poses = 3;
+inline int UpdateRenderAndTakePicturesReq::_internal_camera_poses_size() const {
+  return camera_poses_.size();
+}
+inline int UpdateRenderAndTakePicturesReq::camera_poses_size() const {
+  return _internal_camera_poses_size();
+}
+inline void UpdateRenderAndTakePicturesReq::clear_camera_poses() {
+  camera_poses_.Clear();
+}
+inline ::sapien::Renderer::server::proto::Pose* UpdateRenderAndTakePicturesReq::mutable_camera_poses(int index) {
+  // @@protoc_insertion_point(field_mutable:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_poses)
+  return camera_poses_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose >*
+UpdateRenderAndTakePicturesReq::mutable_camera_poses() {
+  // @@protoc_insertion_point(field_mutable_list:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_poses)
+  return &camera_poses_;
+}
+inline const ::sapien::Renderer::server::proto::Pose& UpdateRenderAndTakePicturesReq::_internal_camera_poses(int index) const {
+  return camera_poses_.Get(index);
+}
+inline const ::sapien::Renderer::server::proto::Pose& UpdateRenderAndTakePicturesReq::camera_poses(int index) const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_poses)
+  return _internal_camera_poses(index);
+}
+inline ::sapien::Renderer::server::proto::Pose* UpdateRenderAndTakePicturesReq::_internal_add_camera_poses() {
+  return camera_poses_.Add();
+}
+inline ::sapien::Renderer::server::proto::Pose* UpdateRenderAndTakePicturesReq::add_camera_poses() {
+  // @@protoc_insertion_point(field_add:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_poses)
+  return _internal_add_camera_poses();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::sapien::Renderer::server::proto::Pose >&
+UpdateRenderAndTakePicturesReq::camera_poses() const {
+  // @@protoc_insertion_point(field_list:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_poses)
+  return camera_poses_;
+}
+
+// repeated uint64 camera_ids = 4 [packed = true];
+inline int UpdateRenderAndTakePicturesReq::_internal_camera_ids_size() const {
+  return camera_ids_.size();
+}
+inline int UpdateRenderAndTakePicturesReq::camera_ids_size() const {
+  return _internal_camera_ids_size();
+}
+inline void UpdateRenderAndTakePicturesReq::clear_camera_ids() {
+  camera_ids_.Clear();
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 UpdateRenderAndTakePicturesReq::_internal_camera_ids(int index) const {
+  return camera_ids_.Get(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 UpdateRenderAndTakePicturesReq::camera_ids(int index) const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_ids)
+  return _internal_camera_ids(index);
+}
+inline void UpdateRenderAndTakePicturesReq::set_camera_ids(int index, ::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  camera_ids_.Set(index, value);
+  // @@protoc_insertion_point(field_set:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_ids)
+}
+inline void UpdateRenderAndTakePicturesReq::_internal_add_camera_ids(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  camera_ids_.Add(value);
+}
+inline void UpdateRenderAndTakePicturesReq::add_camera_ids(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_add_camera_ids(value);
+  // @@protoc_insertion_point(field_add:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_ids)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+UpdateRenderAndTakePicturesReq::_internal_camera_ids() const {
+  return camera_ids_;
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >&
+UpdateRenderAndTakePicturesReq::camera_ids() const {
+  // @@protoc_insertion_point(field_list:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_ids)
+  return _internal_camera_ids();
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+UpdateRenderAndTakePicturesReq::_internal_mutable_camera_ids() {
+  return &camera_ids_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedField< ::PROTOBUF_NAMESPACE_ID::uint64 >*
+UpdateRenderAndTakePicturesReq::mutable_camera_ids() {
+  // @@protoc_insertion_point(field_mutable_list:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq.camera_ids)
+  return _internal_mutable_camera_ids();
+}
+
+// -------------------------------------------------------------------
+
 // CameraParamsReq
 
 // uint64 scene_id = 1;
@@ -6636,6 +6991,8 @@ inline void CameraParamsReq::set_skew(float value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

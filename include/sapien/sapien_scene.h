@@ -255,6 +255,7 @@ public:
    * matrices of objects.
    */
   void updateRender();
+  void updateRenderAndTakePictures(std::vector<SCamera*> const& cameras);
   std::future<void> updateRenderAsync();
   SActorStatic *addGround(PxReal altitude, bool render = true,
                           std::shared_ptr<SPhysicalMaterial> material = nullptr,

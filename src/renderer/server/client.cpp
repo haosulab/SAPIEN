@@ -429,6 +429,53 @@ void ClientScene::updateRender() {
   }
 };
 
+void ClientScene::updateRenderAndTakePictures(std::vector<ICamera *> const &cameras) {
+  syncId();
+
+  ClientContext context;
+  proto::UpdateRenderAndTakePicturesReq req;
+  proto::Empty res;
+
+  req.set_scene_id(mId);
+  for (auto &body : mBodies) {
+    auto &pose = body->getCurrentPose();
+    auto p = req.add_body_poses();
+    p->mutable_p()->set_x(pose.p.x);
+    p->mutable_p()->set_y(pose.p.y);
+    p->mutable_p()->set_z(pose.p.z);
+
+    p->mutable_q()->set_w(pose.q.w);
+    p->mutable_q()->set_x(pose.q.x);
+    p->mutable_q()->set_y(pose.q.y);
+    p->mutable_q()->set_z(pose.q.z);
+  }
+
+  for (auto &cam : mCameras) {
+    auto pose = cam->getPose();
+    auto p = req.add_camera_poses();
+    p->mutable_p()->set_x(pose.p.x);
+    p->mutable_p()->set_y(pose.p.y);
+    p->mutable_p()->set_z(pose.p.z);
+
+    p->mutable_q()->set_w(pose.q.w);
+    p->mutable_q()->set_x(pose.q.x);
+    p->mutable_q()->set_y(pose.q.y);
+    p->mutable_q()->set_z(pose.q.z);
+  }
+
+  for (auto cam : cameras) {
+    if (auto c = dynamic_cast<ClientCamera*>(cam)) {
+      req.add_camera_ids(c->getId());
+    } else {
+      throw std::runtime_error("invalid camera");
+    }
+  }
+  Status status = mRenderer->getStub().UpdateRenderAndTakePictures(&context, req, &res);
+  if (!status.ok()) {
+    throw std::runtime_error(status.error_message());
+  }
+}
+
 void ClientScene::destroy() { getRenderer()->removeScene(this); }
 
 void ClientScene::syncId() {

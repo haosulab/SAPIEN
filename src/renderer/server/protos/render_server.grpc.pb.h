@@ -132,6 +132,13 @@ class RenderService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>> PrepareAsyncUpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>>(PrepareAsyncUpdateRenderRaw(context, request, cq));
     }
+    virtual ::grpc::Status UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::sapien::Renderer::server::proto::Empty* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>> AsyncUpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>>(AsyncUpdateRenderAndTakePicturesRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>> PrepareAsyncUpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>>(PrepareAsyncUpdateRenderAndTakePicturesRaw(context, request, cq));
+    }
     // ========== Material ==========//
     virtual ::grpc::Status SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::sapien::Renderer::server::proto::Empty* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>> AsyncSetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::grpc::CompletionQueue* cq) {
@@ -352,6 +359,18 @@ class RenderService final {
       #else
       virtual void UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
       // ========== Material ==========//
       virtual void SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
       virtual void SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
@@ -486,6 +505,8 @@ class RenderService final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>* PrepareAsyncSetEntityOrderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>* AsyncUpdateRenderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>* PrepareAsyncUpdateRenderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>* AsyncUpdateRenderAndTakePicturesRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>* PrepareAsyncUpdateRenderAndTakePicturesRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>* AsyncSetBaseColorRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>* PrepareAsyncSetBaseColorRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>* AsyncSetRoughnessRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) = 0;
@@ -596,6 +617,13 @@ class RenderService final {
     }
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>> PrepareAsyncUpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>>(PrepareAsyncUpdateRenderRaw(context, request, cq));
+    }
+    ::grpc::Status UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::sapien::Renderer::server::proto::Empty* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>> AsyncUpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>>(AsyncUpdateRenderAndTakePicturesRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>> PrepareAsyncUpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>>(PrepareAsyncUpdateRenderAndTakePicturesRaw(context, request, cq));
     }
     ::grpc::Status SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::sapien::Renderer::server::proto::Empty* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>> AsyncSetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::grpc::CompletionQueue* cq) {
@@ -812,6 +840,18 @@ class RenderService final {
       #else
       void UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
+      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
       void SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
       void SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -945,6 +985,8 @@ class RenderService final {
     ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* PrepareAsyncSetEntityOrderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* AsyncUpdateRenderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* PrepareAsyncUpdateRenderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* AsyncUpdateRenderAndTakePicturesRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* PrepareAsyncUpdateRenderAndTakePicturesRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* AsyncSetBaseColorRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* PrepareAsyncSetBaseColorRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* AsyncSetRoughnessRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) override;
@@ -974,6 +1016,7 @@ class RenderService final {
     const ::grpc::internal::RpcMethod rpcmethod_AddDirectionalLight_;
     const ::grpc::internal::RpcMethod rpcmethod_SetEntityOrder_;
     const ::grpc::internal::RpcMethod rpcmethod_UpdateRender_;
+    const ::grpc::internal::RpcMethod rpcmethod_UpdateRenderAndTakePictures_;
     const ::grpc::internal::RpcMethod rpcmethod_SetBaseColor_;
     const ::grpc::internal::RpcMethod rpcmethod_SetRoughness_;
     const ::grpc::internal::RpcMethod rpcmethod_SetSpecular_;
@@ -1004,6 +1047,7 @@ class RenderService final {
     virtual ::grpc::Status AddDirectionalLight(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response);
     virtual ::grpc::Status SetEntityOrder(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response);
     virtual ::grpc::Status UpdateRender(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response);
+    virtual ::grpc::Status UpdateRenderAndTakePictures(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response);
     // ========== Material ==========//
     virtual ::grpc::Status SetBaseColor(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response);
     virtual ::grpc::Status SetRoughness(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response);
@@ -1277,12 +1321,32 @@ class RenderService final {
     }
   };
   template <class BaseClass>
+  class WithAsyncMethod_UpdateRenderAndTakePictures : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_UpdateRenderAndTakePictures() {
+      ::grpc::Service::MarkMethodAsync(13);
+    }
+    ~WithAsyncMethod_UpdateRenderAndTakePictures() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateRenderAndTakePictures(::grpc::ServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUpdateRenderAndTakePictures(::grpc::ServerContext* context, ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::grpc::ServerAsyncResponseWriter< ::sapien::Renderer::server::proto::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(13, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithAsyncMethod_SetBaseColor : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SetBaseColor() {
-      ::grpc::Service::MarkMethodAsync(13);
+      ::grpc::Service::MarkMethodAsync(14);
     }
     ~WithAsyncMethod_SetBaseColor() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1293,7 +1357,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetBaseColor(::grpc::ServerContext* context, ::sapien::Renderer::server::proto::IdVec4* request, ::grpc::ServerAsyncResponseWriter< ::sapien::Renderer::server::proto::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(13, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(14, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1302,7 +1366,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SetRoughness() {
-      ::grpc::Service::MarkMethodAsync(14);
+      ::grpc::Service::MarkMethodAsync(15);
     }
     ~WithAsyncMethod_SetRoughness() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1313,7 +1377,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetRoughness(::grpc::ServerContext* context, ::sapien::Renderer::server::proto::IdFloat* request, ::grpc::ServerAsyncResponseWriter< ::sapien::Renderer::server::proto::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(14, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(15, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1322,7 +1386,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SetSpecular() {
-      ::grpc::Service::MarkMethodAsync(15);
+      ::grpc::Service::MarkMethodAsync(16);
     }
     ~WithAsyncMethod_SetSpecular() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1333,7 +1397,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetSpecular(::grpc::ServerContext* context, ::sapien::Renderer::server::proto::IdFloat* request, ::grpc::ServerAsyncResponseWriter< ::sapien::Renderer::server::proto::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(15, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1342,7 +1406,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SetMetallic() {
-      ::grpc::Service::MarkMethodAsync(16);
+      ::grpc::Service::MarkMethodAsync(17);
     }
     ~WithAsyncMethod_SetMetallic() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1353,7 +1417,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetMetallic(::grpc::ServerContext* context, ::sapien::Renderer::server::proto::IdFloat* request, ::grpc::ServerAsyncResponseWriter< ::sapien::Renderer::server::proto::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1362,7 +1426,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SetUniqueId() {
-      ::grpc::Service::MarkMethodAsync(17);
+      ::grpc::Service::MarkMethodAsync(18);
     }
     ~WithAsyncMethod_SetUniqueId() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1373,7 +1437,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetUniqueId(::grpc::ServerContext* context, ::sapien::Renderer::server::proto::BodyIdReq* request, ::grpc::ServerAsyncResponseWriter< ::sapien::Renderer::server::proto::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(18, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1382,7 +1446,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SetSegmentationId() {
-      ::grpc::Service::MarkMethodAsync(18);
+      ::grpc::Service::MarkMethodAsync(19);
     }
     ~WithAsyncMethod_SetSegmentationId() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1393,7 +1457,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetSegmentationId(::grpc::ServerContext* context, ::sapien::Renderer::server::proto::BodyIdReq* request, ::grpc::ServerAsyncResponseWriter< ::sapien::Renderer::server::proto::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(18, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(19, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1402,7 +1466,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_TakePicture() {
-      ::grpc::Service::MarkMethodAsync(19);
+      ::grpc::Service::MarkMethodAsync(20);
     }
     ~WithAsyncMethod_TakePicture() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1413,7 +1477,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestTakePicture(::grpc::ServerContext* context, ::sapien::Renderer::server::proto::TakePictureReq* request, ::grpc::ServerAsyncResponseWriter< ::sapien::Renderer::server::proto::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(19, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(20, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1422,7 +1486,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SetCameraParameters() {
-      ::grpc::Service::MarkMethodAsync(20);
+      ::grpc::Service::MarkMethodAsync(21);
     }
     ~WithAsyncMethod_SetCameraParameters() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1433,10 +1497,10 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetCameraParameters(::grpc::ServerContext* context, ::sapien::Renderer::server::proto::CameraParamsReq* request, ::grpc::ServerAsyncResponseWriter< ::sapien::Renderer::server::proto::Empty>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(20, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(21, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_CreateScene<WithAsyncMethod_RemoveScene<WithAsyncMethod_CreateMaterial<WithAsyncMethod_RemoveMaterial<WithAsyncMethod_AddBodyMesh<WithAsyncMethod_AddBodyPrimitive<WithAsyncMethod_RemoveBody<WithAsyncMethod_AddCamera<WithAsyncMethod_SetAmbientLight<WithAsyncMethod_AddPointLight<WithAsyncMethod_AddDirectionalLight<WithAsyncMethod_SetEntityOrder<WithAsyncMethod_UpdateRender<WithAsyncMethod_SetBaseColor<WithAsyncMethod_SetRoughness<WithAsyncMethod_SetSpecular<WithAsyncMethod_SetMetallic<WithAsyncMethod_SetUniqueId<WithAsyncMethod_SetSegmentationId<WithAsyncMethod_TakePicture<WithAsyncMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > AsyncService;
+  typedef WithAsyncMethod_CreateScene<WithAsyncMethod_RemoveScene<WithAsyncMethod_CreateMaterial<WithAsyncMethod_RemoveMaterial<WithAsyncMethod_AddBodyMesh<WithAsyncMethod_AddBodyPrimitive<WithAsyncMethod_RemoveBody<WithAsyncMethod_AddCamera<WithAsyncMethod_SetAmbientLight<WithAsyncMethod_AddPointLight<WithAsyncMethod_AddDirectionalLight<WithAsyncMethod_SetEntityOrder<WithAsyncMethod_UpdateRender<WithAsyncMethod_UpdateRenderAndTakePictures<WithAsyncMethod_SetBaseColor<WithAsyncMethod_SetRoughness<WithAsyncMethod_SetSpecular<WithAsyncMethod_SetMetallic<WithAsyncMethod_SetUniqueId<WithAsyncMethod_SetSegmentationId<WithAsyncMethod_TakePicture<WithAsyncMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_CreateScene : public BaseClass {
    private:
@@ -2049,6 +2113,53 @@ class RenderService final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(13,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->UpdateRenderAndTakePictures(context, request, response); }));}
+    void SetMessageAllocatorFor_UpdateRenderAndTakePictures(
+        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(13);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(13);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateRenderAndTakePictures(::grpc::ServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* UpdateRenderAndTakePictures(
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* UpdateRenderAndTakePictures(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithCallbackMethod_SetBaseColor : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -2059,7 +2170,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(13,
+        MarkMethodCallback(14,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2071,9 +2182,9 @@ class RenderService final {
     void SetMessageAllocatorFor_SetBaseColor(
         ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(13);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(14);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(13);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(14);
     #endif
       static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -2106,7 +2217,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(14,
+        MarkMethodCallback(15,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2118,9 +2229,9 @@ class RenderService final {
     void SetMessageAllocatorFor_SetRoughness(
         ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(14);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(15);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(14);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(15);
     #endif
       static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -2153,7 +2264,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(15,
+        MarkMethodCallback(16,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2165,9 +2276,9 @@ class RenderService final {
     void SetMessageAllocatorFor_SetSpecular(
         ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(15);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(16);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(15);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(16);
     #endif
       static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -2200,7 +2311,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(16,
+        MarkMethodCallback(17,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2212,9 +2323,9 @@ class RenderService final {
     void SetMessageAllocatorFor_SetMetallic(
         ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(16);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(17);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(16);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(17);
     #endif
       static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -2247,7 +2358,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(17,
+        MarkMethodCallback(18,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2259,9 +2370,9 @@ class RenderService final {
     void SetMessageAllocatorFor_SetUniqueId(
         ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(17);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(18);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(17);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(18);
     #endif
       static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -2294,7 +2405,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(18,
+        MarkMethodCallback(19,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2306,9 +2417,9 @@ class RenderService final {
     void SetMessageAllocatorFor_SetSegmentationId(
         ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(18);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(19);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(18);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(19);
     #endif
       static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -2341,7 +2452,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(19,
+        MarkMethodCallback(20,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2353,9 +2464,9 @@ class RenderService final {
     void SetMessageAllocatorFor_TakePicture(
         ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(19);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(20);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(19);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(20);
     #endif
       static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -2388,7 +2499,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(20,
+        MarkMethodCallback(21,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2400,9 +2511,9 @@ class RenderService final {
     void SetMessageAllocatorFor_SetCameraParameters(
         ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(20);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(21);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(20);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(21);
     #endif
       static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -2425,10 +2536,10 @@ class RenderService final {
       { return nullptr; }
   };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_CreateScene<ExperimentalWithCallbackMethod_RemoveScene<ExperimentalWithCallbackMethod_CreateMaterial<ExperimentalWithCallbackMethod_RemoveMaterial<ExperimentalWithCallbackMethod_AddBodyMesh<ExperimentalWithCallbackMethod_AddBodyPrimitive<ExperimentalWithCallbackMethod_RemoveBody<ExperimentalWithCallbackMethod_AddCamera<ExperimentalWithCallbackMethod_SetAmbientLight<ExperimentalWithCallbackMethod_AddPointLight<ExperimentalWithCallbackMethod_AddDirectionalLight<ExperimentalWithCallbackMethod_SetEntityOrder<ExperimentalWithCallbackMethod_UpdateRender<ExperimentalWithCallbackMethod_SetBaseColor<ExperimentalWithCallbackMethod_SetRoughness<ExperimentalWithCallbackMethod_SetSpecular<ExperimentalWithCallbackMethod_SetMetallic<ExperimentalWithCallbackMethod_SetUniqueId<ExperimentalWithCallbackMethod_SetSegmentationId<ExperimentalWithCallbackMethod_TakePicture<ExperimentalWithCallbackMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_CreateScene<ExperimentalWithCallbackMethod_RemoveScene<ExperimentalWithCallbackMethod_CreateMaterial<ExperimentalWithCallbackMethod_RemoveMaterial<ExperimentalWithCallbackMethod_AddBodyMesh<ExperimentalWithCallbackMethod_AddBodyPrimitive<ExperimentalWithCallbackMethod_RemoveBody<ExperimentalWithCallbackMethod_AddCamera<ExperimentalWithCallbackMethod_SetAmbientLight<ExperimentalWithCallbackMethod_AddPointLight<ExperimentalWithCallbackMethod_AddDirectionalLight<ExperimentalWithCallbackMethod_SetEntityOrder<ExperimentalWithCallbackMethod_UpdateRender<ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures<ExperimentalWithCallbackMethod_SetBaseColor<ExperimentalWithCallbackMethod_SetRoughness<ExperimentalWithCallbackMethod_SetSpecular<ExperimentalWithCallbackMethod_SetMetallic<ExperimentalWithCallbackMethod_SetUniqueId<ExperimentalWithCallbackMethod_SetSegmentationId<ExperimentalWithCallbackMethod_TakePicture<ExperimentalWithCallbackMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_CreateScene<ExperimentalWithCallbackMethod_RemoveScene<ExperimentalWithCallbackMethod_CreateMaterial<ExperimentalWithCallbackMethod_RemoveMaterial<ExperimentalWithCallbackMethod_AddBodyMesh<ExperimentalWithCallbackMethod_AddBodyPrimitive<ExperimentalWithCallbackMethod_RemoveBody<ExperimentalWithCallbackMethod_AddCamera<ExperimentalWithCallbackMethod_SetAmbientLight<ExperimentalWithCallbackMethod_AddPointLight<ExperimentalWithCallbackMethod_AddDirectionalLight<ExperimentalWithCallbackMethod_SetEntityOrder<ExperimentalWithCallbackMethod_UpdateRender<ExperimentalWithCallbackMethod_SetBaseColor<ExperimentalWithCallbackMethod_SetRoughness<ExperimentalWithCallbackMethod_SetSpecular<ExperimentalWithCallbackMethod_SetMetallic<ExperimentalWithCallbackMethod_SetUniqueId<ExperimentalWithCallbackMethod_SetSegmentationId<ExperimentalWithCallbackMethod_TakePicture<ExperimentalWithCallbackMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_CreateScene<ExperimentalWithCallbackMethod_RemoveScene<ExperimentalWithCallbackMethod_CreateMaterial<ExperimentalWithCallbackMethod_RemoveMaterial<ExperimentalWithCallbackMethod_AddBodyMesh<ExperimentalWithCallbackMethod_AddBodyPrimitive<ExperimentalWithCallbackMethod_RemoveBody<ExperimentalWithCallbackMethod_AddCamera<ExperimentalWithCallbackMethod_SetAmbientLight<ExperimentalWithCallbackMethod_AddPointLight<ExperimentalWithCallbackMethod_AddDirectionalLight<ExperimentalWithCallbackMethod_SetEntityOrder<ExperimentalWithCallbackMethod_UpdateRender<ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures<ExperimentalWithCallbackMethod_SetBaseColor<ExperimentalWithCallbackMethod_SetRoughness<ExperimentalWithCallbackMethod_SetSpecular<ExperimentalWithCallbackMethod_SetMetallic<ExperimentalWithCallbackMethod_SetUniqueId<ExperimentalWithCallbackMethod_SetSegmentationId<ExperimentalWithCallbackMethod_TakePicture<ExperimentalWithCallbackMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_CreateScene : public BaseClass {
    private:
@@ -2651,12 +2762,29 @@ class RenderService final {
     }
   };
   template <class BaseClass>
+  class WithGenericMethod_UpdateRenderAndTakePictures : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_UpdateRenderAndTakePictures() {
+      ::grpc::Service::MarkMethodGeneric(13);
+    }
+    ~WithGenericMethod_UpdateRenderAndTakePictures() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateRenderAndTakePictures(::grpc::ServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
   class WithGenericMethod_SetBaseColor : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SetBaseColor() {
-      ::grpc::Service::MarkMethodGeneric(13);
+      ::grpc::Service::MarkMethodGeneric(14);
     }
     ~WithGenericMethod_SetBaseColor() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2673,7 +2801,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SetRoughness() {
-      ::grpc::Service::MarkMethodGeneric(14);
+      ::grpc::Service::MarkMethodGeneric(15);
     }
     ~WithGenericMethod_SetRoughness() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2690,7 +2818,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SetSpecular() {
-      ::grpc::Service::MarkMethodGeneric(15);
+      ::grpc::Service::MarkMethodGeneric(16);
     }
     ~WithGenericMethod_SetSpecular() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2707,7 +2835,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SetMetallic() {
-      ::grpc::Service::MarkMethodGeneric(16);
+      ::grpc::Service::MarkMethodGeneric(17);
     }
     ~WithGenericMethod_SetMetallic() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2724,7 +2852,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SetUniqueId() {
-      ::grpc::Service::MarkMethodGeneric(17);
+      ::grpc::Service::MarkMethodGeneric(18);
     }
     ~WithGenericMethod_SetUniqueId() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2741,7 +2869,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SetSegmentationId() {
-      ::grpc::Service::MarkMethodGeneric(18);
+      ::grpc::Service::MarkMethodGeneric(19);
     }
     ~WithGenericMethod_SetSegmentationId() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2758,7 +2886,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_TakePicture() {
-      ::grpc::Service::MarkMethodGeneric(19);
+      ::grpc::Service::MarkMethodGeneric(20);
     }
     ~WithGenericMethod_TakePicture() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2775,7 +2903,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SetCameraParameters() {
-      ::grpc::Service::MarkMethodGeneric(20);
+      ::grpc::Service::MarkMethodGeneric(21);
     }
     ~WithGenericMethod_SetCameraParameters() override {
       BaseClassMustBeDerivedFromService(this);
@@ -3047,12 +3175,32 @@ class RenderService final {
     }
   };
   template <class BaseClass>
+  class WithRawMethod_UpdateRenderAndTakePictures : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_UpdateRenderAndTakePictures() {
+      ::grpc::Service::MarkMethodRaw(13);
+    }
+    ~WithRawMethod_UpdateRenderAndTakePictures() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateRenderAndTakePictures(::grpc::ServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUpdateRenderAndTakePictures(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(13, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithRawMethod_SetBaseColor : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SetBaseColor() {
-      ::grpc::Service::MarkMethodRaw(13);
+      ::grpc::Service::MarkMethodRaw(14);
     }
     ~WithRawMethod_SetBaseColor() override {
       BaseClassMustBeDerivedFromService(this);
@@ -3063,7 +3211,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetBaseColor(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(13, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(14, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3072,7 +3220,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SetRoughness() {
-      ::grpc::Service::MarkMethodRaw(14);
+      ::grpc::Service::MarkMethodRaw(15);
     }
     ~WithRawMethod_SetRoughness() override {
       BaseClassMustBeDerivedFromService(this);
@@ -3083,7 +3231,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetRoughness(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(14, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(15, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3092,7 +3240,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SetSpecular() {
-      ::grpc::Service::MarkMethodRaw(15);
+      ::grpc::Service::MarkMethodRaw(16);
     }
     ~WithRawMethod_SetSpecular() override {
       BaseClassMustBeDerivedFromService(this);
@@ -3103,7 +3251,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetSpecular(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(15, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3112,7 +3260,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SetMetallic() {
-      ::grpc::Service::MarkMethodRaw(16);
+      ::grpc::Service::MarkMethodRaw(17);
     }
     ~WithRawMethod_SetMetallic() override {
       BaseClassMustBeDerivedFromService(this);
@@ -3123,7 +3271,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetMetallic(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(16, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3132,7 +3280,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SetUniqueId() {
-      ::grpc::Service::MarkMethodRaw(17);
+      ::grpc::Service::MarkMethodRaw(18);
     }
     ~WithRawMethod_SetUniqueId() override {
       BaseClassMustBeDerivedFromService(this);
@@ -3143,7 +3291,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetUniqueId(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(17, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(18, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3152,7 +3300,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SetSegmentationId() {
-      ::grpc::Service::MarkMethodRaw(18);
+      ::grpc::Service::MarkMethodRaw(19);
     }
     ~WithRawMethod_SetSegmentationId() override {
       BaseClassMustBeDerivedFromService(this);
@@ -3163,7 +3311,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetSegmentationId(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(18, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(19, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3172,7 +3320,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_TakePicture() {
-      ::grpc::Service::MarkMethodRaw(19);
+      ::grpc::Service::MarkMethodRaw(20);
     }
     ~WithRawMethod_TakePicture() override {
       BaseClassMustBeDerivedFromService(this);
@@ -3183,7 +3331,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestTakePicture(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(19, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(20, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3192,7 +3340,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SetCameraParameters() {
-      ::grpc::Service::MarkMethodRaw(20);
+      ::grpc::Service::MarkMethodRaw(21);
     }
     ~WithRawMethod_SetCameraParameters() override {
       BaseClassMustBeDerivedFromService(this);
@@ -3203,7 +3351,7 @@ class RenderService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetCameraParameters(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(20, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(21, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -3701,6 +3849,44 @@ class RenderService final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_UpdateRenderAndTakePictures : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_UpdateRenderAndTakePictures() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(13,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UpdateRenderAndTakePictures(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_UpdateRenderAndTakePictures() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UpdateRenderAndTakePictures(::grpc::ServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* UpdateRenderAndTakePictures(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* UpdateRenderAndTakePictures(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_SetBaseColor : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -3711,7 +3897,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(13,
+        MarkMethodRawCallback(14,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -3749,7 +3935,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(14,
+        MarkMethodRawCallback(15,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -3787,7 +3973,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(15,
+        MarkMethodRawCallback(16,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -3825,7 +4011,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(16,
+        MarkMethodRawCallback(17,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -3863,7 +4049,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(17,
+        MarkMethodRawCallback(18,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -3901,7 +4087,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(18,
+        MarkMethodRawCallback(19,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -3939,7 +4125,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(19,
+        MarkMethodRawCallback(20,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -3977,7 +4163,7 @@ class RenderService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(20,
+        MarkMethodRawCallback(21,
           new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -4356,12 +4542,39 @@ class RenderService final {
     virtual ::grpc::Status StreamedUpdateRender(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::sapien::Renderer::server::proto::UpdateRenderReq,::sapien::Renderer::server::proto::Empty>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
+  class WithStreamedUnaryMethod_UpdateRenderAndTakePictures : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_UpdateRenderAndTakePictures() {
+      ::grpc::Service::MarkMethodStreamed(13,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>(
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
+                     ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>* streamer) {
+                       return this->StreamedUpdateRenderAndTakePictures(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_UpdateRenderAndTakePictures() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status UpdateRenderAndTakePictures(::grpc::ServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedUpdateRenderAndTakePictures(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq,::sapien::Renderer::server::proto::Empty>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_SetBaseColor : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetBaseColor() {
-      ::grpc::Service::MarkMethodStreamed(13,
+      ::grpc::Service::MarkMethodStreamed(14,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>(
             [this](::grpc_impl::ServerContext* context,
@@ -4388,7 +4601,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetRoughness() {
-      ::grpc::Service::MarkMethodStreamed(14,
+      ::grpc::Service::MarkMethodStreamed(15,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
             [this](::grpc_impl::ServerContext* context,
@@ -4415,7 +4628,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetSpecular() {
-      ::grpc::Service::MarkMethodStreamed(15,
+      ::grpc::Service::MarkMethodStreamed(16,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
             [this](::grpc_impl::ServerContext* context,
@@ -4442,7 +4655,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetMetallic() {
-      ::grpc::Service::MarkMethodStreamed(16,
+      ::grpc::Service::MarkMethodStreamed(17,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
             [this](::grpc_impl::ServerContext* context,
@@ -4469,7 +4682,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetUniqueId() {
-      ::grpc::Service::MarkMethodStreamed(17,
+      ::grpc::Service::MarkMethodStreamed(18,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
             [this](::grpc_impl::ServerContext* context,
@@ -4496,7 +4709,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetSegmentationId() {
-      ::grpc::Service::MarkMethodStreamed(18,
+      ::grpc::Service::MarkMethodStreamed(19,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
             [this](::grpc_impl::ServerContext* context,
@@ -4523,7 +4736,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_TakePicture() {
-      ::grpc::Service::MarkMethodStreamed(19,
+      ::grpc::Service::MarkMethodStreamed(20,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>(
             [this](::grpc_impl::ServerContext* context,
@@ -4550,7 +4763,7 @@ class RenderService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetCameraParameters() {
-      ::grpc::Service::MarkMethodStreamed(20,
+      ::grpc::Service::MarkMethodStreamed(21,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>(
             [this](::grpc_impl::ServerContext* context,
@@ -4571,9 +4784,9 @@ class RenderService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedSetCameraParameters(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::sapien::Renderer::server::proto::CameraParamsReq,::sapien::Renderer::server::proto::Empty>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_CreateScene<WithStreamedUnaryMethod_RemoveScene<WithStreamedUnaryMethod_CreateMaterial<WithStreamedUnaryMethod_RemoveMaterial<WithStreamedUnaryMethod_AddBodyMesh<WithStreamedUnaryMethod_AddBodyPrimitive<WithStreamedUnaryMethod_RemoveBody<WithStreamedUnaryMethod_AddCamera<WithStreamedUnaryMethod_SetAmbientLight<WithStreamedUnaryMethod_AddPointLight<WithStreamedUnaryMethod_AddDirectionalLight<WithStreamedUnaryMethod_SetEntityOrder<WithStreamedUnaryMethod_UpdateRender<WithStreamedUnaryMethod_SetBaseColor<WithStreamedUnaryMethod_SetRoughness<WithStreamedUnaryMethod_SetSpecular<WithStreamedUnaryMethod_SetMetallic<WithStreamedUnaryMethod_SetUniqueId<WithStreamedUnaryMethod_SetSegmentationId<WithStreamedUnaryMethod_TakePicture<WithStreamedUnaryMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_CreateScene<WithStreamedUnaryMethod_RemoveScene<WithStreamedUnaryMethod_CreateMaterial<WithStreamedUnaryMethod_RemoveMaterial<WithStreamedUnaryMethod_AddBodyMesh<WithStreamedUnaryMethod_AddBodyPrimitive<WithStreamedUnaryMethod_RemoveBody<WithStreamedUnaryMethod_AddCamera<WithStreamedUnaryMethod_SetAmbientLight<WithStreamedUnaryMethod_AddPointLight<WithStreamedUnaryMethod_AddDirectionalLight<WithStreamedUnaryMethod_SetEntityOrder<WithStreamedUnaryMethod_UpdateRender<WithStreamedUnaryMethod_UpdateRenderAndTakePictures<WithStreamedUnaryMethod_SetBaseColor<WithStreamedUnaryMethod_SetRoughness<WithStreamedUnaryMethod_SetSpecular<WithStreamedUnaryMethod_SetMetallic<WithStreamedUnaryMethod_SetUniqueId<WithStreamedUnaryMethod_SetSegmentationId<WithStreamedUnaryMethod_TakePicture<WithStreamedUnaryMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_CreateScene<WithStreamedUnaryMethod_RemoveScene<WithStreamedUnaryMethod_CreateMaterial<WithStreamedUnaryMethod_RemoveMaterial<WithStreamedUnaryMethod_AddBodyMesh<WithStreamedUnaryMethod_AddBodyPrimitive<WithStreamedUnaryMethod_RemoveBody<WithStreamedUnaryMethod_AddCamera<WithStreamedUnaryMethod_SetAmbientLight<WithStreamedUnaryMethod_AddPointLight<WithStreamedUnaryMethod_AddDirectionalLight<WithStreamedUnaryMethod_SetEntityOrder<WithStreamedUnaryMethod_UpdateRender<WithStreamedUnaryMethod_SetBaseColor<WithStreamedUnaryMethod_SetRoughness<WithStreamedUnaryMethod_SetSpecular<WithStreamedUnaryMethod_SetMetallic<WithStreamedUnaryMethod_SetUniqueId<WithStreamedUnaryMethod_SetSegmentationId<WithStreamedUnaryMethod_TakePicture<WithStreamedUnaryMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_CreateScene<WithStreamedUnaryMethod_RemoveScene<WithStreamedUnaryMethod_CreateMaterial<WithStreamedUnaryMethod_RemoveMaterial<WithStreamedUnaryMethod_AddBodyMesh<WithStreamedUnaryMethod_AddBodyPrimitive<WithStreamedUnaryMethod_RemoveBody<WithStreamedUnaryMethod_AddCamera<WithStreamedUnaryMethod_SetAmbientLight<WithStreamedUnaryMethod_AddPointLight<WithStreamedUnaryMethod_AddDirectionalLight<WithStreamedUnaryMethod_SetEntityOrder<WithStreamedUnaryMethod_UpdateRender<WithStreamedUnaryMethod_UpdateRenderAndTakePictures<WithStreamedUnaryMethod_SetBaseColor<WithStreamedUnaryMethod_SetRoughness<WithStreamedUnaryMethod_SetSpecular<WithStreamedUnaryMethod_SetMetallic<WithStreamedUnaryMethod_SetUniqueId<WithStreamedUnaryMethod_SetSegmentationId<WithStreamedUnaryMethod_TakePicture<WithStreamedUnaryMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > > StreamedService;
 };
 
 }  // namespace proto

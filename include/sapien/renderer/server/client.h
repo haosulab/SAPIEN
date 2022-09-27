@@ -210,9 +210,7 @@ public:
     spdlog::get("SAPIEN")->error(
         "visibility is not supported for render client. It will be supported in the future.");
   }
-  void setVisible(bool visible) override {
-    setVisibility(1.f);
-  }
+  void setVisible(bool visible) override { setVisibility(1.f); }
   void setRenderMode(uint32_t mode) override {
     throw std::runtime_error("render mode is not supported for render client");
   }
@@ -317,6 +315,9 @@ public:
   };
 
   void updateRender() override;
+
+  void updateRenderAndTakePictures(std::vector<ICamera *> const &cameras) override;
+
   void destroy() override;
 
   inline id_t getId() const { return mId; }

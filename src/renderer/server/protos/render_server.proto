@@ -21,6 +21,7 @@ service RenderService {
 
   rpc SetEntityOrder(EntityOrderReq) returns (Empty);
   rpc UpdateRender(UpdateRenderReq) returns (Empty);
+  rpc UpdateRenderAndTakePictures(UpdateRenderAndTakePicturesReq) returns (Empty);
 
   //========== Material ==========//
   rpc SetBaseColor(IdVec4) returns (Empty);
@@ -175,6 +176,13 @@ message BodyIdReq {
 message TakePictureReq {
   uint64 scene_id = 1;
   uint64 camera_id = 2;
+}
+
+message UpdateRenderAndTakePicturesReq {
+  uint64 scene_id = 1;
+  repeated Pose body_poses = 2;
+  repeated Pose camera_poses = 3;
+  repeated uint64 camera_ids = 4 [packed=true];
 }
 
 message CameraParamsReq {
