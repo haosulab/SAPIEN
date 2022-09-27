@@ -313,8 +313,8 @@ void ClientScene::setAmbientLight(std::array<float, 3> const &color) {
   proto::Empty res;
 
   req.mutable_data()->set_x(color[0]);
-  req.mutable_data()->set_x(color[1]);
-  req.mutable_data()->set_x(color[2]);
+  req.mutable_data()->set_y(color[1]);
+  req.mutable_data()->set_z(color[2]);
 
   Status status = mRenderer->getStub().SetAmbientLight(&context, req, &res);
   if (!status.ok()) {
