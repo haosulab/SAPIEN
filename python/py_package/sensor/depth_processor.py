@@ -1,5 +1,6 @@
 # by Xiaoshuai Jet Zhang <i@jetd.me>, Jan 2021
-# v2021.10.08
+# Changed by Ang Li, Sep 2022
+# v2022.09.27
 #
 # Depth simulation toolkit.
 #
@@ -11,10 +12,8 @@
 # TODO:
 #  1. IR intensity instead of pixel values in real pipeline.
 #
-# Edited by Ang Li, Sep 2022
-#
 
-import sapien.core.pysapien.simsense as pysimsense
+from ..core.pysapien.simsense import DepthSensorEngine
 
 from typing import Optional, Tuple
 
@@ -343,16 +342,12 @@ def calc_main_depth_from_left_right_ir(
     return depth
 
 # GPU Depth Sensor
-class SimSense:
-    """
-    This class is the wrapper for depth sensor simulator implemented with CUDA. The underlying code is shared,
-    which means that different instances of the class will point to the same library. 
-    """
+class DepthSensorCUDA:
     def __init__(self, lr_size, k_l, k_r, l2r, rgb_size=None, k_rgb=None, l2rgb=None, min_depth=0.0, max_depth=10.0, rectified=False,
                     census_width=9, census_height=7, max_disp=128, block_width=1, block_height=1, p1_penalty=7, p2_penalty=86,
                     uniqueness_ratio=0, lr_max_diff=1, median_filter_size=3, depth_dilation=False):
         """
-        Initiate the SimSense class. The camera frame follows the OpenCV coordinate system, which is x right, y down, z forward.
+        Initiate the DepthSensor class. The camera frame follows the OpenCV coordinate system, which is x right, y down, z forward.
         In this sense, the origin of the right camera's frame should have positive x value when viewed in left camera's frame. Left,
         right and RGB image are assumed to be undistorted. By default, the final depth map will be presented in left camera's frame
         with lr_size. Specifying rgb_size, k_rgb and l2rgb will turn on the registration mode, which will tranform the final depth
@@ -434,15 +429,15 @@ class SimSense:
         if registration:
             # Get registration matrix
             a1, a2, a3, b = self._get_registration_mat(lr_size, k_l, k_rgb, l2rgb)
-            pysimsense.init_with_reg(img_h, img_w, rgb_size[1], rgb_size[0], f_len, b_len, min_depth, max_depth, rectified,
-                                    census_width, census_height, max_disp, block_width, block_height,
-                                    p1_penalty, p2_penalty, uniqueness_ratio, lr_max_diff, median_filter_size,
-                                    map_lx, map_ly, map_rx, map_ry, a1, a2, a3, b[0], b[1], b[2], depth_dilation)
+            self.engine = DepthSensorEngine(img_h, img_w, rgb_size[1], rgb_size[0], f_len, b_len, min_depth, max_depth, rectified,
+                                            census_width, census_height, max_disp, block_width, block_height,
+                                            p1_penalty, p2_penalty, uniqueness_ratio, lr_max_diff, median_filter_size,
+                                            map_lx, map_ly, map_rx, map_ry, a1, a2, a3, b[0], b[1], b[2], depth_dilation)
         else:
-            pysimsense.init_without_reg(img_h, img_w, f_len, b_len, min_depth, max_depth, rectified,
-                                        census_width, census_height, max_disp, block_width, block_height,
-                                        p1_penalty, p2_penalty, uniqueness_ratio, lr_max_diff, median_filter_size,
-                                        map_lx, map_ly, map_rx, map_ry)
+            self.engine = DepthSensorEngine(img_h, img_w, f_len, b_len, min_depth, max_depth, rectified,
+                                            census_width, census_height, max_disp, block_width, block_height,
+                                            p1_penalty, p2_penalty, uniqueness_ratio, lr_max_diff, median_filter_size,
+                                            map_lx, map_ly, map_rx, map_ry)
 
     def compute(self, img_l, img_r):
         """
@@ -451,15 +446,12 @@ class SimSense:
         :param img_r: Grayscale/infrared image (uint8) captured by right camera.
         :return: Computed depth map (in meters) from left camera's view or rgb camera's view.
         """
-        result = pysimsense.compute(img_l, img_r)
+        result = self.engine.compute(img_l, img_r)
 
         return result
     
     def close(self):
-        """
-        Free resources including memory allocated by CUDA.
-        """
-        pysimsense.close()
+        self.engine.close()
 
     def _get_registration_mat(self, ir_size, k_ir, k_rgb, ir2rgb):
         R = ir2rgb[:3, :3]
