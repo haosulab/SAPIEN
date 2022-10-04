@@ -2,7 +2,7 @@ import sapien.core as sapien
 import numpy as np
 import transforms3d.euler
 from sapien.core import Pose
-from sapien.sensor import ActiveLightSensor, ActiveLightSensorCUDA
+from sapien.sensor import ActiveLightSensorCUDA
 import PIL.Image as im
 import matplotlib.pyplot as plt
 import open3d as o3d
@@ -87,28 +87,6 @@ def main():
     scene.set_ambient_light([0.3, 0.3, 0.3])
     scene.add_directional_light([0, 0.5, -1], color=[3.0, 3.0, 3.0])
 
-    # CPU sensor
-    # sensor_cpu = ActiveLightSensor(
-    #     'sensor', renderer, scene, sensor_type='fakesense_j415')
-
-    # sensor_cpu.set_pose(
-    #     Pose([-0.28, -0.28, 0.46], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
-
-    # scene.step()
-    # scene.update_render()
-    # sensor_cpu.take_picture()
-
-    # rgb = sensor_cpu.get_rgb()
-    # im.fromarray((rgb * 255).astype(np.uint8)).show()
-
-    # fig = plt.figure()
-    # start = time.process_time()
-    # depth_opencv = sensor_cpu.get_depth()
-    # print("Runtime of get_depth() for cpu sensor: ", time.process_time() - start)
-    # sub = fig.add_subplot(1, 2, 1)
-    # sub.imshow(depth_opencv)
-
-    # GPU sensor
     sensor_cuda = ActiveLightSensorCUDA(
         'sensor', renderer, scene, sensor_type='fakesense_j415')
 
@@ -120,23 +98,14 @@ def main():
     sensor_cuda.take_picture()
 
     rgb = sensor_cuda.get_rgb()
-    # im.fromarray((rgb * 255).astype(np.uint8)).show()
+    im.fromarray((rgb * 255).astype(np.uint8)).show()
 
     start = time.process_time()
     depth_cuda = sensor_cuda.get_depth()
     print("Runtime of get_depth() for gpu sensor: ", time.process_time() - start)
-    # sub = fig.add_subplot(1, 2, 2)
-    # sub.imshow(depth_cuda)
 
     plt.imshow(depth_cuda)
     plt.show()
-
-    # pc = sensor_cuda.get_pointcloud(frame='world', with_rgb=True)
-    # pc1 = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(pc[..., :3]))
-    # pc1.colors = o3d.utility.Vector3dVector(pc[..., 3:])
-    # o3d.visualization.draw_geometries([pc1])
-
-    sensor_cuda.close()
 
 
 main()
