@@ -313,9 +313,9 @@ def calc_main_depth_from_left_right_ir(
     if use_noise:
         ir_l, ir_r = sim_ir_noise(ir_l, **kwargs), sim_ir_noise(ir_r, **kwargs)
 
-    ir_l, ir_r = calc_rectified_stereo_pair(
-        ir_l, ir_r, map1, map2
-    )
+    # ir_l, ir_r = calc_rectified_stereo_pair(
+    #     ir_l, ir_r, map1, map2
+    # )
 
     disp = calc_disparity(
         ir_l, ir_r, method, ndisp=ndisp,

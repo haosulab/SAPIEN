@@ -423,6 +423,7 @@ class ActiveLightSensorCUDA(ActiveLightSensor):
                 self._l2rgb.astype(np.float),
                 self.min_depth,
                 self.max_depth,
+                rectified=True,
                 census_width=7,
                 census_height=7,
                 block_width=7,

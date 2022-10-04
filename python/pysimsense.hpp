@@ -27,6 +27,5 @@ void buildSimsense(py::module &parent) {
                 py::array_t<float>, py::array_t<float>, py::array_t<float>,
                 float, float, float, bool
             >())
-        .def("compute", &DepthSensorEngine::compute)
-        .def("close", &DepthSensorEngine::close);
+        .def("compute", &DepthSensorEngine::compute);
 }
