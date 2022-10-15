@@ -89,6 +89,7 @@ def main():
 
     sensor_cuda = ActiveLightSensorCUDA(
         'sensor', renderer, scene, sensor_type='fakesense_j415')
+    sensor_cuda.depth_sensor.set_penalties(p1_penalty=8, p2_penalty=32)
 
     sensor_cuda.set_pose(
         Pose([-0.28, -0.28, 0.46], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
