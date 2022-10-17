@@ -96,7 +96,7 @@ RUN git clone --single-branch -b v5.2.3 --depth 1 https://github.com/assimp/assi
 RUN sh -c 'printf "@@ -198,3 +198,5 @@\n     mapping.zopen_file = (open_file_func)open;\n+#ifdef ZOPENDISK64\n     mapping.zopendisk_file = (opendisk_file_func)opendisk;\n+#endif\n     mapping.zread_file = (read_file_func)read;" | patch -ulbf /workspace/assimp/code/Common/ZipArchiveIOSystem.cpp'
 RUN mkdir /workspace/assimp/build
 WORKDIR /workspace/assimp/build
-RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j && make install
+RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j4 && make install
 
 RUN rpm -i http://mirror.ghettoforge.org/distributions/gf/el/7/gf/x86_64/gcc10-libstdc++-10.2.1-7.gf.el7.x86_64.rpm
 ENV LD_LIBRARY_PATH=/opt/gcc-10.2.1/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/opt/rh/devtoolset-10/root/usr/lib64/dyninst:/opt/rh/devtoolset-10/root/usr/lib/dyninst:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/workspace/1.2.189.0/x86_64/lib:/workspace/cuda/lib64:/workspace/cuda/lib64/stubs/ PCP_DIR=/opt/rh/devtoolset-10/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-10/root MANPATH=/opt/rh/devtoolset-10/root/usr/share/man: PATH=/opt/rh/devtoolset-10/root/usr/bin:/workspace/1.2.189.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -110,7 +110,9 @@ RUN echo "#!/opt/python/cp38-cp38/bin/python" > /usr/local/bin/auditwheel \
  && echo "    sys.exit(main())" >> /usr/local/bin/auditwheel
 
 WORKDIR /workspace
-COPY cuda-11.4 /workspace/cuda
+RUN yum install -y wget
+RUN wget https://developer.download.nvidia.com/compute/cuda/11.7.1/local_installers/cuda_11.7.1_515.65.01_linux.run \
+ && sh cuda_11.7.1_515.65.01_linux.run --silent --toolkit --toolkitpath=/workspace/cuda --override
 ENV CUDA_PATH=/workspace/cuda
-
-WORKDIR /workspace
+ENV PATH="/workspace/cuda/bin:$PATH"
+ENV LD_LIBRARY_PATH="/workspace/cuda/lib64:$LD_LIBRARY_PATH"

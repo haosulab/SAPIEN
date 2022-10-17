@@ -8,11 +8,16 @@ from ..core import (
     CameraEntity,
 )
 
-from .depth_processor import calc_main_depth_from_left_right_ir
+from .depth_processor import (
+    init_rectify_stereo,
+    calc_main_depth_from_left_right_ir,
+    DepthSensorCUDA
+)
 from .sensor_base import SensorEntity
 
 from typing import Optional, Tuple
 from copy import deepcopy as copy
+from warnings import warn
 import os
 
 import numpy as np
@@ -39,7 +44,6 @@ class ActiveLightSensor(SensorEntity):
                  ir_light_dim_factor : float = 0.05,
                  ):
         """
-
         :param sensor_name: Name of the sensor
         :param renderer:
         :param scene:
@@ -59,9 +63,11 @@ class ActiveLightSensor(SensorEntity):
 
         super().__init__()
 
-        from warnings import warn
         warn('Current implementation of ActiveLightSensor is incompatible with emissive objects.')
         warn('Current implementation of ActiveLightSensor is incompatible with environment maps.')
+        warn("This class implements OpenCV's pipeline when doing depth sensor simulation. " + \
+             "If GPU with CUDA is available, usage of ActiveLightSensorCUDA is highly suggested, " + \
+             "which will provide better performance and more realistic results.")
 
         self.name = sensor_name
         # super().set_name(sensor_name)
@@ -103,6 +109,17 @@ class ActiveLightSensor(SensorEntity):
         self._depth = None
         self._pc = None
 
+        # Initialize variables that depth sensor depends on
+        ex_l = self._pose2cv2ex(self.trans_pose_l)
+        ex_r = self._pose2cv2ex(self.trans_pose_r)
+        ex_main = self._pose2cv2ex(Pose())
+        self._l2r = ex_r @ np.linalg.inv(ex_l)
+        self._l2rgb = ex_main @ np.linalg.inv(ex_l)
+        self._map1, self._map2, self._q = init_rectify_stereo(
+            self.ir_w, self.ir_h, self.ir_intrinsic.astype(np.float),
+            self.ir_intrinsic.astype(np.float), self._l2r.astype(np.float)
+        )
+        
     def clear_cache(self):
         self._rgb = None
         self._ir_l = None
@@ -152,18 +169,16 @@ class ActiveLightSensor(SensorEntity):
             self._fetch('ir_l')
             self._fetch('ir_r')
 
-            ex_l = self._pose2cv2ex(self.trans_pose_l)
-            ex_r = self._pose2cv2ex(self.trans_pose_r)
-            ex_main = self._pose2cv2ex(Pose())
-
             depth = calc_main_depth_from_left_right_ir(
                 self._float2uint8(self._ir_l),
                 self._float2uint8(self._ir_r),
-                ex_l, ex_r, ex_main,
+                self._l2r, self._l2rgb,
                 self.ir_intrinsic, self.ir_intrinsic, self.rgb_intrinsic,
-                lr_consistency=False, main_cam_size=(self.rgb_w, self.rgb_h),
+                self._map1, self._map2, self._q,
+                main_cam_size=(self.rgb_w, self.rgb_h),
                 ndisp=128, use_census=True, register_depth=True, census_wsize=7,
-                use_noise=False)
+                use_noise=False
+            )
             depth[depth > self.max_depth] = 0
             depth[depth < self.min_depth] = 0
             self._depth = depth
@@ -306,3 +321,129 @@ class ActiveLightSensor(SensorEntity):
 
         world_points = np.matmul(r_inv, cam_points - t).transpose()
         return world_points
+
+
+class ActiveLightSensorCUDA(ActiveLightSensor):
+    def __init__(self,
+                 sensor_name: str,
+                 renderer: KuafuRenderer,
+                 scene: Scene,
+                 sensor_type: Optional[str] = 'fakesense_j415',
+                 rgb_resolution: Tuple[int, int] = None,
+                 ir_resolution: Tuple[int, int] = None,
+                 rgb_intrinsic: Optional[np.ndarray] = None,
+                 ir_intrinsic: Optional[np.ndarray] = None,
+                 trans_pose_l: Optional[Pose] = None,
+                 trans_pose_r: Optional[Pose] = None,
+                 light_pattern: Optional[str] = None,
+                 max_depth: float = 8.0,
+                 min_depth: float = 0.3,
+                 ir_ambient_strength: float = 0.002,
+                 ir_light_dim_factor : float = 0.05,
+                 ):
+        """
+        :param sensor_name: Name of the sensor
+        :param renderer:
+        :param scene:
+
+        :param sensor_type: If this is set, all the parameters below will be omitted.
+                            Supported sensor types: ['fakesense_j415']
+        :param rgb_resolution:
+        :param ir_resolution:
+        :param rgb_intrinsic:
+        :param ir_intrinsic:
+        :param trans_pose_l:
+        :param trans_pose_r:
+        :param light_pattern: Path to active light pattern file.
+                              Use rgb modality if set to None.
+        :param light_dim_factor: normal light strength set to ir_light_dim_factor * original
+        """
+
+        warn('Current implementation of ActiveLightSensor is incompatible with emissive objects.')
+        warn('Current implementation of ActiveLightSensor is incompatible with environment maps.')
+
+        self.name = sensor_name
+        # super().set_name(sensor_name)
+
+        self.renderer = renderer
+        self.scene = scene
+        self.mount = self.scene.create_actor_builder().build_kinematic(name=f'{sensor_name}_mount')
+
+        if sensor_type:
+            self._set_sensor_parameters(sensor_type)
+        else:
+            self.rgb_w, self.rgb_h = rgb_resolution
+            self.ir_w, self.ir_h = ir_resolution
+            self.rgb_intrinsic = rgb_intrinsic
+            self.ir_intrinsic = ir_intrinsic
+            self.trans_pose_l = trans_pose_l
+            self.trans_pose_r = trans_pose_r
+            self.light_pattern = light_pattern
+            self.max_depth = max_depth
+            self.min_depth = min_depth
+
+        self.pose = Pose()
+
+        self._create_cameras()
+        self.alight = self.scene.add_active_light(
+            pose=Pose([0, 0, 0]),
+            color=[0, 0, 0],
+            fov=1.57,                      # TODO: parameterize this
+            tex_path=self.light_pattern,
+        )
+        self.ir_ambient_strength = ir_ambient_strength
+        self.ir_light_dim_factor = ir_light_dim_factor
+
+        self.set_pose(Pose())
+
+        self._rgb = None
+        self._ir_l = None
+        self._ir_r = None
+        self._depth = None
+        self._pc = None
+
+        # Initialize variables that depth sensor depends on
+        ex_l = self._pose2cv2ex(self.trans_pose_l)
+        ex_r = self._pose2cv2ex(self.trans_pose_r)
+        ex_main = self._pose2cv2ex(Pose())
+        self._l2r = ex_r @ np.linalg.inv(ex_l)
+        self._l2rgb = ex_main @ np.linalg.inv(ex_l)
+        self._map1, self._map2, self._q = init_rectify_stereo(
+            self.ir_w, self.ir_h, self.ir_intrinsic.astype(np.float),
+            self.ir_intrinsic.astype(np.float), self._l2r.astype(np.float)
+        )
+
+        self.depth_sensor = DepthSensorCUDA(
+                (self.ir_w, self.ir_h),
+                self.ir_intrinsic.astype(np.float),
+                self.ir_intrinsic.astype(np.float),
+                self._l2r.astype(np.float),
+                (self.rgb_w, self.rgb_h),
+                self.rgb_intrinsic.astype(np.float),
+                self._l2rgb.astype(np.float),
+                self.min_depth,
+                self.max_depth,
+                rectified=True,
+                census_width=7,
+                census_height=7,
+                block_width=7,
+                block_height=7,
+                uniqueness_ratio=15,
+                depth_dilation=True
+            )
+    
+    def get_depth(self):
+        if self._depth is None:
+            self._fetch('ir_l')
+            self._fetch('ir_r')
+
+            depth = self.depth_sensor.compute(
+                self._float2uint8(self._ir_l),
+                self._float2uint8(self._ir_r)
+            )
+            self._depth = depth
+
+        return copy(self._depth)
+
+    def close(self):
+        self.depth_sensor.close()
