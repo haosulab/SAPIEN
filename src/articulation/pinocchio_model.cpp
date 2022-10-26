@@ -1,4 +1,3 @@
-#ifdef _USE_PINOCCHIO
 #include "sapien/articulation/pinocchio_model.h"
 #include <pinocchio/algorithm/aba.hpp>
 #include <pinocchio/algorithm/crba.hpp>
@@ -269,5 +268,3 @@ PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform co
 }
 
 } // namespace sapien
-
-#endif

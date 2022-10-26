@@ -47,11 +47,14 @@ class CMakeBuild(build_ext):
             cfg = 'Release'
         build_args = ['--config', cfg]
         if args.profile:
-            cmake_args += ['-DSVULKAN2_PROFILE=ON']
             cmake_args += ['-DSAPIEN_PROFILE=ON']
+        else:
+            cmake_args += ['-DSAPIEN_PROFILE=OFF']
 
-        if platform.system() != 'Darwin':
-            cmake_args += ['-DSAPIEN_DLPACK_INTEROP=ON', '-DSVULKAN2_CUDA_INTEROP=ON']
+        if os.environ.get("CUDA_PATH") is not None:
+            cmake_args += ['-DSAPIEN_CUDA=ON']
+        else:
+            cmake_args += ['-DSAPIEN_CUDA=OFF']
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
         build_args += ['--', '-j8']

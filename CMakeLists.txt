@@ -1,86 +1,75 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES CXX)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -Wnon-virtual-dtor -fsized-deallocation -Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -Wnon-virtual-dtor  -fsized-deallocation -Wno-deprecated-declarations")
-
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Do not try to build shared libraries")
-
-set(SAPIEN_PROFILE FALSE CACHE BOOL "Whether to use Profiler")
-set(SAPIEN_DLPACK_INTEROP TRUE CACHE BOOL "Whether to use render to tensor")
-set(BUILD_WITH_PINOCCHIO_SUPPORT TRUE CACHE BOOL "Use Pinocchio kinematics dynamics library")
-set(BUILD_DEBUG_VIEWER FALSE CACHE BOOL "For C++ debug only")
-
-add_definitions(-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC)
-
-if (${SAPIEN_DLPACK_INTEROP})
-    set(SVULKAN2_CUDA_INTEROP TRUE)
-endif()
-
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
-endif ()
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_DEBUG_POSTFIX "")
-set(OpenGL_GL_PREFERENCE "LEGACY")
+
+option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
+option(SAPIEN_PROFILE "Build SAPIEN with easy_profiler" OFF)
+option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OFF)
+option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, Kuafu denoiser, and simsense" ON)
 
 if (${SAPIEN_PROFILE})
-    add_definitions(-DBUILD_WITH_EASY_PROFILER)
-    set(EASY_PROFILER_LIBRARY easy_profiler)
     message("-- Profiler On")
+    option(SVULKAN2_PROFILE "" ON)
+    add_definitions(-DBUILD_WITH_EASY_PROFILER)
+    find_package(easy_profiler REQUIRED)
 else ()
     message("-- Profiler Off")
+    option(SVULKAN2_PROFILE "" OFF)
 endif ()
+
+
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
+endif ()
+
+if (${SAPIEN_CUDA})
+    include_directories("3rd_party/dlpack/include")
+    include_directories("$ENV{CUDA_PATH}/include")
+    option(SVULKAN2_CUDA_INTEROP "" ON)
+    option(KUAFU_OPTIX_DENOISER "" ON)
+    add_definitions(-DSAPIEN_DLPACK)
+else()
+    option(SVULKAN2_CUDA_INTEROP "" OFF)
+    option(KUAFU_OPTIX_DENOISER "" OFF)
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("-- DEBUG Build")
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
     add_definitions(-DVK_VALIDATION)
     add_definitions(-DVK_CORE_LOGGING)
+    add_definitions(-D_DEBUG)
 else ()
     message("-- RELEASE Build")
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
+    add_definitions(-DNDEBUG)
 endif ()
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     message("Complie source code on Mac OSX")
-    add_definitions(-D_USE_MACOSX)
     set(MACOSX TRUE)
     set(CMAKE_MACOSX_RPATH OFF CACHE BOOL "Do not use rpath for MacOS")
 endif ()
+
+add_definitions(-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC)
 
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(assimp REQUIRED)
+# Pinocchio uses its own FindCppAD but does not provide it
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppAD")
+find_package(Boost COMPONENTS system REQUIRED)
+find_package(pinocchio REQUIRED)
 
-include_directories(
-    "include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/pxshared/include"
-    "src/renderer"
-    )
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked")
-else ()
-    link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release")
-endif ()
-
-
-if (${BUILD_WITH_PINOCCHIO_SUPPORT})
-    # Pinocchio uses its own FindCppAD but does not provide it
-    set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CppAD")
-
-    find_package(Boost COMPONENTS system REQUIRED)
-    find_package(pinocchio REQUIRED)
-    set(PINOCCHIO_LIBRARY ${pinocchio_LIBRARIES} ${Boost_LIBRARIES} urdfdom_model)
-    add_definitions(-DPINOCCHIO_URDFDOM_TYPEDEF_SHARED_PTR)
-    add_definitions(-DPINOCCHIO_WITH_URDFDOM)
-    add_definitions(-D_USE_PINOCCHIO)
-endif ()
+set(PINOCCHIO_LIBRARY ${pinocchio_LIBRARIES} ${Boost_LIBRARIES} urdfdom_model)
+add_definitions(-DPINOCCHIO_URDFDOM_TYPEDEF_SHARED_PTR)
+add_definitions(-DPINOCCHIO_WITH_URDFDOM)
 
 if (${BUILD_DEBUG_VIEWER})
     add_definitions(-D_DEBUG_VIEWER)
@@ -89,17 +78,14 @@ endif ()
 ## include headers inside the project
 include_directories("src" "src/renderer" "/usr/include/eigen3" "/usr/local/include/eigen3")
 
-if (MACOSX)
-    include_directories("/usr/local/include" "/usr/local/opt/glew/include"
-            "/usr/local/include/eigen3")
-    link_directories(/usr/local/lib/)
-else ()
-    include_directories("3rd_party/dlpack/include")
-    add_definitions(-DCUDA_INTEROP)
-    include_directories("$ENV{CUDA_PATH}/include")
-endif ()
+include_directories(
+    "include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/pxshared/include"
+    "src/renderer"
+    )
 
-## Link directory outside the project
+# Link directory outside the project
 if (NOT MACOSX)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/checked")
@@ -107,61 +93,42 @@ if (NOT MACOSX)
         link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release")
     endif ()
 else ()
+    include_directories("/usr/local/include" "/usr/local/include/eigen3")
     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/mac.x86_64/release")
-    link_directories("/usr/local/opt/glm/lib" "/usr/local/opt/glew/lib"
-            "/usr/local/lib")
+    link_directories("/usr/local/opt/glm/lib" "/usr/local/opt/glew/lib" "/usr/local/lib")
 endif ()
 
-# set(ON_SCREEN TRUE CACHE BOOL "Vulkan renderer with on screen rendering")
-# if (${ON_SCREEN})
-add_definitions(-DON_SCREEN)
-# endif()
-
-set(OPTIX_HOME "NOT FOUND" CACHE FILEPATH "Home to OptiX")
-if (EXISTS ${OPTIX_HOME})
-    include_directories("${OPTIX_HOME}/include")
-    link_directories("${OPTIX_HOME}/lib64")
-    set(OPTIX_LIBRARY optix)
-    add_definitions(-D_USE_OPTIX)
-endif ()
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_definitions(-D_DEBUG)
-    # add_definitions(-D_PVD)
-    add_definitions(-DPVD_HOST="192.168.0.110")
-else ()
-    add_definitions(-DNDEBUG)
-endif ()
+# PVD currently not used add_definitions(-DPVD_HOST="192.168.0.110")
 
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
-include_directories("3rd_party/pybind11/include")
-
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
+add_subdirectory("3rd_party/kuafu" EXCLUDE_FROM_ALL)
+
+if (${SAPIEN_CUDA})
+    include_directories("3rd_party/simsense/include")
+    add_subdirectory("3rd_party/simsense" EXCLUDE_FROM_ALL)
+    set(SIMSENSE_LIBRARY simsense)
+    add_definitions(-DSAPIEN_SIMSENSE)
+endif ()
+
+include_directories("3rd_party/pybind11/include")
 include_directories("3rd_party/sapien-vulkan-2/include")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
 include_directories("$ENV{VULKAN_SDK}/include")
-link_directories("$ENV{VULKAN_SDK}/lib")
-
-add_subdirectory("3rd_party/kuafu" EXCLUDE_FROM_ALL)
 include_directories("3rd_party/kuafu/include")
 include_directories("3rd_party/kuafu/include/external")
 include_directories("3rd_party/kuafu/3rd_party/SDL/include")
 include_directories("3rd_party/kuafu/3rd_party/KTX-Software/include")
 include_directories("3rd_party/kuafu/3rd_party/OptiX7SDK/include")
 
-add_subdirectory("3rd_party/simsense" EXCLUDE_FROM_ALL)
-include_directories("3rd_party/simsense/include")
+link_directories("$ENV{VULKAN_SDK}/lib")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp")
 add_library(sapien SHARED ${PROJECT_SRC})
-
-if (EXISTS ${OPTIX_HOME})
-    add_dependencies(sapien ptx_dir)
-endif ()
 
 if (MACOSX)
     target_link_libraries(sapien
@@ -182,7 +149,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt simsense)
+            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt ${SIMSENSE_LIBRARY})
 endif ()
 
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

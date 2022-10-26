@@ -1,6 +1,11 @@
 from .pysapien import *
 from .pysapien import renderer
-from .pysapien import dlpack
+
+try:
+    from .pysapien import dlpack
+except ImportError:
+    pass
+
 import pkg_resources
 import os
 import sys
@@ -12,10 +17,15 @@ def ensure_icd():
 
     # if VK_ICD_FILENAMES is not provided, we try to provide it
     if not icd_filenames:
-        icd_filenames = "{0}/intel_icd.x86_64.json:{0}/nvidia_icd.json:{0}/radeon_icd.x86_64.json:{0}/MoltenVK_icd.json:{1}".format(
-            __VULKAN_ICD_ROOT, icd_filenames
-        )
-        os.environ["VK_ICD_FILENAMES"] = icd_filenames
+        icd_dir = "/usr/share/vulkan/icd.d"
+        if os.path.isdir(icd_dir):
+            files = os.listdir("/usr/share/vulkan/icd.d")
+            os.environ["VK_ICD_FILENAMES"] = ":".join([os.path.join(icd_dir, f) for f in files])
+
+        # icd_filenames = "{0}/intel_icd.x86_64.json:{0}/nvidia_icd.json:{0}/radeon_icd.x86_64.json:{0}/MoltenVK_icd.json:{1}".format(
+        #     __VULKAN_ICD_ROOT, icd_filenames
+        # )
+        # os.environ["VK_ICD_FILENAMES"] = icd_filenames
 
 
 def __enable_vulkan():

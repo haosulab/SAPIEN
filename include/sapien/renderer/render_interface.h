@@ -1,9 +1,9 @@
 #pragma once
+#include "dlpack.hpp"
 #include "sapien/awaitable.hpp"
 #include "sapien/thread_pool.hpp"
 #include <PxPhysicsAPI.h>
 #include <array>
-#include <dlpack/dlpack.h>
 #include <eigen3/Eigen/Eigen>
 #include <foundation/PxTransform.h>
 #include <functional>
@@ -281,16 +281,21 @@ public:
   virtual std::vector<float> getFloatImage(std::string const &name) = 0;
   virtual std::vector<uint32_t> getUintImage(std::string const &name) = 0;
 
+#ifdef SAPIEN_DLPACK
   // return new DLManagedTensor
   virtual DLManagedTensor *getDLImage(std::string const &name) {
     throw std::runtime_error("dlpack is not implemented in this renderer");
   };
+#endif
 
   virtual void takePicture() = 0;
+
+#ifdef SAPIEN_DLPACK
   virtual std::shared_ptr<IAwaitable<std::vector<DLManagedTensor *>>>
   takePictureAndGetDLTensorsAsync(ThreadPool &thread, std::vector<std::string> const &names) {
     throw std::runtime_error("async take picture is not implemented");
   };
+#endif
 };
 
 class ILight {

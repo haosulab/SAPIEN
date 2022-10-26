@@ -1,3 +1,5 @@
+#ifdef SAPIEN_DLPACK
+
 #pragma once
 #include <dlpack/dlpack.h>
 #include <memory>
@@ -34,3 +36,5 @@ DLManagedTensor *dl_wrapper(std::shared_ptr<T> container, void *cudaPtr, int cud
 
 } // namespace Renderer
 } // namespace sapien
+
+#endif

@@ -5,7 +5,8 @@
 #include "sapien/articulation/sapien_link.h"
 #include "sapien/sapien_scene.h"
 #include <eigen3/Eigen/Eigenvalues>
-#include <experimental/filesystem>
+#include <filesystem>
+#include <optional>
 
 namespace sapien {
 namespace URDF {

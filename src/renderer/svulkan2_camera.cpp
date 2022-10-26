@@ -44,6 +44,7 @@ void SVulkan2Camera::takePicture() {
   mRenderer->render(*mCamera, {}, {}, {}, mSemaphore.get(), mFrameCounter);
 }
 
+#ifdef SAPIEN_DLPACK
 std::shared_ptr<IAwaitable<std::vector<DLManagedTensor *>>>
 SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
                                                 std::vector<std::string> const &names) {
@@ -117,6 +118,7 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
       },
       mSemaphore.get(), mFrameCounter, context->getDevice());
 }
+#endif
 
 void SVulkan2Camera::waitForRender() {
   auto context = mScene->getParentRenderer()->mContext;
@@ -141,6 +143,7 @@ std::vector<uint32_t> SVulkan2Camera::getUintImage(std::string const &textureNam
   return std::get<0>(mRenderer->download<uint32_t>(textureName));
 }
 
+#ifdef SAPIEN_DLPACK
 DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   waitForRender();
 
@@ -189,6 +192,7 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   return dl_wrapper(buffer, buffer->getCudaPtr(), buffer->getCudaDeviceId(), sizes2,
                     {dtype, 32, 1});
 }
+#endif
 
 glm::mat4 SVulkan2Camera::getModelMatrix() const { return mCamera->computeWorldModelMatrix(); }
 glm::mat4 SVulkan2Camera::getProjectionMatrix() const { return mCamera->getProjectionMatrix(); }

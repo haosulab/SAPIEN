@@ -1,4 +1,3 @@
-#ifdef _USE_PINOCCHIO
 #pragma once
 
 #include <PxPhysicsAPI.h>
@@ -115,5 +114,3 @@ public:
 };
 
 }; // namespace sapien
-
-#endif

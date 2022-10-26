@@ -24,6 +24,7 @@ void SVulkan2PointBody::setAttribute(
       std::string(name), std::vector<float>{value.data(), value.data() + value.size()});
 }
 
+#ifdef SAPIEN_DLPACK
 DLManagedTensor *SVulkan2PointBody::getDLVertices() {
   auto &buffer = mObject->getPointSet()->getVertexBuffer();
   void *ptr = buffer.getCudaPtr();
@@ -36,6 +37,7 @@ DLManagedTensor *SVulkan2PointBody::getDLVertices() {
                                                     {vertexCount, vertexSize / 4},
                                                     {DLDataTypeCode::kDLFloat, 32, 1});
 }
+#endif
 
 } // namespace Renderer
 } // namespace sapien

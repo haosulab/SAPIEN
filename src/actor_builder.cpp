@@ -454,7 +454,7 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
     return;
   }
   for (auto &r : mVisualRecord) {
-    Renderer::IPxrRigidbody *body;
+    Renderer::IPxrRigidbody *body{};
     switch (r.type) {
     case VisualRecord::Type::Box:
       body = rScene->addRigidbody(PxGeometryType::eBOX, r.scale, r.material);

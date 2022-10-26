@@ -9,9 +9,7 @@
 #include "sapien/articulation/sapien_link.h"
 #include "sapien/sapien_scene.h"
 
-#ifdef _USE_PINOCCHIO
 #include "sapien/articulation/pinocchio_model.h"
-#endif
 
 namespace sapien {
 
@@ -229,7 +227,7 @@ static std::string exportLinkURDF(SLinkBase *link, physx::PxTransform extraTrans
        << "\" />";
 
     ss << "<geometry>";
-    
+
     switch (mPxShape->getGeometryType()) {
     case PxGeometryType::eBOX: {
       PxBoxGeometry g;
@@ -363,7 +361,6 @@ std::string SArticulationBase::exportTreeURDF(SLinkBase *link, physx::PxTransfor
   return ss.str();
 }
 
-#ifdef _USE_PINOCCHIO
 std::unique_ptr<PinocchioModel> SArticulationBase::createPinocchioModel() {
   PxVec3 gravity = getScene()->getPxScene()->getGravity();
   auto pm = PinocchioModel::fromURDFXML(exportKinematicsChainAsURDF(true),
@@ -382,6 +379,5 @@ std::unique_ptr<PinocchioModel> SArticulationBase::createPinocchioModel() {
   pm->setLinkOrder(linkNames);
   return pm;
 }
-#endif
 
 } // namespace sapien

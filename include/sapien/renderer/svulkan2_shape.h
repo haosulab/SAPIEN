@@ -25,7 +25,10 @@ public:
   void setBitangents(std::vector<float> const &) override;
   void setIndices(std::vector<uint32_t> const &) override;
 
+#ifdef SAPIEN_DLPACK
   DLManagedTensor *getDLVertices();
+#endif
+
 
   inline std::shared_ptr<svulkan2::resource::SVMesh> getMesh() const { return mMesh; }
 };
