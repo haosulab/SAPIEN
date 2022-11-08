@@ -5,7 +5,6 @@ from sapien.core import Pose
 from sapien.sensor import ActiveLightSensorCUDA
 import PIL.Image as im
 import matplotlib.pyplot as plt
-import open3d as o3d
 import time
 
 def main():
@@ -89,7 +88,8 @@ def main():
 
     sensor_cuda = ActiveLightSensorCUDA(
         'sensor', renderer, scene, sensor_type='d415')
-    sensor_cuda.depth_sensor.set_penalties(p1_penalty=8, p2_penalty=32)
+    sensor_cuda.depth_sensor.set_penalties(p1_penalty=7, p2_penalty=86)
+    sensor_cuda.depth_sensor.set_uniqueness_ratio(15)
 
     sensor_cuda.set_pose(
         Pose([-0.28, -0.28, 0.46], [0.8876263, -0.135299, 0.3266407, 0.2951603]))

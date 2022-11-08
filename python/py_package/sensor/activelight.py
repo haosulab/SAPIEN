@@ -340,6 +340,16 @@ class ActiveLightSensorCUDA(ActiveLightSensor):
                  min_depth: float = 0.3,
                  ir_ambient_strength: float = 0.002,
                  ir_light_dim_factor : float = 0.05,
+                 census_width: int = None,
+                 census_height: int = None,
+                 max_disp: int = None,
+                 block_width: int = None,
+                 block_height: int = None,
+                 p1_penalty: int = None,
+                 p2_penalty: int = None,
+                 uniqueness_ratio: int = None,
+                 lr_max_diff: int = None,
+                 median_filter_size: int = None
                  ):
         """
         :param sensor_name: Name of the sensor
@@ -357,6 +367,19 @@ class ActiveLightSensorCUDA(ActiveLightSensor):
         :param light_pattern: Path to active light pattern file.
                               Use rgb modality if set to None.
         :param light_dim_factor: normal light strength set to ir_light_dim_factor * original
+        :param census_width: Width of the center-symmetric census transform window. This must be an odd number.
+        :param census_height: Height of the center-symmetric census transform window. This must be an odd number.
+        :param max_disp: Maximum disparity search space (non-inclusive) for stereo matching.
+        :param block_width: Width of the matched block. This must be an odd number.
+        :param block_height: Height of the matched block. This must be an odd number.
+        :param p1_penalty: P1 penalty for semi-global matching algorithm. It is the penalty on the disparity change by plus or minus
+                           1 between neighboring pixels.
+        :param p2_penalty: P2 penalty for semi-global matching algorithm. It is the penalty on the disparity change by more than 1
+                           between neighboring pixels.
+        :param uniqueness_ratio: Margin in percentage by which the minimum computed cost should win the second best (not considering
+                                 best match's adjacent pixels) cost to consider the found match valid.
+        :param lr_max_diff: Maximum allowed difference in the left-right consistency check. Set it to 255 will disable the check.
+        :param median_filter_size: Size of the median filter. Choices are 1, 3, 5, 7. When set to 1 the median filter is turned off.
         """
 
         warn('Current implementation of ActiveLightSensor is incompatible with emissive objects.')
@@ -381,6 +404,16 @@ class ActiveLightSensorCUDA(ActiveLightSensor):
             self.light_pattern = light_pattern
             self.max_depth = max_depth
             self.min_depth = min_depth
+            self.census_width = census_width
+            self.census_height = census_height
+            self.max_disp = max_disp
+            self.block_width = block_width
+            self.block_height = block_height
+            self.p1_penalty = p1_penalty
+            self.p2_penalty = p2_penalty
+            self.uniqueness_ratio = uniqueness_ratio
+            self.lr_max_diff = lr_max_diff
+            self.median_filter_size = median_filter_size
 
         self.pose = Pose()
 
@@ -424,11 +457,16 @@ class ActiveLightSensorCUDA(ActiveLightSensor):
                 self.min_depth,
                 self.max_depth,
                 rectified=True,
-                census_width=7,
-                census_height=7,
-                block_width=7,
-                block_height=7,
-                uniqueness_ratio=15,
+                census_width=self.census_width,
+                census_height=self.census_height,
+                max_disp=self.max_disp,
+                block_width=self.block_width,
+                block_height=self.block_height,
+                p1_penalty=self.p1_penalty,
+                p2_penalty=self.p2_penalty,
+                uniqueness_ratio=self.uniqueness_ratio,
+                lr_max_diff=self.lr_max_diff,
+                median_filter_size=self.median_filter_size,
                 depth_dilation=True
             )
     
@@ -444,3 +482,21 @@ class ActiveLightSensorCUDA(ActiveLightSensor):
             self._depth = depth
 
         return copy(self._depth)
+
+    def _set_sensor_parameters(self, sensor_type):
+        super()._set_sensor_parameters(sensor_type)
+
+        # Stereo matching parameters
+        if sensor_type == 'd415':
+            self.census_width = 7
+            self.census_height = 7
+            self.max_disp = 128
+            self.block_width = 7
+            self.block_height = 7
+            self.p1_penalty = 8
+            self.p2_penalty = 32
+            self.uniqueness_ratio = 5
+            self.lr_max_diff = 1
+            self.median_filter_size = 3
+        else:
+            assert False, f"Unsupported sensor type: {sensor_type}"
