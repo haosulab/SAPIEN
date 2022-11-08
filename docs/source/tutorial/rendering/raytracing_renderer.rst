@@ -163,7 +163,7 @@ After called `take_picture`. We can download RGB image, IR image, depth and poin
 
     Simulated depth image from `ActiveLightSensor`.
 
-GPU-accelerated Sensor Simulation in Kuafu with SimSense
+GPU-accelerated Sensor Simulation with SimSense
 ------------------------------------
 .. note::
     You are required to have an NVIDIA GPU to use SimSense.
