@@ -218,6 +218,25 @@ class ActiveLightSensor(SensorEntity):
             self.light_pattern = os.path.join(os.path.dirname(__file__), 'assets/patterns/fakesense_j415.png')
             self.max_depth = 10.0
             self.min_depth = 0.2
+        elif sensor_type == 'fakesense_j415':
+            warn('sensor_type "fakesense_j415" will be deprecated in the future. Please use the new name "d415".')
+            self.rgb_w, self.rgb_h = (1920, 1080)
+            self.ir_w, self.ir_h = (1280, 720)
+            self.rgb_intrinsic = np.array([
+                [1380.,    0., 960.],
+                [0.,    1380., 540.],
+                [0.,       0.,   1.]
+            ])
+            self.ir_intrinsic = np.array([
+                [920.,   0., 640.],
+                [0.,   920., 360.],
+                [0.,     0.,   1.]
+            ])
+            self.trans_pose_l = Pose([0, -0.0175, 0])
+            self.trans_pose_r = Pose([0, -0.0720, 0])
+            self.light_pattern = os.path.join(os.path.dirname(__file__), 'assets/patterns/fakesense_j415.png')
+            self.max_depth = 10.0
+            self.min_depth = 0.2
         else:
             assert False, f"Unsupported sensor type: {sensor_type}"
 
