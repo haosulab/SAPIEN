@@ -98,7 +98,7 @@ def depth_post_processing(depth: np.ndarray, ksize: int = 5) -> np.ndarray:
     return depth
 
 
-def get_census(img, wsize=7):
+def get_census(img: np.ndarray, wsize:int = 7) -> np.ndarray:
     h, w = img.shape
     assert wsize % 2 == 1
 

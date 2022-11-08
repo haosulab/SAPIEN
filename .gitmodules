@@ -15,5 +15,5 @@
 	url = git@github.com:jetd1/kuafu.git
 [submodule "3rd_party/simsense"]
 	path = 3rd_party/simsense
-	url = https://github.com/angli66/simsense.git
+	url = git@github.com:angli66/simsense.git
 	branch = sapien

@@ -30,7 +30,7 @@ class ActiveLightSensor(SensorEntity):
                  sensor_name: str,
                  renderer: KuafuRenderer,
                  scene: Scene,
-                 sensor_type: Optional[str] = 'fakesense_j415',
+                 sensor_type: Optional[str] = 'd415',
                  rgb_resolution: Tuple[int, int] = None,
                  ir_resolution: Tuple[int, int] = None,
                  rgb_intrinsic: Optional[np.ndarray] = None,
@@ -49,7 +49,7 @@ class ActiveLightSensor(SensorEntity):
         :param scene:
 
         :param sensor_type: If this is set, all the parameters below will be omitted.
-                            Supported sensor types: ['fakesense_j415']
+                            Supported sensor types: ['d415']
         :param rgb_resolution:
         :param ir_resolution:
         :param rgb_intrinsic:
@@ -200,7 +200,7 @@ class ActiveLightSensor(SensorEntity):
         return xyz
 
     def _set_sensor_parameters(self, sensor_type):
-        if sensor_type == 'fakesense_j415':
+        if sensor_type == 'd415':
             self.rgb_w, self.rgb_h = (1920, 1080)
             self.ir_w, self.ir_h = (1280, 720)
             self.rgb_intrinsic = np.array([
@@ -328,7 +328,7 @@ class ActiveLightSensorCUDA(ActiveLightSensor):
                  sensor_name: str,
                  renderer: KuafuRenderer,
                  scene: Scene,
-                 sensor_type: Optional[str] = 'fakesense_j415',
+                 sensor_type: Optional[str] = 'd415',
                  rgb_resolution: Tuple[int, int] = None,
                  ir_resolution: Tuple[int, int] = None,
                  rgb_intrinsic: Optional[np.ndarray] = None,
@@ -347,7 +347,7 @@ class ActiveLightSensorCUDA(ActiveLightSensor):
         :param scene:
 
         :param sensor_type: If this is set, all the parameters below will be omitted.
-                            Supported sensor types: ['fakesense_j415']
+                            Supported sensor types: ['d415']
         :param rgb_resolution:
         :param ir_resolution:
         :param rgb_intrinsic:
@@ -444,6 +444,3 @@ class ActiveLightSensorCUDA(ActiveLightSensor):
             self._depth = depth
 
         return copy(self._depth)
-
-    def close(self):
-        self.depth_sensor.close()

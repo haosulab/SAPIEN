@@ -93,7 +93,7 @@ def main():
     box.set_pose(Pose(p=[0.15, -0.25, 0.1], q=transforms3d.euler.euler2quat(0, 0, -1)))
 
     sensor = ActiveLightSensor(
-        'sensor', renderer, scene, sensor_type='fakesense_j415')
+        'sensor', renderer, scene, sensor_type='d415')
 
     sensor.set_pose(
         Pose([-0.28, -0.28, 0.46], [0.8876263, -0.135299, 0.3266407, 0.2951603]))

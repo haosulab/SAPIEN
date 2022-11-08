@@ -88,7 +88,7 @@ def main():
     scene.add_directional_light([0, 0.5, -1], color=[3.0, 3.0, 3.0])
 
     sensor_cuda = ActiveLightSensorCUDA(
-        'sensor', renderer, scene, sensor_type='fakesense_j415')
+        'sensor', renderer, scene, sensor_type='d415')
     sensor_cuda.depth_sensor.set_penalties(p1_penalty=8, p2_penalty=32)
 
     sensor_cuda.set_pose(
