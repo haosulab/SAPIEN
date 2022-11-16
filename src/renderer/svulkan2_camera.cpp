@@ -77,7 +77,7 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
             VMA_MEMORY_USAGE_GPU_ONLY);
       }
       auto buffer = mImageBuffers.at(name);
-      target->getImage().recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), size,
+      target->getImage().recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0, size,
                                             {0, 0, 0}, extent);
     }
     mCommandBuffer->end();
@@ -167,7 +167,7 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
         VMA_MEMORY_USAGE_GPU_ONLY);
   }
   auto buffer = mImageBuffers.at(name);
-  target->getImage().recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), size, {0, 0, 0},
+  target->getImage().recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0, size, {0, 0, 0},
                                         extent);
   std::vector<long> sizes2 = {extent.height, extent.width};
   uint8_t dtype;

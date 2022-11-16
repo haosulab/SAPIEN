@@ -105,13 +105,6 @@ add_subdirectory("3rd_party/tinyxml2")
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
 add_subdirectory("3rd_party/kuafu" EXCLUDE_FROM_ALL)
 
-if (${SAPIEN_CUDA})
-    include_directories("3rd_party/simsense/include")
-    add_subdirectory("3rd_party/simsense" EXCLUDE_FROM_ALL)
-    set(SIMSENSE_LIBRARY simsense)
-    add_definitions(-DSAPIEN_SIMSENSE)
-endif ()
-
 include_directories("3rd_party/pybind11/include")
 include_directories("3rd_party/sapien-vulkan-2/include")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
@@ -124,6 +117,13 @@ include_directories("3rd_party/kuafu/include/external")
 include_directories("3rd_party/kuafu/3rd_party/SDL/include")
 include_directories("3rd_party/kuafu/3rd_party/KTX-Software/include")
 include_directories("3rd_party/kuafu/3rd_party/OptiX7SDK/include")
+
+if (${SAPIEN_CUDA})
+    include_directories("3rd_party/simsense/include")
+    add_subdirectory("3rd_party/simsense" EXCLUDE_FROM_ALL)
+    set(SIMSENSE_LIBRARY simsense)
+    add_definitions(-DSAPIEN_SIMSENSE)
+endif ()
 
 link_directories("$ENV{VULKAN_SDK}/lib")
 
