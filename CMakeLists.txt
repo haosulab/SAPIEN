@@ -32,6 +32,7 @@ if (${SAPIEN_CUDA})
     include_directories("$ENV{CUDA_PATH}/include")
     option(SVULKAN2_CUDA_INTEROP "" ON)
     option(KUAFU_OPTIX_DENOISER "" ON)
+    add_definitions(-DSVULKAN2_CUDA_INTEROP)
     add_definitions(-DSAPIEN_DLPACK)
 else()
     option(SVULKAN2_CUDA_INTEROP "" OFF)
@@ -58,8 +59,6 @@ endif ()
 
 add_definitions(-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC)
 
-find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(assimp REQUIRED)
 # Pinocchio uses its own FindCppAD but does not provide it
