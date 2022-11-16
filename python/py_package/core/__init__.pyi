@@ -79,6 +79,7 @@ import os
 import pkg_resources
 import sapien.core.pysapien.dlpack
 import sapien.core.pysapien.renderer
+import sapien.core.pysapien.simsense
 import sys
 
 __all__ = [
@@ -163,6 +164,7 @@ __all__ = [
     "pkg_resources",
     "pysapien",
     "renderer",
+    "simsense",
     "sys"
 ]
 
