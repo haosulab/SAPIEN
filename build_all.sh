@@ -29,6 +29,9 @@ function build_manylinux14_wheel() {
   elif [ "$PY_VERSION" -eq 39 ]; then
       PY_DOT=3.9
       EXT=""
+  elif [ "$PY_VERSION" -eq 310 ]; then
+      PY_DOT=3.10
+      EXT=""
   elif [ "$PY_VERSION" -eq 311 ]; then
       PY_DOT=3.11
       EXT=""
