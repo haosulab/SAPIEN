@@ -82,7 +82,8 @@ __all__ = [
     "VulkanWindow",
     "add_profiler_event",
     "dlpack",
-    "renderer"
+    "renderer",
+    "simsense"
 ]
 
 

@@ -7,7 +7,7 @@ Getting Started with Robot
 
 .. note::
    Please first complete :ref:`basic_index` before continuing this tutorial.
-   The assets (robot) used in this tutorial can be found `here <https://github.com/haosulab/SAPIEN-Release/tree/master/examples/assets>`_.
+   The assets (robot) used in this tutorial can be found `here <https://github.com/haosulab/SAPIEN-Release/tree/master/examples/assets>`__.
 
 In this tutorial, you will learn the following:
 
@@ -33,7 +33,7 @@ Load a robot URDF
 Now, you can create a ``URDFLoader`` to load the URDF XML of Kinova Jaco2 arm.
 `URDF XML <http://wiki.ros.org/urdf/XML>`_ describes a robot.
 Usually, URDF files are provided by manufacturers.
-For example, the URDF XML of Kinova Jaco2 arm can be found `here <https://github.com/Kinovarobotics/kinova-ros>`_.
+For example, the URDF XML of Kinova Jaco2 arm can be found `here <https://github.com/Kinovarobotics/kinova-ros>`__.
 
 .. literalinclude:: ../../../../examples/robotics/basic_robot.py
    :dedent: 0

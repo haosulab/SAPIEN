@@ -54,8 +54,10 @@ public:
 
   void takePicture();
 
+#ifdef SAPIEN_DLPACK
   std::shared_ptr<IAwaitable<std::vector<DLManagedTensor *>>>
   takePictureAndGetDLTensorsAsync(std::vector<std::string> const &names);
+#endif
 
   Renderer::ICamera *getRendererCamera() const { return mCamera; }
 

@@ -34,6 +34,7 @@ void SVulkan2Mesh::setBitangents(std::vector<float> const &bitangents) {
 }
 void SVulkan2Mesh::setIndices(std::vector<uint32_t> const &indices) { mMesh->setIndices(indices); }
 
+#ifdef SAPIEN_DLPACK
 DLManagedTensor *SVulkan2Mesh::getDLVertices() {
   auto &buffer = mMesh->getVertexBuffer();
   void *ptr = buffer.getCudaPtr();
@@ -45,6 +46,7 @@ DLManagedTensor *SVulkan2Mesh::getDLVertices() {
   return dl_wrapper<svulkan2::resource::SVMesh>(mMesh, ptr, id, {vertexCount, vertexSize / 4},
                                                 {DLDataTypeCode::kDLFloat, 32, 1});
 }
+#endif
 
 std::shared_ptr<IRenderMesh> SVulkan2RenderShape::getGeometry() const {
   return std::make_shared<SVulkan2Mesh>(mShape->mesh);

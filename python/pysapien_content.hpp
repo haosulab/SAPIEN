@@ -38,11 +38,8 @@
 #include "sapien/renderer/svulkan2_shape.h"
 #include "sapien/renderer/svulkan2_window.h"
 
-#include "sapien/profiler.hpp"
-
-#ifdef _USE_PINOCCHIO
 #include "sapien/articulation/pinocchio_model.h"
-#endif
+#include "sapien/profiler.hpp"
 
 #include "sapien/utils/pose.hpp"
 
@@ -60,6 +57,7 @@ public:
   }
 };
 
+#ifdef SAPIEN_DLPACK
 static py::capsule wrapDLTensor(DLManagedTensor *tensor) {
   auto capsule_destructor = [](PyObject *data) {
     DLManagedTensor *tensor = (DLManagedTensor *)PyCapsule_GetPointer(data, "dltensor");
@@ -73,6 +71,7 @@ static py::capsule wrapDLTensor(DLManagedTensor *tensor) {
 }
 
 using dl_vector = std::vector<DLManagedTensor *>;
+
 class AwaitableDLVectorWrapper : public std::enable_shared_from_this<AwaitableDLVectorWrapper> {
 
 public:
@@ -92,6 +91,7 @@ public:
 private:
   std::shared_ptr<IAwaitable<dl_vector>> mAwaitable;
 };
+#endif
 
 template <typename T> void declare_awaitable(py::module &m, std::string const &typestr) {
   using Class = IAwaitable<T>;
@@ -244,10 +244,13 @@ void buildSapien(py::module &m) {
   m.doc() = "SAPIEN core module";
 
   declare_awaitable<void>(m, "Void");
+
+#ifdef SAPIEN_DLPACK
   py::class_<AwaitableDLVectorWrapper, std::shared_ptr<AwaitableDLVectorWrapper>>(
       m, "AwaitableDLList")
       .def("wait", &AwaitableDLVectorWrapper::wait)
       .def("ready", &AwaitableDLVectorWrapper::ready);
+#endif
 
   auto PyMultistepCallback = py::class_<SceneMultistepCallback>(m, "SceneMultistepCallback");
 
@@ -337,9 +340,7 @@ void buildSapien(py::module &m) {
 
   auto PySubscription = py::class_<Subscription>(m, "Subscription");
 
-#ifdef _USE_PINOCCHIO
   auto PyPinocchioModel = py::class_<PinocchioModel>(m, "PinocchioModel");
-#endif
 
   auto PyVulkanRigidbody =
       py::class_<Renderer::SVulkan2Rigidbody, Renderer::IPxrRigidbody>(m, "VulkanRigidbody");
@@ -1250,11 +1251,9 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_root_pose", &SArticulationBase::getRootPose)
       .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"))
       .def("set_pose", &SArticulationBase::setRootPose, py::arg("pose"), "same as set_root_pose")
-#ifdef _USE_PINOCCHIO
       .def("create_pinocchio_model", &SArticulationBase::createPinocchioModel,
            "Create the kinematic and dynamic model of this articulation implemented by the "
            "Pinocchio library. Allowing computing forward/inverse kinematics/dynamics.")
-#endif
       .def("export_urdf", &SArticulationBase::exportURDF, py::arg("cache_dir") = std::string())
       .def("get_builder", &SArticulationBase::getBuilder);
 
@@ -1809,7 +1808,6 @@ Args:
 
   PySubscription.def("unsubscribe", &Subscription::unsubscribe);
 
-#ifdef _USE_PINOCCHIO
   PyPinocchioModel
       .def("compute_forward_kinematics", &PinocchioModel::computeForwardKinematics,
            "Compute and cache forward kinematics. After computation, use get_link_pose to "
@@ -1863,7 +1861,6 @@ Args:
            "Compute the link(body) Jacobian for a single link. It is faster than "
            "compute_full_jacobian followed by get_link_jacobian",
            py::arg("qpos"), py::arg("link_index"));
-#endif
 
   PyVulkanRenderer
       .def_static("set_log_level", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))
@@ -2045,6 +2042,7 @@ Args:
       .def_property("skew", &SCamera::getSkew, &SCamera::setSkew)
 
       .def("take_picture", &SCamera::takePicture)
+#ifdef SAPIEN_DLPACK
       .def(
           "take_picture_and_get_dl_tensors_async",
           [](SCamera &cam, std::vector<std::string> const &names) {
@@ -2052,6 +2050,7 @@ Args:
                 cam.takePictureAndGetDLTensorsAsync(names));
           },
           py::arg("names"))
+#endif
       .def("get_float_texture", &getFloatImageFromCamera, py::arg("texture_name"))
       .def("get_uint32_texture", &getUintImageFromCamera, py::arg("texture_name"))
 
@@ -2061,7 +2060,7 @@ Args:
       .def("get_normal_rgba", [](SCamera &c) { return getFloatImageFromCamera(c, "Normal"); })
       .def("get_visual_actor_segmentation",
            [](SCamera &c) { return getUintImageFromCamera(c, "Segmentation"); })
-
+#ifdef SAPIEN_DLPACK
       .def(
           "get_dl_tensor",
           [](SCamera &cam, std::string const &name) {
@@ -2070,6 +2069,7 @@ Args:
           "Get raw GPU memory for a render target in the dl format. It can be wrapped into "
           "PyTorch or Tensorflow using their API",
           py::arg("texture_name"))
+#endif
       .def(
           "get_camera_matrix", [](SCamera &c) { return mat42array(c.getCameraMatrix()); },
           "Get 4x4 intrinsic camera matrix in OpenCV format.")
@@ -2301,9 +2301,11 @@ Args:
       .def_property("rendered_point_count", &Renderer::IPxrPointBody::getRenderedVertexCount,
                     &Renderer::IPxrPointBody::setRenderedVertexCount);
 
+#ifdef SAPIEN_DLPACK
   PyVulkanParticleBody.def_property_readonly("dl_vertices", [](Renderer::SVulkan2PointBody &b) {
     return wrapDLTensor(b.getDLVertices());
   });
+#endif
 
   PyRenderBody.def_property_readonly("name", &Renderer::IPxrRigidbody::getName)
       .def_property_readonly("visual_id", &Renderer::IPxrRigidbody::getUniqueId)
@@ -2444,9 +2446,12 @@ Args:
                          Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> uvs) {
         geom.setUVs(std::vector(uvs.data(), uvs.data() + uvs.size()));
       });
+
+#ifdef SAPIEN_DLPACK
   PyVulkanRenderMesh.def_property_readonly("dl_vertices", [](Renderer::SVulkan2Mesh &mesh) {
     return wrapDLTensor(mesh.getDLVertices());
   });
+#endif
 
   m.def("add_profiler_event", &AddProfilerEvent, py::arg("name"));
   py::class_<ProfilerBlock>(m, "ProfilerBlock")
@@ -2454,6 +2459,7 @@ Args:
       .def("__enter__", &ProfilerBlock::enter)
       .def("__exit__", &ProfilerBlock::exit);
 
+#ifdef SAPIEN_DLPACK
   auto dlpack = m.def_submodule("dlpack");
 
   dlpack.def("dl_shape", [](py::capsule data) {
@@ -2482,4 +2488,6 @@ Args:
       py::arg("dl_tensor"), py::arg("result").noconvert());
 
   dlpack.def("dl_cuda_sync", []() { cudaStreamSynchronize(0); });
+#endif
+
 }

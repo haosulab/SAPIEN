@@ -111,15 +111,20 @@ public:
                  SVulkan2Scene *scene, std::string const &shaderDir);
 
   void takePicture() override;
+
+#ifdef SAPIEN_DLPACK
   std::shared_ptr<IAwaitable<std::vector<DLManagedTensor *>>>
   takePictureAndGetDLTensorsAsync(ThreadPool &thread,
                                   std::vector<std::string> const &names) override;
+#endif
 
   std::vector<std::string> getRenderTargetNames();
 
   std::vector<float> getFloatImage(std::string const &name) override;
   std::vector<uint32_t> getUintImage(std::string const &name) override;
+#ifdef SAPIEN_DLPACK
   DLManagedTensor *getDLImage(std::string const &name) override;
+#endif
 
   inline IPxrScene *getScene() override { return mScene; }
 

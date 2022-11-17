@@ -1,4 +1,4 @@
-FROM quay.io/pypa/manylinux2014_x86_64:2021-10-11-14ac00e
+FROM quay.io/pypa/manylinux2014_x86_64:2022-11-14-1226cfc
 RUN yum update -y && mkdir /workspace
 
 WORKDIR /workspace
@@ -60,8 +60,8 @@ WORKDIR /workspace/glfw/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DGLFW_BUILD_DOCS=OFF -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_VULKAN_STATIC=OFF -DBUILD_SHARED_LIBS=ON && make -j && make install
 
 WORKDIR /workspace
-RUN curl -O https://sdk.lunarg.com/sdk/download/1.2.189.0/linux/vulkan_sdk.tar.gz && tar -xf vulkan_sdk.tar.gz && rm -f vulkan_sdk.tar.gz
-ENV VULKAN_SDK=/workspace/1.2.189.0/x86_64 LD_LIBRARY_PATH=/workspace/1.2.189.0/x86_64/lib VK_LAYER_PATH=/workspace/1.2.189.0/x86_64/etc/vulkan/explicit_layer.d PATH=/workspace/1.2.189.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+RUN curl -O https://sdk.lunarg.com/sdk/download/1.3.224.1/linux/vulkan_sdk.tar.gz && tar -xf vulkan_sdk.tar.gz && rm -f vulkan_sdk.tar.gz
+ENV VULKAN_SDK=/workspace/1.3.224.1/x86_64 LD_LIBRARY_PATH=/workspace/1.3.224.1/x86_64/lib VK_LAYER_PATH=/workspace/1.3.224.1/x86_64/etc/vulkan/explicit_layer.d PATH=/workspace/1.3.224.1/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 WORKDIR /workspace
 RUN git clone --single-branch -b 0.9.9.8 --depth 1 https://github.com/g-truc/glm.git
@@ -69,7 +69,7 @@ WORKDIR /workspace/glm
 RUN cp -r glm /usr/local/include
 
 RUN yum install -y glew-devel
-ENV LD_LIBRARY_PATH=/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/opt/rh/devtoolset-10/root/usr/lib64/dyninst:/opt/rh/devtoolset-10/root/usr/lib/dyninst:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/workspace/1.2.189.0/x86_64/lib PCP_DIR=/opt/rh/devtoolset-10/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-10/root MANPATH=/opt/rh/devtoolset-10/root/usr/share/man: PATH=/opt/rh/devtoolset-10/root/usr/bin:/workspace/1.2.189.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV LD_LIBRARY_PATH=/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/opt/rh/devtoolset-10/root/usr/lib64/dyninst:/opt/rh/devtoolset-10/root/usr/lib/dyninst:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/workspace/1.3.224.1/x86_64/lib PCP_DIR=/opt/rh/devtoolset-10/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-10/root MANPATH=/opt/rh/devtoolset-10/root/usr/share/man: PATH=/opt/rh/devtoolset-10/root/usr/bin:/workspace/1.3.224.1/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 WORKDIR /workspace
 RUN git clone --single-branch -b v2.1.0 --depth 1 https://github.com/yse/easy_profiler.git
@@ -99,7 +99,7 @@ WORKDIR /workspace/assimp/build
 RUN cmake .. -DCMAKE_BUILD_TYPE=Release -DASSIMP_BUILD_TESTS=OFF && make -j4 && make install
 
 RUN rpm -i http://mirror.ghettoforge.org/distributions/gf/el/7/gf/x86_64/gcc10-libstdc++-10.2.1-7.gf.el7.x86_64.rpm
-ENV LD_LIBRARY_PATH=/opt/gcc-10.2.1/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/opt/rh/devtoolset-10/root/usr/lib64/dyninst:/opt/rh/devtoolset-10/root/usr/lib/dyninst:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/workspace/1.2.189.0/x86_64/lib:/workspace/cuda/lib64:/workspace/cuda/lib64/stubs/ PCP_DIR=/opt/rh/devtoolset-10/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-10/root MANPATH=/opt/rh/devtoolset-10/root/usr/share/man: PATH=/opt/rh/devtoolset-10/root/usr/bin:/workspace/1.2.189.0/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV LD_LIBRARY_PATH=/opt/gcc-10.2.1/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/opt/rh/devtoolset-10/root/usr/lib64/dyninst:/opt/rh/devtoolset-10/root/usr/lib/dyninst:/opt/rh/devtoolset-10/root/usr/lib64:/opt/rh/devtoolset-10/root/usr/lib:/workspace/1.3.224.1/x86_64/lib:/workspace/cuda/lib64:/workspace/cuda/lib64/stubs/ PCP_DIR=/opt/rh/devtoolset-10/root DEVTOOLSET_ROOTPATH=/opt/rh/devtoolset-10/root MANPATH=/opt/rh/devtoolset-10/root/usr/share/man: PATH=/opt/rh/devtoolset-10/root/usr/bin:/workspace/1.3.224.1/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 RUN /opt/python/cp38-cp38/bin/pip install git+https://github.com/fbxiang/auditwheel.git@088b034ae497b0add794da13f8e0f3b0a3b2d651
 RUN echo "#!/opt/python/cp38-cp38/bin/python" > /usr/local/bin/auditwheel \
@@ -112,7 +112,7 @@ RUN echo "#!/opt/python/cp38-cp38/bin/python" > /usr/local/bin/auditwheel \
 WORKDIR /workspace
 RUN yum install -y wget
 RUN wget https://developer.download.nvidia.com/compute/cuda/11.7.1/local_installers/cuda_11.7.1_515.65.01_linux.run \
- && sh cuda_11.7.1_515.65.01_linux.run --silent --toolkit --toolkitpath=/workspace/cuda --override
+ && sh cuda_11.7.1_515.65.01_linux.run --silent --toolkit --toolkitpath=/workspace/cuda --override && rm -f cuda_11.7.1_515.65.01_linux.run
 ENV CUDA_PATH=/workspace/cuda
 ENV PATH="/workspace/cuda/bin:$PATH"
 ENV LD_LIBRARY_PATH="/workspace/cuda/lib64:$LD_LIBRARY_PATH"

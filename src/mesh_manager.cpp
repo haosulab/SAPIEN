@@ -4,15 +4,15 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <set>
 #include <spdlog/spdlog.h>
 #include <sstream>
 
-namespace sapien {
 namespace fs = std::filesystem;
+namespace sapien {
 
 void exportNonConvexMeshToFile(PxTriangleMesh *pxMesh, const std::string &filename) {
   // check stl supported

@@ -37,7 +37,9 @@ public:
   inline svulkan2::scene::PointObject *const &getVisualObject() const { return mObject; }
   inline SVulkan2Scene *getScene() const { return mParentScene; }
 
+#ifdef SAPIEN_DLPACK
   DLManagedTensor *getDLVertices();
+#endif
 };
 
 } // namespace Renderer

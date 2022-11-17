@@ -47,11 +47,14 @@ class CMakeBuild(build_ext):
             cfg = 'Release'
         build_args = ['--config', cfg]
         if args.profile:
-            cmake_args += ['-DSVULKAN2_PROFILE=ON']
             cmake_args += ['-DSAPIEN_PROFILE=ON']
+        else:
+            cmake_args += ['-DSAPIEN_PROFILE=OFF']
 
-        if platform.system() != 'Darwin':
-            cmake_args += ['-DSAPIEN_DLPACK_INTEROP=ON', '-DSVULKAN2_CUDA_INTEROP=ON']
+        if os.environ.get("CUDA_PATH") is not None:
+            cmake_args += ['-DSAPIEN_CUDA=ON']
+        else:
+            cmake_args += ['-DSAPIEN_CUDA=OFF']
 
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
         build_args += ['--', '-j8']
@@ -71,13 +74,6 @@ class CMakeBuild(build_ext):
             shutil.rmtree(vulkan_shader_path)
         assert os.path.exists(source_path)
         shutil.copytree(source_path, vulkan_shader_path)
-
-        vulkan_icd_path = os.path.join(self.build_lib, 'sapien', 'vulkan_icd')
-        source_path = os.path.join(ext.sourcedir, 'vulkan_icd')
-        if os.path.exists(vulkan_icd_path):
-            shutil.rmtree(vulkan_icd_path)
-        assert os.path.exists(source_path)
-        shutil.copytree(source_path, vulkan_icd_path)
 
         kuafu_shader_path = os.path.join(self.build_lib, 'sapien', 'kuafu_assets', 'shaders')
         source_path = os.path.join(ext.sourcedir, '3rd_party/kuafu/resources/shaders')

@@ -96,8 +96,8 @@ void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {
   uint32_t height = std::max(mWindow->getHeight(), 1u);
   getCamera()->setPerspectiveParameters(near, far, fovy, width, height);
 }
-void SVulkan2Window::setCameraIntrinsicParameters(float near, float far, float fx, float fy, float cx,
-                                         float cy, float skew) {
+void SVulkan2Window::setCameraIntrinsicParameters(float near, float far, float fx, float fy,
+                                                  float cx, float cy, float skew) {
   uint32_t width = std::max(mWindow->getWidth(), 1u);
   uint32_t height = std::max(mWindow->getHeight(), 1u);
   getCamera()->setPerspectiveParameters(near, far, fx, fy, cx, cy, width, height, skew);
@@ -206,25 +206,6 @@ void SVulkan2Window::render(std::string const &targetName,
   }
   mRenderer->mContext->getDevice().resetFences(mSceneRenderFence.get());
 
-#ifdef BUILD_WITH_EASY_PROFILER
-  {
-    EASY_BLOCK("Rendering CPU+GPU");
-    auto fence = mRenderer->mContext->getDevice().createFenceUnique({});
-    // draw
-    mSVulkanRenderer->render(*camera, {}, {}, {}, {});
-    auto imageAcquiredSemaphore = mWindow->getImageAcquiredSemaphore();
-    mSVulkanRenderer->display(targetName, mWindow->getBackbuffer(), mWindow->getBackBufferFormat(),
-                              mWindow->getWidth(), mWindow->getHeight(), {imageAcquiredSemaphore},
-                              {vk::PipelineStageFlagBits::eColorAttachmentOutput},
-                              {mSceneRenderSemaphore.get()}, fence.get());
-
-    if (mRenderer->mContext->getDevice().waitForFences(fence.get(), VK_TRUE, UINT64_MAX) !=
-        vk::Result::eSuccess) {
-      throw std::runtime_error("failed on wait for fence.");
-    }
-    mRenderer->mContext->getDevice().resetFences(fence.get());
-  }
-#else
   {
     // draw
     mSVulkanRenderer->render(*camera, {}, {}, {}, {});
@@ -234,7 +215,6 @@ void SVulkan2Window::render(std::string const &targetName,
                               {vk::PipelineStageFlagBits::eColorAttachmentOutput},
                               {mSceneRenderSemaphore.get()}, {});
   }
-#endif
 
   auto swapchain = mWindow->getSwapchain();
   auto fidx = mWindow->getFrameIndex();
