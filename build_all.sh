@@ -61,9 +61,9 @@ function build_manylinux14_wheel() {
   eval "$WHEEL_COMMAND"
 }
 
-# build_manylinux14_wheel 37
-# build_manylinux14_wheel 38
+build_manylinux14_wheel 37
+build_manylinux14_wheel 38
 build_manylinux14_wheel 39
-# build_manylinux14_wheel 310
-# build_manylinux14_wheel 311
+build_manylinux14_wheel 310
+build_manylinux14_wheel 311
 rm -rf build
