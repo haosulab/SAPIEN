@@ -12,7 +12,37 @@ is a continuation of ShapeNet and PartNet.
 - replace `scene.remove_mounted_camera` with `scene.remove_camera`
 - optionally, remove `fovx` from `scene.add_mounted_camera`.
 
-### 2.0
+<details>
+<summary>2.2</summary>
+
+- GPU active-stereo simulation
+- Python 3.11
+- Minor bug fixes
+</details>
+
+<details>
+<summary>2.1</summary>
+
+- Python 3.10
+- Bug fixes
+  - crash when not using renderer
+  - joint force limit (was impulse limit)
+  - incorrect inertia computation in scaled URDF
+  - incorrect point-light shadow
+  - incorrect collision when loaded from dae
+- Utility improvements
+  - set_material
+  - active light
+  - flat shading
+  - dynamic point rendering
+  - envmap generation
+  - multi-thread envs
+
+</details>
+
+<details>
+<summary>2.1</summary>
+
 - Refactor light system
   - Remove light functions on scene.renderer_scene
 - Refactor camera system
@@ -37,8 +67,11 @@ is a continuation of ShapeNet and PartNet.
     `visual_body.scale` and `shape.pose` is replaced by
     `visual_body.local_pose`. These changes are made to match `add_visual_shape`
     functions when building the actor.
+</details>
 
-### pre2.0
+<details>
+<summary>pre2.0</summary>
+
 - Shader change: 4th component in default camera shader now gives the 0-1 depth value.
 - Add "critical" and "off" log levels.
 - Add support for pointcloud and line rendering (for visualizing camera and point cloud)
@@ -46,8 +79,11 @@ is a continuation of ShapeNet and PartNet.
 - Bug fix
   - Articulation setDriveTarget was now correctly reversed for prismatic joint (joint setDriveTarget is not affected)
   - Fix kinematic articulation loader
+</details>
 
-### 1.1
+<details>
+<summary>1.1</summary>
+
 - Support nonconvex static/kinematic collision shape
 - Add warning for small mass/inertia
 - Introduce Entity as the base class of Actors
@@ -57,8 +93,11 @@ is a continuation of ShapeNet and PartNet.
 - Partial support the material tag in URDF loader (primitive shape, single color)
 - Bug fixes for the renderer
 - Support inner and outer FOV for spotlight
+</details>
 
-### 1.0
+<details>
+<summary>1.0</summary>
+
 - Replace the old Vulkan based renderer completely
   - See `sapien.core.renderer` for details
 - Expose GUI functionalities to Python
@@ -73,6 +112,7 @@ is a continuation of ShapeNet and PartNet.
   - move light functions from scene to `scene.renderer_scene`
 - Add centrifugal and Coriolis force.
 - Change default physical parameters for better stability.
+</details>
 
 ## SAPIEN Engine
 SAPIEN Engine provides physical simulation for articulated objects. It powers
