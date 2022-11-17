@@ -116,7 +116,7 @@ def main():
     )
 
     sensor = ActiveLightSensor(
-        'sensor', renderer, scene, sensor_type='fakesense_j415')
+        'sensor', renderer, scene, sensor_type='d415')
 
     sensor.set_pose(sapien.Pose(
         [0.79111, 0.247229, 0.803505],
