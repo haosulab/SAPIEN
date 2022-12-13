@@ -7,24 +7,23 @@
 #include "render_server.pb.h"
 
 #include <functional>
-#include <grpc/impl/codegen/port_platform.h>
-#include <grpcpp/impl/codegen/async_generic_service.h>
-#include <grpcpp/impl/codegen/async_stream.h>
-#include <grpcpp/impl/codegen/async_unary_call.h>
-#include <grpcpp/impl/codegen/client_callback.h>
-#include <grpcpp/impl/codegen/client_context.h>
-#include <grpcpp/impl/codegen/completion_queue.h>
-#include <grpcpp/impl/codegen/message_allocator.h>
-#include <grpcpp/impl/codegen/method_handler.h>
+#include <grpcpp/generic/async_generic_service.h>
+#include <grpcpp/support/async_stream.h>
+#include <grpcpp/support/async_unary_call.h>
+#include <grpcpp/support/client_callback.h>
+#include <grpcpp/client_context.h>
+#include <grpcpp/completion_queue.h>
+#include <grpcpp/support/message_allocator.h>
+#include <grpcpp/support/method_handler.h>
 #include <grpcpp/impl/codegen/proto_utils.h>
-#include <grpcpp/impl/codegen/rpc_method.h>
-#include <grpcpp/impl/codegen/server_callback.h>
+#include <grpcpp/impl/rpc_method.h>
+#include <grpcpp/support/server_callback.h>
 #include <grpcpp/impl/codegen/server_callback_handlers.h>
-#include <grpcpp/impl/codegen/server_context.h>
-#include <grpcpp/impl/codegen/service_type.h>
+#include <grpcpp/server_context.h>
+#include <grpcpp/impl/service_type.h>
 #include <grpcpp/impl/codegen/status.h>
-#include <grpcpp/impl/codegen/stub_options.h>
-#include <grpcpp/impl/codegen/sync_stream.h>
+#include <grpcpp/support/stub_options.h>
+#include <grpcpp/support/sync_stream.h>
 
 namespace sapien {
 namespace Renderer {
@@ -198,287 +197,63 @@ class RenderService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>> PrepareAsyncSetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>>(PrepareAsyncSetCameraParametersRaw(context, request, cq));
     }
-    class experimental_async_interface {
+    class async_interface {
      public:
-      virtual ~experimental_async_interface() {}
+      virtual ~async_interface() {}
       // ========== Renderer ==========//
       virtual void CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void CreateScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void CreateScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CreateScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void RemoveScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void RemoveScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void RemoveScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void CreateMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void CreateMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CreateMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void RemoveMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void RemoveMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void RemoveMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       // ========== Scene ==========//
       virtual void AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void AddBodyMesh(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void AddBodyMesh(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddBodyMesh(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void AddBodyPrimitive(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void AddBodyPrimitive(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddBodyPrimitive(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void RemoveBody(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void RemoveBody(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void RemoveBody(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void AddCamera(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void AddCamera(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddCamera(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetAmbientLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetAmbientLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetAmbientLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void AddPointLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void AddPointLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddPointLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void AddDirectionalLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void AddDirectionalLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void AddDirectionalLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetEntityOrder(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetEntityOrder(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetEntityOrder(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       // ========== Material ==========//
       virtual void SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetRoughness(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetRoughness(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetRoughness(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetSpecular(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetSpecular(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetSpecular(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetMetallic(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetMetallic(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetMetallic(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       // ========== Body ==========//
       virtual void SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetUniqueId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetUniqueId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetUniqueId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetSegmentationId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetSegmentationId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetSegmentationId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       // ========== Camera ==========//
       virtual void TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void TakePicture(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void TakePicture(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void TakePicture(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      virtual void SetCameraParameters(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SetCameraParameters(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void SetCameraParameters(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
     };
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    typedef class experimental_async_interface async_interface;
-    #endif
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    async_interface* async() { return experimental_async(); }
-    #endif
-    virtual class experimental_async_interface* experimental_async() { return nullptr; }
-  private:
+    typedef class async_interface experimental_async_interface;
+    virtual class async_interface* async() { return nullptr; }
+    class async_interface* experimental_async() { return async(); }
+   private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Id>* AsyncCreateSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Id>* PrepareAsyncCreateSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::sapien::Renderer::server::proto::Empty>* AsyncRemoveSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::grpc::CompletionQueue* cq) = 0;
@@ -526,7 +301,7 @@ class RenderService final {
   };
   class Stub final : public StubInterface {
    public:
-    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel);
+    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
     ::grpc::Status CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::sapien::Renderer::server::proto::Id* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>> AsyncCreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>>(AsyncCreateSceneRaw(context, request, cq));
@@ -681,284 +456,64 @@ class RenderService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>> PrepareAsyncSetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>>(PrepareAsyncSetCameraParametersRaw(context, request, cq));
     }
-    class experimental_async final :
-      public StubInterface::experimental_async_interface {
+    class async final :
+      public StubInterface::async_interface {
      public:
       void CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      void CreateScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void CreateScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CreateScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void RemoveScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void RemoveScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void RemoveScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      void CreateMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void CreateMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CreateMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void RemoveMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void RemoveMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void RemoveMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      void AddBodyMesh(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void AddBodyMesh(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddBodyMesh(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      void AddBodyPrimitive(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void AddBodyPrimitive(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddBodyPrimitive(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void RemoveBody(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void RemoveBody(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void RemoveBody(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      void AddCamera(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void AddCamera(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddCamera(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void SetAmbientLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetAmbientLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetAmbientLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      void AddPointLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void AddPointLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddPointLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      void AddDirectionalLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void AddDirectionalLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void AddDirectionalLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void SetEntityOrder(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetEntityOrder(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetEntityOrder(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void SetRoughness(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetRoughness(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetRoughness(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void SetSpecular(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetSpecular(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetSpecular(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void SetMetallic(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetMetallic(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetMetallic(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void SetUniqueId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetUniqueId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetUniqueId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void SetSegmentationId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetSegmentationId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetSegmentationId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void TakePicture(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void TakePicture(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void TakePicture(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      void SetCameraParameters(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SetCameraParameters(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void SetCameraParameters(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
      private:
       friend class Stub;
-      explicit experimental_async(Stub* stub): stub_(stub) { }
+      explicit async(Stub* stub): stub_(stub) { }
       Stub* stub() { return stub_; }
       Stub* stub_;
     };
-    class experimental_async_interface* experimental_async() override { return &async_stub_; }
+    class async* async() override { return &async_stub_; }
 
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
-    class experimental_async async_stub_{this};
+    class async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* AsyncCreateSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* PrepareAsyncCreateSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* AsyncRemoveSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::grpc::CompletionQueue* cq) override;
@@ -1502,36 +1057,22 @@ class RenderService final {
   };
   typedef WithAsyncMethod_CreateScene<WithAsyncMethod_RemoveScene<WithAsyncMethod_CreateMaterial<WithAsyncMethod_RemoveMaterial<WithAsyncMethod_AddBodyMesh<WithAsyncMethod_AddBodyPrimitive<WithAsyncMethod_RemoveBody<WithAsyncMethod_AddCamera<WithAsyncMethod_SetAmbientLight<WithAsyncMethod_AddPointLight<WithAsyncMethod_AddDirectionalLight<WithAsyncMethod_SetEntityOrder<WithAsyncMethod_UpdateRender<WithAsyncMethod_UpdateRenderAndTakePictures<WithAsyncMethod_SetBaseColor<WithAsyncMethod_SetRoughness<WithAsyncMethod_SetSpecular<WithAsyncMethod_SetMetallic<WithAsyncMethod_SetUniqueId<WithAsyncMethod_SetSegmentationId<WithAsyncMethod_TakePicture<WithAsyncMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_CreateScene : public BaseClass {
+  class WithCallbackMethod_CreateScene : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_CreateScene() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(0,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id>(
+    WithCallbackMethod_CreateScene() {
+      ::grpc::Service::MarkMethodCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response) { return this->CreateScene(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response) { return this->CreateScene(context, request, response); }));}
     void SetMessageAllocatorFor_CreateScene(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_CreateScene() override {
+    ~WithCallbackMethod_CreateScene() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1539,46 +1080,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* CreateScene(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Index* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CreateScene(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Index* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Index* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_RemoveScene : public BaseClass {
+  class WithCallbackMethod_RemoveScene : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_RemoveScene() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(1,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_RemoveScene() {
+      ::grpc::Service::MarkMethodCallback(1,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response) { return this->RemoveScene(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response) { return this->RemoveScene(context, request, response); }));}
     void SetMessageAllocatorFor_RemoveScene(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_RemoveScene() override {
+    ~WithCallbackMethod_RemoveScene() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1586,46 +1107,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* RemoveScene(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Id* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* RemoveScene(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Id* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Id* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_CreateMaterial : public BaseClass {
+  class WithCallbackMethod_CreateMaterial : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_CreateMaterial() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(2,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id>(
+    WithCallbackMethod_CreateMaterial() {
+      ::grpc::Service::MarkMethodCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response) { return this->CreateMaterial(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response) { return this->CreateMaterial(context, request, response); }));}
     void SetMessageAllocatorFor_CreateMaterial(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(2);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_CreateMaterial() override {
+    ~WithCallbackMethod_CreateMaterial() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1633,46 +1134,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* CreateMaterial(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Empty* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CreateMaterial(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Empty* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Empty* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_RemoveMaterial : public BaseClass {
+  class WithCallbackMethod_RemoveMaterial : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_RemoveMaterial() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(3,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_RemoveMaterial() {
+      ::grpc::Service::MarkMethodCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response) { return this->RemoveMaterial(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response) { return this->RemoveMaterial(context, request, response); }));}
     void SetMessageAllocatorFor_RemoveMaterial(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_RemoveMaterial() override {
+    ~WithCallbackMethod_RemoveMaterial() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1680,46 +1161,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* RemoveMaterial(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Id* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* RemoveMaterial(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Id* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::Id* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_AddBodyMesh : public BaseClass {
+  class WithCallbackMethod_AddBodyMesh : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_AddBodyMesh() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(4,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id>(
+    WithCallbackMethod_AddBodyMesh() {
+      ::grpc::Service::MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddBodyMesh(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddBodyMesh(context, request, response); }));}
     void SetMessageAllocatorFor_AddBodyMesh(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_AddBodyMesh() override {
+    ~WithCallbackMethod_AddBodyMesh() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1727,46 +1188,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddBodyMesh(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddBodyMeshReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddBodyMesh(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddBodyMeshReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddBodyMeshReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_AddBodyPrimitive : public BaseClass {
+  class WithCallbackMethod_AddBodyPrimitive : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_AddBodyPrimitive() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(5,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id>(
+    WithCallbackMethod_AddBodyPrimitive() {
+      ::grpc::Service::MarkMethodCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddBodyPrimitive(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddBodyPrimitive(context, request, response); }));}
     void SetMessageAllocatorFor_AddBodyPrimitive(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(5);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_AddBodyPrimitive() override {
+    ~WithCallbackMethod_AddBodyPrimitive() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1774,46 +1215,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddBodyPrimitive(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddBodyPrimitive(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_RemoveBody : public BaseClass {
+  class WithCallbackMethod_RemoveBody : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_RemoveBody() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(6,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_RemoveBody() {
+      ::grpc::Service::MarkMethodCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->RemoveBody(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->RemoveBody(context, request, response); }));}
     void SetMessageAllocatorFor_RemoveBody(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(6);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_RemoveBody() override {
+    ~WithCallbackMethod_RemoveBody() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1821,46 +1242,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* RemoveBody(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::RemoveBodyReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* RemoveBody(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::RemoveBodyReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::RemoveBodyReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_AddCamera : public BaseClass {
+  class WithCallbackMethod_AddCamera : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_AddCamera() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(7,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id>(
+    WithCallbackMethod_AddCamera() {
+      ::grpc::Service::MarkMethodCallback(7,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddCamera(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddCamera(context, request, response); }));}
     void SetMessageAllocatorFor_AddCamera(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(7);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(7);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_AddCamera() override {
+    ~WithCallbackMethod_AddCamera() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1868,46 +1269,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddCamera(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddCameraReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddCamera(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddCameraReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddCameraReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetAmbientLight : public BaseClass {
+  class WithCallbackMethod_SetAmbientLight : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetAmbientLight() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(8,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_SetAmbientLight() {
+      ::grpc::Service::MarkMethodCallback(8,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetAmbientLight(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetAmbientLight(context, request, response); }));}
     void SetMessageAllocatorFor_SetAmbientLight(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(8);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(8);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetAmbientLight() override {
+    ~WithCallbackMethod_SetAmbientLight() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1915,46 +1296,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetAmbientLight(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdVec3* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetAmbientLight(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdVec3* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdVec3* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_AddPointLight : public BaseClass {
+  class WithCallbackMethod_AddPointLight : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_AddPointLight() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(9,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id>(
+    WithCallbackMethod_AddPointLight() {
+      ::grpc::Service::MarkMethodCallback(9,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddPointLight(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddPointLight(context, request, response); }));}
     void SetMessageAllocatorFor_AddPointLight(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(9);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(9);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_AddPointLight() override {
+    ~WithCallbackMethod_AddPointLight() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -1962,46 +1323,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddPointLight(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddPointLightReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddPointLight(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddPointLightReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddPointLightReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_AddDirectionalLight : public BaseClass {
+  class WithCallbackMethod_AddDirectionalLight : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_AddDirectionalLight() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(10,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id>(
+    WithCallbackMethod_AddDirectionalLight() {
+      ::grpc::Service::MarkMethodCallback(10,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddDirectionalLight(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response) { return this->AddDirectionalLight(context, request, response); }));}
     void SetMessageAllocatorFor_AddDirectionalLight(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(10);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(10);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_AddDirectionalLight() override {
+    ~WithCallbackMethod_AddDirectionalLight() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2009,46 +1350,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddDirectionalLight(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddDirectionalLight(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* /*request*/, ::sapien::Renderer::server::proto::Id* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetEntityOrder : public BaseClass {
+  class WithCallbackMethod_SetEntityOrder : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetEntityOrder() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(11,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_SetEntityOrder() {
+      ::grpc::Service::MarkMethodCallback(11,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetEntityOrder(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetEntityOrder(context, request, response); }));}
     void SetMessageAllocatorFor_SetEntityOrder(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(11);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(11);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetEntityOrder() override {
+    ~WithCallbackMethod_SetEntityOrder() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2056,46 +1377,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetEntityOrder(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::EntityOrderReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetEntityOrder(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::EntityOrderReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::EntityOrderReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_UpdateRender : public BaseClass {
+  class WithCallbackMethod_UpdateRender : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_UpdateRender() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(12,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_UpdateRender() {
+      ::grpc::Service::MarkMethodCallback(12,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->UpdateRender(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->UpdateRender(context, request, response); }));}
     void SetMessageAllocatorFor_UpdateRender(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(12);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(12);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_UpdateRender() override {
+    ~WithCallbackMethod_UpdateRender() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2103,46 +1404,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* UpdateRender(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* UpdateRender(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures : public BaseClass {
+  class WithCallbackMethod_UpdateRenderAndTakePictures : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(13,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_UpdateRenderAndTakePictures() {
+      ::grpc::Service::MarkMethodCallback(13,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->UpdateRenderAndTakePictures(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->UpdateRenderAndTakePictures(context, request, response); }));}
     void SetMessageAllocatorFor_UpdateRenderAndTakePictures(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(13);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(13);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures() override {
+    ~WithCallbackMethod_UpdateRenderAndTakePictures() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2150,46 +1431,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* UpdateRenderAndTakePictures(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* UpdateRenderAndTakePictures(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetBaseColor : public BaseClass {
+  class WithCallbackMethod_SetBaseColor : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetBaseColor() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(14,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_SetBaseColor() {
+      ::grpc::Service::MarkMethodCallback(14,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetBaseColor(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetBaseColor(context, request, response); }));}
     void SetMessageAllocatorFor_SetBaseColor(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(14);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(14);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetBaseColor() override {
+    ~WithCallbackMethod_SetBaseColor() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2197,46 +1458,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetBaseColor(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdVec4* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetBaseColor(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdVec4* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdVec4* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetRoughness : public BaseClass {
+  class WithCallbackMethod_SetRoughness : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetRoughness() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(15,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_SetRoughness() {
+      ::grpc::Service::MarkMethodCallback(15,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetRoughness(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetRoughness(context, request, response); }));}
     void SetMessageAllocatorFor_SetRoughness(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(15);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(15);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetRoughness() override {
+    ~WithCallbackMethod_SetRoughness() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2244,46 +1485,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetRoughness(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdFloat* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetRoughness(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdFloat* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdFloat* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetSpecular : public BaseClass {
+  class WithCallbackMethod_SetSpecular : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetSpecular() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(16,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_SetSpecular() {
+      ::grpc::Service::MarkMethodCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetSpecular(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetSpecular(context, request, response); }));}
     void SetMessageAllocatorFor_SetSpecular(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(16);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(16);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetSpecular() override {
+    ~WithCallbackMethod_SetSpecular() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2291,46 +1512,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetSpecular(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdFloat* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetSpecular(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdFloat* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdFloat* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetMetallic : public BaseClass {
+  class WithCallbackMethod_SetMetallic : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetMetallic() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(17,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_SetMetallic() {
+      ::grpc::Service::MarkMethodCallback(17,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetMetallic(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetMetallic(context, request, response); }));}
     void SetMessageAllocatorFor_SetMetallic(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(17);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(17);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetMetallic() override {
+    ~WithCallbackMethod_SetMetallic() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2338,46 +1539,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetMetallic(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdFloat* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetMetallic(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdFloat* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::IdFloat* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetUniqueId : public BaseClass {
+  class WithCallbackMethod_SetUniqueId : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetUniqueId() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(18,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_SetUniqueId() {
+      ::grpc::Service::MarkMethodCallback(18,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetUniqueId(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetUniqueId(context, request, response); }));}
     void SetMessageAllocatorFor_SetUniqueId(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(18);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(18);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetUniqueId() override {
+    ~WithCallbackMethod_SetUniqueId() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2385,46 +1566,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetUniqueId(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::BodyIdReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetUniqueId(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::BodyIdReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::BodyIdReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetSegmentationId : public BaseClass {
+  class WithCallbackMethod_SetSegmentationId : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetSegmentationId() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(19,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_SetSegmentationId() {
+      ::grpc::Service::MarkMethodCallback(19,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetSegmentationId(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetSegmentationId(context, request, response); }));}
     void SetMessageAllocatorFor_SetSegmentationId(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(19);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(19);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetSegmentationId() override {
+    ~WithCallbackMethod_SetSegmentationId() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2432,46 +1593,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetSegmentationId(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::BodyIdReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetSegmentationId(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::BodyIdReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::BodyIdReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_TakePicture : public BaseClass {
+  class WithCallbackMethod_TakePicture : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_TakePicture() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(20,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_TakePicture() {
+      ::grpc::Service::MarkMethodCallback(20,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->TakePicture(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->TakePicture(context, request, response); }));}
     void SetMessageAllocatorFor_TakePicture(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(20);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(20);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_TakePicture() override {
+    ~WithCallbackMethod_TakePicture() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2479,46 +1620,26 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* TakePicture(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::TakePictureReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* TakePicture(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::TakePictureReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::TakePictureReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SetCameraParameters : public BaseClass {
+  class WithCallbackMethod_SetCameraParameters : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SetCameraParameters() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(21,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>(
+    WithCallbackMethod_SetCameraParameters() {
+      ::grpc::Service::MarkMethodCallback(21,
+          new ::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetCameraParameters(context, request, response); }));}
+                   ::grpc::CallbackServerContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response) { return this->SetCameraParameters(context, request, response); }));}
     void SetMessageAllocatorFor_SetCameraParameters(
-        ::grpc::experimental::MessageAllocator< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+        ::grpc::MessageAllocator< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>* allocator) {
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(21);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(21);
-    #endif
-      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SetCameraParameters() override {
+    ~WithCallbackMethod_SetCameraParameters() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -2526,20 +1647,11 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetCameraParameters(
-      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::CameraParamsReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetCameraParameters(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::CameraParamsReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::sapien::Renderer::server::proto::CameraParamsReq* /*request*/, ::sapien::Renderer::server::proto::Empty* /*response*/)  { return nullptr; }
   };
-  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_CreateScene<ExperimentalWithCallbackMethod_RemoveScene<ExperimentalWithCallbackMethod_CreateMaterial<ExperimentalWithCallbackMethod_RemoveMaterial<ExperimentalWithCallbackMethod_AddBodyMesh<ExperimentalWithCallbackMethod_AddBodyPrimitive<ExperimentalWithCallbackMethod_RemoveBody<ExperimentalWithCallbackMethod_AddCamera<ExperimentalWithCallbackMethod_SetAmbientLight<ExperimentalWithCallbackMethod_AddPointLight<ExperimentalWithCallbackMethod_AddDirectionalLight<ExperimentalWithCallbackMethod_SetEntityOrder<ExperimentalWithCallbackMethod_UpdateRender<ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures<ExperimentalWithCallbackMethod_SetBaseColor<ExperimentalWithCallbackMethod_SetRoughness<ExperimentalWithCallbackMethod_SetSpecular<ExperimentalWithCallbackMethod_SetMetallic<ExperimentalWithCallbackMethod_SetUniqueId<ExperimentalWithCallbackMethod_SetSegmentationId<ExperimentalWithCallbackMethod_TakePicture<ExperimentalWithCallbackMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > > CallbackService;
-  #endif
-
-  typedef ExperimentalWithCallbackMethod_CreateScene<ExperimentalWithCallbackMethod_RemoveScene<ExperimentalWithCallbackMethod_CreateMaterial<ExperimentalWithCallbackMethod_RemoveMaterial<ExperimentalWithCallbackMethod_AddBodyMesh<ExperimentalWithCallbackMethod_AddBodyPrimitive<ExperimentalWithCallbackMethod_RemoveBody<ExperimentalWithCallbackMethod_AddCamera<ExperimentalWithCallbackMethod_SetAmbientLight<ExperimentalWithCallbackMethod_AddPointLight<ExperimentalWithCallbackMethod_AddDirectionalLight<ExperimentalWithCallbackMethod_SetEntityOrder<ExperimentalWithCallbackMethod_UpdateRender<ExperimentalWithCallbackMethod_UpdateRenderAndTakePictures<ExperimentalWithCallbackMethod_SetBaseColor<ExperimentalWithCallbackMethod_SetRoughness<ExperimentalWithCallbackMethod_SetSpecular<ExperimentalWithCallbackMethod_SetMetallic<ExperimentalWithCallbackMethod_SetUniqueId<ExperimentalWithCallbackMethod_SetSegmentationId<ExperimentalWithCallbackMethod_TakePicture<ExperimentalWithCallbackMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
+  typedef WithCallbackMethod_CreateScene<WithCallbackMethod_RemoveScene<WithCallbackMethod_CreateMaterial<WithCallbackMethod_RemoveMaterial<WithCallbackMethod_AddBodyMesh<WithCallbackMethod_AddBodyPrimitive<WithCallbackMethod_RemoveBody<WithCallbackMethod_AddCamera<WithCallbackMethod_SetAmbientLight<WithCallbackMethod_AddPointLight<WithCallbackMethod_AddDirectionalLight<WithCallbackMethod_SetEntityOrder<WithCallbackMethod_UpdateRender<WithCallbackMethod_UpdateRenderAndTakePictures<WithCallbackMethod_SetBaseColor<WithCallbackMethod_SetRoughness<WithCallbackMethod_SetSpecular<WithCallbackMethod_SetMetallic<WithCallbackMethod_SetUniqueId<WithCallbackMethod_SetSegmentationId<WithCallbackMethod_TakePicture<WithCallbackMethod_SetCameraParameters<Service > > > > > > > > > > > > > > > > > > > > > > CallbackService;
+  typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_CreateScene : public BaseClass {
    private:
@@ -3355,27 +2467,17 @@ class RenderService final {
     }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_CreateScene : public BaseClass {
+  class WithRawCallbackMethod_CreateScene : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_CreateScene() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(0,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_CreateScene() {
+      ::grpc::Service::MarkMethodRawCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CreateScene(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CreateScene(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_CreateScene() override {
+    ~WithRawCallbackMethod_CreateScene() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3383,37 +2485,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* CreateScene(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CreateScene(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_RemoveScene : public BaseClass {
+  class WithRawCallbackMethod_RemoveScene : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_RemoveScene() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(1,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_RemoveScene() {
+      ::grpc::Service::MarkMethodRawCallback(1,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->RemoveScene(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->RemoveScene(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_RemoveScene() override {
+    ~WithRawCallbackMethod_RemoveScene() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3421,37 +2507,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* RemoveScene(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* RemoveScene(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_CreateMaterial : public BaseClass {
+  class WithRawCallbackMethod_CreateMaterial : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_CreateMaterial() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(2,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_CreateMaterial() {
+      ::grpc::Service::MarkMethodRawCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CreateMaterial(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CreateMaterial(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_CreateMaterial() override {
+    ~WithRawCallbackMethod_CreateMaterial() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3459,37 +2529,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* CreateMaterial(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CreateMaterial(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_RemoveMaterial : public BaseClass {
+  class WithRawCallbackMethod_RemoveMaterial : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_RemoveMaterial() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(3,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_RemoveMaterial() {
+      ::grpc::Service::MarkMethodRawCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->RemoveMaterial(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->RemoveMaterial(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_RemoveMaterial() override {
+    ~WithRawCallbackMethod_RemoveMaterial() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3497,37 +2551,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* RemoveMaterial(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* RemoveMaterial(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_AddBodyMesh : public BaseClass {
+  class WithRawCallbackMethod_AddBodyMesh : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_AddBodyMesh() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(4,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_AddBodyMesh() {
+      ::grpc::Service::MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddBodyMesh(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddBodyMesh(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_AddBodyMesh() override {
+    ~WithRawCallbackMethod_AddBodyMesh() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3535,37 +2573,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddBodyMesh(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddBodyMesh(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_AddBodyPrimitive : public BaseClass {
+  class WithRawCallbackMethod_AddBodyPrimitive : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_AddBodyPrimitive() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(5,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_AddBodyPrimitive() {
+      ::grpc::Service::MarkMethodRawCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddBodyPrimitive(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddBodyPrimitive(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_AddBodyPrimitive() override {
+    ~WithRawCallbackMethod_AddBodyPrimitive() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3573,37 +2595,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddBodyPrimitive(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddBodyPrimitive(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_RemoveBody : public BaseClass {
+  class WithRawCallbackMethod_RemoveBody : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_RemoveBody() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(6,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_RemoveBody() {
+      ::grpc::Service::MarkMethodRawCallback(6,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->RemoveBody(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->RemoveBody(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_RemoveBody() override {
+    ~WithRawCallbackMethod_RemoveBody() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3611,37 +2617,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* RemoveBody(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* RemoveBody(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_AddCamera : public BaseClass {
+  class WithRawCallbackMethod_AddCamera : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_AddCamera() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(7,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_AddCamera() {
+      ::grpc::Service::MarkMethodRawCallback(7,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddCamera(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddCamera(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_AddCamera() override {
+    ~WithRawCallbackMethod_AddCamera() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3649,37 +2639,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddCamera(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddCamera(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetAmbientLight : public BaseClass {
+  class WithRawCallbackMethod_SetAmbientLight : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetAmbientLight() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(8,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetAmbientLight() {
+      ::grpc::Service::MarkMethodRawCallback(8,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetAmbientLight(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetAmbientLight(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetAmbientLight() override {
+    ~WithRawCallbackMethod_SetAmbientLight() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3687,37 +2661,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetAmbientLight(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetAmbientLight(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_AddPointLight : public BaseClass {
+  class WithRawCallbackMethod_AddPointLight : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_AddPointLight() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(9,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_AddPointLight() {
+      ::grpc::Service::MarkMethodRawCallback(9,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddPointLight(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddPointLight(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_AddPointLight() override {
+    ~WithRawCallbackMethod_AddPointLight() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3725,37 +2683,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddPointLight(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddPointLight(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_AddDirectionalLight : public BaseClass {
+  class WithRawCallbackMethod_AddDirectionalLight : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_AddDirectionalLight() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(10,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_AddDirectionalLight() {
+      ::grpc::Service::MarkMethodRawCallback(10,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddDirectionalLight(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->AddDirectionalLight(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_AddDirectionalLight() override {
+    ~WithRawCallbackMethod_AddDirectionalLight() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3763,37 +2705,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* AddDirectionalLight(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* AddDirectionalLight(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetEntityOrder : public BaseClass {
+  class WithRawCallbackMethod_SetEntityOrder : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetEntityOrder() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(11,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetEntityOrder() {
+      ::grpc::Service::MarkMethodRawCallback(11,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetEntityOrder(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetEntityOrder(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetEntityOrder() override {
+    ~WithRawCallbackMethod_SetEntityOrder() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3801,37 +2727,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetEntityOrder(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetEntityOrder(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_UpdateRender : public BaseClass {
+  class WithRawCallbackMethod_UpdateRender : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_UpdateRender() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(12,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_UpdateRender() {
+      ::grpc::Service::MarkMethodRawCallback(12,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UpdateRender(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UpdateRender(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_UpdateRender() override {
+    ~WithRawCallbackMethod_UpdateRender() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3839,37 +2749,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* UpdateRender(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* UpdateRender(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_UpdateRenderAndTakePictures : public BaseClass {
+  class WithRawCallbackMethod_UpdateRenderAndTakePictures : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_UpdateRenderAndTakePictures() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(13,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_UpdateRenderAndTakePictures() {
+      ::grpc::Service::MarkMethodRawCallback(13,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UpdateRenderAndTakePictures(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UpdateRenderAndTakePictures(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_UpdateRenderAndTakePictures() override {
+    ~WithRawCallbackMethod_UpdateRenderAndTakePictures() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3877,37 +2771,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* UpdateRenderAndTakePictures(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* UpdateRenderAndTakePictures(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetBaseColor : public BaseClass {
+  class WithRawCallbackMethod_SetBaseColor : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetBaseColor() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(14,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetBaseColor() {
+      ::grpc::Service::MarkMethodRawCallback(14,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetBaseColor(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetBaseColor(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetBaseColor() override {
+    ~WithRawCallbackMethod_SetBaseColor() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3915,37 +2793,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetBaseColor(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetBaseColor(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetRoughness : public BaseClass {
+  class WithRawCallbackMethod_SetRoughness : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetRoughness() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(15,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetRoughness() {
+      ::grpc::Service::MarkMethodRawCallback(15,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetRoughness(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetRoughness(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetRoughness() override {
+    ~WithRawCallbackMethod_SetRoughness() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3953,37 +2815,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetRoughness(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetRoughness(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetSpecular : public BaseClass {
+  class WithRawCallbackMethod_SetSpecular : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetSpecular() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(16,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetSpecular() {
+      ::grpc::Service::MarkMethodRawCallback(16,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetSpecular(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetSpecular(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetSpecular() override {
+    ~WithRawCallbackMethod_SetSpecular() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -3991,37 +2837,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetSpecular(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetSpecular(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetMetallic : public BaseClass {
+  class WithRawCallbackMethod_SetMetallic : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetMetallic() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(17,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetMetallic() {
+      ::grpc::Service::MarkMethodRawCallback(17,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetMetallic(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetMetallic(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetMetallic() override {
+    ~WithRawCallbackMethod_SetMetallic() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -4029,37 +2859,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetMetallic(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetMetallic(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetUniqueId : public BaseClass {
+  class WithRawCallbackMethod_SetUniqueId : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetUniqueId() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(18,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetUniqueId() {
+      ::grpc::Service::MarkMethodRawCallback(18,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetUniqueId(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetUniqueId(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetUniqueId() override {
+    ~WithRawCallbackMethod_SetUniqueId() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -4067,37 +2881,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetUniqueId(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetUniqueId(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetSegmentationId : public BaseClass {
+  class WithRawCallbackMethod_SetSegmentationId : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetSegmentationId() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(19,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetSegmentationId() {
+      ::grpc::Service::MarkMethodRawCallback(19,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetSegmentationId(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetSegmentationId(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetSegmentationId() override {
+    ~WithRawCallbackMethod_SetSegmentationId() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -4105,37 +2903,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetSegmentationId(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetSegmentationId(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_TakePicture : public BaseClass {
+  class WithRawCallbackMethod_TakePicture : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_TakePicture() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(20,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_TakePicture() {
+      ::grpc::Service::MarkMethodRawCallback(20,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->TakePicture(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->TakePicture(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_TakePicture() override {
+    ~WithRawCallbackMethod_TakePicture() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -4143,37 +2925,21 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* TakePicture(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* TakePicture(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SetCameraParameters : public BaseClass {
+  class WithRawCallbackMethod_SetCameraParameters : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SetCameraParameters() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(21,
-          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    WithRawCallbackMethod_SetCameraParameters() {
+      ::grpc::Service::MarkMethodRawCallback(21,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetCameraParameters(context, request, response); }));
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SetCameraParameters(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SetCameraParameters() override {
+    ~WithRawCallbackMethod_SetCameraParameters() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -4181,14 +2947,8 @@ class RenderService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* SetCameraParameters(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SetCameraParameters(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_CreateScene : public BaseClass {
@@ -4199,8 +2959,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id>* streamer) {
                        return this->StreamedCreateScene(context,
                          streamer);
@@ -4226,8 +2986,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedRemoveScene(context,
                          streamer);
@@ -4253,8 +3013,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(2,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id>* streamer) {
                        return this->StreamedCreateMaterial(context,
                          streamer);
@@ -4280,8 +3040,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(3,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedRemoveMaterial(context,
                          streamer);
@@ -4307,8 +3067,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(4,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id>* streamer) {
                        return this->StreamedAddBodyMesh(context,
                          streamer);
@@ -4334,8 +3094,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(5,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id>* streamer) {
                        return this->StreamedAddBodyPrimitive(context,
                          streamer);
@@ -4361,8 +3121,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(6,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedRemoveBody(context,
                          streamer);
@@ -4388,8 +3148,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(7,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id>* streamer) {
                        return this->StreamedAddCamera(context,
                          streamer);
@@ -4415,8 +3175,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(8,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedSetAmbientLight(context,
                          streamer);
@@ -4442,8 +3202,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(9,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id>* streamer) {
                        return this->StreamedAddPointLight(context,
                          streamer);
@@ -4469,8 +3229,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(10,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id>* streamer) {
                        return this->StreamedAddDirectionalLight(context,
                          streamer);
@@ -4496,8 +3256,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(11,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedSetEntityOrder(context,
                          streamer);
@@ -4523,8 +3283,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(12,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedUpdateRender(context,
                          streamer);
@@ -4550,8 +3310,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(13,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedUpdateRenderAndTakePictures(context,
                          streamer);
@@ -4577,8 +3337,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(14,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedSetBaseColor(context,
                          streamer);
@@ -4604,8 +3364,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(15,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedSetRoughness(context,
                          streamer);
@@ -4631,8 +3391,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(16,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedSetSpecular(context,
                          streamer);
@@ -4658,8 +3418,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(17,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedSetMetallic(context,
                          streamer);
@@ -4685,8 +3445,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(18,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedSetUniqueId(context,
                          streamer);
@@ -4712,8 +3472,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(19,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedSetSegmentationId(context,
                          streamer);
@@ -4739,8 +3499,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(20,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedTakePicture(context,
                          streamer);
@@ -4766,8 +3526,8 @@ class RenderService final {
       ::grpc::Service::MarkMethodStreamed(21,
         new ::grpc::internal::StreamedUnaryHandler<
           ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>(
-            [this](::grpc_impl::ServerContext* context,
-                   ::grpc_impl::ServerUnaryStreamer<
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
                      ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>* streamer) {
                        return this->StreamedSetCameraParameters(context,
                          streamer);

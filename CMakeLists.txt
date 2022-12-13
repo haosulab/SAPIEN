@@ -71,8 +71,10 @@ set(PINOCCHIO_LIBRARY ${pinocchio_LIBRARIES} ${Boost_LIBRARIES} urdfdom_model)
 add_definitions(-DPINOCCHIO_URDFDOM_TYPEDEF_SHARED_PTR)
 add_definitions(-DPINOCCHIO_WITH_URDFDOM)
 
-find_package(protobuf REQUIRED)
-find_package(gRPC REQUIRED)
+set(GRPC_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../grpc/install")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+find_package(GRPC REQUIRED)
+include_directories(${GRPC_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIR})
 
 if (${BUILD_DEBUG_VIEWER})
     add_definitions(-D_DEBUG_VIEWER)
@@ -154,14 +156,14 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt ${SIMSENSE_LIBRARY} gRPC::grpc++)
+            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt ${GRPC_CLIENT_LIBS})
 endif ()
 
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
-target_link_libraries(pysapien PRIVATE sapien)
+target_link_libraries(pysapien PRIVATE sapien ${SIMSENSE_LIBRARY})
 
 add_executable(manual_gear manualtest/gear.cpp)
 target_link_libraries(manual_gear sapien)

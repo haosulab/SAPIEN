@@ -6,19 +6,19 @@
 #include "render_server.grpc.pb.h"
 
 #include <functional>
-#include <grpcpp/impl/codegen/async_stream.h>
-#include <grpcpp/impl/codegen/async_unary_call.h>
-#include <grpcpp/impl/codegen/channel_interface.h>
-#include <grpcpp/impl/codegen/client_unary_call.h>
-#include <grpcpp/impl/codegen/client_callback.h>
-#include <grpcpp/impl/codegen/message_allocator.h>
-#include <grpcpp/impl/codegen/method_handler.h>
-#include <grpcpp/impl/codegen/rpc_service_method.h>
-#include <grpcpp/impl/codegen/server_callback.h>
+#include <grpcpp/support/async_stream.h>
+#include <grpcpp/support/async_unary_call.h>
+#include <grpcpp/impl/channel_interface.h>
+#include <grpcpp/impl/client_unary_call.h>
+#include <grpcpp/support/client_callback.h>
+#include <grpcpp/support/message_allocator.h>
+#include <grpcpp/support/method_handler.h>
+#include <grpcpp/impl/rpc_service_method.h>
+#include <grpcpp/support/server_callback.h>
 #include <grpcpp/impl/codegen/server_callback_handlers.h>
-#include <grpcpp/impl/codegen/server_context.h>
-#include <grpcpp/impl/codegen/service_type.h>
-#include <grpcpp/impl/codegen/sync_stream.h>
+#include <grpcpp/server_context.h>
+#include <grpcpp/impl/service_type.h>
+#include <grpcpp/support/sync_stream.h>
 namespace sapien {
 namespace Renderer {
 namespace server {
@@ -51,658 +51,548 @@ static const char* RenderService_method_names[] = {
 
 std::unique_ptr< RenderService::Stub> RenderService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
   (void)options;
-  std::unique_ptr< RenderService::Stub> stub(new RenderService::Stub(channel));
+  std::unique_ptr< RenderService::Stub> stub(new RenderService::Stub(channel, options));
   return stub;
 }
 
-RenderService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
-  : channel_(channel), rpcmethod_CreateScene_(RenderService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_RemoveScene_(RenderService_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CreateMaterial_(RenderService_method_names[2], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_RemoveMaterial_(RenderService_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_AddBodyMesh_(RenderService_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_AddBodyPrimitive_(RenderService_method_names[5], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_RemoveBody_(RenderService_method_names[6], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_AddCamera_(RenderService_method_names[7], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetAmbientLight_(RenderService_method_names[8], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_AddPointLight_(RenderService_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_AddDirectionalLight_(RenderService_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetEntityOrder_(RenderService_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_UpdateRender_(RenderService_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_UpdateRenderAndTakePictures_(RenderService_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetBaseColor_(RenderService_method_names[14], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetRoughness_(RenderService_method_names[15], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetSpecular_(RenderService_method_names[16], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetMetallic_(RenderService_method_names[17], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetUniqueId_(RenderService_method_names[18], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetSegmentationId_(RenderService_method_names[19], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_TakePicture_(RenderService_method_names[20], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetCameraParameters_(RenderService_method_names[21], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+RenderService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
+  : channel_(channel), rpcmethod_CreateScene_(RenderService_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_RemoveScene_(RenderService_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CreateMaterial_(RenderService_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_RemoveMaterial_(RenderService_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_AddBodyMesh_(RenderService_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_AddBodyPrimitive_(RenderService_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_RemoveBody_(RenderService_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_AddCamera_(RenderService_method_names[7], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetAmbientLight_(RenderService_method_names[8], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_AddPointLight_(RenderService_method_names[9], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_AddDirectionalLight_(RenderService_method_names[10], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetEntityOrder_(RenderService_method_names[11], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UpdateRender_(RenderService_method_names[12], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UpdateRenderAndTakePictures_(RenderService_method_names[13], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetBaseColor_(RenderService_method_names[14], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetRoughness_(RenderService_method_names[15], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetSpecular_(RenderService_method_names[16], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetMetallic_(RenderService_method_names[17], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetUniqueId_(RenderService_method_names[18], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetSegmentationId_(RenderService_method_names[19], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_TakePicture_(RenderService_method_names[20], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetCameraParameters_(RenderService_method_names[21], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status RenderService::Stub::CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::sapien::Renderer::server::proto::Id* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_CreateScene_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CreateScene_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_CreateScene_, context, request, response, std::move(f));
+void RenderService::Stub::async::CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateScene_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::CreateScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_CreateScene_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_CreateScene_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::CreateScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_CreateScene_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncCreateSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_CreateScene_, context, request, true);
+void RenderService::Stub::async::CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateScene_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::PrepareAsyncCreateSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_CreateScene_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Index, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CreateScene_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncCreateSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncCreateSceneRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_RemoveScene_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_RemoveScene_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_RemoveScene_, context, request, response, std::move(f));
+void RenderService::Stub::async::RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_RemoveScene_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::RemoveScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_RemoveScene_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_RemoveScene_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::RemoveScene(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_RemoveScene_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncRemoveSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_RemoveScene_, context, request, true);
+void RenderService::Stub::async::RemoveScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_RemoveScene_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncRemoveSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_RemoveScene_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_RemoveScene_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncRemoveSceneRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncRemoveSceneRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty& request, ::sapien::Renderer::server::proto::Id* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_CreateMaterial_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CreateMaterial_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_CreateMaterial_, context, request, response, std::move(f));
+void RenderService::Stub::async::CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateMaterial_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::CreateMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_CreateMaterial_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_CreateMaterial_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::CreateMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_CreateMaterial_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncCreateMaterialRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_CreateMaterial_, context, request, true);
+void RenderService::Stub::async::CreateMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateMaterial_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::PrepareAsyncCreateMaterialRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_CreateMaterial_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CreateMaterial_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncCreateMaterialRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Empty& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncCreateMaterialRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_RemoveMaterial_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_RemoveMaterial_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_RemoveMaterial_, context, request, response, std::move(f));
+void RenderService::Stub::async::RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_RemoveMaterial_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::RemoveMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_RemoveMaterial_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_RemoveMaterial_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::RemoveMaterial(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_RemoveMaterial_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncRemoveMaterialRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_RemoveMaterial_, context, request, true);
+void RenderService::Stub::async::RemoveMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_RemoveMaterial_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncRemoveMaterialRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_RemoveMaterial_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_RemoveMaterial_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncRemoveMaterialRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Id& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncRemoveMaterialRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq& request, ::sapien::Renderer::server::proto::Id* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_AddBodyMesh_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_AddBodyMesh_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddBodyMesh_, context, request, response, std::move(f));
+void RenderService::Stub::async::AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddBodyMesh_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::AddBodyMesh(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddBodyMesh_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddBodyMesh_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::AddBodyMesh(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddBodyMesh_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddBodyMeshRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddBodyMesh_, context, request, true);
+void RenderService::Stub::async::AddBodyMesh(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddBodyMesh_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::PrepareAsyncAddBodyMeshRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddBodyMesh_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::AddBodyMeshReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_AddBodyMesh_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddBodyMeshRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyMeshReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncAddBodyMeshRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq& request, ::sapien::Renderer::server::proto::Id* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_AddBodyPrimitive_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_AddBodyPrimitive_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddBodyPrimitive_, context, request, response, std::move(f));
+void RenderService::Stub::async::AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddBodyPrimitive_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::AddBodyPrimitive(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddBodyPrimitive_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddBodyPrimitive_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::AddBodyPrimitive(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddBodyPrimitive_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddBodyPrimitiveRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddBodyPrimitive_, context, request, true);
+void RenderService::Stub::async::AddBodyPrimitive(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddBodyPrimitive_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::PrepareAsyncAddBodyPrimitiveRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddBodyPrimitive_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_AddBodyPrimitive_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddBodyPrimitiveRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncAddBodyPrimitiveRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_RemoveBody_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_RemoveBody_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_RemoveBody_, context, request, response, std::move(f));
+void RenderService::Stub::async::RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_RemoveBody_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::RemoveBody(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_RemoveBody_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_RemoveBody_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::RemoveBody(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_RemoveBody_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncRemoveBodyRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_RemoveBody_, context, request, true);
+void RenderService::Stub::async::RemoveBody(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_RemoveBody_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncRemoveBodyRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_RemoveBody_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::RemoveBodyReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_RemoveBody_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncRemoveBodyRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::RemoveBodyReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncRemoveBodyRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq& request, ::sapien::Renderer::server::proto::Id* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_AddCamera_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_AddCamera_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddCamera_, context, request, response, std::move(f));
+void RenderService::Stub::async::AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddCamera_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::AddCamera(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddCamera_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddCamera_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::AddCamera(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddCamera_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddCameraRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddCamera_, context, request, true);
+void RenderService::Stub::async::AddCamera(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddCamera_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::PrepareAsyncAddCameraRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddCamera_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::AddCameraReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_AddCamera_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddCameraRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddCameraReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncAddCameraRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetAmbientLight_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetAmbientLight_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetAmbientLight_, context, request, response, std::move(f));
+void RenderService::Stub::async::SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetAmbientLight_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::SetAmbientLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetAmbientLight_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetAmbientLight_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::SetAmbientLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetAmbientLight_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetAmbientLightRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetAmbientLight_, context, request, true);
+void RenderService::Stub::async::SetAmbientLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetAmbientLight_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetAmbientLightRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetAmbientLight_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::IdVec3, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetAmbientLight_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetAmbientLightRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec3& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetAmbientLightRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq& request, ::sapien::Renderer::server::proto::Id* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_AddPointLight_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_AddPointLight_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddPointLight_, context, request, response, std::move(f));
+void RenderService::Stub::async::AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddPointLight_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::AddPointLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddPointLight_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddPointLight_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::AddPointLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddPointLight_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddPointLightRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddPointLight_, context, request, true);
+void RenderService::Stub::async::AddPointLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddPointLight_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::PrepareAsyncAddPointLightRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddPointLight_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::AddPointLightReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_AddPointLight_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddPointLightRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddPointLightReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncAddPointLightRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq& request, ::sapien::Renderer::server::proto::Id* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_AddDirectionalLight_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_AddDirectionalLight_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddDirectionalLight_, context, request, response, std::move(f));
+void RenderService::Stub::async::AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddDirectionalLight_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::AddDirectionalLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_AddDirectionalLight_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddDirectionalLight_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::AddDirectionalLight(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_AddDirectionalLight_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddDirectionalLightRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddDirectionalLight_, context, request, true);
+void RenderService::Stub::async::AddDirectionalLight(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_AddDirectionalLight_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::PrepareAsyncAddDirectionalLightRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Id>::Create(channel_.get(), cq, rpcmethod_AddDirectionalLight_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_AddDirectionalLight_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncAddDirectionalLightRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::AddDirectionalLightReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncAddDirectionalLightRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetEntityOrder_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetEntityOrder_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetEntityOrder_, context, request, response, std::move(f));
+void RenderService::Stub::async::SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetEntityOrder_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::SetEntityOrder(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetEntityOrder_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetEntityOrder_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::SetEntityOrder(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetEntityOrder_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetEntityOrderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetEntityOrder_, context, request, true);
+void RenderService::Stub::async::SetEntityOrder(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetEntityOrder_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetEntityOrderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetEntityOrder_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::EntityOrderReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetEntityOrder_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetEntityOrderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::EntityOrderReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetEntityOrderRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_UpdateRender_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_UpdateRender_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_UpdateRender_, context, request, response, std::move(f));
+void RenderService::Stub::async::UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UpdateRender_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_UpdateRender_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_UpdateRender_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::UpdateRender(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_UpdateRender_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncUpdateRenderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_UpdateRender_, context, request, true);
+void RenderService::Stub::async::UpdateRender(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UpdateRender_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncUpdateRenderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_UpdateRender_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::UpdateRenderReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_UpdateRender_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncUpdateRenderRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncUpdateRenderRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_UpdateRenderAndTakePictures_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_UpdateRenderAndTakePictures_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, std::move(f));
+void RenderService::Stub::async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncUpdateRenderAndTakePicturesRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_UpdateRenderAndTakePictures_, context, request, true);
+void RenderService::Stub::async::UpdateRenderAndTakePictures(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UpdateRenderAndTakePictures_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncUpdateRenderAndTakePicturesRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_UpdateRenderAndTakePictures_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_UpdateRenderAndTakePictures_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncUpdateRenderAndTakePicturesRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncUpdateRenderAndTakePicturesRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetBaseColor_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetBaseColor_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetBaseColor_, context, request, response, std::move(f));
+void RenderService::Stub::async::SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetBaseColor_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetBaseColor_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetBaseColor_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::SetBaseColor(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetBaseColor_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetBaseColorRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetBaseColor_, context, request, true);
+void RenderService::Stub::async::SetBaseColor(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetBaseColor_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetBaseColorRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetBaseColor_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::IdVec4, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetBaseColor_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetBaseColorRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdVec4& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetBaseColorRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetRoughness_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetRoughness_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetRoughness_, context, request, response, std::move(f));
+void RenderService::Stub::async::SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetRoughness_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::SetRoughness(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetRoughness_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetRoughness_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::SetRoughness(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetRoughness_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetRoughnessRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetRoughness_, context, request, true);
+void RenderService::Stub::async::SetRoughness(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetRoughness_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetRoughnessRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetRoughness_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::IdFloat, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetRoughness_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetRoughnessRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetRoughnessRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetSpecular_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetSpecular_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetSpecular_, context, request, response, std::move(f));
+void RenderService::Stub::async::SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetSpecular_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::SetSpecular(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetSpecular_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetSpecular_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::SetSpecular(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetSpecular_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetSpecularRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetSpecular_, context, request, true);
+void RenderService::Stub::async::SetSpecular(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetSpecular_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetSpecularRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetSpecular_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::IdFloat, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetSpecular_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetSpecularRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetSpecularRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetMetallic_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetMetallic_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetMetallic_, context, request, response, std::move(f));
+void RenderService::Stub::async::SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetMetallic_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::SetMetallic(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetMetallic_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetMetallic_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::SetMetallic(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetMetallic_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetMetallicRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetMetallic_, context, request, true);
+void RenderService::Stub::async::SetMetallic(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetMetallic_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetMetallicRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetMetallic_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::IdFloat, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetMetallic_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetMetallicRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::IdFloat& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetMetallicRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetUniqueId_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetUniqueId_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetUniqueId_, context, request, response, std::move(f));
+void RenderService::Stub::async::SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetUniqueId_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::SetUniqueId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetUniqueId_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetUniqueId_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::SetUniqueId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetUniqueId_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetUniqueIdRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetUniqueId_, context, request, true);
+void RenderService::Stub::async::SetUniqueId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetUniqueId_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetUniqueIdRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetUniqueId_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::BodyIdReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetUniqueId_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetUniqueIdRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetUniqueIdRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetSegmentationId_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetSegmentationId_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetSegmentationId_, context, request, response, std::move(f));
+void RenderService::Stub::async::SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetSegmentationId_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::SetSegmentationId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetSegmentationId_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetSegmentationId_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::SetSegmentationId(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetSegmentationId_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetSegmentationIdRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetSegmentationId_, context, request, true);
+void RenderService::Stub::async::SetSegmentationId(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetSegmentationId_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetSegmentationIdRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetSegmentationId_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::BodyIdReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetSegmentationId_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetSegmentationIdRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyIdReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetSegmentationIdRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_TakePicture_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_TakePicture_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_TakePicture_, context, request, response, std::move(f));
+void RenderService::Stub::async::TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_TakePicture_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::TakePicture(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_TakePicture_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_TakePicture_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::TakePicture(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_TakePicture_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncTakePictureRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_TakePicture_, context, request, true);
+void RenderService::Stub::async::TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_TakePicture_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncTakePictureRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_TakePicture_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::TakePictureReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_TakePicture_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncTakePictureRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncTakePictureRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 ::grpc::Status RenderService::Stub::SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq& request, ::sapien::Renderer::server::proto::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetCameraParameters_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetCameraParameters_, context, request, response);
 }
 
-void RenderService::Stub::experimental_async::SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetCameraParameters_, context, request, response, std::move(f));
+void RenderService::Stub::async::SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetCameraParameters_, context, request, response, std::move(f));
 }
 
-void RenderService::Stub::experimental_async::SetCameraParameters(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetCameraParameters_, context, request, response, std::move(f));
-}
-
-void RenderService::Stub::experimental_async::SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetCameraParameters_, context, request, response, reactor);
-}
-
-void RenderService::Stub::experimental_async::SetCameraParameters(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetCameraParameters_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetCameraParametersRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetCameraParameters_, context, request, true);
+void RenderService::Stub::async::SetCameraParameters(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetCameraParameters_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetCameraParametersRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::sapien::Renderer::server::proto::Empty>::Create(channel_.get(), cq, rpcmethod_SetCameraParameters_, context, request, false);
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::CameraParamsReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetCameraParameters_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetCameraParametersRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::CameraParamsReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetCameraParametersRaw(context, request, cq);
+  result->StartCall();
+  return result;
 }
 
 RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[0],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::Index, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::Index* req,
              ::sapien::Renderer::server::proto::Id* resp) {
                return service->CreateScene(ctx, req, resp);
@@ -710,9 +600,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[1],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::Id* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->RemoveScene(ctx, req, resp);
@@ -720,9 +610,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[2],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::Empty* req,
              ::sapien::Renderer::server::proto::Id* resp) {
                return service->CreateMaterial(ctx, req, resp);
@@ -730,9 +620,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[3],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::Id* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->RemoveMaterial(ctx, req, resp);
@@ -740,9 +630,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[4],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddBodyMeshReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::AddBodyMeshReq* req,
              ::sapien::Renderer::server::proto::Id* resp) {
                return service->AddBodyMesh(ctx, req, resp);
@@ -750,9 +640,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[5],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddBodyPrimitiveReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* req,
              ::sapien::Renderer::server::proto::Id* resp) {
                return service->AddBodyPrimitive(ctx, req, resp);
@@ -760,9 +650,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[6],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::RemoveBodyReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::RemoveBodyReq* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->RemoveBody(ctx, req, resp);
@@ -770,9 +660,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[7],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddCameraReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::AddCameraReq* req,
              ::sapien::Renderer::server::proto::Id* resp) {
                return service->AddCamera(ctx, req, resp);
@@ -780,9 +670,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[8],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdVec3, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::IdVec3* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetAmbientLight(ctx, req, resp);
@@ -790,9 +680,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[9],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddPointLightReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::AddPointLightReq* req,
              ::sapien::Renderer::server::proto::Id* resp) {
                return service->AddPointLight(ctx, req, resp);
@@ -800,9 +690,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[10],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::AddDirectionalLightReq, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::AddDirectionalLightReq* req,
              ::sapien::Renderer::server::proto::Id* resp) {
                return service->AddDirectionalLight(ctx, req, resp);
@@ -810,9 +700,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[11],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::EntityOrderReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::EntityOrderReq* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetEntityOrder(ctx, req, resp);
@@ -820,9 +710,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[12],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::UpdateRenderReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::UpdateRenderReq* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->UpdateRender(ctx, req, resp);
@@ -830,9 +720,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[13],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->UpdateRenderAndTakePictures(ctx, req, resp);
@@ -840,9 +730,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[14],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdVec4, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::IdVec4* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetBaseColor(ctx, req, resp);
@@ -850,9 +740,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[15],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::IdFloat* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetRoughness(ctx, req, resp);
@@ -860,9 +750,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[16],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::IdFloat* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetSpecular(ctx, req, resp);
@@ -870,9 +760,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[17],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::IdFloat, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::IdFloat* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetMetallic(ctx, req, resp);
@@ -880,9 +770,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[18],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::BodyIdReq* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetUniqueId(ctx, req, resp);
@@ -890,9 +780,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[19],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyIdReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::BodyIdReq* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetSegmentationId(ctx, req, resp);
@@ -900,9 +790,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[20],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::TakePictureReq* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->TakePicture(ctx, req, resp);
@@ -910,9 +800,9 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[21],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty>(
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
+             ::grpc::ServerContext* ctx,
              const ::sapien::Renderer::server::proto::CameraParamsReq* req,
              ::sapien::Renderer::server::proto::Empty* resp) {
                return service->SetCameraParameters(ctx, req, resp);

@@ -14,719 +14,674 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-extern PROTOBUF_INTERNAL_EXPORT_render_5fserver_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_Pose_render_5fserver_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_render_5fserver_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Quat_render_5fserver_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_render_5fserver_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Vec3_render_5fserver_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_render_5fserver_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Vec4_render_5fserver_2eproto;
+
+PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace sapien {
 namespace Renderer {
 namespace server {
 namespace proto {
-class EmptyDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Empty> _instance;
-} _Empty_default_instance_;
-class IndexDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Index> _instance;
-} _Index_default_instance_;
-class IdDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Id> _instance;
-} _Id_default_instance_;
-class Vec3DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Vec3> _instance;
-} _Vec3_default_instance_;
-class Vec4DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Vec4> _instance;
-} _Vec4_default_instance_;
-class QuatDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Quat> _instance;
-} _Quat_default_instance_;
-class PoseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Pose> _instance;
-} _Pose_default_instance_;
-class IdVec3DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<IdVec3> _instance;
-} _IdVec3_default_instance_;
-class IdVec4DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<IdVec4> _instance;
-} _IdVec4_default_instance_;
-class IdFloatDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<IdFloat> _instance;
-} _IdFloat_default_instance_;
-class AddBodyMeshReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<AddBodyMeshReq> _instance;
-} _AddBodyMeshReq_default_instance_;
-class AddBodyPrimitiveReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<AddBodyPrimitiveReq> _instance;
-} _AddBodyPrimitiveReq_default_instance_;
-class RemoveBodyReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<RemoveBodyReq> _instance;
-} _RemoveBodyReq_default_instance_;
-class AddCameraReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<AddCameraReq> _instance;
-} _AddCameraReq_default_instance_;
-class RemoveCameraReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<RemoveCameraReq> _instance;
-} _RemoveCameraReq_default_instance_;
-class AddPointLightReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<AddPointLightReq> _instance;
-} _AddPointLightReq_default_instance_;
-class AddDirectionalLightReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<AddDirectionalLightReq> _instance;
-} _AddDirectionalLightReq_default_instance_;
-class RemoveLightReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<RemoveLightReq> _instance;
-} _RemoveLightReq_default_instance_;
-class EntityOrderReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<EntityOrderReq> _instance;
-} _EntityOrderReq_default_instance_;
-class UpdateRenderReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<UpdateRenderReq> _instance;
-} _UpdateRenderReq_default_instance_;
-class BodyIdReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<BodyIdReq> _instance;
-} _BodyIdReq_default_instance_;
-class TakePictureReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TakePictureReq> _instance;
-} _TakePictureReq_default_instance_;
-class UpdateRenderAndTakePicturesReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<UpdateRenderAndTakePicturesReq> _instance;
-} _UpdateRenderAndTakePicturesReq_default_instance_;
-class CameraParamsReqDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<CameraParamsReq> _instance;
-} _CameraParamsReq_default_instance_;
+PROTOBUF_CONSTEXPR Empty::Empty(
+    ::_pbi::ConstantInitialized) {}
+struct EmptyDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR EmptyDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~EmptyDefaultTypeInternal() {}
+  union {
+    Empty _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 EmptyDefaultTypeInternal _Empty_default_instance_;
+PROTOBUF_CONSTEXPR Index::Index(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.index_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct IndexDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR IndexDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~IndexDefaultTypeInternal() {}
+  union {
+    Index _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 IndexDefaultTypeInternal _Index_default_instance_;
+PROTOBUF_CONSTEXPR Id::Id(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct IdDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR IdDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~IdDefaultTypeInternal() {}
+  union {
+    Id _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 IdDefaultTypeInternal _Id_default_instance_;
+PROTOBUF_CONSTEXPR Vec3::Vec3(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.x_)*/0
+  , /*decltype(_impl_.y_)*/0
+  , /*decltype(_impl_.z_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct Vec3DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR Vec3DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~Vec3DefaultTypeInternal() {}
+  union {
+    Vec3 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 Vec3DefaultTypeInternal _Vec3_default_instance_;
+PROTOBUF_CONSTEXPR Vec4::Vec4(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.x_)*/0
+  , /*decltype(_impl_.y_)*/0
+  , /*decltype(_impl_.z_)*/0
+  , /*decltype(_impl_.w_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct Vec4DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR Vec4DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~Vec4DefaultTypeInternal() {}
+  union {
+    Vec4 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 Vec4DefaultTypeInternal _Vec4_default_instance_;
+PROTOBUF_CONSTEXPR Quat::Quat(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.w_)*/0
+  , /*decltype(_impl_.x_)*/0
+  , /*decltype(_impl_.y_)*/0
+  , /*decltype(_impl_.z_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct QuatDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR QuatDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~QuatDefaultTypeInternal() {}
+  union {
+    Quat _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 QuatDefaultTypeInternal _Quat_default_instance_;
+PROTOBUF_CONSTEXPR Pose::Pose(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.p_)*/nullptr
+  , /*decltype(_impl_.q_)*/nullptr
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct PoseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR PoseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~PoseDefaultTypeInternal() {}
+  union {
+    Pose _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PoseDefaultTypeInternal _Pose_default_instance_;
+PROTOBUF_CONSTEXPR IdVec3::IdVec3(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.data_)*/nullptr
+  , /*decltype(_impl_.id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct IdVec3DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR IdVec3DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~IdVec3DefaultTypeInternal() {}
+  union {
+    IdVec3 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 IdVec3DefaultTypeInternal _IdVec3_default_instance_;
+PROTOBUF_CONSTEXPR IdVec4::IdVec4(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.data_)*/nullptr
+  , /*decltype(_impl_.id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct IdVec4DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR IdVec4DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~IdVec4DefaultTypeInternal() {}
+  union {
+    IdVec4 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 IdVec4DefaultTypeInternal _IdVec4_default_instance_;
+PROTOBUF_CONSTEXPR IdFloat::IdFloat(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.id_)*/uint64_t{0u}
+  , /*decltype(_impl_.data_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct IdFloatDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR IdFloatDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~IdFloatDefaultTypeInternal() {}
+  union {
+    IdFloat _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 IdFloatDefaultTypeInternal _IdFloat_default_instance_;
+PROTOBUF_CONSTEXPR AddBodyMeshReq::AddBodyMeshReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.filename_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.scale_)*/nullptr
+  , /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct AddBodyMeshReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AddBodyMeshReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AddBodyMeshReqDefaultTypeInternal() {}
+  union {
+    AddBodyMeshReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AddBodyMeshReqDefaultTypeInternal _AddBodyMeshReq_default_instance_;
+PROTOBUF_CONSTEXPR AddBodyPrimitiveReq::AddBodyPrimitiveReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.scale_)*/nullptr
+  , /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.material_)*/uint64_t{0u}
+  , /*decltype(_impl_.type_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct AddBodyPrimitiveReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AddBodyPrimitiveReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AddBodyPrimitiveReqDefaultTypeInternal() {}
+  union {
+    AddBodyPrimitiveReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AddBodyPrimitiveReqDefaultTypeInternal _AddBodyPrimitiveReq_default_instance_;
+PROTOBUF_CONSTEXPR RemoveBodyReq::RemoveBodyReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.body_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct RemoveBodyReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RemoveBodyReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RemoveBodyReqDefaultTypeInternal() {}
+  union {
+    RemoveBodyReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RemoveBodyReqDefaultTypeInternal _RemoveBodyReq_default_instance_;
+PROTOBUF_CONSTEXPR AddCameraReq::AddCameraReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.shader_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.width_)*/0u
+  , /*decltype(_impl_.height_)*/0u
+  , /*decltype(_impl_.fovy_)*/0
+  , /*decltype(_impl_.near_)*/0
+  , /*decltype(_impl_.far_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct AddCameraReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AddCameraReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AddCameraReqDefaultTypeInternal() {}
+  union {
+    AddCameraReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AddCameraReqDefaultTypeInternal _AddCameraReq_default_instance_;
+PROTOBUF_CONSTEXPR RemoveCameraReq::RemoveCameraReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.camera_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct RemoveCameraReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RemoveCameraReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RemoveCameraReqDefaultTypeInternal() {}
+  union {
+    RemoveCameraReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RemoveCameraReqDefaultTypeInternal _RemoveCameraReq_default_instance_;
+PROTOBUF_CONSTEXPR AddPointLightReq::AddPointLightReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.position_)*/nullptr
+  , /*decltype(_impl_.color_)*/nullptr
+  , /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.shadow_)*/false
+  , /*decltype(_impl_.shadow_near_)*/0
+  , /*decltype(_impl_.shadow_far_)*/0
+  , /*decltype(_impl_.shadow_map_size_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct AddPointLightReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AddPointLightReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AddPointLightReqDefaultTypeInternal() {}
+  union {
+    AddPointLightReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AddPointLightReqDefaultTypeInternal _AddPointLightReq_default_instance_;
+PROTOBUF_CONSTEXPR AddDirectionalLightReq::AddDirectionalLightReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.direction_)*/nullptr
+  , /*decltype(_impl_.color_)*/nullptr
+  , /*decltype(_impl_.position_)*/nullptr
+  , /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.shadow_)*/false
+  , /*decltype(_impl_.shadow_scale_)*/0
+  , /*decltype(_impl_.shadow_near_)*/0
+  , /*decltype(_impl_.shadow_far_)*/0
+  , /*decltype(_impl_.shadow_map_size_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct AddDirectionalLightReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR AddDirectionalLightReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~AddDirectionalLightReqDefaultTypeInternal() {}
+  union {
+    AddDirectionalLightReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AddDirectionalLightReqDefaultTypeInternal _AddDirectionalLightReq_default_instance_;
+PROTOBUF_CONSTEXPR RemoveLightReq::RemoveLightReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.light_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct RemoveLightReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR RemoveLightReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~RemoveLightReqDefaultTypeInternal() {}
+  union {
+    RemoveLightReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 RemoveLightReqDefaultTypeInternal _RemoveLightReq_default_instance_;
+PROTOBUF_CONSTEXPR EntityOrderReq::EntityOrderReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.body_ids_)*/{}
+  , /*decltype(_impl_._body_ids_cached_byte_size_)*/{0}
+  , /*decltype(_impl_.camera_ids_)*/{}
+  , /*decltype(_impl_._camera_ids_cached_byte_size_)*/{0}
+  , /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct EntityOrderReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR EntityOrderReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~EntityOrderReqDefaultTypeInternal() {}
+  union {
+    EntityOrderReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 EntityOrderReqDefaultTypeInternal _EntityOrderReq_default_instance_;
+PROTOBUF_CONSTEXPR UpdateRenderReq::UpdateRenderReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.body_poses_)*/{}
+  , /*decltype(_impl_.camera_poses_)*/{}
+  , /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct UpdateRenderReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR UpdateRenderReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~UpdateRenderReqDefaultTypeInternal() {}
+  union {
+    UpdateRenderReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UpdateRenderReqDefaultTypeInternal _UpdateRenderReq_default_instance_;
+PROTOBUF_CONSTEXPR BodyIdReq::BodyIdReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.body_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.id_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct BodyIdReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR BodyIdReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~BodyIdReqDefaultTypeInternal() {}
+  union {
+    BodyIdReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BodyIdReqDefaultTypeInternal _BodyIdReq_default_instance_;
+PROTOBUF_CONSTEXPR TakePictureReq::TakePictureReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.camera_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct TakePictureReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR TakePictureReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~TakePictureReqDefaultTypeInternal() {}
+  union {
+    TakePictureReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TakePictureReqDefaultTypeInternal _TakePictureReq_default_instance_;
+PROTOBUF_CONSTEXPR UpdateRenderAndTakePicturesReq::UpdateRenderAndTakePicturesReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.body_poses_)*/{}
+  , /*decltype(_impl_.camera_poses_)*/{}
+  , /*decltype(_impl_.camera_ids_)*/{}
+  , /*decltype(_impl_._camera_ids_cached_byte_size_)*/{0}
+  , /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct UpdateRenderAndTakePicturesReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR UpdateRenderAndTakePicturesReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~UpdateRenderAndTakePicturesReqDefaultTypeInternal() {}
+  union {
+    UpdateRenderAndTakePicturesReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 UpdateRenderAndTakePicturesReqDefaultTypeInternal _UpdateRenderAndTakePicturesReq_default_instance_;
+PROTOBUF_CONSTEXPR CameraParamsReq::CameraParamsReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.camera_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.near_)*/0
+  , /*decltype(_impl_.far_)*/0
+  , /*decltype(_impl_.fx_)*/0
+  , /*decltype(_impl_.fy_)*/0
+  , /*decltype(_impl_.cx_)*/0
+  , /*decltype(_impl_.cy_)*/0
+  , /*decltype(_impl_.skew_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct CameraParamsReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR CameraParamsReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~CameraParamsReqDefaultTypeInternal() {}
+  union {
+    CameraParamsReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CameraParamsReqDefaultTypeInternal _CameraParamsReq_default_instance_;
 }  // namespace proto
 }  // namespace server
 }  // namespace Renderer
 }  // namespace sapien
-static void InitDefaultsscc_info_AddBodyMeshReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_AddBodyMeshReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::AddBodyMeshReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::AddBodyMeshReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_AddBodyMeshReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_AddBodyMeshReq_render_5fserver_2eproto}, {
-      &scc_info_Vec3_render_5fserver_2eproto.base,}};
-
-static void InitDefaultsscc_info_AddBodyPrimitiveReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_AddBodyPrimitiveReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::AddBodyPrimitiveReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::AddBodyPrimitiveReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_AddBodyPrimitiveReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_AddBodyPrimitiveReq_render_5fserver_2eproto}, {
-      &scc_info_Vec3_render_5fserver_2eproto.base,}};
-
-static void InitDefaultsscc_info_AddCameraReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_AddCameraReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::AddCameraReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::AddCameraReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_AddCameraReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_AddCameraReq_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_AddDirectionalLightReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_AddDirectionalLightReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::AddDirectionalLightReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::AddDirectionalLightReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_AddDirectionalLightReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_AddDirectionalLightReq_render_5fserver_2eproto}, {
-      &scc_info_Vec3_render_5fserver_2eproto.base,}};
-
-static void InitDefaultsscc_info_AddPointLightReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_AddPointLightReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::AddPointLightReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::AddPointLightReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_AddPointLightReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_AddPointLightReq_render_5fserver_2eproto}, {
-      &scc_info_Vec3_render_5fserver_2eproto.base,}};
-
-static void InitDefaultsscc_info_BodyIdReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_BodyIdReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::BodyIdReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::BodyIdReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_BodyIdReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_BodyIdReq_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_CameraParamsReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_CameraParamsReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::CameraParamsReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::CameraParamsReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_CameraParamsReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_CameraParamsReq_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_Empty_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_Empty_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::Empty();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::Empty::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Empty_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Empty_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_EntityOrderReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_EntityOrderReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::EntityOrderReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::EntityOrderReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_EntityOrderReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_EntityOrderReq_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_Id_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_Id_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::Id();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::Id::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Id_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Id_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_IdFloat_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_IdFloat_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::IdFloat();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::IdFloat::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_IdFloat_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_IdFloat_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_IdVec3_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_IdVec3_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::IdVec3();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::IdVec3::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_IdVec3_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_IdVec3_render_5fserver_2eproto}, {
-      &scc_info_Vec3_render_5fserver_2eproto.base,}};
-
-static void InitDefaultsscc_info_IdVec4_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_IdVec4_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::IdVec4();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::IdVec4::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_IdVec4_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_IdVec4_render_5fserver_2eproto}, {
-      &scc_info_Vec4_render_5fserver_2eproto.base,}};
-
-static void InitDefaultsscc_info_Index_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_Index_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::Index();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::Index::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Index_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Index_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_Pose_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_Pose_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::Pose();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::Pose::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_Pose_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_Pose_render_5fserver_2eproto}, {
-      &scc_info_Vec3_render_5fserver_2eproto.base,
-      &scc_info_Quat_render_5fserver_2eproto.base,}};
-
-static void InitDefaultsscc_info_Quat_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_Quat_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::Quat();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::Quat::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Quat_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Quat_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_RemoveBodyReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_RemoveBodyReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::RemoveBodyReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::RemoveBodyReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_RemoveBodyReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_RemoveBodyReq_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_RemoveCameraReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_RemoveCameraReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::RemoveCameraReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::RemoveCameraReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_RemoveCameraReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_RemoveCameraReq_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_RemoveLightReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_RemoveLightReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::RemoveLightReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::RemoveLightReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_RemoveLightReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_RemoveLightReq_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_TakePictureReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_TakePictureReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::TakePictureReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::TakePictureReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TakePictureReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TakePictureReq_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_UpdateRenderAndTakePicturesReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_UpdateRenderAndTakePicturesReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_UpdateRenderAndTakePicturesReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_UpdateRenderAndTakePicturesReq_render_5fserver_2eproto}, {
-      &scc_info_Pose_render_5fserver_2eproto.base,}};
-
-static void InitDefaultsscc_info_UpdateRenderReq_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_UpdateRenderReq_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::UpdateRenderReq();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::UpdateRenderReq::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_UpdateRenderReq_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_UpdateRenderReq_render_5fserver_2eproto}, {
-      &scc_info_Pose_render_5fserver_2eproto.base,}};
-
-static void InitDefaultsscc_info_Vec3_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_Vec3_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::Vec3();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::Vec3::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Vec3_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Vec3_render_5fserver_2eproto}, {}};
-
-static void InitDefaultsscc_info_Vec4_render_5fserver_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::sapien::Renderer::server::proto::_Vec4_default_instance_;
-    new (ptr) ::sapien::Renderer::server::proto::Vec4();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::sapien::Renderer::server::proto::Vec4::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Vec4_render_5fserver_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Vec4_render_5fserver_2eproto}, {}};
-
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_render_5fserver_2eproto[24];
-static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_render_5fserver_2eproto[1];
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_render_5fserver_2eproto = nullptr;
-
-const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_render_5fserver_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+static ::_pb::Metadata file_level_metadata_render_5fserver_2eproto[24];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_render_5fserver_2eproto[1];
+static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_render_5fserver_2eproto = nullptr;
+
+const uint32_t TableStruct_render_5fserver_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Empty, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Index, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Index, index_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Index, _impl_.index_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Id, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Id, id_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Id, _impl_.id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec3, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec3, x_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec3, y_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec3, z_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec3, _impl_.x_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec3, _impl_.y_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec3, _impl_.z_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec4, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec4, x_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec4, y_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec4, z_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec4, w_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec4, _impl_.x_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec4, _impl_.y_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec4, _impl_.z_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Vec4, _impl_.w_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Quat, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Quat, w_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Quat, x_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Quat, y_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Quat, z_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Quat, _impl_.w_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Quat, _impl_.x_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Quat, _impl_.y_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Quat, _impl_.z_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Pose, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Pose, p_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Pose, q_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Pose, _impl_.p_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Pose, _impl_.q_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec3, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec3, id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec3, data_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec3, _impl_.id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec3, _impl_.data_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec4, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec4, id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec4, data_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec4, _impl_.id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdVec4, _impl_.data_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdFloat, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdFloat, id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdFloat, data_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdFloat, _impl_.id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::IdFloat, _impl_.data_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyMeshReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyMeshReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyMeshReq, filename_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyMeshReq, scale_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyMeshReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyMeshReq, _impl_.filename_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyMeshReq, _impl_.scale_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyPrimitiveReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyPrimitiveReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyPrimitiveReq, type_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyPrimitiveReq, scale_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyPrimitiveReq, material_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyPrimitiveReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyPrimitiveReq, _impl_.type_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyPrimitiveReq, _impl_.scale_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddBodyPrimitiveReq, _impl_.material_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveBodyReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveBodyReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveBodyReq, body_id_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveBodyReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveBodyReq, _impl_.body_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, width_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, height_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, fovy_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, near_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, far_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, shader_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, _impl_.width_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, _impl_.height_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, _impl_.fovy_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, _impl_.near_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, _impl_.far_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddCameraReq, _impl_.shader_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveCameraReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveCameraReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveCameraReq, camera_id_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveCameraReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveCameraReq, _impl_.camera_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, position_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, color_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, shadow_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, shadow_near_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, shadow_far_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, shadow_map_size_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, _impl_.position_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, _impl_.color_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, _impl_.shadow_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, _impl_.shadow_near_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, _impl_.shadow_far_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddPointLightReq, _impl_.shadow_map_size_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, direction_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, color_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, shadow_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, position_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, shadow_scale_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, shadow_near_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, shadow_far_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, shadow_map_size_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _impl_.direction_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _impl_.color_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _impl_.shadow_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _impl_.position_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _impl_.shadow_scale_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _impl_.shadow_near_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _impl_.shadow_far_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::AddDirectionalLightReq, _impl_.shadow_map_size_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveLightReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveLightReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveLightReq, light_id_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveLightReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::RemoveLightReq, _impl_.light_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::EntityOrderReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::EntityOrderReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::EntityOrderReq, body_ids_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::EntityOrderReq, camera_ids_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::EntityOrderReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::EntityOrderReq, _impl_.body_ids_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::EntityOrderReq, _impl_.camera_ids_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderReq, body_poses_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderReq, camera_poses_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderReq, _impl_.body_poses_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderReq, _impl_.camera_poses_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyIdReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyIdReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyIdReq, body_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyIdReq, id_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyIdReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyIdReq, _impl_.body_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyIdReq, _impl_.id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::TakePictureReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::TakePictureReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::TakePictureReq, camera_id_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::TakePictureReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::TakePictureReq, _impl_.camera_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, body_poses_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, camera_poses_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, camera_ids_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, _impl_.body_poses_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, _impl_.camera_poses_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq, _impl_.camera_ids_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, scene_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, camera_id_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, near_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, far_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, fx_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, fy_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, cx_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, cy_),
-  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, skew_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.camera_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.near_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.far_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.fx_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.fy_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.cx_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.cy_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.skew_),
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, sizeof(::sapien::Renderer::server::proto::Empty)},
-  { 5, -1, sizeof(::sapien::Renderer::server::proto::Index)},
-  { 11, -1, sizeof(::sapien::Renderer::server::proto::Id)},
-  { 17, -1, sizeof(::sapien::Renderer::server::proto::Vec3)},
-  { 25, -1, sizeof(::sapien::Renderer::server::proto::Vec4)},
-  { 34, -1, sizeof(::sapien::Renderer::server::proto::Quat)},
-  { 43, -1, sizeof(::sapien::Renderer::server::proto::Pose)},
-  { 50, -1, sizeof(::sapien::Renderer::server::proto::IdVec3)},
-  { 57, -1, sizeof(::sapien::Renderer::server::proto::IdVec4)},
-  { 64, -1, sizeof(::sapien::Renderer::server::proto::IdFloat)},
-  { 71, -1, sizeof(::sapien::Renderer::server::proto::AddBodyMeshReq)},
-  { 79, -1, sizeof(::sapien::Renderer::server::proto::AddBodyPrimitiveReq)},
-  { 88, -1, sizeof(::sapien::Renderer::server::proto::RemoveBodyReq)},
-  { 95, -1, sizeof(::sapien::Renderer::server::proto::AddCameraReq)},
-  { 107, -1, sizeof(::sapien::Renderer::server::proto::RemoveCameraReq)},
-  { 114, -1, sizeof(::sapien::Renderer::server::proto::AddPointLightReq)},
-  { 126, -1, sizeof(::sapien::Renderer::server::proto::AddDirectionalLightReq)},
-  { 140, -1, sizeof(::sapien::Renderer::server::proto::RemoveLightReq)},
-  { 147, -1, sizeof(::sapien::Renderer::server::proto::EntityOrderReq)},
-  { 155, -1, sizeof(::sapien::Renderer::server::proto::UpdateRenderReq)},
-  { 163, -1, sizeof(::sapien::Renderer::server::proto::BodyIdReq)},
-  { 171, -1, sizeof(::sapien::Renderer::server::proto::TakePictureReq)},
-  { 178, -1, sizeof(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq)},
-  { 187, -1, sizeof(::sapien::Renderer::server::proto::CameraParamsReq)},
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+  { 0, -1, -1, sizeof(::sapien::Renderer::server::proto::Empty)},
+  { 6, -1, -1, sizeof(::sapien::Renderer::server::proto::Index)},
+  { 13, -1, -1, sizeof(::sapien::Renderer::server::proto::Id)},
+  { 20, -1, -1, sizeof(::sapien::Renderer::server::proto::Vec3)},
+  { 29, -1, -1, sizeof(::sapien::Renderer::server::proto::Vec4)},
+  { 39, -1, -1, sizeof(::sapien::Renderer::server::proto::Quat)},
+  { 49, -1, -1, sizeof(::sapien::Renderer::server::proto::Pose)},
+  { 57, -1, -1, sizeof(::sapien::Renderer::server::proto::IdVec3)},
+  { 65, -1, -1, sizeof(::sapien::Renderer::server::proto::IdVec4)},
+  { 73, -1, -1, sizeof(::sapien::Renderer::server::proto::IdFloat)},
+  { 81, -1, -1, sizeof(::sapien::Renderer::server::proto::AddBodyMeshReq)},
+  { 90, -1, -1, sizeof(::sapien::Renderer::server::proto::AddBodyPrimitiveReq)},
+  { 100, -1, -1, sizeof(::sapien::Renderer::server::proto::RemoveBodyReq)},
+  { 108, -1, -1, sizeof(::sapien::Renderer::server::proto::AddCameraReq)},
+  { 121, -1, -1, sizeof(::sapien::Renderer::server::proto::RemoveCameraReq)},
+  { 129, -1, -1, sizeof(::sapien::Renderer::server::proto::AddPointLightReq)},
+  { 142, -1, -1, sizeof(::sapien::Renderer::server::proto::AddDirectionalLightReq)},
+  { 157, -1, -1, sizeof(::sapien::Renderer::server::proto::RemoveLightReq)},
+  { 165, -1, -1, sizeof(::sapien::Renderer::server::proto::EntityOrderReq)},
+  { 174, -1, -1, sizeof(::sapien::Renderer::server::proto::UpdateRenderReq)},
+  { 183, -1, -1, sizeof(::sapien::Renderer::server::proto::BodyIdReq)},
+  { 192, -1, -1, sizeof(::sapien::Renderer::server::proto::TakePictureReq)},
+  { 200, -1, -1, sizeof(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq)},
+  { 210, -1, -1, sizeof(::sapien::Renderer::server::proto::CameraParamsReq)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_Empty_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_Index_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_Id_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_Vec3_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_Vec4_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_Quat_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_Pose_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_IdVec3_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_IdVec4_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_IdFloat_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_AddBodyMeshReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_AddBodyPrimitiveReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_RemoveBodyReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_AddCameraReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_RemoveCameraReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_AddPointLightReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_AddDirectionalLightReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_RemoveLightReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_EntityOrderReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_UpdateRenderReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_BodyIdReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_TakePictureReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_UpdateRenderAndTakePicturesReq_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::sapien::Renderer::server::proto::_CameraParamsReq_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::sapien::Renderer::server::proto::_Empty_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_Index_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_Id_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_Vec3_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_Vec4_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_Quat_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_Pose_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_IdVec3_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_IdVec4_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_IdFloat_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_AddBodyMeshReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_AddBodyPrimitiveReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_RemoveBodyReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_AddCameraReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_RemoveCameraReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_AddPointLightReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_AddDirectionalLightReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_RemoveLightReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_EntityOrderReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_UpdateRenderReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_BodyIdReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_TakePictureReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_UpdateRenderAndTakePicturesReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_CameraParamsReq_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_render_5fserver_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -845,44 +800,21 @@ const char descriptor_table_protodef_render_5fserver_2eproto[] PROTOBUF_SECTION_
   "aramsReq\032#.sapien.Renderer.server.proto."
   "Emptyb\006proto3"
   ;
-static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_render_5fserver_2eproto_deps[1] = {
+static ::_pbi::once_flag descriptor_table_render_5fserver_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_render_5fserver_2eproto = {
+    false, false, 4533, descriptor_table_protodef_render_5fserver_2eproto,
+    "render_server.proto",
+    &descriptor_table_render_5fserver_2eproto_once, nullptr, 0, 24,
+    schemas, file_default_instances, TableStruct_render_5fserver_2eproto::offsets,
+    file_level_metadata_render_5fserver_2eproto, file_level_enum_descriptors_render_5fserver_2eproto,
+    file_level_service_descriptors_render_5fserver_2eproto,
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_render_5fserver_2eproto_sccs[24] = {
-  &scc_info_AddBodyMeshReq_render_5fserver_2eproto.base,
-  &scc_info_AddBodyPrimitiveReq_render_5fserver_2eproto.base,
-  &scc_info_AddCameraReq_render_5fserver_2eproto.base,
-  &scc_info_AddDirectionalLightReq_render_5fserver_2eproto.base,
-  &scc_info_AddPointLightReq_render_5fserver_2eproto.base,
-  &scc_info_BodyIdReq_render_5fserver_2eproto.base,
-  &scc_info_CameraParamsReq_render_5fserver_2eproto.base,
-  &scc_info_Empty_render_5fserver_2eproto.base,
-  &scc_info_EntityOrderReq_render_5fserver_2eproto.base,
-  &scc_info_Id_render_5fserver_2eproto.base,
-  &scc_info_IdFloat_render_5fserver_2eproto.base,
-  &scc_info_IdVec3_render_5fserver_2eproto.base,
-  &scc_info_IdVec4_render_5fserver_2eproto.base,
-  &scc_info_Index_render_5fserver_2eproto.base,
-  &scc_info_Pose_render_5fserver_2eproto.base,
-  &scc_info_Quat_render_5fserver_2eproto.base,
-  &scc_info_RemoveBodyReq_render_5fserver_2eproto.base,
-  &scc_info_RemoveCameraReq_render_5fserver_2eproto.base,
-  &scc_info_RemoveLightReq_render_5fserver_2eproto.base,
-  &scc_info_TakePictureReq_render_5fserver_2eproto.base,
-  &scc_info_UpdateRenderAndTakePicturesReq_render_5fserver_2eproto.base,
-  &scc_info_UpdateRenderReq_render_5fserver_2eproto.base,
-  &scc_info_Vec3_render_5fserver_2eproto.base,
-  &scc_info_Vec4_render_5fserver_2eproto.base,
-};
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_render_5fserver_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_render_5fserver_2eproto = {
-  false, false, descriptor_table_protodef_render_5fserver_2eproto, "render_server.proto", 4533,
-  &descriptor_table_render_5fserver_2eproto_once, descriptor_table_render_5fserver_2eproto_sccs, descriptor_table_render_5fserver_2eproto_deps, 24, 0,
-  schemas, file_default_instances, TableStruct_render_5fserver_2eproto::offsets,
-  file_level_metadata_render_5fserver_2eproto, 24, file_level_enum_descriptors_render_5fserver_2eproto, file_level_service_descriptors_render_5fserver_2eproto,
-};
+PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_render_5fserver_2eproto_getter() {
+  return &descriptor_table_render_5fserver_2eproto;
+}
 
 // Force running AddDescriptors() at dynamic initialization time.
-static bool dynamic_init_dummy_render_5fserver_2eproto = (static_cast<void>(::PROTOBUF_NAMESPACE_ID::internal::AddDescriptors(&descriptor_table_render_5fserver_2eproto)), true);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_render_5fserver_2eproto(&descriptor_table_render_5fserver_2eproto);
 namespace sapien {
 namespace Renderer {
 namespace server {
@@ -906,280 +838,156 @@ bool PrimitiveType_IsValid(int value) {
 
 // ===================================================================
 
-void Empty::InitAsDefaultInstance() {
-}
 class Empty::_Internal {
  public:
 };
 
-Empty::Empty(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+Empty::Empty(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase(arena, is_message_owned) {
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.Empty)
 }
 Empty::Empty(const Empty& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  : ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase() {
+  Empty* const _this = this; (void)_this;
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.Empty)
 }
 
-void Empty::SharedCtor() {
-}
-
-Empty::~Empty() {
-  // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.Empty)
-  SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
-
-void Empty::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-}
-
-void Empty::ArenaDtor(void* object) {
-  Empty* _this = reinterpret_cast< Empty* >(object);
-  (void)_this;
-}
-void Empty::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
-void Empty::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
-}
-const Empty& Empty::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Empty_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
 
 
-void Empty::Clear() {
-// @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.Empty)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
 
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
-}
 
-const char* Empty::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
-  while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-  }  // while
-success:
-  return ptr;
-failure:
-  ptr = nullptr;
-  goto success;
-#undef CHK_
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Empty::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::CopyImpl,
+    ::PROTOBUF_NAMESPACE_ID::internal::ZeroFieldsBase::MergeImpl,
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Empty::GetClassData() const { return &_class_data_; }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Empty::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.Empty)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  (void) cached_has_bits;
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
-  }
-  // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.Empty)
-  return target;
-}
 
-size_t Empty::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.Empty)
-  size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void) cached_has_bits;
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
-}
 
-void Empty::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.Empty)
-  GOOGLE_DCHECK_NE(&from, this);
-  const Empty* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Empty>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.Empty)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.Empty)
-    MergeFrom(*source);
-  }
-}
-
-void Empty::MergeFrom(const Empty& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Empty)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
-  (void) cached_has_bits;
-
-}
-
-void Empty::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.Empty)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-void Empty::CopyFrom(const Empty& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:sapien.Renderer.server.proto.Empty)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
-}
-
-bool Empty::IsInitialized() const {
-  return true;
-}
-
-void Empty::InternalSwap(Empty* other) {
-  using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-}
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Empty::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[0]);
 }
-
 
 // ===================================================================
 
-void Index::InitAsDefaultInstance() {
-}
 class Index::_Internal {
  public:
 };
 
-Index::Index(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+Index::Index(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.Index)
 }
 Index::Index(const Index& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Index* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.index_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  index_ = from.index_;
+  _this->_impl_.index_ = from._impl_.index_;
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.Index)
 }
 
-void Index::SharedCtor() {
-  index_ = PROTOBUF_ULONGLONG(0);
+inline void Index::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.index_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 Index::~Index() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.Index)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void Index::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void Index::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void Index::ArenaDtor(void* object) {
-  Index* _this = reinterpret_cast< Index* >(object);
-  (void)_this;
-}
-void Index::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Index::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const Index& Index::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Index_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void Index::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.Index)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  index_ = PROTOBUF_ULONGLONG(0);
+  _impl_.index_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Index::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Index::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 index = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.index_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Index::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* Index::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.Index)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 index = 1;
-  if (this->index() != 0) {
+  if (this->_internal_index() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_index(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_index(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.Index)
@@ -1190,58 +998,37 @@ size_t Index::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.Index)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 index = 1;
-  if (this->index() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_index());
+  if (this->_internal_index() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_index());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void Index::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.Index)
-  GOOGLE_DCHECK_NE(&from, this);
-  const Index* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Index>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.Index)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.Index)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Index::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    Index::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Index::GetClassData() const { return &_class_data_; }
 
-void Index::MergeFrom(const Index& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Index)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void Index::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Index*>(&to_msg);
+  auto& from = static_cast<const Index&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Index)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.index() != 0) {
-    _internal_set_index(from._internal_index());
+  if (from._internal_index() != 0) {
+    _this->_internal_set_index(from._internal_index());
   }
-}
-
-void Index::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.Index)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Index::CopyFrom(const Index& from) {
@@ -1257,126 +1044,128 @@ bool Index::IsInitialized() const {
 
 void Index::InternalSwap(Index* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  swap(index_, other->index_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_.index_, other->_impl_.index_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Index::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[1]);
 }
-
 
 // ===================================================================
 
-void Id::InitAsDefaultInstance() {
-}
 class Id::_Internal {
  public:
 };
 
-Id::Id(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+Id::Id(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.Id)
 }
 Id::Id(const Id& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Id* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  id_ = from.id_;
+  _this->_impl_.id_ = from._impl_.id_;
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.Id)
 }
 
-void Id::SharedCtor() {
-  id_ = PROTOBUF_ULONGLONG(0);
+inline void Id::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 Id::~Id() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.Id)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void Id::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void Id::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void Id::ArenaDtor(void* object) {
-  Id* _this = reinterpret_cast< Id* >(object);
-  (void)_this;
-}
-void Id::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Id::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const Id& Id::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Id_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void Id::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.Id)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  id_ = PROTOBUF_ULONGLONG(0);
+  _impl_.id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Id::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Id::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Id::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* Id::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.Id)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 id = 1;
-  if (this->id() != 0) {
+  if (this->_internal_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.Id)
@@ -1387,58 +1176,37 @@ size_t Id::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.Id)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 id = 1;
-  if (this->id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_id());
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void Id::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.Id)
-  GOOGLE_DCHECK_NE(&from, this);
-  const Id* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Id>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.Id)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.Id)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Id::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    Id::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Id::GetClassData() const { return &_class_data_; }
 
-void Id::MergeFrom(const Id& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Id)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void Id::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Id*>(&to_msg);
+  auto& from = static_cast<const Id&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Id)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.id() != 0) {
-    _internal_set_id(from._internal_id());
+  if (from._internal_id() != 0) {
+    _this->_internal_set_id(from._internal_id());
   }
-}
-
-void Id::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.Id)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Id::CopyFrom(const Id& from) {
@@ -1454,158 +1222,176 @@ bool Id::IsInitialized() const {
 
 void Id::InternalSwap(Id* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  swap(id_, other->id_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_.id_, other->_impl_.id_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Id::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[2]);
 }
-
 
 // ===================================================================
 
-void Vec3::InitAsDefaultInstance() {
-}
 class Vec3::_Internal {
  public:
 };
 
-Vec3::Vec3(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+Vec3::Vec3(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.Vec3)
 }
 Vec3::Vec3(const Vec3& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Vec3* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.x_){}
+    , decltype(_impl_.y_){}
+    , decltype(_impl_.z_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&x_, &from.x_,
-    static_cast<size_t>(reinterpret_cast<char*>(&z_) -
-    reinterpret_cast<char*>(&x_)) + sizeof(z_));
+  ::memcpy(&_impl_.x_, &from._impl_.x_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.z_) -
+    reinterpret_cast<char*>(&_impl_.x_)) + sizeof(_impl_.z_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.Vec3)
 }
 
-void Vec3::SharedCtor() {
-  ::memset(&x_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&z_) -
-      reinterpret_cast<char*>(&x_)) + sizeof(z_));
+inline void Vec3::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.x_){0}
+    , decltype(_impl_.y_){0}
+    , decltype(_impl_.z_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 Vec3::~Vec3() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.Vec3)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void Vec3::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void Vec3::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void Vec3::ArenaDtor(void* object) {
-  Vec3* _this = reinterpret_cast< Vec3* >(object);
-  (void)_this;
-}
-void Vec3::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Vec3::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const Vec3& Vec3::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Vec3_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void Vec3::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.Vec3)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&x_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&z_) -
-      reinterpret_cast<char*>(&x_)) + sizeof(z_));
+  ::memset(&_impl_.x_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.z_) -
+      reinterpret_cast<char*>(&_impl_.x_)) + sizeof(_impl_.z_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Vec3::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Vec3::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // float x = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 13)) {
-          x_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 13)) {
+          _impl_.x_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float y = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 21)) {
-          y_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 21)) {
+          _impl_.y_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float z = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 29)) {
-          z_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 29)) {
+          _impl_.z_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Vec3::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* Vec3::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.Vec3)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // float x = 1;
-  if (!(this->x() <= 0 && this->x() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_x = this->_internal_x();
+  uint32_t raw_x;
+  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
+  if (raw_x != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(1, this->_internal_x(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(1, this->_internal_x(), target);
   }
 
   // float y = 2;
-  if (!(this->y() <= 0 && this->y() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_y = this->_internal_y();
+  uint32_t raw_y;
+  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
+  if (raw_y != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(2, this->_internal_y(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(2, this->_internal_y(), target);
   }
 
   // float z = 3;
-  if (!(this->z() <= 0 && this->z() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_z = this->_internal_z();
+  uint32_t raw_z;
+  memcpy(&raw_z, &tmp_z, sizeof(tmp_z));
+  if (raw_z != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(3, this->_internal_z(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(3, this->_internal_z(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.Vec3)
@@ -1616,72 +1402,77 @@ size_t Vec3::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.Vec3)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // float x = 1;
-  if (!(this->x() <= 0 && this->x() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_x = this->_internal_x();
+  uint32_t raw_x;
+  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
+  if (raw_x != 0) {
     total_size += 1 + 4;
   }
 
   // float y = 2;
-  if (!(this->y() <= 0 && this->y() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_y = this->_internal_y();
+  uint32_t raw_y;
+  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
+  if (raw_y != 0) {
     total_size += 1 + 4;
   }
 
   // float z = 3;
-  if (!(this->z() <= 0 && this->z() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_z = this->_internal_z();
+  uint32_t raw_z;
+  memcpy(&raw_z, &tmp_z, sizeof(tmp_z));
+  if (raw_z != 0) {
     total_size += 1 + 4;
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void Vec3::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.Vec3)
-  GOOGLE_DCHECK_NE(&from, this);
-  const Vec3* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Vec3>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.Vec3)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.Vec3)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Vec3::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    Vec3::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Vec3::GetClassData() const { return &_class_data_; }
 
-void Vec3::MergeFrom(const Vec3& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Vec3)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void Vec3::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Vec3*>(&to_msg);
+  auto& from = static_cast<const Vec3&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Vec3)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (!(from.x() <= 0 && from.x() >= 0)) {
-    _internal_set_x(from._internal_x());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_x = from._internal_x();
+  uint32_t raw_x;
+  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
+  if (raw_x != 0) {
+    _this->_internal_set_x(from._internal_x());
   }
-  if (!(from.y() <= 0 && from.y() >= 0)) {
-    _internal_set_y(from._internal_y());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_y = from._internal_y();
+  uint32_t raw_y;
+  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
+  if (raw_y != 0) {
+    _this->_internal_set_y(from._internal_y());
   }
-  if (!(from.z() <= 0 && from.z() >= 0)) {
-    _internal_set_z(from._internal_z());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_z = from._internal_z();
+  uint32_t raw_z;
+  memcpy(&raw_z, &tmp_z, sizeof(tmp_z));
+  if (raw_z != 0) {
+    _this->_internal_set_z(from._internal_z());
   }
-}
-
-void Vec3::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.Vec3)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Vec3::CopyFrom(const Vec3& from) {
@@ -1697,176 +1488,201 @@ bool Vec3::IsInitialized() const {
 
 void Vec3::InternalSwap(Vec3* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Vec3, z_)
-      + sizeof(Vec3::z_)
-      - PROTOBUF_FIELD_OFFSET(Vec3, x_)>(
-          reinterpret_cast<char*>(&x_),
-          reinterpret_cast<char*>(&other->x_));
+      PROTOBUF_FIELD_OFFSET(Vec3, _impl_.z_)
+      + sizeof(Vec3::_impl_.z_)
+      - PROTOBUF_FIELD_OFFSET(Vec3, _impl_.x_)>(
+          reinterpret_cast<char*>(&_impl_.x_),
+          reinterpret_cast<char*>(&other->_impl_.x_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Vec3::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[3]);
 }
-
 
 // ===================================================================
 
-void Vec4::InitAsDefaultInstance() {
-}
 class Vec4::_Internal {
  public:
 };
 
-Vec4::Vec4(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+Vec4::Vec4(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.Vec4)
 }
 Vec4::Vec4(const Vec4& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Vec4* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.x_){}
+    , decltype(_impl_.y_){}
+    , decltype(_impl_.z_){}
+    , decltype(_impl_.w_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&x_, &from.x_,
-    static_cast<size_t>(reinterpret_cast<char*>(&w_) -
-    reinterpret_cast<char*>(&x_)) + sizeof(w_));
+  ::memcpy(&_impl_.x_, &from._impl_.x_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.w_) -
+    reinterpret_cast<char*>(&_impl_.x_)) + sizeof(_impl_.w_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.Vec4)
 }
 
-void Vec4::SharedCtor() {
-  ::memset(&x_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&w_) -
-      reinterpret_cast<char*>(&x_)) + sizeof(w_));
+inline void Vec4::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.x_){0}
+    , decltype(_impl_.y_){0}
+    , decltype(_impl_.z_){0}
+    , decltype(_impl_.w_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 Vec4::~Vec4() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.Vec4)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void Vec4::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void Vec4::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void Vec4::ArenaDtor(void* object) {
-  Vec4* _this = reinterpret_cast< Vec4* >(object);
-  (void)_this;
-}
-void Vec4::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Vec4::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const Vec4& Vec4::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Vec4_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void Vec4::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.Vec4)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&x_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&w_) -
-      reinterpret_cast<char*>(&x_)) + sizeof(w_));
+  ::memset(&_impl_.x_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.w_) -
+      reinterpret_cast<char*>(&_impl_.x_)) + sizeof(_impl_.w_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Vec4::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Vec4::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // float x = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 13)) {
-          x_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 13)) {
+          _impl_.x_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float y = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 21)) {
-          y_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 21)) {
+          _impl_.y_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float z = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 29)) {
-          z_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 29)) {
+          _impl_.z_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float w = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 37)) {
-          w_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 37)) {
+          _impl_.w_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Vec4::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* Vec4::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.Vec4)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // float x = 1;
-  if (!(this->x() <= 0 && this->x() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_x = this->_internal_x();
+  uint32_t raw_x;
+  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
+  if (raw_x != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(1, this->_internal_x(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(1, this->_internal_x(), target);
   }
 
   // float y = 2;
-  if (!(this->y() <= 0 && this->y() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_y = this->_internal_y();
+  uint32_t raw_y;
+  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
+  if (raw_y != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(2, this->_internal_y(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(2, this->_internal_y(), target);
   }
 
   // float z = 3;
-  if (!(this->z() <= 0 && this->z() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_z = this->_internal_z();
+  uint32_t raw_z;
+  memcpy(&raw_z, &tmp_z, sizeof(tmp_z));
+  if (raw_z != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(3, this->_internal_z(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(3, this->_internal_z(), target);
   }
 
   // float w = 4;
-  if (!(this->w() <= 0 && this->w() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_w = this->_internal_w();
+  uint32_t raw_w;
+  memcpy(&raw_w, &tmp_w, sizeof(tmp_w));
+  if (raw_w != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(4, this->_internal_w(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(4, this->_internal_w(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.Vec4)
@@ -1877,80 +1693,93 @@ size_t Vec4::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.Vec4)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // float x = 1;
-  if (!(this->x() <= 0 && this->x() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_x = this->_internal_x();
+  uint32_t raw_x;
+  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
+  if (raw_x != 0) {
     total_size += 1 + 4;
   }
 
   // float y = 2;
-  if (!(this->y() <= 0 && this->y() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_y = this->_internal_y();
+  uint32_t raw_y;
+  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
+  if (raw_y != 0) {
     total_size += 1 + 4;
   }
 
   // float z = 3;
-  if (!(this->z() <= 0 && this->z() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_z = this->_internal_z();
+  uint32_t raw_z;
+  memcpy(&raw_z, &tmp_z, sizeof(tmp_z));
+  if (raw_z != 0) {
     total_size += 1 + 4;
   }
 
   // float w = 4;
-  if (!(this->w() <= 0 && this->w() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_w = this->_internal_w();
+  uint32_t raw_w;
+  memcpy(&raw_w, &tmp_w, sizeof(tmp_w));
+  if (raw_w != 0) {
     total_size += 1 + 4;
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void Vec4::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.Vec4)
-  GOOGLE_DCHECK_NE(&from, this);
-  const Vec4* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Vec4>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.Vec4)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.Vec4)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Vec4::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    Vec4::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Vec4::GetClassData() const { return &_class_data_; }
 
-void Vec4::MergeFrom(const Vec4& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Vec4)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void Vec4::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Vec4*>(&to_msg);
+  auto& from = static_cast<const Vec4&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Vec4)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (!(from.x() <= 0 && from.x() >= 0)) {
-    _internal_set_x(from._internal_x());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_x = from._internal_x();
+  uint32_t raw_x;
+  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
+  if (raw_x != 0) {
+    _this->_internal_set_x(from._internal_x());
   }
-  if (!(from.y() <= 0 && from.y() >= 0)) {
-    _internal_set_y(from._internal_y());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_y = from._internal_y();
+  uint32_t raw_y;
+  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
+  if (raw_y != 0) {
+    _this->_internal_set_y(from._internal_y());
   }
-  if (!(from.z() <= 0 && from.z() >= 0)) {
-    _internal_set_z(from._internal_z());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_z = from._internal_z();
+  uint32_t raw_z;
+  memcpy(&raw_z, &tmp_z, sizeof(tmp_z));
+  if (raw_z != 0) {
+    _this->_internal_set_z(from._internal_z());
   }
-  if (!(from.w() <= 0 && from.w() >= 0)) {
-    _internal_set_w(from._internal_w());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_w = from._internal_w();
+  uint32_t raw_w;
+  memcpy(&raw_w, &tmp_w, sizeof(tmp_w));
+  if (raw_w != 0) {
+    _this->_internal_set_w(from._internal_w());
   }
-}
-
-void Vec4::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.Vec4)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Vec4::CopyFrom(const Vec4& from) {
@@ -1966,176 +1795,201 @@ bool Vec4::IsInitialized() const {
 
 void Vec4::InternalSwap(Vec4* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Vec4, w_)
-      + sizeof(Vec4::w_)
-      - PROTOBUF_FIELD_OFFSET(Vec4, x_)>(
-          reinterpret_cast<char*>(&x_),
-          reinterpret_cast<char*>(&other->x_));
+      PROTOBUF_FIELD_OFFSET(Vec4, _impl_.w_)
+      + sizeof(Vec4::_impl_.w_)
+      - PROTOBUF_FIELD_OFFSET(Vec4, _impl_.x_)>(
+          reinterpret_cast<char*>(&_impl_.x_),
+          reinterpret_cast<char*>(&other->_impl_.x_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Vec4::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[4]);
 }
-
 
 // ===================================================================
 
-void Quat::InitAsDefaultInstance() {
-}
 class Quat::_Internal {
  public:
 };
 
-Quat::Quat(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+Quat::Quat(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.Quat)
 }
 Quat::Quat(const Quat& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Quat* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.w_){}
+    , decltype(_impl_.x_){}
+    , decltype(_impl_.y_){}
+    , decltype(_impl_.z_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&w_, &from.w_,
-    static_cast<size_t>(reinterpret_cast<char*>(&z_) -
-    reinterpret_cast<char*>(&w_)) + sizeof(z_));
+  ::memcpy(&_impl_.w_, &from._impl_.w_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.z_) -
+    reinterpret_cast<char*>(&_impl_.w_)) + sizeof(_impl_.z_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.Quat)
 }
 
-void Quat::SharedCtor() {
-  ::memset(&w_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&z_) -
-      reinterpret_cast<char*>(&w_)) + sizeof(z_));
+inline void Quat::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.w_){0}
+    , decltype(_impl_.x_){0}
+    , decltype(_impl_.y_){0}
+    , decltype(_impl_.z_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 Quat::~Quat() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.Quat)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void Quat::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void Quat::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void Quat::ArenaDtor(void* object) {
-  Quat* _this = reinterpret_cast< Quat* >(object);
-  (void)_this;
-}
-void Quat::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Quat::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const Quat& Quat::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Quat_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void Quat::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.Quat)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&w_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&z_) -
-      reinterpret_cast<char*>(&w_)) + sizeof(z_));
+  ::memset(&_impl_.w_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.z_) -
+      reinterpret_cast<char*>(&_impl_.w_)) + sizeof(_impl_.z_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Quat::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Quat::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // float w = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 13)) {
-          w_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 13)) {
+          _impl_.w_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float x = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 21)) {
-          x_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 21)) {
+          _impl_.x_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float y = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 29)) {
-          y_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 29)) {
+          _impl_.y_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float z = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 37)) {
-          z_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 37)) {
+          _impl_.z_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Quat::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* Quat::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.Quat)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // float w = 1;
-  if (!(this->w() <= 0 && this->w() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_w = this->_internal_w();
+  uint32_t raw_w;
+  memcpy(&raw_w, &tmp_w, sizeof(tmp_w));
+  if (raw_w != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(1, this->_internal_w(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(1, this->_internal_w(), target);
   }
 
   // float x = 2;
-  if (!(this->x() <= 0 && this->x() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_x = this->_internal_x();
+  uint32_t raw_x;
+  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
+  if (raw_x != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(2, this->_internal_x(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(2, this->_internal_x(), target);
   }
 
   // float y = 3;
-  if (!(this->y() <= 0 && this->y() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_y = this->_internal_y();
+  uint32_t raw_y;
+  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
+  if (raw_y != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(3, this->_internal_y(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(3, this->_internal_y(), target);
   }
 
   // float z = 4;
-  if (!(this->z() <= 0 && this->z() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_z = this->_internal_z();
+  uint32_t raw_z;
+  memcpy(&raw_z, &tmp_z, sizeof(tmp_z));
+  if (raw_z != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(4, this->_internal_z(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(4, this->_internal_z(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.Quat)
@@ -2146,80 +2000,93 @@ size_t Quat::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.Quat)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // float w = 1;
-  if (!(this->w() <= 0 && this->w() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_w = this->_internal_w();
+  uint32_t raw_w;
+  memcpy(&raw_w, &tmp_w, sizeof(tmp_w));
+  if (raw_w != 0) {
     total_size += 1 + 4;
   }
 
   // float x = 2;
-  if (!(this->x() <= 0 && this->x() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_x = this->_internal_x();
+  uint32_t raw_x;
+  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
+  if (raw_x != 0) {
     total_size += 1 + 4;
   }
 
   // float y = 3;
-  if (!(this->y() <= 0 && this->y() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_y = this->_internal_y();
+  uint32_t raw_y;
+  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
+  if (raw_y != 0) {
     total_size += 1 + 4;
   }
 
   // float z = 4;
-  if (!(this->z() <= 0 && this->z() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_z = this->_internal_z();
+  uint32_t raw_z;
+  memcpy(&raw_z, &tmp_z, sizeof(tmp_z));
+  if (raw_z != 0) {
     total_size += 1 + 4;
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void Quat::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.Quat)
-  GOOGLE_DCHECK_NE(&from, this);
-  const Quat* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Quat>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.Quat)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.Quat)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Quat::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    Quat::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Quat::GetClassData() const { return &_class_data_; }
 
-void Quat::MergeFrom(const Quat& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Quat)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void Quat::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Quat*>(&to_msg);
+  auto& from = static_cast<const Quat&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Quat)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (!(from.w() <= 0 && from.w() >= 0)) {
-    _internal_set_w(from._internal_w());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_w = from._internal_w();
+  uint32_t raw_w;
+  memcpy(&raw_w, &tmp_w, sizeof(tmp_w));
+  if (raw_w != 0) {
+    _this->_internal_set_w(from._internal_w());
   }
-  if (!(from.x() <= 0 && from.x() >= 0)) {
-    _internal_set_x(from._internal_x());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_x = from._internal_x();
+  uint32_t raw_x;
+  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
+  if (raw_x != 0) {
+    _this->_internal_set_x(from._internal_x());
   }
-  if (!(from.y() <= 0 && from.y() >= 0)) {
-    _internal_set_y(from._internal_y());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_y = from._internal_y();
+  uint32_t raw_y;
+  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
+  if (raw_y != 0) {
+    _this->_internal_set_y(from._internal_y());
   }
-  if (!(from.z() <= 0 && from.z() >= 0)) {
-    _internal_set_z(from._internal_z());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_z = from._internal_z();
+  uint32_t raw_z;
+  memcpy(&raw_z, &tmp_z, sizeof(tmp_z));
+  if (raw_z != 0) {
+    _this->_internal_set_z(from._internal_z());
   }
-}
-
-void Quat::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.Quat)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Quat::CopyFrom(const Quat& from) {
@@ -2235,28 +2102,23 @@ bool Quat::IsInitialized() const {
 
 void Quat::InternalSwap(Quat* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Quat, z_)
-      + sizeof(Quat::z_)
-      - PROTOBUF_FIELD_OFFSET(Quat, w_)>(
-          reinterpret_cast<char*>(&w_),
-          reinterpret_cast<char*>(&other->w_));
+      PROTOBUF_FIELD_OFFSET(Quat, _impl_.z_)
+      + sizeof(Quat::_impl_.z_)
+      - PROTOBUF_FIELD_OFFSET(Quat, _impl_.w_)>(
+          reinterpret_cast<char*>(&_impl_.w_),
+          reinterpret_cast<char*>(&other->_impl_.w_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Quat::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[5]);
 }
-
 
 // ===================================================================
 
-void Pose::InitAsDefaultInstance() {
-  ::sapien::Renderer::server::proto::_Pose_default_instance_._instance.get_mutable()->p_ = const_cast< ::sapien::Renderer::server::proto::Vec3*>(
-      ::sapien::Renderer::server::proto::Vec3::internal_default_instance());
-  ::sapien::Renderer::server::proto::_Pose_default_instance_._instance.get_mutable()->q_ = const_cast< ::sapien::Renderer::server::proto::Quat*>(
-      ::sapien::Renderer::server::proto::Quat::internal_default_instance());
-}
 class Pose::_Internal {
  public:
   static const ::sapien::Renderer::server::proto::Vec3& p(const Pose* msg);
@@ -2265,153 +2127,150 @@ class Pose::_Internal {
 
 const ::sapien::Renderer::server::proto::Vec3&
 Pose::_Internal::p(const Pose* msg) {
-  return *msg->p_;
+  return *msg->_impl_.p_;
 }
 const ::sapien::Renderer::server::proto::Quat&
 Pose::_Internal::q(const Pose* msg) {
-  return *msg->q_;
+  return *msg->_impl_.q_;
 }
-Pose::Pose(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+Pose::Pose(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.Pose)
 }
 Pose::Pose(const Pose& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Pose* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.p_){nullptr}
+    , decltype(_impl_.q_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_p()) {
-    p_ = new ::sapien::Renderer::server::proto::Vec3(*from.p_);
-  } else {
-    p_ = nullptr;
+    _this->_impl_.p_ = new ::sapien::Renderer::server::proto::Vec3(*from._impl_.p_);
   }
   if (from._internal_has_q()) {
-    q_ = new ::sapien::Renderer::server::proto::Quat(*from.q_);
-  } else {
-    q_ = nullptr;
+    _this->_impl_.q_ = new ::sapien::Renderer::server::proto::Quat(*from._impl_.q_);
   }
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.Pose)
 }
 
-void Pose::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_Pose_render_5fserver_2eproto.base);
-  ::memset(&p_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&q_) -
-      reinterpret_cast<char*>(&p_)) + sizeof(q_));
+inline void Pose::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.p_){nullptr}
+    , decltype(_impl_.q_){nullptr}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 Pose::~Pose() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.Pose)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void Pose::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  if (this != internal_default_instance()) delete p_;
-  if (this != internal_default_instance()) delete q_;
+inline void Pose::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.p_;
+  if (this != internal_default_instance()) delete _impl_.q_;
 }
 
-void Pose::ArenaDtor(void* object) {
-  Pose* _this = reinterpret_cast< Pose* >(object);
-  (void)_this;
-}
-void Pose::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void Pose::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const Pose& Pose::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Pose_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void Pose::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.Pose)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArena() == nullptr && p_ != nullptr) {
-    delete p_;
+  if (GetArenaForAllocation() == nullptr && _impl_.p_ != nullptr) {
+    delete _impl_.p_;
   }
-  p_ = nullptr;
-  if (GetArena() == nullptr && q_ != nullptr) {
-    delete q_;
+  _impl_.p_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.q_ != nullptr) {
+    delete _impl_.q_;
   }
-  q_ = nullptr;
+  _impl_.q_ = nullptr;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* Pose::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* Pose::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // .sapien.Renderer.server.proto.Vec3 p = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_p(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Quat q = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_q(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* Pose::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* Pose::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.Pose)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // .sapien.Renderer.server.proto.Vec3 p = 1;
-  if (this->has_p()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_p()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        1, _Internal::p(this), target, stream);
+      InternalWriteMessage(1, _Internal::p(this),
+        _Internal::p(this).GetCachedSize(), target, stream);
   }
 
   // .sapien.Renderer.server.proto.Quat q = 2;
-  if (this->has_q()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_q()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::q(this), target, stream);
+      InternalWriteMessage(2, _Internal::q(this),
+        _Internal::q(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.Pose)
@@ -2422,68 +2281,51 @@ size_t Pose::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.Pose)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // .sapien.Renderer.server.proto.Vec3 p = 1;
-  if (this->has_p()) {
+  if (this->_internal_has_p()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *p_);
+        *_impl_.p_);
   }
 
   // .sapien.Renderer.server.proto.Quat q = 2;
-  if (this->has_q()) {
+  if (this->_internal_has_q()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *q_);
+        *_impl_.q_);
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void Pose::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.Pose)
-  GOOGLE_DCHECK_NE(&from, this);
-  const Pose* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Pose>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.Pose)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.Pose)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Pose::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    Pose::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Pose::GetClassData() const { return &_class_data_; }
 
-void Pose::MergeFrom(const Pose& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Pose)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void Pose::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Pose*>(&to_msg);
+  auto& from = static_cast<const Pose&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Pose)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.has_p()) {
-    _internal_mutable_p()->::sapien::Renderer::server::proto::Vec3::MergeFrom(from._internal_p());
+  if (from._internal_has_p()) {
+    _this->_internal_mutable_p()->::sapien::Renderer::server::proto::Vec3::MergeFrom(
+        from._internal_p());
   }
-  if (from.has_q()) {
-    _internal_mutable_q()->::sapien::Renderer::server::proto::Quat::MergeFrom(from._internal_q());
+  if (from._internal_has_q()) {
+    _this->_internal_mutable_q()->::sapien::Renderer::server::proto::Quat::MergeFrom(
+        from._internal_q());
   }
-}
-
-void Pose::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.Pose)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Pose::CopyFrom(const Pose& from) {
@@ -2499,26 +2341,23 @@ bool Pose::IsInitialized() const {
 
 void Pose::InternalSwap(Pose* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Pose, q_)
-      + sizeof(Pose::q_)
-      - PROTOBUF_FIELD_OFFSET(Pose, p_)>(
-          reinterpret_cast<char*>(&p_),
-          reinterpret_cast<char*>(&other->p_));
+      PROTOBUF_FIELD_OFFSET(Pose, _impl_.q_)
+      + sizeof(Pose::_impl_.q_)
+      - PROTOBUF_FIELD_OFFSET(Pose, _impl_.p_)>(
+          reinterpret_cast<char*>(&_impl_.p_),
+          reinterpret_cast<char*>(&other->_impl_.p_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Pose::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[6]);
 }
-
 
 // ===================================================================
 
-void IdVec3::InitAsDefaultInstance() {
-  ::sapien::Renderer::server::proto::_IdVec3_default_instance_._instance.get_mutable()->data_ = const_cast< ::sapien::Renderer::server::proto::Vec3*>(
-      ::sapien::Renderer::server::proto::Vec3::internal_default_instance());
-}
 class IdVec3::_Internal {
  public:
   static const ::sapien::Renderer::server::proto::Vec3& data(const IdVec3* msg);
@@ -2526,139 +2365,139 @@ class IdVec3::_Internal {
 
 const ::sapien::Renderer::server::proto::Vec3&
 IdVec3::_Internal::data(const IdVec3* msg) {
-  return *msg->data_;
+  return *msg->_impl_.data_;
 }
-IdVec3::IdVec3(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+IdVec3::IdVec3(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.IdVec3)
 }
 IdVec3::IdVec3(const IdVec3& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  IdVec3* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.data_){nullptr}
+    , decltype(_impl_.id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_data()) {
-    data_ = new ::sapien::Renderer::server::proto::Vec3(*from.data_);
-  } else {
-    data_ = nullptr;
+    _this->_impl_.data_ = new ::sapien::Renderer::server::proto::Vec3(*from._impl_.data_);
   }
-  id_ = from.id_;
+  _this->_impl_.id_ = from._impl_.id_;
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.IdVec3)
 }
 
-void IdVec3::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_IdVec3_render_5fserver_2eproto.base);
-  ::memset(&data_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&id_) -
-      reinterpret_cast<char*>(&data_)) + sizeof(id_));
+inline void IdVec3::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.data_){nullptr}
+    , decltype(_impl_.id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 IdVec3::~IdVec3() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.IdVec3)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void IdVec3::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  if (this != internal_default_instance()) delete data_;
+inline void IdVec3::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.data_;
 }
 
-void IdVec3::ArenaDtor(void* object) {
-  IdVec3* _this = reinterpret_cast< IdVec3* >(object);
-  (void)_this;
-}
-void IdVec3::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void IdVec3::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const IdVec3& IdVec3::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_IdVec3_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void IdVec3::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.IdVec3)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArena() == nullptr && data_ != nullptr) {
-    delete data_;
+  if (GetArenaForAllocation() == nullptr && _impl_.data_ != nullptr) {
+    delete _impl_.data_;
   }
-  data_ = nullptr;
-  id_ = PROTOBUF_ULONGLONG(0);
+  _impl_.data_ = nullptr;
+  _impl_.id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* IdVec3::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* IdVec3::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Vec3 data = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_data(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* IdVec3::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* IdVec3::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.IdVec3)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 id = 1;
-  if (this->id() != 0) {
+  if (this->_internal_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_id(), target);
   }
 
   // .sapien.Renderer.server.proto.Vec3 data = 2;
-  if (this->has_data()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_data()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::data(this), target, stream);
+      InternalWriteMessage(2, _Internal::data(this),
+        _Internal::data(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.IdVec3)
@@ -2669,68 +2508,48 @@ size_t IdVec3::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.IdVec3)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // .sapien.Renderer.server.proto.Vec3 data = 2;
-  if (this->has_data()) {
+  if (this->_internal_has_data()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *data_);
+        *_impl_.data_);
   }
 
   // uint64 id = 1;
-  if (this->id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_id());
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void IdVec3::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.IdVec3)
-  GOOGLE_DCHECK_NE(&from, this);
-  const IdVec3* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<IdVec3>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.IdVec3)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.IdVec3)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData IdVec3::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    IdVec3::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*IdVec3::GetClassData() const { return &_class_data_; }
 
-void IdVec3::MergeFrom(const IdVec3& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.IdVec3)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void IdVec3::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<IdVec3*>(&to_msg);
+  auto& from = static_cast<const IdVec3&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.IdVec3)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.has_data()) {
-    _internal_mutable_data()->::sapien::Renderer::server::proto::Vec3::MergeFrom(from._internal_data());
+  if (from._internal_has_data()) {
+    _this->_internal_mutable_data()->::sapien::Renderer::server::proto::Vec3::MergeFrom(
+        from._internal_data());
   }
-  if (from.id() != 0) {
-    _internal_set_id(from._internal_id());
+  if (from._internal_id() != 0) {
+    _this->_internal_set_id(from._internal_id());
   }
-}
-
-void IdVec3::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.IdVec3)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void IdVec3::CopyFrom(const IdVec3& from) {
@@ -2746,26 +2565,23 @@ bool IdVec3::IsInitialized() const {
 
 void IdVec3::InternalSwap(IdVec3* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(IdVec3, id_)
-      + sizeof(IdVec3::id_)
-      - PROTOBUF_FIELD_OFFSET(IdVec3, data_)>(
-          reinterpret_cast<char*>(&data_),
-          reinterpret_cast<char*>(&other->data_));
+      PROTOBUF_FIELD_OFFSET(IdVec3, _impl_.id_)
+      + sizeof(IdVec3::_impl_.id_)
+      - PROTOBUF_FIELD_OFFSET(IdVec3, _impl_.data_)>(
+          reinterpret_cast<char*>(&_impl_.data_),
+          reinterpret_cast<char*>(&other->_impl_.data_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata IdVec3::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[7]);
 }
-
 
 // ===================================================================
 
-void IdVec4::InitAsDefaultInstance() {
-  ::sapien::Renderer::server::proto::_IdVec4_default_instance_._instance.get_mutable()->data_ = const_cast< ::sapien::Renderer::server::proto::Vec4*>(
-      ::sapien::Renderer::server::proto::Vec4::internal_default_instance());
-}
 class IdVec4::_Internal {
  public:
   static const ::sapien::Renderer::server::proto::Vec4& data(const IdVec4* msg);
@@ -2773,139 +2589,139 @@ class IdVec4::_Internal {
 
 const ::sapien::Renderer::server::proto::Vec4&
 IdVec4::_Internal::data(const IdVec4* msg) {
-  return *msg->data_;
+  return *msg->_impl_.data_;
 }
-IdVec4::IdVec4(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+IdVec4::IdVec4(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.IdVec4)
 }
 IdVec4::IdVec4(const IdVec4& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  IdVec4* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.data_){nullptr}
+    , decltype(_impl_.id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_data()) {
-    data_ = new ::sapien::Renderer::server::proto::Vec4(*from.data_);
-  } else {
-    data_ = nullptr;
+    _this->_impl_.data_ = new ::sapien::Renderer::server::proto::Vec4(*from._impl_.data_);
   }
-  id_ = from.id_;
+  _this->_impl_.id_ = from._impl_.id_;
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.IdVec4)
 }
 
-void IdVec4::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_IdVec4_render_5fserver_2eproto.base);
-  ::memset(&data_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&id_) -
-      reinterpret_cast<char*>(&data_)) + sizeof(id_));
+inline void IdVec4::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.data_){nullptr}
+    , decltype(_impl_.id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 IdVec4::~IdVec4() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.IdVec4)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void IdVec4::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  if (this != internal_default_instance()) delete data_;
+inline void IdVec4::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.data_;
 }
 
-void IdVec4::ArenaDtor(void* object) {
-  IdVec4* _this = reinterpret_cast< IdVec4* >(object);
-  (void)_this;
-}
-void IdVec4::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void IdVec4::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const IdVec4& IdVec4::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_IdVec4_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void IdVec4::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.IdVec4)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArena() == nullptr && data_ != nullptr) {
-    delete data_;
+  if (GetArenaForAllocation() == nullptr && _impl_.data_ != nullptr) {
+    delete _impl_.data_;
   }
-  data_ = nullptr;
-  id_ = PROTOBUF_ULONGLONG(0);
+  _impl_.data_ = nullptr;
+  _impl_.id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* IdVec4::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* IdVec4::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Vec4 data = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_data(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* IdVec4::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* IdVec4::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.IdVec4)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 id = 1;
-  if (this->id() != 0) {
+  if (this->_internal_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_id(), target);
   }
 
   // .sapien.Renderer.server.proto.Vec4 data = 2;
-  if (this->has_data()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_data()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::data(this), target, stream);
+      InternalWriteMessage(2, _Internal::data(this),
+        _Internal::data(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.IdVec4)
@@ -2916,68 +2732,48 @@ size_t IdVec4::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.IdVec4)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // .sapien.Renderer.server.proto.Vec4 data = 2;
-  if (this->has_data()) {
+  if (this->_internal_has_data()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *data_);
+        *_impl_.data_);
   }
 
   // uint64 id = 1;
-  if (this->id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_id());
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void IdVec4::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.IdVec4)
-  GOOGLE_DCHECK_NE(&from, this);
-  const IdVec4* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<IdVec4>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.IdVec4)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.IdVec4)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData IdVec4::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    IdVec4::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*IdVec4::GetClassData() const { return &_class_data_; }
 
-void IdVec4::MergeFrom(const IdVec4& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.IdVec4)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void IdVec4::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<IdVec4*>(&to_msg);
+  auto& from = static_cast<const IdVec4&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.IdVec4)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.has_data()) {
-    _internal_mutable_data()->::sapien::Renderer::server::proto::Vec4::MergeFrom(from._internal_data());
+  if (from._internal_has_data()) {
+    _this->_internal_mutable_data()->::sapien::Renderer::server::proto::Vec4::MergeFrom(
+        from._internal_data());
   }
-  if (from.id() != 0) {
-    _internal_set_id(from._internal_id());
+  if (from._internal_id() != 0) {
+    _this->_internal_set_id(from._internal_id());
   }
-}
-
-void IdVec4::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.IdVec4)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void IdVec4::CopyFrom(const IdVec4& from) {
@@ -2993,150 +2789,157 @@ bool IdVec4::IsInitialized() const {
 
 void IdVec4::InternalSwap(IdVec4* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(IdVec4, id_)
-      + sizeof(IdVec4::id_)
-      - PROTOBUF_FIELD_OFFSET(IdVec4, data_)>(
-          reinterpret_cast<char*>(&data_),
-          reinterpret_cast<char*>(&other->data_));
+      PROTOBUF_FIELD_OFFSET(IdVec4, _impl_.id_)
+      + sizeof(IdVec4::_impl_.id_)
+      - PROTOBUF_FIELD_OFFSET(IdVec4, _impl_.data_)>(
+          reinterpret_cast<char*>(&_impl_.data_),
+          reinterpret_cast<char*>(&other->_impl_.data_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata IdVec4::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[8]);
 }
-
 
 // ===================================================================
 
-void IdFloat::InitAsDefaultInstance() {
-}
 class IdFloat::_Internal {
  public:
 };
 
-IdFloat::IdFloat(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+IdFloat::IdFloat(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.IdFloat)
 }
 IdFloat::IdFloat(const IdFloat& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  IdFloat* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.id_){}
+    , decltype(_impl_.data_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&id_, &from.id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&data_) -
-    reinterpret_cast<char*>(&id_)) + sizeof(data_));
+  ::memcpy(&_impl_.id_, &from._impl_.id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.data_) -
+    reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.data_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.IdFloat)
 }
 
-void IdFloat::SharedCtor() {
-  ::memset(&id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&data_) -
-      reinterpret_cast<char*>(&id_)) + sizeof(data_));
+inline void IdFloat::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.id_){uint64_t{0u}}
+    , decltype(_impl_.data_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 IdFloat::~IdFloat() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.IdFloat)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void IdFloat::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void IdFloat::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void IdFloat::ArenaDtor(void* object) {
-  IdFloat* _this = reinterpret_cast< IdFloat* >(object);
-  (void)_this;
-}
-void IdFloat::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void IdFloat::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const IdFloat& IdFloat::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_IdFloat_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void IdFloat::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.IdFloat)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&data_) -
-      reinterpret_cast<char*>(&id_)) + sizeof(data_));
+  ::memset(&_impl_.id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.data_) -
+      reinterpret_cast<char*>(&_impl_.id_)) + sizeof(_impl_.data_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* IdFloat::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* IdFloat::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float data = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 21)) {
-          data_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 21)) {
+          _impl_.data_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* IdFloat::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* IdFloat::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.IdFloat)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 id = 1;
-  if (this->id() != 0) {
+  if (this->_internal_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_id(), target);
   }
 
   // float data = 2;
-  if (!(this->data() <= 0 && this->data() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_data = this->_internal_data();
+  uint32_t raw_data;
+  memcpy(&raw_data, &tmp_data, sizeof(tmp_data));
+  if (raw_data != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(2, this->_internal_data(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(2, this->_internal_data(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.IdFloat)
@@ -3147,66 +2950,53 @@ size_t IdFloat::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.IdFloat)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 id = 1;
-  if (this->id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_id());
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_id());
   }
 
   // float data = 2;
-  if (!(this->data() <= 0 && this->data() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_data = this->_internal_data();
+  uint32_t raw_data;
+  memcpy(&raw_data, &tmp_data, sizeof(tmp_data));
+  if (raw_data != 0) {
     total_size += 1 + 4;
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void IdFloat::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.IdFloat)
-  GOOGLE_DCHECK_NE(&from, this);
-  const IdFloat* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<IdFloat>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.IdFloat)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.IdFloat)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData IdFloat::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    IdFloat::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*IdFloat::GetClassData() const { return &_class_data_; }
 
-void IdFloat::MergeFrom(const IdFloat& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.IdFloat)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void IdFloat::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<IdFloat*>(&to_msg);
+  auto& from = static_cast<const IdFloat&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.IdFloat)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.id() != 0) {
-    _internal_set_id(from._internal_id());
+  if (from._internal_id() != 0) {
+    _this->_internal_set_id(from._internal_id());
   }
-  if (!(from.data() <= 0 && from.data() >= 0)) {
-    _internal_set_data(from._internal_data());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_data = from._internal_data();
+  uint32_t raw_data;
+  memcpy(&raw_data, &tmp_data, sizeof(tmp_data));
+  if (raw_data != 0) {
+    _this->_internal_set_data(from._internal_data());
   }
-}
-
-void IdFloat::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.IdFloat)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void IdFloat::CopyFrom(const IdFloat& from) {
@@ -3222,26 +3012,23 @@ bool IdFloat::IsInitialized() const {
 
 void IdFloat::InternalSwap(IdFloat* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(IdFloat, data_)
-      + sizeof(IdFloat::data_)
-      - PROTOBUF_FIELD_OFFSET(IdFloat, id_)>(
-          reinterpret_cast<char*>(&id_),
-          reinterpret_cast<char*>(&other->id_));
+      PROTOBUF_FIELD_OFFSET(IdFloat, _impl_.data_)
+      + sizeof(IdFloat::_impl_.data_)
+      - PROTOBUF_FIELD_OFFSET(IdFloat, _impl_.id_)>(
+          reinterpret_cast<char*>(&_impl_.id_),
+          reinterpret_cast<char*>(&other->_impl_.id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata IdFloat::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[9]);
 }
-
 
 // ===================================================================
 
-void AddBodyMeshReq::InitAsDefaultInstance() {
-  ::sapien::Renderer::server::proto::_AddBodyMeshReq_default_instance_._instance.get_mutable()->scale_ = const_cast< ::sapien::Renderer::server::proto::Vec3*>(
-      ::sapien::Renderer::server::proto::Vec3::internal_default_instance());
-}
 class AddBodyMeshReq::_Internal {
  public:
   static const ::sapien::Renderer::server::proto::Vec3& scale(const AddBodyMeshReq* msg);
@@ -3249,148 +3036,158 @@ class AddBodyMeshReq::_Internal {
 
 const ::sapien::Renderer::server::proto::Vec3&
 AddBodyMeshReq::_Internal::scale(const AddBodyMeshReq* msg) {
-  return *msg->scale_;
+  return *msg->_impl_.scale_;
 }
-AddBodyMeshReq::AddBodyMeshReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+AddBodyMeshReq::AddBodyMeshReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.AddBodyMeshReq)
 }
 AddBodyMeshReq::AddBodyMeshReq(const AddBodyMeshReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  AddBodyMeshReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.filename_){}
+    , decltype(_impl_.scale_){nullptr}
+    , decltype(_impl_.scene_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  filename_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  _impl_.filename_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.filename_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_filename().empty()) {
-    filename_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_filename(),
-      GetArena());
+    _this->_impl_.filename_.Set(from._internal_filename(), 
+      _this->GetArenaForAllocation());
   }
   if (from._internal_has_scale()) {
-    scale_ = new ::sapien::Renderer::server::proto::Vec3(*from.scale_);
-  } else {
-    scale_ = nullptr;
+    _this->_impl_.scale_ = new ::sapien::Renderer::server::proto::Vec3(*from._impl_.scale_);
   }
-  scene_id_ = from.scene_id_;
+  _this->_impl_.scene_id_ = from._impl_.scene_id_;
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.AddBodyMeshReq)
 }
 
-void AddBodyMeshReq::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_AddBodyMeshReq_render_5fserver_2eproto.base);
-  filename_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(&scale_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&scene_id_) -
-      reinterpret_cast<char*>(&scale_)) + sizeof(scene_id_));
+inline void AddBodyMeshReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.filename_){}
+    , decltype(_impl_.scale_){nullptr}
+    , decltype(_impl_.scene_id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.filename_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.filename_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 AddBodyMeshReq::~AddBodyMeshReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.AddBodyMeshReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void AddBodyMeshReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  filename_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (this != internal_default_instance()) delete scale_;
+inline void AddBodyMeshReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.filename_.Destroy();
+  if (this != internal_default_instance()) delete _impl_.scale_;
 }
 
-void AddBodyMeshReq::ArenaDtor(void* object) {
-  AddBodyMeshReq* _this = reinterpret_cast< AddBodyMeshReq* >(object);
-  (void)_this;
-}
-void AddBodyMeshReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void AddBodyMeshReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const AddBodyMeshReq& AddBodyMeshReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_AddBodyMeshReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void AddBodyMeshReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.AddBodyMeshReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  filename_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  if (GetArena() == nullptr && scale_ != nullptr) {
-    delete scale_;
+  _impl_.filename_.ClearToEmpty();
+  if (GetArenaForAllocation() == nullptr && _impl_.scale_ != nullptr) {
+    delete _impl_.scale_;
   }
-  scale_ = nullptr;
-  scene_id_ = PROTOBUF_ULONGLONG(0);
+  _impl_.scale_ = nullptr;
+  _impl_.scene_id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* AddBodyMeshReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* AddBodyMeshReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // string filename = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           auto str = _internal_mutable_filename();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "sapien.Renderer.server.proto.AddBodyMeshReq.filename"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else goto handle_unusual;
+          CHK_(::_pbi::VerifyUTF8(str, "sapien.Renderer.server.proto.AddBodyMeshReq.filename"));
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Vec3 scale = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_scale(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* AddBodyMeshReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* AddBodyMeshReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.AddBodyMeshReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // string filename = 2;
-  if (this->filename().size() > 0) {
+  if (!this->_internal_filename().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_filename().data(), static_cast<int>(this->_internal_filename().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
@@ -3400,15 +3197,14 @@ failure:
   }
 
   // .sapien.Renderer.server.proto.Vec3 scale = 3;
-  if (this->has_scale()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_scale()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        3, _Internal::scale(this), target, stream);
+      InternalWriteMessage(3, _Internal::scale(this),
+        _Internal::scale(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.AddBodyMeshReq)
@@ -3419,78 +3215,58 @@ size_t AddBodyMeshReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.AddBodyMeshReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // string filename = 2;
-  if (this->filename().size() > 0) {
+  if (!this->_internal_filename().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_filename());
   }
 
   // .sapien.Renderer.server.proto.Vec3 scale = 3;
-  if (this->has_scale()) {
+  if (this->_internal_has_scale()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *scale_);
+        *_impl_.scale_);
   }
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void AddBodyMeshReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.AddBodyMeshReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const AddBodyMeshReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AddBodyMeshReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.AddBodyMeshReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.AddBodyMeshReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData AddBodyMeshReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    AddBodyMeshReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*AddBodyMeshReq::GetClassData() const { return &_class_data_; }
 
-void AddBodyMeshReq::MergeFrom(const AddBodyMeshReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddBodyMeshReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void AddBodyMeshReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<AddBodyMeshReq*>(&to_msg);
+  auto& from = static_cast<const AddBodyMeshReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddBodyMeshReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.filename().size() > 0) {
-    _internal_set_filename(from._internal_filename());
+  if (!from._internal_filename().empty()) {
+    _this->_internal_set_filename(from._internal_filename());
   }
-  if (from.has_scale()) {
-    _internal_mutable_scale()->::sapien::Renderer::server::proto::Vec3::MergeFrom(from._internal_scale());
+  if (from._internal_has_scale()) {
+    _this->_internal_mutable_scale()->::sapien::Renderer::server::proto::Vec3::MergeFrom(
+        from._internal_scale());
   }
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-}
-
-void AddBodyMeshReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.AddBodyMeshReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void AddBodyMeshReq::CopyFrom(const AddBodyMeshReq& from) {
@@ -3506,27 +3282,29 @@ bool AddBodyMeshReq::IsInitialized() const {
 
 void AddBodyMeshReq::InternalSwap(AddBodyMeshReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  filename_.Swap(&other->filename_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.filename_, lhs_arena,
+      &other->_impl_.filename_, rhs_arena
+  );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AddBodyMeshReq, scene_id_)
-      + sizeof(AddBodyMeshReq::scene_id_)
-      - PROTOBUF_FIELD_OFFSET(AddBodyMeshReq, scale_)>(
-          reinterpret_cast<char*>(&scale_),
-          reinterpret_cast<char*>(&other->scale_));
+      PROTOBUF_FIELD_OFFSET(AddBodyMeshReq, _impl_.scene_id_)
+      + sizeof(AddBodyMeshReq::_impl_.scene_id_)
+      - PROTOBUF_FIELD_OFFSET(AddBodyMeshReq, _impl_.scale_)>(
+          reinterpret_cast<char*>(&_impl_.scale_),
+          reinterpret_cast<char*>(&other->_impl_.scale_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata AddBodyMeshReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[10]);
 }
-
 
 // ===================================================================
 
-void AddBodyPrimitiveReq::InitAsDefaultInstance() {
-  ::sapien::Renderer::server::proto::_AddBodyPrimitiveReq_default_instance_._instance.get_mutable()->scale_ = const_cast< ::sapien::Renderer::server::proto::Vec3*>(
-      ::sapien::Renderer::server::proto::Vec3::internal_default_instance());
-}
 class AddBodyPrimitiveReq::_Internal {
  public:
   static const ::sapien::Renderer::server::proto::Vec3& scale(const AddBodyPrimitiveReq* msg);
@@ -3534,171 +3312,177 @@ class AddBodyPrimitiveReq::_Internal {
 
 const ::sapien::Renderer::server::proto::Vec3&
 AddBodyPrimitiveReq::_Internal::scale(const AddBodyPrimitiveReq* msg) {
-  return *msg->scale_;
+  return *msg->_impl_.scale_;
 }
-AddBodyPrimitiveReq::AddBodyPrimitiveReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+AddBodyPrimitiveReq::AddBodyPrimitiveReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
 }
 AddBodyPrimitiveReq::AddBodyPrimitiveReq(const AddBodyPrimitiveReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  AddBodyPrimitiveReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scale_){nullptr}
+    , decltype(_impl_.scene_id_){}
+    , decltype(_impl_.material_){}
+    , decltype(_impl_.type_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_scale()) {
-    scale_ = new ::sapien::Renderer::server::proto::Vec3(*from.scale_);
-  } else {
-    scale_ = nullptr;
+    _this->_impl_.scale_ = new ::sapien::Renderer::server::proto::Vec3(*from._impl_.scale_);
   }
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&type_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(type_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.type_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.type_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
 }
 
-void AddBodyPrimitiveReq::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_AddBodyPrimitiveReq_render_5fserver_2eproto.base);
-  ::memset(&scale_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&type_) -
-      reinterpret_cast<char*>(&scale_)) + sizeof(type_));
+inline void AddBodyPrimitiveReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scale_){nullptr}
+    , decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.material_){uint64_t{0u}}
+    , decltype(_impl_.type_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 AddBodyPrimitiveReq::~AddBodyPrimitiveReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void AddBodyPrimitiveReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  if (this != internal_default_instance()) delete scale_;
+inline void AddBodyPrimitiveReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.scale_;
 }
 
-void AddBodyPrimitiveReq::ArenaDtor(void* object) {
-  AddBodyPrimitiveReq* _this = reinterpret_cast< AddBodyPrimitiveReq* >(object);
-  (void)_this;
-}
-void AddBodyPrimitiveReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void AddBodyPrimitiveReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const AddBodyPrimitiveReq& AddBodyPrimitiveReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_AddBodyPrimitiveReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void AddBodyPrimitiveReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArena() == nullptr && scale_ != nullptr) {
-    delete scale_;
+  if (GetArenaForAllocation() == nullptr && _impl_.scale_ != nullptr) {
+    delete _impl_.scale_;
   }
-  scale_ = nullptr;
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&type_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(type_));
+  _impl_.scale_ = nullptr;
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.type_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.type_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* AddBodyPrimitiveReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* AddBodyPrimitiveReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.PrimitiveType type = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          ::PROTOBUF_NAMESPACE_ID::uint64 val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          uint64_t val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
           _internal_set_type(static_cast<::sapien::Renderer::server::proto::PrimitiveType>(val));
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Vec3 scale = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_scale(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint64 material = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
-          material_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+          _impl_.material_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* AddBodyPrimitiveReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* AddBodyPrimitiveReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // .sapien.Renderer.server.proto.PrimitiveType type = 2;
-  if (this->type() != 0) {
+  if (this->_internal_type() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
       2, this->_internal_type(), target);
   }
 
   // .sapien.Renderer.server.proto.Vec3 scale = 3;
-  if (this->has_scale()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_scale()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        3, _Internal::scale(this), target, stream);
+      InternalWriteMessage(3, _Internal::scale(this),
+        _Internal::scale(this).GetCachedSize(), target, stream);
   }
 
   // uint64 material = 4;
-  if (this->material() != 0) {
+  if (this->_internal_material() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_material(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(4, this->_internal_material(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
@@ -3709,87 +3493,65 @@ size_t AddBodyPrimitiveReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // .sapien.Renderer.server.proto.Vec3 scale = 3;
-  if (this->has_scale()) {
+  if (this->_internal_has_scale()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *scale_);
+        *_impl_.scale_);
   }
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // uint64 material = 4;
-  if (this->material() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_material());
+  if (this->_internal_material() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_material());
   }
 
   // .sapien.Renderer.server.proto.PrimitiveType type = 2;
-  if (this->type() != 0) {
+  if (this->_internal_type() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_type());
+      ::_pbi::WireFormatLite::EnumSize(this->_internal_type());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void AddBodyPrimitiveReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const AddBodyPrimitiveReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AddBodyPrimitiveReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData AddBodyPrimitiveReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    AddBodyPrimitiveReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*AddBodyPrimitiveReq::GetClassData() const { return &_class_data_; }
 
-void AddBodyPrimitiveReq::MergeFrom(const AddBodyPrimitiveReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void AddBodyPrimitiveReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<AddBodyPrimitiveReq*>(&to_msg);
+  auto& from = static_cast<const AddBodyPrimitiveReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.has_scale()) {
-    _internal_mutable_scale()->::sapien::Renderer::server::proto::Vec3::MergeFrom(from._internal_scale());
+  if (from._internal_has_scale()) {
+    _this->_internal_mutable_scale()->::sapien::Renderer::server::proto::Vec3::MergeFrom(
+        from._internal_scale());
   }
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.material() != 0) {
-    _internal_set_material(from._internal_material());
+  if (from._internal_material() != 0) {
+    _this->_internal_set_material(from._internal_material());
   }
-  if (from.type() != 0) {
-    _internal_set_type(from._internal_type());
+  if (from._internal_type() != 0) {
+    _this->_internal_set_type(from._internal_type());
   }
-}
-
-void AddBodyPrimitiveReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.AddBodyPrimitiveReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void AddBodyPrimitiveReq::CopyFrom(const AddBodyPrimitiveReq& from) {
@@ -3805,150 +3567,153 @@ bool AddBodyPrimitiveReq::IsInitialized() const {
 
 void AddBodyPrimitiveReq::InternalSwap(AddBodyPrimitiveReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AddBodyPrimitiveReq, type_)
-      + sizeof(AddBodyPrimitiveReq::type_)
-      - PROTOBUF_FIELD_OFFSET(AddBodyPrimitiveReq, scale_)>(
-          reinterpret_cast<char*>(&scale_),
-          reinterpret_cast<char*>(&other->scale_));
+      PROTOBUF_FIELD_OFFSET(AddBodyPrimitiveReq, _impl_.type_)
+      + sizeof(AddBodyPrimitiveReq::_impl_.type_)
+      - PROTOBUF_FIELD_OFFSET(AddBodyPrimitiveReq, _impl_.scale_)>(
+          reinterpret_cast<char*>(&_impl_.scale_),
+          reinterpret_cast<char*>(&other->_impl_.scale_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata AddBodyPrimitiveReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[11]);
 }
-
 
 // ===================================================================
 
-void RemoveBodyReq::InitAsDefaultInstance() {
-}
 class RemoveBodyReq::_Internal {
  public:
 };
 
-RemoveBodyReq::RemoveBodyReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+RemoveBodyReq::RemoveBodyReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.RemoveBodyReq)
 }
 RemoveBodyReq::RemoveBodyReq(const RemoveBodyReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RemoveBodyReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){}
+    , decltype(_impl_.body_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&body_id_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(body_id_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.body_id_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.body_id_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.RemoveBodyReq)
 }
 
-void RemoveBodyReq::SharedCtor() {
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&body_id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(body_id_));
+inline void RemoveBodyReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.body_id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 RemoveBodyReq::~RemoveBodyReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.RemoveBodyReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void RemoveBodyReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void RemoveBodyReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void RemoveBodyReq::ArenaDtor(void* object) {
-  RemoveBodyReq* _this = reinterpret_cast< RemoveBodyReq* >(object);
-  (void)_this;
-}
-void RemoveBodyReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void RemoveBodyReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const RemoveBodyReq& RemoveBodyReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_RemoveBodyReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void RemoveBodyReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.RemoveBodyReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&body_id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(body_id_));
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.body_id_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.body_id_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* RemoveBodyReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* RemoveBodyReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint64 body_id = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          body_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.body_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* RemoveBodyReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* RemoveBodyReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.RemoveBodyReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // uint64 body_id = 2;
-  if (this->body_id() != 0) {
+  if (this->_internal_body_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_body_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_body_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.RemoveBodyReq)
@@ -3959,68 +3724,45 @@ size_t RemoveBodyReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.RemoveBodyReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // uint64 body_id = 2;
-  if (this->body_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_body_id());
+  if (this->_internal_body_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_body_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void RemoveBodyReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.RemoveBodyReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const RemoveBodyReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<RemoveBodyReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.RemoveBodyReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.RemoveBodyReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RemoveBodyReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    RemoveBodyReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RemoveBodyReq::GetClassData() const { return &_class_data_; }
 
-void RemoveBodyReq::MergeFrom(const RemoveBodyReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.RemoveBodyReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void RemoveBodyReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RemoveBodyReq*>(&to_msg);
+  auto& from = static_cast<const RemoveBodyReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.RemoveBodyReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.body_id() != 0) {
-    _internal_set_body_id(from._internal_body_id());
+  if (from._internal_body_id() != 0) {
+    _this->_internal_set_body_id(from._internal_body_id());
   }
-}
-
-void RemoveBodyReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.RemoveBodyReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void RemoveBodyReq::CopyFrom(const RemoveBodyReq& from) {
@@ -4036,220 +3778,255 @@ bool RemoveBodyReq::IsInitialized() const {
 
 void RemoveBodyReq::InternalSwap(RemoveBodyReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(RemoveBodyReq, body_id_)
-      + sizeof(RemoveBodyReq::body_id_)
-      - PROTOBUF_FIELD_OFFSET(RemoveBodyReq, scene_id_)>(
-          reinterpret_cast<char*>(&scene_id_),
-          reinterpret_cast<char*>(&other->scene_id_));
+      PROTOBUF_FIELD_OFFSET(RemoveBodyReq, _impl_.body_id_)
+      + sizeof(RemoveBodyReq::_impl_.body_id_)
+      - PROTOBUF_FIELD_OFFSET(RemoveBodyReq, _impl_.scene_id_)>(
+          reinterpret_cast<char*>(&_impl_.scene_id_),
+          reinterpret_cast<char*>(&other->_impl_.scene_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RemoveBodyReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[12]);
 }
-
 
 // ===================================================================
 
-void AddCameraReq::InitAsDefaultInstance() {
-}
 class AddCameraReq::_Internal {
  public:
 };
 
-AddCameraReq::AddCameraReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+AddCameraReq::AddCameraReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.AddCameraReq)
 }
 AddCameraReq::AddCameraReq(const AddCameraReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  AddCameraReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.shader_){}
+    , decltype(_impl_.scene_id_){}
+    , decltype(_impl_.width_){}
+    , decltype(_impl_.height_){}
+    , decltype(_impl_.fovy_){}
+    , decltype(_impl_.near_){}
+    , decltype(_impl_.far_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  shader_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  _impl_.shader_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.shader_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   if (!from._internal_shader().empty()) {
-    shader_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_shader(),
-      GetArena());
+    _this->_impl_.shader_.Set(from._internal_shader(), 
+      _this->GetArenaForAllocation());
   }
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&far_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(far_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.far_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.far_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.AddCameraReq)
 }
 
-void AddCameraReq::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_AddCameraReq_render_5fserver_2eproto.base);
-  shader_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&far_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(far_));
+inline void AddCameraReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.shader_){}
+    , decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.width_){0u}
+    , decltype(_impl_.height_){0u}
+    , decltype(_impl_.fovy_){0}
+    , decltype(_impl_.near_){0}
+    , decltype(_impl_.far_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+  _impl_.shader_.InitDefault();
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+    _impl_.shader_.Set("", GetArenaForAllocation());
+  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
 }
 
 AddCameraReq::~AddCameraReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.AddCameraReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void AddCameraReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  shader_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+inline void AddCameraReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.shader_.Destroy();
 }
 
-void AddCameraReq::ArenaDtor(void* object) {
-  AddCameraReq* _this = reinterpret_cast< AddCameraReq* >(object);
-  (void)_this;
-}
-void AddCameraReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void AddCameraReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const AddCameraReq& AddCameraReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_AddCameraReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void AddCameraReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.AddCameraReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  shader_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&far_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(far_));
+  _impl_.shader_.ClearToEmpty();
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.far_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.far_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* AddCameraReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* AddCameraReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint32 width = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          width_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.width_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint32 height = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          height_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+          _impl_.height_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float fovy = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 37)) {
-          fovy_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 37)) {
+          _impl_.fovy_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float near = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 45)) {
-          near_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 45)) {
+          _impl_.near_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float far = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 53)) {
-          far_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 53)) {
+          _impl_.far_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // string shader = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 58)) {
           auto str = _internal_mutable_shader();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "sapien.Renderer.server.proto.AddCameraReq.shader"));
+          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
-        } else goto handle_unusual;
+          CHK_(::_pbi::VerifyUTF8(str, "sapien.Renderer.server.proto.AddCameraReq.shader"));
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* AddCameraReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* AddCameraReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.AddCameraReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // uint32 width = 2;
-  if (this->width() != 0) {
+  if (this->_internal_width() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(2, this->_internal_width(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(2, this->_internal_width(), target);
   }
 
   // uint32 height = 3;
-  if (this->height() != 0) {
+  if (this->_internal_height() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(3, this->_internal_height(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_height(), target);
   }
 
   // float fovy = 4;
-  if (!(this->fovy() <= 0 && this->fovy() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_fovy = this->_internal_fovy();
+  uint32_t raw_fovy;
+  memcpy(&raw_fovy, &tmp_fovy, sizeof(tmp_fovy));
+  if (raw_fovy != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(4, this->_internal_fovy(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(4, this->_internal_fovy(), target);
   }
 
   // float near = 5;
-  if (!(this->near() <= 0 && this->near() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_near = this->_internal_near();
+  uint32_t raw_near;
+  memcpy(&raw_near, &tmp_near, sizeof(tmp_near));
+  if (raw_near != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(5, this->_internal_near(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(5, this->_internal_near(), target);
   }
 
   // float far = 6;
-  if (!(this->far() <= 0 && this->far() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_far = this->_internal_far();
+  uint32_t raw_far;
+  memcpy(&raw_far, &tmp_far, sizeof(tmp_far));
+  if (raw_far != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(6, this->_internal_far(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(6, this->_internal_far(), target);
   }
 
   // string shader = 7;
-  if (this->shader().size() > 0) {
+  if (!this->_internal_shader().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_shader().data(), static_cast<int>(this->_internal_shader().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
@@ -4259,7 +4036,7 @@ failure:
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.AddCameraReq)
@@ -4270,112 +4047,111 @@ size_t AddCameraReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.AddCameraReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // string shader = 7;
-  if (this->shader().size() > 0) {
+  if (!this->_internal_shader().empty()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_shader());
   }
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // uint32 width = 2;
-  if (this->width() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-        this->_internal_width());
+  if (this->_internal_width() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_width());
   }
 
   // uint32 height = 3;
-  if (this->height() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-        this->_internal_height());
+  if (this->_internal_height() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_height());
   }
 
   // float fovy = 4;
-  if (!(this->fovy() <= 0 && this->fovy() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_fovy = this->_internal_fovy();
+  uint32_t raw_fovy;
+  memcpy(&raw_fovy, &tmp_fovy, sizeof(tmp_fovy));
+  if (raw_fovy != 0) {
     total_size += 1 + 4;
   }
 
   // float near = 5;
-  if (!(this->near() <= 0 && this->near() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_near = this->_internal_near();
+  uint32_t raw_near;
+  memcpy(&raw_near, &tmp_near, sizeof(tmp_near));
+  if (raw_near != 0) {
     total_size += 1 + 4;
   }
 
   // float far = 6;
-  if (!(this->far() <= 0 && this->far() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_far = this->_internal_far();
+  uint32_t raw_far;
+  memcpy(&raw_far, &tmp_far, sizeof(tmp_far));
+  if (raw_far != 0) {
     total_size += 1 + 4;
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void AddCameraReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.AddCameraReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const AddCameraReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AddCameraReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.AddCameraReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.AddCameraReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData AddCameraReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    AddCameraReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*AddCameraReq::GetClassData() const { return &_class_data_; }
 
-void AddCameraReq::MergeFrom(const AddCameraReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddCameraReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void AddCameraReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<AddCameraReq*>(&to_msg);
+  auto& from = static_cast<const AddCameraReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddCameraReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.shader().size() > 0) {
-    _internal_set_shader(from._internal_shader());
+  if (!from._internal_shader().empty()) {
+    _this->_internal_set_shader(from._internal_shader());
   }
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.width() != 0) {
-    _internal_set_width(from._internal_width());
+  if (from._internal_width() != 0) {
+    _this->_internal_set_width(from._internal_width());
   }
-  if (from.height() != 0) {
-    _internal_set_height(from._internal_height());
+  if (from._internal_height() != 0) {
+    _this->_internal_set_height(from._internal_height());
   }
-  if (!(from.fovy() <= 0 && from.fovy() >= 0)) {
-    _internal_set_fovy(from._internal_fovy());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_fovy = from._internal_fovy();
+  uint32_t raw_fovy;
+  memcpy(&raw_fovy, &tmp_fovy, sizeof(tmp_fovy));
+  if (raw_fovy != 0) {
+    _this->_internal_set_fovy(from._internal_fovy());
   }
-  if (!(from.near() <= 0 && from.near() >= 0)) {
-    _internal_set_near(from._internal_near());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_near = from._internal_near();
+  uint32_t raw_near;
+  memcpy(&raw_near, &tmp_near, sizeof(tmp_near));
+  if (raw_near != 0) {
+    _this->_internal_set_near(from._internal_near());
   }
-  if (!(from.far() <= 0 && from.far() >= 0)) {
-    _internal_set_far(from._internal_far());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_far = from._internal_far();
+  uint32_t raw_far;
+  memcpy(&raw_far, &tmp_far, sizeof(tmp_far));
+  if (raw_far != 0) {
+    _this->_internal_set_far(from._internal_far());
   }
-}
-
-void AddCameraReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.AddCameraReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void AddCameraReq::CopyFrom(const AddCameraReq& from) {
@@ -4391,151 +4167,159 @@ bool AddCameraReq::IsInitialized() const {
 
 void AddCameraReq::InternalSwap(AddCameraReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  shader_.Swap(&other->shader_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  auto* lhs_arena = GetArenaForAllocation();
+  auto* rhs_arena = other->GetArenaForAllocation();
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
+      &_impl_.shader_, lhs_arena,
+      &other->_impl_.shader_, rhs_arena
+  );
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AddCameraReq, far_)
-      + sizeof(AddCameraReq::far_)
-      - PROTOBUF_FIELD_OFFSET(AddCameraReq, scene_id_)>(
-          reinterpret_cast<char*>(&scene_id_),
-          reinterpret_cast<char*>(&other->scene_id_));
+      PROTOBUF_FIELD_OFFSET(AddCameraReq, _impl_.far_)
+      + sizeof(AddCameraReq::_impl_.far_)
+      - PROTOBUF_FIELD_OFFSET(AddCameraReq, _impl_.scene_id_)>(
+          reinterpret_cast<char*>(&_impl_.scene_id_),
+          reinterpret_cast<char*>(&other->_impl_.scene_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata AddCameraReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[13]);
 }
-
 
 // ===================================================================
 
-void RemoveCameraReq::InitAsDefaultInstance() {
-}
 class RemoveCameraReq::_Internal {
  public:
 };
 
-RemoveCameraReq::RemoveCameraReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+RemoveCameraReq::RemoveCameraReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.RemoveCameraReq)
 }
 RemoveCameraReq::RemoveCameraReq(const RemoveCameraReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RemoveCameraReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){}
+    , decltype(_impl_.camera_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&camera_id_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(camera_id_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.camera_id_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.camera_id_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.RemoveCameraReq)
 }
 
-void RemoveCameraReq::SharedCtor() {
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&camera_id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(camera_id_));
+inline void RemoveCameraReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.camera_id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 RemoveCameraReq::~RemoveCameraReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.RemoveCameraReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void RemoveCameraReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void RemoveCameraReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void RemoveCameraReq::ArenaDtor(void* object) {
-  RemoveCameraReq* _this = reinterpret_cast< RemoveCameraReq* >(object);
-  (void)_this;
-}
-void RemoveCameraReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void RemoveCameraReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const RemoveCameraReq& RemoveCameraReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_RemoveCameraReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void RemoveCameraReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.RemoveCameraReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&camera_id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(camera_id_));
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.camera_id_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.camera_id_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* RemoveCameraReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* RemoveCameraReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint64 camera_id = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          camera_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.camera_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* RemoveCameraReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* RemoveCameraReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.RemoveCameraReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // uint64 camera_id = 2;
-  if (this->camera_id() != 0) {
+  if (this->_internal_camera_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_camera_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_camera_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.RemoveCameraReq)
@@ -4546,68 +4330,45 @@ size_t RemoveCameraReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.RemoveCameraReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // uint64 camera_id = 2;
-  if (this->camera_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_camera_id());
+  if (this->_internal_camera_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_camera_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void RemoveCameraReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.RemoveCameraReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const RemoveCameraReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<RemoveCameraReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.RemoveCameraReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.RemoveCameraReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RemoveCameraReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    RemoveCameraReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RemoveCameraReq::GetClassData() const { return &_class_data_; }
 
-void RemoveCameraReq::MergeFrom(const RemoveCameraReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.RemoveCameraReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void RemoveCameraReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RemoveCameraReq*>(&to_msg);
+  auto& from = static_cast<const RemoveCameraReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.RemoveCameraReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.camera_id() != 0) {
-    _internal_set_camera_id(from._internal_camera_id());
+  if (from._internal_camera_id() != 0) {
+    _this->_internal_set_camera_id(from._internal_camera_id());
   }
-}
-
-void RemoveCameraReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.RemoveCameraReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void RemoveCameraReq::CopyFrom(const RemoveCameraReq& from) {
@@ -4623,28 +4384,23 @@ bool RemoveCameraReq::IsInitialized() const {
 
 void RemoveCameraReq::InternalSwap(RemoveCameraReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(RemoveCameraReq, camera_id_)
-      + sizeof(RemoveCameraReq::camera_id_)
-      - PROTOBUF_FIELD_OFFSET(RemoveCameraReq, scene_id_)>(
-          reinterpret_cast<char*>(&scene_id_),
-          reinterpret_cast<char*>(&other->scene_id_));
+      PROTOBUF_FIELD_OFFSET(RemoveCameraReq, _impl_.camera_id_)
+      + sizeof(RemoveCameraReq::_impl_.camera_id_)
+      - PROTOBUF_FIELD_OFFSET(RemoveCameraReq, _impl_.scene_id_)>(
+          reinterpret_cast<char*>(&_impl_.scene_id_),
+          reinterpret_cast<char*>(&other->_impl_.scene_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RemoveCameraReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[14]);
 }
-
 
 // ===================================================================
 
-void AddPointLightReq::InitAsDefaultInstance() {
-  ::sapien::Renderer::server::proto::_AddPointLightReq_default_instance_._instance.get_mutable()->position_ = const_cast< ::sapien::Renderer::server::proto::Vec3*>(
-      ::sapien::Renderer::server::proto::Vec3::internal_default_instance());
-  ::sapien::Renderer::server::proto::_AddPointLightReq_default_instance_._instance.get_mutable()->color_ = const_cast< ::sapien::Renderer::server::proto::Vec3*>(
-      ::sapien::Renderer::server::proto::Vec3::internal_default_instance());
-}
 class AddPointLightReq::_Internal {
  public:
   static const ::sapien::Renderer::server::proto::Vec3& position(const AddPointLightReq* msg);
@@ -4653,224 +4409,244 @@ class AddPointLightReq::_Internal {
 
 const ::sapien::Renderer::server::proto::Vec3&
 AddPointLightReq::_Internal::position(const AddPointLightReq* msg) {
-  return *msg->position_;
+  return *msg->_impl_.position_;
 }
 const ::sapien::Renderer::server::proto::Vec3&
 AddPointLightReq::_Internal::color(const AddPointLightReq* msg) {
-  return *msg->color_;
+  return *msg->_impl_.color_;
 }
-AddPointLightReq::AddPointLightReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+AddPointLightReq::AddPointLightReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.AddPointLightReq)
 }
 AddPointLightReq::AddPointLightReq(const AddPointLightReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  AddPointLightReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.position_){nullptr}
+    , decltype(_impl_.color_){nullptr}
+    , decltype(_impl_.scene_id_){}
+    , decltype(_impl_.shadow_){}
+    , decltype(_impl_.shadow_near_){}
+    , decltype(_impl_.shadow_far_){}
+    , decltype(_impl_.shadow_map_size_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_position()) {
-    position_ = new ::sapien::Renderer::server::proto::Vec3(*from.position_);
-  } else {
-    position_ = nullptr;
+    _this->_impl_.position_ = new ::sapien::Renderer::server::proto::Vec3(*from._impl_.position_);
   }
   if (from._internal_has_color()) {
-    color_ = new ::sapien::Renderer::server::proto::Vec3(*from.color_);
-  } else {
-    color_ = nullptr;
+    _this->_impl_.color_ = new ::sapien::Renderer::server::proto::Vec3(*from._impl_.color_);
   }
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&shadow_map_size_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(shadow_map_size_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.shadow_map_size_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.shadow_map_size_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.AddPointLightReq)
 }
 
-void AddPointLightReq::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_AddPointLightReq_render_5fserver_2eproto.base);
-  ::memset(&position_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&shadow_map_size_) -
-      reinterpret_cast<char*>(&position_)) + sizeof(shadow_map_size_));
+inline void AddPointLightReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.position_){nullptr}
+    , decltype(_impl_.color_){nullptr}
+    , decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.shadow_){false}
+    , decltype(_impl_.shadow_near_){0}
+    , decltype(_impl_.shadow_far_){0}
+    , decltype(_impl_.shadow_map_size_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 AddPointLightReq::~AddPointLightReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.AddPointLightReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void AddPointLightReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  if (this != internal_default_instance()) delete position_;
-  if (this != internal_default_instance()) delete color_;
+inline void AddPointLightReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.position_;
+  if (this != internal_default_instance()) delete _impl_.color_;
 }
 
-void AddPointLightReq::ArenaDtor(void* object) {
-  AddPointLightReq* _this = reinterpret_cast< AddPointLightReq* >(object);
-  (void)_this;
-}
-void AddPointLightReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void AddPointLightReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const AddPointLightReq& AddPointLightReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_AddPointLightReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void AddPointLightReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.AddPointLightReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArena() == nullptr && position_ != nullptr) {
-    delete position_;
+  if (GetArenaForAllocation() == nullptr && _impl_.position_ != nullptr) {
+    delete _impl_.position_;
   }
-  position_ = nullptr;
-  if (GetArena() == nullptr && color_ != nullptr) {
-    delete color_;
+  _impl_.position_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.color_ != nullptr) {
+    delete _impl_.color_;
   }
-  color_ = nullptr;
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&shadow_map_size_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(shadow_map_size_));
+  _impl_.color_ = nullptr;
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.shadow_map_size_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.shadow_map_size_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* AddPointLightReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* AddPointLightReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Vec3 position = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_position(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Vec3 color = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_color(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // bool shadow = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
-          shadow_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+          _impl_.shadow_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float shadow_near = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 45)) {
-          shadow_near_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 45)) {
+          _impl_.shadow_near_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float shadow_far = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 53)) {
-          shadow_far_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 53)) {
+          _impl_.shadow_far_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // int32 shadow_map_size = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
-          shadow_map_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 56)) {
+          _impl_.shadow_map_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* AddPointLightReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* AddPointLightReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.AddPointLightReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // .sapien.Renderer.server.proto.Vec3 position = 2;
-  if (this->has_position()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_position()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::position(this), target, stream);
+      InternalWriteMessage(2, _Internal::position(this),
+        _Internal::position(this).GetCachedSize(), target, stream);
   }
 
   // .sapien.Renderer.server.proto.Vec3 color = 3;
-  if (this->has_color()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_color()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        3, _Internal::color(this), target, stream);
+      InternalWriteMessage(3, _Internal::color(this),
+        _Internal::color(this).GetCachedSize(), target, stream);
   }
 
   // bool shadow = 4;
-  if (this->shadow() != 0) {
+  if (this->_internal_shadow() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_shadow(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(4, this->_internal_shadow(), target);
   }
 
   // float shadow_near = 5;
-  if (!(this->shadow_near() <= 0 && this->shadow_near() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_near = this->_internal_shadow_near();
+  uint32_t raw_shadow_near;
+  memcpy(&raw_shadow_near, &tmp_shadow_near, sizeof(tmp_shadow_near));
+  if (raw_shadow_near != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(5, this->_internal_shadow_near(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(5, this->_internal_shadow_near(), target);
   }
 
   // float shadow_far = 6;
-  if (!(this->shadow_far() <= 0 && this->shadow_far() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_far = this->_internal_shadow_far();
+  uint32_t raw_shadow_far;
+  memcpy(&raw_shadow_far, &tmp_shadow_far, sizeof(tmp_shadow_far));
+  if (raw_shadow_far != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(6, this->_internal_shadow_far(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(6, this->_internal_shadow_far(), target);
   }
 
   // int32 shadow_map_size = 7;
-  if (this->shadow_map_size() != 0) {
+  if (this->_internal_shadow_map_size() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(7, this->_internal_shadow_map_size(), target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(7, this->_internal_shadow_map_size(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.AddPointLightReq)
@@ -4881,112 +4657,107 @@ size_t AddPointLightReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.AddPointLightReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // .sapien.Renderer.server.proto.Vec3 position = 2;
-  if (this->has_position()) {
+  if (this->_internal_has_position()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *position_);
+        *_impl_.position_);
   }
 
   // .sapien.Renderer.server.proto.Vec3 color = 3;
-  if (this->has_color()) {
+  if (this->_internal_has_color()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *color_);
+        *_impl_.color_);
   }
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // bool shadow = 4;
-  if (this->shadow() != 0) {
+  if (this->_internal_shadow() != 0) {
     total_size += 1 + 1;
   }
 
   // float shadow_near = 5;
-  if (!(this->shadow_near() <= 0 && this->shadow_near() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_near = this->_internal_shadow_near();
+  uint32_t raw_shadow_near;
+  memcpy(&raw_shadow_near, &tmp_shadow_near, sizeof(tmp_shadow_near));
+  if (raw_shadow_near != 0) {
     total_size += 1 + 4;
   }
 
   // float shadow_far = 6;
-  if (!(this->shadow_far() <= 0 && this->shadow_far() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_far = this->_internal_shadow_far();
+  uint32_t raw_shadow_far;
+  memcpy(&raw_shadow_far, &tmp_shadow_far, sizeof(tmp_shadow_far));
+  if (raw_shadow_far != 0) {
     total_size += 1 + 4;
   }
 
   // int32 shadow_map_size = 7;
-  if (this->shadow_map_size() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_shadow_map_size());
+  if (this->_internal_shadow_map_size() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_shadow_map_size());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void AddPointLightReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.AddPointLightReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const AddPointLightReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AddPointLightReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.AddPointLightReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.AddPointLightReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData AddPointLightReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    AddPointLightReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*AddPointLightReq::GetClassData() const { return &_class_data_; }
 
-void AddPointLightReq::MergeFrom(const AddPointLightReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddPointLightReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void AddPointLightReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<AddPointLightReq*>(&to_msg);
+  auto& from = static_cast<const AddPointLightReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddPointLightReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.has_position()) {
-    _internal_mutable_position()->::sapien::Renderer::server::proto::Vec3::MergeFrom(from._internal_position());
+  if (from._internal_has_position()) {
+    _this->_internal_mutable_position()->::sapien::Renderer::server::proto::Vec3::MergeFrom(
+        from._internal_position());
   }
-  if (from.has_color()) {
-    _internal_mutable_color()->::sapien::Renderer::server::proto::Vec3::MergeFrom(from._internal_color());
+  if (from._internal_has_color()) {
+    _this->_internal_mutable_color()->::sapien::Renderer::server::proto::Vec3::MergeFrom(
+        from._internal_color());
   }
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.shadow() != 0) {
-    _internal_set_shadow(from._internal_shadow());
+  if (from._internal_shadow() != 0) {
+    _this->_internal_set_shadow(from._internal_shadow());
   }
-  if (!(from.shadow_near() <= 0 && from.shadow_near() >= 0)) {
-    _internal_set_shadow_near(from._internal_shadow_near());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_near = from._internal_shadow_near();
+  uint32_t raw_shadow_near;
+  memcpy(&raw_shadow_near, &tmp_shadow_near, sizeof(tmp_shadow_near));
+  if (raw_shadow_near != 0) {
+    _this->_internal_set_shadow_near(from._internal_shadow_near());
   }
-  if (!(from.shadow_far() <= 0 && from.shadow_far() >= 0)) {
-    _internal_set_shadow_far(from._internal_shadow_far());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_far = from._internal_shadow_far();
+  uint32_t raw_shadow_far;
+  memcpy(&raw_shadow_far, &tmp_shadow_far, sizeof(tmp_shadow_far));
+  if (raw_shadow_far != 0) {
+    _this->_internal_set_shadow_far(from._internal_shadow_far());
   }
-  if (from.shadow_map_size() != 0) {
-    _internal_set_shadow_map_size(from._internal_shadow_map_size());
+  if (from._internal_shadow_map_size() != 0) {
+    _this->_internal_set_shadow_map_size(from._internal_shadow_map_size());
   }
-}
-
-void AddPointLightReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.AddPointLightReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void AddPointLightReq::CopyFrom(const AddPointLightReq& from) {
@@ -5002,30 +4773,23 @@ bool AddPointLightReq::IsInitialized() const {
 
 void AddPointLightReq::InternalSwap(AddPointLightReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AddPointLightReq, shadow_map_size_)
-      + sizeof(AddPointLightReq::shadow_map_size_)
-      - PROTOBUF_FIELD_OFFSET(AddPointLightReq, position_)>(
-          reinterpret_cast<char*>(&position_),
-          reinterpret_cast<char*>(&other->position_));
+      PROTOBUF_FIELD_OFFSET(AddPointLightReq, _impl_.shadow_map_size_)
+      + sizeof(AddPointLightReq::_impl_.shadow_map_size_)
+      - PROTOBUF_FIELD_OFFSET(AddPointLightReq, _impl_.position_)>(
+          reinterpret_cast<char*>(&_impl_.position_),
+          reinterpret_cast<char*>(&other->_impl_.position_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata AddPointLightReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[15]);
 }
-
 
 // ===================================================================
 
-void AddDirectionalLightReq::InitAsDefaultInstance() {
-  ::sapien::Renderer::server::proto::_AddDirectionalLightReq_default_instance_._instance.get_mutable()->direction_ = const_cast< ::sapien::Renderer::server::proto::Vec3*>(
-      ::sapien::Renderer::server::proto::Vec3::internal_default_instance());
-  ::sapien::Renderer::server::proto::_AddDirectionalLightReq_default_instance_._instance.get_mutable()->color_ = const_cast< ::sapien::Renderer::server::proto::Vec3*>(
-      ::sapien::Renderer::server::proto::Vec3::internal_default_instance());
-  ::sapien::Renderer::server::proto::_AddDirectionalLightReq_default_instance_._instance.get_mutable()->position_ = const_cast< ::sapien::Renderer::server::proto::Vec3*>(
-      ::sapien::Renderer::server::proto::Vec3::internal_default_instance());
-}
 class AddDirectionalLightReq::_Internal {
  public:
   static const ::sapien::Renderer::server::proto::Vec3& direction(const AddDirectionalLightReq* msg);
@@ -5035,266 +4799,293 @@ class AddDirectionalLightReq::_Internal {
 
 const ::sapien::Renderer::server::proto::Vec3&
 AddDirectionalLightReq::_Internal::direction(const AddDirectionalLightReq* msg) {
-  return *msg->direction_;
+  return *msg->_impl_.direction_;
 }
 const ::sapien::Renderer::server::proto::Vec3&
 AddDirectionalLightReq::_Internal::color(const AddDirectionalLightReq* msg) {
-  return *msg->color_;
+  return *msg->_impl_.color_;
 }
 const ::sapien::Renderer::server::proto::Vec3&
 AddDirectionalLightReq::_Internal::position(const AddDirectionalLightReq* msg) {
-  return *msg->position_;
+  return *msg->_impl_.position_;
 }
-AddDirectionalLightReq::AddDirectionalLightReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+AddDirectionalLightReq::AddDirectionalLightReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.AddDirectionalLightReq)
 }
 AddDirectionalLightReq::AddDirectionalLightReq(const AddDirectionalLightReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  AddDirectionalLightReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.direction_){nullptr}
+    , decltype(_impl_.color_){nullptr}
+    , decltype(_impl_.position_){nullptr}
+    , decltype(_impl_.scene_id_){}
+    , decltype(_impl_.shadow_){}
+    , decltype(_impl_.shadow_scale_){}
+    , decltype(_impl_.shadow_near_){}
+    , decltype(_impl_.shadow_far_){}
+    , decltype(_impl_.shadow_map_size_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_direction()) {
-    direction_ = new ::sapien::Renderer::server::proto::Vec3(*from.direction_);
-  } else {
-    direction_ = nullptr;
+    _this->_impl_.direction_ = new ::sapien::Renderer::server::proto::Vec3(*from._impl_.direction_);
   }
   if (from._internal_has_color()) {
-    color_ = new ::sapien::Renderer::server::proto::Vec3(*from.color_);
-  } else {
-    color_ = nullptr;
+    _this->_impl_.color_ = new ::sapien::Renderer::server::proto::Vec3(*from._impl_.color_);
   }
   if (from._internal_has_position()) {
-    position_ = new ::sapien::Renderer::server::proto::Vec3(*from.position_);
-  } else {
-    position_ = nullptr;
+    _this->_impl_.position_ = new ::sapien::Renderer::server::proto::Vec3(*from._impl_.position_);
   }
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&shadow_map_size_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(shadow_map_size_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.shadow_map_size_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.shadow_map_size_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.AddDirectionalLightReq)
 }
 
-void AddDirectionalLightReq::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_AddDirectionalLightReq_render_5fserver_2eproto.base);
-  ::memset(&direction_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&shadow_map_size_) -
-      reinterpret_cast<char*>(&direction_)) + sizeof(shadow_map_size_));
+inline void AddDirectionalLightReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.direction_){nullptr}
+    , decltype(_impl_.color_){nullptr}
+    , decltype(_impl_.position_){nullptr}
+    , decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.shadow_){false}
+    , decltype(_impl_.shadow_scale_){0}
+    , decltype(_impl_.shadow_near_){0}
+    , decltype(_impl_.shadow_far_){0}
+    , decltype(_impl_.shadow_map_size_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 AddDirectionalLightReq::~AddDirectionalLightReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.AddDirectionalLightReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void AddDirectionalLightReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  if (this != internal_default_instance()) delete direction_;
-  if (this != internal_default_instance()) delete color_;
-  if (this != internal_default_instance()) delete position_;
+inline void AddDirectionalLightReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  if (this != internal_default_instance()) delete _impl_.direction_;
+  if (this != internal_default_instance()) delete _impl_.color_;
+  if (this != internal_default_instance()) delete _impl_.position_;
 }
 
-void AddDirectionalLightReq::ArenaDtor(void* object) {
-  AddDirectionalLightReq* _this = reinterpret_cast< AddDirectionalLightReq* >(object);
-  (void)_this;
-}
-void AddDirectionalLightReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void AddDirectionalLightReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const AddDirectionalLightReq& AddDirectionalLightReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_AddDirectionalLightReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void AddDirectionalLightReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.AddDirectionalLightReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  if (GetArena() == nullptr && direction_ != nullptr) {
-    delete direction_;
+  if (GetArenaForAllocation() == nullptr && _impl_.direction_ != nullptr) {
+    delete _impl_.direction_;
   }
-  direction_ = nullptr;
-  if (GetArena() == nullptr && color_ != nullptr) {
-    delete color_;
+  _impl_.direction_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.color_ != nullptr) {
+    delete _impl_.color_;
   }
-  color_ = nullptr;
-  if (GetArena() == nullptr && position_ != nullptr) {
-    delete position_;
+  _impl_.color_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.position_ != nullptr) {
+    delete _impl_.position_;
   }
-  position_ = nullptr;
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&shadow_map_size_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(shadow_map_size_));
+  _impl_.position_ = nullptr;
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.shadow_map_size_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.shadow_map_size_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* AddDirectionalLightReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* AddDirectionalLightReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Vec3 direction = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ctx->ParseMessage(_internal_mutable_direction(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Vec3 color = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_color(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // bool shadow = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
-          shadow_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 32)) {
+          _impl_.shadow_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .sapien.Renderer.server.proto.Vec3 position = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
           ptr = ctx->ParseMessage(_internal_mutable_position(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float shadow_scale = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 53)) {
-          shadow_scale_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 53)) {
+          _impl_.shadow_scale_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float shadow_near = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 61)) {
-          shadow_near_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 61)) {
+          _impl_.shadow_near_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float shadow_far = 8;
       case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 69)) {
-          shadow_far_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 69)) {
+          _impl_.shadow_far_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // int32 shadow_map_size = 9;
       case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
-          shadow_map_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 72)) {
+          _impl_.shadow_map_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* AddDirectionalLightReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* AddDirectionalLightReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.AddDirectionalLightReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // .sapien.Renderer.server.proto.Vec3 direction = 2;
-  if (this->has_direction()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_direction()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        2, _Internal::direction(this), target, stream);
+      InternalWriteMessage(2, _Internal::direction(this),
+        _Internal::direction(this).GetCachedSize(), target, stream);
   }
 
   // .sapien.Renderer.server.proto.Vec3 color = 3;
-  if (this->has_color()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_color()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        3, _Internal::color(this), target, stream);
+      InternalWriteMessage(3, _Internal::color(this),
+        _Internal::color(this).GetCachedSize(), target, stream);
   }
 
   // bool shadow = 4;
-  if (this->shadow() != 0) {
+  if (this->_internal_shadow() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(4, this->_internal_shadow(), target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(4, this->_internal_shadow(), target);
   }
 
   // .sapien.Renderer.server.proto.Vec3 position = 5;
-  if (this->has_position()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_position()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        5, _Internal::position(this), target, stream);
+      InternalWriteMessage(5, _Internal::position(this),
+        _Internal::position(this).GetCachedSize(), target, stream);
   }
 
   // float shadow_scale = 6;
-  if (!(this->shadow_scale() <= 0 && this->shadow_scale() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_scale = this->_internal_shadow_scale();
+  uint32_t raw_shadow_scale;
+  memcpy(&raw_shadow_scale, &tmp_shadow_scale, sizeof(tmp_shadow_scale));
+  if (raw_shadow_scale != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(6, this->_internal_shadow_scale(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(6, this->_internal_shadow_scale(), target);
   }
 
   // float shadow_near = 7;
-  if (!(this->shadow_near() <= 0 && this->shadow_near() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_near = this->_internal_shadow_near();
+  uint32_t raw_shadow_near;
+  memcpy(&raw_shadow_near, &tmp_shadow_near, sizeof(tmp_shadow_near));
+  if (raw_shadow_near != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(7, this->_internal_shadow_near(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(7, this->_internal_shadow_near(), target);
   }
 
   // float shadow_far = 8;
-  if (!(this->shadow_far() <= 0 && this->shadow_far() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_far = this->_internal_shadow_far();
+  uint32_t raw_shadow_far;
+  memcpy(&raw_shadow_far, &tmp_shadow_far, sizeof(tmp_shadow_far));
+  if (raw_shadow_far != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(8, this->_internal_shadow_far(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(8, this->_internal_shadow_far(), target);
   }
 
   // int32 shadow_map_size = 9;
-  if (this->shadow_map_size() != 0) {
+  if (this->_internal_shadow_map_size() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(9, this->_internal_shadow_map_size(), target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(9, this->_internal_shadow_map_size(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.AddDirectionalLightReq)
@@ -5305,130 +5096,134 @@ size_t AddDirectionalLightReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.AddDirectionalLightReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // .sapien.Renderer.server.proto.Vec3 direction = 2;
-  if (this->has_direction()) {
+  if (this->_internal_has_direction()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *direction_);
+        *_impl_.direction_);
   }
 
   // .sapien.Renderer.server.proto.Vec3 color = 3;
-  if (this->has_color()) {
+  if (this->_internal_has_color()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *color_);
+        *_impl_.color_);
   }
 
   // .sapien.Renderer.server.proto.Vec3 position = 5;
-  if (this->has_position()) {
+  if (this->_internal_has_position()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *position_);
+        *_impl_.position_);
   }
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // bool shadow = 4;
-  if (this->shadow() != 0) {
+  if (this->_internal_shadow() != 0) {
     total_size += 1 + 1;
   }
 
   // float shadow_scale = 6;
-  if (!(this->shadow_scale() <= 0 && this->shadow_scale() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_scale = this->_internal_shadow_scale();
+  uint32_t raw_shadow_scale;
+  memcpy(&raw_shadow_scale, &tmp_shadow_scale, sizeof(tmp_shadow_scale));
+  if (raw_shadow_scale != 0) {
     total_size += 1 + 4;
   }
 
   // float shadow_near = 7;
-  if (!(this->shadow_near() <= 0 && this->shadow_near() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_near = this->_internal_shadow_near();
+  uint32_t raw_shadow_near;
+  memcpy(&raw_shadow_near, &tmp_shadow_near, sizeof(tmp_shadow_near));
+  if (raw_shadow_near != 0) {
     total_size += 1 + 4;
   }
 
   // float shadow_far = 8;
-  if (!(this->shadow_far() <= 0 && this->shadow_far() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_far = this->_internal_shadow_far();
+  uint32_t raw_shadow_far;
+  memcpy(&raw_shadow_far, &tmp_shadow_far, sizeof(tmp_shadow_far));
+  if (raw_shadow_far != 0) {
     total_size += 1 + 4;
   }
 
   // int32 shadow_map_size = 9;
-  if (this->shadow_map_size() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_shadow_map_size());
+  if (this->_internal_shadow_map_size() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_shadow_map_size());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void AddDirectionalLightReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.AddDirectionalLightReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const AddDirectionalLightReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<AddDirectionalLightReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.AddDirectionalLightReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.AddDirectionalLightReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData AddDirectionalLightReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    AddDirectionalLightReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*AddDirectionalLightReq::GetClassData() const { return &_class_data_; }
 
-void AddDirectionalLightReq::MergeFrom(const AddDirectionalLightReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddDirectionalLightReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void AddDirectionalLightReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<AddDirectionalLightReq*>(&to_msg);
+  auto& from = static_cast<const AddDirectionalLightReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.AddDirectionalLightReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.has_direction()) {
-    _internal_mutable_direction()->::sapien::Renderer::server::proto::Vec3::MergeFrom(from._internal_direction());
+  if (from._internal_has_direction()) {
+    _this->_internal_mutable_direction()->::sapien::Renderer::server::proto::Vec3::MergeFrom(
+        from._internal_direction());
   }
-  if (from.has_color()) {
-    _internal_mutable_color()->::sapien::Renderer::server::proto::Vec3::MergeFrom(from._internal_color());
+  if (from._internal_has_color()) {
+    _this->_internal_mutable_color()->::sapien::Renderer::server::proto::Vec3::MergeFrom(
+        from._internal_color());
   }
-  if (from.has_position()) {
-    _internal_mutable_position()->::sapien::Renderer::server::proto::Vec3::MergeFrom(from._internal_position());
+  if (from._internal_has_position()) {
+    _this->_internal_mutable_position()->::sapien::Renderer::server::proto::Vec3::MergeFrom(
+        from._internal_position());
   }
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.shadow() != 0) {
-    _internal_set_shadow(from._internal_shadow());
+  if (from._internal_shadow() != 0) {
+    _this->_internal_set_shadow(from._internal_shadow());
   }
-  if (!(from.shadow_scale() <= 0 && from.shadow_scale() >= 0)) {
-    _internal_set_shadow_scale(from._internal_shadow_scale());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_scale = from._internal_shadow_scale();
+  uint32_t raw_shadow_scale;
+  memcpy(&raw_shadow_scale, &tmp_shadow_scale, sizeof(tmp_shadow_scale));
+  if (raw_shadow_scale != 0) {
+    _this->_internal_set_shadow_scale(from._internal_shadow_scale());
   }
-  if (!(from.shadow_near() <= 0 && from.shadow_near() >= 0)) {
-    _internal_set_shadow_near(from._internal_shadow_near());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_near = from._internal_shadow_near();
+  uint32_t raw_shadow_near;
+  memcpy(&raw_shadow_near, &tmp_shadow_near, sizeof(tmp_shadow_near));
+  if (raw_shadow_near != 0) {
+    _this->_internal_set_shadow_near(from._internal_shadow_near());
   }
-  if (!(from.shadow_far() <= 0 && from.shadow_far() >= 0)) {
-    _internal_set_shadow_far(from._internal_shadow_far());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_shadow_far = from._internal_shadow_far();
+  uint32_t raw_shadow_far;
+  memcpy(&raw_shadow_far, &tmp_shadow_far, sizeof(tmp_shadow_far));
+  if (raw_shadow_far != 0) {
+    _this->_internal_set_shadow_far(from._internal_shadow_far());
   }
-  if (from.shadow_map_size() != 0) {
-    _internal_set_shadow_map_size(from._internal_shadow_map_size());
+  if (from._internal_shadow_map_size() != 0) {
+    _this->_internal_set_shadow_map_size(from._internal_shadow_map_size());
   }
-}
-
-void AddDirectionalLightReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.AddDirectionalLightReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void AddDirectionalLightReq::CopyFrom(const AddDirectionalLightReq& from) {
@@ -5444,150 +5239,153 @@ bool AddDirectionalLightReq::IsInitialized() const {
 
 void AddDirectionalLightReq::InternalSwap(AddDirectionalLightReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AddDirectionalLightReq, shadow_map_size_)
-      + sizeof(AddDirectionalLightReq::shadow_map_size_)
-      - PROTOBUF_FIELD_OFFSET(AddDirectionalLightReq, direction_)>(
-          reinterpret_cast<char*>(&direction_),
-          reinterpret_cast<char*>(&other->direction_));
+      PROTOBUF_FIELD_OFFSET(AddDirectionalLightReq, _impl_.shadow_map_size_)
+      + sizeof(AddDirectionalLightReq::_impl_.shadow_map_size_)
+      - PROTOBUF_FIELD_OFFSET(AddDirectionalLightReq, _impl_.direction_)>(
+          reinterpret_cast<char*>(&_impl_.direction_),
+          reinterpret_cast<char*>(&other->_impl_.direction_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata AddDirectionalLightReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[16]);
 }
-
 
 // ===================================================================
 
-void RemoveLightReq::InitAsDefaultInstance() {
-}
 class RemoveLightReq::_Internal {
  public:
 };
 
-RemoveLightReq::RemoveLightReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+RemoveLightReq::RemoveLightReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.RemoveLightReq)
 }
 RemoveLightReq::RemoveLightReq(const RemoveLightReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  RemoveLightReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){}
+    , decltype(_impl_.light_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&light_id_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(light_id_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.light_id_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.light_id_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.RemoveLightReq)
 }
 
-void RemoveLightReq::SharedCtor() {
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&light_id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(light_id_));
+inline void RemoveLightReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.light_id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 RemoveLightReq::~RemoveLightReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.RemoveLightReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void RemoveLightReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void RemoveLightReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void RemoveLightReq::ArenaDtor(void* object) {
-  RemoveLightReq* _this = reinterpret_cast< RemoveLightReq* >(object);
-  (void)_this;
-}
-void RemoveLightReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void RemoveLightReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const RemoveLightReq& RemoveLightReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_RemoveLightReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void RemoveLightReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.RemoveLightReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&light_id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(light_id_));
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.light_id_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.light_id_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* RemoveLightReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* RemoveLightReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint64 light_id = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          light_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.light_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* RemoveLightReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* RemoveLightReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.RemoveLightReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // uint64 light_id = 2;
-  if (this->light_id() != 0) {
+  if (this->_internal_light_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_light_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_light_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.RemoveLightReq)
@@ -5598,68 +5396,45 @@ size_t RemoveLightReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.RemoveLightReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // uint64 light_id = 2;
-  if (this->light_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_light_id());
+  if (this->_internal_light_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_light_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void RemoveLightReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.RemoveLightReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const RemoveLightReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<RemoveLightReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.RemoveLightReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.RemoveLightReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData RemoveLightReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    RemoveLightReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*RemoveLightReq::GetClassData() const { return &_class_data_; }
 
-void RemoveLightReq::MergeFrom(const RemoveLightReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.RemoveLightReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void RemoveLightReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<RemoveLightReq*>(&to_msg);
+  auto& from = static_cast<const RemoveLightReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.RemoveLightReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.light_id() != 0) {
-    _internal_set_light_id(from._internal_light_id());
+  if (from._internal_light_id() != 0) {
+    _this->_internal_set_light_id(from._internal_light_id());
   }
-}
-
-void RemoveLightReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.RemoveLightReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void RemoveLightReq::CopyFrom(const RemoveLightReq& from) {
@@ -5675,158 +5450,168 @@ bool RemoveLightReq::IsInitialized() const {
 
 void RemoveLightReq::InternalSwap(RemoveLightReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(RemoveLightReq, light_id_)
-      + sizeof(RemoveLightReq::light_id_)
-      - PROTOBUF_FIELD_OFFSET(RemoveLightReq, scene_id_)>(
-          reinterpret_cast<char*>(&scene_id_),
-          reinterpret_cast<char*>(&other->scene_id_));
+      PROTOBUF_FIELD_OFFSET(RemoveLightReq, _impl_.light_id_)
+      + sizeof(RemoveLightReq::_impl_.light_id_)
+      - PROTOBUF_FIELD_OFFSET(RemoveLightReq, _impl_.scene_id_)>(
+          reinterpret_cast<char*>(&_impl_.scene_id_),
+          reinterpret_cast<char*>(&other->_impl_.scene_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata RemoveLightReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[17]);
 }
-
 
 // ===================================================================
 
-void EntityOrderReq::InitAsDefaultInstance() {
-}
 class EntityOrderReq::_Internal {
  public:
 };
 
-EntityOrderReq::EntityOrderReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  body_ids_(arena),
-  camera_ids_(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+EntityOrderReq::EntityOrderReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.EntityOrderReq)
 }
 EntityOrderReq::EntityOrderReq(const EntityOrderReq& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      body_ids_(from.body_ids_),
-      camera_ids_(from.camera_ids_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  EntityOrderReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.body_ids_){from._impl_.body_ids_}
+    , /*decltype(_impl_._body_ids_cached_byte_size_)*/{0}
+    , decltype(_impl_.camera_ids_){from._impl_.camera_ids_}
+    , /*decltype(_impl_._camera_ids_cached_byte_size_)*/{0}
+    , decltype(_impl_.scene_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  scene_id_ = from.scene_id_;
+  _this->_impl_.scene_id_ = from._impl_.scene_id_;
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.EntityOrderReq)
 }
 
-void EntityOrderReq::SharedCtor() {
-  scene_id_ = PROTOBUF_ULONGLONG(0);
+inline void EntityOrderReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.body_ids_){arena}
+    , /*decltype(_impl_._body_ids_cached_byte_size_)*/{0}
+    , decltype(_impl_.camera_ids_){arena}
+    , /*decltype(_impl_._camera_ids_cached_byte_size_)*/{0}
+    , decltype(_impl_.scene_id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 EntityOrderReq::~EntityOrderReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.EntityOrderReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void EntityOrderReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void EntityOrderReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.body_ids_.~RepeatedField();
+  _impl_.camera_ids_.~RepeatedField();
 }
 
-void EntityOrderReq::ArenaDtor(void* object) {
-  EntityOrderReq* _this = reinterpret_cast< EntityOrderReq* >(object);
-  (void)_this;
-}
-void EntityOrderReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void EntityOrderReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const EntityOrderReq& EntityOrderReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_EntityOrderReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void EntityOrderReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.EntityOrderReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  body_ids_.Clear();
-  camera_ids_.Clear();
-  scene_id_ = PROTOBUF_ULONGLONG(0);
+  _impl_.body_ids_.Clear();
+  _impl_.camera_ids_.Clear();
+  _impl_.scene_id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* EntityOrderReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* EntityOrderReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // repeated uint64 body_ids = 2 [packed = true];
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt64Parser(_internal_mutable_body_ids(), ptr, ctx);
           CHK_(ptr);
-        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16) {
+        } else if (static_cast<uint8_t>(tag) == 16) {
           _internal_add_body_ids(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // repeated uint64 camera_ids = 3 [packed = true];
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt64Parser(_internal_mutable_camera_ids(), ptr, ctx);
           CHK_(ptr);
-        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24) {
+        } else if (static_cast<uint8_t>(tag) == 24) {
           _internal_add_camera_ids(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* EntityOrderReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* EntityOrderReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.EntityOrderReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // repeated uint64 body_ids = 2 [packed = true];
   {
-    int byte_size = _body_ids_cached_byte_size_.load(std::memory_order_relaxed);
+    int byte_size = _impl_._body_ids_cached_byte_size_.load(std::memory_order_relaxed);
     if (byte_size > 0) {
       target = stream->WriteUInt64Packed(
           2, _internal_body_ids(), byte_size, target);
@@ -5835,7 +5620,7 @@ failure:
 
   // repeated uint64 camera_ids = 3 [packed = true];
   {
-    int byte_size = _camera_ids_cached_byte_size_.load(std::memory_order_relaxed);
+    int byte_size = _impl_._camera_ids_cached_byte_size_.load(std::memory_order_relaxed);
     if (byte_size > 0) {
       target = stream->WriteUInt64Packed(
           3, _internal_camera_ids(), byte_size, target);
@@ -5843,7 +5628,7 @@ failure:
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.EntityOrderReq)
@@ -5854,90 +5639,67 @@ size_t EntityOrderReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.EntityOrderReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated uint64 body_ids = 2 [packed = true];
   {
-    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      UInt64Size(this->body_ids_);
+    size_t data_size = ::_pbi::WireFormatLite::
+      UInt64Size(this->_impl_.body_ids_);
     if (data_size > 0) {
       total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
+        ::_pbi::WireFormatLite::Int32Size(static_cast<int32_t>(data_size));
     }
-    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
-    _body_ids_cached_byte_size_.store(cached_size,
+    int cached_size = ::_pbi::ToCachedSize(data_size);
+    _impl_._body_ids_cached_byte_size_.store(cached_size,
                                     std::memory_order_relaxed);
     total_size += data_size;
   }
 
   // repeated uint64 camera_ids = 3 [packed = true];
   {
-    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      UInt64Size(this->camera_ids_);
+    size_t data_size = ::_pbi::WireFormatLite::
+      UInt64Size(this->_impl_.camera_ids_);
     if (data_size > 0) {
       total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
+        ::_pbi::WireFormatLite::Int32Size(static_cast<int32_t>(data_size));
     }
-    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
-    _camera_ids_cached_byte_size_.store(cached_size,
+    int cached_size = ::_pbi::ToCachedSize(data_size);
+    _impl_._camera_ids_cached_byte_size_.store(cached_size,
                                     std::memory_order_relaxed);
     total_size += data_size;
   }
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void EntityOrderReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.EntityOrderReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const EntityOrderReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<EntityOrderReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.EntityOrderReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.EntityOrderReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData EntityOrderReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    EntityOrderReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*EntityOrderReq::GetClassData() const { return &_class_data_; }
 
-void EntityOrderReq::MergeFrom(const EntityOrderReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.EntityOrderReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void EntityOrderReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<EntityOrderReq*>(&to_msg);
+  auto& from = static_cast<const EntityOrderReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.EntityOrderReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  body_ids_.MergeFrom(from.body_ids_);
-  camera_ids_.MergeFrom(from.camera_ids_);
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  _this->_impl_.body_ids_.MergeFrom(from._impl_.body_ids_);
+  _this->_impl_.camera_ids_.MergeFrom(from._impl_.camera_ids_);
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-}
-
-void EntityOrderReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.EntityOrderReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void EntityOrderReq::CopyFrom(const EntityOrderReq& from) {
@@ -5953,102 +5715,104 @@ bool EntityOrderReq::IsInitialized() const {
 
 void EntityOrderReq::InternalSwap(EntityOrderReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  body_ids_.InternalSwap(&other->body_ids_);
-  camera_ids_.InternalSwap(&other->camera_ids_);
-  swap(scene_id_, other->scene_id_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.body_ids_.InternalSwap(&other->_impl_.body_ids_);
+  _impl_.camera_ids_.InternalSwap(&other->_impl_.camera_ids_);
+  swap(_impl_.scene_id_, other->_impl_.scene_id_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata EntityOrderReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[18]);
 }
-
 
 // ===================================================================
 
-void UpdateRenderReq::InitAsDefaultInstance() {
-}
 class UpdateRenderReq::_Internal {
  public:
 };
 
-UpdateRenderReq::UpdateRenderReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  body_poses_(arena),
-  camera_poses_(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+UpdateRenderReq::UpdateRenderReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.UpdateRenderReq)
 }
 UpdateRenderReq::UpdateRenderReq(const UpdateRenderReq& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      body_poses_(from.body_poses_),
-      camera_poses_(from.camera_poses_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  UpdateRenderReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.body_poses_){from._impl_.body_poses_}
+    , decltype(_impl_.camera_poses_){from._impl_.camera_poses_}
+    , decltype(_impl_.scene_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  scene_id_ = from.scene_id_;
+  _this->_impl_.scene_id_ = from._impl_.scene_id_;
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.UpdateRenderReq)
 }
 
-void UpdateRenderReq::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_UpdateRenderReq_render_5fserver_2eproto.base);
-  scene_id_ = PROTOBUF_ULONGLONG(0);
+inline void UpdateRenderReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.body_poses_){arena}
+    , decltype(_impl_.camera_poses_){arena}
+    , decltype(_impl_.scene_id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 UpdateRenderReq::~UpdateRenderReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.UpdateRenderReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void UpdateRenderReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void UpdateRenderReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.body_poses_.~RepeatedPtrField();
+  _impl_.camera_poses_.~RepeatedPtrField();
 }
 
-void UpdateRenderReq::ArenaDtor(void* object) {
-  UpdateRenderReq* _this = reinterpret_cast< UpdateRenderReq* >(object);
-  (void)_this;
-}
-void UpdateRenderReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void UpdateRenderReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const UpdateRenderReq& UpdateRenderReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_UpdateRenderReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void UpdateRenderReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.UpdateRenderReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  body_poses_.Clear();
-  camera_poses_.Clear();
-  scene_id_ = PROTOBUF_ULONGLONG(0);
+  _impl_.body_poses_.Clear();
+  _impl_.camera_poses_.Clear();
+  _impl_.scene_id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* UpdateRenderReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* UpdateRenderReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // repeated .sapien.Renderer.server.proto.Pose body_poses = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -6056,11 +5820,12 @@ const char* UpdateRenderReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // repeated .sapien.Renderer.server.proto.Pose camera_poses = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -6068,60 +5833,62 @@ const char* UpdateRenderReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* UpdateRenderReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* UpdateRenderReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.UpdateRenderReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // repeated .sapien.Renderer.server.proto.Pose body_poses = 2;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_body_poses_size()); i < n; i++) {
-    target = stream->EnsureSpace(target);
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_body_poses_size()); i < n; i++) {
+    const auto& repfield = this->_internal_body_poses(i);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, this->_internal_body_poses(i), target, stream);
+        InternalWriteMessage(2, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   // repeated .sapien.Renderer.server.proto.Pose camera_poses = 3;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_camera_poses_size()); i < n; i++) {
-    target = stream->EnsureSpace(target);
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_camera_poses_size()); i < n; i++) {
+    const auto& repfield = this->_internal_camera_poses(i);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, this->_internal_camera_poses(i), target, stream);
+        InternalWriteMessage(3, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.UpdateRenderReq)
@@ -6132,74 +5899,53 @@ size_t UpdateRenderReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.UpdateRenderReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .sapien.Renderer.server.proto.Pose body_poses = 2;
   total_size += 1UL * this->_internal_body_poses_size();
-  for (const auto& msg : this->body_poses_) {
+  for (const auto& msg : this->_impl_.body_poses_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .sapien.Renderer.server.proto.Pose camera_poses = 3;
   total_size += 1UL * this->_internal_camera_poses_size();
-  for (const auto& msg : this->camera_poses_) {
+  for (const auto& msg : this->_impl_.camera_poses_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void UpdateRenderReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.UpdateRenderReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const UpdateRenderReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<UpdateRenderReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.UpdateRenderReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.UpdateRenderReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData UpdateRenderReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    UpdateRenderReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*UpdateRenderReq::GetClassData() const { return &_class_data_; }
 
-void UpdateRenderReq::MergeFrom(const UpdateRenderReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.UpdateRenderReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void UpdateRenderReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<UpdateRenderReq*>(&to_msg);
+  auto& from = static_cast<const UpdateRenderReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.UpdateRenderReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  body_poses_.MergeFrom(from.body_poses_);
-  camera_poses_.MergeFrom(from.camera_poses_);
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  _this->_impl_.body_poses_.MergeFrom(from._impl_.body_poses_);
+  _this->_impl_.camera_poses_.MergeFrom(from._impl_.camera_poses_);
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-}
-
-void UpdateRenderReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.UpdateRenderReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void UpdateRenderReq::CopyFrom(const UpdateRenderReq& from) {
@@ -6215,160 +5961,166 @@ bool UpdateRenderReq::IsInitialized() const {
 
 void UpdateRenderReq::InternalSwap(UpdateRenderReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  body_poses_.InternalSwap(&other->body_poses_);
-  camera_poses_.InternalSwap(&other->camera_poses_);
-  swap(scene_id_, other->scene_id_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.body_poses_.InternalSwap(&other->_impl_.body_poses_);
+  _impl_.camera_poses_.InternalSwap(&other->_impl_.camera_poses_);
+  swap(_impl_.scene_id_, other->_impl_.scene_id_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata UpdateRenderReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[19]);
 }
-
 
 // ===================================================================
 
-void BodyIdReq::InitAsDefaultInstance() {
-}
 class BodyIdReq::_Internal {
  public:
 };
 
-BodyIdReq::BodyIdReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+BodyIdReq::BodyIdReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.BodyIdReq)
 }
 BodyIdReq::BodyIdReq(const BodyIdReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BodyIdReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){}
+    , decltype(_impl_.body_id_){}
+    , decltype(_impl_.id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&id_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(id_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.id_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.id_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.BodyIdReq)
 }
 
-void BodyIdReq::SharedCtor() {
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(id_));
+inline void BodyIdReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.body_id_){uint64_t{0u}}
+    , decltype(_impl_.id_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 BodyIdReq::~BodyIdReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.BodyIdReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void BodyIdReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void BodyIdReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void BodyIdReq::ArenaDtor(void* object) {
-  BodyIdReq* _this = reinterpret_cast< BodyIdReq* >(object);
-  (void)_this;
-}
-void BodyIdReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void BodyIdReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const BodyIdReq& BodyIdReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_BodyIdReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void BodyIdReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.BodyIdReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(id_));
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.id_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.id_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* BodyIdReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* BodyIdReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint64 body_id = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          body_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.body_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint32 id = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+          _impl_.id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* BodyIdReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* BodyIdReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.BodyIdReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // uint64 body_id = 2;
-  if (this->body_id() != 0) {
+  if (this->_internal_body_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_body_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_body_id(), target);
   }
 
   // uint32 id = 3;
-  if (this->id() != 0) {
+  if (this->_internal_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(3, this->_internal_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.BodyIdReq)
@@ -6379,78 +6131,53 @@ size_t BodyIdReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.BodyIdReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // uint64 body_id = 2;
-  if (this->body_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_body_id());
+  if (this->_internal_body_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_body_id());
   }
 
   // uint32 id = 3;
-  if (this->id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-        this->_internal_id());
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void BodyIdReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.BodyIdReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const BodyIdReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<BodyIdReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.BodyIdReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.BodyIdReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BodyIdReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    BodyIdReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BodyIdReq::GetClassData() const { return &_class_data_; }
 
-void BodyIdReq::MergeFrom(const BodyIdReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.BodyIdReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void BodyIdReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BodyIdReq*>(&to_msg);
+  auto& from = static_cast<const BodyIdReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.BodyIdReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.body_id() != 0) {
-    _internal_set_body_id(from._internal_body_id());
+  if (from._internal_body_id() != 0) {
+    _this->_internal_set_body_id(from._internal_body_id());
   }
-  if (from.id() != 0) {
-    _internal_set_id(from._internal_id());
+  if (from._internal_id() != 0) {
+    _this->_internal_set_id(from._internal_id());
   }
-}
-
-void BodyIdReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.BodyIdReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void BodyIdReq::CopyFrom(const BodyIdReq& from) {
@@ -6466,150 +6193,153 @@ bool BodyIdReq::IsInitialized() const {
 
 void BodyIdReq::InternalSwap(BodyIdReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(BodyIdReq, id_)
-      + sizeof(BodyIdReq::id_)
-      - PROTOBUF_FIELD_OFFSET(BodyIdReq, scene_id_)>(
-          reinterpret_cast<char*>(&scene_id_),
-          reinterpret_cast<char*>(&other->scene_id_));
+      PROTOBUF_FIELD_OFFSET(BodyIdReq, _impl_.id_)
+      + sizeof(BodyIdReq::_impl_.id_)
+      - PROTOBUF_FIELD_OFFSET(BodyIdReq, _impl_.scene_id_)>(
+          reinterpret_cast<char*>(&_impl_.scene_id_),
+          reinterpret_cast<char*>(&other->_impl_.scene_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata BodyIdReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[20]);
 }
-
 
 // ===================================================================
 
-void TakePictureReq::InitAsDefaultInstance() {
-}
 class TakePictureReq::_Internal {
  public:
 };
 
-TakePictureReq::TakePictureReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+TakePictureReq::TakePictureReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.TakePictureReq)
 }
 TakePictureReq::TakePictureReq(const TakePictureReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  TakePictureReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){}
+    , decltype(_impl_.camera_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&camera_id_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(camera_id_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.camera_id_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.camera_id_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.TakePictureReq)
 }
 
-void TakePictureReq::SharedCtor() {
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&camera_id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(camera_id_));
+inline void TakePictureReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.camera_id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 TakePictureReq::~TakePictureReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.TakePictureReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void TakePictureReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void TakePictureReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void TakePictureReq::ArenaDtor(void* object) {
-  TakePictureReq* _this = reinterpret_cast< TakePictureReq* >(object);
-  (void)_this;
-}
-void TakePictureReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void TakePictureReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const TakePictureReq& TakePictureReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_TakePictureReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void TakePictureReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.TakePictureReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&camera_id_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(camera_id_));
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.camera_id_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.camera_id_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* TakePictureReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* TakePictureReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint64 camera_id = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          camera_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.camera_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* TakePictureReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* TakePictureReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.TakePictureReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // uint64 camera_id = 2;
-  if (this->camera_id() != 0) {
+  if (this->_internal_camera_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_camera_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_camera_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.TakePictureReq)
@@ -6620,68 +6350,45 @@ size_t TakePictureReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.TakePictureReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // uint64 camera_id = 2;
-  if (this->camera_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_camera_id());
+  if (this->_internal_camera_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_camera_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void TakePictureReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.TakePictureReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const TakePictureReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<TakePictureReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.TakePictureReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.TakePictureReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData TakePictureReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    TakePictureReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*TakePictureReq::GetClassData() const { return &_class_data_; }
 
-void TakePictureReq::MergeFrom(const TakePictureReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.TakePictureReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void TakePictureReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<TakePictureReq*>(&to_msg);
+  auto& from = static_cast<const TakePictureReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.TakePictureReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.camera_id() != 0) {
-    _internal_set_camera_id(from._internal_camera_id());
+  if (from._internal_camera_id() != 0) {
+    _this->_internal_set_camera_id(from._internal_camera_id());
   }
-}
-
-void TakePictureReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.TakePictureReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void TakePictureReq::CopyFrom(const TakePictureReq& from) {
@@ -6697,108 +6404,113 @@ bool TakePictureReq::IsInitialized() const {
 
 void TakePictureReq::InternalSwap(TakePictureReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(TakePictureReq, camera_id_)
-      + sizeof(TakePictureReq::camera_id_)
-      - PROTOBUF_FIELD_OFFSET(TakePictureReq, scene_id_)>(
-          reinterpret_cast<char*>(&scene_id_),
-          reinterpret_cast<char*>(&other->scene_id_));
+      PROTOBUF_FIELD_OFFSET(TakePictureReq, _impl_.camera_id_)
+      + sizeof(TakePictureReq::_impl_.camera_id_)
+      - PROTOBUF_FIELD_OFFSET(TakePictureReq, _impl_.scene_id_)>(
+          reinterpret_cast<char*>(&_impl_.scene_id_),
+          reinterpret_cast<char*>(&other->_impl_.scene_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata TakePictureReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[21]);
 }
-
 
 // ===================================================================
 
-void UpdateRenderAndTakePicturesReq::InitAsDefaultInstance() {
-}
 class UpdateRenderAndTakePicturesReq::_Internal {
  public:
 };
 
-UpdateRenderAndTakePicturesReq::UpdateRenderAndTakePicturesReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  body_poses_(arena),
-  camera_poses_(arena),
-  camera_ids_(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+UpdateRenderAndTakePicturesReq::UpdateRenderAndTakePicturesReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
 }
 UpdateRenderAndTakePicturesReq::UpdateRenderAndTakePicturesReq(const UpdateRenderAndTakePicturesReq& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message(),
-      body_poses_(from.body_poses_),
-      camera_poses_(from.camera_poses_),
-      camera_ids_(from.camera_ids_) {
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  UpdateRenderAndTakePicturesReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.body_poses_){from._impl_.body_poses_}
+    , decltype(_impl_.camera_poses_){from._impl_.camera_poses_}
+    , decltype(_impl_.camera_ids_){from._impl_.camera_ids_}
+    , /*decltype(_impl_._camera_ids_cached_byte_size_)*/{0}
+    , decltype(_impl_.scene_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  scene_id_ = from.scene_id_;
+  _this->_impl_.scene_id_ = from._impl_.scene_id_;
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
 }
 
-void UpdateRenderAndTakePicturesReq::SharedCtor() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_UpdateRenderAndTakePicturesReq_render_5fserver_2eproto.base);
-  scene_id_ = PROTOBUF_ULONGLONG(0);
+inline void UpdateRenderAndTakePicturesReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.body_poses_){arena}
+    , decltype(_impl_.camera_poses_){arena}
+    , decltype(_impl_.camera_ids_){arena}
+    , /*decltype(_impl_._camera_ids_cached_byte_size_)*/{0}
+    , decltype(_impl_.scene_id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 UpdateRenderAndTakePicturesReq::~UpdateRenderAndTakePicturesReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void UpdateRenderAndTakePicturesReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void UpdateRenderAndTakePicturesReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.body_poses_.~RepeatedPtrField();
+  _impl_.camera_poses_.~RepeatedPtrField();
+  _impl_.camera_ids_.~RepeatedField();
 }
 
-void UpdateRenderAndTakePicturesReq::ArenaDtor(void* object) {
-  UpdateRenderAndTakePicturesReq* _this = reinterpret_cast< UpdateRenderAndTakePicturesReq* >(object);
-  (void)_this;
-}
-void UpdateRenderAndTakePicturesReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void UpdateRenderAndTakePicturesReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const UpdateRenderAndTakePicturesReq& UpdateRenderAndTakePicturesReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_UpdateRenderAndTakePicturesReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void UpdateRenderAndTakePicturesReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  body_poses_.Clear();
-  camera_poses_.Clear();
-  camera_ids_.Clear();
-  scene_id_ = PROTOBUF_ULONGLONG(0);
+  _impl_.body_poses_.Clear();
+  _impl_.camera_poses_.Clear();
+  _impl_.camera_ids_.Clear();
+  _impl_.scene_id_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* UpdateRenderAndTakePicturesReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* UpdateRenderAndTakePicturesReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // repeated .sapien.Renderer.server.proto.Pose body_poses = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -6806,11 +6518,12 @@ const char* UpdateRenderAndTakePicturesReq::_InternalParse(const char* ptr, ::PR
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // repeated .sapien.Renderer.server.proto.Pose camera_poses = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -6818,71 +6531,74 @@ const char* UpdateRenderAndTakePicturesReq::_InternalParse(const char* ptr, ::PR
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // repeated uint64 camera_ids = 4 [packed = true];
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::PackedUInt64Parser(_internal_mutable_camera_ids(), ptr, ctx);
           CHK_(ptr);
-        } else if (static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32) {
+        } else if (static_cast<uint8_t>(tag) == 32) {
           _internal_add_camera_ids(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr));
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* UpdateRenderAndTakePicturesReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* UpdateRenderAndTakePicturesReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // repeated .sapien.Renderer.server.proto.Pose body_poses = 2;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_body_poses_size()); i < n; i++) {
-    target = stream->EnsureSpace(target);
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_body_poses_size()); i < n; i++) {
+    const auto& repfield = this->_internal_body_poses(i);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, this->_internal_body_poses(i), target, stream);
+        InternalWriteMessage(2, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   // repeated .sapien.Renderer.server.proto.Pose camera_poses = 3;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_camera_poses_size()); i < n; i++) {
-    target = stream->EnsureSpace(target);
+  for (unsigned i = 0,
+      n = static_cast<unsigned>(this->_internal_camera_poses_size()); i < n; i++) {
+    const auto& repfield = this->_internal_camera_poses(i);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, this->_internal_camera_poses(i), target, stream);
+        InternalWriteMessage(3, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   // repeated uint64 camera_ids = 4 [packed = true];
   {
-    int byte_size = _camera_ids_cached_byte_size_.load(std::memory_order_relaxed);
+    int byte_size = _impl_._camera_ids_cached_byte_size_.load(std::memory_order_relaxed);
     if (byte_size > 0) {
       target = stream->WriteUInt64Packed(
           4, _internal_camera_ids(), byte_size, target);
@@ -6890,7 +6606,7 @@ failure:
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
@@ -6901,90 +6617,68 @@ size_t UpdateRenderAndTakePicturesReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .sapien.Renderer.server.proto.Pose body_poses = 2;
   total_size += 1UL * this->_internal_body_poses_size();
-  for (const auto& msg : this->body_poses_) {
+  for (const auto& msg : this->_impl_.body_poses_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated .sapien.Renderer.server.proto.Pose camera_poses = 3;
   total_size += 1UL * this->_internal_camera_poses_size();
-  for (const auto& msg : this->camera_poses_) {
+  for (const auto& msg : this->_impl_.camera_poses_) {
     total_size +=
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
   // repeated uint64 camera_ids = 4 [packed = true];
   {
-    size_t data_size = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      UInt64Size(this->camera_ids_);
+    size_t data_size = ::_pbi::WireFormatLite::
+      UInt64Size(this->_impl_.camera_ids_);
     if (data_size > 0) {
       total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-            static_cast<::PROTOBUF_NAMESPACE_ID::int32>(data_size));
+        ::_pbi::WireFormatLite::Int32Size(static_cast<int32_t>(data_size));
     }
-    int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(data_size);
-    _camera_ids_cached_byte_size_.store(cached_size,
+    int cached_size = ::_pbi::ToCachedSize(data_size);
+    _impl_._camera_ids_cached_byte_size_.store(cached_size,
                                     std::memory_order_relaxed);
     total_size += data_size;
   }
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void UpdateRenderAndTakePicturesReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const UpdateRenderAndTakePicturesReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<UpdateRenderAndTakePicturesReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData UpdateRenderAndTakePicturesReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    UpdateRenderAndTakePicturesReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*UpdateRenderAndTakePicturesReq::GetClassData() const { return &_class_data_; }
 
-void UpdateRenderAndTakePicturesReq::MergeFrom(const UpdateRenderAndTakePicturesReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void UpdateRenderAndTakePicturesReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<UpdateRenderAndTakePicturesReq*>(&to_msg);
+  auto& from = static_cast<const UpdateRenderAndTakePicturesReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  body_poses_.MergeFrom(from.body_poses_);
-  camera_poses_.MergeFrom(from.camera_poses_);
-  camera_ids_.MergeFrom(from.camera_ids_);
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  _this->_impl_.body_poses_.MergeFrom(from._impl_.body_poses_);
+  _this->_impl_.camera_poses_.MergeFrom(from._impl_.camera_poses_);
+  _this->_impl_.camera_ids_.MergeFrom(from._impl_.camera_ids_);
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-}
-
-void UpdateRenderAndTakePicturesReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.UpdateRenderAndTakePicturesReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void UpdateRenderAndTakePicturesReq::CopyFrom(const UpdateRenderAndTakePicturesReq& from) {
@@ -7000,239 +6694,291 @@ bool UpdateRenderAndTakePicturesReq::IsInitialized() const {
 
 void UpdateRenderAndTakePicturesReq::InternalSwap(UpdateRenderAndTakePicturesReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  body_poses_.InternalSwap(&other->body_poses_);
-  camera_poses_.InternalSwap(&other->camera_poses_);
-  camera_ids_.InternalSwap(&other->camera_ids_);
-  swap(scene_id_, other->scene_id_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  _impl_.body_poses_.InternalSwap(&other->_impl_.body_poses_);
+  _impl_.camera_poses_.InternalSwap(&other->_impl_.camera_poses_);
+  _impl_.camera_ids_.InternalSwap(&other->_impl_.camera_ids_);
+  swap(_impl_.scene_id_, other->_impl_.scene_id_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata UpdateRenderAndTakePicturesReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[22]);
 }
-
 
 // ===================================================================
 
-void CameraParamsReq::InitAsDefaultInstance() {
-}
 class CameraParamsReq::_Internal {
  public:
 };
 
-CameraParamsReq::CameraParamsReq(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+CameraParamsReq::CameraParamsReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.CameraParamsReq)
 }
 CameraParamsReq::CameraParamsReq(const CameraParamsReq& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  CameraParamsReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){}
+    , decltype(_impl_.camera_id_){}
+    , decltype(_impl_.near_){}
+    , decltype(_impl_.far_){}
+    , decltype(_impl_.fx_){}
+    , decltype(_impl_.fy_){}
+    , decltype(_impl_.cx_){}
+    , decltype(_impl_.cy_){}
+    , decltype(_impl_.skew_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&scene_id_, &from.scene_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&skew_) -
-    reinterpret_cast<char*>(&scene_id_)) + sizeof(skew_));
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.skew_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.skew_));
   // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.CameraParamsReq)
 }
 
-void CameraParamsReq::SharedCtor() {
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&skew_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(skew_));
+inline void CameraParamsReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.camera_id_){uint64_t{0u}}
+    , decltype(_impl_.near_){0}
+    , decltype(_impl_.far_){0}
+    , decltype(_impl_.fx_){0}
+    , decltype(_impl_.fy_){0}
+    , decltype(_impl_.cx_){0}
+    , decltype(_impl_.cy_){0}
+    , decltype(_impl_.skew_){0}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 CameraParamsReq::~CameraParamsReq() {
   // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.CameraParamsReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void CameraParamsReq::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void CameraParamsReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void CameraParamsReq::ArenaDtor(void* object) {
-  CameraParamsReq* _this = reinterpret_cast< CameraParamsReq* >(object);
-  (void)_this;
-}
-void CameraParamsReq::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void CameraParamsReq::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const CameraParamsReq& CameraParamsReq::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_CameraParamsReq_render_5fserver_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void CameraParamsReq::Clear() {
 // @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.CameraParamsReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&scene_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&skew_) -
-      reinterpret_cast<char*>(&scene_id_)) + sizeof(skew_));
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.skew_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.skew_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* CameraParamsReq::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* CameraParamsReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 scene_id = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // uint64 camera_id = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          camera_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.camera_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float near = 3;
       case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 29)) {
-          near_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 29)) {
+          _impl_.near_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float far = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 37)) {
-          far_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 37)) {
+          _impl_.far_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float fx = 5;
       case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 45)) {
-          fx_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 45)) {
+          _impl_.fx_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float fy = 6;
       case 6:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 53)) {
-          fy_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 53)) {
+          _impl_.fy_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float cx = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 61)) {
-          cx_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 61)) {
+          _impl_.cx_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float cy = 8;
       case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 69)) {
-          cy_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 69)) {
+          _impl_.cy_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // float skew = 9;
       case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 77)) {
-          skew_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 77)) {
+          _impl_.skew_ = ::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr);
           ptr += sizeof(float);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* CameraParamsReq::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* CameraParamsReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.CameraParamsReq)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
+  if (this->_internal_scene_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
   }
 
   // uint64 camera_id = 2;
-  if (this->camera_id() != 0) {
+  if (this->_internal_camera_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_camera_id(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_camera_id(), target);
   }
 
   // float near = 3;
-  if (!(this->near() <= 0 && this->near() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_near = this->_internal_near();
+  uint32_t raw_near;
+  memcpy(&raw_near, &tmp_near, sizeof(tmp_near));
+  if (raw_near != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(3, this->_internal_near(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(3, this->_internal_near(), target);
   }
 
   // float far = 4;
-  if (!(this->far() <= 0 && this->far() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_far = this->_internal_far();
+  uint32_t raw_far;
+  memcpy(&raw_far, &tmp_far, sizeof(tmp_far));
+  if (raw_far != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(4, this->_internal_far(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(4, this->_internal_far(), target);
   }
 
   // float fx = 5;
-  if (!(this->fx() <= 0 && this->fx() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_fx = this->_internal_fx();
+  uint32_t raw_fx;
+  memcpy(&raw_fx, &tmp_fx, sizeof(tmp_fx));
+  if (raw_fx != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(5, this->_internal_fx(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(5, this->_internal_fx(), target);
   }
 
   // float fy = 6;
-  if (!(this->fy() <= 0 && this->fy() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_fy = this->_internal_fy();
+  uint32_t raw_fy;
+  memcpy(&raw_fy, &tmp_fy, sizeof(tmp_fy));
+  if (raw_fy != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(6, this->_internal_fy(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(6, this->_internal_fy(), target);
   }
 
   // float cx = 7;
-  if (!(this->cx() <= 0 && this->cx() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_cx = this->_internal_cx();
+  uint32_t raw_cx;
+  memcpy(&raw_cx, &tmp_cx, sizeof(tmp_cx));
+  if (raw_cx != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(7, this->_internal_cx(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(7, this->_internal_cx(), target);
   }
 
   // float cy = 8;
-  if (!(this->cy() <= 0 && this->cy() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_cy = this->_internal_cy();
+  uint32_t raw_cy;
+  memcpy(&raw_cy, &tmp_cy, sizeof(tmp_cy));
+  if (raw_cy != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(8, this->_internal_cy(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(8, this->_internal_cy(), target);
   }
 
   // float skew = 9;
-  if (!(this->skew() <= 0 && this->skew() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_skew = this->_internal_skew();
+  uint32_t raw_skew;
+  memcpy(&raw_skew, &tmp_skew, sizeof(tmp_skew));
+  if (raw_skew != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteFloatToArray(9, this->_internal_skew(), target);
+    target = ::_pbi::WireFormatLite::WriteFloatToArray(9, this->_internal_skew(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.CameraParamsReq)
@@ -7243,124 +6989,157 @@ size_t CameraParamsReq::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.CameraParamsReq)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 scene_id = 1;
-  if (this->scene_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_scene_id());
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
   }
 
   // uint64 camera_id = 2;
-  if (this->camera_id() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_camera_id());
+  if (this->_internal_camera_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_camera_id());
   }
 
   // float near = 3;
-  if (!(this->near() <= 0 && this->near() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_near = this->_internal_near();
+  uint32_t raw_near;
+  memcpy(&raw_near, &tmp_near, sizeof(tmp_near));
+  if (raw_near != 0) {
     total_size += 1 + 4;
   }
 
   // float far = 4;
-  if (!(this->far() <= 0 && this->far() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_far = this->_internal_far();
+  uint32_t raw_far;
+  memcpy(&raw_far, &tmp_far, sizeof(tmp_far));
+  if (raw_far != 0) {
     total_size += 1 + 4;
   }
 
   // float fx = 5;
-  if (!(this->fx() <= 0 && this->fx() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_fx = this->_internal_fx();
+  uint32_t raw_fx;
+  memcpy(&raw_fx, &tmp_fx, sizeof(tmp_fx));
+  if (raw_fx != 0) {
     total_size += 1 + 4;
   }
 
   // float fy = 6;
-  if (!(this->fy() <= 0 && this->fy() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_fy = this->_internal_fy();
+  uint32_t raw_fy;
+  memcpy(&raw_fy, &tmp_fy, sizeof(tmp_fy));
+  if (raw_fy != 0) {
     total_size += 1 + 4;
   }
 
   // float cx = 7;
-  if (!(this->cx() <= 0 && this->cx() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_cx = this->_internal_cx();
+  uint32_t raw_cx;
+  memcpy(&raw_cx, &tmp_cx, sizeof(tmp_cx));
+  if (raw_cx != 0) {
     total_size += 1 + 4;
   }
 
   // float cy = 8;
-  if (!(this->cy() <= 0 && this->cy() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_cy = this->_internal_cy();
+  uint32_t raw_cy;
+  memcpy(&raw_cy, &tmp_cy, sizeof(tmp_cy));
+  if (raw_cy != 0) {
     total_size += 1 + 4;
   }
 
   // float skew = 9;
-  if (!(this->skew() <= 0 && this->skew() >= 0)) {
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_skew = this->_internal_skew();
+  uint32_t raw_skew;
+  memcpy(&raw_skew, &tmp_skew, sizeof(tmp_skew));
+  if (raw_skew != 0) {
     total_size += 1 + 4;
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void CameraParamsReq::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:sapien.Renderer.server.proto.CameraParamsReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  const CameraParamsReq* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<CameraParamsReq>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:sapien.Renderer.server.proto.CameraParamsReq)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:sapien.Renderer.server.proto.CameraParamsReq)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData CameraParamsReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    CameraParamsReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*CameraParamsReq::GetClassData() const { return &_class_data_; }
 
-void CameraParamsReq::MergeFrom(const CameraParamsReq& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.CameraParamsReq)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void CameraParamsReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<CameraParamsReq*>(&to_msg);
+  auto& from = static_cast<const CameraParamsReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.CameraParamsReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.scene_id() != 0) {
-    _internal_set_scene_id(from._internal_scene_id());
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
   }
-  if (from.camera_id() != 0) {
-    _internal_set_camera_id(from._internal_camera_id());
+  if (from._internal_camera_id() != 0) {
+    _this->_internal_set_camera_id(from._internal_camera_id());
   }
-  if (!(from.near() <= 0 && from.near() >= 0)) {
-    _internal_set_near(from._internal_near());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_near = from._internal_near();
+  uint32_t raw_near;
+  memcpy(&raw_near, &tmp_near, sizeof(tmp_near));
+  if (raw_near != 0) {
+    _this->_internal_set_near(from._internal_near());
   }
-  if (!(from.far() <= 0 && from.far() >= 0)) {
-    _internal_set_far(from._internal_far());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_far = from._internal_far();
+  uint32_t raw_far;
+  memcpy(&raw_far, &tmp_far, sizeof(tmp_far));
+  if (raw_far != 0) {
+    _this->_internal_set_far(from._internal_far());
   }
-  if (!(from.fx() <= 0 && from.fx() >= 0)) {
-    _internal_set_fx(from._internal_fx());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_fx = from._internal_fx();
+  uint32_t raw_fx;
+  memcpy(&raw_fx, &tmp_fx, sizeof(tmp_fx));
+  if (raw_fx != 0) {
+    _this->_internal_set_fx(from._internal_fx());
   }
-  if (!(from.fy() <= 0 && from.fy() >= 0)) {
-    _internal_set_fy(from._internal_fy());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_fy = from._internal_fy();
+  uint32_t raw_fy;
+  memcpy(&raw_fy, &tmp_fy, sizeof(tmp_fy));
+  if (raw_fy != 0) {
+    _this->_internal_set_fy(from._internal_fy());
   }
-  if (!(from.cx() <= 0 && from.cx() >= 0)) {
-    _internal_set_cx(from._internal_cx());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_cx = from._internal_cx();
+  uint32_t raw_cx;
+  memcpy(&raw_cx, &tmp_cx, sizeof(tmp_cx));
+  if (raw_cx != 0) {
+    _this->_internal_set_cx(from._internal_cx());
   }
-  if (!(from.cy() <= 0 && from.cy() >= 0)) {
-    _internal_set_cy(from._internal_cy());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_cy = from._internal_cy();
+  uint32_t raw_cy;
+  memcpy(&raw_cy, &tmp_cy, sizeof(tmp_cy));
+  if (raw_cy != 0) {
+    _this->_internal_set_cy(from._internal_cy());
   }
-  if (!(from.skew() <= 0 && from.skew() >= 0)) {
-    _internal_set_skew(from._internal_skew());
+  static_assert(sizeof(uint32_t) == sizeof(float), "Code assumes uint32_t and float are the same size.");
+  float tmp_skew = from._internal_skew();
+  uint32_t raw_skew;
+  memcpy(&raw_skew, &tmp_skew, sizeof(tmp_skew));
+  if (raw_skew != 0) {
+    _this->_internal_set_skew(from._internal_skew());
   }
-}
-
-void CameraParamsReq::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:sapien.Renderer.server.proto.CameraParamsReq)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void CameraParamsReq::CopyFrom(const CameraParamsReq& from) {
@@ -7376,19 +7155,20 @@ bool CameraParamsReq::IsInitialized() const {
 
 void CameraParamsReq::InternalSwap(CameraParamsReq* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(CameraParamsReq, skew_)
-      + sizeof(CameraParamsReq::skew_)
-      - PROTOBUF_FIELD_OFFSET(CameraParamsReq, scene_id_)>(
-          reinterpret_cast<char*>(&scene_id_),
-          reinterpret_cast<char*>(&other->scene_id_));
+      PROTOBUF_FIELD_OFFSET(CameraParamsReq, _impl_.skew_)
+      + sizeof(CameraParamsReq::_impl_.skew_)
+      - PROTOBUF_FIELD_OFFSET(CameraParamsReq, _impl_.scene_id_)>(
+          reinterpret_cast<char*>(&_impl_.scene_id_),
+          reinterpret_cast<char*>(&other->_impl_.scene_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata CameraParamsReq::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[23]);
 }
-
 
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace proto
@@ -7396,76 +7176,100 @@ void CameraParamsReq::InternalSwap(CameraParamsReq* other) {
 }  // namespace Renderer
 }  // namespace sapien
 PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Empty* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Empty >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Empty*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Empty >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::Empty >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Index* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Index >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Index*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Index >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::Index >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Id* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Id >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Id*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Id >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::Id >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Vec3* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Vec3 >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Vec3*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Vec3 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::Vec3 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Vec4* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Vec4 >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Vec4*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Vec4 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::Vec4 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Quat* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Quat >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Quat*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Quat >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::Quat >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Pose* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Pose >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Pose*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Pose >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::Pose >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::IdVec3* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::IdVec3 >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::IdVec3*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::IdVec3 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::IdVec3 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::IdVec4* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::IdVec4 >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::IdVec4*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::IdVec4 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::IdVec4 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::IdFloat* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::IdFloat >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::IdFloat*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::IdFloat >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::IdFloat >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddBodyMeshReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddBodyMeshReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddBodyMeshReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddBodyMeshReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::AddBodyMeshReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddBodyPrimitiveReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddBodyPrimitiveReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::AddBodyPrimitiveReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::RemoveBodyReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::RemoveBodyReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::RemoveBodyReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::RemoveBodyReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::RemoveBodyReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddCameraReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddCameraReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddCameraReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddCameraReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::AddCameraReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::RemoveCameraReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::RemoveCameraReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::RemoveCameraReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::RemoveCameraReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::RemoveCameraReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddPointLightReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddPointLightReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddPointLightReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddPointLightReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::AddPointLightReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddDirectionalLightReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddDirectionalLightReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::AddDirectionalLightReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::AddDirectionalLightReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::AddDirectionalLightReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::RemoveLightReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::RemoveLightReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::RemoveLightReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::RemoveLightReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::RemoveLightReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::EntityOrderReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::EntityOrderReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::EntityOrderReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::EntityOrderReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::EntityOrderReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::UpdateRenderReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::UpdateRenderReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::UpdateRenderReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::UpdateRenderReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::UpdateRenderReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::BodyIdReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::BodyIdReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::BodyIdReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::BodyIdReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::BodyIdReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::TakePictureReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::TakePictureReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::TakePictureReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::TakePictureReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::TakePictureReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq >(arena);
 }
-template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::CameraParamsReq* Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::CameraParamsReq >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::CameraParamsReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::CameraParamsReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::CameraParamsReq >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE

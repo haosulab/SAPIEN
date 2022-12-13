@@ -9,8 +9,8 @@
 
 int main() {
   auto sim = sapien::Simulation::getInstance();
-  std::string address = "localhost:5003";
-  auto renderer = std::make_shared<sapien::Renderer::server::ClientRenderer>(address);
+  std::string address = "localhost:15003";
+  auto renderer = std::make_shared<sapien::Renderer::server::ClientRenderer>(address, 0);
   sim->setRenderer(renderer);
   auto scene = sim->createScene();
 }
