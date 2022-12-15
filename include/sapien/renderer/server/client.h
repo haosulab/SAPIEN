@@ -19,10 +19,12 @@ using ::sapien::Renderer::IPxrTexture;
 
 class ClientRenderer;
 class ClientScene;
+class ClientShape;
+class ClientRigidbody;
 
 class ClientMaterial : public IPxrMaterial {
 public:
-  ClientMaterial(std::shared_ptr<ClientRenderer> renderer, id_t id);
+  ClientMaterial(std::shared_ptr<ClientRenderer> renderer, rs_id_t id);
 
   void setBaseColor(std::array<float, 4> color) override;
   [[nodiscard]] std::array<float, 4> getBaseColor() const override {
@@ -43,16 +45,16 @@ public:
 
   virtual ~ClientMaterial();
 
-  id_t getId() const { return mId; }
+  rs_id_t getId() const { return mId; }
 
 private:
   std::shared_ptr<ClientRenderer> mRenderer;
-  id_t mId;
+  rs_id_t mId;
 };
 
 class ClientCamera : public ICamera {
 public:
-  ClientCamera(ClientScene *scene, id_t id, uint32_t width, uint32_t height, float cx, float cy,
+  ClientCamera(ClientScene *scene, rs_id_t id, uint32_t width, uint32_t height, float cx, float cy,
                float fx, float fy, float near, float far, float skew);
 
   [[nodiscard]] inline physx::PxTransform getPose() const { return mPose; };
@@ -82,11 +84,11 @@ public:
 
   void takePicture() override;
 
-  id_t getId() const { return mId; }
+  rs_id_t getId() const { return mId; }
 
 private:
   ClientScene *mScene;
-  id_t mId;
+  rs_id_t mId;
   physx::PxTransform mPose;
   uint32_t mWidth;
   uint32_t mHeight;
@@ -101,7 +103,7 @@ private:
 
 class ClientPointLight : public IPointLight {
 public:
-  ClientPointLight(id_t id) : mId(id){};
+  ClientPointLight(rs_id_t id) : mId(id){};
 
   physx::PxTransform getPose() const override {
     throw std::runtime_error("light cannot be accessed in rendering client");
@@ -138,12 +140,12 @@ public:
   }
 
 private:
-  id_t mId;
+  rs_id_t mId;
 };
 
 class ClientDirectionalLight : public IDirectionalLight {
 public:
-  ClientDirectionalLight(id_t id) : mId(id) {}
+  ClientDirectionalLight(rs_id_t id) : mId(id) {}
 
   physx::PxTransform getPose() const override {
     throw std::runtime_error("light cannot be accessed in rendering client");
@@ -183,13 +185,23 @@ public:
   }
 
 private:
-  id_t mId;
+  rs_id_t mId;
+};
+
+class ClientShape : public IPxrRenderShape {
+public:
+  ClientShape(ClientRigidbody *body, uint32_t index);
+  [[nodiscard]] std::shared_ptr<IPxrMaterial> getMaterial() const override;
+
+private:
+  ClientRigidbody *mBody;
+  uint32_t mIndex;
 };
 
 class ClientRigidbody : public IPxrRigidbody {
 
 public:
-  ClientRigidbody(ClientScene *scene, id_t id);
+  ClientRigidbody(ClientScene *scene, rs_id_t id);
 
   inline void setName(std::string const &name) override { mName = name; }
   inline std::string getName() const override { return mName; }
@@ -221,15 +233,19 @@ public:
     throw std::runtime_error("shade flat is not supported for render client");
   }
 
+  std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() override;
+
   void destroy() override;
 
-  inline id_t getId() const { return mId; };
+  inline rs_id_t getId() const { return mId; };
 
   inline physx::PxTransform const &getCurrentPose() const { return mCurrentPose; }
 
+  inline ClientScene *getScene() const { return mScene; }
+
 public:
   ClientScene *mScene;
-  id_t mId;
+  rs_id_t mId;
   std::string mName;
 
   uint32_t mUniqueId;
@@ -241,7 +257,7 @@ public:
 
 class ClientScene : public IPxrScene {
 public:
-  ClientScene(ClientRenderer *renderer, id_t id, std::string const &name);
+  ClientScene(ClientRenderer *renderer, rs_id_t id, std::string const &name);
 
   //========== Body ==========//
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
@@ -320,7 +336,7 @@ public:
 
   void destroy() override;
 
-  inline id_t getId() const { return mId; }
+  inline rs_id_t getId() const { return mId; }
 
   ClientRenderer *getRenderer() { return mRenderer; }
 
@@ -328,7 +344,7 @@ private:
   void syncId();
 
   ClientRenderer *mRenderer;
-  id_t mId;
+  rs_id_t mId;
   std::string mName;
   std::vector<std::unique_ptr<ClientRigidbody>> mBodies;
   std::vector<std::unique_ptr<ClientCamera>> mCameras;

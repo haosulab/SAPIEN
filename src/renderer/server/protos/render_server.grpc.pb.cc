@@ -45,6 +45,8 @@ static const char* RenderService_method_names[] = {
   "/sapien.Renderer.server.proto.RenderService/SetMetallic",
   "/sapien.Renderer.server.proto.RenderService/SetUniqueId",
   "/sapien.Renderer.server.proto.RenderService/SetSegmentationId",
+  "/sapien.Renderer.server.proto.RenderService/GetShapeCount",
+  "/sapien.Renderer.server.proto.RenderService/GetShapeMaterial",
   "/sapien.Renderer.server.proto.RenderService/TakePicture",
   "/sapien.Renderer.server.proto.RenderService/SetCameraParameters",
 };
@@ -76,8 +78,10 @@ RenderService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& chan
   , rpcmethod_SetMetallic_(RenderService_method_names[17], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SetUniqueId_(RenderService_method_names[18], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SetSegmentationId_(RenderService_method_names[19], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_TakePicture_(RenderService_method_names[20], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetCameraParameters_(RenderService_method_names[21], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetShapeCount_(RenderService_method_names[20], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetShapeMaterial_(RenderService_method_names[21], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_TakePicture_(RenderService_method_names[22], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetCameraParameters_(RenderService_method_names[23], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status RenderService::Stub::CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::sapien::Renderer::server::proto::Id* response) {
@@ -540,6 +544,52 @@ void RenderService::Stub::async::SetSegmentationId(::grpc::ClientContext* contex
   return result;
 }
 
+::grpc::Status RenderService::Stub::GetShapeCount(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyReq& request, ::sapien::Renderer::server::proto::Uint32* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::BodyReq, ::sapien::Renderer::server::proto::Uint32, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetShapeCount_, context, request, response);
+}
+
+void RenderService::Stub::async::GetShapeCount(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyReq* request, ::sapien::Renderer::server::proto::Uint32* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::BodyReq, ::sapien::Renderer::server::proto::Uint32, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetShapeCount_, context, request, response, std::move(f));
+}
+
+void RenderService::Stub::async::GetShapeCount(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyReq* request, ::sapien::Renderer::server::proto::Uint32* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetShapeCount_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Uint32>* RenderService::Stub::PrepareAsyncGetShapeCountRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyReq& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Uint32, ::sapien::Renderer::server::proto::BodyReq, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetShapeCount_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Uint32>* RenderService::Stub::AsyncGetShapeCountRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyReq& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncGetShapeCountRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status RenderService::Stub::GetShapeMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyUint32Req& request, ::sapien::Renderer::server::proto::Id* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::BodyUint32Req, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetShapeMaterial_, context, request, response);
+}
+
+void RenderService::Stub::async::GetShapeMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyUint32Req* request, ::sapien::Renderer::server::proto::Id* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::BodyUint32Req, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetShapeMaterial_, context, request, response, std::move(f));
+}
+
+void RenderService::Stub::async::GetShapeMaterial(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyUint32Req* request, ::sapien::Renderer::server::proto::Id* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetShapeMaterial_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::PrepareAsyncGetShapeMaterialRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyUint32Req& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Id, ::sapien::Renderer::server::proto::BodyUint32Req, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetShapeMaterial_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Id>* RenderService::Stub::AsyncGetShapeMaterialRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyUint32Req& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncGetShapeMaterialRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ::grpc::Status RenderService::Stub::TakePicture(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::TakePictureReq& request, ::sapien::Renderer::server::proto::Empty* response) {
   return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_TakePicture_, context, request, response);
 }
@@ -790,6 +840,26 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[20],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyReq, ::sapien::Renderer::server::proto::Uint32, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](RenderService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::sapien::Renderer::server::proto::BodyReq* req,
+             ::sapien::Renderer::server::proto::Uint32* resp) {
+               return service->GetShapeCount(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      RenderService_method_names[21],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyUint32Req, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](RenderService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::sapien::Renderer::server::proto::BodyUint32Req* req,
+             ::sapien::Renderer::server::proto::Id* resp) {
+               return service->GetShapeMaterial(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      RenderService_method_names[22],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
              ::grpc::ServerContext* ctx,
@@ -798,7 +868,7 @@ RenderService::Service::Service() {
                return service->TakePicture(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      RenderService_method_names[21],
+      RenderService_method_names[23],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
@@ -946,6 +1016,20 @@ RenderService::Service::~Service() {
 }
 
 ::grpc::Status RenderService::Service::SetSegmentationId(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status RenderService::Service::GetShapeCount(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::BodyReq* request, ::sapien::Renderer::server::proto::Uint32* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status RenderService::Service::GetShapeMaterial(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::BodyUint32Req* request, ::sapien::Renderer::server::proto::Id* response) {
   (void) context;
   (void) request;
   (void) response;

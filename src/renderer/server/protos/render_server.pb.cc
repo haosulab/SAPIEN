@@ -35,6 +35,19 @@ struct EmptyDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 EmptyDefaultTypeInternal _Empty_default_instance_;
+PROTOBUF_CONSTEXPR Uint32::Uint32(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.value_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct Uint32DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR Uint32DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~Uint32DefaultTypeInternal() {}
+  union {
+    Uint32 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 Uint32DefaultTypeInternal _Uint32_default_instance_;
 PROTOBUF_CONSTEXPR Index::Index(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.index_)*/uint64_t{0u}
@@ -343,6 +356,21 @@ struct BodyIdReqDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BodyIdReqDefaultTypeInternal _BodyIdReq_default_instance_;
+PROTOBUF_CONSTEXPR BodyUint32Req::BodyUint32Req(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.body_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.id_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct BodyUint32ReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR BodyUint32ReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~BodyUint32ReqDefaultTypeInternal() {}
+  union {
+    BodyUint32Req _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BodyUint32ReqDefaultTypeInternal _BodyUint32Req_default_instance_;
 PROTOBUF_CONSTEXPR TakePictureReq::TakePictureReq(
     ::_pbi::ConstantInitialized): _impl_{
     /*decltype(_impl_.scene_id_)*/uint64_t{0u}
@@ -395,11 +423,25 @@ struct CameraParamsReqDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CameraParamsReqDefaultTypeInternal _CameraParamsReq_default_instance_;
+PROTOBUF_CONSTEXPR BodyReq::BodyReq(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.scene_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.body_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct BodyReqDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR BodyReqDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~BodyReqDefaultTypeInternal() {}
+  union {
+    BodyReq _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BodyReqDefaultTypeInternal _BodyReq_default_instance_;
 }  // namespace proto
 }  // namespace server
 }  // namespace Renderer
 }  // namespace sapien
-static ::_pb::Metadata file_level_metadata_render_5fserver_2eproto[24];
+static ::_pb::Metadata file_level_metadata_render_5fserver_2eproto[27];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_render_5fserver_2eproto[1];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_render_5fserver_2eproto = nullptr;
 
@@ -410,6 +452,13 @@ const uint32_t TableStruct_render_5fserver_2eproto::offsets[] PROTOBUF_SECTION_V
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   ~0u,  // no _inlined_string_donated_
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Uint32, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Uint32, _impl_.value_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::Index, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -597,6 +646,15 @@ const uint32_t TableStruct_render_5fserver_2eproto::offsets[] PROTOBUF_SECTION_V
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyIdReq, _impl_.body_id_),
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyIdReq, _impl_.id_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyUint32Req, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyUint32Req, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyUint32Req, _impl_.body_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyUint32Req, _impl_.id_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::TakePictureReq, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -629,36 +687,48 @@ const uint32_t TableStruct_render_5fserver_2eproto::offsets[] PROTOBUF_SECTION_V
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.cx_),
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.cy_),
   PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::CameraParamsReq, _impl_.skew_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyReq, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyReq, _impl_.scene_id_),
+  PROTOBUF_FIELD_OFFSET(::sapien::Renderer::server::proto::BodyReq, _impl_.body_id_),
 };
 static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, -1, sizeof(::sapien::Renderer::server::proto::Empty)},
-  { 6, -1, -1, sizeof(::sapien::Renderer::server::proto::Index)},
-  { 13, -1, -1, sizeof(::sapien::Renderer::server::proto::Id)},
-  { 20, -1, -1, sizeof(::sapien::Renderer::server::proto::Vec3)},
-  { 29, -1, -1, sizeof(::sapien::Renderer::server::proto::Vec4)},
-  { 39, -1, -1, sizeof(::sapien::Renderer::server::proto::Quat)},
-  { 49, -1, -1, sizeof(::sapien::Renderer::server::proto::Pose)},
-  { 57, -1, -1, sizeof(::sapien::Renderer::server::proto::IdVec3)},
-  { 65, -1, -1, sizeof(::sapien::Renderer::server::proto::IdVec4)},
-  { 73, -1, -1, sizeof(::sapien::Renderer::server::proto::IdFloat)},
-  { 81, -1, -1, sizeof(::sapien::Renderer::server::proto::AddBodyMeshReq)},
-  { 90, -1, -1, sizeof(::sapien::Renderer::server::proto::AddBodyPrimitiveReq)},
-  { 100, -1, -1, sizeof(::sapien::Renderer::server::proto::RemoveBodyReq)},
-  { 108, -1, -1, sizeof(::sapien::Renderer::server::proto::AddCameraReq)},
-  { 121, -1, -1, sizeof(::sapien::Renderer::server::proto::RemoveCameraReq)},
-  { 129, -1, -1, sizeof(::sapien::Renderer::server::proto::AddPointLightReq)},
-  { 142, -1, -1, sizeof(::sapien::Renderer::server::proto::AddDirectionalLightReq)},
-  { 157, -1, -1, sizeof(::sapien::Renderer::server::proto::RemoveLightReq)},
-  { 165, -1, -1, sizeof(::sapien::Renderer::server::proto::EntityOrderReq)},
-  { 174, -1, -1, sizeof(::sapien::Renderer::server::proto::UpdateRenderReq)},
-  { 183, -1, -1, sizeof(::sapien::Renderer::server::proto::BodyIdReq)},
-  { 192, -1, -1, sizeof(::sapien::Renderer::server::proto::TakePictureReq)},
-  { 200, -1, -1, sizeof(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq)},
-  { 210, -1, -1, sizeof(::sapien::Renderer::server::proto::CameraParamsReq)},
+  { 6, -1, -1, sizeof(::sapien::Renderer::server::proto::Uint32)},
+  { 13, -1, -1, sizeof(::sapien::Renderer::server::proto::Index)},
+  { 20, -1, -1, sizeof(::sapien::Renderer::server::proto::Id)},
+  { 27, -1, -1, sizeof(::sapien::Renderer::server::proto::Vec3)},
+  { 36, -1, -1, sizeof(::sapien::Renderer::server::proto::Vec4)},
+  { 46, -1, -1, sizeof(::sapien::Renderer::server::proto::Quat)},
+  { 56, -1, -1, sizeof(::sapien::Renderer::server::proto::Pose)},
+  { 64, -1, -1, sizeof(::sapien::Renderer::server::proto::IdVec3)},
+  { 72, -1, -1, sizeof(::sapien::Renderer::server::proto::IdVec4)},
+  { 80, -1, -1, sizeof(::sapien::Renderer::server::proto::IdFloat)},
+  { 88, -1, -1, sizeof(::sapien::Renderer::server::proto::AddBodyMeshReq)},
+  { 97, -1, -1, sizeof(::sapien::Renderer::server::proto::AddBodyPrimitiveReq)},
+  { 107, -1, -1, sizeof(::sapien::Renderer::server::proto::RemoveBodyReq)},
+  { 115, -1, -1, sizeof(::sapien::Renderer::server::proto::AddCameraReq)},
+  { 128, -1, -1, sizeof(::sapien::Renderer::server::proto::RemoveCameraReq)},
+  { 136, -1, -1, sizeof(::sapien::Renderer::server::proto::AddPointLightReq)},
+  { 149, -1, -1, sizeof(::sapien::Renderer::server::proto::AddDirectionalLightReq)},
+  { 164, -1, -1, sizeof(::sapien::Renderer::server::proto::RemoveLightReq)},
+  { 172, -1, -1, sizeof(::sapien::Renderer::server::proto::EntityOrderReq)},
+  { 181, -1, -1, sizeof(::sapien::Renderer::server::proto::UpdateRenderReq)},
+  { 190, -1, -1, sizeof(::sapien::Renderer::server::proto::BodyIdReq)},
+  { 199, -1, -1, sizeof(::sapien::Renderer::server::proto::BodyUint32Req)},
+  { 208, -1, -1, sizeof(::sapien::Renderer::server::proto::TakePictureReq)},
+  { 216, -1, -1, sizeof(::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq)},
+  { 226, -1, -1, sizeof(::sapien::Renderer::server::proto::CameraParamsReq)},
+  { 241, -1, -1, sizeof(::sapien::Renderer::server::proto::BodyReq)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
   &::sapien::Renderer::server::proto::_Empty_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_Uint32_default_instance_._instance,
   &::sapien::Renderer::server::proto::_Index_default_instance_._instance,
   &::sapien::Renderer::server::proto::_Id_default_instance_._instance,
   &::sapien::Renderer::server::proto::_Vec3_default_instance_._instance,
@@ -679,132 +749,142 @@ static const ::_pb::Message* const file_default_instances[] = {
   &::sapien::Renderer::server::proto::_EntityOrderReq_default_instance_._instance,
   &::sapien::Renderer::server::proto::_UpdateRenderReq_default_instance_._instance,
   &::sapien::Renderer::server::proto::_BodyIdReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_BodyUint32Req_default_instance_._instance,
   &::sapien::Renderer::server::proto::_TakePictureReq_default_instance_._instance,
   &::sapien::Renderer::server::proto::_UpdateRenderAndTakePicturesReq_default_instance_._instance,
   &::sapien::Renderer::server::proto::_CameraParamsReq_default_instance_._instance,
+  &::sapien::Renderer::server::proto::_BodyReq_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_render_5fserver_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\023render_server.proto\022\034sapien.Renderer.s"
-  "erver.proto\"\007\n\005Empty\"\026\n\005Index\022\r\n\005index\030\001"
-  " \001(\004\"\020\n\002Id\022\n\n\002id\030\001 \001(\004\"\'\n\004Vec3\022\t\n\001x\030\001 \001("
-  "\002\022\t\n\001y\030\002 \001(\002\022\t\n\001z\030\003 \001(\002\"2\n\004Vec4\022\t\n\001x\030\001 \001"
-  "(\002\022\t\n\001y\030\002 \001(\002\022\t\n\001z\030\003 \001(\002\022\t\n\001w\030\004 \001(\002\"2\n\004Q"
-  "uat\022\t\n\001w\030\001 \001(\002\022\t\n\001x\030\002 \001(\002\022\t\n\001y\030\003 \001(\002\022\t\n\001"
-  "z\030\004 \001(\002\"d\n\004Pose\022-\n\001p\030\001 \001(\0132\".sapien.Rend"
-  "erer.server.proto.Vec3\022-\n\001q\030\002 \001(\0132\".sapi"
-  "en.Renderer.server.proto.Quat\"F\n\006IdVec3\022"
-  "\n\n\002id\030\001 \001(\004\0220\n\004data\030\002 \001(\0132\".sapien.Rende"
-  "rer.server.proto.Vec3\"F\n\006IdVec4\022\n\n\002id\030\001 "
-  "\001(\004\0220\n\004data\030\002 \001(\0132\".sapien.Renderer.serv"
-  "er.proto.Vec4\"#\n\007IdFloat\022\n\n\002id\030\001 \001(\004\022\014\n\004"
-  "data\030\002 \001(\002\"g\n\016AddBodyMeshReq\022\020\n\010scene_id"
-  "\030\001 \001(\004\022\020\n\010filename\030\002 \001(\t\0221\n\005scale\030\003 \001(\0132"
-  "\".sapien.Renderer.server.proto.Vec3\"\247\001\n\023"
-  "AddBodyPrimitiveReq\022\020\n\010scene_id\030\001 \001(\004\0229\n"
-  "\004type\030\002 \001(\0162+.sapien.Renderer.server.pro"
-  "to.PrimitiveType\0221\n\005scale\030\003 \001(\0132\".sapien"
-  ".Renderer.server.proto.Vec3\022\020\n\010material\030"
-  "\004 \001(\004\"2\n\rRemoveBodyReq\022\020\n\010scene_id\030\001 \001(\004"
-  "\022\017\n\007body_id\030\002 \001(\004\"x\n\014AddCameraReq\022\020\n\010sce"
-  "ne_id\030\001 \001(\004\022\r\n\005width\030\002 \001(\r\022\016\n\006height\030\003 \001"
-  "(\r\022\014\n\004fovy\030\004 \001(\002\022\014\n\004near\030\005 \001(\002\022\013\n\003far\030\006 "
-  "\001(\002\022\016\n\006shader\030\007 \001(\t\"6\n\017RemoveCameraReq\022\020"
-  "\n\010scene_id\030\001 \001(\004\022\021\n\tcamera_id\030\002 \001(\004\"\337\001\n\020"
-  "AddPointLightReq\022\020\n\010scene_id\030\001 \001(\004\0224\n\010po"
-  "sition\030\002 \001(\0132\".sapien.Renderer.server.pr"
-  "oto.Vec3\0221\n\005color\030\003 \001(\0132\".sapien.Rendere"
-  "r.server.proto.Vec3\022\016\n\006shadow\030\004 \001(\010\022\023\n\013s"
-  "hadow_near\030\005 \001(\002\022\022\n\nshadow_far\030\006 \001(\002\022\027\n\017"
-  "shadow_map_size\030\007 \001(\005\"\262\002\n\026AddDirectional"
-  "LightReq\022\020\n\010scene_id\030\001 \001(\004\0225\n\tdirection\030"
-  "\002 \001(\0132\".sapien.Renderer.server.proto.Vec"
-  "3\0221\n\005color\030\003 \001(\0132\".sapien.Renderer.serve"
-  "r.proto.Vec3\022\016\n\006shadow\030\004 \001(\010\0224\n\010position"
-  "\030\005 \001(\0132\".sapien.Renderer.server.proto.Ve"
-  "c3\022\024\n\014shadow_scale\030\006 \001(\002\022\023\n\013shadow_near\030"
-  "\007 \001(\002\022\022\n\nshadow_far\030\010 \001(\002\022\027\n\017shadow_map_"
-  "size\030\t \001(\005\"4\n\016RemoveLightReq\022\020\n\010scene_id"
-  "\030\001 \001(\004\022\020\n\010light_id\030\002 \001(\004\"P\n\016EntityOrderR"
-  "eq\022\020\n\010scene_id\030\001 \001(\004\022\024\n\010body_ids\030\002 \003(\004B\002"
-  "\020\001\022\026\n\ncamera_ids\030\003 \003(\004B\002\020\001\"\225\001\n\017UpdateRen"
-  "derReq\022\020\n\010scene_id\030\001 \001(\004\0226\n\nbody_poses\030\002"
-  " \003(\0132\".sapien.Renderer.server.proto.Pose"
-  "\0228\n\014camera_poses\030\003 \003(\0132\".sapien.Renderer"
-  ".server.proto.Pose\":\n\tBodyIdReq\022\020\n\010scene"
-  "_id\030\001 \001(\004\022\017\n\007body_id\030\002 \001(\004\022\n\n\002id\030\003 \001(\r\"5"
-  "\n\016TakePictureReq\022\020\n\010scene_id\030\001 \001(\004\022\021\n\tca"
-  "mera_id\030\002 \001(\004\"\274\001\n\036UpdateRenderAndTakePic"
-  "turesReq\022\020\n\010scene_id\030\001 \001(\004\0226\n\nbody_poses"
-  "\030\002 \003(\0132\".sapien.Renderer.server.proto.Po"
-  "se\0228\n\014camera_poses\030\003 \003(\0132\".sapien.Render"
-  "er.server.proto.Pose\022\026\n\ncamera_ids\030\004 \003(\004"
-  "B\002\020\001\"\217\001\n\017CameraParamsReq\022\020\n\010scene_id\030\001 \001"
-  "(\004\022\021\n\tcamera_id\030\002 \001(\004\022\014\n\004near\030\003 \001(\002\022\013\n\003f"
-  "ar\030\004 \001(\002\022\n\n\002fx\030\005 \001(\002\022\n\n\002fy\030\006 \001(\002\022\n\n\002cx\030\007"
-  " \001(\002\022\n\n\002cy\030\010 \001(\002\022\014\n\004skew\030\t \001(\002*<\n\rPrimit"
-  "iveType\022\n\n\006SPHERE\020\000\022\007\n\003BOX\020\001\022\013\n\007CAPSULE\020"
-  "\002\022\t\n\005PLANE\020\0032\346\020\n\rRenderService\022T\n\013Create"
-  "Scene\022#.sapien.Renderer.server.proto.Ind"
-  "ex\032 .sapien.Renderer.server.proto.Id\022T\n\013"
-  "RemoveScene\022 .sapien.Renderer.server.pro"
-  "to.Id\032#.sapien.Renderer.server.proto.Emp"
-  "ty\022W\n\016CreateMaterial\022#.sapien.Renderer.s"
-  "erver.proto.Empty\032 .sapien.Renderer.serv"
-  "er.proto.Id\022W\n\016RemoveMaterial\022 .sapien.R"
-  "enderer.server.proto.Id\032#.sapien.Rendere"
-  "r.server.proto.Empty\022]\n\013AddBodyMesh\022,.sa"
-  "pien.Renderer.server.proto.AddBodyMeshRe"
-  "q\032 .sapien.Renderer.server.proto.Id\022g\n\020A"
-  "ddBodyPrimitive\0221.sapien.Renderer.server"
-  ".proto.AddBodyPrimitiveReq\032 .sapien.Rend"
-  "erer.server.proto.Id\022^\n\nRemoveBody\022+.sap"
-  "ien.Renderer.server.proto.RemoveBodyReq\032"
-  "#.sapien.Renderer.server.proto.Empty\022Y\n\t"
-  "AddCamera\022*.sapien.Renderer.server.proto"
-  ".AddCameraReq\032 .sapien.Renderer.server.p"
-  "roto.Id\022\\\n\017SetAmbientLight\022$.sapien.Rend"
-  "erer.server.proto.IdVec3\032#.sapien.Render"
-  "er.server.proto.Empty\022a\n\rAddPointLight\022."
-  ".sapien.Renderer.server.proto.AddPointLi"
-  "ghtReq\032 .sapien.Renderer.server.proto.Id"
-  "\022m\n\023AddDirectionalLight\0224.sapien.Rendere"
-  "r.server.proto.AddDirectionalLightReq\032 ."
-  "sapien.Renderer.server.proto.Id\022c\n\016SetEn"
-  "tityOrder\022,.sapien.Renderer.server.proto"
-  ".EntityOrderReq\032#.sapien.Renderer.server"
-  ".proto.Empty\022b\n\014UpdateRender\022-.sapien.Re"
-  "nderer.server.proto.UpdateRenderReq\032#.sa"
-  "pien.Renderer.server.proto.Empty\022\200\001\n\033Upd"
-  "ateRenderAndTakePictures\022<.sapien.Render"
-  "er.server.proto.UpdateRenderAndTakePictu"
-  "resReq\032#.sapien.Renderer.server.proto.Em"
-  "pty\022Y\n\014SetBaseColor\022$.sapien.Renderer.se"
-  "rver.proto.IdVec4\032#.sapien.Renderer.serv"
-  "er.proto.Empty\022Z\n\014SetRoughness\022%.sapien."
-  "Renderer.server.proto.IdFloat\032#.sapien.R"
-  "enderer.server.proto.Empty\022Y\n\013SetSpecula"
-  "r\022%.sapien.Renderer.server.proto.IdFloat"
-  "\032#.sapien.Renderer.server.proto.Empty\022Y\n"
-  "\013SetMetallic\022%.sapien.Renderer.server.pr"
-  "oto.IdFloat\032#.sapien.Renderer.server.pro"
-  "to.Empty\022[\n\013SetUniqueId\022\'.sapien.Rendere"
-  "r.server.proto.BodyIdReq\032#.sapien.Render"
-  "er.server.proto.Empty\022a\n\021SetSegmentation"
-  "Id\022\'.sapien.Renderer.server.proto.BodyId"
-  "Req\032#.sapien.Renderer.server.proto.Empty"
-  "\022`\n\013TakePicture\022,.sapien.Renderer.server"
-  ".proto.TakePictureReq\032#.sapien.Renderer."
-  "server.proto.Empty\022i\n\023SetCameraParameter"
-  "s\022-.sapien.Renderer.server.proto.CameraP"
-  "aramsReq\032#.sapien.Renderer.server.proto."
-  "Emptyb\006proto3"
+  "erver.proto\"\007\n\005Empty\"\027\n\006Uint32\022\r\n\005value\030"
+  "\001 \001(\r\"\026\n\005Index\022\r\n\005index\030\001 \001(\004\"\020\n\002Id\022\n\n\002i"
+  "d\030\001 \001(\004\"\'\n\004Vec3\022\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\022\t\n"
+  "\001z\030\003 \001(\002\"2\n\004Vec4\022\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\022\t"
+  "\n\001z\030\003 \001(\002\022\t\n\001w\030\004 \001(\002\"2\n\004Quat\022\t\n\001w\030\001 \001(\002\022"
+  "\t\n\001x\030\002 \001(\002\022\t\n\001y\030\003 \001(\002\022\t\n\001z\030\004 \001(\002\"d\n\004Pose"
+  "\022-\n\001p\030\001 \001(\0132\".sapien.Renderer.server.pro"
+  "to.Vec3\022-\n\001q\030\002 \001(\0132\".sapien.Renderer.ser"
+  "ver.proto.Quat\"F\n\006IdVec3\022\n\n\002id\030\001 \001(\004\0220\n\004"
+  "data\030\002 \001(\0132\".sapien.Renderer.server.prot"
+  "o.Vec3\"F\n\006IdVec4\022\n\n\002id\030\001 \001(\004\0220\n\004data\030\002 \001"
+  "(\0132\".sapien.Renderer.server.proto.Vec4\"#"
+  "\n\007IdFloat\022\n\n\002id\030\001 \001(\004\022\014\n\004data\030\002 \001(\002\"g\n\016A"
+  "ddBodyMeshReq\022\020\n\010scene_id\030\001 \001(\004\022\020\n\010filen"
+  "ame\030\002 \001(\t\0221\n\005scale\030\003 \001(\0132\".sapien.Render"
+  "er.server.proto.Vec3\"\247\001\n\023AddBodyPrimitiv"
+  "eReq\022\020\n\010scene_id\030\001 \001(\004\0229\n\004type\030\002 \001(\0162+.s"
+  "apien.Renderer.server.proto.PrimitiveTyp"
+  "e\0221\n\005scale\030\003 \001(\0132\".sapien.Renderer.serve"
+  "r.proto.Vec3\022\020\n\010material\030\004 \001(\004\"2\n\rRemove"
+  "BodyReq\022\020\n\010scene_id\030\001 \001(\004\022\017\n\007body_id\030\002 \001"
+  "(\004\"x\n\014AddCameraReq\022\020\n\010scene_id\030\001 \001(\004\022\r\n\005"
+  "width\030\002 \001(\r\022\016\n\006height\030\003 \001(\r\022\014\n\004fovy\030\004 \001("
+  "\002\022\014\n\004near\030\005 \001(\002\022\013\n\003far\030\006 \001(\002\022\016\n\006shader\030\007"
+  " \001(\t\"6\n\017RemoveCameraReq\022\020\n\010scene_id\030\001 \001("
+  "\004\022\021\n\tcamera_id\030\002 \001(\004\"\337\001\n\020AddPointLightRe"
+  "q\022\020\n\010scene_id\030\001 \001(\004\0224\n\010position\030\002 \001(\0132\"."
+  "sapien.Renderer.server.proto.Vec3\0221\n\005col"
+  "or\030\003 \001(\0132\".sapien.Renderer.server.proto."
+  "Vec3\022\016\n\006shadow\030\004 \001(\010\022\023\n\013shadow_near\030\005 \001("
+  "\002\022\022\n\nshadow_far\030\006 \001(\002\022\027\n\017shadow_map_size"
+  "\030\007 \001(\005\"\262\002\n\026AddDirectionalLightReq\022\020\n\010sce"
+  "ne_id\030\001 \001(\004\0225\n\tdirection\030\002 \001(\0132\".sapien."
+  "Renderer.server.proto.Vec3\0221\n\005color\030\003 \001("
+  "\0132\".sapien.Renderer.server.proto.Vec3\022\016\n"
+  "\006shadow\030\004 \001(\010\0224\n\010position\030\005 \001(\0132\".sapien"
+  ".Renderer.server.proto.Vec3\022\024\n\014shadow_sc"
+  "ale\030\006 \001(\002\022\023\n\013shadow_near\030\007 \001(\002\022\022\n\nshadow"
+  "_far\030\010 \001(\002\022\027\n\017shadow_map_size\030\t \001(\005\"4\n\016R"
+  "emoveLightReq\022\020\n\010scene_id\030\001 \001(\004\022\020\n\010light"
+  "_id\030\002 \001(\004\"P\n\016EntityOrderReq\022\020\n\010scene_id\030"
+  "\001 \001(\004\022\024\n\010body_ids\030\002 \003(\004B\002\020\001\022\026\n\ncamera_id"
+  "s\030\003 \003(\004B\002\020\001\"\225\001\n\017UpdateRenderReq\022\020\n\010scene"
+  "_id\030\001 \001(\004\0226\n\nbody_poses\030\002 \003(\0132\".sapien.R"
+  "enderer.server.proto.Pose\0228\n\014camera_pose"
+  "s\030\003 \003(\0132\".sapien.Renderer.server.proto.P"
+  "ose\":\n\tBodyIdReq\022\020\n\010scene_id\030\001 \001(\004\022\017\n\007bo"
+  "dy_id\030\002 \001(\004\022\n\n\002id\030\003 \001(\r\">\n\rBodyUint32Req"
+  "\022\020\n\010scene_id\030\001 \001(\004\022\017\n\007body_id\030\002 \001(\004\022\n\n\002i"
+  "d\030\003 \001(\r\"5\n\016TakePictureReq\022\020\n\010scene_id\030\001 "
+  "\001(\004\022\021\n\tcamera_id\030\002 \001(\004\"\274\001\n\036UpdateRenderA"
+  "ndTakePicturesReq\022\020\n\010scene_id\030\001 \001(\004\0226\n\nb"
+  "ody_poses\030\002 \003(\0132\".sapien.Renderer.server"
+  ".proto.Pose\0228\n\014camera_poses\030\003 \003(\0132\".sapi"
+  "en.Renderer.server.proto.Pose\022\026\n\ncamera_"
+  "ids\030\004 \003(\004B\002\020\001\"\217\001\n\017CameraParamsReq\022\020\n\010sce"
+  "ne_id\030\001 \001(\004\022\021\n\tcamera_id\030\002 \001(\004\022\014\n\004near\030\003"
+  " \001(\002\022\013\n\003far\030\004 \001(\002\022\n\n\002fx\030\005 \001(\002\022\n\n\002fy\030\006 \001("
+  "\002\022\n\n\002cx\030\007 \001(\002\022\n\n\002cy\030\010 \001(\002\022\014\n\004skew\030\t \001(\002\""
+  ",\n\007BodyReq\022\020\n\010scene_id\030\001 \001(\004\022\017\n\007body_id\030"
+  "\002 \001(\004*<\n\rPrimitiveType\022\n\n\006SPHERE\020\000\022\007\n\003BO"
+  "X\020\001\022\013\n\007CAPSULE\020\002\022\t\n\005PLANE\020\0032\247\022\n\rRenderSe"
+  "rvice\022T\n\013CreateScene\022#.sapien.Renderer.s"
+  "erver.proto.Index\032 .sapien.Renderer.serv"
+  "er.proto.Id\022T\n\013RemoveScene\022 .sapien.Rend"
+  "erer.server.proto.Id\032#.sapien.Renderer.s"
+  "erver.proto.Empty\022W\n\016CreateMaterial\022#.sa"
+  "pien.Renderer.server.proto.Empty\032 .sapie"
+  "n.Renderer.server.proto.Id\022W\n\016RemoveMate"
+  "rial\022 .sapien.Renderer.server.proto.Id\032#"
+  ".sapien.Renderer.server.proto.Empty\022]\n\013A"
+  "ddBodyMesh\022,.sapien.Renderer.server.prot"
+  "o.AddBodyMeshReq\032 .sapien.Renderer.serve"
+  "r.proto.Id\022g\n\020AddBodyPrimitive\0221.sapien."
+  "Renderer.server.proto.AddBodyPrimitiveRe"
+  "q\032 .sapien.Renderer.server.proto.Id\022^\n\nR"
+  "emoveBody\022+.sapien.Renderer.server.proto"
+  ".RemoveBodyReq\032#.sapien.Renderer.server."
+  "proto.Empty\022Y\n\tAddCamera\022*.sapien.Render"
+  "er.server.proto.AddCameraReq\032 .sapien.Re"
+  "nderer.server.proto.Id\022\\\n\017SetAmbientLigh"
+  "t\022$.sapien.Renderer.server.proto.IdVec3\032"
+  "#.sapien.Renderer.server.proto.Empty\022a\n\r"
+  "AddPointLight\022..sapien.Renderer.server.p"
+  "roto.AddPointLightReq\032 .sapien.Renderer."
+  "server.proto.Id\022m\n\023AddDirectionalLight\0224"
+  ".sapien.Renderer.server.proto.AddDirecti"
+  "onalLightReq\032 .sapien.Renderer.server.pr"
+  "oto.Id\022c\n\016SetEntityOrder\022,.sapien.Render"
+  "er.server.proto.EntityOrderReq\032#.sapien."
+  "Renderer.server.proto.Empty\022b\n\014UpdateRen"
+  "der\022-.sapien.Renderer.server.proto.Updat"
+  "eRenderReq\032#.sapien.Renderer.server.prot"
+  "o.Empty\022\200\001\n\033UpdateRenderAndTakePictures\022"
+  "<.sapien.Renderer.server.proto.UpdateRen"
+  "derAndTakePicturesReq\032#.sapien.Renderer."
+  "server.proto.Empty\022Y\n\014SetBaseColor\022$.sap"
+  "ien.Renderer.server.proto.IdVec4\032#.sapie"
+  "n.Renderer.server.proto.Empty\022Z\n\014SetRoug"
+  "hness\022%.sapien.Renderer.server.proto.IdF"
+  "loat\032#.sapien.Renderer.server.proto.Empt"
+  "y\022Y\n\013SetSpecular\022%.sapien.Renderer.serve"
+  "r.proto.IdFloat\032#.sapien.Renderer.server"
+  ".proto.Empty\022Y\n\013SetMetallic\022%.sapien.Ren"
+  "derer.server.proto.IdFloat\032#.sapien.Rend"
+  "erer.server.proto.Empty\022[\n\013SetUniqueId\022\'"
+  ".sapien.Renderer.server.proto.BodyIdReq\032"
+  "#.sapien.Renderer.server.proto.Empty\022a\n\021"
+  "SetSegmentationId\022\'.sapien.Renderer.serv"
+  "er.proto.BodyIdReq\032#.sapien.Renderer.ser"
+  "ver.proto.Empty\022\\\n\rGetShapeCount\022%.sapie"
+  "n.Renderer.server.proto.BodyReq\032$.sapien"
+  ".Renderer.server.proto.Uint32\022a\n\020GetShap"
+  "eMaterial\022+.sapien.Renderer.server.proto"
+  ".BodyUint32Req\032 .sapien.Renderer.server."
+  "proto.Id\022`\n\013TakePicture\022,.sapien.Rendere"
+  "r.server.proto.TakePictureReq\032#.sapien.R"
+  "enderer.server.proto.Empty\022i\n\023SetCameraP"
+  "arameters\022-.sapien.Renderer.server.proto"
+  ".CameraParamsReq\032#.sapien.Renderer.serve"
+  "r.proto.Emptyb\006proto3"
   ;
 static ::_pbi::once_flag descriptor_table_render_5fserver_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_render_5fserver_2eproto = {
-    false, false, 4533, descriptor_table_protodef_render_5fserver_2eproto,
+    false, false, 4861, descriptor_table_protodef_render_5fserver_2eproto,
     "render_server.proto",
-    &descriptor_table_render_5fserver_2eproto_once, nullptr, 0, 24,
+    &descriptor_table_render_5fserver_2eproto_once, nullptr, 0, 27,
     schemas, file_default_instances, TableStruct_render_5fserver_2eproto::offsets,
     file_level_metadata_render_5fserver_2eproto, file_level_enum_descriptors_render_5fserver_2eproto,
     file_level_service_descriptors_render_5fserver_2eproto,
@@ -874,6 +954,184 @@ const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Empty::GetClassData() const { 
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
       file_level_metadata_render_5fserver_2eproto[0]);
+}
+
+// ===================================================================
+
+class Uint32::_Internal {
+ public:
+};
+
+Uint32::Uint32(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.Uint32)
+}
+Uint32::Uint32(const Uint32& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  Uint32* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.value_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_impl_.value_ = from._impl_.value_;
+  // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.Uint32)
+}
+
+inline void Uint32::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.value_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+Uint32::~Uint32() {
+  // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.Uint32)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void Uint32::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void Uint32::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void Uint32::Clear() {
+// @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.Uint32)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.value_ = 0u;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* Uint32::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // uint32 value = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.value_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* Uint32::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.Uint32)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // uint32 value = 1;
+  if (this->_internal_value() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(1, this->_internal_value(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.Uint32)
+  return target;
+}
+
+size_t Uint32::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.Uint32)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // uint32 value = 1;
+  if (this->_internal_value() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_value());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Uint32::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    Uint32::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Uint32::GetClassData() const { return &_class_data_; }
+
+
+void Uint32::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<Uint32*>(&to_msg);
+  auto& from = static_cast<const Uint32&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.Uint32)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_value() != 0) {
+    _this->_internal_set_value(from._internal_value());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void Uint32::CopyFrom(const Uint32& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sapien.Renderer.server.proto.Uint32)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Uint32::IsInitialized() const {
+  return true;
+}
+
+void Uint32::InternalSwap(Uint32* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_.value_, other->_impl_.value_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata Uint32::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[1]);
 }
 
 // ===================================================================
@@ -1051,7 +1309,7 @@ void Index::InternalSwap(Index* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Index::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[1]);
+      file_level_metadata_render_5fserver_2eproto[2]);
 }
 
 // ===================================================================
@@ -1229,7 +1487,7 @@ void Id::InternalSwap(Id* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Id::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[2]);
+      file_level_metadata_render_5fserver_2eproto[3]);
 }
 
 // ===================================================================
@@ -1500,7 +1758,7 @@ void Vec3::InternalSwap(Vec3* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Vec3::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[3]);
+      file_level_metadata_render_5fserver_2eproto[4]);
 }
 
 // ===================================================================
@@ -1807,7 +2065,7 @@ void Vec4::InternalSwap(Vec4* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Vec4::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[4]);
+      file_level_metadata_render_5fserver_2eproto[5]);
 }
 
 // ===================================================================
@@ -2114,7 +2372,7 @@ void Quat::InternalSwap(Quat* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Quat::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[5]);
+      file_level_metadata_render_5fserver_2eproto[6]);
 }
 
 // ===================================================================
@@ -2353,7 +2611,7 @@ void Pose::InternalSwap(Pose* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata Pose::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[6]);
+      file_level_metadata_render_5fserver_2eproto[7]);
 }
 
 // ===================================================================
@@ -2577,7 +2835,7 @@ void IdVec3::InternalSwap(IdVec3* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata IdVec3::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[7]);
+      file_level_metadata_render_5fserver_2eproto[8]);
 }
 
 // ===================================================================
@@ -2801,7 +3059,7 @@ void IdVec4::InternalSwap(IdVec4* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata IdVec4::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[8]);
+      file_level_metadata_render_5fserver_2eproto[9]);
 }
 
 // ===================================================================
@@ -3024,7 +3282,7 @@ void IdFloat::InternalSwap(IdFloat* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata IdFloat::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[9]);
+      file_level_metadata_render_5fserver_2eproto[10]);
 }
 
 // ===================================================================
@@ -3300,7 +3558,7 @@ void AddBodyMeshReq::InternalSwap(AddBodyMeshReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata AddBodyMeshReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[10]);
+      file_level_metadata_render_5fserver_2eproto[11]);
 }
 
 // ===================================================================
@@ -3579,7 +3837,7 @@ void AddBodyPrimitiveReq::InternalSwap(AddBodyPrimitiveReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata AddBodyPrimitiveReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[11]);
+      file_level_metadata_render_5fserver_2eproto[12]);
 }
 
 // ===================================================================
@@ -3790,7 +4048,7 @@ void RemoveBodyReq::InternalSwap(RemoveBodyReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata RemoveBodyReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[12]);
+      file_level_metadata_render_5fserver_2eproto[13]);
 }
 
 // ===================================================================
@@ -4185,7 +4443,7 @@ void AddCameraReq::InternalSwap(AddCameraReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata AddCameraReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[13]);
+      file_level_metadata_render_5fserver_2eproto[14]);
 }
 
 // ===================================================================
@@ -4396,7 +4654,7 @@ void RemoveCameraReq::InternalSwap(RemoveCameraReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata RemoveCameraReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[14]);
+      file_level_metadata_render_5fserver_2eproto[15]);
 }
 
 // ===================================================================
@@ -4785,7 +5043,7 @@ void AddPointLightReq::InternalSwap(AddPointLightReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata AddPointLightReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[15]);
+      file_level_metadata_render_5fserver_2eproto[16]);
 }
 
 // ===================================================================
@@ -5251,7 +5509,7 @@ void AddDirectionalLightReq::InternalSwap(AddDirectionalLightReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata AddDirectionalLightReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[16]);
+      file_level_metadata_render_5fserver_2eproto[17]);
 }
 
 // ===================================================================
@@ -5462,7 +5720,7 @@ void RemoveLightReq::InternalSwap(RemoveLightReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata RemoveLightReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[17]);
+      file_level_metadata_render_5fserver_2eproto[18]);
 }
 
 // ===================================================================
@@ -5724,7 +5982,7 @@ void EntityOrderReq::InternalSwap(EntityOrderReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata EntityOrderReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[18]);
+      file_level_metadata_render_5fserver_2eproto[19]);
 }
 
 // ===================================================================
@@ -5970,7 +6228,7 @@ void UpdateRenderReq::InternalSwap(UpdateRenderReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata UpdateRenderReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[19]);
+      file_level_metadata_render_5fserver_2eproto[20]);
 }
 
 // ===================================================================
@@ -6205,7 +6463,242 @@ void BodyIdReq::InternalSwap(BodyIdReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata BodyIdReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[20]);
+      file_level_metadata_render_5fserver_2eproto[21]);
+}
+
+// ===================================================================
+
+class BodyUint32Req::_Internal {
+ public:
+};
+
+BodyUint32Req::BodyUint32Req(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.BodyUint32Req)
+}
+BodyUint32Req::BodyUint32Req(const BodyUint32Req& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BodyUint32Req* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){}
+    , decltype(_impl_.body_id_){}
+    , decltype(_impl_.id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.id_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.id_));
+  // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.BodyUint32Req)
+}
+
+inline void BodyUint32Req::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.body_id_){uint64_t{0u}}
+    , decltype(_impl_.id_){0u}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+BodyUint32Req::~BodyUint32Req() {
+  // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.BodyUint32Req)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void BodyUint32Req::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void BodyUint32Req::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void BodyUint32Req::Clear() {
+// @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.BodyUint32Req)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.id_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.id_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* BodyUint32Req::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // uint64 scene_id = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // uint64 body_id = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.body_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // uint32 id = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 24)) {
+          _impl_.id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* BodyUint32Req::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.BodyUint32Req)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // uint64 scene_id = 1;
+  if (this->_internal_scene_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+  }
+
+  // uint64 body_id = 2;
+  if (this->_internal_body_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_body_id(), target);
+  }
+
+  // uint32 id = 3;
+  if (this->_internal_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(3, this->_internal_id(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.BodyUint32Req)
+  return target;
+}
+
+size_t BodyUint32Req::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.BodyUint32Req)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // uint64 scene_id = 1;
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
+  }
+
+  // uint64 body_id = 2;
+  if (this->_internal_body_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_body_id());
+  }
+
+  // uint32 id = 3;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt32SizePlusOne(this->_internal_id());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BodyUint32Req::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    BodyUint32Req::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BodyUint32Req::GetClassData() const { return &_class_data_; }
+
+
+void BodyUint32Req::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BodyUint32Req*>(&to_msg);
+  auto& from = static_cast<const BodyUint32Req&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.BodyUint32Req)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
+  }
+  if (from._internal_body_id() != 0) {
+    _this->_internal_set_body_id(from._internal_body_id());
+  }
+  if (from._internal_id() != 0) {
+    _this->_internal_set_id(from._internal_id());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void BodyUint32Req::CopyFrom(const BodyUint32Req& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sapien.Renderer.server.proto.BodyUint32Req)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool BodyUint32Req::IsInitialized() const {
+  return true;
+}
+
+void BodyUint32Req::InternalSwap(BodyUint32Req* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(BodyUint32Req, _impl_.id_)
+      + sizeof(BodyUint32Req::_impl_.id_)
+      - PROTOBUF_FIELD_OFFSET(BodyUint32Req, _impl_.scene_id_)>(
+          reinterpret_cast<char*>(&_impl_.scene_id_),
+          reinterpret_cast<char*>(&other->_impl_.scene_id_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata BodyUint32Req::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[22]);
 }
 
 // ===================================================================
@@ -6416,7 +6909,7 @@ void TakePictureReq::InternalSwap(TakePictureReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata TakePictureReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[21]);
+      file_level_metadata_render_5fserver_2eproto[23]);
 }
 
 // ===================================================================
@@ -6704,7 +7197,7 @@ void UpdateRenderAndTakePicturesReq::InternalSwap(UpdateRenderAndTakePicturesReq
 ::PROTOBUF_NAMESPACE_ID::Metadata UpdateRenderAndTakePicturesReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[22]);
+      file_level_metadata_render_5fserver_2eproto[24]);
 }
 
 // ===================================================================
@@ -7167,7 +7660,218 @@ void CameraParamsReq::InternalSwap(CameraParamsReq* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata CameraParamsReq::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
-      file_level_metadata_render_5fserver_2eproto[23]);
+      file_level_metadata_render_5fserver_2eproto[25]);
+}
+
+// ===================================================================
+
+class BodyReq::_Internal {
+ public:
+};
+
+BodyReq::BodyReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  // @@protoc_insertion_point(arena_constructor:sapien.Renderer.server.proto.BodyReq)
+}
+BodyReq::BodyReq(const BodyReq& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  BodyReq* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){}
+    , decltype(_impl_.body_id_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&_impl_.scene_id_, &from._impl_.scene_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.body_id_) -
+    reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.body_id_));
+  // @@protoc_insertion_point(copy_constructor:sapien.Renderer.server.proto.BodyReq)
+}
+
+inline void BodyReq::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.scene_id_){uint64_t{0u}}
+    , decltype(_impl_.body_id_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
+}
+
+BodyReq::~BodyReq() {
+  // @@protoc_insertion_point(destructor:sapien.Renderer.server.proto.BodyReq)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
+  SharedDtor();
+}
+
+inline void BodyReq::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+}
+
+void BodyReq::SetCachedSize(int size) const {
+  _impl_._cached_size_.Set(size);
+}
+
+void BodyReq::Clear() {
+// @@protoc_insertion_point(message_clear_start:sapien.Renderer.server.proto.BodyReq)
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&_impl_.scene_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.body_id_) -
+      reinterpret_cast<char*>(&_impl_.scene_id_)) + sizeof(_impl_.body_id_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* BodyReq::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
+    switch (tag >> 3) {
+      // uint64 scene_id = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.scene_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      // uint64 body_id = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
+          _impl_.body_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else
+          goto handle_unusual;
+        continue;
+      default:
+        goto handle_unusual;
+    }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
+  }  // while
+message_done:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto message_done;
+#undef CHK_
+}
+
+uint8_t* BodyReq::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:sapien.Renderer.server.proto.BodyReq)
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // uint64 scene_id = 1;
+  if (this->_internal_scene_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_scene_id(), target);
+  }
+
+  // uint64 body_id = 2;
+  if (this->_internal_body_id() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(2, this->_internal_body_id(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:sapien.Renderer.server.proto.BodyReq)
+  return target;
+}
+
+size_t BodyReq::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:sapien.Renderer.server.proto.BodyReq)
+  size_t total_size = 0;
+
+  uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // uint64 scene_id = 1;
+  if (this->_internal_scene_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_scene_id());
+  }
+
+  // uint64 body_id = 2;
+  if (this->_internal_body_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_body_id());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData BodyReq::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    BodyReq::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*BodyReq::GetClassData() const { return &_class_data_; }
+
+
+void BodyReq::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<BodyReq*>(&to_msg);
+  auto& from = static_cast<const BodyReq&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:sapien.Renderer.server.proto.BodyReq)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_scene_id() != 0) {
+    _this->_internal_set_scene_id(from._internal_scene_id());
+  }
+  if (from._internal_body_id() != 0) {
+    _this->_internal_set_body_id(from._internal_body_id());
+  }
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void BodyReq::CopyFrom(const BodyReq& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:sapien.Renderer.server.proto.BodyReq)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool BodyReq::IsInitialized() const {
+  return true;
+}
+
+void BodyReq::InternalSwap(BodyReq* other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(BodyReq, _impl_.body_id_)
+      + sizeof(BodyReq::_impl_.body_id_)
+      - PROTOBUF_FIELD_OFFSET(BodyReq, _impl_.scene_id_)>(
+          reinterpret_cast<char*>(&_impl_.scene_id_),
+          reinterpret_cast<char*>(&other->_impl_.scene_id_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata BodyReq::GetMetadata() const {
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_render_5fserver_2eproto_getter, &descriptor_table_render_5fserver_2eproto_once,
+      file_level_metadata_render_5fserver_2eproto[26]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -7179,6 +7883,10 @@ PROTOBUF_NAMESPACE_OPEN
 template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Empty*
 Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Empty >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::Empty >(arena);
+}
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Uint32*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Uint32 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::Uint32 >(arena);
 }
 template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::Index*
 Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::Index >(Arena* arena) {
@@ -7260,6 +7968,10 @@ template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::BodyIdReq*
 Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::BodyIdReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::BodyIdReq >(arena);
 }
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::BodyUint32Req*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::BodyUint32Req >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::BodyUint32Req >(arena);
+}
 template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::TakePictureReq*
 Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::TakePictureReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::TakePictureReq >(arena);
@@ -7271,6 +7983,10 @@ Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::UpdateRenderAndTak
 template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::CameraParamsReq*
 Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::CameraParamsReq >(Arena* arena) {
   return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::CameraParamsReq >(arena);
+}
+template<> PROTOBUF_NOINLINE ::sapien::Renderer::server::proto::BodyReq*
+Arena::CreateMaybeMessage< ::sapien::Renderer::server::proto::BodyReq >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::sapien::Renderer::server::proto::BodyReq >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

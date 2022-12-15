@@ -9,7 +9,7 @@ using ::grpc::ClientContext;
 using ::grpc::Status;
 
 //========== Material ==========//
-ClientMaterial::ClientMaterial(std::shared_ptr<ClientRenderer> renderer, id_t id)
+ClientMaterial::ClientMaterial(std::shared_ptr<ClientRenderer> renderer, rs_id_t id)
     : mRenderer(renderer), mId(id){};
 
 void ClientMaterial::setBaseColor(std::array<float, 4> color) {
@@ -82,7 +82,7 @@ ClientMaterial::~ClientMaterial() {
 
 //========== Camera ==========//
 IPxrScene *ClientCamera::getScene() { return mScene; }
-ClientCamera::ClientCamera(ClientScene *scene, id_t id, uint32_t width, uint32_t height, float cx,
+ClientCamera::ClientCamera(ClientScene *scene, rs_id_t id, uint32_t width, uint32_t height, float cx,
                            float cy, float fx, float fy, float near, float far, float skew)
     : mScene(scene), mId(id), mWidth(width), mHeight(height), mCx(cx), mCy(cy), mFx(fy), mFy(fy),
       mNear(near), mFar(far), mSkew(skew) {}
@@ -129,8 +129,29 @@ void ClientCamera::setPerspectiveCameraParameters(float near, float far, float f
   throw std::runtime_error(status.error_message());
 }
 
+//========== Shape ==========//
+
+ClientShape::ClientShape(ClientRigidbody *body, uint32_t index) : mBody(body), mIndex(index) {}
+
+std::shared_ptr<IPxrMaterial> ClientShape::getMaterial() const {
+  ClientContext context;
+  proto::BodyUint32Req req;
+  proto::Id res;
+  req.set_scene_id(mBody->getScene()->getId());
+  req.set_body_id(mBody->getId());
+  req.set_id(mIndex);
+
+  Status status =
+      mBody->getScene()->getRenderer()->getStub().GetShapeMaterial(&context, req, &res);
+  if (!status.ok()) {
+    throw std::runtime_error(status.error_message());
+  }
+  return std::make_shared<ClientMaterial>(mBody->getScene()->getRenderer()->shared_from_this(),
+                                          res.id());
+}
+
 //========== Body ==========//
-ClientRigidbody::ClientRigidbody(ClientScene *scene, id_t id) : mScene(scene), mId(id) {}
+ClientRigidbody::ClientRigidbody(ClientScene *scene, rs_id_t id) : mScene(scene), mId(id) {}
 
 void ClientRigidbody::setUniqueId(uint32_t uniqueId) {
   mUniqueId = uniqueId;
@@ -174,8 +195,27 @@ void ClientRigidbody::update(const physx::PxTransform &transform) {
 
 void ClientRigidbody::destroy() { mScene->removeRigidbody(this); }
 
+std::vector<std::shared_ptr<IPxrRenderShape>> ClientRigidbody::getRenderShapes() {
+  ClientContext context;
+  proto::BodyReq req;
+  proto::Uint32 res;
+  req.set_scene_id(mScene->getId());
+  req.set_body_id(mId);
+  Status status = mScene->getRenderer()->getStub().GetShapeCount(&context, req, &res);
+  if (!status.ok()) {
+    throw std::runtime_error(status.error_message());
+  }
+  uint32_t count = res.value();
+
+  std::vector<std::shared_ptr<IPxrRenderShape>> shapes;
+  for (uint32_t i = 0; i < count; ++i) {
+    shapes.push_back(std::make_shared<ClientShape>(this, i));
+  }
+  return shapes;
+}
+
 //========== Scene ==========//
-ClientScene::ClientScene(ClientRenderer *renderer, id_t id, std::string const &name)
+ClientScene::ClientScene(ClientRenderer *renderer, rs_id_t id, std::string const &name)
     : mRenderer(renderer), mId(id), mName(name) {}
 
 IPxrRigidbody *ClientScene::addRigidbody(physx::PxGeometryType::Enum type,
@@ -469,7 +509,7 @@ void ClientScene::updateRenderAndTakePictures(std::vector<ICamera *> const &came
   }
 
   for (auto cam : cameras) {
-    if (auto c = dynamic_cast<ClientCamera*>(cam)) {
+    if (auto c = dynamic_cast<ClientCamera *>(cam)) {
       req.add_camera_ids(c->getId());
     } else {
       throw std::runtime_error("invalid camera");

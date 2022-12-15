@@ -61,6 +61,10 @@ class RenderServiceImpl final : public proto::RenderService::Service {
   Status SetUniqueId(ServerContext *c, const proto::BodyIdReq *req, proto::Empty *res) override;
   Status SetSegmentationId(ServerContext *c, const proto::BodyIdReq *req,
                            proto::Empty *res) override;
+  Status GetShapeCount(ServerContext *c, const proto::BodyReq *req, proto::Uint32 *res) override;
+  // ========== Shape ==========//
+  Status GetShapeMaterial(ServerContext *c, const proto::BodyUint32Req *req,
+                          proto::Id *res) override;
   // ========== Camera ==========//
   Status TakePicture(ServerContext *c, const proto::TakePictureReq *req,
                      proto::Empty *res) override;
@@ -99,10 +103,13 @@ private:
     uint64_t sceneId;
     std::unique_ptr<svulkan2::scene::Scene> scene;
 
-    std::unordered_map<id_t, std::shared_ptr<CameraInfo>> cameraMap;
+    std::unordered_map<rs_id_t, std::shared_ptr<CameraInfo>> cameraMap;
     std::vector<std::shared_ptr<CameraInfo>> cameraList;
 
-    std::unordered_map<id_t, svulkan2::scene::Object *> objectMap;
+    std::unordered_map<rs_id_t, svulkan2::scene::Object *> objectMap;
+
+    // store material list of an object
+    std::unordered_map<rs_id_t, std::vector<rs_id_t>> objectMaterialIdMap;
 
     // ordered objects and cameras for pose update
     std::vector<svulkan2::scene::Object *> orderedObjects;
@@ -111,15 +118,15 @@ private:
     std::unique_ptr<ThreadPool> threadRunner;
   };
 
-  // std::shared_mutex mMaterialMutex;
-  // std::unordered_map<id_t, std::shared_ptr<svulkan2::resource::SVMetallicMaterial>>
-  // mMaterialMap;
-  ts_unordered_map<id_t, std::shared_ptr<svulkan2::resource::SVMetallicMaterial>> mMaterialMap;
+  // store materials on an object
+  ts_unordered_map<rs_id_t, std::weak_ptr<svulkan2::resource::SVMetallicMaterial>> mObjectMaterialMap;
+  ts_unordered_map<rs_id_t, std::shared_ptr<svulkan2::resource::SVMetallicMaterial>> mMaterialMap;
+  ts_unordered_map<rs_id_t, std::shared_ptr<SceneInfo>> mSceneMap;
 
-  // std::shared_mutex mSceneMutex;
-  // std::unordered_map<id_t, SceneInfo> mSceneMap;
+  std::shared_ptr<svulkan2::resource::SVMetallicMaterial> getMaterial(rs_id_t id);
 
-  ts_unordered_map<id_t, std::shared_ptr<SceneInfo>> mSceneMap;
+  // refresh the object material map to remove expired weak ptr
+  void updateObjectMaterialMap();
 
   std::shared_mutex mSceneListLock;
   std::vector<std::shared_ptr<SceneInfo>> mSceneList;

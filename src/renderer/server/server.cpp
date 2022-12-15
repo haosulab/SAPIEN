@@ -27,8 +27,7 @@ namespace server {
 //   getLogger()->error(fmt, args...);
 // };
 
-// template <typename... Args> inline void critical(spdlog::string_view_t fmt, const Args &...args)
-// {
+// template <typename... Args> inline void critical(spdlog::string_view_t fmt, const Args &...args) {
 //   getLogger()->critical(fmt, args...);
 // };
 // } // namespace log
@@ -43,8 +42,8 @@ template <typename... Args> inline void warn(spdlog::string_view_t fmt, const Ar
 
 template <typename... Args> inline void error(spdlog::string_view_t fmt, const Args &...args){};
 
-template <typename... Args> inline void critical(spdlog::string_view_t fmt, const Args &...args){};
-} // namespace log
+template <typename... Args> inline void critical(spdlog::string_view_t fmt, const Args
+&...args){}; } // namespace log
 
 typedef std::unique_lock<std::shared_mutex> WriteLock;
 typedef std::shared_lock<std::shared_mutex> ReadLock;
@@ -56,7 +55,7 @@ void setDefaultShaderDirectory(std::string const &dir) { gDefaultShaderDirectory
 Status RenderServiceImpl::CreateScene(ServerContext *c, const proto::Index *req, proto::Id *res) {
   log::info("CreateScene");
   auto index = req->index();
-  id_t id = generateId();
+  rs_id_t id = generateId();
 
   auto info = std::make_shared<SceneInfo>();
   info->sceneIndex = index;
@@ -109,6 +108,7 @@ Status RenderServiceImpl::RemoveScene(ServerContext *c, const proto::Id *req, pr
   }
 
   mSceneMap.erase(req->id());
+  updateObjectMaterialMap();
 
   return status;
 }
@@ -116,7 +116,7 @@ Status RenderServiceImpl::RemoveScene(ServerContext *c, const proto::Id *req, pr
 Status RenderServiceImpl::CreateMaterial(ServerContext *c, const proto::Empty *req,
                                          proto::Id *res) {
   log::info("CreateMaterial");
-  id_t id = generateId();
+  rs_id_t id = generateId();
 
   auto mat = std::make_shared<svulkan2::resource::SVMetallicMaterial>();
   mat->setBaseColor({1.0, 1.0, 1.0, 1.0});
@@ -138,12 +138,26 @@ Status RenderServiceImpl::RemoveMaterial(ServerContext *c, const proto::Id *req,
 // ========== Scene ==========//
 Status RenderServiceImpl::AddBodyMesh(ServerContext *c, const proto::AddBodyMeshReq *req,
                                       proto::Id *res) {
-  id_t id = generateId();
+  log::info("AddBodyMesh");
+  rs_id_t id = generateId();
 
   auto info = mSceneMap.get(req->scene_id());
   svulkan2::scene::Object *object =
       &info->scene->addObject(mResourceManager->CreateModelFromFile(req->filename()));
   info->objectMap[id] = object;
+
+  // std::vector<rs_id_t> mat_ids;
+  // if (object && object->getModel()) {
+  //   for (auto shape : object->getModel()->getShapes()) {
+  //     rs_id_t mat_id = generateId();
+  //     log::info("generate mat id {}", mat_id);
+  //     mat_ids.push_back(mat_id);
+  //     mObjectMaterialMap.set(
+  //         mat_id,
+  //         std::static_pointer_cast<svulkan2::resource::SVMetallicMaterial>(shape->material));
+  //   }
+  // }
+  // info->objectMaterialIdMap[id] = mat_ids;
 
   res->set_id(id);
   return Status::OK;
@@ -151,10 +165,12 @@ Status RenderServiceImpl::AddBodyMesh(ServerContext *c, const proto::AddBodyMesh
 
 Status RenderServiceImpl::AddBodyPrimitive(ServerContext *c, const proto::AddBodyPrimitiveReq *req,
                                            proto::Id *res) {
-  id_t id = generateId();
+  log::info("AddBodyPrimitive");
+  rs_id_t id = generateId();
+  rs_id_t mat_id = req->material();
 
   glm::vec3 scale{req->scale().x(), req->scale().y(), req->scale().z()};
-  auto mat = mMaterialMap.get(req->material());
+  auto mat = getMaterial(mat_id);
   auto info = mSceneMap.get(req->scene_id());
 
   svulkan2::scene::Object *object;
@@ -193,6 +209,8 @@ Status RenderServiceImpl::AddBodyPrimitive(ServerContext *c, const proto::AddBod
 
   info->objectMap[id] = object;
 
+  info->objectMaterialIdMap[id] = {mat_id};
+
   res->set_id(id);
   return Status::OK;
 }
@@ -206,9 +224,20 @@ Status RenderServiceImpl::RemoveBody(ServerContext *c, const proto::RemoveBodyRe
     auto it = info->objectMap.find(req->body_id());
     info->scene->removeNode(*it->second);
     info->objectMap.erase(it);
+
+    info->objectMaterialIdMap.erase(req->body_id());
+    updateObjectMaterialMap(); // TODO: optimize
   }
 
   return Status::OK;
+}
+
+void RenderServiceImpl::updateObjectMaterialMap() {
+  mObjectMaterialMap.lockWrite();
+  std::erase_if(mObjectMaterialMap.getMap(), [](const auto &item) {
+    auto const &[key, value] = item;
+    return value.expired();
+  });
 }
 
 Status RenderServiceImpl::AddCamera(ServerContext *c, const proto::AddCameraReq *req,
@@ -216,7 +245,7 @@ Status RenderServiceImpl::AddCamera(ServerContext *c, const proto::AddCameraReq 
   log::info("AddCamera");
   try {
 
-    id_t id = generateId();
+    rs_id_t id = generateId();
 
     auto sceneInfo = mSceneMap.get(req->scene_id());
 
@@ -266,7 +295,7 @@ Status RenderServiceImpl::SetAmbientLight(ServerContext *c, const proto::IdVec3 
 
 Status RenderServiceImpl::AddPointLight(ServerContext *c, const proto::AddPointLightReq *req,
                                         proto::Id *res) {
-  id_t id = generateId(); // TODO: implement remove light
+  rs_id_t id = generateId(); // TODO: implement remove light
   auto info = mSceneMap.get(req->scene_id());
   auto &light = info->scene->addPointLight();
 
@@ -284,7 +313,7 @@ Status RenderServiceImpl::AddPointLight(ServerContext *c, const proto::AddPointL
 Status RenderServiceImpl::AddDirectionalLight(ServerContext *c,
                                               const proto::AddDirectionalLightReq *req,
                                               proto::Id *res) {
-  id_t id = generateId(); // TODO: implement remove light
+  rs_id_t id = generateId(); // TODO: implement remove light
 
   auto info = mSceneMap.get(req->scene_id());
   auto &light = info->scene->addDirectionalLight();
@@ -422,7 +451,7 @@ Status RenderServiceImpl::UpdateRenderAndTakePictures(
 // ========== Material ==========//
 Status RenderServiceImpl::SetBaseColor(ServerContext *c, const proto::IdVec4 *req,
                                        proto::Empty *res) {
-  mMaterialMap.get(req->id())->setBaseColor(
+  getMaterial(req->id())->setBaseColor(
       {req->data().x(), req->data().y(), req->data().z(), req->data().w()});
 
   return Status::OK;
@@ -430,20 +459,20 @@ Status RenderServiceImpl::SetBaseColor(ServerContext *c, const proto::IdVec4 *re
 
 Status RenderServiceImpl::SetRoughness(ServerContext *c, const proto::IdFloat *req,
                                        proto::Empty *res) {
-  mMaterialMap.get(req->id())->setRoughness(req->data());
+  getMaterial(req->id())->setRoughness(req->data());
 
   return Status::OK;
 }
 
 Status RenderServiceImpl::SetSpecular(ServerContext *c, const proto::IdFloat *req,
                                       proto::Empty *res) {
-  mMaterialMap.get(req->id())->setFresnel(req->data());
+  getMaterial(req->id())->setFresnel(req->data());
   return Status::OK;
 }
 
 Status RenderServiceImpl::SetMetallic(ServerContext *c, const proto::IdFloat *req,
                                       proto::Empty *res) {
-  mMaterialMap.get(req->id())->setMetallic(req->data());
+  getMaterial(req->id())->setMetallic(req->data());
   return Status::OK;
 }
 
@@ -471,6 +500,45 @@ Status RenderServiceImpl::SetSegmentationId(ServerContext *c, const proto::BodyI
     seg[1] = req->id();
     obj->setSegmentation(seg);
   }
+  return Status::OK;
+}
+
+Status RenderServiceImpl::GetShapeCount(ServerContext *c, const proto::BodyReq *req,
+                                        proto::Uint32 *res) {
+  log::info("GetShapeCount {} {}", req->scene_id(), req->body_id());
+  auto info = mSceneMap.get(req->scene_id());
+  auto obj = info->objectMap.at(req->body_id());
+  res->set_value(obj->getModel()->getShapes().size());
+  return Status::OK;
+}
+
+Status RenderServiceImpl::GetShapeMaterial(ServerContext *c, const proto::BodyUint32Req *req,
+                                           proto::Id *res) {
+  log::info("GetShapeMaterial {} {} {}", req->scene_id(), req->body_id(), req->id());
+  auto info = mSceneMap.get(req->scene_id());
+  rs_id_t body_id = req->body_id();
+
+  // lazy generation
+  if (!info->objectMaterialIdMap.contains(body_id)) {
+    std::vector<rs_id_t> mat_ids;
+    auto object = info->objectMap.at(body_id);
+    if (object && object->getModel()) {
+      for (auto shape : object->getModel()->getShapes()) {
+        rs_id_t mat_id = generateId();
+        log::info("generate mat id {}", mat_id);
+        mat_ids.push_back(mat_id);
+        mObjectMaterialMap.set(
+            mat_id,
+            std::static_pointer_cast<svulkan2::resource::SVMetallicMaterial>(shape->material));
+      }
+    }
+    info->objectMaterialIdMap[body_id] = mat_ids;
+  }
+
+
+  uint32_t mat_id = info->objectMaterialIdMap.at(body_id).at(req->id());
+
+  res->set_id(mat_id);
   return Status::OK;
 }
 
@@ -533,6 +601,18 @@ Status RenderServiceImpl::SetCameraParameters(ServerContext *c, const proto::Cam
                                 req->cy(), cam->getWidth(), cam->getHeight(), req->skew());
 
   return Status::OK;
+}
+
+std::shared_ptr<svulkan2::resource::SVMetallicMaterial>
+RenderServiceImpl::getMaterial(rs_id_t id) {
+  if (auto mat = mMaterialMap.get(id, nullptr)) {
+    return mat;
+  }
+  auto wm = mObjectMaterialMap.get(id);
+  if (auto mat = wm.lock()) {
+    return mat;
+  }
+  throw std::out_of_range("object expired");
 }
 
 RenderServiceImpl::RenderServiceImpl(

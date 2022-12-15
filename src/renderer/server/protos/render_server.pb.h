@@ -68,6 +68,12 @@ extern AddPointLightReqDefaultTypeInternal _AddPointLightReq_default_instance_;
 class BodyIdReq;
 struct BodyIdReqDefaultTypeInternal;
 extern BodyIdReqDefaultTypeInternal _BodyIdReq_default_instance_;
+class BodyReq;
+struct BodyReqDefaultTypeInternal;
+extern BodyReqDefaultTypeInternal _BodyReq_default_instance_;
+class BodyUint32Req;
+struct BodyUint32ReqDefaultTypeInternal;
+extern BodyUint32ReqDefaultTypeInternal _BodyUint32Req_default_instance_;
 class CameraParamsReq;
 struct CameraParamsReqDefaultTypeInternal;
 extern CameraParamsReqDefaultTypeInternal _CameraParamsReq_default_instance_;
@@ -110,6 +116,9 @@ extern RemoveLightReqDefaultTypeInternal _RemoveLightReq_default_instance_;
 class TakePictureReq;
 struct TakePictureReqDefaultTypeInternal;
 extern TakePictureReqDefaultTypeInternal _TakePictureReq_default_instance_;
+class Uint32;
+struct Uint32DefaultTypeInternal;
+extern Uint32DefaultTypeInternal _Uint32_default_instance_;
 class UpdateRenderAndTakePicturesReq;
 struct UpdateRenderAndTakePicturesReqDefaultTypeInternal;
 extern UpdateRenderAndTakePicturesReqDefaultTypeInternal _UpdateRenderAndTakePicturesReq_default_instance_;
@@ -133,6 +142,8 @@ template<> ::sapien::Renderer::server::proto::AddCameraReq* Arena::CreateMaybeMe
 template<> ::sapien::Renderer::server::proto::AddDirectionalLightReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::AddDirectionalLightReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::AddPointLightReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::AddPointLightReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::BodyIdReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::BodyIdReq>(Arena*);
+template<> ::sapien::Renderer::server::proto::BodyReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::BodyReq>(Arena*);
+template<> ::sapien::Renderer::server::proto::BodyUint32Req* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::BodyUint32Req>(Arena*);
 template<> ::sapien::Renderer::server::proto::CameraParamsReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::CameraParamsReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::Empty* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::Empty>(Arena*);
 template<> ::sapien::Renderer::server::proto::EntityOrderReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::EntityOrderReq>(Arena*);
@@ -147,6 +158,7 @@ template<> ::sapien::Renderer::server::proto::RemoveBodyReq* Arena::CreateMaybeM
 template<> ::sapien::Renderer::server::proto::RemoveCameraReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::RemoveCameraReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::RemoveLightReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::RemoveLightReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::TakePictureReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::TakePictureReq>(Arena*);
+template<> ::sapien::Renderer::server::proto::Uint32* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::Uint32>(Arena*);
 template<> ::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::UpdateRenderAndTakePicturesReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::UpdateRenderReq* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::UpdateRenderReq>(Arena*);
 template<> ::sapien::Renderer::server::proto::Vec3* Arena::CreateMaybeMessage<::sapien::Renderer::server::proto::Vec3>(Arena*);
@@ -304,6 +316,154 @@ class Empty final :
 };
 // -------------------------------------------------------------------
 
+class Uint32 final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:sapien.Renderer.server.proto.Uint32) */ {
+ public:
+  inline Uint32() : Uint32(nullptr) {}
+  ~Uint32() override;
+  explicit PROTOBUF_CONSTEXPR Uint32(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  Uint32(const Uint32& from);
+  Uint32(Uint32&& from) noexcept
+    : Uint32() {
+    *this = ::std::move(from);
+  }
+
+  inline Uint32& operator=(const Uint32& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Uint32& operator=(Uint32&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const Uint32& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Uint32* internal_default_instance() {
+    return reinterpret_cast<const Uint32*>(
+               &_Uint32_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  friend void swap(Uint32& a, Uint32& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Uint32* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Uint32* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  Uint32* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<Uint32>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const Uint32& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const Uint32& from) {
+    Uint32::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Uint32* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "sapien.Renderer.server.proto.Uint32";
+  }
+  protected:
+  explicit Uint32(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kValueFieldNumber = 1,
+  };
+  // uint32 value = 1;
+  void clear_value();
+  uint32_t value() const;
+  void set_value(uint32_t value);
+  private:
+  uint32_t _internal_value() const;
+  void _internal_set_value(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:sapien.Renderer.server.proto.Uint32)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    uint32_t value_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_render_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Index final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:sapien.Renderer.server.proto.Index) */ {
  public:
@@ -352,7 +512,7 @@ class Index final :
                &_Index_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    2;
 
   friend void swap(Index& a, Index& b) {
     a.Swap(&b);
@@ -500,7 +660,7 @@ class Id final :
                &_Id_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    3;
 
   friend void swap(Id& a, Id& b) {
     a.Swap(&b);
@@ -648,7 +808,7 @@ class Vec3 final :
                &_Vec3_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(Vec3& a, Vec3& b) {
     a.Swap(&b);
@@ -818,7 +978,7 @@ class Vec4 final :
                &_Vec4_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    5;
 
   friend void swap(Vec4& a, Vec4& b) {
     a.Swap(&b);
@@ -999,7 +1159,7 @@ class Quat final :
                &_Quat_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(Quat& a, Quat& b) {
     a.Swap(&b);
@@ -1180,7 +1340,7 @@ class Pose final :
                &_Pose_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    7;
 
   friend void swap(Pose& a, Pose& b) {
     a.Swap(&b);
@@ -1357,7 +1517,7 @@ class IdVec3 final :
                &_IdVec3_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    8;
 
   friend void swap(IdVec3& a, IdVec3& b) {
     a.Swap(&b);
@@ -1525,7 +1685,7 @@ class IdVec4 final :
                &_IdVec4_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    9;
 
   friend void swap(IdVec4& a, IdVec4& b) {
     a.Swap(&b);
@@ -1693,7 +1853,7 @@ class IdFloat final :
                &_IdFloat_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    10;
 
   friend void swap(IdFloat& a, IdFloat& b) {
     a.Swap(&b);
@@ -1852,7 +2012,7 @@ class AddBodyMeshReq final :
                &_AddBodyMeshReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    11;
 
   friend void swap(AddBodyMeshReq& a, AddBodyMeshReq& b) {
     a.Swap(&b);
@@ -2036,7 +2196,7 @@ class AddBodyPrimitiveReq final :
                &_AddBodyPrimitiveReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    12;
 
   friend void swap(AddBodyPrimitiveReq& a, AddBodyPrimitiveReq& b) {
     a.Swap(&b);
@@ -2226,7 +2386,7 @@ class RemoveBodyReq final :
                &_RemoveBodyReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    13;
 
   friend void swap(RemoveBodyReq& a, RemoveBodyReq& b) {
     a.Swap(&b);
@@ -2385,7 +2545,7 @@ class AddCameraReq final :
                &_AddCameraReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    14;
 
   friend void swap(AddCameraReq& a, AddCameraReq& b) {
     a.Swap(&b);
@@ -2604,7 +2764,7 @@ class RemoveCameraReq final :
                &_RemoveCameraReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    15;
 
   friend void swap(RemoveCameraReq& a, RemoveCameraReq& b) {
     a.Swap(&b);
@@ -2763,7 +2923,7 @@ class AddPointLightReq final :
                &_AddPointLightReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    16;
 
   friend void swap(AddPointLightReq& a, AddPointLightReq& b) {
     a.Swap(&b);
@@ -2995,7 +3155,7 @@ class AddDirectionalLightReq final :
                &_AddDirectionalLightReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    17;
 
   friend void swap(AddDirectionalLightReq& a, AddDirectionalLightReq& b) {
     a.Swap(&b);
@@ -3258,7 +3418,7 @@ class RemoveLightReq final :
                &_RemoveLightReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    18;
 
   friend void swap(RemoveLightReq& a, RemoveLightReq& b) {
     a.Swap(&b);
@@ -3417,7 +3577,7 @@ class EntityOrderReq final :
                &_EntityOrderReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    19;
 
   friend void swap(EntityOrderReq& a, EntityOrderReq& b) {
     a.Swap(&b);
@@ -3615,7 +3775,7 @@ class UpdateRenderReq final :
                &_UpdateRenderReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    20;
 
   friend void swap(UpdateRenderReq& a, UpdateRenderReq& b) {
     a.Swap(&b);
@@ -3803,7 +3963,7 @@ class BodyIdReq final :
                &_BodyIdReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    21;
 
   friend void swap(BodyIdReq& a, BodyIdReq& b) {
     a.Swap(&b);
@@ -3925,6 +4085,176 @@ class BodyIdReq final :
 };
 // -------------------------------------------------------------------
 
+class BodyUint32Req final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:sapien.Renderer.server.proto.BodyUint32Req) */ {
+ public:
+  inline BodyUint32Req() : BodyUint32Req(nullptr) {}
+  ~BodyUint32Req() override;
+  explicit PROTOBUF_CONSTEXPR BodyUint32Req(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  BodyUint32Req(const BodyUint32Req& from);
+  BodyUint32Req(BodyUint32Req&& from) noexcept
+    : BodyUint32Req() {
+    *this = ::std::move(from);
+  }
+
+  inline BodyUint32Req& operator=(const BodyUint32Req& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline BodyUint32Req& operator=(BodyUint32Req&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const BodyUint32Req& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const BodyUint32Req* internal_default_instance() {
+    return reinterpret_cast<const BodyUint32Req*>(
+               &_BodyUint32Req_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    22;
+
+  friend void swap(BodyUint32Req& a, BodyUint32Req& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(BodyUint32Req* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(BodyUint32Req* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  BodyUint32Req* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<BodyUint32Req>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const BodyUint32Req& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const BodyUint32Req& from) {
+    BodyUint32Req::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(BodyUint32Req* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "sapien.Renderer.server.proto.BodyUint32Req";
+  }
+  protected:
+  explicit BodyUint32Req(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSceneIdFieldNumber = 1,
+    kBodyIdFieldNumber = 2,
+    kIdFieldNumber = 3,
+  };
+  // uint64 scene_id = 1;
+  void clear_scene_id();
+  uint64_t scene_id() const;
+  void set_scene_id(uint64_t value);
+  private:
+  uint64_t _internal_scene_id() const;
+  void _internal_set_scene_id(uint64_t value);
+  public:
+
+  // uint64 body_id = 2;
+  void clear_body_id();
+  uint64_t body_id() const;
+  void set_body_id(uint64_t value);
+  private:
+  uint64_t _internal_body_id() const;
+  void _internal_set_body_id(uint64_t value);
+  public:
+
+  // uint32 id = 3;
+  void clear_id();
+  uint32_t id() const;
+  void set_id(uint32_t value);
+  private:
+  uint32_t _internal_id() const;
+  void _internal_set_id(uint32_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:sapien.Renderer.server.proto.BodyUint32Req)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    uint64_t scene_id_;
+    uint64_t body_id_;
+    uint32_t id_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_render_5fserver_2eproto;
+};
+// -------------------------------------------------------------------
+
 class TakePictureReq final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:sapien.Renderer.server.proto.TakePictureReq) */ {
  public:
@@ -3973,7 +4303,7 @@ class TakePictureReq final :
                &_TakePictureReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    23;
 
   friend void swap(TakePictureReq& a, TakePictureReq& b) {
     a.Swap(&b);
@@ -4132,7 +4462,7 @@ class UpdateRenderAndTakePicturesReq final :
                &_UpdateRenderAndTakePicturesReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    24;
 
   friend void swap(UpdateRenderAndTakePicturesReq& a, UpdateRenderAndTakePicturesReq& b) {
     a.Swap(&b);
@@ -4345,7 +4675,7 @@ class CameraParamsReq final :
                &_CameraParamsReq_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    25;
 
   friend void swap(CameraParamsReq& a, CameraParamsReq& b) {
     a.Swap(&b);
@@ -4531,6 +4861,165 @@ class CameraParamsReq final :
   union { Impl_ _impl_; };
   friend struct ::TableStruct_render_5fserver_2eproto;
 };
+// -------------------------------------------------------------------
+
+class BodyReq final :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:sapien.Renderer.server.proto.BodyReq) */ {
+ public:
+  inline BodyReq() : BodyReq(nullptr) {}
+  ~BodyReq() override;
+  explicit PROTOBUF_CONSTEXPR BodyReq(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  BodyReq(const BodyReq& from);
+  BodyReq(BodyReq&& from) noexcept
+    : BodyReq() {
+    *this = ::std::move(from);
+  }
+
+  inline BodyReq& operator=(const BodyReq& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline BodyReq& operator=(BodyReq&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const BodyReq& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const BodyReq* internal_default_instance() {
+    return reinterpret_cast<const BodyReq*>(
+               &_BodyReq_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    26;
+
+  friend void swap(BodyReq& a, BodyReq& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(BodyReq* other) {
+    if (other == this) return;
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(BodyReq* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  BodyReq* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
+    return CreateMaybeMessage<BodyReq>(arena);
+  }
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
+  void CopyFrom(const BodyReq& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const BodyReq& from) {
+    BodyReq::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(BodyReq* other);
+
+  private:
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "sapien.Renderer.server.proto.BodyReq";
+  }
+  protected:
+  explicit BodyReq(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
+  public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSceneIdFieldNumber = 1,
+    kBodyIdFieldNumber = 2,
+  };
+  // uint64 scene_id = 1;
+  void clear_scene_id();
+  uint64_t scene_id() const;
+  void set_scene_id(uint64_t value);
+  private:
+  uint64_t _internal_scene_id() const;
+  void _internal_set_scene_id(uint64_t value);
+  public:
+
+  // uint64 body_id = 2;
+  void clear_body_id();
+  uint64_t body_id() const;
+  void set_body_id(uint64_t value);
+  private:
+  uint64_t _internal_body_id() const;
+  void _internal_set_body_id(uint64_t value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:sapien.Renderer.server.proto.BodyReq)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  struct Impl_ {
+    uint64_t scene_id_;
+    uint64_t body_id_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_render_5fserver_2eproto;
+};
 // ===================================================================
 
 
@@ -4541,6 +5030,30 @@ class CameraParamsReq final :
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
 // Empty
+
+// -------------------------------------------------------------------
+
+// Uint32
+
+// uint32 value = 1;
+inline void Uint32::clear_value() {
+  _impl_.value_ = 0u;
+}
+inline uint32_t Uint32::_internal_value() const {
+  return _impl_.value_;
+}
+inline uint32_t Uint32::value() const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.Uint32.value)
+  return _internal_value();
+}
+inline void Uint32::_internal_set_value(uint32_t value) {
+  
+  _impl_.value_ = value;
+}
+inline void Uint32::set_value(uint32_t value) {
+  _internal_set_value(value);
+  // @@protoc_insertion_point(field_set:sapien.Renderer.server.proto.Uint32.value)
+}
 
 // -------------------------------------------------------------------
 
@@ -6868,6 +7381,70 @@ inline void BodyIdReq::set_id(uint32_t value) {
 
 // -------------------------------------------------------------------
 
+// BodyUint32Req
+
+// uint64 scene_id = 1;
+inline void BodyUint32Req::clear_scene_id() {
+  _impl_.scene_id_ = uint64_t{0u};
+}
+inline uint64_t BodyUint32Req::_internal_scene_id() const {
+  return _impl_.scene_id_;
+}
+inline uint64_t BodyUint32Req::scene_id() const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.BodyUint32Req.scene_id)
+  return _internal_scene_id();
+}
+inline void BodyUint32Req::_internal_set_scene_id(uint64_t value) {
+  
+  _impl_.scene_id_ = value;
+}
+inline void BodyUint32Req::set_scene_id(uint64_t value) {
+  _internal_set_scene_id(value);
+  // @@protoc_insertion_point(field_set:sapien.Renderer.server.proto.BodyUint32Req.scene_id)
+}
+
+// uint64 body_id = 2;
+inline void BodyUint32Req::clear_body_id() {
+  _impl_.body_id_ = uint64_t{0u};
+}
+inline uint64_t BodyUint32Req::_internal_body_id() const {
+  return _impl_.body_id_;
+}
+inline uint64_t BodyUint32Req::body_id() const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.BodyUint32Req.body_id)
+  return _internal_body_id();
+}
+inline void BodyUint32Req::_internal_set_body_id(uint64_t value) {
+  
+  _impl_.body_id_ = value;
+}
+inline void BodyUint32Req::set_body_id(uint64_t value) {
+  _internal_set_body_id(value);
+  // @@protoc_insertion_point(field_set:sapien.Renderer.server.proto.BodyUint32Req.body_id)
+}
+
+// uint32 id = 3;
+inline void BodyUint32Req::clear_id() {
+  _impl_.id_ = 0u;
+}
+inline uint32_t BodyUint32Req::_internal_id() const {
+  return _impl_.id_;
+}
+inline uint32_t BodyUint32Req::id() const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.BodyUint32Req.id)
+  return _internal_id();
+}
+inline void BodyUint32Req::_internal_set_id(uint32_t value) {
+  
+  _impl_.id_ = value;
+}
+inline void BodyUint32Req::set_id(uint32_t value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:sapien.Renderer.server.proto.BodyUint32Req.id)
+}
+
+// -------------------------------------------------------------------
+
 // TakePictureReq
 
 // uint64 scene_id = 1;
@@ -7245,9 +7822,59 @@ inline void CameraParamsReq::set_skew(float value) {
   // @@protoc_insertion_point(field_set:sapien.Renderer.server.proto.CameraParamsReq.skew)
 }
 
+// -------------------------------------------------------------------
+
+// BodyReq
+
+// uint64 scene_id = 1;
+inline void BodyReq::clear_scene_id() {
+  _impl_.scene_id_ = uint64_t{0u};
+}
+inline uint64_t BodyReq::_internal_scene_id() const {
+  return _impl_.scene_id_;
+}
+inline uint64_t BodyReq::scene_id() const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.BodyReq.scene_id)
+  return _internal_scene_id();
+}
+inline void BodyReq::_internal_set_scene_id(uint64_t value) {
+  
+  _impl_.scene_id_ = value;
+}
+inline void BodyReq::set_scene_id(uint64_t value) {
+  _internal_set_scene_id(value);
+  // @@protoc_insertion_point(field_set:sapien.Renderer.server.proto.BodyReq.scene_id)
+}
+
+// uint64 body_id = 2;
+inline void BodyReq::clear_body_id() {
+  _impl_.body_id_ = uint64_t{0u};
+}
+inline uint64_t BodyReq::_internal_body_id() const {
+  return _impl_.body_id_;
+}
+inline uint64_t BodyReq::body_id() const {
+  // @@protoc_insertion_point(field_get:sapien.Renderer.server.proto.BodyReq.body_id)
+  return _internal_body_id();
+}
+inline void BodyReq::_internal_set_body_id(uint64_t value) {
+  
+  _impl_.body_id_ = value;
+}
+inline void BodyReq::set_body_id(uint64_t value) {
+  _internal_set_body_id(value);
+  // @@protoc_insertion_point(field_set:sapien.Renderer.server.proto.BodyReq.body_id)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

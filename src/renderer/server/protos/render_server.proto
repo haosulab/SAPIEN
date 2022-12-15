@@ -32,6 +32,10 @@ service RenderService {
   //========== Body ==========//
   rpc SetUniqueId(BodyIdReq) returns (Empty);
   rpc SetSegmentationId(BodyIdReq) returns (Empty);
+  rpc GetShapeCount(BodyReq) returns (Uint32);
+
+  //========== Shape ==========//
+  rpc GetShapeMaterial(BodyUint32Req) returns (Id);
 
   //========== Camera ==========//
   rpc TakePicture(TakePictureReq) returns (Empty);
@@ -39,6 +43,10 @@ service RenderService {
 }
 
 message Empty {}
+
+message Uint32 {
+  uint32 value = 1;
+};
 
 message Index {
   uint64 index = 1;
@@ -173,6 +181,12 @@ message BodyIdReq {
   uint32 id = 3;
 }
 
+message BodyUint32Req {
+  uint64 scene_id = 1;
+  uint64 body_id = 2;
+  uint32 id = 3;
+}
+
 message TakePictureReq {
   uint64 scene_id = 1;
   uint64 camera_id = 2;
@@ -195,4 +209,9 @@ message CameraParamsReq {
   float cx = 7;
   float cy = 8;
   float skew = 9;
+}
+
+message BodyReq {
+  uint64 scene_id = 1;
+  uint64 body_id = 2;
 }

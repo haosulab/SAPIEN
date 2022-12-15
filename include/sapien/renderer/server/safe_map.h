@@ -12,6 +12,15 @@ typedef std::shared_lock<std::shared_mutex> ReadLock;
 
 template <typename Key, typename Tp> class ts_unordered_map {
 public:
+  Tp get(Key key, Tp empty) {
+    ReadLock lock(mMutex);
+    auto it = mMap.find(key);
+    if (it != mMap.end()) {
+      return it->second;
+    }
+    return empty;
+  }
+
   Tp get(Key key) {
     ReadLock lock(mMutex);
     return mMap.at(key);
@@ -38,7 +47,9 @@ public:
 
   ReadLock lockRead() { return ReadLock(mMutex); }
   WriteLock lockWrite() { return WriteLock(mMutex); }
+
   std::unordered_map<Key, Tp> const &getMap() const { return mMap; }
+  std::unordered_map<Key, Tp> &getMap() { return mMap; }
 
 private:
   mutable std::shared_mutex mMutex;
