@@ -82,8 +82,9 @@ ClientMaterial::~ClientMaterial() {
 
 //========== Camera ==========//
 IPxrScene *ClientCamera::getScene() { return mScene; }
-ClientCamera::ClientCamera(ClientScene *scene, rs_id_t id, uint32_t width, uint32_t height, float cx,
-                           float cy, float fx, float fy, float near, float far, float skew)
+ClientCamera::ClientCamera(ClientScene *scene, rs_id_t id, uint32_t width, uint32_t height,
+                           float cx, float cy, float fx, float fy, float near, float far,
+                           float skew)
     : mScene(scene), mId(id), mWidth(width), mHeight(height), mCx(cx), mCy(cy), mFx(fy), mFy(fy),
       mNear(near), mFar(far), mSkew(skew) {}
 void ClientCamera::takePicture() {
@@ -191,6 +192,20 @@ void ClientRigidbody::setInitialPose(const physx::PxTransform &transform) {
 
 void ClientRigidbody::update(const physx::PxTransform &transform) {
   mCurrentPose = transform * mInitialPose;
+}
+
+void ClientRigidbody::setVisibility(float visibility) {
+  ClientContext context;
+  proto::BodyFloat32Req req;
+  proto::Empty res;
+
+  req.set_scene_id(mScene->getId());
+  req.set_body_id(mId);
+  req.set_value(visibility);
+  Status status = mScene->getRenderer()->getStub().SetVisibility(&context, req, &res);
+  if (!status.ok()) {
+    throw std::runtime_error(status.error_message());
+  }
 }
 
 void ClientRigidbody::destroy() { mScene->removeRigidbody(this); }

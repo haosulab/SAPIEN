@@ -27,7 +27,8 @@ namespace server {
 //   getLogger()->error(fmt, args...);
 // };
 
-// template <typename... Args> inline void critical(spdlog::string_view_t fmt, const Args &...args) {
+// template <typename... Args> inline void critical(spdlog::string_view_t fmt, const Args &...args)
+// {
 //   getLogger()->critical(fmt, args...);
 // };
 // } // namespace log
@@ -42,8 +43,8 @@ template <typename... Args> inline void warn(spdlog::string_view_t fmt, const Ar
 
 template <typename... Args> inline void error(spdlog::string_view_t fmt, const Args &...args){};
 
-template <typename... Args> inline void critical(spdlog::string_view_t fmt, const Args
-&...args){}; } // namespace log
+template <typename... Args> inline void critical(spdlog::string_view_t fmt, const Args &...args){};
+} // namespace log
 
 typedef std::unique_lock<std::shared_mutex> WriteLock;
 typedef std::shared_lock<std::shared_mutex> ReadLock;
@@ -500,6 +501,14 @@ Status RenderServiceImpl::SetSegmentationId(ServerContext *c, const proto::BodyI
     seg[1] = req->id();
     obj->setSegmentation(seg);
   }
+  return Status::OK;
+}
+
+Status RenderServiceImpl::SetVisibility(ServerContext *c, const proto::BodyFloat32Req *req,
+                                        proto::Empty *res) {
+  auto info = mSceneMap.get(req->scene_id());
+  auto obj = info->objectMap.at(req->body_id());
+  obj->setTransparency(1 - req->value());
   return Status::OK;
 }
 

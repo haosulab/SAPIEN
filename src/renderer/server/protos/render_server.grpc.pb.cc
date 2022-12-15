@@ -45,6 +45,7 @@ static const char* RenderService_method_names[] = {
   "/sapien.Renderer.server.proto.RenderService/SetMetallic",
   "/sapien.Renderer.server.proto.RenderService/SetUniqueId",
   "/sapien.Renderer.server.proto.RenderService/SetSegmentationId",
+  "/sapien.Renderer.server.proto.RenderService/SetVisibility",
   "/sapien.Renderer.server.proto.RenderService/GetShapeCount",
   "/sapien.Renderer.server.proto.RenderService/GetShapeMaterial",
   "/sapien.Renderer.server.proto.RenderService/TakePicture",
@@ -78,10 +79,11 @@ RenderService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& chan
   , rpcmethod_SetMetallic_(RenderService_method_names[17], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SetUniqueId_(RenderService_method_names[18], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SetSegmentationId_(RenderService_method_names[19], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetShapeCount_(RenderService_method_names[20], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetShapeMaterial_(RenderService_method_names[21], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_TakePicture_(RenderService_method_names[22], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetCameraParameters_(RenderService_method_names[23], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetVisibility_(RenderService_method_names[20], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetShapeCount_(RenderService_method_names[21], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetShapeMaterial_(RenderService_method_names[22], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_TakePicture_(RenderService_method_names[23], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetCameraParameters_(RenderService_method_names[24], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status RenderService::Stub::CreateScene(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::Index& request, ::sapien::Renderer::server::proto::Id* response) {
@@ -544,6 +546,29 @@ void RenderService::Stub::async::SetSegmentationId(::grpc::ClientContext* contex
   return result;
 }
 
+::grpc::Status RenderService::Stub::SetVisibility(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyFloat32Req& request, ::sapien::Renderer::server::proto::Empty* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::BodyFloat32Req, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetVisibility_, context, request, response);
+}
+
+void RenderService::Stub::async::SetVisibility(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyFloat32Req* request, ::sapien::Renderer::server::proto::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::sapien::Renderer::server::proto::BodyFloat32Req, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetVisibility_, context, request, response, std::move(f));
+}
+
+void RenderService::Stub::async::SetVisibility(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyFloat32Req* request, ::sapien::Renderer::server::proto::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetVisibility_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::PrepareAsyncSetVisibilityRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyFloat32Req& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::sapien::Renderer::server::proto::Empty, ::sapien::Renderer::server::proto::BodyFloat32Req, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetVisibility_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::sapien::Renderer::server::proto::Empty>* RenderService::Stub::AsyncSetVisibilityRaw(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyFloat32Req& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncSetVisibilityRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ::grpc::Status RenderService::Stub::GetShapeCount(::grpc::ClientContext* context, const ::sapien::Renderer::server::proto::BodyReq& request, ::sapien::Renderer::server::proto::Uint32* response) {
   return ::grpc::internal::BlockingUnaryCall< ::sapien::Renderer::server::proto::BodyReq, ::sapien::Renderer::server::proto::Uint32, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetShapeCount_, context, request, response);
 }
@@ -840,6 +865,16 @@ RenderService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       RenderService_method_names[20],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyFloat32Req, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](RenderService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::sapien::Renderer::server::proto::BodyFloat32Req* req,
+             ::sapien::Renderer::server::proto::Empty* resp) {
+               return service->SetVisibility(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      RenderService_method_names[21],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyReq, ::sapien::Renderer::server::proto::Uint32, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
              ::grpc::ServerContext* ctx,
@@ -848,7 +883,7 @@ RenderService::Service::Service() {
                return service->GetShapeCount(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      RenderService_method_names[21],
+      RenderService_method_names[22],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::BodyUint32Req, ::sapien::Renderer::server::proto::Id, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
@@ -858,7 +893,7 @@ RenderService::Service::Service() {
                return service->GetShapeMaterial(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      RenderService_method_names[22],
+      RenderService_method_names[23],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::TakePictureReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
@@ -868,7 +903,7 @@ RenderService::Service::Service() {
                return service->TakePicture(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      RenderService_method_names[23],
+      RenderService_method_names[24],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< RenderService::Service, ::sapien::Renderer::server::proto::CameraParamsReq, ::sapien::Renderer::server::proto::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](RenderService::Service* service,
@@ -1016,6 +1051,13 @@ RenderService::Service::~Service() {
 }
 
 ::grpc::Status RenderService::Service::SetSegmentationId(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::BodyIdReq* request, ::sapien::Renderer::server::proto::Empty* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status RenderService::Service::SetVisibility(::grpc::ServerContext* context, const ::sapien::Renderer::server::proto::BodyFloat32Req* request, ::sapien::Renderer::server::proto::Empty* response) {
   (void) context;
   (void) request;
   (void) response;

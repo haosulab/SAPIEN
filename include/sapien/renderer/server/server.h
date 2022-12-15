@@ -61,6 +61,8 @@ class RenderServiceImpl final : public proto::RenderService::Service {
   Status SetUniqueId(ServerContext *c, const proto::BodyIdReq *req, proto::Empty *res) override;
   Status SetSegmentationId(ServerContext *c, const proto::BodyIdReq *req,
                            proto::Empty *res) override;
+  Status SetVisibility(ServerContext *c, const proto::BodyFloat32Req *req,
+                       proto::Empty *res) override;
   Status GetShapeCount(ServerContext *c, const proto::BodyReq *req, proto::Uint32 *res) override;
   // ========== Shape ==========//
   Status GetShapeMaterial(ServerContext *c, const proto::BodyUint32Req *req,
@@ -119,7 +121,8 @@ private:
   };
 
   // store materials on an object
-  ts_unordered_map<rs_id_t, std::weak_ptr<svulkan2::resource::SVMetallicMaterial>> mObjectMaterialMap;
+  ts_unordered_map<rs_id_t, std::weak_ptr<svulkan2::resource::SVMetallicMaterial>>
+      mObjectMaterialMap;
   ts_unordered_map<rs_id_t, std::shared_ptr<svulkan2::resource::SVMetallicMaterial>> mMaterialMap;
   ts_unordered_map<rs_id_t, std::shared_ptr<SceneInfo>> mSceneMap;
 

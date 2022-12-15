@@ -218,10 +218,7 @@ public:
     throw std::runtime_error("custom data is not valid for render client");
   }
   void update(const physx::PxTransform &transform) override;
-  void setVisibility(float visibility) override {
-    spdlog::get("SAPIEN")->error(
-        "visibility is not supported for render client. It will be supported in the future.");
-  }
+  void setVisibility(float visibility) override;
   void setVisible(bool visible) override { setVisibility(1.f); }
   void setRenderMode(uint32_t mode) override {
     throw std::runtime_error("render mode is not supported for render client");
