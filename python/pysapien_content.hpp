@@ -435,6 +435,7 @@ void buildSapien(py::module &m) {
                                py::tuple shape = py::cast(buffer.getShape());
                                return shape;
                              })
+#ifdef SAPIEN_CUDA
       .def_property_readonly("pointer",
                              [](Renderer::server::VulkanCudaBuffer &buffer) {
                                return reinterpret_cast<uintptr_t>(buffer.getCudaPtr());
@@ -446,7 +447,9 @@ void buildSapien(py::module &m) {
                 "shape"_a = shape, "typestr"_a = buffer.getType(),
                 "data"_a = py::make_tuple(reinterpret_cast<uintptr_t>(buffer.getCudaPtr()), false),
                 "version"_a = 2);
-          });
+          })
+#endif
+    ;
 
   //======== Internal ========//
 

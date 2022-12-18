@@ -13,8 +13,6 @@
 #  1. IR intensity instead of pixel values in real pipeline.
 #
 
-from ..core.pysapien.simsense import DepthSensorEngine
-
 from typing import Optional, Tuple
 
 import numpy as np
@@ -379,6 +377,8 @@ class DepthSensorCUDA:
         :param depth_dilation: Whether to dilate the final depth map to avoid holes. This is only effective when registration mode is on.
                                Depth dilation is recommended when rgb_size is greater than lr_size.
         """
+        from ..core.pysapien.simsense import DepthSensorEngine
+
         img_w, img_h = lr_size
         registration = False
         if rgb_size != None or k_rgb != None or l2rgb != None:

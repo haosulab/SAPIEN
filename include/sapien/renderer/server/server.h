@@ -167,10 +167,13 @@ public:
 
   inline std::vector<int> const &getShape() const { return mShape; }
   inline std::string getType() const { return mType; }
-  inline void *getCudaPtr() const { return mCudaPtr; }
   inline vk::Buffer getBuffer() const { return mBuffer.get(); }
 
   vk::DeviceSize getSize() const { return mSize; }
+
+#ifdef SAPIEN_CUDA
+  inline void *getCudaPtr() const { return mCudaPtr; }
+#endif
 
 private:
   uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
@@ -184,9 +187,11 @@ private:
   vk::UniqueBuffer mBuffer;
   vk::UniqueDeviceMemory mMemory;
 
+#ifdef SAPIEN_CUDA
   int mCudaDeviceId{-1};
   void *mCudaPtr{};
   cudaExternalMemory_t mCudaMem{};
+#endif
 };
 
 class RenderServer {

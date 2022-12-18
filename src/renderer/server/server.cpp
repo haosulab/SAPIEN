@@ -9,7 +9,12 @@ namespace Renderer {
 namespace server {
 
 // namespace log {
-// std::shared_ptr<spdlog::logger> getLogger() { return spdlog::get("RenderServer"); }
+// std::shared_ptr<spdlog::logger> getLogger() {
+//   if (!spdlog::get("RenderServer")) {
+//     spdlog::stderr_color_mt("SAPIEN");
+//   }
+//   return spdlog::get("RenderServer");
+// }
 
 // template <typename... Args> inline void debug(spdlog::string_view_t fmt, const Args &...args) {
 //   getLogger()->debug(fmt, args...);
@@ -544,7 +549,6 @@ Status RenderServiceImpl::GetShapeMaterial(ServerContext *c, const proto::BodyUi
     info->objectMaterialIdMap[body_id] = mat_ids;
   }
 
-
   uint32_t mat_id = info->objectMaterialIdMap.at(body_id).at(req->id());
 
   res->set_id(mat_id);
@@ -640,7 +644,7 @@ RenderServer::RenderServer(uint32_t maxNumMaterials, uint32_t maxNumTextures,
   mContext = svulkan2::core::Context::Create(false, maxNumMaterials, maxNumTextures,
                                              defaultMipLevels, doNotLoadTexture, device);
   mResourceManager = mContext->createResourceManager();
-  spdlog::stderr_color_mt("RenderServer");
+  // spdlog::stderr_color_mt("RenderServer");
 }
 
 void RenderServer::start(std::string const &address) {
@@ -867,6 +871,7 @@ VulkanCudaBuffer::VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physica
   mMemory = device.allocateMemoryUnique(memoryInfo);
   device.bindBufferMemory(mBuffer.get(), mMemory.get(), 0);
 
+#ifdef SAPIEN_CUDA
   mCudaDeviceId = getCudaDeviceIdFromPhysicalDevice(physicalDevice);
   if (mCudaDeviceId < 0) {
     throw std::runtime_error(
@@ -892,13 +897,16 @@ VulkanCudaBuffer::VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physica
   externalMemBufferDesc.flags = 0;
 
   checkCudaErrors(cudaExternalMemoryGetMappedBuffer(&mCudaPtr, mCudaMem, &externalMemBufferDesc));
+#endif
 }
 
 VulkanCudaBuffer::~VulkanCudaBuffer() {
+#ifdef SAPIEN_CUDA
   if (mCudaPtr) {
     checkCudaErrors(cudaDestroyExternalMemory(mCudaMem));
     checkCudaErrors(cudaFree(mCudaPtr));
   }
+#endif
 }
 
 uint32_t VulkanCudaBuffer::findMemoryType(uint32_t typeFilter,
