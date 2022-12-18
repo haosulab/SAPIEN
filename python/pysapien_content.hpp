@@ -129,6 +129,32 @@ py::array_t<uint32_t> getUintImageFromCamera(SCamera &cam, std::string const &na
   }
 }
 
+py::array_t<uint8_t> getUint8ImageFromCamera(SCamera &cam, std::string const &name) {
+  uint32_t width = cam.getWidth();
+  uint32_t height = cam.getHeight();
+  auto image = cam.getRendererCamera()->getUint8Image(name);
+  uint32_t channel = image.size() / (width * height);
+  if (channel == 1) {
+    return py::array_t<uint8_t>({height, width}, image.data());
+  } else {
+    return py::array_t<uint8_t>({height, width, channel}, image.data());
+  }
+}
+
+py::array getImageFromCamera(SCamera &cam, std::string const &name) {
+  std::string format = cam.getRendererCamera()->getImageFormat(name);
+  if (format == "i4") {
+    return getUintImageFromCamera(cam, name);
+  }
+  else if (format == "f4") {
+    return getFloatImageFromCamera(cam, name);
+  }
+  else if (format == "u1") {
+    return getUint8ImageFromCamera(cam, name);
+  }
+  throw std::runtime_error("unexpected image format " + format);
+}
+
 URDF::URDFConfig parseURDFConfig(py::dict &dict) {
   URDF::URDFConfig config;
   if (dict.contains("material")) {
@@ -441,7 +467,8 @@ void buildSapien(py::module &m) {
                                return reinterpret_cast<uintptr_t>(buffer.getCudaPtr());
                              })
       .def_property_readonly(
-          "__cuda_array_interface__", [](Renderer::server::VulkanCudaBuffer &buffer) {
+          "__cuda_array_interface__",
+          [](Renderer::server::VulkanCudaBuffer &buffer) {
             py::tuple shape = py::cast(buffer.getShape());
             return py::dict(
                 "shape"_a = shape, "typestr"_a = buffer.getType(),
@@ -449,7 +476,7 @@ void buildSapien(py::module &m) {
                 "version"_a = 2);
           })
 #endif
-    ;
+      ;
 
   //======== Internal ========//
 
@@ -1979,7 +2006,66 @@ Args:
           "A very unsafe way to release cached gpu (but not CPU) resources. It MUST be called "
           "when no rendering is running, and all cameras and windows become invalid after "
           "calling "
-          "this function.");
+          "this function.")
+      .def(
+          "set_default_texture_format",
+          [](Renderer::SVulkan2Renderer &renderer, py::dict const &dict) {
+            auto config = renderer.getDefaultRendererConfig();
+            vk::Format color1 = vk::Format::eR32Sfloat;
+            vk::Format color4 = vk::Format::eR32G32B32A32Sfloat;
+            if (dict.contains("color_format_1")) {
+              auto color1str = dict["color_format_1"].cast<std::string>();
+              if (color1str == "u4") {
+                color1 = vk::Format::eR8Unorm;
+              } else if (color1str == "f4") {
+                color1 = vk::Format::eR32Sfloat;
+              } else {
+                throw std::runtime_error(color1str + " is not supported for color_format_1");
+              }
+            }
+            if (dict.contains("color_format_4")) {
+              auto color4str = dict["color_format_4"].cast<std::string>();
+              if (color4str == "4u4") {
+                color1 = vk::Format::eR8G8B8A8Unorm;
+              } else if (color4str == "4f4") {
+                color1 = vk::Format::eR32G32B32A32Sfloat;
+              } else {
+                throw std::runtime_error(color4str + " is not supported for color_format_1");
+              }
+            }
+            config->colorFormat1 = color1;
+            config->colorFormat4 = color4;
+            config->depthFormat = vk::Format::eD32Sfloat; // depth format must be float32
+            if (dict.contains("texture_format")) {
+              auto formats = dict["texture_format"].cast<py::dict>();
+              for (auto kv : formats) {
+                auto name = kv.first.cast<std::string>();
+                auto formatstr = kv.second.cast<std::string>();
+                if (formatstr == "u1") {
+                  config->textureFormat[name] = vk::Format::eR8Unorm;
+                } else if (formatstr == "f4") {
+                  config->textureFormat[name] = vk::Format::eR32Sfloat;
+                } else if (formatstr == "4u1") {
+                  config->textureFormat[name] = vk::Format::eR8G8B8A8Unorm;
+                } else if (formatstr == "4f4") {
+                  config->textureFormat[name] = vk::Format::eR32G32B32A32Sfloat;
+                } else {
+                  throw std::runtime_error("invalid texture format " + formatstr);
+                }
+              }
+            }
+          },
+          py::arg("config"), R"doc(
+Set the default texture format with a config dict. The dict takes 3 keys,
+["color_format_1", "color_format_4", "texture_format"].
+"color_format_1" determines the default texture format for single-channel color textures
+    "u1": unorm texture (using uint8 to represent 0-1 values).
+    "f4": signed float32 texture (default)
+"color_format_4" determines the default texture format for 4-channel color textures
+    "4u1": unorm rgba texture
+    "4f4" signed float32 rgba texture (default)
+"texture_format" takes an dictionary, whose keys are texture names and values are texture foramts.
+The values can be one of ["u1", "f4", "4u1", "4f4"])doc");
 
   PyVulkanRigidbody.def_property_readonly("_internal_objects",
                                           &Renderer::SVulkan2Rigidbody::getVisualObjects,
@@ -2111,6 +2197,8 @@ Args:
 #endif
       .def("get_float_texture", &getFloatImageFromCamera, py::arg("texture_name"))
       .def("get_uint32_texture", &getUintImageFromCamera, py::arg("texture_name"))
+      .def("get_uint8_texture", &getUint8ImageFromCamera, py::arg("texture_name"))
+      .def("get_texture", &getImageFromCamera, py::arg("texture_name"))
 
       .def("get_color_rgba", [](SCamera &c) { return getFloatImageFromCamera(c, "Color"); })
       .def("get_position_rgba", [](SCamera &c) { return getFloatImageFromCamera(c, "Position"); })
@@ -2547,5 +2635,4 @@ Args:
 
   dlpack.def("dl_cuda_sync", []() { cudaStreamSynchronize(0); });
 #endif
-
 }

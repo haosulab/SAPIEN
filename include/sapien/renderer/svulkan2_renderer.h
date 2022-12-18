@@ -46,9 +46,6 @@ public:
 
 class SVulkan2Renderer : public IPxrRenderer {
 public:
-  vk::CullModeFlagBits mCullMode;
-
-public:
   static void setLogLevel(std::string const &level);
 
   SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
@@ -72,15 +69,22 @@ public:
   std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
                                           std::vector<uint32_t> const &indices) override;
 
+  vk::CullModeFlags getCullMode() const;
   inline std::shared_ptr<svulkan2::core::Context> getContext() const { return mContext; };
   inline std::shared_ptr<svulkan2::resource::SVResourceManager> getResourceManager() const {
     return mResourceManager;
   };
 
+  inline std::shared_ptr<svulkan2::RendererConfig> getDefaultRendererConfig() const {
+    return mDefaultRendererConfig;
+  }
+
 private:
   std::shared_ptr<svulkan2::core::Context> mContext{};
   std::shared_ptr<svulkan2::resource::SVResourceManager> mResourceManager{};
   std::vector<std::unique_ptr<SVulkan2Scene>> mScenes;
+
+  std::shared_ptr<svulkan2::RendererConfig> mDefaultRendererConfig{};
 };
 
 class SVulkan2Camera : public ICamera {
@@ -126,6 +130,10 @@ public:
 
   std::vector<float> getFloatImage(std::string const &name) override;
   std::vector<uint32_t> getUintImage(std::string const &name) override;
+  std::vector<uint8_t> getUint8Image(std::string const &name) override;
+
+  std::string getImageFormat(std::string const &name) override;
+
 #ifdef SAPIEN_DLPACK
   DLManagedTensor *getDLImage(std::string const &name) override;
 #endif

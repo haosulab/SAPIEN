@@ -9,9 +9,7 @@ SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, floa
     : mWidth(width), mHeight(height), mScene(scene) {
   auto context = mScene->getParentRenderer()->getContext();
   auto config = std::make_shared<svulkan2::RendererConfig>();
-  config->culling = mScene->getParentRenderer()->mCullMode;
-  config->colorFormat4 = vk::Format::eR32G32B32A32Sfloat;
-  config->depthFormat = vk::Format::eD32Sfloat;
+  *config = *mScene->getParentRenderer()->getDefaultRendererConfig();
   config->shaderDir = shaderDir;
 
   mRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
@@ -141,6 +139,29 @@ std::vector<float> SVulkan2Camera::getFloatImage(std::string const &name) {
 std::vector<uint32_t> SVulkan2Camera::getUintImage(std::string const &textureName) {
   waitForRender();
   return std::get<0>(mRenderer->download<uint32_t>(textureName));
+}
+
+std::vector<uint8_t> SVulkan2Camera::getUint8Image(std::string const &name) {
+  waitForRender();
+  return std::get<0>(mRenderer->download<uint8_t>(name));
+}
+
+std::string SVulkan2Camera::getImageFormat(std::string const &name) {
+  waitForRender();
+  switch (mRenderer->getRenderTarget(name)->getFormat()) {
+  case vk::Format::eR8Unorm:
+  case vk::Format::eR8G8B8A8Unorm:
+    return "u1";
+  case vk::Format::eR32Sfloat:
+  case vk::Format::eR32G32B32A32Sfloat:
+  case vk::Format::eD32Sfloat:
+    return "f4";
+  case vk::Format::eR32G32B32A32Uint: // FIXME: use int instead of uint
+  case vk::Format::eR32G32B32A32Sint:
+    return "i4";
+  default:
+    throw std::runtime_error("image format not supported");
+  }
 }
 
 #ifdef SAPIEN_DLPACK

@@ -260,6 +260,13 @@ public:
    */
   virtual std::vector<float> getFloatImage(std::string const &name) = 0;
   virtual std::vector<uint32_t> getUintImage(std::string const &name) = 0;
+  virtual std::vector<uint8_t> getUint8Image(std::string const &name) {
+    throw std::runtime_error("getUint8Image is not implemented");
+  }
+
+  virtual std::string getImageFormat(std::string const &name) {
+    throw std::runtime_error("getImageFormat is not implemented");
+  }
 
 #ifdef SAPIEN_DLPACK
   // return new DLManagedTensor

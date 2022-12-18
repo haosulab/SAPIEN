@@ -54,18 +54,26 @@ SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
                                         defaultMipLevels, doNotLoadTexture, device);
     gResourceManager = mResourceManager = mContext->createResourceManager();
   }
+  mDefaultRendererConfig = std::make_shared<svulkan2::RendererConfig>();
+  mDefaultRendererConfig->culling = vk::CullModeFlagBits::eBack;
+  mDefaultRendererConfig->colorFormat1 = vk::Format::eR32Sfloat;
+  mDefaultRendererConfig->colorFormat4 = vk::Format::eR32G32B32A32Sfloat;
+  mDefaultRendererConfig->depthFormat = vk::Format::eD32Sfloat;
+
   if (culling == "back") {
-    mCullMode = vk::CullModeFlagBits::eBack;
+    mDefaultRendererConfig->culling = vk::CullModeFlagBits::eBack;
   } else if (culling == "front") {
-    mCullMode = vk::CullModeFlagBits::eFront;
+    mDefaultRendererConfig->culling = vk::CullModeFlagBits::eFront;
   } else if (culling == "front_and_back" || culling == "both") {
-    mCullMode = vk::CullModeFlagBits::eFrontAndBack;
+    mDefaultRendererConfig->culling = vk::CullModeFlagBits::eFrontAndBack;
   } else if (culling == "none") {
-    mCullMode = vk::CullModeFlagBits::eNone;
+    mDefaultRendererConfig->culling = vk::CullModeFlagBits::eNone;
   } else {
     throw std::runtime_error("culling mode must be one of back, front, both, or none");
   }
 }
+
+vk::CullModeFlags SVulkan2Renderer::getCullMode() const { return mDefaultRendererConfig->culling; }
 
 IPxrScene *SVulkan2Renderer::createScene(std::string const &name) {
   mScenes.push_back(std::make_unique<SVulkan2Scene>(this, name));
