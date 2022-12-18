@@ -90,7 +90,7 @@ IActiveLight *SVulkan2Scene::addActiveLight(physx::PxTransform const &pose,
   light.setColor({1, 1, 1});
   light.enableShadow(true);
   light.setShadowParameters(shadowNear, shadowFar, shadowMapSize);
-  auto tex = mParentRenderer->mContext->getResourceManager()->CreateTextureFromFile(
+  auto tex = mParentRenderer->getContext()->getResourceManager()->CreateTextureFromFile(
       std::string(texPath), 1, vk::Filter::eLinear, vk::Filter::eLinear,
       vk::SamplerAddressMode::eClampToBorder, vk::SamplerAddressMode::eClampToBorder, true);
   light.setTexture(tex);
@@ -127,7 +127,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
     return mBodies.back().get();
   }
 
-  auto model = mParentRenderer->mContext->getResourceManager()->CreateModelFromFile(meshFile);
+  auto model = mParentRenderer->getContext()->getResourceManager()->CreateModelFromFile(meshFile);
   std::vector<svulkan2::scene::Object *> objects2;
   auto &obj = mScene->addObject(model);
   obj.setScale({scale.x, scale.y, scale.z});
@@ -152,7 +152,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const ph
                                             physx::PxGeometryType::eTRIANGLEMESH, scale));
     return mBodies.back().get();
   }
-  auto model = mParentRenderer->mContext->getResourceManager()->CreateModelFromFile(meshFile);
+  auto model = mParentRenderer->getContext()->getResourceManager()->CreateModelFromFile(meshFile);
   model->loadAsync().get();
 
   std::vector<std::shared_ptr<svulkan2::resource::SVShape>> shapes;
@@ -367,12 +367,12 @@ void SVulkan2Scene::updateRender() { mScene->updateModelMatrices(); }
 
 void SVulkan2Scene::setEnvironmentMap(std::string_view path) {
   auto tex =
-      mParentRenderer->mContext->getResourceManager()->CreateCubemapFromKTX(std::string(path), 5);
+      mParentRenderer->getContext()->getResourceManager()->CreateCubemapFromKTX(std::string(path), 5);
   mScene->setEnvironmentMap(tex);
 }
 
 void SVulkan2Scene::setEnvironmentMap(std::array<std::string_view, 6> paths) {
-  auto tex = mParentRenderer->mContext->getResourceManager()->CreateCubemapFromFiles(
+  auto tex = mParentRenderer->getContext()->getResourceManager()->CreateCubemapFromFiles(
       {
           std::string(paths[0]),
           std::string(paths[1]),

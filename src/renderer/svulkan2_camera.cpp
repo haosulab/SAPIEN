@@ -7,7 +7,7 @@ namespace Renderer {
 SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, float near, float far,
                                SVulkan2Scene *scene, std::string const &shaderDir)
     : mWidth(width), mHeight(height), mScene(scene) {
-  auto context = mScene->getParentRenderer()->mContext;
+  auto context = mScene->getParentRenderer()->getContext();
   auto config = std::make_shared<svulkan2::RendererConfig>();
   config->culling = mScene->getParentRenderer()->mCullMode;
   config->colorFormat4 = vk::Format::eR32G32B32A32Sfloat;
@@ -38,7 +38,7 @@ void SVulkan2Camera::setPerspectiveCameraParameters(float near, float far, float
 }
 
 void SVulkan2Camera::takePicture() {
-  auto context = mScene->getParentRenderer()->mContext;
+  auto context = mScene->getParentRenderer()->getContext();
   waitForRender();
   mFrameCounter++;
   mRenderer->render(*mCamera, {}, {}, {}, mSemaphore.get(), mFrameCounter);
@@ -48,7 +48,7 @@ void SVulkan2Camera::takePicture() {
 std::shared_ptr<IAwaitable<std::vector<DLManagedTensor *>>>
 SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
                                                 std::vector<std::string> const &names) {
-  auto context = mScene->getParentRenderer()->mContext;
+  auto context = mScene->getParentRenderer()->getContext();
   mFrameCounter++;
   thread.submit([context, frame = mFrameCounter, this, names = std::move(names)]() {
     uint64_t waitFrame = frame - 1;
@@ -121,7 +121,7 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
 #endif
 
 void SVulkan2Camera::waitForRender() {
-  auto context = mScene->getParentRenderer()->mContext;
+  auto context = mScene->getParentRenderer()->getContext();
   auto result = context->getDevice().waitSemaphores(
       vk::SemaphoreWaitInfo({}, mSemaphore.get(), mFrameCounter), UINT64_MAX);
   if (result != vk::Result::eSuccess) {
@@ -147,7 +147,7 @@ std::vector<uint32_t> SVulkan2Camera::getUintImage(std::string const &textureNam
 DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   waitForRender();
 
-  auto context = mScene->getParentRenderer()->mContext;
+  auto context = mScene->getParentRenderer()->getContext();
   if (!mCommandPool) {
     mCommandPool = context->createCommandPool();
     mCommandBuffer = mCommandPool->allocateCommandBuffer();

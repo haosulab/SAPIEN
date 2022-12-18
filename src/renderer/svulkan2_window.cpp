@@ -58,9 +58,9 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
   mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
 
   // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-  mWindow = renderer->mContext->createWindow(width, height);
+  mWindow = renderer->getContext()->createWindow(width, height);
   mWindow->initImgui();
-  renderer->mContext->getDevice().waitIdle();
+  renderer->getContext()->getDevice().waitIdle();
 
   mViewportWidth = width;
   mViewportHeight = height;
@@ -77,9 +77,9 @@ SVulkan2Window::~SVulkan2Window() {
 
 void SVulkan2Window::close() {
   mClosed = true;
-  mRenderer->mContext->getDevice().waitIdle();
+  mRenderer->getContext()->getDevice().waitIdle();
   mWindow->close();
-  mRenderer->mContext->getDevice().waitIdle();
+  mRenderer->getContext()->getDevice().waitIdle();
 }
 
 void SVulkan2Window::hide() { glfwHideWindow(mWindow->getGLFWWindow()); }
@@ -121,15 +121,15 @@ std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
 }
 
 void SVulkan2Window::rebuild() {
-  mRenderer->mContext->getDevice().waitIdle();
+  mRenderer->getContext()->getDevice().waitIdle();
   do {
     glfwGetFramebufferSize(mWindow->getGLFWWindow(), &mViewportWidth, &mViewportHeight);
   } while (!mWindow->updateSize(mViewportWidth, mViewportHeight));
-  mSceneRenderSemaphore = mRenderer->mContext->getDevice().createSemaphoreUnique({});
+  mSceneRenderSemaphore = mRenderer->getContext()->getDevice().createSemaphoreUnique({});
   mSceneRenderFence =
-      mRenderer->mContext->getDevice().createFenceUnique({vk::FenceCreateFlagBits::eSignaled});
+      mRenderer->getContext()->getDevice().createFenceUnique({vk::FenceCreateFlagBits::eSignaled});
   mSVulkanRenderer->resize(mViewportWidth, mViewportHeight);
-  mRenderer->mContext->getDevice().waitIdle();
+  mRenderer->getContext()->getDevice().waitIdle();
   mRequiresRebuild = false;
 
   if (mScene) {
@@ -200,11 +200,11 @@ void SVulkan2Window::render(std::string const &targetName,
     w->build();
   }
   ImGui::Render();
-  if (mRenderer->mContext->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE,
+  if (mRenderer->getContext()->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE,
                                                      UINT64_MAX) != vk::Result::eSuccess) {
     throw std::runtime_error("failed on wait for fence.");
   }
-  mRenderer->mContext->getDevice().resetFences(mSceneRenderFence.get());
+  mRenderer->getContext()->getDevice().resetFences(mSceneRenderFence.get());
 
   {
     // draw

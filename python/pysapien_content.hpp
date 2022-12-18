@@ -1955,7 +1955,7 @@ Args:
           "create_ktx_environment_map",
           [](Renderer::SVulkan2Renderer &renderer, std::string px, std::string nx, std::string py,
              std::string ny, std::string pz, std::string nz, std::string out) {
-            auto cubemap = renderer.mContext->getResourceManager()->CreateCubemapFromFiles(
+            auto cubemap = renderer.getContext()->getResourceManager()->CreateCubemapFromFiles(
                 {px, nx, py, ny, pz, nz}, 5);
             cubemap->load();
             cubemap->uploadToDevice();
@@ -1965,16 +1965,16 @@ Args:
           py::arg("out"))
       .def_property_readonly(
           "_internal_context",
-          [](Renderer::SVulkan2Renderer &renderer) { return renderer.mContext.get(); },
+          [](Renderer::SVulkan2Renderer &renderer) { return renderer.getContext().get(); },
           py::return_value_policy::reference)
       .def("clear_cached_resources",
            [](Renderer::SVulkan2Renderer &renderer) {
-             renderer.mContext->getResourceManager()->clearCachedResources();
+             renderer.getContext()->getResourceManager()->clearCachedResources();
            })
       .def(
           "_release_gpu_memory_unsafe",
           [](Renderer::SVulkan2Renderer &renderer) {
-            renderer.mContext->getResourceManager()->releaseGPUResourcesUnsafe();
+            renderer.getContext()->getResourceManager()->releaseGPUResourcesUnsafe();
           },
           "A very unsafe way to release cached gpu (but not CPU) resources. It MUST be called "
           "when no rendering is running, and all cameras and windows become invalid after "

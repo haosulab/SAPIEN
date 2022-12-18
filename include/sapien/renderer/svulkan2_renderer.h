@@ -46,13 +46,7 @@ public:
 
 class SVulkan2Renderer : public IPxrRenderer {
 public:
-  std::shared_ptr<svulkan2::core::Context> mContext{};
-  std::shared_ptr<svulkan2::resource::SVResourceManager> mResourceManager{};
   vk::CullModeFlagBits mCullMode;
-
-private:
-  static std::string gDefaultSpvDir;
-  std::vector<std::unique_ptr<SVulkan2Scene>> mScenes;
 
 public:
   static void setLogLevel(std::string const &level);
@@ -77,6 +71,16 @@ public:
 
   std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
                                           std::vector<uint32_t> const &indices) override;
+
+  inline std::shared_ptr<svulkan2::core::Context> getContext() const { return mContext; };
+  inline std::shared_ptr<svulkan2::resource::SVResourceManager> getResourceManager() const {
+    return mResourceManager;
+  };
+
+private:
+  std::shared_ptr<svulkan2::core::Context> mContext{};
+  std::shared_ptr<svulkan2::resource::SVResourceManager> mResourceManager{};
+  std::vector<std::unique_ptr<SVulkan2Scene>> mScenes;
 };
 
 class SVulkan2Camera : public ICamera {
