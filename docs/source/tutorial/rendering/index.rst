@@ -9,3 +9,4 @@ This tutorial focuses on basic and advanced rendering in SAPIEN.
 
    camera
    raytracing_renderer
+   depth_sensor
