@@ -219,7 +219,7 @@ public:
   }
   void update(const physx::PxTransform &transform) override;
   void setVisibility(float visibility) override;
-  void setVisible(bool visible) override { setVisibility(1.f); }
+  void setVisible(bool visible) override { setVisibility(visible); }
   void setRenderMode(uint32_t mode) override {
     throw std::runtime_error("render mode is not supported for render client");
   }
