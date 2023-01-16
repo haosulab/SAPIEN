@@ -217,6 +217,7 @@ class Viewer(object):
         self.selected_entity = None
         self.focused_entity = None
         self.paused = False
+        self.do_not_update_render = False
         self.target_name = "Color"
         self.single_step = False
 
@@ -1141,6 +1142,13 @@ class Viewer(object):
                 .Callback(lambda p: self.toggle_pause(p.checked))
             )
 
+            self.update_render_checkbox = (
+                R.UICheckbox()
+                .Label("Do not Update Render")
+                .Checked(self.do_not_update_render)
+                .Callback(lambda p: setattr(self, "do_not_update_render", p.checked))
+            )
+
             self.control_window = (
                 R.UIWindow()
                 .Label("Control")
@@ -1152,6 +1160,7 @@ class Viewer(object):
                         R.UIButton()
                         .Label("Single Step")
                         .Callback(lambda p: self.step_button()),
+                        self.update_render_checkbox
                     ),
                     R.UIDisplayText().Text("Camera Speed"),
                     R.UISliderFloat()
@@ -2282,7 +2291,8 @@ class Viewer(object):
         self.set_fovy(self.fovy)
 
         while True:
-            self.scene.update_render()
+            if not self.paused or not self.do_not_update_render:
+                self.scene.update_render()
 
             self.build_control_window()
             self.build_scene_window()

@@ -118,6 +118,11 @@ public:
     _warn_mat_func_not_supported(__func__);
     return 0.0;
   };
+  virtual void setTransmissionRoughness(float roughness) { _warn_mat_func_not_supported(__func__); };
+  [[nodiscard]] virtual float getTransmissionRoughness() const {
+    _warn_mat_func_not_supported(__func__);
+    return 0.0;
+  };
 
   // texture functions
   virtual void setEmissionTexture(std::shared_ptr<IPxrTexture> texture) {

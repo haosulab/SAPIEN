@@ -6,6 +6,7 @@
 #include <memory>
 #include <svulkan2/core/context.h>
 #include <svulkan2/renderer/renderer.h>
+#include <svulkan2/renderer/rt_renderer.h>
 #include <svulkan2/scene/scene.h>
 
 namespace sapien {
@@ -90,7 +91,7 @@ private:
 class SVulkan2Camera : public ICamera {
   uint32_t mWidth, mHeight;
   SVulkan2Scene *mScene;
-  std::unique_ptr<svulkan2::renderer::Renderer> mRenderer;
+  std::unique_ptr<svulkan2::renderer::RendererBase> mRenderer;
   svulkan2::scene::Camera *mCamera;
   vk::UniqueSemaphore mSemaphore;
   uint64_t mFrameCounter{0};
@@ -153,7 +154,7 @@ public:
   svulkan2::scene::Camera *getCamera() const { return mCamera; }
   std::string getMode() const;
 
-  inline svulkan2::renderer::Renderer *getInternalRenderer() const { return mRenderer.get(); }
+  inline svulkan2::renderer::RendererBase *getInternalRenderer() const { return mRenderer.get(); }
 };
 
 } // namespace Renderer

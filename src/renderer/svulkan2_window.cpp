@@ -54,7 +54,9 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
   auto config = std::make_shared<svulkan2::RendererConfig>();
   *config = *renderer->getDefaultRendererConfig();
   config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultViewerShaderDirectory;
-  mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
+
+  // mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
+  mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);
 
   // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   mWindow = renderer->getContext()->createWindow(width, height);
@@ -66,6 +68,20 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
 
 #ifdef _DEBUG_VIEWER
 #endif
+}
+
+void SVulkan2Window::setShader(std::string const &shaderDir) {
+  mRequiresRebuild = true;
+  mRenderer->getContext()->getDevice().waitIdle();
+
+  auto config = std::make_shared<svulkan2::RendererConfig>();
+  *config = *mRenderer->getDefaultRendererConfig();
+  config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultViewerShaderDirectory;
+  mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);
+  if (mScene) {
+    mSVulkanRenderer->setScene(*mScene->getScene());
+  }
+  mSVulkanRenderer->resize(mViewportWidth, mViewportHeight);
 }
 
 SVulkan2Window::~SVulkan2Window() {
@@ -104,6 +120,13 @@ void SVulkan2Window::setCameraIntrinsicParameters(float near, float far, float f
 
 void SVulkan2Window::setCameraPosition(glm::vec3 const &pos) { getCamera()->setPosition(pos); }
 void SVulkan2Window::setCameraRotation(glm::quat const &rot) { getCamera()->setRotation(rot); }
+
+void SVulkan2Window::setCameraProperty(std::string const &name, float property) {
+  mSVulkanRenderer->setCustomProperty(name, property);
+}
+void SVulkan2Window::setCameraProperty(std::string const &name, int property) {
+  mSVulkanRenderer->setCustomProperty(name, property);
+}
 
 glm::vec3 SVulkan2Window::getCameraPosition() { return getCamera()->getPosition(); }
 glm::quat SVulkan2Window::getCameraRotation() { return getCamera()->getRotation(); }
@@ -200,7 +223,7 @@ void SVulkan2Window::render(std::string const &targetName,
   }
   ImGui::Render();
   if (mRenderer->getContext()->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE,
-                                                     UINT64_MAX) != vk::Result::eSuccess) {
+                                                         UINT64_MAX) != vk::Result::eSuccess) {
     throw std::runtime_error("failed on wait for fence.");
   }
   mRenderer->getContext()->getDevice().resetFences(mSceneRenderFence.get());
@@ -281,7 +304,7 @@ svulkan2::scene::Camera *SVulkan2Window::getCamera() {
 
 std::tuple<std::vector<float>, std::array<uint32_t, 3>>
 SVulkan2Window::downloadFloatTarget(std::string const &name) {
-  auto format = mSVulkanRenderer->getRenderTarget(name)->getFormat();
+  auto format = mSVulkanRenderer->getRenderImage(name).getFormat();
   if (format != vk::Format::eR32G32B32A32Sfloat && format != vk::Format::eD32Sfloat) {
     throw std::runtime_error("failed to download: " + name + " is not a float render target.");
   }
@@ -289,13 +312,13 @@ SVulkan2Window::downloadFloatTarget(std::string const &name) {
 }
 
 std::array<uint32_t, 2> SVulkan2Window::getRenderTargetSize(std::string const &name) const {
-  auto target = mSVulkanRenderer->getRenderTarget(name);
-  return {target->getWidth(), target->getHeight()};
+  auto &image = mSVulkanRenderer->getRenderImage(name);
+  return {image.getExtent().width, image.getExtent().height};
 }
 
 std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>
 SVulkan2Window::downloadUint32Target(std::string const &name) {
-  if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR32G32B32A32Uint) {
+  if (mSVulkanRenderer->getRenderImage(name).getFormat() != vk::Format::eR32G32B32A32Uint) {
     throw std::runtime_error("failed to download: " + name + " is not a uint32 render target.");
   }
   return mSVulkanRenderer->download<uint32_t>(name);
@@ -303,7 +326,7 @@ SVulkan2Window::downloadUint32Target(std::string const &name) {
 
 std::tuple<std::vector<uint8_t>, std::array<uint32_t, 3>>
 SVulkan2Window::downloadUint8Target(std::string const &name) {
-  if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR8G8B8A8Unorm) {
+  if (mSVulkanRenderer->getRenderImage(name).getFormat() != vk::Format::eR8G8B8A8Unorm) {
     throw std::runtime_error("failed to download: " + name + " is not a uint8 render target.");
   }
   return mSVulkanRenderer->download<uint8_t>(name);
@@ -311,7 +334,7 @@ SVulkan2Window::downloadUint8Target(std::string const &name) {
 
 std::vector<float> SVulkan2Window::downloadFloatTargetPixel(std::string const &name, uint32_t x,
                                                             uint32_t y) {
-  auto format = mSVulkanRenderer->getRenderTarget(name)->getFormat();
+  auto format = mSVulkanRenderer->getRenderImage(name).getFormat();
   if (format != vk::Format::eR32G32B32A32Sfloat && format != vk::Format::eD32Sfloat) {
     throw std::runtime_error("failed to download: " + name + " is not a float render target.");
   }
@@ -321,7 +344,7 @@ std::vector<float> SVulkan2Window::downloadFloatTargetPixel(std::string const &n
 
 std::vector<uint32_t> SVulkan2Window::downloadUint32TargetPixel(std::string const &name,
                                                                 uint32_t x, uint32_t y) {
-  if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR32G32B32A32Uint) {
+  if (mSVulkanRenderer->getRenderImage(name).getFormat() != vk::Format::eR32G32B32A32Uint) {
     throw std::runtime_error("failed to download: " + name + " is not a uint32 render target.");
   }
   return std::get<0>(mSVulkanRenderer->downloadRegion<uint32_t>(
@@ -330,7 +353,7 @@ std::vector<uint32_t> SVulkan2Window::downloadUint32TargetPixel(std::string cons
 
 std::vector<uint8_t> SVulkan2Window::downloadUint8TargetPixel(std::string const &name, uint32_t x,
                                                               uint32_t y) {
-  if (mSVulkanRenderer->getRenderTarget(name)->getFormat() != vk::Format::eR8G8B8A8Unorm) {
+  if (mSVulkanRenderer->getRenderImage(name).getFormat() != vk::Format::eR8G8B8A8Unorm) {
     throw std::runtime_error("failed to download: " + name + " is not a uint8 render target.");
   }
   return std::get<0>(mSVulkanRenderer->downloadRegion<uint8_t>(

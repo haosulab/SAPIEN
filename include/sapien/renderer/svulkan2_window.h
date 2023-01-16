@@ -37,7 +37,7 @@ public:
 class SVulkan2Window {
   std::shared_ptr<SVulkan2Renderer> mRenderer{};
   std::string mShaderDir{};
-  std::unique_ptr<svulkan2::renderer::Renderer> mSVulkanRenderer{};
+  std::unique_ptr<svulkan2::renderer::RendererBase> mSVulkanRenderer{};
   SVulkan2Scene *mScene{};
 
   std::unique_ptr<svulkan2::renderer::GuiWindow> mWindow;
@@ -61,10 +61,14 @@ public:
   ~SVulkan2Window();
   void setScene(SVulkan2Scene *scene);
   void setCameraParameters(float near, float far, float fovy);
-  void setCameraIntrinsicParameters(float near, float far, float fx, float fy, float cx, float cy, float skew);
+  void setCameraIntrinsicParameters(float near, float far, float fx, float fy, float cx, float cy,
+                                    float skew);
 
   void setCameraPosition(glm::vec3 const &pos);
   void setCameraRotation(glm::quat const &rot);
+
+  void setCameraProperty(std::string const &name, float property);
+  void setCameraProperty(std::string const &name, int property);
 
   float getCameraNear();
   float getCameraFar();
@@ -119,9 +123,11 @@ public:
 
   float getFPS();
 
-  inline svulkan2::renderer::Renderer *getInternalRenderer() const {
+  inline svulkan2::renderer::RendererBase *getInternalRenderer() const {
     return mSVulkanRenderer.get();
   }
+
+  void setShader(std::string const &shaderDir);
 
 private:
   svulkan2::scene::Camera *getCamera();

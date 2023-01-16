@@ -43,6 +43,12 @@ public:
   [[nodiscard]] float getSpecular() const override;
   void setMetallic(float metallic) override;
   [[nodiscard]] float getMetallic() const override;
+  void setIOR(float ior) override;
+  [[nodiscard]] float getIOR() const override;
+  void setTransmission(float transmission) override;
+  [[nodiscard]] float getTransmission() const override;
+  void setTransmissionRoughness(float roughness) override;
+  [[nodiscard]] float getTransmissionRoughness() const override;
 
   void setEmissionTexture(std::shared_ptr<IPxrTexture> texture) override;
   void setEmissionTextureFromFilename(std::string_view filename) override;

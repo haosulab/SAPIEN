@@ -145,11 +145,9 @@ py::array getImageFromCamera(SCamera &cam, std::string const &name) {
   std::string format = cam.getRendererCamera()->getImageFormat(name);
   if (format == "i4") {
     return getUintImageFromCamera(cam, name);
-  }
-  else if (format == "f4") {
+  } else if (format == "f4") {
     return getFloatImageFromCamera(cam, name);
-  }
-  else if (format == "u1") {
+  } else if (format == "u1") {
     return getUint8ImageFromCamera(cam, name);
   }
   throw std::runtime_error("unexpected image format " + format);
@@ -2256,6 +2254,20 @@ The values can be one of ["u1", "f4", "4u1", "4f4"])doc");
             window.setCameraRotation({quat.at(0), quat.at(1), quat.at(2), quat.at(3)});
           },
           py::arg("quat"))
+      .def(
+          "set_camera_property",
+          [](Renderer::SVulkan2Window &window, std::string name, float property) {
+            window.setCameraProperty(name, property);
+          },
+          py::arg("key"), py::arg("value"))
+      .def(
+          "set_camera_property",
+          [](Renderer::SVulkan2Window &window, std::string name, int property) {
+            window.setCameraProperty(name, property);
+          },
+          py::arg("key"), py::arg("value"))
+      .def(
+          "set_shader_dir", &Renderer::SVulkan2Window::setShader, py::arg("shader_dir"))
       .def("get_camera_position",
            [](Renderer::SVulkan2Window &window) {
              auto pos = window.getCameraPosition();

@@ -12,7 +12,9 @@ SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, floa
   *config = *mScene->getParentRenderer()->getDefaultRendererConfig();
   config->shaderDir = shaderDir;
 
-  mRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
+  // mRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
+  mRenderer = svulkan2::renderer::RendererBase::Create(config);
+
   mRenderer->resize(width, height);
 
   mCamera = &mScene->getScene()->addCamera();
@@ -64,9 +66,9 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
     mRenderer->render(*mCamera, {}, {}, {}, {});
 
     for (auto &name : names) {
-      auto target = mRenderer->getRenderTarget(name);
-      auto extent = target->getImage().getExtent();
-      vk::Format format = target->getFormat();
+      auto &image = mRenderer->getRenderImage(name);
+      auto extent = image.getExtent();
+      vk::Format format = image.getFormat();
       vk::DeviceSize size =
           extent.width * extent.height * extent.depth * svulkan2::getFormatSize(format);
       if (!mImageBuffers.contains(name)) {
@@ -75,8 +77,8 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
             VMA_MEMORY_USAGE_GPU_ONLY);
       }
       auto buffer = mImageBuffers.at(name);
-      target->getImage().recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0,
-                                            size, {0, 0, 0}, extent);
+      image.recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0, size, {0, 0, 0},
+                               extent);
     }
     mCommandBuffer->end();
     context->getQueue().submit(mCommandBuffer.get(), {}, {}, {}, mSemaphore.get(), frame, {});
@@ -86,9 +88,9 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
       [this, names]() {
         std::vector<DLManagedTensor *> tensors;
         for (auto &name : names) {
-          auto target = mRenderer->getRenderTarget(name);
-          auto extent = target->getImage().getExtent();
-          vk::Format format = target->getFormat();
+          auto &image = mRenderer->getRenderImage(name);
+          auto extent = image.getExtent();
+          vk::Format format = image.getFormat();
           auto buffer = mImageBuffers.at(name);
           std::vector<long> sizes2 = {extent.height, extent.width};
           uint8_t dtype;
@@ -148,7 +150,7 @@ std::vector<uint8_t> SVulkan2Camera::getUint8Image(std::string const &name) {
 
 std::string SVulkan2Camera::getImageFormat(std::string const &name) {
   waitForRender();
-  switch (mRenderer->getRenderTarget(name)->getFormat()) {
+  switch (mRenderer->getRenderImage(name).getFormat()) {
   case vk::Format::eR8Unorm:
   case vk::Format::eR8G8B8A8Unorm:
     return "u1";
@@ -177,9 +179,9 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   mCommandBuffer->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
   mRenderer->render(*mCamera, {}, {}, {}, {});
 
-  auto target = mRenderer->getRenderTarget(name);
-  auto extent = target->getImage().getExtent();
-  vk::Format format = target->getFormat();
+  auto &image = mRenderer->getRenderImage(name);
+  auto extent = image.getExtent();
+  vk::Format format = image.getFormat();
   vk::DeviceSize size =
       extent.width * extent.height * extent.depth * svulkan2::getFormatSize(format);
   if (!mImageBuffers.contains(name)) {
@@ -188,8 +190,8 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
         VMA_MEMORY_USAGE_GPU_ONLY);
   }
   auto buffer = mImageBuffers.at(name);
-  target->getImage().recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0, size,
-                                        {0, 0, 0}, extent);
+  image.recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0, size, {0, 0, 0},
+                           extent);
   std::vector<long> sizes2 = {extent.height, extent.width};
   uint8_t dtype;
   switch (format) {

@@ -102,6 +102,18 @@ void SVulkan2Material::setSpecular(float specular) { mMaterial->setFresnel(specu
 float SVulkan2Material::getSpecular() const { return mMaterial->getFresnel(); }
 void SVulkan2Material::setMetallic(float metallic) { mMaterial->setMetallic(metallic); }
 float SVulkan2Material::getMetallic() const { return mMaterial->getMetallic(); }
+void SVulkan2Material::setIOR(float ior) { mMaterial->setIor(ior); }
+float SVulkan2Material::getIOR() const { return mMaterial->getIor(); }
+void SVulkan2Material::setTransmission(float transmission) {
+  mMaterial->setTransmission(transmission);
+}
+float SVulkan2Material::getTransmission() const { return mMaterial->getTransmission(); }
+void SVulkan2Material::setTransmissionRoughness(float roughness) {
+  mMaterial->setTransmissionRoughness(roughness);
+}
+float SVulkan2Material::getTransmissionRoughness() const {
+  return mMaterial->getTransmissionRoughness();
+}
 
 void SVulkan2Material::setEmissionTexture(std::shared_ptr<IPxrTexture> texture) {
   if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {

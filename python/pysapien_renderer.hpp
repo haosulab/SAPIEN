@@ -39,7 +39,7 @@ void buildRenderer(py::module &parent) {
       py::class_<resource::SVPrimitiveSet, std::shared_ptr<resource::SVPrimitiveSet>>(
           m, "PrimitiveSet");
 
-  auto PyRenderer = py::class_<renderer::Renderer>(m, "Renderer");
+  auto PyRenderer = py::class_<renderer::RendererBase>(m, "Renderer");
 
   auto PyUIWidget = py::class_<ui::Widget, std::shared_ptr<ui::Widget>>(m, "UIWidget");
   auto PyUIWindow = py::class_<ui::Window, ui::Widget, std::shared_ptr<ui::Window>>(m, "UIWindow");
@@ -364,7 +364,7 @@ void buildRenderer(py::module &parent) {
           "create_material",
           [](core::Context &context, py::array_t<float> emission, py::array_t<float> baseColor,
              float fresnel, float roughness, float metallic) {
-            return context.createMetallicMaterial(
+            return context.getResourceManager()->createMetallicMaterial(
                 {emission.at(0), emission.at(1), emission.at(2), emission.at(3)},
                 {baseColor.at(0), baseColor.at(1), baseColor.at(2), baseColor.at(3)}, fresnel,
                 roughness, metallic, 0.f);
@@ -474,7 +474,7 @@ void buildRenderer(py::module &parent) {
              std::vector<std::shared_ptr<resource::SVMetallicMaterial>> const &materials) {
             std::vector<std::shared_ptr<resource::SVMaterial>> mats;
             mats.insert(mats.end(), materials.begin(), materials.end());
-            return context.createModel(meshes, mats);
+            return context.getResourceManager()->createModel(meshes, mats);
           },
           py::arg("meshes"), py::arg("materials"))
       .def(
@@ -617,12 +617,18 @@ void buildRenderer(py::module &parent) {
       .def_property_readonly("model", &scene::Object::getModel);
 
   PyRenderer
-      .def("set_custom_texture", &renderer::Renderer::setCustomTexture, py::arg("name"),
+      .def("set_custom_texture", &renderer::RendererBase::setCustomTexture, py::arg("name"),
            py::arg("texture"))
-      .def("set_custom_cubemap", &renderer::Renderer::setCustomCubemap, py::arg("name"),
+      .def("set_custom_cubemap", &renderer::RendererBase::setCustomCubemap, py::arg("name"),
            py::arg("texture"))
-      .def("set_specialization_constant_int", &renderer::Renderer::setSpecializationConstantInt,
-           py::arg("name"), py::arg("value"))
-      .def("set_specialization_constant_float",
-           &renderer::Renderer::setSpecializationConstantFloat, py::arg("name"), py::arg("value"));
+      .def(
+          "set_custom_property",
+          [](renderer::RendererBase &r, std::string name, float v) {
+            r.setCustomProperty(name, v);
+          },
+          py::arg("name"), py::arg("value"))
+      .def(
+          "set_custom_property",
+          [](renderer::RendererBase &r, std::string name, int v) { r.setCustomProperty(name, v); },
+          py::arg("name"), py::arg("value"));
 }
