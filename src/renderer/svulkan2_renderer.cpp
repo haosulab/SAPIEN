@@ -11,16 +11,6 @@ namespace Renderer {
 static std::weak_ptr<svulkan2::core::Context> gContext;
 static std::weak_ptr<svulkan2::resource::SVResourceManager> gResourceManager;
 
-std::string gDefaultViewerShaderDirectory = "";
-void setDefaultViewerShaderDirectory(std::string const &dir) {
-  gDefaultViewerShaderDirectory = dir;
-}
-
-std::string gDefaultCameraShaderDirectory = "";
-void setDefaultCameraShaderDirectory(std::string const &dir) {
-  gDefaultCameraShaderDirectory = dir;
-}
-
 void SVulkan2Renderer::setLogLevel(std::string const &level) {
   if (level == "debug") {
     svulkan2::log::getLogger()->set_level(spdlog::level::debug);

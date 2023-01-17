@@ -1,4 +1,5 @@
 #include "sapien/renderer/dlpack.hpp"
+#include "sapien/renderer/render_config.h"
 #include "sapien/renderer/svulkan2_renderer.h"
 
 namespace sapien {
@@ -7,21 +8,46 @@ namespace Renderer {
 SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, float near, float far,
                                SVulkan2Scene *scene, std::string const &shaderDir)
     : mWidth(width), mHeight(height), mScene(scene) {
+  auto &renderConfig = GetRenderConfig();
+
   auto context = mScene->getParentRenderer()->getContext();
   auto config = std::make_shared<svulkan2::RendererConfig>();
+  for (auto &[name, format] : renderConfig.renderTargetFormats) {
+    if (format == "r32g32b32a32float" || format == "4f4") {
+      config->textureFormat[name] = vk::Format::eR32G32B32A32Sfloat;
+    } else if (format == "r8g8b8a8unorm" || format == "4u1") {
+      config->textureFormat[name] = vk::Format::eR8G8B8A8Unorm;
+    } else {
+      throw std::runtime_error("only r32g32b32a32float (4f4) and r8g8b8a8unorm (4u1) are "
+                               "supported custom texture formats");
+    }
+  }
+
   *config = *mScene->getParentRenderer()->getDefaultRendererConfig();
   config->shaderDir = shaderDir;
 
-  // mRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
   mRenderer = svulkan2::renderer::RendererBase::Create(config);
-
   mRenderer->resize(width, height);
-
   mCamera = &mScene->getScene()->addCamera();
   mCamera->setPerspectiveParameters(near, far, fovy, width, height);
-
   mSemaphore = context->createTimelineSemaphore(0);
   mRenderer->setScene(*scene->getScene());
+
+  // RT renderer
+  if (auto rtRenderer = dynamic_cast<svulkan2::renderer::RTRenderer *>(mRenderer.get())) {
+    rtRenderer->setCustomProperty("spp", renderConfig.rayTracingSamplesPerPixel);
+    rtRenderer->setCustomProperty("maxDepth", renderConfig.rayTracingPathDepth);
+    if (renderConfig.rayTracingRussianRouletteMinBounces >= 0) {
+      rtRenderer->setCustomProperty("russianRoulette", 1);
+      rtRenderer->setCustomProperty("russianRouletteMinBounces",
+                                    renderConfig.rayTracingRussianRouletteMinBounces);
+    } else {
+      rtRenderer->setCustomProperty("russianRoulette", 0);
+    }
+    if (renderConfig.rayTracingUseDenoiser) {
+      rtRenderer->enableDenoiser("HdrColor", "Albedo", "Normal");
+    }
+  }
 }
 
 float SVulkan2Camera::getPrincipalPointX() const { return mCamera->getCx(); }

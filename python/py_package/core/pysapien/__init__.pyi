@@ -59,6 +59,7 @@ __all__ = [
     "ProfilerBlock",
     "RenderBody",
     "RenderClient",
+    "RenderConfig",
     "RenderMaterial",
     "RenderMesh",
     "RenderParticleBody",
@@ -85,6 +86,7 @@ __all__ = [
     "VulkanWindow",
     "add_profiler_event",
     "dlpack",
+    "get_global_render_config",
     "renderer",
     "simsense"
 ]
@@ -1254,6 +1256,52 @@ class RenderBody():
 class RenderClient(IPxrRenderer):
     def __init__(self, address: str, process_index: int) -> None: ...
     pass
+class RenderConfig():
+    def get_render_target_format(self, name: str) -> str: ...
+    def has_render_target_format(self, name: str) -> bool: ...
+    def set_render_target_format(self, name: str, format: str) -> None: ...
+    def unset_render_target_format(self, name: str) -> None: ...
+    @property
+    def camera_shader_dir(self) -> str:
+        """
+        :type: str
+        """
+    @camera_shader_dir.setter
+    def camera_shader_dir(self, arg0: str) -> None:
+        pass
+    @property
+    def rt_path_depth(self) -> int:
+        """
+        :type: int
+        """
+    @rt_path_depth.setter
+    def rt_path_depth(self, arg0: int) -> None:
+        pass
+    @property
+    def rt_samples_per_pixel(self) -> int:
+        """
+        :type: int
+        """
+    @rt_samples_per_pixel.setter
+    def rt_samples_per_pixel(self, arg0: int) -> None:
+        pass
+    @property
+    def rt_use_denoiser(self) -> bool:
+        """
+        :type: bool
+        """
+    @rt_use_denoiser.setter
+    def rt_use_denoiser(self, arg0: bool) -> None:
+        pass
+    @property
+    def viewer_shader_dir(self) -> str:
+        """
+        :type: str
+        """
+    @viewer_shader_dir.setter
+    def viewer_shader_dir(self, arg0: str) -> None:
+        pass
+    pass
 class RenderMaterial():
     def set_base_color(self, rgba: numpy.ndarray[numpy.float32]) -> None: ...
     def set_diffuse_texture(self, texture: RenderTexture) -> None: ...
@@ -2056,26 +2104,9 @@ class VulkanRenderer(IPxrRenderer):
         """
         A very unsafe way to release cached gpu (but not CPU) resources. It MUST be called when no rendering is running, and all cameras and windows become invalid after calling this function.
         """
-    @staticmethod
-    def _set_camera_shader_dir(shader_dir: str) -> None: ...
-    @staticmethod
-    def _set_viewer_shader_dir(shader_dir: str) -> None: ...
     def clear_cached_resources(self) -> None: ...
     def create_ktx_environment_map(self, px: str, nx: str, py: str, ny: str, pz: str, nz: str, out: str) -> None: ...
     def create_window(self, width: int = 800, height: int = 600, shader_dir: str = '') -> VulkanWindow: ...
-    def set_default_texture_format(self, config: dict) -> None: 
-        """
-        Set the default texture format with a config dict. The dict takes 3 keys,
-        ["color_format_1", "color_format_4", "texture_format"].
-        "color_format_1" determines the default texture format for single-channel color textures
-            "u1": unorm texture (using uint8 to represent 0-1 values).
-            "f4": signed float32 texture (default)
-        "color_format_4" determines the default texture format for 4-channel color textures
-            "4u1": unorm rgba texture
-            "4f4" signed float32 rgba texture (default)
-        "texture_format" takes an dictionary, whose keys are texture names and values are texture foramts.
-        The values can be one of ["u1", "f4", "4u1", "4f4"]
-        """
     @staticmethod
     def set_log_level(level: str) -> None: ...
     @property
@@ -2212,4 +2243,6 @@ class VulkanWindow():
         """
     pass
 def add_profiler_event(name: str) -> None:
+    pass
+def get_global_render_config() -> RenderConfig:
     pass

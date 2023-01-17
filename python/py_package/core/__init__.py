@@ -1,19 +1,22 @@
+from warnings import warn
+
 from .pysapien import *
 from .pysapien import renderer
+from .renderer_config import *
 
 try:
     from .pysapien import dlpack
 except ImportError:
     pass
 
-import pkg_resources
 import os
 import sys
 from typing import List
 
+import pkg_resources
+
 
 def ensure_icd():
-    __VULKAN_ICD_ROOT = pkg_resources.resource_filename("sapien", "vulkan_icd")
     icd_filenames = os.environ.get("VK_ICD_FILENAMES")
 
     # if VK_ICD_FILENAMES is not provided, we try to provide it
@@ -21,12 +24,56 @@ def ensure_icd():
         icd_dir = "/usr/share/vulkan/icd.d"
         if os.path.isdir(icd_dir):
             files = os.listdir("/usr/share/vulkan/icd.d")
-            os.environ["VK_ICD_FILENAMES"] = ":".join([os.path.join(icd_dir, f) for f in files])
+            os.environ["VK_ICD_FILENAMES"] = ":".join(
+                [os.path.join(icd_dir, f) for f in files]
+            )
 
-        # icd_filenames = "{0}/intel_icd.x86_64.json:{0}/nvidia_icd.json:{0}/radeon_icd.x86_64.json:{0}/MoltenVK_icd.json:{1}".format(
-        #     __VULKAN_ICD_ROOT, icd_filenames
-        # )
-        # os.environ["VK_ICD_FILENAMES"] = icd_filenames
+
+# _global_render_config = get_global_render_config()
+
+
+# def _set_viewer_shader_dir(shader_dir):
+#     if os.path.exists(shader_dir):
+#         _global_render_config.viewer_shader_dir = shader_dir
+#         return
+#     pkg_shader_dir = pkg_resources.resource_filename(
+#         "sapien", "vulkan_shader/{}".format(shader_dir)
+#     )
+#     if os.path.exists(pkg_shader_dir):
+#         _global_render_config.viewer_shader_dir = pkg_shader_dir
+#         return
+#     raise FileNotFoundError(shader_dir)
+
+
+# def _set_camera_shader_dir(shader_dir):
+#     if os.path.exists(shader_dir):
+#         _global_render_config.camera_shader_dir = shader_dir
+#         return
+#     pkg_shader_dir = pkg_resources.resource_filename(
+#         "sapien", "vulkan_shader/{}".format(shader_dir)
+#     )
+#     if os.path.exists(pkg_shader_dir):
+#         _global_render_config.camera_shader_dir = pkg_shader_dir
+#         return
+#     raise FileNotFoundError(shader_dir)
+
+
+# def _set_viewer_shader_dir_deprecated(shader_dir):
+#     warn(
+#         "This method is deprecated. Use context manager CameraShaderDir instead",
+#         DeprecationWarning,
+#         stacklevel=2,
+#     )
+#     _set_viewer_shader_dir(shader_dir)
+
+
+# def _set_camera_shader_dir_deprecated(shader_dir):
+#     warn(
+#         "This method is deprecated. Use context manager ViewerShaderDir instead",
+#         DeprecationWarning,
+#         stacklevel=2,
+#     )
+#     _set_camera_shader_dir(shader_dir)
 
 
 def __enable_vulkan():
@@ -41,8 +88,12 @@ def __enable_vulkan():
     assert os.path.exists(__VULKAN_CAMERA_SHADER_ROOT)
     assert os.path.exists(__KUAFU_ASSETS_ROOT)
     RenderServer._set_shader_dir(__VULKAN_CAMERA_SHADER_ROOT)
-    VulkanRenderer._set_viewer_shader_dir(__VULKAN_VIEWER_SHADER_ROOT)
-    VulkanRenderer._set_camera_shader_dir(__VULKAN_CAMERA_SHADER_ROOT)
+
+    get_global_render_config().viewer_shader_dir = __VULKAN_VIEWER_SHADER_ROOT
+    get_global_render_config().camera_shader_dir = __VULKAN_CAMERA_SHADER_ROOT
+    # VulkanRenderer._set_viewer_shader_dir(__VULKAN_VIEWER_SHADER_ROOT)
+    # VulkanRenderer._set_camera_shader_dir(__VULKAN_CAMERA_SHADER_ROOT)
+
     KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
     ensure_icd()
 
@@ -50,34 +101,6 @@ def __enable_vulkan():
 __enable_vulkan()
 
 
-def __set_viewer_shader_dir(shader_dir):
-    if os.path.exists(shader_dir):
-        VulkanRenderer._set_viewer_shader_dir(shader_dir)
-        return
-    shader_dir = pkg_resources.resource_filename(
-        "sapien", "vulkan_shader/{}".format(shader_dir)
-    )
-    if os.path.exists(shader_dir):
-        VulkanRenderer._set_viewer_shader_dir(shader_dir)
-        return
-    raise FileNotFoundError(shader_dir)
-
-
-def __set_camera_shader_dir(shader_dir):
-    if os.path.exists(shader_dir):
-        VulkanRenderer._set_camera_shader_dir(shader_dir)
-        return
-    shader_dir = pkg_resources.resource_filename(
-        "sapien", "vulkan_shader/{}".format(shader_dir)
-    )
-    if os.path.exists(shader_dir):
-        VulkanRenderer._set_camera_shader_dir(shader_dir)
-        return
-    raise FileNotFoundError(shader_dir)
-
-
-VulkanRenderer.set_viewer_shader_dir = __set_viewer_shader_dir
-VulkanRenderer.set_camera_shader_dir = __set_camera_shader_dir
 Entity.classname = property(lambda e: e.__class__.__name__)
 
 

@@ -31,6 +31,7 @@
 #include "sapien/event_system/event_system.h"
 
 #include "sapien/renderer/kuafu_renderer.hpp"
+#include "sapien/renderer/render_config.h"
 #include "sapien/renderer/svulkan2_pointbody.h"
 #include "sapien/renderer/svulkan2_renderer.h"
 #include "sapien/renderer/svulkan2_rigidbody.h"
@@ -391,6 +392,39 @@ void buildSapien(py::module &m) {
 
   auto PyParticleEntity = py::class_<SEntityParticle, SEntity>(m, "ParticleEntity");
   auto PyCameraEntity = py::class_<SCamera, SEntity>(m, "CameraEntity");
+
+  auto PyRenderConfig = py::class_<Renderer::RenderConfig>(m, "RenderConfig");
+  m.def("get_global_render_config", &Renderer::GetRenderConfig,
+        py::return_value_policy::reference);
+  PyRenderConfig.def_readwrite("viewer_shader_dir", &Renderer::RenderConfig::viewerShaderDirectory)
+      .def_readwrite("camera_shader_dir", &Renderer::RenderConfig::cameraShaderDirectory)
+      .def_readwrite("rt_samples_per_pixel", &Renderer::RenderConfig::rayTracingSamplesPerPixel)
+      .def_readwrite("rt_path_depth", &Renderer::RenderConfig::rayTracingPathDepth)
+      .def_readwrite("rt_use_denoiser", &Renderer::RenderConfig::rayTracingUseDenoiser)
+      .def(
+          "set_render_target_format",
+          [](Renderer::RenderConfig &config, std::string name, std::string format) {
+            config.renderTargetFormats[name] = format;
+          },
+          py::arg("name"), py::arg("format"))
+      .def(
+          "unset_render_target_format",
+          [](Renderer::RenderConfig &config, std::string name) {
+            config.renderTargetFormats.erase(name);
+          },
+          py::arg("name"))
+      .def(
+          "get_render_target_format",
+          [](Renderer::RenderConfig &config, std::string name) {
+            return config.renderTargetFormats.at(name);
+          },
+          py::arg("name"))
+      .def(
+          "has_render_target_format",
+          [](Renderer::RenderConfig &config, std::string name) {
+            return config.renderTargetFormats.contains(name);
+          },
+          py::arg("name"));
 
   //======== Kuafu ========//
   auto PyKuafuConfig = py::class_<Renderer::KuafuConfig>(m, "KuafuConfig");
@@ -1965,10 +1999,10 @@ Args:
     'cuda', the renderer tries to render using a cuda-visible device. If present is requested, it will be prioritized
     'pci:x', where x is a hexadecimal number, the renderer picks the device with given PCI bus number
     '', if present is requested, first try to find cuda+present, next present only, and then turn off present. If present is turned off, first try to find cuda, next any graphics device.)doc")
-      .def_static("_set_viewer_shader_dir", &Renderer::setDefaultViewerShaderDirectory,
-                  py::arg("shader_dir"))
-      .def_static("_set_camera_shader_dir", &Renderer::setDefaultCameraShaderDirectory,
-                  py::arg("shader_dir"))
+      // .def_static("_set_viewer_shader_dir", &Renderer::setDefaultViewerShaderDirectory,
+      //             py::arg("shader_dir"))
+      // .def_static("_set_camera_shader_dir", &Renderer::setDefaultCameraShaderDirectory,
+      //             py::arg("shader_dir"))
       .def(
           "create_window",
           [](std::shared_ptr<Renderer::SVulkan2Renderer> renderer, int width, int height,
@@ -2004,66 +2038,66 @@ Args:
           "A very unsafe way to release cached gpu (but not CPU) resources. It MUST be called "
           "when no rendering is running, and all cameras and windows become invalid after "
           "calling "
-          "this function.")
-      .def(
-          "set_default_texture_format",
-          [](Renderer::SVulkan2Renderer &renderer, py::dict const &dict) {
-            auto config = renderer.getDefaultRendererConfig();
-            vk::Format color1 = vk::Format::eR32Sfloat;
-            vk::Format color4 = vk::Format::eR32G32B32A32Sfloat;
-            if (dict.contains("color_format_1")) {
-              auto color1str = dict["color_format_1"].cast<std::string>();
-              if (color1str == "u4") {
-                color1 = vk::Format::eR8Unorm;
-              } else if (color1str == "f4") {
-                color1 = vk::Format::eR32Sfloat;
-              } else {
-                throw std::runtime_error(color1str + " is not supported for color_format_1");
-              }
-            }
-            if (dict.contains("color_format_4")) {
-              auto color4str = dict["color_format_4"].cast<std::string>();
-              if (color4str == "4u4") {
-                color1 = vk::Format::eR8G8B8A8Unorm;
-              } else if (color4str == "4f4") {
-                color1 = vk::Format::eR32G32B32A32Sfloat;
-              } else {
-                throw std::runtime_error(color4str + " is not supported for color_format_1");
-              }
-            }
-            config->colorFormat1 = color1;
-            config->colorFormat4 = color4;
-            config->depthFormat = vk::Format::eD32Sfloat; // depth format must be float32
-            if (dict.contains("texture_format")) {
-              auto formats = dict["texture_format"].cast<py::dict>();
-              for (auto kv : formats) {
-                auto name = kv.first.cast<std::string>();
-                auto formatstr = kv.second.cast<std::string>();
-                if (formatstr == "u1") {
-                  config->textureFormat[name] = vk::Format::eR8Unorm;
-                } else if (formatstr == "f4") {
-                  config->textureFormat[name] = vk::Format::eR32Sfloat;
-                } else if (formatstr == "4u1") {
-                  config->textureFormat[name] = vk::Format::eR8G8B8A8Unorm;
-                } else if (formatstr == "4f4") {
-                  config->textureFormat[name] = vk::Format::eR32G32B32A32Sfloat;
-                } else {
-                  throw std::runtime_error("invalid texture format " + formatstr);
-                }
-              }
-            }
-          },
-          py::arg("config"), R"doc(
-Set the default texture format with a config dict. The dict takes 3 keys,
-["color_format_1", "color_format_4", "texture_format"].
-"color_format_1" determines the default texture format for single-channel color textures
-    "u1": unorm texture (using uint8 to represent 0-1 values).
-    "f4": signed float32 texture (default)
-"color_format_4" determines the default texture format for 4-channel color textures
-    "4u1": unorm rgba texture
-    "4f4" signed float32 rgba texture (default)
-"texture_format" takes an dictionary, whose keys are texture names and values are texture foramts.
-The values can be one of ["u1", "f4", "4u1", "4f4"])doc");
+          "this function.");
+//       .def(
+//           "set_default_texture_format",
+//           [](Renderer::SVulkan2Renderer &renderer, py::dict const &dict) {
+//             auto config = renderer.getDefaultRendererConfig();
+//             vk::Format color1 = vk::Format::eR32Sfloat;
+//             vk::Format color4 = vk::Format::eR32G32B32A32Sfloat;
+//             if (dict.contains("color_format_1")) {
+//               auto color1str = dict["color_format_1"].cast<std::string>();
+//               if (color1str == "u4") {
+//                 color1 = vk::Format::eR8Unorm;
+//               } else if (color1str == "f4") {
+//                 color1 = vk::Format::eR32Sfloat;
+//               } else {
+//                 throw std::runtime_error(color1str + " is not supported for color_format_1");
+//               }
+//             }
+//             if (dict.contains("color_format_4")) {
+//               auto color4str = dict["color_format_4"].cast<std::string>();
+//               if (color4str == "4u4") {
+//                 color1 = vk::Format::eR8G8B8A8Unorm;
+//               } else if (color4str == "4f4") {
+//                 color1 = vk::Format::eR32G32B32A32Sfloat;
+//               } else {
+//                 throw std::runtime_error(color4str + " is not supported for color_format_1");
+//               }
+//             }
+//             config->colorFormat1 = color1;
+//             config->colorFormat4 = color4;
+//             config->depthFormat = vk::Format::eD32Sfloat; // depth format must be float32
+//             if (dict.contains("texture_format")) {
+//               auto formats = dict["texture_format"].cast<py::dict>();
+//               for (auto kv : formats) {
+//                 auto name = kv.first.cast<std::string>();
+//                 auto formatstr = kv.second.cast<std::string>();
+//                 if (formatstr == "u1") {
+//                   config->textureFormat[name] = vk::Format::eR8Unorm;
+//                 } else if (formatstr == "f4") {
+//                   config->textureFormat[name] = vk::Format::eR32Sfloat;
+//                 } else if (formatstr == "4u1") {
+//                   config->textureFormat[name] = vk::Format::eR8G8B8A8Unorm;
+//                 } else if (formatstr == "4f4") {
+//                   config->textureFormat[name] = vk::Format::eR32G32B32A32Sfloat;
+//                 } else {
+//                   throw std::runtime_error("invalid texture format " + formatstr);
+//                 }
+//               }
+//             }
+//           },
+//           py::arg("config"), R"doc(
+// Set the default texture format with a config dict. The dict takes 3 keys,
+// ["color_format_1", "color_format_4", "texture_format"].
+// "color_format_1" determines the default texture format for single-channel color textures
+//     "u1": unorm texture (using uint8 to represent 0-1 values).
+//     "f4": signed float32 texture (default)
+// "color_format_4" determines the default texture format for 4-channel color textures
+//     "4u1": unorm rgba texture
+//     "4f4" signed float32 rgba texture (default)
+// "texture_format" takes an dictionary, whose keys are texture names and values are texture foramts.
+// The values can be one of ["u1", "f4", "4u1", "4f4"])doc");
 
   PyVulkanRigidbody.def_property_readonly("_internal_objects",
                                           &Renderer::SVulkan2Rigidbody::getVisualObjects,
@@ -2266,8 +2300,7 @@ The values can be one of ["u1", "f4", "4u1", "4f4"])doc");
             window.setCameraProperty(name, property);
           },
           py::arg("key"), py::arg("value"))
-      .def(
-          "set_shader_dir", &Renderer::SVulkan2Window::setShader, py::arg("shader_dir"))
+      .def("set_shader_dir", &Renderer::SVulkan2Window::setShader, py::arg("shader_dir"))
       .def("get_camera_position",
            [](Renderer::SVulkan2Window &window) {
              auto pos = window.getCameraPosition();

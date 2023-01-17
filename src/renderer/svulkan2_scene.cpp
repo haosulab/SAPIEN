@@ -1,4 +1,5 @@
 #include "sapien/renderer/svulkan2_scene.h"
+#include "sapien/renderer/render_config.h"
 #include "sapien/renderer/svulkan2_renderer.h"
 #include "sapien/renderer/svulkan2_rigidbody.h"
 #include "sapien/renderer/svulkan2_shape.h"
@@ -87,7 +88,7 @@ IActiveLight *SVulkan2Scene::addActiveLight(physx::PxTransform const &pose,
   light.setRotation({pose.q.w, pose.q.x, pose.q.y, pose.q.z});
   light.setFov(fov);
   light.setFovSmall(fov);
-  light.setColor({1, 1, 1});
+  light.setColor({color[0], color[1], color[2]});
   light.enableShadow(true);
   light.setShadowParameters(shadowNear, shadowFar, shadowMapSize);
   auto tex = mParentRenderer->getContext()->getResourceManager()->CreateTextureFromFile(
@@ -338,7 +339,7 @@ void SVulkan2Scene::removePointBody(IPxrPointBody *body) {
 
 ICamera *SVulkan2Scene::addCamera(uint32_t width, uint32_t height, float fovy, float near,
                                   float far, std::string const &shaderDir) {
-  std::string shader = shaderDir.length() ? shaderDir : gDefaultCameraShaderDirectory;
+  std::string shader = shaderDir.length() ? shaderDir : GetRenderConfig().cameraShaderDirectory;
   auto cam = std::make_unique<SVulkan2Camera>(width, height, fovy, near, far, this, shader);
   mCameras.push_back(std::move(cam));
   return mCameras.back().get();
@@ -363,11 +364,13 @@ std::vector<ICamera *> SVulkan2Scene::getCameras() {
   return cams;
 }
 
-void SVulkan2Scene::updateRender() { mScene->updateModelMatrices(); }
+void SVulkan2Scene::updateRender() {
+  mScene->updateModelMatrices();
+}
 
 void SVulkan2Scene::setEnvironmentMap(std::string_view path) {
-  auto tex =
-      mParentRenderer->getContext()->getResourceManager()->CreateCubemapFromKTX(std::string(path), 5);
+  auto tex = mParentRenderer->getContext()->getResourceManager()->CreateCubemapFromKTX(
+      std::string(path), 5);
   mScene->setEnvironmentMap(tex);
 }
 

@@ -1,4 +1,5 @@
 #include "sapien/renderer/svulkan2_window.h"
+#include "sapien/renderer/render_config.h"
 #include <easy/profiler.h>
 
 namespace sapien {
@@ -53,7 +54,8 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
     : mRenderer(renderer), mShaderDir(shaderDir) {
   auto config = std::make_shared<svulkan2::RendererConfig>();
   *config = *renderer->getDefaultRendererConfig();
-  config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultViewerShaderDirectory;
+
+  config->shaderDir = mShaderDir.length() ? mShaderDir : GetRenderConfig().viewerShaderDirectory;
 
   // mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
   mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);
@@ -76,7 +78,7 @@ void SVulkan2Window::setShader(std::string const &shaderDir) {
 
   auto config = std::make_shared<svulkan2::RendererConfig>();
   *config = *mRenderer->getDefaultRendererConfig();
-  config->shaderDir = mShaderDir.length() ? mShaderDir : gDefaultViewerShaderDirectory;
+  config->shaderDir = mShaderDir.length() ? mShaderDir : GetRenderConfig().viewerShaderDirectory;
   mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);
   if (mScene) {
     mSVulkanRenderer->setScene(*mScene->getScene());

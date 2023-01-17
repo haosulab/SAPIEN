@@ -54,6 +54,7 @@ from sapien.core.pysapien import Pose
 from sapien.core.pysapien import ProfilerBlock
 from sapien.core.pysapien import RenderBody
 from sapien.core.pysapien import RenderClient
+from sapien.core.pysapien import RenderConfig
 from sapien.core.pysapien import RenderMaterial
 from sapien.core.pysapien import RenderMesh
 from sapien.core.pysapien import RenderParticleBody
@@ -83,6 +84,7 @@ import pkg_resources
 import sapien.core.pysapien.dlpack
 import sapien.core.pysapien.renderer
 import sapien.core.pysapien.simsense
+import sapien.core.renderer_config
 import sys
 
 __all__ = [
@@ -140,6 +142,7 @@ __all__ = [
     "ProfilerBlock",
     "RenderBody",
     "RenderClient",
+    "RenderConfig",
     "RenderMaterial",
     "RenderMesh",
     "RenderParticleBody",
@@ -157,6 +160,7 @@ __all__ = [
     "Subscription",
     "Trigger",
     "URDFLoader",
+    "Union",
     "VisualRecord",
     "VulkanParticleBody",
     "VulkanRenderMesh",
@@ -167,15 +171,23 @@ __all__ = [
     "add_profiler_event",
     "dlpack",
     "ensure_icd",
+    "get_global_render_config",
     "os",
     "pkg_resources",
     "pysapien",
+    "render_config",
     "renderer",
+    "renderer_config",
     "simsense",
-    "sys"
+    "sys",
+    "warn"
 ]
 
 
 def add_profiler_event(name: str) -> None:
     pass
+def get_global_render_config() -> pysapien.RenderConfig:
+    pass
 List: typing._SpecialGenericAlias # value = typing.List
+Union: typing._SpecialForm # value = typing.Union
+render_config: sapien.core.renderer_config._RenderConfig

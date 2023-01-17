@@ -1,0 +1,11 @@
+#version 450
+
+layout(set = 0, binding = 0, rgba32f) uniform readonly image2D HdrColor;
+layout(set = 0, binding = 1, rgba32f) uniform writeonly image2D Color;
+
+void main() {
+  uint x = gl_GlobalInvocationID.x;
+  uint y = gl_GlobalInvocationID.y;
+  vec4 color = imageLoad(HdrColor, ivec2(gl_GlobalInvocationID.xy));
+  imageStore(Color, ivec2(gl_GlobalInvocationID.xy), vec4(pow(color.rgb, vec3(1/2.2)), color.a));
+}

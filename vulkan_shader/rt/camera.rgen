@@ -1,0 +1,125 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+#extension GL_ARB_shader_clock : enable
+#extension GL_GOOGLE_include_directive : enable
+
+
+#include "random.glsl"
+#include "ray.glsl"
+
+layout(location = 0) rayPayloadEXT Ray ray;
+// layout(location = 1) rayPayloadEXT ShadowRay shadowRay;
+
+layout(set = 0, binding = 0, rgba32f) uniform image2D outHdrColor;
+layout(set = 0, binding = 1, rgba32f) uniform image2D outAlbedo;
+layout(set = 0, binding = 2, rgba32f) uniform image2D outNormal;
+layout(set = 0, binding = 3, rgba32ui) uniform uimage2D outSegmentation;
+layout(set = 0, binding = 4, rgba32f) uniform image2D outRadiance;
+
+layout(set = 1, binding = 0) uniform accelerationStructureEXT tlas;
+
+layout(set = 2, binding = 0) uniform CameraBuffer {
+  mat4 viewMatrix;
+  mat4 projectionMatrix;
+  mat4 viewMatrixInverse;
+  mat4 projectionMatrixInverse;
+  mat4 prevViewMatrix;
+  mat4 prevViewMatrixInverse;
+  float width;
+  float height;
+} cameraBuffer;
+
+#include "push_constant.glsl"
+
+void main() {
+  // imageStore(outColor, ivec2(gl_LaunchIDEXT.xy), vec4(vec2(gl_LaunchIDEXT.xy) / vec2(gl_LaunchSizeEXT.xy), 0.0, 1.0));
+
+  vec2 invScreen = vec2(2.f) / gl_LaunchSizeEXT.xy;
+  vec2 pixel = gl_LaunchIDEXT.xy * invScreen - 1.f;
+  // vec4 target = cameraBuffer.projectionMatrixInverse * vec4(pixel, 1.f, 1.f);
+  uint seed = tea(gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x + gl_LaunchIDEXT.x, uint(clockARB()));
+
+  // imageStore(outColor, ivec2(gl_LaunchIDEXT.xy), target);
+
+  vec3 radiance = vec3(0.f);
+  // vec3 albedo = vec3(0.f);
+  // vec3 normal = vec3(0.f);
+
+  uint rayFlags = gl_RayFlagsNoneEXT;
+  // // TODO: use camera near far
+  float tMin = 0.001f;
+  float tMax = 10000.0f;
+
+  ray.seed = seed;
+
+  for (int i = 0; i < spp; ++i) {
+    vec2 r = halton2d(frameCount * spp + i, 2, 3);
+    // vec2 r = vec2(0.0);  // TODO: AA with jitter
+    vec2 d = pixel + r * invScreen;  // jittered pixel position
+    vec4 csDir = cameraBuffer.projectionMatrixInverse * vec4(d, 1.f, 1.f);
+    vec4 origin = cameraBuffer.viewMatrixInverse * vec4(0.f, 0.f, 0.f, 1.f);
+    vec4 direction = cameraBuffer.viewMatrixInverse * vec4(csDir.xyz, 0.f);
+
+    ray.origin = origin.xyz;
+    ray.direction = normalize(direction.xyz);
+    ray.albedo = vec3(0.);
+    ray.normal = vec3(0.);
+    ray.radiance = vec3(0.f);
+    ray.attenuation = vec3(1.f);
+    ray.depth = 0;
+
+    vec3 attenuation = vec3(1.f);
+    for (ray.depth = 0; ray.depth <= maxDepth; ++ray.depth) {
+      bool first = false;
+      if (ray.depth == 0) {
+        first = true;
+      }
+
+      traceRayEXT(tlas,
+                  rayFlags,
+                  0xff,
+                  0,
+                  0,
+                  0,
+                  ray.origin,
+                  tMin,
+                  ray.direction,
+                  tMax,
+                  0);
+
+      radiance += ray.radiance * attenuation;
+      attenuation *= ray.attenuation;
+
+      if (russianRoulette != 0 && ray.depth >= russianRouletteMinBounces) {
+        float p = max(attenuation.x, max(attenuation.y, attenuation.z));
+        // kill to 0 with probability 1-p
+        if (rnd(seed) > p) {
+          break;
+        }
+        // amplify to 1/p with probability p
+        attenuation *= 1.0 / p;
+      }
+
+      if (first) {
+        imageStore(outNormal, ivec2(gl_LaunchIDEXT.xy), vec4(mat3(cameraBuffer.viewMatrix) * ray.normal, 1.0));
+        imageStore(outAlbedo, ivec2(gl_LaunchIDEXT.xy), vec4(ray.albedo, 1.0));
+        imageStore(outSegmentation, ivec2(gl_LaunchIDEXT.xy), ray.segmentation);
+      }
+    }
+  //   radiance += attenuation * environmentLight;
+  }
+
+  radiance /= spp;
+
+  if (frameCount > 0) {
+    vec3 oldColor = imageLoad(outRadiance, ivec2(gl_LaunchIDEXT.xy)).xyz;
+    vec4 newColor = vec4(mix(oldColor, radiance, 1.0 / float(frameCount + 1)), 1.0);
+    imageStore(outRadiance, ivec2(gl_LaunchIDEXT.xy), newColor);
+    imageStore(outHdrColor, ivec2(gl_LaunchIDEXT.xy), newColor);
+  } else {
+    imageStore(outRadiance, ivec2(gl_LaunchIDEXT.xy), vec4(radiance, 1.0));
+    imageStore(outHdrColor, ivec2(gl_LaunchIDEXT.xy), vec4(radiance, 1.0));
+  }
+
+  // imageStore(outColor, ivec2(gl_LaunchIDEXT.xy), imageLoad(outNormal, ivec2(gl_LaunchIDEXT.xy)));
+}

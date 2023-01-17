@@ -1,5 +1,5 @@
 from ..core import (
-    KuafuRenderer,
+    IPxrRenderer,
     ActorBase,
     ActorStatic,
     Pose,
@@ -30,7 +30,7 @@ import transforms3d as t3d
 class ActiveLightSensor(SensorEntity):
     def __init__(self,
                  sensor_name: str,
-                 renderer: KuafuRenderer,
+                 renderer: IPxrRenderer,
                  scene: Scene,
                  sensor_type: Optional[str] = 'd415',
                  rgb_resolution: Tuple[int, int] = None,
@@ -217,7 +217,7 @@ class ActiveLightSensor(SensorEntity):
             ])
             self.trans_pose_l = Pose([0, -0.0175, 0])
             self.trans_pose_r = Pose([0, -0.0720, 0])
-            self.light_pattern = os.path.join(os.path.dirname(__file__), 'assets/patterns/fakesense_j415.png')
+            self.light_pattern = os.path.join(os.path.dirname(__file__), 'assets/patterns/d415.png')
             self.max_depth = 10.0
             self.min_depth = 0.2
         elif sensor_type == 'fakesense_j415':
@@ -236,7 +236,7 @@ class ActiveLightSensor(SensorEntity):
             ])
             self.trans_pose_l = Pose([0, -0.0175, 0])
             self.trans_pose_r = Pose([0, -0.0720, 0])
-            self.light_pattern = os.path.join(os.path.dirname(__file__), 'assets/patterns/fakesense_j415.png')
+            self.light_pattern = os.path.join(os.path.dirname(__file__), 'assets/patterns/d415.png')
             self.max_depth = 10.0
             self.min_depth = 0.2
         else:
@@ -346,7 +346,7 @@ class ActiveLightSensor(SensorEntity):
 class ActiveLightSensorCUDA(ActiveLightSensor):
     def __init__(self,
                 sensor_name: str,
-                renderer: KuafuRenderer,
+                renderer: IPxrRenderer,
                 scene: Scene,
                 sensor_type: Optional[str] = 'd415',
                 rgb_resolution: Tuple[int, int] = None,
