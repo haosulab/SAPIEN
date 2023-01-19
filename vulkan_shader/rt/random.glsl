@@ -1,4 +1,5 @@
 #define M_PI 3.141592
+#define M_1_PI 0.318309886
 
 uint tea(uint val0, uint val1) {
   uint v0 = val0;

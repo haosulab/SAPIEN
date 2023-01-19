@@ -20,6 +20,7 @@ void main() {
   ray.albedo = ray.radiance;
   ray.normal = -ray.direction;
 
+  ray.attenuation = vec3(0.0);
   ray.depth = maxDepth + 1;
 
   // ray.depth = maxDepth + 1;

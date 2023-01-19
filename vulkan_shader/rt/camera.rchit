@@ -90,29 +90,92 @@ float maxVec3(vec3 v) {
   return max(v.x, max(v.y, v.z));
 }
 
-void sampleDiffuse(inout uint seed, in mat3 tbn, vec3 albedo, out vec3 L, out vec3 attenuation) {
-  L = tbn * cosineSampleHemisphere(seed);
-  attenuation = albedo;
-  // TODO check correctness
+float schlickFresnel(float cosTheta) {
+  float m = clamp(1.0 - cosTheta, 0.0, 1.0);
+  float m2 = m * m;
+  return m2 * m2 * m;
 }
 
-void sampleGGX(inout uint seed, in mat3 tbn, vec3 F0, vec3 V, float roughness, out vec3 L, out vec3 attenuation) {
-  vec3 N = tbn[2];
+float dielectricFresnel(float cosTheta, float eta) {
+// https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf (eq. 22)
+// eta: target ior / input ior
+  float c = abs(cosTheta);
+  float g = eta * eta - 1.0 + c * c;
+  if (g > 0.0) {
+    g = sqrt(g);
+    float A = (g - c) / (g + c);
+    float B = (c * (g + c) - 1.0) / (c * (g - c) + 1.0);
+    return 0.5 * A * A * (1.0 + B * B);
+  }
+  return 1.0;
+}
 
+// diffuse with schlick
+vec3 diffuseBRDF(in vec3 albedo, in float dotNL, in float dotNV) {
+  // return M_1_PI * albedo;
+  float f = (1.0 - 0.5 * schlickFresnel(dotNL)) * (1.0 - 0.5 * schlickFresnel(dotNV));
+  return  M_1_PI * f * albedo;
+}
+
+vec3 evalDiffuse(in float dotNL, in float dotNV, in vec3 albedo) {
+  return dotNL *  diffuseBRDF(albedo, dotNL, dotNV);
+}
+
+void sampleDiffuse(inout uint seed, in mat3 tbn, in vec3 V, in vec3 albedo, out vec3 L, out vec3 attenuation) {
+  vec3 N = tbn[2];
+  L = tbn * cosineSampleHemisphere(seed);  // PDF = dotNL / PI
+  float dotNL = dot(N, L);
+  float dotNV = dot(N, V);
+  vec3 f = diffuseBRDF(albedo, dotNL, dotNV);
+  attenuation = f * M_PI;  // attenuation = dotNL * BRDF / PDF
+}
+
+
+// D
+float ggxNormalDistribution(float dotNH, float a2) {
+  float d = max(dotNH * dotNH * (a2 - 1.0) + 1.0, 1e-5);
+  return a2 / (d * d * M_PI);
+}
+
+// G
+float smithGGXMaskingShadowing(float dotNL, float dotNV, float a2) {
+  float A = dotNV * sqrt(a2 + (1.0 - a2) * dotNL * dotNL);
+  float B = dotNL * sqrt(a2 + (1.0 - a2) * dotNV * dotNV);
+  return 2.0 * dotNL * dotNV / (A + B);
+}
+
+vec3 sampleNormalDistribution(inout uint seed, in float a2) {
   float u0 = rnd(seed);
   float u1 = rnd(seed);
 
-  float alpha = roughness * roughness;
-  float alpha2 = alpha * alpha;
-  float k = (alpha + 2 * roughness + 1) / 8.0;
-
-  float z1 = (1.0 - u1) / (1.0 + (alpha2 - 1.0) * u1);
+  // sample the GGX distribution
+  float z1 = clamp((1.0 - u1) / (1.0 + (a2 - 1.0) * u1), 0.0, 1.0);
   float cosTheta = sqrt(z1);
   float sinTheta = sqrt(1.0 - z1);
-  float phi = 2 * M_PI * u0;
-
+  float phi = 2.0 * M_PI * u0;
   vec3 H = vec3(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
-  H = tbn * H;
+
+  return H;  // PDF = D * dotNH / (4 * dotVH)
+}
+
+vec3 evalGGXReflection(float dotNL, float dotNV, float dotNH, float dotVH, float roughness, vec3 F0) {
+  float a = roughness * roughness;
+  float a2 = a * a;
+
+  vec3 F = F0 + (1.0 - F0) * schlickFresnel(dotVH);
+  float D = ggxNormalDistribution(dotNH, a2);
+  float G = smithGGXMaskingShadowing(dotNL, dotNV, a2);
+
+  return F * D * G / max(4.0 * dotNL * dotNV, 1e-6);
+}
+
+
+void sampleGGXReflection(inout uint seed, in mat3 tbn, vec3 V, float roughness,vec3 F0,  out vec3 L, out vec3 attenuation) {
+  vec3 N = tbn[2];
+  float a = roughness * roughness;
+  float a2 =  a*a;
+
+  vec3 H = tbn * sampleNormalDistribution(seed, a2);
 
   L = 2 * dot(V, H) * H - V;
 
@@ -121,81 +184,105 @@ void sampleGGX(inout uint seed, in mat3 tbn, vec3 F0, vec3 V, float roughness, o
   float dotNL = dot(N, L);
   float dotNV = clamp(dot(N, V), 1e-6, 1);
 
-  // attenuation = F0 * M_PI;
-
   if (dotNL >= 0) {
-    vec3 F = F0 + (1 - F0) * pow(2.0, (-5.55473 * dotVH - 6.98316) * dotVH);
-    float G = (dotNV * dotNL) / ((dotNV * (1 - k) + k) * (dotNL * (1 - k) + k));  // G2_smith
+    vec3 F = F0 + (1.0 - F0) * schlickFresnel(dotVH);
+    float G = smithGGXMaskingShadowing(max(dotNL, 1e-6), dotNV, a2);
     attenuation = F * G * dotVH / (dotNH * dotNV);
   } else {
     attenuation = vec3(0.0);
   }
 }
 
-void sampleGGXTransmission(inout uint seed, in mat3 tbn, vec3 Ft, vec3 V, float roughness, float ior, out vec3 L, out vec3 attenuation) {
+
+vec3 evalGGXTransmission(vec3 N, vec3 L, vec3 V, float eta, float roughness) {
+// eta is ior of source over ior of target, eta1 / eta2
+// air to water: 1 / 1.3
+
+  float a = roughness * roughness;
+  float a2 = a * a;
+
+  if (dot(N, L) < 0) {
+    // refraction
+    vec3 h = -(eta * V + L);
+    vec3 H = normalize(h);
+    float dotVH = dot(V, H);
+    if (dotVH < 1e-6) {
+      return vec3(0.0);
+    }
+
+    float dotLH = dot(L, H);
+    float dotNL = dot(N, L);
+    float dotNV = dot(N, V);
+    float dotNH = dot(N, H);
+
+    float F = dielectricFresnel(dotVH, 1.0 / eta);
+    float D = ggxNormalDistribution(dotNH, a2);
+    float G = smithGGXMaskingShadowing(dotNL, dotNV, a2);
+
+    float A = abs((dotLH * dotVH) / (dotNL * dotNV));
+    float B = dotLH / eta + dotVH;
+
+    float result = A * (1 - F) * D * G / (B * B);
+
+    return vec3(result);
+  } else {
+    // reflection
+    vec3 H = normalize(V + L);
+
+    float dotNH = clamp(dot(N, H), 1e-6, 1);
+    float dotVH = clamp(dot(V, H), 1e-6, 1);
+    float dotNL = dot(N, L);
+    float dotNV = clamp(dot(N, V), 1e-6, 1);
+
+    float F = dielectricFresnel(dotVH, 1.0 / eta);
+    float D = ggxNormalDistribution(dotNH, a2);
+    float G = smithGGXMaskingShadowing(dotNL, dotNV, a2);
+
+    float result = F * D * G / (4.0 * dotNL * dotNV);
+
+    return vec3(result);
+  }
+}
+
+void sampleGGXTransmission(inout uint seed, in mat3 tbn, vec3 V, float eta, float roughness, out vec3 L, out vec3 attenuation) {
+// eta is ior of camera side over ior of light side
+// tracing air into water: 1 / 1.3
   vec3 N = tbn[2];
 
-  float u0 = rnd(seed);
-  float u1 = rnd(seed);
+  float a = roughness * roughness;
+  float a2 = a * a;
 
-  float alpha = roughness * roughness;
-  float alpha2 = alpha * alpha;
-  // float k = (alpha + 2 * roughness + 1) / 8.0;
+  vec3 H = tbn * sampleNormalDistribution(seed, a2);
 
-  float z1 = (1.0 - u1) / (1.0 + (alpha2 - 1.0) * u1);
-  float cosTheta = sqrt(z1);
-  float sinTheta = sqrt(1.0 - z1);
-  float phi = 2 * M_PI * u0;
+  float dotVH = clamp(dot(V, H), 1e-6, 1.0);
+  float dotNV = clamp(dot(N, V), 1e-6, 1.0);
+  float dotNH = clamp(dot(N, H), 1e-6, 1.0);
 
-  vec3 H = vec3(sinTheta * cos(phi), sinTheta * sin(phi), cosTheta);
-  H = tbn * H;
+  float F = dielectricFresnel(dotVH, 1.0 / eta);
+  if (rnd(seed) <= F) {
+    // reflection
+    L = 2 * dot(V, H) * H - V;
+    float dotNL = max(dot(N, L), 1e-6);
+    float G = smithGGXMaskingShadowing(dotNL, dotNV, a2);
+    float result = G * dotVH / (dotNV * dotNH);
 
-  L = refract(-V, H, ior);
-  float dotNL = dot(-N, L);
-
-  if (dotNL >= 0) {
-    attenuation = Ft;  // TODO: proper importance sampling
+    attenuation = vec3(result);
   } else {
-    attenuation = vec3(0.0);
+    // refraction
+    L = refract(-V, H, eta);
+    float dotNL = dot(N, L);
+    float dotLH = dot(L, H);
+
+    float G = smithGGXMaskingShadowing(max(abs(dotNL), 1e-6), dotNV, a2);
+
+    float result = G * dotVH / (dotNV * dotNH);
+
+    attenuation = vec3(result);
   }
 }
 
 
-
-vec3 evalDiffuse(float dotNL, vec3 albedo) {
-  return albedo * dotNL / M_PI;
-}
-
-vec3 evalGGX(
-  float dotNL,
-  float dotNV,
-  float dotNH,
-  float dotVH,
-  float roughness,
-  vec3 F0
-) {
-  // https://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf
-
-  float alpha = roughness * roughness;
-  float alpha2 = alpha * alpha;
-  float k = (alpha + 2 * roughness + 1) / 8.0;
-
-  vec3 F = F0 + (1 - F0) * pow(2.0, (-5.55473 * dotVH - 6.98316) * dotVH);
-
-  // denominator for D
-  float d0 = dotNH * dotNH * (alpha2 - 1) + 1;
-  d0 = M_PI * d0 * d0;
-
-  // denominator for G
-  float d1 = (dotNV * (1 - k) + k) * (dotNL * (1 - k) + k);
-
-  vec3 spec = (F * alpha2) / (4 * d0 * d1);
-
-  return spec * dotNL;
-}
-
-
-vec3 traceDirectionalLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColor, float roughness) {
+vec3 traceDirectionalLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColor, float roughness, float transmissionWeight, float eta) {
   vec3 result = vec3(0.0);
   for (uint i = 0; i < directionalLightCount; ++i) {
     DirectionalLight light = directionalLights.l[i];
@@ -226,17 +313,20 @@ vec3 traceDirectionalLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specu
       vec3 H = normalize(V + L);
       float dotNH = clamp(dot(normal, H), 1e-6, 1);
       float dotVH = clamp(dot(V, H), 1e-6, 1);
-      float dotNL = clamp(dot(normal, L), 0, 1);
+      float dotNL = clamp(dot(normal, L), 1e-6, 1);
       float dotNV = clamp(dot(normal, V), 1e-6, 1);
 
-      result += evalDiffuse(dotNL, diffuseColor) * emission;  // diffuse
-      result += evalGGX(dotNL, dotNV, dotNH, dotVH, roughness, specularColor) * emission;  // specular
+      result += evalDiffuse(dotNL, dotNV, diffuseColor) * emission;  // diffuse
+      result += evalGGXReflection(dotNL, dotNV, dotNH, dotVH, roughness, specularColor) * emission;  // specular
+      if (transmissionWeight > 1e-5) {
+        result += evalGGXTransmission(normal, L, V, eta, roughness) * emission;
+      }
     }
   }
   return result;
 }
 
-vec3 tracePointLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColor, float roughness) {
+vec3 tracePointLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColor, float roughness, float transmissionWeight, float eta) {
   vec3 result = vec3(0.0);
   for (uint i = 0; i < pointLightCount; ++i) {
     PointLight light = pointLights.l[i];
@@ -261,22 +351,25 @@ vec3 tracePointLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularCol
                 sqrt(d2) - 0.001,
                 1  // payload location
     );
-
+    //
     if (!shadowRay.shadowed) {
       vec3 H = normalize(V + L);
       float dotNH = clamp(dot(normal, H), 1e-6, 1);
       float dotVH = clamp(dot(V, H), 1e-6, 1);
-      float dotNL = clamp(dot(normal, L), 0, 1);
+      float dotNL = clamp(dot(normal, L), 1e-6, 1);
       float dotNV = clamp(dot(normal, V), 1e-6, 1);
 
-      result += evalDiffuse(dotNL, diffuseColor) * emission / d2;  // diffuse
-      result += evalGGX(dotNL, dotNV, dotNH, dotVH, roughness, specularColor) * emission / d2;  // specular
+      result += evalDiffuse(dotNL, dotNV, diffuseColor) * emission / d2;  // diffuse
+      result += evalGGXReflection(dotNL, dotNV, dotNH, dotVH, roughness, specularColor) * emission / d2;  // specular
+      if (transmissionWeight > 1e-5) {
+        result += evalGGXTransmission(normal, L, V, eta, roughness) * emission / d2;
+      }
     }
   }
   return result;
 }
 
-vec3 traceSpotLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColor, float roughness) {
+vec3 traceSpotLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColor, float roughness, float transmissionWeight, float eta) {
   vec3 result = vec3(0.0);
   for (uint i = 0; i < spotLightCount; ++i) {
     SpotLight light = spotLights.l[i];
@@ -297,7 +390,7 @@ vec3 traceSpotLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColo
     vec3 H = normalize(V + L);
     float dotNH = clamp(dot(normal, H), 1e-6, 1);
     float dotVH = clamp(dot(V, H), 1e-6, 1);
-    float dotNL = clamp(dot(normal, L), 0, 1);
+    float dotNL = clamp(dot(normal, L), 1e-6, 1);
     float dotNV = clamp(dot(normal, V), 1e-6, 1);
 
     int texId = light.textureId;
@@ -309,6 +402,8 @@ vec3 traceSpotLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColo
       vec2 uv = texcoord.xy * 0.5 + 0.5;
       texColor = texture(textures[nonuniformEXT(texId)], uv).rgb;
     }
+
+    float maxTexColor = maxVec3(texColor);
 
     if (visibility > 0.0) {
       uint flags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT;
@@ -325,9 +420,12 @@ vec3 traceSpotLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColo
                   sqrt(d2) - 0.001,
                   1  // payload location
       );
-      if (!shadowRay.shadowed) {
-        result += (evalDiffuse(dotNL, diffuseColor) * emission / d2  // diffuse
-                   + evalGGX(dotNL, dotNV, dotNH, dotVH, roughness, specularColor) * emission / d2) * visibility * texColor;  // specular
+      if (!shadowRay.shadowed && visibility > 1e-5 && maxTexColor > 1e-5) {
+        result += evalDiffuse(dotNL, dotNV, diffuseColor) * emission / d2 * visibility * texColor;  // diffuse
+        result += evalGGXReflection(dotNL, dotNV, dotNH, dotVH, roughness, specularColor) * emission / d2 * visibility * texColor;  // specular
+        if (transmissionWeight > 1e-5) {
+          result += evalGGXTransmission(normal, L, V, eta, roughness) * emission * visibility * texColor;
+        }
       }
     }
   }
@@ -378,15 +476,17 @@ void main() {
   TextureIndex ti = textureIndices.t[materialIndex];
 
   vec3 baseColor = mat.baseColor.rgb;
+  float alpha = 1.0;
   if (ti.diffuse >= 0) {
-    baseColor = texture(textures[nonuniformEXT(ti.diffuse)], uv).rgb;
+    vec4 baseColorAlpha = texture(textures[nonuniformEXT(ti.diffuse)], uv);
+    baseColor = baseColorAlpha.rgb;
+    alpha = baseColorAlpha.a;
   }
 
   float metallic = mat.metallic;
   if (ti.metallic >= 0) {
     metallic = texture(textures[nonuniformEXT(ti.metallic)], uv).x;
   }
-  metallic = clamp(metallic, 0.0, 1.0);
 
   float roughness = mat.roughness;
   if (ti.roughness >= 0) {
@@ -414,19 +514,24 @@ void main() {
     return;
   }
 
+  float specular = max(mat.fresnel, 0.0);
+
   float transmission = clamp(mat.transmission, 0.0, 1.0);
+  transmission = 1.0 - clamp(alpha, 0.0, 1.0) * (1.0 - transmission);
 
-  float specular = clamp(mat.fresnel * 0.08, 0.0, 1.0);
+  metallic = clamp(metallic, 0.0, 1.0);
+  float ior = clamp(mat.ior, 1.01, 4.0);
 
-  float nonMetallic = 1.0 - metallic;
+  float diffuseWeight = (1.0 - metallic) * (1.0 - transmission);
+  transmission = (1.0 - metallic) * transmission;
+  float specularWeight = 1.0 - transmission;
 
-  vec3 diffuseColor = (1.0 - transmission) * baseColor * nonMetallic;
-  vec3 specularColor = baseColor * metallic + vec3(specular) * nonMetallic;
-  vec3 transmissionColor = transmission * baseColor * nonMetallic;
+  vec3 specularColor = (specular * 0.08) * (1.0 - metallic) + baseColor * metallic;
+  vec3 diffuseColor = baseColor * diffuseWeight;
 
   float diffuseProb = maxVec3(diffuseColor);
   float specularProb = maxVec3(specularColor);
-  float transmissionProb = maxVec3(transmissionColor);
+  float transmissionProb = transmission;
   float total = diffuseProb + specularProb + transmissionProb;
 
   diffuseProb = diffuseProb / total;
@@ -450,26 +555,25 @@ void main() {
   if (isInside) {
     tbn *= -1.0;
   }
+  float eta = isInside ? ior : (1.0 / ior);
 
   vec3 attenuation = vec3(0.0);
   vec3 L = vec3(0.0);
   if (rand <= diffuseProb) {
-    sampleDiffuse(ray.seed, tbn, diffuseColor, L, attenuation);
+    sampleDiffuse(ray.seed, tbn, V, diffuseColor, L, attenuation);
     attenuation = attenuation / diffuseProb;
   } else if (rand <= diffuseProb + specularProb) {  // specular
-    sampleGGX(ray.seed, tbn, specularColor, V, roughness, L, attenuation);
+    sampleGGXReflection(ray.seed, tbn, V, roughness, specularColor, L, attenuation);
     attenuation /= specularProb;
   } else {  // transmission
-    float ior = isInside ? mat.ior : (1.0 / mat.ior);
-    float tr = mat.transmissionRoughness;
-    sampleGGXTransmission(ray.seed, tbn, transmissionColor, V, tr, ior, L, attenuation);
-    attenuation /= transmissionProb;
+    sampleGGXTransmission(ray.seed, tbn, V, eta, roughness, L, attenuation);
+    attenuation *= transmission / transmissionProb;
   }
 
   ray.radiance = emission
-    + tracePointLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness)
-    + traceDirectionalLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness)
-    + traceSpotLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness);
+    + tracePointLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness, transmission, eta)
+    + traceDirectionalLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness, transmission, eta)
+    + traceSpotLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness, transmission, eta);
 
   ray.origin = worldPosition;
   ray.direction = L;
