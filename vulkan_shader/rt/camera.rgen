@@ -120,6 +120,4 @@ void main() {
     imageStore(outRadiance, ivec2(gl_LaunchIDEXT.xy), vec4(radiance, 1.0));
     imageStore(outHdrColor, ivec2(gl_LaunchIDEXT.xy), vec4(radiance, 1.0));
   }
-
-  // imageStore(outColor, ivec2(gl_LaunchIDEXT.xy), imageLoad(outNormal, ivec2(gl_LaunchIDEXT.xy)));
 }

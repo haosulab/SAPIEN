@@ -100,7 +100,7 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
       if (!mImageBuffers.contains(name)) {
         mImageBuffers[name] = std::make_shared<svulkan2::core::Buffer>(
             size, vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst,
-            VMA_MEMORY_USAGE_GPU_ONLY);
+            VMA_MEMORY_USAGE_GPU_ONLY, VmaAllocationCreateFlags{}, true);
       }
       auto buffer = mImageBuffers.at(name);
       image.recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0, size, {0, 0, 0},
@@ -213,7 +213,7 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   if (!mImageBuffers.contains(name)) {
     mImageBuffers[name] = std::make_shared<svulkan2::core::Buffer>(
         size, vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst,
-        VMA_MEMORY_USAGE_GPU_ONLY);
+        VMA_MEMORY_USAGE_GPU_ONLY, VmaAllocationCreateFlags{}, true);
   }
   auto buffer = mImageBuffers.at(name);
   image.recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0, size, {0, 0, 0},
