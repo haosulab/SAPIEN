@@ -106,7 +106,7 @@ void main() {
         imageStore(outSegmentation, ivec2(gl_LaunchIDEXT.xy), ray.segmentation);
       }
     }
-  //   radiance += attenuation * environmentLight;
+    radiance += attenuation * ambientLight;  // HACK: implement unterminated ray properly
   }
 
   radiance /= spp;

@@ -52,12 +52,13 @@ void FPSCameraControllerDebug::update() {
 SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int width, int height,
                                std::string const &shaderDir)
     : mRenderer(renderer), mShaderDir(shaderDir) {
+  auto &renderConfig = GetRenderConfig();
+
   auto config = std::make_shared<svulkan2::RendererConfig>();
   *config = *renderer->getDefaultRendererConfig();
 
-  config->shaderDir = mShaderDir.length() ? mShaderDir : GetRenderConfig().viewerShaderDirectory;
+  config->shaderDir = mShaderDir.length() ? mShaderDir : renderConfig.viewerShaderDirectory;
 
-  // mSVulkanRenderer = std::make_unique<svulkan2::renderer::Renderer>(config);
   mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);
 
   // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -68,8 +69,20 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
   mViewportWidth = width;
   mViewportHeight = height;
 
-#ifdef _DEBUG_VIEWER
-#endif
+  if (auto rtRenderer = dynamic_cast<svulkan2::renderer::RTRenderer *>(mSVulkanRenderer.get())) {
+    rtRenderer->setCustomProperty("spp", renderConfig.rayTracingSamplesPerPixel);
+    rtRenderer->setCustomProperty("maxDepth", renderConfig.rayTracingPathDepth);
+    if (renderConfig.rayTracingRussianRouletteMinBounces >= 0) {
+      rtRenderer->setCustomProperty("russianRoulette", 1);
+      rtRenderer->setCustomProperty("russianRouletteMinBounces",
+                                    renderConfig.rayTracingRussianRouletteMinBounces);
+    } else {
+      rtRenderer->setCustomProperty("russianRoulette", 0);
+    }
+    if (renderConfig.rayTracingUseDenoiser) {
+      rtRenderer->enableDenoiser("HdrColor", "Albedo", "Normal");
+    }
+  }
 }
 
 void SVulkan2Window::setShader(std::string const &shaderDir) {

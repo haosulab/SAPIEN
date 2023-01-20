@@ -54,7 +54,7 @@ def main():
     sapien.VulkanRenderer.set_log_level("info")
 
     sim = sapien.Engine()
-    renderer = sapien.VulkanRenderer(default_mipmap_levels=4, do_not_load_texture=True)
+    renderer = sapien.VulkanRenderer(default_mipmap_levels=4)
     renderer_context: R.Context = renderer._internal_context
     sim.set_renderer(renderer)
 
@@ -63,8 +63,8 @@ def main():
     copper.set_metallic(1)
     copper.set_roughness(0.2)
 
-    sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
-    sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/ibl")
+    sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/rt")
+    sapien.VulkanRenderer.set_camera_shader_dir("../vulkan_shader/rt")
     viewer = Viewer(renderer)
 
     # cubemap = renderer_context.create_cubemap_from_files(
@@ -252,6 +252,7 @@ def main():
     loader = scene.create_urdf_loader()
     loader.fix_root_link = True
     robot = loader.load("../assets/robot/movo/movo.urdf")
+    robot.set_pose(sapien.Pose([-1,0,0]))
     robot.get_qpos()
     import ipdb; ipdb.set_trace()
     # for j in robot.get_active_joints():
@@ -333,24 +334,24 @@ def main():
         viewer.render()
         count += 1
 
-        cam2.take_picture()
-        img = cam2.get_dl_tensor("Color")
-        shape = sapien.dlpack.dl_shape(img)
-        output = np.zeros(shape, dtype=np.float32)
-        sapien.dlpack.dl_to_numpy_cuda_async_unchecked(img, output)
-        sapien.dlpack.dl_cuda_sync()
+        # cam2.take_picture()
+        # img = cam2.get_dl_tensor("Color")
+        # shape = sapien.dlpack.dl_shape(img)
+        # output = np.zeros(shape, dtype=np.float32)
+        # sapien.dlpack.dl_to_numpy_cuda_async_unchecked(img, output)
+        # sapien.dlpack.dl_cuda_sync()
 
-        imgs = cam2.take_picture_and_get_dl_tensors_async(["Color"]).wait()
-        shape = sapien.dlpack.dl_shape(imgs[0])
-        output = np.zeros(shape, dtype=np.float32)
-        sapien.dlpack.dl_to_numpy_cuda_async_unchecked(imgs[0], output)
-        sapien.dlpack.dl_cuda_sync()
+        # imgs = cam2.take_picture_and_get_dl_tensors_async(["Color"]).wait()
+        # shape = sapien.dlpack.dl_shape(imgs[0])
+        # output = np.zeros(shape, dtype=np.float32)
+        # sapien.dlpack.dl_to_numpy_cuda_async_unchecked(imgs[0], output)
+        # sapien.dlpack.dl_cuda_sync()
 
-        print('here1')
-        import matplotlib.pyplot as plt
-        plt.imshow(output)
-        plt.show()
-        print('here2')
+        # print('here1')
+        # import matplotlib.pyplot as plt
+        # plt.imshow(output)
+        # plt.show()
+        # print('here2')
 
         robot.get_qpos()
         if count == 1:
