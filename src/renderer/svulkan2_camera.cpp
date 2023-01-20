@@ -203,7 +203,6 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   }
   mCommandBuffer->reset();
   mCommandBuffer->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-  mRenderer->render(*mCamera, {}, {}, {}, {});
 
   auto &image = mRenderer->getRenderImage(name);
   auto extent = image.getExtent();
