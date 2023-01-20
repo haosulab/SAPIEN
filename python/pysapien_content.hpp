@@ -2668,7 +2668,7 @@ Args:
       [](py::capsule data, py::array_t<float> array) {
         DLManagedTensor *tensor = (DLManagedTensor *)data.get_pointer();
         int64_t size = 1;
-        for (uint32_t i = 0; i < tensor->dl_tensor.ndim; ++i) {
+        for (int i = 0; i < tensor->dl_tensor.ndim; ++i) {
           size *= tensor->dl_tensor.shape[i];
         };
         int64_t bytes = size * (tensor->dl_tensor.dtype.bits / 8);
