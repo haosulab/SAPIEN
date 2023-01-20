@@ -66,7 +66,7 @@ Status RenderServiceImpl::CreateScene(ServerContext *c, const proto::Index *req,
   auto info = std::make_shared<SceneInfo>();
   info->sceneIndex = index;
   info->sceneId = id;
-  info->scene = std::make_unique<svulkan2::scene::Scene>();
+  info->scene = std::make_shared<svulkan2::scene::Scene>();
   info->threadRunner = std::make_unique<ThreadPool>(1);
   info->threadRunner->init();
 
@@ -269,7 +269,7 @@ Status RenderServiceImpl::AddCamera(ServerContext *c, const proto::AddCameraReq 
 
     camInfo->renderer = std::make_unique<svulkan2::renderer::Renderer>(config);
     camInfo->renderer->resize(req->width(), req->height());
-    camInfo->renderer->setScene(*sceneInfo->scene);
+    camInfo->renderer->setScene(sceneInfo->scene);
 
     camInfo->camera = &sceneInfo->scene->addCamera();
     camInfo->camera->setPerspectiveParameters(req->near(), req->far(), req->fovy(), req->width(),

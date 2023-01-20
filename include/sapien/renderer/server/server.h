@@ -103,7 +103,7 @@ private:
   struct SceneInfo {
     uint64_t sceneIndex;
     uint64_t sceneId;
-    std::unique_ptr<svulkan2::scene::Scene> scene;
+    std::shared_ptr<svulkan2::scene::Scene> scene;
 
     std::unordered_map<rs_id_t, std::shared_ptr<CameraInfo>> cameraMap;
     std::vector<std::shared_ptr<CameraInfo>> cameraList;

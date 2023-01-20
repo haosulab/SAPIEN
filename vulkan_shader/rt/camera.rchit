@@ -112,9 +112,9 @@ float dielectricFresnel(float cosTheta, float eta) {
 
 // diffuse with schlick
 vec3 diffuseBRDF(in vec3 albedo, in float dotNL, in float dotNV) {
-  // return M_1_PI * albedo;
-  float f = (1.0 - 0.5 * schlickFresnel(dotNL)) * (1.0 - 0.5 * schlickFresnel(dotNV));
-  return  M_1_PI * f * albedo;
+  return M_1_PI * albedo;
+  // float f = (1.0 - 0.5 * schlickFresnel(dotNL)) * (1.0 - 0.5 * schlickFresnel(dotNV));
+  // return  M_1_PI * f * albedo;
 }
 
 vec3 evalDiffuse(in float dotNL, in float dotNV, in vec3 albedo) {
@@ -317,10 +317,10 @@ vec3 traceDirectionalLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specu
       float dotNV = clamp(dot(normal, V), 1e-6, 1);
 
       result += evalDiffuse(dotNL, dotNV, diffuseColor) * emission;  // diffuse
-      result += evalGGXReflection(dotNL, dotNV, dotNH, dotVH, roughness, specularColor) * emission;  // specular
-      if (transmissionWeight > 1e-5) {
-        result += evalGGXTransmission(normal, L, V, eta, roughness) * emission;
-      }
+      // result += evalGGXReflection(dotNL, dotNV, dotNH, dotVH, roughness, specularColor) * emission;  // specular
+      // if (transmissionWeight > 1e-5) {
+      //   result += evalGGXTransmission(normal, L, V, eta, roughness) * emission;
+      // }
     }
   }
   return result;
@@ -559,13 +559,13 @@ void main() {
 
   vec3 attenuation = vec3(0.0);
   vec3 L = vec3(0.0);
-  if (rand <= diffuseProb) {
+  if (diffuseProb > 1e-5 && rand <= diffuseProb) {
     sampleDiffuse(ray.seed, tbn, V, diffuseColor, L, attenuation);
     attenuation = attenuation / diffuseProb;
-  } else if (rand <= diffuseProb + specularProb) {  // specular
+  } else if (specularProb > 1e-5 && rand <= diffuseProb + specularProb) {  // specular
     sampleGGXReflection(ray.seed, tbn, V, roughness, specularColor, L, attenuation);
     attenuation /= specularProb;
-  } else {  // transmission
+  } else if (transmissionProb > 1e-5){  // transmission
     sampleGGXTransmission(ray.seed, tbn, V, eta, roughness, L, attenuation);
     attenuation *= transmission / transmissionProb;
   }

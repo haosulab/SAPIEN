@@ -2403,8 +2403,7 @@ Args:
       .def_property_readonly("mouse_wheel_delta", &Renderer::SVulkan2Window::getMouseWheelDelta);
 
   PyVulkanScene.def_property_readonly(
-      "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); },
-      py::return_value_policy::reference);
+      "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); });
 
   PyRenderer.def("create_material", &Renderer::IPxrRenderer::createMaterial)
       .def(

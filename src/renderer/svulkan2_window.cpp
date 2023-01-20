@@ -94,7 +94,7 @@ void SVulkan2Window::setShader(std::string const &shaderDir) {
   config->shaderDir = mShaderDir.length() ? mShaderDir : GetRenderConfig().viewerShaderDirectory;
   mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);
   if (mScene) {
-    mSVulkanRenderer->setScene(*mScene->getScene());
+    mSVulkanRenderer->setScene(mScene->getScene());
   }
   mSVulkanRenderer->resize(mViewportWidth, mViewportHeight);
 }
@@ -118,7 +118,7 @@ void SVulkan2Window::show() { glfwShowWindow(mWindow->getGLFWWindow()); }
 
 void SVulkan2Window::setScene(SVulkan2Scene *scene) {
   mScene = scene;
-  mSVulkanRenderer->setScene(*mScene->getScene());
+  mSVulkanRenderer->setScene(mScene->getScene());
 }
 
 void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {

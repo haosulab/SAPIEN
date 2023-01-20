@@ -13,7 +13,7 @@ class SVulkan2Camera;
 
 class SVulkan2Scene : public IPxrScene {
   SVulkan2Renderer *mParentRenderer;
-  std::unique_ptr<svulkan2::scene::Scene> mScene;
+  std::shared_ptr<svulkan2::scene::Scene> mScene;
   std::vector<std::unique_ptr<SVulkan2Rigidbody>> mBodies;
   std::vector<std::unique_ptr<SVulkan2PointBody>> mPointBodies;
   std::vector<std::unique_ptr<SVulkan2Camera>> mCameras;
@@ -29,7 +29,7 @@ public:
 
   inline std::string getName() { return mName; }
 
-  inline svulkan2::scene::Scene *getScene() { return mScene.get(); };
+  inline std::shared_ptr<svulkan2::scene::Scene> getScene() { return mScene; };
 
   // IPxrScene
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;

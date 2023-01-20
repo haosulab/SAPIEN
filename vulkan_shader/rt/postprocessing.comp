@@ -8,6 +8,12 @@ void main() {
   uint x = gl_GlobalInvocationID.x;
   uint y = gl_GlobalInvocationID.y;
   vec4 color = imageLoad(HdrColor, ivec2(gl_GlobalInvocationID.xy));
+
+  // make nan visible for debugging
+  if (isnan(color.x + color.y + color.z)) {
+    color = vec4(1000.0, 0, 1000.0, 1);
+  }
+
   imageStore(Color, ivec2(gl_GlobalInvocationID.xy), vec4(pow(color.rgb, vec3(1/2.2)), color.a));
 
   // vec4 albedo = imageLoad(Albedo, ivec2(gl_GlobalInvocationID.xy));

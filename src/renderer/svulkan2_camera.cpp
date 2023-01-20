@@ -31,7 +31,7 @@ SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, floa
   mCamera = &mScene->getScene()->addCamera();
   mCamera->setPerspectiveParameters(near, far, fovy, width, height);
   mSemaphore = context->createTimelineSemaphore(0);
-  mRenderer->setScene(*scene->getScene());
+  mRenderer->setScene(scene->getScene());
 
   // RT renderer
   if (auto rtRenderer = dynamic_cast<svulkan2::renderer::RTRenderer *>(mRenderer.get())) {
