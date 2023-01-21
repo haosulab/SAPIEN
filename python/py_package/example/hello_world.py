@@ -31,9 +31,8 @@ def main():
     box.set_pose(sapien.Pose(p=[0, 0, 0.5]))
 
     # Add some lights so that you can observe the scene
-    rscene = scene.get_renderer_scene()
-    rscene.set_ambient_light([0.5, 0.5, 0.5])
-    rscene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
+    scene.set_ambient_light([0.5, 0.5, 0.5])
+    scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
     viewer = Viewer(renderer)  # Create a viewer (window)
     viewer.set_scene(scene)  # Bind the viewer and the scene

@@ -7,7 +7,7 @@ Create Articulations
 
 The **articulation** is a set of **links** (each of which behaves like a rigid body) connected together with special **joints**.
 For instance, a drawer can be connected to a table by a **prismatic** joint (slider), and a door can be connected to a frame by a **revolute** joint (hinge).
-A robot is also an instance of articulation.
+A robot is also an instance of an articulation.
 Articulations are usually loaded from `URDF XML <http://wiki.ros.org/urdf/XML>`_, which we will see in other examples.
 This tutorial showcases how to create an articulation programmatically by SAPIEN.
 

@@ -51,7 +51,7 @@ Focused Camera Control
 Press ``f`` when an actor is selected will enter the ``Focused Camera Control``
 mode. In this mode, the center of the camera will be "focused" on the selected
 object. In this mode, the ``Right Mouse Button`` rotates around the object
-instead of object center. Additionally the ``Mouse Wheel`` can be used to zoom
+instead of the camera center. Additionally the ``Mouse Wheel`` can be used to zoom
 in and out. The ``Shift`` key can still be used to slow down the camera
 movement. Pressing any of ``wasd`` will put you back into the ``Free Camera
 Control``.
@@ -64,13 +64,13 @@ The control window (shown below) by default appears at the top-left of the GUI.
 .. image:: assets/control_window.png
     :width: 48%
 
-The ``Pause`` checkbox, when checked, will pause the simulation (entering a
+The ``Pause`` checkbox, when checked, will pause the simulation (entering an
 infinite rendering loop). You can still move the viewer camera around and even
 change the pose of objects (details in later sections). The ``Single Step``
 button let you jump out of the rendering loop for once.
 
 The ``Camera Speed`` section allows you to adjust the speed for various mouse
-operations. ``Move`` slides adjusts movement speed of ``wasd``. ``Rotate``
+operations. ``Move`` slider adjusts movement speed of ``wasd``. ``Rotate``
 adjust the rotating speed when pressing down ``Right Mouse Button``. ``Scroll``
 adjusts the zoom speed in ``Focus Camera Control``.
 
@@ -89,7 +89,9 @@ Axes`` checkbox can turn off the axes display. ``Axes Mode`` allows to place
 coordinate axes at actor origin or actor center of mass. ``Axes Scale`` adjusts
 the size of the axes. ``Opacity`` adjusts the opacity of the selected actor.
 
-Finally ``FPS`` displays the current rendering FPS.
+Finally ``FPS`` displays the current rendering FPS. Note this value does not
+represent the time to render a frame, as it is v-synced and affected by CPU
+operations (simulation, Python code execution, etc.)
 
 Scene Hierarchy Window
 -------------------------------------------
