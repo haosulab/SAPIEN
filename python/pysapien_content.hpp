@@ -2204,6 +2204,16 @@ Args:
   PyCameraEntity.def_property("parent", &SCamera::getParent, &SCamera::setParent)
       .def("set_parent", &SCamera::setParent, py::arg("parent"), py::arg("keep_pose"))
       .def("set_local_pose", &SCamera::setLocalPose, py::arg("pose"))
+      .def(
+          "set_pose",
+          [](SCamera &c, PxTransform const &pose) {
+            if (c.getParent()) {
+              throw std::runtime_error(
+                  "set_pose is not allowed for a mounted camera. Call set_local_pose instead.");
+            }
+            c.setLocalPose(pose);
+          },
+          py::arg("pose"))
       .def_property_readonly("local_pose", &SCamera::getLocalPose)
 
       .def_property_readonly("width", &SCamera::getWidth)
