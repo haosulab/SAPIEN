@@ -162,7 +162,6 @@ class VulkanCudaBuffer {
 public:
   VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physicalDevice, std::string const &type,
                    std::vector<int> const &shape);
-  // VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physicalDevice, vk::DeviceSize size);
   ~VulkanCudaBuffer();
 
   inline std::vector<int> const &getShape() const { return mShape; }

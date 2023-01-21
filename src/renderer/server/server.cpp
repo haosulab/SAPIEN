@@ -854,7 +854,7 @@ VulkanCudaBuffer::VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physica
   for (uint32_t i = 0; i < shape.size(); ++i) {
     mSize *= shape[i];
   }
-  mSize = std::max(mSize, static_cast<vk::DeviceSize>(1024 * 1024));
+  // mSize = std::max(mSize, static_cast<vk::DeviceSize>(1024 * 1024));
   if (mSize <= 0) {
     throw std::runtime_error("empty buffer is not allowed");
   }
@@ -862,12 +862,20 @@ VulkanCudaBuffer::VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physica
   vk::BufferCreateInfo bufferInfo(
       {}, mSize, vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst,
       vk::SharingMode::eExclusive);
+  vk::ExternalMemoryBufferCreateInfo externalMemoryInfo(
+      vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd);
+  bufferInfo.setPNext(&externalMemoryInfo);
+
   mBuffer = device.createBufferUnique(bufferInfo);
 
   auto memReqs = device.getBufferMemoryRequirements(mBuffer.get());
   vk::MemoryAllocateInfo memoryInfo(
       memReqs.size,
       findMemoryType(memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal));
+
+  vk::ExportMemoryAllocateInfo allocInfo(vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd);
+  memoryInfo.setPNext(&allocInfo);
+
   mMemory = device.allocateMemoryUnique(memoryInfo);
   device.bindBufferMemory(mBuffer.get(), mMemory.get(), 0);
 
