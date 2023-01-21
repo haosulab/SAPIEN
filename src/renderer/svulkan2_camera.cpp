@@ -31,7 +31,7 @@ SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, floa
   mCamera = &mScene->getScene()->addCamera();
   mCamera->setPerspectiveParameters(near, far, fovy, width, height);
   mSemaphore = context->createTimelineSemaphore(0);
-  mRenderer->setScene(*scene->getScene());
+  mRenderer->setScene(scene->getScene());
 
   // RT renderer
   if (auto rtRenderer = dynamic_cast<svulkan2::renderer::RTRenderer *>(mRenderer.get())) {
@@ -100,7 +100,7 @@ SVulkan2Camera::takePictureAndGetDLTensorsAsync(ThreadPool &thread,
       if (!mImageBuffers.contains(name)) {
         mImageBuffers[name] = std::make_shared<svulkan2::core::Buffer>(
             size, vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst,
-            VMA_MEMORY_USAGE_GPU_ONLY);
+            VMA_MEMORY_USAGE_GPU_ONLY, VmaAllocationCreateFlags{}, true);
       }
       auto buffer = mImageBuffers.at(name);
       image.recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0, size, {0, 0, 0},
@@ -203,7 +203,6 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   }
   mCommandBuffer->reset();
   mCommandBuffer->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
-  mRenderer->render(*mCamera, {}, {}, {}, {});
 
   auto &image = mRenderer->getRenderImage(name);
   auto extent = image.getExtent();
@@ -213,7 +212,7 @@ DLManagedTensor *SVulkan2Camera::getDLImage(std::string const &name) {
   if (!mImageBuffers.contains(name)) {
     mImageBuffers[name] = std::make_shared<svulkan2::core::Buffer>(
         size, vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst,
-        VMA_MEMORY_USAGE_GPU_ONLY);
+        VMA_MEMORY_USAGE_GPU_ONLY, VmaAllocationCreateFlags{}, true);
   }
   auto buffer = mImageBuffers.at(name);
   image.recordCopyToBuffer(mCommandBuffer.get(), buffer->getVulkanBuffer(), 0, size, {0, 0, 0},

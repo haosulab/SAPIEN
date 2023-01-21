@@ -1,12 +1,14 @@
 .. _basic_index:
 
-Basic
+Basics
 ===================================================================
 
 This tutorial focuses on the basic usage of SAPIEN Python APIs.
 
+
 .. toctree::
 
+   installation
    hello_world
    create_actors
    physics

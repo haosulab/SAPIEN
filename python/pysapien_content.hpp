@@ -30,7 +30,10 @@
 #include "sapien/articulation/urdf_loader.h"
 #include "sapien/event_system/event_system.h"
 
+#ifdef SAPIEN_KUAFU
 #include "sapien/renderer/kuafu_renderer.hpp"
+#endif
+
 #include "sapien/renderer/render_config.h"
 #include "sapien/renderer/svulkan2_pointbody.h"
 #include "sapien/renderer/svulkan2_renderer.h"
@@ -427,6 +430,7 @@ void buildSapien(py::module &m) {
           py::arg("name"));
 
   //======== Kuafu ========//
+#ifdef SAPIEN_KUAFU
   auto PyKuafuConfig = py::class_<Renderer::KuafuConfig>(m, "KuafuConfig");
   PyKuafuConfig.def(py::init<>())
       .def_readwrite("use_viewer", &Renderer::KuafuConfig::mUseViewer)
@@ -456,6 +460,8 @@ void buildSapien(py::module &m) {
   //                   "Set camera into perspective projection mode with full camera parameters",
   //                   py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"),
   //                   py::arg("width"), py::arg("height"), py::arg("skew"));
+
+#endif
 
   auto PyRenderClient =
       py::class_<Renderer::server::ClientRenderer, Renderer::IPxrRenderer,
@@ -919,9 +925,17 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
              return std::static_pointer_cast<IAwaitable<void>>(
                  std::make_shared<AwaitableFuture<void>>(scene.updateRenderAsync()));
            })
-      .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
-           py::arg("material") = nullptr, py::arg("render_material") = nullptr,
-           py::return_value_policy::reference)
+      .def(
+          "add_ground",
+          [](SScene &s, float altitude, bool render, std::shared_ptr<SPhysicalMaterial> material,
+             std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
+             py::array_t<float> const &renderSize) {
+            s.addGround(altitude, render, material, renderMaterial, {renderSize.at(0), renderSize.at(1)});
+          },
+          py::arg("altitude"), py::arg("render") = true, py::arg("material") = nullptr,
+          py::arg("render_material") = nullptr,
+          py::arg("render_half_size") = make_array<float>({10.f, 10.f}),
+          py::return_value_policy::reference)
       .def("get_contacts", &SScene::getContacts, py::return_value_policy::reference)
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
       .def("get_all_articulations", &SScene::getAllArticulations,
@@ -1942,7 +1956,7 @@ Args:
     link_index: index of the link
     pose: target pose of the link in articulation base frame
     initial_qpos: initial qpos to start CLIK
-    active_mask: dof sized integer array, 1 to indicate active joints and 0 for inactive joints
+    active_qmask: dof sized integer array, 1 to indicate active joints and 0 for inactive joints, default to all 1s
     max_iterations: number of iterations steps
     dt: iteration step "speed"
     damp: iteration step "damping"
@@ -2403,8 +2417,7 @@ Args:
       .def_property_readonly("mouse_wheel_delta", &Renderer::SVulkan2Window::getMouseWheelDelta);
 
   PyVulkanScene.def_property_readonly(
-      "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); },
-      py::return_value_policy::reference);
+      "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); });
 
   PyRenderer.def("create_material", &Renderer::IPxrRenderer::createMaterial)
       .def(
@@ -2669,7 +2682,7 @@ Args:
       [](py::capsule data, py::array_t<float> array) {
         DLManagedTensor *tensor = (DLManagedTensor *)data.get_pointer();
         int64_t size = 1;
-        for (uint32_t i = 0; i < tensor->dl_tensor.ndim; ++i) {
+        for (int i = 0; i < tensor->dl_tensor.ndim; ++i) {
           size *= tensor->dl_tensor.shape[i];
         };
         int64_t bytes = size * (tensor->dl_tensor.dtype.bits / 8);

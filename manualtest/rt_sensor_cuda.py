@@ -7,15 +7,25 @@ import PIL.Image as im
 import matplotlib.pyplot as plt
 import time
 
+from tqdm import trange
+
 def main():
     sim = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
-    sim.set_renderer(renderer)
 
-    sapien.render_config.camera_shader_dir = "rt"
+    sapien.render_config.camera_shader_dir = "../vulkan_shader/rt"
+    sapien.render_config.viewer_shader_dir = "../vulkan_shader/rt"
     sapien.render_config.rt_samples_per_pixel = 32
     sapien.render_config.rt_max_path_depth = 8
     sapien.render_config.rt_use_denoiser = True
+    renderer = sapien.VulkanRenderer()
+
+    # config = sapien.KuafuConfig()
+    # config.spp = 32
+    # config.max_bounces = 8
+    # config.use_denoiser = True
+    # renderer = sapien.KuafuRenderer(config)
+
+    sim.set_renderer(renderer)
 
     scene_config = sapien.SceneConfig()
     scene = sim.create_scene(scene_config)
@@ -91,19 +101,37 @@ def main():
     sensor_cuda.set_pose(
         Pose([-0.28, -0.28, 0.46], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
 
-    scene.step()
-    scene.update_render()
-    sensor_cuda.take_picture()
+    # scene.step()
+    # scene.update_render()
+    # sensor_cuda.take_picture()
+    # depth_cuda = sensor_cuda.get_depth()
 
-    rgb = sensor_cuda.get_rgb()
-    im.fromarray((rgb * 255).astype(np.uint8)).show()
+    # rgb = sensor_cuda.get_rgb()
+    # im.fromarray((rgb * 255).astype(np.uint8)).show()
+    # start = time.process_time()
+    # depth_cuda = sensor_cuda.get_depth()
+    # print("Runtime of get_depth() for gpu sensor: ", time.process_time() - start)
+    # plt.figure()
+    # plt.imshow(depth_cuda)
+    # plt.figure()
+    # ir = sensor_cuda.get_ir()
+    # print(np.sum(np.isnan(ir[0])))
+    # plt.imshow(ir[0])
+    # plt.show()
 
-    start = time.process_time()
-    depth_cuda = sensor_cuda.get_depth()
-    print("Runtime of get_depth() for gpu sensor: ", time.process_time() - start)
 
-    plt.imshow(depth_cuda)
-    plt.show()
+    from sapien.utils import Viewer
+    viewer = Viewer(renderer)
+    viewer.set_scene(scene)
+    viewer.set_camera_xyz(x=-1, y=0, z=0.5)
+    viewer.set_camera_rpy(r=0, p=-np.arctan2(2, 4), y=0)
+
+    while not viewer.closed:
+        scene.step()
+        scene.update_render()
+        viewer.render()
+        tex = viewer.window.get_float_texture("Color")
+        print(np.sum(np.isnan(tex)))
 
 
 main()

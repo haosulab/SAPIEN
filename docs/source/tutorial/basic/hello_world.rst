@@ -30,20 +30,24 @@ To simulate with SAPIEN, you need to first create a simulation engine, and then 
    :dedent: 0
    :lines: 18-23
 
-``Engine`` is the physical simulation engine connected to the `PhysX <https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Index.html>`_ backend.
-One engine per process is allowed.
+``Engine`` is the physical simulation engine connected to the `PhysX
+<https://gameworksdocs.nvidia.com/PhysX/4.1/documentation/physxguide/Manual/Index.html>`_
+backend. One engine per process is allowed. Creating additional engines without deleting (overwriting the variable, letting it go out of scope) a previous one will result in the same Engine being returned.
+
 ``Scene`` is an instance of the simulation world.
-Multiple scenes can be created through ``create_scene``, and run independently.
-``VulkanRenderer`` is the rendering engine connected to our `vulkan-based <https://www.khronos.org/vulkan/>`_ renderer.
-The renderer should be bound with an engine, and then all the scenes created by the engine will be bound with the renderer.
+Multiple scenes can be created through ``create_scene``, and they are independent.
+
+``VulkanRenderer`` is the rendering engine connected to our `Vulkan <https://www.khronos.org/vulkan/>`_-based renderer.
+the renderer should first be bound with an engine, and then all the scenes created by the engine will be bound with the renderer.
 
 Add rigid bodies
 -------------------
 
 So far, our scene is empty.
-``Actor`` (rigid body) is simulated in SAPIEN.
+
+In SAPIEN, a simulated rigid body is named an ``Actor``.
 Let's add two actors, a ground and a box, to the scene.
-How to create actors will be elaborated in :ref:`create_actors`.
+Actor creation will be elaborated in :ref:`create_actors`.
 
 .. literalinclude:: ../../../../examples/basic/hello_world.py
    :dedent: 0
@@ -53,7 +57,8 @@ Viewer
 -------------------------------------------
 
 ``Viewer`` creates a window (GUI) to render the simulation world.
-How to use the GUI will be elaborated in :ref:`viewer`.
+It is only available with a connected display (e.g. monitor).
+Usage of the GUI will be elaborated in :ref:`viewer`.
 
 .. literalinclude:: ../../../../examples/basic/hello_world.py
    :dedent: 0

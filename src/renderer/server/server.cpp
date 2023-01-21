@@ -66,7 +66,7 @@ Status RenderServiceImpl::CreateScene(ServerContext *c, const proto::Index *req,
   auto info = std::make_shared<SceneInfo>();
   info->sceneIndex = index;
   info->sceneId = id;
-  info->scene = std::make_unique<svulkan2::scene::Scene>();
+  info->scene = std::make_shared<svulkan2::scene::Scene>();
   info->threadRunner = std::make_unique<ThreadPool>(1);
   info->threadRunner->init();
 
@@ -269,7 +269,7 @@ Status RenderServiceImpl::AddCamera(ServerContext *c, const proto::AddCameraReq 
 
     camInfo->renderer = std::make_unique<svulkan2::renderer::Renderer>(config);
     camInfo->renderer->resize(req->width(), req->height());
-    camInfo->renderer->setScene(*sceneInfo->scene);
+    camInfo->renderer->setScene(sceneInfo->scene);
 
     camInfo->camera = &sceneInfo->scene->addCamera();
     camInfo->camera->setPerspectiveParameters(req->near(), req->far(), req->fovy(), req->width(),
@@ -854,7 +854,7 @@ VulkanCudaBuffer::VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physica
   for (uint32_t i = 0; i < shape.size(); ++i) {
     mSize *= shape[i];
   }
-  mSize = std::max(mSize, static_cast<vk::DeviceSize>(1024 * 1024));
+  // mSize = std::max(mSize, static_cast<vk::DeviceSize>(1024 * 1024));
   if (mSize <= 0) {
     throw std::runtime_error("empty buffer is not allowed");
   }
@@ -862,12 +862,20 @@ VulkanCudaBuffer::VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physica
   vk::BufferCreateInfo bufferInfo(
       {}, mSize, vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst,
       vk::SharingMode::eExclusive);
+  vk::ExternalMemoryBufferCreateInfo externalMemoryInfo(
+      vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd);
+  bufferInfo.setPNext(&externalMemoryInfo);
+
   mBuffer = device.createBufferUnique(bufferInfo);
 
   auto memReqs = device.getBufferMemoryRequirements(mBuffer.get());
   vk::MemoryAllocateInfo memoryInfo(
       memReqs.size,
       findMemoryType(memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal));
+
+  vk::ExportMemoryAllocateInfo allocInfo(vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd);
+  memoryInfo.setPNext(&allocInfo);
+
   mMemory = device.allocateMemoryUnique(memoryInfo);
   device.bindBufferMemory(mBuffer.get(), mMemory.get(), 0);
 

@@ -91,10 +91,10 @@ void SVulkan2Window::setShader(std::string const &shaderDir) {
 
   auto config = std::make_shared<svulkan2::RendererConfig>();
   *config = *mRenderer->getDefaultRendererConfig();
-  config->shaderDir = mShaderDir.length() ? mShaderDir : GetRenderConfig().viewerShaderDirectory;
+  config->shaderDir = shaderDir;
   mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);
   if (mScene) {
-    mSVulkanRenderer->setScene(*mScene->getScene());
+    mSVulkanRenderer->setScene(mScene->getScene());
   }
   mSVulkanRenderer->resize(mViewportWidth, mViewportHeight);
 }
@@ -118,7 +118,7 @@ void SVulkan2Window::show() { glfwShowWindow(mWindow->getGLFWWindow()); }
 
 void SVulkan2Window::setScene(SVulkan2Scene *scene) {
   mScene = scene;
-  mSVulkanRenderer->setScene(*mScene->getScene());
+  mSVulkanRenderer->setScene(mScene->getScene());
 }
 
 void SVulkan2Window::setCameraParameters(float near, float far, float fovy) {
@@ -140,6 +140,15 @@ void SVulkan2Window::setCameraProperty(std::string const &name, float property) 
   mSVulkanRenderer->setCustomProperty(name, property);
 }
 void SVulkan2Window::setCameraProperty(std::string const &name, int property) {
+  if (auto rtRenderer = dynamic_cast<svulkan2::renderer::RTRenderer *>(mSVulkanRenderer.get())) {
+    if (name == "_denoiser") {
+      if (property == 0) {
+        rtRenderer->disableDenoiser();
+      } else {
+        rtRenderer->enableDenoiser("HdrColor", "Albedo", "Normal");
+      }
+    }
+  }
   mSVulkanRenderer->setCustomProperty(name, property);
 }
 

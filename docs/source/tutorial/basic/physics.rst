@@ -58,7 +58,7 @@ Some other physical properties, like density, are directly provided to collision
    :emphasize-lines: 6,7,12
 
 .. note::
-   The rolling restitution (friction) is not modeled in SAPIEN currently.
+   The rolling resistance (friction) is not modeled in SAPIEN currently.
 
 Create a kinematic actor
 -------------------------------------
@@ -76,7 +76,7 @@ We can set ``is_kinematic=True`` when building the actor.
 Set damping for the actor
 -------------------------------------
 
-Sometimes, you might model some restitution proportional to (linear or angular) velocity, like air restitution.
+Sometimes, you might model some resistance proportional to (linear or angular) velocity, like air resistance.
 It can be achieved by setting the **damping** of an actor.
 
 .. literalinclude:: ../../../../examples/basic/physics.py

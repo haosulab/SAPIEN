@@ -19,7 +19,7 @@ void buildRenderer(py::module &parent) {
   py::module m = parent.def_submodule("renderer");
 
   auto PyContext = py::class_<core::Context, std::shared_ptr<core::Context>>(m, "Context");
-  auto PyScene = py::class_<scene::Scene>(m, "Scene");
+  auto PyScene = py::class_<scene::Scene, std::shared_ptr<scene::Scene>>(m, "Scene");
   auto PySceneNode = py::class_<scene::Node>(m, "Node");
   auto PySceneObject = py::class_<scene::Object, scene::Node>(m, "Object");
   auto PyLineSetObject = py::class_<scene::LineObject, scene::Node>(m, "LineSetObject");

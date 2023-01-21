@@ -22,7 +22,8 @@ layout(set = 1, binding = 0) uniform ObjectBuffer {
 } objectBuffer;
 
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec4 color;
+layout(location = 1) in float scale;
+layout(location = 2) in vec4 color;
 
 layout(location = 0) out vec4 outPosition;
 layout(location = 1) out vec4 outPrevPosition;

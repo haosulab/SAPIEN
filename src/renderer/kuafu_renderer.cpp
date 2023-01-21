@@ -2,6 +2,8 @@
 // Created by jet on 7/18/21.
 //
 
+#ifdef SAPIEN_KUAFU
+
 #include "sapien/renderer/kuafu_renderer.hpp"
 #include "sapien/renderer/kuafu_scene.hpp"
 
@@ -75,3 +77,5 @@ std::shared_ptr<IPxrMaterial> KuafuRenderer::createMaterial() {
 };
 
 }
+
+#endif

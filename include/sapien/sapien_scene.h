@@ -255,11 +255,12 @@ public:
    * matrices of objects.
    */
   void updateRender();
-  void updateRenderAndTakePictures(std::vector<SCamera*> const& cameras);
+  void updateRenderAndTakePictures(std::vector<SCamera *> const &cameras);
   std::future<void> updateRenderAsync();
   SActorStatic *addGround(PxReal altitude, bool render = true,
                           std::shared_ptr<SPhysicalMaterial> material = nullptr,
-                          std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = nullptr);
+                          std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = nullptr,
+                          glm::vec2 renderSize = {1.f, 1.f});
 
   std::map<physx_id_t, std::string> findRenderId2VisualName() const;
 

@@ -26,7 +26,7 @@ Create an actor by a single primitive
 
 The primitives supported by SAPIEN include box, sphere and capsule.
 Here we show an example about how to create a box.
-Examples to create a sphere and a capsule can found in the code provided.
+Examples to create a sphere and a capsule can be found in the code provided.
 
 .. literalinclude:: ../../../../examples/basic/create_actors.py
    :dedent: 0
@@ -47,7 +47,7 @@ Then, you might create a box as follows:
    :lines: 127-133
 
 The pose of the box in the world frame can be specified by ``Pose``.
-``Pose`` describes a 6D pose, consisting of a 3-dim position vector ``p`` and a 4-dim quaternion ``q`` (to represent the rotation).
+``Pose`` describes a 6D pose, consisting of a 3-dim position vector ``p`` and a 4-dim quaternion ``q`` (to represent the rotation, in the wxyz convention).
 
 Create an actor by multiple primitives
 -------------------------------------------

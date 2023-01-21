@@ -39,7 +39,6 @@ from sapien.core.pysapien import KinematicJointRevolute
 from sapien.core.pysapien import KinematicJointSingleDof
 from sapien.core.pysapien import KinematicLink
 from sapien.core.pysapien import KuafuConfig
-from sapien.core.pysapien import KuafuRenderer
 from sapien.core.pysapien import LightEntity
 from sapien.core.pysapien import Link
 from sapien.core.pysapien import LinkBase
@@ -79,8 +78,10 @@ from sapien.core.pysapien import VulkanRenderer
 from sapien.core.pysapien import VulkanRigidbody
 from sapien.core.pysapien import VulkanScene
 from sapien.core.pysapien import VulkanWindow
+from sapien.core.pysapien import KuafuRenderer as _KuafuRenderer
 import os
 import pkg_resources
+import sapien.core.pysapien
 import sapien.core.pysapien.dlpack
 import sapien.core.pysapien.renderer
 import sapien.core.pysapien.simsense
@@ -184,6 +185,8 @@ __all__ = [
 ]
 
 
+class KuafuRenderer(pysapien.IPxrRenderer):
+    pass
 def add_profiler_event(name: str) -> None:
     pass
 def get_global_render_config() -> pysapien.RenderConfig:

@@ -8,7 +8,7 @@ def main():
     renderer = sapien.VulkanRenderer()  # Create a Vulkan renderer
 
     renderer.set_log_level("info")
-    # sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/rt")
+    sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/rt")
 
     # renderer.set_default_texture_format({
     #     "texture_format": {
@@ -35,8 +35,7 @@ def main():
     # scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
     scene.add_directional_light([0, 1, -1], [1, 1, 1])
 
-    with sapien.ViewerShaderDir("../vulkan_shader/rt"):
-        viewer = Viewer(renderer)
+    viewer = Viewer(renderer)
     viewer.set_scene(scene)  # Bind the viewer and the scene
     # viewer.window.set_camera_property("spp", 32)
 

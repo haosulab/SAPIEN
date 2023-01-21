@@ -14,11 +14,25 @@ from sapien.core import (
     SpotLightEntity,
     CameraEntity,
 )
+import sapien.core as sapien
 from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.euler import quat2euler
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector, qinverse
 import numpy as np
 import os
+
+import pkg_resources
+from pathlib import Path
+
+shader_dir = Path(pkg_resources.resource_filename("sapien", "vulkan_shader"))
+shader_list = []
+for f in shader_dir.iterdir():
+    if f.is_dir():
+        if any(
+            "gbuffer.frag" in x.name or "camera.rgen" in x.name for x in f.iterdir()
+        ):
+            shader_list.append(f)
+
 
 imgui_ini = """
 [Window][DockSpace Demo]
@@ -195,7 +209,9 @@ class Viewer(object):
             with open("imgui.ini", "w") as f:
                 f.write(imgui_ini)
 
-        self.shader_dir = shader_dir
+        if not shader_dir:
+            self.shader_dir = sapien.render_config.viewer_shader_dir
+
         self.renderer = renderer
         self.renderer_context: R.Context = renderer._internal_context
 
@@ -1101,16 +1117,16 @@ class Viewer(object):
         self.fovy = fovy
         self.window.set_camera_parameters(0.1, 100, fovy)
 
-    # def set_window_resolutions(self, resolutions):
-    #     assert len(resolutions)
-    #     for r in resolutions:
-    #         assert len(r) == 2
+    def set_shader(self, index):
+        self.shader_dir = str(shader_list[index])
+        self.window.set_shader_dir(self.shader_dir)
+        self.reset_windows()
 
-    #     self.window = self.renderer.create_window(
-    #         resolutions[0][0], resolutions[0][1], self.shader_dir
-    #     )
-    #     self.resolution = resolutions[0]
-    #     self.resolutions = resolutions
+    def enable_denoiser(self, enable):
+        if enable:
+            self.window.set_camera_property("_denoiser", 1)
+        else:
+            self.window.set_camera_property("_denoiser", 0)
 
     def build_control_window(self):
         if not self.control_window:
@@ -1150,99 +1166,117 @@ class Viewer(object):
             )
 
             self.control_window = (
-                R.UIWindow()
-                .Label("Control")
-                .Pos(10, 10)
-                .Size(400, 400)
-                .append(
-                    R.UISameLine().append(
-                        self.ui_pause_checkbox,
-                        R.UIButton()
-                        .Label("Single Step")
-                        .Callback(lambda p: self.step_button()),
-                        self.update_render_checkbox
-                    ),
-                    R.UIDisplayText().Text("Camera Speed"),
-                    R.UISliderFloat()
-                    .Min(0.01)
-                    .Max(1)
-                    .Value(self.move_speed)
-                    .Label("Move")
-                    .Callback(lambda w: self.set_move_speed(w.value)),
-                    R.UISliderFloat()
-                    .Min(0.001)
-                    .Max(0.01)
-                    .Value(self.rotate_speed)
-                    .Label("Rotate")
-                    .Callback(lambda w: self.set_rotate_speed(w.value)),
-                    R.UISliderFloat()
-                    .Min(0.1)
-                    .Max(1)
-                    .Value(self.scroll_speed)
-                    .Label("Scroll")
-                    .Callback(lambda w: self.set_scroll_speed(w.value)),
-                    R.UIDisplayText().Text("Camera"),
-                    self.camera_ui,
-                    R.UIButton()
-                    .Label("Copy Camera Settings")
-                    .Callback(lambda c: self.copy_camera_settings()),
-                    R.UIDisplayText().Text("Display Settings"),
-                    R.UISliderAngle()
-                    .Min(1)
-                    .Max(179)
-                    .Value(self.fovy)
-                    .Label("Fov Y")
-                    .Callback(lambda w: self.set_fovy(w.value)),
-                    R.UIOptions()
-                    .Style("select")
-                    .Label("Render Target")
-                    .Index(0)
-                    .Items(
-                        ["Color"]
-                        + [x for x in self.window.display_target_names if x != "Color"]
-                    )
-                    .Callback(lambda p: self.set_target(p.value)),
-                    R.UIInputInt2()
-                    .Label("Resolution")
-                    .Value(self.resolution)
-                    .Callback(lambda c: self.set_resolution(c.value)),
-                    R.UIDisplayText().Text("Actor Selection"),
-                    R.UICheckbox()
-                    .Label("Coordinate Axes")
-                    .Checked(True)
-                    .Callback(lambda p: self.toggle_axes(p.checked)),
-                    R.UICheckbox()
-                    .Label("Camera Display")
-                    .Checked(True)
-                    .Callback(lambda p: self.toggle_camera_lines(p.checked)),
-                    R.UIOptions()
-                    .Style("select")
-                    .Label("Axes Mode")
-                    .Index(0)
-                    .Items(["Origin", "Center of Mass"])
-                    .Callback(lambda p: self.set_coordinate_axes_mode(p.value)),
-                    R.UISliderFloat()
-                    .Label("Axes Scale")
-                    .Min(0)
-                    .Max(1)
-                    .Value(self.axes_scale)
-                    .Callback(lambda p: self.update_coordinate_axes_scale(p.value)),
-                    R.UISliderFloat()
-                    .Label("Opacity")
-                    .Min(0)
-                    .Max(1)
-                    .Value(self.selection_opacity)
-                    .Callback(lambda p: self.set_selection_opacity(p.value)),
-                    R.UICheckbox()
-                    .Label("Immediate Move")
-                    .Checked(self.immediate_mode)
-                    .Callback(lambda p: self.set_immediate_move(p.checked)),
-                    R.UIButton()
-                    .Label("Take Screenshot")
-                    .Callback(self.take_screenshot),
-                    R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps)),
-                )
+                R.UIWindow().Label("Control").Pos(10, 10).Size(400, 400)
             )
+
+            self.control_window.append(
+                R.UISameLine().append(
+                    self.ui_pause_checkbox,
+                    R.UIButton()
+                    .Label("Single Step")
+                    .Callback(lambda p: self.step_button()),
+                    self.update_render_checkbox,
+                ),
+                R.UIDisplayText().Text("Camera Speed"),
+                R.UISliderFloat()
+                .Min(0.01)
+                .Max(1)
+                .Value(self.move_speed)
+                .Label("Move")
+                .Callback(lambda w: self.set_move_speed(w.value)),
+                R.UISliderFloat()
+                .Min(0.001)
+                .Max(0.01)
+                .Value(self.rotate_speed)
+                .Label("Rotate")
+                .Callback(lambda w: self.set_rotate_speed(w.value)),
+                R.UISliderFloat()
+                .Min(0.1)
+                .Max(1)
+                .Value(self.scroll_speed)
+                .Label("Scroll")
+                .Callback(lambda w: self.set_scroll_speed(w.value)),
+                R.UIDisplayText().Text("Camera"),
+                self.camera_ui,
+                R.UIButton()
+                .Label("Copy Camera Settings")
+                .Callback(lambda c: self.copy_camera_settings()),
+                R.UIDisplayText().Text("Display Settings"),
+                R.UIOptions()
+                .Style("select")
+                .Label("Shader")
+                .Items([d.name for d in shader_list])
+                .Callback(lambda p: self.set_shader(p.index)),
+            )
+
+            if "camera.rgen" in os.listdir(self.shader_dir):
+                self.control_window.append(
+                    R.UIDisplayText().Text("Denoiser"),
+                    R.UISameLine().append(
+                        R.UIButton()
+                        .Label("Enable")
+                        .Callback(lambda x: self.enable_denoiser(True)),
+                        R.UIButton()
+                        .Label("Disable")
+                        .Callback(lambda x: self.enable_denoiser(False)),
+                    ),
+                )
+
+            self.control_window.append(
+                R.UISliderAngle()
+                .Min(1)
+                .Max(179)
+                .Value(self.fovy)
+                .Label("Fov Y")
+                .Callback(lambda w: self.set_fovy(w.value)),
+                R.UIOptions()
+                .Style("select")
+                .Label("Render Target")
+                .Index(0)
+                .Items(
+                    ["Color"]
+                    + [x for x in self.window.display_target_names if x != "Color"]
+                )
+                .Callback(lambda p: self.set_target(p.value)),
+                R.UIInputInt2()
+                .Label("Resolution")
+                .Value(self.resolution)
+                .Callback(lambda c: self.set_resolution(c.value)),
+                R.UIDisplayText().Text("Actor Selection"),
+                R.UICheckbox()
+                .Label("Coordinate Axes")
+                .Checked(True)
+                .Callback(lambda p: self.toggle_axes(p.checked)),
+                R.UICheckbox()
+                .Label("Camera Display")
+                .Checked(True)
+                .Callback(lambda p: self.toggle_camera_lines(p.checked)),
+                R.UIOptions()
+                .Style("select")
+                .Label("Axes Mode")
+                .Index(0)
+                .Items(["Origin", "Center of Mass"])
+                .Callback(lambda p: self.set_coordinate_axes_mode(p.value)),
+                R.UISliderFloat()
+                .Label("Axes Scale")
+                .Min(0)
+                .Max(1)
+                .Value(self.axes_scale)
+                .Callback(lambda p: self.update_coordinate_axes_scale(p.value)),
+                R.UISliderFloat()
+                .Label("Opacity")
+                .Min(0)
+                .Max(1)
+                .Value(self.selection_opacity)
+                .Callback(lambda p: self.set_selection_opacity(p.value)),
+                R.UICheckbox()
+                .Label("Immediate Move")
+                .Checked(self.immediate_mode)
+                .Callback(lambda p: self.set_immediate_move(p.checked)),
+                R.UIButton().Label("Take Screenshot").Callback(self.take_screenshot),
+                R.UIDisplayText().Text("FPS: {:.2f}".format(self.window.fps)),
+            )
+
         self.control_window.get_children()[-1].Text(
             "FPS: {:.2f}".format(self.window.fps)
         )
@@ -2283,6 +2317,14 @@ class Viewer(object):
         else:
             self.joint_axes[0].transparency = 1
             self.joint_axes[1].transparency = 1
+
+    def reset_windows(self):
+        self.control_window = None
+        self.scene_window = None
+        self.actor_window = None
+        self.articulation_window = None
+        self.info_window = None
+        self.ik_window = None
 
     def render(self):
         if self.closed:

@@ -9,7 +9,7 @@ namespace Renderer {
 
 SVulkan2Scene::SVulkan2Scene(SVulkan2Renderer *renderer, std::string const &name)
     : mParentRenderer(renderer), mName(name) {
-  mScene = std::make_unique<svulkan2::scene::Scene>();
+  mScene = std::make_shared<svulkan2::scene::Scene>();
 }
 
 void SVulkan2Scene::setAmbientLight(std::array<float, 3> const &color) {

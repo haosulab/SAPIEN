@@ -800,7 +800,7 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
 SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
                                         std::shared_ptr<SPhysicalMaterial> material,
                                         std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
-                                        std::string const &name) {
+                                        glm::vec2 renderSize, std::string const &name) {
   physx_id_t actorId = mScene->mActorIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
 
@@ -815,8 +815,8 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
     if (!renderMaterial) {
       renderMaterial = mScene->getSimulation()->getRenderer()->createMaterial();
     }
-    auto body =
-        mScene->mRendererScene->addRigidbody(PxGeometryType::ePLANE, {10, 10, 10}, renderMaterial);
+    auto body = mScene->mRendererScene->addRigidbody(
+        PxGeometryType::ePLANE, {1.f, renderSize.y, renderSize.x}, renderMaterial);
     body->setInitialPose(pose);
     renderBodies.push_back(body);
 

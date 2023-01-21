@@ -15,6 +15,25 @@ from typing import List
 
 import pkg_resources
 
+from .pysapien import KuafuRenderer as _KuafuRenderer
+
+
+class KuafuRenderer(_KuafuRenderer):
+    def __init__(self, config: KuafuConfig):
+        warn(
+            """Kuafu renderer is deprecated in favor of `VulkanRenderer`, which supports both rasterization and ray tracing. To migrate,
+set `sapien.core.render_config.viewer_shader_dir` or `sapien.core.render_config.camera_shader_dir` to `"rt"`. Replace the following,
+kuafu_config.spp -> sapien.core.render_config.rt_samples_per_pixel
+kuafu_config.max_bounces -> sapien.core.render_config.rt_max_path_depth
+kuafu_config.use_denoiser -> sapien.core.render_config.rt_use_denoiser
+`kuafu_config.max_materials` and `kuafu_config.max_textures` are now input parameters to `VulkanRenderer`.
+There is currently no hard limit on max geometries.
+`kuafu_config.accumulate_frames` is no longer needed. Frames are automatically accumulated if scene.update_render is not called.
+In addition, `sapien.core.render_config` can be modified at any time and it takes effect for the cameras created after the modification.
+
+            """)
+        super().__init__(config)
+
 
 def ensure_icd():
     icd_filenames = os.environ.get("VK_ICD_FILENAMES")
@@ -27,53 +46,6 @@ def ensure_icd():
             os.environ["VK_ICD_FILENAMES"] = ":".join(
                 [os.path.join(icd_dir, f) for f in files]
             )
-
-
-# _global_render_config = get_global_render_config()
-
-
-# def _set_viewer_shader_dir(shader_dir):
-#     if os.path.exists(shader_dir):
-#         _global_render_config.viewer_shader_dir = shader_dir
-#         return
-#     pkg_shader_dir = pkg_resources.resource_filename(
-#         "sapien", "vulkan_shader/{}".format(shader_dir)
-#     )
-#     if os.path.exists(pkg_shader_dir):
-#         _global_render_config.viewer_shader_dir = pkg_shader_dir
-#         return
-#     raise FileNotFoundError(shader_dir)
-
-
-# def _set_camera_shader_dir(shader_dir):
-#     if os.path.exists(shader_dir):
-#         _global_render_config.camera_shader_dir = shader_dir
-#         return
-#     pkg_shader_dir = pkg_resources.resource_filename(
-#         "sapien", "vulkan_shader/{}".format(shader_dir)
-#     )
-#     if os.path.exists(pkg_shader_dir):
-#         _global_render_config.camera_shader_dir = pkg_shader_dir
-#         return
-#     raise FileNotFoundError(shader_dir)
-
-
-# def _set_viewer_shader_dir_deprecated(shader_dir):
-#     warn(
-#         "This method is deprecated. Use context manager CameraShaderDir instead",
-#         DeprecationWarning,
-#         stacklevel=2,
-#     )
-#     _set_viewer_shader_dir(shader_dir)
-
-
-# def _set_camera_shader_dir_deprecated(shader_dir):
-#     warn(
-#         "This method is deprecated. Use context manager ViewerShaderDir instead",
-#         DeprecationWarning,
-#         stacklevel=2,
-#     )
-#     _set_camera_shader_dir(shader_dir)
 
 
 def __enable_vulkan():
@@ -94,7 +66,7 @@ def __enable_vulkan():
     # VulkanRenderer._set_viewer_shader_dir(__VULKAN_VIEWER_SHADER_ROOT)
     # VulkanRenderer._set_camera_shader_dir(__VULKAN_CAMERA_SHADER_ROOT)
 
-    KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
+    _KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
     ensure_icd()
 
 

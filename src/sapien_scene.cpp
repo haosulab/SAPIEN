@@ -664,7 +664,7 @@ void SScene::updateRender() {
   getRendererScene()->updateRender();
 }
 
-void SScene::updateRenderAndTakePictures(std::vector<SCamera*> const &cameras) {
+void SScene::updateRenderAndTakePictures(std::vector<SCamera *> const &cameras) {
   std::lock_guard lock(mUpdateRenderMutex);
 
   if (!mRendererScene) {
@@ -710,8 +710,10 @@ std::future<void> SScene::updateRenderAsync() {
 
 SActorStatic *SScene::addGround(PxReal altitude, bool render,
                                 std::shared_ptr<SPhysicalMaterial> material,
-                                std::shared_ptr<Renderer::IPxrMaterial> renderMaterial) {
-  return createActorBuilder()->buildGround(altitude, render, material, renderMaterial, "ground");
+                                std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
+                                glm::vec2 renderSize) {
+  return createActorBuilder()->buildGround(altitude, render, material, renderMaterial, renderSize,
+                                           "ground");
 }
 
 void SScene::updateContact(std::unique_ptr<SContact> contact) {
