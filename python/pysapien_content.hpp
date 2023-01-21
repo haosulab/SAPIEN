@@ -925,9 +925,17 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
              return std::static_pointer_cast<IAwaitable<void>>(
                  std::make_shared<AwaitableFuture<void>>(scene.updateRenderAsync()));
            })
-      .def("add_ground", &SScene::addGround, py::arg("altitude"), py::arg("render") = true,
-           py::arg("material") = nullptr, py::arg("render_material") = nullptr,
-           py::return_value_policy::reference)
+      .def(
+          "add_ground",
+          [](SScene &s, float altitude, bool render, std::shared_ptr<SPhysicalMaterial> material,
+             std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
+             py::array_t<float> const &renderSize) {
+            s.addGround(altitude, render, material, renderMaterial, {renderSize.at(0), renderSize.at(1)});
+          },
+          py::arg("altitude"), py::arg("render") = true, py::arg("material") = nullptr,
+          py::arg("render_material") = nullptr,
+          py::arg("render_half_size") = make_array<float>({10.f, 10.f}),
+          py::return_value_policy::reference)
       .def("get_contacts", &SScene::getContacts, py::return_value_policy::reference)
       .def("get_all_actors", &SScene::getAllActors, py::return_value_policy::reference)
       .def("get_all_articulations", &SScene::getAllArticulations,

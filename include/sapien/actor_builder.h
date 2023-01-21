@@ -177,7 +177,7 @@ public:
   SActorStatic *buildGround(PxReal altitude, bool render,
                             std::shared_ptr<SPhysicalMaterial> material,
                             std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = {},
-                            std::string const &name = "");
+                            glm::vec2 renderSize = {1.f, 1.f}, std::string const &name = "");
 
   virtual ~ActorBuilder() = default;
 
