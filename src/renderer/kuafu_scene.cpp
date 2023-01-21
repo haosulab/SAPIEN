@@ -2,6 +2,8 @@
 // Created by jet on 7/18/21.
 //
 
+#ifdef SAPIEN_KUAFU
+
 #include "sapien/renderer/kuafu_scene.hpp"
 #include "sapien/renderer/kuafu_light.hpp"
 #include "sapien/renderer/kuafu_renderer.hpp"
@@ -461,3 +463,5 @@ void KuafuScene::destroy() {
   pKRenderer->removeScene(pKScene);
 }
 } // namespace sapien::Renderer
+
+#endif

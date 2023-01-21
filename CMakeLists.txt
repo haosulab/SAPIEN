@@ -11,6 +11,7 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(SAPIEN_PROFILE "Build SAPIEN with easy_profiler" OFF)
 option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OFF)
 option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, Kuafu denoiser, and simsense" ON)
+option(SAPIEN_KUAFU "Build Kuafu ray tracer" ON)
 
 if (${SAPIEN_PROFILE})
     message("-- Profiler On")
@@ -109,7 +110,11 @@ endif ()
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
-add_subdirectory("3rd_party/kuafu" EXCLUDE_FROM_ALL)
+
+if (${SAPIEN_KUAFU})
+    add_subdirectory("3rd_party/kuafu" EXCLUDE_FROM_ALL)
+    add_definitions(-DSAPIEN_KUAFU)
+endif()
 
 include_directories("3rd_party/pybind11/include")
 include_directories("3rd_party/sapien-vulkan-2/include")
@@ -118,12 +123,15 @@ include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
 include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
 include_directories("$ENV{VULKAN_SDK}/include")
-include_directories("3rd_party/kuafu/include")
-include_directories("3rd_party/kuafu/include/external")
-include_directories("3rd_party/kuafu/3rd_party/OptiX7SDK/include")
 
-find_package(SDL2 REQUIRED)
-include_directories(${SDL2_INCLUDE_DIRS})
+if (${SAPIEN_KUAFU})
+    include_directories("3rd_party/kuafu/include")
+    include_directories("3rd_party/kuafu/include/external")
+    include_directories("3rd_party/kuafu/3rd_party/OptiX7SDK/include")
+    find_package(SDL2 REQUIRED)
+    include_directories(${SDL2_INCLUDE_DIRS})
+    set(KUAFU_LIBRARY "kuafu")
+endif()
 
 
 if (${SAPIEN_CUDA})
@@ -148,7 +156,7 @@ if (MACOSX)
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt gRPC::grpc++ "-framework Cocoa -framework IOKit")
+            ${PINOCCHIO_LIBRARY} svulkan2 ${KUAFU_LIBRARY} rt gRPC::grpc++ "-framework Cocoa -framework IOKit")
 else ()
     target_link_libraries(sapien -Wl,--start-group
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -158,7 +166,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} svulkan2 kuafu rt ${GRPC_CLIENT_LIBS})
+            ${PINOCCHIO_LIBRARY} svulkan2 ${KUAFU_LIBRARY} rt ${GRPC_CLIENT_LIBS})
 endif ()
 
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
@@ -177,8 +185,11 @@ add_executable(manual_urdf manualtest/urdf.cpp)
 target_link_libraries(manual_urdf sapien ${PINOCCHIO_LIBRARY})
 add_executable(manual_kinematics manualtest/kinematics.cpp)
 target_link_libraries(manual_kinematics sapien)
-add_executable(manual_kuafu_minimal manualtest/kuafu_minimal.cpp)
-target_link_libraries(manual_kuafu_minimal sapien)
+
+if (${SAPIEN_KUAFU})
+    add_executable(manual_kuafu_minimal manualtest/kuafu_minimal.cpp)
+    target_link_libraries(manual_kuafu_minimal sapien)
+endif()
 
 add_executable(render_server manualtest/render_server.cpp)
 target_link_libraries(render_server sapien)

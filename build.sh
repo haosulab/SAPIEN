@@ -3,10 +3,12 @@
 VERSION=""
 DEBUG=false
 PROFILE=false
+KUAFU=true
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --debug) DEBUG=true;;
         --profile) PROFILE=true;;
+        --no-kuafu) KUAFU=false;;
         35) VERSION="35";;
         36) VERSION="36";;
         37) VERSION="37";;
@@ -20,6 +22,9 @@ done
 
 [ -z $VERSION ] && echo "invalid version" && exit || echo "Compile for Python ${VERSION}"
 [ $DEBUG == true ] && echo "Debug Mode" || [ $PROFILE == true ] && echo "Profile Mode"  || echo "Release Mode"
+
+KUAFU_ARG=""
+[ $KUAFU == false ] && echo "Kuafu disabled" && KUAFU_ARG=" --no-kuafu"
 
 function build_manylinux14_wheel() {
   PY_VERSION=$1
@@ -54,9 +59,9 @@ function build_manylinux14_wheel() {
   echo "Using include path ${INCLUDE_PATH}"
 
   export CPLUS_INCLUDE_PATH=$INCLUDE_PATH
-  COMMAND="${BIN} setup.py bdist_wheel"
-  [ $PROFILE == true ] && COMMAND="${BIN} setup.py bdist_wheel --profile"
-  [ $DEBUG == true ] && COMMAND="${BIN} setup.py bdist_wheel --debug"
+  COMMAND="${BIN} setup.py bdist_wheel ${KUAFU_ARG}"
+  [ $PROFILE == true ] && COMMAND="${BIN} setup.py bdist_wheel --profile ${KUAFU_ARG}"
+  [ $DEBUG == true ] && COMMAND="${BIN} setup.py bdist_wheel --debug ${KUAFU_ARG}"
   echo "Running command ${COMMNAD}"
   eval "$COMMAND"
 

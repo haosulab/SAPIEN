@@ -30,7 +30,10 @@
 #include "sapien/articulation/urdf_loader.h"
 #include "sapien/event_system/event_system.h"
 
+#ifdef SAPIEN_KUAFU
 #include "sapien/renderer/kuafu_renderer.hpp"
+#endif
+
 #include "sapien/renderer/render_config.h"
 #include "sapien/renderer/svulkan2_pointbody.h"
 #include "sapien/renderer/svulkan2_renderer.h"
@@ -427,6 +430,7 @@ void buildSapien(py::module &m) {
           py::arg("name"));
 
   //======== Kuafu ========//
+#ifdef SAPIEN_KUAFU
   auto PyKuafuConfig = py::class_<Renderer::KuafuConfig>(m, "KuafuConfig");
   PyKuafuConfig.def(py::init<>())
       .def_readwrite("use_viewer", &Renderer::KuafuConfig::mUseViewer)
@@ -456,6 +460,8 @@ void buildSapien(py::module &m) {
   //                   "Set camera into perspective projection mode with full camera parameters",
   //                   py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"),
   //                   py::arg("width"), py::arg("height"), py::arg("skew"));
+
+#endif
 
   auto PyRenderClient =
       py::class_<Renderer::server::ClientRenderer, Renderer::IPxrRenderer,
