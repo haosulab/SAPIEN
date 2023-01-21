@@ -216,7 +216,10 @@ PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform co
   if (activeQMask.size() > 0) {
     mask = indexS2P * activeQMask.cast<double>();
   } else {
-    mask = Eigen::VectorXd(model.nv, 1);
+    mask = Eigen::VectorXd(model.nv);
+    for (int i = 0; i < model.nv; ++i) {
+      mask(i) = 1.0;
+    }
   }
 
   auto frameIdx = linkIdx2FrameIdx[linkIdx];

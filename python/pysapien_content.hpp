@@ -1948,7 +1948,7 @@ Args:
     link_index: index of the link
     pose: target pose of the link in articulation base frame
     initial_qpos: initial qpos to start CLIK
-    active_mask: dof sized integer array, 1 to indicate active joints and 0 for inactive joints
+    active_qmask: dof sized integer array, 1 to indicate active joints and 0 for inactive joints, default to all 1s
     max_iterations: number of iterations steps
     dt: iteration step "speed"
     damp: iteration step "damping"
