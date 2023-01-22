@@ -4,7 +4,7 @@ from typing import Union
 import pkg_resources
 from warnings import warn
 
-from .pysapien import VulkanRenderer, get_global_render_config
+from .pysapien import SapienRenderer, get_global_render_config
 
 _global_render_config = get_global_render_config()
 
@@ -53,8 +53,8 @@ def _set_camera_shader_dir_deprecated(shader_dir):
     _set_camera_shader_dir(shader_dir)
 
 
-VulkanRenderer.set_viewer_shader_dir = _set_viewer_shader_dir_deprecated
-VulkanRenderer.set_camera_shader_dir = _set_camera_shader_dir_deprecated
+SapienRenderer.set_viewer_shader_dir = _set_viewer_shader_dir_deprecated
+SapienRenderer.set_camera_shader_dir = _set_camera_shader_dir_deprecated
 
 
 class _RenderConfig:

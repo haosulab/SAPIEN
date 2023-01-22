@@ -40,11 +40,12 @@ void main() {
     ignoreIntersectionEXT;
   }
 
-  // uint materialIndex = geometryInstances.i[gl_InstanceID].materialIndex;
-  // Material m = materials[nonuniformEXT(materialIndex)].m;
-  // if (m.baseColor.a == 0.0) {
-  //   ignoreIntersectionEXT;
-  // } else if (rnd(ray.seed) > m.baseColor.a) {
-  //   ignoreIntersectionEXT;
-  // }
+  // HACK: manual backface culling for bad models
+  int instanceId = gl_InstanceCustomIndexEXT + gl_GeometryIndexEXT;
+  uint materialIndex = geometryInstances.i[instanceId].materialIndex;
+  Material mat = materials[nonuniformEXT(materialIndex)].m;
+  bool isInside = gl_HitKindEXT == gl_HitKindBackFacingTriangleEXT;
+  if (isInside && mat.transmission < 1e-4) {
+    ignoreIntersectionEXT;
+  }
 }

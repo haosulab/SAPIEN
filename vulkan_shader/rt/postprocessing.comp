@@ -14,8 +14,5 @@ void main() {
     color = vec4(1000.0, 0, 1000.0, 1);
   }
 
-  imageStore(Color, ivec2(gl_GlobalInvocationID.xy), vec4(pow(color.rgb, vec3(1/2.2)), color.a));
-
-  // vec4 albedo = imageLoad(Albedo, ivec2(gl_GlobalInvocationID.xy));
-  // imageStore(Color, ivec2(gl_GlobalInvocationID.xy), vec4(pow(albedo.rgb, vec3(1/2.2)), color.a));
+  imageStore(Color, ivec2(gl_GlobalInvocationID.xy), clamp(vec4(pow(color.rgb, vec3(1/2.2)), color.a), 0.0, 1.0));
 }

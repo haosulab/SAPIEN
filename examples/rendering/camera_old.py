@@ -40,20 +40,19 @@ def main():
     # ---------------------------------------------------------------------------- #
     near, far = 0.1, 100
     width, height = 640, 480
-    camera = scene.add_camera(
+    camera_mount_actor = scene.create_actor_builder().build_kinematic()
+    camera = scene.add_mounted_camera(
         name="camera",
+        actor=camera_mount_actor,
+        pose=sapien.Pose(),  # relative to the mounted actor
         width=width,
         height=height,
         fovy=np.deg2rad(35),
         near=near,
         far=far,
     )
-    camera.set_pose(sapien.Pose(p=[1, 0, 0]))
 
     print('Intrinsic matrix\n', camera.get_camera_matrix())
-
-    camera_mount_actor = scene.create_actor_builder().build_kinematic()
-    camera.set_parent(parent=camera_mount_actor, keep_pose=False)
 
     # Compute the camera pose by specifying forward(x), left(y) and up(z)
     cam_pos = np.array([-2, -2, 3])
@@ -83,12 +82,12 @@ def main():
     # ---------------------------------------------------------------------------- #
     # XYZ position in the camera space
     # ---------------------------------------------------------------------------- #
-    # Each pixel is (x, y, z, render_depth) in camera space (OpenGL/Blender)
+    # Each pixel is (x, y, z, is_valid) in camera space (OpenGL/Blender)
     position = camera.get_float_texture('Position')  # [H, W, 4]
 
     # OpenGL/Blender: y up and -z forward
-    points_opengl = position[..., :3][position[..., 3] < 1]
-    points_color = rgba[position[..., 3] < 1][..., :3]
+    points_opengl = position[..., :3][position[..., 3] > 0]
+    points_color = rgba[position[..., 3] > 0][..., :3]
     # Model matrix is the transformation from OpenGL camera space to SAPIEN world space
     # camera.get_model_matrix() must be called after scene.update_render()!
     model_matrix = camera.get_model_matrix()
