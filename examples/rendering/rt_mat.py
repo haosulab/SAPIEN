@@ -8,26 +8,23 @@ import PIL.Image as im
 
 
 def main():
-    use_kuafu = False
+    ray_tracing = True
 
-    sim = sapien.Engine()
-    sim.set_log_level('warning')
-    sapien.KuafuRenderer.set_log_level('warning')
+    engine = sapien.Engine()
+    engine.set_log_level('warning')
 
-    if use_kuafu:
-        render_config = sapien.KuafuConfig()
-        render_config.use_viewer = False
-        render_config.spp = 32
-        render_config.max_bounces = 8
-        render_config.use_denoiser = True
-        renderer = sapien.KuafuRenderer(render_config)
-    else:
-        renderer = sapien.VulkanRenderer()
+    if ray_tracing:
+        sapien.render_config.camera_shader_dir = "rt"
+        sapien.render_config.viewer_shader_dir = "rt"
+        sapien.render_config.rt_samples_per_pixel = 64
+        sapien.render_config.rt_use_denoiser = True
 
-    sim.set_renderer(renderer)
+    renderer = sapien.SapienRenderer()
+
+    engine.set_renderer(renderer)
 
     scene_config = sapien.SceneConfig()
-    scene = sim.create_scene(scene_config)
+    scene = engine.create_scene(scene_config)
 
     camera_mount = scene.create_actor_builder().build_kinematic()
     camera = scene.add_mounted_camera(
@@ -65,11 +62,11 @@ def main():
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.ior = 1.4
+    material.ior = 1.2
     material.transmission = 1.0
     material.base_color = [1.0, 1.0, 1.0, 1.0]
-    material.roughness = 0.3
-    material.metallic = 0.1
+    material.roughness = 0.15
+    material.metallic = 0.0
     builder.add_sphere_visual(radius=0.07, material=material)
     builder.add_sphere_collision(radius=0.07)
     sphere2 = builder.build()
@@ -79,7 +76,7 @@ def main():
     material = renderer.create_material()
     material.base_color = [0.8, 0.7, 0.1, 1.0]
     material.roughness = 0.01
-    material.metallic = 0.95
+    material.metallic = 1.0
     builder.add_capsule_visual(radius=0.02, half_length=0.1, material=material)
     builder.add_capsule_collision(radius=0.02, half_length=0.1)
     cap = builder.build()
@@ -89,7 +86,7 @@ def main():
     material = renderer.create_material()
     material.base_color = [0.8, 0.2, 0.2, 1.0]
     material.roughness = 0.005
-    material.metallic = 0.7
+    material.metallic = 1.0
     builder.add_box_visual(half_size=[0.09, 0.09, 0.09], material=material)
     builder.add_box_collision(half_size=[0.09, 0.09, 0.09])
     box = builder.build()
@@ -99,7 +96,7 @@ def main():
     material = renderer.create_material()
     material.base_color = [0.9, 0.6, 0.5, 1.0]
     material.roughness = 0.0
-    material.metallic = 0.9
+    material.metallic = 1.0
     builder.add_visual_from_file(
         '../assets/objects/suzanne.dae', scale=[0.1, 0.1, 0.1], material=material)
     builder.add_box_collision(half_size=[0.1, 0.1, 0.1])
@@ -112,7 +109,7 @@ def main():
 
     rgb = camera.get_color_rgba()
     rgb = im.fromarray((rgb * 255).astype(np.uint8))
-    rgb.save(f'mat_{"k" if use_kuafu else "v"}.png')
+    rgb.save(f'mat_{"rt" if ray_tracing else "rast"}.png')
     rgb.show()
 
 

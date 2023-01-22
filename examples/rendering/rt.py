@@ -1,14 +1,12 @@
 """Camera.
 
 Concepts:
-    - Create and mount cameras
-    - Render RGB images, point clouds, segmentation masks
+    - Ray tracing
 """
 
 import sapien.core as sapien
 import numpy as np
 from PIL import Image, ImageColor
-import open3d as o3d
 from sapien.utils.viewer import Viewer
 from transforms3d.euler import mat2euler
 
@@ -16,10 +14,11 @@ from transforms3d.euler import mat2euler
 def main():
     engine = sapien.Engine()
 
-    config = sapien.KuafuConfig()
-    # config.spp = 64
-    # config.use_denoiser = True
-    renderer = sapien.KuafuRenderer(config)
+    sapien.render_config.camera_shader_dir = "rt"
+    sapien.render_config.viewer_shader_dir = "rt"
+    sapien.render_config.rt_samples_per_pixel = 256
+    sapien.render_config.rt_use_denoiser = True
+    renderer = sapien.SapienRenderer()
     engine.set_renderer(renderer)
 
     scene = engine.create_scene()
@@ -27,11 +26,10 @@ def main():
 
     loader = scene.create_urdf_loader()
     loader.fix_root_link = True
-    urdf_path = '../assets/179/mobility.urdf'
+    urdf_path = "../assets/179/mobility.urdf"
     # load as a kinematic articulation
     asset = loader.load_kinematic(urdf_path)
-    assert asset, 'URDF not loaded.'
-
+    assert asset, "URDF not loaded."
 
     scene.set_ambient_light([0.5, 0.5, 0.5])
     scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5], shadow=True)
@@ -56,7 +54,7 @@ def main():
         far=far,
     )
 
-    print('Intrinsic matrix\n', camera.get_camera_matrix())
+    print("Intrinsic matrix\n", camera.get_camera_matrix())
 
     # Compute the camera pose by specifying forward(x), left(y) and up(z)
     cam_pos = np.array([-2, -2, 3])
@@ -76,12 +74,13 @@ def main():
     # ---------------------------------------------------------------------------- #
     # RGBA
     # ---------------------------------------------------------------------------- #
-    rgba = camera.get_float_texture('Color')  # [H, W, 4]
+    rgba = camera.get_float_texture("Color")  # [H, W, 4]
     # An alias is also provided
     # rgba = camera.get_color_rgba()  # [H, W, 4]
     rgba_img = (rgba * 255).clip(0, 255).astype("uint8")
     rgba_pil = Image.fromarray(rgba_img)
-    rgba_pil.save('kuafu_color.png')
+    rgba_pil.save("rt_color.png")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
