@@ -18,6 +18,12 @@ import pkg_resources
 from .pysapien import KuafuRenderer as _KuafuRenderer
 
 
+class VulkanRenderer(SapienRenderer):
+    def __init__(self, *args, **kwargs):
+        warn("VulkanRenderer is renamed SapienRenderer now")
+        super().__init__(*args, **kwargs)
+
+
 class KuafuRenderer(_KuafuRenderer):
     def __init__(self, config: KuafuConfig):
         warn(
@@ -63,8 +69,6 @@ def __enable_vulkan():
 
     get_global_render_config().viewer_shader_dir = __VULKAN_VIEWER_SHADER_ROOT
     get_global_render_config().camera_shader_dir = __VULKAN_CAMERA_SHADER_ROOT
-    # VulkanRenderer._set_viewer_shader_dir(__VULKAN_VIEWER_SHADER_ROOT)
-    # VulkanRenderer._set_camera_shader_dir(__VULKAN_CAMERA_SHADER_ROOT)
 
     _KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
     ensure_icd()

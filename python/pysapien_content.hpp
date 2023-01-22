@@ -378,7 +378,7 @@ void buildSapien(py::module &m) {
       py::class_<Renderer::SVulkan2Rigidbody, Renderer::IPxrRigidbody>(m, "VulkanRigidbody");
   auto PyVulkanRenderer =
       py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer,
-                 std::shared_ptr<Renderer::SVulkan2Renderer>>(m, "VulkanRenderer");
+                 std::shared_ptr<Renderer::SVulkan2Renderer>>(m, "SapienRenderer");
 
   // auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m,
   // "VulkanCamera");
