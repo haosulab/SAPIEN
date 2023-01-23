@@ -1,0 +1,18 @@
+#version 450
+
+layout(set = 0, binding = 0, rgba32f) uniform readonly image2D HdrColor;
+layout(set = 0, binding = 1, rgba32f) uniform writeonly image2D Color;
+// layout(set = 0, binding = 2, rgba32f) uniform readonly image2D Albedo;
+
+void main() {
+  uint x = gl_GlobalInvocationID.x;
+  uint y = gl_GlobalInvocationID.y;
+  vec4 color = imageLoad(HdrColor, ivec2(gl_GlobalInvocationID.xy));
+
+  // make nan visible for debugging
+  if (isnan(color.x + color.y + color.z)) {
+    color = vec4(1000.0, 0, 1000.0, 1);
+  }
+
+  imageStore(Color, ivec2(gl_GlobalInvocationID.xy), clamp(vec4(pow(color.rgb, vec3(1/2.2)), color.a), 0.0, 1.0));
+}
