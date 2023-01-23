@@ -30,8 +30,8 @@ void buildSimsense(py::module &parent) {
             py::array_t<float>, py::array_t<float>, float, float, float, bool
         >()
     );
-    PySimsense.def("compute", py::overload_cast<py::capsule, py::capsule>(&simsense::DepthSensorEngine::compute));
     PySimsense.def("compute", py::overload_cast<py::array_t<uint8_t>, py::array_t<uint8_t>>(&simsense::DepthSensorEngine::compute));
+    PySimsense.def("compute", py::overload_cast<py::capsule, py::capsule>(&simsense::DepthSensorEngine::compute));
     PySimsense.def("get_ndarray", &simsense::DepthSensorEngine::getNdarray);
     PySimsense.def("get_dl_tensor", &simsense::DepthSensorEngine::getDLTensor);
     PySimsense.def("set_ir_noise_parameters", &simsense::DepthSensorEngine::setInfraredNoiseParameters);

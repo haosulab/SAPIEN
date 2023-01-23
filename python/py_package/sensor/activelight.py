@@ -11,7 +11,6 @@ from ..core import (
 from .depth_processor import (
     init_rectify_stereo,
     calc_main_depth_from_left_right_ir,
-    DepthSensorCUDA
 )
 
 
@@ -49,7 +48,7 @@ class ActiveLightSensor(SensorEntity):
         :param sensor_name: Name of the sensor
         :param renderer:
         :param scene:
-
+        
         :param sensor_type: If this is set, all the parameters below will be omitted.
                             Supported sensor types: ['d415']
         :param rgb_resolution:
@@ -65,8 +64,6 @@ class ActiveLightSensor(SensorEntity):
 
         super().__init__()
 
-        warn('Current implementation of ActiveLightSensor is incompatible with emissive objects.')
-        warn('Current implementation of ActiveLightSensor is incompatible with environment maps.')
         warn("This class implements OpenCV's pipeline when doing depth sensor simulation. " + \
              "If GPU with CUDA is available, usage of ActiveLightSensorCUDA is highly suggested, " + \
              "which will provide better performance and more realistic results.")
@@ -342,181 +339,3 @@ class ActiveLightSensor(SensorEntity):
 
         world_points = np.matmul(r_inv, cam_points - t).transpose()
         return world_points
-
-class ActiveLightSensorCUDA(ActiveLightSensor):
-    def __init__(self,
-                sensor_name: str,
-                renderer: IPxrRenderer,
-                scene: Scene,
-                sensor_type: Optional[str] = 'd415',
-                rgb_resolution: Tuple[int, int] = None,
-                ir_resolution: Tuple[int, int] = None,
-                rgb_intrinsic: Optional[np.ndarray] = None,
-                ir_intrinsic: Optional[np.ndarray] = None,
-                trans_pose_l: Optional[Pose] = None,
-                trans_pose_r: Optional[Pose] = None,
-                light_pattern: Optional[str] = None,
-                max_depth: float = 8.0,
-                min_depth: float = 0.3,
-                ir_ambient_strength: float = 0.002,
-                ir_light_dim_factor : float = 0.05,
-                census_width: int = None,
-                census_height: int = None,
-                max_disp: int = None,
-                block_width: int = None,
-                block_height: int = None,
-                p1_penalty: int = None,
-                p2_penalty: int = None,
-                uniqueness_ratio: int = None,
-                lr_max_diff: int = None,
-                median_filter_size: int = None
-                ):
-        """
-        :param sensor_name: Name of the sensor
-        :param renderer:
-        :param scene:
-
-        :param sensor_type: If this is set, all the parameters below will be omitted.
-                            Supported sensor types: ['d415']
-        :param rgb_resolution:
-        :param ir_resolution:
-        :param rgb_intrinsic:
-        :param ir_intrinsic:
-        :param trans_pose_l:
-        :param trans_pose_r:
-        :param light_pattern: Path to active light pattern file.
-                            Use rgb modality if set to None.
-        :param light_dim_factor: normal light strength set to ir_light_dim_factor * original
-        :param census_width: Width of the center-symmetric census transform window. This must be an odd number.
-        :param census_height: Height of the center-symmetric census transform window. This must be an odd number.
-        :param max_disp: Maximum disparity search space (non-inclusive) for stereo matching.
-        :param block_width: Width of the matched block. This must be an odd number.
-        :param block_height: Height of the matched block. This must be an odd number.
-        :param p1_penalty: P1 penalty for semi-global matching algorithm. It is the penalty on the disparity change by plus or minus
-                        1 between neighboring pixels.
-        :param p2_penalty: P2 penalty for semi-global matching algorithm. It is the penalty on the disparity change by more than 1
-                        between neighboring pixels.
-        :param uniqueness_ratio: Margin in percentage by which the minimum computed cost should win the second best (not considering
-                                best match's adjacent pixels) cost to consider the found match valid.
-        :param lr_max_diff: Maximum allowed difference in the left-right consistency check. Set it to 255 will disable the check.
-        :param median_filter_size: Size of the median filter. Choices are 1, 3, 5, 7. When set to 1 the median filter is turned off.
-        """
-
-        warn('Current implementation of ActiveLightSensor is incompatible with emissive objects.')
-        warn('Current implementation of ActiveLightSensor is incompatible with environment maps.')
-
-        self.name = sensor_name
-        # super().set_name(sensor_name)
-
-        self.renderer = renderer
-        self.scene = scene
-        self.mount = self.scene.create_actor_builder().build_kinematic(name=f'{sensor_name}_mount')
-
-        if sensor_type:
-            self._set_sensor_parameters(sensor_type)
-        else:
-            self.rgb_w, self.rgb_h = rgb_resolution
-            self.ir_w, self.ir_h = ir_resolution
-            self.rgb_intrinsic = rgb_intrinsic
-            self.ir_intrinsic = ir_intrinsic
-            self.trans_pose_l = trans_pose_l
-            self.trans_pose_r = trans_pose_r
-            self.light_pattern = light_pattern
-            self.max_depth = max_depth
-            self.min_depth = min_depth
-            self.census_width = census_width
-            self.census_height = census_height
-            self.max_disp = max_disp
-            self.block_width = block_width
-            self.block_height = block_height
-            self.p1_penalty = p1_penalty
-            self.p2_penalty = p2_penalty
-            self.uniqueness_ratio = uniqueness_ratio
-            self.lr_max_diff = lr_max_diff
-            self.median_filter_size = median_filter_size
-
-        self.pose = Pose()
-
-        self._create_cameras()
-        self.alight = self.scene.add_active_light(
-            pose=Pose([0, 0, 0]),
-            color=[0, 0, 0],
-            fov=1.57,                      # TODO: parameterize this
-            tex_path=self.light_pattern,
-        )
-        self.ir_ambient_strength = ir_ambient_strength
-        self.ir_light_dim_factor = ir_light_dim_factor
-
-        self.set_pose(Pose())
-
-        self._rgb = None
-        self._ir_l = None
-        self._ir_r = None
-        self._depth = None
-        self._pc = None
-
-        # Initialize variables that depth sensor depends on
-        ex_l = self._pose2cv2ex(self.trans_pose_l)
-        ex_r = self._pose2cv2ex(self.trans_pose_r)
-        ex_main = self._pose2cv2ex(Pose())
-        self._l2r = ex_r @ np.linalg.inv(ex_l)
-        self._l2rgb = ex_main @ np.linalg.inv(ex_l)
-        self._map1, self._map2, self._q = init_rectify_stereo(
-            self.ir_w, self.ir_h, self.ir_intrinsic.astype(np.float),
-            self.ir_intrinsic.astype(np.float), self._l2r.astype(np.float)
-        )
-
-        self.depth_sensor = DepthSensorCUDA(
-                (self.ir_w, self.ir_h),
-                self.ir_intrinsic.astype(np.float),
-                self.ir_intrinsic.astype(np.float),
-                self._l2r.astype(np.float),
-                (self.rgb_w, self.rgb_h),
-                self.rgb_intrinsic.astype(np.float),
-                self._l2rgb.astype(np.float),
-                self.min_depth,
-                self.max_depth,
-                rectified=True,
-                census_width=self.census_width,
-                census_height=self.census_height,
-                max_disp=self.max_disp,
-                block_width=self.block_width,
-                block_height=self.block_height,
-                p1_penalty=self.p1_penalty,
-                p2_penalty=self.p2_penalty,
-                uniqueness_ratio=self.uniqueness_ratio,
-                lr_max_diff=self.lr_max_diff,
-                median_filter_size=self.median_filter_size,
-                depth_dilation=True
-            )
-
-    def get_depth(self):
-        if self._depth is None:
-            self._fetch('ir_l')
-            self._fetch('ir_r')
-
-            depth = self.depth_sensor.compute(
-                self._float2uint8(self._ir_l),
-                self._float2uint8(self._ir_r)
-            )
-            self._depth = depth
-
-        return copy(self._depth)
-
-    def _set_sensor_parameters(self, sensor_type):
-        super()._set_sensor_parameters(sensor_type)
-
-        # Stereo matching parameters
-        if sensor_type == 'd415':
-            self.census_width = 7
-            self.census_height = 7
-            self.max_disp = 128
-            self.block_width = 7
-            self.block_height = 7
-            self.p1_penalty = 8
-            self.p2_penalty = 32
-            self.uniqueness_ratio = 5
-            self.lr_max_diff = 1
-            self.median_filter_size = 3
-        else:
-            assert False, f"Unsupported sensor type: {sensor_type}"
