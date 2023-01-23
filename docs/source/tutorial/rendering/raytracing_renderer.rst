@@ -1,25 +1,34 @@
 .. _raytracing_renderer:
 
 
-Raytracing Renderer
+Ray tracing Renderer
 ==========================
 
 .. highlight:: python
 
 In this tutorial, you will learn the following:
 
-* Use of raytracing-based backend *Kuafu*
-* Use of GPU-accelerated depth computing module *SimSense*
+* Use ray tracing in ``SapienRenderer``
+* Use GPU-accelerated depth computing module *SimSense*
 
-The full script can be downloaded from :download:`kuafu.py <../../../../examples/rendering/kuafu.py>`, :download:`kuafu_mat.py <../../../../examples/rendering/kuafu_mat.py>`, :download:`kuafu_sensor.py <../../../../examples/rendering/kuafu_sensor.py>`, and :download:`kuafu_sensor_cuda.py <../../../../examples/rendering/kuafu_sensor_cuda.py>`
+The full script can be downloaded from :download:`rt.py <../../../../examples/rendering/rt.py>`, :download:`rt_mat.py <../../../../examples/rendering/rt_mat.py>`.
 
-
-Raytracing vs. rasterization
+Ray tracing vs. rasterization
 ------------------------------------
 
-In the previous tutorials, we have learned how to set up a basic scene with SAPIEN and acquire rendering results with `VulkanRenderer`. The `VulkanRenderer` is a high-efficiency rasterization-based renderer, making it suitable for data-intensive tasks such as reinforcement learning.
+In the previous tutorials, we have learned how to set up a basic scene with
+SAPIEN and acquire rendering results under the default settings using
+`SapienRenderer`. By default, `SapienRenderer` uses a high-efficiency
+rasterization-based rendering pipeline, making it suitable for data-intensive
+tasks such as reinforcement learning.
 
-However, though fast, the rasterization-based renderer is not physically-grounded, cannot render many real-world effects *e.g.* indirect lighting, realistic shadows, reflections and refractions, making the results overly *flat* and lack realism. On the other end, raytracing renderer simulates how rays interact with objects in a physically correct manner, and produces images that can be indistinguishable from those captured by a camera.
+However, though fast, the rasterization-based renderer is not
+physically-grounded, and cannot faithfully model many real-world effects,
+*e.g.*, indirect lighting, realistic shadows, reflections and refractions,
+making the results overly flat and lack realism. On the other end, ray tracing
+renderer simulates how light rays interact with objects in a physically correct
+manner, and produces images that can be indistinguishable from those captured by
+a camera.
 
 .. figure:: assets/rst_vs_rt.png
    :width: 540px
@@ -27,20 +36,21 @@ However, though fast, the rasterization-based renderer is not physically-grounde
 
    From *A Shader-Based Ray Tracing Engine*, Park et al.
 
-Raytracing with SAPIEN
+Ray tracing with SAPIEN
 ------------------------------------
 
-SAPIEN 2.0 ships with a raytracing renderer backend, named *Kuafu* (`KuafuRenderer`). Switching to Kuafu is easy, in the previous camera example, we set up the renderer with:
+In SAPIEN 2.2, the default renderer ``SapienRenderer`` (formerly known as
+``VulkanRenderer``) supports both rasterization and ray tracing, and different
+cameras can use differet rendering pipelines. Choosing a pipeline is done
+through specifying a `shader pack`, which is a directory containing a collection
+of `glsl` files.
 
-::
+To use the ray-tracing pipeline, simply add the following lines before creating a
+camera or a viewer.
 
-  renderer = sapien.VulkanRenderer()
-
-To use Kuafu instead of the rasterization renderer, simply replace the line with:
-
-::
-
-  renderer = sapien.KuafuRenderer()
+.. literalinclude:: ../../../../examples/rendering/rt.py
+   :dedent: 0
+   :lines: 17-18
 
 That's it! You can now rerun the script with raytracing renderer. The result would look like:
 
@@ -49,70 +59,70 @@ That's it! You can now rerun the script with raytracing renderer. The result wou
    :align: center
 
 
-.. note::
-    1. The Kuafu backend currently (2.0a) only supports `Color` downloading. Trying to download `Position` and other data from the camera will fail.
-    2. The Kuafu backend does not feature full support for viewers. It is recommended to debug and build scene with `VulkanRenderer` and produce the final results with `KuafuRenderer`.
+You may find that the result looks more realistic with the ray tracing shader.
+However the result contains noise due to under-sampling. To reduce the noise,
+one way is to increase the sample-per-pixel for the renderer. To achieve this,
+simply change the ``rt_samples_per_pixel`` in ``render_config``.
 
-You may find that the result looks more realistic with the raytracing renderer. However the result contains noise due to under-sampling. To reduce the noise, one way is increasing the sample-per-pixel (spp) for the renderer. To achieve this, we can pass a `KuafuConfig` object when creating the renderer:
+.. literalinclude:: ../../../../examples/rendering/rt.py
+   :dedent: 0
+   :lines: 19
 
-::
+Increasing the spp will affect the rendering speed directly. A cheaper way to reduce the noise is using a denoiser. ``SapienRenderer`` supports the OptiX denoiser on NVIDIA RTX GPUs.
 
-  render_config = sapien.KuafuConfig()
-  renderer_config.spp = 256
-  renderer = sapien.KuafuRenderer(render_config)
-
-Increasing the spp will affect the rendering speed directly. A cheaper way to reduce the noise is using a denoiser. Kuafu features an OptiX denoiser by NVIDIA. To enable the denoiser, we can set the `use_denoiser` flag in the config:
-
-::
-
-  render_config = sapien.KuafuConfig()
-  renderer_config.spp = 64
-  renderer_config.use_denoiser = True
-  renderer = sapien.KuafuRenderer(render_config)
-
+.. literalinclude:: ../../../../examples/rendering/rt.py
+   :dedent: 0
+   :lines: 20
 
 .. note::
-    You are required to have an NVIDIA GPU with driver version > 470 installed to use the denoiser.
+   You are required to have an NVIDIA RTX GPU with driver version >= 522 installed to use the denoiser.
 
+   While you may get the denoiser to work on drivers of lower versions (it has
+   worked on 470 in one of our tests), it is not officially supported.
 
-Advanced Material Support in Kuafu
+Reflection and refraction
 ------------------------------------
 
-To demonstrate the diverse material support in Kuafu. We will create a scene in SAPIEN and render with both `VulkanRenderer` and `KuafuRenderer`. First, let's setup the environment:
+Ray tracing allows SAPIEN to render realistic reflection and refractions.
+
+We will create a scene in SAPIEN and render with ray tracing turned on and off.
+First, let's setup the environment:
+
+.. literalinclude:: ../../../../examples/rendering/rt_mat.py
+   :dedent: 0
+   :lines: 11-51
+
+We add a flag ``ray_tracing`` to allow switching between rasterization and ray
+tracing. Next, let's build the scene. First, we create a rough bluish sphere:
 
 .. literalinclude:: ../../../../examples/rendering/kuafu_mat.py
    :dedent: 0
-   :lines: 11-54
+   :lines: 53-61
 
-We add a flag `use_kuafu` to allow easy switching between `VulkanRenderer` and `KuafuRenderer`. Next, let's build the scene. First, we create a rough bluish sphere:
-
-.. literalinclude:: ../../../../examples/rendering/kuafu_mat.py
-   :dedent: 0
-   :lines: 56-64
-
-Next, we create a transparent sphere:
+Next, we create a rough transparent sphere:
 
 .. literalinclude:: ../../../../examples/rendering/kuafu_mat.py
    :dedent: 0
-   :lines: 66-76
+   :lines: 63-73
 
-Generally, setting a large `transmission` value will lead to a transparent material. Similarly, we can add a capsule and a box with advanced materials:
+Generally, setting a large `transmission` value will lead to a transparent
+material. Similarly, we can add a capsule and a box with complex materials:
 
 .. literalinclude:: ../../../../examples/rendering/kuafu_mat.py
    :dedent: 0
-   :lines: 78-96
+   :lines: 75-93
 
 Finally, let's load an external mesh and assign a highly metallic material to that object:
 
 .. literalinclude:: ../../../../examples/rendering/kuafu_mat.py
    :dedent: 0
-   :lines: 98-107
+   :lines: 95-104
 
 After building the scene, we can get rendering results from the camera:
 
 .. literalinclude:: ../../../../examples/rendering/kuafu_mat.py
    :dedent: 0
-   :lines: 109-116
+   :lines: 106-113
 
 .. figure:: assets/mat_v.png
     :width: 720px
@@ -127,44 +137,8 @@ After building the scene, we can get rendering results from the camera:
     Result with `KuafuRenderer`
 
 
-Sensor Simulation in Kuafu
-------------------------------------
-.. TODO: split this into an individual section.
-.. TODO: Add out paper reference
-
-Backed by realistic rendering. SAPIEN is able to simulate the full sensor pipeline and simulate realistic sensor depth. Starting from our previously built environment, let's add a sensor to the scene:
-
-::
-
-  from sapien.sensor import ActiveLightSensor
-  sensor = ActiveLightSensor('sensor', renderer, scene, sensor_type='d415')
-
-The `ActiveLightSensor` class has built-in sensor types such as `d415`. We can also manually set all the sensor parameters by passing them to the class. Please check the API doc for details. The `sensor` behaves just like a mounted camera. You can `set_pose`, and `take_picture` on the sensor:
-
-.. literalinclude:: ../../../../examples/rendering/kuafu_sensor.py
-   :dedent: 0
-   :lines: 98-103
-
-After called `take_picture`. We can download RGB image, IR image, depth and point cloud from the sensor:
-
-.. literalinclude:: ../../../../examples/rendering/kuafu_sensor.py
-   :dedent: 0
-   :lines: 105-119
-
-.. figure:: assets/sensor_ir.png
-    :width: 720px
-    :align: center
-
-    Simulated infra-red image from `ActiveLightSensor`.
-
-.. figure:: assets/sensor_depth.png
-    :width: 720px
-    :align: center
-
-    Simulated depth image from `ActiveLightSensor`.
-
 GPU-accelerated Sensor Simulation with SimSense
-------------------------------------
+------------------------------------------------------------------------
 .. note::
     You are required to have an NVIDIA GPU to use SimSense.
 
