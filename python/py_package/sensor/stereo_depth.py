@@ -27,10 +27,10 @@ class StereoDepthSensorConfig:
         self.ir_light_dim_factor = 0.05
         """Dimming factor of the active light."""
 
-        self.rgb_w, self.rgb_h = (1920, 1080)
+        self.rgb_resolution = (1920, 1080)
         """Resolution of the RGB camera (width x height)."""
 
-        self.ir_w, self.ir_h = (1280, 720)
+        self.ir_resolution = (1280, 720)
         """Resolution of the infrared cameras (width x height)."""
 
         self.rgb_intrinsic = np.array([
@@ -62,17 +62,17 @@ class StereoDepthSensorConfig:
         self.ir_noise_seed = 0
         """Random seed for simulating infrared noise."""
         
-        self.speckle_shape = 0.0
+        self.speckle_shape = 1333.33
         """Shape parameter for simulating infrared speckle noise (Gamma distribution).
         Set to 0 will disable noise simulation."""
 
-        self.speckle_scale = 0.0
+        self.speckle_scale = 7.5e-4
         """Scale parameter for simulating infrared speckle noise (Gamma distribution)."""
 
-        self.gaussian_mu = 0.0
+        self.gaussian_mu = -0.23
         """Mean for simulating infrared thermal noise (Gaussian distribution)."""
 
-        self.gaussian_sigma = 0.0
+        self.gaussian_sigma = 0.25
         """Standard deviation for simulating infrared thermal noise (Gaussian distribution)."""
 
         self.rectified = True
@@ -96,10 +96,10 @@ class StereoDepthSensorConfig:
         self.block_height = 7
         """Height of the matched block for stereo matching. This must be an odd number."""
 
-        self.p1_penalty = 7
+        self.p1_penalty = 8
         """P1 penalty for semi-global matching algorithm."""
 
-        self.p2_penalty = 86
+        self.p2_penalty = 32
         """P2 penalty for semi-global matching algorithm."""
 
         self.uniqueness_ratio = 15
@@ -136,9 +136,12 @@ class StereoDepthSensor(SensorEntity):
         self._config = config
 
         # Instance check
-        if not isinstance(self._config.ir_w, int) or not isinstance(self._config.ir_h, int) or \
-            self._config.ir_w < 32 or self._config.ir_h < 32:
-            raise TypeError("Image width and height must be integer no less than 32")
+        if not isinstance(self._config.rgb_resolution[0], int) or not isinstance(self._config.rgb_resolution[1], int):
+            raise TypeError("RGB resolution (width and height) must be integer")
+
+        if not isinstance(self._config.ir_resolution[0], int) or not isinstance(self._config.ir_resolution[1], int) or \
+            self._config.ir_resolution[0] < 32 or self._config.ir_resolution[1] < 32:
+            raise TypeError("Infrared resolution (width and height) must be integer and no less than 32")
 
         if self._config.speckle_shape > 0 and (self._config.speckle_scale <= 0 or self._config.gaussian_sigma <= 0):
             raise TypeError("Infrared noise simulation is on. Speckle_scale and gaussian_sigma must both be positive")
@@ -150,7 +153,7 @@ class StereoDepthSensor(SensorEntity):
             raise TypeError("census_width and census_height must be positive odd integers and their product should be no larger than 65")
         
         if not isinstance(self._config.max_disp, int) or self._config.max_disp < 32 or self._config.max_disp > 1024:
-            raise TypeError("max_disp must be integer within range [32, 1024]")
+            raise TypeError("max_disp must be integer and within range [32, 1024]")
         
         if not isinstance(self._config.block_width, int) or not isinstance(self._config.block_height, int) or \
             self._config.block_width <= 0 or self._config.block_height <= 0 or \
@@ -163,10 +166,10 @@ class StereoDepthSensor(SensorEntity):
             raise TypeError("p1_penalty must be positive integer less than p2_penalty and p2_penalty be positive integer less than 224")
 
         if not isinstance(self._config.uniqueness_ratio, int) or self._config.uniqueness_ratio < 0 or self._config.uniqueness_ratio > 255:
-            raise TypeError("uniqueness_ratio must be positive integer no larger than 255")
+            raise TypeError("uniqueness_ratio must be positive integer and no larger than 255")
 
         if not isinstance(self._config.lr_max_diff, int) or self._config.lr_max_diff < -1 or self._config.lr_max_diff > 255:
-            raise TypeError("lr_max_diff must be integer within the range [0, 255]")
+            raise TypeError("lr_max_diff must be integer and within the range [0, 255]")
 
         if self._config.median_filter_size != 1 and self._config.median_filter_size != 3 and self._config.median_filter_size != 5 and \
             self._config.self._config.median_filter_size != 7:
@@ -193,8 +196,7 @@ class StereoDepthSensor(SensorEntity):
         self._create_cameras()
 
         # Depth computing engine
-        ir_size = (self._config.ir_w, self._config.ir_h)
-        rgb_size = (self._config.rgb_w, self._config.rgb_h)
+        ir_size, rgb_size = self._config.ir_resolution, self._config.rgb_resolution
         ir_intrinsic = self._config.ir_intrinsic.astype(np.float)
         rgb_intrinsic = self._config.rgb_intrinsic.astype(np.float)
         rgb_extrinsic = self._pose2cv2ex(self._pose)
@@ -349,6 +351,9 @@ class StereoDepthSensor(SensorEntity):
         return self._cam_rgb.get_dl_tensor('Color')
 
     def get_ir(self):
+        """
+        Note: Noise simulation won't be reflected here
+        """
         self._fetch('ir_l')
         self._fetch('ir_r')
         return [copy(self._ir_l), copy(self._ir_r)]
@@ -378,7 +383,7 @@ class StereoDepthSensor(SensorEntity):
         self._scene.update_render()
 
         self._cam_rgb = self._scene.add_mounted_camera(
-            f"{self.name}", self._mount, Pose([0, 0, 0]), self._config.rgb_w, self._config.rgb_h, 0.78, 0.001, 100)
+            f"{self.name}", self._mount, Pose([0, 0, 0]), *self._config.rgb_resolution, 0.78, 0.001, 100)
         self._cam_rgb.set_perspective_parameters(
             0.1, 100.0,
             self._config.rgb_intrinsic[0, 0], self._config.rgb_intrinsic[1, 1],
@@ -387,7 +392,7 @@ class StereoDepthSensor(SensorEntity):
         )
 
         self._cam_ir_l = self._scene.add_mounted_camera(
-            f"{self.name}_left", self._mount, self._config.trans_pose_l, self._config.ir_w, self._config.ir_h, 0.78, 0.001, 100)
+            f"{self.name}_left", self._mount, self._config.trans_pose_l, *self._config.ir_resolution, 0.78, 0.001, 100)
         self._cam_ir_l.set_perspective_parameters(
             0.1, 100.0,
             self._config.ir_intrinsic[0, 0], self._config.ir_intrinsic[1, 1],
@@ -396,29 +401,13 @@ class StereoDepthSensor(SensorEntity):
         )
 
         self._cam_ir_r = self._scene.add_mounted_camera(
-            f"{self.name}_right", self._mount, self._config.trans_pose_r, self._config.ir_w, self._config.ir_h, 0.78, 0.001, 100)
+            f"{self.name}_right", self._mount, self._config.trans_pose_r, *self._config.ir_resolution, 0.78, 0.001, 100)
         self._cam_ir_r.set_perspective_parameters(
             0.1, 100.0,
             self._config.ir_intrinsic[0, 0], self._config.ir_intrinsic[1, 1],
             self._config.ir_intrinsic[0, 2], self._config.ir_intrinsic[1, 2],
             self._config.ir_intrinsic[0, 1]
         )
-    
-    def _get_registration_mat(self, ir_size, ir_intrinsic, rgb_intrinsic, ir2rgb):
-        R = ir2rgb[:3, :3]
-        t = ir2rgb[:3, 3:]
-        
-        w, h = ir_size
-        x = np.arange(w)
-        y = np.arange(h)
-        u, v = np.meshgrid(x, y)
-        w = np.ones_like(u)
-        pixel_coords = np.stack([u, v, w], axis=-1) # pixel_coords[y, x] is (x, y, 1)
-
-        A = np.einsum("ij,hwj->hwi", rgb_intrinsic @ R @ np.linalg.inv(ir_intrinsic), pixel_coords)
-        B = rgb_intrinsic @ t
-
-        return A[..., 0], A[..., 1], A[..., 2], B
 
     def _ir_mode(self):
         if self._config.light_pattern is None:
@@ -450,6 +439,23 @@ class StereoDepthSensor(SensorEntity):
             self._ir_r = self._cam_ir_r.get_color_rgba()[..., 0].clip(0, 1)
         elif mod == 'depth' and self._depth is None:
             self._depth = self._engine.get_ndarray()
+
+    @staticmethod
+    def _get_registration_mat(ir_size, ir_intrinsic, rgb_intrinsic, ir2rgb):
+        R = ir2rgb[:3, :3]
+        t = ir2rgb[:3, 3:]
+        
+        w, h = ir_size
+        x = np.arange(w)
+        y = np.arange(h)
+        u, v = np.meshgrid(x, y)
+        w = np.ones_like(u)
+        pixel_coords = np.stack([u, v, w], axis=-1) # pixel_coords[y, x] is (x, y, 1)
+
+        A = np.einsum("ij,hwj->hwi", rgb_intrinsic @ R @ np.linalg.inv(ir_intrinsic), pixel_coords)
+        B = rgb_intrinsic @ t
+
+        return A[..., 0], A[..., 1], A[..., 2], B
 
     @staticmethod
     def _pose2cv2ex(pose):
