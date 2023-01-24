@@ -15,6 +15,7 @@ layout(set = 0, binding = 1, rgba32f) uniform image2D outAlbedo;
 layout(set = 0, binding = 2, rgba32f) uniform image2D outNormal;
 layout(set = 0, binding = 3, rgba32ui) uniform uimage2D outSegmentation;
 layout(set = 0, binding = 4, rgba32f) uniform image2D outRadiance;
+layout(set = 0, binding = 5, rgba32f) uniform image2D outPosition;
 
 layout(set = 1, binding = 0) uniform accelerationStructureEXT tlas;
 
@@ -104,6 +105,10 @@ void main() {
         imageStore(outNormal, ivec2(gl_LaunchIDEXT.xy), vec4(mat3(cameraBuffer.viewMatrix) * ray.normal, 1.0));
         imageStore(outAlbedo, ivec2(gl_LaunchIDEXT.xy), vec4(ray.albedo, 1.0));
         imageStore(outSegmentation, ivec2(gl_LaunchIDEXT.xy), ray.segmentation);
+
+        vec4 position = cameraBuffer.viewMatrix * vec4(ray.origin, 1.0);
+        vec4 ndc = cameraBuffer.projectionMatrix * position;
+        imageStore(outPosition, ivec2(gl_LaunchIDEXT.xy), vec4(position.xyz, ndc.z / ndc.w));
       }
     }
     radiance += attenuation * ambientLight;  // HACK: implement unterminated ray properly

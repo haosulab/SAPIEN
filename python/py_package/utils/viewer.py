@@ -1341,7 +1341,7 @@ class Viewer(object):
             )
 
     def take_screenshot(self, _):
-        picture = self.window.get_float_texture("Color")
+        picture = self.window.get_float_texture(self.target_name)
         for i in range(100000000):
             n = f"sapien_screenshot_{i}.png"
             if os.path.exists(n):

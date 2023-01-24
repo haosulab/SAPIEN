@@ -512,7 +512,7 @@ void main() {
   }
 
   if (rnd(ray.seed) < obj.transparency) {
-    ray.origin = worldPosition + 0.001 * ray.direction;
+    ray.origin = worldPosition;
     ray.attenuation = vec3(1.0);
     ray.normal = worldShadingNormal;
     ray.albedo = baseColor;

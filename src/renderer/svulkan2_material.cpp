@@ -176,6 +176,18 @@ std::shared_ptr<IPxrTexture> SVulkan2Material::getMetallicTexture() const {
   return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
 }
 
+void SVulkan2Material::setTransmissionTexture(std::shared_ptr<IPxrTexture> texture) {
+  if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
+    mMaterial->setTransmissionTexture(tex->getTexture());
+  } else {
+    mMaterial->setTransmissionTexture(nullptr);
+  }
+}
+std::shared_ptr<IPxrTexture> SVulkan2Material::getTransmissionTexture() const {
+  auto tex = mMaterial->getTransmissionTexture();
+  return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
+}
+
 void SVulkan2Material::setEmissionTextureFromFilename(std::string_view filename) {
   setEmissionTexture(mParentRenderer->createTexture(filename));
 }
@@ -190,6 +202,9 @@ void SVulkan2Material::setMetallicTextureFromFilename(std::string_view filename)
 }
 void SVulkan2Material::setRoughnessTextureFromFilename(std::string_view filename) {
   setRoughnessTexture(mParentRenderer->createTexture(filename));
+}
+void SVulkan2Material::setTransmissionTextureFromFilename(std::string_view filename) {
+  setTransmissionTexture(mParentRenderer->createTexture(filename));
 }
 
 } // namespace Renderer

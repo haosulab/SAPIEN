@@ -65,6 +65,9 @@ public:
   void setNormalTexture(std::shared_ptr<IPxrTexture> texture) override;
   void setNormalTextureFromFilename(std::string_view filename) override;
   [[nodiscard]] std::shared_ptr<IPxrTexture> getNormalTexture() const override;
+  void setTransmissionTexture(std::shared_ptr<IPxrTexture> texture) override;
+  void setTransmissionTextureFromFilename(std::string_view filename) override;
+  [[nodiscard]] std::shared_ptr<IPxrTexture> getTransmissionTexture() const override;
 
   [[nodiscard]] std::shared_ptr<svulkan2::resource::SVMetallicMaterial> getMaterial() const {
     return mMaterial;
