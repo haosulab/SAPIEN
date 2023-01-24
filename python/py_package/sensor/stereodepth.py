@@ -25,7 +25,7 @@ class StereoDepthSensorConfig:
         """Strength of the active light."""
 
         self.ir_light_dim_factor = 0.05
-        """Dimming factor of the active light."""
+        """Final light strength will be timed by ir_light_dim_factor."""
 
         self.rgb_resolution = (1920, 1080)
         """Resolution of the RGB camera (width x height)."""

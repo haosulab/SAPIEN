@@ -1,17 +1,12 @@
-# by Xiaoshuai Jet Zhang <i@jetd.me>, Jan 2021
-# Changed by Ang Li, Sep 2022
-# v2022.09.27
+# by Xiaoshuai Jet Zhang <i@jetd.me>, Ang Li, Jan 2023
+# v2023.01.23
 #
-# Depth simulation toolkit.
+# CPU Depth simulation toolkit.
 #
 # Please run:
 #  1. `pip3 install --upgrade pip`
 #  2. `pip3 install opencv-contrib-python scipy open3d`
 # before using this package.
-#
-# TODO:
-#  1. IR intensity instead of pixel values in real pipeline.
-#
 
 from typing import Optional, Tuple
 
@@ -39,15 +34,13 @@ def unpad_lr(img: np.ndarray, ndisp: int) -> np.ndarray:
 
 
 def sim_ir_noise(
-        img: np.ndarray,
-        scale: float = 0.0, blur_ksize: int = 0, blur_ksigma: float = 0.03,
-        speckle_shape: float = 398.12, speckle_scale: float = 2.54e-3,
-        gaussian_mu: float = -0.231, gaussian_sigma: float = 0.83,
-        seed: int = 0
+    img: np.ndarray,
+    scale: float = 0.0, blur_ksize: int = 0, blur_ksigma: float = 0.03,
+    speckle_shape: float = 398.12, speckle_scale: float = 2.54e-3,
+    gaussian_mu: float = -0.231, gaussian_sigma: float = 0.83,
+    seed: int = 0
 ) -> np.ndarray:
     """
-    TODO: IR density model
-
     Simulate IR camera noise.
 
     Noise model from Landau et al.
@@ -92,7 +85,7 @@ def sim_ir_noise(
 
 
 def depth_post_processing(depth: np.ndarray, ksize: int = 5) -> np.ndarray:
-    # depth = scipy.signal.medfilt2d(depth, kernel_size=ksize)
+    depth = scipy.signal.medfilt2d(depth, kernel_size=ksize)
     return depth
 
 
@@ -118,9 +111,9 @@ def get_census(img: np.ndarray, wsize:int = 7) -> np.ndarray:
 
 
 def calc_disparity(
-        imgl: np.ndarray, imgr: np.ndarray, method: str, *,
-        ndisp: int = 96, min_disp: int = 0,
-        use_census: bool = True, census_wsize: int = 7
+    imgl: np.ndarray, imgr: np.ndarray, method: str, *,
+    ndisp: int = 128, min_disp: int = 0,
+    use_census: bool = True, census_wsize: int = 7
 ) -> np.ndarray:
     """
     Calculate disparity given a rectified image pair.
@@ -162,15 +155,14 @@ def calc_disparity(
         raise NotImplementedError(f'Not implemented: {method}')
 
     displ = matcherl.compute(imgl, imgr)
-
     displ = unpad_lr(displ, ndisp).astype(np.float32) / 16.0
-
+    
     return displ
 
 
 def init_rectify_stereo(
-        w: int, h: int, kl: np.ndarray, kr: np.ndarray, rt: np.ndarray,
-        distortl: Optional[np.ndarray] = None, distortr: Optional[np.ndarray] = None
+    w: int, h: int, kl: np.ndarray, kr: np.ndarray, rt: np.ndarray,
+    distortl: Optional[np.ndarray] = None, distortr: Optional[np.ndarray] = None
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Initiate parameters needed for rectification with given camera parameters.
@@ -200,7 +192,7 @@ def init_rectify_stereo(
 
 
 def calc_rectified_stereo_pair(
-        imgl: np.ndarray, imgr: np.ndarray, map1: np.ndarray, map2:np.ndarray
+    imgl: np.ndarray, imgr: np.ndarray, map1: np.ndarray, map2:np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Rectify an image pair with given camera parameters.
@@ -221,8 +213,8 @@ def calc_rectified_stereo_pair(
 
 
 def calc_depth_and_pointcloud(
-        disparity: np.ndarray, mask: np.ndarray, q: np.ndarray,
-        no_pointcloud: bool = False
+    disparity: np.ndarray, mask: np.ndarray, q: np.ndarray,
+    no_pointcloud: bool = False
 ) -> Tuple[np.ndarray, object]:  # object is o3d.geometry.PointCloud
     """
     Calculate depth and pointcloud.
@@ -265,19 +257,19 @@ def calc_depth_and_pointcloud(
 
 
 def calc_main_depth_from_left_right_ir(
-        ir_l: np.ndarray, ir_r: np.ndarray,
-        l2r:np.ndarray, l2rgb: np.ndarray,
-        k_l: np.ndarray, k_r: np.ndarray, k_main: np.ndarray,
-        map1: np.ndarray, map2:np.ndarray, q: np.ndarray,
-        method: str = 'SGBM',
-        ndisp: int = 96,
-        use_noise: bool = True,
-        use_census: bool = True,
-        register_depth: bool = True,
-        register_blur_ksize: int = 5,
-        main_cam_size=(1920, 1080),
-        census_wsize=7,
-        **kwargs
+    ir_l: np.ndarray, ir_r: np.ndarray,
+    l2r:np.ndarray, l2rgb: np.ndarray,
+    k_l: np.ndarray, k_r: np.ndarray, k_main: np.ndarray,
+    map1: np.ndarray, map2:np.ndarray, q: np.ndarray,
+    method: str = 'SGBM',
+    ndisp: int = 128,
+    use_noise: bool = False,
+    use_census: bool = True,
+    register_depth: bool = True,
+    register_blur_ksize: int = 5,
+    main_cam_size=(1920, 1080),
+    census_wsize=7,
+    **kwargs
 ) -> np.ndarray:
     """
     Calculate depth for rgb camera from left right ir images.
@@ -298,9 +290,6 @@ def calc_main_depth_from_left_right_ir(
     """
     assert ir_l.shape == ir_r.shape
 
-    # assert np.allclose(k_l, k_r)
-    # w, h = k_main[:2, 2]
-    # w, h = int(w * 2), int(h * 2)
     w, h = main_cam_size
 
     if not np.allclose(l2r[:3, :3], np.eye(3), atol=1e-6):
@@ -311,9 +300,7 @@ def calc_main_depth_from_left_right_ir(
     if use_noise:
         ir_l, ir_r = sim_ir_noise(ir_l, **kwargs), sim_ir_noise(ir_r, **kwargs)
 
-    # ir_l, ir_r = calc_rectified_stereo_pair(
-    #     ir_l, ir_r, map1, map2
-    # )
+    ir_l, ir_r = calc_rectified_stereo_pair(ir_l, ir_r, map1, map2)
 
     disp = calc_disparity(
         ir_l, ir_r, method, ndisp=ndisp,
