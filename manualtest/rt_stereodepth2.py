@@ -92,16 +92,16 @@ def main():
     sensor_config = StereoDepthSensorConfig()
     sensor_config.rgb_resolution = (480, 270)
     sensor_config.rgb_intrinsic = np.array([
-            [345.,    0., 240.],
-            [0.,    345., 135.],
-            [0.,      0.,   1.]
-        ])
+        [345.,    0., 240.],
+        [0.,    345., 135.],
+        [0.,      0.,   1.]
+    ])
     sensor_config.ir_resolution = (640, 360)
     sensor_config.ir_intrinsic = np.array([
-            [460.,   0., 320.],
-            [0.,   460., 180.],
-            [0.,     0.,   1.]
-        ])
+        [460.,   0., 320.],
+        [0.,   460., 180.],
+        [0.,     0.,   1.]
+    ])
     sensor_config.max_disp = 96 # Max disparity for stereo matching
     sensor = StereoDepthSensor('sensor', scene, sensor_config)
     sensor.set_pose(
