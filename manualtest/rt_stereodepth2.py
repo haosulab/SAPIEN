@@ -118,7 +118,7 @@ def main():
         scene.update_render()
         sensor.take_picture(infrared_only=True)
         sensor.compute_depth()
-        torch.utils.dlpack.from_dlpack(sensor.get_depth_dl_tensor())
+        tensor = torch.utils.dlpack.from_dlpack(sensor.get_depth_dl_tensor()).clone() # Example of passing result directly to pytorch
 
     depth = sensor.get_depth()
     plt.imshow(depth)
