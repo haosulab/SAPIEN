@@ -62,18 +62,11 @@ class StereoDepthSensorConfig:
         self.ir_noise_seed = 0
         """Random seed for simulating infrared noise."""
         
-        self.speckle_shape = 1333.33
-        """Shape parameter for simulating infrared speckle noise (Gamma distribution).
-        Set to 0 will disable noise simulation."""
+        self.ir_speckle_noise = 1.0
+        """Scale for simulating infrared speckle noise. Set to 0 will disable noise simulation."""
 
-        self.speckle_scale = 7.5e-4
-        """Scale parameter for simulating infrared speckle noise (Gamma distribution)."""
-
-        self.gaussian_mu = -0.23
-        """Mean for simulating infrared thermal noise (Gaussian distribution)."""
-
-        self.gaussian_sigma = 0.25
-        """Standard deviation for simulating infrared thermal noise (Gaussian distribution)."""
+        self.ir_thermal_noise = 1.0
+        """Scale for simulating infrared thermal noise. Only effective when speckle noise is on."""
 
         self.rectified = True
         """Set to true if left and right infrared cameras have a common image plane,
@@ -143,8 +136,8 @@ class StereoDepthSensor(SensorEntity):
             self._config.ir_resolution[0] < 32 or self._config.ir_resolution[1] < 32:
             raise TypeError("Infrared resolution (width and height) must be integer and no less than 32")
 
-        if self._config.speckle_shape > 0 and (self._config.speckle_scale <= 0 or self._config.gaussian_sigma <= 0):
-            raise TypeError("Infrared noise simulation is on. Speckle_scale and gaussian_sigma must both be positive")
+        if self._config.ir_speckle_noise > 0 and self._config.ir_thermal_noise <= 0:
+            raise TypeError("ir_speckle_noise > 0, Infrared noise simulation is on. ir_thermal_noise must also be positive")
         
         if not isinstance(self._config.census_width, int) or not isinstance(self._config.census_height, int) or \
             self._config.census_width <= 0 or self._config.census_height <= 0 or \
@@ -195,6 +188,15 @@ class StereoDepthSensor(SensorEntity):
         self._cam_ir_r = None
         self._create_cameras()
 
+        # Noise simulation parameters
+        self._default_speckle_shape = 1333.33
+        self._default_gaussian_sigma = 0.25
+        self._default_gaussian_mu = 0
+        speckle_shape = self._default_speckle_shape / self._config.ir_speckle_noise
+        speckle_scale = self._config.ir_speckle_noise / self._default_speckle_shape
+        gaussian_mu = self._default_gaussian_mu
+        gaussian_sigma = self._default_gaussian_sigma * self._config.ir_thermal_noise
+
         # Depth computing engine
         ir_size, rgb_size = self._config.ir_resolution, self._config.rgb_resolution
         ir_intrinsic = self._config.ir_intrinsic.astype(np.float)
@@ -218,11 +220,11 @@ class StereoDepthSensor(SensorEntity):
 
         self._engine = DepthSensorEngine(
             ir_size[1], ir_size[0], rgb_size[1], rgb_size[0], f_len, b_len, self._config.min_depth, self._config.max_depth,
-            self._config.ir_noise_seed, self._config.speckle_shape, self._config.speckle_scale, self._config.gaussian_mu,
-            self._config.gaussian_sigma, self._config.rectified, self._config.census_width, self._config.census_height,
-            self._config.max_disp, self._config.block_width, self._config.block_height, self._config.p1_penalty,
-            self._config.p2_penalty, self._config.uniqueness_ratio, self._config.lr_max_diff, self._config.median_filter_size,
-            map_lx, map_ly, map_rx, map_ry, a1, a2, a3, b[0], b[1], b[2], self._config.depth_dilation
+            self._config.ir_noise_seed, speckle_shape, speckle_scale, gaussian_mu, gaussian_sigma, self._config.rectified,
+            self._config.census_width, self._config.census_height, self._config.max_disp, self._config.block_width,
+            self._config.block_height, self._config.p1_penalty, self._config.p2_penalty, self._config.uniqueness_ratio,
+            self._config.lr_max_diff, self._config.median_filter_size, map_lx, map_ly, map_rx,
+            map_ry, a1, a2, a3, b[0], b[1], b[2], self._config.depth_dilation
         )
     
     def clear_cache(self):
@@ -266,23 +268,23 @@ class StereoDepthSensor(SensorEntity):
         self._alight.set_pose(Pose(self._mount.get_pose().p, apos))
         self.clear_cache()
     
-    def set_ir_noise_parameters(self, speckle_shape, speckle_scale, gaussian_mu, gaussian_sigma):
+    def set_ir_noise(self, ir_speckle_noise: float, ir_thermal_noise: float):
         """
-        :param speckle_shape: Shape parameter for simulating infrared speckle noise (Gamma distribution). Set to 0 to disable
-                              noise simulation.
-        :param speckle_scale: Scale parameter for simulating infrared speckle noise (Gamma distribution).
-        :param gaussian_mu: Mean for simulating infrared thermal noise (Gaussian distribution).
-        :param gaussian_sigma: Standard deviation for simulating infrared thermal noise (Gaussian distribution).
+        :param ir_speckle_noise: Scale for simulating infrared speckle noise. Set to 0 will disable noise simulation.
+        :param ir_thermal_noise: Scale for simulating infrared thermal noise. Only effective when speckle noise is on.
         """
-        if speckle_shape > 0 and (speckle_scale <= 0 or gaussian_sigma <= 0):
-            raise TypeError("Infrared noise simulation is on. Speckle_scale and gaussian_sigma must both be positive")
-        self._config.speckle_shape = speckle_shape
-        self._config.speckle_scale = speckle_scale
-        self._config.gaussian_mu = gaussian_mu
-        self._config.gaussian_sigma = gaussian_sigma
+        if ir_speckle_noise > 0 and ir_thermal_noise <= 0:
+            raise TypeError("ir_speckle_noise > 0, Infrared noise simulation is on. ir_thermal_noise must also be positive")
+        speckle_shape = self._default_speckle_shape / ir_speckle_noise
+        speckle_scale = ir_speckle_noise / self._default_speckle_shape
+        gaussian_mu = self._default_gaussian_mu
+        gaussian_sigma = self._default_gaussian_sigma * ir_thermal_noise
+
+        self._config.ir_speckle_noise = ir_speckle_noise
+        self._config.ir_thermal_noise = ir_thermal_noise
         self._engine.set_ir_noise_parameters(speckle_shape, speckle_scale, gaussian_mu, gaussian_sigma)
     
-    def set_census_window_size(self, census_width, census_height):
+    def set_census_window_size(self, census_width: int, census_height: int):
         """
         :param census_width: Width of the center-symmetric census transform window. This must be an odd number.
         :param census_height: Height of the center-symmetric census transform window. This must be an odd number.
@@ -294,7 +296,7 @@ class StereoDepthSensor(SensorEntity):
         self._config.census_height = census_height
         self._engine.set_census_window_size(census_width, census_height)
     
-    def set_matching_block_size(self, block_width, block_height):
+    def set_matching_block_size(self, block_width: int, block_height: int):
         """
         :param block_width: Width of the matched block. This must be an odd number.
         :param block_height: Height of the matched block. This must be an odd number.
@@ -306,7 +308,7 @@ class StereoDepthSensor(SensorEntity):
         self._config.block_height = block_height
         self._engine.set_matching_block_size(block_width, block_height)
     
-    def set_penalties(self, p1_penalty, p2_penalty):
+    def set_penalties(self, p1_penalty: int, p2_penalty: int):
         """
         :param p1_penalty: P1 penalty for semi-global matching algorithm.
         :param p2_penalty: P2 penalty for semi-global matching algorithm.
@@ -318,7 +320,7 @@ class StereoDepthSensor(SensorEntity):
         self._config.p2_penalty = p2_penalty
         self._engine.set_penalties(p1_penalty, p2_penalty)
     
-    def set_uniqueness_ratio(self, uniqueness_ratio):
+    def set_uniqueness_ratio(self, uniqueness_ratio: int):
         """
         :param uniqueness_ratio: Margin in percentage by which the minimum computed cost should win the second best (not considering
                                  best match's adjacent pixels) cost to consider the found match valid.
@@ -328,7 +330,7 @@ class StereoDepthSensor(SensorEntity):
         self._config.uniqueness_ratio = uniqueness_ratio
         self._engine.set_uniqueness_ratio(uniqueness_ratio)
 
-    def set_lr_max_diff(self, lr_max_diff):
+    def set_lr_max_diff(self, lr_max_diff: int):
         """
         :param lr_max_diff: Maximum allowed difference in the left-right consistency check. Set it to 255 to disable the check.
         """
@@ -365,7 +367,7 @@ class StereoDepthSensor(SensorEntity):
     def get_depth_dl_tensor(self):
         return self._engine.get_dl_tensor()
 
-    def get_pointcloud(self, frame='camera', with_rgb=False):
+    def get_pointcloud(self, frame: str = 'camera', with_rgb: bool = False):
         assert frame in ['camera', 'world']
         depth = self.get_depth()
         if frame == 'camera':
