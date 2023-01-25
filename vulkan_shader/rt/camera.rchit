@@ -238,7 +238,7 @@ vec3 evalGGXTransmission(vec3 N, vec3 L, vec3 V, float eta, float roughness) {
 
     float dotNH = clamp(dot(N, H), 1e-6, 1);
     float dotVH = clamp(dot(V, H), 1e-6, 1);
-    float dotNL = dot(N, L);
+    float dotNL = clamp(dot(N, L), 1e-6, 1);
     float dotNV = clamp(dot(N, V), 1e-6, 1);
 
     float F = dielectricFresnel(dotVH, 1.0 / eta);
