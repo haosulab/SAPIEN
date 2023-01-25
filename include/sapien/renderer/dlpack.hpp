@@ -11,6 +11,7 @@ namespace Renderer {
 template <typename T> void dl_deleter(DLManagedTensor *self) {
   delete[] self->dl_tensor.shape;
   delete static_cast<std::shared_ptr<T> *>(self->manager_ctx);
+  delete self;
 }
 
 template <typename T>

@@ -68,6 +68,7 @@ __all__ = [
     "RenderServerBuffer",
     "RenderShape",
     "RenderTexture",
+    "SapienRenderer",
     "Scene",
     "SceneConfig",
     "SceneMultistepCallback",
@@ -80,7 +81,6 @@ __all__ = [
     "VisualRecord",
     "VulkanParticleBody",
     "VulkanRenderMesh",
-    "VulkanRenderer",
     "VulkanRigidbody",
     "VulkanScene",
     "VulkanWindow",
@@ -399,6 +399,7 @@ class CameraEntity(Entity):
     def set_local_pose(self, pose: Pose) -> None: ...
     def set_parent(self, parent: ActorBase, keep_pose: bool) -> None: ...
     def set_perspective_parameters(self, near: float, far: float, fx: float, fy: float, cx: float, cy: float, skew: float) -> None: ...
+    def set_pose(self, pose: Pose) -> None: ...
     def set_principal_point(self, cx: float, cy: float) -> None: ...
     def take_picture(self) -> None: ...
     def take_picture_and_get_dl_tensors_async(self, names: typing.List[str]) -> AwaitableDLList: ...
@@ -1628,6 +1629,37 @@ class RenderTexture():
         :type: int
         """
     pass
+class SapienRenderer(IPxrRenderer):
+    def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '', culling: str = 'back', do_not_load_texture: bool = False) -> None: 
+        """
+        Create the VulkanRenderer for rasterization-based rendering.
+
+        Args:
+          offscreen_only: tell the renderer the user does not need to present onto a screen. The renderer will not try to select a GPU with present abilities.
+          max_num_materials: tell the maximum number of materials that will exist at the same time. Increase this number if descriptor pool is out of memory.
+          max_num_textures: specify the maximum number of textures that will exist at the same time. Increase this number if descriptor pool is out of memory.
+          default_mipmap_levels: set the mip map levels for loaded textures.
+          device: One the the following:
+            'cuda:x' where x is a decimal number, the renderer tries to render using this cuda device. Present request is ignored
+            'cuda', the renderer tries to render using a cuda-visible device. If present is requested, it will be prioritized
+            'pci:x', where x is a hexadecimal number, the renderer picks the device with given PCI bus number
+            '', if present is requested, first try to find cuda+present, next present only, and then turn off present. If present is turned off, first try to find cuda, next any graphics device.
+        """
+    def _release_gpu_memory_unsafe(self) -> None: 
+        """
+        A very unsafe way to release cached gpu (but not CPU) resources. It MUST be called when no rendering is running, and all cameras and windows become invalid after calling this function.
+        """
+    def clear_cached_resources(self) -> None: ...
+    def create_ktx_environment_map(self, px: str, nx: str, py: str, ny: str, pz: str, nz: str, out: str) -> None: ...
+    def create_window(self, width: int = 800, height: int = 600, shader_dir: str = '') -> VulkanWindow: ...
+    @staticmethod
+    def set_log_level(level: str) -> None: ...
+    @property
+    def _internal_context(self) -> renderer.Context:
+        """
+        :type: renderer.Context
+        """
+    pass
 class Scene():
     def _update_render_and_take_pictures(self, arg0: typing.List[CameraEntity]) -> None: ...
     def add_active_light(self, pose: Pose, color: numpy.ndarray[numpy.float32], fov: float, tex_path: str, near: float = 0.10000000149011612, far: float = 10.0, shadow_map_size: int = 2048) -> ActiveLightEntity: ...
@@ -2082,37 +2114,6 @@ class VulkanRenderMesh(RenderMesh):
     def dl_vertices(self) -> capsule:
         """
         :type: capsule
-        """
-    pass
-class VulkanRenderer(IPxrRenderer):
-    def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '', culling: str = 'back', do_not_load_texture: bool = False) -> None: 
-        """
-        Create the VulkanRenderer for rasterization-based rendering.
-
-        Args:
-          offscreen_only: tell the renderer the user does not need to present onto a screen. The renderer will not try to select a GPU with present abilities.
-          max_num_materials: tell the maximum number of materials that will exist at the same time. Increase this number if descriptor pool is out of memory.
-          max_num_textures: specify the maximum number of textures that will exist at the same time. Increase this number if descriptor pool is out of memory.
-          default_mipmap_levels: set the mip map levels for loaded textures.
-          device: One the the following:
-            'cuda:x' where x is a decimal number, the renderer tries to render using this cuda device. Present request is ignored
-            'cuda', the renderer tries to render using a cuda-visible device. If present is requested, it will be prioritized
-            'pci:x', where x is a hexadecimal number, the renderer picks the device with given PCI bus number
-            '', if present is requested, first try to find cuda+present, next present only, and then turn off present. If present is turned off, first try to find cuda, next any graphics device.
-        """
-    def _release_gpu_memory_unsafe(self) -> None: 
-        """
-        A very unsafe way to release cached gpu (but not CPU) resources. It MUST be called when no rendering is running, and all cameras and windows become invalid after calling this function.
-        """
-    def clear_cached_resources(self) -> None: ...
-    def create_ktx_environment_map(self, px: str, nx: str, py: str, ny: str, pz: str, nz: str, out: str) -> None: ...
-    def create_window(self, width: int = 800, height: int = 600, shader_dir: str = '') -> VulkanWindow: ...
-    @staticmethod
-    def set_log_level(level: str) -> None: ...
-    @property
-    def _internal_context(self) -> renderer.Context:
-        """
-        :type: renderer.Context
         """
     pass
 class VulkanRigidbody(RenderBody):

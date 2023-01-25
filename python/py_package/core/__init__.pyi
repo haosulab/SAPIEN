@@ -62,6 +62,7 @@ from sapien.core.pysapien import RenderServer
 from sapien.core.pysapien import RenderServerBuffer
 from sapien.core.pysapien import RenderShape
 from sapien.core.pysapien import RenderTexture
+from sapien.core.pysapien import SapienRenderer
 from sapien.core.pysapien import Scene
 from sapien.core.pysapien import SceneConfig
 from sapien.core.pysapien import SceneMultistepCallback
@@ -74,7 +75,6 @@ from sapien.core.pysapien import URDFLoader
 from sapien.core.pysapien import VisualRecord
 from sapien.core.pysapien import VulkanParticleBody
 from sapien.core.pysapien import VulkanRenderMesh
-from sapien.core.pysapien import VulkanRenderer
 from sapien.core.pysapien import VulkanRigidbody
 from sapien.core.pysapien import VulkanScene
 from sapien.core.pysapien import VulkanWindow
@@ -152,6 +152,7 @@ __all__ = [
     "RenderServerBuffer",
     "RenderShape",
     "RenderTexture",
+    "SapienRenderer",
     "Scene",
     "SceneConfig",
     "SceneMultistepCallback",
@@ -186,6 +187,8 @@ __all__ = [
 
 
 class KuafuRenderer(pysapien.IPxrRenderer):
+    pass
+class VulkanRenderer(pysapien.SapienRenderer, pysapien.IPxrRenderer):
     pass
 def add_profiler_event(name: str) -> None:
     pass

@@ -142,7 +142,7 @@ class CMakeBuild(build_ext):
             shutil.rmtree(include_path)
         shutil.copytree(source_include_path, include_path)
 
-        include_path = os.path.join(self.build_lib, '3rd_party', 'include', 'simsense')
+        include_path = os.path.join(self.build_lib, 'sapien', 'include', 'simsense')
         source_include_path = os.path.join(ext.sourcedir, '3rd_party', 'simsense', 'include')
         if os.path.exists(include_path):
             shutil.rmtree(include_path)

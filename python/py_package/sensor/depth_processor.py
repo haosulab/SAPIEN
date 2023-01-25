@@ -1,17 +1,12 @@
-# by Xiaoshuai Jet Zhang <i@jetd.me>, Jan 2021
-# Changed by Ang Li, Sep 2022
-# v2022.09.27
+# by Xiaoshuai Jet Zhang <i@jetd.me>, Ang Li, Jan 2023
+# v2023.01.23
 #
-# Depth simulation toolkit.
+# CPU Depth simulation toolkit.
 #
 # Please run:
 #  1. `pip3 install --upgrade pip`
 #  2. `pip3 install opencv-contrib-python scipy open3d`
 # before using this package.
-#
-# TODO:
-#  1. IR intensity instead of pixel values in real pipeline.
-#
 
 from typing import Optional, Tuple
 
@@ -39,15 +34,13 @@ def unpad_lr(img: np.ndarray, ndisp: int) -> np.ndarray:
 
 
 def sim_ir_noise(
-        img: np.ndarray,
-        scale: float = 0.0, blur_ksize: int = 0, blur_ksigma: float = 0.03,
-        speckle_shape: float = 398.12, speckle_scale: float = 2.54e-3,
-        gaussian_mu: float = -0.231, gaussian_sigma: float = 0.83,
-        seed: int = 0
+    img: np.ndarray,
+    scale: float = 0.0, blur_ksize: int = 0, blur_ksigma: float = 0.03,
+    speckle_shape: float = 398.12, speckle_scale: float = 2.54e-3,
+    gaussian_mu: float = -0.231, gaussian_sigma: float = 0.83,
+    seed: int = 0
 ) -> np.ndarray:
     """
-    TODO: IR density model
-
     Simulate IR camera noise.
 
     Noise model from Landau et al.
@@ -92,7 +85,7 @@ def sim_ir_noise(
 
 
 def depth_post_processing(depth: np.ndarray, ksize: int = 5) -> np.ndarray:
-    # depth = scipy.signal.medfilt2d(depth, kernel_size=ksize)
+    depth = scipy.signal.medfilt2d(depth, kernel_size=ksize)
     return depth
 
 
@@ -118,9 +111,9 @@ def get_census(img: np.ndarray, wsize:int = 7) -> np.ndarray:
 
 
 def calc_disparity(
-        imgl: np.ndarray, imgr: np.ndarray, method: str, *,
-        ndisp: int = 96, min_disp: int = 0,
-        use_census: bool = True, census_wsize: int = 7
+    imgl: np.ndarray, imgr: np.ndarray, method: str, *,
+    ndisp: int = 128, min_disp: int = 0,
+    use_census: bool = True, census_wsize: int = 7
 ) -> np.ndarray:
     """
     Calculate disparity given a rectified image pair.
@@ -162,15 +155,14 @@ def calc_disparity(
         raise NotImplementedError(f'Not implemented: {method}')
 
     displ = matcherl.compute(imgl, imgr)
-
     displ = unpad_lr(displ, ndisp).astype(np.float32) / 16.0
-
+    
     return displ
 
 
 def init_rectify_stereo(
-        w: int, h: int, kl: np.ndarray, kr: np.ndarray, rt: np.ndarray,
-        distortl: Optional[np.ndarray] = None, distortr: Optional[np.ndarray] = None
+    w: int, h: int, kl: np.ndarray, kr: np.ndarray, rt: np.ndarray,
+    distortl: Optional[np.ndarray] = None, distortr: Optional[np.ndarray] = None
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Initiate parameters needed for rectification with given camera parameters.
@@ -200,7 +192,7 @@ def init_rectify_stereo(
 
 
 def calc_rectified_stereo_pair(
-        imgl: np.ndarray, imgr: np.ndarray, map1: np.ndarray, map2:np.ndarray
+    imgl: np.ndarray, imgr: np.ndarray, map1: np.ndarray, map2:np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Rectify an image pair with given camera parameters.
@@ -221,8 +213,8 @@ def calc_rectified_stereo_pair(
 
 
 def calc_depth_and_pointcloud(
-        disparity: np.ndarray, mask: np.ndarray, q: np.ndarray,
-        no_pointcloud: bool = False
+    disparity: np.ndarray, mask: np.ndarray, q: np.ndarray,
+    no_pointcloud: bool = False
 ) -> Tuple[np.ndarray, object]:  # object is o3d.geometry.PointCloud
     """
     Calculate depth and pointcloud.
@@ -265,19 +257,19 @@ def calc_depth_and_pointcloud(
 
 
 def calc_main_depth_from_left_right_ir(
-        ir_l: np.ndarray, ir_r: np.ndarray,
-        l2r:np.ndarray, l2rgb: np.ndarray,
-        k_l: np.ndarray, k_r: np.ndarray, k_main: np.ndarray,
-        map1: np.ndarray, map2:np.ndarray, q: np.ndarray,
-        method: str = 'SGBM',
-        ndisp: int = 96,
-        use_noise: bool = True,
-        use_census: bool = True,
-        register_depth: bool = True,
-        register_blur_ksize: int = 5,
-        main_cam_size=(1920, 1080),
-        census_wsize=7,
-        **kwargs
+    ir_l: np.ndarray, ir_r: np.ndarray,
+    l2r:np.ndarray, l2rgb: np.ndarray,
+    k_l: np.ndarray, k_r: np.ndarray, k_main: np.ndarray,
+    map1: np.ndarray, map2:np.ndarray, q: np.ndarray,
+    method: str = 'SGBM',
+    ndisp: int = 128,
+    use_noise: bool = False,
+    use_census: bool = True,
+    register_depth: bool = True,
+    register_blur_ksize: int = 5,
+    main_cam_size=(1920, 1080),
+    census_wsize=7,
+    **kwargs
 ) -> np.ndarray:
     """
     Calculate depth for rgb camera from left right ir images.
@@ -298,9 +290,6 @@ def calc_main_depth_from_left_right_ir(
     """
     assert ir_l.shape == ir_r.shape
 
-    # assert np.allclose(k_l, k_r)
-    # w, h = k_main[:2, 2]
-    # w, h = int(w * 2), int(h * 2)
     w, h = main_cam_size
 
     if not np.allclose(l2r[:3, :3], np.eye(3), atol=1e-6):
@@ -311,9 +300,7 @@ def calc_main_depth_from_left_right_ir(
     if use_noise:
         ir_l, ir_r = sim_ir_noise(ir_l, **kwargs), sim_ir_noise(ir_r, **kwargs)
 
-    # ir_l, ir_r = calc_rectified_stereo_pair(
-    #     ir_l, ir_r, map1, map2
-    # )
+    ir_l, ir_r = calc_rectified_stereo_pair(ir_l, ir_r, map1, map2)
 
     disp = calc_disparity(
         ir_l, ir_r, method, ndisp=ndisp,
@@ -338,160 +325,3 @@ def calc_main_depth_from_left_right_ir(
             depth = cv2.medianBlur(depth, register_blur_ksize)
 
     return depth
-
-# GPU Depth Sensor
-class DepthSensorCUDA:
-    def __init__(self, lr_size, k_l, k_r, l2r, rgb_size=None, k_rgb=None, l2rgb=None, min_depth=0.0, max_depth=10.0, rectified=False,
-                    census_width=9, census_height=7, max_disp=128, block_width=1, block_height=1, p1_penalty=7, p2_penalty=86,
-                    uniqueness_ratio=0, lr_max_diff=1, median_filter_size=3, depth_dilation=False):
-        """
-        Initiate the DepthSensor class. The camera frame follows the OpenCV coordinate system, which is x right, y down, z forward.
-        In this sense, the origin of the right camera's frame should have positive x value when viewed in left camera's frame. Left,
-        right and RGB image are assumed to be undistorted. By default, the final depth map will be presented in left camera's frame
-        with lr_size. Specifying rgb_size, k_rgb and l2rgb will turn on the registration mode, which will tranform the final depth
-        map from left camera's frame to specified RGB camera's frame with rgb_size.
-
-        :param lr_size: (width, height) of the left and right image.
-        :param k_l: Intrinsic matrix of the left camera (in OpenCV coordinate system).
-        :param k_r: Intrinsic matrix of the right camera (in OpenCV coordinate system).
-        :param l2r: Change-of-coordinate matrix from left camera's frame to right camera's frame (in OpenCV coordinate system).
-        :param rgb_size: (width, height) of the RGB image.
-        :param k_rgb: Intrinsic matrix of the RGB camera (in OpenCV coordinate system).
-        :param l2rgb: Change-of-coordinate matrix from left camera's frame to RGB camera's frame (in OpenCV coordinate system).
-        :param min_depth: Minimum valid depth in meters.
-        :param max_depth: Maximum valid depth (non-inclusive) in meters.
-        :param rectified: Whether the input has already been rectified. Set to true if no rectification is needed.
-        :param census_width: Width of the center-symmetric census transform window. This must be an odd number.
-        :param census_height: Height of the center-symmetric census transform window. This must be an odd number.
-        :param max_disp: Maximum disparity search space (non-inclusive) for stereo matching.
-        :param block_width: Width of the matched block. This must be an odd number.
-        :param block_height: Height of the matched block. This must be an odd number.
-        :param p1_penalty: P1 penalty for semi-global matching algorithm. It is the penalty on the disparity change by plus or minus
-                           1 between neighboring pixels.
-        :param p2_penalty: P2 penalty for semi-global matching algorithm. It is the penalty on the disparity change by more than 1
-                           between neighboring pixels.
-        :param uniqueness_ratio: Margin in percentage by which the minimum computed cost should win the second best (not considering
-                                 best match's adjacent pixels) cost to consider the found match valid.
-        :param lr_max_diff: Maximum allowed difference in the left-right consistency check. Set it to 255 will disable the check.
-        :param median_filter_size: Size of the median filter. Choices are 1, 3, 5, 7. When set to 1 the median filter is turned off.
-        :param depth_dilation: Whether to dilate the final depth map to avoid holes. This is only effective when registration mode is on.
-                               Depth dilation is recommended when rgb_size is greater than lr_size.
-        """
-        from ..core.pysapien.simsense import DepthSensorEngine
-
-        img_w, img_h = lr_size
-        registration = False
-        if rgb_size != None or k_rgb != None or l2rgb != None:
-            registration = True
-
-        # Instance check
-        if not isinstance(img_h, int) or not isinstance(img_w, int) or img_h < 32 or img_w < 32:
-            raise TypeError("Image height and width must be integer no less than 32")
-        
-        if registration == True and (rgb_size is None or k_rgb is None or l2rgb is None):
-            raise TypeError("Registration mode is on but missing one or two RGB camera's parameters")
-
-        if not isinstance(census_width, int) or not isinstance(census_height, int) or census_width <= 0 or census_height <= 0 or \
-                census_width % 2 == 0 or census_height % 2 == 0 or census_width*census_height > 65:
-            raise TypeError("census_width and census_height must be positive odd integers and their product should be no larger than 65")
-        
-        if not isinstance(max_disp, int) or max_disp < 32 or max_disp > 1024:
-            raise TypeError("max_disp must be integer within range [32, 1024]")
-        
-        if not isinstance(block_width, int) or not isinstance(block_height, int) or block_width <= 0 or block_height <= 0 or \
-                block_width % 2 == 0 or block_height % 2 == 0 or block_width*block_height > 256:
-            raise TypeError("block_width and block_height must be positive odd integers and their product should be no larger than 256")
- 
-        if not isinstance(p1_penalty, int) or not isinstance(p2_penalty, int) or p1_penalty <= 0 or p2_penalty <= 0 or \
-                p1_penalty >= p2_penalty or p2_penalty >= 224:
-            raise TypeError("p1 must be positive integer less than p2 and p2 be positive integer less than 224")
-
-        if not isinstance(uniqueness_ratio, int) or uniqueness_ratio < 0 or uniqueness_ratio > 255:
-            raise TypeError("uniqueness_ratio must be positive integer no larger than 255")
-
-        if not isinstance(lr_max_diff, int) or lr_max_diff < -1 or lr_max_diff > 255:
-            raise TypeError("lr_max_diff must be integer within the range [0, 255]")
-
-        if median_filter_size != 1 and median_filter_size != 3 and median_filter_size != 5 and median_filter_size != 7:
-            raise TypeError("Median filter size choices are 1, 3, 5, 7")
-
-        # Get rectification map
-        r1, r2, p1, p2, q, _, _ = cv2.stereoRectify(
-            cameraMatrix1=k_l, distCoeffs1=None, cameraMatrix2=k_r, distCoeffs2=None,
-            imageSize=lr_size, R=l2r[:3, :3], T=l2r[:3, 3:], alpha=1.0, newImageSize=lr_size
-        )
-        f_len = q[2][3] # focal length of the left camera in meters
-        b_len = 1.0 / q[3][2] # baseline length in meters
-        map_l = cv2.initUndistortRectifyMap(k_l, None, r1, p1, lr_size, cv2.CV_32F)
-        map_r = cv2.initUndistortRectifyMap(k_r, None, r2, p2, lr_size, cv2.CV_32F)
-        map_lx, map_ly = map_l
-        map_rx, map_ry = map_r
-
-        if registration:
-            # Get registration matrix
-            a1, a2, a3, b = self._get_registration_mat(lr_size, k_l, k_rgb, l2rgb)
-            self.engine = DepthSensorEngine(img_h, img_w, rgb_size[1], rgb_size[0], f_len, b_len, min_depth, max_depth, rectified,
-                                            census_width, census_height, max_disp, block_width, block_height,
-                                            p1_penalty, p2_penalty, uniqueness_ratio, lr_max_diff, median_filter_size,
-                                            map_lx, map_ly, map_rx, map_ry, a1, a2, a3, b[0], b[1], b[2], depth_dilation)
-        else:
-            self.engine = DepthSensorEngine(img_h, img_w, f_len, b_len, min_depth, max_depth, rectified,
-                                            census_width, census_height, max_disp, block_width, block_height,
-                                            p1_penalty, p2_penalty, uniqueness_ratio, lr_max_diff, median_filter_size,
-                                            map_lx, map_ly, map_rx, map_ry)
-
-    def compute(self, img_l, img_r):
-        """
-        Take two images captured by a pair of nearby parallel cameras, and output the computed depth map in meters.
-
-        :param img_l: Grayscale/infrared image (uint8) captured by left camera.
-        :param img_r: Grayscale/infrared image (uint8) captured by right camera.
-        :return: Computed depth map (in meters) from left camera's view or rgb camera's view.
-        """
-        result = self.engine.compute(img_l, img_r)
-
-        return result
-    
-    def set_penalties(self, p1_penalty, p2_penalty):
-        if not isinstance(p1_penalty, int) or not isinstance(p2_penalty, int) or p1_penalty <= 0 or p2_penalty <= 0 or \
-                p1_penalty >= p2_penalty or p2_penalty >= 224:
-            raise TypeError("p1 must be positive integer less than p2 and p2 be positive integer less than 224")
-        self.engine._set_penalties(p1_penalty, p2_penalty)
-    
-    def set_census_window_size(self, census_width, census_height):
-        if not isinstance(census_width, int) or not isinstance(census_height, int) or census_width <= 0 or census_height <= 0 or \
-                census_width % 2 == 0 or census_height % 2 == 0 or census_width*census_height > 65:
-            raise TypeError("census_width and census_height must be positive odd integers and their product should be no larger than 65")
-        self.engine._set_census_window_size(census_width, census_height)
-    
-    def set_matching_block_size(self, block_width, block_height):
-        if not isinstance(block_width, int) or not isinstance(block_height, int) or block_width <= 0 or block_height <= 0 or \
-                block_width % 2 == 0 or block_height % 2 == 0 or block_width*block_height > 256:
-            raise TypeError("block_width and block_height must be positive odd integers and their product should be no larger than 256")
-        self.engine._set_matching_block_size(block_width, block_height)
-    
-    def set_uniqueness_ratio(self, uniqueness_ratio):
-        if not isinstance(uniqueness_ratio, int) or uniqueness_ratio < 0 or uniqueness_ratio > 255:
-            raise TypeError("uniqueness_ratio must be positive integer no larger than 255")
-        self.engine._set_uniqueness_ratio(uniqueness_ratio)
-
-    def set_lr_max_diff(self, lr_max_diff):
-        if not isinstance(lr_max_diff, int) or lr_max_diff < -1 or lr_max_diff > 255:
-            raise TypeError("lr_max_diff must be integer within the range [0, 255]")
-        self.engine._set_lr_max_diff(lr_max_diff)
-
-    def _get_registration_mat(self, ir_size, k_ir, k_rgb, ir2rgb):
-        R = ir2rgb[:3, :3]
-        t = ir2rgb[:3, 3:]
-        
-        w, h = ir_size
-        x = np.arange(w)
-        y = np.arange(h)
-        u, v = np.meshgrid(x, y)
-        w = np.ones_like(u)
-        pixel_coords = np.stack([u, v, w], axis=-1) # pixel_coords[y, x] is (x, y, 1)
-
-        A = np.einsum("ij,hwj->hwi", k_rgb @ R @ np.linalg.inv(k_ir), pixel_coords)
-        B = k_rgb @ t
-
-        return A[..., 0], A[..., 1], A[..., 2], B

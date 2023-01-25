@@ -1,6 +1,6 @@
 from .activelight import ActiveLightSensor
 
 try:
-    from .activelight import ActiveLightSensorCUDA
+    from .stereodepth import StereoDepthSensor, StereoDepthSensorConfig
 except ImportError:
     pass
