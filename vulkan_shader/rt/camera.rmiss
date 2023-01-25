@@ -23,6 +23,7 @@ void main() {
 
   ray.attenuation = vec3(0.0);
   ray.depth = maxDepth + 1;
+  ray.origin = vec3(0.0);
 
   // ray.depth = maxDepth + 1;
   // ray.radiance = vec3(100000.0, 0.0, 100000.0);

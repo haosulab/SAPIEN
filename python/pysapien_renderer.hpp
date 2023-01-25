@@ -506,7 +506,7 @@ void buildRenderer(py::module &parent) {
       .def("set_textures", &resource::SVMetallicMaterial::setTextures,
            py::arg("base_color") = nullptr, py::arg("roughness") = nullptr,
            py::arg("normal") = nullptr, py::arg("metallic") = nullptr,
-           py::arg("emission") = nullptr)
+           py::arg("emission") = nullptr, py::arg("transmission") = nullptr)
       .def(
           "set_base_color",
           [](resource::SVMetallicMaterial &mat, py::array_t<float> color) {
@@ -515,7 +515,9 @@ void buildRenderer(py::module &parent) {
           py::arg("rgba"))
       .def("set_specular", &resource::SVMetallicMaterial::setFresnel, py::arg("specular"))
       .def("set_metallic", &resource::SVMetallicMaterial::setMetallic, py::arg("metallic"))
-      .def("set_roughness", &resource::SVMetallicMaterial::setRoughness, py::arg("roughness"));
+      .def("set_roughness", &resource::SVMetallicMaterial::setRoughness, py::arg("roughness"))
+      .def("set_emission", &resource::SVMetallicMaterial::setRoughness, py::arg("emission"))
+      .def("set_transmission", &resource::SVMetallicMaterial::setRoughness, py::arg("transmission"));
 
   PyScene
       .def(
