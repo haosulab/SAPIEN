@@ -6,7 +6,7 @@ import numpy as np
 
 def main():
     engine = sapien.Engine()
-    # renderer = sapien.VulkanRenderer()
+    # renderer = sapien.SapienRenderer()
     # engine.set_renderer(renderer)
     scene = engine.create_scene()
     dt = 1 / 100.0

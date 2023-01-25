@@ -5,7 +5,7 @@ from sapien.utils import Viewer
 
 def main(filename):
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = sapien.SapienRenderer()
     engine.set_renderer(renderer)
 
     config = sapien.SceneConfig()

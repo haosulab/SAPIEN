@@ -8,7 +8,7 @@ from PIL import Image
 
 def main():
     engine = sapien.Engine()  # Create a physical simulation engine
-    renderer = sapien.VulkanRenderer()  # Create a Vulkan renderer
+    renderer = sapien.SapienRenderer()  # Create a renderer
     engine.set_renderer(renderer)  # Bind the renderer and the engine
 
     scene = engine.create_scene()  # Create an instance of simulation world (aka scene)

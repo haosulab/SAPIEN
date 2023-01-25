@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import sapien.core as sapien
 
 engine = sapien.Engine()
-renderer = sapien.VulkanRenderer(True)
+renderer = sapien.SapienRenderer(True)
 engine.set_renderer(renderer)
 
 scenes = []
@@ -37,21 +37,13 @@ for i in range(8):
     scene.step()
 
 from tqdm import trange
-for _ in trange(1000000):
+for _ in trange(1000):
     fs = []
     for scene in scenes:
         scene.update_render_async()
+        # make sure ensure async is not broken
         f = cam.take_picture_and_get_dl_tensors_async(["Color"])
         fs.append(f)
 
     for f in fs:
         f.wait()
-
-
-
-
-# cam.take_picture()
-# color = cam.get_color_rgba()
-# albedo = cam.get_albedo_rgba()
-# position = cam.get_position_rgba()
-# segmentation = cam.get_visual_actor_segmentation()

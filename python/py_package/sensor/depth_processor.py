@@ -11,17 +11,7 @@
 from typing import Optional, Tuple
 
 import numpy as np
-try:
-    import scipy.signal
-except ImportError:
-    print('Please install scipy with `pip3 install scipy`')
-    raise
-try:
-    import cv2
-except ImportError:
-    print('opencv-contrib not installed, '
-          'some features will be disabled.')
-    print('Please install with `pip3 install opencv-contrib-python`')
+import cv2
 
 
 def pad_lr(img: np.ndarray, ndisp: int) -> np.ndarray:
@@ -85,6 +75,10 @@ def sim_ir_noise(
 
 
 def depth_post_processing(depth: np.ndarray, ksize: int = 5) -> np.ndarray:
+    try:
+        import scipy.signal
+    except ModuleNotFoundError:
+        raise Exception("scipy is required for the CPU depth sensor. Please install with `pip install scipy`")
     depth = scipy.signal.medfilt2d(depth, kernel_size=ksize)
     return depth
 
@@ -229,8 +223,7 @@ def calc_depth_and_pointcloud(
     try:
         import open3d as o3d
     except ImportError:
-        print('Please install open3d with `pip3 install open3d`')
-        raise
+        raise Exception('open3d is required for CPU depth sensor. Please install with `pip3 install open3d`')
 
     _3d_image = cv2.reprojectImageTo3D(disparity, q)
     depth = _3d_image[..., 2]
@@ -315,9 +308,12 @@ def calc_main_depth_from_left_right_ir(
     depth[depth < 0] = 0
 
     if register_depth:
-        depth = cv2.rgbd.registerDepth(
-            k_l.astype(np.float), k_main.astype(np.float),
-            None, l2rgb.astype(np.float), depth, (w, h), depthDilation=True)
+        try:
+            depth = cv2.rgbd.registerDepth(
+                k_l.astype(np.float), k_main.astype(np.float),
+                None, l2rgb.astype(np.float), depth, (w, h), depthDilation=True)
+        except AttributeError:
+            raise Exception("opencv-contrib-python is required for the CPU depth sensor. Please install with `pip install opencv-contrib-python`")
         depth[np.isnan(depth)] = 0
         depth[np.isinf(depth)] = 0
         depth[depth < 0] = 0

@@ -800,7 +800,7 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
 SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
                                         std::shared_ptr<SPhysicalMaterial> material,
                                         std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
-                                        glm::vec2 renderSize, std::string const &name) {
+                                        const PxVec2 &renderSize, std::string const &name) {
   physx_id_t actorId = mScene->mActorIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
 

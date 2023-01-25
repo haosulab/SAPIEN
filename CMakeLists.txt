@@ -10,7 +10,7 @@ set(CMAKE_DEBUG_POSTFIX "")
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(SAPIEN_PROFILE "Build SAPIEN with easy_profiler" OFF)
 option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OFF)
-option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, Kuafu denoiser, and simsense" ON)
+option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, denoiser, and simsense" ON)
 option(SAPIEN_KUAFU "Build Kuafu ray tracer" ON)
 
 if (${SAPIEN_PROFILE})
@@ -174,27 +174,6 @@ set_target_properties(sapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURREN
 
 pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
 target_link_libraries(pysapien PRIVATE sapien ${SIMSENSE_LIBRARY})
-
-add_executable(manual_gear manualtest/gear.cpp)
-target_link_libraries(manual_gear sapien)
-add_executable(manual_actor manualtest/actor.cpp)
-target_link_libraries(manual_actor sapien)
-add_executable(manual_articulation manualtest/articulation.cpp)
-target_link_libraries(manual_articulation sapien)
-add_executable(manual_urdf manualtest/urdf.cpp)
-target_link_libraries(manual_urdf sapien ${PINOCCHIO_LIBRARY})
-add_executable(manual_kinematics manualtest/kinematics.cpp)
-target_link_libraries(manual_kinematics sapien)
-
-if (${SAPIEN_KUAFU})
-    add_executable(manual_kuafu_minimal manualtest/kuafu_minimal.cpp)
-    target_link_libraries(manual_kuafu_minimal sapien)
-endif()
-
-add_executable(render_server manualtest/render_server.cpp)
-target_link_libraries(render_server sapien)
-add_executable(render_client manualtest/render_client.cpp)
-target_link_libraries(render_client sapien)
 
 add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
 add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtest/*.py ${CMAKE_CURRENT_BINARY_DIR})

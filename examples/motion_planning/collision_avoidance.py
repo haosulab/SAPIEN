@@ -6,7 +6,7 @@ from sapien.utils.viewer import Viewer
 class PlanningDemo():
     def __init__(self):
         self.engine = sapien.Engine()
-        self.renderer = sapien.VulkanRenderer()
+        self.renderer = sapien.SapienRenderer()
         self.engine.set_renderer(self.renderer)
 
         scene_config = sapien.SceneConfig()

@@ -65,7 +65,7 @@ def build_scene(sim, renderer):
     material.roughness = 0.0
     material.metallic = 1.0
     builder.add_visual_from_file(
-        '../3rd_party/kuafu/resources/models/suzanne.dae', scale=[0.1, 0.1, 0.1], material=material)
+        '../assets/models/suzanne.dae', scale=[0.1, 0.1, 0.1], material=material)
     builder.add_box_collision(half_size=[0.1, 0.1, 0.1])
     monkey = builder.build()
     monkey.set_pose(Pose(p=[0.15, -0.25, 0.1], q=transforms3d.euler.euler2quat(0, 0, -1)))
@@ -99,12 +99,15 @@ def main():
     depth = sensor.get_depth()
 
     rgb = sensor.get_rgb()
-    im.fromarray((rgb * 255).astype(np.uint8)).show()
+    plt.subplot(221)
+    plt.imshow((rgb * 255).astype(np.uint8))
 
     ir_l, ir_r = sensor.get_ir()
-    im.fromarray((ir_l * 255).astype(np.uint8)).show()
-    im.fromarray((ir_r * 255).astype(np.uint8)).show()
-
+    plt.subplot(222)
+    plt.imshow((ir_l * 255).astype(np.uint8), cmap='gray')
+    plt.subplot(223)
+    plt.imshow((ir_r * 255).astype(np.uint8), cmap='gray')
+    plt.subplot(224)
     plt.imshow(depth)
     plt.show()
 

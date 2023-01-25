@@ -60,15 +60,20 @@ class ActiveLightSensor(SensorEntity):
         warn("It is highly recommended to use the StereoDepthSensor class instead of this one when CUDA "
              "is available, as it offers more extensive functions and operates in real-time.")
 
+        self.light_pattern = (
+            os.path.join(os.path.dirname(__file__), "assets/patterns/d415.png")
+            if light_pattern is None
+            else light_pattern
+        )
+
         self.name = sensor_name
         self.renderer = renderer
         self.scene = scene
         self.pose = None
         self.mount = self.scene.create_actor_builder().build_kinematic(name=f'{sensor_name}_mount')
-        self._alight = self._scene.add_active_light(
+        self.alight = self.scene.add_active_light(
             pose=Pose([0, 0, 0]), color=[0, 0, 0], fov=1.57, tex_path=self.light_pattern)
         self.set_pose(Pose())
-        self._create_cameras()
         
         if sensor_type:
             self._set_sensor_parameters(sensor_type)
@@ -82,6 +87,9 @@ class ActiveLightSensor(SensorEntity):
             self.light_pattern = light_pattern
             self.max_depth = max_depth
             self.min_depth = min_depth
+
+        self._create_cameras()
+
         self.ir_ambient_strength = ir_ambient_strength
         self.ir_light_dim_factor = ir_light_dim_factor
 
@@ -94,7 +102,7 @@ class ActiveLightSensor(SensorEntity):
         # Initialize variables that depth sensor depends on
         ex_l = self._pose2cv2ex(self.trans_pose_l)
         ex_r = self._pose2cv2ex(self.trans_pose_r)
-        ex_main = self._pose2cv2ex(self._pose)
+        ex_main = self._pose2cv2ex(self.pose)
         self._l2r = ex_r @ np.linalg.inv(ex_l)
         self._l2rgb = ex_main @ np.linalg.inv(ex_l)
         self._map1, self._map2, self._q = init_rectify_stereo(
@@ -262,9 +270,9 @@ class ActiveLightSensor(SensorEntity):
 
     def _fetch(self, mod):
         if mod == 'rgb' and self._rgb is None:
-            self.rgb = self.cam_rgb.get_color_rgba()[..., :3].clip(0, 1)
-        elif mod == 'ir_l' and self.ir_l is None:
-            self.ir_l = self.cam_ir_l.get_color_rgba()[..., 0].clip(0, 1)
+            self._rgb = self.cam_rgb.get_color_rgba()[..., :3].clip(0, 1)
+        elif mod == 'ir_l' and self._ir_l is None:
+            self._ir_l = self.cam_ir_l.get_color_rgba()[..., 0].clip(0, 1)
         elif mod == 'ir_r' and self._ir_r is None:
             self._ir_r = self.cam_ir_r.get_color_rgba()[..., 0].clip(0, 1)
 

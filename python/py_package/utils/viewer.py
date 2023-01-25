@@ -2,7 +2,7 @@ from sapien.core import renderer as R
 from sapien.core import (
     ActorBase,
     Pose,
-    VulkanRenderer,
+    SapienRenderer,
     Scene,
     VulkanWindow,
     ArticulationBase,
@@ -201,7 +201,7 @@ class ArcRotateCameraController:
 class Viewer(object):
     def __init__(
         self,
-        renderer: VulkanRenderer,
+        renderer: SapienRenderer,
         shader_dir="",
         resolutions=(1024, 768),
     ):

@@ -7,14 +7,13 @@ import numpy as np
 from sapien.utils import Viewer
 
 
-sapien.VulkanRenderer.set_log_level("info")
+sapien.SapienRenderer.set_log_level("info")
 
 engine = sapien.Engine()
-renderer = sapien.VulkanRenderer()
+renderer = sapien.SapienRenderer()
 renderer_context: R.Context = renderer._internal_context
 engine.set_renderer(renderer)
 
-sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/ibl")
 viewer = Viewer(renderer)
 
 brdf_lut = renderer_context.create_brdf_lut()

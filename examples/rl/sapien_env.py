@@ -12,7 +12,7 @@ class SapienEnv(gym.Env):
         self.timestep = timestep
 
         self._engine = sapien.Engine()
-        self._renderer = sapien.VulkanRenderer()
+        self._renderer = sapien.SapienRenderer()
         self._engine.set_renderer(self._renderer)
         self._scene = self._engine.create_scene()
         self._scene.set_timestep(timestep)

@@ -4,7 +4,7 @@ from transforms3d.quaternions import axangle2quat as aa
 from sapien.core import SceneConfig, Pose
 
 sim = sapien.Engine()
-renderer = sapien.VulkanRenderer()
+renderer = sapien.SapienRenderer()
 sim.set_renderer(renderer)
 
 scene = sim.create_scene(config=SceneConfig())

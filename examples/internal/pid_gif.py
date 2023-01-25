@@ -36,7 +36,7 @@ def pid_forward(pids: list,
 
 def demo(use_internal_drive, use_external_pid):
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = sapien.SapienRenderer()
     engine.set_renderer(renderer)
 
     scene_config = sapien.SceneConfig()

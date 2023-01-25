@@ -4,7 +4,7 @@ from sapien.utils.viewer import Viewer
 
 def demo(fix_root_link, balance_passive_force):
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = sapien.SapienRenderer()
     engine.set_renderer(renderer)
 
     scene_config = sapien.SceneConfig()

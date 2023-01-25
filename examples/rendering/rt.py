@@ -54,7 +54,7 @@ def main():
         far=far,
     )
 
-    print("Intrinsic matrix\n", camera.get_camera_matrix())
+    print("Intrinsic matrix\n", camera.get_intrinsic_matrix())
 
     # Compute the camera pose by specifying forward(x), left(y) and up(z)
     cam_pos = np.array([-2, -2, 3])

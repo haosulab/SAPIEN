@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-VERSION=""
-DEBUG=false
-PROFILE=false
-KUAFU=true
+VERSION=
+DEBUG=
+PROFILE=
+KUAFU=1
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        --debug) DEBUG=true;;
-        --profile) PROFILE=true;;
-        --no-kuafu) KUAFU=false;;
+        --debug) DEBUG=1;;
+        --profile) PROFILE=1;;
+        --no-kuafu) KUAFU=;;
         35) VERSION="35";;
         36) VERSION="36";;
         37) VERSION="37";;
@@ -20,11 +20,11 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-[ -z $VERSION ] && echo "invalid version" && exit || echo "Compile for Python ${VERSION}"
-[ $DEBUG == true ] && echo "Debug Mode" || [ $PROFILE == true ] && echo "Profile Mode"  || echo "Release Mode"
+[ -z $VERSION ] && echo "Version not specified" && exit || echo "Compile for Python ${VERSION}"
+[ $DEBUG ] && echo "Debug Mode" || [ $PROFILE ] && echo "Profile Mode"  || echo "Release Mode"
 
-KUAFU_ARG=""
-[ $KUAFU == false ] && echo "Kuafu disabled" && KUAFU_ARG=" --no-kuafu"
+KUAFU_ARG=
+[ ! $KUAFU ] && echo "Kuafu disabled" && KUAFU_ARG="--no-kuafu"
 
 function build_manylinux14_wheel() {
   PY_VERSION=$1
@@ -60,9 +60,9 @@ function build_manylinux14_wheel() {
 
   export CPLUS_INCLUDE_PATH=$INCLUDE_PATH
   COMMAND="${BIN} setup.py bdist_wheel ${KUAFU_ARG}"
-  [ $PROFILE == true ] && COMMAND="${BIN} setup.py bdist_wheel --profile ${KUAFU_ARG}"
-  [ $DEBUG == true ] && COMMAND="${BIN} setup.py bdist_wheel --debug ${KUAFU_ARG}"
-  echo "Running command ${COMMNAD}"
+  [ $PROFILE ] && COMMAND="${BIN} setup.py bdist_wheel --profile ${KUAFU_ARG}"
+  [ $DEBUG ] && COMMAND="${BIN} setup.py bdist_wheel --debug ${KUAFU_ARG}"
+  echo "Running command ${COMMAND}"
   eval "$COMMAND"
 
   PACKAGE_VERSION=$(<./python/VERSION)

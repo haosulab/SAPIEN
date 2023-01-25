@@ -5,10 +5,9 @@ import numpy as np
 
 def main():
     engine = sapien.Engine()  # Create a physical simulation engine
-    renderer = sapien.VulkanRenderer()  # Create a Vulkan renderer
+    renderer = sapien.SapienRenderer()  # Create a Vulkan renderer
 
     renderer.set_log_level("info")
-    sapien.VulkanRenderer.set_viewer_shader_dir("../vulkan_shader/rt")
 
     # renderer.set_default_texture_format({
     #     "texture_format": {
@@ -56,11 +55,6 @@ def main():
     from torch.utils.dlpack import from_dlpack
 
     color = from_dlpack(camera.get_dl_tensor("Color")).cpu().numpy()
-
-    # color = camera.get_texture("Color")
-    # print(color.shape, color.dtype)
-    # position = camera.get_texture("Position")
-    # print(position.shape, position.dtype)
 
     import matplotlib.pyplot as plt
 

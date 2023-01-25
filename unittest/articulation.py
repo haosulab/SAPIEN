@@ -7,7 +7,7 @@ import os
 class TestArticulation(unittest.TestCase):
     def test_drive(self):
         engine = sapien.Engine()
-        renderer = sapien.VulkanRenderer(True)
+        renderer = sapien.SapienRenderer(True)
         engine.set_renderer(renderer)
         scene = engine.create_scene()
         loader = scene.create_urdf_loader()
@@ -62,7 +62,7 @@ class TestArticulation(unittest.TestCase):
 
     def test_urdf_loader(self):
         engine = sapien.Engine()
-        renderer = sapien.VulkanRenderer(True)
+        renderer = sapien.SapienRenderer(True)
         engine.set_renderer(renderer)
         scene = engine.create_scene()
         loader = scene.create_urdf_loader()

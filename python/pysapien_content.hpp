@@ -2001,7 +2001,7 @@ Args:
            py::arg("device") = "", py::arg("culling") = "back",
            py::arg("do_not_load_texture") = false,
            R"doc(
-Create the VulkanRenderer for rasterization-based rendering.
+Create the Vulkan-based renderer (rasterization and ray tracing)
 
 Args:
   offscreen_only: tell the renderer the user does not need to present onto a screen. The renderer will not try to select a GPU with present abilities.
@@ -2013,10 +2013,6 @@ Args:
     'cuda', the renderer tries to render using a cuda-visible device. If present is requested, it will be prioritized
     'pci:x', where x is a hexadecimal number, the renderer picks the device with given PCI bus number
     '', if present is requested, first try to find cuda+present, next present only, and then turn off present. If present is turned off, first try to find cuda, next any graphics device.)doc")
-      // .def_static("_set_viewer_shader_dir", &Renderer::setDefaultViewerShaderDirectory,
-      //             py::arg("shader_dir"))
-      // .def_static("_set_camera_shader_dir", &Renderer::setDefaultCameraShaderDirectory,
-      //             py::arg("shader_dir"))
       .def(
           "create_window",
           [](std::shared_ptr<Renderer::SVulkan2Renderer> renderer, int width, int height,

@@ -114,7 +114,7 @@ def create_table(
 
 def main():
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = sapien.SapienRenderer()
     engine.set_renderer(renderer)
 
     scene = engine.create_scene()

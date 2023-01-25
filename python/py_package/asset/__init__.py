@@ -55,7 +55,7 @@ def create_dome_envmap(
     assert str(filename).endswith(".ktx"), "generated envmap must end with .ktx"
     path = Path(filename)
     path.parent.mkdir(exist_ok=True)
-    from sapien.core import VulkanRenderer
+    from sapien.core import SapienRenderer
     import numpy as np
     from PIL import Image
     import tempfile
@@ -83,7 +83,7 @@ def create_dome_envmap(
         Image.fromarray(ny).save(fny)
         Image.fromarray(other).save(fother)
 
-        renderer = VulkanRenderer()
+        renderer = SapienRenderer()
         renderer.create_ktx_environment_map(
             fother, fother, fpy, fny, fother, fother, filename
         )

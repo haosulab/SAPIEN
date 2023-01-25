@@ -15,7 +15,7 @@ from transforms3d.euler import mat2euler
 
 def main():
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = sapien.SapienRenderer()
     engine.set_renderer(renderer)
 
     scene = engine.create_scene()
@@ -50,7 +50,7 @@ def main():
     )
     camera.set_pose(sapien.Pose(p=[1, 0, 0]))
 
-    print('Intrinsic matrix\n', camera.get_camera_matrix())
+    print('Intrinsic matrix\n', camera.get_intrinsic_matrix())
 
     camera_mount_actor = scene.create_actor_builder().build_kinematic()
     camera.set_parent(parent=camera_mount_actor, keep_pose=False)

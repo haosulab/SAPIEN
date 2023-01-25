@@ -181,7 +181,7 @@ def main():
     args = parse_args()
 
     engine = sapien.Engine()
-    renderer = sapien.VulkanRenderer()
+    renderer = sapien.SapienRenderer()
     engine.set_renderer(renderer)
 
     scene_config = sapien.SceneConfig()
