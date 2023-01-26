@@ -36,8 +36,9 @@ SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
   if (!gContext.expired() && !gResourceManager.expired()) {
     mContext = gContext.lock();
     mResourceManager = gResourceManager.lock();
-    spdlog::get("SAPIEN")->warn("A second renderer will share the same internal context with the "
-                                "first one. Arguments passed to constructor will be ignored.");
+    svulkan2::log::getLogger()->warn(
+        "A second renderer will share the same internal context with the "
+        "first one. Arguments passed to constructor will be ignored.");
   } else {
     gContext = mContext =
         svulkan2::core::Context::Create(!offscreenOnly, maxNumMaterials, maxNumTextures,
