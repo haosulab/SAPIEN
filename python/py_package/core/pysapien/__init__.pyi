@@ -1632,7 +1632,7 @@ class RenderTexture():
 class SapienRenderer(IPxrRenderer):
     def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '', culling: str = 'back', do_not_load_texture: bool = False) -> None: 
         """
-        Create the VulkanRenderer for rasterization-based rendering.
+        Create the Vulkan-based renderer (rasterization and ray tracing)
 
         Args:
           offscreen_only: tell the renderer the user does not need to present onto a screen. The renderer will not try to select a GPU with present abilities.

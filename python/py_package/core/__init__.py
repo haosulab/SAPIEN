@@ -43,9 +43,12 @@ try:
             )
             super().__init__(config)
 
-    __KUAFU_ASSETS_ROOT = pkg_resources.resource_filename("sapien", "kuafu_assets")
-    assert os.path.exists(__KUAFU_ASSETS_ROOT)
-    _KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
+    def __enable_kuafu():
+        __KUAFU_ASSETS_ROOT = pkg_resources.resource_filename("sapien", "kuafu_assets")
+        assert os.path.exists(__KUAFU_ASSETS_ROOT)
+        _KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
+
+    __enable_kuafu()
 
 except ImportError:
     pass
