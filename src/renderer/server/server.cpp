@@ -98,19 +98,18 @@ Status RenderServiceImpl::RemoveScene(ServerContext *c, const proto::Id *req, pr
     if (mSceneList.at(info->sceneIndex) == info) {
       mSceneList[info->sceneIndex] = nullptr;
     }
+  }
 
-    std::vector<vk::Semaphore> sems;
-    std::vector<uint64_t> values;
-    for (auto &kv : info->cameraMap) {
-      sems.push_back(kv.second->semaphore.get());
-      values.push_back(kv.second->frameCounter);
-    }
-    auto result =
-        mContext->getDevice().waitSemaphores(vk::SemaphoreWaitInfo({}, sems, values), UINT64_MAX);
-    if (result != vk::Result::eSuccess) {
-      status =
-          Status(grpc::StatusCode::INTERNAL, "remove scene failed: waiting for camera failed");
-    }
+  std::vector<vk::Semaphore> sems;
+  std::vector<uint64_t> values;
+  for (auto &kv : info->cameraMap) {
+    sems.push_back(kv.second->semaphore.get());
+    values.push_back(kv.second->frameCounter);
+  }
+  auto result =
+      mContext->getDevice().waitSemaphores(vk::SemaphoreWaitInfo({}, sems, values), UINT64_MAX);
+  if (result != vk::Result::eSuccess) {
+    status = Status(grpc::StatusCode::INTERNAL, "remove scene failed: waiting for camera failed");
   }
 
   mSceneMap.erase(req->id());
@@ -239,7 +238,7 @@ Status RenderServiceImpl::RemoveBody(ServerContext *c, const proto::RemoveBodyRe
 }
 
 void RenderServiceImpl::updateObjectMaterialMap() {
-  mObjectMaterialMap.lockWrite();
+  WriteLock lock(mObjectMaterialMap.lockWrite());
   std::erase_if(mObjectMaterialMap.getMap(), [](const auto &item) {
     auto const &[key, value] = item;
     return value.expired();
