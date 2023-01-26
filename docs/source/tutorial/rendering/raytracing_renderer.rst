@@ -90,39 +90,39 @@ First, let's setup the environment:
 
 .. literalinclude:: ../../../../examples/rendering/rt_mat.py
    :dedent: 0
-   :lines: 11-51
+   :lines: 13-53
 
 We add a flag ``ray_tracing`` to allow switching between rasterization and ray
 tracing. Next, let's build the scene. First, we create a rough bluish sphere:
 
 .. literalinclude:: ../../../../examples/rendering/rt_mat.py
    :dedent: 0
-   :lines: 53-61
+   :lines: 55-63
 
 Next, we create a rough transparent sphere:
 
 .. literalinclude:: ../../../../examples/rendering/rt_mat.py
    :dedent: 0
-   :lines: 63-73
+   :lines: 65-75
 
 Generally, setting a large `transmission` value will lead to a transparent
 material. Similarly, we can add a capsule and a box with complex materials:
 
 .. literalinclude:: ../../../../examples/rendering/rt_mat.py
    :dedent: 0
-   :lines: 75-93
+   :lines: 77-95
 
 Finally, let's load an external mesh and assign a highly metallic material to that object:
 
 .. literalinclude:: ../../../../examples/rendering/rt_mat.py
    :dedent: 0
-   :lines: 95-104
+   :lines: 97-103
 
 After building the scene, we can get rendering results from the camera:
 
 .. literalinclude:: ../../../../examples/rendering/rt_mat.py
    :dedent: 0
-   :lines: 106-113
+   :lines: 108-115
 
 .. figure:: assets/mat_rast.png
     :width: 720px
@@ -136,6 +136,3 @@ After building the scene, we can get rendering results from the camera:
 
     Result with ray tracer
 
-
-GPU-accelerated Sensor Simulation with SimSense
-------------------------------------------------------------------------

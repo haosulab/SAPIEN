@@ -48,7 +48,9 @@ def main():
     scene.set_timestep(1 / 240)
 
     scene.set_ambient_light([0.3, 0.3, 0.3])
-    scene.add_directional_light([0, 0.5, -1], color=[3.0, 3.0, 3.0])
+    scene.add_directional_light([0, 0.5, -1], color=[3.0, 3.0, 3.0],
+                                shadow=True, scale=2.0, shadow_map_size=4096  # these are only needed for rasterization
+                                )
 
     builder = scene.create_actor_builder()
     material = renderer.create_material()
