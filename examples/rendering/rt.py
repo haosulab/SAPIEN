@@ -16,8 +16,8 @@ def main():
 
     sapien.render_config.camera_shader_dir = "rt"
     sapien.render_config.viewer_shader_dir = "rt"
-    sapien.render_config.rt_samples_per_pixel = 256
-    sapien.render_config.rt_use_denoiser = True
+    sapien.render_config.rt_samples_per_pixel = 4  # change to 256 for less noise
+    sapien.render_config.rt_use_denoiser = False  # change to True for OptiX denoiser
     renderer = sapien.SapienRenderer()
     engine.set_renderer(renderer)
 

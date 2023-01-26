@@ -8,7 +8,7 @@ import PIL.Image as im
 
 
 def main():
-    ray_tracing = True
+    ray_tracing = False
 
     engine = sapien.Engine()
     engine.set_log_level('warning')

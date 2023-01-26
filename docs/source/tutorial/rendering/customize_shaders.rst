@@ -165,6 +165,7 @@ Material set
 The material set should always be the same.
 
 .. code-block:: glsl
+
    layout(set = 2, binding = 0) uniform MaterialBuffer {
      vec4 emission;
      vec4 baseColor;
