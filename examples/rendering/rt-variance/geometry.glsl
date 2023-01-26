@@ -24,7 +24,7 @@ struct TextureIndex {
   int roughness;
   int emission;
   int normal;
+  int transmission;
   int occlusion;
   int padding0;
-  int padding1;
 };

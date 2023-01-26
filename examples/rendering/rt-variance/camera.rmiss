@@ -18,15 +18,9 @@ void main() {
   }
 
   ray.albedo = ray.radiance;
-  // ray.normal = -ray.direction;
   ray.normal = vec3(0.0);
 
   ray.attenuation = vec3(0.0);
   ray.depth = maxDepth + 1;
-
-  // ray.depth = maxDepth + 1;
-  // ray.radiance = vec3(100000.0, 0.0, 100000.0);
-  // ray.radiance = vec3(0.24740411, 0.62902375, 0.8324022);
-  // ray.radiance = vec3(1.0);
-  // ray.radiance = vec3(10.0);
+  ray.origin = vec3(0.0);
 }

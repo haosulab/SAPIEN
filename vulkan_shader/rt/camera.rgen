@@ -8,7 +8,6 @@
 #include "ray.glsl"
 
 layout(location = 0) rayPayloadEXT Ray ray;
-// layout(location = 1) rayPayloadEXT ShadowRay shadowRay;
 
 layout(set = 0, binding = 0, rgba32f) uniform image2D outHdrColor;
 layout(set = 0, binding = 1, rgba32f) uniform image2D outAlbedo;
@@ -33,21 +32,16 @@ layout(set = 2, binding = 0) uniform CameraBuffer {
 #include "push_constant.glsl"
 
 void main() {
-  // imageStore(outColor, ivec2(gl_LaunchIDEXT.xy), vec4(vec2(gl_LaunchIDEXT.xy) / vec2(gl_LaunchSizeEXT.xy), 0.0, 1.0));
-
   vec2 invScreen = vec2(2.f) / gl_LaunchSizeEXT.xy;
   vec2 pixel = gl_LaunchIDEXT.xy * invScreen - 1.f;
-  // vec4 target = cameraBuffer.projectionMatrixInverse * vec4(pixel, 1.f, 1.f);
-  uint seed = tea(gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x + gl_LaunchIDEXT.x, uint(clockARB()));
-
-  // imageStore(outColor, ivec2(gl_LaunchIDEXT.xy), target);
+  uint magic = 0x9e3779b9;  // use fixed seed for consistency
+  // uint matic = uint(clockARB());
+  uint seed = tea(gl_LaunchSizeEXT.x * gl_LaunchSizeEXT.y * spp * frameCount +
+                  gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x + gl_LaunchIDEXT.x, magic);
 
   vec3 radiance = vec3(0.f);
-  // vec3 albedo = vec3(0.f);
-  // vec3 normal = vec3(0.f);
 
   uint rayFlags = gl_RayFlagsNoneEXT;
-  // // TODO: use camera near far
   float tMin = 0.001f;
   float tMax = 10000.0f;
 
@@ -55,7 +49,6 @@ void main() {
 
   for (int i = 0; i < spp; ++i) {
     vec2 r = halton2d(frameCount * spp + i, 2, 3);
-    // vec2 r = vec2(0.0);  // TODO: AA with jitter
     vec2 d = pixel + r * invScreen;  // jittered pixel position
     vec4 csDir = cameraBuffer.projectionMatrixInverse * vec4(d, 1.f, 1.f);
     vec4 origin = cameraBuffer.viewMatrixInverse * vec4(0.f, 0.f, 0.f, 1.f);

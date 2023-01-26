@@ -179,10 +179,10 @@ void sampleGGXReflection(inout uint seed, in mat3 tbn, vec3 V, float roughness,v
 
   L = 2 * dot(V, H) * H - V;
 
-  float dotNH = clamp(dot(N, H), 1e-6, 1);
-  float dotVH = clamp(dot(V, H), 1e-6, 1);
-  float dotNL = dot(N, L);
-  float dotNV = clamp(dot(N, V), 1e-6, 1);
+  float dotNH = clamp(dot(N, H), 1e-6, 1.0);
+  float dotVH = clamp(dot(V, H), 1e-6, 1.0);
+  float dotNL = clamp(dot(N, L), 1e-6, 1.0);
+  float dotNV = clamp(dot(N, V), 1e-6, 1.0);
 
   if (dotNL >= 0) {
     vec3 F = F0 + (1.0 - F0) * schlickFresnel(dotVH);
@@ -236,10 +236,10 @@ vec3 evalGGXTransmission(vec3 N, vec3 L, vec3 V, float eta, float roughness) {
     // reflection
     vec3 H = normalize(V + L);
 
-    float dotNH = clamp(dot(N, H), 1e-6, 1);
-    float dotVH = clamp(dot(V, H), 1e-6, 1);
-    float dotNL = dot(N, L);
-    float dotNV = clamp(dot(N, V), 1e-6, 1);
+    float dotNH = clamp(dot(N, H), 1e-6, 1.0);
+    float dotVH = clamp(dot(V, H), 1e-6, 1.0);
+    float dotNL = clamp(dot(N, L), 1e-6, 1.0);
+    float dotNV = clamp(dot(N, V), 1e-6, 1.0);
 
     float F = dielectricFresnel(dotVH, 1.0 / eta);
     float D = ggxNormalDistribution(dotNH, a2);
@@ -512,7 +512,7 @@ void main() {
   }
 
   if (rnd(ray.seed) < obj.transparency) {
-    ray.origin = worldPosition + 0.001 * ray.direction;
+    ray.origin = worldPosition;
     ray.attenuation = vec3(1.0);
     ray.normal = worldShadingNormal;
     ray.albedo = baseColor;
