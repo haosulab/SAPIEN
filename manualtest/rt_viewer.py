@@ -14,7 +14,7 @@ def main():
     engine.set_renderer(renderer)
 
     sapien.render_config.camera_shader_dir = "rt"
-    sapien.render_config.viewer_shader_dir = "../vulkan_shader/rt"
+    sapien.render_config.viewer_shader_dir = "rt"
     sapien.render_config.rt_samples_per_pixel = 32
     sapien.render_config.rt_max_path_depth = 8
     sapien.render_config.rt_use_denoiser = True
@@ -72,8 +72,7 @@ def main():
     material.base_color = [0.8, 0.2, 0.2, 1.0]
     material.roughness = 0.1
     material.metallic = 1.0
-    builder.add_visual_from_file("/home/fx/Downloads/sapien_cube_t.glb", scale=[0.09, 0.09, 0.09])
-    # builder.add_box_visual(half_size=[0.09, 0.09, 0.09], material=material)
+    builder.add_box_visual(half_size=[0.09, 0.09, 0.09], material=material)
     builder.add_box_collision(half_size=[0.09, 0.09, 0.09])
     box = builder.build()
     box.set_pose(Pose(p=[0.05, 0.17, 0.09]))

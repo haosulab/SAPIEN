@@ -580,7 +580,7 @@ void main() {
     attenuation /= specularProb;
   } else if (transmissionProb > 1e-5){  // transmission
     sampleGGXTransmission(ray.seed, tbn, V, eta, roughness, L, attenuation);
-    attenuation *= transmission / transmissionProb;
+    attenuation *= transmission / transmissionProb * baseColor;
   }
 
   ray.radiance = emission
