@@ -663,16 +663,43 @@ class ConvexMeshGeometry(CollisionGeometry):
     pass
 class LightEntity(Entity):
     def set_color(self, color: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_local_pose(self, pose: Pose) -> None: ...
+    def set_parent(self, parent: ActorBase, keep_pose: bool) -> None: ...
     def set_pose(self, pose: Pose) -> None: ...
+    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
     @property
     def color(self) -> numpy.ndarray[numpy.float32]:
         """
         :type: numpy.ndarray[numpy.float32]
         """
     @property
+    def direction(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def local_pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def parent(self) -> ActorBase:
+        """
+        :type: ActorBase
+        """
+    @parent.setter
+    def parent(self, arg1: ActorBase, arg2: bool) -> None:
+        pass
+    @property
     def pose(self) -> Pose:
         """
         :type: Pose
+        """
+    @property
+    def position(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
         """
     @property
     def shadow(self) -> bool:
@@ -720,17 +747,11 @@ class Engine():
     pass
 class ActiveLightEntity(LightEntity, Entity):
     def set_fov(self, arg0: float) -> None: ...
-    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
     def set_shadow_parameters(self, near: float, far: float) -> None: ...
     @property
     def fov(self) -> float:
         """
         :type: float
-        """
-    @property
-    def position(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
         """
     @property
     def shadow_far(self) -> float:
@@ -988,13 +1009,7 @@ class KuafuRenderer(IPxrRenderer):
         """
     pass
 class DirectionalLightEntity(LightEntity, Entity):
-    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
     def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
-    @property
-    def direction(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
     @property
     def shadow_far(self) -> float:
         """
@@ -1141,13 +1156,7 @@ class PinocchioModel():
 class PlaneGeometry(CollisionGeometry):
     pass
 class PointLightEntity(LightEntity, Entity):
-    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
     def set_shadow_parameters(self, near: float, far: float) -> None: ...
-    @property
-    def position(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
     @property
     def shadow_far(self) -> float:
         """
@@ -1939,24 +1948,12 @@ class SphereGeometry(CollisionGeometry):
         """
     pass
 class SpotLightEntity(LightEntity, Entity):
-    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
     def set_fov(self, arg0: float) -> None: ...
-    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
     def set_shadow_parameters(self, near: float, far: float) -> None: ...
-    @property
-    def direction(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
     @property
     def fov(self) -> float:
         """
         :type: float
-        """
-    @property
-    def position(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
         """
     @property
     def shadow_far(self) -> float:

@@ -2122,32 +2122,37 @@ Args:
           },
           py::arg("color"))
       .def_property_readonly("color", [](SLight &light) { return vec32array(light.getColor()); })
-      .def_property("shadow", &SLight::getShadowEnabled, &SLight::setShadowEnabled);
+      .def_property("shadow", &SLight::getShadowEnabled, &SLight::setShadowEnabled)
+      .def_property("parent", &SLight::getParent, &SLight::setParent)
+      .def("set_parent", &SLight::setParent, py::arg("parent"), py::arg("keep_pose"))
+      .def("set_local_pose", &SLight::setLocalPose, py::arg("pose"))
+      .def_property_readonly("local_pose", &SLight::getLocalPose)
 
-  // Light Entity
-  PyPointLightEntity
       .def(
           "set_position",
-          [](SPointLight &light, py::array_t<float> position) {
+          [](SLight &light, py::array_t<float> position) {
             light.setPosition({position.at(0), position.at(1), position.at(2)});
           },
           py::arg("position"))
-      .def_property_readonly("position",
-                             [](SPointLight &light) { return vec32array(light.getPosition()); })
+          .def_property_readonly("position",
+                                 [](SLight &light) { return vec32array(light.getPosition()); })
+          .def(
+              "set_direction",
+              [](SLight &light, py::array_t<float> direction) {
+                light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+              },
+              py::arg("direction"))
+          .def_property_readonly("direction",
+                                 [](SLight &light) { return vec32array(light.getDirection()); });
+
+  // Light Entity
+  PyPointLightEntity
       .def("set_shadow_parameters", &SPointLight::setShadowParameters, py ::arg("near"),
            py::arg("far"))
       .def_property_readonly("shadow_near", &SPointLight::getShadowNear)
       .def_property_readonly("shadow_far", &SPointLight::getShadowFar);
 
   PyDirectionalLightEntity
-      .def(
-          "set_direction",
-          [](SDirectionalLight &light, py::array_t<float> direction) {
-            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
-          },
-          py::arg("direction"))
-      .def_property_readonly(
-          "direction", [](SDirectionalLight &light) { return vec32array(light.getDirection()); })
       .def("set_shadow_parameters", &SDirectionalLight::setShadowParameters, py::arg("half_size"),
            py ::arg("near"), py::arg("far"))
       .def_property_readonly("shadow_near", &SDirectionalLight::getShadowNear)
@@ -2155,22 +2160,6 @@ Args:
       .def_property_readonly("shadow_half_size", &SDirectionalLight::getShadowHalfSize);
 
   PySpotLightEntity
-      .def(
-          "set_position",
-          [](SSpotLight &light, py::array_t<float> position) {
-            light.setPosition({position.at(0), position.at(1), position.at(2)});
-          },
-          py::arg("position"))
-      .def_property_readonly("position",
-                             [](SSpotLight &light) { return vec32array(light.getPosition()); })
-      .def(
-          "set_direction",
-          [](SSpotLight &light, py::array_t<float> direction) {
-            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
-          },
-          py::arg("direction"))
-      .def_property_readonly("direction",
-                             [](SSpotLight &light) { return vec32array(light.getDirection()); })
       .def("set_shadow_parameters", &SSpotLight::setShadowParameters, py ::arg("near"),
            py::arg("far"))
       .def_property_readonly("shadow_near", &SSpotLight::getShadowNear)
@@ -2179,14 +2168,6 @@ Args:
       .def_property_readonly("fov", &SSpotLight::getFov);
 
   PyActiveLightEntity
-      .def(
-          "set_position",
-          [](SActiveLight &light, py::array_t<float> position) {
-            light.setPosition({position.at(0), position.at(1), position.at(2)});
-          },
-          py::arg("position"))
-      .def_property_readonly("position",
-                             [](SActiveLight &light) { return vec32array(light.getPosition()); })
       .def("set_fov", &SActiveLight::setFov)
       .def_property_readonly("fov", &SActiveLight::getFov)
       .def("set_shadow_parameters", &SActiveLight::setShadowParameters, py ::arg("near"),
