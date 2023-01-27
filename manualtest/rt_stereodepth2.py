@@ -1,9 +1,7 @@
 import sapien.core as sapien
 import numpy as np
 import transforms3d.euler
-import PIL.Image as im
 import matplotlib.pyplot as plt
-import open3d as o3d
 import torch
 from sapien.core import Pose
 from sapien.sensor import StereoDepthSensor, StereoDepthSensorConfig
@@ -118,10 +116,11 @@ def main():
         scene.update_render()
         sensor.take_picture(infrared_only=True)
         sensor.compute_depth()
-        tensor = torch.utils.dlpack.from_dlpack(sensor.get_depth_dl_tensor()).clone() # Example of passing result directly to pytorch
 
-    depth = sensor.get_depth()
-    plt.imshow(depth)
+        # Example of passing result directly to pytorch
+        tensor = torch.utils.dlpack.from_dlpack(sensor.get_depth_dl_tensor()).clone()
+
+    plt.imshow(tensor.cpu().numpy())
     plt.show()
 
 

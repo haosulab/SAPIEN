@@ -241,7 +241,7 @@ class StereoDepthSensor(SensorEntity):
         """
         Note: we expect one scene.update_render() call before calling take_picture().
 
-        param: infrared_only: If true, only take infrared pictures without taking RGB picture.
+        :param infrared_only: If true, only take infrared pictures without taking RGB picture.
         """
         self.clear_cache()
 
@@ -360,7 +360,7 @@ class StereoDepthSensor(SensorEntity):
 
     def get_ir(self):
         """
-        Note: Noise simulation won't be reflected here
+        Note: Noise simulation won't be reflected here.
         """
         self._fetch('ir_l')
         self._fetch('ir_r')

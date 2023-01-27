@@ -1,6 +1,6 @@
 .. _customize_shaders:
 
-Customize shaders
+Customize Shaders
 ====================================
 
 SAPIEN renderer compiles GLSL shaders on the fly. One may provide new shader
