@@ -661,6 +661,10 @@ void SScene::updateRender() {
     cam->update();
   }
 
+  for (auto &light : mLights) {
+    light->update();
+  }
+
   getRendererScene()->updateRender();
 }
 
@@ -855,10 +859,10 @@ PxVec3 SScene::getAmbientLight() const {
 
 SPointLight *SScene::addPointLight(PxVec3 const &position, PxVec3 const &color, bool enableShadow,
                                    float shadowNear, float shadowFar, uint32_t shadowMapSize) {
-  auto light = mRendererScene->addPointLight({position.x, position.y, position.z},
-                                             {color.x, color.y, color.z}, enableShadow, shadowNear,
-                                             shadowFar, shadowMapSize);
+  auto light = mRendererScene->addPointLight({0, 0, 0}, {color.x, color.y, color.z}, enableShadow,
+                                             shadowNear, shadowFar, shadowMapSize);
   auto sl = std::make_unique<SPointLight>(this, light);
+  sl->setPosition(position);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));
   return ret;
@@ -868,10 +872,12 @@ SDirectionalLight *SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 c
                                                bool enableShadow, PxVec3 const &position,
                                                float shadowScale, float shadowNear,
                                                float shadowFar, uint32_t shadowMapSize) {
-  auto light = mRendererScene->addDirectionalLight(
-      {direction.x, direction.y, direction.z}, {color.x, color.y, color.z}, enableShadow,
-      {position.x, position.y, position.z}, shadowScale, shadowNear, shadowFar, shadowMapSize);
+  auto light = mRendererScene->addDirectionalLight({1, 0, 0}, {color.x, color.y, color.z},
+                                                   enableShadow, {0, 0, 0}, shadowScale,
+                                                   shadowNear, shadowFar, shadowMapSize);
   auto sl = std::make_unique<SDirectionalLight>(this, light);
+  sl->setPosition(position);
+  sl->setDirection(direction);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));
   return ret;
@@ -880,10 +886,12 @@ SDirectionalLight *SScene::addDirectionalLight(PxVec3 const &direction, PxVec3 c
 SSpotLight *SScene::addSpotLight(PxVec3 const &position, PxVec3 const &direction, float fovInner,
                                  float fovOuter, PxVec3 const &color, bool enableShadow,
                                  float shadowNear, float shadowFar, uint32_t shadowMapSize) {
-  auto light = mRendererScene->addSpotLight(
-      {position.x, position.y, position.z}, {direction.x, direction.y, direction.z}, fovInner,
-      fovOuter, {color.x, color.y, color.z}, enableShadow, shadowNear, shadowFar, shadowMapSize);
+  auto light = mRendererScene->addSpotLight({0, 0, 0}, {1, 0, 0}, fovInner, fovOuter,
+                                            {color.x, color.y, color.z}, enableShadow, shadowNear,
+                                            shadowFar, shadowMapSize);
   auto sl = std::make_unique<SSpotLight>(this, light);
+  sl->setPosition(position);
+  sl->setDirection(direction);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));
   return ret;
@@ -892,9 +900,10 @@ SSpotLight *SScene::addSpotLight(PxVec3 const &position, PxVec3 const &direction
 SActiveLight *SScene::addActiveLight(PxTransform const &pose, PxVec3 const &color, float fov,
                                      std::string_view texPath, float shadowNear, float shadowFar,
                                      uint32_t shadowMapSize) {
-  auto light = mRendererScene->addActiveLight(pose, {color.x, color.y, color.z}, fov, texPath,
-                                              shadowNear, shadowFar, shadowMapSize);
+  auto light = mRendererScene->addActiveLight(PxTransform{PxIdentity}, {color.x, color.y, color.z},
+                                              fov, texPath, shadowNear, shadowFar, shadowMapSize);
   auto sl = std::make_unique<SActiveLight>(this, light);
+  sl->setPose(pose);
   auto ret = sl.get();
   mLights.push_back(std::move(sl));
   return ret;
