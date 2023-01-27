@@ -511,6 +511,12 @@ void main() {
     emission = texture(textures[nonuniformEXT(ti.emission)], uv).rgb;
   }
 
+  float transmission = mat.transmission;
+  if (ti.transmission >= 0) {
+    transmission = texture(textures[nonuniformEXT(ti.transmission)], uv).x;
+  }
+
+
   if (rnd(ray.seed) < obj.transparency) {
     ray.origin = worldPosition;
     ray.attenuation = vec3(1.0);
@@ -523,7 +529,7 @@ void main() {
 
   float specular = max(mat.fresnel, 0.0);
 
-  float transmission = clamp(mat.transmission, 0.0, 1.0);
+  transmission = clamp(transmission, 0.0, 1.0);
   transmission = 1.0 - clamp(alpha, 0.0, 1.0) * (1.0 - transmission);
 
   metallic = clamp(metallic, 0.0, 1.0);
