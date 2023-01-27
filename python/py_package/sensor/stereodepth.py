@@ -192,7 +192,10 @@ class StereoDepthSensor(SensorEntity):
         self._default_speckle_shape = 1333.33
         self._default_gaussian_sigma = 0.25
         self._default_gaussian_mu = 0
-        speckle_shape = self._default_speckle_shape / self._config.ir_speckle_noise
+        if self._config.ir_speckle_noise == 0:
+            speckle_shape = 0
+        else:
+            speckle_shape = self._default_speckle_shape / self._config.ir_speckle_noise
         speckle_scale = self._config.ir_speckle_noise / self._default_speckle_shape
         gaussian_mu = self._default_gaussian_mu
         gaussian_sigma = self._default_gaussian_sigma * self._config.ir_thermal_noise
@@ -275,7 +278,10 @@ class StereoDepthSensor(SensorEntity):
         """
         if ir_speckle_noise > 0 and ir_thermal_noise <= 0:
             raise TypeError("ir_speckle_noise > 0, Infrared noise simulation is on. ir_thermal_noise must also be positive")
-        speckle_shape = self._default_speckle_shape / ir_speckle_noise
+        if ir_speckle_noise == 0:
+            speckle_shape = 0
+        else:
+            speckle_shape = self._default_speckle_shape / ir_speckle_noise
         speckle_scale = ir_speckle_noise / self._default_speckle_shape
         gaussian_mu = self._default_gaussian_mu
         gaussian_sigma = self._default_gaussian_sigma * ir_thermal_noise
