@@ -1,77 +1,75 @@
 import sapien.core as sapien
 import numpy as np
-import transforms3d.euler
-import PIL.Image as im
 import matplotlib.pyplot as plt
 import open3d as o3d
 from sapien.core import Pose
 from sapien.sensor import StereoDepthSensor, StereoDepthSensorConfig
 
+
 def build_scene(sim, renderer):
     scene_config = sapien.SceneConfig()
     scene = sim.create_scene(scene_config)
 
-    ground_material = renderer.create_material()
-    ground_material.base_color = np.array([202, 164, 114, 256]) / 256
-    ground_material.specular = 0.5
-    scene.add_ground(0, render_material=ground_material)
-    scene.set_timestep(1 / 240)
-
     builder = scene.create_actor_builder()
     material = renderer.create_material()
-    material.base_color = [0.2, 0.2, 0.8, 1.0]
-    material.roughness = 0.5
-    material.metallic = 0.0
-    builder.add_sphere_visual(radius=0.06, material=material)
-    builder.add_sphere_collision(radius=0.06)
-    sphere1 = builder.build()
-    sphere1.set_pose(Pose(p=[-0.05, 0.05, 0.06]))
-
-    builder = scene.create_actor_builder()
-    material = renderer.create_material()
-    material.ior = 1.2
-    material.transmission = 1.0
     material.base_color = [1.0, 1.0, 1.0, 1.0]
+    material.diffuse_texture_filename = "../assets/aligned/beer_can/texture.png"
+    material.metallic = 0.001
+    material.roughness = 0.4
+    builder.add_visual_from_file("../assets/aligned/beer_can/visual_mesh.obj", material=material)
+    beer_can = builder.build()
+    beer_can.set_pose(Pose([0.370301, -0.246856, 0.0738802], [0.922673, -0.00379302, -0.00852731, 0.385469]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.base_color = [1.0, 1.0, 1.0, 1.0]
+    material.diffuse_texture_filename = "../assets/aligned/champagne/texture.png"
+    material.metallic = 0.01
+    material.roughness = 0.2
+    builder.add_visual_from_file("../assets/aligned/champagne/visual_mesh.obj", material=material)
+    champagne = builder.build()
+    champagne.set_pose(Pose([0.182963, -0.277838, 0.0873777], [0.723872, 0.00616071, -0.00678847, -0.689874]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.base_color = [1.0, 1.0, 1.0, 1.0]
+    material.diffuse_texture_filename = "../assets/aligned/pepsi_bottle/texture.png"
+    material.metallic = 0.001
+    material.roughness = 0.6
+    builder.add_visual_from_file("../assets/aligned/pepsi_bottle/visual_mesh.obj", material=material)
+    pepsi_bottle = builder.build()
+    pepsi_bottle.set_pose(Pose([0.392403, 0.0504232, 0.116739], [0.991259, -0.00145631, -0.00922613, 0.131601]))
+
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.base_color = [0.6, 0.6, 0.6, 1.0]
+    material.metallic = 0.8
+    material.roughness = 0.2
+    builder.add_visual_from_file("../assets/aligned/steel_ball/visual_mesh.obj", material=material)
+    steel_ball = builder.build()
+    steel_ball.set_pose(Pose([0.192034, 0.131187, 0.0170772], [0.949057, -0.0375225, 0.0676584, -0.305458]))
+
+    builder = scene.create_actor_builder()
+    builder.add_visual_from_file("../assets/aligned/water_bottle/water_bottle.glb")
+    water_bottle = builder.build()
+    water_bottle.set_pose(Pose([0.256327, -0.0162116, 0], [0.00627772, -0.0093401, 0.000145366, 1.0008]))
+    
+    builder = scene.create_actor_builder()
+    material = renderer.create_material()
+    material.base_color = [1.0, 1.0, 1.0, 1.0]
+    material.diffuse_texture_filename = "../assets/aligned/table/texture.png"
+    material.metallic = 0.1
     material.roughness = 0.3
-    material.metallic = 0.0
-    builder.add_sphere_visual(radius=0.07, material=material)
-    builder.add_sphere_collision(radius=0.07)
-    sphere2 = builder.build()
-    sphere2.set_pose(Pose(p=[0.05, -0.05, 0.07]))
+    builder.add_visual_from_file("../assets/aligned/table/visual_mesh.obj", material=material)
+    table = builder.build()
+    table.set_pose(Pose([0.405808, 0.022201, -0.043524], [0.999921, -0.000290915, -0.00932814, 0.00842011]))
 
-    builder = scene.create_actor_builder()
-    material = renderer.create_material()
-    material.base_color = [0.8, 0.7, 0.1, 1.0]
-    material.roughness = 0.01
-    material.metallic = 0.95
-    builder.add_capsule_visual(radius=0.02, half_length=0.1, material=material)
-    builder.add_capsule_collision(radius=0.02, half_length=0.1)
-    cap = builder.build()
-    cap.set_pose(Pose(p=[0.15, -0.01, 0.01], q=transforms3d.euler.euler2quat(0, 0, -0.7)))
-
-    builder = scene.create_actor_builder()
-    material = renderer.create_material()
-    material.base_color = [0.8, 0.2, 0.2, 1.0]
-    material.roughness = 0.01
-    material.metallic = 1.0
-    builder.add_box_visual(half_size=[0.09, 0.09, 0.09], material=material)
-    builder.add_box_collision(half_size=[0.09, 0.09, 0.09])
-    box = builder.build()
-    box.set_pose(Pose(p=[0.05, 0.17, 0.09]))
-
-    builder = scene.create_actor_builder()
-    material = renderer.create_material()
-    material.base_color = [0.9, 0.6, 0.5, 1.0]
-    material.roughness = 0.0
-    material.metallic = 1.0
-    builder.add_visual_from_file(
-        '../assets/models/suzanne.dae', scale=[0.1, 0.1, 0.1], material=material)
-    builder.add_box_collision(half_size=[0.1, 0.1, 0.1])
-    monkey = builder.build()
-    monkey.set_pose(Pose(p=[0.15, -0.25, 0.1], q=transforms3d.euler.euler2quat(0, 0, -1)))
-
-    scene.set_ambient_light([0.3, 0.3, 0.3])
-    scene.add_directional_light([0, 0.5, -1], color=[3.0, 3.0, 3.0])
+    scene.set_ambient_light([0., 0., 0.])
+    scene.add_point_light([1.0, 0.2, 2.5], [10, 10, 10])
+    scene.add_point_light([1.0, -2.7, 2.5], [10, 10, 10])
+    scene.add_point_light([1.0, -5.6, 2.5], [10, 10, 10])
+    scene.add_point_light([1.0, 3.1, 2.5], [10, 10, 10])
+    scene.add_point_light([1.0, 6.0, 2.5], [10, 10, 10])
 
     return scene
 
@@ -89,25 +87,28 @@ def main():
 
     sensor_config = StereoDepthSensorConfig()
     sensor = StereoDepthSensor('sensor', scene, sensor_config)
-    sensor.set_pose(
-        Pose([-0.28, -0.28, 0.46], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
+    sensor.set_pose(Pose([-0.13732728, 0.13584249, 0.82386769],[0.84667092, -0.01287458, 0.53195302, -0.00292851]))
 
     scene.step()
     scene.update_render()
     sensor.take_picture()
     sensor.compute_depth()
-    depth = sensor.get_depth()
 
     rgb = sensor.get_rgb()
-    plt.subplot(221)
-    plt.imshow((rgb * 255).astype(np.uint8))
-
     ir_l, ir_r = sensor.get_ir()
+    depth = sensor.get_depth()
+
+    plt.subplot(221)
+    plt.title("RGB Image")
+    plt.imshow((rgb * 255).astype(np.uint8))
     plt.subplot(222)
+    plt.title("Left Infrared Image")
     plt.imshow((ir_l * 255).astype(np.uint8), cmap='gray')
     plt.subplot(223)
+    plt.title("Right Infrared Image")
     plt.imshow((ir_r * 255).astype(np.uint8), cmap='gray')
     plt.subplot(224)
+    plt.title("Depth Map")
     plt.imshow(depth)
     plt.show()
 

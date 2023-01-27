@@ -1,7 +1,7 @@
 .. _raytracing_renderer:
 
 
-Ray tracing Renderer
+Ray Tracing Renderer
 ==========================
 
 .. highlight:: python
@@ -9,7 +9,6 @@ Ray tracing Renderer
 In this tutorial, you will learn the following:
 
 * Use ray tracing in ``SapienRenderer``
-* Use GPU-accelerated depth computing module *SimSense*
 
 The full script can be downloaded from :download:`rt.py <../../../../examples/rendering/rt.py>`, :download:`rt_mat.py <../../../../examples/rendering/rt_mat.py>`.
 
