@@ -221,7 +221,7 @@ class Viewer(object):
 
         self.resolution = np.array(resolutions).flatten()[:2]
         self.window = self.renderer.create_window(
-            resolutions[0], resolutions[1], self.shader_dir
+            self.resolution[0], self.resolution[1], self.shader_dir
         )
 
         self.fovy = np.pi / 2
