@@ -78,7 +78,7 @@ and what's more, ``compute_depth`` on the sensor:
     :dedent: 0
     :lines: 90-95
 
-One important differences between camera and ``sensor`` is that while mounted camera will only take picture of an RGB image, ``sensor`` will take another pair
+One important differences between camera and ``sensor`` is that while camera will only take picture of an RGB image, ``sensor`` will take another pair
 of infrared images, which will be used to compute depth. After calling ``take_picture``, the RGB image and infrared images will be saved within ``sensor``. We
 can take a look at them by calling ``sensor.get_rgb`` and ``sensor.get_ir``:
 
