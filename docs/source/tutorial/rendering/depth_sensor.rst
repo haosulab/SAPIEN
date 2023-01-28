@@ -60,16 +60,27 @@ Now, let's add a ``StereoDepthSensor`` to the scene:
     sensor = StereoDepthSensor('sensor', scene, sensor_config)
 
 ``StereoDepthSensor`` supports a large number of configurable parameters to maximize its flexibility of simulating different sensors. For more information,
-Please check the API doc for class ``StereoDepthSensorConfig``. ``sensor`` behaves very similar to a mounted camera. You can ``set_pose``, ``take_picture``,
+Please check the API doc for class ``StereoDepthSensorConfig``.
+
+Optionally, you can mount the sensor to an existing actor:
+
+::
+
+    sensor_config = StereoDepthSensorConfig()
+    sensor = StereoDepthSensor('sensor', scene, sensor_config, mount=actor)
+
+After mounting to an actor, the sensor will move along with it. Calling ``set_pose`` from either the sensor or the actor will move the two entities together.
+
+``sensor`` behaves very similar to a camera. You can ``set_pose``, ``take_picture``,
 and what's more, ``compute_depth`` on the sensor:
 
 .. literalinclude:: ../../../../examples/rendering/rt_stereodepth.py
     :dedent: 0
     :lines: 90-95
 
-One important differences between mounted camera and ``sensor`` is that while mounted camera will only take picture of an RGB image, ``sensor`` will take
-another pair of infrared images, which will be used to compute depth. After calling ``take_picture``, the RGB image and infrared images will be saved within
-``sensor``. We can take a look at them by calling ``sensor.get_rgb`` and ``sensor.get_ir``:
+One important differences between camera and ``sensor`` is that while mounted camera will only take picture of an RGB image, ``sensor`` will take another pair
+of infrared images, which will be used to compute depth. After calling ``take_picture``, the RGB image and infrared images will be saved within ``sensor``. We
+can take a look at them by calling ``sensor.get_rgb`` and ``sensor.get_ir``:
 
 .. figure:: assets/aligned_rgb.png
     :width: 720px
@@ -133,4 +144,4 @@ your need.
 
 References
 ----------
-[1] Xiaoshuai Zhang, Rui Chen, Ang Li, Fanbo Xiang, Yuzhe Qin, Jiayuan Gu, Zhan Ling, Minghua Liu, Peiyu Zeng, Songfang Han, Zhiao Huang, Tongzhou Mu, Jing Xu, Hao Su, "Close the Optical Sensing Domain Gap by Physics-Grounded Active Stereo Sensor Simulation," in IEEE Transactions on Robotics (T-RO).
+[1] Zhang, X., Chen, R., Li, A., Xiang, F., Qin, Y., Gu, J., Ling, Z., Liu, M., Zeng, P., Han, S., Huang, Z., Mu, T., Xu, J., & Su, H. (2023). Close the Optical Sensing Domain Gap by Physics-Grounded Active Stereo Sensor Simulation. IEEE Transactions on Robotics, 1–19. https://doi.org/10.1109/TRO.2023.3235591

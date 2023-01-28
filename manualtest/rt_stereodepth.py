@@ -52,7 +52,7 @@ def build_scene(sim, renderer):
     builder = scene.create_actor_builder()
     builder.add_visual_from_file("../assets/aligned/water_bottle/water_bottle.glb")
     water_bottle = builder.build()
-    water_bottle.set_pose(Pose([0.256327, -0.0162116, 0], [0.00627772, -0.0093401, 0.000145366, 1.0008]))
+    water_bottle.set_pose(Pose([0.256327, -0.0162116, -0.01], [0.00627772, -0.0093401, 0.000145366, 1.0008]))
     
     builder = scene.create_actor_builder()
     material = renderer.create_material()

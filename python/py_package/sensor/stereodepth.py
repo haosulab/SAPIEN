@@ -5,12 +5,11 @@ from ..core import (
 )
 from ..core.pysapien.simsense import DepthSensorEngine
 from .sensor_base import SensorEntity
-from typing import Optional, Tuple
+from typing import Optional
 from copy import deepcopy as copy
 
 import os
 import numpy as np
-import transforms3d as t3d
 import cv2
 
 
@@ -171,19 +170,13 @@ class StereoDepthSensor(SensorEntity):
             raise TypeError("Median filter size choices are 1, 3, 5, 7")
 
         # Pose
-        # self._mount = self._scene.create_actor_builder().build_kinematic(name=f'{sensor_name}_mount')
         self._mount = mount
+        self._alight = self._scene.add_active_light(
+            pose=Pose(), color=[0, 0, 0], fov=1.57, tex_path=self._config.light_pattern)
         if self._mount is None:
             self._pose = Pose()
-            apos = t3d.quaternions.mat2quat(
-                self._pose.to_transformation_matrix()[:3, :3]
-                @ t3d.quaternions.quat2mat((-0.5, 0.5, 0.5, -0.5)))
-            self._alight = self._scene.add_active_light(
-                pose=Pose(self._pose.p, apos), color=[0, 0, 0], fov=1.57,
-                tex_path=self._config.light_pattern)
         else:
-            pass
-            # mount _alight to mount
+            self._alight.set_parent(self._mount, keep_pose=False)
         
         # Cameras
         self._cam_rgb = None
@@ -263,10 +256,7 @@ class StereoDepthSensor(SensorEntity):
         """
         if self._mount is None:
             self._pose = pose
-            apos = t3d.quaternions.mat2quat(
-                pose.to_transformation_matrix()[:3, :3]
-                @ t3d.quaternions.quat2mat((-0.5, 0.5, 0.5, -0.5)))
-            self._alight.set_pose(Pose(pose.p, apos))
+            self._alight.set_pose(self._pose)
             self._cam_rgb.set_local_pose(self._pose)
             self._cam_ir_l.set_local_pose(self._pose * self._config.trans_pose_l)
             self._cam_ir_r.set_local_pose(self._pose * self._config.trans_pose_r)
