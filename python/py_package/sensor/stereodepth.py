@@ -382,7 +382,7 @@ class StereoDepthSensor(SensorEntity):
 
     def get_pointcloud(self, with_rgb: bool = False):
         """
-        Note: Returned point cloud is in RGB camera frame with x rightward, y downward, z forward.
+        Note: Returned point cloud is from RGB camera's with x rightward, y downward, z forward.
         """
         if with_rgb:
             rgba_dl_tensor = self.get_rgba_dl_tensor()
@@ -394,7 +394,7 @@ class StereoDepthSensor(SensorEntity):
 
     def get_pointcloud_dl_tensor(self, with_rgb: bool = False):
         """
-        Note: Returned point cloud is in RGB camera frame with x rightward, y downward, z forward.
+        Note: Returned point cloud is from RGB camera's with x rightward, y downward, z forward.
         """
         if with_rgb:
             rgba_dl_tensor = self.get_rgba_dl_tensor()
