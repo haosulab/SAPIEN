@@ -930,7 +930,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           [](SScene &s, float altitude, bool render, std::shared_ptr<SPhysicalMaterial> material,
              std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
              py::array_t<float> const &renderSize) {
-            s.addGround(altitude, render, material, renderMaterial, {renderSize.at(0), renderSize.at(1)});
+            s.addGround(altitude, render, material, renderMaterial,
+                        {renderSize.at(0), renderSize.at(1)});
           },
           py::arg("altitude"), py::arg("render") = true, py::arg("material") = nullptr,
           py::arg("render_material") = nullptr,
@@ -2049,65 +2050,65 @@ Args:
           "when no rendering is running, and all cameras and windows become invalid after "
           "calling "
           "this function.");
-//       .def(
-//           "set_default_texture_format",
-//           [](Renderer::SVulkan2Renderer &renderer, py::dict const &dict) {
-//             auto config = renderer.getDefaultRendererConfig();
-//             vk::Format color1 = vk::Format::eR32Sfloat;
-//             vk::Format color4 = vk::Format::eR32G32B32A32Sfloat;
-//             if (dict.contains("color_format_1")) {
-//               auto color1str = dict["color_format_1"].cast<std::string>();
-//               if (color1str == "u4") {
-//                 color1 = vk::Format::eR8Unorm;
-//               } else if (color1str == "f4") {
-//                 color1 = vk::Format::eR32Sfloat;
-//               } else {
-//                 throw std::runtime_error(color1str + " is not supported for color_format_1");
-//               }
-//             }
-//             if (dict.contains("color_format_4")) {
-//               auto color4str = dict["color_format_4"].cast<std::string>();
-//               if (color4str == "4u4") {
-//                 color1 = vk::Format::eR8G8B8A8Unorm;
-//               } else if (color4str == "4f4") {
-//                 color1 = vk::Format::eR32G32B32A32Sfloat;
-//               } else {
-//                 throw std::runtime_error(color4str + " is not supported for color_format_1");
-//               }
-//             }
-//             config->colorFormat1 = color1;
-//             config->colorFormat4 = color4;
-//             config->depthFormat = vk::Format::eD32Sfloat; // depth format must be float32
-//             if (dict.contains("texture_format")) {
-//               auto formats = dict["texture_format"].cast<py::dict>();
-//               for (auto kv : formats) {
-//                 auto name = kv.first.cast<std::string>();
-//                 auto formatstr = kv.second.cast<std::string>();
-//                 if (formatstr == "u1") {
-//                   config->textureFormat[name] = vk::Format::eR8Unorm;
-//                 } else if (formatstr == "f4") {
-//                   config->textureFormat[name] = vk::Format::eR32Sfloat;
-//                 } else if (formatstr == "4u1") {
-//                   config->textureFormat[name] = vk::Format::eR8G8B8A8Unorm;
-//                 } else if (formatstr == "4f4") {
-//                   config->textureFormat[name] = vk::Format::eR32G32B32A32Sfloat;
-//                 } else {
-//                   throw std::runtime_error("invalid texture format " + formatstr);
-//                 }
-//               }
-//             }
-//           },
-//           py::arg("config"), R"doc(
-// Set the default texture format with a config dict. The dict takes 3 keys,
-// ["color_format_1", "color_format_4", "texture_format"].
-// "color_format_1" determines the default texture format for single-channel color textures
-//     "u1": unorm texture (using uint8 to represent 0-1 values).
-//     "f4": signed float32 texture (default)
-// "color_format_4" determines the default texture format for 4-channel color textures
-//     "4u1": unorm rgba texture
-//     "4f4" signed float32 rgba texture (default)
-// "texture_format" takes an dictionary, whose keys are texture names and values are texture foramts.
-// The values can be one of ["u1", "f4", "4u1", "4f4"])doc");
+  //       .def(
+  //           "set_default_texture_format",
+  //           [](Renderer::SVulkan2Renderer &renderer, py::dict const &dict) {
+  //             auto config = renderer.getDefaultRendererConfig();
+  //             vk::Format color1 = vk::Format::eR32Sfloat;
+  //             vk::Format color4 = vk::Format::eR32G32B32A32Sfloat;
+  //             if (dict.contains("color_format_1")) {
+  //               auto color1str = dict["color_format_1"].cast<std::string>();
+  //               if (color1str == "u4") {
+  //                 color1 = vk::Format::eR8Unorm;
+  //               } else if (color1str == "f4") {
+  //                 color1 = vk::Format::eR32Sfloat;
+  //               } else {
+  //                 throw std::runtime_error(color1str + " is not supported for color_format_1");
+  //               }
+  //             }
+  //             if (dict.contains("color_format_4")) {
+  //               auto color4str = dict["color_format_4"].cast<std::string>();
+  //               if (color4str == "4u4") {
+  //                 color1 = vk::Format::eR8G8B8A8Unorm;
+  //               } else if (color4str == "4f4") {
+  //                 color1 = vk::Format::eR32G32B32A32Sfloat;
+  //               } else {
+  //                 throw std::runtime_error(color4str + " is not supported for color_format_1");
+  //               }
+  //             }
+  //             config->colorFormat1 = color1;
+  //             config->colorFormat4 = color4;
+  //             config->depthFormat = vk::Format::eD32Sfloat; // depth format must be float32
+  //             if (dict.contains("texture_format")) {
+  //               auto formats = dict["texture_format"].cast<py::dict>();
+  //               for (auto kv : formats) {
+  //                 auto name = kv.first.cast<std::string>();
+  //                 auto formatstr = kv.second.cast<std::string>();
+  //                 if (formatstr == "u1") {
+  //                   config->textureFormat[name] = vk::Format::eR8Unorm;
+  //                 } else if (formatstr == "f4") {
+  //                   config->textureFormat[name] = vk::Format::eR32Sfloat;
+  //                 } else if (formatstr == "4u1") {
+  //                   config->textureFormat[name] = vk::Format::eR8G8B8A8Unorm;
+  //                 } else if (formatstr == "4f4") {
+  //                   config->textureFormat[name] = vk::Format::eR32G32B32A32Sfloat;
+  //                 } else {
+  //                   throw std::runtime_error("invalid texture format " + formatstr);
+  //                 }
+  //               }
+  //             }
+  //           },
+  //           py::arg("config"), R"doc(
+  // Set the default texture format with a config dict. The dict takes 3 keys,
+  // ["color_format_1", "color_format_4", "texture_format"].
+  // "color_format_1" determines the default texture format for single-channel color textures
+  //     "u1": unorm texture (using uint8 to represent 0-1 values).
+  //     "f4": signed float32 texture (default)
+  // "color_format_4" determines the default texture format for 4-channel color textures
+  //     "4u1": unorm rgba texture
+  //     "4f4" signed float32 rgba texture (default)
+  // "texture_format" takes an dictionary, whose keys are texture names and values are texture
+  // foramts. The values can be one of ["u1", "f4", "4u1", "4f4"])doc");
 
   PyVulkanRigidbody.def_property_readonly("_internal_objects",
                                           &Renderer::SVulkan2Rigidbody::getVisualObjects,
@@ -2134,16 +2135,16 @@ Args:
             light.setPosition({position.at(0), position.at(1), position.at(2)});
           },
           py::arg("position"))
-          .def_property_readonly("position",
-                                 [](SLight &light) { return vec32array(light.getPosition()); })
-          .def(
-              "set_direction",
-              [](SLight &light, py::array_t<float> direction) {
-                light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
-              },
-              py::arg("direction"))
-          .def_property_readonly("direction",
-                                 [](SLight &light) { return vec32array(light.getDirection()); });
+      .def_property_readonly("position",
+                             [](SLight &light) { return vec32array(light.getPosition()); })
+      .def(
+          "set_direction",
+          [](SLight &light, py::array_t<float> direction) {
+            light.setDirection({direction.at(0), direction.at(1), direction.at(2)});
+          },
+          py::arg("direction"))
+      .def_property_readonly("direction",
+                             [](SLight &light) { return vec32array(light.getDirection()); });
 
   // Light Entity
   PyPointLightEntity
@@ -2167,8 +2168,7 @@ Args:
       .def("set_fov", &SSpotLight::setFov)
       .def_property_readonly("fov", &SSpotLight::getFov);
 
-  PyActiveLightEntity
-      .def("set_fov", &SActiveLight::setFov)
+  PyActiveLightEntity.def("set_fov", &SActiveLight::setFov)
       .def_property_readonly("fov", &SActiveLight::getFov)
       .def("set_shadow_parameters", &SActiveLight::setShadowParameters, py ::arg("near"),
            py::arg("far"))
@@ -2401,7 +2401,9 @@ Args:
       .def("mouse_click", &Renderer::SVulkan2Window::isMouseKeyClicked, py::arg("key"))
       .def_property_readonly("mouse_position", &Renderer::SVulkan2Window::getMousePosition)
       .def_property_readonly("mouse_delta", &Renderer::SVulkan2Window::getMouseDelta)
-      .def_property_readonly("mouse_wheel_delta", &Renderer::SVulkan2Window::getMouseWheelDelta);
+      .def_property_readonly("mouse_wheel_delta", &Renderer::SVulkan2Window::getMouseWheelDelta)
+      .def("set_drop_callback", &Renderer::SVulkan2Window::setDropCallback, py::arg("callback"))
+      .def("unset_drop_callback", &Renderer::SVulkan2Window::unsetDropCallback);
 
   PyVulkanScene.def_property_readonly(
       "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); });

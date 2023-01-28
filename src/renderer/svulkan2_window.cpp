@@ -99,6 +99,12 @@ void SVulkan2Window::setShader(std::string const &shaderDir) {
   mSVulkanRenderer->resize(mViewportWidth, mViewportHeight);
 }
 
+void SVulkan2Window::setDropCallback(std::function<void(std::vector<std::string>)> callback) {
+  mWindow->setDropCallback(callback);
+}
+
+void SVulkan2Window::unsetDropCallback() { mWindow->unsetDropCallback(); }
+
 SVulkan2Window::~SVulkan2Window() {
   if (!mClosed) {
     close();

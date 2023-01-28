@@ -1,6 +1,7 @@
 #pragma once
 #include "svulkan2/ui/ui.h"
 #include "svulkan2_renderer.h"
+#include <functional>
 
 namespace sapien {
 namespace Renderer {
@@ -128,6 +129,9 @@ public:
   }
 
   void setShader(std::string const &shaderDir);
+
+  void setDropCallback(std::function<void(std::vector<std::string>)> callback);
+  void unsetDropCallback();
 
 private:
   svulkan2::scene::Camera *getCamera();

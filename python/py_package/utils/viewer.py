@@ -269,6 +269,13 @@ class Viewer(object):
         self.camera_linesets = []
         self._show_camera_linesets = True
 
+        self.window.set_drop_callback(self.drag_and_drop)
+
+    def drag_and_drop(self, paths):
+        b = self.scene.create_actor_builder()
+        b.add_visual_from_file(paths[0])
+        b.build_kinematic()
+
     def _clear_camera_linesets(self):
         if self.scene is None:
             return
