@@ -113,7 +113,7 @@ def main():
     plt.show()
 
     pc = sensor.get_pointcloud(with_rgb=True) # In RGB camera frame with x rightward, y downward, z forward
-    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(pc[..., :3] * np.array([1, -1, -1])))
+    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(pc[..., :3] * np.array([1, -1, -1]))) # Change axis direction for easier view
     pcd.colors = o3d.utility.Vector3dVector(pc[..., 3:])
     o3d.visualization.draw_geometries([pcd])
 
