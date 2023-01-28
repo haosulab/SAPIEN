@@ -105,8 +105,8 @@ class ActiveLightSensor(SensorEntity):
         self._l2r = ex_r @ np.linalg.inv(ex_l)
         self._l2rgb = ex_main @ np.linalg.inv(ex_l)
         self._map1, self._map2, self._q = init_rectify_stereo(
-            self.ir_w, self.ir_h, self.ir_intrinsic.astype(np.float),
-            self.ir_intrinsic.astype(np.float), self._l2r.astype(np.float)
+            self.ir_w, self.ir_h, self.ir_intrinsic.astype(float),
+            self.ir_intrinsic.astype(float), self._l2r.astype(float)
         )
         
     def clear_cache(self):
@@ -277,7 +277,7 @@ class ActiveLightSensor(SensorEntity):
         ros2opencv = np.array([[0., -1., 0., 0.],
                                [0., 0., -1., 0.],
                                [1., 0., 0., 0.],
-                               [0., 0., 0., 1.]], dtype=np.float32)
+                               [0., 0., 0., 1.]], dtype=float)
         return ros2opencv @ np.linalg.inv(pose.to_transformation_matrix())
 
     @staticmethod
@@ -287,7 +287,7 @@ class ActiveLightSensor(SensorEntity):
         x_coordinates, y_coordinates = np.meshgrid(x_linspace, y_linspace)
         x_coordinates = np.reshape(x_coordinates, (1, -1))
         y_coordinates = np.reshape(y_coordinates, (1, -1))
-        ones = np.ones_like(x_coordinates).astype(np.float)
+        ones = np.ones_like(x_coordinates).astype(float)
         grid = np.concatenate([x_coordinates, y_coordinates, ones], axis=0)
         return grid
 
