@@ -14,7 +14,6 @@ from warnings import warn
 
 import os
 import numpy as np
-import transforms3d as t3d
 
 
 class ActiveLightSensor(SensorEntity):
@@ -135,10 +134,7 @@ class ActiveLightSensor(SensorEntity):
     def set_pose(self, pose: Pose):
         self.pose = pose
         self.mount.set_pose(pose)
-        apos = t3d.quaternions.mat2quat(
-            self.mount.get_pose().to_transformation_matrix()[:3, :3]
-            @ t3d.quaternions.quat2mat((-0.5, 0.5, 0.5, -0.5)))
-        self.alight.set_pose(Pose(self.mount.get_pose().p, apos))
+        self.alight.set_pose(pose)
         self.clear_cache()
 
     def get_pose(self):

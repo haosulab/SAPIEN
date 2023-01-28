@@ -1,14 +1,15 @@
 from ..core import (
     Pose,
-    Scene
+    Scene,
+    Actor
 )
 from ..core.pysapien.simsense import DepthSensorEngine
 from .sensor_base import SensorEntity
+from typing import Optional
 from copy import deepcopy as copy
 
 import os
 import numpy as np
-import transforms3d as t3d
 import cv2
 
 
@@ -120,7 +121,7 @@ class StereoDepthSensor(SensorEntity):
     parameters. The computed depth map will be presented in RGB camera frame.
     """
 
-    def __init__(self, sensor_name: str, scene: Scene, config: StereoDepthSensorConfig):
+    def __init__(self, sensor_name: str, scene: Scene, config: StereoDepthSensorConfig, mount: Optional[Actor] = None):
         super().__init__()
 
         # Basic configuration
@@ -165,22 +166,17 @@ class StereoDepthSensor(SensorEntity):
             raise TypeError("lr_max_diff must be integer and within the range [0, 255]")
 
         if self._config.median_filter_size != 1 and self._config.median_filter_size != 3 and self._config.median_filter_size != 5 and \
-            self._config.self._config.median_filter_size != 7:
+            self._config.median_filter_size != 7:
             raise TypeError("Median filter size choices are 1, 3, 5, 7")
 
-        # Cache
-        self._rgb = None
-        self._ir_l = None
-        self._ir_r = None
-        self._depth = None
-        self._pc = None
-
         # Pose
-        self._pose = None
-        self._mount = self._scene.create_actor_builder().build_kinematic(name=f'{sensor_name}_mount')
+        self._mount = mount
         self._alight = self._scene.add_active_light(
-            pose=Pose([0, 0, 0]), color=[0, 0, 0], fov=1.57, tex_path=self._config.light_pattern)
-        self.set_pose(Pose())
+            pose=Pose(), color=[0, 0, 0], fov=1.57, tex_path=self._config.light_pattern)
+        if self._mount is None:
+            self._pose = Pose()
+        else:
+            self._alight.set_parent(self._mount, keep_pose=False)
         
         # Cameras
         self._cam_rgb = None
@@ -204,9 +200,13 @@ class StereoDepthSensor(SensorEntity):
         ir_size, rgb_size = self._config.ir_resolution, self._config.rgb_resolution
         ir_intrinsic = self._config.ir_intrinsic.astype(np.float)
         rgb_intrinsic = self._config.rgb_intrinsic.astype(np.float)
-        rgb_extrinsic = self._pose2cv2ex(self._pose)
-        l_extrinsic = self._pose2cv2ex(self._config.trans_pose_l)
-        r_extrinsic = self._pose2cv2ex(self._config.trans_pose_r)
+        if self._mount is None:
+            rgb_pose = self._pose
+        else:
+            rgb_pose = self._mount.get_pose()
+        rgb_extrinsic = self._pose2cv2ex(rgb_pose)
+        l_extrinsic = self._pose2cv2ex(rgb_pose * self._config.trans_pose_l)
+        r_extrinsic = self._pose2cv2ex(rgb_pose * self._config.trans_pose_r)
         l2r = r_extrinsic @ np.linalg.inv(l_extrinsic).astype(np.float)
         l2rgb = rgb_extrinsic @ np.linalg.inv(l_extrinsic).astype(np.float)
         r1, r2, p1, p2, q, _, _ = cv2.stereoRectify(
@@ -229,13 +229,6 @@ class StereoDepthSensor(SensorEntity):
             self._config.lr_max_diff, self._config.median_filter_size, map_lx, map_ly, map_rx,
             map_ry, a1, a2, a3, b[0], b[1], b[2], self._config.depth_dilation
         )
-    
-    def clear_cache(self):
-        self._rgb = None
-        self._ir_l = None
-        self._ir_r = None
-        self._depth = None
-        self._pc = None
 
     def take_picture(self, infrared_only: bool = False):
         """
@@ -243,11 +236,8 @@ class StereoDepthSensor(SensorEntity):
 
         :param infrared_only: If true, only take infrared pictures without taking RGB picture.
         """
-        self.clear_cache()
-
         if not infrared_only:
             self._cam_rgb.take_picture()
-
         self._ir_mode()
         self._scene.update_render()
         self._cam_ir_l.take_picture()
@@ -256,20 +246,22 @@ class StereoDepthSensor(SensorEntity):
         self._scene.update_render()
     
     def compute_depth(self):
-        self._depth = None
-
         left_dl_tensor = self._cam_ir_l.get_dl_tensor('Color')
         right_dl_tensor = self._cam_ir_r.get_dl_tensor('Color')
         self._engine.compute(left_dl_tensor, right_dl_tensor)
 
     def set_pose(self, pose: Pose):
-        self._pose = pose
-        self._mount.set_pose(pose)
-        apos = t3d.quaternions.mat2quat(
-            self._mount.get_pose().to_transformation_matrix()[:3, :3]
-            @ t3d.quaternions.quat2mat((-0.5, 0.5, 0.5, -0.5)))
-        self._alight.set_pose(Pose(self._mount.get_pose().p, apos))
-        self.clear_cache()
+        """
+        Note: if mount exists, setting sensor's pose will also have effect on the mounted actor.
+        """
+        if self._mount is None:
+            self._pose = pose
+            self._alight.set_pose(self._pose)
+            self._cam_rgb.set_local_pose(self._pose)
+            self._cam_ir_l.set_local_pose(self._pose * self._config.trans_pose_l)
+            self._cam_ir_r.set_local_pose(self._pose * self._config.trans_pose_r)
+        else:
+            self._mount.set_pose(pose)
     
     def set_ir_noise(self, ir_speckle_noise: float, ir_thermal_noise: float):
         """
@@ -349,11 +341,14 @@ class StereoDepthSensor(SensorEntity):
         return copy(self._config)
 
     def get_pose(self):
-        return copy(self._pose)
+        if self._mount is None:
+            return copy(self._pose)
+        else:
+            return copy(self._mount().get_pose())
 
     def get_rgb(self):
-        self._fetch('rgb')
-        return copy(self._rgb)
+        rgb = self._cam_rgb.get_color_rgba()[..., :3].clip(0, 1)
+        return copy(rgb)
 
     def get_rgb_dl_tensor(self):
         return self._cam_rgb.get_dl_tensor('Color')
@@ -362,13 +357,13 @@ class StereoDepthSensor(SensorEntity):
         """
         Note: Noise simulation won't be reflected here.
         """
-        self._fetch('ir_l')
-        self._fetch('ir_r')
-        return [copy(self._ir_l), copy(self._ir_r)]
+        ir_l = self._cam_ir_l.get_color_rgba()[..., 0].clip(0, 1)
+        ir_r = self._cam_ir_r.get_color_rgba()[..., 0].clip(0, 1)
+        return [copy(ir_l), copy(ir_r)]
 
     def get_depth(self):
-        self._fetch('depth')
-        return copy(self._depth)
+        depth = self._engine.get_ndarray()
+        return copy(depth)
 
     def get_depth_dl_tensor(self):
         return self._engine.get_dl_tensor()
@@ -379,19 +374,43 @@ class StereoDepthSensor(SensorEntity):
         if frame == 'camera':
             xyz = self._depth2pts_np(depth, self._config.rgb_intrinsic)
         else:
-            xyz = self._depth2pts_np(depth, self._config.rgb_intrinsic, self._pose2cv2ex(self._pose))
+            if self._mount is None:
+                pose = self._pose
+            else:
+                pose = self._mount.get_pose()
+            xyz = self._depth2pts_np(depth, self._config.rgb_intrinsic, self._pose2cv2ex(pose))
 
         if with_rgb:
-            self._fetch('rgb')
-            xyz = np.concatenate([xyz, self._rgb.reshape(-1, 3)], axis=1)
+            rgb = self.get_rgb()
+            xyz = np.concatenate([xyz, rgb.reshape(-1, 3)], axis=1)
 
         return xyz
 
     def _create_cameras(self):
         self._scene.update_render()
 
-        self._cam_rgb = self._scene.add_mounted_camera(
-            f"{self.name}", self._mount, Pose([0, 0, 0]), *self._config.rgb_resolution, 0.78, 0.001, 100)
+        if self._mount is None:
+            self._cam_rgb = self._scene.add_camera(
+                f"{self.name}", *self._config.rgb_resolution, 0.78, 0.001, 100)
+            self._cam_rgb.set_local_pose(self._pose)
+
+            self._cam_ir_l = self._scene.add_camera(
+                f"{self.name}_left", *self._config.ir_resolution, 0.78, 0.001, 100)
+            self._cam_ir_l.set_local_pose(self._pose * self._config.trans_pose_l)
+
+            self._cam_ir_r = self._scene.add_camera(
+                f"{self.name}_right", *self._config.ir_resolution, 0.78, 0.001, 100)
+            self._cam_ir_r.set_local_pose(self._pose * self._config.trans_pose_r)
+        else:
+            self._cam_rgb = self._scene.add_mounted_camera(
+                f"{self.name}", self._mount, Pose(), *self._config.rgb_resolution, 0.78, 0.001, 100)
+
+            self._cam_ir_l = self._scene.add_mounted_camera(
+                f"{self.name}_left", self._mount, self._config.trans_pose_l, *self._config.ir_resolution, 0.78, 0.001, 100)
+
+            self._cam_ir_r = self._scene.add_mounted_camera(
+                f"{self.name}_right", self._mount, self._config.trans_pose_r, *self._config.ir_resolution, 0.78, 0.001, 100)
+        
         self._cam_rgb.set_perspective_parameters(
             0.1, 100.0,
             self._config.rgb_intrinsic[0, 0], self._config.rgb_intrinsic[1, 1],
@@ -399,8 +418,6 @@ class StereoDepthSensor(SensorEntity):
             self._config.rgb_intrinsic[0, 1]
         )
 
-        self._cam_ir_l = self._scene.add_mounted_camera(
-            f"{self.name}_left", self._mount, self._config.trans_pose_l, *self._config.ir_resolution, 0.78, 0.001, 100)
         self._cam_ir_l.set_perspective_parameters(
             0.1, 100.0,
             self._config.ir_intrinsic[0, 0], self._config.ir_intrinsic[1, 1],
@@ -408,8 +425,6 @@ class StereoDepthSensor(SensorEntity):
             self._config.ir_intrinsic[0, 1]
         )
 
-        self._cam_ir_r = self._scene.add_mounted_camera(
-            f"{self.name}_right", self._mount, self._config.trans_pose_r, *self._config.ir_resolution, 0.78, 0.001, 100)
         self._cam_ir_r.set_perspective_parameters(
             0.1, 100.0,
             self._config.ir_intrinsic[0, 0], self._config.ir_intrinsic[1, 1],
@@ -437,16 +452,6 @@ class StereoDepthSensor(SensorEntity):
                 l.set_color(self._light_d[l])
             self._scene.set_ambient_light(self._light_a)
             self._alight.set_color([0, 0, 0])
-
-    def _fetch(self, mod):
-        if mod == 'rgb' and self._rgb is None:
-            self._rgb = self._cam_rgb.get_color_rgba()[..., :3].clip(0, 1)
-        elif mod == 'ir_l' and self._ir_l is None:
-            self._ir_l = self._cam_ir_l.get_color_rgba()[..., 0].clip(0, 1)
-        elif mod == 'ir_r' and self._ir_r is None:
-            self._ir_r = self._cam_ir_r.get_color_rgba()[..., 0].clip(0, 1)
-        elif mod == 'depth' and self._depth is None:
-            self._depth = self._engine.get_ndarray()
 
     @staticmethod
     def _get_registration_mat(ir_size, ir_intrinsic, rgb_intrinsic, ir2rgb):
