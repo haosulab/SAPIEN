@@ -112,10 +112,10 @@ def main():
     plt.imshow(depth)
     plt.show()
 
-    pc = sensor.get_pointcloud(frame='world', with_rgb=True)
-    pc1 = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(pc[..., :3]))
-    pc1.colors = o3d.utility.Vector3dVector(pc[..., 3:])
-    o3d.visualization.draw_geometries([pc1])
+    pc = sensor.get_pointcloud(with_rgb=True) # From RGB camera's view with x rightward, y downward, z forward
+    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(pc[..., :3] * np.array([1, -1, -1]))) # Change axis direction for easier view
+    pcd.colors = o3d.utility.Vector3dVector(pc[..., 3:])
+    o3d.visualization.draw_geometries([pcd])
 
 
 main()

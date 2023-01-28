@@ -39,14 +39,14 @@ class StereoDepthSensorConfig:
             [0.,    1380., 540.],
             [0.,       0.,   1.]
         ])
-        """Intrinsic matrix of the RGB camera (OpenCV coordinate system)."""
+        """Intrinsic matrix of the RGB camera."""
 
         self.ir_intrinsic = np.array([
             [920.,   0., 640.],
             [0.,   920., 360.],
             [0.,     0.,   1.]
         ])
-        """Intrinsic matrix of the infrared cameras (OpenCV coordinate system)."""
+        """Intrinsic matrix of the infrared cameras."""
 
         self.trans_pose_l = Pose([0, -0.0175, 0])
         """Relative pose of the left infrared camera to the RGB camera."""
@@ -177,6 +177,7 @@ class StereoDepthSensor(SensorEntity):
             self._pose = Pose()
         else:
             self._alight.set_parent(self._mount, keep_pose=False)
+            self._alight.set_local_pose(Pose())
         
         # Cameras
         self._cam_rgb = None
@@ -198,8 +199,8 @@ class StereoDepthSensor(SensorEntity):
 
         # Depth computing engine
         ir_size, rgb_size = self._config.ir_resolution, self._config.rgb_resolution
-        ir_intrinsic = self._config.ir_intrinsic.astype(np.float)
-        rgb_intrinsic = self._config.rgb_intrinsic.astype(np.float)
+        ir_intrinsic = self._config.ir_intrinsic.astype(float)
+        rgb_intrinsic = self._config.rgb_intrinsic.astype(float)
         if self._mount is None:
             rgb_pose = self._pose
         else:
@@ -207,8 +208,8 @@ class StereoDepthSensor(SensorEntity):
         rgb_extrinsic = self._pose2cv2ex(rgb_pose)
         l_extrinsic = self._pose2cv2ex(rgb_pose * self._config.trans_pose_l)
         r_extrinsic = self._pose2cv2ex(rgb_pose * self._config.trans_pose_r)
-        l2r = r_extrinsic @ np.linalg.inv(l_extrinsic).astype(np.float)
-        l2rgb = rgb_extrinsic @ np.linalg.inv(l_extrinsic).astype(np.float)
+        l2r = r_extrinsic @ np.linalg.inv(l_extrinsic).astype(float)
+        l2rgb = rgb_extrinsic @ np.linalg.inv(l_extrinsic).astype(float)
         r1, r2, p1, p2, q, _, _ = cv2.stereoRectify(
             cameraMatrix1=ir_intrinsic, distCoeffs1=None, cameraMatrix2=ir_intrinsic, distCoeffs2=None,
             imageSize=ir_size, R=l2r[:3, :3], T=l2r[:3, 3:], alpha=1.0, newImageSize=ir_size
@@ -220,19 +221,24 @@ class StereoDepthSensor(SensorEntity):
         map_lx, map_ly = map_l
         map_rx, map_ry = map_r
         a1, a2, a3, b = self._get_registration_mat(ir_size, ir_intrinsic, rgb_intrinsic, l2rgb)
+        rgb_fx = rgb_intrinsic[0][0]
+        rgb_fy = rgb_intrinsic[1][1]
+        rgb_skew = rgb_intrinsic[0][1]
+        rgb_cx = rgb_intrinsic[0][2]
+        rgb_cy = rgb_intrinsic[1][2]
 
         self._engine = DepthSensorEngine(
             ir_size[1], ir_size[0], rgb_size[1], rgb_size[0], f_len, b_len, self._config.min_depth, self._config.max_depth,
             self._config.ir_noise_seed, speckle_shape, speckle_scale, gaussian_mu, gaussian_sigma, self._config.rectified,
             self._config.census_width, self._config.census_height, self._config.max_disp, self._config.block_width,
             self._config.block_height, self._config.p1_penalty, self._config.p2_penalty, self._config.uniqueness_ratio,
-            self._config.lr_max_diff, self._config.median_filter_size, map_lx, map_ly, map_rx,
-            map_ry, a1, a2, a3, b[0], b[1], b[2], self._config.depth_dilation
+            self._config.lr_max_diff, self._config.median_filter_size, map_lx, map_ly, map_rx, map_ry, a1, a2, a3, b[0],
+            b[1], b[2], self._config.depth_dilation, rgb_fx, rgb_fy, rgb_skew, rgb_cx, rgb_cy
         )
 
     def take_picture(self, infrared_only: bool = False):
         """
-        Note: we expect one scene.update_render() call before calling take_picture().
+        Note: We expect one scene.update_render() call before calling take_picture().
 
         :param infrared_only: If true, only take infrared pictures without taking RGB picture.
         """
@@ -252,7 +258,7 @@ class StereoDepthSensor(SensorEntity):
 
     def set_pose(self, pose: Pose):
         """
-        Note: if mount exists, setting sensor's pose will also have effect on the mounted actor.
+        Note: If mount exists, setting sensor's pose will also have effect on the mounted actor.
         """
         if self._mount is None:
             self._pose = pose
@@ -350,7 +356,7 @@ class StereoDepthSensor(SensorEntity):
         rgb = self._cam_rgb.get_color_rgba()[..., :3].clip(0, 1)
         return copy(rgb)
 
-    def get_rgb_dl_tensor(self):
+    def get_rgba_dl_tensor(self):
         return self._cam_rgb.get_dl_tensor('Color')
 
     def get_ir(self):
@@ -362,29 +368,41 @@ class StereoDepthSensor(SensorEntity):
         return [copy(ir_l), copy(ir_r)]
 
     def get_depth(self):
+        """
+        Note: Returned depth map will be of the same resolution and frame of RGB camera.
+        """
         depth = self._engine.get_ndarray()
         return copy(depth)
 
     def get_depth_dl_tensor(self):
+        """
+        Note: Returned depth map will be of the same resolution and frame of RGB camera.
+        """
         return self._engine.get_dl_tensor()
 
-    def get_pointcloud(self, frame: str = 'camera', with_rgb: bool = False):
-        assert frame in ['camera', 'world']
-        depth = self.get_depth()
-        if frame == 'camera':
-            xyz = self._depth2pts_np(depth, self._config.rgb_intrinsic)
-        else:
-            if self._mount is None:
-                pose = self._pose
-            else:
-                pose = self._mount.get_pose()
-            xyz = self._depth2pts_np(depth, self._config.rgb_intrinsic, self._pose2cv2ex(pose))
-
+    def get_pointcloud(self, with_rgb: bool = False):
+        """
+        Note: Returned point cloud is from RGB camera's with x rightward, y downward, z forward.
+        """
         if with_rgb:
-            rgb = self.get_rgb()
-            xyz = np.concatenate([xyz, rgb.reshape(-1, 3)], axis=1)
+            rgba_dl_tensor = self.get_rgba_dl_tensor()
+            pc = self._engine.get_rgb_point_cloud_ndarray(rgba_dl_tensor)
+        else:
+            pc = self._engine.get_point_cloud_ndarray()
 
-        return xyz
+        return pc
+
+    def get_pointcloud_dl_tensor(self, with_rgb: bool = False):
+        """
+        Note: Returned point cloud is from RGB camera's with x rightward, y downward, z forward.
+        """
+        if with_rgb:
+            rgba_dl_tensor = self.get_rgba_dl_tensor()
+            pc_dl_tensor = self._engine.get_rgb_point_cloud_dl_tensor(rgba_dl_tensor)
+        else:
+            pc_dl_tensor = self._engine.get_point_cloud_dl_tensor()
+
+        return pc_dl_tensor
 
     def _create_cameras(self):
         self._scene.update_render()
@@ -475,31 +493,5 @@ class StereoDepthSensor(SensorEntity):
         ros2opencv = np.array([[0., -1., 0., 0.],
                                [0., 0., -1., 0.],
                                [1., 0., 0., 0.],
-                               [0., 0., 0., 1.]], dtype=np.float32)
+                               [0., 0., 0., 1.]], dtype=float)
         return ros2opencv @ np.linalg.inv(pose.to_transformation_matrix())
-
-    @staticmethod
-    def _get_pixel_grids_np(height, width):
-        x_linspace = np.linspace(0.5, width - 0.5, width)
-        y_linspace = np.linspace(0.5, height - 0.5, height)
-        x_coordinates, y_coordinates = np.meshgrid(x_linspace, y_linspace)
-        x_coordinates = np.reshape(x_coordinates, (1, -1))
-        y_coordinates = np.reshape(y_coordinates, (1, -1))
-        ones = np.ones_like(x_coordinates).astype(np.float)
-        grid = np.concatenate([x_coordinates, y_coordinates, ones], axis=0)
-        return grid
-
-    @staticmethod
-    def _depth2pts_np(depth_map, cam_intrinsic, cam_extrinsic=np.eye(4)):
-        feature_grid = StereoDepthSensor._get_pixel_grids_np(
-            depth_map.shape[0], depth_map.shape[1])
-
-        uv = np.matmul(np.linalg.inv(cam_intrinsic), feature_grid)
-        cam_points = uv * np.reshape(depth_map, (1, -1))
-
-        r = cam_extrinsic[:3, :3]
-        t = cam_extrinsic[:3, 3:4]
-        r_inv = np.linalg.inv(r)
-
-        world_points = np.matmul(r_inv, cam_points - t).transpose()
-        return world_points

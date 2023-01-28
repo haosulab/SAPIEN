@@ -17,7 +17,8 @@ void buildSimsense(py::module &parent) {
             uint32_t, uint32_t, float, float, float, float, uint64_t,
             float, float, float, float, bool, uint8_t, uint8_t, uint32_t,
             uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t,
-            py::array_t<float>, py::array_t<float>, py::array_t<float>, py::array_t<float>
+            py::array_t<float>, py::array_t<float>, py::array_t<float>, py::array_t<float>,
+            float, float, float, float, float
         >()
     );
     PySimsense.def(
@@ -27,13 +28,18 @@ void buildSimsense(py::module &parent) {
             uint8_t, uint32_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t,
             uint8_t, uint8_t, py::array_t<float>, py::array_t<float>,
             py::array_t<float>, py::array_t<float>, py::array_t<float>,
-            py::array_t<float>, py::array_t<float>, float, float, float, bool
+            py::array_t<float>, py::array_t<float>, float, float, float, bool,
+            float, float, float, float, float
         >()
     );
     PySimsense.def("compute", py::overload_cast<py::array_t<uint8_t>, py::array_t<uint8_t>>(&simsense::DepthSensorEngine::compute));
     PySimsense.def("compute", py::overload_cast<py::capsule, py::capsule>(&simsense::DepthSensorEngine::compute));
     PySimsense.def("get_ndarray", &simsense::DepthSensorEngine::getNdarray);
     PySimsense.def("get_dl_tensor", &simsense::DepthSensorEngine::getDLTensor);
+    PySimsense.def("get_point_cloud_ndarray", &simsense::DepthSensorEngine::getPointCloudNdarray);
+    PySimsense.def("get_point_cloud_dl_tensor", &simsense::DepthSensorEngine::getPointCloudDLTensor);
+    PySimsense.def("get_rgb_point_cloud_ndarray", &simsense::DepthSensorEngine::getRgbPointCloudNdarray);
+    PySimsense.def("get_rgb_point_cloud_dl_tensor", &simsense::DepthSensorEngine::getRgbPointCloudDLTensor);
     PySimsense.def("set_ir_noise_parameters", &simsense::DepthSensorEngine::setInfraredNoiseParameters);
     PySimsense.def("set_census_window_size", &simsense::DepthSensorEngine::setCensusWindowSize);
     PySimsense.def("set_matching_block_size", &simsense::DepthSensorEngine::setMatchingBlockSize);
