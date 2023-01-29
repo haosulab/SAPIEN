@@ -129,3 +129,44 @@ def create_checkerboard(
     )
 
     return mesh, mat
+
+
+def bake_envmap(
+    renderer: sapien.core.SapienRenderer,
+    scene: sapien.core.Scene,
+    position: np.ndarray,
+    resolution: int,
+    output_dir="sapien_generated_envmap",
+    near=0.1,
+    far=100.0,
+):
+    cam = scene.add_camera("cam", resolution, resolution, np.pi / 2, near, far)
+    poses = [
+        sapien.core.Pose(position, [1, 0, 0, 0]),  # +x
+        sapien.core.Pose(position, [0, 0, 0, 1]),  # -x
+        sapien.core.Pose(position, [0.5, -0.5, -0.5, -0.5]),  # +y
+        sapien.core.Pose(position, [0.5, 0.5, 0.5, -0.5]),  # -y
+        sapien.core.Pose(position, [0.7071068, 0, 0, -0.7071068]),  # +z
+        sapien.core.Pose(position, [0.7071068, 0, 0, 0.7071068]),  # -z
+    ]
+
+    filenames = [
+        os.path.join(output_dir, name + ".png")
+        for name in ["px", "nx", "py", "ny", "pz", "nz"]
+    ]
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    from PIL import Image
+
+    for pose, filename in zip(poses, filenames):
+        cam.set_pose(pose)
+        scene.update_render()
+        cam.take_picture()
+        img = cam.get_texture("Color")[:, ::-1]
+        Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8)).save(filename)
+
+    renderer.create_ktx_environment_map(
+        *filenames, os.path.join(output_dir, "envmap.ktx")
+    )
+    scene.remove_camera(cam)
