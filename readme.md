@@ -7,17 +7,19 @@ is a continuation of ShapeNet and PartNet.
 
 ## Change Log
 
-### 1 to 2 migration guide
-- replace `scene.renderer_scene.add_xxx_light` with `scene.add_xxx_light`
-- replace `scene.remove_mounted_camera` with `scene.remove_camera`
-- optionally, remove `fovx` from `scene.add_mounted_camera`.
-
-<details>
+<details open>
 <summary>2.2</summary>
 
-- GPU active-stereo simulation
+- Rename `VulkanRenderer` to `SapienRenderer` (VulkanRenderer is still an alias)
+- Support **ray tracing** in `SapienRenderer`
+- Deprecate `KuafuRenderer`, use the rt shader in `SapienRenderer` instead
+- **GPU-accelerated stereo depth sensor simulation**
+- **Render server**
 - Python 3.11
-- Minor bug fixes
+- bug fixes
+  - Fix inverse kinematics default active joint mask (now defaults to all 1s)
+  - Fix incorrectly exported memory in Vulkan-Cuda interop
+  - Fix joint `get_global_pose`
 </details>
 
 <details>
@@ -80,6 +82,15 @@ is a continuation of ShapeNet and PartNet.
   - Articulation setDriveTarget was now correctly reversed for prismatic joint (joint setDriveTarget is not affected)
   - Fix kinematic articulation loader
 </details>
+
+<details>
+<summary>1 to 2 migration</summary>
+
+- replace `scene.renderer_scene.add_xxx_light` with `scene.add_xxx_light`
+- replace `scene.remove_mounted_camera` with `scene.remove_camera`
+- optionally, remove `fovx` from `scene.add_mounted_camera`.
+</details>
+
 
 <details>
 <summary>1.1</summary>
