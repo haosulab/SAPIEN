@@ -101,6 +101,9 @@ public:
   // default physical material
   inline std::shared_ptr<SPhysicalMaterial> getDefaultMaterial() const { return mDefaultMaterial; }
   inline void setDefaultMaterial(std::shared_ptr<SPhysicalMaterial> material) {
+    mConfig.dynamic_friction = material->getDynamicFriction();
+    mConfig.static_friction = material->getStaticFriction();
+    mConfig.restitution = material->getRestitution();
     mDefaultMaterial = material;
   }
 
@@ -266,6 +269,8 @@ public:
 
   ThreadPool &getThread();
 
+  SceneConfig getConfig() const { return mConfig; }
+
 private:
   void removeCameraByParent(SActorBase *actor);
 
@@ -282,6 +287,8 @@ public:
   void unpackScene(SceneData const &data);
 
 private:
+  SceneConfig mConfig{};
+
   std::map<std::pair<PxShape *, PxShape *>, std::unique_ptr<SContact>> mContacts;
 
   ThreadPool mRunnerThread{1};

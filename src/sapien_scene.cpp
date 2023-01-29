@@ -26,7 +26,7 @@ namespace sapien {
  * Basic
  ***********************************************/
 SScene::SScene(std::shared_ptr<Simulation> sim, SceneConfig const &config)
-    : mSimulationShared(sim), mSimulationCallback(this), mRendererScene(nullptr) {
+    : mSimulationShared(sim), mSimulationCallback(this), mRendererScene(nullptr), mConfig(config) {
 
   PxSceneDesc sceneDesc(sim->mPhysicsSDK->getTolerancesScale());
   sceneDesc.gravity = PxVec3({config.gravity.x(), config.gravity.y(), config.gravity.z()});
