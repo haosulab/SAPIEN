@@ -843,6 +843,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("set_timestep", &SScene::setTimestep, py::arg("second"))
       .def("get_timestep", &SScene::getTimestep)
       .def_property("timestep", &SScene::getTimestep, &SScene::setTimestep)
+      .def("get_config", &SScene::getConfig)
       .def_property("default_physical_material", &SScene::getDefaultMaterial,
                     &SScene::setDefaultMaterial)
       .def("create_actor_builder", &SScene::createActorBuilder)
@@ -877,9 +878,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           "add_mounted_camera",
           [](SScene &scene, std::string const &name, SActorBase *actor, PxTransform const &pose,
              uint32_t width, uint32_t height, float fovx, float fovy, float near, float far) {
-            // spdlog::get("SAPIEN")->warn(
-            //     "add_mounted_camera with fovx has been deprecated and will be "
-            //     "removed in the next release.");
             auto cam = scene.addCamera(name, width, height, fovy, near, far);
             cam->setParent(actor);
             cam->setLocalPose(pose);
@@ -889,23 +887,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("fovx"), py::arg("fovy"), py::arg("near"), py::arg("far"),
           py::return_value_policy::reference)
       .def("get_cameras", &SScene::getCameras, py::return_value_policy::reference)
-      .def(
-          "get_mounted_cameras",
-          [](SScene &scene) {
-            // spdlog::get("SAPIEN")->warn("get_mounted_cameras has been deprecated and will be "
-            //                             "removed in the next release, "
-            //                             "please use equivalent function get_cameras instead.");
-            return scene.getCameras();
-          },
-          py::return_value_policy::reference)
+      .def("get_mounted_cameras", &SScene::getCameras, py::return_value_policy::reference)
       .def("remove_camera", &SScene::removeCamera, py::arg("camera"))
-
-      // .def("remove_mounted_camera", &SScene::removeMountedCamera, py::arg("camera"))
-      // .def("get_mounted_actors", &SScene::getMountedActors,
-      // py::return_value_policy::reference) .def("find_mounted_camera",
-      // &SScene::findMountedCamera, py::arg("name"), py::arg("actor") = nullptr,
-      // py::return_value_policy::reference)
-
       .def("step", &SScene::step)
       .def("step_async",
            [](SScene &scene) {
