@@ -57,7 +57,7 @@ public:
   ClientCamera(ClientScene *scene, rs_id_t id, uint32_t width, uint32_t height, float cx, float cy,
                float fx, float fy, float near, float far, float skew);
 
-  [[nodiscard]] inline physx::PxTransform getPose() const { return mPose; };
+  [[nodiscard]] inline physx::PxTransform getPose() const override { return mPose; };
   inline void setPose(physx::PxTransform const &pose) override { mPose = pose; }
   IPxrScene *getScene() override;
 
@@ -106,37 +106,43 @@ public:
   ClientPointLight(rs_id_t id) : mId(id){};
 
   physx::PxTransform getPose() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return physx::PxTransform{physx::PxIdentity};
   }
   void setPose(physx::PxTransform const &transform) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   physx::PxVec3 getColor() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return {0.f, 0.f, 0.f};
   }
   void setColor(physx::PxVec3 color) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   bool getShadowEnabled() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return false;
   }
   void setShadowEnabled(bool enabled) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   physx::PxVec3 getPosition() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return {0.f, 0.f, 0.f};
   }
   void setPosition(physx::PxVec3 position) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   void setShadowParameters(float near, float far) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   float getShadowNear() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return 0.f;
   }
   float getShadowFar() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return 0.f;
   }
 
 private:
@@ -148,40 +154,47 @@ public:
   ClientDirectionalLight(rs_id_t id) : mId(id) {}
 
   physx::PxTransform getPose() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return physx::PxTransform{physx::PxIdentity};
   }
   void setPose(physx::PxTransform const &transform) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   physx::PxVec3 getColor() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return {0.f, 0.f, 0.f};
   }
   void setColor(physx::PxVec3 color) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   bool getShadowEnabled() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return false;
   }
   void setShadowEnabled(bool enabled) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   physx::PxVec3 getDirection() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return {0.f, 0.f, 0.f};
   }
   void setDirection(physx::PxVec3 direction) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   void setShadowParameters(float halfSize, float near, float far) override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
   }
   float getShadowHalfSize() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return 0.f;
   }
   float getShadowNear() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return 0.f;
   }
   float getShadowFar() const override {
-    throw std::runtime_error("light cannot be accessed in rendering client");
+    spdlog::get("SAPIEN")->warn("light cannot be accessed in rendering client");
+    return 0.f;
   }
 
 private:
