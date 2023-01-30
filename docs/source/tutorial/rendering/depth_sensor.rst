@@ -69,16 +69,16 @@ Optionally, you can mount the sensor to an existing actor:
     sensor_config = StereoDepthSensorConfig()
     sensor = StereoDepthSensor('sensor', scene, sensor_config, mount=actor)
 
-After mounting to an actor, the sensor will move along with it. Calling ``set_pose`` from either the sensor or the actor will move the two entities together.
+After mounting to an actor, the sensor will move along with it. Calling ``sensor.set_local_pose`` can adjust the relative pose to the mounted actor.
 
-``sensor`` behaves very similar to a camera. You can ``set_pose`` and ``take_picture`` just like working with a camera. What's more, you can ``compute_depth`` and
-``get_pointcloud`` on the sensor:
+``sensor`` behaves very similar to a camera. You can ``set_pose`` (if not mounted) and ``take_picture`` just like working with a camera. What's more, you can
+``compute_depth`` and ``get_pointcloud`` on the sensor:
 
 .. literalinclude:: ../../../../examples/rendering/rt_stereodepth.py
     :dedent: 0
     :lines: 90-95
 
-One important differences between camera and ``sensor`` is that while camera will only take picture of an RGB image, ``sensor`` will take another pair
+One important difference between camera and ``sensor`` is that while camera will only take picture of an RGB image, ``sensor`` will take another pair
 of infrared images, which will be used to compute depth. After calling ``take_picture``, the RGB image and infrared images will be saved within ``sensor``.
 Calling ``sensor.get_rgb`` and ``sensor.get_ir`` will return the pictures in ndarray form. Let's take a look at them:
 
