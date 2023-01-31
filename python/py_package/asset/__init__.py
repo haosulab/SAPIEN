@@ -142,12 +142,12 @@ def bake_envmap(
 ):
     cam = scene.add_camera("cam", resolution, resolution, np.pi / 2, near, far)
     poses = [
-        sapien.core.Pose(position, [1, 0, 0, 0]),  # +x
-        sapien.core.Pose(position, [0, 0, 0, 1]),  # -x
-        sapien.core.Pose(position, [0.5, -0.5, -0.5, -0.5]),  # +y
-        sapien.core.Pose(position, [0.5, 0.5, 0.5, -0.5]),  # -y
-        sapien.core.Pose(position, [0.7071068, 0, 0, -0.7071068]),  # +z
-        sapien.core.Pose(position, [0.7071068, 0, 0, 0.7071068]),  # -z
+        sapien.core.Pose(position, [0.7071068, 0, 0, -0.7071068]),
+        sapien.core.Pose(position, [0.7071068, 0, 0, 0.7071068]),
+        sapien.core.Pose(position, [0, 0.7071068, 0, 0.7071068]),
+        sapien.core.Pose(position, [0, 0.7071068, 0, -0.7071068]),
+        sapien.core.Pose(position, [0, 0, 0, 1]),
+        sapien.core.Pose(position, [1, 0, 0, 0]),  # +x direction is -z in opengl
     ]
 
     filenames = [
