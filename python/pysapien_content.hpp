@@ -913,8 +913,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           [](SScene &s, float altitude, bool render, std::shared_ptr<SPhysicalMaterial> material,
              std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
              py::array_t<float> const &renderSize) {
-            s.addGround(altitude, render, material, renderMaterial,
-                        {renderSize.at(0), renderSize.at(1)});
+            return s.addGround(altitude, render, material, renderMaterial,
+                               {renderSize.at(0), renderSize.at(1)});
           },
           py::arg("altitude"), py::arg("render") = true, py::arg("material") = nullptr,
           py::arg("render_material") = nullptr,
