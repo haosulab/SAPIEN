@@ -54,6 +54,11 @@ public:
   std::unique_ptr<SCollisionShape>
   createCollisionShape(PxGeometry const &geometry, std::shared_ptr<SPhysicalMaterial> material);
 
+  std::shared_ptr<SNonconvexMeshGeometry> createMeshGeometry(std::vector<physx::PxReal> vertices,
+                                                             std::vector<uint32_t> indices,
+                                                             physx::PxVec3 scale,
+                                                             physx::PxQuat rotation);
+
   inline std::shared_ptr<Renderer::IPxrRenderer> getRenderer() const { return mRenderer; }
   void setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer);
 

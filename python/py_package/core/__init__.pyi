@@ -171,6 +171,7 @@ __all__ = [
     "VulkanScene",
     "VulkanWindow",
     "add_profiler_event",
+    "coacd",
     "dlpack",
     "ensure_icd",
     "get_global_render_config",
@@ -191,6 +192,8 @@ class KuafuRenderer(pysapien.IPxrRenderer):
 class VulkanRenderer(pysapien.SapienRenderer, pysapien.IPxrRenderer):
     pass
 def add_profiler_event(name: str) -> None:
+    pass
+def coacd(mesh: pysapien.NonconvexMeshGeometry) -> typing.List[pysapien.ConvexMeshGeometry]:
     pass
 def get_global_render_config() -> pysapien.RenderConfig:
     pass

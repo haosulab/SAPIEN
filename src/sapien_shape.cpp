@@ -91,7 +91,7 @@ std::string SCollisionShape::getType() const {
   throw std::runtime_error("unsupported shape type");
 }
 
-std::unique_ptr<SGeometry> SCollisionShape::getGeometry() const {
+std::shared_ptr<SGeometry> SCollisionShape::getGeometry() const {
   switch (mPxShape->getGeometryType()) {
   case PxGeometryType::eBOX: {
     PxBoxGeometry g;

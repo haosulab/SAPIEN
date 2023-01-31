@@ -50,6 +50,8 @@
 
 #include "sapien/utils/pose.hpp"
 
+#include "sapien/acd.h"
+
 using namespace pybind11::literals;
 using namespace sapien;
 namespace py = pybind11;
@@ -287,14 +289,22 @@ void buildSapien(py::module &m) {
   auto PyMultistepCallback = py::class_<SceneMultistepCallback>(m, "SceneMultistepCallback");
 
   // collision geometry and shape
-  auto PyGeometry = py::class_<SGeometry>(m, "CollisionGeometry");
-  auto PyBoxGeometry = py::class_<SBoxGeometry, SGeometry>(m, "BoxGeometry");
-  auto PySphereGeometry = py::class_<SSphereGeometry, SGeometry>(m, "SphereGeometry");
-  auto PyCapsuleGeometry = py::class_<SCapsuleGeometry, SGeometry>(m, "CapsuleGeometry");
-  auto PyPlaneGeometry = py::class_<SPlaneGeometry, SGeometry>(m, "PlaneGeometry");
-  auto PyConvexMeshGeometry = py::class_<SConvexMeshGeometry, SGeometry>(m, "ConvexMeshGeometry");
+  auto PyGeometry = py::class_<SGeometry, std::shared_ptr<SGeometry>>(m, "CollisionGeometry");
+  auto PyBoxGeometry =
+      py::class_<SBoxGeometry, SGeometry, std::shared_ptr<SBoxGeometry>>(m, "BoxGeometry");
+  auto PySphereGeometry = py::class_<SSphereGeometry, SGeometry, std::shared_ptr<SSphereGeometry>>(
+      m, "SphereGeometry");
+  auto PyCapsuleGeometry =
+      py::class_<SCapsuleGeometry, SGeometry, std::shared_ptr<SCapsuleGeometry>>(
+          m, "CapsuleGeometry");
+  auto PyPlaneGeometry =
+      py::class_<SPlaneGeometry, SGeometry, std::shared_ptr<SPlaneGeometry>>(m, "PlaneGeometry");
+  auto PyConvexMeshGeometry =
+      py::class_<SConvexMeshGeometry, SGeometry, std::shared_ptr<SConvexMeshGeometry>>(
+          m, "ConvexMeshGeometry");
   auto PyNonconvexMeshGeometry =
-      py::class_<SNonconvexMeshGeometry, SGeometry>(m, "NonconvexMeshGeometry");
+      py::class_<SNonconvexMeshGeometry, SGeometry, std::shared_ptr<SNonconvexMeshGeometry>>(
+          m, "NonconvexMeshGeometry");
 
   auto PyCollisionShape = py::class_<SCollisionShape>(m, "CollisionShape");
 
@@ -835,7 +845,38 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("set_renderer", &Simulation::setRenderer, py::arg("renderer"))
       .def("set_log_level", &Simulation::setLogLevel, py::arg("level"))
       .def("create_physical_material", &Simulation::createPhysicalMaterial,
-           py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"));
+           py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"))
+      .def(
+          "create_mesh_geometry",
+          [](Simulation &sim, py::array_t<float> const &vertices,
+             py::array_t<uint32_t> const &indices, py::array_t<float> const &scale,
+             py::array_t<float> const &rotation) {
+            if (vertices.ndim() != 2 || vertices.shape(1) != 3) {
+              throw std::runtime_error(
+                  "create_mesh_geometry: unexpected vertices shape, expecting (-1, 3)");
+            }
+            if (indices.ndim() != 2 || indices.shape(1) != 3) {
+              throw std::runtime_error(
+                  "create_mesh_geometry: unexpected indices shape, expecting (-1, 3)");
+            }
+            if (scale.ndim() != 1 || scale.shape(0) != 3) {
+              throw std::runtime_error(
+                  "create_mesh_geometry: unexpected scale shape, expecting (3,)");
+            }
+            if (rotation.ndim() != 1 || rotation.shape(0) != 4) {
+              throw std::runtime_error(
+                  "create_mesh_geometry: unexpected rotation shape, expecting (4,)");
+            }
+
+            return sim.createMeshGeometry(
+                std::vector<float>(vertices.begin(), vertices.end()),
+                std::vector<uint32_t>(indices.begin(), indices.end()),
+                {scale.at(0), scale.at(1), scale.at(2)},
+                {rotation.at(1), rotation.at(2), rotation.at(3), rotation.at(0)});
+          },
+          py::arg("vertices"), py::arg("indices"),
+          py::arg("scale") = make_array<float>({1.f, 1.f, 1.f}),
+          py::arg("rotation") = make_array<float>({1.f, 0.f, 0.f, 0.f}));
 
   PyScene.def_property_readonly("_ptr", [](SScene &s) { return (void *)&s; })
       .def_property_readonly("name", &SScene::getName)
@@ -2665,4 +2706,6 @@ Args:
 
   dlpack.def("dl_cuda_sync", []() { cudaStreamSynchronize(0); });
 #endif
+
+  m.def("coacd", &CoACD, py::arg("mesh"));
 }

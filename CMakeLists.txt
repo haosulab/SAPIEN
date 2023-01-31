@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -Wnon-virtual-dtor -fsized-deallocation -Wno-deprecated-declarations")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -Wnon-virtual-dtor  -fsized-deallocation -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -Wnon-virtual-dtor -fsized-deallocation -Wno-deprecated-declarations -fopenmp")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -Wnon-virtual-dtor  -fsized-deallocation -Wno-deprecated-declarations -fopenmp")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_DEBUG_POSTFIX "")
 
@@ -110,6 +110,8 @@ endif ()
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
+add_subdirectory("3rd_party/CoACD" EXCLUDE_FROM_ALL)
+set_target_properties(coacd PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 if (${SAPIEN_KUAFU})
     add_subdirectory("3rd_party/kuafu" EXCLUDE_FROM_ALL)
@@ -147,6 +149,7 @@ link_directories("$ENV{VULKAN_SDK}/lib")
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp" "src/*.cc")
 add_library(sapien SHARED ${PROJECT_SRC})
 
+
 if (MACOSX)
     target_link_libraries(sapien
             libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
@@ -166,7 +169,7 @@ else ()
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
             pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
-            ${PINOCCHIO_LIBRARY} svulkan2 ${KUAFU_LIBRARY} rt ${GRPC_CLIENT_LIBS})
+            ${PINOCCHIO_LIBRARY} svulkan2 ${KUAFU_LIBRARY} rt ${GRPC_CLIENT_LIBS} coacd)
 endif ()
 
 set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

@@ -85,6 +85,7 @@ __all__ = [
     "VulkanScene",
     "VulkanWindow",
     "add_profiler_event",
+    "coacd",
     "dlpack",
     "get_global_render_config",
     "renderer",
@@ -2244,6 +2245,8 @@ class VulkanWindow():
         """
     pass
 def add_profiler_event(name: str) -> None:
+    pass
+def coacd(mesh: NonconvexMeshGeometry) -> typing.List[ConvexMeshGeometry]:
     pass
 def get_global_render_config() -> RenderConfig:
     pass

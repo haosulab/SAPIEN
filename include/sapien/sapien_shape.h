@@ -86,7 +86,7 @@ public:
   std::shared_ptr<SPhysicalMaterial> getPhysicalMaterial() const;
 
   std::string getType() const;
-  std::unique_ptr<SGeometry> getGeometry() const;
+  std::shared_ptr<SGeometry> getGeometry() const;
 
   SCollisionShape(SCollisionShape const &) = delete;
   SCollisionShape(SCollisionShape &&) = default;

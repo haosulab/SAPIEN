@@ -124,6 +124,25 @@ Simulation::createCollisionShape(PxGeometry const &geometry,
   return result;
 }
 
+std::shared_ptr<SNonconvexMeshGeometry>
+Simulation::createMeshGeometry(std::vector<physx::PxReal> vertices, std::vector<uint32_t> indices,
+                               physx::PxVec3 scale, physx::PxQuat rotation) {
+  if (vertices.size() % 3 != 0 || indices.size() % 3 != 0) {
+    throw std::runtime_error("failed to create geometry: invalid vertex or index size");
+  }
+  for (uint32_t i : indices) {
+    if (i >= vertices.size()) {
+      throw std::runtime_error("failed to create geometry: some index >= vertex count.");
+    }
+  }
+  auto geometry = std::make_shared<SNonconvexMeshGeometry>();
+  geometry->vertices = vertices;
+  geometry->indices = indices;
+  geometry->scale = scale;
+  geometry->rotation = rotation;
+  return geometry;
+}
+
 void Simulation::setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer) {
   if (mRenderer)
     spdlog::get("SAPIEN")->warn("Setting renderer more than once should be avoided.");
