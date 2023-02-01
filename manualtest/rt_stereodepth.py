@@ -87,7 +87,7 @@ def main():
 
     sensor_config = StereoDepthSensorConfig()
     sensor = StereoDepthSensor('sensor', scene, sensor_config)
-    sensor.set_pose(Pose([-0.13732728, 0.13584249, 0.82386769],[0.84667092, -0.01287458, 0.53195302, -0.00292851]))
+    sensor.set_pose(Pose([-0.13732728, 0.13584249, 0.82386769], [0.84667092, -0.01287458, 0.53195302, -0.00292851]))
 
     scene.step()
     scene.update_render()

@@ -102,8 +102,7 @@ def main():
     ])
     sensor_config.max_disp = 96 # Max disparity for stereo matching
     sensor = StereoDepthSensor('sensor', scene, sensor_config)
-    sensor.set_pose(
-        Pose([-0.28, -0.28, 0.46], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
+    sensor.set_pose(Pose([-0.28, -0.28, 0.46], [0.8876263, -0.135299, 0.3266407, 0.2951603]))
     
     # Warm up
     scene.step()
