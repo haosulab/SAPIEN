@@ -81,7 +81,7 @@ vec4 world2camera(vec4 pos) {
 vec3 diffuseIBL(vec3 albedo, vec3 N) {
   N = vec3(-N.y, N.z, -N.x);
   vec3 color = textureLod(samplerEnvironment, N, 5).rgb;
-  return color * albedo;
+  return color * albedo / 3.1415926535;
 }
 
 vec3 specularIBL(vec3 fresnel, float roughness, vec3 N, vec3 V) {
