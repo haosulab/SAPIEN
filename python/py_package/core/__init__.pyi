@@ -82,6 +82,7 @@ from sapien.core.pysapien import KuafuRenderer as _KuafuRenderer
 import os
 import pkg_resources
 import sapien.core.pysapien
+import sapien.core.pysapien.coacd
 import sapien.core.pysapien.dlpack
 import sapien.core.pysapien.renderer
 import sapien.core.pysapien.simsense
@@ -192,8 +193,6 @@ class KuafuRenderer(pysapien.IPxrRenderer):
 class VulkanRenderer(pysapien.SapienRenderer, pysapien.IPxrRenderer):
     pass
 def add_profiler_event(name: str) -> None:
-    pass
-def coacd(mesh: pysapien.NonconvexMeshGeometry) -> typing.List[pysapien.ConvexMeshGeometry]:
     pass
 def get_global_render_config() -> pysapien.RenderConfig:
     pass

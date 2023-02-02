@@ -1209,9 +1209,11 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
 
   PyActorStatic.def("set_pose", &SActorStatic::setPose, py::arg("pose"))
       .def("pack", &SActorStatic::packData)
-      .def("unpack", [](SActorStatic &a, const py::array_t<PxReal> &arr) {
-        a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-      });
+      .def("unpack",
+           [](SActorStatic &a,
+              const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
+             a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           });
 
   PyActor.def("set_pose", &SActor::setPose, py::arg("pose"))
       .def("set_velocity", [](SActor &a, py::array_t<PxReal> v) { a.setVelocity(array2vec3(v)); })
@@ -1221,7 +1223,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            py::arg("z") = true, py::arg("rx") = true, py::arg("ry") = true, py::arg("rz") = true)
       .def("pack", &SActor::packData)
       .def("unpack",
-           [](SActor &a, const py::array_t<PxReal> &arr) {
+           [](SActor &a,
+              const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
              a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
            })
       .def("set_solver_iterations", &SActor::setSolverIterations, py::arg("position"),
@@ -1344,7 +1347,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            })
       .def(
           "set_qpos",
-          [](SArticulationBase &a, const py::array_t<PxReal> &arr) {
+          [](SArticulationBase &a,
+             const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
             a.setQpos(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
           },
           py::arg("qpos"))
@@ -1356,7 +1360,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            })
       .def(
           "set_qvel",
-          [](SArticulationBase &a, const py::array_t<PxReal> &arr) {
+          [](SArticulationBase &a,
+             const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
             a.setQvel(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
           },
           py::arg("qvel"))
@@ -1367,7 +1372,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            })
       .def(
           "set_qacc",
-          [](SArticulationBase &a, const py::array_t<PxReal> &arr) {
+          [](SArticulationBase &a,
+             const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
             a.setQacc(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
           },
           py::arg("qacc"))
@@ -1378,7 +1384,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            })
       .def(
           "set_qf",
-          [](SArticulationBase &a, const py::array_t<PxReal> &arr) {
+          [](SArticulationBase &a,
+             const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
             a.setQf(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
           },
           py::arg("qf"))
@@ -1422,7 +1429,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            })
       .def(
           "set_drive_target",
-          [](SArticulationDrivable &a, const py::array_t<PxReal> &arr) {
+          [](SArticulationDrivable &a,
+             const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
             a.setDriveTarget(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
           },
           py::arg("drive_target"));
@@ -1435,7 +1443,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            })
       .def(
           "set_drive_velocity_target",
-          [](SArticulation &a, const py::array_t<PxReal> &arr) {
+          [](SArticulation &a,
+             const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
             a.setDriveVelocityTarget(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
           },
           py::arg("drive_velocity_target"))
@@ -1477,14 +1486,16 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("forces"), py::arg("torques"))
 
       .def("compute_inverse_dynamics",
-           [](SArticulation &a, const py::array_t<PxReal> &arr) {
+           [](SArticulation &a,
+              const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
              assert(arr.size() == a.dof());
              std::vector<PxReal> qacc(arr.data(), arr.data() + a.dof());
              auto qf = a.computeInverseDynamics(qacc);
              return py::array_t<PxReal>(qf.size(), qf.data());
            })
       .def("compute_forward_dynamics",
-           [](SArticulation &a, const py::array_t<PxReal> &arr) {
+           [](SArticulation &a,
+              const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
              assert(arr.size() == a.dof());
              std::vector<PxReal> qf(arr.data(), arr.data() + a.dof());
              auto qacc = a.computeForwardDynamics(qf);
@@ -1505,9 +1516,11 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            py::arg("world_velocity"), py::arg("commanded_link_id"),
            py::arg("active_joint_ids") = std::vector<uint32_t>())
       .def("pack", &SArticulation::packData)
-      .def("unpack", [](SArticulation &a, const py::array_t<PxReal> &arr) {
-        a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
-      });
+      .def("unpack",
+           [](SArticulation &a,
+              const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
+             a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           });
 
   //======== End Articulation ========//
 
@@ -2456,8 +2469,9 @@ Args:
           py::arg("address_mode") = "repeat")
       .def(
           "create_texture_from_array",
-          [](Renderer::IPxrRenderer &renderer, py::array_t<uint8_t> array, uint32_t mipLevels,
-             std::string const &filterMode, std::string const &addressMode) {
+          [](Renderer::IPxrRenderer &renderer,
+             py::array_t<uint8_t, py::array::c_style | py::array::forcecast> array,
+             uint32_t mipLevels, std::string const &filterMode, std::string const &addressMode) {
             Renderer::IPxrTexture::FilterMode::Enum fm = getFilterMode(filterMode);
             Renderer::IPxrTexture::AddressMode::Enum am = getAddressMode(addressMode);
             if (array.ndim() != 2 && array.ndim() != 3) {
@@ -2708,5 +2722,11 @@ Args:
   dlpack.def("dl_cuda_sync", []() { cudaStreamSynchronize(0); });
 #endif
 
-  m.def("coacd", &CoACD, py::arg("mesh"));
+  auto coacd = m.def_submodule("coacd");
+
+  coacd.def("run_coacd", &sapien::CoACD, py::arg("mesh"), py::arg("threshold") = 0.05,
+        py::arg("preprocess") = true, py::arg("preprocess_resolution") = 30,
+        py::arg("pca") = false, py::arg("merge") = true, py::arg("mcts_max_depth") = 3,
+        py::arg("mcts_nodes") = 20, py::arg("mcts_iterations") = 150, py::arg("seed") = 0);
+  coacd.def("set_log_level", &coacd::set_log_level, py::arg("level"));
 }

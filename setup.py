@@ -203,7 +203,7 @@ def read_requirements():
 # Data files for packaging
 project_python_home_dir = os.path.join("python", "py_package")
 package_data = {
-    "sapien.core": ["__init__.pyi", "pysapien/__init__.pyi", "pysapien/renderer/__init__.pyi", "pysapien/dlpack/__init__.pyi"]
+    "sapien.core": ["__init__.pyi", "pysapien/__init__.pyi", "pysapien/renderer/__init__.pyi", "pysapien/dlpack/__init__.pyi", "pysapien/coacd/__init__.pyi"]
 }
 
 setup(name="sapien",
@@ -243,4 +243,5 @@ setup(name="sapien",
       url="https://sapien.ucsd.edu",
       project_urls={"Documentation": "https://sapien.ucsd.edu/docs"},
       package_data=package_data,
-      package_dir={"sapien": project_python_home_dir})
+      package_dir={"sapien": project_python_home_dir},
+      scripts=["python/py_package/bin/coacd"])

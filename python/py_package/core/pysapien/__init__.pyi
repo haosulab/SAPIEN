@@ -2247,7 +2247,5 @@ class VulkanWindow():
     pass
 def add_profiler_event(name: str) -> None:
     pass
-def coacd(mesh: NonconvexMeshGeometry) -> typing.List[ConvexMeshGeometry]:
-    pass
 def get_global_render_config() -> RenderConfig:
     pass
