@@ -848,9 +848,10 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            py::arg("static_friction"), py::arg("dynamic_friction"), py::arg("restitution"))
       .def(
           "create_mesh_geometry",
-          [](Simulation &sim, py::array_t<float> const &vertices,
-             py::array_t<uint32_t> const &indices, py::array_t<float> const &scale,
-             py::array_t<float> const &rotation) {
+          [](Simulation &sim,
+             py::array_t<float, py::array::c_style | py::array::forcecast> const &vertices,
+             py::array_t<uint32_t, py::array::c_style | py::array::forcecast> const &indices,
+             py::array_t<float> const &scale, py::array_t<float> const &rotation) {
             if (vertices.ndim() != 2 || vertices.shape(1) != 3) {
               throw std::runtime_error(
                   "create_mesh_geometry: unexpected vertices shape, expecting (-1, 3)");
@@ -869,8 +870,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
             }
 
             return sim.createMeshGeometry(
-                std::vector<float>(vertices.begin(), vertices.end()),
-                std::vector<uint32_t>(indices.begin(), indices.end()),
+                std::vector<float>(vertices.data(), vertices.data() + vertices.size()),
+                std::vector<uint32_t>(indices.data(), indices.data() + indices.size()),
                 {scale.at(0), scale.at(1), scale.at(2)},
                 {rotation.at(1), rotation.at(2), rotation.at(3), rotation.at(0)});
           },

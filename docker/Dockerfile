@@ -6,7 +6,8 @@ COPY PhysX /workspace/PhysX
 
 ENV CC=/opt/rh/devtoolset-10/root/usr/bin/cc CXX=/opt/rh/devtoolset-10/root/usr/bin/c++
 
-RUN yum install -y tinyxml-devel boost-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel glew-devel zip wget
+RUN yum install -y tinyxml-devel boost169-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel glew-devel zip wget
+RUN ln -s /usr/lib64/boost169/* /usr/lib64 && ln -s /usr/include/boost169/boost/ /usr/include/boost
 
 RUN cd /workspace && git clone --single-branch -b 20210000.6 --depth 1 https://github.com/coin-or/CppAD.git && \
     cd /workspace/CppAD && mkdir /workspace/CppAD/build && \
@@ -99,3 +100,20 @@ RUN echo "#!/opt/python/cp38-cp38/bin/python" > /usr/local/bin/auditwheel && \
 RUN cd /workspace && wget https://developer.download.nvidia.com/compute/cuda/11.7.1/local_installers/cuda_11.7.1_515.65.01_linux.run && \
     sh cuda_11.7.1_515.65.01_linux.run --silent --toolkit --toolkitpath=/workspace/cuda --override && rm -f cuda_11.7.1_515.65.01_linux.run
 ENV CUDA_PATH=/workspace/cuda PATH="/workspace/cuda/bin:$PATH" LD_LIBRARY_PATH="/workspace/cuda/lib64:$LD_LIBRARY_PATH"
+
+RUN cd /workspace && git clone --single-branch -b v2021.8.0 --depth 1 https://github.com/oneapi-src/oneTBB.git && \
+    mkdir /workspace/oneTBB/build && cd /workspace/oneTBB/build && \
+    cmake .. -DBUILD_SHARED_LIBS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-DTBB_ALLOCATOR_TRAITS_BROKEN && make -j && make install && \
+    cd /workspace && rm -rf oneTBB
+
+RUN cd /workspace && git clone --single-branch -b v1.5.0 --depth 1 https://github.com/Blosc/c-blosc.git && \
+    mkdir /workspace/c-blosc/build && cd /workspace/c-blosc/build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED=OFF -DBUILD_TESTS=OFF && make -j && make install && \
+    cd /workspace && rm -rf c-blosc
+
+RUN yum install -y zlib-static
+
+RUN cd /workspace && git clone --single-branch -b v8.2.0 --depth 1 https://github.com/AcademySoftwareFoundation/openvdb.git && \
+    mkdir /workspace/openvdb/build && cd /workspace/openvdb/build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DTBB_USE_STATIC_LIBS=ON -DBLOSC_USE_STATIC_LIBS=ON && make -j && make install && \
+    cd /workspace && rm -rf openvdb

@@ -110,6 +110,7 @@ endif ()
 add_subdirectory("3rd_party/pybind11")
 add_subdirectory("3rd_party/tinyxml2")
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
+option(OPENVDB_STATIC "Use Static OPENVDB" ON)
 add_subdirectory("3rd_party/CoACD" EXCLUDE_FROM_ALL)
 set_target_properties(coacd PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
