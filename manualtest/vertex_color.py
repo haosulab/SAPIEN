@@ -20,7 +20,7 @@ def main():
     scene = engine.create_scene(scene_config)
 
     builder = scene.create_actor_builder()
-    builder.add_visual_from_file("/data/replica/frl_apartment_3/mesh.ply")
+    builder.add_visual_from_file("../assets/models/vertex_color.obj")
     builder.build_static()
 
     viewer = Viewer(renderer, resolutions=(1920, 1080))
