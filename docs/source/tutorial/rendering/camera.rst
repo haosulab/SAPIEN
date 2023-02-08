@@ -172,7 +172,7 @@ increases starting from 0.
 
 The ``Window`` of the viewer also provides the same interfaces as
 ``CameraEntity``, ``get_float_texture`` and ``get_uint32_texture``, to allow
-taking screenshots programmaitcally. Thus, you could take a screenshot by
+taking screenshots programmatically. Thus, you could take a screenshot by
 calling them. Notice the definition of ``rpy`` (roll, yaw, pitch) when you set
 the viewer camera.
 
