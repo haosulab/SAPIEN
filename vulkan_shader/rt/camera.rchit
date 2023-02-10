@@ -186,7 +186,7 @@ void sampleGGXReflection(inout uint seed, in mat3 tbn, vec3 V, float roughness,v
 
   if (dotNL >= 0) {
     vec3 F = F0 + (1.0 - F0) * schlickFresnel(dotVH);
-    float G = smithGGXMaskingShadowing(max(dotNL, 1e-6), dotNV, a2);
+    float G = smithGGXMaskingShadowing(dotNL, dotNV, a2);
     attenuation = F * G * dotVH / (dotNH * dotNV);
   } else {
     attenuation = vec3(0.0);
@@ -465,6 +465,9 @@ void main() {
 
   vec3 geometricNormal = cross(p1 - p0, p2 - p0);
   vec3 shadingNormal = obj.shadeFlat != 0 ? geometricNormal : (n0 * b0 + n1 * b1 + n2 * b2);
+  if (dot(shadingNormal, shadingNormal) < 1e-3) {
+    shadingNormal = geometricNormal;
+  }
 
   vec2 uv = uv0 * b0 + uv1 * b1 + uv2 * b2;
   vec3 tangent = t0 * b0 + t1 * b1 + t2 * b2;
