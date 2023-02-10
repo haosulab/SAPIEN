@@ -1,7 +1,7 @@
 .. _raytracing_renderer:
 
 
-Ray Tracing Renderer
+Ray Tracing Renderer [New!]
 ==========================
 
 .. highlight:: python

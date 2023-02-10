@@ -1,7 +1,7 @@
 .. _depth_sensor:
 
 
-SAPIEN Realistic Depth
+SAPIEN Realistic Depth [New!]
 ======================
 
 .. highlight:: python

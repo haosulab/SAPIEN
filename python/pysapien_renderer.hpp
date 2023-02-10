@@ -363,14 +363,14 @@ void buildRenderer(py::module &parent) {
       .def(
           "create_material",
           [](core::Context &context, py::array_t<float> emission, py::array_t<float> baseColor,
-             float fresnel, float roughness, float metallic) {
+             float fresnel, float roughness, float metallic, float transmission, float ior) {
             return context.getResourceManager()->createMetallicMaterial(
                 {emission.at(0), emission.at(1), emission.at(2), emission.at(3)},
                 {baseColor.at(0), baseColor.at(1), baseColor.at(2), baseColor.at(3)}, fresnel,
-                roughness, metallic, 0.f);
+                roughness, metallic, transmission, ior);
           },
           py::arg("emission"), py::arg("base_color"), py::arg("specular"), py::arg("roughness"),
-          py::arg("metallic"))
+          py::arg("metallic"), py::arg("transmission") = 0.f, py::arg("ior") = 1.01f)
       .def(
           "create_model_from_file",
           [](core::Context &context, std::string const &filename) {
@@ -517,7 +517,8 @@ void buildRenderer(py::module &parent) {
       .def("set_metallic", &resource::SVMetallicMaterial::setMetallic, py::arg("metallic"))
       .def("set_roughness", &resource::SVMetallicMaterial::setRoughness, py::arg("roughness"))
       .def("set_emission", &resource::SVMetallicMaterial::setRoughness, py::arg("emission"))
-      .def("set_transmission", &resource::SVMetallicMaterial::setRoughness, py::arg("transmission"));
+      .def("set_transmission", &resource::SVMetallicMaterial::setRoughness,
+           py::arg("transmission"));
 
   PyScene
       .def(
