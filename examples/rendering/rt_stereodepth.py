@@ -17,7 +17,7 @@ def build_scene(sim, renderer):
     material.metallic = 0.001
     material.roughness = 0.4
     builder.add_visual_from_file("../assets/aligned/beer_can/visual_mesh.obj", material=material)
-    beer_can = builder.build()
+    beer_can = builder.build_kinematic()
     beer_can.set_pose(Pose([0.370301, -0.246856, 0.0738802], [0.922673, -0.00379302, -0.00852731, 0.385469]))
 
     builder = scene.create_actor_builder()
@@ -27,7 +27,7 @@ def build_scene(sim, renderer):
     material.metallic = 0.01
     material.roughness = 0.2
     builder.add_visual_from_file("../assets/aligned/champagne/visual_mesh.obj", material=material)
-    champagne = builder.build()
+    champagne = builder.build_kinematic()
     champagne.set_pose(Pose([0.182963, -0.277838, 0.0873777], [0.723872, 0.00616071, -0.00678847, -0.689874]))
 
     builder = scene.create_actor_builder()
@@ -37,7 +37,7 @@ def build_scene(sim, renderer):
     material.metallic = 0.001
     material.roughness = 0.6
     builder.add_visual_from_file("../assets/aligned/pepsi_bottle/visual_mesh.obj", material=material)
-    pepsi_bottle = builder.build()
+    pepsi_bottle = builder.build_kinematic()
     pepsi_bottle.set_pose(Pose([0.392403, 0.0504232, 0.116739], [0.991259, -0.00145631, -0.00922613, 0.131601]))
 
     builder = scene.create_actor_builder()
@@ -46,12 +46,12 @@ def build_scene(sim, renderer):
     material.metallic = 0.8
     material.roughness = 0.2
     builder.add_visual_from_file("../assets/aligned/steel_ball/visual_mesh.obj", material=material)
-    steel_ball = builder.build()
+    steel_ball = builder.build_kinematic()
     steel_ball.set_pose(Pose([0.192034, 0.131187, 0.0170772], [0.949057, -0.0375225, 0.0676584, -0.305458]))
 
     builder = scene.create_actor_builder()
     builder.add_visual_from_file("../assets/aligned/water_bottle/water_bottle.glb")
-    water_bottle = builder.build()
+    water_bottle = builder.build_kinematic()
     water_bottle.set_pose(Pose([0.256327, -0.0162116, -0.01], [0.00627772, -0.0093401, 0.000145366, 1.0008]))
     
     builder = scene.create_actor_builder()
@@ -61,7 +61,7 @@ def build_scene(sim, renderer):
     material.metallic = 0.1
     material.roughness = 0.3
     builder.add_visual_from_file("../assets/aligned/table/visual_mesh.obj", material=material)
-    table = builder.build()
+    table = builder.build_kinematic()
     table.set_pose(Pose([0.405808, 0.022201, -0.043524], [0.999921, -0.000290915, -0.00932814, 0.00842011]))
 
     scene.set_ambient_light([0., 0., 0.])
@@ -79,7 +79,7 @@ def main():
     renderer = sapien.SapienRenderer()
     sim.set_renderer(renderer)
     sapien.render_config.camera_shader_dir = "rt"
-    sapien.render_config.rt_samples_per_pixel = 32
+    sapien.render_config.rt_samples_per_pixel = 8
     sapien.render_config.rt_max_path_depth = 8
     sapien.render_config.rt_use_denoiser = True
 

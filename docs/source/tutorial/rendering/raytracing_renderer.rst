@@ -76,8 +76,7 @@ Increasing the spp will affect the rendering speed directly. A cheaper way to re
 .. note::
    You are required to have an NVIDIA RTX GPU with driver version >= 522 installed to use the denoiser.
 
-   While you may get the denoiser to work on drivers of lower versions (it has
-   worked on 470 in one of our tests), it is not officially supported.
+   While you may get the denoiser to work on drivers of lower versions, it is not officially supported.
 
 Reflection and refraction
 ------------------------------------

@@ -37,7 +37,7 @@ backend. One engine per process is allowed. Creating additional engines without 
 ``Scene`` is an instance of the simulation world.
 Multiple scenes can be created through ``create_scene``, and they are independent.
 
-``VulkanRenderer`` is the rendering engine connected to our `Vulkan <https://www.khronos.org/vulkan/>`_-based renderer.
+``SapienRenderer`` is the rendering engine connected to our `Vulkan <https://www.khronos.org/vulkan/>`_-based renderer.
 the renderer should first be bound with an engine, and then all the scenes created by the engine will be bound with the renderer.
 
 Add rigid bodies

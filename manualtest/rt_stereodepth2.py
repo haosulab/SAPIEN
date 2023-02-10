@@ -24,7 +24,7 @@ def build_scene(sim, renderer):
     material.metallic = 0.0
     builder.add_sphere_visual(radius=0.06, material=material)
     builder.add_sphere_collision(radius=0.06)
-    sphere1 = builder.build()
+    sphere1 = builder.build_kinematic()
     sphere1.set_pose(Pose(p=[-0.05, 0.05, 0.06]))
 
     builder = scene.create_actor_builder()
@@ -36,7 +36,7 @@ def build_scene(sim, renderer):
     material.metallic = 0.0
     builder.add_sphere_visual(radius=0.07, material=material)
     builder.add_sphere_collision(radius=0.07)
-    sphere2 = builder.build()
+    sphere2 = builder.build_kinematic()
     sphere2.set_pose(Pose(p=[0.05, -0.05, 0.07]))
 
     builder = scene.create_actor_builder()
@@ -46,7 +46,7 @@ def build_scene(sim, renderer):
     material.metallic = 0.95
     builder.add_capsule_visual(radius=0.02, half_length=0.1, material=material)
     builder.add_capsule_collision(radius=0.02, half_length=0.1)
-    cap = builder.build()
+    cap = builder.build_kinematic()
     cap.set_pose(Pose(p=[0.15, -0.01, 0.01], q=transforms3d.euler.euler2quat(0, 0, -0.7)))
 
     builder = scene.create_actor_builder()
@@ -56,7 +56,7 @@ def build_scene(sim, renderer):
     material.metallic = 1.0
     builder.add_box_visual(half_size=[0.09, 0.09, 0.09], material=material)
     builder.add_box_collision(half_size=[0.09, 0.09, 0.09])
-    box = builder.build()
+    box = builder.build_kinematic()
     box.set_pose(Pose(p=[0.05, 0.17, 0.09]))
 
     builder = scene.create_actor_builder()
@@ -67,7 +67,7 @@ def build_scene(sim, renderer):
     builder.add_visual_from_file(
         '../assets/models/suzanne.dae', scale=[0.1, 0.1, 0.1], material=material)
     builder.add_box_collision(half_size=[0.1, 0.1, 0.1])
-    monkey = builder.build()
+    monkey = builder.build_kinematic()
     monkey.set_pose(Pose(p=[0.15, -0.25, 0.1], q=transforms3d.euler.euler2quat(0, 0, -1)))
 
     scene.set_ambient_light([0.3, 0.3, 0.3])
