@@ -146,7 +146,7 @@ class PlanningDemo():
         if with_screw:
             return self.move_to_pose_with_screw(pose)
         else:
-            return self.move_to_pose_with_RRT(pose)
+            return self.move_to_pose_with_RRTConnect(pose)
 
     def demo(self, with_screw = True):
         poses = [[0.4, 0.3, 0.12, 0, 1, 0, 0],
