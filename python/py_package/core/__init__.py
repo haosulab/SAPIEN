@@ -1,5 +1,15 @@
 from warnings import warn
 
+import pkg_resources
+import os
+
+# perform tricks before linking pysapien
+from ._vulkan_tricks import _ensure_libvulkan, _ensure_egl_icd, _ensure_vulkan_icd
+
+_ensure_libvulkan()
+_ensure_vulkan_icd()
+_ensure_egl_icd()
+
 from .pysapien import *
 from .pysapien import renderer
 from .renderer_config import *
@@ -14,8 +24,6 @@ from .pysapien import coacd
 import os
 import sys
 from typing import List
-
-import pkg_resources
 
 
 class VulkanRenderer(SapienRenderer):
@@ -53,7 +61,33 @@ try:
     __enable_kuafu()
 
 except ImportError:
-    pass
+
+    class KuafuConfig:
+        def __init__(self):
+            self.use_viewer = False
+            self.viewer_width = 0
+            self.viewer_height = 0
+            self.asset_path = ""
+            self.spp = 4
+            self.max_bounces = 8
+            self.accumulate_frames = True
+            self.use_denoiser = False
+            self.max_textures = 0
+            self.max_materials = 0
+            self.max_geometries = 0
+            self.max_geometry_instances = 0
+
+    class KuafuRenderer(SapienRenderer):
+        def __init__(self, config: KuafuConfig):
+            warn(
+                """Kuafu renderer is deprecated. SAPIEN will use SapienRenderer instead."""
+            )
+            super().__init__()
+            render_config.viewer_shader_dir = "rt"
+            render_config.camera_shader_dir = "rt"
+            render_config.rt_samples_per_pixel = config.spp
+            render_config.rt_max_path_depth = config.max_bounces
+            render_config.rt_use_denoiser = config.use_denoiser
 
 
 def ensure_icd():

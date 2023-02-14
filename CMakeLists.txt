@@ -60,8 +60,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(CMAKE_MACOSX_RPATH OFF CACHE BOOL "Do not use rpath for MacOS")
 endif ()
 
-add_definitions(-DVULKAN_HPP_DISPATCH_LOADER_DYNAMIC)
-
 find_package(spdlog REQUIRED)
 find_package(assimp REQUIRED)
 # Pinocchio uses its own FindCppAD but does not provide it
@@ -120,12 +118,12 @@ if (${SAPIEN_KUAFU})
 endif()
 
 include_directories("3rd_party/pybind11/include")
-include_directories("3rd_party/sapien-vulkan-2/include")
-include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
-include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui")
-include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
-include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
-include_directories("$ENV{VULKAN_SDK}/include")
+# include_directories("3rd_party/sapien-vulkan-2/include")
+# include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
+# include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui")
+# include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
+# include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
+# include_directories("$ENV{VULKAN_SDK}/include")
 
 if (${SAPIEN_KUAFU})
     include_directories("3rd_party/kuafu/include")
@@ -158,7 +156,7 @@ if (MACOSX)
             libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a
-            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
+            pthread ${OPENGL_LIBRARY} glfw ${ASSIMP_LIBRARIES} dl
             tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
             ${PINOCCHIO_LIBRARY} svulkan2 ${KUAFU_LIBRARY} rt gRPC::grpc++ "-framework Cocoa -framework IOKit")
 else ()
@@ -168,7 +166,7 @@ else ()
             libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
             libPhysX_static_64.a libPhysXVehicle_static_64.a
             libSnippetRender_static_64.a libSnippetUtils_static_64.a -Wl,--end-group
-            pthread ${OPENGL_LIBRARY} glfw GLEW ${ASSIMP_LIBRARIES} dl
+            pthread ${OPENGL_LIBRARY} glfw ${ASSIMP_LIBRARIES} dl
             stdc++fs tinyxml2 ${OPTIX_LIBRARY} ${SPDLOG_LIBRARIES} ${EASY_PROFILER_LIBRARY}
             ${PINOCCHIO_LIBRARY} svulkan2 ${KUAFU_LIBRARY} rt ${GRPC_CLIENT_LIBS} coacd)
 endif ()

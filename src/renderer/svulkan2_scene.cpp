@@ -3,6 +3,7 @@
 #include "sapien/renderer/svulkan2_renderer.h"
 #include "sapien/renderer/svulkan2_rigidbody.h"
 #include "sapien/renderer/svulkan2_shape.h"
+#include <filesystem>
 
 namespace sapien {
 namespace Renderer {
