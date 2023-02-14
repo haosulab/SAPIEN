@@ -11,7 +11,6 @@
 from typing import Optional, Tuple
 
 import numpy as np
-import cv2
 
 
 def pad_lr(img: np.ndarray, ndisp: int) -> np.ndarray:
@@ -49,6 +48,7 @@ def sim_ir_noise(
     """
     h, w = img.shape
 
+    import cv2
     if scale > 0:
         # downsampling (to emulate soft intensity)
         inter = cv2.INTER_BICUBIC if scale > 1 else cv2.INTER_LANCZOS4
@@ -126,6 +126,7 @@ def calc_disparity(
     imgl = pad_lr(imgl, ndisp)
     imgr = pad_lr(imgr, ndisp)
 
+    import cv2
     if method == 'SGBM':
         window_size = 7
         matcherl = cv2.StereoSGBM_create(
@@ -172,6 +173,7 @@ def init_rectify_stereo(
     :return map2: Map for right camera
     :return q: Perspective transformation matrix (for cv2.reprojectImageTo3D)
     """
+    import cv2
     r1, r2, p1, p2, q, _, _ = cv2.stereoRectify(
         R=rt[:3, :3], T=rt[:3, 3:],
         cameraMatrix1=kl, cameraMatrix2=kr,
@@ -200,6 +202,7 @@ def calc_rectified_stereo_pair(
     """
     assert imgl.shape == imgr.shape
 
+    import cv2
     imgl_rect = cv2.remap(imgl, *map1, cv2.INTER_LINEAR)
     imgr_rect = cv2.remap(imgr, *map2, cv2.INTER_LINEAR)
 
@@ -225,6 +228,7 @@ def calc_depth_and_pointcloud(
     except ImportError:
         raise Exception('open3d is required for CPU depth sensor. Please install with `pip3 install open3d`')
 
+    import cv2
     _3d_image = cv2.reprojectImageTo3D(disparity, q)
     depth = _3d_image[..., 2]
     depth[~mask] = 0
@@ -307,6 +311,7 @@ def calc_main_depth_from_left_right_ir(
     depth[np.isinf(depth)] = 0
     depth[depth < 0] = 0
 
+    import cv2
     if register_depth:
         try:
             depth = cv2.rgbd.registerDepth(

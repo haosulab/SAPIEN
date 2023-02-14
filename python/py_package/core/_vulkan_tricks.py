@@ -48,13 +48,11 @@ def _ensure_egl_icd():
     if os.environ.get("__EGL_VENDOR_LIBRARY_FILENAMES") or os.environ.get(
         "__EGL_VENDOR_LIBRARY_DIRS"
     ):
-        print("found egl variable")
         return
 
     # 10_nvidia.json is installed
     for d in ["/usr/share/glvnd/egl_vendor.d", "/etc/glvnd/egl_vendor.d"]:
         if any(("nvidia" in f) for f in os.listdir(d)):
-            print("found egl path")
             return
 
     warn(

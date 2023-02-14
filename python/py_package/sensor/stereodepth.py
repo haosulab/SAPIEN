@@ -10,7 +10,6 @@ from copy import deepcopy as copy
 
 import os
 import numpy as np
-import cv2
 
 
 class StereoDepthSensorConfig:
@@ -131,6 +130,7 @@ class StereoDepthSensor(SensorEntity):
         """
   
         super().__init__()
+        import cv2
 
         # Basic configuration
         self.name = sensor_name
