@@ -118,12 +118,6 @@ if (${SAPIEN_KUAFU})
 endif()
 
 include_directories("3rd_party/pybind11/include")
-# include_directories("3rd_party/sapien-vulkan-2/include")
-# include_directories("3rd_party/sapien-vulkan-2/3rd_party/VulkanMemoryAllocator")
-# include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui")
-# include_directories("3rd_party/sapien-vulkan-2/3rd_party/imgui/backends")
-# include_directories("3rd_party/sapien-vulkan-2/3rd_party/ImGuizmo")
-# include_directories("$ENV{VULKAN_SDK}/include")
 
 if (${SAPIEN_KUAFU})
     include_directories("3rd_party/kuafu/include")
@@ -142,8 +136,6 @@ if (${SAPIEN_CUDA})
     set(SIMSENSE_LIBRARY simsense)
     add_definitions(-DSAPIEN_SIMSENSE)
 endif ()
-
-link_directories("$ENV{VULKAN_SDK}/lib")
 
 file(GLOB_RECURSE PROJECT_SRC "src/*.h" "src/*.cpp" "src/*.cc")
 add_library(sapien SHARED ${PROJECT_SRC})
