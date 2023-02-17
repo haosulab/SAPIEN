@@ -5,10 +5,52 @@ interaction tasks that require detailed part-level understanding. SAPIEN is a
 collaborative effort between researchers at UCSD, Stanford and SFU. The dataset
 is a continuation of ShapeNet and PartNet.
 
+## Getting Started
+SAPIEN is distributed via [PyPI](https://pypi.org/project/sapien/). Installation is just
+
+```shell
+pip install sapien
+```
+
+It requires Linux with NVIDIA or AMD GPU to run. Verify installation with
+
+```shell
+python -m sapien.exapmle.hello_world
+```
+
+Next, follow our tutorial at:
+[https://sapien.ucsd.edu/docs/latest/index.html](https://sapien.ucsd.edu/docs/latest/index.html).
+
+### Offscreen rendering on a server
+To use SAPIEN on a GPU server without display, the only system dependencies
+required are `libegl1` and `libxext6`. If using NVIDIA docker environment,
+enable graphics, utility, and compute by setting the environment variable in the
+Dockerfile.
+```Dockerfile
+ENV NVIDIA_DRIVER_CAPABILITIES graphics,utility,compute
+```
+
+### Virtual desktop on a server
+To use SAPIEN on a GPU server with virtual display, additionally install `xvfb`,
+`x11vnc`, and any window manager such as `fluxbox` or `xfce`. Add display
+capabilities for NVIDIA docker.
+```Dockerfile
+ENV NVIDIA_DRIVER_CAPABILITIES graphics,utility,compute,display
+```
+
+Assuming `fluxbox`, start a VNC server by 
+```shell
+x11vnc -create -env FD_PROG=/usr/bin/fluxbox  -env X11VNC_FINDDISPLAY_ALWAYS_FAILS=1 -env X11VNC_CREATE_GEOM=${99:-1920x1080x16} -gone 'pkill Xvfb' -nopw
+# Note: you should use a strong password and/or only allow local access
+```
+Now you can connect to the server at port 5900. SAPIEN should be fully functional, test with
+```shell
+python -m sapien.exapmle.hello_world
+```
+
 ## Change Log
 
-<details open>
-<summary>2.2</summary>
+<details open> <summary>2.2</summary>
 
 - Rename `VulkanRenderer` to `SapienRenderer` (VulkanRenderer is still an alias)
 - Support **ray tracing** in `SapienRenderer`
