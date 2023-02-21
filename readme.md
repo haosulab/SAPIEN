@@ -167,18 +167,6 @@ python -m sapien.exapmle.hello_world
 - Change default physical parameters for better stability.
 </details>
 
-## SAPIEN Engine
-SAPIEN Engine provides physical simulation for articulated objects. It powers
-reinforcement learning and robotics with its pure Python interface.
-
-## SAPIEN Renderer
-SAPIEN provides rasterized and ray traced rendering with Vulkan.
-
-## PartNet-Mobility
-SAPIEN releases PartNet-Mobility dataset, which is a collection of 2K
-articulated objects with motion annotations and rendernig material. The dataset
-powers research for generalizable computer vision and manipulation.
-
 ## Website and Documentation
 SAPIEN Website: [https://sapien.ucsd.edu/](https://sapien.ucsd.edu/). SAPIEN
 Documentation:
