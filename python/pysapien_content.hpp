@@ -414,6 +414,7 @@ void buildSapien(py::module &m) {
       .def_readwrite("rt_samples_per_pixel", &Renderer::RenderConfig::rayTracingSamplesPerPixel)
       .def_readwrite("rt_path_depth", &Renderer::RenderConfig::rayTracingPathDepth)
       .def_readwrite("rt_use_denoiser", &Renderer::RenderConfig::rayTracingUseDenoiser)
+      .def_readwrite("msaa", &Renderer::RenderConfig::msaa)
       .def(
           "set_render_target_format",
           [](Renderer::RenderConfig &config, std::string name, std::string format) {
@@ -2305,7 +2306,14 @@ Args:
           "get_projection_matrix", [](SCamera &c) { return mat42array(c.getProjectionMatrix()); },
           "Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and "
           "[0,1] "
-          "Z)");
+          "Z)")
+      .def("set_custom_property",
+           [](SCamera &c, std::string const &name, int property) {
+             c.getRendererCamera()->setIntProperty(name, property);
+           })
+      .def("set_custom_property", [](SCamera &c, std::string const &name, float property) {
+        c.getRendererCamera()->setFloatProperty(name, property);
+      });
 
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
       .def("hide", &Renderer::SVulkan2Window::hide)
@@ -2486,7 +2494,37 @@ Args:
                 mipLevels, fm, am);
           },
           py::arg("array"), py::arg("mipmap_levels") = 1, py::arg("filter_mode") = "linear",
-          py::arg("address_mode") = "repeat");
+          py::arg("address_mode") = "repeat")
+
+      .def(
+          "create_texture_from_array",
+          [](Renderer::IPxrRenderer &renderer,
+             py::array_t<float, py::array::c_style | py::array::forcecast> array, int dim,
+             uint32_t mipLevels, std::string const &filterMode, std::string const &addressMode) {
+            Renderer::IPxrTexture::FilterMode::Enum fm = getFilterMode(filterMode);
+            Renderer::IPxrTexture::AddressMode::Enum am = getAddressMode(addressMode);
+            if (array.ndim() != dim && array.ndim() != dim + 1) {
+              throw std::runtime_error("failed to create texture: array shape must texture dim");
+            }
+            int width = 1;
+            int height = 1;
+            int depth = 1;
+            if (dim == 1) {
+              width = array.shape(0);
+            } else if (dim == 2) {
+              height = array.shape(0);
+              width = array.shape(1);
+            } else {
+              depth = array.shape(0);
+              height = array.shape(1);
+              width = array.shape(2);
+            }
+            return renderer.createTexture(
+                std::vector<float>(array.data(), array.data() + array.size()), width, height,
+                depth, dim, mipLevels, fm, am);
+          },
+          py::arg("array"), py::arg("dim"), py::arg("mipmap_levels") = 1,
+          py::arg("filter_mode") = "linear", py::arg("address_mode") = "repeat");
 
   PyRenderScene
       .def_property_readonly("ambient_light",
@@ -2549,8 +2587,15 @@ Args:
       .def("set_visual_id", &Renderer::IPxrRigidbody::setUniqueId, py::arg("id"))
       .def("get_visual_id", &Renderer::IPxrRigidbody::getUniqueId)
       .def("get_actor_id", &Renderer::IPxrRigidbody::getSegmentationId)
+
       .def("set_custom_data", &Renderer::IPxrRigidbody::setSegmentationCustomData,
            py::arg("custom_data"))
+      .def("set_custom_property", &Renderer::IPxrRigidbody::setCustomPropertyFloat3,
+           py::arg("name"), py::arg("value"))
+      .def("set_custom_texture", &Renderer::IPxrRigidbody::setCustomTexture, py::arg("name"),
+           py::arg("texture"))
+      .def("set_custom_texture_array", &Renderer::IPxrRigidbody::setCustomTextureArray,
+           py::arg("name"), py::arg("textures"))
       .def("get_render_shapes", &Renderer::IPxrRigidbody::getRenderShapes)
       .def("set_pose", &Renderer::IPxrRigidbody::update, py::arg("pose"))
       .def("set_visibility", &Renderer::IPxrRigidbody::setVisibility, py::arg("visibility"))
@@ -2680,9 +2725,14 @@ Args:
       });
 
 #ifdef SAPIEN_DLPACK
-  PyVulkanRenderMesh.def_property_readonly("dl_vertices", [](Renderer::SVulkan2Mesh &mesh) {
-    return wrapDLTensor(mesh.getDLVertices());
-  });
+  PyVulkanRenderMesh
+      .def_property_readonly(
+          "dl_vertices",
+          [](Renderer::SVulkan2Mesh &mesh) { return wrapDLTensor(mesh.getDLVertices()); })
+      .def("set_attribute", [](Renderer::SVulkan2Mesh &mesh, std::string_view name,
+                               Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> value) {
+        mesh.setAttribute(name, value);
+      });
 #endif
 
   m.def("add_profiler_event", &AddProfilerEvent, py::arg("name"));

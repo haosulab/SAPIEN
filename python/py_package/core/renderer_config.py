@@ -101,6 +101,14 @@ class _RenderConfig:
     def rt_use_denoiser(self, enable: bool):
         self.config.rt_use_denoiser = enable
 
+    @property
+    def msaa(self):
+        return self.config.msaa
+
+    @msaa.setter
+    def msaa(self, msaa: int):
+        self.config.msaa = msaa
+
     def get_render_target_format(self, name: str) -> Union[str, None]:
         if not self.config.has_render_target_format(name):
             return None

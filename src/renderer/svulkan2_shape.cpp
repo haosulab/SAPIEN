@@ -1,9 +1,9 @@
 #include "sapien/renderer/svulkan2_shape.h"
 #include "sapien/renderer/dlpack.hpp"
-#include <svulkan2/resource/shape.h>
 #include "sapien/renderer/svulkan2_material.h"
 #include "sapien/renderer/svulkan2_renderer.h"
 #include "sapien/renderer/svulkan2_rigidbody.h"
+#include <svulkan2/resource/shape.h>
 
 namespace sapien {
 namespace Renderer {
@@ -47,6 +47,13 @@ DLManagedTensor *SVulkan2Mesh::getDLVertices() {
                                                 {DLDataTypeCode::kDLFloat, 32, 1});
 }
 #endif
+
+void SVulkan2Mesh::setAttribute(
+    std::string_view name,
+    Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> value) {
+  mMesh->setVertexAttribute(std::string(name),
+                            std::vector<float>{value.data(), value.data() + value.size()});
+}
 
 std::shared_ptr<IRenderMesh> SVulkan2RenderShape::getGeometry() const {
   return std::make_shared<SVulkan2Mesh>(mShape->mesh);

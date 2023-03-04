@@ -46,6 +46,38 @@ void SVulkan2Rigidbody::setSegmentationCustomData(const std::vector<float> &cust
   }
 }
 
+void SVulkan2Rigidbody::setCustomTexture(std::string const &name,
+                                         std::shared_ptr<IPxrTexture> texture) {
+  if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
+    for (auto obj : mObjects) {
+      obj->setCustomTexture(name, t->getTexture());
+    }
+  } else {
+    throw std::runtime_error("failed to set custom texture: invalid texture.");
+  }
+}
+
+void SVulkan2Rigidbody::setCustomTextureArray(std::string const &name,
+                                              std::vector<std::shared_ptr<IPxrTexture>> textures) {
+  std::vector<std::shared_ptr<svulkan2::resource::SVTexture>> sts;
+  for (auto tex : textures) {
+    if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(tex)) {
+      sts.push_back(t->getTexture());
+    } else {
+      throw std::runtime_error("failed to set custom texture array: invalid texture.");
+    }
+  }
+  for (auto obj : mObjects) {
+    obj->setCustomTextureArray(name, sts);
+  }
+}
+void SVulkan2Rigidbody::setCustomPropertyFloat3(std::string const &name,
+                                                std::array<float, 3> property) {
+  for (auto obj : mObjects) {
+    obj->setCustomDataFloat3(name, {property[0], property[1], property[2]});
+  }
+}
+
 void SVulkan2Rigidbody::setInitialPose(const physx::PxTransform &transform) {
   mInitialPose = transform;
   update({{0, 0, 0}, physx::PxIdentity});

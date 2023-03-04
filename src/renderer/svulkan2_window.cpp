@@ -57,6 +57,23 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
   auto config = std::make_shared<svulkan2::RendererConfig>();
   *config = *renderer->getDefaultRendererConfig();
 
+  switch (renderConfig.msaa) {
+  case 1:
+    config->msaa = vk::SampleCountFlagBits::e1;
+    break;
+  case 2:
+    config->msaa = vk::SampleCountFlagBits::e2;
+    break;
+  case 4:
+    config->msaa = vk::SampleCountFlagBits::e4;
+    break;
+  case 8:
+    config->msaa = vk::SampleCountFlagBits::e8;
+    break;
+  default:
+    throw std::runtime_error("MSAA count must be one of [1, 2, 4, 8]");
+  }
+
   config->shaderDir = mShaderDir.length() ? mShaderDir : renderConfig.viewerShaderDirectory;
 
   mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);

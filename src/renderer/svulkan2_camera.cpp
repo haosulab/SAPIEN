@@ -11,7 +11,10 @@ SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, floa
   auto &renderConfig = GetRenderConfig();
 
   auto context = mScene->getParentRenderer()->getContext();
+
   auto config = std::make_shared<svulkan2::RendererConfig>();
+  *config = *mScene->getParentRenderer()->getDefaultRendererConfig();
+
   for (auto &[name, format] : renderConfig.renderTargetFormats) {
     if (format == "r32g32b32a32float" || format == "4f4") {
       config->textureFormat[name] = vk::Format::eR32G32B32A32Sfloat;
@@ -23,7 +26,23 @@ SVulkan2Camera::SVulkan2Camera(uint32_t width, uint32_t height, float fovy, floa
     }
   }
 
-  *config = *mScene->getParentRenderer()->getDefaultRendererConfig();
+  switch (renderConfig.msaa) {
+  case 1:
+    config->msaa = vk::SampleCountFlagBits::e1;
+    break;
+  case 2:
+    config->msaa = vk::SampleCountFlagBits::e2;
+    break;
+  case 4:
+    config->msaa = vk::SampleCountFlagBits::e4;
+    break;
+  case 8:
+    config->msaa = vk::SampleCountFlagBits::e8;
+    break;
+  default:
+    throw std::runtime_error("MSAA count must be one of [1, 2, 4, 8]");
+  }
+
   config->shaderDir = shaderDir;
 
   mRenderer = svulkan2::renderer::RendererBase::Create(config);
@@ -61,6 +80,13 @@ float SVulkan2Camera::getSkew() const { return mCamera->getSkew(); }
 void SVulkan2Camera::setPerspectiveCameraParameters(float near, float far, float fx, float fy,
                                                     float cx, float cy, float skew) {
   mCamera->setPerspectiveParameters(near, far, fx, fy, cx, cy, mWidth, mHeight, skew);
+}
+
+void SVulkan2Camera::setIntProperty(std::string const &name, int property) {
+  mRenderer->setCustomProperty(name, property);
+}
+void SVulkan2Camera::setFloatProperty(std::string const &name, float property) {
+  mRenderer->setCustomProperty(name, property);
 }
 
 void SVulkan2Camera::takePicture() {

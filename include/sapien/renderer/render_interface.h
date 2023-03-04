@@ -118,7 +118,9 @@ public:
     _warn_mat_func_not_supported(__func__);
     return 0.0;
   };
-  virtual void setTransmissionRoughness(float roughness) { _warn_mat_func_not_supported(__func__); };
+  virtual void setTransmissionRoughness(float roughness) {
+    _warn_mat_func_not_supported(__func__);
+  };
   [[nodiscard]] virtual float getTransmissionRoughness() const {
     _warn_mat_func_not_supported(__func__);
     return 0.0;
@@ -273,6 +275,14 @@ public:
     throw std::runtime_error("getImageFormat is not implemented");
   }
 
+  virtual void setIntProperty(std::string const &name, int property) {
+    throw std::runtime_error("setIntProperty is not implemented");
+  }
+
+  virtual void setFloatProperty(std::string const &name, float property) {
+    throw std::runtime_error("setFloatProperty is not implemented");
+  }
+
 #ifdef SAPIEN_DLPACK
   // return new DLManagedTensor
   virtual DLManagedTensor *getDLImage(std::string const &name) {
@@ -392,26 +402,35 @@ public:
 
   virtual ~IPxrRigidbody() = default;
 
-  // TODO: implement
   // return one of "box", "sphere", "capsule", "mesh"
   virtual physx::PxGeometryType::Enum getType() const {
     throw std::runtime_error("getType is not implemented");
   }
 
-  // TODO: implement
   virtual physx::PxTransform getInitialPose() const {
     throw std::runtime_error("getInitialPose is not implemented");
   }
 
-  // TODO: implement
   virtual std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() {
     throw std::runtime_error("getRenderShapes is not implemented");
   }
 
-  // TODO: implement
   // for capsule, it should return [half_length, radius, radius]
   virtual physx::PxVec3 getScale() const {
     throw std::runtime_error("getScale is not implemented");
+  }
+
+  // custom stuff
+  virtual void setCustomPropertyFloat3(std::string const &name, std::array<float, 3> property) {
+    throw std::runtime_error("setCustomPropertyFloat3 is not implemented");
+  };
+
+  virtual void setCustomTexture(std::string const &name, std::shared_ptr<IPxrTexture> texture) {
+    throw std::runtime_error("setCustomTexture is not implemented");
+  }
+  virtual void setCustomTextureArray(std::string const &name,
+                                     std::vector<std::shared_ptr<IPxrTexture>> textures) {
+    throw std::runtime_error("setCustomTextureArray is not implemented");
   }
 };
 
@@ -531,6 +550,13 @@ public:
   createTexture(std::vector<uint8_t> const &data, int width, int height, uint32_t mipLevels = 1,
                 IPxrTexture::FilterMode::Enum filterMode = {},
                 IPxrTexture::AddressMode::Enum addressMode = {}, bool srgb = true) {
+    throw std::runtime_error("Texture creation is not supported.");
+  }
+
+  virtual std::shared_ptr<IPxrTexture>
+  createTexture(std::vector<float> const &data, int width, int height, int depth, int dim,
+                uint32_t mipLevels = 1, IPxrTexture::FilterMode::Enum filterMode = {},
+                IPxrTexture::AddressMode::Enum addressMode = {}) {
     throw std::runtime_error("Texture creation is not supported.");
   }
 

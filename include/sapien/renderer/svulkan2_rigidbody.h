@@ -34,6 +34,12 @@ public:
   void setSegmentationId(uint32_t segmentationId) override;
   uint32_t getSegmentationId() const override;
   void setSegmentationCustomData(const std::vector<float> &customData) override;
+
+  void setCustomTexture(std::string const &name, std::shared_ptr<IPxrTexture> texture) override;
+  void setCustomTextureArray(std::string const &name,
+                             std::vector<std::shared_ptr<IPxrTexture>> textures) override;
+  void setCustomPropertyFloat3(std::string const &name, std::array<float, 3> property) override;
+
   void setInitialPose(const physx::PxTransform &transform) override;
   inline physx::PxTransform getInitialPose() const override { return mInitialPose; };
   void update(const physx::PxTransform &transform) override;

@@ -61,6 +61,11 @@ public:
                                              IPxrTexture::AddressMode::Enum addressMode = {},
                                              bool srgb = true) override;
 
+  std::shared_ptr<IPxrTexture>
+  createTexture(std::vector<float> const &data, int width, int height, int depth, int dim,
+                uint32_t mipLevels = 1, IPxrTexture::FilterMode::Enum filterMode = {},
+                IPxrTexture::AddressMode::Enum addressMode = {}) override;
+
   std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
                                           std::vector<uint32_t> const &indices) override;
 
@@ -109,6 +114,9 @@ public:
 
   void setPerspectiveCameraParameters(float near, float far, float fx, float fy, float cx,
                                       float cy, float skew) override;
+
+  void setIntProperty(std::string const &name, int property) override;
+  void setFloatProperty(std::string const &name, float property) override;
 
   SVulkan2Camera(uint32_t width, uint32_t height, float fovy, float near, float far,
                  SVulkan2Scene *scene, std::string const &shaderDir);

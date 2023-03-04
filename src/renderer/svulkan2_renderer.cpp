@@ -170,5 +170,49 @@ SVulkan2Renderer::createTexture(std::vector<uint8_t> const &data, int width, int
   return std::make_shared<SVulkan2Texture>(texture);
 }
 
+std::shared_ptr<IPxrTexture> SVulkan2Renderer::createTexture(
+    std::vector<float> const &data, int width, int height, int depth, int dim, uint32_t mipLevels,
+    IPxrTexture::FilterMode::Enum filterMode, IPxrTexture::AddressMode::Enum addressMode) {
+  vk::Filter vkf;
+  vk::SamplerAddressMode vka;
+  switch (filterMode) {
+  case IPxrTexture::FilterMode::eNEAREST:
+    vkf = vk::Filter::eNearest;
+    break;
+  case IPxrTexture::FilterMode::eLINEAR:
+    vkf = vk::Filter::eLinear;
+    break;
+  }
+
+  switch (addressMode) {
+  case IPxrTexture::AddressMode::eREPEAT:
+    vka = vk::SamplerAddressMode::eRepeat;
+    break;
+  case IPxrTexture::AddressMode::eBORDER:
+    vka = vk::SamplerAddressMode::eClampToBorder;
+    break;
+  case IPxrTexture::AddressMode::eEDGE:
+    vka = vk::SamplerAddressMode::eClampToEdge;
+    break;
+  case IPxrTexture::AddressMode::eMIRROR:
+    vka = vk::SamplerAddressMode::eMirroredRepeat;
+    break;
+  }
+
+  int channels = data.size() / width / height / depth;
+  if (channels * width * height * depth != data.size()) {
+    throw std::runtime_error("failed to create texture: incompatible data and size.");
+  }
+  if (channels > 4) {
+    throw std::runtime_error("failed to create texture: channel size must be <= 4. Got " +
+                             std::to_string(width) + "x" + std::to_string(height) + "x" +
+                             std::to_string(depth) + "x" + std::to_string(channels));
+  }
+
+  auto texture = svulkan2::resource::SVTexture::FromData(width, height, depth, channels, data, dim,
+                                                         mipLevels, vkf, vkf, vka, vka, vka);
+  return std::make_shared<SVulkan2Texture>(texture);
+}
+
 } // namespace Renderer
 } // namespace sapien

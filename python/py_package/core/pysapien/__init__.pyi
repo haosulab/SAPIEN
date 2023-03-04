@@ -43,8 +43,6 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
-    "KuafuConfig",
-    "KuafuRenderer",
     "LightEntity",
     "Link",
     "LinkBase",
@@ -394,6 +392,10 @@ class CameraEntity(Entity):
     def get_uint32_texture(self, texture_name: str) -> numpy.ndarray[numpy.uint32]: ...
     def get_uint8_texture(self, texture_name: str) -> numpy.ndarray[numpy.uint8]: ...
     def get_visual_actor_segmentation(self) -> numpy.ndarray[numpy.uint32]: ...
+    @typing.overload
+    def set_custom_property(self, arg0: str, arg1: float) -> None: ...
+    @typing.overload
+    def set_custom_property(self, arg0: str, arg1: int) -> None: ...
     def set_focal_lengths(self, fx: float, fy: float) -> None: ...
     def set_fovx(self, fov: float, compute_y: bool = True) -> None: ...
     def set_fovy(self, fov: float, compute_x: bool = True) -> None: ...
@@ -779,6 +781,9 @@ class Gear():
 class IPxrRenderer():
     def create_material(self) -> RenderMaterial: ...
     def create_mesh(self, vertices: numpy.ndarray[numpy.float32, _Shape[m, 3]], indices: numpy.ndarray[numpy.uint32, _Shape[m, 3]]) -> RenderMesh: ...
+    @typing.overload
+    def create_texture_from_array(self, array: numpy.ndarray[numpy.float32], dim: int, mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat') -> RenderTexture: ...
+    @typing.overload
     def create_texture_from_array(self, array: numpy.ndarray[numpy.uint8], mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat') -> RenderTexture: ...
     def create_texture_from_file(self, filename: str, mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat') -> RenderTexture: ...
     pass
@@ -898,117 +903,6 @@ class KinematicJointPrismatic(KinematicJointSingleDof, KinematicJoint, JointBase
 class LinkBase(ActorDynamicBase, ActorBase, Entity):
     def get_articulation(self) -> ArticulationBase: ...
     def get_index(self) -> int: ...
-    pass
-class KuafuConfig():
-    def __init__(self) -> None: ...
-    @property
-    def accumulate_frames(self) -> bool:
-        """
-        :type: bool
-        """
-    @accumulate_frames.setter
-    def accumulate_frames(self, arg0: bool) -> None:
-        pass
-    @property
-    def assets_path(self) -> str:
-        """
-        :type: str
-        """
-    @assets_path.setter
-    def assets_path(self, arg0: str) -> None:
-        pass
-    @property
-    def max_bounces(self) -> int:
-        """
-        :type: int
-        """
-    @max_bounces.setter
-    def max_bounces(self, arg0: int) -> None:
-        pass
-    @property
-    def max_geometries(self) -> int:
-        """
-        :type: int
-        """
-    @max_geometries.setter
-    def max_geometries(self, arg0: int) -> None:
-        pass
-    @property
-    def max_geometry_instances(self) -> int:
-        """
-        :type: int
-        """
-    @max_geometry_instances.setter
-    def max_geometry_instances(self, arg0: int) -> None:
-        pass
-    @property
-    def max_materials(self) -> int:
-        """
-        :type: int
-        """
-    @max_materials.setter
-    def max_materials(self, arg0: int) -> None:
-        pass
-    @property
-    def max_textures(self) -> int:
-        """
-        :type: int
-        """
-    @max_textures.setter
-    def max_textures(self, arg0: int) -> None:
-        pass
-    @property
-    def spp(self) -> int:
-        """
-        :type: int
-        """
-    @spp.setter
-    def spp(self, arg0: int) -> None:
-        pass
-    @property
-    def use_denoiser(self) -> bool:
-        """
-        :type: bool
-        """
-    @use_denoiser.setter
-    def use_denoiser(self, arg0: bool) -> None:
-        pass
-    @property
-    def use_viewer(self) -> bool:
-        """
-        :type: bool
-        """
-    @use_viewer.setter
-    def use_viewer(self, arg0: bool) -> None:
-        pass
-    @property
-    def viewer_height(self) -> int:
-        """
-        :type: int
-        """
-    @viewer_height.setter
-    def viewer_height(self, arg0: int) -> None:
-        pass
-    @property
-    def viewer_width(self) -> int:
-        """
-        :type: int
-        """
-    @viewer_width.setter
-    def viewer_width(self, arg0: int) -> None:
-        pass
-    pass
-class KuafuRenderer(IPxrRenderer):
-    def __init__(self, config: KuafuConfig = ...) -> None: ...
-    @staticmethod
-    def _set_default_assets_path(assets_path: str) -> None: ...
-    @staticmethod
-    def set_log_level(level: str) -> None: ...
-    @property
-    def is_running(self) -> bool:
-        """
-        :type: bool
-        """
     pass
 class DirectionalLightEntity(LightEntity, Entity):
     def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
@@ -1206,6 +1100,9 @@ class RenderBody():
     def get_render_shapes(self) -> typing.List[RenderShape]: ...
     def get_visual_id(self) -> int: ...
     def set_custom_data(self, custom_data: typing.List[float]) -> None: ...
+    def set_custom_property(self, name: str, value: typing.List[float[3]]) -> None: ...
+    def set_custom_texture(self, name: str, texture: RenderTexture) -> None: ...
+    def set_custom_texture_array(self, name: str, textures: typing.List[RenderTexture]) -> None: ...
     def set_name(self, name: str) -> None: ...
     def set_pose(self, pose: Pose) -> None: ...
     def set_visibility(self, visibility: float) -> None: ...
@@ -1280,6 +1177,14 @@ class RenderConfig():
         """
     @camera_shader_dir.setter
     def camera_shader_dir(self, arg0: str) -> None:
+        pass
+    @property
+    def msaa(self) -> int:
+        """
+        :type: int
+        """
+    @msaa.setter
+    def msaa(self, arg0: int) -> None:
         pass
     @property
     def rt_path_depth(self) -> int:
@@ -2110,6 +2015,7 @@ class VulkanParticleBody(RenderParticleBody):
         """
     pass
 class VulkanRenderMesh(RenderMesh):
+    def set_attribute(self, arg0: str, arg1: numpy.ndarray[numpy.float32, _Shape[m, n]]) -> None: ...
     @property
     def dl_vertices(self) -> capsule:
         """

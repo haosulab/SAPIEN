@@ -25,10 +25,13 @@ public:
   void setBitangents(std::vector<float> const &) override;
   void setIndices(std::vector<uint32_t> const &) override;
 
+  void
+  setAttribute(std::string_view name,
+               Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>);
+
 #ifdef SAPIEN_DLPACK
   DLManagedTensor *getDLVertices();
 #endif
-
 
   inline std::shared_ptr<svulkan2::resource::SVMesh> getMesh() const { return mMesh; }
 };

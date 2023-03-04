@@ -16,6 +16,7 @@ struct RenderConfig {
   int rayTracingPathDepth{8};
   int rayTracingRussianRouletteMinBounces{-1};
   bool rayTracingUseDenoiser{false};
+  int msaa{1};
 };
 
 RenderConfig &GetRenderConfig();
