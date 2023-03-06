@@ -126,11 +126,11 @@ __enable_vulkan()
 Entity.classname = property(lambda e: e.__class__.__name__)
 
 
-def _auto_allocate_torch_tensors(self: RenderServer, render_targets: List[str]):
+def _auto_allocate_torch_tensors(self: RenderServer, render_targets: List[str], device="cuda"):
     import torch
 
     buffers = self.auto_allocate_buffers(render_targets)
-    tensors = [torch.as_tensor(x, device="cuda") for x in buffers]
+    tensors = [torch.as_tensor(x, device=device) for x in buffers]
 
     for b, t in zip(buffers, tensors):
         assert b.__cuda_array_interface__["data"][0] == t.data_ptr()

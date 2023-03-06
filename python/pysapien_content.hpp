@@ -523,6 +523,17 @@ void buildSapien(py::module &m) {
                 "data"_a = py::make_tuple(reinterpret_cast<uintptr_t>(buffer.getCudaPtr()), false),
                 "version"_a = 2);
           })
+      .def(
+          "copy_to_host_async",
+          [](Renderer::server::VulkanCudaBuffer &buffer, py::array_t<float> array) {
+            auto data_ptr = buffer.getCudaPtr();
+            auto nbytes = buffer.getSize();
+            cudaMemcpyAsync(py::detail::array_proxy(array.ptr())->data, data_ptr, nbytes,
+                            cudaMemcpyDeviceToHost);
+          },
+          py::arg("array").noconvert())
+      .def("synchronize",
+           [](Renderer::server::VulkanCudaBuffer &buffer) { cudaStreamSynchronize(0); });
 #endif
       ;
 

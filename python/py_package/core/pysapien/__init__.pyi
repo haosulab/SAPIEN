@@ -43,8 +43,6 @@ __all__ = [
     "KinematicJointRevolute",
     "KinematicJointSingleDof",
     "KinematicLink",
-    "KuafuConfig",
-    "KuafuRenderer",
     "LightEntity",
     "Link",
     "LinkBase",
@@ -899,117 +897,6 @@ class LinkBase(ActorDynamicBase, ActorBase, Entity):
     def get_articulation(self) -> ArticulationBase: ...
     def get_index(self) -> int: ...
     pass
-class KuafuConfig():
-    def __init__(self) -> None: ...
-    @property
-    def accumulate_frames(self) -> bool:
-        """
-        :type: bool
-        """
-    @accumulate_frames.setter
-    def accumulate_frames(self, arg0: bool) -> None:
-        pass
-    @property
-    def assets_path(self) -> str:
-        """
-        :type: str
-        """
-    @assets_path.setter
-    def assets_path(self, arg0: str) -> None:
-        pass
-    @property
-    def max_bounces(self) -> int:
-        """
-        :type: int
-        """
-    @max_bounces.setter
-    def max_bounces(self, arg0: int) -> None:
-        pass
-    @property
-    def max_geometries(self) -> int:
-        """
-        :type: int
-        """
-    @max_geometries.setter
-    def max_geometries(self, arg0: int) -> None:
-        pass
-    @property
-    def max_geometry_instances(self) -> int:
-        """
-        :type: int
-        """
-    @max_geometry_instances.setter
-    def max_geometry_instances(self, arg0: int) -> None:
-        pass
-    @property
-    def max_materials(self) -> int:
-        """
-        :type: int
-        """
-    @max_materials.setter
-    def max_materials(self, arg0: int) -> None:
-        pass
-    @property
-    def max_textures(self) -> int:
-        """
-        :type: int
-        """
-    @max_textures.setter
-    def max_textures(self, arg0: int) -> None:
-        pass
-    @property
-    def spp(self) -> int:
-        """
-        :type: int
-        """
-    @spp.setter
-    def spp(self, arg0: int) -> None:
-        pass
-    @property
-    def use_denoiser(self) -> bool:
-        """
-        :type: bool
-        """
-    @use_denoiser.setter
-    def use_denoiser(self, arg0: bool) -> None:
-        pass
-    @property
-    def use_viewer(self) -> bool:
-        """
-        :type: bool
-        """
-    @use_viewer.setter
-    def use_viewer(self, arg0: bool) -> None:
-        pass
-    @property
-    def viewer_height(self) -> int:
-        """
-        :type: int
-        """
-    @viewer_height.setter
-    def viewer_height(self, arg0: int) -> None:
-        pass
-    @property
-    def viewer_width(self) -> int:
-        """
-        :type: int
-        """
-    @viewer_width.setter
-    def viewer_width(self, arg0: int) -> None:
-        pass
-    pass
-class KuafuRenderer(IPxrRenderer):
-    def __init__(self, config: KuafuConfig = ...) -> None: ...
-    @staticmethod
-    def _set_default_assets_path(assets_path: str) -> None: ...
-    @staticmethod
-    def set_log_level(level: str) -> None: ...
-    @property
-    def is_running(self) -> bool:
-        """
-        :type: bool
-        """
-    pass
 class DirectionalLightEntity(LightEntity, Entity):
     def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
     @property
@@ -1559,6 +1446,8 @@ class RenderServer():
     def wait_scenes(self, scenes: typing.List[int], timeout: int = 18446744073709551615) -> bool: ...
     pass
 class RenderServerBuffer():
+    def copy_to_host_async(self, array: numpy.ndarray[numpy.float32]) -> None: ...
+    def synchronize(self) -> None: ...
     @property
     def __cuda_array_interface__(self) -> dict:
         """
