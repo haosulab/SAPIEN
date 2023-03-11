@@ -19,8 +19,10 @@ void main() {
 
   ray.albedo = ray.radiance;
   ray.normal = vec3(0.0);
+  ray.segmentation = uvec4(0);
 
   ray.attenuation = vec3(0.0);
   ray.depth = maxDepth + 1;
   ray.origin = vec3(0.0);
+  ray.alpha = 0.0;
 }

@@ -4,10 +4,10 @@ struct Ray {
   vec3 albedo;
   vec3 normal;
   vec3 radiance;
+  float alpha;
   vec3 attenuation;
   uvec4 segmentation;
   uint depth;
-  uint done;
   uint seed;
 };
 
