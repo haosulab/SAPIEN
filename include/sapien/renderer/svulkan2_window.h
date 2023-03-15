@@ -70,6 +70,7 @@ public:
 
   void setCameraProperty(std::string const &name, float property);
   void setCameraProperty(std::string const &name, int property);
+  void setCameraTexture(std::string const &name, std::shared_ptr<Renderer::IPxrTexture> texture);
 
   float getCameraNear();
   float getCameraFar();

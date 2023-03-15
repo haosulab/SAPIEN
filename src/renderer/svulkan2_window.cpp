@@ -174,6 +174,14 @@ void SVulkan2Window::setCameraProperty(std::string const &name, int property) {
   }
   mSVulkanRenderer->setCustomProperty(name, property);
 }
+void SVulkan2Window::setCameraTexture(std::string const &name,
+                                      std::shared_ptr<Renderer::IPxrTexture> texture) {
+  if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
+    mSVulkanRenderer->setCustomTexture(name, t->getTexture());
+  } else {
+    throw std::runtime_error("failed to set camera texture: invalid texture.");
+  }
+}
 
 glm::vec3 SVulkan2Window::getCameraPosition() { return getCamera()->getPosition(); }
 glm::quat SVulkan2Window::getCameraRotation() { return getCamera()->getRotation(); }

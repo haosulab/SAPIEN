@@ -2307,13 +2307,24 @@ Args:
           "Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and "
           "[0,1] "
           "Z)")
-      .def("set_custom_property",
-           [](SCamera &c, std::string const &name, int property) {
-             c.getRendererCamera()->setIntProperty(name, property);
-           })
-      .def("set_custom_property", [](SCamera &c, std::string const &name, float property) {
-        c.getRendererCamera()->setFloatProperty(name, property);
-      });
+      .def(
+          "set_custom_property",
+          [](SCamera &c, std::string const &name, int property) {
+            c.getRendererCamera()->setIntProperty(name, property);
+          },
+          py::arg("name"), py::arg("value"))
+      .def(
+          "set_custom_property",
+          [](SCamera &c, std::string const &name, float property) {
+            c.getRendererCamera()->setFloatProperty(name, property);
+          },
+          py::arg("name"), py::arg("value"))
+      .def(
+          "set_custom_texture",
+          [](SCamera &c, std::string const &name, std::shared_ptr<Renderer::IPxrTexture> texture) {
+            c.getRendererCamera()->setCustomTexture(name, texture);
+          },
+          py::arg("name"), py::arg("texture"));
 
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
       .def("hide", &Renderer::SVulkan2Window::hide)
@@ -2347,6 +2358,14 @@ Args:
             window.setCameraProperty(name, property);
           },
           py::arg("key"), py::arg("value"))
+      .def(
+          "set_camera_texture",
+          [](Renderer::SVulkan2Window &window, std::string const &name,
+             std::shared_ptr<Renderer::IPxrTexture> texture) {
+            window.setCameraTexture(name, texture);
+          },
+          py::arg("name"), py::arg("texture"))
+
       .def("set_shader_dir", &Renderer::SVulkan2Window::setShader, py::arg("shader_dir"))
       .def("get_camera_position",
            [](Renderer::SVulkan2Window &window) {
@@ -2479,7 +2498,8 @@ Args:
           "create_texture_from_array",
           [](Renderer::IPxrRenderer &renderer,
              py::array_t<uint8_t, py::array::c_style | py::array::forcecast> array,
-             uint32_t mipLevels, std::string const &filterMode, std::string const &addressMode) {
+             uint32_t mipLevels, std::string const &filterMode, std::string const &addressMode,
+             bool srgb) {
             Renderer::IPxrTexture::FilterMode::Enum fm = getFilterMode(filterMode);
             Renderer::IPxrTexture::AddressMode::Enum am = getAddressMode(addressMode);
             if (array.ndim() != 2 && array.ndim() != 3) {
@@ -2491,10 +2511,10 @@ Args:
 
             return renderer.createTexture(
                 std::vector<uint8_t>(array.data(), array.data() + array.size()), width, height,
-                mipLevels, fm, am);
+                mipLevels, fm, am, srgb);
           },
           py::arg("array"), py::arg("mipmap_levels") = 1, py::arg("filter_mode") = "linear",
-          py::arg("address_mode") = "repeat")
+          py::arg("address_mode") = "repeat", py::arg("srgb") = true)
 
       .def(
           "create_texture_from_array",
@@ -2729,10 +2749,11 @@ Args:
       .def_property_readonly(
           "dl_vertices",
           [](Renderer::SVulkan2Mesh &mesh) { return wrapDLTensor(mesh.getDLVertices()); })
-      .def("set_attribute", [](Renderer::SVulkan2Mesh &mesh, std::string_view name,
-                               Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> value) {
-        mesh.setAttribute(name, value);
-      });
+      .def("set_attribute",
+           [](Renderer::SVulkan2Mesh &mesh, std::string_view name,
+              Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> value) {
+             mesh.setAttribute(name, value);
+           });
 #endif
 
   m.def("add_profiler_event", &AddProfilerEvent, py::arg("name"));

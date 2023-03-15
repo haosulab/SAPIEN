@@ -282,6 +282,9 @@ public:
   virtual void setFloatProperty(std::string const &name, float property) {
     throw std::runtime_error("setFloatProperty is not implemented");
   }
+  virtual void setCustomTexture(std::string const &name, std::shared_ptr<IPxrTexture> texture) {
+    throw std::runtime_error("setCustomTexture is not implemented");
+  }
 
 #ifdef SAPIEN_DLPACK
   // return new DLManagedTensor

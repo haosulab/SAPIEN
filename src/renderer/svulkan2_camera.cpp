@@ -89,6 +89,15 @@ void SVulkan2Camera::setFloatProperty(std::string const &name, float property) {
   mRenderer->setCustomProperty(name, property);
 }
 
+void SVulkan2Camera::setCustomTexture(std::string const &name,
+                                      std::shared_ptr<IPxrTexture> texture) {
+  if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
+    mRenderer->setCustomTexture(name, t->getTexture());
+  } else {
+    throw std::runtime_error("failed to set custom texture: invalid texture.");
+  }
+}
+
 void SVulkan2Camera::takePicture() {
   auto context = mScene->getParentRenderer()->getContext();
   waitForRender();
