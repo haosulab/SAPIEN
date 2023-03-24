@@ -320,6 +320,7 @@ void ClientScene::removeRigidbody(IPxrRigidbody *body) {
     if (!status.ok()) {
       throw std::runtime_error(status.error_message());
     }
+    return;
   }
   throw std::runtime_error("failed to remove body: invalid body");
 }
