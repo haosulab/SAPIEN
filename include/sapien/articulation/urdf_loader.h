@@ -806,6 +806,9 @@ public:
   /* directory for package:// */
   std::string packageDir = "";
 
+  /* build revolute as unwrapped */
+  bool revoluteUnwrapped = false;
+
   explicit URDFLoader(SScene *scene);
 
   SArticulation *load(const std::string &filename, URDFConfig const &config = {});

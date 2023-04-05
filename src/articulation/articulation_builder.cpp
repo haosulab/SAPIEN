@@ -57,6 +57,18 @@ std::string LinkBuilder::summary() const {
         }
       }
       break;
+      case PxArticulationJointType::eREVOLUTE_UNWRAPPED:
+      ss << "RevoluteUnwrapped.";
+      if (!checkJointProperties()) {
+        ss << " Not valid.";
+      } else {
+        if (mJointRecord.limits[0][0] == -std::numeric_limits<float>::infinity()) {
+          ss << " Free.";
+        } else {
+          ss << " [" << mJointRecord.limits[0][0] << ",  " << mJointRecord.limits[0][1] << "]";
+        }
+      }
+      break;
     case PxArticulationJointType::ePRISMATIC:
       ss << "ePrismatic.";
       if (!checkJointProperties()) {
@@ -107,7 +119,8 @@ bool LinkBuilder::checkJointProperties() const {
     }
     return true;
   }
-  case PxArticulationJointType::eREVOLUTE: {
+  case PxArticulationJointType::eREVOLUTE:
+  case PxArticulationJointType::eREVOLUTE_UNWRAPPED: {
     if (mJointRecord.limits.size() != 1) {
       spdlog::get("SAPIEN")->error("Revolute joint should have 1 limits for joint {}. \"{}\"",
                                    mIndex, mJointRecord.name);
@@ -303,6 +316,7 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
           new SKJointFixed(&articulation, links[mParent].get(), links[mIndex].get()));
       break;
     case PxArticulationJointType::eREVOLUTE:
+    case PxArticulationJointType::eREVOLUTE_UNWRAPPED:
       j = std::unique_ptr<SKJoint>(
           new SKJointRevolute(&articulation, links[mParent].get(), links[mIndex].get()));
       break;

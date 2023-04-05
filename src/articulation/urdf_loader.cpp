@@ -293,9 +293,9 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
                                             visual->name);
         break;
       case Geometry::MESH:
-        currentLinkBuilder->addVisualFromFile(getAbsPath(urdfFilename, visual->geometry->filename, packageDir),
-                                              tVisual2Link, visual->geometry->scale * scale,
-                                              nullptr, visual->name);
+        currentLinkBuilder->addVisualFromFile(
+            getAbsPath(urdfFilename, visual->geometry->filename, packageDir), tVisual2Link,
+            visual->geometry->scale * scale, nullptr, visual->name);
         break;
       }
     }
@@ -435,11 +435,14 @@ URDFLoader::parseRobotDescription(XMLDocument const &urdfDoc, XMLDocument const 
       }
       const PxTransform tAxis2Parent = tJoint2Parent * tAxis2Joint;
 
+      PxArticulationJointType::Enum revoluteType =
+          revoluteUnwrapped ? PxArticulationJointType::eREVOLUTE_UNWRAPPED
+                            : PxArticulationJointType::eREVOLUTE;
+
       if (current->joint->type == "revolute") {
         currentLinkBuilder->setJointProperties(
-            PxArticulationJointType::eREVOLUTE,
-            {{current->joint->limit->lower, current->joint->limit->upper}}, tAxis2Parent,
-            tAxis2Joint, friction, damping);
+            revoluteType, {{current->joint->limit->lower, current->joint->limit->upper}},
+            tAxis2Parent, tAxis2Joint, friction, damping);
       } else if (current->joint->type == "continuous") {
         currentLinkBuilder->setJointProperties(
             PxArticulationJointType::eREVOLUTE,
