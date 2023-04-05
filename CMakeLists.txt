@@ -86,7 +86,6 @@ include_directories("src" "src/renderer" "/usr/include/eigen3" "/usr/local/inclu
 include_directories(
     "include"
     "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/include"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/pxshared/include"
     "src/renderer"
     )
 

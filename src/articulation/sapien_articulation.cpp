@@ -1,4 +1,5 @@
 #include "sapien/articulation/sapien_articulation.h"
+#include "PxArticulationFlag.h"
 #include "sapien/articulation/sapien_joint.h"
 #include "sapien/articulation/sapien_link.h"
 #include "sapien/sapien_scene.h"
@@ -47,7 +48,7 @@ uint32_t SArticulation::dof() const { return mPxArticulation->getDofs(); }
 std::vector<physx::PxReal> SArticulation::getQpos() const {
   EASY_FUNCTION();
   EASY_BLOCK("copy internal state")
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::ePOSITION);
   EASY_END_BLOCK;
   auto n = dof();
   std::vector<physx::PxReal> result(n);
@@ -62,11 +63,11 @@ void SArticulation::setQpos(std::vector<physx::PxReal> const &v) {
   auto n = dof();
   Eigen::Map<Eigen::VectorXf>(mCache->jointPosition, n) =
       mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(v.data(), n);
-  mPxArticulation->applyCache(*mCache, PxArticulationCache::ePOSITION);
+  mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::ePOSITION);
 }
 
 std::vector<physx::PxReal> SArticulation::getQvel() const {
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eVELOCITY);
 
   auto n = dof();
   std::vector<physx::PxReal> result(n);
@@ -81,11 +82,11 @@ void SArticulation::setQvel(std::vector<physx::PxReal> const &v) {
   auto n = dof();
   Eigen::Map<Eigen::VectorXf>(mCache->jointVelocity, n) =
       mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(v.data(), n);
-  mPxArticulation->applyCache(*mCache, PxArticulationCache::eVELOCITY);
+  mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::eVELOCITY);
 }
 
 std::vector<physx::PxReal> SArticulation::getQacc() const {
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eACCELERATION);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eACCELERATION);
   auto n = dof();
   std::vector<physx::PxReal> result(n);
   Eigen::Map<Eigen::VectorXf>(result.data(), n) =
@@ -99,11 +100,11 @@ void SArticulation::setQacc(std::vector<physx::PxReal> const &v) {
   auto n = dof();
   Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, n) =
       mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(v.data(), n);
-  mPxArticulation->applyCache(*mCache, PxArticulationCache::eACCELERATION);
+  mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::eACCELERATION);
 }
 
 std::vector<physx::PxReal> SArticulation::getQf() const {
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eFORCE);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eFORCE);
   auto n = dof();
   std::vector<physx::PxReal> result(n);
   Eigen::Map<Eigen::VectorXf>(result.data(), n) =
@@ -117,7 +118,7 @@ void SArticulation::setQf(std::vector<physx::PxReal> const &v) {
   auto n = dof();
   Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n) =
       mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(v.data(), n);
-  mPxArticulation->applyCache(*mCache, PxArticulationCache::eFORCE);
+  mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::eFORCE);
 }
 
 std::vector<std::array<physx::PxReal, 2>> SArticulation::getQlimits() const {
@@ -143,15 +144,15 @@ void SArticulation::setQlimits(std::vector<std::array<physx::PxReal, 2>> const &
 }
 
 void SArticulation::setRootPose(physx::PxTransform const &T) {
-  mPxArticulation->teleportRootLink(T, true);
+  mPxArticulation->setRootGlobalPose(T);
 }
 
 void SArticulation::setRootVelocity(physx::PxVec3 const &v) {
-  mRootLink->getPxActor()->setLinearVelocity(v);
+  mPxArticulation->setRootLinearVelocity(v);
 }
 
 void SArticulation::setRootAngularVelocity(physx::PxVec3 const &omega) {
-  mRootLink->getPxActor()->setAngularVelocity(omega);
+  mPxArticulation->setRootAngularVelocity(omega);
 }
 
 SLinkBase *SArticulation::getRootLink() const { return mRootLink; }
@@ -248,9 +249,12 @@ bool SArticulation::isBaseFixed() const {
 }
 
 void SArticulation::resetCache() {
-  mPxArticulation->releaseCache(*mCache);
+  if (mCache) {
+    mCache->release();
+  }
   mCache = mPxArticulation->createCache();
 }
+
 std::vector<physx::PxReal>
 SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bool external) {
   mPxArticulation->commonInit();
@@ -260,7 +264,7 @@ SArticulation::computePassiveForce(bool gravity, bool coriolisAndCentrifugal, bo
   Eigen::Map<Eigen::VectorXf> passiveForceVector(passiveForce.data(), n);
 
   if (coriolisAndCentrifugal) {
-    mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
+    mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eVELOCITY);
     mPxArticulation->computeCoriolisAndCentrifugalForce(*mCache);
     passiveForceVector += Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n);
   }
@@ -309,8 +313,8 @@ std::vector<physx::PxReal> SArticulation::computeForwardDynamics(const std::vect
   auto n = dof();
 
   mPxArticulation->commonInit();
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eVELOCITY);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::ePOSITION);
   Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n) =
       mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(qf.data(), n);
   mPxArticulation->computeJointAcceleration(*mCache);
@@ -328,8 +332,8 @@ std::vector<physx::PxReal> SArticulation::computeInverseDynamics(const std::vect
   auto n = dof();
 
   mPxArticulation->commonInit();
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eVELOCITY);
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::ePOSITION);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eVELOCITY);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::ePOSITION);
   Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, n) =
       mPermutationE2I * Eigen::Map<Eigen::VectorXf const>(qacc.data(), n);
   mPxArticulation->computeJointForce(*mCache);
@@ -443,7 +447,7 @@ SArticulation::computeWorldCartesianJacobianMatrix() {
 std::vector<PxReal> SArticulation::packData() {
   std::vector<PxReal> data;
 
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eALL);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eALL);
   auto ndof = mPxArticulation->getDofs();
   auto nlinks = mPxArticulation->getNbLinks();
 
@@ -478,7 +482,7 @@ std::vector<PxReal> SArticulation::packData() {
 }
 
 void SArticulation::unpackData(std::vector<PxReal> const &data) {
-  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCache::eALL);
+  mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eALL);
   auto ndof = mPxArticulation->getDofs();
   auto nlinks = mPxArticulation->getNbLinks();
 
@@ -535,7 +539,7 @@ void SArticulation::unpackData(std::vector<PxReal> const &data) {
   mCache->rootLinkData->worldAngAccel = {data[p], data[p + 1], data[p + 2]};
   p += 3;
 
-  mPxArticulation->applyCache(*mCache, PxArticulationCache::eALL);
+  mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::eALL);
 }
 
 std::vector<PxReal> SArticulation::packDrive() {

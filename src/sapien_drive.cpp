@@ -198,7 +198,6 @@ void SDriveRevolute::setLimit(float low, float high) {
   auto limit = mJoint->getLimit();
   limit.lower = low;
   limit.upper = high;
-  limit.contactDistance = 0.1;
   mJoint->setLimit(limit);
 }
 

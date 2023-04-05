@@ -13,7 +13,6 @@
 #include "sapien/sapien_contact.h"
 #include "sapien/sapien_drive.h"
 #include "sapien/sapien_entity_particle.h"
-#include "sapien/sapien_gear.h"
 #include "sapien/simulation.h"
 #include <algorithm>
 #include <spdlog/spdlog.h>
@@ -46,9 +45,6 @@ SScene::SScene(std::shared_ptr<Simulation> sim, SceneConfig const &config)
   }
   if (config.enableFrictionEveryIteration) {
     sceneFlags |= PxSceneFlag::eENABLE_FRICTION_EVERY_ITERATION;
-  }
-  if (config.enableAdaptiveForce) {
-    sceneFlags |= PxSceneFlag::eADAPTIVE_FORCE;
   }
   sceneDesc.flags = sceneFlags;
 
@@ -94,9 +90,6 @@ SScene::~SScene() {
   }
   for (auto &drive : mDrives) {
     drive->getPxJoint()->release();
-  }
-  for (auto &gear : mGears) {
-    gear->mGearJoint->release();
   }
   mPxScene->release();
 
@@ -144,11 +137,6 @@ SDrive6D *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SAct
   return static_cast<SDrive6D *>(drive);
 }
 
-SGear *SScene::createGear(SActorDynamicBase *actor1, PxTransform const &pose1,
-                          SActorDynamicBase *actor2, PxTransform const &pose2) {
-  mGears.push_back(std::make_unique<SGear>(this, actor1, pose1, actor2, pose2));
-  return mGears.back().get();
-}
 
 void SScene::addActor(std::unique_ptr<SActorBase> actor) {
   mPxScene->addActor(*actor->getPxActor());
@@ -260,17 +248,6 @@ void SScene::removeActor(SActorBase *actor) {
     }
   }
 
-  for (auto it = mGears.begin(); it != mGears.end();) {
-    if ((*it)->getActor1() == actor || (*it)->getActor2() == actor) {
-      wakeUpActor((*it)->getActor1());
-      wakeUpActor((*it)->getActor2());
-      (*it)->getGearJoint()->release();
-      it = mGears.erase(it);
-    } else {
-      ++it;
-    }
-  }
-
   // remove camera
   removeCameraByParent(actor);
 
@@ -310,16 +287,6 @@ void SScene::removeArticulation(SArticulation *articulation) {
         wakeUpActor((*it)->getActor2());
         (*it)->getPxJoint()->release();
         it = mDrives.erase(it);
-      } else {
-        ++it;
-      }
-    }
-    for (auto it = mGears.begin(); it != mGears.end();) {
-      if ((*it)->getActor1() == link || (*it)->getActor2() == link) {
-        wakeUpActor((*it)->getActor1());
-        wakeUpActor((*it)->getActor2());
-        (*it)->getGearJoint()->release();
-        it = mGears.erase(it);
       } else {
         ++it;
       }
@@ -374,17 +341,6 @@ void SScene::removeKinematicArticulation(SKArticulation *articulation) {
       }
     }
 
-    for (auto it = mGears.begin(); it != mGears.end();) {
-      if ((*it)->getActor1() == link || (*it)->getActor2() == link) {
-        wakeUpActor((*it)->getActor1());
-        wakeUpActor((*it)->getActor2());
-        (*it)->getGearJoint()->release();
-        it = mGears.erase(it);
-      } else {
-        ++it;
-      }
-    }
-
     // remove camera
     removeCameraByParent(link);
 
@@ -416,16 +372,6 @@ void SScene::removeDrive(SDrive *drive) {
   wakeUpActor(drive->getActor2());
   drive->getPxJoint()->release();
   std::erase_if(mDrives, [drive](auto &d) { return d.get() == drive; });
-}
-
-void SScene::removeGear(SGear *gear) {
-  if (gear->mScene != this) {
-    spdlog::get("SAPIEN")->error("Failed to remove gear: gear is not in this scene.");
-  }
-  wakeUpActor(gear->getActor1());
-  wakeUpActor(gear->getActor2());
-  gear->getGearJoint()->release();
-  std::erase_if(mGears, [=](auto const &g) { return g.get() == gear; });
 }
 
 SActorBase *SScene::findActorById(physx_id_t id) const {
