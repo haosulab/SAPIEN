@@ -188,16 +188,8 @@ void SArticulation::setDriveVelocityTarget(std::vector<physx::PxReal> const &v) 
 
   auto n = dof();
   for (uint32_t i = 0; i < n; ++i) {
-    mActiveJoints[i]->setDriveVelocity(mDriveAxes[i], v[i] * mDriveMultiplier[i]);
+    mActiveJoints[i]->setDriveVelocity(mDriveAxes[i], v[i]);
   }
-
-  // uint32_t i = 0;
-  // for (auto &j : mJoints) {
-  //   if (j->getAxes().size() == 1) {
-  //     j->setDriveVelocityTarget(v[i]);
-  //     i += 1;
-  //   }
-  // }
   mPxArticulation->wakeUp();
 }
 
@@ -205,14 +197,8 @@ std::vector<PxReal> SArticulation::getDriveVelocityTarget() const {
   auto n = dof();
   std::vector<PxReal> driveTarget(n);
   for (uint32_t i = 0; i < n; ++i) {
-    driveTarget[i] = mActiveJoints[i]->getDriveVelocity(mDriveAxes[i]) * mDriveMultiplier[i];
+    driveTarget[i] = mActiveJoints[i]->getDriveVelocity(mDriveAxes[i]);
   }
-
-  // for (auto &j : mJoints) {
-  //   if (j->getAxes().size() == 1) {
-  //     driveTarget.push_back(j->getDriveVelocityTarget());
-  //   }
-  // }
   return driveTarget;
 }
 

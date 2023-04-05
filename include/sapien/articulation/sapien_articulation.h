@@ -34,8 +34,6 @@ class SArticulation : public SArticulationDrivable {
   // helper cache, external order
   std::vector<PxArticulationJointReducedCoordinate *> mActiveJoints;
   std::vector<PxArticulationAxis::Enum> mDriveAxes;
-  std::vector<float>
-      mDriveMultiplier; // due to physx bug, some drive target needs to be multiplied -1
 
 public:
   std::vector<SLinkBase *> getBaseLinks() override;

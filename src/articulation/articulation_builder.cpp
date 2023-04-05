@@ -478,23 +478,16 @@ SArticulation *ArticulationBuilder::build(bool fixBase) const {
 
     std::vector<PxArticulationJointReducedCoordinate *> activeJoints;
     std::vector<PxArticulationAxis::Enum> driveAxes;
-    std::vector<float> driveMultiplier;
 
     for (auto &j : result->mJoints) {
       if (j->getDof() == 1) {
         activeJoints.push_back(j->getPxJoint());
         auto axis = j->getAxes()[0];
         driveAxes.push_back(axis);
-        if (axis == PxArticulationAxis::eX) {
-          driveMultiplier.push_back(-1);
-        } else {
-          driveMultiplier.push_back(1);
-        }
       }
     }
     result->mActiveJoints = activeJoints;
     result->mDriveAxes = driveAxes;
-    result->mDriveMultiplier = driveMultiplier;
   }
 
   for (auto &j : result->mJoints) {
