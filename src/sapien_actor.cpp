@@ -62,17 +62,6 @@ void SActor::setSolverIterations(uint32_t position, uint32_t velocity) {
   getPxActor()->setSolverIterationCounts(position, velocity);
 }
 
-void SActor::prestep() {
-  SActorDynamicBase::prestep();
-  if (mActor->getAngularVelocity().magnitudeSquared() >= 1e-4) {
-    PxVec3 I = mActor->getMassSpaceInertiaTensor();
-    PxVec3 w = mActor->getAngularVelocity();
-    PxQuat orient = mActor->getGlobalPose().q * mActor->getCMassLocalPose().q;
-    PxVec3 C = orient.rotate(orient.rotateInv(w).multiply(I)).cross(w);
-    mActor->addTorque(C, PxForceMode::eFORCE, false);
-  }
-}
-
 std::vector<PxReal> SActor::packData() {
   std::vector<PxReal> data;
   auto pose = getPose();

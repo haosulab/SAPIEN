@@ -33,8 +33,6 @@ public:
   PxTransform getKinematicTarget() const;
 
 public:
-  void prestep() override;
-
   EActorType getType() const override;
   void destroy();
 
