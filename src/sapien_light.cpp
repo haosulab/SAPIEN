@@ -52,4 +52,12 @@ void SLight::update() {
   getRendererLight()->setPose(getParentPose() * mLocalPose * gl2ros);
 }
 
+void SParallelogramLight::update() {
+  PxVec3 edge0{0, mEdge0.x, mEdge0.y};
+  PxVec3 edge1{0, mEdge1.x, mEdge1.y};
+  PxTransform corner2center{-edge0 / 2.f - edge1 / 2.f, PxIdentity};
+
+  getRendererLight()->setPose(getParentPose() * mLocalPose * corner2center);
+}
+
 } // namespace sapien

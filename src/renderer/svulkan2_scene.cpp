@@ -80,6 +80,20 @@ SVulkan2SpotLight *SVulkan2Scene::addSpotLight(std::array<float, 3> const &posit
   return result;
 }
 
+SVulkan2ParallelogramLight *SVulkan2Scene::addParallelogramLight(
+    physx::PxTransform const &pose, std::array<float, 3> const &color,
+    std::array<float, 3> const &edge0, std::array<float, 3> const &edge1) {
+  auto &light = mScene->addParallelogramLight();
+  light.setTransform({.position = {pose.p.x, pose.p.y, pose.p.z},
+                      .rotation = {pose.q.w, pose.q.x, pose.q.y, pose.q.z}});
+  light.setShape({edge0[0], edge0[1], edge0[2]}, {edge1[0], edge1[1], edge1[2]});
+  light.setColor({color[0], color[1], color[2]});
+  auto l = std::make_unique<SVulkan2ParallelogramLight>(light);
+  auto result = l.get();
+  mLights.push_back(std::move(l));
+  return result;
+}
+
 IActiveLight *SVulkan2Scene::addActiveLight(physx::PxTransform const &pose,
                                             std::array<float, 3> const &color, float fov,
                                             std::string_view texPath, float shadowNear,
@@ -365,9 +379,7 @@ std::vector<ICamera *> SVulkan2Scene::getCameras() {
   return cams;
 }
 
-void SVulkan2Scene::updateRender() {
-  mScene->updateModelMatrices();
-}
+void SVulkan2Scene::updateRender() { mScene->updateModelMatrices(); }
 
 void SVulkan2Scene::setEnvironmentMap(std::string_view path) {
   auto tex = mParentRenderer->getContext()->getResourceManager()->CreateCubemapFromKTX(

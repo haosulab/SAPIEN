@@ -10,6 +10,7 @@ layout(push_constant) uniform Constants {
   int pointLightCount;
   int directionalLightCount;
   int spotLightCount;
+  int parallelogramLightCount;
 
   int envmap;
 };

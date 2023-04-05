@@ -48,6 +48,11 @@ layout(set = 1, binding = 7) readonly buffer SpotLights
   SpotLight l[];
 } spotLights;
 
+layout(set = 1, binding = 12) readonly buffer ParallelogramLights
+{
+  ParallelogramLight l[];
+} parallelogramLights;
+
 struct Vertex {
   float x, y, z;
   float nx, ny, nz;
@@ -110,11 +115,34 @@ float dielectricFresnel(float cosTheta, float eta) {
   return 1.0;
 }
 
-// diffuse with schlick
 vec3 diffuseBRDF(in vec3 albedo, in float dotNL, in float dotNV) {
   return M_1_PI * albedo;
   // float f = (1.0 - 0.5 * schlickFresnel(dotNL)) * (1.0 - 0.5 * schlickFresnel(dotNV));
   // return  M_1_PI * f * albedo;
+}
+
+// D
+float ggxNormalDistribution(float dotNH, float a2) {
+  float d = max(dotNH * dotNH * (a2 - 1.0) + 1.0, 1e-5);
+  return a2 / (d * d * M_PI);
+}
+
+// G
+float smithGGXMaskingShadowing(float dotNL, float dotNV, float a2) {
+  float A = dotNV * sqrt(a2 + (1.0 - a2) * dotNL * dotNL);
+  float B = dotNL * sqrt(a2 + (1.0 - a2) * dotNV * dotNV);
+  return 2.0 * dotNL * dotNV / (A + B);
+}
+
+vec3 ggxBRDF(float dotNL, float dotNV, float dotNH, float dotVH, float roughness, vec3 F0) {
+  float a = roughness * roughness;
+  float a2 = a * a;
+
+  vec3 F = F0 + (1.0 - F0) * schlickFresnel(dotVH);
+  float D = ggxNormalDistribution(dotNH, a2);
+  float G = smithGGXMaskingShadowing(dotNL, dotNV, a2);
+
+  return F * D * G / max(4.0 * dotNL * dotNV, 1e-6);
 }
 
 vec3 evalDiffuse(in float dotNL, in float dotNV, in vec3 albedo) {
@@ -131,19 +159,6 @@ void sampleDiffuse(inout uint seed, in mat3 tbn, in vec3 V, in vec3 albedo, out 
 }
 
 
-// D
-float ggxNormalDistribution(float dotNH, float a2) {
-  float d = max(dotNH * dotNH * (a2 - 1.0) + 1.0, 1e-5);
-  return a2 / (d * d * M_PI);
-}
-
-// G
-float smithGGXMaskingShadowing(float dotNL, float dotNV, float a2) {
-  float A = dotNV * sqrt(a2 + (1.0 - a2) * dotNL * dotNL);
-  float B = dotNL * sqrt(a2 + (1.0 - a2) * dotNV * dotNV);
-  return 2.0 * dotNL * dotNV / (A + B);
-}
-
 vec3 sampleNormalDistribution(inout uint seed, in float a2) {
   float u0 = rnd(seed);
   float u1 = rnd(seed);
@@ -159,16 +174,8 @@ vec3 sampleNormalDistribution(inout uint seed, in float a2) {
 }
 
 vec3 evalGGXReflection(float dotNL, float dotNV, float dotNH, float dotVH, float roughness, vec3 F0) {
-  float a = roughness * roughness;
-  float a2 = a * a;
-
-  vec3 F = F0 + (1.0 - F0) * schlickFresnel(dotVH);
-  float D = ggxNormalDistribution(dotNH, a2);
-  float G = smithGGXMaskingShadowing(dotNL, dotNV, a2);
-
-  return F * D * G / max(4.0 * dotNL * dotNV, 1e-6);
+  return dotNL * ggxBRDF(dotNL, dotNV, dotNH, dotVH, roughness, F0);
 }
-
 
 void sampleGGXReflection(inout uint seed, in mat3 tbn, vec3 V, float roughness,vec3 F0,  out vec3 L, out vec3 attenuation) {
   vec3 N = tbn[2];
@@ -231,7 +238,7 @@ vec3 evalGGXTransmission(vec3 N, vec3 L, vec3 V, float eta, float roughness) {
 
     float result = A * (1.0 - F) * D * G / B;
 
-    return vec3(result);
+    return dotNL * vec3(result);
   } else {
     // reflection
     vec3 H = normalize(V + L);
@@ -247,7 +254,7 @@ vec3 evalGGXTransmission(vec3 N, vec3 L, vec3 V, float eta, float roughness) {
 
     float result = F * D * G / (4.0 * dotNL * dotNV);
 
-    return vec3(result);
+    return dotNL * vec3(result);
   }
 }
 
@@ -328,6 +335,59 @@ vec3 traceDirectionalLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specu
       if (transmissionWeight > 1e-5) {
         result += evalGGXTransmission(normal, L, V, eta, roughness) * emission * transmissionWeight;
       }
+    }
+  }
+  return result;
+}
+
+
+vec3 traceParallelogramLights(vec3 pos, vec3 normal, vec3 diffuseColor, vec3 specularColor, float roughness, float transmissionWeight, float eta) {
+  vec3 result = vec3(0.0);
+  for (uint i = 0; i < parallelogramLightCount; ++i) {
+    ParallelogramLight light = parallelogramLights.l[i];
+    vec3 emission = light.rgb;
+    vec3 d = light.position + rnd(ray.seed) * light.edge0 + rnd(ray.seed) * light.edge1 - pos;
+    float d2 = max(dot(d, d), 1e-6);
+    vec3 L = normalize(d);
+    vec3 V = normalize(-ray.direction);
+
+    vec3 lnormal = cross(light.edge0, light.edge1);
+    float area = length(lnormal);
+    lnormal = normalize(lnormal);
+    float dotlnld = dot(lnormal, L); // light normal dot light direction
+
+    if (dotlnld < 0.0) {
+      emission = emission * (-dotlnld) * area / d2;
+
+      uint flags = gl_RayFlagsTerminateOnFirstHitEXT | gl_RayFlagsOpaqueEXT | gl_RayFlagsSkipClosestHitShaderEXT;
+      shadowRay.shadowed = true;
+      traceRayEXT(tlas,
+                  flags,
+                  0xff,
+                  0,
+                  0,
+                  1,  // miss index
+                  pos,
+                  0.001,
+                  L,
+                  sqrt(d2) - 0.001,
+                  1  // payload location
+      );
+
+      if (!shadowRay.shadowed) {
+        vec3 H = normalize(V + L);
+        float dotNH = clamp(dot(normal, H), 1e-6, 1);
+        float dotVH = clamp(dot(V, H), 1e-6, 1);
+        float dotNL = clamp(dot(normal, L), 1e-6, 1);
+        float dotNV = clamp(dot(normal, V), 1e-6, 1);
+
+        result += evalDiffuse(dotNL, dotNV, diffuseColor) * emission;  // diffuse
+        result += evalGGXReflection(dotNL, dotNV, dotNH, dotVH, roughness, specularColor) * emission;  // specular
+        if (transmissionWeight > 1e-5) {
+          result += evalGGXTransmission(normal, L, V, eta, roughness) * emission;
+        }
+      }
+
     }
   }
   return result;
@@ -552,7 +612,22 @@ void main() {
 
   diffuseProb = diffuseProb / total;
   specularProb = specularProb / total;
-  transmissionProb = 1.0 - diffuseProb - specularProb;
+  transmissionProb = transmissionProb / total;
+
+  // HACK: avoid extreme values to reduce fireflies
+  if (diffuseProb > 1e-6) {
+    diffuseProb += 0.1;
+  }
+  if (specularProb > 1e-6) {
+    specularProb += 0.1;
+  }
+  if (transmissionProb > 1e-6) {
+    transmissionProb += 0.1;
+  }
+  total = diffuseProb + specularProb + transmissionProb;
+  diffuseProb = diffuseProb / total;
+  specularProb = specularProb / total;
+  transmissionProb = transmissionProb / total;
 
   float rand = rnd(ray.seed);
 
@@ -589,7 +664,8 @@ void main() {
   ray.radiance = emission
     + tracePointLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness, transmission, eta)
     + traceDirectionalLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness, transmission, eta)
-    + traceSpotLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness, transmission, eta);
+    + traceSpotLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness, transmission, eta)
+    + traceParallelogramLights(worldPosition, worldShadingNormal, diffuseColor, specularColor, roughness, transmission, eta);
 
   ray.origin = worldPosition;
   ray.direction = L;

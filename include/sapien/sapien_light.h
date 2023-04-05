@@ -30,19 +30,16 @@ public:
   void setParent(SActorBase *actor, bool keepPose = false);
 
   /** call update to sync light pose to renderer */
-  void update();
+  virtual void update();
 
-private:
+protected:
   PxTransform getParentPose() const;
-
   PxTransform mLocalPose{PxIdentity};
   SActorBase *mParent{};
 };
 
 class SPointLight : public SLight {
 public:
-  // inline physx::PxVec3 getPosition() const { return getRendererLight()->getPosition(); }
-  // inline void setPosition(physx::PxVec3 position) { getRendererLight()->setPosition(position); }
   inline void setShadowParameters(float near, float far) {
     getRendererLight()->setShadowParameters(near, far);
   }
@@ -51,17 +48,14 @@ public:
 
   inline SPointLight(SScene *scene, Renderer::IPointLight *light) : SLight(scene), mLight(light) {}
 
-private:
   Renderer::IPointLight *getRendererLight() const override { return mLight; }
+
+private:
   Renderer::IPointLight *mLight;
 };
 
 class SDirectionalLight : public SLight {
 public:
-  // inline physx::PxVec3 getDirection() const { return getRendererLight()->getDirection(); }
-  // inline void setDirection(physx::PxVec3 direction) {
-  //   getRendererLight()->setDirection(direction);
-  // }
   inline void setShadowParameters(float halfSize, float near, float far) {
     getRendererLight()->setShadowParameters(halfSize, near, far);
   }
@@ -73,19 +67,14 @@ public:
   inline SDirectionalLight(SScene *scene, Renderer::IDirectionalLight *light)
       : SLight(scene), mLight(light) {}
 
-private:
   Renderer::IDirectionalLight *getRendererLight() const override { return mLight; }
+
+private:
   Renderer::IDirectionalLight *mLight;
 };
 
 class SSpotLight : public SLight {
 public:
-  // inline physx::PxVec3 getPosition() const { return getRendererLight()->getPosition(); }
-  // inline void setPosition(physx::PxVec3 position) { getRendererLight()->setPosition(position); }
-  // inline physx::PxVec3 getDirection() const { return getRendererLight()->getDirection(); }
-  // inline void setDirection(physx::PxVec3 direction) {
-  //   getRendererLight()->setDirection(direction);
-  // }
   inline void setFov(float fov) const { getRendererLight()->setFov(fov); }
   inline float getFov() const { return getRendererLight()->getFov(); }
 
@@ -97,15 +86,14 @@ public:
 
   inline SSpotLight(SScene *scene, Renderer::ISpotLight *light) : SLight(scene), mLight(light) {}
 
-private:
   Renderer::ISpotLight *getRendererLight() const override { return mLight; }
+
+private:
   Renderer::ISpotLight *mLight;
 };
 
 class SActiveLight : public SLight {
 public:
-  // inline physx::PxVec3 getPosition() const { return getRendererLight()->getPosition(); }
-  // inline void setPosition(physx::PxVec3 position) { getRendererLight()->setPosition(position); }
   inline void setFov(float fov) const { getRendererLight()->setFov(fov); }
   inline float getFov() const { return getRendererLight()->getFov(); }
 
@@ -118,9 +106,32 @@ public:
   inline SActiveLight(SScene *scene, Renderer::IActiveLight *light)
       : SLight(scene), mLight(light) {}
 
-private:
   Renderer::IActiveLight *getRendererLight() const override { return mLight; }
+
+private:
   Renderer::IActiveLight *mLight;
+};
+
+class SParallelogramLight : public SLight {
+public:
+  inline void setShape(physx::PxVec2 edge0, physx::PxVec2 edge1) {
+    mEdge0 = edge0;
+    mEdge1 = edge1;
+    mLight->setShape({0, edge0.x, edge0.y}, {0, edge1.x, edge1.y});
+  }
+  inline physx::PxVec2 getEdge0() const { return mEdge0; }
+  inline physx::PxVec2 getEdge1() const { return mEdge1; }
+
+  inline SParallelogramLight(SScene *scene, Renderer::IParallelogramLight *light)
+      : SLight(scene), mLight(light) {}
+
+  Renderer::IParallelogramLight *getRendererLight() const override { return mLight; }
+  void update() override;
+
+private:
+  PxVec2 mEdge0;
+  PxVec2 mEdge1;
+  Renderer::IParallelogramLight *mLight;
 };
 
 } // namespace sapien

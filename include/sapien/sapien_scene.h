@@ -243,6 +243,8 @@ public:
   SActiveLight *addActiveLight(PxTransform const &pose, PxVec3 const &color, float fov,
                                std::string_view texPath, float shadowNear, float shadowFar,
                                uint32_t shadowMapSize);
+  SParallelogramLight *addParallelogramLight(PxTransform const &pose, PxVec3 const &color,
+                                             PxVec2 const &edge0, PxVec2 const &edge1);
 
   void setEnvironmentMap(std::string_view filename);
   void setEnvironmentMapFromFiles(std::string_view px, std::string_view nx, std::string_view py,

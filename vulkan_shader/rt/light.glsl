@@ -24,3 +24,14 @@ struct SpotLight {
   int textureId;
   int padding2;
 };
+
+struct ParallelogramLight {
+  vec3 rgb;
+  float padding0;
+  vec3 position;
+  float padding1;
+  vec3 edge0;
+  float padding2;
+  vec3 edge1;
+  float padding3;
+};

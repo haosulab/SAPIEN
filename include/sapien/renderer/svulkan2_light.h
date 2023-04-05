@@ -76,6 +76,28 @@ public:
   inline svulkan2::scene::SpotLight *getInternalLight() const { return mLight; }
 };
 
+class SVulkan2ParallelogramLight : public IParallelogramLight {
+  svulkan2::scene::ParallelogramLight *mLight;
+
+public:
+  SVulkan2ParallelogramLight(svulkan2::scene::ParallelogramLight &light);
+
+  physx::PxTransform getPose() const override;
+  void setPose(physx::PxTransform const &transform) override;
+  physx::PxVec3 getColor() const override;
+  void setColor(physx::PxVec3 color) override;
+
+  // TODO: handle shadow
+  inline bool getShadowEnabled() const override { return true; }
+  inline void setShadowEnabled(bool enabled) override {}
+
+  void setShape(physx::PxVec3 edge0, physx::PxVec3 edge1) override;
+  physx::PxVec3 getEdge0() override;
+  physx::PxVec3 getEdge1() override;
+
+  inline svulkan2::scene::ParallelogramLight *getInternalLight() const { return mLight; }
+};
+
 class SVulkan2ActiveLight : public IActiveLight {
   svulkan2::scene::TexturedLight *mLight;
 
@@ -101,7 +123,7 @@ public:
   void setTexture(std::string_view path) override;
   std::string_view getTexture() override;
 
-  inline svulkan2::scene::SpotLight *getInternalLight() const { return mLight; }
+  inline svulkan2::scene::TexturedLight *getInternalLight() const { return mLight; }
 };
 
 } // namespace Renderer

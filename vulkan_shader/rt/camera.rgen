@@ -87,16 +87,6 @@ void main() {
       alpha += ray.alpha;
       attenuation *= ray.attenuation;
 
-      if (russianRoulette != 0 && ray.depth >= russianRouletteMinBounces) {
-        float p = max(attenuation.x, max(attenuation.y, attenuation.z));
-        // kill to 0 with probability 1-p
-        if (rnd(seed) > p) {
-          break;
-        }
-        // amplify to 1/p with probability p
-        attenuation *= 1.0 / p;
-      }
-
       if (first) {
         imageStore(outNormal, ivec2(gl_LaunchIDEXT.xy), vec4(mat3(cameraBuffer.viewMatrix) * ray.normal, 1.0));
         imageStore(outAlbedo, ivec2(gl_LaunchIDEXT.xy), vec4(ray.albedo, 1.0));

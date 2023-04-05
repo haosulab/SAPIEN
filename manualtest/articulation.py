@@ -207,7 +207,6 @@ def main():
 
     print(cam1.get_projection_matrix())
 
-    # sapien.SapienRenderer.set_camera_shader_dir("../vulkan_shader/active_light")
 
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
@@ -241,7 +240,7 @@ def main():
 
     light = scene.add_active_light(
         Pose([0, 0, 1]),
-        [1, 1, 1],
+        [10, 10, 10],
         np.pi / 2,
         "../3rd_party/sapien-vulkan-2/test/assets/image/flashlight.jpg",
     )

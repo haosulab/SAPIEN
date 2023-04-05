@@ -12,6 +12,7 @@ __all__ = [
     "ActorBuilder",
     "ActorDynamicBase",
     "ActorStatic",
+    "AreaLightEntity",
     "Articulation",
     "ArticulationBase",
     "ArticulationBuilder",
@@ -274,6 +275,55 @@ class ActorStatic(ActorBase, Entity):
     def pack(self) -> typing.List[float]: ...
     def set_pose(self, pose: Pose) -> None: ...
     def unpack(self, arg0: numpy.ndarray[numpy.float32]) -> None: ...
+    pass
+class LightEntity(Entity):
+    def set_color(self, color: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
+    def set_local_pose(self, pose: Pose) -> None: ...
+    def set_parent(self, parent: ActorBase, keep_pose: bool) -> None: ...
+    def set_pose(self, pose: Pose) -> None: ...
+    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
+    @property
+    def color(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def direction(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def local_pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def parent(self) -> ActorBase:
+        """
+        :type: ActorBase
+        """
+    @parent.setter
+    def parent(self, arg1: ActorBase, arg2: bool) -> None:
+        pass
+    @property
+    def pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @property
+    def position(self) -> numpy.ndarray[numpy.float32]:
+        """
+        :type: numpy.ndarray[numpy.float32]
+        """
+    @property
+    def shadow(self) -> bool:
+        """
+        :type: bool
+        """
+    @shadow.setter
+    def shadow(self, arg1: bool) -> None:
+        pass
     pass
 class ArticulationBase(Entity):
     def create_pinocchio_model(self) -> PinocchioModel: 
@@ -665,54 +715,23 @@ class ConvexMeshGeometry(CollisionGeometry):
         :type: numpy.ndarray[numpy.float32]
         """
     pass
-class LightEntity(Entity):
-    def set_color(self, color: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_direction(self, direction: numpy.ndarray[numpy.float32]) -> None: ...
-    def set_local_pose(self, pose: Pose) -> None: ...
-    def set_parent(self, parent: ActorBase, keep_pose: bool) -> None: ...
-    def set_pose(self, pose: Pose) -> None: ...
-    def set_position(self, position: numpy.ndarray[numpy.float32]) -> None: ...
+class DirectionalLightEntity(LightEntity, Entity):
+    def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
     @property
-    def color(self) -> numpy.ndarray[numpy.float32]:
+    def shadow_far(self) -> float:
         """
-        :type: numpy.ndarray[numpy.float32]
+        :type: float
         """
     @property
-    def direction(self) -> numpy.ndarray[numpy.float32]:
+    def shadow_half_size(self) -> float:
         """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def local_pose(self) -> Pose:
-        """
-        :type: Pose
+        :type: float
         """
     @property
-    def parent(self) -> ActorBase:
+    def shadow_near(self) -> float:
         """
-        :type: ActorBase
+        :type: float
         """
-    @parent.setter
-    def parent(self, arg1: ActorBase, arg2: bool) -> None:
-        pass
-    @property
-    def pose(self) -> Pose:
-        """
-        :type: Pose
-        """
-    @property
-    def position(self) -> numpy.ndarray[numpy.float32]:
-        """
-        :type: numpy.ndarray[numpy.float32]
-        """
-    @property
-    def shadow(self) -> bool:
-        """
-        :type: bool
-        """
-    @shadow.setter
-    def shadow(self, arg1: bool) -> None:
-        pass
     pass
 class Drive(Constraint):
     def free_motion(self, tx: bool, ty: bool, tz: bool, rx: bool, ry: bool, rz: bool) -> None: ...
@@ -905,22 +924,17 @@ class LinkBase(ActorDynamicBase, ActorBase, Entity):
     def get_articulation(self) -> ArticulationBase: ...
     def get_index(self) -> int: ...
     pass
-class DirectionalLightEntity(LightEntity, Entity):
-    def set_shadow_parameters(self, half_size: float, near: float, far: float) -> None: ...
+class AreaLightEntity(LightEntity, Entity):
+    def set_shape(self, edge0: numpy.ndarray[numpy.float32], edge1: numpy.ndarray[numpy.float32]) -> None: ...
     @property
-    def shadow_far(self) -> float:
+    def edge0(self) -> numpy.ndarray[numpy.float32]:
         """
-        :type: float
-        """
-    @property
-    def shadow_half_size(self) -> float:
-        """
-        :type: float
+        :type: numpy.ndarray[numpy.float32]
         """
     @property
-    def shadow_near(self) -> float:
+    def edge1(self) -> numpy.ndarray[numpy.float32]:
         """
-        :type: float
+        :type: numpy.ndarray[numpy.float32]
         """
     pass
 class Link(LinkBase, ActorDynamicBase, ActorBase, Entity):
@@ -1580,6 +1594,7 @@ class SapienRenderer(IPxrRenderer):
 class Scene():
     def _update_render_and_take_pictures(self, arg0: typing.List[CameraEntity]) -> None: ...
     def add_active_light(self, pose: Pose, color: numpy.ndarray[numpy.float32], fov: float, tex_path: str, near: float = 0.10000000149011612, far: float = 10.0, shadow_map_size: int = 2048) -> ActiveLightEntity: ...
+    def add_area_light_for_ray_tracing(self, pose: Pose, color: numpy.ndarray[numpy.float32], width: float, height: float) -> AreaLightEntity: ...
     def add_camera(self, name: str, width: int, height: int, fovy: float, near: float, far: float) -> CameraEntity: ...
     def add_directional_light(self, direction: numpy.ndarray[numpy.float32], color: numpy.ndarray[numpy.float32], shadow: bool = False, position: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), scale: float = 10.0, near: float = -10.0, far: float = 10.0, shadow_map_size: int = 2048) -> DirectionalLightEntity: ...
     def add_ground(self, altitude: float, render: bool = True, material: PhysicalMaterial = None, render_material: RenderMaterial = None, render_half_size: numpy.ndarray[numpy.float32] = array([10., 10.], dtype=float32)) -> ActorStatic: ...

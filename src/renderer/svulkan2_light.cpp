@@ -204,5 +204,38 @@ std::string_view SVulkan2ActiveLight::getTexture() {
   throw std::runtime_error("This function is not implemented and will soon be removed.");
 }
 
+SVulkan2ParallelogramLight::SVulkan2ParallelogramLight(svulkan2::scene::ParallelogramLight &light)
+    : mLight(&light) {}
+
+physx::PxTransform SVulkan2ParallelogramLight::getPose() const {
+  auto pose = mLight->getTransform();
+  return {{pose.position.x, pose.position.y, pose.position.z},
+          {pose.rotation.x, pose.rotation.y, pose.rotation.z, pose.rotation.w}};
+}
+void SVulkan2ParallelogramLight::setPose(physx::PxTransform const &transform) {
+  mLight->setTransform(svulkan2::scene::Transform{
+      .position = glm::vec3(transform.p.x, transform.p.y, transform.p.z),
+      .rotation = glm::quat(transform.q.w, transform.q.x, transform.q.y, transform.q.z)});
+}
+physx::PxVec3 SVulkan2ParallelogramLight::getColor() const {
+  auto color = mLight->getColor();
+  return {color.x, color.y, color.z};
+}
+void SVulkan2ParallelogramLight::setColor(physx::PxVec3 color) {
+  mLight->setColor({color.x, color.y, color.z});
+}
+
+void SVulkan2ParallelogramLight::setShape(physx::PxVec3 edge0, physx::PxVec3 edge1) {
+  mLight->setShape({edge0.x, edge0.y, edge0.z}, {edge1.x, edge1.y, edge1.z});
+}
+physx::PxVec3 SVulkan2ParallelogramLight::getEdge0() {
+  auto e = mLight->getEdge0();
+  return {e.x, e.y, e.z};
+}
+physx::PxVec3 SVulkan2ParallelogramLight::getEdge1() {
+  auto e = mLight->getEdge1();
+  return {e.x, e.y, e.z};
+}
+
 } // namespace Renderer
 } // namespace sapien

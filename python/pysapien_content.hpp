@@ -402,6 +402,7 @@ void buildSapien(py::module &m) {
       py::class_<SDirectionalLight, SLight>(m, "DirectionalLightEntity");
   auto PySpotLightEntity = py::class_<SSpotLight, SLight>(m, "SpotLightEntity");
   auto PyActiveLightEntity = py::class_<SActiveLight, SLight>(m, "ActiveLightEntity");
+  auto PyAreaLightEntity = py::class_<SParallelogramLight, SLight>(m, "AreaLightEntity");
 
   auto PyParticleEntity = py::class_<SEntityParticle, SEntity>(m, "ParticleEntity");
   auto PyCameraEntity = py::class_<SCamera, SEntity>(m, "CameraEntity");
@@ -1041,6 +1042,14 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("pose"), py::arg("color"), py::arg("fov"), py::arg("tex_path"),
           py::arg("near") = 0.1f, py::arg("far") = 10.f, py::arg("shadow_map_size") = 2048,
+          py::return_value_policy::reference)
+      .def(
+          "add_area_light_for_ray_tracing",
+          [](SScene &scene, PxTransform const &pose, py::array_t<float> const &color, float width,
+             float height) {
+            return scene.addParallelogramLight(pose, array2vec3(color), {width, 0}, {0, height});
+          },
+          py::arg("pose"), py::arg("color"), py::arg("width"), py::arg("height"),
           py::return_value_policy::reference)
       .def("remove_light", &SScene::removeLight, py::arg("light"))
       .def("set_environment_map", &SScene::setEnvironmentMap, py::arg("filename"))
@@ -2213,6 +2222,23 @@ Args:
            py::arg("far"))
       .def_property_readonly("shadow_near", &SActiveLight::getShadowNear)
       .def_property_readonly("shadow_far", &SActiveLight::getShadowFar);
+
+  PyAreaLightEntity
+      .def(
+          "set_shape",
+          [](SParallelogramLight &light, py::array_t<float> edge0, py::array_t<float> edge1) {
+            light.setShape({edge0.at(0), edge0.at(1)}, {edge1.at(0), edge1.at(1)});
+          },
+          py::arg("edge0"), py::arg("edge1"))
+      .def_property_readonly("edge0",
+                             [](SParallelogramLight &light) {
+                               auto edge = light.getEdge0();
+                               return make_array<float>({edge.x, edge.y});
+                             })
+      .def_property_readonly("edge1", [](SParallelogramLight &light) {
+        auto edge = light.getEdge1();
+        return make_array<float>({edge.x, edge.y});
+      });
 
   PyParticleEntity.def_property_readonly("visual_body",
                                          [](SEntityParticle &p) { return p.getVisualBody(); });

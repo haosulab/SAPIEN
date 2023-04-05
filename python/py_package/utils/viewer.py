@@ -1775,10 +1775,11 @@ class Viewer(object):
                 .Value(light.pose.q[3])
                 .ReadOnly(True),
             )
-            self.actor_window.append(
-                R.UIInputFloat().Label("Near").Value(light.shadow_near).ReadOnly(True),
-                R.UIInputFloat().Label("Far").Value(light.shadow_far).ReadOnly(True),
-            )
+            if hasattr(light, "shadow_near"):
+                self.actor_window.append(
+                    R.UIInputFloat().Label("Near").Value(light.shadow_near).ReadOnly(True),
+                    R.UIInputFloat().Label("Far").Value(light.shadow_far).ReadOnly(True),
+                )
 
             if light.classname == "PointLightEntity":
                 light: PointLightEntity

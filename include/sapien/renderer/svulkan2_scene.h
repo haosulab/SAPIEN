@@ -88,6 +88,10 @@ public:
                                   float fovOuter, std::array<float, 3> const &color,
                                   bool enableShadow, float shadowNear, float shadowFar,
                                   uint32_t shadowMapSize) override;
+  SVulkan2ParallelogramLight *addParallelogramLight(physx::PxTransform const &pose,
+                                             std::array<float, 3> const &color,
+                                             std::array<float, 3> const &edge0,
+                                             std::array<float, 3> const &edge1) override;
   IActiveLight *addActiveLight(physx::PxTransform const &pose, std::array<float, 3> const &color,
                                float fov, std::string_view texPath, float shadowNear,
                                float shadowFar, uint32_t shadowMapSize) override;

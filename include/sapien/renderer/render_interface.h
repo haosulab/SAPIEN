@@ -25,6 +25,7 @@ class ILight;
 class IPointLight;
 class ISpotLight;
 class IDirectionalLight;
+class IParallelogramLight;
 
 static inline void _warn_mat_func_not_supported(std::string_view func_name) {
   // gcc9 do not have source_location
@@ -335,6 +336,13 @@ public:
   virtual float getShadowFar() const = 0;
 };
 
+class IParallelogramLight : public ILight {
+public:
+  virtual void setShape(physx::PxVec3 edge0, physx::PxVec3 edge1) = 0;
+  virtual physx::PxVec3 getEdge0() = 0;
+  virtual physx::PxVec3 getEdge1() = 0;
+};
+
 class ISpotLight : public ILight {
 public:
   virtual physx::PxVec3 getPosition() const = 0;
@@ -512,6 +520,13 @@ public:
                                        std::array<float, 3> const &color, float fov,
                                        std::string_view texPath, float shadowNear, float shadowFar,
                                        uint32_t shadowMapSize) = 0;
+
+  virtual IParallelogramLight *addParallelogramLight(physx::PxTransform const &pose,
+                                                     std::array<float, 3> const &color,
+                                                     std::array<float, 3> const &edge0,
+                                                     std::array<float, 3> const &edge1) {
+    throw std::runtime_error("parallelogram light is not supported");
+  }
 
   virtual void removeLight(ILight *light) = 0;
 

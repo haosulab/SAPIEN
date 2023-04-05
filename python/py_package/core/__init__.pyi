@@ -7,6 +7,7 @@ from sapien.core.pysapien import ActorBase
 from sapien.core.pysapien import ActorBuilder
 from sapien.core.pysapien import ActorDynamicBase
 from sapien.core.pysapien import ActorStatic
+from sapien.core.pysapien import AreaLightEntity
 from sapien.core.pysapien import Articulation
 from sapien.core.pysapien import ArticulationBase
 from sapien.core.pysapien import ArticulationBuilder
@@ -94,6 +95,7 @@ __all__ = [
     "ActorBuilder",
     "ActorDynamicBase",
     "ActorStatic",
+    "AreaLightEntity",
     "Articulation",
     "ArticulationBase",
     "ArticulationBuilder",

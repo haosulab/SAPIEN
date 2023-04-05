@@ -911,6 +911,22 @@ SActiveLight *SScene::addActiveLight(PxTransform const &pose, PxVec3 const &colo
   return ret;
 }
 
+SParallelogramLight *SScene::addParallelogramLight(PxTransform const &pose, PxVec3 const &color,
+                                                   PxVec2 const &edge0, PxVec2 const &edge1) {
+  PxVec3 e0{0, edge0.x, edge0.y};
+  PxVec3 e1{0, edge1.x, edge1.y};
+  PxTransform corner2center{-e0 / 2.f - e1 / 2.f, PxIdentity};
+  auto light =
+      mRendererScene->addParallelogramLight(pose * corner2center, {color.x, color.y, color.z},
+                                            {0, edge0.x, edge0.y}, {0, edge1.x, edge1.y});
+  auto sl = std::make_unique<SParallelogramLight>(this, light);
+  sl->setShape(edge0, edge1);
+  sl->setPose(pose);
+  auto ret = sl.get();
+  mLights.push_back(std::move(sl));
+  return ret;
+}
+
 void SScene::removeLight(SLight *light) {
   if (light && light->getRendererLight()) {
     mRendererScene->removeLight(light->getRendererLight());
