@@ -338,7 +338,8 @@ bool SVulkan2Window::windowCloseRequested() {
 
 svulkan2::scene::Camera *SVulkan2Window::getCamera() {
   if (!mScene) {
-    throw std::runtime_error("failed to operate camera, you need to set scene first.");
+    throw std::runtime_error(
+        "failed to operate camera, did you forget to call viewer.set_scene ?");
   }
   auto cams = mScene->getScene()->getCameras();
   for (auto cam : cams) {

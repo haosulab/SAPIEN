@@ -566,7 +566,7 @@ void main() {
 
   vec3 texNormal = vec3(0.0, 0.0, 1.0);  // TODO use
   if (ti.normal >= 0) {
-    texNormal = normalize(texture(textures[nonuniformEXT(ti.normal)], uv).xyz);
+    texNormal = normalize(texture(textures[nonuniformEXT(ti.normal)], uv).xyz * 2.0 - 1.0);
   }
 
   vec3 emission = mat.emission.rgb;
