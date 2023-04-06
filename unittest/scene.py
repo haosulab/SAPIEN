@@ -26,7 +26,6 @@ class TestScene(unittest.TestCase):
         config.enable_ccd = True
         config.enable_enhanced_determinism = True
         config.enable_friction_every_iteration = False
-        config.enable_adaptive_force = True
         config.disable_collision_visual = True
         scene = engine.create_scene(config)
         config1 = scene.get_config()
@@ -45,7 +44,6 @@ class TestScene(unittest.TestCase):
         self.assertEqual(config.enable_ccd, True)
         self.assertEqual(config.enable_enhanced_determinism, True)
         self.assertEqual(config.enable_friction_every_iteration, False)
-        self.assertEqual(config.enable_adaptive_force, True)
         self.assertEqual(config.disable_collision_visual, True)
 
     def test_actor_builder(self):
