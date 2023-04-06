@@ -1,9 +1,6 @@
 FROM quay.io/pypa/manylinux2014_x86_64:2022-11-14-1226cfc
 RUN yum update -y && mkdir /workspace
 
-WORKDIR /workspace
-COPY PhysX /workspace/PhysX
-
 ENV CC=/opt/rh/devtoolset-10/root/usr/bin/cc CXX=/opt/rh/devtoolset-10/root/usr/bin/c++
 
 RUN yum install -y tinyxml-devel boost169-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel glew-devel zip wget
@@ -82,6 +79,8 @@ RUN cd /workspace && git clone --single-branch -b v1.51.1 --depth 1 https://gith
     cd /workspace/grpc && git submodule update --init --recursive && mkdir -p build && \
     cd /workspace/grpc/build && cmake .. -DCMAKE_INSTALL_PREFIX=/workspace/grpc_install/install && make -j8 && make install && \
     cd /workspace && rm -rf grpc && mv grpc_install grpc
+
+RUN cd /workspace && wget https://storage1.ucsd.edu/datasets/PhysX5_compiled.zip && unzip PhysX5_compiled.zip && mv PhysX5_compiled PhysX && rm -f PhysX5_compiled.zip
 
 RUN cd /workspace && curl -O https://sdk.lunarg.com/sdk/download/1.3.224.1/linux/vulkan_sdk.tar.gz && tar -xf vulkan_sdk.tar.gz && rm -f vulkan_sdk.tar.gz
 ENV VULKAN_SDK=/workspace/1.3.224.1/x86_64 LD_LIBRARY_PATH=/workspace/1.3.224.1/x86_64/lib VK_LAYER_PATH=/workspace/1.3.224.1/x86_64/etc/vulkan/explicit_layer.d PATH=/workspace/1.3.224.1/x86_64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

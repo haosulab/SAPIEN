@@ -32,7 +32,6 @@ __all__ = [
     "Drive",
     "Engine",
     "Entity",
-    "Gear",
     "IPxrRenderer",
     "Joint",
     "JointBase",
@@ -788,16 +787,6 @@ class ActiveLightEntity(LightEntity, Entity):
         :type: float
         """
     pass
-class Gear():
-    @property
-    def ratio(self) -> float:
-        """
-        :type: float
-        """
-    @ratio.setter
-    def ratio(self, arg1: float) -> None:
-        pass
-    pass
 class IPxrRenderer():
     def create_material(self) -> RenderMaterial: ...
     def create_mesh(self, vertices: numpy.ndarray[numpy.float32, _Shape[m, 3]], indices: numpy.ndarray[numpy.uint32, _Shape[m, 3]]) -> RenderMesh: ...
@@ -954,7 +943,7 @@ class LinkBuilder(ActorBuilder):
         Set the properties of the joint.
 
         Args:
-          joint_type: ["revolute", "prismatic", "fixed"]
+          joint_type: ["revolute", "revolute_unwrapped", "prismatic", "fixed"]
           limits: [[min1, max1], ...], the length is the DoF
           pose_in_parent: joint pose in parent frame. 
             The x-axis is the rotation axis for revolute, or the translation axis for prismatic.
@@ -1608,7 +1597,6 @@ class Scene():
     def create_actor_builder(self) -> ActorBuilder: ...
     def create_articulation_builder(self) -> ArticulationBuilder: ...
     def create_drive(self, actor1: ActorBase, pose1: Pose, actor2: ActorBase, pose2: Pose) -> Drive: ...
-    def create_gear(self, actor1: ActorDynamicBase, pose1: Pose, actor2: ActorDynamicBase, pose2: Pose) -> Gear: ...
     def create_physical_material(self, static_friction: float, dynamic_friction: float, restitution: float) -> PhysicalMaterial: ...
     def create_urdf_loader(self) -> URDFLoader: ...
     def find_actor_by_id(self, id: int) -> ActorBase: ...
@@ -1740,12 +1728,12 @@ class SceneConfig():
     def disable_collision_visual(self, arg0: bool) -> None:
         pass
     @property
-    def enable_adaptive_force(self) -> bool:
+    def enable_adaptive_force(self) -> None:
         """
-        :type: bool
+        :type: None
         """
     @enable_adaptive_force.setter
-    def enable_adaptive_force(self, arg0: bool) -> None:
+    def enable_adaptive_force(self, arg1: bool) -> None:
         pass
     @property
     def enable_ccd(self) -> bool:
@@ -1976,6 +1964,14 @@ class URDFLoader():
         """
     @package_dir.setter
     def package_dir(self, arg0: str) -> None:
+        pass
+    @property
+    def revolute_unwrapped(self) -> bool:
+        """
+        :type: bool
+        """
+    @revolute_unwrapped.setter
+    def revolute_unwrapped(self, arg0: bool) -> None:
         pass
     @property
     def scale(self) -> float:
