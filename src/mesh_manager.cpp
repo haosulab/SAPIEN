@@ -268,8 +268,7 @@ physx::PxTriangleMesh *MeshManager::loadNonConvexMesh(const std::string &filenam
   meshDesc.triangles.data = triangles.data();
 
   PxDefaultMemoryOutputStream writeBuffer;
-  PxTriangleMeshCookingResult::Enum result;
-  if (!mSimulation->mCooking->cookTriangleMesh(meshDesc, writeBuffer, &result)) {
+  if (!mSimulation->mCooking->cookTriangleMesh(meshDesc, writeBuffer)) {
     spdlog::get("SAPIEN")->error("Failed to cook non-convex mesh: {}", filename);
     return nullptr;
   }
@@ -324,11 +323,10 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
   convexDesc.points.stride = sizeof(PxVec3);
   convexDesc.points.data = vertices.data();
   convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // FIXME: shift vertices may improve statbility
-  convexDesc.vertexLimit = 256;
+  convexDesc.vertexLimit = 255;
 
   PxDefaultMemoryOutputStream buf;
-  PxConvexMeshCookingResult::Enum result;
-  if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
+  if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf)) {
     spdlog::get("SAPIEN")->error("Failed to cook mesh: {}", filename);
     return nullptr;
   }
@@ -447,11 +445,10 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
       convexDesc.points.stride = sizeof(PxVec3);
       convexDesc.points.data = vertices.data();
       convexDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // | PxConvexFlag::eSHIFT_VERTICES;
-      convexDesc.vertexLimit = 256;
+      convexDesc.vertexLimit = 255;
 
       PxDefaultMemoryOutputStream buf;
-      PxConvexMeshCookingResult::Enum result;
-      if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf, &result)) {
+      if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf)) {
         spdlog::get("SAPIEN")->error("Failed to cook a mesh from file: {}", filename);
       }
       PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
