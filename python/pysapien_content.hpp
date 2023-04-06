@@ -29,10 +29,6 @@
 #include "sapien/articulation/urdf_loader.h"
 #include "sapien/event_system/event_system.h"
 
-#ifdef SAPIEN_KUAFU
-#include "sapien/renderer/kuafu_renderer.hpp"
-#endif
-
 #include "sapien/renderer/render_config.h"
 #include "sapien/renderer/svulkan2_pointbody.h"
 #include "sapien/renderer/svulkan2_renderer.h"
@@ -438,40 +434,6 @@ void buildSapien(py::module &m) {
             return config.renderTargetFormats.contains(name);
           },
           py::arg("name"));
-
-  //======== Kuafu ========//
-#ifdef SAPIEN_KUAFU
-  auto PyKuafuConfig = py::class_<Renderer::KuafuConfig>(m, "KuafuConfig");
-  PyKuafuConfig.def(py::init<>())
-      .def_readwrite("use_viewer", &Renderer::KuafuConfig::mUseViewer)
-      .def_readwrite("viewer_width", &Renderer::KuafuConfig::mViewerWidth)
-      .def_readwrite("viewer_height", &Renderer::KuafuConfig::mViewerHeight)
-      .def_readwrite("assets_path", &Renderer::KuafuConfig::mAssetsPath)
-      .def_readwrite("spp", &Renderer::KuafuConfig::mPerPixelSampleRate)
-      .def_readwrite("max_bounces", &Renderer::KuafuConfig::mPathDepth)
-      .def_readwrite("accumulate_frames", &Renderer::KuafuConfig::mAccumulateFrames)
-      .def_readwrite("use_denoiser", &Renderer::KuafuConfig::mUseDenoiser)
-      .def_readwrite("max_textures", &Renderer::KuafuConfig::mMaxTextures)
-      .def_readwrite("max_materials", &Renderer::KuafuConfig::mMaxMaterials)
-      .def_readwrite("max_geometries", &Renderer::KuafuConfig::mMaxGeometry)
-      .def_readwrite("max_geometry_instances", &Renderer::KuafuConfig::mMaxGeometryInstances);
-
-  auto PyKuafuRenderer = py::class_<Renderer::KuafuRenderer, Renderer::IPxrRenderer,
-                                    std::shared_ptr<Renderer::KuafuRenderer>>(m, "KuafuRenderer");
-  PyKuafuRenderer
-      .def(py::init<Renderer::KuafuConfig>(), py::arg("config") = Renderer::KuafuConfig())
-      .def_static("_set_default_assets_path", &Renderer::KuafuRenderer::setDefaultAssetsPath,
-                  py::arg("assets_path"))
-      .def_static("set_log_level", &Renderer::KuafuRenderer::setLogLevel, py::arg("level"))
-      .def_property_readonly("is_running", &Renderer::KuafuRenderer::isRunning);
-
-  // auto PyKuafuCamera = py::class_<Renderer::KuafuCamera, Renderer::ICamera>(m, "KuafuCamera");
-  // PyKuafuCamera.def("set_full_perspective", &Renderer::KuafuCamera::setFullPerspective,
-  //                   "Set camera into perspective projection mode with full camera parameters",
-  //                   py::arg("fx"), py::arg("fy"), py::arg("cx"), py::arg("cy"),
-  //                   py::arg("width"), py::arg("height"), py::arg("skew"));
-
-#endif
 
   auto PyRenderClient =
       py::class_<Renderer::server::ClientRenderer, Renderer::IPxrRenderer,

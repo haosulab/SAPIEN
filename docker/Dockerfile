@@ -64,11 +64,6 @@ RUN cd /workspace && git clone --single-branch -b v4.0.0 --depth 1 https://githu
     cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install && \
     cd /workspace && rm -rf KTX-Software
 
-RUN cd /workspace && git clone --single-branch -b release-2.0.16 --depth 1 https://github.com/libsdl-org/SDL.git && \
-    mkdir /workspace/SDL/build && cd /workspace/SDL/build && \
-    cmake .. -DCMAKE_BUILD_TYPE=Release && make -j && make install && \
-    cd /workspace && rm -rf SDL
-
 RUN cd /workspace && git clone --single-branch -b v5.2.3 --depth 1 https://github.com/assimp/assimp.git && \
     sh -c 'printf "@@ -198,3 +198,5 @@\n     mapping.zopen_file = (open_file_func)open;\n+#ifdef ZOPENDISK64\n     mapping.zopendisk_file = (opendisk_file_func)opendisk;\n+#endif\n     mapping.zread_file = (read_file_func)read;" | patch -ulbf /workspace/assimp/code/Common/ZipArchiveIOSystem.cpp' && \
     mkdir /workspace/assimp/build && cd /workspace/assimp/build && \

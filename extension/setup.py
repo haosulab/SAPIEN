@@ -21,7 +21,6 @@ def get_extensions():
         os.path.join(sapien.__path__[0], "include"),
         os.path.join(sapien.__path__[0], "include", "physx"),
         os.path.join(sapien.__path__[0], "include", "pxshared"),
-        os.path.join(sapien.__path__[0], "include", "kuafu"),
     ]  # SAPIEN include path
     include_dirs += [extensions_dir, os.path.join(extensions_dir, "include")]
     print(include_dirs)

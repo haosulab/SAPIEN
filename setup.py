@@ -14,7 +14,6 @@ from setuptools.command.build_ext import build_ext
 parser = argparse.ArgumentParser()
 parser.add_argument('--debug', action='store_true')
 parser.add_argument('--profile', action='store_true')
-parser.add_argument('--no-kuafu', action='store_true')
 args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
 
@@ -52,11 +51,6 @@ class CMakeBuild(build_ext):
         else:
             cmake_args += ['-DSAPIEN_PROFILE=OFF']
 
-        if args.no_kuafu:
-            cmake_args += ['-DSAPIEN_KUAFU=OFF']
-        else:
-            cmake_args += ['-DSAPIEN_KUAFU=ON']
-
         if os.environ.get("CUDA_PATH") is not None:
             cmake_args += ['-DSAPIEN_CUDA=ON']
         else:
@@ -86,14 +80,6 @@ class CMakeBuild(build_ext):
             shutil.rmtree(vulkan_library_path)
         assert os.path.exists(source_path)
         shutil.copytree(source_path, vulkan_library_path)
-
-        if not args.no_kuafu:
-            kuafu_shader_path = os.path.join(self.build_lib, 'sapien', 'kuafu_assets', 'shaders')
-            source_path = os.path.join(ext.sourcedir, '3rd_party/kuafu/resources/shaders')
-            if os.path.exists(kuafu_shader_path):
-                shutil.rmtree(kuafu_shader_path)
-            assert os.path.exists(source_path)
-            shutil.copytree(source_path, kuafu_shader_path)
 
         sensor_assets_path = os.path.join(self.build_lib, 'sapien', 'sensor', 'assets')
         source_patterns_path = os.path.join(ext.sourcedir, 'python', 'py_package', 'sensor', 'assets', 'patterns')
@@ -125,13 +111,6 @@ class CMakeBuild(build_ext):
         if os.path.exists(include_path):
             shutil.rmtree(include_path)
         shutil.copytree(source_include_path, include_path)
-
-        if not args.no_kuafu:
-            include_path = os.path.join(self.build_lib, 'sapien', 'include', 'kuafu')
-            source_include_path = os.path.join(ext.sourcedir, '3rd_party', 'kuafu', 'include')
-            if os.path.exists(include_path):
-                shutil.rmtree(include_path)
-            shutil.copytree(source_include_path, include_path)
 
         shutil.copy(os.path.join(ext.sourcedir, '3rd_party', 'tinyxml2', 'tinyxml2.h'),
                     os.path.join(self.build_lib, 'sapien', 'include', 'tinyxml2.h'))

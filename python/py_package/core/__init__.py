@@ -32,62 +32,32 @@ class VulkanRenderer(SapienRenderer):
         super().__init__(*args, **kwargs)
 
 
-# it is okay to not have Kuafu
-try:
-    from .pysapien import KuafuRenderer as _KuafuRenderer
+class KuafuConfig:
+    def __init__(self):
+        self.use_viewer = False
+        self.viewer_width = 0
+        self.viewer_height = 0
+        self.asset_path = ""
+        self.spp = 4
+        self.max_bounces = 8
+        self.accumulate_frames = True
+        self.use_denoiser = False
+        self.max_textures = 0
+        self.max_materials = 0
+        self.max_geometries = 0
+        self.max_geometry_instances = 0
 
-    class KuafuRenderer(_KuafuRenderer):
-        def __init__(self, config: KuafuConfig):
-            warn(
-                """Kuafu renderer is deprecated in favor of `VulkanRenderer`, which supports both rasterization and ray tracing. To migrate,
-    set `sapien.core.render_config.viewer_shader_dir` or `sapien.core.render_config.camera_shader_dir` to `"rt"`. Replace the following,
-    kuafu_config.spp -> sapien.core.render_config.rt_samples_per_pixel
-    kuafu_config.max_bounces -> sapien.core.render_config.rt_max_path_depth
-    kuafu_config.use_denoiser -> sapien.core.render_config.rt_use_denoiser
-    `kuafu_config.max_materials` and `kuafu_config.max_textures` are now input parameters to `VulkanRenderer`.
-    There is currently no hard limit on max geometries.
-    `kuafu_config.accumulate_frames` is no longer needed. Frames are automatically accumulated if scene.update_render is not called.
-    In addition, `sapien.core.render_config` can be modified at any time and it takes effect for the cameras created after the modification.
-
-                """
-            )
-            super().__init__(config)
-
-    def __enable_kuafu():
-        __KUAFU_ASSETS_ROOT = pkg_resources.resource_filename("sapien", "kuafu_assets")
-        assert os.path.exists(__KUAFU_ASSETS_ROOT)
-        _KuafuRenderer._set_default_assets_path(__KUAFU_ASSETS_ROOT)
-
-    __enable_kuafu()
-
-except ImportError:
-
-    class KuafuConfig:
-        def __init__(self):
-            self.use_viewer = False
-            self.viewer_width = 0
-            self.viewer_height = 0
-            self.asset_path = ""
-            self.spp = 4
-            self.max_bounces = 8
-            self.accumulate_frames = True
-            self.use_denoiser = False
-            self.max_textures = 0
-            self.max_materials = 0
-            self.max_geometries = 0
-            self.max_geometry_instances = 0
-
-    class KuafuRenderer(SapienRenderer):
-        def __init__(self, config: KuafuConfig):
-            warn(
-                """Kuafu renderer is deprecated. SAPIEN will use SapienRenderer instead."""
-            )
-            super().__init__()
-            render_config.viewer_shader_dir = "rt"
-            render_config.camera_shader_dir = "rt"
-            render_config.rt_samples_per_pixel = config.spp
-            render_config.rt_max_path_depth = config.max_bounces
-            render_config.rt_use_denoiser = config.use_denoiser
+class KuafuRenderer(SapienRenderer):
+    def __init__(self, config: KuafuConfig):
+        warn(
+            """Kuafu renderer is deprecated. SAPIEN will use SapienRenderer instead."""
+        )
+        super().__init__()
+        render_config.viewer_shader_dir = "rt"
+        render_config.camera_shader_dir = "rt"
+        render_config.rt_samples_per_pixel = config.spp
+        render_config.rt_max_path_depth = config.max_bounces
+        render_config.rt_use_denoiser = config.use_denoiser
 
 
 def ensure_icd():

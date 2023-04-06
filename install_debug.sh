@@ -12,7 +12,7 @@ fi
 echo ${VERSION} > python/VERSION
 echo __version__=\"${VERSION}\" > python/py_package/version.py
 
-python3 setup.py bdist_wheel --debug --no-kuafu
+python3 setup.py bdist_wheel --debug
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
