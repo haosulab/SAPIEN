@@ -3,7 +3,7 @@
 	url = https://github.com/fbxiang/optifuser.git
 [submodule "3rd_party/sapien-vulkan-2"]
 	path = 3rd_party/sapien-vulkan-2
-	url = git@github.com:haosulab/sapien-vulkan-2.git
+	url = git@github.com:angli66/sapien-vulkan-2.git
 [submodule "3rd_party/simsense"]
 	path = 3rd_party/simsense
 	url = git@github.com:angli66/simsense.git
