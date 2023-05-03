@@ -100,30 +100,6 @@ std::vector<std::array<physx::PxReal, 2>> SKArticulation::getQlimits() const {
   return result;
 }
 
-void SKArticulation::setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const {
-  CHECK_SIZE(v);
-  auto it = v.begin();
-  for (auto &j : mJoints) {
-    uint32_t dof = j->getDof();
-    j->setLimits({it, it + dof});
-    it += dof;
-  }
-}
-
-void SKArticulation::setDriveTarget(std::vector<physx::PxReal> const &v) {
-  CHECK_SIZE(v);
-  auto it = v.begin();
-  for (auto &j : mJoints) {
-    uint32_t dof = j->getDof();
-    j->setDriveTarget({it, it + dof});
-    it += dof;
-  }
-}
-
-std::vector<physx::PxReal> SKArticulation::getDriveTarget() const {
-  return std::vector<PxReal>(0, dof());
-}
-
 void SKArticulation::prestep() {
   auto time = mParentScene->getTimestep();
   EventArticulationStep s;
@@ -150,7 +126,7 @@ void SKArticulation::prestep() {
   }
 }
 
-SKArticulation::SKArticulation(SScene *scene) : SArticulationDrivable(scene) {}
+SKArticulation::SKArticulation(SScene *scene) : SArticulationBase(scene) {}
 
 } // namespace sapien
 

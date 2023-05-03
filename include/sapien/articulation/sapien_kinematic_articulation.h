@@ -8,7 +8,7 @@ class SScene;
 class SKLink;
 class SKJoint;
 
-class SKArticulation : public SArticulationDrivable {
+class SKArticulation : public SArticulationBase {
   friend class ArticulationBuilder;
   friend class LinkBuilder;
 
@@ -42,10 +42,6 @@ public:
   virtual void setRootPose(const physx::PxTransform &T) override;
 
   virtual std::vector<std::array<physx::PxReal, 2>> getQlimits() const override;
-  virtual void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const override;
-
-  virtual void setDriveTarget(std::vector<physx::PxReal> const &v) override;
-  virtual std::vector<physx::PxReal> getDriveTarget() const override;
 
   void prestep() override;
 

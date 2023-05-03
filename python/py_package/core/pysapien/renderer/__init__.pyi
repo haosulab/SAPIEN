@@ -32,6 +32,7 @@ __all__ = [
     "UIInputInt3",
     "UIInputInt4",
     "UIInputText",
+    "UIKeyFrameEditor",
     "UIOptions",
     "UISameLine",
     "UISection",
@@ -299,6 +300,9 @@ class UIInputText(UIWidget):
         """
         :type: str
         """
+    pass
+class UIKeyFrameEditor(UIWidget):
+    def __init__(self, arg0: float) -> None: ...
     pass
 class UIOptions(UIWidget):
     def Callback(self, func: typing.Callable[[UIOptions], None]) -> UIOptions: ...

@@ -104,10 +104,12 @@ std::unique_ptr<SScene> Simulation::createScene(SceneConfig const &config) {
 
 std::shared_ptr<SPhysicalMaterial> Simulation::createPhysicalMaterial(PxReal staticFriction,
                                                                       PxReal dynamicFriction,
-                                                                      PxReal restitution) const {
+                                                                      PxReal restitution) {
+  physx_id_t materialId = mPhysicalMaterialIdGenerator.next();
+
   auto mat = mPhysicsSDK->createMaterial(staticFriction, dynamicFriction, restitution);
   mat->setFlag(PxMaterialFlag::eIMPROVED_PATCH_FRICTION, true);
-  return std::make_shared<SPhysicalMaterial>(shared_from_this(), mat);
+  return std::make_shared<SPhysicalMaterial>(shared_from_this(), mat, materialId);
 }
 
 std::unique_ptr<SCollisionShape>

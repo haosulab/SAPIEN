@@ -86,6 +86,8 @@ void buildRenderer(py::module &parent) {
       m, "UISliderAngle");
   auto PyUIGizmo = py::class_<ui::Gizmo, ui::Widget, std::shared_ptr<ui::Gizmo>>(m, "UIGizmo");
 
+  auto PyUIKeyFrame = py::class_<ui::KeyFrameEditor, ui::Widget, std::shared_ptr<ui::KeyFrameEditor>>(m, "UIKeyFrameEditor");
+
   PyUIWidget.def("remove", &ui::Widget::remove)
       .def("remove_children", &ui::Widget::removeChildren)
       .def("get_children", &ui::Widget::getChildren);
@@ -357,6 +359,8 @@ void buildRenderer(py::module &parent) {
                          proj.at(2, 3), proj.at(3, 3));
              gizmo.setCameraParameters(v, p);
            });
+
+  PyUIKeyFrame.def(py::init<float>());
   // end UI
 
   PyContext

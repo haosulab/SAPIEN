@@ -194,6 +194,7 @@ void SVulkan2Window::setCameraTextureArray(
   }
   mSVulkanRenderer->setCustomTextureArray(name, sts);
 }
+float SVulkan2Window::getContentScale() { return mWindow->getContentScale(); }
 
 glm::vec3 SVulkan2Window::getCameraPosition() { return getCamera()->getPosition(); }
 glm::quat SVulkan2Window::getCameraRotation() { return getCamera()->getRotation(); }

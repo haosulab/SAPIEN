@@ -132,17 +132,6 @@ std::vector<std::array<physx::PxReal, 2>> SArticulation::getQlimits() const {
   return output;
 }
 
-// FIXME needs testing
-void SArticulation::setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const {
-  CHECK_SIZE(v);
-  uint32_t n = 0;
-  for (auto &j : mJoints) {
-    uint32_t dof = j->getDof();
-    j->setLimits(std::vector<std::array<physx::PxReal, 2>>(v.begin() + n, v.begin() + dof));
-    n += dof;
-  }
-}
-
 void SArticulation::setRootPose(physx::PxTransform const &T) {
   mPxArticulation->setRootGlobalPose(T);
 }

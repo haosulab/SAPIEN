@@ -226,6 +226,7 @@ public:
   std::vector<SActorBase *> getAllActors() const;
   std::vector<SArticulationBase *> getAllArticulations() const;
   std::vector<SLight *> getAllLights() const;
+  std::vector<SDrive *> getAllDrives() const;
 
   void setAmbientLight(PxVec3 const &color);
   PxVec3 getAmbientLight() const;

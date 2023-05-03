@@ -353,7 +353,7 @@ void buildSapien(py::module &m) {
   auto PyArticulationDrivable =
       py::class_<SArticulationDrivable, SArticulationBase>(m, "ArticulationDrivable");
   auto PyArticulation = py::class_<SArticulation, SArticulationDrivable>(m, "Articulation");
-  py::class_<SKArticulation, SArticulationDrivable>(m, "KinematicArticulation");
+  py::class_<SKArticulation, SArticulationBase>(m, "KinematicArticulation");
 
   auto PyContact = py::class_<SContact>(m, "Contact");
   auto PyTrigger = py::class_<STrigger>(m, "Trigger");
@@ -493,9 +493,11 @@ void buildSapien(py::module &m) {
   //======== Internal ========//
 
   PyPhysicalMaterial
+      .def_property_readonly("id", &SPhysicalMaterial::getId)
       .def_property_readonly("static_friction", &SPhysicalMaterial::getStaticFriction)
       .def_property_readonly("dynamic_friction", &SPhysicalMaterial::getDynamicFriction)
       .def_property_readonly("restitution", &SPhysicalMaterial::getRestitution)
+      .def("get_id", &SPhysicalMaterial::getId)
       .def("get_static_friction", &SPhysicalMaterial::getStaticFriction)
       .def("get_dynamic_friction", &SPhysicalMaterial::getDynamicFriction)
       .def("get_restitution", &SPhysicalMaterial::getRestitution)
@@ -788,7 +790,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_readwrite("enable_friction_every_iteration", &SceneConfig::enableFrictionEveryIteration)
       .def_readwrite("disable_collision_visual", &SceneConfig::disableCollisionVisual)
       .def("__repr__", [](SceneConfig &) { return "SceneConfig()"; })
-
       .def_property(
           "enable_adaptive_force",
           [](SceneConfig &) {
@@ -796,7 +797,9 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           [](SceneConfig &, bool) {
             PyErr_WarnEx(PyExc_DeprecationWarning, "adaptive_force is removed in PhysX 5.", 1);
-          });
+          })
+      .def("__getstate__", &SceneConfig::getState)
+      .def("__setstate__", &SceneConfig::setState);
 
   //======== Simulation ========//
   PyEngine
@@ -934,6 +937,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_all_articulations", &SScene::getAllArticulations,
            py::return_value_policy::reference)
       .def("get_all_lights", &SScene::getAllLights, py::return_value_policy::reference)
+      .def("get_all_drives", &SScene::getAllDrives, py::return_value_policy::reference)
       // drive, constrains, and joints
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
            py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
@@ -1059,40 +1063,165 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("data"));
 
   //======= Drive =======//
-  PyDrive.def("set_x_limit", &SDrive6D::setXLimit, py::arg("low"), py::arg("high"))
-      .def("set_y_limit", &SDrive6D::setYLimit, py::arg("low"), py::arg("high"))
-      .def("set_z_limit", &SDrive6D::setZLimit, py::arg("low"), py::arg("high"))
-      .def("set_x_twist_limit", &SDrive6D::setXTwistLimit, py::arg("low"), py::arg("high"))
-      .def("set_yz_cone_limit", &SDrive6D::setYZConeLimit, py::arg("y"), py::arg("z"))
-      .def("set_yz_pyramid_limit", &SDrive6D::setYZPyramidLimit, py::arg("ylow"), py::arg("yhigh"),
-           py::arg("zlow"), py::arg("zhigh"))
-      .def("set_distance_limit", &SDrive6D::setDistanceLimit, py::arg("distance"))
-      .def("set_x_twist_properties", &SDrive6D::setXTwistDriveProperties, py::arg("stiffness"),
-           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
-           py::arg("is_acceleration") = true)
-      .def("set_yz_swing_properties", &SDrive6D::setYZSwingDriveProperties, py::arg("stiffness"),
-           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
-           py::arg("is_acceleration") = true)
-      .def("set_slerp_properties", &SDrive6D::setSlerpProperties, py::arg("stiffness"),
-           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
-           py::arg("is_acceleration") = true)
-      .def("set_x_properties", &SDrive6D::setXProperties, py::arg("stiffness"), py::arg("damping"),
-           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("set_y_properties", &SDrive6D::setYProperties, py::arg("stiffness"), py::arg("damping"),
-           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
-      .def("set_z_properties", &SDrive6D::setZProperties, py::arg("stiffness"), py::arg("damping"),
-           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
+  PyDrive
+      .def("get_actor1", &SDrive::getActor1, py::return_value_policy::reference)
+      .def("get_actor2", &SDrive::getActor2, py::return_value_policy::reference)
+      .def("get_pose1", &SDrive::getLocalPose1)
+      .def("get_pose2", &SDrive::getLocalPose2)
+      .def("get_dof_states",
+           [](SDrive6D &drive) {
+            std::vector<std::string> states;
+            for (int dofState : drive.getDofStates()) {
+              if (dofState == 0) {
+                states.push_back("locked");
+              } else if (dofState == 1) {
+                states.push_back("limited");
+              } else if (dofState == 2) {
+                states.push_back("free");
+              }
+            }
+            return states;
+           },
+           R"doc(
+Return the states of the six degrees of freedom (tx, ty, tz, rx, ry, rz) of the drive. State can
+be locked, limited, or free.)doc")
       .def("lock_motion", &SDrive6D::lockMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
            py::arg("rx"), py::arg("ry"), py::arg("rz"))
       .def("free_motion", &SDrive6D::freeMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
            py::arg("rx"), py::arg("ry"), py::arg("rz"))
+      .def("set_x_limit", &SDrive6D::setXLimit, py::arg("low"), py::arg("high"))
+      .def("get_x_limit", &SDrive6D::getXLimit)
+      .def("set_y_limit", &SDrive6D::setYLimit, py::arg("low"), py::arg("high"))
+      .def("get_y_limit", &SDrive6D::getYLimit)
+      .def("set_z_limit", &SDrive6D::setZLimit, py::arg("low"), py::arg("high"))
+      .def("get_z_limit", &SDrive6D::getZLimit)
+      .def("set_x_twist_limit", &SDrive6D::setXTwistLimit, py::arg("low"), py::arg("high"))
+      .def("get_x_twist_limit", &SDrive6D::getXTwistLimit)
+      .def("set_yz_cone_limit", &SDrive6D::setYZConeLimit, py::arg("y"), py::arg("z"))
+      .def("get_yz_cone_limit", &SDrive6D::getYZConeLimit)
+      .def("set_yz_pyramid_limit", &SDrive6D::setYZPyramidLimit, py::arg("ylow"), py::arg("yhigh"),
+           py::arg("zlow"), py::arg("zhigh"))
+      .def("get_yz_pyramid_limit", &SDrive6D::getYZPyramidLimit)
+      .def("set_distance_limit", &SDrive6D::setDistanceLimit, py::arg("distance"))
+      .def("get_distance_limit", &SDrive6D::getDistanceLimit)
+      .def("set_x_properties", &SDrive6D::setXProperties, py::arg("stiffness"), py::arg("damping"),
+           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
+      .def("get_x_properties",
+           [] (SDrive6D &drive) {
+            std::vector<float> properties = drive.getXProperties();
+            py::dict data;
+            data["stiffness"] = properties[0];
+            data["damping"] = properties[1];
+            data["force_limit"] = properties[2];
+            if (properties[3] == 0.0) {
+              data["is_acceleration"] = false;
+            } else {
+              data["is_acceleration"] = true;
+            }
+            return data;
+           })
+      .def("set_y_properties", &SDrive6D::setYProperties, py::arg("stiffness"), py::arg("damping"),
+           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
+      .def("get_y_properties",
+           [] (SDrive6D &drive) {
+            std::vector<float> properties = drive.getYProperties();
+            py::dict data;
+            data["stiffness"] = properties[0];
+            data["damping"] = properties[1];
+            data["force_limit"] = properties[2];
+            if (properties[3] == 0.0) {
+              data["is_acceleration"] = false;
+            } else {
+              data["is_acceleration"] = true;
+            }
+            return data;
+           })
+      .def("set_z_properties", &SDrive6D::setZProperties, py::arg("stiffness"), py::arg("damping"),
+           py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
+      .def("get_z_properties",
+           [] (SDrive6D &drive) {
+            std::vector<float> properties = drive.getZProperties();
+            py::dict data;
+            data["stiffness"] = properties[0];
+            data["damping"] = properties[1];
+            data["force_limit"] = properties[2];
+            if (properties[3] == 0.0) {
+              data["is_acceleration"] = false;
+            } else {
+              data["is_acceleration"] = true;
+            }
+            return data;
+           })
+      .def("set_x_twist_properties", &SDrive6D::setXTwistDriveProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("is_acceleration") = true)
+      .def("get_x_twist_properties",
+           [] (SDrive6D &drive) {
+            std::vector<float> properties = drive.getXTwistDriveProperties();
+            py::dict data;
+            data["stiffness"] = properties[0];
+            data["damping"] = properties[1];
+            data["force_limit"] = properties[2];
+            if (properties[3] == 0.0) {
+              data["is_acceleration"] = false;
+            } else {
+              data["is_acceleration"] = true;
+            }
+            return data;
+           })
+      .def("set_yz_swing_properties", &SDrive6D::setYZSwingDriveProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("is_acceleration") = true)
+      .def("get_yz_swing_properties",
+           [] (SDrive6D &drive) {
+            std::vector<float> properties = drive.getYZSwingDriveProperties();
+            py::dict data;
+            data["stiffness"] = properties[0];
+            data["damping"] = properties[1];
+            data["force_limit"] = properties[2];
+            if (properties[3] == 0.0) {
+              data["is_acceleration"] = false;
+            } else {
+              data["is_acceleration"] = true;
+            }
+            return data;
+           })
+      .def("set_slerp_properties", &SDrive6D::setSlerpProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("is_acceleration") = true)
+      .def("get_slerp_properties",
+           [] (SDrive6D &drive) {
+            std::vector<float> properties = drive.getSlerpProperties();
+            py::dict data;
+            data["stiffness"] = properties[0];
+            data["damping"] = properties[1];
+            data["force_limit"] = properties[2];
+            if (properties[3] == 0.0) {
+              data["is_acceleration"] = false;
+            } else {
+              data["is_acceleration"] = true;
+            }
+            return data;
+           })
       .def("set_target", &SDrive6D::setTarget, py::arg("pose"))
+      .def("get_target", &SDrive6D::getTarget)
       .def(
           "set_target_velocity",
           [](SDrive6D &d, py::array_t<PxReal> const &linear, py::array_t<PxReal> const &angular) {
             d.setTargetVelocity(array2vec3(linear), array2vec3(angular));
           },
-          py::arg("linear"), py::arg("angular"));
+          py::arg("linear"), py::arg("angular"))
+      .def("get_target_velocity",
+           [](SDrive6D &d) {
+            auto targetVelocity = d.getTargetVelocity();
+            py::array_t<PxReal> linear = vec32array(std::get<0>(targetVelocity));
+            py::array_t<PxReal> angular = vec32array(std::get<1>(targetVelocity));
+
+            std::vector<py::array_t<PxReal>> target_velocity;
+            target_velocity.push_back(linear);
+            target_velocity.push_back(angular);
+            return target_velocity;
+           });
 
   PyGear.def_property("gear_ratio", &SGear::getGearRatio, &SGear::setGearRatio);
 
@@ -1180,6 +1309,10 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           },
           py::arg("force"), py::arg("torque"))
       .def("set_damping", &SActorDynamicBase::setDamping, py::arg("linear"), py::arg("angular"))
+      .def_property_readonly("linear_damping", &SActorDynamicBase::getLinearDamping)
+      .def("get_linear_damping", &SActorDynamicBase::getLinearDamping)
+      .def_property_readonly("angular_damping", &SActorDynamicBase::getAngularDamping)
+      .def("get_angular_damping", &SActorDynamicBase::getAngularDamping)
       .def("set_ccd", &SActorDynamicBase::setCCDEnabled, py::arg("enable"))
       .def_property("ccd", &SActorDynamicBase::getCCDEnabled, &SActorDynamicBase::setCCDEnabled);
 
@@ -1197,6 +1330,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            [](SActor &a, py::array_t<PxReal> v) { a.setAngularVelocity(array2vec3(v)); })
       .def("lock_motion", &SActor::lockMotion, py::arg("x") = true, py::arg("y") = true,
            py::arg("z") = true, py::arg("rx") = true, py::arg("ry") = true, py::arg("rz") = true)
+      .def("dof_are_locked", &SActor::dofAreLocked)
       .def("pack", &SActor::packData)
       .def("unpack",
            [](SActor &a,
@@ -1375,21 +1509,6 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
                                         {sizeof(std::array<PxReal, 2>), sizeof(PxReal)},
                                         reinterpret_cast<PxReal *>(limits.data()));
            })
-      .def(
-          "set_qlimits",
-          [](SArticulationBase &a, py::array_t<PxReal> limits) {
-            std::vector<std::array<PxReal, 2>> l;
-            if (limits.ndim() == 2) {
-              if (limits.shape(1) != 2) {
-                throw std::runtime_error("Joint limits should have shape [dof, 2]");
-              }
-              for (uint32_t i = 0; i < limits.size() / 2; ++i) {
-                l.push_back({limits.at(i, 0), limits.at(i, 1)});
-              }
-            }
-            a.setQlimits(l);
-          },
-          py::arg("qlimits"))
       .def("get_root_pose", &SArticulationBase::getRootPose)
       .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"))
       .def("set_pose", &SArticulationBase::setRootPose, py::arg("pose"), "same as set_root_pose")
@@ -1500,6 +1619,12 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
            [](SArticulation &a,
               const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
              a.unpackData(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
+           })
+      .def("pack_drive", &SArticulation::packDrive)
+      .def("unpack_drive",
+           [](SArticulation &a,
+              const py::array_t<PxReal, py::array::c_style | py::array::forcecast> &arr) {
+             a.unpackDrive(std::vector<PxReal>(arr.data(), arr.data() + arr.size()));
            });
 
   //======== End Articulation ========//
@@ -1564,7 +1689,16 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
 
   //======== Builders ========
 
-  PyActorBuilder.def("set_scene", &ActorBuilder::setScene)
+  PyActorBuilder
+      .def_property_readonly("use_density", &ActorBuilder::getUseDensity)
+      .def_property_readonly("mass", &ActorBuilder::getMass)
+      .def_property_readonly("c_mass_pose", &ActorBuilder::getCMassPose)
+      .def_property_readonly(
+        "inertia", [](ActorBuilder &a) { return vec32array(a.getInertia()); })
+      .def_property_readonly(
+          "scale", [](ActorBuilder::ShapeRecord const &r) { return vec32array(r.scale); })
+      .def_property_readonly("collision_groups", &ActorBuilder::getCollisionGroup)
+      .def("set_scene", &ActorBuilder::setScene)
       .def(
           "add_collision_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
@@ -1770,7 +1904,10 @@ References:
       .def_readonly("pose", &ActorBuilder::ShapeRecord::pose)
       .def_readonly("density", &ActorBuilder::ShapeRecord::density)
       .def_readonly("material", &ActorBuilder::ShapeRecord::material,
-                    py::return_value_policy::reference);
+                    py::return_value_policy::reference)
+      .def_readonly("patch_radius", &ActorBuilder::ShapeRecord::patchRadius)
+      .def_readonly("min_patch_radius", &ActorBuilder::ShapeRecord::minPatchRadius)
+      .def_readonly("is_trigger", &ActorBuilder::ShapeRecord::isTrigger);
 
   PyVisualRecord.def_readonly("filename", &ActorBuilder::VisualRecord::filename)
       .def_property_readonly("type",
@@ -2382,6 +2519,7 @@ Args:
           py::arg("name"), py::arg("textures"))
 
       .def("set_shader_dir", &Renderer::SVulkan2Window::setShader, py::arg("shader_dir"))
+      .def("get_content_scale", &Renderer::SVulkan2Window::getContentScale)
       .def("get_camera_position",
            [](Renderer::SVulkan2Window &window) {
              auto pos = window.getCameraPosition();

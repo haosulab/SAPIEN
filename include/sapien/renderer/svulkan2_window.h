@@ -74,6 +74,8 @@ public:
   void setCameraTextureArray(std::string const &name,
                              std::vector<std::shared_ptr<Renderer::IPxrTexture>> textures);
 
+  float getContentScale();
+
   float getCameraNear();
   float getCameraFar();
   float getCameraFovy();

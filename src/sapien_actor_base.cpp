@@ -122,6 +122,16 @@ void SActorDynamicBase::setDamping(PxReal linear, PxReal angular) {
   actor->setAngularDamping(angular);
 }
 
+PxReal SActorDynamicBase::getLinearDamping() const {
+  auto actor = getPxActor();
+  return actor->getLinearDamping();
+}
+
+PxReal SActorDynamicBase::getAngularDamping() const {
+  auto actor = getPxActor();
+  return actor->getAngularDamping();
+}
+
 PxReal SActorDynamicBase::getMass() { return getPxActor()->getMass(); }
 PxVec3 SActorDynamicBase::getInertia() { return getPxActor()->getMassSpaceInertiaTensor(); }
 PxTransform SActorDynamicBase::getCMassLocalPose() { return getPxActor()->getCMassLocalPose(); }
@@ -131,7 +141,7 @@ void SActorDynamicBase::setCCDEnabled(bool enable) {
 }
 
 bool SActorDynamicBase::getCCDEnabled() const {
-  return getPxActor()->getRigidBodyFlags() | PxRigidBodyFlag::eENABLE_CCD;
+  return getPxActor()->getRigidBodyFlags() & PxRigidBodyFlag::eENABLE_CCD;
 }
 
 } // namespace sapien

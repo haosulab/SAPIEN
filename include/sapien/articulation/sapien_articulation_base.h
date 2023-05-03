@@ -46,7 +46,6 @@ public:
   virtual void setRootPose(const physx::PxTransform &T) = 0;
 
   virtual std::vector<std::array<physx::PxReal, 2>> getQlimits() const = 0;
-  virtual void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const = 0;
 
   virtual void prestep() = 0;
 

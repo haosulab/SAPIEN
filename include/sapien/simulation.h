@@ -19,6 +19,7 @@
 #include <PxPhysicsAPI.h>
 
 // TODO(jigu): check whether to replace with forward declaration
+#include "id_generator.h"
 #include "mesh_manager.h"
 #include "renderer/render_interface.h"
 #include "sapien_material.h"
@@ -49,7 +50,7 @@ public:
   std::unique_ptr<SScene> createScene(SceneConfig const &config = {});
 
   std::shared_ptr<SPhysicalMaterial>
-  createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction, PxReal restitution) const;
+  createPhysicalMaterial(PxReal staticFriction, PxReal dynamicFriction, PxReal restitution);
 
   std::unique_ptr<SCollisionShape>
   createCollisionShape(PxGeometry const &geometry, std::shared_ptr<SPhysicalMaterial> material);
@@ -82,6 +83,8 @@ private:
   std::shared_ptr<Renderer::IPxrRenderer> mRenderer = nullptr;
 
   MeshManager mMeshManager;
+
+  IDGenerator mPhysicalMaterialIdGenerator;  // unique id generator for physical materials
 };
 
 } // namespace sapien

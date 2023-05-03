@@ -20,5 +20,43 @@ struct SceneConfig {
   bool enableFrictionEveryIteration =
       true;                         // better friction calculation, recommended for robotics
   bool disableCollisionVisual = false;   // do not create visual shapes for collisions
+
+  std::tuple<Eigen::Vector3f, float, float, float, float, float, float, uint32_t, uint32_t, bool, bool, bool, bool, bool, bool> getState() const {
+    return std::make_tuple(
+      gravity,
+      static_friction,
+      dynamic_friction,
+      restitution,
+      bounceThreshold,
+      sleepThreshold,
+      contactOffset,
+      solverIterations,
+      solverVelocityIterations,
+      enablePCM,
+      enableTGS,
+      enableCCD,
+      enableEnhancedDeterminism,
+      enableFrictionEveryIteration,
+      disableCollisionVisual
+    );
+  }
+
+  void setState(const std::tuple<Eigen::Vector3f, float, float, float, float, float, float, uint32_t, uint32_t, bool, bool, bool, bool, bool, bool>& state) {
+    gravity = std::get<0>(state);
+    static_friction = std::get<1>(state);
+    dynamic_friction = std::get<2>(state);
+    restitution = std::get<3>(state);
+    bounceThreshold = std::get<4>(state);
+    sleepThreshold = std::get<5>(state);
+    contactOffset = std::get<6>(state);
+    solverIterations = std::get<7>(state);
+    solverVelocityIterations = std::get<8>(state);
+    enablePCM = std::get<9>(state);
+    enableTGS = std::get<10>(state);
+    enableCCD = std::get<11>(state);
+    enableEnhancedDeterminism = std::get<12>(state);
+    enableFrictionEveryIteration = std::get<13>(state);
+    disableCollisionVisual = std::get<14>(state);
+  }
 };
 } // namespace sapien

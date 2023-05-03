@@ -730,6 +730,14 @@ std::vector<SLight *> SScene::getAllLights() const {
   return output;
 }
 
+std::vector<SDrive *> SScene::getAllDrives() const {
+  std::vector<SDrive *> output;
+  for (auto &drive : mDrives) {
+    output.push_back(drive.get());
+  }
+  return output;
+}
+
 std::map<physx_id_t, std::string> SScene::findRenderId2VisualName() const {
   std::map<physx_id_t, std::string> result;
   for (auto &actor : mActors) {

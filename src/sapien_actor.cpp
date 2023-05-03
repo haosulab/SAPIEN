@@ -58,6 +58,18 @@ void SActor::lockMotion(bool x, bool y, bool z, bool ax, bool ay, bool az) {
   mActor->setRigidDynamicLockFlags(flags);
 }
 
+std::vector<bool> SActor::dofAreLocked() {
+  auto flags = mActor->getRigidDynamicLockFlags();
+  std::vector<bool> areLocked;
+  areLocked.push_back(flags.isSet(PxRigidDynamicLockFlag::eLOCK_LINEAR_X));
+  areLocked.push_back(flags.isSet(PxRigidDynamicLockFlag::eLOCK_LINEAR_Y));
+  areLocked.push_back(flags.isSet(PxRigidDynamicLockFlag::eLOCK_LINEAR_Z));
+  areLocked.push_back(flags.isSet(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X));
+  areLocked.push_back(flags.isSet(PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y));
+  areLocked.push_back(flags.isSet(PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z));
+  return areLocked;
+}
+
 void SActor::setSolverIterations(uint32_t position, uint32_t velocity) {
   getPxActor()->setSolverIterationCounts(position, velocity);
 }

@@ -171,6 +171,15 @@ public:
                                                   PxVec3 const &inertia);
   std::shared_ptr<ActorBuilder> setScene(SScene *scene);
 
+  bool getUseDensity() const { return mUseDensity; };
+  PxReal getMass() const { return mMass; };
+  PxTransform getCMassPose() const { return mCMassPose; };
+  PxVec3 getInertia() const { return mInertia; };
+  std::vector<uint32_t> getCollisionGroup() const {
+    std::vector<uint32_t> vec{mCollisionGroup.w0, mCollisionGroup.w1, mCollisionGroup.w2, mCollisionGroup.w3};
+    return vec;
+  };
+
   SActor *build(bool isKinematic = false, std::string const &name = "") const;
   SActorStatic *buildStatic(std::string const &name = "") const;
 

@@ -59,7 +59,6 @@ public:
   void setQf(std::vector<physx::PxReal> const &v) override;
 
   std::vector<std::array<physx::PxReal, 2>> getQlimits() const override;
-  void setQlimits(std::vector<std::array<physx::PxReal, 2>> const &v) const override;
 
   std::vector<physx::PxReal> getDriveTarget() const override;
   void setDriveTarget(std::vector<physx::PxReal> const &v) override;
