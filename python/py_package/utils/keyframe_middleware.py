@@ -15,6 +15,12 @@ class KeyFrameData:
         
         # Sort by keys
         self.keyframes = OrderedDict(sorted(self.keyframes.items(), key=lambda item: item[0]))
+    
+    def update(self, frame: int, scene: Scene):
+        if frame not in self.keyframes:
+            return
+        
+        self.keyframes[frame].update_state_from(scene)
 
     def delete(self, frame: int):
         if frame not in self.keyframes:

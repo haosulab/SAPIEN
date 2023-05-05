@@ -1062,6 +1062,7 @@ class Viewer(object):
                 .append(
                     R.UIKeyFrameEditor(self.window.get_content_scale())
                     .InsertKeyFrameCallback(self.insert_key_frame)
+                    .UpdateKeyFrameCallback(self.update_key_frame)
                     .DeleteKeyFrameCallback(self.delete_key_frame)
                 )
             )
@@ -2593,6 +2594,11 @@ class Viewer(object):
 
     def insert_key_frame(self, c):
         self.key_frame_data.insert(c.get_current_frame(), self.scene)
+
+    def update_key_frame(self, c):
+        print(self.scene.pack())
+        self.key_frame_data.update(c.get_current_frame(), self.scene)
+        print(self.scene.pack())
 
     def delete_key_frame(self, c):
         self.key_frame_data.delete(c.get_current_frame())
