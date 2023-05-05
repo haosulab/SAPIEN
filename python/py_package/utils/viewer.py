@@ -24,6 +24,10 @@ import os
 import pkg_resources
 from pathlib import Path
 
+from .keyframe_middleware import (
+    KeyFrameData
+)
+
 shader_dir = Path(pkg_resources.resource_filename("sapien", "vulkan_shader"))
 shader_list = []
 for f in shader_dir.iterdir():
@@ -264,6 +268,7 @@ class Viewer(object):
         self.ik_enabled = False
         self.ik_display_objects = []
         self.keyframe_window = None
+        self.key_frame_data = KeyFrameData()
 
         self.move_group_joints = []
         self.move_group_selection = {}
@@ -1055,7 +1060,9 @@ class Viewer(object):
                 R.UIWindow()
                 .Label("Key Frame Editor")
                 .append(
-                    R.UIKeyFrameEditor(self.window.get_content_scale()),
+                    R.UIKeyFrameEditor(self.window.get_content_scale())
+                    .InsertKeyFrameCallback(self.insert_key_frame)
+                    .DeleteKeyFrameCallback(self.delete_key_frame)
                 )
             )
 
@@ -2553,8 +2560,6 @@ class Viewer(object):
             self.joint_axes[0].transparency = 1
             self.joint_axes[1].transparency = 1
 
-    
-
     def is_mouse_available(self, mx, my):
         w, h = self.window.size
         # print(f"[I] windowSize: {w, h}; mousePose: {mx, my}")
@@ -2585,3 +2590,9 @@ class Viewer(object):
         q = self.window.get_camera_rotation()
         point = rotate_vector(point, q) + self.window.get_camera_position()
         return point
+
+    def insert_key_frame(self, c):
+        self.key_frame_data.insert(c.get_current_frame(), self.scene)
+
+    def delete_key_frame(self, c):
+        self.key_frame_data.delete(c.get_current_frame())

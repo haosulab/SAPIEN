@@ -360,7 +360,10 @@ void buildRenderer(py::module &parent) {
              gizmo.setCameraParameters(v, p);
            });
 
-  PyUIKeyFrame.def(py::init<float>());
+  PyUIKeyFrame.def(py::init<float>())
+    .def("InsertKeyFrameCallback", &ui::KeyFrameEditor::InsertKeyFrameCallback, py::arg("func"))
+    .def("DeleteKeyFrameCallback", &ui::KeyFrameEditor::DeleteKeyFrameCallback, py::arg("func"))
+    .def("get_current_frame", &ui::KeyFrameEditor::getCurrentFrame);
   // end UI
 
   PyContext

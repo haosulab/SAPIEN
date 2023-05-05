@@ -186,24 +186,45 @@ class SerializedScene:
     
     def dump_state_into(self, scene: Scene):
         """
-        Update states (pose, velocity, etc.) of actors and articulations according to data saved in SerializedScene.
-        SerializedScene and scene must have the exact same set of actors and articulations (with same ids).
+        Update states (pose, velocity, etc.) of actors and articulations of scene according to data saved in
+        SerializedScene. SerializedScene and scene must have the exact same set of actors and articulations
+        (with same ids).
 
         :param: scene: Scene to be updated
         """
-        for src_actor_id, src_actor_data in self.serialized_actors.items():
-            dest_actor = scene.find_actor_by_id(src_actor_id)
+        for actor_id, src_actor_data in self.serialized_actors.items():
+            dest_actor = scene.find_actor_by_id(actor_id)
             dest_actor.unpack(src_actor_data['state'])
 
-        dest_articulations = scene.get_all_articulations()
+        dest_arts = scene.get_all_articulations()
         for i, src_art_data in enumerate(self.serialized_articulations):
-            dest_articulation = dest_articulations[i]
-            if dest_articulation.type == 'dynamic':
-                dest_articulation.unpack(src_art_data['state'])
-                dest_articulation.unpack_drive(src_art_data['drive_state'])
-            elif dest_articulation.type == 'kinematic':
-                dest_articulation.set_qpos(src_art_data['qpos'])
-                dest_articulation.set_root_pose(src_art_data['root_pose'])
+            dest_art = dest_arts[i]
+            if dest_art.type == 'dynamic':
+                dest_art.unpack(src_art_data['state'])
+                dest_art.unpack_drive(src_art_data['drive_state'])
+            elif dest_art.type == 'kinematic':
+                dest_art.set_qpos(src_art_data['qpos'])
+                dest_art.set_root_pose(src_art_data['root_pose'])
+
+    def update_state_from(self, scene: Scene):
+        """
+        Update states (pose, velocity, etc.) of actors and articulations of SerializedScene according to data saved in
+        scene. SerializedScene and scene must have the exact same set of actors and articulations (with same ids).
+
+        :param: scene: Scene that SerializedScene is updated from
+        """
+        for src_actor in scene.get_all_actors():
+            actor_id = src_actor.get_id()
+            self.serialized_actors[actor_id]['state'] = src_actor.pack()
+
+        for i, src_art in enumerate(scene.get_all_articulations()):
+            dest_art_data = self.serialized_articulations[i]
+            if src_art.type == 'dynamic':
+                dest_art_data['state'] = src_art.pack()
+                dest_art_data['drive_state'] = src_art.pack_drive()
+            elif src_art.type == 'kinematic':
+                dest_art_data['qpos'] = src_art.get_qpos()
+                dest_art_data['root_pose'] = src_art.get_root_pose()
 
     class SerializedMaterial:
         def __init__(self, material: PhysicalMaterial):
