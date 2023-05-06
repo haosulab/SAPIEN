@@ -1064,6 +1064,7 @@ class Viewer(object):
                     .InsertKeyFrameCallback(self.insert_key_frame)
                     .UpdateKeyFrameCallback(self.update_key_frame)
                     .DeleteKeyFrameCallback(self.delete_key_frame)
+                    .DragKeyFrameCallback(self.drag_key_frame)
                 )
             )
 
@@ -2596,9 +2597,10 @@ class Viewer(object):
         self.key_frame_data.insert(c.get_current_frame(), self.scene)
 
     def update_key_frame(self, c):
-        print(self.scene.pack())
         self.key_frame_data.update(c.get_current_frame(), self.scene)
-        print(self.scene.pack())
 
     def delete_key_frame(self, c):
         self.key_frame_data.delete(c.get_current_frame())
+
+    def drag_key_frame(self, c):
+        self.key_frame_data.drag(c.get_dragged_index(), c.get_dragged_new_val())

@@ -27,3 +27,16 @@ class KeyFrameData:
             return
         
         self.keyframes.pop(frame)
+
+    def drag(self, index: int, new_frame: int):
+        old_frame = list(self.keyframes.keys())[index]
+        if old_frame == new_frame:
+            return
+
+        if new_frame in self.keyframes:
+            self.keyframes.pop(new_frame) # Previous key frame at new_frame will be deleted
+        
+        self.keyframes[new_frame] = self.keyframes.pop(old_frame)
+
+        # Sort by keys
+        self.keyframes = OrderedDict(sorted(self.keyframes.items(), key=lambda item: item[0]))
