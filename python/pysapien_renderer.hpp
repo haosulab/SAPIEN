@@ -362,6 +362,7 @@ void buildRenderer(py::module &parent) {
 
   PyUIKeyFrame.def(py::init<float>())
     .def("InsertKeyFrameCallback", &ui::KeyFrameEditor::InsertKeyFrameCallback, py::arg("func"))
+    .def("LoadKeyFrameCallback", &ui::KeyFrameEditor::LoadKeyFrameCallback, py::arg("func"))
     .def("UpdateKeyFrameCallback", &ui::KeyFrameEditor::UpdateKeyFrameCallback, py::arg("func"))
     .def("DeleteKeyFrameCallback", &ui::KeyFrameEditor::DeleteKeyFrameCallback, py::arg("func"))
     .def("DragKeyFrameCallback", &ui::KeyFrameEditor::DragKeyFrameCallback, py::arg("func"))

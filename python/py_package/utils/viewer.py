@@ -1063,6 +1063,7 @@ class Viewer(object):
                 .append(
                     R.UIKeyFrameEditor(self.window.get_content_scale())
                     .InsertKeyFrameCallback(self.insert_key_frame)
+                    .LoadKeyFrameCallback(self.load_key_frame)
                     .UpdateKeyFrameCallback(self.update_key_frame)
                     .DeleteKeyFrameCallback(self.delete_key_frame)
                     .DragKeyFrameCallback(self.drag_key_frame)
@@ -2598,11 +2599,16 @@ class Viewer(object):
         key_frame = KeyFrame(c.get_current_frame(), self.scene)
         self.key_frame_container.insert(key_frame)
         key_frame.set_container(self.key_frame_container)
+    
+    def load_key_frame(self, c):
+        key_frame = self.key_frame_container.find(c.get_current_frame())
+        if key_frame:
+            key_frame.s_scene.dump_state_into(self.scene)
 
     def update_key_frame(self, c):
-        key_frame = self.key_frame_container.find(c)
+        key_frame = self.key_frame_container.find(c.get_current_frame())
         if key_frame:
-            key_frame.update_state(self.scene)
+            key_frame.s_scene.update_state_from(self.scene)
 
     def delete_key_frame(self, c):
         self.key_frame_container.delete(c.get_current_frame())

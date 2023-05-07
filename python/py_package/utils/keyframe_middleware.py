@@ -7,9 +7,9 @@ from copy import deepcopy as copy
 
 class KeyFrame:
     def __init__(self, frame: int, scene: Scene):
-        self._frame = frame
-        self._serialized_scene = SerializedScene(scene)
         self._container = None
+        self._frame = frame
+        self.s_scene = SerializedScene(scene)
     
     def set_container(self, container: 'KeyFrameContainer'):
         self._container = container
@@ -26,12 +26,6 @@ class KeyFrame:
 
     def get_frame(self) -> int:
         return self._frame
-
-    def update_state(self, scene: Scene):
-        self._serialized_scene.update_state_from(scene)
-
-    def get_serialized_scene(self) -> SerializedScene:
-        return copy(self._serialized_scene)
 
 
 class KeyFrameContainer:
