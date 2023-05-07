@@ -25,7 +25,8 @@ import pkg_resources
 from pathlib import Path
 
 from .keyframe_middleware import (
-    KeyFrameData
+    KeyFrame,
+    KeyFrameContainer,
 )
 
 shader_dir = Path(pkg_resources.resource_filename("sapien", "vulkan_shader"))
@@ -268,7 +269,7 @@ class Viewer(object):
         self.ik_enabled = False
         self.ik_display_objects = []
         self.keyframe_window = None
-        self.key_frame_data = KeyFrameData()
+        self.key_frame_container = KeyFrameContainer()
 
         self.move_group_joints = []
         self.move_group_selection = {}
@@ -2594,13 +2595,18 @@ class Viewer(object):
         return point
 
     def insert_key_frame(self, c):
-        self.key_frame_data.insert(c.get_current_frame(), self.scene)
+        key_frame = KeyFrame(c.get_current_frame(), self.scene)
+        self.key_frame_container.insert(key_frame)
+        key_frame.set_container(self.key_frame_container)
 
     def update_key_frame(self, c):
-        self.key_frame_data.update(c.get_current_frame(), self.scene)
+        key_frame = self.key_frame_container.find(c)
+        if key_frame:
+            key_frame.update_state(self.scene)
 
     def delete_key_frame(self, c):
-        self.key_frame_data.delete(c.get_current_frame())
+        self.key_frame_container.delete(c.get_current_frame())
 
     def drag_key_frame(self, c):
-        self.key_frame_data.drag(c.get_dragged_index(), c.get_dragged_new_val())
+        key_frame = self.key_frame_container.find_by_index(c.get_dragged_index())
+        key_frame.set_frame(c.get_dragged_new_val())
