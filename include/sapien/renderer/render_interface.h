@@ -4,7 +4,7 @@
 #include "sapien/thread_pool.hpp"
 #include <PxPhysicsAPI.h>
 #include <array>
-#include <eigen3/Eigen/Eigen>
+#include <Eigen/Eigen>
 #include <foundation/PxTransform.h>
 #include <functional>
 #include <memory>

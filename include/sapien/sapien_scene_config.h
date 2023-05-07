@@ -1,5 +1,5 @@
 #pragma once
-#include <eigen3/Eigen/Eigen>
+#include <Eigen/Eigen>
 
 namespace sapien {
 

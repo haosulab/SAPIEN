@@ -1,7 +1,7 @@
 #include <filesystem>
 #include <map>
 
-#include <eigen3/Eigen/Eigen>
+#include <Eigen/Eigen>
 #include <spdlog/spdlog.h>
 
 #include "sapien/articulation/sapien_articulation_base.h"

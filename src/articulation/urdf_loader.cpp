@@ -4,7 +4,7 @@
 #include "sapien/articulation/sapien_kinematic_articulation.h"
 #include "sapien/articulation/sapien_link.h"
 #include "sapien/sapien_scene.h"
-#include <eigen3/Eigen/Eigenvalues>
+#include <Eigen/Eigenvalues>
 #include <filesystem>
 #include <optional>
 

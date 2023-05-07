@@ -4,7 +4,7 @@
 #if __has_include(<Eigen/Dense>)
 #include <Eigen/Dense>
 #else
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #endif
 
 #include <memory>

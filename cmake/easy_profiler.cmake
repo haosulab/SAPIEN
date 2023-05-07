@@ -7,6 +7,8 @@ FetchContent_Declare(
     easy_profiler
     GIT_REPOSITORY https://github.com/yse/easy_profiler.git
     GIT_TAG v2.1.0
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
 )
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME easy_profiler)
