@@ -2,7 +2,6 @@ from ..core import Scene
 from .serialization import SerializedScene
 
 from typing import Optional
-from copy import deepcopy as copy
 
 
 class KeyFrame:
@@ -70,4 +69,3 @@ class KeyFrameContainer:
         
         key_frame = self.key_frames.pop(frame_list.index(frame))
         key_frame.clear_container()
-    
