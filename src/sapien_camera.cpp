@@ -1,6 +1,7 @@
 #include "sapien/sapien_camera.h"
 #include "sapien/sapien_scene.h"
 #include <glm/gtx/quaternion.hpp>
+#include <spdlog/spdlog.h>
 
 namespace sapien {
 

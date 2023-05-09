@@ -12,21 +12,7 @@ static std::weak_ptr<svulkan2::core::Context> gContext;
 static std::weak_ptr<svulkan2::resource::SVResourceManager> gResourceManager;
 
 void SVulkan2Renderer::setLogLevel(std::string const &level) {
-  if (level == "debug") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::debug);
-  } else if (level == "info") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::info);
-  } else if (level == "warn" || level == "warning") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::warn);
-  } else if (level == "err" || level == "error") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::err);
-  } else if (level == "critical") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::critical);
-  } else if (level == "off") {
-    svulkan2::log::getLogger()->set_level(spdlog::level::off);
-  } else {
-    svulkan2::log::getLogger()->error("Invalid log level \"{}\"", level);
-  }
+  svulkan2::logger::setLogLevel(level);
 }
 
 SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
@@ -36,9 +22,10 @@ SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
   if (!gContext.expired() && !gResourceManager.expired()) {
     mContext = gContext.lock();
     mResourceManager = gResourceManager.lock();
-    svulkan2::log::getLogger()->warn(
-        "A second renderer will share the same internal context with the "
-        "first one. Arguments passed to constructor will be ignored.");
+    // TODO: restore this warning
+    // svulkan2::logger::getLogger()->warn(
+    //     "A second renderer will share the same internal context with the "
+    //     "first one. Arguments passed to constructor will be ignored.");
   } else {
     gContext = mContext =
         svulkan2::core::Context::Create(!offscreenOnly, maxNumMaterials, maxNumTextures,

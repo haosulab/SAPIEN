@@ -1,5 +1,4 @@
 #pragma once
-#include <coacd.h>
 #include <memory>
 #include <vector>
 
@@ -19,5 +18,7 @@ CoACD(std::shared_ptr<SNonconvexMeshGeometry> g,
 
 std::shared_ptr<SConvexMeshGeometry> Remesh(std::shared_ptr<SNonconvexMeshGeometry> g,
                                             int resolution = 30, double level_set = 0.55);
+
+void coacd_set_log_level(std::string_view level);
 
 }; // namespace sapien

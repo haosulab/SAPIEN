@@ -78,7 +78,6 @@ SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int w
 
   mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);
 
-  // glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
   mWindow = renderer->getContext()->createWindow(width, height);
   mWindow->initImgui();
   renderer->getContext()->getDevice().waitIdle();
@@ -135,9 +134,9 @@ void SVulkan2Window::close() {
   mRenderer->getContext()->getDevice().waitIdle();
 }
 
-void SVulkan2Window::hide() { glfwHideWindow(mWindow->getGLFWWindow()); }
+void SVulkan2Window::hide() { mWindow->hide(); }
 
-void SVulkan2Window::show() { glfwShowWindow(mWindow->getGLFWWindow()); }
+void SVulkan2Window::show() { mWindow->show(); }
 
 void SVulkan2Window::setScene(SVulkan2Scene *scene) {
   mScene = scene;
@@ -200,7 +199,9 @@ std::vector<std::string> SVulkan2Window::getDisplayTargetNames() const {
 void SVulkan2Window::rebuild() {
   mRenderer->getContext()->getDevice().waitIdle();
   do {
-    glfwGetFramebufferSize(mWindow->getGLFWWindow(), &mViewportWidth, &mViewportHeight);
+    auto [vw, vh] = mWindow->getWindowFramebufferSize();
+    mViewportWidth = vw;
+    mViewportWidth = vh;
   } while (!mWindow->updateSize(mViewportWidth, mViewportHeight));
   mSceneRenderSemaphore = mRenderer->getContext()->getDevice().createSemaphoreUnique({});
   mSceneRenderFence =
@@ -218,7 +219,7 @@ void SVulkan2Window::rebuild() {
 }
 
 void SVulkan2Window::resize(int width, int height) {
-  glfwSetWindowSize(mWindow->getGLFWWindow(), width, height);
+  mWindow->setWindowSize(width, height);
   mRequiresRebuild = true;
 }
 
@@ -241,42 +242,16 @@ void SVulkan2Window::render(std::string const &targetName,
     return;
   }
 
-  ImGui::NewFrame();
-  ImGuizmo::BeginFrame();
+  mWindow->imguiBeginFrame();
 
-  // setup docking window
-  ImGuiWindowFlags flags = ImGuiWindowFlags_MenuBar;
-  flags |= ImGuiWindowFlags_NoDocking;
-  ImGuiViewport *viewport = ImGui::GetMainViewport();
-  ImGui::SetNextWindowPos(viewport->Pos);
-  ImGui::SetNextWindowSize(viewport->Size);
-  ImGui::SetNextWindowViewport(viewport->ID);
-  ImGui::SetNextWindowBgAlpha(0.f);
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-  flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize |
-           ImGuiWindowFlags_NoMove;
-  flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-  ImGui::Begin("DockSpace Demo", 0, flags);
-  ImGui::PopStyleVar();
-
-  ImGui::DockSpace(ImGui::GetID("Dockspace"), ImVec2(0, 0),
-                   ImGuiDockNodeFlags_PassthruCentralNode |
-                       ImGuiDockNodeFlags_NoDockingInCentralNode);
-  ImGui::End();
-  ImGui::PopStyleVar();
-
-  if (uiWindows.size() == 0) {
-    ImGui::ShowDemoWindow();
-  }
   for (auto w : uiWindows) {
     if (!w) {
       throw std::runtime_error("failed to render UI windows: a windows is null");
     }
     w->build();
   }
-  ImGui::Render();
+
+  mWindow->imguiRender();
   if (mRenderer->getContext()->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE,
                                                          UINT64_MAX) != vk::Result::eSuccess) {
     throw std::runtime_error("failed on wait for fence.");
@@ -332,9 +307,7 @@ void SVulkan2Window::render(std::string const &targetName,
 #endif
 }
 
-bool SVulkan2Window::windowCloseRequested() {
-  return glfwWindowShouldClose(mWindow->getGLFWWindow());
-}
+bool SVulkan2Window::windowCloseRequested() { return mWindow->isCloseRequested(); }
 
 svulkan2::scene::Camera *SVulkan2Window::getCamera() {
   if (!mScene) {
@@ -439,13 +412,9 @@ std::array<float, 2> SVulkan2Window::getMouseWheelDelta() {
   return {x, y};
 }
 
-std::array<int, 2> SVulkan2Window::getWindowSize() {
-  int width, height;
-  glfwGetWindowSize(mWindow->getGLFWWindow(), &width, &height);
-  return {width, height};
-}
+std::array<int, 2> SVulkan2Window::getWindowSize() { mWindow->getWindowSize(); }
 
-float SVulkan2Window::getFPS() { return ImGui::GetIO().Framerate; }
+float SVulkan2Window::getFPS() { return mWindow->imguiGetFramerate(); }
 
 void SVulkan2Window::setCursorEnabled(bool enabled) { mWindow->setCursorEnabled(enabled); }
 

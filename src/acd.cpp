@@ -1,5 +1,6 @@
 #include "sapien/acd.h"
 #include "sapien/sapien_shape.h"
+#include <coacd.h>
 
 namespace sapien {
 
@@ -62,5 +63,7 @@ std::shared_ptr<SConvexMeshGeometry> Remesh(std::shared_ptr<SNonconvexMeshGeomet
   }
   return result;
 }
+
+void coacd_set_log_level(std::string_view level) { coacd::set_log_level(level); }
 
 } // namespace sapien

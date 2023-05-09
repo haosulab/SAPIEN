@@ -2,13 +2,12 @@
 #include "dlpack.hpp"
 #include "sapien/awaitable.hpp"
 #include "sapien/thread_pool.hpp"
+#include <Eigen/Eigen>
 #include <PxPhysicsAPI.h>
 #include <array>
-#include <Eigen/Eigen>
 #include <foundation/PxTransform.h>
 #include <functional>
 #include <memory>
-#include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
 
@@ -26,16 +25,6 @@ class IPointLight;
 class ISpotLight;
 class IDirectionalLight;
 class IParallelogramLight;
-
-static inline void _warn_mat_func_not_supported(std::string_view func_name) {
-  // gcc9 do not have source_location
-  spdlog::get("SAPIEN")->warn("{} is not supported for the renderer", func_name);
-}
-
-static inline void _warn_texture_func_not_supported(std::string_view func_name) {
-  // gcc9 do not have source_location
-  spdlog::get("SAPIEN")->warn("{} is not supported for the renderer", func_name);
-}
 
 class IRenderMesh {
 public:
@@ -72,23 +61,11 @@ public:
   [[nodiscard]] virtual int getHeight() const = 0;
   [[nodiscard]] virtual int getChannels() const = 0;
 
-  [[nodiscard]] virtual int getMipmapLevels() const {
-    _warn_texture_func_not_supported(__func__);
-    return 0;
-  };
+  [[nodiscard]] virtual int getMipmapLevels() const = 0;
+  [[nodiscard]] virtual Type::Enum getType() const = 0;
+  [[nodiscard]] virtual AddressMode::Enum getAddressMode() const = 0;
+  [[nodiscard]] virtual FilterMode::Enum getFilterMode() const = 0;
 
-  [[nodiscard]] virtual Type::Enum getType() const {
-    _warn_texture_func_not_supported(__func__);
-    return Type::eOTHER;
-  }
-  [[nodiscard]] virtual AddressMode::Enum getAddressMode() const {
-    _warn_texture_func_not_supported(__func__);
-    return AddressMode::eREPEAT;
-  };
-  [[nodiscard]] virtual FilterMode::Enum getFilterMode() const {
-    _warn_texture_func_not_supported(__func__);
-    return FilterMode::eNEAREST;
-  };
   [[nodiscard]] virtual std::string getFilename() const { return ""; };
   virtual ~IPxrTexture() = default;
 };
@@ -104,112 +81,56 @@ public:
   virtual void setMetallic(float metallic) = 0;
   [[nodiscard]] virtual float getMetallic() const = 0;
 
-  virtual void setEmission(std::array<float, 4> color) { _warn_mat_func_not_supported(__func__); };
-  [[nodiscard]] virtual std::array<float, 4> getEmission() const {
-    _warn_mat_func_not_supported(__func__);
-    return {};
-  };
-  virtual void setIOR(float ior) { _warn_mat_func_not_supported(__func__); };
-  [[nodiscard]] virtual float getIOR() const {
-    _warn_mat_func_not_supported(__func__);
-    return 0.0;
-  };
-  virtual void setTransmission(float transmission) { _warn_mat_func_not_supported(__func__); };
-  [[nodiscard]] virtual float getTransmission() const {
-    _warn_mat_func_not_supported(__func__);
-    return 0.0;
-  };
-  virtual void setTransmissionRoughness(float roughness) {
-    _warn_mat_func_not_supported(__func__);
-  };
-  [[nodiscard]] virtual float getTransmissionRoughness() const {
-    _warn_mat_func_not_supported(__func__);
-    return 0.0;
-  };
+  virtual void setEmission(std::array<float, 4> color) = 0;
+  [[nodiscard]] virtual std::array<float, 4> getEmission() const = 0;
+  virtual void setIOR(float ior) = 0;
+  [[nodiscard]] virtual float getIOR() const = 0;
+  virtual void setTransmission(float transmission) = 0;
+  [[nodiscard]] virtual float getTransmission() const = 0;
+  virtual void setTransmissionRoughness(float roughness) = 0;
+  [[nodiscard]] virtual float getTransmissionRoughness() const = 0;
 
   // texture functions
-  virtual void setEmissionTexture(std::shared_ptr<IPxrTexture> texture) {
-    _warn_mat_func_not_supported(__func__);
-  }
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getEmissionTexture() const {
-    _warn_mat_func_not_supported(__func__);
-    return nullptr;
-  }
-  virtual void setDiffuseTexture(std::shared_ptr<IPxrTexture> texture) {
-    _warn_mat_func_not_supported(__func__);
-  }
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getDiffuseTexture() const {
-    _warn_mat_func_not_supported(__func__);
-    return nullptr;
-  }
-  virtual void setMetallicTexture(std::shared_ptr<IPxrTexture> texture) {
-    _warn_mat_func_not_supported(__func__);
-  }
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getMetallicTexture() const {
-    _warn_mat_func_not_supported(__func__);
-    return nullptr;
-  }
-  virtual void setRoughnessTexture(std::shared_ptr<IPxrTexture> texture) {
-    _warn_mat_func_not_supported(__func__);
-  }
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getRoughnessTexture() const {
-    _warn_mat_func_not_supported(__func__);
-    return nullptr;
-  }
-  virtual void setNormalTexture(std::shared_ptr<IPxrTexture> texture) {
-    _warn_mat_func_not_supported(__func__);
-  }
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getNormalTexture() const {
-    _warn_mat_func_not_supported(__func__);
-    return nullptr;
-  }
-  virtual void setTransmissionTexture(std::shared_ptr<IPxrTexture> texture) {
-    _warn_mat_func_not_supported(__func__);
-  }
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getTransmissionTexture() const {
-    _warn_mat_func_not_supported(__func__);
-    return nullptr;
-  }
+  virtual void setEmissionTexture(std::shared_ptr<IPxrTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getEmissionTexture() const = 0;
+  virtual void setDiffuseTexture(std::shared_ptr<IPxrTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getDiffuseTexture() const = 0;
+  virtual void setMetallicTexture(std::shared_ptr<IPxrTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getMetallicTexture() const = 0;
+  virtual void setRoughnessTexture(std::shared_ptr<IPxrTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getRoughnessTexture() const = 0;
+  virtual void setNormalTexture(std::shared_ptr<IPxrTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getNormalTexture() const = 0;
+  virtual void setTransmissionTexture(std::shared_ptr<IPxrTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getTransmissionTexture() const = 0;
 
   // texture filename functions
-  virtual void setEmissionTextureFromFilename(std::string_view path) {
-    _warn_mat_func_not_supported(__func__);
-  };
+  virtual void setEmissionTextureFromFilename(std::string_view path) = 0;
   [[nodiscard]] virtual std::string getEmissionTextureFilename() const {
     auto tex = getEmissionTexture();
     return tex ? tex->getFilename() : "";
   };
-  virtual void setDiffuseTextureFromFilename(std::string_view path) {
-    _warn_mat_func_not_supported(__func__);
-  };
+  virtual void setDiffuseTextureFromFilename(std::string_view path) = 0;
   [[nodiscard]] virtual std::string getDiffuseTextureFilename() const {
     auto tex = getDiffuseTexture();
     return tex ? tex->getFilename() : "";
   };
-  virtual void setMetallicTextureFromFilename(std::string_view path) {
-    _warn_mat_func_not_supported(__func__);
-  };
+  virtual void setMetallicTextureFromFilename(std::string_view path) = 0;
   [[nodiscard]] virtual std::string getMetallicTextureFilename() const {
-    _warn_mat_func_not_supported(__func__);
-    return "";
-  };
-  virtual void setRoughnessTextureFromFilename(std::string_view path) {
-    _warn_mat_func_not_supported(__func__);
-  };
+    auto tex = getMetallicTexture();
+    return tex ? tex->getFilename() : "";
+  }
+  virtual void setRoughnessTextureFromFilename(std::string_view path) = 0;
   [[nodiscard]] virtual std::string getRoughnessTextureFilename() const {
     auto tex = getRoughnessTexture();
     return tex ? tex->getFilename() : "";
   };
-  virtual void setNormalTextureFromFilename(std::string_view path) {
-    _warn_mat_func_not_supported(__func__);
-  };
+  virtual void setNormalTextureFromFilename(std::string_view path) = 0;
   [[nodiscard]] virtual std::string getNormalTextureFilename() const {
     auto tex = getNormalTexture();
     return tex ? tex->getFilename() : "";
   };
-  virtual void setTransmissionTextureFromFilename(std::string_view path) {
-    _warn_mat_func_not_supported(__func__);
-  };
+  virtual void setTransmissionTextureFromFilename(std::string_view path) = 0;
   [[nodiscard]] virtual std::string getTransmissionTextureFilename() const {
     auto tex = getTransmissionTexture();
     return tex ? tex->getFilename() : "";
@@ -452,10 +373,11 @@ public:
   inline virtual IPxrRigidbody *
   addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
                std::shared_ptr<IPxrMaterial> material) { // add and replace material
-    if (material)
-      spdlog::get("SAPIEN")->warn("Add rigid body and substitute material is "
-                                  "not supported on this rendering backend. Material in the mesh "
-                                  "file will be used!");
+    // TODO: restore this warning
+    // if (material)
+    //   spdlog::get("SAPIEN")->warn("Add rigid body and substitute material is "
+    //                               "not supported on this rendering backend. Material in the mesh
+    //                               " "file will be used!");
     return addRigidbody(meshFile, scale);
   }
 
@@ -539,11 +461,11 @@ public:
   }
 
   virtual void setEnvironmentMap(std::string_view path) {
-    spdlog::get("SAPIEN")->warn("Environment map is not supported!");
+    throw std::runtime_error("Environment map is not supported!");
   };
 
   virtual void setEnvironmentMap(std::array<std::string_view, 6> paths) {
-    spdlog::get("SAPIEN")->warn("Environment map is not supported!");
+    throw std::runtime_error("Environment map is not supported!");
   };
 
   virtual void destroy() = 0;

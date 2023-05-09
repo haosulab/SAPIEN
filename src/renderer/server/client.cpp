@@ -1,4 +1,5 @@
 #include "sapien/renderer/server/client.h"
+#include "client_impl.h"
 #include <spdlog/spdlog.h>
 
 namespace sapien {
@@ -572,7 +573,7 @@ ClientRenderer::ClientRenderer(std::string const &address, uint64_t processIndex
   mStub = proto::RenderService::NewStub(mChannel);
 }
 
-ClientScene *ClientRenderer::createScene(std::string const &name) {
+IPxrScene *ClientRenderer::createScene(std::string const &name) {
   ClientContext context;
   proto::Index req;
   proto::Id res;
@@ -581,7 +582,7 @@ ClientScene *ClientRenderer::createScene(std::string const &name) {
 
   Status status = mStub->CreateScene(&context, req, &res);
   if (status.ok()) {
-    mScenes.push_back(std::make_unique<ClientScene>(this, res.id(), name));
+    mScenes.push_back(std::make_shared<ClientScene>(this, res.id(), name));
     return mScenes.back().get();
   }
   throw std::runtime_error(status.error_message());

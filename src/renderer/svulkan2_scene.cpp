@@ -4,6 +4,7 @@
 #include "sapien/renderer/svulkan2_rigidbody.h"
 #include "sapien/renderer/svulkan2_shape.h"
 #include <filesystem>
+#include <spdlog/spdlog.h>
 
 namespace sapien {
 namespace Renderer {

@@ -1,6 +1,7 @@
 #include "sapien/renderer/dlpack.hpp"
 #include "sapien/renderer/render_config.h"
 #include "sapien/renderer/svulkan2_renderer.h"
+#include <spdlog/spdlog.h>
 
 namespace sapien {
 namespace Renderer {
