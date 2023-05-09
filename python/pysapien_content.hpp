@@ -40,7 +40,6 @@
 #include "sapien/renderer/server/client.h"
 #include "sapien/renderer/server/server.h"
 
-#include "sapien/articulation/pinocchio_model.h"
 #include "sapien/profiler.hpp"
 
 #include "sapien/utils/pose.hpp"
@@ -376,7 +375,7 @@ void buildSapien(py::module &m) {
 
   auto PySubscription = py::class_<Subscription>(m, "Subscription");
 
-  auto PyPinocchioModel = py::class_<PinocchioModel>(m, "PinocchioModel");
+  // auto PyPinocchioModel = py::class_<PinocchioModel>(m, "PinocchioModel");
 
   auto PyVulkanRigidbody =
       py::class_<Renderer::SVulkan2Rigidbody, Renderer::IPxrRigidbody>(m, "VulkanRigidbody");
@@ -1096,6 +1095,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("linear"), py::arg("angular"));
 
   PyEntity.def_property_readonly("_ptr", [](SEntity &e) { return (void *)&e; })
+      .def_property_readonly("scene", &SEntity::getScene)
       .def_property("name", &SEntity::getName, &SEntity::setName)
       .def("get_name", &SEntity::getName)
       .def("set_name", &SEntity::setName, py::arg("name"))
@@ -1391,10 +1391,11 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_root_pose", &SArticulationBase::getRootPose)
       .def("set_root_pose", &SArticulationBase::setRootPose, py::arg("pose"))
       .def("set_pose", &SArticulationBase::setRootPose, py::arg("pose"), "same as set_root_pose")
-      .def("create_pinocchio_model", &SArticulationBase::createPinocchioModel,
-           "Create the kinematic and dynamic model of this articulation implemented by the "
-           "Pinocchio library. Allowing computing forward/inverse kinematics/dynamics.")
+      // .def("create_pinocchio_model", &SArticulationBase::createPinocchioModel,
+      //      "Create the kinematic and dynamic model of this articulation implemented by the "
+      //      "Pinocchio library. Allowing computing forward/inverse kinematics/dynamics.")
       .def("export_urdf", &SArticulationBase::exportURDF, py::arg("cache_dir") = std::string())
+      .def("_export_kinematics_chain_urdf_string", &SArticulationBase::exportKinematicsChainAsURDF, py::arg("fix_root_link")=true)
       .def("get_builder", &SArticulationBase::getBuilder);
 
   PyArticulationDrivable
@@ -1959,59 +1960,59 @@ Args:
 
   PySubscription.def("unsubscribe", &Subscription::unsubscribe);
 
-  PyPinocchioModel
-      .def("compute_forward_kinematics", &PinocchioModel::computeForwardKinematics,
-           "Compute and cache forward kinematics. After computation, use get_link_pose to "
-           "retrieve the computed pose for a specific link.",
-           py::arg("qpos"))
-      .def("get_link_pose", &PinocchioModel::getLinkPose,
-           "Given link index, get link pose (in articulation base frame) from forward kinematics. "
-           "Must be called after compute_forward_kinematics.",
-           py::arg("link_index"))
-      .def("compute_inverse_kinematics", &PinocchioModel::computeInverseKinematics,
-           R"doc(
-Compute inverse kinematics with CLIK algorithm.
-Details see https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_i-inverse-kinematics.html
-Args:
-    link_index: index of the link
-    pose: target pose of the link in articulation base frame
-    initial_qpos: initial qpos to start CLIK
-    active_qmask: dof sized integer array, 1 to indicate active joints and 0 for inactive joints, default to all 1s
-    max_iterations: number of iterations steps
-    dt: iteration step "speed"
-    damp: iteration step "damping"
-Returns:
-    result: qpos from IK
-    success: whether IK is successful
-    error: se3 norm error
-)doc",
-           py::arg("link_index"), py::arg("pose"), py::arg("initial_qpos") = Eigen::VectorXd{},
-           py::arg("active_qmask") = Eigen::VectorXi{}, py::arg("eps") = 1e-4,
-           py::arg("max_iterations") = 1000, py::arg("dt") = 0.1, py::arg("damp") = 1e-6)
-      .def("compute_forward_dynamics", &PinocchioModel::computeForwardDynamics, py::arg("qpos"),
-           py::arg("qvel"), py::arg("qf"))
-      .def("compute_inverse_dynamics", &PinocchioModel::computeInverseDynamics, py::arg("qpos"),
-           py::arg("qvel"), py::arg("qacc"))
-      .def("compute_generalized_mass_matrix", &PinocchioModel::computeGeneralizedMassMatrix,
-           py::arg("qpos"))
-      .def("compute_coriolis_matrix", &PinocchioModel::computeCoriolisMatrix, py::arg("qpos"),
-           py::arg("qvel"))
+//   PyPinocchioModel
+//       .def("compute_forward_kinematics", &PinocchioModel::computeForwardKinematics,
+//            "Compute and cache forward kinematics. After computation, use get_link_pose to "
+//            "retrieve the computed pose for a specific link.",
+//            py::arg("qpos"))
+//       .def("get_link_pose", &PinocchioModel::getLinkPose,
+//            "Given link index, get link pose (in articulation base frame) from forward kinematics. "
+//            "Must be called after compute_forward_kinematics.",
+//            py::arg("link_index"))
+//       .def("compute_inverse_kinematics", &PinocchioModel::computeInverseKinematics,
+//            R"doc(
+// Compute inverse kinematics with CLIK algorithm.
+// Details see https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_i-inverse-kinematics.html
+// Args:
+//     link_index: index of the link
+//     pose: target pose of the link in articulation base frame
+//     initial_qpos: initial qpos to start CLIK
+//     active_qmask: dof sized integer array, 1 to indicate active joints and 0 for inactive joints, default to all 1s
+//     max_iterations: number of iterations steps
+//     dt: iteration step "speed"
+//     damp: iteration step "damping"
+// Returns:
+//     result: qpos from IK
+//     success: whether IK is successful
+//     error: se3 norm error
+// )doc",
+//            py::arg("link_index"), py::arg("pose"), py::arg("initial_qpos") = Eigen::VectorXd{},
+//            py::arg("active_qmask") = Eigen::VectorXi{}, py::arg("eps") = 1e-4,
+//            py::arg("max_iterations") = 1000, py::arg("dt") = 0.1, py::arg("damp") = 1e-6)
+//       .def("compute_forward_dynamics", &PinocchioModel::computeForwardDynamics, py::arg("qpos"),
+//            py::arg("qvel"), py::arg("qf"))
+//       .def("compute_inverse_dynamics", &PinocchioModel::computeInverseDynamics, py::arg("qpos"),
+//            py::arg("qvel"), py::arg("qacc"))
+//       .def("compute_generalized_mass_matrix", &PinocchioModel::computeGeneralizedMassMatrix,
+//            py::arg("qpos"))
+//       .def("compute_coriolis_matrix", &PinocchioModel::computeCoriolisMatrix, py::arg("qpos"),
+//            py::arg("qvel"))
 
-      .def("compute_full_jacobian", &PinocchioModel::computeFullJacobian,
-           "Compute and cache Jacobian for all links", py::arg("qpos"))
-      .def("get_link_jacobian", &PinocchioModel::getLinkJacobian,
-           R"doc(
-Given link index, get the Jacobian. Must be called after compute_full_jacobian.
+//       .def("compute_full_jacobian", &PinocchioModel::computeFullJacobian,
+//            "Compute and cache Jacobian for all links", py::arg("qpos"))
+//       .def("get_link_jacobian", &PinocchioModel::getLinkJacobian,
+//            R"doc(
+// Given link index, get the Jacobian. Must be called after compute_full_jacobian.
 
-Args:
-  link_index: index of the link
-  local: True for world(spatial) frame; False for link(body) frame
-)doc",
-           py::arg("link_index"), py::arg("local") = false)
-      .def("compute_single_link_local_jacobian", &PinocchioModel::computeSingleLinkLocalJacobian,
-           "Compute the link(body) Jacobian for a single link. It is faster than "
-           "compute_full_jacobian followed by get_link_jacobian",
-           py::arg("qpos"), py::arg("link_index"));
+// Args:
+//   link_index: index of the link
+//   local: True for world(spatial) frame; False for link(body) frame
+// )doc",
+//            py::arg("link_index"), py::arg("local") = false)
+//       .def("compute_single_link_local_jacobian", &PinocchioModel::computeSingleLinkLocalJacobian,
+//            "Compute the link(body) Jacobian for a single link. It is faster than "
+//            "compute_full_jacobian followed by get_link_jacobian",
+//            py::arg("qpos"), py::arg("link_index"));
 
   PyVulkanRenderer
       .def_static("set_log_level", &Renderer::SVulkan2Renderer::setLogLevel, py::arg("level"))

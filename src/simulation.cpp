@@ -37,9 +37,11 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
     setLogLevel("warn");
   }
 
+#ifdef SAPIEN_PROFILE
   if (!profiler::isListening()) {
     profiler::startListen();
   }
+#endif
 
   // TODO(fanbo): figure out what "track allocation" means in the PhysX doc
   mFoundation = PxCreateFoundation(PX_PHYSICS_VERSION, gDefaultAllocatorCallback, mErrorCallback);

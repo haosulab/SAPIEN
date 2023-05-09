@@ -19,13 +19,12 @@ endif ()
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(physx5)
-include(boost)
 include(zlib)
 include(tinyxml2)
 include(eigen)
-include(pinocchio)
 include(grpc)
 include(pybind11)
+include(easy_profiler)
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message("-- DEBUG Build")
@@ -49,9 +48,7 @@ else ()
     link_directories("${CMAKE_CURRENT_SOURCE_DIR}/../PhysX/physx/bin/linux.clang/release")
 endif ()
 
-
 if (${SAPIEN_PROFILE})
-    include(easy_profiler)
     set(SVULKAN2_PROFILE ON CACHE BOOL "" FORCE)
 else ()
     set(SVULKAN2_PROFILE OFF CACHE BOOL "" FORCE)
@@ -77,8 +74,8 @@ endif ()
 
 file(GLOB_RECURSE SAPIEN_SRC "src/*.h" "src/*.cpp" "src/*.cc")
 add_library(sapien SHARED ${SAPIEN_SRC})
-target_link_libraries(sapien physx5 pthread glfw assimp::assimp dl stdc++fs
-    tinyxml2 spdlog::spdlog easy_profiler pinocchio svulkan2 rt grpc++ coacd
+target_link_libraries(sapien physx5 pthread dl stdc++fs
+    tinyxml2 spdlog::spdlog easy_profiler svulkan2 rt grpc++ coacd
     eigen)
 if (${SAPIEN_CUDA})
     target_compile_definitions(sapien PUBLIC SAPIEN_DLPACK SAPIEN_CUDA)
@@ -91,6 +88,10 @@ set_target_properties(sapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURREN
 
 if (${SAPIEN_CUDA})
     target_link_libraries(sapien simsense)
+endif()
+
+if (${SAPIEN_PROFILE})
+    target_compile_definitions(sapien SAPIEN_PROFILE)
 endif()
 
 pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)

@@ -50,7 +50,6 @@ __all__ = [
     "NonconvexMeshGeometry",
     "ParticleEntity",
     "PhysicalMaterial",
-    "PinocchioModel",
     "PlaneGeometry",
     "PointLightEntity",
     "Pose",
@@ -117,6 +116,11 @@ class Entity():
     def pose(self) -> Pose:
         """
         :type: Pose
+        """
+    @property
+    def scene(self) -> Scene:
+        """
+        :type: Scene
         """
     pass
 class ActorBase(Entity):
@@ -325,10 +329,7 @@ class LightEntity(Entity):
         pass
     pass
 class ArticulationBase(Entity):
-    def create_pinocchio_model(self) -> PinocchioModel: 
-        """
-        Create the kinematic and dynamic model of this articulation implemented by the Pinocchio library. Allowing computing forward/inverse kinematics/dynamics.
-        """
+    def _export_kinematics_chain_urdf_string(self, fix_root_link: bool = True) -> str: ...
     def export_urdf(self, cache_dir: str = '') -> str: ...
     def get_builder(self) -> ArticulationBuilder: ...
     def get_joints(self) -> typing.List[JointBase]: ...
@@ -1004,53 +1005,6 @@ class PhysicalMaterial():
     def static_friction(self) -> float:
         """
         :type: float
-        """
-    pass
-class PinocchioModel():
-    def compute_coriolis_matrix(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], qvel: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, n]]: ...
-    def compute_forward_dynamics(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], qvel: numpy.ndarray[numpy.float64, _Shape[m, 1]], qf: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
-    def compute_forward_kinematics(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: 
-        """
-        Compute and cache forward kinematics. After computation, use get_link_pose to retrieve the computed pose for a specific link.
-        """
-    def compute_full_jacobian(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> None: 
-        """
-        Compute and cache Jacobian for all links
-        """
-    def compute_generalized_mass_matrix(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, n]]: ...
-    def compute_inverse_dynamics(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], qvel: numpy.ndarray[numpy.float64, _Shape[m, 1]], qacc: numpy.ndarray[numpy.float64, _Shape[m, 1]]) -> numpy.ndarray[numpy.float64, _Shape[m, 1]]: ...
-    def compute_inverse_kinematics(self, link_index: int, pose: Pose, initial_qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]] = array([], dtype=float64), active_qmask: numpy.ndarray[numpy.int32, _Shape[m, 1]] = array([], dtype=int32), eps: float = 0.0001, max_iterations: int = 1000, dt: float = 0.1, damp: float = 1e-06) -> typing.Tuple[numpy.ndarray[numpy.float64, _Shape[m, 1]], bool, numpy.ndarray[numpy.float64, _Shape[6, 1]]]: 
-        """
-        Compute inverse kinematics with CLIK algorithm.
-        Details see https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_i-inverse-kinematics.html
-        Args:
-            link_index: index of the link
-            pose: target pose of the link in articulation base frame
-            initial_qpos: initial qpos to start CLIK
-            active_qmask: dof sized integer array, 1 to indicate active joints and 0 for inactive joints, default to all 1s
-            max_iterations: number of iterations steps
-            dt: iteration step "speed"
-            damp: iteration step "damping"
-        Returns:
-            result: qpos from IK
-            success: whether IK is successful
-            error: se3 norm error
-        """
-    def compute_single_link_local_jacobian(self, qpos: numpy.ndarray[numpy.float64, _Shape[m, 1]], link_index: int) -> numpy.ndarray[numpy.float64, _Shape[6, n]]: 
-        """
-        Compute the link(body) Jacobian for a single link. It is faster than compute_full_jacobian followed by get_link_jacobian
-        """
-    def get_link_jacobian(self, link_index: int, local: bool = False) -> numpy.ndarray[numpy.float64, _Shape[6, n]]: 
-        """
-        Given link index, get the Jacobian. Must be called after compute_full_jacobian.
-
-        Args:
-          link_index: index of the link
-          local: True for world(spatial) frame; False for link(body) frame
-        """
-    def get_link_pose(self, link_index: int) -> Pose: 
-        """
-        Given link index, get link pose (in articulation base frame) from forward kinematics. Must be called after compute_forward_kinematics.
         """
     pass
 class PlaneGeometry(CollisionGeometry):

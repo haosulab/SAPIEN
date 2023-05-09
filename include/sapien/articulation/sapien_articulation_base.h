@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "pinocchio_model.h"
-
 namespace sapien {
 class SLinkBase;
 class SJointBase;
@@ -68,7 +66,6 @@ public:
   inline std::shared_ptr<ArticulationBuilder const> getBuilder() const { return mBuilder; }
 
   using SEntity::SEntity;
-  std::unique_ptr<PinocchioModel> createPinocchioModel();
 
 private:
   std::string exportTreeURDF(SLinkBase *link, physx::PxTransform extraTransform,

@@ -9,7 +9,6 @@
 #include "sapien/articulation/sapien_link.h"
 #include "sapien/sapien_scene.h"
 
-#include "sapien/articulation/pinocchio_model.h"
 
 namespace sapien {
 
@@ -359,25 +358,6 @@ std::string SArticulationBase::exportTreeURDF(SLinkBase *link, physx::PxTransfor
   }
 
   return ss.str();
-}
-
-std::unique_ptr<PinocchioModel> SArticulationBase::createPinocchioModel() {
-  PxVec3 gravity = getScene()->getPxScene()->getGravity();
-  auto pm = PinocchioModel::fromURDFXML(exportKinematicsChainAsURDF(true),
-                                        {gravity.x, gravity.y, gravity.z});
-  std::vector<std::string> jointNames;
-  std::vector<std::string> linkNames;
-  for (auto j : getBaseJoints()) {
-    if (j->getDof() > 0) {
-      jointNames.push_back("joint_" + std::to_string(j->getChildLink()->getIndex()));
-    }
-  }
-  for (auto l : getBaseLinks()) {
-    linkNames.push_back("link_" + std::to_string(l->getIndex()));
-  }
-  pm->setJointOrder(jointNames);
-  pm->setLinkOrder(linkNames);
-  return pm;
 }
 
 } // namespace sapien

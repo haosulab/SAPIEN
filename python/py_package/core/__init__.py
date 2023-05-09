@@ -2,6 +2,7 @@ from warnings import warn
 
 import pkg_resources
 import os
+from ._pinocchio_model import _create_pinocchio_model
 
 # perform tricks before linking pysapien
 from ._vulkan_tricks import _ensure_libvulkan, _ensure_egl_icd, _ensure_vulkan_icd
@@ -46,6 +47,7 @@ class KuafuConfig:
         self.max_materials = 0
         self.max_geometries = 0
         self.max_geometry_instances = 0
+
 
 class KuafuRenderer(SapienRenderer):
     def __init__(self, config: KuafuConfig):
@@ -109,3 +111,4 @@ def _auto_allocate_torch_tensors(self: RenderServer, render_targets: List[str]):
 
 
 RenderServer.auto_allocate_torch_tensors = _auto_allocate_torch_tensors
+ArticulationBase.create_pinocchio_model = _create_pinocchio_model
