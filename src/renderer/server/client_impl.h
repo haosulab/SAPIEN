@@ -1,4 +1,5 @@
 #pragma once
+#include "sapien/renderer/server/client.h"
 #include <spdlog/spdlog.h>
 
 namespace sapien {
@@ -9,10 +10,11 @@ class ClientRenderer;
 class ClientScene;
 class ClientShape;
 class ClientRigidbody;
+class ClientRendererImpl;
 
 class ClientMaterial : public IPxrMaterial {
 public:
-  ClientMaterial(std::shared_ptr<ClientRenderer> renderer, rs_id_t id);
+  ClientMaterial(std::shared_ptr<ClientRendererImpl> renderer, rs_id_t id);
 
   void setBaseColor(std::array<float, 4> color) override;
   [[nodiscard]] std::array<float, 4> getBaseColor() const override {
@@ -120,7 +122,7 @@ public:
   rs_id_t getId() const { return mId; }
 
 private:
-  std::shared_ptr<ClientRenderer> mRenderer;
+  std::shared_ptr<ClientRendererImpl> mRenderer;
   rs_id_t mId;
 };
 
@@ -339,7 +341,7 @@ public:
 
 class ClientScene : public IPxrScene {
 public:
-  ClientScene(ClientRenderer *renderer, rs_id_t id, std::string const &name);
+  ClientScene(ClientRendererImpl *renderer, rs_id_t id, std::string const &name);
 
   //========== Body ==========//
   IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
@@ -420,12 +422,12 @@ public:
 
   inline rs_id_t getId() const { return mId; }
 
-  ClientRenderer *getRenderer() { return mRenderer; }
+  ClientRendererImpl *getRenderer() { return mRenderer; }
 
 private:
   void syncId();
 
-  ClientRenderer *mRenderer;
+  ClientRendererImpl *mRenderer;
   rs_id_t mId;
   std::string mName;
   std::vector<std::unique_ptr<ClientRigidbody>> mBodies;

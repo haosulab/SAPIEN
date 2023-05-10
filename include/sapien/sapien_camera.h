@@ -4,7 +4,6 @@
 #include "renderer/render_interface.h"
 #include "sapien_actor_base.h"
 #include "sapien_entity.h"
-// #include <glm/glm.hpp>
 
 namespace sapien {
 

@@ -443,8 +443,10 @@ void buildSapien(py::module &m) {
   auto PyRenderServerBuffer =
       py::class_<Renderer::server::VulkanCudaBuffer>(m, "RenderServerBuffer");
 
-  PyRenderClient.def(py::init<std::string, uint64_t>(), py::arg("address"),
-                     py::arg("process_index"));
+  PyRenderClient.def(py::init([](std::string address, uint64_t process) {
+                       return Renderer::server::ClientRenderer::Create(address, process);
+                     }),
+                     py::arg("address"), py::arg("process_index"));
 
   PyRenderServer
       .def_static("_set_shader_dir", &Renderer::server::setDefaultShaderDirectory,

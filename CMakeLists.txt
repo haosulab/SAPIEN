@@ -74,9 +74,11 @@ endif ()
 
 file(GLOB_RECURSE SAPIEN_SRC "src/*.h" "src/*.cpp" "src/*.cc")
 add_library(sapien SHARED ${SAPIEN_SRC})
-target_link_libraries(sapien physx5 pthread dl stdc++fs
-    tinyxml2 spdlog::spdlog easy_profiler svulkan2 rt grpc++ coacd
-    eigen)
+
+target_link_libraries(sapien PUBLIC physx5 svulkan2 eigen)
+target_link_libraries(sapien PRIVATE tinyxml2 spdlog::spdlog easy_profiler
+    grpc++ coacd pthread rt dl stdc++fs)
+
 if (${SAPIEN_CUDA})
     target_compile_definitions(sapien PUBLIC SAPIEN_DLPACK SAPIEN_CUDA)
     target_include_directories(sapien PUBLIC "3rd_party/dlpack/include" "$ENV{CUDA_PATH}/include")
@@ -87,7 +89,7 @@ set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 if (${SAPIEN_CUDA})
-    target_link_libraries(sapien simsense)
+    target_link_libraries(sapien INTERFACE simsense)
 endif()
 
 if (${SAPIEN_PROFILE})

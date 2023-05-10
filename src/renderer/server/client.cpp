@@ -1,5 +1,8 @@
 #include "sapien/renderer/server/client.h"
 #include "client_impl.h"
+#include "renderer/server/protos/render_server.grpc.pb.h"
+#include <grpc/grpc.h>
+#include <grpcpp/grpcpp.h>
 #include <spdlog/spdlog.h>
 
 namespace sapien {
@@ -9,8 +12,38 @@ namespace server {
 using ::grpc::ClientContext;
 using ::grpc::Status;
 
+class ClientRendererImpl : public ClientRenderer,
+                           public std::enable_shared_from_this<ClientRendererImpl> {
+public:
+  ClientRendererImpl(std::string const &address, uint64_t processIndex);
+
+  IPxrScene *createScene(std::string const &name) override;
+  void removeScene(IPxrScene *scene) override;
+  std::shared_ptr<IPxrMaterial> createMaterial() override;
+
+  std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
+                                          std::vector<uint32_t> const &indices) override {
+    throw std::runtime_error("Mesh creation is not supported for rendering client");
+  };
+
+  proto::RenderService::Stub &getStub() const { return *mStub; }
+
+  inline uint64_t getProcessIndex() const { return mProcessIndex; }
+
+private:
+  uint64_t mProcessIndex;
+  std::shared_ptr<grpc::Channel> mChannel;
+  std::unique_ptr<proto::RenderService::Stub> mStub;
+  std::vector<std::shared_ptr<ClientScene>> mScenes;
+};
+
+std::shared_ptr<ClientRenderer> ClientRenderer::Create(std::string const &address,
+                                                       uint64_t processIndex) {
+  return std::make_shared<ClientRendererImpl>(address, processIndex);
+}
+
 //========== Material ==========//
-ClientMaterial::ClientMaterial(std::shared_ptr<ClientRenderer> renderer, rs_id_t id)
+ClientMaterial::ClientMaterial(std::shared_ptr<ClientRendererImpl> renderer, rs_id_t id)
     : mRenderer(renderer), mId(id){};
 
 void ClientMaterial::setBaseColor(std::array<float, 4> color) {
@@ -231,7 +264,7 @@ std::vector<std::shared_ptr<IPxrRenderShape>> ClientRigidbody::getRenderShapes()
 }
 
 //========== Scene ==========//
-ClientScene::ClientScene(ClientRenderer *renderer, rs_id_t id, std::string const &name)
+ClientScene::ClientScene(ClientRendererImpl *renderer, rs_id_t id, std::string const &name)
     : mRenderer(renderer), mId(id), mName(name) {}
 
 IPxrRigidbody *ClientScene::addRigidbody(physx::PxGeometryType::Enum type,
@@ -565,7 +598,7 @@ void ClientScene::syncId() {
 }
 
 //========== Renderer ==========//
-ClientRenderer::ClientRenderer(std::string const &address, uint64_t processIndex)
+ClientRendererImpl::ClientRendererImpl(std::string const &address, uint64_t processIndex)
     : mProcessIndex(processIndex) {
   grpc::ChannelArguments args;
   args.SetLoadBalancingPolicyName("round_robin");
@@ -573,7 +606,7 @@ ClientRenderer::ClientRenderer(std::string const &address, uint64_t processIndex
   mStub = proto::RenderService::NewStub(mChannel);
 }
 
-IPxrScene *ClientRenderer::createScene(std::string const &name) {
+IPxrScene *ClientRendererImpl::createScene(std::string const &name) {
   ClientContext context;
   proto::Index req;
   proto::Id res;
@@ -588,7 +621,7 @@ IPxrScene *ClientRenderer::createScene(std::string const &name) {
   throw std::runtime_error(status.error_message());
 }
 
-void ClientRenderer::removeScene(IPxrScene *scene) {
+void ClientRendererImpl::removeScene(IPxrScene *scene) {
   if (ClientScene *clientScene = dynamic_cast<ClientScene *>(scene)) {
     ClientContext context;
     proto::Id req;
@@ -604,7 +637,7 @@ void ClientRenderer::removeScene(IPxrScene *scene) {
   }
 }
 
-std::shared_ptr<IPxrMaterial> ClientRenderer::createMaterial() {
+std::shared_ptr<IPxrMaterial> ClientRendererImpl::createMaterial() {
   ClientContext context;
   proto::Empty req;
   proto::Id res;
