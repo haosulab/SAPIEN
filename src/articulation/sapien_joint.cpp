@@ -196,11 +196,7 @@ void SJoint::setDriveVelocityTarget(std::vector<PxReal> const &v) {
   }
   auto axes = getAxes();
   for (uint32_t i = 0, s = v.size(); i < s; ++i) {
-    if (axes[i] == PxArticulationAxis::eX) {
-      mPxJoint->setDriveVelocity(axes[i], -v[i]);
-    } else {
-      mPxJoint->setDriveVelocity(axes[i], v[i]);
-    }
+    mPxJoint->setDriveVelocity(axes[i], v[i]);
   }
   mArticulation->getPxArticulation()->wakeUp();
 }
@@ -290,11 +286,7 @@ PxReal SJoint::getDriveVelocityTarget() const {
     throw std::runtime_error("get drive target not implemented for multi-dof joints");
   }
   if (ax.size()) {
-    if (ax[0] == PxArticulationAxis::eX) {
-      return -mPxJoint->getDriveVelocity(ax[0]);
-    } else {
-      return mPxJoint->getDriveVelocity(ax[0]);
-    }
+    return mPxJoint->getDriveVelocity(ax[0]);
   }
   return 0.f;
 }
