@@ -410,7 +410,7 @@ class CollisionGeometry():
     pass
 class CameraEntity(Entity):
     def get_albedo_rgba(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_camera_matrix(self) -> numpy.ndarray[numpy.float32]: 
+    def get_camera_matrix(self) -> numpy.ndarray[numpy.float32, _Shape[4, 4]]: 
         """
         Get 4x4 intrinsic camera matrix in OpenCV format.
         """
@@ -419,22 +419,22 @@ class CameraEntity(Entity):
         """
         Get raw GPU memory for a render target in the dl format. It can be wrapped into PyTorch or Tensorflow using their API
         """
-    def get_extrinsic_matrix(self) -> numpy.ndarray[numpy.float32]: 
+    def get_extrinsic_matrix(self) -> numpy.ndarray[numpy.float32, _Shape[4, 4]]: 
         """
         Get 4x4 extrinsic camera matrix in OpenCV format.
         """
     def get_float_texture(self, texture_name: str) -> numpy.ndarray[numpy.float32]: ...
-    def get_intrinsic_matrix(self) -> numpy.ndarray[numpy.float32]: 
+    def get_intrinsic_matrix(self) -> numpy.ndarray[numpy.float32, _Shape[3, 3]]: 
         """
         Get 3x3 intrinsic camera matrix in OpenCV format.
         """
-    def get_model_matrix(self) -> numpy.ndarray[numpy.float32]: 
+    def get_model_matrix(self) -> numpy.ndarray[numpy.float32, _Shape[4, 4]]: 
         """
         Get model matrix (inverse of extrinsic matrix) used in rendering (Y up, Z back)
         """
     def get_normal_rgba(self) -> numpy.ndarray[numpy.float32]: ...
     def get_position_rgba(self) -> numpy.ndarray[numpy.float32]: ...
-    def get_projection_matrix(self) -> numpy.ndarray[numpy.float32]: 
+    def get_projection_matrix(self) -> numpy.ndarray[numpy.float32, _Shape[4, 4]]: 
         """
         Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and [0,1] Z)
         """
@@ -1024,12 +1024,15 @@ class PointLightEntity(LightEntity, Entity):
     pass
 class Pose():
     def __getstate__(self) -> tuple: ...
-    def __init__(self, p: numpy.ndarray[numpy.float32] = array([0., 0., 0.], dtype=float32), q: numpy.ndarray[numpy.float32] = array([1., 0., 0., 0.], dtype=float32)) -> None: ...
+    @typing.overload
+    def __init__(self, mat44: numpy.ndarray[numpy.float32, _Shape[4, 4]]) -> None: ...
+    @typing.overload
+    def __init__(self, p: numpy.ndarray[numpy.float32, _Shape[3, 1]] = array([0., 0., 0.], dtype=float32), q: numpy.ndarray[numpy.float32, _Shape[4, 1]] = array([1., 0., 0., 0.], dtype=float32)) -> None: ...
     def __mul__(self, arg0: Pose) -> Pose: ...
     def __repr__(self) -> str: ...
     def __setstate__(self, arg0: tuple) -> None: ...
     @staticmethod
-    def from_transformation_matrix(mat44: numpy.ndarray[numpy.float32]) -> Pose: ...
+    def from_transformation_matrix(mat44: numpy.ndarray[numpy.float32, _Shape[4, 4]]) -> Pose: ...
     def inv(self) -> Pose: ...
     def set_p(self, p: numpy.ndarray[numpy.float32]) -> None: ...
     def set_q(self, q: numpy.ndarray[numpy.float32]) -> None: ...

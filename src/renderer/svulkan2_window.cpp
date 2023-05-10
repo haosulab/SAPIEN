@@ -201,7 +201,7 @@ void SVulkan2Window::rebuild() {
   do {
     auto [vw, vh] = mWindow->getWindowFramebufferSize();
     mViewportWidth = vw;
-    mViewportWidth = vh;
+    mViewportHeight = vh;
   } while (!mWindow->updateSize(mViewportWidth, mViewportHeight));
   mSceneRenderSemaphore = mRenderer->getContext()->getDevice().createSemaphoreUnique({});
   mSceneRenderFence =
@@ -412,7 +412,7 @@ std::array<float, 2> SVulkan2Window::getMouseWheelDelta() {
   return {x, y};
 }
 
-std::array<int, 2> SVulkan2Window::getWindowSize() { mWindow->getWindowSize(); }
+std::array<int, 2> SVulkan2Window::getWindowSize() { return mWindow->getWindowSize(); }
 
 float SVulkan2Window::getFPS() { return mWindow->imguiGetFramerate(); }
 

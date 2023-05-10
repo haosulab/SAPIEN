@@ -1,9 +1,10 @@
 #pragma once
 #include "awaitable.hpp"
+#include "math.h"
 #include "renderer/render_interface.h"
 #include "sapien_actor_base.h"
 #include "sapien_entity.h"
-#include <glm/glm.hpp>
+// #include <glm/glm.hpp>
 
 namespace sapien {
 
@@ -46,12 +47,12 @@ public:
   void setPerspectiveParameters(float near, float far, float fx, float fy, float cx, float cy,
                                 float skew);
 
-  glm::mat4 getProjectionMatrix() const;
-  glm::mat4 getCameraMatrix() const;
-  glm::mat4 getModelMatrix() const;
+  Mat4 getProjectionMatrix() const;
+  Mat4 getCameraMatrix() const;
+  Mat4 getModelMatrix() const;
 
-  glm::mat3 getIntrinsicMatrix() const;
-  glm::mat4 getExtrinsicMatrix() const;
+  Mat3 getIntrinsicMatrix() const;
+  Mat4 getExtrinsicMatrix() const;
 
   void takePicture();
 

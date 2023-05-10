@@ -42,8 +42,6 @@
 
 #include "sapien/profiler.h"
 
-#include "sapien/utils/pose.hpp"
-
 #include "sapien/acd.h"
 
 #ifdef SAPIEN_CUDA
@@ -505,28 +503,22 @@ void buildSapien(py::module &m) {
       .def("set_restitution", &SPhysicalMaterial::setRestitution, py::arg("coef"));
 
   PyPose
-      .def(py::init([](py::array_t<PxReal> p, py::array_t<PxReal> q) {
-             if (p.size() == 16) {
-               return utils::fromTransFormationMatrix(p);
-             }
-             if (p.size() == 3 && q.size() == 4) {
-               return new PxTransform({p.at(0), p.at(1), p.at(2)},
-                                      {q.at(1), q.at(2), q.at(3), q.at(0)});
-             }
-             throw std::invalid_argument("failed to create Pose: invalid array size");
+      .def(py::init([](Eigen::Ref<Vec3 const> const &p, Eigen::Ref<Vec4 const> const &q) {
+             return PxTransform({p(0), p(1), p(2)}, {q(1), q(2), q(3), q(0)});
            }),
-           py::return_value_policy::automatic, py::arg("p") = make_array<float>({0, 0, 0}),
-           py::arg("q") = make_array<float>({1, 0, 0, 0}))
-      .def_static("from_transformation_matrix", &utils::fromTransFormationMatrix,
-                  py::return_value_policy::automatic, py::arg("mat44"))
-      .def("to_transformation_matrix", &utils::toTransformationMatrix)
+           py::arg("p") = Vec3(0, 0, 0), py::arg("q") = Vec4(1, 0, 0, 0))
+      .def(py::init([](Eigen::Ref<Mat4 const> const &t) { return fromTransFormationMatrix(t); }),
+           py::arg("mat44"))
+
+      .def_static("from_transformation_matrix", &fromTransFormationMatrix, py::arg("mat44"))
+      .def("to_transformation_matrix", &toTransformationMatrix)
       .def_property_readonly(
           "p", [](PxTransform &t) { return Eigen::Matrix<PxReal, 3, 1>(t.p.x, t.p.y, t.p.z); })
       .def_property_readonly(
           "q",
           [](PxTransform &t) { return Eigen::Matrix<PxReal, 4, 1>(t.q.w, t.q.x, t.q.y, t.q.z); })
       .def("inv", &PxTransform::getInverse)
-      .def("__repr__", &utils::poseRepresentation)
+      .def("__repr__", &poseRepr)
       .def("transform", [](PxTransform &t, PxTransform &src) { return t.transform(src); })
       .def(
           "set_p", [](PxTransform &t, const py::array_t<PxReal> &arr) { t.p = array2vec3(arr); },
@@ -2296,25 +2288,20 @@ Args:
           "PyTorch or Tensorflow using their API",
           py::arg("texture_name"))
 #endif
-      .def(
-          "get_camera_matrix", [](SCamera &c) { return mat42array(c.getCameraMatrix()); },
-          "Get 4x4 intrinsic camera matrix in OpenCV format.")
+      .def("get_camera_matrix", &SCamera::getCameraMatrix,
+           "Get 4x4 intrinsic camera matrix in OpenCV format.")
 
-      .def(
-          "get_intrinsic_matrix", [](SCamera &c) { return mat32array(c.getIntrinsicMatrix()); },
-          "Get 3x3 intrinsic camera matrix in OpenCV format.")
-      .def(
-          "get_extrinsic_matrix", [](SCamera &c) { return mat42array(c.getExtrinsicMatrix()); },
-          "Get 4x4 extrinsic camera matrix in OpenCV format.")
+      .def("get_intrinsic_matrix", &SCamera::getIntrinsicMatrix,
+           "Get 3x3 intrinsic camera matrix in OpenCV format.")
+      .def("get_extrinsic_matrix", &SCamera::getExtrinsicMatrix,
+           "Get 4x4 extrinsic camera matrix in OpenCV format.")
 
-      .def(
-          "get_model_matrix", [](SCamera &c) { return mat42array(c.getModelMatrix()); },
-          "Get model matrix (inverse of extrinsic matrix) used in rendering (Y up, Z back)")
-      .def(
-          "get_projection_matrix", [](SCamera &c) { return mat42array(c.getProjectionMatrix()); },
-          "Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and "
-          "[0,1] "
-          "Z)")
+      .def("get_model_matrix", &SCamera::getModelMatrix,
+           "Get model matrix (inverse of extrinsic matrix) used in rendering (Y up, Z back)")
+      .def("get_projection_matrix", &SCamera::getProjectionMatrix,
+           "Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and "
+           "[0,1] "
+           "Z)")
       .def(
           "set_custom_property",
           [](SCamera &c, std::string const &name, int property) {

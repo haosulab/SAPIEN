@@ -55,6 +55,7 @@ class TestArticulation(unittest.TestCase):
         robot.set_drive_velocity_target(q)
         for j, v in zip(robot.get_active_joints(), q):
             self.assertTrue(np.allclose(j.get_drive_velocity_target(), v))
+
         robot.set_drive_target(q)
         for j, v in zip(robot.get_active_joints(), q):
             self.assertTrue(np.allclose(j.get_drive_target(), v))
