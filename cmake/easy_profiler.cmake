@@ -11,10 +11,5 @@ FetchContent_Declare(
     GIT_PROGRESS TRUE
 )
 
-set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME easy_profiler)
-FetchContent_GetProperties(easy_profiler)
-if(NOT easy_profiler_POPULATED)
-  FetchContent_Populate(easy_profiler)
-  add_subdirectory(${easy_profiler_SOURCE_DIR} ${easy_profiler_BINARY_DIR} EXCLUDE_FROM_ALL)
-endif()
+FetchContent_MakeAvailableExclude(easy_profiler)
 set_target_properties(easy_profiler PROPERTIES POSITION_INDEPENDENT_CODE TRUE)

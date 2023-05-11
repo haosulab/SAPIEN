@@ -15,5 +15,7 @@ FetchContent_Declare(
 set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF)
 set(EIGEN_BUILD_PKGCONFIG OFF)
-FetchContent_MakeAvailable(eigen)
+
+FetchContent_MakeAvailableExclude(eigen)
+
 set(Eigen3_DIR ${eigen_BINARY_DIR})

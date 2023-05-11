@@ -14,7 +14,7 @@ FetchContent_Declare(
 )
 
 set(FETCHCONTENT_QUIET OFF)
-FetchContent_MakeAvailable(grpc)
+FetchContent_MakeAvailableExclude(grpc)
 set(FETCHCONTENT_QUIET ON)
 set_target_properties(grpc++ PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
