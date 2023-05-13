@@ -22,3 +22,4 @@ RUN cd /workspace && wget https://developer.download.nvidia.com/compute/cuda/11.
 ENV CUDA_PATH=/workspace/cuda PATH="/workspace/cuda/bin:$PATH" LD_LIBRARY_PATH="/workspace/cuda/lib64:$LD_LIBRARY_PATH"
 
 RUN pipx install cmake==3.26.3 --force
+ENV PATH=/opt/python/cp311-cp311/bin:$PATH
