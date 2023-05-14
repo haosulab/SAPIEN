@@ -2790,13 +2790,4 @@ Args:
   dlpack.def("dl_cuda_sync", []() { cudaStreamSynchronize(0); });
 #endif
 
-  auto coacd = m.def_submodule("coacd");
-
-  coacd.def("run_coacd", &sapien::CoACD, py::arg("mesh"), py::arg("threshold") = 0.05,
-            py::arg("preprocess") = true, py::arg("preprocess_resolution") = 30,
-            py::arg("pca") = false, py::arg("merge") = true, py::arg("mcts_max_depth") = 3,
-            py::arg("mcts_nodes") = 20, py::arg("mcts_iterations") = 150, py::arg("seed") = 0);
-  coacd.def("run_remesh", &sapien::Remesh, py::arg("mesh"), py::arg("resolution") = 30,
-            py::arg("level_set") = 0.55);
-  coacd.def("set_log_level", &coacd_set_log_level, py::arg("level"));
 }

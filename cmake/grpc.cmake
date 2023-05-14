@@ -19,11 +19,10 @@ set(FETCHCONTENT_QUIET OFF)
 FetchContent_MakeAvailableExclude(grpc)
 set(FETCHCONTENT_QUIET ON)
 
-message(------------------- ${zlib_BINARY_DIR})
-if (zlib_SOURCE_DIR)
-  target_include_directories(grpc PRIVATE ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
-  target_include_directories(grpc++ PRIVATE ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
-endif()
+# if (zlib_SOURCE_DIR)
+#   target_include_directories(grpc PRIVATE ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
+#   target_include_directories(grpc++ PRIVATE ${zlib_SOURCE_DIR} ${zlib_BINARY_DIR})
+# endif()
 
 set(CMAKE_CXX_STANDARD 20)
 

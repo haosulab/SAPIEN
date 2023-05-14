@@ -64,11 +64,8 @@ else()
     set(SVULKAN2_CUDA_INTEROP OFF CACHE BOOL "" FORCE)
 endif()
 
-add_subdirectory("3rd_party/CoACD" EXCLUDE_FROM_ALL)
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
 include_directories(assimp ${zlib_SOURCE_DIR})
-
-set_target_properties(coacd PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 if (${SAPIEN_CUDA})
     add_subdirectory("3rd_party/simsense")
@@ -84,7 +81,7 @@ target_link_libraries(sapien PUBLIC eigen)
 target_link_libraries(sapien PUBLIC svulkan2)
 target_link_libraries(sapien PRIVATE physx5)
 target_link_libraries(sapien PRIVATE tinyxml2 spdlog::spdlog easy_profiler
-    grpc++ coacd pthread rt dl stdc++fs)
+    grpc++ pthread rt dl stdc++fs)
 target_link_libraries(sapien PRIVATE Vulkan::Headers glm assimp::assimp)
 
 if (${SAPIEN_CUDA})

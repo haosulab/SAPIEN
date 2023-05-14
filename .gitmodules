@@ -8,6 +8,3 @@
 	path = 3rd_party/simsense
 	url = git@github.com:angli66/simsense.git
 	branch = sapien
-[submodule "3rd_party/CoACD"]
-	path = 3rd_party/CoACD
-	url = git@github.com:fbxiang/CoACD.git

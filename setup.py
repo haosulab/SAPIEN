@@ -192,7 +192,6 @@ package_data = {
         "pysapien/__init__.pyi",
         "pysapien/renderer/__init__.pyi",
         "pysapien/dlpack/__init__.pyi",
-        "pysapien/coacd/__init__.pyi",
     ]
 }
 
@@ -242,5 +241,5 @@ setup(
     project_urls={"Documentation": "https://sapien.ucsd.edu/docs"},
     package_data=package_data,
     package_dir={"sapien": project_python_home_dir},
-    scripts=["python/py_package/bin/coacd"],
+    scripts=[],
 )
