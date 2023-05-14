@@ -25,8 +25,7 @@ import pkg_resources
 from pathlib import Path
 
 from .keyframe_middleware import (
-    KeyFrame,
-    KeyFrameContainer,
+    KeyFrameManager
 )
 
 shader_dir = Path(pkg_resources.resource_filename("sapien", "vulkan_shader"))
@@ -269,7 +268,7 @@ class Viewer(object):
         self.ik_enabled = False
         self.ik_display_objects = []
         self.keyframe_window = None
-        self.key_frame_container = KeyFrameContainer()
+        self.kf_manager = KeyFrameManager()
 
         self.move_group_joints = []
         self.move_group_selection = {}
@@ -2595,24 +2594,29 @@ class Viewer(object):
         point = rotate_vector(point, q) + self.window.get_camera_position()
         return point
 
-    def insert_key_frame(self, c):
-        key_frame = KeyFrame(c.get_current_frame(), self.scene)
-        self.key_frame_container.insert(key_frame)
-        key_frame.set_container(self.key_frame_container)
+    def insert_key_frame(self, _):
+        self.kf_manager.insert(self.scene)
     
     def load_key_frame(self, c):
-        key_frame = self.key_frame_container.find(c.get_current_frame())
-        if key_frame:
-            key_frame.s_scene.dump_state_into(self.scene)
+        for kf in c.get_key_frames_in_used():
+            if kf.frame == c.get_current_frame():
+                s_scene = self.kf_manager.get_serialized_scene(kf.get_id())
+                s_scene.dump_state_into(self.scene)
+                break
 
     def update_key_frame(self, c):
-        key_frame = self.key_frame_container.find(c.get_current_frame())
-        if key_frame:
-            key_frame.s_scene.update_state_from(self.scene)
+        for kf in c.get_key_frames_in_used():
+            if kf.frame == c.get_current_frame():
+                s_scene = self.kf_manager.get_serialized_scene(kf.get_id())
+                s_scene.update_state_from(self.scene)
+                break
 
     def delete_key_frame(self, c):
-        self.key_frame_container.delete(c.get_current_frame())
+        for kf in c.get_key_frames_in_used():
+            if kf.frame == c.get_current_frame():
+                self.kf_manager.delete(kf.get_id())
+                break
 
+    # Called only when dragged key frame is overwriting another existing key frame
     def drag_key_frame(self, c):
-        key_frame = self.key_frame_container.find_by_index(c.get_dragged_index())
-        key_frame.set_frame(c.get_dragged_new_val())
+        self.kf_manager.delete(c.get_key_frame_to_delete())

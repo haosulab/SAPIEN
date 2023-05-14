@@ -86,7 +86,8 @@ void buildRenderer(py::module &parent) {
       m, "UISliderAngle");
   auto PyUIGizmo = py::class_<ui::Gizmo, ui::Widget, std::shared_ptr<ui::Gizmo>>(m, "UIGizmo");
 
-  auto PyUIKeyFrame = py::class_<ui::KeyFrameEditor, ui::Widget, std::shared_ptr<ui::KeyFrameEditor>>(m, "UIKeyFrameEditor");
+  auto PyUIKeyFrame = py::class_<ui::KeyFrame>(m, "UIKeyFrame");
+  auto PyUIKeyFrameEditor = py::class_<ui::KeyFrameEditor, ui::Widget, std::shared_ptr<ui::KeyFrameEditor>>(m, "UIKeyFrameEditor");
 
   PyUIWidget.def("remove", &ui::Widget::remove)
       .def("remove_children", &ui::Widget::removeChildren)
@@ -359,16 +360,21 @@ void buildRenderer(py::module &parent) {
                          proj.at(2, 3), proj.at(3, 3));
              gizmo.setCameraParameters(v, p);
            });
+  
+  PyUIKeyFrame
+    .def("get_id", &ui::KeyFrame::getId)
+    .def_readonly("frame", &ui::KeyFrame::frame);
 
-  PyUIKeyFrame.def(py::init<float>())
+  PyUIKeyFrameEditor
+    .def(py::init<float>())
     .def("InsertKeyFrameCallback", &ui::KeyFrameEditor::InsertKeyFrameCallback, py::arg("func"))
     .def("LoadKeyFrameCallback", &ui::KeyFrameEditor::LoadKeyFrameCallback, py::arg("func"))
     .def("UpdateKeyFrameCallback", &ui::KeyFrameEditor::UpdateKeyFrameCallback, py::arg("func"))
     .def("DeleteKeyFrameCallback", &ui::KeyFrameEditor::DeleteKeyFrameCallback, py::arg("func"))
     .def("DragKeyFrameCallback", &ui::KeyFrameEditor::DragKeyFrameCallback, py::arg("func"))
     .def("get_current_frame", &ui::KeyFrameEditor::getCurrentFrame)
-    .def("get_dragged_index", &ui::KeyFrameEditor::getDraggedIndex)
-    .def("get_dragged_new_val", &ui::KeyFrameEditor::getDraggedNewVal);
+    .def("get_key_frames_in_used", &ui::KeyFrameEditor::getKeyFramesInUsed, py::return_value_policy::reference)
+    .def("get_key_frame_to_delete", &ui::KeyFrameEditor::getKeyFrameToDelete);
   // end UI
 
   PyContext
