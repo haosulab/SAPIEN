@@ -3,6 +3,9 @@
 #include "sapien_actor_base.h"
 #include "sapien_entity.h"
 
+#undef near
+#undef far
+
 namespace sapien {
 
 class SLight : public SEntity {

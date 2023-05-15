@@ -4,6 +4,7 @@ endif()
 
 set(MZ_LZMA OFF CACHE BOOL "" FORCE)
 set(MZ_ZSTD OFF CACHE BOOL "" FORCE)
+set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
 
 include(FetchContent)
 

@@ -4,12 +4,15 @@ import pkg_resources
 import os
 from ._pinocchio_model import _create_pinocchio_model
 
-# perform tricks before linking pysapien
-from ._vulkan_tricks import _ensure_libvulkan, _ensure_egl_icd, _ensure_vulkan_icd
+import platform
 
-_ensure_libvulkan()
-_ensure_vulkan_icd()
-_ensure_egl_icd()
+if platform.system() == "Linux":
+    # perform tricks before linking pysapien
+    from ._vulkan_tricks import _ensure_libvulkan, _ensure_egl_icd, _ensure_vulkan_icd
+
+    _ensure_libvulkan()
+    _ensure_vulkan_icd()
+    _ensure_egl_icd()
 
 from .pysapien import *
 from .pysapien import renderer

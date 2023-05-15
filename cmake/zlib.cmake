@@ -13,7 +13,3 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailableExclude(zlib)
 set_target_properties(zlibstatic PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-add_library(ZLIB::ZLIB ALIAS zlibstatic)
-set(ZLIB_LIBRARY ZLIB::ZLIB)
-set(ZLIB_INCLUDE_DIR ${zlib_SOURCE_DIR})
-set(ZLIB_FOUND TRUE)  # assimp use ZLIB_FOUND to avoid linking system zlib

@@ -115,12 +115,14 @@ class CMakeBuild(build_ext):
         assert os.path.exists(source_path)
         shutil.copytree(source_path, vulkan_shader_path)
 
-        vulkan_library_path = os.path.join(self.build_lib, "sapien", "vulkan_library")
-        source_path = os.path.join(ext.sourcedir, "vulkan_library")
-        if os.path.exists(vulkan_library_path):
-            shutil.rmtree(vulkan_library_path)
-        assert os.path.exists(source_path)
-        shutil.copytree(source_path, vulkan_library_path)
+        # provide Vulkan libraries for linux
+        if platform.system() == "Linux":
+            vulkan_library_path = os.path.join(self.build_lib, "sapien", "vulkan_library")
+            source_path = os.path.join(ext.sourcedir, "vulkan_library")
+            if os.path.exists(vulkan_library_path):
+                shutil.rmtree(vulkan_library_path)
+            assert os.path.exists(source_path)
+            shutil.copytree(source_path, vulkan_library_path)
 
         sensor_assets_path = os.path.join(self.build_lib, "sapien", "sensor", "assets")
         source_patterns_path = os.path.join(

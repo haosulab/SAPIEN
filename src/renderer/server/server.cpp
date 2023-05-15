@@ -7,6 +7,9 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
+#undef near
+#undef far
+
 using grpc::ServerContext;
 using grpc::Status;
 

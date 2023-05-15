@@ -5,6 +5,9 @@
 #include <grpcpp/grpcpp.h>
 #include <spdlog/spdlog.h>
 
+#undef near
+#undef far
+
 namespace sapien {
 namespace Renderer {
 namespace server {

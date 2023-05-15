@@ -14,7 +14,7 @@ def _set_viewer_shader_dir(shader_dir):
         _global_render_config.viewer_shader_dir = shader_dir
         return
     pkg_shader_dir = pkg_resources.resource_filename(
-        "sapien", "vulkan_shader/{}".format(shader_dir)
+        "sapien", os.path.join("vulkan_shader", format(shader_dir))
     )
     if os.path.exists(pkg_shader_dir):
         _global_render_config.viewer_shader_dir = pkg_shader_dir
@@ -27,7 +27,7 @@ def _set_camera_shader_dir(shader_dir):
         _global_render_config.camera_shader_dir = shader_dir
         return
     pkg_shader_dir = pkg_resources.resource_filename(
-        "sapien", "vulkan_shader/{}".format(shader_dir)
+        "sapien", os.path.join("vulkan_shader", format(shader_dir))
     )
     if os.path.exists(pkg_shader_dir):
         _global_render_config.camera_shader_dir = pkg_shader_dir

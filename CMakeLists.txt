@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -fsized-deallocation -Wno-deprecated-declarations -fopenmp")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -fsized-deallocation -Wno-deprecated-declarations -fopenmp")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -fsized-deallocation -static-libstdc++ -static-libgcc")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -fsized-deallocation -static-libstdc++ -static-libgcc")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_DEBUG_POSTFIX "")
 
@@ -26,12 +26,15 @@ macro(FetchContent_MakeAvailableExclude)
 endmacro()
 
 list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 include(physx5)
 include(zlib)
-include(minizip)
+include(grpc)
+
+# TODO: on Windows, manually link physx5 and grpc
+
 include(tinyxml2)
 include(eigen)
-include(grpc)
 include(easy_profiler)
 include(vulkan)
 
@@ -65,7 +68,6 @@ else()
 endif()
 
 add_subdirectory("3rd_party/sapien-vulkan-2" EXCLUDE_FROM_ALL)
-include_directories(assimp ${zlib_SOURCE_DIR})
 
 if (${SAPIEN_CUDA})
     add_subdirectory("3rd_party/simsense")
@@ -81,7 +83,7 @@ target_link_libraries(sapien PUBLIC eigen)
 target_link_libraries(sapien PUBLIC svulkan2)
 target_link_libraries(sapien PRIVATE physx5)
 target_link_libraries(sapien PRIVATE tinyxml2 spdlog::spdlog easy_profiler
-    grpc++ pthread rt dl stdc++fs)
+    grpc++ ${CMAKE_DL_LIBS} stdc++fs)
 target_link_libraries(sapien PRIVATE Vulkan::Headers glm assimp::assimp)
 
 if (${SAPIEN_CUDA})
@@ -97,11 +99,6 @@ set_target_properties(sapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURREN
 if (${SAPIEN_PROFILE})
     target_compile_definitions(sapien SAPIEN_PROFILE)
 endif()
-
-# pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
-# target_link_libraries(pysapien PRIVATE sapien)
-# add_custom_target(python_test COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/test/*.py ${CMAKE_CURRENT_SOURCE_DIR}/test/*.json ${CMAKE_CURRENT_BINARY_DIR})
-# add_custom_target(manual_python COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/manualtest/*.py ${CMAKE_CURRENT_BINARY_DIR})
 
 target_include_directories(sapien INTERFACE
     $<INSTALL_INTERFACE:include>
