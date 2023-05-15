@@ -1065,7 +1065,6 @@ class Viewer(object):
                     .LoadKeyFrameCallback(self.load_key_frame)
                     .UpdateKeyFrameCallback(self.update_key_frame)
                     .DeleteKeyFrameCallback(self.delete_key_frame)
-                    .DragKeyFrameCallback(self.drag_key_frame)
                 )
             )
 
@@ -2598,25 +2597,12 @@ class Viewer(object):
         self.kf_manager.insert(self.scene)
     
     def load_key_frame(self, c):
-        for kf in c.get_key_frames_in_used():
-            if kf.frame == c.get_current_frame():
-                s_scene = self.kf_manager.get_serialized_scene(kf.get_id())
-                s_scene.dump_state_into(self.scene)
-                break
+        s_scene = self.kf_manager.get_serialized_scene(c.get_key_frame_to_modify())
+        s_scene.dump_state_into(self.scene)
 
     def update_key_frame(self, c):
-        for kf in c.get_key_frames_in_used():
-            if kf.frame == c.get_current_frame():
-                s_scene = self.kf_manager.get_serialized_scene(kf.get_id())
-                s_scene.update_state_from(self.scene)
-                break
+        s_scene = self.kf_manager.get_serialized_scene(c.get_key_frame_to_modify())
+        s_scene.update_state_from(self.scene)
 
     def delete_key_frame(self, c):
-        for kf in c.get_key_frames_in_used():
-            if kf.frame == c.get_current_frame():
-                self.kf_manager.delete(kf.get_id())
-                break
-
-    # Called only when dragged key frame is overwriting another existing key frame
-    def drag_key_frame(self, c):
-        self.kf_manager.delete(c.get_key_frame_to_delete())
+        self.kf_manager.delete(c.get_key_frame_to_modify())

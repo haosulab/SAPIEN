@@ -371,10 +371,9 @@ void buildRenderer(py::module &parent) {
     .def("LoadKeyFrameCallback", &ui::KeyFrameEditor::LoadKeyFrameCallback, py::arg("func"))
     .def("UpdateKeyFrameCallback", &ui::KeyFrameEditor::UpdateKeyFrameCallback, py::arg("func"))
     .def("DeleteKeyFrameCallback", &ui::KeyFrameEditor::DeleteKeyFrameCallback, py::arg("func"))
-    .def("DragKeyFrameCallback", &ui::KeyFrameEditor::DragKeyFrameCallback, py::arg("func"))
     .def("get_current_frame", &ui::KeyFrameEditor::getCurrentFrame)
     .def("get_key_frames_in_used", &ui::KeyFrameEditor::getKeyFramesInUsed, py::return_value_policy::reference)
-    .def("get_key_frame_to_delete", &ui::KeyFrameEditor::getKeyFrameToDelete);
+    .def("get_key_frame_to_modify", &ui::KeyFrameEditor::getKeyFrameToModify);
   // end UI
 
   PyContext
