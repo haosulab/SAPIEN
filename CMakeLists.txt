@@ -87,7 +87,13 @@ target_link_libraries(sapien PUBLIC eigen)
 target_link_libraries(sapien PUBLIC svulkan2)
 target_link_libraries(sapien PRIVATE physx5)
 target_link_libraries(sapien PRIVATE tinyxml2 spdlog::spdlog easy_profiler
-    grpc++ ${CMAKE_DL_LIBS} stdc++fs)
+    grpc++ ${CMAKE_DL_LIBS})
+
+if (UNIX)
+    target_link_libraries(sapien PRIVATE stdc++fs)
+endif ()
+
+
 target_link_libraries(sapien PRIVATE Vulkan::Headers glm assimp::assimp)
 
 if (${SAPIEN_CUDA})
