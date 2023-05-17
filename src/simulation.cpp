@@ -72,12 +72,6 @@ Simulation::Simulation(uint32_t nthread, PxReal toleranceLength, PxReal toleranc
     throw std::runtime_error("Simulation Creation Failed");
   }
 
-  mCooking = PxCreateCooking(PX_PHYSICS_VERSION, *mFoundation, PxCookingParams(toleranceScale));
-  if (!mCooking) {
-    spdlog::get("SAPIEN")->critical("Failed to create PhysX Cooking");
-    throw std::runtime_error("Simulation Creation Failed");
-  }
-
   if (!PxInitExtensions(*mPhysicsSDK, nullptr)) {
     spdlog::get("SAPIEN")->critical("Failed to initialize PhysX Extensions");
     throw std::runtime_error("Simulation Creation Failed");
@@ -88,7 +82,6 @@ Simulation::~Simulation() {
   if (mCpuDispatcher) {
     mCpuDispatcher->release();
   }
-  mCooking->release();
   PxCloseExtensions();
   mPhysicsSDK->release();
 #ifdef _PVD

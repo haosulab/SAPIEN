@@ -71,7 +71,6 @@ public:
 #endif
 
   PxPhysics *mPhysicsSDK = nullptr;
-  PxCooking *mCooking = nullptr;
 
 private:
   // PhysX objects

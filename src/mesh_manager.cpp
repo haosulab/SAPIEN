@@ -268,7 +268,8 @@ physx::PxTriangleMesh *MeshManager::loadNonConvexMesh(const std::string &filenam
   meshDesc.triangles.data = triangles.data();
 
   PxDefaultMemoryOutputStream writeBuffer;
-  if (!mSimulation->mCooking->cookTriangleMesh(meshDesc, writeBuffer)) {
+  if (!PxCookTriangleMesh(PxCookingParams(mSimulation->mPhysicsSDK->getTolerancesScale()),
+                          meshDesc, writeBuffer)) {
     spdlog::get("SAPIEN")->error("Failed to cook non-convex mesh: {}", filename);
     return nullptr;
   }
@@ -326,7 +327,9 @@ physx::PxConvexMesh *MeshManager::loadMesh(const std::string &filename, bool use
   convexDesc.vertexLimit = 255;
 
   PxDefaultMemoryOutputStream buf;
-  if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf)) {
+
+  if (!PxCookConvexMesh(PxCookingParams(mSimulation->mPhysicsSDK->getTolerancesScale()),
+                        convexDesc, buf)) {
     spdlog::get("SAPIEN")->error("Failed to cook mesh: {}", filename);
     return nullptr;
   }
@@ -448,7 +451,9 @@ std::vector<PxConvexMesh *> MeshManager::loadMeshGroup(const std::string &filena
       convexDesc.vertexLimit = 255;
 
       PxDefaultMemoryOutputStream buf;
-      if (!mSimulation->mCooking->cookConvexMesh(convexDesc, buf)) {
+
+      if (!PxCookConvexMesh(PxCookingParams(mSimulation->mPhysicsSDK->getTolerancesScale()),
+                            convexDesc, buf)) {
         spdlog::get("SAPIEN")->error("Failed to cook a mesh from file: {}", filename);
       }
       PxDefaultMemoryInputData input(buf.getData(), buf.getSize());

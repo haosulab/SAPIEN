@@ -34,31 +34,18 @@ public:
   inline std::string getType() const { return mType; }
   inline vk::Buffer getBuffer() const { return mBuffer->getVulkanBuffer(); }
 
-  vk::DeviceSize getSize() const { return mSize; }
+  inline vk::DeviceSize getSize() const { return mSize; }
 
 #ifdef SAPIEN_CUDA
   inline void *getCudaPtr() const { return mBuffer->getCudaPtr(); }
 #endif
 
 private:
-  // uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
-
   std::shared_ptr<svulkan2::core::Context> mContext;
-  // vk::Device mDevice;
-  // vk::PhysicalDevice mPhysicalDevice;
   std::string mType{};
   std::vector<int> mShape;
   vk::DeviceSize mSize;
-
   std::unique_ptr<svulkan2::core::Buffer> mBuffer;
-  // vk::UniqueBuffer mBuffer;
-  // vk::UniqueDeviceMemory mMemory;
-
-  // #ifdef SAPIEN_CUDA
-  //   int mCudaDeviceId{-1};
-  //   void *mCudaPtr{};
-  //   cudaExternalMemory_t mCudaMem{};
-  // #endif
 };
 
 class RenderServer {
