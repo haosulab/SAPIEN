@@ -13,9 +13,26 @@ option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OF
 option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, denoiser, and simsense" ON)
 set(SAPIEN_PHYSX5_DIR "" CACHE STRING "Directory for precompield PhysX5")
 
+# HACK
+if (WIN32)
+endif ()
+
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 endif ()
+
+if (NOT WIN32)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        message("-- DEBUG Build")
+        add_definitions(-DVK_VALIDATION)
+        add_definitions(-DVK_CORE_LOGGING)
+        add_definitions(-D_DEBUG)
+    else()
+        add_definitions(-DNDEBUG)
+    endif()
+else()
+    add_definitions(-DNDEBUG)
+endif()
 
 macro(FetchContent_MakeAvailableExclude)
     FetchContent_GetProperties(${ARGV})
@@ -35,20 +52,7 @@ include(grpc)
 
 include(tinyxml2)
 include(eigen)
-include(easy_profiler)
 include(vulkan)
-
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message("-- DEBUG Build")
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_DEBUG})
-    add_definitions(-DVK_VALIDATION)
-    add_definitions(-DVK_CORE_LOGGING)
-    add_definitions(-D_DEBUG)
-else ()
-    message("-- RELEASE Build")
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS_RELEASE})
-    add_definitions(-DNDEBUG)
-endif ()
 
 if (${SAPIEN_DEBUG_VIEWER})
     add_definitions(-D_DEBUG_VIEWER)

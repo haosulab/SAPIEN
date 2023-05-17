@@ -39,11 +39,10 @@ if (WIN32)
   target_include_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/include>)
   target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/bin/win.x86_64.vc143.mt/release>)
   target_link_libraries(physx5 INTERFACE
-    PhysX_64.dll
-    PhysXFoundation_64.dll
-    PhysXCooking_64.dll
-    PhysXCommon_64.dll
-    PhysXExtensions_static_64.lib
-  )
-  target_compile_definitions(physx5 INTERFACE PX_SIMD_DISABLED)
+    LowLevelDynamics_static_64.lib SimulationController_static_64.lib
+    LowLevel_static_64.lib PhysXFoundation_64.lib LowLevelAABB_static_64.lib
+    PhysXTask_static_64.lib SceneQuery_static_64.lib PhysXVehicle2_static_64.lib
+    PhysXExtensions_static_64.lib PhysX_64.lib PhysXCooking_64.lib
+    PhysXCommon_64.lib PhysXVehicle_static_64.lib
+    PhysXCharacterKinematic_static_64.lib)
 endif()

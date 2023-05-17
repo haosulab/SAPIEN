@@ -53,4 +53,7 @@ public:
   std::string getCachedFilename(const std::string &filename);
   std::string getCachedFilenameNonConvex(const std::string &filename);
 };
+
+void exportMeshToFile(physx::PxConvexMesh *pxMesh, const std::string &filename);
+
 } // namespace sapien

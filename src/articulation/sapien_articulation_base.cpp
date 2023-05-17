@@ -8,6 +8,7 @@
 #include "sapien/articulation/sapien_joint.h"
 #include "sapien/articulation/sapien_link.h"
 #include "sapien/sapien_scene.h"
+#include "sapien/mesh_manager.h"
 
 
 namespace sapien {
@@ -255,8 +256,6 @@ static std::string exportLinkURDF(SLinkBase *link, physx::PxTransform extraTrans
       fs::path fullPath = fs::path(cacheDir) / fs::path(baseName);
       PxConvexMeshGeometry g;
       mPxShape->getConvexMeshGeometry(g);
-      /* mesh_manager.cpp */
-      void exportMeshToFile(PxConvexMesh * pxMesh, const std::string &filename);
       exportMeshToFile(g.convexMesh, fullPath.string());
       ss << "<mesh filename=\"" << baseName << "\" />";
       break;
