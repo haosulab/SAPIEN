@@ -858,8 +858,7 @@ bool RenderServer::waitScenes(std::vector<int> const &list, uint64_t timeout) {
 
 VulkanCudaBuffer *RenderServer::allocateBuffer(std::string const &type,
                                                std::vector<int> const &shape) {
-  mBuffers.push_back(std::make_unique<VulkanCudaBuffer>(
-      mContext->getDevice(), mContext->getPhysicalDevice(), type, shape));
+  mBuffers.push_back(std::make_unique<VulkanCudaBuffer>(mContext, type, shape));
   return mBuffers.back().get();
 }
 
@@ -995,9 +994,9 @@ std::string RenderServer::summary() const {
 
 RenderServer::~RenderServer() {}
 
-VulkanCudaBuffer::VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physicalDevice,
-                                   std::string const &type, std::vector<int> const &shape)
-    : mDevice(device), mPhysicalDevice(physicalDevice), mType(type), mShape(shape) {
+VulkanCudaBuffer::VulkanCudaBuffer(std::shared_ptr<svulkan2::core::Context> context, std::string const &type,
+                                   std::vector<int> const &shape)
+    : mContext(context), mType(type), mShape(shape) {
   if (type.length() < 3 || (type[0] != '<' && type[0] != '>')) {
     throw std::runtime_error("invalid type");
   }
@@ -1015,75 +1014,13 @@ VulkanCudaBuffer::VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physica
     throw std::runtime_error("empty buffer is not allowed");
   }
 
-  vk::BufferCreateInfo bufferInfo(
-      {}, mSize, vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst,
-      vk::SharingMode::eExclusive);
-  vk::ExternalMemoryBufferCreateInfo externalMemoryInfo(
-      vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd);
-  bufferInfo.setPNext(&externalMemoryInfo);
-
-  mBuffer = device.createBufferUnique(bufferInfo);
-
-  auto memReqs = device.getBufferMemoryRequirements(mBuffer.get());
-  vk::MemoryAllocateInfo memoryInfo(
-      memReqs.size,
-      findMemoryType(memReqs.memoryTypeBits, vk::MemoryPropertyFlagBits::eDeviceLocal));
-
-  vk::ExportMemoryAllocateInfo allocInfo(vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd);
-  memoryInfo.setPNext(&allocInfo);
-
-  mMemory = device.allocateMemoryUnique(memoryInfo);
-  device.bindBufferMemory(mBuffer.get(), mMemory.get(), 0);
-
-#ifdef SAPIEN_CUDA
-  mCudaDeviceId = getCudaDeviceIdFromPhysicalDevice(physicalDevice);
-  if (mCudaDeviceId < 0) {
-    throw std::runtime_error(
-        "Vulkan Device is not visible to CUDA. You probably need to unset the "
-        "CUDA_VISIBLE_DEVICES variable. Or you can try other "
-        "CUDA_VISIBLE_DEVICES until you find a working one.");
-  }
-  checkCudaErrors(cudaSetDevice(mCudaDeviceId));
-  cudaExternalMemoryHandleDesc externalMemoryHandleDesc = {};
-  externalMemoryHandleDesc.type = cudaExternalMemoryHandleTypeOpaqueFd;
-  externalMemoryHandleDesc.size = memReqs.size;
-  vk::MemoryGetFdInfoKHR vkMemoryGetFdInfoKHR;
-  vkMemoryGetFdInfoKHR.setPNext(nullptr);
-  vkMemoryGetFdInfoKHR.setMemory(mMemory.get());
-  vkMemoryGetFdInfoKHR.setHandleType(vk::ExternalMemoryHandleTypeFlagBits::eOpaqueFd);
-  auto cudaFd = device.getMemoryFdKHR(vkMemoryGetFdInfoKHR);
-  externalMemoryHandleDesc.handle.fd = cudaFd;
-  checkCudaErrors(cudaImportExternalMemory(&mCudaMem, &externalMemoryHandleDesc));
-
-  cudaExternalMemoryBufferDesc externalMemBufferDesc = {};
-  externalMemBufferDesc.offset = 0;
-  externalMemBufferDesc.size = memReqs.size;
-  externalMemBufferDesc.flags = 0;
-
-  checkCudaErrors(cudaExternalMemoryGetMappedBuffer(&mCudaPtr, mCudaMem, &externalMemBufferDesc));
-#endif
+  mBuffer = std::make_unique<svulkan2::core::Buffer>(
+      mSize, vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst,
+      VmaMemoryUsage::VMA_MEMORY_USAGE_GPU_ONLY, VmaAllocationCreateFlags{}, true);
 }
 
-VulkanCudaBuffer::~VulkanCudaBuffer() {
-#ifdef SAPIEN_CUDA
-  if (mCudaPtr) {
-    checkCudaErrors(cudaDestroyExternalMemory(mCudaMem));
-    checkCudaErrors(cudaFree(mCudaPtr));
-  }
-#endif
-}
+VulkanCudaBuffer::~VulkanCudaBuffer() {}
 
-uint32_t VulkanCudaBuffer::findMemoryType(uint32_t typeFilter,
-                                          vk::MemoryPropertyFlags properties) {
-  auto memProps = mPhysicalDevice.getMemoryProperties();
-  for (uint32_t i = 0; i < memProps.memoryTypeCount; i++) {
-    if ((typeFilter & (1 << i)) &&
-        (memProps.memoryTypes[i].propertyFlags & properties) == properties) {
-      return i;
-    }
-  }
-  throw std::runtime_error("cannot find suitable memory to allocate buffer");
-}
 
 } // namespace server
 } // namespace Renderer

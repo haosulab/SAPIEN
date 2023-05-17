@@ -26,37 +26,39 @@ void setDefaultShaderDirectory(std::string const &dir);
 
 class VulkanCudaBuffer {
 public:
-  VulkanCudaBuffer(vk::Device device, vk::PhysicalDevice physicalDevice, std::string const &type,
+  VulkanCudaBuffer(std::shared_ptr<svulkan2::core::Context> context, std::string const &type,
                    std::vector<int> const &shape);
   ~VulkanCudaBuffer();
 
   inline std::vector<int> const &getShape() const { return mShape; }
   inline std::string getType() const { return mType; }
-  inline vk::Buffer getBuffer() const { return mBuffer.get(); }
+  inline vk::Buffer getBuffer() const { return mBuffer->getVulkanBuffer(); }
 
   vk::DeviceSize getSize() const { return mSize; }
 
 #ifdef SAPIEN_CUDA
-  inline void *getCudaPtr() const { return mCudaPtr; }
+  inline void *getCudaPtr() const { return mBuffer->getCudaPtr(); }
 #endif
 
 private:
-  uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
+  // uint32_t findMemoryType(uint32_t typeFilter, vk::MemoryPropertyFlags properties);
 
-  vk::Device mDevice;
-  vk::PhysicalDevice mPhysicalDevice;
+  std::shared_ptr<svulkan2::core::Context> mContext;
+  // vk::Device mDevice;
+  // vk::PhysicalDevice mPhysicalDevice;
   std::string mType{};
   std::vector<int> mShape;
   vk::DeviceSize mSize;
 
-  vk::UniqueBuffer mBuffer;
-  vk::UniqueDeviceMemory mMemory;
+  std::unique_ptr<svulkan2::core::Buffer> mBuffer;
+  // vk::UniqueBuffer mBuffer;
+  // vk::UniqueDeviceMemory mMemory;
 
-#ifdef SAPIEN_CUDA
-  int mCudaDeviceId{-1};
-  void *mCudaPtr{};
-  cudaExternalMemory_t mCudaMem{};
-#endif
+  // #ifdef SAPIEN_CUDA
+  //   int mCudaDeviceId{-1};
+  //   void *mCudaPtr{};
+  //   cudaExternalMemory_t mCudaMem{};
+  // #endif
 };
 
 class RenderServer {

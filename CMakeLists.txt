@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -fsized-deallocation -static-libstdc++ -static-libgcc")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -fsized-deallocation -static-libstdc++ -static-libgcc")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_DEBUG_POSTFIX "")
 
@@ -13,15 +13,11 @@ option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OF
 option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, denoiser, and simsense" ON)
 set(SAPIEN_PHYSX5_DIR "" CACHE STRING "Directory for precompield PhysX5")
 
-# HACK
-if (WIN32)
-endif ()
-
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 endif ()
 
-if (NOT WIN32)
+if (UNIX)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         message("-- DEBUG Build")
         add_definitions(-DVK_VALIDATION)
@@ -30,8 +26,12 @@ if (NOT WIN32)
     else()
         add_definitions(-DNDEBUG)
     endif()
-else()
+endif()
+
+if (WIN32)
+    # We will only build release version for Windows
     add_definitions(-DNDEBUG)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
 macro(FetchContent_MakeAvailableExclude)
