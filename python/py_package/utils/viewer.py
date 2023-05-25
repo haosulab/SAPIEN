@@ -86,6 +86,11 @@ Size=1024,127
 Collapsed=0
 DockId=0x0000000C,0
 
+[Window][Reward Details]
+Pos=721,380
+Size=404,256
+Collapsed=0
+
 [Window][Debug##Default]
 Pos=60,60
 Size=400,400
