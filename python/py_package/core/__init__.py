@@ -23,8 +23,6 @@ try:
 except ImportError:
     pass
 
-from .pysapien import coacd
-
 import os
 import sys
 from typing import List

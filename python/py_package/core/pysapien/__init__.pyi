@@ -82,7 +82,6 @@ __all__ = [
     "VulkanScene",
     "VulkanWindow",
     "add_profiler_event",
-    "coacd",
     "dlpack",
     "get_global_render_config",
     "renderer",

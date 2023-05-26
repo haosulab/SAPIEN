@@ -78,8 +78,8 @@ from sapien.core.pysapien import VulkanScene
 from sapien.core.pysapien import VulkanWindow
 import os
 import pkg_resources
+import platform
 import sapien.core.pysapien
-import sapien.core.pysapien.coacd
 import sapien.core.pysapien.dlpack
 import sapien.core.pysapien.renderer
 import sapien.core.pysapien.simsense
@@ -168,12 +168,12 @@ __all__ = [
     "VulkanScene",
     "VulkanWindow",
     "add_profiler_event",
-    "coacd",
     "dlpack",
     "ensure_icd",
     "get_global_render_config",
     "os",
     "pkg_resources",
+    "platform",
     "pysapien",
     "render_config",
     "renderer",

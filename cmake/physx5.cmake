@@ -43,3 +43,4 @@ if (WIN32)
     PhysXCooking_static_64.lib PhysXCommon_static_64.lib
     PhysXCharacterKinematic_static_64.lib PhysXFoundation_static_64.lib)
 endif()
+target_compile_definitions(physx5 INTERFACE PX_PHYSX_STATIC_LIB)
