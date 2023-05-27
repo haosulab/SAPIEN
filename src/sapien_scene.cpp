@@ -137,6 +137,14 @@ SDrive6D *SScene::createDrive(SActorBase *actor1, PxTransform const &pose1, SAct
   return static_cast<SDrive6D *>(drive);
 }
 
+SGear *SScene::createGear(SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+                          PxTransform const &pose2) {
+  mDrives.push_back(std::unique_ptr<SGear>(new SGear(this, actor1, pose1, actor2, pose2)));
+  auto drive = mDrives.back().get();
+  wakeUpActor(actor1);
+  wakeUpActor(actor2);
+  return static_cast<SGear *>(drive);
+}
 
 void SScene::addActor(std::unique_ptr<SActorBase> actor) {
   mPxScene->addActor(*actor->getPxActor());

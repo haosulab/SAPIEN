@@ -219,6 +219,16 @@ void SDriveRevolute::setLimitProperties(float stiffness, float damping) {
 float SDriveRevolute::getLimitStiffness() const { return mJoint->getLimit().stiffness; }
 float SDriveRevolute::getLimitDamping() const { return mJoint->getLimit().damping; }
 
-/// prismatic
+SGear::SGear(SScene *scene, SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+             PxTransform const &pose2)
+    : SDrive(scene, actor1, actor2) {
+  PxRigidActor *pxa1 = actor1 ? actor1->getPxActor() : nullptr;
+  PxRigidActor *pxa2 = actor2 ? actor2->getPxActor() : nullptr;
+  mJoint = PxGearJointCreate(*scene->getSimulation()->mPhysicsSDK, pxa1, pose1, pxa2, pose2);
+}
+
+PxJoint *SGear::getPxJoint() const { return mJoint; }
+float SGear::getGearRatio() const { return mJoint->getGearRatio(); }
+void SGear::setGearRatio(float ratio) { mJoint->setGearRatio(ratio); }
 
 } // namespace sapien

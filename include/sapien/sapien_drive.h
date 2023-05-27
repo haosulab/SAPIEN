@@ -90,4 +90,16 @@ public:
   float getLimitDamping() const;
 };
 
+class SGear : public SDrive {
+  PxGearJoint *mJoint;
+
+public:
+  SGear(SScene *scene, SActorBase *actor1, PxTransform const &pose1, SActorBase *actor2,
+        PxTransform const &pose2);
+  PxJoint *getPxJoint() const override;
+
+  float getGearRatio() const;
+  void setGearRatio(float ratio);
+};
+
 } // namespace sapien

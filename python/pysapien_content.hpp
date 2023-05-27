@@ -334,6 +334,7 @@ void buildSapien(py::module &m) {
   auto PyScene = py::class_<SScene>(m, "Scene");
   auto PyConstraint = py::class_<SDrive>(m, "Constraint");
   auto PyDrive = py::class_<SDrive6D, SDrive>(m, "Drive");
+  auto PyGear = py::class_<SGear, SDrive>(m, "Gear");
 
   auto PyEntity = py::class_<SEntity>(m, "Entity");
   auto PyActorBase = py::class_<SActorBase, SEntity>(m, "ActorBase");
@@ -865,6 +866,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("remove_kinematic_articulation", &SScene::removeKinematicArticulation,
            py::arg("kinematic_articulation"))
       .def("remove_drive", &SScene::removeDrive, py::arg("drive"))
+      .def("remove_gear", &SScene::removeDrive, py::arg("gear"))
       .def("find_actor_by_id", &SScene::findActorById, py::arg("id"),
            py::return_value_policy::reference)
       .def("find_articulation_link_by_link_id", &SScene::findArticulationLinkById, py::arg("id"),
@@ -936,6 +938,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_all_lights", &SScene::getAllLights, py::return_value_policy::reference)
       // drive, constrains, and joints
       .def("create_drive", &SScene::createDrive, py::arg("actor1"), py::arg("pose1"),
+           py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
+      .def("create_gear", &SScene::createGear, py::arg("actor1"), py::arg("pose1"),
            py::arg("actor2"), py::arg("pose2"), py::return_value_policy::reference)
       .def_property_readonly("render_id_to_visual_name", &SScene::findRenderId2VisualName)
 
@@ -1091,6 +1095,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
             d.setTargetVelocity(array2vec3(linear), array2vec3(angular));
           },
           py::arg("linear"), py::arg("angular"));
+
+  PyGear.def_property("gear_ratio", &SGear::getGearRatio, &SGear::setGearRatio);
 
   PyEntity.def_property_readonly("_ptr", [](SEntity &e) { return (void *)&e; })
       .def_property_readonly("scene", &SEntity::getScene)
@@ -2789,5 +2795,4 @@ Args:
 
   dlpack.def("dl_cuda_sync", []() { cudaStreamSynchronize(0); });
 #endif
-
 }
