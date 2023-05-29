@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -fsized-deallocation -Wno-deprecated-declarations -fopenmp")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -fsized-deallocation -Wno-deprecated-declarations -fopenmp")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall")
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-D_DEBUG)
@@ -26,4 +26,8 @@ include(pybind11)
 find_package(sapien REQUIRED)
 
 pybind11_add_module(pysapien "pysapien.cpp" NO_EXTRAS)
-target_link_libraries(pysapien PRIVATE sapien::sapien sapien::simsense eigen)
+target_link_libraries(pysapien PRIVATE sapien::sapien eigen)
+
+if (TARGET sapien::simsense)
+    target_link_libraries(pysapien PRIVATE sapien::simsense)
+endif()
