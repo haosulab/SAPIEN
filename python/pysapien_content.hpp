@@ -42,8 +42,6 @@
 
 #include "sapien/profiler.h"
 
-#include "sapien/acd.h"
-
 #ifdef SAPIEN_CUDA
 #include <cuda_runtime.h>
 #endif
