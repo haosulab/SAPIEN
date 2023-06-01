@@ -118,6 +118,8 @@ public:
   void setIntProperty(std::string const &name, int property) override;
   void setFloatProperty(std::string const &name, float property) override;
   void setCustomTexture(std::string const &name, std::shared_ptr<IPxrTexture> texture) override;
+  void setCustomTextureArray(std::string const &name,
+                             std::vector<std::shared_ptr<IPxrTexture>> textures) override;
 
   SVulkan2Camera(uint32_t width, uint32_t height, float fovy, float near, float far,
                  SVulkan2Scene *scene, std::string const &shaderDir);

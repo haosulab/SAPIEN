@@ -99,6 +99,19 @@ void SVulkan2Camera::setCustomTexture(std::string const &name,
   }
 }
 
+void SVulkan2Camera::setCustomTextureArray(std::string const &name,
+                                           std::vector<std::shared_ptr<IPxrTexture>> textures) {
+  std::vector<std::shared_ptr<svulkan2::resource::SVTexture>> sts;
+  for (auto tex : textures) {
+    if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(tex)) {
+      sts.push_back(t->getTexture());
+    } else {
+      throw std::runtime_error("failed to set custom texture array: invalid texture.");
+    }
+  }
+  mRenderer->setCustomTextureArray(name, sts);
+}
+
 void SVulkan2Camera::takePicture() {
   auto context = mScene->getParentRenderer()->getContext();
   waitForRender();

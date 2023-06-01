@@ -207,6 +207,10 @@ public:
   virtual void setCustomTexture(std::string const &name, std::shared_ptr<IPxrTexture> texture) {
     throw std::runtime_error("setCustomTexture is not implemented");
   }
+  virtual void setCustomTextureArray(std::string const &name,
+                                     std::vector<std::shared_ptr<IPxrTexture>> textures) {
+    throw std::runtime_error("setCustomTextureArray is not implemented");
+  }
 
 #ifdef SAPIEN_DLPACK
   // return new DLManagedTensor

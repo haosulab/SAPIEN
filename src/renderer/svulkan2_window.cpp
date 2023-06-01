@@ -182,6 +182,19 @@ void SVulkan2Window::setCameraTexture(std::string const &name,
   }
 }
 
+void SVulkan2Window::setCameraTextureArray(
+    std::string const &name, std::vector<std::shared_ptr<Renderer::IPxrTexture>> textures) {
+  std::vector<std::shared_ptr<svulkan2::resource::SVTexture>> sts;
+  for (auto tex : textures) {
+    if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(tex)) {
+      sts.push_back(t->getTexture());
+    } else {
+      throw std::runtime_error("failed to set custom texture array: invalid texture.");
+    }
+  }
+  mSVulkanRenderer->setCustomTextureArray(name, sts);
+}
+
 glm::vec3 SVulkan2Window::getCameraPosition() { return getCamera()->getPosition(); }
 glm::quat SVulkan2Window::getCameraRotation() { return getCamera()->getRotation(); }
 glm::mat4 SVulkan2Window::getCameraProjectionMatrix() {

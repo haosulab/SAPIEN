@@ -2325,7 +2325,14 @@ Args:
           [](SCamera &c, std::string const &name, std::shared_ptr<Renderer::IPxrTexture> texture) {
             c.getRendererCamera()->setCustomTexture(name, texture);
           },
-          py::arg("name"), py::arg("texture"));
+          py::arg("name"), py::arg("texture"))
+      .def(
+          "set_custom_texture_array",
+          [](SCamera &c, std::string const &name,
+             std::vector<std::shared_ptr<Renderer::IPxrTexture>> textures) {
+            c.getRendererCamera()->setCustomTextureArray(name, textures);
+          },
+          py::arg("name"), py::arg("textures"));
 
   PyVulkanWindow.def("show", &Renderer::SVulkan2Window::show)
       .def("hide", &Renderer::SVulkan2Window::hide)
@@ -2366,6 +2373,13 @@ Args:
             window.setCameraTexture(name, texture);
           },
           py::arg("name"), py::arg("texture"))
+      .def(
+          "set_camera_texture_array",
+          [](Renderer::SVulkan2Window &window, std::string const &name,
+             std::vector<std::shared_ptr<Renderer::IPxrTexture>> textures) {
+            window.setCameraTextureArray(name, textures);
+          },
+          py::arg("name"), py::arg("textures"))
 
       .def("set_shader_dir", &Renderer::SVulkan2Window::setShader, py::arg("shader_dir"))
       .def("get_camera_position",
