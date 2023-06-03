@@ -15,6 +15,8 @@ from setuptools.command.build_ext import build_ext
 parser = argparse.ArgumentParser()
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--profile", action="store_true")
+parser.add_argument("--sapien-only", action="store_true", help="build sapien without python binding")
+parser.add_argument("--pybind-only", action="store_true", help="build python binding assuming sapien is already built")
 args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
 
@@ -95,7 +97,9 @@ class CMakeBuild(build_ext):
             cfg = "Release"
         build_args = ["--config", cfg]
         cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-        cmake_args += ["-Dsapien_DIR=" + os.path.join(sapien_install_dir, "lib/cmake/sapien")]
+        cmake_args += [
+            "-Dsapien_DIR=" + os.path.join(sapien_install_dir, "lib/cmake/sapien")
+        ]
         env = os.environ.copy()
         subprocess.check_call(
             ["cmake", os.path.join(ext.sourcedir, "python")] + cmake_args,
@@ -117,7 +121,9 @@ class CMakeBuild(build_ext):
 
         # provide Vulkan libraries for linux
         if platform.system() == "Linux":
-            vulkan_library_path = os.path.join(self.build_lib, "sapien", "vulkan_library")
+            vulkan_library_path = os.path.join(
+                self.build_lib, "sapien", "vulkan_library"
+            )
             source_path = os.path.join(ext.sourcedir, "vulkan_library")
             if os.path.exists(vulkan_library_path):
                 shutil.rmtree(vulkan_library_path)
@@ -136,9 +142,16 @@ class CMakeBuild(build_ext):
         )
 
     def build_extension(self, ext):
-        self.build_sapien(ext)
-        self.build_pybind(ext)
-        self.copy_assets(ext)
+        assert not (args.sapien_only and args.pybind_only)
+        if args.sapien_only:
+            self.build_sapien(ext)
+        elif args.pybind_only:
+            self.build_pybind(ext)
+            self.copy_assets(ext)
+        else:
+            self.build_sapien(ext)
+            self.build_pybind(ext)
+            self.copy_assets(ext)
 
 
 def check_version_info():
