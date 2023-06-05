@@ -86,7 +86,9 @@ void buildRenderer(py::module &parent) {
       m, "UISliderAngle");
   auto PyUIGizmo = py::class_<ui::Gizmo, ui::Widget, std::shared_ptr<ui::Gizmo>>(m, "UIGizmo");
 
+  auto PyUIIdGenerator = py::class_<ui::IdGenerator>(m, "UIIdGenerator");
   auto PyUIKeyFrame = py::class_<ui::KeyFrame>(m, "UIKeyFrame");
+  auto PyUIReward = py::class_<ui::Reward>(m, "UIReward");
   auto PyUIKeyFrameEditor = py::class_<ui::KeyFrameEditor, ui::Widget, std::shared_ptr<ui::KeyFrameEditor>>(m, "UIKeyFrameEditor");
 
   PyUIWidget.def("remove", &ui::Widget::remove)
@@ -360,10 +362,21 @@ void buildRenderer(py::module &parent) {
                          proj.at(2, 3), proj.at(3, 3));
              gizmo.setCameraParameters(v, p);
            });
+
+  PyUIIdGenerator
+    .def("__getstate__", &ui::IdGenerator::getState)
+    .def("__setstate__", &ui::IdGenerator::setState);
   
   PyUIKeyFrame
     .def("get_id", &ui::KeyFrame::getId)
     .def_readonly("frame", &ui::KeyFrame::frame);
+
+  PyUIReward
+    .def("get_id", &ui::Reward::getId)
+    .def_readonly("kf1_id", &ui::Reward::kf1Id)
+    .def_readonly("kf2_id", &ui::Reward::kf2Id)
+    .def_readonly("name", &ui::Reward::name)
+    .def_readonly("definition", &ui::Reward::definition);
 
   PyUIKeyFrameEditor
     .def(py::init<float>())
@@ -371,9 +384,19 @@ void buildRenderer(py::module &parent) {
     .def("LoadKeyFrameCallback", &ui::KeyFrameEditor::LoadKeyFrameCallback, py::arg("func"))
     .def("UpdateKeyFrameCallback", &ui::KeyFrameEditor::UpdateKeyFrameCallback, py::arg("func"))
     .def("DeleteKeyFrameCallback", &ui::KeyFrameEditor::DeleteKeyFrameCallback, py::arg("func"))
+    .def("ExportCallback", &ui::KeyFrameEditor::ExportCallback, py::arg("func"))
+    .def("ImportCallback", &ui::KeyFrameEditor::ImportCallback, py::arg("func"))
     .def("get_current_frame", &ui::KeyFrameEditor::getCurrentFrame)
+    .def("get_key_frame_to_modify", &ui::KeyFrameEditor::getKeyFrameToModify)
+    .def("get_key_frame_id_generator", &ui::KeyFrameEditor::getKeyFrameIdGenerator, py::return_value_policy::reference)
+    .def("get_reward_id_generator", &ui::KeyFrameEditor::getRewardIdGenerator, py::return_value_policy::reference)
     .def("get_key_frames_in_used", &ui::KeyFrameEditor::getKeyFramesInUsed, py::return_value_policy::reference)
-    .def("get_key_frame_to_modify", &ui::KeyFrameEditor::getKeyFrameToModify);
+    .def("get_rewards_in_used", &ui::KeyFrameEditor::getRewardsInUsed, py::return_value_policy::reference)
+    .def("set_key_frame_id_generator_state", &ui::KeyFrameEditor::setKeyFrameIdGeneratorState)
+    .def("set_reward_id_generator_state", &ui::KeyFrameEditor::setRewardIdGeneratorState)
+    .def("clear", &ui::KeyFrameEditor::clear)
+    .def("add_key_frame", &ui::KeyFrameEditor::addKeyFrame)
+    .def("add_reward", &ui::KeyFrameEditor::addReward);
   // end UI
 
   PyContext

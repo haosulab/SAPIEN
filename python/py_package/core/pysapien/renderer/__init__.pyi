@@ -23,6 +23,7 @@ __all__ = [
     "UICheckbox",
     "UIDisplayText",
     "UIGizmo",
+    "UIIdGenerator",
     "UIInputFloat",
     "UIInputFloat2",
     "UIInputFloat3",
@@ -35,6 +36,7 @@ __all__ = [
     "UIKeyFrame",
     "UIKeyFrameEditor",
     "UIOptions",
+    "UIReward",
     "UISameLine",
     "UISection",
     "UISelectable",
@@ -193,6 +195,10 @@ class UIGizmo(UIWidget):
         :type: numpy.ndarray[numpy.float32]
         """
     pass
+class UIIdGenerator():
+    def __getstate__(self) -> int: ...
+    def __setstate__(self, arg0: int) -> None: ...
+    pass
 class UIInputFloat(UIWidget):
     def Callback(self, func: typing.Callable[[UIInputFloat], None]) -> UIInputFloat: ...
     def Label(self, label: str) -> UIInputFloat: ...
@@ -312,13 +318,23 @@ class UIKeyFrame():
     pass
 class UIKeyFrameEditor(UIWidget):
     def DeleteKeyFrameCallback(self, func: typing.Callable[[UIKeyFrameEditor], None]) -> UIKeyFrameEditor: ...
+    def ExportCallback(self, func: typing.Callable[[UIKeyFrameEditor], None]) -> UIKeyFrameEditor: ...
+    def ImportCallback(self, func: typing.Callable[[UIKeyFrameEditor], None]) -> UIKeyFrameEditor: ...
     def InsertKeyFrameCallback(self, func: typing.Callable[[UIKeyFrameEditor], None]) -> UIKeyFrameEditor: ...
     def LoadKeyFrameCallback(self, func: typing.Callable[[UIKeyFrameEditor], None]) -> UIKeyFrameEditor: ...
     def UpdateKeyFrameCallback(self, func: typing.Callable[[UIKeyFrameEditor], None]) -> UIKeyFrameEditor: ...
     def __init__(self, arg0: float) -> None: ...
+    def add_key_frame(self, arg0: int, arg1: int) -> None: ...
+    def add_reward(self, arg0: int, arg1: int, arg2: int, arg3: str, arg4: str) -> None: ...
+    def clear(self) -> None: ...
     def get_current_frame(self) -> int: ...
+    def get_key_frame_id_generator(self) -> UIIdGenerator: ...
     def get_key_frame_to_modify(self) -> int: ...
     def get_key_frames_in_used(self) -> typing.List[UIKeyFrame]: ...
+    def get_reward_id_generator(self) -> UIIdGenerator: ...
+    def get_rewards_in_used(self) -> typing.List[UIReward]: ...
+    def set_key_frame_id_generator_state(self, arg0: int) -> None: ...
+    def set_reward_id_generator_state(self, arg0: int) -> None: ...
     pass
 class UIOptions(UIWidget):
     def Callback(self, func: typing.Callable[[UIOptions], None]) -> UIOptions: ...
@@ -334,6 +350,29 @@ class UIOptions(UIWidget):
         """
     @property
     def value(self) -> str:
+        """
+        :type: str
+        """
+    pass
+class UIReward():
+    def get_id(self) -> int: ...
+    @property
+    def definition(self) -> str:
+        """
+        :type: str
+        """
+    @property
+    def kf1_id(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def kf2_id(self) -> int:
+        """
+        :type: int
+        """
+    @property
+    def name(self) -> str:
         """
         :type: str
         """

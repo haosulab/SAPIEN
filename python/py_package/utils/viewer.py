@@ -24,8 +24,10 @@ import os
 import pkg_resources
 from pathlib import Path
 
+import copy
+from .serialization import SerializedScene
 from .keyframe_middleware import (
-    KeyFrameManager
+    KeyFrameEditorSnapshot
 )
 
 shader_dir = Path(pkg_resources.resource_filename("sapien", "vulkan_shader"))
@@ -273,7 +275,8 @@ class Viewer(object):
         self.ik_enabled = False
         self.ik_display_objects = []
         self.keyframe_window = None
-        self.kf_manager = KeyFrameManager()
+        self.key_frame_scenes = []
+        self.key_frame_snapshot = None
 
         self.move_group_joints = []
         self.move_group_selection = {}
@@ -1070,6 +1073,8 @@ class Viewer(object):
                     .LoadKeyFrameCallback(self.load_key_frame)
                     .UpdateKeyFrameCallback(self.update_key_frame)
                     .DeleteKeyFrameCallback(self.delete_key_frame)
+                    .ExportCallback(self.export_key_frame_editor)
+                    .ImportCallback(self.import_key_frame_editor)
                 )
             )
 
@@ -2599,15 +2604,50 @@ class Viewer(object):
         return point
 
     def insert_key_frame(self, _):
-        self.kf_manager.insert(self.scene)
+        self.key_frame_scenes.append(SerializedScene(self.scene))
     
     def load_key_frame(self, c):
-        s_scene = self.kf_manager.get_serialized_scene(c.get_key_frame_to_modify())
+        s_scene = self.key_frame_scenes[c.get_key_frame_to_modify()]
         s_scene.dump_state_into(self.scene)
 
     def update_key_frame(self, c):
-        s_scene = self.kf_manager.get_serialized_scene(c.get_key_frame_to_modify())
+        s_scene = self.key_frame_scenes[c.get_key_frame_to_modify()]
         s_scene.update_state_from(self.scene)
 
     def delete_key_frame(self, c):
-        self.kf_manager.delete(c.get_key_frame_to_modify())
+        self.key_frame_scenes[c.get_key_frame_to_modify()] = None
+
+    def export_key_frame_editor(self, c):
+        self.key_frame_snapshot = KeyFrameEditorSnapshot(c, self.key_frame_scenes)
+
+    def import_key_frame_editor(self, c):
+        if not self.key_frame_snapshot:
+            return
+
+        kfs = self.key_frame_snapshot
+
+        # Id generator states
+        c.set_key_frame_id_generator_state(kfs.key_frame_id_state)
+        c.set_reward_id_generator_state(kfs.reward_id_state)
+
+        # Clear key frames, rewards and scene serialization
+        c.clear()
+        self.key_frame_scenes = []
+
+        # UI key frame
+        for s_kf in kfs.serialized_key_frames:
+            c.add_key_frame(s_kf.id, s_kf.frame)
+
+        # UI reward
+        for s_reward in kfs.serialized_rewards:
+            c.add_reward(
+                s_reward.id,
+                s_reward.kf1_id,
+                s_reward.kf2_id,
+                s_reward.name,
+                s_reward.definition
+            )
+        
+        # Key frame's scene
+        for s_scene in kfs.serialized_scenes:
+            self.key_frame_scenes.append(copy.deepcopy(s_scene))
