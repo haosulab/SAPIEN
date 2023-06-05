@@ -9,5 +9,5 @@ if platform.system() == "Linux":
         if 'microsoft' in '\n'.join(f.readlines()).lower():
             warnings.warn("It seems you are using WSL. SAPIEN renderer is not supported on WSL. Please use SAPIEN on native Windows.")
 
-from sapien import core, sensor, asset, example, utils
-from sapien.version import __version__
+from . import core, sensor, asset, example, utils
+from .version import __version__

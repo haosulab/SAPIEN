@@ -1,4 +1,5 @@
-import sapien
+import numpy as np
+from .pysapien import Pose
 
 try:
     import pinocchio
@@ -115,7 +116,7 @@ class PinocchioModel:
         T = np.eye(4)
         T[:3, :3] = q
         T[:3, 3] = p
-        return sapien.Pose(T)
+        return Pose(T)
 
     def compute_full_jacobian(self, qpos):
         """
