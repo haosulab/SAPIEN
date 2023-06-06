@@ -2621,10 +2621,9 @@ class Viewer(object):
         self.key_frame_snapshot = KeyFrameEditorSnapshot(c, self.key_frame_scenes)
 
     def import_key_frame_editor(self, c):
-        if not self.key_frame_snapshot:
-            return
-
         kfs = self.key_frame_snapshot
+        if not kfs:
+            return
 
         # Id generator states
         c.set_key_frame_id_generator_state(kfs.key_frame_id_state)
@@ -2651,3 +2650,9 @@ class Viewer(object):
         # Key frame's scene
         for s_scene in kfs.serialized_scenes:
             self.key_frame_scenes.append(copy.deepcopy(s_scene))
+
+        # Adjust total frame
+        if len(kfs.serialized_key_frames) != 0:
+            largest_frame = max(s_kf.frame for s_kf in kfs.serialized_key_frames)
+            if largest_frame > c.get_total_frame() - 1:
+                c.set_total_frame(largest_frame + 1)

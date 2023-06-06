@@ -396,7 +396,9 @@ void buildRenderer(py::module &parent) {
     .def("set_reward_id_generator_state", &ui::KeyFrameEditor::setRewardIdGeneratorState)
     .def("clear", &ui::KeyFrameEditor::clear)
     .def("add_key_frame", &ui::KeyFrameEditor::addKeyFrame)
-    .def("add_reward", &ui::KeyFrameEditor::addReward);
+    .def("add_reward", &ui::KeyFrameEditor::addReward)
+    .def("get_total_frame", &ui::KeyFrameEditor::getTotalFrame)
+    .def("set_total_frame", &ui::KeyFrameEditor::setTotalFrame);
   // end UI
 
   PyContext
