@@ -47,19 +47,19 @@ layout(location = 4) in vec3 objectCoord;
 layout(location = 5) in mat3 inTbn;
 
 layout(location = 0) out vec4 outAlbedo;
-layout(location = 1) out vec4 outPosition0;
+layout(location = 1) out vec4 outPosition;
 layout(location = 2) out vec4 outSpecular;
 layout(location = 3) out vec4 outNormal;
-layout(location = 4) out uvec4 outSegmentation0;
+layout(location = 4) out uvec4 outSegmentation;
 layout(location = 5) out vec4 outCustom;
 layout(location = 6) out vec4 outMotionDirection;
 layout(location = 7) out vec4 outEmission;
 
 void main() {
   outCustom = vec4(objectCoord, 1);
-  outSegmentation0 = inSegmentation;
+  outSegmentation = inSegmentation;
 
-  outPosition0 = inPosition;
+  outPosition = inPosition;
 
   vec4 p1 = cameraBuffer.projectionMatrix * inPosition;
   p1 /= p1.w;

@@ -110,13 +110,13 @@ layout(location = 2) in flat uvec4 inSegmentation;
 layout(location = 3) in vec3 objectCoord;
 layout(location = 4) in mat3 inTbn;
 
-layout(location = 0) out vec4 outLighting1;
-layout(location = 1) out vec4 outNormal1;
-layout(location = 2) out uvec4 outSegmentation1;
-layout(location = 3) out vec4 outPosition1;
+layout(location = 0) out vec4 outLighting;
+layout(location = 1) out vec4 outNormal;
+layout(location = 2) out uvec4 outSegmentation;
+layout(location = 3) out vec4 outPosition;
 
 void main() {
-  outSegmentation1 = inSegmentation;
+  outSegmentation = inSegmentation;
 
   vec4 emission;
   vec4 albedo;
@@ -156,24 +156,24 @@ void main() {
 
   if (objectBuffer.shadeFlat == 0) {
     if ((materialBuffer.textureMask & 4) != 0) {
-      outNormal1 = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
+      outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
     } else {
-      outNormal1 = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
+      outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
     }
   } else {
     vec4 fdx = dFdx(inPosition);
     vec4 fdy = dFdy(inPosition);
     vec3 normal = -normalize(cross(fdx.xyz, fdy.xyz));
-    outNormal1 = vec4(normal, 0);
+    outNormal = vec4(normal, 0);
   }
 
-  outPosition1 = inPosition;
+  outPosition = inPosition;
 
   float specular = frm.x;
   float roughness = frm.y;
   float metallic = frm.z;
 
-  vec3 normal = outNormal1.xyz;
+  vec3 normal = outNormal.xyz;
   vec4 csPosition = inPosition;
   csPosition /= csPosition.w;
 
@@ -246,5 +246,5 @@ void main() {
 
   color += sceneBuffer.ambientLight.rgb * albedo.rgb;
 
-  outLighting1 = vec4(color, albedo.a);
+  outLighting = vec4(color, albedo.a);
 }

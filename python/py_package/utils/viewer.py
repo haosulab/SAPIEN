@@ -313,20 +313,20 @@ class Viewer(object):
         self.capsule = self.renderer_context.create_capsule_mesh(0.1, 0.5, 16, 4)
 
         self.mat_red = self.renderer_context.create_material(
-            [0, 0, 0, 1], [1, 0, 0, 1], 0, 0, 0
+            [1, 0, 0, 1], [0, 0, 0, 1], 0, 1, 0
         )
         self.mat_green = self.renderer_context.create_material(
-            [0, 0, 0, 1], [0, 1, 0, 1], 0, 0, 0
+            [0, 1, 0, 1], [0, 0, 0, 1], 0, 1, 0
         )
         self.mat_blue = self.renderer_context.create_material(
-            [0, 0, 0, 1], [0, 0, 1, 1], 0, 0, 0
+            [0, 0, 1, 1], [0, 0, 0, 1], 0, 1, 0
         )
 
         self.mat_cyan = self.renderer_context.create_material(
-            [0, 0, 0, 1], [0, 1, 1, 1], 0, 0, 0
+            [0, 1, 1, 1], [0, 0, 0, 1], 0, 1, 0
         )
         self.mat_magenta = self.renderer_context.create_material(
-            [0, 0, 0, 1], [1, 0, 1, 1], 0, 0, 0
+            [1, 0, 1, 1], [0, 0, 0, 1], 0, 1, 0
         )
 
         self.red_cone = self.renderer_context.create_model([self.cone], [self.mat_red])
@@ -433,14 +433,14 @@ class Viewer(object):
         obj = render_scene.add_object(self.red_cone, node)
         obj.set_scale([0.5, 0.2, 0.2])
         obj.set_position([1, 0, 0])
-        obj.shading_mode = 2
+        obj.shading_mode = 0
         obj.cast_shadow = False
         obj.transparency = 1
 
         obj = render_scene.add_object(self.red_capsule, node)
         obj.set_position([0.5, 0, 0])
         obj.set_scale([1.02, 1.02, 1.02])
-        obj.shading_mode = 2
+        obj.shading_mode = 0
         obj.cast_shadow = False
         obj.transparency = 1
 
@@ -448,14 +448,14 @@ class Viewer(object):
         obj.set_scale([0.5, 0.2, 0.2])
         obj.set_position([0, 1, 0])
         obj.set_rotation([0.7071068, 0, 0, 0.7071068])
-        obj.shading_mode = 2
+        obj.shading_mode = 0
         obj.cast_shadow = False
         obj.transparency = 1
 
         obj = render_scene.add_object(self.green_capsule, node)
         obj.set_position([0, 0.5, 0])
         obj.set_rotation([0.7071068, 0, 0, 0.7071068])
-        obj.shading_mode = 2
+        obj.shading_mode = 0
         obj.cast_shadow = False
         obj.transparency = 1
 
@@ -463,14 +463,14 @@ class Viewer(object):
         obj.set_scale([0.5, 0.2, 0.2])
         obj.set_position([0, 0, 1])
         obj.set_rotation([0, 0.7071068, 0, 0.7071068])
-        obj.shading_mode = 2
+        obj.shading_mode = 0
         obj.cast_shadow = False
         obj.transparency = 1
 
         obj = render_scene.add_object(self.blue_capsule, node)
         obj.set_position([0, 0, 0.5])
         obj.set_rotation([0, 0.7071068, 0, 0.7071068])
-        obj.shading_mode = 2
+        obj.shading_mode = 0
         obj.cast_shadow = False
         obj.transparency = 1
 
@@ -489,7 +489,7 @@ class Viewer(object):
         for obj in grab_axes:
             obj.set_position([0, 0, 0])
             obj.set_scale([100, 0.1, 0.1])
-            obj.shading_mode = 2
+            obj.shading_mode = 0
             obj.cast_shadow = False
             obj.transparency = 1
         return grab_axes
@@ -506,7 +506,7 @@ class Viewer(object):
         for obj in joint_axes:
             obj.set_position([0, 0, 0])
             obj.set_scale([5, 0.1, 0.1])
-            obj.shading_mode = 2
+            obj.shading_mode = 0
             obj.cast_shadow = False
             obj.transparency = 1
         return joint_axes
