@@ -12,5 +12,5 @@ echo __version__=\"${VERSION}\" > python/py_package/version.py
 
 docker run -v `pwd`:/workspace/SAPIEN -it --rm \
        -u $(id -u ${USER}):$(id -g ${USER}) \
-       fxiangucsd/sapien-build-env:latest bash -c \
-       "export CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} && cd /workspace/SAPIEN && ./build.sh 37 && ./build.sh 38 && ./build.sh 39 && ./build.sh 310 && ./build.sh 311"
+       fxiangucsd/sapien-build-env:3.0 bash -c \
+       "export CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} && cd /workspace/SAPIEN && ./build.sh $1"

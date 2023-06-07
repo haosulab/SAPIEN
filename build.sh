@@ -18,10 +18,21 @@ while [[ "$#" -gt 0 ]]; do
     shift
 done
 
-[ -z $VERSION ] && echo "Version not specified" && exit || echo "Compile for Python ${VERSION}"
-[ $DEBUG ] && echo "Debug Mode" || [ $PROFILE ] && echo "Profile Mode"  || echo "Release Mode"
+[ -z $VERSION ] && echo "Version not specified, building for all versions" || echo "Compile for Python ${VERSION}"
+( [ $DEBUG ] && echo "Debug Mode" ) || ( [ $PROFILE ] && echo "Profile Mode" )  || echo "Release Mode"
 
-function build_manylinux14_wheel() {
+function build_sapien() {
+  echo "Building SAPIEN"
+  BIN=/opt/python/cp310-cp310/bin/python
+  COMMAND="${BIN} setup.py bdist_wheel"
+  [ $PROFILE ] && COMMAND="${BIN} setup.py bdist_wheel --profile"
+  [ $DEBUG ] && COMMAND="${BIN} setup.py bdist_wheel --debug"
+  eval "${COMMAND} --sapien-only --build-dir=docker_sapien_build"
+}
+
+function build_pybind() {
+  echo "Building Pybind"
+
   PY_VERSION=$1
   if [ "$PY_VERSION" -eq 35 ]; then
       PY_DOT=3.5
@@ -50,18 +61,11 @@ function build_manylinux14_wheel() {
 
   INCLUDE_PATH=/opt/python/cp${PY_VERSION}-cp${PY_VERSION}${EXT}/include/python${PY_DOT}${EXT}
   BIN=/opt/python/cp${PY_VERSION}-cp${PY_VERSION}${EXT}/bin/python
-  echo "Using bin path ${BIN}"
-  echo "Using include path ${INCLUDE_PATH}"
-
-  export CPLUS_INCLUDE_PATH=$INCLUDE_PATH
+  export CPLUS_INCLUDE_PATH=${INCLUDE_PATH}
   COMMAND="${BIN} setup.py bdist_wheel"
-  [ $PROFILE ] && COMMAND="${BIN} setup.py bdist_wheel --profile"
-  [ $DEBUG ] && COMMAND="${BIN} setup.py bdist_wheel --debug"
-  echo "Running command ${COMMAND}"
-  eval "$COMMAND"
+  eval "${COMMAND} --pybind-only --build-dir=docker_sapien_build"
 
   PACKAGE_VERSION=$(<./python/VERSION)
-  echo "SAPIEN version ${PACKAGE_VERSION}"
   WHEEL_NAME="./dist/sapien-${PACKAGE_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}${EXT}-linux_x86_64.whl"
   if test -f "$WHEEL_NAME"; then
     echo "$FILE exist, begin audit and repair"
@@ -69,4 +73,14 @@ function build_manylinux14_wheel() {
   auditwheel repair ${WHEEL_NAME} --exclude libvulkan --internal libsapien
 }
 
-build_manylinux14_wheel $VERSION
+build_sapien
+if [ -z "${VERSION}" ]
+then
+   build_pybind 37
+   build_pybind 38
+   build_pybind 39
+   build_pybind 310
+   build_pybind 311
+else
+   build_pybind $VERSION
+fi

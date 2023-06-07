@@ -9,16 +9,85 @@ import shutil
 import argparse
 
 from setuptools import setup, Extension
+from setuptools.command.build import build
 from setuptools.command.build_ext import build_ext
+from wheel.bdist_wheel import bdist_wheel
+from distutils.command.bdist import bdist
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--debug", action="store_true")
 parser.add_argument("--profile", action="store_true")
-parser.add_argument("--sapien-only", action="store_true", help="build sapien without python binding")
-parser.add_argument("--pybind-only", action="store_true", help="build python binding assuming sapien is already built")
+parser.add_argument(
+    "--sapien-only", action="store_true", help="build sapien without python binding"
+)
+parser.add_argument(
+    "--pybind-only",
+    action="store_true",
+    help="build python binding assuming sapien is already built",
+)
+parser.add_argument(
+    "--build-dir",
+    type=str,
+    default="sapien_build",
+    help="directory to put build files",
+)
+
 args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
+
+
+def build_sapien(sapien_source_dir, sapien_build_dir):
+    build_dir = os.path.join(sapien_build_dir, "_sapien_build")
+    install_dir = os.path.join(sapien_build_dir, "_sapien_install")
+    os.makedirs(sapien_build_dir, exist_ok=True)
+
+    cmake_args = []
+
+    if args.debug:
+        cfg = "Debug"
+    else:
+        cfg = "Release"
+    build_args = ["--config", cfg]
+    if args.profile:
+        cmake_args += ["-DSAPIEN_PROFILE=ON"]
+    else:
+        cmake_args += ["-DSAPIEN_PROFILE=OFF"]
+
+    if os.environ.get("CUDA_PATH") is not None:
+        cmake_args += ["-DSAPIEN_CUDA=ON"]
+    else:
+        cmake_args += ["-DSAPIEN_CUDA=OFF"]
+
+    cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
+    cmake_args += ["-DCMAKE_INSTALL_PREFIX=" + install_dir]
+
+    env = os.environ.copy()
+    subprocess.check_call(
+        ["cmake", sapien_source_dir] + cmake_args, cwd=build_dir, env=env
+    )
+    subprocess.check_call(
+        ["cmake", "--build", ".", "--target", "install"] + build_args,
+        cwd=build_dir,
+    )
+
+    include_path = os.path.join(self.build_lib, "sapien", "include")
+    source_include_path = os.path.join(install_dir, "include")
+    if os.path.exists(include_path):
+        shutil.rmtree(include_path)
+    shutil.copytree(source_include_path, include_path)
+
+
+class sapien_bdist(bdist):
+    def initialize_options(self):
+        super().initialize_options()
+        self.bdist_base = os.path.join(os.path.dirname(__file__), args.build_dir)
+
+
+class sapien_build(build):
+    def initialize_options(self):
+        super().initialize_options()
+        self.build_base = os.path.join(os.path.dirname(__file__), args.build_dir)
 
 
 class CMakeExtension(Extension):
@@ -28,6 +97,11 @@ class CMakeExtension(Extension):
 
 
 class CMakeBuild(build_ext):
+    def initialize_options(self):
+        super().initialize_options()
+        self.sapien_build_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), args.build_dir)
+        self.build_base = self.sapien_build_dir
+
     def run(self):
         try:
             out = subprocess.check_output(["cmake", "--version"])
@@ -40,48 +114,8 @@ class CMakeBuild(build_ext):
         for ext in self.extensions:
             self.build_extension(ext)
 
-    def build_sapien(self, ext):
-        sapien_build_dir = os.path.join(ext.sourcedir, "_sapien_build")
-        sapien_install_dir = os.path.join(ext.sourcedir, "_sapien_install")
-        os.makedirs(sapien_build_dir, exist_ok=True)
-
-        cmake_args = []
-
-        if args.debug:
-            cfg = "Debug"
-        else:
-            cfg = "Release"
-        build_args = ["--config", cfg]
-        if args.profile:
-            cmake_args += ["-DSAPIEN_PROFILE=ON"]
-        else:
-            cmake_args += ["-DSAPIEN_PROFILE=OFF"]
-
-        if os.environ.get("CUDA_PATH") is not None:
-            cmake_args += ["-DSAPIEN_CUDA=ON"]
-        else:
-            cmake_args += ["-DSAPIEN_CUDA=OFF"]
-
-        cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-        cmake_args += ["-DCMAKE_INSTALL_PREFIX=" + sapien_install_dir]
-
-        env = os.environ.copy()
-        subprocess.check_call(
-            ["cmake", ext.sourcedir] + cmake_args, cwd=sapien_build_dir, env=env
-        )
-        subprocess.check_call(
-            ["cmake", "--build", ".", "--target", "install"] + build_args,
-            cwd=sapien_build_dir,
-        )
-
-        include_path = os.path.join(self.build_lib, "sapien", "include")
-        source_include_path = os.path.join(sapien_install_dir, "include")
-        if os.path.exists(include_path):
-            shutil.rmtree(include_path)
-        shutil.copytree(source_include_path, include_path)
-
     def build_pybind(self, ext):
-        sapien_install_dir = os.path.join(ext.sourcedir, "_sapien_install")
+        sapien_install_dir = os.path.join(self.sapien_build_dir, "_sapien_install")
 
         os.makedirs(self.build_temp, exist_ok=True)
         original_full_path = self.get_ext_fullpath(ext.name)
@@ -142,16 +176,8 @@ class CMakeBuild(build_ext):
         )
 
     def build_extension(self, ext):
-        assert not (args.sapien_only and args.pybind_only)
-        if args.sapien_only:
-            self.build_sapien(ext)
-        elif args.pybind_only:
-            self.build_pybind(ext)
-            self.copy_assets(ext)
-        else:
-            self.build_sapien(ext)
-            self.build_pybind(ext)
-            self.copy_assets(ext)
+        self.build_pybind(ext)
+        self.copy_assets(ext)
 
 
 def check_version_info():
@@ -210,6 +236,16 @@ package_data = {
     ]
 }
 
+
+if not args.pybind_only:
+    # build SAPIEN
+    source_dir = os.path.dirname(__file__)
+    build_sapien(source_dir, os.path.join(source_dir, args.build_dir))
+
+if args.sapien_only:
+    exit(0)
+
+
 setup(
     name="sapien",
     version=check_version_info()[3],
@@ -241,7 +277,7 @@ setup(
     install_requires=read_requirements(),
     long_description=open("readme.md").read(),
     long_description_content_type="text/markdown",
-    cmdclass=dict(build_ext=CMakeBuild),
+    cmdclass=dict(build=sapien_build, build_ext=CMakeBuild, bdist=sapien_bdist),
     zip_safe=False,
     packages=[
         "sapien",
