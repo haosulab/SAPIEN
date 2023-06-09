@@ -7,7 +7,8 @@ from transforms3d.quaternions import qmult, mat2quat, rotate_vector
 import sapien.core.pysapien.renderer as R
 from sapien.asset import download_partnet_mobility, create_dome_envmap
 
-from sapien.utils import Viewer
+# from sapien.utils import Viewer
+from sapien.utils import KeyframeEditor as Viewer
 
 
 def create_table(

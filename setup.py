@@ -71,12 +71,6 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
         cwd=build_dir,
     )
 
-    include_path = os.path.join(self.build_lib, "sapien", "include")
-    source_include_path = os.path.join(install_dir, "include")
-    if os.path.exists(include_path):
-        shutil.rmtree(include_path)
-    shutil.copytree(source_include_path, include_path)
-
 
 class sapien_bdist(bdist):
     def initialize_options(self):
@@ -99,7 +93,9 @@ class CMakeExtension(Extension):
 class CMakeBuild(build_ext):
     def initialize_options(self):
         super().initialize_options()
-        self.sapien_build_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), args.build_dir)
+        self.sapien_build_dir = os.path.join(
+            os.path.abspath(os.path.dirname(__file__)), args.build_dir
+        )
         self.build_base = self.sapien_build_dir
 
     def run(self):
@@ -144,6 +140,12 @@ class CMakeBuild(build_ext):
             ["cmake", "--build", ".", "--target", "pysapien"] + build_args,
             cwd=self.build_temp,
         )
+
+        include_path = os.path.join(self.build_lib, "sapien", "include")
+        source_include_path = os.path.join(sapien_install_dir, "include")
+        if os.path.exists(include_path):
+            shutil.rmtree(include_path)
+        shutil.copytree(source_include_path, include_path)
 
     def copy_assets(self, ext):
         vulkan_shader_path = os.path.join(self.build_lib, "sapien", "vulkan_shader")

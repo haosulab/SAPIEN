@@ -88,7 +88,7 @@ void buildRenderer(py::module &parent) {
 
   auto PyUIIdGenerator = py::class_<ui::IdGenerator>(m, "UIIdGenerator");
   auto PyUIKeyFrame = py::class_<ui::KeyFrame>(m, "UIKeyFrame");
-  auto PyUIReward = py::class_<ui::Reward>(m, "UIReward");
+  auto PyUIDuration = py::class_<ui::Duration>(m, "UIDuration");
   auto PyUIKeyFrameEditor = py::class_<ui::KeyFrameEditor, ui::Widget, std::shared_ptr<ui::KeyFrameEditor>>(m, "UIKeyFrameEditor");
 
   PyUIWidget.def("remove", &ui::Widget::remove)
@@ -363,20 +363,18 @@ void buildRenderer(py::module &parent) {
              gizmo.setCameraParameters(v, p);
            });
 
-  PyUIIdGenerator
-    .def("__getstate__", &ui::IdGenerator::getState)
-    .def("__setstate__", &ui::IdGenerator::setState);
-  
+  // TODO: seems id generator does not need to be pickled
+
   PyUIKeyFrame
     .def("get_id", &ui::KeyFrame::getId)
     .def_readonly("frame", &ui::KeyFrame::frame);
 
-  PyUIReward
-    .def("get_id", &ui::Reward::getId)
-    .def_readonly("kf1_id", &ui::Reward::kf1Id)
-    .def_readonly("kf2_id", &ui::Reward::kf2Id)
-    .def_readonly("name", &ui::Reward::name)
-    .def_readonly("definition", &ui::Reward::definition);
+  PyUIDuration
+    .def("get_id", &ui::Duration::getId)
+    .def_readonly("kf1_id", &ui::Duration::kf1Id)
+    .def_readonly("kf2_id", &ui::Duration::kf2Id)
+    .def_readonly("name", &ui::Duration::name)
+    .def_readonly("definition", &ui::Duration::definition);
 
   PyUIKeyFrameEditor
     .def(py::init<float>())
@@ -384,21 +382,33 @@ void buildRenderer(py::module &parent) {
     .def("LoadKeyFrameCallback", &ui::KeyFrameEditor::LoadKeyFrameCallback, py::arg("func"))
     .def("UpdateKeyFrameCallback", &ui::KeyFrameEditor::UpdateKeyFrameCallback, py::arg("func"))
     .def("DeleteKeyFrameCallback", &ui::KeyFrameEditor::DeleteKeyFrameCallback, py::arg("func"))
-    .def("ExportCallback", &ui::KeyFrameEditor::ExportCallback, py::arg("func"))
-    .def("ImportCallback", &ui::KeyFrameEditor::ImportCallback, py::arg("func"))
     .def("get_current_frame", &ui::KeyFrameEditor::getCurrentFrame)
     .def("get_key_frame_to_modify", &ui::KeyFrameEditor::getKeyFrameToModify)
     .def("get_key_frame_id_generator", &ui::KeyFrameEditor::getKeyFrameIdGenerator, py::return_value_policy::reference)
-    .def("get_reward_id_generator", &ui::KeyFrameEditor::getRewardIdGenerator, py::return_value_policy::reference)
+    .def("get_duration_id_generator", &ui::KeyFrameEditor::getDurationIdGenerator, py::return_value_policy::reference)
     .def("get_key_frames_in_used", &ui::KeyFrameEditor::getKeyFramesInUsed, py::return_value_policy::reference)
-    .def("get_rewards_in_used", &ui::KeyFrameEditor::getRewardsInUsed, py::return_value_policy::reference)
-    .def("set_key_frame_id_generator_state", &ui::KeyFrameEditor::setKeyFrameIdGeneratorState)
-    .def("set_reward_id_generator_state", &ui::KeyFrameEditor::setRewardIdGeneratorState)
+    .def("get_durations_in_used", &ui::KeyFrameEditor::getDurationsInUsed, py::return_value_policy::reference)
+    .def("get_key_frame_id_generator_state", &ui::KeyFrameEditor::getKeyFrameIdGeneratorState)
+    .def("get_duration_id_generator_state", &ui::KeyFrameEditor::getDurationIdGeneratorState)
+    .def("set_key_frame_id_generator_state", &ui::KeyFrameEditor::setKeyFrameIdGeneratorState, py::arg("state"))
+    .def("set_duration_id_generator_state", &ui::KeyFrameEditor::setDurationIdGeneratorState, py::arg("state"))
     .def("clear", &ui::KeyFrameEditor::clear)
-    .def("add_key_frame", &ui::KeyFrameEditor::addKeyFrame)
-    .def("add_reward", &ui::KeyFrameEditor::addReward)
+    .def("add_key_frame", &ui::KeyFrameEditor::addKeyFrame, py::arg("id"), py::arg("frame"))
+    .def("add_duration", &ui::KeyFrameEditor::addDuration,
+         py::arg("id"), py::arg("keyframe1_id"), py::arg("keyframe2_id"), py::arg("name"), py::arg("definition"))
     .def("get_total_frame", &ui::KeyFrameEditor::getTotalFrame)
-    .def("set_total_frame", &ui::KeyFrameEditor::setTotalFrame);
+    .def("set_total_frame", &ui::KeyFrameEditor::setTotalFrame, py::arg("count"))
+    .def("append", [](ui::KeyFrameEditor &editor, py::args args) {
+      if (args.size() == 0) {
+        throw std::runtime_error("append must take 1 or more arguments");
+      }
+      std::shared_ptr<ui::KeyFrameEditor> result;
+      for (auto &arg : args) {
+        auto widget = arg.cast<std::shared_ptr<ui::Widget>>();
+        result = editor.append(widget);
+      }
+      return result;
+    });
   // end UI
 
   PyContext

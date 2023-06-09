@@ -492,8 +492,7 @@ void buildSapien(py::module &m) {
 
   //======== Internal ========//
 
-  PyPhysicalMaterial
-      .def_property_readonly("id", &SPhysicalMaterial::getId)
+  PyPhysicalMaterial.def_property_readonly("id", &SPhysicalMaterial::getId)
       .def_property_readonly("static_friction", &SPhysicalMaterial::getStaticFriction)
       .def_property_readonly("dynamic_friction", &SPhysicalMaterial::getDynamicFriction)
       .def_property_readonly("restitution", &SPhysicalMaterial::getRestitution)
@@ -798,8 +797,43 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           [](SceneConfig &, bool) {
             PyErr_WarnEx(PyExc_DeprecationWarning, "adaptive_force is removed in PhysX 5.", 1);
           })
-      .def("__getstate__", &SceneConfig::getState)
-      .def("__setstate__", &SceneConfig::setState);
+      .def(py::pickle(
+          [](SceneConfig &config) {
+            return py::make_tuple(
+                config.gravity, config.static_friction, config.dynamic_friction,
+                config.restitution, config.bounceThreshold, config.sleepThreshold,
+                config.contactOffset, config.solverIterations, config.solverVelocityIterations,
+                config.enablePCM, config.enableTGS, config.enableCCD,
+                config.enableEnhancedDeterminism, config.enableFrictionEveryIteration,
+                config.disableCollisionVisual);
+          },
+          [](py::tuple t) {
+            if (t.size() != 15) {
+              throw std::runtime_error("Invalid state!");
+            }
+            SceneConfig config;
+            config.gravity = t[0].cast<decltype(config.gravity)>();
+            config.static_friction = t[1].cast<decltype(config.static_friction)>();
+            config.dynamic_friction = t[2].cast<decltype(config.dynamic_friction)>();
+            config.restitution = t[3].cast<decltype(config.restitution)>();
+            config.bounceThreshold = t[4].cast<decltype(config.bounceThreshold)>();
+            config.sleepThreshold = t[5].cast<decltype(config.sleepThreshold)>();
+            config.contactOffset = t[6].cast<decltype(config.contactOffset)>();
+            config.solverIterations = t[7].cast<decltype(config.solverIterations)>();
+            config.solverVelocityIterations =
+                t[8].cast<decltype(config.solverVelocityIterations)>();
+            config.enablePCM = t[9].cast<decltype(config.enablePCM)>();
+            config.enableTGS = t[10].cast<decltype(config.enableTGS)>();
+            config.enableCCD = t[11].cast<decltype(config.enableCCD)>();
+            config.enableEnhancedDeterminism =
+                t[12].cast<decltype(config.enableEnhancedDeterminism)>();
+            config.enableFrictionEveryIteration =
+                t[13].cast<decltype(config.enableFrictionEveryIteration)>();
+            config.disableCollisionVisual = t[14].cast<decltype(config.disableCollisionVisual)>();
+            return config;
+          }));
+  // .def("__getstate__", &SceneConfig::getState)
+  // .def("__setstate__", &SceneConfig::setState);
 
   //======== Simulation ========//
   PyEngine
@@ -1063,13 +1097,13 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
           py::arg("data"));
 
   //======= Drive =======//
-  PyDrive
-      .def("get_actor1", &SDrive::getActor1, py::return_value_policy::reference)
+  PyDrive.def("get_actor1", &SDrive::getActor1, py::return_value_policy::reference)
       .def("get_actor2", &SDrive::getActor2, py::return_value_policy::reference)
       .def("get_pose1", &SDrive::getLocalPose1)
       .def("get_pose2", &SDrive::getLocalPose2)
-      .def("get_dof_states",
-           [](SDrive6D &drive) {
+      .def(
+          "get_dof_states",
+          [](SDrive6D &drive) {
             std::vector<std::string> states;
             for (int dofState : drive.getDofStates()) {
               if (dofState == 0) {
@@ -1081,8 +1115,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
               }
             }
             return states;
-           },
-           R"doc(
+          },
+          R"doc(
 Return the states of the six degrees of freedom (tx, ty, tz, rx, ry, rz) of the drive. State can
 be locked, limited, or free.)doc")
       .def("lock_motion", &SDrive6D::lockMotion, py::arg("tx"), py::arg("ty"), py::arg("tz"),
@@ -1107,101 +1141,101 @@ be locked, limited, or free.)doc")
       .def("set_x_properties", &SDrive6D::setXProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
       .def("get_x_properties",
-           [] (SDrive6D &drive) {
-            std::vector<float> properties = drive.getXProperties();
-            py::dict data;
-            data["stiffness"] = properties[0];
-            data["damping"] = properties[1];
-            data["force_limit"] = properties[2];
-            if (properties[3] == 0.0) {
-              data["is_acceleration"] = false;
-            } else {
-              data["is_acceleration"] = true;
-            }
-            return data;
+           [](SDrive6D &drive) {
+             std::vector<float> properties = drive.getXProperties();
+             py::dict data;
+             data["stiffness"] = properties[0];
+             data["damping"] = properties[1];
+             data["force_limit"] = properties[2];
+             if (properties[3] == 0.0) {
+               data["is_acceleration"] = false;
+             } else {
+               data["is_acceleration"] = true;
+             }
+             return data;
            })
       .def("set_y_properties", &SDrive6D::setYProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
       .def("get_y_properties",
-           [] (SDrive6D &drive) {
-            std::vector<float> properties = drive.getYProperties();
-            py::dict data;
-            data["stiffness"] = properties[0];
-            data["damping"] = properties[1];
-            data["force_limit"] = properties[2];
-            if (properties[3] == 0.0) {
-              data["is_acceleration"] = false;
-            } else {
-              data["is_acceleration"] = true;
-            }
-            return data;
+           [](SDrive6D &drive) {
+             std::vector<float> properties = drive.getYProperties();
+             py::dict data;
+             data["stiffness"] = properties[0];
+             data["damping"] = properties[1];
+             data["force_limit"] = properties[2];
+             if (properties[3] == 0.0) {
+               data["is_acceleration"] = false;
+             } else {
+               data["is_acceleration"] = true;
+             }
+             return data;
            })
       .def("set_z_properties", &SDrive6D::setZProperties, py::arg("stiffness"), py::arg("damping"),
            py::arg("force_limit") = PX_MAX_F32, py::arg("is_acceleration") = true)
       .def("get_z_properties",
-           [] (SDrive6D &drive) {
-            std::vector<float> properties = drive.getZProperties();
-            py::dict data;
-            data["stiffness"] = properties[0];
-            data["damping"] = properties[1];
-            data["force_limit"] = properties[2];
-            if (properties[3] == 0.0) {
-              data["is_acceleration"] = false;
-            } else {
-              data["is_acceleration"] = true;
-            }
-            return data;
+           [](SDrive6D &drive) {
+             std::vector<float> properties = drive.getZProperties();
+             py::dict data;
+             data["stiffness"] = properties[0];
+             data["damping"] = properties[1];
+             data["force_limit"] = properties[2];
+             if (properties[3] == 0.0) {
+               data["is_acceleration"] = false;
+             } else {
+               data["is_acceleration"] = true;
+             }
+             return data;
            })
       .def("set_x_twist_properties", &SDrive6D::setXTwistDriveProperties, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
            py::arg("is_acceleration") = true)
       .def("get_x_twist_properties",
-           [] (SDrive6D &drive) {
-            std::vector<float> properties = drive.getXTwistDriveProperties();
-            py::dict data;
-            data["stiffness"] = properties[0];
-            data["damping"] = properties[1];
-            data["force_limit"] = properties[2];
-            if (properties[3] == 0.0) {
-              data["is_acceleration"] = false;
-            } else {
-              data["is_acceleration"] = true;
-            }
-            return data;
+           [](SDrive6D &drive) {
+             std::vector<float> properties = drive.getXTwistDriveProperties();
+             py::dict data;
+             data["stiffness"] = properties[0];
+             data["damping"] = properties[1];
+             data["force_limit"] = properties[2];
+             if (properties[3] == 0.0) {
+               data["is_acceleration"] = false;
+             } else {
+               data["is_acceleration"] = true;
+             }
+             return data;
            })
       .def("set_yz_swing_properties", &SDrive6D::setYZSwingDriveProperties, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
            py::arg("is_acceleration") = true)
       .def("get_yz_swing_properties",
-           [] (SDrive6D &drive) {
-            std::vector<float> properties = drive.getYZSwingDriveProperties();
-            py::dict data;
-            data["stiffness"] = properties[0];
-            data["damping"] = properties[1];
-            data["force_limit"] = properties[2];
-            if (properties[3] == 0.0) {
-              data["is_acceleration"] = false;
-            } else {
-              data["is_acceleration"] = true;
-            }
-            return data;
+           [](SDrive6D &drive) {
+             std::vector<float> properties = drive.getYZSwingDriveProperties();
+             py::dict data;
+             data["stiffness"] = properties[0];
+             data["damping"] = properties[1];
+             data["force_limit"] = properties[2];
+             if (properties[3] == 0.0) {
+               data["is_acceleration"] = false;
+             } else {
+               data["is_acceleration"] = true;
+             }
+             return data;
            })
       .def("set_slerp_properties", &SDrive6D::setSlerpProperties, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
            py::arg("is_acceleration") = true)
       .def("get_slerp_properties",
-           [] (SDrive6D &drive) {
-            std::vector<float> properties = drive.getSlerpProperties();
-            py::dict data;
-            data["stiffness"] = properties[0];
-            data["damping"] = properties[1];
-            data["force_limit"] = properties[2];
-            if (properties[3] == 0.0) {
-              data["is_acceleration"] = false;
-            } else {
-              data["is_acceleration"] = true;
-            }
-            return data;
+           [](SDrive6D &drive) {
+             std::vector<float> properties = drive.getSlerpProperties();
+             py::dict data;
+             data["stiffness"] = properties[0];
+             data["damping"] = properties[1];
+             data["force_limit"] = properties[2];
+             if (properties[3] == 0.0) {
+               data["is_acceleration"] = false;
+             } else {
+               data["is_acceleration"] = true;
+             }
+             return data;
            })
       .def("set_target", &SDrive6D::setTarget, py::arg("pose"))
       .def("get_target", &SDrive6D::getTarget)
@@ -1211,17 +1245,16 @@ be locked, limited, or free.)doc")
             d.setTargetVelocity(array2vec3(linear), array2vec3(angular));
           },
           py::arg("linear"), py::arg("angular"))
-      .def("get_target_velocity",
-           [](SDrive6D &d) {
-            auto targetVelocity = d.getTargetVelocity();
-            py::array_t<PxReal> linear = vec32array(std::get<0>(targetVelocity));
-            py::array_t<PxReal> angular = vec32array(std::get<1>(targetVelocity));
+      .def("get_target_velocity", [](SDrive6D &d) {
+        auto targetVelocity = d.getTargetVelocity();
+        py::array_t<PxReal> linear = vec32array(std::get<0>(targetVelocity));
+        py::array_t<PxReal> angular = vec32array(std::get<1>(targetVelocity));
 
-            std::vector<py::array_t<PxReal>> target_velocity;
-            target_velocity.push_back(linear);
-            target_velocity.push_back(angular);
-            return target_velocity;
-           });
+        std::vector<py::array_t<PxReal>> target_velocity;
+        target_velocity.push_back(linear);
+        target_velocity.push_back(angular);
+        return target_velocity;
+      });
 
   PyGear.def_property("gear_ratio", &SGear::getGearRatio, &SGear::setGearRatio);
 
@@ -1689,12 +1722,10 @@ be locked, limited, or free.)doc")
 
   //======== Builders ========
 
-  PyActorBuilder
-      .def_property_readonly("use_density", &ActorBuilder::getUseDensity)
+  PyActorBuilder.def_property_readonly("use_density", &ActorBuilder::getUseDensity)
       .def_property_readonly("mass", &ActorBuilder::getMass)
       .def_property_readonly("c_mass_pose", &ActorBuilder::getCMassPose)
-      .def_property_readonly(
-        "inertia", [](ActorBuilder &a) { return vec32array(a.getInertia()); })
+      .def_property_readonly("inertia", [](ActorBuilder &a) { return vec32array(a.getInertia()); })
       .def_property_readonly(
           "scale", [](ActorBuilder::ShapeRecord const &r) { return vec32array(r.scale); })
       .def_property_readonly("collision_groups", &ActorBuilder::getCollisionGroup)

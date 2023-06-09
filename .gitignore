@@ -1,4 +1,6 @@
-build
+/build
+/sapien_build
+/docker_sapien_build
 compile_commands.json
 .vscode
 .pyc

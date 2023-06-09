@@ -10,6 +10,7 @@ from ..core import (
     ArticulationBuilder,
     Drive
 )
+import pickle
 
 class SerializedScene:
     """
@@ -18,7 +19,7 @@ class SerializedScene:
 
     def __init__(self, scene: Scene):
         # Scene config
-        self.serialized_config = scene.get_config().__getstate__()
+        self.serialized_config = pickle.dumps(scene.get_config())
 
         # Timestep
         self.timestep = scene.get_timestep()
@@ -112,8 +113,7 @@ class SerializedScene:
 
     def deserialize(self, engine: Engine) -> Scene:
         # Initialize with scene config
-        scene_config = SceneConfig()
-        scene_config.__setstate__(self.serialized_config)
+        scene_config = pickle.loads(self.serialized_config)
         scene = engine.create_scene(scene_config)
 
         # Timestep
