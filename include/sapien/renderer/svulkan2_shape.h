@@ -36,7 +36,7 @@ public:
   inline std::shared_ptr<svulkan2::resource::SVMesh> getMesh() const { return mMesh; }
 };
 
-class SVulkan2RenderShape : public IPxrRenderShape {
+class SVulkan2RenderShape : public IRenderShape {
   std::shared_ptr<svulkan2::resource::SVShape> mShape;
   class SVulkan2Rigidbody *mParentBody;
 
@@ -45,8 +45,8 @@ public:
                              SVulkan2Rigidbody *body)
       : mShape(shape), mParentBody(body) {}
   [[nodiscard]] std::shared_ptr<IRenderMesh> getGeometry() const override;
-  [[nodiscard]] std::shared_ptr<IPxrMaterial> getMaterial() const override;
-  void setMaterial(std::shared_ptr<IPxrMaterial> material) override;
+  [[nodiscard]] std::shared_ptr<IRenderMaterial> getMaterial() const override;
+  void setMaterial(std::shared_ptr<IRenderMaterial> material) override;
 };
 
 } // namespace Renderer

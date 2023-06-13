@@ -12,7 +12,7 @@ class SDrive6D;
 class SScene;
 class ActorBuilder;
 namespace Renderer {
-class IPxrRigidbody;
+class IRenderBody;
 }
 
 class SActor : public SActorDynamicBase {
@@ -43,8 +43,8 @@ public:
 private:
   /* Only actor builder can create actor */
   SActor(PxRigidDynamic *actor, physx_id_t id, SScene *scene,
-         std::vector<Renderer::IPxrRigidbody *> renderBodies,
-         std::vector<Renderer::IPxrRigidbody *> collisionBodies);
+         std::vector<Renderer::IRenderBody *> renderBodies,
+         std::vector<Renderer::IRenderBody *> collisionBodies);
 };
 
 class SActorStatic : public SActorBase {
@@ -67,8 +67,8 @@ public:
 private:
   /* Only actor builder can create actor */
   SActorStatic(PxRigidStatic *actor, physx_id_t id, SScene *scene,
-               std::vector<Renderer::IPxrRigidbody *> renderBodies,
-               std::vector<Renderer::IPxrRigidbody *> collisionBodies);
+               std::vector<Renderer::IRenderBody *> renderBodies,
+               std::vector<Renderer::IRenderBody *> collisionBodies);
 };
 
 } // namespace sapien

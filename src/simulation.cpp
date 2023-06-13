@@ -140,7 +140,7 @@ Simulation::createMeshGeometry(std::vector<physx::PxReal> vertices, std::vector<
   return geometry;
 }
 
-void Simulation::setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer) {
+void Simulation::setRenderer(std::shared_ptr<Renderer::IRenderer> renderer) {
   if (mRenderer)
     spdlog::get("SAPIEN")->warn("Setting renderer more than once should be avoided.");
   mRenderer = renderer;

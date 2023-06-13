@@ -47,7 +47,7 @@ void SVulkan2Rigidbody::setSegmentationCustomData(const std::vector<float> &cust
 }
 
 void SVulkan2Rigidbody::setCustomTexture(std::string const &name,
-                                         std::shared_ptr<IPxrTexture> texture) {
+                                         std::shared_ptr<IRenderTexture> texture) {
   if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
     for (auto obj : mObjects) {
       obj->setCustomTexture(name, t->getTexture());
@@ -58,7 +58,7 @@ void SVulkan2Rigidbody::setCustomTexture(std::string const &name,
 }
 
 void SVulkan2Rigidbody::setCustomTextureArray(std::string const &name,
-                                              std::vector<std::shared_ptr<IPxrTexture>> textures) {
+                                              std::vector<std::shared_ptr<IRenderTexture>> textures) {
   std::vector<std::shared_ptr<svulkan2::resource::SVTexture>> sts;
   for (auto tex : textures) {
     if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(tex)) {
@@ -129,9 +129,9 @@ bool SVulkan2Rigidbody::getShadeFlat() { return mObjects.at(0)->getShadeFlat(); 
 
 physx::PxVec3 SVulkan2Rigidbody::getScale() const { return mScale; }
 
-std::vector<std::shared_ptr<IPxrRenderShape>> SVulkan2Rigidbody::getRenderShapes() {
+std::vector<std::shared_ptr<IRenderShape>> SVulkan2Rigidbody::getRenderShapes() {
   auto objects = getVisualObjects();
-  std::vector<std::shared_ptr<IPxrRenderShape>> result;
+  std::vector<std::shared_ptr<IRenderShape>> result;
 
   for (auto obj : objects) {
     for (auto &shape : obj->getModel()->getShapes()) {

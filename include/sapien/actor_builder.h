@@ -51,7 +51,7 @@ public:
     PxReal length;
 
     std::shared_ptr<Renderer::IRenderMesh> mesh;
-    std::shared_ptr<Renderer::IPxrMaterial> material;
+    std::shared_ptr<Renderer::IRenderMaterial> material;
 
     PxTransform pose;
     std::string name;
@@ -123,7 +123,7 @@ public:
   /* Visual functions */
   std::shared_ptr<ActorBuilder> addBoxVisualWithMaterial(
       const PxTransform &pose = {{0, 0, 0}, PxIdentity}, const PxVec3 &halfSize = {1, 1, 1},
-      std::shared_ptr<Renderer::IPxrMaterial> material = {}, std::string const &name = "");
+      std::shared_ptr<Renderer::IRenderMaterial> material = {}, std::string const &name = "");
   std::shared_ptr<ActorBuilder> addBoxVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                              const PxVec3 &size = {1, 1, 1},
                                              const PxVec3 &color = {1, 1, 1},
@@ -131,7 +131,7 @@ public:
 
   std::shared_ptr<ActorBuilder> addCapsuleVisualWithMaterial(
       const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1, PxReal halfLength = 1,
-      std::shared_ptr<Renderer::IPxrMaterial> material = {}, std::string const &name = "");
+      std::shared_ptr<Renderer::IRenderMaterial> material = {}, std::string const &name = "");
   std::shared_ptr<ActorBuilder> addCapsuleVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                                  PxReal radius = 1, PxReal halfLength = 1,
                                                  const PxVec3 &color = {1, 1, 1},
@@ -139,7 +139,7 @@ public:
 
   std::shared_ptr<ActorBuilder>
   addSphereVisualWithMaterial(const PxTransform &pose = {{0, 0, 0}, PxIdentity}, PxReal radius = 1,
-                              std::shared_ptr<Renderer::IPxrMaterial> material = {},
+                              std::shared_ptr<Renderer::IRenderMaterial> material = {},
                               std::string const &name = "");
   std::shared_ptr<ActorBuilder> addSphereVisual(const PxTransform &pose = {{0, 0, 0}, PxIdentity},
                                                 PxReal radius = 1, const PxVec3 &color = {1, 1, 1},
@@ -147,14 +147,14 @@ public:
 
   std::shared_ptr<ActorBuilder> addVisualFromFile(
       const std::string &filename, const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
-      const PxVec3 &scale = {1, 1, 1}, std::shared_ptr<Renderer::IPxrMaterial> material = nullptr,
+      const PxVec3 &scale = {1, 1, 1}, std::shared_ptr<Renderer::IRenderMaterial> material = nullptr,
       std::string const &name = "");
 
   std::shared_ptr<ActorBuilder>
   addVisualFromMeshWithMaterial(std::shared_ptr<Renderer::IRenderMesh> mesh,
                                 const PxTransform &pose = PxTransform({0, 0, 0}, PxIdentity),
                                 const PxVec3 &scale = {1, 1, 1},
-                                std::shared_ptr<Renderer::IPxrMaterial> material = nullptr,
+                                std::shared_ptr<Renderer::IRenderMaterial> material = nullptr,
                                 std::string const &name = "");
 
   /* when a.g1 & b.g2 != 0, the collision is ignored
@@ -185,7 +185,7 @@ public:
 
   SActorStatic *buildGround(PxReal altitude, bool render,
                             std::shared_ptr<SPhysicalMaterial> material,
-                            std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = {},
+                            std::shared_ptr<Renderer::IRenderMaterial> renderMaterial = {},
                             const PxVec2 &renderSize = {1.f, 1.f}, std::string const &name = "");
 
   virtual ~ActorBuilder() = default;
@@ -193,9 +193,9 @@ public:
 protected:
   void buildShapes(std::vector<std::unique_ptr<SCollisionShape>> &shapes,
                    std::vector<PxReal> &densities) const;
-  void buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBodies,
+  void buildVisuals(std::vector<Renderer::IRenderBody *> &renderBodies,
                     std::vector<physx_id_t> &renderIds) const;
-  void buildCollisionVisuals(std::vector<Renderer::IPxrRigidbody *> &collisionBodies,
+  void buildCollisionVisuals(std::vector<Renderer::IRenderBody *> &collisionBodies,
                              std::vector<std::unique_ptr<SCollisionShape>> &shapes) const;
 };
 

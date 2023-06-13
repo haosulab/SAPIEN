@@ -153,7 +153,7 @@ ActorBuilder::addSphereShape(const PxTransform &pose, PxReal radius,
 
 std::shared_ptr<ActorBuilder>
 ActorBuilder::addBoxVisualWithMaterial(const PxTransform &pose, const PxVec3 &halfSize,
-                                       std::shared_ptr<Renderer::IPxrMaterial> material,
+                                       std::shared_ptr<Renderer::IRenderMaterial> material,
                                        std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (!renderer) {
@@ -188,7 +188,7 @@ std::shared_ptr<ActorBuilder> ActorBuilder::addBoxVisual(const PxTransform &pose
 
 std::shared_ptr<ActorBuilder> ActorBuilder::addCapsuleVisualWithMaterial(
     const PxTransform &pose, PxReal radius, PxReal halfLength,
-    std::shared_ptr<Renderer::IPxrMaterial> material, std::string const &name) {
+    std::shared_ptr<Renderer::IRenderMaterial> material, std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (!renderer) {
     return shared_from_this();
@@ -225,7 +225,7 @@ std::shared_ptr<ActorBuilder> ActorBuilder::addCapsuleVisual(const PxTransform &
 
 std::shared_ptr<ActorBuilder>
 ActorBuilder::addSphereVisualWithMaterial(const PxTransform &pose, PxReal radius,
-                                          std::shared_ptr<Renderer::IPxrMaterial> material,
+                                          std::shared_ptr<Renderer::IRenderMaterial> material,
                                           std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (!material) {
@@ -258,7 +258,7 @@ std::shared_ptr<ActorBuilder> ActorBuilder::addSphereVisual(const PxTransform &p
 
 std::shared_ptr<ActorBuilder> ActorBuilder::addVisualFromFile(
     const std::string &filename, const PxTransform &pose, const PxVec3 &scale,
-    std::shared_ptr<Renderer::IPxrMaterial> material, std::string const &name) {
+    std::shared_ptr<Renderer::IRenderMaterial> material, std::string const &name) {
   VisualRecord r;
   r.type = VisualRecord::Type::File;
   r.pose = pose;
@@ -274,7 +274,7 @@ std::shared_ptr<ActorBuilder> ActorBuilder::addVisualFromFile(
 
 std::shared_ptr<ActorBuilder> ActorBuilder::addVisualFromMeshWithMaterial(
     std::shared_ptr<Renderer::IRenderMesh> mesh, const PxTransform &pose, const PxVec3 &scale,
-    std::shared_ptr<Renderer::IPxrMaterial> material, std::string const &name) {
+    std::shared_ptr<Renderer::IRenderMaterial> material, std::string const &name) {
   auto renderer = mScene->getSimulation()->getRenderer();
   if (!material) {
     material = mScene->getSimulation()->getRenderer()->createMaterial();
@@ -446,7 +446,7 @@ void ActorBuilder::buildShapes(std::vector<std::unique_ptr<SCollisionShape>> &sh
   }
 }
 
-void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBodies,
+void ActorBuilder::buildVisuals(std::vector<Renderer::IRenderBody *> &renderBodies,
                                 std::vector<physx_id_t> &renderIds) const {
 
   auto rScene = mScene->getRendererScene();
@@ -454,7 +454,7 @@ void ActorBuilder::buildVisuals(std::vector<Renderer::IPxrRigidbody *> &renderBo
     return;
   }
   for (auto &r : mVisualRecord) {
-    Renderer::IPxrRigidbody *body{};
+    Renderer::IRenderBody *body{};
     switch (r.type) {
     case VisualRecord::Type::Box:
       body = rScene->addRigidbody(PxGeometryType::eBOX, r.scale, r.material);
@@ -523,7 +523,7 @@ std::shared_ptr<ActorBuilder> ActorBuilder::resetCollisionGroup() {
 }
 
 void ActorBuilder::buildCollisionVisuals(
-    std::vector<Renderer::IPxrRigidbody *> &collisionBodies,
+    std::vector<Renderer::IRenderBody *> &collisionBodies,
     std::vector<std::unique_ptr<SCollisionShape>> &shapes) const {
   if (mScene->mDisableCollisionVisual) {
     return;
@@ -534,7 +534,7 @@ void ActorBuilder::buildCollisionVisuals(
     return;
   }
   for (auto &shape : shapes) {
-    Renderer::IPxrRigidbody *cBody;
+    Renderer::IRenderBody *cBody;
     switch (shape->getPxShape()->getGeometryType()) {
     case PxGeometryType::eBOX: {
       PxBoxGeometry geom;
@@ -674,13 +674,13 @@ SActor *ActorBuilder::build(bool isKinematic, std::string const &name) const {
   buildShapes(shapes, densities);
 
   std::vector<physx_id_t> renderIds;
-  std::vector<Renderer::IPxrRigidbody *> renderBodies;
+  std::vector<Renderer::IRenderBody *> renderBodies;
   buildVisuals(renderBodies, renderIds);
   for (auto body : renderBodies) {
     body->setSegmentationId(actorId);
   }
 
-  std::vector<Renderer::IPxrRigidbody *> collisionBodies;
+  std::vector<Renderer::IRenderBody *> collisionBodies;
   buildCollisionVisuals(collisionBodies, shapes);
   for (auto body : collisionBodies) {
     body->setSegmentationId(actorId);
@@ -755,13 +755,13 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
   buildShapes(shapes, densities);
 
   std::vector<physx_id_t> renderIds;
-  std::vector<Renderer::IPxrRigidbody *> renderBodies;
+  std::vector<Renderer::IRenderBody *> renderBodies;
   buildVisuals(renderBodies, renderIds);
   for (auto body : renderBodies) {
     body->setSegmentationId(actorId);
   }
 
-  std::vector<Renderer::IPxrRigidbody *> collisionBodies;
+  std::vector<Renderer::IRenderBody *> collisionBodies;
   buildCollisionVisuals(collisionBodies, shapes);
   for (auto body : collisionBodies) {
     body->setSegmentationId(actorId);
@@ -800,7 +800,7 @@ SActorStatic *ActorBuilder::buildStatic(std::string const &name) const {
 
 SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
                                         std::shared_ptr<SPhysicalMaterial> material,
-                                        std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
+                                        std::shared_ptr<Renderer::IRenderMaterial> renderMaterial,
                                         const PxVec2 &renderSize, std::string const &name) {
   physx_id_t actorId = mScene->mActorIdGenerator.next();
   material = material ? material : mScene->mDefaultMaterial;
@@ -811,7 +811,7 @@ SActorStatic *ActorBuilder::buildGround(PxReal altitude, bool render,
   shape->setCollisionGroups(mCollisionGroup.w0, mCollisionGroup.w1, mCollisionGroup.w2,
                             mCollisionGroup.w3);
 
-  std::vector<Renderer::IPxrRigidbody *> renderBodies;
+  std::vector<Renderer::IRenderBody *> renderBodies;
   if (render && mScene->getRendererScene()) {
     if (!renderMaterial) {
       renderMaterial = mScene->getSimulation()->getRenderer()->createMaterial();

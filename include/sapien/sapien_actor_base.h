@@ -14,7 +14,7 @@ namespace sapien {
 using namespace physx;
 
 namespace Renderer {
-class IPxrRigidbody;
+class IRenderBody;
 };
 
 class SDrive;
@@ -43,8 +43,8 @@ protected:
   // std::string mName{""};
   physx_id_t mId{0};
   SScene *mParentScene{};
-  std::vector<Renderer::IPxrRigidbody *> mRenderBodies{};
-  std::vector<Renderer::IPxrRigidbody *> mCollisionBodies{};
+  std::vector<Renderer::IRenderBody *> mRenderBodies{};
+  std::vector<Renderer::IRenderBody *> mCollisionBodies{};
   std::vector<std::unique_ptr<SCollisionShape>> mCollisionShapes{};
 
   uint32_t mCol1{0};
@@ -78,8 +78,8 @@ public:
   std::vector<SCollisionShape *> getCollisionShapes() const;
 
   // render
-  std::vector<Renderer::IPxrRigidbody *> getRenderBodies();
-  std::vector<Renderer::IPxrRigidbody *> getCollisionBodies();
+  std::vector<Renderer::IRenderBody *> getRenderBodies();
+  std::vector<Renderer::IRenderBody *> getCollisionBodies();
   void updateRender(PxTransform const &pose);
 
   virtual PxRigidActor *getPxActor() const = 0;
@@ -122,8 +122,8 @@ public:
   SActorBase(SActorBase &&other) = delete;
 
 protected:
-  SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IPxrRigidbody *> renderBodies,
-             std::vector<Renderer::IPxrRigidbody *> collisionBodies);
+  SActorBase(physx_id_t id, SScene *scene, std::vector<Renderer::IRenderBody *> renderBodies,
+             std::vector<Renderer::IRenderBody *> collisionBodies);
 };
 
 class SActorDynamicBase : public SActorBase {

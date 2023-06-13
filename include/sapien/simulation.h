@@ -60,8 +60,8 @@ public:
                                                              physx::PxVec3 scale,
                                                              physx::PxQuat rotation);
 
-  inline std::shared_ptr<Renderer::IPxrRenderer> getRenderer() const { return mRenderer; }
-  void setRenderer(std::shared_ptr<Renderer::IPxrRenderer> renderer);
+  inline std::shared_ptr<Renderer::IRenderer> getRenderer() const { return mRenderer; }
+  void setRenderer(std::shared_ptr<Renderer::IRenderer> renderer);
 
   inline MeshManager &getMeshManager() { return mMeshManager; }
   void setLogLevel(std::string const &level);
@@ -80,7 +80,7 @@ private:
   PxDefaultCpuDispatcher *mCpuDispatcher = nullptr;
   SapienErrorCallback mErrorCallback;
 
-  std::shared_ptr<Renderer::IPxrRenderer> mRenderer = nullptr;
+  std::shared_ptr<Renderer::IRenderer> mRenderer = nullptr;
 
   MeshManager mMeshManager;
 

@@ -17,8 +17,8 @@ void SActorBase::setDisplayVisibility(float visibility) {
 
 float SActorBase::getDisplayVisibility() const { return mDisplayVisibility; }
 
-std::vector<Renderer::IPxrRigidbody *> SActorBase::getRenderBodies() { return mRenderBodies; }
-std::vector<Renderer::IPxrRigidbody *> SActorBase::getCollisionBodies() {
+std::vector<Renderer::IRenderBody *> SActorBase::getRenderBodies() { return mRenderBodies; }
+std::vector<Renderer::IRenderBody *> SActorBase::getCollisionBodies() {
   return mCollisionBodies;
 }
 
@@ -96,8 +96,8 @@ std::vector<SCollisionShape *> SActorBase::getCollisionShapes() const {
 }
 
 SActorBase::SActorBase(physx_id_t id, SScene *scene,
-                       std::vector<Renderer::IPxrRigidbody *> renderBodies,
-                       std::vector<Renderer::IPxrRigidbody *> collisionBodies)
+                       std::vector<Renderer::IRenderBody *> renderBodies,
+                       std::vector<Renderer::IRenderBody *> collisionBodies)
     : SEntity(scene), mId(id), mParentScene(scene), mRenderBodies(renderBodies),
       mCollisionBodies(collisionBodies) {}
 

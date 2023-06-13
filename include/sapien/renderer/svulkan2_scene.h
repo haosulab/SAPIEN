@@ -11,7 +11,7 @@ class SVulkan2Renderer;
 class SVulkan2Rigidbody;
 class SVulkan2Camera;
 
-class SVulkan2Scene : public IPxrScene {
+class SVulkan2Scene : public IRenderScene {
   SVulkan2Renderer *mParentRenderer;
   std::shared_ptr<svulkan2::scene::Scene> mScene;
   std::vector<std::unique_ptr<SVulkan2Rigidbody>> mBodies;
@@ -31,38 +31,38 @@ public:
 
   inline std::shared_ptr<svulkan2::scene::Scene> getScene() { return mScene; };
 
-  // IPxrScene
-  IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
+  // IRenderScene
+  IRenderBody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
 
-  IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override;
+  IRenderBody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
+                              std::shared_ptr<IRenderMaterial> material) override;
 
-  IPxrRigidbody *addRigidbody(std::shared_ptr<IRenderMesh> mesh, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override;
+  IRenderBody *addRigidbody(std::shared_ptr<IRenderMesh> mesh, const physx::PxVec3 &scale,
+                              std::shared_ptr<IRenderMaterial> material) override;
 
-  IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override;
+  IRenderBody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+                              std::shared_ptr<IRenderMaterial> material) override;
 
-  IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+  IRenderBody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
                               const physx::PxVec3 &color) override;
 
-  IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+  IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                               std::vector<physx::PxVec3> const &normals,
                               std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override;
+                              std::shared_ptr<IRenderMaterial> material) override;
 
-  IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+  IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                               std::vector<physx::PxVec3> const &normals,
                               std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
                               const physx::PxVec3 &color) override;
 
-  IPxrRigidbody *cloneRigidbody(SVulkan2Rigidbody *other);
+  IRenderBody *cloneRigidbody(SVulkan2Rigidbody *other);
 
-  IPxrPointBody *addPointBody(
+  IRenderPointBody *addPointBody(
       Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>> positions) override;
 
-  void removeRigidbody(IPxrRigidbody *body) override;
-  void removePointBody(IPxrPointBody *body) override;
+  void removeRigidbody(IRenderBody *body) override;
+  void removePointBody(IRenderPointBody *body) override;
 
   ICamera *addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,
                      std::string const &shaderDir = "") override;

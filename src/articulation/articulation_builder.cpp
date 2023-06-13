@@ -158,13 +158,13 @@ bool LinkBuilder::build(SArticulation &articulation) const {
   buildShapes(shapes, densities);
 
   std::vector<physx_id_t> renderIds;
-  std::vector<Renderer::IPxrRigidbody *> renderBodies;
+  std::vector<Renderer::IRenderBody *> renderBodies;
   buildVisuals(renderBodies, renderIds);
   for (auto body : renderBodies) {
     body->setSegmentationId(linkId);
   }
 
-  std::vector<Renderer::IPxrRigidbody *> collisionBodies;
+  std::vector<Renderer::IRenderBody *> collisionBodies;
   buildCollisionVisuals(collisionBodies, shapes);
   for (auto body : collisionBodies) {
     body->setSegmentationId(linkId);
@@ -256,13 +256,13 @@ bool LinkBuilder::buildKinematic(SKArticulation &articulation) const {
   buildShapes(shapes, densities);
 
   std::vector<physx_id_t> renderIds;
-  std::vector<Renderer::IPxrRigidbody *> renderBodies;
+  std::vector<Renderer::IRenderBody *> renderBodies;
   buildVisuals(renderBodies, renderIds);
   for (auto body : renderBodies) {
     body->setSegmentationId(linkId);
   }
 
-  std::vector<Renderer::IPxrRigidbody *> collisionBodies;
+  std::vector<Renderer::IRenderBody *> collisionBodies;
   buildCollisionVisuals(collisionBodies, shapes);
   for (auto body : collisionBodies) {
     body->setSegmentationId(linkId);

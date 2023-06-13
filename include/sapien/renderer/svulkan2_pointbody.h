@@ -7,7 +7,7 @@ namespace Renderer {
 
 class SVulkan2Scene;
 
-class SVulkan2PointBody : public IPxrPointBody {
+class SVulkan2PointBody : public IRenderPointBody {
   std::string mName{};
   SVulkan2Scene *mParentScene = nullptr;
   physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};

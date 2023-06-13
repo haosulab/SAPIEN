@@ -7,7 +7,7 @@ namespace Renderer {
 
 class SVulkan2Scene;
 
-class SVulkan2Rigidbody : public IPxrRigidbody {
+class SVulkan2Rigidbody : public IRenderBody {
   std::string mName{};
   SVulkan2Scene *mParentScene = nullptr;
   physx::PxTransform mInitialPose = {{0, 0, 0}, physx::PxIdentity};
@@ -35,9 +35,9 @@ public:
   uint32_t getSegmentationId() const override;
   void setSegmentationCustomData(const std::vector<float> &customData) override;
 
-  void setCustomTexture(std::string const &name, std::shared_ptr<IPxrTexture> texture) override;
+  void setCustomTexture(std::string const &name, std::shared_ptr<IRenderTexture> texture) override;
   void setCustomTextureArray(std::string const &name,
-                             std::vector<std::shared_ptr<IPxrTexture>> textures) override;
+                             std::vector<std::shared_ptr<IRenderTexture>> textures) override;
   void setCustomPropertyFloat3(std::string const &name, std::array<float, 3> property) override;
 
   void setInitialPose(const physx::PxTransform &transform) override;
@@ -62,7 +62,7 @@ public:
     return mObjects;
   }
 
-  std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() override;
+  std::vector<std::shared_ptr<IRenderShape>> getRenderShapes() override;
 
   inline SVulkan2Scene *getScene() const { return mParentScene; }
 };

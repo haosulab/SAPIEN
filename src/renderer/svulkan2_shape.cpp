@@ -59,7 +59,7 @@ std::shared_ptr<IRenderMesh> SVulkan2RenderShape::getGeometry() const {
   return std::make_shared<SVulkan2Mesh>(mShape->mesh);
 }
 
-std::shared_ptr<IPxrMaterial> SVulkan2RenderShape::getMaterial() const {
+std::shared_ptr<IRenderMaterial> SVulkan2RenderShape::getMaterial() const {
   auto mat = std::dynamic_pointer_cast<svulkan2::resource::SVMetallicMaterial>(mShape->material);
   if (!mat) {
     throw std::runtime_error("invalid material");
@@ -67,7 +67,7 @@ std::shared_ptr<IPxrMaterial> SVulkan2RenderShape::getMaterial() const {
   return std::make_shared<SVulkan2Material>(mat, mParentBody->getScene()->getParentRenderer());
 }
 
-void SVulkan2RenderShape::setMaterial(std::shared_ptr<IPxrMaterial> material) {
+void SVulkan2RenderShape::setMaterial(std::shared_ptr<IRenderMaterial> material) {
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
   if (!mat) {
     throw std::runtime_error("invalid material");

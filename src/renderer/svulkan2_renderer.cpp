@@ -53,19 +53,19 @@ SVulkan2Renderer::SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials,
 
 vk::CullModeFlags SVulkan2Renderer::getCullMode() const { return mDefaultRendererConfig->culling; }
 
-IPxrScene *SVulkan2Renderer::createScene(std::string const &name) {
+IRenderScene *SVulkan2Renderer::createScene(std::string const &name) {
   mScenes.push_back(std::make_unique<SVulkan2Scene>(this, name));
   return mScenes.back().get();
 }
 
-void SVulkan2Renderer::removeScene(IPxrScene *scene) {
+void SVulkan2Renderer::removeScene(IRenderScene *scene) {
   mContext->getDevice().waitIdle(); // wait for all render tasks to finish
   mScenes.erase(std::remove_if(mScenes.begin(), mScenes.end(),
                                [scene](auto &s) { return scene == s.get(); }),
                 mScenes.end());
 }
 
-std::shared_ptr<IPxrMaterial> SVulkan2Renderer::createMaterial() {
+std::shared_ptr<IRenderMaterial> SVulkan2Renderer::createMaterial() {
   auto mat = std::make_shared<SVulkan2Material>(
       std::make_shared<svulkan2::resource::SVMetallicMaterial>(), this);
   mat->setBaseColor({1.0, 1.0, 1.0, 1});
@@ -78,32 +78,32 @@ std::shared_ptr<IRenderMesh> SVulkan2Renderer::createMesh(std::vector<float> con
   return std::make_shared<SVulkan2Mesh>(mesh);
 }
 
-std::shared_ptr<IPxrTexture>
+std::shared_ptr<IRenderTexture>
 SVulkan2Renderer::createTexture(std::string_view filename, uint32_t mipLevels,
-                                IPxrTexture::FilterMode::Enum filterMode,
-                                IPxrTexture::AddressMode::Enum addressMode) {
+                                IRenderTexture::FilterMode::Enum filterMode,
+                                IRenderTexture::AddressMode::Enum addressMode) {
   vk::Filter vkf;
   vk::SamplerAddressMode vka;
   switch (filterMode) {
-  case IPxrTexture::FilterMode::eNEAREST:
+  case IRenderTexture::FilterMode::eNEAREST:
     vkf = vk::Filter::eNearest;
     break;
-  case IPxrTexture::FilterMode::eLINEAR:
+  case IRenderTexture::FilterMode::eLINEAR:
     vkf = vk::Filter::eLinear;
     break;
   }
 
   switch (addressMode) {
-  case IPxrTexture::AddressMode::eREPEAT:
+  case IRenderTexture::AddressMode::eREPEAT:
     vka = vk::SamplerAddressMode::eRepeat;
     break;
-  case IPxrTexture::AddressMode::eBORDER:
+  case IRenderTexture::AddressMode::eBORDER:
     vka = vk::SamplerAddressMode::eClampToBorder;
     break;
-  case IPxrTexture::AddressMode::eEDGE:
+  case IRenderTexture::AddressMode::eEDGE:
     vka = vk::SamplerAddressMode::eClampToEdge;
     break;
-  case IPxrTexture::AddressMode::eMIRROR:
+  case IRenderTexture::AddressMode::eMIRROR:
     vka = vk::SamplerAddressMode::eMirroredRepeat;
     break;
   }
@@ -114,32 +114,32 @@ SVulkan2Renderer::createTexture(std::string_view filename, uint32_t mipLevels,
   return std::make_shared<SVulkan2Texture>(texture);
 }
 
-std::shared_ptr<IPxrTexture>
+std::shared_ptr<IRenderTexture>
 SVulkan2Renderer::createTexture(std::vector<uint8_t> const &data, int width, int height,
-                                uint32_t mipLevels, IPxrTexture::FilterMode::Enum filterMode,
-                                IPxrTexture::AddressMode::Enum addressMode, bool srgb) {
+                                uint32_t mipLevels, IRenderTexture::FilterMode::Enum filterMode,
+                                IRenderTexture::AddressMode::Enum addressMode, bool srgb) {
   vk::Filter vkf;
   vk::SamplerAddressMode vka;
   switch (filterMode) {
-  case IPxrTexture::FilterMode::eNEAREST:
+  case IRenderTexture::FilterMode::eNEAREST:
     vkf = vk::Filter::eNearest;
     break;
-  case IPxrTexture::FilterMode::eLINEAR:
+  case IRenderTexture::FilterMode::eLINEAR:
     vkf = vk::Filter::eLinear;
     break;
   }
 
   switch (addressMode) {
-  case IPxrTexture::AddressMode::eREPEAT:
+  case IRenderTexture::AddressMode::eREPEAT:
     vka = vk::SamplerAddressMode::eRepeat;
     break;
-  case IPxrTexture::AddressMode::eBORDER:
+  case IRenderTexture::AddressMode::eBORDER:
     vka = vk::SamplerAddressMode::eClampToBorder;
     break;
-  case IPxrTexture::AddressMode::eEDGE:
+  case IRenderTexture::AddressMode::eEDGE:
     vka = vk::SamplerAddressMode::eClampToEdge;
     break;
-  case IPxrTexture::AddressMode::eMIRROR:
+  case IRenderTexture::AddressMode::eMIRROR:
     vka = vk::SamplerAddressMode::eMirroredRepeat;
     break;
   }
@@ -157,31 +157,31 @@ SVulkan2Renderer::createTexture(std::vector<uint8_t> const &data, int width, int
   return std::make_shared<SVulkan2Texture>(texture);
 }
 
-std::shared_ptr<IPxrTexture> SVulkan2Renderer::createTexture(
+std::shared_ptr<IRenderTexture> SVulkan2Renderer::createTexture(
     std::vector<float> const &data, int width, int height, int depth, int dim, uint32_t mipLevels,
-    IPxrTexture::FilterMode::Enum filterMode, IPxrTexture::AddressMode::Enum addressMode) {
+    IRenderTexture::FilterMode::Enum filterMode, IRenderTexture::AddressMode::Enum addressMode) {
   vk::Filter vkf;
   vk::SamplerAddressMode vka;
   switch (filterMode) {
-  case IPxrTexture::FilterMode::eNEAREST:
+  case IRenderTexture::FilterMode::eNEAREST:
     vkf = vk::Filter::eNearest;
     break;
-  case IPxrTexture::FilterMode::eLINEAR:
+  case IRenderTexture::FilterMode::eLINEAR:
     vkf = vk::Filter::eLinear;
     break;
   }
 
   switch (addressMode) {
-  case IPxrTexture::AddressMode::eREPEAT:
+  case IRenderTexture::AddressMode::eREPEAT:
     vka = vk::SamplerAddressMode::eRepeat;
     break;
-  case IPxrTexture::AddressMode::eBORDER:
+  case IRenderTexture::AddressMode::eBORDER:
     vka = vk::SamplerAddressMode::eClampToBorder;
     break;
-  case IPxrTexture::AddressMode::eEDGE:
+  case IRenderTexture::AddressMode::eEDGE:
     vka = vk::SamplerAddressMode::eClampToEdge;
     break;
-  case IPxrTexture::AddressMode::eMIRROR:
+  case IRenderTexture::AddressMode::eMIRROR:
     vka = vk::SamplerAddressMode::eMirroredRepeat;
     break;
   }

@@ -16,9 +16,9 @@ namespace Renderer {
 
 class ISensor;
 class ICamera;
-class IPxrScene;
-class IPxrRigidbody;
-class IPxrRenderer;
+class IRenderScene;
+class IRenderBody;
+class IRenderer;
 
 class ILight;
 class IPointLight;
@@ -45,7 +45,7 @@ public:
   virtual ~IRenderMesh() = default;
 };
 
-class IPxrTexture {
+class IRenderTexture {
 public:
   struct FilterMode {
     enum Enum { eNEAREST, eLINEAR };
@@ -67,10 +67,10 @@ public:
   [[nodiscard]] virtual FilterMode::Enum getFilterMode() const = 0;
 
   [[nodiscard]] virtual std::string getFilename() const { return ""; };
-  virtual ~IPxrTexture() = default;
+  virtual ~IRenderTexture() = default;
 };
 
-class IPxrMaterial {
+class IRenderMaterial {
 public:
   virtual void setBaseColor(std::array<float, 4> color) = 0;
   [[nodiscard]] virtual std::array<float, 4> getBaseColor() const = 0;
@@ -91,18 +91,18 @@ public:
   [[nodiscard]] virtual float getTransmissionRoughness() const = 0;
 
   // texture functions
-  virtual void setEmissionTexture(std::shared_ptr<IPxrTexture> texture) = 0;
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getEmissionTexture() const = 0;
-  virtual void setDiffuseTexture(std::shared_ptr<IPxrTexture> texture) = 0;
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getDiffuseTexture() const = 0;
-  virtual void setMetallicTexture(std::shared_ptr<IPxrTexture> texture) = 0;
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getMetallicTexture() const = 0;
-  virtual void setRoughnessTexture(std::shared_ptr<IPxrTexture> texture) = 0;
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getRoughnessTexture() const = 0;
-  virtual void setNormalTexture(std::shared_ptr<IPxrTexture> texture) = 0;
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getNormalTexture() const = 0;
-  virtual void setTransmissionTexture(std::shared_ptr<IPxrTexture> texture) = 0;
-  [[nodiscard]] virtual std::shared_ptr<IPxrTexture> getTransmissionTexture() const = 0;
+  virtual void setEmissionTexture(std::shared_ptr<IRenderTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IRenderTexture> getEmissionTexture() const = 0;
+  virtual void setDiffuseTexture(std::shared_ptr<IRenderTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IRenderTexture> getDiffuseTexture() const = 0;
+  virtual void setMetallicTexture(std::shared_ptr<IRenderTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IRenderTexture> getMetallicTexture() const = 0;
+  virtual void setRoughnessTexture(std::shared_ptr<IRenderTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IRenderTexture> getRoughnessTexture() const = 0;
+  virtual void setNormalTexture(std::shared_ptr<IRenderTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IRenderTexture> getNormalTexture() const = 0;
+  virtual void setTransmissionTexture(std::shared_ptr<IRenderTexture> texture) = 0;
+  [[nodiscard]] virtual std::shared_ptr<IRenderTexture> getTransmissionTexture() const = 0;
 
   // texture filename functions
   virtual void setEmissionTextureFromFilename(std::string_view path) = 0;
@@ -136,17 +136,17 @@ public:
     return tex ? tex->getFilename() : "";
   };
 
-  virtual ~IPxrMaterial() = default;
+  virtual ~IRenderMaterial() = default;
 };
 
-class IPxrRenderShape {
+class IRenderShape {
 public:
   [[nodiscard]] virtual std::shared_ptr<IRenderMesh> getGeometry() const { return {}; }
-  [[nodiscard]] virtual std::shared_ptr<IPxrMaterial> getMaterial() const { return nullptr; }
-  virtual void setMaterial(std::shared_ptr<IPxrMaterial>) {
+  [[nodiscard]] virtual std::shared_ptr<IRenderMaterial> getMaterial() const { return nullptr; }
+  virtual void setMaterial(std::shared_ptr<IRenderMaterial>) {
     throw std::runtime_error("setMaterial is not implemented");
   }
-  virtual ~IPxrRenderShape() = default;
+  virtual ~IRenderShape() = default;
 };
 
 class ISensor {
@@ -154,7 +154,7 @@ public:
   // virtual void setInitialPose(physx::PxTransform const &pose) = 0;
   [[nodiscard]] virtual physx::PxTransform getPose() const = 0;
   virtual void setPose(physx::PxTransform const &pose) = 0;
-  virtual IPxrScene *getScene() = 0;
+  virtual IRenderScene *getScene() = 0;
 
   virtual ~ISensor() = default;
 };
@@ -204,11 +204,11 @@ public:
   virtual void setFloatProperty(std::string const &name, float property) {
     throw std::runtime_error("setFloatProperty is not implemented");
   }
-  virtual void setCustomTexture(std::string const &name, std::shared_ptr<IPxrTexture> texture) {
+  virtual void setCustomTexture(std::string const &name, std::shared_ptr<IRenderTexture> texture) {
     throw std::runtime_error("setCustomTexture is not implemented");
   }
   virtual void setCustomTextureArray(std::string const &name,
-                                     std::vector<std::shared_ptr<IPxrTexture>> textures) {
+                                     std::vector<std::shared_ptr<IRenderTexture>> textures) {
     throw std::runtime_error("setCustomTextureArray is not implemented");
   }
 
@@ -299,7 +299,7 @@ public:
   virtual float getShadowFar() const = 0;
 };
 
-class IPxrPointBody {
+class IRenderPointBody {
 public:
   virtual void setName(std::string const &name) = 0;
   virtual std::string getName() const = 0;
@@ -313,10 +313,10 @@ public:
       std::string_view name,
       Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>) = 0;
 
-  virtual ~IPxrPointBody() = default;
+  virtual ~IRenderPointBody() = default;
 };
 
-class IPxrRigidbody {
+class IRenderBody {
 public:
   virtual void setName(std::string const &name) = 0;
   virtual std::string getName() const = 0;
@@ -336,7 +336,7 @@ public:
 
   virtual void destroy() = 0;
 
-  virtual ~IPxrRigidbody() = default;
+  virtual ~IRenderBody() = default;
 
   // return one of "box", "sphere", "capsule", "mesh"
   virtual physx::PxGeometryType::Enum getType() const {
@@ -347,7 +347,7 @@ public:
     throw std::runtime_error("getInitialPose is not implemented");
   }
 
-  virtual std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() {
+  virtual std::vector<std::shared_ptr<IRenderShape>> getRenderShapes() {
     throw std::runtime_error("getRenderShapes is not implemented");
   }
 
@@ -361,22 +361,22 @@ public:
     throw std::runtime_error("setCustomPropertyFloat3 is not implemented");
   };
 
-  virtual void setCustomTexture(std::string const &name, std::shared_ptr<IPxrTexture> texture) {
+  virtual void setCustomTexture(std::string const &name, std::shared_ptr<IRenderTexture> texture) {
     throw std::runtime_error("setCustomTexture is not implemented");
   }
   virtual void setCustomTextureArray(std::string const &name,
-                                     std::vector<std::shared_ptr<IPxrTexture>> textures) {
+                                     std::vector<std::shared_ptr<IRenderTexture>> textures) {
     throw std::runtime_error("setCustomTextureArray is not implemented");
   }
 };
 
-class IPxrScene {
+class IRenderScene {
 
 public:
-  virtual IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) = 0;
-  inline virtual IPxrRigidbody *
+  virtual IRenderBody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) = 0;
+  inline virtual IRenderBody *
   addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
-               std::shared_ptr<IPxrMaterial> material) { // add and replace material
+               std::shared_ptr<IRenderMaterial> material) { // add and replace material
     // TODO: restore this warning
     // if (material)
     //   spdlog::get("SAPIEN")->warn("Add rigid body and substitute material is "
@@ -385,34 +385,34 @@ public:
     return addRigidbody(meshFile, scale);
   }
 
-  virtual IPxrRigidbody *addRigidbody(std::shared_ptr<IRenderMesh> mesh,
+  virtual IRenderBody *addRigidbody(std::shared_ptr<IRenderMesh> mesh,
                                       const physx::PxVec3 &scale,
-                                      std::shared_ptr<IPxrMaterial> material) = 0;
+                                      std::shared_ptr<IRenderMaterial> material) = 0;
 
-  virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                                      std::shared_ptr<IPxrMaterial> material) = 0;
-  inline virtual IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type,
+  virtual IRenderBody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+                                      std::shared_ptr<IRenderMaterial> material) = 0;
+  inline virtual IRenderBody *addRigidbody(physx::PxGeometryType::Enum type,
                                              const physx::PxVec3 &scale,
                                              const physx::PxVec3 &color) = 0;
 
-  virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+  virtual IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                       std::vector<physx::PxVec3> const &normals,
                                       std::vector<uint32_t> const &indices,
                                       const physx::PxVec3 &scale,
-                                      std::shared_ptr<IPxrMaterial> material) = 0;
-  inline virtual IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+                                      std::shared_ptr<IRenderMaterial> material) = 0;
+  inline virtual IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                              std::vector<physx::PxVec3> const &normals,
                                              std::vector<uint32_t> const &indices,
                                              const physx::PxVec3 &scale,
                                              const physx::PxVec3 &color) = 0;
 
-  virtual IPxrPointBody *
+  virtual IRenderPointBody *
   addPointBody(Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>> positions) {
     throw std::runtime_error("PointBody is not implemented in this renderer");
   };
 
-  virtual void removeRigidbody(IPxrRigidbody *body) = 0;
-  virtual void removePointBody(IPxrPointBody *body) {
+  virtual void removeRigidbody(IRenderBody *body) = 0;
+  virtual void removePointBody(IRenderPointBody *body) {
     throw std::runtime_error("PointBody is not implemented in this renderer");
   };
 
@@ -474,37 +474,37 @@ public:
 
   virtual void destroy() = 0;
 
-  virtual ~IPxrScene() = default;
+  virtual ~IRenderScene() = default;
 };
 
-class IPxrRenderer {
+class IRenderer {
 public:
-  virtual IPxrScene *createScene(std::string const &name) = 0;
-  virtual void removeScene(IPxrScene *scene) = 0;
-  virtual std::shared_ptr<IPxrMaterial> createMaterial() = 0;
+  virtual IRenderScene *createScene(std::string const &name) = 0;
+  virtual void removeScene(IRenderScene *scene) = 0;
+  virtual std::shared_ptr<IRenderMaterial> createMaterial() = 0;
   virtual std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
                                                   std::vector<uint32_t> const &indices) = 0;
-  virtual std::shared_ptr<IPxrTexture>
+  virtual std::shared_ptr<IRenderTexture>
   createTexture(std::string_view filename, uint32_t mipLevels = 1,
-                IPxrTexture::FilterMode::Enum filterMode = {},
-                IPxrTexture::AddressMode::Enum addressMode = {}) {
+                IRenderTexture::FilterMode::Enum filterMode = {},
+                IRenderTexture::AddressMode::Enum addressMode = {}) {
     throw std::runtime_error("Texture creation is not supported.");
   }
-  virtual std::shared_ptr<IPxrTexture>
+  virtual std::shared_ptr<IRenderTexture>
   createTexture(std::vector<uint8_t> const &data, int width, int height, uint32_t mipLevels = 1,
-                IPxrTexture::FilterMode::Enum filterMode = {},
-                IPxrTexture::AddressMode::Enum addressMode = {}, bool srgb = true) {
+                IRenderTexture::FilterMode::Enum filterMode = {},
+                IRenderTexture::AddressMode::Enum addressMode = {}, bool srgb = true) {
     throw std::runtime_error("Texture creation is not supported.");
   }
 
-  virtual std::shared_ptr<IPxrTexture>
+  virtual std::shared_ptr<IRenderTexture>
   createTexture(std::vector<float> const &data, int width, int height, int depth, int dim,
-                uint32_t mipLevels = 1, IPxrTexture::FilterMode::Enum filterMode = {},
-                IPxrTexture::AddressMode::Enum addressMode = {}) {
+                uint32_t mipLevels = 1, IRenderTexture::FilterMode::Enum filterMode = {},
+                IRenderTexture::AddressMode::Enum addressMode = {}) {
     throw std::runtime_error("Texture creation is not supported.");
   }
 
-  virtual ~IPxrRenderer() = default;
+  virtual ~IRenderer() = default;
 };
 
 } // namespace Renderer

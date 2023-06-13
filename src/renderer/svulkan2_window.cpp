@@ -174,7 +174,7 @@ void SVulkan2Window::setCameraProperty(std::string const &name, int property) {
   mSVulkanRenderer->setCustomProperty(name, property);
 }
 void SVulkan2Window::setCameraTexture(std::string const &name,
-                                      std::shared_ptr<Renderer::IPxrTexture> texture) {
+                                      std::shared_ptr<Renderer::IRenderTexture> texture) {
   if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
     mSVulkanRenderer->setCustomTexture(name, t->getTexture());
   } else {
@@ -183,7 +183,7 @@ void SVulkan2Window::setCameraTexture(std::string const &name,
 }
 
 void SVulkan2Window::setCameraTextureArray(
-    std::string const &name, std::vector<std::shared_ptr<Renderer::IPxrTexture>> textures) {
+    std::string const &name, std::vector<std::shared_ptr<Renderer::IRenderTexture>> textures) {
   std::vector<std::shared_ptr<svulkan2::resource::SVTexture>> sts;
   for (auto tex : textures) {
     if (auto t = std::dynamic_pointer_cast<SVulkan2Texture>(tex)) {

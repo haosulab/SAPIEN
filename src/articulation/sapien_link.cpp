@@ -7,14 +7,14 @@ PxArticulationLink *SLink::getPxActor() const { return mActor; }
 SArticulation *SLink::getArticulation() { return mArticulation; }
 
 SLink::SLink(PxArticulationLink *actor, SArticulation *articulation, physx_id_t id, SScene *scene,
-             std::vector<Renderer::IPxrRigidbody *> renderBodies,
-             std::vector<Renderer::IPxrRigidbody *> collisionBodies)
+             std::vector<Renderer::IRenderBody *> renderBodies,
+             std::vector<Renderer::IRenderBody *> collisionBodies)
     : SLinkBase(id, scene, renderBodies, collisionBodies), mActor(actor),
       mArticulation(articulation) {}
 
 SKLink::SKLink(PxRigidDynamic *actor, SKArticulation *articulation, physx_id_t id, SScene *scene,
-               std::vector<Renderer::IPxrRigidbody *> renderBodies,
-               std::vector<Renderer::IPxrRigidbody *> collisionBodies)
+               std::vector<Renderer::IRenderBody *> renderBodies,
+               std::vector<Renderer::IRenderBody *> collisionBodies)
     : SLinkBase(id, scene, renderBodies, collisionBodies), mActor(actor),
       mArticulation(articulation) {}
 

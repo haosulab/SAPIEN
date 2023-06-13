@@ -668,7 +668,7 @@ std::future<void> SScene::updateRenderAsync() {
 
 SActorStatic *SScene::addGround(PxReal altitude, bool render,
                                 std::shared_ptr<SPhysicalMaterial> material,
-                                std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
+                                std::shared_ptr<Renderer::IRenderMaterial> renderMaterial,
                                 PxVec2 const &renderSize) {
   return createActorBuilder()->buildGround(altitude, render, material, renderMaterial, renderSize,
                                            "ground");

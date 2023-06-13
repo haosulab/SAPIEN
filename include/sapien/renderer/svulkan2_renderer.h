@@ -39,32 +39,32 @@ public:
   }
 };
 
-class SVulkan2Renderer : public IPxrRenderer {
+class SVulkan2Renderer : public IRenderer {
 public:
   static void setLogLevel(std::string const &level);
 
   SVulkan2Renderer(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
                    uint32_t defaultMipLevels, std::string const &device,
                    std::string const &culling, bool doNotLoadTexture);
-  IPxrScene *createScene(std::string const &name) override;
-  void removeScene(IPxrScene *scene) override;
+  IRenderScene *createScene(std::string const &name) override;
+  void removeScene(IRenderScene *scene) override;
 
-  std::shared_ptr<IPxrMaterial> createMaterial() override;
-  std::shared_ptr<IPxrTexture>
+  std::shared_ptr<IRenderMaterial> createMaterial() override;
+  std::shared_ptr<IRenderTexture>
   createTexture(std::string_view filename, uint32_t mipLevels = 1,
-                IPxrTexture::FilterMode::Enum filterMode = {},
-                IPxrTexture::AddressMode::Enum addressMode = {}) override;
+                IRenderTexture::FilterMode::Enum filterMode = {},
+                IRenderTexture::AddressMode::Enum addressMode = {}) override;
 
-  std::shared_ptr<IPxrTexture> createTexture(std::vector<uint8_t> const &data, int width,
+  std::shared_ptr<IRenderTexture> createTexture(std::vector<uint8_t> const &data, int width,
                                              int height, uint32_t mipLevels = 1,
-                                             IPxrTexture::FilterMode::Enum filterMode = {},
-                                             IPxrTexture::AddressMode::Enum addressMode = {},
+                                             IRenderTexture::FilterMode::Enum filterMode = {},
+                                             IRenderTexture::AddressMode::Enum addressMode = {},
                                              bool srgb = true) override;
 
-  std::shared_ptr<IPxrTexture>
+  std::shared_ptr<IRenderTexture>
   createTexture(std::vector<float> const &data, int width, int height, int depth, int dim,
-                uint32_t mipLevels = 1, IPxrTexture::FilterMode::Enum filterMode = {},
-                IPxrTexture::AddressMode::Enum addressMode = {}) override;
+                uint32_t mipLevels = 1, IRenderTexture::FilterMode::Enum filterMode = {},
+                IRenderTexture::AddressMode::Enum addressMode = {}) override;
 
   std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
                                           std::vector<uint32_t> const &indices) override;
@@ -117,9 +117,9 @@ public:
 
   void setIntProperty(std::string const &name, int property) override;
   void setFloatProperty(std::string const &name, float property) override;
-  void setCustomTexture(std::string const &name, std::shared_ptr<IPxrTexture> texture) override;
+  void setCustomTexture(std::string const &name, std::shared_ptr<IRenderTexture> texture) override;
   void setCustomTextureArray(std::string const &name,
-                             std::vector<std::shared_ptr<IPxrTexture>> textures) override;
+                             std::vector<std::shared_ptr<IRenderTexture>> textures) override;
 
   SVulkan2Camera(uint32_t width, uint32_t height, float fovy, float near, float far,
                  SVulkan2Scene *scene, std::string const &shaderDir);
@@ -144,7 +144,7 @@ public:
   DLManagedTensor *getDLImage(std::string const &name) override;
 #endif
 
-  inline IPxrScene *getScene() override { return mScene; }
+  inline IRenderScene *getScene() override { return mScene; }
 
   glm::mat4 getModelMatrix() const;
   glm::mat4 getProjectionMatrix() const;

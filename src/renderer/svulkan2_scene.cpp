@@ -134,7 +134,7 @@ void SVulkan2Scene::removeLight(ILight *light) {
 
 void SVulkan2Scene::destroy() { mParentRenderer->removeScene(this); }
 
-IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
+IRenderBody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
                                            const physx::PxVec3 &scale) {
   if (!std::filesystem::exists(meshFile)) {
     spdlog::get("SAPIEN")->error("Failed to load visual mesh: " + meshFile);
@@ -154,8 +154,8 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
   return mBodies.back().get();
 }
 
-IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
-                                           std::shared_ptr<IPxrMaterial> material) {
+IRenderBody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
+                                           std::shared_ptr<IRenderMaterial> material) {
   if (!material) {
     return addRigidbody(meshFile, scale);
   }
@@ -186,9 +186,9 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const ph
   return mBodies.back().get();
 }
 
-IPxrRigidbody *SVulkan2Scene::addRigidbody(std::shared_ptr<IRenderMesh> mesh,
+IRenderBody *SVulkan2Scene::addRigidbody(std::shared_ptr<IRenderMesh> mesh,
                                            const physx::PxVec3 &scale,
-                                           std::shared_ptr<IPxrMaterial> material) {
+                                           std::shared_ptr<IRenderMaterial> material) {
   auto rmesh = std::dynamic_pointer_cast<SVulkan2Mesh>(mesh);
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
   auto shape = svulkan2::resource::SVShape::Create(rmesh->getMesh(), mat->getMaterial());
@@ -199,7 +199,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(std::shared_ptr<IRenderMesh> mesh,
   return mBodies.back().get();
 }
 
-IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
+IRenderBody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
                                            const physx::PxVec3 &scale,
                                            const physx::PxVec3 &color) {
   auto material = std::make_shared<svulkan2::resource::SVMetallicMaterial>(
@@ -207,9 +207,9 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
   return addRigidbody(type, scale, std::make_shared<SVulkan2Material>(material, mParentRenderer));
 }
 
-IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
+IRenderBody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
                                            const physx::PxVec3 &scale,
-                                           std::shared_ptr<IPxrMaterial> material) {
+                                           std::shared_ptr<IRenderMaterial> material) {
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
   if (!mat) {
     mat = std::static_pointer_cast<SVulkan2Material>(mParentRenderer->createMaterial());
@@ -263,7 +263,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
   return mBodies.back().get();
 }
 
-IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &vertices,
+IRenderBody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                            std::vector<physx::PxVec3> const &normals,
                                            std::vector<uint32_t> const &indices,
                                            const physx::PxVec3 &scale,
@@ -274,11 +274,11 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &ver
                       std::make_shared<SVulkan2Material>(material, getParentRenderer()));
 }
 
-IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &vertices,
+IRenderBody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &vertices,
                                            std::vector<physx::PxVec3> const &normals,
                                            std::vector<uint32_t> const &indices,
                                            const physx::PxVec3 &scale,
-                                           std::shared_ptr<IPxrMaterial> material) {
+                                           std::shared_ptr<IRenderMaterial> material) {
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
   if (!mat) {
     mat = std::static_pointer_cast<SVulkan2Material>(mParentRenderer->createMaterial());
@@ -309,7 +309,7 @@ IPxrRigidbody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &ver
   return mBodies.back().get();
 }
 
-IPxrRigidbody *SVulkan2Scene::cloneRigidbody(SVulkan2Rigidbody *other) {
+IRenderBody *SVulkan2Scene::cloneRigidbody(SVulkan2Rigidbody *other) {
   auto &otherObjs = other->getVisualObjects();
   std::vector<svulkan2::scene::Object *> objs;
   for (auto &obj : otherObjs) {
@@ -323,7 +323,7 @@ IPxrRigidbody *SVulkan2Scene::cloneRigidbody(SVulkan2Rigidbody *other) {
   return body;
 }
 
-IPxrPointBody *SVulkan2Scene::addPointBody(
+IRenderPointBody *SVulkan2Scene::addPointBody(
     Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>> positions) {
   auto pointset = std::make_shared<svulkan2::resource::SVPointSet>();
   pointset->setVertexAttribute(
@@ -333,7 +333,7 @@ IPxrPointBody *SVulkan2Scene::addPointBody(
   return mPointBodies.back().get();
 }
 
-void SVulkan2Scene::removeRigidbody(IPxrRigidbody *body) {
+void SVulkan2Scene::removeRigidbody(IRenderBody *body) {
   for (auto it = mBodies.begin(); it != mBodies.end(); ++it) {
     if (it->get() == body) {
       it->get()->destroyVisualObjects();
@@ -343,7 +343,7 @@ void SVulkan2Scene::removeRigidbody(IPxrRigidbody *body) {
   }
 }
 
-void SVulkan2Scene::removePointBody(IPxrPointBody *body) {
+void SVulkan2Scene::removePointBody(IRenderPointBody *body) {
   for (auto it = mPointBodies.begin(); it != mPointBodies.end(); ++it) {
     if (it->get() == body) {
       it->get()->destroyVisualObject();

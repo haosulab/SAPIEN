@@ -28,7 +28,6 @@ from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
 from sapien.core.pysapien import Entity
 from sapien.core.pysapien import Gear
-from sapien.core.pysapien import IPxrRenderer
 from sapien.core.pysapien import Joint
 from sapien.core.pysapien import JointBase
 from sapien.core.pysapien import JointRecord
@@ -61,6 +60,7 @@ from sapien.core.pysapien import RenderServer
 from sapien.core.pysapien import RenderServerBuffer
 from sapien.core.pysapien import RenderShape
 from sapien.core.pysapien import RenderTexture
+from sapien.core.pysapien import Renderer
 from sapien.core.pysapien import SapienRenderer
 from sapien.core.pysapien import Scene
 from sapien.core.pysapien import SceneConfig
@@ -115,7 +115,6 @@ __all__ = [
     "Engine",
     "Entity",
     "Gear",
-    "IPxrRenderer",
     "Joint",
     "JointBase",
     "JointRecord",
@@ -151,6 +150,7 @@ __all__ = [
     "RenderServerBuffer",
     "RenderShape",
     "RenderTexture",
+    "Renderer",
     "SapienRenderer",
     "Scene",
     "SceneConfig",
@@ -188,9 +188,9 @@ __all__ = [
 
 class KuafuConfig():
     pass
-class KuafuRenderer(pysapien.SapienRenderer, pysapien.IPxrRenderer):
+class KuafuRenderer(pysapien.SapienRenderer, pysapien.Renderer):
     pass
-class VulkanRenderer(pysapien.SapienRenderer, pysapien.IPxrRenderer):
+class VulkanRenderer(pysapien.SapienRenderer, pysapien.Renderer):
     pass
 def add_profiler_event(name: str) -> None:
     pass

@@ -246,20 +246,20 @@ py::array_t<PxReal> mat32array(glm::mat3 const &mat) {
 
 static auto getFilterMode(std::string mode) {
   if (mode == "linear") {
-    return Renderer::IPxrTexture::FilterMode::eLINEAR;
+    return Renderer::IRenderTexture::FilterMode::eLINEAR;
   } else if (mode == "nearest") {
-    return Renderer::IPxrTexture::FilterMode::eNEAREST;
+    return Renderer::IRenderTexture::FilterMode::eNEAREST;
   }
   throw std::invalid_argument("Unknown filter mode " + mode);
 }
 
 static auto getAddressMode(std::string mode) {
   if (mode == "repeat") {
-    return Renderer::IPxrTexture::AddressMode::eREPEAT;
+    return Renderer::IRenderTexture::AddressMode::eREPEAT;
   } else if (mode == "border") {
-    return Renderer::IPxrTexture::AddressMode::eBORDER;
+    return Renderer::IRenderTexture::AddressMode::eBORDER;
   } else if (mode == "edge") {
-    return Renderer::IPxrTexture::AddressMode::eEDGE;
+    return Renderer::IRenderTexture::AddressMode::eEDGE;
   } else {
     throw std::invalid_argument("Unknown address mode " + mode);
   }
@@ -307,22 +307,22 @@ void buildSapien(py::module &m) {
       py::class_<SPhysicalMaterial, std::shared_ptr<SPhysicalMaterial>>(m, "PhysicalMaterial");
   auto PyPose = py::class_<PxTransform>(m, "Pose");
   auto PyRenderMaterial =
-      py::class_<Renderer::IPxrMaterial, std::shared_ptr<Renderer::IPxrMaterial>>(
+      py::class_<Renderer::IRenderMaterial, std::shared_ptr<Renderer::IRenderMaterial>>(
           m, "RenderMaterial");
-  auto PyRenderTexture = py::class_<Renderer::IPxrTexture, std::shared_ptr<Renderer::IPxrTexture>>(
-      m, "RenderTexture");
+  auto PyRenderTexture =
+      py::class_<Renderer::IRenderTexture, std::shared_ptr<Renderer::IRenderTexture>>(
+          m, "RenderTexture");
 
-  auto PyRenderShape =
-      py::class_<Renderer::IPxrRenderShape, std::shared_ptr<Renderer::IPxrRenderShape>>(
-          m, "RenderShape");
+  auto PyRenderShape = py::class_<Renderer::IRenderShape, std::shared_ptr<Renderer::IRenderShape>>(
+      m, "RenderShape");
 
-  auto PyRenderer = py::class_<Renderer::IPxrRenderer, std::shared_ptr<Renderer::IPxrRenderer>>(
-      m, "IPxrRenderer");
-  auto PyRenderScene = py::class_<Renderer::IPxrScene>(m, "RenderScene");
-  auto PyRenderBody = py::class_<Renderer::IPxrRigidbody>(m, "RenderBody");
-  auto PyRenderParticleBody = py::class_<Renderer::IPxrPointBody>(m, "RenderParticleBody");
+  auto PyRenderer =
+      py::class_<Renderer::IRenderer, std::shared_ptr<Renderer::IRenderer>>(m, "Renderer");
+  auto PyRenderScene = py::class_<Renderer::IRenderScene>(m, "RenderScene");
+  auto PyRenderBody = py::class_<Renderer::IRenderBody>(m, "RenderBody");
+  auto PyRenderParticleBody = py::class_<Renderer::IRenderPointBody>(m, "RenderParticleBody");
   auto PyVulkanParticleBody =
-      py::class_<Renderer::SVulkan2PointBody, Renderer::IPxrPointBody>(m, "VulkanParticleBody");
+      py::class_<Renderer::SVulkan2PointBody, Renderer::IRenderPointBody>(m, "VulkanParticleBody");
 
   // auto PyISensor = py::class_<Renderer::ISensor>(m, "ISensor");
   // auto PyICamera = py::class_<Renderer::ICamera, Renderer::ISensor>(m, "ICamera");
@@ -379,16 +379,17 @@ void buildSapien(py::module &m) {
   // auto PyPinocchioModel = py::class_<PinocchioModel>(m, "PinocchioModel");
 
   auto PyVulkanRigidbody =
-      py::class_<Renderer::SVulkan2Rigidbody, Renderer::IPxrRigidbody>(m, "VulkanRigidbody");
+      py::class_<Renderer::SVulkan2Rigidbody, Renderer::IRenderBody>(m, "VulkanRigidbody");
   auto PyVulkanRenderer =
-      py::class_<Renderer::SVulkan2Renderer, Renderer::IPxrRenderer,
+      py::class_<Renderer::SVulkan2Renderer, Renderer::IRenderer,
                  std::shared_ptr<Renderer::SVulkan2Renderer>>(m, "SapienRenderer");
 
   // auto PyVulkanCamera = py::class_<Renderer::SVulkan2Camera, Renderer::ICamera>(m,
   // "VulkanCamera");
 
   auto PyVulkanWindow = py::class_<Renderer::SVulkan2Window>(m, "VulkanWindow");
-  auto PyVulkanScene = py::class_<Renderer::SVulkan2Scene, Renderer::IPxrScene>(m, "VulkanScene");
+  auto PyVulkanScene =
+      py::class_<Renderer::SVulkan2Scene, Renderer::IRenderScene>(m, "VulkanScene");
 
   auto PyLightEntity = py::class_<SLight, SEntity>(m, "LightEntity");
   auto PyPointLightEntity = py::class_<SPointLight, SLight>(m, "PointLightEntity");
@@ -436,7 +437,7 @@ void buildSapien(py::module &m) {
           py::arg("name"));
 
   auto PyRenderClient =
-      py::class_<Renderer::server::ClientRenderer, Renderer::IPxrRenderer,
+      py::class_<Renderer::server::ClientRenderer, Renderer::IRenderer,
                  std::shared_ptr<Renderer::server::ClientRenderer>>(m, "RenderClient");
   auto PyRenderServer = py::class_<Renderer::server::RenderServer>(m, "RenderServer");
   auto PyRenderServerBuffer =
@@ -635,142 +636,148 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
   PyRenderMaterial
       .def(
           "set_base_color",
-          [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+          [](Renderer::IRenderMaterial &mat, py::array_t<float> color) {
             mat.setBaseColor({color.at(0), color.at(1), color.at(2), color.at(3)});
           },
           py::arg("rgba"))
       .def(
           "set_emission",
-          [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+          [](Renderer::IRenderMaterial &mat, py::array_t<float> color) {
             mat.setEmission({color.at(0), color.at(1), color.at(2), color.at(3)});
           },
           py::arg("rgbs"))
-      .def("set_specular", &Renderer::IPxrMaterial::setSpecular, py::arg("specular"))
-      .def("set_metallic", &Renderer::IPxrMaterial::setMetallic, py::arg("metallic"))
-      .def("set_roughness", &Renderer::IPxrMaterial::setRoughness, py::arg("roughness"))
-      .def("set_transmission", &Renderer::IPxrMaterial::setTransmission, py::arg("transmission"))
-      .def("set_ior", &Renderer::IPxrMaterial::setIOR, py::arg("ior"))
+      .def("set_specular", &Renderer::IRenderMaterial::setSpecular, py::arg("specular"))
+      .def("set_metallic", &Renderer::IRenderMaterial::setMetallic, py::arg("metallic"))
+      .def("set_roughness", &Renderer::IRenderMaterial::setRoughness, py::arg("roughness"))
+      .def("set_transmission", &Renderer::IRenderMaterial::setTransmission,
+           py::arg("transmission"))
+      .def("set_ior", &Renderer::IRenderMaterial::setIOR, py::arg("ior"))
 
-      .def("set_emission_texture", &Renderer::IPxrMaterial::setEmissionTexture, py::arg("texture"))
-      .def("set_diffuse_texture", &Renderer::IPxrMaterial::setDiffuseTexture, py::arg("texture"))
-      .def("set_metallic_texture", &Renderer::IPxrMaterial::setMetallicTexture, py::arg("texture"))
-      .def("set_roughness_texture", &Renderer::IPxrMaterial::setRoughnessTexture,
+      .def("set_emission_texture", &Renderer::IRenderMaterial::setEmissionTexture,
            py::arg("texture"))
-      .def("set_transmission_texture", &Renderer::IPxrMaterial::setTransmissionTexture,
+      .def("set_diffuse_texture", &Renderer::IRenderMaterial::setDiffuseTexture,
            py::arg("texture"))
-      .def("set_normal_texture", &Renderer::IPxrMaterial::setNormalTexture, py::arg("texture"))
+      .def("set_metallic_texture", &Renderer::IRenderMaterial::setMetallicTexture,
+           py::arg("texture"))
+      .def("set_roughness_texture", &Renderer::IRenderMaterial::setRoughnessTexture,
+           py::arg("texture"))
+      .def("set_transmission_texture", &Renderer::IRenderMaterial::setTransmissionTexture,
+           py::arg("texture"))
+      .def("set_normal_texture", &Renderer::IRenderMaterial::setNormalTexture, py::arg("texture"))
 
       .def("set_emission_texture_from_file",
-           &Renderer::IPxrMaterial::setEmissionTextureFromFilename, py::arg("path"))
-      .def("set_diffuse_texture_from_file", &Renderer::IPxrMaterial::setDiffuseTextureFromFilename,
-           py::arg("path"))
+           &Renderer::IRenderMaterial::setEmissionTextureFromFilename, py::arg("path"))
+      .def("set_diffuse_texture_from_file",
+           &Renderer::IRenderMaterial::setDiffuseTextureFromFilename, py::arg("path"))
       .def("set_metallic_texture_from_file",
-           &Renderer::IPxrMaterial::setMetallicTextureFromFilename, py::arg("path"))
+           &Renderer::IRenderMaterial::setMetallicTextureFromFilename, py::arg("path"))
       .def("set_roughness_texture_from_file",
-           &Renderer::IPxrMaterial::setRoughnessTextureFromFilename, py::arg("path"))
+           &Renderer::IRenderMaterial::setRoughnessTextureFromFilename, py::arg("path"))
       .def("set_transmission_texture_from_file",
-           &Renderer::IPxrMaterial::setTransmissionTextureFromFilename, py::arg("path"))
-      .def("set_normal_texture_from_file", &Renderer::IPxrMaterial::setNormalTextureFromFilename,
-           py::arg("path"))
+           &Renderer::IRenderMaterial::setTransmissionTextureFromFilename, py::arg("path"))
+      .def("set_normal_texture_from_file",
+           &Renderer::IRenderMaterial::setNormalTextureFromFilename, py::arg("path"))
 
-      .def_property("base_color", &Renderer::IPxrMaterial::getBaseColor,
-                    [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+      .def_property("base_color", &Renderer::IRenderMaterial::getBaseColor,
+                    [](Renderer::IRenderMaterial &mat, py::array_t<float> color) {
                       mat.setBaseColor({color.at(0), color.at(1), color.at(2), color.at(3)});
                     })
-      .def_property("emission", &Renderer::IPxrMaterial::getEmission,
-                    [](Renderer::IPxrMaterial &mat, py::array_t<float> color) {
+      .def_property("emission", &Renderer::IRenderMaterial::getEmission,
+                    [](Renderer::IRenderMaterial &mat, py::array_t<float> color) {
                       mat.setEmission({color.at(0), color.at(1), color.at(2), color.at(3)});
                     })
-      .def_property("specular", &Renderer::IPxrMaterial::getSpecular,
-                    &Renderer::IPxrMaterial::setSpecular)
-      .def_property("metallic", &Renderer::IPxrMaterial::getMetallic,
-                    &Renderer::IPxrMaterial::setMetallic)
-      .def_property("roughness", &Renderer::IPxrMaterial::getRoughness,
-                    &Renderer::IPxrMaterial::setRoughness)
-      .def_property("transmission", &Renderer::IPxrMaterial::getTransmission,
-                    &Renderer::IPxrMaterial::setTransmission)
-      .def_property("ior", &Renderer::IPxrMaterial::getIOR, &Renderer::IPxrMaterial::setIOR)
+      .def_property("specular", &Renderer::IRenderMaterial::getSpecular,
+                    &Renderer::IRenderMaterial::setSpecular)
+      .def_property("metallic", &Renderer::IRenderMaterial::getMetallic,
+                    &Renderer::IRenderMaterial::setMetallic)
+      .def_property("roughness", &Renderer::IRenderMaterial::getRoughness,
+                    &Renderer::IRenderMaterial::setRoughness)
+      .def_property("transmission", &Renderer::IRenderMaterial::getTransmission,
+                    &Renderer::IRenderMaterial::setTransmission)
+      .def_property("ior", &Renderer::IRenderMaterial::getIOR, &Renderer::IRenderMaterial::setIOR)
 
-      .def_property("emission_texture", &Renderer::IPxrMaterial::getEmissionTexture,
-                    &Renderer::IPxrMaterial::setDiffuseTexture)
-      .def_property("diffuse_texture", &Renderer::IPxrMaterial::getDiffuseTexture,
-                    &Renderer::IPxrMaterial::setDiffuseTexture)
-      .def_property("metallic_texture", &Renderer::IPxrMaterial::getMetallicTexture,
-                    &Renderer::IPxrMaterial::setMetallicTexture)
-      .def_property("roughness_texture", &Renderer::IPxrMaterial::getRoughnessTexture,
-                    &Renderer::IPxrMaterial::setRoughnessTexture)
-      .def_property("normal_texture", &Renderer::IPxrMaterial::getNormalTexture,
-                    &Renderer::IPxrMaterial::setDiffuseTexture)
-      .def_property("transmission_texture", &Renderer::IPxrMaterial::getTransmissionTexture,
-                    &Renderer::IPxrMaterial::setTransmissionTexture)
+      .def_property("emission_texture", &Renderer::IRenderMaterial::getEmissionTexture,
+                    &Renderer::IRenderMaterial::setDiffuseTexture)
+      .def_property("diffuse_texture", &Renderer::IRenderMaterial::getDiffuseTexture,
+                    &Renderer::IRenderMaterial::setDiffuseTexture)
+      .def_property("metallic_texture", &Renderer::IRenderMaterial::getMetallicTexture,
+                    &Renderer::IRenderMaterial::setMetallicTexture)
+      .def_property("roughness_texture", &Renderer::IRenderMaterial::getRoughnessTexture,
+                    &Renderer::IRenderMaterial::setRoughnessTexture)
+      .def_property("normal_texture", &Renderer::IRenderMaterial::getNormalTexture,
+                    &Renderer::IRenderMaterial::setDiffuseTexture)
+      .def_property("transmission_texture", &Renderer::IRenderMaterial::getTransmissionTexture,
+                    &Renderer::IRenderMaterial::setTransmissionTexture)
 
       .def_property("emission_texture_filename",
-                    &Renderer::IPxrMaterial::getEmissionTextureFilename,
-                    &Renderer::IPxrMaterial::setDiffuseTextureFromFilename)
-      .def_property("diffuse_texture_filename", &Renderer::IPxrMaterial::getDiffuseTextureFilename,
-                    &Renderer::IPxrMaterial::setDiffuseTextureFromFilename)
+                    &Renderer::IRenderMaterial::getEmissionTextureFilename,
+                    &Renderer::IRenderMaterial::setDiffuseTextureFromFilename)
+      .def_property("diffuse_texture_filename",
+                    &Renderer::IRenderMaterial::getDiffuseTextureFilename,
+                    &Renderer::IRenderMaterial::setDiffuseTextureFromFilename)
       .def_property("metallic_texture_filename",
-                    &Renderer::IPxrMaterial::getMetallicTextureFilename,
-                    &Renderer::IPxrMaterial::setMetallicTextureFromFilename)
+                    &Renderer::IRenderMaterial::getMetallicTextureFilename,
+                    &Renderer::IRenderMaterial::setMetallicTextureFromFilename)
       .def_property("roughness_texture_filename",
-                    &Renderer::IPxrMaterial::getRoughnessTextureFilename,
-                    &Renderer::IPxrMaterial::setRoughnessTextureFromFilename)
-      .def_property("normal_texture_filename", &Renderer::IPxrMaterial::getNormalTextureFilename,
-                    &Renderer::IPxrMaterial::setDiffuseTextureFromFilename)
+                    &Renderer::IRenderMaterial::getRoughnessTextureFilename,
+                    &Renderer::IRenderMaterial::setRoughnessTextureFromFilename)
+      .def_property("normal_texture_filename",
+                    &Renderer::IRenderMaterial::getNormalTextureFilename,
+                    &Renderer::IRenderMaterial::setDiffuseTextureFromFilename)
       .def_property("transmission_texture_filename",
-                    &Renderer::IPxrMaterial::getTransmissionTextureFilename,
-                    &Renderer::IPxrMaterial::setTransmissionTextureFromFilename);
+                    &Renderer::IRenderMaterial::getTransmissionTextureFilename,
+                    &Renderer::IRenderMaterial::setTransmissionTextureFromFilename);
 
   //     // TODO: implement those together with UV
   //     // .def_readwrite("specular_texture", &Renderer::PxrMaterial::specular_texture)
   //     // .def_readwrite("normal_texture", &Renderer::PxrMaterial::normal_texture);
 
-  PyRenderTexture.def_property_readonly("width", &Renderer::IPxrTexture::getWidth)
-      .def_property_readonly("height", &Renderer::IPxrTexture::getHeight)
-      .def_property_readonly("channels", &Renderer::IPxrTexture::getChannels)
-      .def_property_readonly("mipmap_levels", &Renderer::IPxrTexture::getMipmapLevels)
+  PyRenderTexture.def_property_readonly("width", &Renderer::IRenderTexture::getWidth)
+      .def_property_readonly("height", &Renderer::IRenderTexture::getHeight)
+      .def_property_readonly("channels", &Renderer::IRenderTexture::getChannels)
+      .def_property_readonly("mipmap_levels", &Renderer::IRenderTexture::getMipmapLevels)
       .def_property_readonly("dtype",
-                             [](Renderer::IPxrTexture &tex) {
+                             [](Renderer::IRenderTexture &tex) {
                                py::module np = py::module::import("numpy");
                                switch (tex.getType()) {
-                               case Renderer::IPxrTexture::Type::eBYTE:
+                               case Renderer::IRenderTexture::Type::eBYTE:
                                  return np.attr("uint8");
-                               case Renderer::IPxrTexture::Type::eINT:
+                               case Renderer::IRenderTexture::Type::eINT:
                                  return np.attr("int32");
-                               case Renderer::IPxrTexture::Type::eHALF:
+                               case Renderer::IRenderTexture::Type::eHALF:
                                  return np.attr("float16");
-                               case Renderer::IPxrTexture::Type::eFLOAT:
+                               case Renderer::IRenderTexture::Type::eFLOAT:
                                  return np.attr("float32");
-                               case Renderer::IPxrTexture::Type::eOTHER:
+                               case Renderer::IRenderTexture::Type::eOTHER:
                                  return np.attr("object");
                                }
                                return np.attr("object");
                              })
       .def_property_readonly("address_mode",
-                             [](Renderer::IPxrTexture &tex) {
+                             [](Renderer::IRenderTexture &tex) {
                                switch (tex.getAddressMode()) {
-                               case Renderer::IPxrTexture::AddressMode::eREPEAT:
+                               case Renderer::IRenderTexture::AddressMode::eREPEAT:
                                  return "repeat";
-                               case Renderer::IPxrTexture::AddressMode::eBORDER:
+                               case Renderer::IRenderTexture::AddressMode::eBORDER:
                                  return "border";
-                               case Renderer::IPxrTexture::AddressMode::eEDGE:
+                               case Renderer::IRenderTexture::AddressMode::eEDGE:
                                  return "edge";
-                               case Renderer::IPxrTexture::AddressMode::eMIRROR:
+                               case Renderer::IRenderTexture::AddressMode::eMIRROR:
                                  return "mirror";
                                }
                                return "unknown";
                              })
       .def_property_readonly("filter_mode",
-                             [](Renderer::IPxrTexture &tex) {
+                             [](Renderer::IRenderTexture &tex) {
                                switch (tex.getFilterMode()) {
-                               case Renderer::IPxrTexture::FilterMode::eLINEAR:
+                               case Renderer::IRenderTexture::FilterMode::eLINEAR:
                                  return "linear";
-                               case Renderer::IPxrTexture::FilterMode::eNEAREST:
+                               case Renderer::IRenderTexture::FilterMode::eNEAREST:
                                  return "nearest";
                                }
                                return "unknown";
                              })
-      .def_property_readonly("filename", &Renderer::IPxrTexture::getFilename);
+      .def_property_readonly("filename", &Renderer::IRenderTexture::getFilename);
 
   PySceneConfig.def(py::init<>())
       .def_readwrite("gravity", &SceneConfig::gravity)
@@ -957,7 +964,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def(
           "add_ground",
           [](SScene &s, float altitude, bool render, std::shared_ptr<SPhysicalMaterial> material,
-             std::shared_ptr<Renderer::IPxrMaterial> renderMaterial,
+             std::shared_ptr<Renderer::IRenderMaterial> renderMaterial,
              py::array_t<float> const &renderSize) {
             return s.addGround(altitude, render, material, renderMaterial,
                                {renderSize.at(0), renderSize.at(1)});
@@ -1808,7 +1815,7 @@ Different from @add_collision_from_file, all connected components in the file wi
       .def(
           "add_box_visual",
           [](ActorBuilder &a, PxTransform const &pose, py::array_t<PxReal> const &halfSize,
-             std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
+             std::shared_ptr<Renderer::IRenderMaterial> &mat, std::string const &name) {
             return a.addBoxVisualWithMaterial(pose, array2vec3(halfSize), mat, name);
           },
           py::arg("pose") = PxTransform(PxIdentity),
@@ -1827,7 +1834,7 @@ Different from @add_collision_from_file, all connected components in the file wi
       .def(
           "add_capsule_visual",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius, PxReal halfLength,
-             std::shared_ptr<Renderer::IPxrMaterial> &mat, std::string const &name) {
+             std::shared_ptr<Renderer::IRenderMaterial> &mat, std::string const &name) {
             return a.addCapsuleVisualWithMaterial(pose, radius, halfLength, mat, name);
           },
           "Add a capsule visual shape. The height is along the x-axis.",
@@ -1844,14 +1851,14 @@ Different from @add_collision_from_file, all connected components in the file wi
       .def(
           "add_sphere_visual",
           [](ActorBuilder &a, PxTransform const &pose, PxReal radius,
-             std::shared_ptr<Renderer::IPxrMaterial> &mat,
+             std::shared_ptr<Renderer::IRenderMaterial> &mat,
              std::string const &name) { a.addSphereVisualWithMaterial(pose, radius, mat, name); },
           py::arg("pose") = PxTransform(PxIdentity), py::arg("radius") = 1,
           py::arg("material") = nullptr, py::arg("name") = "")
       .def(
           "add_visual_from_file",
           [](ActorBuilder &a, std::string const &filename, PxTransform const &pose,
-             py::array_t<PxReal> scale, std::shared_ptr<Renderer::IPxrMaterial> &mat,
+             py::array_t<PxReal> scale, std::shared_ptr<Renderer::IRenderMaterial> &mat,
              std::string const &name) {
             return a.addVisualFromFile(filename, pose, array2vec3(scale), mat, name);
           },
@@ -1861,7 +1868,7 @@ Different from @add_collision_from_file, all connected components in the file wi
       .def(
           "add_visual_from_mesh",
           [](ActorBuilder &a, std::shared_ptr<Renderer::IRenderMesh> mesh, PxTransform const &pose,
-             py::array_t<PxReal> scale, std::shared_ptr<Renderer::IPxrMaterial> &mat,
+             py::array_t<PxReal> scale, std::shared_ptr<Renderer::IRenderMaterial> &mat,
              std::string const &name) {
             return a.addVisualFromMeshWithMaterial(mesh, pose, array2vec3(scale), mat, name);
           },
@@ -2490,14 +2497,15 @@ Args:
           py::arg("name"), py::arg("value"))
       .def(
           "set_custom_texture",
-          [](SCamera &c, std::string const &name, std::shared_ptr<Renderer::IPxrTexture> texture) {
+          [](SCamera &c, std::string const &name,
+             std::shared_ptr<Renderer::IRenderTexture> texture) {
             c.getRendererCamera()->setCustomTexture(name, texture);
           },
           py::arg("name"), py::arg("texture"))
       .def(
           "set_custom_texture_array",
           [](SCamera &c, std::string const &name,
-             std::vector<std::shared_ptr<Renderer::IPxrTexture>> textures) {
+             std::vector<std::shared_ptr<Renderer::IRenderTexture>> textures) {
             c.getRendererCamera()->setCustomTextureArray(name, textures);
           },
           py::arg("name"), py::arg("textures"));
@@ -2537,14 +2545,14 @@ Args:
       .def(
           "set_camera_texture",
           [](Renderer::SVulkan2Window &window, std::string const &name,
-             std::shared_ptr<Renderer::IPxrTexture> texture) {
+             std::shared_ptr<Renderer::IRenderTexture> texture) {
             window.setCameraTexture(name, texture);
           },
           py::arg("name"), py::arg("texture"))
       .def(
           "set_camera_texture_array",
           [](Renderer::SVulkan2Window &window, std::string const &name,
-             std::vector<std::shared_ptr<Renderer::IPxrTexture>> textures) {
+             std::vector<std::shared_ptr<Renderer::IRenderTexture>> textures) {
             window.setCameraTextureArray(name, textures);
           },
           py::arg("name"), py::arg("textures"))
@@ -2657,10 +2665,10 @@ Args:
   PyVulkanScene.def_property_readonly(
       "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); });
 
-  PyRenderer.def("create_material", &Renderer::IPxrRenderer::createMaterial)
+  PyRenderer.def("create_material", &Renderer::IRenderer::createMaterial)
       .def(
           "create_mesh",
-          [](Renderer::IPxrRenderer &renderer,
+          [](Renderer::IRenderer &renderer,
              Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices,
              Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &indices) {
             return renderer.createMesh(
@@ -2670,22 +2678,22 @@ Args:
           py::arg("vertices"), py::arg("indices"))
       .def(
           "create_texture_from_file",
-          [](Renderer::IPxrRenderer &renderer, std::string const &filename, uint32_t mipLevels,
+          [](Renderer::IRenderer &renderer, std::string const &filename, uint32_t mipLevels,
              std::string const &filterMode, std::string const &addressMode) {
-            Renderer::IPxrTexture::FilterMode::Enum fm = getFilterMode(filterMode);
-            Renderer::IPxrTexture::AddressMode::Enum am = getAddressMode(addressMode);
+            Renderer::IRenderTexture::FilterMode::Enum fm = getFilterMode(filterMode);
+            Renderer::IRenderTexture::AddressMode::Enum am = getAddressMode(addressMode);
             return renderer.createTexture(filename, mipLevels, fm, am);
           },
           py::arg("filename"), py::arg("mipmap_levels") = 1, py::arg("filter_mode") = "linear",
           py::arg("address_mode") = "repeat")
       .def(
           "create_texture_from_array",
-          [](Renderer::IPxrRenderer &renderer,
+          [](Renderer::IRenderer &renderer,
              py::array_t<uint8_t, py::array::c_style | py::array::forcecast> array,
              uint32_t mipLevels, std::string const &filterMode, std::string const &addressMode,
              bool srgb) {
-            Renderer::IPxrTexture::FilterMode::Enum fm = getFilterMode(filterMode);
-            Renderer::IPxrTexture::AddressMode::Enum am = getAddressMode(addressMode);
+            Renderer::IRenderTexture::FilterMode::Enum fm = getFilterMode(filterMode);
+            Renderer::IRenderTexture::AddressMode::Enum am = getAddressMode(addressMode);
             if (array.ndim() != 2 && array.ndim() != 3) {
               throw std::runtime_error(
                   "failed to create texture: array shape must be [h, w, c] or [h, w]");
@@ -2702,11 +2710,11 @@ Args:
 
       .def(
           "create_texture_from_array",
-          [](Renderer::IPxrRenderer &renderer,
+          [](Renderer::IRenderer &renderer,
              py::array_t<float, py::array::c_style | py::array::forcecast> array, int dim,
              uint32_t mipLevels, std::string const &filterMode, std::string const &addressMode) {
-            Renderer::IPxrTexture::FilterMode::Enum fm = getFilterMode(filterMode);
-            Renderer::IPxrTexture::AddressMode::Enum am = getAddressMode(addressMode);
+            Renderer::IRenderTexture::FilterMode::Enum fm = getFilterMode(filterMode);
+            Renderer::IRenderTexture::AddressMode::Enum am = getAddressMode(addressMode);
             if (array.ndim() != dim && array.ndim() != dim + 1) {
               throw std::runtime_error("failed to create texture: array shape must texture dim");
             }
@@ -2732,20 +2740,19 @@ Args:
 
   PyRenderScene
       .def_property_readonly("ambient_light",
-                             [](Renderer::IPxrScene &scene) {
+                             [](Renderer::IRenderScene &scene) {
                                auto light = scene.getAmbientLight();
                                return make_array(std::vector<float>{light[0], light[1], light[2]});
                              })
       .def(
           "add_mesh_from_file",
-          [](Renderer::IPxrScene &scene, std::string const &meshFile, py::array_t<float> scale) {
-            return scene.addRigidbody(meshFile, array2vec3(scale));
-          },
+          [](Renderer::IRenderScene &scene, std::string const &meshFile,
+             py::array_t<float> scale) { return scene.addRigidbody(meshFile, array2vec3(scale)); },
           py::arg("mesh_file"), py::arg("scale"), py::return_value_policy::reference)
       .def(
           "add_primitive_mesh",
-          [](Renderer::IPxrScene &scene, std::string const &type, py::array_t<float> scale,
-             std::shared_ptr<Renderer::IPxrMaterial> &material) {
+          [](Renderer::IRenderScene &scene, std::string const &type, py::array_t<float> scale,
+             std::shared_ptr<Renderer::IRenderMaterial> &material) {
             physx::PxGeometryType::Enum ptype;
             if (type == "box") {
               ptype = physx::PxGeometryType::eBOX;
@@ -2763,17 +2770,17 @@ Args:
           py::arg("type"), py::arg("scale") = make_array<float>({1.f, 1.f, 1.f}),
           py::arg("material") = nullptr, py::return_value_policy::reference)
       // TODO: add mesh from vertices
-      .def("remove_mesh", &Renderer::IPxrScene::removeRigidbody, py::arg("mesh"));
+      .def("remove_mesh", &Renderer::IRenderScene::removeRigidbody, py::arg("mesh"));
 
   PyRenderParticleBody
-      .def("set_visibility", &Renderer::IPxrPointBody::setVisibility, py::arg("visibility"))
-      .def("set_shading_mode", &Renderer::IPxrPointBody::setRenderMode, py::arg("mode"))
-      .def("set_attribute", &Renderer::IPxrPointBody::setAttribute, py::arg("name"),
+      .def("set_visibility", &Renderer::IRenderPointBody::setVisibility, py::arg("visibility"))
+      .def("set_shading_mode", &Renderer::IRenderPointBody::setRenderMode, py::arg("mode"))
+      .def("set_attribute", &Renderer::IRenderPointBody::setAttribute, py::arg("name"),
            py::arg("value"))
-      .def("set_rendered_point_count", &Renderer::IPxrPointBody::setRenderedVertexCount,
+      .def("set_rendered_point_count", &Renderer::IRenderPointBody::setRenderedVertexCount,
            py::arg("n"))
-      .def_property("rendered_point_count", &Renderer::IPxrPointBody::getRenderedVertexCount,
-                    &Renderer::IPxrPointBody::setRenderedVertexCount);
+      .def_property("rendered_point_count", &Renderer::IRenderPointBody::getRenderedVertexCount,
+                    &Renderer::IRenderPointBody::setRenderedVertexCount);
 
 #ifdef SAPIEN_DLPACK
   PyVulkanParticleBody.def_property_readonly("dl_vertices", [](Renderer::SVulkan2PointBody &b) {
@@ -2781,34 +2788,34 @@ Args:
   });
 #endif
 
-  PyRenderBody.def_property_readonly("name", &Renderer::IPxrRigidbody::getName)
-      .def_property_readonly("visual_id", &Renderer::IPxrRigidbody::getUniqueId)
-      .def_property_readonly("actor_id", &Renderer::IPxrRigidbody::getSegmentationId)
-      .def_property_readonly("local_pose", &Renderer::IPxrRigidbody::getInitialPose,
+  PyRenderBody.def_property_readonly("name", &Renderer::IRenderBody::getName)
+      .def_property_readonly("visual_id", &Renderer::IRenderBody::getUniqueId)
+      .def_property_readonly("actor_id", &Renderer::IRenderBody::getSegmentationId)
+      .def_property_readonly("local_pose", &Renderer::IRenderBody::getInitialPose,
                              "Local pose is pre-multiplied when calling set_pose")
-      .def("get_name", &Renderer::IPxrRigidbody::getName)
-      .def("set_name", &Renderer::IPxrRigidbody::setName, py::arg("name"))
-      .def("set_visual_id", &Renderer::IPxrRigidbody::setUniqueId, py::arg("id"))
-      .def("get_visual_id", &Renderer::IPxrRigidbody::getUniqueId)
-      .def("get_actor_id", &Renderer::IPxrRigidbody::getSegmentationId)
+      .def("get_name", &Renderer::IRenderBody::getName)
+      .def("set_name", &Renderer::IRenderBody::setName, py::arg("name"))
+      .def("set_visual_id", &Renderer::IRenderBody::setUniqueId, py::arg("id"))
+      .def("get_visual_id", &Renderer::IRenderBody::getUniqueId)
+      .def("get_actor_id", &Renderer::IRenderBody::getSegmentationId)
 
-      .def("set_custom_data", &Renderer::IPxrRigidbody::setSegmentationCustomData,
+      .def("set_custom_data", &Renderer::IRenderBody::setSegmentationCustomData,
            py::arg("custom_data"))
-      .def("set_custom_property", &Renderer::IPxrRigidbody::setCustomPropertyFloat3,
-           py::arg("name"), py::arg("value"))
-      .def("set_custom_texture", &Renderer::IPxrRigidbody::setCustomTexture, py::arg("name"),
+      .def("set_custom_property", &Renderer::IRenderBody::setCustomPropertyFloat3, py::arg("name"),
+           py::arg("value"))
+      .def("set_custom_texture", &Renderer::IRenderBody::setCustomTexture, py::arg("name"),
            py::arg("texture"))
-      .def("set_custom_texture_array", &Renderer::IPxrRigidbody::setCustomTextureArray,
+      .def("set_custom_texture_array", &Renderer::IRenderBody::setCustomTextureArray,
            py::arg("name"), py::arg("textures"))
-      .def("get_render_shapes", &Renderer::IPxrRigidbody::getRenderShapes)
-      .def("set_pose", &Renderer::IPxrRigidbody::update, py::arg("pose"))
-      .def("set_visibility", &Renderer::IPxrRigidbody::setVisibility, py::arg("visibility"))
-      .def("set_visible", &Renderer::IPxrRigidbody::setVisible, py::arg("is_visible"))
-      .def_property("shade_flat", &Renderer::IPxrRigidbody::getShadeFlat,
-                    &Renderer::IPxrRigidbody::setShadeFlat)
+      .def("get_render_shapes", &Renderer::IRenderBody::getRenderShapes)
+      .def("set_pose", &Renderer::IRenderBody::update, py::arg("pose"))
+      .def("set_visibility", &Renderer::IRenderBody::setVisibility, py::arg("visibility"))
+      .def("set_visible", &Renderer::IRenderBody::setVisible, py::arg("is_visible"))
+      .def_property("shade_flat", &Renderer::IRenderBody::getShadeFlat,
+                    &Renderer::IRenderBody::setShadeFlat)
 
       .def_property_readonly("type",
-                             [](Renderer::IPxrRigidbody &body) {
+                             [](Renderer::IRenderBody &body) {
                                switch (body.getType()) {
                                case physx::PxGeometryType::eBOX:
                                  return "box";
@@ -2822,11 +2829,11 @@ Args:
                                  return "mesh";
                                }
                              })
-      .def_property_readonly("local_pose", &Renderer::IPxrRigidbody::getInitialPose)
+      .def_property_readonly("local_pose", &Renderer::IRenderBody::getInitialPose)
 
       // attribute access for different types
       .def_property_readonly("scale",
-                             [](Renderer::IPxrRigidbody &body) {
+                             [](Renderer::IRenderBody &body) {
                                if (body.getType() != physx::PxGeometryType::eTRIANGLEMESH &&
                                    body.getType() != physx::PxGeometryType::eCONVEXMESH) {
                                  throw std::runtime_error(
@@ -2835,7 +2842,7 @@ Args:
                                return vec32array(body.getScale());
                              })
       .def_property_readonly("radius",
-                             [](Renderer::IPxrRigidbody &body) {
+                             [](Renderer::IRenderBody &body) {
                                if (body.getType() != physx::PxGeometryType::eSPHERE &&
                                    body.getType() != physx::PxGeometryType::eCAPSULE) {
                                  throw std::runtime_error(
@@ -2844,14 +2851,14 @@ Args:
                                return body.getScale().y;
                              })
       .def_property_readonly("half_lengths",
-                             [](Renderer::IPxrRigidbody &body) {
+                             [](Renderer::IRenderBody &body) {
                                if (body.getType() != physx::PxGeometryType::eBOX) {
                                  throw std::runtime_error(
                                      "Visual body half_lengths is only valid for box.");
                                }
                                return vec32array(body.getScale());
                              })
-      .def_property_readonly("half_length", [](Renderer::IPxrRigidbody &body) {
+      .def_property_readonly("half_length", [](Renderer::IRenderBody &body) {
         if (body.getType() != physx::PxGeometryType::eCAPSULE) {
           throw std::runtime_error("Visual body half_length is only valid for capsule.");
         }
@@ -2866,9 +2873,9 @@ Args:
       //                        [](Renderer::RenderShape &shape) { return
       //                        vec32array(shape.scale);
       //                        })
-      .def_property_readonly("mesh", &Renderer::IPxrRenderShape::getGeometry)
-      .def_property_readonly("material", &Renderer::IPxrRenderShape::getMaterial)
-      .def("set_material", &Renderer::IPxrRenderShape::setMaterial, py::arg("material"));
+      .def_property_readonly("mesh", &Renderer::IRenderShape::getGeometry)
+      .def_property_readonly("material", &Renderer::IRenderShape::getMaterial)
+      .def("set_material", &Renderer::IRenderShape::setMaterial, py::arg("material"));
 
   PyRenderMesh
       .def_property_readonly("vertices",

@@ -38,8 +38,8 @@ public:
 
 private:
   SLink(PxArticulationLink *actor, SArticulation *articulation, physx_id_t id, SScene *scene,
-        std::vector<Renderer::IPxrRigidbody *> renderBodies,
-        std::vector<Renderer::IPxrRigidbody *> collisionBodies);
+        std::vector<Renderer::IRenderBody *> renderBodies,
+        std::vector<Renderer::IRenderBody *> collisionBodies);
 };
 
 class SKLink : public SLinkBase {
@@ -60,8 +60,8 @@ public:
 
 private:
   SKLink(PxRigidDynamic *actor, SKArticulation *articulation, physx_id_t id, SScene *scene,
-         std::vector<Renderer::IPxrRigidbody *> renderBodies,
-         std::vector<Renderer::IPxrRigidbody *> collisionBodies);
+         std::vector<Renderer::IRenderBody *> renderBodies,
+         std::vector<Renderer::IRenderBody *> collisionBodies);
 };
 
 } // namespace sapien

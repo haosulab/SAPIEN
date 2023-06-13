@@ -30,7 +30,7 @@ int SVulkan2Texture::getChannels() const {
   return mTexture->getImage()->getChannels();
 }
 
-IPxrTexture::Type::Enum SVulkan2Texture::getType() const {
+IRenderTexture::Type::Enum SVulkan2Texture::getType() const {
   switch (mTexture->getDescription().format) {
   case svulkan2::resource::SVTextureDescription::Format::eUINT8:
     return Type::eBYTE;
@@ -42,7 +42,7 @@ IPxrTexture::Type::Enum SVulkan2Texture::getType() const {
   return Type::eOTHER;
 }
 
-IPxrTexture::AddressMode::Enum SVulkan2Texture::getAddressMode() const {
+IRenderTexture::AddressMode::Enum SVulkan2Texture::getAddressMode() const {
   switch (mTexture->getDescription().addressModeU) {
   case vk::SamplerAddressMode::eRepeat:
     return AddressMode::eREPEAT;
@@ -56,7 +56,7 @@ IPxrTexture::AddressMode::Enum SVulkan2Texture::getAddressMode() const {
   return AddressMode::eREPEAT;
 };
 
-IPxrTexture::FilterMode::Enum SVulkan2Texture::getFilterMode() const {
+IRenderTexture::FilterMode::Enum SVulkan2Texture::getFilterMode() const {
   switch (mTexture->getDescription().magFilter) {
   case vk::Filter::eNearest:
     return FilterMode::eNEAREST;
@@ -115,7 +115,7 @@ float SVulkan2Material::getTransmissionRoughness() const {
   return mMaterial->getTransmissionRoughness();
 }
 
-void SVulkan2Material::setEmissionTexture(std::shared_ptr<IPxrTexture> texture) {
+void SVulkan2Material::setEmissionTexture(std::shared_ptr<IRenderTexture> texture) {
   if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
     mMaterial->setEmissionTexture(tex->getTexture());
   } else {
@@ -123,67 +123,67 @@ void SVulkan2Material::setEmissionTexture(std::shared_ptr<IPxrTexture> texture) 
   }
 }
 
-std::shared_ptr<IPxrTexture> SVulkan2Material::getEmissionTexture() const {
+std::shared_ptr<IRenderTexture> SVulkan2Material::getEmissionTexture() const {
   auto tex = mMaterial->getEmissionTexture();
   return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
 }
 
-void SVulkan2Material::setDiffuseTexture(std::shared_ptr<IPxrTexture> texture) {
+void SVulkan2Material::setDiffuseTexture(std::shared_ptr<IRenderTexture> texture) {
   if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
     mMaterial->setDiffuseTexture(tex->getTexture());
   } else {
     mMaterial->setDiffuseTexture(nullptr);
   }
 }
-std::shared_ptr<IPxrTexture> SVulkan2Material::getDiffuseTexture() const {
+std::shared_ptr<IRenderTexture> SVulkan2Material::getDiffuseTexture() const {
   auto tex = mMaterial->getDiffuseTexture();
   return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
 }
 
-void SVulkan2Material::setNormalTexture(std::shared_ptr<IPxrTexture> texture) {
+void SVulkan2Material::setNormalTexture(std::shared_ptr<IRenderTexture> texture) {
   if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
     mMaterial->setNormalTexture(tex->getTexture());
   } else {
     mMaterial->setNormalTexture(nullptr);
   }
 }
-std::shared_ptr<IPxrTexture> SVulkan2Material::getNormalTexture() const {
+std::shared_ptr<IRenderTexture> SVulkan2Material::getNormalTexture() const {
   auto tex = mMaterial->getNormalTexture();
   return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
 }
 
-void SVulkan2Material::setRoughnessTexture(std::shared_ptr<IPxrTexture> texture) {
+void SVulkan2Material::setRoughnessTexture(std::shared_ptr<IRenderTexture> texture) {
   if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
     mMaterial->setRoughnessTexture(tex->getTexture());
   } else {
     mMaterial->setRoughnessTexture(nullptr);
   }
 }
-std::shared_ptr<IPxrTexture> SVulkan2Material::getRoughnessTexture() const {
+std::shared_ptr<IRenderTexture> SVulkan2Material::getRoughnessTexture() const {
   auto tex = mMaterial->getRoughnessTexture();
   return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
 }
 
-void SVulkan2Material::setMetallicTexture(std::shared_ptr<IPxrTexture> texture) {
+void SVulkan2Material::setMetallicTexture(std::shared_ptr<IRenderTexture> texture) {
   if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
     mMaterial->setMetallicTexture(tex->getTexture());
   } else {
     mMaterial->setMetallicTexture(nullptr);
   }
 }
-std::shared_ptr<IPxrTexture> SVulkan2Material::getMetallicTexture() const {
+std::shared_ptr<IRenderTexture> SVulkan2Material::getMetallicTexture() const {
   auto tex = mMaterial->getMetallicTexture();
   return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
 }
 
-void SVulkan2Material::setTransmissionTexture(std::shared_ptr<IPxrTexture> texture) {
+void SVulkan2Material::setTransmissionTexture(std::shared_ptr<IRenderTexture> texture) {
   if (auto tex = std::dynamic_pointer_cast<SVulkan2Texture>(texture)) {
     mMaterial->setTransmissionTexture(tex->getTexture());
   } else {
     mMaterial->setTransmissionTexture(nullptr);
   }
 }
-std::shared_ptr<IPxrTexture> SVulkan2Material::getTransmissionTexture() const {
+std::shared_ptr<IRenderTexture> SVulkan2Material::getTransmissionTexture() const {
   auto tex = mMaterial->getTransmissionTexture();
   return tex ? std::make_shared<SVulkan2Texture>(tex) : nullptr;
 }

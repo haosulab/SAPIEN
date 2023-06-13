@@ -1,5 +1,5 @@
 from ..core import (
-    IPxrRenderer,
+    Renderer,
     Pose,
     Scene
 )
@@ -20,7 +20,7 @@ class ActiveLightSensor(SensorEntity):
     def __init__(
         self,
         sensor_name: str,
-        renderer: IPxrRenderer,
+        renderer: Renderer,
         scene: Scene,
         sensor_type: Optional[str] = 'd415',
         rgb_resolution: Tuple[int, int] = None,

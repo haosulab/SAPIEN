@@ -6,7 +6,7 @@ namespace sapien {
 
 class SEntityParticle : public SEntity {
 public:
-  SEntityParticle(SScene *scene, Renderer::IPxrPointBody *renderBody);
+  SEntityParticle(SScene *scene, Renderer::IRenderPointBody *renderBody);
 
   PxTransform getPose() const override { return {PxVec3(0, 0, 0), physx::PxIdentity}; }
 
@@ -15,10 +15,10 @@ public:
   SEntityParticle(SEntityParticle const &other) = delete;
   SEntityParticle(SEntityParticle &&other) = delete;
 
-  inline Renderer::IPxrPointBody *getVisualBody() { return mRenderBody; };
+  inline Renderer::IRenderPointBody *getVisualBody() { return mRenderBody; };
 
 private:
-  Renderer::IPxrPointBody *mRenderBody{};
+  Renderer::IRenderPointBody *mRenderBody{};
 };
 
 } // namespace sapien

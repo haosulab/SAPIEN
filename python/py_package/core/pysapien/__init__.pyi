@@ -33,7 +33,6 @@ __all__ = [
     "Engine",
     "Entity",
     "Gear",
-    "IPxrRenderer",
     "Joint",
     "JointBase",
     "JointRecord",
@@ -66,6 +65,7 @@ __all__ = [
     "RenderServerBuffer",
     "RenderShape",
     "RenderTexture",
+    "Renderer",
     "SapienRenderer",
     "Scene",
     "SceneConfig",
@@ -826,16 +826,16 @@ class Engine():
     def create_mesh_geometry(self, vertices: numpy.ndarray[numpy.float32], indices: numpy.ndarray[numpy.uint32], scale: numpy.ndarray[numpy.float32] = array([1., 1., 1.], dtype=float32), rotation: numpy.ndarray[numpy.float32] = array([1., 0., 0., 0.], dtype=float32)) -> NonconvexMeshGeometry: ...
     def create_physical_material(self, static_friction: float, dynamic_friction: float, restitution: float) -> PhysicalMaterial: ...
     def create_scene(self, config: SceneConfig = SceneConfig()) -> Scene: ...
-    def get_renderer(self) -> IPxrRenderer: ...
+    def get_renderer(self) -> Renderer: ...
     def set_log_level(self, level: str) -> None: ...
-    def set_renderer(self, renderer: IPxrRenderer) -> None: ...
+    def set_renderer(self, renderer: Renderer) -> None: ...
     @property
-    def renderer(self) -> IPxrRenderer:
+    def renderer(self) -> Renderer:
         """
-        :type: IPxrRenderer
+        :type: Renderer
         """
     @renderer.setter
-    def renderer(self, arg1: IPxrRenderer) -> None:
+    def renderer(self, arg1: Renderer) -> None:
         pass
     pass
 class ActiveLightEntity(LightEntity, Entity):
@@ -866,15 +866,6 @@ class Gear(Constraint):
     @gear_ratio.setter
     def gear_ratio(self, arg1: float) -> None:
         pass
-    pass
-class IPxrRenderer():
-    def create_material(self) -> RenderMaterial: ...
-    def create_mesh(self, vertices: numpy.ndarray[numpy.float32, _Shape[m, 3]], indices: numpy.ndarray[numpy.uint32, _Shape[m, 3]]) -> RenderMesh: ...
-    @typing.overload
-    def create_texture_from_array(self, array: numpy.ndarray[numpy.float32], dim: int, mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat') -> RenderTexture: ...
-    @typing.overload
-    def create_texture_from_array(self, array: numpy.ndarray[numpy.uint8], mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat', srgb: bool = True) -> RenderTexture: ...
-    def create_texture_from_file(self, filename: str, mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat') -> RenderTexture: ...
     pass
 class JointBase():
     def __repr__ (self) -> str: ...
@@ -1208,8 +1199,14 @@ class RenderBody():
         :type: int
         """
     pass
-class RenderClient(IPxrRenderer):
-    def __init__(self, address: str, process_index: int) -> None: ...
+class Renderer():
+    def create_material(self) -> RenderMaterial: ...
+    def create_mesh(self, vertices: numpy.ndarray[numpy.float32, _Shape[m, 3]], indices: numpy.ndarray[numpy.uint32, _Shape[m, 3]]) -> RenderMesh: ...
+    @typing.overload
+    def create_texture_from_array(self, array: numpy.ndarray[numpy.float32], dim: int, mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat') -> RenderTexture: ...
+    @typing.overload
+    def create_texture_from_array(self, array: numpy.ndarray[numpy.uint8], mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat', srgb: bool = True) -> RenderTexture: ...
+    def create_texture_from_file(self, filename: str, mipmap_levels: int = 1, filter_mode: str = 'linear', address_mode: str = 'repeat') -> RenderTexture: ...
     pass
 class RenderConfig():
     def get_render_target_format(self, name: str) -> str: ...
@@ -1591,7 +1588,10 @@ class RenderTexture():
         :type: int
         """
     pass
-class SapienRenderer(IPxrRenderer):
+class RenderClient(Renderer):
+    def __init__(self, address: str, process_index: int) -> None: ...
+    pass
+class SapienRenderer(Renderer):
     def __init__(self, offscreen_only: bool = False, max_num_materials: int = 5000, max_num_textures: int = 5000, default_mipmap_levels: int = 1, device: str = '', culling: str = 'back', do_not_load_texture: bool = False) -> None: 
         """
         Create the Vulkan-based renderer (rasterization and ray tracing)

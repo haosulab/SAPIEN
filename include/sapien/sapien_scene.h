@@ -54,7 +54,7 @@ class SDrive;
 struct SContact;
 
 namespace Renderer {
-class IPxrScene;
+class IRenderScene;
 } // namespace Renderer
 
 namespace URDF {
@@ -88,7 +88,7 @@ public:
   inline std::shared_ptr<Simulation> getSimulation() const { return mSimulationShared; }
   inline PxScene *getPxScene() { return mPxScene; }
 
-  inline Renderer::IPxrScene *getRendererScene() { return mRendererScene; }
+  inline Renderer::IRenderScene *getRendererScene() { return mRendererScene; }
 
   // default parameters of simulation solver
   inline float getDefaultSleepThreshold() const { return mDefaultSleepThreshold; }
@@ -112,7 +112,7 @@ private:
   PxScene *mPxScene{};                             // physx scene
   DefaultEventCallback mSimulationCallback;        // physx scene's simulation callback
 
-  Renderer::IPxrScene *mRendererScene{}; // renderer scene
+  Renderer::IRenderScene *mRendererScene{}; // renderer scene
 
   // defaults
   float mDefaultSleepThreshold;
@@ -263,7 +263,7 @@ public:
   std::future<void> updateRenderAsync();
   SActorStatic *addGround(PxReal altitude, bool render = true,
                           std::shared_ptr<SPhysicalMaterial> material = nullptr,
-                          std::shared_ptr<Renderer::IPxrMaterial> renderMaterial = nullptr,
+                          std::shared_ptr<Renderer::IRenderMaterial> renderMaterial = nullptr,
                           PxVec2 const &renderSize = {1.f, 1.f});
 
   std::map<physx_id_t, std::string> findRenderId2VisualName() const;

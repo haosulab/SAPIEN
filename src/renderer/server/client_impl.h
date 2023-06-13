@@ -12,7 +12,7 @@ class ClientShape;
 class ClientRigidbody;
 class ClientRendererImpl;
 
-class ClientMaterial : public IPxrMaterial {
+class ClientMaterial : public IRenderMaterial {
 public:
   ClientMaterial(std::shared_ptr<ClientRendererImpl> renderer, rs_id_t id);
 
@@ -61,40 +61,40 @@ public:
   }
 
   // texture functions
-  void setEmissionTexture(std::shared_ptr<IPxrTexture> texture) override {
+  void setEmissionTexture(std::shared_ptr<IRenderTexture> texture) override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  [[nodiscard]] std::shared_ptr<IPxrTexture> getEmissionTexture() const override {
+  [[nodiscard]] std::shared_ptr<IRenderTexture> getEmissionTexture() const override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  void setDiffuseTexture(std::shared_ptr<IPxrTexture> texture) override {
+  void setDiffuseTexture(std::shared_ptr<IRenderTexture> texture) override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  [[nodiscard]] std::shared_ptr<IPxrTexture> getDiffuseTexture() const override {
+  [[nodiscard]] std::shared_ptr<IRenderTexture> getDiffuseTexture() const override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  void setMetallicTexture(std::shared_ptr<IPxrTexture> texture) override {
+  void setMetallicTexture(std::shared_ptr<IRenderTexture> texture) override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  [[nodiscard]] std::shared_ptr<IPxrTexture> getMetallicTexture() const override {
+  [[nodiscard]] std::shared_ptr<IRenderTexture> getMetallicTexture() const override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  void setRoughnessTexture(std::shared_ptr<IPxrTexture> texture) override {
+  void setRoughnessTexture(std::shared_ptr<IRenderTexture> texture) override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  [[nodiscard]] std::shared_ptr<IPxrTexture> getRoughnessTexture() const override {
+  [[nodiscard]] std::shared_ptr<IRenderTexture> getRoughnessTexture() const override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  void setNormalTexture(std::shared_ptr<IPxrTexture> texture) override {
+  void setNormalTexture(std::shared_ptr<IRenderTexture> texture) override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  [[nodiscard]] std::shared_ptr<IPxrTexture> getNormalTexture() const override {
+  [[nodiscard]] std::shared_ptr<IRenderTexture> getNormalTexture() const override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  void setTransmissionTexture(std::shared_ptr<IPxrTexture> texture) override {
+  void setTransmissionTexture(std::shared_ptr<IRenderTexture> texture) override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
-  [[nodiscard]] std::shared_ptr<IPxrTexture> getTransmissionTexture() const override {
+  [[nodiscard]] std::shared_ptr<IRenderTexture> getTransmissionTexture() const override {
     throw std::runtime_error("texture functions not implemented for rendering client");
   }
 
@@ -133,7 +133,7 @@ public:
 
   [[nodiscard]] inline physx::PxTransform getPose() const override { return mPose; };
   inline void setPose(physx::PxTransform const &pose) override { mPose = pose; }
-  IPxrScene *getScene() override;
+  IRenderScene *getScene() override;
 
   uint32_t getWidth() const override { return mWidth; }
   uint32_t getHeight() const override { return mHeight; };
@@ -275,17 +275,17 @@ private:
   rs_id_t mId;
 };
 
-class ClientShape : public IPxrRenderShape {
+class ClientShape : public IRenderShape {
 public:
   ClientShape(ClientRigidbody *body, uint32_t index);
-  [[nodiscard]] std::shared_ptr<IPxrMaterial> getMaterial() const override;
+  [[nodiscard]] std::shared_ptr<IRenderMaterial> getMaterial() const override;
 
 private:
   ClientRigidbody *mBody;
   uint32_t mIndex;
 };
 
-class ClientRigidbody : public IPxrRigidbody {
+class ClientRigidbody : public IRenderBody {
 
 public:
   ClientRigidbody(ClientScene *scene, rs_id_t id);
@@ -317,7 +317,7 @@ public:
     throw std::runtime_error("shade flat is not supported for render client");
   }
 
-  std::vector<std::shared_ptr<IPxrRenderShape>> getRenderShapes() override;
+  std::vector<std::shared_ptr<IRenderShape>> getRenderShapes() override;
 
   void destroy() override;
 
@@ -339,31 +339,31 @@ public:
   physx::PxTransform mCurrentPose;
 };
 
-class ClientScene : public IPxrScene {
+class ClientScene : public IRenderScene {
 public:
   ClientScene(ClientRendererImpl *renderer, rs_id_t id, std::string const &name);
 
   //========== Body ==========//
-  IPxrRigidbody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
-  IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override;
+  IRenderBody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
+  IRenderBody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+                              std::shared_ptr<IRenderMaterial> material) override;
 
-  IPxrRigidbody *addRigidbody(std::shared_ptr<IRenderMesh> mesh, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override {
+  IRenderBody *addRigidbody(std::shared_ptr<IRenderMesh> mesh, const physx::PxVec3 &scale,
+                              std::shared_ptr<IRenderMaterial> material) override {
     throw std::runtime_error("Body creation from mesh is not supported for rendering client");
   };
-  IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+  IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                               std::vector<physx::PxVec3> const &normals,
                               std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
-                              std::shared_ptr<IPxrMaterial> material) override {
+                              std::shared_ptr<IRenderMaterial> material) override {
     spdlog::get("SAPIEN")->warn("Body creation from vertices (e.g. debug visuals for collisions) "
                                 "is not supported for rendering client");
     return nullptr;
   };
 
-  IPxrRigidbody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+  IRenderBody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
                               const physx::PxVec3 &color);
-  IPxrRigidbody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+  IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
                               std::vector<physx::PxVec3> const &normals,
                               std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
                               const physx::PxVec3 &color) {
@@ -372,7 +372,7 @@ public:
     return nullptr;
   }
 
-  void removeRigidbody(IPxrRigidbody *body) override;
+  void removeRigidbody(IRenderBody *body) override;
 
   //========== Camera ==========//
   ClientCamera *addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,

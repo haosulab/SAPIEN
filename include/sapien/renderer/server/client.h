@@ -7,7 +7,7 @@ namespace sapien {
 namespace Renderer {
 namespace server {
 
-class ClientRenderer : public IPxrRenderer {
+class ClientRenderer : public IRenderer {
 public:
   static std::shared_ptr<ClientRenderer> Create(std::string const &address, uint64_t processIndex);
 };

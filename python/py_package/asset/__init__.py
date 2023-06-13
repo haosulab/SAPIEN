@@ -91,7 +91,7 @@ def create_dome_envmap(
 
 
 def create_checkerboard(
-    renderer: sapien.core.IPxrRenderer,
+    renderer: sapien.core.Renderer,
     shape: tuple,
     length=0.1,
     color1=[1, 1, 1, 1],

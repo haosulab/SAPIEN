@@ -20,9 +20,9 @@ class ClientRendererImpl : public ClientRenderer,
 public:
   ClientRendererImpl(std::string const &address, uint64_t processIndex);
 
-  IPxrScene *createScene(std::string const &name) override;
-  void removeScene(IPxrScene *scene) override;
-  std::shared_ptr<IPxrMaterial> createMaterial() override;
+  IRenderScene *createScene(std::string const &name) override;
+  void removeScene(IRenderScene *scene) override;
+  std::shared_ptr<IRenderMaterial> createMaterial() override;
 
   std::shared_ptr<IRenderMesh> createMesh(std::vector<float> const &vertices,
                                           std::vector<uint32_t> const &indices) override {
@@ -118,7 +118,7 @@ ClientMaterial::~ClientMaterial() {
 }
 
 //========== Camera ==========//
-IPxrScene *ClientCamera::getScene() { return mScene; }
+IRenderScene *ClientCamera::getScene() { return mScene; }
 ClientCamera::ClientCamera(ClientScene *scene, rs_id_t id, uint32_t width, uint32_t height,
                            float cx, float cy, float fx, float fy, float near, float far,
                            float skew)
@@ -171,7 +171,7 @@ void ClientCamera::setPerspectiveCameraParameters(float near, float far, float f
 
 ClientShape::ClientShape(ClientRigidbody *body, uint32_t index) : mBody(body), mIndex(index) {}
 
-std::shared_ptr<IPxrMaterial> ClientShape::getMaterial() const {
+std::shared_ptr<IRenderMaterial> ClientShape::getMaterial() const {
   ClientContext context;
   proto::BodyUint32Req req;
   proto::Id res;
@@ -247,7 +247,7 @@ void ClientRigidbody::setVisibility(float visibility) {
 
 void ClientRigidbody::destroy() { mScene->removeRigidbody(this); }
 
-std::vector<std::shared_ptr<IPxrRenderShape>> ClientRigidbody::getRenderShapes() {
+std::vector<std::shared_ptr<IRenderShape>> ClientRigidbody::getRenderShapes() {
   ClientContext context;
   proto::BodyReq req;
   proto::Uint32 res;
@@ -259,7 +259,7 @@ std::vector<std::shared_ptr<IPxrRenderShape>> ClientRigidbody::getRenderShapes()
   }
   uint32_t count = res.value();
 
-  std::vector<std::shared_ptr<IPxrRenderShape>> shapes;
+  std::vector<std::shared_ptr<IRenderShape>> shapes;
   for (uint32_t i = 0; i < count; ++i) {
     shapes.push_back(std::make_shared<ClientShape>(this, i));
   }
@@ -270,14 +270,14 @@ std::vector<std::shared_ptr<IPxrRenderShape>> ClientRigidbody::getRenderShapes()
 ClientScene::ClientScene(ClientRendererImpl *renderer, rs_id_t id, std::string const &name)
     : mRenderer(renderer), mId(id), mName(name) {}
 
-IPxrRigidbody *ClientScene::addRigidbody(physx::PxGeometryType::Enum type,
+IRenderBody *ClientScene::addRigidbody(physx::PxGeometryType::Enum type,
                                          const physx::PxVec3 &scale, const physx::PxVec3 &color) {
   auto mat = mRenderer->createMaterial();
   mat->setBaseColor({color.x, color.y, color.z, 1.f});
   return addRigidbody(type, scale, mat);
 }
 
-IPxrRigidbody *ClientScene::addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) {
+IRenderBody *ClientScene::addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) {
   mIdSynced = false;
   ClientContext context;
   proto::AddBodyMeshReq req;
@@ -296,9 +296,9 @@ IPxrRigidbody *ClientScene::addRigidbody(const std::string &meshFile, const phys
   }
   throw std::runtime_error(status.error_message());
 }
-IPxrRigidbody *ClientScene::addRigidbody(physx::PxGeometryType::Enum type,
+IRenderBody *ClientScene::addRigidbody(physx::PxGeometryType::Enum type,
                                          const physx::PxVec3 &scale,
-                                         std::shared_ptr<IPxrMaterial> material) {
+                                         std::shared_ptr<IRenderMaterial> material) {
   if (!material) {
     material = mRenderer->createMaterial();
   }
@@ -344,7 +344,7 @@ IPxrRigidbody *ClientScene::addRigidbody(physx::PxGeometryType::Enum type,
   throw std::runtime_error(status.error_message());
 }
 
-void ClientScene::removeRigidbody(IPxrRigidbody *body) {
+void ClientScene::removeRigidbody(IRenderBody *body) {
   mIdSynced = false;
   if (ClientRigidbody *b = dynamic_cast<ClientRigidbody *>(body)) {
     ClientContext context;
@@ -609,7 +609,7 @@ ClientRendererImpl::ClientRendererImpl(std::string const &address, uint64_t proc
   mStub = proto::RenderService::NewStub(mChannel);
 }
 
-IPxrScene *ClientRendererImpl::createScene(std::string const &name) {
+IRenderScene *ClientRendererImpl::createScene(std::string const &name) {
   ClientContext context;
   proto::Index req;
   proto::Id res;
@@ -624,7 +624,7 @@ IPxrScene *ClientRendererImpl::createScene(std::string const &name) {
   throw std::runtime_error(status.error_message());
 }
 
-void ClientRendererImpl::removeScene(IPxrScene *scene) {
+void ClientRendererImpl::removeScene(IRenderScene *scene) {
   if (ClientScene *clientScene = dynamic_cast<ClientScene *>(scene)) {
     ClientContext context;
     proto::Id req;
@@ -640,7 +640,7 @@ void ClientRendererImpl::removeScene(IPxrScene *scene) {
   }
 }
 
-std::shared_ptr<IPxrMaterial> ClientRendererImpl::createMaterial() {
+std::shared_ptr<IRenderMaterial> ClientRendererImpl::createMaterial() {
   ClientContext context;
   proto::Empty req;
   proto::Id res;
