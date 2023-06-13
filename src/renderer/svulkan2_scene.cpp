@@ -134,8 +134,7 @@ void SVulkan2Scene::removeLight(ILight *light) {
 
 void SVulkan2Scene::destroy() { mParentRenderer->removeScene(this); }
 
-IRenderBody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
-                                           const physx::PxVec3 &scale) {
+IRenderBody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) {
   if (!std::filesystem::exists(meshFile)) {
     spdlog::get("SAPIEN")->error("Failed to load visual mesh: " + meshFile);
     mBodies.push_back(
@@ -155,7 +154,7 @@ IRenderBody *SVulkan2Scene::addRigidbody(const std::string &meshFile,
 }
 
 IRenderBody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
-                                           std::shared_ptr<IRenderMaterial> material) {
+                                         std::shared_ptr<IRenderMaterial> material) {
   if (!material) {
     return addRigidbody(meshFile, scale);
   }
@@ -187,8 +186,8 @@ IRenderBody *SVulkan2Scene::addRigidbody(const std::string &meshFile, const phys
 }
 
 IRenderBody *SVulkan2Scene::addRigidbody(std::shared_ptr<IRenderMesh> mesh,
-                                           const physx::PxVec3 &scale,
-                                           std::shared_ptr<IRenderMaterial> material) {
+                                         const physx::PxVec3 &scale,
+                                         std::shared_ptr<IRenderMaterial> material) {
   auto rmesh = std::dynamic_pointer_cast<SVulkan2Mesh>(mesh);
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
   auto shape = svulkan2::resource::SVShape::Create(rmesh->getMesh(), mat->getMaterial());
@@ -200,16 +199,15 @@ IRenderBody *SVulkan2Scene::addRigidbody(std::shared_ptr<IRenderMesh> mesh,
 }
 
 IRenderBody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
-                                           const physx::PxVec3 &scale,
-                                           const physx::PxVec3 &color) {
+                                         const physx::PxVec3 &scale, const physx::PxVec3 &color) {
   auto material = std::make_shared<svulkan2::resource::SVMetallicMaterial>(
       glm::vec4{0.f, 0.f, 0.f, 1.f}, glm::vec4{color.x, color.y, color.z, 1.f});
   return addRigidbody(type, scale, std::make_shared<SVulkan2Material>(material, mParentRenderer));
 }
 
 IRenderBody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
-                                           const physx::PxVec3 &scale,
-                                           std::shared_ptr<IRenderMaterial> material) {
+                                         const physx::PxVec3 &scale,
+                                         std::shared_ptr<IRenderMaterial> material) {
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
   if (!mat) {
     mat = std::static_pointer_cast<SVulkan2Material>(mParentRenderer->createMaterial());
@@ -264,10 +262,9 @@ IRenderBody *SVulkan2Scene::addRigidbody(physx::PxGeometryType::Enum type,
 }
 
 IRenderBody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                                           std::vector<physx::PxVec3> const &normals,
-                                           std::vector<uint32_t> const &indices,
-                                           const physx::PxVec3 &scale,
-                                           const physx::PxVec3 &color) {
+                                         std::vector<physx::PxVec3> const &normals,
+                                         std::vector<uint32_t> const &indices,
+                                         const physx::PxVec3 &scale, const physx::PxVec3 &color) {
   auto material = std::make_shared<svulkan2::resource::SVMetallicMaterial>(
       glm::vec4{0.f, 0.f, 0.f, 1.0f}, glm::vec4{color.x, color.y, color.z, 1.f});
   return addRigidbody(vertices, normals, indices, scale,
@@ -275,10 +272,10 @@ IRenderBody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &verti
 }
 
 IRenderBody *SVulkan2Scene::addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                                           std::vector<physx::PxVec3> const &normals,
-                                           std::vector<uint32_t> const &indices,
-                                           const physx::PxVec3 &scale,
-                                           std::shared_ptr<IRenderMaterial> material) {
+                                         std::vector<physx::PxVec3> const &normals,
+                                         std::vector<uint32_t> const &indices,
+                                         const physx::PxVec3 &scale,
+                                         std::shared_ptr<IRenderMaterial> material) {
   auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
   if (!mat) {
     mat = std::static_pointer_cast<SVulkan2Material>(mParentRenderer->createMaterial());
@@ -353,6 +350,27 @@ void SVulkan2Scene::removePointBody(IRenderPointBody *body) {
   }
 }
 
+IRenderBody *SVulkan2Scene::addDeformableBody(std::shared_ptr<IRenderMesh> mesh,
+                                              std::shared_ptr<IRenderMaterial> material) {
+  auto rmesh = std::dynamic_pointer_cast<SVulkan2Mesh>(mesh);
+  auto mat = std::dynamic_pointer_cast<SVulkan2Material>(material);
+  auto shape = svulkan2::resource::SVShape::Create(rmesh->getMesh(), mat->getMaterial());
+  auto &obj = mScene->addDeformableObject(svulkan2::resource::SVModel::FromData({shape}));
+  mDeformableBodies.push_back(std::make_unique<SVulkan2Rigidbody>(
+      this, std::vector({&obj}), physx::PxGeometryType::eTRIANGLEMESH, physx::PxVec3{1, 1, 1}));
+  return mDeformableBodies.back().get();
+}
+
+void SVulkan2Scene::removeDeformableBody(IRenderBody *body) {
+  for (auto it = mBodies.begin(); it != mBodies.end(); ++it) {
+    if (it->get() == body) {
+      it->get()->destroyVisualObjects();
+      mBodies.erase(it);
+      return;
+    }
+  }
+}
+
 ICamera *SVulkan2Scene::addCamera(uint32_t width, uint32_t height, float fovy, float near,
                                   float far, std::string const &shaderDir) {
   std::string shader = shaderDir.length() ? shaderDir : GetRenderConfig().cameraShaderDirectory;
@@ -380,7 +398,10 @@ std::vector<ICamera *> SVulkan2Scene::getCameras() {
   return cams;
 }
 
-void SVulkan2Scene::updateRender() { mScene->updateModelMatrices(); }
+void SVulkan2Scene::updateRender() {
+  mScene->updateModelMatrices();
+  mScene->updateRenderVersion();
+}
 
 void SVulkan2Scene::setEnvironmentMap(std::string_view path) {
   auto tex = mParentRenderer->getContext()->getResourceManager()->CreateCubemapFromKTX(

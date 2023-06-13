@@ -15,6 +15,7 @@
 #include "sapien/sapien_contact.h"
 #include "sapien/sapien_drive.h"
 #include "sapien/sapien_entity_particle.h"
+#include "sapien/sapien_entity_deformable.h"
 #include "sapien/sapien_material.h"
 #include "sapien/sapien_scene.h"
 #include "sapien/simulation.h"
@@ -400,6 +401,7 @@ void buildSapien(py::module &m) {
   auto PyAreaLightEntity = py::class_<SParallelogramLight, SLight>(m, "AreaLightEntity");
 
   auto PyParticleEntity = py::class_<SEntityParticle, SEntity>(m, "ParticleEntity");
+  auto PyDeformableEntity = py::class_<SEntityDeformable, SEntity>(m, "DeformableEntity");
   auto PyCameraEntity = py::class_<SCamera, SEntity>(m, "CameraEntity");
 
   auto PyRenderConfig = py::class_<Renderer::RenderConfig>(m, "RenderConfig");
@@ -1068,6 +1070,9 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("add_particle_entity", &SScene::addParticleEntity, py::arg("positions"),
            py::return_value_policy::reference)
       .def("remove_particle_entity", &SScene::removeParticleEntity, py::arg("entity"))
+      .def("add_deformable_entity", &SScene::addDeformableEntity, py::arg("mesh"),
+           py::arg("material"), py::return_value_policy::reference)
+      .def("remove_deformable_entity", &SScene::removeDeformableEntity, py::arg("entity"))
 
       // save
       .def("pack",
@@ -2398,6 +2403,8 @@ Args:
   PyParticleEntity.def_property_readonly("visual_body",
                                          [](SEntityParticle &p) { return p.getVisualBody(); });
 
+  PyDeformableEntity.def_property_readonly("visual_body", &SEntityDeformable::getVisualBody);
+
   PyCameraEntity.def_property("parent", &SCamera::getParent, &SCamera::setParent)
       .def("set_parent", &SCamera::setParent, py::arg("parent"), py::arg("keep_pose"))
       .def("set_local_pose", &SCamera::setLocalPose, py::arg("pose"))
@@ -2865,15 +2872,7 @@ Args:
         return body.getScale().x;
       });
 
-  PyRenderShape
-      // .def_readonly("type", &Renderer::RenderShape::type)
-      // .def_readonly("pose", &Renderer::RenderShape::pose)
-      // .def_readonly("visual_id", &Renderer::RenderShape::objId)
-      // .def_property_readonly("scale",
-      //                        [](Renderer::RenderShape &shape) { return
-      //                        vec32array(shape.scale);
-      //                        })
-      .def_property_readonly("mesh", &Renderer::IRenderShape::getGeometry)
+  PyRenderShape.def_property_readonly("mesh", &Renderer::IRenderShape::getGeometry)
       .def_property_readonly("material", &Renderer::IRenderShape::getMaterial)
       .def("set_material", &Renderer::IRenderShape::setMaterial, py::arg("material"));
 

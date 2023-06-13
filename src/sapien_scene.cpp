@@ -12,6 +12,7 @@
 #include "sapien/sapien_actor.h"
 #include "sapien/sapien_contact.h"
 #include "sapien/sapien_drive.h"
+#include "sapien/sapien_entity_deformable.h"
 #include "sapien/sapien_entity_particle.h"
 #include "sapien/simulation.h"
 #include <algorithm>
@@ -933,6 +934,22 @@ void SScene::removeParticleEntity(SEntityParticle *entity) {
     mRendererScene->removePointBody(entity->getVisualBody());
   }
   mParticlesEntities.erase(start, mParticlesEntities.end());
+}
+
+SEntityDeformable *
+SScene::addDeformableEntity(std::shared_ptr<Renderer::IRenderMesh> mesh,
+                            std::shared_ptr<Renderer::IRenderMaterial> material) {
+  auto body = mRendererScene->addDeformableBody(mesh, material);
+  mDeformableEntities.push_back(std::make_unique<SEntityDeformable>(this, body));
+  return mDeformableEntities.back().get();
+}
+
+void SScene::removeDeformableEntity(SEntityDeformable *entity) {
+  auto start =
+      std::remove_if(mDeformableEntities.begin(), mDeformableEntities.end(),
+                     [=](std::unique_ptr<SEntityDeformable> &e) { return e.get() == entity; });
+  mRendererScene->removeDeformableBody(entity->getVisualBody());
+  mDeformableEntities.erase(start, mDeformableEntities.end());
 }
 
 ThreadPool &SScene::getThread() {

@@ -23,6 +23,7 @@ from sapien.core.pysapien import Constraint
 from sapien.core.pysapien import Contact
 from sapien.core.pysapien import ContactPoint
 from sapien.core.pysapien import ConvexMeshGeometry
+from sapien.core.pysapien import DeformableEntity
 from sapien.core.pysapien import DirectionalLightEntity
 from sapien.core.pysapien import Drive
 from sapien.core.pysapien import Engine
@@ -110,6 +111,7 @@ __all__ = [
     "Contact",
     "ContactPoint",
     "ConvexMeshGeometry",
+    "DeformableEntity",
     "DirectionalLightEntity",
     "Drive",
     "Engine",

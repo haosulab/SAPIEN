@@ -42,6 +42,7 @@ class SLink;
 class SLinkBase;
 class SActorBase;
 class SEntityParticle;
+class SEntityDeformable;
 class SArticulation;
 class SKArticulation;
 class Simulation;
@@ -152,6 +153,12 @@ public:
 
   void removeParticleEntity(SEntityParticle *entity);
 
+  /** create a mesh-based visual entity that allows dynamic update */
+  SEntityDeformable *addDeformableEntity(std::shared_ptr<Renderer::IRenderMesh> mesh,
+                                         std::shared_ptr<Renderer::IRenderMaterial> material);
+
+  void removeDeformableEntity(SEntityDeformable *entity);
+
   /** Mark an actor in a destroyed state
    *  Actors in destroyed state do not emit events
    *  The actors are truly removed at the end of this current frame
@@ -207,6 +214,7 @@ private:
   std::vector<std::unique_ptr<SArticulation>> mArticulations;
   std::vector<std::unique_ptr<SKArticulation>> mKinematicArticulations;
   std::vector<std::unique_ptr<SEntityParticle>> mParticlesEntities;
+  std::vector<std::unique_ptr<SEntityDeformable>> mDeformableEntities;
 
   std::vector<std::unique_ptr<SLight>> mLights;
 

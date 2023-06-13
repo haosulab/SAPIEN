@@ -385,26 +385,28 @@ public:
     return addRigidbody(meshFile, scale);
   }
 
-  virtual IRenderBody *addRigidbody(std::shared_ptr<IRenderMesh> mesh,
-                                      const physx::PxVec3 &scale,
-                                      std::shared_ptr<IRenderMaterial> material) = 0;
+  virtual IRenderBody *addRigidbody(std::shared_ptr<IRenderMesh> mesh, const physx::PxVec3 &scale,
+                                    std::shared_ptr<IRenderMaterial> material) = 0;
 
   virtual IRenderBody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                                      std::shared_ptr<IRenderMaterial> material) = 0;
-  inline virtual IRenderBody *addRigidbody(physx::PxGeometryType::Enum type,
-                                             const physx::PxVec3 &scale,
-                                             const physx::PxVec3 &color) = 0;
+                                    std::shared_ptr<IRenderMaterial> material) = 0;
+  virtual IRenderBody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
+                                    const physx::PxVec3 &color) = 0;
 
   virtual IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                                      std::vector<physx::PxVec3> const &normals,
-                                      std::vector<uint32_t> const &indices,
-                                      const physx::PxVec3 &scale,
-                                      std::shared_ptr<IRenderMaterial> material) = 0;
-  inline virtual IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                                             std::vector<physx::PxVec3> const &normals,
-                                             std::vector<uint32_t> const &indices,
-                                             const physx::PxVec3 &scale,
-                                             const physx::PxVec3 &color) = 0;
+                                    std::vector<physx::PxVec3> const &normals,
+                                    std::vector<uint32_t> const &indices,
+                                    const physx::PxVec3 &scale,
+                                    std::shared_ptr<IRenderMaterial> material) = 0;
+  virtual IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
+                                    std::vector<physx::PxVec3> const &normals,
+                                    std::vector<uint32_t> const &indices,
+                                    const physx::PxVec3 &scale, const physx::PxVec3 &color) = 0;
+
+  virtual IRenderBody *addDeformableBody(std::shared_ptr<IRenderMesh> mesh,
+                                         std::shared_ptr<IRenderMaterial> material) {
+    throw std::runtime_error("DeformableBody is not implemented in this renderer");
+  };
 
   virtual IRenderPointBody *
   addPointBody(Eigen::Ref<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>> positions) {
@@ -415,6 +417,9 @@ public:
   virtual void removePointBody(IRenderPointBody *body) {
     throw std::runtime_error("PointBody is not implemented in this renderer");
   };
+  virtual void removeDeformableBody(IRenderBody *body) {
+    throw std::runtime_error("Deformable is not implemented in this renderer");
+  }
 
   virtual ICamera *addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,
                              std::string const &shaderDir = "") = 0;

@@ -15,6 +15,7 @@ class SVulkan2Scene : public IRenderScene {
   SVulkan2Renderer *mParentRenderer;
   std::shared_ptr<svulkan2::scene::Scene> mScene;
   std::vector<std::unique_ptr<SVulkan2Rigidbody>> mBodies;
+  std::vector<std::unique_ptr<SVulkan2Rigidbody>> mDeformableBodies;
   std::vector<std::unique_ptr<SVulkan2PointBody>> mPointBodies;
   std::vector<std::unique_ptr<SVulkan2Camera>> mCameras;
   std::vector<std::unique_ptr<ILight>> mLights;
@@ -35,26 +36,29 @@ public:
   IRenderBody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale) override;
 
   IRenderBody *addRigidbody(const std::string &meshFile, const physx::PxVec3 &scale,
-                              std::shared_ptr<IRenderMaterial> material) override;
+                            std::shared_ptr<IRenderMaterial> material) override;
 
   IRenderBody *addRigidbody(std::shared_ptr<IRenderMesh> mesh, const physx::PxVec3 &scale,
-                              std::shared_ptr<IRenderMaterial> material) override;
+                            std::shared_ptr<IRenderMaterial> material) override;
 
   IRenderBody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                              std::shared_ptr<IRenderMaterial> material) override;
+                            std::shared_ptr<IRenderMaterial> material) override;
 
   IRenderBody *addRigidbody(physx::PxGeometryType::Enum type, const physx::PxVec3 &scale,
-                              const physx::PxVec3 &color) override;
+                            const physx::PxVec3 &color) override;
 
   IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                              std::vector<physx::PxVec3> const &normals,
-                              std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
-                              std::shared_ptr<IRenderMaterial> material) override;
+                            std::vector<physx::PxVec3> const &normals,
+                            std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
+                            std::shared_ptr<IRenderMaterial> material) override;
 
   IRenderBody *addRigidbody(std::vector<physx::PxVec3> const &vertices,
-                              std::vector<physx::PxVec3> const &normals,
-                              std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
-                              const physx::PxVec3 &color) override;
+                            std::vector<physx::PxVec3> const &normals,
+                            std::vector<uint32_t> const &indices, const physx::PxVec3 &scale,
+                            const physx::PxVec3 &color) override;
+
+  IRenderBody *addDeformableBody(std::shared_ptr<IRenderMesh> mesh,
+                                 std::shared_ptr<IRenderMaterial> material) override;
 
   IRenderBody *cloneRigidbody(SVulkan2Rigidbody *other);
 
@@ -63,6 +67,7 @@ public:
 
   void removeRigidbody(IRenderBody *body) override;
   void removePointBody(IRenderPointBody *body) override;
+  void removeDeformableBody(IRenderBody *body) override;
 
   ICamera *addCamera(uint32_t width, uint32_t height, float fovy, float near, float far,
                      std::string const &shaderDir = "") override;
@@ -89,9 +94,9 @@ public:
                                   bool enableShadow, float shadowNear, float shadowFar,
                                   uint32_t shadowMapSize) override;
   SVulkan2ParallelogramLight *addParallelogramLight(physx::PxTransform const &pose,
-                                             std::array<float, 3> const &color,
-                                             std::array<float, 3> const &edge0,
-                                             std::array<float, 3> const &edge1) override;
+                                                    std::array<float, 3> const &color,
+                                                    std::array<float, 3> const &edge0,
+                                                    std::array<float, 3> const &edge1) override;
   IActiveLight *addActiveLight(physx::PxTransform const &pose, std::array<float, 3> const &color,
                                float fov, std::string_view texPath, float shadowNear,
                                float shadowFar, uint32_t shadowMapSize) override;
