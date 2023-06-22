@@ -34,77 +34,12 @@ for f in shader_dir.iterdir():
             shader_list.append(f)
 
 
-imgui_ini = """
-[Window][DockSpace Demo]
-Pos=0,0
-Size=1024,768
-Collapsed=0
-
-[Window][Actor/Entity]
-Pos=726,23
-Size=298,335
-Collapsed=0
-DockId=0x00000007,0
-
-[Window][Control]
-Pos=0,23
-Size=248,368
-Collapsed=0
-DockId=0x00000003,0
-
-[Window][Scene Hierarchy]
-Pos=0,393
-Size=248,314
-Collapsed=0
-DockId=0x00000004,0
-
-[Window][Articulation]
-Pos=726,360
-Size=298,347
-Collapsed=0
-DockId=0x00000008,0
-
-[Window][Info]
-Pos=0,709
-Size=1024,59
-Collapsed=0
-DockId=0x0000000A,0
-
-[Window][IK]
-Pos=726,360
-Size=298,347
-Collapsed=0
-DockId=0x00000008,1
-
-[Window][Debug##Default]
-Pos=60,60
-Size=400,400
-Collapsed=0
-
-[Docking][Data]
-DockSpace         ID=0x4BBE4C7A Window=0x4647B76E Pos=0,23 Size=1024,745 Split=Y
-  DockNode        ID=0x00000009 Parent=0x4BBE4C7A SizeRef=1024,684 Split=X
-    DockNode      ID=0x00000005 Parent=0x00000009 SizeRef=724,747 Split=X
-      DockNode    ID=0x00000001 Parent=0x00000005 SizeRef=248,747 Split=Y Selected=0x9A68760C
-        DockNode  ID=0x00000003 Parent=0x00000001 SizeRef=399,368 Selected=0x226615D7
-        DockNode  ID=0x00000004 Parent=0x00000001 SizeRef=399,314 Selected=0x9A68760C
-      DockNode    ID=0x00000002 Parent=0x00000005 SizeRef=474,747 CentralNode=1
-    DockNode      ID=0x00000006 Parent=0x00000009 SizeRef=298,747 Split=Y Selected=0x85B479FD
-      DockNode    ID=0x00000007 Parent=0x00000006 SizeRef=121,335 Selected=0x0A9B993B
-      DockNode    ID=0x00000008 Parent=0x00000006 SizeRef=121,347 Selected=0x816C7EAB
-  DockNode        ID=0x0000000A Parent=0x4BBE4C7A SizeRef=1024,59 Selected=0x6BBB9E69
-"""
-
-
 class FPSCameraController:
     def __init__(self, window: VulkanWindow):
         self.window = window
         self.forward = np.array([1, 0, 0])
         self.up = np.array([0, 0, 1])
         self.left = np.cross(self.up, self.forward)
-        self.initial_rotation = mat2quat(
-            np.array([-self.left, self.up, -self.forward]).T
-        )
         self.xyz = np.zeros(3)
         self.rpy = np.zeros(3)
 
@@ -140,12 +75,10 @@ class FPSCameraController:
             self.rpy[2] = self.rpy[2] + 2 * np.pi
 
         rot = qmult(
-            qmult(
-                qmult(aa(self.up, -self.rpy[2]), aa(self.left, -self.rpy[1])),
-                aa(self.forward, self.rpy[0]),
-            ),
-            self.initial_rotation,
+            qmult(aa(self.up, -self.rpy[2]), aa(self.left, -self.rpy[1])),
+            aa(self.forward, self.rpy[0]),
         )
+
         self.window.set_camera_rotation(rot)
         self.window.set_camera_position(self.xyz)
 
@@ -156,9 +89,6 @@ class ArcRotateCameraController:
         self.forward = np.array([1, 0, 0])
         self.up = np.array([0, 0, 1])
         self.left = np.cross(self.up, self.forward)
-        self.initial_rotation = mat2quat(
-            np.array([-self.left, self.up, -self.forward]).T
-        )
         self.center = np.zeros(3)
         self.yaw = 0
         self.pitch = 0
@@ -189,10 +119,8 @@ class ArcRotateCameraController:
         self.update()
 
     def update(self):
-        rot = qmult(
-            qmult(aa(self.up, self.yaw), aa(self.left, self.pitch)),
-            self.initial_rotation,
-        )
+        rot = qmult(aa(self.up, self.yaw), aa(self.left, self.pitch))
+
         pos = self.center - self.radius * rotate_vector(np.array([0, 0, -1]), rot)
         self.window.set_camera_rotation(rot)
         self.window.set_camera_position(pos)
@@ -208,7 +136,6 @@ class Viewer(object):
         if not os.path.exists("imgui.ini"):
             with open("imgui.ini", "w") as f:
                 f.write(imgui_ini)
-
         if not shader_dir:
             self.shader_dir = sapien.render_config.viewer_shader_dir
 
@@ -216,9 +143,7 @@ class Viewer(object):
         self.renderer_context: R.Context = renderer._internal_context
 
         self.create_visual_models()
-
         self.scene = None
-
         self.resolution = np.array(resolutions).flatten()[:2]
         self.window = self.renderer.create_window(
             self.resolution[0], self.resolution[1], self.shader_dir
@@ -1161,8 +1086,9 @@ class Viewer(object):
             self.ui_pause_checkbox = (
                 R.UICheckbox()
                 .Label("Pause")
-                .Checked(self.paused)
-                .Callback(lambda p: self.toggle_pause(p.checked))
+                .Bind(self, "paused")
+                # .Checked(self.paused)
+                # .Callback(lambda p: self.toggle_pause(p.checked))
             )
 
             self.update_render_checkbox = (
@@ -1995,10 +1921,10 @@ class Viewer(object):
     def set_camera_rpy(self, r, p, y):
         self.fps_camera_controller.setRPY(r, p, y)
 
-    def toggle_pause(self, paused):
-        self.paused = paused
-        if hasattr(self, "ui_pause_checkbox"):
-            self.ui_pause_checkbox.Checked(paused)
+    # def toggle_pause(self, paused):
+    #     self.paused = paused
+    #     if hasattr(self, "ui_pause_checkbox"):
+    #         self.ui_pause_checkbox.Checked(paused)
 
     def toggle_axes(self, show):
         self.show_axes = show

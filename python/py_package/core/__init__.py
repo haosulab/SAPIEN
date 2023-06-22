@@ -2,7 +2,7 @@ from warnings import warn
 
 import pkg_resources
 import os
-from ._pinocchio_model import _create_pinocchio_model
+from ._pinocchio_model import _create_pinocchio_model, PinocchioModel
 
 import platform
 

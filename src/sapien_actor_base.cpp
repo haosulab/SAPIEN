@@ -8,10 +8,10 @@ namespace sapien {
 void SActorBase::setDisplayVisibility(float visibility) {
   mDisplayVisibility = visibility;
   for (auto body : mRenderBodies) {
-    body->setVisibility((!collisionRender) * mDisplayVisibility);
+    body->setVisibility((!mCollisionRender) * mDisplayVisibility);
   }
   for (auto body : mCollisionBodies) {
-    body->setVisibility(collisionRender * mDisplayVisibility);
+    body->setVisibility(mCollisionRender * mDisplayVisibility);
   }
 }
 
@@ -23,7 +23,7 @@ std::vector<Renderer::IRenderBody *> SActorBase::getCollisionBodies() {
 }
 
 void SActorBase::renderCollisionBodies(bool collision) {
-  collisionRender = collision;
+  mCollisionRender = collision;
   for (auto body : mRenderBodies) {
     body->setVisibility((!collision) * mDisplayVisibility);
   }
@@ -32,7 +32,7 @@ void SActorBase::renderCollisionBodies(bool collision) {
   }
 }
 
-bool SActorBase::isRenderingCollision() const { return collisionRender; }
+bool SActorBase::isRenderingCollision() const { return mCollisionRender; }
 
 void SActorBase::hideVisual() {
   for (auto body : mRenderBodies) {

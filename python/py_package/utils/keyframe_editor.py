@@ -26,7 +26,7 @@ from pathlib import Path
 
 import copy
 from .serialization import SerializedScene
-from .keyframe_middleware import KeyFrameEditorSnapshot
+from .keyframe_middleware import KeyframeEditorSnapshot
 
 shader_dir = Path(pkg_resources.resource_filename("sapien", "vulkan_shader"))
 shader_list = []
@@ -263,6 +263,7 @@ class KeyframeEditor(object):
         self.scroll_speed = 0.5
         self.selection_opacity = 0.7
 
+        self.file_chooser = None
         self.control_window = None
         self.scene_window = None
         self.actor_window = None
@@ -292,6 +293,15 @@ class KeyframeEditor(object):
         self._show_camera_linesets = True
 
         self.window.set_drop_callback(self.drag_and_drop)
+
+    def build_file_chooser(self):
+        if not self.file_chooser:
+            self.file_chooser = (
+                R.UIFileChooser()
+                .Label("FileChooser")
+                .Filter(".py")
+                .Callback(self.choose_file)
+            )
 
     # UI windows
     def build_control_window(self):
@@ -1069,21 +1079,26 @@ class KeyframeEditor(object):
     def build_keyframe_window(self):
         if not self.keyframe_window:
             self.keyframe_editor = (
-                R.UIKeyFrameEditor(self.window.get_content_scale())
-                .InsertKeyFrameCallback(self.insert_key_frame)
-                .LoadKeyFrameCallback(self.load_key_frame)
-                .UpdateKeyFrameCallback(self.update_key_frame)
-                .DeleteKeyFrameCallback(self.delete_key_frame)
+                R.UIKeyframeEditor(self.window.get_content_scale())
+                .InsertKeyframeCallback(self.insert_key_frame)
+                .LoadKeyframeCallback(self.load_key_frame)
+                .UpdateKeyframeCallback(self.update_key_frame)
+                .DeleteKeyframeCallback(self.delete_key_frame)
             )
             self.keyframe_window = (
                 R.UIWindow().Label("Key Frame Editor").append(self.keyframe_editor)
             )
             self.keyframe_editor.append(
-                R.UIButton().Label("Import").Callback(lambda _: self.import_key_frame_editor(self.keyframe_editor)),
-                R.UIButton().Label("Export").Callback(lambda _: self.export_key_frame_editor(self.keyframe_editor)),
+                R.UIButton()
+                .Label("Import")
+                .Callback(lambda _: self.import_key_frame_editor(self.keyframe_editor)),
+                R.UIButton()
+                .Label("Export")
+                .Callback(lambda _: self.export_key_frame_editor(self.keyframe_editor)),
             )
 
     def reset_windows(self):
+        self.file_chooser = None
         self.control_window = None
         self.scene_window = None
         self.actor_window = None
@@ -1635,6 +1650,10 @@ class KeyframeEditor(object):
         if key in self.key_down_action_map:
             self.key_down_action_map[key]()
 
+    def choose_file(self, chooser, filepath, dirpath):
+        chooser.close()
+        print(filepath, dirpath)
+
     # Functions
     def render(self):
         if self.closed:
@@ -1646,6 +1665,7 @@ class KeyframeEditor(object):
             if not self.paused or not self.do_not_update_render:
                 self.scene.update_render()
 
+            self.build_file_chooser()
             self.build_control_window()
             self.build_scene_window()
             self.build_actor_window()
@@ -1674,6 +1694,7 @@ class KeyframeEditor(object):
                     self.info_window,
                     self.ik_window,
                     self.keyframe_window,
+                    self.file_chooser,
                 ],
             )
 
@@ -2623,7 +2644,7 @@ class KeyframeEditor(object):
         self.key_frame_scenes[c.get_key_frame_to_modify()] = None
 
     def export_key_frame_editor(self, c):
-        self.key_frame_snapshot = KeyFrameEditorSnapshot(c, self.key_frame_scenes)
+        self.key_frame_snapshot = KeyframeEditorSnapshot(c, self.key_frame_scenes)
 
     def import_key_frame_editor(self, c):
         kfs = self.key_frame_snapshot

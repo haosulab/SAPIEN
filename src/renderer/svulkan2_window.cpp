@@ -49,6 +49,8 @@ void FPSCameraControllerDebug::update() {
 }
 #endif
 
+static physx::PxTransform gl2ros({0, 0, 0}, {-0.5, 0.5, 0.5, -0.5});
+
 SVulkan2Window::SVulkan2Window(std::shared_ptr<SVulkan2Renderer> renderer, int width, int height,
                                std::string const &shaderDir)
     : mRenderer(renderer), mShaderDir(shaderDir) {
@@ -121,6 +123,12 @@ void SVulkan2Window::setDropCallback(std::function<void(std::vector<std::string>
 
 void SVulkan2Window::unsetDropCallback() { mWindow->unsetDropCallback(); }
 
+void SVulkan2Window::setFocusCallback(std::function<void(int)> callback) {
+  mWindow->setFocusCallback(callback);
+}
+
+void SVulkan2Window::unsetFocusCallback() { mWindow->unsetFocusCallback(); }
+
 SVulkan2Window::~SVulkan2Window() {
   if (!mClosed) {
     close();
@@ -155,8 +163,40 @@ void SVulkan2Window::setCameraIntrinsicParameters(float near, float far, float f
   getCamera()->setPerspectiveParameters(near, far, fx, fy, cx, cy, width, height, skew);
 }
 
-void SVulkan2Window::setCameraPosition(glm::vec3 const &pos) { getCamera()->setPosition(pos); }
-void SVulkan2Window::setCameraRotation(glm::quat const &rot) { getCamera()->setRotation(rot); }
+void SVulkan2Window::setCameraPose(physx::PxTransform const &pose) {
+  auto glpose = pose * gl2ros;
+  auto cam = getCamera();
+  cam->setPosition({glpose.p.x, glpose.p.y, glpose.p.z});
+  cam->setRotation({glpose.q.w, glpose.q.x, glpose.q.y, glpose.q.z});
+}
+
+physx::PxTransform SVulkan2Window::getCameraPose() {
+  auto cam = getCamera();
+  auto p = cam->getPosition();
+  auto q = cam->getRotation();
+  auto glpose = physx::PxTransform({p.x, p.y, p.z}, {q.x, q.y, q.z, q.w});
+  return glpose * gl2ros.getInverse();
+}
+
+void SVulkan2Window::setCameraPosition(glm::vec3 const &pos) {
+  auto pose = getCameraPose();
+  pose.p = {pos.x, pos.y, pos.z};
+  setCameraPose(pose);
+}
+void SVulkan2Window::setCameraRotation(glm::quat const &rot) {
+  auto pose = getCameraPose();
+  pose.q = {rot.x, rot.y, rot.z, rot.w};
+  setCameraPose(pose);
+}
+
+glm::vec3 SVulkan2Window::getCameraPosition() {
+  auto pose = getCameraPose();
+  return {pose.p.x, pose.p.y, pose.p.z};
+}
+glm::quat SVulkan2Window::getCameraRotation() {
+  auto pose = getCameraPose();
+  return {pose.q.w, pose.q.x, pose.q.y, pose.q.z};
+}
 
 void SVulkan2Window::setCameraProperty(std::string const &name, float property) {
   mSVulkanRenderer->setCustomProperty(name, property);
@@ -196,8 +236,6 @@ void SVulkan2Window::setCameraTextureArray(
 }
 float SVulkan2Window::getContentScale() { return mWindow->getContentScale(); }
 
-glm::vec3 SVulkan2Window::getCameraPosition() { return getCamera()->getPosition(); }
-glm::quat SVulkan2Window::getCameraRotation() { return getCamera()->getRotation(); }
 glm::mat4 SVulkan2Window::getCameraProjectionMatrix() {
   return getCamera()->getProjectionMatrix();
 }
@@ -238,7 +276,7 @@ void SVulkan2Window::resize(int width, int height) {
 }
 
 void SVulkan2Window::render(std::string const &targetName,
-                            std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows) {
+                            std::vector<std::shared_ptr<svulkan2::ui::Widget>> uiWindows) {
 
   if (!mScene) {
     return;
@@ -266,6 +304,8 @@ void SVulkan2Window::render(std::string const &targetName,
   }
 
   mWindow->imguiRender();
+  mWindow->imguiEndFrame();
+
   if (mRenderer->getContext()->getDevice().waitForFences(mSceneRenderFence.get(), VK_TRUE,
                                                          UINT64_MAX) != vk::Result::eSuccess) {
     throw std::runtime_error("failed on wait for fence.");

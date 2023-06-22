@@ -7,8 +7,12 @@ from transforms3d.quaternions import qmult, mat2quat, rotate_vector
 import sapien.core.pysapien.renderer as R
 from sapien.asset import download_partnet_mobility, create_dome_envmap
 
-# from sapien.utils import Viewer
-from sapien.utils import KeyframeEditor as Viewer
+import argparse
+
+# if args.old:
+from sapien.utils import Viewer
+# else:
+#     from viewer.viewer import Viewer
 
 
 def create_table(
@@ -51,7 +55,6 @@ def create_table(
 
 
 def main():
-
     sapien.SapienRenderer.set_log_level("info")
 
     sim = sapien.Engine()
@@ -208,7 +211,6 @@ def main():
 
     print(cam1.get_projection_matrix())
 
-
     mount = scene.create_actor_builder().build_kinematic()
     mount.set_pose(Pose([-3, 0, 2], qmult(aa([0, 0, 1], 0.3), aa([0, 1, 0], 0.5))))
     cam2 = scene.add_mounted_camera("cam", mount, Pose(), 1920, 1080, 0, 1, 0.1, 100)
@@ -248,13 +250,11 @@ def main():
 
     plight = scene.add_point_light([0, -1, 1], [2, 1, 2], True)
 
-    count = 0
     while not viewer.closed:
         for i in range(4):
             scene.step()
         scene.update_render()
         viewer.render()
-        count += 1
         robot.get_qpos()
 
     viewer.close()

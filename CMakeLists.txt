@@ -11,6 +11,10 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(SAPIEN_PROFILE "Build SAPIEN with easy_profiler" OFF)
 option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OFF)
 option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, denoiser, and simsense" ON)
+
+option(SAPIEN_BUILD_PYTHON "Build Python binding, only intended to generate compile_commands.json for IDE" OFF)
+
+
 set(SAPIEN_PHYSX5_DIR "" CACHE STRING "Directory for precompield PhysX5")
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -155,3 +159,12 @@ install(
     FILES "${CMAKE_CURRENT_BINARY_DIR}/sapienConfig.cmake"
     DESTINATION "lib/cmake/sapien"
 )
+
+if (SAPIEN_BUILD_PYTHON)
+    include(pybind11)
+    pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
+    target_link_libraries(pysapien PRIVATE sapien eigen)
+    if (TARGET simsense)
+        target_link_libraries(pysapien PRIVATE simsense)
+    endif()
+endif()

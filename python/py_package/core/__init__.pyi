@@ -46,6 +46,7 @@ from sapien.core.pysapien import LinkBuilder
 from sapien.core.pysapien import NonconvexMeshGeometry
 from sapien.core.pysapien import ParticleEntity
 from sapien.core.pysapien import PhysicalMaterial
+from sapien.core._pinocchio_model import PinocchioModel
 from sapien.core.pysapien import PlaneGeometry
 from sapien.core.pysapien import PointLightEntity
 from sapien.core.pysapien import Pose
@@ -137,6 +138,7 @@ __all__ = [
     "NonconvexMeshGeometry",
     "ParticleEntity",
     "PhysicalMaterial",
+    "PinocchioModel",
     "PlaneGeometry",
     "PointLightEntity",
     "Pose",

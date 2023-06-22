@@ -51,7 +51,7 @@ protected:
   uint32_t mCol2{0};
   uint32_t mCol3{0};
 
-  bool collisionRender{false};
+  bool mCollisionRender{false};
   bool mHidden{false};
   float mDisplayVisibility{1.f};
 

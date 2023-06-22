@@ -40,7 +40,8 @@ sys.argv = [sys.argv[0]] + unknown
 def build_sapien(sapien_source_dir, sapien_build_dir):
     build_dir = os.path.join(sapien_build_dir, "_sapien_build")
     install_dir = os.path.join(sapien_build_dir, "_sapien_install")
-    os.makedirs(sapien_build_dir, exist_ok=True)
+    os.makedirs(build_dir, exist_ok=True)
+    os.makedirs(install_dir, exist_ok=True)
 
     cmake_args = []
 
@@ -110,6 +111,37 @@ class CMakeBuild(build_ext):
         for ext in self.extensions:
             self.build_extension(ext)
 
+    def build_pinocchio(self, ext):
+        sapien_install_dir = os.path.join(self.sapien_build_dir, "_sapien_install")
+        build_dir = os.path.join(self.sapien_build_dir, "_pinocchio_build")
+        os.makedirs(build_dir, exist_ok=True)
+        original_full_path = self.get_ext_fullpath(ext.name)
+        extdir = os.path.abspath(os.path.dirname(original_full_path))
+        extdir = os.path.join(extdir, self.distribution.get_name(), "core")
+        cmake_args = [
+            "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
+            "-DPYTHON_EXECUTABLE=" + sys.executable,
+        ]
+        if args.debug:
+            cfg = "Debug"
+        else:
+            cfg = "Release"
+        build_args = ["--config", cfg]
+        cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
+        cmake_args += [
+            "-Dsapien_DIR=" + os.path.join(sapien_install_dir, "lib/cmake/sapien")
+        ]
+        env = os.environ.copy()
+        subprocess.check_call(
+            ["cmake", os.path.join(ext.sourcedir, "pinocchio")] + cmake_args,
+            cwd=build_dir,
+            env=env,
+        )
+        subprocess.check_call(
+            ["cmake", "--build", ".", "--target", "pysapien_pinocchio"] + build_args,
+            cwd=build_dir,
+        )
+
     def build_pybind(self, ext):
         sapien_install_dir = os.path.join(self.sapien_build_dir, "_sapien_install")
 
@@ -178,6 +210,8 @@ class CMakeBuild(build_ext):
         )
 
     def build_extension(self, ext):
+        if platform.system() == "Linux":
+            self.build_pinocchio(ext)
         self.build_pybind(ext)
         self.copy_assets(ext)
 
@@ -287,6 +321,7 @@ setup(
         "sapien.asset",
         "sapien.example",
         "sapien.utils",
+        "sapien.utils.viewer",
         "sapien.sensor",
     ],
     keywords="robotics simulator dataset articulation partnet",

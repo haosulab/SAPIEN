@@ -14,8 +14,8 @@
 #include "sapien/sapien_actor_base.h"
 #include "sapien/sapien_contact.h"
 #include "sapien/sapien_drive.h"
-#include "sapien/sapien_entity_particle.h"
 #include "sapien/sapien_entity_deformable.h"
+#include "sapien/sapien_entity_particle.h"
 #include "sapien/sapien_material.h"
 #include "sapien/sapien_scene.h"
 #include "sapien/simulation.h"
@@ -1314,13 +1314,16 @@ be locked, limited, or free.)doc")
       .def("get_collision_visual_bodies", &SActorBase::getCollisionBodies,
            py::return_value_policy::reference)
       .def("render_collision", &SActorBase::renderCollisionBodies, py::arg("render") = true)
+      .def("is_rendering_collision", &SActorBase::isRenderingCollision)
       .def("hide_visual", &SActorBase::hideVisual)
       .def("unhide_visual", &SActorBase::unhideVisual)
       .def("is_hiding_visual", &SActorBase::isHidingVisual)
       .def("on_step", &SActorBase::onStep, py::arg("func"))
       .def("on_contact", &SActorBase::onContact, py::arg("func"))
       .def("on_trigger", &SActorBase::onTrigger, py::arg("func"))
-      .def("get_builder", &SActorBase::getBuilder);
+      .def("get_builder", &SActorBase::getBuilder)
+      .def("set_visibility", &SActorBase::setDisplayVisibility, py::arg("visibility"))
+      .def("get_visibility", &SActorBase::getDisplayVisibility);
 
   PyActorDynamicBase
       .def_property_readonly("velocity",
@@ -2525,6 +2528,7 @@ Args:
       .def("set_intrinsic_parameters", &Renderer::SVulkan2Window::setCameraIntrinsicParameters,
            py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
            py::arg("cy"), py::arg("skew"))
+      .def("set_camera_pose", &Renderer::SVulkan2Window::setCameraPose)
       .def(
           "set_camera_position",
           [](Renderer::SVulkan2Window &window, py::array_t<float> position) {
@@ -2576,6 +2580,7 @@ Args:
              auto quat = window.getCameraRotation();
              return make_array<float>({quat.w, quat.x, quat.y, quat.z});
            })
+      .def("get_camera_pose", &Renderer::SVulkan2Window::getCameraPose)
       .def("get_camera_projection_matrix",
            [](Renderer::SVulkan2Window &window) {
              glm::mat4 proj = glm::transpose(window.getCameraProjectionMatrix());
@@ -2601,7 +2606,7 @@ Args:
                              "in the render function")
       .def("get_target_size", &Renderer::SVulkan2Window::getRenderTargetSize, py::arg("name"))
       .def("render", &Renderer::SVulkan2Window::render, py::arg("target_name"),
-           py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Window>>())
+           py::arg("ui_windows") = std::vector<std::shared_ptr<svulkan2::ui::Widget>>())
       .def("resize", &Renderer::SVulkan2Window::resize, py::arg("width"), py::arg("height"))
       .def_property_readonly("fps", &Renderer::SVulkan2Window::getFPS)
       .def_property_readonly("size", &Renderer::SVulkan2Window::getWindowSize)
@@ -2667,7 +2672,10 @@ Args:
       .def_property_readonly("mouse_delta", &Renderer::SVulkan2Window::getMouseDelta)
       .def_property_readonly("mouse_wheel_delta", &Renderer::SVulkan2Window::getMouseWheelDelta)
       .def("set_drop_callback", &Renderer::SVulkan2Window::setDropCallback, py::arg("callback"))
-      .def("unset_drop_callback", &Renderer::SVulkan2Window::unsetDropCallback);
+      .def("unset_drop_callback", &Renderer::SVulkan2Window::unsetDropCallback)
+      .def("set_focus_callback", &Renderer::SVulkan2Window::setFocusCallback, py::arg("callback"))
+      .def("unset_focus_callback", &Renderer::SVulkan2Window::unsetFocusCallback);
+
 
   PyVulkanScene.def_property_readonly(
       "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); });

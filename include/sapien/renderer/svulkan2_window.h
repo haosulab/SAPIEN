@@ -65,12 +65,19 @@ public:
   void setCameraIntrinsicParameters(float near, float far, float fx, float fy, float cx, float cy,
                                     float skew);
 
+  void setCameraPose(physx::PxTransform const &pose);
+  physx::PxTransform getCameraPose();
+
   void setCameraPosition(glm::vec3 const &pos);
   void setCameraRotation(glm::quat const &rot);
 
+  glm::vec3 getCameraPosition();
+  glm::quat getCameraRotation();
+
   void setCameraProperty(std::string const &name, float property);
   void setCameraProperty(std::string const &name, int property);
-  void setCameraTexture(std::string const &name, std::shared_ptr<Renderer::IRenderTexture> texture);
+  void setCameraTexture(std::string const &name,
+                        std::shared_ptr<Renderer::IRenderTexture> texture);
   void setCameraTextureArray(std::string const &name,
                              std::vector<std::shared_ptr<Renderer::IRenderTexture>> textures);
 
@@ -80,13 +87,11 @@ public:
   float getCameraFar();
   float getCameraFovy();
 
-  glm::vec3 getCameraPosition();
-  glm::quat getCameraRotation();
   glm::mat4 getCameraProjectionMatrix();
 
   std::vector<std::string> getDisplayTargetNames() const;
   void render(std::string const &targetName,
-              std::vector<std::shared_ptr<svulkan2::ui::Window>> uiWindows = {});
+              std::vector<std::shared_ptr<svulkan2::ui::Widget>> uiWindows = {});
   void show();
   void hide();
 
@@ -137,6 +142,9 @@ public:
 
   void setDropCallback(std::function<void(std::vector<std::string>)> callback);
   void unsetDropCallback();
+
+  void setFocusCallback(std::function<void(int)> callback);
+  void unsetFocusCallback();
 
 private:
   svulkan2::scene::Camera *getCamera();
