@@ -179,6 +179,12 @@ class CMakeBuild(build_ext):
             shutil.rmtree(include_path)
         shutil.copytree(source_include_path, include_path)
 
+        if platform.system() == "Windows":
+            bindir = os.path.join(sapien_install_dir, "bin")
+            for f in os.listdir(bindir):
+                if f.endswith("dll"):
+                    shutil.copy(os.path.join(bindir, f), extdir)
+
     def copy_assets(self, ext):
         vulkan_shader_path = os.path.join(self.build_lib, "sapien", "vulkan_shader")
         source_path = os.path.join(ext.sourcedir, "vulkan_shader")

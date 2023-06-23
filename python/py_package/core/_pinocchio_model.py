@@ -1,6 +1,7 @@
 import numpy as np
 import warnings
 from .pysapien import Pose
+import platform
 
 try:
     import pinocchio
@@ -272,13 +273,17 @@ try:
             return self.q_p2s(best_q), success, best_error
 
 except ModuleNotFoundError:
-    warnings.warn("pinnochio package is not installed, fallback to built-in pinocchio")
-    from .pysapien_pinocchio import PinocchioModel
+    if platform.system() == "Linux":
+        warnings.warn("pinnochio package is not installed, fallback to built-in pinocchio")
+        from .pysapien_pinocchio import PinocchioModel
+    warnings.warn("pinnochio package is not installed, robotics functionalities will not be available")
 except ImportError:
-    warnings.warn(
-        "pinnochio package is broken, fallback to built-in pinocchio. This may be fixed by installing pinocchio via conda instead of pip"
-    )
-    from .pysapien_pinocchio import PinocchioModel
+    if platform.system() == "Linux":
+        warnings.warn(
+            "pinnochio package is broken, fallback to built-in pinocchio. This may be fixed by installing pinocchio via conda instead of pip"
+        )
+        from .pysapien_pinocchio import PinocchioModel
+    warnings.warn("pinnochio package is broken, robotics functionalities will not be available")
 
 
 def _create_pinocchio_model(articulation) -> PinocchioModel:

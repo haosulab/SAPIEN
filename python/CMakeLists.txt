@@ -2,8 +2,14 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall")
+
+if (MSVC)
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /bigobj")
+else()
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall")
+endif()
+
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-D_DEBUG)
@@ -28,6 +34,12 @@ find_package(sapien REQUIRED)
 pybind11_add_module(pysapien "pysapien.cpp" NO_EXTRAS)
 target_link_libraries(pysapien PRIVATE sapien::sapien eigen)
 
+if (MSVC)
+    set_target_properties(pysapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+    set_target_properties(pysapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+    set_target_properties(pysapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+endif ()
+
 if (TARGET sapien::simsense)
     target_link_libraries(pysapien PRIVATE sapien::simsense)
-endif()
+endif ()
