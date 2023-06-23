@@ -598,7 +598,7 @@ class CapsuleGeometry(CollisionGeometry):
     pass
 class BoxGeometry(CollisionGeometry):
     @property
-    def half_lengths(self) -> numpy.ndarray[numpy.float32]:
+    def half_size(self) -> numpy.ndarray[numpy.float32]:
         """
         :type: numpy.ndarray[numpy.float32]
         """
@@ -1168,7 +1168,7 @@ class RenderBody():
         :type: float
         """
     @property
-    def half_lengths(self) -> numpy.ndarray[numpy.float32]:
+    def half_size(self) -> numpy.ndarray[numpy.float32]:
         """
         :type: numpy.ndarray[numpy.float32]
         """

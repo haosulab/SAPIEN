@@ -462,8 +462,6 @@ void buildSapien(py::module &m) {
       .def("wait_all", &Renderer::server::RenderServer::waitAll, py::arg("timeout") = UINT64_MAX)
       .def("wait_scenes", &Renderer::server::RenderServer::waitScenes, py::arg("scenes"),
            py::arg("timeout") = UINT64_MAX)
-      // .def("allocate_buffer", &Renderer::server::RenderServer::allocateBuffer, py::arg("type"),
-      //      py::arg("shape"), py::return_value_policy::reference)
       .def("auto_allocate_buffers", &Renderer::server::RenderServer::autoAllocateBuffers,
            py::arg("render_targets"), py::return_value_policy::reference)
       .def("summary", &Renderer::server::RenderServer::summary);
@@ -561,7 +559,7 @@ void buildSapien(py::module &m) {
 
   //======== Geometry ========//
 
-  PyBoxGeometry.def_property_readonly("half_lengths",
+  PyBoxGeometry.def_property_readonly("half_size",
                                       [](SBoxGeometry &g) { return vec32array(g.halfLengths); });
   PySphereGeometry.def_readonly("radius", &SSphereGeometry::radius);
   PyCapsuleGeometry.def_readonly("radius", &SCapsuleGeometry::radius)
@@ -2865,11 +2863,11 @@ Args:
                                }
                                return body.getScale().y;
                              })
-      .def_property_readonly("half_lengths",
+      .def_property_readonly("half_size",
                              [](Renderer::IRenderBody &body) {
                                if (body.getType() != physx::PxGeometryType::eBOX) {
                                  throw std::runtime_error(
-                                     "Visual body half_lengths is only valid for box.");
+                                     "Visual body half_size is only valid for box.");
                                }
                                return vec32array(body.getScale());
                              })

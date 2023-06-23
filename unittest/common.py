@@ -11,8 +11,17 @@ def rand_q():
     q /= np.linalg.norm(q)
     return q
 
+
 def rand_size():
     return np.random.rand(3) * 10
 
+
 def rand_pose():
     return sapien.Pose(rand_p(), rand_q())
+
+
+def pose_equal(pose0, pose1, rtol=1.0e-5, atol=1.0e-8):
+    return np.allclose(pose0.p, pose1.p, rtol=rtol, atol=atol) and (
+        np.allclose(pose0.q, pose1.q, rtol=rtol, atol=atol)
+        or np.allclose(pose0.q, -pose1.q, rtol=rtol, atol=atol)
+    )

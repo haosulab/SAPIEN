@@ -1518,10 +1518,10 @@ class Viewer(object):
                         ),
                     )
                 elif shape.type == "box":
-                    x, y, z = shape.geometry.half_lengths
+                    x, y, z = shape.geometry.half_size
                     shape_info.append(
                         R.UIDisplayText().Text(
-                            "Box half lengths: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                            "Box half size: {:.3g} {:.3g} {:.3g}".format(x, y, z)
                         )
                     )
                 elif shape.type == "convex_mesh":
@@ -1559,10 +1559,10 @@ class Viewer(object):
                         ),
                     )
                 elif body.type == "box":
-                    x, y, z = body.half_lengths
+                    x, y, z = body.half_size
                     body_info.append(
                         R.UIDisplayText().Text(
-                            "Half extents: {:.3g} {:.3g} {:.3g}".format(x, y, z)
+                            "Half size: {:.3g} {:.3g} {:.3g}".format(x, y, z)
                         )
                     )
                 elif body.type == "mesh":
