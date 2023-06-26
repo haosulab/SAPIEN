@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  build-linux:
     resource_class: large
     docker:
       - image: fxiangucsd/sapien-build-env:3.0
@@ -13,7 +13,7 @@ jobs:
       - run: git submodule update --init --recursive
       - run:
           name: Build wheels
-          command: ./build_wheels.sh
+          command: ./build.sh
       - store_artifacts:
           path: /workspace/SAPIEN/wheelhouse
           destination: wheels
@@ -21,4 +21,9 @@ jobs:
 workflows:
   build:
     jobs:
-      - build
+      - build-linux:
+          filters:
+            branches:
+              only:
+                - master
+                - dev

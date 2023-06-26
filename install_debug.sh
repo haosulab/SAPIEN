@@ -2,15 +2,6 @@
 
 rm -rf sapien.egg-info
 rm -f dist/*.whl
-if [ -z ${VERSION} ]
-then
-    echo VERSION variable is not specified
-    VERSION=2.0.0.dev$(date +"%Y%m%d")
-    echo VERSION defaults to ${VERSION}
-fi
-
-echo ${VERSION} > python/VERSION
-echo __version__=\"${VERSION}\" > python/py_package/version.py
 
 python3 setup.py bdist_wheel --debug
 

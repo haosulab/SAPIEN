@@ -65,7 +65,7 @@ function build_pybind() {
   COMMAND="${BIN} setup.py bdist_wheel"
   eval "${COMMAND} --pybind-only --build-dir=docker_sapien_build"
 
-  PACKAGE_VERSION=$(<./python/VERSION)
+  PACKAGE_VERSION=`${BIN} setup.py --get-version`
   WHEEL_NAME="./dist/sapien-${PACKAGE_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}${EXT}-linux_x86_64.whl"
   if test -f "$WHEEL_NAME"; then
     echo "$FILE exist, begin audit and repair"
@@ -76,7 +76,6 @@ function build_pybind() {
 build_sapien
 if [ -z "${VERSION}" ]
 then
-   build_pybind 37
    build_pybind 38
    build_pybind 39
    build_pybind 310

@@ -32,9 +32,49 @@ parser.add_argument(
     default="sapien_build",
     help="directory to put build files",
 )
+parser.add_argument(
+    "--get-version",
+    action="store_true",
+    help="print version string and exit immediately",
+)
 
 args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
+
+
+def check_version_info():
+    try:
+        git_revision = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"])
+            .decode("utf-8")
+            .split("\n")[0]
+        )
+        git_branch = (
+            subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+            .decode("utf-8")
+            .split("\n")[0]
+        )
+    except (subprocess.CalledProcessError, OSError):
+        git_revision = ""
+        git_branch = "non-git"
+
+    build_datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
+    with open("python/VERSION") as f:
+        version_number = f.readline().strip()
+
+    hostname = socket.gethostname()
+
+    if git_branch != "master":
+        version_number += ".dev" + time.strftime("%Y%m%d", time.gmtime())
+
+    return git_revision, git_branch, build_datetime, version_number, hostname
+
+
+version = check_version_info()[3]
+
+if args.get_version:
+    print(version)
+    exit(0)
 
 
 def build_sapien(sapien_source_dir, sapien_build_dir):
@@ -214,49 +254,14 @@ class CMakeBuild(build_ext):
         shutil.copytree(
             source_patterns_path, os.path.join(sensor_assets_path, "patterns")
         )
+        with open(os.path.join(self.build_lib, "sapien", "version.py"), "w") as f:
+            f.write('__version__="{}"'.format(version))
 
     def build_extension(self, ext):
         if platform.system() == "Linux":
             self.build_pinocchio(ext)
         self.build_pybind(ext)
         self.copy_assets(ext)
-
-
-def check_version_info():
-    try:
-        git_revision = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"])
-            .decode("utf-8")
-            .split("\n")[0]
-        )
-        git_branch = (
-            subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
-            .decode("utf-8")
-            .split("\n")[0]
-        )
-    except (subprocess.CalledProcessError, OSError):
-        git_revision = ""
-        git_branch = "non-git"
-
-    build_datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
-    with open("python/VERSION") as f:
-        version_number = f.readline().strip()
-
-    hostname = socket.gethostname()
-
-    sys.stdout.write(
-        "====================Version Data====================\n"
-        "Git Revision Number: {}\n"
-        "Git Branch: {}\n"
-        "Build Datetime: {}\n"
-        "Version Number: {}\n"
-        "Host Name: {}\n"
-        "====================================================\n\n".format(
-            git_revision, git_branch, build_datetime, version_number, hostname
-        )
-    )
-
-    return git_revision, git_branch, build_datetime, version_number, hostname
 
 
 # Read requirements.txt
@@ -287,10 +292,9 @@ if not args.pybind_only:
 if args.sapien_only:
     exit(0)
 
-
 setup(
     name="sapien",
-    version=check_version_info()[3],
+    version=version,
     author="Sapien",
     python_requires=">=3.7",
     author_email="sapienaicontact@gmail.com",
