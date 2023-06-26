@@ -59,7 +59,8 @@ def check_version_info():
         git_branch = "non-git"
 
     build_datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
-    with open("python/VERSION") as f:
+
+    with open(os.path.join(os.path.dirname(__file__), "python", "VERSION"), "r") as f:
         version_number = f.readline().strip()
 
     hostname = socket.gethostname()
