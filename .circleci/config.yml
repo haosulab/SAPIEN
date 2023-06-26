@@ -4,7 +4,7 @@ jobs:
   build-linux:
     resource_class: large
     docker:
-      - image: fxiangucsd/sapien-build-env:3.0
+      - image: fxiangucsd/sapien-build-env:3.1
     environment:
       CMAKE_BUILD_PARALLEL_LEVEL: 4
     working_directory: /workspace/SAPIEN

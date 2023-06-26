@@ -21,5 +21,7 @@ RUN cd /workspace && wget https://developer.download.nvidia.com/compute/cuda/11.
     sh cuda_11.7.1_515.65.01_linux.run --silent --toolkit --toolkitpath=/workspace/cuda --override && rm -f cuda_11.7.1_515.65.01_linux.run
 ENV CUDA_PATH=/workspace/cuda PATH="/workspace/cuda/bin:$PATH" LD_LIBRARY_PATH="/workspace/cuda/lib64:$LD_LIBRARY_PATH"
 
+RUN yum install -y openssh-clients
+
 RUN pipx install cmake==3.26.3 --force
 ENV PATH=/opt/python/cp311-cp311/bin:$PATH
