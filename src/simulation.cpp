@@ -164,14 +164,22 @@ void Simulation::setLogLevel(std::string const &level) {
   }
 }
 
+static std::weak_ptr<Simulation> _instance{};
 std::shared_ptr<Simulation> Simulation::getInstance(uint32_t nthread, PxReal toleranceLength,
                                                     PxReal toleranceSpeed) {
-  static std::weak_ptr<Simulation> _instance;
-  if (!_instance.expired()) {
-    spdlog::get("SAPIEN")->warn("A second engine will share the same internal structures with "
-                                "the first one. Arguments passed to constructor will be ignored.");
-    return _instance.lock();
+  if (auto sim = _instance.lock()) {
+    if (sim) {
+      auto scale = sim->mPhysicsSDK->getTolerancesScale();
+      PxReal dl = scale.length - toleranceLength;
+      PxReal ds = scale.speed - toleranceSpeed;
+      if (abs(dl) > 1e-6f || abs(ds) > 1e-6f) {
+        spdlog::get("SAPIEN")->warn("Creating multiple engines with different parameters is not "
+                                    "allowed. Parameters will be ignored.");
+      }
+      return sim;
+    }
   }
+
   auto sim = std::make_shared<Simulation>(nthread, toleranceLength, toleranceSpeed);
   _instance = sim;
   return sim;

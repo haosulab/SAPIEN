@@ -687,9 +687,11 @@ struct Sensor : DomBase {
     float nearValue = std::atof(near->GetText());
     float farValue = std::atof(far->GetText());
 
-    if (image->FirstChildElement("format")) {
-      spdlog::get("SAPIEN")->warn("Ignored <format> on camera");
-    }
+    // NOTE: format is useless for SAPIEN
+    // if (image->FirstChildElement("format")) {
+    //   spdlog::get("SAPIEN")->warn("Ignored <format> on camera");
+    // }
+
     auto width = image->FirstChildElement("width");
     auto height = image->FirstChildElement("height");
     if (!width || !height) {
