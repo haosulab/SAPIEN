@@ -250,8 +250,8 @@ PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform co
   Vector6d bestErr;
   for (int i = 0;; i++) {
     pinocchio::forwardKinematics(model, data, q);
-    const pinocchio::SE3 dMi = oMdes.actInv(data.oMi[jointIdx]);
-    err = pinocchio::log6(dMi).toVector();
+    const pinocchio::SE3 iMd = data.oMi[jointIdx].actInv(oMdes);
+    err = pinocchio::log6(iMd).toVector();
     double errNorm = err.norm();
     if (errNorm < minError) {
       minError = errNorm;
@@ -267,6 +267,9 @@ PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform co
       break;
     }
     pinocchio::computeJointJacobian(model, data, q, jointIdx, J);
+    pinocchio::Data::Matrix6 Jlog;
+    pinocchio::Jlog6(iMd.inverse(), Jlog);
+    J = -Jlog * J;
     J = J * mask.asDiagonal();
 
     pinocchio::Data::Matrix6 JJt;

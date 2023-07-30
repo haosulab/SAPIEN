@@ -205,6 +205,7 @@ try:
             """
             Compute inverse kinematics with CLIK algorithm.
             Details see https://gepettoweb.laas.fr/doc/stack-of-tasks/pinocchio/master/doxygen-html/md_doc_b-examples_i-inverse-kinematics.html
+            Also see bug fix from https://github.com/stack-of-tasks/pinocchio/pull/1963/files
             Args:
                 link_index: index of the link
                 pose: target pose of the link in articulation base frame
@@ -247,8 +248,10 @@ try:
 
             for i in range(max_iterations):
                 pinocchio.forwardKinematics(self.model, self.data, q)
-                dMi = oMdes.actInv(self.data.oMi[joint])
-                err = pinocchio.log6(dMi).vector
+                # dMi = oMdes.actInv(self.data.oMi[joint])
+                # err = pinocchio.log6(dMi).vector
+                iMd = data.oMi[JOINT_ID].actInv(oMdes)
+                err = pinocchio.log6(iMd).vector
                 err_norm = np.linalg.norm(err)
                 if err_norm < best_error:
                     best_error = err_norm
@@ -259,6 +262,8 @@ try:
                     break
 
                 J = pinocchio.computeJointJacobian(self.model, self.data, q, joint)
+                Jlog = pinocchio.Jlog6(iMd.inverse())
+                J = -Jlog * J
                 J = J @ mask
 
                 JJt = J @ J.T
