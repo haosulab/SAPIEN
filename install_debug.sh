@@ -11,6 +11,6 @@ cd dist
 pip3 uninstall -y sapien
 pip3 install *
 
-cd /tmp && rm stubs -rf && pybind11-stubgen sapien.core --ignore-invalid all
-cp /tmp/stubs/sapien/core-stubs/__init__.pyi $DIR/python/py_package/core
-cp -r /tmp/stubs/sapien/core-stubs/pysapien $DIR/python/py_package/core
+cd /tmp && rm stubs -rf && python3 ${DIR}/python/stubgen.py sapien.core --ignore-invalid all
+cp /tmp/stubs/sapien/core-stubs/__init__.pyi ${DIR}/python/py_package/core
+cp -r /tmp/stubs/sapien/core-stubs/pysapien ${DIR}/python/py_package/core
