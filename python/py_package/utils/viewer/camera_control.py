@@ -1,7 +1,7 @@
 import numpy as np
 from transforms3d.quaternions import axangle2quat as aa
 from transforms3d.quaternions import qmult, mat2quat, rotate_vector, qinverse
-from sapien.core import Pose
+from sapien import Pose
 
 
 class FPSCameraController:

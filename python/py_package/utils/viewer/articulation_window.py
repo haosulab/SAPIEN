@@ -1,6 +1,6 @@
 from .plugin import Plugin
-from sapien.core import renderer as R
-import sapien.core as sapien
+from sapien import internal_renderer as R
+import sapien
 
 
 class ArticulationWindow(Plugin):
@@ -8,6 +8,7 @@ class ArticulationWindow(Plugin):
         self.reset()
 
     def reset(self):
+        self.articulation = None
         self.ui_window = None
 
     def close(self):
@@ -22,10 +23,14 @@ class ArticulationWindow(Plugin):
         return self.viewer.selected_entity
 
     def notify_selected_entity_change(self):
-        if isinstance(self.selected_entity, sapien.LinkBase):
-            self.articulation: sapien.ArticulationBase = (
-                self.selected_entity.get_articulation()
-            )
+        articulation = None
+        if self.selected_entity:
+            for c in self.selected_entity.components:
+                if isinstance(c, sapien.physx.PhysxArticulationLinkComponent):
+                    articulation = c.articulation
+
+        self.articulation = articulation
+        if articulation:
             self.joint_details = [False] * self.articulation.dof
 
     def set_joint_details(self, index, v):
@@ -37,27 +42,34 @@ class ArticulationWindow(Plugin):
             return
 
         self.ui_window = R.UIWindow().Label("Articulation")
-        if (
-            not self.selected_entity
-            or not isinstance(self.selected_entity, sapien.ActorBase)
-            or self.selected_entity.classname not in ["Link", "KinematicLink"]
-        ):
+
+        # art = None
+        # if self.selected_entity:
+        #     for c in self.selected_entity.components:
+        #         if isinstance(c, sapien.physx.PhysxArticulationLinkComponent):
+        #             articulation = c.articulation
+        # if not art:
+        #     self.ui_window.append(R.UIDisplayText().Text("No articulation selected."))
+        #     return
+
+        if not self.articulation:
             self.ui_window.append(R.UIDisplayText().Text("No articulation selected."))
             return
 
-        art = self.selected_entity.get_articulation()
-        art: ArticulationBase
+        art = self.articulation
+
         self.ui_window.append(
             R.UIDisplayText().Text(
                 "Name: {}".format(art.name if art.name else "(no name)")
             ),
-            R.UIDisplayText().Text("Class: {}".format(art.classname)),
-            R.UIDisplayText().Text("Base Link Id: {}".format(art.get_links()[0].id)),
+            R.UIDisplayText().Text(
+                "Base Link Entity Id: {}".format(art.root.entity.id)
+            ),
         )
         uijoints = R.UISection().Label("Joints")
         joints = []
-        for j in art.get_joints():
-            if j.get_dof() > 0:
+        for j in art.joints:
+            if j.dof > 0:
                 joints.append(j)
 
         def wrapper(art, i, qpos):
@@ -75,113 +87,111 @@ class ArticulationWindow(Plugin):
                 R.UISliderFloat()
                 .WidthRatio(0.5)
                 .Id("joint_{}".format(i))
-                .Min(max(j.get_limits()[0][0], -20))
-                .Max(min(j.get_limits()[0][1], 20))
+                .Min(max(j.limit[0, 0], -20))
+                .Max(min(j.limit[0, 1], 20))
                 .Value(q)
                 .Callback(wrapper(art, i, qpos)),
             )
-            if art.classname == "Articulation":
-                j: Joint
 
-                if self.joint_details[i]:
-                    line.append(
-                        R.UIButton()
-                        .Label("-")
-                        .Id(str(i))
-                        .Width(40)
-                        .Callback(
-                            (lambda i: lambda _: self.set_joint_details(i, False))(i)
-                        ),
-                        R.UIDisplayText().Text(j.name),
-                    )
+            if self.joint_details[i]:
+                line.append(
+                    R.UIButton()
+                    .Label("-")
+                    .Id(str(i))
+                    .Width(40)
+                    .Callback(
+                        (lambda i: lambda _: self.set_joint_details(i, False))(i)
+                    ),
+                    R.UIDisplayText().Text(j.name),
+                )
 
-                    uijoints.append(
-                        R.UISliderFloat()
-                        .Label("Drive Target")
-                        .Id(str(i))
-                        .WidthRatio(0.5)
-                        .Min(max(j.get_limits()[0][0], -20))
-                        .Max(min(j.get_limits()[0][1], 20))
-                        .Value(j.get_drive_target())
-                        .Callback((lambda j: lambda p: j.set_drive_target(p.value))(j)),
-                        R.UIInputFloat()
-                        .Label("Damping")
-                        .Id(str(i))
-                        .WidthRatio(0.5)
-                        .Value(j.damping)
-                        .Callback(
-                            (
-                                lambda j: lambda p: j.set_drive_property(
-                                    j.stiffness,
-                                    p.value,
-                                    j.force_limit,
-                                    j.drive_mode,
-                                )
-                            )(j)
-                        ),
-                        R.UIInputFloat()
-                        .Label("Stiffness")
-                        .Id(str(i))
-                        .WidthRatio(0.5)
-                        .Value(j.stiffness)
-                        .Callback(
-                            (
-                                lambda j: lambda p: j.set_drive_property(
-                                    p.value,
-                                    j.damping,
-                                    j.force_limit,
-                                    j.drive_mode,
-                                )
-                            )(j)
-                        ),
-                        R.UIInputFloat()
-                        .Label("Force Limit")
-                        .Id(str(i))
-                        .WidthRatio(0.5)
-                        .Value(j.force_limit)
-                        .Callback(
-                            (
-                                lambda j: lambda p: j.set_drive_property(
-                                    j.stiffness,
-                                    j.damping,
-                                    p.value,
-                                    j.drive_mode,
-                                )
-                            )(j)
-                        ),
-                        R.UIInputFloat()
-                        .Label("Friction")
-                        .Id(str(i))
-                        .WidthRatio(0.5)
-                        .Value(j.friction)
-                        .Callback((lambda j: lambda p: j.set_friction(p.value))(j)),
-                        R.UICheckbox()
-                        .Label("Acceleration")
-                        .Id(str(i))
-                        .Checked(j.drive_mode == "acceleration")
-                        .Callback(
-                            (
-                                lambda j: lambda p: j.set_drive_property(
-                                    j.stiffness,
-                                    j.damping,
-                                    j.force_limit,
-                                    "acceleration" if p.checked else "force",
-                                )
-                            )(j)
-                        ),
-                        R.UIDummy().Height(20),
-                    )
-                else:
-                    line.append(
-                        R.UIButton()
-                        .Label("+")
-                        .Id(str(i))
-                        .Width(40)
-                        .Callback(
-                            (lambda i: lambda _: self.set_joint_details(i, True))(i)
-                        ),
-                        R.UIDisplayText().Text(j.name),
-                    )
+                uijoints.append(
+                    R.UISliderFloat()
+                    .Label("Drive Target")
+                    .Id(str(i))
+                    .WidthRatio(0.5)
+                    .Min(max(j.limit[0, 0], -20))
+                    .Max(min(j.limit[0, 1], 20))
+                    .Value(j.drive_target)
+                    .Callback(
+                        (lambda j: lambda p: j.set_drive_target(p.value))(j)
+                    ),
+                    R.UIInputFloat()
+                    .Label("Damping")
+                    .Id(str(i))
+                    .WidthRatio(0.5)
+                    .Value(j.damping)
+                    .Callback(
+                        (
+                            lambda j: lambda p: j.set_drive_properties(
+                                j.stiffness,
+                                p.value,
+                                j.force_limit,
+                                j.drive_mode,
+                            )
+                        )(j)
+                    ),
+                    R.UIInputFloat()
+                    .Label("Stiffness")
+                    .Id(str(i))
+                    .WidthRatio(0.5)
+                    .Value(j.stiffness)
+                    .Callback(
+                        (
+                            lambda j: lambda p: j.set_drive_properties(
+                                p.value,
+                                j.damping,
+                                j.force_limit,
+                                j.drive_mode,
+                            )
+                        )(j)
+                    ),
+                    R.UIInputFloat()
+                    .Label("Force Limit")
+                    .Id(str(i))
+                    .WidthRatio(0.5)
+                    .Value(j.force_limit)
+                    .Callback(
+                        (
+                            lambda j: lambda p: j.set_drive_properties(
+                                j.stiffness,
+                                j.damping,
+                                p.value,
+                                j.drive_mode,
+                            )
+                        )(j)
+                    ),
+                    R.UIInputFloat()
+                    .Label("Friction")
+                    .Id(str(i))
+                    .WidthRatio(0.5)
+                    .Value(j.friction)
+                    .Callback((lambda j: lambda p: j.set_friction(p.value))(j)),
+                    R.UICheckbox()
+                    .Label("Acceleration")
+                    .Id(str(i))
+                    .Checked(j.drive_mode == "acceleration")
+                    .Callback(
+                        (
+                            lambda j: lambda p: j.set_drive_properties(
+                                j.stiffness,
+                                j.damping,
+                                j.force_limit,
+                                "acceleration" if p.checked else "force",
+                            )
+                        )(j)
+                    ),
+                    R.UIDummy().Height(20),
+                )
+            else:
+                line.append(
+                    R.UIButton()
+                    .Label("+")
+                    .Id(str(i))
+                    .Width(40)
+                    .Callback((lambda i: lambda _: self.set_joint_details(i, True))(i)),
+                    R.UIDisplayText().Text(j.name),
+                )
 
         self.ui_window.append(uijoints)
 
@@ -199,9 +209,13 @@ class ArticulationWindow(Plugin):
 
         def wrapper(art, show):
             def show_link_collision(_):
-                for link in art.get_links():
-                    link.render_collision(show)
-
+                for plugin in self.viewer.plugins:
+                    if plugin.__class__.__name__ == "EntityWindow":
+                        for link in art.links:
+                            if show:
+                                plugin.enable_collision_visual(link.entity)
+                            else:
+                                plugin.disable_collision_visual(link.entity)
             return show_link_collision
 
         self.ui_window.append(

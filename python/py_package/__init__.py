@@ -1,13 +1,40 @@
+from warnings import warn
+import pkg_resources
 import os
-import warnings
 import platform
-
-if platform.system() == "Linux":
-    if not os.path.exists("/proc/version"):
-        warnings.warn("You are not using a standard Linux based OS. SAPIEN probably will not work")
-    with open("/proc/version") as f:
-        if 'microsoft' in '\n'.join(f.readlines()).lower():
-            warnings.warn("It seems you are using WSL. SAPIEN renderer is not supported on WSL. Please use SAPIEN on native Windows.")
-
-from . import core, sensor, asset, example, utils
 from .version import __version__
+
+os.environ["SAPIEN_PACKAGE_PATH"] = os.path.dirname(__file__)
+from . import _oidn_tricks
+
+from .pysapien import *
+from . import serialization
+
+from . import _vulkan_tricks
+
+from .wrapper.scene import Scene, SceneConfig, Module
+from .wrapper.engine import Engine
+from .wrapper.renderer import SapienRenderer
+from .wrapper.actor_builder import (
+    ActorBuilder,
+    VisualMaterialRecord,
+    PhysicalMaterialRecord,
+)
+from .wrapper.articulation_builder import ArticulationBuilder
+from .wrapper.pinocchio_model import PinocchioModel
+
+import pkg_resources
+
+try:
+    render._internal_set_shader_search_path(
+        pkg_resources.resource_filename("sapien", "vulkan_shader")
+    )
+    render.set_viewer_shader_dir("default")
+    render.set_camera_shader_dir("default")
+except RuntimeError:
+    pass
+
+
+import atexit
+
+atexit.register(physx._unload)

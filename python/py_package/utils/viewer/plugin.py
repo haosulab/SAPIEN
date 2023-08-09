@@ -1,5 +1,5 @@
 from __future__ import annotations
-from sapien.core import Scene
+from sapien import Scene
 
 from typing import TYPE_CHECKING
 

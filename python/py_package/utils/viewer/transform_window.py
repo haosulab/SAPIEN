@@ -1,6 +1,6 @@
 import numpy as np
-import sapien.core as sapien
-from sapien.core import renderer as R
+import sapien
+from sapien import internal_renderer as R
 
 from .plugin import Plugin
 
@@ -35,6 +35,15 @@ class TransformWindow(Plugin):
         self.update_ghost_objects()
         self.follow = False
 
+    def get_articulation(self, entity):
+        if not entity:
+            return None
+
+        for c in entity.components:
+            if isinstance(c, sapien.physx.PhysxArticulationLinkComponent):
+                return c.articulation
+        return None
+
     def notify_selected_entity_change(self):
         # self.refresh_ghost_objects()
         self.clear_ghost_objects()
@@ -45,13 +54,15 @@ class TransformWindow(Plugin):
             self._gizmo_pose = self.selected_entity.pose
             self.follow = True
 
-            if isinstance(self.selected_entity, sapien.LinkBase):
-                if self.ik_articulation == self.selected_entity.get_articulation():
+            art = self.get_articulation(self.selected_entity)
+            if art is not None:
+                if self.ik_articulation == art:
                     return
-                self.ik_articulation = self.selected_entity.get_articulation()
+                self.ik_articulation = art
                 self.pinocchio_model: sapien.PinocchioModel = (
                     self.ik_articulation.create_pinocchio_model()
                 )
+
                 self.move_group_joints = [
                     j.name
                     for j in self.ik_articulation.get_joints()
@@ -68,9 +79,15 @@ class TransformWindow(Plugin):
         if (
             self.selected_entity is not None
             and self.ik_enabled
-            and isinstance(self.selected_entity, sapien.LinkBase)
+            and self.get_articulation(self.selected_entity)
         ):
-            link_idx = self.ik_articulation.get_links().index(self.selected_entity)
+            link_idx = self.ik_articulation.get_links().index(
+                next(
+                    c
+                    for c in self.selected_entity.components
+                    if isinstance(c, sapien.physx.PhysxArticulationLinkComponent)
+                )
+            )
             mask = np.array(
                 [
                     self.move_group_selection[j]
@@ -97,60 +114,69 @@ class TransformWindow(Plugin):
         return self.viewer.selected_entity
 
     def clear_ghost_objects(self):
-        rs = self.scene.renderer_scene
-        render_scene: R.Scene = rs._internal_scene
+        render_scene: R.Scene = self.viewer.system._internal_scene
         for obj in self.ghost_objects:
             render_scene.remove_node(obj)
         self.ghost_objects = []
         self.viewer.notify_render_update()
 
     def refresh_ghost_objects(self):
-        rs = self.scene.renderer_scene
-        render_scene: R.Scene = rs._internal_scene
+        render_scene: R.Scene = self.viewer.system._internal_scene
         self.clear_ghost_objects()
 
         if self.selected_entity is None:
             return
 
-        elif isinstance(self.selected_entity, sapien.LinkBase):
+        render_body = None
+        articulation_link = None
+        for c in self.selected_entity.components:
+            if isinstance(c, sapien.render.RenderBodyComponent):
+                render_body = c
+            if isinstance(c, sapien.physx.PhysxArticulationLinkComponent):
+                articulation_link = c
+
+        if render_body is None:
+            return
+
+        elif articulation_link is not None:
             link: sapien.LinkBase = self.selected_entity
             link2world = link.pose
-            articulation = link.get_articulation()
+            articulation = articulation_link.articulation
             for l in articulation.get_links():
-                node = render_scene.add_node()
-                for body in l.get_visual_bodies():
-                    for obj in body._internal_objects:
-                        scale = obj.scale
-                        obj2world = sapien.Pose(obj.position, obj.rotation)
-                        obj2selected = l.pose.inv() * obj2world
-                        new_obj = render_scene.add_object(obj.model, node)
-                        new_obj.set_position(obj2selected.p)
-                        new_obj.set_rotation(obj2selected.q)
-                        new_obj.set_scale(scale)
+                new_node = render_scene.add_node()
+                for body in [
+                    c
+                    for c in l.entity.components
+                    if isinstance(c, sapien.render.RenderBodyComponent)
+                ]:
+                    render_node = body._internal_node
+                    for obj in render_node.children:
+                        new_obj = render_scene.add_object(obj.model, new_node)
+                        new_obj.set_position(obj.position)
+                        new_obj.set_rotation(obj.rotation)
+                        new_obj.set_scale(obj.scale)
                         new_obj.transparency = 0.7
                         new_obj.set_segmentation(obj.get_segmentation())
-                node.set_position(l.pose.p)
-                node.set_rotation(l.pose.q)
-                self.ghost_objects.append(node)
 
-        elif isinstance(self.selected_entity, sapien.ActorBase):
-            # actors
-            actor = self.selected_entity
-            actor2world = actor.pose
-            node = render_scene.add_node()
-            for body in actor.get_visual_bodies():
-                for obj in body._internal_objects:
-                    scale = obj.scale
-                    obj2world = sapien.Pose(obj.position, obj.rotation)
-                    obj2selected = actor2world.inv() * obj2world
-                    new_obj = render_scene.add_object(obj.model, node)
-                    new_obj.set_position(obj2selected.p)
-                    new_obj.set_rotation(obj2selected.q)
-                    new_obj.set_scale(scale)
-                    new_obj.transparency = 0.7
-            node.set_position(actor.pose.p)
-            node.set_rotation(actor.pose.q)
-            self.ghost_objects.append(node)
+                new_node.set_position(l.pose.p)
+                new_node.set_rotation(l.pose.q)
+                self.ghost_objects.append(new_node)
+
+        else:
+            entity2world = self.selected_entity.pose
+            render_node = render_body._internal_node
+            new_node = render_scene.add_node()
+
+            for obj in render_node.children:
+                new_obj = render_scene.add_object(obj.model, new_node)
+                new_obj.set_position(obj.position)
+                new_obj.set_rotation(obj.rotation)
+                new_obj.set_scale(obj.scale)
+                new_obj.transparency = 0.7
+
+            new_node.set_position(self.selected_entity.pose.p)
+            new_node.set_rotation(self.selected_entity.pose.q)
+            self.ghost_objects.append(new_node)
 
         self.viewer.notify_render_update()
 
@@ -161,7 +187,8 @@ class TransformWindow(Plugin):
         if not self.ghost_objects:
             self.refresh_ghost_objects()
 
-        if isinstance(self.selected_entity, sapien.LinkBase):
+        art = self.get_articulation(self.selected_entity)
+        if art is not None:
             if self.ik_enabled:
                 # IK
                 result, success, error = self.compute_ik()
@@ -170,18 +197,13 @@ class TransformWindow(Plugin):
                 self.ik_errpr = error
                 self.pinocchio_model.compute_forward_kinematics(result)
                 for idx, obj in enumerate(self.ghost_objects):
-                    pose = (
-                        self.selected_entity.get_articulation().pose
-                        * self.pinocchio_model.get_link_pose(idx)
-                    )
+                    pose = art.pose * self.pinocchio_model.get_link_pose(idx)
                     obj.set_position(pose.p)
                     obj.set_rotation(pose.q)
             else:
-                # no IK
-                link: sapien.LinkBase = self.selected_entity
+                link = self.selected_entity
                 link2world = link.pose
-                articulation = link.get_articulation()
-                for l, node in zip(articulation.get_links(), self.ghost_objects):
+                for l, node in zip(art.get_links(), self.ghost_objects):
                     newlink2world = self._gizmo_pose
                     l2world = l.pose
                     l2link = link2world.inv() * l2world
@@ -190,27 +212,27 @@ class TransformWindow(Plugin):
                     node.set_rotation(newl2world.q)
             return
 
-        if isinstance(self.selected_entity, sapien.ActorBase):
-            for obj in self.ghost_objects:
-                obj.set_position(self._gizmo_pose.p)
-                obj.set_rotation(self._gizmo_pose.q)
+        else:
+            for node in self.ghost_objects:
+                node.set_position(self._gizmo_pose.p)
+                node.set_rotation(self._gizmo_pose.q)
 
         self.viewer.notify_render_update()
 
     def teleport(self, _):
         try:
-            if isinstance(self.selected_entity, sapien.LinkBase):
+            art = self.get_articulation(self.selected_entity)
+            if art:
                 link: sapien.LinkBase = self.selected_entity
-                articulation = link.get_articulation()
                 if self.ik_enabled:
-                    articulation.set_qpos(self.ik_result)
+                    art.set_qpos(self.ik_result)
                 else:
                     link2world = link.pose
                     newlink2world = self._gizmo_pose
-                    l2world = articulation.pose
+                    l2world = art.pose
                     l2link = link2world.inv() * l2world
                     newl2world = newlink2world * l2link
-                    articulation.set_root_pose(newl2world)
+                    art.set_root_pose(newl2world)
             else:
                 self.selected_entity.set_pose(self._gizmo_pose)
             self.viewer.notify_render_update()
@@ -241,7 +263,10 @@ class TransformWindow(Plugin):
                     .Bind(lambda: self.selected_entity is not None)
                     .append(
                         R.UIConditional()
-                        .Bind(lambda: isinstance(self.selected_entity, sapien.LinkBase))
+                        .Bind(
+                            lambda: self.get_articulation(self.selected_entity)
+                            is not None
+                        )
                         .append(
                             R.UICheckbox().Label("IK").Bind(self, "ik_enabled"),
                             self.ui_move_group,

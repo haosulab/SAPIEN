@@ -1,32 +1,23 @@
 import os
 
 import numpy as np
-import sapien.core as sapien
-from sapien.core import (
-    ActorBase,
-    ArticulationBase,
-    CameraEntity,
-    DirectionalLightEntity,
-    Entity,
-    Joint,
-    LightEntity,
-    LinkBase,
-    PointLightEntity,
-    Pose,
-    SapienRenderer,
-    Scene,
-    SpotLightEntity,
-    VulkanWindow,
-    render_config,
-)
-from sapien.core import renderer as R
+import sapien
+from sapien import internal_renderer as R
+from sapien.render import get_viewer_shader_dir
+from sapien.render import SapienRenderer, RenderWindow, RenderSystem
+from sapien import Scene, Entity
 
-from .actor_window import ActorWindow
+from .entity_window import EntityWindow
+
 from .articulation_window import ArticulationWindow
 from .control_window import ControlWindow
+from .render_window import RenderOptionsWindow
+
 from .imgui_ini import imgui_ini
-from .keyframe_window import KeyframeWindow
+
+# from .keyframe_window import KeyframeWindow
 from .plugin import Plugin
+
 from .scene_window import SceneWindow
 from .transform_window import TransformWindow
 
@@ -34,31 +25,44 @@ from .transform_window import TransformWindow
 class Viewer:
     def __init__(
         self,
-        renderer: SapienRenderer,
+        renderer: SapienRenderer = None,
         shader_dir="",
         resolutions=(1920, 1080),
         plugins=[
             ControlWindow(),
             SceneWindow(),
-            ActorWindow(),
+            EntityWindow(),
             ArticulationWindow(),
             TransformWindow(),
-            KeyframeWindow(),
+            RenderOptionsWindow()
+            # KeyframeWindow(),
         ],
     ):
         if not os.path.exists("imgui.ini"):
             with open("imgui.ini", "w") as f:
                 f.write(imgui_ini)
 
+        if renderer is None:
+            renderer = SapienRenderer()
+
         self.renderer = renderer
+
         self.renderer_context = renderer._internal_context
+
         if not shader_dir:
-            self.shader_dir = render_config.viewer_shader_dir
+            self.shader_dir = get_viewer_shader_dir()
+        else:
+            self.shader_dir = shader_dir
+
         resolution = np.array(resolutions).flatten()[:2]
 
         self.scene = None
-        self.window = self.renderer.create_window(*resolution, self.shader_dir)
+        self.system = None
+
+        self.window = RenderWindow(*resolution, self.shader_dir)
         self.window.set_focus_callback(self.focus_change)
+        self.window.set_drop_callback(self.drop)
+
         self.paused = False
         self.render_target = "Color"
 
@@ -66,6 +70,15 @@ class Viewer:
         self.init_plugins(plugins)
 
         self._selected_entity_visibility = 0.5
+
+    def drop(self, files):
+        if not self.scene:
+            return
+
+        builder = self.scene.create_actor_builder()
+        for f in files:
+            builder.add_visual_from_file(f)
+        builder.build_kinematic("dropped file")
 
     def focus_change(self, focused):
         for plugin in self.plugins:
@@ -78,12 +91,19 @@ class Viewer:
 
     def set_scene(self, scene: Scene):
         if self.scene is not None:
+            camera_pose = self.window.get_camera_pose()
             self.clear_scene()
+        else:
+            camera_pose = sapien.Pose([-2, 0, 0.5])
 
         self.selected_entity = None
 
         self.scene = scene
+        self.system = scene.render_system
         self.window.set_scene(scene)
+
+        self.window.set_camera_parameters(0.1, 1000, np.pi / 2)
+        self.set_camera_pose(camera_pose)
 
         for plugin in self.plugins:
             plugin.notify_scene_change()
@@ -91,7 +111,6 @@ class Viewer:
     def clear_scene(self):
         for plugin in self.plugins:
             plugin.clear_scene()
-        pass
 
     @property
     def closed(self):
@@ -121,8 +140,11 @@ class Viewer:
             return
 
         while True:
+            if self.window.should_close:
+                break
+
             if not self.paused or self.render_updated:
-                self.scene.update_render()
+                self.system.step()
             self.reset_notifications()
 
             for plugin in self.plugins:
@@ -146,15 +168,17 @@ class Viewer:
 
         # reset previous selected entity
         if self.selected_entity is not None:
-            if isinstance(self.selected_entity, sapien.ActorBase):
-                self.selected_entity.set_visibility(1)
+            for c in self.selected_entity.components:
+                if isinstance(c, sapien.render.RenderBodyComponent):
+                    c.visibility = 1
 
         self.selected_entity = entity
 
         # update selected entity
         if self.selected_entity is not None:
-            if isinstance(self.selected_entity, sapien.ActorBase):
-                self.selected_entity.set_visibility(self.selected_entity_visibility)
+            for c in self.selected_entity.components:
+                if isinstance(c, sapien.render.RenderBodyComponent):
+                    c.visibility = self.selected_entity_visibility
 
         for plugin in self.plugins:
             plugin.notify_selected_entity_change()
@@ -168,10 +192,10 @@ class Viewer:
         self.notify_render_update()
         self._selected_entity_visibility = v
 
-        # update selected entity
         if self.selected_entity is not None:
-            if isinstance(self.selected_entity, sapien.ActorBase):
-                self.selected_entity.set_visibility(self.selected_entity_visibility)
+            for c in self.selected_entity.components:
+                if isinstance(c, sapien.render.RenderBodyComponent):
+                    c.visibility = self.selected_entity_visibility
 
     @property
     def resolution(self):

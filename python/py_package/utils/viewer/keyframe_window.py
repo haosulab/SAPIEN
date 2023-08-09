@@ -2,8 +2,8 @@ import os
 import platform
 
 import numpy as np
-import sapien.core as sapien
-from sapien.core import renderer as R
+import sapien
+from sapien import internal_renderer as R
 
 from .plugin import Plugin
 from ..serialization import SerializedScene
@@ -26,7 +26,7 @@ class Keyframe(R.UIKeyframe):
 
 
 class Duration(R.UIDuration):
-    DEFAULT_DEFINITION = """import sapien.core as sapien
+    DEFAULT_DEFINITION = """import sapien
 import numpy as np
 
 

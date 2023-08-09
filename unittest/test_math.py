@@ -1,5 +1,5 @@
 import unittest
-import sapien.core as sapien
+import sapien
 import numpy as np
 
 
@@ -35,11 +35,8 @@ class TestPose(unittest.TestCase):
         pose = sapien.Pose(p, q)
         matrix = pose.to_transformation_matrix()
         pose2 = sapien.Pose(matrix)
-        pose3 = sapien.Pose.from_transformation_matrix(matrix)
 
         self.assertTrue(np.allclose(matrix[:3, 3], p))
         self.assertTrue(np.allclose(matrix[:3, :3], R))
         self.assertTrue(np.allclose(pose.p, pose2.p))
         self.assertTrue(np.allclose(pose.q, pose2.q) or np.allclose(pose.q, -pose2.q))
-        self.assertTrue(np.allclose(pose.p, pose3.p))
-        self.assertTrue(np.allclose(pose.q, pose3.q) or np.allclose(pose.q, -pose3.q))

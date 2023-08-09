@@ -55,7 +55,7 @@ def create_dome_envmap(
     assert str(filename).endswith(".ktx"), "generated envmap must end with .ktx"
     path = Path(filename)
     path.parent.mkdir(exist_ok=True)
-    from sapien.core import SapienRenderer
+
     import numpy as np
     from PIL import Image
     import tempfile
@@ -83,90 +83,88 @@ def create_dome_envmap(
         Image.fromarray(ny).save(fny)
         Image.fromarray(other).save(fother)
 
-        renderer = SapienRenderer()
-        renderer.create_ktx_environment_map(
-            fother, fother, fpy, fny, fother, fother, filename
-        )
-    return filename
+        cubemap = sapien.render.RenderCubemap(fother, fother, fpy, fny, fother, fother)
+        cubemap.export(filename)
+    return cubemap
 
 
-def create_checkerboard(
-    renderer: sapien.core.Renderer,
-    shape: tuple,
-    length=0.1,
-    color1=[1, 1, 1, 1],
-    color2=[0, 0, 0, 1],
-) -> Tuple[sapien.core.RenderMesh, sapien.core.RenderMaterial]:
-    array = np.zeros([*shape, 4])
-    checker = np.indices(shape).sum(axis=0) % 2
-    array[checker == 0] = color1
-    array[checker == 1] = color2
+# def create_checkerboard(
+#     renderer: sapien.core.Renderer,
+#     shape: tuple,
+#     length=0.1,
+#     color1=[1, 1, 1, 1],
+#     color2=[0, 0, 0, 1],
+# ) -> Tuple[sapien.core.RenderMesh, sapien.core.RenderMaterial]:
+#     array = np.zeros([*shape, 4])
+#     checker = np.indices(shape).sum(axis=0) % 2
+#     array[checker == 0] = color1
+#     array[checker == 1] = color2
 
-    array = (array * 255).clip(0, 255).astype(np.uint8)
+#     array = (array * 255).clip(0, 255).astype(np.uint8)
 
-    texture = renderer.create_texture_from_array(array, filter_mode="nearest")
-    mat = renderer.create_material()
-    mat.set_diffuse_texture(texture)
-    mat.set_base_color([1, 0, 1, 1])
+#     texture = renderer.create_texture_from_array(array, filter_mode="nearest")
+#     mat = renderer.create_material()
+#     mat.set_diffuse_texture(texture)
+#     mat.set_base_color([1, 0, 1, 1])
 
-    width = length * shape[0]
-    height = length * shape[1]
-    mesh = renderer.create_mesh(
-        np.array(
-            [
-                [0, 0, 0],
-                [width, 0, 0],
-                [width, height, 0],
-                [0, height, 0],
-            ],
-            dtype=np.float32,
-        ),
-        np.array([[0, 1, 2], [0, 2, 3]], dtype=np.uint32),
-    )
-    mesh.set_uvs(np.array([[0, 0], [0, 1], [1, 1], [1, 0]], dtype=np.float32))
-    mesh.set_normals(
-        np.array([[0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1]], dtype=np.float32)
-    )
+#     width = length * shape[0]
+#     height = length * shape[1]
+#     mesh = renderer.create_mesh(
+#         np.array(
+#             [
+#                 [0, 0, 0],
+#                 [width, 0, 0],
+#                 [width, height, 0],
+#                 [0, height, 0],
+#             ],
+#             dtype=np.float32,
+#         ),
+#         np.array([[0, 1, 2], [0, 2, 3]], dtype=np.uint32),
+#     )
+#     mesh.set_uvs(np.array([[0, 0], [0, 1], [1, 1], [1, 0]], dtype=np.float32))
+#     mesh.set_normals(
+#         np.array([[0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1]], dtype=np.float32)
+#     )
 
-    return mesh, mat
+#     return mesh, mat
 
 
-def bake_envmap(
-    renderer: sapien.core.SapienRenderer,
-    scene: sapien.core.Scene,
-    position: np.ndarray,
-    resolution: int,
-    output_dir="sapien_generated_envmap",
-    near=0.1,
-    far=100.0,
-):
-    cam = scene.add_camera("cam", resolution, resolution, np.pi / 2, near, far)
-    poses = [
-        sapien.core.Pose(position, [0.7071068, 0, 0, -0.7071068]),
-        sapien.core.Pose(position, [0.7071068, 0, 0, 0.7071068]),
-        sapien.core.Pose(position, [0, 0.7071068, 0, 0.7071068]),
-        sapien.core.Pose(position, [0, 0.7071068, 0, -0.7071068]),
-        sapien.core.Pose(position, [0, 0, 0, 1]),
-        sapien.core.Pose(position, [1, 0, 0, 0]),  # +x direction is -z in opengl
-    ]
+# def bake_envmap(
+#     renderer: sapien.core.SapienRenderer,
+#     scene: sapien.core.Scene,
+#     position: np.ndarray,
+#     resolution: int,
+#     output_dir="sapien_generated_envmap",
+#     near=0.1,
+#     far=100.0,
+# ):
+#     cam = scene.add_camera("cam", resolution, resolution, np.pi / 2, near, far)
+#     poses = [
+#         sapien.core.Pose(position, [0.7071068, 0, 0, -0.7071068]),
+#         sapien.core.Pose(position, [0.7071068, 0, 0, 0.7071068]),
+#         sapien.core.Pose(position, [0, 0.7071068, 0, 0.7071068]),
+#         sapien.core.Pose(position, [0, 0.7071068, 0, -0.7071068]),
+#         sapien.core.Pose(position, [0, 0, 0, 1]),
+#         sapien.core.Pose(position, [1, 0, 0, 0]),  # +x direction is -z in opengl
+#     ]
 
-    filenames = [
-        os.path.join(output_dir, name + ".png")
-        for name in ["px", "nx", "py", "ny", "pz", "nz"]
-    ]
+#     filenames = [
+#         os.path.join(output_dir, name + ".png")
+#         for name in ["px", "nx", "py", "ny", "pz", "nz"]
+#     ]
 
-    os.makedirs(output_dir, exist_ok=True)
+#     os.makedirs(output_dir, exist_ok=True)
 
-    from PIL import Image
+#     from PIL import Image
 
-    for pose, filename in zip(poses, filenames):
-        cam.set_pose(pose)
-        scene.update_render()
-        cam.take_picture()
-        img = cam.get_texture("Color")[:, ::-1]
-        Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8)).save(filename)
+#     for pose, filename in zip(poses, filenames):
+#         cam.set_pose(pose)
+#         scene.update_render()
+#         cam.take_picture()
+#         img = cam.get_texture("Color")[:, ::-1]
+#         Image.fromarray((np.clip(img, 0, 1) * 255).astype(np.uint8)).save(filename)
 
-    renderer.create_ktx_environment_map(
-        *filenames, os.path.join(output_dir, "envmap.ktx")
-    )
-    scene.remove_camera(cam)
+#     renderer.create_ktx_environment_map(
+#         *filenames, os.path.join(output_dir, "envmap.ktx")
+#     )
+#     scene.remove_camera(cam)

@@ -794,7 +794,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_readwrite("enable_ccd", &SceneConfig::enableCCD)
       .def_readwrite("enable_enhanced_determinism", &SceneConfig::enableEnhancedDeterminism)
       .def_readwrite("enable_friction_every_iteration", &SceneConfig::enableFrictionEveryIteration)
-      .def_readwrite("disable_collision_visual", &SceneConfig::disableCollisionVisual)
+      // .def_readwrite("disable_collision_visual", &SceneConfig::disableCollisionVisual)
       .def("__repr__", [](SceneConfig &) { return "SceneConfig()"; })
       .def_property(
           "enable_adaptive_force",
@@ -811,11 +811,12 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
                 config.restitution, config.bounceThreshold, config.sleepThreshold,
                 config.contactOffset, config.solverIterations, config.solverVelocityIterations,
                 config.enablePCM, config.enableTGS, config.enableCCD,
-                config.enableEnhancedDeterminism, config.enableFrictionEveryIteration,
-                config.disableCollisionVisual);
+                config.enableEnhancedDeterminism, config.enableFrictionEveryIteration
+                // config.disableCollisionVisual
+            );
           },
           [](py::tuple t) {
-            if (t.size() != 15) {
+            if (t.size() != 14) {
               throw std::runtime_error("Invalid state!");
             }
             SceneConfig config;
@@ -836,7 +837,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
                 t[12].cast<decltype(config.enableEnhancedDeterminism)>();
             config.enableFrictionEveryIteration =
                 t[13].cast<decltype(config.enableFrictionEveryIteration)>();
-            config.disableCollisionVisual = t[14].cast<decltype(config.disableCollisionVisual)>();
+            // config.disableCollisionVisual =
+            // t[14].cast<decltype(config.disableCollisionVisual)>();
             return config;
           }));
   // .def("__getstate__", &SceneConfig::getState)
@@ -2673,7 +2675,6 @@ Args:
       .def("unset_drop_callback", &Renderer::SVulkan2Window::unsetDropCallback)
       .def("set_focus_callback", &Renderer::SVulkan2Window::setFocusCallback, py::arg("callback"))
       .def("unset_focus_callback", &Renderer::SVulkan2Window::unsetFocusCallback);
-
 
   PyVulkanScene.def_property_readonly(
       "_internal_scene", [](Renderer::SVulkan2Scene &scene) { return scene.getScene(); });

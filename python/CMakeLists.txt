@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 20)
 if (MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "/O2 /bigobj")
 else()
-    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -fcoroutines")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -fcoroutines")
 endif()
 
 
@@ -31,8 +31,10 @@ include(pybind11)
 
 find_package(sapien REQUIRED)
 
-pybind11_add_module(pysapien "pysapien.cpp" NO_EXTRAS)
+file(GLOB_RECURSE PYBIND_SRC "pybind/*.cpp")
+pybind11_add_module(pysapien ${PYBIND_SRC})
 target_link_libraries(pysapien PRIVATE sapien::sapien eigen)
+target_compile_definitions(pysapien PRIVATE PYBIND11_USE_SMART_HOLDER_AS_DEFAULT)
 
 if (MSVC)
     set_target_properties(pysapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})

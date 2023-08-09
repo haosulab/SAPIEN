@@ -1,0 +1,240 @@
+#include "./python_component.hpp"
+#include "./serialization.h"
+#include "generator.hpp"
+#include "sapien/component/component.h"
+#include "sapien/component/interface.h"
+#include "sapien/component/physx/physx_system.h"
+#include "sapien/component/sapien_renderer/sapien_renderer.h"
+#include "sapien/component/system.h"
+#include "sapien/entity.h"
+#include "sapien/logger.h"
+#include "sapien/math/math.h"
+#include "sapien/module.h"
+#include "sapien/scene.h"
+#include "sapien_type_caster.h"
+#include <pybind11/eigen.h>
+#include <pybind11/numpy.h>
+#include <pybind11/operators.h>
+#include <pybind11/smart_holder.h>
+#include <pybind11/stl.h>
+
+namespace py = pybind11;
+using namespace pybind11::literals;
+using namespace sapien;
+
+class PythonCudaDataSource : public component::CudaDataSource,
+                             public py::trampoline_self_life_support {
+  uintptr_t getCudaPointer() const override {
+    PYBIND11_OVERRIDE_PURE_NAME(uintptr_t, component::CudaDataSource, "get_cuda_pointer",
+                                getCudaPointer, );
+  }
+  uintptr_t getCudaStream() const override {
+    PYBIND11_OVERRIDE_NAME(uintptr_t, component::CudaDataSource, "get_cuda_stream",
+                           getCudaStream, );
+  }
+  size_t getSize() const override {
+    PYBIND11_OVERRIDE_PURE_NAME(size_t, component::CudaDataSource, "get_size", getSize, );
+  }
+};
+
+class PythonSystem : public component::System, public py::trampoline_self_life_support {
+public:
+  using component::System::System;
+
+  void step() override { PYBIND11_OVERRIDE_PURE(void, component::System, step, ); }
+  std::string getName() const override {
+    PYBIND11_OVERRIDE_PURE_NAME(std::string, component::System, "get_name", getName, );
+  }
+};
+
+Generator<int> init_sapien(py::module &m) {
+
+  m.def("set_log_level", &sapien::logger::setLogLevel, py::arg("level"));
+
+  auto PyPose = py::class_<Pose>(m, "Pose");
+  auto PyScene = py::class_<Scene>(m, "Scene");
+  auto PyEntity = py::class_<Entity>(m, "Entity");
+
+  // auto PyModule = py::class_<Module>(m, "Module");
+
+  auto PyComponent = py::class_<component::Component, PythonComponent>(m, "Component");
+
+  auto PyCudaDataSource =
+      py::class_<component::CudaDataSource, PythonCudaDataSource>(m, "CudaDataSource");
+
+  auto PySystem = py::class_<component::System, PythonSystem>(m, "System");
+  auto PyCudaArray = py::class_<CudaArrayHandle>(m, "CudaArray");
+
+  co_yield 0;
+
+  PyPose.def(py::init<Vec3, Quat>(), py::arg("p") = Vec3(), py::arg("q") = Quat())
+      .def(py::init(&EigenMat4ToPose))
+      .def("to_transformation_matrix", &PoseToEigenMat4)
+
+      .def_readwrite("p", &Pose::p)
+      .def(
+          "set_p", [](Pose &pose, Vec3 const &p) { pose.p = p; }, py::arg("p"))
+      .def("get_p", [](Pose &pose) { return pose.p; })
+
+      .def_readwrite("q", &Pose::q)
+      .def(
+          "set_q", [](Pose &pose, Quat const &q) { pose.q = q; }, py::arg("q"))
+      .def("get_q", [](Pose &pose) { return pose.q; })
+
+      .def("inv", &Pose::getInverse)
+      .def(py::self * py::self)
+      .def("__repr__", [](Pose const &pose) {
+        std::ostringstream oss;
+        oss << "Pose([" << pose.p.x << ", " << pose.p.y << ", " << pose.p.z << "], [" << pose.q.w
+            << ", " << pose.q.x << ", " << pose.q.y << ", " << pose.q.z << "])";
+        return oss.str();
+      });
+
+  PyScene
+      .def(py::init<std::vector<std::shared_ptr<component::System>> const &>(),
+           py::arg("systems")) // TODO: support parameters
+
+      .def_property_readonly("entities", &Scene::getEntities)
+      .def("get_entities", &Scene::getEntities)
+      .def("add_entity", &Scene::addEntity)
+      .def("remove_entity", &Scene::removeEntity, py::arg("entity"))
+      .def("add_system", &Scene::addSystem)
+      .def("get_system", &Scene::getSystem, py::arg("name"))
+
+      // .def_property_readonly("modules", &Scene::getModules)
+      // .def("get_modules", &Scene::getModules)
+      // .def("add_module", &Scene::addModule)
+      // .def("remove_module", &Scene::removeModule, py::arg("module"))
+
+      .def_property_readonly("physx_system", &Scene::getPhysxSystem)
+      .def("get_physx_system", &Scene::getPhysxSystem)
+      .def_property_readonly("render_system", &Scene::getSapienRendererSystem)
+      .def("get_render_system", &Scene::getSapienRendererSystem)
+      .def(
+          py::pickle([](std::shared_ptr<Scene> scene) { return py::bytes(serializeScene(scene)); },
+                     [](py::bytes t) { return unserializeScene(t); }));
+
+  PyEntity.def(py::init<>())
+      .def_property_readonly("id", &Entity::getId)
+      .def("get_id", &Entity::getId)
+
+      .def_property("name", &Entity::getName, &Entity::setName)
+      .def("get_name", &Entity::getName)
+      .def("set_name", &Entity::setName)
+
+      .def_property_readonly("scene", &Entity::getScene, py::return_value_policy::reference)
+      .def("get_scene", &Entity::getScene)
+
+      .def_property_readonly("components", &Entity::getComponents)
+      .def("get_components", &Entity::getComponents)
+
+      .def("add_component", &Entity::addComponent, py::arg("component"))
+      .def("remove_component", &Entity::removeComponent, py::arg("component"))
+
+      .def_property("pose", &Entity::getPose, &Entity::setPose)
+      .def("get_pose", &Entity::getPose)
+      .def("set_pose", &Entity::setPose)
+
+      .def("remove_from_scene", &Entity::removeFromScene);
+
+  // PyModule.def(py::init<>())
+  //     .def_property("name", &Module::getName, &Module::setName)
+  //     .def("get_name", &Module::getName)
+  //     .def("set_name", &Module::setName)
+  //     .def("add_entity", &Module::addEntity)
+  //     .def("remove_entity", &Module::removeEntity)
+
+  //     .def_property_readonly("scene", &Module::getScene, py::return_value_policy::reference)
+  //     .def("get_scene", &Module::getScene);
+
+  PyComponent.def(py::init<>())
+      .def_property_readonly("entity", &component::Component::getEntity)
+      .def("get_entity", &component::Component::getEntity)
+
+      .def_property("name", &component::Component::getName, &component::Component::setName)
+      .def("get_name", &component::Component::getName)
+      .def("set_name", &component::Component::setName)
+
+      .def_property("pose", &component::Component::getPose, &component::Component::setPose,
+                    "An alias for self.entity.pose")
+      .def("set_pose", &component::Component::setPose, "An alias for self.entity.set_pose")
+      .def("get_pose", &component::Component::getPose, "An alias for self.entity.get_pose")
+
+      .def_property_readonly("is_enabled", &component::Component::getEnabled)
+      .def("enable", &component::Component::enable, "enable the component")
+      .def("disable", &component::Component::disable, "disable the component")
+
+      .def_property(
+          "_serialization_id",
+          [](component::Component &c) {
+            if (auto p = dynamic_cast<PythonComponent *>(&c)) {
+              return p->getSerializationId();
+            }
+            throw std::runtime_error("only Python-inherited components have serialization id");
+          },
+          [](component::Component &c, uint64_t id) {
+            if (auto p = dynamic_cast<PythonComponent *>(&c)) {
+              p->setSerializationId(id);
+              return;
+            }
+            throw std::runtime_error("only Python-inherited components have serialization id");
+          });
+
+  PyCudaDataSource.def(py::init<>());
+
+  PySystem.def(py::init<>()).def("step", &component::System::step);
+
+  PyCudaArray.def_readonly("shape", &CudaArrayHandle::shape)
+      .def_readonly("strides", &CudaArrayHandle::strides)
+      .def_readonly("cuda_id", &CudaArrayHandle::cudaId)
+      .def_readonly("typstr", &CudaArrayHandle::type)
+      .def_property_readonly(
+          "ptr", [](CudaArrayHandle &array) { return reinterpret_cast<intptr_t>(array.ptr); })
+      .def_property_readonly("__cuda_array_interface__", [](CudaArrayHandle &array) {
+        py::tuple shape = py::cast(array.shape);
+        py::tuple strides = py::cast(array.strides);
+        std::string type = array.type;
+
+        // torch does not support uint type except uint8
+        if (type != "u1" && type[0] == 'u') {
+          type = "i" + type.substr(1);
+        }
+
+        return py::dict("shape"_a = shape, "strides"_a = strides, "typestr"_a = type,
+                        "data"_a = py::make_tuple(reinterpret_cast<intptr_t>(array.ptr), false),
+                        "version"_a = 2);
+      });
+
+  PyScene
+      .def("_swap_in_python_components",
+           [](Scene &scene,
+              std::vector<std::shared_ptr<component::Component>> const &components) -> void {
+             std::unordered_map<uint64_t, std::shared_ptr<PythonComponent>> map;
+             for (auto &c : components) {
+               auto p = std::dynamic_pointer_cast<PythonComponent>(c);
+               assert(p);
+               map[p->getSerializationId()] = p;
+             }
+             auto entities = scene.getEntities();
+             for (auto e : scene.getEntities()) {
+               auto comps = e->getComponents();
+               for (uint32_t i = 0; i < comps.size(); ++i) {
+                 if (auto p = dynamic_cast<PythonComponent *>(comps[i].get())) {
+                   e->internalSwapInComponent(i, map.at(p->getSerializationId()));
+                 }
+               }
+             }
+           })
+      .def("_find_all_python_components", [](Scene &scene) {
+        std::unordered_set<std::shared_ptr<component::Component>> result;
+        for (auto &e : scene.getEntities()) {
+          auto comps = e->getComponents();
+          for (auto c : comps) {
+            if (std::dynamic_pointer_cast<PythonComponent>(c)) {
+              result.insert(c);
+            }
+          }
+        }
+        return std::vector(result.begin(), result.end());
+      });
+}

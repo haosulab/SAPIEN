@@ -1,12 +1,13 @@
+import os
 from pathlib import Path
 from typing import List
 
 import numpy as np
 import pkg_resources
-import sapien.core as sapien
-from sapien.core import renderer as R
+import sapien
+from sapien import internal_renderer as R
 from transforms3d.euler import quat2euler
-from transforms3d.quaternions import rotate_vector, mat2quat
+from transforms3d.quaternions import mat2quat, rotate_vector
 
 from .camera_control import ArcRotateCameraController, FPSCameraController
 from .plugin import Plugin
@@ -23,34 +24,7 @@ class ControlWindow(Plugin):
         self.viewer.focus_entity = self.focus_entity
         self.viewer.focus_camera = self.focus_camera
 
-        self._setup_shader_dir()
         self._create_visual_models()
-
-    def _setup_shader_dir(self):
-        default_shader_dir = Path(self.viewer.shader_dir)
-
-        all_shader_dir = Path(
-            pkg_resources.resource_filename("sapien", "vulkan_shader")
-        )
-        self.shader_list = []
-        self.shader_types = []
-        for f in all_shader_dir.iterdir():
-            if f.is_dir():
-                if any("gbuffer.frag" in x.name for x in f.iterdir()):
-                    self.shader_list.append(f)
-                    self.shader_types.append("rast")
-                if any("camera.rgen" in x.name for x in f.iterdir()):
-                    self.shader_list.append(f)
-                    self.shader_types.append("rt")
-
-        self.shader_list = [default_shader_dir] + self.shader_list
-        if "camera.rgen" in default_shader_dir.iterdir():
-            self.shader_types = ["rt"] + self.shader_types
-        else:
-            self.shader_types = ["rast"] + self.shader_types
-
-        self.shader_type = self.shader_types[0]
-        self.shader_dir = str(self.shader_list[0])
 
     @property
     def selected_entity(self):
@@ -91,29 +65,59 @@ class ControlWindow(Plugin):
         if self.joint_axes is None:
             self._create_joint_axes()
 
-        if isinstance(self.selected_entity, sapien.LinkBase):
-            link: LinkBase = self.selected_entity
-            j = link.get_articulation().get_joints()[link.get_index()]
-            if j.type not in ["revolute", "prismatic"]:
-                for x in self.joint_axes:
-                    x.transparency = 1
-            j2c = j.get_pose_in_child()
-            c2w = link.get_pose()
-            j2w = c2w * j2c
-            if j.type == "prismatic":
-                j2w.set_p(c2w.p)
-                self.joint_axes[1].set_position(j2w.p)
-                self.joint_axes[1].set_rotation(j2w.q)
-                self.joint_axes[1].transparency = 0 if self.show_joint_axes else 1
-                self.joint_axes[0].transparency = 1
-            elif j.type == "revolute":
-                self.joint_axes[0].set_position(j2w.p)
-                self.joint_axes[0].set_rotation(j2w.q)
-                self.joint_axes[0].transparency = 0 if self.show_joint_axes else 1
-                self.joint_axes[1].transparency = 1
+        if not self.selected_entity:
+            self.joint_axes[0].transparency = 1
+            self.joint_axes[1].transparency = 1
+            return
+
+        for c in self.selected_entity.components:
+            if isinstance(c, sapien.physx.PhysxArticulationLinkComponent):
+                c: sapien.physx.PhysxArticulationLinkComponent
+                j = c.joint
+                if j.type not in ["revolute", "revolute_unwrapped", "prismatic"]:
+                    for x in self.joint_axes:
+                        x.transparency = 1
+
+                j2c = j.pose_in_child
+                c2w = c.pose
+                j2w = c2w * j2c
+                if j.type == "prismatic":
+                    j2w.set_p(c2w.p)
+                    self.joint_axes[1].set_position(j2w.p)
+                    self.joint_axes[1].set_rotation(j2w.q)
+                    self.joint_axes[1].transparency = 0 if self.show_joint_axes else 1
+                    self.joint_axes[0].transparency = 1
+                elif j.type in ["revolute", "revolute_unwrapped"]:
+                    self.joint_axes[0].set_position(j2w.p)
+                    self.joint_axes[0].set_rotation(j2w.q)
+                    self.joint_axes[0].transparency = 0 if self.show_joint_axes else 1
+                    self.joint_axes[1].transparency = 1
+                break
         else:
             self.joint_axes[0].transparency = 1
             self.joint_axes[1].transparency = 1
+
+    def take_screenshot(self, _):
+        picture = self.window.get_picture(self.viewer.render_target)
+
+        for i in range(100000000):
+            n = f"sapien_screenshot_{i}.png"
+            if os.path.exists(n):
+                continue
+
+            from PIL import Image
+
+            if picture.dtype == np.uint8:
+                Image.fromarray(picture).save(n)
+            else:
+                Image.fromarray((picture.clip(0, 1) * 255).astype(np.uint8)).save(n)
+            break
+
+    def _sync_fps_camera_controller(self):
+        cam_pose = self.window.get_camera_pose()
+        self.fps_camera_controller.setXYZ(*cam_pose.p)
+        r, p, y = quat2euler(cam_pose.q)
+        self.fps_camera_controller.setRPY(r, -p, -y)
 
     def focus_entity(self, entity: sapien.Entity):
         if entity == self.focused_entity:
@@ -139,45 +143,23 @@ class ControlWindow(Plugin):
             self.fps_camera_controller.setRPY(r, -p, -y)
             self.viewer.set_camera_pose(self.fps_camera_controller.pose)
 
-    def focus_camera(self, camera: sapien.CameraEntity):
-        if self.focus_camera == camera:
+    def focus_camera(self, camera):
+        if self.focused_camera == camera:
             return
 
         self.focused_camera = camera
         if self.focused_camera is not None:
             self.focus_entity(None)
 
-    def set_shader(self, index):
-        self.shader_dir = str(self.shader_list[index])
-        self.shader_type = str(self.shader_types[index])
-        self.window.set_shader_dir(self.shader_dir)
-        self.viewer.render_target = "Color"
-        self._denoiser = False
-
-    @property
-    def is_rt(self):
-        return getattr(self, "shader_type", None) == "rt"
-
-    @property
-    def denoiser(self):
-        return self._denoiser
-
-    @denoiser.setter
-    def denoiser(self, enable):
-        self._denoiser = enable
-        self.window.set_camera_property("_denoiser", enable)
-
-    @property
-    def scene(self):
-        return self.viewer.scene
-
     def notify_scene_change(self):
         if self.viewer.scene is None:
             self.reset()
+        else:
+            self._sync_fps_camera_controller()
 
     @property
     def camera_items(self):
-        return ["None"] + [c.name for i, c in enumerate(self.scene.get_cameras())]
+        return ["None"] + [c.entity.name for c in self.viewer.system.cameras]
 
     @property
     def camera_index(self):
@@ -189,7 +171,7 @@ class ControlWindow(Plugin):
         if i == 0:
             self.focus_camera(None)
         else:
-            self.focus_camera(self.scene.get_cameras()[i - 1])
+            self.focus_camera(self.viewer.system.cameras[i - 1])
 
     def single_step(self, _):
         self._single_step = True
@@ -209,7 +191,7 @@ class ControlWindow(Plugin):
         )
 
     def build(self):
-        if self.scene is None:
+        if self.viewer.system is None:
             self.ui_window = None
             return
 
@@ -270,17 +252,9 @@ class ControlWindow(Plugin):
                 .append(
                     R.UIInputInt2().Label("Resolution").Bind(self.viewer, "resolution"),
                     R.UIOptions()
-                    .Label("Shader")
-                    .Style("select")
-                    .Items([d.name for i, d in enumerate(self.shader_list)])
-                    .Callback(lambda p: self.set_shader(p.index)),
-                    R.UIConditional()
-                    .Bind(self, "is_rt")
-                    .append(R.UICheckbox().Label("Denoiser").Bind(self, "denoiser")),
-                    R.UIOptions()
                     .Label("Target")
                     .Style("select")
-                    .BindItems(self.window, "display_target_names")
+                    .BindItems(self.window, "display_picture_names")
                     .BindIndex(self, "display_target_index"),
                     R.UICheckbox()
                     .Label("Show Cameras in Viewport")
@@ -315,6 +289,7 @@ class ControlWindow(Plugin):
                         )
                     ),
                 ),
+                R.UIButton().Label("Screenshot").Callback(self.take_screenshot),
                 R.UIDisplayText().Bind(lambda: "FPS: {:.2f}".format(self.window.fps)),
             )
 
@@ -338,6 +313,8 @@ class ControlWindow(Plugin):
             self._single_step = False
             self.viewer.paused = True
 
+        self._sync_fps_camera_controller()
+
         self._handle_focused_camera()
         self._handle_focused_entity()
 
@@ -359,25 +336,19 @@ class ControlWindow(Plugin):
             ww, wh = self.window.size
             if mx < 0 or my < 0 or mx >= ww or my >= wh:
                 return
-            tw, th = self.window.get_target_size("Segmentation")
+            tw, th = self.window.get_picture_size("Segmentation")
             mx = mx * tw / ww
             my = my * th / wh
-            pixel = self.window.get_uint32_texture_pixel(
-                "Segmentation", int(mx), int(my)
-            )
+            pixel = self.window.get_picture_pixel("Segmentation", int(mx), int(my))
 
-            actor = self.find_actor_by_id(pixel[1])
-            self.viewer.select_entity(actor)
+            entity = self.find_entity_by_id(pixel[1])
+            self.viewer.select_entity(entity)
 
-    def find_actor_by_id(self, id):
-        actors = self.scene.get_all_actors()
-        for actor in actors:
-            if actor.id == id:
-                return actor
-        for a in self.scene.get_all_articulations():
-            for link in a.get_links():
-                if link.id == id:
-                    return link
+    def find_entity_by_id(self, id):
+        for entity in self.viewer.scene.entities:
+            if entity.id == id:
+                return entity
+        return None
 
     def _handle_focused_camera(self):
         """
@@ -578,16 +549,15 @@ class ControlWindow(Plugin):
         self.camera_lineset = None
 
     def _create_joint_axes(self):
-        assert self.scene is not None
-        rs = self.scene.renderer_scene
-        render_scene: R.Scene = rs._internal_scene
+        assert self.viewer.system is not None
+        render_scene: R.Scene = self.viewer.system._internal_scene
         joint_axes = [
             render_scene.add_object(self.magenta_capsule),
             render_scene.add_object(self.cyan_capsule),
         ]
         for obj in joint_axes:
             obj.set_position([0, 0, 0])
-            obj.set_scale([5, 0.1, 0.1])
+            obj.set_scale([5, 0.05, 0.05])
             obj.shading_mode = 0
             obj.cast_shadow = False
             obj.transparency = 1
@@ -597,9 +567,8 @@ class ControlWindow(Plugin):
         if self.joint_axes is None:
             return
 
-        assert self.scene is not None
-        rs = self.scene.renderer_scene
-        render_scene: R.Scene = rs._internal_scene
+        assert self.viewer.system is not None
+        render_scene: R.Scene = self.viewer.system._internal_scene
 
         for x in self.joint_axes:
             render_scene.remove_node(x)
@@ -607,9 +576,8 @@ class ControlWindow(Plugin):
         self.joint_axes = None
 
     def _create_coordinate_axes(self):
-        assert self.scene is not None
-        rs = self.scene.renderer_scene
-        render_scene: R.Scene = rs._internal_scene
+        assert self.viewer.system is not None
+        render_scene: R.Scene = self.viewer.system._internal_scene
 
         node = render_scene.add_node()
         obj = render_scene.add_object(self.red_cone, node)
@@ -659,15 +627,15 @@ class ControlWindow(Plugin):
         self.coordinate_axes = node
 
     def _update_camera_linesets(self):
-        if self.scene is None:
+        if self.viewer.system is None:
             return
-        rs = self.scene.renderer_scene
-        render_scene: R.Scene = rs._internal_scene
+        render_scene: R.Scene = self.viewer.system._internal_scene
 
-        cameras = self.scene.get_cameras()
+        # TODO
+        cameras = self.viewer.system.cameras
         if len(self.camera_linesets) != len(cameras):
             self._clear_camera_linesets()
-            for c in self.scene.get_cameras():
+            for c in cameras:
                 self.camera_linesets.append(
                     render_scene.add_line_set(self.camera_lineset)
                 )
@@ -682,12 +650,12 @@ class ControlWindow(Plugin):
             lineset.set_scale(np.array([scalex, scaley, 1]) * 0.3)
 
     def _clear_camera_linesets(self):
-        if self.scene is None:
+        if self.viewer.system is None:
             return
 
-        rs = self.scene.renderer_scene
+        render_scene: R.Scene = self.viewer.system._internal_scene
         for n in self.camera_linesets:
-            rs._internal_scene.remove_node(n)
+            render_scene.remove_node(n)
         self.camera_linesets = []
 
     @property
@@ -701,10 +669,10 @@ class ControlWindow(Plugin):
     @property
     def display_target_index(self):
         try:
-            return self.window.display_target_names.index(self.viewer.render_target)
+            return self.window.display_picture_names.index(self.viewer.render_target)
         except ValueError:
             return 0
 
     @display_target_index.setter
     def display_target_index(self, index):
-        self.viewer.render_target = self.window.display_target_names[index]
+        self.viewer.render_target = self.window.display_picture_names[index]

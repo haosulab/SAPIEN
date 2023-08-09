@@ -1,23 +1,23 @@
 import numpy as np
-import sapien.core as sapien
+import sapien
 import transforms3d
 from sapien.asset import create_dome_envmap
 from sapien.core import Pose
 
 from sapien.utils import Viewer
 
-import sapien.core as sapien
+import ctypes
 
 def main():
     engine = sapien.Engine()
     renderer = sapien.SapienRenderer()
     engine.set_renderer(renderer)
 
-    sapien.render_config.camera_shader_dir = "rt"
-    sapien.render_config.viewer_shader_dir = "rt"
-    sapien.render_config.rt_samples_per_pixel = 32
-    sapien.render_config.rt_max_path_depth = 8
-    sapien.render_config.rt_use_denoiser = True
+    sapien.render.set_camera_shader_dir("../vulkan_shader/rt")
+    sapien.render.set_viewer_shader_dir("../vulkan_shader/rt")
+    sapien.render.set_ray_tracing_samples_per_pixel(32)
+    sapien.render.set_ray_tracing_path_depth(8)
+    sapien.render.set_ray_tracing_denoiser("oidn")
 
     scene_config = sapien.SceneConfig()
     scene = engine.create_scene(scene_config)

@@ -1,10 +1,10 @@
 from .viewer import (
-    ActorWindow,
-    ArticulationWindow,
-    ControlWindow,
-    KeyframeWindow,
+    # ActorWindow,
+    # ArticulationWindow,
+    # ControlWindow,
+    # KeyframeWindow,
     Plugin,
-    SceneWindow,
-    TransformWindow,
+    # SceneWindow,
+    # TransformWindow,
     Viewer,
 )

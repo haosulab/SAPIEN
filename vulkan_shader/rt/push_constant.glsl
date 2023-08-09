@@ -4,6 +4,9 @@ layout(push_constant) uniform Constants {
   int spp;
   int maxDepth;
 
+  float aperture;
+  float focusPlane;
+
   int russianRoulette;
   int russianRouletteMinBounces;
 
@@ -13,4 +16,8 @@ layout(push_constant) uniform Constants {
   int parallelogramLightCount;
 
   int envmap;
+
+  // post processing
+  float exposure;
+  int toneMapper;
 };

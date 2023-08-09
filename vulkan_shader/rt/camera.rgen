@@ -31,11 +31,13 @@ layout(set = 2, binding = 0) uniform CameraBuffer {
 
 #include "push_constant.glsl"
 
+
+
 void main() {
   vec2 invScreen = vec2(2.0) / gl_LaunchSizeEXT.xy;
   vec2 pixel = gl_LaunchIDEXT.xy * invScreen - 1.0;
   uint magic = 0x9e3779b9;  // use fixed seed for consistency
-  // uint matic = uint(clockARB());
+  // uint magic = uint(clockARB());
   uint seed = tea(gl_LaunchSizeEXT.x * gl_LaunchSizeEXT.y * spp * frameCount +
                   gl_LaunchIDEXT.y * gl_LaunchSizeEXT.x + gl_LaunchIDEXT.x, magic);
 
@@ -49,11 +51,26 @@ void main() {
   ray.seed = seed;
 
   for (int i = 0; i < spp; ++i) {
+    // sample point on aperture
+    float at = rnd(ray.seed) * 2.0 * M_PI;
+    float ar = rnd(ray.seed) * aperture;
+    float ax = ar * cos(at);
+    float ay = ar * sin(at);
+
+    // vec2 r = vec2(rnd(ray.seed), rnd(ray.seed));
     vec2 r = halton2d(frameCount * spp + i, 2, 3);
+
     vec2 d = pixel + r * invScreen;  // jittered pixel position
     vec4 csDir = cameraBuffer.projectionMatrixInverse * vec4(d, 1.0, 1.0);
-    vec4 origin = cameraBuffer.viewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0);
-    vec4 direction = cameraBuffer.viewMatrixInverse * vec4(csDir.xyz, 0.0);
+
+    vec3 csFocusPoint = csDir.xyz / (-csDir.z) * focusPlane;
+    vec3 csFocusOrigin = vec3(ax, ay, 0.0);
+    vec3 csFocusDir = csFocusPoint - csFocusOrigin;
+
+    // vec4 origin = cameraBuffer.viewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0);
+    // vec4 direction = cameraBuffer.viewMatrixInverse * vec4(csDir.xyz, 0.0);
+    vec4 origin = cameraBuffer.viewMatrixInverse * vec4(csFocusOrigin, 1.0);
+    vec4 direction = cameraBuffer.viewMatrixInverse * vec4(csFocusDir, 0.0);
 
     ray.origin = origin.xyz;
     ray.direction = normalize(direction.xyz);

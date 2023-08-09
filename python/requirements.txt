@@ -2,3 +2,4 @@ numpy >= 1.17
 requests >= 2.22
 transforms3d >= 0.3
 opencv-python >= 4.0
+lxml

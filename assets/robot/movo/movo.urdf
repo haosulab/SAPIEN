@@ -33,6 +33,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <robot name="movo" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Included URDF/XACRO Files -->
   <link name="base_link"/>
+  <!-- <link name="box"> -->
+  <!--   <visual> -->
+  <!--     <geometry> -->
+  <!--       <box size="0.1 0.1 0.1"/> -->
+  <!--     </geometry> -->
+  <!--   </visual> -->
+  <!--   <collision> -->
+  <!--     <geometry> -->
+  <!--       <box size="0.1 0.1 0.1"/> -->
+  <!--     </geometry> -->
+  <!--   </collision> -->
+  <!-- </link> -->
+  <!-- <joint name="" type="floating"> -->
+  <!--   <origin rpy="0 0 0" xyz="0 2 1"/> -->
+  <!--   <parent link="base_link"/> -->
+  <!--   <child link="box"/> -->
+  <!-- </joint> -->
+
   <gazebo reference="base_link">
     <mu1>0.0</mu1>
   </gazebo>

@@ -1,6 +1,6 @@
 import numpy as np
-import sapien.core as sapien
-from sapien.core import renderer as R
+import sapien
+from sapien import internal_renderer as R
 
 from .plugin import Plugin
 

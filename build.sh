@@ -70,7 +70,7 @@ function build_pybind() {
   if test -f "$WHEEL_NAME"; then
     echo "$FILE exist, begin audit and repair"
   fi
-  auditwheel repair ${WHEEL_NAME} --exclude libvulkan --internal libsapien
+  auditwheel repair ${WHEEL_NAME} --exclude libvulkan,libOpenImageDenoise --internal libsapien
 }
 
 build_sapien

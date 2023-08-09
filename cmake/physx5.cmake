@@ -31,11 +31,11 @@ if (UNIX)
     libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
     libPhysX_static_64.a libPhysXVehicle_static_64.a
     -Wl,--end-group)
-  target_include_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/include>)
+  target_include_directories(physx5 SYSTEM INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/include>)
 endif()
 
 if (WIN32)
-  target_include_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/include>)
+  target_include_directories(physx5 SYSTEM INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/include>)
   target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/bin/win.x86_64.vc143.md/release>)
   target_link_libraries(physx5 INTERFACE
     PhysXVehicle2_static_64.lib PhysXExtensions_static_64.lib

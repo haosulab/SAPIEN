@@ -158,7 +158,7 @@ class CMakeBuild(build_ext):
         os.makedirs(build_dir, exist_ok=True)
         original_full_path = self.get_ext_fullpath(ext.name)
         extdir = os.path.abspath(os.path.dirname(original_full_path))
-        extdir = os.path.join(extdir, self.distribution.get_name(), "core")
+        extdir = os.path.join(extdir, self.distribution.get_name())
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DPYTHON_EXECUTABLE=" + sys.executable,
@@ -189,7 +189,7 @@ class CMakeBuild(build_ext):
         os.makedirs(self.build_temp, exist_ok=True)
         original_full_path = self.get_ext_fullpath(ext.name)
         extdir = os.path.abspath(os.path.dirname(original_full_path))
-        extdir = os.path.join(extdir, self.distribution.get_name(), "core")
+        extdir = os.path.join(extdir, self.distribution.get_name())
         cmake_args = [
             "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
             "-DPYTHON_EXECUTABLE=" + sys.executable,
@@ -225,6 +225,20 @@ class CMakeBuild(build_ext):
             for f in os.listdir(bindir):
                 if f.endswith("dll"):
                     shutil.copy(os.path.join(bindir, f), extdir)
+
+        oidn_library_path = os.path.join(extdir, "oidn_library")
+        if os.path.exists(oidn_library_path):
+            shutil.rmtree(oidn_library_path)
+        os.makedirs(oidn_library_path, exist_ok=True)
+
+        for folder in ["lib", "lib64"]:
+            library_dir = os.path.join(sapien_install_dir, folder)
+            if not os.path.exists(library_dir):
+                continue
+            print('copy library from', library_dir)
+            for lib in os.listdir(library_dir):
+                if lib in ["libOpenImageDenoise.so.2.0.1", "libOpenImageDenoise_core.so.2.0.1", "libOpenImageDenoise_device_cuda.so.2.0.1"]:
+                    shutil.copy(os.path.join(library_dir, lib), oidn_library_path)
 
     def copy_assets(self, ext):
         vulkan_shader_path = os.path.join(self.build_lib, "sapien", "vulkan_shader")
@@ -276,11 +290,15 @@ def read_requirements():
 # Data files for packaging
 project_python_home_dir = os.path.join("python", "py_package")
 package_data = {
-    "sapien.core": [
+    "sapien": [
         "__init__.pyi",
         "pysapien/__init__.pyi",
-        "pysapien/renderer/__init__.pyi",
-        "pysapien/dlpack/__init__.pyi",
+        "pysapien/internal_renderer/__init__.pyi",
+        "pysapien/physx/__init__.pyi",
+        "pysapien/serialization/__init__.pyi",
+        "pysapien/internal_renderer/__init__.pyi",
+        "pysapien/render/__init__.pyi",
+        "pysapien/math/__init__.pyi",
     ]
 }
 
@@ -328,7 +346,13 @@ setup(
     zip_safe=False,
     packages=[
         "sapien",
+        "sapien.physx",
+        "sapien.internal_renderer",
+        "sapien.render",
+        "sapien.wrapper",
         "sapien.core",
+        "sapien.serialization",
+        "sapien.wrapper.urchin",
         "sapien.asset",
         "sapien.example",
         "sapien.utils",

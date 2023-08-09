@@ -17,7 +17,7 @@ struct SpotLight {
   mat4 projMat;
   vec3 rgb;
   int padding0;
-  vec3 position;  // FIXME: this is redundant?
+  vec3 position;
   int padding1;
   float fovInner;
   float fovOuter;

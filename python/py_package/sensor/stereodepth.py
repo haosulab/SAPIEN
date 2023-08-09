@@ -1,10 +1,6 @@
-from ..core import (
-    Pose,
-    Scene,
-    Actor
-)
-from ..core.pysapien.simsense import DepthSensorEngine
-from .sensor_base import SensorEntity
+from ..pysapien import Pose, Scene, Entity
+from ..pysapien.simsense import DepthSensorEngine
+from ..pysapien.render import RenderCameraComponent, RenderTexturedLightComponent, RenderTexture
 from typing import Optional
 from copy import deepcopy as copy
 
@@ -113,20 +109,19 @@ class StereoDepthSensorConfig:
         is greater than ir_resolution."""
 
 
-class StereoDepthSensor(SensorEntity):
+class StereoDepthSensor:
     """
     This class simulates an active stereo depth sensor. It has one RGB camera and two infrared camera.
     Depth is computed via semi-global block matching. Refer to StereoDepthSensorConfig for configurable
     parameters. The computed depth map will be presented in RGB camera frame.
     """
 
-    def __init__(self, sensor_name: str, scene: Scene, config: StereoDepthSensorConfig, mount: Optional[Actor] = None, pose: Optional[Pose] = None):
+    def __init__(self, sensor_name: str, config: StereoDepthSensorConfig, mount: Optional[Entity] = None, pose: Optional[Pose] = None):
         """
         :param sensor_name: name of the sensor.
-        :param scene: scene that the sensor is attached to.
         :param config: configuration of the sensor.
-        :param mount: optionally mount the sensor to an actor. If mounted, the sensor will move along with the actor.
-        :param pose: If not mounted, this will be the global pose for the sensor. Otherwise, it will be the local pose relative to the mounted actor.
+        :param mount: optionally mount the sensor to an entity. If mounted, the sensor will move along with the entity.
+        :param pose: If not mounted, this will be the global pose for the sensor. Otherwise, it will be the local pose relative to the mounted entity.
         """
   
         super().__init__()
@@ -134,7 +129,6 @@ class StereoDepthSensor(SensorEntity):
 
         # Basic configuration
         self.name = sensor_name
-        self._scene = scene
         self._config = config
 
         # Instance check
@@ -184,12 +178,14 @@ class StereoDepthSensor(SensorEntity):
         else:
             self._pose = pose
 
-        # Active Light
-        self._alight = self._scene.add_active_light(
-            pose=Pose(), color=[0, 0, 0], fov=1.57, tex_path=self._config.light_pattern)
-        if self._mount is not None:
-            self._alight.set_parent(self._mount, keep_pose=False)
-        self._alight.set_local_pose(self._pose)
+        # # Active Light
+        # self._alight = self._scene.add_active_light(
+        #     pose=Pose(), color=[0, 0, 0], fov=1.57, tex_path=self._config.light_pattern)
+        # if self._mount is not None:
+        #     self._alight.set_parent(self._mount, keep_pose=False)
+        # self._alight.set_local_pose(self._pose)
+        self._alight = None
+        self._create_light()
         
         # Cameras
         self._cam_rgb = None
@@ -265,28 +261,28 @@ class StereoDepthSensor(SensorEntity):
         right_dl_tensor = self._cam_ir_r.get_dl_tensor('Color')
         self._engine.compute(left_dl_tensor, right_dl_tensor)
 
-    def set_pose(self, pose: Pose):
-        """
-        Set the global pose of the sensor. Call set_local_pose instead of set_pose if mount exists.
-        """
-        if self._mount is None:
-            self._pose = pose
-            self._alight.set_pose(pose)
-            self._cam_rgb.set_local_pose(pose)
-            self._cam_ir_l.set_local_pose(pose * self._config.trans_pose_l)
-            self._cam_ir_r.set_local_pose(pose * self._config.trans_pose_r)
-        else:
-            raise RuntimeError("cannot set_pose when sensor is mounted, use set_local_pose instead")
+    # def set_pose(self, pose: Pose):
+    #     """
+    #     Set the global pose of the sensor. Call set_local_pose instead of set_pose if mount exists.
+    #     """
+    #     if self._mount is None:
+    #         self._pose = pose
+    #         self._alight.set_pose(pose)
+    #         self._cam_rgb.set_local_pose(pose)
+    #         self._cam_ir_l.set_local_pose(pose * self._config.trans_pose_l)
+    #         self._cam_ir_r.set_local_pose(pose * self._config.trans_pose_r)
+    #     else:
+    #         raise RuntimeError("cannot set_pose when sensor is mounted, use set_local_pose instead")
 
     def set_local_pose(self, pose: Pose):
         """
         If mount exists, set local pose of the sensor relative to mounted actor. Otherwise, set global pose of the sensor.
         """
         self._pose = pose
-        self._alight.set_local_pose(pose)
-        self._cam_rgb.set_local_pose(pose)
-        self._cam_ir_l.set_local_pose(pose * self._config.trans_pose_l)
-        self._cam_ir_r.set_local_pose(pose * self._config.trans_pose_r)
+        self._alight.local_pose = pose
+        self._cam_rgb.local_pose = pose
+        self._cam_ir_l.local_pose = pose * self._config.trans_pose_l
+        self._cam_ir_r.local_pose = pose * self._config.trans_pose_r
     
     def set_ir_noise(self, ir_speckle_noise: float, ir_thermal_noise: float):
         """
@@ -426,28 +422,46 @@ class StereoDepthSensor(SensorEntity):
     def _create_cameras(self):
         self._scene.update_render()
 
-        if self._mount is None:
-            self._cam_rgb = self._scene.add_camera(
-                f"{self.name}", *self._config.rgb_resolution, 0.78, 0.001, 100)
-            self._cam_rgb.set_local_pose(self._pose)
 
-            self._cam_ir_l = self._scene.add_camera(
-                f"{self.name}_left", *self._config.ir_resolution, 0.78, 0.001, 100)
-            self._cam_ir_l.set_local_pose(self._pose * self._config.trans_pose_l)
+        self._cam_rgb = RenderCameraComponent(*self._config.rgb_resolution)
+        self._cam_rgb.set_fovy(0.78)
+        self._cam_rgb.near = 0.001
+        self._cam_rgb.far = 100
+        self._cam_rgb.local_pose = self._pose
+        self._cam_rgb.name = "cam_rgb"
 
-            self._cam_ir_r = self._scene.add_camera(
-                f"{self.name}_right", *self._config.ir_resolution, 0.78, 0.001, 100)
-            self._cam_ir_r.set_local_pose(self._pose * self._config.trans_pose_r)
-        else:
-            self._cam_rgb = self._scene.add_mounted_camera(
-                f"{self.name}", self._mount, self._pose, *self._config.rgb_resolution, 0.78, 0.001, 100)
+        self._cam_ir_l = RenderCameraComponent(*self._config.ir_resolution)
+        self._cam_ir_l.local_pose = self._pose * self._config.trans_pose_l
+        self._cam_rgb.name = "cam_ir_l"
 
-            self._cam_ir_l = self._scene.add_mounted_camera(
-                f"{self.name}_left", self._mount, self._pose * self._config.trans_pose_l, *self._config.ir_resolution, 0.78, 0.001, 100)
+        self._cam_ir_r = RenderCameraComponent(*self._config.ir_resolution)
+        self._cam_ir_r.local_pose = self._pose * self._config.trans_pose_r
+        self._cam_rgb.name = "cam_ir_r"
 
-            self._cam_ir_r = self._scene.add_mounted_camera(
-                f"{self.name}_right", self._mount, self._pose * self._config.trans_pose_r, *self._config.ir_resolution, 0.78, 0.001, 100)
-        
+
+        # if self._mount is None:
+        #     self._cam_rgb = self._scene.add_camera(
+        #         f"{self.name}", *self._config.rgb_resolution, 0.78, 0.001, 100)
+        #     self._cam_rgb.set_local_pose(self._pose)
+
+        #     self._cam_ir_l = self._scene.add_camera(
+        #         f"{self.name}_left", *self._config.ir_resolution, 0.78, 0.001, 100)
+        #     self._cam_ir_l.set_local_pose(self._pose * self._config.trans_pose_l)
+
+        #     self._cam_ir_r = self._scene.add_camera(
+        #         f"{self.name}_right", *self._config.ir_resolution, 0.78, 0.001, 100)
+        #     self._cam_ir_r.set_local_pose(self._pose * self._config.trans_pose_r)
+        # else:
+        #     self._cam_rgb = self._scene.add_mounted_camera(
+        #         f"{self.name}", self._mount, self._pose, *self._config.rgb_resolution, 0.78, 0.001, 100)
+
+        #     self._cam_ir_l = self._scene.add_mounted_camera(
+        #         f"{self.name}_left", self._mount, self._pose * self._config.trans_pose_l, *self._config.ir_resolution, 0.78, 0.001, 100)
+
+        #     self._cam_ir_r = self._scene.add_mounted_camera(
+        #         f"{self.name}_right", self._mount, self._pose * self._config.trans_pose_r, *self._config.ir_resolution, 0.78, 0.001, 100)
+
+
         self._cam_rgb.set_perspective_parameters(
             0.1, 100.0,
             self._config.rgb_intrinsic[0, 0], self._config.rgb_intrinsic[1, 1],
@@ -469,6 +483,22 @@ class StereoDepthSensor(SensorEntity):
             self._config.ir_intrinsic[0, 1]
         )
 
+        self._mount.add_component(self._cam_rgb)
+        self._mount.add_component(self._cam_ir_l)
+        self._mount.add_component(self._cam_ir_r)
+
+
+    def _create_light(self):
+        # Active Light
+        self._alight = RenderTexturedLightComponent()
+        self._alight.color[0, 0, 0]
+        self._alight.inner_fov = 1.57
+        self._alight.texture = RenderTexture(self._config.light_pattern)
+        self._alight.local_pose = self._pose
+        self._alight.name = "active_light"
+        self._mount.add_component(self._alight)
+
+
     def _ir_mode(self):
         if self._config.light_pattern is None:
             return
@@ -479,7 +509,7 @@ class StereoDepthSensor(SensorEntity):
                 l.set_color(l.color * self._config.ir_light_dim_factor)
             self._light_a = self._scene.ambient_light
             self._scene.set_ambient_light([self._config.ir_ambient_strength, 0, 0])
-            self._alight.set_color([1, 0, 0])
+            self._alight.color = [1, 0, 0]
 
     def _normal_mode(self):
         if self._config.light_pattern is None:

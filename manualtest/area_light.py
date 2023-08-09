@@ -1,5 +1,5 @@
 import numpy as np
-import sapien.core as sapien
+import sapien
 import trimesh
 from sapien.utils import Viewer
 
@@ -7,20 +7,25 @@ engine = sapien.Engine()
 renderer = sapien.SapienRenderer()
 engine.set_renderer(renderer)
 
-sapien.render_config.viewer_shader_dir = "../vulkan_shader/rt"
+sapien.render.set_viewer_shader_dir("../vulkan_shader/rt")
+sapien.render.set_ray_tracing_samples_per_pixel(2)
+sapien.render.set_ray_tracing_denoiser("oidn")
+
+sapien.render.set_ray_tracing_dof_aperture(0.001)
+sapien.render.set_ray_tracing_dof_plane(2)
 
 scene = engine.create_scene()
 scene.add_ground(0)
-builder = scene.create_actor_builder().add_visual_from_file(
-    "../assets/models/suzanne.dae", scale=[0.1, 0.1, 0.1]
-)
-model = builder.build_kinematic()
-model.set_pose(sapien.Pose([0, 0, 0.1]))
+# builder = scene.create_actor_builder().add_visual_from_file(
+#     "../assets/models/suzanne.dae", scale=[0.1, 0.1, 0.1]
+# )
+# model = builder.build_kinematic()
+# model.set_pose(sapien.Pose([0, 0, 0.1]))
 
 
 def add_area_light():
     light = scene.add_area_light_for_ray_tracing(
-        sapien.Pose([0, 0, 0.3], [0.7071068, 0, 0.7071068, 0]), [1, 1, 1], 0.1, 0.1
+        sapien.Pose([0, 0, 0.01], [0.7071068, 0, 0.7071068, 0]), [1, 1, 1], 1, 0.1
     )
 
 
@@ -41,10 +46,11 @@ def add_emission_plane():
 
 
 add_area_light()
-# add_emission_plane()
 
 viewer = Viewer(renderer)
 viewer.set_scene(scene)
+
+viewer.set_camera_xyz(-1, 0, 0.5)
 
 scene.step()
 while not viewer.closed:

@@ -1,6 +1,6 @@
 from .plugin import Plugin
-from sapien.core import renderer as R
-import sapien.core as sapien
+from sapien import internal_renderer as R
+import sapien as sapien
 
 
 class SceneWindow(Plugin):
@@ -37,59 +37,60 @@ class SceneWindow(Plugin):
                 R.UIWindow()
                 .Pos(410, 10)
                 .Size(400, 400)
-                .Label("Scene Hierarchy")
+                .Label("Scene")
                 .append(
                     R.UITreeNode()
                     .Label("World")
                     .append(
-                        R.UITreeNode().Label("Actors"),
-                        R.UITreeNode().Label("Articulations"),
-                        R.UITreeNode().Label("Lights"),
+                        R.UITreeNode().Label("Entities"),
+                        # R.UITreeNode().Label("Articulations"),
+                        # R.UITreeNode().Label("Lights"),
                     ),
                 )
             )
 
-        atree, arttree, ltree = self.ui_window.get_children()[0].get_children()
+        # atree, arttree, ltree = self.ui_window.get_children()[0].get_children()
+        (atree,) = self.ui_window.get_children()[0].get_children()
         atree: R.UITreeNode
-        arttree: R.UITreeNode
-        ltree: R.UITreeNode
+        # arttree: R.UITreeNode
+        # ltree: R.UITreeNode
         atree.remove_children()
-        arttree.remove_children()
-        ltree.remove_children()
+        # arttree.remove_children()
+        # ltree.remove_children()
 
-        for i, actor in enumerate(self.scene.get_all_actors()):
+        for i, entity in enumerate(self.scene.entities):
             atree.append(
                 R.UISelectable()
-                .Label(actor.name if actor.name else "(no name)")
-                .Id("actor{}".format(i))
-                .Selected(self.selected_entity == actor)
-                .Callback((lambda link: lambda _: self.select_entity(link))(actor))
+                .Label(entity.name if entity.name else "(no name)")
+                .Id("entity{}".format(i))
+                .Selected(self.selected_entity == entity)
+                .Callback((lambda link: lambda _: self.select_entity(link))(entity))
             )
 
-        for i, art in enumerate(self.scene.get_all_articulations()):
-            art_node = (
-                R.UITreeNode()
-                .Label(art.name if art.name else "(no name)")
-                .Id("art{}".format(i))
-            )
-            for j, link in enumerate(art.get_links()):
-                art_node.append(
-                    R.UISelectable()
-                    .Label(link.name if link.name else "(no name)")
-                    .Id("link{}".format(j))
-                    .Selected(self.selected_entity == link)
-                    .Callback((lambda link: lambda _: self.select_entity(link))(link))
-                )
-            arttree.append(art_node)
+        # for i, art in enumerate(self.scene.get_all_articulations()):
+        #     art_node = (
+        #         R.UITreeNode()
+        #         .Label(art.name if art.name else "(no name)")
+        #         .Id("art{}".format(i))
+        #     )
+        #     for j, link in enumerate(art.get_links()):
+        #         art_node.append(
+        #             R.UISelectable()
+        #             .Label(link.name if link.name else "(no name)")
+        #             .Id("link{}".format(j))
+        #             .Selected(self.selected_entity == link)
+        #             .Callback((lambda link: lambda _: self.select_entity(link))(link))
+        #         )
+        #     arttree.append(art_node)
 
-        for i, light in enumerate(self.scene.get_all_lights()):
-            ltree.append(
-                R.UISelectable()
-                .Label(light.name if light.name else "(no name)")
-                .Id("light{}".format(i))
-                .Selected(self.selected_entity == light)
-                .Callback((lambda light: lambda _: self.select_entity(light))(light))
-            )
+        # for i, light in enumerate(self.scene.get_all_lights()):
+        #     ltree.append(
+        #         R.UISelectable()
+        #         .Label(light.name if light.name else "(no name)")
+        #         .Id("light{}".format(i))
+        #         .Selected(self.selected_entity == light)
+        #         .Callback((lambda light: lambda _: self.select_entity(light))(light))
+        #     )
 
     def get_ui_windows(self):
         self.build()

@@ -11,7 +11,7 @@ rm -f wheelhouse/*.whl
 
 docker run -v `pwd`:/workspace/SAPIEN -it --rm \
        -u $(id -u ${USER}):$(id -g ${USER}) \
-       fxiangucsd/sapien-build-env:3.0 bash -c "export CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} && cd /workspace/SAPIEN && ./build.sh ${PYTHON_VERSION}"
+       fxiangucsd/sapien-build-env:3.2 bash -c "export CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} && cd /workspace/SAPIEN && ./build.sh ${PYTHON_VERSION}"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
@@ -19,6 +19,6 @@ cd wheelhouse
 pip3 uninstall -y sapien
 pip3 install *
 
-cp -r /tmp/stubs/sapien/core-stubs/pysapien ${DIR}/python/py_package/core
-cp /tmp/stubs/sapien/core-stubs/__init__.pyi $DIR/python/py_package/core
-cp -r /tmp/stubs/sapien/core-stubs/pysapien $DIR/python/py_package/core
+cd /tmp && rm stubs -rf && python3 ${DIR}/python/stubgen.py sapien --ignore-invalid all
+cp -r /tmp/stubs/sapien-stubs/__init__.pyi ${DIR}/python/py_package
+cp -r /tmp/stubs/sapien-stubs/pysapien ${DIR}/python/py_package

@@ -2,9 +2,20 @@ cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall")
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+if(MSVC)
+    add_compile_options("/W4" "$<$<CONFIG:Release>:/O2>")
+else()
+    add_compile_options("-Wall"
+        "$<$<CONFIG:Debug>:-g3>" "$<$<CONFIG:Debug>:-O0>"
+        "$<$<CONFIG:Release>:-O3>")
+endif()
+
+add_compile_definitions("$<$<CONFIG:DEBUG>:_DEBUG>")
+add_compile_definitions("$<$<CONFIG:DEBUG>:VK_VALIDATION>")
+add_compile_definitions("$<$<CONFIG:DEBUG>:VK_CORE_LOGGING>")
+add_compile_definitions("$<$<NOT:$<CONFIG:Debug>>:NDEBUG>")
+
 set(CMAKE_DEBUG_POSTFIX "")
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
@@ -13,6 +24,7 @@ option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OF
 option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, denoiser, and simsense" ON)
 
 option(SAPIEN_BUILD_PYTHON "Build Python binding, only intended to generate compile_commands.json for IDE" OFF)
+option(SAPIEN_BUILD_TEST "build unit tests")
 
 
 set(SAPIEN_PHYSX5_DIR "" CACHE STRING "Directory for precompield PhysX5")
@@ -21,20 +33,7 @@ if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build." FORCE)
 endif ()
 
-if (UNIX)
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        message("-- DEBUG Build")
-        add_definitions(-DVK_VALIDATION)
-        add_definitions(-DVK_CORE_LOGGING)
-        add_definitions(-D_DEBUG)
-    else()
-        add_definitions(-DNDEBUG)
-    endif()
-endif()
-
 if (WIN32)
-    # We will only build release version for Windows
-    add_definitions(-DNDEBUG)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
@@ -51,15 +50,12 @@ list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(physx5)
 include(zlib)
 include(grpc)
-
-# TODO: on Windows, manually link physx5 and grpc
-
-include(tinyxml2)
 include(eigen)
 include(vulkan)
+include(cereal)
 
 if (${SAPIEN_DEBUG_VIEWER})
-    add_definitions(-D_DEBUG_VIEWER)
+    add_definitions(_DEBUG_VIEWER)
 endif ()
 
 if (${SAPIEN_PROFILE})
@@ -87,23 +83,18 @@ endif ()
 file(GLOB_RECURSE SAPIEN_SRC "src/*.h" "src/*.cpp" "src/*.cc")
 add_library(sapien SHARED ${SAPIEN_SRC})
 
-target_link_libraries(sapien PUBLIC eigen)
-target_link_libraries(sapien PUBLIC svulkan2)
-target_link_libraries(sapien PRIVATE physx5)
-target_link_libraries(sapien PRIVATE tinyxml2 spdlog::spdlog easy_profiler
-    grpc++ ${CMAKE_DL_LIBS})
+target_link_libraries(sapien PUBLIC eigen svulkan2 cereal)
+target_link_libraries(sapien PRIVATE physx5 spdlog::spdlog easy_profiler grpc++ ${CMAKE_DL_LIBS} assimp::assimp)
 
 if (UNIX)
     target_link_libraries(sapien PRIVATE stdc++fs)
 endif ()
 
-
-target_link_libraries(sapien PRIVATE Vulkan::Headers glm assimp::assimp)
-
 if (${SAPIEN_CUDA})
     target_compile_definitions(sapien PUBLIC SAPIEN_DLPACK SAPIEN_CUDA)
     target_include_directories(sapien PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/dlpack/include> "$ENV{CUDA_PATH}/include")
 endif()
+
 target_include_directories(sapien PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_include_directories(sapien PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
@@ -120,13 +111,22 @@ target_include_directories(sapien INTERFACE
 )
 
 if (${SAPIEN_CUDA})
+    add_dependencies(sapien OpenImageDenoise_device_cuda)
+    ExternalProject_Get_property(OpenImageDenoise_device_cuda binary_dir)
+
+    if(EXISTS ${binary_dir}/../preinstall/lib)
+        install(DIRECTORY ${binary_dir}/../preinstall/lib DESTINATION ".")
+    else()
+        install(DIRECTORY ${binary_dir}/../preinstall/lib64 DESTINATION ".")
+    endif()
+
     install(
-        TARGETS sapien svulkan2 simsense
+        TARGETS sapien svulkan2 simsense cereal physx5 OpenImageDenoise OpenImageDenoise_core OpenImageDenoise_common glm Vulkan-Headers
         EXPORT sapienTargets
     )
 else()
     install(
-        TARGETS sapien svulkan2
+        TARGETS sapien svulkan2 cereal
         EXPORT sapienTargets
     )
 endif()
@@ -138,6 +138,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/sapien-vulkan-2/include
 install(DIRECTORY "${glm_SOURCE_DIR}/glm" DESTINATION "include")
 install(DIRECTORY "${vulkan_SOURCE_DIR}/include/vulkan" DESTINATION "include")
 install(DIRECTORY "${vulkan_SOURCE_DIR}/include/vk_video" DESTINATION "include")
+install(DIRECTORY "${cereal_SOURCE_DIR}/include/cereal" DESTINATION "include")
 
 if (${SAPIEN_CUDA})
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/simsense/include/simsense" DESTINATION "include")
@@ -162,9 +163,24 @@ install(
 
 if (SAPIEN_BUILD_PYTHON)
     include(pybind11)
-    pybind11_add_module(pysapien "python/pysapien.cpp" NO_EXTRAS)
-    target_link_libraries(pysapien PRIVATE sapien eigen)
+    file(GLOB_RECURSE PYBIND_SRC "python/pybind/*.cpp")
+    pybind11_add_module(pysapien ${PYBIND_SRC} NO_EXTRAS)
+    target_link_libraries(pysapien PRIVATE sapien eigen physx5 Vulkan::Headers glm)
     if (TARGET simsense)
         target_link_libraries(pysapien PRIVATE simsense)
     endif()
+    target_compile_definitions(pysapien PRIVATE PYBIND11_USE_SMART_HOLDER_AS_DEFAULT)
+endif()
+
+if (${SAPIEN_BUILD_TEST})
+    include(googletest)
+    file(GLOB_RECURSE SAPIEN_TEST_SRC "test/*.cpp")
+    add_executable(sapien_test EXCLUDE_FROM_ALL ${SAPIEN_TEST_SRC})
+    target_link_libraries(sapien_test sapien GTest::gtest_main physx5 cereal
+        # -fsanitize=address
+    )
+    target_include_directories(sapien_test PRIVATE "test")
+
+    add_executable(manual_test EXCLUDE_FROM_ALL "manualtest/main.cpp")
+    target_link_libraries(manual_test sapien physx5)
 endif()
