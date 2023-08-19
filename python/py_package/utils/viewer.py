@@ -204,6 +204,7 @@ class Viewer(object):
         renderer: SapienRenderer,
         shader_dir="",
         resolutions=(1024, 768),
+        show_axes=True,
     ):
         if not os.path.exists("imgui.ini"):
             with open("imgui.ini", "w") as f:
@@ -227,7 +228,7 @@ class Viewer(object):
         self.fovy = np.pi / 2
 
         self.axes = None
-        self.show_axes = True
+        self.show_axes = show_axes
         self.axes_scale = 0.1
 
         self.selected_entity = None
@@ -1979,7 +1980,7 @@ class Viewer(object):
         self.fps_camera_controller = FPSCameraController(self.window)
         self.arc_camera_controller = ArcRotateCameraController(self.window)
         self.create_visual_objects()
-        self.toggle_axes(True)
+        self.toggle_axes(self.show_axes)
         self.set_fovy(np.pi / 2)
 
     def set_camera_xyz(self, x, y, z):
