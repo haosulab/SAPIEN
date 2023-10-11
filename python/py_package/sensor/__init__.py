@@ -1,4 +1,4 @@
-from .activelight import ActiveLightSensor
+# from .activelight import ActiveLightSensor
 
 try:
     from .stereodepth import StereoDepthSensor, StereoDepthSensorConfig

@@ -8,6 +8,7 @@ void init_sapien_renderer_internal(py::module &m);
 void init_sapien_renderer(py::module &m);
 void init_math(py::module &m);
 void init_serialization(py::module &m);
+void init_simsense(py::module &m);
 
 PYBIND11_MODULE(pysapien, m) {
   auto sapien_gen = init_sapien(m);
@@ -23,4 +24,6 @@ PYBIND11_MODULE(pysapien, m) {
 
   sapien_gen.next();
   physx_gen.next();
+
+  init_simsense(m);
 }

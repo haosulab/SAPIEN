@@ -346,7 +346,7 @@ void init_sapien_renderer(py::module &sapien) {
 
   auto PyRenderTexture2D = py::class_<SapienRenderTexture2D>(m, "RenderTexture2D");
 
-  auto PyRenderTargetCuda = py::class_<SapienRenderImageCuda>(m, "RenderImageCuda");
+  auto PyRenderTargetCuda = py::class_<SapienRenderImageCuda, CudaArrayHandle>(m, "RenderImageCuda");
 
   auto PyRenderCubemap = py::class_<SapienRenderCubemap>(m, "RenderCubemap");
 
