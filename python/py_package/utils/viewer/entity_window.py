@@ -55,7 +55,7 @@ class EntityWindow(Plugin):
                         vs = sapien.render.RenderShapeSphere(s.radius, blue_mat)
 
                     if isinstance(s, sapien.physx.PhysxCollisionShapeBox):
-                        vs = sapien.render.RenderShapeSphere(s.half_size, blue_mat)
+                        vs = sapien.render.RenderShapeBox(s.half_size, blue_mat)
 
                     if isinstance(s, sapien.physx.PhysxCollisionShapeCapsule):
                         vs = sapien.render.RenderShapeCapsule(
