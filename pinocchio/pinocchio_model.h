@@ -1,6 +1,7 @@
 #pragma once
 
-#include <PxPhysicsAPI.h>
+#include "sapien/math/pose.h"
+// #include <PxPhysicsAPI.h>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
@@ -56,7 +57,7 @@ public:
    *
    *  must be called after computeForwardKinematics
    */
-  physx::PxTransform getLinkPose(uint32_t index);
+  Pose getLinkPose(uint32_t index);
 
   void computeFullJacobian(const Eigen::VectorXd &qpos);
 
@@ -107,7 +108,7 @@ public:
    *
    */
   std::tuple<Eigen::VectorXd, bool, Eigen::Matrix<double, 6, 1>>
-  computeInverseKinematics(uint32_t linkIdx, physx::PxTransform const &pose,
+  computeInverseKinematics(uint32_t linkIdx, Pose const &pose,
                            Eigen::VectorXd const &initialQpos = {},
                            Eigen::VectorXi const &activeJointIndices = {}, double eps = 1e-4,
                            int maxIter = 1000, double dt = 1e-1, double damp = 1e-6);

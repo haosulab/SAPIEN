@@ -5,6 +5,8 @@
 #include <pinocchio/algorithm/rnea.hpp>
 
 #include <memory>
+
+#define PYBIND11_USE_SMART_HOLDER_AS_DEFAULT 1
 #include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
@@ -129,7 +131,7 @@ void PinocchioModel::computeForwardKinematics(const Eigen::VectorXd &qpos) {
   pinocchio::forwardKinematics(model, data, posS2P(qpos));
 }
 
-physx::PxTransform PinocchioModel::getLinkPose(uint32_t index) {
+Pose PinocchioModel::getLinkPose(uint32_t index) {
   ASSERT(index < linkIdx2FrameIdx.size(), "link index out of bound");
   auto frame = linkIdx2FrameIdx[index];
   auto parentJoint = model.frames[frame].parent;
@@ -139,7 +141,7 @@ physx::PxTransform PinocchioModel::getLinkPose(uint32_t index) {
   auto link2world = joint2world * link2joint;
   auto P = link2world.translation();
   auto Q = Eigen::Quaterniond(link2world.rotation());
-  return {physx::PxVec3(P.x(), P.y(), P.z()), physx::PxQuat(Q.x(), Q.y(), Q.z(), Q.w())};
+  return {Vec3(P.x(), P.y(), P.z()), Quat(Q.w(), Q.x(), Q.y(), Q.z())};
 }
 
 void PinocchioModel::computeFullJacobian(const Eigen::VectorXd &qpos) {
@@ -208,7 +210,7 @@ Eigen::VectorXd PinocchioModel::computeForwardDynamics(const Eigen::VectorXd &qp
 }
 
 std::tuple<Eigen::VectorXd, bool, Eigen::Matrix<double, 6, 1>>
-PinocchioModel::computeInverseKinematics(uint32_t linkIdx, physx::PxTransform const &pose,
+PinocchioModel::computeInverseKinematics(uint32_t linkIdx, Pose const &pose,
                                          Eigen::VectorXd const &initialQpos,
                                          Eigen::VectorXi const &activeQMask, double eps,
                                          int maxIter, double dt, double damp) {
@@ -287,7 +289,7 @@ using namespace sapien;
 namespace py = pybind11;
 PYBIND11_MODULE(pysapien_pinocchio, m) {
   auto PyPinocchioModel =
-      py::class_<PinocchioModel, std::unique_ptr<PinocchioModel>>(m, "PinocchioModel");
+      py::class_<PinocchioModel>(m, "PinocchioModel");
   PyPinocchioModel
       .def(py::init([](std::string urdf, Eigen::Vector3d gravity) {
         return PinocchioModel::fromURDFXML(urdf, gravity);

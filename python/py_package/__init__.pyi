@@ -8,14 +8,14 @@ from sapien.pysapien import CudaArray
 from sapien.pysapien import CudaDataSource
 from sapien.wrapper.engine import Engine
 from sapien.pysapien import Entity
-from sapien.pysapien import Module
 from sapien.wrapper.actor_builder import PhysicalMaterialRecord
-from sapien.wrapper.pinocchio_model import PinocchioModel
+from sapien.pysapien_pinocchio import PinocchioModel
 from sapien.pysapien import Pose
 from sapien.wrapper.renderer import SapienRenderer
 from sapien.wrapper.scene import Scene
 from sapien.pysapien import System
 from sapien.wrapper.actor_builder import VisualMaterialRecord
+from sapien.wrapper.scene import Widget
 import atexit
 import os
 import pkg_resources
@@ -33,7 +33,6 @@ __all__ = [
     "CudaDataSource",
     "Engine",
     "Entity",
-    "Module",
     "PhysicalMaterialRecord",
     "PinocchioModel",
     "Pose",
@@ -42,6 +41,7 @@ __all__ = [
     "SceneConfig",
     "System",
     "VisualMaterialRecord",
+    "Widget",
     "atexit",
     "internal_renderer",
     "math",
@@ -50,6 +50,7 @@ __all__ = [
     "pkg_resources",
     "platform",
     "pysapien",
+    "pysapien_pinocchio",
     "render",
     "serialization",
     "set_log_level",
@@ -61,5 +62,5 @@ __all__ = [
 
 def set_log_level(level: str) -> None:
     pass
-__version__ = '3.0.0.dev20231010'
+__version__ = '3.0.0.dev20231012'
 SceneConfig = sapien.pysapien.physx.PhysxSceneConfig
