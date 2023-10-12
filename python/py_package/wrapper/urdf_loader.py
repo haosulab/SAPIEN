@@ -37,7 +37,9 @@ class URDFLoader:
     def _get_material(self, link_name, index):
         if link_name in self._link_material:
             return PhysicalMaterialRecord(*self._link_material[link_name])
-        return PhysicalMaterialRecord(*self._material)
+        if self._material is not None:
+            return PhysicalMaterialRecord(*self._material)
+        return None
 
     def _get_patch_radius(self, link_name, index):
         if link_name in self._link_patch_radius:

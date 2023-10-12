@@ -194,33 +194,53 @@ class ActorBuilder:
                 shape = sapien.physx.PhysxCollisionShapePlane(
                     material=record2mat[id(r.material)],
                 )
+                shapes = [shape]
             elif r.type == "box":
                 shape = sapien.physx.PhysxCollisionShapeBox(
                     half_size=r.scale, material=record2mat[id(r.material)]
                 )
+                shapes = [shape]
             elif r.type == "capsule":
                 shape = sapien.physx.PhysxCollisionShapeCapsule(
                     radius=r.radius,
                     half_length=r.length,
                     material=record2mat[id(r.material)],
                 )
+                shapes = [shape]
             elif r.type == "sphere":
                 shape = sapien.physx.PhysxCollisionShapeSphere(
                     radius=r.radius,
                     material=record2mat[id(r.material)],
                 )
+                shapes = [shape]
             elif r.type == "convex_mesh":
                 shape = sapien.physx.PhysxCollisionShapeConvexMesh(
                     filename=r.filename,
                     scale=r.scale,
                     material=record2mat[id(r.material)],
                 )
+                shapes = [shape]
+            elif r.type == "nonconvex_mesh":
+                shape = sapien.physx.PhysxCollisionShapeTriangleMesh(
+                    filename=r.filename,
+                    scale=r.scale,
+                    material=record2mat[id(r.material)],
+                )
+                shapes = [shape]
+            elif r.type == "multiple_convex_meshes":
+                shapes = sapien.physx.PhysxCollisionShapeConvexMesh.load_multiple(
+                    filename=r.filename,
+                    scale=r.scale,
+                    material=record2mat[id(r.material)],
+                )
+
             else:
                 raise Exception(f"invalid collision shape type [{r.type}]")
 
-            shape.local_pose = r.pose
-            shape.set_collision_groups(self.collision_groups)
-            component.attach(shape)
+            for shape in shapes:
+                shape.local_pose = r.pose
+                shape.set_collision_groups(self.collision_groups)
+                component.attach(shape)
 
         if not self._auto_inertial and self.physx_body_type != "kinematic":
             component.mass = self._mass
@@ -390,7 +410,8 @@ class ActorBuilder:
     ):
         self.collision_records.append(
             CollisionShapeRecord(
-                type="multiple_convex",
+                type="multiple_convex_meshes",
+                filename=filename,
                 pose=pose,
                 scale=scale,
                 material=material,
@@ -414,7 +435,8 @@ class ActorBuilder:
     ):
         self.collision_records.append(
             CollisionShapeRecord(
-                type="nonconvex",
+                type="nonconvex_mesh",
+                filename=filename,
                 pose=pose,
                 scale=scale,
                 material=material,
