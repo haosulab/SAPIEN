@@ -430,6 +430,15 @@ Generator<int> init_physx(py::module &sapien) {
       .def_property_readonly("auto_compute_mass", &PhysxRigidBodyComponent::getAutoComputeMass)
       .def("get_auto_compute_mass", &PhysxRigidBodyComponent::getAutoComputeMass)
 
+      .def_property("linear_damping", &PhysxRigidBodyComponent::getLinearDamping,
+                    &PhysxRigidBodyComponent::setLinearDamping)
+      .def("get_linear_damping", &PhysxRigidBodyComponent::getLinearDamping)
+      .def("set_linear_damping", &PhysxRigidBodyComponent::setLinearDamping, py::arg("damping"))
+      .def_property("angular_damping", &PhysxRigidBodyComponent::getAngularDamping,
+                    &PhysxRigidBodyComponent::setAngularDamping)
+      .def("get_angular_damping", &PhysxRigidBodyComponent::getAngularDamping)
+      .def("set_angular_damping", &PhysxRigidBodyComponent::setAngularDamping, py::arg("damping"))
+
       .def_property("mass", &PhysxRigidBodyComponent::getMass, &PhysxRigidBodyComponent::setMass)
       .def("get_mass", &PhysxRigidBodyComponent::getMass)
       .def("set_mass", &PhysxRigidBodyComponent::setMass)
