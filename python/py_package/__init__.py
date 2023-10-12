@@ -12,7 +12,7 @@ from . import serialization
 
 from . import _vulkan_tricks
 
-from .wrapper.scene import Scene, SceneConfig, Module
+from .wrapper.scene import Scene, SceneConfig, Widget
 from .wrapper.engine import Engine
 from .wrapper.renderer import SapienRenderer
 from .wrapper.actor_builder import (

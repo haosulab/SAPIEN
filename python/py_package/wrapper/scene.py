@@ -4,7 +4,7 @@ from ..pysapien.physx import PhysxSceneConfig as SceneConfig
 from typing import Union, Optional
 
 
-class Module:
+class Widget:
     def load(self):
         pass
 
@@ -19,7 +19,7 @@ class Scene(_Scene):
         else:
             super().__init__(systems)
 
-        self.modules = []
+        self.widgets = []
 
     @property
     def timestep(self):
@@ -71,7 +71,7 @@ class Scene(_Scene):
     # TODO: find actor by id
     def add_camera(
         self, name, width: int, height: int, fovy: float, near: float, far: float
-    ):
+    ) -> sapien.render.RenderCameraComponent:
         camera_mount = sapien.Entity()
         camera = sapien.render.RenderCameraComponent(width, height)
         camera.set_fovy(fovy, compute_x=True)
@@ -84,7 +84,9 @@ class Scene(_Scene):
 
         return camera
 
-    def add_mounted_camera(self, name, mount, pose, width, height, fovy, near, far):
+    def add_mounted_camera(
+        self, name, mount, pose, width, height, fovy, near, far
+    ) -> sapien.render.RenderCameraComponent:
         camera = sapien.render.RenderCameraComponent(width, height)
         camera.set_fovy(fovy, compute_x=True)
         camera.near = near
@@ -98,7 +100,7 @@ class Scene(_Scene):
     def remove_camera(self, camera):
         self.remove_entity(camera.entity)
 
-    def get_camreas(self):
+    def get_cameras(self):
         return self.render_system.cameras
 
     def get_mounted_cameras(self):
@@ -407,40 +409,36 @@ class Scene(_Scene):
         components = _unserialize_python_components(python_component_data)
         self._swap_in_python_components(components)
 
-    def load_module(self, package_path_or_name: str, entry: str = None):
-        """
-        Args:
-            path: file path to a module as a zip file or unpacked folder, path can be a url
-            entry: entry point class accessible in the __init__.py file at the root of the module
-                if None, the first sapien.Module found will be loaded
-        Returns:
-            an instantiated sapien.Module added to this scene
-        """
+    def load_widget(self, widget: Widget):
+        self.widgets.append(widget)
+        widget.load(self)
+        return widget
 
+    def load_widget_from_package(
+        self, package_name, entry: str = None, widget_params=dict()
+    ):
         from sapien.package import load_package
         import inspect
 
-        m = load_package(package_path_or_name)
+        m = load_package(package_name)
         if entry is None:
             for k, v in m.__dict__.items():
-                if inspect.isclass(v) and issubclass(v, Module):
+                if inspect.isclass(v) and issubclass(v, Widget):
                     entry = k
         if entry is None:
-            raise Exception("failed to find module from package")
+            raise Exception("failed to find widget from package")
 
         cls = getattr(m, entry)
-        if not issubclass(cls, Module):
-            raise Exception(f"given entry {entry} is not a sapien Module class")
+        if not issubclass(cls, Widget):
+            raise Exception(f"given entry {entry} is not a sapien Widget class")
 
-        module = getattr(m, entry)()
+        widget = getattr(m, entry)(**widget_params)
 
-        self.modules.append(module)
-        module.load(self)
-        return module
+        self.load_widget(widget)
 
-    def unload_module(self, module: Module):
-        if module not in self.modules:
-            raise Exception("module not in scene")
+    def unload_widget(self, widget: Widget):
+        if widget not in self.widgets:
+            raise Exception("failed to unload widget: it is not in scene")
 
-        module.unload(self)
-        self.modules.remove(module)
+        widget.unload(self)
+        self.widgets.remove(widget)
