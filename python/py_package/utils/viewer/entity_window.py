@@ -35,18 +35,18 @@ class EntityWindow(Plugin):
         if entity is None:
             return
 
+        for c in entity.components:
+            if isinstance(c, sapien.render.RenderBodyComponent):
+                if c.name == "Collision":
+                    return
+
+                c.disable()
+
         new_visual = sapien.render.RenderBodyComponent()
         red_mat = sapien.render.RenderMaterial(base_color=[1, 0, 0, 1])
         green_mat = sapien.render.RenderMaterial(base_color=[0, 1, 0, 1])
         blue_mat = sapien.render.RenderMaterial(base_color=[0, 0, 1, 1])
         new_visual.name = "Collision"
-
-        for c in entity.components:
-            if isinstance(c, sapien.render.RenderBodyComponent):
-                if c.name == "Collision":
-                    continue
-
-                c.disable()
 
         for c in entity.components:
             if isinstance(c, sapien.physx.PhysxRigidBaseComponent):
@@ -66,16 +66,19 @@ class EntityWindow(Plugin):
                         vs = sapien.render.RenderShapeTriangleMesh(
                             s.vertices, s.triangles, np.zeros((0, 3)), green_mat
                         )
+                        vs.scale = s.scale
 
                     if isinstance(s, sapien.physx.PhysxCollisionShapeTriangleMesh):
                         vs = sapien.render.RenderShapeTriangleMesh(
                             s.vertices, s.triangles, np.zeros((0, 3)), red_mat
                         )
+                        vs.scale = s.scale
 
                     new_visual.attach(vs)
 
         entity.add_component(new_visual)
         new_visual.set_property("shadeFlat", 1)
+        self.viewer.notify_render_update()
 
     def disable_collision_visual(self, entity=None):
         if entity is None:
@@ -90,6 +93,8 @@ class EntityWindow(Plugin):
                     continue
 
                 c.enable()
+
+        self.viewer.notify_render_update()
 
     def create_collision_shapes(self, entity):
         render_scene: R.Scene = self.viewer.system._internal_scene
