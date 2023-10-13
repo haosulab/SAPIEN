@@ -570,20 +570,18 @@ class URDFLoader:
             name2entity[a.name] = a
 
         for cam in cameras:
-            for a in articulations:
-                for actor in a.links:
-                    cam_component = RenderCameraComponent(cam["width"], cam["height"])
-                    if cam["fovx"] is not None and cam["fovy"] is not None:
-                        cam_component.set_fovx(cam["fovx"], False)
-                        cam_component.set_fovy(cam["fovy"], False)
-                    elif cam["fovy"] is None:
-                        cam_component.set_fovx(cam["fovx"], True)
-                    elif cam["fovx"] is None:
-                        cam_component.set_fovy(cam["fovy"], True)
+            cam_component = RenderCameraComponent(cam["width"], cam["height"])
+            if cam["fovx"] is not None and cam["fovy"] is not None:
+                cam_component.set_fovx(cam["fovx"], False)
+                cam_component.set_fovy(cam["fovy"], False)
+            elif cam["fovy"] is None:
+                cam_component.set_fovx(cam["fovx"], True)
+            elif cam["fovx"] is None:
+                cam_component.set_fovy(cam["fovy"], True)
 
-                    cam_component.near = cam["near"]
-                    cam_component.far = cam["far"]
-                    name2entity[cam["reference"]].add_component(cam_component)
+            cam_component.near = cam["near"]
+            cam_component.far = cam["far"]
+            name2entity[cam["reference"]].add_component(cam_component)
 
         return articulations, actors
 
@@ -625,20 +623,18 @@ class URDFLoader:
             name2entity[a.name] = a
 
         for cam in cameras:
-            for a in articulations:
-                for actor in a.links:
-                    cam_component = RenderCameraComponent(cam["width"], cam["height"])
-                    if cam["fovx"] is not None and cam["fovy"] is not None:
-                        cam_component.set_fovx(cam["fovx"], False)
-                        cam_component.set_fovy(cam["fovy"], False)
-                    elif cam["fovy"] is None:
-                        cam_component.set_fovx(cam["fovx"], True)
-                    elif cam["fovx"] is None:
-                        cam_component.set_fovy(cam["fovy"], True)
+            cam_component = RenderCameraComponent(cam["width"], cam["height"])
+            if cam["fovx"] is not None and cam["fovy"] is not None:
+                cam_component.set_fovx(cam["fovx"], False)
+                cam_component.set_fovy(cam["fovy"], False)
+            elif cam["fovy"] is None:
+                cam_component.set_fovx(cam["fovx"], True)
+            elif cam["fovx"] is None:
+                cam_component.set_fovy(cam["fovy"], True)
 
-                    cam_component.near = cam["near"]
-                    cam_component.far = cam["far"]
-                    name2entity[cam["reference"]].add_component(cam_component)
+            cam_component.near = cam["near"]
+            cam_component.far = cam["far"]
+            name2entity[cam["reference"]].add_component(cam_component)
 
         return articulations[0]
 
