@@ -54,25 +54,31 @@ class EntityWindow(Plugin):
                     if isinstance(s, sapien.physx.PhysxCollisionShapeSphere):
                         vs = sapien.render.RenderShapeSphere(s.radius, blue_mat)
 
-                    if isinstance(s, sapien.physx.PhysxCollisionShapeBox):
+                    elif isinstance(s, sapien.physx.PhysxCollisionShapeBox):
                         vs = sapien.render.RenderShapeBox(s.half_size, blue_mat)
 
-                    if isinstance(s, sapien.physx.PhysxCollisionShapeCapsule):
+                    elif isinstance(s, sapien.physx.PhysxCollisionShapeCapsule):
                         vs = sapien.render.RenderShapeCapsule(
                             s.radius, s.half_length, blue_mat
                         )
 
-                    if isinstance(s, sapien.physx.PhysxCollisionShapeConvexMesh):
+                    elif isinstance(s, sapien.physx.PhysxCollisionShapeConvexMesh):
                         vs = sapien.render.RenderShapeTriangleMesh(
                             s.vertices, s.triangles, np.zeros((0, 3)), green_mat
                         )
                         vs.scale = s.scale
 
-                    if isinstance(s, sapien.physx.PhysxCollisionShapeTriangleMesh):
+                    elif isinstance(s, sapien.physx.PhysxCollisionShapeTriangleMesh):
                         vs = sapien.render.RenderShapeTriangleMesh(
                             s.vertices, s.triangles, np.zeros((0, 3)), red_mat
                         )
                         vs.scale = s.scale
+
+                    elif isinstance(s, sapien.physx.PhysxCollisionShapePlane):
+                        vs = sapien.render.RenderShapePlane([1, 1e4, 1e4], blue_mat)
+
+                    else:
+                        raise Exception("invalid collision shape, this code should be unreachable.")
 
                     vs.local_pose = s.local_pose
 
