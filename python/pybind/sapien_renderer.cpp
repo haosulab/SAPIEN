@@ -17,7 +17,7 @@ using namespace sapien::component;
 namespace pybind11::detail {
 template <> struct type_caster<svulkan2::renderer::RTRenderer::DenoiserType> {
   PYBIND11_TYPE_CASTER(svulkan2::renderer::RTRenderer::DenoiserType,
-                       _("typing.Liternal['none', 'oidn', 'optix']"));
+                       _("typing.Literal['none', 'oidn', 'optix']"));
 
   bool load(py::handle src, bool convert) {
     std::string name = py::cast<std::string>(src);

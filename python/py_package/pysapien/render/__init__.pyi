@@ -905,12 +905,12 @@ class RenderWindow():
     def cursor(self, arg1: bool) -> None:
         pass
     @property
-    def denoiser(self) -> typing.Liternal['none', 'oidn', 'optix']:
+    def denoiser(self) -> typing.Literal['none', 'oidn', 'optix']:
         """
-        :type: typing.Liternal['none', 'oidn', 'optix']
+        :type: typing.Literal['none', 'oidn', 'optix']
         """
     @denoiser.setter
-    def denoiser(self, arg1: typing.Liternal['none', 'oidn', 'optix']) -> None:
+    def denoiser(self, arg1: typing.Literal['none', 'oidn', 'optix']) -> None:
         pass
     @property
     def display_picture_names(self) -> list[str]:
@@ -991,7 +991,7 @@ def get_camera_shader_dir() -> str:
     pass
 def get_msaa() -> int:
     pass
-def get_ray_tracing_denoiser() -> typing.Liternal['none', 'oidn', 'optix']:
+def get_ray_tracing_denoiser() -> typing.Literal['none', 'oidn', 'optix']:
     pass
 def get_ray_tracing_dof_aperture() -> float:
     pass
@@ -1013,7 +1013,7 @@ def set_msaa(msaa: int) -> None:
     pass
 def set_picture_format(name: str, format: str) -> None:
     pass
-def set_ray_tracing_denoiser(name: typing.Liternal['none', 'oidn', 'optix']) -> None:
+def set_ray_tracing_denoiser(name: typing.Literal['none', 'oidn', 'optix']) -> None:
     pass
 def set_ray_tracing_dof_aperture(radius: float) -> None:
     pass

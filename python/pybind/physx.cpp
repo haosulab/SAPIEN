@@ -16,7 +16,7 @@ namespace pybind11::detail {
 template <> struct type_caster<physx::PxArticulationJointType::Enum> {
   PYBIND11_TYPE_CASTER(
       physx::PxArticulationJointType::Enum,
-      _("typing.Liternal['fixed', 'revolute', 'revolute_unwrapped', 'prismatic', 'free']"));
+      _("typing.Literal['fixed', 'revolute', 'revolute_unwrapped', 'prismatic', 'free']"));
 
   bool load(py::handle src, bool convert) {
     std::string name = py::cast<std::string>(src);
