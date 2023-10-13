@@ -22,7 +22,7 @@ class PhysxRigidBaseComponent : public PhysxBaseComponent {
 public:
   using PhysxBaseComponent::PhysxBaseComponent;
   virtual void attachCollision(std::shared_ptr<PhysxCollisionShape> shape);
-  std::vector<PhysxCollisionShape *> getCollisionShapes() const;
+  std::vector<std::shared_ptr<PhysxCollisionShape>> getCollisionShapes() const;
   virtual physx::PxRigidActor *getPxActor() const = 0;
 
   void afterStep();

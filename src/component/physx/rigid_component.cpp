@@ -19,12 +19,9 @@ void PhysxRigidBaseComponent::attachCollision(std::shared_ptr<PhysxCollisionShap
   shape->internalSetParent(this);
 }
 
-std::vector<PhysxCollisionShape *> PhysxRigidBaseComponent::getCollisionShapes() const {
-  std::vector<PhysxCollisionShape *> result;
-  for (auto &shape : mCollisionShapes) {
-    result.push_back(shape.get());
-  }
-  return result;
+std::vector<std::shared_ptr<PhysxCollisionShape>>
+PhysxRigidBaseComponent::getCollisionShapes() const {
+  return mCollisionShapes;
 }
 
 void PhysxRigidBaseComponent::internalRegisterJoint(std::shared_ptr<PhysxJointComponent> drive) {
