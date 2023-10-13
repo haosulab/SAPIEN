@@ -239,7 +239,7 @@ class URDFLoader:
 
         # collision shapes
         for cid, collision in enumerate(link.collisions):
-            t_collision2link = self._pose_from_origin(visual.origin, self.scale)
+            t_collision2link = self._pose_from_origin(collision.origin, self.scale)
 
             material = self._get_material(link.name, cid)
             density = self._get_density(link.name, cid)
