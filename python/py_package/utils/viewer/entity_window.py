@@ -74,6 +74,8 @@ class EntityWindow(Plugin):
                         )
                         vs.scale = s.scale
 
+                    vs.local_pose = s.local_pose
+
                     new_visual.attach(vs)
 
         entity.add_component(new_visual)

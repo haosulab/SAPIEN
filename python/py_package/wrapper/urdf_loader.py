@@ -299,7 +299,7 @@ class URDFLoader:
                     scale = np.ones(3)
 
                 filename = os.path.join(
-                    self.package_dir, _prune_package(visual.geometry.mesh.filename)
+                    self.package_dir, _prune_package(collision.geometry.mesh.filename)
                 )
 
                 if self.load_multiple_collisions_from_file:
