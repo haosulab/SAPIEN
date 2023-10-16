@@ -23,7 +23,7 @@ struct PhysxSceneConfig {
   uint32_t solverIterations = 10;         // solver position iterations, helps reduce jittering
   uint32_t solverVelocityIterations = 1;  // solver velocity iterations
   bool enablePCM = false;                 // Use persistent contact manifold solver for contact
-  bool enableTGS = false;                 // use TGS solver
+  bool enableTGS = true;                  // use TGS solver
   bool enableCCD = false;                 // use continuous collision detection
   bool enableEnhancedDeterminism = false; // improve determinism
   bool enableFrictionEveryIteration =

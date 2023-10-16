@@ -26,6 +26,8 @@ public:
   void setChildAnchorPose(Pose const &pose);
   Pose getChildAnchorPose() const;
 
+  Pose getRelativePose() const;
+
   virtual physx::PxJoint *getPxJoint() const = 0;
   ~PhysxJointComponent();
 
@@ -93,6 +95,9 @@ public:
   float getGearRatio() const;
   void setGearRatio(float ratio);
 
+  void enableHinges();
+  bool getHingesEnabled() const { return mHingesEnabled; };
+
   physx::PxJoint *getPxJoint() const override { return mJoint; }
 
   void internalRefresh() override;
@@ -100,6 +105,7 @@ public:
   ~PhysxGearComponent();
 
 private:
+  bool mHingesEnabled{false};
   physx::PxGearJoint *mJoint;
 };
 

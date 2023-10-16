@@ -112,7 +112,12 @@ Generator<int> init_sapien(py::module &m) {
       .def("get_render_system", &Scene::getSapienRendererSystem)
       .def(
           py::pickle([](std::shared_ptr<Scene> scene) { return py::bytes(serializeScene(scene)); },
-                     [](py::bytes t) { return unserializeScene(t); }));
+                     [](py::bytes t) { return unserializeScene(t); }))
+
+      .def("pack_poses", [](Scene &s) { return py::bytes(s.packEntityPoses()); })
+      .def(
+          "unpack_poses", [](Scene &s, py::bytes data) { s.unpackEntityPoses(data); },
+          py::arg("data"));
 
   PyEntity.def(py::init<>())
       .def_property_readonly("id", &Entity::getId)
@@ -136,16 +141,6 @@ Generator<int> init_sapien(py::module &m) {
       .def("set_pose", &Entity::setPose)
 
       .def("remove_from_scene", &Entity::removeFromScene);
-
-  // PyModule.def(py::init<>())
-  //     .def_property("name", &Module::getName, &Module::setName)
-  //     .def("get_name", &Module::getName)
-  //     .def("set_name", &Module::setName)
-  //     .def("add_entity", &Module::addEntity)
-  //     .def("remove_entity", &Module::removeEntity)
-
-  //     .def_property_readonly("scene", &Module::getScene, py::return_value_policy::reference)
-  //     .def("get_scene", &Module::getScene);
 
   PyComponent.def(py::init<>())
       .def_property_readonly("entity", &component::Component::getEntity)

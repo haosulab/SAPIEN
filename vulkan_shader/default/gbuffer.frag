@@ -30,6 +30,7 @@ layout(set = 2, binding = 0) uniform MaterialBuffer {
   float transmissionRoughness;
   int textureMask;
   int padding1;
+  vec4 textureTransforms[6];
 } materialBuffer;
 
 layout(set = 2, binding = 1) uniform sampler2D colorTexture;
@@ -78,7 +79,7 @@ void main() {
   }
 
   if ((materialBuffer.textureMask & 1) != 0) {
-    outAlbedo = texture(colorTexture, inUV);
+    outAlbedo = texture(colorTexture, inUV * materialBuffer.textureTransforms[0].ba + materialBuffer.textureTransforms[0].rg);
   } else {
     outAlbedo = materialBuffer.baseColor;
   }

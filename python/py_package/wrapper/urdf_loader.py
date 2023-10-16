@@ -5,6 +5,7 @@ from lxml import etree as ET
 
 import numpy as np
 
+from ..pysapien.physx import PhysxArticulation
 from ..pysapien.render import RenderCameraComponent
 from ..pysapien import Pose
 from .articulation_builder import ArticulationBuilder, PhysicalMaterialRecord
@@ -586,8 +587,8 @@ class URDFLoader:
         return articulations, actors
 
     def load(
-        self, urdf_file: str, srdf_file=None, package_dir=None, multiple_objects=False
-    ):
+        self, urdf_file: str, srdf_file=None, package_dir=None
+    ) -> PhysxArticulation:
         """
         Args:
             urdf_file: filename for URDL file
@@ -603,7 +604,7 @@ class URDFLoader:
 
         if len(articulation_builders) > 1 or len(actor_builders) != 0:
             raise Exception(
-                "URDF contains multiple objects, pass multiple_objects=True to the URDFLoader.load to enable this feature"
+                "URDF contains multiple objects, call load_multiple instead"
             )
 
         articulations = []
@@ -646,8 +647,6 @@ class URDFLoader:
         )
 
         if len(articulation_builders) > 1 or len(actor_builders) != 0:
-            raise Exception(
-                "URDF contains multiple objects, pass multiple_objects=True to the URDFLoader.load to enable this feature"
-            )
+            raise Exception("URDF contains multiple objects")
 
         return articulation_builders[0]

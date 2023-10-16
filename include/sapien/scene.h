@@ -1,7 +1,6 @@
 #pragma once
 #include "entity.h"
 #include "sapien/component/system.h"
-#include "sapien/module.h"
 #include <cereal/types/unordered_map.hpp>
 #include <typeindex>
 #include <unordered_map>
@@ -20,13 +19,9 @@ public:
   void addEntity(std::shared_ptr<Entity> entity);
   void removeEntity(std::shared_ptr<Entity> entity);
 
-  // void addModule(std::shared_ptr<Module> mod);
-  // void removeModule(std::shared_ptr<Module> mod);
-
   void addSystem(std::shared_ptr<component::System> system);
   std::shared_ptr<component::System> getSystem(std::string const &name) const;
 
-  // std::vector<std::shared_ptr<Module>> getModules() const { return mModules; };
   std::vector<std::shared_ptr<Entity>> getEntities() const { return mEntities; };
 
   // for convenience
@@ -35,6 +30,9 @@ public:
 
   std::shared_ptr<component::SapienRendererSystem> getSapienRendererSystem() const;
   void updateRender();
+
+  std::string packEntityPoses();
+  void unpackEntityPoses(std::string const &data);
 
   template <class Archive> void save(Archive &ar) const { ar(mSystems, mEntities); }
   template <class Archive> void load(Archive &ar) {
@@ -59,7 +57,6 @@ public:
 private:
   std::unordered_map<std::string, std::shared_ptr<component::System>> mSystems;
   std::vector<std::shared_ptr<Entity>> mEntities;
-  // std::vector<std::shared_ptr<Module>> mModules;
 };
 
 } // namespace sapien

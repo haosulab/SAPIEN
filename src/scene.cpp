@@ -59,27 +59,24 @@ void Scene::removeEntity(std::shared_ptr<Entity> entity) {
   entity->internalSetScene(nullptr);
 }
 
-// void Scene::addModule(std::shared_ptr<Module> mod) {
-//   if (mod->getScene()) {
-//     throw std::runtime_error("failed to add entity to scene: entity is already added to a
-//     scene.");
-//   }
-//   mModules.push_back(mod);
-//   for (auto e : mod->getEntities()) {
-//     addEntity(e);
-//   }
-// }
+std::string Scene::packEntityPoses() {
+  std::ostringstream ss;
+  for (auto e : mEntities) {
+    Pose pose = e->getPose();
+    ss.write(reinterpret_cast<char *>(&pose), sizeof(Pose));
+  }
+  return ss.str();
+}
 
-// void Scene::removeModule(std::shared_ptr<Module> mod) {
-//   auto count = std::erase_if(mModules, [=](auto &m) { return m == mod; });
-//   if (count == 0) {
-//     throw std::runtime_error("failed to remove module: not added");
-//   }
-//   for (auto e : mod->getEntities()) {
-//     removeEntity(e);
-//   }
-//   mod->internalSetScene(nullptr);
-// }
+void Scene::unpackEntityPoses(std::string const &data) {
+  std::istringstream ss(data);
+  for (auto e : mEntities) {
+    Pose pose;
+    ss.read(reinterpret_cast<char *>(&pose), sizeof(Pose));
+    e->internalSyncPose(pose);
+  }
+  // TODO: check nothing is left
+}
 
 Scene::~Scene() {}
 

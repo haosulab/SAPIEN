@@ -50,6 +50,10 @@ Pose PhysxJointComponent::getChildAnchorPose() const {
   return PxTransformToPose(getPxJoint()->getLocalPose(PxJointActorIndex::eACTOR1));
 }
 
+Pose PhysxJointComponent::getRelativePose() const {
+  return PxTransformToPose(getPxJoint()->getRelativeTransform());
+}
+
 void PhysxJointComponent::onAttach() {
   if (mChild->getEntity().get() != getEntity().get()) {
     throw std::runtime_error(
@@ -215,15 +219,22 @@ void PhysxGearComponent::internalRefresh() {
     return;
   }
 
-  if (parentJoint->getJointType() != PxArticulationJointType::eREVOLUTE &&
-      parentJoint->getJointType() != PxArticulationJointType::eREVOLUTE_UNWRAPPED) {
-    return;
+  if (mHingesEnabled) {
+    if (parentJoint->getJointType() != PxArticulationJointType::eREVOLUTE &&
+        parentJoint->getJointType() != PxArticulationJointType::eREVOLUTE_UNWRAPPED) {
+      return;
+    }
+    if (childJoint->getJointType() != PxArticulationJointType::eREVOLUTE &&
+        childJoint->getJointType() != PxArticulationJointType::eREVOLUTE_UNWRAPPED) {
+      return;
+    }
+    mJoint->setHinges(parentJoint, childJoint);
   }
-  if (childJoint->getJointType() != PxArticulationJointType::eREVOLUTE &&
-      childJoint->getJointType() != PxArticulationJointType::eREVOLUTE_UNWRAPPED) {
-    return;
-  }
-  mJoint->setHinges(parentJoint, childJoint);
+}
+
+void PhysxGearComponent::enableHinges() {
+  mHingesEnabled = true;
+  internalRefresh();
 }
 
 PhysxGearComponent::~PhysxGearComponent() {

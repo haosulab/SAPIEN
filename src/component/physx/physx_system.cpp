@@ -179,6 +179,14 @@ std::string PhysxSystem::packState() const {
   for (auto &link : mArticulationLinkComponents) {
     if (link->isRoot()) {
       auto art = link->getArticulation();
+
+      Pose pose = art->getRootPose();
+      Vec3 v = art->getRootLinearVelocity();
+      Vec3 w = art->getRootAngularVelocity();
+      ss.write(reinterpret_cast<const char *>(&pose), sizeof(Pose));
+      ss.write(reinterpret_cast<const char *>(&v), sizeof(Vec3));
+      ss.write(reinterpret_cast<const char *>(&w), sizeof(Vec3));
+
       auto qpos = art->getQpos();
       auto qvel = art->getQvel();
 
@@ -192,15 +200,15 @@ std::string PhysxSystem::packState() const {
         ss.write(reinterpret_cast<const char *>(pos.data()), pos.size() * sizeof(float));
         ss.write(reinterpret_cast<const char *>(vel.data()), vel.size() * sizeof(float));
 
-        float p = j->getDriveStiffness();
-        float d = j->getDriveDamping();
-        float l = j->getDriveForceLimit();
-        int m = j->getDriveType();
+        // float p = j->getDriveStiffness();
+        // float d = j->getDriveDamping();
+        // float l = j->getDriveForceLimit();
+        // int m = j->getDriveType();
 
-        ss.write(reinterpret_cast<const char *>(&p), sizeof(float));
-        ss.write(reinterpret_cast<const char *>(&d), sizeof(float));
-        ss.write(reinterpret_cast<const char *>(&l), sizeof(float));
-        ss.write(reinterpret_cast<const char *>(&m), sizeof(int));
+        // ss.write(reinterpret_cast<const char *>(&p), sizeof(float));
+        // ss.write(reinterpret_cast<const char *>(&d), sizeof(float));
+        // ss.write(reinterpret_cast<const char *>(&l), sizeof(float));
+        // ss.write(reinterpret_cast<const char *>(&m), sizeof(int));
       }
     }
   }
@@ -221,7 +229,16 @@ void PhysxSystem::unpackState(std::string const &data) {
   }
   for (auto &link : mArticulationLinkComponents) {
     if (link->isRoot()) {
+      Pose pose;
+      Vec3 v, w;
+      ss.read(reinterpret_cast<char *>(&pose), sizeof(Pose));
+      ss.read(reinterpret_cast<char *>(&v), sizeof(Vec3));
+      ss.read(reinterpret_cast<char *>(&w), sizeof(Vec3));
       auto art = link->getArticulation();
+      art->setRootPose(pose);
+      art->setRootLinearVelocity(v);
+      art->setRootAngularVelocity(w);
+
       Eigen::VectorXf qpos;
       Eigen::VectorXf qvel;
       qpos.resize(art->getDof());
@@ -240,17 +257,18 @@ void PhysxSystem::unpackState(std::string const &data) {
         j->setDriveTargetPosition(pos);
         j->setDriveTargetVelocity(vel);
 
-        float p, d, l;
-        int m;
-        ss.read(reinterpret_cast<char *>(&p), sizeof(float));
-        ss.read(reinterpret_cast<char *>(&d), sizeof(float));
-        ss.read(reinterpret_cast<char *>(&l), sizeof(float));
-        ss.read(reinterpret_cast<char *>(&m), sizeof(int));
+        // float p, d, l;
+        // int m;
+        // ss.read(reinterpret_cast<char *>(&p), sizeof(float));
+        // ss.read(reinterpret_cast<char *>(&d), sizeof(float));
+        // ss.read(reinterpret_cast<char *>(&l), sizeof(float));
+        // ss.read(reinterpret_cast<char *>(&m), sizeof(int));
 
-        j->setDriveProperties(p, d, l, static_cast<physx::PxArticulationDriveType::Enum>(m));
+        // j->setDriveProperties(p, d, l, static_cast<physx::PxArticulationDriveType::Enum>(m));
       }
     }
   }
+  // TODO: check nothing is left
 }
 
 } // namespace component

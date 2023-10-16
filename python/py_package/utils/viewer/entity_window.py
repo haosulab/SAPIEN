@@ -78,7 +78,9 @@ class EntityWindow(Plugin):
                         vs = sapien.render.RenderShapePlane([1, 1e4, 1e4], blue_mat)
 
                     else:
-                        raise Exception("invalid collision shape, this code should be unreachable.")
+                        raise Exception(
+                            "invalid collision shape, this code should be unreachable."
+                        )
 
                     vs.local_pose = s.local_pose
 
@@ -288,10 +290,7 @@ class EntityWindow(Plugin):
                                 .Label("Half Size")
                                 .ReadOnly(True)
                                 .Value(s.half_size),
-                                R.UIInputFloat()
-                                .Label("Density")
-                                .ReadOnly(True)
-                                .Value(s.density),
+                                R.UIDisplayText().Text(f"Density: {s.density}"),
                             )
                         )
                     if s.__class__.__name__ == "PhysxCollisionShapeCapsule":
@@ -308,10 +307,7 @@ class EntityWindow(Plugin):
                                 .Label("Half Length")
                                 .ReadOnly(True)
                                 .Value(s.half_length),
-                                R.UIInputFloat()
-                                .Label("Density")
-                                .ReadOnly(True)
-                                .Value(s.density),
+                                R.UIDisplayText().Text(f"Density: {s.density}"),
                             )
                         )
                     if s.__class__.__name__ == "PhysxCollisionShapeSphere":
@@ -324,10 +320,7 @@ class EntityWindow(Plugin):
                                 .Label("Radius")
                                 .ReadOnly(True)
                                 .Value(s.radius),
-                                R.UIInputFloat()
-                                .Label("Density")
-                                .ReadOnly(True)
-                                .Value(s.density),
+                                R.UIDisplayText().Text(f"Density: {s.density}"),
                             )
                         )
                     if s.__class__.__name__ == "PhysxCollisionShapeConvexMesh":
@@ -336,10 +329,7 @@ class EntityWindow(Plugin):
                             .Label("Convex Mesh")
                             .Id("collision{}".format(idx))
                             .append(
-                                R.UIInputFloat()
-                                .Label("Density")
-                                .ReadOnly(True)
-                                .Value(s.density),
+                                R.UIDisplayText().Text(f"Density: {s.density}"),
                             )
                         )
                     if s.__class__.__name__ == "PhysxCollisionShapeTriangleMesh":
@@ -351,7 +341,33 @@ class EntityWindow(Plugin):
 
                     s: sapien.physx.PhysxCollisionShape
                     c0, c1, c2, c3 = s.collision_groups
+                    mat = s.physical_material
+
                     shape_info.append(
+                        R.UIDisplayText().Text(
+                            "Contact offset: {:.3g}".format(s.contact_offset)
+                        ),
+                        R.UIDisplayText().Text(
+                            "Rest offset: {:.3g}".format(s.rest_offset)
+                        ),
+                        R.UIDisplayText().Text(
+                            "Patch radius: {:.3g}".format(s.patch_radius)
+                        ),
+                        R.UIDisplayText().Text(
+                            "Min path radius: {:.3g}".format(s.min_patch_radius)
+                        ),
+                        # R.UICheckbox().Label("Is trigger").Checked(s.is_trigger),
+                        R.UIDisplayText().Text(
+                            "Static friction: {:.3g}".format(mat.get_static_friction())
+                        ),
+                        R.UIDisplayText().Text(
+                            "Dynamic friction: {:.3g}".format(
+                                mat.get_dynamic_friction()
+                            )
+                        ),
+                        R.UIDisplayText().Text(
+                            "Restitution: {:.3g}".format(mat.get_restitution())
+                        ),
                         R.UIDisplayText().Text("Collision groups:"),
                         R.UIDisplayText().Text("  0x{:08x}  0x{:08x}".format(c0, c1)),
                         R.UIDisplayText().Text("  0x{:08x}  0x{:08x}".format(c2, c3)),

@@ -5,10 +5,10 @@ from typing import Union, Optional
 
 
 class Widget:
-    def load(self):
+    def load(self, scene):
         pass
 
-    def unload(self):
+    def unload(self, scene):
         pass
 
 

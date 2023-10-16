@@ -301,6 +301,9 @@ Generator<int> init_physx(py::module &sapien) {
       });
 
   PyPhysxSystem.def(py::init<PhysxSceneConfig const &>(), py::arg("config") = PhysxSceneConfig())
+      .def_property_readonly("config", &PhysxSystem::getSceneConfig)
+      .def("get_config", &PhysxSystem::getSceneConfig)
+
       .def_property("timestep", &PhysxSystem::getTimestep, &PhysxSystem::setTimestep)
       .def("get_timestep", &PhysxSystem::getTimestep)
       .def("set_timestep", &PhysxSystem::setTimestep)
@@ -679,7 +682,25 @@ Example:
       .def("set_pose", &PhysxArticulation::setRootPose)
       .def("get_pose", &PhysxArticulation::getRootPose)
       .def("compute_passive_force", &PhysxArticulation::computePassiveForce,
-           py::arg("gravity") = true, py::arg("coriolis_and_centrifugal") = true);
+           py::arg("gravity") = true, py::arg("coriolis_and_centrifugal") = true)
+
+      .def("find_link_by_name",
+           [](PhysxArticulation &a, std::string const &name) {
+             for (auto &l : a.getLinks()) {
+               if (l->getName() == name) {
+                 return l;
+               }
+             }
+             return std::shared_ptr<PhysxArticulationLinkComponent>{};
+           })
+      .def("find_joint_by_name", [](PhysxArticulation &a, std::string const &name) {
+        for (auto &j : a.getJoints()) {
+          if (j->getName() == name) {
+            return j;
+          }
+        }
+        return std::shared_ptr<PhysxArticulationJoint>{};
+      });
 
   PyPhysxJointComponent
       .def_property("parent", &PhysxJointComponent::getParent, &PhysxJointComponent::setParent)
@@ -694,7 +715,10 @@ Example:
       .def_property("pose_in_child", &PhysxJointComponent::getChildAnchorPose,
                     &PhysxJointComponent::setChildAnchorPose)
       .def("get_pose_in_child", &PhysxJointComponent::getChildAnchorPose)
-      .def("set_pose_in_child", &PhysxJointComponent::setChildAnchorPose, py::arg("pose"));
+      .def("set_pose_in_child", &PhysxJointComponent::setChildAnchorPose, py::arg("pose"))
+
+      .def_property_readonly("relative_pose", &PhysxJointComponent::getRelativePose)
+      .def("get_relative_pose", &PhysxJointComponent::getRelativePose);
 
   PyPhysxDriveComponent.def(py::init(&PhysxDriveComponent::Create), py::arg("body"))
       .def_property("drive_target", &PhysxDriveComponent::getDriveTarget,
@@ -745,7 +769,10 @@ Example:
       .def_property("gear_ratio", &PhysxGearComponent::getGearRatio,
                     &PhysxGearComponent::setGearRatio)
       .def("get_gear_ratio", &PhysxGearComponent::getGearRatio)
-      .def("set_gear_ratio", &PhysxGearComponent::setGearRatio, py::arg("ratio"));
+      .def("set_gear_ratio", &PhysxGearComponent::setGearRatio, py::arg("ratio"))
+
+      .def("enable_hinges", &PhysxGearComponent::enableHinges)
+      .def_property_readonly("is_hinges_enabled", &PhysxGearComponent::getHingesEnabled);
 
   PyPhysxDistanceJointComponent
       .def(py::init(&PhysxDistanceJointComponent::Create), py::arg("body"))
