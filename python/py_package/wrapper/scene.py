@@ -415,12 +415,12 @@ class Scene(_Scene):
         return widget
 
     def load_widget_from_package(
-        self, package_name, entry: str = None, widget_params=dict()
+        self, package_name, entry: str = None, widget_params=dict(), reinstall=False
     ):
         from sapien.package import load_package
         import inspect
 
-        m = load_package(package_name)
+        m = load_package(package_name, reinstall=reinstall)
         if entry is None:
             for k, v in m.__dict__.items():
                 if inspect.isclass(v) and issubclass(v, Widget):
@@ -434,7 +434,7 @@ class Scene(_Scene):
 
         widget = getattr(m, entry)(**widget_params)
 
-        self.load_widget(widget)
+        return self.load_widget(widget)
 
     def unload_widget(self, widget: Widget):
         if widget not in self.widgets:

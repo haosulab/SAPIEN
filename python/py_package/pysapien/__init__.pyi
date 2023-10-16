@@ -3,6 +3,7 @@ import sapien.pysapien
 import typing
 import numpy
 _Shape = typing.Tuple[int, ...]
+_T = typing.TypeVar("T")
 
 __all__ = [
     "Component",
@@ -31,16 +32,12 @@ class Component():
         enable the component
         """
     def get_entity(self) -> Entity: ...
+    def get_entity_pose(self) -> Pose: ...
     def get_name(self) -> str: ...
-    def get_pose(self) -> Pose: 
-        """
-        An alias for self.entity.get_pose
-        """
+    def get_pose(self) -> Pose: ...
+    def set_entity_pose(self, arg0: Pose) -> None: ...
     def set_name(self, arg0: str) -> None: ...
-    def set_pose(self, arg0: Pose) -> None: 
-        """
-        An alias for self.entity.set_pose
-        """
+    def set_pose(self, arg0: Pose) -> None: ...
     @property
     def _serialization_id(self) -> int:
         """
@@ -54,6 +51,14 @@ class Component():
         """
         :type: Entity
         """
+    @property
+    def entity_pose(self) -> Pose:
+        """
+        :type: Pose
+        """
+    @entity_pose.setter
+    def entity_pose(self, arg1: Pose) -> None:
+        pass
     @property
     def is_enabled(self) -> bool:
         """
@@ -70,15 +75,11 @@ class Component():
     @property
     def pose(self) -> Pose:
         """
-        An alias for self.entity.pose
-
         :type: Pose
         """
     @pose.setter
     def pose(self, arg1: Pose) -> None:
-        """
-        An alias for self.entity.pose
-        """
+        pass
     pass
 class CudaArray():
     @property
@@ -118,6 +119,7 @@ class CudaDataSource():
 class Entity():
     def __init__(self) -> None: ...
     def add_component(self, component: Component) -> Entity: ...
+    def find_component_by_type(self, cls: typing.Type[_T]) -> _T: ...
     def get_components(self) -> list[Component]: ...
     def get_id(self) -> int: ...
     def get_name(self) -> str: ...

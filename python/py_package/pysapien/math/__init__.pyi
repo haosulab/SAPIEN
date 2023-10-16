@@ -3,6 +3,7 @@ import sapien.pysapien.math
 import typing
 import numpy
 _Shape = typing.Tuple[int, ...]
+_T = typing.TypeVar("T")
 
 __all__ = [
     "shortest_rotation"

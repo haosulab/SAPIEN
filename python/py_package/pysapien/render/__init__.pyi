@@ -2,10 +2,10 @@ from __future__ import annotations
 import sapien.pysapien.render
 import typing
 import numpy
-import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien.internal_renderer
 _Shape = typing.Tuple[int, ...]
+_T = typing.TypeVar("T")
 
 __all__ = [
     "RenderBodyComponent",
@@ -368,10 +368,10 @@ class RenderDirectionalLightComponent(RenderLightComponent, sapien.pysapien.Comp
         pass
     pass
 class RenderMaterial():
-    def __init__(self, emission: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)] = [0.0, 0.0, 0.0, 0.0], base_color: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)] = [1.0, 1.0, 1.0, 1.0], specular: float = 0.0, roughness: float = 1.0, metallic: float = 0.0, transmission: float = 0.0, ior: float = 1.4500000476837158, transmission_roughness: float = 0.0) -> None: ...
-    def get_base_color(self) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]: ...
+    def __init__(self, emission: list[float] = [0.0, 0.0, 0.0, 0.0], base_color: list[float] = [1.0, 1.0, 1.0, 1.0], specular: float = 0.0, roughness: float = 1.0, metallic: float = 0.0, transmission: float = 0.0, ior: float = 1.4500000476837158, transmission_roughness: float = 0.0) -> None: ...
+    def get_base_color(self) -> list[float]: ...
     def get_diffuse_texture(self) -> RenderTexture2D: ...
-    def get_emission(self) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]: ...
+    def get_emission(self) -> list[float]: ...
     def get_emission_texture(self) -> RenderTexture2D: ...
     def get_ior(self) -> float: ...
     def get_metallic(self) -> float: ...
@@ -384,17 +384,17 @@ class RenderMaterial():
     def get_transmission_roughness(self) -> float: ...
     def get_transmission_texture(self) -> RenderTexture2D: ...
     @typing.overload
-    def set_base_color(self, arg0: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]) -> None: ...
+    def set_base_color(self, arg0: list[float]) -> None: ...
     @typing.overload
-    def set_base_color(self, color: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]) -> None: ...
+    def set_base_color(self, color: list[float]) -> None: ...
     @typing.overload
     def set_diffuse_texture(self, arg0: RenderTexture2D) -> None: ...
     @typing.overload
     def set_diffuse_texture(self, texture: RenderTexture2D) -> None: ...
     @typing.overload
-    def set_emission(self, arg0: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]) -> None: ...
+    def set_emission(self, arg0: list[float]) -> None: ...
     @typing.overload
-    def set_emission(self, emission: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]) -> None: ...
+    def set_emission(self, emission: list[float]) -> None: ...
     @typing.overload
     def set_emission_texture(self, arg0: RenderTexture2D) -> None: ...
     @typing.overload
@@ -440,12 +440,12 @@ class RenderMaterial():
     @typing.overload
     def set_transmission_texture(self, texture: RenderTexture2D) -> None: ...
     @property
-    def base_color(self) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]:
+    def base_color(self) -> list[float]:
         """
-        :type: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]
+        :type: list[float]
         """
     @base_color.setter
-    def base_color(self, arg1: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]) -> None:
+    def base_color(self, arg1: list[float]) -> None:
         pass
     @property
     def diffuse_texture(self) -> RenderTexture2D:
@@ -456,12 +456,12 @@ class RenderMaterial():
     def diffuse_texture(self, arg1: RenderTexture2D) -> None:
         pass
     @property
-    def emission(self) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]:
+    def emission(self) -> list[float]:
         """
-        :type: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]
+        :type: list[float]
         """
     @emission.setter
-    def emission(self, arg1: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]) -> None:
+    def emission(self, arg1: list[float]) -> None:
         pass
     @property
     def emission_texture(self) -> RenderTexture2D:
@@ -855,7 +855,7 @@ class RenderWindow():
     def get_content_scale(self) -> float: ...
     def get_picture(self, name: str) -> numpy.ndarray: ...
     def get_picture_pixel(self, name: str, x: int, y: int) -> numpy.ndarray: ...
-    def get_picture_size(self, name: str) -> typing.Annotated[list[int], pybind11_stubgen.typing_ext.FixedSize(2)]: ...
+    def get_picture_size(self, name: str) -> list[int]: ...
     def hide(self) -> None: ...
     def key_down(self, key: str) -> bool: ...
     def key_press(self, key: str) -> bool: ...
@@ -935,19 +935,19 @@ class RenderWindow():
         :type: float
         """
     @property
-    def mouse_delta(self) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(2)]:
+    def mouse_delta(self) -> list[float]:
         """
-        :type: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(2)]
-        """
-    @property
-    def mouse_position(self) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(2)]:
-        """
-        :type: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(2)]
+        :type: list[float]
         """
     @property
-    def mouse_wheel_delta(self) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(2)]:
+    def mouse_position(self) -> list[float]:
         """
-        :type: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(2)]
+        :type: list[float]
+        """
+    @property
+    def mouse_wheel_delta(self) -> list[float]:
+        """
+        :type: list[float]
         """
     @property
     def near(self) -> float:
@@ -965,9 +965,9 @@ class RenderWindow():
         :type: bool
         """
     @property
-    def size(self) -> typing.Annotated[list[int], pybind11_stubgen.typing_ext.FixedSize(2)]:
+    def size(self) -> list[int]:
         """
-        :type: typing.Annotated[list[int], pybind11_stubgen.typing_ext.FixedSize(2)]
+        :type: list[int]
         """
     @property
     def super(self) -> bool:

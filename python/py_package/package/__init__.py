@@ -54,6 +54,7 @@ def check_local(name: str, version: str):
 
 
 def download_to_local(path: str, name: str):
+    print(f"Downloading package from {path}")
     if path.startswith("https://") or path.startswith("http://"):
         r = requests.get(path, stream=True)
         if not r.ok:
@@ -79,7 +80,7 @@ def download_to_local(path: str, name: str):
     return check_local(name, None)
 
 
-def load_package(path: str, version: str = None):
+def load_package(path: str, version: str = None, reinstall=False):
     is_url = path.startswith("https://") or path.startswith("http://")
     if is_url:
         name = path.split("/")[-1]
@@ -90,14 +91,15 @@ def load_package(path: str, version: str = None):
     if name.lower().endswith(".zip"):
         name = name[:-4]
 
-    loaded = check_loaded(name, version)
-    if loaded is not None:
-        return loaded
+    if not reinstall:
+        loaded = check_loaded(name, version)
+        if loaded is not None:
+            return loaded
 
-    loaded = check_local(name, version)
-    if loaded is not None:
-        loaded_packages[name] = loaded
-        return loaded
+        loaded = check_local(name, version)
+        if loaded is not None:
+            loaded_packages[name] = loaded
+            return loaded
 
     # loaded = check_global(name, version)
     # if loaded is not None:

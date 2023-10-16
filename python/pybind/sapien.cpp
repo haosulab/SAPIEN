@@ -140,7 +140,19 @@ Generator<int> init_sapien(py::module &m) {
       .def("get_pose", &Entity::getPose)
       .def("set_pose", &Entity::setPose)
 
-      .def("remove_from_scene", &Entity::removeFromScene);
+      .def("remove_from_scene", &Entity::removeFromScene)
+
+      .def(
+          "find_component_by_type",
+          [](Entity &e, py::type type) {
+            for (auto &c : e.getComponents()) {
+              if (py::isinstance(py::cast(c), type)) {
+                return c;
+              }
+            }
+            return std::shared_ptr<component::Component>(nullptr);
+          },
+          py::arg("cls"));
 
   PyComponent.def(py::init<>())
       .def_property_readonly("entity", &component::Component::getEntity)
@@ -150,10 +162,38 @@ Generator<int> init_sapien(py::module &m) {
       .def("get_name", &component::Component::getName)
       .def("set_name", &component::Component::setName)
 
-      .def_property("pose", &component::Component::getPose, &component::Component::setPose,
-                    "An alias for self.entity.pose")
-      .def("set_pose", &component::Component::setPose, "An alias for self.entity.set_pose")
-      .def("get_pose", &component::Component::getPose, "An alias for self.entity.get_pose")
+      .def_property(
+          "pose",
+          [](component::Component &c) {
+            PyErr_WarnEx(PyExc_DeprecationWarning,
+                         "component.pose can be ambiguous thus deprecated. It is equivalent to"
+                         "component.entity_pose, which should be used instead",
+                         1);
+            return c.getPose();
+          },
+          [](component::Component &c, Pose const &pose) { c.setPose(pose); })
+      .def("get_pose",
+           [](component::Component &c) {
+             PyErr_WarnEx(
+                 PyExc_DeprecationWarning,
+                 "component.get_pose can be ambiguous thus deprecated. It is equivalent to"
+                 "component.get_entity_pose, which should be used instead",
+                 1);
+             return c.getPose();
+           })
+      .def("set_pose",
+           [](component::Component &c, Pose const &pose) {
+             PyErr_WarnEx(
+                 PyExc_DeprecationWarning,
+                 "component.set_pose can be ambiguous thus deprecated. It is equivalent to"
+                 "component.set_entity_pose, which should be used instead",
+                 1);
+             c.setPose(pose);
+           })
+
+      .def_property("entity_pose", &component::Component::getPose, &component::Component::setPose)
+      .def("get_entity_pose", &component::Component::getPose)
+      .def("set_entity_pose", &component::Component::setPose)
 
       .def_property_readonly("is_enabled", &component::Component::getEnabled)
       .def("enable", &component::Component::enable, "enable the component")

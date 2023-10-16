@@ -2,8 +2,8 @@ from __future__ import annotations
 import sapien.pysapien.internal_renderer
 import typing
 import numpy
-import pybind11_stubgen.typing_ext
 _Shape = typing.Tuple[int, ...]
+_T = typing.TypeVar("T")
 
 __all__ = [
     "Context",
@@ -61,7 +61,7 @@ class Context():
         """
     def create_capsule_mesh(self, radius: float, half_length: float, segments: int = 32, half_rings: int = 8) -> Mesh: ...
     def create_cone_mesh(self, segments: int = 32) -> Mesh: ...
-    def create_cubemap_from_files(self, filenames: typing.Annotated[list[str], pybind11_stubgen.typing_ext.FixedSize(6)], mipmap_levels: int) -> Cubemap: 
+    def create_cubemap_from_files(self, filenames: list[str], mipmap_levels: int) -> Cubemap: 
         """
         Load cube map, its mipmaps are generated based on roughness, details see https://learnopengl.com/PBR/IBL/Specular-IBL
         """
