@@ -127,8 +127,10 @@ std::vector<std::vector<int>> splitMesh(aiMesh *mesh) {
 static std::vector<Vertices>
 loadConnectedComponentVerticesFromMeshFile(std::string const &filename) {
   Assimp::Importer importer;
-  uint32_t flags =
-      aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_RemoveComponent;
+
+  uint32_t flags = aiProcess_Triangulate | aiProcess_PreTransformVertices |
+                   aiProcess_JoinIdenticalVertices | aiProcess_RemoveComponent;
+
   importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
                               aiComponent_NORMALS | aiComponent_TEXCOORDS | aiComponent_COLORS |
                                   aiComponent_TANGENTS_AND_BITANGENTS | aiComponent_MATERIALS |
