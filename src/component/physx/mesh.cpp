@@ -220,8 +220,20 @@ PhysxConvexMesh::LoadByConnectedParts(std::string const &filename) {
   std::vector<std::shared_ptr<PhysxConvexMesh>> result;
   auto parts = loadConnectedComponentVerticesFromMeshFile(filename);
   for (uint32_t i = 0; i < parts.size(); ++i) {
-    result.push_back(std::make_shared<PhysxConvexMesh>(parts[i], filename, i));
+    try {
+      result.push_back(std::make_shared<PhysxConvexMesh>(parts[i], filename, i));
+    } catch (std::runtime_error &err) {
+      // PhysX should be giving a critical error already
+      logger::warn("failed to load a component from file " + filename);
+    }
   }
+
+  if (result.size() == 0) {
+    throw std::runtime_error(
+        "failed to load mesh file " + filename +
+        ". All connected components of the mesh are invalid collision shapes.");
+  }
+
   return result;
 }
 
