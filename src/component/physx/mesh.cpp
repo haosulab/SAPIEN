@@ -53,7 +53,7 @@ loadVerticesAndTrianglesFromMeshFile(std::string const &filename) {
 
   if (!scene) {
     logger::error(importer.GetErrorString());
-    return {};
+    throw std::runtime_error("failed to load scene from " + filename);
   }
 
   uint32_t vertexCount = 0;

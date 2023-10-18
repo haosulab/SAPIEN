@@ -442,3 +442,11 @@ class Scene(_Scene):
 
         widget.unload(self)
         self.widgets.remove(widget)
+
+    def create_viewer(self):
+        from sapien.utils import Viewer
+
+        viewer = Viewer()
+        viewer.set_scene(self)
+
+        return viewer

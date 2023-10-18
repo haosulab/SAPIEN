@@ -17,6 +17,8 @@ public:
 
   bool getShadowEnabled() const { return mShadowEnabled; }
   void setShadowEnabled(bool enabled) { mShadowEnabled = enabled; }
+  void enableShadow() { setShadowEnabled(true); }
+  void disableShadow() { setShadowEnabled(false); }
 
   float getShadowNear() const { return mShadowNear; }
   void setShadowNear(float near) { mShadowNear = near; }

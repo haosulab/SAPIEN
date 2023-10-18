@@ -328,14 +328,22 @@ void init_sapien_renderer(py::module &sapien) {
                     &SapienRendererSystem::setAmbientLight)
       .def("get_ambient_light", &SapienRendererSystem::getAmbientLight)
       .def("set_ambient_light", &SapienRendererSystem::setAmbientLight, py::arg("color"))
-      .def_property_readonly("_internal_scene", &SapienRendererSystem::getScene)
+
       .def_property_readonly("cameras", &SapienRendererSystem::getCameraComponents)
+      .def("get_cameras", &SapienRendererSystem::getCameraComponents)
+
       .def_property_readonly("render_bodies", &SapienRendererSystem::getRenderBodyComponents)
+      .def("get_render_bodies", &SapienRendererSystem::getRenderBodyComponents)
+
       .def_property_readonly("lights", &SapienRendererSystem::getLightComponents)
+      .def("get_lights", &SapienRendererSystem::getLightComponents)
+
       .def_property("cubemap", &SapienRendererSystem::getCubemap,
                     &SapienRendererSystem::setCubemap)
       .def("get_cubemap", &SapienRendererSystem::getCubemap)
-      .def("set_cubemap", &SapienRendererSystem::setCubemap, py::arg("cubemap"));
+      .def("set_cubemap", &SapienRendererSystem::setCubemap, py::arg("cubemap"))
+
+      .def_property_readonly("_internal_scene", &SapienRendererSystem::getScene);
 
   PyRenderTexture
       .def(py::init(&CreateSapienTexture), py::arg("array"), py::arg("dim"), py::arg("format"),
@@ -344,14 +352,22 @@ void init_sapien_renderer(py::module &sapien) {
            py::arg("address_mode") = SapienRenderTexture::AddressMode::eREPEAT,
            py::arg("srgb") = false)
       .def_property_readonly("width", &SapienRenderTexture::getWidth)
+      .def("get_width", &SapienRenderTexture::getWidth)
       .def_property_readonly("height", &SapienRenderTexture::getHeight)
+      .def("get_height", &SapienRenderTexture::getHeight)
       .def_property_readonly("depth", &SapienRenderTexture::getDepth)
+      .def("get_depth", &SapienRenderTexture::getDepth)
       .def_property_readonly("channels", &SapienRenderTexture::getChannels)
+      .def("get_channels", &SapienRenderTexture::getChannels)
       .def_property_readonly("mipmap_levels", &SapienRenderTexture::getMipmapLevels)
+      .def("get_mipmap_levels", &SapienRenderTexture::getMipmapLevels)
       .def_property_readonly("address_mode", &SapienRenderTexture::getAddressMode)
+      .def("get_address_mode", &SapienRenderTexture::getAddressMode)
       .def_property_readonly("filter_mode", &SapienRenderTexture::getFilterMode)
+      .def("get_filter_mode", &SapienRenderTexture::getFilterMode)
       .def_property_readonly("format", &SapienRenderTexture::getFormat)
-      .def_property_readonly("srgb", &SapienRenderTexture::getIsSrgb);
+      .def("get_format", &SapienRenderTexture::getFormat)
+      .def_property_readonly("is_srgb", &SapienRenderTexture::getIsSrgb);
 
   PyRenderTexture2D
       .def(py::init<std::string, uint32_t, SapienRenderTexture::FilterMode,
@@ -360,14 +376,22 @@ void init_sapien_renderer(py::module &sapien) {
            py::arg("filter_mode") = SapienRenderTexture::FilterMode::eLINEAR,
            py::arg("address_mode") = SapienRenderTexture::AddressMode::eREPEAT)
       .def_property_readonly("width", &SapienRenderTexture2D::getWidth)
+      .def("get_width", &SapienRenderTexture2D::getWidth)
       .def_property_readonly("height", &SapienRenderTexture2D::getHeight)
+      .def("get_height", &SapienRenderTexture2D::getHeight)
       .def_property_readonly("channels", &SapienRenderTexture2D::getChannels)
+      .def("get_channels", &SapienRenderTexture2D::getChannels)
       .def_property_readonly("mipmap_levels", &SapienRenderTexture2D::getMipmapLevels)
+      .def("get_mipmap_levels", &SapienRenderTexture2D::getMipmapLevels)
 
       .def_property_readonly("address_mode", &SapienRenderTexture2D::getAddressMode)
+      .def("get_address_mode", &SapienRenderTexture2D::getAddressMode)
       .def_property_readonly("filter_mode", &SapienRenderTexture2D::getFilterMode)
+      .def("get_filter_mode", &SapienRenderTexture2D::getFilterMode)
       .def_property_readonly("filename", &SapienRenderTexture2D::getFilename)
-      .def_property_readonly("format", &SapienRenderTexture2D::getFormat);
+      .def("get_filename", &SapienRenderTexture2D::getFilename)
+      .def_property_readonly("format", &SapienRenderTexture2D::getFormat)
+      .def("get_format", &SapienRenderTexture2D::getFormat);
 
   PyRenderTargetCuda.def_readonly("shape", &SapienRenderImageCuda::shape)
       .def_readonly("strides", &SapienRenderImageCuda::strides)
@@ -400,40 +424,6 @@ void init_sapien_renderer(py::module &sapien) {
            py::arg("specular") = 0.f, py::arg("roughness") = 1.f, py::arg("metallic") = 0.f,
            py::arg("transmission") = 0.f, py::arg("ior") = 1.45f,
            py::arg("transmission_roughness") = 0.f)
-
-      // getter
-      .def("get_base_color", &SapienRenderMaterial::getBaseColor)
-      .def("get_emission", &SapienRenderMaterial::getEmission)
-      .def("get_specular", &SapienRenderMaterial::getSpecular)
-      .def("get_metallic", &SapienRenderMaterial::getMetallic)
-      .def("get_roughness", &SapienRenderMaterial::getRoughness)
-      .def("get_transmission", &SapienRenderMaterial::getTransmission)
-      .def("get_ior", &SapienRenderMaterial::getIOR)
-      .def("get_transmission_roughness", &SapienRenderMaterial::getTransmissionRoughness)
-
-      .def("get_emission_texture", &SapienRenderMaterial::getEmissionTexture)
-      .def("get_diffuse_texture", &SapienRenderMaterial::getDiffuseTexture)
-      .def("get_metallic_texture", &SapienRenderMaterial::getMetallicTexture)
-      .def("get_roughness_texture", &SapienRenderMaterial::getRoughnessTexture)
-      .def("get_normal_texture", &SapienRenderMaterial::getNormalTexture)
-      .def("get_transmission_texture", &SapienRenderMaterial::getTransmissionTexture)
-
-      // setter
-      .def("set_base_color", &SapienRenderMaterial::setBaseColor)
-      .def("set_emission", &SapienRenderMaterial::setEmission)
-      .def("set_specular", &SapienRenderMaterial::setSpecular)
-      .def("set_metallic", &SapienRenderMaterial::setMetallic)
-      .def("set_roughness", &SapienRenderMaterial::setRoughness)
-      .def("set_transmission", &SapienRenderMaterial::setTransmission)
-      .def("set_ior", &SapienRenderMaterial::setIOR)
-      .def("set_transmission_roughness", &SapienRenderMaterial::setTransmissionRoughness)
-
-      .def("set_emission_texture", &SapienRenderMaterial::setEmissionTexture)
-      .def("set_diffuse_texture", &SapienRenderMaterial::setDiffuseTexture)
-      .def("set_metallic_texture", &SapienRenderMaterial::setMetallicTexture)
-      .def("set_roughness_texture", &SapienRenderMaterial::setRoughnessTexture)
-      .def("set_normal_texture", &SapienRenderMaterial::setNormalTexture)
-      .def("set_transmission_texture", &SapienRenderMaterial::setTransmissionTexture)
 
       // property
       .def_property("base_color", &SapienRenderMaterial::getBaseColor,
@@ -495,33 +485,49 @@ void init_sapien_renderer(py::module &sapien) {
       .def("set_transmission_texture", &SapienRenderMaterial::setTransmissionTexture,
            py::arg("texture"));
 
-  PyRenderShape.def_property("local_pose", &RenderShape::getLocalPose, &RenderShape::setLocalPose);
+  PyRenderShape.def_property("local_pose", &RenderShape::getLocalPose, &RenderShape::setLocalPose)
+      .def("get_local_pose", &RenderShape::getLocalPose)
+      .def("set_local_pose", &RenderShape::setLocalPose);
+
   PyRenderShapePlane
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("scale"),
            py::arg("material"))
-      .def_property_readonly("scale", &RenderShapePlane::getScale);
+      .def_property_readonly("scale", &RenderShapePlane::getScale)
+      .def("get_scale", &RenderShapePlane::getScale);
+
   PyRenderShapeBox
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("half_size"),
            py::arg("material"))
-      .def_property_readonly("half_size", &RenderShapeBox::getHalfLengths);
+      .def_property_readonly("half_size", &RenderShapeBox::getHalfLengths)
+      .def("get_half_size", &RenderShapeBox::getHalfLengths);
+
   PyRenderShapeSphere
       .def(py::init<float, std::shared_ptr<SapienRenderMaterial>>(), py::arg("radius"),
            py::arg("material"))
-      .def_property_readonly("radius", &RenderShapeSphere::getRadius);
+      .def_property_readonly("radius", &RenderShapeSphere::getRadius)
+      .def("get_radius", &RenderShapeSphere::getRadius);
+
   PyRenderShapeCapsule
       .def(py::init<float, float, std::shared_ptr<SapienRenderMaterial>>(), py::arg("radius"),
            py::arg("half_length"), py::arg("material"))
       .def_property_readonly("half_length", &RenderShapeCapsule::getHalfLength)
-      .def_property_readonly("radius", &RenderShapeCapsule::getRadius);
+      .def("get_half_length", &RenderShapeCapsule::getHalfLength)
+      .def_property_readonly("radius", &RenderShapeCapsule::getRadius)
+      .def("get_radius", &RenderShapeCapsule::getRadius);
 
   PyRenderShapeTriangleMeshPart
       .def_property_readonly("material", &RenderShapeTriangleMeshPart::getMaterial)
+      .def("get_material", &RenderShapeTriangleMeshPart::getMaterial)
       .def_property_readonly("vertices", &RenderShapeTriangleMeshPart::getVertices)
+      .def("get_vertices", &RenderShapeTriangleMeshPart::getVertices)
       .def_property_readonly("triangles", &RenderShapeTriangleMeshPart::getTriangles)
+      .def("get_triangles", &RenderShapeTriangleMeshPart::getTriangles)
       .def_property_readonly("cuda_vertices",
                              &RenderShapeTriangleMeshPart::getVertexBufferCudaArray)
+      .def("get_cuda_vertices", &RenderShapeTriangleMeshPart::getVertexBufferCudaArray)
       .def_property_readonly("cuda_triangles",
-                             &RenderShapeTriangleMeshPart::getIndexBufferCudaArray);
+                             &RenderShapeTriangleMeshPart::getIndexBufferCudaArray)
+      .def("get_cuda_triangles", &RenderShapeTriangleMeshPart::getIndexBufferCudaArray);
 
   PyRenderShapeTriangleMesh
       .def(py::init<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &,
@@ -532,6 +538,7 @@ void init_sapien_renderer(py::module &sapien) {
       .def(py::init<std::string const &, Vec3, std::shared_ptr<SapienRenderMaterial>>(),
            py::arg("filename"), py::arg("scale") = Vec3(1.f), py::arg("material") = nullptr)
       .def_property_readonly("filename", &RenderShapeTriangleMesh::getFilename)
+      .def("get_filename", &RenderShapeTriangleMesh::getFilename)
 
       .def_property("scale", &RenderShapeTriangleMesh::getScale,
                     &RenderShapeTriangleMesh::setScale)
@@ -539,7 +546,8 @@ void init_sapien_renderer(py::module &sapien) {
       .def("set_scale", &RenderShapeTriangleMesh::setScale, py::arg("scale"),
            "Note: this function only works when the shape is not added to scene")
 
-      .def_property_readonly("parts", &RenderShapeTriangleMesh::getParts);
+      .def_property_readonly("parts", &RenderShapeTriangleMesh::getParts)
+      .def("get_parts", &RenderShapeTriangleMesh::getParts);
 
   PyRenderBodyComponent.def(py::init<>())
       .def("attach", &SapienRenderBodyComponent::attachRenderShape)
@@ -568,16 +576,29 @@ void init_sapien_renderer(py::module &sapien) {
   PyRenderCameraComponent
       .def(py::init<uint32_t, uint32_t, std::string const &>(), py::arg("width"),
            py::arg("height"), py::arg("shader_dir") = "")
+
       .def_property("local_pose", &SapienRenderCameraComponent::getLocalPose,
                     &SapienRenderCameraComponent::setLocalPose)
+      .def("get_local_pose", &SapienRenderCameraComponent::getLocalPose)
+      .def("set_local_pose", &SapienRenderCameraComponent::setLocalPose)
+
       .def_property_readonly("global_pose", &SapienRenderCameraComponent::getGlobalPose)
+      .def("get_global_pose", &SapienRenderCameraComponent::getGlobalPose)
+
       .def_property_readonly("width", &SapienRenderCameraComponent::getWidth)
+      .def("get_width", &SapienRenderCameraComponent::getWidth)
+
       .def_property_readonly("height", &SapienRenderCameraComponent::getHeight)
+      .def("get_height", &SapienRenderCameraComponent::getHeight)
 
       .def_property("near", &SapienRenderCameraComponent::getNear,
                     &SapienRenderCameraComponent::setNear)
+      .def("get_near", &SapienRenderCameraComponent::getNear)
+      .def("set_near", &SapienRenderCameraComponent::setNear, py::arg("near"))
       .def_property("far", &SapienRenderCameraComponent::getFar,
                     &SapienRenderCameraComponent::setFar)
+      .def("get_far", &SapienRenderCameraComponent::getFar)
+      .def("set_far", &SapienRenderCameraComponent::setFar, py::arg("far"))
 
       .def_property_readonly("fovx", &SapienRenderCameraComponent::getFovX)
       .def_property_readonly("fovy", &SapienRenderCameraComponent::getFovY)
@@ -585,16 +606,22 @@ void init_sapien_renderer(py::module &sapien) {
            py::arg("compute_y") = true)
       .def("set_fovy", &SapienRenderCameraComponent::setFovY, py::arg("fov"),
            py::arg("compute_x") = true)
+
       .def_property_readonly("fx", &SapienRenderCameraComponent::getFocalLengthX)
       .def_property_readonly("fy", &SapienRenderCameraComponent::getFocalLengthY)
       .def("set_focal_lengths", &SapienRenderCameraComponent::setFocalLengths, py::arg("fx"),
            py::arg("fy"))
+
       .def_property_readonly("cx", &SapienRenderCameraComponent::getPrincipalPointX)
       .def_property_readonly("cy", &SapienRenderCameraComponent::getPrincipalPointY)
       .def("set_principal_point", &SapienRenderCameraComponent::setPrincipalPoint, py::arg("cx"),
            py::arg("cy"))
+
       .def_property("skew", &SapienRenderCameraComponent::getSkew,
                     &SapienRenderCameraComponent::setSkew)
+      .def("get_skew", &SapienRenderCameraComponent::getSkew)
+      .def("set_skew", &SapienRenderCameraComponent::setSkew, py::arg("skew"))
+
       .def("set_perspective_parameters", &SapienRenderCameraComponent::setPerspectiveParameters,
            py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
            py::arg("cy"), py::arg("skew"))
@@ -649,30 +676,61 @@ consumer library. Make a copy if needed.
   PyRenderLightComponent
       .def_property("local_pose", &SapienRenderLightComponent::getLocalPose,
                     &SapienRenderLightComponent::setLocalPose)
+      .def("get_local_pose", &SapienRenderLightComponent::getLocalPose)
+      .def("set_local_pose", &SapienRenderLightComponent::setLocalPose, py::arg("pose"))
+
       .def_property_readonly("global_pose", &SapienRenderLightComponent::getGlobalPose)
+      .def("get_global_pose", &SapienRenderLightComponent::getGlobalPose)
+
       .def_property("color", &SapienRenderLightComponent::getColor,
                     &SapienRenderLightComponent::setColor)
+      .def("get_color", &SapienRenderLightComponent::getColor)
+      .def("set_color", &SapienRenderLightComponent::setColor, "color")
+
       .def_property("shadow", &SapienRenderLightComponent::getShadowEnabled,
                     &SapienRenderLightComponent::setShadowEnabled)
+      .def("enable_shadow", &SapienRenderLightComponent::enableShadow)
+      .def("disable_shadow", &SapienRenderLightComponent::disableShadow)
+
       .def_property("shadow_near", &SapienRenderLightComponent::getShadowNear,
                     &SapienRenderLightComponent::setShadowNear)
+      .def("get_shadow_near", &SapienRenderLightComponent::getShadowNear)
+      .def("set_shadow_near", &SapienRenderLightComponent::setShadowNear, py::arg("near"))
+
       .def_property("shadow_far", &SapienRenderLightComponent::getShadowFar,
                     &SapienRenderLightComponent::setShadowFar)
+      .def("get_shadow_far", &SapienRenderLightComponent::getShadowFar)
+      .def("set_shadow_far", &SapienRenderLightComponent::setShadowFar, py::arg("far"))
+
       .def_property("shadow_map_size", &SapienRenderLightComponent::getShadowMapSize,
-                    &SapienRenderLightComponent::setShadowMapSize);
+                    &SapienRenderLightComponent::setShadowMapSize)
+      .def("get_shadow_map_size", &SapienRenderLightComponent::getShadowMapSize)
+      .def("set_shadow_map_size", &SapienRenderLightComponent::setShadowMapSize, py::arg("size"));
 
   PyRenderPointLightComponent.def(py::init<>());
   PyRenderDirectionalLightComponent.def(py::init<>())
       .def_property("shadow_half_size", &SapienRenderDirectionalLightComponent::getShadowHalfSize,
-                    &SapienRenderDirectionalLightComponent::setShadowHalfSize);
+                    &SapienRenderDirectionalLightComponent::setShadowHalfSize)
+      .def("get_shadow_half_size", &SapienRenderDirectionalLightComponent::getShadowHalfSize)
+      .def("set_shadow_half_size", &SapienRenderDirectionalLightComponent::setShadowHalfSize);
+
   PyRenderSpotLightComponent.def(py::init<>())
       .def_property("inner_fov", &SapienRenderSpotLightComponent::getFovInner,
                     &SapienRenderSpotLightComponent::setFovInner)
+      .def("get_inner_fov", &SapienRenderSpotLightComponent::getFovInner)
+      .def("set_inner_fov", &SapienRenderSpotLightComponent::setFovInner, py::arg("fov"))
+
       .def_property("outer_fov", &SapienRenderSpotLightComponent::getFovOuter,
-                    &SapienRenderSpotLightComponent::setFovOuter);
+                    &SapienRenderSpotLightComponent::setFovOuter)
+      .def("get_outer_fov", &SapienRenderSpotLightComponent::getFovOuter)
+      .def("set_outer_fov", &SapienRenderSpotLightComponent::setFovOuter, py::arg("fov"));
+
   PyRenderTexturedLightComponent.def(py::init<>())
       .def_property("texture", &SapienRenderTexturedLightComponent::getTexture,
-                    &SapienRenderTexturedLightComponent::setTexture);
+                    &SapienRenderTexturedLightComponent::setTexture)
+      .def("get_texture", &SapienRenderTexturedLightComponent::getTexture)
+      .def("set_texture", &SapienRenderTexturedLightComponent::setTexture, py::arg("texture"));
+
   PyRenderParallelogramLightComponent.def(py::init<>())
       .def("set_shape", &SapienRenderParallelogramLightComponent::setShape, py::arg("half_width"),
            py::arg("half_height"), py::arg("angle") = std::numbers::pi_v<float> / 2.f)
@@ -784,51 +842,6 @@ consumer library. Make a copy if needed.
       .def("get_picture_pixel", &SapienRendererWindow::getImagePixel, py::arg("name"),
            py::arg("x"), py::arg("y"))
 
-      // // Download images from window
-      // .def(
-      //     "get_float_texture",
-      //     [](SapienRendererWindow &window, std::string const &name) {
-      //       auto [image, sizes] = window.downloadFloatTarget(name);
-      //       if (sizes[2] == 1) {
-      //         return py::array_t<float>({static_cast<int>(sizes[0]),
-      //         static_cast<int>(sizes[1])},
-      //                                   image.data());
-      //       } else {
-      //         return py::array_t<float>({static_cast<int>(sizes[0]), static_cast<int>(sizes[1]),
-      //                                    static_cast<int>(sizes[2])},
-      //                                   image.data());
-      //       }
-      //     },
-      //     py::arg("name"))
-      // .def(
-      //     "get_uint32_texture",
-      //     [](SapienRendererWindow &window, std::string const &name) {
-      //       auto [image, sizes] = window.downloadUint32Target(name);
-      //       if (sizes[2] == 1) {
-      //         return py::array_t<uint32_t>(
-      //             {static_cast<int>(sizes[0]), static_cast<int>(sizes[1])}, image.data());
-      //       } else {
-      //         return py::array_t<uint32_t>({static_cast<int>(sizes[0]),
-      //         static_cast<int>(sizes[1]),
-      //                                       static_cast<int>(sizes[2])},
-      //                                      image.data());
-      //       }
-      //     },
-      //     py::arg("name"))
-      // .def(
-      //     "get_float_texture_pixel",
-      //     [](SapienRendererWindow &window, std::string const &name, uint32_t x, uint32_t y) {
-      //       auto v = window.downloadFloatTargetPixel(name, x, y);
-      //       return py::array_t<float>(static_cast<int>(v.size()), v.data());
-      //     },
-      //     py::arg("name"), py::arg("x"), py::arg("y"))
-      // .def(
-      //     "get_uint32_texture_pixel",
-      //     [](SapienRendererWindow &window, std::string const &name, uint32_t x, uint32_t y) {
-      //       auto v = window.downloadUint32TargetPixel(name, x, y);
-      //       return py::array_t<uint32_t>(static_cast<int>(v.size()), v.data());
-      //     },
-      //     py::arg("name"), py::arg("x"), py::arg("y"))
       .def_property_readonly("shift", &SapienRendererWindow::isShiftDown)
       .def_property_readonly("alt", &SapienRendererWindow::isAltDown)
       .def_property_readonly("ctrl", &SapienRendererWindow::isCtrlDown)

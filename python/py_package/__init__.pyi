@@ -62,5 +62,5 @@ __all__ = [
 
 def set_log_level(level: str) -> None:
     pass
-__version__ = '3.0.0.dev20231016'
+__version__ = '3.0.0.dev20231018'
 SceneConfig = sapien.pysapien.physx.PhysxSceneConfig

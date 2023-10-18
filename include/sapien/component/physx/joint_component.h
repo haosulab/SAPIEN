@@ -54,12 +54,26 @@ public:
   void setYZPyramidLimit(float yLow, float yHigh, float zLow, float zHigh, float stiffness,
                          float damping);
 
+  std::tuple<float, float, float, float> getXLimit() const;
+  std::tuple<float, float, float, float> getYLimit() const;
+  std::tuple<float, float, float, float> getZLimit() const;
+  std::tuple<float, float, float, float> getXTwistLimit() const;
+  std::tuple<float, float, float, float> getYZConeLimit() const;
+  std::tuple<float, float, float, float, float, float> getZPyramidLimit() const;
+
   void setXDriveProperties(float stiffness, float damping, float forceLimit, DriveMode mode);
   void setYDriveProperties(float stiffness, float damping, float forceLimit, DriveMode mode);
   void setZDriveProperties(float stiffness, float damping, float forceLimit, DriveMode mode);
   void setXTwistDriveProperties(float stiffness, float damping, float forceLimit, DriveMode mode);
   void setYZSwingDriveProperties(float stiffness, float damping, float forceLimit, DriveMode mode);
   void setSlerpDriveProperties(float stiffness, float damping, float forceLimit, DriveMode mode);
+
+  std::tuple<float, float, float, DriveMode> getXDriveProperties() const;
+  std::tuple<float, float, float, DriveMode> getYDriveProperties() const;
+  std::tuple<float, float, float, DriveMode> getZDriveProperties() const;
+  std::tuple<float, float, float, DriveMode> getXTwistDriveProperties() const;
+  std::tuple<float, float, float, DriveMode> getYZSwingDriveProperties() const;
+  std::tuple<float, float, float, DriveMode> getSlerpDriveProperties() const;
 
   void setDriveTarget(Pose const &pose);
   Pose getDriveTarget() const;
@@ -80,6 +94,7 @@ private:
                       float damping);
   void setDrive(physx::PxD6Drive::Enum drive, float stiffness, float damping, float forceLimit,
                 DriveMode mode);
+
 
   physx::PxD6Joint *mJoint;
 };

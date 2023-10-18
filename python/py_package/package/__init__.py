@@ -14,9 +14,9 @@ loaded_packages = dict()
 # TODO: implement global package
 # TODO: implement versioning
 # global_package_dir = Path.home() / ".sapien" / "sapien_packages_global"
-local_package_dir = Path(".") / "sapien_packages"
+local_package_dir = (Path(".") / "sapien_packages_local" / "sapien_packages").absolute()
 
-sys.path.insert(0, local_package_dir.parent)
+# sys.path.insert(0, str(local_package_dir.parent.absolute()))
 # sys.path.insert(0, global_package_dir.parent)
 
 
@@ -65,6 +65,10 @@ def download_to_local(path: str, name: str):
         z = zipfile.ZipFile(path)
 
     local_package_dir.mkdir(exist_ok=True, parents=True)
+
+    # NOTE: somehow if local_package_dir does not exist yet, sys.path.insert does not work
+    if local_package_dir not in sys.path:
+        sys.path.insert(0, str(local_package_dir.parent.absolute()))
 
     with tempfile.TemporaryDirectory() as temp:
         z.extractall(temp)

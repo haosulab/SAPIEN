@@ -130,6 +130,33 @@ void PhysxDriveComponent::setXTwistLimit(float low, float high, float stiffness,
   mJoint->setTwistLimit({low, high, {stiffness, damping}});
 }
 
+std::tuple<float, float, float, float> PhysxDriveComponent::getXLimit() const {
+  auto l = mJoint->getLinearLimit(PxD6Axis::eX);
+  return {l.lower, l.upper, l.stiffness, l.damping};
+}
+std::tuple<float, float, float, float> PhysxDriveComponent::getYLimit() const {
+  auto l = mJoint->getLinearLimit(PxD6Axis::eY);
+  return {l.lower, l.upper, l.stiffness, l.damping};
+}
+std::tuple<float, float, float, float> PhysxDriveComponent::getZLimit() const {
+  auto l = mJoint->getLinearLimit(PxD6Axis::eZ);
+  return {l.lower, l.upper, l.stiffness, l.damping};
+}
+
+std::tuple<float, float, float, float> PhysxDriveComponent::getXTwistLimit() const {
+  auto l = mJoint->getTwistLimit();
+  return {l.lower, l.upper, l.stiffness, l.damping};
+}
+std::tuple<float, float, float, float> PhysxDriveComponent::getYZConeLimit() const {
+  auto l = mJoint->getSwingLimit();
+  return {l.yAngle, l.zAngle, l.stiffness, l.damping};
+}
+std::tuple<float, float, float, float, float, float>
+PhysxDriveComponent::getZPyramidLimit() const {
+  auto l = mJoint->getPyramidSwingLimit();
+  return {l.yAngleMin, l.yAngleMax, l.zAngleMin, l.zAngleMax, l.stiffness, l.damping};
+}
+
 void PhysxDriveComponent::setDrive(PxD6Drive::Enum drive, float stiffness, float damping,
                                    float forceLimit, DriveMode mode) {
   mJoint->setDrive(drive, {stiffness, damping, forceLimit, mode == DriveMode::eACCELERATION});
@@ -157,6 +184,49 @@ void PhysxDriveComponent::setYZSwingDriveProperties(float stiffness, float dampi
 void PhysxDriveComponent::setSlerpDriveProperties(float stiffness, float damping, float forceLimit,
                                                   DriveMode mode) {
   setDrive(PxD6Drive::eSLERP, stiffness, damping, forceLimit, mode);
+}
+
+std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
+PhysxDriveComponent::getXDriveProperties() const {
+  auto d = mJoint->getDrive(PxD6Drive::eX);
+  return {d.stiffness, d.damping, d.forceLimit,
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
+                                                           : DriveMode::eFORCE};
+}
+std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
+PhysxDriveComponent::getYDriveProperties() const {
+  auto d = mJoint->getDrive(PxD6Drive::eY);
+  return {d.stiffness, d.damping, d.forceLimit,
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
+                                                           : DriveMode::eFORCE};
+}
+std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
+PhysxDriveComponent::getZDriveProperties() const {
+  auto d = mJoint->getDrive(PxD6Drive::eZ);
+  return {d.stiffness, d.damping, d.forceLimit,
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
+                                                           : DriveMode::eFORCE};
+}
+std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
+PhysxDriveComponent::getXTwistDriveProperties() const {
+  auto d = mJoint->getDrive(PxD6Drive::eTWIST);
+  return {d.stiffness, d.damping, d.forceLimit,
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
+                                                           : DriveMode::eFORCE};
+}
+std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
+PhysxDriveComponent::getYZSwingDriveProperties() const {
+  auto d = mJoint->getDrive(PxD6Drive::eSWING);
+  return {d.stiffness, d.damping, d.forceLimit,
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
+                                                           : DriveMode::eFORCE};
+}
+std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
+PhysxDriveComponent::getSlerpDriveProperties() const {
+  auto d = mJoint->getDrive(PxD6Drive::eSLERP);
+  return {d.stiffness, d.damping, d.forceLimit,
+          d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
+                                                           : DriveMode::eFORCE};
 }
 
 void PhysxDriveComponent::setDriveTarget(Pose const &pose) {

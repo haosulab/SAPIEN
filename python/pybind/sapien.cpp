@@ -152,7 +152,10 @@ Generator<int> init_sapien(py::module &m) {
             }
             return std::shared_ptr<component::Component>(nullptr);
           },
-          py::arg("cls"));
+          py::arg("cls"))
+
+      .def("add_to_scene", &Entity::addToScene, py::arg("scene"))
+      .def("remove_from_scene", &Entity::removeFromScene);
 
   PyComponent.def(py::init<>())
       .def_property_readonly("entity", &component::Component::getEntity)

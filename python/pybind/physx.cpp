@@ -514,8 +514,6 @@ Example:
       .def("get_kinematic_target", &PhysxRigidDynamicComponent::getKinematicTarget)
       .def("set_kinematic_target", &PhysxRigidDynamicComponent::setKinematicTarget);
 
-  // TODO: continue
-
   PyPhysxArticulationLinkComponent
       .def(py::init(&PhysxArticulationLinkComponent::Create), py::arg("parent") = nullptr)
 
@@ -730,7 +728,6 @@ Example:
            py::arg("linear"), py::arg("angular"))
       .def("get_drive_velocity_target", &PhysxDriveComponent::getDriveTargetVelocity)
 
-      // TODO: implement getters
       .def("set_limit_x", &PhysxDriveComponent::setXLimit, py::arg("low"), py::arg("high"),
            py::arg("stiffness") = 0.f, py::arg("damping") = 0.f)
       .def("set_limit_y", &PhysxDriveComponent::setYLimit, py::arg("low"), py::arg("high"),
@@ -745,6 +742,13 @@ Example:
       .def("set_limit_twist", &PhysxDriveComponent::setXTwistLimit, py::arg("low"),
            py::arg("high"), py::arg("stiffness") = 0.f, py::arg("damping") = 0.f)
 
+      .def("get_limit_x", &PhysxDriveComponent::getXLimit)
+      .def("get_limit_y", &PhysxDriveComponent::getYLimit)
+      .def("get_limit_z", &PhysxDriveComponent::getZLimit)
+      .def("get_limit_cone", &PhysxDriveComponent::getYZConeLimit)
+      .def("get_limit_pyramid", &PhysxDriveComponent::getZPyramidLimit)
+      .def("get_limit_twist", &PhysxDriveComponent::getXTwistLimit)
+
       .def("set_drive_property_x", &PhysxDriveComponent::setXDriveProperties, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
            py::arg("mode") = PhysxDriveComponent::DriveMode::eFORCE)
@@ -754,7 +758,6 @@ Example:
       .def("set_drive_property_z", &PhysxDriveComponent::setZDriveProperties, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
            py::arg("mode") = PhysxDriveComponent::DriveMode::eFORCE)
-
       .def("set_drive_property_twist", &PhysxDriveComponent::setXTwistDriveProperties,
            py::arg("stiffness"), py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
            py::arg("mode") = PhysxDriveComponent::DriveMode::eFORCE)
@@ -763,7 +766,14 @@ Example:
            py::arg("mode") = PhysxDriveComponent::DriveMode::eFORCE)
       .def("set_drive_property_slerp", &PhysxDriveComponent::setSlerpDriveProperties,
            py::arg("stiffness"), py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
-           py::arg("mode") = PhysxDriveComponent::DriveMode::eFORCE);
+           py::arg("mode") = PhysxDriveComponent::DriveMode::eFORCE)
+
+      .def("get_drive_property_x", &PhysxDriveComponent::getXDriveProperties)
+      .def("get_drive_property_y", &PhysxDriveComponent::getYDriveProperties)
+      .def("get_drive_property_z", &PhysxDriveComponent::getZDriveProperties)
+      .def("get_drive_property_twist", &PhysxDriveComponent::getXTwistDriveProperties)
+      .def("get_drive_property_swing", &PhysxDriveComponent::getYZSwingDriveProperties)
+      .def("get_drive_property_slerp", &PhysxDriveComponent::getSlerpDriveProperties);
 
   PyPhysxGearComponent.def(py::init(&PhysxGearComponent::Create), py::arg("body"))
       .def_property("gear_ratio", &PhysxGearComponent::getGearRatio,
