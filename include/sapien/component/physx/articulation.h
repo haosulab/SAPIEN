@@ -70,6 +70,12 @@ public:
   void internalAddLinkAtIndex(PhysxArticulationLinkComponent &link,
                               PhysxArticulationLinkComponent *parent, uint32_t index);
 
+  void createFixedTendon(std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> const &chain,
+                         std::vector<float> const &coefficients,
+                         std::vector<float> const &recipCoefficients, float restLength,
+                         float offset, float stiffness, float damping, float low, float high,
+                         float limitStiffness);
+
   ~PhysxArticulation();
 
 private:

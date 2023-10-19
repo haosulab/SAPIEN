@@ -336,6 +336,114 @@ Eigen::VectorXf PhysxArticulation::computePassiveForce(bool gravity, bool coriol
   return f;
 }
 
+void PhysxArticulation::createFixedTendon(
+    std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> const &chain,
+    std::vector<float> const &coefficients, std::vector<float> const &recipCoefficients,
+    float restLength, float offset, float stiffness, float damping, float low, float high,
+    float limitStiffness) {
+  for (auto &link : chain) {
+    if (link->getArticulation().get() != this) {
+      throw std::runtime_error(
+          "failed to create tendon: the link does not belong to this articulation.");
+    }
+  }
+  if (chain.size() == 0) {
+    throw std::runtime_error("failed to create tendon: no links provided");
+  }
+  if (chain.size() != coefficients.size() || chain.size() != recipCoefficients.size()) {
+    throw std::runtime_error(
+        "failed to create tendon: link count does not match one coefficient count");
+  }
+
+  // std::shared_ptr<PhysxArticulationLinkComponent> parent{};
+  // for (auto &link : chain) {
+  //   if (parent && link->getParent() != parent) {
+  //     throw std::runtime_error("failed to create tendon: links do not form a chain");
+  //   }
+  //   parent = link;
+  // }
+
+  // for (auto &link : chain) {
+  //   switch (link->getJoint()->getType()) {
+  //   case PxArticulationJointType::ePRISMATIC:
+  //   case PxArticulationJointType::eREVOLUTE:
+  //   case PxArticulationJointType::eREVOLUTE_UNWRAPPED:
+  //     break;
+  //   default:
+  //     if (link != chain.at(0)) {
+  //       throw std::runtime_error(
+  //           "failed to create tendon: all joints but the root must be prismatic or revolute");
+  //     }
+  //   }
+  // }
+
+  std::map<PxArticulationLink *, PxArticulationTendonJoint *> l2t;
+
+  PxScene *scene{};
+  if ((scene = mPxArticulation->getScene())) {
+    mPxArticulation->getScene()->removeArticulation(*mPxArticulation);
+  }
+  auto tendon = mPxArticulation->createFixedTendon();
+
+  tendon->setOffset(offset);
+  tendon->setRestLength(restLength);
+  tendon->setStiffness(stiffness);
+  tendon->setDamping(damping);
+  tendon->setLimitParameters({low, high});
+  tendon->setLimitStiffness(limitStiffness);
+
+  for (uint32_t i = 0; i < chain.size(); ++i) {
+    PxArticulationAxis::Enum axis;
+    switch (chain.at(i)->getJoint()->getType()) {
+    case PxArticulationJointType::ePRISMATIC:
+      axis = PxArticulationAxis::eX;
+      break;
+    case PxArticulationJointType::eREVOLUTE:
+    case PxArticulationJointType::eREVOLUTE_UNWRAPPED:
+      axis = PxArticulationAxis::eTWIST;
+      break;
+    default:
+      if (i != 0) {
+        tendon->release();
+        if (scene) {
+          scene->addArticulation(*mPxArticulation);
+        }
+        throw std::runtime_error(
+            "failed to create tendon: all joints but the root must be prismatic or revolute");
+      }
+      axis = PxArticulationAxis::eX; // axis does not matter for root
+    }
+
+    auto link = chain.at(i)->getPxActor();
+    if (i == 0) {
+      l2t[link] = tendon->createTendonJoint(nullptr, axis, coefficients.at(i),
+                                            recipCoefficients.at(i), link);
+    } else {
+      auto parent = link->getInboundJoint() ? &link->getInboundJoint()->getParentArticulationLink()
+                                            : nullptr;
+      if (!l2t.contains(parent)) {
+        tendon->release();
+        if (scene) {
+          scene->addArticulation(*mPxArticulation);
+        }
+        throw std::runtime_error("failed to create tendon: links do not form a tree");
+      }
+      if (l2t.contains(link)) {
+        tendon->release();
+        if (scene) {
+          scene->addArticulation(*mPxArticulation);
+        }
+        throw std::runtime_error("failed to create tendon: duplicated links");
+      }
+      l2t[link] = tendon->createTendonJoint(l2t.at(parent), axis, coefficients.at(i),
+                                            recipCoefficients.at(i), link);
+    }
+  }
+  if (scene) {
+    scene->addArticulation(*mPxArticulation);
+  }
+}
+
 PhysxArticulation::~PhysxArticulation() {
   if (mCache) {
     mCache->release();

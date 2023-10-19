@@ -228,7 +228,7 @@ void PhysxRigidBodyComponent::internalUpdateMass() {
 
 bool PhysxRigidBodyComponent::canAutoComputeMass() {
   for (auto c : mCollisionShapes) {
-    auto type = c->getPxShape()->getGeometryType();
+    auto type = c->getPxShape()->getGeometry().getType();
     if (type == PxGeometryType::eTRIANGLEMESH || type == PxGeometryType::eHEIGHTFIELD ||
         type == PxGeometryType::ePLANE) {
       return false;

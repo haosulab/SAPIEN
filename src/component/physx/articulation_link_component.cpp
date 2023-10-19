@@ -156,7 +156,7 @@ void PhysxArticulationJoint::setLimit(
       continue;
     }
     j->setMotion(mAxes[i], PxArticulationMotion::eLIMITED);
-    j->setLimit(mAxes[i], low, high);
+    j->setLimitParams(mAxes[i], {low, high});
   }
 }
 
@@ -164,7 +164,7 @@ void PhysxArticulationJoint::setDriveProperties(float stiffness, float damping, 
                                                 physx::PxArticulationDriveType::Enum type) {
   auto j = getPxJoint();
   for (auto axis : mAxes) {
-    j->setDrive(axis, stiffness, damping, maxForce, type);
+    j->setDriveParams(axis, {stiffness, damping, maxForce, type});
   }
 }
 

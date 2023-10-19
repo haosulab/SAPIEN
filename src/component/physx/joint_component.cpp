@@ -371,12 +371,6 @@ float PhysxDistanceJointComponent::getDamping() const { return mJoint->getDampin
 Eigen::Vector2f PhysxDistanceJointComponent::getLimit() const {
   return {mJoint->getMinDistance(), mJoint->getMaxDistance()};
 }
-void PhysxDistanceJointComponent::setContactDistance(float distance) {
-  mJoint->setContactDistance(distance);
-}
-float PhysxDistanceJointComponent::getContactDistance() const {
-  return mJoint->getContactDistance();
-}
 
 float PhysxDistanceJointComponent::getDistance() const { return mJoint->getDistance(); }
 

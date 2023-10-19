@@ -135,9 +135,6 @@ public:
   float getDamping() const;
   Eigen::Vector2f getLimit() const;
 
-  void setContactDistance(float distance);
-  float getContactDistance() const;
-
   float getDistance() const;
 
   physx::PxJoint *getPxJoint() const override { return mJoint; }

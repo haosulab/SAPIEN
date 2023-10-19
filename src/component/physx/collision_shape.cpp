@@ -231,41 +231,40 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
 //////////////////// end collision shape constructor ////////////////////
 
 Vec3 PhysxCollisionShapeBox::getHalfLengths() const {
-  PxBoxGeometry g;
-  mPxShape->getBoxGeometry(g);
-  return PxVec3ToVec3(g.halfExtents);
+  auto &g = mPxShape->getGeometry();
+  assert(g.getType() == PxGeometryType::eBOX);
+  return PxVec3ToVec3(static_cast<PxBoxGeometry const &>(g).halfExtents);
 }
 
 float PhysxCollisionShapeCapsule::getRadius() const {
-  PxCapsuleGeometry g;
-  mPxShape->getCapsuleGeometry(g);
-  return g.radius;
+  auto &g = mPxShape->getGeometry();
+  assert(g.getType() == PxGeometryType::eCAPSULE);
+  return static_cast<PxCapsuleGeometry const &>(g).radius;
 }
 
 float PhysxCollisionShapeCapsule::getHalfLength() const {
-  PxCapsuleGeometry g;
-  mPxShape->getCapsuleGeometry(g);
-  return g.halfHeight;
+  auto &g = mPxShape->getGeometry();
+  assert(g.getType() == PxGeometryType::eCAPSULE);
+  return static_cast<PxCapsuleGeometry const &>(g).halfHeight;
 }
 
 float PhysxCollisionShapeSphere::getRadius() const {
-  PxSphereGeometry g;
-  mPxShape->getSphereGeometry(g);
-  return g.radius;
+  auto &g = mPxShape->getGeometry();
+  assert(g.getType() == PxGeometryType::eSPHERE);
+  return static_cast<PxSphereGeometry const &>(g).radius;
 }
 
 Vec3 PhysxCollisionShapeConvexMesh::getScale() const {
-  PxConvexMeshGeometry g;
-  mPxShape->getConvexMeshGeometry(g);
-  return PxVec3ToVec3(g.scale.scale);
+  auto &g = mPxShape->getGeometry();
+  assert(g.getType() == PxGeometryType::eCONVEXMESH);
+  return PxVec3ToVec3(static_cast<PxConvexMeshGeometry const &>(g).scale.scale);
 }
 
 Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>
 PhysxCollisionShapeConvexMesh::getVertices() const {
-  PxConvexMeshGeometry g;
-  if (!mPxShape->getConvexMeshGeometry(g)) {
-    throw std::runtime_error("corrupted convex mesh geometry");
-  }
+  auto &g_ = mPxShape->getGeometry();
+  assert(g_.getType() == PxGeometryType::eCONVEXMESH);
+  auto &g = static_cast<PxConvexMeshGeometry const &>(g_);
 
   std::vector<float> vertices;
   vertices.reserve(3 * g.convexMesh->getNbVertices());
@@ -281,10 +280,9 @@ PhysxCollisionShapeConvexMesh::getVertices() const {
 
 Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>
 PhysxCollisionShapeConvexMesh::getTriangles() const {
-  PxConvexMeshGeometry g;
-  if (!mPxShape->getConvexMeshGeometry(g)) {
-    throw std::runtime_error("corrupted convex mesh geometry");
-  }
+  auto &g_ = mPxShape->getGeometry();
+  assert(g_.getType() == PxGeometryType::eCONVEXMESH);
+  auto &g = static_cast<PxConvexMeshGeometry const &>(g_);
 
   std::vector<uint32_t> indices;
   auto gi = g.convexMesh->getIndexBuffer();
@@ -302,17 +300,16 @@ PhysxCollisionShapeConvexMesh::getTriangles() const {
 }
 
 Vec3 PhysxCollisionShapeTriangleMesh::getScale() const {
-  PxTriangleMeshGeometry g;
-  mPxShape->getTriangleMeshGeometry(g);
-  return PxVec3ToVec3(g.scale.scale);
+  auto &g = mPxShape->getGeometry();
+  assert(g.getType() == PxGeometryType::eTRIANGLEMESH);
+  return PxVec3ToVec3(static_cast<PxTriangleMeshGeometry const &>(g).scale.scale);
 }
 
 Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>
 PhysxCollisionShapeTriangleMesh::getVertices() const {
-  PxTriangleMeshGeometry g;
-  if (!mPxShape->getTriangleMeshGeometry(g)) {
-    throw std::runtime_error("corrupted triangle mesh geometry");
-  }
+  auto &g_ = mPxShape->getGeometry();
+  assert(g_.getType() == PxGeometryType::eTRIANGLEMESH);
+  auto &g = static_cast<PxTriangleMeshGeometry const &>(g_);
 
   std::vector<float> vertices;
   vertices.reserve(3 * g.triangleMesh->getNbVertices());
@@ -328,10 +325,9 @@ PhysxCollisionShapeTriangleMesh::getVertices() const {
 
 Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>
 PhysxCollisionShapeTriangleMesh::getTriangles() const {
-  PxTriangleMeshGeometry g;
-  if (!mPxShape->getTriangleMeshGeometry(g)) {
-    throw std::runtime_error("corrupted convex mesh geometry");
-  }
+  auto &g_ = mPxShape->getGeometry();
+  assert(g_.getType() == PxGeometryType::eTRIANGLEMESH);
+  auto &g = static_cast<PxTriangleMeshGeometry const &>(g_);
 
   std::vector<uint32_t> indices;
   indices.reserve(3 * g.triangleMesh->getNbTriangles());

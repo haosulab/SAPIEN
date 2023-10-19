@@ -32,6 +32,11 @@ def check_loaded(name: str, version: str):
 
 
 def check_local(name: str, version: str):
+    if not local_package_dir.exists():
+        return None
+    if local_package_dir not in sys.path:
+        sys.path.insert(0, str(local_package_dir.parent.absolute()))
+
     try:
         m = importlib.import_module(f"sapien_packages.{name}")
     except ModuleNotFoundError:

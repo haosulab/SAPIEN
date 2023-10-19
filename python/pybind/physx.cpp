@@ -682,6 +682,12 @@ Example:
       .def("compute_passive_force", &PhysxArticulation::computePassiveForce,
            py::arg("gravity") = true, py::arg("coriolis_and_centrifugal") = true)
 
+      .def("create_fixed_tendon", &PhysxArticulation::createFixedTendon, py::arg("link_chain"),
+           py::arg("coefficients"), py::arg("recip_coefficients"), py::arg("rest_length") = 0,
+           py::arg("offset") = 0, py::arg("stiffness") = 0, py::arg("damping") = 0,
+           py::arg("low") = -PX_MAX_F32, py::arg("high") = PX_MAX_F32,
+           py::arg("limit_stiffness") = 0)
+
       .def("find_link_by_name",
            [](PhysxArticulation &a, std::string const &name) {
              for (auto &l : a.getLinks()) {
@@ -788,12 +794,6 @@ Example:
       .def(py::init(&PhysxDistanceJointComponent::Create), py::arg("body"))
       .def("set_limit", &PhysxDistanceJointComponent::setLimit, py::arg("low"), py::arg("high"),
            py::arg("stiffness") = 0.f, py::arg("damping") = 0.f)
-
-      .def_property("contact_distance", &PhysxDistanceJointComponent::getContactDistance,
-                    &PhysxDistanceJointComponent::setContactDistance)
-      .def("get_contact_distance", &PhysxDistanceJointComponent::getContactDistance)
-      .def("set_contact_distance", &PhysxDistanceJointComponent::setContactDistance,
-           py::arg("distance"))
 
       .def_property_readonly("distance", &PhysxDistanceJointComponent::getDistance)
       .def("get_distance", &PhysxDistanceJointComponent::getDistance);
