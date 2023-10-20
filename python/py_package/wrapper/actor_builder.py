@@ -2,9 +2,141 @@ from .. import pysapien as sapien
 from dataclasses import dataclass
 import numpy as np
 import typing
+import os
+from multiprocessing import Process
+import hashlib
 
 
-# TODO: use sapien default
+def get_file_md5(filename):
+    with open(filename, "rb") as file_to_check:
+        data = file_to_check.read()
+        return hashlib.md5(data).hexdigest()
+
+
+def do_coacd(
+    filename,
+    threshold=0.05,
+    max_convex_hull=-1,
+    preprocess_mode="auto",
+    preprocess_resolution=30,
+    resolution=2000,
+    mcts_nodes=20,
+    mcts_iterations=150,
+    mcts_max_depth=3,
+    pca=False,
+    merge=True,
+    seed=0,
+    verbose=False,
+):
+    try:
+        import coacd
+    except ModuleNotFoundError:
+        print("coacd not found, install by [pip install coacd]")
+        raise
+
+    try:
+        import trimesh
+    except ModuleNotFoundError:
+        print("trimesh not found, install by [pip install trimesh]")
+        raise
+
+    if verbose:
+        coacd.set_log_level("info")
+    else:
+        coacd.set_log_level("warn")
+
+    md5 = get_file_md5(filename)
+    paramstr = f"md5={md5}, threshold={threshold:.2f}, max_convex_hull={max_convex_hull}, preprocess_mode={preprocess_mode}, preprocess_resolution={preprocess_resolution}, resolution={resolution}, mcts_nodes={mcts_nodes}, mcts_iterations={mcts_iterations}, mcts_max_depth={mcts_max_depth}, pca={pca}, merge={merge}, seed={seed}"
+
+    outfile = filename + ".coacd.ply"
+    if os.path.exists(outfile):
+        with open(outfile, "rb") as f:
+            success = f.readline() == b"ply\n"
+            success = success and f.readline() == b"format binary_little_endian 1.0\n"
+            success = (
+                success and f.readline().decode("ascii") == f"comment {paramstr}\n"
+            )
+            if success:
+                if verbose:
+                    print("using cached decomposition file")
+                return outfile
+
+        os.unlink(outfile)
+
+    def func():
+        mesh = trimesh.load(filename, force="mesh")
+        mesh = coacd.Mesh(mesh.vertices, mesh.faces)
+        result = coacd.run_coacd(
+            mesh,
+            threshold=threshold,
+            max_convex_hull=max_convex_hull,
+            preprocess_mode=preprocess_mode,
+            preprocess_resolution=preprocess_resolution,
+            resolution=resolution,
+            mcts_nodes=mcts_nodes,
+            mcts_iterations=mcts_iterations,
+            mcts_max_depth=mcts_max_depth,
+            pca=pca,
+            merge=merge,
+            seed=seed,
+        )
+
+        content = sum([trimesh.Trimesh(*m) for m in result]).export(None, "ply")
+        content = content.split(b"\n", 2)
+        content.insert(2, ("comment " + paramstr).encode("ascii"))
+        content = b"\n".join(content)
+
+        with open(outfile, "wb") as f:
+            f.write(content)
+
+    p = Process(target=func)
+    p.start()
+    p.join()
+    if os.path.exists(outfile):
+        return outfile
+
+    # preprocess is already on, fail immediately
+    if preprocess_mode == "on":
+        raise Exception(f"coacd failed on {filename}")
+
+    # try again with preprocess on since auto may have issues
+    print("coacd failed, trying again with preprocess_mode on")
+
+    def fallback():
+        mesh = trimesh.load(filename, force="mesh")
+        mesh = coacd.Mesh(mesh.vertices, mesh.faces)
+        result = coacd.run_coacd(
+            mesh,
+            threshold=threshold,
+            max_convex_hull=max_convex_hull,
+            preprocess_mode="on",
+            preprocess_resolution=preprocess_resolution,
+            resolution=resolution,
+            mcts_nodes=mcts_nodes,
+            mcts_iterations=mcts_iterations,
+            mcts_max_depth=mcts_max_depth,
+            pca=pca,
+            merge=merge,
+            seed=seed,
+        )
+
+        content = sum([trimesh.Trimesh(*m) for m in result]).export(None, "ply")
+        content = content.split(b"\n", 2)
+        content.insert(2, ("comment " + paramstr).encode("ascii"))
+        content = b"\n".join(content)
+
+        with open(outfile, "wb") as f:
+            f.write(content)
+
+    p = Process(target=fallback)
+    p.start()
+    p.join()
+    if os.path.exists(outfile):
+        return outfile
+
+    raise Exception(f"coacd failed on {filename}")
+
+
 @dataclass
 class PhysicalMaterialRecord:
     static_friction: float = 0.3
@@ -47,6 +179,9 @@ class CollisionShapeRecord:
     patch_radius: float = 0
     min_patch_radius: float = 0
     is_trigger: bool = False
+
+    decomposition: str = "none"
+    decomposition_params: dict = None
 
 
 @dataclass
@@ -228,8 +363,17 @@ class ActorBuilder:
                 )
                 shapes = [shape]
             elif r.type == "multiple_convex_meshes":
+                if r.decomposition == "coacd":
+                    params = r.decomposition_params
+                    if params is None:
+                        params = dict()
+
+                    filename = do_coacd(r.filename, **params)
+                else:
+                    filename = r.filename
+
                 shapes = sapien.physx.PhysxCollisionShapeConvexMesh.load_multiple(
-                    filename=r.filename,
+                    filename=filename,
                     scale=r.scale,
                     material=record2mat[id(r.material)],
                 )
@@ -276,6 +420,10 @@ class ActorBuilder:
 
     def build_kinematic(self, name=""):
         self.set_physx_body_type("kinematic")
+        return self.build(name=name)
+
+    def build_static(self, name=""):
+        self.set_physx_body_type("static")
         return self.build(name=name)
 
     def add_plane_collision(
@@ -409,6 +557,8 @@ class ActorBuilder:
         patch_radius: float = 0,
         min_patch_radius: float = 0,
         is_trigger: bool = False,
+        decomposition: typing.Literal["none", "coacd"] = "none",
+        decomposition_params=dict(),
     ):
         self.collision_records.append(
             CollisionShapeRecord(
@@ -421,11 +571,13 @@ class ActorBuilder:
                 patch_radius=patch_radius,
                 min_patch_radius=min_patch_radius,
                 is_trigger=is_trigger,
+                decomposition=decomposition,
+                decomposition_params=decomposition_params,
             )
         )
         return self
 
-    def add_nonconvex_collisions_from_file(
+    def add_nonconvex_collision_from_file(
         self,
         filename: str,
         pose: sapien.Pose = sapien.Pose(),
