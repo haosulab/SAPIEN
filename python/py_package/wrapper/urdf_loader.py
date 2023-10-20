@@ -21,7 +21,11 @@ def _prune_package(filename):
 class URDFLoader:
     def __init__(self):
         self.fix_root_link = True
+
         self.load_multiple_collisions_from_file = False
+        self.multiple_collisions_decomposition = "none"
+        self.multiple_collisions_decomposition_params = dict()
+
         self.collision_is_visual = False
         self.revolute_unwrapped = False
         self.scale = 1.0
@@ -312,6 +316,8 @@ class URDFLoader:
                         density=density,
                         patch_radius=patch_radius,
                         min_patch_radius=min_patch_radius,
+                        decomposition=self.multiple_collisions_decomposition,
+                        decomposition_params=self.multiple_collisions_decomposition_params,
                     )
                 else:
                     link_builder.add_convex_collision_from_file(
