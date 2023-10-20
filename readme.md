@@ -1,4 +1,4 @@
-# SAPIEN: A SimulAted Part-based Interactive ENvironment
+# SAPIEN
 SAPIEN is a realistic and physics-rich simulated environment that hosts a
 large-scale set for articulated objects. It enables various robotic vision and
 interaction tasks that require detailed part-level understanding. SAPIEN is a
@@ -12,7 +12,7 @@ SAPIEN is distributed via [PyPI](https://pypi.org/project/sapien/). Installation
 pip install sapien
 ```
 
-It requires Linux with NVIDIA or AMD GPU to run. Verify installation with
+It requires Linux with NVIDIA, AMD, or Intel GPU to run. Verify installation with
 
 ```shell
 python -m sapien.exapmle.hello_world
@@ -49,8 +49,12 @@ python -m sapien.exapmle.hello_world
 ```
 
 ## Change Log
+<details open> <summary>3.0</summary>
 
-<details open> <summary>2.2</summary>
+- Major API & infrastructure overhaul
+
+<details> 
+<summary>2.2</summary>
 
 - Rename `VulkanRenderer` to `SapienRenderer` (VulkanRenderer is still an alias)
 - Support **ray tracing** in `SapienRenderer`
