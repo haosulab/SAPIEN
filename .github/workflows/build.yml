@@ -10,10 +10,16 @@ jobs:
     container:
       image: fxiangucsd/sapien-build-env:3.2
       env:
-        CMAKE_BUILD_PARALLEL_LEVEL: 4
+        CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
         with:
           submodules: "true"
       - name: Build wheels
         run: ./build.sh
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: ./wheelhouse/*.whl
