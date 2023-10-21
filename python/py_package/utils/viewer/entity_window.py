@@ -23,7 +23,6 @@ class EntityWindow(Plugin):
         return self.viewer.selected_entity
 
     def set_actor_pose(self, pose):
-        # TODO: handle articulation
         try:
             self.selected_entity.pose = pose
         except AttributeError:

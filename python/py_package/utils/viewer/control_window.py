@@ -58,6 +58,16 @@ class ControlWindow(Plugin):
         if not v:
             self._clear_joint_axes()
 
+    @property
+    def show_origin_frame(self):
+        return self._show_origin_frame
+
+    @show_origin_frame.setter
+    def show_origin_frame(self, v):
+        self._show_origin_frame = v
+        if not v:
+            self._clear_coordinate_axes()
+
     def _update_joint_axes(self):
         if not self.show_joint_axes:
             return
@@ -262,6 +272,14 @@ class ControlWindow(Plugin):
                     R.UICheckbox()
                     .Label("Show Joint Axes")
                     .Bind(self, "show_joint_axes"),
+                    R.UICheckbox()
+                    .Label("Show Origin Frame")
+                    .Bind(self, "show_origin_frame"),
+                    R.UISliderFloat()
+                    .Label("Frame Size")
+                    .Min(0)
+                    .Max(1)
+                    .Bind(self, "coordinate_axes_scale"),
                 ),
                 R.UISection()
                 .Label("Selection")
@@ -329,6 +347,7 @@ class ControlWindow(Plugin):
 
         if self.show_joint_axes:
             self._update_joint_axes()
+            self._update_coordinate_axes()
 
     def _handle_click(self):
         if self.window.mouse_click(0):
@@ -466,10 +485,12 @@ class ControlWindow(Plugin):
         # display objects
         self.camera_linesets = []
         self.coordinate_axes = None
+        self.coordinate_axes_scale = 0.1
         self.joint_axes = None
 
         self._show_camera_linesets = True
-        self.show_joint_axes = True
+        self._show_joint_axes = True
+        self._show_origin_frame = True
 
     def get_ui_windows(self):
         self.build()
@@ -589,7 +610,6 @@ class ControlWindow(Plugin):
 
         obj = render_scene.add_object(self.red_capsule, node)
         obj.set_position([0.5, 0, 0])
-        obj.set_scale([1.02, 1.02, 1.02])
         obj.shading_mode = 0
         obj.cast_shadow = False
         obj.transparency = 1
@@ -626,12 +646,37 @@ class ControlWindow(Plugin):
 
         self.coordinate_axes = node
 
+    def _clear_coordinate_axes(self):
+        if self.coordinate_axes is None:
+            return
+
+        assert self.viewer.system is not None
+        render_scene: R.Scene = self.viewer.system._internal_scene
+        render_scene.remove_node(self.coordinate_axes)
+        self.coordinate_axes = None
+
+    def _update_coordinate_axes(self):
+        if not self.show_origin_frame:
+            return
+
+        if not self.coordinate_axes:
+            self._create_coordinate_axes()
+
+        if self.selected_entity:
+            for c in self.coordinate_axes.children:
+                c.transparency = 0
+            self.coordinate_axes.set_scale([self.coordinate_axes_scale] * 3)
+            self.coordinate_axes.set_position(self.selected_entity.pose.p)
+            self.coordinate_axes.set_rotation(self.selected_entity.pose.q)
+        else:
+            for c in self.coordinate_axes.children:
+                c.transparency = 1
+
     def _update_camera_linesets(self):
         if self.viewer.system is None:
             return
         render_scene: R.Scene = self.viewer.system._internal_scene
 
-        # TODO
         cameras = self.viewer.system.cameras
         if len(self.camera_linesets) != len(cameras):
             self._clear_camera_linesets()
