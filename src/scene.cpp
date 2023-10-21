@@ -47,6 +47,7 @@ void Scene::addEntity(std::shared_ptr<Entity> entity) {
 
   mEntities.push_back(entity);
   entity->internalSetScene(this);
+  entity->internalSetPerSceneId(mNextEntityId++);
   entity->onAddToScene(*this);
 }
 
@@ -56,6 +57,7 @@ void Scene::removeEntity(std::shared_ptr<Entity> entity) {
     throw std::runtime_error("failed to remove entity: not added");
   }
   entity->onRemoveFromScene(*this);
+  entity->internalSetPerSceneId(0);
   entity->internalSetScene(nullptr);
 }
 

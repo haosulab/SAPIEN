@@ -58,6 +58,8 @@ __all__ = [
 class RenderBodyComponent(sapien.pysapien.Component):
     def __init__(self) -> None: ...
     def attach(self, arg0: RenderShape) -> RenderBodyComponent: ...
+    def disable_render_id(self) -> None: ...
+    def enable_render_id(self) -> None: ...
     @typing.overload
     def set_property(self, name: str, value: numpy.ndarray[numpy.float32, _Shape, _Shape[3]]) -> None: ...
     @typing.overload
@@ -70,6 +72,11 @@ class RenderBodyComponent(sapien.pysapien.Component):
     def _internal_node(self) -> sapien.pysapien.internal_renderer.Node:
         """
         :type: sapien.pysapien.internal_renderer.Node
+        """
+    @property
+    def is_render_id_disabled(self) -> bool:
+        """
+        :type: bool
         """
     @property
     def render_shapes(self) -> list[RenderShape]:
@@ -566,6 +573,7 @@ class RenderPointLightComponent(RenderLightComponent, sapien.pysapien.Component)
     pass
 class RenderShape():
     def get_local_pose(self) -> sapien.pysapien.Pose: ...
+    def get_per_scene_id(self) -> int: ...
     def set_local_pose(self, arg0: sapien.pysapien.Pose) -> None: ...
     @property
     def local_pose(self) -> sapien.pysapien.Pose:
@@ -575,6 +583,11 @@ class RenderShape():
     @local_pose.setter
     def local_pose(self, arg1: sapien.pysapien.Pose) -> None:
         pass
+    @property
+    def per_scene_id(self) -> int:
+        """
+        :type: int
+        """
     pass
 class RenderShapeBox(RenderShape):
     def __init__(self, half_size: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], material: RenderMaterial) -> None: ...

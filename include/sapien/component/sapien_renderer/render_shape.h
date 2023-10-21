@@ -44,7 +44,11 @@ public:
     throw std::runtime_error("cereal workaround. should never be called.");
   }
 
+  uint64_t getRenderId() const { return mRenderId; }
+  void internalSetRenderId(uint64_t id) { mRenderId = id; }
+
 protected:
+  uint64_t mRenderId{0};
   std::shared_ptr<SapienRenderEngine> mEngine;
   Pose mLocalPose{};
   std::shared_ptr<svulkan2::resource::SVModel> mModel;

@@ -365,7 +365,7 @@ class ControlWindow(Plugin):
 
     def find_entity_by_id(self, id):
         for entity in self.viewer.scene.entities:
-            if entity.id == id:
+            if entity.per_scene_id == id:
                 return entity
         return None
 

@@ -95,7 +95,11 @@ public:
     setCubemap(cubemap);
   }
 
+  uint64_t nextRenderId() { return mNextRenderId++; };
+
 private:
+  uint64_t mNextRenderId{1};
+
   std::shared_ptr<SapienRenderEngine> mEngine;
   std::shared_ptr<svulkan2::scene::Scene> mScene;
 

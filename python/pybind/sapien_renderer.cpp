@@ -487,7 +487,9 @@ void init_sapien_renderer(py::module &sapien) {
 
   PyRenderShape.def_property("local_pose", &RenderShape::getLocalPose, &RenderShape::setLocalPose)
       .def("get_local_pose", &RenderShape::getLocalPose)
-      .def("set_local_pose", &RenderShape::setLocalPose);
+      .def("set_local_pose", &RenderShape::setLocalPose)
+      .def_property_readonly("per_scene_id", &RenderShape::getRenderId)
+      .def("get_per_scene_id", &RenderShape::getRenderId);
 
   PyRenderShapePlane
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("scale"),
@@ -571,7 +573,12 @@ void init_sapien_renderer(py::module &sapien) {
            py::arg("textures"))
 
       .def_property("shading_mode", &SapienRenderBodyComponent::getShadingMode,
-                    &SapienRenderBodyComponent::setShadingMode);
+                    &SapienRenderBodyComponent::setShadingMode)
+
+      .def_property_readonly("is_render_id_disabled",
+                             &SapienRenderBodyComponent::getRenderIdDisabled)
+      .def("disable_render_id", &SapienRenderBodyComponent::disableRenderId)
+      .def("enable_render_id", &SapienRenderBodyComponent::enableRenderId);
 
   PyRenderCameraComponent
       .def(py::init<uint32_t, uint32_t, std::string const &>(), py::arg("width"),

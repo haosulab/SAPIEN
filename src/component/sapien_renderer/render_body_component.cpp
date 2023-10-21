@@ -7,9 +7,7 @@
 namespace sapien {
 namespace component {
 
-uint64_t SapienRenderBodyComponent::gNextVisualId = 1ul;
-
-SapienRenderBodyComponent::SapienRenderBodyComponent() : mVisualId(gNextVisualId++) {}
+SapienRenderBodyComponent::SapienRenderBodyComponent() {}
 
 std::shared_ptr<SapienRenderBodyComponent>
 SapienRenderBodyComponent::attachRenderShape(std::shared_ptr<RenderShape> shape) {
@@ -30,7 +28,11 @@ void SapienRenderBodyComponent::onAddToScene(Scene &scene) {
   for (auto &shape : mRenderShapes) {
     auto &obj = s->addObject(*mNode, shape->getModel());
     obj.setTransform(shape->getLocalTransform());
-    obj.setSegmentation({mVisualId, getEntity()->getId(), 0, 0});
+
+    uint64_t id = mRenderIdDisabled ? 0 : system->nextRenderId();
+    shape->internalSetRenderId(id);
+
+    obj.setSegmentation({id, getEntity()->getPerSceneId(), 0, 0});
     obj.setTransparency(1.f - mVisibility);
   }
 
@@ -42,6 +44,9 @@ void SapienRenderBodyComponent::onAddToScene(Scene &scene) {
 void SapienRenderBodyComponent::onRemoveFromScene(Scene &scene) {
   auto system = scene.getSapienRendererSystem();
   auto s = system->getScene();
+  for (auto &s : mRenderShapes) {
+    s->internalSetRenderId(0);
+  }
   s->removeNode(*mNode);
   mNode = nullptr;
 
@@ -156,6 +161,19 @@ void SapienRenderBodyComponent::internalUpdate() {
 }
 
 SapienRenderBodyComponent::~SapienRenderBodyComponent() {}
+
+void SapienRenderBodyComponent::disableRenderId() {
+  if (getScene()) {
+    throw std::runtime_error("failed to disable render id: component already added to scene");
+  }
+  mRenderIdDisabled = true;
+}
+void SapienRenderBodyComponent::enableRenderId() {
+  if (getScene()) {
+    throw std::runtime_error("failed to disable render id: component already added to scene");
+  }
+  mRenderIdDisabled = false;
+}
 
 } // namespace component
 } // namespace sapien

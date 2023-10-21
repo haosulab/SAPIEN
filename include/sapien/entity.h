@@ -73,6 +73,9 @@ public:
   uint64_t getId() const { return mId; }
   void internalSetId(uint64_t id) { mId = id; }
 
+  uint64_t getPerSceneId() const { return mPerSceneId; }
+  void internalSetPerSceneId(uint64_t id) { mPerSceneId = id; }
+
   template <class Archive> void save(Archive &ar) const { ar(mName, mPose, mComponents); }
   template <class Archive> void load(Archive &ar) {
     std::vector<std::shared_ptr<component::Component>> components;
@@ -84,6 +87,8 @@ public:
 
 protected:
   uint64_t mId{};
+  uint64_t mPerSceneId{0};
+
   std::string mName{};
   Scene *mScene{};
   Pose mPose;

@@ -120,8 +120,10 @@ Generator<int> init_sapien(py::module &m) {
           py::arg("data"));
 
   PyEntity.def(py::init<>())
-      .def_property_readonly("id", &Entity::getId)
-      .def("get_id", &Entity::getId)
+      .def_property_readonly("per_scene_id", &Entity::getPerSceneId)
+      .def("get_per_scene_id", &Entity::getPerSceneId)
+      .def_property_readonly("global_id", &Entity::getId)
+      .def("get_global_id", &Entity::getId)
 
       .def_property("name", &Entity::getName, &Entity::setName)
       .def("get_name", &Entity::getName)

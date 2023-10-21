@@ -43,15 +43,6 @@ class ArticulationWindow(Plugin):
 
         self.ui_window = R.UIWindow().Label("Articulation")
 
-        # art = None
-        # if self.selected_entity:
-        #     for c in self.selected_entity.components:
-        #         if isinstance(c, sapien.physx.PhysxArticulationLinkComponent):
-        #             articulation = c.articulation
-        # if not art:
-        #     self.ui_window.append(R.UIDisplayText().Text("No articulation selected."))
-        #     return
-
         if not self.articulation:
             self.ui_window.append(R.UIDisplayText().Text("No articulation selected."))
             return
@@ -63,7 +54,7 @@ class ArticulationWindow(Plugin):
                 "Name: {}".format(art.name if art.name else "(no name)")
             ),
             R.UIDisplayText().Text(
-                "Base Link Entity Id: {}".format(art.root.entity.id)
+                "Base Link Entity Id: {}".format(art.root.entity.per_scene_id)
             ),
         )
         uijoints = R.UISection().Label("Joints")

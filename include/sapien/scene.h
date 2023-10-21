@@ -55,6 +55,8 @@ public:
   Scene &operator=(Scene const &&) = delete;
 
 private:
+  uint64_t mNextEntityId{1};
+
   std::unordered_map<std::string, std::shared_ptr<component::System>> mSystems;
   std::vector<std::shared_ptr<Entity>> mEntities;
 };

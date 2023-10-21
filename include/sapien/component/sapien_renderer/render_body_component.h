@@ -2,8 +2,8 @@
 
 #include "../component.h"
 #include "render_shape.h"
-#include "sapien/math/pose.h"
 #include "sapien/math/bounding_box.h"
+#include "sapien/math/pose.h"
 #include "sapien/serialize.h"
 #include <memory>
 #include <string>
@@ -17,8 +17,6 @@ class Entity;
 namespace component {
 
 class SapienRenderBodyComponent : public Component {
-  static uint64_t gNextVisualId;
-
 public:
   SapienRenderBodyComponent();
 
@@ -60,13 +58,18 @@ public:
   }
   template <class Archive> void load(Archive &ar) { ar(mRenderShapes, mVisibility, mShadingMode); }
 
+  void disableRenderId();
+  void enableRenderId();
+  bool getRenderIdDisabled() const { return mRenderIdDisabled; }
+
 private:
-  uint64_t mVisualId;
   std::vector<std::shared_ptr<RenderShape>> mRenderShapes{};
   svulkan2::scene::Node *mNode{};
 
   float mVisibility{1.f};
   int mShadingMode{0};
+
+  bool mRenderIdDisabled{false};
 };
 
 } // namespace component

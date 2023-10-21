@@ -42,6 +42,8 @@ class EntityWindow(Plugin):
                 c.disable()
 
         new_visual = sapien.render.RenderBodyComponent()
+        new_visual.disable_render_id()  # avoid it interfere with visual id counting
+
         red_mat = sapien.render.RenderMaterial(base_color=[1, 0, 0, 1])
         green_mat = sapien.render.RenderMaterial(base_color=[0, 1, 0, 1])
         blue_mat = sapien.render.RenderMaterial(base_color=[0, 0, 1, 1])
@@ -137,7 +139,7 @@ class EntityWindow(Plugin):
         q = self.selected_entity.pose.q
         self.ui_window.append(
             R.UIDisplayText().Text("Name: {}".format(self.selected_entity.name)),
-            R.UIDisplayText().Text("Id: {}".format(self.selected_entity.id)),
+            R.UIDisplayText().Text("Id: {}".format(self.selected_entity.per_scene_id)),
             R.UIInputFloat3()
             .Label("pose.p")
             .Id("xyz")
