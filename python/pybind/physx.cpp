@@ -425,7 +425,10 @@ Generator<int> init_physx(py::module &sapien) {
   PyPhysxRigidBaseComponent
       .def("attach", &PhysxRigidBaseComponent::attachCollision, py::arg("collision_shape"))
       .def_property_readonly("collision_shapes", &PhysxRigidBaseComponent::getCollisionShapes)
-      .def("get_collision_shapes", &PhysxRigidBaseComponent::getCollisionShapes);
+      .def("get_collision_shapes", &PhysxRigidBaseComponent::getCollisionShapes)
+
+      .def("compute_global_aabb_tight", &PhysxRigidBaseComponent::computeGlobalAABBTight)
+      .def("get_global_aabb_fast", &PhysxRigidBaseComponent::getGlobalAABBFast);
 
   PyPhysxRigidStaticComponent.def(py::init<>());
 

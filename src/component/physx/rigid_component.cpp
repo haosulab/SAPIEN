@@ -24,6 +24,29 @@ PhysxRigidBaseComponent::getCollisionShapes() const {
   return mCollisionShapes;
 }
 
+AABB PhysxRigidBaseComponent::getGlobalAABBFast() const {
+  auto shapes = getCollisionShapes();
+  if (shapes.size() == 0) {
+    throw std::runtime_error("afiled to get bounding box: no collision shapes attached");
+  }
+  AABB aabb = shapes.at(0)->getGlobalAABBFast();
+  for (uint32_t i = 1; i < shapes.size(); ++i) {
+    aabb = aabb + shapes[i]->getGlobalAABBFast();
+  }
+  return aabb;
+}
+AABB PhysxRigidBaseComponent::computeGlobalAABBTight() const {
+  auto shapes = getCollisionShapes();
+  if (shapes.size() == 0) {
+    throw std::runtime_error("afiled to get bounding box: no collision shapes attached");
+  }
+  AABB aabb = shapes.at(0)->computeGlobalAABBTight();
+  for (uint32_t i = 1; i < shapes.size(); ++i) {
+    aabb = aabb + shapes[i]->computeGlobalAABBTight();
+  }
+  return aabb;
+}
+
 void PhysxRigidBaseComponent::internalRegisterJoint(std::shared_ptr<PhysxJointComponent> drive) {
   mJoints.push_back(drive);
 }

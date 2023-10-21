@@ -204,3 +204,48 @@ class Viewer:
     @resolution.setter
     def resolution(self, res):
         self.window.resize(res[0], res[1])
+
+    def add_bounding_box(self, pose, half_size, color):
+        vertices = np.array(
+            [
+                [1, -1, -1],
+                [1, 1, -1],
+                [-1, 1, -1],
+                [-1, -1, -1],
+                [1, -1, 1],
+                [1, 1, 1],
+                [-1, 1, 1],
+                [-1, -1, 1],
+            ]
+        )
+        lines = [0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7]
+        vertices = vertices[lines]
+        colors = np.ones((vertices.shape[0], 4)) * [*color[:3], 1]
+        lineset = self.renderer_context.create_line_set(vertices, colors)
+
+        render_scene: R.Scene = self.system._internal_scene
+        box = render_scene.add_line_set(lineset)
+        box.set_position(pose.p)
+        box.set_rotation(pose.q)
+        box.set_scale(half_size)
+
+        return box
+
+    def update_bounding_box(self, box, pose, half_size):
+        box.set_position(pose.p)
+        box.set_rotation(pose.q)
+        box.set_scale(half_size)
+
+    def remove_bounding_box(self, box):
+        render_scene: R.Scene = self.system._internal_scene
+        render_scene.remove_node(box)
+
+    def draw_aabb(self, lower, upper, color):
+        pose = sapien.Pose((lower + upper) / 2)
+        half_size = (upper - lower) / 2
+        return self.add_bounding_box(pose, half_size, color)
+
+    def update_aabb(self, aabb, lower, upper):
+        pose = sapien.Pose((lower + upper) / 2)
+        half_size = (upper - lower) / 2
+        self.update_bounding_box(aabb, pose, half_size)

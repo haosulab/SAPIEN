@@ -21,6 +21,29 @@ SapienRenderBodyComponent::attachRenderShape(std::shared_ptr<RenderShape> shape)
   return std::static_pointer_cast<SapienRenderBodyComponent>(shared_from_this());
 }
 
+AABB SapienRenderBodyComponent::getGlobalAABBFast() const {
+  auto shapes = getRenderShapes();
+  if (shapes.size() == 0) {
+    throw std::runtime_error("afiled to get bounding box: no collision shapes attached");
+  }
+  AABB aabb = shapes.at(0)->getGlobalAABBFast();
+  for (uint32_t i = 1; i < shapes.size(); ++i) {
+    aabb = aabb + shapes[i]->getGlobalAABBFast();
+  }
+  return aabb;
+}
+AABB SapienRenderBodyComponent::computeGlobalAABBTight() const {
+  auto shapes = getRenderShapes();
+  if (shapes.size() == 0) {
+    throw std::runtime_error("afiled to get bounding box: no collision shapes attached");
+  }
+  AABB aabb = shapes.at(0)->computeGlobalAABBTight();
+  for (uint32_t i = 1; i < shapes.size(); ++i) {
+    aabb = aabb + shapes[i]->computeGlobalAABBTight();
+  }
+  return aabb;
+}
+
 void SapienRenderBodyComponent::onAddToScene(Scene &scene) {
   auto system = scene.getSapienRendererSystem();
   auto s = system->getScene();
@@ -138,21 +161,21 @@ void SapienRenderBodyComponent::setTextureArray(
   }
 }
 
-AABB SapienRenderBodyComponent::getGlobalAABBFast() {
-  AABB aabb;
-  for (auto &s : getRenderShapes()) {
-    aabb = aabb + s->getGlobalAABBFast();
-  }
-  return aabb;
-}
+// AABB SapienRenderBodyComponent::getGlobalAABBFast() {
+//   AABB aabb;
+//   for (auto &s : getRenderShapes()) {
+//     aabb = aabb + s->getGlobalAABBFast();
+//   }
+//   return aabb;
+// }
 
-AABB SapienRenderBodyComponent::computeGlobalAABBTight() {
-  AABB aabb;
-  for (auto &s : getRenderShapes()) {
-    aabb = aabb + s->computeGlobalAABBTight();
-  }
-  return aabb;
-}
+// AABB SapienRenderBodyComponent::computeGlobalAABBTight() {
+//   AABB aabb;
+//   for (auto &s : getRenderShapes()) {
+//     aabb = aabb + s->computeGlobalAABBTight();
+//   }
+//   return aabb;
+// }
 
 void SapienRenderBodyComponent::internalUpdate() {
   auto pose = getEntity()->getPose();

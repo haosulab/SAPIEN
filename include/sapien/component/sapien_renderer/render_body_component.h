@@ -23,6 +23,9 @@ public:
   std::shared_ptr<SapienRenderBodyComponent> attachRenderShape(std::shared_ptr<RenderShape> shape);
   std::vector<std::shared_ptr<RenderShape>> getRenderShapes() const { return mRenderShapes; };
 
+  AABB getGlobalAABBFast() const;
+  AABB computeGlobalAABBTight() const;
+
   void onAddToScene(Scene &scene) override;
   void onRemoveFromScene(Scene &scene) override;
 
@@ -43,9 +46,6 @@ public:
   void setTexture(std::string const &name, std::shared_ptr<SapienRenderTexture> texture);
   void setTextureArray(std::string const &name,
                        std::vector<std::shared_ptr<SapienRenderTexture>> textures);
-
-  AABB getGlobalAABBFast();
-  AABB computeGlobalAABBTight();
 
   ~SapienRenderBodyComponent();
   SapienRenderBodyComponent(SapienRenderBodyComponent const &) = delete;

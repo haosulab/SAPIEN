@@ -25,6 +25,9 @@ public:
   std::vector<std::shared_ptr<PhysxCollisionShape>> getCollisionShapes() const;
   virtual physx::PxRigidActor *getPxActor() const = 0;
 
+  AABB getGlobalAABBFast() const;
+  AABB computeGlobalAABBTight() const;
+
   void afterStep();
 
   void internalRegisterJoint(std::shared_ptr<PhysxJointComponent> joint);

@@ -1,4 +1,5 @@
 #pragma once
+#include "sapien/math/bounding_box.h"
 #include "sapien/math/math.h"
 #include <pybind11/numpy.h>
 #include <pybind11/smart_holder.h>
@@ -46,6 +47,18 @@ template <> struct type_caster<Quat> {
 
   static py::handle cast(Quat const &src, py::return_value_policy policy, py::handle parent) {
     return py::array_t<float>(4, &src.w).release();
+  }
+};
+
+template <> struct type_caster<AABB> {
+  PYBIND11_TYPE_CASTER(AABB, _("numpy.ndarray[numpy.float32, _Shape[2, 3]]"));
+
+  bool load(py::handle src, bool convert) { return false; }
+
+  static py::handle cast(AABB const &src, py::return_value_policy policy, py::handle parent) {
+    std::vector<float> arr{src.lower.x, src.lower.y, src.lower.z,
+                           src.upper.x, src.upper.y, src.upper.z};
+    return py::array_t<float>({2, 3}, arr.data()).release();
   }
 };
 } // namespace pybind11::detail

@@ -231,21 +231,32 @@ AABB RenderShapeTriangleMesh::getLocalAABB() {
   if (mAABB.has_value()) {
     return mAABB.value();
   }
-  AABB aabb;
-  for (auto &p : getParts()) {
-    aabb = aabb + computeAABB(p.getVertices(), getScale(), Pose());
+
+  auto parts = getParts();
+  if (parts.size() == 0) {
+    throw std::runtime_error("failed to get global AABB: triangle mesh is empty");
+  }
+  AABB aabb = computeAABB(parts[0].getVertices(), getScale(), Pose());
+  for (uint32_t i = 1; i < parts.size(); ++i) {
+    aabb = aabb + computeAABB(parts[i].getVertices(), getScale(), Pose());
   }
   mAABB = aabb;
-  return mAABB.value();
+  return aabb;
 }
 
 AABB RenderShapeTriangleMesh::computeGlobalAABBTight() {
   if (!mParent) {
     throw std::runtime_error("failed to get global AABB: shape is not attached to a component");
   }
-  AABB aabb;
-  for (auto &p : getParts()) {
-    aabb = aabb + computeAABB(p.getVertices(), getScale(), mParent->getPose() * getLocalPose());
+
+  auto parts = getParts();
+  if (parts.size() == 0) {
+    throw std::runtime_error("failed to get global AABB: triangle mesh is empty");
+  }
+  AABB aabb = computeAABB(parts[0].getVertices(), getScale(), mParent->getPose() * getLocalPose());
+  for (uint32_t i = 1; i < parts.size(); ++i) {
+    aabb = aabb +
+           computeAABB(parts[i].getVertices(), getScale(), mParent->getPose() * getLocalPose());
   }
   return aabb;
 }

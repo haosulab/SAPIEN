@@ -18,8 +18,8 @@ struct AABB {
   AABB operator+(AABB const &other) {
     return {{std::min(other.lower.x, lower.x), std::min(other.lower.y, lower.y),
              std::min(other.lower.z, lower.z)},
-            {std::min(other.upper.x, upper.x), std::min(other.upper.y, upper.y),
-             std::min(other.upper.z, upper.z)}};
+            {std::max(other.upper.x, upper.x), std::max(other.upper.y, upper.y),
+             std::max(other.upper.z, upper.z)}};
   }
 };
 
@@ -46,23 +46,10 @@ inline AABB computeAABB(Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>
 inline AABB computeAABB(Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices,
                         Pose const &pose) {
   return computeAABB(vertices, Vec3(1.f), pose);
-  // auto R =
-  //     Eigen::Quaternionf(pose.q.w, pose.q.x, pose.q.y,
-  //     pose.q.z).normalized().toRotationMatrix();
-  // auto points = vertices * R.transpose();
-
-  // auto lower = points.colwise().minCoeff();
-  // auto upper = points.colwise().maxCoeff();
-  // return {.lower = Vec3(lower(0), lower(1), lower(2)) + pose.p,
-  //         .upper = Vec3(upper(0), upper(1), upper(2)) + pose.p};
 }
 
 inline AABB computeAABB(Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices) {
   return computeAABB(vertices, Vec3(1.f), Pose());
-  // auto lower = vertices.colwise().minCoeff();
-  // auto upper = vertices.colwise().maxCoeff();
-  // return {.lower = Vec3(lower(0), lower(1), lower(2)),
-  //         .upper = Vec3(upper(0), upper(1), upper(2))};
 }
 
 inline AABB getTransformedAABB(AABB const &b, Pose const &transform) {
@@ -71,11 +58,13 @@ inline AABB getTransformedAABB(AABB const &b, Pose const &transform) {
   return obb.getAABB();
 }
 
-OBB AABB::getOBB() const { return {.halfExtents = (lower + upper) * 0.5, .pose = Pose()}; }
+OBB AABB::getOBB() const {
+  return {.halfExtents = (upper - lower) * 0.5, .pose = Pose((lower + upper) * 0.5)};
+}
 
 AABB OBB::getAABB() const {
   Eigen::Matrix<float, 8, 3, Eigen::RowMajor> points;
-  points << 1, 1, 1, 1, 1, -1, 1, -1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, 1, 1, -1, -1;
+  points << 1, 1, 1, 1, 1, -1, 1, -1, 1, 1, -1, -1, -1, 1, 1, -1, 1, -1, -1, -1, 1, -1, -1, -1;
   points = points * Eigen::Vector3f(halfExtents.x, halfExtents.y, halfExtents.z).asDiagonal();
   return computeAABB(points, pose);
 }

@@ -575,6 +575,9 @@ void init_sapien_renderer(py::module &sapien) {
       .def_property("shading_mode", &SapienRenderBodyComponent::getShadingMode,
                     &SapienRenderBodyComponent::setShadingMode)
 
+      .def("compute_global_aabb_tight", &SapienRenderBodyComponent::computeGlobalAABBTight)
+      .def("get_global_aabb_fast", &SapienRenderBodyComponent::getGlobalAABBFast)
+
       .def_property_readonly("is_render_id_disabled",
                              &SapienRenderBodyComponent::getRenderIdDisabled)
       .def("disable_render_id", &SapienRenderBodyComponent::disableRenderId)
