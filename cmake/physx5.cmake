@@ -11,7 +11,7 @@ else()
   FetchContent_Declare(
     physx5
     URL https://storage1.ucsd.edu/datasets/PhysX5_compiled.zip
-    URL_HASH MD5=5dac6854be438c5db3c845e51fc60111
+    URL_HASH MD5=42447aca1effc64ac281510757f36760
   )
   FetchContent_MakeAvailable(physx5)
 endif()
