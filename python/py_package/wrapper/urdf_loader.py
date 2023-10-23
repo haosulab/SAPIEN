@@ -219,7 +219,7 @@ class URDFLoader:
                 )
             if visual.geometry.capsule:
                 link_builder.add_capsule_visual(
-                    t_visual2link,
+                    t_visual2link * Pose(q=[0.7071068, 0, 0.7071068, 0]),
                     visual.geometry.capsule.radius * self.scale,
                     visual.geometry.capsule.length * self.scale / 2.0,
                     material=color,
@@ -227,7 +227,7 @@ class URDFLoader:
                 )
             if visual.geometry.cylinder:
                 link_builder.add_cylinder_visual(
-                    t_visual2link,
+                    t_visual2link * Pose(q=[0.7071068, 0, 0.7071068, 0]),
                     visual.geometry.cylinder.radius * self.scale,
                     visual.geometry.cylinder.length * self.scale / 2.0,
                     material=color,
@@ -288,7 +288,7 @@ class URDFLoader:
                     )
             if collision.geometry.capsule:
                 link_builder.add_capsule_collision(
-                    t_collision2link,
+                    t_collision2link * Pose(q=[0.7071068, 0, 0.7071068, 0]),
                     collision.geometry.capsule.radius * self.scale,
                     collision.geometry.capsule.length * self.scale / 2.0,
                     material=material,
@@ -298,13 +298,13 @@ class URDFLoader:
                 )
                 if self.collision_is_visual:
                     link_builder.add_capsule_visual(
-                        t_collision2link,
+                        t_collision2link * Pose(q=[0.7071068, 0, 0.7071068, 0]),
                         collision.geometry.capsule.radius * self.scale,
                         collision.geometry.capsule.length * self.scale / 2.0,
                     )
             if collision.geometry.cylinder:
                 link_builder.add_cylinder_collision(
-                    t_collision2link,
+                    t_collision2link * Pose(q=[0.7071068, 0, 0.7071068, 0]),
                     collision.geometry.cylinder.radius * self.scale,
                     collision.geometry.cylinder.length * self.scale / 2.0,
                     material=material,
@@ -314,7 +314,7 @@ class URDFLoader:
                 )
                 if self.collision_is_visual:
                     link_builder.add_cylinder_visual(
-                        t_collision2link,
+                        t_collision2link * Pose(q=[0.7071068, 0, 0.7071068, 0]),
                         collision.geometry.cylinder.radius * self.scale,
                         collision.geometry.cylinder.length * self.scale / 2.0,
                     )
@@ -360,7 +360,7 @@ class URDFLoader:
                     )
 
     def _parse_articulation(self, root, fix_base):
-        builder: sapien.ArticulationBuilder = self.scene.create_articulation_builder()
+        builder = self.scene.create_articulation_builder()
         stack = [root]
 
         link2builder = dict()
