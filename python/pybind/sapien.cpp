@@ -83,13 +83,25 @@ Generator<int> init_sapien(py::module &m) {
 
       .def("inv", &Pose::getInverse)
       .def(py::self * py::self)
-      .def("__repr__", [](Pose const &pose) {
-        std::ostringstream oss;
-        oss << "Pose([" << pose.p.x << ", " << pose.p.y << ", " << pose.p.z << "], [" << pose.q.w
-            << ", " << pose.q.x << ", " << pose.q.y << ", " << pose.q.z << "])";
-        return oss.str();
-      })
-    ;
+      .def("__repr__",
+           [](Pose const &pose) {
+             std::ostringstream oss;
+             oss << "Pose([" << pose.p.x << ", " << pose.p.y << ", " << pose.p.z << "], ["
+                 << pose.q.w << ", " << pose.q.x << ", " << pose.q.y << ", " << pose.q.z << "])";
+             return oss.str();
+           })
+      .def(py::pickle(
+          [](Pose const &p) {
+            return py::make_tuple(p.p.x, p.p.y, p.p.z, p.q.w, p.q.x, p.q.y, p.q.z);
+          },
+          [](py::tuple t) {
+            if (t.size() != 7) {
+              throw std::runtime_error("Invalid state!");
+            }
+            return Pose(Vec3{t[0].cast<float>(), t[1].cast<float>(), t[2].cast<float>()},
+                        Quat{t[3].cast<float>(), t[4].cast<float>(), t[5].cast<float>(),
+                             t[6].cast<float>()});
+          }));
 
   PyScene
       .def(py::init<std::vector<std::shared_ptr<component::System>> const &>(),
