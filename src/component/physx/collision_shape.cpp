@@ -116,6 +116,21 @@ PhysxCollisionShapeCapsule::PhysxCollisionShapeCapsule(float radius, float halfL
   mPxShape->userData = this;
 }
 
+PhysxCollisionShapeCylinder::PhysxCollisionShapeCylinder(float radius, float halfLength,
+                                                         std::shared_ptr<PhysxMaterial> material) {
+  mEngine = PhysxEngine::Get();
+  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mMesh = PhysxConvexMesh::CreateCylinder();
+
+  mRadius = radius;
+  mHalfLength = halfLength;
+
+  mPxShape = mEngine->getPxPhysics()->createShape(
+      PxConvexMeshGeometry(mMesh->getPxMesh(), PxMeshScale({halfLength, radius, radius})),
+      *getPhysicalMaterial()->getPxMaterial(), true);
+  mPxShape->userData = this;
+}
+
 PhysxCollisionShapeSphere::PhysxCollisionShapeSphere(float radius,
                                                      std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
@@ -248,6 +263,9 @@ float PhysxCollisionShapeCapsule::getHalfLength() const {
   return static_cast<PxCapsuleGeometry const &>(g).halfHeight;
 }
 
+float PhysxCollisionShapeCylinder::getRadius() const { return mRadius; }
+float PhysxCollisionShapeCylinder::getHalfLength() const { return mHalfLength; }
+
 float PhysxCollisionShapeSphere::getRadius() const {
   auto &g = mPxShape->getGeometry();
   assert(g.getType() == PxGeometryType::eSPHERE);
@@ -372,6 +390,12 @@ AABB PhysxCollisionShapeCapsule::getLocalAABB() const {
   float r = getRadius();
   float h = getHalfLength();
   return {{-r - h, -r, -r}, {r + h, r, r}};
+}
+
+AABB PhysxCollisionShapeCylinder::getLocalAABB() const {
+  float r = getRadius();
+  float h = getHalfLength();
+  return {{-h, -r, -r}, {h, r, r}};
 }
 
 AABB PhysxCollisionShapeSphere::getLocalAABB() const {

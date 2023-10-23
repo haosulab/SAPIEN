@@ -271,6 +271,9 @@ Generator<int> init_physx(py::module &sapien) {
       py::class_<PhysxCollisionShapeSphere, PhysxCollisionShape>(m, "PhysxCollisionShapeSphere");
   auto PyPhysxCollisionShapeCapsule =
       py::class_<PhysxCollisionShapeCapsule, PhysxCollisionShape>(m, "PhysxCollisionShapeCapsule");
+  auto PyPhysxCollisionShapeCylinder =
+      py::class_<PhysxCollisionShapeCylinder, PhysxCollisionShape>(m,
+                                                                   "PhysxCollisionShapeCylinder");
   auto PyPhysxCollisionShapeConvexMesh =
       py::class_<PhysxCollisionShapeConvexMesh, PhysxCollisionShape>(
           m, "PhysxCollisionShapeConvexMesh");
@@ -397,6 +400,13 @@ Generator<int> init_physx(py::module &sapien) {
       .def("get_radius", &PhysxCollisionShapeCapsule::getRadius)
       .def_property_readonly("half_length", &PhysxCollisionShapeCapsule::getHalfLength)
       .def("get_half_length", &PhysxCollisionShapeCapsule::getHalfLength);
+  PyPhysxCollisionShapeCylinder
+      .def(py::init<float, float, std::shared_ptr<PhysxMaterial>>(), py::arg("radius"),
+           py::arg("half_length"), py::arg("material"))
+      .def_property_readonly("radius", &PhysxCollisionShapeCylinder::getRadius)
+      .def("get_radius", &PhysxCollisionShapeCylinder::getRadius)
+      .def_property_readonly("half_length", &PhysxCollisionShapeCylinder::getHalfLength)
+      .def("get_half_length", &PhysxCollisionShapeCylinder::getHalfLength);
 
   // TODO: support load from vertices
   PyPhysxCollisionShapeConvexMesh

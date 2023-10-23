@@ -285,6 +285,8 @@ void init_sapien_renderer(py::module &sapien) {
   auto PyRenderShapeBox = py::class_<RenderShapeBox, RenderShape>(m, "RenderShapeBox");
   auto PyRenderShapeSphere = py::class_<RenderShapeSphere, RenderShape>(m, "RenderShapeSphere");
   auto PyRenderShapeCapsule = py::class_<RenderShapeCapsule, RenderShape>(m, "RenderShapeCapsule");
+  auto PyRenderShapeCylinder =
+      py::class_<RenderShapeCylinder, RenderShape>(m, "RenderShapeCylinder");
   auto PyRenderShapeTriangleMesh =
       py::class_<RenderShapeTriangleMesh, RenderShape>(m, "RenderShapeTriangleMesh");
 
@@ -516,6 +518,14 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_half_length", &RenderShapeCapsule::getHalfLength)
       .def_property_readonly("radius", &RenderShapeCapsule::getRadius)
       .def("get_radius", &RenderShapeCapsule::getRadius);
+
+  PyRenderShapeCylinder
+      .def(py::init<float, float, std::shared_ptr<SapienRenderMaterial>>(), py::arg("radius"),
+           py::arg("half_length"), py::arg("material"))
+      .def_property_readonly("half_length", &RenderShapeCylinder::getHalfLength)
+      .def("get_half_length", &RenderShapeCylinder::getHalfLength)
+      .def_property_readonly("radius", &RenderShapeCylinder::getRadius)
+      .def("get_radius", &RenderShapeCylinder::getRadius);
 
   PyRenderShapeTriangleMeshPart
       .def_property_readonly("material", &RenderShapeTriangleMeshPart::getMaterial)

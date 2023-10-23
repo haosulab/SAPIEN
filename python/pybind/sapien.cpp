@@ -88,7 +88,8 @@ Generator<int> init_sapien(py::module &m) {
         oss << "Pose([" << pose.p.x << ", " << pose.p.y << ", " << pose.p.z << "], [" << pose.q.w
             << ", " << pose.q.x << ", " << pose.q.y << ", " << pose.q.z << "])";
         return oss.str();
-      });
+      })
+    ;
 
   PyScene
       .def(py::init<std::vector<std::shared_ptr<component::System>> const &>(),

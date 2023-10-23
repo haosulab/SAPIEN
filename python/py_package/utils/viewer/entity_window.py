@@ -78,6 +78,9 @@ class EntityWindow(Plugin):
                     elif isinstance(s, sapien.physx.PhysxCollisionShapePlane):
                         vs = sapien.render.RenderShapePlane([1, 1e4, 1e4], blue_mat)
 
+                    elif isinstance(s, sapien.physx.PhysxCollisionShapeCylinder):
+                        vs = sapien.render.RenderShapeCylinder(s.radius, s.half_length, green_mat)
+
                     else:
                         raise Exception(
                             "invalid collision shape, this code should be unreachable."
@@ -207,6 +210,22 @@ class EntityWindow(Plugin):
                                 .Value(s.half_length),
                             )
                         )
+                    if s.__class__.__name__ == "RenderShapeCylinder":
+                        shape_info = (
+                            R.UITreeNode()
+                            .Label("Cylinder")
+                            .Id("visual{}".format(idx))
+                            .append(
+                                R.UIInputFloat()
+                                .Label("Radius")
+                                .ReadOnly(True)
+                                .Value(s.radius),
+                                R.UIInputFloat()
+                                .Label("Half Length")
+                                .ReadOnly(True)
+                                .Value(s.half_length),
+                            )
+                        )
                     if s.__class__.__name__ == "RenderShapeTriangleMesh":
                         shape_info = (
                             R.UITreeNode()
@@ -298,6 +317,23 @@ class EntityWindow(Plugin):
                         shape_info = (
                             R.UITreeNode()
                             .Label("Capsule")
+                            .Id("collision{}".format(idx))
+                            .append(
+                                R.UIInputFloat()
+                                .Label("Radius")
+                                .ReadOnly(True)
+                                .Value(s.radius),
+                                R.UIInputFloat()
+                                .Label("Half Length")
+                                .ReadOnly(True)
+                                .Value(s.half_length),
+                                R.UIDisplayText().Text(f"Density: {s.density}"),
+                            )
+                        )
+                    if s.__class__.__name__ == "PhysxCollisionShapeCylinder":
+                        shape_info = (
+                            R.UITreeNode()
+                            .Label("Cylinder")
                             .Id("collision{}".format(idx))
                             .append(
                                 R.UIInputFloat()

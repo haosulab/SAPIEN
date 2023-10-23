@@ -5,8 +5,10 @@ import os
 import warnings
 
 
-class Comp(sapien.Component):
-    pass
+# sapien.render.set_camera_shader_dir("rt")
+# sapien.render.set_viewer_shader_dir("rt")
+# sapien.render.set_ray_tracing_samples_per_pixel(2)
+# sapien.render.set_ray_tracing_denoiser("oidn")
 
 
 def main():
@@ -15,7 +17,7 @@ def main():
     config.solver_iterations = 20
     scene = engine.create_scene(config)
 
-    reinstall = True
+    reinstall = False
 
     scene.load_widget_from_package(
         "https://storage1.ucsd.edu/datasets/ManiSkill3-fxiang/default_arena.zip",
@@ -30,14 +32,14 @@ def main():
         reinstall=reinstall,
     )
 
-    scene.create_actor_builder().add_visual_from_file(
-        "/home/fx/Downloads/Spray_Bottle_5.glb"
-    ).add_multiple_convex_collisions_from_file(
-        "/home/fx/Downloads/Spray_Bottle_5.glb"
-    ).build()
-
-    # e: sapien.Entity = xarm.robot.links[1].entity
-    # comp = e.find_component_by_type(sapien.physx.PhysxArticulationLinkComponent)
+    bottle = (
+        scene.create_actor_builder()
+        .add_visual_from_file("/home/fx/Downloads/Spray_Bottle_5.glb")
+        .add_multiple_convex_collisions_from_file(
+            "/home/fx/Downloads/Spray_Bottle_5.glb", decomposition="coacd"
+        )
+        .build()
+    )
 
     viewer = Viewer()
     viewer.set_scene(scene)
@@ -49,6 +51,20 @@ def main():
     box = b.build_kinematic(name="red cube")
     box.set_pose(sapien.Pose([0.4, 0, 0.015]))
 
+    # aabb = bottle.find_component_by_type(
+    #     sapien.physx.PhysxRigidBaseComponent
+    # ).get_global_aabb_fast()
+
+    aabb = bottle.find_component_by_type(
+        sapien.render.RenderBodyComponent
+    ).compute_global_aabb_tight()
+
+    # aabb = bottle.find_component_by_type(
+    #     sapien.physx.PhysxRigidBaseComponent
+    # ).compute_global_aabb_tight()
+
+    aabb_handle = viewer.draw_aabb(aabb[0], aabb[1], [1, 0, 1])
+
     scene.step()
 
     count = 0
@@ -59,6 +75,22 @@ def main():
         scene.update_render()
         viewer.render()
         xarm.set_gripper_target((np.sin(count / 100) + 1) * 0.4)
+
+        aabb = bottle.find_component_by_type(
+            sapien.render.RenderBodyComponent
+        ).compute_global_aabb_tight()
+
+        # aabb = bottle.find_component_by_type(
+        #     sapien.physx.PhysxRigidBaseComponent
+        # ).get_global_aabb_fast()
+
+        # aabb = bottle.find_component_by_type(
+        #     sapien.physx.PhysxRigidBaseComponent
+        # ).compute_global_aabb_tight()
+
+        viewer.update_aabb(aabb_handle, aabb[0], aabb[1])
+        print(aabb)
+
 
 
 main()

@@ -55,6 +55,18 @@ RenderShapeCapsule::RenderShapeCapsule(float radius, float halfLength,
 float RenderShapeCapsule::getRadius() const { return mRadius; }
 float RenderShapeCapsule::getHalfLength() const { return mHalfLength; }
 
+RenderShapeCylinder::RenderShapeCylinder(float radius, float halfLength,
+                                         std::shared_ptr<SapienRenderMaterial> material)
+    : mRadius(radius), mHalfLength(halfLength) {
+  auto mesh = svulkan2::resource::SVMesh::CreateCylinder(32);
+  auto shape = svulkan2::resource::SVShape::Create(mesh, material->getMaterial());
+  mMaterial = material;
+  mScale = {halfLength, radius, radius};
+  mModel = svulkan2::resource::SVModel::FromData({shape});
+}
+float RenderShapeCylinder::getRadius() const { return mRadius; }
+float RenderShapeCylinder::getHalfLength() const { return mHalfLength; }
+
 RenderShapeSphere::RenderShapeSphere(float radius,
                                      std::shared_ptr<SapienRenderMaterial> material) {
   auto mesh = mEngine->getSphereMesh();
@@ -226,6 +238,11 @@ AABB RenderShapeCapsule::getLocalAABB() {
   float r = getRadius();
   float h = getHalfLength();
   return {{-r - h, -r, -r}, {r + h, r, r}};
+}
+AABB RenderShapeCylinder::getLocalAABB() {
+  float r = getRadius();
+  float h = getHalfLength();
+  return {{-h, -r, -r}, {h, r, r}};
 }
 AABB RenderShapeTriangleMesh::getLocalAABB() {
   if (mAABB.has_value()) {

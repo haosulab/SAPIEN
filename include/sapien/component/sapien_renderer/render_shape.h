@@ -128,6 +128,33 @@ private:
   std::shared_ptr<SapienRenderMaterial> mMaterial;
 };
 
+class RenderShapeCylinder : public RenderShape {
+public:
+  RenderShapeCylinder(float radius, float halfLength,
+                      std::shared_ptr<SapienRenderMaterial> material);
+  float getRadius() const;
+  float getHalfLength() const;
+  AABB getLocalAABB() override;
+
+  template <class Archive> void save(Archive &ar) const {
+    ar(getRadius(), getHalfLength(), mLocalPose, mMaterial);
+  }
+  template <class Archive>
+  static void load_and_construct(Archive &ar, cereal::construct<RenderShapeCylinder> &construct) {
+    float radius, halfLength;
+    std::shared_ptr<SapienRenderMaterial> material;
+    Pose pose;
+    ar(radius, halfLength, pose, material);
+    construct(radius, halfLength, material);
+    construct->setLocalPose(pose);
+  }
+
+private:
+  float mRadius{};
+  float mHalfLength{};
+  std::shared_ptr<SapienRenderMaterial> mMaterial;
+};
+
 class RenderShapeSphere : public RenderShape {
 public:
   RenderShapeSphere(float radius, std::shared_ptr<SapienRenderMaterial> material);
@@ -220,6 +247,7 @@ CEREAL_REGISTER_TYPE(sapien::component::RenderShapePlane);
 CEREAL_REGISTER_TYPE(sapien::component::RenderShapeBox);
 CEREAL_REGISTER_TYPE(sapien::component::RenderShapeSphere);
 CEREAL_REGISTER_TYPE(sapien::component::RenderShapeCapsule);
+CEREAL_REGISTER_TYPE(sapien::component::RenderShapeCylinder);
 CEREAL_REGISTER_TYPE(sapien::component::RenderShapeTriangleMesh);
 
 CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::RenderShape,
@@ -230,5 +258,7 @@ CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::RenderShape,
                                      sapien::component::RenderShapeSphere);
 CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::RenderShape,
                                      sapien::component::RenderShapeCapsule);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::RenderShape,
+                                     sapien::component::RenderShapeCylinder);
 CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::RenderShape,
                                      sapien::component::RenderShapeTriangleMesh);

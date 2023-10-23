@@ -24,6 +24,8 @@ public:
   static std::vector<std::shared_ptr<PhysxConvexMesh>>
   LoadByConnectedParts(std::string const &filename);
 
+  static std::shared_ptr<PhysxConvexMesh> CreateCylinder();
+
   physx::PxConvexMesh *getPxMesh() const { return mMesh; }
   bool hasFilename() { return mFilename.has_value(); }
   std::string getFilename() {

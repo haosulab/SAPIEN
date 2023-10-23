@@ -15,6 +15,7 @@ __all__ = [
     "PhysxCollisionShapeBox",
     "PhysxCollisionShapeCapsule",
     "PhysxCollisionShapeConvexMesh",
+    "PhysxCollisionShapeCylinder",
     "PhysxCollisionShapePlane",
     "PhysxCollisionShapeSphere",
     "PhysxCollisionShapeTriangleMesh",
@@ -450,6 +451,21 @@ class PhysxCollisionShapeConvexMesh(PhysxCollisionShape):
     def vertices(self) -> numpy.ndarray[numpy.float32, _Shape[m, 3]]:
         """
         :type: numpy.ndarray[numpy.float32, _Shape[m, 3]]
+        """
+    pass
+class PhysxCollisionShapeCylinder(PhysxCollisionShape):
+    def __init__(self, radius: float, half_length: float, material: PhysxMaterial) -> None: ...
+    def get_half_length(self) -> float: ...
+    def get_radius(self) -> float: ...
+    @property
+    def half_length(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def radius(self) -> float:
+        """
+        :type: float
         """
     pass
 class PhysxCollisionShapePlane(PhysxCollisionShape):

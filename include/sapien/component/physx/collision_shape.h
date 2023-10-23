@@ -185,6 +185,34 @@ public:
   }
 };
 
+class PhysxCollisionShapeCylinder : public PhysxCollisionShape {
+public:
+  PhysxCollisionShapeCylinder(float radius, float halfLength,
+                              std::shared_ptr<PhysxMaterial> material = nullptr);
+  float getRadius() const;
+  float getHalfLength() const;
+  AABB getLocalAABB() const override;
+
+  template <class Archive> void save(Archive &ar) const {
+    ar(mPhysicalMaterial, getRadius(), getHalfLength());
+    PhysxCollisionShape::saveBase(ar);
+  }
+  template <class Archive>
+  static void load_and_construct(Archive &ar,
+                                 cereal::construct<PhysxCollisionShapeCylinder> &construct) {
+    float r, l;
+    std::shared_ptr<PhysxMaterial> m;
+    ar(m, r, l);
+    construct(r, l, m);
+    construct->PhysxCollisionShape::loadBase(ar);
+  }
+
+private:
+  std::shared_ptr<PhysxConvexMesh> mMesh;
+  float mRadius;
+  float mHalfLength;
+};
+
 class PhysxCollisionShapeSphere : public PhysxCollisionShape {
 public:
   PhysxCollisionShapeSphere(float radius, std::shared_ptr<PhysxMaterial> material = nullptr);
@@ -303,6 +331,7 @@ CEREAL_REGISTER_TYPE(sapien::component::PhysxCollisionShapePlane);
 CEREAL_REGISTER_TYPE(sapien::component::PhysxCollisionShapeBox);
 CEREAL_REGISTER_TYPE(sapien::component::PhysxCollisionShapeSphere);
 CEREAL_REGISTER_TYPE(sapien::component::PhysxCollisionShapeCapsule);
+CEREAL_REGISTER_TYPE(sapien::component::PhysxCollisionShapeCylinder);
 CEREAL_REGISTER_TYPE(sapien::component::PhysxCollisionShapeConvexMesh);
 CEREAL_REGISTER_TYPE(sapien::component::PhysxCollisionShapeTriangleMesh);
 
@@ -314,6 +343,8 @@ CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::PhysxCollisionShape,
                                      sapien::component::PhysxCollisionShapeSphere);
 CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::PhysxCollisionShape,
                                      sapien::component::PhysxCollisionShapeCapsule);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::PhysxCollisionShape,
+                                     sapien::component::PhysxCollisionShapeCylinder);
 CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::PhysxCollisionShape,
                                      sapien::component::PhysxCollisionShapeConvexMesh);
 CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::PhysxCollisionShape,

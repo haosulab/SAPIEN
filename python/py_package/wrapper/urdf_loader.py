@@ -225,7 +225,14 @@ class URDFLoader:
                     material=color,
                     name=name,
                 )
-            # TODO: handle cylinder
+            if visual.geometry.cylinder:
+                link_builder.add_cylinder_visual(
+                    t_visual2link,
+                    visual.geometry.cylinder.radius * self.scale,
+                    visual.geometry.cylinder.length * self.scale / 2.0,
+                    material=color,
+                    name=name,
+                )
             if visual.geometry.mesh:
                 if visual.geometry.mesh.scale is not None:
                     scale = visual.geometry.mesh.scale
@@ -295,8 +302,23 @@ class URDFLoader:
                         collision.geometry.capsule.radius * self.scale,
                         collision.geometry.capsule.length * self.scale / 2.0,
                     )
+            if collision.geometry.cylinder:
+                link_builder.add_cylinder_collision(
+                    t_collision2link,
+                    collision.geometry.cylinder.radius * self.scale,
+                    collision.geometry.cylinder.length * self.scale / 2.0,
+                    material=material,
+                    density=density,
+                    patch_radius=patch_radius,
+                    min_patch_radius=min_patch_radius,
+                )
+                if self.collision_is_visual:
+                    link_builder.add_cylinder_visual(
+                        t_collision2link,
+                        collision.geometry.cylinder.radius * self.scale,
+                        collision.geometry.cylinder.length * self.scale / 2.0,
+                    )
 
-            # TODO: handle cylinder
             if collision.geometry.mesh:
                 if collision.geometry.mesh.scale is not None:
                     scale = collision.geometry.mesh.scale

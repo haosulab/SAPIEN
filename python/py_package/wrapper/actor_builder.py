@@ -160,7 +160,7 @@ class VisualMaterialRecord:
 
 @dataclass
 class CollisionShapeRecord:
-    type: str  # one of "convex_mesh", "multiple_convex_meshes", "nonconvex_mesh", "box", "capsule", "sphere"
+    type: str  # one of "convex_mesh", "multiple_convex_meshes", "nonconvex_mesh", "box", "capsule", "sphere", "cylinder"
 
     # for mesh type
     filename: str = ""
@@ -193,7 +193,7 @@ class MeshRecord:
 
 @dataclass
 class VisualShapeRecord:
-    type: str  # one of "file", "box", "capsule", "sphere", "mesh"
+    type: str  # one of "file", "box", "capsule", "sphere", "mesh", "cylinder"
 
     filename: str = ""
     scale: tuple = (1, 1, 1)
@@ -285,6 +285,10 @@ class ActorBuilder:
                 shape = sapien.render.RenderShapeCapsule(
                     r.radius, r.length, record2mat[id(r.material)]
                 )
+            elif r.type == "cylinder":
+                shape = sapien.render.RenderShapeCylinder(
+                    r.radius, r.length, record2mat[id(r.material)]
+                )
             elif r.type == "file":
                 shape = sapien.render.RenderShapeTriangleMesh(
                     r.filename,
@@ -338,6 +342,13 @@ class ActorBuilder:
                 shapes = [shape]
             elif r.type == "capsule":
                 shape = sapien.physx.PhysxCollisionShapeCapsule(
+                    radius=r.radius,
+                    half_length=r.length,
+                    material=record2mat[id(r.material)],
+                )
+                shapes = [shape]
+            elif r.type == "cylinder":
+                shape = sapien.physx.PhysxCollisionShapeCylinder(
                     radius=r.radius,
                     half_length=r.length,
                     material=record2mat[id(r.material)],
@@ -486,6 +497,32 @@ class ActorBuilder:
         self.collision_records.append(
             CollisionShapeRecord(
                 type="capsule",
+                pose=pose,
+                radius=radius,
+                length=half_length,
+                material=material,
+                density=density,
+                patch_radius=patch_radius,
+                min_patch_radius=min_patch_radius,
+                is_trigger=is_trigger,
+            )
+        )
+        return self
+
+    def add_cylinder_collision(
+        self,
+        pose: sapien.Pose = sapien.Pose(),
+        radius: float = 1,
+        half_length: float = 1,
+        material: PhysicalMaterialRecord = None,
+        density: float = 1000,
+        patch_radius: float = 0,
+        min_patch_radius: float = 0,
+        is_trigger: bool = False,
+    ):
+        self.collision_records.append(
+            CollisionShapeRecord(
+                type="cylinder",
                 pose=pose,
                 radius=radius,
                 length=half_length,
@@ -663,6 +700,33 @@ class ActorBuilder:
         self.visual_records.append(
             VisualShapeRecord(
                 type="capsule",
+                pose=pose,
+                radius=radius,
+                length=half_length,
+                material=material,
+                name=name,
+            )
+        )
+        return self
+
+    def add_cylinder_visual(
+        self,
+        pose: sapien.Pose = sapien.Pose(),
+        radius: float = 1,
+        half_length: float = 1,
+        material: VisualMaterialRecord = None,
+        name: str = "",
+    ):
+        if material is None:
+            material = VisualMaterialRecord()
+        if not isinstance(
+            material, (VisualMaterialRecord, sapien.render.RenderMaterial)
+        ):
+            material = VisualMaterialRecord(base_color=(*material[:3], 1))
+
+        self.visual_records.append(
+            VisualShapeRecord(
+                type="cylinder",
                 pose=pose,
                 radius=radius,
                 length=half_length,

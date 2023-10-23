@@ -21,6 +21,7 @@ __all__ = [
     "RenderShape",
     "RenderShapeBox",
     "RenderShapeCapsule",
+    "RenderShapeCylinder",
     "RenderShapePlane",
     "RenderShapeSphere",
     "RenderShapeTriangleMesh",
@@ -601,6 +602,21 @@ class RenderShapeBox(RenderShape):
         """
     pass
 class RenderShapeCapsule(RenderShape):
+    def __init__(self, radius: float, half_length: float, material: RenderMaterial) -> None: ...
+    def get_half_length(self) -> float: ...
+    def get_radius(self) -> float: ...
+    @property
+    def half_length(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def radius(self) -> float:
+        """
+        :type: float
+        """
+    pass
+class RenderShapeCylinder(RenderShape):
     def __init__(self, radius: float, half_length: float, material: RenderMaterial) -> None: ...
     def get_half_length(self) -> float: ...
     def get_radius(self) -> float: ...

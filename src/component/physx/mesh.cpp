@@ -324,5 +324,23 @@ Triangles PhysxTriangleMesh::getTriangles() const {
   return Eigen::Map<Triangles>(indices.data(), indices.size() / 3, 3);
 }
 
+static std::weak_ptr<PhysxConvexMesh> gCylinder;
+std::shared_ptr<PhysxConvexMesh> PhysxConvexMesh::CreateCylinder() {
+  auto c = gCylinder.lock();
+  if (c) {
+    return c;
+  }
+  constexpr int segments = 32;
+  Vertices vertices;
+  vertices.resize(segments * 2, 3);
+  float step = M_PIf * 2.f / segments;
+  for (int i = 0; i < segments; ++i) {
+    vertices.row(2 * i) << 1.f, std::cos(step * i), std::sin(step * i);
+    vertices.row(2 * i + 1) << -1.f, std::cos(step * i), std::sin(step * i);
+  }
+  gCylinder = c = std::make_shared<PhysxConvexMesh>(vertices);
+  return c;
+}
+
 } // namespace component
 } // namespace sapien
