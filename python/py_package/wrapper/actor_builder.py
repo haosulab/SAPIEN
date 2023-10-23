@@ -5,6 +5,7 @@ import typing
 import os
 from multiprocessing import Process
 import hashlib
+from typing import List
 
 
 def get_file_md5(filename):
@@ -186,8 +187,8 @@ class CollisionShapeRecord:
 
 @dataclass
 class MeshRecord:
-    vertices: list[list[float]]
-    indices: list[list[int]]
+    vertices: List[List[float]]
+    indices: List[List[int]]
 
 
 @dataclass

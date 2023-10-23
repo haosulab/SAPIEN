@@ -2,12 +2,13 @@ from .actor_builder import ActorBuilder, PhysicalMaterialRecord
 from .. import pysapien as sapien
 import numpy as np
 from dataclasses import dataclass
+from typing import List, Tuple
 
 
 @dataclass
 class JointRecord:
     joint_type: str = "undefined"  # "fixed", "prismatic", "revolute"
-    limits: tuple[float] = (-np.inf, np.inf)
+    limits: Tuple[float] = (-np.inf, np.inf)
     pose_in_parent: sapien.Pose = sapien.Pose()
     pose_in_child: sapien.Pose = sapien.Pose()
     friction: float = 0
@@ -58,7 +59,7 @@ class ArticulationBuilder:
 
     def set_scene(self, scene: sapien.Scene):
         self.scene = scene
-        self.link_builders: list[LinkBuilder] = []
+        self.link_builders: List[LinkBuilder] = []
         return self
 
     def create_link_builder(self, parent: LinkBuilder = None):
@@ -119,7 +120,9 @@ class ArticulationBuilder:
         links = self.build_entities()
 
         if fix_root_link is not None:
-            links[0].components[0].joint.type = "fixed" if fix_root_link else "undefined"
+            links[0].components[0].joint.type = (
+                "fixed" if fix_root_link else "undefined"
+            )
 
         for l in links:
             self.scene.add_entity(l)
