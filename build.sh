@@ -14,6 +14,7 @@ while [[ "$#" -gt 0 ]]; do
         39) VERSION="39";;
         310) VERSION="310";;
         311) VERSION="311";;
+        312) VERSION="312";;
     esac
     shift
 done
@@ -80,6 +81,7 @@ then
    build_pybind 39
    build_pybind 310
    build_pybind 311
+   build_pybind 312
 else
    build_pybind $VERSION
 fi
