@@ -32,7 +32,7 @@ class Scene(_Scene):
     def set_timestep(self, timestep):
         self.timestep = timestep
 
-    def get_timestep(self, timestep):
+    def get_timestep(self):
         return self.timestep
 
     def create_actor_builder(self):
