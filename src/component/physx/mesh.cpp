@@ -333,7 +333,7 @@ std::shared_ptr<PhysxConvexMesh> PhysxConvexMesh::CreateCylinder() {
   constexpr int segments = 32;
   Vertices vertices;
   vertices.resize(segments * 2, 3);
-  float step = M_PIf * 2.f / segments;
+  float step = std::numbers::pi_v<float> * 2.f / segments;
   for (int i = 0; i < segments; ++i) {
     vertices.row(2 * i) << 1.f, std::cos(step * i), std::sin(step * i);
     vertices.row(2 * i + 1) << -1.f, std::cos(step * i), std::sin(step * i);
