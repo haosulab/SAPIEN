@@ -19,18 +19,10 @@ def main():
 
     reinstall = False
 
-    scene.load_widget_from_package(
-        "https://storage1.ucsd.edu/datasets/ManiSkill3-fxiang/default_arena.zip",
-        "DefaultArena",
-        reinstall=reinstall,
-    )
+    scene.load_widget_from_package("demo_arena", "DemoArena")
     scene.set_timestep(1 / 200)
 
-    xarm = scene.load_widget_from_package(
-        "https://storage1.ucsd.edu/datasets/ManiSkill3-fxiang/xarm7.zip",
-        "XArm7",
-        reinstall=reinstall,
-    )
+    xarm = scene.load_widget_from_package("xarm7", "XArm7")
 
     bottle = (
         scene.create_actor_builder()
@@ -90,7 +82,6 @@ def main():
 
         viewer.update_aabb(aabb_handle, aabb[0], aabb[1])
         print(aabb)
-
 
 
 main()

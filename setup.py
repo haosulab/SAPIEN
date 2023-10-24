@@ -365,5 +365,5 @@ setup(
     project_urls={"Documentation": "https://sapien.ucsd.edu/docs"},
     package_data=package_data,
     package_dir={"sapien": project_python_home_dir},
-    scripts=[],
+    scripts=["python/py_package/scripts/sapien"],
 )

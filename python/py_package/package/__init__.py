@@ -1,123 +1,34 @@
 import importlib
-import io
-import os
-import sys
-import tempfile
-import zipfile
-from pathlib import Path
-import shutil
-
-import requests
-
-loaded_packages = dict()
-
-# TODO: implement global package
-# TODO: implement versioning
-# global_package_dir = Path.home() / ".sapien" / "sapien_packages_global"
-local_package_dir = (Path(".") / "sapien_packages_local" / "sapien_packages").absolute()
-
-# sys.path.insert(0, str(local_package_dir.parent.absolute()))
-# sys.path.insert(0, global_package_dir.parent)
+import warnings
 
 
-def check_loaded(name: str, version: str):
-    if name in loaded_packages:
-        lv = loaded_packages[name].__version__
-        if version is None or lv == version:
-            return loaded_packages[name]
-        raise Exception(
-            f"pacakge {name} version mismatch. {lv} loaded but {version} requested"
-        )
-    return None
+def load_package(name: str):
+    if name.startswith("sapien_"):
+        name = name[7:]
 
-
-def check_local(name: str, version: str):
-    if not local_package_dir.exists():
-        return None
-    if local_package_dir not in sys.path:
-        sys.path.insert(0, str(local_package_dir.parent.absolute()))
+    # try to import the package if exists
+    import importlib
 
     try:
-        m = importlib.import_module(f"sapien_packages.{name}")
+        return importlib.import_module("sapien_" + name)
     except ModuleNotFoundError:
-        return None
+        pass
 
-    if version is not None and m.__version__ != version:
-        return None
-    return m
+    warnings.warn(
+        f"Installing sapien package at runtime can be unsafe and should be avoided. Please use `sapien install {name}` instead."
+    )
 
+    import subprocess
+    import sys
 
-# def check_global(name: str, version: str):
-#     try:
-#         m = importlib.import_module(f"sapien_packages_global.{name}")
-#     except ModuleNotFoundError:
-#         return None
+    args = [
+        sys.executable,
+        "-m",
+        "pip",
+        "install",
+        "--user",
+        f"git+https://github.com/sapien-sim/{name}",
+    ]
+    subprocess.run(args)
 
-#     if m.__version__ != version:
-#         return None
-#     return m
-
-
-def download_to_local(path: str, name: str):
-    print(f"Downloading package from {path}")
-    if path.startswith("https://") or path.startswith("http://"):
-        r = requests.get(path, stream=True)
-        if not r.ok:
-            raise Exception(f"failed to load package from url {path}")
-
-        z = zipfile.ZipFile(io.BytesIO(r.content))
-    else:
-        z = zipfile.ZipFile(path)
-
-    local_package_dir.mkdir(exist_ok=True, parents=True)
-
-    # NOTE: somehow if local_package_dir does not exist yet, sys.path.insert does not work
-    if local_package_dir not in sys.path:
-        sys.path.insert(0, str(local_package_dir.parent.absolute()))
-
-    with tempfile.TemporaryDirectory() as temp:
-        z.extractall(temp)
-        files = os.listdir(temp)
-        if len(files) != 1:
-            raise Exception(f"invalid package {path}")
-        if not os.path.isdir(os.path.join(temp, files[0])) or files[0] != name:
-            raise Exception(f"invalid package {path}")
-
-        shutil.rmtree(str(local_package_dir / name), ignore_errors=True)
-        shutil.copytree(os.path.join(temp, files[0]), str(local_package_dir / name))
-
-    return check_local(name, None)
-
-
-def load_package(path: str, version: str = None, reinstall=False):
-    is_url = path.startswith("https://") or path.startswith("http://")
-    if is_url:
-        name = path.split("/")[-1]
-    else:
-        name = os.path.split(path)[-1]
-        assert name.lower().endswith(".zip")
-
-    if name.lower().endswith(".zip"):
-        name = name[:-4]
-
-    if not reinstall:
-        loaded = check_loaded(name, version)
-        if loaded is not None:
-            return loaded
-
-        loaded = check_local(name, version)
-        if loaded is not None:
-            loaded_packages[name] = loaded
-            return loaded
-
-    # loaded = check_global(name, version)
-    # if loaded is not None:
-    #     loaded_packages[name] = loaded
-    #     return loaded
-
-    loaded = download_to_local(path, name)
-    if loaded is not None:
-        loaded_packages[name] = loaded
-        return loaded
-
-    raise Exception(f"failed to load package {name} from {path}")
+    return importlib.import_module("sapien_" + name)
