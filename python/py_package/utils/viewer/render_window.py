@@ -20,11 +20,17 @@ class RenderOptionsWindow(Plugin):
     def window(self):
         return self.viewer.window
 
+    @property
+    def shader_name_list(self):
+        return [d.name for d in self.shader_list]
+
     def set_shader(self, index):
         self.shader_dir = str(self.shader_list[index])
         self.shader_type = str(self.shader_types[index])
         self.window.set_shader_dir(self.shader_dir)
         self.viewer.render_target = "Color"
+        self.shader_index = index
+        print(self.shader_index)
 
     def reset(self):
         self.ui_window = None
@@ -151,6 +157,8 @@ class RenderOptionsWindow(Plugin):
             self.shader_list = [default_shader_dir] + self.shader_list
             self.shader_types = [default_type] + self.shader_types
 
+        self.shader_index = self.shader_list.index(default_shader_dir)
+
     def build(self):
         if self.viewer.system is None:
             self.ui_window = None
@@ -163,7 +171,8 @@ class RenderOptionsWindow(Plugin):
                 R.UIOptions()
                 .Label("Shader")
                 .Style("select")
-                .Items([d.name for i, d in enumerate(self.shader_list)])
+                .BindItems(self, "shader_name_list")
+                .BindIndex(self, "shader_index")
                 .Callback(lambda p: self.set_shader(p.index)),
                 R.UIConditional()
                 .Bind(self, "is_rt")

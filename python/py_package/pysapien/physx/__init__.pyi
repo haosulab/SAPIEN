@@ -100,6 +100,9 @@ class PhysxArticulation():
         """
         :type: sapien.pysapien.Pose
         """
+    @pose.setter
+    def pose(self, arg1: sapien.pysapien.Pose) -> None:
+        pass
     @property
     def qacc(self) -> numpy.ndarray[numpy.float32, _Shape[m, 1]]:
         """

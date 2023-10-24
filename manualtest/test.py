@@ -24,14 +24,18 @@ def main():
 
     xarm = scene.load_widget_from_package("xarm7", "XArm7")
 
-    bottle = (
-        scene.create_actor_builder()
-        .add_visual_from_file("/home/fx/Downloads/Spray_Bottle_5.glb")
-        .add_multiple_convex_collisions_from_file(
-            "/home/fx/Downloads/Spray_Bottle_5.glb", decomposition="coacd"
-        )
-        .build()
-    )
+    franka = scene.load_widget_from_package("franka", "Franka")
+
+    franka.robot.pose = sapien.Pose([0, 1, 0])
+
+    # bottle = (
+    #     scene.create_actor_builder()
+    #     .add_visual_from_file("/home/fx/Downloads/Spray_Bottle_5.glb")
+    #     .add_multiple_convex_collisions_from_file(
+    #         "/home/fx/Downloads/Spray_Bottle_5.glb", decomposition="coacd"
+    #     )
+    #     .build()
+    # )
 
     viewer = Viewer()
     viewer.set_scene(scene)
@@ -47,15 +51,15 @@ def main():
     #     sapien.physx.PhysxRigidBaseComponent
     # ).get_global_aabb_fast()
 
-    aabb = bottle.find_component_by_type(
-        sapien.render.RenderBodyComponent
-    ).compute_global_aabb_tight()
+    # aabb = bottle.find_component_by_type(
+    #     sapien.render.RenderBodyComponent
+    # ).compute_global_aabb_tight()
 
     # aabb = bottle.find_component_by_type(
     #     sapien.physx.PhysxRigidBaseComponent
     # ).compute_global_aabb_tight()
 
-    aabb_handle = viewer.draw_aabb(aabb[0], aabb[1], [1, 0, 1])
+    # aabb_handle = viewer.draw_aabb(aabb[0], aabb[1], [1, 0, 1])
 
     scene.step()
 
@@ -68,9 +72,11 @@ def main():
         viewer.render()
         xarm.set_gripper_target((np.sin(count / 100) + 1) * 0.4)
 
-        aabb = bottle.find_component_by_type(
-            sapien.render.RenderBodyComponent
-        ).compute_global_aabb_tight()
+        franka.set_gripper_target((np.sin(count / 100) + 1) * 0.02)
+
+        # aabb = bottle.find_component_by_type(
+        #     sapien.render.RenderBodyComponent
+        # ).compute_global_aabb_tight()
 
         # aabb = bottle.find_component_by_type(
         #     sapien.physx.PhysxRigidBaseComponent
@@ -80,8 +86,8 @@ def main():
         #     sapien.physx.PhysxRigidBaseComponent
         # ).compute_global_aabb_tight()
 
-        viewer.update_aabb(aabb_handle, aabb[0], aabb[1])
-        print(aabb)
+        # viewer.update_aabb(aabb_handle, aabb[0], aabb[1])
+        # print(aabb)
 
 
 main()

@@ -19,6 +19,8 @@ class TransformWindow(Plugin):
         self.ik_enabled = True
         self.display_ghosts = False
 
+        self.enabled = False
+
         # self.ui_move_group = None
         self.move_group_joints = []
 
@@ -45,7 +47,6 @@ class TransformWindow(Plugin):
         return None
 
     def notify_selected_entity_change(self):
-        # self.refresh_ghost_objects()
         self.clear_ghost_objects()
         if self.viewer.selected_entity is None:
             self._gizmo_pose = sapien.Pose()
@@ -258,20 +259,25 @@ class TransformWindow(Plugin):
                 .Pos(10, 10)
                 .Size(400, 400)
                 .append(
-                    self.gizmo,
+                    R.UICheckbox().Label("Enabled").Bind(self, "enabled"),
                     R.UIConditional()
-                    .Bind(lambda: self.selected_entity is not None)
+                    .Bind(self, "enabled")
                     .append(
+                        self.gizmo,
                         R.UIConditional()
-                        .Bind(
-                            lambda: self.get_articulation(self.selected_entity)
-                            is not None
-                        )
+                        .Bind(lambda: self.selected_entity is not None)
                         .append(
-                            R.UICheckbox().Label("IK").Bind(self, "ik_enabled"),
-                            self.ui_move_group,
+                            R.UIConditional()
+                            .Bind(
+                                lambda: self.get_articulation(self.selected_entity)
+                                is not None
+                            )
+                            .append(
+                                R.UICheckbox().Label("IK").Bind(self, "ik_enabled"),
+                                self.ui_move_group,
+                            ),
+                            R.UIButton().Label("Teleport").Callback(self.teleport),
                         ),
-                        R.UIButton().Label("Teleport").Callback(self.teleport),
                     ),
                 )
             )

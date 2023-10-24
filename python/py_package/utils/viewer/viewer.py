@@ -249,3 +249,10 @@ class Viewer:
         pose = sapien.Pose((lower + upper) / 2)
         half_size = (upper - lower) / 2
         self.update_bounding_box(aabb, pose, half_size)
+
+    @property
+    def control_window(self) -> ControlWindow:
+        for plugin in self.plugins:
+            if isinstance(plugin, ControlWindow):
+                return plugin
+        return None

@@ -48,6 +48,15 @@ class ControlWindow(Plugin):
         if not v:
             self._clear_camera_linesets()
 
+    def toggle_joint_axes(self, show):
+        self.show_joint_axes = show
+
+    def toggle_origin_frame(self, show):
+        self.show_origin_frame = show
+
+    def toggle_camera_lines(self, show):
+        self.show_camera_linesets = show
+
     @property
     def show_joint_axes(self):
         return self._show_joint_axes
@@ -347,6 +356,7 @@ class ControlWindow(Plugin):
 
         if self.show_joint_axes:
             self._update_joint_axes()
+        if self.show_origin_frame:
             self._update_coordinate_axes()
 
     def _handle_click(self):
@@ -489,8 +499,8 @@ class ControlWindow(Plugin):
         self.joint_axes = None
 
         self._show_camera_linesets = True
-        self._show_joint_axes = True
-        self._show_origin_frame = True
+        self._show_joint_axes = False
+        self._show_origin_frame = False
 
     def get_ui_windows(self):
         self.build()
