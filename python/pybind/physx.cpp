@@ -689,7 +689,7 @@ Example:
       .def("set_root_angular_velocity", &PhysxArticulation::setRootAngularVelocity,
            py::arg("velocity"))
 
-      .def_property_readonly("pose", &PhysxArticulation::getRootPose)
+      .def_property("pose", &PhysxArticulation::getRootPose, &PhysxArticulation::setRootPose)
       .def("set_pose", &PhysxArticulation::setRootPose)
       .def("get_pose", &PhysxArticulation::getRootPose)
       .def("compute_passive_force", &PhysxArticulation::computePassiveForce,
