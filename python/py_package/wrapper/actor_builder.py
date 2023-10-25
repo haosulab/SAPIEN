@@ -266,6 +266,7 @@ class ActorBuilder:
             for shape in shapes:
                 shape.local_pose = r.pose
                 shape.set_collision_groups(self.collision_groups)
+                shape.set_density(r.density)
                 shape.set_patch_radius(r.patch_radius)
                 shape.set_min_patch_radius(r.min_patch_radius)
                 component.attach(shape)
