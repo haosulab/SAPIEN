@@ -12,6 +12,9 @@ class SapienRendererDefault {
 public:
   static SapienRendererDefault &Get();
 
+  static void setImguiIniFilename(std::string const &filename);
+  static std::string getImguiIniFilename();
+
   static void setViewerShaderDirectory(std::string const &dir);
   static void setCameraShaderDirectory(std::string const &dir);
   static void setRayTracingSamplesPerPixel(int spp);

@@ -82,7 +82,10 @@ Pose Entity::getPose() const { return mPose; }
 void Entity::internalSyncPose(Pose const &pose) { mPose = pose; }
 
 /** same as Scene::addEntity */
-void Entity::addToScene(Scene &scene) { scene.addEntity(shared_from_this()); }
+std::shared_ptr<Entity> Entity::addToScene(Scene &scene) {
+  scene.addEntity(shared_from_this());
+  return shared_from_this();
+}
 void Entity::removeFromScene() {
   if (!mScene) {
     throw std::runtime_error(

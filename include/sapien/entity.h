@@ -49,7 +49,7 @@ public:
   void onRemoveFromScene(Scene &);
 
   /** same as Scene::addEntity */
-  void addToScene(Scene &);
+  std::shared_ptr<Entity> addToScene(Scene &);
 
   /** same as Scene::removeEntity */
   void removeFromScene();

@@ -17,6 +17,7 @@ __all__ = [
     "RenderLightComponent",
     "RenderMaterial",
     "RenderParallelogramLightComponent",
+    "RenderPointCloudComponent",
     "RenderPointLightComponent",
     "RenderShape",
     "RenderShapeBox",
@@ -35,6 +36,7 @@ __all__ = [
     "SapienRenderer",
     "clear_cache",
     "get_camera_shader_dir",
+    "get_imgui_ini_filename",
     "get_msaa",
     "get_ray_tracing_denoiser",
     "get_ray_tracing_dof_aperture",
@@ -44,6 +46,7 @@ __all__ = [
     "get_viewer_shader_dir",
     "load_scene",
     "set_camera_shader_dir",
+    "set_imgui_ini_filename",
     "set_log_level",
     "set_msaa",
     "set_picture_format",
@@ -571,6 +574,12 @@ class RenderParallelogramLightComponent(RenderLightComponent, sapien.pysapien.Co
         :type: float
         """
     pass
+class RenderPointCloudComponent(sapien.pysapien.Component):
+    def __init__(self, capacity: int = 0) -> None: ...
+    def get_cuda_vertices(self) -> sapien.pysapien.CudaArray: ...
+    def set_attribute(self, name: str, attribute: numpy.ndarray[numpy.float32, _Shape[m, n]]) -> RenderPointCloudComponent: ...
+    def set_vertices(self, vertices: numpy.ndarray[numpy.float32, _Shape[m, 3]]) -> RenderPointCloudComponent: ...
+    pass
 class RenderPointLightComponent(RenderLightComponent, sapien.pysapien.Component):
     def __init__(self) -> None: ...
     pass
@@ -1046,6 +1055,8 @@ def clear_cache(models: bool = True, images: bool = True, shaders: bool = False)
     pass
 def get_camera_shader_dir() -> str:
     pass
+def get_imgui_ini_filename() -> str:
+    pass
 def get_msaa() -> int:
     pass
 def get_ray_tracing_denoiser() -> typing.Literal['none', 'oidn', 'optix']:
@@ -1063,6 +1074,8 @@ def get_viewer_shader_dir() -> str:
 def load_scene(filename: str) -> list[sapien.pysapien.Entity]:
     pass
 def set_camera_shader_dir(dir: str) -> None:
+    pass
+def set_imgui_ini_filename(filename: str) -> None:
     pass
 def set_log_level(level: str) -> None:
     pass

@@ -34,3 +34,8 @@ if __name__ == "__main__":
         ]
 
         subprocess.run(args)
+
+    elif args.command == "show":
+        from sapien.show_anything import show_anything
+
+        show_anything(*rest)

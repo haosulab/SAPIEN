@@ -13,10 +13,11 @@ class PointCloudComponent : public Component {
 public:
   PointCloudComponent(uint32_t capacity = 0);
 
-  void setVertices(Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices);
-  void setAttribute(
+  std::shared_ptr<PointCloudComponent>
+  setVertices(Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices);
+  std::shared_ptr<PointCloudComponent> setAttribute(
       std::string const &name,
-      Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> const &vertices);
+      Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> const &attribute);
 
   inline std::shared_ptr<svulkan2::resource::SVPointSet> const &getPointSet() const {
     return mPointSet;

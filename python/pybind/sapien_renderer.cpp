@@ -224,6 +224,8 @@ void init_sapien_renderer(py::module &sapien) {
   ////////// global //////////
 
   m.def("_internal_set_shader_search_path", &SapienRendererDefault::internalSetShaderSearchPath)
+      .def("set_imgui_ini_filename", &SapienRendererDefault::setImguiIniFilename,
+           py::arg("filename"))
       .def("set_viewer_shader_dir", &SapienRendererDefault::setViewerShaderDirectory,
            py::arg("dir"))
       .def("set_camera_shader_dir", &SapienRendererDefault::setCameraShaderDirectory,
@@ -242,6 +244,7 @@ void init_sapien_renderer(py::module &sapien) {
       .def("set_picture_format", &SapienRendererDefault::setRenderTargetFormat, py::arg("name"),
            py::arg("format"))
 
+      .def("get_imgui_ini_filename", &SapienRendererDefault::getImguiIniFilename)
       .def("get_viewer_shader_dir", &SapienRendererDefault::getViewerShaderDirectory)
       .def("get_camera_shader_dir", &SapienRendererDefault::getCameraShaderDirectory)
       .def("get_ray_tracing_samples_per_pixel",
@@ -294,6 +297,8 @@ void init_sapien_renderer(py::module &sapien) {
 
   auto PyRenderBodyComponent =
       py::class_<SapienRenderBodyComponent, Component>(m, "RenderBodyComponent");
+  auto PyRenderPointCloudComponent =
+      py::class_<PointCloudComponent, Component>(m, "RenderPointCloudComponent");
   auto PyRenderCameraComponent =
       py::class_<SapienRenderCameraComponent, Component>(m, "RenderCameraComponent");
   auto PyRenderLightComponent =
@@ -592,6 +597,12 @@ void init_sapien_renderer(py::module &sapien) {
                              &SapienRenderBodyComponent::getRenderIdDisabled)
       .def("disable_render_id", &SapienRenderBodyComponent::disableRenderId)
       .def("enable_render_id", &SapienRenderBodyComponent::enableRenderId);
+
+  PyRenderPointCloudComponent.def(py::init<uint32_t>(), py::arg("capacity") = 0)
+      .def("set_vertices", &PointCloudComponent::setVertices, py::arg("vertices"))
+      .def("set_attribute", &PointCloudComponent::setAttribute, py::arg("name"),
+           py::arg("attribute"))
+      .def("get_cuda_vertices", &PointCloudComponent::getCudaArray);
 
   PyRenderCameraComponent
       .def(py::init<uint32_t, uint32_t, std::string const &>(), py::arg("width"),

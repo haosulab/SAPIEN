@@ -1,23 +1,25 @@
 import os
+from pathlib import Path
 
 import numpy as np
 import sapien
+from sapien import Entity, Scene
 from sapien import internal_renderer as R
-from sapien.render import get_viewer_shader_dir
-from sapien.render import SapienRenderer, RenderWindow, RenderSystem
-from sapien import Scene, Entity
-
-from .entity_window import EntityWindow
+from sapien.render import (
+    RenderSystem,
+    RenderWindow,
+    SapienRenderer,
+    get_viewer_shader_dir,
+)
 
 from .articulation_window import ArticulationWindow
 from .control_window import ControlWindow
-from .render_window import RenderOptionsWindow
-
+from .entity_window import EntityWindow
 from .imgui_ini import imgui_ini
 
 # from .keyframe_window import KeyframeWindow
 from .plugin import Plugin
-
+from .render_window import RenderOptionsWindow
 from .scene_window import SceneWindow
 from .transform_window import TransformWindow
 
@@ -38,8 +40,14 @@ class Viewer:
             # KeyframeWindow(),
         ],
     ):
-        if not os.path.exists("imgui.ini"):
-            with open("imgui.ini", "w") as f:
+        filename = sapien.render.get_imgui_ini_filename()
+        if not filename:
+            filename = "imgui.ini"
+
+        if not os.path.exists(filename):
+            Path(filename).parent.mkdir(parents=True, exist_ok=True)
+
+            with open(filename, "w") as f:
                 f.write(imgui_ini)
 
         if renderer is None:

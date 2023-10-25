@@ -1,6 +1,7 @@
 from warnings import warn
 import pkg_resources
 import os
+from pathlib import Path
 import platform
 from .version import __version__
 
@@ -26,6 +27,7 @@ from .wrapper.pinocchio_model import PinocchioModel
 import pkg_resources
 
 try:
+    render.set_imgui_ini_filename(str(Path.home() / ".sapien" / "imgui.ini"))
     render._internal_set_shader_search_path(
         pkg_resources.resource_filename("sapien", "vulkan_shader")
     )
