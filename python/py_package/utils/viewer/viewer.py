@@ -31,12 +31,12 @@ class Viewer:
         shader_dir="",
         resolutions=(1920, 1080),
         plugins=[
+            TransformWindow(),
+            RenderOptionsWindow(),
             ControlWindow(),
             SceneWindow(),
             EntityWindow(),
             ArticulationWindow(),
-            TransformWindow(),
-            RenderOptionsWindow()
             # KeyframeWindow(),
         ],
     ):

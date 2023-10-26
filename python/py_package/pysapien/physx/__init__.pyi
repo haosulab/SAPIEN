@@ -905,30 +905,6 @@ class PhysxSceneConfig():
     def contact_offset(self, arg0: float) -> None:
         pass
     @property
-    def default_dynamic_friction(self) -> float:
-        """
-        :type: float
-        """
-    @default_dynamic_friction.setter
-    def default_dynamic_friction(self, arg0: float) -> None:
-        pass
-    @property
-    def default_restitution(self) -> float:
-        """
-        :type: float
-        """
-    @default_restitution.setter
-    def default_restitution(self, arg0: float) -> None:
-        pass
-    @property
-    def default_static_friction(self) -> float:
-        """
-        :type: float
-        """
-    @default_static_friction.setter
-    def default_static_friction(self, arg0: float) -> None:
-        pass
-    @property
     def enable_ccd(self) -> bool:
         """
         :type: bool
