@@ -13,10 +13,12 @@ void PhysxRigidBaseComponent::afterStep() {
   getEntity()->internalSyncPose(PxTransformToPose(getPxActor()->getGlobalPose()));
 }
 
-void PhysxRigidBaseComponent::attachCollision(std::shared_ptr<PhysxCollisionShape> shape) {
+std::shared_ptr<PhysxRigidBaseComponent>
+PhysxRigidBaseComponent::attachCollision(std::shared_ptr<PhysxCollisionShape> shape) {
   getPxActor()->attachShape(*shape->getPxShape()); // TODO: set actor to shape
   mCollisionShapes.push_back(shape);
   shape->internalSetParent(this);
+  return std::static_pointer_cast<PhysxRigidBaseComponent>(shared_from_this());
 }
 
 std::vector<std::shared_ptr<PhysxCollisionShape>>
@@ -212,7 +214,8 @@ void PhysxRigidDynamicComponent::onRemoveFromScene(Scene &scene) {
       std::static_pointer_cast<PhysxRigidDynamicComponent>(shared_from_this()));
 }
 
-void PhysxRigidBodyComponent::attachCollision(std::shared_ptr<PhysxCollisionShape> shape) {
+std::shared_ptr<PhysxRigidBaseComponent>
+PhysxRigidBodyComponent::attachCollision(std::shared_ptr<PhysxCollisionShape> shape) {
   getPxActor()->attachShape(*shape->getPxShape());
   mCollisionShapes.push_back(shape);
   shape->internalSetParent(this);
@@ -229,6 +232,7 @@ void PhysxRigidBodyComponent::attachCollision(std::shared_ptr<PhysxCollisionShap
     mMassProperties = PxMassProperties::sum(mp.data(), t.data(), 2);
     internalUpdateMass();
   }
+  return std::static_pointer_cast<PhysxRigidBaseComponent>(shared_from_this());
 }
 
 bool PhysxRigidBodyComponent::getDisableGravity() const {

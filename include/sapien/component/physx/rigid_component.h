@@ -21,7 +21,9 @@ class PhysxJointComponent;
 class PhysxRigidBaseComponent : public PhysxBaseComponent {
 public:
   using PhysxBaseComponent::PhysxBaseComponent;
-  virtual void attachCollision(std::shared_ptr<PhysxCollisionShape> shape);
+  virtual std::shared_ptr<PhysxRigidBaseComponent>
+  attachCollision(std::shared_ptr<PhysxCollisionShape> shape);
+
   std::vector<std::shared_ptr<PhysxCollisionShape>> getCollisionShapes() const;
   virtual physx::PxRigidActor *getPxActor() const = 0;
 
@@ -91,7 +93,9 @@ public:
 
   bool getAutoComputeMass() const;
   void setAutoComputeMass(bool enable);
-  void attachCollision(std::shared_ptr<PhysxCollisionShape> shape) override;
+
+  virtual std::shared_ptr<PhysxRigidBaseComponent>
+  attachCollision(std::shared_ptr<PhysxCollisionShape> shape) override;
 
   bool getDisableGravity() const;
   void setDisableGravity(bool disable);

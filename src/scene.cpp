@@ -41,6 +41,10 @@ void Scene::step() { getPhysxSystem()->step(); }
 void Scene::updateRender() { getSapienRendererSystem()->step(); }
 
 void Scene::addEntity(std::shared_ptr<Entity> entity) {
+  if (!entity) {
+    throw std::runtime_error("failed to add entity to scene: entity is null");
+  }
+
   if (entity->getScene()) {
     throw std::runtime_error("failed to add entity to scene: entity is already added to a scene.");
   }
