@@ -31,3 +31,6 @@ class Plugin:
 
     def close(self):
         pass
+
+    def clear_scene(self):
+        pass

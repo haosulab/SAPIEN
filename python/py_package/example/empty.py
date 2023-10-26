@@ -3,8 +3,7 @@ from sapien.utils import Viewer
 
 
 def main():
-    engine = sapien.Engine()
-    scene = engine.create_scene()
+    scene = sapien.Scene()
     scene.add_ground(0, render_half_size=[2, 2])
 
     scene.set_ambient_light([0.5, 0.5, 0.5])
@@ -12,7 +11,7 @@ def main():
 
     viewer = Viewer()
     viewer.set_scene(scene)
-    viewer.set_camera_xyz(-4, 0, 0.3)
+    viewer.set_camera_xyz(-4, 0, 1)
 
     while not viewer.closed:
         scene.step()

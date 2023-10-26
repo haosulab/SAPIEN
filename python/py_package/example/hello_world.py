@@ -1,7 +1,7 @@
 """Hello world for Sapien.
 
 Concepts:
-    - Engine and scene
+    - Scene
     - Renderer, viewer, lighting
     - Run a simulation loop
 
@@ -9,34 +9,27 @@ Notes:
     - For one process, you can only create one engine and one renderer.
 """
 
-import sapien.core as sapien
+import sapien as sapien
 from sapien.utils import Viewer
 import numpy as np
 
 
 def main():
-    engine = sapien.Engine()  # Create a physical simulation engine
-    renderer = sapien.SapienRenderer()  # Create a renderer
-    engine.set_renderer(renderer)  # Bind the renderer and the engine
-
-    scene = engine.create_scene()  # Create an instance of simulation world (aka scene)
+    scene = sapien.Scene()  # Create an instance of simulation world (aka scene)
     scene.set_timestep(1 / 100.0)  # Set the simulation frequency
 
-    # NOTE: How to build actors (rigid bodies) is elaborated in create_actors.py
     scene.add_ground(altitude=0)  # Add a ground
     actor_builder = scene.create_actor_builder()
     actor_builder.add_box_collision(half_size=[0.5, 0.5, 0.5])
-    actor_builder.add_box_visual(half_size=[0.5, 0.5, 0.5], color=[1., 0., 0.])
-    box = actor_builder.build(name='box')  # Add a box
+    actor_builder.add_box_visual(half_size=[0.5, 0.5, 0.5], material=[1.0, 0.0, 0.0])
+    box = actor_builder.build(name="box")  # Add a box
     box.set_pose(sapien.Pose(p=[0, 0, 0.5]))
-
 
     # Add some lights so that you can observe the scene
     scene.set_ambient_light([0.5, 0.5, 0.5])
     scene.add_directional_light([0, 1, -1], [0.5, 0.5, 0.5])
 
-    viewer = Viewer(renderer)  # Create a viewer (window)
-    viewer.set_scene(scene)  # Bind the viewer and the scene
+    viewer = scene.create_viewer()
 
     # The coordinate frame in Sapien is: x(forward), y(left), z(upward)
     # The principle axis of the camera is the x-axis
@@ -52,5 +45,5 @@ def main():
         viewer.render()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
