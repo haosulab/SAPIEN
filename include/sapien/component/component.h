@@ -30,12 +30,6 @@ public:
   /** called right after parent entity's pose is modified */
   virtual void onSetPose(Pose const &){};
 
-  /** called right after component is attached to entity */
-  virtual void onAttach(){};
-
-  /** called right before the component is detached from entity */
-  virtual void onDetach(){};
-
   std::shared_ptr<Scene> getScene();
 
   void enable();

@@ -26,7 +26,6 @@ std::shared_ptr<Entity> Entity::addComponent(std::shared_ptr<component::Componen
 
   component->internalSetEntity(shared_from_this());
   mComponents.push_back(component);
-  component->onAttach();
   component->onSetPose(mPose);
 
   if (mScene) {
@@ -42,7 +41,6 @@ void Entity::internalSwapInComponent(uint32_t index,
   }
   component->internalSetEntity(shared_from_this());
   mComponents[index] = component;
-  component->onAttach();
   if (mScene) {
     component->onAddToScene(*mScene);
   }
@@ -56,7 +54,6 @@ void Entity::removeComponent(std::shared_ptr<component::Component> component) {
   if (mScene) {
     component->onRemoveFromScene(*mScene);
   }
-  component->onDetach();
 
   std::erase(mComponents, component);
   component->internalSetEntity(nullptr);

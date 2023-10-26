@@ -37,14 +37,6 @@ public:
     PYBIND11_OVERRIDE_NAME(void, component::Component, "on_set_pose", onSetPose, pose);
   }
 
-  void onAttach() override {
-    PYBIND11_OVERRIDE_NAME(void, component::Component, "on_attach", onAttach, );
-  }
-
-  void onDetach() override {
-    PYBIND11_OVERRIDE_NAME(void, component::Component, "on_detach", onDetach, );
-  }
-
   template <class Archive> void save(Archive &ar) const {
     ar(mObjectId);
     ar(cereal::base_class<component::Component>(this));

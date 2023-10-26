@@ -14,7 +14,6 @@ public:
   /** should be called internally when PxActor changes for parent or child */
   virtual void internalRefresh();
 
-  void onAttach() override;
   void onAddToScene(Scene &scene) override;
   void onRemoveFromScene(Scene &scene) override;
 

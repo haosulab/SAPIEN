@@ -54,14 +54,12 @@ Pose PhysxJointComponent::getRelativePose() const {
   return PxTransformToPose(getPxJoint()->getRelativeTransform());
 }
 
-void PhysxJointComponent::onAttach() {
+void PhysxJointComponent::onAddToScene(Scene &scene) {
   if (mChild->getEntity().get() != getEntity().get()) {
     throw std::runtime_error(
         "physx drive component and its attach body must be attached to the same entity.");
   }
-}
 
-void PhysxJointComponent::onAddToScene(Scene &scene) {
   internalRefresh();
   getPxJoint()->setConstraintFlag(PxConstraintFlag::eDISABLE_CONSTRAINT, false);
 }
