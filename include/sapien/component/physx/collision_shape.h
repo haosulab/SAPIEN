@@ -53,6 +53,9 @@ public:
   void setIsTrigger(bool trigger);
   bool isTrigger() const;
 
+  void setIsSceneQuery(bool query);
+  bool isSceneQuery() const;
+
   void setPhysicalMaterial(std::shared_ptr<PhysxMaterial> material);
   std::shared_ptr<PhysxMaterial> getPhysicalMaterial() const;
 
@@ -80,7 +83,7 @@ public:
   // serialization
   template <class Archive> void saveBase(Archive &ar) const {
     ar(getCollisionGroups(), getRestOffset(), getContactOffset(), getTorsionalPatchRadius(),
-       getMinTorsionalPatchRadius(), getLocalPose(), isTrigger(), mDensity);
+       getMinTorsionalPatchRadius(), getLocalPose(), isTrigger(), isSceneQuery(), mDensity);
   }
   template <class Archive> void loadBase(Archive &ar) {
     if (!mPxShape) {
@@ -89,9 +92,9 @@ public:
     std::array<uint32_t, 4> groups;
     float restOffset, contactOffset, patchRadius, minPatchRadius;
     Pose localPose;
-    bool trigger;
+    bool trigger, sceneQuery;
     ar(groups, restOffset, contactOffset, patchRadius, minPatchRadius, localPose, trigger,
-       mDensity);
+       sceneQuery, mDensity);
 
     setCollisionGroups(groups);
     setContactOffset(contactOffset);
@@ -100,6 +103,7 @@ public:
     setMinTorsionalPatchRadius(minPatchRadius);
     setLocalPose(localPose);
     setIsTrigger(trigger);
+    setIsSceneQuery(sceneQuery);
   }
 
   template <class Archive> void save(Archive &archive) const {

@@ -149,6 +149,19 @@ PhysxSystem::getArticulationLinkComponents() const {
   return {mArticulationLinkComponents.begin(), mArticulationLinkComponents.end()};
 }
 
+std::unique_ptr<PhysxHitInfo> PhysxSystem::raycast(Vec3 const &origin, Vec3 const &direction,
+                                                   float distance) {
+  PxRaycastBuffer hit;
+  bool status = mPxScene->raycast(Vec3ToPxVec3(origin), Vec3ToPxVec3(direction), distance, hit);
+  if (status) {
+    return std::make_unique<PhysxHitInfo>(
+        PxVec3ToVec3(hit.block.position), PxVec3ToVec3(hit.block.normal), hit.block.distance,
+        static_cast<PhysxCollisionShape *>(hit.block.shape->userData),
+        static_cast<PhysxRigidBaseComponent *>(hit.block.actor->userData));
+  }
+  return nullptr;
+}
+
 void PhysxSystem::step() {
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {

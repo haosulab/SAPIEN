@@ -2,6 +2,7 @@
 #include "../system.h"
 #include "mesh_manager.h"
 #include "sapien/scene.h"
+#include "scene_query.h"
 #include "simulation_callback.hpp"
 #include <PxPhysicsAPI.h>
 #include <memory>
@@ -80,6 +81,8 @@ public:
   std::vector<Contact *> getContacts() const { return mSimulationCallback.getContacts(); }
 
   PhysxSceneConfig const &getSceneConfig() const { return mSceneConfig; };
+
+  std::unique_ptr<PhysxHitInfo> raycast(Vec3 const &origin, Vec3 const &direction, float distance);
 
   template <class Archive> void save(Archive &ar) const { ar(mSceneConfig); }
   template <class Archive>

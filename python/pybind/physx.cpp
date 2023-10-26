@@ -227,6 +227,7 @@ Generator<int> init_physx(py::module &sapien) {
   auto PyPhysxContactPoint = py::class_<ContactPoint>(m, "PhysxContactPoint");
   auto PyPhysxContact = py::class_<Contact>(m, "PhysxContact");
 
+  auto PyPhysxRayHit = py::class_<PhysxHitInfo>(m, "PhysxRayHit");
   auto PyPhysxSystem = py::class_<PhysxSystem, System>(m, "PhysxSystem");
 
   auto PyPhysxBaseComponent = py::class_<PhysxBaseComponent, Component>(m, "PhysxBaseComponent");
@@ -296,6 +297,20 @@ Generator<int> init_physx(py::module &sapien) {
                ", entity1=" + c.components[1]->getEntity()->getName() + ")";
       });
 
+  PyPhysxRayHit.def_readonly("position", &PhysxHitInfo::position)
+      .def_readonly("normal", &PhysxHitInfo::normal)
+      .def_readonly("distance", &PhysxHitInfo::distance)
+      .def_readonly("shape", &PhysxHitInfo::shape, py::return_value_policy::reference)
+      .def_readonly("component", &PhysxHitInfo::component, py::return_value_policy::reference)
+      .def("__repr__", [](PhysxHitInfo const &hit) {
+        std::ostringstream s;
+        s << "PhysxRayHit(position=[";
+        s << hit.position.x << ", " << hit.position.y << ", " << hit.position.z << "], normal=[";
+        s << hit.normal.x << ", " << hit.normal.y << ", " << hit.normal.z << "], distance=";
+        s << hit.distance << ")";
+        return s.str();
+      });
+
   PyPhysxSystem.def(py::init<PhysxSceneConfig const &>(), py::arg("config") = PhysxSceneConfig())
       .def_property_readonly("config", &PhysxSystem::getSceneConfig)
       .def("get_config", &PhysxSystem::getSceneConfig)
@@ -315,6 +330,9 @@ Generator<int> init_physx(py::module &sapien) {
       .def("get_articulation_link_components", &PhysxSystem::getArticulationLinkComponents)
 
       .def("get_contacts", &PhysxSystem::getContacts, py::return_value_policy::reference)
+      .def("raycast", &PhysxSystem::raycast, py::arg("position"), py::arg("direction"),
+           py::arg("distance"),
+           R"doc(Casts a ray and returns the closest hit. Returns None if no hit)doc")
       .def("pack", [](PhysxSystem &s) { return py::bytes(s.packState()); })
       .def(
           "unpack", [](PhysxSystem &s, py::bytes data) { s.unpackState(data); }, py::arg("data"));

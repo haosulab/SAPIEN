@@ -27,6 +27,7 @@ __all__ = [
     "PhysxGearComponent",
     "PhysxJointComponent",
     "PhysxMaterial",
+    "PhysxRayHit",
     "PhysxRigidBaseComponent",
     "PhysxRigidBodyComponent",
     "PhysxRigidDynamicComponent",
@@ -686,6 +687,34 @@ class PhysxMaterial():
     def static_friction(self, arg1: float) -> None:
         pass
     pass
+class PhysxRayHit():
+    def __repr__(self) -> str: ...
+    @property
+    def component(self) -> PhysxRigidBaseComponent:
+        """
+        :type: PhysxRigidBaseComponent
+        """
+    @property
+    def distance(self) -> float:
+        """
+        :type: float
+        """
+    @property
+    def normal(self) -> numpy.ndarray[numpy.float32, _Shape, _Shape[3]]:
+        """
+        :type: numpy.ndarray[numpy.float32, _Shape, _Shape[3]]
+        """
+    @property
+    def position(self) -> numpy.ndarray[numpy.float32, _Shape, _Shape[3]]:
+        """
+        :type: numpy.ndarray[numpy.float32, _Shape, _Shape[3]]
+        """
+    @property
+    def shape(self) -> PhysxCollisionShape:
+        """
+        :type: PhysxCollisionShape
+        """
+    pass
 class PhysxRigidBodyComponent(PhysxRigidBaseComponent, PhysxBaseComponent, sapien.pysapien.Component):
     def add_force_at_point(self, force: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], point: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], mode: typing.Literal['force', 'acceleration', 'velocity_change', 'impulse'] = 'force') -> None: ...
     def add_force_torque(self, force: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], torque: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], mode: typing.Literal['force', 'acceleration', 'velocity_change', 'impulse'] = 'force') -> None: ...
@@ -1006,6 +1035,10 @@ class PhysxSystem(sapien.pysapien.System):
     def get_rigid_static_components(self) -> list[PhysxRigidStaticComponent]: ...
     def get_timestep(self) -> float: ...
     def pack(self) -> bytes: ...
+    def raycast(self, position: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], direction: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], distance: float) -> PhysxRayHit: 
+        """
+        Casts a ray and returns the closest hit. Returns None if no hit
+        """
     def set_timestep(self, arg0: float) -> None: ...
     def unpack(self, data: bytes) -> None: ...
     @property

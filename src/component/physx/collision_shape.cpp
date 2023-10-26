@@ -71,6 +71,13 @@ bool PhysxCollisionShape::isTrigger() const {
   return mPxShape->getFlags() & PxShapeFlag::eTRIGGER_SHAPE;
 }
 
+void PhysxCollisionShape::setIsSceneQuery(bool query) {
+  mPxShape->setFlag(PxShapeFlag::eSCENE_QUERY_SHAPE, query);
+}
+bool PhysxCollisionShape::isSceneQuery() const {
+  return mPxShape->getFlags() & PxShapeFlag::eSCENE_QUERY_SHAPE;
+}
+
 void PhysxCollisionShape::setPhysicalMaterial(std::shared_ptr<PhysxMaterial> material) {
   if (!material) {
     throw std::runtime_error("material must not be null");
@@ -96,6 +103,7 @@ PhysxCollisionShapePlane::PhysxCollisionShapePlane(std::shared_ptr<PhysxMaterial
   mPxShape = mEngine->getPxPhysics()->createShape(PxPlaneGeometry(),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
+  setIsSceneQuery(true);
 }
 
 PhysxCollisionShapeBox::PhysxCollisionShapeBox(Vec3 halfLengths,
@@ -105,6 +113,7 @@ PhysxCollisionShapeBox::PhysxCollisionShapeBox(Vec3 halfLengths,
   mPxShape = mEngine->getPxPhysics()->createShape(PxBoxGeometry(Vec3ToPxVec3(halfLengths)),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
+  setIsSceneQuery(true);
 }
 
 PhysxCollisionShapeCapsule::PhysxCollisionShapeCapsule(float radius, float halfLength,
@@ -114,6 +123,7 @@ PhysxCollisionShapeCapsule::PhysxCollisionShapeCapsule(float radius, float halfL
   mPxShape = mEngine->getPxPhysics()->createShape(PxCapsuleGeometry(radius, halfLength),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
+  setIsSceneQuery(true);
 }
 
 PhysxCollisionShapeCylinder::PhysxCollisionShapeCylinder(float radius, float halfLength,
@@ -129,6 +139,7 @@ PhysxCollisionShapeCylinder::PhysxCollisionShapeCylinder(float radius, float hal
       PxConvexMeshGeometry(mMesh->getPxMesh(), PxMeshScale({halfLength, radius, radius})),
       *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
+  setIsSceneQuery(true);
 }
 
 PhysxCollisionShapeSphere::PhysxCollisionShapeSphere(float radius,
@@ -138,6 +149,7 @@ PhysxCollisionShapeSphere::PhysxCollisionShapeSphere(float radius,
   mPxShape = mEngine->getPxPhysics()->createShape(PxSphereGeometry(radius),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
+  setIsSceneQuery(true);
 }
 
 PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
@@ -153,6 +165,7 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
 
   auto aabb = computeAABB(getVertices());
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
+  setIsSceneQuery(true);
 }
 
 PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
@@ -167,6 +180,7 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
 
   auto aabb = computeAABB(getVertices());
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
+  setIsSceneQuery(true);
 }
 
 PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
@@ -183,6 +197,7 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
 
   auto aabb = computeAABB(getVertices());
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
+  setIsSceneQuery(true);
 }
 
 std::vector<std::shared_ptr<PhysxCollisionShapeConvexMesh>>
@@ -209,6 +224,7 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
 
   auto aabb = computeAABB(getVertices());
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
+  setIsSceneQuery(true);
 }
 
 PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
@@ -225,6 +241,7 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
 
   auto aabb = computeAABB(getVertices());
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
+  setIsSceneQuery(true);
 }
 
 // internal use only
@@ -241,6 +258,7 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
 
   auto aabb = computeAABB(getVertices());
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
+  setIsSceneQuery(true);
 }
 
 //////////////////// end collision shape constructor ////////////////////
