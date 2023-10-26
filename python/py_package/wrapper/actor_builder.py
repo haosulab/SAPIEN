@@ -3,47 +3,35 @@ from dataclasses import dataclass
 import numpy as np
 import typing
 import os
-from typing import List
+from typing import List, Union, Dict, Any, Tuple, Literal
 
 from .coacd import do_coacd
 
 
 @dataclass
-class PhysicalMaterialRecord:
-    static_friction: float = 0.3
-    dynamic_friction: float = 0.3
-    restitution: float = 0.0
-
-
-# TODO: support texture
-@dataclass
-class VisualMaterialRecord:
-    emission: tuple = (0, 0, 0, 1)
-    base_color: tuple = (1, 1, 1, 1)
-    specular: float = 0
-    roughness: float = 1
-    metallic: float = 0
-    transmission: float = 0
-    ior: float = 1.45
-    transmission_roughness = 0.0
-
-
-@dataclass
 class CollisionShapeRecord:
-    type: str  # one of "convex_mesh", "multiple_convex_meshes", "nonconvex_mesh", "box", "capsule", "sphere", "cylinder"
+    type: Literal[
+        "convex_mesh",
+        "multiple_convex_meshes",
+        "nonconvex_mesh",
+        "box",
+        "capsule",
+        "sphere",
+        "cylinder",
+    ]
 
     # for mesh type
     filename: str = ""
 
     # mesh & box
-    scale: tuple = (1, 1, 1)
+    scale: Tuple = (1, 1, 1)
 
     # circle & capsule
     radius: float = 1
     # capsule
     length: float = 1
 
-    material: PhysicalMaterialRecord = None
+    material: sapien.physx.PhysxMaterial = None
     pose: sapien.Pose = sapien.Pose()
 
     density: float = 1000
@@ -52,18 +40,12 @@ class CollisionShapeRecord:
     is_trigger: bool = False
 
     decomposition: str = "none"
-    decomposition_params: dict = None
-
-
-@dataclass
-class MeshRecord:
-    vertices: List[List[float]]
-    indices: List[List[int]]
+    decomposition_params: Union[Dict[str, Any], None] = None
 
 
 @dataclass
 class VisualShapeRecord:
-    type: str  # one of "file", "box", "capsule", "sphere", "mesh", "cylinder"
+    type: Literal["file", "box", "capsule", "sphere", "cylinder"]
 
     filename: str = ""
     scale: tuple = (1, 1, 1)
@@ -71,14 +53,15 @@ class VisualShapeRecord:
     radius: float = 1
     length: float = 1
 
-    mesh: MeshRecord = None
-    material: VisualMaterialRecord = None
+    material: Union[
+        sapien.render.RenderMaterial, None
+    ] = None  # None is only used for mesh
 
     pose: sapien.Pose = sapien.Pose()
     name: str = ""
 
 
-Vec3 = tuple
+Vec3 = Tuple
 
 
 class ActorBuilder:
@@ -117,56 +100,31 @@ class ActorBuilder:
         return self
 
     def build_render_component(self):
-        # TODO: handle None material
-        record2mat = dict()
-        for r in self.visual_records:
-            mat = sapien.render.RenderMaterial()
-
-            # TODO: support global default material
-            m = r.material
-            if m is not None:
-                mat.emission = m.emission
-                mat.base_color = m.base_color
-                mat.specular = m.specular
-                mat.roughness = m.roughness
-                mat.metallic = m.metallic
-                mat.transmission = m.transmission
-                mat.ior = m.ior
-                mat.transmission_roughness = m.transmission_roughness
-
-            record2mat[id(m)] = mat
-
         component = sapien.render.RenderBodyComponent()
-        component.name = r.name
         for r in self.visual_records:
+            if r.type != "file":
+                assert isinstance(r.material, sapien.render.RenderMaterial)
+            else:
+                assert r.material is None or isinstance(
+                    r.material, sapien.render.RenderMaterial
+                )
+
             if r.type == "plane":
-                shape = sapien.render.RenderShapePlane(
-                    r.scale, record2mat[id(r.material)]
-                )
+                shape = sapien.render.RenderShapePlane(r.scale, r.material)
             elif r.type == "box":
-                shape = sapien.render.RenderShapeBox(
-                    r.scale, record2mat[id(r.material)]
-                )
+                shape = sapien.render.RenderShapeBox(r.scale, r.material)
             elif r.type == "sphere":
-                shape = sapien.render.RenderShapeSphere(
-                    r.radius, record2mat[id(r.material)]
-                )
+                shape = sapien.render.RenderShapeSphere(r.radius, r.material)
             elif r.type == "capsule":
-                shape = sapien.render.RenderShapeCapsule(
-                    r.radius, r.length, record2mat[id(r.material)]
-                )
+                shape = sapien.render.RenderShapeCapsule(r.radius, r.length, r.material)
             elif r.type == "cylinder":
                 shape = sapien.render.RenderShapeCylinder(
-                    r.radius, r.length, record2mat[id(r.material)]
+                    r.radius, r.length, r.material
                 )
             elif r.type == "file":
                 shape = sapien.render.RenderShapeTriangleMesh(
-                    r.filename,
-                    r.scale,
-                    record2mat[id(r.material)] if r.material is not None else None,
+                    r.filename, r.scale, r.material
                 )
-            elif r.type == "mesh":
-                raise Exception("TODO: Mesh in not implemented yet")
             else:
                 raise Exception(f"invalid visual shape type [{r.type}]")
 
@@ -175,17 +133,8 @@ class ActorBuilder:
         return component
 
     def build_physx_component(self, link_parent=None):
-        record2mat = dict()
         for r in self.collision_records:
-            m = r.material
-            if m is not None:
-                mat = sapien.physx.PhysxMaterial(
-                    m.static_friction, m.dynamic_friction, m.restitution
-                )
-            else:
-                mat = sapien.physx.get_default_material()
-
-            record2mat[id(m)] = mat
+            assert isinstance(r.material, sapien.physx.PhysxMaterial)
 
         if self.physx_body_type == "dynamic":
             component = sapien.physx.PhysxRigidDynamicComponent()
@@ -202,46 +151,46 @@ class ActorBuilder:
         for r in self.collision_records:
             if r.type == "plane":
                 shape = sapien.physx.PhysxCollisionShapePlane(
-                    material=record2mat[id(r.material)],
+                    material=r.material,
                 )
                 shapes = [shape]
             elif r.type == "box":
                 shape = sapien.physx.PhysxCollisionShapeBox(
-                    half_size=r.scale, material=record2mat[id(r.material)]
+                    half_size=r.scale, material=r.material
                 )
                 shapes = [shape]
             elif r.type == "capsule":
                 shape = sapien.physx.PhysxCollisionShapeCapsule(
                     radius=r.radius,
                     half_length=r.length,
-                    material=record2mat[id(r.material)],
+                    material=r.material,
                 )
                 shapes = [shape]
             elif r.type == "cylinder":
                 shape = sapien.physx.PhysxCollisionShapeCylinder(
                     radius=r.radius,
                     half_length=r.length,
-                    material=record2mat[id(r.material)],
+                    material=r.material,
                 )
                 shapes = [shape]
             elif r.type == "sphere":
                 shape = sapien.physx.PhysxCollisionShapeSphere(
                     radius=r.radius,
-                    material=record2mat[id(r.material)],
+                    material=r.material,
                 )
                 shapes = [shape]
             elif r.type == "convex_mesh":
                 shape = sapien.physx.PhysxCollisionShapeConvexMesh(
                     filename=r.filename,
                     scale=r.scale,
-                    material=record2mat[id(r.material)],
+                    material=r.material,
                 )
                 shapes = [shape]
             elif r.type == "nonconvex_mesh":
                 shape = sapien.physx.PhysxCollisionShapeTriangleMesh(
                     filename=r.filename,
                     scale=r.scale,
-                    material=record2mat[id(r.material)],
+                    material=r.material,
                 )
                 shapes = [shape]
             elif r.type == "multiple_convex_meshes":
@@ -257,7 +206,7 @@ class ActorBuilder:
                 shapes = sapien.physx.PhysxCollisionShapeConvexMesh.load_multiple(
                     filename=filename,
                     scale=r.scale,
-                    material=record2mat[id(r.material)],
+                    material=r.material,
                 )
 
             else:
@@ -312,11 +261,14 @@ class ActorBuilder:
     def add_plane_collision(
         self,
         pose: sapien.Pose = sapien.Pose(),
-        material: PhysicalMaterialRecord = None,
+        material: Union[sapien.physx.PhysxMaterial, None] = None,
         patch_radius: float = 0,
         min_patch_radius: float = 0,
         is_trigger: bool = False,
     ):
+        if material is None:
+            material = sapien.physx.get_default_material()
+
         self.collision_records.append(
             CollisionShapeRecord(
                 type="plane",
@@ -333,13 +285,16 @@ class ActorBuilder:
     def add_box_collision(
         self,
         pose: sapien.Pose = sapien.Pose(),
-        half_size: Vec3 = [1, 1, 1],
-        material: PhysicalMaterialRecord = None,
+        half_size: Vec3 = (1, 1, 1),
+        material: Union[sapien.physx.PhysxMaterial, None] = None,
         density: float = 1000,
         patch_radius: float = 0,
         min_patch_radius: float = 0,
         is_trigger: bool = False,
     ):
+        if material is None:
+            material = sapien.physx.get_default_material()
+
         self.collision_records.append(
             CollisionShapeRecord(
                 type="box",
@@ -359,12 +314,15 @@ class ActorBuilder:
         pose: sapien.Pose = sapien.Pose(),
         radius: float = 1,
         half_length: float = 1,
-        material: PhysicalMaterialRecord = None,
+        material: Union[sapien.physx.PhysxMaterial, None] = None,
         density: float = 1000,
         patch_radius: float = 0,
         min_patch_radius: float = 0,
         is_trigger: bool = False,
     ):
+        if material is None:
+            material = sapien.physx.get_default_material()
+
         self.collision_records.append(
             CollisionShapeRecord(
                 type="capsule",
@@ -385,12 +343,15 @@ class ActorBuilder:
         pose: sapien.Pose = sapien.Pose(),
         radius: float = 1,
         half_length: float = 1,
-        material: PhysicalMaterialRecord = None,
+        material: Union[sapien.physx.PhysxMaterial, None] = None,
         density: float = 1000,
         patch_radius: float = 0,
         min_patch_radius: float = 0,
         is_trigger: bool = False,
     ):
+        if material is None:
+            material = sapien.physx.get_default_material()
+
         self.collision_records.append(
             CollisionShapeRecord(
                 type="cylinder",
@@ -410,12 +371,15 @@ class ActorBuilder:
         self,
         pose: sapien.Pose = sapien.Pose(),
         radius: float = 1,
-        material: PhysicalMaterialRecord = None,
+        material: Union[sapien.physx.PhysxMaterial, None] = None,
         density: float = 1000,
         patch_radius: float = 0,
         min_patch_radius: float = 0,
         is_trigger: bool = False,
     ):
+        if material is None:
+            material = sapien.physx.get_default_material()
+
         self.collision_records.append(
             CollisionShapeRecord(
                 type="sphere",
@@ -434,13 +398,16 @@ class ActorBuilder:
         self,
         filename,
         pose: sapien.Pose = sapien.Pose(),
-        scale: Vec3 = [1, 1, 1],
-        material: PhysicalMaterialRecord = None,
+        scale: Vec3 = (1, 1, 1),
+        material: Union[sapien.physx.PhysxMaterial, None] = None,
         density: float = 1000,
         patch_radius: float = 0,
         min_patch_radius: float = 0,
         is_trigger: bool = False,
     ):
+        if material is None:
+            material = sapien.physx.get_default_material()
+
         self.collision_records.append(
             CollisionShapeRecord(
                 type="convex_mesh",
@@ -460,8 +427,8 @@ class ActorBuilder:
         self,
         filename,
         pose: sapien.Pose = sapien.Pose(),
-        scale: Vec3 = [1, 1, 1],
-        material: PhysicalMaterialRecord = None,
+        scale: Vec3 = (1, 1, 1),
+        material: Union[sapien.physx.PhysxMaterial, None] = None,
         density: float = 1000,
         patch_radius: float = 0,
         min_patch_radius: float = 0,
@@ -469,6 +436,9 @@ class ActorBuilder:
         decomposition: typing.Literal["none", "coacd"] = "none",
         decomposition_params=dict(),
     ):
+        if material is None:
+            material = sapien.physx.get_default_material()
+
         self.collision_records.append(
             CollisionShapeRecord(
                 type="multiple_convex_meshes",
@@ -490,12 +460,15 @@ class ActorBuilder:
         self,
         filename: str,
         pose: sapien.Pose = sapien.Pose(),
-        scale: Vec3 = [1, 1, 1],
-        material: PhysicalMaterialRecord = None,
+        scale: Vec3 = (1, 1, 1),
+        material: Union[sapien.physx.PhysxMaterial, None] = None,
         patch_radius: float = 0,
         min_patch_radius: float = 0,
         is_trigger: bool = False,
     ):
+        if material is None:
+            material = sapien.physx.get_default_material()
+
         self.collision_records.append(
             CollisionShapeRecord(
                 type="nonconvex_mesh",
@@ -514,16 +487,14 @@ class ActorBuilder:
     def add_plane_visual(
         self,
         pose: sapien.Pose = sapien.Pose(),
-        scale: Vec3 = [1, 1, 1],
-        material: VisualMaterialRecord = None,
+        scale: Vec3 = (1, 1, 1),
+        material: Union[sapien.render.RenderMaterial, None, Vec3] = None,
         name: str = "",
     ):
         if material is None:
-            material = VisualMaterialRecord()
-        if not isinstance(
-            material, (VisualMaterialRecord, sapien.render.RenderMaterial)
-        ):
-            material = VisualMaterialRecord(base_color=(*material[:3], 1))
+            material = sapien.render.RenderMaterial()
+        if not isinstance(material, sapien.render.RenderMaterial):
+            material = sapien.render.RenderMaterial(base_color=(*material[:3], 1))
 
         self.visual_records.append(
             VisualShapeRecord(
@@ -535,16 +506,14 @@ class ActorBuilder:
     def add_box_visual(
         self,
         pose: sapien.Pose = sapien.Pose(),
-        half_size: Vec3 = [1, 1, 1],
-        material: VisualMaterialRecord = None,
+        half_size: Vec3 = (1, 1, 1),
+        material: Union[sapien.render.RenderMaterial, None, Vec3] = None,
         name: str = "",
     ):
         if material is None:
-            material = VisualMaterialRecord()
-        if not isinstance(
-            material, (VisualMaterialRecord, sapien.render.RenderMaterial)
-        ):
-            material = VisualMaterialRecord(base_color=(*material[:3], 1))
+            material = sapien.render.RenderMaterial()
+        if not isinstance(material, sapien.render.RenderMaterial):
+            material = sapien.render.RenderMaterial(base_color=(*material[:3], 1))
 
         self.visual_records.append(
             VisualShapeRecord(
@@ -558,15 +527,13 @@ class ActorBuilder:
         pose: sapien.Pose = sapien.Pose(),
         radius: float = 1,
         half_length: float = 1,
-        material: VisualMaterialRecord = None,
+        material: Union[sapien.render.RenderMaterial, None, Vec3] = None,
         name: str = "",
     ):
         if material is None:
-            material = VisualMaterialRecord()
-        if not isinstance(
-            material, (VisualMaterialRecord, sapien.render.RenderMaterial)
-        ):
-            material = VisualMaterialRecord(base_color=(*material[:3], 1))
+            material = sapien.render.RenderMaterial()
+        if not isinstance(material, sapien.render.RenderMaterial):
+            material = sapien.render.RenderMaterial(base_color=(*material[:3], 1))
 
         self.visual_records.append(
             VisualShapeRecord(
@@ -585,15 +552,13 @@ class ActorBuilder:
         pose: sapien.Pose = sapien.Pose(),
         radius: float = 1,
         half_length: float = 1,
-        material: VisualMaterialRecord = None,
+        material: Union[sapien.render.RenderMaterial, None, Vec3] = None,
         name: str = "",
     ):
         if material is None:
-            material = VisualMaterialRecord()
-        if not isinstance(
-            material, (VisualMaterialRecord, sapien.render.RenderMaterial)
-        ):
-            material = VisualMaterialRecord(base_color=(*material[:3], 1))
+            material = sapien.render.RenderMaterial()
+        if not isinstance(material, sapien.render.RenderMaterial):
+            material = sapien.render.RenderMaterial(base_color=(*material[:3], 1))
 
         self.visual_records.append(
             VisualShapeRecord(
@@ -611,15 +576,13 @@ class ActorBuilder:
         self,
         pose: sapien.Pose = sapien.Pose(),
         radius: float = 1,
-        material: VisualMaterialRecord = None,
+        material: Union[sapien.render.RenderMaterial, None, Vec3] = None,
         name: str = "",
     ):
         if material is None:
-            material = VisualMaterialRecord()
-        if not isinstance(
-            material, (VisualMaterialRecord, sapien.render.RenderMaterial)
-        ):
-            material = VisualMaterialRecord(base_color=(*material[:3], 1))
+            material = sapien.render.RenderMaterial()
+        if not isinstance(material, sapien.render.RenderMaterial):
+            material = sapien.render.RenderMaterial(base_color=(*material[:3], 1))
 
         self.visual_records.append(
             VisualShapeRecord(
@@ -636,45 +599,19 @@ class ActorBuilder:
         self,
         filename: str,
         pose: sapien.Pose = sapien.Pose(),
-        scale: Vec3 = [1, 1, 1],
-        material: VisualMaterialRecord = None,
+        scale: Vec3 = (1, 1, 1),
+        material: Union[sapien.render.RenderMaterial, None, Vec3] = None,
         name: str = "",
     ):
         if material is not None and not isinstance(
-            material, (VisualMaterialRecord, sapien.render.RenderMaterial)
+            material, sapien.render.RenderMaterial
         ):
-            material = VisualMaterialRecord(base_color=(*material[:3], 1))
+            material = sapien.render.RenderMaterial(base_color=(*material[:3], 1))
 
         self.visual_records.append(
             VisualShapeRecord(
                 type="file",
                 filename=filename,
-                pose=pose,
-                scale=scale,
-                material=material,
-                name=name,
-            )
-        )
-        return self
-
-    def add_visual_from_mesh(
-        self,
-        mesh: MeshRecord,
-        pose: sapien.Pose = sapien.Pose(),
-        scale: Vec3 = [1, 1, 1],
-        material: VisualMaterialRecord = None,
-        name: str = "",
-    ):
-        if material is not None:
-            if not isinstance(
-                material, (VisualMaterialRecord, sapien.render.RenderMaterial)
-            ):
-                material = VisualMaterialRecord(base_color=(*material[:3], 1))
-
-        self.visual_records.append(
-            VisualShapeRecord(
-                type="mesh",
-                mesh=mesh,
                 pose=pose,
                 scale=scale,
                 material=material,

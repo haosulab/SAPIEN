@@ -16,11 +16,7 @@ from . import _vulkan_tricks
 from .wrapper.scene import Scene, SceneConfig, Widget
 from .wrapper.engine import Engine
 from .wrapper.renderer import SapienRenderer
-from .wrapper.actor_builder import (
-    ActorBuilder,
-    VisualMaterialRecord,
-    PhysicalMaterialRecord,
-)
+from .wrapper.actor_builder import ActorBuilder
 from .wrapper.articulation_builder import ArticulationBuilder
 from .wrapper.pinocchio_model import PinocchioModel
 

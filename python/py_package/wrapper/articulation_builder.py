@@ -1,4 +1,4 @@
-from .actor_builder import ActorBuilder, PhysicalMaterialRecord
+from .actor_builder import ActorBuilder
 from .. import pysapien as sapien
 import numpy as np
 from dataclasses import dataclass

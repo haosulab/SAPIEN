@@ -5,10 +5,10 @@ from lxml import etree as ET
 
 import numpy as np
 
-from ..pysapien.physx import PhysxArticulation
+from ..pysapien.physx import PhysxArticulation, PhysxMaterial
 from ..pysapien.render import RenderCameraComponent
 from ..pysapien import Pose
-from .articulation_builder import ArticulationBuilder, PhysicalMaterialRecord
+from .articulation_builder import ArticulationBuilder
 from .urchin import URDF
 
 
@@ -41,9 +41,9 @@ class URDFLoader:
 
     def _get_material(self, link_name, index):
         if link_name in self._link_material:
-            return PhysicalMaterialRecord(*self._link_material[link_name])
+            return  PhysxMaterial(*self._link_material[link_name])
         if self._material is not None:
-            return PhysicalMaterialRecord(*self._material)
+            return PhysxMaterial(*self._material)
         return None
 
     def _get_patch_radius(self, link_name, index):
