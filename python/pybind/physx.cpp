@@ -181,9 +181,6 @@ Generator<int> init_physx(py::module &sapien) {
   auto PyPhysxSceneConfig = py::class_<PhysxSceneConfig>(m, "PhysxSceneConfig");
   PyPhysxSceneConfig.def(py::init<>())
       .def_readwrite("gravity", &PhysxSceneConfig::gravity)
-      .def_readwrite("default_static_friction", &PhysxSceneConfig::static_friction)
-      .def_readwrite("default_dynamic_friction", &PhysxSceneConfig::dynamic_friction)
-      .def_readwrite("default_restitution", &PhysxSceneConfig::restitution)
       .def_readwrite("bounce_threshold", &PhysxSceneConfig::bounceThreshold)
       .def_readwrite("sleep_threshold", &PhysxSceneConfig::sleepThreshold)
       .def_readwrite("contact_offset", &PhysxSceneConfig::contactOffset)
@@ -199,34 +196,30 @@ Generator<int> init_physx(py::module &sapien) {
       .def(py::pickle(
           [](PhysxSceneConfig &config) {
             return py::make_tuple(
-                config.gravity, config.static_friction, config.dynamic_friction,
-                config.restitution, config.bounceThreshold, config.sleepThreshold,
+                config.gravity, config.bounceThreshold, config.sleepThreshold,
                 config.contactOffset, config.solverIterations, config.solverVelocityIterations,
                 config.enablePCM, config.enableTGS, config.enableCCD,
                 config.enableEnhancedDeterminism, config.enableFrictionEveryIteration);
           },
           [](py::tuple t) {
-            if (t.size() != 14) {
+            if (t.size() != 11) {
               throw std::runtime_error("Invalid state!");
             }
             PhysxSceneConfig config;
             config.gravity = t[0].cast<decltype(config.gravity)>();
-            config.static_friction = t[1].cast<decltype(config.static_friction)>();
-            config.dynamic_friction = t[2].cast<decltype(config.dynamic_friction)>();
-            config.restitution = t[3].cast<decltype(config.restitution)>();
-            config.bounceThreshold = t[4].cast<decltype(config.bounceThreshold)>();
-            config.sleepThreshold = t[5].cast<decltype(config.sleepThreshold)>();
-            config.contactOffset = t[6].cast<decltype(config.contactOffset)>();
-            config.solverIterations = t[7].cast<decltype(config.solverIterations)>();
+            config.bounceThreshold = t[1].cast<decltype(config.bounceThreshold)>();
+            config.sleepThreshold = t[2].cast<decltype(config.sleepThreshold)>();
+            config.contactOffset = t[3].cast<decltype(config.contactOffset)>();
+            config.solverIterations = t[4].cast<decltype(config.solverIterations)>();
             config.solverVelocityIterations =
-                t[8].cast<decltype(config.solverVelocityIterations)>();
-            config.enablePCM = t[9].cast<decltype(config.enablePCM)>();
-            config.enableTGS = t[10].cast<decltype(config.enableTGS)>();
-            config.enableCCD = t[11].cast<decltype(config.enableCCD)>();
+                t[5].cast<decltype(config.solverVelocityIterations)>();
+            config.enablePCM = t[6].cast<decltype(config.enablePCM)>();
+            config.enableTGS = t[7].cast<decltype(config.enableTGS)>();
+            config.enableCCD = t[8].cast<decltype(config.enableCCD)>();
             config.enableEnhancedDeterminism =
-                t[12].cast<decltype(config.enableEnhancedDeterminism)>();
+                t[9].cast<decltype(config.enableEnhancedDeterminism)>();
             config.enableFrictionEveryIteration =
-                t[13].cast<decltype(config.enableFrictionEveryIteration)>();
+                t[10].cast<decltype(config.enableFrictionEveryIteration)>();
             return config;
           }));
 

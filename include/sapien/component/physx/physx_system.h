@@ -14,9 +14,6 @@ class PhysxMaterial;
 
 struct PhysxSceneConfig {
   Vec3 gravity = {0, 0, -9.81};           // default gravity
-  float static_friction = 0.3f;           // default static friction coefficient
-  float dynamic_friction = 0.3f;          // default dynamic friction coefficient
-  float restitution = 0.1f;               // default restitution coefficient
   float bounceThreshold = 2.f;            // relative velocity below this will not bounce
   float sleepThreshold = 0.005f;          // put to sleep if (kinetic energy/(mass) falls below
   float contactOffset = 0.01f;            // how close should contacts be generated
@@ -30,9 +27,9 @@ struct PhysxSceneConfig {
       true; // better friction calculation, recommended for robotics
 
   template <class Archive> void serialize(Archive &ar) {
-    ar(gravity, static_friction, dynamic_friction, restitution, bounceThreshold, sleepThreshold,
-       contactOffset, solverIterations, solverVelocityIterations, enablePCM, enableTGS, enableCCD,
-       enableEnhancedDeterminism, enableFrictionEveryIteration);
+    ar(gravity, bounceThreshold, sleepThreshold, contactOffset, solverIterations,
+       solverVelocityIterations, enablePCM, enableTGS, enableCCD, enableEnhancedDeterminism,
+       enableFrictionEveryIteration);
   }
 };
 
