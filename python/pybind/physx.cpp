@@ -448,6 +448,19 @@ Generator<int> init_physx(py::module &sapien) {
       .def("get_angular_damping", &PhysxRigidBodyComponent::getAngularDamping)
       .def("set_angular_damping", &PhysxRigidBodyComponent::setAngularDamping, py::arg("damping"))
 
+      .def_property("max_depenetraion_velocity",
+                    &PhysxRigidBodyComponent::getMaxDepenetrationVelocity,
+                    &PhysxRigidBodyComponent::setMaxDepenetrationVelocity)
+      .def("get_max_depenetraion_velocity", &PhysxRigidBodyComponent::getMaxDepenetrationVelocity)
+      .def("set_max_depenetraion_velocity", &PhysxRigidBodyComponent::setMaxDepenetrationVelocity,
+           py::arg("velocity"))
+
+      .def_property("max_contact_impulse", &PhysxRigidBodyComponent::getMaxContactImpulse,
+                    &PhysxRigidBodyComponent::setMaxContactImpulse)
+      .def("get_max_contact_impulse", &PhysxRigidBodyComponent::getMaxContactImpulse)
+      .def("set_max_contact_impulse", &PhysxRigidBodyComponent::setMaxContactImpulse,
+           py::arg("impulse"))
+
       .def_property("mass", &PhysxRigidBodyComponent::getMass, &PhysxRigidBodyComponent::setMass)
       .def("get_mass", &PhysxRigidBodyComponent::getMass)
       .def("set_mass", &PhysxRigidBodyComponent::setMass)

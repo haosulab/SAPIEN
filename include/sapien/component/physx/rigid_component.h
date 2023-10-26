@@ -105,6 +105,12 @@ public:
   void addForceAtPoint(Vec3 const &force, Vec3 const &point, physx::PxForceMode::Enum mode);
   void addForceTorque(Vec3 const &force, Vec3 const &torque, physx::PxForceMode::Enum mode);
 
+  // related to physx contact handling
+  void setMaxDepenetrationVelocity(float speed);
+  float getMaxDepenetrationVelocity() const;
+  void setMaxContactImpulse(float impulse);
+  float getMaxContactImpulse() const;
+
   physx::PxRigidBody *getPxActor() const override = 0;
 
   template <class Archive> void save(Archive &ar) const {
@@ -113,7 +119,8 @@ public:
     physx::PxActorFlags::InternalType actorFlags = getPxActor()->getActorFlags();
     physx::PxRigidBodyFlags::InternalType rigidBodyFlags = getPxActor()->getRigidBodyFlags();
     ar(actorFlags, rigidBodyFlags, getLinearDamping(), getAngularDamping());
-    ar(getMass(), getInertia(), getCMassLocalPose());
+    ar(getMass(), getInertia(), getCMassLocalPose(), getMaxDepenetrationVelocity(),
+       getMaxContactImpulse());
 
     ar(mMassProperties.mass, mMassProperties.inertiaTensor.column0[0],
        mMassProperties.inertiaTensor.column0[1], mMassProperties.inertiaTensor.column0[2],
@@ -131,12 +138,14 @@ public:
 
     physx::PxActorFlags::InternalType actorFlags;
     physx::PxRigidBodyFlags::InternalType rigidBodyFlags;
-    float linearDamping, angularDamping;
-    ar(actorFlags, rigidBodyFlags, linearDamping, angularDamping);
+    float linearDamping, angularDamping, speed, impulse;
+    ar(actorFlags, rigidBodyFlags, linearDamping, angularDamping, speed, impulse);
     getPxActor()->setActorFlags(physx::PxActorFlags(actorFlags));
     getPxActor()->setRigidBodyFlags(physx::PxRigidBodyFlags(rigidBodyFlags));
     setLinearDamping(linearDamping);
     setAngularDamping(angularDamping);
+    setMaxDepenetrationVelocity(speed);
+    setMaxContactImpulse(impulse);
 
     float mass;
     Vec3 inertia;

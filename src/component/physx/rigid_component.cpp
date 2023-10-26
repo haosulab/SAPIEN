@@ -298,4 +298,17 @@ void PhysxRigidBodyComponent::addForceTorque(Vec3 const &force, Vec3 const &torq
   getPxActor()->addTorque(Vec3ToPxVec3(torque), mode);
 }
 
+void PhysxRigidBodyComponent::setMaxDepenetrationVelocity(float speed) {
+  getPxActor()->setMaxDepenetrationVelocity(speed);
+}
+float PhysxRigidBodyComponent::getMaxDepenetrationVelocity() const {
+  return getPxActor()->getMaxDepenetrationVelocity();
+}
+void PhysxRigidBodyComponent::setMaxContactImpulse(float impulse) {
+  getPxActor()->setMaxContactImpulse(impulse);
+}
+float PhysxRigidBodyComponent::getMaxContactImpulse() const {
+  return getPxActor()->getMaxContactImpulse();
+}
+
 } // namespace sapien::component
