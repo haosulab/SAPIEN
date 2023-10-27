@@ -114,7 +114,7 @@ class ArticulationWindow(Plugin):
                     .Value(j.damping)
                     .Callback(
                         (
-                            lambda j: lambda p: j.set_drive_properties(
+                            lambda j: lambda p: j.set_drive_property(
                                 j.stiffness,
                                 p.value,
                                 j.force_limit,
@@ -129,7 +129,7 @@ class ArticulationWindow(Plugin):
                     .Value(j.stiffness)
                     .Callback(
                         (
-                            lambda j: lambda p: j.set_drive_properties(
+                            lambda j: lambda p: j.set_drive_property(
                                 p.value,
                                 j.damping,
                                 j.force_limit,
@@ -144,7 +144,7 @@ class ArticulationWindow(Plugin):
                     .Value(j.force_limit)
                     .Callback(
                         (
-                            lambda j: lambda p: j.set_drive_properties(
+                            lambda j: lambda p: j.set_drive_property(
                                 j.stiffness,
                                 j.damping,
                                 p.value,
@@ -164,7 +164,7 @@ class ArticulationWindow(Plugin):
                     .Checked(j.drive_mode == "acceleration")
                     .Callback(
                         (
-                            lambda j: lambda p: j.set_drive_properties(
+                            lambda j: lambda p: j.set_drive_property(
                                 j.stiffness,
                                 j.damping,
                                 j.force_limit,

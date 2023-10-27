@@ -104,11 +104,11 @@ class ArticulationBuilder:
                 "revolute_unwrapped",
             ]:
                 link_component.joint.limit = np.array(b.joint_record.limits).flatten()
-                link_component.joint.set_drive_properties(0, b.joint_record.damping)
+                link_component.joint.set_drive_property(0, b.joint_record.damping)
 
             if link_component.joint.type == "continuous":
                 link_component.joint.limit = [-np.inf, np.inf]
-                link_component.joint.set_drive_properties(0, b.joint_record.damping)
+                link_component.joint.set_drive_property(0, b.joint_record.damping)
 
             links.append(link_component)
             entities.append(entity)

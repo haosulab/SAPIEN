@@ -612,8 +612,8 @@ Example:
       .def("get_armature", &PhysxArticulationJoint::getArmature)
       .def("set_armature", &PhysxArticulationJoint::setArmature, py::arg("armature"))
 
-      .def("set_drive_properties", &PhysxArticulationJoint::setDriveProperties,
-           py::arg("stiffness"), py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+      .def("set_drive_property", &PhysxArticulationJoint::setDriveProperties, py::arg("stiffness"),
+           py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
            py::arg("mode") = physx::PxForceMode::eFORCE)
 
       .def_property("drive_target", &PhysxArticulationJoint::getDriveTargetPosition,
