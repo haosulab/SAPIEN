@@ -278,6 +278,11 @@ class ControlWindow(Plugin):
                     R.UICheckbox()
                     .Label("Show Cameras in Viewport")
                     .Bind(self, "show_camera_linesets"),
+                ),
+                R.UISection()
+                .Label("Selection")
+                .Expanded(True)
+                .append(
                     R.UICheckbox()
                     .Label("Show Joint Axes")
                     .Bind(self, "show_joint_axes"),
@@ -289,11 +294,6 @@ class ControlWindow(Plugin):
                     .Min(0)
                     .Max(1)
                     .Bind(self, "coordinate_axes_scale"),
-                ),
-                R.UISection()
-                .Label("Selection")
-                .Expanded(True)
-                .append(
                     R.UISliderFloat()
                     .Label("Opacity")
                     .Min(0)
