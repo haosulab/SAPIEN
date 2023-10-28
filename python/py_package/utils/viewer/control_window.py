@@ -385,7 +385,7 @@ class ControlWindow(Plugin):
         """
         if self.focused_camera is None:
             return
-        self.viewer.set_camera_pose(self.focused_camera.pose)
+        self.viewer.set_camera_pose(self.focused_camera.global_pose)
 
     def _handle_focused_entity(self):
         if self.focused_entity is None:
