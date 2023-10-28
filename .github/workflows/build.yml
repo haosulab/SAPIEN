@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     container:
       image: fxiangucsd/sapien-build-env:3.2
       env:
@@ -23,3 +25,14 @@ jobs:
         with:
           name: wheels
           path: ./wheelhouse/*.whl
+      - name: Update Nightly Release
+        uses: andelf/nightly-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: nightly
+          name: 'Nightly Release'
+          prerelease: true
+          body: 'SAPIEN development nightly release. This release is mainly for internal testing. Stable releases are published to pypi https://pypi.org/project/sapien/'
+          files: |
+            ./wheelhouse/*.whl
