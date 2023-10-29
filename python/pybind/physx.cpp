@@ -604,17 +604,24 @@ Example:
       .def("set_friction", &PhysxArticulationJoint::setFriction, py::arg("friction"))
 
       .def_property("limit", &PhysxArticulationJoint::getLimit, &PhysxArticulationJoint::setLimit)
-      .def("get_limit", &PhysxArticulationJoint::getLimit)
-      .def("set_limit", &PhysxArticulationJoint::setLimit, py::arg("limit"))
+      .def_property("limits", &PhysxArticulationJoint::getLimit, &PhysxArticulationJoint::setLimit)
+      .def("get_limit", &PhysxArticulationJoint::getLimit, R"doc(same as get_limits)doc")
+      .def("get_limits", &PhysxArticulationJoint::getLimit)
+      .def("set_limit", &PhysxArticulationJoint::setLimit, py::arg("limit"),
+           R"doc(same as set_limits)doc")
+      .def("set_limits", &PhysxArticulationJoint::setLimit, py::arg("limit"))
 
       .def_property("armature", &PhysxArticulationJoint::getArmature,
                     &PhysxArticulationJoint::setArmature)
       .def("get_armature", &PhysxArticulationJoint::getArmature)
       .def("set_armature", &PhysxArticulationJoint::setArmature, py::arg("armature"))
 
+      .def("set_drive_properties", &PhysxArticulationJoint::setDriveProperties,
+           py::arg("stiffness"), py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
+           py::arg("mode") = physx::PxForceMode::eFORCE)
       .def("set_drive_property", &PhysxArticulationJoint::setDriveProperties, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
-           py::arg("mode") = physx::PxForceMode::eFORCE)
+           py::arg("mode") = physx::PxForceMode::eFORCE, R"doc(same as set_drive_properties)doc")
 
       .def_property("drive_target", &PhysxArticulationJoint::getDriveTargetPosition,
                     py::overload_cast<Eigen::VectorXf const &>(
@@ -698,7 +705,9 @@ Example:
       .def("set_qf", &PhysxArticulation::setQf, py::arg("qf"))
 
       .def_property_readonly("qlimit", &PhysxArticulation::getQLimit)
-      .def("get_qlimit", &PhysxArticulation::getQLimit)
+      .def_property_readonly("qlimits", &PhysxArticulation::getQLimit)
+      .def("get_qlimit", &PhysxArticulation::getQLimit, R"doc(same as get_qlimit)doc")
+      .def("get_qlimits", &PhysxArticulation::getQLimit)
 
       .def_property("root_pose", &PhysxArticulation::getRootPose, &PhysxArticulation::setRootPose)
       .def("get_root_pose", &PhysxArticulation::getRootPose)
