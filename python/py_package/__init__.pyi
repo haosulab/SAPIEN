@@ -22,7 +22,6 @@ import platform
 import sapien.pysapien.internal_renderer
 import sapien.pysapien.math
 import sapien.pysapien.physx
-import sapien.pysapien.render
 
 __all__ = [
     "ActorBuilder",
@@ -40,6 +39,7 @@ __all__ = [
     "SceneConfig",
     "System",
     "Widget",
+    "asset",
     "atexit",
     "internal_renderer",
     "math",
@@ -52,6 +52,7 @@ __all__ = [
     "render",
     "serialization",
     "set_log_level",
+    "utils",
     "version",
     "warn",
     "wrapper"

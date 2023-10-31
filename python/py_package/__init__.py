@@ -32,6 +32,8 @@ try:
 except RuntimeError:
     pass
 
+from . import utils
+from . import asset
 
 import atexit
 
