@@ -1,4 +1,5 @@
 #pragma once
+#include "./image.h"
 #include "sapien/serialize.h"
 #include <filesystem>
 #include <svulkan2/resource/material.h>
@@ -33,8 +34,10 @@ public:
   AddressMode getAddressModeW() const;
   int getMipmapLevels() const;
   bool getIsSrgb() const;
-
   int getChannels() const;
+
+  void download(void *data);
+  void upload(void *data);
 
   std::shared_ptr<svulkan2::resource::SVTexture> getTexture() const { return mTexture; }
 
@@ -48,10 +51,6 @@ protected:
 class SapienRenderTexture2D : public SapienRenderTexture {
 
 public:
-  // enum class FilterMode { eNEAREST, eLINEAR };
-  // enum class AddressMode { eREPEAT, eBORDER, eEDGE, eMIRROR };
-  // enum class Type { eBYTE, eINT, eHALF, eFLOAT, eOTHER };
-
   SapienRenderTexture2D(std::string_view filename, uint32_t mipLevels, FilterMode filterMode,
                         AddressMode addressMode);
   explicit SapienRenderTexture2D(std::shared_ptr<svulkan2::resource::SVTexture> tex);

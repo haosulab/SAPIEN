@@ -49,6 +49,78 @@ template <> struct type_caster<svulkan2::renderer::RTRenderer::DenoiserType> {
 };
 } // namespace pybind11::detail
 
+py::array downloadSapienTexture(SapienRenderTexture &texture) {
+  vk::Format format = texture.getFormat();
+  int channels = getFormatChannels(format);
+  int dim = texture.getDim();
+
+  std::vector<ssize_t> shape;
+  if (dim == 1) {
+    shape.push_back(texture.getWidth());
+  } else if (dim == 2) {
+    shape.push_back(texture.getHeight());
+    shape.push_back(texture.getWidth());
+  } else if (dim == 3) {
+    shape.push_back(texture.getDepth());
+    shape.push_back(texture.getHeight());
+    shape.push_back(texture.getWidth());
+  }
+  shape.push_back(channels);
+
+  size_t size = texture.getWidth() * texture.getHeight() * texture.getDepth() *
+                svulkan2::getFormatSize(format);
+  std::vector<char> data(size);
+
+  texture.download(data.data());
+  return py::array(py::dtype(getFormatTypestr(format)), shape, data.data());
+}
+
+py::array downloadSapienTexture2D(SapienRenderTexture2D &texture) {
+  return downloadSapienTexture(texture);
+}
+
+void uploadSapienTexture(SapienRenderTexture &texture, py::array array) {
+  if (!(array.flags() & py::array::c_style)) {
+    throw std::runtime_error("array is not contiguous.");
+  }
+
+  vk::Format format = texture.getFormat();
+  int channels = getFormatChannels(format);
+  int dim = texture.getDim();
+
+  std::vector<ssize_t> shape;
+  if (dim == 1) {
+    shape.push_back(texture.getWidth());
+  } else if (dim == 2) {
+    shape.push_back(texture.getHeight());
+    shape.push_back(texture.getWidth());
+  } else if (dim == 3) {
+    shape.push_back(texture.getDepth());
+    shape.push_back(texture.getHeight());
+    shape.push_back(texture.getWidth());
+  }
+  shape.push_back(channels);
+
+  // check array matches texture
+  if (!array.dtype().is(py::dtype(getFormatTypestr(format)))) {
+    throw std::runtime_error("array format does not match texture format");
+  }
+  if (array.ndim() != static_cast<int>(shape.size())) {
+    throw std::runtime_error("array dim does not match texture");
+  }
+  for (int i = 0; i < array.ndim(); ++i) {
+    if (array.shape(0) != shape.at(0)) {
+      throw std::runtime_error("array shape does not match texture");
+    }
+  }
+
+  texture.upload(array.request().ptr);
+}
+
+void uploadSapienTexture2D(SapienRenderTexture2D &texture, py::array array) {
+  uploadSapienTexture(texture, array);
+}
+
 static std::shared_ptr<SapienRenderTexture>
 CreateSapienTexture(py::array array, int dim, vk::Format format, uint32_t mipLevels,
                     SapienRenderTexture::FilterMode filterMode,
@@ -374,7 +446,9 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_filter_mode", &SapienRenderTexture::getFilterMode)
       .def_property_readonly("format", &SapienRenderTexture::getFormat)
       .def("get_format", &SapienRenderTexture::getFormat)
-      .def_property_readonly("is_srgb", &SapienRenderTexture::getIsSrgb);
+      .def_property_readonly("is_srgb", &SapienRenderTexture::getIsSrgb)
+      .def("download", &downloadSapienTexture)
+      .def("upload", &uploadSapienTexture, py::arg("data"));
 
   PyRenderTexture2D
       .def(py::init<std::string, uint32_t, SapienRenderTexture::FilterMode,
@@ -398,7 +472,9 @@ void init_sapien_renderer(py::module &sapien) {
       .def_property_readonly("filename", &SapienRenderTexture2D::getFilename)
       .def("get_filename", &SapienRenderTexture2D::getFilename)
       .def_property_readonly("format", &SapienRenderTexture2D::getFormat)
-      .def("get_format", &SapienRenderTexture2D::getFormat);
+      .def("get_format", &SapienRenderTexture2D::getFormat)
+      .def("download", &downloadSapienTexture2D)
+      .def("upload", &uploadSapienTexture2D, py::arg("data"));
 
   PyRenderTargetCuda.def_readonly("shape", &SapienRenderImageCuda::shape)
       .def_readonly("strides", &SapienRenderImageCuda::strides)

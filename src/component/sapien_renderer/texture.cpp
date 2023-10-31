@@ -162,24 +162,78 @@ SapienRenderTexture2D::SapienRenderTexture2D(std::shared_ptr<svulkan2::resource:
   mTexture = tex;
 }
 
-// SapienRenderTexture2D::Type SapienRenderTexture2D::getType() const {
-// switch (mTexture->getDescription().format) {
-// case svulkan2::resource::SVTextureDescription::Format::eUINT8:
-//   return Type::eBYTE;
-// case svulkan2::resource::SVTextureDescription::Format::eFLOAT:
-//   return Type::eFLOAT;
-// default:
-//   return Type::eOTHER;
-// }
-// return Type::eOTHER;
-// }
-
 std::string SapienRenderTexture2D::getFilename() const {
   if (mTexture->getDescription().source ==
       svulkan2::resource::SVTextureDescription::SourceType::eFILE) {
     return mTexture->getDescription().filename;
   }
   return "";
+}
+
+void SapienRenderTexture::download(void *data) {
+  if (!mTexture->isLoaded()) {
+    mTexture->loadAsync().get();
+  }
+  mTexture->uploadToDevice();
+
+  auto image = getTexture()->getImage()->getDeviceImage();
+  auto extent = image->getExtent();
+  size_t size =
+      extent.width * extent.height * extent.depth * svulkan2::getFormatSize(image->getFormat());
+
+  image->download(data, size, vk::Offset3D{0, 0, 0}, image->getExtent(), 0, 0);
+
+  // transfer image layout back immediately
+  auto context = mEngine->getContext();
+  auto pool = context->createCommandPool();
+  auto cb = pool->allocateCommandBuffer();
+  cb->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+  image->transitionLayout(cb.get(), vk::ImageLayout::eTransferSrcOptimal,
+                          vk::ImageLayout::eShaderReadOnlyOptimal,
+                          vk::AccessFlagBits::eTransferRead, vk::AccessFlagBits::eShaderRead,
+                          vk::PipelineStageFlagBits::eTransfer,
+                          vk::PipelineStageFlagBits::eFragmentShader |
+                              vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+  cb->end();
+  context->getQueue().submitAndWait(cb.get());
+}
+
+void SapienRenderTexture::upload(void *data) {
+  if (!mTexture->isLoaded()) {
+    mTexture->loadAsync().get();
+  }
+  mTexture->uploadToDevice();
+
+  auto image = getTexture()->getImage()->getDeviceImage();
+  auto extent = image->getExtent();
+  size_t size =
+      extent.width * extent.height * extent.depth * svulkan2::getFormatSize(image->getFormat());
+
+  auto context = mEngine->getContext();
+  auto pool = context->createCommandPool();
+
+  auto cb = pool->allocateCommandBuffer();
+  cb->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+  image->transitionLayout(
+      cb.get(), vk::ImageLayout::eShaderReadOnlyOptimal, vk::ImageLayout::eTransferDstOptimal,
+      vk::AccessFlagBits::eShaderRead, vk::AccessFlagBits::eTransferWrite,
+      vk::PipelineStageFlagBits::eFragmentShader | vk::PipelineStageFlagBits::eRayTracingShaderKHR,
+      vk::PipelineStageFlagBits::eTransfer);
+  cb->end();
+  context->getQueue().submitAndWait(cb.get());
+
+  image->uploadLevel(data, size, 0, 0);
+
+  cb = pool->allocateCommandBuffer();
+  cb->begin({vk::CommandBufferUsageFlagBits::eOneTimeSubmit});
+  image->transitionLayout(cb.get(), vk::ImageLayout::eTransferDstOptimal,
+                          vk::ImageLayout::eShaderReadOnlyOptimal,
+                          vk::AccessFlagBits::eTransferWrite, vk::AccessFlagBits::eShaderRead,
+                          vk::PipelineStageFlagBits::eTransfer,
+                          vk::PipelineStageFlagBits::eFragmentShader |
+                              vk::PipelineStageFlagBits::eRayTracingShaderKHR);
+  cb->end();
+  context->getQueue().submitAndWait(cb.get());
 }
 
 } // namespace component
