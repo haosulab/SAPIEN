@@ -149,68 +149,71 @@ class ActorBuilder:
             raise Exception(f"invalid physx body type [{self.physx_body_type}]")
 
         for r in self.collision_records:
-            if r.type == "plane":
-                shape = sapien.physx.PhysxCollisionShapePlane(
-                    material=r.material,
-                )
-                shapes = [shape]
-            elif r.type == "box":
-                shape = sapien.physx.PhysxCollisionShapeBox(
-                    half_size=r.scale, material=r.material
-                )
-                shapes = [shape]
-            elif r.type == "capsule":
-                shape = sapien.physx.PhysxCollisionShapeCapsule(
-                    radius=r.radius,
-                    half_length=r.length,
-                    material=r.material,
-                )
-                shapes = [shape]
-            elif r.type == "cylinder":
-                shape = sapien.physx.PhysxCollisionShapeCylinder(
-                    radius=r.radius,
-                    half_length=r.length,
-                    material=r.material,
-                )
-                shapes = [shape]
-            elif r.type == "sphere":
-                shape = sapien.physx.PhysxCollisionShapeSphere(
-                    radius=r.radius,
-                    material=r.material,
-                )
-                shapes = [shape]
-            elif r.type == "convex_mesh":
-                shape = sapien.physx.PhysxCollisionShapeConvexMesh(
-                    filename=r.filename,
-                    scale=r.scale,
-                    material=r.material,
-                )
-                shapes = [shape]
-            elif r.type == "nonconvex_mesh":
-                shape = sapien.physx.PhysxCollisionShapeTriangleMesh(
-                    filename=r.filename,
-                    scale=r.scale,
-                    material=r.material,
-                )
-                shapes = [shape]
-            elif r.type == "multiple_convex_meshes":
-                if r.decomposition == "coacd":
-                    params = r.decomposition_params
-                    if params is None:
-                        params = dict()
+            try:
+                if r.type == "plane":
+                    shape = sapien.physx.PhysxCollisionShapePlane(
+                        material=r.material,
+                    )
+                    shapes = [shape]
+                elif r.type == "box":
+                    shape = sapien.physx.PhysxCollisionShapeBox(
+                        half_size=r.scale, material=r.material
+                    )
+                    shapes = [shape]
+                elif r.type == "capsule":
+                    shape = sapien.physx.PhysxCollisionShapeCapsule(
+                        radius=r.radius,
+                        half_length=r.length,
+                        material=r.material,
+                    )
+                    shapes = [shape]
+                elif r.type == "cylinder":
+                    shape = sapien.physx.PhysxCollisionShapeCylinder(
+                        radius=r.radius,
+                        half_length=r.length,
+                        material=r.material,
+                    )
+                    shapes = [shape]
+                elif r.type == "sphere":
+                    shape = sapien.physx.PhysxCollisionShapeSphere(
+                        radius=r.radius,
+                        material=r.material,
+                    )
+                    shapes = [shape]
+                elif r.type == "convex_mesh":
+                    shape = sapien.physx.PhysxCollisionShapeConvexMesh(
+                        filename=r.filename,
+                        scale=r.scale,
+                        material=r.material,
+                    )
+                    shapes = [shape]
+                elif r.type == "nonconvex_mesh":
+                    shape = sapien.physx.PhysxCollisionShapeTriangleMesh(
+                        filename=r.filename,
+                        scale=r.scale,
+                        material=r.material,
+                    )
+                    shapes = [shape]
+                elif r.type == "multiple_convex_meshes":
+                    if r.decomposition == "coacd":
+                        params = r.decomposition_params
+                        if params is None:
+                            params = dict()
 
-                    filename = do_coacd(r.filename, **params)
+                        filename = do_coacd(r.filename, **params)
+                    else:
+                        filename = r.filename
+
+                    shapes = sapien.physx.PhysxCollisionShapeConvexMesh.load_multiple(
+                        filename=filename,
+                        scale=r.scale,
+                        material=r.material,
+                    )
                 else:
-                    filename = r.filename
-
-                shapes = sapien.physx.PhysxCollisionShapeConvexMesh.load_multiple(
-                    filename=filename,
-                    scale=r.scale,
-                    material=r.material,
-                )
-
-            else:
-                raise Exception(f"invalid collision shape type [{r.type}]")
+                    raise RuntimeError(f"invalid collision shape type [{r.type}]")
+            except RuntimeError as e:
+                # ignore runtime error (e.g., failed to cooke mesh)
+                continue
 
             for shape in shapes:
                 shape.local_pose = r.pose

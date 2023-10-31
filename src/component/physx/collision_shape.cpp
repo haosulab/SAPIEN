@@ -91,8 +91,10 @@ std::shared_ptr<PhysxMaterial> PhysxCollisionShape::getPhysicalMaterial() const 
 }
 
 PhysxCollisionShape::~PhysxCollisionShape() {
-  mPxShape->userData = nullptr;
-  mPxShape->release();
+  if (mPxShape) {
+    mPxShape->userData = nullptr;
+    mPxShape->release();
+  }
 }
 
 //////////////////// collision shape constructor ////////////////////
