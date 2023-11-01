@@ -264,3 +264,14 @@ class Viewer:
             if isinstance(plugin, ControlWindow):
                 return plugin
         return None
+
+    def loop(self, physx_steps=0):
+        """
+        A convenience method for opening a temporary viewer for a scene.
+        Simply call scene.create_viewer().loop()
+        """
+        while not self.closed:
+            for _ in range(physx_steps):
+                self.scene.physx_system.step()
+            self.scene.update_render()
+            self.render()

@@ -122,22 +122,21 @@ class Scene(_Scene):
     ):
         from .actor_builder import ActorBuilder
 
-        ground = (
-            ActorBuilder()
-            .set_scene(self)
-            .add_plane_visual(
+        builder = self.create_actor_builder()
+        if render:
+            builder.add_plane_visual(
                 sapien.Pose(p=[0, 0, altitude], q=[0.7071068, 0, -0.7071068, 0]),
                 [10, *render_half_size],
                 render_material,
                 "",
             )
-            .add_plane_collision(
-                sapien.Pose(p=[0, 0, altitude], q=[0.7071068, 0, -0.7071068, 0]),
-                material,
-            )
-            .set_physx_body_type("static")
-            .build()
+
+        builder.add_plane_collision(
+            sapien.Pose(p=[0, 0, altitude], q=[0.7071068, 0, -0.7071068, 0]),
+            material,
         )
+        builder.set_physx_body_type("static")
+        ground = builder.build()
         ground.name = "ground"
         return ground
 
