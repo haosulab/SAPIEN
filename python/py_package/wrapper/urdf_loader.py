@@ -542,8 +542,13 @@ class URDFLoader:
             if len(self.link2child_joints[root]) == 0:
                 actor_builders.append(self._parse_actor(root))
             else:
+                if root == robot.base_link.name:
+                    fix_base = self.fix_root_link
+                else:
+                    fix_base = False
+
                 articulation_builders.append(
-                    self._parse_articulation(root, root == robot.base_link.name)
+                    self._parse_articulation(root, fix_base)
                 )
 
         extra = ET.fromstring(robot.other_xml)
