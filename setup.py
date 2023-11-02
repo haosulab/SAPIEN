@@ -231,14 +231,20 @@ class CMakeBuild(build_ext):
             shutil.rmtree(oidn_library_path)
         os.makedirs(oidn_library_path, exist_ok=True)
 
-        for folder in ["lib", "lib64"]:
-            library_dir = os.path.join(sapien_install_dir, folder)
-            if not os.path.exists(library_dir):
-                continue
-            print('copy library from', library_dir)
-            for lib in os.listdir(library_dir):
-                if lib in ["libOpenImageDenoise.so.2.0.1", "libOpenImageDenoise_core.so.2.0.1", "libOpenImageDenoise_device_cuda.so.2.0.1"]:
-                    shutil.copy(os.path.join(library_dir, lib), oidn_library_path)
+        # provide oidn for linux
+        if platform.system() == "Linux":
+            for folder in ["lib", "lib64"]:
+                library_dir = os.path.join(sapien_install_dir, folder)
+                if not os.path.exists(library_dir):
+                    continue
+                print("copy library from", library_dir)
+                for lib in os.listdir(library_dir):
+                    if lib in [
+                        "libOpenImageDenoise.so.2.0.1",
+                        "libOpenImageDenoise_core.so.2.0.1",
+                        "libOpenImageDenoise_device_cuda.so.2.0.1",
+                    ]:
+                        shutil.copy(os.path.join(library_dir, lib), oidn_library_path)
 
     def copy_assets(self, ext):
         vulkan_shader_path = os.path.join(self.build_lib, "sapien", "vulkan_shader")

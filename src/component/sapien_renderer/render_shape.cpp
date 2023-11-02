@@ -93,6 +93,7 @@ RenderShapeTriangleMeshPart::getVertices() const {
 }
 
 CudaArrayHandle RenderShapeTriangleMeshPart::getVertexBufferCudaArray() const {
+#ifdef SAPIEN_CUDA
   int count = mShape->mesh->getVertexCount();
   int channels = mShape->mesh->getVertexSize() / 4;
   int itemsize = 4;
@@ -105,9 +106,13 @@ CudaArrayHandle RenderShapeTriangleMeshPart::getVertexBufferCudaArray() const {
                          .type = "f4",
                          .cudaId = mShape->mesh->getVertexBuffer().getCudaDeviceId(),
                          .ptr = mShape->mesh->getVertexBuffer().getCudaPtr()};
+#else
+  throw std::runtime_error("sapien is not copmiled with CUDA support");
+#endif
 }
 
 CudaArrayHandle RenderShapeTriangleMeshPart::getIndexBufferCudaArray() const {
+#ifdef SAPIEN_CUDA
   int count = mShape->mesh->getTriangleCount();
   int channels = 3;
   int itemsize = 4;
@@ -120,6 +125,9 @@ CudaArrayHandle RenderShapeTriangleMeshPart::getIndexBufferCudaArray() const {
                          .type = "u4",
                          .cudaId = mShape->mesh->getIndexBuffer().getCudaDeviceId(),
                          .ptr = mShape->mesh->getIndexBuffer().getCudaPtr()};
+#else
+  throw std::runtime_error("sapien is not copmiled with CUDA support");
+#endif
 }
 
 Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>

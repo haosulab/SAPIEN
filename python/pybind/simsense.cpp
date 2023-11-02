@@ -1,3 +1,5 @@
+#ifdef SAPIEN_CUDA
+
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <sapien/array.h>
@@ -223,3 +225,5 @@ void init_simsense(py::module &sapien) {
   PySimsense.def("set_uniqueness_ratio", &DepthSensorEnginePython::setUniquenessRatio);
   PySimsense.def("set_lr_max_diff", &DepthSensorEnginePython::setLrMaxDiff);
 }
+
+#endif

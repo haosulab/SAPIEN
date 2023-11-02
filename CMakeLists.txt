@@ -91,7 +91,7 @@ if (UNIX)
 endif ()
 
 if (${SAPIEN_CUDA})
-    target_compile_definitions(sapien PUBLIC SAPIEN_DLPACK SAPIEN_CUDA)
+    target_compile_definitions(sapien PUBLIC SAPIEN_CUDA SAPIEN_CUDA)
     target_include_directories(sapien PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/dlpack/include> "$ENV{CUDA_PATH}/include")
 endif()
 
@@ -126,7 +126,7 @@ if (${SAPIEN_CUDA})
     )
 else()
     install(
-        TARGETS sapien svulkan2 cereal
+        TARGETS sapien svulkan2 cereal glm Vulkan-Headers
         EXPORT sapienTargets
     )
 endif()

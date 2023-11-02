@@ -47,6 +47,7 @@ void PointCloudComponent::internalUpdate() {
 }
 
 CudaArrayHandle PointCloudComponent::getCudaArray() const {
+#ifdef SAPIEN_CUDA
   int count = mPointSet->getVertexCount();
   int channels = mPointSet->getVertexSize() / 4;
   int itemsize = 4;
@@ -56,14 +57,10 @@ CudaArrayHandle PointCloudComponent::getCudaArray() const {
                          .type = "f4",
                          .cudaId = mPointSet->getVertexBuffer().getCudaDeviceId(),
                          .ptr = mPointSet->getVertexBuffer().getCudaPtr()};
+#else
+  throw std::runtime_error("sapien is not copmiled with CUDA support");
+#endif
 }
-
-// void *PointCloudComponent::getCudaPtr() { return mPointSet->getVertexBuffer().getCudaPtr(); }
-// int PointCloudComponent::getCudaDevice() { return
-// mPointSet->getVertexBuffer().getCudaDeviceId(); } uint32_t PointCloudComponent::getVertexCount()
-// { return mPointSet->getVertexCount(); } uint32_t PointCloudComponent::getVertexChannels() {
-// return mPointSet->getVertexSize() / 4; } std::string PointCloudComponent::getVertexTypestr() {
-// return "f4"; }
 
 svulkan2::scene::Transform PointCloudComponent::getTransform() const {
   auto pose = getPose();

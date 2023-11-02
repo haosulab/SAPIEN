@@ -24,7 +24,9 @@ struct SapienRenderCameraInternal {
   std::unordered_map<std::string, std::vector<char>> mImageBuffers;
 
   // GPU image buffer
+#ifdef SAPIEN_CUDA
   std::unordered_map<std::string, std::shared_ptr<svulkan2::core::Buffer>> mCudaImageBuffers;
+#endif
   std::unique_ptr<svulkan2::core::CommandPool> mCommandPool;
   vk::UniqueCommandBuffer mCommandBuffer;
 
@@ -111,6 +113,7 @@ struct SapienRenderCameraInternal {
   }
 
   SapienRenderImageCuda getImageCuda(std::string const &name) {
+#ifdef SAPIEN_CUDA
     waitForRender();
 
     auto context = mEngine->getContext();
@@ -141,6 +144,9 @@ struct SapienRenderCameraInternal {
 
     return SapienRenderImageCuda(mWidth, mHeight, format, buffer->getCudaPtr(),
                                  buffer->getCudaDeviceId());
+#else
+    throw std::runtime_error("sapien is not copmiled with CUDA support");
+#endif
   }
 
   ~SapienRenderCameraInternal() { mScene->removeNode(*mCamera); }
@@ -236,10 +242,14 @@ SapienRenderImageCpu SapienRenderCameraComponent::getImage(std::string const &na
 }
 
 SapienRenderImageCuda SapienRenderCameraComponent::getImageCuda(std::string const &name) {
+#ifdef SAPIEN_CUDA
   if (!mCamera) {
     throw std::runtime_error("failed to get image: the camera is not added to scene");
   }
   return mCamera->getImageCuda(name);
+#else
+  throw std::runtime_error("sapien is not copmiled with CUDA support");
+#endif
 }
 
 // getters

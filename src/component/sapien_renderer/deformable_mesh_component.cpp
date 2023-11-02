@@ -65,6 +65,7 @@ uint32_t CudaDeformableMeshComponent::getMaxTriangleCount() const {
 }
 
 CudaArrayHandle CudaDeformableMeshComponent::getVertexBufferCudaArray() const {
+#ifdef SAPIEN_CUDA
   int count = mMesh->getMaxVertexCount();
   int channels = mMesh->getVertexSize() / 4;
   int itemsize = 4;
@@ -76,9 +77,13 @@ CudaArrayHandle CudaDeformableMeshComponent::getVertexBufferCudaArray() const {
                          .type = "f4",
                          .cudaId = mMesh->getVertexBuffer().getCudaDeviceId(),
                          .ptr = mMesh->getVertexBuffer().getCudaPtr()};
+#else
+  throw std::runtime_error("sapien is not copmiled with CUDA support");
+#endif
 }
 
 CudaArrayHandle CudaDeformableMeshComponent::getIndexBufferCudaArray() const {
+#ifdef SAPIEN_CUDA
   int count = mMesh->getMaxTriangleCount();
   int channels = 3;
   int itemsize = 4;
@@ -90,6 +95,9 @@ CudaArrayHandle CudaDeformableMeshComponent::getIndexBufferCudaArray() const {
                          .type = "u4",
                          .cudaId = mMesh->getIndexBuffer().getCudaDeviceId(),
                          .ptr = mMesh->getIndexBuffer().getCudaPtr()};
+#else
+  throw std::runtime_error("sapien is not copmiled with CUDA support");
+#endif
 }
 
 void CudaDeformableMeshComponent::onAddToScene(Scene &scene) {
@@ -114,6 +122,7 @@ void CudaDeformableMeshComponent::onRemoveFromScene(Scene &scene) {
 }
 
 void CudaDeformableMeshComponent::internalUpdate() {
+#ifdef SAPIEN_CUDA
   if (!mVertexProvider) {
     return;
   }
@@ -126,16 +135,13 @@ void CudaDeformableMeshComponent::internalUpdate() {
   cudaMemcpy2DAsync(mMesh->getVertexBuffer().getCudaPtr(), mMesh->getVertexSize(), source, 12, 12,
                     getVertexCount(), cudaMemcpyDeviceToDevice, stream);
 
-  // cudaDeviceSynchronize();
-
-  // semaphore
-
   cudaExternalSemaphoreSignalParams sigParams{};
   sigParams.flags = 0;
   sigParams.params.fence.value = ++mSemValue;
   cudaSignalExternalSemaphoresAsync(&mCudaSem, &sigParams, 1, stream);
   vk::PipelineStageFlags flags = vk::PipelineStageFlagBits::eVertexInput;
   mEngine->getContext()->getQueue().submit({}, mSem.get(), flags, mSemValue, {}, {}, {});
+#endif
 }
 
 void CudaDeformableMeshComponent::setDataSource(std::shared_ptr<CudaDataSource> vertexProvider) {
