@@ -176,8 +176,6 @@ template <> struct type_caster<physx::PxForceMode::Enum> {
 Generator<int> init_physx(py::module &sapien) {
   auto m = sapien.def_submodule("physx");
 
-  m.def("_unload", []() { MeshManager::Clear(); });
-
   auto PyPhysxSceneConfig = py::class_<PhysxSceneConfig>(m, "PhysxSceneConfig");
   PyPhysxSceneConfig.def(py::init<>())
       .def_readwrite("gravity", &PhysxSceneConfig::gravity)
@@ -855,4 +853,7 @@ Example:
       .def("get_default_material", &PhysxDefault::getDefaultMaterial);
 
   ////////// end global //////////
+
+  auto atexit = py::module_::import("atexit");
+  atexit.attr("register")(py::cpp_function([]() { MeshManager::Clear(); }));
 }

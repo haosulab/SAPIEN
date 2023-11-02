@@ -1101,8 +1101,6 @@ class PhysxSystem(sapien.pysapien.System):
     def timestep(self, arg1: float) -> None:
         pass
     pass
-def _unload() -> None:
-    pass
 def get_default_material() -> PhysxMaterial:
     pass
 def set_default_material(static_friction: float, dynamic_friction: float, restitution: float) -> None:

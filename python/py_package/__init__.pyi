@@ -15,7 +15,6 @@ from sapien.wrapper.renderer import SapienRenderer
 from sapien.wrapper.scene import Scene
 from sapien.pysapien import System
 from sapien.wrapper.scene import Widget
-import atexit
 import os
 import pkg_resources
 import platform
@@ -41,7 +40,6 @@ __all__ = [
     "System",
     "Widget",
     "asset",
-    "atexit",
     "internal_renderer",
     "math",
     "os",

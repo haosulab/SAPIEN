@@ -34,7 +34,3 @@ except RuntimeError:
 
 from . import utils
 from . import asset
-
-import atexit
-
-atexit.register(physx._unload)

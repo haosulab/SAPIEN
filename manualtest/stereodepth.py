@@ -1,5 +1,5 @@
 import sapien
-from sapien import Scene, Entity, Pose, ActorBuilder, VisualMaterialRecord
+from sapien import Scene, Entity, Pose, ActorBuilder
 from sapien.physx import PhysxSystem
 from sapien.render import RenderSystem
 from sapien.utils.viewer import Viewer
@@ -7,7 +7,7 @@ from sapien.sensor import StereoDepthSensor, StereoDepthSensorConfig
 
 import numpy as np
 import matplotlib.pyplot as plt
-import open3d as o3d
+import trimesh
 import torch
 
 
@@ -20,7 +20,7 @@ def build_scene(render_system, physx_system):
         .add_plane_visual(
             Pose(q=[0.7071068, 0, -0.7071068, 0]),
             [10, 10, 10],
-            VisualMaterialRecord(
+            sapien.render.RenderMaterial(
                 base_color=np.array([202, 164, 114, 256]) / 256, specular=0.5
             ),
             "",
@@ -36,7 +36,7 @@ def build_scene(render_system, physx_system):
         .add_sphere_visual(
             Pose(),
             0.06,
-            VisualMaterialRecord(
+            sapien.render.RenderMaterial(
                 base_color=[0.2, 0.2, 0.8, 1.0], roughness=0.5, metallic=0.0
             ),
             "",
@@ -53,7 +53,7 @@ def build_scene(render_system, physx_system):
         .add_sphere_visual(
             Pose(),
             0.07,
-            VisualMaterialRecord(
+            sapien.render.RenderMaterial(
                 base_color=[1.0, 1.0, 1.0, 1.0],
                 roughness=0.3,
                 metallic=0.0,
@@ -75,7 +75,7 @@ def build_scene(render_system, physx_system):
             Pose(),
             0.02,
             0.1,
-            VisualMaterialRecord(
+            sapien.render.RenderMaterial(
                 base_color=[0.8, 0.7, 0.1, 1.0], roughness=0.01, metallic=0.95
             ),
             "",
@@ -92,7 +92,7 @@ def build_scene(render_system, physx_system):
         .add_box_visual(
             Pose(),
             [0.09, 0.09, 0.09],
-            VisualMaterialRecord(
+            sapien.render.RenderMaterial(
                 base_color=[0.8, 0.2, 0.2, 1.0], roughness=0.01, metallic=1.0
             ),
             "",
@@ -148,45 +148,27 @@ def main():
     ir_l, ir_r = sensor.get_ir()
     depth = sensor.get_depth()
 
-    # Testing cuda buffer for depth
-    # depth_cuda = sensor.get_depth_cuda()
-    # torch_tensor = torch.as_tensor(depth_cuda)
-    # depth = torch_tensor.numpy()
-
     plt.subplot(221)
     plt.title("RGB Image")
     plt.imshow((rgb * 255).astype(np.uint8))
     plt.subplot(222)
     plt.title("Left Infrared Image")
-    plt.imshow((ir_l * 255).astype(np.uint8), cmap='gray')
+    plt.imshow((ir_l * 255).astype(np.uint8), cmap="gray")
     plt.subplot(223)
     plt.title("Right Infrared Image")
-    plt.imshow((ir_r * 255).astype(np.uint8), cmap='gray')
+    plt.imshow((ir_r * 255).astype(np.uint8), cmap="gray")
     plt.subplot(224)
     plt.title("Depth Map")
     plt.imshow(depth)
     plt.show()
 
-    pc = sensor.get_pointcloud(with_rgb=True) # From RGB camera's view with x rightward, y downward, z forward
-    pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(pc[..., :3] * np.array([1, -1, -1]))) # Change axis direction for easier view
-    pcd.colors = o3d.utility.Vector3dVector(pc[..., 3:])
-    o3d.visualization.draw_geometries([pcd])
-
-    # Testing cuda buffer for pointcloud
-    # pc = sensor.get_pointcloud_cuda(with_rgb=True) # From RGB camera's view with x rightward, y downward, z forward
-    # pc = torch.as_tensor(pc).numpy()
-    # pcd = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(pc[..., :3] * np.array([1, -1, -1]))) # Change axis direction for easier view
-    # pcd.colors = o3d.utility.Vector3dVector(pc[..., 3:])
-    # o3d.visualization.draw_geometries([pcd])
-
-    # viewer = Viewer(resolutions=(1920, 1080), shader_dir="../vulkan_shader/ibl")
-    # viewer.set_scene(scene)
-    # viewer.set_camera_pose(Pose([-0.420344, -0.218716, 0.339383], [0.927951, -0.0967264, 0.211487, 0.291245]))
-    # while not viewer.closed:
-    #     physx_system.step()
-    #     render_system.step()
-    #     viewer.render()
-    # viewer.close()
+    pc = sensor.get_pointcloud(
+        with_rgb=True
+    )  # From RGB camera's view with x rightward, y downward, z forward
+    pcd = trimesh.PointCloud(
+        pc[..., :3] * np.array([1, -1, -1]), pc[..., 3:]
+    )  # Change axis direction for easier view
+    pcd.show()
 
 
 if __name__ == "__main__":
