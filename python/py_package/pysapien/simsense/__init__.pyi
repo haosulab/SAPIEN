@@ -4,6 +4,7 @@ import typing
 import numpy
 import sapien.pysapien
 _Shape = typing.Tuple[int, ...]
+_T = typing.TypeVar("T")
 
 __all__ = [
     "DepthSensorEngine"

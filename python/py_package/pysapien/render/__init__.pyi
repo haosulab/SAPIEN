@@ -364,7 +364,7 @@ class RenderLightComponent(sapien.pysapien.Component):
     def shadow_near(self, arg1: float) -> None:
         pass
     pass
-class RenderImageCuda():
+class RenderImageCuda(sapien.pysapien.CudaArray):
     @property
     def __cuda_array_interface__(self) -> dict:
         """

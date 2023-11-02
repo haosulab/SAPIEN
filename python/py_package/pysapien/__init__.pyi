@@ -17,7 +17,8 @@ __all__ = [
     "math",
     "physx",
     "render",
-    "set_log_level"
+    "set_log_level",
+    "simsense"
 ]
 
 

@@ -22,6 +22,7 @@ import platform
 import sapien.pysapien.internal_renderer
 import sapien.pysapien.math
 import sapien.pysapien.physx
+import sapien.pysapien.simsense
 
 __all__ = [
     "ActorBuilder",
@@ -52,6 +53,7 @@ __all__ = [
     "render",
     "serialization",
     "set_log_level",
+    "simsense",
     "utils",
     "version",
     "warn",
