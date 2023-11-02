@@ -28,6 +28,16 @@ void PhysxJointComponent::setParent(std::shared_ptr<PhysxRigidBaseComponent> bod
   }
 }
 
+void PhysxJointComponent::setInvMassScales(float s0, float s1) {
+  getPxJoint()->setInvMassScale0(s0);
+  getPxJoint()->setInvMassScale1(s1);
+}
+
+void PhysxJointComponent::setInvInertiaScales(float s0, float s1) {
+  getPxJoint()->setInvInertiaScale0(s0);
+  getPxJoint()->setInvInertiaScale1(s1);
+}
+
 std::shared_ptr<PhysxRigidBaseComponent> PhysxJointComponent::getParent() const { return mParent; }
 
 void PhysxJointComponent::internalRefresh() {

@@ -27,6 +27,10 @@ public:
 
   Pose getRelativePose() const;
 
+  // TODO: serialize
+  void setInvMassScales(float, float);
+  void setInvInertiaScales(float, float);
+
   virtual physx::PxJoint *getPxJoint() const = 0;
   ~PhysxJointComponent();
 
@@ -93,7 +97,6 @@ private:
                       float damping);
   void setDrive(physx::PxD6Drive::Enum drive, float stiffness, float damping, float forceLimit,
                 DriveMode mode);
-
 
   physx::PxD6Joint *mJoint;
 };

@@ -768,7 +768,11 @@ Example:
       .def("set_pose_in_child", &PhysxJointComponent::setChildAnchorPose, py::arg("pose"))
 
       .def_property_readonly("relative_pose", &PhysxJointComponent::getRelativePose)
-      .def("get_relative_pose", &PhysxJointComponent::getRelativePose);
+      .def("get_relative_pose", &PhysxJointComponent::getRelativePose)
+      .def("set_inv_mass_scales", &PhysxJointComponent::setInvMassScales, py::arg("scale0"),
+           py::arg("scale1"))
+      .def("set_inv_inertia_scales", &PhysxJointComponent::setInvInertiaScales, py::arg("scale0"),
+           py::arg("scale1"));
 
   PyPhysxDriveComponent.def(py::init(&PhysxDriveComponent::Create), py::arg("body"))
       .def_property("drive_target", &PhysxDriveComponent::getDriveTarget,
