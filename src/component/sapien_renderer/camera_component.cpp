@@ -147,16 +147,16 @@ struct SapienRenderCameraInternal {
 };
 
 void SapienRenderCameraComponent::setProperty(std::string const &name, int property) {
-  if (!mCamera) {
-    throw std::runtime_error("camera property is only available for cameras added to scene");
+  mProperties[name] = property;
+  if (mCamera) {
+    mCamera->mRenderer->setCustomProperty(name, property);
   }
-  mCamera->mRenderer->setCustomProperty(name, property);
 }
 void SapienRenderCameraComponent::setProperty(std::string const &name, float property) {
-  if (!mCamera) {
-    throw std::runtime_error("camera property is only available for cameras added to scene");
+  mProperties[name] = property;
+  if (mCamera) {
+    mCamera->mRenderer->setCustomProperty(name, property);
   }
-  mCamera->mRenderer->setCustomProperty(name, property);
 }
 void SapienRenderCameraComponent::setTexture(std::string const &name,
                                              std::shared_ptr<SapienRenderTexture> texture) {
@@ -192,11 +192,17 @@ SapienRenderCameraComponent::SapienRenderCameraComponent(uint32_t width, uint32_
 
 void SapienRenderCameraComponent::onAddToScene(Scene &scene) {
   auto system = scene.getSapienRendererSystem();
-  // TODO: fix shader dir
   mCamera = std::make_unique<SapienRenderCameraInternal>(getWidth(), getHeight(), mShaderDir,
                                                          system->getScene());
   mCamera->mCamera->setPerspectiveParameters(mNear, mFar, mFx, mFy, mCx, mCy, mWidth, mHeight,
                                              mSkew);
+  for (auto &[k, v] : mProperties) {
+    if (std::holds_alternative<int>(v)) {
+      mCamera->mRenderer->setCustomProperty(k, std::get<int>(v));
+    } else {
+      mCamera->mRenderer->setCustomProperty(k, std::get<float>(v));
+    }
+  }
   system->registerComponent(
       std::static_pointer_cast<SapienRenderCameraComponent>(shared_from_this()));
 }

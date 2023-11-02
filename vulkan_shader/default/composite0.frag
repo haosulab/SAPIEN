@@ -1,5 +1,7 @@
 #version 450
 
+layout (constant_id = 0) const float exposure = 1.0;
+
 layout(set = 0, binding = 0) uniform sampler2D samplerLighting;
 layout(set = 0, binding = 1) uniform usampler2D samplerSegmentation;
 layout(set = 0, binding = 2) uniform sampler2D samplerPosition;
@@ -95,7 +97,7 @@ vec4 colors[60] = {
 
 void main() {
   outColor = texture(samplerLighting, inUV);
-  outColor = pow(outColor, vec4(1/2.2, 1/2.2, 1/2.2, 1));
+  outColor.rgb = pow(outColor.rgb * exposure, vec3(1/2.2));
   outColor = clamp(outColor, vec4(0), vec4(1));
 
   outDepthLinear.x = -texture(samplerPosition, inUV).z;

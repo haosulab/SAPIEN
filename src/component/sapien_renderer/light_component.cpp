@@ -146,5 +146,31 @@ void SapienRenderLightComponent::setLocalPose(Pose const &pose) { mLocalPose = p
 Pose SapienRenderLightComponent::getLocalPose() const { return mLocalPose; }
 Pose SapienRenderLightComponent::getGlobalPose() const { return getPose() * mLocalPose; }
 
+void SapienRenderLightComponent::setColor(Vec3 color) { mColor = color; }
+void SapienRenderPointLightComponent::setColor(Vec3 color) {
+  mColor = color;
+  if (mPointLight) {
+    mPointLight->setColor({color.x, color.y, color.z});
+  }
+}
+void SapienRenderDirectionalLightComponent::setColor(Vec3 color) {
+  mColor = color;
+  if (mDirectionalLight) {
+    mDirectionalLight->setColor({color.x, color.y, color.z});
+  }
+}
+void SapienRenderSpotLightComponent::setColor(Vec3 color) {
+  mColor = color;
+  if (mSpotLight) {
+    mSpotLight->setColor({color.x, color.y, color.z});
+  }
+}
+void SapienRenderParallelogramLightComponent::setColor(Vec3 color) {
+  mColor = color;
+  if (mParallelogramLight) {
+    mParallelogramLight->setColor({color.x, color.y, color.z});
+  }
+}
+
 } // namespace component
 } // namespace sapien

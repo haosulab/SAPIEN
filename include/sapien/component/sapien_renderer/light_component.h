@@ -13,7 +13,7 @@ namespace component {
 class SapienRenderLightComponent : public Component {
 public:
   Vec3 getColor() const { return mColor; }
-  void setColor(Vec3 color) { mColor = color; }
+  virtual void setColor(Vec3 color);
 
   bool getShadowEnabled() const { return mShadowEnabled; }
   void setShadowEnabled(bool enabled) { mShadowEnabled = enabled; }
@@ -59,6 +59,7 @@ public:
   void onRemoveFromScene(Scene &scene) override;
 
   void internalUpdate() override;
+  void setColor(Vec3 color) override;
 
   template <class Archive> void save(Archive &ar) const {
     ar(cereal::base_class<SapienRenderLightComponent>(this));
@@ -80,6 +81,7 @@ public:
   void onRemoveFromScene(Scene &scene) override;
 
   void internalUpdate() override;
+  void setColor(Vec3 color) override;
 
   template <class Archive> void save(Archive &ar) const {
     ar(cereal::base_class<SapienRenderLightComponent>(this));
@@ -106,6 +108,7 @@ public:
   void onRemoveFromScene(Scene &scene) override;
 
   void internalUpdate() override;
+  void setColor(Vec3 color) override;
 
   template <class Archive> void save(Archive &ar) const {
     ar(cereal::base_class<SapienRenderLightComponent>(this));
@@ -160,6 +163,7 @@ public:
   float getAngle() const { return mAngle; }
 
   void internalUpdate() override;
+  void setColor(Vec3 color) override;
 
   template <class Archive> void save(Archive &ar) const {
     ar(cereal::base_class<SapienRenderLightComponent>(this));

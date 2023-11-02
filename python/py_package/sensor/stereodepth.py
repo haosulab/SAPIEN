@@ -22,8 +22,7 @@ class StereoDepthSensorConfig:
         )
         """Path to active light pattern file. Use RGB modality if set to None."""
 
-        # TODO: implement camera exposure
-        # self.ir_camera_exposure = 0.01
+        self.ir_camera_exposure = 0.01
         # """Camera exposure for infrared cameras."""
 
         self.rgb_resolution = (1920, 1080)
@@ -148,8 +147,7 @@ class StereoDepthSensor:
 
         # Active light
         self._alight = None
-        # TODO: uncomment this after real time color adjustment implemented
-        # self._create_light()
+        self._create_light()
 
         # Simsense component
         self._ss = SimSenseComponent(
@@ -175,7 +173,7 @@ class StereoDepthSensor:
             config.uniqueness_ratio,
             config.lr_max_diff,
             config.median_filter_size,
-            config.depth_dilation
+            config.depth_dilation,
         )
         self._mount.add_component(self._ss)
 
@@ -407,8 +405,6 @@ class StereoDepthSensor:
             self._config.ir_intrinsic[1, 2],
             self._config.ir_intrinsic[0, 1],
         )
-        # TODO: uncomment after exposure is implemented
-        # self._cam_ir_l.set_property('exposure', self._config.ir_camera_exposure)
 
         self._cam_ir_r = RenderCameraComponent(*self._config.ir_resolution)
         self._cam_ir_r.local_pose = self._pose * self._config.trans_pose_r
@@ -422,12 +418,13 @@ class StereoDepthSensor:
             self._config.ir_intrinsic[1, 2],
             self._config.ir_intrinsic[0, 1],
         )
-        # TODO: uncomment after exposure is implemented
-        # self._cam_ir_r.set_property('exposure', self._config.ir_camera_exposure)
 
         self._mount.add_component(self._cam_rgb)
         self._mount.add_component(self._cam_ir_l)
         self._mount.add_component(self._cam_ir_r)
+
+        self._cam_ir_l.set_property("exposure", float(self._config.ir_camera_exposure))
+        self._cam_ir_r.set_property("exposure", float(self._config.ir_camera_exposure))
 
     def _create_light(self):
         # Active Light
@@ -443,15 +440,9 @@ class StereoDepthSensor:
     def _ir_mode(self):
         if self._config.light_pattern is None:
             return
-        else:
-            # TODO: real time color adjustment
-            # self._alight.color = [100, 0, 0]
-            return
+        self._alight.color = [100, 0, 0]
 
     def _normal_mode(self):
         if self._config.light_pattern is None:
             return
-        else:
-            # TODO: real time color adjustment
-            # self._alight.color = [0, 0, 0]
-            return
+        self._alight.color = [0, 0, 0]

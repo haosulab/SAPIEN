@@ -5,6 +5,7 @@
 #include "sapien/math/pose.h"
 #include "sapien/serialize.h"
 #include <svulkan2/scene/camera.h>
+#include <variant>
 
 namespace sapien {
 class Entity;
@@ -100,6 +101,8 @@ private:
   float mFar{};
   float mSkew{};
   std::string mShaderDir;
+
+  std::map<std::string, std::variant<int, float>> mProperties;
 
   std::unique_ptr<SapienRenderCameraInternal> mCamera;
   Pose mLocalPose;

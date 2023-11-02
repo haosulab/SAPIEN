@@ -103,13 +103,17 @@ def build_scene(render_system, physx_system):
     box.name = "box"
     box.pose = Pose([0.05, 0.26797, 0.09], [1, 0, 0, 0])
 
-    # scene.set_ambient_light([0.3, 0.3, 0.3])
-    # scene.add_directional_light([0, 0.5, -1], color=[3.0, 3.0, 3.0])
+    scene.set_ambient_light([0.3, 0.3, 0.3])
+    scene.add_directional_light([0, 0.5, -1], color=[0.5, 0.5, 0.5])
 
     return scene
 
 
 def main():
+    sapien.render.set_camera_shader_dir("rt")
+    sapien.render.set_ray_tracing_denoiser("optix")
+    sapien.render.set_ray_tracing_samples_per_pixel(4)
+
     render_system = RenderSystem()
     physx_system = PhysxSystem()
     scene = build_scene(render_system, physx_system)
@@ -120,17 +124,6 @@ def main():
 
     # Test infrared light
     from sapien.render import RenderTexturedLightComponent, RenderTexture2D
-
-    alight = RenderTexturedLightComponent()
-    alight.color = [1, 0, 0]
-    alight.inner_fov = 1.57
-    alight.outer_fov = 1.57
-    alight.texture = RenderTexture2D(
-        "../python/py_package/sensor/assets/patterns/d415.png"
-    )
-    alight.local_pose = Pose()
-    alight.name = "infrared_light"
-    sensor_entity.add_component(alight)
 
     scene.add_entity(sensor_entity)
     sensor_entity.set_pose(
