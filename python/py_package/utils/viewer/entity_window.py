@@ -79,7 +79,9 @@ class EntityWindow(Plugin):
                         vs = sapien.render.RenderShapePlane([1, 1e4, 1e4], blue_mat)
 
                     elif isinstance(s, sapien.physx.PhysxCollisionShapeCylinder):
-                        vs = sapien.render.RenderShapeCylinder(s.radius, s.half_length, green_mat)
+                        vs = sapien.render.RenderShapeCylinder(
+                            s.radius, s.half_length, green_mat
+                        )
 
                     else:
                         raise Exception(
@@ -805,3 +807,6 @@ class EntityWindow(Plugin):
         if self.ui_window:
             return [self.ui_window]
         return []
+
+    def notify_scene_change(self):
+        self.reset()

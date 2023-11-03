@@ -34,6 +34,11 @@ class RenderOptionsWindow(Plugin):
 
     def reset(self):
         self.ui_window = None
+        self.shader_dir = None
+        self.shader_index = None
+        self.shader_list = None
+        self.shader_type = None
+        self.shader_types = None
 
     @property
     def is_rt(self):

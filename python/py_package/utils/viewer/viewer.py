@@ -53,8 +53,6 @@ class Viewer:
         if renderer is None:
             renderer = SapienRenderer()
 
-        self.renderer = renderer
-
         self.renderer_context = renderer._internal_context
 
         if not shader_dir:
@@ -125,7 +123,15 @@ class Viewer:
         return self.window is None
 
     def close(self):
+        for plugin in self.plugins:
+            plugin.close()
+
+        self.selected_entity = None
+        self.scene = None
+        self.system = None
         self.window = None
+        self.plugins = None
+        self.renderer_context = None
 
     def set_camera_pose(self, pose):
         self.window.set_camera_pose(pose)
@@ -140,8 +146,6 @@ class Viewer:
 
     def render(self):
         if self.window.should_close:
-            for plugin in self.plugins:
-                plugin.close()
             self.close()
 
         if self.closed:

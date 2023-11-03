@@ -14,15 +14,21 @@ class TransformWindow(Plugin):
         self.gizmo = None
         self._gizmo_pose = sapien.Pose()
         self.ghost_objects = []
+
         self.ik_articulation = None
-        self.follow = False
         self.ik_enabled = True
+
+        self.ik_errpr = None
+        self.ik_result = None
+        self.ik_success = False
+
+        self.follow = False
         self.display_ghosts = False
-
         self.enabled = False
-
-        # self.ui_move_group = None
+        self.ui_move_group = None
         self.move_group_joints = []
+        self.move_group_selection = []
+        self.pinocchio_model = None
 
     def close(self):
         self.reset()
