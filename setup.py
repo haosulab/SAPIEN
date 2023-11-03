@@ -160,8 +160,8 @@ class CMakeBuild(build_ext):
         extdir = os.path.abspath(os.path.dirname(original_full_path))
         extdir = os.path.join(extdir, self.distribution.get_name())
         cmake_args = [
-            "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
-            "-DPYTHON_EXECUTABLE=" + sys.executable,
+            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
+            f"-DPYTHON_EXECUTABLE={sys.executable}",
         ]
         if args.debug:
             cfg = "Debug"
@@ -191,8 +191,8 @@ class CMakeBuild(build_ext):
         extdir = os.path.abspath(os.path.dirname(original_full_path))
         extdir = os.path.join(extdir, self.distribution.get_name())
         cmake_args = [
-            "-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=" + extdir,
-            "-DPYTHON_EXECUTABLE=" + sys.executable,
+            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
+            f"-DPYTHON_EXECUTABLE={sys.executable}",
         ]
         if args.debug:
             cfg = "Debug"
