@@ -79,11 +79,13 @@ void SapienRendererDefault::internalSetShaderSearchPath(std::string const &dir) 
 }
 
 void SapienRendererDefault::setImguiIniFilename(std::string const &filename) {
-  svulkan2::renderer::GuiWindow::gImguiIniFileLocation = filename;
+  svulkan2::renderer::GuiWindow::setImguiIniFileLocation(filename);
+  // svulkan2::renderer::GuiWindow::gImguiIniFileLocation = filename;
 }
 
 std::string SapienRendererDefault::getImguiIniFilename() {
-  return svulkan2::renderer::GuiWindow::gImguiIniFileLocation;
+  return svulkan2::renderer::GuiWindow::getImguiIniFileLocation();
+  // return svulkan2::renderer::GuiWindow::gImguiIniFileLocation;
 }
 
 } // namespace component

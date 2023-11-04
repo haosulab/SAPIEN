@@ -7,7 +7,9 @@
 #include "sapien/serialize.h"
 #include <svulkan2/resource/model.h>
 
+#ifdef SAPIEN_CUDA
 #include <cuda_runtime.h>
+#endif
 
 namespace sapien {
 namespace component {
@@ -49,9 +51,11 @@ private:
 
   svulkan2::scene::Object *mObject{};
 
+#ifdef SAPIEN_CUDA
   vk::UniqueSemaphore mSem{};
   cudaExternalSemaphore_t mCudaSem{};
   uint64_t mSemValue{0};
+#endif
 };
 
 } // namespace component

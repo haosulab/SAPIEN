@@ -4,8 +4,6 @@
 #include "sapien/entity.h"
 #include "sapien/scene.h"
 
-#include <cuda_runtime.h>
-
 namespace sapien {
 namespace component {
 
@@ -14,6 +12,7 @@ CudaDeformableMeshComponent::CudaDeformableMeshComponent(uint32_t maxVertexCount
   mEngine = SapienRenderEngine::Get();
   mMesh = std::make_shared<svulkan2::resource::SVMeshDeformable>(maxVertexCount, maxTriangleCount);
 
+#ifdef SAPIEN_CUDA
   vk::SemaphoreTypeCreateInfo timelineCreateInfo(vk::SemaphoreType::eTimeline, 0);
   vk::SemaphoreCreateInfo createInfo{};
   vk::ExportSemaphoreCreateInfo exportCreateInfo(
@@ -34,8 +33,8 @@ CudaDeformableMeshComponent::CudaDeformableMeshComponent(uint32_t maxVertexCount
     throw std::runtime_error("Failed to export semaphore to CUDA: " +
                              std::string(cudaGetErrorName(err)));
   }
+#endif
 
-  // TODO: set material
   mMaterial = std::make_shared<SapienRenderMaterial>();
 }
 

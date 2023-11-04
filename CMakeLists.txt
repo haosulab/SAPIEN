@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 project(sapien LANGUAGES C CXX)
 
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
+endif()
+
+
 set(CMAKE_CXX_STANDARD 20)
 
 if(MSVC)
@@ -49,7 +54,10 @@ list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(physx5)
 include(zlib)
-include(grpc)
+
+# TODO: re-enable render server
+# include(grpc)
+
 include(eigen)
 include(vulkan)
 include(cereal)
@@ -84,7 +92,8 @@ file(GLOB_RECURSE SAPIEN_SRC "src/*.h" "src/*.cpp" "src/*.cc")
 add_library(sapien SHARED ${SAPIEN_SRC})
 
 target_link_libraries(sapien PUBLIC eigen svulkan2 cereal)
-target_link_libraries(sapien PRIVATE physx5 spdlog::spdlog easy_profiler grpc++ ${CMAKE_DL_LIBS} assimp::assimp)
+target_link_libraries(sapien PRIVATE physx5 spdlog::spdlog easy_profiler # grpc++
+    ${CMAKE_DL_LIBS} assimp::assimp)
 
 if (UNIX)
     target_link_libraries(sapien PRIVATE stdc++fs)

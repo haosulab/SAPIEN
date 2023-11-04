@@ -101,8 +101,11 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
     else:
         cmake_args += ["-DSAPIEN_CUDA=OFF"]
 
-    cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
-    cmake_args += ["-DCMAKE_INSTALL_PREFIX=" + install_dir]
+    cmake_args += [
+        f"-DCMAKE_BUILD_TYPE={cfg}",
+        f"-DCMAKE_INSTALL_PREFIX={install_dir}",
+        "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+    ]
 
     env = os.environ.copy()
     subprocess.check_call(
@@ -162,6 +165,7 @@ class CMakeBuild(build_ext):
         cmake_args = [
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
+            f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
         ]
         if args.debug:
             cfg = "Debug"
@@ -193,6 +197,7 @@ class CMakeBuild(build_ext):
         cmake_args = [
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
+            f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
         ]
         if args.debug:
             cfg = "Debug"

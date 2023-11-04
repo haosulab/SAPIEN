@@ -36,7 +36,7 @@ endif()
 
 if (WIN32)
   target_include_directories(physx5 SYSTEM INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/include>)
-  target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/bin/win.x86_64.vc143.md/release>)
+  target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/physx/bin/win.x86_64.vc143.mt/release>)
   target_link_libraries(physx5 INTERFACE
     PhysXVehicle2_static_64.lib PhysXExtensions_static_64.lib
     PhysXVehicle_static_64.lib PhysX_static_64.lib PhysXPvdSDK_static_64.lib
