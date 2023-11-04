@@ -15,8 +15,6 @@ class Scene;
 // class Module;
 
 class Entity : public std::enable_shared_from_this<Entity> {
-  static uint64_t gNextEntityId;
-
 public:
   Entity();
 

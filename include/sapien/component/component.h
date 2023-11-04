@@ -12,10 +12,9 @@ class Scene;
 namespace component {
 
 class Component : public std::enable_shared_from_this<Component> {
-  static uint64_t gNextComponentId;
-
 public:
-  Component() : mId(gNextComponentId++) {}
+  Component();
+
   std::shared_ptr<Entity> getEntity() const { return mEntity.lock(); }
   std::string getName() const { return mName; }
   void setName(std::string const &name) { mName = name; }

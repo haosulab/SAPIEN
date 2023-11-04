@@ -16,8 +16,8 @@ template <> struct type_caster<CpuArrayHandle> {
   static py::handle cast(CpuArrayHandle const &src, py::return_value_policy policy,
                          py::handle parent) {
 
-    std::vector<ssize_t> shape;
-    std::vector<ssize_t> strides;
+    std::vector<py::ssize_t> shape;
+    std::vector<py::ssize_t> strides;
     for (auto s : src.shape) {
       shape.push_back(s);
     }
@@ -43,8 +43,8 @@ template <> struct type_caster<CpuArray> {
 
   static py::handle cast(CpuArray const &src, py::return_value_policy policy, py::handle parent) {
 
-    std::vector<ssize_t> shape;
-    std::vector<ssize_t> strides;
+    std::vector<py::ssize_t> shape;
+    std::vector<py::ssize_t> strides;
     for (auto s : src.shape) {
       shape.push_back(s);
     }

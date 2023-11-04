@@ -4,7 +4,8 @@
 
 namespace sapien::component {
 
-uint64_t Component::gNextComponentId = 1ul;
+static uint64_t gNextComponentId = 1ul;
+Component::Component() : mId(gNextComponentId++) {}
 
 std::shared_ptr<Scene> Component::getScene() {
   if (auto e = getEntity()) {

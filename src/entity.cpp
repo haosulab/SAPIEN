@@ -4,7 +4,7 @@
 
 namespace sapien {
 
-uint64_t Entity::gNextEntityId = 1ul;
+static uint64_t gNextEntityId = 1ul;
 
 Entity::Entity() : mId(gNextEntityId++) {}
 

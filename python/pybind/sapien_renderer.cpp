@@ -54,7 +54,7 @@ py::array downloadSapienTexture(SapienRenderTexture &texture) {
   int channels = getFormatChannels(format);
   int dim = texture.getDim();
 
-  std::vector<ssize_t> shape;
+  std::vector<py::ssize_t> shape;
   if (dim == 1) {
     shape.push_back(texture.getWidth());
   } else if (dim == 2) {
@@ -88,7 +88,7 @@ void uploadSapienTexture(SapienRenderTexture &texture, py::array array) {
   int channels = getFormatChannels(format);
   int dim = texture.getDim();
 
-  std::vector<ssize_t> shape;
+  std::vector<py::ssize_t> shape;
   if (dim == 1) {
     shape.push_back(texture.getWidth());
   } else if (dim == 2) {

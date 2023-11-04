@@ -17,6 +17,8 @@ public:
     [[noreturn]] static void unhandled_exception() { throw; }
 
     std::optional<T> current_value;
+
+    void return_void() noexcept {}
   };
 
   using Handle = std::coroutine_handle<promise_type>;
