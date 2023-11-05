@@ -8,11 +8,20 @@ if (IS_DIRECTORY ${SAPIEN_PHYSX5_DIR})
 else()
   # We provide a precompiled physx5 here
   include(FetchContent)
-  FetchContent_Declare(
-    physx5
-    URL https://storage1.ucsd.edu/datasets/PhysX5_compiled.zip
-    URL_HASH MD5=42447aca1effc64ac281510757f36760
-  )
+
+  if (UNIX)
+    FetchContent_Declare(
+      physx5
+      URL https://storage1.ucsd.edu/datasets/PhysX5_compiled.zip
+      URL_HASH MD5=42447aca1effc64ac281510757f36760
+    )
+  elseif (WIN32)
+    FetchContent_Declare(
+      physx5
+      URL https://storage1.ucsd.edu/datasets/PhysX5_compiled_windows.zip
+      URL_HASH MD5=84d05333a60b78655690b1225a3c5ea8
+    )
+  endif()
   FetchContent_MakeAvailable(physx5)
 endif()
 
