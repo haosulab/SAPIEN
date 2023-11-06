@@ -346,7 +346,8 @@ void init_sapien_renderer(py::module &sapien) {
 
   auto PyRenderTexture2D = py::class_<SapienRenderTexture2D>(m, "RenderTexture2D");
 
-  auto PyRenderTargetCuda = py::class_<SapienRenderImageCuda, CudaArrayHandle>(m, "RenderImageCuda");
+  auto PyRenderTargetCuda =
+      py::class_<SapienRenderImageCuda, CudaArrayHandle>(m, "RenderImageCuda");
 
   auto PyRenderCubemap = py::class_<SapienRenderCubemap>(m, "RenderCubemap");
 
@@ -572,7 +573,10 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_local_pose", &RenderShape::getLocalPose)
       .def("set_local_pose", &RenderShape::setLocalPose)
       .def_property_readonly("per_scene_id", &RenderShape::getRenderId)
-      .def("get_per_scene_id", &RenderShape::getRenderId);
+      .def("get_per_scene_id", &RenderShape::getRenderId)
+      .def_property("name", &RenderShape::getName, &RenderShape::setName)
+      .def("get_name", &RenderShape::getName)
+      .def("set_name", &RenderShape::setName, py::arg("name"));
 
   PyRenderShapePlane
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("scale"),

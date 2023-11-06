@@ -166,10 +166,12 @@ class EntityWindow(Plugin):
                             .Label("Plane")
                             .Id("visual{}".format(idx))
                             .append(
+                                R.UIDisplayText().Text(f"Name: {s.name}"),
+                                R.UIDisplayText().Text(f"Id: {s.per_scene_id}"),
                                 R.UIInputFloat3()
                                 .Label("Scale")
                                 .ReadOnly(True)
-                                .Value(s.scale)
+                                .Value(s.scale),
                             )
                         )
                     if s.__class__.__name__ == "RenderShapeBox":
@@ -178,10 +180,12 @@ class EntityWindow(Plugin):
                             .Label("Box")
                             .Id("visual{}".format(idx))
                             .append(
+                                R.UIDisplayText().Text(f"Name: {s.name}"),
+                                R.UIDisplayText().Text(f"Id: {s.per_scene_id}"),
                                 R.UIInputFloat3()
                                 .Label("Half Size")
                                 .ReadOnly(True)
-                                .Value(s.half_size)
+                                .Value(s.half_size),
                             )
                         )
                     if s.__class__.__name__ == "RenderShapeSphere":
@@ -190,10 +194,12 @@ class EntityWindow(Plugin):
                             .Label("Sphere")
                             .Id("visual{}".format(idx))
                             .append(
+                                R.UIDisplayText().Text(f"Name: {s.name}"),
+                                R.UIDisplayText().Text(f"Id: {s.per_scene_id}"),
                                 R.UIInputFloat()
                                 .Label("Radius")
                                 .ReadOnly(True)
-                                .Value(s.radius)
+                                .Value(s.radius),
                             )
                         )
                     if s.__class__.__name__ == "RenderShapeCapsule":
@@ -202,6 +208,8 @@ class EntityWindow(Plugin):
                             .Label("Capsule")
                             .Id("visual{}".format(idx))
                             .append(
+                                R.UIDisplayText().Text(f"Name: {s.name}"),
+                                R.UIDisplayText().Text(f"Id: {s.per_scene_id}"),
                                 R.UIInputFloat()
                                 .Label("Radius")
                                 .ReadOnly(True)
@@ -218,6 +226,8 @@ class EntityWindow(Plugin):
                             .Label("Cylinder")
                             .Id("visual{}".format(idx))
                             .append(
+                                R.UIDisplayText().Text(f"Name: {s.name}"),
+                                R.UIDisplayText().Text(f"Id: {s.per_scene_id}"),
                                 R.UIInputFloat()
                                 .Label("Radius")
                                 .ReadOnly(True)
@@ -233,6 +243,10 @@ class EntityWindow(Plugin):
                             R.UITreeNode()
                             .Label("Triangle Mesh")
                             .Id("visual{}".format(idx))
+                            .append(
+                                R.UIDisplayText().Text(f"Name: {s.name}"),
+                                R.UIDisplayText().Text(f"Id: {s.per_scene_id}"),
+                            )
                             # .append(
                             #     R.UIInputFloat()
                             #     .Label("filename")

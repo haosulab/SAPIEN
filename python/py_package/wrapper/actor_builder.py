@@ -129,6 +129,7 @@ class ActorBuilder:
                 raise Exception(f"invalid visual shape type [{r.type}]")
 
             shape.local_pose = r.pose
+            shape.name = r.name
             component.attach(shape)
         return component
 

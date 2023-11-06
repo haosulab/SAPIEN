@@ -585,8 +585,10 @@ class RenderPointLightComponent(RenderLightComponent, sapien.pysapien.Component)
     pass
 class RenderShape():
     def get_local_pose(self) -> sapien.pysapien.Pose: ...
+    def get_name(self) -> str: ...
     def get_per_scene_id(self) -> int: ...
     def set_local_pose(self, arg0: sapien.pysapien.Pose) -> None: ...
+    def set_name(self, name: str) -> None: ...
     @property
     def local_pose(self) -> sapien.pysapien.Pose:
         """
@@ -594,6 +596,14 @@ class RenderShape():
         """
     @local_pose.setter
     def local_pose(self, arg1: sapien.pysapien.Pose) -> None:
+        pass
+    @property
+    def name(self) -> str:
+        """
+        :type: str
+        """
+    @name.setter
+    def name(self, arg1: str) -> None:
         pass
     @property
     def per_scene_id(self) -> int:

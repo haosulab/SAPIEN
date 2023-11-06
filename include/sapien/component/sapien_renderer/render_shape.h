@@ -47,8 +47,12 @@ public:
   uint64_t getRenderId() const { return mRenderId; }
   void internalSetRenderId(uint64_t id) { mRenderId = id; }
 
+  void setName(std::string const &name) { mName = name; }
+  std::string getName() const { return mName; }
+
 protected:
   uint64_t mRenderId{0};
+  std::string mName;
   std::shared_ptr<SapienRenderEngine> mEngine;
   Pose mLocalPose{};
   std::shared_ptr<svulkan2::resource::SVModel> mModel;
