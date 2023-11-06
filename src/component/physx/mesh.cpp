@@ -9,6 +9,9 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
+
 namespace fs = std::filesystem;
 
 namespace sapien {
@@ -124,8 +127,53 @@ std::vector<std::vector<int>> splitMesh(aiMesh *mesh) {
   return groups;
 }
 
-static std::vector<Vertices>
-loadConnectedComponentVerticesFromMeshFile(std::string const &filename) {
+static std::vector<Vertices> loadComponentVerticesFromMeshFileObj(std::string const &filename) {
+  std::vector<Vertices> result;
+
+  tinyobj::ObjReader reader;
+
+  if (!reader.ParseFromFile(filename, tinyobj::ObjReaderConfig())) {
+    if (!reader.Error().empty()) {
+      throw std::runtime_error("TinyObjReader: " + reader.Error());
+    }
+  }
+
+  if (!reader.Warning().empty()) {
+    logger::warn("TinyObjReader: {}", reader.Warning());
+  }
+
+  auto &attrib = reader.GetAttrib();
+  auto &shapes = reader.GetShapes();
+
+  // Loop over shapes
+  for (size_t s = 0; s < shapes.size(); s++) {
+
+    std::vector<float> vertices;
+
+    // Loop over faces(polygon)
+    size_t index_offset = 0;
+    for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+      size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+
+      // Loop over vertices in the face.
+      for (size_t v = 0; v < fv; v++) {
+        // access to vertex
+        tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+        tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
+        tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
+        tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+        vertices.push_back(vx);
+        vertices.push_back(vy);
+        vertices.push_back(vz);
+      }
+      index_offset += fv;
+    }
+    result.push_back(Eigen::Map<Vertices>(vertices.data(), vertices.size() / 3, 3));
+  }
+  return result;
+}
+
+static std::vector<Vertices> loadComponentVerticesFromMeshFileAssimp(std::string const &filename) {
   Assimp::Importer importer;
 
   uint32_t flags =
@@ -164,6 +212,14 @@ loadConnectedComponentVerticesFromMeshFile(std::string const &filename) {
     }
   }
   return result;
+}
+
+static std::vector<Vertices>
+loadComponentVerticesFromMeshFile(std::string const &filename) {
+  if (filename.ends_with(".obj") || filename.ends_with(".OBJ")) {
+    return loadComponentVerticesFromMeshFileObj(filename);
+  }
+  return loadComponentVerticesFromMeshFileAssimp(filename);
 }
 
 //////////////////// helpers end ////////////////////
@@ -219,7 +275,7 @@ Vertices PhysxConvexMesh::getVertices() const {
 std::vector<std::shared_ptr<PhysxConvexMesh>>
 PhysxConvexMesh::LoadByConnectedParts(std::string const &filename) {
   std::vector<std::shared_ptr<PhysxConvexMesh>> result;
-  auto parts = loadConnectedComponentVerticesFromMeshFile(filename);
+  auto parts = loadComponentVerticesFromMeshFile(filename);
   for (uint32_t i = 0; i < parts.size(); ++i) {
     try {
       result.push_back(std::make_shared<PhysxConvexMesh>(parts[i], filename, i));
