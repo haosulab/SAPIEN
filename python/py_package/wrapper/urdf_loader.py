@@ -442,7 +442,7 @@ class URDFLoader:
                 elif joint.joint_type == "prismatic":
                     link_builder.set_joint_properties(
                         "prismatic",
-                        [[joint.limit.lower, joint.limit.upper]],
+                        [[joint.limit.lower * self.scale, joint.limit.upper * self.scale]],
                         t_axis2parent,
                         t_axis2joint,
                         friction,
