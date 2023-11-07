@@ -235,8 +235,7 @@ class ActorBuilder:
         entity = sapien.Entity()
         if self.visual_records:
             entity.add_component(self.build_render_component())
-        if self.collision_records:
-            entity.add_component(self.build_physx_component())
+        entity.add_component(self.build_physx_component())
         entity.name = self.name
         return entity
 
