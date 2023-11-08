@@ -14,6 +14,7 @@ shared_link(PhysxArticulationLinkComponent *link) {
 }
 
 PhysxArticulation::PhysxArticulation() {
+  mEngine = PhysxEngine::Get();
   mPxArticulation = PhysxEngine::Get()->getPxPhysics()->createArticulationReducedCoordinate();
   mPxArticulation->setArticulationFlag(PxArticulationFlag::eDRIVE_LIMITS_ARE_FORCES, true);
 }

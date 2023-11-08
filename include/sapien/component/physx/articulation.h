@@ -95,6 +95,8 @@ private:
     mLinks.resize(size, 0);
   }
 
+  std::shared_ptr<PhysxEngine> mEngine;
+
   physx::PxArticulationReducedCoordinate *mPxArticulation{};
   physx::PxArticulationCache *mCache{};
 
