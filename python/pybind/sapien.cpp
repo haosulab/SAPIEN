@@ -184,7 +184,7 @@ Generator<int> init_sapien(py::module &m) {
           "pose",
           [](component::Component &c) {
             PyErr_WarnEx(PyExc_DeprecationWarning,
-                         "component.pose can be ambiguous thus deprecated. It is equivalent to"
+                         "component.pose can be ambiguous thus deprecated. It is equivalent to "
                          "component.entity_pose, which should be used instead",
                          1);
             return c.getPose();
@@ -194,7 +194,7 @@ Generator<int> init_sapien(py::module &m) {
            [](component::Component &c) {
              PyErr_WarnEx(
                  PyExc_DeprecationWarning,
-                 "component.get_pose can be ambiguous thus deprecated. It is equivalent to"
+                 "component.get_pose can be ambiguous thus deprecated. It is equivalent to "
                  "component.get_entity_pose, which should be used instead",
                  1);
              return c.getPose();
@@ -203,7 +203,7 @@ Generator<int> init_sapien(py::module &m) {
            [](component::Component &c, Pose const &pose) {
              PyErr_WarnEx(
                  PyExc_DeprecationWarning,
-                 "component.set_pose can be ambiguous thus deprecated. It is equivalent to"
+                 "component.set_pose can be ambiguous thus deprecated. It is equivalent to "
                  "component.set_entity_pose, which should be used instead",
                  1);
              c.setPose(pose);
