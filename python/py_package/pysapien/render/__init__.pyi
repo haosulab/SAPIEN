@@ -1085,7 +1085,7 @@ def get_ray_tracing_samples_per_pixel() -> int:
     pass
 def get_viewer_shader_dir() -> str:
     pass
-def load_scene(filename: str) -> list[sapien.pysapien.Entity]:
+def load_scene(filename: str, apply_scale: bool = True) -> dict:
     pass
 def set_camera_shader_dir(dir: str) -> None:
     pass

@@ -290,6 +290,15 @@ template <> struct type_caster<SapienRenderTexture::AddressMode> {
 
 } // namespace pybind11::detail
 
+static py::dict parseSceneNode(RenderSceneNode const &node) {
+  py::list childList;
+  for (auto &node : node.children) {
+    childList.append(parseSceneNode(*node));
+  }
+  return py::dict("name"_a = node.name, "pose"_a = node.pose, "scale"_a = node.scale,
+                  "children"_a = childList, "mesh"_a = node.mesh, "light"_a = node.light);
+}
+
 void init_sapien_renderer(py::module &sapien) {
   auto m = sapien.def_submodule("render");
 
@@ -336,7 +345,13 @@ void init_sapien_renderer(py::module &sapien) {
           },
           py::arg("models") = true, py::arg("images") = true, py::arg("shaders") = false)
 
-      .def("load_scene", &LoadScene, py::arg("filename"));
+      .def(
+          "load_scene",
+          [](std::string const &filename, bool applyScale) {
+            auto root = LoadScene(filename, applyScale);
+            return parseSceneNode(*root);
+          },
+          py::arg("filename"), py::arg("apply_scale") = true);
 
   ////////// end global //////////
 
