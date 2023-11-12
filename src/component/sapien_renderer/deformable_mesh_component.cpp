@@ -109,7 +109,7 @@ void CudaDeformableMeshComponent::onAddToScene(Scene &scene) {
   auto system = scene.getSapienRendererSystem();
   auto s = system->getScene();
 
-  mObject = &s->addObject(svulkan2::resource::SVModel::FromData(
+  mObject = &s->addDeformableObject(svulkan2::resource::SVModel::FromData(
       {svulkan2::resource::SVShape::Create(mMesh, mMaterial->getMaterial())}));
   mObject->setCustomDataInt("shadeFlat", true);
 
