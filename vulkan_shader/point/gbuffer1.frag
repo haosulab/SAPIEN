@@ -38,6 +38,7 @@ layout(set = 2, binding = 0) uniform MaterialBuffer {
   float transmissionRoughness;
   int textureMask;
   int padding1;
+  vec4 textureTransforms[6];
 } materialBuffer;
 
 layout(set = 2, binding = 1) uniform sampler2D colorTexture;
@@ -79,6 +80,9 @@ layout(set = 3, binding = 4) uniform sampler2D samplerTexturedLightDepths[1];
 layout(set = 3, binding = 5) uniform sampler2D samplerSpotLightDepths[10];
 layout(set = 3, binding = 6) uniform sampler2D samplerTexturedLightTextures[1];
 
+layout(set = 3, binding = 7) uniform samplerCube samplerEnvironment;
+layout(set = 3, binding = 8) uniform sampler2D samplerBRDFLUT;
+
 vec4 world2camera(vec4 pos) {
   return cameraBuffer.viewMatrix * pos;
 }
@@ -87,32 +91,47 @@ vec3 getBackgroundColor(vec3 texcoord) {
   return vec3(1,1,1);
 }
 
+vec3 diffuseIBL(vec3 albedo, vec3 N) {
+  N = vec3(-N.y, N.z, -N.x);
+  vec3 color = textureLod(samplerEnvironment, N, 5).rgb;
+  return color * albedo;
+}
+
+vec3 specularIBL(vec3 fresnel, float roughness, vec3 N, vec3 V) {
+  float dotNV = max(dot(N, V), 0);
+  vec3 R = 2 * dot(N, V) * N - V;
+  R = vec3(-R.y, R.z, -R.x);
+  vec3 color = textureLod(samplerEnvironment, R, roughness * 5).rgb;
+  vec2 envBRDF = texture(samplerBRDFLUT, vec2(roughness, dotNV)).xy;
+  return color * (fresnel * envBRDF.x + envBRDF.y);
+}
+
 layout(location = 0) in vec4 inPosition;
 layout(location = 1) in vec2 inUV;
 layout(location = 2) in flat uvec4 inSegmentation;
 layout(location = 3) in vec3 objectCoord;
 layout(location = 4) in mat3 inTbn;
 
-layout(location = 0) out vec4 outLighting1;
-layout(location = 1) out vec4 outNormal1;
-layout(location = 2) out uvec4 outSegmentation1;
-layout(location = 3) out vec4 outPosition1;
+layout(location = 0) out vec4 outLighting;
+layout(location = 1) out vec4 outNormal;
+layout(location = 2) out uvec4 outSegmentation;
+layout(location = 3) out vec4 outPosition;
 
 void main() {
-  outSegmentation1 = inSegmentation;
+  outSegmentation = inSegmentation;
 
   vec4 emission;
   vec4 albedo;
   vec4 frm;
 
   if ((materialBuffer.textureMask & 16) != 0) {
-    emission = texture(emissionTexture, inUV);
+    emission = texture(emissionTexture, inUV * materialBuffer.textureTransforms[4].zw + materialBuffer.textureTransforms[4].xy);
   } else {
     emission = materialBuffer.emission;
   }
 
   if ((materialBuffer.textureMask & 1) != 0) {
-    albedo = texture(colorTexture, inUV);
+    albedo = texture(colorTexture, inUV * materialBuffer.textureTransforms[0].zw + materialBuffer.textureTransforms[0].xy);
   } else {
     albedo = materialBuffer.baseColor;
   }
@@ -126,37 +145,37 @@ void main() {
   frm.r = materialBuffer.fresnel * 0.08;
 
   if ((materialBuffer.textureMask & 2) != 0) {
-    frm.g = texture(roughnessTexture, inUV).r;
+    frm.g = texture(roughnessTexture, inUV * materialBuffer.textureTransforms[1].zw + materialBuffer.textureTransforms[1].xy).r;
   } else {
     frm.g = materialBuffer.roughness;
   }
 
   if ((materialBuffer.textureMask & 8) != 0) {
-    frm.b = texture(metallicTexture, inUV).r;
+    frm.b = texture(metallicTexture, inUV * materialBuffer.textureTransforms[3].zw + materialBuffer.textureTransforms[3].xy).r;
   } else {
     frm.b = materialBuffer.metallic;
   }
 
   if (objectBuffer.shadeFlat == 0) {
     if ((materialBuffer.textureMask & 4) != 0) {
-      outNormal1 = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
+      outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV * materialBuffer.textureTransforms[2].zw + materialBuffer.textureTransforms[2].xy).xyz * 2 - 1)), 0);
     } else {
-      outNormal1 = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
+      outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
     }
   } else {
     vec4 fdx = dFdx(inPosition);
     vec4 fdy = dFdy(inPosition);
     vec3 normal = -normalize(cross(fdx.xyz, fdy.xyz));
-    outNormal1 = vec4(normal, 0);
+    outNormal = vec4(normal, 0);
   }
 
-  outPosition1 = inPosition;
+  outPosition = inPosition;
 
   float specular = frm.x;
   float roughness = frm.y;
   float metallic = frm.z;
 
-  vec3 normal = outNormal1.xyz;
+  vec3 normal = outNormal.xyz;
   vec4 csPosition = inPosition;
   csPosition /= csPosition.w;
 
@@ -221,7 +240,13 @@ void main() {
         l, normal, camDir, diffuseAlbedo, roughness, fresnel);
   }
 
+  vec3 wnormal = mat3(cameraBuffer.viewMatrixInverse) * normal;
+  color += diffuseIBL(diffuseAlbedo, wnormal);
+  color += specularIBL(fresnel, roughness,
+                       wnormal,
+                       mat3(cameraBuffer.viewMatrixInverse) * camDir);
+
   color += sceneBuffer.ambientLight.rgb * albedo.rgb;
 
-  outLighting1 = vec4(color, albedo.a);
+  outLighting = vec4(color, albedo.a);
 }

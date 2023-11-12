@@ -73,13 +73,13 @@ void main() {
   outMotionDirection = vec4((p1s - p2s)*0.5, 0, 1);
 
   if ((materialBuffer.textureMask & 16) != 0) {
-    outEmission = texture(emissionTexture, inUV);
+    outEmission = texture(emissionTexture, inUV * materialBuffer.textureTransforms[4].zw + materialBuffer.textureTransforms[4].xy);
   } else {
     outEmission = materialBuffer.emission;
   }
 
   if ((materialBuffer.textureMask & 1) != 0) {
-    outAlbedo = texture(colorTexture, inUV * materialBuffer.textureTransforms[0].ba + materialBuffer.textureTransforms[0].rg);
+    outAlbedo = texture(colorTexture, inUV * materialBuffer.textureTransforms[0].zw + materialBuffer.textureTransforms[0].xy);
   } else {
     outAlbedo = materialBuffer.baseColor;
   }
@@ -91,20 +91,20 @@ void main() {
   outSpecular.r = materialBuffer.fresnel * 0.08;
 
   if ((materialBuffer.textureMask & 2) != 0) {
-    outSpecular.g = texture(roughnessTexture, inUV).r;
+    outSpecular.g = texture(roughnessTexture, inUV * materialBuffer.textureTransforms[1].zw + materialBuffer.textureTransforms[1].xy).r;
   } else {
     outSpecular.g = materialBuffer.roughness;
   }
 
   if ((materialBuffer.textureMask & 8) != 0) {
-    outSpecular.b = texture(metallicTexture, inUV).r;
+    outSpecular.b = texture(metallicTexture, inUV * materialBuffer.textureTransforms[3].zw + materialBuffer.textureTransforms[3].xy).r;
   } else {
     outSpecular.b = materialBuffer.metallic;
   }
 
   if (objectBuffer.shadeFlat == 0) {
     if ((materialBuffer.textureMask & 4) != 0) {
-      outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
+      outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV * materialBuffer.textureTransforms[2].zw + materialBuffer.textureTransforms[2].xy).xyz * 2 - 1)), 0);
     } else {
       outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
     }

@@ -548,37 +548,37 @@ void main() {
   vec3 baseColor = mat.baseColor.rgb;
   float alpha = 1.0;
   if (ti.diffuse >= 0) {
-    vec4 baseColorAlpha = texture(textures[nonuniformEXT(ti.diffuse)], uv);
+    vec4 baseColorAlpha = texture(textures[nonuniformEXT(ti.diffuse)], uv * mat.textureTransforms[0].zw + mat.textureTransforms[0].xy);
     baseColor = baseColorAlpha.rgb;
     alpha = baseColorAlpha.a;
   }
 
   float metallic = mat.metallic;
   if (ti.metallic >= 0) {
-    metallic = texture(textures[nonuniformEXT(ti.metallic)], uv).x;
+    metallic = texture(textures[nonuniformEXT(ti.metallic)], uv * mat.textureTransforms[3].zw + mat.textureTransforms[3].xy).x;
   }
 
   float roughness = mat.roughness;
   if (ti.roughness >= 0) {
-    roughness = texture(textures[nonuniformEXT(ti.roughness)], uv).x;
+    roughness = texture(textures[nonuniformEXT(ti.roughness)], uv * mat.textureTransforms[1].zw + mat.textureTransforms[1].xy).x;
   }
   float a2 = roughness * roughness;
 
-  vec3 texNormal = vec3(0.0, 0.0, 1.0);  // TODO use
+  vec3 texNormal = vec3(0.0, 0.0, 1.0);
   if (ti.normal >= 0) {
-    texNormal = normalize(texture(textures[nonuniformEXT(ti.normal)], uv).xyz * 2.0 - 1.0);
+    texNormal = normalize(texture(textures[nonuniformEXT(ti.normal)], uv * mat.textureTransforms[2].zw + mat.textureTransforms[2].xy).xyz * 2.0 - 1.0);
   }
 
   vec3 emission = mat.emission.rgb;
   float strength = mat.emission.a;
   if (ti.emission >= 0) {
-    emission = texture(textures[nonuniformEXT(ti.emission)], uv).rgb;
+    emission = texture(textures[nonuniformEXT(ti.emission)], uv * mat.textureTransforms[4].zw + mat.textureTransforms[4].xy).rgb;
   }
   emission *= strength;
 
   float transmission = mat.transmission;
   if (ti.transmission >= 0) {
-    transmission = texture(textures[nonuniformEXT(ti.transmission)], uv).x;
+    transmission = texture(textures[nonuniformEXT(ti.transmission)], uv * mat.textureTransforms[5].zw + mat.textureTransforms[5].xy).x;
   }
 
 

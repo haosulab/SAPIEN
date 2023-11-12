@@ -11,7 +11,8 @@ layout(location = 0) in vec4 inColor;
 layout(location = 1) in flat vec4 inCenterRadius;
 
 layout(location = 0) out vec4 outPointColor;
-layout(location = 1) out vec4 outPointDepthLinear;
+layout(location = 1) out vec4 outPointNormal;
+layout(location = 2) out vec4 outPointPosition;
 
 layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 viewMatrix;
@@ -52,6 +53,9 @@ void main() {
   ndc /= ndc.w;
   gl_FragDepth = ndc.z;
 
+  vec3 normal = normalize(csPosition.xyz - center);
+
   outPointColor = inColor;
-  outPointDepthLinear.x = csPosition.z;
+  outPointNormal = vec4(normal, 1);
+  outPointPosition = csPosition;
 }

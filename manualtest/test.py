@@ -5,7 +5,10 @@ import os
 import warnings
 
 
-sapien.render.set_viewer_shader_dir("rt")
+sapien.render.set_viewer_shader_dir("../vulkan_shader/rt")
+
+# sapien.render.set_viewer_shader_dir("../vulkan_shader/trivial")
+# sapien.render.set_viewer_shader_dir("rt")
 
 
 def main():
@@ -19,7 +22,7 @@ def main():
     scene.load_widget_from_package("demo_arena", "DemoArena")
     scene.set_timestep(1 / 200)
 
-    scene.create_urdf_loader().load("/home/fx/Downloads/1000/1000/mobility_cvx.urdf")
+    # scene.create_urdf_loader().load("/home/fx/Downloads/1000/1000/mobility_cvx.urdf")
 
     xarm = scene.load_widget_from_package("xarm7", "XArm7")
     franka = scene.load_widget_from_package("franka", "Franka")

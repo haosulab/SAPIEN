@@ -46,6 +46,7 @@ layout(set = 2, binding = 2) uniform sampler2D roughnessTexture;
 layout(set = 2, binding = 3) uniform sampler2D normalTexture;
 layout(set = 2, binding = 4) uniform sampler2D metallicTexture;
 layout(set = 2, binding = 5) uniform sampler2D emissionTexture;
+layout(set = 2, binding = 6) uniform sampler2D transmissionTexture;
 
 #include "../common/lights.glsl"
 
@@ -124,13 +125,13 @@ void main() {
   vec4 frm;
 
   if ((materialBuffer.textureMask & 16) != 0) {
-    emission = texture(emissionTexture, inUV);
+    emission = texture(emissionTexture, inUV * materialBuffer.textureTransforms[4].zw + materialBuffer.textureTransforms[4].xy);
   } else {
     emission = materialBuffer.emission;
   }
 
   if ((materialBuffer.textureMask & 1) != 0) {
-    albedo = texture(colorTexture, inUV);
+    albedo = texture(colorTexture, inUV * materialBuffer.textureTransforms[0].zw + materialBuffer.textureTransforms[0].xy);
   } else {
     albedo = materialBuffer.baseColor;
   }
@@ -144,20 +145,20 @@ void main() {
   frm.r = materialBuffer.fresnel * 0.08;
 
   if ((materialBuffer.textureMask & 2) != 0) {
-    frm.g = texture(roughnessTexture, inUV).r;
+    frm.g = texture(roughnessTexture, inUV * materialBuffer.textureTransforms[1].zw + materialBuffer.textureTransforms[1].xy).r;
   } else {
     frm.g = materialBuffer.roughness;
   }
 
   if ((materialBuffer.textureMask & 8) != 0) {
-    frm.b = texture(metallicTexture, inUV).r;
+    frm.b = texture(metallicTexture, inUV * materialBuffer.textureTransforms[3].zw + materialBuffer.textureTransforms[3].xy).r;
   } else {
     frm.b = materialBuffer.metallic;
   }
 
   if (objectBuffer.shadeFlat == 0) {
     if ((materialBuffer.textureMask & 4) != 0) {
-      outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV).xyz * 2 - 1)), 0);
+      outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV * materialBuffer.textureTransforms[2].zw + materialBuffer.textureTransforms[2].xy).xyz * 2 - 1)), 0);
     } else {
       outNormal = vec4(normalize(inTbn * vec3(0, 0, 1)), 0);
     }

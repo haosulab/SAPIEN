@@ -16,6 +16,7 @@ struct Material {
   float transmissionRoughness;
   int textureMask;
   int padding1;
+  vec4 textureTransforms[6];
 };
 
 struct TextureIndex {
