@@ -1,4 +1,5 @@
 #include "sapien/component/sapien_renderer/camera_component.h"
+#include "../../logger.h"
 #include "sapien/component/sapien_renderer/sapien_renderer_default.h"
 #include "sapien/component/sapien_renderer/sapien_renderer_system.h"
 #include "sapien/component/sapien_renderer/texture.h"
@@ -225,6 +226,7 @@ void SapienRenderCameraComponent::takePicture() {
     throw std::runtime_error("failed to take picture: the camera is not added to scene");
   }
   mCamera->takePicture();
+  mUpdatedWithoutTakingPicture = false;
 }
 
 std::vector<std::string> SapienRenderCameraComponent::getImageNames() const {
@@ -238,6 +240,9 @@ SapienRenderImageCpu SapienRenderCameraComponent::getImage(std::string const &na
   if (!mCamera) {
     throw std::runtime_error("failed to get image: the camera is not added to scene");
   }
+  if (mUpdatedWithoutTakingPicture) {
+    logger::warn("getting picture without taking picture since last camera update");
+  }
   return mCamera->getImage(name);
 }
 
@@ -245,6 +250,9 @@ SapienRenderImageCuda SapienRenderCameraComponent::getImageCuda(std::string cons
 #ifdef SAPIEN_CUDA
   if (!mCamera) {
     throw std::runtime_error("failed to get image: the camera is not added to scene");
+  }
+  if (mUpdatedWithoutTakingPicture) {
+    logger::warn("getting picture without taking picture since last camera update");
   }
   return mCamera->getImageCuda(name);
 #else
@@ -351,6 +359,7 @@ void SapienRenderCameraComponent::internalUpdate() {
     mCamera->mCamera->setTransform({.position = {pose.p.x, pose.p.y, pose.p.z},
                                     .rotation = {pose.q.w, pose.q.x, pose.q.y, pose.q.z}});
   }
+  mUpdatedWithoutTakingPicture = true;
 }
 SapienRenderCameraComponent::~SapienRenderCameraComponent() {}
 

@@ -106,6 +106,10 @@ private:
 
   std::unique_ptr<SapienRenderCameraInternal> mCamera;
   Pose mLocalPose;
+
+  // this is set to true when the camera is updated but take picture has not
+  // been called to produce a warning for get picture
+  bool mUpdatedWithoutTakingPicture{true};
 };
 
 } // namespace component
