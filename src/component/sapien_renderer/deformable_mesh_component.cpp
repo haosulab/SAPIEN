@@ -55,6 +55,12 @@ void CudaDeformableMeshComponent::setTriangleCount(uint32_t count) {
   mMesh->setTriangleCount(count);
 }
 
+void CudaDeformableMeshComponent::setTriangles(
+    Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles) {
+  setTriangleCount(triangles.rows());
+  mMesh->getIndexBuffer().upload(triangles.data(), triangles.size() * sizeof(uint32_t));
+}
+
 uint32_t CudaDeformableMeshComponent::getMaxVertexCount() const {
   return mMesh->getMaxVertexCount();
 }

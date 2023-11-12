@@ -876,6 +876,7 @@ consumer library. Make a copy if needed.
                     &CudaDeformableMeshComponent::setVertexCount)
       .def("get_vertex_count", &CudaDeformableMeshComponent::getVertexCount)
       .def("set_vertex_count", &CudaDeformableMeshComponent::setVertexCount)
+      .def("set_triangles", &CudaDeformableMeshComponent::setTriangles)
 
       .def_property("triangle_count", &CudaDeformableMeshComponent::getTriangleCount,
                     &CudaDeformableMeshComponent::setTriangleCount)

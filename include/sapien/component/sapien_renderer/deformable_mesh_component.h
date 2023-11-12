@@ -23,6 +23,8 @@ public:
 
   void setDataSource(std::shared_ptr<CudaDataSource> vertexProvider);
 
+  void setTriangles(Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles);
+
   uint32_t getVertexCount() const;
   void setVertexCount(uint32_t count);
 
