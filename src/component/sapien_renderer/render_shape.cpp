@@ -13,7 +13,13 @@ std::shared_ptr<SapienRenderBodyComponent> RenderShape::getParent() const {
 
 RenderShape::RenderShape() { mEngine = SapienRenderEngine::Get(); }
 
-void RenderShape::setLocalPose(Pose const &pose) { mLocalPose = pose; }
+void RenderShape::setLocalPose(Pose const &pose) {
+  if (mParent) {
+    throw std::runtime_error(
+        "failed to set local pose: local pose cannot be modified once attached to component");
+  }
+  mLocalPose = pose;
+}
 Pose RenderShape::getLocalPose() const { return mLocalPose; }
 RenderShape::~RenderShape() {}
 
@@ -192,7 +198,9 @@ std::string RenderShapeTriangleMesh::getFilename() const { return mFilename; }
 Vec3 RenderShapeTriangleMesh::getScale() const { return mScale; }
 
 void RenderShapeTriangleMesh::setScale(Vec3 const &scale) {
-  // TODO: only allowed when not attached
+  if (mParent) {
+    throw std::runtime_error("failed to set scale: only allowed when not attached to component");
+  }
   mScale = scale;
 }
 

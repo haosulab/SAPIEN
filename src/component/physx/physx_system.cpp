@@ -39,7 +39,6 @@ static SapienErrorCallback gDefaultErrorCallback;
 
 static std::weak_ptr<PhysxEngine> gEngine;
 std::shared_ptr<PhysxEngine> PhysxEngine::Get(float toleranceLength, float toleranceSpeed) {
-  // TODO: thread safety?
   auto engine = gEngine.lock();
   if (!engine) {
     gEngine = engine = std::make_shared<PhysxEngine>(toleranceLength, toleranceSpeed);

@@ -15,7 +15,6 @@ class RenderShape {
 public:
   RenderShape();
 
-  // TODO: disable set local pose after added to component
   void setLocalPose(Pose const &pose);
   Pose getLocalPose() const;
 
@@ -58,7 +57,7 @@ protected:
   std::shared_ptr<svulkan2::resource::SVModel> mModel;
   Vec3 mScale{1.f};
 
-  SapienRenderBodyComponent *mParent;
+  SapienRenderBodyComponent *mParent{nullptr};
 };
 
 class RenderShapePlane : public RenderShape {

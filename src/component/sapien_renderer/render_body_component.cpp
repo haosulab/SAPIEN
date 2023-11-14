@@ -161,29 +161,17 @@ void SapienRenderBodyComponent::setTextureArray(
   }
 }
 
-// AABB SapienRenderBodyComponent::getGlobalAABBFast() {
-//   AABB aabb;
-//   for (auto &s : getRenderShapes()) {
-//     aabb = aabb + s->getGlobalAABBFast();
-//   }
-//   return aabb;
-// }
-
-// AABB SapienRenderBodyComponent::computeGlobalAABBTight() {
-//   AABB aabb;
-//   for (auto &s : getRenderShapes()) {
-//     aabb = aabb + s->computeGlobalAABBTight();
-//   }
-//   return aabb;
-// }
-
 void SapienRenderBodyComponent::internalUpdate() {
   auto pose = getEntity()->getPose();
   mNode->setPosition({pose.p.x, pose.p.y, pose.p.z});
   mNode->setRotation({pose.q.w, pose.q.x, pose.q.y, pose.q.z});
 }
 
-SapienRenderBodyComponent::~SapienRenderBodyComponent() {}
+SapienRenderBodyComponent::~SapienRenderBodyComponent() {
+  for (auto s : mRenderShapes) {
+    s->internalSetParent(nullptr);
+  }
+}
 
 void SapienRenderBodyComponent::disableRenderId() {
   if (getScene()) {
