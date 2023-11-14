@@ -28,7 +28,7 @@ std::shared_ptr<Entity> Entity::addComponent(std::shared_ptr<component::Componen
   mComponents.push_back(component);
   component->onSetPose(mPose);
 
-  if (mScene) {
+  if (mScene && component->getEnabled()) {
     component->onAddToScene(*mScene);
   }
   return shared_from_this();
@@ -51,7 +51,7 @@ void Entity::removeComponent(std::shared_ptr<component::Component> component) {
     throw std::runtime_error("failed to add component: component already added.");
   }
 
-  if (mScene) {
+  if (mScene && component->getEnabled()) {
     component->onRemoveFromScene(*mScene);
   }
 
