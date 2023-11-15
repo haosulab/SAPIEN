@@ -122,9 +122,8 @@ public:
 
     ::physx::PxActorFlags::InternalType actorFlags = getPxActor()->getActorFlags();
     ::physx::PxRigidBodyFlags::InternalType rigidBodyFlags = getPxActor()->getRigidBodyFlags();
-    ar(actorFlags, rigidBodyFlags, getLinearDamping(), getAngularDamping());
-    ar(getMass(), getInertia(), getCMassLocalPose(), getMaxDepenetrationVelocity(),
-       getMaxContactImpulse());
+    ar(actorFlags, rigidBodyFlags, getLinearDamping(), getAngularDamping(), getMaxDepenetrationVelocity(), getMaxContactImpulse());
+    ar(getMass(), getInertia(), getCMassLocalPose());
 
     ar(mMassProperties.mass, mMassProperties.inertiaTensor.column0[0],
        mMassProperties.inertiaTensor.column0[1], mMassProperties.inertiaTensor.column0[2],
