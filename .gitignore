@@ -1,4 +1,5 @@
 /build
+*/build
 /sapien_build
 /docker_sapien_build
 compile_commands.json
@@ -6,7 +7,7 @@ compile_commands.json
 .pyc
 cmake-build-debug
 /cmake-build-debug/
-/.ccls-cache/
+.ccls-cache/
 /.dir-locals.el
 /sapien.egg-info/
 __pycache__
@@ -30,3 +31,7 @@ imgui.ini
 /docker/cuda-11.4/
 
 apidoc
+
+*.pb.cc
+*.pb.h
+python/py_package/*.so

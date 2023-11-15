@@ -187,6 +187,39 @@ class CMakeBuild(build_ext):
             cwd=build_dir,
         )
 
+    def build_render_server(self, ext):
+        sapien_install_dir = os.path.join(self.sapien_build_dir, "_sapien_install")
+        build_dir = os.path.join(self.sapien_build_dir, "_render_server_build")
+        os.makedirs(build_dir, exist_ok=True)
+        original_full_path = self.get_ext_fullpath(ext.name)
+        extdir = os.path.abspath(os.path.dirname(original_full_path))
+        extdir = os.path.join(extdir, self.distribution.get_name())
+        cmake_args = [
+            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
+            f"-DPYTHON_EXECUTABLE={sys.executable}",
+            f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+        ]
+        if args.debug:
+            cfg = "Debug"
+        else:
+            cfg = "Release"
+        build_args = ["--config", cfg]
+        cmake_args += ["-DCMAKE_BUILD_TYPE=" + cfg]
+        cmake_args += [
+            "-Dsapien_DIR=" + os.path.join(sapien_install_dir, "lib/cmake/sapien")
+        ]
+        env = os.environ.copy()
+        subprocess.check_call(
+            ["cmake", os.path.join(ext.sourcedir, "render_server")] + cmake_args,
+            cwd=build_dir,
+            env=env,
+        )
+        subprocess.check_call(
+            ["cmake", "--build", ".", "--target", "pysapien_render_server"]
+            + build_args,
+            cwd=build_dir,
+        )
+
     def build_pybind(self, ext):
         sapien_install_dir = os.path.join(self.sapien_build_dir, "_sapien_install")
 
@@ -286,6 +319,7 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext):
         if platform.system() == "Linux":
             self.build_pinocchio(ext)
+            # self.build_render_server(ext)
         self.build_pybind(ext)
         self.copy_assets(ext)
 

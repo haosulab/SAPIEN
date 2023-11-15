@@ -22,6 +22,13 @@ public:
   void addSystem(std::shared_ptr<component::System> system);
   std::shared_ptr<component::System> getSystem(std::string const &name) const;
 
+  template <class T> std::shared_ptr<T> getSystemWithType(std::string const &name) const {
+    if (auto s = std::dynamic_pointer_cast<T>(getSystem(name))) {
+      return s;
+    }
+    throw std::runtime_error("failed to get system: type mismatch");
+  }
+
   std::vector<std::shared_ptr<Entity>> getEntities() const { return mEntities; };
 
   // for convenience
