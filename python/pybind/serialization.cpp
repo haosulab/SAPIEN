@@ -1,7 +1,7 @@
 #include "./serialization.h"
-#include "sapien/component/component.h"
-#include "sapien/component/physx/physx.h"
-#include "sapien/component/sapien_renderer/sapien_renderer.h"
+#include "sapien/component.h"
+#include "sapien/physx/physx.h"
+#include "sapien/sapien_renderer/sapien_renderer.h"
 #include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
@@ -37,7 +37,7 @@ std::string serializeEntityGroup(std::vector<std::shared_ptr<Entity>> const &ent
 }
 
 std::string serializeArticulationEntityGroup(
-    std::shared_ptr<component::PhysxArticulation> const &articulation) {
+    std::shared_ptr<::sapien::physx::PhysxArticulation> const &articulation) {
   std::vector<std::shared_ptr<Entity>> entities;
   auto links = articulation->getLinks();
   for (auto l : links) {
@@ -50,7 +50,7 @@ std::string serializeArticulationEntityGroup(
   return serializeEntityGroup(entities);
 }
 
-std::string serializeComponent(std::shared_ptr<component::Component> const &component) {
+std::string serializeComponent(std::shared_ptr<Component> const &component) {
   std::stringstream os;
   cereal::BinaryOutputArchive archive(os);
   archive(component);
@@ -82,10 +82,10 @@ std::vector<std::shared_ptr<Entity>> unserializeEntityGroup(std::string const &d
   return entities;
 }
 
-std::shared_ptr<component::Component> unserializeComponent(std::string const &data) {
+std::shared_ptr<Component> unserializeComponent(std::string const &data) {
   std::stringstream is(std::string(data.begin(), data.end()));
   cereal::BinaryInputArchive archive(is);
-  std::shared_ptr<component::Component> component;
+  std::shared_ptr<Component> component;
   archive(component);
   return component;
 }
@@ -107,14 +107,13 @@ void init_serialization(py::module &m) {
       .def("_serialize_entity_group",
            byteWrapper<std::vector<std::shared_ptr<Entity>>>(serializeEntityGroup))
       .def("_serialize_articulation_entity_group",
-           byteWrapper<std::shared_ptr<component::PhysxArticulation>>(
+           byteWrapper<std::shared_ptr<::sapien::physx::PhysxArticulation>>(
                serializeArticulationEntityGroup))
-      .def("_serialize_component",
-           byteWrapper<std::shared_ptr<component::Component>>(serializeComponent))
+      .def("_serialize_component", byteWrapper<std::shared_ptr<Component>>(serializeComponent))
       .def("_unserialize_scene", byteUnwrapper<std::shared_ptr<Scene>>(unserializeScene))
       .def("_unserialize_entity", byteUnwrapper<std::shared_ptr<Entity>>(unserializeEntity))
       .def("_unserialize_component",
-           byteUnwrapper<std::shared_ptr<component::Component>>(unserializeComponent))
+           byteUnwrapper<std::shared_ptr<Component>>(unserializeComponent))
       .def("_unserialize_entity_group",
            byteUnwrapper<std::vector<std::shared_ptr<Entity>>>(unserializeEntityGroup));
 }

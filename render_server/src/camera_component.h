@@ -1,12 +1,12 @@
 #pragma once
 #include "proto/render_server.grpc.pb.h"
-#include <sapien/component/component.h>
 #include <numbers>
+#include <sapien/component.h>
 
 namespace sapien {
 namespace render_server {
 
-class ClientCameraComponent : public component::Component {
+class ClientCameraComponent : public Component {
 public:
   ClientCameraComponent(uint32_t width, uint32_t height, std::string const &shaderDir);
 

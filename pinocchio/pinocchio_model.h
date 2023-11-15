@@ -1,7 +1,6 @@
 #pragma once
 
 #include "sapien/math/pose.h"
-// #include <PxPhysicsAPI.h>
 #include <pinocchio/algorithm/jacobian.hpp>
 #include <pinocchio/algorithm/joint-configuration.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>

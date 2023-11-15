@@ -1,5 +1,5 @@
 #pragma once
-#include "sapien/component/sapien_renderer/sapien_renderer.h"
+#include "sapien/sapien_renderer/sapien_renderer.h"
 
 const std::map<vk::Format, std::string> FormatToString = {
     {vk::Format::eR8Uint, "R8Uint"},

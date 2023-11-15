@@ -123,11 +123,9 @@ if (${SAPIEN_CUDA})
     add_dependencies(sapien OpenImageDenoise_device_cuda)
     ExternalProject_Get_property(OpenImageDenoise_device_cuda binary_dir)
 
-    if(EXISTS ${binary_dir}/../preinstall/lib)
-        install(DIRECTORY ${binary_dir}/../preinstall/lib DESTINATION ".")
-    else()
-        install(DIRECTORY ${binary_dir}/../preinstall/lib64 DESTINATION ".")
-    endif()
+    message(---- ${binary_dir}/../preinstall/lib)
+    install(DIRECTORY ${binary_dir}/../preinstall/lib DESTINATION "." OPTIONAL)
+    install(DIRECTORY ${binary_dir}/../preinstall/lib64 DESTINATION "." OPTIONAL)
 
     install(
         TARGETS sapien svulkan2 simsense cereal physx5 OpenImageDenoise OpenImageDenoise_core OpenImageDenoise_common glm Vulkan-Headers

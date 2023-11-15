@@ -30,30 +30,3 @@ void load(Archive &ar, Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, 
   ar(binary_data(m.data(), static_cast<std::size_t>(rows * cols * sizeof(_Scalar))));
 }
 } // namespace cereal
-
-namespace sapien {
-class Scene;
-class Entity;
-
-namespace component {
-class Component;
-class PhysxArticulation;
-} // namespace component
-
-// std::string serializeScene(std::shared_ptr<Scene> scene);
-// std::shared_ptr<Scene> unserializeScene(std::string const &data);
-
-// std::string serializeEntity(std::shared_ptr<Entity> entity);
-// std::shared_ptr<Entity> unserializeEntity(std::string const &data);
-
-// std::string serializeEntityGroup(std::vector<std::shared_ptr<Entity>> const &entities);
-// std::vector<std::shared_ptr<Entity>> unserializeEntityGroup(std::string const &data);
-
-// std::string
-// serializeArticulationEntityGroup(std::shared_ptr<component::PhysxArticulation> articulation);
-
-// std::string serializeComponent(std::shared_ptr<component::Component> component);
-// std::shared_ptr<component::Component> unserializeComponent(std::string const &data);
-
-} // namespace sapien
-

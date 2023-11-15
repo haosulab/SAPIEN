@@ -1,5 +1,5 @@
 #include "sapien/entity.h"
-#include "sapien/component/component.h"
+#include "sapien/component.h"
 #include "sapien/scene.h"
 
 namespace sapien {
@@ -19,7 +19,7 @@ void Entity::setPose(Pose const &pose) {
   }
 }
 
-std::shared_ptr<Entity> Entity::addComponent(std::shared_ptr<component::Component> component) {
+std::shared_ptr<Entity> Entity::addComponent(std::shared_ptr<Component> component) {
   if (component->getEntity()) {
     throw std::runtime_error("failed to add component: component already added.");
   }
@@ -35,7 +35,7 @@ std::shared_ptr<Entity> Entity::addComponent(std::shared_ptr<component::Componen
 }
 
 void Entity::internalSwapInComponent(uint32_t index,
-                                     std::shared_ptr<component::Component> component) {
+                                     std::shared_ptr<Component> component) {
   if (component->getEntity()) {
     throw std::runtime_error("failed to add component: component already added.");
   }
@@ -46,7 +46,7 @@ void Entity::internalSwapInComponent(uint32_t index,
   }
 }
 
-void Entity::removeComponent(std::shared_ptr<component::Component> component) {
+void Entity::removeComponent(std::shared_ptr<Component> component) {
   if (component->getEntity().get() != this) {
     throw std::runtime_error("failed to add component: component already added.");
   }

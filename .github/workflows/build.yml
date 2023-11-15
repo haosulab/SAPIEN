@@ -18,6 +18,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: "true"
+      - name: Set up cmake cache
+        uses: actions/cache@v3
+        with:
+          path: docker_sapien_build/_sapien_deps
+          key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/CMakeLists.txt') }}
       - name: Build wheels
         run: ./build.sh
       - name: Upload wheels

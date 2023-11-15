@@ -1,26 +1,29 @@
 #pragma once
 #include "entity.h"
-#include "sapien/component/system.h"
+#include "system.h"
 #include <cereal/types/unordered_map.hpp>
 #include <typeindex>
 #include <unordered_map>
 
 namespace sapien {
 
-namespace component {
+namespace physx {
 class PhysxSystem;
+} // namespace physx
+
+namespace sapien_renderer {
 class SapienRendererSystem;
-} // namespace component
+}
 
 class Scene : public std::enable_shared_from_this<Scene> {
 public:
-  Scene(std::vector<std::shared_ptr<component::System>> const &systems = {});
+  Scene(std::vector<std::shared_ptr<System>> const &systems = {});
 
   void addEntity(std::shared_ptr<Entity> entity);
   void removeEntity(std::shared_ptr<Entity> entity);
 
-  void addSystem(std::shared_ptr<component::System> system);
-  std::shared_ptr<component::System> getSystem(std::string const &name) const;
+  void addSystem(std::shared_ptr<System> system);
+  std::shared_ptr<System> getSystem(std::string const &name) const;
 
   template <class T> std::shared_ptr<T> getSystemWithType(std::string const &name) const {
     if (auto s = std::dynamic_pointer_cast<T>(getSystem(name))) {
@@ -32,10 +35,10 @@ public:
   std::vector<std::shared_ptr<Entity>> getEntities() const { return mEntities; };
 
   // for convenience
-  std::shared_ptr<component::PhysxSystem> getPhysxSystem() const;
+  std::shared_ptr<physx::PhysxSystem> getPhysxSystem() const;
   void step();
 
-  std::shared_ptr<component::SapienRendererSystem> getSapienRendererSystem() const;
+  std::shared_ptr<sapien_renderer::SapienRendererSystem> getSapienRendererSystem() const;
   void updateRender();
 
   std::string packEntityPoses();
@@ -43,7 +46,7 @@ public:
 
   template <class Archive> void save(Archive &ar) const { ar(mSystems, mEntities); }
   template <class Archive> void load(Archive &ar) {
-    std::unordered_map<std::string, std::shared_ptr<component::System>> systems;
+    std::unordered_map<std::string, std::shared_ptr<System>> systems;
     std::vector<std::shared_ptr<Entity>> entities;
     ar(systems, entities);
 
@@ -64,7 +67,7 @@ public:
 private:
   uint64_t mNextEntityId{1};
 
-  std::unordered_map<std::string, std::shared_ptr<component::System>> mSystems;
+  std::unordered_map<std::string, std::shared_ptr<System>> mSystems;
   std::vector<std::shared_ptr<Entity>> mEntities;
 };
 

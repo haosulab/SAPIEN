@@ -6,7 +6,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <sapien/component/component.h>
+#include <sapien/component.h>
 
 #include "camera_component.h"
 #include "render_body_component.h"
@@ -22,11 +22,9 @@ PYBIND11_MODULE(pysapien_render_server, m) {
   auto PyRenderServerBuffer = py::class_<VulkanCudaBuffer>(m, "RenderServerBuffer");
 
   auto PyRenderClientCameraComponent =
-      py::class_<ClientCameraComponent, sapien::component::Component>(
-          m, "RenderClientCameraComponent");
+      py::class_<ClientCameraComponent, sapien::Component>(m, "RenderClientCameraComponent");
   auto PyRenderClientBodyComponent =
-      py::class_<ClientRenderBodyComponent, sapien::component::Component>(
-          m, "RenderClientBodyComponent");
+      py::class_<ClientRenderBodyComponent, sapien::Component>(m, "RenderClientBodyComponent");
 
   auto PyRenderClientShape = py::class_<ClientRenderShape>(m, "RenderClientShape");
   auto PyRenderClientShapeTriangleMesh =

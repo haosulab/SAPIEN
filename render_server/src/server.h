@@ -1,7 +1,7 @@
 #pragma once
 #include "proto/render_server.grpc.pb.h"
 #include "safe_map.h"
-#include "sapien/thread_pool.hpp"
+#include "thread_pool.hpp"
 #include <grpc/grpc.h>
 #include <grpcpp/grpcpp.h>
 #include <memory>

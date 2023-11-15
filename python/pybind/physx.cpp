@@ -1,4 +1,4 @@
-#include "sapien/component/physx/physx.h"
+#include "sapien/physx/physx.h"
 #include "generator.hpp"
 #include "sapien_type_caster.h"
 #include <pybind11/eigen.h>
@@ -9,96 +9,96 @@
 
 namespace py = pybind11;
 using namespace sapien;
-using namespace sapien::component;
+using namespace sapien::physx;
 
 namespace pybind11::detail {
 
-template <> struct type_caster<physx::PxArticulationJointType::Enum> {
+template <> struct type_caster<::physx::PxArticulationJointType::Enum> {
   PYBIND11_TYPE_CASTER(
-      physx::PxArticulationJointType::Enum,
+      ::physx::PxArticulationJointType::Enum,
       _("typing.Literal['fixed', 'revolute', 'revolute_unwrapped', 'prismatic', 'free']"));
 
   bool load(py::handle src, bool convert) {
     std::string name = py::cast<std::string>(src);
     if (name == "fixed") {
-      value = physx::PxArticulationJointType::eFIX;
+      value = ::physx::PxArticulationJointType::eFIX;
       return true;
     } else if (name == "revolute" || name == "hinge" || name == "continuous") {
-      value = physx::PxArticulationJointType::eREVOLUTE;
+      value = ::physx::PxArticulationJointType::eREVOLUTE;
       return true;
     } else if (name == "revolute_unwrapped") {
-      value = physx::PxArticulationJointType::eREVOLUTE_UNWRAPPED;
+      value = ::physx::PxArticulationJointType::eREVOLUTE_UNWRAPPED;
       return true;
     } else if (name == "prismatic" || name == "slider") {
-      value = physx::PxArticulationJointType::ePRISMATIC;
+      value = ::physx::PxArticulationJointType::ePRISMATIC;
       return true;
     } else if (name == "spherical" || name == "ball") {
-      value = physx::PxArticulationJointType::eSPHERICAL;
+      value = ::physx::PxArticulationJointType::eSPHERICAL;
       return true;
     } else if (name == "undefined" || name == "free") {
-      value = physx::PxArticulationJointType::eUNDEFINED;
+      value = ::physx::PxArticulationJointType::eUNDEFINED;
       return true;
     }
     return false;
   }
 
-  static py::handle cast(physx::PxArticulationJointType::Enum const &src,
+  static py::handle cast(::physx::PxArticulationJointType::Enum const &src,
                          py::return_value_policy policy, py::handle parent) {
     switch (src) {
-    case physx::PxArticulationJointType::eFIX:
+    case ::physx::PxArticulationJointType::eFIX:
       return py::str("fixed").release();
-    case physx::PxArticulationJointType::ePRISMATIC:
+    case ::physx::PxArticulationJointType::ePRISMATIC:
       return py::str("prismatic").release();
-    case physx::PxArticulationJointType::eREVOLUTE:
+    case ::physx::PxArticulationJointType::eREVOLUTE:
       return py::str("revolute").release();
-    case physx::PxArticulationJointType::eREVOLUTE_UNWRAPPED:
+    case ::physx::PxArticulationJointType::eREVOLUTE_UNWRAPPED:
       return py::str("revolute_unwrapped").release();
-    case physx::PxArticulationJointType::eSPHERICAL:
+    case ::physx::PxArticulationJointType::eSPHERICAL:
       return py::str("spherical").release();
-    case physx::PxArticulationJointType::eUNDEFINED:
+    case ::physx::PxArticulationJointType::eUNDEFINED:
       return py::str("undefined").release();
     }
     throw std::runtime_error("invalid joint type");
   }
 };
 
-template <> struct type_caster<physx::PxArticulationDriveType::Enum> {
-  PYBIND11_TYPE_CASTER(physx::PxArticulationDriveType::Enum,
+template <> struct type_caster<::physx::PxArticulationDriveType::Enum> {
+  PYBIND11_TYPE_CASTER(::physx::PxArticulationDriveType::Enum,
                        _("typing.Literal['force', 'acceleration']"));
 
   bool load(py::handle src, bool convert) {
     std::string name = py::cast<std::string>(src);
     if (name == "force") {
-      value = physx::PxArticulationDriveType::eFORCE;
+      value = ::physx::PxArticulationDriveType::eFORCE;
       return true;
     } else if (name == "acceleration" || name == "acc") {
-      value = physx::PxArticulationDriveType::eACCELERATION;
+      value = ::physx::PxArticulationDriveType::eACCELERATION;
       return true;
     } else if (name == "target") {
-      value = physx::PxArticulationDriveType::eTARGET;
+      value = ::physx::PxArticulationDriveType::eTARGET;
       return true;
     } else if (name == "velocity") {
-      value = physx::PxArticulationDriveType::eVELOCITY;
+      value = ::physx::PxArticulationDriveType::eVELOCITY;
       return true;
     } else if (name == "none") {
-      value = physx::PxArticulationDriveType::eNONE;
+      value = ::physx::PxArticulationDriveType::eNONE;
       return true;
     }
     return false;
   }
 
-  static py::handle cast(physx::PxArticulationDriveType::Enum const &src,
+  static py::handle cast(::physx::PxArticulationDriveType::Enum const &src,
                          py::return_value_policy policy, py::handle parent) {
     switch (src) {
-    case physx::PxArticulationDriveType::eFORCE:
+    case ::physx::PxArticulationDriveType::eFORCE:
       return py::str("force").release();
-    case physx::PxArticulationDriveType::eACCELERATION:
+    case ::physx::PxArticulationDriveType::eACCELERATION:
       return py::str("acceleration").release();
-    case physx::PxArticulationDriveType::eTARGET:
+    case ::physx::PxArticulationDriveType::eTARGET:
       return py::str("target").release();
-    case physx::PxArticulationDriveType::eVELOCITY:
+    case ::physx::PxArticulationDriveType::eVELOCITY:
       return py::str("velocity").release();
-    case physx::PxArticulationDriveType::eNONE:
+    case ::physx::PxArticulationDriveType::eNONE:
       return py::str("none").release();
     }
     throw std::runtime_error("invalid drive type");
@@ -133,38 +133,38 @@ template <> struct type_caster<PhysxDriveComponent::DriveMode> {
   }
 };
 
-template <> struct type_caster<physx::PxForceMode::Enum> {
-  PYBIND11_TYPE_CASTER(physx::PxForceMode::Enum,
+template <> struct type_caster<::physx::PxForceMode::Enum> {
+  PYBIND11_TYPE_CASTER(::physx::PxForceMode::Enum,
                        _("typing.Literal['force', 'acceleration', 'velocity_change', 'impulse']"));
 
   bool load(py::handle src, bool convert) {
     std::string name = py::cast<std::string>(src);
     if (name == "force" || name == "f") {
-      value = physx::PxForceMode::eFORCE;
+      value = ::physx::PxForceMode::eFORCE;
       return true;
     } else if (name == "acceleration" || name == "acc") {
-      value = physx::PxForceMode::eACCELERATION;
+      value = ::physx::PxForceMode::eACCELERATION;
       return true;
     } else if (name == "velocity_change") {
-      value = physx::PxForceMode::eVELOCITY_CHANGE;
+      value = ::physx::PxForceMode::eVELOCITY_CHANGE;
       return true;
     } else if (name == "impulse") {
-      value = physx::PxForceMode::eIMPULSE;
+      value = ::physx::PxForceMode::eIMPULSE;
       return true;
     }
     return false;
   }
 
-  static py::handle cast(physx::PxForceMode::Enum const &src, py::return_value_policy policy,
+  static py::handle cast(::physx::PxForceMode::Enum const &src, py::return_value_policy policy,
                          py::handle parent) {
     switch (src) {
-    case physx::PxForceMode::eFORCE:
+    case ::physx::PxForceMode::eFORCE:
       return py::str("force").release();
-    case physx::PxForceMode::eACCELERATION:
+    case ::physx::PxForceMode::eACCELERATION:
       return py::str("acceleration").release();
-    case physx::PxForceMode::eVELOCITY_CHANGE:
+    case ::physx::PxForceMode::eVELOCITY_CHANGE:
       return py::str("velocity_change").release();
-    case physx::PxForceMode::eIMPULSE:
+    case ::physx::PxForceMode::eIMPULSE:
       return py::str("impulse").release();
     }
     throw std::runtime_error("invalid drive type");
@@ -503,9 +503,9 @@ Generator<int> init_physx(py::module &sapien) {
       .def("set_disable_gravity", &PhysxRigidBodyComponent::setDisableGravity)
 
       .def("add_force_torque", &PhysxRigidBodyComponent::addForceTorque, py::arg("force"),
-           py::arg("torque"), py::arg("mode") = physx::PxForceMode::eFORCE)
+           py::arg("torque"), py::arg("mode") = ::physx::PxForceMode::eFORCE)
       .def("add_force_at_point", &PhysxRigidBodyComponent::addForceAtPoint, py::arg("force"),
-           py::arg("point"), py::arg("mode") = physx::PxForceMode::eFORCE);
+           py::arg("point"), py::arg("mode") = ::physx::PxForceMode::eFORCE);
 
   PyPhysxRigidDynamicComponent
       .def(py::init<>())
@@ -616,10 +616,10 @@ Example:
 
       .def("set_drive_properties", &PhysxArticulationJoint::setDriveProperties,
            py::arg("stiffness"), py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
-           py::arg("mode") = physx::PxForceMode::eFORCE)
+           py::arg("mode") = ::physx::PxForceMode::eFORCE)
       .def("set_drive_property", &PhysxArticulationJoint::setDriveProperties, py::arg("stiffness"),
            py::arg("damping"), py::arg("force_limit") = PX_MAX_F32,
-           py::arg("mode") = physx::PxForceMode::eFORCE, R"doc(same as set_drive_properties)doc")
+           py::arg("mode") = ::physx::PxForceMode::eFORCE, R"doc(same as set_drive_properties)doc")
 
       .def_property("drive_target", &PhysxArticulationJoint::getDriveTargetPosition,
                     py::overload_cast<Eigen::VectorXf const &>(

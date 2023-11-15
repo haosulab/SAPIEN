@@ -1,12 +1,12 @@
 #pragma once
 #include "proto/render_server.grpc.pb.h"
 #include "render_shape.h"
-#include <sapien/component/component.h>
+#include <sapien/component.h>
 
 namespace sapien {
 namespace render_server {
 
-class ClientRenderBodyComponent : public component::Component {
+class ClientRenderBodyComponent : public Component {
 public:
   ClientRenderBodyComponent();
 

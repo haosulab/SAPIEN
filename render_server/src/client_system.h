@@ -1,6 +1,6 @@
 #pragma once
 #include "proto/render_server.grpc.pb.h"
-#include "sapien/component/system.h"
+#include "sapien/system.h"
 #include <grpcpp/create_channel.h>
 #include <sapien/math/pose.h>
 
@@ -10,7 +10,7 @@ namespace render_server {
 class ClientCameraComponent;
 class ClientRenderBodyComponent;
 
-class ClientSystem : sapien::component::System {
+class ClientSystem : sapien::System {
 public:
   ClientSystem(std::string const &address, uint64_t index);
 

@@ -1,16 +1,15 @@
 #include "./python_component.hpp"
 #include "./serialization.h"
 #include "generator.hpp"
-#include "sapien/component/component.h"
-#include "sapien/component/interface.h"
-#include "sapien/component/physx/physx_system.h"
-#include "sapien/component/sapien_renderer/sapien_renderer.h"
-#include "sapien/component/system.h"
+#include "sapien/component.h"
 #include "sapien/entity.h"
+#include "sapien/interface.h"
 #include "sapien/logger.h"
 #include "sapien/math/math.h"
-#include "sapien/module.h"
+#include "sapien/physx/physx_system.h"
+#include "sapien/sapien_renderer/sapien_renderer.h"
 #include "sapien/scene.h"
+#include "sapien/system.h"
 #include "sapien_type_caster.h"
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
@@ -22,28 +21,25 @@ namespace py = pybind11;
 using namespace pybind11::literals;
 using namespace sapien;
 
-class PythonCudaDataSource : public component::CudaDataSource,
-                             public py::trampoline_self_life_support {
+class PythonCudaDataSource : public CudaDataSource, public py::trampoline_self_life_support {
   uintptr_t getCudaPointer() const override {
-    PYBIND11_OVERRIDE_PURE_NAME(uintptr_t, component::CudaDataSource, "get_cuda_pointer",
-                                getCudaPointer, );
+    PYBIND11_OVERRIDE_PURE_NAME(uintptr_t, CudaDataSource, "get_cuda_pointer", getCudaPointer, );
   }
   uintptr_t getCudaStream() const override {
-    PYBIND11_OVERRIDE_NAME(uintptr_t, component::CudaDataSource, "get_cuda_stream",
-                           getCudaStream, );
+    PYBIND11_OVERRIDE_NAME(uintptr_t, CudaDataSource, "get_cuda_stream", getCudaStream, );
   }
   size_t getSize() const override {
-    PYBIND11_OVERRIDE_PURE_NAME(size_t, component::CudaDataSource, "get_size", getSize, );
+    PYBIND11_OVERRIDE_PURE_NAME(size_t, CudaDataSource, "get_size", getSize, );
   }
 };
 
-class PythonSystem : public component::System, public py::trampoline_self_life_support {
+class PythonSystem : public System, public py::trampoline_self_life_support {
 public:
-  using component::System::System;
+  using System::System;
 
-  void step() override { PYBIND11_OVERRIDE_PURE(void, component::System, step, ); }
+  void step() override { PYBIND11_OVERRIDE_PURE(void, System, step, ); }
   std::string getName() const override {
-    PYBIND11_OVERRIDE_PURE_NAME(std::string, component::System, "get_name", getName, );
+    PYBIND11_OVERRIDE_PURE_NAME(std::string, System, "get_name", getName, );
   }
 };
 
@@ -57,12 +53,11 @@ Generator<int> init_sapien(py::module &m) {
 
   // auto PyModule = py::class_<Module>(m, "Module");
 
-  auto PyComponent = py::class_<component::Component, PythonComponent>(m, "Component");
+  auto PyComponent = py::class_<Component, PythonComponent>(m, "Component");
 
-  auto PyCudaDataSource =
-      py::class_<component::CudaDataSource, PythonCudaDataSource>(m, "CudaDataSource");
+  auto PyCudaDataSource = py::class_<CudaDataSource, PythonCudaDataSource>(m, "CudaDataSource");
 
-  auto PySystem = py::class_<component::System, PythonSystem>(m, "System");
+  auto PySystem = py::class_<System, PythonSystem>(m, "System");
   auto PyCudaArray = py::class_<CudaArrayHandle>(m, "CudaArray");
 
   co_yield 0;
@@ -104,7 +99,7 @@ Generator<int> init_sapien(py::module &m) {
           }));
 
   PyScene
-      .def(py::init<std::vector<std::shared_ptr<component::System>> const &>(),
+      .def(py::init<std::vector<std::shared_ptr<System>> const &>(),
            py::arg("systems")) // TODO: support parameters
 
       .def_property_readonly("entities", &Scene::getEntities)
@@ -165,7 +160,7 @@ Generator<int> init_sapien(py::module &m) {
                 return c;
               }
             }
-            return std::shared_ptr<component::Component>(nullptr);
+            return std::shared_ptr<Component>(nullptr);
           },
           py::arg("cls"))
 
@@ -173,25 +168,25 @@ Generator<int> init_sapien(py::module &m) {
       .def("remove_from_scene", &Entity::removeFromScene);
 
   PyComponent.def(py::init<>())
-      .def_property_readonly("entity", &component::Component::getEntity)
-      .def("get_entity", &component::Component::getEntity)
+      .def_property_readonly("entity", &Component::getEntity)
+      .def("get_entity", &Component::getEntity)
 
-      .def_property("name", &component::Component::getName, &component::Component::setName)
-      .def("get_name", &component::Component::getName)
-      .def("set_name", &component::Component::setName)
+      .def_property("name", &Component::getName, &Component::setName)
+      .def("get_name", &Component::getName)
+      .def("set_name", &Component::setName)
 
       .def_property(
           "pose",
-          [](component::Component &c) {
+          [](Component &c) {
             PyErr_WarnEx(PyExc_DeprecationWarning,
                          "component.pose can be ambiguous thus deprecated. It is equivalent to "
                          "component.entity_pose, which should be used instead",
                          1);
             return c.getPose();
           },
-          [](component::Component &c, Pose const &pose) { c.setPose(pose); })
+          [](Component &c, Pose const &pose) { c.setPose(pose); })
       .def("get_pose",
-           [](component::Component &c) {
+           [](Component &c) {
              PyErr_WarnEx(
                  PyExc_DeprecationWarning,
                  "component.get_pose can be ambiguous thus deprecated. It is equivalent to "
@@ -200,7 +195,7 @@ Generator<int> init_sapien(py::module &m) {
              return c.getPose();
            })
       .def("set_pose",
-           [](component::Component &c, Pose const &pose) {
+           [](Component &c, Pose const &pose) {
              PyErr_WarnEx(
                  PyExc_DeprecationWarning,
                  "component.set_pose can be ambiguous thus deprecated. It is equivalent to "
@@ -209,23 +204,23 @@ Generator<int> init_sapien(py::module &m) {
              c.setPose(pose);
            })
 
-      .def_property("entity_pose", &component::Component::getPose, &component::Component::setPose)
-      .def("get_entity_pose", &component::Component::getPose)
-      .def("set_entity_pose", &component::Component::setPose)
+      .def_property("entity_pose", &Component::getPose, &Component::setPose)
+      .def("get_entity_pose", &Component::getPose)
+      .def("set_entity_pose", &Component::setPose)
 
-      .def_property_readonly("is_enabled", &component::Component::getEnabled)
-      .def("enable", &component::Component::enable, "enable the component")
-      .def("disable", &component::Component::disable, "disable the component")
+      .def_property_readonly("is_enabled", &Component::getEnabled)
+      .def("enable", &Component::enable, "enable the component")
+      .def("disable", &Component::disable, "disable the component")
 
       .def_property(
           "_serialization_id",
-          [](component::Component &c) {
+          [](Component &c) {
             if (auto p = dynamic_cast<PythonComponent *>(&c)) {
               return p->getSerializationId();
             }
             throw std::runtime_error("only Python-inherited components have serialization id");
           },
-          [](component::Component &c, uint64_t id) {
+          [](Component &c, uint64_t id) {
             if (auto p = dynamic_cast<PythonComponent *>(&c)) {
               p->setSerializationId(id);
               return;
@@ -235,7 +230,7 @@ Generator<int> init_sapien(py::module &m) {
 
   PyCudaDataSource.def(py::init<>());
 
-  PySystem.def(py::init<>()).def("step", &component::System::step);
+  PySystem.def(py::init<>()).def("step", &System::step);
 
   PyCudaArray.def_readonly("shape", &CudaArrayHandle::shape)
       .def_readonly("strides", &CudaArrayHandle::strides)
@@ -260,8 +255,7 @@ Generator<int> init_sapien(py::module &m) {
 
   PyScene
       .def("_swap_in_python_components",
-           [](Scene &scene,
-              std::vector<std::shared_ptr<component::Component>> const &components) -> void {
+           [](Scene &scene, std::vector<std::shared_ptr<Component>> const &components) -> void {
              std::unordered_map<uint64_t, std::shared_ptr<PythonComponent>> map;
              for (auto &c : components) {
                auto p = std::dynamic_pointer_cast<PythonComponent>(c);
@@ -279,7 +273,7 @@ Generator<int> init_sapien(py::module &m) {
              }
            })
       .def("_find_all_python_components", [](Scene &scene) {
-        std::unordered_set<std::shared_ptr<component::Component>> result;
+        std::unordered_set<std::shared_ptr<Component>> result;
         for (auto &e : scene.getEntities()) {
           auto comps = e->getComponents();
           for (auto c : comps) {

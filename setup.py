@@ -107,6 +107,9 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
         "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
     ]
 
+    deps_dir = os.path.join(sapien_build_dir, "_sapien_deps")
+    cmake_args += [f"-DFETCHCONTENT_BASE_DIR={deps_dir}"]
+
     env = os.environ.copy()
     subprocess.check_call(
         ["cmake", sapien_source_dir] + cmake_args, cwd=build_dir, env=env
@@ -167,6 +170,10 @@ class CMakeBuild(build_ext):
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
         ]
+
+        deps_dir = os.path.join(self.sapien_build_dir, "_sapien_deps")
+        cmake_args += [f"-DFETCHCONTENT_BASE_DIR={deps_dir}"]
+
         if args.debug:
             cfg = "Debug"
         else:
@@ -199,6 +206,10 @@ class CMakeBuild(build_ext):
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
         ]
+
+        deps_dir = os.path.join(self.sapien_build_dir, "_sapien_deps")
+        cmake_args += [f"-DFETCHCONTENT_BASE_DIR={deps_dir}"]
+
         if args.debug:
             cfg = "Debug"
         else:
@@ -319,7 +330,7 @@ class CMakeBuild(build_ext):
     def build_extension(self, ext):
         if platform.system() == "Linux":
             self.build_pinocchio(ext)
-            # self.build_render_server(ext)
+            self.build_render_server(ext)
         self.build_pybind(ext)
         self.copy_assets(ext)
 

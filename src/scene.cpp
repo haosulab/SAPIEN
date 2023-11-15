@@ -1,17 +1,17 @@
 #include "sapien/scene.h"
-#include "sapien/component/physx/physx_system.h"
-#include "sapien/component/sapien_renderer/sapien_renderer.h"
+#include "sapien/physx/physx_system.h"
+#include "sapien/sapien_renderer/sapien_renderer.h"
 #include "sapien/entity.h"
 
 namespace sapien {
 
-Scene::Scene(std::vector<std::shared_ptr<component::System>> const &systems) {
+Scene::Scene(std::vector<std::shared_ptr<System>> const &systems) {
   for (auto s : systems) {
     addSystem(s);
   }
 }
 
-void Scene::addSystem(std::shared_ptr<component::System> system) {
+void Scene::addSystem(std::shared_ptr<System> system) {
   auto name = system->getName();
   if (mSystems.contains(name)) {
     throw std::runtime_error("faedil to add system: a system with name [" + name +
@@ -20,7 +20,7 @@ void Scene::addSystem(std::shared_ptr<component::System> system) {
   mSystems[name] = system;
 }
 
-std::shared_ptr<component::System> Scene::getSystem(std::string const &name) const {
+std::shared_ptr<System> Scene::getSystem(std::string const &name) const {
   try {
     return mSystems.at(name);
   } catch (std::out_of_range &e) {
@@ -29,12 +29,12 @@ std::shared_ptr<component::System> Scene::getSystem(std::string const &name) con
   }
 }
 
-std::shared_ptr<component::PhysxSystem> Scene::getPhysxSystem() const {
-  return std::dynamic_pointer_cast<component::PhysxSystem>(getSystem("physx"));
+std::shared_ptr<physx::PhysxSystem> Scene::getPhysxSystem() const {
+  return std::dynamic_pointer_cast<physx::PhysxSystem>(getSystem("physx"));
 }
 
-std::shared_ptr<component::SapienRendererSystem> Scene::getSapienRendererSystem() const {
-  return std::dynamic_pointer_cast<component::SapienRendererSystem>(getSystem("render"));
+std::shared_ptr<sapien_renderer::SapienRendererSystem> Scene::getSapienRendererSystem() const {
+  return std::dynamic_pointer_cast<sapien_renderer::SapienRendererSystem>(getSystem("render"));
 }
 
 void Scene::step() { getPhysxSystem()->step(); }

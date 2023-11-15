@@ -6,16 +6,16 @@
 
 namespace sapien {
 
-inline Vec3 PxVec3ToVec3(physx::PxVec3 const &v) { return {v.x, v.y, v.z}; }
-inline Quat PxQuatToQuat(physx::PxQuat const &q) { return {q.w, q.x, q.y, q.z}; }
+inline Vec3 PxVec3ToVec3(::physx::PxVec3 const &v) { return {v.x, v.y, v.z}; }
+inline Quat PxQuatToQuat(::physx::PxQuat const &q) { return {q.w, q.x, q.y, q.z}; }
 
-inline physx::PxVec3 Vec3ToPxVec3(Vec3 const &v) { return {v.x, v.y, v.z}; }
-inline physx::PxQuat QuatToPxQuat(Quat const &q) { return {q.x, q.y, q.z, q.w}; }
+inline ::physx::PxVec3 Vec3ToPxVec3(Vec3 const &v) { return {v.x, v.y, v.z}; }
+inline ::physx::PxQuat QuatToPxQuat(Quat const &q) { return {q.x, q.y, q.z, q.w}; }
 
-inline Pose PxTransformToPose(physx::PxTransform const &transform) {
+inline Pose PxTransformToPose(::physx::PxTransform const &transform) {
   return {PxVec3ToVec3(transform.p), PxQuatToQuat(transform.q)};
 }
-inline physx::PxTransform PoseToPxTransform(Pose const &pose) {
+inline ::physx::PxTransform PoseToPxTransform(Pose const &pose) {
   return {Vec3ToPxVec3(pose.p), QuatToPxQuat(pose.q)};
 }
 

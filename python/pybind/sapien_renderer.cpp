@@ -1,4 +1,4 @@
-#include "sapien/component/sapien_renderer/sapien_renderer.h"
+#include "sapien/sapien_renderer/sapien_renderer.h"
 #include "array.hpp"
 #include "format.hpp"
 #include "sapien_type_caster.h"
@@ -12,7 +12,7 @@ namespace py = pybind11;
 
 using namespace pybind11::literals;
 using namespace sapien;
-using namespace sapien::component;
+using namespace sapien::sapien_renderer;
 
 namespace pybind11::detail {
 template <> struct type_caster<svulkan2::renderer::RTRenderer::DenoiserType> {

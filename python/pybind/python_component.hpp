@@ -1,5 +1,5 @@
 #pragma once
-#include "sapien/component/component.h"
+#include "sapien/component.h"
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
@@ -17,7 +17,7 @@ using namespace sapien;
 class PythonComponent;
 extern cereal::construct<PythonComponent> *gCurrentConstruct;
 
-class PythonComponent : public component::Component, public py::trampoline_self_life_support {
+class PythonComponent : public Component, public py::trampoline_self_life_support {
 
 public:
   PythonComponent() : mObjectId(gCurrentObjectId++) {}
@@ -34,17 +34,17 @@ public:
   void onRemoveFromSceneImpl(Scene &scene) {}
 
   void onSetPose(Pose const &pose) override {
-    PYBIND11_OVERRIDE_NAME(void, component::Component, "on_set_pose", onSetPose, pose);
+    PYBIND11_OVERRIDE_NAME(void, Component, "on_set_pose", onSetPose, pose);
   }
 
   template <class Archive> void save(Archive &ar) const {
     ar(mObjectId);
-    ar(cereal::base_class<component::Component>(this));
+    ar(cereal::base_class<Component>(this));
   }
 
   template <class Archive> void load(Archive &ar) {
     ar(mObjectId);
-    ar(cereal::base_class<component::Component>(this));
+    ar(cereal::base_class<Component>(this));
     mPlaceholder = true;
   }
 
@@ -64,4 +64,4 @@ private:
 uint64_t PythonComponent::gCurrentObjectId = 0;
 
 CEREAL_REGISTER_TYPE(PythonComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::component::Component, PythonComponent);
+CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::Component, PythonComponent);

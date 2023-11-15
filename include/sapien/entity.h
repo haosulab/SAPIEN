@@ -7,12 +7,8 @@
 #include <vector>
 
 namespace sapien {
-namespace component {
 class Component;
-}
-
 class Scene;
-// class Module;
 
 class Entity : public std::enable_shared_from_this<Entity> {
 public:
@@ -23,7 +19,7 @@ public:
 
   std::shared_ptr<Scene> getScene();
 
-  template <std::derived_from<component::Component> T> std::shared_ptr<T> getComponent() const {
+  template <std::derived_from<Component> T> std::shared_ptr<T> getComponent() const {
     auto it = std::find_if(mComponents.begin(), mComponents.end(),
                            [](auto &c) { return dynamic_cast<T *>(c.get()) != nullptr; });
     if (it == mComponents.end()) {
@@ -32,10 +28,10 @@ public:
     return std::static_pointer_cast<T>(*it);
   }
 
-  std::shared_ptr<Entity> addComponent(std::shared_ptr<component::Component> component);
-  void removeComponent(std::shared_ptr<component::Component> component);
+  std::shared_ptr<Entity> addComponent(std::shared_ptr<Component> component);
+  void removeComponent(std::shared_ptr<Component> component);
 
-  std::vector<std::shared_ptr<component::Component>> getComponents() const { return mComponents; }
+  std::vector<std::shared_ptr<Component>> getComponents() const { return mComponents; }
 
   Pose getPose() const;
   void setPose(Pose const &);
@@ -66,7 +62,7 @@ public:
   void internalSyncPose(Pose const &);
 
   // called internally to swap in python components to replace placeholder components
-  void internalSwapInComponent(uint32_t index, std::shared_ptr<component::Component> component);
+  void internalSwapInComponent(uint32_t index, std::shared_ptr<Component> component);
 
   uint64_t getId() const { return mId; }
   void internalSetId(uint64_t id) { mId = id; }
@@ -76,7 +72,7 @@ public:
 
   template <class Archive> void save(Archive &ar) const { ar(mName, mPose, mComponents); }
   template <class Archive> void load(Archive &ar) {
-    std::vector<std::shared_ptr<component::Component>> components;
+    std::vector<std::shared_ptr<Component>> components;
     ar(mName, mPose, components);
     for (auto &c : components) {
       addComponent(c);
@@ -90,7 +86,7 @@ protected:
   std::string mName{};
   Scene *mScene{};
   Pose mPose;
-  std::vector<std::shared_ptr<component::Component>> mComponents;
+  std::vector<std::shared_ptr<Component>> mComponents;
 };
 
 } // namespace sapien
