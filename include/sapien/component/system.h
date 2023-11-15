@@ -6,9 +6,6 @@
 
 namespace sapien {
 namespace component {
-class PhysxRigidDynamicComponent;
-class PhysxRigidStaticComponent;
-class PhysxArticulationLinkComponent;
 
 /** System controls entity components in a scene.
  *  Components should register themselves to a system to enable lifecycle methods */

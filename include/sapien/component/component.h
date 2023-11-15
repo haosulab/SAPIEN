@@ -45,6 +45,8 @@ public:
   // internal only, set parent entity
   void internalSetEntity(std::shared_ptr<Entity> const &entity) { mEntity = entity; }
 
+  uint64_t getId() const { return mId; }
+
   virtual ~Component() = default;
 
   virtual std::vector<uint64_t> getSerializationDependencies() const { return {}; }
@@ -57,6 +59,18 @@ protected:
   bool mEnabled{true};
 
   uint64_t mId{};
+};
+
+struct comp_cmp {
+  bool operator()(std::shared_ptr<Component> const &a, std::shared_ptr<Component> const &b) const {
+    if (!a) {
+      return true;
+    }
+    if (!b) {
+      return true;
+    }
+    return a->getId() < b->getId();
+  }
 };
 
 } // namespace component

@@ -1,12 +1,13 @@
 #pragma once
 
+#include "../component.h"
 #include "../system.h"
 #include "cubemap.h"
 #include "sapien/math/vec3.h"
 #include "sapien/serialize.h"
+#include <set>
 #include <svulkan2/core/context.h>
 #include <svulkan2/scene/scene.h>
-#include <unordered_set>
 
 namespace sapien {
 namespace component {
@@ -103,11 +104,11 @@ private:
   std::shared_ptr<SapienRenderEngine> mEngine;
   std::shared_ptr<svulkan2::scene::Scene> mScene;
 
-  std::unordered_set<std::shared_ptr<SapienRenderBodyComponent>> mRenderBodyComponents;
-  std::unordered_set<std::shared_ptr<SapienRenderCameraComponent>> mRenderCameraComponents;
-  std::unordered_set<std::shared_ptr<SapienRenderLightComponent>> mRenderLightComponents;
-  std::unordered_set<std::shared_ptr<PointCloudComponent>> mPointCloudComponents;
-  std::unordered_set<std::shared_ptr<CudaDeformableMeshComponent>> mCudaDeformableMeshComponents;
+  std::set<std::shared_ptr<SapienRenderBodyComponent>, comp_cmp> mRenderBodyComponents;
+  std::set<std::shared_ptr<SapienRenderCameraComponent>, comp_cmp> mRenderCameraComponents;
+  std::set<std::shared_ptr<SapienRenderLightComponent>, comp_cmp> mRenderLightComponents;
+  std::set<std::shared_ptr<PointCloudComponent>, comp_cmp> mPointCloudComponents;
+  std::set<std::shared_ptr<CudaDeformableMeshComponent>, comp_cmp> mCudaDeformableMeshComponents;
 
   std::shared_ptr<SapienRenderCubemap> mCubemap;
 };

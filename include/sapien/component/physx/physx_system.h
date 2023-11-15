@@ -1,4 +1,5 @@
 #pragma once
+#include "../component.h"
 #include "../system.h"
 #include "mesh_manager.h"
 #include "sapien/scene.h"
@@ -6,12 +7,15 @@
 #include "simulation_callback.hpp"
 #include <PxPhysicsAPI.h>
 #include <memory>
-#include <unordered_set>
+#include <set>
 
 namespace sapien {
 namespace component {
 class PhysxArticulation;
 class PhysxMaterial;
+class PhysxRigidDynamicComponent;
+class PhysxRigidStaticComponent;
+class PhysxArticulationLinkComponent;
 
 struct PhysxSceneConfig {
   Vec3 gravity = {0, 0, -9.81};           // default gravity
@@ -100,10 +104,11 @@ private:
   physx::PxScene *mPxScene;
   float mTimestep{0.01f};
 
-  std::unordered_set<std::shared_ptr<component::PhysxRigidDynamicComponent>>
+  std::set<std::shared_ptr<component::PhysxRigidDynamicComponent>,comp_cmp>
       mRigidDynamicComponents;
-  std::unordered_set<std::shared_ptr<component::PhysxRigidStaticComponent>> mRigidStaticComponents;
-  std::unordered_set<std::shared_ptr<component::PhysxArticulationLinkComponent>>
+  std::set<std::shared_ptr<component::PhysxRigidStaticComponent>, comp_cmp>
+      mRigidStaticComponents;
+  std::set<std::shared_ptr<component::PhysxArticulationLinkComponent>, comp_cmp>
       mArticulationLinkComponents;
 
   DefaultEventCallback mSimulationCallback;
