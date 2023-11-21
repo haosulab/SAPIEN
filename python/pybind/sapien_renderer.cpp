@@ -223,6 +223,43 @@ template <> struct type_caster<vk::Format> {
   }
 };
 
+template <> struct type_caster<vk::CullModeFlagBits> {
+  PYBIND11_TYPE_CASTER(vk::CullModeFlagBits, _("typing.Literal['back', 'front', 'none', 'both']"));
+
+  bool load(py::handle src, bool convert) {
+    std::string name = py::cast<std::string>(src);
+    if (name == "back") {
+      value = vk::CullModeFlagBits::eBack;
+      return true;
+    } else if (name == "front") {
+      value = vk::CullModeFlagBits::eFront;
+      return true;
+    } else if (name == "none") {
+      value = vk::CullModeFlagBits::eNone;
+      return true;
+    } else if (name == "both" || name == "front_and_back") {
+      value = vk::CullModeFlagBits::eFrontAndBack;
+      return true;
+    }
+    return false;
+  }
+
+  static py::handle cast(vk::CullModeFlagBits const &src, py::return_value_policy policy,
+                         py::handle parent) {
+    switch (src) {
+    case vk::CullModeFlagBits::eBack:
+      return py::str("back").release();
+    case vk::CullModeFlagBits::eFront:
+      return py::str("front").release();
+    case vk::CullModeFlagBits::eFrontAndBack:
+      return py::str("both").release();
+    case vk::CullModeFlagBits::eNone:
+      return py::str("none").release();
+    }
+    throw std::runtime_error("invalid culling");
+  }
+};
+
 template <> struct type_caster<SapienRenderTexture::FilterMode> {
   PYBIND11_TYPE_CASTER(SapienRenderTexture::FilterMode, _("typing.Literal['nearest', 'linear']"));
 
@@ -587,6 +624,11 @@ void init_sapien_renderer(py::module &sapien) {
   PyRenderShape.def_property("local_pose", &RenderShape::getLocalPose, &RenderShape::setLocalPose)
       .def("get_local_pose", &RenderShape::getLocalPose)
       .def("set_local_pose", &RenderShape::setLocalPose)
+
+      .def_property("culling", &RenderShape::getCulling, &RenderShape::setCulling)
+      .def("get_culling", &RenderShape::getCulling)
+      .def("set_culling", &RenderShape::setCulling, py::arg("culling"))
+
       .def_property_readonly("per_scene_id", &RenderShape::getRenderId)
       .def("get_per_scene_id", &RenderShape::getRenderId)
       .def_property("name", &RenderShape::getName, &RenderShape::setName)

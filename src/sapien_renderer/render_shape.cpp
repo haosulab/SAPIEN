@@ -20,6 +20,16 @@ void RenderShape::setLocalPose(Pose const &pose) {
   }
   mLocalPose = pose;
 }
+
+vk::CullModeFlagBits RenderShape::getCulling() const { return mCulling; }
+void RenderShape::setCulling(vk::CullModeFlagBits culling) {
+  if (mParent) {
+    throw std::runtime_error(
+        "failed to set culling: it cannot be modified once attached to component");
+  }
+  mCulling = culling;
+}
+
 Pose RenderShape::getLocalPose() const { return mLocalPose; }
 RenderShape::~RenderShape() {}
 

@@ -1,7 +1,7 @@
 #include "sapien/sapien_renderer/render_body_component.h"
+#include "sapien/entity.h"
 #include "sapien/sapien_renderer/render_shape.h"
 #include "sapien/sapien_renderer/sapien_renderer_system.h"
-#include "sapien/entity.h"
 #include "sapien/scene.h"
 
 namespace sapien {
@@ -51,6 +51,7 @@ void SapienRenderBodyComponent::onAddToScene(Scene &scene) {
   for (auto &shape : mRenderShapes) {
     auto &obj = s->addObject(*mNode, shape->getModel());
     obj.setTransform(shape->getLocalTransform());
+    obj.setCullMode(shape->getCulling());
 
     uint64_t id = mRenderIdDisabled ? 0 : system->nextRenderId();
     shape->internalSetRenderId(id);
