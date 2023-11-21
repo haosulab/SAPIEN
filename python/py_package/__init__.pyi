@@ -49,6 +49,7 @@ __all__ = [
     "pysapien",
     "pysapien_pinocchio",
     "render",
+    "render_server",
     "serialization",
     "set_log_level",
     "simsense",
@@ -61,5 +62,5 @@ __all__ = [
 
 def set_log_level(level: str) -> None:
     pass
-__version__ = '3.0.0.dev20231115'
+__version__ = '3.0.0.dev20231121'
 SceneConfig = sapien.pysapien.physx.PhysxSceneConfig

@@ -30,8 +30,8 @@ service RenderService {
   rpc SetMetallic(IdFloat) returns (Empty);
 
   //========== Body ==========//
-  rpc SetUniqueId(BodyIdReq) returns (Empty);
-  rpc SetSegmentationId(BodyIdReq) returns (Empty);
+  // rpc SetUniqueId(BodyIdReq) returns (Empty);
+  // rpc SetSegmentationId(BodyIdReq) returns (Empty);
   rpc SetVisibility(BodyFloat32Req) returns (Empty);
   rpc GetShapeCount(BodyReq) returns (Uint32);
 

@@ -24,6 +24,5 @@ find_package(sapien REQUIRED)
 file(GLOB_RECURSE RENDER_SERVER_SRC "src/*.cpp")
 
 pybind11_add_module(pysapien_render_server ${RENDER_SERVER_SRC} ${PROTO_SRCS} ${GRPC_SRCS} NO_EXTRAS)
-# add_library(sapien_render_server ${RENDER_SERVER_SRC} ${PROTO_SRCS} ${GRPC_SRCS})
 target_link_libraries(pysapien_render_server PRIVATE grpc++ sapien::sapien eigen)
 target_include_directories(pysapien_render_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

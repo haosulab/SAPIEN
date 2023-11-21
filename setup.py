@@ -201,8 +201,9 @@ class CMakeBuild(build_ext):
         original_full_path = self.get_ext_fullpath(ext.name)
         extdir = os.path.abspath(os.path.dirname(original_full_path))
         extdir = os.path.join(extdir, self.distribution.get_name())
+
         cmake_args = [
-            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
+            f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{os.path.join(extdir, 'render_server')}>",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
         ]
@@ -355,7 +356,11 @@ package_data = {
         "pysapien/internal_renderer/__init__.pyi",
         "pysapien/render/__init__.pyi",
         "pysapien/math/__init__.pyi",
-    ]
+    ],
+    "sapien.render_server": [
+        "__init__.pyi",
+        "pysapien_render_server/__init__.pyi",
+    ],
 }
 
 
@@ -416,6 +421,7 @@ setup(
         "sapien.utils",
         "sapien.utils.viewer",
         "sapien.sensor",
+        "sapien.render_server",
     ],
     keywords="robotics simulator dataset articulation partnet",
     url="https://sapien.ucsd.edu",

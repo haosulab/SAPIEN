@@ -38,7 +38,7 @@ void ClientCameraComponent::onAddToScene(Scene &scene) {
     if (!status.ok()) {
       throw std::runtime_error("failed to add camera to scene: " + status.error_message());
     }
-    mId = res.id();
+    mServerId = res.id();
   }
 }
 
@@ -74,7 +74,7 @@ void ClientCameraComponent::takePicture() {
   proto::TakePictureReq req;
   proto::Empty res;
   req.set_scene_id(system->getServerId());
-  req.set_camera_id(mId);
+  req.set_camera_id(mServerId);
 
   auto status = system->getStub().TakePicture(&context, req, &res);
   if (!status.ok()) {

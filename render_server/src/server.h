@@ -58,9 +58,8 @@ class RenderServiceImpl final : public proto::RenderService::Service {
   Status SetSpecular(ServerContext *c, const proto::IdFloat *req, proto::Empty *res) override;
   Status SetMetallic(ServerContext *c, const proto::IdFloat *req, proto::Empty *res) override;
   // ========== Body ==========//
-  Status SetUniqueId(ServerContext *c, const proto::BodyIdReq *req, proto::Empty *res) override;
-  Status SetSegmentationId(ServerContext *c, const proto::BodyIdReq *req,
-                           proto::Empty *res) override;
+  // Status SetUniqueId(ServerContext *c, const proto::BodyIdReq *req, proto::Empty *res) override;
+  // Status SetSegmentationId(ServerContext *c, const proto::BodyIdReq *req, proto::Empty *res) override;
   Status SetVisibility(ServerContext *c, const proto::BodyFloat32Req *req,
                        proto::Empty *res) override;
   Status GetShapeCount(ServerContext *c, const proto::BodyReq *req, proto::Uint32 *res) override;

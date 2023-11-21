@@ -21,6 +21,8 @@ public:
 
   void takePicture();
 
+  uint64_t getServerId() const { return mServerId; }
+
 private:
   float mWidth;
   float mHeight;
@@ -34,7 +36,7 @@ private:
   float mCy;
   float mSkew;
 
-  uint64_t mId{};
+  uint64_t mServerId{0};
 
   Pose mLocalPose;
 };

@@ -30,13 +30,18 @@ public:
                            Vec3 const &position, float shadowScale, float shadowNear,
                            float shadowFar, int shadowMapSize);
 
+  std::string getName() const override { return "render_system"; }
   void step() override;
+  void
+  updateRenderAndTakePictures(std::vector<std::shared_ptr<ClientCameraComponent>> const &cameras);
 
   uint64_t nextRenderId() { return mNextRenderId++; };
-
   ~ClientSystem();
 
 private:
+  void syncId();
+  bool mIdSynced{false};
+
   uint64_t mIndex;
   uint64_t mServerId;
   std::shared_ptr<grpc::Channel> mChannel;

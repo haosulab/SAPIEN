@@ -9,8 +9,11 @@
 #include <sapien/component.h>
 
 #include "camera_component.h"
+#include "client_system.h"
 #include "render_body_component.h"
 #include "server.h"
+
+#include "sapien_type_caster.h"
 
 namespace py = pybind11;
 
@@ -21,6 +24,7 @@ PYBIND11_MODULE(pysapien_render_server, m) {
   auto PyRenderServer = py::class_<RenderServer>(m, "RenderServer");
   auto PyRenderServerBuffer = py::class_<VulkanCudaBuffer>(m, "RenderServerBuffer");
 
+  auto PyRenderClientSystem = py::class_<ClientSystem>(m, "RenderClientSystem");
   auto PyRenderClientCameraComponent =
       py::class_<ClientCameraComponent, sapien::Component>(m, "RenderClientCameraComponent");
   auto PyRenderClientBodyComponent =
@@ -30,6 +34,23 @@ PYBIND11_MODULE(pysapien_render_server, m) {
   auto PyRenderClientShapeTriangleMesh =
       py::class_<ClientRenderShapeTriangleMesh, ClientRenderShape>(
           m, "RenderClientShapeTriangleMesh");
+
+  PyRenderClientSystem
+      .def(py::init<std::string const &, uint64_t>(), py::arg("address"), py::arg("process_index"))
+
+      .def_property_readonly("process_index", &ClientSystem::getIndex)
+      .def("get_process_index", &ClientSystem::getIndex)
+      .def("update_render_and_take_pictures", &ClientSystem::updateRenderAndTakePictures)
+      .def("set_ambient_light", &ClientSystem::setAmbientLight, py::arg("color"))
+      .def("add_point_light", &ClientSystem::addPointLight, py::arg("position"), py::arg("color"),
+           py::arg("shadow") = false, py::arg("shadow_near") = 0.01f,
+           py::arg("shadow_far") = 100.f, py::arg("shadow_map_size") = 1024)
+      .def("set_ambient_light", &ClientSystem::addDirectionalLight, py::arg("direction"),
+           py::arg("color"), py::arg("shadow") = false, py::arg("position") = sapien::Vec3(0.f),
+           py::arg("shadow_scale") = 5.f, py::arg("shadow_near") = 0.01f,
+           py::arg("shadow_far") = 100.f, py::arg("shadow_map_size") = 1024)
+
+      ;
 
   PyRenderServer.def_static("_set_shader_dir", &setDefaultShaderDirectory, py::arg("shader_dir"))
       .def(py::init<uint32_t, uint32_t, uint32_t, std::string const &, bool>(),
