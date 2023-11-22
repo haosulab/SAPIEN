@@ -2,6 +2,7 @@
 #include "../logger.h"
 #include "sapien/physx/physx_system.h"
 #include <filesystem>
+#include <queue>
 #include <set>
 
 #include <assimp/Exporter.hpp>
@@ -9,8 +10,8 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
+// #define TINYOBJLOADER_IMPLEMENTATION
+// #include "tiny_obj_loader.h"
 
 using namespace physx;
 namespace fs = std::filesystem;
@@ -128,57 +129,122 @@ std::vector<std::vector<int>> splitMesh(aiMesh *mesh) {
   return groups;
 }
 
-static std::vector<Vertices> loadComponentVerticesFromMeshFileObj(std::string const &filename) {
+// static std::vector<Vertices> loadComponentVerticesFromMeshFileObj(std::string const &filename) {
+//   std::vector<Vertices> result;
+
+//   tinyobj::ObjReader reader;
+
+//   if (!reader.ParseFromFile(filename, tinyobj::ObjReaderConfig())) {
+//     if (!reader.Error().empty()) {
+//       throw std::runtime_error("TinyObjReader: " + reader.Error());
+//     }
+//   }
+
+//   if (!reader.Warning().empty()) {
+//     logger::warn("TinyObjReader: {}", reader.Warning());
+//   }
+
+//   auto &attrib = reader.GetAttrib();
+//   auto &shapes = reader.GetShapes();
+
+//   // Loop over shapes
+//   for (size_t s = 0; s < shapes.size(); s++) {
+
+//     std::vector<float> vertices;
+
+//     // Loop over faces(polygon)
+//     size_t index_offset = 0;
+//     for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+//       size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
+
+//       // Loop over vertices in the face.
+//       for (size_t v = 0; v < fv; v++) {
+//         // access to vertex
+//         tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+//         tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
+//         tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
+//         tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
+//         vertices.push_back(vx);
+//         vertices.push_back(vy);
+//         vertices.push_back(vz);
+//       }
+//       index_offset += fv;
+//     }
+//     result.push_back(Eigen::Map<Vertices>(vertices.data(), vertices.size() / 3, 3));
+//   }
+//   return result;
+// }
+
+static std::vector<Vertices>
+loadComponentVerticesFromMeshFileAssimpScene(std::string const &filename) {
+  uint32_t flags = aiProcess_Triangulate | aiProcess_RemoveComponent;
+
+  if (filename.ends_with(".stl") || filename.ends_with(".STL")) {
+    logger::warn(
+        "loading multiple convex collision meshes from STL file is unsupported and can "
+        "result in invalid collision meshes. Do you mean to load a single convex mesh instead?");
+    flags |= aiProcess_JoinIdenticalVertices;
+  }
+
+  Assimp::Importer importer;
+
+  importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
+                              aiComponent_NORMALS | aiComponent_TEXCOORDS | aiComponent_COLORS |
+                                  aiComponent_TANGENTS_AND_BITANGENTS | aiComponent_MATERIALS |
+                                  aiComponent_TEXTURES);
+
+  importer.SetPropertyBool(AI_CONFIG_IMPORT_COLLADA_IGNORE_UP_DIRECTION, true);
+  const aiScene *scene = importer.ReadFile(filename, flags);
+  if (!scene) {
+    logger::error(importer.GetErrorString());
+    return {};
+  }
+
+  std::queue<aiNode *> q;
+  std::queue<aiMatrix4x4> qt;
+  q.push(scene->mRootNode);
+  qt.push(scene->mRootNode->mTransformation);
+
   std::vector<Vertices> result;
-
-  tinyobj::ObjReader reader;
-
-  if (!reader.ParseFromFile(filename, tinyobj::ObjReaderConfig())) {
-    if (!reader.Error().empty()) {
-      throw std::runtime_error("TinyObjReader: " + reader.Error());
-    }
-  }
-
-  if (!reader.Warning().empty()) {
-    logger::warn("TinyObjReader: {}", reader.Warning());
-  }
-
-  auto &attrib = reader.GetAttrib();
-  auto &shapes = reader.GetShapes();
-
-  // Loop over shapes
-  for (size_t s = 0; s < shapes.size(); s++) {
-
+  while (!q.empty()) {
+    aiNode *node = q.front();
+    auto transform = qt.front();
+    q.pop();
+    qt.pop();
     std::vector<float> vertices;
-
-    // Loop over faces(polygon)
-    size_t index_offset = 0;
-    for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
-      size_t fv = size_t(shapes[s].mesh.num_face_vertices[f]);
-
-      // Loop over vertices in the face.
-      for (size_t v = 0; v < fv; v++) {
-        // access to vertex
-        tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
-        tinyobj::real_t vx = attrib.vertices[3 * size_t(idx.vertex_index) + 0];
-        tinyobj::real_t vy = attrib.vertices[3 * size_t(idx.vertex_index) + 1];
-        tinyobj::real_t vz = attrib.vertices[3 * size_t(idx.vertex_index) + 2];
-        vertices.push_back(vx);
-        vertices.push_back(vy);
-        vertices.push_back(vz);
+    for (uint32_t i = 0; i < node->mNumMeshes; ++i) {
+      aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+      for (uint32_t j = 0; j < mesh->mNumVertices; ++j) {
+        auto v = transform * mesh->mVertices[j];
+        vertices.push_back(v.x);
+        vertices.push_back(v.y);
+        vertices.push_back(v.z);
       }
-      index_offset += fv;
     }
-    result.push_back(Eigen::Map<Vertices>(vertices.data(), vertices.size() / 3, 3));
+    if (vertices.size()) {
+      result.push_back(Eigen::Map<Vertices>(vertices.data(), vertices.size() / 3, 3));
+    }
+
+    for (uint32_t i = 0; i < node->mNumChildren; ++i) {
+      q.push(node->mChildren[i]);
+      qt.push(transform * node->mChildren[i]->mTransformation);
+    }
   }
   return result;
 }
 
-static std::vector<Vertices> loadComponentVerticesFromMeshFileAssimp(std::string const &filename) {
-  Assimp::Importer importer;
-
+static std::vector<Vertices> loadComponentVerticesFromMeshFileStlPly(std::string const &filename) {
   uint32_t flags =
       aiProcess_Triangulate | aiProcess_PreTransformVertices | aiProcess_RemoveComponent;
+
+  if (filename.ends_with(".stl") || filename.ends_with(".STL")) {
+    logger::warn(
+        "loading multiple convex collision meshes from STL file is unsupported and can "
+        "result in invalid collision meshes. Do you mean to load a single convex mesh instead?");
+    flags |= aiProcess_JoinIdenticalVertices;
+  }
+
+  Assimp::Importer importer;
 
   importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
                               aiComponent_NORMALS | aiComponent_TEXCOORDS | aiComponent_COLORS |
@@ -215,12 +281,12 @@ static std::vector<Vertices> loadComponentVerticesFromMeshFileAssimp(std::string
   return result;
 }
 
-static std::vector<Vertices>
-loadComponentVerticesFromMeshFile(std::string const &filename) {
-  if (filename.ends_with(".obj") || filename.ends_with(".OBJ")) {
-    return loadComponentVerticesFromMeshFileObj(filename);
+static std::vector<Vertices> loadComponentVerticesFromMeshFile(std::string const &filename) {
+  if (filename.ends_with(".stl") || filename.ends_with(".STL") || filename.ends_with(".ply") ||
+      filename.ends_with(".PLY")) {
+    return loadComponentVerticesFromMeshFileStlPly(filename);
   }
-  return loadComponentVerticesFromMeshFileAssimp(filename);
+  return loadComponentVerticesFromMeshFileAssimpScene(filename);
 }
 
 //////////////////// helpers end ////////////////////
