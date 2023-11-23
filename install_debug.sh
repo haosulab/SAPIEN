@@ -14,3 +14,4 @@ pip3 install *
 cd /tmp && rm stubs -rf && python3 ${DIR}/python/stubgen.py sapien --ignore-invalid all
 cp -r /tmp/stubs/sapien-stubs/__init__.pyi ${DIR}/python/py_package
 cp -r /tmp/stubs/sapien-stubs/pysapien ${DIR}/python/py_package
+cp -r /tmp/stubs/sapien-stubs/render_server ${DIR}/python/py_package

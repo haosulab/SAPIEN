@@ -37,6 +37,8 @@ public:
   std::shared_ptr<svulkan2::resource::SVMesh> getPlaneMesh();
   std::shared_ptr<svulkan2::resource::SVMesh> getBoxMesh();
 
+  std::string getSummary();
+
 private:
   std::shared_ptr<svulkan2::core::Context> mContext;
   std::shared_ptr<svulkan2::resource::SVResourceManager> mResourceManager;

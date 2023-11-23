@@ -36,6 +36,7 @@ __all__ = [
     "SapienRenderer",
     "clear_cache",
     "get_camera_shader_dir",
+    "get_device_summary",
     "get_imgui_ini_filename",
     "get_msaa",
     "get_ray_tracing_denoiser",
@@ -1079,6 +1080,8 @@ def _internal_set_shader_search_path(arg0: str) -> None:
 def clear_cache(models: bool = True, images: bool = True, shaders: bool = False) -> None:
     pass
 def get_camera_shader_dir() -> str:
+    pass
+def get_device_summary() -> str:
     pass
 def get_imgui_ini_filename() -> str:
     pass

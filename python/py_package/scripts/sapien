@@ -39,3 +39,20 @@ if __name__ == "__main__":
         from sapien.show_anything import show_anything
 
         show_anything(*rest)
+
+    elif args.command == "info":
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            import sapien
+            import platform
+            sapien.render.set_log_level("critical")
+            info = ""
+            info += "Python: " + platform.python_version() + "\n"
+            info += "Platform: " + platform.platform() + "\n"
+            info += "sapien: " + sapien.__version__ + "\n"
+
+            if "--all" in rest:
+                info += sapien.render.get_device_summary() + "\n"
+
+            print(info)

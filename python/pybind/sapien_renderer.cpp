@@ -388,7 +388,8 @@ void init_sapien_renderer(py::module &sapien) {
             auto root = LoadScene(filename, applyScale);
             return parseSceneNode(*root);
           },
-          py::arg("filename"), py::arg("apply_scale") = true);
+          py::arg("filename"), py::arg("apply_scale") = true)
+      .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); });
 
   ////////// end global //////////
 

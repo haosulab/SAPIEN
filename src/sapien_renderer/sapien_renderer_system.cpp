@@ -6,6 +6,7 @@
 #include "sapien/sapien_renderer/point_cloud_component.h"
 #include "sapien/sapien_renderer/render_body_component.h"
 #include <svulkan2/core/context.h>
+#include <svulkan2/core/physical_device.h>
 #include <svulkan2/renderer/renderer.h>
 #include <svulkan2/renderer/rt_renderer.h>
 #include <svulkan2/scene/scene.h>
@@ -25,6 +26,21 @@ SapienRenderEngine::Get(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t m
   gEngine = engine = std::make_shared<SapienRenderEngine>(
       offscreenOnly, maxNumMaterials, maxNumTextures, defaultMipLevels, device, doNotLoadTexture);
   return engine;
+}
+
+std::string SapienRenderEngine::getSummary() {
+  std::stringstream ss;
+  auto info = mContext->getPhysicalDevice2()->summarizeDeviceInfo();
+  for (auto &entry : info) {
+    ss << "GPU: " << entry.name << "\n";
+    ss << "  Present:   " << entry.present << "\n";
+    ss << "  Supported: " << entry.supported << "\n";
+    ss << "  cudaId:    " << entry.cudaId << "\n";
+    ss << "  pciBus:    " << entry.pciBus << "\n";
+    ss << "  rayTrace:  " << entry.rayTracing << "\n";
+    ss << "  cudaMode   " << entry.cudaComputeMode << "\n";
+  }
+  return ss.str();
 }
 
 SapienRenderEngine::SapienRenderEngine(bool offscreenOnly, uint32_t maxNumMaterials,
