@@ -19,7 +19,6 @@ layout(set = 1, binding = 2) readonly buffer Materials
 {
   Material m;
 } materials[];
-// TODO: Material m[] may be more efficient?
 
 struct Object {
   uvec4 segmentation;

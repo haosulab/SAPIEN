@@ -114,7 +114,7 @@ void main() {
         imageStore(outPosition, ivec2(gl_LaunchIDEXT.xy), vec4(position.xyz, ndc.z / ndc.w));
       }
     }
-    radiance += attenuation * ambientLight;  // HACK: implement unterminated ray properly
+    // TODO: implement unterminated ray properly
   }
   radiance /= spp;
   alpha /= spp;

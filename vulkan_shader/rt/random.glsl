@@ -20,7 +20,6 @@ uint tea(uint val0, uint val1) {
 }
 
 // log(N) time should be okay
-// TODO: lookup may be more efficient?
 float halton(int i, int b) {
   float f = 1;
   float r = 0.f;
