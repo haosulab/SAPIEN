@@ -35,11 +35,11 @@ public:
     std::array<std::string, 6> filenames;
     ar(type, filenames);
     switch (static_cast<svulkan2::resource::SVCubemapDescription::SourceType>(type)) {
-    case svulkan2::resource::SVCubemapDescription::SourceType::eFILES:
+    case svulkan2::resource::SVCubemapDescription::SourceType::eFACES:
       construct(filenames[0], filenames[1], filenames[2], filenames[3], filenames[4],
                 filenames[5]);
       break;
-    case svulkan2::resource::SVCubemapDescription::SourceType::eSINGLE_FILE:
+    case svulkan2::resource::SVCubemapDescription::SourceType::eKTX:
       construct(filenames[0]);
       break;
     default:

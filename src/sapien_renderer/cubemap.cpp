@@ -5,17 +5,18 @@ namespace sapien {
 namespace sapien_renderer {
 
 SapienRenderCubemap::SapienRenderCubemap(std::string const &filename) {
-  if (!filename.ends_with(".ktx") && !filename.ends_with(".KTX") && !filename.ends_with("exr") &&
-      !filename.ends_with(".EXR")) {
-    throw std::runtime_error("Only .ktx and .exr file are supported for cube map");
-  }
+  // if (!filename.ends_with(".ktx") && !filename.ends_with(".KTX") && !filename.ends_with("exr") &&
+  //     !filename.ends_with(".EXR")) {
+  //   throw std::runtime_error("Only .ktx and .exr file are supported for cube map");
+  // }
   mEngine = SapienRenderEngine::Get();
 
-  if (filename.ends_with(".exr") || filename.ends_with(".EXR")) {
-    mCubemap = mEngine->getContext()->getResourceManager()->CreateCubemapFromEXR(filename, 5);
-  } else {
-    mCubemap = mEngine->getContext()->getResourceManager()->CreateCubemapFromKTX(filename, 5);
-  }
+  // if (filename.ends_with(".exr") || filename.ends_with(".EXR")) {
+  //   mCubemap = mEngine->getContext()->getResourceManager()->CreateCubemapFromEXR(filename, 5);
+  // } else {
+  //   mCubemap = mEngine->getContext()->getResourceManager()->CreateCubemapFromFile(filename, 5);
+  // }
+  mCubemap = mEngine->getContext()->getResourceManager()->CreateCubemapFromFile(filename, 5);
 }
 
 SapienRenderCubemap::SapienRenderCubemap(std::string const &px, std::string const &nx,

@@ -10,7 +10,7 @@ layout(set = 1, binding = 10) uniform samplerCube samplerEnvironment;  // TODO: 
 
 void main() {
   vec3 dir = ray.direction;
-  dir = vec3(-dir.y, dir.z, -dir.x);
+  dir = dir.xzy;
   if (envmap != 0) {
     // FIXME: super high values seem to cause nan
     ray.radiance = clamp(texture(samplerEnvironment, dir).xyz, vec3(0,0,0), vec3(100, 100, 100));
