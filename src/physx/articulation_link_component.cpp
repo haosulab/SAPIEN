@@ -154,10 +154,14 @@ void PhysxArticulationJoint::setLimit(
     float low = limit(i, 0);
     float high = limit(i, 1);
     if (std::isinf(low) && low < 0 && std::isinf(high) && high > 0) {
-      j->setMotion(mAxes[i], PxArticulationMotion::eFREE);
+      if (j->getMotion(mAxes[i]) != PxArticulationMotion::eFREE) {
+        j->setMotion(mAxes[i], PxArticulationMotion::eFREE);
+      }
       continue;
     }
-    j->setMotion(mAxes[i], PxArticulationMotion::eLIMITED);
+    if (j->getMotion(mAxes[i]) != PxArticulationMotion::eLIMITED) {
+      j->setMotion(mAxes[i], PxArticulationMotion::eLIMITED);
+    }
     j->setLimitParams(mAxes[i], {low, high});
   }
 }
