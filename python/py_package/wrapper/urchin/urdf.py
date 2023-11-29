@@ -7,8 +7,12 @@ from lxml import etree as ET
 import networkx as nx
 import numpy as np
 import PIL
-import trimesh
 import six
+
+try:
+    import trimesh
+except ModuleNotFoundError:
+    pass
 
 from .utils import (
     parse_origin,

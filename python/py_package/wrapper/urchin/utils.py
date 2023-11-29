@@ -4,7 +4,11 @@ import os
 
 from lxml import etree as ET
 import numpy as np
-import trimesh
+
+try:
+    import trimesh
+except ModuleNotFoundError:
+    pass
 
 
 def rpy_to_matrix(coords):
