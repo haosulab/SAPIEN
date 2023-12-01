@@ -56,6 +56,9 @@ function build_pybind() {
   elif [ "$PY_VERSION" -eq 311 ]; then
       PY_DOT=3.11
       EXT=""
+  elif [ "$PY_VERSION" -eq 312 ]; then
+      PY_DOT=3.12
+      EXT=""
   else
     echo "Error, python version not found!"
   fi

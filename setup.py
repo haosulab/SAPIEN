@@ -3,7 +3,6 @@ import re
 import sys
 import platform
 import subprocess
-import socket
 import time
 import shutil
 import argparse
@@ -42,10 +41,15 @@ args, unknown = parser.parse_known_args()
 sys.argv = [sys.argv[0]] + unknown
 
 
-def check_version_info():
+def generate_version():
     try:
         git_revision = (
             subprocess.check_output(["git", "rev-parse", "HEAD"])
+            .decode("utf-8")
+            .split("\n")[0]
+        )
+        git_revision_short = (
+            subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
             .decode("utf-8")
             .split("\n")[0]
         )
@@ -56,22 +60,43 @@ def check_version_info():
         )
     except (subprocess.CalledProcessError, OSError):
         git_revision = ""
+        git_revision_short = ""
         git_branch = "non-git"
 
+    try:
+        git_tag = (
+            subprocess.check_output(
+                ["git", "describe", "--tags", "--exact-match", "HEAD"],
+                stderr=subprocess.DEVNULL,
+            )
+            .decode("utf-8")
+            .split("\n")[0]
+        )
+    except (subprocess.CalledProcessError, OSError):
+        git_tag = ""
+
     build_datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
+    build_datetime_short = time.strftime("%Y%m%d", time.gmtime())
 
-    with open(os.path.join(os.path.dirname(__file__), "python", "VERSION"), "r") as f:
-        version_number = f.readline().strip()
+    if git_branch == "master":
+        assert git_tag is not None
 
-    hostname = socket.gethostname()
+    if git_tag in ["", "nightly"]:
+        # no meaning tag
+        with open(
+            os.path.join(os.path.dirname(__file__), "python", "VERSION"), "r"
+        ) as f:
+            base_version = f.readline().strip()
+        version = (
+            base_version + ".dev" + build_datetime_short + "+" + git_revision_short
+        )
+    else:
+        version = git_tag
 
-    if git_branch != "master":
-        version_number += ".dev" + time.strftime("%Y%m%d", time.gmtime())
-
-    return git_revision, git_branch, build_datetime, version_number, hostname
+    return version
 
 
-version = check_version_info()[3]
+version = generate_version()
 
 if args.get_version:
     print(version)
