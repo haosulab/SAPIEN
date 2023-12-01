@@ -48,19 +48,25 @@ def generate_version():
             .decode("utf-8")
             .split("\n")[0]
         )
+    except (subprocess.CalledProcessError, OSError):
+        git_revision = ""
+
+    try:
         git_revision_short = (
             subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
             .decode("utf-8")
             .split("\n")[0]
         )
+    except (subprocess.CalledProcessError, OSError):
+        git_revision_short = ""
+
+    try:
         git_branch = (
             subprocess.check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
             .decode("utf-8")
             .split("\n")[0]
         )
     except (subprocess.CalledProcessError, OSError):
-        git_revision = ""
-        git_revision_short = ""
         git_branch = "non-git"
 
     try:
@@ -74,6 +80,10 @@ def generate_version():
         )
     except (subprocess.CalledProcessError, OSError):
         git_tag = ""
+
+    print("revision: ", git_revision_short)
+    print("branch: ", git_branch)
+    print("tag: ", git_tag)
 
     build_datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
     build_datetime_short = time.strftime("%Y%m%d", time.gmtime())
