@@ -81,10 +81,6 @@ def generate_version():
     except (subprocess.CalledProcessError, OSError):
         git_tag = ""
 
-    print("revision: ", git_revision_short)
-    print("branch: ", git_branch)
-    print("tag: ", git_tag)
-
     build_datetime = time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime())
     build_datetime_short = time.strftime("%Y%m%d", time.gmtime())
 
