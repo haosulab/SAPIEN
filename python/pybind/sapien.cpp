@@ -76,6 +76,12 @@ Generator<int> init_sapien(py::module &m) {
           "set_q", [](Pose &pose, Quat const &q) { pose.q = q; }, py::arg("q"))
       .def("get_q", [](Pose &pose) { return pose.q; })
 
+      .def_property(
+          "rpy", [](Pose &pose) { return QuatToRPY(pose.q); },
+          [](Pose &pose, Vec3 const &rpy) { pose.q = RPYToQuat(rpy); })
+      .def("get_rpy", [](Pose &pose) { return QuatToRPY(pose.q); })
+      .def("set_rpy", [](Pose &pose, Vec3 const &rpy) { pose.q = RPYToQuat(rpy); })
+
       .def("inv", &Pose::getInverse)
       .def(py::self * py::self)
       .def("__repr__",

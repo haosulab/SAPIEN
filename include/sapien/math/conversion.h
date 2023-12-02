@@ -34,6 +34,16 @@ inline Eigen::Matrix<float, 4, 4, Eigen::RowMajor> PoseToEigenMat4(Pose const &p
   return mat;
 }
 
+inline Vec3 QuatToRPY(Quat const &quat) {
+  Eigen::Quaternionf q(quat.w, quat.x, quat.y, quat.z);
+  auto rpy = q.toRotationMatrix().eulerAngles(2, 1, 0);
+  return Vec3(rpy[2], rpy[1], rpy[0]);
+}
+
+inline Quat RPYToQuat(Vec3 const &rpy) {
+  return Quat(Vec3(0, 0, 1), rpy.z) * Quat(Vec3(0, 1, 0), rpy.y) * Quat(Vec3(1, 0, 0), rpy.x);
+}
+
 inline Quat ShortestRotation(Vec3 const &v0_, Vec3 const &v1_) {
   Vec3 v0 = v0_.getNormalized();
   Vec3 v1 = v1_.getNormalized();

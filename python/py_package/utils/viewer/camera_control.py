@@ -1,6 +1,6 @@
 import numpy as np
 from transforms3d.quaternions import axangle2quat as aa
-from transforms3d.quaternions import qmult, mat2quat, rotate_vector, qinverse
+from transforms3d.quaternions import qmult, rotate_vector
 from sapien import Pose
 
 

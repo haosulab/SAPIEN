@@ -1,11 +1,10 @@
 from xml.etree import ElementTree as ET
 from ..pysapien.physx import PhysxArticulationLinkComponent, PhysxArticulationJoint
-from transforms3d.euler import quat2euler
 
 
 def export_link(link: PhysxArticulationLinkComponent):
     cmass_pose = link.cmass_local_pose
-    angles = quat2euler(cmass_pose.q)
+    angles = cmass_pose.rpy
 
     elem_link = ET.Element("link", {"name": f"link_{link.index}"})
     elem_inertial = ET.SubElement(elem_link, "inertial")
@@ -58,7 +57,7 @@ def export_joint(joint: PhysxArticulationJoint):
     j2p = joint.pose_in_parent
     c2j = joint.pose_in_child.inv()
 
-    angles = quat2euler(j2p.q)
+    angles = j2p.rpy
 
     # dummy link at joint frame
     elem_dummy_link = ET.Element(
@@ -94,7 +93,7 @@ def export_joint(joint: PhysxArticulationJoint):
     elem_dummy_joint = ET.Element(
         "joint", {"name": f"joint_dummy_{joint.child_link.index}", "type": "fixed"}
     )
-    angles = quat2euler(c2j.q)
+    angles = c2j.rpy
 
     ET.SubElement(
         elem_dummy_joint,

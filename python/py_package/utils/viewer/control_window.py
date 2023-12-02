@@ -6,8 +6,7 @@ import numpy as np
 import pkg_resources
 import sapien
 from sapien import internal_renderer as R
-from transforms3d.euler import quat2euler
-from transforms3d.quaternions import mat2quat, rotate_vector
+from transforms3d.quaternions import mat2quat
 
 from .camera_control import ArcRotateCameraController, FPSCameraController
 from .plugin import Plugin
@@ -135,7 +134,7 @@ class ControlWindow(Plugin):
     def _sync_fps_camera_controller(self):
         cam_pose = self.window.get_camera_pose()
         self.fps_camera_controller.setXYZ(*cam_pose.p)
-        r, p, y = quat2euler(cam_pose.q)
+        r, p, y = cam_pose.rpy
         self.fps_camera_controller.setRPY(r, -p, -y)
 
     def focus_entity(self, entity: sapien.Entity):
@@ -148,7 +147,7 @@ class ControlWindow(Plugin):
         if self.focused_entity is not None:
             # initialize arc camera
             self.focus_camera(None)
-            _, pitch, yaw = quat2euler(cam_pose.q)
+            _, pitch, yaw = cam_pose.rpy
             self.arc_camera_controller.set_yaw_pitch(yaw, pitch)
             self.arc_camera_controller.set_center(entity.pose.p)
             self.arc_camera_controller.set_zoom(
@@ -158,7 +157,7 @@ class ControlWindow(Plugin):
         else:
             # switch to fps camera
             self.fps_camera_controller.setXYZ(*cam_pose.p)
-            r, p, y = quat2euler(cam_pose.q)
+            r, p, y = cam_pose.rpy
             self.fps_camera_controller.setRPY(r, -p, -y)
             self.viewer.set_camera_pose(self.fps_camera_controller.pose)
 
