@@ -34,6 +34,7 @@ public:
   void internalSetParent(SapienRenderBodyComponent *parent) { mParent = parent; }
   std::shared_ptr<SapienRenderBodyComponent> getParent() const;
 
+  virtual std::shared_ptr<SapienRenderMaterial> getMaterial() const = 0;
   virtual ~RenderShape();
 
   template <class Archive> void save(Archive &archive) const {
@@ -70,6 +71,8 @@ public:
   Vec3 getScale() const;
   AABB getLocalAABB() override;
 
+  std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
+
   template <class Archive> void save(Archive &ar) const { ar(mScale, mLocalPose, mMaterial); }
   template <class Archive>
   static void load_and_construct(Archive &ar, cereal::construct<RenderShapePlane> &construct) {
@@ -90,6 +93,8 @@ public:
   RenderShapeBox(Vec3 halfLengths, std::shared_ptr<SapienRenderMaterial> material);
   Vec3 getHalfLengths() const;
   AABB getLocalAABB() override;
+
+  std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
 
   template <class Archive> void save(Archive &ar) const {
     ar(getHalfLengths(), mLocalPose, mMaterial);
@@ -115,6 +120,8 @@ public:
   float getRadius() const;
   float getHalfLength() const;
   AABB getLocalAABB() override;
+
+  std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
 
   template <class Archive> void save(Archive &ar) const {
     ar(getRadius(), getHalfLength(), mLocalPose, mMaterial);
@@ -143,6 +150,8 @@ public:
   float getHalfLength() const;
   AABB getLocalAABB() override;
 
+  std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
+
   template <class Archive> void save(Archive &ar) const {
     ar(getRadius(), getHalfLength(), mLocalPose, mMaterial);
   }
@@ -167,6 +176,7 @@ public:
   RenderShapeSphere(float radius, std::shared_ptr<SapienRenderMaterial> material);
   float getRadius() const;
   AABB getLocalAABB() override;
+  std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
 
   template <class Archive> void save(Archive &ar) const { ar(getRadius(), mLocalPose, mMaterial); }
   template <class Archive>
@@ -238,7 +248,7 @@ public:
 
   std::vector<RenderShapeTriangleMeshPart> getParts();
 
-  std::shared_ptr<SapienRenderMaterial> getMaterial();
+  std::shared_ptr<SapienRenderMaterial> getMaterial() const override;
 
 private:
   std::string mFilename{};

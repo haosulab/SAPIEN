@@ -634,7 +634,11 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_per_scene_id", &RenderShape::getRenderId)
       .def_property("name", &RenderShape::getName, &RenderShape::setName)
       .def("get_name", &RenderShape::getName)
-      .def("set_name", &RenderShape::setName, py::arg("name"));
+      .def("set_name", &RenderShape::setName, py::arg("name"))
+
+      // TODO: set material
+      .def_property_readonly("material", &RenderShape::getMaterial)
+      .def("get_material", &RenderShape::getMaterial);
 
   PyRenderShapePlane
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("scale"),
@@ -671,8 +675,6 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_radius", &RenderShapeCylinder::getRadius);
 
   PyRenderShapeTriangleMeshPart
-      .def_property_readonly("material", &RenderShapeTriangleMeshPart::getMaterial)
-      .def("get_material", &RenderShapeTriangleMeshPart::getMaterial)
       .def_property_readonly("vertices", &RenderShapeTriangleMeshPart::getVertices)
       .def("get_vertices", &RenderShapeTriangleMeshPart::getVertices)
       .def_property_readonly("triangles", &RenderShapeTriangleMeshPart::getTriangles)
@@ -936,7 +938,7 @@ consumer library. Make a copy if needed.
 
       .def_property("material", &CudaDeformableMeshComponent::getMaterial,
                     &CudaDeformableMeshComponent::setMaterial)
-      .def("getmaterial", &CudaDeformableMeshComponent::getMaterial)
+      .def("get_material", &CudaDeformableMeshComponent::getMaterial)
       .def("set_material", &CudaDeformableMeshComponent::setMaterial, py::arg("material"))
       .def("set_data_source", &CudaDeformableMeshComponent::setDataSource,
            py::arg("vertex_provider"));

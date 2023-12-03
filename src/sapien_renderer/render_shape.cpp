@@ -222,7 +222,7 @@ std::vector<RenderShapeTriangleMeshPart> RenderShapeTriangleMesh::getParts() {
   return parts;
 }
 
-std::shared_ptr<SapienRenderMaterial> RenderShapeTriangleMesh::getMaterial() {
+std::shared_ptr<SapienRenderMaterial> RenderShapeTriangleMesh::getMaterial() const {
   if (mMaterial) {
     return mMaterial;
   }
