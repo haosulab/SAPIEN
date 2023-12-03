@@ -1,7 +1,7 @@
 from ..pysapien import Scene as _Scene
 from .. import pysapien as sapien
 from ..pysapien.physx import PhysxSceneConfig as SceneConfig
-from typing import Union, Optional
+from typing import Union, Optional, TypeVar
 
 
 class Widget:
@@ -10,6 +10,9 @@ class Widget:
 
     def unload(self, scene):
         pass
+
+
+WidgetType = TypeVar("WidgetType", bound=Widget)
 
 
 class Scene(_Scene):
@@ -408,7 +411,7 @@ class Scene(_Scene):
         components = _unserialize_python_components(python_component_data)
         self._swap_in_python_components(components)
 
-    def load_widget(self, widget: Widget):
+    def load_widget(self, widget: WidgetType) -> WidgetType:
         self.widgets.append(widget)
         widget.load(self)
         return widget
