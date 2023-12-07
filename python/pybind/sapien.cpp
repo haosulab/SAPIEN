@@ -1,3 +1,4 @@
+#include "./array.hpp"
 #include "./python_component.hpp"
 #include "./serialization.h"
 #include "generator.hpp"
@@ -20,6 +21,14 @@
 namespace py = pybind11;
 using namespace pybind11::literals;
 using namespace sapien;
+
+namespace sapien {
+
+static std::string gPythonCudaBackend = "none";
+void setPythonCudaBackend(std::string const &name) { gPythonCudaBackend = name; }
+std::string getPythonCudaBackend() { return gPythonCudaBackend; }
+
+}; // namespace sapien
 
 class PythonCudaDataSource : public CudaDataSource, public py::trampoline_self_life_support {
   uintptr_t getCudaPointer() const override {
@@ -46,19 +55,21 @@ public:
 Generator<int> init_sapien(py::module &m) {
 
   m.def("set_log_level", &sapien::logger::setLogLevel, py::arg("level"));
+  m.def(
+      "set_cuda_tensor_backend", &sapien::setPythonCudaBackend, py::arg("backend"),
+      R"doc(set the backend returned CUDA tensors. Supported backends are "torch" and "jax")doc");
+  m.def("get_cuda_tensor_backend", &sapien::getPythonCudaBackend);
 
   auto PyPose = py::class_<Pose>(m, "Pose");
   auto PyScene = py::class_<Scene>(m, "Scene");
   auto PyEntity = py::class_<Entity>(m, "Entity");
-
-  // auto PyModule = py::class_<Module>(m, "Module");
 
   auto PyComponent = py::class_<Component, PythonComponent>(m, "Component");
 
   auto PyCudaDataSource = py::class_<CudaDataSource, PythonCudaDataSource>(m, "CudaDataSource");
 
   auto PySystem = py::class_<System, PythonSystem>(m, "System");
-  auto PyCudaArray = py::class_<CudaArrayHandle>(m, "CudaArray");
+  auto PyCudaArray = py::class_<PythonCudaArrayHandle>(m, "CudaArray");
 
   co_yield 0;
 
@@ -238,13 +249,43 @@ Generator<int> init_sapien(py::module &m) {
 
   PySystem.def(py::init<>()).def("step", &System::step);
 
-  PyCudaArray.def_readonly("shape", &CudaArrayHandle::shape)
-      .def_readonly("strides", &CudaArrayHandle::strides)
-      .def_readonly("cuda_id", &CudaArrayHandle::cudaId)
-      .def_readonly("typstr", &CudaArrayHandle::type)
+  PyCudaArray
+      .def(py::init<>([](py::object obj) {
+        auto interface = obj.attr("__cuda_array_interface__").cast<py::dict>();
+
+        auto shape = interface.attr("shape").cast<py::tuple>().cast<std::vector<int>>();
+        auto type = interface.attr("typestr").cast<std::string>();
+        py::dtype dtype(type);
+
+        std::vector<int> strides;
+        if (py::hasattr(obj, "stride") && !obj.is_none()) {
+          strides = interface.attr("strides").cast<py::tuple>().cast<std::vector<int>>();
+        } else {
+          int acc = dtype.itemsize();
+          strides.push_back(acc);
+          for (uint32_t i = shape.size() - 1; i >= 1; --i) {
+            acc *= shape.at(i);
+            strides.push_back(acc);
+          }
+        }
+
+        auto data = interface.attr("data").cast<py::tuple>();
+        void *ptr = reinterpret_cast<void *>(data[0].cast<uintptr_t>());
+
+        return PythonCudaArrayHandle{.shape = shape,
+                                     .strides = strides,
+                                     .type = type,
+                                     .cudaId = 0, // TODO: do we need cuda id?
+                                     .ptr = ptr};
+      }))
+      .def_readonly("shape", &PythonCudaArrayHandle::shape)
+      .def_readonly("strides", &PythonCudaArrayHandle::strides)
+      .def_readonly("cuda_id", &PythonCudaArrayHandle::cudaId)
+      .def_readonly("typstr", &PythonCudaArrayHandle::type)
       .def_property_readonly(
-          "ptr", [](CudaArrayHandle &array) { return reinterpret_cast<intptr_t>(array.ptr); })
-      .def_property_readonly("__cuda_array_interface__", [](CudaArrayHandle &array) {
+          "ptr",
+          [](PythonCudaArrayHandle &array) { return reinterpret_cast<intptr_t>(array.ptr); })
+      .def_property_readonly("__cuda_array_interface__", [](PythonCudaArrayHandle &array) {
         py::tuple shape = py::cast(array.shape);
         py::tuple strides = py::cast(array.strides);
         std::string type = array.type;

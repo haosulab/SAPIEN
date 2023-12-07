@@ -81,7 +81,7 @@ public:
   void onAddToScene(Scene &scene) override;
   void onRemoveFromScene(Scene &scene) override;
   void onSetPose(Pose const &pose) override;
-  void afterStep();
+  void syncPoseToEntity();
 
   void setParent(std::shared_ptr<PhysxArticulationLinkComponent> parent);
 
@@ -96,8 +96,8 @@ public:
 
   std::shared_ptr<PhysxArticulation> getArticulation() const { return mArticulation; }
   ::physx::PxArticulationLink *getPxActor() const override { return mPxLink; }
-  int getIndex() { return mIndex; }
   std::shared_ptr<PhysxArticulationJoint> getJoint() const { return mJoint; }
+  int getIndex() const;
 
   bool isSleeping() const;
   void wakeUp();
@@ -110,7 +110,7 @@ public:
       internalUpdateMass();
     }
   }
-  void internalSetIndex(int index) { mIndex = index; }
+  // void internalSetIndex(int index) { mIndex = index; }
   ~PhysxArticulationLinkComponent();
 
   std::vector<uint64_t> getSerializationDependencies() const override {
@@ -132,13 +132,13 @@ private:
   std::shared_ptr<PhysxArticulation> mArticulation;
   ::physx::PxArticulationLink *mPxLink{};
 
-  int mIndex{-1};
+  // int mIndex{-1};
   std::shared_ptr<PhysxArticulationJoint>
       mJoint; // cannot use unique_ptr for pybind11 compatibility
 };
 
 template <class Archive> void PhysxArticulationLinkComponent::save(Archive &ar) const {
-  ar(mParent, mArticulation, mIndex);
+  ar(mParent, mArticulation);
 
   if (!mParent) {
     mArticulation->getRootLinearVelocity();
@@ -197,10 +197,10 @@ template <class Archive> void PhysxArticulationLinkComponent::save(Archive &ar) 
 }
 
 template <class Archive> void PhysxArticulationLinkComponent::load(Archive &ar) {
-  ar(mParent, mArticulation, mIndex);
+  ar(mParent, mArticulation);
 
   auto sthis = std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this());
-  mArticulation->internalAddLinkAtIndex(*this, mParent.get(), mIndex);
+  mArticulation->addLink(*this, mParent.get());
   mJoint = std::make_shared<PhysxArticulationJoint>(sthis);
   if (mParent) {
     mParent->mChildren.push_back(sthis);

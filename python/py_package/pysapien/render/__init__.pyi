@@ -13,7 +13,6 @@ __all__ = [
     "RenderCubemap",
     "RenderCudaMeshComponent",
     "RenderDirectionalLightComponent",
-    "RenderImageCuda",
     "RenderLightComponent",
     "RenderMaterial",
     "RenderParallelogramLightComponent",
@@ -127,13 +126,18 @@ class RenderCameraComponent(sapien.pysapien.Component):
         """
     def get_near(self) -> float: ...
     def get_picture(self, name: str) -> numpy.ndarray: ...
-    def get_picture_cuda(self, name: str) -> RenderImageCuda: 
+    def get_picture_cuda(self, name: str) -> CudaArrayHandle: 
         """
         This function transfers the rendered image into a CUDA buffer.
         The returned object implements __cuda_array_interface__
 
         Usage:
 
+        # use torch backend
+        sapien.set_cuda_tensor_backend("torch")  # called once per process
+        image: torch.Tensor = camera.getImageCuda()
+
+        # use default backend
         image = camera.getImageCuda()
         torch_tensor = torch.as_tensor(image)
 
@@ -250,8 +254,8 @@ class RenderCubemap():
     pass
 class RenderCudaMeshComponent(sapien.pysapien.Component):
     def __init__(self, max_vertex_count: int, max_triangle_count: int) -> None: ...
-    def get_cuda_triangles(self) -> sapien.pysapien.CudaArray: ...
-    def get_cuda_vertices(self) -> sapien.pysapien.CudaArray: ...
+    def get_cuda_triangles(self) -> CudaArrayHandle: ...
+    def get_cuda_vertices(self) -> CudaArrayHandle: ...
     def get_material(self) -> RenderMaterial: ...
     def get_triangle_count(self) -> int: ...
     def get_vertex_count(self) -> int: ...
@@ -261,14 +265,14 @@ class RenderCudaMeshComponent(sapien.pysapien.Component):
     def set_triangles(self, arg0: numpy.ndarray[numpy.uint32, _Shape[m, 3]]) -> None: ...
     def set_vertex_count(self, arg0: int) -> None: ...
     @property
-    def cuda_triangles(self) -> sapien.pysapien.CudaArray:
+    def cuda_triangles(self) -> CudaArrayHandle:
         """
-        :type: sapien.pysapien.CudaArray
+        :type: CudaArrayHandle
         """
     @property
-    def cuda_vertices(self) -> sapien.pysapien.CudaArray:
+    def cuda_vertices(self) -> CudaArrayHandle:
         """
-        :type: sapien.pysapien.CudaArray
+        :type: CudaArrayHandle
         """
     @property
     def material(self) -> RenderMaterial:
@@ -365,38 +369,6 @@ class RenderLightComponent(sapien.pysapien.Component):
     @shadow_near.setter
     def shadow_near(self, arg1: float) -> None:
         pass
-    pass
-class RenderImageCuda(sapien.pysapien.CudaArray):
-    @property
-    def __cuda_array_interface__(self) -> dict:
-        """
-        :type: dict
-        """
-    @property
-    def cuda_id(self) -> int:
-        """
-        :type: int
-        """
-    @property
-    def ptr(self) -> int:
-        """
-        :type: int
-        """
-    @property
-    def shape(self) -> list[int]:
-        """
-        :type: list[int]
-        """
-    @property
-    def strides(self) -> list[int]:
-        """
-        :type: list[int]
-        """
-    @property
-    def typstr(self) -> str:
-        """
-        :type: str
-        """
     pass
 class RenderDirectionalLightComponent(RenderLightComponent, sapien.pysapien.Component):
     def __init__(self) -> None: ...
@@ -578,7 +550,7 @@ class RenderParallelogramLightComponent(RenderLightComponent, sapien.pysapien.Co
     pass
 class RenderPointCloudComponent(sapien.pysapien.Component):
     def __init__(self, capacity: int = 0) -> None: ...
-    def get_cuda_vertices(self) -> sapien.pysapien.CudaArray: ...
+    def get_cuda_vertices(self) -> CudaArrayHandle: ...
     def set_attribute(self, name: str, attribute: numpy.ndarray[numpy.float32, _Shape[m, n]]) -> RenderPointCloudComponent: ...
     def set_vertices(self, vertices: numpy.ndarray[numpy.float32, _Shape[m, 3]]) -> RenderPointCloudComponent: ...
     pass
@@ -718,19 +690,19 @@ class RenderShapeTriangleMesh(RenderShape):
         pass
     pass
 class RenderShapeTriangleMeshPart():
-    def get_cuda_triangles(self) -> sapien.pysapien.CudaArray: ...
-    def get_cuda_vertices(self) -> sapien.pysapien.CudaArray: ...
+    def get_cuda_triangles(self) -> CudaArrayHandle: ...
+    def get_cuda_vertices(self) -> CudaArrayHandle: ...
     def get_triangles(self) -> numpy.ndarray[numpy.uint32, _Shape[m, 3]]: ...
     def get_vertices(self) -> numpy.ndarray[numpy.float32, _Shape[m, 3]]: ...
     @property
-    def cuda_triangles(self) -> sapien.pysapien.CudaArray:
+    def cuda_triangles(self) -> CudaArrayHandle:
         """
-        :type: sapien.pysapien.CudaArray
+        :type: CudaArrayHandle
         """
     @property
-    def cuda_vertices(self) -> sapien.pysapien.CudaArray:
+    def cuda_vertices(self) -> CudaArrayHandle:
         """
-        :type: sapien.pysapien.CudaArray
+        :type: CudaArrayHandle
         """
     @property
     def triangles(self) -> numpy.ndarray[numpy.uint32, _Shape[m, 3]]:

@@ -20,4 +20,11 @@ class Engine:
         pass
 
     def create_scene(self, config=SceneConfig()):
-        return Scene([PhysxSystem(config), RenderSystem()])
+        if sapien.physx.is_gpu_enabled():
+            physx_system = Scene._GpuSystem
+            if physx_system is None:
+                Scene._GpuSystem = physx_system = sapien.physx.PhysxGpuSystem(config)
+            else:
+                physx_system = sapien.physx.PhysxSystem(config)
+
+        return Scene([physx_system, RenderSystem()])

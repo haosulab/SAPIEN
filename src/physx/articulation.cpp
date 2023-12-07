@@ -27,20 +27,7 @@ void PhysxArticulation::addLink(PhysxArticulationLinkComponent &link,
   auto pxlink = mPxArticulation->createLink(parent ? parent->getPxActor() : nullptr,
                                             PxTransform{PxIdentity});
   link.internalSetPxLink(pxlink);
-  link.internalSetIndex(mLinks.size() - 1);
-}
-
-void PhysxArticulation::internalAddLinkAtIndex(PhysxArticulationLinkComponent &link,
-                                               PhysxArticulationLinkComponent *parent,
-                                               uint32_t index) {
-  if (index >= mLinks.size()) {
-    throw std::runtime_error("corrupted articulation index");
-  }
-  mLinks[index] = &link;
-  auto pxlink = mPxArticulation->createLink(parent ? parent->getPxActor() : nullptr,
-                                            PxTransform{PxIdentity});
-  link.internalSetPxLink(pxlink);
-  link.internalSetIndex(index);
+  // link.internalSetIndex(mLinks.size() - 1);
 }
 
 // remove link must only be called when PxArticulation is not added to scene
@@ -53,13 +40,6 @@ void PhysxArticulation::removeLink(PhysxArticulationLinkComponent &link) {
   }
   link.getPxActor()->release();
   link.internalSetPxLink(nullptr);
-  refreshLinkIndices();
-}
-
-void PhysxArticulation::refreshLinkIndices() {
-  for (uint32_t i = 0; i < mLinks.size(); ++i) {
-    mLinks[i]->internalSetIndex(i);
-  }
 }
 
 void PhysxArticulation::syncPose() {
@@ -130,9 +110,19 @@ void PhysxArticulation::internalNotifyRemoveFromScene(PhysxArticulationLinkCompo
 
 void PhysxArticulation::internalAddPxArticulationToScene(Scene &scene) {
   auto system = scene.getPhysxSystem();
+
+#ifdef SAPIEN_CUDA
+  if (auto s = std::dynamic_pointer_cast<PhysxSystemGpu>(system)) {
+    // Apply GPU scene offset
+    Vec3 offset = s->getSceneOffset(scene.shared_from_this());
+    PxTransform pose = getPxArticulation()->getRootGlobalPose();
+    pose.p = pose.p + PxVec3(offset.x, offset.y, offset.z);
+    getPxArticulation()->setRootGlobalPose(pose);
+  }
+#endif
+
   system->getPxScene()->addArticulation(*mPxArticulation);
   mCache = mPxArticulation->createCache();
-  updatePermutationMatrix();
   mPxArticulation->setSolverIterationCounts(system->getSceneConfig().solverIterations,
                                             system->getSceneConfig().solverVelocityIterations);
   mPxArticulation->setSleepThreshold(system->getSceneConfig().sleepThreshold);
@@ -148,46 +138,6 @@ void PhysxArticulation::internalEnsureRemovedFromScene() {
   }
 }
 
-void PhysxArticulation::updatePermutationMatrix() {
-  std::vector<uint32_t> dofStarts(mLinks.size());
-  dofStarts[0] = 0;
-  for (auto &link : mLinks) {
-    auto pxLink = link->getPxActor();
-    auto idx = pxLink->getLinkIndex();
-    if (idx) {
-      dofStarts[idx] = pxLink->getInboundJointDof();
-    }
-  }
-  uint32_t count = 0;
-  for (uint32_t i = 1; i < mLinks.size(); ++i) {
-    uint32_t dofs = dofStarts[i];
-    dofStarts[i] = count;
-    count += dofs;
-  }
-  std::vector<int> jointE2I;
-  count = 0;
-  for (uint32_t i = 0; i < mLinks.size(); ++i) {
-    uint32_t dof = mLinks[i]->getPxActor()->getInboundJointDof();
-    uint32_t start = dofStarts[mLinks[i]->getPxActor()->getLinkIndex()];
-    for (uint32_t d = 0; d < dof; ++d) {
-      jointE2I.push_back(start + d);
-    }
-  }
-
-  std::vector<int> rowE2I(6 * (mLinks.size() - 1));
-  for (size_t k = 1; k < mLinks.size(); ++k) {
-    auto internalIndex = mLinks[k]->getPxActor()->getLinkIndex() - 1;
-    auto externalIndex = k - 1;
-    for (int j = 0; j < 6; ++j) {
-      rowE2I[6 * externalIndex + j] = 6 * internalIndex + j;
-    }
-  }
-  mPermutationE2I = Eigen::PermutationMatrix<Eigen::Dynamic>(
-      Eigen::Map<Eigen::VectorXi>(jointE2I.data(), jointE2I.size()));
-  mLinkPermutationE2I = Eigen::PermutationMatrix<Eigen::Dynamic>(
-      Eigen::Map<Eigen::VectorXi>(rowE2I.data(), rowE2I.size()));
-}
-
 std::shared_ptr<PhysxArticulationLinkComponent> PhysxArticulation::getRoot() const {
   if (mLinks.size() == 0) {
     throw std::runtime_error("articulation is invalid");
@@ -201,12 +151,16 @@ std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> PhysxArticulation::
   for (auto l : mLinks) {
     result.push_back(shared_link(l));
   }
+
+  std::sort(result.begin(), result.end(), [](auto const &a, auto const &b) {
+    return a->getPxActor()->getLinkIndex() < b->getPxActor()->getLinkIndex();
+  });
   return result;
 }
 
 std::vector<std::shared_ptr<PhysxArticulationJoint>> PhysxArticulation::getJoints() const {
   std::vector<std::shared_ptr<PhysxArticulationJoint>> result;
-  for (auto l : mLinks) {
+  for (auto l : getLinks()) {
     result.push_back(l->getJoint());
   }
   return result;
@@ -214,7 +168,7 @@ std::vector<std::shared_ptr<PhysxArticulationJoint>> PhysxArticulation::getJoint
 
 std::vector<std::shared_ptr<PhysxArticulationJoint>> PhysxArticulation::getActiveJoints() const {
   std::vector<std::shared_ptr<PhysxArticulationJoint>> result;
-  for (auto l : mLinks) {
+  for (auto l : getLinks()) {
     if (l->getJoint()->getDof()) {
       result.push_back(l->getJoint());
     }
@@ -237,49 +191,73 @@ void PhysxArticulation::checkDof(uint32_t n) {
 }
 
 Eigen::VectorXf PhysxArticulation::getQpos() {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("getting qpos is not supported in GPU simulation.");
+  }
   uint32_t dof = getDof();
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::ePOSITION);
-  return mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointPosition, dof);
+  return Eigen::Map<Eigen::VectorXf>(mCache->jointPosition, dof);
 }
 Eigen::VectorXf PhysxArticulation::getQvel() {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("getting qvel is not supported in GPU simulation.");
+  }
   uint32_t dof = getDof();
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eVELOCITY);
-  return mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointVelocity, dof);
+  return Eigen::Map<Eigen::VectorXf>(mCache->jointVelocity, dof);
 }
 Eigen::VectorXf PhysxArticulation::getQacc() {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("getting qacc is not supported in GPU simulation.");
+  }
   uint32_t dof = getDof();
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eACCELERATION);
-  return mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, dof);
+  return Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, dof);
 }
 Eigen::VectorXf PhysxArticulation::getQf() {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("getting qf is not supported in GPU simulation.");
+  }
   uint32_t dof = getDof();
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eFORCE);
-  return mPermutationE2I.inverse() * Eigen::Map<Eigen::VectorXf>(mCache->jointForce, dof);
+  return Eigen::Map<Eigen::VectorXf>(mCache->jointForce, dof);
 }
 
 void PhysxArticulation::setQpos(Eigen::VectorXf const &q) {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting qpos is not supported in GPU simulation.");
+  }
   checkDof(q.size());
   uint32_t dof = getDof();
-  Eigen::Map<Eigen::VectorXf>(mCache->jointPosition, dof) = mPermutationE2I * q;
+  Eigen::Map<Eigen::VectorXf>(mCache->jointPosition, dof) = q;
   mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::ePOSITION);
   syncPose();
 }
 void PhysxArticulation::setQvel(Eigen::VectorXf const &q) {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting qvel is not supported in GPU simulation.");
+  }
   checkDof(q.size());
   uint32_t dof = getDof();
-  Eigen::Map<Eigen::VectorXf>(mCache->jointVelocity, dof) = mPermutationE2I * q;
+  Eigen::Map<Eigen::VectorXf>(mCache->jointVelocity, dof) = q;
   mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::eVELOCITY);
 }
 void PhysxArticulation::setQacc(Eigen::VectorXf const &q) {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting qacc is not supported in GPU simulation.");
+  }
   checkDof(q.size());
   uint32_t dof = getDof();
-  Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, dof) = mPermutationE2I * q;
+  Eigen::Map<Eigen::VectorXf>(mCache->jointAcceleration, dof) = q;
   mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::eACCELERATION);
 }
 void PhysxArticulation::setQf(Eigen::VectorXf const &q) {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting qf is not supported in GPU simulation.");
+  }
   checkDof(q.size());
   uint32_t dof = getDof();
-  Eigen::Map<Eigen::VectorXf>(mCache->jointForce, dof) = mPermutationE2I * q;
+  Eigen::Map<Eigen::VectorXf>(mCache->jointForce, dof) = q;
   mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::eFORCE);
 }
 
@@ -298,23 +276,41 @@ Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> PhysxArticulation::getQ
 }
 
 Pose PhysxArticulation::getRootPose() {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("getting root pose is not supported in GPU simulation.");
+  }
   return PxTransformToPose(mPxArticulation->getRootGlobalPose());
 }
 Vec3 PhysxArticulation::getRootLinearVelocity() {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
+  }
   return PxVec3ToVec3(mPxArticulation->getRootLinearVelocity());
 }
 Vec3 PhysxArticulation::getRootAngularVelocity() {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
+  }
   return PxVec3ToVec3(mPxArticulation->getRootAngularVelocity());
 }
 
 void PhysxArticulation::setRootPose(Pose const &pose) {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting root pose is not supported in GPU simulation.");
+  }
   mPxArticulation->setRootGlobalPose(PoseToPxTransform(pose));
   syncPose();
 }
 void PhysxArticulation::setRootLinearVelocity(Vec3 const &v) {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting root velocity is not supported in GPU simulation.");
+  }
   mPxArticulation->setRootLinearVelocity(Vec3ToPxVec3(v));
 }
 void PhysxArticulation::setRootAngularVelocity(Vec3 const &v) {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting root angular is not supported in GPU simulation.");
+  }
   mPxArticulation->setRootAngularVelocity(Vec3ToPxVec3(v));
 }
 
@@ -356,28 +352,6 @@ void PhysxArticulation::createFixedTendon(
     throw std::runtime_error(
         "failed to create tendon: link count does not match one coefficient count");
   }
-
-  // std::shared_ptr<PhysxArticulationLinkComponent> parent{};
-  // for (auto &link : chain) {
-  //   if (parent && link->getParent() != parent) {
-  //     throw std::runtime_error("failed to create tendon: links do not form a chain");
-  //   }
-  //   parent = link;
-  // }
-
-  // for (auto &link : chain) {
-  //   switch (link->getJoint()->getType()) {
-  //   case PxArticulationJointType::ePRISMATIC:
-  //   case PxArticulationJointType::eREVOLUTE:
-  //   case PxArticulationJointType::eREVOLUTE_UNWRAPPED:
-  //     break;
-  //   default:
-  //     if (link != chain.at(0)) {
-  //       throw std::runtime_error(
-  //           "failed to create tendon: all joints but the root must be prismatic or revolute");
-  //     }
-  //   }
-  // }
 
   std::map<PxArticulationLink *, PxArticulationTendonJoint *> l2t;
 

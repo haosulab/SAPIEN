@@ -5,8 +5,9 @@ import os
 import warnings
 
 
-sapien.render.set_viewer_shader_dir("../vulkan_shader/rt")
+# sapien.physx.enable_gpu()
 
+# sapien.render.set_viewer_shader_dir("../vulkan_shader/rt")
 # sapien.render.set_viewer_shader_dir("../vulkan_shader/trivial")
 # sapien.render.set_viewer_shader_dir("rt")
 
@@ -76,11 +77,12 @@ def main():
         for _ in range(4):
             scene.step()
             count += 1
-        scene.update_render()
-        viewer.render()
-        # xarm.set_gripper_target((np.sin(count / 100) + 1) * 0.4)
+        # scene.update_render()
+        # viewer.render()
 
-        # franka.set_gripper_target((np.sin(count / 100) + 1) * 0.02)
+        xarm.set_gripper_target((np.sin(count / 100) + 1) * 0.4)
+
+        franka.set_gripper_target((np.sin(count / 100) + 1) * 0.02)
 
         # aabb = bottle.find_component_by_type(
         #     sapien.render.RenderBodyComponent

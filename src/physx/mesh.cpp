@@ -1,5 +1,6 @@
 #include "sapien/physx/mesh.h"
 #include "../logger.h"
+#include "sapien/physx/physx_default.h"
 #include "sapien/physx/physx_system.h"
 #include <filesystem>
 #include <queue>
@@ -302,8 +303,12 @@ void PhysxConvexMesh::loadMesh(Vertices const &vertices) {
   convexDesc.vertexLimit = 255;
 
   PxDefaultMemoryOutputStream buf;
-  if (!PxCookConvexMesh(PxCookingParams(mEngine->getPxPhysics()->getTolerancesScale()), convexDesc,
-                        buf)) {
+  PxCookingParams params(mEngine->getPxPhysics()->getTolerancesScale());
+  if (PhysxDefault::GetGPUEnabled()) {
+    params.buildGPUData = true;
+  }
+
+  if (!PxCookConvexMesh(params, convexDesc, buf)) {
     throw std::runtime_error("failed to add convex mesh from vertices");
   }
 
@@ -388,9 +393,13 @@ void PhysxTriangleMesh::loadMesh(Vertices const &vertices, Triangles const &tria
   meshDesc.triangles.stride = sizeof(uint32_t) * 3;
   meshDesc.triangles.data = triangles.data();
 
+  PxCookingParams params(mEngine->getPxPhysics()->getTolerancesScale());
+  if (PhysxDefault::GetGPUEnabled()) {
+    params.buildGPUData = true;
+  }
+
   PxDefaultMemoryOutputStream writeBuffer;
-  if (!PxCookTriangleMesh(PxCookingParams(mEngine->getPxPhysics()->getTolerancesScale()), meshDesc,
-                          writeBuffer)) {
+  if (!PxCookTriangleMesh(params, meshDesc, writeBuffer)) {
     throw std::runtime_error("Failed to cook non-convex mesh");
   }
   PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());

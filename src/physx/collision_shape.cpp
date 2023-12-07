@@ -1,10 +1,10 @@
 #include "sapien/physx/collision_shape.h"
+#include "sapien/math/conversion.h"
 #include "sapien/physx/material.h"
 #include "sapien/physx/mesh.h"
 #include "sapien/physx/physx_default.h"
 #include "sapien/physx/physx_system.h"
 #include "sapien/physx/rigid_component.h"
-#include "sapien/math/conversion.h"
 
 using namespace physx;
 namespace sapien::physx {
@@ -101,7 +101,7 @@ PhysxCollisionShape::~PhysxCollisionShape() {
 
 PhysxCollisionShapePlane::PhysxCollisionShapePlane(std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxPlaneGeometry(),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
@@ -112,7 +112,7 @@ PhysxCollisionShapePlane::PhysxCollisionShapePlane(std::shared_ptr<PhysxMaterial
 PhysxCollisionShapeBox::PhysxCollisionShapeBox(Vec3 halfLengths,
                                                std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxBoxGeometry(Vec3ToPxVec3(halfLengths)),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
@@ -123,7 +123,7 @@ PhysxCollisionShapeBox::PhysxCollisionShapeBox(Vec3 halfLengths,
 PhysxCollisionShapeCapsule::PhysxCollisionShapeCapsule(float radius, float halfLength,
                                                        std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxCapsuleGeometry(radius, halfLength),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
@@ -134,7 +134,7 @@ PhysxCollisionShapeCapsule::PhysxCollisionShapeCapsule(float radius, float halfL
 PhysxCollisionShapeCylinder::PhysxCollisionShapeCylinder(float radius, float halfLength,
                                                          std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = PhysxConvexMesh::CreateCylinder();
 
   mRadius = radius;
@@ -151,7 +151,7 @@ PhysxCollisionShapeCylinder::PhysxCollisionShapeCylinder(float radius, float hal
 PhysxCollisionShapeSphere::PhysxCollisionShapeSphere(float radius,
                                                      std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxSphereGeometry(radius),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
@@ -163,7 +163,7 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
     std::shared_ptr<PhysxConvexMesh> mesh, Vec3 const &scale,
     std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = mesh;
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxConvexMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
@@ -179,7 +179,7 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
 PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
     std::string const &filename, Vec3 const &scale, std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = MeshManager::Get()->loadConvexMesh(filename);
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxConvexMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
@@ -196,7 +196,7 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
     Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices, Vec3 const &scale,
     std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = std::make_shared<PhysxConvexMesh>(vertices);
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxConvexMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
@@ -225,7 +225,7 @@ PhysxCollisionShapeConvexMesh::LoadMultiple(std::string const &filename, Vec3 sc
 PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
     std::string const &filename, Vec3 const &scale, std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = MeshManager::Get()->loadTriangleMesh(filename);
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxTriangleMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
@@ -243,7 +243,7 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
     Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles,
     Vec3 const &scale, std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = std::make_shared<PhysxTriangleMesh>(vertices, triangles);
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxTriangleMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
@@ -261,7 +261,7 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
     std::shared_ptr<PhysxTriangleMesh> mesh, Vec3 const &scale,
     std::shared_ptr<PhysxMaterial> material) {
   mEngine = PhysxEngine::Get();
-  mPhysicalMaterial = material ? material : PhysxDefault::Get().getDefaultMaterial();
+  mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = mesh;
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxTriangleMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),

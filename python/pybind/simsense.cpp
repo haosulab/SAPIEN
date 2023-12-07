@@ -1,5 +1,6 @@
 #ifdef SAPIEN_CUDA
 
+#include "./array.hpp"
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <sapien/array.h>

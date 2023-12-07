@@ -394,18 +394,13 @@ void init_sapien_renderer(py::module &sapien) {
   ////////// end global //////////
 
   auto PySapienRenderer = py::class_<SapienRenderEngine>(m, "SapienRenderer");
-
   auto PyRenderTexture = py::class_<SapienRenderTexture>(m, "RenderTexture");
-
   auto PyRenderTexture2D = py::class_<SapienRenderTexture2D>(m, "RenderTexture2D");
 
-  auto PyRenderTargetCuda =
-      py::class_<SapienRenderImageCuda, CudaArrayHandle>(m, "RenderImageCuda");
+  // auto PyRenderTargetCuda = py::class_<SapienRenderImageCuda>(m, "RenderImageCuda");
 
   auto PyRenderCubemap = py::class_<SapienRenderCubemap>(m, "RenderCubemap");
-
   auto PyRenderMaterial = py::class_<SapienRenderMaterial>(m, "RenderMaterial");
-
   auto PyRenderShapeTriangleMeshPart =
       py::class_<RenderShapeTriangleMeshPart>(m, "RenderShapeTriangleMeshPart");
 
@@ -530,21 +525,21 @@ void init_sapien_renderer(py::module &sapien) {
       .def("download", &downloadSapienTexture2D)
       .def("upload", &uploadSapienTexture2D, py::arg("data"));
 
-  PyRenderTargetCuda.def_readonly("shape", &SapienRenderImageCuda::shape)
-      .def_readonly("strides", &SapienRenderImageCuda::strides)
-      .def_readonly("cuda_id", &SapienRenderImageCuda::cudaId)
-      .def_readonly("typstr", &SapienRenderImageCuda::type)
-      .def_property_readonly(
-          "ptr",
-          [](SapienRenderImageCuda &array) { return reinterpret_cast<intptr_t>(array.ptr); })
-      .def_property_readonly("__cuda_array_interface__", [](SapienRenderImageCuda &array) {
-        py::tuple shape = py::cast(array.shape);
-        py::tuple strides = py::cast(array.strides);
+  // PyRenderTargetCuda.def_readonly("shape", &SapienRenderImageCuda::shape)
+  //     .def_readonly("strides", &SapienRenderImageCuda::strides)
+  //     .def_readonly("cuda_id", &SapienRenderImageCuda::cudaId)
+  //     .def_readonly("typstr", &SapienRenderImageCuda::type)
+  //     .def_property_readonly(
+  //         "ptr",
+  //         [](SapienRenderImageCuda &array) { return reinterpret_cast<intptr_t>(array.ptr); })
+  //     .def_property_readonly("__cuda_array_interface__", [](SapienRenderImageCuda &array) {
+  //       py::tuple shape = py::cast(array.shape);
+  //       py::tuple strides = py::cast(array.strides);
 
-        return py::dict("shape"_a = shape, "strides"_a = strides, "typestr"_a = array.type,
-                        "data"_a = py::make_tuple(reinterpret_cast<intptr_t>(array.ptr), false),
-                        "version"_a = 2);
-      });
+  //       return py::dict("shape"_a = shape, "strides"_a = strides, "typestr"_a = array.type,
+  //                       "data"_a = py::make_tuple(reinterpret_cast<intptr_t>(array.ptr), false),
+  //                       "version"_a = 2);
+  //     });
 
   PyRenderCubemap.def(py::init<std::string const &>(), py::arg("filename"))
       .def(py::init<std::string const &, std::string const &, std::string const &,
@@ -830,13 +825,23 @@ void init_sapien_renderer(py::module &sapien) {
           },
           py::arg("name"))
 
-      .def("get_picture_cuda", &SapienRenderCameraComponent::getImageCuda, py::arg("name"),
-           R"doc(
+      .def(
+          "get_picture_cuda",
+          [](SapienRenderCameraComponent &c, std::string const &name) {
+            return CudaArrayHandle(c.getImageCuda(name));
+          },
+          py::arg("name"),
+          R"doc(
 This function transfers the rendered image into a CUDA buffer.
 The returned object implements __cuda_array_interface__
 
 Usage:
 
+# use torch backend
+sapien.set_cuda_tensor_backend("torch")  # called once per process
+image: torch.Tensor = camera.getImageCuda()
+
+# use default backend
 image = camera.getImageCuda()
 torch_tensor = torch.as_tensor(image)
 

@@ -56,10 +56,13 @@ class LinkBuilder(ActorBuilder):
 class ArticulationBuilder:
     def __init__(self):
         self.initial_pose = sapien.Pose()
+        self.link_builders: List[LinkBuilder] = []
+
+    def set_initial_pose(self, pose):
+        self.initial_pose = pose
 
     def set_scene(self, scene: sapien.Scene):
         self.scene = scene
-        self.link_builders: List[LinkBuilder] = []
         return self
 
     def create_link_builder(self, parent: LinkBuilder = None):
@@ -88,9 +91,6 @@ class ArticulationBuilder:
             if b.visual_records:
                 entity.add_component(b.build_render_component())
             entity.name = b.name
-
-            # if b.parent:
-            #     link_component.set_parent(links[b.parent.index])
 
             link_component.name = b.name
             link_component.joint.name = b.joint_record.name
@@ -124,7 +124,7 @@ class ArticulationBuilder:
                 "fixed" if fix_root_link else "undefined"
             )
 
+        links[0].pose = self.initial_pose
         for l in links:
             self.scene.add_entity(l)
-        links[0].pose = self.initial_pose
         return l.components[0].articulation

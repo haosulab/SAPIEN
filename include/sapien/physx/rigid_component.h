@@ -30,13 +30,16 @@ public:
   AABB getGlobalAABBFast() const;
   AABB computeGlobalAABBTight() const;
 
-  void afterStep();
+  void syncPoseToEntity();
 
   void internalRegisterJoint(std::shared_ptr<PhysxJointComponent> joint);
   void internalUnregisterJoint(std::shared_ptr<PhysxJointComponent> joint);
 
   /** called when some drive is deleted */
   void internalClearExpiredJoints();
+
+  /** returns true if the physx actor is added to a GPU-enabled scene */
+  bool isUsingDirectGPUAPI() const;
 
   template <class Archive> void save(Archive &ar) const {
     ar(cereal::base_class<PhysxBaseComponent>(this));
@@ -122,7 +125,8 @@ public:
 
     ::physx::PxActorFlags::InternalType actorFlags = getPxActor()->getActorFlags();
     ::physx::PxRigidBodyFlags::InternalType rigidBodyFlags = getPxActor()->getRigidBodyFlags();
-    ar(actorFlags, rigidBodyFlags, getLinearDamping(), getAngularDamping(), getMaxDepenetrationVelocity(), getMaxContactImpulse());
+    ar(actorFlags, rigidBodyFlags, getLinearDamping(), getAngularDamping(),
+       getMaxDepenetrationVelocity(), getMaxContactImpulse());
     ar(getMass(), getInertia(), getCMassLocalPose());
 
     ar(mMassProperties.mass, mMassProperties.inertiaTensor.column0[0],
@@ -172,7 +176,8 @@ protected:
   bool canAutoComputeMass();
 
   bool mAutoComputeMass{true};
-  ::physx::PxMassProperties mMassProperties{0.f, ::physx::PxMat33(::physx::PxZero), ::physx::PxVec3(0.f)};
+  ::physx::PxMassProperties mMassProperties{0.f, ::physx::PxMat33(::physx::PxZero),
+                                            ::physx::PxVec3(0.f)};
 };
 
 class PhysxRigidDynamicComponent : public PhysxRigidBodyComponent {
@@ -213,7 +218,8 @@ public:
       ar(getLinearVelocity(), getAngularVelocity());
     }
 
-    ::physx::PxRigidDynamicLockFlags::InternalType lockFlags = mPxActor->getRigidDynamicLockFlags();
+    ::physx::PxRigidDynamicLockFlags::InternalType lockFlags =
+        mPxActor->getRigidDynamicLockFlags();
     ar(lockFlags);
   }
 

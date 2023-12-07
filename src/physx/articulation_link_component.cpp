@@ -1,4 +1,5 @@
 #include "sapien/physx/articulation_link_component.h"
+#include "../logger.h"
 #include "sapien/entity.h"
 #include "sapien/math/conversion.h"
 #include "sapien/physx/articulation.h"
@@ -200,6 +201,9 @@ PxArticulationDriveType::Enum PhysxArticulationJoint::getDriveType() const {
 }
 
 Eigen::VectorXf PhysxArticulationJoint::getDriveTargetPosition() const {
+  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  }
   Eigen::VectorXf result;
   result.resize(mAxes.size());
   auto j = getPxJoint();
@@ -210,6 +214,9 @@ Eigen::VectorXf PhysxArticulationJoint::getDriveTargetPosition() const {
 }
 
 Eigen::VectorXf PhysxArticulationJoint::getDriveTargetVelocity() const {
+  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  }
   Eigen::VectorXf result;
   result.resize(mAxes.size());
   auto j = getPxJoint();
@@ -220,6 +227,9 @@ Eigen::VectorXf PhysxArticulationJoint::getDriveTargetVelocity() const {
 }
 
 void PhysxArticulationJoint::setDriveTargetPosition(Eigen::VectorXf const &position) {
+  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  }
   if (static_cast<size_t>(position.size()) != mAxes.size()) {
     throw std::runtime_error("target size does not match joint dof");
   }
@@ -230,6 +240,9 @@ void PhysxArticulationJoint::setDriveTargetPosition(Eigen::VectorXf const &posit
 }
 
 void PhysxArticulationJoint::setDriveTargetVelocity(Eigen::VectorXf const &velocity) {
+  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  }
   if (static_cast<size_t>(velocity.size()) != mAxes.size()) {
     throw std::runtime_error("target size does not match joint dof");
   }
@@ -240,12 +253,18 @@ void PhysxArticulationJoint::setDriveTargetVelocity(Eigen::VectorXf const &veloc
 }
 
 void PhysxArticulationJoint::setDriveTargetPosition(float position) {
+  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  }
   Eigen::VectorXf v(1);
   v << position;
   setDriveTargetPosition(v);
 }
 
 void PhysxArticulationJoint::setDriveTargetVelocity(float velocity) {
+  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  }
   Eigen::VectorXf v(1);
   v << velocity;
   setDriveTargetVelocity(v);
@@ -327,11 +346,16 @@ void PhysxArticulationLinkComponent::onRemoveFromScene(Scene &scene) {
       std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this()));
 }
 void PhysxArticulationLinkComponent::onSetPose(Pose const &pose) {
-  if (isRoot()) {
-    mArticulation->setRootPose(pose);
+  if (!isUsingDirectGPUAPI()) {
+    if (isRoot()) {
+      mArticulation->setRootPose(pose);
+    }
+  } else {
+    // TODO: allow disabling this warning
+    logger::warn("setting pose has no effect for physx GPU simulation.");
   }
 }
-void PhysxArticulationLinkComponent::afterStep() {
+void PhysxArticulationLinkComponent::syncPoseToEntity() {
   // TODO: how slow is it? get on demand?
   getEntity()->internalSyncPose(PxTransformToPose(getPxActor()->getGlobalPose()));
 }
@@ -514,6 +538,14 @@ void PhysxArticulationLinkComponent::setParent(
       }
     }
   }
+}
+
+int PhysxArticulationLinkComponent::getIndex() const {
+  if (!mArticulation->getPxArticulation()->getScene()) {
+    throw std::runtime_error(
+        "failed to get link index: the articulation first needs to be added to a scene.");
+  }
+  return getPxActor()->getLinkIndex();
 }
 
 bool PhysxArticulationLinkComponent::isSleeping() const {

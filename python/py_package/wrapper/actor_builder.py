@@ -81,14 +81,20 @@ class ActorBuilder:
 
         self.initial_pose = sapien.Pose()
 
+    def set_initial_pose(self, pose):
+        self.initial_pose = pose
+        return self
+
     def set_mass_and_inertia(self, mass, cmass_local_pose, inertia):
         self._mass = mass
         self._cmass_local_pose = cmass_local_pose
         self._inertia = inertia
         self._auto_inertial = False
+        return self
 
     def set_name(self, name):
         self.name = name
+        return self
 
     def set_scene(self, scene: sapien.Scene):
         self.scene = scene
@@ -250,9 +256,9 @@ class ActorBuilder:
             )
 
         entity = self.build_entity()
-        self.scene.add_entity(entity)
         entity.name = self.name
-        entity.pose = self.initial_pose
+        entity.pose = self.initial_pose  # set pose before adding to scene
+        self.scene.add_entity(entity)
         return entity
 
     def build_kinematic(self, name=""):

@@ -65,9 +65,6 @@ public:
   void internalEnsureAddedToScene();
   void internalAddPxArticulationToScene(Scene &scene);
 
-  void internalAddLinkAtIndex(PhysxArticulationLinkComponent &link,
-                              PhysxArticulationLinkComponent *parent, uint32_t index);
-
   void createFixedTendon(std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> const &chain,
                          std::vector<float> const &coefficients,
                          std::vector<float> const &recipCoefficients, float restLength,
@@ -77,9 +74,7 @@ public:
   ~PhysxArticulation();
 
 private:
-  void updatePermutationMatrix();
   void checkDof(uint32_t n);
-  void refreshLinkIndices();
   void syncPose();
 
   friend cereal::access;
@@ -98,13 +93,8 @@ private:
   ::physx::PxArticulationReducedCoordinate *mPxArticulation{};
   ::physx::PxArticulationCache *mCache{};
 
-  // std::vector<std::weak_ptr<PhysxArticulationLinkComponent>> mLinks;
-
-  /** links sorted in the added order, guaranteed to be topologically sorted */
+  // links sorted in the added order, guaranteed to be topologically sorted
   std::vector<PhysxArticulationLinkComponent *> mLinks;
-
-  Eigen::PermutationMatrix<Eigen::Dynamic> mPermutationE2I;
-  Eigen::PermutationMatrix<Eigen::Dynamic> mLinkPermutationE2I;
 
   Scene *mScene{};
   uint32_t mLinksAddedToScene{};

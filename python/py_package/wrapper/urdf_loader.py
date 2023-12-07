@@ -41,7 +41,7 @@ class URDFLoader:
 
     def _get_material(self, link_name, index):
         if link_name in self._link_material:
-            return  PhysxMaterial(*self._link_material[link_name])
+            return PhysxMaterial(*self._link_material[link_name])
         if self._material is not None:
             return PhysxMaterial(*self._material)
         return None
@@ -442,7 +442,12 @@ class URDFLoader:
                 elif joint.joint_type == "prismatic":
                     link_builder.set_joint_properties(
                         "prismatic",
-                        [[joint.limit.lower * self.scale, joint.limit.upper * self.scale]],
+                        [
+                            [
+                                joint.limit.lower * self.scale,
+                                joint.limit.upper * self.scale,
+                            ]
+                        ],
                         t_axis2parent,
                         t_axis2joint,
                         friction,
@@ -547,9 +552,7 @@ class URDFLoader:
                 else:
                     fix_base = False
 
-                articulation_builders.append(
-                    self._parse_articulation(root, fix_base)
-                )
+                articulation_builders.append(self._parse_articulation(root, fix_base))
 
         extra = ET.fromstring(robot.other_xml)
         cameras = self._parse_cameras(extra)
@@ -674,7 +677,7 @@ class URDFLoader:
 
     def load_file_as_articulation_builder(
         self, urdf_file, srdf_file=None, package_dir=None
-    ):
+    ) -> ArticulationBuilder:
         articulation_builders, actor_builders, cameras = self.parse(
             urdf_file, srdf_file, package_dir
         )

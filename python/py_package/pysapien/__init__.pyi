@@ -13,10 +13,12 @@ __all__ = [
     "Pose",
     "Scene",
     "System",
+    "get_cuda_tensor_backend",
     "internal_renderer",
     "math",
     "physx",
     "render",
+    "set_cuda_tensor_backend",
     "set_log_level",
     "simsense"
 ]
@@ -83,6 +85,7 @@ class Component():
         pass
     pass
 class CudaArray():
+    def __init__(self, arg0: object) -> None: ...
     @property
     def __cuda_array_interface__(self) -> dict:
         """
@@ -246,5 +249,11 @@ class System():
     def __init__(self) -> None: ...
     def step(self) -> None: ...
     pass
+def get_cuda_tensor_backend() -> str:
+    pass
+def set_cuda_tensor_backend(backend: str) -> None:
+    """
+    set the backend returned CUDA tensors. Supported backends are "torch" and "jax"
+    """
 def set_log_level(level: str) -> None:
     pass

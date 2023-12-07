@@ -8,7 +8,14 @@ from .version import __version__
 os.environ["SAPIEN_PACKAGE_PATH"] = os.path.dirname(__file__)
 from . import _oidn_tricks
 
-from .pysapien import *
+from . import pysapien
+
+from .pysapien import Entity, Component, System, CudaArray, CudaDataSource, Pose
+from .pysapien import set_cuda_tensor_backend, set_log_level
+from .pysapien import math, simsense
+
+from . import physx
+from . import render
 from . import serialization
 
 from . import _vulkan_tricks
@@ -24,7 +31,7 @@ import pkg_resources
 
 try:
     render.set_imgui_ini_filename(str(Path.home() / ".sapien" / "imgui.ini"))
-    render._internal_set_shader_search_path(
+    pysapien.render._internal_set_shader_search_path(
         pkg_resources.resource_filename("sapien", "vulkan_shader")
     )
     render.set_viewer_shader_dir("default")

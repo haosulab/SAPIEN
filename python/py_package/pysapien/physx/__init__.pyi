@@ -21,10 +21,12 @@ __all__ = [
     "PhysxCollisionShapeTriangleMesh",
     "PhysxContact",
     "PhysxContactPoint",
+    "PhysxCpuSystem",
     "PhysxDistanceJointComponent",
     "PhysxDriveComponent",
     "PhysxEngine",
     "PhysxGearComponent",
+    "PhysxGpuSystem",
     "PhysxJointComponent",
     "PhysxMaterial",
     "PhysxRayHit",
@@ -35,6 +37,7 @@ __all__ = [
     "PhysxSceneConfig",
     "PhysxSystem",
     "get_default_material",
+    "is_gpu_enabled",
     "set_default_material"
 ]
 
@@ -583,6 +586,43 @@ class PhysxContactPoint():
         :type: float
         """
     pass
+class PhysxSystem(sapien.pysapien.System):
+    def __init__(self, config: PhysxSceneConfig = SceneConfig()) -> None: ...
+    def get_articulation_link_components(self) -> list[PhysxArticulationLinkComponent]: ...
+    def get_config(self) -> PhysxSceneConfig: ...
+    def get_rigid_dynamic_components(self) -> list[PhysxRigidDynamicComponent]: ...
+    def get_rigid_static_components(self) -> list[PhysxRigidStaticComponent]: ...
+    def get_timestep(self) -> float: ...
+    def set_timestep(self, arg0: float) -> None: ...
+    @property
+    def articulation_link_components(self) -> list[PhysxArticulationLinkComponent]:
+        """
+        :type: list[PhysxArticulationLinkComponent]
+        """
+    @property
+    def config(self) -> PhysxSceneConfig:
+        """
+        :type: PhysxSceneConfig
+        """
+    @property
+    def rigid_dynamic_components(self) -> list[PhysxRigidDynamicComponent]:
+        """
+        :type: list[PhysxRigidDynamicComponent]
+        """
+    @property
+    def rigid_static_components(self) -> list[PhysxRigidStaticComponent]:
+        """
+        :type: list[PhysxRigidStaticComponent]
+        """
+    @property
+    def timestep(self) -> float:
+        """
+        :type: float
+        """
+    @timestep.setter
+    def timestep(self, arg1: float) -> None:
+        pass
+    pass
 class PhysxJointComponent(PhysxBaseComponent, sapien.pysapien.Component):
     def get_parent(self) -> PhysxRigidBaseComponent: ...
     def get_pose_in_child(self) -> sapien.pysapien.Pose: ...
@@ -682,6 +722,59 @@ class PhysxGearComponent(PhysxJointComponent, PhysxBaseComponent, sapien.pysapie
     def is_hinges_enabled(self) -> bool:
         """
         :type: bool
+        """
+    pass
+class PhysxGpuSystem(PhysxSystem, sapien.pysapien.System):
+    def __init__(self, config: PhysxSceneConfig = SceneConfig()) -> None: ...
+    def _gpu_query_articulation_root_pose_raw(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def _gpu_query_body_data_raw(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def get_scene_offset(self, scene: sapien.pysapien.Scene) -> numpy.ndarray[numpy.float32, _Shape, _Shape[3]]: ...
+    def gpu_apply_articulation_drive_target(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_apply_articulation_drive_velocity_target(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_apply_articulation_qpos(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_apply_articulation_qvel(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_apply_articulation_root_pose(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle, offset_buffer: CudaArrayHandle) -> None: ...
+    def gpu_apply_body_data(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle, offset_buffer: CudaArrayHandle) -> None: ...
+    def gpu_apply_body_force(self, force_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_apply_body_torque(self, torque_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_create_articulation_index_buffer(self, articulations: list[PhysxArticulation]) -> CudaArray: ...
+    def gpu_create_articulation_offset_buffer(self) -> CudaArray: ...
+    def gpu_create_articulation_q_buffer(self) -> CudaArray: ...
+    def gpu_create_articulation_root_pose_buffer(self) -> CudaArray: ...
+    def gpu_create_body_data_buffer(self, count: int) -> CudaArray: ...
+    def gpu_create_body_index_buffer(self, bodies: list[PhysxRigidBodyComponent]) -> CudaArray: ...
+    def gpu_create_body_offset_buffer(self, bodies: list[PhysxRigidBodyComponent]) -> CudaArray: ...
+    def gpu_init(self) -> None: 
+        """
+        "Warm start" the GPU simulation by stepping the system once. This function
+        must be called each time when actors are added or removed from the scene. One
+        may call `gpu_apply_*` functions to initialize the system after calling this
+        function.
+        """
+    def gpu_query_articulation_drive_target(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_query_articulation_drive_velocity_target(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_query_articulation_qpos(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_query_articulation_qvel(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle) -> None: ...
+    def gpu_query_articulation_root_pose(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle, offset_buffer: CudaArrayHandle) -> None: ...
+    def gpu_query_body_data(self, data_buffer: CudaArrayHandle, index_buffer: CudaArrayHandle, offset_buffer: CudaArrayHandle) -> None: ...
+    def gpu_set_cuda_stream(self, stream: int) -> None: 
+        """
+        PhysX GPU APIs will be synchronized with the provided stream and SAPIEN's CUDA
+        kernels will be launched to the provided stream.
+
+        Args:
+            stream: integer representation of a cuda stream pointer
+        """
+    def gpu_update_articulation_kinematics(self) -> None: ...
+    def set_scene_offset(self, scene: sapien.pysapien.Scene, offset: numpy.ndarray[numpy.float32, _Shape, _Shape[3]]) -> None: 
+        """
+        In GPU mode, all SAPIEN scenes share the same PhysX scene. One should call this
+        function to apply an offset to avoid bodies in different scenes interfere with
+        each other. This function must be called before any PhysX body is added to scene.
+
+        Example: After calling `set_scene_offset([2, 1, 0])`, an SAPIEN object with
+        position `[1, 1, 1]` will be at position `[1, 1, 1] + [2, 1, 0] = [3, 2, 1]` in
+        PhysX scene.
         """
     pass
 class PhysxDistanceJointComponent(PhysxJointComponent, PhysxBaseComponent, sapien.pysapien.Component):
@@ -1066,51 +1159,21 @@ class PhysxSceneConfig():
     def solver_velocity_iterations(self, arg0: int) -> None:
         pass
     pass
-class PhysxSystem(sapien.pysapien.System):
+class PhysxCpuSystem(PhysxSystem, sapien.pysapien.System):
     def __init__(self, config: PhysxSceneConfig = SceneConfig()) -> None: ...
-    def get_articulation_link_components(self) -> list[PhysxArticulationLinkComponent]: ...
-    def get_config(self) -> PhysxSceneConfig: ...
     def get_contacts(self) -> list[PhysxContact]: ...
-    def get_rigid_dynamic_components(self) -> list[PhysxRigidDynamicComponent]: ...
-    def get_rigid_static_components(self) -> list[PhysxRigidStaticComponent]: ...
-    def get_timestep(self) -> float: ...
     def pack(self) -> bytes: ...
     def raycast(self, position: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], direction: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], distance: float) -> PhysxRayHit: 
         """
         Casts a ray and returns the closest hit. Returns None if no hit
         """
-    def set_timestep(self, arg0: float) -> None: ...
     def unpack(self, data: bytes) -> None: ...
-    @property
-    def articulation_link_components(self) -> list[PhysxArticulationLinkComponent]:
-        """
-        :type: list[PhysxArticulationLinkComponent]
-        """
-    @property
-    def config(self) -> PhysxSceneConfig:
-        """
-        :type: PhysxSceneConfig
-        """
-    @property
-    def rigid_dynamic_components(self) -> list[PhysxRigidDynamicComponent]:
-        """
-        :type: list[PhysxRigidDynamicComponent]
-        """
-    @property
-    def rigid_static_components(self) -> list[PhysxRigidStaticComponent]:
-        """
-        :type: list[PhysxRigidStaticComponent]
-        """
-    @property
-    def timestep(self) -> float:
-        """
-        :type: float
-        """
-    @timestep.setter
-    def timestep(self, arg1: float) -> None:
-        pass
+    pass
+def _enable_gpu() -> None:
     pass
 def get_default_material() -> PhysxMaterial:
+    pass
+def is_gpu_enabled() -> bool:
     pass
 def set_default_material(static_friction: float, dynamic_friction: float, restitution: float) -> None:
     pass

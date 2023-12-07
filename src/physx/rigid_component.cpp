@@ -1,4 +1,5 @@
 #include "sapien/physx/rigid_component.h"
+#include "../logger.h"
 #include "sapien/entity.h"
 #include "sapien/math/conversion.h"
 #include "sapien/physx/physx_system.h"
@@ -9,7 +10,7 @@ using namespace physx;
 namespace sapien {
 namespace physx {
 
-void PhysxRigidBaseComponent::afterStep() {
+void PhysxRigidBaseComponent::syncPoseToEntity() {
   // TODO: get on demand?
   getEntity()->internalSyncPose(PxTransformToPose(getPxActor()->getGlobalPose()));
 }
@@ -62,11 +63,22 @@ void PhysxRigidBaseComponent::internalClearExpiredJoints() {
   std::erase_if(mJoints, [](auto &d) { return d.expired(); });
 }
 
+bool PhysxRigidBaseComponent::isUsingDirectGPUAPI() const {
+  return getPxActor()->getScene() &&
+         getPxActor()->getScene()->getFlags().isSet(PxSceneFlag::eENABLE_DIRECT_GPU_API);
+}
+
 Vec3 PhysxRigidBodyComponent::getLinearVelocity() const {
+  if (isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to set velocity: not supported on GPU mode");
+  }
   return PxVec3ToVec3(getPxActor()->getLinearVelocity());
 }
 
 Vec3 PhysxRigidBodyComponent::getAngularVelocity() const {
+  if (isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to set velocity: not supported on GPU mode");
+  }
   return PxVec3ToVec3(getPxActor()->getAngularVelocity());
 }
 
@@ -92,9 +104,15 @@ void PhysxRigidBodyComponent::setCMassLocalPose(Pose const &pose) {
 }
 
 void PhysxRigidDynamicComponent::setLinearVelocity(Vec3 const &v) {
+  if (isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to set velocity: not supported on GPU mode");
+  }
   getPxActor()->setLinearVelocity(Vec3ToPxVec3(v));
 }
 void PhysxRigidDynamicComponent::setAngularVelocity(Vec3 const &v) {
+  if (isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to set velocity: not supported on GPU mode");
+  }
   getPxActor()->setAngularVelocity(Vec3ToPxVec3(v));
 }
 
@@ -158,6 +176,8 @@ PhysxRigidStaticComponent::PhysxRigidStaticComponent() {
 
 PhysxRigidDynamicComponent::PhysxRigidDynamicComponent() {
   mPxActor = PhysxEngine::Get()->getPxPhysics()->createRigidDynamic(PxTransform{PxIdentity});
+  mPxActor->setLinearVelocity({0.f, 0.f, 0.f});
+  mPxActor->setAngularVelocity({0.f, 0.f, 0.f});
   mPxActor->userData = this;
   mPxActor->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_GYROSCOPIC_FORCES, true);
   internalUpdateMass();
@@ -168,12 +188,16 @@ void PhysxRigidStaticComponent::onSetPose(Pose const &pose) {
 }
 
 void PhysxRigidDynamicComponent::onSetPose(Pose const &pose) {
-  getPxActor()->setGlobalPose(PoseToPxTransform(pose));
+  if (!isUsingDirectGPUAPI()) {
+    getPxActor()->setGlobalPose(PoseToPxTransform(pose));
+  } else {
+    // TODO: disable this warning
+    logger::warn("setting pose does not affect PhysX GPU simulation.");
+  }
 }
 
 void PhysxRigidStaticComponent::onAddToScene(Scene &scene) {
   auto system = scene.getPhysxSystem();
-  system->getPxScene()->addActor(*getPxActor());
   system->registerComponent(
       std::static_pointer_cast<PhysxRigidStaticComponent>(shared_from_this()));
 
@@ -181,6 +205,17 @@ void PhysxRigidStaticComponent::onAddToScene(Scene &scene) {
   for (auto &shape : mCollisionShapes) {
     shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
   }
+
+#ifdef SAPIEN_CUDA
+  if (auto s = std::dynamic_pointer_cast<PhysxSystemGpu>(system)) {
+    // Apply GPU scene offset
+    Vec3 offset = s->getSceneOffset(scene.shared_from_this());
+    PxTransform pose = getPxActor()->getGlobalPose();
+    pose.p = pose.p + PxVec3(offset.x, offset.y, offset.z);
+    getPxActor()->setGlobalPose(pose);
+  }
+#endif
+  system->getPxScene()->addActor(*getPxActor());
 }
 
 void PhysxRigidStaticComponent::onRemoveFromScene(Scene &scene) {
@@ -193,7 +228,6 @@ void PhysxRigidStaticComponent::onRemoveFromScene(Scene &scene) {
 
 void PhysxRigidDynamicComponent::onAddToScene(Scene &scene) {
   auto system = scene.getPhysxSystem();
-  system->getPxScene()->addActor(*getPxActor());
 
   // setup physical parameters
   mPxActor->setSolverIterationCounts(system->getSceneConfig().solverIterations,
@@ -205,6 +239,18 @@ void PhysxRigidDynamicComponent::onAddToScene(Scene &scene) {
 
   system->registerComponent(
       std::static_pointer_cast<PhysxRigidDynamicComponent>(shared_from_this()));
+
+#ifdef SAPIEN_CUDA
+  if (auto s = std::dynamic_pointer_cast<PhysxSystemGpu>(system)) {
+    // Apply GPU scene offset
+    Vec3 offset = s->getSceneOffset(scene.shared_from_this());
+    PxTransform pose = getPxActor()->getGlobalPose();
+    pose.p = pose.p + PxVec3(offset.x, offset.y, offset.z);
+    getPxActor()->setGlobalPose(pose);
+  }
+#endif
+
+  system->getPxScene()->addActor(*getPxActor());
 }
 
 void PhysxRigidDynamicComponent::onRemoveFromScene(Scene &scene) {
@@ -294,11 +340,17 @@ void PhysxRigidBodyComponent::setAngularDamping(float damping) {
 
 void PhysxRigidBodyComponent::addForceAtPoint(Vec3 const &force, Vec3 const &point,
                                               PxForceMode::Enum mode) {
+  if (isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to add force: not supported on GPU mode");
+  }
   PxRigidBodyExt::addForceAtPos(*getPxActor(), Vec3ToPxVec3(force), Vec3ToPxVec3(point), mode);
 }
 
 void PhysxRigidBodyComponent::addForceTorque(Vec3 const &force, Vec3 const &torque,
                                              PxForceMode::Enum mode) {
+  if (isUsingDirectGPUAPI()) {
+    throw std::runtime_error("failed to add force torque: not supported on GPU mode");
+  }
   getPxActor()->addForce(Vec3ToPxVec3(force), mode);
   getPxActor()->addTorque(Vec3ToPxVec3(torque), mode);
 }

@@ -16,9 +16,17 @@ WidgetType = TypeVar("WidgetType", bound=Widget)
 
 
 class Scene(_Scene):
+    _GpuSystem = None
+
     def __init__(self, systems=None):
         if systems is None:
-            super().__init__([sapien.physx.PhysxSystem(), sapien.render.RenderSystem()])
+            if sapien.physx.is_gpu_enabled():
+                physx_system = Scene._GpuSystem
+                if physx_system is None:
+                    Scene._GpuSystem = physx_system = sapien.physx.PhysxGpuSystem()
+            else:
+                physx_system = sapien.physx.PhysxSystem()
+            super().__init__([physx_system, sapien.render.RenderSystem()])
         else:
             super().__init__(systems)
 

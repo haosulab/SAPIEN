@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
-project(sapien LANGUAGES C CXX)
+project(sapien LANGUAGES C CXX CUDA)
 
 if(MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
@@ -73,6 +73,10 @@ else ()
 endif ()
 
 if (${SAPIEN_CUDA})
+    set(CMAKE_CUDA_STANDARD 17)
+    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -O3 -lineinfo -ftemplate-depth=1024")
+    file(GLOB_RECURSE SAPIEN_CUDA_SRC "src/*.cu")
+
     find_package(CUDA REQUIRED)
     set(SVULKAN2_CUDA_INTEROP ON CACHE BOOL "" FORCE)
 else()
@@ -89,7 +93,7 @@ if (${SAPIEN_CUDA})
 endif ()
 
 file(GLOB_RECURSE SAPIEN_SRC "src/*.h" "src/*.cpp" "src/*.cc")
-add_library(sapien SHARED ${SAPIEN_SRC})
+add_library(sapien SHARED ${SAPIEN_SRC} ${SAPIEN_CUDA_SRC})
 
 target_link_libraries(sapien PUBLIC eigen svulkan2 cereal)
 target_link_libraries(sapien PRIVATE physx5 spdlog::spdlog easy_profiler # grpc++

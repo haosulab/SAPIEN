@@ -18,9 +18,7 @@ from sapien.wrapper.scene import Widget
 import os
 import pkg_resources
 import platform
-import sapien.pysapien.internal_renderer
 import sapien.pysapien.math
-import sapien.pysapien.physx
 import sapien.pysapien.simsense
 
 __all__ = [
@@ -51,6 +49,7 @@ __all__ = [
     "render",
     "render_server",
     "serialization",
+    "set_cuda_tensor_backend",
     "set_log_level",
     "simsense",
     "utils",
@@ -60,7 +59,11 @@ __all__ = [
 ]
 
 
+def set_cuda_tensor_backend(backend: str) -> None:
+    """
+    set the backend returned CUDA tensors. Supported backends are "torch" and "jax"
+    """
 def set_log_level(level: str) -> None:
     pass
-__version__ = '3.0.0.dev20231203+9229fcb4'
+__version__ = '3.0.0.dev20231215+37f5fa5f'
 SceneConfig = sapien.pysapien.physx.PhysxSceneConfig

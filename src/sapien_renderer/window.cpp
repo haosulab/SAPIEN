@@ -402,7 +402,7 @@ CpuArray SapienRendererWindow::getImagePixel(std::string const &name, uint32_t x
 
   assert(static_cast<int>(buffer.size()) == channels * itemsize);
 
-  return CpuArray{.shape = {channels}, .strides = {itemsize}, .type = type, .data = buffer};
+  return CpuArray{.shape = {channels}, .type = type, .data = buffer};
 }
 
 // std::tuple<std::vector<float>, std::array<uint32_t, 3>>

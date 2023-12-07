@@ -9,11 +9,11 @@ using namespace sapien::physx;
 
 TEST(PhysxCollisionShapeBox, Default) {
   auto shape1 = std::make_shared<PhysxCollisionShapeBox>(Vec3{1.5, 2.5, 3.5});
-  EXPECT_EQ(shape1->getPhysicalMaterial(), PhysxDefault::Get().getDefaultMaterial());
+  EXPECT_EQ(shape1->getPhysicalMaterial(), PhysxDefault::GetDefaultMaterial());
 
-  PhysxDefault::Get().setDefaultMaterial(0, 0, 0);
+  PhysxDefault::SetDefaultMaterial(0, 0, 0);
   auto shape2 = std::make_shared<PhysxCollisionShapeBox>(Vec3{1.5, 2.5, 3.5});
-  EXPECT_EQ(shape2->getPhysicalMaterial(), PhysxDefault::Get().getDefaultMaterial());
+  EXPECT_EQ(shape2->getPhysicalMaterial(), PhysxDefault::GetDefaultMaterial());
   EXPECT_NE(shape1->getPhysicalMaterial(), shape2->getPhysicalMaterial());
 }
 
@@ -51,8 +51,8 @@ TEST(PhysxCollisionShapeCapsule, Create) {
 
 TEST(PhysxCollisionShapeConvexMesh, Create) {
   {
-    auto meshfile = std::filesystem::path(__FILE__).parent_path().parent_path() /
-                    "assets" / "cube.obj";
+    auto meshfile =
+        std::filesystem::path(__FILE__).parent_path().parent_path() / "assets" / "cube.obj";
     auto mat = std::make_shared<PhysxMaterial>(0.2, 0.25, 0.1);
     auto shape = std::make_shared<PhysxCollisionShapeConvexMesh>(meshfile.string(),
                                                                  Vec3(0.5, 0.4, 0.3), mat);
@@ -64,8 +64,8 @@ TEST(PhysxCollisionShapeConvexMesh, Create) {
   }
 
   {
-    auto meshfile = std::filesystem::path(__FILE__).parent_path().parent_path() /
-                    "assets" / "doublecube.obj";
+    auto meshfile =
+        std::filesystem::path(__FILE__).parent_path().parent_path() / "assets" / "doublecube.obj";
     auto mat = std::make_shared<PhysxMaterial>(0.2, 0.25, 0.1);
     auto shapes =
         PhysxCollisionShapeConvexMesh::LoadMultiple(meshfile.string(), Vec3(0.5, 0.4, 0.3), mat);
@@ -81,8 +81,8 @@ TEST(PhysxCollisionShapeConvexMesh, Create) {
 }
 
 TEST(PhysxCollisionShapeTriangleMesh, Create) {
-  auto meshfile = std::filesystem::path(__FILE__).parent_path().parent_path() /
-                  "assets" / "cube.obj";
+  auto meshfile =
+      std::filesystem::path(__FILE__).parent_path().parent_path() / "assets" / "cube.obj";
 
   auto mat = std::make_shared<PhysxMaterial>(0.2, 0.25, 0.1);
   auto shape = std::make_shared<PhysxCollisionShapeTriangleMesh>(meshfile.string(),
@@ -151,8 +151,8 @@ TEST(PhysxCollisionShapeCapsule, Serialize) {
 }
 
 TEST(PhysxCollisionShapeConvexMesh, Serialize) {
-  auto meshfile = std::filesystem::path(__FILE__).parent_path().parent_path() /
-                  "assets" / "cube.obj";
+  auto meshfile =
+      std::filesystem::path(__FILE__).parent_path().parent_path() / "assets" / "cube.obj";
   auto mat = std::make_shared<PhysxMaterial>(0.2, 0.25, 0.1);
   auto shape =
       std::make_shared<PhysxCollisionShapeConvexMesh>(meshfile.string(), Vec3(0.5, 0.4, 0.3), mat);
@@ -173,8 +173,8 @@ TEST(PhysxCollisionShapeConvexMesh, Serialize) {
 }
 
 TEST(PhysxCollisionShapeTriangleMesh, Serialize) {
-  auto meshfile = std::filesystem::path(__FILE__).parent_path().parent_path() /
-                  "assets" / "cube.obj";
+  auto meshfile =
+      std::filesystem::path(__FILE__).parent_path().parent_path() / "assets" / "cube.obj";
 
   auto mat = std::make_shared<PhysxMaterial>(0.2, 0.25, 0.1);
   auto shape = std::make_shared<PhysxCollisionShapeTriangleMesh>(meshfile.string(),
@@ -196,8 +196,8 @@ TEST(PhysxCollisionShapeTriangleMesh, Serialize) {
 }
 
 TEST(PhysxCollisionShapeTriangleMesh, SerializePolymorphism) {
-  auto meshfile = std::filesystem::path(__FILE__).parent_path().parent_path() /
-                  "assets" / "cube.obj";
+  auto meshfile =
+      std::filesystem::path(__FILE__).parent_path().parent_path() / "assets" / "cube.obj";
   auto mat = std::make_shared<PhysxMaterial>(0.2, 0.25, 0.1);
   auto shape = std::make_shared<PhysxCollisionShapeSphere>(0.5, mat);
 

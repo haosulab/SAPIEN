@@ -8,18 +8,12 @@ class PhysxMaterial;
 
 class PhysxDefault {
 public:
-  static PhysxDefault &Get();
-  static std::shared_ptr<PhysxMaterial> getDefaultMaterial();
-  static void setDefaultMaterial(float staticFriction, float dynamicFriction, float restitution);
+  static std::shared_ptr<PhysxMaterial> GetDefaultMaterial();
+  static void SetDefaultMaterial(float staticFriction, float dynamicFriction, float restitution);
 
-private:
-  std::shared_ptr<PhysxMaterial> _getDefaultMaterial();
-  void _setDefaultMaterial(float staticFriction, float dynamicFriction, float restitution);
-
-  float mStaticFriction{0.3};
-  float mDynamicFriction{0.3};
-  float mRestitution{0.1};
-  std::weak_ptr<PhysxMaterial> mDefaultMaterial;
+  // enable GPU simulation, may not be disabled
+  static void EnableGPU();
+  static bool GetGPUEnabled();
 };
 
 } // namespace physx

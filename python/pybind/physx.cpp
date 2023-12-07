@@ -1,4 +1,5 @@
 #include "sapien/physx/physx.h"
+#include "./array.hpp"
 #include "generator.hpp"
 #include "sapien_type_caster.h"
 #include <pybind11/eigen.h>
@@ -226,7 +227,10 @@ Generator<int> init_physx(py::module &sapien) {
   auto PyPhysxContact = py::class_<Contact>(m, "PhysxContact");
 
   auto PyPhysxRayHit = py::class_<PhysxHitInfo>(m, "PhysxRayHit");
+
   auto PyPhysxSystem = py::class_<PhysxSystem, System>(m, "PhysxSystem");
+  auto PyPhysxSystemCpu = py::class_<PhysxSystemCpu, PhysxSystem>(m, "PhysxCpuSystem");
+  auto PyPhysxSystemGpu = py::class_<PhysxSystemGpu, PhysxSystem>(m, "PhysxGpuSystem");
 
   auto PyPhysxBaseComponent = py::class_<PhysxBaseComponent, Component>(m, "PhysxBaseComponent");
   auto PyPhysxRigidBaseComponent =
@@ -309,31 +313,120 @@ Generator<int> init_physx(py::module &sapien) {
         return s.str();
       });
 
-  PyPhysxSystem.def(py::init<PhysxSceneConfig const &>(), py::arg("config") = PhysxSceneConfig())
+  PyPhysxSystem
+      .def(py::init([](PhysxSceneConfig const &config) -> std::shared_ptr<PhysxSystem> {
+             if (PhysxDefault::GetGPUEnabled()) {
+               return std::make_shared<PhysxSystemGpu>(config);
+             }
+             return std::make_shared<PhysxSystemCpu>(config);
+           }),
+           py::arg("config") = PhysxSceneConfig())
       .def_property_readonly("config", &PhysxSystem::getSceneConfig)
       .def("get_config", &PhysxSystem::getSceneConfig)
-
       .def_property("timestep", &PhysxSystem::getTimestep, &PhysxSystem::setTimestep)
       .def("get_timestep", &PhysxSystem::getTimestep)
       .def("set_timestep", &PhysxSystem::setTimestep)
 
       .def_property_readonly("rigid_dynamic_components", &PhysxSystem::getRigidDynamicComponents)
       .def("get_rigid_dynamic_components", &PhysxSystem::getRigidDynamicComponents)
-
       .def_property_readonly("rigid_static_components", &PhysxSystem::getRigidStaticComponents)
       .def("get_rigid_static_components", &PhysxSystem::getRigidStaticComponents)
-
       .def_property_readonly("articulation_link_components",
                              &PhysxSystem::getArticulationLinkComponents)
-      .def("get_articulation_link_components", &PhysxSystem::getArticulationLinkComponents)
+      .def("get_articulation_link_components", &PhysxSystem::getArticulationLinkComponents);
 
-      .def("get_contacts", &PhysxSystem::getContacts, py::return_value_policy::reference)
-      .def("raycast", &PhysxSystem::raycast, py::arg("position"), py::arg("direction"),
+  PyPhysxSystemCpu
+      .def(py::init<PhysxSceneConfig const &>(), py::arg("config") = PhysxSceneConfig())
+      .def("get_contacts", &PhysxSystemCpu::getContacts, py::return_value_policy::reference)
+      .def("raycast", &PhysxSystemCpu::raycast, py::arg("position"), py::arg("direction"),
            py::arg("distance"),
            R"doc(Casts a ray and returns the closest hit. Returns None if no hit)doc")
-      .def("pack", [](PhysxSystem &s) { return py::bytes(s.packState()); })
+      .def("pack", [](PhysxSystemCpu &s) { return py::bytes(s.packState()); })
       .def(
-          "unpack", [](PhysxSystem &s, py::bytes data) { s.unpackState(data); }, py::arg("data"));
+          "unpack", [](PhysxSystemCpu &s, py::bytes data) { s.unpackState(data); },
+          py::arg("data"));
+
+  PyPhysxSystemGpu
+      .def(py::init<PhysxSceneConfig const &>(), py::arg("config") = PhysxSceneConfig())
+      .def("get_scene_offset", &PhysxSystemGpu::getSceneOffset, py::arg("scene"))
+      .def("set_scene_offset", &PhysxSystemGpu::setSceneOffset, py::arg("scene"),
+           py::arg("offset"), R"doc(
+In GPU mode, all SAPIEN scenes share the same PhysX scene. One should call this
+function to apply an offset to avoid bodies in different scenes interfere with
+each other. This function must be called before any PhysX body is added to scene.
+
+Example: After calling `set_scene_offset([2, 1, 0])`, an SAPIEN object with
+position `[1, 1, 1]` will be at position `[1, 1, 1] + [2, 1, 0] = [3, 2, 1]` in
+PhysX scene.
+)doc")
+
+      .def("gpu_init", &PhysxSystemGpu::gpuInit, R"doc(
+   "Warm start" the GPU simulation by stepping the system once. This function
+   must be called each time when actors are added or removed from the scene. One
+   may call `gpu_apply_*` functions to initialize the system after calling this
+   function.
+)doc")
+      .def("gpu_set_cuda_stream", &PhysxSystemGpu::gpuSetCudaStream, py::arg("stream"), R"doc(
+PhysX GPU APIs will be synchronized with the provided stream and SAPIEN's CUDA
+kernels will be launched to the provided stream.
+
+Args:
+    stream: integer representation of a cuda stream pointer
+)doc")
+
+      .def("gpu_create_body_index_buffer", &PhysxSystemGpu::gpuCreateBodyIndices,
+           py::arg("bodies"))
+      .def("gpu_create_body_data_buffer", &PhysxSystemGpu::gpuCreateBodyDataBuffer,
+           py::arg("count"))
+      .def("gpu_create_body_offset_buffer", &PhysxSystemGpu::gpuCreateBodyOffsets,
+           py::arg("bodies"))
+
+      .def("_gpu_query_body_data_raw", &PhysxSystemGpu::gpuQueryBodyDataRaw,
+           py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("gpu_query_body_data", &PhysxSystemGpu::gpuQueryBodyData, py::arg("data_buffer"),
+           py::arg("index_buffer"), py::arg("offset_buffer"))
+      .def("gpu_apply_body_data", &PhysxSystemGpu::gpuApplyBodyData, py::arg("data_buffer"),
+           py::arg("index_buffer"), py::arg("offset_buffer"))
+      .def("gpu_apply_body_force", &PhysxSystemGpu::gpuApplyBodyForce, py::arg("force_buffer"),
+           py::arg("index_buffer"))
+      .def("gpu_apply_body_torque", &PhysxSystemGpu::gpuApplyBodyTorque, py::arg("torque_buffer"),
+           py::arg("index_buffer"))
+
+      .def("gpu_create_articulation_index_buffer", &PhysxSystemGpu::gpuCreateArticulationIndices,
+           py::arg("articulations"))
+      .def("gpu_create_articulation_q_buffer", &PhysxSystemGpu::gpuCreateArticulationQBuffer)
+      .def("gpu_create_articulation_root_pose_buffer",
+           &PhysxSystemGpu::gpuCreateArticulationRootPoseBuffer)
+      .def("gpu_create_articulation_offset_buffer", &PhysxSystemGpu::gpuCreateArticulationOffsets)
+
+      .def("gpu_query_articulation_qpos", &PhysxSystemGpu::gpuQueryArticulationQpos,
+           py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("gpu_query_articulation_qvel", &PhysxSystemGpu::gpuQueryArticulationQvel,
+           py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("gpu_query_articulation_drive_target", &PhysxSystemGpu::gpuQueryArticulationDrivePos,
+           py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("gpu_query_articulation_drive_velocity_target",
+           &PhysxSystemGpu::gpuQueryArticulationDriveVel, py::arg("data_buffer"),
+           py::arg("index_buffer"))
+      .def("_gpu_query_articulation_root_pose_raw",
+           &PhysxSystemGpu::gpuQueryArticulationRootPoseRaw, py::arg("data_buffer"),
+           py::arg("index_buffer"))
+      .def("gpu_query_articulation_root_pose", &PhysxSystemGpu::gpuQueryArticulationRootPose,
+           py::arg("data_buffer"), py::arg("index_buffer"), py::arg("offset_buffer"))
+
+      .def("gpu_apply_articulation_qpos", &PhysxSystemGpu::gpuApplyArticulationQpos,
+           py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("gpu_apply_articulation_qvel", &PhysxSystemGpu::gpuApplyArticulationQvel,
+           py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("gpu_apply_articulation_drive_target", &PhysxSystemGpu::gpuApplyArticulationDrivePos,
+           py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("gpu_apply_articulation_drive_velocity_target",
+           &PhysxSystemGpu::gpuApplyArticulationDriveVel, py::arg("data_buffer"),
+           py::arg("index_buffer"))
+      .def("gpu_apply_articulation_root_pose", &PhysxSystemGpu::gpuApplyArticulationRootPose,
+           py::arg("data_buffer"), py::arg("index_buffer"), py::arg("offset_buffer"))
+
+      .def("gpu_update_articulation_kinematics", &PhysxSystemGpu::gpuUpdateArticulationKinematics);
 
   PyPhysxMaterial
       .def(py::init<float, float, float>(), py::arg("static_friction"),
@@ -856,9 +949,11 @@ Example:
 
   ////////// global //////////
 
-  m.def("set_default_material", &PhysxDefault::setDefaultMaterial, py::arg("static_friction"),
+  m.def("set_default_material", &PhysxDefault::SetDefaultMaterial, py::arg("static_friction"),
         py::arg("dynamic_friction"), py::arg("restitution"))
-      .def("get_default_material", &PhysxDefault::getDefaultMaterial);
+      .def("get_default_material", &PhysxDefault::GetDefaultMaterial)
+      .def("_enable_gpu", &PhysxDefault::EnableGPU)
+      .def("is_gpu_enabled", &PhysxDefault::GetGPUEnabled);
 
   ////////// end global //////////
 
