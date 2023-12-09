@@ -7,6 +7,7 @@ import pkg_resources
 import sapien
 from sapien import internal_renderer as R
 from transforms3d.quaternions import mat2quat
+from transforms3d.euler import quat2euler
 
 from .camera_control import ArcRotateCameraController, FPSCameraController
 from .plugin import Plugin
@@ -134,7 +135,7 @@ class ControlWindow(Plugin):
     def _sync_fps_camera_controller(self):
         cam_pose = self.window.get_camera_pose()
         self.fps_camera_controller.setXYZ(*cam_pose.p)
-        r, p, y = cam_pose.rpy
+        r, p, y = quat2euler(cam_pose.q.astype(np.float64))
         self.fps_camera_controller.setRPY(r, -p, -y)
 
     def focus_entity(self, entity: sapien.Entity):
@@ -147,7 +148,7 @@ class ControlWindow(Plugin):
         if self.focused_entity is not None:
             # initialize arc camera
             self.focus_camera(None)
-            _, pitch, yaw = cam_pose.rpy
+            _, pitch, yaw = quat2euler(cam_pose.q.astype(np.float64))
             self.arc_camera_controller.set_yaw_pitch(yaw, pitch)
             self.arc_camera_controller.set_center(entity.pose.p)
             self.arc_camera_controller.set_zoom(
@@ -157,7 +158,7 @@ class ControlWindow(Plugin):
         else:
             # switch to fps camera
             self.fps_camera_controller.setXYZ(*cam_pose.p)
-            r, p, y = cam_pose.rpy
+            r, p, y = quat2euler(cam_pose.q.astype(np.float64))
             self.fps_camera_controller.setRPY(r, -p, -y)
             self.viewer.set_camera_pose(self.fps_camera_controller.pose)
 
@@ -349,6 +350,7 @@ class ControlWindow(Plugin):
         self._handle_input_wasd()
         self._handle_input_mouse()
         self._handle_input_f()
+        self._handle_input_esc()
 
         if self.show_camera_linesets:
             self._update_camera_linesets()
@@ -419,6 +421,10 @@ class ControlWindow(Plugin):
     def _handle_input_f(self):
         if self.window.key_down("f"):
             self.focus_entity(self.selected_entity)
+
+    def _handle_input_esc(self):
+        if self.window.key_down("esc"):
+            self.viewer.select_entity(None)
 
     def _handle_input_mouse(self):
         """

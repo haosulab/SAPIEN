@@ -130,7 +130,7 @@ class Viewer:
         self.scene = None
         self.system = None
         self.window = None
-        self.plugins = None
+        self.plugins = []
         self.renderer_context = None
 
     def set_camera_pose(self, pose):
