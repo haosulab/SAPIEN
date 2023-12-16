@@ -1,5 +1,6 @@
 from ..pysapien import Scene as _Scene
 from .. import pysapien as sapien
+from ..pysapien.render import RenderCameraComponent
 from ..pysapien.physx import PhysxSceneConfig as SceneConfig
 from typing import Union, Optional, TypeVar
 
@@ -82,9 +83,9 @@ class Scene(_Scene):
     # TODO: find actor by id
     def add_camera(
         self, name, width: int, height: int, fovy: float, near: float, far: float
-    ) -> sapien.render.RenderCameraComponent:
+    ) -> RenderCameraComponent:
         camera_mount = sapien.Entity()
-        camera = sapien.render.RenderCameraComponent(width, height)
+        camera = RenderCameraComponent(width, height)
         camera.set_fovy(fovy, compute_x=True)
         camera.near = near
         camera.far = far
@@ -97,8 +98,8 @@ class Scene(_Scene):
 
     def add_mounted_camera(
         self, name, mount, pose, width, height, fovy, near, far
-    ) -> sapien.render.RenderCameraComponent:
-        camera = sapien.render.RenderCameraComponent(width, height)
+    ) -> RenderCameraComponent:
+        camera = RenderCameraComponent(width, height)
         camera.set_fovy(fovy, compute_x=True)
         camera.near = near
         camera.far = far
