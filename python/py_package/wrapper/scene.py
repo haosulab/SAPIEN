@@ -26,7 +26,7 @@ class Scene(_Scene):
                 if physx_system is None:
                     Scene._GpuSystem = physx_system = sapien.physx.PhysxGpuSystem()
             else:
-                physx_system = sapien.physx.PhysxSystem()
+                physx_system = sapien.physx.PhysxCpuSystem()
             super().__init__([physx_system, sapien.render.RenderSystem()])
         else:
             super().__init__(systems)

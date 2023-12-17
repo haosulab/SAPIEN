@@ -1,4 +1,5 @@
-from ..pysapien.physx import PhysxSystem, PhysxMaterial
+from ..pysapien.physx import PhysxSystem, PhysxGpuSystem, PhysxCpuSystem, PhysxMaterial
+from .. import pysapien as sapien
 from ..pysapien.render import RenderSystem
 import warnings
 from .scene import Scene
@@ -25,6 +26,6 @@ class Engine:
             if physx_system is None:
                 Scene._GpuSystem = physx_system = sapien.physx.PhysxGpuSystem(config)
             else:
-                physx_system = sapien.physx.PhysxSystem(config)
+                physx_system = sapien.physx.PhysxCpuSystem(config)
 
         return Scene([physx_system, RenderSystem()])
