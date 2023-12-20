@@ -94,6 +94,9 @@ endif ()
 
 file(GLOB_RECURSE SAPIEN_SRC "src/*.h" "src/*.cpp" "src/*.cc")
 add_library(sapien SHARED ${SAPIEN_SRC} ${SAPIEN_CUDA_SRC})
+if (${SAPIEN_CUDA})
+    set_target_properties(sapien PROPERTIES CUDA_ARCHITECTURES "60;61;70;75;80;86")
+endif ()
 
 target_link_libraries(sapien PUBLIC eigen svulkan2 cereal)
 target_link_libraries(sapien PRIVATE physx5 spdlog::spdlog easy_profiler # grpc++
