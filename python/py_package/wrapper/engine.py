@@ -25,7 +25,7 @@ class Engine:
             physx_system = Scene._GpuSystem
             if physx_system is None:
                 Scene._GpuSystem = physx_system = sapien.physx.PhysxGpuSystem(config)
-            else:
-                physx_system = sapien.physx.PhysxCpuSystem(config)
+        else:
+            physx_system = sapien.physx.PhysxCpuSystem(config)
 
         return Scene([physx_system, RenderSystem()])
