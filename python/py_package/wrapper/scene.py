@@ -116,7 +116,7 @@ class Scene(_Scene):
         return self.render_system.cameras
 
     def get_mounted_cameras(self):
-        return self.get_camreas()
+        return self.get_cameras()
 
     def step(self):
         self.physx_system.step()
