@@ -465,7 +465,7 @@ CudaArray PhysxSystemGpu::gpuCreateArticulationRootVelocityBuffer() const {
 }
 
 void PhysxSystemGpu::gpuQueryBodyDataRaw(CudaArrayHandle const &data,
-                                         CudaArrayHandle const &index) const {
+                                         CudaArrayHandle const &index) {
   checkGpuInitialized();
 
   data.checkCongiguous();
@@ -482,14 +482,9 @@ void PhysxSystemGpu::gpuQueryBodyDataRaw(CudaArrayHandle const &data,
 }
 
 void PhysxSystemGpu::gpuQueryBodyData(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                                      CudaArrayHandle const &offset) const {
-  gpuQueryBodyDataRaw(data, index);
-  body_data_physx_to_sapien_subtract_offset(data.ptr, index.ptr, offset.ptr, index.shape.at(0),
-                                            mCudaStream);
-}
+                                      CudaArrayHandle const &offset) {
+  checkGpuInitialized();
 
-void PhysxSystemGpu::gpuApplyBodyData(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                                      CudaArrayHandle const &offset) const {
   data.checkCongiguous();
   data.checkShape({-1, sizeof(PxGpuBodyData) / sizeof(float)});
   data.checkStride({sizeof(PxGpuBodyData), sizeof(float)});
@@ -498,17 +493,37 @@ void PhysxSystemGpu::gpuApplyBodyData(CudaArrayHandle const &data, CudaArrayHand
   index.checkShape({-1, sizeof(PxGpuActorPair) / sizeof(float)});
   index.checkStride({sizeof(PxGpuActorPair), 4});
 
-  body_data_sapien_to_physx_add_offset(data.ptr, index.ptr, offset.ptr, index.shape.at(0),
-                                       mCudaStream);
+  ensureScratchSize(data.bytes());
+  mPxScene->copyBodyData((PxGpuBodyData *)mCudaScratch.ptr, (PxGpuActorPair *)index.ptr,
+                         index.shape.at(0), mCudaEventWait.event);
+  mCudaEventWait.wait(mCudaStream);
+  body_data_physx_to_sapien_subtract_offset(data.ptr, mCudaScratch.ptr, index.ptr, offset.ptr,
+                                            index.shape.at(0), mCudaStream);
+}
+
+void PhysxSystemGpu::gpuApplyBodyData(CudaArrayHandle const &data, CudaArrayHandle const &index,
+                                      CudaArrayHandle const &offset) {
+  data.checkCongiguous();
+  data.checkShape({-1, sizeof(PxGpuBodyData) / sizeof(float)});
+  data.checkStride({sizeof(PxGpuBodyData), sizeof(float)});
+
+  index.checkCongiguous();
+  index.checkShape({-1, sizeof(PxGpuActorPair) / sizeof(float)});
+  index.checkStride({sizeof(PxGpuActorPair), 4});
+
+  ensureScratchSize(data.bytes());
+
+  body_data_sapien_to_physx_add_offset(mCudaScratch.ptr, data.ptr, index.ptr, offset.ptr,
+                                       index.shape.at(0), mCudaStream);
 
   mCudaEventRecord.record(mCudaStream);
-  mPxScene->applyActorData(data.ptr, (PxGpuActorPair *)index.ptr, PxActorCacheFlag::eACTOR_DATA,
-                           index.shape.at(0), mCudaEventRecord.event, mCudaEventWait.event);
+  mPxScene->applyActorData(mCudaScratch.ptr, (PxGpuActorPair *)index.ptr,
+                           PxActorCacheFlag::eACTOR_DATA, index.shape.at(0),
+                           mCudaEventRecord.event, mCudaEventWait.event);
   mCudaEventWait.wait(mCudaStream);
 }
 
-void PhysxSystemGpu::gpuApplyBodyForce(CudaArrayHandle const &data,
-                                       CudaArrayHandle const &index) const {
+void PhysxSystemGpu::gpuApplyBodyForce(CudaArrayHandle const &data, CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({-1, 4});
   data.checkStride({4 * sizeof(float), sizeof(float)});
@@ -524,7 +539,7 @@ void PhysxSystemGpu::gpuApplyBodyForce(CudaArrayHandle const &data,
 }
 
 void PhysxSystemGpu::gpuApplyBodyTorque(CudaArrayHandle const &data,
-                                        CudaArrayHandle const &index) const {
+                                        CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({-1, 4});
   data.checkStride({4 * sizeof(float), sizeof(float)});
@@ -540,7 +555,7 @@ void PhysxSystemGpu::gpuApplyBodyTorque(CudaArrayHandle const &data,
 }
 
 void PhysxSystemGpu::gpuQueryArticulationQpos(CudaArrayHandle const &data,
-                                              CudaArrayHandle const &index) const {
+                                              CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
 
@@ -554,7 +569,7 @@ void PhysxSystemGpu::gpuQueryArticulationQpos(CudaArrayHandle const &data,
 }
 
 void PhysxSystemGpu::gpuQueryArticulationQvel(CudaArrayHandle const &data,
-                                              CudaArrayHandle const &index) const {
+                                              CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
 
@@ -567,8 +582,23 @@ void PhysxSystemGpu::gpuQueryArticulationQvel(CudaArrayHandle const &data,
   mCudaEventWait.wait(mCudaStream);
 }
 
+void PhysxSystemGpu::gpuQueryArticulationQacc(CudaArrayHandle const &data,
+                                              CudaArrayHandle const &index) {
+  data.checkCongiguous();
+  data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
+
+  index.checkCongiguous();
+  index.checkShape({-1});
+  index.checkStride({sizeof(int)});
+
+  mPxScene->copyArticulationData(data.ptr, index.ptr,
+                                 PxArticulationGpuDataType::eJOINT_ACCELERATION, index.shape.at(0),
+                                 mCudaEventWait.event);
+  mCudaEventWait.wait(mCudaStream);
+}
+
 void PhysxSystemGpu::gpuQueryArticulationDrivePos(CudaArrayHandle const &data,
-                                                  CudaArrayHandle const &index) const {
+                                                  CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
 
@@ -583,7 +613,7 @@ void PhysxSystemGpu::gpuQueryArticulationDrivePos(CudaArrayHandle const &data,
 }
 
 void PhysxSystemGpu::gpuQueryArticulationDriveVel(CudaArrayHandle const &data,
-                                                  CudaArrayHandle const &index) const {
+                                                  CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
 
@@ -598,7 +628,7 @@ void PhysxSystemGpu::gpuQueryArticulationDriveVel(CudaArrayHandle const &data,
 }
 
 void PhysxSystemGpu::gpuApplyArticulationQpos(CudaArrayHandle const &data,
-                                              CudaArrayHandle const &index) const {
+                                              CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
 
@@ -613,7 +643,7 @@ void PhysxSystemGpu::gpuApplyArticulationQpos(CudaArrayHandle const &data,
 }
 
 void PhysxSystemGpu::gpuApplyArticulationQvel(CudaArrayHandle const &data,
-                                              CudaArrayHandle const &index) const {
+                                              CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
 
@@ -627,8 +657,23 @@ void PhysxSystemGpu::gpuApplyArticulationQvel(CudaArrayHandle const &data,
   mCudaEventWait.wait(mCudaStream);
 }
 
+void PhysxSystemGpu::gpuApplyArticulationQf(CudaArrayHandle const &data,
+                                            CudaArrayHandle const &index) {
+  data.checkCongiguous();
+  data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
+
+  index.checkCongiguous();
+  index.checkShape({-1});
+  index.checkStride({sizeof(int)});
+
+  mCudaEventRecord.record(mCudaStream);
+  mPxScene->applyArticulationData(data.ptr, index.ptr, PxArticulationGpuDataType::eJOINT_FORCE,
+                                  index.shape.at(0), mCudaEventRecord.event, mCudaEventWait.event);
+  mCudaEventWait.wait(mCudaStream);
+}
+
 void PhysxSystemGpu::gpuApplyArticulationDrivePos(CudaArrayHandle const &data,
-                                                  CudaArrayHandle const &index) const {
+                                                  CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
 
@@ -644,7 +689,7 @@ void PhysxSystemGpu::gpuApplyArticulationDrivePos(CudaArrayHandle const &data,
 }
 
 void PhysxSystemGpu::gpuApplyArticulationDriveVel(CudaArrayHandle const &data,
-                                                  CudaArrayHandle const &index) const {
+                                                  CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, mGpuArticulationMaxDof});
 
@@ -660,7 +705,7 @@ void PhysxSystemGpu::gpuApplyArticulationDriveVel(CudaArrayHandle const &data,
 }
 
 void PhysxSystemGpu::gpuQueryArticulationRootPoseRaw(CudaArrayHandle const &data,
-                                                     CudaArrayHandle const &index) const {
+                                                     CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, sizeof(PxTransform) / sizeof(float)});
 
@@ -675,15 +720,7 @@ void PhysxSystemGpu::gpuQueryArticulationRootPoseRaw(CudaArrayHandle const &data
 
 void PhysxSystemGpu::gpuQueryArticulationRootPose(CudaArrayHandle const &data,
                                                   CudaArrayHandle const &index,
-                                                  CudaArrayHandle const &offset) const {
-  gpuQueryArticulationRootPoseRaw(data, index);
-  transform_physx_to_sapien_subtract_offset(data.ptr, index.ptr, offset.ptr, index.shape.at(0),
-                                            mCudaStream);
-}
-
-void PhysxSystemGpu::gpuApplyArticulationRootPose(CudaArrayHandle const &data,
-                                                  CudaArrayHandle const &index,
-                                                  CudaArrayHandle const &offset) const {
+                                                  CudaArrayHandle const &offset) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, sizeof(PxTransform) / sizeof(float)});
 
@@ -691,16 +728,40 @@ void PhysxSystemGpu::gpuApplyArticulationRootPose(CudaArrayHandle const &data,
   index.checkShape({-1});
   index.checkStride({sizeof(int)});
 
-  transform_sapien_to_physx_add_offset(data.ptr, index.ptr, offset.ptr, index.shape.at(0),
-                                       mCudaStream);
+  ensureScratchSize(data.bytes());
+
+  mPxScene->copyArticulationData(mCudaScratch.ptr, index.ptr,
+                                 PxArticulationGpuDataType::eROOT_TRANSFORM, index.shape.at(0),
+                                 mCudaEventWait.event);
+  mCudaEventWait.wait(mCudaStream);
+
+  transform_physx_to_sapien_subtract_offset(data.ptr, mCudaScratch.ptr, index.ptr, offset.ptr,
+                                            index.shape.at(0), mCudaStream);
+}
+
+void PhysxSystemGpu::gpuApplyArticulationRootPose(CudaArrayHandle const &data,
+                                                  CudaArrayHandle const &index,
+                                                  CudaArrayHandle const &offset) {
+  data.checkCongiguous();
+  data.checkShape({mGpuArticulationCount, sizeof(PxTransform) / sizeof(float)});
+
+  index.checkCongiguous();
+  index.checkShape({-1});
+  index.checkStride({sizeof(int)});
+
+  ensureScratchSize(data.bytes());
+
+  transform_sapien_to_physx_add_offset(mCudaScratch.ptr, data.ptr, index.ptr, offset.ptr,
+                                       index.shape.at(0), mCudaStream);
   mCudaEventRecord.record(mCudaStream);
-  mPxScene->applyArticulationData(data.ptr, index.ptr, PxArticulationGpuDataType::eROOT_TRANSFORM,
-                                  index.shape.at(0), mCudaEventRecord.event, mCudaEventWait.event);
+  mPxScene->applyArticulationData(mCudaScratch.ptr, index.ptr,
+                                  PxArticulationGpuDataType::eROOT_TRANSFORM, index.shape.at(0),
+                                  mCudaEventRecord.event, mCudaEventWait.event);
   mCudaEventWait.wait(mCudaStream);
 }
 
 void PhysxSystemGpu::gpuQueryArticulationRootVelocity(CudaArrayHandle const &data,
-                                                      CudaArrayHandle const &index) const {
+                                                      CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, 8});
   data.checkStride({8 * sizeof(float), sizeof(float)});
@@ -715,7 +776,7 @@ void PhysxSystemGpu::gpuQueryArticulationRootVelocity(CudaArrayHandle const &dat
 }
 
 void PhysxSystemGpu::gpuApplyArticulationRootVelocity(CudaArrayHandle const &data,
-                                                      CudaArrayHandle const &index) const {
+                                                      CudaArrayHandle const &index) {
   data.checkCongiguous();
   data.checkShape({mGpuArticulationCount, 8});
   data.checkStride({8 * sizeof(float), sizeof(float)});
@@ -759,6 +820,14 @@ Vec3 PhysxSystemGpu::getSceneOffset(std::shared_ptr<Scene> scene) const {
     return mSceneOffset.at(scene);
   }
   return Vec3(0.0f);
+}
+
+void PhysxSystemGpu::ensureScratchSize(int size) {
+  if (!mCudaScratch.ptr || mCudaScratch.shape.at(0) < size) {
+    logger::info("resizing physx scratch buffer to {}", size);
+    cudaStreamSynchronize(mCudaStream);
+    mCudaScratch = CudaArray({size}, "u1");
+  }
 }
 
 } // namespace physx

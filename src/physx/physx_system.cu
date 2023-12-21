@@ -44,7 +44,8 @@ static_assert(sizeof(SapienTransform) == 28);
 
 } // namespace
 
-__global__ void transform_sapien_to_physx_add_offset(SapienTransform *__restrict__ data,
+__global__ void transform_sapien_to_physx_add_offset(PxTransform *__restrict__ output,
+                                                     SapienTransform *__restrict__ data,
                                                      int const *__restrict__ index,
                                                      float4 const *__restrict__ offset,
                                                      int count) {
@@ -55,10 +56,7 @@ __global__ void transform_sapien_to_physx_add_offset(SapienTransform *__restrict
 
   int i = index[g];
 
-  union {
-    PxTransform pd{};
-    SapienTransform sd;
-  };
+  PxTransform pd{};
 
   pd.q[0] = data[i].pq[4];
   pd.q[1] = data[i].pq[5];
@@ -69,10 +67,11 @@ __global__ void transform_sapien_to_physx_add_offset(SapienTransform *__restrict
   pd.p[1] = data[i].pq[1] + offset[i].y;
   pd.p[2] = data[i].pq[2] + offset[i].z;
 
-  data[i] = sd;
+  output[i] = pd;
 }
 
-__global__ void transform_physx_to_sapien_subtract_offset(PxTransform *__restrict__ data,
+__global__ void transform_physx_to_sapien_subtract_offset(SapienTransform *__restrict__ output,
+                                                          PxTransform *__restrict__ data,
                                                           int const *__restrict__ index,
                                                           float4 const *__restrict__ offset,
                                                           int count) {
@@ -82,10 +81,7 @@ __global__ void transform_physx_to_sapien_subtract_offset(PxTransform *__restric
   }
   int i = index[g];
 
-  union {
-    SapienBodyData sd{};
-    PxTransform pd;
-  };
+  SapienTransform sd{};
 
   sd.pq[0] = data[i].p[0] - offset[i].x;
   sd.pq[1] = data[i].p[1] - offset[i].y;
@@ -96,10 +92,11 @@ __global__ void transform_physx_to_sapien_subtract_offset(PxTransform *__restric
   sd.pq[5] = data[i].q[1];
   sd.pq[6] = data[i].q[2];
 
-  data[i] = pd;
+  output[i] = sd;
 }
 
-__global__ void body_data_sapien_to_physx_add_offset(SapienBodyData *__restrict__ data,
+__global__ void body_data_sapien_to_physx_add_offset(PxBodyData *__restrict__ output,
+                                                     SapienBodyData *__restrict__ data,
                                                      int4 const *__restrict__ index,
                                                      float4 const *__restrict__ offset,
                                                      int count) {
@@ -109,10 +106,7 @@ __global__ void body_data_sapien_to_physx_add_offset(SapienBodyData *__restrict_
   }
   int i = index[g].x;
 
-  union {
-    PxBodyData pd{};
-    SapienBodyData sd;
-  };
+  PxBodyData pd{};
 
   pd.q = make_float4(data[i].pq[4], data[i].pq[5], data[i].pq[6], data[i].pq[3]);
   pd.p = make_float3(data[i].pq[0] + offset[i].x, data[i].pq[1] + offset[i].y,
@@ -120,10 +114,11 @@ __global__ void body_data_sapien_to_physx_add_offset(SapienBodyData *__restrict_
   pd.v = data[i].v;
   pd.w = data[i].w;
 
-  data[i] = sd;
+  output[i] = pd;
 }
 
-__global__ void body_data_physx_to_sapien_subtract_offset(PxBodyData *__restrict__ data,
+__global__ void body_data_physx_to_sapien_subtract_offset(SapienBodyData *__restrict__ output,
+                                                          PxBodyData *__restrict__ data,
                                                           int4 const *__restrict__ index,
                                                           float4 const *__restrict__ offset,
                                                           int count) {
@@ -133,10 +128,7 @@ __global__ void body_data_physx_to_sapien_subtract_offset(PxBodyData *__restrict
   }
   int i = index[g].x;
 
-  union {
-    SapienBodyData sd{};
-    PxBodyData pd;
-  };
+  SapienBodyData sd{};
 
   sd.pq[0] = data[i].p.x - offset[i].x;
   sd.pq[1] = data[i].p.y - offset[i].y;
@@ -150,39 +142,39 @@ __global__ void body_data_physx_to_sapien_subtract_offset(PxBodyData *__restrict
   sd.v = data[i].v;
   sd.w = data[i].w;
 
-  data[i] = pd;
+  output[i] = sd;
 }
 
 namespace sapien {
 
 constexpr int BLOCK_SIZE = 128;
 
-void body_data_physx_to_sapien_subtract_offset(void *data, void *index, void *offset, int count,
-                                               void *stream) {
+void body_data_physx_to_sapien_subtract_offset(void *output, void *data, void *index, void *offset,
+                                               int count, void *stream) {
   body_data_physx_to_sapien_subtract_offset<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
                                               (cudaStream_t)stream>>>(
-      (PxBodyData *)data, (int4 *)index, (float4 *)offset, count);
+      (SapienBodyData *)output, (PxBodyData *)data, (int4 *)index, (float4 *)offset, count);
 }
 
-void body_data_sapien_to_physx_add_offset(void *data, void *index, void *offset, int count,
-                                          void *stream) {
+void body_data_sapien_to_physx_add_offset(void *output, void *data, void *index, void *offset,
+                                          int count, void *stream) {
   body_data_sapien_to_physx_add_offset<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
                                          (cudaStream_t)stream>>>(
-      (SapienBodyData *)data, (int4 *)index, (float4 *)offset, count);
+      (PxBodyData *)output, (SapienBodyData *)data, (int4 *)index, (float4 *)offset, count);
 }
 
-void transform_sapien_to_physx_add_offset(void *data, void *index, void *offset, int count,
-                                          void *stream) {
+void transform_sapien_to_physx_add_offset(void *output, void *data, void *index, void *offset,
+                                          int count, void *stream) {
   transform_sapien_to_physx_add_offset<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
                                          (cudaStream_t)stream>>>(
-      (SapienTransform *)data, (int *)index, (float4 *)offset, count);
+      (PxTransform *)output, (SapienTransform *)data, (int *)index, (float4 *)offset, count);
 }
 
-void transform_physx_to_sapien_subtract_offset(void *data, void *index, void *offset, int count,
-                                               void *stream) {
+void transform_physx_to_sapien_subtract_offset(void *output, void *data, void *index, void *offset,
+                                               int count, void *stream) {
   transform_physx_to_sapien_subtract_offset<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
                                               (cudaStream_t)stream>>>(
-      (PxTransform *)data, (int *)index, (float4 *)offset, count);
+      (SapienTransform *)output, (PxTransform *)data, (int *)index, (float4 *)offset, count);
 }
 
 }; // namespace sapien

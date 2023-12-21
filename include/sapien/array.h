@@ -23,6 +23,8 @@ struct CudaArrayHandle {
   void checkCongiguous() const;
   void checkShape(std::vector<int> const &expected) const;
   void checkStride(std::vector<int> const &expected) const;
+
+  int bytes() const;
 };
 
 struct CudaArray {
@@ -35,6 +37,7 @@ struct CudaArray {
 
   DLManagedTensor *moveToDLPack();
 
+  CudaArray() {}
   CudaArray(std::vector<int> shape_, std::string type_);
   CudaArray(CudaArray const &) = delete;
   CudaArray &operator=(CudaArray const &) = delete;

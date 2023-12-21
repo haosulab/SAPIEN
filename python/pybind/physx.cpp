@@ -403,6 +403,8 @@ Args:
            py::arg("data_buffer"), py::arg("index_buffer"))
       .def("gpu_query_articulation_qvel", &PhysxSystemGpu::gpuQueryArticulationQvel,
            py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("gpu_query_articulation_qacc", &PhysxSystemGpu::gpuQueryArticulationQacc,
+           py::arg("data_buffer"), py::arg("index_buffer"))
       .def("gpu_query_articulation_drive_target", &PhysxSystemGpu::gpuQueryArticulationDrivePos,
            py::arg("data_buffer"), py::arg("index_buffer"))
       .def("gpu_query_articulation_drive_velocity_target",
@@ -417,6 +419,8 @@ Args:
       .def("gpu_apply_articulation_qpos", &PhysxSystemGpu::gpuApplyArticulationQpos,
            py::arg("data_buffer"), py::arg("index_buffer"))
       .def("gpu_apply_articulation_qvel", &PhysxSystemGpu::gpuApplyArticulationQvel,
+           py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("gpu_apply_articulation_qf", &PhysxSystemGpu::gpuApplyArticulationQf,
            py::arg("data_buffer"), py::arg("index_buffer"))
       .def("gpu_apply_articulation_drive_target", &PhysxSystemGpu::gpuApplyArticulationDrivePos,
            py::arg("data_buffer"), py::arg("index_buffer"))
@@ -811,10 +815,10 @@ Example:
       .def_property("root_pose", &PhysxArticulation::getRootPose, &PhysxArticulation::setRootPose)
       .def("get_root_pose", &PhysxArticulation::getRootPose)
       .def("set_root_pose", &PhysxArticulation::setRootPose, py::arg("pose"))
-      .def_property("root_velocity", &PhysxArticulation::getRootLinearVelocity,
+      .def_property("root_linear_velocity", &PhysxArticulation::getRootLinearVelocity,
                     &PhysxArticulation::setRootLinearVelocity)
-      .def("get_root_velocity", &PhysxArticulation::getRootLinearVelocity)
-      .def("set_root_velocity", &PhysxArticulation::setRootLinearVelocity, py::arg("velocity"))
+      .def("get_root_linear_velocity", &PhysxArticulation::getRootLinearVelocity)
+      .def("set_root_linear_velocity", &PhysxArticulation::setRootLinearVelocity, py::arg("velocity"))
       .def_property("root_angular_velocity", &PhysxArticulation::getRootAngularVelocity,
                     &PhysxArticulation::setRootAngularVelocity)
       .def("get_root_angular_velocity", &PhysxArticulation::getRootAngularVelocity)

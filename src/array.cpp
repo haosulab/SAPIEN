@@ -86,6 +86,14 @@ void CudaArrayHandle::checkStride(std::vector<int> const &expected) const {
   }
 }
 
+int CudaArrayHandle::bytes() const {
+  int size = 1;
+  for (auto s : shape) {
+    size *= s;
+  }
+  return size * typestrBytes(type);
+}
+
 static void DLManagedTensorDeleter(DLManagedTensor *self) {
   delete self->dl_tensor.strides;
   delete self->dl_tensor.shape;

@@ -204,40 +204,35 @@ public:
   /** Query the pose and velocity of rigid bodies represented by the index buffer,
    *  The result is stored to the data buffer */
 
-  void gpuQueryBodyDataRaw(CudaArrayHandle const &data, CudaArrayHandle const &index) const;
+  void gpuQueryBodyDataRaw(CudaArrayHandle const &data, CudaArrayHandle const &index);
   void gpuQueryBodyData(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                        CudaArrayHandle const &offset) const;
+                        CudaArrayHandle const &offset);
   void gpuApplyBodyData(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                        CudaArrayHandle const &offset) const;
+                        CudaArrayHandle const &offset);
 
-  void gpuApplyBodyForce(CudaArrayHandle const &data, CudaArrayHandle const &index) const;
-  void gpuApplyBodyTorque(CudaArrayHandle const &data, CudaArrayHandle const &index) const;
+  void gpuApplyBodyForce(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuApplyBodyTorque(CudaArrayHandle const &data, CudaArrayHandle const &index);
 
-  void gpuQueryArticulationQpos(CudaArrayHandle const &data, CudaArrayHandle const &index) const;
-  void gpuQueryArticulationQvel(CudaArrayHandle const &data, CudaArrayHandle const &index) const;
-  void gpuQueryArticulationDrivePos(CudaArrayHandle const &data,
-                                    CudaArrayHandle const &index) const;
-  void gpuQueryArticulationDriveVel(CudaArrayHandle const &data,
-                                    CudaArrayHandle const &index) const;
+  void gpuQueryArticulationQpos(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuQueryArticulationQvel(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuQueryArticulationQacc(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuQueryArticulationDrivePos(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuQueryArticulationDriveVel(CudaArrayHandle const &data, CudaArrayHandle const &index);
 
-  void gpuQueryArticulationRootPoseRaw(CudaArrayHandle const &data,
-                                       CudaArrayHandle const &index) const;
+  void gpuQueryArticulationRootPoseRaw(CudaArrayHandle const &data, CudaArrayHandle const &index);
   void gpuQueryArticulationRootPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                                    CudaArrayHandle const &offset) const;
+                                    CudaArrayHandle const &offset);
 
-  void gpuQueryArticulationRootVelocity(CudaArrayHandle const &data,
-                                        CudaArrayHandle const &index) const;
+  void gpuQueryArticulationRootVelocity(CudaArrayHandle const &data, CudaArrayHandle const &index);
 
-  void gpuApplyArticulationQpos(CudaArrayHandle const &data, CudaArrayHandle const &index) const;
-  void gpuApplyArticulationQvel(CudaArrayHandle const &data, CudaArrayHandle const &index) const;
-  void gpuApplyArticulationDrivePos(CudaArrayHandle const &data,
-                                    CudaArrayHandle const &index) const;
-  void gpuApplyArticulationDriveVel(CudaArrayHandle const &data,
-                                    CudaArrayHandle const &index) const;
+  void gpuApplyArticulationQpos(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuApplyArticulationQvel(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuApplyArticulationQf(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuApplyArticulationDrivePos(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuApplyArticulationDriveVel(CudaArrayHandle const &data, CudaArrayHandle const &index);
   void gpuApplyArticulationRootPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                                    CudaArrayHandle const &offset) const;
-  void gpuApplyArticulationRootVelocity(CudaArrayHandle const &data,
-                                        CudaArrayHandle const &index) const;
+                                    CudaArrayHandle const &offset);
+  void gpuApplyArticulationRootVelocity(CudaArrayHandle const &data, CudaArrayHandle const &index);
 
   void gpuUpdateArticulationKinematics() const;
 
@@ -264,6 +259,9 @@ private:
   CudaEvent mCudaEventRecord;
   CudaEvent mCudaEventWait;
   cudaStream_t mCudaStream{0};
+
+  void ensureScratchSize(int size);
+  CudaArray mCudaScratch;
 };
 
 #endif
