@@ -471,6 +471,11 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_cubemap", &SapienRendererSystem::getCubemap)
       .def("set_cubemap", &SapienRendererSystem::setCubemap, py::arg("cubemap"))
 
+      .def("disable_auto_upload", &SapienRendererSystem::disableAutoUpload)
+
+      .def_property_readonly("cuda_object_transforms",
+                             &SapienRendererSystem::getTransformCudaArray)
+
       .def_property_readonly("_internal_scene", &SapienRendererSystem::getScene);
 
   PyRenderTexture
@@ -524,22 +529,6 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_format", &SapienRenderTexture2D::getFormat)
       .def("download", &downloadSapienTexture2D)
       .def("upload", &uploadSapienTexture2D, py::arg("data"));
-
-  // PyRenderTargetCuda.def_readonly("shape", &SapienRenderImageCuda::shape)
-  //     .def_readonly("strides", &SapienRenderImageCuda::strides)
-  //     .def_readonly("cuda_id", &SapienRenderImageCuda::cudaId)
-  //     .def_readonly("typstr", &SapienRenderImageCuda::type)
-  //     .def_property_readonly(
-  //         "ptr",
-  //         [](SapienRenderImageCuda &array) { return reinterpret_cast<intptr_t>(array.ptr); })
-  //     .def_property_readonly("__cuda_array_interface__", [](SapienRenderImageCuda &array) {
-  //       py::tuple shape = py::cast(array.shape);
-  //       py::tuple strides = py::cast(array.strides);
-
-  //       return py::dict("shape"_a = shape, "strides"_a = strides, "typestr"_a = array.type,
-  //                       "data"_a = py::make_tuple(reinterpret_cast<intptr_t>(array.ptr), false),
-  //                       "version"_a = 2);
-  //     });
 
   PyRenderCubemap.def(py::init<std::string const &>(), py::arg("filename"))
       .def(py::init<std::string const &, std::string const &, std::string const &,
@@ -824,6 +813,8 @@ void init_sapien_renderer(py::module &sapien) {
             return CpuArrayHandle(c.getImage(name));
           },
           py::arg("name"))
+
+      .def_property_readonly("cuda_buffer", &SapienRenderCameraComponent::getCudaBuffer)
 
       .def(
           "get_picture_cuda",

@@ -13,19 +13,19 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 projectionMatrix;
   mat4 viewMatrixInverse;
   mat4 projectionMatrixInverse;
-  mat4 prevViewMatrix;
-  mat4 prevViewMatrixInverse;
   float width;
   float height;
 } cameraBuffer;
 
-layout(set = 1, binding = 0) uniform ObjectBuffer {
+layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
   mat4 modelMatrix;
-  mat4 prevModelMatrix;
+} objectTransformBuffer;
+
+layout(set = 1, binding = 1) uniform ObjectDataBuffer {
   uvec4 segmentation;
   float transparency;
   int shadeFlat;
-} objectBuffer;
+} objectDataBuffer;
 
 layout(set = 2, binding = 0) uniform MaterialBuffer {
   vec4 emission;
@@ -132,7 +132,7 @@ void main() {
     albedo = materialBuffer.baseColor;
   }
 
-  albedo.a *=  (1.f - objectBuffer.transparency);
+  albedo.a *=  (1.f - objectDataBuffer.transparency);
 
   if (albedo.a == 0) {
     discard;
@@ -152,7 +152,7 @@ void main() {
     frm.b = materialBuffer.metallic;
   }
 
-  if (objectBuffer.shadeFlat == 0) {
+  if (objectDataBuffer.shadeFlat == 0) {
     if ((materialBuffer.textureMask & 4) != 0) {
       outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV * materialBuffer.textureTransforms[2].zw + materialBuffer.textureTransforms[2].xy).xyz * 2 - 1)), 0);
     } else {

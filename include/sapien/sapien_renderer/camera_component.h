@@ -67,6 +67,8 @@ public:
 
   void internalUpdate();
 
+  CudaArrayHandle getCudaBuffer();
+
   template <class Archive> void save(Archive &ar) const {
     // TODO: handle shader dir
     ar(mWidth, mHeight, mFx, mFy, mCx, mCy, mNear, mFar, mSkew, mShaderDir);

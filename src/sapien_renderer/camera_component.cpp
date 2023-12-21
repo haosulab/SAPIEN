@@ -6,6 +6,7 @@
 #include "sapien/sapien_renderer/sapien_renderer_system.h"
 #include "sapien/sapien_renderer/texture.h"
 #include "sapien/scene.h"
+#include <svulkan2/renderer/renderer.h>
 #include <svulkan2/renderer/renderer_base.h>
 
 namespace sapien {
@@ -150,6 +151,8 @@ struct SapienRenderCameraInternal {
 #endif
   }
 
+  svulkan2::renderer::RendererBase &getRenderer() const { return *mRenderer; }
+
   ~SapienRenderCameraInternal() { mScene->removeNode(*mCamera); }
 };
 
@@ -203,6 +206,12 @@ void SapienRenderCameraComponent::onAddToScene(Scene &scene) {
                                                          system->getScene());
   mCamera->mCamera->setPerspectiveParameters(mNear, mFar, mFx, mFy, mCx, mCy, mWidth, mHeight,
                                              mSkew);
+
+  if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(&mCamera->getRenderer())) {
+    // TODO: do it for rt renderer
+    r->setAutoUploadEnabled(system->isAutoUploadEnabled());
+  }
+
   for (auto &[k, v] : mProperties) {
     if (std::holds_alternative<int>(v)) {
       mCamera->mRenderer->setCustomProperty(k, std::get<int>(v));
@@ -361,6 +370,25 @@ void SapienRenderCameraComponent::internalUpdate() {
   }
   mUpdatedWithoutTakingPicture = true;
 }
+
+CudaArrayHandle SapienRenderCameraComponent::getCudaBuffer() {
+  if (!mCamera) {
+    throw std::runtime_error(
+        "failed to access camera cuda buffer: the camera is not added to scene.");
+  }
+
+  if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(&mCamera->getRenderer())) {
+    auto &buffer = r->getCameraBuffer();
+    return CudaArrayHandle{.shape = {static_cast<int>(buffer.getSize() / sizeof(float))},
+                           .strides = {4},
+                           .type = "f4",
+                           .cudaId = buffer.getCudaDeviceId(),
+                           .ptr = buffer.getCudaPtr()};
+  } else {
+    throw std::runtime_error("only rasterization renderer supports camera cuda buffer.");
+  }
+}
+
 SapienRenderCameraComponent::~SapienRenderCameraComponent() {}
 
 } // namespace sapien_renderer

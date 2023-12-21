@@ -3,6 +3,7 @@
 #include "../component.h"
 #include "../system.h"
 #include "cubemap.h"
+#include "sapien/array.h"
 #include "sapien/math/vec3.h"
 #include "sapien/serialize.h"
 #include <set>
@@ -87,6 +88,10 @@ public:
   void step() override;
   std::string getName() const override { return "render"; }
 
+  CudaArrayHandle getTransformCudaArray();
+  void disableAutoUpload();
+  bool isAutoUploadEnabled();
+
   ~SapienRendererSystem();
 
   template <class Archive> void save(Archive &ar) const { ar(getAmbientLight(), getCubemap()); }
@@ -113,6 +118,8 @@ private:
   std::set<std::shared_ptr<CudaDeformableMeshComponent>, comp_cmp> mCudaDeformableMeshComponents;
 
   std::shared_ptr<SapienRenderCubemap> mCubemap;
+
+  bool mAutoUploadEnabled{true};
 };
 
 } // namespace sapien_renderer

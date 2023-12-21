@@ -7,19 +7,19 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 projectionMatrix;
   mat4 viewMatrixInverse;
   mat4 projectionMatrixInverse;
-  mat4 prevViewMatrix;
-  mat4 prevViewMatrixInverse;
   float width;
   float height;
 } cameraBuffer;
 
-layout(set = 1, binding = 0) uniform ObjectBuffer {
+layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
   mat4 modelMatrix;
-  mat4 prevModelMatrix;
+} objectTransformBuffer;
+
+layout(set = 1, binding = 1) uniform ObjectDataBuffer {
   uvec4 segmentation;
   float transparency;
   int shadeFlat;
-} objectBuffer;
+} objectDataBuffer;
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 normal;
@@ -28,19 +28,17 @@ layout(location = 3) in vec3 tangent;
 layout(location = 4) in vec3 bitangent;
 
 layout(location = 0) out vec4 outPosition;
-layout(location = 1) out vec4 outPrevPosition;
-layout(location = 2) out vec2 outUV;
-layout(location = 3) out flat uvec4 outSegmentation;
-layout(location = 4) out vec3 objectCoord;
-layout(location = 5) out mat3 outTbn;
+layout(location = 1) out vec2 outUV;
+layout(location = 2) out flat uvec4 outSegmentation;
+layout(location = 3) out vec3 objectCoord;
+layout(location = 4) out mat3 outTbn;
 
 void main() {
-  outSegmentation = objectBuffer.segmentation;
-  mat4 modelView = cameraBuffer.viewMatrix * objectBuffer.modelMatrix;
+  outSegmentation = objectDataBuffer.segmentation;
+  mat4 modelView = cameraBuffer.viewMatrix * objectTransformBuffer.modelMatrix;
   mat3 normalMatrix = mat3(transpose(inverse(modelView)));
   objectCoord = position;
   outPosition = modelView * vec4(position, 1);
-  outPrevPosition = cameraBuffer.prevViewMatrix * objectBuffer.prevModelMatrix * vec4(position, 1);
   outUV = uv;
   gl_Position = cameraBuffer.projectionMatrix * outPosition;
   vec3 outTangent = normalize(normalMatrix * tangent);

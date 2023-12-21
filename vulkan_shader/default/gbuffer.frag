@@ -5,19 +5,20 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 projectionMatrix;
   mat4 viewMatrixInverse;
   mat4 projectionMatrixInverse;
-  mat4 prevViewMatrix;
-  mat4 prevViewMatrixInverse;
   float width;
   float height;
 } cameraBuffer;
 
-layout(set = 1, binding = 0) uniform ObjectBuffer {
+layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
   mat4 modelMatrix;
-  mat4 prevModelMatrix;
+} objectTransformBuffer;
+
+layout(set = 1, binding = 1) uniform ObjectDataBuffer {
   uvec4 segmentation;
   float transparency;
   int shadeFlat;
-} objectBuffer;
+} objectDataBuffer;
+
 
 layout(set = 2, binding = 0) uniform MaterialBuffer {
   vec4 emission;
@@ -41,11 +42,10 @@ layout(set = 2, binding = 5) uniform sampler2D emissionTexture;
 layout(set = 2, binding = 6) uniform sampler2D transmissionTexture;
 
 layout(location = 0) in vec4 inPosition;
-layout(location = 1) in vec4 inPrevPosition;
-layout(location = 2) in vec2 inUV;
-layout(location = 3) in flat uvec4 inSegmentation;
-layout(location = 4) in vec3 objectCoord;
-layout(location = 5) in mat3 inTbn;
+layout(location = 1) in vec2 inUV;
+layout(location = 2) in flat uvec4 inSegmentation;
+layout(location = 3) in vec3 objectCoord;
+layout(location = 4) in mat3 inTbn;
 
 layout(location = 0) out vec4 outAlbedo;
 layout(location = 1) out vec4 outPosition;
@@ -53,8 +53,7 @@ layout(location = 2) out vec4 outSpecular;
 layout(location = 3) out vec4 outNormal;
 layout(location = 4) out uvec4 outSegmentation;
 layout(location = 5) out vec4 outCustom;
-layout(location = 6) out vec4 outMotionDirection;
-layout(location = 7) out vec4 outEmission;
+layout(location = 6) out vec4 outEmission;
 
 void main() {
   outCustom = vec4(objectCoord, 1);
@@ -65,12 +64,6 @@ void main() {
   vec4 p1 = cameraBuffer.projectionMatrix * inPosition;
   p1 /= p1.w;
   vec2 p1s = p1.xy / p1.z;
-
-  vec4 p2 = cameraBuffer.projectionMatrix * inPrevPosition;
-  p2 /= p2.w;
-  vec2 p2s = p2.xy / p2.z;
-
-  outMotionDirection = vec4((p1s - p2s)*0.5, 0, 1);
 
   if ((materialBuffer.textureMask & 16) != 0) {
     outEmission = texture(emissionTexture, inUV * materialBuffer.textureTransforms[4].zw + materialBuffer.textureTransforms[4].xy);
@@ -102,7 +95,7 @@ void main() {
     outSpecular.b = materialBuffer.metallic;
   }
 
-  if (objectBuffer.shadeFlat == 0) {
+  if (objectDataBuffer.shadeFlat == 0) {
     if ((materialBuffer.textureMask & 4) != 0) {
       outNormal = vec4(normalize(inTbn * (texture(normalTexture, inUV * materialBuffer.textureTransforms[2].zw + materialBuffer.textureTransforms[2].xy).xyz * 2 - 1)), 0);
     } else {

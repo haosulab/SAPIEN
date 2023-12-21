@@ -152,6 +152,25 @@ void SapienRendererSystem::step() {
   mScene->updateModelMatrices();
 }
 
+CudaArrayHandle SapienRendererSystem::getTransformCudaArray() {
+  mScene->prepareObjectTransformBuffer();
+  auto buffer = mScene->getObjectTransformBuffer();
+  return CudaArrayHandle{.shape = {4, 4},
+                         .strides = {16, 4},
+                         .type = "f4",
+                         .cudaId = buffer->getCudaDeviceId(),
+                         .ptr = buffer->getCudaPtr()};
+}
+
+void SapienRendererSystem::disableAutoUpload() {
+  if (mRenderCameraComponents.size()) {
+    throw std::runtime_error("auto upload cannot be modified after camera is added to scene.");
+  }
+  mAutoUploadEnabled = false;
+}
+
+bool SapienRendererSystem::isAutoUploadEnabled() { return mAutoUploadEnabled; }
+
 SapienRendererSystem::~SapienRendererSystem() {}
 
 } // namespace sapien_renderer

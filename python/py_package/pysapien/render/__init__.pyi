@@ -168,6 +168,11 @@ class RenderCameraComponent(sapien.pysapien.Component):
     def set_texture_array(self, name: str, textures: list[RenderTexture]) -> None: ...
     def take_picture(self) -> None: ...
     @property
+    def cuda_buffer(self) -> CudaArrayHandle:
+        """
+        :type: CudaArrayHandle
+        """
+    @property
     def cx(self) -> float:
         """
         :type: float
@@ -740,6 +745,7 @@ class RenderSpotLightComponent(RenderLightComponent, sapien.pysapien.Component):
     pass
 class RenderSystem(sapien.pysapien.System):
     def __init__(self) -> None: ...
+    def disable_auto_upload(self) -> None: ...
     def get_ambient_light(self) -> numpy.ndarray[numpy.float32, _Shape, _Shape[3]]: ...
     def get_cameras(self) -> list[RenderCameraComponent]: ...
     def get_cubemap(self) -> RenderCubemap: ...
@@ -773,6 +779,11 @@ class RenderSystem(sapien.pysapien.System):
     @cubemap.setter
     def cubemap(self, arg1: RenderCubemap) -> None:
         pass
+    @property
+    def cuda_object_transforms(self) -> CudaArrayHandle:
+        """
+        :type: CudaArrayHandle
+        """
     @property
     def lights(self) -> list[RenderLightComponent]:
         """

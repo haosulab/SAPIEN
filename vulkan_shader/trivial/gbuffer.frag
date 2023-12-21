@@ -9,12 +9,15 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   float height;
 } cameraBuffer;
 
-layout(set = 1, binding = 0) uniform ObjectBuffer {
+layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
   mat4 modelMatrix;
+} objectTransformBuffer;
+
+layout(set = 1, binding = 1) uniform ObjectDataBuffer {
   uvec4 segmentation;
   float transparency;
   int shadeFlat;
-} objectBuffer;
+} objectDataBuffer;
 
 layout(set = 2, binding = 0) uniform MaterialBuffer {
   vec4 emission;
@@ -73,7 +76,7 @@ void main() {
   outPosition = inPosition;
   outSegmentation = inSeg;
   if ((materialBuffer.textureMask & 1) != 0) {
-    outColor = texture(colorTexture, inUV * materialBuffer.textureTransforms[0].ba + materialBuffer.textureTransforms[0].rg);
+    outColor = texture(colorTexture, inUV);
   } else {
     outColor = materialBuffer.baseColor;
   }

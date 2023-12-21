@@ -11,6 +11,10 @@ import argparse
 from sapien.utils import Viewer
 
 
+sapien.render.set_viewer_shader_dir("../vulkan_shader/default")
+sapien.render.set_camera_shader_dir("../vulkan_shader/default")
+
+
 def create_table(
     scene: sapien.Scene,
     pose: sapien.Pose,
@@ -192,8 +196,6 @@ def main():
         f4.add_capsule_visual(Pose(), 0.08, 0.282, copper)
 
         return builder
-
-    sapien.render.set_camera_shader_dir("default")
 
     config = sapien.SceneConfig()
     scene = sim.create_scene(config)
