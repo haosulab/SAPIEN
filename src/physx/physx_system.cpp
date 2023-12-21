@@ -395,6 +395,7 @@ CudaArray PhysxSystemGpu::gpuCreateBodyOffsets(
 }
 
 void PhysxSystemGpu::gpuFillArticulationOffsets(CudaArrayHandle const &offset) {
+  checkGpuInitialized();
   offset.checkCongiguous();
   offset.checkShape({mGpuArticulationCount, 4});
   offset.checkStride({4 * sizeof(float), sizeof(float)});
@@ -413,6 +414,7 @@ void PhysxSystemGpu::gpuFillArticulationOffsets(CudaArrayHandle const &offset) {
 }
 
 CudaArray PhysxSystemGpu::gpuCreateArticulationOffsets() {
+  checkGpuInitialized();
   CudaArray offsets({static_cast<int>(mGpuArticulationCount), 4}, "f4");
   gpuFillArticulationOffsets(offsets.handle());
   return offsets;
@@ -425,6 +427,8 @@ CudaArray PhysxSystemGpu::gpuCreateBodyDataBuffer(uint32_t count) {
 void PhysxSystemGpu::gpuFillArticulationIndices(
     CudaArrayHandle const &index,
     std::vector<std::shared_ptr<PhysxArticulation>> const &articulations) const {
+  checkGpuInitialized();
+
   assert(index.type == "i4");
   assert(index.shape.size() == 1);
   assert(index.shape.at(0) == articulations.size());
@@ -447,14 +451,13 @@ CudaArray PhysxSystemGpu::gpuCreateArticulationIndices(
 }
 
 CudaArray PhysxSystemGpu::gpuCreateArticulationQBuffer() const {
-  return CudaArray({static_cast<int>(mPxScene->getNbArticulations()), getArticulationMaxDof()},
-                   "f4");
+  checkGpuInitialized();
+  return CudaArray({mGpuArticulationCount, mGpuArticulationMaxDof}, "f4");
 }
 
 CudaArray PhysxSystemGpu::gpuCreateArticulationRootPoseBuffer() const {
-  return CudaArray(
-      {static_cast<int>(mPxScene->getNbArticulations()), sizeof(PxTransform) / sizeof(float)},
-      "f4");
+  checkGpuInitialized();
+  return CudaArray({mGpuArticulationCount, sizeof(PxTransform) / sizeof(float)}, "f4");
 }
 
 CudaArray PhysxSystemGpu::gpuCreateArticulationRootVelocityBuffer() const {
