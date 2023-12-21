@@ -202,6 +202,8 @@ def main():
     scene.add_ground(0)
     scene.set_timestep(1 / 240)
 
+    scene.render_system.disable_auto_upload()
+
     create_dome_envmap()
     scene.set_environment_map(sapien.render.RenderCubemap("/tmp/sapien_dome.ktx"))
 

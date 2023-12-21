@@ -10,6 +10,9 @@
 #include <svulkan2/core/context.h>
 #include <svulkan2/scene/scene.h>
 
+typedef struct CUstream_st *cudaStream_t;
+typedef struct CUexternalSemaphore_st *cudaExternalSemaphore_t;
+
 namespace sapien {
 namespace sapien_renderer {
 class SapienRenderBodyComponent;
@@ -91,6 +94,7 @@ public:
   CudaArrayHandle getTransformCudaArray();
   void disableAutoUpload();
   bool isAutoUploadEnabled();
+  void notifyCudaTransformUpdated(cudaStream_t cudaStream);
 
   ~SapienRendererSystem();
 
@@ -120,6 +124,12 @@ private:
   std::shared_ptr<SapienRenderCubemap> mCubemap;
 
   bool mAutoUploadEnabled{true};
+
+#ifdef SAPIEN_CUDA
+  vk::UniqueSemaphore mSem{};
+  cudaExternalSemaphore_t mCudaSem{};
+  uint64_t mSemValue{0};
+#endif
 };
 
 } // namespace sapien_renderer

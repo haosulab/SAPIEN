@@ -55,6 +55,7 @@ void SapienRenderBodyComponent::onAddToScene(Scene &scene) {
 
     uint64_t id = mRenderIdDisabled ? 0 : system->nextRenderId();
     shape->internalSetRenderId(id);
+    shape->internalSetRenderObject(&obj);
 
     obj.setSegmentation({id, getEntity()->getPerSceneId(), 0, 0});
     obj.setTransparency(1.f - mVisibility);
@@ -70,6 +71,7 @@ void SapienRenderBodyComponent::onRemoveFromScene(Scene &scene) {
   auto s = system->getScene();
   for (auto &s : mRenderShapes) {
     s->internalSetRenderId(0);
+    s->internalSetRenderObject(nullptr);
   }
   s->removeNode(*mNode);
   mNode = nullptr;

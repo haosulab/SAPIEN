@@ -622,7 +622,10 @@ void init_sapien_renderer(py::module &sapien) {
 
       // TODO: set material
       .def_property_readonly("material", &RenderShape::getMaterial)
-      .def("get_material", &RenderShape::getMaterial);
+      .def("get_material", &RenderShape::getMaterial)
+
+      .def("get_gpu_transform_index", &RenderShape::getInternalGpuTransformIndex)
+      .def_property_readonly("gpu_transform_index", &RenderShape::getInternalGpuTransformIndex);
 
   PyRenderShapePlane
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("scale"),

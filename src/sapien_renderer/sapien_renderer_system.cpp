@@ -11,6 +11,10 @@
 #include <svulkan2/renderer/rt_renderer.h>
 #include <svulkan2/scene/scene.h>
 
+#if SAPIEN_CUDA
+#include "sapien/utils/cuda.h"
+#endif
+
 namespace sapien {
 namespace sapien_renderer {
 
@@ -155,8 +159,8 @@ void SapienRendererSystem::step() {
 CudaArrayHandle SapienRendererSystem::getTransformCudaArray() {
   mScene->prepareObjectTransformBuffer();
   auto buffer = mScene->getObjectTransformBuffer();
-  return CudaArrayHandle{.shape = {4, 4},
-                         .strides = {16, 4},
+  return CudaArrayHandle{.shape = {static_cast<int>(buffer->getSize() / 64), 4, 4},
+                         .strides = {64, 16, 4},
                          .type = "f4",
                          .cudaId = buffer->getCudaDeviceId(),
                          .ptr = buffer->getCudaPtr()};
@@ -171,7 +175,40 @@ void SapienRendererSystem::disableAutoUpload() {
 
 bool SapienRendererSystem::isAutoUploadEnabled() { return mAutoUploadEnabled; }
 
-SapienRendererSystem::~SapienRendererSystem() {}
+// TODO: SAPIEN_CUDA stuff
+void SapienRendererSystem::notifyCudaTransformUpdated(cudaStream_t cudaStream) {
+  if (!mSem) {
+    vk::SemaphoreTypeCreateInfo timelineCreateInfo(vk::SemaphoreType::eTimeline, 0);
+    vk::SemaphoreCreateInfo createInfo{};
+    vk::ExportSemaphoreCreateInfo exportCreateInfo(
+        vk::ExternalSemaphoreHandleTypeFlagBits::eOpaqueFd);
+    createInfo.setPNext(&exportCreateInfo);
+    exportCreateInfo.setPNext(&timelineCreateInfo);
+    mSem = mEngine->getContext()->getDevice().createSemaphoreUnique(createInfo);
+
+    int fd = mEngine->getContext()->getDevice().getSemaphoreFdKHR(
+        {mSem.get(), vk::ExternalSemaphoreHandleTypeFlagBits::eOpaqueFd});
+    cudaExternalSemaphoreHandleDesc desc = {};
+    desc.flags = 0;
+    desc.handle.fd = fd;
+    desc.type = cudaExternalSemaphoreHandleTypeTimelineSemaphoreFd;
+    checkCudaErrors(cudaImportExternalSemaphore(&mCudaSem, &desc));
+  }
+
+  cudaExternalSemaphoreSignalParams sigParams{};
+  sigParams.flags = 0;
+  sigParams.params.fence.value = ++mSemValue;
+  cudaSignalExternalSemaphoresAsync(&mCudaSem, &sigParams, 1, cudaStream);
+
+  vk::PipelineStageFlags stage = vk::PipelineStageFlagBits::eAllCommands;
+  mEngine->getContext()->getQueue().submit({}, mSem.get(), stage, mSemValue, {}, {}, {});
+}
+
+SapienRendererSystem::~SapienRendererSystem() {
+  if (mSem) {
+    cudaDestroyExternalSemaphore(mCudaSem);
+  }
+}
 
 } // namespace sapien_renderer
 } // namespace sapien

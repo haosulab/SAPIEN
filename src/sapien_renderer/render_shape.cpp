@@ -41,6 +41,14 @@ svulkan2::scene::Transform RenderShape::getLocalTransform() const {
   return t;
 }
 
+int RenderShape::getInternalGpuTransformIndex() {
+  if (!mObject) {
+    throw std::runtime_error("the shape is not added to scene");
+  }
+  mObject->getScene()->prepareObjectTransformBuffer();
+  return mObject->getInternalGpuIndex();
+}
+
 RenderShapePlane::RenderShapePlane(Vec3 scale, std::shared_ptr<SapienRenderMaterial> material) {
   auto mesh = mEngine->getPlaneMesh();
   mMaterial = material;

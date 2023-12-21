@@ -1,6 +1,9 @@
 import sapien
 import torch
 
+sapien.set_log_level("info")
+sapien.render.set_log_level("info")
+
 sapien.physx.enable_gpu()
 sapien.set_cuda_tensor_backend("torch")
 
@@ -39,45 +42,48 @@ builder.set_scene(scene1)
 a1 = builder.build()
 
 physx_system.gpu_init()
-physx_system.step()
 
-ai = physx_system.gpu_create_articulation_index_buffer([r0, r1])
-print("ai", ai)
 
-qpos_buffer = physx_system.gpu_create_articulation_q_buffer()
-print("qpos", qpos_buffer.shape)
 
-qvel_buffer = physx_system.gpu_create_articulation_q_buffer()
-print("qvel", qvel_buffer.shape)
+# physx_system.step()
 
-offset_buffer = physx_system.gpu_create_articulation_offset_buffer()
-print("offset", offset_buffer)
+# ai = physx_system.gpu_create_articulation_index_buffer([r0, r1])
+# print("ai", ai)
 
-root_pose_buffer = physx_system.gpu_create_articulation_root_pose_buffer()
-print("root_pose", root_pose_buffer.shape)
+# qpos_buffer = physx_system.gpu_create_articulation_q_buffer()
+# print("qpos", qpos_buffer.shape)
 
-physx_system.gpu_query_articulation_qpos(qpos_buffer, ai)
-physx_system.gpu_query_articulation_qvel(qvel_buffer, ai)
-print("qpos", qpos_buffer)
-print("qvel", qvel_buffer)
+# qvel_buffer = physx_system.gpu_create_articulation_q_buffer()
+# print("qvel", qvel_buffer.shape)
 
-physx_system.gpu_query_articulation_root_pose(root_pose_buffer, ai, offset_buffer)
-print("root pose", root_pose_buffer)
+# offset_buffer = physx_system.gpu_create_articulation_offset_buffer()
+# print("offset", offset_buffer)
 
-root_pose_buffer[0] = torch.tensor([0.1, 0, 0, 0, 1, 0, 0])
-root_pose_buffer[1] = torch.tensor([0, 0.1, 0, 0, 0, 1, 0])
+# root_pose_buffer = physx_system.gpu_create_articulation_root_pose_buffer()
+# print("root_pose", root_pose_buffer.shape)
 
-physx_system.gpu_apply_articulation_root_pose(root_pose_buffer, ai, offset_buffer)
-root_pose_buffer[0] = torch.tensor([0, 0, 0, 0, 0, 0, 0])
-root_pose_buffer[1] = torch.tensor([0, 0, 0, 0, 0, 0, 0])
+# physx_system.gpu_query_articulation_qpos(qpos_buffer, ai)
+# physx_system.gpu_query_articulation_qvel(qvel_buffer, ai)
+# print("qpos", qpos_buffer)
+# print("qvel", qvel_buffer)
 
-# physx_system.gpu_update_articulation_kinematics()
+# physx_system.gpu_query_articulation_root_pose(root_pose_buffer, ai, offset_buffer)
+# print("root pose", root_pose_buffer)
 
-physx_system.gpu_query_articulation_root_pose(root_pose_buffer, ai, offset_buffer)
-print("sapien pose", root_pose_buffer)
+# root_pose_buffer[0] = torch.tensor([0.1, 0, 0, 0, 1, 0, 0])
+# root_pose_buffer[1] = torch.tensor([0, 0.1, 0, 0, 0, 1, 0])
 
-physx_system._gpu_query_articulation_root_pose_raw(root_pose_buffer, ai)
-print("raw pose", root_pose_buffer)
+# physx_system.gpu_apply_articulation_root_pose(root_pose_buffer, ai, offset_buffer)
+# root_pose_buffer[0] = torch.tensor([0, 0, 0, 0, 0, 0, 0])
+# root_pose_buffer[1] = torch.tensor([0, 0, 0, 0, 0, 0, 0])
+
+# # physx_system.gpu_update_articulation_kinematics()
+
+# physx_system.gpu_query_articulation_root_pose(root_pose_buffer, ai, offset_buffer)
+# print("sapien pose", root_pose_buffer)
+
+# physx_system._gpu_query_articulation_root_pose_raw(root_pose_buffer, ai)
+# print("raw pose", root_pose_buffer)
 
 
 bodies = [
@@ -92,15 +98,39 @@ print(body_data_buffer)
 print(body_offset_buffer)
 
 physx_system.gpu_query_body_data(body_data_buffer, bi, body_offset_buffer)
-
 print("body data", body_data_buffer)
 
-# p, q, v, w
-body_data_buffer[0, :13] = torch.tensor([0.1, 0, 10, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0.5])
-body_data_buffer[1, :13] = torch.tensor([0, 0.1, 8, 0, 0, 1, 0, 0, 0, -2, 0, 0, 0.8])
-physx_system.gpu_apply_body_data(body_data_buffer, bi, body_offset_buffer)
+physx_system._gpu_query_body_data_raw(body_data_buffer, bi)
+print("body data raw", body_data_buffer)
 
-physx_system.step()
+# # p, q, v, w
+# body_data_buffer[0, :13] = torch.tensor([0.1, 0, 10, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0.5])
+# body_data_buffer[1, :13] = torch.tensor([0, 0.1, 8, 0, 0, 1, 0, 0, 0, -2, 0, 0, 0.8])
+# physx_system.gpu_apply_body_data(body_data_buffer, bi, body_offset_buffer)
 
-physx_system.gpu_query_body_data(body_data_buffer, bi, body_offset_buffer)
-print(body_data_buffer)
+# print("should not change", body_data_buffer)
+
+# physx_system.step()
+
+# physx_system.gpu_query_body_data(body_data_buffer, bi, body_offset_buffer)
+# print(body_data_buffer)
+
+# physx_system._gpu_query_body_data_raw(body_data_buffer, bi)
+# print(body_data_buffer)
+
+
+# scene0.update_render()
+
+# cam0 = scene0.add_camera("", 256, 256, 1, 0.01, 10)
+# # cam1 = scene0.add_camera("", 256, 256, 1, 0.01, 10)
+
+# cam0.take_picture()
+# # cam1.take_picture()
+
+# cam0.get_picture("Color")
+# # cam1.get_picture("Color")
+
+# render_bodies0 = scene0.render_system.render_bodies
+
+# print(scene0.render_system.cuda_object_transforms)
+# print(cam0.cuda_buffer)

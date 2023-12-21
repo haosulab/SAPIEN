@@ -564,6 +564,7 @@ class RenderPointLightComponent(RenderLightComponent, sapien.pysapien.Component)
     pass
 class RenderShape():
     def get_culling(self) -> typing.Literal['back', 'front', 'none', 'both']: ...
+    def get_gpu_transform_index(self) -> int: ...
     def get_local_pose(self) -> sapien.pysapien.Pose: ...
     def get_material(self) -> RenderMaterial: ...
     def get_name(self) -> str: ...
@@ -579,6 +580,11 @@ class RenderShape():
     @culling.setter
     def culling(self, arg1: typing.Literal['back', 'front', 'none', 'both']) -> None:
         pass
+    @property
+    def gpu_transform_index(self) -> int:
+        """
+        :type: int
+        """
     @property
     def local_pose(self) -> sapien.pysapien.Pose:
         """

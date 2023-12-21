@@ -34,6 +34,8 @@ public:
   void internalSetParent(SapienRenderBodyComponent *parent) { mParent = parent; }
   std::shared_ptr<SapienRenderBodyComponent> getParent() const;
 
+  void internalSetRenderObject(svulkan2::scene::Object *object) { mObject = object; }
+
   virtual std::shared_ptr<SapienRenderMaterial> getMaterial() const = 0;
   virtual ~RenderShape();
 
@@ -53,6 +55,10 @@ public:
   vk::CullModeFlagBits getCulling() const;
   void setCulling(vk::CullModeFlagBits);
 
+  /** Get the index of this shape in the transform array of the render scene
+   *  The index will change when any object is removed from the scene. */
+  int getInternalGpuTransformIndex();
+
 protected:
   uint64_t mRenderId{0};
   std::string mName;
@@ -63,6 +69,7 @@ protected:
   vk::CullModeFlagBits mCulling{vk::CullModeFlagBits::eBack};
 
   SapienRenderBodyComponent *mParent{nullptr};
+  svulkan2::scene::Object *mObject{nullptr};
 };
 
 class RenderShapePlane : public RenderShape {
