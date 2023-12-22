@@ -157,16 +157,27 @@ void SapienRendererWindow::setScene(std::shared_ptr<Scene> scene) {
   mScene = scene;
 }
 
+void SapienRendererWindow::forceUploadCamera() {
+  if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(mSVulkanRenderer.get())) {
+    if (!r->getAutoUploadEnabled()) {
+      r->forceUploadCameraBuffer(*getCamera());
+    }
+  }
+}
+
 void SapienRendererWindow::setCameraParameters(float near, float far, float fovy) {
   uint32_t width = std::max(mWindow->getWidth(), 1u);
   uint32_t height = std::max(mWindow->getHeight(), 1u);
   getCamera()->setPerspectiveParameters(near, far, fovy, width, height);
+  forceUploadCamera();
 }
+
 void SapienRendererWindow::setCameraIntrinsicParameters(float near, float far, float fx, float fy,
                                                         float cx, float cy, float skew) {
   uint32_t width = std::max(mWindow->getWidth(), 1u);
   uint32_t height = std::max(mWindow->getHeight(), 1u);
   getCamera()->setPerspectiveParameters(near, far, fx, fy, cx, cy, width, height, skew);
+  forceUploadCamera();
 }
 
 void SapienRendererWindow::setCameraPose(Pose const &pose) {
@@ -174,6 +185,7 @@ void SapienRendererWindow::setCameraPose(Pose const &pose) {
   auto cam = getCamera();
   cam->setPosition({glpose.p.x, glpose.p.y, glpose.p.z});
   cam->setRotation({glpose.q.w, glpose.q.x, glpose.q.y, glpose.q.z});
+  forceUploadCamera();
 }
 
 Pose SapienRendererWindow::getCameraPose() {

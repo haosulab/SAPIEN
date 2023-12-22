@@ -150,6 +150,9 @@ private:
   int mViewportHeight{};
   bool mRequiresRebuild{true};
   bool mClosed{};
+
+  // when auto upload is disabled, forcefully upload camera to device
+  void forceUploadCamera();
 };
 
 } // namespace sapien_renderer
