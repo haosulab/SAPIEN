@@ -6,7 +6,6 @@ import time
 from lxml import etree as ET
 import networkx as nx
 import numpy as np
-import PIL
 import six
 
 try:
@@ -1002,19 +1001,13 @@ class Texture(URDFType):
     filename : str
         The path to the image that contains this texture. This can be
         relative to the top-level URDF or an absolute path.
-    image : :class:`PIL.Image.Image`, optional
-        The image for the texture.
-        If not specified, it is loaded automatically from the filename.
     """
 
     _ATTRIBS = {"filename": (str, True)}
     _TAG = "texture"
 
-    def __init__(self, filename, image=None):
-        if image is None:
-            image = PIL.image.open(filename)
+    def __init__(self, filename):
         self.filename = filename
-        self.image = image
 
     @property
     def filename(self):
@@ -1024,31 +1017,6 @@ class Texture(URDFType):
     @filename.setter
     def filename(self, value):
         self._filename = str(value)
-
-    @property
-    def image(self):
-        """:class:`PIL.Image.Image` : The image for this texture."""
-        return self._image
-
-    @image.setter
-    def image(self, value):
-        if isinstance(value, str):
-            value = PIL.Image.open(value)
-        if isinstance(value, np.ndarray):
-            value = PIL.Image.fromarray(value)
-        elif not isinstance(value, PIL.Image.Image):
-            raise ValueError("Texture only supports numpy arrays " "or PIL images")
-        self._image = value
-
-    @classmethod
-    def _from_xml(cls, node, path):
-        kwargs = cls._parse(node, path)
-
-        # Load image
-        fn = get_filename(path, kwargs["filename"])
-        kwargs["image"] = PIL.Image.open(fn)
-
-        return Texture(**kwargs)
 
     def _to_xml(self, parent, path):
         # Save the image
@@ -1130,8 +1098,7 @@ class Material(URDFType):
     def texture(self, value):
         if value is not None:
             if isinstance(value, six.string_types):
-                image = PIL.Image.open(value)
-                value = Texture(filename=value, image=image)
+                value = Texture(filename=value)
             elif not isinstance(value, Texture):
                 raise ValueError(
                     "Invalid type for texture -- expect path to " "image or Texture"

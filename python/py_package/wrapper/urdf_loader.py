@@ -11,6 +11,8 @@ from ..pysapien import Pose
 from .articulation_builder import ArticulationBuilder
 from .urchin import URDF
 
+import warnings
+
 
 def _prune_package(filename):
     if filename.startswith("package://"):
@@ -197,6 +199,9 @@ class URDFLoader:
         # visual shapes
         for visual in link.visuals:
             if visual.material:
+                if visual.material.texture:
+                    warnings.warn("URDF texture tag is unsupported and ignored.")
+
                 color = visual.material.color
             else:
                 color = None
