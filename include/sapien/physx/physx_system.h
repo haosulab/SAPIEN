@@ -195,6 +195,12 @@ public:
   /** Allocate a CUDA buffer capable of storing data of ALL articulation joint data */
   CudaArray gpuCreateArticulationQBuffer() const;
 
+  /** Allocate a CUDA buffer capable of storing data of ALL articulation link poses */
+  CudaArray gpuCreateArticulationLinkPoseBuffer() const;
+
+  /** Allocate a CUDA buffer capable of storing data of ALL articulation link velocity */
+  CudaArray gpuCreateArticulationLinkVelocityBuffer() const;
+
   /** Allocate a CUDA buffer capable of storing data of ALL articulation root poses */
   CudaArray gpuCreateArticulationRootPoseBuffer() const;
 
@@ -222,8 +228,12 @@ public:
   void gpuQueryArticulationRootPoseRaw(CudaArrayHandle const &data, CudaArrayHandle const &index);
   void gpuQueryArticulationRootPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
                                     CudaArrayHandle const &offset);
-
   void gpuQueryArticulationRootVelocity(CudaArrayHandle const &data, CudaArrayHandle const &index);
+
+  void gpuQueryArticulationLinkPoseRaw(CudaArrayHandle const &data, CudaArrayHandle const &index);
+  void gpuQueryArticulationLinkPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
+                                    CudaArrayHandle const &offset);
+  void gpuQueryArticulationLinkVelocity(CudaArrayHandle const &data, CudaArrayHandle const &index);
 
   void gpuApplyArticulationQpos(CudaArrayHandle const &data, CudaArrayHandle const &index);
   void gpuApplyArticulationQvel(CudaArrayHandle const &data, CudaArrayHandle const &index);
@@ -233,6 +243,9 @@ public:
   void gpuApplyArticulationRootPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
                                     CudaArrayHandle const &offset);
   void gpuApplyArticulationRootVelocity(CudaArrayHandle const &data, CudaArrayHandle const &index);
+
+  void gpuApplyArticulationLinkPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
+                                    CudaArrayHandle const &offset);
 
   void gpuUpdateArticulationKinematics() const;
 
