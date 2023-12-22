@@ -817,7 +817,12 @@ void init_sapien_renderer(py::module &sapien) {
           },
           py::arg("name"))
 
-      .def_property_readonly("cuda_buffer", &SapienRenderCameraComponent::getCudaBuffer)
+      .def("gpu_init", &SapienRenderCameraComponent::gpuInit,
+           "Do rendering once to ensure all GPU resources for this camera is initialized")
+      .def_property_readonly("cuda_buffer", &SapienRenderCameraComponent::getCudaBuffer,
+                             "Get the CUDA buffer containing GPU data for this camera, including "
+                             "transformaion matrices, sizes, and user-defined shader fields. This "
+                             "function can only be called after gpu_init")
 
       .def(
           "get_picture_cuda",

@@ -67,6 +67,8 @@ public:
 
   void internalUpdate();
 
+  // render once to get all buffers initialized
+  void gpuInit();
   CudaArrayHandle getCudaBuffer();
 
   template <class Archive> void save(Archive &ar) const {
@@ -112,6 +114,9 @@ private:
   // this is set to true when the camera is updated but take picture has not
   // been called to produce a warning for get picture
   bool mUpdatedWithoutTakingPicture{true};
+
+  // this is set to true when GPU resources is available
+  bool mGpuInitialized{false};
 };
 
 } // namespace sapien_renderer

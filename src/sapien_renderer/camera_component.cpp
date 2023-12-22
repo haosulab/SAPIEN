@@ -252,7 +252,9 @@ SapienRenderImageCpu SapienRenderCameraComponent::getImage(std::string const &na
   if (mUpdatedWithoutTakingPicture) {
     logger::warn("getting picture without taking picture since last camera update");
   }
-  return mCamera->getImage(name);
+  auto image = mCamera->getImage(name);
+  mGpuInitialized = true;
+  return image;
 }
 
 SapienRenderImageCuda SapienRenderCameraComponent::getImageCuda(std::string const &name) {
@@ -263,7 +265,9 @@ SapienRenderImageCuda SapienRenderCameraComponent::getImageCuda(std::string cons
   if (mUpdatedWithoutTakingPicture) {
     logger::warn("getting picture without taking picture since last camera update");
   }
-  return mCamera->getImageCuda(name);
+  auto image = mCamera->getImageCuda(name);
+  mGpuInitialized = true;
+  return image;
 #else
   throw std::runtime_error("sapien is not copmiled with CUDA support");
 #endif
@@ -371,10 +375,24 @@ void SapienRenderCameraComponent::internalUpdate() {
   mUpdatedWithoutTakingPicture = true;
 }
 
+void SapienRenderCameraComponent::gpuInit() {
+  if (!mCamera) {
+    throw std::runtime_error("failed to init: the camera is not added to scene.");
+  }
+  mCamera->takePicture();
+  mCamera->waitForRender();
+  mGpuInitialized = true;
+}
+
 CudaArrayHandle SapienRenderCameraComponent::getCudaBuffer() {
   if (!mCamera) {
     throw std::runtime_error(
         "failed to access camera cuda buffer: the camera is not added to scene.");
+  }
+
+  if (!mGpuInitialized) {
+    throw std::runtime_error(
+        "failed to access camera cuda buffer: the camera is not initialized on the GPU.");
   }
 
   if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(&mCamera->getRenderer())) {

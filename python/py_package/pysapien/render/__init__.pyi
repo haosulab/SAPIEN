@@ -151,6 +151,10 @@ class RenderCameraComponent(sapien.pysapien.Component):
         """
     def get_skew(self) -> float: ...
     def get_width(self) -> int: ...
+    def gpu_init(self) -> None: 
+        """
+        Do rendering once to ensure all GPU resources for this camera is initialized
+        """
     def set_far(self, far: float) -> None: ...
     def set_focal_lengths(self, fx: float, fy: float) -> None: ...
     def set_fovx(self, fov: float, compute_y: bool = True) -> None: ...
@@ -170,6 +174,8 @@ class RenderCameraComponent(sapien.pysapien.Component):
     @property
     def cuda_buffer(self) -> CudaArrayHandle:
         """
+        Get the CUDA buffer containing GPU data for this camera, including transformaion matrices, sizes, and user-defined shader fields. This function can only be called after gpu_init
+
         :type: CudaArrayHandle
         """
     @property
