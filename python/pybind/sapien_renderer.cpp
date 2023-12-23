@@ -389,7 +389,23 @@ void init_sapien_renderer(py::module &sapien) {
             return parseSceneNode(*root);
           },
           py::arg("filename"), py::arg("apply_scale") = true)
-      .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); });
+      .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); })
+
+      .def(
+          "gpu_transfer_poses_to_render_scenes",
+          [](CudaArrayHandle sceneTransformRefs, CudaArrayHandle sceneIndices,
+             CudaArrayHandle transformIndices, CudaArrayHandle localTransforms,
+             CudaArrayHandle localScales, CudaArrayHandle parentIndices,
+             CudaArrayHandle parentTransforms) {
+            SapienRenderEngine::Get()->gpuTransferPosesToRenderScenes(
+                sceneTransformRefs, sceneIndices, transformIndices, localTransforms, localScales,
+                parentIndices, parentTransforms);
+          },
+          py::arg("scene_transform_pointers"), py::arg("scene_indices"),
+          py::arg("transform_indices"), py::arg("local_poses"), py::arg("local_scales"),
+          py::arg("parent_indices"), py::arg("parent_transforms"))
+      .def("gpu_notify_poses_updated",
+           []() { SapienRenderEngine::Get()->gpuNotifyPosesUpdated(); });
 
   ////////// end global //////////
 
@@ -625,7 +641,7 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_material", &RenderShape::getMaterial)
 
       .def("get_gpu_transform_index", &RenderShape::getInternalGpuTransformIndex)
-      .def_property_readonly("gpu_transform_index", &RenderShape::getInternalGpuTransformIndex);
+      .def("get_gpu_scale", &RenderShape::getGpuScale);
 
   PyRenderShapePlane
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("scale"),

@@ -33,6 +33,7 @@ r1 = builder.build()
 builder = scene0.create_actor_builder()
 builder.add_box_collision(half_size=[0.1, 0.1, 0.1])
 builder.add_box_visual(half_size=[0.1, 0.1, 0.1])
+builder.add_box_visual(half_size=[0.2, 0.2, 0.2])
 builder.set_initial_pose(sapien.Pose([0, 0, 5]))
 
 builder.set_scene(scene0)
@@ -42,7 +43,6 @@ builder.set_scene(scene1)
 a1 = builder.build()
 
 physx_system.gpu_init()
-
 
 
 # physx_system.step()
@@ -86,8 +86,11 @@ physx_system.gpu_init()
 # print("raw pose", root_pose_buffer)
 
 
+all_actors = [a0, a1]
+
 bodies = [
-    a.find_component_by_type(sapien.physx.PhysxRigidDynamicComponent) for a in [a0, a1]
+    a.find_component_by_type(sapien.physx.PhysxRigidDynamicComponent)
+    for a in all_actors
 ]
 bi = physx_system.gpu_create_body_index_buffer(bodies)
 body_data_buffer = physx_system.gpu_create_body_data_buffer(2)
@@ -119,18 +122,46 @@ print("body data raw", body_data_buffer)
 # print(body_data_buffer)
 
 
-# scene0.update_render()
+scene0.update_render()
+scene1.update_render()
 
-# cam0 = scene0.add_camera("", 256, 256, 1, 0.01, 10)
-# # cam1 = scene0.add_camera("", 256, 256, 1, 0.01, 10)
+cam0 = scene0.add_camera("", 256, 256, 1, 0.01, 10)
+cam1 = scene1.add_camera("", 256, 256, 1, 0.01, 10)
+
+cam0.gpu_init()
+cam1.gpu_init()
+
 
 # cam0.take_picture()
-# # cam1.take_picture()
+# cam1.take_picture()
 
 # cam0.get_picture("Color")
-# # cam1.get_picture("Color")
+# cam1.get_picture("Color")
 
-# render_bodies0 = scene0.render_system.render_bodies
+render_bodies0 = scene0.render_system.render_bodies
+render_bodies1 = scene1.render_system.render_bodies
 
-# print(scene0.render_system.cuda_object_transforms)
-# print(cam0.cuda_buffer)
+b0 = scene0.render_system.cuda_object_transforms
+b1 = scene1.render_system.cuda_object_transforms
+
+print(cam0.cuda_buffer)
+print(cam1.cuda_buffer)
+
+scene_dict = {scene0: 0, scene1: 1}
+
+scene_render_local_pose = [[], []]
+scene_render_index = [[], []]
+
+for physx_idx, a in enumerate(all_actors):
+    comp = a.find_component_by_type(sapien.render.RenderBodyComponent)
+    if comp is None:
+        continue
+
+    scene_idx = scene_dict[a.scene]
+
+    for shape in comp.render_shapes:
+        local_pose = shape.local_pose
+        gpu_idx = shape.get_gpu_transform_index()
+
+        scene_render_index[scene_idx].append([physx_idx, gpu_idx])
+        scene_render_local_pose[scene_idx].append(local_pose)

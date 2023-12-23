@@ -350,6 +350,12 @@ void PhysxSystemGpu::gpuFillBodyIndices(
   for (uint32_t i = 0; i < bodies.size(); ++i) {
     auto actor = bodies[i]->getPxActor();
 
+    if (actor->getType() != PxActorType::eRIGID_DYNAMIC) {
+      throw std::runtime_error(
+          "Gpu body functions only work with rigid dynamic objects. Make "
+          "sure the body list does not contain static boides or articulation links.");
+    }
+
     PxGpuActorPair pair;
     memset(&pair, 0, sizeof(pair));
     pair.srcIndex = i;

@@ -12,6 +12,7 @@
 #include <svulkan2/scene/scene.h>
 
 #if SAPIEN_CUDA
+#include "./sapien_renderer_system.cuh"
 #include "sapien/utils/cuda.h"
 #endif
 
@@ -50,7 +51,6 @@ std::string SapienRenderEngine::getSummary() {
 SapienRenderEngine::SapienRenderEngine(bool offscreenOnly, uint32_t maxNumMaterials,
                                        uint32_t maxNumTextures, uint32_t defaultMipLevels,
                                        std::string const &device, bool doNotLoadTexture) {
-  // TODO: culling
   mContext = svulkan2::core::Context::Create(!offscreenOnly, maxNumMaterials, maxNumTextures,
                                              defaultMipLevels, doNotLoadTexture, device);
   mResourceManager = mContext->createResourceManager();
@@ -75,6 +75,78 @@ std::shared_ptr<svulkan2::resource::SVMesh> SapienRenderEngine::getBoxMesh() {
     mBoxMesh = svulkan2::resource::SVMesh::CreateCube();
   }
   return mBoxMesh;
+}
+
+void SapienRenderEngine::gpuTransferPosesToRenderScenes(
+    CudaArrayHandle sceneTransformRefs, CudaArrayHandle sceneIndices,
+    CudaArrayHandle transformIndices, CudaArrayHandle localTransforms, CudaArrayHandle localScales,
+    CudaArrayHandle parentIndices, CudaArrayHandle parentTransforms) {
+  sceneTransformRefs.checkCongiguous();
+  sceneIndices.checkCongiguous();
+  transformIndices.checkCongiguous();
+  localTransforms.checkCongiguous();
+  localScales.checkCongiguous();
+  parentIndices.checkCongiguous();
+  parentTransforms.checkCongiguous();
+
+  sceneTransformRefs.checkShape({-1});
+  sceneTransformRefs.checkStride({8});
+
+  sceneIndices.checkShape({-1});
+  transformIndices.checkShape({-1});
+  localTransforms.checkShape({-1, 7});
+  localScales.checkShape({-1, 3});
+  parentIndices.checkShape({-1});
+
+  if (!(sceneIndices.shape[0] == transformIndices.shape[0] &&
+        sceneIndices.shape[0] == localTransforms.shape[0] &&
+        sceneIndices.shape[0] == localScales.shape[0] &&
+        sceneIndices.shape[0] == parentIndices.shape[0])) {
+    throw std::runtime_error(
+        "scene indices, transform indices, local transforms, local scales, and parent "
+        "indices must have the same length.");
+  }
+
+  transform_sapien_to_render(
+      (float **)sceneTransformRefs.ptr, (int *)sceneIndices.ptr, (int *)transformIndices.ptr,
+      (float *)localTransforms.ptr, (float *)localScales.ptr, (int *)parentIndices.ptr,
+      (float *)parentTransforms.ptr, parentTransforms.shape.at(parentTransforms.shape.size() - 1),
+      sceneIndices.shape[0], (cudaStream_t)mCudaStream);
+}
+
+// TODO: SAPIEN_CUDA stuff
+void SapienRenderEngine::gpuNotifyPosesUpdated() {
+  if (!mSem) {
+    vk::SemaphoreTypeCreateInfo timelineCreateInfo(vk::SemaphoreType::eTimeline, 0);
+    vk::SemaphoreCreateInfo createInfo{};
+    vk::ExportSemaphoreCreateInfo exportCreateInfo(
+        vk::ExternalSemaphoreHandleTypeFlagBits::eOpaqueFd);
+    createInfo.setPNext(&exportCreateInfo);
+    exportCreateInfo.setPNext(&timelineCreateInfo);
+    mSem = getContext()->getDevice().createSemaphoreUnique(createInfo);
+
+    int fd = getContext()->getDevice().getSemaphoreFdKHR(
+        {mSem.get(), vk::ExternalSemaphoreHandleTypeFlagBits::eOpaqueFd});
+    cudaExternalSemaphoreHandleDesc desc = {};
+    desc.flags = 0;
+    desc.handle.fd = fd;
+    desc.type = cudaExternalSemaphoreHandleTypeTimelineSemaphoreFd;
+    checkCudaErrors(cudaImportExternalSemaphore(&mCudaSem, &desc));
+  }
+
+  cudaExternalSemaphoreSignalParams sigParams{};
+  sigParams.flags = 0;
+  sigParams.params.fence.value = ++mSemValue;
+  cudaSignalExternalSemaphoresAsync(&mCudaSem, &sigParams, 1, (cudaStream_t)mCudaStream);
+
+  vk::PipelineStageFlags stage = vk::PipelineStageFlagBits::eAllCommands;
+  getContext()->getQueue().submit({}, mSem.get(), stage, mSemValue, {}, {}, {});
+}
+
+SapienRenderEngine::~SapienRenderEngine() {
+  if (mSem) {
+    cudaDestroyExternalSemaphore(mCudaSem);
+  }
 }
 
 SapienRendererSystem::SapienRendererSystem() {
@@ -175,40 +247,7 @@ void SapienRendererSystem::disableAutoUpload() {
 
 bool SapienRendererSystem::isAutoUploadEnabled() { return mAutoUploadEnabled; }
 
-// TODO: SAPIEN_CUDA stuff
-void SapienRendererSystem::notifyCudaTransformUpdated(cudaStream_t cudaStream) {
-  if (!mSem) {
-    vk::SemaphoreTypeCreateInfo timelineCreateInfo(vk::SemaphoreType::eTimeline, 0);
-    vk::SemaphoreCreateInfo createInfo{};
-    vk::ExportSemaphoreCreateInfo exportCreateInfo(
-        vk::ExternalSemaphoreHandleTypeFlagBits::eOpaqueFd);
-    createInfo.setPNext(&exportCreateInfo);
-    exportCreateInfo.setPNext(&timelineCreateInfo);
-    mSem = mEngine->getContext()->getDevice().createSemaphoreUnique(createInfo);
-
-    int fd = mEngine->getContext()->getDevice().getSemaphoreFdKHR(
-        {mSem.get(), vk::ExternalSemaphoreHandleTypeFlagBits::eOpaqueFd});
-    cudaExternalSemaphoreHandleDesc desc = {};
-    desc.flags = 0;
-    desc.handle.fd = fd;
-    desc.type = cudaExternalSemaphoreHandleTypeTimelineSemaphoreFd;
-    checkCudaErrors(cudaImportExternalSemaphore(&mCudaSem, &desc));
-  }
-
-  cudaExternalSemaphoreSignalParams sigParams{};
-  sigParams.flags = 0;
-  sigParams.params.fence.value = ++mSemValue;
-  cudaSignalExternalSemaphoresAsync(&mCudaSem, &sigParams, 1, cudaStream);
-
-  vk::PipelineStageFlags stage = vk::PipelineStageFlagBits::eAllCommands;
-  mEngine->getContext()->getQueue().submit({}, mSem.get(), stage, mSemValue, {}, {}, {});
-}
-
-SapienRendererSystem::~SapienRendererSystem() {
-  if (mSem) {
-    cudaDestroyExternalSemaphore(mCudaSem);
-  }
-}
+SapienRendererSystem::~SapienRendererSystem() {}
 
 } // namespace sapien_renderer
 } // namespace sapien

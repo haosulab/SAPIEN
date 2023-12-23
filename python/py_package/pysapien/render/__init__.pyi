@@ -44,6 +44,8 @@ __all__ = [
     "get_ray_tracing_path_depth",
     "get_ray_tracing_samples_per_pixel",
     "get_viewer_shader_dir",
+    "gpu_notify_poses_updated",
+    "gpu_transfer_poses_to_render_scenes",
     "load_scene",
     "set_camera_shader_dir",
     "set_imgui_ini_filename",
@@ -570,6 +572,7 @@ class RenderPointLightComponent(RenderLightComponent, sapien.pysapien.Component)
     pass
 class RenderShape():
     def get_culling(self) -> typing.Literal['back', 'front', 'none', 'both']: ...
+    def get_gpu_scale(self) -> numpy.ndarray[numpy.float32, _Shape, _Shape[3]]: ...
     def get_gpu_transform_index(self) -> int: ...
     def get_local_pose(self) -> sapien.pysapien.Pose: ...
     def get_material(self) -> RenderMaterial: ...
@@ -586,11 +589,6 @@ class RenderShape():
     @culling.setter
     def culling(self, arg1: typing.Literal['back', 'front', 'none', 'both']) -> None:
         pass
-    @property
-    def gpu_transform_index(self) -> int:
-        """
-        :type: int
-        """
     @property
     def local_pose(self) -> sapien.pysapien.Pose:
         """
@@ -1093,6 +1091,10 @@ def get_ray_tracing_path_depth() -> int:
 def get_ray_tracing_samples_per_pixel() -> int:
     pass
 def get_viewer_shader_dir() -> str:
+    pass
+def gpu_notify_poses_updated() -> None:
+    pass
+def gpu_transfer_poses_to_render_scenes(scene_transform_pointers: CudaArrayHandle, scene_indices: CudaArrayHandle, transform_indices: CudaArrayHandle, local_poses: CudaArrayHandle, local_scales: CudaArrayHandle, parent_indices: CudaArrayHandle, parent_transforms: CudaArrayHandle) -> None:
     pass
 def load_scene(filename: str, apply_scale: bool = True) -> dict:
     pass

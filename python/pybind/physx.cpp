@@ -423,8 +423,9 @@ Args:
       .def("gpu_query_articulation_root_pose", &PhysxSystemGpu::gpuQueryArticulationRootPose,
            py::arg("data_buffer"), py::arg("index_buffer"), py::arg("offset_buffer"))
 
-      .def("_gpu_query_articulation_link_pose_raw", &PhysxSystemGpu::gpuQueryArticulationLinkPoseRaw,
-           py::arg("data_buffer"), py::arg("index_buffer"))
+      .def("_gpu_query_articulation_link_pose_raw",
+           &PhysxSystemGpu::gpuQueryArticulationLinkPoseRaw, py::arg("data_buffer"),
+           py::arg("index_buffer"))
       .def("gpu_query_articulation_link_pose", &PhysxSystemGpu::gpuQueryArticulationLinkPose,
            py::arg("data_buffer"), py::arg("index_buffer"), py::arg("offset_buffer"))
       .def("gpu_query_articulation_link_velocity",
@@ -862,14 +863,17 @@ Example:
              }
              return std::shared_ptr<PhysxArticulationLinkComponent>{};
            })
-      .def("find_joint_by_name", [](PhysxArticulation &a, std::string const &name) {
-        for (auto &j : a.getJoints()) {
-          if (j->getName() == name) {
-            return j;
-          }
-        }
-        return std::shared_ptr<PhysxArticulationJoint>{};
-      });
+      .def("find_joint_by_name",
+           [](PhysxArticulation &a, std::string const &name) {
+             for (auto &j : a.getJoints()) {
+               if (j->getName() == name) {
+                 return j;
+               }
+             }
+             return std::shared_ptr<PhysxArticulationJoint>{};
+           })
+      .def("get_gpu_index",
+           [](PhysxArticulation &a) { return a.getPxArticulation()->getGpuArticulationIndex(); });
 
   PyPhysxJointComponent
       .def_property("parent", &PhysxJointComponent::getParent, &PhysxJointComponent::setParent)

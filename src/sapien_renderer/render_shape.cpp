@@ -49,6 +49,8 @@ int RenderShape::getInternalGpuTransformIndex() {
   return mObject->getInternalGpuIndex();
 }
 
+Vec3 RenderShape::getGpuScale() { return mScale; }
+
 RenderShapePlane::RenderShapePlane(Vec3 scale, std::shared_ptr<SapienRenderMaterial> material) {
   auto mesh = mEngine->getPlaneMesh();
   mMaterial = material;

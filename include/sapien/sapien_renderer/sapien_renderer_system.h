@@ -43,6 +43,27 @@ public:
 
   std::string getSummary();
 
+  /**
+   *  Args:
+   *      sceneTransformRefs: uint64 pointers pointing to per-scene transform buffers
+   *      sceneIndices: scene index for each shape
+   *      transformIndices: per-scene transform index for each shape
+   *      localTransforms: local pose for each shape
+   *      localScales: local scales for each shape
+   *      parnetIndices: index fo each shape's parent in the parentTranasforms array
+   *      parentTransforms: transform array for parent objects
+   *  */
+  void gpuTransferPosesToRenderScenes(CudaArrayHandle sceneTransformRefs,
+                                      CudaArrayHandle sceneIndices,
+                                      CudaArrayHandle transformIndices,
+                                      CudaArrayHandle localTransforms, CudaArrayHandle localScales,
+                                      CudaArrayHandle parentIndices,
+                                      CudaArrayHandle parentTransforms);
+  void gpuTransferPosesToRenderCameras();
+  void gpuNotifyPosesUpdated();
+
+  ~SapienRenderEngine();
+
 private:
   std::shared_ptr<svulkan2::core::Context> mContext;
   std::shared_ptr<svulkan2::resource::SVResourceManager> mResourceManager;
@@ -50,6 +71,13 @@ private:
   std::shared_ptr<svulkan2::resource::SVMesh> mSphereMesh;
   std::shared_ptr<svulkan2::resource::SVMesh> mPlaneMesh;
   std::shared_ptr<svulkan2::resource::SVMesh> mBoxMesh;
+
+#ifdef SAPIEN_CUDA
+  vk::UniqueSemaphore mSem{};
+  cudaExternalSemaphore_t mCudaSem{};
+  uint64_t mSemValue{0};
+  void *mCudaStream{nullptr};
+#endif
 };
 
 class SapienRendererSystem : public System {
@@ -124,12 +152,6 @@ private:
   std::shared_ptr<SapienRenderCubemap> mCubemap;
 
   bool mAutoUploadEnabled{true};
-
-#ifdef SAPIEN_CUDA
-  vk::UniqueSemaphore mSem{};
-  cudaExternalSemaphore_t mCudaSem{};
-  uint64_t mSemValue{0};
-#endif
 };
 
 } // namespace sapien_renderer

@@ -59,13 +59,23 @@ public:
    *  The index will change when any object is removed from the scene. */
   int getInternalGpuTransformIndex();
 
+  /** Get the internal mesh scale
+   *  For mesh, this is the same as getScale
+   *  For other shapes, it is implementation dependent
+   *  This should be used with the API that directly updates poses on the GPU
+   * */
+  Vec3 getGpuScale();
+
 protected:
   uint64_t mRenderId{0};
   std::string mName;
   std::shared_ptr<SapienRenderEngine> mEngine;
   Pose mLocalPose{};
   std::shared_ptr<svulkan2::resource::SVModel> mModel;
+
+  // this corresponds to the actual scale in the renderer
   Vec3 mScale{1.f};
+
   vk::CullModeFlagBits mCulling{vk::CullModeFlagBits::eBack};
 
   SapienRenderBodyComponent *mParent{nullptr};
