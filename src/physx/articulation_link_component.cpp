@@ -201,7 +201,7 @@ PxArticulationDriveType::Enum PhysxArticulationJoint::getDriveType() const {
 }
 
 Eigen::VectorXf PhysxArticulationJoint::getDriveTargetPosition() const {
-  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+  if (mLink.lock()->isUsingDirectGPUAPI()) {
     throw std::runtime_error("failed to access drive: not supported on GPU mode");
   }
   Eigen::VectorXf result;
@@ -214,7 +214,7 @@ Eigen::VectorXf PhysxArticulationJoint::getDriveTargetPosition() const {
 }
 
 Eigen::VectorXf PhysxArticulationJoint::getDriveTargetVelocity() const {
-  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+  if (mLink.lock()->isUsingDirectGPUAPI()) {
     throw std::runtime_error("failed to access drive: not supported on GPU mode");
   }
   Eigen::VectorXf result;
@@ -227,7 +227,7 @@ Eigen::VectorXf PhysxArticulationJoint::getDriveTargetVelocity() const {
 }
 
 void PhysxArticulationJoint::setDriveTargetPosition(Eigen::VectorXf const &position) {
-  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+  if (mLink.lock()->isUsingDirectGPUAPI()) {
     throw std::runtime_error("failed to access drive: not supported on GPU mode");
   }
   if (static_cast<size_t>(position.size()) != mAxes.size()) {
@@ -240,7 +240,7 @@ void PhysxArticulationJoint::setDriveTargetPosition(Eigen::VectorXf const &posit
 }
 
 void PhysxArticulationJoint::setDriveTargetVelocity(Eigen::VectorXf const &velocity) {
-  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+  if (mLink.lock()->isUsingDirectGPUAPI()) {
     throw std::runtime_error("failed to access drive: not supported on GPU mode");
   }
   if (static_cast<size_t>(velocity.size()) != mAxes.size()) {
@@ -253,7 +253,7 @@ void PhysxArticulationJoint::setDriveTargetVelocity(Eigen::VectorXf const &veloc
 }
 
 void PhysxArticulationJoint::setDriveTargetPosition(float position) {
-  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+  if (mLink.lock()->isUsingDirectGPUAPI()) {
     throw std::runtime_error("failed to access drive: not supported on GPU mode");
   }
   Eigen::VectorXf v(1);
@@ -262,7 +262,7 @@ void PhysxArticulationJoint::setDriveTargetPosition(float position) {
 }
 
 void PhysxArticulationJoint::setDriveTargetVelocity(float velocity) {
-  if (!mLink.lock()->isUsingDirectGPUAPI()) {
+  if (mLink.lock()->isUsingDirectGPUAPI()) {
     throw std::runtime_error("failed to access drive: not supported on GPU mode");
   }
   Eigen::VectorXf v(1);
