@@ -42,24 +42,24 @@ public:
 
   std::string getSummary();
 
-  /**
-   *  Args:
-   *      sceneTransformRefs: uint64 pointers pointing to per-scene transform buffers
-   *      sceneIndices: scene index for each shape
-   *      transformIndices: per-scene transform index for each shape
-   *      localTransforms: local pose for each shape
-   *      localScales: local scales for each shape
-   *      parnetIndices: index fo each shape's parent in the parentTranasforms array
-   *      parentTransforms: transform array for parent objects
-   *  */
-  void gpuTransferPosesToRenderScenes(CudaArrayHandle sceneTransformRefs,
-                                      CudaArrayHandle sceneIndices,
-                                      CudaArrayHandle transformIndices,
-                                      CudaArrayHandle localTransforms, CudaArrayHandle localScales,
-                                      CudaArrayHandle parentIndices,
-                                      CudaArrayHandle parentTransforms);
-  void gpuTransferPosesToRenderCameras();
-  void gpuNotifyPosesUpdated();
+  // /**
+  //  *  Args:
+  //  *      sceneTransformRefs: uint64 pointers pointing to per-scene transform buffers
+  //  *      sceneIndices: scene index for each shape
+  //  *      transformIndices: per-scene transform index for each shape
+  //  *      localTransforms: local pose for each shape
+  //  *      localScales: local scales for each shape
+  //  *      parnetIndices: index fo each shape's parent in the parentTranasforms array
+  //  *      parentTransforms: transform array for parent objects
+  //  *  */
+  // void gpuTransferPosesToRenderScenes(CudaArrayHandle sceneTransformRefs,
+  //                                     CudaArrayHandle sceneIndices,
+  //                                     CudaArrayHandle transformIndices,
+  //                                     CudaArrayHandle localTransforms, CudaArrayHandle localScales,
+  //                                     CudaArrayHandle parentIndices,
+  //                                     CudaArrayHandle parentTransforms);
+  // void gpuTransferPosesToRenderCameras();
+  // void gpuNotifyPosesUpdated();
 
   ~SapienRenderEngine();
 
@@ -70,13 +70,6 @@ private:
   std::shared_ptr<svulkan2::resource::SVMesh> mSphereMesh;
   std::shared_ptr<svulkan2::resource::SVMesh> mPlaneMesh;
   std::shared_ptr<svulkan2::resource::SVMesh> mBoxMesh;
-
-#ifdef SAPIEN_CUDA
-  vk::UniqueSemaphore mSem{};
-  cudaExternalSemaphore_t mCudaSem{};
-  uint64_t mSemValue{0};
-  void *mCudaStream{nullptr};
-#endif
 };
 
 class SapienRendererSystem : public System {
@@ -119,9 +112,6 @@ public:
   std::string getName() const override { return "render"; }
 
   CudaArrayHandle getTransformCudaArray();
-  void disableAutoUpload();
-  bool isAutoUploadEnabled();
-  void notifyCudaTransformUpdated(cudaStream_t cudaStream);
 
   ~SapienRendererSystem();
 
@@ -149,8 +139,6 @@ private:
   std::set<std::shared_ptr<CudaDeformableMeshComponent>, comp_cmp> mCudaDeformableMeshComponents;
 
   std::shared_ptr<SapienRenderCubemap> mCubemap;
-
-  bool mAutoUploadEnabled{true};
 };
 
 } // namespace sapien_renderer

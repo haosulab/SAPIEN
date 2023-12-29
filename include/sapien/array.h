@@ -28,22 +28,29 @@ struct CudaArrayHandle {
 };
 
 struct CudaArray {
-  std::vector<int> shape;
-  std::string type;
-  int cudaId{-1};
-  void *ptr{nullptr};
-
-  CudaArrayHandle handle() const;
-
-  DLManagedTensor *moveToDLPack();
-
   CudaArray() {}
   CudaArray(std::vector<int> shape_, std::string type_);
+
+  static CudaArray FromData(void *data, int size);
+
+  template <typename T> static CudaArray FromData(std::vector<T> data) {
+    return CudaArray::FromData(data.data(), data.size() * sizeof(T));
+  }
+
+  CudaArrayHandle handle() const;
+  int bytes() const;
+  DLManagedTensor *moveToDLPack();
+
   CudaArray(CudaArray const &) = delete;
   CudaArray &operator=(CudaArray const &) = delete;
   CudaArray(CudaArray &&other);
   CudaArray &operator=(CudaArray &&other);
   ~CudaArray();
+
+  std::vector<int> shape;
+  std::string type;
+  int cudaId{-1};
+  void *ptr{nullptr};
 };
 
 struct CpuArrayHandle {

@@ -148,21 +148,24 @@ void SapienRendererWindow::show() { mWindow->show(); }
 void SapienRendererWindow::setScene(std::shared_ptr<Scene> scene) {
   mSVulkanRenderer->setScene(scene->getSapienRendererSystem()->getScene());
 
-  auto system = scene->getSapienRendererSystem();
-  if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(mSVulkanRenderer.get())) {
-    // TODO: do it for rt renderer
-    r->setAutoUploadEnabled(system->isAutoUploadEnabled());
-  }
+  // TODO handle auto upload
+
+  // auto system = scene->getSapienRendererSystem();
+  // if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(mSVulkanRenderer.get())) {
+  //   // TODO: do it for rt renderer
+  //   r->setAutoUploadEnabled(system->isAutoUploadEnabled());
+  // }
 
   mScene = scene;
 }
 
 void SapienRendererWindow::forceUploadCamera() {
-  if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(mSVulkanRenderer.get())) {
-    if (!r->getAutoUploadEnabled()) {
-      r->forceUploadCameraBuffer(*getCamera());
-    }
-  }
+  // TODO handle auto upload
+  // if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(mSVulkanRenderer.get())) {
+  //   if (!r->getAutoUploadEnabled()) {
+  //     r->forceUploadCameraBuffer(*getCamera());
+  //   }
+  // }
 }
 
 void SapienRendererWindow::setCameraParameters(float near, float far, float fovy) {

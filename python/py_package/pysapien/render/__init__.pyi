@@ -10,6 +10,7 @@ _T = typing.TypeVar("T")
 __all__ = [
     "RenderBodyComponent",
     "RenderCameraComponent",
+    "RenderCameraGroup",
     "RenderCubemap",
     "RenderCudaMeshComponent",
     "RenderDirectionalLightComponent",
@@ -28,6 +29,7 @@ __all__ = [
     "RenderShapeTriangleMeshPart",
     "RenderSpotLightComponent",
     "RenderSystem",
+    "RenderSystemGroup",
     "RenderTexture",
     "RenderTexture2D",
     "RenderTexturedLightComponent",
@@ -44,8 +46,6 @@ __all__ = [
     "get_ray_tracing_path_depth",
     "get_ray_tracing_samples_per_pixel",
     "get_viewer_shader_dir",
-    "gpu_notify_poses_updated",
-    "gpu_transfer_poses_to_render_scenes",
     "load_scene",
     "set_camera_shader_dir",
     "set_imgui_ini_filename",
@@ -153,14 +153,11 @@ class RenderCameraComponent(sapien.pysapien.Component):
         """
     def get_skew(self) -> float: ...
     def get_width(self) -> int: ...
-    def gpu_init(self) -> None: 
-        """
-        Do rendering once to ensure all GPU resources for this camera is initialized
-        """
     def set_far(self, far: float) -> None: ...
     def set_focal_lengths(self, fx: float, fy: float) -> None: ...
     def set_fovx(self, fov: float, compute_y: bool = True) -> None: ...
     def set_fovy(self, fov: float, compute_x: bool = True) -> None: ...
+    def set_gpu_pose_batch_index(self, arg0: int) -> None: ...
     def set_local_pose(self, arg0: sapien.pysapien.Pose) -> None: ...
     def set_near(self, near: float) -> None: ...
     def set_perspective_parameters(self, near: float, far: float, fx: float, fy: float, cx: float, cy: float, skew: float) -> None: ...
@@ -174,9 +171,9 @@ class RenderCameraComponent(sapien.pysapien.Component):
     def set_texture_array(self, name: str, textures: list[RenderTexture]) -> None: ...
     def take_picture(self) -> None: ...
     @property
-    def cuda_buffer(self) -> CudaArrayHandle:
+    def _cuda_buffer(self) -> CudaArrayHandle:
         """
-        Get the CUDA buffer containing GPU data for this camera, including transformaion matrices, sizes, and user-defined shader fields. This function can only be called after gpu_init
+        Debug only. Get the CUDA buffer containing GPU data for this camera, including transformaion matrices, sizes, and user-defined shader fields.
 
         :type: CudaArrayHandle
         """
@@ -257,6 +254,10 @@ class RenderCameraComponent(sapien.pysapien.Component):
         """
         :type: int
         """
+    pass
+class RenderCameraGroup():
+    def get_picture_cuda(self, name: str) -> CudaArrayHandle: ...
+    def take_picture(self) -> None: ...
     pass
 class RenderCubemap():
     @typing.overload
@@ -572,13 +573,12 @@ class RenderPointLightComponent(RenderLightComponent, sapien.pysapien.Component)
     pass
 class RenderShape():
     def get_culling(self) -> typing.Literal['back', 'front', 'none', 'both']: ...
-    def get_gpu_scale(self) -> numpy.ndarray[numpy.float32, _Shape, _Shape[3]]: ...
-    def get_gpu_transform_index(self) -> int: ...
     def get_local_pose(self) -> sapien.pysapien.Pose: ...
     def get_material(self) -> RenderMaterial: ...
     def get_name(self) -> str: ...
     def get_per_scene_id(self) -> int: ...
     def set_culling(self, culling: typing.Literal['back', 'front', 'none', 'both']) -> None: ...
+    def set_gpu_pose_batch_index(self, arg0: int) -> None: ...
     def set_local_pose(self, arg0: sapien.pysapien.Pose) -> None: ...
     def set_name(self, name: str) -> None: ...
     @property
@@ -755,7 +755,6 @@ class RenderSpotLightComponent(RenderLightComponent, sapien.pysapien.Component):
     pass
 class RenderSystem(sapien.pysapien.System):
     def __init__(self) -> None: ...
-    def disable_auto_upload(self) -> None: ...
     def get_ambient_light(self) -> numpy.ndarray[numpy.float32, _Shape, _Shape[3]]: ...
     def get_cameras(self) -> list[RenderCameraComponent]: ...
     def get_cubemap(self) -> RenderCubemap: ...
@@ -803,6 +802,19 @@ class RenderSystem(sapien.pysapien.System):
     def render_bodies(self) -> list[RenderBodyComponent]:
         """
         :type: list[RenderBodyComponent]
+        """
+    pass
+class RenderSystemGroup():
+    def __init__(self, arg0: list[RenderSystem]) -> None: ...
+    def create_camera_group(self, cameras: list[RenderCameraComponent], picture_names: list[str]) -> RenderCameraGroup: ...
+    def set_cuda_poses(self, arg0: CudaArrayHandle) -> None: ...
+    def set_cuda_stream(self, arg0: int) -> None: ...
+    def update_render(self) -> None: 
+        """
+        This function performs CUDA operations to transfer poses from the CUDA buffer provided by :func:`set_cuda_poses` into render systems.
+        It updates the transformation matrices of objects and cameras.
+
+        This function waits for any pending CUDA operations on cuda stream provided by :func:`set_cuda_stream`.
         """
     pass
 class RenderTexture():
@@ -1091,10 +1103,6 @@ def get_ray_tracing_path_depth() -> int:
 def get_ray_tracing_samples_per_pixel() -> int:
     pass
 def get_viewer_shader_dir() -> str:
-    pass
-def gpu_notify_poses_updated() -> None:
-    pass
-def gpu_transfer_poses_to_render_scenes(scene_transform_pointers: CudaArrayHandle, scene_indices: CudaArrayHandle, transform_indices: CudaArrayHandle, local_poses: CudaArrayHandle, local_scales: CudaArrayHandle, parent_indices: CudaArrayHandle, parent_transforms: CudaArrayHandle) -> None:
     pass
 def load_scene(filename: str, apply_scale: bool = True) -> dict:
     pass

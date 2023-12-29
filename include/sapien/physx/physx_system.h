@@ -76,10 +76,10 @@ public:
   int getArticulationCount() const;
 
   /** get articulation max dof directly from PhysX */
-  int getArticulationMaxDof() const;
+  int computeArticulationMaxDof() const;
 
   /** get articulation max link count directly from PhysX */
-  int getArticulationMaxLinkCount() const;
+  int computeArticulationMaxLinkCount() const;
 
 protected:
   PhysxSystem(PhysxSceneConfig const &config);
@@ -151,8 +151,7 @@ public:
   bool isGpu() const override { return true; }
 
   void gpuInit();
-  bool isInitialized() const { return mInitialized; }
-
+  bool isInitialized() const { return mGpuInitialized; }
   void checkGpuInitialized() const;
 
   /** Set the CUDA stream for all GPU operations.
@@ -160,96 +159,49 @@ public:
    *  If not set, gpuQuery* and gpuApply* synchronizes with the default stream */
   void gpuSetCudaStream(uintptr_t stream);
 
-  void gpuFillBodyIndices(CudaArrayHandle const &index,
-                          std::vector<std::shared_ptr<PhysxRigidBodyComponent>> const &bodies);
+  // int gpuQueryContacts(CudaArrayHandle const &data) const;
 
-  /** Create a index buffer for rigid bodies given a list rigid dynamic objects
-   *  Each entry of the index buffer is 128 bits. First 32 bits represent the
-   *  location in a target data buffer, it is filled with consecutive integers
-   *  starting from 0. Next 32 bits are paddings. The final 64 bits are PhysX
-   *  internal id used to identify a GPU rigid body. */
-  CudaArray
-  gpuCreateBodyIndices(std::vector<std::shared_ptr<PhysxRigidBodyComponent>> const &bodies);
+  /** handle to the pose-vel buffer for rigid dynamic bodies and links */
+  CudaArrayHandle gpuGetRigidBodyCudaHandle() const { return mCudaRigidBodyBuffer.handle(); }
+  CudaArrayHandle gpuGetRigidDynamicCudaHandle() const { return mCudaRigidDynamicHandle; }
+  CudaArrayHandle gpuGetArticulationLinkCudaHandle() const { return mCudaLinkHandle; }
 
-  void gpuFillArticulationIndices(
-      CudaArrayHandle const &index,
-      std::vector<std::shared_ptr<PhysxArticulation>> const &articulations) const;
+  CudaArrayHandle gpuGetArticulationQposCudaHandle() const { return mCudaQposHandle; }
+  CudaArrayHandle gpuGetArticulationQvelCudaHandle() const { return mCudaQTargetVelHandle; }
+  CudaArrayHandle gpuGetArticulationQaccCudaHandle() const { return mCudaQaccHandle; }
+  CudaArrayHandle gpuGetArticulationQfCudaHandle() const { return mCudaQfHandle; }
 
-  /** Create a index buffer for articulations given a list of articulations.
-   *  The content of the buffer are a list of GPU indices of the provided articulations
-   *  Each entry is a 32-bit integer articulation id */
-  CudaArray gpuCreateArticulationIndices(
-      std::vector<std::shared_ptr<PhysxArticulation>> const &articulations) const;
+  CudaArrayHandle gpuGetArticulationQTargetPosCudaHandle() const { return mCudaQTargetPosHandle; }
+  CudaArrayHandle gpuGetArticulationQTargetVelCudaHandle() const { return mCudaQTargetVelHandle; }
 
-  void gpuFillBodyOffsets(CudaArrayHandle const &offset,
-                          std::vector<std::shared_ptr<PhysxRigidBodyComponent>> const &bodies);
-  CudaArray
-  gpuCreateBodyOffsets(std::vector<std::shared_ptr<PhysxRigidBodyComponent>> const &bodies);
+  void gpuFetchRigidDynamicData();
+  void gpuFetchArticulationLinkPose();
+  void gpuFetchArticulationLinkVel();
+  void gpuFetchArticulationQpos();
+  void gpuFetchArticulationQvel();
+  void gpuFetchArticulationQacc();
+  void gpuFetchArticulationQTargetPos();
+  void gpuFetchArticulationQTargetVel();
 
-  void gpuFillArticulationOffsets(CudaArrayHandle const &offset);
-  CudaArray gpuCreateArticulationOffsets();
+  void gpuApplyRigidDynamicData(CudaArrayHandle const &indices);
+  void gpuApplyArticulationRootPose(CudaArrayHandle const &indices);
+  void gpuApplyArticulationRootVel(CudaArrayHandle const &indices);
+  void gpuApplyArticulationQpos(CudaArrayHandle const &indices);
+  void gpuApplyArticulationQvel(CudaArrayHandle const &indices);
+  void gpuApplyArticulationQf(CudaArrayHandle const &indices);
+  void gpuApplyArticulationQTargetPos(CudaArrayHandle const &indices);
+  void gpuApplyArticulationQTargetVel(CudaArrayHandle const &indices);
 
-  /** Allocate a CUDA buffer capable of storing data of "count" number of rigid bodies */
-  CudaArray gpuCreateBodyDataBuffer(uint32_t count);
+  void gpuApplyRigidDynamicData();
+  void gpuApplyArticulationRootPose();
+  void gpuApplyArticulationRootVel();
+  void gpuApplyArticulationQpos();
+  void gpuApplyArticulationQvel();
+  void gpuApplyArticulationQf();
+  void gpuApplyArticulationQTargetPos();
+  void gpuApplyArticulationQTargetVel();
 
-  /** Allocate a CUDA buffer capable of storing data of ALL articulation joint data */
-  CudaArray gpuCreateArticulationQBuffer() const;
-
-  /** Allocate a CUDA buffer capable of storing data of ALL articulation link poses */
-  CudaArray gpuCreateArticulationLinkPoseBuffer() const;
-
-  /** Allocate a CUDA buffer capable of storing data of ALL articulation link velocity */
-  CudaArray gpuCreateArticulationLinkVelocityBuffer() const;
-
-  /** Allocate a CUDA buffer capable of storing data of ALL articulation root poses */
-  CudaArray gpuCreateArticulationRootPoseBuffer() const;
-
-  /** Allocate a CUDA buffer capable of storing data of ALL articulation root velocity */
-  CudaArray gpuCreateArticulationRootVelocityBuffer() const;
-
-  /** Query the pose and velocity of rigid bodies represented by the index buffer,
-   *  The result is stored to the data buffer */
-
-  void gpuQueryBodyDataRaw(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuQueryBodyData(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                        CudaArrayHandle const &offset);
-  void gpuApplyBodyData(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                        CudaArrayHandle const &offset);
-
-  void gpuApplyBodyForce(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuApplyBodyTorque(CudaArrayHandle const &data, CudaArrayHandle const &index);
-
-  void gpuQueryArticulationQpos(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuQueryArticulationQvel(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuQueryArticulationQacc(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuQueryArticulationDrivePos(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuQueryArticulationDriveVel(CudaArrayHandle const &data, CudaArrayHandle const &index);
-
-  void gpuQueryArticulationRootPoseRaw(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuQueryArticulationRootPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                                    CudaArrayHandle const &offset);
-  void gpuQueryArticulationRootVelocity(CudaArrayHandle const &data, CudaArrayHandle const &index);
-
-  void gpuQueryArticulationLinkPoseRaw(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuQueryArticulationLinkPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                                    CudaArrayHandle const &offset);
-  void gpuQueryArticulationLinkVelocity(CudaArrayHandle const &data, CudaArrayHandle const &index);
-
-  void gpuApplyArticulationQpos(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuApplyArticulationQvel(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuApplyArticulationQf(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuApplyArticulationDrivePos(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuApplyArticulationDriveVel(CudaArrayHandle const &data, CudaArrayHandle const &index);
-  void gpuApplyArticulationRootPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                                    CudaArrayHandle const &offset);
-  void gpuApplyArticulationRootVelocity(CudaArrayHandle const &data, CudaArrayHandle const &index);
-
-  void gpuApplyArticulationLinkPose(CudaArrayHandle const &data, CudaArrayHandle const &index,
-                                    CudaArrayHandle const &offset);
-
-  void gpuUpdateArticulationKinematics() const;
-
-  int gpuQueryContacts(CudaArrayHandle const &data) const;
+  void gpuUpdateArticulationKinematics();
 
   void setSceneOffset(std::shared_ptr<Scene> scene, Vec3 offset);
   Vec3 getSceneOffset(std::shared_ptr<Scene> scene) const;
@@ -262,7 +214,7 @@ private:
   std::set<std::shared_ptr<PhysxRigidStaticComponent>, comp_cmp> mRigidStaticComponents;
   std::set<std::shared_ptr<PhysxArticulationLinkComponent>, comp_cmp> mArticulationLinkComponents;
 
-  bool mInitialized{false};
+  bool mGpuInitialized{false};
 
   // cache values updated in gpuInit
   int mGpuArticulationCount{-1};
@@ -273,8 +225,33 @@ private:
   CudaEvent mCudaEventWait;
   cudaStream_t mCudaStream{0};
 
-  void ensureScratchSize(int size);
-  CudaArray mCudaScratch;
+  CudaArray mCudaRigidDynamicScratch;
+  CudaArray mCudaLinkPoseScratch;
+  CudaArray mCudaLinkVelScratch;
+  CudaArray mCudaRigidDynamicIndexScratch;
+  CudaArray mCudaArticulationIndexScratch;
+
+  void allocateCudaBuffers();
+
+  // indx buffer for all rigid dynamic bodies
+  CudaArray mCudaRigidDynamicIndexBuffer;
+  CudaArray mCudaRigidDynamicOffsetBuffer;
+
+  // index buffer for all articulations
+  CudaArray mCudaArticulationIndexBuffer;
+  CudaArray mCudaArticulationOffsetBuffer;
+
+  CudaArray mCudaRigidBodyBuffer;
+  CudaArrayHandle mCudaRigidDynamicHandle;
+  CudaArrayHandle mCudaLinkHandle;
+
+  CudaArray mCudaArticulationBuffer;
+  CudaArrayHandle mCudaQposHandle;
+  CudaArrayHandle mCudaQvelHandle;
+  CudaArrayHandle mCudaQfHandle;
+  CudaArrayHandle mCudaQaccHandle;
+  CudaArrayHandle mCudaQTargetPosHandle;
+  CudaArrayHandle mCudaQTargetVelHandle;
 };
 
 #endif

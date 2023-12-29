@@ -47,6 +47,10 @@ public:
   vk::CullModeFlagBits getCulling() const;
   void setCulling(vk::CullModeFlagBits);
 
+  /** batched rendering only, sets the index to look up for GPU pose */
+  void setGpuBatchedPoseIndex(int);
+  int getGpuBatchedPoseIndex() const;
+
   /** Get the index of this shape in the transform array of the render scene
    *  The index will change when any object is removed from the scene. */
   int getInternalGpuTransformIndex();
@@ -72,6 +76,8 @@ protected:
 
   SapienRenderBodyComponent *mParent{nullptr};
   svulkan2::scene::Object *mObject{nullptr};
+
+  int mBatchedPoseIndex{-1};
 };
 
 class RenderShapePlane : public RenderShape {
@@ -190,4 +196,3 @@ private:
 
 } // namespace sapien_renderer
 } // namespace sapien
-

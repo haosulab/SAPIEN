@@ -3,6 +3,7 @@
 #include "image.h"
 #include "sapien/math/mat.h"
 #include "sapien/math/pose.h"
+#include <svulkan2/renderer/renderer_base.h>
 #include <svulkan2/scene/camera.h>
 #include <variant>
 #include <map>
@@ -67,9 +68,15 @@ public:
 
   void internalUpdate();
 
-  // render once to get all buffers initialized
+  // GPU apis
   void gpuInit();
   CudaArrayHandle getCudaBuffer();
+  void setGpuBatchedPoseIndex(int);
+  int getGpuBatchedPoseIndex() const;
+  void setAutoUpload(bool enable);
+  svulkan2::core::Image &getInternalImage(std::string const &name);
+  svulkan2::renderer::RendererBase &getInternalRenderer();
+  svulkan2::scene::Camera &getInternalCamera();
 
   ~SapienRenderCameraComponent();
   SapienRenderCameraComponent(SapienRenderCameraComponent const &) = delete;
@@ -100,6 +107,7 @@ private:
 
   // this is set to true when GPU resources is available
   bool mGpuInitialized{false};
+  int mGpuPoseIndex{-1};
 };
 
 } // namespace sapien_renderer

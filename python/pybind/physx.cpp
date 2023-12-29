@@ -374,79 +374,72 @@ Args:
     stream: integer representation of a cuda stream pointer
 )doc")
 
-      .def("gpu_create_body_index_buffer", &PhysxSystemGpu::gpuCreateBodyIndices,
-           py::arg("bodies"))
-      .def("gpu_create_body_data_buffer", &PhysxSystemGpu::gpuCreateBodyDataBuffer,
-           py::arg("count"))
-      .def("gpu_create_body_offset_buffer", &PhysxSystemGpu::gpuCreateBodyOffsets,
-           py::arg("bodies"))
+      .def_property_readonly("cuda_rigid_body_data", &PhysxSystemGpu::gpuGetRigidBodyCudaHandle)
+      .def_property_readonly("cuda_rigid_dynamic_data",
+                             &PhysxSystemGpu::gpuGetRigidDynamicCudaHandle)
+      .def_property_readonly("cuda_articulation_link_data",
+                             &PhysxSystemGpu::gpuGetArticulationLinkCudaHandle)
+      .def_property_readonly("cuda_articulation_qpos",
+                             &PhysxSystemGpu::gpuGetArticulationQposCudaHandle)
+      .def_property_readonly("cuda_articulation_qvel",
+                             &PhysxSystemGpu::gpuGetArticulationQvelCudaHandle)
+      .def_property_readonly("cuda_articulation_qacc",
+                             &PhysxSystemGpu::gpuGetArticulationQaccCudaHandle)
+      .def_property_readonly("cuda_articulation_qf",
+                             &PhysxSystemGpu::gpuGetArticulationQfCudaHandle)
+      .def_property_readonly("cuda_articulation_target_qpos",
+                             &PhysxSystemGpu::gpuGetArticulationQTargetPosCudaHandle)
+      .def_property_readonly("cuda_articulation_target_qvel",
+                             &PhysxSystemGpu::gpuGetArticulationQTargetVelCudaHandle)
 
-      .def("_gpu_query_body_data_raw", &PhysxSystemGpu::gpuQueryBodyDataRaw,
-           py::arg("data_buffer"), py::arg("index_buffer"))
-      .def("gpu_query_body_data", &PhysxSystemGpu::gpuQueryBodyData, py::arg("data_buffer"),
-           py::arg("index_buffer"), py::arg("offset_buffer"))
-      .def("gpu_apply_body_data", &PhysxSystemGpu::gpuApplyBodyData, py::arg("data_buffer"),
-           py::arg("index_buffer"), py::arg("offset_buffer"))
-      .def("gpu_apply_body_force", &PhysxSystemGpu::gpuApplyBodyForce, py::arg("force_buffer"),
-           py::arg("index_buffer"))
-      .def("gpu_apply_body_torque", &PhysxSystemGpu::gpuApplyBodyTorque, py::arg("torque_buffer"),
-           py::arg("index_buffer"))
+      .def("gpu_fetch_rigid_dynamic_data", &PhysxSystemGpu::gpuFetchRigidDynamicData)
+      .def("gpu_fetch_articulation_link_pose", &PhysxSystemGpu::gpuFetchArticulationLinkPose)
+      .def("gpu_fetch_articulation_link_velocity", &PhysxSystemGpu::gpuFetchArticulationLinkVel)
+      .def("gpu_fetch_articulation_qpos", &PhysxSystemGpu::gpuFetchArticulationQpos)
+      .def("gpu_fetch_articulation_qvel", &PhysxSystemGpu::gpuFetchArticulationQvel)
+      .def("gpu_fetch_articulation_qacc", &PhysxSystemGpu::gpuFetchArticulationQacc)
+      .def("gpu_fetch_articulation_target_qpos", &PhysxSystemGpu::gpuFetchArticulationQTargetPos)
+      .def("gpu_fetch_articulation_target_qvel", &PhysxSystemGpu::gpuFetchArticulationQTargetVel)
 
-      .def("gpu_create_articulation_index_buffer", &PhysxSystemGpu::gpuCreateArticulationIndices,
-           py::arg("articulations"))
-      .def("gpu_create_articulation_q_buffer", &PhysxSystemGpu::gpuCreateArticulationQBuffer)
+      .def("gpu_update_articulation_kinematics", &PhysxSystemGpu::gpuUpdateArticulationKinematics)
 
-      .def("gpu_create_articulation_link_pose_buffer",
-           &PhysxSystemGpu::gpuCreateArticulationLinkPoseBuffer)
-      .def("gpu_create_articulation_link_velocity_buffer",
-           &PhysxSystemGpu::gpuCreateArticulationLinkVelocityBuffer)
+      // TODO apply force torque
+      .def("gpu_apply_rigid_dynamic_data",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyRigidDynamicData))
+      .def("gpu_apply_articulation_root_pose",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationRootPose))
+      .def("gpu_apply_articulation_root_velocity",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationRootVel))
+      .def("gpu_apply_articulation_qpos",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationQpos))
+      .def("gpu_apply_articulation_qvel",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationQvel))
+      .def("gpu_apply_articulation_qf",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationQf))
+      .def("gpu_apply_articulation_target_position",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationQTargetPos))
+      .def("gpu_apply_articulation_target_velocity",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationQTargetVel))
 
-      .def("gpu_create_articulation_root_pose_buffer",
-           &PhysxSystemGpu::gpuCreateArticulationRootPoseBuffer)
-
-      .def("gpu_create_articulation_offset_buffer", &PhysxSystemGpu::gpuCreateArticulationOffsets)
-
-      .def("gpu_query_articulation_qpos", &PhysxSystemGpu::gpuQueryArticulationQpos,
-           py::arg("data_buffer"), py::arg("index_buffer"))
-      .def("gpu_query_articulation_qvel", &PhysxSystemGpu::gpuQueryArticulationQvel,
-           py::arg("data_buffer"), py::arg("index_buffer"))
-      .def("gpu_query_articulation_qacc", &PhysxSystemGpu::gpuQueryArticulationQacc,
-           py::arg("data_buffer"), py::arg("index_buffer"))
-      .def("gpu_query_articulation_drive_target", &PhysxSystemGpu::gpuQueryArticulationDrivePos,
-           py::arg("data_buffer"), py::arg("index_buffer"))
-      .def("gpu_query_articulation_drive_velocity_target",
-           &PhysxSystemGpu::gpuQueryArticulationDriveVel, py::arg("data_buffer"),
-           py::arg("index_buffer"))
-      .def("_gpu_query_articulation_root_pose_raw",
-           &PhysxSystemGpu::gpuQueryArticulationRootPoseRaw, py::arg("data_buffer"),
-           py::arg("index_buffer"))
-      .def("gpu_query_articulation_root_pose", &PhysxSystemGpu::gpuQueryArticulationRootPose,
-           py::arg("data_buffer"), py::arg("index_buffer"), py::arg("offset_buffer"))
-
-      .def("_gpu_query_articulation_link_pose_raw",
-           &PhysxSystemGpu::gpuQueryArticulationLinkPoseRaw, py::arg("data_buffer"),
-           py::arg("index_buffer"))
-      .def("gpu_query_articulation_link_pose", &PhysxSystemGpu::gpuQueryArticulationLinkPose,
-           py::arg("data_buffer"), py::arg("index_buffer"), py::arg("offset_buffer"))
-      .def("gpu_query_articulation_link_velocity",
-           &PhysxSystemGpu::gpuQueryArticulationLinkVelocity, py::arg("data_buffer"),
-           py::arg("index_buffer"))
-
-      .def("gpu_apply_articulation_qpos", &PhysxSystemGpu::gpuApplyArticulationQpos,
-           py::arg("data_buffer"), py::arg("index_buffer"))
-      .def("gpu_apply_articulation_qvel", &PhysxSystemGpu::gpuApplyArticulationQvel,
-           py::arg("data_buffer"), py::arg("index_buffer"))
-      .def("gpu_apply_articulation_qf", &PhysxSystemGpu::gpuApplyArticulationQf,
-           py::arg("data_buffer"), py::arg("index_buffer"))
-      .def("gpu_apply_articulation_drive_target", &PhysxSystemGpu::gpuApplyArticulationDrivePos,
-           py::arg("data_buffer"), py::arg("index_buffer"))
-      .def("gpu_apply_articulation_drive_velocity_target",
-           &PhysxSystemGpu::gpuApplyArticulationDriveVel, py::arg("data_buffer"),
-           py::arg("index_buffer"))
-      .def("gpu_apply_articulation_root_pose", &PhysxSystemGpu::gpuApplyArticulationRootPose,
-           py::arg("data_buffer"), py::arg("index_buffer"), py::arg("offset_buffer"))
-
-      .def("gpu_update_articulation_kinematics", &PhysxSystemGpu::gpuUpdateArticulationKinematics);
+      .def("gpu_apply_rigid_dynamic_data",
+           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyRigidDynamicData))
+      .def("gpu_apply_articulation_root_pose", py::overload_cast<CudaArrayHandle const &>(
+                                                   &PhysxSystemGpu::gpuApplyArticulationRootPose))
+      .def(
+          "gpu_apply_articulation_root_velocity",
+          py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationRootVel))
+      .def("gpu_apply_articulation_qpos",
+           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQpos))
+      .def("gpu_apply_articulation_qvel",
+           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQvel))
+      .def("gpu_apply_articulation_qf",
+           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQf))
+      .def("gpu_apply_articulation_target_position",
+           py::overload_cast<CudaArrayHandle const &>(
+               &PhysxSystemGpu::gpuApplyArticulationQTargetPos))
+      .def("gpu_apply_articulation_target_velocity",
+           py::overload_cast<CudaArrayHandle const &>(
+               &PhysxSystemGpu::gpuApplyArticulationQTargetVel));
 
   PyPhysxMaterial
       .def(py::init<float, float, float>(), py::arg("static_friction"),
@@ -668,7 +661,12 @@ Example:
       .def_property("kinematic_target", &PhysxRigidDynamicComponent::getKinematicTarget,
                     &PhysxRigidDynamicComponent::setKinematicTarget)
       .def("get_kinematic_target", &PhysxRigidDynamicComponent::getKinematicTarget)
-      .def("set_kinematic_target", &PhysxRigidDynamicComponent::setKinematicTarget);
+      .def("set_kinematic_target", &PhysxRigidDynamicComponent::setKinematicTarget)
+
+      .def_property_readonly("gpu_index", &PhysxRigidDynamicComponent::getGpuIndex)
+      .def("get_gpu_index", &PhysxRigidDynamicComponent::getGpuIndex)
+      .def_property_readonly("gpu_pose_index", &PhysxRigidDynamicComponent::getGpuPoseIndex)
+      .def("get_gpu_pose_index", &PhysxRigidDynamicComponent::getGpuPoseIndex);
 
   PyPhysxArticulationLinkComponent
       .def(py::init(&PhysxArticulationLinkComponent::Create), py::arg("parent") = nullptr)
@@ -693,7 +691,10 @@ Example:
       .def("put_to_sleep", &PhysxArticulationLinkComponent::putToSleep)
 
       .def_property_readonly("index", &PhysxArticulationLinkComponent::getIndex)
-      .def("get_index", &PhysxArticulationLinkComponent::getIndex);
+      .def("get_index", &PhysxArticulationLinkComponent::getIndex)
+
+      .def_property_readonly("gpu_pose_index", &PhysxArticulationLinkComponent::getGpuPoseIndex)
+      .def("get_gpu_pose_index", &PhysxArticulationLinkComponent::getGpuPoseIndex);
 
   PyPhysxArticulationJoint
       .def_property("name", &PhysxArticulationJoint::getName, &PhysxArticulationJoint::setName)
@@ -872,8 +873,9 @@ Example:
              }
              return std::shared_ptr<PhysxArticulationJoint>{};
            })
-      .def("get_gpu_index",
-           [](PhysxArticulation &a) { return a.getPxArticulation()->getGpuArticulationIndex(); });
+
+      .def_property_readonly("gpu_index", &PhysxArticulation::getGpuIndex)
+      .def("get_gpu_index", &PhysxArticulation::getGpuIndex);
 
   PyPhysxJointComponent
       .def_property("parent", &PhysxJointComponent::getParent, &PhysxJointComponent::setParent)

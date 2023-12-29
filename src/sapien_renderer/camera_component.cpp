@@ -152,6 +152,7 @@ struct SapienRenderCameraInternal {
   }
 
   svulkan2::renderer::RendererBase &getRenderer() const { return *mRenderer; }
+  svulkan2::scene::Camera &getCamera() const { return *mCamera; }
 
   ~SapienRenderCameraInternal() { mScene->removeNode(*mCamera); }
 };
@@ -200,17 +201,40 @@ SapienRenderCameraComponent::SapienRenderCameraComponent(uint32_t width, uint32_
   mShaderDir = shaderDir;
 }
 
+void SapienRenderCameraComponent::setAutoUpload(bool enable) {
+  auto scene = getScene();
+  if (!scene) {
+    throw std::runtime_error("The camera needs to be added to scene.");
+  }
+
+  auto system = scene->getSapienRendererSystem();
+  if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(&mCamera->getRenderer())) {
+    // TODO: do it for rt renderer
+    r->setAutoUploadEnabled(enable);
+  }
+}
+
+svulkan2::core::Image &SapienRenderCameraComponent::getInternalImage(std::string const &name) {
+  if (!mGpuInitialized) {
+    throw std::runtime_error("The camera needs to be initialized");
+  }
+  return mCamera->getRenderer().getRenderImage(name);
+}
+
+svulkan2::renderer::RendererBase &SapienRenderCameraComponent::getInternalRenderer() {
+  return mCamera->getRenderer();
+}
+
+svulkan2::scene::Camera &SapienRenderCameraComponent::getInternalCamera() {
+  return mCamera->getCamera();
+}
+
 void SapienRenderCameraComponent::onAddToScene(Scene &scene) {
   auto system = scene.getSapienRendererSystem();
   mCamera = std::make_unique<SapienRenderCameraInternal>(getWidth(), getHeight(), mShaderDir,
                                                          system->getScene());
   mCamera->mCamera->setPerspectiveParameters(mNear, mFar, mFx, mFy, mCx, mCy, mWidth, mHeight,
                                              mSkew);
-
-  if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(&mCamera->getRenderer())) {
-    // TODO: do it for rt renderer
-    r->setAutoUploadEnabled(system->isAutoUploadEnabled());
-  }
 
   for (auto &[k, v] : mProperties) {
     if (std::holds_alternative<int>(v)) {
@@ -253,7 +277,6 @@ SapienRenderImageCpu SapienRenderCameraComponent::getImage(std::string const &na
     logger::warn("getting picture without taking picture since last camera update");
   }
   auto image = mCamera->getImage(name);
-  mGpuInitialized = true;
   return image;
 }
 
@@ -266,7 +289,6 @@ SapienRenderImageCuda SapienRenderCameraComponent::getImageCuda(std::string cons
     logger::warn("getting picture without taking picture since last camera update");
   }
   auto image = mCamera->getImageCuda(name);
-  mGpuInitialized = true;
   return image;
 #else
   throw std::runtime_error("sapien is not copmiled with CUDA support");
@@ -376,11 +398,19 @@ void SapienRenderCameraComponent::internalUpdate() {
 }
 
 void SapienRenderCameraComponent::gpuInit() {
+  if (mGpuInitialized) {
+    return;
+  }
+
   if (!mCamera) {
     throw std::runtime_error("failed to init: the camera is not added to scene.");
   }
+
+  setAutoUpload(true);
   mCamera->takePicture();
   mCamera->waitForRender();
+  setAutoUpload(false);
+
   mGpuInitialized = true;
 }
 
@@ -406,6 +436,9 @@ CudaArrayHandle SapienRenderCameraComponent::getCudaBuffer() {
     throw std::runtime_error("only rasterization renderer supports camera cuda buffer.");
   }
 }
+
+void SapienRenderCameraComponent::setGpuBatchedPoseIndex(int index) { mGpuPoseIndex = index; }
+int SapienRenderCameraComponent::getGpuBatchedPoseIndex() const { return mGpuPoseIndex; }
 
 SapienRenderCameraComponent::~SapienRenderCameraComponent() {}
 

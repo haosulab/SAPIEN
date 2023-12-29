@@ -69,6 +69,8 @@ public:
                          float offset, float stiffness, float damping, float low, float high,
                          float limitStiffness);
 
+  int getGpuIndex() const;
+
   ~PhysxArticulation();
 
 private:

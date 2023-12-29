@@ -124,6 +124,14 @@ DLManagedTensor *CudaArrayHandle::toDLPack() const {
   return tensor;
 }
 
+CudaArray CudaArray::FromData(void *data, int size) {
+  CudaArray buffer({size}, "u1");
+#ifdef SAPIEN_CUDA
+  checkCudaErrors(cudaMemcpy(buffer.ptr, data, size, cudaMemcpyHostToDevice));
+#endif
+  return buffer;
+}
+
 CudaArray::CudaArray(std::vector<int> shape_, std::string type_)
     : shape(shape_), type(type_), cudaId(-1), ptr(nullptr) {
 #ifdef SAPIEN_CUDA
@@ -208,6 +216,14 @@ DLManagedTensor *CudaArray::moveToDLPack() {
 
   tensor->manager_ctx = new CudaArray(std::move(*this));
   return tensor;
+}
+
+int CudaArray::bytes() const {
+  int size = 1;
+  for (auto s : shape) {
+    size *= s;
+  }
+  return size * typestrBytes(type);
 }
 
 } // namespace sapien

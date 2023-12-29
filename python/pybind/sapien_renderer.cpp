@@ -389,23 +389,23 @@ void init_sapien_renderer(py::module &sapien) {
             return parseSceneNode(*root);
           },
           py::arg("filename"), py::arg("apply_scale") = true)
-      .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); })
+      .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); });
 
-      .def(
-          "gpu_transfer_poses_to_render_scenes",
-          [](CudaArrayHandle sceneTransformRefs, CudaArrayHandle sceneIndices,
-             CudaArrayHandle transformIndices, CudaArrayHandle localTransforms,
-             CudaArrayHandle localScales, CudaArrayHandle parentIndices,
-             CudaArrayHandle parentTransforms) {
-            SapienRenderEngine::Get()->gpuTransferPosesToRenderScenes(
-                sceneTransformRefs, sceneIndices, transformIndices, localTransforms, localScales,
-                parentIndices, parentTransforms);
-          },
-          py::arg("scene_transform_pointers"), py::arg("scene_indices"),
-          py::arg("transform_indices"), py::arg("local_poses"), py::arg("local_scales"),
-          py::arg("parent_indices"), py::arg("parent_transforms"))
-      .def("gpu_notify_poses_updated",
-           []() { SapienRenderEngine::Get()->gpuNotifyPosesUpdated(); });
+  // .def(
+  //     "gpu_transfer_poses_to_render_scenes",
+  //     [](CudaArrayHandle sceneTransformRefs, CudaArrayHandle sceneIndices,
+  //        CudaArrayHandle transformIndices, CudaArrayHandle localTransforms,
+  //        CudaArrayHandle localScales, CudaArrayHandle parentIndices,
+  //        CudaArrayHandle parentTransforms) {
+  //       SapienRenderEngine::Get()->gpuTransferPosesToRenderScenes(
+  //           sceneTransformRefs, sceneIndices, transformIndices, localTransforms,
+  //           localScales, parentIndices, parentTransforms);
+  //     },
+  //     py::arg("scene_transform_pointers"), py::arg("scene_indices"),
+  //     py::arg("transform_indices"), py::arg("local_poses"), py::arg("local_scales"),
+  //     py::arg("parent_indices"), py::arg("parent_transforms"))
+  // .def("gpu_notify_poses_updated",
+  //      []() { SapienRenderEngine::Get()->gpuNotifyPosesUpdated(); });
 
   ////////// end global //////////
 
@@ -431,6 +431,9 @@ void init_sapien_renderer(py::module &sapien) {
       py::class_<RenderShapeTriangleMesh, RenderShape>(m, "RenderShapeTriangleMesh");
 
   auto PyRenderSystem = py::class_<SapienRendererSystem, System>(m, "RenderSystem");
+
+  auto PyRenderSystemGroup = py::class_<BatchedRenderSystem>(m, "RenderSystemGroup");
+  auto PyCameraGroup = py::class_<BatchedCamera>(m, "RenderCameraGroup");
 
   auto PyRenderBodyComponent =
       py::class_<SapienRenderBodyComponent, Component>(m, "RenderBodyComponent");
@@ -467,6 +470,22 @@ void init_sapien_renderer(py::module &sapien) {
            py::arg("do_not_load_texture") = false)
       .def_property_readonly("_internal_context", &SapienRenderEngine::getContext);
 
+  PyRenderSystemGroup.def(py::init<std::vector<std::shared_ptr<SapienRendererSystem>>>())
+      .def("create_camera_group", &BatchedRenderSystem::createCameraBatch, py::arg("cameras"),
+           py::arg("picture_names"))
+      .def("set_cuda_stream", &BatchedRenderSystem::setCudaStream)
+      .def("set_cuda_poses", &BatchedRenderSystem::setPoseSource)
+      .def("update_render", &BatchedRenderSystem::update,
+           R"doc(
+This function performs CUDA operations to transfer poses from the CUDA buffer provided by :func:`set_cuda_poses` into render systems.
+It updates the transformation matrices of objects and cameras.
+
+This function waits for any pending CUDA operations on cuda stream provided by :func:`set_cuda_stream`.
+)doc");
+
+  PyCameraGroup.def("take_picture", &BatchedCamera::takePicture)
+      .def("get_picture_cuda", &BatchedCamera::getPictureCuda, py::arg("name"));
+
   PyRenderSystem.def(py::init<>())
       .def_property("ambient_light", &SapienRendererSystem::getAmbientLight,
                     &SapienRendererSystem::setAmbientLight)
@@ -487,7 +506,7 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_cubemap", &SapienRendererSystem::getCubemap)
       .def("set_cubemap", &SapienRendererSystem::setCubemap, py::arg("cubemap"))
 
-      .def("disable_auto_upload", &SapienRendererSystem::disableAutoUpload)
+      // .def("disable_auto_upload", &SapienRendererSystem::disableAutoUpload)
 
       .def_property_readonly("cuda_object_transforms",
                              &SapienRendererSystem::getTransformCudaArray)
@@ -640,8 +659,10 @@ void init_sapien_renderer(py::module &sapien) {
       .def_property_readonly("material", &RenderShape::getMaterial)
       .def("get_material", &RenderShape::getMaterial)
 
-      .def("get_gpu_transform_index", &RenderShape::getInternalGpuTransformIndex)
-      .def("get_gpu_scale", &RenderShape::getGpuScale);
+      .def("set_gpu_pose_batch_index", &RenderShape::setGpuBatchedPoseIndex);
+
+  // .def("get_gpu_transform_index", &RenderShape::getInternalGpuTransformIndex)
+  // .def("get_gpu_scale", &RenderShape::getGpuScale);
 
   PyRenderShapePlane
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("scale"),
@@ -833,12 +854,13 @@ void init_sapien_renderer(py::module &sapien) {
           },
           py::arg("name"))
 
-      .def("gpu_init", &SapienRenderCameraComponent::gpuInit,
-           "Do rendering once to ensure all GPU resources for this camera is initialized")
-      .def_property_readonly("cuda_buffer", &SapienRenderCameraComponent::getCudaBuffer,
-                             "Get the CUDA buffer containing GPU data for this camera, including "
-                             "transformaion matrices, sizes, and user-defined shader fields. This "
-                             "function can only be called after gpu_init")
+      // .def("gpu_init", &SapienRenderCameraComponent::gpuInit,
+      //      "Do rendering once to ensure all GPU resources for this camera is initialized")
+      .def_property_readonly(
+          "_cuda_buffer", &SapienRenderCameraComponent::getCudaBuffer,
+          "Debug only. Get the CUDA buffer containing GPU data for this camera, including "
+          "transformaion matrices, sizes, and user-defined shader fields.")
+      .def("set_gpu_pose_batch_index", &SapienRenderCameraComponent::setGpuBatchedPoseIndex)
 
       .def(
           "get_picture_cuda",

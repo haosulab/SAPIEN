@@ -258,6 +258,9 @@ AABB RenderShape::getGlobalAABBFast() {
 }
 AABB RenderShape::computeGlobalAABBTight() { return getGlobalAABBFast(); }
 
+void RenderShape::setGpuBatchedPoseIndex(int index) { mBatchedPoseIndex = index; }
+int RenderShape::getGpuBatchedPoseIndex() const { return mBatchedPoseIndex; }
+
 AABB RenderShapePlane::getLocalAABB() {
   Vec3 h = getScale();
   return {-h, h};

@@ -368,5 +368,20 @@ float PhysxRigidBodyComponent::getMaxContactImpulse() const {
   return getPxActor()->getMaxContactImpulse();
 }
 
+void PhysxRigidDynamicComponent::internalSetGpuIndex(int index) {
+  if (!isUsingDirectGPUAPI()) {
+    throw std::runtime_error("the body is not added to a GPU scene.");
+  }
+  mGpuIndex = index;
+}
+int PhysxRigidDynamicComponent::getGpuIndex() const {
+  if (!isUsingDirectGPUAPI()) {
+    throw std::runtime_error("the body is not added to a GPU scene.");
+  }
+  return mGpuIndex;
+}
+
+int PhysxRigidDynamicComponent::getGpuPoseIndex() const { return getGpuIndex(); }
+
 } // namespace physx
 } // namespace sapien

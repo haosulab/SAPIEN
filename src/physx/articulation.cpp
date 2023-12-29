@@ -430,5 +430,9 @@ PhysxArticulation::~PhysxArticulation() {
   mPxArticulation->release();
 }
 
+int PhysxArticulation::getGpuIndex() const {
+  return getPxArticulation()->getGpuArticulationIndex();
+}
+
 } // namespace physx
 } // namespace sapien

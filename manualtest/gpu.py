@@ -92,19 +92,61 @@ bodies = [
     a.find_component_by_type(sapien.physx.PhysxRigidDynamicComponent)
     for a in all_actors
 ]
-bi = physx_system.gpu_create_body_index_buffer(bodies)
-body_data_buffer = physx_system.gpu_create_body_data_buffer(2)
-body_offset_buffer = physx_system.gpu_create_body_offset_buffer(bodies)
 
-print("bi", bi)
-print(body_data_buffer)
-print(body_offset_buffer)
 
-physx_system.gpu_query_body_data(body_data_buffer, bi, body_offset_buffer)
-print("body data", body_data_buffer)
+qpos = physx_system.cuda_articulation_qpos
+qvel = physx_system.cuda_articulation_qvel
+qacc = physx_system.cuda_articulation_qacc
+qf = physx_system.cuda_articulation_qf
+target_qpos = physx_system.cuda_articulation_target_qpos
+target_qvel = physx_system.cuda_articulation_target_qvel
 
-physx_system._gpu_query_body_data_raw(body_data_buffer, bi)
-print("body data raw", body_data_buffer)
+body_data = physx_system.cuda_rigid_body_data
+
+actor_data = physx_system.cuda_rigid_dynamic_data
+actor_pose_slice = actor_data[:, :7]  # this is in-place
+
+link_data = physx_system.cuda_articulation_link_data
+import ipdb
+ipdb.set_trace()
+
+physx_system.gpu_fetch_rigid_dynamic_data()
+print(actor_data)
+print(actor_pose_slice)
+
+physx_system.gpu_fetch_articulation_link_pose()
+physx_system.gpu_fetch_articulation_link_velocity()
+print(link_data)
+
+physx_system.gpu_fetch_articulation_qpos()
+print(qpos)
+
+physx_system.gpu_fetch_articulation_qvel()
+print(qvel)
+
+physx_system.gpu_fetch_articulation_qacc()
+print(qacc)
+
+physx_system.gpu_fetch_articulation_target_qpos()
+print(target_qpos)
+
+physx_system.gpu_fetch_articulation_target_qvel()
+print(target_qvel)
+
+
+# bi = physx_system.gpu_create_body_index_buffer(bodies)
+# body_data_buffer = physx_system.gpu_create_body_data_buffer(2)
+# body_offset_buffer = physx_system.gpu_create_body_offset_buffer(bodies)
+
+# print("bi", bi)
+# print(body_data_buffer)
+# print(body_offset_buffer)
+
+# physx_system.gpu_query_body_data(body_data_buffer, bi, body_offset_buffer)
+# print("body data", body_data_buffer)
+
+# physx_system._gpu_query_body_data_raw(body_data_buffer, bi)
+# print("body data raw", body_data_buffer)
 
 # # p, q, v, w
 # body_data_buffer[0, :13] = torch.tensor([0.1, 0, 10, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0.5])
@@ -122,46 +164,40 @@ print("body data raw", body_data_buffer)
 # print(body_data_buffer)
 
 
-scene0.update_render()
-scene1.update_render()
+# scene0.update_render()
+# scene1.update_render()
 
-cam0 = scene0.add_camera("", 256, 256, 1, 0.01, 10)
-cam1 = scene1.add_camera("", 256, 256, 1, 0.01, 10)
+# cam0 = scene0.add_camera("", 256, 256, 1, 0.01, 10)
+# cam1 = scene1.add_camera("", 256, 256, 1, 0.01, 10)
 
-cam0.gpu_init()
-cam1.gpu_init()
+# cam0.gpu_init()
+# cam1.gpu_init()
 
 
-# cam0.take_picture()
-# cam1.take_picture()
+# render_bodies0 = scene0.render_system.render_bodies
+# render_bodies1 = scene1.render_system.render_bodies
 
-# cam0.get_picture("Color")
-# cam1.get_picture("Color")
+# b0 = scene0.render_system.cuda_object_transforms
+# b1 = scene1.render_system.cuda_object_transforms
 
-render_bodies0 = scene0.render_system.render_bodies
-render_bodies1 = scene1.render_system.render_bodies
+# print(cam0.cuda_buffer)
+# print(cam1.cuda_buffer)
 
-b0 = scene0.render_system.cuda_object_transforms
-b1 = scene1.render_system.cuda_object_transforms
+# scene_dict = {scene0: 0, scene1: 1}
 
-print(cam0.cuda_buffer)
-print(cam1.cuda_buffer)
+# scene_render_local_pose = [[], []]
+# scene_render_index = [[], []]
 
-scene_dict = {scene0: 0, scene1: 1}
+# for physx_idx, a in enumerate(all_actors):
+#     comp = a.find_component_by_type(sapien.render.RenderBodyComponent)
+#     if comp is None:
+#         continue
 
-scene_render_local_pose = [[], []]
-scene_render_index = [[], []]
+#     scene_idx = scene_dict[a.scene]
 
-for physx_idx, a in enumerate(all_actors):
-    comp = a.find_component_by_type(sapien.render.RenderBodyComponent)
-    if comp is None:
-        continue
+#     for shape in comp.render_shapes:
+#         local_pose = shape.local_pose
+#         gpu_idx = shape.get_gpu_transform_index()
 
-    scene_idx = scene_dict[a.scene]
-
-    for shape in comp.render_shapes:
-        local_pose = shape.local_pose
-        gpu_idx = shape.get_gpu_transform_index()
-
-        scene_render_index[scene_idx].append([physx_idx, gpu_idx])
-        scene_render_local_pose[scene_idx].append(local_pose)
+#         scene_render_index[scene_idx].append([physx_idx, gpu_idx])
+#         scene_render_local_pose[scene_idx].append(local_pose)
