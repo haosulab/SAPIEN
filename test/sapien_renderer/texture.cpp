@@ -1,5 +1,4 @@
 #include "sapien/sapien_renderer/sapien_renderer.h"
-#include "serialize.hpp"
 #include <filesystem>
 #include <gtest/gtest.h>
 

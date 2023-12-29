@@ -5,8 +5,6 @@
 #include <memory>
 #include <vector>
 
-#include <cereal/cereal.hpp>
-
 namespace sapien {
 class Entity;
 class Scene;
@@ -76,17 +74,6 @@ public:
 private:
   void checkDof(uint32_t n);
   void syncPose();
-
-  friend cereal::access;
-  template <class Archive> void save(Archive &ar) const {
-    uint32_t size = mLinks.size();
-    ar(size);
-  }
-  template <class Archive> void load(Archive &ar) {
-    uint32_t size;
-    ar(size);
-    mLinks.resize(size, 0);
-  }
 
   std::shared_ptr<PhysxEngine> mEngine;
 

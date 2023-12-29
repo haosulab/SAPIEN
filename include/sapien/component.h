@@ -1,6 +1,5 @@
 #pragma once
 #include "sapien/math/pose.h"
-#include "serialize.h"
 #include <PxPhysicsAPI.h>
 #include <memory>
 #include <string>
@@ -47,10 +46,6 @@ public:
 
   virtual ~Component() = default;
 
-  virtual std::vector<uint64_t> getSerializationDependencies() const { return {}; }
-  template <class Archive> void save(Archive &ar) const { ar(mName, mEnabled); }
-  template <class Archive> void load(Archive &ar) { ar(mName, mEnabled); }
-
 protected:
   std::weak_ptr<Entity> mEntity{};
   std::string mName;
@@ -72,5 +67,3 @@ struct comp_cmp {
 };
 
 } // namespace sapien
-
-CEREAL_REGISTER_TYPE(sapien::Component);

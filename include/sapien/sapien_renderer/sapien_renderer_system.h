@@ -5,7 +5,6 @@
 #include "cubemap.h"
 #include "sapien/array.h"
 #include "sapien/math/vec3.h"
-#include "sapien/serialize.h"
 #include <set>
 #include <svulkan2/core/context.h>
 #include <svulkan2/scene/scene.h>
@@ -157,6 +156,3 @@ private:
 } // namespace sapien_renderer
 } // namespace sapien
 
-CEREAL_REGISTER_TYPE(sapien::sapien_renderer::SapienRendererSystem);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::System,
-                                     sapien::sapien_renderer::SapienRendererSystem);

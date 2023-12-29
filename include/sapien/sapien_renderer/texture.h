@@ -1,6 +1,5 @@
 #pragma once
 #include "./image.h"
-#include "sapien/serialize.h"
 #include <filesystem>
 #include <svulkan2/resource/material.h>
 
@@ -56,31 +55,6 @@ public:
   explicit SapienRenderTexture2D(std::shared_ptr<svulkan2::resource::SVTexture> tex);
 
   std::string getFilename() const;
-
-  template <class Archive> void save(Archive &ar) const {
-    auto desc = mTexture->getDescription();
-    if (desc.source != svulkan2::resource::SVTextureDescription::SourceType::eFILE) {
-      throw std::runtime_error("textured not created from file is not currently serializable");
-    }
-
-    std::string filename =
-        std::filesystem::relative(std::filesystem::path(getFilename())).string();
-    uint32_t mipLevels = getMipmapLevels();
-    int filterMode = static_cast<int>(getFilterMode());
-    int addressMode = static_cast<int>(getAddressMode());
-    ar(filename, mipLevels, filterMode, addressMode);
-  }
-  template <class Archive>
-  static void load_and_construct(Archive &ar,
-                                 cereal::construct<SapienRenderTexture2D> &construct) {
-    std::string filename;
-    uint32_t mipLevels;
-    int filterMode;
-    int addressMode;
-    ar(filename, mipLevels, filterMode, addressMode);
-    construct(filename, mipLevels, static_cast<FilterMode>(filterMode),
-              static_cast<AddressMode>(addressMode));
-  }
 };
 
 } // namespace sapien_renderer

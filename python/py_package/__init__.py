@@ -16,7 +16,6 @@ from .pysapien import math, simsense
 
 from . import physx
 from . import render
-from . import serialization
 
 from . import _vulkan_tricks
 

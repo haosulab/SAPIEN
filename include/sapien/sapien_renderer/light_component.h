@@ -35,15 +35,6 @@ public:
 
   virtual void internalUpdate() = 0;
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<Component>(this));
-    ar(mColor, mShadowEnabled, mShadowNear, mShadowFar, mShadowMapSize, mLocalPose);
-  }
-  template <class Archive> void load(Archive &ar) {
-    ar(cereal::base_class<Component>(this));
-    ar(mColor, mShadowEnabled, mShadowNear, mShadowFar, mShadowMapSize, mLocalPose);
-  }
-
 protected:
   Vec3 mColor{1.f, 1.f, 1.f};
   bool mShadowEnabled{true};
@@ -61,13 +52,6 @@ public:
   void internalUpdate() override;
   void setColor(Vec3 color) override;
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<SapienRenderLightComponent>(this));
-  }
-  template <class Archive> void load(Archive &ar) {
-    ar(cereal::base_class<SapienRenderLightComponent>(this));
-  }
-
 private:
   svulkan2::scene::PointLight *mPointLight{};
 };
@@ -82,15 +66,6 @@ public:
 
   void internalUpdate() override;
   void setColor(Vec3 color) override;
-
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<SapienRenderLightComponent>(this));
-    ar(mShadowHalfSize);
-  }
-  template <class Archive> void load(Archive &ar) {
-    ar(cereal::base_class<SapienRenderLightComponent>(this));
-    ar(mShadowHalfSize);
-  }
 
 private:
   svulkan2::scene::DirectionalLight *mDirectionalLight{};
@@ -110,15 +85,6 @@ public:
   void internalUpdate() override;
   void setColor(Vec3 color) override;
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<SapienRenderLightComponent>(this));
-    ar(mFovInner);
-  }
-  template <class Archive> void load(Archive &ar) {
-    ar(cereal::base_class<SapienRenderLightComponent>(this));
-    ar(mFovOuter);
-  }
-
 protected:
   float mFovInner{0.f};
   float mFovOuter{0.f};
@@ -135,15 +101,6 @@ public:
   std::shared_ptr<SapienRenderTexture2D> getTexture() const { return mTexture; }
 
   void internalUpdate() override;
-
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<SapienRenderSpotLightComponent>(this));
-    ar(mTexture);
-  }
-  template <class Archive> void load(Archive &ar) {
-    ar(cereal::base_class<SapienRenderSpotLightComponent>(this));
-    ar(mTexture);
-  }
 
 private:
   svulkan2::scene::TexturedLight *getLight() const {
@@ -165,15 +122,6 @@ public:
   void internalUpdate() override;
   void setColor(Vec3 color) override;
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<SapienRenderLightComponent>(this));
-    ar(mHalfWidth, mHalfHeight, mAngle);
-  }
-  template <class Archive> void load(Archive &ar) {
-    ar(cereal::base_class<SapienRenderLightComponent>(this));
-    ar(mHalfWidth, mHalfHeight, mAngle);
-  }
-
 private:
   float mHalfWidth = 1.f;
   float mHalfHeight = 1.f;
@@ -184,23 +132,3 @@ private:
 
 } // namespace sapien_renderer
 } // namespace sapien
-
-CEREAL_REGISTER_TYPE(sapien::sapien_renderer::SapienRenderLightComponent);
-CEREAL_REGISTER_TYPE(sapien::sapien_renderer::SapienRenderPointLightComponent);
-CEREAL_REGISTER_TYPE(sapien::sapien_renderer::SapienRenderDirectionalLightComponent)
-CEREAL_REGISTER_TYPE(sapien::sapien_renderer::SapienRenderSpotLightComponent);
-CEREAL_REGISTER_TYPE(sapien::sapien_renderer::SapienRenderTexturedLightComponent);
-CEREAL_REGISTER_TYPE(sapien::sapien_renderer::SapienRenderParallelogramLightComponent);
-
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::Component,
-                                     sapien::sapien_renderer::SapienRenderLightComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::sapien_renderer::SapienRenderLightComponent,
-                                     sapien::sapien_renderer::SapienRenderPointLightComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::sapien_renderer::SapienRenderLightComponent,
-                                     sapien::sapien_renderer::SapienRenderDirectionalLightComponent)
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::sapien_renderer::SapienRenderLightComponent,
-                                     sapien::sapien_renderer::SapienRenderSpotLightComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::sapien_renderer::SapienRenderSpotLightComponent,
-                                     sapien::sapien_renderer::SapienRenderTexturedLightComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::sapien_renderer::SapienRenderLightComponent,
-                                     sapien::sapien_renderer::SapienRenderParallelogramLightComponent);

@@ -6,16 +6,11 @@
 #include <pybind11/smart_holder.h>
 #include <pybind11/stl.h>
 
-#include <cereal/archives/binary.hpp>
-#include <cereal/cereal.hpp>
-#include <cereal/types/polymorphic.hpp>
-
 namespace py = pybind11;
 using namespace pybind11::literals;
 using namespace sapien;
 
 class PythonComponent;
-extern cereal::construct<PythonComponent> *gCurrentConstruct;
 
 class PythonComponent : public Component, public py::trampoline_self_life_support {
 
@@ -37,31 +32,10 @@ public:
     PYBIND11_OVERRIDE_NAME(void, Component, "on_set_pose", onSetPose, pose);
   }
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(mObjectId);
-    ar(cereal::base_class<Component>(this));
-  }
-
-  template <class Archive> void load(Archive &ar) {
-    ar(mObjectId);
-    ar(cereal::base_class<Component>(this));
-    mPlaceholder = true;
-  }
-
-  uint64_t getSerializationId() const { return mObjectId; }
-  void setSerializationId(uint64_t id) { mObjectId = id; }
-
 private:
   // TODO: make thread safe?
   static uint64_t gCurrentObjectId;
   uint64_t mObjectId{0};
-
-  // indicate this component is a placeholder and should be replaced with an actual python
-  // component loaded by python serialization
-  bool mPlaceholder{false};
 };
 
 uint64_t PythonComponent::gCurrentObjectId = 0;
-
-CEREAL_REGISTER_TYPE(PythonComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::Component, PythonComponent);

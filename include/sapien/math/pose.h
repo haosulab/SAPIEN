@@ -28,7 +28,6 @@ struct Pose {
   }
 
   bool isSane() const { return p.isSane() && q.isSane(); }
-  template <class Archive> void serialize(Archive &ar) { ar(q, p); }
 };
 
 static Pose const POSE_GL_TO_ROS({0, 0, 0}, {-0.5, -0.5, 0.5, 0.5});

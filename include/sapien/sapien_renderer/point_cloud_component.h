@@ -3,8 +3,8 @@
 #include "sapien/array.h"
 #include "sapien_renderer_system.h"
 #include "sapien/math/pose.h"
-#include "sapien/serialize.h"
 #include <svulkan2/resource/model.h>
+#include <Eigen/Dense>
 
 namespace sapien {
 namespace sapien_renderer {

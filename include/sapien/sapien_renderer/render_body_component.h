@@ -4,7 +4,6 @@
 #include "render_shape.h"
 #include "sapien/math/bounding_box.h"
 #include "sapien/math/pose.h"
-#include "sapien/serialize.h"
 #include <memory>
 #include <string>
 #include <svulkan2/scene/node.h>
@@ -75,6 +74,3 @@ private:
 } // namespace sapien_renderer
 } // namespace sapien
 
-CEREAL_REGISTER_TYPE(sapien::sapien_renderer::SapienRenderBodyComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::Component,
-                                     sapien::sapien_renderer::SapienRenderBodyComponent);

@@ -60,7 +60,6 @@ include(zlib)
 
 include(eigen)
 include(vulkan)
-include(cereal)
 
 if (${SAPIEN_DEBUG_VIEWER})
     add_definitions(_DEBUG_VIEWER)
@@ -98,7 +97,7 @@ if (${SAPIEN_CUDA})
     set_target_properties(sapien PROPERTIES CUDA_ARCHITECTURES "60;61;70;75;80;86")
 endif ()
 
-target_link_libraries(sapien PUBLIC eigen svulkan2 cereal)
+target_link_libraries(sapien PUBLIC eigen svulkan2)
 target_link_libraries(sapien PRIVATE physx5 spdlog::spdlog easy_profiler # grpc++
     ${CMAKE_DL_LIBS} assimp::assimp)
 
@@ -135,12 +134,12 @@ if (${SAPIEN_CUDA})
     install(DIRECTORY ${binary_dir}/../preinstall/lib64 DESTINATION "." OPTIONAL)
 
     install(
-        TARGETS sapien svulkan2 simsense cereal physx5 OpenImageDenoise OpenImageDenoise_core OpenImageDenoise_common glm Vulkan-Headers
+        TARGETS sapien svulkan2 simsense physx5 OpenImageDenoise OpenImageDenoise_core OpenImageDenoise_common glm Vulkan-Headers
         EXPORT sapienTargets
     )
 else()
     install(
-        TARGETS sapien svulkan2 cereal glm Vulkan-Headers
+        TARGETS sapien svulkan2 glm Vulkan-Headers
         EXPORT sapienTargets
     )
 endif()
@@ -152,7 +151,6 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/sapien-vulkan-2/include
 install(DIRECTORY "${glm_SOURCE_DIR}/glm" DESTINATION "include")
 install(DIRECTORY "${vulkan_SOURCE_DIR}/include/vulkan" DESTINATION "include")
 install(DIRECTORY "${vulkan_SOURCE_DIR}/include/vk_video" DESTINATION "include")
-install(DIRECTORY "${cereal_SOURCE_DIR}/include/cereal" DESTINATION "include")
 
 if (${SAPIEN_CUDA})
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/simsense/include/simsense" DESTINATION "include")
@@ -190,7 +188,7 @@ if (${SAPIEN_BUILD_TEST})
     include(googletest)
     file(GLOB_RECURSE SAPIEN_TEST_SRC "test/*.cpp")
     add_executable(sapien_test EXCLUDE_FROM_ALL ${SAPIEN_TEST_SRC})
-    target_link_libraries(sapien_test sapien GTest::gtest_main physx5 cereal
+    target_link_libraries(sapien_test sapien GTest::gtest_main physx5
         # -fsanitize=address
     )
     target_include_directories(sapien_test PRIVATE "test")

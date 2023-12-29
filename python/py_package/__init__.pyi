@@ -48,7 +48,6 @@ __all__ = [
     "pysapien_pinocchio",
     "render",
     "render_server",
-    "serialization",
     "set_cuda_tensor_backend",
     "set_log_level",
     "simsense",
@@ -65,5 +64,5 @@ def set_cuda_tensor_backend(backend: str) -> None:
     """
 def set_log_level(level: str) -> None:
     pass
-__version__ = '3.0.0.dev20231223+ff051db7'
+__version__ = '3.0.0.dev20231229+01f65143'
 SceneConfig = sapien.pysapien.physx.PhysxSceneConfig

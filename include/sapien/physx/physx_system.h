@@ -281,6 +281,3 @@ private:
 
 } // namespace physx
 } // namespace sapien
-
-// CEREAL_REGISTER_TYPE(sapien::physx::PhysxSystem);
-// CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::System, sapien::physx::PhysxSystem);

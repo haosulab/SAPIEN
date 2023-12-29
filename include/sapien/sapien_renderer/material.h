@@ -1,5 +1,4 @@
 #pragma once
-#include "sapien/serialize.h"
 #include "texture.h"
 #include <svulkan2/resource/material.h>
 
@@ -55,43 +54,6 @@ public:
 
   [[nodiscard]] std::shared_ptr<svulkan2::resource::SVMetallicMaterial> getMaterial() const {
     return mMaterial;
-  }
-
-  template <class Archive> void save(Archive &ar) const {
-    ar(getEmission(), getBaseColor(), getRoughness(), getSpecular(), getMetallic(), getIOR(),
-       getTransmission(), getTransmissionRoughness());
-    ar(getEmissionTexture(), getDiffuseTexture(), getRoughnessTexture(), getMetallicTexture(),
-       getNormalTexture(), getTransmissionTexture());
-  }
-  template <class Archive>
-  static void load_and_construct(Archive &ar, cereal::construct<SapienRenderMaterial> &construct) {
-    std::array<float, 4> emission;
-    std::array<float, 4> baseColor;
-    float roughness;
-    float specular;
-    float metallic;
-    float ior;
-    float transmission;
-    float transmissionRoughness;
-    ar(emission, baseColor, roughness, specular, metallic, ior, transmission,
-       transmissionRoughness);
-    std::shared_ptr<SapienRenderTexture2D> emissionTexture;
-    std::shared_ptr<SapienRenderTexture2D> diffuseTexture;
-    std::shared_ptr<SapienRenderTexture2D> roughnessTexture;
-    std::shared_ptr<SapienRenderTexture2D> metallicTexture;
-    std::shared_ptr<SapienRenderTexture2D> normalTexture;
-    std::shared_ptr<SapienRenderTexture2D> transmissionTexture;
-    ar(emissionTexture, diffuseTexture, roughnessTexture, metallicTexture, normalTexture,
-       transmissionTexture);
-
-    construct(emission, baseColor, specular, roughness, metallic, transmission, ior,
-              transmissionRoughness);
-    construct->setEmissionTexture(emissionTexture);
-    construct->setDiffuseTexture(diffuseTexture);
-    construct->setRoughnessTexture(roughnessTexture);
-    construct->setMetallicTexture(metallicTexture);
-    construct->setNormalTexture(normalTexture);
-    construct->setTransmissionTexture(transmissionTexture);
   }
 
 public:

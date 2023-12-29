@@ -8,11 +8,6 @@
 #include <memory>
 #include <string>
 
-#include <cereal/access.hpp>
-#include <cereal/archives/binary.hpp>
-#include <cereal/types/polymorphic.hpp>
-#include <cereal/types/vector.hpp>
-
 namespace sapien {
 class Entity;
 namespace physx {
@@ -41,20 +36,6 @@ public:
   /** returns true if the physx actor is added to a GPU-enabled scene */
   bool isUsingDirectGPUAPI() const;
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<PhysxBaseComponent>(this));
-    ar(mCollisionShapes);
-  }
-
-  template <class Archive> void load(Archive &ar) {
-    ar(cereal::base_class<PhysxBaseComponent>(this));
-    std::vector<std::shared_ptr<PhysxCollisionShape>> shapes;
-    ar(shapes);
-    for (auto s : shapes) {
-      attachCollision(s);
-    }
-  }
-
 protected:
   std::vector<std::weak_ptr<PhysxJointComponent>> mJoints;
   std::vector<std::shared_ptr<PhysxCollisionShape>> mCollisionShapes{};
@@ -69,14 +50,6 @@ public:
   void onSetPose(Pose const &pose) override;
   void onAddToScene(Scene &scene) override;
   void onRemoveFromScene(Scene &scene) override;
-
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<PhysxRigidBaseComponent>(this));
-  }
-
-  template <class Archive> void load(Archive &ar) {
-    ar(cereal::base_class<PhysxRigidBaseComponent>(this));
-  }
 
 private:
   ::physx::PxRigidStatic *mPxActor;
@@ -120,57 +93,6 @@ public:
 
   ::physx::PxRigidBody *getPxActor() const override = 0;
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<PhysxRigidBaseComponent>(this));
-
-    ::physx::PxActorFlags::InternalType actorFlags = getPxActor()->getActorFlags();
-    ::physx::PxRigidBodyFlags::InternalType rigidBodyFlags = getPxActor()->getRigidBodyFlags();
-    ar(actorFlags, rigidBodyFlags, getLinearDamping(), getAngularDamping(),
-       getMaxDepenetrationVelocity(), getMaxContactImpulse());
-    ar(getMass(), getInertia(), getCMassLocalPose());
-
-    ar(mMassProperties.mass, mMassProperties.inertiaTensor.column0[0],
-       mMassProperties.inertiaTensor.column0[1], mMassProperties.inertiaTensor.column0[2],
-       mMassProperties.inertiaTensor.column1[0], mMassProperties.inertiaTensor.column1[1],
-       mMassProperties.inertiaTensor.column1[2], mMassProperties.inertiaTensor.column2[0],
-       mMassProperties.inertiaTensor.column2[1], mMassProperties.inertiaTensor.column2[2],
-       mMassProperties.centerOfMass[0], mMassProperties.centerOfMass[1],
-       mMassProperties.centerOfMass[2], mAutoComputeMass);
-  }
-
-  template <class Archive> void load(Archive &ar) {
-    mAutoComputeMass = false;
-
-    ar(cereal::base_class<PhysxRigidBaseComponent>(this));
-
-    ::physx::PxActorFlags::InternalType actorFlags;
-    ::physx::PxRigidBodyFlags::InternalType rigidBodyFlags;
-    float linearDamping, angularDamping, speed, impulse;
-    ar(actorFlags, rigidBodyFlags, linearDamping, angularDamping, speed, impulse);
-    getPxActor()->setActorFlags(::physx::PxActorFlags(actorFlags));
-    getPxActor()->setRigidBodyFlags(::physx::PxRigidBodyFlags(rigidBodyFlags));
-    setLinearDamping(linearDamping);
-    setAngularDamping(angularDamping);
-    setMaxDepenetrationVelocity(speed);
-    setMaxContactImpulse(impulse);
-
-    float mass;
-    Vec3 inertia;
-    Pose localPose;
-    ar(mass, inertia, localPose);
-    setMass(mass);
-    setInertia(inertia);
-    setCMassLocalPose(localPose);
-
-    ar(mMassProperties.mass, mMassProperties.inertiaTensor.column0[0],
-       mMassProperties.inertiaTensor.column0[1], mMassProperties.inertiaTensor.column0[2],
-       mMassProperties.inertiaTensor.column1[0], mMassProperties.inertiaTensor.column1[1],
-       mMassProperties.inertiaTensor.column1[2], mMassProperties.inertiaTensor.column2[0],
-       mMassProperties.inertiaTensor.column2[1], mMassProperties.inertiaTensor.column2[2],
-       mMassProperties.centerOfMass[0], mMassProperties.centerOfMass[1],
-       mMassProperties.centerOfMass[2], mAutoComputeMass);
-  }
-
 protected:
   void internalUpdateMass();
   bool canAutoComputeMass();
@@ -210,53 +132,9 @@ public:
   void onAddToScene(Scene &scene) override;
   void onRemoveFromScene(Scene &scene) override;
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(cereal::base_class<PhysxRigidBodyComponent>(this));
-    ar(isKinematic());
-
-    if (!isKinematic()) {
-      ar(getLinearVelocity(), getAngularVelocity());
-    }
-
-    ::physx::PxRigidDynamicLockFlags::InternalType lockFlags =
-        mPxActor->getRigidDynamicLockFlags();
-    ar(lockFlags);
-  }
-
-  template <class Archive> void load(Archive &ar) {
-    ar(cereal::base_class<PhysxRigidBodyComponent>(this));
-
-    bool kinematic;
-    ar(kinematic);
-    setKinematic(kinematic);
-
-    if (!kinematic) {
-      Vec3 linearVelocity, angularVelocity;
-      ar(linearVelocity, angularVelocity);
-      setLinearVelocity(linearVelocity);
-      setAngularVelocity(angularVelocity);
-    }
-
-    ::physx::PxRigidDynamicLockFlags::InternalType lockFlags;
-    ar(lockFlags);
-    mPxActor->setRigidDynamicLockFlags(static_cast<::physx::PxRigidDynamicLockFlags>(lockFlags));
-  }
-
 private:
   ::physx::PxRigidDynamic *mPxActor;
 };
 
 } // namespace physx
 } // namespace sapien
-
-CEREAL_REGISTER_TYPE(sapien::physx::PhysxRigidDynamicComponent);
-CEREAL_REGISTER_TYPE(sapien::physx::PhysxRigidStaticComponent);
-
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxBaseComponent,
-                                     sapien::physx::PhysxRigidBaseComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxRigidBaseComponent,
-                                     sapien::physx::PhysxRigidBodyComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxRigidBaseComponent,
-                                     sapien::physx::PhysxRigidStaticComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxRigidBodyComponent,
-                                     sapien::physx::PhysxRigidDynamicComponent);

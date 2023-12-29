@@ -12,12 +12,6 @@
 #include "material.h"
 #include "mesh.h"
 
-#include <cereal/archives/binary.hpp>
-#include <cereal/types/array.hpp>
-#include <cereal/types/memory.hpp>
-#include <cereal/types/optional.hpp>
-#include <cereal/types/polymorphic.hpp>
-
 namespace sapien {
 namespace physx {
 
@@ -80,39 +74,6 @@ public:
   PhysxCollisionShape &operator=(PhysxCollisionShape const &) = delete;
   PhysxCollisionShape &operator=(PhysxCollisionShape &&) = default;
 
-  // serialization
-  template <class Archive> void saveBase(Archive &ar) const {
-    ar(getCollisionGroups(), getRestOffset(), getContactOffset(), getTorsionalPatchRadius(),
-       getMinTorsionalPatchRadius(), getLocalPose(), isTrigger(), isSceneQuery(), mDensity);
-  }
-  template <class Archive> void loadBase(Archive &ar) {
-    if (!mPxShape) {
-      throw std::runtime_error("loading PhysxCollisionShape base class is not allowed.");
-    }
-    std::array<uint32_t, 4> groups;
-    float restOffset, contactOffset, patchRadius, minPatchRadius;
-    Pose localPose;
-    bool trigger, sceneQuery;
-    ar(groups, restOffset, contactOffset, patchRadius, minPatchRadius, localPose, trigger,
-       sceneQuery, mDensity);
-
-    setCollisionGroups(groups);
-    setContactOffset(contactOffset);
-    setRestOffset(restOffset);
-    setTorsionalPatchRadius(patchRadius);
-    setMinTorsionalPatchRadius(minPatchRadius);
-    setLocalPose(localPose);
-    setIsTrigger(trigger);
-    setIsSceneQuery(sceneQuery);
-  }
-
-  template <class Archive> void save(Archive &archive) const {
-    throw std::runtime_error("cereal workaround. should never be called.");
-  }
-  template <class Archive> void load(Archive &archive) {
-    throw std::runtime_error("cereal workaround. should never be called.");
-  }
-
   virtual ~PhysxCollisionShape();
 
 protected:
@@ -129,19 +90,6 @@ class PhysxCollisionShapePlane : public PhysxCollisionShape {
 public:
   PhysxCollisionShapePlane(std::shared_ptr<PhysxMaterial> material = nullptr);
   AABB getLocalAABB() const override;
-
-  template <class Archive> void save(Archive &ar) const {
-    ar(mPhysicalMaterial);
-    PhysxCollisionShape::saveBase(ar);
-  }
-  template <class Archive>
-  static void load_and_construct(Archive &ar,
-                                 cereal::construct<PhysxCollisionShapePlane> &construct) {
-    std::shared_ptr<PhysxMaterial> m;
-    ar(m);
-    construct(m);
-    construct->PhysxCollisionShape::loadBase(ar);
-  }
 };
 
 class PhysxCollisionShapeBox : public PhysxCollisionShape {
@@ -149,21 +97,6 @@ public:
   PhysxCollisionShapeBox(Vec3 halfLengths, std::shared_ptr<PhysxMaterial> material = nullptr);
   Vec3 getHalfLengths() const;
   AABB getLocalAABB() const override;
-
-  template <class Archive> void save(Archive &ar) const {
-    ar(mPhysicalMaterial, getHalfLengths());
-    PhysxCollisionShape::saveBase(ar);
-  }
-
-  template <class Archive>
-  static void load_and_construct(Archive &ar,
-                                 cereal::construct<PhysxCollisionShapeBox> &construct) {
-    Vec3 l;
-    std::shared_ptr<PhysxMaterial> m;
-    ar(m, l);
-    construct(l, m);
-    construct->PhysxCollisionShape::loadBase(ar);
-  }
 };
 
 class PhysxCollisionShapeCapsule : public PhysxCollisionShape {
@@ -173,20 +106,6 @@ public:
   float getRadius() const;
   float getHalfLength() const;
   AABB getLocalAABB() const override;
-
-  template <class Archive> void save(Archive &ar) const {
-    ar(mPhysicalMaterial, getRadius(), getHalfLength());
-    PhysxCollisionShape::saveBase(ar);
-  }
-  template <class Archive>
-  static void load_and_construct(Archive &ar,
-                                 cereal::construct<PhysxCollisionShapeCapsule> &construct) {
-    float r, l;
-    std::shared_ptr<PhysxMaterial> m;
-    ar(m, r, l);
-    construct(r, l, m);
-    construct->PhysxCollisionShape::loadBase(ar);
-  }
 };
 
 class PhysxCollisionShapeCylinder : public PhysxCollisionShape {
@@ -196,20 +115,6 @@ public:
   float getRadius() const;
   float getHalfLength() const;
   AABB getLocalAABB() const override;
-
-  template <class Archive> void save(Archive &ar) const {
-    ar(mPhysicalMaterial, getRadius(), getHalfLength());
-    PhysxCollisionShape::saveBase(ar);
-  }
-  template <class Archive>
-  static void load_and_construct(Archive &ar,
-                                 cereal::construct<PhysxCollisionShapeCylinder> &construct) {
-    float r, l;
-    std::shared_ptr<PhysxMaterial> m;
-    ar(m, r, l);
-    construct(r, l, m);
-    construct->PhysxCollisionShape::loadBase(ar);
-  }
 
 private:
   std::shared_ptr<PhysxConvexMesh> mMesh;
@@ -225,20 +130,6 @@ public:
 
   // TODO: implement this properly
   // AABB getGlobalAABBFast() const override;
-
-  template <class Archive> void save(Archive &ar) const {
-    ar(mPhysicalMaterial, getRadius());
-    PhysxCollisionShape::saveBase(ar);
-  }
-  template <class Archive>
-  static void load_and_construct(Archive &ar,
-                                 cereal::construct<PhysxCollisionShapeSphere> &construct) {
-    float r;
-    std::shared_ptr<PhysxMaterial> m;
-    ar(m, r);
-    construct(r, m);
-    construct->PhysxCollisionShape::loadBase(ar);
-  }
 };
 
 class PhysxCollisionShapeConvexMesh : public PhysxCollisionShape {
@@ -263,22 +154,6 @@ public:
   std::shared_ptr<PhysxConvexMesh> getMesh() const { return mMesh; };
   AABB getLocalAABB() const override;
   AABB computeGlobalAABBTight() const override;
-
-  // TODO: serialize AABB
-  template <class Archive> void save(Archive &ar) const {
-    ar(mPhysicalMaterial, getScale(), mMesh);
-    PhysxCollisionShape::saveBase(ar);
-  }
-  template <class Archive>
-  static void load_and_construct(Archive &ar,
-                                 cereal::construct<PhysxCollisionShapeConvexMesh> &construct) {
-    std::shared_ptr<PhysxConvexMesh> mesh;
-    Vec3 scale;
-    std::shared_ptr<PhysxMaterial> m;
-    ar(m, scale, mesh);
-    construct(mesh, scale, m);
-    construct->PhysxCollisionShape::loadBase(ar);
-  }
 
 private:
   std::shared_ptr<PhysxConvexMesh> mMesh;
@@ -307,22 +182,6 @@ public:
   AABB getLocalAABB() const override;
   AABB computeGlobalAABBTight() const override;
 
-  // TODO: serialize AABB
-  template <class Archive> void save(Archive &ar) const {
-    ar(mPhysicalMaterial, getScale(), mMesh);
-    PhysxCollisionShape::saveBase(ar);
-  }
-  template <class Archive>
-  static void load_and_construct(Archive &ar,
-                                 cereal::construct<PhysxCollisionShapeTriangleMesh> &construct) {
-    std::shared_ptr<PhysxTriangleMesh> mesh;
-    Vec3 scale;
-    std::shared_ptr<PhysxMaterial> m;
-    ar(m, scale, mesh);
-    construct(mesh, scale, m);
-    construct->PhysxCollisionShape::loadBase(ar);
-  }
-
 private:
   std::shared_ptr<PhysxTriangleMesh> mMesh;
   AABB mLocalAABB;
@@ -330,26 +189,3 @@ private:
 
 } // namespace physx
 } // namespace sapien
-
-CEREAL_REGISTER_TYPE(sapien::physx::PhysxCollisionShapePlane);
-CEREAL_REGISTER_TYPE(sapien::physx::PhysxCollisionShapeBox);
-CEREAL_REGISTER_TYPE(sapien::physx::PhysxCollisionShapeSphere);
-CEREAL_REGISTER_TYPE(sapien::physx::PhysxCollisionShapeCapsule);
-CEREAL_REGISTER_TYPE(sapien::physx::PhysxCollisionShapeCylinder);
-CEREAL_REGISTER_TYPE(sapien::physx::PhysxCollisionShapeConvexMesh);
-CEREAL_REGISTER_TYPE(sapien::physx::PhysxCollisionShapeTriangleMesh);
-
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxCollisionShape,
-                                     sapien::physx::PhysxCollisionShapePlane);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxCollisionShape,
-                                     sapien::physx::PhysxCollisionShapeBox);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxCollisionShape,
-                                     sapien::physx::PhysxCollisionShapeSphere);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxCollisionShape,
-                                     sapien::physx::PhysxCollisionShapeCapsule);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxCollisionShape,
-                                     sapien::physx::PhysxCollisionShapeCylinder);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxCollisionShape,
-                                     sapien::physx::PhysxCollisionShapeConvexMesh);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::physx::PhysxCollisionShape,
-                                     sapien::physx::PhysxCollisionShapeTriangleMesh);

@@ -3,9 +3,9 @@
 #include "../interface.h"
 #include "sapien/array.h"
 #include "sapien/math/pose.h"
-#include "sapien/serialize.h"
 #include "sapien_renderer_system.h"
 #include <svulkan2/resource/model.h>
+#include <Eigen/Dense>
 
 #ifdef SAPIEN_CUDA
 #include <cuda_runtime.h>

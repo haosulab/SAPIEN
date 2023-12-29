@@ -1,6 +1,5 @@
 #include "./array.hpp"
 #include "./python_component.hpp"
-#include "./serialization.h"
 #include "generator.hpp"
 #include "sapien/component.h"
 #include "sapien/entity.h"
@@ -135,10 +134,6 @@ Generator<int> init_sapien(py::module &m) {
       .def("get_physx_system", &Scene::getPhysxSystem)
       .def_property_readonly("render_system", &Scene::getSapienRendererSystem)
       .def("get_render_system", &Scene::getSapienRendererSystem)
-      .def(
-          py::pickle([](std::shared_ptr<Scene> scene) { return py::bytes(serializeScene(scene)); },
-                     [](py::bytes t) { return unserializeScene(t); }))
-
       .def("pack_poses", [](Scene &s) { return py::bytes(s.packEntityPoses()); })
       .def(
           "unpack_poses", [](Scene &s, py::bytes data) { s.unpackEntityPoses(data); },
@@ -227,23 +222,7 @@ Generator<int> init_sapien(py::module &m) {
 
       .def_property_readonly("is_enabled", &Component::getEnabled)
       .def("enable", &Component::enable, "enable the component")
-      .def("disable", &Component::disable, "disable the component")
-
-      .def_property(
-          "_serialization_id",
-          [](Component &c) {
-            if (auto p = dynamic_cast<PythonComponent *>(&c)) {
-              return p->getSerializationId();
-            }
-            throw std::runtime_error("only Python-inherited components have serialization id");
-          },
-          [](Component &c, uint64_t id) {
-            if (auto p = dynamic_cast<PythonComponent *>(&c)) {
-              p->setSerializationId(id);
-              return;
-            }
-            throw std::runtime_error("only Python-inherited components have serialization id");
-          });
+      .def("disable", &Component::disable, "disable the component");
 
   PyCudaDataSource.def(py::init<>());
 
@@ -298,37 +277,5 @@ Generator<int> init_sapien(py::module &m) {
         return py::dict("shape"_a = shape, "strides"_a = strides, "typestr"_a = type,
                         "data"_a = py::make_tuple(reinterpret_cast<intptr_t>(array.ptr), false),
                         "version"_a = 2);
-      });
-
-  PyScene
-      .def("_swap_in_python_components",
-           [](Scene &scene, std::vector<std::shared_ptr<Component>> const &components) -> void {
-             std::unordered_map<uint64_t, std::shared_ptr<PythonComponent>> map;
-             for (auto &c : components) {
-               auto p = std::dynamic_pointer_cast<PythonComponent>(c);
-               assert(p);
-               map[p->getSerializationId()] = p;
-             }
-             auto entities = scene.getEntities();
-             for (auto e : scene.getEntities()) {
-               auto comps = e->getComponents();
-               for (uint32_t i = 0; i < comps.size(); ++i) {
-                 if (auto p = dynamic_cast<PythonComponent *>(comps[i].get())) {
-                   e->internalSwapInComponent(i, map.at(p->getSerializationId()));
-                 }
-               }
-             }
-           })
-      .def("_find_all_python_components", [](Scene &scene) {
-        std::unordered_set<std::shared_ptr<Component>> result;
-        for (auto &e : scene.getEntities()) {
-          auto comps = e->getComponents();
-          for (auto c : comps) {
-            if (std::dynamic_pointer_cast<PythonComponent>(c)) {
-              result.insert(c);
-            }
-          }
-        }
-        return std::vector(result.begin(), result.end());
       });
 }

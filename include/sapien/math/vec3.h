@@ -60,7 +60,6 @@ struct Vec3 {
 
   float x{0.f}, y{0.f}, z{0.f};
 
-  template <class Archive> void serialize(Archive &ar) { ar(x, y, z); }
 };
 
 inline Vec3 operator+(float s, Vec3 const &v) { return v + s; }

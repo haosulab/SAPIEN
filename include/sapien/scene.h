@@ -1,7 +1,6 @@
 #pragma once
 #include "entity.h"
 #include "system.h"
-#include <cereal/types/unordered_map.hpp>
 #include <typeindex>
 #include <unordered_map>
 

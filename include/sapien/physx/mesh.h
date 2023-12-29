@@ -1,5 +1,4 @@
 #pragma once
-#include "sapien/serialize.h"
 #include <Eigen/Eigen>
 #include <PxPhysicsAPI.h>
 #include <memory>
@@ -58,14 +57,7 @@ private:
   std::optional<std::string> mFilename;
   std::optional<int> mPart;
 
-  friend cereal::access;
   PhysxConvexMesh() {}
-  template <class Archive> void save(Archive &ar) const { ar(getVertices(), mFilename, mPart); }
-  template <class Archive> void load(Archive &ar) {
-    Vertices vertices;
-    ar(vertices, mFilename, mPart);
-    loadMesh(vertices);
-  }
 };
 
 class PhysxTriangleMesh {
@@ -99,7 +91,6 @@ private:
   ::physx::PxTriangleMesh *mMesh{};
   std::optional<std::string> mFilename;
 
-  friend cereal::access;
   PhysxTriangleMesh() {}
   template <class Archive> void save(Archive &ar) const {
     ar(getVertices(), getTriangles(), mFilename);

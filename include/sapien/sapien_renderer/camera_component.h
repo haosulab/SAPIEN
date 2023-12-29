@@ -3,9 +3,9 @@
 #include "image.h"
 #include "sapien/math/mat.h"
 #include "sapien/math/pose.h"
-#include "sapien/serialize.h"
 #include <svulkan2/scene/camera.h>
 #include <variant>
+#include <map>
 
 namespace sapien {
 class Entity;
@@ -71,23 +71,6 @@ public:
   void gpuInit();
   CudaArrayHandle getCudaBuffer();
 
-  template <class Archive> void save(Archive &ar) const {
-    // TODO: handle shader dir
-    ar(mWidth, mHeight, mFx, mFy, mCx, mCy, mNear, mFar, mSkew, mShaderDir);
-    ar(cereal::base_class<Component>(this));
-  }
-  template <class Archive>
-  static void load_and_construct(Archive &ar,
-                                 cereal::construct<SapienRenderCameraComponent> &construct) {
-    uint32_t width, height;
-    float fx, fy, cx, cy, near, far, skew;
-    std::string shader;
-    ar(width, height, fx, fy, cx, cy, near, far, skew, shader);
-    construct(width, height, shader);
-    ar(cereal::base_class<Component>(construct.ptr()));
-    construct->setPerspectiveParameters(near, far, fx, fy, cx, cy, skew);
-  }
-
   ~SapienRenderCameraComponent();
   SapienRenderCameraComponent(SapienRenderCameraComponent const &) = delete;
   SapienRenderCameraComponent &operator=(SapienRenderCameraComponent const &) = delete;
@@ -122,6 +105,3 @@ private:
 } // namespace sapien_renderer
 } // namespace sapien
 
-CEREAL_REGISTER_TYPE(sapien::sapien_renderer::SapienRenderCameraComponent);
-CEREAL_REGISTER_POLYMORPHIC_RELATION(sapien::Component,
-                                     sapien::sapien_renderer::SapienRenderCameraComponent);

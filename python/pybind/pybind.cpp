@@ -7,7 +7,6 @@ Generator<int> init_physx(py::module &m);
 void init_sapien_renderer_internal(py::module &m);
 void init_sapien_renderer(py::module &m);
 void init_math(py::module &m);
-void init_serialization(py::module &m);
 
 #ifdef SAPIEN_CUDA
 void init_simsense(py::module &m);
@@ -23,7 +22,6 @@ PYBIND11_MODULE(pysapien, m) {
   init_sapien_renderer_internal(m);
   init_sapien_renderer(m);
   init_math(m);
-  init_serialization(m);
 
   sapien_gen.next();
   physx_gen.next();

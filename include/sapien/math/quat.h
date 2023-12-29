@@ -63,7 +63,6 @@ struct Quat {
   }
 
   float w{1.f}, x{0.f}, y{0.f}, z{0.f};
-  template <class Archive> void serialize(Archive &ar) { ar(w, x, y, z); }
 };
 
 } // namespace sapien
