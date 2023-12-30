@@ -12,7 +12,6 @@
 #include <svulkan2/scene/scene.h>
 
 #if SAPIEN_CUDA
-#include "./sapien_renderer_system.cuh"
 #include "sapien/utils/cuda.h"
 #endif
 
