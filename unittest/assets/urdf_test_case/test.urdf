@@ -1,0 +1,196 @@
+<?xml version="1.0" ?>
+
+<robot name="camera_shaft">
+  <material name="Green">
+    <color rgba="0.0 1 0 1.0"/>
+  </material>
+
+  <link name="world"/>
+  <link name="platform">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.05"/>
+      <geometry>
+        <box size="0.3 0.2 0.1"/>
+      </geometry>
+      <material name="Red">
+        <color rgba="1.0 0 0 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.05"/>
+      <geometry>
+        <box size="0.3 0.2 0.1"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="platform" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <!-- axis defaults to 1 0 0 -->
+    <parent link="world" />
+    <child link="platform" />
+    <limit effort="0" velocity="0" lower="-0.4" upper="0.6"/>
+  </joint>
+
+  <link name="base">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.025"/>
+      <geometry>
+        <box size="0.1 0.1 0.05"/>
+      </geometry>
+      <material name="Green"/>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.025"/>
+      <geometry>
+        <box size="0.1 0.1 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base" type="prismatic">
+    <origin rpy="0 0 0" xyz="0 0 0.1" />
+    <axis xyz="0 1 0" />
+    <parent link="platform" />
+    <child link="base" />
+    <limit effort="0" velocity="0" lower="-0.1" upper="0.1"/>
+  </joint>
+
+  <link name="beam">
+    <visual>
+      <origin rpy="0 1.5707963267948966 0" xyz="0.1 0 0"/>
+      <geometry>
+        <cylinder length="0.2" radius="0.025"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 1.5707963267948966 0" xyz="0.1 0 0"/>
+      <geometry>
+        <cylinder length="0.2" radius="0.025"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="beam" type="revolute">
+    <origin rpy="0 -1.5707963267948966 0" xyz="0 0 0.05" />
+    <parent link="base" />
+    <child link="beam" />
+    <limit effort="0" velocity="0" lower="0" upper="1"/>
+  </joint>
+
+  <link name="shaft">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.075"/>
+      <geometry>
+        <cylinder length="0.15" radius="0.02"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0.075"/>
+      <geometry>
+        <cylinder length="0.15" radius="0.02"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="shaft" type="prismatic">
+    <origin rpy="0 1.5707963267948966 0" xyz="0.2 0 0" />
+    <axis xyz="0 0 1"/>
+    <parent link="beam" />
+    <child link="shaft" />
+    <limit effort="0" velocity="0" lower="-0.1" upper="0"/>
+  </joint>
+
+  <link name="rod">
+    <!-- default origin -->
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+    </visual>
+    <visual>
+      <origin xyz="0.05 0 0" rpy="0 1.5707963267948966 0"/>
+      <geometry>
+        <capsule radius="0.02" length="0.1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.05 0 0" rpy="0 1.5707963267948966  0"/>
+      <geometry>
+        <capsule radius="0.02" length="0.1"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="rod" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.15" />
+    <axis xyz="0 0 0"/>
+    <parent link="shaft" />
+    <child link="rod" />
+  </joint>
+
+  <link name="mount">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="mount.glb" scale="0.03 0.03 0.03"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="mount.glb" scale="0.03 0.03 0.03"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="mount" type="continuous">
+    <origin rpy="0 0 0" xyz="0.1 0 0.04" />
+    <axis xyz="1 0 0"/>
+    <parent link="rod" />
+    <child link="mount" />
+    <limit effort="0" velocity="0"/>
+  </joint>
+
+  <link name="camera">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://camera.obj" scale="0.03 0.03 0.03"/>
+      </geometry>
+      <material name="tex">
+        <texture filename="package://texture.png"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://camera.obj" scale="0.03 0.03 0.03"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="camera" type="continuous">
+    <origin rpy="0 0 0" xyz="0 0 0" />
+    <axis xyz="0 1 0"/>
+    <parent link="mount" />
+    <child link="camera" />
+    <limit effort="0" velocity="0"/>
+  </joint>
+
+  <sensor name="camera" type="depth">
+    <parent link="camera"/>
+    <origin xyz="0.02 0 0"/>
+    <camera>
+      <horizontal_fov>1.5707963267948966</horizontal_fov>
+      <image>
+        <format>L8</format>
+        <width>800</width>
+        <height>200</height>
+      </image>
+      <clip>
+        <near>0.01</near>
+        <far>100</far>
+      </clip>
+    </camera>
+  </sensor>
+
+</robot>

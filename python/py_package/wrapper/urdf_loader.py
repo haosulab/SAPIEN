@@ -6,7 +6,7 @@ from lxml import etree as ET
 import numpy as np
 
 from ..pysapien.physx import PhysxArticulation, PhysxMaterial
-from ..pysapien.render import RenderCameraComponent
+from ..pysapien.render import RenderCameraComponent, RenderMaterial, RenderTexture2D
 from ..pysapien import Pose
 from .articulation_builder import ArticulationBuilder
 from .urchin import URDF
@@ -113,16 +113,40 @@ class URDFLoader:
     def _parse_cameras(self, extra):
         cameras = []
 
+        sensors = []
         for gazebo in extra.findall("gazebo"):
             if "reference" not in gazebo.attrib:
                 continue
-            link_name = gazebo.attrib["reference"]
-            sensor = gazebo.find("sensor")
-            if sensor is None:
+            for s in gazebo.findall("sensor"):
+                if s.find("parent") is None:
+                    ET.SubElement(s, "parent", {"link": gazebo.attrib["reference"]})
+                sensors.append(s)
+
+        sensors += extra.findall("sensor")
+
+        for sensor in sensors:
+            parent = sensor.find("parent")
+            if parent is None:
                 continue
+
             camera = sensor.find("camera")
             if camera is None:
                 continue
+
+            xyz = "0 0 0"
+            rpy = "0 0 0"
+            origin = sensor.find("origin")
+            if origin is not None:
+                xyz = origin.attrib.get("xyz", "0 0 0")
+                rpy = origin.attrib.get("rpy", "0 0 0")
+
+            xyz = [float(x) for x in xyz.split()]
+            rpy = [float(x) for x in rpy.split()]
+            pose = Pose()
+            pose.set_p(xyz)
+            pose.set_rpy(rpy)
+
+            link_name = parent.attrib["link"]
 
             image = camera.find("image")
             assert image is not None
@@ -152,13 +176,14 @@ class URDFLoader:
 
             cameras.append(
                 {
-                    "reference": link_name,
+                    "parent": link_name,
                     "fovx": fovx,
                     "fovy": fovy,
                     "width": width,
                     "height": height,
                     "near": near,
                     "far": far,
+                    "pose": pose,
                 }
             )
 
@@ -198,13 +223,13 @@ class URDFLoader:
 
         # visual shapes
         for visual in link.visuals:
+            material = None
             if visual.material:
-                if visual.material.texture:
-                    warnings.warn("URDF texture tag is unsupported and ignored.")
-
-                color = visual.material.color
-            else:
-                color = None
+                material = RenderMaterial()
+                if visual.material.color is not None:
+                    material.base_color = visual.material.color
+                elif visual.material.texture is not None:
+                    material.diffuse_texture = RenderTexture2D(_prune_package(visual.material.texture.filename))
 
             t_visual2link = self._pose_from_origin(visual.origin, self.scale)
             name = visual.name if visual.name else ""
@@ -212,14 +237,14 @@ class URDFLoader:
                 link_builder.add_box_visual(
                     t_visual2link,
                     visual.geometry.box.size * self.scale / 2.0,
-                    material=color,
+                    material=material,
                     name=name,
                 )
             if visual.geometry.sphere:
                 link_builder.add_sphere_visual(
                     t_visual2link,
                     visual.geometry.sphere.radius * self.scale,
-                    material=color,
+                    material=material,
                     name=name,
                 )
             if visual.geometry.capsule:
@@ -227,7 +252,7 @@ class URDFLoader:
                     t_visual2link * Pose(q=[0.7071068, 0, 0.7071068, 0]),
                     visual.geometry.capsule.radius * self.scale,
                     visual.geometry.capsule.length * self.scale / 2.0,
-                    material=color,
+                    material=material,
                     name=name,
                 )
             if visual.geometry.cylinder:
@@ -235,7 +260,7 @@ class URDFLoader:
                     t_visual2link * Pose(q=[0.7071068, 0, 0.7071068, 0]),
                     visual.geometry.cylinder.radius * self.scale,
                     visual.geometry.cylinder.length * self.scale / 2.0,
-                    material=color,
+                    material=material,
                     name=name,
                 )
             if visual.geometry.mesh:
@@ -250,7 +275,7 @@ class URDFLoader:
                     ),
                     t_visual2link,
                     scale * self.scale,
-                    material=color,
+                    material=material,
                     name=name,
                 )
 
@@ -623,7 +648,8 @@ class URDFLoader:
 
             cam_component.near = cam["near"]
             cam_component.far = cam["far"]
-            name2entity[cam["reference"]].add_component(cam_component)
+            cam_component.local_pose = cam["pose"]
+            name2entity[cam["parent"]].add_component(cam_component)
 
         return articulations, actors
 
@@ -676,7 +702,8 @@ class URDFLoader:
 
             cam_component.near = cam["near"]
             cam_component.far = cam["far"]
-            name2entity[cam["reference"]].add_component(cam_component)
+            cam_component.local_pose = cam["pose"]
+            name2entity[cam["parent"]].add_component(cam_component)
 
         return articulations[0]
 
