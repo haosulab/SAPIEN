@@ -203,6 +203,8 @@ public:
 
   void gpuUpdateArticulationKinematics();
 
+  void syncPosesGpuToCpu();
+
   void setSceneOffset(std::shared_ptr<Scene> scene, Vec3 offset);
   Vec3 getSceneOffset(std::shared_ptr<Scene> scene) const;
 
@@ -213,6 +215,8 @@ private:
   std::set<std::shared_ptr<PhysxRigidDynamicComponent>, comp_cmp> mRigidDynamicComponents;
   std::set<std::shared_ptr<PhysxRigidStaticComponent>, comp_cmp> mRigidStaticComponents;
   std::set<std::shared_ptr<PhysxArticulationLinkComponent>, comp_cmp> mArticulationLinkComponents;
+
+  uint64_t mTotalSteps;
 
   bool mGpuInitialized{false};
 
@@ -244,6 +248,8 @@ private:
   CudaArray mCudaRigidBodyBuffer;
   CudaArrayHandle mCudaRigidDynamicHandle;
   CudaArrayHandle mCudaLinkHandle;
+
+  CudaHostArray mCudaHostRigidBodyBuffer;
 
   CudaArray mCudaArticulationBuffer;
   CudaArrayHandle mCudaQposHandle;

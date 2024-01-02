@@ -439,7 +439,11 @@ Args:
                &PhysxSystemGpu::gpuApplyArticulationQTargetPos))
       .def("gpu_apply_articulation_target_velocity",
            py::overload_cast<CudaArrayHandle const &>(
-               &PhysxSystemGpu::gpuApplyArticulationQTargetVel));
+               &PhysxSystemGpu::gpuApplyArticulationQTargetVel))
+
+      .def("sync_poses_gpu_to_cpu", &PhysxSystemGpu::syncPosesGpuToCpu,
+           "Warning: this function is super slow and for debug only. Download all poses from the "
+           "GPU and copy to SAPIEN entities.");
 
   PyPhysxMaterial
       .def(py::init<float, float, float>(), py::arg("static_friction"),

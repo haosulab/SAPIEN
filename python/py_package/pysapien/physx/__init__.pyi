@@ -799,6 +799,10 @@ class PhysxGpuSystem(PhysxSystem, sapien.pysapien.System):
         position `[1, 1, 1]` will be at position `[1, 1, 1] + [2, 1, 0] = [3, 2, 1]` in
         PhysX scene.
         """
+    def sync_poses_gpu_to_cpu(self) -> None: 
+        """
+        Warning: this function is super slow and for debug only. Download all poses from the GPU and copy to SAPIEN entities.
+        """
     @property
     def cuda_articulation_link_data(self) -> CudaArrayHandle:
         """

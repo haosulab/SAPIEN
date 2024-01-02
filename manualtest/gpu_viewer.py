@@ -55,49 +55,71 @@ def main():
 
     px.gpu_init()
 
-    # tell render shapes where to look for poses
-    for body in all_links + all_bodies:
-        rb = body.entity.find_component_by_type(sapien.render.RenderBodyComponent)
-        if rb is None:
-            continue
-        for s in rb.render_shapes:
-            s.set_gpu_pose_batch_index(body.gpu_pose_index)
-
-    # viewer = scenes[0].create_viewer()
-    # viewer.render()
-
-    # render system group manages batched rendering
-    render_system_group = sapien.render.RenderSystemGroup(
-        [s.render_system for s in scenes]
-    )
-
-    # camera group renders images in batches
-    camera_group = render_system_group.create_camera_group(cams, ["Color"])
-    render_system_group.set_cuda_poses(px.cuda_rigid_body_data)
-
-    px.gpu_fetch_rigid_dynamic_data()
-    px.gpu_fetch_articulation_link_pose()
-    render_system_group.update_render()
-
     import matplotlib.pyplot as plt
+    def fast_way():
+        # tell render shapes where to look for poses
+        for body in all_links + all_bodies:
+            rb = body.entity.find_component_by_type(sapien.render.RenderBodyComponent)
+            if rb is None:
+                continue
+            for s in rb.render_shapes:
+                s.set_gpu_pose_batch_index(body.gpu_pose_index)
 
-    for _ in range(5):
-        for _ in range(10):
-            px.step()
+        # viewer = scenes[0].create_viewer()
+        # viewer.render()
+
+        # render system group manages batched rendering
+        render_system_group = sapien.render.RenderSystemGroup(
+            [s.render_system for s in scenes]
+        )
+
+        # camera group renders images in batches
+        camera_group = render_system_group.create_camera_group(cams, ["Color"])
+        render_system_group.set_cuda_poses(px.cuda_rigid_body_data)
 
         px.gpu_fetch_rigid_dynamic_data()
         px.gpu_fetch_articulation_link_pose()
-
         render_system_group.update_render()
-        camera_group.take_picture()
-        picture = camera_group.get_picture_cuda("Color")
-        picture = picture.cpu().numpy()
 
-        plt.subplot(1, 2, 1)
-        plt.imshow(picture[0])
-        plt.subplot(1, 2, 2)
-        plt.imshow(picture[1])
-        plt.show()
+
+        for _ in range(5):
+            for _ in range(10):
+                px.step()
+
+            px.gpu_fetch_rigid_dynamic_data()
+            px.gpu_fetch_articulation_link_pose()
+
+            render_system_group.update_render()
+            camera_group.take_picture()
+            picture = camera_group.get_picture_cuda("Color")
+            picture = picture.cpu().numpy()
+
+            plt.subplot(1, 2, 1)
+            plt.imshow(picture[0])
+            plt.subplot(1, 2, 2)
+            plt.imshow(picture[1])
+            plt.show()
+
+    def slow_way():
+        for _ in range(5):
+            for _ in range(10):
+                px.step()
+
+            px.sync_poses_gpu_to_cpu()
+            for scene in scenes:
+                scene.update_render()
+            for cam in cams:
+                cam.take_picture()
+
+            pictures = [cam.get_picture("Color") for cam in cams]
+
+            plt.subplot(1, 2, 1)
+            plt.imshow(pictures[0])
+            plt.subplot(1, 2, 2)
+            plt.imshow(pictures[1])
+            plt.show()
+
+    slow_way()
 
     # while not viewer.closed:
     #     px.step()

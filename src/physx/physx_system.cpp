@@ -204,6 +204,7 @@ void PhysxSystemGpu::step() {
     throw std::runtime_error("failed to step: gpu simulation is not initialized.");
   }
 
+  ++mTotalSteps;
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
   }
@@ -323,6 +324,7 @@ int PhysxSystem::computeArticulationMaxLinkCount() const {
 }
 
 void PhysxSystemGpu::gpuInit() {
+  ++mTotalSteps;
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
   }
@@ -598,6 +600,27 @@ void PhysxSystemGpu::gpuApplyArticulationQTargetVel(CudaArrayHandle const &indic
                                   indices.shape.at(0), mCudaEventRecord.event,
                                   mCudaEventWait.event);
   mCudaEventWait.wait(mCudaStream);
+}
+
+void PhysxSystemGpu::syncPosesGpuToCpu() {
+  checkGpuInitialized();
+  gpuFetchRigidDynamicData();
+  gpuFetchArticulationLinkPose();
+  if (mCudaHostRigidBodyBuffer.shape != mCudaRigidBodyBuffer.shape) {
+    mCudaHostRigidBodyBuffer =
+        CudaHostArray(mCudaRigidBodyBuffer.shape, mCudaRigidBodyBuffer.type);
+  }
+  mCudaHostRigidBodyBuffer.copyFrom(mCudaRigidBodyBuffer);
+  auto data = (SapienBodyData *)mCudaHostRigidBodyBuffer.ptr;
+
+  for (auto &body : mRigidDynamicComponents) {
+    assert(body->getGpuPoseIndex() >= 0);
+    body->getEntity()->internalSyncPose(data[body->getGpuPoseIndex()].pose);
+  }
+  for (auto &body : mArticulationLinkComponents) {
+    assert(body->getGpuPoseIndex() >= 0);
+    body->getEntity()->internalSyncPose(data[body->getGpuPoseIndex()].pose);
+  }
 }
 
 void PhysxSystemGpu::setSceneOffset(std::shared_ptr<Scene> scene, Vec3 offset) {
