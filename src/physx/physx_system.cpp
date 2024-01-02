@@ -16,6 +16,14 @@ using namespace physx;
 namespace sapien {
 namespace physx {
 
+struct SapienBodyDataTest {
+  Pose pose;
+  Vec3 v;
+  Vec3 w;
+};
+
+static_assert(sizeof(SapienBodyDataTest) == 52);
+
 PhysxSystem::PhysxSystem(PhysxSceneConfig const &config)
     : mSceneConfig(config), mEngine(PhysxEngine::Get()) {}
 

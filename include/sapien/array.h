@@ -53,6 +53,23 @@ struct CudaArray {
   void *ptr{nullptr};
 };
 
+struct CudaHostArray {
+  CudaHostArray(){};
+  CudaHostArray(std::vector<int> shape_, std::string type_);
+
+  void copyFrom(CudaArray const &array);
+
+  CudaHostArray(CudaHostArray const &) = delete;
+  CudaHostArray &operator=(CudaHostArray const &) = delete;
+  CudaHostArray(CudaHostArray &&other);
+  CudaHostArray &operator=(CudaHostArray &&other);
+  ~CudaHostArray();
+
+  std::vector<int> shape;
+  std::string type;
+  void *ptr{nullptr};
+};
+
 struct CpuArrayHandle {
   std::vector<int> shape;
   std::vector<int> strides;

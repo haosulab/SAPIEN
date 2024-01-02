@@ -175,20 +175,78 @@ CudaArray &CudaArray::operator=(CudaArray &&other) {
 #endif
 }
 
-CudaArrayHandle CudaArray::handle() const {
-  return CudaArrayHandle{.shape = shape,
-                         .strides = ShapeToStrides(shape, typestrBytes(type)),
-                         .type = type,
-                         .cudaId = cudaId,
-                         .ptr = ptr};
-}
-
 CudaArray::~CudaArray() {
 #ifdef SAPIEN_CUDA
   if (ptr) {
     cudaFree(ptr);
   }
 #endif
+}
+
+CudaHostArray::CudaHostArray(std::vector<int> shape_, std::string type_)
+    : shape(shape_), type(type_), ptr(nullptr) {
+#ifdef SAPIEN_CUDA
+  size_t size = 1;
+  for (auto s : shape) {
+    size *= s;
+  }
+  size *= typestrBytes(type);
+  checkCudaErrors(cudaMallocHost(&ptr, size));
+#endif
+}
+
+CudaHostArray::CudaHostArray(CudaHostArray &&other) {
+#ifdef SAPIEN_CUDA
+  shape = other.shape;
+  type = other.type;
+  ptr = other.ptr;
+
+  other.shape.clear();
+  other.ptr = nullptr;
+#endif
+}
+
+CudaHostArray::~CudaHostArray() {
+#ifdef SAPIEN_CUDA
+  if (ptr) {
+    cudaFreeHost(ptr);
+  }
+#endif
+}
+
+CudaHostArray &CudaHostArray::operator=(CudaHostArray &&other) {
+#ifdef SAPIEN_CUDA
+  if (this != &other) {
+    if (ptr) {
+      checkCudaErrors(cudaFreeHost(ptr));
+    }
+    shape = other.shape;
+    type = other.type;
+    ptr = other.ptr;
+
+    other.shape.clear();
+    other.ptr = nullptr;
+  }
+  return *this;
+#endif
+}
+
+void CudaHostArray::copyFrom(const CudaArray &array) {
+  if (array.shape != shape) {
+    throw std::runtime_error("failed to copy: arrays have different shapes");
+  }
+  if (array.type != type) {
+    throw std::runtime_error("failed to copy: arrays have different types");
+  }
+  checkCudaErrors(cudaMemcpy(ptr, array.ptr, array.bytes(), cudaMemcpyDeviceToHost));
+}
+
+CudaArrayHandle CudaArray::handle() const {
+  return CudaArrayHandle{.shape = shape,
+                         .strides = ShapeToStrides(shape, typestrBytes(type)),
+                         .type = type,
+                         .cudaId = cudaId,
+                         .ptr = ptr};
 }
 
 static void CudaArrayDLManagedTensorDeleter(DLManagedTensor *self) {

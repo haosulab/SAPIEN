@@ -178,18 +178,8 @@ void BatchedRenderSystem::init() {
 
         static_assert(sizeof(RenderShapeData) == 4 * 13);
         RenderShapeData data;
-        data.localRot[0] = localPose.q.w;
-        data.localRot[1] = localPose.q.x;
-        data.localRot[2] = localPose.q.y;
-        data.localRot[3] = localPose.q.z;
-
-        data.localPos[0] = localPose.p.x;
-        data.localPos[1] = localPose.p.y;
-        data.localPos[2] = localPose.p.z;
-
-        data.scale[0] = scale.x;
-        data.scale[1] = scale.y;
-        data.scale[2] = scale.z;
+        data.localPose = localPose;
+        data.scale = scale;
 
         data.poseIndex = poseIndex;
         data.sceneIndex = sceneIndex;
@@ -241,6 +231,7 @@ std::shared_ptr<BatchedCamera> BatchedRenderSystem::createCameraBatch(
   mCameraBatches.push_back(cameraBatch);
 
   std::vector<CameraData> allCamData;
+  mCameraCount = 0;
   for (auto &cb : mCameraBatches) {
     for (auto &cam : cb->getCameras()) {
       int index = cam->getGpuBatchedPoseIndex();
@@ -250,19 +241,13 @@ std::shared_ptr<BatchedCamera> BatchedRenderSystem::createCameraBatch(
       }
       CameraData data;
       data.buffer = cam->getCudaBuffer().ptr;
-      auto pose = cam->getLocalPose();
-      data.localRot[0] = pose.q.w;
-      data.localRot[1] = pose.q.x;
-      data.localRot[2] = pose.q.y;
-      data.localRot[3] = pose.q.z;
-
-      data.localPos[0] = pose.q.x;
-      data.localPos[1] = pose.q.y;
-      data.localPos[2] = pose.q.z;
+      auto pose = cam->getLocalPose() * POSE_GL_TO_ROS;
+      data.localPose = pose;
 
       data.poseIndex = index;
 
       allCamData.push_back(data);
+      mCameraCount++;
     }
   }
   mCudaCameraDataBuffer = CudaArray::FromData(allCamData);
@@ -285,9 +270,13 @@ void BatchedRenderSystem::update() {
   }
 
   // upload data
-  transform_sapien_to_render(
+
+  update_object_transforms(
       (float **)mCudaSceneTransformRefBuffer.ptr, (RenderShapeData *)mCudaShapeDataBuffer.ptr,
       (float *)mCudaPoseHandle.ptr, mCudaPoseHandle.shape.at(1), mShapeCount, mCudaStream);
+
+  update_camera_transforms((CameraData *)mCudaCameraDataBuffer.ptr, (float *)mCudaPoseHandle.ptr,
+                           mCudaPoseHandle.shape.at(1), mCameraCount, mCudaStream);
 
   // TODO: uplaod camera
 

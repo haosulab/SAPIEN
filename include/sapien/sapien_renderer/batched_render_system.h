@@ -66,6 +66,8 @@ private:
   int mShapeCount{0};
   CudaArray mCudaSceneTransformRefBuffer;
   CudaArray mCudaShapeDataBuffer;
+
+  int mCameraCount{0};
   CudaArray mCudaCameraDataBuffer;
 
   CUstream_st *mCudaStream{nullptr};
