@@ -1,7 +1,6 @@
 #include "sapien/sapien_renderer/deformable_mesh_component.h"
-#include "sapien/interface.h"
-#include "sapien/sapien_renderer/material.h"
 #include "sapien/entity.h"
+#include "sapien/sapien_renderer/material.h"
 #include "sapien/scene.h"
 
 namespace sapien {
@@ -116,6 +115,7 @@ void CudaDeformableMeshComponent::onAddToScene(Scene &scene) {
   system->registerComponent(
       std::static_pointer_cast<CudaDeformableMeshComponent>(shared_from_this()));
 }
+
 void CudaDeformableMeshComponent::onRemoveFromScene(Scene &scene) {
   auto system = scene.getSapienRendererSystem();
   auto s = system->getScene();
@@ -126,32 +126,19 @@ void CudaDeformableMeshComponent::onRemoveFromScene(Scene &scene) {
       std::static_pointer_cast<CudaDeformableMeshComponent>(shared_from_this()));
 }
 
-void CudaDeformableMeshComponent::internalUpdate() {
+void CudaDeformableMeshComponent::notifyVertexUpdated(uintptr_t stream) {
 #ifdef SAPIEN_CUDA
-  if (!mVertexProvider) {
-    return;
-  }
-
-  void *source = reinterpret_cast<void *>(mVertexProvider->getCudaPointer());
-  cudaStream_t stream = reinterpret_cast<cudaStream_t>(mVertexProvider->getCudaStream());
-  if (!source) {
-    return;
-  }
-  cudaMemcpy2DAsync(mMesh->getVertexBuffer().getCudaPtr(), mMesh->getVertexSize(), source, 12, 12,
-                    getVertexCount(), cudaMemcpyDeviceToDevice, stream);
-
   cudaExternalSemaphoreSignalParams sigParams{};
   sigParams.flags = 0;
   sigParams.params.fence.value = ++mSemValue;
-  cudaSignalExternalSemaphoresAsync(&mCudaSem, &sigParams, 1, stream);
+  cudaSignalExternalSemaphoresAsync(&mCudaSem, &sigParams, 1,
+                                    reinterpret_cast<cudaStream_t>(stream));
   vk::PipelineStageFlags flags = vk::PipelineStageFlagBits::eVertexInput;
   mEngine->getContext()->getQueue().submit({}, mSem.get(), flags, mSemValue, {}, {}, {});
 #endif
 }
 
-void CudaDeformableMeshComponent::setDataSource(std::shared_ptr<CudaDataSource> vertexProvider) {
-  mVertexProvider = vertexProvider;
-}
+void CudaDeformableMeshComponent::internalUpdate() {}
 
 } // namespace sapien_renderer
 } // namespace sapien

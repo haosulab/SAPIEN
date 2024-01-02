@@ -56,6 +56,7 @@ def main():
     px.gpu_init()
 
     import matplotlib.pyplot as plt
+
     def fast_way():
         # tell render shapes where to look for poses
         for body in all_links + all_bodies:
@@ -64,9 +65,6 @@ def main():
                 continue
             for s in rb.render_shapes:
                 s.set_gpu_pose_batch_index(body.gpu_pose_index)
-
-        # viewer = scenes[0].create_viewer()
-        # viewer.render()
 
         # render system group manages batched rendering
         render_system_group = sapien.render.RenderSystemGroup(
@@ -80,7 +78,6 @@ def main():
         px.gpu_fetch_rigid_dynamic_data()
         px.gpu_fetch_articulation_link_pose()
         render_system_group.update_render()
-
 
         for _ in range(5):
             for _ in range(10):
@@ -101,8 +98,8 @@ def main():
             plt.show()
 
     def slow_way():
-        for _ in range(5):
-            for _ in range(10):
+        for _ in range(10):
+            for _ in range(20):
                 px.step()
 
             px.sync_poses_gpu_to_cpu()
@@ -119,12 +116,15 @@ def main():
             plt.imshow(pictures[1])
             plt.show()
 
-    slow_way()
+    # slow_way()
+    viewer = scenes[0].create_viewer()
+    viewer.render()
 
-    # while not viewer.closed:
-    #     px.step()
-    #     render_system_group.update_render()
-    #     viewer.render()
+    while not viewer.closed:
+        px.step()
+        px.sync_poses_gpu_to_cpu()
+        scenes[0].update_render()
+        viewer.render()
 
 
 main()

@@ -3,7 +3,6 @@
 #include "generator.hpp"
 #include "sapien/component.h"
 #include "sapien/entity.h"
-#include "sapien/interface.h"
 #include "sapien/logger.h"
 #include "sapien/math/math.h"
 #include "sapien/physx/physx_system.h"
@@ -29,18 +28,6 @@ std::string getPythonCudaBackend() { return gPythonCudaBackend; }
 
 }; // namespace sapien
 
-class PythonCudaDataSource : public CudaDataSource, public py::trampoline_self_life_support {
-  uintptr_t getCudaPointer() const override {
-    PYBIND11_OVERRIDE_PURE_NAME(uintptr_t, CudaDataSource, "get_cuda_pointer", getCudaPointer, );
-  }
-  uintptr_t getCudaStream() const override {
-    PYBIND11_OVERRIDE_NAME(uintptr_t, CudaDataSource, "get_cuda_stream", getCudaStream, );
-  }
-  size_t getSize() const override {
-    PYBIND11_OVERRIDE_PURE_NAME(size_t, CudaDataSource, "get_size", getSize, );
-  }
-};
-
 class PythonSystem : public System, public py::trampoline_self_life_support {
 public:
   using System::System;
@@ -64,8 +51,6 @@ Generator<int> init_sapien(py::module &m) {
   auto PyEntity = py::class_<Entity>(m, "Entity");
 
   auto PyComponent = py::class_<Component, PythonComponent>(m, "Component");
-
-  auto PyCudaDataSource = py::class_<CudaDataSource, PythonCudaDataSource>(m, "CudaDataSource");
 
   auto PySystem = py::class_<System, PythonSystem>(m, "System");
   auto PyCudaArray = py::class_<PythonCudaArrayHandle>(m, "CudaArray");
@@ -223,8 +208,6 @@ Generator<int> init_sapien(py::module &m) {
       .def_property_readonly("is_enabled", &Component::getEnabled)
       .def("enable", &Component::enable, "enable the component")
       .def("disable", &Component::disable, "disable the component");
-
-  PyCudaDataSource.def(py::init<>());
 
   PySystem.def(py::init<>()).def("step", &System::step);
 

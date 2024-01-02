@@ -8,7 +8,6 @@ _T = typing.TypeVar("T")
 __all__ = [
     "Component",
     "CudaArray",
-    "CudaDataSource",
     "Entity",
     "Pose",
     "Scene",
@@ -108,9 +107,6 @@ class CudaArray():
         """
         :type: str
         """
-    pass
-class CudaDataSource():
-    def __init__(self) -> None: ...
     pass
 class Entity():
     def __init__(self) -> None: ...

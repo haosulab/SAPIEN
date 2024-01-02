@@ -131,16 +131,15 @@ class RenderCameraComponent(sapien.pysapien.Component):
     def get_picture_cuda(self, name: str) -> CudaArrayHandle: 
         """
         This function transfers the rendered image into a CUDA buffer.
-        The returned object implements __cuda_array_interface__
 
         Usage:
 
         # use torch backend
         sapien.set_cuda_tensor_backend("torch")  # called once per process
-        image: torch.Tensor = camera.getImageCuda()
+        image: torch.Tensor = camera.get_picture_cuda()
 
         # use default backend
-        image = camera.getImageCuda()
+        image = camera.get_picture_cuda()
         torch_tensor = torch.as_tensor(image)
 
         Warning: The camera must not be destroyed when the GPU tensor is in use by the
@@ -273,7 +272,7 @@ class RenderCudaMeshComponent(sapien.pysapien.Component):
     def get_material(self) -> RenderMaterial: ...
     def get_triangle_count(self) -> int: ...
     def get_vertex_count(self) -> int: ...
-    def set_data_source(self, vertex_provider: sapien.pysapien.CudaDataSource) -> None: ...
+    def notify_vertex_updated(self, cuda_stream: int = 0) -> None: ...
     def set_material(self, material: RenderMaterial) -> None: ...
     def set_triangle_count(self, arg0: int) -> None: ...
     def set_triangles(self, arg0: numpy.ndarray[numpy.uint32, _Shape[m, 3]]) -> None: ...

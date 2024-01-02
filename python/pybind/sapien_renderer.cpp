@@ -870,16 +870,15 @@ This function waits for any pending CUDA operations on cuda stream provided by :
           py::arg("name"),
           R"doc(
 This function transfers the rendered image into a CUDA buffer.
-The returned object implements __cuda_array_interface__
 
 Usage:
 
 # use torch backend
 sapien.set_cuda_tensor_backend("torch")  # called once per process
-image: torch.Tensor = camera.getImageCuda()
+image: torch.Tensor = camera.get_picture_cuda()
 
 # use default backend
-image = camera.getImageCuda()
+image = camera.get_picture_cuda()
 torch_tensor = torch.as_tensor(image)
 
 Warning: The camera must not be destroyed when the GPU tensor is in use by the
@@ -982,8 +981,8 @@ consumer library. Make a copy if needed.
                     &CudaDeformableMeshComponent::setMaterial)
       .def("get_material", &CudaDeformableMeshComponent::getMaterial)
       .def("set_material", &CudaDeformableMeshComponent::setMaterial, py::arg("material"))
-      .def("set_data_source", &CudaDeformableMeshComponent::setDataSource,
-           py::arg("vertex_provider"));
+      .def("notify_vertex_updated", &CudaDeformableMeshComponent::notifyVertexUpdated,
+           py::arg("cuda_stream") = 0);
 
   PyRenderWindow
       .def(py::init<int, int, std::string>(), py::arg("width"), py::arg("height"),

@@ -5,7 +5,6 @@ from sapien.wrapper.actor_builder import ActorBuilder
 from sapien.wrapper.articulation_builder import ArticulationBuilder
 from sapien.pysapien import Component
 from sapien.pysapien import CudaArray
-from sapien.pysapien import CudaDataSource
 from sapien.wrapper.engine import Engine
 from sapien.pysapien import Entity
 from pathlib import Path
@@ -26,7 +25,6 @@ __all__ = [
     "ArticulationBuilder",
     "Component",
     "CudaArray",
-    "CudaDataSource",
     "Engine",
     "Entity",
     "Path",
@@ -64,5 +62,5 @@ def set_cuda_tensor_backend(backend: str) -> None:
     """
 def set_log_level(level: str) -> None:
     pass
-__version__ = '3.0.0.dev20240102+417f965f'
+__version__ = '3.0.0.dev20240102+9e3648f8'
 SceneConfig = sapien.pysapien.physx.PhysxSceneConfig
