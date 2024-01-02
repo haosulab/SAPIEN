@@ -140,8 +140,10 @@ CudaArray::CudaArray(std::vector<int> shape_, std::string type_)
     size *= s;
   }
   size *= typestrBytes(type);
-  checkCudaErrors(cudaGetDevice(&cudaId));
-  checkCudaErrors(cudaMalloc(&ptr, size));
+  if (size > 0) {
+    checkCudaErrors(cudaGetDevice(&cudaId));
+    checkCudaErrors(cudaMalloc(&ptr, size));
+  }
 #endif
 }
 
@@ -160,9 +162,7 @@ CudaArray::CudaArray(CudaArray &&other) {
 CudaArray &CudaArray::operator=(CudaArray &&other) {
 #ifdef SAPIEN_CUDA
   if (this != &other) {
-    if (ptr) {
-      checkCudaErrors(cudaFree(ptr));
-    }
+    checkCudaErrors(cudaFree(ptr));
     shape = other.shape;
     type = other.type;
     cudaId = other.cudaId;
@@ -177,9 +177,7 @@ CudaArray &CudaArray::operator=(CudaArray &&other) {
 
 CudaArray::~CudaArray() {
 #ifdef SAPIEN_CUDA
-  if (ptr) {
-    cudaFree(ptr);
-  }
+  cudaFree(ptr);
 #endif
 }
 
@@ -191,7 +189,9 @@ CudaHostArray::CudaHostArray(std::vector<int> shape_, std::string type_)
     size *= s;
   }
   size *= typestrBytes(type);
-  checkCudaErrors(cudaMallocHost(&ptr, size));
+  if (size > 0) {
+    checkCudaErrors(cudaMallocHost(&ptr, size));
+  }
 #endif
 }
 
@@ -208,18 +208,14 @@ CudaHostArray::CudaHostArray(CudaHostArray &&other) {
 
 CudaHostArray::~CudaHostArray() {
 #ifdef SAPIEN_CUDA
-  if (ptr) {
-    cudaFreeHost(ptr);
-  }
+  cudaFreeHost(ptr);
 #endif
 }
 
 CudaHostArray &CudaHostArray::operator=(CudaHostArray &&other) {
 #ifdef SAPIEN_CUDA
   if (this != &other) {
-    if (ptr) {
-      checkCudaErrors(cudaFreeHost(ptr));
-    }
+    checkCudaErrors(cudaFreeHost(ptr));
     shape = other.shape;
     type = other.type;
     ptr = other.ptr;

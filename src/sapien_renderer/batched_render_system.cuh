@@ -5,7 +5,6 @@ struct CUstream_st;
 namespace sapien {
 namespace sapien_renderer {
 
-// TODO: use sapien::Pose directly
 struct RenderShapeData {
   Pose localPose;
   Vec3 scale;
