@@ -7,32 +7,30 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 projectionMatrix;
   mat4 viewMatrixInverse;
   mat4 projectionMatrixInverse;
-  mat4 prevViewMatrix;
-  mat4 prevViewMatrixInverse;
   float width;
   float height;
 } cameraBuffer;
 
-layout(set = 1, binding = 0) uniform ObjectBuffer {
+layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
   mat4 modelMatrix;
-  mat4 prevModelMatrix;
+} objectTransformBuffer;
+
+layout(set = 1, binding = 1) uniform ObjectDataBuffer {
   uvec4 segmentation;
   float transparency;
   int shadeFlat;
-} objectBuffer;
+} objectDataBuffer;
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in float scale;
 layout(location = 2) in vec4 color;
 
 layout(location = 0) out vec4 outPosition;
-layout(location = 1) out vec4 outPrevPosition;
-layout(location = 2) out vec4 outColor;
+layout(location = 1) out vec4 outColor;
 
 void main() {
-  mat4 modelView = cameraBuffer.viewMatrix * objectBuffer.modelMatrix;
+  mat4 modelView = cameraBuffer.viewMatrix * objectTransformBuffer.modelMatrix;
   outPosition = modelView * vec4(position, 1);
-  outPrevPosition = cameraBuffer.prevViewMatrix * objectBuffer.prevModelMatrix * vec4(position, 1);
   gl_Position = cameraBuffer.projectionMatrix * outPosition;
   outColor = color;
 }

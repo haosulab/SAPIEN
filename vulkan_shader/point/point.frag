@@ -19,8 +19,6 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 projectionMatrix;
   mat4 viewMatrixInverse;
   mat4 projectionMatrixInverse;
-  mat4 prevViewMatrix;
-  mat4 prevViewMatrixInverse;
   float width;
   float height;
 } cameraBuffer;

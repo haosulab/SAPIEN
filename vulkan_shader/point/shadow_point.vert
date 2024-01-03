@@ -11,13 +11,15 @@ layout(set = 0, binding = 0) uniform LightBuffer {
   int height;
 } lightBuffer;
 
-layout(set = 1, binding = 0) uniform ObjectBuffer {
+layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
   mat4 modelMatrix;
-  mat4 prevModelMatrix;
+} objectTransformBuffer;
+
+layout(set = 1, binding = 1) uniform ObjectDataBuffer {
   uvec4 segmentation;
   float transparency;
   int shadeFlat;
-} objectBuffer;
+} objectDataBuffer;
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in float scale;
@@ -27,7 +29,7 @@ layout(location = 0) out vec4 outPosition;
 layout(location = 1) out flat vec4 outNdcRadius;
 
 void main() {
-  mat4 modelView = lightBuffer.viewMatrix * objectBuffer.modelMatrix;
+  mat4 modelView = lightBuffer.viewMatrix * objectTransformBuffer.modelMatrix;
   outPosition = modelView * vec4(position, 1);
 
   float radius = scale;

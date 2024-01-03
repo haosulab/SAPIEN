@@ -7,19 +7,19 @@ layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 projectionMatrix;
   mat4 viewMatrixInverse;
   mat4 projectionMatrixInverse;
-  mat4 prevViewMatrix;
-  mat4 prevViewMatrixInverse;
   float width;
   float height;
 } cameraBuffer;
 
-layout(set = 1, binding = 0) uniform ObjectBuffer {
+layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
   mat4 modelMatrix;
-  mat4 prevModelMatrix;
+} objectTransformBuffer;
+
+layout(set = 1, binding = 1) uniform ObjectDataBuffer {
   uvec4 segmentation;
   float transparency;
   int shadeFlat;
-} objectBuffer;
+} objectDataBuffer;
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in float scale;
@@ -29,7 +29,7 @@ layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outCenterRadius;
 
 void main() {
-  mat4 modelView = cameraBuffer.viewMatrix * objectBuffer.modelMatrix;
+  mat4 modelView = cameraBuffer.viewMatrix * objectTransformBuffer.modelMatrix;
   vec4 outPosition = modelView * vec4(position, 1);
   float radius = scale;
 
