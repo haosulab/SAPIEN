@@ -10,6 +10,7 @@ layout(set = 0, binding = 3) uniform sampler2D samplerLineDepth;
 layout(set = 0, binding = 4) uniform sampler2D samplerLine;
 layout(set = 0, binding = 5) uniform sampler2D samplerPointDepth;
 layout(set = 0, binding = 6) uniform sampler2D samplerPoint;
+layout(set = 0, binding = 7) uniform sampler2D samplerGbufferDepth;
 
 
 layout(location = 0) in vec2 inUV;
@@ -111,7 +112,8 @@ void main() {
 
   vec4 pointColor = texture(samplerPoint, inUV);
   pointColor.rgb = pow(pointColor.rgb * exposure, vec3(1/2.2));
-  if (texture(samplerPointDepth, inUV).x < 1) {
+  float pointDepth = texture(samplerPointDepth, inUV).x;
+  if (pointDepth < 1 && pointDepth < texture(samplerGbufferDepth, inUV).x) {
     outColor = vec4(pointColor.xyz, 1);
   }
 }
