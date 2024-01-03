@@ -5,6 +5,7 @@
 #include "sapien/physx/articulation.h"
 #include "sapien/physx/articulation_link_component.h"
 #include "sapien/physx/material.h"
+#include "sapien/physx/physx_default.h"
 #include "sapien/physx/rigid_component.h"
 #include <extensions/PxExtensionsAPI.h>
 
@@ -65,6 +66,8 @@ PhysxSystemGpu::PhysxSystemGpu(PhysxSceneConfig const &config) : PhysxSystem(con
   sceneDesc.filterShader = TypeAffinityIgnoreFilterShader;
   sceneDesc.solverType = config.enableTGS ? PxSolverType::eTGS : PxSolverType::ePGS;
   sceneDesc.bounceThresholdVelocity = config.bounceThreshold;
+
+  sceneDesc.gpuDynamicsConfig = PhysxDefault::getGpuMemoryConfig();
 
   PxSceneFlags sceneFlags;
   if (config.enableEnhancedDeterminism) {

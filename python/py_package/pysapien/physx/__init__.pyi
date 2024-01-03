@@ -38,7 +38,8 @@ __all__ = [
     "PhysxSystem",
     "get_default_material",
     "is_gpu_enabled",
-    "set_default_material"
+    "set_default_material",
+    "set_gpu_memory_config"
 ]
 
 
@@ -1266,4 +1267,6 @@ def get_default_material() -> PhysxMaterial:
 def is_gpu_enabled() -> bool:
     pass
 def set_default_material(static_friction: float, dynamic_friction: float, restitution: float) -> None:
+    pass
+def set_gpu_memory_config(temp_buffer_capacity: int = 16777216, max_rigid_contact_count: int = 524288, max_rigid_patch_count: int = 81920, heap_capacity: int = 67108864, found_lost_pairs_capacity: int = 262144, found_lost_aggregate_pairs_capacity: int = 1024, total_aggregate_pairs_capacity: int = 1024) -> None:
     pass
