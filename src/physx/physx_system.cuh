@@ -32,7 +32,8 @@ struct PhysxBodyData {
 static_assert(sizeof(PhysxBodyData) == 64);
 
 struct SapienBodyData {
-  Pose pose{};
+  Vec3 p;
+  Quat q;
   Vec3 v{};
   Vec3 w{};
 };

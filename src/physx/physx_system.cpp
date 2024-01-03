@@ -615,11 +615,13 @@ void PhysxSystemGpu::syncPosesGpuToCpu() {
 
   for (auto &body : mRigidDynamicComponents) {
     assert(body->getGpuPoseIndex() >= 0);
-    body->getEntity()->internalSyncPose(data[body->getGpuPoseIndex()].pose);
+    body->getEntity()->internalSyncPose(
+        {data[body->getGpuPoseIndex()].p, data[body->getGpuPoseIndex()].q});
   }
   for (auto &body : mArticulationLinkComponents) {
     assert(body->getGpuPoseIndex() >= 0);
-    body->getEntity()->internalSyncPose(data[body->getGpuPoseIndex()].pose);
+    body->getEntity()->internalSyncPose(
+        {data[body->getGpuPoseIndex()].p, data[body->getGpuPoseIndex()].q});
   }
 }
 

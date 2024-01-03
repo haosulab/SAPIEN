@@ -12,9 +12,9 @@ __global__ void body_data_physx_to_sapien_kernel(SapienBodyData *__restrict__ sa
   }
 
   sapien_data[g] = {
-      .pose = Pose(physx_data[g].pose.p - offset[g],
-                   Quat(physx_data[g].pose.q.w, physx_data[g].pose.q.x, physx_data[g].pose.q.y,
-                        physx_data[g].pose.q.z)),
+      .p = physx_data[g].pose.p - offset[g],
+      .q = Quat(physx_data[g].pose.q.w, physx_data[g].pose.q.x, physx_data[g].pose.q.y,
+                physx_data[g].pose.q.z),
       .v = physx_data[g].v,
       .w = physx_data[g].w,
   };
@@ -31,8 +31,7 @@ __global__ void body_data_sapien_to_physx_kernel(PhysxBodyData *__restrict__ phy
   SapienBodyData sd = sapien_data[g];
 
   PhysxBodyData pd{
-      .pose = {.q = {sd.pose.q.x, sd.pose.q.y, sd.pose.q.z, sd.pose.q.w},
-               .p = sd.pose.p + offset[g]},
+      .pose = {.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w}, .p = sd.p + offset[g]},
       .v = sd.v,
       .w = sd.w,
   };
@@ -56,8 +55,7 @@ __global__ void body_data_sapien_to_physx_kernel(PhysxBodyData *__restrict__ phy
   SapienBodyData sd = sapien_data[i];
 
   PhysxBodyData pd{
-      .pose = {.q = {sd.pose.q.x, sd.pose.q.y, sd.pose.q.z, sd.pose.q.w},
-               .p = sd.pose.p + offset[i]},
+      .pose = {.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w}, .p = sd.p + offset[i]},
       .v = sd.v,
       .w = sd.w,
   };
@@ -77,9 +75,9 @@ __global__ void link_pose_physx_to_sapien_kernel(SapienBodyData *__restrict__ sa
 
   int ai = g / link_count;
 
-  sapien_data[g].pose =
-      Pose(physx_pose[g].p - offset[ai],
-           Quat(physx_pose[g].q.w, physx_pose[g].q.x, physx_pose[g].q.y, physx_pose[g].q.z));
+  sapien_data[g].p = physx_pose[g].p - offset[ai];
+  sapien_data[g].q =
+      Quat(physx_pose[g].q.w, physx_pose[g].q.x, physx_pose[g].q.y, physx_pose[g].q.z);
 }
 
 __global__ void root_pose_sapien_to_physx_kernel(PhysxPose *__restrict__ physx_pose,
@@ -96,8 +94,7 @@ __global__ void root_pose_sapien_to_physx_kernel(PhysxPose *__restrict__ physx_p
 
   SapienBodyData sd = sapien_data[ai * link_count];
 
-  physx_pose[ai] = {.q = {sd.pose.q.x, sd.pose.q.y, sd.pose.q.z, sd.pose.q.w},
-                    .p = sd.pose.p + offset[ai]};
+  physx_pose[ai] = {.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w}, .p = sd.p + offset[ai]};
 }
 
 __global__ void link_vel_physx_to_sapien_kernel(SapienBodyData *__restrict__ sapien_data,
