@@ -67,7 +67,6 @@ struct SapienRenderCameraInternal {
     mRenderer = svulkan2::renderer::RendererBase::Create(config);
     mRenderer->resize(width, height);
     mCamera = &scene->addCamera();
-    mSemaphore = mEngine->getContext()->createTimelineSemaphore(0);
     mRenderer->setScene(scene);
 
     if (auto rtRenderer = dynamic_cast<svulkan2::renderer::RTRenderer *>(mRenderer.get())) {
@@ -88,6 +87,9 @@ struct SapienRenderCameraInternal {
   }
 
   void waitForRender() {
+    if (!mSemaphore) {
+      return;
+    }
     auto result = mEngine->getContext()->getDevice().waitSemaphores(
         vk::SemaphoreWaitInfo({}, mSemaphore.get(), mFrameCounter), UINT64_MAX);
     if (result != vk::Result::eSuccess) {
@@ -96,6 +98,9 @@ struct SapienRenderCameraInternal {
   }
 
   void takePicture() {
+    if (!mSemaphore) {
+      mSemaphore = mEngine->getContext()->createTimelineSemaphore(mFrameCounter);
+    }
     waitForRender();
     mFrameCounter++;
     mRenderer->render(*mCamera, {}, {}, {}, mSemaphore.get(), mFrameCounter);
@@ -407,10 +412,9 @@ void SapienRenderCameraComponent::gpuInit() {
   }
 
   setAutoUpload(true);
-  mCamera->takePicture();
-  mCamera->waitForRender();
+  auto fence = SapienRenderEngine::Get()->getContext()->getDevice().createFenceUnique({});
+  mCamera->getRenderer().render(mCamera->getCamera(), {}, {}, {}, fence.get());
   setAutoUpload(false);
-
   mGpuInitialized = true;
 }
 
