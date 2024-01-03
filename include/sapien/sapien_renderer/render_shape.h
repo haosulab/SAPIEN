@@ -10,6 +10,29 @@ namespace sapien {
 namespace sapien_renderer {
 class SapienRenderBodyComponent;
 
+class RenderShapeTriangleMeshPart {
+public:
+  RenderShapeTriangleMeshPart(std::shared_ptr<svulkan2::resource::SVShape> shape);
+
+  Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> getVertices() const;
+  Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> getTriangles() const;
+  std::shared_ptr<SapienRenderMaterial> getMaterial() const;
+
+  void setUV(Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> const &);
+  void setNormal(Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &);
+
+  Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> getUV() const;
+  Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> getNormal() const;
+
+  CudaArrayHandle getVertexBufferCudaArray() const;
+  CudaArrayHandle getIndexBufferCudaArray() const;
+
+  std::shared_ptr<svulkan2::resource::SVShape> getShape() const { return mShape; };
+
+private:
+  std::shared_ptr<svulkan2::resource::SVShape> mShape;
+};
+
 class RenderShape {
 public:
   RenderShape();
@@ -46,6 +69,10 @@ public:
 
   vk::CullModeFlagBits getCulling() const;
   void setCulling(vk::CullModeFlagBits);
+
+  virtual std::vector<RenderShapeTriangleMeshPart> getParts() {
+    return {mModel->getShapes().at(0)};
+  }
 
   /** batched rendering only, sets the index to look up for GPU pose */
   void setGpuBatchedPoseIndex(int);
@@ -147,23 +174,6 @@ private:
   std::shared_ptr<SapienRenderMaterial> mMaterial;
 };
 
-class RenderShapeTriangleMeshPart {
-public:
-  RenderShapeTriangleMeshPart(std::shared_ptr<svulkan2::resource::SVShape> shape);
-
-  Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> getVertices() const;
-  Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> getTriangles() const;
-  std::shared_ptr<SapienRenderMaterial> getMaterial() const;
-
-  CudaArrayHandle getVertexBufferCudaArray() const;
-  CudaArrayHandle getIndexBufferCudaArray() const;
-
-  std::shared_ptr<svulkan2::resource::SVShape> getShape() const { return mShape; };
-
-private:
-  std::shared_ptr<svulkan2::resource::SVShape> mShape;
-};
-
 class RenderShapeTriangleMesh : public RenderShape {
 public:
   RenderShapeTriangleMesh(std::string const &filename, Vec3 scale,
@@ -183,7 +193,7 @@ public:
   Vec3 getScale() const;
   void setScale(Vec3 const &scale);
 
-  std::vector<RenderShapeTriangleMeshPart> getParts();
+  std::vector<RenderShapeTriangleMeshPart> getParts() override;
 
   std::shared_ptr<SapienRenderMaterial> getMaterial() const override;
 

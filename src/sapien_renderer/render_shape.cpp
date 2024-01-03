@@ -163,6 +163,30 @@ RenderShapeTriangleMeshPart::getTriangles() const {
       indices.data(), indices.size() / 3, 3);
 }
 
+void RenderShapeTriangleMeshPart::setUV(
+    Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> const &uv) {
+  mShape->mesh->setVertexAttribute("uv", std::vector<float>(uv.data(), uv.data() + uv.size()));
+}
+
+void RenderShapeTriangleMeshPart::setNormal(
+    Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &normal) {
+  mShape->mesh->setVertexAttribute(
+      "normal", std::vector<float>(normal.data(), normal.data() + normal.size()));
+}
+
+Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>
+RenderShapeTriangleMeshPart::getUV() const {
+  auto uv = mShape->mesh->getVertexAttribute("uv");
+  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(uv.data(),
+                                                                              uv.size() / 2, 2);
+}
+Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>
+RenderShapeTriangleMeshPart::getNormal() const {
+  auto normal = mShape->mesh->getVertexAttribute("normal");
+  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>>(
+      normal.data(), normal.size() / 3, 3);
+}
+
 std::shared_ptr<SapienRenderMaterial> RenderShapeTriangleMeshPart::getMaterial() const {
   return std::make_shared<SapienRenderMaterial>(
       std::dynamic_pointer_cast<svulkan2::resource::SVMetallicMaterial>(mShape->material));

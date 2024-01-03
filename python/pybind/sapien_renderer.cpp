@@ -659,7 +659,10 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def_property_readonly("material", &RenderShape::getMaterial)
       .def("get_material", &RenderShape::getMaterial)
 
-      .def("set_gpu_pose_batch_index", &RenderShape::setGpuBatchedPoseIndex);
+      .def("set_gpu_pose_batch_index", &RenderShape::setGpuBatchedPoseIndex)
+
+      .def_property_readonly("parts", &RenderShape::getParts)
+      .def("get_parts", &RenderShape::getParts);
 
   // .def("get_gpu_transform_index", &RenderShape::getInternalGpuTransformIndex)
   // .def("get_gpu_scale", &RenderShape::getGpuScale);
@@ -705,10 +708,17 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("get_triangles", &RenderShapeTriangleMeshPart::getTriangles)
       .def_property_readonly("cuda_vertices",
                              &RenderShapeTriangleMeshPart::getVertexBufferCudaArray)
+      .def("get_vertex_normal", &RenderShapeTriangleMeshPart::getNormal)
+      .def("set_vertex_normal", &RenderShapeTriangleMeshPart::setNormal, py::arg("normal"))
+      .def("get_vertex_uv", &RenderShapeTriangleMeshPart::getUV)
+      .def("set_vertex_uv", &RenderShapeTriangleMeshPart::setUV, py::arg("uv"))
+
       .def("get_cuda_vertices", &RenderShapeTriangleMeshPart::getVertexBufferCudaArray)
       .def_property_readonly("cuda_triangles",
                              &RenderShapeTriangleMeshPart::getIndexBufferCudaArray)
-      .def("get_cuda_triangles", &RenderShapeTriangleMeshPart::getIndexBufferCudaArray);
+      .def("get_cuda_triangles", &RenderShapeTriangleMeshPart::getIndexBufferCudaArray)
+      .def_property_readonly("material", &RenderShapeTriangleMeshPart::getMaterial)
+      .def("get_material", &RenderShapeTriangleMeshPart::getMaterial);
 
   PyRenderShapeTriangleMesh
       .def(py::init<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &,
@@ -725,10 +735,7 @@ This function waits for any pending CUDA operations on cuda stream provided by :
                     &RenderShapeTriangleMesh::setScale)
       .def("get_scale", &RenderShapeTriangleMesh::getScale)
       .def("set_scale", &RenderShapeTriangleMesh::setScale, py::arg("scale"),
-           "Note: this function only works when the shape is not added to scene")
-
-      .def_property_readonly("parts", &RenderShapeTriangleMesh::getParts)
-      .def("get_parts", &RenderShapeTriangleMesh::getParts);
+           "Note: this function only works when the shape is not added to scene");
 
   PyRenderBodyComponent.def(py::init<>())
       .def("attach", &SapienRenderBodyComponent::attachRenderShape)
