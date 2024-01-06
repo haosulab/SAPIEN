@@ -24,7 +24,7 @@ add_compile_definitions("$<$<NOT:$<CONFIG:Debug>>:NDEBUG>")
 set(CMAKE_DEBUG_POSTFIX "")
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-option(SAPIEN_PROFILE "Build SAPIEN with easy_profiler" OFF)
+option(SAPIEN_PROFILE "Build SAPIEN with easy_profiler" ON)
 option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OFF)
 option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, denoiser, and simsense" ON)
 
@@ -117,7 +117,9 @@ set_target_properties(sapien PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 set_target_properties(sapien PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 if (${SAPIEN_PROFILE})
-    target_compile_definitions(sapien SAPIEN_PROFILE)
+    target_compile_definitions(sapien PUBLIC SAPIEN_PROFILE)
+else ()
+    target_compile_definitions(sapien PUBLIC NVTX_DISABLE=1)
 endif()
 
 target_include_directories(sapien INTERFACE

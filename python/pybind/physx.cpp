@@ -327,6 +327,11 @@ Generator<int> init_physx(py::module &sapien) {
       .def("get_timestep", &PhysxSystem::getTimestep)
       .def("set_timestep", &PhysxSystem::setTimestep)
 
+      .def_property("scene_collision_id", &PhysxSystem::getSceneCollisionId,
+                    &PhysxSystem::setSceneCollisionId)
+      .def("set_scene_collision_id", &PhysxSystem::setSceneCollisionId, py::arg("id"))
+      .def("get_scene_collision_id", &PhysxSystem::getSceneCollisionId)
+
       .def_property_readonly("rigid_dynamic_components", &PhysxSystem::getRigidDynamicComponents)
       .def("get_rigid_dynamic_components", &PhysxSystem::getRigidDynamicComponents)
       .def_property_readonly("rigid_static_components", &PhysxSystem::getRigidStaticComponents)
@@ -876,6 +881,11 @@ Example:
                }
              }
              return std::shared_ptr<PhysxArticulationJoint>{};
+           })
+
+      .def("clone_links",
+           [](PhysxArticulation &a) {
+             return PhysxArticulationLinkComponent::cloneArticulation(a.getRoot());
            })
 
       .def_property_readonly("gpu_index", &PhysxArticulation::getGpuIndex)

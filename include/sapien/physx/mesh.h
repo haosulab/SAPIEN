@@ -1,4 +1,5 @@
 #pragma once
+#include "sapien/math/bounding_box.h"
 #include <Eigen/Eigen>
 #include <PxPhysicsAPI.h>
 #include <memory>
@@ -43,6 +44,7 @@ public:
 
   Vertices getVertices() const;
   Triangles getTriangles() const;
+  AABB const &getAABB() const { return mAABB; }
 
   ~PhysxConvexMesh() {
     if (mMesh) {
@@ -56,6 +58,8 @@ private:
   ::physx::PxConvexMesh *mMesh{};
   std::optional<std::string> mFilename;
   std::optional<int> mPart;
+
+  AABB mAABB;
 
   PhysxConvexMesh() {}
 };
@@ -78,6 +82,7 @@ public:
 
   Vertices getVertices() const;
   Triangles getTriangles() const;
+  AABB const &getAABB() const { return mAABB; }
 
   ~PhysxTriangleMesh() {
     if (mMesh) {
@@ -90,6 +95,8 @@ private:
   std::shared_ptr<PhysxEngine> mEngine;
   ::physx::PxTriangleMesh *mMesh{};
   std::optional<std::string> mFilename;
+
+  AABB mAABB;
 
   PhysxTriangleMesh() {}
   template <class Archive> void save(Archive &ar) const {

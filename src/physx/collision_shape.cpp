@@ -6,6 +6,8 @@
 #include "sapien/physx/physx_system.h"
 #include "sapien/physx/rigid_component.h"
 
+#include "sapien/profiler.h"
+
 using namespace physx;
 namespace sapien::physx {
 
@@ -97,6 +99,19 @@ PhysxCollisionShape::~PhysxCollisionShape() {
   }
 }
 
+void PhysxCollisionShape::copyProperties(PhysxCollisionShape &target) const {
+  target.setCollisionGroups(getCollisionGroups());
+  target.setDensity(getDensity());
+  target.setIsTrigger(isTrigger());
+  target.setLocalPose(getLocalPose());
+  target.setContactOffset(getContactOffset());
+  target.setRestOffset(getRestOffset());
+  target.setIsSceneQuery(isSceneQuery());
+  target.setCollisionGroups(getCollisionGroups());
+  target.setTorsionalPatchRadius(getTorsionalPatchRadius());
+  target.setMinTorsionalPatchRadius(getMinTorsionalPatchRadius());
+}
+
 //////////////////// collision shape constructor ////////////////////
 
 PhysxCollisionShapePlane::PhysxCollisionShapePlane(std::shared_ptr<PhysxMaterial> material) {
@@ -170,7 +185,7 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
       *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
 
-  auto aabb = computeAABB(getVertices());
+  auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
   setIsSceneQuery(true);
   setCollisionGroups({1, 1, 0, 0});
@@ -186,7 +201,7 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
       *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
 
-  auto aabb = computeAABB(getVertices());
+  auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
   setIsSceneQuery(true);
   setCollisionGroups({1, 1, 0, 0});
@@ -204,7 +219,7 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
 
   mPxShape->userData = this;
 
-  auto aabb = computeAABB(getVertices());
+  auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
   setIsSceneQuery(true);
   setCollisionGroups({1, 1, 0, 0});
@@ -232,7 +247,7 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
       *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
 
-  auto aabb = computeAABB(getVertices());
+  auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
   setIsSceneQuery(true);
   setCollisionGroups({1, 1, 0, 0});
@@ -250,7 +265,7 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
       *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
 
-  auto aabb = computeAABB(getVertices());
+  auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
   setIsSceneQuery(true);
   setCollisionGroups({1, 1, 0, 0});
@@ -268,7 +283,7 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
       *getPhysicalMaterial()->getPxMaterial(), true);
   mPxShape->userData = this;
 
-  auto aabb = computeAABB(getVertices());
+  auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
   setIsSceneQuery(true);
   setCollisionGroups({1, 1, 0, 0});
@@ -448,6 +463,51 @@ AABB PhysxCollisionShapeTriangleMesh::computeGlobalAABBTight() const {
     throw std::runtime_error("failed to get global AABB: shape is not attached to a component");
   }
   return computeAABB(getVertices(), getScale(), mParent->getPose() * getLocalPose());
+}
+
+std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapePlane::clone() const {
+  auto shape = std::make_shared<PhysxCollisionShapePlane>(getPhysicalMaterial());
+  copyProperties(*shape);
+  return shape;
+}
+
+std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeBox::clone() const {
+  auto shape = std::make_shared<PhysxCollisionShapeBox>(getHalfLengths(), getPhysicalMaterial());
+  copyProperties(*shape);
+  return shape;
+}
+
+std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeSphere::clone() const {
+  auto shape = std::make_shared<PhysxCollisionShapeSphere>(getRadius(), getPhysicalMaterial());
+  copyProperties(*shape);
+  return shape;
+}
+
+std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeCapsule::clone() const {
+  auto shape = std::make_shared<PhysxCollisionShapeCapsule>(getRadius(), getHalfLength(),
+                                                            getPhysicalMaterial());
+  copyProperties(*shape);
+  return shape;
+}
+
+std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeCylinder::clone() const {
+  auto shape = std::make_shared<PhysxCollisionShapeCylinder>(getRadius(), getHalfLength(),
+                                                             getPhysicalMaterial());
+  copyProperties(*shape);
+  return shape;
+}
+
+std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeConvexMesh::clone() const {
+  auto shape = std::make_shared<PhysxCollisionShapeConvexMesh>(getMesh(), getScale(),
+                                                               getPhysicalMaterial());
+  return shape;
+}
+
+std::shared_ptr<PhysxCollisionShape> PhysxCollisionShapeTriangleMesh::clone() const {
+  auto shape = std::make_shared<PhysxCollisionShapeTriangleMesh>(getMesh(), getScale(),
+                                                                 getPhysicalMaterial());
+  copyProperties(*shape);
+  return shape;
 }
 
 } // namespace sapien::physx

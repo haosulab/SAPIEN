@@ -146,12 +146,17 @@ std::shared_ptr<PhysxArticulationLinkComponent> PhysxArticulation::getRoot() con
   return shared_link(l);
 }
 
-std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> PhysxArticulation::getLinks() const {
+std::vector<std::shared_ptr<PhysxArticulationLinkComponent>>
+PhysxArticulation::getLinksAdditionOrder() const {
   std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> result;
   for (auto l : mLinks) {
     result.push_back(shared_link(l));
   }
+  return result;
+}
 
+std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> PhysxArticulation::getLinks() const {
+  auto result = getLinksAdditionOrder();
   std::sort(result.begin(), result.end(), [](auto const &a, auto const &b) {
     return a->getPxActor()->getLinkIndex() < b->getPxActor()->getLinkIndex();
   });
@@ -276,41 +281,41 @@ Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> PhysxArticulation::getQ
 }
 
 Pose PhysxArticulation::getRootPose() {
-  if (getRoot()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("getting root pose is not supported in GPU simulation.");
-  }
+  // if (getRoot()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("getting root pose is not supported in GPU simulation.");
+  // }
   return PxTransformToPose(mPxArticulation->getRootGlobalPose());
 }
 Vec3 PhysxArticulation::getRootLinearVelocity() {
-  if (getRoot()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
-  }
+  // if (getRoot()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
+  // }
   return PxVec3ToVec3(mPxArticulation->getRootLinearVelocity());
 }
 Vec3 PhysxArticulation::getRootAngularVelocity() {
-  if (getRoot()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
-  }
+  // if (getRoot()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
+  // }
   return PxVec3ToVec3(mPxArticulation->getRootAngularVelocity());
 }
 
 void PhysxArticulation::setRootPose(Pose const &pose) {
-  if (getRoot()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("setting root pose is not supported in GPU simulation.");
-  }
+  // if (getRoot()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("setting root pose is not supported in GPU simulation.");
+  // }
   mPxArticulation->setRootGlobalPose(PoseToPxTransform(pose));
   syncPose();
 }
 void PhysxArticulation::setRootLinearVelocity(Vec3 const &v) {
-  if (getRoot()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("setting root velocity is not supported in GPU simulation.");
-  }
+  // if (getRoot()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("setting root velocity is not supported in GPU simulation.");
+  // }
   mPxArticulation->setRootLinearVelocity(Vec3ToPxVec3(v));
 }
 void PhysxArticulation::setRootAngularVelocity(Vec3 const &v) {
-  if (getRoot()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("setting root angular is not supported in GPU simulation.");
-  }
+  // if (getRoot()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("setting root angular is not supported in GPU simulation.");
+  // }
   mPxArticulation->setRootAngularVelocity(Vec3ToPxVec3(v));
 }
 

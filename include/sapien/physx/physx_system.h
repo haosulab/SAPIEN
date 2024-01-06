@@ -81,6 +81,9 @@ public:
   /** get articulation max link count directly from PhysX */
   int computeArticulationMaxLinkCount() const;
 
+  void setSceneCollisionId(int id) { mSceneCollisionId = id; }
+  int getSceneCollisionId() const { return mSceneCollisionId; }
+
 protected:
   PhysxSystem(PhysxSceneConfig const &config);
 
@@ -91,6 +94,8 @@ protected:
   float mTimestep{0.01f};
 
   ::physx::PxDefaultCpuDispatcher *mPxCPUDispatcher;
+
+  int mSceneCollisionId{0};
 };
 
 class PhysxSystemCpu : public PhysxSystem {

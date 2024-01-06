@@ -364,6 +364,11 @@ void PhysxSystemGpu::gpuSetCudaStream(uintptr_t stream) { mCudaStream = (cudaStr
 
 void PhysxSystemGpu::gpuFetchRigidDynamicData() {
   checkGpuInitialized();
+
+  if (mRigidDynamicComponents.empty()) {
+    return;
+  }
+
   mPxScene->copyBodyData((PxGpuBodyData *)mCudaRigidDynamicScratch.ptr,
                          (PxGpuActorPair *)mCudaRigidDynamicIndexBuffer.ptr,
                          mCudaRigidDynamicIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -375,6 +380,10 @@ void PhysxSystemGpu::gpuFetchRigidDynamicData() {
 
 void PhysxSystemGpu::gpuFetchArticulationLinkPose() {
   checkGpuInitialized();
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
 
   mPxScene->copyArticulationData(mCudaLinkPoseScratch.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eLINK_TRANSFORM,
@@ -389,6 +398,10 @@ void PhysxSystemGpu::gpuFetchArticulationLinkPose() {
 void PhysxSystemGpu::gpuFetchArticulationLinkVel() {
   checkGpuInitialized();
 
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   mPxScene->copyArticulationData(mCudaLinkVelScratch.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eLINK_TRANSFORM,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -400,6 +413,11 @@ void PhysxSystemGpu::gpuFetchArticulationLinkVel() {
 
 void PhysxSystemGpu::gpuFetchArticulationQpos() {
   checkGpuInitialized();
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   mPxScene->copyArticulationData(mCudaQposHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_POSITION,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -408,6 +426,11 @@ void PhysxSystemGpu::gpuFetchArticulationQpos() {
 
 void PhysxSystemGpu::gpuFetchArticulationQvel() {
   checkGpuInitialized();
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   mPxScene->copyArticulationData(mCudaQvelHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_VELOCITY,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -416,6 +439,11 @@ void PhysxSystemGpu::gpuFetchArticulationQvel() {
 
 void PhysxSystemGpu::gpuFetchArticulationQTargetPos() {
   checkGpuInitialized();
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   mPxScene->copyArticulationData(mCudaQTargetPosHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_TARGET_POSITION,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -424,6 +452,11 @@ void PhysxSystemGpu::gpuFetchArticulationQTargetPos() {
 
 void PhysxSystemGpu::gpuFetchArticulationQTargetVel() {
   checkGpuInitialized();
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   mPxScene->copyArticulationData(mCudaQTargetVelHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_TARGET_VELOCITY,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -432,6 +465,11 @@ void PhysxSystemGpu::gpuFetchArticulationQTargetVel() {
 
 void PhysxSystemGpu::gpuFetchArticulationQacc() {
   checkGpuInitialized();
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   mPxScene->copyArticulationData(mCudaQaccHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_ACCELERATION,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -446,6 +484,10 @@ void PhysxSystemGpu::gpuUpdateArticulationKinematics() {
 
 void PhysxSystemGpu::gpuApplyRigidDynamicData() {
   checkGpuInitialized();
+
+  if (mRigidDynamicComponents.empty()) {
+    return;
+  }
 
   body_data_sapien_to_physx(mCudaRigidDynamicScratch.ptr, mCudaRigidDynamicHandle.ptr,
                             mCudaRigidDynamicOffsetBuffer.ptr,
@@ -464,6 +506,10 @@ void PhysxSystemGpu::gpuApplyRigidDynamicData(CudaArrayHandle const &indices) {
   indices.checkCongiguous();
   indices.checkShape({-1});
   indices.checkStride({sizeof(int)});
+
+  if (mRigidDynamicComponents.empty()) {
+    return;
+  }
 
   // gather indices to physx indices
   // gather sapien poses into physx poses
@@ -489,6 +535,10 @@ void PhysxSystemGpu::gpuApplyArticulationRootPose(CudaArrayHandle const &indices
   indices.checkShape({-1});
   indices.checkStride({sizeof(int)});
 
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   root_pose_sapien_to_physx(mCudaLinkPoseScratch.ptr, mCudaLinkHandle.ptr, indices.ptr,
                             mCudaArticulationOffsetBuffer.ptr, mGpuArticulationMaxLinkCount,
                             indices.shape.at(0), mCudaStream);
@@ -509,6 +559,10 @@ void PhysxSystemGpu::gpuApplyArticulationRootVel(CudaArrayHandle const &indices)
   indices.checkShape({-1});
   indices.checkStride({sizeof(int)});
 
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   root_vel_sapien_to_physx(mCudaLinkPoseScratch.ptr, mCudaLinkHandle.ptr, indices.ptr,
                            mGpuArticulationMaxLinkCount, indices.shape.at(0), mCudaStream);
   mCudaEventRecord.record(mCudaStream);
@@ -528,6 +582,10 @@ void PhysxSystemGpu::gpuApplyArticulationQpos(CudaArrayHandle const &indices) {
   indices.checkShape({-1});
   indices.checkStride({sizeof(int)});
 
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQposHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                   PxArticulationGpuDataType::eJOINT_POSITION, indices.shape.at(0),
@@ -544,6 +602,10 @@ void PhysxSystemGpu::gpuApplyArticulationQvel(CudaArrayHandle const &indices) {
   indices.checkCongiguous();
   indices.checkShape({-1});
   indices.checkStride({sizeof(int)});
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
 
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQvelHandle.ptr, mCudaArticulationIndexBuffer.ptr,
@@ -562,6 +624,10 @@ void PhysxSystemGpu::gpuApplyArticulationQf(CudaArrayHandle const &indices) {
   indices.checkShape({-1});
   indices.checkStride({sizeof(int)});
 
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQfHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                   PxArticulationGpuDataType::eJOINT_FORCE, indices.shape.at(0),
@@ -578,6 +644,10 @@ void PhysxSystemGpu::gpuApplyArticulationQTargetPos(CudaArrayHandle const &indic
   indices.checkCongiguous();
   indices.checkShape({-1});
   indices.checkStride({sizeof(int)});
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
 
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQTargetPosHandle.ptr, mCudaArticulationIndexBuffer.ptr,
@@ -596,6 +666,10 @@ void PhysxSystemGpu::gpuApplyArticulationQTargetVel(CudaArrayHandle const &indic
   indices.checkCongiguous();
   indices.checkShape({-1});
   indices.checkStride({sizeof(int)});
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
 
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQTargetVelHandle.ptr, mCudaArticulationIndexBuffer.ptr,

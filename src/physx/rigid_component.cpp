@@ -17,7 +17,7 @@ void PhysxRigidBaseComponent::syncPoseToEntity() {
 
 std::shared_ptr<PhysxRigidBaseComponent>
 PhysxRigidBaseComponent::attachCollision(std::shared_ptr<PhysxCollisionShape> shape) {
-  getPxActor()->attachShape(*shape->getPxShape()); // TODO: set actor to shape
+  getPxActor()->attachShape(*shape->getPxShape());
   mCollisionShapes.push_back(shape);
   shape->internalSetParent(this);
   return std::static_pointer_cast<PhysxRigidBaseComponent>(shared_from_this());
@@ -69,16 +69,16 @@ bool PhysxRigidBaseComponent::isUsingDirectGPUAPI() const {
 }
 
 Vec3 PhysxRigidBodyComponent::getLinearVelocity() const {
-  if (isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to set velocity: not supported on GPU mode");
-  }
+  // if (isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to set velocity: not supported on GPU mode");
+  // }
   return PxVec3ToVec3(getPxActor()->getLinearVelocity());
 }
 
 Vec3 PhysxRigidBodyComponent::getAngularVelocity() const {
-  if (isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to set velocity: not supported on GPU mode");
-  }
+  // if (isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to set velocity: not supported on GPU mode");
+  // }
   return PxVec3ToVec3(getPxActor()->getAngularVelocity());
 }
 
@@ -104,15 +104,15 @@ void PhysxRigidBodyComponent::setCMassLocalPose(Pose const &pose) {
 }
 
 void PhysxRigidDynamicComponent::setLinearVelocity(Vec3 const &v) {
-  if (isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to set velocity: not supported on GPU mode");
-  }
+  // if (isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to set velocity: not supported on GPU mode");
+  // }
   getPxActor()->setLinearVelocity(Vec3ToPxVec3(v));
 }
 void PhysxRigidDynamicComponent::setAngularVelocity(Vec3 const &v) {
-  if (isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to set velocity: not supported on GPU mode");
-  }
+  // if (isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to set velocity: not supported on GPU mode");
+  // }
   getPxActor()->setAngularVelocity(Vec3ToPxVec3(v));
 }
 
@@ -204,6 +204,10 @@ void PhysxRigidStaticComponent::onAddToScene(Scene &scene) {
   // setup physical parameters
   for (auto &shape : mCollisionShapes) {
     shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
+
+    auto col = shape->getCollisionGroups();
+    col[3] = (system->getSceneCollisionId() << 16) + col[3] & 0xffff;
+    shape->setCollisionGroups(col);
   }
 
 #ifdef SAPIEN_CUDA
@@ -235,6 +239,10 @@ void PhysxRigidDynamicComponent::onAddToScene(Scene &scene) {
   mPxActor->setSleepThreshold(system->getSceneConfig().sleepThreshold);
   for (auto &shape : mCollisionShapes) {
     shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
+
+    auto col = shape->getCollisionGroups();
+    col[3] = (system->getSceneCollisionId() << 16) + col[3] & 0xffff;
+    shape->setCollisionGroups(col);
   }
 
   system->registerComponent(

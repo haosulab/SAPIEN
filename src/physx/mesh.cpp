@@ -314,6 +314,8 @@ void PhysxConvexMesh::loadMesh(Vertices const &vertices) {
 
   PxDefaultMemoryInputData input(buf.getData(), buf.getSize());
   mMesh = mEngine->getPxPhysics()->createConvexMesh(input);
+
+  mAABB = computeAABB(getVertices());
 }
 
 PhysxConvexMesh::PhysxConvexMesh(Vertices const &vertices) { loadMesh(vertices); }
@@ -334,7 +336,7 @@ PhysxConvexMesh::PhysxConvexMesh(std::string const &filename)
 
 Vertices PhysxConvexMesh::getVertices() const {
   std::vector<float> vertices;
-  vertices.reserve(mMesh->getNbVertices());
+  vertices.reserve(mMesh->getNbVertices() * 3);
   auto gv = mMesh->getVertices();
   for (uint32_t i = 0; i < mMesh->getNbVertices(); ++i) {
     vertices.push_back(gv[i].x);
@@ -404,6 +406,8 @@ void PhysxTriangleMesh::loadMesh(Vertices const &vertices, Triangles const &tria
   }
   PxDefaultMemoryInputData readBuffer(writeBuffer.getData(), writeBuffer.getSize());
   mMesh = mEngine->getPxPhysics()->createTriangleMesh(readBuffer);
+
+  mAABB = computeAABB(getVertices());
 }
 
 PhysxTriangleMesh::PhysxTriangleMesh(Vertices const &vertices, Triangles const &triangles) {

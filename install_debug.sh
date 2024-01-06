@@ -3,7 +3,7 @@
 rm -rf sapien.egg-info
 rm -f dist/*.whl
 
-python3 setup.py bdist_wheel --debug
+python3 setup.py bdist_wheel --debug --profile
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 

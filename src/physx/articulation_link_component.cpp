@@ -7,6 +7,8 @@
 #include "sapien/physx/physx_system.h"
 #include "sapien/scene.h"
 
+#include "sapien/profiler.h"
+
 using namespace physx;
 
 namespace sapien {
@@ -201,9 +203,9 @@ PxArticulationDriveType::Enum PhysxArticulationJoint::getDriveType() const {
 }
 
 Eigen::VectorXf PhysxArticulationJoint::getDriveTargetPosition() const {
-  if (mLink.lock()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to access drive: not supported on GPU mode");
-  }
+  // if (mLink.lock()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  // }
   Eigen::VectorXf result;
   result.resize(mAxes.size());
   auto j = getPxJoint();
@@ -214,9 +216,9 @@ Eigen::VectorXf PhysxArticulationJoint::getDriveTargetPosition() const {
 }
 
 Eigen::VectorXf PhysxArticulationJoint::getDriveTargetVelocity() const {
-  if (mLink.lock()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to access drive: not supported on GPU mode");
-  }
+  // if (mLink.lock()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  // }
   Eigen::VectorXf result;
   result.resize(mAxes.size());
   auto j = getPxJoint();
@@ -227,9 +229,9 @@ Eigen::VectorXf PhysxArticulationJoint::getDriveTargetVelocity() const {
 }
 
 void PhysxArticulationJoint::setDriveTargetPosition(Eigen::VectorXf const &position) {
-  if (mLink.lock()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to access drive: not supported on GPU mode");
-  }
+  // if (mLink.lock()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  // }
   if (static_cast<size_t>(position.size()) != mAxes.size()) {
     throw std::runtime_error("target size does not match joint dof");
   }
@@ -240,9 +242,9 @@ void PhysxArticulationJoint::setDriveTargetPosition(Eigen::VectorXf const &posit
 }
 
 void PhysxArticulationJoint::setDriveTargetVelocity(Eigen::VectorXf const &velocity) {
-  if (mLink.lock()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to access drive: not supported on GPU mode");
-  }
+  // if (mLink.lock()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  // }
   if (static_cast<size_t>(velocity.size()) != mAxes.size()) {
     throw std::runtime_error("target size does not match joint dof");
   }
@@ -253,18 +255,18 @@ void PhysxArticulationJoint::setDriveTargetVelocity(Eigen::VectorXf const &veloc
 }
 
 void PhysxArticulationJoint::setDriveTargetPosition(float position) {
-  if (mLink.lock()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to access drive: not supported on GPU mode");
-  }
+  // if (mLink.lock()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  // }
   Eigen::VectorXf v(1);
   v << position;
   setDriveTargetPosition(v);
 }
 
 void PhysxArticulationJoint::setDriveTargetVelocity(float velocity) {
-  if (mLink.lock()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("failed to access drive: not supported on GPU mode");
-  }
+  // if (mLink.lock()->isUsingDirectGPUAPI()) {
+  //   throw std::runtime_error("failed to access drive: not supported on GPU mode");
+  // }
   Eigen::VectorXf v(1);
   v << velocity;
   setDriveTargetVelocity(v);
@@ -336,6 +338,15 @@ bool PhysxArticulationLinkComponent::isRoot() const { return mParent == nullptr;
 void PhysxArticulationLinkComponent::onAddToScene(Scene &scene) {
   mArticulation->internalNotifyAddToScene(this, scene);
   auto system = scene.getPhysxSystem();
+
+  for (auto &shape : mCollisionShapes) {
+    shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
+
+    auto col = shape->getCollisionGroups();
+    col[3] = (system->getSceneCollisionId() << 16) + col[3] & 0xffff;
+    shape->setCollisionGroups(col);
+  }
+
   system->registerComponent(
       std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this()));
 }
@@ -566,6 +577,83 @@ PhysxArticulationLinkComponent::~PhysxArticulationLinkComponent() {
   if (mParent) {
     std::erase_if(mParent->mChildren, [](auto c) { return c.expired(); });
   }
+}
+
+std::vector<std::shared_ptr<PhysxArticulationLinkComponent>>
+PhysxArticulationLinkComponent::cloneArticulation(
+    std::shared_ptr<PhysxArticulationLinkComponent> root) {
+
+  SAPIEN_PROFILE_FUNCTION
+
+  if (!root->isRoot()) {
+    throw std::runtime_error("clone articulation takes a root link");
+  }
+
+  std::map<std::shared_ptr<PhysxArticulationLinkComponent>,
+           std::shared_ptr<PhysxArticulationLinkComponent>>
+      old2new;
+
+  auto links = root->getArticulation()->getLinksAdditionOrder();
+  std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> newLinks;
+
+  old2new[root] = PhysxArticulationLinkComponent::Create();
+  for (auto link : links) {
+    auto parent = link->getParent() ? old2new.at(link->getParent()) : nullptr;
+
+    auto newLink = PhysxArticulationLinkComponent::Create(parent);
+
+    newLinks.push_back(newLink);
+    old2new[link] = newLink;
+
+    // TODO: move to rigid body class
+
+    // update mass
+    newLink->setAutoComputeMass(false);
+
+    for (auto s : link->getCollisionShapes()) {
+      newLink->attachCollision(s->clone());
+    }
+
+    newLink->setMass(link->getMass());
+    newLink->setInertia(link->getInertia());
+    newLink->setCMassLocalPose(link->getCMassLocalPose());
+    newLink->mAutoComputeMass = link->getAutoComputeMass();
+
+    // other properties
+    newLink->setName(link->getName());
+    newLink->setAngularDamping(link->getAngularDamping());
+    newLink->setLinearDamping(link->getLinearDamping());
+    newLink->setDisableGravity(link->getDisableGravity());
+    newLink->setMaxContactImpulse(link->getMaxContactImpulse());
+    newLink->setMaxDepenetrationVelocity(link->getMaxDepenetrationVelocity());
+
+    auto joint = link->getJoint();
+    auto newJoint = newLink->getJoint();
+    newJoint->setName(joint->getName());
+    newJoint->setType(joint->getType());
+    newJoint->setAnchorPoseInChild(joint->getAnchorPoseInChild());
+    newJoint->setAnchorPoseInParent(joint->getAnchorPoseInParent());
+    newJoint->setLimit(joint->getLimit());
+    newJoint->setArmature(joint->getArmature());
+    newJoint->setFriction(joint->getFriction());
+    newJoint->setDriveTargetPosition(joint->getDriveTargetPosition());
+    newJoint->setDriveTargetVelocity(joint->getDriveTargetVelocity());
+    if (joint->getDof() != 0) {
+      newJoint->setDriveProperties(newJoint->getDriveStiffness(), newJoint->getDriveDamping(),
+                                   newJoint->getDriveForceLimit(), newJoint->getDriveType());
+    }
+  }
+
+  auto art = root->getArticulation();
+  auto newArt = newLinks.at(0)->getArticulation();
+  newArt->setName(art->getName());
+  newArt->setRootPose(art->getRootPose());
+  newArt->setRootLinearVelocity(art->getRootLinearVelocity());
+  newArt->setRootAngularVelocity(art->getRootAngularVelocity());
+
+  ProfilerBlockEnd();
+
+  return newLinks;
 }
 
 } // namespace physx

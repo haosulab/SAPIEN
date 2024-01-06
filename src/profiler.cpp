@@ -1,15 +1,10 @@
 #include "sapien/profiler.h"
-#include <easy/profiler.h>
+#include <nvtx3/nvToolsExt.h>
 
 namespace sapien {
 
-void AddProfilerEvent(char const *name) {
-  if (!profiler::isListening()) {
-    profiler::startListen();
-  }
-  EASY_EVENT(name);
-}
-void StartProfilerBlock(char const *name) { EASY_NONSCOPED_BLOCK(name); }
-void EndProfilerBlock() { EASY_END_BLOCK; }
+void ProfilerEvent(char const *name) { nvtxMarkA(name); }
+void ProfilerBlockBegin(char const *name) { nvtxRangePushA(name); }
+void ProfilerBlockEnd() { nvtxRangePop(); }
 
 } // namespace sapien

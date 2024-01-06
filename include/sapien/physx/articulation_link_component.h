@@ -118,6 +118,9 @@ public:
 
   ~PhysxArticulationLinkComponent();
 
+  static std::vector<std::shared_ptr<PhysxArticulationLinkComponent>>
+  cloneArticulation(std::shared_ptr<PhysxArticulationLinkComponent> root);
+
 private:
   PhysxArticulationLinkComponent() {}
 

@@ -76,6 +76,8 @@ public:
 
   virtual ~PhysxCollisionShape();
 
+  virtual std::shared_ptr<PhysxCollisionShape> clone() const = 0;
+
 protected:
   std::shared_ptr<PhysxEngine> mEngine{};
   std::shared_ptr<PhysxMaterial> mPhysicalMaterial{};
@@ -84,12 +86,16 @@ protected:
 
   // TODO: unattach shape and clear parent
   PhysxRigidBaseComponent *mParent{};
+
+  void copyProperties(PhysxCollisionShape &target) const;
 };
 
 class PhysxCollisionShapePlane : public PhysxCollisionShape {
 public:
   PhysxCollisionShapePlane(std::shared_ptr<PhysxMaterial> material = nullptr);
   AABB getLocalAABB() const override;
+
+  std::shared_ptr<PhysxCollisionShape> clone() const override;
 };
 
 class PhysxCollisionShapeBox : public PhysxCollisionShape {
@@ -97,6 +103,8 @@ public:
   PhysxCollisionShapeBox(Vec3 halfLengths, std::shared_ptr<PhysxMaterial> material = nullptr);
   Vec3 getHalfLengths() const;
   AABB getLocalAABB() const override;
+
+  std::shared_ptr<PhysxCollisionShape> clone() const override;
 };
 
 class PhysxCollisionShapeCapsule : public PhysxCollisionShape {
@@ -106,6 +114,8 @@ public:
   float getRadius() const;
   float getHalfLength() const;
   AABB getLocalAABB() const override;
+
+  std::shared_ptr<PhysxCollisionShape> clone() const override;
 };
 
 class PhysxCollisionShapeCylinder : public PhysxCollisionShape {
@@ -115,6 +125,8 @@ public:
   float getRadius() const;
   float getHalfLength() const;
   AABB getLocalAABB() const override;
+
+  std::shared_ptr<PhysxCollisionShape> clone() const override;
 
 private:
   std::shared_ptr<PhysxConvexMesh> mMesh;
@@ -127,6 +139,8 @@ public:
   PhysxCollisionShapeSphere(float radius, std::shared_ptr<PhysxMaterial> material = nullptr);
   float getRadius() const;
   AABB getLocalAABB() const override;
+
+  std::shared_ptr<PhysxCollisionShape> clone() const override;
 
   // TODO: implement this properly
   // AABB getGlobalAABBFast() const override;
@@ -147,6 +161,8 @@ public:
   // internal use only
   PhysxCollisionShapeConvexMesh(std::shared_ptr<PhysxConvexMesh> mesh, Vec3 const &scale,
                                 std::shared_ptr<PhysxMaterial> material = nullptr);
+  // PhysxCollisionShapeConvexMesh(PhysxCollisionShapeConvexMesh const &other);
+
   Vec3 getScale() const;
   Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> getVertices() const;
   Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> getTriangles() const;
@@ -154,6 +170,8 @@ public:
   std::shared_ptr<PhysxConvexMesh> getMesh() const { return mMesh; };
   AABB getLocalAABB() const override;
   AABB computeGlobalAABBTight() const override;
+
+  std::shared_ptr<PhysxCollisionShape> clone() const override;
 
 private:
   std::shared_ptr<PhysxConvexMesh> mMesh;
@@ -181,6 +199,8 @@ public:
   std::shared_ptr<PhysxTriangleMesh> getMesh() const { return mMesh; };
   AABB getLocalAABB() const override;
   AABB computeGlobalAABBTight() const override;
+
+  std::shared_ptr<PhysxCollisionShape> clone() const override;
 
 private:
   std::shared_ptr<PhysxTriangleMesh> mMesh;

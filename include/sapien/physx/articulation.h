@@ -53,6 +53,7 @@ public:
   std::string getName() const { return mName; }
 
   std::shared_ptr<PhysxArticulationLinkComponent> getRoot() const;
+  std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> getLinksAdditionOrder() const;
   std::vector<std::shared_ptr<PhysxArticulationLinkComponent>> getLinks() const;
   std::vector<std::shared_ptr<PhysxArticulationJoint>> getJoints() const;
   std::vector<std::shared_ptr<PhysxArticulationJoint>> getActiveJoints() const;
