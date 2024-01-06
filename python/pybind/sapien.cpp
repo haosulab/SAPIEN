@@ -6,6 +6,7 @@
 #include "sapien/logger.h"
 #include "sapien/math/math.h"
 #include "sapien/physx/physx_system.h"
+#include "sapien/profiler.h"
 #include "sapien/sapien_renderer/sapien_renderer.h"
 #include "sapien/scene.h"
 #include "sapien/system.h"
@@ -38,6 +39,21 @@ public:
   }
 };
 
+class PythonProfiler {
+public:
+  PythonProfiler(std::string const &name) { mName = name; }
+
+  void enter() { ProfilerBlockBegin(mName.c_str()); }
+  void exit(const std::optional<pybind11::type> &exc_type,
+            const std::optional<pybind11::object> &exc_value,
+            const std::optional<pybind11::object> &traceback) {
+    ProfilerBlockEnd();
+  }
+
+private:
+  std::string mName;
+};
+
 Generator<int> init_sapien(py::module &m) {
 
   m.def("set_log_level", &sapien::logger::setLogLevel, py::arg("level"));
@@ -45,6 +61,11 @@ Generator<int> init_sapien(py::module &m) {
       "set_cuda_tensor_backend", &sapien::setPythonCudaBackend, py::arg("backend"),
       R"doc(set the backend returned CUDA tensors. Supported backends are "torch" and "jax")doc");
   m.def("get_cuda_tensor_backend", &sapien::getPythonCudaBackend);
+
+  py::class_<PythonProfiler>(m, "Profiler")
+      .def(py::init<std::string const &>())
+      .def("__enter__", &PythonProfiler::enter)
+      .def("__exit__", &PythonProfiler::exit);
 
   auto PyPose = py::class_<Pose>(m, "Pose");
   auto PyScene = py::class_<Scene>(m, "Scene");

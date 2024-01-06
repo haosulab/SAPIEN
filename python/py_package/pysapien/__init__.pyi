@@ -10,6 +10,7 @@ __all__ = [
     "CudaArray",
     "Entity",
     "Pose",
+    "Profiler",
     "Scene",
     "System",
     "get_cuda_tensor_backend",
@@ -201,6 +202,11 @@ class Pose():
     @rpy.setter
     def rpy(self, arg1: numpy.ndarray[numpy.float32, _Shape, _Shape[3]]) -> None:
         pass
+    pass
+class Profiler():
+    def __enter__(self) -> None: ...
+    def __exit__(self, arg0: typing.Optional[type], arg1: typing.Optional[object], arg2: typing.Optional[object]) -> None: ...
+    def __init__(self, arg0: str) -> None: ...
     pass
 class Scene():
     def __init__(self, systems: list[System]) -> None: ...
