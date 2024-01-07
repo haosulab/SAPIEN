@@ -47,7 +47,7 @@ def export_joint(joint: PhysxArticulationJoint):
     elif joint.type == "prismatic":
         type = "prismatic"
     elif joint.type.startswith("revolute"):
-        if joint.limit[0][0] < 1e-5 and joint.limit[0][1] > 1e5:
+        if joint.limit[0][0] < -1e5 and joint.limit[0][1] > 1e5:
             type = "continuous"
         else:
             type = "revolute"

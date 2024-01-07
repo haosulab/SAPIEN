@@ -520,8 +520,8 @@ class URDFLoader:
                     "Too many collision groups. Please use a simpler SRDF file"
                 )
 
-            link2builder[l1].collision_groups[2] |= group_count
-            link2builder[l2].collision_groups[2] |= group_count
+            link2builder[l1].collision_groups[2] |= (1 << (group_count - 1))
+            link2builder[l2].collision_groups[2] |= (1 << (group_count - 1))
 
         return builder
 
