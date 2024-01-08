@@ -427,72 +427,10 @@ CpuArray SapienRendererWindow::getImagePixel(std::string const &name, uint32_t x
   return CpuArray{.shape = {channels}, .type = type, .data = buffer};
 }
 
-// std::tuple<std::vector<float>, std::array<uint32_t, 3>>
-// SapienRendererWindow::downloadFloatTarget(std::string const &name) {
-//   auto format = mSVulkanRenderer->getRenderImage(name).getFormat();
-//   if (format != vk::Format::eR32G32B32A32Sfloat && format != vk::Format::eD32Sfloat) {
-//     throw std::runtime_error("failed to download: " + name + " is not a float render
-//     target.");
-//   }
-//   return mSVulkanRenderer->download<float>(name);
-// }
-
 std::array<uint32_t, 2> SapienRendererWindow::getRenderTargetSize(std::string const &name) const {
   auto &image = mSVulkanRenderer->getRenderImage(name);
   return {image.getExtent().width, image.getExtent().height};
 }
-
-// std::tuple<std::vector<uint32_t>, std::array<uint32_t, 3>>
-// SapienRendererWindow::downloadUint32Target(std::string const &name) {
-//   if (mSVulkanRenderer->getRenderImage(name).getFormat() != vk::Format::eR32G32B32A32Uint) {
-//     throw std::runtime_error("failed to download: " + name + " is not a uint32 render
-//     target.");
-//   }
-//   return mSVulkanRenderer->download<uint32_t>(name);
-// }
-
-// std::tuple<std::vector<uint8_t>, std::array<uint32_t, 3>>
-// SapienRendererWindow::downloadUint8Target(std::string const &name) {
-//   if (mSVulkanRenderer->getRenderImage(name).getFormat() != vk::Format::eR8G8B8A8Unorm) {
-//     throw std::runtime_error("failed to download: " + name + " is not a uint8 render
-//     target.");
-//   }
-//   return mSVulkanRenderer->download<uint8_t>(name);
-// }
-
-// std::vector<float> SapienRendererWindow::downloadFloatTargetPixel(std::string const &name,
-//                                                                   uint32_t x, uint32_t y) {
-//   auto format = mSVulkanRenderer->getRenderImage(name).getFormat();
-//   if (format != vk::Format::eR32G32B32A32Sfloat && format != vk::Format::eD32Sfloat) {
-//     throw std::runtime_error("failed to download: " + name + " is not a float render
-//     target.");
-//   }
-//   return std::get<0>(mSVulkanRenderer->downloadRegion<float>(
-//       name, vk::Offset2D{static_cast<int>(x), static_cast<int>(y)}, vk::Extent2D{1, 1}));
-// }
-
-// std::vector<uint32_t> SapienRendererWindow::downloadUint32TargetPixel(std::string const
-// &name,
-//                                                                       uint32_t x, uint32_t
-//                                                                       y) {
-//   if (mSVulkanRenderer->getRenderImage(name).getFormat() != vk::Format::eR32G32B32A32Uint) {
-//     throw std::runtime_error("failed to download: " + name + " is not a uint32 render
-//     target.");
-//   }
-//   return std::get<0>(mSVulkanRenderer->downloadRegion<uint32_t>(
-//       name, vk::Offset2D{static_cast<int>(x), static_cast<int>(y)}, vk::Extent2D{1, 1}));
-// }
-
-// std::vector<uint8_t> SapienRendererWindow::downloadUint8TargetPixel(std::string const &name,
-//                                                                     uint32_t x, uint32_t y)
-//                                                                     {
-//   if (mSVulkanRenderer->getRenderImage(name).getFormat() != vk::Format::eR8G8B8A8Unorm) {
-//     throw std::runtime_error("failed to download: " + name + " is not a uint8 render
-//     target.");
-//   }
-//   return std::get<0>(mSVulkanRenderer->downloadRegion<uint8_t>(
-//       name, vk::Offset2D{static_cast<int>(x), static_cast<int>(y)}, vk::Extent2D{1, 1}));
-// }
 
 bool SapienRendererWindow::isShiftDown() { return mWindow->isShiftDown(); }
 bool SapienRendererWindow::isCtrlDown() { return mWindow->isCtrlDown(); }

@@ -63,9 +63,6 @@ __global__ void update_object_transforms_kernel(
   int scene_index = shape.sceneIndex;
   int transform_index = shape.transformIndex;
 
-  // printf("tid: %d, pose: %d, scene: %d, transform: %d\n", g, pose_index, scene_index,
-  //        transform_index);
-
   PoseToMatrix(scene_transform_buffers[scene_index] + transform_index * 16, p, scale);
 }
 

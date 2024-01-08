@@ -221,7 +221,7 @@ private:
   std::set<std::shared_ptr<PhysxRigidStaticComponent>, comp_cmp> mRigidStaticComponents;
   std::set<std::shared_ptr<PhysxArticulationLinkComponent>, comp_cmp> mArticulationLinkComponents;
 
-  uint64_t mTotalSteps;
+  uint64_t mTotalSteps{};
 
   bool mGpuInitialized{false};
 
