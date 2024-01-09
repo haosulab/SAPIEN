@@ -210,6 +210,9 @@ public:
 
   void syncPosesGpuToCpu();
 
+  std::vector<float> gpuDownloadArticulationQpos(int index);
+  void gpuUploadArticulationQpos(int index, Eigen::VectorXf const &q);
+
   void setSceneOffset(std::shared_ptr<Scene> scene, Vec3 offset);
   Vec3 getSceneOffset(std::shared_ptr<Scene> scene) const;
 

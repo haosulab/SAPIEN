@@ -62,5 +62,5 @@ def set_cuda_tensor_backend(backend: str) -> None:
     """
 def set_log_level(level: str) -> None:
     pass
-__version__ = '3.0.0.dev20240107+d78b038a'
+__version__ = '3.0.0.dev20240108+1d936206'
 SceneConfig = sapien.pysapien.physx.PhysxSceneConfig

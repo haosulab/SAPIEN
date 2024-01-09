@@ -7,6 +7,7 @@
 #include "sapien/physx/material.h"
 #include "sapien/physx/physx_default.h"
 #include "sapien/physx/rigid_component.h"
+#include "sapien/profiler.h"
 #include <extensions/PxExtensionsAPI.h>
 
 #ifdef SAPIEN_CUDA
@@ -63,7 +64,7 @@ PhysxSystemCpu::PhysxSystemCpu(PhysxSceneConfig const &config) : PhysxSystem(con
 PhysxSystemGpu::PhysxSystemGpu(PhysxSceneConfig const &config) : PhysxSystem(config) {
   PxSceneDesc sceneDesc(mEngine->getPxPhysics()->getTolerancesScale());
   sceneDesc.gravity = Vec3ToPxVec3(config.gravity);
-  sceneDesc.filterShader = TypeAffinityIgnoreFilterShader;
+  sceneDesc.filterShader = TypeAffinityIgnoreFilterShaderGpu;
   sceneDesc.solverType = config.enableTGS ? PxSolverType::eTGS : PxSolverType::ePGS;
   sceneDesc.bounceThresholdVelocity = config.bounceThreshold;
 
@@ -483,6 +484,7 @@ void PhysxSystemGpu::gpuUpdateArticulationKinematics() {
 }
 
 void PhysxSystemGpu::gpuApplyRigidDynamicData() {
+  SAPIEN_PROFILE_FUNCTION;
   checkGpuInitialized();
 
   if (mRigidDynamicComponents.empty()) {
@@ -502,6 +504,7 @@ void PhysxSystemGpu::gpuApplyRigidDynamicData() {
 }
 
 void PhysxSystemGpu::gpuApplyRigidDynamicData(CudaArrayHandle const &indices) {
+  SAPIEN_PROFILE_FUNCTION;
   checkGpuInitialized();
   indices.checkCongiguous();
   indices.checkShape({-1});
@@ -530,6 +533,7 @@ void PhysxSystemGpu::gpuApplyArticulationRootPose() {
 }
 
 void PhysxSystemGpu::gpuApplyArticulationRootPose(CudaArrayHandle const &indices) {
+  SAPIEN_PROFILE_FUNCTION;
   checkGpuInitialized();
   indices.checkCongiguous();
   indices.checkShape({-1});
@@ -554,6 +558,7 @@ void PhysxSystemGpu::gpuApplyArticulationRootVel() {
 }
 
 void PhysxSystemGpu::gpuApplyArticulationRootVel(CudaArrayHandle const &indices) {
+  SAPIEN_PROFILE_FUNCTION;
   checkGpuInitialized();
   indices.checkCongiguous();
   indices.checkShape({-1});
@@ -577,6 +582,7 @@ void PhysxSystemGpu::gpuApplyArticulationQpos() {
 }
 
 void PhysxSystemGpu::gpuApplyArticulationQpos(CudaArrayHandle const &indices) {
+  SAPIEN_PROFILE_FUNCTION;
   checkGpuInitialized();
   indices.checkCongiguous();
   indices.checkShape({-1});
@@ -598,6 +604,7 @@ void PhysxSystemGpu::gpuApplyArticulationQvel() {
 }
 
 void PhysxSystemGpu::gpuApplyArticulationQvel(CudaArrayHandle const &indices) {
+  SAPIEN_PROFILE_FUNCTION;
   checkGpuInitialized();
   indices.checkCongiguous();
   indices.checkShape({-1});
@@ -619,6 +626,7 @@ void PhysxSystemGpu::gpuApplyArticulationQf() {
 }
 
 void PhysxSystemGpu::gpuApplyArticulationQf(CudaArrayHandle const &indices) {
+  SAPIEN_PROFILE_FUNCTION;
   checkGpuInitialized();
   indices.checkCongiguous();
   indices.checkShape({-1});
@@ -640,6 +648,7 @@ void PhysxSystemGpu::gpuApplyArticulationQTargetPos() {
 }
 
 void PhysxSystemGpu::gpuApplyArticulationQTargetPos(CudaArrayHandle const &indices) {
+  SAPIEN_PROFILE_FUNCTION;
   checkGpuInitialized();
   indices.checkCongiguous();
   indices.checkShape({-1});
@@ -662,6 +671,7 @@ void PhysxSystemGpu::gpuApplyArticulationQTargetVel() {
 }
 
 void PhysxSystemGpu::gpuApplyArticulationQTargetVel(CudaArrayHandle const &indices) {
+  SAPIEN_PROFILE_FUNCTION;
   checkGpuInitialized();
   indices.checkCongiguous();
   indices.checkShape({-1});
@@ -702,6 +712,33 @@ void PhysxSystemGpu::syncPosesGpuToCpu() {
   }
 }
 
+std::vector<float> PhysxSystemGpu::gpuDownloadArticulationQpos(int index) {
+  gpuFetchArticulationQpos();
+  cudaStreamSynchronize(mCudaStream);
+
+  if (index < 0 || index >= mGpuArticulationMaxDof) {
+    throw std::runtime_error("failed to download articulation qpos: invalid index");
+  }
+
+  std::vector<float> buffer(mGpuArticulationMaxDof);
+
+  cudaMemcpy(buffer.data(), &((float *)mCudaQposHandle.ptr)[index * mGpuArticulationMaxDof],
+             mGpuArticulationMaxDof * sizeof(float), cudaMemcpyDeviceToHost);
+  return buffer;
+}
+
+void PhysxSystemGpu::gpuUploadArticulationQpos(int index, Eigen::VectorXf const &q) {
+  cudaStreamSynchronize(mCudaStream);
+  if (index < 0 || index >= mGpuArticulationMaxDof) {
+    throw std::runtime_error("failed to download articulation qpos: invalid index");
+  }
+
+  cudaMemcpy(&((float *)mCudaQposHandle.ptr)[index * mGpuArticulationMaxDof], q.data(),
+             q.size() * sizeof(float), cudaMemcpyHostToDevice);
+  CudaArray cudaIndex({1}, "i4");
+  gpuApplyArticulationQpos(cudaIndex.handle());
+}
+
 void PhysxSystemGpu::setSceneOffset(std::shared_ptr<Scene> scene, Vec3 offset) {
   if (mRigidDynamicComponents.size() || mRigidStaticComponents.size() ||
       mArticulationLinkComponents.size()) {
@@ -719,6 +756,7 @@ Vec3 PhysxSystemGpu::getSceneOffset(std::shared_ptr<Scene> scene) const {
 }
 
 void PhysxSystemGpu::allocateCudaBuffers() {
+  SAPIEN_PROFILE_FUNCTION;
   int rigidDynamicCount = mRigidDynamicComponents.size();
   int rigidBodyCount = rigidDynamicCount + mGpuArticulationCount * mGpuArticulationMaxLinkCount;
 

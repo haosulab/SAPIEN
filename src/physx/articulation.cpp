@@ -1,4 +1,5 @@
 #include "sapien/physx/articulation.h"
+#include "../logger.h"
 #include "sapien/math/conversion.h"
 #include "sapien/physx/articulation_link_component.h"
 #include "sapien/physx/physx_system.h"
@@ -196,10 +197,15 @@ void PhysxArticulation::checkDof(uint32_t n) {
 }
 
 Eigen::VectorXf PhysxArticulation::getQpos() {
-  if (getRoot()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("getting qpos is not supported in GPU simulation.");
-  }
   uint32_t dof = getDof();
+
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    logger::warn("fetching articulation qpos from GPU is very slow and should be avoided");
+    auto qpos = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem())
+                    ->gpuDownloadArticulationQpos(mPxArticulation->getGpuArticulationIndex());
+    return Eigen::Map<Eigen::VectorXf>(qpos.data(), dof);
+  }
+
   mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::ePOSITION);
   return Eigen::Map<Eigen::VectorXf>(mCache->jointPosition, dof);
 }
@@ -229,11 +235,14 @@ Eigen::VectorXf PhysxArticulation::getQf() {
 }
 
 void PhysxArticulation::setQpos(Eigen::VectorXf const &q) {
-  if (getRoot()->isUsingDirectGPUAPI()) {
-    throw std::runtime_error("setting qpos is not supported in GPU simulation.");
-  }
   checkDof(q.size());
   uint32_t dof = getDof();
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    logger::warn("setting articulation qpos to GPU is very slow and should be avoided");
+    std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem())
+        ->gpuUploadArticulationQpos(mPxArticulation->getGpuArticulationIndex(), q);
+    return;
+  }
   Eigen::Map<Eigen::VectorXf>(mCache->jointPosition, dof) = q;
   mPxArticulation->applyCache(*mCache, PxArticulationCacheFlag::ePOSITION);
   syncPose();

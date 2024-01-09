@@ -57,6 +57,8 @@ def main():
 
     import matplotlib.pyplot as plt
 
+    px.gpu_fetch_articulation_link_pose()
+
     def fast_way():
         # tell render shapes where to look for poses
         for body in all_links + all_bodies:
@@ -80,7 +82,7 @@ def main():
         render_system_group.update_render()
 
         for _ in range(5):
-            for _ in range(10):
+            for _ in range(20):
                 px.step()
 
             px.gpu_fetch_rigid_dynamic_data()
@@ -116,7 +118,8 @@ def main():
             plt.imshow(pictures[1])
             plt.show()
 
-    # slow_way()
+    # fast_way()
+
     viewer = scenes[0].create_viewer()
     viewer.render()
 

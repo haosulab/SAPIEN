@@ -1,9 +1,9 @@
-import sapien as sapien
+import sapien
 import numpy as np
 from sapien.utils import Viewer
 
 
-def main(filename):
+def main(filename, package_dir):
     config = sapien.physx.PhysxSceneConfig()
     config.gravity = np.array([0, 0, 0])
 
@@ -23,7 +23,8 @@ def main(filename):
 
     loader = scene.create_urdf_loader()
     loader.fix_root_link = True
-    robot = loader.load(filename)
+
+    robot = loader.load(filename, package_dir=package_dir)
 
     while not viewer.closed:
         scene.step()
@@ -38,5 +39,11 @@ if __name__ == "__main__":
     parser.add_argument(
         "filename", type=str, help="Filename of the urdf you would like load."
     )
+    parser.add_argument(
+        "--package",
+        type=str,
+        default=None,
+        help="used to resolve package:// for urdf assets",
+    )
     args = parser.parse_args()
-    main(args.filename)
+    main(args.filename, args.package)

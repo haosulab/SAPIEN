@@ -1,5 +1,5 @@
 import unittest
-import sapien.core as sapien
+import sapien
 import numpy as np
 
 
@@ -65,14 +65,6 @@ class TestCamera(unittest.TestCase):
         cam = scene.add_camera("", width, height, 1, near, far)
         cam.set_perspective_parameters(near, far, fx, fy, cx, cy, skew)
 
-        self.assertTrue(
-            np.allclose(
-                cam.get_camera_matrix(),
-                np.array(
-                    [[fx, skew, cx, 0], [0, fy, cy, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-                ),
-            )
-        )
         self.assertTrue(
             np.allclose(
                 cam.get_intrinsic_matrix(),
@@ -153,7 +145,6 @@ class TestCamera(unittest.TestCase):
             [-0.25517473, -0.41660324, 0.8725409, 0.49105754],
             [-0.0112305, 0.90363157, 0.42816344, -0.9335064],
             [-0.96682966, 0.09945743, -0.2352626, 0.38347024],
-            [0.0, 0.0, 0.0, 1.0],
         ]
 
         self.assertTrue(np.allclose(model, gt_model))
