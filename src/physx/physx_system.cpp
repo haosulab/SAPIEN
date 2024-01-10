@@ -794,12 +794,12 @@ void PhysxSystemGpu::allocateCudaBuffers() {
                                     .cudaId = mCudaArticulationBuffer.cudaId,
                                     .ptr = mCudaArticulationBuffer.ptr};
 
-  mCudaQvelHandle =
-      CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxDof},
-                      .strides = {mGpuArticulationMaxDof * 4, 4},
-                      .type = "f4",
-                      .cudaId = mCudaArticulationBuffer.cudaId,
-                      .ptr = (float *)mCudaArticulationBuffer.ptr + mGpuArticulationMaxDof};
+  mCudaQvelHandle = CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxDof},
+                                    .strides = {mGpuArticulationMaxDof * 4, 4},
+                                    .type = "f4",
+                                    .cudaId = mCudaArticulationBuffer.cudaId,
+                                    .ptr = (float *)mCudaArticulationBuffer.ptr +
+                                           mGpuArticulationCount * mGpuArticulationMaxDof};
 
   mCudaQfHandle = CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxDof},
                                   .strides = {mGpuArticulationMaxDof * 4, 4},
