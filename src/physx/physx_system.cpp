@@ -415,7 +415,7 @@ void PhysxSystemGpu::gpuFetchArticulationLinkVel() {
   }
 
   mPxScene->copyArticulationData(mCudaLinkVelScratch.ptr, mCudaArticulationIndexBuffer.ptr,
-                                 PxArticulationGpuDataType::eLINK_TRANSFORM,
+                                 PxArticulationGpuDataType::eLINK_VELOCITY,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
   mCudaEventWait.wait(mCudaStream);
   link_vel_physx_to_sapien(mCudaLinkHandle.ptr, mCudaLinkVelScratch.ptr,
