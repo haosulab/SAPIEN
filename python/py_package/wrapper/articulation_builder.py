@@ -74,7 +74,7 @@ class ArticulationBuilder:
 
         return builder
 
-    def build_entities(self):
+    def build_entities(self, fix_root_link=None):
         entities = []
         links = []
         for b in self.link_builders:
@@ -113,18 +113,17 @@ class ArticulationBuilder:
             links.append(link_component)
             entities.append(entity)
 
-        return entities
-
-    def build(self, fix_root_link=None):
-        assert self.scene is not None
-        links = self.build_entities()
-
         if fix_root_link is not None:
-            links[0].components[0].joint.type = (
+            entities[0].components[0].joint.type = (
                 "fixed" if fix_root_link else "undefined"
             )
+        entities[0].pose = self.initial_pose
+        return entities
 
-        links[0].pose = self.initial_pose
+    def build(self, fix_root_link=None) -> sapien.physx.PhysxArticulation:
+        assert self.scene is not None
+        links = self.build_entities(fix_root_link=fix_root_link)
+
         for l in links:
             self.scene.add_entity(l)
         return l.components[0].articulation

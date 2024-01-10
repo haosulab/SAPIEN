@@ -314,13 +314,12 @@ Generator<int> init_physx(py::module &sapien) {
       });
 
   PyPhysxSystem
-      .def(py::init([](PhysxSceneConfig const &config) -> std::shared_ptr<PhysxSystem> {
-             if (PhysxDefault::GetGPUEnabled()) {
-               return std::make_shared<PhysxSystemGpu>(config);
-             }
-             return std::make_shared<PhysxSystemCpu>(config);
-           }),
-           py::arg("config") = PhysxSceneConfig())
+      .def(py::init([]() -> std::shared_ptr<PhysxSystem> {
+        if (PhysxDefault::GetGPUEnabled()) {
+          return std::make_shared<PhysxSystemGpu>();
+        }
+        return std::make_shared<PhysxSystemCpu>();
+      }))
       .def_property_readonly("config", &PhysxSystem::getSceneConfig)
       .def("get_config", &PhysxSystem::getSceneConfig)
       .def_property("timestep", &PhysxSystem::getTimestep, &PhysxSystem::setTimestep)
@@ -340,8 +339,7 @@ Generator<int> init_physx(py::module &sapien) {
                              &PhysxSystem::getArticulationLinkComponents)
       .def("get_articulation_link_components", &PhysxSystem::getArticulationLinkComponents);
 
-  PyPhysxSystemCpu
-      .def(py::init<PhysxSceneConfig const &>(), py::arg("config") = PhysxSceneConfig())
+  PyPhysxSystemCpu.def(py::init<>())
       .def("get_contacts", &PhysxSystemCpu::getContacts, py::return_value_policy::reference)
       .def("raycast", &PhysxSystemCpu::raycast, py::arg("position"), py::arg("direction"),
            py::arg("distance"),
@@ -351,8 +349,7 @@ Generator<int> init_physx(py::module &sapien) {
           "unpack", [](PhysxSystemCpu &s, py::bytes data) { s.unpackState(data); },
           py::arg("data"));
 
-  PyPhysxSystemGpu
-      .def(py::init<PhysxSceneConfig const &>(), py::arg("config") = PhysxSceneConfig())
+  PyPhysxSystemGpu.def(py::init<>())
       .def("get_scene_offset", &PhysxSystemGpu::getSceneOffset, py::arg("scene"))
       .def("set_scene_offset", &PhysxSystemGpu::setSceneOffset, py::arg("scene"),
            py::arg("offset"), R"doc(
@@ -1005,8 +1002,20 @@ Example:
            py::arg("found_lost_pairs_capacity") = 256 * 1024,
            py::arg("found_lost_aggregate_pairs_capacity") = 1024,
            py::arg("total_aggregate_pairs_capacity") = 1024)
-      .def("set_cpu_workers", &PhysxDefault::setCpuWorkers, py::arg("count"))
-      .def("get_cpu_workers", &PhysxDefault::getCpuWorkers);
+
+      .def("set_scene_config",
+           py::overload_cast<Vec3, float, float, float, uint32_t, uint32_t, bool, bool, bool, bool,
+                             bool, uint32_t>(&PhysxDefault::setSceneConfig),
+           py::arg("gravity") = Vec3{0, 0, -9.81}, py::arg("bounce_threshold") = 2.f,
+           py::arg("sleep_threshold") = 0.005f, py::arg("contact_offset") = 0.01f,
+           py::arg("solver_iterations") = 10, py::arg("solver_velocity_iterations") = 1,
+           py::arg("enable_pcm") = true, py::arg("enable_tgs") = true,
+           py::arg("enable_ccd") = false, py::arg("enable_enhanced_determinism") = false,
+           py::arg("enable_friction_every_iteration") = true, py::arg("cpu_workers") = 0)
+      .def("set_scene_config",
+           py::overload_cast<PhysxSceneConfig const &>(&PhysxDefault::setSceneConfig),
+           py::arg("config"))
+      .def("get_scene_config", &PhysxDefault::getSceneConfig);
 
   ////////// end global //////////
 

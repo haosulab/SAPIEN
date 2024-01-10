@@ -26,10 +26,11 @@ struct SapienBodyDataTest {
 
 static_assert(sizeof(SapienBodyDataTest) == 52);
 
-PhysxSystem::PhysxSystem(PhysxSceneConfig const &config)
-    : mSceneConfig(config), mEngine(PhysxEngine::Get()) {}
+PhysxSystem::PhysxSystem()
+    : mSceneConfig(PhysxDefault::getSceneConfig()), mEngine(PhysxEngine::Get()) {}
 
-PhysxSystemCpu::PhysxSystemCpu(PhysxSceneConfig const &config) : PhysxSystem(config) {
+PhysxSystemCpu::PhysxSystemCpu() {
+  auto &config = mSceneConfig;
   PxSceneDesc sceneDesc(mEngine->getPxPhysics()->getTolerancesScale());
   sceneDesc.gravity = Vec3ToPxVec3(config.gravity);
   sceneDesc.filterShader = TypeAffinityIgnoreFilterShader;
@@ -52,7 +53,7 @@ PhysxSystemCpu::PhysxSystemCpu(PhysxSceneConfig const &config) : PhysxSystem(con
 
   sceneDesc.flags = sceneFlags;
 
-  mPxCPUDispatcher = PxDefaultCpuDispatcherCreate(PhysxDefault::getCpuWorkers());
+  mPxCPUDispatcher = PxDefaultCpuDispatcherCreate(config.cpuWorkers);
   if (!mPxCPUDispatcher) {
     throw std::runtime_error("PhysX system creation failed: failed to create CPU dispatcher");
   }
@@ -61,7 +62,8 @@ PhysxSystemCpu::PhysxSystemCpu(PhysxSceneConfig const &config) : PhysxSystem(con
   mPxScene->setSimulationEventCallback(&mSimulationCallback);
 }
 
-PhysxSystemGpu::PhysxSystemGpu(PhysxSceneConfig const &config) : PhysxSystem(config) {
+PhysxSystemGpu::PhysxSystemGpu() {
+  auto &config = mSceneConfig;
   PxSceneDesc sceneDesc(mEngine->getPxPhysics()->getTolerancesScale());
   sceneDesc.gravity = Vec3ToPxVec3(config.gravity);
   sceneDesc.filterShader = TypeAffinityIgnoreFilterShaderGpu;
@@ -95,7 +97,7 @@ PhysxSystemGpu::PhysxSystemGpu(PhysxSceneConfig const &config) : PhysxSystem(con
 
   sceneDesc.flags = sceneFlags;
 
-  mPxCPUDispatcher = PxDefaultCpuDispatcherCreate(PhysxDefault::getCpuWorkers());
+  mPxCPUDispatcher = PxDefaultCpuDispatcherCreate(config.cpuWorkers);
   if (!mPxCPUDispatcher) {
     throw std::runtime_error("PhysX system creation failed: failed to create CPU dispatcher");
   }

@@ -11,6 +11,7 @@ static float gRestitution{0.1};
 static std::weak_ptr<PhysxMaterial> gDefaultMaterial;
 static bool gGPUEnabled{false};
 static uint32_t gCpuWorkers{0};
+static PhysxSceneConfig gSceneConfig{};
 
 static ::physx::PxgDynamicsMemoryConfig gGpuMemoryConfig{};
 
@@ -50,8 +51,26 @@ void PhysxDefault::setGpuMemoryConfig(uint32_t tempBufferCapacity, uint32_t maxR
   return gGpuMemoryConfig;
 }
 
-void PhysxDefault::setCpuWorkers(uint32_t count) { gCpuWorkers = count; }
-uint32_t PhysxDefault::getCpuWorkers() { return gCpuWorkers; }
+void PhysxDefault::setSceneConfig(Vec3 gravity, float bounceThreshold, float sleepThreshold,
+                                  float contactOffset, uint32_t solverIterations,
+                                  uint32_t solverVelocityIterations, bool enablePCM,
+                                  bool enableTGS, bool enableCCD, bool enableEnhancedDeterminism,
+                                  bool enableFrictionEveryIteration, uint32_t cpuWorkers) {
+  gSceneConfig.gravity = gravity;
+  gSceneConfig.bounceThreshold = bounceThreshold;
+  gSceneConfig.sleepThreshold = sleepThreshold;
+  gSceneConfig.contactOffset = contactOffset;
+  gSceneConfig.solverIterations = solverIterations;
+  gSceneConfig.solverVelocityIterations = solverVelocityIterations;
+  gSceneConfig.enablePCM = enablePCM;
+  gSceneConfig.enableTGS = enableTGS;
+  gSceneConfig.enableCCD = enableCCD;
+  gSceneConfig.enableEnhancedDeterminism = enableEnhancedDeterminism;
+  gSceneConfig.enableFrictionEveryIteration = enableFrictionEveryIteration;
+  gSceneConfig.cpuWorkers = cpuWorkers;
+}
+void PhysxDefault::setSceneConfig(PhysxSceneConfig const &config) { gSceneConfig = config; }
+PhysxSceneConfig const &PhysxDefault::getSceneConfig() { return gSceneConfig; }
 
 void PhysxDefault::EnableGPU() {
   if (PhysxEngine::GetIfExists()) {

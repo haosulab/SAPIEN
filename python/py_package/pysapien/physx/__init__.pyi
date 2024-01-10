@@ -36,12 +36,12 @@ __all__ = [
     "PhysxRigidStaticComponent",
     "PhysxSceneConfig",
     "PhysxSystem",
-    "get_cpu_workers",
     "get_default_material",
+    "get_scene_config",
     "is_gpu_enabled",
-    "set_cpu_workers",
     "set_default_material",
-    "set_gpu_memory_config"
+    "set_gpu_memory_config",
+    "set_scene_config"
 ]
 
 
@@ -597,7 +597,7 @@ class PhysxContactPoint():
         """
     pass
 class PhysxSystem(sapien.pysapien.System):
-    def __init__(self, config: PhysxSceneConfig = SceneConfig()) -> None: ...
+    def __init__(self) -> None: ...
     def get_articulation_link_components(self) -> list[PhysxArticulationLinkComponent]: ...
     def get_config(self) -> PhysxSceneConfig: ...
     def get_rigid_dynamic_components(self) -> list[PhysxRigidDynamicComponent]: ...
@@ -745,7 +745,7 @@ class PhysxGearComponent(PhysxJointComponent, PhysxBaseComponent, sapien.pysapie
         """
     pass
 class PhysxGpuSystem(PhysxSystem, sapien.pysapien.System):
-    def __init__(self, config: PhysxSceneConfig = SceneConfig()) -> None: ...
+    def __init__(self) -> None: ...
     def get_scene_offset(self, scene: sapien.pysapien.Scene) -> numpy.ndarray[numpy.float32, _Shape, _Shape[3]]: ...
     @typing.overload
     def gpu_apply_articulation_qf(self) -> None: ...
@@ -1266,7 +1266,7 @@ class PhysxSceneConfig():
         pass
     pass
 class PhysxCpuSystem(PhysxSystem, sapien.pysapien.System):
-    def __init__(self, config: PhysxSceneConfig = SceneConfig()) -> None: ...
+    def __init__(self) -> None: ...
     def get_contacts(self) -> list[PhysxContact]: ...
     def pack(self) -> bytes: ...
     def raycast(self, position: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], direction: numpy.ndarray[numpy.float32, _Shape, _Shape[3]], distance: float) -> PhysxRayHit: 
@@ -1277,15 +1277,19 @@ class PhysxCpuSystem(PhysxSystem, sapien.pysapien.System):
     pass
 def _enable_gpu() -> None:
     pass
-def get_cpu_workers() -> int:
-    pass
 def get_default_material() -> PhysxMaterial:
     pass
-def is_gpu_enabled() -> bool:
+def get_scene_config() -> PhysxSceneConfig:
     pass
-def set_cpu_workers(count: int) -> None:
+def is_gpu_enabled() -> bool:
     pass
 def set_default_material(static_friction: float, dynamic_friction: float, restitution: float) -> None:
     pass
 def set_gpu_memory_config(temp_buffer_capacity: int = 16777216, max_rigid_contact_count: int = 524288, max_rigid_patch_count: int = 81920, heap_capacity: int = 67108864, found_lost_pairs_capacity: int = 262144, found_lost_aggregate_pairs_capacity: int = 1024, total_aggregate_pairs_capacity: int = 1024) -> None:
+    pass
+@typing.overload
+def set_scene_config(gravity: numpy.ndarray[numpy.float32, _Shape, _Shape[3]] = array([ 0. , 0. , -9.81], dtype=float32), bounce_threshold: float = 2.0, sleep_threshold: float = 0.004999999888241291, contact_offset: float = 0.009999999776482582, solver_iterations: int = 10, solver_velocity_iterations: int = 1, enable_pcm: bool = True, enable_tgs: bool = True, enable_ccd: bool = False, enable_enhanced_determinism: bool = False, enable_friction_every_iteration: bool = True, cpu_workers: int = 0) -> None:
+    pass
+@typing.overload
+def set_scene_config(config: PhysxSceneConfig) -> None:
     pass

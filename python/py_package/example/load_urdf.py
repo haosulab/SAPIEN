@@ -4,12 +4,8 @@ from sapien.utils import Viewer
 
 
 def main(filename, package_dir):
-    config = sapien.physx.PhysxSceneConfig()
-    config.gravity = np.array([0, 0, 0])
-
-    scene = sapien.Scene(
-        [sapien.physx.PhysxSystem(config), sapien.render.RenderSystem()]
-    )
+    sapien.physx.set_scene_config(gravity=[0, 0, 0])
+    scene = sapien.Scene()
     scene.set_timestep(1 / 125)
     scene.set_ambient_light([0.4, 0.4, 0.4])
     scene.add_directional_light([1, -1, -1], [0.5, 0.5, 0.5])

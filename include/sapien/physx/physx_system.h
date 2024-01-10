@@ -2,6 +2,7 @@
 #include "../array.h"
 #include "../component.h"
 #include "../system.h"
+#include "./physx_default.h"
 #include "./physx_engine.h"
 #include "mesh_manager.h"
 #include "sapien/scene.h"
@@ -23,27 +24,6 @@ class PhysxRigidBodyComponent;
 class PhysxRigidDynamicComponent;
 class PhysxRigidStaticComponent;
 class PhysxArticulationLinkComponent;
-
-struct PhysxSceneConfig {
-  Vec3 gravity = {0, 0, -9.81};           // default gravity
-  float bounceThreshold = 2.f;            // relative velocity below this will not bounce
-  float sleepThreshold = 0.005f;          // put to sleep if (kinetic energy/(mass) falls below
-  float contactOffset = 0.01f;            // how close should contacts be generated
-  uint32_t solverIterations = 10;         // solver position iterations, helps reduce jittering
-  uint32_t solverVelocityIterations = 1;  // solver velocity iterations
-  bool enablePCM = true;                  // Use persistent contact manifold solver for contact
-  bool enableTGS = true;                  // use TGS solver
-  bool enableCCD = false;                 // use continuous collision detection
-  bool enableEnhancedDeterminism = false; // improve determinism
-  bool enableFrictionEveryIteration =
-      true; // better friction calculation, recommended for robotics
-
-  template <class Archive> void serialize(Archive &ar) {
-    ar(gravity, bounceThreshold, sleepThreshold, contactOffset, solverIterations,
-       solverVelocityIterations, enablePCM, enableTGS, enableCCD, enableEnhancedDeterminism,
-       enableFrictionEveryIteration);
-  }
-};
 
 class PhysxSystem : public System {
 
@@ -85,7 +65,7 @@ public:
   int getSceneCollisionId() const { return mSceneCollisionId; }
 
 protected:
-  PhysxSystem(PhysxSceneConfig const &config);
+  PhysxSystem();
 
   PhysxSceneConfig mSceneConfig;
   std::shared_ptr<PhysxEngine> mEngine;
@@ -100,7 +80,7 @@ protected:
 
 class PhysxSystemCpu : public PhysxSystem {
 public:
-  PhysxSystemCpu(PhysxSceneConfig const &config);
+  PhysxSystemCpu();
 
   void registerComponent(std::shared_ptr<PhysxRigidDynamicComponent> component) override;
   void registerComponent(std::shared_ptr<PhysxRigidStaticComponent> component) override;
@@ -137,7 +117,7 @@ private:
 
 class PhysxSystemGpu : public PhysxSystem {
 public:
-  PhysxSystemGpu(PhysxSceneConfig const &config);
+  PhysxSystemGpu();
 
   void registerComponent(std::shared_ptr<PhysxRigidDynamicComponent> component) override;
   void registerComponent(std::shared_ptr<PhysxRigidStaticComponent> component) override;
