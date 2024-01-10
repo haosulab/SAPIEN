@@ -10,6 +10,7 @@ static float gDynamicFriction{0.3};
 static float gRestitution{0.1};
 static std::weak_ptr<PhysxMaterial> gDefaultMaterial;
 static bool gGPUEnabled{false};
+static uint32_t gCpuWorkers{0};
 
 static ::physx::PxgDynamicsMemoryConfig gGpuMemoryConfig{};
 
@@ -48,6 +49,9 @@ void PhysxDefault::setGpuMemoryConfig(uint32_t tempBufferCapacity, uint32_t maxR
 ::physx::PxgDynamicsMemoryConfig const &PhysxDefault::getGpuMemoryConfig() {
   return gGpuMemoryConfig;
 }
+
+void PhysxDefault::setCpuWorkers(uint32_t count) { gCpuWorkers = count; }
+uint32_t PhysxDefault::getCpuWorkers() { return gCpuWorkers; }
 
 void PhysxDefault::EnableGPU() {
   if (PhysxEngine::GetIfExists()) {

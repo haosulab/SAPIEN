@@ -153,6 +153,10 @@ public:
   getArticulationLinkComponents() const override;
 
   void step() override;
+
+  void stepStart();
+  void stepFinish();
+
   bool isGpu() const override { return true; }
 
   void gpuInit();

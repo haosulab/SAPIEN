@@ -52,7 +52,7 @@ PhysxSystemCpu::PhysxSystemCpu(PhysxSceneConfig const &config) : PhysxSystem(con
 
   sceneDesc.flags = sceneFlags;
 
-  mPxCPUDispatcher = PxDefaultCpuDispatcherCreate(0);
+  mPxCPUDispatcher = PxDefaultCpuDispatcherCreate(PhysxDefault::getCpuWorkers());
   if (!mPxCPUDispatcher) {
     throw std::runtime_error("PhysX system creation failed: failed to create CPU dispatcher");
   }
@@ -95,7 +95,7 @@ PhysxSystemGpu::PhysxSystemGpu(PhysxSceneConfig const &config) : PhysxSystem(con
 
   sceneDesc.flags = sceneFlags;
 
-  mPxCPUDispatcher = PxDefaultCpuDispatcherCreate(0);
+  mPxCPUDispatcher = PxDefaultCpuDispatcherCreate(PhysxDefault::getCpuWorkers());
   if (!mPxCPUDispatcher) {
     throw std::runtime_error("PhysX system creation failed: failed to create CPU dispatcher");
   }
@@ -190,8 +190,7 @@ std::unique_ptr<PhysxHitInfo> PhysxSystemCpu::raycast(Vec3 const &origin, Vec3 c
 
 void PhysxSystemCpu::step() {
   mPxScene->simulate(mTimestep);
-  while (!mPxScene->fetchResults(true)) {
-  }
+  mPxScene->fetchResults(true);
   for (auto c : mRigidStaticComponents) {
     c->syncPoseToEntity();
   }
@@ -210,10 +209,20 @@ void PhysxSystemGpu::step() {
 
   ++mTotalSteps;
   mPxScene->simulate(mTimestep);
-  while (!mPxScene->fetchResults(true)) {
-  }
+  mPxScene->fetchResults(true);
   // TODO: does the GPU API require fetch results?
 }
+
+void PhysxSystemGpu::stepStart() {
+  if (!mGpuInitialized) {
+    throw std::runtime_error("failed to step: gpu simulation is not initialized.");
+  }
+
+  ++mTotalSteps;
+  mPxScene->simulate(mTimestep);
+}
+
+void PhysxSystemGpu::stepFinish() { mPxScene->fetchResults(true); }
 
 std::string PhysxSystemCpu::packState() const {
   std::ostringstream ss;

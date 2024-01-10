@@ -36,8 +36,10 @@ __all__ = [
     "PhysxRigidStaticComponent",
     "PhysxSceneConfig",
     "PhysxSystem",
+    "get_cpu_workers",
     "get_default_material",
     "is_gpu_enabled",
+    "set_cpu_workers",
     "set_default_material",
     "set_gpu_memory_config"
 ]
@@ -811,6 +813,8 @@ class PhysxGpuSystem(PhysxSystem, sapien.pysapien.System):
         position `[1, 1, 1]` will be at position `[1, 1, 1] + [2, 1, 0] = [3, 2, 1]` in
         PhysX scene.
         """
+    def step_finish(self) -> None: ...
+    def step_start(self) -> None: ...
     def sync_poses_gpu_to_cpu(self) -> None: 
         """
         Warning: this function is super slow and for debug only. Download all poses from the GPU and copy to SAPIEN entities.
@@ -1273,9 +1277,13 @@ class PhysxCpuSystem(PhysxSystem, sapien.pysapien.System):
     pass
 def _enable_gpu() -> None:
     pass
+def get_cpu_workers() -> int:
+    pass
 def get_default_material() -> PhysxMaterial:
     pass
 def is_gpu_enabled() -> bool:
+    pass
+def set_cpu_workers(count: int) -> None:
     pass
 def set_default_material(static_friction: float, dynamic_friction: float, restitution: float) -> None:
     pass

@@ -21,6 +21,9 @@ public:
                                  uint32_t totalAggregatePairsCapacity);
   static ::physx::PxgDynamicsMemoryConfig const &getGpuMemoryConfig();
 
+  static void setCpuWorkers(uint32_t count);
+  static uint32_t getCpuWorkers();
+
   // enable GPU simulation, may not be disabled
   static void EnableGPU();
   static bool GetGPUEnabled();

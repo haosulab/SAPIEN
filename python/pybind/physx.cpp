@@ -448,7 +448,10 @@ Args:
 
       .def("sync_poses_gpu_to_cpu", &PhysxSystemGpu::syncPosesGpuToCpu,
            "Warning: this function is super slow and for debug only. Download all poses from the "
-           "GPU and copy to SAPIEN entities.");
+           "GPU and copy to SAPIEN entities.")
+
+      .def("step_start", &PhysxSystemGpu::stepStart)
+      .def("step_finish", &PhysxSystemGpu::stepFinish);
 
   PyPhysxMaterial
       .def(py::init<float, float, float>(), py::arg("static_friction"),
@@ -1001,7 +1004,9 @@ Example:
            py::arg("heap_capacity") = 64 * 1024 * 1024,
            py::arg("found_lost_pairs_capacity") = 256 * 1024,
            py::arg("found_lost_aggregate_pairs_capacity") = 1024,
-           py::arg("total_aggregate_pairs_capacity") = 1024);
+           py::arg("total_aggregate_pairs_capacity") = 1024)
+      .def("set_cpu_workers", &PhysxDefault::setCpuWorkers, py::arg("count"))
+      .def("get_cpu_workers", &PhysxDefault::getCpuWorkers);
 
   ////////// end global //////////
 
