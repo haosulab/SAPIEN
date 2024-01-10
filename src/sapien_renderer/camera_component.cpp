@@ -412,8 +412,12 @@ void SapienRenderCameraComponent::gpuInit() {
   }
 
   setAutoUpload(true);
-  auto fence = SapienRenderEngine::Get()->getContext()->getDevice().createFenceUnique({});
+  auto device = SapienRenderEngine::Get()->getContext()->getDevice();
+  auto fence = device.createFenceUnique({});
   mCamera->getRenderer().render(mCamera->getCamera(), {}, {}, {}, fence.get());
+  if (device.waitForFences(fence.get(), true, UINT64_MAX) != vk::Result::eSuccess) {
+    throw std::runtime_error("failed to initialize camera: the camera failed to render");
+  }
   setAutoUpload(false);
   mGpuInitialized = true;
 }
