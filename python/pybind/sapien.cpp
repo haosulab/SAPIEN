@@ -43,11 +43,22 @@ class PythonProfiler {
 public:
   PythonProfiler(std::string const &name) { mName = name; }
 
-  void enter() { ProfilerBlockBegin(mName.c_str()); }
+  void enter() {
+    ProfilerBlockBegin(mName.c_str());
+  }
   void exit(const std::optional<pybind11::type> &exc_type,
             const std::optional<pybind11::object> &exc_value,
             const std::optional<pybind11::object> &traceback) {
     ProfilerBlockEnd();
+  }
+
+  py::cpp_function decorate(py::function func) {
+    return [func = func, name = mName](py::args args, py::kwargs const &kwargs) {
+      ProfilerBlockBegin(name.c_str());
+      auto obj = func(*args, **kwargs);
+      ProfilerBlockEnd();
+      return obj;
+    };
   }
 
 private:
@@ -65,7 +76,14 @@ Generator<int> init_sapien(py::module &m) {
   py::class_<PythonProfiler>(m, "Profiler")
       .def(py::init<std::string const &>())
       .def("__enter__", &PythonProfiler::enter)
-      .def("__exit__", &PythonProfiler::exit);
+      .def("__exit__", &PythonProfiler::exit)
+      .def("__call__", &PythonProfiler::decorate);
+
+  m.def("profile", [](std::string const &name) {
+     return PythonProfiler(name);
+   }).def("profile", [](py::function func) {
+    return PythonProfiler(py::getattr(func, "__name__").cast<std::string>()).decorate(func);
+  });
 
   auto PyPose = py::class_<Pose>(m, "Pose");
   auto PyScene = py::class_<Scene>(m, "Scene");

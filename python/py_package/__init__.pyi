@@ -42,6 +42,7 @@ __all__ = [
     "physx",
     "pkg_resources",
     "platform",
+    "profile",
     "pysapien",
     "pysapien_pinocchio",
     "render",
@@ -56,11 +57,17 @@ __all__ = [
 ]
 
 
+@typing.overload
+def profile(arg0: str) -> pysapien.Profiler:
+    pass
+@typing.overload
+def profile(arg0: typing.Callable) -> cpp_function:
+    pass
 def set_cuda_tensor_backend(backend: str) -> None:
     """
     set the backend returned CUDA tensors. Supported backends are "torch" and "jax"
     """
 def set_log_level(level: str) -> None:
     pass
-__version__ = '3.0.0.dev20240110+3fcf354b'
+__version__ = '3.0.0.dev20240110+01b55817'
 SceneConfig = sapien.pysapien.physx.PhysxSceneConfig

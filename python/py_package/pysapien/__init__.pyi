@@ -17,6 +17,7 @@ __all__ = [
     "internal_renderer",
     "math",
     "physx",
+    "profile",
     "render",
     "set_cuda_tensor_backend",
     "set_log_level",
@@ -204,6 +205,7 @@ class Pose():
         pass
     pass
 class Profiler():
+    def __call__(self, arg0: typing.Callable) -> cpp_function: ...
     def __enter__(self) -> None: ...
     def __exit__(self, arg0: typing.Optional[type], arg1: typing.Optional[object], arg2: typing.Optional[object]) -> None: ...
     def __init__(self, arg0: str) -> None: ...
@@ -240,6 +242,12 @@ class System():
     def step(self) -> None: ...
     pass
 def get_cuda_tensor_backend() -> str:
+    pass
+@typing.overload
+def profile(arg0: str) -> Profiler:
+    pass
+@typing.overload
+def profile(arg0: typing.Callable) -> cpp_function:
     pass
 def set_cuda_tensor_backend(backend: str) -> None:
     """

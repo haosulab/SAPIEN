@@ -11,6 +11,7 @@ from . import _oidn_tricks
 from . import pysapien
 
 from .pysapien import Entity, Component, System, CudaArray, Pose
+from .pysapien import profile
 from .pysapien import set_cuda_tensor_backend, set_log_level
 from .pysapien import math, simsense
 
