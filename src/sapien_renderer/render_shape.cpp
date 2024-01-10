@@ -248,10 +248,10 @@ void RenderShapeTriangleMesh::setScale(Vec3 const &scale) {
   mScale = scale;
 }
 
-std::vector<RenderShapeTriangleMeshPart> RenderShapeTriangleMesh::getParts() {
-  std::vector<RenderShapeTriangleMeshPart> parts;
+std::vector<std::shared_ptr<RenderShapeTriangleMeshPart>> RenderShapeTriangleMesh::getParts() {
+  std::vector<std::shared_ptr<RenderShapeTriangleMeshPart>> parts;
   for (auto shape : mModel->getShapes()) {
-    parts.push_back({shape});
+    parts.push_back({std::make_shared<RenderShapeTriangleMeshPart>(shape)});
   }
   return parts;
 }
@@ -316,9 +316,9 @@ AABB RenderShapeTriangleMesh::getLocalAABB() {
   if (parts.size() == 0) {
     throw std::runtime_error("failed to get global AABB: triangle mesh is empty");
   }
-  AABB aabb = computeAABB(parts[0].getVertices(), getScale(), Pose());
+  AABB aabb = computeAABB(parts[0]->getVertices(), getScale(), Pose());
   for (uint32_t i = 1; i < parts.size(); ++i) {
-    aabb = aabb + computeAABB(parts[i].getVertices(), getScale(), Pose());
+    aabb = aabb + computeAABB(parts[i]->getVertices(), getScale(), Pose());
   }
   mAABB = aabb;
   return aabb;
@@ -333,12 +333,71 @@ AABB RenderShapeTriangleMesh::computeGlobalAABBTight() {
   if (parts.size() == 0) {
     throw std::runtime_error("failed to get global AABB: triangle mesh is empty");
   }
-  AABB aabb = computeAABB(parts[0].getVertices(), getScale(), mParent->getPose() * getLocalPose());
+  AABB aabb =
+      computeAABB(parts[0]->getVertices(), getScale(), mParent->getPose() * getLocalPose());
   for (uint32_t i = 1; i < parts.size(); ++i) {
     aabb = aabb +
-           computeAABB(parts[i].getVertices(), getScale(), mParent->getPose() * getLocalPose());
+           computeAABB(parts[i]->getVertices(), getScale(), mParent->getPose() * getLocalPose());
   }
   return aabb;
+}
+
+std::shared_ptr<RenderShape> RenderShapePlane::clone() const {
+  auto newShape = std::make_shared<RenderShapePlane>(getScale(), getMaterial());
+  newShape->setCulling(getCulling());
+  newShape->setName(getName());
+  newShape->setLocalPose(getLocalPose());
+  return newShape;
+}
+
+std::shared_ptr<RenderShape> RenderShapeBox::clone() const {
+  auto newShape = std::make_shared<RenderShapeBox>(getHalfLengths(), getMaterial());
+  newShape->setCulling(getCulling());
+  newShape->setName(getName());
+  newShape->setLocalPose(getLocalPose());
+  return newShape;
+}
+
+std::shared_ptr<RenderShape> RenderShapeSphere::clone() const {
+  auto newShape = std::make_shared<RenderShapeSphere>(getRadius(), getMaterial());
+  newShape->setCulling(getCulling());
+  newShape->setName(getName());
+  newShape->setLocalPose(getLocalPose());
+  return newShape;
+}
+
+std::shared_ptr<RenderShape> RenderShapeCapsule::clone() const {
+  auto newShape =
+      std::make_shared<RenderShapeCapsule>(getRadius(), getHalfLength(), getMaterial());
+  newShape->setCulling(getCulling());
+  newShape->setName(getName());
+  newShape->setLocalPose(getLocalPose());
+  return newShape;
+}
+
+std::shared_ptr<RenderShape> RenderShapeCylinder::clone() const {
+  auto newShape =
+      std::make_shared<RenderShapeCylinder>(getRadius(), getHalfLength(), getMaterial());
+  newShape->setCulling(getCulling());
+  newShape->setName(getName());
+  newShape->setLocalPose(getLocalPose());
+  return newShape;
+}
+
+std::shared_ptr<RenderShape> RenderShapeTriangleMesh::clone() const {
+  std::vector<std::shared_ptr<RenderShapeTriangleMeshPart>> parts;
+  for (auto shape : mModel->getShapes()) {
+    parts.push_back(std::make_shared<RenderShapeTriangleMeshPart>(shape));
+  }
+  auto newShape = std::make_shared<RenderShapeTriangleMesh>(parts);
+  newShape->mScale = mScale;
+  newShape->mFilename = mFilename;
+  newShape->mMaterial = mMaterial;
+
+  newShape->setCulling(getCulling());
+  newShape->setName(getName());
+  newShape->setLocalPose(getLocalPose());
+  return newShape;
 }
 
 } // namespace sapien_renderer

@@ -234,6 +234,9 @@ void CudaHostArray::copyFrom(const CudaArray &array) {
   if (array.type != type) {
     throw std::runtime_error("failed to copy: arrays have different types");
   }
+  if (!array.ptr) {
+    return;
+  }
   checkCudaErrors(cudaMemcpy(ptr, array.ptr, array.bytes(), cudaMemcpyDeviceToHost));
 }
 

@@ -61,6 +61,8 @@ public:
   void enableRenderId();
   bool getRenderIdDisabled() const { return mRenderIdDisabled; }
 
+  std::shared_ptr<SapienRenderBodyComponent> clone() const;
+
 private:
   std::vector<std::shared_ptr<RenderShape>> mRenderShapes{};
   svulkan2::scene::Node *mNode{};
@@ -73,4 +75,3 @@ private:
 
 } // namespace sapien_renderer
 } // namespace sapien
-

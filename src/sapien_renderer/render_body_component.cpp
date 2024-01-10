@@ -3,6 +3,7 @@
 #include "sapien/sapien_renderer/render_shape.h"
 #include "sapien/sapien_renderer/sapien_renderer_system.h"
 #include "sapien/scene.h"
+#include "sapien/profiler.h"
 
 namespace sapien {
 namespace sapien_renderer {
@@ -187,6 +188,20 @@ void SapienRenderBodyComponent::enableRenderId() {
     throw std::runtime_error("failed to disable render id: component already added to scene");
   }
   mRenderIdDisabled = false;
+}
+
+std::shared_ptr<SapienRenderBodyComponent> SapienRenderBodyComponent::clone() const {
+  SAPIEN_PROFILE_FUNCTION;
+
+  auto body = std::make_shared<SapienRenderBodyComponent>();
+  for (auto s : getRenderShapes()) {
+    body->attachRenderShape(s->clone());
+  }
+  body->setVisibility(getVisibility());
+  body->setShadingMode(getShadingMode());
+  body->mRenderIdDisabled = mRenderIdDisabled;
+  // TODO copy properties
+  return body;
 }
 
 } // namespace sapien_renderer

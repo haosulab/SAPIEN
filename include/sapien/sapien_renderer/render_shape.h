@@ -70,9 +70,11 @@ public:
   vk::CullModeFlagBits getCulling() const;
   void setCulling(vk::CullModeFlagBits);
 
-  virtual std::vector<RenderShapeTriangleMeshPart> getParts() {
-    return {mModel->getShapes().at(0)};
+  virtual std::vector<std::shared_ptr<RenderShapeTriangleMeshPart>> getParts() {
+    return {std::make_shared<RenderShapeTriangleMeshPart>(mModel->getShapes().at(0))};
   }
+
+  virtual std::shared_ptr<RenderShape> clone() const = 0;
 
   /** batched rendering only, sets the index to look up for GPU pose */
   void setGpuBatchedPoseIndex(int);
@@ -115,6 +117,8 @@ public:
 
   std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
 
+  std::shared_ptr<RenderShape> clone() const override;
+
 private:
   std::shared_ptr<SapienRenderMaterial> mMaterial;
 };
@@ -126,6 +130,8 @@ public:
   AABB getLocalAABB() override;
 
   std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
+
+  std::shared_ptr<RenderShape> clone() const override;
 
 private:
   std::shared_ptr<SapienRenderMaterial> mMaterial;
@@ -140,6 +146,8 @@ public:
   AABB getLocalAABB() override;
 
   std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
+
+  std::shared_ptr<RenderShape> clone() const override;
 
 private:
   float mRadius{};
@@ -157,6 +165,8 @@ public:
 
   std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
 
+  std::shared_ptr<RenderShape> clone() const override;
+
 private:
   float mRadius{};
   float mHalfLength{};
@@ -169,6 +179,8 @@ public:
   float getRadius() const;
   AABB getLocalAABB() override;
   std::shared_ptr<SapienRenderMaterial> getMaterial() const override { return mMaterial; }
+
+  std::shared_ptr<RenderShape> clone() const override;
 
 private:
   std::shared_ptr<SapienRenderMaterial> mMaterial;
@@ -193,9 +205,11 @@ public:
   Vec3 getScale() const;
   void setScale(Vec3 const &scale);
 
-  std::vector<RenderShapeTriangleMeshPart> getParts() override;
+  std::vector<std::shared_ptr<RenderShapeTriangleMeshPart>> getParts() override;
 
   std::shared_ptr<SapienRenderMaterial> getMaterial() const override;
+
+  std::shared_ptr<RenderShape> clone() const override;
 
 private:
   std::string mFilename{};

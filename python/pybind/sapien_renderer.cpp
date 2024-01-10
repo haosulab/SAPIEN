@@ -391,22 +391,6 @@ void init_sapien_renderer(py::module &sapien) {
           py::arg("filename"), py::arg("apply_scale") = true)
       .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); });
 
-  // .def(
-  //     "gpu_transfer_poses_to_render_scenes",
-  //     [](CudaArrayHandle sceneTransformRefs, CudaArrayHandle sceneIndices,
-  //        CudaArrayHandle transformIndices, CudaArrayHandle localTransforms,
-  //        CudaArrayHandle localScales, CudaArrayHandle parentIndices,
-  //        CudaArrayHandle parentTransforms) {
-  //       SapienRenderEngine::Get()->gpuTransferPosesToRenderScenes(
-  //           sceneTransformRefs, sceneIndices, transformIndices, localTransforms,
-  //           localScales, parentIndices, parentTransforms);
-  //     },
-  //     py::arg("scene_transform_pointers"), py::arg("scene_indices"),
-  //     py::arg("transform_indices"), py::arg("local_poses"), py::arg("local_scales"),
-  //     py::arg("parent_indices"), py::arg("parent_transforms"))
-  // .def("gpu_notify_poses_updated",
-  //      []() { SapienRenderEngine::Get()->gpuNotifyPosesUpdated(); });
-
   ////////// end global //////////
 
   auto PySapienRenderer = py::class_<SapienRenderEngine>(m, "SapienRenderer");
@@ -662,10 +646,8 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("set_gpu_pose_batch_index", &RenderShape::setGpuBatchedPoseIndex)
 
       .def_property_readonly("parts", &RenderShape::getParts)
-      .def("get_parts", &RenderShape::getParts);
-
-  // .def("get_gpu_transform_index", &RenderShape::getInternalGpuTransformIndex)
-  // .def("get_gpu_scale", &RenderShape::getGpuScale);
+      .def("get_parts", &RenderShape::getParts)
+      .def("clone", &RenderShape::clone);
 
   PyRenderShapePlane
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("scale"),
@@ -767,7 +749,8 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def_property_readonly("is_render_id_disabled",
                              &SapienRenderBodyComponent::getRenderIdDisabled)
       .def("disable_render_id", &SapienRenderBodyComponent::disableRenderId)
-      .def("enable_render_id", &SapienRenderBodyComponent::enableRenderId);
+      .def("enable_render_id", &SapienRenderBodyComponent::enableRenderId)
+      .def("clone", &SapienRenderBodyComponent::clone);
 
   PyRenderPointCloudComponent.def(py::init<uint32_t>(), py::arg("capacity") = 0)
       .def("set_vertices", &PointCloudComponent::setVertices, py::arg("vertices"))
