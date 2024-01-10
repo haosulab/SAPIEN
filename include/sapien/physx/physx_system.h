@@ -172,7 +172,7 @@ public:
   CudaArrayHandle gpuGetArticulationLinkCudaHandle() const { return mCudaLinkHandle; }
 
   CudaArrayHandle gpuGetArticulationQposCudaHandle() const { return mCudaQposHandle; }
-  CudaArrayHandle gpuGetArticulationQvelCudaHandle() const { return mCudaQTargetVelHandle; }
+  CudaArrayHandle gpuGetArticulationQvelCudaHandle() const { return mCudaQvelHandle; }
   CudaArrayHandle gpuGetArticulationQaccCudaHandle() const { return mCudaQaccHandle; }
   CudaArrayHandle gpuGetArticulationQfCudaHandle() const { return mCudaQfHandle; }
 

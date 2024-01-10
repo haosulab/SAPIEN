@@ -568,10 +568,10 @@ void PhysxSystemGpu::gpuApplyArticulationRootVel(CudaArrayHandle const &indices)
     return;
   }
 
-  root_vel_sapien_to_physx(mCudaLinkPoseScratch.ptr, mCudaLinkHandle.ptr, indices.ptr,
+  root_vel_sapien_to_physx(mCudaLinkVelScratch.ptr, mCudaLinkHandle.ptr, indices.ptr,
                            mGpuArticulationMaxLinkCount, indices.shape.at(0), mCudaStream);
   mCudaEventRecord.record(mCudaStream);
-  mPxScene->applyArticulationData(mCudaLinkPoseScratch.ptr, indices.ptr,
+  mPxScene->applyArticulationData(mCudaLinkVelScratch.ptr, indices.ptr,
                                   PxArticulationGpuDataType::eROOT_VELOCITY, indices.shape.at(0),
                                   mCudaEventRecord.event, mCudaEventWait.event);
   mCudaEventWait.wait(mCudaStream);
@@ -790,33 +790,35 @@ void PhysxSystemGpu::allocateCudaBuffers() {
                       .cudaId = mCudaArticulationBuffer.cudaId,
                       .ptr = (float *)mCudaArticulationBuffer.ptr + mGpuArticulationMaxDof};
 
-  mCudaQfHandle =
-      CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxDof},
-                      .strides = {mGpuArticulationMaxDof * 4, 4},
-                      .type = "f4",
-                      .cudaId = mCudaArticulationBuffer.cudaId,
-                      .ptr = (float *)mCudaArticulationBuffer.ptr + mGpuArticulationMaxDof * 2};
+  mCudaQfHandle = CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxDof},
+                                  .strides = {mGpuArticulationMaxDof * 4, 4},
+                                  .type = "f4",
+                                  .cudaId = mCudaArticulationBuffer.cudaId,
+                                  .ptr = (float *)mCudaArticulationBuffer.ptr +
+                                         mGpuArticulationCount * mGpuArticulationMaxDof * 2};
 
-  mCudaQaccHandle =
-      CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxDof},
-                      .strides = {mGpuArticulationMaxDof * 4, 4},
-                      .type = "f4",
-                      .cudaId = mCudaArticulationBuffer.cudaId,
-                      .ptr = (float *)mCudaArticulationBuffer.ptr + mGpuArticulationMaxDof * 3};
+  mCudaQaccHandle = CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxDof},
+                                    .strides = {mGpuArticulationMaxDof * 4, 4},
+                                    .type = "f4",
+                                    .cudaId = mCudaArticulationBuffer.cudaId,
+                                    .ptr = (float *)mCudaArticulationBuffer.ptr +
+                                           mGpuArticulationCount * mGpuArticulationMaxDof * 3};
 
   mCudaQTargetPosHandle =
       CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxDof},
                       .strides = {mGpuArticulationMaxDof * 4, 4},
                       .type = "f4",
                       .cudaId = mCudaArticulationBuffer.cudaId,
-                      .ptr = (float *)mCudaArticulationBuffer.ptr + mGpuArticulationMaxDof * 4};
+                      .ptr = (float *)mCudaArticulationBuffer.ptr +
+                             mGpuArticulationCount * mGpuArticulationMaxDof * 4};
 
   mCudaQTargetVelHandle =
       CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxDof},
                       .strides = {mGpuArticulationMaxDof * 4, 4},
                       .type = "f4",
                       .cudaId = mCudaArticulationBuffer.cudaId,
-                      .ptr = (float *)mCudaArticulationBuffer.ptr + mGpuArticulationMaxDof * 5};
+                      .ptr = (float *)mCudaArticulationBuffer.ptr +
+                             mGpuArticulationCount * mGpuArticulationMaxDof * 5};
 
   {
     mCudaRigidDynamicIndexBuffer = CudaArray({rigidDynamicCount, 4}, "i4");
