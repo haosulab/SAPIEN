@@ -15,10 +15,6 @@ class EntityWindow(Plugin):
         self.reset()
 
     @property
-    def scene(self):
-        return self.viewer.scene
-
-    @property
     def selected_entity(self):
         return self.viewer.selected_entity
 
@@ -127,7 +123,7 @@ class EntityWindow(Plugin):
         c.set_parent(None)
 
     def build(self):
-        if self.scene is None:
+        if self.viewer.render_scene is None:
             self.ui_window = None
             return
 
@@ -428,17 +424,19 @@ class EntityWindow(Plugin):
 
                     section.append(shape_info)
 
-                section.append(
-                    R.UISameLine().append(
-                        R.UIButton()
-                        .Label("Show")
-                        .Callback(lambda _: self.enable_collision_visual()),
-                        R.UIButton()
-                        .Label("Hide")
-                        .Callback(lambda _: self.disable_collision_visual()),
-                        R.UIDisplayText().Text("Collision"),
+                # only supported in single scene mode
+                if len(self.viewer.scenes) == 1:
+                    section.append(
+                        R.UISameLine().append(
+                            R.UIButton()
+                            .Label("Show")
+                            .Callback(lambda _: self.enable_collision_visual()),
+                            R.UIButton()
+                            .Label("Hide")
+                            .Callback(lambda _: self.disable_collision_visual()),
+                            R.UIDisplayText().Text("Collision"),
+                        )
                     )
-                )
 
             elif isinstance(c, sapien.physx.PhysxDriveComponent):
                 c: sapien.physx.PhysxDriveComponent

@@ -48,7 +48,13 @@ public:
 
   SapienRendererWindow(int width, int height, std::string const &shaderDir);
   ~SapienRendererWindow();
+
   void setScene(std::shared_ptr<Scene> scene);
+  void setScenes(std::vector<std::shared_ptr<Scene>> const &scenes);
+
+  /** updateRender calls updateRender of individual scenes */
+  void updateRender();
+
   void setCameraParameters(float near, float far, float fovy);
   void setCameraIntrinsicParameters(float near, float far, float fx, float fy, float cx, float cy,
                                     float skew);
@@ -120,6 +126,7 @@ public:
   inline svulkan2::renderer::RendererBase *getInternalRenderer() const {
     return mSVulkanRenderer.get();
   }
+  inline svulkan2::scene::Scene *getInternalScene() const { return mRenderScene.get(); }
 
   void setShader(std::string const &shaderDir);
 
@@ -136,7 +143,10 @@ private:
   svulkan2::scene::Camera *getCamera();
 
   std::shared_ptr<SapienRenderEngine> mEngine;
-  std::shared_ptr<Scene> mScene;
+
+  std::vector<std::shared_ptr<SapienRendererSystem>> mRenderSystems;
+  std::shared_ptr<svulkan2::scene::Scene> mRenderScene;
+
   std::string mShaderDir{};
   std::unique_ptr<svulkan2::renderer::RendererBase> mSVulkanRenderer{};
 
@@ -150,9 +160,6 @@ private:
   int mViewportHeight{};
   bool mRequiresRebuild{true};
   bool mClosed{};
-
-  // when auto upload is disabled, forcefully upload camera to device
-  void forceUploadCamera();
 };
 
 } // namespace sapien_renderer

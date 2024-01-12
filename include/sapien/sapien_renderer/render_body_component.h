@@ -52,11 +52,6 @@ public:
   SapienRenderBodyComponent(SapienRenderBodyComponent const &&) = delete;
   SapienRenderBodyComponent &operator=(SapienRenderBodyComponent const &&) = delete;
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(mRenderShapes, mVisibility, mShadingMode);
-  }
-  template <class Archive> void load(Archive &ar) { ar(mRenderShapes, mVisibility, mShadingMode); }
-
   void disableRenderId();
   void enableRenderId();
   bool getRenderIdDisabled() const { return mRenderIdDisabled; }

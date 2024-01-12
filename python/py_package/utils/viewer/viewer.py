@@ -62,8 +62,7 @@ class Viewer:
 
         resolution = np.array(resolutions).flatten()[:2]
 
-        self.scene = None
-        self.system = None
+        self.scenes = []
 
         self.window = RenderWindow(*resolution, self.shader_dir)
         self.window.set_focus_callback(self.focus_change)
@@ -76,6 +75,22 @@ class Viewer:
         self.init_plugins(plugins)
 
         self._selected_entity_visibility = 0.5
+
+    @property
+    def render_scene(self):
+        return self.window._internal_scene
+
+    @property
+    def scene(self) -> sapien.Scene:
+        if len(self.scenes) == 1:
+            return self.scenes[0]
+        return None
+
+    @property
+    def cameras(self):
+        if self.scene:
+            return self.scene.render_system.cameras
+        return []
 
     def drop(self, files):
         if not self.scene:
@@ -95,8 +110,8 @@ class Viewer:
             assert isinstance(plugin, Plugin)
             plugin.init(self)
 
-    def set_scene(self, scene: Scene):
-        if self.scene is not None:
+    def set_scenes(self, scenes):
+        if self.scenes:
             camera_pose = self.window.get_camera_pose()
             self.clear_scene()
         else:
@@ -104,15 +119,47 @@ class Viewer:
 
         self.selected_entity = None
 
-        self.scene = scene
-        self.system = scene.render_system
-        self.window.set_scene(scene)
+        self.scenes = scenes
+        # self.scene = scenes[0]
+        # self.system = self.scene.render_system
+        # self.window.set_scene(scene)
+
+        if len(scenes) == 0:
+            self.window.set_scene(None)
+        elif len(scenes) == 1:
+            self.window.set_scene(scenes[0])
+        else:
+            self.window.set_scenes(scenes)
 
         self.window.set_camera_parameters(0.1, 1000, np.pi / 2)
         self.set_camera_pose(camera_pose)
 
         for plugin in self.plugins:
             plugin.notify_scene_change()
+
+    def get_entity_viewer_pose(self, entity):
+        rs = entity.scene.render_system._internal_scene
+        return sapien.Pose(rs.get_root_position(), rs.get_root_rotation()) * entity.pose
+
+    def set_scene(self, scene: Scene):
+        self.set_scenes([scene])
+        # if self.scene is not None:
+        #     camera_pose = self.window.get_camera_pose()
+        #     self.clear_scene()
+        # else:
+        #     camera_pose = sapien.Pose([-2, 0, 0.5])
+
+        # self.selected_entity = None
+
+        # self.scene = scene
+        # # self.system = self.scene.render_system
+        # self.window.set_scene(scene)
+
+        # self.window.set_camera_parameters(0.1, 1000, np.pi / 2)
+        # self.set_camera_pose(camera_pose)
+
+        # for plugin in self.plugins:
+        #     plugin.notify_scene_change()
 
     def clear_scene(self):
         for plugin in self.plugins:
@@ -127,8 +174,8 @@ class Viewer:
             plugin.close()
 
         self.selected_entity = None
-        self.scene = None
-        self.system = None
+        self.scenes = []
+        # self.system = None
         self.window = None
         self.plugins = []
         self.renderer_context = None
@@ -156,7 +203,8 @@ class Viewer:
                 break
 
             if not self.paused or self.render_updated:
-                self.system.step()
+                self.window.update_render()
+                # self.system.step()
             self.reset_notifications()
 
             for plugin in self.plugins:
@@ -194,6 +242,8 @@ class Viewer:
 
         for plugin in self.plugins:
             plugin.notify_selected_entity_change()
+
+        self.render_scene.force_rebuild()
 
     @property
     def selected_entity_visibility(self):
@@ -235,8 +285,8 @@ class Viewer:
         colors = np.ones((vertices.shape[0], 4)) * [*color[:3], 1]
         lineset = self.renderer_context.create_line_set(vertices, colors)
 
-        render_scene: R.Scene = self.system._internal_scene
-        box = render_scene.add_line_set(lineset)
+        # render_scene: R.Scene = self.system._internal_scene
+        box = self.render_scene.add_line_set(lineset)
         box.set_position(pose.p)
         box.set_rotation(pose.q)
         box.set_scale(half_size)
@@ -249,8 +299,8 @@ class Viewer:
         box.set_scale(half_size)
 
     def remove_bounding_box(self, box):
-        render_scene: R.Scene = self.system._internal_scene
-        render_scene.remove_node(box)
+        # render_scene: R.Scene = self.system._internal_scene
+        self.render_scene.remove_node(box)
 
     def draw_aabb(self, lower, upper, color):
         pose = sapien.Pose((lower + upper) / 2)

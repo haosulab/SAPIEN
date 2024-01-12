@@ -1,9 +1,9 @@
 #include "sapien/sapien_renderer/render_body_component.h"
 #include "sapien/entity.h"
+#include "sapien/profiler.h"
 #include "sapien/sapien_renderer/render_shape.h"
 #include "sapien/sapien_renderer/sapien_renderer_system.h"
 #include "sapien/scene.h"
-#include "sapien/profiler.h"
 
 namespace sapien {
 namespace sapien_renderer {
@@ -58,7 +58,7 @@ void SapienRenderBodyComponent::onAddToScene(Scene &scene) {
     shape->internalSetRenderId(id);
     shape->internalSetRenderObject(&obj);
 
-    obj.setSegmentation({id, getEntity()->getPerSceneId(), 0, 0});
+    obj.setSegmentation({id, getEntity()->getPerSceneId(), scene.getId(), 0});
     obj.setTransparency(1.f - mVisibility);
   }
 

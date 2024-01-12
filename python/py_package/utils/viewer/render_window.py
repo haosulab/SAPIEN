@@ -165,7 +165,7 @@ class RenderOptionsWindow(Plugin):
         self.shader_index = self.shader_list.index(default_shader_dir)
 
     def build(self):
-        if self.viewer.system is None:
+        if self.viewer.render_scene is None:
             self.ui_window = None
             return
 

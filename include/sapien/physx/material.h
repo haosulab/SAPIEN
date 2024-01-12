@@ -28,18 +28,6 @@ public:
 
   ~PhysxMaterial();
 
-  template <class Archive> void save(Archive &ar) const {
-    ar(getStaticFriction(), getDynamicFriction(), getRestitution());
-  }
-
-  template <class Archive> void load(Archive &ar) {
-    float staticFriction, dynamicFriction, restitution;
-    ar(staticFriction, dynamicFriction, restitution);
-    setDynamicFriction(dynamicFriction);
-    setStaticFriction(staticFriction);
-    setRestitution(restitution);
-  }
-
 private:
   std::shared_ptr<PhysxEngine> mEngine;
   ::physx::PxMaterial *mMaterial;

@@ -1,11 +1,13 @@
 #include "sapien/scene.h"
+#include "sapien/entity.h"
 #include "sapien/physx/physx_system.h"
 #include "sapien/sapien_renderer/sapien_renderer.h"
-#include "sapien/entity.h"
 
 namespace sapien {
 
-Scene::Scene(std::vector<std::shared_ptr<System>> const &systems) {
+uint64_t Scene::gNextSceneId = 1;
+
+Scene::Scene(std::vector<std::shared_ptr<System>> const &systems) : mId(gNextSceneId++) {
   for (auto s : systems) {
     addSystem(s);
   }

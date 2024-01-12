@@ -15,10 +15,6 @@ class ArticulationWindow(Plugin):
         self.reset()
 
     @property
-    def scene(self):
-        return self.viewer.scene
-
-    @property
     def selected_entity(self):
         return self.viewer.selected_entity
 
@@ -37,7 +33,7 @@ class ArticulationWindow(Plugin):
         self.joint_details[index] = v
 
     def build(self):
-        if self.scene is None:
+        if self.viewer.render_scene is None:
             self.ui_window = None
             return
 
@@ -104,9 +100,7 @@ class ArticulationWindow(Plugin):
                     .Min(max(j.limit[0, 0], -20))
                     .Max(min(j.limit[0, 1], 20))
                     .Value(j.drive_target)
-                    .Callback(
-                        (lambda j: lambda p: j.set_drive_target(p.value))(j)
-                    ),
+                    .Callback((lambda j: lambda p: j.set_drive_target(p.value))(j)),
                     R.UIInputFloat()
                     .Label("Damping")
                     .Id(str(i))
@@ -207,6 +201,7 @@ class ArticulationWindow(Plugin):
                                 plugin.enable_collision_visual(link.entity)
                             else:
                                 plugin.disable_collision_visual(link.entity)
+
             return show_link_collision
 
         self.ui_window.append(

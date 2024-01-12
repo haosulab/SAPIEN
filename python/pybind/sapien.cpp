@@ -43,9 +43,7 @@ class PythonProfiler {
 public:
   PythonProfiler(std::string const &name) { mName = name; }
 
-  void enter() {
-    ProfilerBlockBegin(mName.c_str());
-  }
+  void enter() { ProfilerBlockBegin(mName.c_str()); }
   void exit(const std::optional<pybind11::type> &exc_type,
             const std::optional<pybind11::object> &exc_value,
             const std::optional<pybind11::object> &traceback) {
@@ -141,19 +139,14 @@ Generator<int> init_sapien(py::module &m) {
   PyScene
       .def(py::init<std::vector<std::shared_ptr<System>> const &>(),
            py::arg("systems")) // TODO: support parameters
-
+      .def_property_readonly("id", &Scene::getId)
+      .def("get_id", &Scene::getId)
       .def_property_readonly("entities", &Scene::getEntities)
       .def("get_entities", &Scene::getEntities)
       .def("add_entity", &Scene::addEntity)
       .def("remove_entity", &Scene::removeEntity, py::arg("entity"))
       .def("add_system", &Scene::addSystem)
       .def("get_system", &Scene::getSystem, py::arg("name"))
-
-      // .def_property_readonly("modules", &Scene::getModules)
-      // .def("get_modules", &Scene::getModules)
-      // .def("add_module", &Scene::addModule)
-      // .def("remove_module", &Scene::removeModule, py::arg("module"))
-
       .def_property_readonly("physx_system", &Scene::getPhysxSystem)
       .def("get_physx_system", &Scene::getPhysxSystem)
       .def_property_readonly("render_system", &Scene::getSapienRendererSystem)

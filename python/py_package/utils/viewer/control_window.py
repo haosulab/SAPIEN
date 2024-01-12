@@ -100,15 +100,20 @@ class ControlWindow(Plugin):
                 j2c = j.pose_in_child
                 c2w = c.pose
                 j2w = c2w * j2c
+
+                rs = self.selected_entity.scene.render_system._internal_scene
+                w2v = sapien.Pose(rs.get_root_position(), rs.get_root_rotation())
+                j2v = w2v * j2w
+
                 if j.type == "prismatic":
                     j2w.set_p(c2w.p)
-                    self.joint_axes[1].set_position(j2w.p)
-                    self.joint_axes[1].set_rotation(j2w.q)
+                    self.joint_axes[1].set_position(j2v.p)
+                    self.joint_axes[1].set_rotation(j2v.q)
                     self.joint_axes[1].transparency = 0 if self.show_joint_axes else 1
                     self.joint_axes[0].transparency = 1
                 elif j.type in ["revolute", "revolute_unwrapped"]:
-                    self.joint_axes[0].set_position(j2w.p)
-                    self.joint_axes[0].set_rotation(j2w.q)
+                    self.joint_axes[0].set_position(j2v.p)
+                    self.joint_axes[0].set_rotation(j2v.q)
                     self.joint_axes[0].transparency = 0 if self.show_joint_axes else 1
                     self.joint_axes[1].transparency = 1
                 break
@@ -150,10 +155,11 @@ class ControlWindow(Plugin):
             self.focus_camera(None)
             _, pitch, yaw = quat2euler(cam_pose.q.astype(np.float64))
             self.arc_camera_controller.set_yaw_pitch(yaw, pitch)
-            self.arc_camera_controller.set_center(entity.pose.p)
-            self.arc_camera_controller.set_zoom(
-                np.linalg.norm(entity.pose.p - cam_pose.p)
-            )
+
+            pose = self.viewer.get_entity_viewer_pose(entity)
+
+            self.arc_camera_controller.set_center(pose.p)
+            self.arc_camera_controller.set_zoom(np.linalg.norm(pose.p - cam_pose.p))
             self.viewer.set_camera_pose(self.arc_camera_controller.pose)
         else:
             # switch to fps camera
@@ -171,14 +177,14 @@ class ControlWindow(Plugin):
             self.focus_entity(None)
 
     def notify_scene_change(self):
-        if self.viewer.scene is None:
+        if not self.viewer.scenes:
             self.reset()
         else:
             self._sync_fps_camera_controller()
 
     @property
     def camera_items(self):
-        return ["None"] + [c.entity.name for c in self.viewer.system.cameras]
+        return ["None"] + [c.entity.name for c in self.viewer.cameras]
 
     @property
     def camera_index(self):
@@ -190,7 +196,7 @@ class ControlWindow(Plugin):
         if i == 0:
             self.focus_camera(None)
         else:
-            self.focus_camera(self.viewer.system.cameras[i - 1])
+            self.focus_camera(self.viewer.cameras[i - 1])
 
     def single_step(self, _):
         self._single_step = True
@@ -210,7 +216,7 @@ class ControlWindow(Plugin):
         )
 
     def build(self):
-        if self.viewer.system is None:
+        if not self.viewer.scenes:
             self.ui_window = None
             return
 
@@ -371,13 +377,22 @@ class ControlWindow(Plugin):
             my = my * th / wh
             pixel = self.window.get_picture_pixel("Segmentation", int(mx), int(my))
 
-            entity = self.find_entity_by_id(pixel[1])
+            entity_id = pixel[1]
+            scene_id = pixel[2]
+            entity = self.find_entity_by_id(entity_id, scene_id)
             self.viewer.select_entity(entity)
 
-    def find_entity_by_id(self, id):
-        for entity in self.viewer.scene.entities:
-            if entity.per_scene_id == id:
+    def find_entity_by_id(self, entity_id, scene_id):
+        for scene in self.viewer.scenes:
+            if scene.id == scene_id:
+                break
+        else:
+            return None
+
+        for entity in scene.entities:
+            if entity.per_scene_id == entity_id:
                 return entity
+
         return None
 
     def _handle_focused_camera(self):
@@ -391,7 +406,9 @@ class ControlWindow(Plugin):
     def _handle_focused_entity(self):
         if self.focused_entity is None:
             return
-        self.arc_camera_controller.set_center(self.focused_entity.pose.p)
+        pose = self.viewer.get_entity_viewer_pose(self.focused_entity)
+
+        self.arc_camera_controller.set_center(pose.p)
 
     def _handle_input_wasd(self):
         """
@@ -585,8 +602,8 @@ class ControlWindow(Plugin):
         self.camera_lineset = None
 
     def _create_joint_axes(self):
-        assert self.viewer.system is not None
-        render_scene: R.Scene = self.viewer.system._internal_scene
+        assert self.viewer.render_scene is not None
+        render_scene: R.Scene = self.viewer.render_scene
         joint_axes = [
             render_scene.add_object(self.magenta_capsule),
             render_scene.add_object(self.cyan_capsule),
@@ -603,8 +620,8 @@ class ControlWindow(Plugin):
         if self.joint_axes is None:
             return
 
-        assert self.viewer.system is not None
-        render_scene: R.Scene = self.viewer.system._internal_scene
+        assert self.viewer.render_scene is not None
+        render_scene: R.Scene = self.viewer.render_scene
 
         for x in self.joint_axes:
             render_scene.remove_node(x)
@@ -612,8 +629,8 @@ class ControlWindow(Plugin):
         self.joint_axes = None
 
     def _create_coordinate_axes(self):
-        assert self.viewer.system is not None
-        render_scene: R.Scene = self.viewer.system._internal_scene
+        assert self.viewer.render_scene is not None
+        render_scene: R.Scene = self.viewer.render_scene
 
         node = render_scene.add_node()
         obj = render_scene.add_object(self.red_cone, node)
@@ -665,8 +682,8 @@ class ControlWindow(Plugin):
         if self.coordinate_axes is None:
             return
 
-        assert self.viewer.system is not None
-        render_scene: R.Scene = self.viewer.system._internal_scene
+        assert self.viewer.render_scene is not None
+        render_scene: R.Scene = self.viewer.render_scene
         render_scene.remove_node(self.coordinate_axes)
         self.coordinate_axes = None
 
@@ -681,18 +698,19 @@ class ControlWindow(Plugin):
             for c in self.coordinate_axes.children:
                 c.transparency = 0
             self.coordinate_axes.set_scale([self.coordinate_axes_scale] * 3)
-            self.coordinate_axes.set_position(self.selected_entity.pose.p)
-            self.coordinate_axes.set_rotation(self.selected_entity.pose.q)
+            pose = self.viewer.get_entity_viewer_pose(self.selected_entity)
+            self.coordinate_axes.set_position(pose.p)
+            self.coordinate_axes.set_rotation(pose.q)
         else:
             for c in self.coordinate_axes.children:
                 c.transparency = 1
 
     def _update_camera_linesets(self):
-        if self.viewer.system is None:
+        if self.viewer.render_scene is None:
             return
-        render_scene: R.Scene = self.viewer.system._internal_scene
+        render_scene: R.Scene = self.viewer.render_scene
 
-        cameras = self.viewer.system.cameras
+        cameras = self.viewer.cameras
         if len(self.camera_linesets) != len(cameras):
             self._clear_camera_linesets()
             for c in cameras:
@@ -710,10 +728,10 @@ class ControlWindow(Plugin):
             lineset.set_scale(np.array([scalex, scaley, 1]) * 0.3)
 
     def _clear_camera_linesets(self):
-        if self.viewer.system is None:
+        if self.viewer.render_scene is None:
             return
 
-        render_scene: R.Scene = self.viewer.system._internal_scene
+        render_scene: R.Scene = self.viewer.render_scene
         for n in self.camera_linesets:
             render_scene.remove_node(n)
         self.camera_linesets = []

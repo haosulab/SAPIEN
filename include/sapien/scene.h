@@ -15,6 +15,8 @@ class SapienRendererSystem;
 }
 
 class Scene : public std::enable_shared_from_this<Scene> {
+  static uint64_t gNextSceneId;
+
 public:
   Scene(std::vector<std::shared_ptr<System>> const &systems = {});
 
@@ -43,19 +45,7 @@ public:
   std::string packEntityPoses();
   void unpackEntityPoses(std::string const &data);
 
-  template <class Archive> void save(Archive &ar) const { ar(mSystems, mEntities); }
-  template <class Archive> void load(Archive &ar) {
-    std::unordered_map<std::string, std::shared_ptr<System>> systems;
-    std::vector<std::shared_ptr<Entity>> entities;
-    ar(systems, entities);
-
-    for (auto &[n, s] : systems) {
-      addSystem(s);
-    }
-    for (auto &e : entities) {
-      addEntity(e);
-    }
-  }
+  uint64_t getId() const { return mId; };
 
   ~Scene();
   Scene(Scene const &) = delete;
@@ -66,6 +56,7 @@ public:
 private:
   uint64_t mNextEntityId{1};
 
+  uint64_t mId{};
   std::unordered_map<std::string, std::shared_ptr<System>> mSystems;
   std::vector<std::shared_ptr<Entity>> mEntities;
 };

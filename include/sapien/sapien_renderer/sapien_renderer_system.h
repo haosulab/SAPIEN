@@ -42,25 +42,6 @@ public:
 
   std::string getSummary();
 
-  // /**
-  //  *  Args:
-  //  *      sceneTransformRefs: uint64 pointers pointing to per-scene transform buffers
-  //  *      sceneIndices: scene index for each shape
-  //  *      transformIndices: per-scene transform index for each shape
-  //  *      localTransforms: local pose for each shape
-  //  *      localScales: local scales for each shape
-  //  *      parnetIndices: index fo each shape's parent in the parentTranasforms array
-  //  *      parentTransforms: transform array for parent objects
-  //  *  */
-  // void gpuTransferPosesToRenderScenes(CudaArrayHandle sceneTransformRefs,
-  //                                     CudaArrayHandle sceneIndices,
-  //                                     CudaArrayHandle transformIndices,
-  //                                     CudaArrayHandle localTransforms, CudaArrayHandle localScales,
-  //                                     CudaArrayHandle parentIndices,
-  //                                     CudaArrayHandle parentTransforms);
-  // void gpuTransferPosesToRenderCameras();
-  // void gpuNotifyPosesUpdated();
-
   ~SapienRenderEngine();
 
 private:
@@ -115,15 +96,6 @@ public:
 
   ~SapienRendererSystem();
 
-  template <class Archive> void save(Archive &ar) const { ar(getAmbientLight(), getCubemap()); }
-  template <class Archive> void load(Archive &ar) {
-    Vec3 ambientLight;
-    std::shared_ptr<SapienRenderCubemap> cubemap;
-    ar(ambientLight, cubemap);
-    setAmbientLight(ambientLight);
-    setCubemap(cubemap);
-  }
-
   uint64_t nextRenderId() { return mNextRenderId++; };
 
 private:
@@ -143,4 +115,3 @@ private:
 
 } // namespace sapien_renderer
 } // namespace sapien
-

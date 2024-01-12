@@ -2,6 +2,7 @@
 #include "sapien/sapien_renderer/sapien_renderer_default.h"
 #include "sapien/sapien_renderer/sapien_renderer_system.h"
 #include <svulkan2/renderer/rt_renderer.h>
+#include <svulkan2/scene/scene_group.h>
 
 namespace sapien {
 namespace sapien_renderer {
@@ -109,8 +110,9 @@ void SapienRendererWindow::setShader(std::string const &shaderDir) {
   auto config = std::make_shared<svulkan2::RendererConfig>();
   config->shaderDir = shaderDir;
   mSVulkanRenderer = svulkan2::renderer::RendererBase::Create(config);
-  if (mScene) {
-    mSVulkanRenderer->setScene(mScene->getSapienRendererSystem()->getScene());
+  if (mRenderScene) {
+    mSVulkanRenderer->setScene(mRenderScene);
+    // mSVulkanRenderer->setScene(mScene->getSapienRendererSystem()->getScene());
   }
   mSVulkanRenderer->resize(mViewportWidth, mViewportHeight);
 }
@@ -146,33 +148,41 @@ void SapienRendererWindow::hide() { mWindow->hide(); }
 void SapienRendererWindow::show() { mWindow->show(); }
 
 void SapienRendererWindow::setScene(std::shared_ptr<Scene> scene) {
-  mSVulkanRenderer->setScene(scene->getSapienRendererSystem()->getScene());
-
-  // TODO handle auto upload
-
-  // auto system = scene->getSapienRendererSystem();
-  // if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(mSVulkanRenderer.get())) {
-  //   // TODO: do it for rt renderer
-  //   r->setAutoUploadEnabled(system->isAutoUploadEnabled());
-  // }
-
-  mScene = scene;
+  mRenderSystems = {scene->getSapienRendererSystem()};
+  mRenderScene = scene->getSapienRendererSystem()->getScene();
+  mSVulkanRenderer->setScene(mRenderScene);
 }
 
-void SapienRendererWindow::forceUploadCamera() {
-  // TODO handle auto upload
-  // if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(mSVulkanRenderer.get())) {
-  //   if (!r->getAutoUploadEnabled()) {
-  //     r->forceUploadCameraBuffer(*getCamera());
-  //   }
-  // }
+void SapienRendererWindow::setScenes(std::vector<std::shared_ptr<Scene>> const &scenes) {
+  if (scenes.size() <= 1) {
+    throw std::runtime_error(
+        "failed to set scenes: the function should be called with 2 or more scenes.");
+  }
+  mRenderSystems = {};
+  std::vector<std::shared_ptr<svulkan2::scene::Scene>> allScenes;
+  for (auto s : scenes) {
+    mRenderSystems.push_back(s->getSapienRendererSystem());
+    allScenes.push_back(s->getSapienRendererSystem()->getScene());
+  }
+
+  mRenderScene = std::make_shared<svulkan2::scene::SceneGroup>(allScenes);
+  mSVulkanRenderer->setScene(mRenderScene);
+}
+
+void SapienRendererWindow::updateRender() {
+  for (auto &s : mRenderSystems) {
+    s->step();
+  }
+
+  if (dynamic_cast<svulkan2::scene::SceneGroup *>(mRenderScene.get())) {
+    mRenderScene->updateModelMatrices();
+  }
 }
 
 void SapienRendererWindow::setCameraParameters(float near, float far, float fovy) {
   uint32_t width = std::max(mWindow->getWidth(), 1u);
   uint32_t height = std::max(mWindow->getHeight(), 1u);
   getCamera()->setPerspectiveParameters(near, far, fovy, width, height);
-  forceUploadCamera();
 }
 
 void SapienRendererWindow::setCameraIntrinsicParameters(float near, float far, float fx, float fy,
@@ -180,7 +190,6 @@ void SapienRendererWindow::setCameraIntrinsicParameters(float near, float far, f
   uint32_t width = std::max(mWindow->getWidth(), 1u);
   uint32_t height = std::max(mWindow->getHeight(), 1u);
   getCamera()->setPerspectiveParameters(near, far, fx, fy, cx, cy, width, height, skew);
-  forceUploadCamera();
 }
 
 void SapienRendererWindow::setCameraPose(Pose const &pose) {
@@ -188,7 +197,6 @@ void SapienRendererWindow::setCameraPose(Pose const &pose) {
   auto cam = getCamera();
   cam->setPosition({glpose.p.x, glpose.p.y, glpose.p.z});
   cam->setRotation({glpose.q.w, glpose.q.x, glpose.q.y, glpose.q.z});
-  forceUploadCamera();
 }
 
 Pose SapienRendererWindow::getCameraPose() {
@@ -274,7 +282,7 @@ void SapienRendererWindow::rebuild() {
   mEngine->getContext()->getDevice().waitIdle();
   mRequiresRebuild = false;
 
-  if (mScene) {
+  if (mRenderScene) {
     auto cam = getCamera();
     uint32_t width = std::max(mWindow->getWidth(), 1u);
     uint32_t height = std::max(mWindow->getHeight(), 1u);
@@ -290,7 +298,7 @@ void SapienRendererWindow::resize(int width, int height) {
 void SapienRendererWindow::render(std::string const &targetName,
                                   std::vector<std::shared_ptr<svulkan2::ui::Widget>> uiWindows) {
 
-  if (!mScene) {
+  if (!mRenderScene) {
     return;
   }
   if (mRequiresRebuild) {
@@ -373,17 +381,19 @@ void SapienRendererWindow::render(std::string const &targetName,
 bool SapienRendererWindow::windowCloseRequested() { return mWindow->isCloseRequested(); }
 
 svulkan2::scene::Camera *SapienRendererWindow::getCamera() {
-  if (!mScene) {
+  if (!mRenderScene) {
     throw std::runtime_error(
         "failed to operate camera, did you forget to call viewer.set_scene ?");
   }
-  auto cams = mScene->getSapienRendererSystem()->getScene()->getCameras();
+  auto cams = mRenderScene->getCameras();
+  // auto cams = mScene->getSapienRendererSystem()->getScene()->getCameras();
   for (auto cam : cams) {
     if (cam->getName() == "_controller") {
       return cam;
     }
   }
-  auto camera = &mScene->getSapienRendererSystem()->getScene()->addCamera();
+  auto camera = &mRenderScene->addCamera();
+  // auto camera = &mScene->getSapienRendererSystem()->getScene()->addCamera();
 
   uint32_t width = std::max(mWindow->getWidth(), 1u);
   uint32_t height = std::max(mWindow->getHeight(), 1u);

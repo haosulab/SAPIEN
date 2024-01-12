@@ -1,8 +1,13 @@
 import sapien
 import numpy as np
+from sapien.utils.viewer.viewer import Viewer, ControlWindow
+from sapien.asset import create_dome_envmap
 
 sapien.physx.enable_gpu()
 sapien.set_cuda_tensor_backend("torch")
+
+sapien.render.set_viewer_shader_dir("../vulkan_shader/default")
+sapien.render.set_camera_shader_dir("../vulkan_shader/default")
 
 
 def main():
@@ -82,7 +87,7 @@ def main():
         render_system_group.update_render()
 
         for _ in range(5):
-            for _ in range(20):
+            for _ in range(40):
                 px.step()
 
             px.gpu_fetch_rigid_dynamic_data()
@@ -119,14 +124,22 @@ def main():
             plt.show()
 
     # fast_way()
+    viewer = Viewer()
 
-    viewer = scenes[0].create_viewer()
+    rs: sapien.internal_renderer.Scene = scenes[1].render_system._internal_scene
+    rs.set_root_transform([2, 0, 0], [1, 0, 0, 0], [1, 1, 1])
+
+    viewer.set_scenes(scenes[:2])
+    vs = viewer.window._internal_scene
+    vs.set_ambient_light([0.1, 0.1, 0.1])
+    vs.set_cubemap(scenes[0].render_system.get_cubemap()._internal_cubemap)
+
     viewer.render()
 
     while not viewer.closed:
         px.step()
         px.sync_poses_gpu_to_cpu()
-        scenes[0].update_render()
+        viewer.window.update_render()
         viewer.render()
 
 

@@ -554,7 +554,8 @@ This function waits for any pending CUDA operations on cuda stream provided by :
                     std::string const &, std::string const &, std::string const &>(),
            py::arg("px"), py::arg("nx"), py::arg("py"), py::arg("ny"), py::arg("pz"),
            py::arg("nz"))
-      .def("export", &SapienRenderCubemap::exportKtx, py::arg("filename"));
+      .def("export", &SapienRenderCubemap::exportKtx, py::arg("filename"))
+      .def_property_readonly("_internal_cubemap", &SapienRenderCubemap::getCubemap);
 
   PyRenderMaterial
       .def(py::init<std::array<float, 4>, std::array<float, 4>, float, float, float, float, float,
@@ -1013,11 +1014,18 @@ consumer library. Make a copy if needed.
              glm::mat4 proj = glm::transpose(window.getCameraProjectionMatrix());
              return py::array_t<float>({4, 4}, &proj[0][0]);
            })
+
+      .def("update_render", &SapienRendererWindow::updateRender,
+           "Equivalent to calling the update_render function for all added scene")
       .def_property_readonly(
           "_internal_renderer",
           [](SapienRendererWindow &window) { return window.getInternalRenderer(); },
           py::return_value_policy::reference)
+      .def_property_readonly("_internal_scene", &SapienRendererWindow::getInternalScene,
+                             py::return_value_policy::reference)
+
       .def("set_scene", &SapienRendererWindow::setScene, py::arg("scene"))
+      .def("set_scenes", &SapienRendererWindow::setScenes, py::arg("scenes"))
       .def_property_readonly("display_picture_names", &SapienRendererWindow::getDisplayTargetNames,
                              "Names for available display targets that can be displayed "
                              "in the render function")

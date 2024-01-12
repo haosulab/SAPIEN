@@ -99,15 +99,6 @@ private:
   AABB mAABB;
 
   PhysxTriangleMesh() {}
-  template <class Archive> void save(Archive &ar) const {
-    ar(getVertices(), getTriangles(), mFilename);
-  }
-  template <class Archive> void load(Archive &ar) {
-    Vertices vertices;
-    Triangles triangles;
-    ar(vertices, triangles, mFilename);
-    loadMesh(vertices, triangles);
-  }
 };
 
 } // namespace physx
