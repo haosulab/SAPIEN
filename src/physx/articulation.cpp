@@ -200,7 +200,13 @@ Eigen::VectorXf PhysxArticulation::getQpos() {
   uint32_t dof = getDof();
 
   if (getRoot()->isUsingDirectGPUAPI()) {
-    logger::warn("fetching articulation qpos from GPU is very slow and should be avoided");
+
+    static bool once = []() {
+      logger::warn("fetching articulation qpos from GPU is very slow and should be avoided");
+      return true;
+    }();
+    (void)once;
+
     auto qpos = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem())
                     ->gpuDownloadArticulationQpos(mPxArticulation->getGpuArticulationIndex());
     return Eigen::Map<Eigen::VectorXf>(qpos.data(), dof);
@@ -238,7 +244,13 @@ void PhysxArticulation::setQpos(Eigen::VectorXf const &q) {
   checkDof(q.size());
   uint32_t dof = getDof();
   if (getRoot()->isUsingDirectGPUAPI()) {
-    logger::warn("setting articulation qpos to GPU is very slow and should be avoided");
+
+    static bool once = []() {
+      logger::warn("setting articulation qpos to GPU is very slow and should be avoided");
+      return true;
+    }();
+    (void)once;
+
     std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem())
         ->gpuUploadArticulationQpos(mPxArticulation->getGpuArticulationIndex(), q);
     return;

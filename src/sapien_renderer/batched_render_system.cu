@@ -74,7 +74,7 @@ __global__ void update_camera_transforms_kernel(CameraData *cameras, float *pose
   }
   CameraData camera = cameras[g];
   int pose_index = camera.poseIndex;
-  float *buffer = (float *)cameras->buffer;
+  float *buffer = (float *)camera.buffer;
 
   Pose pose_b2w =
       Pose(Vec3(poses[pose_stride * pose_index], poses[pose_stride * pose_index + 1],
@@ -84,7 +84,11 @@ __global__ void update_camera_transforms_kernel(CameraData *cameras, float *pose
   Pose pose_c2b = camera.localPose;
 
   Pose viewInverse = pose_b2w * pose_c2b;
-  PoseToMatrix(buffer + 16, viewInverse, Vec3(1.f));
+
+  // viewInverse: 32-48
+  PoseToMatrix(buffer + 32, viewInverse, Vec3(1.f));
+
+  // view: 0-16
   PoseToMatrix(buffer, viewInverse.getInverse(), Vec3(1.f));
 }
 

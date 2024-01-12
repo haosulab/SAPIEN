@@ -53,6 +53,9 @@ class TransformWindow(Plugin):
         return None
 
     def notify_selected_entity_change(self):
+        if not self.scene:
+            return
+
         self.clear_ghost_objects()
         if self.viewer.selected_entity is None:
             self._gizmo_pose = sapien.Pose()
@@ -121,14 +124,14 @@ class TransformWindow(Plugin):
         return self.viewer.selected_entity
 
     def clear_ghost_objects(self):
-        render_scene: R.Scene = self.viewer.system._internal_scene
+        render_scene: R.Scene = self.viewer.render_scene
         for obj in self.ghost_objects:
             render_scene.remove_node(obj)
         self.ghost_objects = []
         self.viewer.notify_render_update()
 
     def refresh_ghost_objects(self):
-        render_scene: R.Scene = self.viewer.system._internal_scene
+        render_scene: R.Scene = self.viewer.render_scene
         self.clear_ghost_objects()
 
         if self.selected_entity is None:

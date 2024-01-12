@@ -53,9 +53,12 @@ def main():
     ]
 
     cams = []
-    for scene in scenes:
-        cam = scene.add_camera("", 256, 512, 1, 0.01, 10)
-        cam.entity.set_pose(sapien.Pose([-2, 0, 0.5]))
+    for scene, robot in zip(scenes, robots):
+        cam = scene.add_mounted_camera(
+            "", robot.links[6].entity, sapien.Pose([0.5,0,0]), 256, 512, 1, 0.01, 10
+        )
+        # cam = scene.add_camera("", 256, 512, 1, 0.01, 10)
+        # cam.entity.set_pose(sapien.Pose([-2, 0, 0.5]))
         cams.append(cam)
 
     px.gpu_init()
@@ -73,6 +76,12 @@ def main():
             for s in rb.render_shapes:
                 s.set_gpu_pose_batch_index(body.gpu_pose_index)
 
+        for cam in cams:
+            body = cam.entity.find_component_by_type(sapien.physx.PhysxRigidBodyComponent)
+            if body is None:
+                continue
+            cam.set_gpu_pose_batch_index(body.gpu_pose_index)
+
         # render system group manages batched rendering
         render_system_group = sapien.render.RenderSystemGroup(
             [s.render_system for s in scenes]
@@ -86,8 +95,8 @@ def main():
         px.gpu_fetch_articulation_link_pose()
         render_system_group.update_render()
 
-        for _ in range(5):
-            for _ in range(40):
+        for _ in range(10):
+            for _ in range(20):
                 px.step()
 
             px.gpu_fetch_rigid_dynamic_data()
@@ -123,12 +132,14 @@ def main():
             plt.imshow(pictures[1])
             plt.show()
 
+    # slow_way()
     # fast_way()
     viewer = Viewer()
 
     rs: sapien.internal_renderer.Scene = scenes[1].render_system._internal_scene
     rs.set_root_transform([2, 0, 0], [1, 0, 0, 0], [1, 1, 1])
 
+    # viewer.set_scene(scenes[0])
     viewer.set_scenes(scenes[:2])
     vs = viewer.window._internal_scene
     vs.set_ambient_light([0.1, 0.1, 0.1])
