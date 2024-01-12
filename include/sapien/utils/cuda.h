@@ -1,7 +1,9 @@
 #pragma once
-#include <cuda_runtime.h>
 #include <stdexcept>
 #include <string>
+
+#include <cuda.h>
+#include <cuda_runtime.h>
 
 #define checkCudaErrors(call)                                                                     \
   do {                                                                                            \
@@ -12,6 +14,14 @@
   } while (0)
 
 namespace sapien {
+
+struct CudaContext {
+  static CudaContext &Get();
+  CudaContext();
+  void *libcuda{};
+  decltype(::cuEventRecord) *cuEventRecord{};
+  decltype(::cuStreamWaitEvent) *cuStreamWaitEvent{};
+};
 
 struct CudaEvent {
   CudaEvent() {}
@@ -53,14 +63,14 @@ struct CudaEvent {
     if (!event) {
       throw std::runtime_error("cuda event is not initialized");
     }
-    cudaEventRecord(event, stream);
+    CudaContext::Get().cuEventRecord(event, stream);
   }
 
   void wait(cudaStream_t stream) const {
     if (!event) {
       throw std::runtime_error("cuda event is not initialized");
     }
-    cudaStreamWaitEvent(stream, event);
+    CudaContext::Get().cuStreamWaitEvent(stream, event, 0);
   }
 
   ~CudaEvent() {
