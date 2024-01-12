@@ -50,7 +50,8 @@ public:
   ~SapienRendererWindow();
 
   void setScene(std::shared_ptr<Scene> scene);
-  void setScenes(std::vector<std::shared_ptr<Scene>> const &scenes);
+  void setScenes(std::vector<std::shared_ptr<Scene>> const &scenes,
+                 std::vector<Vec3> const &offsets);
 
   /** updateRender calls updateRender of individual scenes */
   void updateRender();

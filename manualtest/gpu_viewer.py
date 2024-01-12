@@ -137,8 +137,6 @@ def main():
     viewer = Viewer()
 
     rs: sapien.internal_renderer.Scene = scenes[1].render_system._internal_scene
-    rs.set_root_transform([2, 0, 0], [1, 0, 0, 0], [1, 1, 1])
-
     # viewer.set_scene(scenes[0])
     viewer.set_scenes(scenes[:2])
     vs = viewer.window._internal_scene

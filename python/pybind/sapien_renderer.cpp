@@ -1025,7 +1025,7 @@ consumer library. Make a copy if needed.
                              py::return_value_policy::reference)
 
       .def("set_scene", &SapienRendererWindow::setScene, py::arg("scene"))
-      .def("set_scenes", &SapienRendererWindow::setScenes, py::arg("scenes"))
+      .def("set_scenes", &SapienRendererWindow::setScenes, py::arg("scenes"), py::arg("offsets"))
       .def_property_readonly("display_picture_names", &SapienRendererWindow::getDisplayTargetNames,
                              "Names for available display targets that can be displayed "
                              "in the render function")

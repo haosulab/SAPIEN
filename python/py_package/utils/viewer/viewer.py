@@ -110,7 +110,12 @@ class Viewer:
             assert isinstance(plugin, Plugin)
             plugin.init(self)
 
-    def set_scenes(self, scenes):
+    def set_scenes(self, scenes, offsets=None):
+        if offsets is None:
+            side = int(np.ceil(len(scenes) ** 0.5))
+            idx = np.arange(len(scenes))
+            offsets = np.stack([idx // side, idx % side, np.zeros_like(idx)], axis=1)
+
         if self.scenes:
             camera_pose = self.window.get_camera_pose()
             self.clear_scene()
@@ -118,18 +123,16 @@ class Viewer:
             camera_pose = sapien.Pose([-2, 0, 0.5])
 
         self.selected_entity = None
-
         self.scenes = scenes
-        # self.scene = scenes[0]
-        # self.system = self.scene.render_system
-        # self.window.set_scene(scene)
 
         if len(scenes) == 0:
             self.window.set_scene(None)
         elif len(scenes) == 1:
             self.window.set_scene(scenes[0])
+            self.scene_offset = dict((scenes[0], np.array([0, 0, 0])))
         else:
-            self.window.set_scenes(scenes)
+            self.window.set_scenes(scenes, offsets)
+            self.scene_offset = dict((s, o) for s, o in zip(scenes, offsets))
 
         self.window.set_camera_parameters(0.1, 1000, np.pi / 2)
         self.set_camera_pose(camera_pose)
@@ -138,8 +141,7 @@ class Viewer:
             plugin.notify_scene_change()
 
     def get_entity_viewer_pose(self, entity):
-        rs = entity.scene.render_system._internal_scene
-        return sapien.Pose(rs.get_root_position(), rs.get_root_rotation()) * entity.pose
+        return sapien.Pose(self.scene_offset[entity.scene]) * entity.pose
 
     def set_scene(self, scene: Scene):
         self.set_scenes([scene])

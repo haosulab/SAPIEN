@@ -153,19 +153,28 @@ void SapienRendererWindow::setScene(std::shared_ptr<Scene> scene) {
   mSVulkanRenderer->setScene(mRenderScene);
 }
 
-void SapienRendererWindow::setScenes(std::vector<std::shared_ptr<Scene>> const &scenes) {
+void SapienRendererWindow::setScenes(std::vector<std::shared_ptr<Scene>> const &scenes,
+                                     std::vector<Vec3> const &offsets) {
   if (scenes.size() <= 1) {
     throw std::runtime_error(
         "failed to set scenes: the function should be called with 2 or more scenes.");
   }
-  mRenderSystems = {};
-  std::vector<std::shared_ptr<svulkan2::scene::Scene>> allScenes;
-  for (auto s : scenes) {
-    mRenderSystems.push_back(s->getSapienRendererSystem());
-    allScenes.push_back(s->getSapienRendererSystem()->getScene());
+  if (scenes.size() != offsets.size()) {
+    throw std::runtime_error("failed to set scenes: scenes and offsets must have the same size.");
   }
 
-  mRenderScene = std::make_shared<svulkan2::scene::SceneGroup>(allScenes);
+  mRenderSystems = {};
+  std::vector<std::shared_ptr<svulkan2::scene::Scene>> allScenes;
+  std::vector<svulkan2::scene::Transform> allTransforms;
+  for (uint32_t i = 0; i < scenes.size(); ++i) {
+    auto s = scenes[i];
+    mRenderSystems.push_back(s->getSapienRendererSystem());
+    allScenes.push_back(s->getSapienRendererSystem()->getScene());
+    allTransforms.push_back(
+        svulkan2::scene::Transform{.position = {offsets[i].x, offsets[i].y, offsets[i].z}});
+  }
+
+  mRenderScene = std::make_shared<svulkan2::scene::SceneGroup>(allScenes, allTransforms);
   mSVulkanRenderer->setScene(mRenderScene);
 }
 

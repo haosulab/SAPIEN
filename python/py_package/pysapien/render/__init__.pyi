@@ -995,6 +995,10 @@ class RenderWindow():
     def show(self) -> None: ...
     def unset_drop_callback(self) -> None: ...
     def unset_focus_callback(self) -> None: ...
+    def update_render(self) -> None: 
+        """
+        Equivalent to calling the update_render function for all added scene
+        """
     @property
     def _internal_renderer(self) -> sapien.pysapien.internal_renderer.Renderer:
         """
