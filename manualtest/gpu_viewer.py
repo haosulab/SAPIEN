@@ -7,7 +7,11 @@ sapien.physx.enable_gpu()
 sapien.set_cuda_tensor_backend("torch")
 
 sapien.render.set_viewer_shader_dir("../vulkan_shader/default")
-sapien.render.set_camera_shader_dir("../vulkan_shader/default")
+
+sapien.render.set_camera_shader_dir("../vulkan_shader/minimal")
+sapien.render.set_picture_format("Color", "r8g8b8a8unorm")
+sapien.render.set_picture_format("ColorRaw", "r8g8b8a8unorm")
+sapien.render.set_picture_format("outPositionSegmentation", "r16g16b16a16sint")
 
 
 def main():
@@ -55,7 +59,7 @@ def main():
     cams = []
     for scene, robot in zip(scenes, robots):
         cam = scene.add_mounted_camera(
-            "", robot.links[6].entity, sapien.Pose([0.5,0,0]), 256, 512, 1, 0.01, 10
+            "", robot.links[6].entity, sapien.Pose([0.5, 0, 0]), 256, 512, 1, 0.01, 10
         )
         # cam = scene.add_camera("", 256, 512, 1, 0.01, 10)
         # cam.entity.set_pose(sapien.Pose([-2, 0, 0.5]))
@@ -77,7 +81,9 @@ def main():
                 s.set_gpu_pose_batch_index(body.gpu_pose_index)
 
         for cam in cams:
-            body = cam.entity.find_component_by_type(sapien.physx.PhysxRigidBodyComponent)
+            body = cam.entity.find_component_by_type(
+                sapien.physx.PhysxRigidBodyComponent
+            )
             if body is None:
                 continue
             cam.set_gpu_pose_batch_index(body.gpu_pose_index)
@@ -88,7 +94,9 @@ def main():
         )
 
         # camera group renders images in batches
-        camera_group = render_system_group.create_camera_group(cams, ["Color"])
+        camera_group = render_system_group.create_camera_group(
+            cams, ["Color", "PositionSegmentation"]
+        )
         render_system_group.set_cuda_poses(px.cuda_rigid_body_data)
 
         px.gpu_fetch_rigid_dynamic_data()
@@ -104,13 +112,22 @@ def main():
 
             render_system_group.update_render()
             camera_group.take_picture()
-            picture = camera_group.get_picture_cuda("Color")
-            picture = picture.cpu().numpy()
+            color = camera_group.get_picture_cuda("Color")
+            color = color.cpu().numpy()
 
-            plt.subplot(1, 2, 1)
-            plt.imshow(picture[0])
-            plt.subplot(1, 2, 2)
-            plt.imshow(picture[1])
+            ps = camera_group.get_picture_cuda("PositionSegmentation")
+            ps = ps.cpu().numpy()
+
+            plt.subplot(2, 2, 1)
+            plt.imshow(color[0][..., :3])
+            plt.subplot(2, 2, 2)
+            plt.imshow(color[1][..., :3])
+
+            plt.subplot(2, 2, 3)
+            plt.imshow((ps[0][..., :3] + 32768)/65535)
+            plt.subplot(2, 2, 4)
+            plt.imshow((ps[1][..., :3] + 32768)/65535)
+
             plt.show()
 
     def slow_way():
@@ -134,10 +151,10 @@ def main():
 
     # slow_way()
     # fast_way()
+
     viewer = Viewer()
-
-    viewer.set_scenes(scenes)
-
+    viewer.set_scene(scenes[0])
+    # viewer.set_scenes(scenes)
     vs = viewer.window._internal_scene
     vs.set_ambient_light([0.1, 0.1, 0.1])
     vs.set_cubemap(scenes[0].render_system.get_cubemap()._internal_cubemap)
