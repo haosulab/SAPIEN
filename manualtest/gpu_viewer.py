@@ -11,7 +11,7 @@ sapien.render.set_camera_shader_dir("../vulkan_shader/default")
 
 
 def main():
-    scene_count = 2
+    scene_count = 64
 
     scenes = []
     for i in range(scene_count):
@@ -136,9 +136,8 @@ def main():
     # fast_way()
     viewer = Viewer()
 
-    rs: sapien.internal_renderer.Scene = scenes[1].render_system._internal_scene
-    # viewer.set_scene(scenes[0])
-    viewer.set_scenes(scenes[:2])
+    viewer.set_scenes(scenes)
+
     vs = viewer.window._internal_scene
     vs.set_ambient_light([0.1, 0.1, 0.1])
     vs.set_cubemap(scenes[0].render_system.get_cubemap()._internal_cubemap)

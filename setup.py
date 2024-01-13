@@ -381,15 +381,15 @@ package_data = {
     "sapien": [
         "__init__.pyi",
         "pysapien/__init__.pyi",
-        "pysapien/internal_renderer/__init__.pyi",
-        "pysapien/physx/__init__.pyi",
-        "pysapien/internal_renderer/__init__.pyi",
-        "pysapien/render/__init__.pyi",
-        "pysapien/math/__init__.pyi",
+        "pysapien/simsense.pyi",
+        "pysapien/physx.pyi",
+        "pysapien/render.pyi",
+        "pysapien/math.pyi",
+        "pysapien/internal_renderer.pyi",
     ],
     "sapien.render_server": [
         "__init__.pyi",
-        "pysapien_render_server/__init__.pyi",
+        "pysapien_render_server.pyi",
     ],
 }
 
