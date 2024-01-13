@@ -129,7 +129,7 @@ class Viewer:
             self.window.set_scene(None)
         elif len(scenes) == 1:
             self.window.set_scene(scenes[0])
-            self.scene_offset = dict((scenes[0], np.array([0, 0, 0])))
+            self.scene_offset = {scenes[0]: np.array([0, 0, 0])}
         else:
             self.window.set_scenes(scenes, offsets)
             self.scene_offset = dict((s, o) for s, o in zip(scenes, offsets))
