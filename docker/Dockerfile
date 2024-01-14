@@ -16,8 +16,8 @@ RUN echo "#!/opt/python/cp38-cp38/bin/python" > /usr/local/bin/auditwheel && \
     echo "    sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])" >> /usr/local/bin/auditwheel && \
     echo "    sys.exit(main())" >> /usr/local/bin/auditwheel
 
-RUN cd /workspace && wget https://developer.download.nvidia.com/compute/cuda/12.2.2/local_installers/cuda_12.2.2_535.104.05_linux.run  && \
-    sh cuda_12.2.2_535.104.05_linux.run --silent --toolkit --toolkitpath=/workspace/cuda --override && rm -f cuda_12.2.2_535.104.05_linux.run
+RUN cd /workspace && wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run  && \
+    sh cuda_11.8.0_520.61.05_linux.run --silent --toolkit --toolkitpath=/workspace/cuda --override && rm -f cuda_11.8.0_520.61.05_linux.run
 ENV CUDA_PATH=/workspace/cuda PATH="/workspace/cuda/bin:$PATH" LD_LIBRARY_PATH="/workspace/cuda/lib64:$LD_LIBRARY_PATH"
 
 RUN pipx install cmake==3.26.3 --force
