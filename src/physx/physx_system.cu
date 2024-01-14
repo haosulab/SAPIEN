@@ -30,11 +30,11 @@ __global__ void body_data_sapien_to_physx_kernel(PhysxBodyData *__restrict__ phy
 
   SapienBodyData sd = sapien_data[g];
 
-  PhysxBodyData pd{
-      .pose = {.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w}, .p = sd.p + offset[g]},
-      .v = sd.v,
-      .w = sd.w,
-  };
+  PhysxBodyData pd;
+  pd.pose.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w};
+  pd.pose.p = sd.p + offset[g];
+  pd.v = sd.v;
+  pd.w = sd.w;
 
   physx_data[g] = pd;
 }
@@ -54,11 +54,11 @@ __global__ void body_data_sapien_to_physx_kernel(PhysxBodyData *__restrict__ phy
 
   SapienBodyData sd = sapien_data[i];
 
-  PhysxBodyData pd{
-      .pose = {.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w}, .p = sd.p + offset[i]},
-      .v = sd.v,
-      .w = sd.w,
-  };
+  PhysxBodyData pd;
+  pd.pose.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w};
+  pd.pose.p = sd.p + offset[i];
+  pd.v = sd.v;
+  pd.w = sd.w;
 
   physx_data[g] = pd;
   physx_index[g] = sapien_index[i];
