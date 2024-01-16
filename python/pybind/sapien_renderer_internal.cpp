@@ -144,6 +144,8 @@ void init_sapien_renderer_internal(py::module &parent) {
 
   auto PyUIDummy = py::class_<ui::Dummy, ui::Widget>(m, "UIDummy");
 
+  auto PyUIPicture = py::class_<ui::DisplayImage, ui::Widget>(m, "UIPicture");
+
   PyUIWidget.def("remove", &ui::Widget::remove)
       .def("remove_children", &ui::Widget::removeChildren)
       .def("get_children", &ui::Widget::getChildren);
@@ -570,6 +572,22 @@ void init_sapien_renderer_internal(py::module &parent) {
 
   PyUIDummy.def(py::init<>()).def("Width", &ui::Dummy::Width).def("Height", &ui::Dummy::Height);
 
+  PyUIPicture.def(py::init<>())
+      .def(
+          "Size",
+          [](ui::DisplayImage &image, float x, float y) {
+            return image.Size({x, y});
+          },
+          py::arg("x"), py::arg("y"))
+      .def(
+          "Picture",
+          [](ui::DisplayImage &image, renderer::RendererBase &renderer, std::string const &name) {
+            return image.Image(renderer.getRenderImage(name),
+                               renderer.getRenderTargetImageLayout(name));
+          },
+          py::arg("renderer"), py::arg("name"))
+      .def("Clear", &ui::DisplayImage::Clear);
+
   // end UI
 
   PyContext
@@ -792,33 +810,6 @@ void init_sapien_renderer_internal(py::module &parent) {
            })
       .def("set_cubemap", &scene::Scene::setEnvironmentMap)
 
-      // .def(
-      //     "set_root_transform",
-      //     [](scene::Scene &s, py::array_t<float> position, py::array_t<float> rotation,
-      //        py::array_t<float> scale) {
-      //       s.getRootNode().setTransform({
-      //           .position = {position.at(0), position.at(1), position.at(2)},
-      //           .rotation = {rotation.at(0), rotation.at(1), rotation.at(2), rotation.at(3)},
-      //           .scale = {scale.at(0), scale.at(1), scale.at(2)},
-      //       });
-      //     },
-      //     py::arg("position"), py::arg("rotation"), py::arg("scale"))
-      // .def("get_root_position",
-      //      [](scene::Scene &s) {
-      //        auto position = s.getRootNode().getTransform().position;
-      //        return py::array_t<float>(3, &position.x);
-      //      })
-      // .def("get_root_rotation",
-      //      [](scene::Scene &s) {
-      //        auto rot = s.getRootNode().getTransform().rotation;
-      //        std::array<float, 4> q{rot.w, rot.x, rot.y, rot.z};
-      //        return py::array_t<float>(4, &q[0]);
-      //      })
-      // .def("get_root_scale",
-      //      [](scene::Scene &s) {
-      //        auto scale = s.getRootNode().getTransform().scale;
-      //        return py::array_t<float>(3, &scale.x);
-      //      })
       .def("force_update", [](scene::Scene &s) { s.updateModelMatrices(); })
       .def("force_rebuild", &scene::Scene::updateVersion);
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy
 import pybind11_stubgen.typing_ext
 import typing
-__all__ = ['Context', 'Cubemap', 'LineSetObject', 'Material', 'Mesh', 'Model', 'Node', 'Object', 'PointSetObject', 'PrimitiveSet', 'Renderer', 'Scene', 'Shape', 'Texture', 'UIButton', 'UICheckbox', 'UIConditional', 'UIDisplayText', 'UIDummy', 'UIDuration', 'UIFileChooser', 'UIGizmo', 'UIInputFloat', 'UIInputFloat2', 'UIInputFloat3', 'UIInputFloat4', 'UIInputInt', 'UIInputInt2', 'UIInputInt3', 'UIInputInt4', 'UIInputText', 'UIInputTextMultiline', 'UIKeyframe', 'UIKeyframeEditor', 'UIOptions', 'UIPopup', 'UISameLine', 'UISection', 'UISelectable', 'UISliderAngle', 'UISliderFloat', 'UITreeNode', 'UIWidget', 'UIWindow']
+__all__ = ['Context', 'Cubemap', 'LineSetObject', 'Material', 'Mesh', 'Model', 'Node', 'Object', 'PointSetObject', 'PrimitiveSet', 'Renderer', 'Scene', 'Shape', 'Texture', 'UIButton', 'UICheckbox', 'UIConditional', 'UIDisplayText', 'UIDummy', 'UIDuration', 'UIFileChooser', 'UIGizmo', 'UIInputFloat', 'UIInputFloat2', 'UIInputFloat3', 'UIInputFloat4', 'UIInputInt', 'UIInputInt2', 'UIInputInt3', 'UIInputInt4', 'UIInputText', 'UIInputTextMultiline', 'UIKeyframe', 'UIKeyframeEditor', 'UIOptions', 'UIPicture', 'UIPopup', 'UISameLine', 'UISection', 'UISelectable', 'UISliderAngle', 'UISliderFloat', 'UITreeNode', 'UIWidget', 'UIWindow']
 class Context:
     def create_box_mesh(self) -> Mesh:
         ...
@@ -485,6 +485,13 @@ class UIOptions(UIWidget):
         ...
     @property
     def value(self) -> str:
+        ...
+class UIPicture(UIWidget):
+    def Picture(self, renderer: Renderer, name: str) -> UIPicture:
+        ...
+    def Size(self, x: float, y: float) -> UIPicture:
+        ...
+    def __init__(self) -> None:
         ...
 class UIPopup(UIWidget):
     def EscCallback(self, func: typing.Callable[[], None]) -> UIPopup:

@@ -142,6 +142,9 @@ class RenderCameraComponent(sapien.pysapien.Component):
         Debug only. Get the CUDA buffer containing GPU data for this camera, including transformaion matrices, sizes, and user-defined shader fields.
         """
     @property
+    def _internal_renderer(self) -> sapien.pysapien.internal_renderer.Renderer:
+        ...
+    @property
     def cx(self) -> float:
         ...
     @property

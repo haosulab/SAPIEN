@@ -220,6 +220,15 @@ class ControlWindow(Plugin):
             self.ui_window = None
             return
 
+        if self.focused_camera and self.focused_camera and self.ui_camera_image:
+            self.focused_camera.take_picture()
+            self.ui_camera_image.Size(0, 0)
+            self.ui_camera_image.Picture(
+                self.focused_camera._internal_renderer, "Color"
+            )
+        elif self.ui_camera_image:
+            self.ui_camera_image.Clear()
+
         if self.ui_window is None:
             self.ui_camera = (
                 R.UIOptions()
@@ -229,6 +238,8 @@ class ControlWindow(Plugin):
                 .BindItems(self, "camera_items")
                 .BindIndex(self, "camera_index")
             )
+
+            self.ui_camera_image = R.UIPicture()
 
             self.ui_pause_checkbox = (
                 R.UICheckbox().Label("Pause").Bind(self.viewer, "paused")
@@ -266,6 +277,7 @@ class ControlWindow(Plugin):
                 .Expanded(True)
                 .append(
                     self.ui_camera,
+                    self.ui_camera_image,
                     R.UISliderAngle().Label("FOV Y").Min(1).Max(179).Bind(self, "fovy"),
                     R.UIButton()
                     .Label("Copy Camera Settings")
@@ -348,7 +360,7 @@ class ControlWindow(Plugin):
 
         self._sync_fps_camera_controller()
 
-        self._handle_focused_camera()
+        # self._handle_focused_camera()
         self._handle_focused_entity()
 
         self._handle_click()
@@ -502,6 +514,7 @@ class ControlWindow(Plugin):
         self.focused_entity: sapien.Entity = None
 
         self.ui_camera = None
+        self.ui_camera_image = None
         self.ui_pause_checkbox = None
 
         self.move_speed = 0.05

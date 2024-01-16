@@ -874,7 +874,12 @@ torch_tensor = torch.as_tensor(image)
 
 Warning: The camera must not be destroyed when the GPU tensor is in use by the
 consumer library. Make a copy if needed.
-)doc");
+)doc")
+
+      .def_property_readonly(
+          "_internal_renderer",
+          [](SapienRenderCameraComponent &cam) { return &cam.getInternalRenderer(); },
+          py::return_value_policy::reference);
 
   PyRenderLightComponent
       .def_property("local_pose", &SapienRenderLightComponent::getLocalPose,
