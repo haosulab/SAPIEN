@@ -8,6 +8,8 @@ CudaContext::CudaContext() {
   libcuda = dlopen("libcuda.so", RTLD_LAZY);
   this->cuEventRecord = (decltype(::cuEventRecord) *)dlsym(libcuda, "cuEventRecord");
   this->cuStreamWaitEvent = (decltype(::cuStreamWaitEvent) *)dlsym(libcuda, "cuStreamWaitEvent");
+  this->cuEventSynchronize =
+      (decltype(::cuEventSynchronize) *)dlsym(libcuda, "cuEventSynchronize");
 }
 
 CudaContext &CudaContext::Get() {

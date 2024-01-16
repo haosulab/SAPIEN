@@ -490,8 +490,12 @@ void PhysxSystemGpu::gpuFetchArticulationQacc() {
 
 void PhysxSystemGpu::gpuUpdateArticulationKinematics() {
   checkGpuInitialized();
-  mPxScene->updateArticulationsKinematic(mCudaEventWait.event);
-  mCudaEventWait.wait(mCudaStream);
+
+  // wait for previous apply to finish
+  mCudaEventWait.synchronize();
+
+  // also synchronously wait for the update to finish
+  mPxScene->updateArticulationsKinematic(nullptr);
 }
 
 void PhysxSystemGpu::gpuApplyRigidDynamicData() {

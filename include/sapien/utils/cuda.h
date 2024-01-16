@@ -21,6 +21,7 @@ struct CudaContext {
   void *libcuda{};
   decltype(::cuEventRecord) *cuEventRecord{};
   decltype(::cuStreamWaitEvent) *cuStreamWaitEvent{};
+  decltype(::cuEventSynchronize) *cuEventSynchronize{};
 };
 
 struct CudaEvent {
@@ -71,6 +72,13 @@ struct CudaEvent {
       throw std::runtime_error("cuda event is not initialized");
     }
     CudaContext::Get().cuStreamWaitEvent(stream, event, 0);
+  }
+
+  void synchronize() const {
+    if (!event) {
+      throw std::runtime_error("cuda event is not initialized");
+    }
+    CudaContext::Get().cuEventSynchronize(event);
   }
 
   ~CudaEvent() {
