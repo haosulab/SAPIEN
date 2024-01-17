@@ -152,7 +152,6 @@ class ControlWindow(Plugin):
         cam_pose = self.window.get_camera_pose()
         if self.focused_entity is not None:
             # initialize arc camera
-            self.focus_camera(None)
             _, pitch, yaw = quat2euler(cam_pose.q.astype(np.float64))
             self.arc_camera_controller.set_yaw_pitch(yaw, pitch)
 

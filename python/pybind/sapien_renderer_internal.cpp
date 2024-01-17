@@ -582,8 +582,7 @@ void init_sapien_renderer_internal(py::module &parent) {
       .def(
           "Picture",
           [](ui::DisplayImage &image, renderer::RendererBase &renderer, std::string const &name) {
-            return image.Image(renderer.getRenderImage(name),
-                               renderer.getRenderTargetImageLayout(name));
+            return image.Image(renderer.getRenderImage(name));
           },
           py::arg("renderer"), py::arg("name"))
       .def("Clear", &ui::DisplayImage::Clear);
