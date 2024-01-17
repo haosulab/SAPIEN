@@ -2,6 +2,8 @@
 #include "../logger.h"
 #include "sapien/physx/physx_default.h"
 
+#include "sapien/utils/cuda.h"
+
 using namespace physx;
 
 namespace sapien {
@@ -56,6 +58,13 @@ PhysxEngine::PhysxEngine(float toleranceLength, float toleranceSpeed) {
 
   if (PhysxDefault::GetGPUEnabled()) {
     PxCudaContextManagerDesc cudaContextManagerDesc;
+
+    CUcontext context{};
+    checkCudaDriverErrors(CudaLib::Get().cuCtxGetCurrent(&context));
+    if (!context) {
+      throw std::runtime_error("failed to get CUDA context.");
+    }
+    cudaContextManagerDesc.ctx = &context;
     mCudaContextManager = PxCreateCudaContextManager(*mPxFoundation, cudaContextManagerDesc,
                                                      PxGetProfilerCallback());
   }

@@ -13,12 +13,24 @@
     }                                                                                             \
   } while (0)
 
+#define checkCudaDriverErrors(call)                                                               \
+  do {                                                                                            \
+    CUresult err = call;                                                                          \
+    if (err != CUDA_SUCCESS) {                                                                    \
+      throw std::runtime_error("CUDA failed");                                                    \
+    }                                                                                             \
+  } while (0)
+
 namespace sapien {
 
-struct CudaContext {
-  static CudaContext &Get();
-  CudaContext();
+struct CudaLib {
+  static CudaLib &Get();
+  CudaLib();
   void *libcuda{};
+
+  decltype(::cuCtxGetCurrent) *cuCtxGetCurrent{};
+  decltype(::cuEventCreate) *cuEventCreate{};
+  decltype(::cuEventDestroy) *cuEventDestroy{};
   decltype(::cuEventRecord) *cuEventRecord{};
   decltype(::cuStreamWaitEvent) *cuStreamWaitEvent{};
   decltype(::cuEventSynchronize) *cuEventSynchronize{};
@@ -27,10 +39,7 @@ struct CudaContext {
 struct CudaEvent {
   CudaEvent() {}
 
-  void init() {
-    checkCudaErrors(cudaGetDevice(&cudaId));
-    checkCudaErrors(cudaEventCreate(&event));
-  }
+  void init() { checkCudaDriverErrors(CudaLib::Get().cuEventCreate(&event, 0)); }
 
   CudaEvent(CudaEvent const &) = delete;
   CudaEvent &operator=(CudaEvent const &) = delete;
@@ -47,7 +56,7 @@ struct CudaEvent {
   CudaEvent &operator=(CudaEvent &&other) {
     // destroy self
     if (event) {
-      checkCudaErrors(cudaEventDestroy(event));
+      checkCudaDriverErrors(CudaLib::Get().cuEventDestroy(event));
     }
 
     // copy
@@ -64,31 +73,31 @@ struct CudaEvent {
     if (!event) {
       throw std::runtime_error("cuda event is not initialized");
     }
-    CudaContext::Get().cuEventRecord(event, stream);
+    CudaLib::Get().cuEventRecord(event, stream);
   }
 
   void wait(cudaStream_t stream) const {
     if (!event) {
       throw std::runtime_error("cuda event is not initialized");
     }
-    CudaContext::Get().cuStreamWaitEvent(stream, event, 0);
+    CudaLib::Get().cuStreamWaitEvent(stream, event, 0);
   }
 
   void synchronize() const {
     if (!event) {
       throw std::runtime_error("cuda event is not initialized");
     }
-    CudaContext::Get().cuEventSynchronize(event);
+    CudaLib::Get().cuEventSynchronize(event);
   }
 
   ~CudaEvent() {
     if (event) {
-      cudaEventDestroy(event);
+      CudaLib::Get().cuEventDestroy(event);
     }
   }
 
   int cudaId{-1};
-  cudaEvent_t event{nullptr};
+  CUevent event{nullptr};
 };
 
 }; // namespace sapien
