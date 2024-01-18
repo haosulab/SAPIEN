@@ -341,10 +341,6 @@ void PhysxArticulationLinkComponent::onAddToScene(Scene &scene) {
 
   for (auto &shape : mCollisionShapes) {
     shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
-
-    auto col = shape->getCollisionGroups();
-    col[3] = (system->getSceneCollisionId() << 16) + col[3] & 0xffff;
-    shape->setCollisionGroups(col);
   }
 
   system->registerComponent(

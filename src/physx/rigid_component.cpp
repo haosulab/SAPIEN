@@ -204,10 +204,6 @@ void PhysxRigidStaticComponent::onAddToScene(Scene &scene) {
   // setup physical parameters
   for (auto &shape : mCollisionShapes) {
     shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
-
-    auto col = shape->getCollisionGroups();
-    col[3] = (system->getSceneCollisionId() << 16) + col[3] & 0xffff;
-    shape->setCollisionGroups(col);
   }
 
 #ifdef SAPIEN_CUDA
@@ -239,10 +235,6 @@ void PhysxRigidDynamicComponent::onAddToScene(Scene &scene) {
   mPxActor->setSleepThreshold(system->getSceneConfig().sleepThreshold);
   for (auto &shape : mCollisionShapes) {
     shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
-
-    auto col = shape->getCollisionGroups();
-    col[3] = (system->getSceneCollisionId() << 16) + col[3] & 0xffff;
-    shape->setCollisionGroups(col);
   }
 
   system->registerComponent(
