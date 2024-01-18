@@ -291,7 +291,7 @@ Generator<int> init_physx(py::module &sapien) {
       .def_readonly("separation", &ContactPoint::separation);
 
   PyPhysxContact
-      .def_readonly("components", &Contact::components, py::return_value_policy::reference)
+      .def_readonly("bodies", &Contact::components, py::return_value_policy::reference)
       .def_readonly("shapes", &Contact::shapes, py::return_value_policy::reference)
       .def_readonly("points", &Contact::points)
       .def("__repr__", [](Contact const &c) {
