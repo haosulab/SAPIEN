@@ -428,7 +428,6 @@ void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
 
   int size = upperPowerOf2(num);
   if (mCudaContactBuffer.shape[0] < size) {
-    printf("reallocate to %d\n", size);
     SAPIEN_PROFILE_BLOCK("re-allocate contact buffer");
     mCudaContactBuffer = CudaArray({size, sizeof(PxGpuContactPair)}, "u1");
   }
