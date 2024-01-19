@@ -396,28 +396,44 @@ std::shared_ptr<PhysxGpuContactQuery> PhysxSystemGpu::gpuCreateContactQuery(
   return res;
 }
 
+inline static int upperPowerOf2(int x) {
+  x--;
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  x |= x >> 16;
+  x++;
+  return x;
+}
+
 void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
   SAPIEN_PROFILE_FUNCTION;
 
   cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3, mCudaStream);
-  int maxContacts = mPxScene->getGpuDynamicsConfig().foundLostPairsCapacity;
-  if (!mCudaContactBuffer.ptr || mCudaContactBuffer.shape[0] < maxContacts) {
-    mCudaContactBuffer = CudaArray({maxContacts, sizeof(PxGpuContactPair)}, "u1");
-  }
+
   if (!mCudaContactCount.ptr) {
     mCudaContactCount = CudaArray({1}, "u4");
   }
 
-  SAPIEN_PROFILE_BLOCK_BEGIN("copy contacts and transfer count to CPU");
-  mPxScene->copyContactData(mCudaContactBuffer.ptr, maxContacts, mCudaContactCount.ptr);
+  if (!mCudaContactBuffer.ptr) {
+    mCudaContactBuffer = CudaArray({1024, sizeof(PxGpuContactPair)}, "u1");
+  }
+
+  SAPIEN_PROFILE_BLOCK_BEGIN("fetch contact count");
+  mPxScene->copyContactData(mCudaContactBuffer.ptr, 0, mCudaContactCount.ptr);
   int num{0};
   cudaMemcpy(&num, mCudaContactCount.ptr, sizeof(int), cudaMemcpyDeviceToHost);
   SAPIEN_PROFILE_BLOCK_END;
 
-  if (num > maxContacts) {
-    logger::error(
-        "Contact count exceeds contact buffer. Please report the error to SAPIEN developer.");
+  int size = upperPowerOf2(num);
+  if (mCudaContactBuffer.shape[0] < size) {
+    printf("reallocate to %d\n", size);
+    SAPIEN_PROFILE_BLOCK("re-allocate contact buffer");
+    mCudaContactBuffer = CudaArray({size, sizeof(PxGpuContactPair)}, "u1");
   }
+
+  mPxScene->copyContactData(mCudaContactBuffer.ptr, size, mCudaContactCount.ptr);
 
   handle_contacts((PxGpuContactPair *)mCudaContactBuffer.ptr, num,
                   (ActorPairQuery *)query.query.ptr, query.query.shape.at(0),
