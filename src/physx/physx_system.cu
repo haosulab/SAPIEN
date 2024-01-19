@@ -128,7 +128,7 @@ __global__ void root_vel_sapien_to_physx_kernel(PhysxVelocity *__restrict__ phys
 
 __device__ int binary_search(ActorPairQuery const *__restrict__ arr, int count, ActorPair x) {
   int low = 0;
-  int high = count;
+  int high = count - 1;
   while (low <= high) {
     int mid = low + (high - low) / 2;
     if (arr[mid].pair == x)

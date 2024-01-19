@@ -88,6 +88,8 @@ void root_pose_sapien_to_physx(void *physx_pose, void *sapien_data, void *index,
 void root_vel_sapien_to_physx(void *physx_vel, void *sapien_data, void *index, int link_count,
                               int count, CUstream_st *);
 
+// fill out_forces with net contact forces. query stores sorted pairs of interested actors and
+// their index corresponding to the out_forces array
 void handle_contacts(::physx::PxGpuContactPair *contacts, int contact_count, ActorPairQuery *query,
                      int query_count, Vec3 *out_forces, cudaStream_t stream);
 
