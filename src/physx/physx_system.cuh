@@ -1,9 +1,41 @@
 #include "sapien/math/pose.h"
+#include <PxContact.h>
+#include <geomutils/PxContactPoint.h>
 
 struct CUstream_st;
 
 namespace sapien {
 namespace physx {
+
+struct ActorPair {
+  ::physx::PxActor *actor0;
+  ::physx::PxActor *actor1;
+};
+
+CUDA_CALLABLE inline ActorPair makeActorPair(::physx::PxActor *a0, ::physx::PxActor *a1,
+                                             int &order) {
+  if (a0 < a1) {
+    order = 1;
+    return {a0, a1};
+  } else {
+    order = -1;
+    return {a1, a0};
+  }
+}
+
+struct ActorPairQuery {
+  ActorPair pair;
+  uint32_t id;
+  int order;
+};
+
+CUDA_CALLABLE inline bool operator==(ActorPair const &a, ActorPair const &b) {
+  return a.actor0 == b.actor0 && a.actor1 == b.actor1;
+}
+
+CUDA_CALLABLE inline bool operator<(ActorPair const &a, ActorPair const &b) {
+  return a.actor0 < b.actor0 || (a.actor0 == b.actor0 && a.actor1 < b.actor1);
+}
 
 struct PhysxQuat {
   float x, y, z, w;
@@ -55,6 +87,9 @@ void root_pose_sapien_to_physx(void *physx_pose, void *sapien_data, void *index,
                                int link_count, int count, CUstream_st *);
 void root_vel_sapien_to_physx(void *physx_vel, void *sapien_data, void *index, int link_count,
                               int count, CUstream_st *);
+
+void handle_contacts(::physx::PxGpuContactPair *contacts, int contact_count, ActorPairQuery *query,
+                     int query_count, Vec3 *out_forces, cudaStream_t stream);
 
 } // namespace physx
 } // namespace sapien

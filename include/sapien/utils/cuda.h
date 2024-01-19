@@ -73,21 +73,21 @@ struct CudaEvent {
     if (!event) {
       throw std::runtime_error("cuda event is not initialized");
     }
-    CudaLib::Get().cuEventRecord(event, stream);
+    checkCudaDriverErrors(CudaLib::Get().cuEventRecord(event, stream));
   }
 
   void wait(cudaStream_t stream) const {
     if (!event) {
       throw std::runtime_error("cuda event is not initialized");
     }
-    CudaLib::Get().cuStreamWaitEvent(stream, event, 0);
+    checkCudaDriverErrors(CudaLib::Get().cuStreamWaitEvent(stream, event, 0));
   }
 
   void synchronize() const {
     if (!event) {
       throw std::runtime_error("cuda event is not initialized");
     }
-    CudaLib::Get().cuEventSynchronize(event);
+    checkCudaDriverErrors(CudaLib::Get().cuEventSynchronize(event));
   }
 
   ~CudaEvent() {

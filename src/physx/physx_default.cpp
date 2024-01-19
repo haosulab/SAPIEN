@@ -10,7 +10,6 @@ static float gDynamicFriction{0.3};
 static float gRestitution{0.1};
 static std::weak_ptr<PhysxMaterial> gDefaultMaterial;
 static bool gGPUEnabled{false};
-static uint32_t gCpuWorkers{0};
 static PhysxSceneConfig gSceneConfig{};
 
 static ::physx::PxgDynamicsMemoryConfig gGpuMemoryConfig{};

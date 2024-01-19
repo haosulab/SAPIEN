@@ -4,7 +4,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien_pinocchio
 import typing
-__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSceneConfig', 'PhysxSystem', 'get_default_material', 'get_scene_config', 'is_gpu_enabled', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config']
+__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSceneConfig', 'PhysxSystem', 'get_default_material', 'get_scene_config', 'is_gpu_enabled', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config']
 M = typing.TypeVar("M", bound=int)
 class PhysxArticulation:
     name: str
@@ -402,7 +402,7 @@ class PhysxContact:
     def __repr__(self) -> str:
         ...
     @property
-    def components(self) -> typing.Annotated[list[PhysxRigidBaseComponent], pybind11_stubgen.typing_ext.FixedSize(2)]:
+    def bodies(self) -> typing.Annotated[list[PhysxRigidBaseComponent], pybind11_stubgen.typing_ext.FixedSize(2)]:
         ...
     @property
     def points(self) -> list[PhysxContactPoint]:
@@ -522,6 +522,10 @@ class PhysxGearComponent(PhysxJointComponent):
     @property
     def is_hinges_enabled(self) -> bool:
         ...
+class PhysxGpuContactQuery:
+    @property
+    def cuda_contacts(self) -> CudaArrayHandle:
+        ...
 class PhysxGpuSystem(PhysxSystem):
     def __init__(self) -> None:
         ...
@@ -575,6 +579,8 @@ class PhysxGpuSystem(PhysxSystem):
     @typing.overload
     def gpu_apply_rigid_dynamic_data(self, arg0: CudaArrayHandle) -> None:
         ...
+    def gpu_create_contact_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactQuery:
+        ...
     def gpu_fetch_articulation_link_pose(self) -> None:
         ...
     def gpu_fetch_articulation_link_velocity(self) -> None:
@@ -598,6 +604,8 @@ class PhysxGpuSystem(PhysxSystem):
            may call `gpu_apply_*` functions to initialize the system after calling this
            function.
         """
+    def gpu_query_contacts(self, query: PhysxGpuContactQuery) -> None:
+        ...
     def gpu_set_cuda_stream(self, stream: int) -> None:
         """
         PhysX GPU APIs will be synchronized with the provided stream and SAPIEN's CUDA
@@ -722,6 +730,9 @@ class PhysxRigidBaseComponent(PhysxBaseComponent):
     def get_collision_shapes(self) -> list[PhysxCollisionShape]:
         ...
     def get_global_aabb_fast(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+        ...
+    @property
+    def _physx_pointer(self) -> int:
         ...
     @property
     def collision_shapes(self) -> list[PhysxCollisionShape]:

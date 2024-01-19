@@ -115,6 +115,11 @@ private:
 
 #ifdef SAPIEN_CUDA
 
+struct PhysxGpuContactQuery {
+  CudaArray query;
+  CudaArray buffer;
+};
+
 class PhysxSystemGpu : public PhysxSystem {
 public:
   PhysxSystemGpu();
@@ -147,8 +152,6 @@ public:
    *  gpuQuery* and gpuApply* will be synchronized with the stream
    *  If not set, gpuQuery* and gpuApply* synchronizes with the default stream */
   void gpuSetCudaStream(uintptr_t stream);
-
-  // int gpuQueryContacts(CudaArrayHandle const &data) const;
 
   /** handle to the pose-vel buffer for rigid dynamic bodies and links */
   CudaArrayHandle gpuGetRigidBodyCudaHandle() const { return mCudaRigidBodyBuffer.handle(); }
@@ -191,6 +194,11 @@ public:
   void gpuApplyArticulationQTargetVel();
 
   void gpuUpdateArticulationKinematics();
+
+  std::shared_ptr<PhysxGpuContactQuery> gpuCreateContactQuery(
+      std::vector<std::pair<std::shared_ptr<PhysxRigidBaseComponent>,
+                            std::shared_ptr<PhysxRigidBaseComponent>>> const &bodyPairs);
+  void gpuQueryContacts(PhysxGpuContactQuery const &query);
 
   void syncPosesGpuToCpu();
 
@@ -250,6 +258,9 @@ private:
   CudaArrayHandle mCudaQaccHandle;
   CudaArrayHandle mCudaQTargetPosHandle;
   CudaArrayHandle mCudaQTargetVelHandle;
+
+  CudaArray mCudaContactBuffer;
+  CudaArray mCudaContactCount;
 };
 
 #endif

@@ -230,7 +230,9 @@ Generator<int> init_physx(py::module &sapien) {
 
   auto PyPhysxSystem = py::class_<PhysxSystem, System>(m, "PhysxSystem");
   auto PyPhysxSystemCpu = py::class_<PhysxSystemCpu, PhysxSystem>(m, "PhysxCpuSystem");
+
   auto PyPhysxSystemGpu = py::class_<PhysxSystemGpu, PhysxSystem>(m, "PhysxGpuSystem");
+  auto PyPhysxGpuContactQuery = py::class_<PhysxGpuContactQuery>(m, "PhysxGpuContactQuery");
 
   auto PyPhysxBaseComponent = py::class_<PhysxBaseComponent, Component>(m, "PhysxBaseComponent");
   auto PyPhysxRigidBaseComponent =
@@ -290,8 +292,7 @@ Generator<int> init_physx(py::module &sapien) {
       .def_readonly("impulse", &ContactPoint::impulse)
       .def_readonly("separation", &ContactPoint::separation);
 
-  PyPhysxContact
-      .def_readonly("bodies", &Contact::components, py::return_value_policy::reference)
+  PyPhysxContact.def_readonly("bodies", &Contact::components, py::return_value_policy::reference)
       .def_readonly("shapes", &Contact::shapes, py::return_value_policy::reference)
       .def_readonly("points", &Contact::points)
       .def("__repr__", [](Contact const &c) {
@@ -403,6 +404,10 @@ Args:
       .def("gpu_fetch_articulation_target_qpos", &PhysxSystemGpu::gpuFetchArticulationQTargetPos)
       .def("gpu_fetch_articulation_target_qvel", &PhysxSystemGpu::gpuFetchArticulationQTargetVel)
 
+      .def("gpu_create_contact_query", &PhysxSystemGpu::gpuCreateContactQuery,
+           py::arg("body_pairs"))
+      .def("gpu_query_contacts", &PhysxSystemGpu::gpuQueryContacts, py::arg("query"))
+
       .def("gpu_update_articulation_kinematics", &PhysxSystemGpu::gpuUpdateArticulationKinematics)
 
       // TODO apply force torque
@@ -449,6 +454,9 @@ Args:
 
       .def("step_start", &PhysxSystemGpu::stepStart)
       .def("step_finish", &PhysxSystemGpu::stepFinish);
+
+  PyPhysxGpuContactQuery.def_property_readonly(
+      "cuda_contacts", [](PhysxGpuContactQuery const &q) { return q.buffer.handle(); });
 
   PyPhysxMaterial
       .def(py::init<float, float, float>(), py::arg("static_friction"),
@@ -570,7 +578,10 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_collision_shapes", &PhysxRigidBaseComponent::getCollisionShapes)
 
       .def("compute_global_aabb_tight", &PhysxRigidBaseComponent::computeGlobalAABBTight)
-      .def("get_global_aabb_fast", &PhysxRigidBaseComponent::getGlobalAABBFast);
+      .def("get_global_aabb_fast", &PhysxRigidBaseComponent::getGlobalAABBFast)
+      .def_property_readonly("_physx_pointer", [](PhysxRigidBaseComponent const &c) {
+        return reinterpret_cast<uintptr_t>(c.getPxActor());
+      });
 
   PyPhysxRigidStaticComponent.def(py::init<>());
 

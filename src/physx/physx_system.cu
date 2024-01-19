@@ -1,5 +1,7 @@
 #include "./physx_system.cuh"
 
+#include <cstdio>
+
 namespace sapien {
 namespace physx {
 
@@ -124,6 +126,59 @@ __global__ void root_vel_sapien_to_physx_kernel(PhysxVelocity *__restrict__ phys
   physx_vel[ai].w = sd.w;
 }
 
+__device__ int binary_search(ActorPairQuery const *__restrict__ arr, int count, ActorPair x) {
+  int low = 0;
+  int high = count;
+  while (low <= high) {
+    int mid = low + (high - low) / 2;
+    if (arr[mid].pair == x)
+      return mid;
+    if (arr[mid].pair < x)
+      low = mid + 1;
+    else
+      high = mid - 1;
+  }
+  return -1;
+}
+
+__global__ void handle_contacts_kernel(::physx::PxGpuContactPair *__restrict__ contacts,
+                                       int contact_count, ActorPairQuery *__restrict__ query,
+                                       int query_count, Vec3 *__restrict__ out_forces) {
+  int g = blockIdx.x * blockDim.x + threadIdx.x;
+  if (g >= contact_count) {
+    return;
+  }
+
+  int order = 0;
+  ActorPair pair = makeActorPair(contacts[g].actor0, contacts[g].actor1, order);
+
+  int index = binary_search(query, query_count, pair);
+  if (index < 0) {
+    return;
+  }
+  uint32_t id = query[index].id;
+
+  order *= query[index].order;
+
+  ::physx::PxContactPatch *patches = (::physx::PxContactPatch *)contacts[g].contactPatches;
+  ::physx::PxContact *points = (::physx::PxContact *)contacts[g].contactPoints;
+
+  float *forces = contacts[g].contactForces;
+
+  Vec3 force = Vec3(0.f);
+  for (int pi = 0; pi < contacts[g].nbPatches; ++pi) {
+    Vec3 normal(patches[pi].normal.x, patches[pi].normal.y, patches[pi].normal.z);
+    for (int i = 0; i < patches[pi].nbContacts; ++i) {
+      int ci = patches[pi].startContactIndex + i;
+      float f = forces[ci];
+      force += normal * (f * order);
+      // printf("normal = %f %f %f, normal length2 = %f, separation = %f, force = %f\n", normal.x,
+      //        normal.y, normal.z, normal.dot(normal), points[ci].separation, f);
+    }
+  }
+  out_forces[id] = force;
+}
+
 constexpr int BLOCK_SIZE = 128;
 
 void body_data_physx_to_sapien(void *sapien_data, void *physx_data, void *offset, int count,
@@ -175,6 +230,12 @@ void root_vel_sapien_to_physx(void *physx_vel, void *sapien_data, void *index, i
   root_vel_sapien_to_physx_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
                                     stream>>>(
       (PhysxVelocity *)physx_vel, (SapienBodyData *)sapien_data, (int *)index, link_count, count);
+}
+
+void handle_contacts(::physx::PxGpuContactPair *contacts, int contact_count, ActorPairQuery *query,
+                     int query_count, Vec3 *out_forces, cudaStream_t stream) {
+  handle_contacts_kernel<<<(contact_count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0, stream>>>(
+      contacts, contact_count, query, query_count, out_forces);
 }
 
 } // namespace physx

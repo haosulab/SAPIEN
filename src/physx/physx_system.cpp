@@ -364,15 +364,66 @@ void PhysxSystemGpu::checkGpuInitialized() const {
 
 void PhysxSystemGpu::gpuSetCudaStream(uintptr_t stream) { mCudaStream = (cudaStream_t)stream; }
 
-// int PhysxSystemGpu::gpuQueryContacts(CudaArrayHandle const &data) const {
-//   data.checkCongiguous();
-//   data.checkShape({-1, sizeof(PxGpuContactPair)});
-//   data.checkStride({sizeof(PxGpuContactPair), 1});
-//   int count;
-//   mPxScene->copyContactData(data.ptr, data.shape.at(0), &count, mCudaEventWait.event);
-//   mCudaEventWait.wait(mCudaStream);
-//   return count;
-// }
+std::shared_ptr<PhysxGpuContactQuery> PhysxSystemGpu::gpuCreateContactQuery(
+    std::vector<std::pair<std::shared_ptr<PhysxRigidBaseComponent>,
+                          std::shared_ptr<PhysxRigidBaseComponent>>> const &bodyPairs) {
+  if (bodyPairs.empty()) {
+    throw std::runtime_error("failed to create contact query: empty body pairs");
+  }
+  std::vector<ActorPairQuery> pairs;
+  for (uint32_t i = 0; i < bodyPairs.size(); ++i) {
+    auto &[b0, b1] = bodyPairs[i];
+    if (!b0 || !b1) {
+      throw std::runtime_error("failed to create contact query: invalid body");
+    }
+    int order{0};
+    ActorPair pair = makeActorPair(b0->getPxActor(), b1->getPxActor(), order);
+    pairs.push_back({pair, i, order});
+  }
+
+  std::sort(pairs.begin(), pairs.end(),
+            [](ActorPairQuery const &a, ActorPairQuery const &b) { return a.pair < b.pair; });
+
+  static_assert(sizeof(ActorPairQuery) == 24);
+  CudaArray query({static_cast<int>(pairs.size()), 6}, "i4");
+  checkCudaErrors(cudaMemcpy(query.ptr, pairs.data(), pairs.size() * sizeof(ActorPairQuery),
+                             cudaMemcpyHostToDevice));
+  CudaArray buffer({static_cast<int>(pairs.size()), 3}, "f4");
+
+  auto res = std::make_shared<PhysxGpuContactQuery>();
+  res->query = std::move(query);
+  res->buffer = std::move(buffer);
+  return res;
+}
+
+void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
+  SAPIEN_PROFILE_FUNCTION;
+
+  cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3, mCudaStream);
+  int maxContacts = mPxScene->getGpuDynamicsConfig().foundLostPairsCapacity;
+  if (!mCudaContactBuffer.ptr || mCudaContactBuffer.shape[0] < maxContacts) {
+    mCudaContactBuffer = CudaArray({maxContacts, sizeof(PxGpuContactPair)}, "u1");
+  }
+  if (!mCudaContactCount.ptr) {
+    mCudaContactCount = CudaArray({1}, "u4");
+  }
+
+  SAPIEN_PROFILE_BLOCK_BEGIN("copy contacts and transfer count to CPU");
+  mPxScene->copyContactData(mCudaContactBuffer.ptr, maxContacts, mCudaContactCount.ptr);
+  int num{0};
+  cudaMemcpy(&num, mCudaContactCount.ptr, sizeof(int), cudaMemcpyDeviceToHost);
+  SAPIEN_PROFILE_BLOCK_END;
+
+  if (num > maxContacts) {
+    logger::error(
+        "Contact count exceeds contact buffer. Please report the error to SAPIEN developer.");
+  }
+
+  handle_contacts((PxGpuContactPair *)mCudaContactBuffer.ptr, num,
+                  (ActorPairQuery *)query.query.ptr, query.query.shape.at(0),
+                  (Vec3 *)query.buffer.ptr, mCudaStream);
+  cudaStreamSynchronize(mCudaStream);
+}
 
 void PhysxSystemGpu::gpuFetchRigidDynamicData() {
   checkGpuInitialized();
@@ -492,7 +543,7 @@ void PhysxSystemGpu::gpuUpdateArticulationKinematics() {
   checkGpuInitialized();
 
   // wait for previous apply to finish
-  mCudaEventWait.synchronize();
+  checkCudaErrors(cudaDeviceSynchronize());
 
   // also synchronously wait for the update to finish
   mPxScene->updateArticulationsKinematic(nullptr);
@@ -882,7 +933,7 @@ void PhysxSystemGpu::allocateCudaBuffers() {
     mCudaArticulationIndexBuffer = CudaArray({mGpuArticulationCount}, "i4");
     mCudaArticulationIndexScratch = CudaArray({mGpuArticulationCount}, "i4");
     std::vector<int> host_index;
-    for (uint32_t i = 0; i < mGpuArticulationCount; ++i) {
+    for (int i = 0; i < mGpuArticulationCount; ++i) {
       host_index.push_back(i);
     }
     checkCudaErrors(cudaMemcpy(mCudaArticulationIndexBuffer.ptr, host_index.data(),
