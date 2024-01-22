@@ -73,7 +73,7 @@ vec4 world2camera(vec4 pos) {
 
 vec3 getBackgroundColor(vec3 texcoord) {
   texcoord = texcoord.xzy;
-  return textureLod(samplerEnvironment, texcoord, 0).rgb;
+  return textureLod(samplerEnvironment, texcoord, 0).rgb + sceneBuffer.ambientLight.rgb;
 }
 
 vec3 diffuseIBL(vec3 albedo, vec3 N) {
@@ -242,7 +242,7 @@ void main() {
   color += sceneBuffer.ambientLight.rgb * albedo.rgb;
 
   if (depth == 1) {
-    outLighting = vec4(getBackgroundColor((cameraBuffer.viewMatrixInverse * csPosition).xyz), 1.f);
+    outLighting = vec4(getBackgroundColor((cameraBuffer.viewMatrixInverse * csPosition).xyz), 0.f);
   } else {
     outLighting = vec4(color, 1);
   }
