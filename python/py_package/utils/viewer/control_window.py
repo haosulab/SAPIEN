@@ -101,8 +101,7 @@ class ControlWindow(Plugin):
                 c2w = c.pose
                 j2w = c2w * j2c
 
-                rs = self.selected_entity.scene.render_system._internal_scene
-                w2v = sapien.Pose(rs.get_root_position(), rs.get_root_rotation())
+                w2v = sapien.Pose(self.viewer.scene_offset[self.selected_entity.scene])
                 j2v = w2v * j2w
 
                 if j.type == "prismatic":
