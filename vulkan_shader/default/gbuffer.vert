@@ -27,7 +27,7 @@ layout(location = 2) in vec2 uv;
 layout(location = 3) in vec3 tangent;
 layout(location = 4) in vec3 bitangent;
 
-layout(location = 0) out vec4 outPosition;
+layout(location = 0) out vec4 outPositionRaw;
 layout(location = 1) out vec2 outUV;
 layout(location = 2) out flat uvec4 outSegmentation;
 layout(location = 3) out vec3 objectCoord;
@@ -38,9 +38,9 @@ void main() {
   mat4 modelView = cameraBuffer.viewMatrix * objectTransformBuffer.modelMatrix;
   mat3 normalMatrix = mat3(transpose(inverse(modelView)));
   objectCoord = position;
-  outPosition = modelView * vec4(position, 1);
+  outPositionRaw = modelView * vec4(position, 1);
   outUV = uv;
-  gl_Position = cameraBuffer.projectionMatrix * outPosition;
+  gl_Position = cameraBuffer.projectionMatrix * outPositionRaw;
   vec3 outTangent = normalize(normalMatrix * tangent);
   vec3 outBitangent = normalize(normalMatrix * bitangent);
   vec3 outNormal = normalize(normalMatrix * normal);

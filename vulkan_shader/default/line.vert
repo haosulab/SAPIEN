@@ -25,12 +25,12 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in float scale;
 layout(location = 2) in vec4 color;
 
-layout(location = 0) out vec4 outPosition;
+layout(location = 0) out vec4 outPositionRaw;
 layout(location = 1) out vec4 outColor;
 
 void main() {
   mat4 modelView = cameraBuffer.viewMatrix * objectTransformBuffer.modelMatrix;
-  outPosition = modelView * vec4(position, 1);
-  gl_Position = cameraBuffer.projectionMatrix * outPosition;
+  outPositionRaw = modelView * vec4(position, 1);
+  gl_Position = cameraBuffer.projectionMatrix * outPositionRaw;
   outColor = color;
 }

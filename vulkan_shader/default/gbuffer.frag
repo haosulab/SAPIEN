@@ -48,7 +48,7 @@ layout(location = 3) in vec3 objectCoord;
 layout(location = 4) in mat3 inTbn;
 
 layout(location = 0) out vec4 outAlbedo;
-layout(location = 1) out vec4 outPosition;
+layout(location = 1) out vec4 outPositionRaw;
 layout(location = 2) out vec4 outSpecular;
 layout(location = 3) out vec4 outNormal;
 layout(location = 4) out uvec4 outSegmentation;
@@ -59,7 +59,7 @@ void main() {
   outCustom = vec4(objectCoord, 1);
   outSegmentation = inSegmentation;
 
-  outPosition = inPosition;
+  outPositionRaw = inPosition;
 
   vec4 p1 = cameraBuffer.projectionMatrix * inPosition;
   p1 /= p1.w;

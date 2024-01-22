@@ -4,12 +4,13 @@ layout (constant_id = 0) const float exposure = 1.0;
 
 layout(set = 0, binding = 0) uniform sampler2D samplerLighting;
 layout(set = 0, binding = 1) uniform usampler2D samplerSegmentation;
-layout(set = 0, binding = 2) uniform sampler2D samplerPosition;
+layout(set = 0, binding = 2) uniform sampler2D samplerPositionRaw;
 
 layout(set = 0, binding = 3) uniform sampler2D samplerLineDepth;
 layout(set = 0, binding = 4) uniform sampler2D samplerLine;
 layout(set = 0, binding = 5) uniform sampler2D samplerPointDepth;
 layout(set = 0, binding = 6) uniform sampler2D samplerPoint;
+layout(set = 0, binding = 7) uniform sampler2D samplerGbufferDepth;
 
 
 layout(location = 0) in vec2 inUV;
@@ -18,6 +19,7 @@ layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outDepthLinear;
 layout(location = 2) out vec4 outSegmentationView0;
 layout(location = 3) out vec4 outSegmentationView1;
+layout(location = 4) out vec4 outPosition;
 
 
 layout(set = 1, binding = 0) uniform CameraBuffer {
@@ -98,7 +100,9 @@ void main() {
   outColor.rgb = pow(outColor.rgb * exposure, vec3(1/2.2));
   outColor = clamp(outColor, vec4(0), vec4(1));
 
-  outDepthLinear.x = -texture(samplerPosition, inUV).z;
+  vec3 position = texture(samplerPositionRaw, inUV).xyz;
+
+  outDepthLinear.x = position.z;
 
   uvec2 seg = texture(samplerSegmentation, inUV).xy;
   outSegmentationView0 = mix(vec4(0,0,0,1), colors[seg.x % 60], sign(seg.x));
@@ -113,4 +117,6 @@ void main() {
   if (texture(samplerPointDepth, inUV).x < 1) {
     outColor = vec4(pointColor.xyz, 1);
   }
+
+  outPosition = vec4(position, texture(samplerGbufferDepth, inUV).x);
 }

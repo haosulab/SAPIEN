@@ -111,7 +111,7 @@ layout(location = 4) in mat3 inTbn;
 layout(location = 0) out vec4 outLighting;
 layout(location = 1) out vec4 outNormal;
 layout(location = 2) out uvec4 outSegmentation;
-layout(location = 3) out vec4 outPosition;
+layout(location = 3) out vec4 outPositionRaw;
 
 void main() {
   outSegmentation = inSegmentation;
@@ -165,7 +165,7 @@ void main() {
     outNormal = vec4(normal, 0);
   }
 
-  outPosition = inPosition;
+  outPositionRaw = inPosition;
 
   float specular = frm.x;
   float roughness = frm.y;
