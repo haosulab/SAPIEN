@@ -7,6 +7,25 @@ namespace fs = std::filesystem;
 namespace sapien {
 namespace sapien_renderer {
 
+void SapienRendererDefault::setGlobalConfig(bool offscreenOnly, int32_t maxNumMaterials,
+                                            uint32_t maxNumTextures, uint32_t defaultMipMaps,
+                                            std::string const &device, bool doNotLoadTexture) {
+  auto &d = Get();
+  d.offscreenOnly = offscreenOnly;
+  d.defaultMipMaps = defaultMipMaps;
+  d.device = device;
+  d.doNotLoadTexture = doNotLoadTexture;
+  d.maxNumMaterials = maxNumMaterials;
+  d.maxNumTextures = maxNumTextures;
+}
+
+bool SapienRendererDefault::getOffscreenOnly() { return Get().offscreenOnly; }
+uint32_t SapienRendererDefault::getDefaultMipMaps() { return Get().defaultMipMaps; }
+std::string SapienRendererDefault::getDevice() { return Get().device; }
+bool SapienRendererDefault::getDoNotLoadTexture() { return Get().doNotLoadTexture; }
+uint32_t SapienRendererDefault::getMaxNumMaterials() { return Get().maxNumMaterials; }
+uint32_t SapienRendererDefault::getMaxNumTextures() { return Get().maxNumTextures; }
+
 void SapienRendererDefault::setViewerShaderDirectory(std::string const &dir) {
   auto path = fs::path(dir);
   if (!fs::is_directory(path)) {

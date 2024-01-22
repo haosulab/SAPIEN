@@ -12,6 +12,16 @@ class SapienRendererDefault {
 public:
   static SapienRendererDefault &Get();
 
+  static void setGlobalConfig(bool offscreenOnly, int32_t maxNumMaterials, uint32_t maxNumTextures,
+                              uint32_t defaultMipMaps, std::string const &device,
+                              bool doNotLoadTexture);
+  static bool getOffscreenOnly();
+  static uint32_t getDefaultMipMaps();
+  static std::string getDevice();
+  static bool getDoNotLoadTexture();
+  static uint32_t getMaxNumMaterials();
+  static uint32_t getMaxNumTextures();
+
   static void setImguiIniFilename(std::string const &filename);
   static std::string getImguiIniFilename();
 
@@ -39,6 +49,13 @@ public:
   static void internalSetShaderSearchPath(std::string const &dir);
 
 public:
+  bool offscreenOnly = false;
+  uint32_t defaultMipMaps = 1;
+  std::string device = "";
+  bool doNotLoadTexture = false;
+  uint32_t maxNumMaterials = 128;
+  uint32_t maxNumTextures = 512;
+
   std::string viewerShaderDirectory{};
   std::string cameraShaderDirectory{};
   std::unordered_map<std::string, vk::Format> renderTargetFormats;

@@ -5,6 +5,7 @@
 #include "sapien/sapien_renderer/light_component.h"
 #include "sapien/sapien_renderer/point_cloud_component.h"
 #include "sapien/sapien_renderer/render_body_component.h"
+#include "sapien/sapien_renderer/sapien_renderer_default.h"
 #include <svulkan2/core/context.h>
 #include <svulkan2/core/physical_device.h>
 #include <svulkan2/renderer/renderer.h>
@@ -18,17 +19,13 @@
 namespace sapien {
 namespace sapien_renderer {
 
-std::shared_ptr<SapienRenderEngine>
-SapienRenderEngine::Get(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
-                        uint32_t defaultMipLevels, std::string const &device,
-                        bool doNotLoadTexture) {
+std::shared_ptr<SapienRenderEngine> SapienRenderEngine::Get() {
   static std::weak_ptr<SapienRenderEngine> gEngine;
   std::shared_ptr<SapienRenderEngine> engine;
   if ((engine = gEngine.lock())) {
     return engine;
   }
-  gEngine = engine = std::make_shared<SapienRenderEngine>(
-      offscreenOnly, maxNumMaterials, maxNumTextures, defaultMipLevels, device, doNotLoadTexture);
+  gEngine = engine = std::make_shared<SapienRenderEngine>();
   return engine;
 }
 
@@ -47,11 +44,11 @@ std::string SapienRenderEngine::getSummary() {
   return ss.str();
 }
 
-SapienRenderEngine::SapienRenderEngine(bool offscreenOnly, uint32_t maxNumMaterials,
-                                       uint32_t maxNumTextures, uint32_t defaultMipLevels,
-                                       std::string const &device, bool doNotLoadTexture) {
-  mContext = svulkan2::core::Context::Create(!offscreenOnly, maxNumMaterials, maxNumTextures,
-                                             defaultMipLevels, doNotLoadTexture, device);
+SapienRenderEngine::SapienRenderEngine() {
+  auto &d = SapienRendererDefault::Get();
+  mContext = svulkan2::core::Context::Create(!d.getOffscreenOnly(), d.getMaxNumMaterials(),
+                                             d.getMaxNumTextures(), d.getDefaultMipMaps(),
+                                             d.getDoNotLoadTexture());
   mResourceManager = mContext->createResourceManager();
 }
 

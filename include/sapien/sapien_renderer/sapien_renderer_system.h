@@ -23,13 +23,9 @@ class SapienRenderCubemap;
 
 class SapienRenderEngine {
 public:
-  static std::shared_ptr<SapienRenderEngine>
-  Get(bool offscreenOnly = false, uint32_t maxNumMaterials = 512, uint32_t maxNumTextures = 128,
-      uint32_t defaultMipLevels = 1, std::string const &device = "",
-      bool doNotLoadTexture = false);
+  static std::shared_ptr<SapienRenderEngine> Get();
 
-  SapienRenderEngine(bool offscreenOnly, uint32_t maxNumMaterials, uint32_t maxNumTextures,
-                     uint32_t defaultMipLevels, std::string const &device, bool doNotLoadTexture);
+  SapienRenderEngine();
 
   std::shared_ptr<svulkan2::core::Context> getContext() const { return mContext; }
   std::shared_ptr<svulkan2::resource::SVResourceManager> getResourceManager() const {

@@ -389,7 +389,14 @@ void init_sapien_renderer(py::module &sapien) {
             return parseSceneNode(*root);
           },
           py::arg("filename"), py::arg("apply_scale") = true)
-      .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); });
+      .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); })
+
+      .def("set_global_config", &SapienRendererDefault::setGlobalConfig,
+           py::arg("offscreen_only") = false, py::arg("max_num_materials") = 128,
+           py::arg("max_num_textures") = 512, py::arg("default_mipmap_levels") = 1,
+           py::arg("default_device") = "", py::arg("do_not_load_texture") = false,
+           "Sets global properties for SAPIEN renderer. This function should only be called "
+           "before creating any renderer-related objects.");
 
   ////////// end global //////////
 
@@ -447,11 +454,7 @@ void init_sapien_renderer(py::module &sapien) {
 
   auto PyRenderWindow = py::class_<SapienRendererWindow>(m, "RenderWindow");
 
-  PySapienRenderer
-      .def(py::init(&SapienRenderEngine::Get), py::arg("offscreen_only") = false,
-           py::arg("max_num_materials") = 128, py::arg("max_num_textures") = 512,
-           py::arg("default_mipmap_levels") = 1, py::arg("default_device") = "",
-           py::arg("do_not_load_texture") = false)
+  PySapienRenderer.def(py::init(&SapienRenderEngine::Get))
       .def_property_readonly("_internal_context", &SapienRenderEngine::getContext);
 
   PyRenderSystemGroup.def(py::init<std::vector<std::shared_ptr<SapienRendererSystem>>>())
