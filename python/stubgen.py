@@ -2,10 +2,155 @@ import pybind11_stubgen
 import re
 import sys
 import itertools
+import types
 
 from pybind11_stubgen import *
+from pybind11_stubgen.parser.errors import InvalidIdentifierError
 from pybind11_stubgen.printer import Printer
-from pybind11_stubgen.structs import Module
+from typing import Any, Sequence
+from pybind11_stubgen.structs import (
+    Alias,
+    Annotation,
+    Argument,
+    Attribute,
+    Class,
+    Docstring,
+    Field,
+    Function,
+    Identifier,
+    Import,
+    InvalidExpression,
+    Method,
+    Module,
+    Property,
+    QualifiedName,
+    ResolvedType,
+    TypeVar_,
+    Value,
+)
+
+
+# pybind11-stubgen == 2.4.2
+
+
+class FixCppFunction(IParser):
+    def handle_function(self, path: QualifiedName, func: Any) -> list[Function]:
+        result = super().handle_function(path, func)
+        for f in result:
+            if (
+                isinstance(f.returns, ResolvedType)
+                and isinstance(f.returns.name, QualifiedName)
+                and str(f.returns.name) == "cpp_function"
+            ):
+                f.returns = self.parse_annotation_str("typing.Callable")
+        return result
+
+
+class FixNoneParameterType(IParser):
+    def handle_class_member(
+        self, path: QualifiedName, class_: type, obj: Any
+    ) -> Docstring | Alias | Class | list[Method] | Field | Property | None:
+        result = super().handle_class_member(path, class_, obj)
+        if isinstance(result, list):
+            for method in result:
+                if isinstance(method, Method):
+                    for arg in method.function.args:
+                        if (
+                            arg.annotation is not None
+                            and isinstance(arg.annotation, ResolvedType)
+                            and arg.default is not None
+                            and isinstance(arg.default, Value)
+                            and str(arg.default) == "None"
+                        ):
+                            arg.annotation = self.parse_annotation_str(
+                                f"typing.Optional[{str(arg.annotation)}]"
+                            )
+
+        return result
+
+
+class FixAutoListToArrayConversion(IParser):
+    def handle_class_member(
+        self, path: QualifiedName, class_: type, obj: Any
+    ) -> Docstring | Alias | Class | list[Method] | Field | Property | None:
+        result = super().handle_class_member(path, class_, obj)
+        if isinstance(result, list):
+            for method in result:
+                if isinstance(method, Method):
+                    for arg in method.function.args:
+                        if (
+                            arg.annotation is not None
+                            and isinstance(arg.annotation, ResolvedType)
+                            and str(arg.annotation.name) == "numpy.ndarray"
+                            and arg.annotation.parameters is not None
+                            and len(arg.annotation.parameters) >= 2
+                            and isinstance(arg.annotation.parameters[1], ResolvedType)
+                            and str(arg.annotation.parameters[1].name) == "numpy.dtype"
+                        ):
+                            list_type = ResolvedType(QualifiedName.from_str("list"))
+                            params = arg.annotation.parameters[1].parameters
+
+                            # figure out list[int] or list[float]
+                            if (
+                                isinstance(arg.annotation.parameters[0], ResolvedType)
+                                and str(arg.annotation.parameters[0].name)
+                                == "typing.Literal"
+                                and params is not None
+                                and isinstance(params[0], ResolvedType)
+                            ):
+                                if "float" in str(params[0].name):
+                                    list_type = self.parse_annotation_str("list[float]")
+                                elif "int" in str(params[0].name):
+                                    list_type = self.parse_annotation_str("list[int]")
+
+                            arg.annotation = ResolvedType(
+                                QualifiedName.from_str("typing.Union"),
+                                [
+                                    arg.annotation,
+                                    list_type,
+                                    ResolvedType(QualifiedName.from_str("tuple")),
+                                ],
+                            )
+        return result
+
+
+class FixFindComponentByType(IParser):
+    def handle_class_member(
+        self, path: QualifiedName, class_: type, obj: Any
+    ) -> Docstring | Alias | Class | list[Method] | Field | Property | None:
+        result = super().handle_class_member(path, class_, obj)
+        if not isinstance(result, list):
+            return result
+
+        for method in result:
+            if str(method.function.name) == "find_component_by_type":
+                method.function.returns = ResolvedType(QualifiedName.from_str("_T"))
+                assert len(method.function.args) == 2
+                method.function.args[1].annotation = ResolvedType(
+                    QualifiedName.from_str("type"),
+                    [ResolvedType(QualifiedName.from_str("_T"))],
+                )
+
+        return result
+
+    def handle_module(
+        self, path: QualifiedName, module: types.ModuleType
+    ) -> Module | None:
+        result = super().handle_module(path, module)
+        if result is None:
+            return None
+        if str(path).endswith("pysapien"):
+            result.imports.add(
+                Import(name=None, origin=QualifiedName.from_str("typing")),
+            )
+            result.type_vars.append(
+                TypeVar_(
+                    name=Identifier("_T"),
+                    bound=ResolvedType(QualifiedName.from_str("Component")),
+                ),
+            )
+
+        return result
 
 
 def stub_parser() -> IParser:
@@ -18,8 +163,6 @@ def stub_parser() -> IParser:
         SuggestCxxSignatureFix,
     ]
 
-    numpy_fixes: list[type] = [FixNumpyArrayDimTypeVar]
-
     class Parser(
         *error_handlers_top,  # type: ignore[misc]
         FixMissing__future__AnnotationsImport,
@@ -28,18 +171,22 @@ def stub_parser() -> IParser:
         FixMissingImports,
         FilterTypingModuleAttributes,
         FixPEP585CollectionNames,
+        FixCppFunction,
+        FixNoneParameterType,
         FixTypingTypeNames,
         FixScipyTypeArguments,
         FixMissingFixedSizeImport,
         FixMissingEnumMembersAnnotation,
         OverridePrintSafeValues,
-        *numpy_fixes,  # type: ignore[misc]
+        FixNumpyArrayDimTypeVar,
         FixNumpyDtype,
         FixNumpyArrayFlags,
+        FixFindComponentByType,
         FixCurrentModulePrefixInTypeNames,
         FixBuiltinTypes,
         RewritePybind11EnumValueRepr,
         FilterClassMembers,
+        FixAutoListToArrayConversion,
         ReplaceReadWritePropertyWithField,
         FilterInvalidIdentifiers,
         FixValueReprRandomAddress,
@@ -60,38 +207,6 @@ def stub_parser() -> IParser:
     return parser
 
 
-class Writer:
-    def __init__(self, stub_ext: str = "pyi"):
-        # assert stub_extension in ["pyi", "py"]
-        self.stub_ext: str = stub_ext
-
-    def write_module(
-        self, module: Module, printer: Printer, to: Path, sub_dir: Path | None = None
-    ):
-        assert to.exists()
-        assert to.is_dir()
-        if module.sub_modules or sub_dir is not None:
-            if sub_dir is None:
-                sub_dir = Path(module.name)
-            module_dir = to / sub_dir
-            module_dir.mkdir(exist_ok=True)
-            module_file = module_dir / f"__init__.{self.stub_ext}"
-        else:
-            module_file = to / f"{module.name}.{self.stub_ext}"
-        with open(module_file, "w", encoding="utf-8") as f:
-            lines = printer.print_module(module)
-            new_lines = []
-            for line in lines:
-                if "find_component_by_type" in line:
-                    line = '    _T = typing.TypeVar("T")\n    def find_component_by_type(self, cls: typing.Type[_T]) -> _T:'
-                new_lines.append(line)
-
-            f.writelines(line + "\n" for line in new_lines)
-
-        for sub_module in module.sub_modules:
-            self.write_module(sub_module, printer, to=module_dir)
-
-
 run(
     parser=stub_parser(),
     printer=Printer(invalid_expr_as_ellipses=True),
@@ -101,88 +216,3 @@ run(
     dry_run=False,
     writer=Writer(),
 )
-
-# # HACK: get a TypeVar for better annotation
-# class ModuleStubsGenerator(_ModuleStubsGenerator):
-#     def to_lines(self):
-#         result = []
-
-#         if self.doc_string:
-#             result += ['"""' + self.doc_string.replace('"""', r"\"\"\"") + '"""']
-
-#         if sys.version_info[:2] >= (3, 7):
-#             result += ["from __future__ import annotations"]
-
-#         result += ["import {}".format(self.module.__name__)]
-
-#         # import everything from typing
-#         result += ["import typing"]
-
-#         for name, class_ in self.imported_classes.items():
-#             class_name = getattr(class_, "__qualname__", class_.__name__)
-#             if name == class_name:
-#                 suffix = ""
-#             else:
-#                 suffix = " as {}".format(name)
-#             result += [
-#                 "from {} import {}{}".format(class_.__module__, class_name, suffix)
-#             ]
-
-#         # import used packages
-#         used_modules = sorted(self.get_involved_modules_names())
-#         if used_modules:
-#             # result.append("if TYPE_CHECKING:")
-#             # result.extend(map(self.indent, map(lambda m: "import {}".format(m), used_modules)))
-#             result.extend(map(lambda mod: "import {}".format(mod), used_modules))
-
-#         if "numpy" in used_modules and not BARE_NUPMY_NDARRAY:
-#             result += ["_Shape = typing.Tuple[int, ...]"]
-#             result += ['_T = typing.TypeVar("T")']
-
-#         # add space between imports and rest of module
-#         result += [""]
-
-#         globals_ = {}
-#         exec("from {} import *".format(self.module.__name__), globals_)
-#         all_ = set(member for member in globals_.keys() if member.isidentifier()) - {
-#             "__builtins__"
-#         }
-#         result.append(
-#             "__all__ = [\n    "
-#             + ",\n    ".join(map(lambda s: '"%s"' % s, sorted(all_)))
-#             + "\n]\n\n"
-#         )
-
-#         for x in itertools.chain(
-#             self.classes, self.free_functions, self.attributes, self.alias
-#         ):
-#             result.extend(x.to_lines())
-#         result.append("")  # Newline at EOF
-#         return result
-
-
-# pybind11_stubgen.ModuleStubsGenerator = ModuleStubsGenerator
-
-
-# def fix(match: re.Match):
-#     return match.group(1)
-
-
-# def fix_array(docstring: str):
-#     if docstring is None:
-#         return None
-
-#     # manual signature for find_component_by_type
-#     if "find_component_by_type" in docstring:
-#         return "find_component_by_type(self: sapien.pysapien.Entity, cls: typing.Type[_T]) -> _T"
-
-#     # Get rid of Annotated and FixedSize
-#     return re.sub(
-#         r"Annotated\[(list\[\w+\])\,\ FixedSize\([0-9]+\)\]", r"\1", docstring
-#     )
-
-
-# if __name__ == "__main__":
-#     pybind11_stubgen.function_docstring_preprocessing_hooks.append(fix_array)
-
-#     pybind11_stubgen.main()

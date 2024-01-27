@@ -2,7 +2,6 @@ from .. import pysapien as sapien
 from dataclasses import dataclass
 import numpy as np
 import typing
-import os
 from typing import List, Union, Dict, Any, Tuple, Literal
 
 from .coacd import do_coacd
@@ -14,6 +13,7 @@ class CollisionShapeRecord:
         "convex_mesh",
         "multiple_convex_meshes",
         "nonconvex_mesh",
+        "plane",
         "box",
         "capsule",
         "sphere",
@@ -31,7 +31,7 @@ class CollisionShapeRecord:
     # capsule
     length: float = 1
 
-    material: sapien.physx.PhysxMaterial = None
+    material: Union[sapien.physx.PhysxMaterial, None] = None
     pose: sapien.Pose = sapien.Pose()
 
     density: float = 1000
@@ -45,7 +45,7 @@ class CollisionShapeRecord:
 
 @dataclass
 class VisualShapeRecord:
-    type: Literal["file", "box", "capsule", "sphere", "cylinder"]
+    type: Literal["file", "plane", "box", "capsule", "sphere", "cylinder"]
 
     filename: str = ""
     scale: tuple = (1, 1, 1)
@@ -66,8 +66,8 @@ Vec3 = Tuple
 
 class ActorBuilder:
     def __init__(self):
-        self.collision_records: typing.List[CollisionShapeRecord] = []
-        self.visual_records: typing.List[VisualShapeRecord] = []
+        self.collision_records: List[CollisionShapeRecord] = []
+        self.visual_records: List[VisualShapeRecord] = []
         self.use_density = True
         self.collision_groups = [1, 1, 0, 0]
         self.scene = None

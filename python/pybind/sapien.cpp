@@ -21,14 +21,6 @@ namespace py = pybind11;
 using namespace pybind11::literals;
 using namespace sapien;
 
-namespace sapien {
-
-static std::string gPythonCudaBackend = "none";
-void setPythonCudaBackend(std::string const &name) { gPythonCudaBackend = name; }
-std::string getPythonCudaBackend() { return gPythonCudaBackend; }
-
-}; // namespace sapien
-
 class PythonSystem : public System, public py::trampoline_self_life_support {
 public:
   using System::System;
@@ -66,10 +58,6 @@ private:
 Generator<int> init_sapien(py::module &m) {
 
   m.def("set_log_level", &sapien::logger::setLogLevel, py::arg("level"));
-  m.def(
-      "set_cuda_tensor_backend", &sapien::setPythonCudaBackend, py::arg("backend"),
-      R"doc(set the backend returned CUDA tensors. Supported backends are "torch" and "jax")doc");
-  m.def("get_cuda_tensor_backend", &sapien::getPythonCudaBackend);
 
   py::class_<PythonProfiler>(m, "Profiler")
       .def(py::init<std::string const &>())
@@ -90,7 +78,7 @@ Generator<int> init_sapien(py::module &m) {
   auto PyComponent = py::class_<Component, PythonComponent>(m, "Component");
 
   auto PySystem = py::class_<System, PythonSystem>(m, "System");
-  auto PyCudaArray = py::class_<PythonCudaArrayHandle>(m, "CudaArray");
+  auto PyCudaArray = py::class_<CudaArrayHandle>(m, "CudaArray");
 
   co_yield 0;
 
@@ -266,31 +254,55 @@ Generator<int> init_sapien(py::module &m) {
         auto data = interface.attr("data").cast<py::tuple>();
         void *ptr = reinterpret_cast<void *>(data[0].cast<uintptr_t>());
 
-        return PythonCudaArrayHandle{.shape = shape,
-                                     .strides = strides,
-                                     .type = type,
-                                     .cudaId = 0, // TODO: do we need cuda id?
-                                     .ptr = ptr};
+        return CudaArrayHandle{.shape = shape,
+                               .strides = strides,
+                               .type = type,
+                               .cudaId = 0, // TODO: do we need cuda id?
+                               .ptr = ptr};
       }))
-      .def_readonly("shape", &PythonCudaArrayHandle::shape)
-      .def_readonly("strides", &PythonCudaArrayHandle::strides)
-      .def_readonly("cuda_id", &PythonCudaArrayHandle::cudaId)
-      .def_readonly("typstr", &PythonCudaArrayHandle::type)
+      .def_readonly("shape", &CudaArrayHandle::shape)
+      .def_readonly("strides", &CudaArrayHandle::strides)
+      .def_readonly("cuda_id", &CudaArrayHandle::cudaId)
+      .def_readonly("typstr", &CudaArrayHandle::type)
       .def_property_readonly(
-          "ptr",
-          [](PythonCudaArrayHandle &array) { return reinterpret_cast<intptr_t>(array.ptr); })
-      .def_property_readonly("__cuda_array_interface__", [](PythonCudaArrayHandle &array) {
-        py::tuple shape = py::cast(array.shape);
-        py::tuple strides = py::cast(array.strides);
-        std::string type = array.type;
+          "ptr", [](CudaArrayHandle &array) { return reinterpret_cast<intptr_t>(array.ptr); })
+      .def_property_readonly(
+          "__cuda_array_interface__",
+          [](CudaArrayHandle &array) {
+            py::tuple shape = py::cast(array.shape);
+            py::tuple strides = py::cast(array.strides);
+            std::string type = array.type;
 
-        // torch does not support uint type except uint8
-        if (type != "u1" && type[0] == 'u') {
-          type = "i" + type.substr(1);
-        }
+            // torch does not support uint type except uint8
+            // if (type != "u1" && type[0] == 'u') {
+            //   type = "i" + type.substr(1);
+            // }
 
-        return py::dict("shape"_a = shape, "strides"_a = strides, "typestr"_a = type,
-                        "data"_a = py::make_tuple(reinterpret_cast<intptr_t>(array.ptr), false),
-                        "version"_a = 2);
+            return py::dict("shape"_a = shape, "strides"_a = strides, "typestr"_a = type,
+                            "data"_a =
+                                py::make_tuple(reinterpret_cast<intptr_t>(array.ptr), false),
+                            "version"_a = 2);
+          })
+      .def("torch",
+           [](CudaArrayHandle &array) {
+             // torch does not support uint except uint8
+             CudaArrayHandle newArray = array;
+             if (array.type != "u1" && array.type[0] == 'u') {
+               newArray.type = "i" + array.type.substr(1);
+             }
+
+             py::object obj = py::cast(newArray);
+             auto as_tensor = py::module_::import("torch").attr("as_tensor");
+             return as_tensor("data"_a = obj, "device"_a = "cuda").release();
+           })
+      .def("jax",
+           [](CudaArrayHandle &array) {
+             auto from_dlpack = py::module_::import("jax").attr("dlpack").attr("from_dlpack");
+             auto capsule = DLPackToCapsule(array.toDLPack());
+             return from_dlpack(capsule).release();
+           })
+      .def("dlpack", [](CudaArrayHandle &array) -> py::object {
+        auto capsule = DLPackToCapsule(array.toDLPack());
+        return capsule;
       });
 }

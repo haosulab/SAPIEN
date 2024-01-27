@@ -12,7 +12,6 @@ from sapien.pysapien import System
 from sapien.pysapien import math
 from sapien.pysapien.physx import PhysxSceneConfig as SceneConfig
 from sapien.pysapien import profile
-from sapien.pysapien import set_cuda_tensor_backend
 from sapien.pysapien import set_log_level
 from sapien.pysapien import simsense
 from sapien.pysapien_pinocchio import PinocchioModel
@@ -34,5 +33,5 @@ from . import render_server
 from . import utils
 from . import version
 from . import wrapper
-__all__ = ['ActorBuilder', 'ArticulationBuilder', 'Component', 'CudaArray', 'Engine', 'Entity', 'Path', 'PinocchioModel', 'Pose', 'SapienRenderer', 'Scene', 'SceneConfig', 'System', 'Widget', 'asset', 'internal_renderer', 'math', 'os', 'physx', 'pkg_resources', 'platform', 'profile', 'pysapien', 'pysapien_pinocchio', 'render', 'render_server', 'set_cuda_tensor_backend', 'set_log_level', 'simsense', 'utils', 'version', 'warn', 'wrapper']
-__version__: str = '3.0.0.dev20240122+a8854ccd'
+__all__ = ['ActorBuilder', 'ArticulationBuilder', 'Component', 'CudaArray', 'Engine', 'Entity', 'Path', 'PinocchioModel', 'Pose', 'SapienRenderer', 'Scene', 'SceneConfig', 'System', 'Widget', 'asset', 'internal_renderer', 'math', 'os', 'physx', 'pkg_resources', 'platform', 'profile', 'pysapien', 'pysapien_pinocchio', 'render', 'render_server', 'set_log_level', 'simsense', 'utils', 'version', 'warn', 'wrapper']
+__version__: str = '3.0.0.dev20240127+33ca7c50'

@@ -1,6 +1,6 @@
 from ..pysapien import Scene as _Scene
 from .. import pysapien as sapien
-from ..pysapien.render import RenderCameraComponent
+from ..pysapien.render import RenderCameraComponent, RenderCubemap
 from ..pysapien.physx import PhysxSceneConfig as SceneConfig
 from typing import Union, Optional, TypeVar
 
@@ -389,7 +389,7 @@ class Scene(_Scene):
     def remove_light(self, light):
         self.remove_entity(light.entity)
 
-    def set_environment_map(self, cubemap: str):
+    def set_environment_map(self, cubemap: str | RenderCubemap):
         if isinstance(cubemap, str):
             self.render_system.cubemap = sapien.render.RenderCubemap(cubemap)
         else:
@@ -401,24 +401,6 @@ class Scene(_Scene):
         self.render_system.cubemap = sapien.render.RenderCubemap(px, nx, py, ny, pz, nz)
 
     # TODO particle entity, deformable entity
-
-    # pack, unpack
-
-    def __getstate__(self):
-        from ..serialization import _serialize_python_components
-
-        python_component_data = _serialize_python_components(
-            self._find_all_python_components()
-        )
-        return super().__getstate__(), python_component_data
-
-    def __setstate__(self, d):
-        from ..serialization import _unserialize_python_components
-
-        super_state, python_component_data = d
-        super().__setstate__(super_state)
-        components = _unserialize_python_components(python_component_data)
-        self._swap_in_python_components(components)
 
     def load_widget(self, widget: WidgetType) -> WidgetType:
         self.widgets.append(widget)

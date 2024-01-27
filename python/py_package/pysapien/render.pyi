@@ -16,16 +16,16 @@ class RenderBodyComponent(sapien.pysapien.Component):
         ...
     def clone(self) -> RenderBodyComponent:
         ...
-    def compute_global_aabb_tight(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def compute_global_aabb_tight(self) -> numpy.ndarray[tuple[typing.Literal[2], typing.Literal[3]], numpy.dtype[numpy.float32]]:
         ...
     def disable_render_id(self) -> None:
         ...
     def enable_render_id(self) -> None:
         ...
-    def get_global_aabb_fast(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def get_global_aabb_fast(self) -> numpy.ndarray[tuple[typing.Literal[2], typing.Literal[3]], numpy.dtype[numpy.float32]]:
         ...
     @typing.overload
-    def set_property(self, name: str, value: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]) -> None:
+    def set_property(self, name: str, value: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         ...
     @typing.overload
     def set_property(self, name: str, value: float) -> None:
@@ -77,7 +77,7 @@ class RenderCameraComponent(sapien.pysapien.Component):
         ...
     def get_picture(self, name: str) -> numpy.ndarray[typing.Any, numpy.dtype[typing.Any]]:
         ...
-    def get_picture_cuda(self, name: str) -> CudaArrayHandle:
+    def get_picture_cuda(self, name: str) -> sapien.pysapien.CudaArray:
         """
         This function transfers the rendered image into a CUDA buffer.
         
@@ -137,7 +137,7 @@ class RenderCameraComponent(sapien.pysapien.Component):
     def take_picture(self) -> None:
         ...
     @property
-    def _cuda_buffer(self) -> CudaArrayHandle:
+    def _cuda_buffer(self) -> sapien.pysapien.CudaArray:
         """
         Debug only. Get the CUDA buffer containing GPU data for this camera, including transformaion matrices, sizes, and user-defined shader fields.
         """
@@ -172,7 +172,7 @@ class RenderCameraComponent(sapien.pysapien.Component):
     def width(self) -> int:
         ...
 class RenderCameraGroup:
-    def get_picture_cuda(self, name: str) -> CudaArrayHandle:
+    def get_picture_cuda(self, name: str) -> sapien.pysapien.CudaArray:
         ...
     def take_picture(self) -> None:
         ...
@@ -194,9 +194,9 @@ class RenderCudaMeshComponent(sapien.pysapien.Component):
     vertex_count: int
     def __init__(self, max_vertex_count: int, max_triangle_count: int) -> None:
         ...
-    def get_cuda_triangles(self) -> CudaArrayHandle:
+    def get_cuda_triangles(self) -> sapien.pysapien.CudaArray:
         ...
-    def get_cuda_vertices(self) -> CudaArrayHandle:
+    def get_cuda_vertices(self) -> sapien.pysapien.CudaArray:
         ...
     def get_material(self) -> RenderMaterial:
         ...
@@ -215,10 +215,10 @@ class RenderCudaMeshComponent(sapien.pysapien.Component):
     def set_vertex_count(self, arg0: int) -> None:
         ...
     @property
-    def cuda_triangles(self) -> CudaArrayHandle:
+    def cuda_triangles(self) -> sapien.pysapien.CudaArray:
         ...
     @property
-    def cuda_vertices(self) -> CudaArrayHandle:
+    def cuda_vertices(self) -> sapien.pysapien.CudaArray:
         ...
 class RenderDirectionalLightComponent(RenderLightComponent):
     shadow_half_size: float
@@ -229,7 +229,7 @@ class RenderDirectionalLightComponent(RenderLightComponent):
     def set_shadow_half_size(self, arg0: float) -> None:
         ...
 class RenderLightComponent(sapien.pysapien.Component):
-    color: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]
+    color: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
     local_pose: sapien.pysapien.Pose
     shadow: bool
     shadow_far: float
@@ -239,7 +239,7 @@ class RenderLightComponent(sapien.pysapien.Component):
         ...
     def enable_shadow(self) -> None:
         ...
-    def get_color(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def get_color(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
     def get_global_pose(self) -> sapien.pysapien.Pose:
         ...
@@ -251,7 +251,7 @@ class RenderLightComponent(sapien.pysapien.Component):
         ...
     def get_shadow_near(self) -> float:
         ...
-    def set_color(self, arg0: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]) -> None:
+    def set_color(self, arg0: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         """
         color
         """
@@ -362,11 +362,11 @@ class RenderParallelogramLightComponent(RenderLightComponent):
 class RenderPointCloudComponent(sapien.pysapien.Component):
     def __init__(self, capacity: int = 0) -> None:
         ...
-    def get_cuda_vertices(self) -> CudaArrayHandle:
+    def get_cuda_vertices(self) -> sapien.pysapien.CudaArray:
         ...
-    def set_attribute(self, name: str, attribute: numpy.ndarray[tuple[M, N], numpy.dtype[numpy.float32]]) -> RenderPointCloudComponent:
+    def set_attribute(self, name: str, attribute: numpy.ndarray[tuple[M, N], numpy.dtype[numpy.float32]] | list | tuple) -> RenderPointCloudComponent:
         ...
-    def set_vertices(self, vertices: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]) -> RenderPointCloudComponent:
+    def set_vertices(self, vertices: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple) -> RenderPointCloudComponent:
         ...
 class RenderPointLightComponent(RenderLightComponent):
     def __init__(self) -> None:
@@ -407,12 +407,12 @@ class RenderShape:
     def per_scene_id(self) -> int:
         ...
 class RenderShapeBox(RenderShape):
-    def __init__(self, half_size: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]], material: RenderMaterial) -> None:
+    def __init__(self, half_size: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: RenderMaterial) -> None:
         ...
-    def get_half_size(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def get_half_size(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
     @property
-    def half_size(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def half_size(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
 class RenderShapeCapsule(RenderShape):
     def __init__(self, radius: float, half_length: float, material: RenderMaterial) -> None:
@@ -441,12 +441,12 @@ class RenderShapeCylinder(RenderShape):
     def radius(self) -> float:
         ...
 class RenderShapePlane(RenderShape):
-    def __init__(self, scale: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]], material: RenderMaterial) -> None:
+    def __init__(self, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: RenderMaterial) -> None:
         ...
-    def get_scale(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def get_scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
     @property
-    def scale(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
 class RenderShapeSphere(RenderShape):
     def __init__(self, radius: float, material: RenderMaterial) -> None:
@@ -457,18 +457,18 @@ class RenderShapeSphere(RenderShape):
     def radius(self) -> float:
         ...
 class RenderShapeTriangleMesh(RenderShape):
-    scale: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]
+    scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
     @typing.overload
-    def __init__(self, vertices: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]], triangles: numpy.ndarray[numpy.uint32[M, 3]], normals: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]], material: RenderMaterial) -> None:
+    def __init__(self, vertices: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple, triangles: numpy.ndarray[numpy.uint32[M, 3]], normals: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple, material: RenderMaterial) -> None:
         ...
     @typing.overload
-    def __init__(self, filename: str, scale: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] = ..., material: RenderMaterial = None) -> None:
+    def __init__(self, filename: str, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple = ..., material: RenderMaterial | None = None) -> None:
         ...
     def get_filename(self) -> str:
         ...
-    def get_scale(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def get_scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
-    def set_scale(self, scale: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]) -> None:
+    def set_scale(self, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         """
         Note: this function only works when the shape is not added to scene
         """
@@ -476,9 +476,9 @@ class RenderShapeTriangleMesh(RenderShape):
     def filename(self) -> str:
         ...
 class RenderShapeTriangleMeshPart:
-    def get_cuda_triangles(self) -> CudaArrayHandle:
+    def get_cuda_triangles(self) -> sapien.pysapien.CudaArray:
         ...
-    def get_cuda_vertices(self) -> CudaArrayHandle:
+    def get_cuda_vertices(self) -> sapien.pysapien.CudaArray:
         ...
     def get_material(self) -> RenderMaterial:
         ...
@@ -490,15 +490,15 @@ class RenderShapeTriangleMeshPart:
         ...
     def get_vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
         ...
-    def set_vertex_normal(self, normal: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]) -> None:
+    def set_vertex_normal(self, normal: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
         ...
-    def set_vertex_uv(self, uv: numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]) -> None:
-        ...
-    @property
-    def cuda_triangles(self) -> CudaArrayHandle:
+    def set_vertex_uv(self, uv: numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
         ...
     @property
-    def cuda_vertices(self) -> CudaArrayHandle:
+    def cuda_triangles(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_vertices(self) -> sapien.pysapien.CudaArray:
         ...
     @property
     def material(self) -> RenderMaterial:
@@ -523,11 +523,11 @@ class RenderSpotLightComponent(RenderLightComponent):
     def set_outer_fov(self, fov: float) -> None:
         ...
 class RenderSystem(sapien.pysapien.System):
-    ambient_light: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]
+    ambient_light: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
     cubemap: RenderCubemap
     def __init__(self) -> None:
         ...
-    def get_ambient_light(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def get_ambient_light(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
     def get_cameras(self) -> list[RenderCameraComponent]:
         ...
@@ -537,7 +537,7 @@ class RenderSystem(sapien.pysapien.System):
         ...
     def get_render_bodies(self) -> list[RenderBodyComponent]:
         ...
-    def set_ambient_light(self, color: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]) -> None:
+    def set_ambient_light(self, color: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         ...
     def set_cubemap(self, cubemap: RenderCubemap) -> None:
         ...
@@ -548,7 +548,7 @@ class RenderSystem(sapien.pysapien.System):
     def cameras(self) -> list[RenderCameraComponent]:
         ...
     @property
-    def cuda_object_transforms(self) -> CudaArrayHandle:
+    def cuda_object_transforms(self) -> sapien.pysapien.CudaArray:
         ...
     @property
     def lights(self) -> list[RenderLightComponent]:
@@ -561,7 +561,7 @@ class RenderSystemGroup:
         ...
     def create_camera_group(self, cameras: list[RenderCameraComponent], picture_names: list[str]) -> RenderCameraGroup:
         ...
-    def set_cuda_poses(self, arg0: CudaArrayHandle) -> None:
+    def set_cuda_poses(self, arg0: sapien.pysapien.CudaArray) -> None:
         ...
     def set_cuda_stream(self, arg0: int) -> None:
         ...
@@ -573,7 +573,7 @@ class RenderSystemGroup:
         This function waits for any pending CUDA operations on cuda stream provided by :func:`set_cuda_stream`.
         """
 class RenderTexture:
-    def __init__(self, array: numpy.ndarray[typing.Any, numpy.dtype[typing.Any]], dim: int, format: str, mipmap_levels: int = 1, filter_mode: typing.Literal['nearest', 'linear'] = 'linear', address_mode: typing.Literal['repeat', 'border', 'edge', 'mirror'] = 'repeat', srgb: bool = False) -> None:
+    def __init__(self, array: numpy.ndarray[typing.Any, numpy.dtype[typing.Any]] | list | tuple, dim: int, format: str, mipmap_levels: int = 1, filter_mode: typing.Literal['nearest', 'linear'] = 'linear', address_mode: typing.Literal['repeat', 'border', 'edge', 'mirror'] = 'repeat', srgb: bool = False) -> None:
         ...
     def download(self) -> numpy.ndarray[typing.Any, numpy.dtype[typing.Any]]:
         ...
@@ -593,7 +593,7 @@ class RenderTexture:
         ...
     def get_width(self) -> int:
         ...
-    def upload(self, data: numpy.ndarray[typing.Any, numpy.dtype[typing.Any]]) -> None:
+    def upload(self, data: numpy.ndarray[typing.Any, numpy.dtype[typing.Any]] | list | tuple) -> None:
         ...
     @property
     def address_mode(self) -> typing.Literal['repeat', 'border', 'edge', 'mirror']:
@@ -643,7 +643,7 @@ class RenderTexture2D:
         ...
     def get_width(self) -> int:
         ...
-    def upload(self, data: numpy.ndarray[typing.Any, numpy.dtype[typing.Any]]) -> None:
+    def upload(self, data: numpy.ndarray[typing.Any, numpy.dtype[typing.Any]] | list | tuple) -> None:
         ...
     @property
     def address_mode(self) -> typing.Literal['repeat', 'border', 'edge', 'mirror']:
@@ -684,7 +684,7 @@ class RenderWindow:
         ...
     def get_camera_pose(self) -> sapien.pysapien.Pose:
         ...
-    def get_camera_position(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def get_camera_position(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
     def get_camera_projection_matrix(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
         ...
@@ -692,7 +692,7 @@ class RenderWindow:
         ...
     def get_camera_property_int(self, arg0: str) -> int:
         ...
-    def get_camera_rotation(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def get_camera_rotation(self) -> numpy.ndarray[typing.Literal[4], numpy.dtype[numpy.float32]]:
         ...
     def get_content_scale(self) -> float:
         ...
@@ -720,7 +720,7 @@ class RenderWindow:
         ...
     def set_camera_pose(self, arg0: sapien.pysapien.Pose) -> None:
         ...
-    def set_camera_position(self, position: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]) -> None:
+    def set_camera_position(self, position: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         ...
     @typing.overload
     def set_camera_property(self, key: str, value: float) -> None:
@@ -728,7 +728,7 @@ class RenderWindow:
     @typing.overload
     def set_camera_property(self, key: str, value: int) -> None:
         ...
-    def set_camera_rotation(self, quat: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]) -> None:
+    def set_camera_rotation(self, quat: numpy.ndarray[typing.Literal[4], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         ...
     def set_camera_texture(self, name: str, texture: RenderTexture2D) -> None:
         ...
@@ -742,7 +742,7 @@ class RenderWindow:
         ...
     def set_scene(self, scene: sapien.pysapien.Scene) -> None:
         ...
-    def set_scenes(self, scenes: list[sapien.pysapien.Scene], offsets: list[numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]]) -> None:
+    def set_scenes(self, scenes: list[sapien.pysapien.Scene], offsets: list[numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]]) -> None:
         ...
     def set_shader_dir(self, shader_dir: str) -> None:
         ...

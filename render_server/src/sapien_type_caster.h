@@ -11,7 +11,7 @@ using namespace sapien;
 
 namespace pybind11::detail {
 template <> struct type_caster<Vec3> {
-  PYBIND11_TYPE_CASTER(Vec3, _("numpy.ndarray[numpy.float32, _Shape[3]]"));
+  PYBIND11_TYPE_CASTER(Vec3, _("numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]"));
 
   bool load(py::handle src, bool convert) {
     if (!convert && !py::array_t<float>::check_(src))
@@ -32,7 +32,7 @@ template <> struct type_caster<Vec3> {
 };
 
 template <> struct type_caster<Quat> {
-  PYBIND11_TYPE_CASTER(Quat, _("numpy.ndarray[numpy.float32, _Shape[4]]"));
+  PYBIND11_TYPE_CASTER(Quat, _("numpy.ndarray[typing.Literal[4], numpy.dtype[numpy.float32]]"));
 
   bool load(py::handle src, bool convert) {
     if (!convert && !py::array_t<float>::check_(src))
@@ -53,7 +53,7 @@ template <> struct type_caster<Quat> {
 };
 
 template <> struct type_caster<AABB> {
-  PYBIND11_TYPE_CASTER(AABB, _("numpy.ndarray[numpy.float32, _Shape[2, 3]]"));
+  PYBIND11_TYPE_CASTER(AABB, _("numpy.ndarray[tuple[typing.Literal[2], typing.Literal[3]] numpy.float32]"));
 
   bool load(py::handle src, bool convert) { return false; }
 
