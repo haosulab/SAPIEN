@@ -1,5 +1,7 @@
 from __future__ import annotations
+import jax
 import numpy
+import torch
 import typing
 from . import internal_renderer
 from . import math
@@ -7,7 +9,7 @@ from . import physx
 from . import render
 from . import simsense
 __all__ = ['Component', 'CudaArray', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'internal_renderer', 'math', 'physx', 'profile', 'render', 'set_log_level', 'simsense']
-_T = typing.TypeVar("_T", bound=Component)
+_T = typing.TypeVar("_T", bound=sapien.Component)
 class Component:
     entity_pose: Pose
     name: str
@@ -47,9 +49,9 @@ class CudaArray:
         ...
     def dlpack(self) -> typing.Any:
         ...
-    def jax(self) -> typing.Any:
+    def jax(self) -> jax.Array:
         ...
-    def torch(self) -> typing.Any:
+    def torch(self) -> torch.Tensor:
         ...
     @property
     def __cuda_array_interface__(self) -> dict:
@@ -151,7 +153,7 @@ class Pose:
     def to_transformation_matrix(self) -> numpy.ndarray[tuple[typing.Literal[4], typing.Literal[4]], numpy.dtype[numpy.float32]]:
         ...
 class Profiler:
-    def __call__(self, arg0: typing.Callable) -> cpp_function:
+    def __call__(self, arg0: typing.Callable) -> typing.Callable:
         ...
     def __enter__(self) -> None:
         ...
@@ -203,7 +205,7 @@ class System:
 def profile(arg0: str) -> Profiler:
     ...
 @typing.overload
-def profile(arg0: typing.Callable) -> cpp_function:
+def profile(arg0: typing.Callable) -> typing.Callable:
     ...
 def set_log_level(level: str) -> None:
     ...

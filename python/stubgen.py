@@ -33,6 +33,45 @@ from pybind11_stubgen.structs import (
 # pybind11-stubgen == 2.4.2
 
 
+class FixTorchJax(IParser):
+    def handle_class_member(
+        self, path: QualifiedName, class_: type, obj: Any
+    ) -> Docstring | Alias | Class | list[Method] | Field | Property | None:
+        result = super().handle_class_member(path, class_, obj)
+        if not isinstance(result, list):
+            return result
+
+        for method in result:
+            if str(method.function.name) == "torch":
+                method.function.returns = ResolvedType(
+                    QualifiedName.from_str("torch.Tensor")
+                )
+
+        for method in result:
+            if str(method.function.name) == "jax":
+                method.function.returns = ResolvedType(
+                    QualifiedName.from_str("jax.Array")
+                )
+
+        return result
+
+    def handle_module(
+        self, path: QualifiedName, module: types.ModuleType
+    ) -> Module | None:
+        result = super().handle_module(path, module)
+        if result is None:
+            return None
+        if str(path).endswith("pysapien"):
+            result.imports.add(
+                Import(name=None, origin=QualifiedName.from_str("torch")),
+            )
+            result.imports.add(
+                Import(name=None, origin=QualifiedName.from_str("jax")),
+            )
+
+        return result
+
+
 class FixCppFunction(IParser):
     def handle_function(self, path: QualifiedName, func: Any) -> list[Function]:
         result = super().handle_function(path, func)
@@ -146,7 +185,7 @@ class FixFindComponentByType(IParser):
             result.type_vars.append(
                 TypeVar_(
                     name=Identifier("_T"),
-                    bound=ResolvedType(QualifiedName.from_str("Component")),
+                    constraints=[ResolvedType((QualifiedName.from_str("Component")))],
                 ),
             )
 
@@ -171,6 +210,7 @@ def stub_parser() -> IParser:
         FixMissingImports,
         FilterTypingModuleAttributes,
         FixPEP585CollectionNames,
+        FixTorchJax,
         FixCppFunction,
         FixNoneParameterType,
         FixTypingTypeNames,
