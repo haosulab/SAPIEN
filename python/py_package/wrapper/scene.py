@@ -1,3 +1,4 @@
+from __future__ import annotations
 from ..pysapien import Scene as _Scene
 from .. import pysapien as sapien
 from ..pysapien.render import RenderCameraComponent, RenderCubemap
