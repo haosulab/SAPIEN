@@ -821,11 +821,11 @@ void PhysxSystemGpu::gpuUploadArticulationQpos(int index, Eigen::VectorXf const 
 }
 
 void PhysxSystemGpu::setSceneOffset(std::shared_ptr<Scene> scene, Vec3 offset) {
-  if (mRigidDynamicComponents.size() || mRigidStaticComponents.size() ||
-      mArticulationLinkComponents.size()) {
-    throw std::runtime_error(
-        "Scene offset may only be changed when no bodies are added to the scene.");
+  // clean up occasionally
+  if (mSceneOffset.size() % 1024 == 0) {
+    std::erase_if(mSceneOffset, [](const auto &p) { return p.first.expired(); });
   }
+
   mSceneOffset[scene] = offset;
 }
 
@@ -963,6 +963,19 @@ void PhysxSystemGpu::allocateCudaBuffers() {
 
   int linkVelSize = mGpuArticulationCount * mGpuArticulationMaxLinkCount * 6 * sizeof(float);
   mCudaLinkVelScratch = CudaArray({linkVelSize}, "u1");
+}
+
+PhysxSystem::~PhysxSystem() { logger::info("Deleting PhysxSystem"); }
+
+PhysxSystemCpu::~PhysxSystemCpu() {
+  if (mPxScene) {
+    mPxScene->release();
+  }
+}
+PhysxSystemGpu::~PhysxSystemGpu() {
+  if (mPxScene) {
+    mPxScene->release();
+  }
 }
 
 } // namespace physx

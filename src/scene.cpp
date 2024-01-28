@@ -1,4 +1,5 @@
 #include "sapien/scene.h"
+#include "./logger.h"
 #include "sapien/entity.h"
 #include "sapien/physx/physx_system.h"
 #include "sapien/sapien_renderer/sapien_renderer.h"
@@ -7,10 +8,14 @@ namespace sapien {
 
 uint64_t Scene::gNextSceneId = 1;
 
+static uint64_t gSceneCount = 0;
+
 Scene::Scene(std::vector<std::shared_ptr<System>> const &systems) : mId(gNextSceneId++) {
   for (auto s : systems) {
     addSystem(s);
   }
+  gSceneCount++;
+  logger::info("Created Scene {}, total {}", mId, gSceneCount);
 }
 
 void Scene::addSystem(std::shared_ptr<System> system) {
@@ -86,6 +91,15 @@ void Scene::unpackEntityPoses(std::string const &data) {
   // TODO: check nothing is left
 }
 
-Scene::~Scene() {}
+Scene::~Scene() {
+  gSceneCount--;
+  logger::info("Deleting Scene {}, total {}", mId, gSceneCount);
+  for (auto &entity : mEntities) {
+    entity->onRemoveFromScene(*this);
+    entity->internalSetPerSceneId(0);
+    entity->internalSetScene(nullptr);
+  }
+  mEntities.clear();
+}
 
 } // namespace sapien

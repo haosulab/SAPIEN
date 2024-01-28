@@ -9,7 +9,7 @@ from . import physx
 from . import render
 from . import simsense
 __all__ = ['Component', 'CudaArray', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'internal_renderer', 'math', 'physx', 'profile', 'render', 'set_log_level', 'simsense']
-_T = typing.TypeVar("_T", bound=sapien.Component)
+_T = typing.TypeVar("_T", Component)
 class Component:
     entity_pose: Pose
     name: str

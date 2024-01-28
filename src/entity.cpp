@@ -1,12 +1,17 @@
 #include "sapien/entity.h"
+#include "./logger.h"
 #include "sapien/component.h"
 #include "sapien/scene.h"
 
 namespace sapien {
 
 static uint64_t gNextEntityId = 1ul;
+static uint64_t gEntityCount = 0;
 
-Entity::Entity() : mId(gNextEntityId++) {}
+Entity::Entity() : mId(gNextEntityId++) {
+  gEntityCount++;
+  logger::info("Created Entity {}, total {}", mId, gEntityCount);
+}
 
 std::shared_ptr<Scene> Entity::getScene() { return mScene ? mScene->shared_from_this() : nullptr; }
 
@@ -34,8 +39,7 @@ std::shared_ptr<Entity> Entity::addComponent(std::shared_ptr<Component> componen
   return shared_from_this();
 }
 
-void Entity::internalSwapInComponent(uint32_t index,
-                                     std::shared_ptr<Component> component) {
+void Entity::internalSwapInComponent(uint32_t index, std::shared_ptr<Component> component) {
   if (component->getEntity()) {
     throw std::runtime_error("failed to add component: component already added.");
   }
@@ -89,6 +93,11 @@ void Entity::removeFromScene() {
         "failed to remove entity from scene: the entity is not added to any scene.");
   }
   mScene->removeEntity(shared_from_this());
+}
+
+Entity::~Entity() {
+  gEntityCount--;
+  logger::info("Deleting Entity {}, total {}", mId, gEntityCount);
 }
 
 } // namespace sapien

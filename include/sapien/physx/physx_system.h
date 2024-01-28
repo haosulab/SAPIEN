@@ -64,6 +64,8 @@ public:
   void setSceneCollisionId(int id) { mSceneCollisionId = id; }
   int getSceneCollisionId() const { return mSceneCollisionId; }
 
+  ~PhysxSystem();
+
 protected:
   PhysxSystem();
 
@@ -104,6 +106,8 @@ public:
   void unpackState(std::string const &data);
 
   std::vector<Contact *> getContacts() const { return mSimulationCallback.getContacts(); }
+
+  ~PhysxSystemCpu();
 
 private:
   DefaultEventCallback mSimulationCallback;
@@ -207,6 +211,8 @@ public:
 
   void setSceneOffset(std::shared_ptr<Scene> scene, Vec3 offset);
   Vec3 getSceneOffset(std::shared_ptr<Scene> scene) const;
+
+  ~PhysxSystemGpu();
 
 private:
   // TODO do weak pointer clean up

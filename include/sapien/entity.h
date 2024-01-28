@@ -48,7 +48,7 @@ public:
   /** same as Scene::removeEntity */
   void removeFromScene();
 
-  ~Entity() = default;
+  ~Entity();
   Entity &operator=(Entity const &other) = delete;
   Entity &operator=(Entity &&other) = delete;
   Entity(Entity const &other) = delete;
