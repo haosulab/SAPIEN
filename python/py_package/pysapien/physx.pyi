@@ -4,7 +4,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien_pinocchio
 import typing
-__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSceneConfig', 'PhysxSystem', 'get_default_material', 'get_scene_config', 'is_gpu_enabled', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config']
+__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyForceQuery', 'PhysxGpuContactQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSceneConfig', 'PhysxSystem', 'get_default_material', 'get_scene_config', 'is_gpu_enabled', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config']
 M = typing.TypeVar("M", bound=int)
 class PhysxArticulation:
     name: str
@@ -293,7 +293,7 @@ class PhysxCollisionShape:
         
         ((A.g0 & B.g1) or (A.g1 & B.g0)) and (not ((A.g2 & B.g2) and ((A.g3 & 0xffff) == (B.g3 & 0xffff))))
         
-        Here is some explanation: g2 is the "ignore group" and g3 is the "id group". The only the lower 16 bits of the id group is used since the upper 16 bits are reserved for other purposes in the future. When 2 collision shapes have the same ID (g3), then if any of their g2 bits match, their collisions are definitely ignored.
+        Here is some explanation: g2 is the "ignore group" and g3 is the "id group". Only the lower 16 bits of the id group is used since the upper 16 bits are reserved for other purposes in the future. When 2 collision shapes have the same ID (g3), then if any of their g2 bits match, their collisions are always ignored.
         
         If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g0 is the "contact type group" and g1 is the "contact affinity group". Collision shapes collide only when a bit in the contact type of the first shape matches a bit in the contact affinity of the second shape.
         """
@@ -522,6 +522,10 @@ class PhysxGearComponent(PhysxJointComponent):
     @property
     def is_hinges_enabled(self) -> bool:
         ...
+class PhysxGpuContactBodyForceQuery:
+    @property
+    def cuda_forces(self) -> sapien.pysapien.CudaArray:
+        ...
 class PhysxGpuContactQuery:
     @property
     def cuda_contacts(self) -> sapien.pysapien.CudaArray:
@@ -579,6 +583,8 @@ class PhysxGpuSystem(PhysxSystem):
     @typing.overload
     def gpu_apply_rigid_dynamic_data(self, arg0: sapien.pysapien.CudaArray) -> None:
         ...
+    def gpu_create_contact_body_force_query(self, bodies: list[PhysxRigidBaseComponent]) -> PhysxGpuContactBodyForceQuery:
+        ...
     def gpu_create_contact_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactQuery:
         ...
     def gpu_fetch_articulation_link_pose(self) -> None:
@@ -603,6 +609,16 @@ class PhysxGpuSystem(PhysxSystem):
            must be called each time when actors are added or removed from the scene. One
            may call `gpu_apply_*` functions to initialize the system after calling this
            function.
+        """
+    def gpu_query_contact_body_forces(self, query: PhysxGpuContactBodyForceQuery) -> None:
+        """
+        Query net contact forces for specific bodies of the last simulation step.
+        Usage:
+            query = system.gpu_create_contact_body_force_query(bodies)  # create force query in advance
+        
+            # after simulation step
+            system.gpu_query_contact_body_forces(query)
+            # query.cuda_buffer is now filled with net contact forces for each body
         """
     def gpu_query_contacts(self, query: PhysxGpuContactQuery) -> None:
         ...

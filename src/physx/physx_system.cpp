@@ -209,6 +209,8 @@ void PhysxSystemGpu::step() {
     throw std::runtime_error("failed to step: gpu simulation is not initialized.");
   }
 
+  mContactUpToDate = false;
+
   ++mTotalSteps;
   mPxScene->simulate(mTimestep);
   mPxScene->fetchResults(true);
@@ -219,6 +221,8 @@ void PhysxSystemGpu::stepStart() {
   if (!mGpuInitialized) {
     throw std::runtime_error("failed to step: gpu simulation is not initialized.");
   }
+
+  mContactUpToDate = false;
 
   ++mTotalSteps;
   mPxScene->simulate(mTimestep);
@@ -396,6 +400,35 @@ std::shared_ptr<PhysxGpuContactQuery> PhysxSystemGpu::gpuCreateContactQuery(
   return res;
 }
 
+std::shared_ptr<PhysxGpuContactBodyForceQuery> PhysxSystemGpu::gpuCreateContactBodyForceQuery(
+    std::vector<std::shared_ptr<PhysxRigidBaseComponent>> const &bodies) {
+  if (bodies.empty()) {
+    throw std::runtime_error("failed to create contact query: empty body list");
+  }
+  std::vector<ActorQuery> actors;
+  for (uint32_t i = 0; i < bodies.size(); ++i) {
+    if (!bodies[i]) {
+      throw std::runtime_error("failed to create contact actors: invalid body");
+    }
+    actors.push_back({bodies[i]->getPxActor(), i});
+  }
+
+  std::sort(actors.begin(), actors.end(),
+            [](ActorQuery const &a, ActorQuery const &b) { return a.actor < b.actor; });
+  static_assert(sizeof(ActorQuery) == 16);
+
+  CudaArray query({static_cast<int>(actors.size()), 4}, "i4");
+  checkCudaErrors(cudaMemcpy(query.ptr, actors.data(), actors.size() * sizeof(ActorQuery),
+                             cudaMemcpyHostToDevice));
+  CudaArray buffer({static_cast<int>(actors.size()), 3}, "f4");
+
+  // TODO: use dedicated type, do not reuse contact query
+  auto res = std::make_shared<PhysxGpuContactBodyForceQuery>();
+  res->query = std::move(query);
+  res->buffer = std::move(buffer);
+  return res;
+}
+
 inline static int upperPowerOf2(int x) {
   x--;
   x |= x >> 1;
@@ -407,10 +440,10 @@ inline static int upperPowerOf2(int x) {
   return x;
 }
 
-void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
-  SAPIEN_PROFILE_FUNCTION;
-
-  cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3, mCudaStream);
+void PhysxSystemGpu::copyContactData() {
+  if (mContactUpToDate) {
+    return;
+  }
 
   if (!mCudaContactCount.ptr) {
     mCudaContactCount = CudaArray({1}, "u4");
@@ -422,11 +455,10 @@ void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
 
   SAPIEN_PROFILE_BLOCK_BEGIN("fetch contact count");
   mPxScene->copyContactData(mCudaContactBuffer.ptr, 0, mCudaContactCount.ptr);
-  int num{0};
-  cudaMemcpy(&num, mCudaContactCount.ptr, sizeof(int), cudaMemcpyDeviceToHost);
+  cudaMemcpy(&mContactCount, mCudaContactCount.ptr, sizeof(int), cudaMemcpyDeviceToHost);
   SAPIEN_PROFILE_BLOCK_END;
 
-  int size = upperPowerOf2(num);
+  int size = upperPowerOf2(mContactCount);
   if (mCudaContactBuffer.shape[0] < size) {
     SAPIEN_PROFILE_BLOCK("re-allocate contact buffer");
     mCudaContactBuffer = CudaArray({size, sizeof(PxGpuContactPair)}, "u1");
@@ -434,9 +466,34 @@ void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
 
   mPxScene->copyContactData(mCudaContactBuffer.ptr, size, mCudaContactCount.ptr);
 
-  handle_contacts((PxGpuContactPair *)mCudaContactBuffer.ptr, num,
+  mContactUpToDate = true;
+}
+
+void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
+  SAPIEN_PROFILE_FUNCTION;
+  query.query.handle().checkShape({-1, 6});
+
+  cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3, mCudaStream);
+
+  copyContactData();
+
+  handle_contacts((PxGpuContactPair *)mCudaContactBuffer.ptr, mContactCount,
                   (ActorPairQuery *)query.query.ptr, query.query.shape.at(0),
                   (Vec3 *)query.buffer.ptr, mCudaStream);
+  cudaStreamSynchronize(mCudaStream);
+}
+
+void PhysxSystemGpu::gpuQueryContactBodyForces(PhysxGpuContactBodyForceQuery const &query) {
+  SAPIEN_PROFILE_FUNCTION;
+  query.query.handle().checkShape({-1, 4});
+
+  cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3, mCudaStream);
+
+  copyContactData();
+
+  handle_net_contact_force((PxGpuContactPair *)mCudaContactBuffer.ptr, mContactCount,
+                           (ActorQuery *)query.query.ptr, query.query.shape.at(0),
+                           (Vec3 *)query.buffer.ptr, mCudaStream);
   cudaStreamSynchronize(mCudaStream);
 }
 

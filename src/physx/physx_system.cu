@@ -141,6 +141,21 @@ __device__ int binary_search(ActorPairQuery const *__restrict__ arr, int count, 
   return -1;
 }
 
+__device__ int binary_search(ActorQuery const *__restrict__ arr, int count, ::physx::PxActor *x) {
+  int low = 0;
+  int high = count - 1;
+  while (low <= high) {
+    int mid = low + (high - low) / 2;
+    if (arr[mid].actor == x)
+      return mid;
+    if (arr[mid].actor < x)
+      low = mid + 1;
+    else
+      high = mid - 1;
+  }
+  return -1;
+}
+
 __global__ void handle_contacts_kernel(::physx::PxGpuContactPair *__restrict__ contacts,
                                        int contact_count, ActorPairQuery *__restrict__ query,
                                        int query_count, Vec3 *__restrict__ out_forces) {
@@ -177,6 +192,53 @@ __global__ void handle_contacts_kernel(::physx::PxGpuContactPair *__restrict__ c
     }
   }
   out_forces[id] = force;
+}
+
+__global__ void handle_net_contact_force_kernel(::physx::PxGpuContactPair *__restrict__ contacts,
+                                                int contact_count, ActorQuery *__restrict__ query,
+                                                int query_count, Vec3 *__restrict__ out_forces) {
+  int g = blockIdx.x * blockDim.x + threadIdx.x;
+  if (g >= contact_count) {
+    return;
+  }
+
+  ::physx::PxActor *actor0 = contacts[g].actor0;
+  ::physx::PxActor *actor1 = contacts[g].actor1;
+
+  int index0 = binary_search(query, query_count, actor0);
+  int index1 = binary_search(query, query_count, actor1);
+
+  if (index0 < 0 && index1 < 0) {
+    return;
+  }
+
+  ::physx::PxContactPatch *patches = (::physx::PxContactPatch *)contacts[g].contactPatches;
+  ::physx::PxContact *points = (::physx::PxContact *)contacts[g].contactPoints;
+
+  float *forces = contacts[g].contactForces;
+
+  Vec3 force = Vec3(0.f);
+  for (int pi = 0; pi < contacts[g].nbPatches; ++pi) {
+    Vec3 normal(patches[pi].normal.x, patches[pi].normal.y, patches[pi].normal.z);
+    for (int i = 0; i < patches[pi].nbContacts; ++i) {
+      int ci = patches[pi].startContactIndex + i;
+      float f = forces[ci];
+      force += normal * f;
+    }
+  }
+
+  if (index0 >= 0) {
+    int id = query[index0].id;
+    atomicAdd(&out_forces[id].x, force.x);
+    atomicAdd(&out_forces[id].y, force.y);
+    atomicAdd(&out_forces[id].z, force.z);
+  }
+  if (index1 >= 0) {
+    int id = query[index1].id;
+    atomicAdd(&out_forces[id].x, -force.x);
+    atomicAdd(&out_forces[id].y, -force.y);
+    atomicAdd(&out_forces[id].z, -force.z);
+  }
 }
 
 constexpr int BLOCK_SIZE = 128;
@@ -236,6 +298,14 @@ void handle_contacts(::physx::PxGpuContactPair *contacts, int contact_count, Act
                      int query_count, Vec3 *out_forces, cudaStream_t stream) {
   handle_contacts_kernel<<<(contact_count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0, stream>>>(
       contacts, contact_count, query, query_count, out_forces);
+}
+
+void handle_net_contact_force(::physx::PxGpuContactPair *contacts, int contact_count,
+                              ActorQuery *query, int query_count, Vec3 *out_forces,
+                              cudaStream_t stream) {
+  handle_net_contact_force_kernel<<<(contact_count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
+                                    stream>>>(contacts, contact_count, query, query_count,
+                                              out_forces);
 }
 
 } // namespace physx

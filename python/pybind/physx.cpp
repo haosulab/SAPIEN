@@ -232,7 +232,10 @@ Generator<int> init_physx(py::module &sapien) {
   auto PyPhysxSystemCpu = py::class_<PhysxSystemCpu, PhysxSystem>(m, "PhysxCpuSystem");
 
   auto PyPhysxSystemGpu = py::class_<PhysxSystemGpu, PhysxSystem>(m, "PhysxGpuSystem");
+
   auto PyPhysxGpuContactQuery = py::class_<PhysxGpuContactQuery>(m, "PhysxGpuContactQuery");
+  auto PyPhysxGpuContactBodyForceQuery =
+      py::class_<PhysxGpuContactBodyForceQuery>(m, "PhysxGpuContactBodyForceQuery");
 
   auto PyPhysxBaseComponent = py::class_<PhysxBaseComponent, Component>(m, "PhysxBaseComponent");
   auto PyPhysxRigidBaseComponent =
@@ -408,6 +411,19 @@ Args:
            py::arg("body_pairs"))
       .def("gpu_query_contacts", &PhysxSystemGpu::gpuQueryContacts, py::arg("query"))
 
+      .def("gpu_create_contact_body_force_query", &PhysxSystemGpu::gpuCreateContactBodyForceQuery,
+           py::arg("bodies"))
+      .def("gpu_query_contact_body_forces", &PhysxSystemGpu::gpuQueryContactBodyForces,
+           py::arg("query"),
+           R"doc(Query net contact forces for specific bodies of the last simulation step.
+Usage:
+    query = system.gpu_create_contact_body_force_query(bodies)  # create force query in advance
+
+    # after simulation step
+    system.gpu_query_contact_body_forces(query)
+    # query.cuda_buffer is now filled with net contact forces for each body
+)doc")
+
       .def("gpu_update_articulation_kinematics", &PhysxSystemGpu::gpuUpdateArticulationKinematics)
 
       // TODO apply force torque
@@ -457,6 +473,9 @@ Args:
 
   PyPhysxGpuContactQuery.def_property_readonly(
       "cuda_contacts", [](PhysxGpuContactQuery const &q) { return q.buffer.handle(); });
+
+  PyPhysxGpuContactBodyForceQuery.def_property_readonly(
+      "cuda_forces", [](PhysxGpuContactBodyForceQuery const &q) { return q.buffer.handle(); });
 
   PyPhysxMaterial
       .def(py::init<float, float, float>(), py::arg("static_friction"),
@@ -513,7 +532,7 @@ collision groups determine the collision behavior of objects. Let A.gx denote th
 
 ((A.g0 & B.g1) or (A.g1 & B.g0)) and (not ((A.g2 & B.g2) and ((A.g3 & 0xffff) == (B.g3 & 0xffff))))
 
-Here is some explanation: g2 is the "ignore group" and g3 is the "id group". The only the lower 16 bits of the id group is used since the upper 16 bits are reserved for other purposes in the future. When 2 collision shapes have the same ID (g3), then if any of their g2 bits match, their collisions are definitely ignored.
+Here is some explanation: g2 is the "ignore group" and g3 is the "id group". Only the lower 16 bits of the id group is used since the upper 16 bits are reserved for other purposes in the future. When 2 collision shapes have the same ID (g3), then if any of their g2 bits match, their collisions are always ignored.
 
 If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g0 is the "contact type group" and g1 is the "contact affinity group". Collision shapes collide only when a bit in the contact type of the first shape matches a bit in the contact affinity of the second shape.)doc")
 

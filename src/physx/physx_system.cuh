@@ -29,6 +29,11 @@ struct ActorPairQuery {
   int order;
 };
 
+struct ActorQuery {
+  ::physx::PxActor *actor;
+  uint32_t id;
+};
+
 CUDA_CALLABLE inline bool operator==(ActorPair const &a, ActorPair const &b) {
   return a.actor0 == b.actor0 && a.actor1 == b.actor1;
 }
@@ -88,10 +93,16 @@ void root_pose_sapien_to_physx(void *physx_pose, void *sapien_data, void *index,
 void root_vel_sapien_to_physx(void *physx_vel, void *sapien_data, void *index, int link_count,
                               int count, CUstream_st *);
 
-// fill out_forces with net contact forces. query stores sorted pairs of interested actors and
-// their index corresponding to the out_forces array
+// fill out_forces with net contact forces per body pair. query stores sorted pairs of
+// interested actors and their indices corresponding to the out_forces array
 void handle_contacts(::physx::PxGpuContactPair *contacts, int contact_count, ActorPairQuery *query,
                      int query_count, Vec3 *out_forces, cudaStream_t stream);
+
+// fill out_forces with net contact forces per body. query stores sorted actors
+// and their indices corresponding to the out_forces array
+void handle_net_contact_force(::physx::PxGpuContactPair *contacts, int contact_count,
+                              ActorQuery *query, int query_count, Vec3 *out_forces,
+                              cudaStream_t stream);
 
 } // namespace physx
 } // namespace sapien

@@ -124,6 +124,11 @@ struct PhysxGpuContactQuery {
   CudaArray buffer;
 };
 
+struct PhysxGpuContactBodyForceQuery {
+  CudaArray query;
+  CudaArray buffer;
+};
+
 class PhysxSystemGpu : public PhysxSystem {
 public:
   PhysxSystemGpu();
@@ -202,7 +207,11 @@ public:
   std::shared_ptr<PhysxGpuContactQuery> gpuCreateContactQuery(
       std::vector<std::pair<std::shared_ptr<PhysxRigidBaseComponent>,
                             std::shared_ptr<PhysxRigidBaseComponent>>> const &bodyPairs);
+  std::shared_ptr<PhysxGpuContactBodyForceQuery> gpuCreateContactBodyForceQuery(
+      std::vector<std::shared_ptr<PhysxRigidBaseComponent>> const &bodies);
+
   void gpuQueryContacts(PhysxGpuContactQuery const &query);
+  void gpuQueryContactBodyForces(PhysxGpuContactBodyForceQuery const &query);
 
   void syncPosesGpuToCpu();
 
@@ -267,6 +276,10 @@ private:
 
   CudaArray mCudaContactBuffer;
   CudaArray mCudaContactCount;
+
+  bool mContactUpToDate{false};
+  int mContactCount{0}; // current contact count, valid only when contactUpdaToDate is true
+  void copyContactData();
 };
 
 #endif
