@@ -2,24 +2,13 @@
 #extension GL_ARB_separate_shader_objects : enable
 #extension GL_ARB_shading_language_420pack : enable
 
-layout(set = 0, binding = 0) uniform CameraBuffer {
-  mat4 viewMatrix;
-  mat4 projectionMatrix;
-  mat4 viewMatrixInverse;
-  mat4 projectionMatrixInverse;
-  float width;
-  float height;
-} cameraBuffer;
+#define SET_NUM 0
+#include "./camera_set.glsl"
+#undef SET_NUM
 
-layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
-  mat4 modelMatrix;
-} objectTransformBuffer;
-
-layout(set = 1, binding = 1) uniform ObjectDataBuffer {
-  uvec4 segmentation;
-  float transparency;
-  int shadeFlat;
-} objectDataBuffer;
+#define SET_NUM 1
+#include "./object_set.glsl"
+#undef SET_NUM
 
 layout(location = 0) in vec3 position;
 layout(location = 1) in float scale;

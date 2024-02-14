@@ -8,49 +8,13 @@ layout (constant_id = 4) const int NUM_TEXTURED_LIGHT_SHADOWS = 1;
 layout (constant_id = 5) const int NUM_SPOT_LIGHT_SHADOWS = 10;
 layout (constant_id = 6) const int NUM_SPOT_LIGHTS = 10;
 
-#include "../common/view.glsl"
-#include "../common/lights.glsl"
-#include "../common/shadow.glsl"
+#define SET_NUM 0
+#include "./scene_set.glsl"
+#undef SET_NUM
 
-
-layout(set = 0, binding = 0) uniform SceneBuffer {
-  vec4 ambientLight;
-  DirectionalLight directionalLights[3];
-  SpotLight spotLights[10];
-  PointLight pointLights[10];
-  SpotLight texturedLights[1];
-} sceneBuffer;
-
-struct LightBuffer {
-  mat4 viewMatrix;
-  mat4 viewMatrixInverse;
-  mat4 projectionMatrix;
-  mat4 projectionMatrixInverse;
-  int width;
-  int height;
-};
-
-layout(set = 0, binding = 1) uniform ShadowBuffer {
-  LightBuffer directionalLightBuffers[3];
-  LightBuffer spotLightBuffers[10];
-  LightBuffer pointLightBuffers[60];
-  LightBuffer texturedLightBuffers[1];
-} shadowBuffer;
-
-layout(set = 0, binding = 2) uniform samplerCube samplerPointLightDepths[3];
-layout(set = 0, binding = 3) uniform sampler2D samplerDirectionalLightDepths[1];
-layout(set = 0, binding = 4) uniform sampler2D samplerTexturedLightDepths[1];
-layout(set = 0, binding = 5) uniform sampler2D samplerSpotLightDepths[10];
-layout(set = 0, binding = 6) uniform sampler2D samplerTexturedLightTextures[1];
-
-layout(set = 1, binding = 0) uniform CameraBuffer {
-  mat4 viewMatrix;
-  mat4 projectionMatrix;
-  mat4 viewMatrixInverse;
-  mat4 projectionMatrixInverse;
-  float width;
-  float height;
-} cameraBuffer;
+#define SET_NUM 1
+#include "./camera_set.glsl"
+#undef SET_NUM
 
 layout(set = 2, binding = 0) uniform sampler2D samplerAlbedo;
 layout(set = 2, binding = 1) uniform sampler2D samplerPositionRaw;
@@ -59,10 +23,6 @@ layout(set = 2, binding = 3) uniform sampler2D samplerNormal;
 layout(set = 2, binding = 4) uniform sampler2D samplerEmission;
 layout(set = 2, binding = 5) uniform sampler2D samplerGbufferDepth;
 layout(set = 2, binding = 6) uniform sampler2D samplerCustom;
-
-// IBL
-layout(set = 2, binding = 7) uniform samplerCube samplerEnvironment;
-layout(set = 2, binding = 8) uniform sampler2D samplerBRDFLUT;
 
 layout(location = 0) in vec2 inUV;
 layout(location = 0) out vec4 outLighting;

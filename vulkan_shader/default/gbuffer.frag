@@ -1,45 +1,17 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform CameraBuffer {
-  mat4 viewMatrix;
-  mat4 projectionMatrix;
-  mat4 viewMatrixInverse;
-  mat4 projectionMatrixInverse;
-  float width;
-  float height;
-} cameraBuffer;
+#define SET_NUM 0
+#include "./camera_set.glsl"
+#undef SET_NUM
 
-layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
-  mat4 modelMatrix;
-} objectTransformBuffer;
+#define SET_NUM 1
+#include "./object_set.glsl"
+#undef SET_NUM
 
-layout(set = 1, binding = 1) uniform ObjectDataBuffer {
-  uvec4 segmentation;
-  float transparency;
-  int shadeFlat;
-} objectDataBuffer;
+#define SET_NUM 2
+#include "./material_set.glsl"
+#undef SET_NUM
 
-
-layout(set = 2, binding = 0) uniform MaterialBuffer {
-  vec4 emission;
-  vec4 baseColor;
-  float fresnel;
-  float roughness;
-  float metallic;
-  float transmission;
-  float ior;
-  float transmissionRoughness;
-  int textureMask;
-  int padding1;
-  vec4 textureTransforms[6];
-} materialBuffer;
-
-layout(set = 2, binding = 1) uniform sampler2D colorTexture;
-layout(set = 2, binding = 2) uniform sampler2D roughnessTexture;
-layout(set = 2, binding = 3) uniform sampler2D normalTexture;
-layout(set = 2, binding = 4) uniform sampler2D metallicTexture;
-layout(set = 2, binding = 5) uniform sampler2D emissionTexture;
-layout(set = 2, binding = 6) uniform sampler2D transmissionTexture;
 
 layout(location = 0) in vec4 inPosition;
 layout(location = 1) in vec2 inUV;
