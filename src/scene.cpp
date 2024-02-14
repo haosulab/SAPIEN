@@ -91,6 +91,15 @@ void Scene::unpackEntityPoses(std::string const &data) {
   // TODO: check nothing is left
 }
 
+void Scene::clear() {
+  for (auto &entity : mEntities) {
+    entity->onRemoveFromScene(*this);
+    entity->internalSetPerSceneId(0);
+    entity->internalSetScene(nullptr);
+  }
+  mEntities.clear();
+}
+
 Scene::~Scene() {
   gSceneCount--;
   logger::info("Deleting Scene {}, total {}", mId, gSceneCount);

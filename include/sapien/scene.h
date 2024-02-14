@@ -47,6 +47,8 @@ public:
 
   uint64_t getId() const { return mId; };
 
+  void clear();
+
   ~Scene();
   Scene(Scene const &) = delete;
   Scene &operator=(Scene const &) = delete;

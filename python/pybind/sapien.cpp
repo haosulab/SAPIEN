@@ -142,7 +142,8 @@ Generator<int> init_sapien(py::module &m) {
       .def("pack_poses", [](Scene &s) { return py::bytes(s.packEntityPoses()); })
       .def(
           "unpack_poses", [](Scene &s, py::bytes data) { s.unpackEntityPoses(data); },
-          py::arg("data"));
+          py::arg("data"))
+      .def("clear", &Scene::clear);
 
   PyEntity.def(py::init<>())
       .def_property_readonly("per_scene_id", &Entity::getPerSceneId)

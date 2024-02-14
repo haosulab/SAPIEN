@@ -444,3 +444,6 @@ class Scene(_Scene):
         viewer.set_scene(self)
 
         return viewer
+
+    def __del__(self):
+        self.clear()
