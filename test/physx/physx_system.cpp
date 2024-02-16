@@ -23,9 +23,9 @@ TEST(Engine, Creation) {
   }
 }
 
-TEST(PhysxSystem, Creation) {
+TEST(PhysxSystemCpu, Creation) {
   auto scene = std::make_shared<Scene>();
-  scene->addSystem(std::make_shared<PhysxSystem>());
+  scene->addSystem(std::make_shared<PhysxSystemCpu>());
 
   auto mat = std::make_shared<PhysxMaterial>(0.3, 0.3, 0.1);
   auto shape = std::make_shared<PhysxCollisionShapePlane>(mat);
