@@ -1,5 +1,4 @@
 #include "sapien/device.h"
-#include <GLFW/glfw3.h>
 #include <svulkan2/core/context.h>
 #include <svulkan2/core/instance.h>
 #include <svulkan2/core/physical_device.h>
