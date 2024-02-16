@@ -17,10 +17,10 @@ static std::vector<std::shared_ptr<Device>> vulkanFindDevices() {
 
   std::vector<std::shared_ptr<Device>> res;
   try {
-    auto instance = std::make_shared<svulkan2::core::Instance>(
-        VK_MAKE_VERSION(0, 0, 1), VK_MAKE_VERSION(0, 0, 1), VK_API_VERSION_1_2);
+    auto instance = svulkan2::core::Instance::Get(VK_MAKE_VERSION(0, 0, 1),
+                                                  VK_MAKE_VERSION(0, 0, 1), VK_API_VERSION_1_2);
     if (instance) {
-      auto devices = svulkan2::core::PhysicalDevice::summarizeDeviceInfo(*instance);
+      auto devices = instance->summarizePhysicalDevices();
       for (auto &d : devices) {
         int priority = 0;
 

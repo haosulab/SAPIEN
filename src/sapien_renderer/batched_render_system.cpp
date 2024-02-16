@@ -49,7 +49,7 @@ BatchedCamera::BatchedCamera(std::vector<std::shared_ptr<SapienRenderCameraCompo
       vk::DeviceSize imageSize =
           extent.width * extent.height * extent.depth * svulkan2::getFormatSize(format);
       if (!mCudaImageBuffers.contains(name)) {
-        mCudaImageBuffers[name] = std::make_shared<svulkan2::core::Buffer>(
+        mCudaImageBuffers[name] = svulkan2::core::Buffer::Create(
             imageSize * cameras.size(),
             vk::BufferUsageFlagBits::eTransferSrc | vk::BufferUsageFlagBits::eTransferDst,
             VMA_MEMORY_USAGE_GPU_ONLY, VmaAllocationCreateFlags{}, true);

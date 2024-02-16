@@ -31,7 +31,9 @@ std::shared_ptr<SapienRenderEngine> SapienRenderEngine::Get() {
 
 std::string SapienRenderEngine::getSummary() {
   std::stringstream ss;
-  auto info = mContext->getPhysicalDevice2()->summarizeDeviceInfo();
+  auto info = svulkan2::core::Instance::Get(VK_MAKE_VERSION(0, 0, 1), VK_MAKE_VERSION(0, 0, 1),
+                                            VK_API_VERSION_1_2)
+                  ->summarizePhysicalDevices();
   for (auto const &entry : info) {
     ss << "GPU: " << entry.name << "\n";
     ss << "  Supported: " << entry.supported << "\n";
