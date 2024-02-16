@@ -162,6 +162,9 @@ CudaArray::CudaArray(CudaArray &&other) {
 CudaArray &CudaArray::operator=(CudaArray &&other) {
 #ifdef SAPIEN_CUDA
   if (this != &other) {
+    if (cudaId >= 0) {
+      checkCudaErrors(cudaSetDevice(cudaId));
+    }
     checkCudaErrors(cudaFree(ptr));
     shape = other.shape;
     type = other.type;
@@ -190,7 +193,8 @@ CudaHostArray::CudaHostArray(std::vector<int> shape_, std::string type_)
   }
   size *= typestrBytes(type);
   if (size > 0) {
-    checkCudaErrors(cudaMallocHost(&ptr, size));
+    checkCudaErrors(cudaHostAlloc(&ptr, size, cudaHostAllocPortable));
+    // checkCudaErrors(cudaMallocHost(&ptr, size));
   }
 #endif
 }

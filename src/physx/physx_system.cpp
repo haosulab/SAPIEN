@@ -30,6 +30,13 @@ PhysxSystem::PhysxSystem()
     : mSceneConfig(PhysxDefault::getSceneConfig()), mEngine(PhysxEngine::Get()) {}
 
 PhysxSystemCpu::PhysxSystemCpu() {
+  if (PhysxDefault::GetGPUEnabled()) {
+    logger::warn(
+        "A PhysX CPU system is being created while PhysX GPU is enabled. You can safely ignore "
+        "this message if it is intended. To use GPU PhysX, create a sapien.physx.PhysxGpuSystem "
+        "explicitly and pass it to sapien.Scene constructor.");
+  }
+
   auto &config = mSceneConfig;
   PxSceneDesc sceneDesc(mEngine->getPxPhysics()->getTolerancesScale());
   sceneDesc.gravity = Vec3ToPxVec3(config.gravity);
@@ -62,7 +69,23 @@ PhysxSystemCpu::PhysxSystemCpu() {
   mPxScene->setSimulationEventCallback(&mSimulationCallback);
 }
 
-PhysxSystemGpu::PhysxSystemGpu() {
+PhysxSystemGpu::PhysxSystemGpu(std::shared_ptr<Device> device) {
+  if (!PhysxDefault::GetGPUEnabled()) {
+    throw std::runtime_error(
+        "sapien.physx.enable_gpu() must be called before creating a PhysX GPU system.");
+  }
+
+  if (!device) {
+    device = findDevice("cuda");
+    if (!device) {
+      throw std::runtime_error("failed to find a CUDA device for PhysX GPU");
+    }
+  } else if (!device->isCuda()) {
+    throw std::runtime_error(
+        "failed to create PhysX GPU system: device provided does not support CUDA");
+  }
+  mDevice = device;
+
   auto &config = mSceneConfig;
   PxSceneDesc sceneDesc(mEngine->getPxPhysics()->getTolerancesScale());
   sceneDesc.gravity = Vec3ToPxVec3(config.gravity);
@@ -89,7 +112,7 @@ PhysxSystemGpu::PhysxSystemGpu() {
   sceneFlags |= PxSceneFlag::eENABLE_GPU_DYNAMICS;
   sceneFlags |= PxSceneFlag::eENABLE_DIRECT_GPU_API;
   sceneDesc.broadPhaseType = PxBroadPhaseType::eGPU;
-  sceneDesc.cudaContextManager = mEngine->getCudaContextManager();
+  sceneDesc.cudaContextManager = mEngine->getCudaContextManager(device->cudaId);
   if (!config.enablePCM) {
     logger::warn("PCM must be enabled when using GPU.");
     sceneFlags |= PxSceneFlag::eENABLE_PCM;
@@ -214,6 +237,7 @@ void PhysxSystemGpu::step() {
   ++mTotalSteps;
   mPxScene->simulate(mTimestep);
   mPxScene->fetchResults(true);
+
   // TODO: does the GPU API require fetch results?
 }
 
@@ -354,8 +378,9 @@ void PhysxSystemGpu::gpuInit() {
 
   allocateCudaBuffers();
 
-  mCudaEventRecord.init();
-  mCudaEventWait.init();
+  // ensureCudaDevice();
+  // mCudaEventRecord.init();
+  // mCudaEventWait.init();
 
   mGpuInitialized = true;
 }
@@ -389,6 +414,8 @@ std::shared_ptr<PhysxGpuContactQuery> PhysxSystemGpu::gpuCreateContactQuery(
             [](ActorPairQuery const &a, ActorPairQuery const &b) { return a.pair < b.pair; });
 
   static_assert(sizeof(ActorPairQuery) == 24);
+
+  ensureCudaDevice();
   CudaArray query({static_cast<int>(pairs.size()), 6}, "i4");
   checkCudaErrors(cudaMemcpy(query.ptr, pairs.data(), pairs.size() * sizeof(ActorPairQuery),
                              cudaMemcpyHostToDevice));
@@ -417,6 +444,7 @@ std::shared_ptr<PhysxGpuContactBodyForceQuery> PhysxSystemGpu::gpuCreateContactB
             [](ActorQuery const &a, ActorQuery const &b) { return a.actor < b.actor; });
   static_assert(sizeof(ActorQuery) == 16);
 
+  ensureCudaDevice();
   CudaArray query({static_cast<int>(actors.size()), 4}, "i4");
   checkCudaErrors(cudaMemcpy(query.ptr, actors.data(), actors.size() * sizeof(ActorQuery),
                              cudaMemcpyHostToDevice));
@@ -445,6 +473,7 @@ void PhysxSystemGpu::copyContactData() {
     return;
   }
 
+  ensureCudaDevice();
   if (!mCudaContactCount.ptr) {
     mCudaContactCount = CudaArray({1}, "u4");
   }
@@ -473,6 +502,8 @@ void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
   SAPIEN_PROFILE_FUNCTION;
   query.query.handle().checkShape({-1, 6});
 
+  ensureCudaDevice();
+
   cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3, mCudaStream);
 
   copyContactData();
@@ -487,6 +518,7 @@ void PhysxSystemGpu::gpuQueryContactBodyForces(PhysxGpuContactBodyForceQuery con
   SAPIEN_PROFILE_FUNCTION;
   query.query.handle().checkShape({-1, 4});
 
+  ensureCudaDevice();
   cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3, mCudaStream);
 
   copyContactData();
@@ -504,6 +536,7 @@ void PhysxSystemGpu::gpuFetchRigidDynamicData() {
     return;
   }
 
+  ensureCudaDevice();
   mPxScene->copyBodyData((PxGpuBodyData *)mCudaRigidDynamicScratch.ptr,
                          (PxGpuActorPair *)mCudaRigidDynamicIndexBuffer.ptr,
                          mCudaRigidDynamicIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -520,6 +553,7 @@ void PhysxSystemGpu::gpuFetchArticulationLinkPose() {
     return;
   }
 
+  ensureCudaDevice();
   mPxScene->copyArticulationData(mCudaLinkPoseScratch.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eLINK_TRANSFORM,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -537,6 +571,8 @@ void PhysxSystemGpu::gpuFetchArticulationLinkVel() {
     return;
   }
 
+  ensureCudaDevice();
+
   mPxScene->copyArticulationData(mCudaLinkVelScratch.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eLINK_VELOCITY,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -553,6 +589,8 @@ void PhysxSystemGpu::gpuFetchArticulationQpos() {
     return;
   }
 
+  ensureCudaDevice();
+
   mPxScene->copyArticulationData(mCudaQposHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_POSITION,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -565,6 +603,8 @@ void PhysxSystemGpu::gpuFetchArticulationQvel() {
   if (mGpuArticulationCount == 0) {
     return;
   }
+
+  ensureCudaDevice();
 
   mPxScene->copyArticulationData(mCudaQvelHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_VELOCITY,
@@ -579,6 +619,8 @@ void PhysxSystemGpu::gpuFetchArticulationQTargetPos() {
     return;
   }
 
+  ensureCudaDevice();
+
   mPxScene->copyArticulationData(mCudaQTargetPosHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_TARGET_POSITION,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -592,6 +634,8 @@ void PhysxSystemGpu::gpuFetchArticulationQTargetVel() {
     return;
   }
 
+  ensureCudaDevice();
+
   mPxScene->copyArticulationData(mCudaQTargetVelHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_TARGET_VELOCITY,
                                  mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
@@ -604,6 +648,7 @@ void PhysxSystemGpu::gpuFetchArticulationQacc() {
   if (mGpuArticulationCount == 0) {
     return;
   }
+  ensureCudaDevice();
 
   mPxScene->copyArticulationData(mCudaQaccHandle.ptr, mCudaArticulationIndexBuffer.ptr,
                                  PxArticulationGpuDataType::eJOINT_ACCELERATION,
@@ -613,6 +658,8 @@ void PhysxSystemGpu::gpuFetchArticulationQacc() {
 
 void PhysxSystemGpu::gpuUpdateArticulationKinematics() {
   checkGpuInitialized();
+
+  ensureCudaDevice();
 
   // wait for previous apply to finish
   checkCudaErrors(cudaDeviceSynchronize());
@@ -629,6 +676,7 @@ void PhysxSystemGpu::gpuApplyRigidDynamicData() {
     return;
   }
 
+  ensureCudaDevice();
   body_data_sapien_to_physx(mCudaRigidDynamicScratch.ptr, mCudaRigidDynamicHandle.ptr,
                             mCudaRigidDynamicOffsetBuffer.ptr,
                             mCudaRigidDynamicIndexBuffer.shape.at(0), mCudaStream);
@@ -654,6 +702,7 @@ void PhysxSystemGpu::gpuApplyRigidDynamicData(CudaArrayHandle const &indices) {
 
   // gather indices to physx indices
   // gather sapien poses into physx poses
+  ensureCudaDevice();
   body_data_sapien_to_physx(mCudaRigidDynamicScratch.ptr, mCudaRigidDynamicIndexScratch.ptr,
                             mCudaRigidDynamicHandle.ptr, mCudaRigidDynamicIndexBuffer.ptr,
                             indices.ptr, mCudaRigidDynamicOffsetBuffer.ptr, indices.shape.at(0),
@@ -680,6 +729,7 @@ void PhysxSystemGpu::gpuApplyArticulationRootPose(CudaArrayHandle const &indices
   if (mGpuArticulationCount == 0) {
     return;
   }
+  ensureCudaDevice();
 
   root_pose_sapien_to_physx(mCudaLinkPoseScratch.ptr, mCudaLinkHandle.ptr, indices.ptr,
                             mCudaArticulationOffsetBuffer.ptr, mGpuArticulationMaxLinkCount,
@@ -705,6 +755,7 @@ void PhysxSystemGpu::gpuApplyArticulationRootVel(CudaArrayHandle const &indices)
   if (mGpuArticulationCount == 0) {
     return;
   }
+  ensureCudaDevice();
 
   root_vel_sapien_to_physx(mCudaLinkVelScratch.ptr, mCudaLinkHandle.ptr, indices.ptr,
                            mGpuArticulationMaxLinkCount, indices.shape.at(0), mCudaStream);
@@ -729,6 +780,7 @@ void PhysxSystemGpu::gpuApplyArticulationQpos(CudaArrayHandle const &indices) {
   if (mGpuArticulationCount == 0) {
     return;
   }
+  ensureCudaDevice();
 
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQposHandle.ptr, mCudaArticulationIndexBuffer.ptr,
@@ -751,6 +803,7 @@ void PhysxSystemGpu::gpuApplyArticulationQvel(CudaArrayHandle const &indices) {
   if (mGpuArticulationCount == 0) {
     return;
   }
+  ensureCudaDevice();
 
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQvelHandle.ptr, mCudaArticulationIndexBuffer.ptr,
@@ -773,6 +826,7 @@ void PhysxSystemGpu::gpuApplyArticulationQf(CudaArrayHandle const &indices) {
   if (mGpuArticulationCount == 0) {
     return;
   }
+  ensureCudaDevice();
 
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQfHandle.ptr, mCudaArticulationIndexBuffer.ptr,
@@ -795,6 +849,7 @@ void PhysxSystemGpu::gpuApplyArticulationQTargetPos(CudaArrayHandle const &indic
   if (mGpuArticulationCount == 0) {
     return;
   }
+  ensureCudaDevice();
 
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQTargetPosHandle.ptr, mCudaArticulationIndexBuffer.ptr,
@@ -818,6 +873,7 @@ void PhysxSystemGpu::gpuApplyArticulationQTargetVel(CudaArrayHandle const &indic
   if (mGpuArticulationCount == 0) {
     return;
   }
+  ensureCudaDevice();
 
   mCudaEventRecord.record(mCudaStream);
   mPxScene->applyArticulationData(mCudaQTargetVelHandle.ptr, mCudaArticulationIndexBuffer.ptr,
@@ -851,6 +907,7 @@ void PhysxSystemGpu::syncPosesGpuToCpu() {
 }
 
 std::vector<float> PhysxSystemGpu::gpuDownloadArticulationQpos(int index) {
+  ensureCudaDevice();
   gpuFetchArticulationQpos();
   cudaStreamSynchronize(mCudaStream);
 
@@ -866,6 +923,7 @@ std::vector<float> PhysxSystemGpu::gpuDownloadArticulationQpos(int index) {
 }
 
 void PhysxSystemGpu::gpuUploadArticulationQpos(int index, Eigen::VectorXf const &q) {
+  ensureCudaDevice();
   cudaStreamSynchronize(mCudaStream);
   if (index < 0 || index >= mGpuArticulationMaxDof) {
     throw std::runtime_error("failed to download articulation qpos: invalid index");
@@ -898,6 +956,7 @@ void PhysxSystemGpu::allocateCudaBuffers() {
   int rigidDynamicCount = mRigidDynamicComponents.size();
   int rigidBodyCount = rigidDynamicCount + mGpuArticulationCount * mGpuArticulationMaxLinkCount;
 
+  ensureCudaDevice();
   mCudaRigidBodyBuffer = CudaArray({rigidBodyCount, 13}, "f4");
 
   mCudaRigidDynamicHandle = CudaArrayHandle{.shape = {rigidDynamicCount, 13},
@@ -1021,6 +1080,8 @@ void PhysxSystemGpu::allocateCudaBuffers() {
   int linkVelSize = mGpuArticulationCount * mGpuArticulationMaxLinkCount * 6 * sizeof(float);
   mCudaLinkVelScratch = CudaArray({linkVelSize}, "u1");
 }
+
+void PhysxSystemGpu::ensureCudaDevice() { checkCudaErrors(cudaSetDevice(mDevice->cudaId)); }
 
 PhysxSystem::~PhysxSystem() { logger::info("Deleting PhysxSystem"); }
 

@@ -4,33 +4,33 @@ from sapien.utils.viewer.viewer import Viewer, ControlWindow
 from sapien.asset import create_dome_envmap
 
 sapien.physx.enable_gpu()
-sapien.set_cuda_tensor_backend("torch")
 
 sapien.render.set_viewer_shader_dir("../vulkan_shader/default")
-
 sapien.render.set_camera_shader_dir("../vulkan_shader/minimal")
+
 sapien.render.set_picture_format("Color", "r8g8b8a8unorm")
 sapien.render.set_picture_format("ColorRaw", "r8g8b8a8unorm")
-sapien.render.set_picture_format("outPositionSegmentation", "r16g16b16a16sint")
+sapien.render.set_picture_format("PositionSegmentation", "r16g16b16a16sint")
 
 
 def main():
-    scene_count = 64
+    scene_count = 16
 
-    scenes = []
+    px = sapien.physx.PhysxGpuSystem()
+    scenes = list[sapien.Scene]()
+
     for i in range(scene_count):
-        scene = sapien.Scene()
-        px: sapien.physx.PhysxGpuSystem = scene.physx_system
-        px.set_scene_offset(scene, [i * 10, 0, 0])
+        scene = sapien.Scene([px, sapien.render.RenderSystem()])
+        px.set_scene_offset(scene, [i * 10.0, 0.0, 0.0])
         scenes.append(scene)
 
-    px: sapien.physx.PhysxGpuSystem = scenes[0].physx_system
-
     urdf_loader = scenes[0].create_urdf_loader()
+
     builder = urdf_loader.load_file_as_articulation_builder(
         "../assets/robot/panda/panda.urdf"
     )
-    robots = []
+
+    robots: list[sapien.physx.PhysxArticulation] = []
     for scene in scenes:
         scene.load_widget_from_package("demo_arena", "DemoArena")
         builder.set_scene(scene)
@@ -42,6 +42,7 @@ def main():
     builder = scenes[0].create_actor_builder()
     builder.add_sphere_collision(radius=0.1)
     builder.add_sphere_visual(radius=0.1)
+    # builder.collision_groups = [1, 1, 1, 0]
 
     balls = []
     z = 5
@@ -55,6 +56,14 @@ def main():
     all_bodies = [
         b.find_component_by_type(sapien.physx.PhysxRigidDynamicComponent) for b in balls
     ]
+    for b in balls:
+        print(
+            "ball {:x}".format(
+                b.find_component_by_type(
+                    sapien.physx.PhysxRigidDynamicComponent
+                )._physx_pointer
+            )
+        )
 
     cams = []
     for scene, robot in zip(scenes, robots):
@@ -66,6 +75,19 @@ def main():
         cams.append(cam)
 
     px.gpu_init()
+
+    for r in robots:
+        for l in r.links:
+            for s in l.collision_shapes:
+                groups = s.get_collision_groups()
+                groups[2] |= 1 << 29
+                s.set_collision_groups(groups)
+    for b in balls:
+        l = b.find_component_by_type(sapien.physx.PhysxRigidDynamicComponent)
+        for s in l.collision_shapes:
+            groups = s.get_collision_groups()
+            groups[2] = 1
+            s.set_collision_groups(groups)
 
     import matplotlib.pyplot as plt
 
@@ -103,7 +125,7 @@ def main():
         px.gpu_fetch_articulation_link_pose()
         render_system_group.update_render()
 
-        for _ in range(10):
+        for _ in range(100):
             for _ in range(20):
                 px.step()
 
@@ -113,10 +135,11 @@ def main():
             render_system_group.update_render()
             camera_group.take_picture()
             color = camera_group.get_picture_cuda("Color")
-            color = color.cpu().numpy()
+
+            color = color.torch().cpu().numpy()
 
             ps = camera_group.get_picture_cuda("PositionSegmentation")
-            ps = ps.cpu().numpy()
+            ps = ps.torch().cpu().numpy()
 
             plt.subplot(2, 2, 1)
             plt.imshow(color[0][..., :3])
@@ -124,9 +147,9 @@ def main():
             plt.imshow(color[1][..., :3])
 
             plt.subplot(2, 2, 3)
-            plt.imshow((ps[0][..., :3] + 32768)/65535)
+            plt.imshow((ps[0][..., :3] + 32768) / 65535)
             plt.subplot(2, 2, 4)
-            plt.imshow((ps[1][..., :3] + 32768)/65535)
+            plt.imshow((ps[1][..., :3] + 32768) / 65535)
 
             plt.show()
 
@@ -153,8 +176,8 @@ def main():
     # fast_way()
 
     viewer = Viewer()
-    viewer.set_scene(scenes[0])
-    # viewer.set_scenes(scenes)
+    # viewer.set_scene(scenes[0])
+    viewer.set_scenes(scenes)
     vs = viewer.window._internal_scene
     vs.set_ambient_light([0.1, 0.1, 0.1])
     vs.set_cubemap(scenes[0].render_system.get_cubemap()._internal_cubemap)

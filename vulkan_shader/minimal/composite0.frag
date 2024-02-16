@@ -24,9 +24,9 @@ layout(set = 1, binding = 0) uniform CameraBuffer {
 
 layout(set = 2, binding = 0) uniform SceneBuffer {
   vec4 ambientLight;
+  PointLight pointLights[10];
   DirectionalLight directionalLights[3];
-  SpotLight spotLights[1];
-  PointLight pointLights[3];
+  SpotLight spotLights[10];
   SpotLight texturedLights[1];
 } sceneBuffer;
 
@@ -40,16 +40,16 @@ struct LightBuffer {
 };
 
 layout(set = 2, binding = 1) uniform ShadowBuffer {
+  LightBuffer pointLightBuffers[60];
   LightBuffer directionalLightBuffers[3];
   LightBuffer spotLightBuffers[10];
-  LightBuffer pointLightBuffers[60];
   LightBuffer texturedLightBuffers[1];
 } shadowBuffer;
 
-layout(set = 2, binding = 2) uniform samplerCube samplerPointLightDepths[3];
-layout(set = 2, binding = 3) uniform sampler2D samplerDirectionalLightDepths[1];
-layout(set = 2, binding = 4) uniform sampler2D samplerTexturedLightDepths[1];
-layout(set = 2, binding = 5) uniform sampler2D samplerSpotLightDepths[10];
+layout(set = 2, binding = 2) uniform samplerCube samplerPointLightDepths[10];
+layout(set = 2, binding = 3) uniform sampler2D samplerDirectionalLightDepths[3];
+layout(set = 2, binding = 4) uniform sampler2D samplerSpotLightDepths[10];
+layout(set = 2, binding = 5) uniform sampler2D samplerTexturedLightDepths[1];
 layout(set = 2, binding = 6) uniform sampler2D samplerTexturedLightTextures[1];
 layout(set = 2, binding = 7) uniform samplerCube samplerEnvironment;
 layout(set = 2, binding = 8) uniform sampler2D samplerBRDFLUT;

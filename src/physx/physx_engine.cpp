@@ -56,18 +56,18 @@ PhysxEngine::PhysxEngine(float toleranceLength, float toleranceSpeed) {
 
   PxTolerancesScale toleranceScale(toleranceLength, toleranceSpeed);
 
-  if (PhysxDefault::GetGPUEnabled()) {
-    PxCudaContextManagerDesc cudaContextManagerDesc;
+  // if (PhysxDefault::GetGPUEnabled()) {
+  //   PxCudaContextManagerDesc cudaContextManagerDesc;
 
-    CUcontext context{};
-    checkCudaDriverErrors(CudaLib::Get().cuCtxGetCurrent(&context));
-    if (!context) {
-      throw std::runtime_error("failed to get CUDA context.");
-    }
-    cudaContextManagerDesc.ctx = &context;
-    mCudaContextManager = PxCreateCudaContextManager(*mPxFoundation, cudaContextManagerDesc,
-                                                     PxGetProfilerCallback());
-  }
+  //   CUcontext context{};
+  //   checkCudaDriverErrors(CudaLib::Get().cuCtxGetCurrent(&context));
+  //   if (!context) {
+  //     throw std::runtime_error("failed to get CUDA context.");
+  //   }
+  //   cudaContextManagerDesc.ctx = &context;
+  //   mCudaContextManager = PxCreateCudaContextManager(*mPxFoundation, cudaContextManagerDesc,
+  //                                                    PxGetProfilerCallback());
+  // }
 
   mPxPhysics = PxCreatePhysics(PX_PHYSICS_VERSION, *mPxFoundation, toleranceScale);
   if (!mPxPhysics) {
@@ -76,6 +76,30 @@ PhysxEngine::PhysxEngine(float toleranceLength, float toleranceSpeed) {
   if (!PxInitExtensions(*mPxPhysics, nullptr)) {
     throw std::runtime_error("PhysX extension initialization failed");
   }
+}
+
+::physx::PxCudaContextManager *PhysxEngine::getCudaContextManager(int cudaId) {
+  if (!PhysxDefault::GetGPUEnabled()) {
+    throw std::runtime_error("Using CUDA is not allowed when PhysX GPU is not enabled.");
+  }
+
+  if (mCudaContextManagers.contains(cudaId)) {
+    return mCudaContextManagers.at(cudaId);
+  }
+
+  PxCudaContextManagerDesc cudaContextManagerDesc;
+  CUcontext context{};
+  checkCudaErrors(cudaSetDevice(cudaId));
+  checkCudaDriverErrors(CudaLib::Get().cuCtxGetCurrent(&context));
+  if (!context) {
+    throw std::runtime_error("failed to get CUDA context.");
+  }
+  cudaContextManagerDesc.ctx = &context;
+  mCudaContextManagers[cudaId] =
+      PxCreateCudaContextManager(*mPxFoundation, cudaContextManagerDesc, PxGetProfilerCallback());
+  return mCudaContextManagers[cudaId];
+
+  // TODO clean up
 }
 
 PhysxEngine::~PhysxEngine() {

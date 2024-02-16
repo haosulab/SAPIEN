@@ -319,11 +319,10 @@ Generator<int> init_physx(py::module &sapien) {
 
   PyPhysxSystem
       .def(py::init([]() -> std::shared_ptr<PhysxSystem> {
-        if (PhysxDefault::GetGPUEnabled()) {
-          return std::make_shared<PhysxSystemGpu>();
-        }
-        return std::make_shared<PhysxSystemCpu>();
+        throw std::runtime_error(
+            "PhysxSystem has been removed, use PhysxCpuSystem or PhysxGpuSystem instead");
       }))
+
       .def_property_readonly("config", &PhysxSystem::getSceneConfig)
       .def("get_config", &PhysxSystem::getSceneConfig)
       .def_property("timestep", &PhysxSystem::getTimestep, &PhysxSystem::setTimestep)
@@ -353,7 +352,16 @@ Generator<int> init_physx(py::module &sapien) {
           "unpack", [](PhysxSystemCpu &s, py::bytes data) { s.unpackState(data); },
           py::arg("data"));
 
-  PyPhysxSystemGpu.def(py::init<>())
+  PyPhysxSystemGpu
+      .def(py::init([](std::string const &device) {
+             return std::make_shared<PhysxSystemGpu>(findDevice(device));
+           }),
+           py::arg("device") = "cuda")
+      .def(py::init([](std::shared_ptr<Device> device) {
+             return std::make_shared<PhysxSystemGpu>(device);
+           }),
+           py::arg("device"))
+      .def_property_readonly("device", &PhysxSystemGpu::getDevice)
       .def("get_scene_offset", &PhysxSystemGpu::getSceneOffset, py::arg("scene"))
       .def("set_scene_offset", &PhysxSystemGpu::setSceneOffset, py::arg("scene"),
            py::arg("offset"), R"doc(

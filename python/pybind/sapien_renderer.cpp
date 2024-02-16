@@ -392,9 +392,9 @@ void init_sapien_renderer(py::module &sapien) {
       .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); })
 
       .def("set_global_config", &SapienRendererDefault::setGlobalConfig,
-           py::arg("offscreen_only") = false, py::arg("max_num_materials") = 128,
-           py::arg("max_num_textures") = 512, py::arg("default_mipmap_levels") = 1,
-           py::arg("default_device") = "", py::arg("do_not_load_texture") = false,
+           py::arg("max_num_materials") = 128, py::arg("max_num_textures") = 512,
+           py::arg("default_mipmap_levels") = 1, py::arg("default_device") = nullptr,
+           py::arg("do_not_load_texture") = false,
            "Sets global properties for SAPIEN renderer. This function should only be called "
            "before creating any renderer-related objects.");
 

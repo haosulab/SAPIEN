@@ -51,7 +51,9 @@ template <> struct type_caster<Quat> {
 };
 
 template <> struct type_caster<AABB> {
-  PYBIND11_TYPE_CASTER(AABB, _("numpy.ndarray[tuple[typing.Literal[2], typing.Literal[3]], numpy.dtype[numpy.float32]]"));
+  PYBIND11_TYPE_CASTER(
+      AABB,
+      _("numpy.ndarray[tuple[typing.Literal[2], typing.Literal[3]], numpy.dtype[numpy.float32]]"));
 
   bool load(py::handle src, bool convert) { return false; }
 
@@ -61,4 +63,5 @@ template <> struct type_caster<AABB> {
     return py::array_t<float>({2, 3}, arr.data()).release();
   }
 };
+
 } // namespace pybind11::detail

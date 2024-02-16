@@ -8,7 +8,7 @@ from . import math
 from . import physx
 from . import render
 from . import simsense
-__all__ = ['Component', 'CudaArray', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'internal_renderer', 'math', 'physx', 'profile', 'render', 'set_log_level', 'simsense']
+__all__ = ['Component', 'CudaArray', 'Device', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'internal_renderer', 'math', 'physx', 'profile', 'render', 'set_log_level', 'simsense']
 _T = typing.TypeVar("_T", Component)
 class Component:
     entity_pose: Pose
@@ -70,6 +70,30 @@ class CudaArray:
         ...
     @property
     def typstr(self) -> str:
+        ...
+class Device:
+    def __init__(self, alias: str) -> None:
+        ...
+    def __repr__(self) -> str:
+        ...
+    def __str__(self) -> str:
+        ...
+    def can_present(self) -> bool:
+        ...
+    def can_render(self) -> bool:
+        ...
+    def is_cpu(self) -> bool:
+        ...
+    def is_cuda(self) -> bool:
+        ...
+    @property
+    def cuda_id(self) -> int:
+        ...
+    @property
+    def name(self) -> str:
+        ...
+    @property
+    def pci_string(self) -> str | None:
         ...
 class Entity:
     name: str

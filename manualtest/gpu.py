@@ -5,12 +5,15 @@ sapien.set_log_level("info")
 sapien.render.set_log_level("info")
 
 sapien.physx.enable_gpu()
-sapien.set_cuda_tensor_backend("torch")
+
+physx_system = sapien.physx.PhysxGpuSystem()
+
+print(physx_system.device)
 
 
 def create_scene(offset):
-    scene = sapien.Scene()
-    scene.physx_system.set_scene_offset(scene, offset)
+    scene = sapien.Scene([physx_system, sapien.render.RenderSystem()])
+    physx_system.set_scene_offset(scene, offset)
     scene.set_ambient_light([0.5, 0.5, 0.5])
     return scene
 
@@ -19,7 +22,6 @@ scene0 = create_scene([0, 0, 0])
 scene1 = create_scene([10, 0, 0])
 
 assert scene0.physx_system == scene1.physx_system
-physx_system: sapien.physx.PhysxGpuSystem = scene0.physx_system
 
 loader = scene0.create_urdf_loader()
 builder = loader.load_file_as_articulation_builder("../assets/robot/panda/panda.urdf")
@@ -108,6 +110,7 @@ actor_pose_slice = actor_data[:, :7]  # this is in-place
 
 link_data = physx_system.cuda_articulation_link_data
 import ipdb
+
 ipdb.set_trace()
 
 physx_system.gpu_fetch_rigid_dynamic_data()

@@ -34,10 +34,9 @@ std::string SapienRenderEngine::getSummary() {
   auto info = mContext->getPhysicalDevice2()->summarizeDeviceInfo();
   for (auto const &entry : info) {
     ss << "GPU: " << entry.name << "\n";
-    ss << "  Present:   " << entry.present << "\n";
     ss << "  Supported: " << entry.supported << "\n";
+    ss << "  Present:   " << entry.present << "\n";
     ss << "  cudaId:    " << entry.cudaId << "\n";
-    ss << "  pciBus:    " << entry.pciBus << "\n";
     ss << "  rayTrace:  " << entry.rayTracing << "\n";
     ss << "  cudaMode   " << entry.cudaComputeMode << "\n";
   }
@@ -46,9 +45,10 @@ std::string SapienRenderEngine::getSummary() {
 
 SapienRenderEngine::SapienRenderEngine() {
   auto &d = SapienRendererDefault::Get();
-  mContext = svulkan2::core::Context::Create(!d.getOffscreenOnly(), d.getMaxNumMaterials(),
-                                             d.getMaxNumTextures(), d.getDefaultMipMaps(),
-                                             d.getDoNotLoadTexture());
+  auto device = d.getDevice();
+  mContext = svulkan2::core::Context::Create(d.getMaxNumMaterials(), d.getMaxNumTextures(),
+                                             d.getDefaultMipMaps(), d.getDoNotLoadTexture(),
+                                             device ? device->getAlias() : "");
   mResourceManager = mContext->createResourceManager();
 }
 

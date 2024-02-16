@@ -27,10 +27,57 @@ struct CudaArrayHandle {
   int bytes() const;
 };
 
+// template <int... Shape> static bool checkShape(std::vector<int> const &shape);
+// template <> bool checkShape(std::vector<int> const &shape) { return shape.empty(); }
+// template <int Head, int... Tail> bool checkShape(std::vector<int> const &shape) {
+//   return !shape.empty() && (Head == -1 || shape[0] == Head) && checkShape<Tail...>(shape);
+// }
+
+// template <typename T> static bool checkType(std::string const &type) {
+//   if constexpr (std::is_floating_point<T>::value) {
+//     return type == "f" + std::to_string(sizeof(T));
+//   }
+//   if constexpr (std::is_integral<T>::value && std::is_unsigned<T>::value) {
+//     return type == "u" + std::to_string(sizeof(T));
+//   }
+//   if constexpr (std::is_integral<T>::value && std::is_signed<T>::value) {
+//     return type == "i" + std::to_string(sizeof(T));
+//   }
+//   return false;
+// }
+
+// template <typename T, int... Shape> struct CudaArrayHandleT : public CudaArrayHandle {
+//   CudaArrayHandleT(CudaArrayHandle const &other) {
+//     if (!checkType<T>(other.type)) {
+//       throw std::runtime_error("incompatble types");
+//     }
+//     if (!checkShape<Shape...>(other.type)) {
+//       throw std::runtime_error("incompatble shapes");
+//     }
+
+//     shape = other.shape;
+//     strides = other.strides;
+//     type = other.type;
+//     cudaId = other.cudaId;
+//     ptr = other.ptr;
+//   }
+// };
+
 struct CudaArray {
+  /** Create uninitialized empty CudaArray */
   CudaArray() {}
+
+  /** Create cuda array on the current cuda runtime device
+   * @param shape shape of the array
+   * @param typestr in numpy typestr format
+   */
   CudaArray(std::vector<int> shape_, std::string type_);
 
+  /** Create uint8 cuda array on the current cuda runtime device
+   * @param data CPU raw data buffer
+   * @param size of the raw data buffer
+   * @return cuda array filled with data buffer
+   */
   static CudaArray FromData(void *data, int size);
 
   template <typename T> static CudaArray FromData(std::vector<T> data) {
@@ -38,7 +85,10 @@ struct CudaArray {
   }
 
   CudaArrayHandle handle() const;
+
+  /** @return byte size of the array in bytes */
   int bytes() const;
+
   DLManagedTensor *moveToDLPack();
 
   CudaArray(CudaArray const &) = delete;

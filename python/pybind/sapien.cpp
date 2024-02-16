@@ -2,6 +2,7 @@
 #include "./python_component.hpp"
 #include "generator.hpp"
 #include "sapien/component.h"
+#include "sapien/device.h"
 #include "sapien/entity.h"
 #include "sapien/logger.h"
 #include "sapien/math/math.h"
@@ -79,6 +80,7 @@ Generator<int> init_sapien(py::module &m) {
 
   auto PySystem = py::class_<System, PythonSystem>(m, "System");
   auto PyCudaArray = py::class_<CudaArrayHandle>(m, "CudaArray");
+  auto PyDevice = py::class_<Device>(m, "Device");
 
   co_yield 0;
 
@@ -231,6 +233,19 @@ Generator<int> init_sapien(py::module &m) {
       .def("disable", &Component::disable, "disable the component");
 
   PySystem.def(py::init<>()).def("step", &System::step);
+
+  PyDevice
+      .def(py::init<>([](std::string const &alias) { return findDevice(alias); }),
+           py::arg("alias"))
+      .def("__repr__", [](Device const &d) { return "Device(\"" + d.getAlias() + "\")"; })
+      .def("__str__", &Device::getAlias)
+      .def("is_cpu", &Device::isCpu)
+      .def("is_cuda", &Device::isCuda)
+      .def_readonly("cuda_id", &Device::cudaId)
+      .def("can_render", &Device::canRender)
+      .def("can_present", &Device::canPresent)
+      .def_readonly("name", &Device::name)
+      .def_property_readonly("pci_string", &Device::getPciString);
 
   PyCudaArray
       .def(py::init<>([](py::object obj) {

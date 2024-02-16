@@ -1,6 +1,7 @@
 #pragma once
 #include "../array.h"
 #include "../component.h"
+#include "../device.h"
 #include "../system.h"
 #include "./physx_default.h"
 #include "./physx_engine.h"
@@ -131,7 +132,7 @@ struct PhysxGpuContactBodyForceQuery {
 
 class PhysxSystemGpu : public PhysxSystem {
 public:
-  PhysxSystemGpu();
+  PhysxSystemGpu(std::shared_ptr<Device> device);
 
   void registerComponent(std::shared_ptr<PhysxRigidDynamicComponent> component) override;
   void registerComponent(std::shared_ptr<PhysxRigidStaticComponent> component) override;
@@ -221,10 +222,14 @@ public:
   void setSceneOffset(std::shared_ptr<Scene> scene, Vec3 offset);
   Vec3 getSceneOffset(std::shared_ptr<Scene> scene) const;
 
+  std::shared_ptr<Device> getDevice() const { return mDevice; };
+
   ~PhysxSystemGpu();
 
 private:
-  // TODO do weak pointer clean up
+  std::shared_ptr<Device> mDevice;
+  void ensureCudaDevice();
+
   std::map<std::weak_ptr<Scene>, Vec3, std::owner_less<>> mSceneOffset;
 
   std::set<std::shared_ptr<PhysxRigidDynamicComponent>, comp_cmp> mRigidDynamicComponents;

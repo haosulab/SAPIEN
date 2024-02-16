@@ -39,7 +39,10 @@ struct CudaLib {
 struct CudaEvent {
   CudaEvent() {}
 
-  void init() { checkCudaDriverErrors(CudaLib::Get().cuEventCreate(&event, 0)); }
+  void init() {
+    checkCudaErrors(cudaGetDevice(&cudaId));
+    checkCudaDriverErrors(CudaLib::Get().cuEventCreate(&event, 0));
+  }
 
   CudaEvent(CudaEvent const &) = delete;
   CudaEvent &operator=(CudaEvent const &) = delete;
@@ -69,29 +72,33 @@ struct CudaEvent {
     return *this;
   }
 
-  void record(cudaStream_t stream) const {
+  /** record cuda event on the current cuda runtime device
+   *  @param stream cuda stream, must be created from the same cuda runtime device */
+  void record(cudaStream_t stream) {
     if (!event) {
-      throw std::runtime_error("cuda event is not initialized");
+      init();
     }
     checkCudaDriverErrors(CudaLib::Get().cuEventRecord(event, stream));
   }
 
   void wait(cudaStream_t stream) const {
     if (!event) {
-      throw std::runtime_error("cuda event is not initialized");
+      // no need to wait if no one records to this event
+      return;
     }
     checkCudaDriverErrors(CudaLib::Get().cuStreamWaitEvent(stream, event, 0));
   }
 
   void synchronize() const {
     if (!event) {
-      throw std::runtime_error("cuda event is not initialized");
+      // no need to wait if no one records to this event
     }
     checkCudaDriverErrors(CudaLib::Get().cuEventSynchronize(event));
   }
 
   ~CudaEvent() {
     if (event) {
+      cudaSetDevice(cudaId);
       CudaLib::Get().cuEventDestroy(event);
     }
   }

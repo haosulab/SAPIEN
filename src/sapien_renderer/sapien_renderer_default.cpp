@@ -7,11 +7,12 @@ namespace fs = std::filesystem;
 namespace sapien {
 namespace sapien_renderer {
 
-void SapienRendererDefault::setGlobalConfig(bool offscreenOnly, int32_t maxNumMaterials,
-                                            uint32_t maxNumTextures, uint32_t defaultMipMaps,
-                                            std::string const &device, bool doNotLoadTexture) {
+void SapienRendererDefault::setGlobalConfig(int32_t maxNumMaterials, uint32_t maxNumTextures,
+                                            uint32_t defaultMipMaps,
+                                            std::shared_ptr<Device> device,
+                                            bool doNotLoadTexture) {
   auto &d = Get();
-  d.offscreenOnly = offscreenOnly;
+
   d.defaultMipMaps = defaultMipMaps;
   d.device = device;
   d.doNotLoadTexture = doNotLoadTexture;
@@ -19,9 +20,16 @@ void SapienRendererDefault::setGlobalConfig(bool offscreenOnly, int32_t maxNumMa
   d.maxNumTextures = maxNumTextures;
 }
 
-bool SapienRendererDefault::getOffscreenOnly() { return Get().offscreenOnly; }
 uint32_t SapienRendererDefault::getDefaultMipMaps() { return Get().defaultMipMaps; }
-std::string SapienRendererDefault::getDevice() { return Get().device; }
+
+std::shared_ptr<Device> SapienRendererDefault::getDevice() {
+  auto device = Get().device;
+  if (device) {
+    return device;
+  }
+  return findBestRenderDevice();
+}
+
 bool SapienRendererDefault::getDoNotLoadTexture() { return Get().doNotLoadTexture; }
 uint32_t SapienRendererDefault::getMaxNumMaterials() { return Get().maxNumMaterials; }
 uint32_t SapienRendererDefault::getMaxNumTextures() { return Get().maxNumTextures; }

@@ -1,5 +1,6 @@
 #pragma once
 #include <PxPhysicsAPI.h>
+#include <map>
 #include <memory>
 
 namespace sapien {
@@ -13,14 +14,19 @@ public:
 
   PhysxEngine(float toleranceLength, float toleranceSpeed);
   ::physx::PxPhysics *getPxPhysics() const { return mPxPhysics; }
-  ::physx::PxCudaContextManager *getCudaContextManager() const { return mCudaContextManager; };
+
+  // ::physx::PxCudaContextManager *getCudaContextManager() const { return mCudaContextManager; };
+  ::physx::PxCudaContextManager *getCudaContextManager(int cudaId);// const { return mCudaContextManager; };
 
   ~PhysxEngine();
 
 private:
   ::physx::PxPhysics *mPxPhysics;
   ::physx::PxFoundation *mPxFoundation;
-  ::physx::PxCudaContextManager *mCudaContextManager{nullptr};
+
+  std::map<int, ::physx::PxCudaContextManager *> mCudaContextManagers; // per device context
+
+  // ::physx::PxCudaContextManager *mCudaContextManager{nullptr};
 };
 
 } // namespace physx

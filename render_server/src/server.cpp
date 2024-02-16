@@ -672,8 +672,8 @@ RenderServiceImpl::RenderServiceImpl(
 RenderServer::RenderServer(uint32_t maxNumMaterials, uint32_t maxNumTextures,
                            uint32_t defaultMipLevels, std::string const &device,
                            bool doNotLoadTexture) {
-  mContext = svulkan2::core::Context::Create(false, maxNumMaterials, maxNumTextures,
-                                             defaultMipLevels, doNotLoadTexture, device);
+  mContext = svulkan2::core::Context::Create(maxNumMaterials, maxNumTextures, defaultMipLevels,
+                                             doNotLoadTexture, device);
   mResourceManager = mContext->createResourceManager();
   // spdlog::stderr_color_mt("RenderServer");
 }

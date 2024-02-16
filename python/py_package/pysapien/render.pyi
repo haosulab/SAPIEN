@@ -840,7 +840,7 @@ def load_scene(filename: str, apply_scale: bool = True) -> dict:
     ...
 def set_camera_shader_dir(dir: str) -> None:
     ...
-def set_global_config(offscreen_only: bool = False, max_num_materials: int = 128, max_num_textures: int = 512, default_mipmap_levels: int = 1, default_device: str = '', do_not_load_texture: bool = False) -> None:
+def set_global_config(max_num_materials: int = 128, max_num_textures: int = 512, default_mipmap_levels: int = 1, default_device: sapien.pysapien.Device = None, do_not_load_texture: bool = False) -> None:
     """
     Sets global properties for SAPIEN renderer. This function should only be called before creating any renderer-related objects.
     """

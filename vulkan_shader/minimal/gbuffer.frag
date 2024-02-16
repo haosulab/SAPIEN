@@ -1,12 +1,12 @@
 #version 450
 
-layout (constant_id = 0) const int NUM_DIRECTIONAL_LIGHTS = 3;
-layout (constant_id = 1) const int NUM_POINT_LIGHTS = 3;
-layout (constant_id = 2) const int NUM_DIRECTIONAL_LIGHT_SHADOWS = 1;
-layout (constant_id = 3) const int NUM_POINT_LIGHT_SHADOWS = 1;
-layout (constant_id = 4) const int NUM_TEXTURED_LIGHT_SHADOWS = 1;
-layout (constant_id = 5) const int NUM_SPOT_LIGHT_SHADOWS = 1;
-layout (constant_id = 6) const int NUM_SPOT_LIGHTS = 1;
+layout (constant_id = 0) const int NUM_DIRECTIONAL_LIGHTS = 0;
+layout (constant_id = 1) const int NUM_DIRECTIONAL_LIGHT_SHADOWS = 0;
+layout (constant_id = 2) const int NUM_POINT_LIGHTS = 0;
+layout (constant_id = 3) const int NUM_POINT_LIGHT_SHADOWS = 0;
+layout (constant_id = 4) const int NUM_SPOT_LIGHTS = 0;
+layout (constant_id = 5) const int NUM_SPOT_LIGHT_SHADOWS = 0;
+layout (constant_id = 6) const int NUM_TEXTURED_LIGHT_SHADOWS = 0;
 
 layout(set = 0, binding = 0) uniform CameraBuffer {
   mat4 viewMatrix;
@@ -53,9 +53,9 @@ layout(set = 2, binding = 6) uniform sampler2D transmissionTexture;
 
 layout(set = 3, binding = 0) uniform SceneBuffer {
   vec4 ambientLight;
+  PointLight pointLights[10];
   DirectionalLight directionalLights[3];
-  SpotLight spotLights[1];
-  PointLight pointLights[3];
+  SpotLight spotLights[10];
   SpotLight texturedLights[1];
 } sceneBuffer;
 
@@ -69,18 +69,17 @@ struct LightBuffer {
 };
 
 layout(set = 3, binding = 1) uniform ShadowBuffer {
+  LightBuffer pointLightBuffers[60];
   LightBuffer directionalLightBuffers[3];
   LightBuffer spotLightBuffers[10];
-  LightBuffer pointLightBuffers[60];
   LightBuffer texturedLightBuffers[1];
 } shadowBuffer;
 
-layout(set = 3, binding = 2) uniform samplerCube samplerPointLightDepths[3];
-layout(set = 3, binding = 3) uniform sampler2D samplerDirectionalLightDepths[1];
-layout(set = 3, binding = 4) uniform sampler2D samplerTexturedLightDepths[1];
-layout(set = 3, binding = 5) uniform sampler2D samplerSpotLightDepths[10];
+layout(set = 3, binding = 2) uniform samplerCube samplerPointLightDepths[10];
+layout(set = 3, binding = 3) uniform sampler2D samplerDirectionalLightDepths[3];
+layout(set = 3, binding = 4) uniform sampler2D samplerSpotLightDepths[10];
+layout(set = 3, binding = 5) uniform sampler2D samplerTexturedLightDepths[1];
 layout(set = 3, binding = 6) uniform sampler2D samplerTexturedLightTextures[1];
-
 layout(set = 3, binding = 7) uniform samplerCube samplerEnvironment;
 layout(set = 3, binding = 8) uniform sampler2D samplerBRDFLUT;
 
@@ -114,7 +113,7 @@ layout(location = 2) in flat uvec4 inSegmentation;
 layout(location = 3) in vec3 objectCoord;
 layout(location = 4) in mat3 inTbn;
 
-layout(location = 0) out vec4 outColorRaw;
+layout(location = 0) out vec4 outColor;
 layout(location = 1) out ivec4 outPositionSegmentation;
 
 void main() {
@@ -309,6 +308,6 @@ void main() {
                        mat3(cameraBuffer.viewMatrixInverse) * camDir);
   color += sceneBuffer.ambientLight.rgb * albedo.rgb;
 
-  outColorRaw = vec4(clamp(pow(color, vec3(1/2.2)), vec3(0), vec3(1)), albedo.a);
+  outColor = vec4(clamp(pow(color, vec3(1/2.2)), vec3(0), vec3(1)), albedo.a);
   outPositionSegmentation = ivec4(ivec3(inPosition * 1000), inSegmentation[1]);
 }

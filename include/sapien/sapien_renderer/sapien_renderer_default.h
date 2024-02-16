@@ -1,4 +1,5 @@
 #pragma once
+#include "../device.h"
 #include <memory>
 #include <string>
 #include <svulkan2/common/vk.h>
@@ -12,12 +13,12 @@ class SapienRendererDefault {
 public:
   static SapienRendererDefault &Get();
 
-  static void setGlobalConfig(bool offscreenOnly, int32_t maxNumMaterials, uint32_t maxNumTextures,
-                              uint32_t defaultMipMaps, std::string const &device,
+  static void setGlobalConfig(int32_t maxNumMaterials, uint32_t maxNumTextures,
+                              uint32_t defaultMipMaps, std::shared_ptr<Device> device,
                               bool doNotLoadTexture);
-  static bool getOffscreenOnly();
+
   static uint32_t getDefaultMipMaps();
-  static std::string getDevice();
+  static std::shared_ptr<Device> getDevice();
   static bool getDoNotLoadTexture();
   static uint32_t getMaxNumMaterials();
   static uint32_t getMaxNumTextures();
@@ -49,9 +50,8 @@ public:
   static void internalSetShaderSearchPath(std::string const &dir);
 
 public:
-  bool offscreenOnly = false;
   uint32_t defaultMipMaps = 1;
-  std::string device = "";
+  std::shared_ptr<Device> device{};
   bool doNotLoadTexture = false;
   uint32_t maxNumMaterials = 128;
   uint32_t maxNumTextures = 512;
