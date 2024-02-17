@@ -8,6 +8,9 @@ import io
 
 
 def enable_gpu():
+    if is_gpu_enabled():
+        return
+
     if platform.system() != "Linux":
         raise Exception("GPU PhysX is currently only supported on Linux")
 

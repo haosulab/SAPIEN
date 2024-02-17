@@ -89,14 +89,30 @@ PhysxEngine::PhysxEngine(float toleranceLength, float toleranceSpeed) {
 
   PxCudaContextManagerDesc cudaContextManagerDesc;
   CUcontext context{};
+
   checkCudaErrors(cudaSetDevice(cudaId));
+
+  // NOTE: context initialization seems inconsistent across cuda versions
+  // cudaFree(0) is guaranteed to establish context
+  checkCudaErrors(cudaFree(0));
+
   checkCudaDriverErrors(CudaLib::Get().cuCtxGetCurrent(&context));
   if (!context) {
     throw std::runtime_error("failed to get CUDA context.");
   }
+
+  // NOTE: PhysX API really suggests it supports multiple GPUs, but no it doesn't.
+  if (!mCudaContextManagers.empty() && mCudaContextManagers.begin()->first != cudaId) {
+    throw std::runtime_error(
+        "failed to create PhysX on cuda:" + std::to_string(cudaId) +
+        ". PhysX only supports a single GPU and a scene has previously been created on cuda:" +
+        std::to_string(cudaId) + ".");
+  }
+
   cudaContextManagerDesc.ctx = &context;
   mCudaContextManagers[cudaId] =
       PxCreateCudaContextManager(*mPxFoundation, cudaContextManagerDesc, PxGetProfilerCallback());
+
   return mCudaContextManagers[cudaId];
 
   // TODO clean up

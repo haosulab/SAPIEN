@@ -31,7 +31,7 @@ std::shared_ptr<System> Scene::getSystem(std::string const &name) const {
   try {
     return mSystems.at(name);
   } catch (std::out_of_range &e) {
-    throw std::runtime_error("failed to get system: no system with anem [" + name +
+    throw std::runtime_error("failed to get system: no system with name [" + name +
                              "] is added to scene");
   }
 }

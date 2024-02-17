@@ -190,6 +190,8 @@ void BatchedRenderSystem::init() {
     }
   }
   mShapeCount = allShapeData.size();
+
+  checkCudaErrors(cudaSetDevice(SapienRenderEngine::Get()->getDevice()->cudaId));
   mCudaShapeDataBuffer = CudaArray::FromData(allShapeData);
   mCudaSceneTransformRefBuffer = CudaArray::FromData(sceneTransformRefs);
 
@@ -250,6 +252,8 @@ std::shared_ptr<BatchedCamera> BatchedRenderSystem::createCameraBatch(
       mCameraCount++;
     }
   }
+
+  checkCudaErrors(cudaSetDevice(SapienRenderEngine::Get()->getDevice()->cudaId));
   mCudaCameraDataBuffer = CudaArray::FromData(allCamData);
   return cameraBatch;
 }
@@ -263,14 +267,21 @@ void BatchedRenderSystem::update() {
   // check scene versions
   for (uint32_t i = 0; i < mSystems.size(); ++i) {
     if (mSystems.at(i)->getScene()->getVersion() != mSceneVersions.at(i)) {
-      // init();
       throw std::runtime_error("Modifying a scene (add/remove object/camera) is not allowed after "
                                "creating the batched render system.");
     }
   }
 
-  // upload data
+  if (mCudaSceneTransformRefBuffer.cudaId != mCudaPoseHandle.cudaId) {
+    throw std::runtime_error("failed to update render system group: cuda pose buffer (cuda:" +
+                             std::to_string(mCudaPoseHandle.cudaId) +
+                             ") and the "
+                             "renderer (cuda:" +
+                             std::to_string(mCudaSceneTransformRefBuffer.cudaId) +
+                             ") are on different cuda devices.");
+  }
 
+  // upload data
   update_object_transforms(
       (float **)mCudaSceneTransformRefBuffer.ptr, (RenderShapeData *)mCudaShapeDataBuffer.ptr,
       (float *)mCudaPoseHandle.ptr, mCudaPoseHandle.shape.at(1), mShapeCount, mCudaStream);

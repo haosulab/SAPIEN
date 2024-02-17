@@ -368,6 +368,7 @@ int PhysxSystem::computeArticulationMaxLinkCount() const {
 
 void PhysxSystemGpu::gpuInit() {
   ++mTotalSteps;
+  ensureCudaDevice();
   mPxScene->simulate(mTimestep);
   while (!mPxScene->fetchResults(true)) {
   }
