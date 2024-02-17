@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../component.h"
+#include "../device.h"
 #include "../system.h"
 #include "cubemap.h"
 #include "sapien/array.h"
@@ -23,9 +24,9 @@ class SapienRenderCubemap;
 
 class SapienRenderEngine {
 public:
-  static std::shared_ptr<SapienRenderEngine> Get();
+  static std::shared_ptr<SapienRenderEngine> Get(std::shared_ptr<Device> device = nullptr);
 
-  SapienRenderEngine();
+  SapienRenderEngine(std::shared_ptr<Device> device);
 
   std::shared_ptr<svulkan2::core::Context> getContext() const { return mContext; }
   std::shared_ptr<svulkan2::resource::SVResourceManager> getResourceManager() const {
@@ -38,9 +39,12 @@ public:
 
   std::string getSummary();
 
+  std::shared_ptr<Device> getDevice() const { return mDevice; }
+
   ~SapienRenderEngine();
 
 private:
+  std::shared_ptr<Device> mDevice;
   std::shared_ptr<svulkan2::core::Context> mContext;
   std::shared_ptr<svulkan2::resource::SVResourceManager> mResourceManager;
 
@@ -51,8 +55,9 @@ private:
 
 class SapienRendererSystem : public System {
 public:
-  SapienRendererSystem();
-  std::shared_ptr<SapienRenderEngine> getEngine();
+  SapienRendererSystem(std::shared_ptr<Device> device);
+  std::shared_ptr<Device> getDevice() const;
+
   std::shared_ptr<svulkan2::scene::Scene> getScene() { return mScene; }
 
   Vec3 getAmbientLight() const;

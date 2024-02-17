@@ -8,27 +8,16 @@ namespace sapien {
 namespace sapien_renderer {
 
 void SapienRendererDefault::setGlobalConfig(int32_t maxNumMaterials, uint32_t maxNumTextures,
-                                            uint32_t defaultMipMaps,
-                                            std::shared_ptr<Device> device,
-                                            bool doNotLoadTexture) {
+                                            uint32_t defaultMipMaps, bool doNotLoadTexture) {
   auto &d = Get();
 
   d.defaultMipMaps = defaultMipMaps;
-  d.device = device;
   d.doNotLoadTexture = doNotLoadTexture;
   d.maxNumMaterials = maxNumMaterials;
   d.maxNumTextures = maxNumTextures;
 }
 
 uint32_t SapienRendererDefault::getDefaultMipMaps() { return Get().defaultMipMaps; }
-
-std::shared_ptr<Device> SapienRendererDefault::getDevice() {
-  auto device = Get().device;
-  if (device) {
-    return device;
-  }
-  return findBestRenderDevice();
-}
 
 bool SapienRendererDefault::getDoNotLoadTexture() { return Get().doNotLoadTexture; }
 uint32_t SapienRendererDefault::getMaxNumMaterials() { return Get().maxNumMaterials; }

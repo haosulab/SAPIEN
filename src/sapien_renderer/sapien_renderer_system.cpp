@@ -19,13 +19,17 @@
 namespace sapien {
 namespace sapien_renderer {
 
-std::shared_ptr<SapienRenderEngine> SapienRenderEngine::Get() {
+std::shared_ptr<SapienRenderEngine> SapienRenderEngine::Get(std::shared_ptr<Device> device) {
   static std::weak_ptr<SapienRenderEngine> gEngine;
   std::shared_ptr<SapienRenderEngine> engine;
   if ((engine = gEngine.lock())) {
+    if (device && engine->mDevice != device) {
+      throw std::runtime_error("failed to create renderer on device \"" + device->getAlias() +
+                               "\": current SAPIEN version only supports single-GPU rendering.");
+    }
     return engine;
   }
-  gEngine = engine = std::make_shared<SapienRenderEngine>();
+  gEngine = engine = std::make_shared<SapienRenderEngine>(device);
   return engine;
 }
 
@@ -45,12 +49,19 @@ std::string SapienRenderEngine::getSummary() {
   return ss.str();
 }
 
-SapienRenderEngine::SapienRenderEngine() {
+SapienRenderEngine::SapienRenderEngine(std::shared_ptr<Device> device) {
+  if (!device) {
+    device = findBestRenderDevice();
+  }
+  if (!device) {
+    throw std::runtime_error("failed to find a rendering device");
+  }
+
+  mDevice = device;
   auto &d = SapienRendererDefault::Get();
-  auto device = d.getDevice();
   mContext = svulkan2::core::Context::Create(d.getMaxNumMaterials(), d.getMaxNumTextures(),
                                              d.getDefaultMipMaps(), d.getDoNotLoadTexture(),
-                                             device ? device->getAlias() : "");
+                                             device->getAlias());
   mResourceManager = mContext->createResourceManager();
 }
 
@@ -77,10 +88,12 @@ std::shared_ptr<svulkan2::resource::SVMesh> SapienRenderEngine::getBoxMesh() {
 
 SapienRenderEngine::~SapienRenderEngine() {}
 
-SapienRendererSystem::SapienRendererSystem() {
-  mEngine = SapienRenderEngine::Get();
+SapienRendererSystem::SapienRendererSystem(std::shared_ptr<Device> device) {
+  mEngine = SapienRenderEngine::Get(device);
   mScene = std::make_shared<svulkan2::scene::Scene>();
 }
+
+std::shared_ptr<Device> SapienRendererSystem::getDevice() const { return mEngine->getDevice(); }
 
 Vec3 SapienRendererSystem::getAmbientLight() const {
   auto l = mScene->getAmbientLight();

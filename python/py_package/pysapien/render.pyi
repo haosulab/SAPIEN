@@ -525,7 +525,11 @@ class RenderSpotLightComponent(RenderLightComponent):
 class RenderSystem(sapien.pysapien.System):
     ambient_light: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
     cubemap: RenderCubemap
-    def __init__(self) -> None:
+    @typing.overload
+    def __init__(self, device: sapien.pysapien.Device | None = None) -> None:
+        ...
+    @typing.overload
+    def __init__(self, device: str) -> None:
         ...
     def get_ambient_light(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
@@ -549,6 +553,9 @@ class RenderSystem(sapien.pysapien.System):
         ...
     @property
     def cuda_object_transforms(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def device(self) -> sapien.pysapien.Device:
         ...
     @property
     def lights(self) -> list[RenderLightComponent]:
@@ -807,7 +814,7 @@ class RenderWindow:
     def super(self) -> bool:
         ...
 class SapienRenderer:
-    def __init__(self) -> None:
+    def __init__(self, arg0: sapien.pysapien.Device) -> None:
         ...
     @property
     def _internal_context(self) -> sapien.pysapien.internal_renderer.Context:
@@ -840,7 +847,7 @@ def load_scene(filename: str, apply_scale: bool = True) -> dict:
     ...
 def set_camera_shader_dir(dir: str) -> None:
     ...
-def set_global_config(max_num_materials: int = 128, max_num_textures: int = 512, default_mipmap_levels: int = 1, default_device: sapien.pysapien.Device = None, do_not_load_texture: bool = False) -> None:
+def set_global_config(max_num_materials: int = 128, max_num_textures: int = 512, default_mipmap_levels: int = 1, do_not_load_texture: bool = False) -> None:
     """
     Sets global properties for SAPIEN renderer. This function should only be called before creating any renderer-related objects.
     """

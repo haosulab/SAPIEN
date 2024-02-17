@@ -377,8 +377,8 @@ void init_sapien_renderer(py::module &sapien) {
       .def(
           "clear_cache",
           [](bool models, bool images, bool shaders) {
-            SapienRenderEngine::Get()->getResourceManager()->clearCachedResources(models, images,
-                                                                                  shaders);
+            SapienRenderEngine::Get(nullptr)->getResourceManager()->clearCachedResources(
+                models, images, shaders);
           },
           py::arg("models") = true, py::arg("images") = true, py::arg("shaders") = false)
 
@@ -389,12 +389,11 @@ void init_sapien_renderer(py::module &sapien) {
             return parseSceneNode(*root);
           },
           py::arg("filename"), py::arg("apply_scale") = true)
-      .def("get_device_summary", []() { return SapienRenderEngine::Get()->getSummary(); })
+      .def("get_device_summary", []() { return SapienRenderEngine::Get(nullptr)->getSummary(); })
 
       .def("set_global_config", &SapienRendererDefault::setGlobalConfig,
            py::arg("max_num_materials") = 128, py::arg("max_num_textures") = 512,
-           py::arg("default_mipmap_levels") = 1, py::arg("default_device") = nullptr,
-           py::arg("do_not_load_texture") = false,
+           py::arg("default_mipmap_levels") = 1, py::arg("do_not_load_texture") = false,
            "Sets global properties for SAPIEN renderer. This function should only be called "
            "before creating any renderer-related objects.");
 
@@ -473,7 +472,16 @@ This function waits for any pending CUDA operations on cuda stream provided by :
   PyCameraGroup.def("take_picture", &BatchedCamera::takePicture)
       .def("get_picture_cuda", &BatchedCamera::getPictureCuda, py::arg("name"));
 
-  PyRenderSystem.def(py::init<>())
+  PyRenderSystem
+      .def(py::init([](std::shared_ptr<Device> device) {
+             return std::make_shared<SapienRendererSystem>(device);
+           }),
+           py::arg("device") = nullptr)
+      .def(py::init([](std::string const &device) {
+             return std::make_shared<SapienRendererSystem>(findDevice(device));
+           }),
+           py::arg("device"))
+    .def_property_readonly("device", &SapienRendererSystem::getDevice)
       .def_property("ambient_light", &SapienRendererSystem::getAmbientLight,
                     &SapienRendererSystem::setAmbientLight)
       .def("get_ambient_light", &SapienRendererSystem::getAmbientLight)
