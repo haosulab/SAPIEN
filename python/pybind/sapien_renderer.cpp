@@ -341,7 +341,8 @@ void init_sapien_renderer(py::module &sapien) {
 
   ////////// global //////////
 
-  m.def("_internal_set_shader_search_path", &SapienRendererDefault::internalSetShaderSearchPath)
+  m.def("_internal_set_shader_search_path", &SapienRendererDefault::internalSetShaderSearchPath,
+        py::arg("path"))
       .def("set_imgui_ini_filename", &SapienRendererDefault::setImguiIniFilename,
            py::arg("filename"))
       .def("set_viewer_shader_dir", &SapienRendererDefault::setViewerShaderDirectory,
@@ -453,14 +454,15 @@ void init_sapien_renderer(py::module &sapien) {
 
   auto PyRenderWindow = py::class_<SapienRendererWindow>(m, "RenderWindow");
 
-  PySapienRenderer.def(py::init(&SapienRenderEngine::Get))
+  PySapienRenderer.def(py::init(&SapienRenderEngine::Get), py::arg("device") = nullptr)
       .def_property_readonly("_internal_context", &SapienRenderEngine::getContext);
 
-  PyRenderSystemGroup.def(py::init<std::vector<std::shared_ptr<SapienRendererSystem>>>())
+  PyRenderSystemGroup
+      .def(py::init<std::vector<std::shared_ptr<SapienRendererSystem>>>(), py::arg("systems"))
       .def("create_camera_group", &BatchedRenderSystem::createCameraBatch, py::arg("cameras"),
            py::arg("picture_names"))
-      .def("set_cuda_stream", &BatchedRenderSystem::setCudaStream)
-      .def("set_cuda_poses", &BatchedRenderSystem::setPoseSource)
+      .def("set_cuda_stream", &BatchedRenderSystem::setCudaStream, py::arg("stream"))
+      .def("set_cuda_poses", &BatchedRenderSystem::setPoseSource, py::arg("pose_buffer"))
       .def("update_render", &BatchedRenderSystem::update,
            R"doc(
 This function performs CUDA operations to transfer poses from the CUDA buffer provided by :func:`set_cuda_poses` into render systems.
@@ -481,7 +483,7 @@ This function waits for any pending CUDA operations on cuda stream provided by :
              return std::make_shared<SapienRendererSystem>(findDevice(device));
            }),
            py::arg("device"))
-    .def_property_readonly("device", &SapienRendererSystem::getDevice)
+      .def_property_readonly("device", &SapienRendererSystem::getDevice)
       .def_property("ambient_light", &SapienRendererSystem::getAmbientLight,
                     &SapienRendererSystem::setAmbientLight)
       .def("get_ambient_light", &SapienRendererSystem::getAmbientLight)
@@ -639,7 +641,7 @@ This function waits for any pending CUDA operations on cuda stream provided by :
 
   PyRenderShape.def_property("local_pose", &RenderShape::getLocalPose, &RenderShape::setLocalPose)
       .def("get_local_pose", &RenderShape::getLocalPose)
-      .def("set_local_pose", &RenderShape::setLocalPose)
+      .def("set_local_pose", &RenderShape::setLocalPose, py::arg("pose"))
 
       .def_property("culling", &RenderShape::getCulling, &RenderShape::setCulling)
       .def("get_culling", &RenderShape::getCulling)
@@ -655,7 +657,7 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def_property_readonly("material", &RenderShape::getMaterial)
       .def("get_material", &RenderShape::getMaterial)
 
-      .def("set_gpu_pose_batch_index", &RenderShape::setGpuBatchedPoseIndex)
+      .def("set_gpu_pose_batch_index", &RenderShape::setGpuBatchedPoseIndex, py::arg("index"))
 
       .def_property_readonly("parts", &RenderShape::getParts)
       .def("get_parts", &RenderShape::getParts)
@@ -732,7 +734,7 @@ This function waits for any pending CUDA operations on cuda stream provided by :
            "Note: this function only works when the shape is not added to scene");
 
   PyRenderBodyComponent.def(py::init<>())
-      .def("attach", &SapienRenderBodyComponent::attachRenderShape)
+      .def("attach", &SapienRenderBodyComponent::attachRenderShape, py::arg("shape"))
       .def_property_readonly("render_shapes", &SapienRenderBodyComponent::getRenderShapes)
       .def_property_readonly("_internal_node", &SapienRenderBodyComponent::internalGetNode)
       .def_property("visibility", &SapienRenderBodyComponent::getVisibility,
@@ -777,7 +779,7 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def_property("local_pose", &SapienRenderCameraComponent::getLocalPose,
                     &SapienRenderCameraComponent::setLocalPose)
       .def("get_local_pose", &SapienRenderCameraComponent::getLocalPose)
-      .def("set_local_pose", &SapienRenderCameraComponent::setLocalPose)
+      .def("set_local_pose", &SapienRenderCameraComponent::setLocalPose, py::arg("pose"))
 
       .def_property_readonly("global_pose", &SapienRenderCameraComponent::getGlobalPose)
       .def("get_global_pose", &SapienRenderCameraComponent::getGlobalPose)
@@ -862,7 +864,8 @@ This function waits for any pending CUDA operations on cuda stream provided by :
           "_cuda_buffer", &SapienRenderCameraComponent::getCudaBuffer,
           "Debug only. Get the CUDA buffer containing GPU data for this camera, including "
           "transformaion matrices, sizes, and user-defined shader fields.")
-      .def("set_gpu_pose_batch_index", &SapienRenderCameraComponent::setGpuBatchedPoseIndex)
+      .def("set_gpu_pose_batch_index", &SapienRenderCameraComponent::setGpuBatchedPoseIndex,
+           py::arg("index"))
 
       .def(
           "get_picture_cuda",
@@ -904,7 +907,7 @@ consumer library. Make a copy if needed.
       .def_property("color", &SapienRenderLightComponent::getColor,
                     &SapienRenderLightComponent::setColor)
       .def("get_color", &SapienRenderLightComponent::getColor)
-      .def("set_color", &SapienRenderLightComponent::setColor, "color")
+      .def("set_color", &SapienRenderLightComponent::setColor, py::arg("color"))
 
       .def_property("shadow", &SapienRenderLightComponent::getShadowEnabled,
                     &SapienRenderLightComponent::setShadowEnabled)
@@ -931,7 +934,8 @@ consumer library. Make a copy if needed.
       .def_property("shadow_half_size", &SapienRenderDirectionalLightComponent::getShadowHalfSize,
                     &SapienRenderDirectionalLightComponent::setShadowHalfSize)
       .def("get_shadow_half_size", &SapienRenderDirectionalLightComponent::getShadowHalfSize)
-      .def("set_shadow_half_size", &SapienRenderDirectionalLightComponent::setShadowHalfSize);
+      .def("set_shadow_half_size", &SapienRenderDirectionalLightComponent::setShadowHalfSize,
+           py::arg("size"));
 
   PyRenderSpotLightComponent.def(py::init<>())
       .def_property("inner_fov", &SapienRenderSpotLightComponent::getFovInner,
@@ -968,13 +972,13 @@ consumer library. Make a copy if needed.
       .def_property("vertex_count", &CudaDeformableMeshComponent::getVertexCount,
                     &CudaDeformableMeshComponent::setVertexCount)
       .def("get_vertex_count", &CudaDeformableMeshComponent::getVertexCount)
-      .def("set_vertex_count", &CudaDeformableMeshComponent::setVertexCount)
-      .def("set_triangles", &CudaDeformableMeshComponent::setTriangles)
+      .def("set_vertex_count", &CudaDeformableMeshComponent::setVertexCount, py::arg("count"))
+      .def("set_triangles", &CudaDeformableMeshComponent::setTriangles, py::arg("triangles"))
 
       .def_property("triangle_count", &CudaDeformableMeshComponent::getTriangleCount,
                     &CudaDeformableMeshComponent::setTriangleCount)
       .def("get_triangle_count", &CudaDeformableMeshComponent::getTriangleCount)
-      .def("set_triangle_count", &CudaDeformableMeshComponent::setTriangleCount)
+      .def("set_triangle_count", &CudaDeformableMeshComponent::setTriangleCount, py::arg("count"))
 
       .def_property_readonly("cuda_vertices",
                              &CudaDeformableMeshComponent::getVertexBufferCudaArray)
@@ -1002,12 +1006,13 @@ consumer library. Make a copy if needed.
       .def("set_intrinsic_parameters", &SapienRendererWindow::setCameraIntrinsicParameters,
            py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
            py::arg("cy"), py::arg("skew"))
-      .def("set_camera_pose", &SapienRendererWindow::setCameraPose)
+      .def("set_camera_pose", &SapienRendererWindow::setCameraPose, py::arg("pose"))
       .def("set_camera_position", &SapienRendererWindow::setCameraPosition, py::arg("position"))
       .def("set_camera_rotation", &SapienRendererWindow::setCameraRotation, py::arg("quat"))
 
-      .def("get_camera_property_int", &SapienRendererWindow::getCameraPropertyInt)
-      .def("get_camera_property_float", &SapienRendererWindow::getCameraPropertyFloat)
+      .def("get_camera_property_int", &SapienRendererWindow::getCameraPropertyInt, py::arg("key"))
+      .def("get_camera_property_float", &SapienRendererWindow::getCameraPropertyFloat,
+           py::arg("key"))
       .def("set_camera_property",
            py::overload_cast<const std::string &, float>(&SapienRendererWindow::setCameraProperty),
            py::arg("key"), py::arg("value"))

@@ -61,16 +61,21 @@ Generator<int> init_sapien(py::module &m) {
   m.def("set_log_level", &sapien::logger::setLogLevel, py::arg("level"));
 
   py::class_<PythonProfiler>(m, "Profiler")
-      .def(py::init<std::string const &>())
+      .def(py::init<std::string const &>(), py::arg("name"))
       .def("__enter__", &PythonProfiler::enter)
-      .def("__exit__", &PythonProfiler::exit)
-      .def("__call__", &PythonProfiler::decorate);
+      .def("__exit__", &PythonProfiler::exit, py::arg("exec_type"), py::arg("exec_value"),
+           py::arg("traceback"))
+      .def("__call__", &PythonProfiler::decorate, py::arg("func"));
 
-  m.def("profile", [](std::string const &name) {
-     return PythonProfiler(name);
-   }).def("profile", [](py::function func) {
-    return PythonProfiler(py::getattr(func, "__name__").cast<std::string>()).decorate(func);
-  });
+  m.def(
+       "profile", [](std::string const &name) { return PythonProfiler(name); }, py::arg("name"))
+      .def(
+          "profile",
+          [](py::function func) {
+            return PythonProfiler(py::getattr(func, "__name__").cast<std::string>())
+                .decorate(func);
+          },
+          py::arg("func"));
 
   auto PyPose = py::class_<Pose>(m, "Pose");
   auto PyScene = py::class_<Scene>(m, "Scene");
@@ -85,7 +90,7 @@ Generator<int> init_sapien(py::module &m) {
   co_yield 0;
 
   PyPose.def(py::init<Vec3, Quat>(), py::arg("p") = Vec3(), py::arg("q") = Quat())
-      .def(py::init(&EigenMat4ToPose))
+      .def(py::init(&EigenMat4ToPose), py::arg("matrix"))
       .def("to_transformation_matrix", &PoseToEigenMat4)
 
       .def_readwrite("p", &Pose::p)
@@ -102,10 +107,11 @@ Generator<int> init_sapien(py::module &m) {
           "rpy", [](Pose &pose) { return QuatToRPY(pose.q); },
           [](Pose &pose, Vec3 const &rpy) { pose.q = RPYToQuat(rpy); })
       .def("get_rpy", [](Pose &pose) { return QuatToRPY(pose.q); })
-      .def("set_rpy", [](Pose &pose, Vec3 const &rpy) { pose.q = RPYToQuat(rpy); })
+      .def(
+          "set_rpy", [](Pose &pose, Vec3 const &rpy) { pose.q = RPYToQuat(rpy); }, py::arg("rpy"))
 
       .def("inv", &Pose::getInverse)
-      .def(py::self * py::self)
+      .def(py::self * py::self, py::arg("other"))
       .def("__repr__",
            [](Pose const &pose) {
              std::ostringstream oss;
@@ -133,9 +139,9 @@ Generator<int> init_sapien(py::module &m) {
       .def("get_id", &Scene::getId)
       .def_property_readonly("entities", &Scene::getEntities)
       .def("get_entities", &Scene::getEntities)
-      .def("add_entity", &Scene::addEntity)
+      .def("add_entity", &Scene::addEntity, py::arg("entity"))
       .def("remove_entity", &Scene::removeEntity, py::arg("entity"))
-      .def("add_system", &Scene::addSystem)
+      .def("add_system", &Scene::addSystem, py::arg("system"))
       .def("get_system", &Scene::getSystem, py::arg("name"))
       .def_property_readonly("physx_system", &Scene::getPhysxSystem)
       .def("get_physx_system", &Scene::getPhysxSystem)
@@ -155,7 +161,7 @@ Generator<int> init_sapien(py::module &m) {
 
       .def_property("name", &Entity::getName, &Entity::setName)
       .def("get_name", &Entity::getName)
-      .def("set_name", &Entity::setName)
+      .def("set_name", &Entity::setName, py::arg("name"))
 
       .def_property_readonly("scene", &Entity::getScene, py::return_value_policy::reference)
       .def("get_scene", &Entity::getScene)
@@ -168,7 +174,7 @@ Generator<int> init_sapien(py::module &m) {
 
       .def_property("pose", &Entity::getPose, &Entity::setPose)
       .def("get_pose", &Entity::getPose)
-      .def("set_pose", &Entity::setPose)
+      .def("set_pose", &Entity::setPose, py::arg("pose"))
 
       .def("remove_from_scene", &Entity::removeFromScene)
 
@@ -193,7 +199,7 @@ Generator<int> init_sapien(py::module &m) {
 
       .def_property("name", &Component::getName, &Component::setName)
       .def("get_name", &Component::getName)
-      .def("set_name", &Component::setName)
+      .def("set_name", &Component::setName, py::arg("name"))
 
       .def_property(
           "pose",
@@ -214,19 +220,21 @@ Generator<int> init_sapien(py::module &m) {
                  1);
              return c.getPose();
            })
-      .def("set_pose",
-           [](Component &c, Pose const &pose) {
-             PyErr_WarnEx(
-                 PyExc_DeprecationWarning,
-                 "component.set_pose can be ambiguous thus deprecated. It is equivalent to "
-                 "component.set_entity_pose, which should be used instead",
-                 1);
-             c.setPose(pose);
-           })
+      .def(
+          "set_pose",
+          [](Component &c, Pose const &pose) {
+            PyErr_WarnEx(
+                PyExc_DeprecationWarning,
+                "component.set_pose can be ambiguous thus deprecated. It is equivalent to "
+                "component.set_entity_pose, which should be used instead",
+                1);
+            c.setPose(pose);
+          },
+          py::arg("pose"))
 
       .def_property("entity_pose", &Component::getPose, &Component::setPose)
       .def("get_entity_pose", &Component::getPose)
-      .def("set_entity_pose", &Component::setPose)
+      .def("set_entity_pose", &Component::setPose, py::arg("pose"))
 
       .def_property_readonly("is_enabled", &Component::getEnabled)
       .def("enable", &Component::enable, "enable the component")
@@ -249,33 +257,34 @@ Generator<int> init_sapien(py::module &m) {
 
   PyCudaArray
       .def(py::init<>([](py::object obj) {
-        auto interface = obj.attr("__cuda_array_interface__").cast<py::dict>();
+             auto interface = obj.attr("__cuda_array_interface__").cast<py::dict>();
 
-        auto shape = interface.attr("shape").cast<py::tuple>().cast<std::vector<int>>();
-        auto type = interface.attr("typestr").cast<std::string>();
-        py::dtype dtype(type);
+             auto shape = interface.attr("shape").cast<py::tuple>().cast<std::vector<int>>();
+             auto type = interface.attr("typestr").cast<std::string>();
+             py::dtype dtype(type);
 
-        std::vector<int> strides;
-        if (py::hasattr(obj, "stride") && !obj.is_none()) {
-          strides = interface.attr("strides").cast<py::tuple>().cast<std::vector<int>>();
-        } else {
-          int acc = dtype.itemsize();
-          strides.push_back(acc);
-          for (uint32_t i = shape.size() - 1; i >= 1; --i) {
-            acc *= shape.at(i);
-            strides.push_back(acc);
-          }
-        }
+             std::vector<int> strides;
+             if (py::hasattr(obj, "stride") && !obj.is_none()) {
+               strides = interface.attr("strides").cast<py::tuple>().cast<std::vector<int>>();
+             } else {
+               int acc = dtype.itemsize();
+               strides.push_back(acc);
+               for (uint32_t i = shape.size() - 1; i >= 1; --i) {
+                 acc *= shape.at(i);
+                 strides.push_back(acc);
+               }
+             }
 
-        auto data = interface.attr("data").cast<py::tuple>();
-        void *ptr = reinterpret_cast<void *>(data[0].cast<uintptr_t>());
+             auto data = interface.attr("data").cast<py::tuple>();
+             void *ptr = reinterpret_cast<void *>(data[0].cast<uintptr_t>());
 
-        return CudaArrayHandle{.shape = shape,
-                               .strides = strides,
-                               .type = type,
-                               .cudaId = 0, // TODO: do we need cuda id?
-                               .ptr = ptr};
-      }))
+             return CudaArrayHandle{.shape = shape,
+                                    .strides = strides,
+                                    .type = type,
+                                    .cudaId = 0, // TODO: do we need cuda id?
+                                    .ptr = ptr};
+           }),
+           py::arg("data"))
       .def_readonly("shape", &CudaArrayHandle::shape)
       .def_readonly("strides", &CudaArrayHandle::strides)
       .def_readonly("cuda_id", &CudaArrayHandle::cudaId)

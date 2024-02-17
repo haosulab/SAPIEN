@@ -6,7 +6,7 @@ __all__ = ['RenderClientBodyComponent', 'RenderClientCameraComponent', 'RenderCl
 class RenderClientBodyComponent(sapien.pysapien.Component):
     def __init__(self) -> None:
         ...
-    def attach(self, arg0: RenderClientShape) -> RenderClientBodyComponent:
+    def attach(self, shape: RenderClientShape) -> RenderClientBodyComponent:
         ...
 class RenderClientCameraComponent(sapien.pysapien.Component):
     local_pose: sapien.pysapien.Pose
@@ -57,7 +57,7 @@ class RenderClientSystem:
     @typing.overload
     def set_ambient_light(self, direction: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, color: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, shadow: bool = False, position: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple = ..., shadow_scale: float = 5.0, shadow_near: float = 0.009999999776482582, shadow_far: float = 100.0, shadow_map_size: int = 1024) -> None:
         ...
-    def update_render_and_take_pictures(self, arg0: list[RenderClientCameraComponent]) -> None:
+    def update_render_and_take_pictures(self, cameras: list[RenderClientCameraComponent]) -> None:
         ...
     @property
     def process_index(self) -> int:

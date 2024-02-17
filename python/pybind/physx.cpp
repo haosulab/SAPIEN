@@ -327,7 +327,7 @@ Generator<int> init_physx(py::module &sapien) {
       .def("get_config", &PhysxSystem::getSceneConfig)
       .def_property("timestep", &PhysxSystem::getTimestep, &PhysxSystem::setTimestep)
       .def("get_timestep", &PhysxSystem::getTimestep)
-      .def("set_timestep", &PhysxSystem::setTimestep)
+      .def("set_timestep", &PhysxSystem::setTimestep, py::arg("timestep"))
 
       .def_property("scene_collision_id", &PhysxSystem::getSceneCollisionId,
                     &PhysxSystem::setSceneCollisionId)
@@ -453,24 +453,33 @@ Usage:
            py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationQTargetVel))
 
       .def("gpu_apply_rigid_dynamic_data",
-           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyRigidDynamicData))
-      .def("gpu_apply_articulation_root_pose", py::overload_cast<CudaArrayHandle const &>(
-                                                   &PhysxSystemGpu::gpuApplyArticulationRootPose))
+           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyRigidDynamicData),
+           py::arg("index_buffer"))
+      .def("gpu_apply_articulation_root_pose",
+           py::overload_cast<CudaArrayHandle const &>(
+               &PhysxSystemGpu::gpuApplyArticulationRootPose),
+           py::arg("index_buffer"))
       .def(
           "gpu_apply_articulation_root_velocity",
-          py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationRootVel))
+          py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationRootVel),
+          py::arg("index_buffer"))
       .def("gpu_apply_articulation_qpos",
-           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQpos))
+           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQpos),
+           py::arg("index_buffer"))
       .def("gpu_apply_articulation_qvel",
-           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQvel))
+           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQvel),
+           py::arg("index_buffer"))
       .def("gpu_apply_articulation_qf",
-           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQf))
+           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQf),
+           py::arg("index_buffer"))
       .def("gpu_apply_articulation_target_position",
            py::overload_cast<CudaArrayHandle const &>(
-               &PhysxSystemGpu::gpuApplyArticulationQTargetPos))
+               &PhysxSystemGpu::gpuApplyArticulationQTargetPos),
+           py::arg("index_buffer"))
       .def("gpu_apply_articulation_target_velocity",
            py::overload_cast<CudaArrayHandle const &>(
-               &PhysxSystemGpu::gpuApplyArticulationQTargetVel))
+               &PhysxSystemGpu::gpuApplyArticulationQTargetVel),
+           py::arg("index_buffer"))
 
       .def("sync_poses_gpu_to_cpu", &PhysxSystemGpu::syncPosesGpuToCpu,
            "Warning: this function is super slow and for debug only. Download all poses from the "
@@ -492,22 +501,22 @@ Usage:
       .def_property("dynamic_friction", &PhysxMaterial::getDynamicFriction,
                     &PhysxMaterial::setDynamicFriction)
       .def("get_dynamic_friction", &PhysxMaterial::getDynamicFriction)
-      .def("set_dynamic_friction", &PhysxMaterial::setDynamicFriction)
+      .def("set_dynamic_friction", &PhysxMaterial::setDynamicFriction, py::arg("friction"))
 
       .def_property("static_friction", &PhysxMaterial::getStaticFriction,
                     &PhysxMaterial::setStaticFriction)
       .def("get_static_friction", &PhysxMaterial::getStaticFriction)
-      .def("set_static_friction", &PhysxMaterial::setStaticFriction)
+      .def("set_static_friction", &PhysxMaterial::setStaticFriction, py::arg("friction"))
 
       .def_property("restitution", &PhysxMaterial::getRestitution, &PhysxMaterial::setRestitution)
       .def("get_restitution", &PhysxMaterial::getRestitution)
-      .def("set_restitution", &PhysxMaterial::setRestitution);
+      .def("set_restitution", &PhysxMaterial::setRestitution, py::arg("restitution"));
 
   PyPhysxCollisionShape
       .def_property("local_pose", &PhysxCollisionShape::getLocalPose,
                     &PhysxCollisionShape::setLocalPose)
       .def("get_local_pose", &PhysxCollisionShape::getLocalPose)
-      .def("set_local_pose", &PhysxCollisionShape::setLocalPose)
+      .def("set_local_pose", &PhysxCollisionShape::setLocalPose, py::arg("pose"))
 
       .def_property("rest_offset", &PhysxCollisionShape::getRestOffset,
                     &PhysxCollisionShape::setRestOffset)
@@ -546,7 +555,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
 
       .def_property("density", &PhysxCollisionShape::getDensity, &PhysxCollisionShape::setDensity)
       .def("get_density", &PhysxCollisionShape::getDensity)
-      .def("set_density", &PhysxCollisionShape::setDensity);
+      .def("set_density", &PhysxCollisionShape::setDensity, py::arg("density"));
 
   PyPhysxCollisionShapePlane.def(py::init<std::shared_ptr<PhysxMaterial>>(), py::arg("material"));
   PyPhysxCollisionShapeBox
@@ -640,17 +649,17 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
 
       .def_property("mass", &PhysxRigidBodyComponent::getMass, &PhysxRigidBodyComponent::setMass)
       .def("get_mass", &PhysxRigidBodyComponent::getMass)
-      .def("set_mass", &PhysxRigidBodyComponent::setMass)
+      .def("set_mass", &PhysxRigidBodyComponent::setMass, py::arg("mass"))
 
       .def_property("inertia", &PhysxRigidBodyComponent::getInertia,
                     &PhysxRigidBodyComponent::setInertia)
       .def("get_inertia", &PhysxRigidBodyComponent::getInertia)
-      .def("set_inertia", &PhysxRigidBodyComponent::setInertia)
+      .def("set_inertia", &PhysxRigidBodyComponent::setInertia, py::arg("inertia"))
 
       .def_property("cmass_local_pose", &PhysxRigidBodyComponent::getCMassLocalPose,
                     &PhysxRigidBodyComponent::setCMassLocalPose)
       .def("get_cmass_local_pose", &PhysxRigidBodyComponent::getCMassLocalPose)
-      .def("set_cmass_local_pose", &PhysxRigidBodyComponent::setCMassLocalPose)
+      .def("set_cmass_local_pose", &PhysxRigidBodyComponent::setCMassLocalPose, py::arg("pose"))
 
       .def_property_readonly("linear_velocity", &PhysxRigidBodyComponent::getLinearVelocity)
       .def("get_linear_velocity", &PhysxRigidBodyComponent::getLinearVelocity)
@@ -661,7 +670,7 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_property("disable_gravity", &PhysxRigidBodyComponent::getDisableGravity,
                     &PhysxRigidBodyComponent::setDisableGravity)
       .def("get_disable_gravity", &PhysxRigidBodyComponent::getDisableGravity)
-      .def("set_disable_gravity", &PhysxRigidBodyComponent::setDisableGravity)
+      .def("set_disable_gravity", &PhysxRigidBodyComponent::setDisableGravity, py::arg("disable"))
 
       .def("add_force_torque", &PhysxRigidBodyComponent::addForceTorque, py::arg("force"),
            py::arg("torque"), py::arg("mode") = ::physx::PxForceMode::eFORCE)
@@ -674,12 +683,14 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_property("linear_velocity", &PhysxRigidDynamicComponent::getLinearVelocity,
                     &PhysxRigidDynamicComponent::setLinearVelocity)
       .def("get_linear_velocity", &PhysxRigidDynamicComponent::getLinearVelocity)
-      .def("set_linear_velocity", &PhysxRigidDynamicComponent::setLinearVelocity)
+      .def("set_linear_velocity", &PhysxRigidDynamicComponent::setLinearVelocity,
+           py::arg("velocity"))
 
       .def_property("angular_velocity", &PhysxRigidDynamicComponent::getAngularVelocity,
                     &PhysxRigidDynamicComponent::setAngularVelocity)
       .def("get_angular_velocity", &PhysxRigidDynamicComponent::getAngularVelocity)
-      .def("set_angular_velocity", &PhysxRigidDynamicComponent::setAngularVelocity)
+      .def("set_angular_velocity", &PhysxRigidDynamicComponent::setAngularVelocity,
+           py::arg("velocity"))
 
       .def_property_readonly("locked_motion_axes",
                              &PhysxRigidDynamicComponent::getLockedMotionAxes)
@@ -703,12 +714,13 @@ Example:
       .def_property("kinematic", &PhysxRigidDynamicComponent::isKinematic,
                     &PhysxRigidDynamicComponent::setKinematic)
       .def("get_kinematic", &PhysxRigidDynamicComponent::isKinematic)
-      .def("set_kinematic", &PhysxRigidDynamicComponent::setKinematic)
+      .def("set_kinematic", &PhysxRigidDynamicComponent::setKinematic, py::arg("kinematic"))
 
       .def_property("kinematic_target", &PhysxRigidDynamicComponent::getKinematicTarget,
                     &PhysxRigidDynamicComponent::setKinematicTarget)
       .def("get_kinematic_target", &PhysxRigidDynamicComponent::getKinematicTarget)
-      .def("set_kinematic_target", &PhysxRigidDynamicComponent::setKinematicTarget)
+      .def("set_kinematic_target", &PhysxRigidDynamicComponent::setKinematicTarget,
+           py::arg("target"))
 
       .def_property_readonly("gpu_index", &PhysxRigidDynamicComponent::getGpuIndex)
       .def("get_gpu_index", &PhysxRigidDynamicComponent::getGpuIndex)
@@ -838,7 +850,7 @@ Example:
   PyPhysxArticulation
       .def_property("name", &PhysxArticulation::getName, &PhysxArticulation::setName)
       .def("get_name", &PhysxArticulation::getName)
-      .def("set_name", &PhysxArticulation::setName)
+      .def("set_name", &PhysxArticulation::setName, py::arg("name"))
 
       .def_property_readonly("dof", &PhysxArticulation::getDof)
       .def("get_dof", &PhysxArticulation::getDof)
@@ -891,7 +903,7 @@ Example:
            py::arg("velocity"))
 
       .def_property("pose", &PhysxArticulation::getRootPose, &PhysxArticulation::setRootPose)
-      .def("set_pose", &PhysxArticulation::setRootPose)
+      .def("set_pose", &PhysxArticulation::setRootPose, py::arg("pose"))
       .def("get_pose", &PhysxArticulation::getRootPose)
       .def("compute_passive_force", &PhysxArticulation::computePassiveForce,
            py::arg("gravity") = true, py::arg("coriolis_and_centrifugal") = true)
@@ -902,24 +914,28 @@ Example:
            py::arg("low") = -PX_MAX_F32, py::arg("high") = PX_MAX_F32,
            py::arg("limit_stiffness") = 0)
 
-      .def("find_link_by_name",
-           [](PhysxArticulation &a, std::string const &name) {
-             for (auto &l : a.getLinks()) {
-               if (l->getName() == name) {
-                 return l;
-               }
-             }
-             return std::shared_ptr<PhysxArticulationLinkComponent>{};
-           })
-      .def("find_joint_by_name",
-           [](PhysxArticulation &a, std::string const &name) {
-             for (auto &j : a.getJoints()) {
-               if (j->getName() == name) {
-                 return j;
-               }
-             }
-             return std::shared_ptr<PhysxArticulationJoint>{};
-           })
+      .def(
+          "find_link_by_name",
+          [](PhysxArticulation &a, std::string const &name) {
+            for (auto &l : a.getLinks()) {
+              if (l->getName() == name) {
+                return l;
+              }
+            }
+            return std::shared_ptr<PhysxArticulationLinkComponent>{};
+          },
+          py::arg("name"))
+      .def(
+          "find_joint_by_name",
+          [](PhysxArticulation &a, std::string const &name) {
+            for (auto &j : a.getJoints()) {
+              if (j->getName() == name) {
+                return j;
+              }
+            }
+            return std::shared_ptr<PhysxArticulationJoint>{};
+          },
+          py::arg("name"))
 
       .def("clone_links",
            [](PhysxArticulation &a) {

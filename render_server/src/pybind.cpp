@@ -40,7 +40,7 @@ PYBIND11_MODULE(pysapien_render_server, m) {
 
       .def_property_readonly("process_index", &ClientSystem::getIndex)
       .def("get_process_index", &ClientSystem::getIndex)
-      .def("update_render_and_take_pictures", &ClientSystem::updateRenderAndTakePictures)
+      .def("update_render_and_take_pictures", &ClientSystem::updateRenderAndTakePictures, py::arg("cameras"))
       .def("set_ambient_light", &ClientSystem::setAmbientLight, py::arg("color"))
       .def("add_point_light", &ClientSystem::addPointLight, py::arg("position"), py::arg("color"),
            py::arg("shadow") = false, py::arg("shadow_near") = 0.01f,
@@ -103,7 +103,7 @@ PYBIND11_MODULE(pysapien_render_server, m) {
       .def("take_picture", &ClientCameraComponent::takePicture);
 
   PyRenderClientBodyComponent.def(py::init<>())
-      .def("attach", &ClientRenderBodyComponent::attachRenderShape);
+      .def("attach", &ClientRenderBodyComponent::attachRenderShape, py::arg("shape"));
 
   PyRenderClientShape
       .def_property("local_pose", &ClientRenderShape::getLocalPose,
