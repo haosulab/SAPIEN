@@ -504,8 +504,7 @@ void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
   query.query.handle().checkShape({-1, 6});
 
   ensureCudaDevice();
-
-  cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3, mCudaStream);
+  cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3 * sizeof(float), mCudaStream);
 
   copyContactData();
 
@@ -520,7 +519,7 @@ void PhysxSystemGpu::gpuQueryContactBodyForces(PhysxGpuContactBodyForceQuery con
   query.query.handle().checkShape({-1, 4});
 
   ensureCudaDevice();
-  cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3, mCudaStream);
+  cudaMemsetAsync(query.buffer.ptr, 0, query.query.shape.at(0) * 3 * sizeof(float), mCudaStream);
 
   copyContactData();
 
