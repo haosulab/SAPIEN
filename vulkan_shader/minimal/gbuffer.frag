@@ -113,7 +113,7 @@ layout(location = 2) in flat uvec4 inSegmentation;
 layout(location = 3) in vec3 objectCoord;
 layout(location = 4) in mat3 inTbn;
 
-layout(location = 0) out vec4 outColor;
+layout(location = 0) out vec4 outColorRaw;
 layout(location = 1) out ivec4 outPositionSegmentation;
 
 void main() {
@@ -308,6 +308,6 @@ void main() {
                        mat3(cameraBuffer.viewMatrixInverse) * camDir);
   color += sceneBuffer.ambientLight.rgb * albedo.rgb;
 
-  outColor = vec4(clamp(pow(color, vec3(1/2.2)), vec3(0), vec3(1)), albedo.a);
+  outColorRaw = vec4(clamp(pow(color, vec3(1/2.2)), vec3(0), vec3(1)), albedo.a);
   outPositionSegmentation = ivec4(ivec3(inPosition * 1000), inSegmentation[1]);
 }
