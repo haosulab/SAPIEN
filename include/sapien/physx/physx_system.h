@@ -120,12 +120,12 @@ private:
 
 #ifdef SAPIEN_CUDA
 
-struct PhysxGpuContactQuery {
+struct PhysxGpuContactPairImpulseQuery {
   CudaArray query;
   CudaArray buffer;
 };
 
-struct PhysxGpuContactBodyForceQuery {
+struct PhysxGpuContactBodyImpulseQuery {
   CudaArray query;
   CudaArray buffer;
 };
@@ -205,14 +205,14 @@ public:
 
   void gpuUpdateArticulationKinematics();
 
-  std::shared_ptr<PhysxGpuContactQuery> gpuCreateContactQuery(
+  std::shared_ptr<PhysxGpuContactPairImpulseQuery> gpuCreateContactPairImpulseQuery(
       std::vector<std::pair<std::shared_ptr<PhysxRigidBaseComponent>,
                             std::shared_ptr<PhysxRigidBaseComponent>>> const &bodyPairs);
-  std::shared_ptr<PhysxGpuContactBodyForceQuery> gpuCreateContactBodyForceQuery(
+  std::shared_ptr<PhysxGpuContactBodyImpulseQuery> gpuCreateContactBodyImpulseQuery(
       std::vector<std::shared_ptr<PhysxRigidBaseComponent>> const &bodies);
 
-  void gpuQueryContacts(PhysxGpuContactQuery const &query);
-  void gpuQueryContactBodyForces(PhysxGpuContactBodyForceQuery const &query);
+  void gpuQueryContactPairImpulses(PhysxGpuContactPairImpulseQuery const &query);
+  void gpuQueryContactBodyImpulses(PhysxGpuContactBodyImpulseQuery const &query);
 
   void syncPosesGpuToCpu();
 

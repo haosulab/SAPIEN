@@ -4,7 +4,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien_pinocchio
 import typing
-__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyForceQuery', 'PhysxGpuContactQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSceneConfig', 'PhysxSystem', 'get_default_material', 'get_scene_config', 'is_gpu_enabled', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config']
+__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSceneConfig', 'PhysxSystem', 'get_default_material', 'get_scene_config', 'is_gpu_enabled', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config']
 M = typing.TypeVar("M", bound=int)
 class PhysxArticulation:
     name: str
@@ -522,13 +522,13 @@ class PhysxGearComponent(PhysxJointComponent):
     @property
     def is_hinges_enabled(self) -> bool:
         ...
-class PhysxGpuContactBodyForceQuery:
+class PhysxGpuContactBodyImpulseQuery:
     @property
-    def cuda_forces(self) -> sapien.pysapien.CudaArray:
+    def cuda_impulses(self) -> sapien.pysapien.CudaArray:
         ...
-class PhysxGpuContactQuery:
+class PhysxGpuContactPairImpulseQuery:
     @property
-    def cuda_contacts(self) -> sapien.pysapien.CudaArray:
+    def cuda_impulses(self) -> sapien.pysapien.CudaArray:
         ...
 class PhysxGpuSystem(PhysxSystem):
     @typing.overload
@@ -587,9 +587,9 @@ class PhysxGpuSystem(PhysxSystem):
     @typing.overload
     def gpu_apply_rigid_dynamic_data(self, index_buffer: sapien.pysapien.CudaArray) -> None:
         ...
-    def gpu_create_contact_body_force_query(self, bodies: list[PhysxRigidBaseComponent]) -> PhysxGpuContactBodyForceQuery:
+    def gpu_create_contact_body_impulse_query(self, bodies: list[PhysxRigidBaseComponent]) -> PhysxGpuContactBodyImpulseQuery:
         ...
-    def gpu_create_contact_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactQuery:
+    def gpu_create_contact_pair_impulse_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactPairImpulseQuery:
         ...
     def gpu_fetch_articulation_link_pose(self) -> None:
         ...
@@ -614,7 +614,7 @@ class PhysxGpuSystem(PhysxSystem):
            may call `gpu_apply_*` functions to initialize the system after calling this
            function.
         """
-    def gpu_query_contact_body_forces(self, query: PhysxGpuContactBodyForceQuery) -> None:
+    def gpu_query_contact_body_impulses(self, query: PhysxGpuContactBodyImpulseQuery) -> None:
         """
         Query net contact forces for specific bodies of the last simulation step.
         Usage:
@@ -624,7 +624,7 @@ class PhysxGpuSystem(PhysxSystem):
             system.gpu_query_contact_body_forces(query)
             # query.cuda_buffer is now filled with net contact forces for each body
         """
-    def gpu_query_contacts(self, query: PhysxGpuContactQuery) -> None:
+    def gpu_query_contact_pair_impulses(self, query: PhysxGpuContactPairImpulseQuery) -> None:
         ...
     def gpu_set_cuda_stream(self, stream: int) -> None:
         """

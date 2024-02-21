@@ -394,7 +394,7 @@ void PhysxSystemGpu::checkGpuInitialized() const {
 
 void PhysxSystemGpu::gpuSetCudaStream(uintptr_t stream) { mCudaStream = (cudaStream_t)stream; }
 
-std::shared_ptr<PhysxGpuContactQuery> PhysxSystemGpu::gpuCreateContactQuery(
+std::shared_ptr<PhysxGpuContactPairImpulseQuery> PhysxSystemGpu::gpuCreateContactPairImpulseQuery(
     std::vector<std::pair<std::shared_ptr<PhysxRigidBaseComponent>,
                           std::shared_ptr<PhysxRigidBaseComponent>>> const &bodyPairs) {
   if (bodyPairs.empty()) {
@@ -422,13 +422,13 @@ std::shared_ptr<PhysxGpuContactQuery> PhysxSystemGpu::gpuCreateContactQuery(
                              cudaMemcpyHostToDevice));
   CudaArray buffer({static_cast<int>(pairs.size()), 3}, "f4");
 
-  auto res = std::make_shared<PhysxGpuContactQuery>();
+  auto res = std::make_shared<PhysxGpuContactPairImpulseQuery>();
   res->query = std::move(query);
   res->buffer = std::move(buffer);
   return res;
 }
 
-std::shared_ptr<PhysxGpuContactBodyForceQuery> PhysxSystemGpu::gpuCreateContactBodyForceQuery(
+std::shared_ptr<PhysxGpuContactBodyImpulseQuery> PhysxSystemGpu::gpuCreateContactBodyImpulseQuery(
     std::vector<std::shared_ptr<PhysxRigidBaseComponent>> const &bodies) {
   if (bodies.empty()) {
     throw std::runtime_error("failed to create contact query: empty body list");
@@ -452,7 +452,7 @@ std::shared_ptr<PhysxGpuContactBodyForceQuery> PhysxSystemGpu::gpuCreateContactB
   CudaArray buffer({static_cast<int>(actors.size()), 3}, "f4");
 
   // TODO: use dedicated type, do not reuse contact query
-  auto res = std::make_shared<PhysxGpuContactBodyForceQuery>();
+  auto res = std::make_shared<PhysxGpuContactBodyImpulseQuery>();
   res->query = std::move(query);
   res->buffer = std::move(buffer);
   return res;
@@ -499,7 +499,7 @@ void PhysxSystemGpu::copyContactData() {
   mContactUpToDate = true;
 }
 
-void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
+void PhysxSystemGpu::gpuQueryContactPairImpulses(PhysxGpuContactPairImpulseQuery const &query) {
   SAPIEN_PROFILE_FUNCTION;
   query.query.handle().checkShape({-1, 6});
 
@@ -514,7 +514,7 @@ void PhysxSystemGpu::gpuQueryContacts(PhysxGpuContactQuery const &query) {
   cudaStreamSynchronize(mCudaStream);
 }
 
-void PhysxSystemGpu::gpuQueryContactBodyForces(PhysxGpuContactBodyForceQuery const &query) {
+void PhysxSystemGpu::gpuQueryContactBodyImpulses(PhysxGpuContactBodyImpulseQuery const &query) {
   SAPIEN_PROFILE_FUNCTION;
   query.query.handle().checkShape({-1, 4});
 

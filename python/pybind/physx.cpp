@@ -233,9 +233,10 @@ Generator<int> init_physx(py::module &sapien) {
 
   auto PyPhysxSystemGpu = py::class_<PhysxSystemGpu, PhysxSystem>(m, "PhysxGpuSystem");
 
-  auto PyPhysxGpuContactQuery = py::class_<PhysxGpuContactQuery>(m, "PhysxGpuContactQuery");
-  auto PyPhysxGpuContactBodyForceQuery =
-      py::class_<PhysxGpuContactBodyForceQuery>(m, "PhysxGpuContactBodyForceQuery");
+  auto PyPhysxGpuContactPairImpulseQuery =
+      py::class_<PhysxGpuContactPairImpulseQuery>(m, "PhysxGpuContactPairImpulseQuery");
+  auto PyPhysxGpuContactBodyImpulseQuery =
+      py::class_<PhysxGpuContactBodyImpulseQuery>(m, "PhysxGpuContactBodyImpulseQuery");
 
   auto PyPhysxBaseComponent = py::class_<PhysxBaseComponent, Component>(m, "PhysxBaseComponent");
   auto PyPhysxRigidBaseComponent =
@@ -415,13 +416,14 @@ Args:
       .def("gpu_fetch_articulation_target_qpos", &PhysxSystemGpu::gpuFetchArticulationQTargetPos)
       .def("gpu_fetch_articulation_target_qvel", &PhysxSystemGpu::gpuFetchArticulationQTargetVel)
 
-      .def("gpu_create_contact_query", &PhysxSystemGpu::gpuCreateContactQuery,
-           py::arg("body_pairs"))
-      .def("gpu_query_contacts", &PhysxSystemGpu::gpuQueryContacts, py::arg("query"))
+      .def("gpu_create_contact_pair_impulse_query",
+           &PhysxSystemGpu::gpuCreateContactPairImpulseQuery, py::arg("body_pairs"))
+      .def("gpu_query_contact_pair_impulses", &PhysxSystemGpu::gpuQueryContactPairImpulses,
+           py::arg("query"))
 
-      .def("gpu_create_contact_body_force_query", &PhysxSystemGpu::gpuCreateContactBodyForceQuery,
-           py::arg("bodies"))
-      .def("gpu_query_contact_body_forces", &PhysxSystemGpu::gpuQueryContactBodyForces,
+      .def("gpu_create_contact_body_impulse_query",
+           &PhysxSystemGpu::gpuCreateContactBodyImpulseQuery, py::arg("bodies"))
+      .def("gpu_query_contact_body_impulses", &PhysxSystemGpu::gpuQueryContactBodyImpulses,
            py::arg("query"),
            R"doc(Query net contact forces for specific bodies of the last simulation step.
 Usage:
@@ -488,11 +490,11 @@ Usage:
       .def("step_start", &PhysxSystemGpu::stepStart)
       .def("step_finish", &PhysxSystemGpu::stepFinish);
 
-  PyPhysxGpuContactQuery.def_property_readonly(
-      "cuda_contacts", [](PhysxGpuContactQuery const &q) { return q.buffer.handle(); });
+  PyPhysxGpuContactPairImpulseQuery.def_property_readonly(
+      "cuda_impulses", [](PhysxGpuContactPairImpulseQuery const &q) { return q.buffer.handle(); });
 
-  PyPhysxGpuContactBodyForceQuery.def_property_readonly(
-      "cuda_forces", [](PhysxGpuContactBodyForceQuery const &q) { return q.buffer.handle(); });
+  PyPhysxGpuContactBodyImpulseQuery.def_property_readonly(
+      "cuda_impulses", [](PhysxGpuContactBodyImpulseQuery const &q) { return q.buffer.handle(); });
 
   PyPhysxMaterial
       .def(py::init<float, float, float>(), py::arg("static_friction"),
