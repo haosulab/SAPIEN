@@ -278,10 +278,16 @@ Generator<int> init_sapien(py::module &m) {
              auto data = interface.attr("data").cast<py::tuple>();
              void *ptr = reinterpret_cast<void *>(data[0].cast<uintptr_t>());
 
+             cudaPointerAttributes attr{};
+             checkCudaErrors(cudaPointerGetAttributes(&attr, ptr));
+             if (!attr.devicePointer) {
+               throw std::runtime_error("invalid cuda pointer");
+             }
+
              return CudaArrayHandle{.shape = shape,
                                     .strides = strides,
                                     .type = type,
-                                    .cudaId = 0, // TODO: do we need cuda id?
+                                    .cudaId = attr.device,
                                     .ptr = ptr};
            }),
            py::arg("data"))
