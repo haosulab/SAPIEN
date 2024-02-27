@@ -176,20 +176,29 @@
     <limit effort="0" velocity="0"/>
   </joint>
 
+  <gazebo reference="camera">
+    <sensor name="camera_gazebo" type="depth">
+      <origin xyz="0.02 0 0"/>
+      <camera>
+        <horizontal_fov>1.5708</horizontal_fov>
+        <image>
+          <format>L8</format>
+          <width>800</width>
+          <height>200</height>
+        </image>
+        <clip>
+          <near>0.01</near>
+          <far>100</far>
+        </clip>
+      </camera>
+    </sensor>
+  </gazebo>
+
   <sensor name="camera" type="depth">
     <parent link="camera"/>
     <origin xyz="0.02 0 0"/>
     <camera>
-      <horizontal_fov>1.5707963267948966</horizontal_fov>
-      <image>
-        <format>L8</format>
-        <width>800</width>
-        <height>200</height>
-      </image>
-      <clip>
-        <near>0.01</near>
-        <far>100</far>
-      </clip>
+      <image width="640" height="480" hfov="1.5708" format="RGB8" near="0.01" far="50.0"/>
     </camera>
   </sensor>
 

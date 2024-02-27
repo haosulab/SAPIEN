@@ -150,29 +150,59 @@ class URDFLoader:
 
             image = camera.find("image")
             assert image is not None
+
+            # handle both <image><width></width></image> and <image width=""/>
             width = image.find("width")
+            if width is not None:
+                width = width.text
+            else:
+                width = image.attrib.get("width")
+            assert width
+            width = int(width)
+
             height = image.find("height")
-            assert width is not None and height is not None
-            width = int(width.text)
-            height = int(height.text)
+            if height is not None:
+                height = height.text
+            else:
+                height = image.attrib.get("height")
+            assert height
+            height = int(height)
+
             assert width > 0 and height > 0
 
+            # handle both clip and image attribute
             clip = camera.find("clip")
-            if clip is None:
-                near = 0.01
-                far = 100
-            else:
+            if clip is not None:
                 near = clip.find("near")
                 far = clip.find("far")
-                near = float(near.text) if near is not None else 0.01
-                far = float(far.text) if far is not None else 100
+                near = near.text
+                far = far.text
+            else:
+                near = image.attrib.get("near")
+                far = image.attrib.get("far")
+
+            # default
+            near = near or "0.01"
+            far = far or "100"
+
+            near = float(near)
+            far = float(far)
 
             fovx = camera.find("horizontal_fov")
-            fovy = camera.find("vertical_fov")
-            assert fovx is not None or fovy is not None
+            if fovx is not None:
+                fovx = fovx.text
+            else:
+                fovx = image.attrib.get("hfov")
 
-            fovx = float(fovx.text) if fovx is not None else None
-            fovy = float(fovy.text) if fovy is not None else None
+            fovy = camera.find("vertical_fov")
+            if fovy is not None:
+                fovy = fovy.text
+            else:
+                fovy = image.attrib.get("vfov")
+            assert fovx or fovy
+
+            fovx = float(fovx) if fovx else None
+            fovy = float(fovy) if fovy else None
 
             cameras.append(
                 {
@@ -229,7 +259,9 @@ class URDFLoader:
                 if visual.material.color is not None:
                     material.base_color = visual.material.color
                 elif visual.material.texture is not None:
-                    material.diffuse_texture = RenderTexture2D(_prune_package(visual.material.texture.filename))
+                    material.diffuse_texture = RenderTexture2D(
+                        _prune_package(visual.material.texture.filename)
+                    )
 
             t_visual2link = self._pose_from_origin(visual.origin, self.scale)
             name = visual.name if visual.name else ""
@@ -520,8 +552,8 @@ class URDFLoader:
                     "Too many collision groups. Please use a simpler SRDF file"
                 )
 
-            link2builder[l1].collision_groups[2] |= (1 << (group_count - 1))
-            link2builder[l2].collision_groups[2] |= (1 << (group_count - 1))
+            link2builder[l1].collision_groups[2] |= 1 << (group_count - 1)
+            link2builder[l2].collision_groups[2] |= 1 << (group_count - 1)
 
         return builder
 
