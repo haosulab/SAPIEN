@@ -18,6 +18,8 @@ class Context:
         """
         Load cube map, its mipmaps are generated based on roughness, details see https://learnopengl.com/PBR/IBL/Specular-IBL
         """
+    def create_cylinder_mesh(self, segments: int = 32) -> Mesh:
+        ...
     def create_line_set(self, vertices: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple, colors: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple) -> PrimitiveSet:
         ...
     def create_material(self, emission: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple, base_color: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple, specular: float, roughness: float, metallic: float, transmission: float = 0.0, ior: float = 1.0099999904632568) -> Material:
@@ -37,7 +39,7 @@ class Context:
 class Cubemap:
     pass
 class LineSetObject(Node):
-    pass
+    line_width: float
 class Material:
     def set_base_color(self, rgba: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple) -> None:
         ...

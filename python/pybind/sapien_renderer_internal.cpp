@@ -660,6 +660,10 @@ void init_sapien_renderer_internal(py::module &parent) {
           py::arg("radius"), py::arg("half_length"), py::arg("segments") = 32,
           py::arg("half_rings") = 8)
       .def(
+          "create_cylinder_mesh",
+          [](core::Context &, int segments) { return resource::SVMesh::CreateCylinder(segments); },
+          py::arg("segments") = 32)
+      .def(
           "create_uvsphere_mesh",
           [](core::Context &, int segments, int rings) {
             return resource::SVMesh::CreateUVSphere(segments, rings);
@@ -864,6 +868,9 @@ void init_sapien_renderer_internal(py::module &parent) {
       .def("set_segmentation", [](scene::Object &obj, py::array_t<uint32_t> seg) {
         obj.setSegmentation({seg.at(0), seg.at(1), seg.at(2), seg.at(3)});
       });
+
+  PyLineSetObject.def_property("line_width", &scene::LineObject::getLineWidth,
+                               &scene::LineObject::setLineWidth);
 
   PyRenderer
       .def("set_custom_texture", &renderer::RendererBase::setCustomTexture, py::arg("name"),

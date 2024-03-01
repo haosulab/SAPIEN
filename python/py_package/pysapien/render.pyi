@@ -692,7 +692,9 @@ class RenderVRDisplay:
         """
     def get_controller_axis_state(self, id: int, axis: int) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(2)]:
         ...
-    def get_controller_button_state(self, id: int) -> int:
+    def get_controller_button_pressed(self, id: int) -> int:
+        ...
+    def get_controller_button_touched(self, id: int) -> int:
         ...
     def get_controller_ids(self) -> list[int]:
         ...
@@ -700,8 +702,6 @@ class RenderVRDisplay:
         """
         Gets the local pose of a controller. It should be called immediately after fetch_poses
         """
-    def get_controller_touch_state(self, id: int) -> int:
-        ...
     def get_hmd_pose(self) -> sapien.pysapien.Pose:
         """
         Gets the local pose of the head set. It should be called immediately after fetch_poses
