@@ -453,6 +453,7 @@ void init_sapien_renderer(py::module &sapien) {
       py::class_<CudaDeformableMeshComponent, Component>(m, "RenderCudaMeshComponent");
 
   auto PyRenderWindow = py::class_<SapienRendererWindow>(m, "RenderWindow");
+  auto PyRenderVRDisplay = py::class_<SapienVRDisplay>(m, "RenderVRDisplay");
 
   PySapienRenderer.def(py::init(&SapienRenderEngine::Get), py::arg("device") = nullptr)
       .def_property_readonly("_internal_context", &SapienRenderEngine::getContext);
@@ -1090,4 +1091,33 @@ consumer library. Make a copy if needed.
       .def("unset_drop_callback", &SapienRendererWindow::unsetDropCallback)
       .def("set_focus_callback", &SapienRendererWindow::setFocusCallback, py::arg("callback"))
       .def("unset_focus_callback", &SapienRendererWindow::unsetFocusCallback);
+
+  PyRenderVRDisplay.def(py::init<>())
+      .def("set_scene", &SapienVRDisplay::setScene, py::arg("scene"))
+      .def("set_camera_parameters", &SapienVRDisplay::setCameraParameters, py::arg("near"),
+           py::arg("far"))
+
+      .def_property("root_pose", &SapienVRDisplay::getRootPose, &SapienVRDisplay::setRootPose)
+      .def("get_root_pose", &SapienVRDisplay::getRootPose)
+      .def("set_root_pose", &SapienVRDisplay::setRootPose, py::arg("pose"))
+
+      .def("get_controller_ids", &SapienVRDisplay::getControllerIds)
+      .def("fetch_poses", &SapienVRDisplay::fetchPoses, "fetches poses of HMD and controllers")
+      .def(
+          "get_hmd_pose", &SapienVRDisplay::getHMDPose,
+          "Gets the local pose of the head set. It should be called immediately after fetch_poses")
+      .def(
+          "get_controller_pose", &SapienVRDisplay::getControllerPose, py::arg("id"),
+          "Gets the local pose of a controller. It should be called immediately after fetch_poses")
+      .def("update_render", &SapienVRDisplay::updateRender,
+           "update_render implicitly calls fetch_poses to make sure the HMD pose is up-to-date")
+      .def("render", &SapienVRDisplay::render)
+      .def_property_readonly("_internal_scene", &SapienVRDisplay::getInternalScene,
+                             py::return_value_policy::reference)
+
+      .def("get_controller_button_pressed", &SapienVRDisplay::getControllerButtonPressed,
+           py::arg("id"))
+      .def("get_controller_button_touched", &SapienVRDisplay::getControllerButtonTouched, py::arg("id"))
+      .def("get_controller_axis_state", &SapienVRDisplay::getControllerAxisState, py::arg("id"),
+           py::arg("axis"));
 }

@@ -13,5 +13,6 @@
 #include "sapien_renderer_default.h"
 #include "sapien_renderer_system.h"
 #include "window.h"
+#include "vr.h"
 
 #include "batched_render_system.h"

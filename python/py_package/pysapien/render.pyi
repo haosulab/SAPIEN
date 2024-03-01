@@ -4,7 +4,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien.internal_renderer
 import typing
-__all__ = ['RenderBodyComponent', 'RenderCameraComponent', 'RenderCameraGroup', 'RenderCubemap', 'RenderCudaMeshComponent', 'RenderDirectionalLightComponent', 'RenderLightComponent', 'RenderMaterial', 'RenderParallelogramLightComponent', 'RenderPointCloudComponent', 'RenderPointLightComponent', 'RenderShape', 'RenderShapeBox', 'RenderShapeCapsule', 'RenderShapeCylinder', 'RenderShapePlane', 'RenderShapeSphere', 'RenderShapeTriangleMesh', 'RenderShapeTriangleMeshPart', 'RenderSpotLightComponent', 'RenderSystem', 'RenderSystemGroup', 'RenderTexture', 'RenderTexture2D', 'RenderTexturedLightComponent', 'RenderWindow', 'SapienRenderer', 'clear_cache', 'get_camera_shader_dir', 'get_device_summary', 'get_imgui_ini_filename', 'get_msaa', 'get_ray_tracing_denoiser', 'get_ray_tracing_dof_aperture', 'get_ray_tracing_dof_plane', 'get_ray_tracing_path_depth', 'get_ray_tracing_samples_per_pixel', 'get_viewer_shader_dir', 'load_scene', 'set_camera_shader_dir', 'set_global_config', 'set_imgui_ini_filename', 'set_log_level', 'set_msaa', 'set_picture_format', 'set_ray_tracing_denoiser', 'set_ray_tracing_dof_aperture', 'set_ray_tracing_dof_plane', 'set_ray_tracing_path_depth', 'set_ray_tracing_samples_per_pixel', 'set_viewer_shader_dir']
+__all__ = ['RenderBodyComponent', 'RenderCameraComponent', 'RenderCameraGroup', 'RenderCubemap', 'RenderCudaMeshComponent', 'RenderDirectionalLightComponent', 'RenderLightComponent', 'RenderMaterial', 'RenderParallelogramLightComponent', 'RenderPointCloudComponent', 'RenderPointLightComponent', 'RenderShape', 'RenderShapeBox', 'RenderShapeCapsule', 'RenderShapeCylinder', 'RenderShapePlane', 'RenderShapeSphere', 'RenderShapeTriangleMesh', 'RenderShapeTriangleMeshPart', 'RenderSpotLightComponent', 'RenderSystem', 'RenderSystemGroup', 'RenderTexture', 'RenderTexture2D', 'RenderTexturedLightComponent', 'RenderVRDisplay', 'RenderWindow', 'SapienRenderer', 'clear_cache', 'get_camera_shader_dir', 'get_device_summary', 'get_imgui_ini_filename', 'get_msaa', 'get_ray_tracing_denoiser', 'get_ray_tracing_dof_aperture', 'get_ray_tracing_dof_plane', 'get_ray_tracing_path_depth', 'get_ray_tracing_samples_per_pixel', 'get_viewer_shader_dir', 'load_scene', 'set_camera_shader_dir', 'set_global_config', 'set_imgui_ini_filename', 'set_log_level', 'set_msaa', 'set_picture_format', 'set_ray_tracing_denoiser', 'set_ray_tracing_dof_aperture', 'set_ray_tracing_dof_plane', 'set_ray_tracing_path_depth', 'set_ray_tracing_samples_per_pixel', 'set_viewer_shader_dir']
 M = typing.TypeVar("M", bound=int)
 N = typing.TypeVar("N", bound=int)
 class RenderBodyComponent(sapien.pysapien.Component):
@@ -681,6 +681,47 @@ class RenderTexturedLightComponent(RenderSpotLightComponent):
     def get_texture(self) -> RenderTexture2D:
         ...
     def set_texture(self, texture: RenderTexture2D) -> None:
+        ...
+class RenderVRDisplay:
+    root_pose: sapien.pysapien.Pose
+    def __init__(self) -> None:
+        ...
+    def fetch_poses(self) -> None:
+        """
+        fetches poses of HMD and controllers
+        """
+    def get_controller_axis_state(self, id: int, axis: int) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(2)]:
+        ...
+    def get_controller_button_state(self, id: int) -> int:
+        ...
+    def get_controller_ids(self) -> list[int]:
+        ...
+    def get_controller_pose(self, id: int) -> sapien.pysapien.Pose:
+        """
+        Gets the local pose of a controller. It should be called immediately after fetch_poses
+        """
+    def get_controller_touch_state(self, id: int) -> int:
+        ...
+    def get_hmd_pose(self) -> sapien.pysapien.Pose:
+        """
+        Gets the local pose of the head set. It should be called immediately after fetch_poses
+        """
+    def get_root_pose(self) -> sapien.pysapien.Pose:
+        ...
+    def render(self) -> None:
+        ...
+    def set_camera_parameters(self, near: float, far: float) -> None:
+        ...
+    def set_root_pose(self, pose: sapien.pysapien.Pose) -> None:
+        ...
+    def set_scene(self, scene: sapien.pysapien.Scene) -> None:
+        ...
+    def update_render(self) -> None:
+        """
+        update_render implicitly calls fetch_poses to make sure the HMD pose is up-to-date
+        """
+    @property
+    def _internal_scene(self) -> sapien.pysapien.internal_renderer.Scene:
         ...
 class RenderWindow:
     cursor: bool
