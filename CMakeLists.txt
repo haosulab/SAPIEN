@@ -54,10 +54,6 @@ list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(physx5)
 include(zlib)
-
-# TODO: re-enable render server
-# include(grpc)
-
 include(eigen)
 include(vulkan)
 

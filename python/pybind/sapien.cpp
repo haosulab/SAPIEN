@@ -57,7 +57,6 @@ private:
 };
 
 Generator<int> init_sapien(py::module &m) {
-
   m.def("set_log_level", &sapien::logger::setLogLevel, py::arg("level"));
 
   py::class_<PythonProfiler>(m, "Profiler")
@@ -336,4 +335,15 @@ Generator<int> init_sapien(py::module &m) {
         auto capsule = DLPackToCapsule(array.toDLPack());
         return capsule;
       });
+
+  m.def("compiled_with_cxx11_abi", []() { return (bool)_GLIBCXX_USE_CXX11_ABI; });
+  m.def("abi_version", []() { return __GXX_ABI_VERSION; });
+  m.def("pybind11_use_smart_holder", []() {
+#ifdef PYBIND11_USE_SMART_HOLDER_AS_DEFAULT
+    return true;
+#else
+    return false;
+#endif
+  });
+  m.def("pybind11_internals_id", []() { return PYBIND11_INTERNALS_ID; });
 }
