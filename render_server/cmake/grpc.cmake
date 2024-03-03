@@ -12,6 +12,7 @@ FetchContent_Declare(
   grpc
   GIT_REPOSITORY https://github.com/grpc/grpc
   GIT_TAG        v1.51.1
+  GIT_SHALLOW TRUE
 )
 
 set(FETCHCONTENT_QUIET OFF)
