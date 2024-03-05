@@ -174,7 +174,7 @@ python -m sapien.exapmle.hello_world
 ## Website and Documentation
 SAPIEN Website: [https://sapien.ucsd.edu/](https://sapien.ucsd.edu/). SAPIEN
 Documentation:
-[https://sapien.ucsd.edu/docs/latest/index.html](https://sapien.ucsd.edu/docs/latest/index.html).
+[https://sapien-sim.github.io/docs/](https://sapien-sim.github.io/docs/).
 
 ## Build from source
 ### Before build
