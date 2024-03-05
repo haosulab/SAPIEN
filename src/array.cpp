@@ -1,3 +1,4 @@
+#include <sstream>
 #include "sapien/array.h"
 #include "sapien/utils/cuda.h"
 #include "sapien/utils/typestr.h"

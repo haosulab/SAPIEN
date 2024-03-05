@@ -1,3 +1,4 @@
+#include <numbers>
 #include "sapien/sapien_renderer/camera_component.h"
 #include "../logger.h"
 #include "sapien/entity.h"
@@ -8,6 +9,13 @@
 #include "sapien/scene.h"
 #include <svulkan2/renderer/renderer.h>
 #include <svulkan2/renderer/renderer_base.h>
+
+#ifdef near
+#undef near
+#endif
+#ifdef far
+#undef far
+#endif
 
 namespace sapien {
 namespace sapien_renderer {

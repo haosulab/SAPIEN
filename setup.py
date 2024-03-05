@@ -138,6 +138,9 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
         "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
     ]
 
+    if sys.platform == 'win32':
+        cmake_args += [f"-DBUILD_TESTING=Off"]
+
     deps_dir = os.path.join(sapien_build_dir, "_sapien_deps")
     cmake_args += [f"-DFETCHCONTENT_BASE_DIR={deps_dir}"]
 
@@ -353,7 +356,7 @@ package_data = {
 
 if not args.pybind_only:
     # build SAPIEN
-    source_dir = os.path.dirname(__file__)
+    source_dir = os.path.abspath(os.path.dirname(__file__))
     build_sapien(source_dir, os.path.join(source_dir, args.build_dir))
 
 if args.sapien_only:

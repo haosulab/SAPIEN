@@ -9,7 +9,7 @@ endif()
 set(CMAKE_CXX_STANDARD 20)
 
 if(MSVC)
-    add_compile_options("/W4" "$<$<CONFIG:Release>:/O2>")
+    add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:/W4>" "$<$<CONFIG:Release>:$<$<COMPILE_LANGUAGE:CXX>:/O2>>")
 else()
     add_compile_options("-Wall"
         "$<$<CONFIG:Debug>:-g3>" "$<$<CONFIG:Debug>:-O0>"

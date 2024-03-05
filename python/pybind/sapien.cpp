@@ -335,9 +335,13 @@ Generator<int> init_sapien(py::module &m) {
         auto capsule = DLPackToCapsule(array.toDLPack());
         return capsule;
       });
-
+#ifdef _MSC_VER
+  m.def("compiled_with_cxx11_abi", []() { return true; });
+  m.def("abi_version", []() { return _MSC_VER; });
+#else
   m.def("compiled_with_cxx11_abi", []() { return (bool)_GLIBCXX_USE_CXX11_ABI; });
   m.def("abi_version", []() { return __GXX_ABI_VERSION; });
+#endif
   m.def("pybind11_use_smart_holder", []() {
 #ifdef PYBIND11_USE_SMART_HOLDER_AS_DEFAULT
     return true;

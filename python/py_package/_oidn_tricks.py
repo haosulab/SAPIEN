@@ -20,3 +20,19 @@ if platform.system() == "Linux":
         )
     except Exception:
         pass
+if platform.system() == "Windows":
+    try:
+        oidn_dll = ctypes.CDLL(
+            os.path.join(
+                os.path.dirname(__file__),
+                "oidn_library/OpenImageDenoise_core.dll",
+            ),
+        )
+
+        oidn_dll = ctypes.CDLL(
+            os.path.join(
+                os.path.dirname(__file__), "oidn_library/OpenImageDenoise.dll"
+            ),
+        )
+    except Exception:
+        pass

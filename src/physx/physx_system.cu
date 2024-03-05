@@ -14,11 +14,11 @@ __global__ void body_data_physx_to_sapien_kernel(SapienBodyData *__restrict__ sa
   }
 
   sapien_data[g] = {
-      .p = physx_data[g].pose.p - offset[g],
-      .q = Quat(physx_data[g].pose.q.w, physx_data[g].pose.q.x, physx_data[g].pose.q.y,
-                physx_data[g].pose.q.z),
-      .v = physx_data[g].v,
-      .w = physx_data[g].w,
+      physx_data[g].pose.p - offset[g],
+      Quat(physx_data[g].pose.q.w, physx_data[g].pose.q.x, physx_data[g].pose.q.y,
+           physx_data[g].pose.q.z),
+      physx_data[g].v,
+      physx_data[g].w,
   };
 }
 
@@ -96,7 +96,7 @@ __global__ void root_pose_sapien_to_physx_kernel(PhysxPose *__restrict__ physx_p
 
   SapienBodyData sd = sapien_data[ai * link_count];
 
-  physx_pose[ai] = {.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w}, .p = sd.p + offset[ai]};
+  physx_pose[ai] = {{sd.q.x, sd.q.y, sd.q.z, sd.q.w}, sd.p + offset[ai]};
 }
 
 __global__ void link_vel_physx_to_sapien_kernel(SapienBodyData *__restrict__ sapien_data,
