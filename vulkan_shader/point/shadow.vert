@@ -11,15 +11,9 @@ layout(set = 0, binding = 0) uniform LightBuffer {
   int height;
 } lightBuffer;
 
-layout(set = 1, binding = 0) uniform ObjectTransformBuffer {
-  mat4 modelMatrix;
-} objectTransformBuffer;
-
-layout(set = 1, binding = 1) uniform ObjectDataBuffer {
-  uvec4 segmentation;
-  float transparency;
-  int shadeFlat;
-} objectDataBuffer;
+#define SET_NUM 1
+#include "./object_set.glsl"
+#undef SET_NUM
 
 
 layout(location = 0) in vec3 position;

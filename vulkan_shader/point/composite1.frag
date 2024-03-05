@@ -20,15 +20,9 @@ layout(location = 1) out vec4 outDepthLinear;
 layout(location = 2) out vec4 outSegmentationView0;
 layout(location = 3) out vec4 outSegmentationView1;
 
-
-layout(set = 1, binding = 0) uniform CameraBuffer {
-  mat4 viewMatrix;
-  mat4 projectionMatrix;
-  mat4 viewMatrixInverse;
-  mat4 projectionMatrixInverse;
-  float width;
-  float height;
-} cameraBuffer;
+#define SET_NUM 1
+#include "./camera_set.glsl"
+#undef SET_NUM
 
 vec4 colors[60] = {
   vec4(0.8,  0.4,  0.4 , 1 ),
