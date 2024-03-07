@@ -22,6 +22,7 @@ from .plugin import Plugin
 from .render_window import RenderOptionsWindow
 from .scene_window import SceneWindow
 from .transform_window import TransformWindow
+from .setting_window import SettingWindow
 
 
 class Viewer:
@@ -31,6 +32,7 @@ class Viewer:
         shader_dir="",
         resolutions=(1920, 1080),
         plugins=[
+            SettingWindow(),
             TransformWindow(),
             RenderOptionsWindow(),
             ControlWindow(),

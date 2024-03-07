@@ -94,13 +94,21 @@ class ArticulationWindow(Plugin):
 
                 uijoints.append(
                     R.UISliderFloat()
-                    .Label("Drive Target")
+                    .Label("Position Target")
                     .Id(str(i))
                     .WidthRatio(0.5)
                     .Min(max(j.limit[0, 0], -20))
                     .Max(min(j.limit[0, 1], 20))
                     .Value(j.drive_target)
                     .Callback((lambda j: lambda p: j.set_drive_target(p.value))(j)),
+                    R.UISliderFloat()
+                    .Label("Velocity Target")
+                    .Id(str(i))
+                    .WidthRatio(0.5)
+                    .Min(-1)
+                    .Max(1)
+                    .Value(j.drive_velocity_target)
+                    .Callback((lambda j: lambda p: j.set_drive_velocity_target(p.value))(j)),
                     R.UIInputFloat()
                     .Label("Damping")
                     .Id(str(i))
