@@ -187,6 +187,7 @@ def show_anything(*args, update_camera=True, loop=True):
 
     if loop:
         while not viewer.viewer.closed:
+            viewer.scene.step()
             viewer.scene.update_render()
             viewer.viewer.render()
 

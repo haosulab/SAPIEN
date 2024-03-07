@@ -2,22 +2,43 @@ import math
 import os
 from lxml import etree
 from lxml import etree as ET
+from pathlib import Path
 
 import numpy as np
 
 from ..pysapien.physx import PhysxArticulation, PhysxMaterial
 from ..pysapien.render import RenderCameraComponent, RenderMaterial, RenderTexture2D
 from ..pysapien import Pose
-from .articulation_builder import ArticulationBuilder
+from .articulation_builder import ArticulationBuilder, MimicJointRecord
 from .urchin import URDF
 
-import warnings
 
+def _try_very_hard_to_find_file(filename, urdf_dir, package_dir=None):
+    urdf_dir = Path(urdf_dir).absolute()
+    package_dir = Path(package_dir).absolute() if package_dir is not None else None
 
-def _prune_package(filename):
+    fpath = None
     if filename.startswith("package://"):
-        return filename[10:]
-    return filename
+        filename = filename[10:]
+        if package_dir is not None:
+            fpath = package_dir / filename
+
+        parent_dir = urdf_dir
+        while True:
+            fpath = parent_dir / filename
+            if fpath.is_file():
+                break
+            if parent_dir == Path("/"):
+                break
+            parent_dir = parent_dir.parent
+    else:
+        fpath = urdf_dir / filename
+
+    if fpath is None or not fpath.is_file():
+        # TODO: warn
+        return filename
+
+    return str(fpath)
 
 
 class URDFLoader:
@@ -260,7 +281,11 @@ class URDFLoader:
                     material.base_color = visual.material.color
                 elif visual.material.texture is not None:
                     material.diffuse_texture = RenderTexture2D(
-                        _prune_package(visual.material.texture.filename)
+                        _try_very_hard_to_find_file(
+                            visual.material.texture.filename,
+                            self.urdf_dir,
+                            self.package_dir,
+                        )
                     )
 
             t_visual2link = self._pose_from_origin(visual.origin, self.scale)
@@ -302,8 +327,10 @@ class URDFLoader:
                     scale = np.ones(3)
 
                 link_builder.add_visual_from_file(
-                    os.path.join(
-                        self.package_dir, _prune_package(visual.geometry.mesh.filename)
+                    _try_very_hard_to_find_file(
+                        visual.geometry.mesh.filename,
+                        self.urdf_dir,
+                        self.package_dir,
                     ),
                     t_visual2link,
                     scale * self.scale,
@@ -387,8 +414,10 @@ class URDFLoader:
                 else:
                     scale = np.ones(3)
 
-                filename = os.path.join(
-                    self.package_dir, _prune_package(collision.geometry.mesh.filename)
+                filename = _try_very_hard_to_find_file(
+                    collision.geometry.mesh.filename,
+                    self.urdf_dir,
+                    self.package_dir,
                 )
 
                 if self.load_multiple_collisions_from_file:
@@ -529,6 +558,16 @@ class URDFLoader:
                 elif joint.joint_type == "plannar":
                     raise Exception("URDF planner joint is not supported")
 
+                if joint.mimic is not None:
+                    builder.mimic_joint_records.append(
+                        MimicJointRecord(
+                            joint.name,
+                            joint.mimic.joint,
+                            joint.mimic.multiplier,
+                            joint.mimic.offset,
+                        )
+                    )
+
             for j in reversed(self.link2child_joints[link_name]):
                 stack.append(j.child)
 
@@ -571,10 +610,10 @@ class URDFLoader:
 
         return builder
 
-    def _parse_urdf(self, urdf_string, package_dir):
+    def _parse_urdf(self, urdf_string):
         xml = ET.fromstring(urdf_string.encode("utf-8"))
 
-        robot = URDF._from_xml(xml, package_dir, lazy_load_meshes=True)
+        robot = URDF._from_xml(xml, self.urdf_dir, lazy_load_meshes=True)
         links = robot.links
         joints = robot.joints
 
@@ -622,9 +661,8 @@ class URDFLoader:
         return articulation_builders, actor_builders, cameras
 
     def parse(self, urdf_file, srdf_file=None, package_dir=None):
-        if package_dir is None:
-            package_dir = os.path.dirname(urdf_file)
         self.package_dir = package_dir
+        self.urdf_dir = os.path.dirname(urdf_file)
 
         with open(urdf_file, "r") as f:
             urdf_string = f.read()
@@ -637,7 +675,7 @@ class URDFLoader:
         else:
             self.ignore_pairs = []
 
-        return self._parse_urdf(urdf_string, package_dir)
+        return self._parse_urdf(urdf_string)
 
     def load_multiple(self, urdf_file: str, srdf_file=None, package_dir=None):
         """

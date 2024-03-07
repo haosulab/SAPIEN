@@ -56,9 +56,10 @@ def create_table(
 
 def main():
     sapien.render.set_log_level("info")
+    sapien.render.set_global_config(default_mipmap_levels=4)
 
     sim = sapien.Engine()
-    renderer = sapien.SapienRenderer(default_mipmap_levels=4)
+    renderer = sapien.SapienRenderer()
     sim.set_renderer(renderer)
 
     copper = renderer.create_material()

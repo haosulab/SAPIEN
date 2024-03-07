@@ -6,6 +6,14 @@ from typing import List, Tuple
 
 
 @dataclass
+class MimicJointRecord:
+    joint: str
+    mimic: str
+    multiplier: float
+    offset: float
+
+
+@dataclass
 class JointRecord:
     joint_type: str = "undefined"  # "fixed", "prismatic", "revolute"
     limits: Tuple[float] = (-np.inf, np.inf)
@@ -57,6 +65,7 @@ class ArticulationBuilder:
     def __init__(self):
         self.initial_pose = sapien.Pose()
         self.link_builders: List[LinkBuilder] = []
+        self.mimic_joint_records: List[MimicJointRecord] = []
 
     def set_initial_pose(self, pose):
         self.initial_pose = pose
@@ -116,10 +125,53 @@ class ArticulationBuilder:
         entities[0].pose = self.initial_pose
         return entities
 
-    def build(self, fix_root_link=None) -> sapien.physx.PhysxArticulation:
+    def build(
+        self, fix_root_link=None, build_mimic_joints=True
+    ) -> sapien.physx.PhysxArticulation:
         assert self.scene is not None
         links = self.build_entities(fix_root_link=fix_root_link)
 
+        articulation: sapien.physx.PhysxArticulation = (
+            links[0]
+            .find_component_by_type(sapien.physx.PhysxArticulationLinkComponent)
+            .articulation
+        )
+
+        if build_mimic_joints:
+            for mimic in self.mimic_joint_records:
+                joint = articulation.find_joint_by_name(mimic.joint)
+                mimic_joint = articulation.find_joint_by_name(mimic.mimic)
+                multiplier = mimic.multiplier
+                offset = mimic.offset
+
+                # joint mimics parent
+                if joint.parent_link == mimic_joint.child_link:
+                    if joint.parent_link.parent is None:
+                        # TODO warn
+                        # tendon must be attached to grandparent
+                        continue
+                    root = joint.parent_link.parent
+                    parent = joint.parent_link
+                    child = joint.child_link
+                    articulation.create_fixed_tendon(
+                        [root, parent, child],
+                        [0, -1, multiplier],
+                        [0, -1, multiplier],
+                        rest_length=offset,
+                        stiffness=1e5,
+                    )
+                # 2 children mimic each other
+                if joint.parent_link == mimic_joint.parent_link:
+                    assert joint.parent_link is not None
+                    root = joint.parent_link
+                    articulation.create_fixed_tendon(
+                        [root, joint.child_link, mimic_joint.child_link],
+                        [0, -1, multiplier],
+                        [0, -1, multiplier],
+                        rest_length=offset,
+                        stiffness=1e5,
+                    )
+
         for l in links:
             self.scene.add_entity(l)
-        return l.components[0].articulation
+        return articulation
