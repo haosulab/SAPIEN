@@ -323,13 +323,13 @@ Generator<int> init_sapien(py::module &m) {
 
              py::object obj = py::cast(newArray);
              auto as_tensor = py::module_::import("torch").attr("as_tensor");
-             return as_tensor("data"_a = obj, "device"_a = "cuda").release();
+             return as_tensor("data"_a = obj, "device"_a = "cuda");
            })
       .def("jax",
            [](CudaArrayHandle &array) {
              auto from_dlpack = py::module_::import("jax").attr("dlpack").attr("from_dlpack");
              auto capsule = DLPackToCapsule(array.toDLPack());
-             return from_dlpack(capsule).release();
+             return from_dlpack(capsule);
            })
       .def("dlpack", [](CudaArrayHandle &array) -> py::object {
         auto capsule = DLPackToCapsule(array.toDLPack());
