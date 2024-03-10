@@ -191,7 +191,9 @@ __global__ void handle_contacts_kernel(::physx::PxGpuContactPair *__restrict__ c
       //        normal.y, normal.z, normal.dot(normal), points[ci].separation, f);
     }
   }
-  out_forces[id] = force;
+  atomicAdd(&out_forces[id].x, force.x);
+  atomicAdd(&out_forces[id].y, force.y);
+  atomicAdd(&out_forces[id].z, force.z);
 }
 
 __global__ void handle_net_contact_force_kernel(::physx::PxGpuContactPair *__restrict__ contacts,
