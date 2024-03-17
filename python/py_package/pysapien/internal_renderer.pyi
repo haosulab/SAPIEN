@@ -2,7 +2,7 @@ from __future__ import annotations
 import numpy
 import pybind11_stubgen.typing_ext
 import typing
-__all__ = ['Context', 'Cubemap', 'LineSetObject', 'Material', 'Mesh', 'Model', 'Node', 'Object', 'PointSetObject', 'PrimitiveSet', 'Renderer', 'Scene', 'Shape', 'Texture', 'UIButton', 'UICheckbox', 'UIConditional', 'UIDisplayText', 'UIDummy', 'UIDuration', 'UIFileChooser', 'UIGizmo', 'UIInputFloat', 'UIInputFloat2', 'UIInputFloat3', 'UIInputFloat4', 'UIInputInt', 'UIInputInt2', 'UIInputInt3', 'UIInputInt4', 'UIInputText', 'UIInputTextMultiline', 'UIKeyframe', 'UIKeyframeEditor', 'UIOptions', 'UIPicture', 'UIPopup', 'UISameLine', 'UISection', 'UISelectable', 'UISliderAngle', 'UISliderFloat', 'UITreeNode', 'UIWidget', 'UIWindow']
+__all__ = ['Context', 'Cubemap', 'LineSet', 'LineSetObject', 'Material', 'Mesh', 'Model', 'Node', 'Object', 'PointSet', 'PointSetObject', 'PrimitiveSet', 'Renderer', 'Scene', 'Shape', 'Texture', 'UIButton', 'UICheckbox', 'UIConditional', 'UIDisplayText', 'UIDummy', 'UIDuration', 'UIFileChooser', 'UIGizmo', 'UIInputFloat', 'UIInputFloat2', 'UIInputFloat3', 'UIInputFloat4', 'UIInputInt', 'UIInputInt2', 'UIInputInt3', 'UIInputInt4', 'UIInputText', 'UIInputTextMultiline', 'UIKeyframe', 'UIKeyframeEditor', 'UIOptions', 'UIPicture', 'UIPopup', 'UISameLine', 'UISection', 'UISelectable', 'UISliderAngle', 'UISliderFloat', 'UITreeNode', 'UIWidget', 'UIWindow']
 class Context:
     def create_box_mesh(self) -> Mesh:
         ...
@@ -20,7 +20,7 @@ class Context:
         """
     def create_cylinder_mesh(self, segments: int = 32) -> Mesh:
         ...
-    def create_line_set(self, vertices: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple, colors: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple) -> PrimitiveSet:
+    def create_line_set(self, vertices: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple, colors: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple) -> PointSet:
         ...
     def create_material(self, emission: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple, base_color: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple, specular: float, roughness: float, metallic: float, transmission: float = 0.0, ior: float = 1.0099999904632568) -> Material:
         ...
@@ -30,13 +30,15 @@ class Context:
         ...
     def create_model_from_file(self, filename: str) -> Model:
         ...
-    def create_point_set(self, vertices: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple, colors: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple) -> PrimitiveSet:
+    def create_point_set(self, vertices: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple, colors: numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]] | list | tuple) -> LineSet:
         ...
     def create_texture_from_file(self, filename: str, mipmap_levels: int, filter: str = 'linear', address_mode: str = 'repeat') -> Texture:
         ...
     def create_uvsphere_mesh(self, segments: int = 32, half_rings: int = 16) -> Mesh:
         ...
 class Cubemap:
+    pass
+class LineSet(PrimitiveSet):
     pass
 class LineSetObject(Node):
     line_width: float
@@ -89,6 +91,8 @@ class Object(Node):
     @property
     def model(self) -> Model:
         ...
+class PointSet(PrimitiveSet):
+    pass
 class PointSetObject(Node):
     pass
 class PrimitiveSet:
@@ -105,13 +109,13 @@ class Renderer:
     def set_custom_texture(self, name: str, texture: Texture) -> None:
         ...
 class Scene:
-    def add_line_set(self, line_set: PrimitiveSet, parent: Node | None = None) -> LineSetObject:
+    def add_line_set(self, line_set: PointSet, parent: Node | None = None) -> LineSetObject:
         ...
     def add_node(self, parent: Node | None = None) -> Node:
         ...
     def add_object(self, model: Model, parent: Node | None = None) -> Object:
         ...
-    def add_point_set(self, point_set: PrimitiveSet, parent: Node | None = None) -> PointSetObject:
+    def add_point_set(self, point_set: LineSet, parent: Node | None = None) -> PointSetObject:
         ...
     def force_rebuild(self) -> None:
         ...

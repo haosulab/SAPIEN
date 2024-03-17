@@ -35,6 +35,10 @@ class SettingWindow(Plugin):
                 .Expanded(True)
                 .Label("PhysX Settings")
                 .append(
+                    R.UIInputFloat()
+                    .ReadOnly(True)
+                    .Label("Time Step")
+                    .Value(px.timestep),
                     R.UIInputFloat3()
                     .ReadOnly(True)
                     .Label("Gravity")

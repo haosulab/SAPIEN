@@ -360,6 +360,10 @@ class RenderParallelogramLightComponent(RenderLightComponent):
 class RenderPointCloudComponent(sapien.pysapien.Component):
     def __init__(self, capacity: int = 0) -> None:
         ...
+    def get_cuda_aabb(self) -> sapien.pysapien.CudaArray | None:
+        """
+        this function is a temporary hack to help update the AABBs used for ray tracing BLAS
+        """
     def get_cuda_vertices(self) -> sapien.pysapien.CudaArray:
         ...
     def set_attribute(self, name: str, attribute: numpy.ndarray[tuple[M, N], numpy.dtype[numpy.float32]] | list | tuple) -> RenderPointCloudComponent:

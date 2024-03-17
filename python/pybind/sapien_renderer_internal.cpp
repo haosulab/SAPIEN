@@ -99,6 +99,8 @@ void init_sapien_renderer_internal(py::module &parent) {
   auto PyMesh = py::class_<resource::SVMesh>(m, "Mesh");
 
   auto PyPrimitiveSet = py::class_<resource::SVPrimitiveSet>(m, "PrimitiveSet");
+  auto PyLineSet = py::class_<resource::SVPointSet, resource::SVPrimitiveSet>(m, "LineSet");
+  auto PyPointSet = py::class_<resource::SVLineSet, resource::SVPrimitiveSet>(m, "PointSet");
 
   auto PyRenderer = py::class_<renderer::RendererBase>(m, "Renderer");
 

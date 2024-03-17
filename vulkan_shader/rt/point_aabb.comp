@@ -1,0 +1,42 @@
+#version 450
+
+#include "./point.glsl"
+
+layout(push_constant) uniform Constants {
+  int size;
+};
+
+
+layout(set = 0, binding = 0, std430) readonly buffer Points {
+  Point points[];
+};
+
+struct Aabb {
+  float lx;
+  float ly;
+  float lz;
+  float hx;
+  float hy;
+  float hz;
+};
+
+layout(set = 0, binding = 0, std430) writeonly buffer Aabbs {
+  Aabb aabbs[];
+};
+
+void main() {
+  uint x = gl_GlobalInvocationID.x;
+  if (x >= size) {
+    return;
+  }
+  Point point = points[x];
+  vec3 lower = point.position - vec3(point.scale);
+  vec3 upper = point.position + vec3(point.scale);
+
+  aabbs[x].lx = lower.x;
+  aabbs[x].ly = lower.y;
+  aabbs[x].lz = lower.z;
+  aabbs[x].hx = upper.x;
+  aabbs[x].hy = upper.y;
+  aabbs[x].hz = upper.z;
+}

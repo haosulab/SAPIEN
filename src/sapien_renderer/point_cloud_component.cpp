@@ -62,6 +62,25 @@ CudaArrayHandle PointCloudComponent::getCudaArray() const {
 #endif
 }
 
+std::optional<CudaArrayHandle> PointCloudComponent::getCudaAABBArray() const {
+#ifdef SAPIEN_CUDA
+  auto buffer = mPointSet->getAabbBuffer();
+  if (!buffer) {
+    return {};
+  }
+
+  int count = mPointSet->getVertexCount();
+
+  return CudaArrayHandle{.shape = {count, 2, 3},
+                         .strides = {6 * sizeof(float), 3 * sizeof(float), sizeof(float)},
+                         .type = "f4",
+                         .cudaId = buffer->getCudaDeviceId(),
+                         .ptr = buffer->getCudaPtr()};
+#else
+  throw std::runtime_error("sapien is not copmiled with CUDA support");
+#endif
+}
+
 svulkan2::scene::Transform PointCloudComponent::getTransform() const {
   auto pose = getPose();
   return {

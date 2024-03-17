@@ -771,7 +771,10 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("set_vertices", &PointCloudComponent::setVertices, py::arg("vertices"))
       .def("set_attribute", &PointCloudComponent::setAttribute, py::arg("name"),
            py::arg("attribute"))
-      .def("get_cuda_vertices", &PointCloudComponent::getCudaArray);
+      .def("get_cuda_vertices", &PointCloudComponent::getCudaArray)
+      .def("get_cuda_aabb", &PointCloudComponent::getCudaAABBArray,
+           "this function is a temporary hack to help update the AABBs used for ray tracing BLAS. "
+           "returns None if ray tracing has not been initialized");
 
   PyRenderCameraComponent
       .def(py::init<uint32_t, uint32_t, std::string const &>(), py::arg("width"),
@@ -1117,7 +1120,8 @@ consumer library. Make a copy if needed.
 
       .def("get_controller_button_pressed", &SapienVRDisplay::getControllerButtonPressed,
            py::arg("id"))
-      .def("get_controller_button_touched", &SapienVRDisplay::getControllerButtonTouched, py::arg("id"))
+      .def("get_controller_button_touched", &SapienVRDisplay::getControllerButtonTouched,
+           py::arg("id"))
       .def("get_controller_axis_state", &SapienVRDisplay::getControllerAxisState, py::arg("id"),
            py::arg("axis"));
 }

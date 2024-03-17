@@ -1,0 +1,60 @@
+#version 460
+#extension GL_EXT_ray_tracing : require
+#extension GL_EXT_nonuniform_qualifier : enable
+#extension GL_EXT_scalar_block_layout : enable
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_EXT_buffer_reference2 : require
+
+struct Sphere
+{
+  vec3  center;
+  float radius;
+};
+
+struct Point {
+  vec3 position;
+  float scale;
+  vec4 color;
+};
+
+layout(set = 1, binding = 13) readonly buffer PointInstances
+{
+  int pointInstances[];
+};
+
+layout(std430, set = 1, binding = 14) readonly buffer Points {
+  Point p[];
+} points[];
+
+// Ray-Sphere intersection
+// http://viclw17.github.io/2018/07/16/raytracing-ray-sphere-intersection/
+float hitSphere(vec3 center, float radius, const vec3 origin, const vec3 direction)
+{
+  vec3  oc           = origin - center;
+  float a            = dot(direction, direction);
+  float b            = 2.0 * dot(oc, direction);
+  float c            = dot(oc, oc) - radius * radius;
+  float discriminant = b * b - 4 * a * c;
+  if(discriminant < 0)
+  {
+    return -1.0;
+  }
+  else
+  {
+    return (-b - sqrt(discriminant)) / (2.0 * a);
+  }
+}
+
+void main()
+{
+  vec3 origin    = gl_ObjectRayOriginEXT;
+  vec3 direction = gl_ObjectRayDirectionEXT;
+
+  int id = pointInstances[nonuniformEXT(gl_InstanceID)];
+  Point p = points[nonuniformEXT(id)].p[gl_PrimitiveID];
+  float tHit    = -1;
+  tHit = hitSphere(p.position, p.scale, origin, direction);
+
+  if(tHit > 0)
+    reportIntersectionEXT(tHit, 0);
+}

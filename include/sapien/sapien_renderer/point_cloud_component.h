@@ -1,10 +1,10 @@
 #pragma once
 #include "../component.h"
 #include "sapien/array.h"
-#include "sapien_renderer_system.h"
 #include "sapien/math/pose.h"
-#include <svulkan2/resource/model.h>
+#include "sapien_renderer_system.h"
 #include <Eigen/Dense>
+#include <svulkan2/resource/model.h>
 
 namespace sapien {
 namespace sapien_renderer {
@@ -29,6 +29,9 @@ public:
   void internalUpdate();
 
   CudaArrayHandle getCudaArray() const;
+
+  /** temporary, used to update AABB for ray tracing BLAS */
+  std::optional<CudaArrayHandle> getCudaAABBArray() const;
 
   PointCloudComponent(PointCloudComponent const &) = delete;
   PointCloudComponent &operator=(PointCloudComponent const &) = delete;

@@ -166,7 +166,7 @@ class FixFindComponentByType(IParser):
                 method.function.returns = ResolvedType(QualifiedName.from_str("_T"))
                 assert len(method.function.args) == 2
                 method.function.args[1].annotation = ResolvedType(
-                    QualifiedName.from_str("type"),
+                    QualifiedName.from_str("typing.Type"),
                     [ResolvedType(QualifiedName.from_str("_T"))],
                 )
 

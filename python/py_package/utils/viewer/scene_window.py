@@ -26,29 +26,35 @@ class SceneWindow(Plugin):
     def build(self):
         if self.viewer.render_scene is None:
             self.ui_window = None
-            return
+
 
         if self.ui_window is None:
             self.ui_window = R.UIWindow().Pos(410, 10).Size(400, 400).Label("Scene")
 
         if self.viewer.selected_entity is not None:
-            self.ui_window.remove_children()
-            self.ui_window.append(
-                R.UIDisplayText().Text(
-                    "Selected scene: {}".format(self.viewer.selected_entity.scene.id)
-                )
-            )
-            atree = R.UITreeNode().Label("Entities")
-            self.ui_window.append(atree)
+            scene = self.viewer.selected_entity.scene
+        elif self.viewer.scene is not None:
+            scene = self.viewer.scene
+        else:
+            return
 
-            for i, entity in enumerate(self.selected_entity.scene.entities):
-                atree.append(
-                    R.UISelectable()
-                    .Label(entity.name if entity.name else "(no name)")
-                    .Id("entity{}".format(i))
-                    .Selected(self.selected_entity == entity)
-                    .Callback((lambda link: lambda _: self.select_entity(link))(entity))
-                )
+        self.ui_window.remove_children()
+        self.ui_window.append(
+            R.UIDisplayText().Text(
+                "Selected scene: {}".format(scene.id)
+            )
+        )
+        atree = R.UITreeNode().Label("Entities")
+        self.ui_window.append(atree)
+
+        for i, entity in enumerate(scene.entities):
+            atree.append(
+                R.UISelectable()
+                .Label(entity.name if entity.name else "(no name)")
+                .Id("entity{}".format(i))
+                .Selected(self.selected_entity == entity)
+                .Callback((lambda link: lambda _: self.select_entity(link))(entity))
+            )
 
     def get_ui_windows(self):
         self.build()
