@@ -13,17 +13,18 @@ from sapien.render import (
 )
 
 from .articulation_window import ArticulationWindow
+from .contact_window import ContactWindow
 from .control_window import ControlWindow
 from .entity_window import EntityWindow
 from .imgui_ini import imgui_ini
-
-# from .keyframe_window import KeyframeWindow
+from .path_window import PathWindow
 from .plugin import Plugin
 from .render_window import RenderOptionsWindow
 from .scene_window import SceneWindow
-from .transform_window import TransformWindow
 from .setting_window import SettingWindow
-from .contact_window import ContactWindow
+from .transform_window import TransformWindow
+
+# from .keyframe_window import KeyframeWindow
 
 
 class Viewer:
@@ -33,6 +34,7 @@ class Viewer:
         shader_dir="",
         resolutions=(1920, 1080),
         plugins=[
+            PathWindow(),
             ContactWindow(),
             SettingWindow(),
             TransformWindow(),

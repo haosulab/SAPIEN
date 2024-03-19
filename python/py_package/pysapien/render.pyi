@@ -362,7 +362,7 @@ class RenderPointCloudComponent(sapien.pysapien.Component):
         ...
     def get_cuda_aabb(self) -> sapien.pysapien.CudaArray | None:
         """
-        this function is a temporary hack to help update the AABBs used for ray tracing BLAS
+        this function is a temporary hack to help update the AABBs used for ray tracing BLAS. returns None if ray tracing has not been initialized
         """
     def get_cuda_vertices(self) -> sapien.pysapien.CudaArray:
         ...
