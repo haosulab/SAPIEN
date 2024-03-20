@@ -1,43 +1,76 @@
-name: Build
+name: TestWindowsBuild
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, test-windows]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  # build-linux:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   container:
+  #     image: fxiangucsd/sapien-build-env:3.3
+  #     env:
+  #       CMAKE_BUILD_PARALLEL_LEVEL: 2
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: "true"
+  #     - name: Set up cmake cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: docker_sapien_build/_sapien_deps
+  #         key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/CMakeLists.txt') }}
+  #     - name: Build wheels
+  #       run: "git config --global --add safe.directory '*' && ./build.sh"
+  #     - name: Upload wheels
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: wheels
+  #         path: ./wheelhouse/*.whl
+
+  build-windows:
+    runs-on: windows-2019
     permissions:
       contents: write
-    container:
-      image: fxiangucsd/sapien-build-env:3.3
-      env:
-        CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: "true"
-      - name: Set up cmake cache
-        uses: actions/cache@v3
+      - uses: Jimver/cuda-toolkit@v0.2.14
+        id: cuda-toolkit
         with:
-          path: docker_sapien_build/_sapien_deps
-          key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/CMakeLists.txt') }}
+          cuda: '12.3.2'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: |
+            3.8
+            3.9
+            3.10
+            3.11
+            3.12
       - name: Build wheels
-        run: "git config --global --add safe.directory '*' && ./build.sh"
+        run: |
+          python setup.py --sapien-only --build-dir=sapien_build
+          python setup.py --pybind-only --build-dir=sapien_build
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
-          name: wheels
-          path: ./wheelhouse/*.whl
-      - name: Update Nightly Release
-        uses: andelf/nightly-release@main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: nightly
-          name: 'Nightly Release'
-          prerelease: true
-          body: 'SAPIEN development nightly release. This release is mainly for internal testing. Stable releases are published to pypi https://pypi.org/project/sapien/'
-          files: |
-            ./wheelhouse/*.whl
+          name: windows-wheels
+          path: ./dist/*.whl
+
+
+      # - name: Update Nightly Release
+      #   uses: andelf/nightly-release@main
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: nightly
+      #     name: 'Nightly Release'
+      #     prerelease: true
+      #     body: 'SAPIEN development nightly release. This release is mainly for internal testing. Stable releases are published to pypi https://pypi.org/project/sapien/'
+      #     files: |
+      #       ./wheelhouse/*.whl
