@@ -24,7 +24,7 @@ add_compile_definitions("$<$<NOT:$<CONFIG:Debug>>:NDEBUG>")
 set(CMAKE_DEBUG_POSTFIX "")
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
-option(SAPIEN_PROFILE "Build SAPIEN with easy_profiler" ON)
+option(SAPIEN_PROFILE "Build SAPIEN with profiler" ON)
 option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OFF)
 option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, denoiser, and simsense" ON)
 
@@ -94,8 +94,7 @@ if (${SAPIEN_CUDA})
 endif ()
 
 target_link_libraries(sapien PUBLIC eigen svulkan2)
-target_link_libraries(sapien PRIVATE physx5 spdlog::spdlog easy_profiler # grpc++
-    ${CMAKE_DL_LIBS} assimp::assimp)
+target_link_libraries(sapien PRIVATE physx5 spdlog::spdlog ${CMAKE_DL_LIBS} assimp::assimp)
 
 if (UNIX)
     target_link_libraries(sapien PRIVATE stdc++fs)
