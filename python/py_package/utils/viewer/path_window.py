@@ -106,6 +106,34 @@ class PathWindow(Plugin):
         self.show_curve()
         self.selected_point_index = len(path.poses) - 1
 
+    def insert_point(self, _):
+        path = self.current_path
+        if path is None:
+            print("no path selected")
+            return
+
+        if self.viewer.selected_entity != self.current_path.entity:
+            print("selected entity is not path entity")
+            return
+
+        tw = self.transform_window
+        if not tw.enabled:
+            tw.enabled = True
+
+        if path.poses:
+            if (
+                np.linalg.norm(
+                    path.poses[self.selected_point_index].p - tw._gizmo_pose.p
+                )
+                < 1e-4
+            ):
+                print("path points too close!!!")
+                return
+
+        path.poses.insert(self.selected_point_index + 1, tw._gizmo_pose)
+        self.show_curve()
+        self.selected_point_index = self.selected_point_index + 1
+
     def set_point(self, _):
         path = self.current_path
         if path is None:
@@ -299,6 +327,9 @@ class PathWindow(Plugin):
                     .append(
                         R.UISameLine().append(
                             R.UIButton().Label("Add Point").Callback(self.add_point),
+                            R.UIButton()
+                            .Label("Insert Point")
+                            .Callback(self.insert_point),
                             R.UIButton().Label("Set Point").Callback(self.set_point),
                             R.UIButton().Label("Del Point").Callback(self.del_point),
                         ),
