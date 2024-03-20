@@ -14,4 +14,6 @@ using namespace sapien;
 void init_math(py::module &sapien) {
   auto m = sapien.def_submodule("math");
   m.def("shortest_rotation", &ShortestRotation, py::arg("source"), py::arg("target"));
+  m.attr("pose_gl_to_ros") = POSE_GL_TO_ROS;
+  m.attr("pose_ros_to_gl") = POSE_ROS_TO_GL;
 }

@@ -337,3 +337,18 @@ class Viewer:
                 self.scene.physx_system.step()
             self.scene.update_render()
             self.render()
+
+    def register_click_handler(self, handler):
+        ...
+
+    def set_camera_xyz(self, x, y, z):
+        ...
+
+    def set_camera_rpy(self, r, p, y):
+        ...
+
+    def focus_entity(self, entity):
+        ...
+
+    def focus_camera(self, camera):
+        ...

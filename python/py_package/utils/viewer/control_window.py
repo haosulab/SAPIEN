@@ -23,6 +23,7 @@ class ControlWindow(Plugin):
         self.viewer.set_camera_rpy = self.set_camera_rpy
         self.viewer.focus_entity = self.focus_entity
         self.viewer.focus_camera = self.focus_camera
+        self.viewer.register_click_handler = self.register_click_handler
 
         self._create_visual_models()
 
@@ -376,6 +377,9 @@ class ControlWindow(Plugin):
         if self.show_origin_frame:
             self._update_coordinate_axes()
 
+    def register_click_handler(self, func):
+        self.click_handlers.append(func)
+
     def _handle_click(self):
         if self.window.mouse_click(0):
             mx, my = self.window.mouse_position
@@ -385,8 +389,12 @@ class ControlWindow(Plugin):
             tw, th = self.window.get_picture_size("Segmentation")
             mx = mx * tw / ww
             my = my * th / wh
-            pixel = self.window.get_picture_pixel("Segmentation", int(mx), int(my))
 
+            for handler in self.click_handlers:
+                if handler(self.viewer, int(mx), int(my)):
+                    return
+
+            pixel = self.window.get_picture_pixel("Segmentation", int(mx), int(my))
             entity_id = pixel[1]
             scene_id = pixel[2]
             entity = self.find_entity_by_id(entity_id, scene_id)
@@ -534,6 +542,8 @@ class ControlWindow(Plugin):
         self._show_camera_linesets = True
         self._show_joint_axes = False
         self._show_origin_frame = False
+
+        self.click_handlers = []
 
     def get_ui_windows(self):
         self.build()

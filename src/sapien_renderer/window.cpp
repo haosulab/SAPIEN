@@ -1,4 +1,5 @@
 #include "sapien/sapien_renderer/window.h"
+#include "sapien/math/conversion.h"
 #include "sapien/sapien_renderer/sapien_renderer_default.h"
 #include "sapien/sapien_renderer/sapien_renderer_system.h"
 #include <svulkan2/renderer/rt_renderer.h>
@@ -267,6 +268,10 @@ float SapienRendererWindow::getContentScale() { return mWindow->getContentScale(
 
 glm::mat4 SapienRendererWindow::getCameraProjectionMatrix() {
   return getCamera()->getProjectionMatrix();
+}
+
+Mat4 SapienRendererWindow::getCameraModelMatrix() {
+  return PoseToEigenMat4(getCameraPose() * POSE_GL_TO_ROS);
 }
 
 float SapienRendererWindow::getCameraNear() { return getCamera()->getNear(); }

@@ -1,6 +1,7 @@
 #pragma once
 #include "image.h"
 #include "material.h"
+#include "sapien/math/mat.h"
 #include "sapien/scene.h"
 #include <functional>
 #include <svulkan2/renderer/renderer.h>
@@ -85,6 +86,7 @@ public:
   float getCameraFovy();
 
   glm::mat4 getCameraProjectionMatrix();
+  Mat4 getCameraModelMatrix();
 
   std::vector<std::string> getDisplayTargetNames() const;
   void render(std::string const &targetName,

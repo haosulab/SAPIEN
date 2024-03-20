@@ -1039,6 +1039,7 @@ consumer library. Make a copy if needed.
              glm::mat4 proj = glm::transpose(window.getCameraProjectionMatrix());
              return py::array_t<float>({4, 4}, &proj[0][0]);
            })
+      .def("get_camera_model_matrix", &SapienRendererWindow::getCameraModelMatrix)
 
       .def("update_render", &SapienRendererWindow::updateRender,
            "Equivalent to calling the update_render function for all added scene")
