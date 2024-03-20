@@ -2,6 +2,7 @@
 #include "sapien/math/vec3.h"
 #include <cstdint>
 #include <memory>
+#include <string>
 
 namespace physx {
 struct PxgDynamicsMemoryConfig;

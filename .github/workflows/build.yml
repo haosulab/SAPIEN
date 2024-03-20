@@ -1,43 +1,110 @@
-name: Build
+name: TestWindowsBuild
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, test-windows]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  # build-linux:
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   container:
+  #     image: fxiangucsd/sapien-build-env:3.3
+  #     env:
+  #       CMAKE_BUILD_PARALLEL_LEVEL: 2
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: "true"
+  #     - name: Set up cmake cache
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: docker_sapien_build/_sapien_deps
+  #         key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/CMakeLists.txt') }}
+  #     - name: Build wheels
+  #       run: "git config --global --add safe.directory '*' && ./build.sh"
+  #     - name: Upload wheels
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: wheels
+  #         path: ./wheelhouse/*.whl
+
+  build-windows-sapien:
+    runs-on: windows-2022
     permissions:
       contents: write
-    container:
-      image: fxiangucsd/sapien-build-env:3.3
-      env:
-        CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: "true"
-      - name: Set up cmake cache
-        uses: actions/cache@v3
+      - name: setup CUDA
+        shell: bash
+        run: |
+          C:/msys64/usr/bin/wget.exe https://developer.download.nvidia.com/compute/cuda/11.8.0/network_installers/cuda_11.8.0_windows_network.exe
+          ./cuda_11.8.0_windows_network.exe -s cudart_11.8 nvcc_11.8 visual_studio_integration_11.8 nvtx_11.8 curand_dev_11.8
+      - uses: actions/setup-python@v5
         with:
-          path: docker_sapien_build/_sapien_deps
-          key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/CMakeLists.txt') }}
+          python-version: |
+            3.11
       - name: Build wheels
-        run: "git config --global --add safe.directory '*' && ./build.sh"
+        shell: bash
+        run: |
+          ls "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
+          python -m pip install setuptools wheel
+          python --version
+          export CUDA_PATH="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
+          export CudaToolkitDir="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
+          python setup.py --sapien-only --build-dir=sapien_build
+      - name: Upload SAPIEN
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-sapien
+          path: |
+            sapien_build/_sapien_install
+
+  build-windows-pybind:
+    runs-on: windows-2022
+    needs: build-windows-sapien
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Download SAPIEN
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-sapien
+          path: sapien_build/_sapien_install
+      - name: Build wheels
+        shell: bash
+        run: |
+          python -m pip install -U pip
+          python -m pip install -U setuptools wheel
+          python setup.py bdist_wheel --pybind-only --build-dir=sapien_build
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
-          path: ./wheelhouse/*.whl
-      - name: Update Nightly Release
-        uses: andelf/nightly-release@main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: nightly
-          name: 'Nightly Release'
-          prerelease: true
-          body: 'SAPIEN development nightly release. This release is mainly for internal testing. Stable releases are published to pypi https://pypi.org/project/sapien/'
-          files: |
-            ./wheelhouse/*.whl
+          name: windows-wheel-${{ matrix.python-version }}
+          path: ./dist/*.whl
+
+
+      # - name: Update Nightly Release
+      #   uses: andelf/nightly-release@main
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: nightly
+      #     name: 'Nightly Release'
+      #     prerelease: true
+      #     body: 'SAPIEN development nightly release. This release is mainly for internal testing. Stable releases are published to pypi https://pypi.org/project/sapien/'
+      #     files: |
+      #       ./wheelhouse/*.whl
