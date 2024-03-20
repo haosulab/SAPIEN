@@ -49,6 +49,8 @@ public:
   // enable GPU simulation, may not be disabled
   static void EnableGPU();
   static bool GetGPUEnabled();
+
+  static std::string getPhysxVersion();
 };
 
 } // namespace physx

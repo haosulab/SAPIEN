@@ -81,5 +81,7 @@ void PhysxDefault::EnableGPU() {
 
 bool PhysxDefault::GetGPUEnabled() { return gGPUEnabled; }
 
+std::string PhysxDefault::getPhysxVersion() { return PHYSX_VERSION; }
+
 } // namespace physx
 } // namespace sapien

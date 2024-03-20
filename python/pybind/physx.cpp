@@ -1071,7 +1071,8 @@ Example:
       .def("set_scene_config",
            py::overload_cast<PhysxSceneConfig const &>(&PhysxDefault::setSceneConfig),
            py::arg("config"))
-      .def("get_scene_config", &PhysxDefault::getSceneConfig);
+      .def("get_scene_config", &PhysxDefault::getSceneConfig)
+      .def("version", []() { return PhysxDefault::getPhysxVersion(); });
 
   ////////// end global //////////
 

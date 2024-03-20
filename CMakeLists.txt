@@ -143,7 +143,7 @@ else()
 endif()
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/sapien" DESTINATION "include")
-install(DIRECTORY "${physx5_SOURCE_DIR}/physx/include" DESTINATION "include/physx")
+install(DIRECTORY "${physx5_SOURCE_DIR}/include" DESTINATION "include/physx")
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/dlpack/include/dlpack" DESTINATION "include")
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/sapien-vulkan-2/include/svulkan2" DESTINATION "include")
 install(DIRECTORY "${glm_SOURCE_DIR}/glm" DESTINATION "include")
