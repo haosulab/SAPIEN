@@ -53,6 +53,7 @@ jobs:
         env:
           CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8
         run: |
+          ls "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
           python -m pip install setuptools wheel
           python --version
           python setup.py --sapien-only --build-dir=sapien_build
