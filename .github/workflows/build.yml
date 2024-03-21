@@ -50,6 +50,7 @@ jobs:
           python-version: |
             3.11
       - name: Build wheels
+        shell: bash
         run: |
           ls "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
           python -m pip install setuptools wheel
