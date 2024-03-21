@@ -49,14 +49,11 @@ jobs:
         with:
           python-version: |
             3.8
-            3.9
-            3.10
-            3.11
-            3.12
       - name: Build wheels
         env:
           CUDA_PATH: "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8"
         run: |
+          pip install setuptools wheel
           python setup.py --sapien-only --build-dir=sapien_build
           python setup.py --pybind-only --build-dir=sapien_build
       - name: Upload wheels
