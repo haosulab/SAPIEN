@@ -1,48 +1,80 @@
 #include "sapien/utils/cuda.h"
 #include <cuda.h>
-#if _WIN64
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#else
-#include <dlfcn.h>
-#endif
+
+#include "./cuda_lib.h"
+#include <cuda.h>
+#include <cuda_runtime.h>
 
 namespace sapien {
 
-CudaLib::CudaLib() {
-#if _WIN64
-  HMODULE handle = LoadLibrary("libcuda.so");
-  libcuda = (void*)handle;
-  cudaFree(0); // establish cuda context with runtime API
-  
-  this->cuCtxGetCurrent = (decltype(::cuCtxGetCurrent) *)GetProcAddress(handle, "cuCtxGetCurrent");
-  this->cuEventCreate = (decltype(::cuEventCreate) *)GetProcAddress(handle, "cuEventCreate");
-  this->cuEventDestroy = (decltype(::cuEventDestroy) *)GetProcAddress(handle, "cuEventDestroy");
-  this->cuEventRecord = (decltype(::cuEventRecord) *)GetProcAddress(handle, "cuEventRecord");
-  this->cuStreamWaitEvent = (decltype(::cuStreamWaitEvent) *)GetProcAddress(handle, "cuStreamWaitEvent");
-  this->cuEventSynchronize =
-      (decltype(::cuEventSynchronize) *)GetProcAddress(handle, "cuEventSynchronize");
-#else
-  libcuda = dlopen("libcuda.so", RTLD_LAZY);
-
-  cudaFree(0); // establish cuda context with runtime API
-
-  this->cuCtxGetCurrent = (decltype(::cuCtxGetCurrent) *)dlsym(libcuda, "cuCtxGetCurrent");
-  this->cuEventCreate = (decltype(::cuEventCreate) *)dlsym(libcuda, "cuEventCreate");
-  this->cuEventDestroy = (decltype(::cuEventDestroy) *)dlsym(libcuda, "cuEventDestroy");
-  this->cuEventRecord = (decltype(::cuEventRecord) *)dlsym(libcuda, "cuEventRecord");
-  this->cuStreamWaitEvent = (decltype(::cuStreamWaitEvent) *)dlsym(libcuda, "cuStreamWaitEvent");
-  this->cuEventSynchronize =
-      (decltype(::cuEventSynchronize) *)dlsym(libcuda, "cuEventSynchronize");
-#endif
+void CudaEvent::init() {
+  checkCudaErrors(cudaGetDevice(&cudaId));
+  checkCudaDriverErrors(CudaLib::Get().cuEventCreate(&event, 0));
 }
 
-CudaLib &CudaLib::Get() {
-  static CudaLib lib;
-  if (!lib.libcuda) {
-    throw std::runtime_error("failed to load libcuda.so");
+CudaEvent::CudaEvent(CudaEvent &&other) {
+  // copy
+  cudaId = other.cudaId;
+  event = other.event;
+
+  // destory other
+  other.event = nullptr;
+}
+
+CudaEvent &CudaEvent::operator=(CudaEvent &&other) {
+  // destroy self
+  if (event) {
+    checkCudaDriverErrors(CudaLib::Get().cuEventDestroy(event));
   }
-  return lib;
+
+  // copy
+  cudaId = other.cudaId;
+  event = other.event;
+
+  // destroy other
+  other.event = nullptr;
+
+  return *this;
+}
+
+/** record cuda event on the current cuda runtime device
+ *  @param stream cuda stream, must be created from the same cuda runtime device */
+void CudaEvent::record(cudaStream_t stream) {
+  if (!event) {
+    init();
+  }
+  checkCudaDriverErrors(CudaLib::Get().cuEventRecord(event, stream));
+}
+
+void CudaEvent::wait(cudaStream_t stream) const {
+  if (!event) {
+    // no need to wait if no one records to this event
+    return;
+  }
+  checkCudaDriverErrors(CudaLib::Get().cuStreamWaitEvent(stream, event, 0));
+}
+
+void CudaEvent::synchronize() const {
+  if (!event) {
+    // no need to wait if no one records to this event
+  }
+  checkCudaDriverErrors(CudaLib::Get().cuEventSynchronize(event));
+}
+
+CudaEvent::~CudaEvent() {
+  if (event) {
+    cudaSetDevice(cudaId);
+    CudaLib::Get().cuEventDestroy(event);
+  }
+}
+
+int getCudaPtrDevice(void *ptr) {
+  cudaPointerAttributes attr{};
+  checkCudaErrors(cudaPointerGetAttributes(&attr, ptr));
+  if (!attr.devicePointer) {
+    throw std::runtime_error("invalid cuda pointer");
+  }
+  return attr.device;
 }
 
 } // namespace sapien

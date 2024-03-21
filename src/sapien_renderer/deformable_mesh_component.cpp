@@ -2,6 +2,7 @@
 #include "sapien/entity.h"
 #include "sapien/sapien_renderer/material.h"
 #include "sapien/scene.h"
+#include <cuda_runtime.h>
 
 namespace sapien {
 namespace sapien_renderer {

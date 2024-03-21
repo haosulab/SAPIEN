@@ -2,6 +2,7 @@
 #include "../logger.h"
 #include "sapien/physx/physx_default.h"
 
+#include "../utils/cuda_lib.h"
 #include "sapien/utils/cuda.h"
 
 using namespace physx;

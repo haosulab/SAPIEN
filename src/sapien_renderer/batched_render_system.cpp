@@ -6,6 +6,7 @@
 #include <svulkan2/renderer/renderer_base.h>
 
 #include "sapien/utils/cuda.h"
+#include <cuda_runtime.h>
 
 namespace sapien {
 namespace sapien_renderer {

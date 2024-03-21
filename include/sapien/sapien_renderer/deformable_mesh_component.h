@@ -6,10 +6,6 @@
 #include <Eigen/Dense>
 #include <svulkan2/resource/model.h>
 
-#ifdef SAPIEN_CUDA
-#include <cuda_runtime.h>
-#endif
-
 namespace sapien {
 
 namespace sapien_renderer {

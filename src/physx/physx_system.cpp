@@ -10,9 +10,9 @@
 #include "sapien/profiler.h"
 #include <extensions/PxExtensionsAPI.h>
 
-#ifdef SAPIEN_CUDA
 #include "./physx_system.cuh"
-#endif
+#include <cuda.h>
+#include <cuda_runtime.h>
 
 using namespace physx;
 namespace sapien {

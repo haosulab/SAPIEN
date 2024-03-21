@@ -4,6 +4,8 @@
 #include "sapien/utils/typestr.h"
 #include <dlpack/dlpack.h>
 
+#include <cuda_runtime.h>
+
 namespace sapien {
 
 template <typename T> static std::string VectorToString(std::vector<T> const &v) {

@@ -12,9 +12,8 @@
 #include <svulkan2/renderer/rt_renderer.h>
 #include <svulkan2/scene/scene.h>
 
-#if SAPIEN_CUDA
 #include "sapien/utils/cuda.h"
-#endif
+#include <cuda_runtime.h>
 
 namespace sapien {
 namespace sapien_renderer {
