@@ -44,14 +44,14 @@ jobs:
         shell: bash
         run: |
           C:/msys64/usr/bin/wget.exe https://developer.download.nvidia.com/compute/cuda/11.8.0/network_installers/cuda_11.8.0_windows_network.exe
-          ./cuda_11.8.0_windows_network.exe -s cuda_profiler_api_11.8 cudart_11.8 cuobjdump_11.8 cupti_11.8 cuxxfilt_11.8 demo_suite_11.8 documentation_11.8 memcheck_11.8 nvcc_11.8 nvdisasm_11.8 nvml_dev_11.8 nvprof_11.8 nvprune_11.8 nvrtc_dev_11.8 nvtx_11.8 visual_profiler_11.8 sanitizer_11.8 thrust_11.8 cublas_dev_11.8 cufft_dev_11.8 curand_dev_11.8 cusolver_dev_11.8 cusparse_dev_11.8 npp_dev_11.8 nvjpeg_dev_11.8 nsight_compute_11.8 nsight_nvtx_11.8 nsight_systems_11.8 nsight_vse_11.8 visual_studio_integration_11.8 occupancy_calculator_11.8
+          ./cuda_11.8.0_windows_network.exe -s cudart_11.8 nvcc_11.8 visual_studio_integration_11.8
       - uses: actions/setup-python@v5
         with:
           python-version: |
             3.11
       - name: Build wheels
         env:
-          CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8
+          CUDA_PATH: C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8
         run: |
           ls "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
           python -m pip install setuptools wheel
