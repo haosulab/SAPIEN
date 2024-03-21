@@ -51,7 +51,7 @@ jobs:
             3.11
       - name: Build wheels
         env:
-          CUDA_PATH: "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v11.8"
+          CUDA_PATH: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8
         run: |
           python -m pip install setuptools wheel
           python --version
