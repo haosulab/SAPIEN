@@ -31,7 +31,7 @@ jobs:
   #         name: wheels
   #         path: ./wheelhouse/*.whl
 
-  build-windows:
+  build-windows-sapien:
     runs-on: windows-2022
     permissions:
       contents: write
@@ -50,19 +50,45 @@ jobs:
           python-version: |
             3.11
       - name: Build wheels
-        env:
-          CUDA_PATH: C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8
         run: |
           ls "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
           python -m pip install setuptools wheel
           python --version
+          export CUDA_PATH="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
           python setup.py --sapien-only --build-dir=sapien_build
-          python setup.py --pybind-only --build-dir=sapien_build
-      - name: Upload wheels
-        uses: actions/upload-artifact@v3
+      - name: Upload SAPIEN
+        uses: actions/upload-artifact@v4
         with:
-          name: windows-wheels
-          path: ./dist/*.whl
+          name: windows-sapien
+          path: |
+            sapien_build
+
+  # build-windows-pybind:
+  #   runs-on: windows-2022
+  #   strategy:
+  #     matrix:
+  #       python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: "true"
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - name: Download SAPIEN
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: windows-sapien
+  #     - name: Build wheels
+  #       shell: bash
+  #       run: |
+  #         python setup.py --pybind-only --build-dir=sapien_build
+  #     - name: Upload wheels
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: windows-wheel-${{ matrix.python-version }}
+  #         path: ./dist/*.whl
 
 
       # - name: Update Nightly Release
