@@ -43,7 +43,7 @@ jobs:
       - name: setup CUDA
         shell: bash
         run: |
-          wget https://developer.download.nvidia.com/compute/cuda/11.8.0/network_installers/cuda_11.8.0_windows_network.exe
+          C:/msys64/usr/bin/wget.exe https://developer.download.nvidia.com/compute/cuda/11.8.0/network_installers/cuda_11.8.0_windows_network.exe
           ./cuda_11.8.0_windows_network.exe -s nvcc_11.8 cudart_11.8
       - uses: actions/setup-python@v5
         with:
