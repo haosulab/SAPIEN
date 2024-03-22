@@ -26,6 +26,7 @@ class PathWindow(Plugin):
         self._selected_point_index = -1
         self._curve = None
         self._curve_time = 0
+        self.curve_segments = 128
 
     @property
     def transform_window(self):
@@ -183,7 +184,7 @@ class PathWindow(Plugin):
 
         return [f"Point {i}" for i in range(len(self.current_path.poses))]
 
-    def get_curve(self, knots=100):
+    def get_curve(self, knots=128):
         if self.current_path is None:
             return None, None, None
 
@@ -228,7 +229,7 @@ class PathWindow(Plugin):
 
         self.hide_curve(_)
 
-        ts, points, _ = self.get_curve()
+        ts, points, _ = self.get_curve(self.curve_segments)
         if points is None:
             return
 
@@ -338,6 +339,7 @@ class PathWindow(Plugin):
                         .Min(0)
                         .Max(1)
                         .Bind(self, "curve_time"),
+                        R.UIInputInt().Label("Segments").Bind(self, "curve_segments"),
                         R.UISameLine().append(
                             R.UIButton().Label("Save").Callback(self.save),
                             self.file_chooser_save.Filter(".json").Callback(
