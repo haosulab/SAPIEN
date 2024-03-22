@@ -68,6 +68,7 @@ else ()
 endif ()
 
 if (${SAPIEN_CUDA})
+    set(CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_PATH})
     set(CMAKE_CUDA_STANDARD 17)
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -O3 -lineinfo -ftemplate-depth=1024")
     file(GLOB_RECURSE SAPIEN_CUDA_SRC "src/*.cu")
