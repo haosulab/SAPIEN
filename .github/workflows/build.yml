@@ -55,8 +55,7 @@ jobs:
           ls "C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
           python -m pip install setuptools wheel
           python --version
-          export CUDA_PATH="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8"
-          python setup.py --sapien-only --build-dir=sapien_build
+          CUDA_PATH="C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v11.8" python setup.py --sapien-only --build-dir=sapien_build
       - name: Upload SAPIEN
         uses: actions/upload-artifact@v4
         with:
