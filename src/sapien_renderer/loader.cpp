@@ -5,15 +5,15 @@
 namespace sapien {
 namespace sapien_renderer {
 
-std::unique_ptr<RenderSceneNode> LoadScene(std::string const &filename, bool applyScale) {
+std::unique_ptr<RenderSceneLoaderNode> LoadScene(std::string const &filename, bool applyScale) {
   auto scene = svulkan2::scene::LoadScene(filename);
 
-  std::unique_ptr<RenderSceneNode> rootNode;
+  std::unique_ptr<RenderSceneLoaderNode> rootNode;
 
   std::queue<svulkan2::scene::Node *> q;
   q.push(&scene->getRootNode());
 
-  std::queue<RenderSceneNode *> qs;
+  std::queue<RenderSceneLoaderNode *> qs;
   qs.push(nullptr);
 
   std::queue<glm::mat4> qt;
@@ -26,12 +26,12 @@ std::unique_ptr<RenderSceneNode> LoadScene(std::string const &filename, bool app
     glm::mat4 parentTransform = qt.front();
     qt.pop();
 
-    RenderSceneNode *parent = qs.front();
+    RenderSceneLoaderNode *parent = qs.front();
     qs.pop();
 
     auto mat = parentTransform * node->getTransform().matrix();
 
-    auto newSnode = std::make_unique<RenderSceneNode>();
+    auto newSnode = std::make_unique<RenderSceneLoaderNode>();
     newSnode->name = node->getName();
 
     auto transform = svulkan2::scene::Transform::FromMatrix(mat);
@@ -89,7 +89,7 @@ std::unique_ptr<RenderSceneNode> LoadScene(std::string const &filename, bool app
     c->setShadowEnabled(true);
     c->setLocalPose({});
 
-    auto newNode = std::make_unique<RenderSceneNode>();
+    auto newNode = std::make_unique<RenderSceneLoaderNode>();
     newNode->pose = pose;
     rootNode->children.push_back(std::move(newNode));
   }
@@ -106,7 +106,7 @@ std::unique_ptr<RenderSceneNode> LoadScene(std::string const &filename, bool app
     c->setShadowEnabled(true);
     c->setLocalPose({});
 
-    auto newNode = std::make_unique<RenderSceneNode>();
+    auto newNode = std::make_unique<RenderSceneLoaderNode>();
     newNode->pose = pose;
     rootNode->children.push_back(std::move(newNode));
   }
@@ -125,7 +125,7 @@ std::unique_ptr<RenderSceneNode> LoadScene(std::string const &filename, bool app
     c->setFovOuter(l->getFov());
     c->setLocalPose({});
 
-    auto newNode = std::make_unique<RenderSceneNode>();
+    auto newNode = std::make_unique<RenderSceneLoaderNode>();
     newNode->pose = pose;
     rootNode->children.push_back(std::move(newNode));
   }
@@ -143,12 +143,43 @@ std::unique_ptr<RenderSceneNode> LoadScene(std::string const &filename, bool app
     c->setShape(l->getHalfSize().x, l->getHalfSize().y, l->getAngle());
     c->setLocalPose({});
 
-    auto newNode = std::make_unique<RenderSceneNode>();
+    auto newNode = std::make_unique<RenderSceneLoaderNode>();
     newNode->pose = pose;
     rootNode->children.push_back(std::move(newNode));
   }
 
   return rootNode;
+}
+
+static void _flatten(std::vector<std::shared_ptr<RenderShapeTriangleMesh>> &meshes,
+                     std::vector<std::shared_ptr<SapienRenderLightComponent>> &lights,
+                     RenderSceneLoaderNode &node, Pose const &parentPose) {
+  // TODO: apply scale if not already applied
+
+  Pose pose = parentPose * node.pose;
+  node.pose = Pose();
+
+  if (node.mesh) {
+    node.mesh->setLocalPose(pose);
+    meshes.push_back(node.mesh);
+  }
+  if (node.light) {
+    node.light->setLocalPose(pose);
+    lights.push_back(node.light);
+  }
+
+  for (auto c : node.children) {
+    _flatten(meshes, lights, *c, pose);
+  }
+}
+
+std::tuple<std::vector<std::shared_ptr<RenderShapeTriangleMesh>>,
+           std::vector<std::shared_ptr<SapienRenderLightComponent>>>
+RenderSceneLoaderNode::flatten() {
+  std::vector<std::shared_ptr<RenderShapeTriangleMesh>> meshes;
+  std::vector<std::shared_ptr<SapienRenderLightComponent>> lights;
+  _flatten(meshes, lights, *this, Pose());
+  return {meshes, lights};
 }
 
 } // namespace sapien_renderer

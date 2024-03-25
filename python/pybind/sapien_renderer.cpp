@@ -327,14 +327,14 @@ template <> struct type_caster<SapienRenderTexture::AddressMode> {
 
 } // namespace pybind11::detail
 
-static py::dict parseSceneNode(RenderSceneNode const &node) {
-  py::list childList;
-  for (auto &node : node.children) {
-    childList.append(parseSceneNode(*node));
-  }
-  return py::dict("name"_a = node.name, "pose"_a = node.pose, "scale"_a = node.scale,
-                  "children"_a = childList, "mesh"_a = node.mesh, "light"_a = node.light);
-}
+// static py::dict parseSceneNode(RenderSceneLoaderNode const &node) {
+//   py::list childList;
+//   for (auto &node : node.children) {
+//     childList.append(parseSceneNode(*node));
+//   }
+//   return py::dict("name"_a = node.name, "pose"_a = node.pose, "scale"_a = node.scale,
+//                   "children"_a = childList, "mesh"_a = node.mesh, "light"_a = node.light);
+// }
 
 void init_sapien_renderer(py::module &sapien) {
   auto m = sapien.def_submodule("render");
@@ -386,8 +386,7 @@ void init_sapien_renderer(py::module &sapien) {
       .def(
           "load_scene",
           [](std::string const &filename, bool applyScale) {
-            auto root = LoadScene(filename, applyScale);
-            return parseSceneNode(*root);
+            return LoadScene(filename, applyScale);
           },
           py::arg("filename"), py::arg("apply_scale") = true)
       .def("get_device_summary", []() { return SapienRenderEngine::Get(nullptr)->getSummary(); })
@@ -454,6 +453,8 @@ void init_sapien_renderer(py::module &sapien) {
 
   auto PyRenderWindow = py::class_<SapienRendererWindow>(m, "RenderWindow");
   auto PyRenderVRDisplay = py::class_<SapienVRDisplay>(m, "RenderVRDisplay");
+
+  auto PyRenderSceneLoaderNode = py::class_<RenderSceneLoaderNode>(m, "RenderSceneLoaderNode");
 
   PySapienRenderer.def(py::init(&SapienRenderEngine::Get), py::arg("device") = nullptr)
       .def_property_readonly("_internal_context", &SapienRenderEngine::getContext);
@@ -1125,4 +1126,12 @@ consumer library. Make a copy if needed.
            py::arg("id"))
       .def("get_controller_axis_state", &SapienVRDisplay::getControllerAxisState, py::arg("id"),
            py::arg("axis"));
+
+  PyRenderSceneLoaderNode.def_readonly("name", &RenderSceneLoaderNode::name)
+      .def_readonly("pose", &RenderSceneLoaderNode::pose)
+      .def_readonly("mesh", &RenderSceneLoaderNode::mesh)
+      .def_readonly("light", &RenderSceneLoaderNode::light)
+      .def_readonly("scale", &RenderSceneLoaderNode::scale)
+      .def_readonly("children", &RenderSceneLoaderNode::children)
+      .def("flatten", &RenderSceneLoaderNode::flatten);
 }

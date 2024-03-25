@@ -4,7 +4,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien.internal_renderer
 import typing
-__all__ = ['RenderBodyComponent', 'RenderCameraComponent', 'RenderCameraGroup', 'RenderCubemap', 'RenderCudaMeshComponent', 'RenderDirectionalLightComponent', 'RenderLightComponent', 'RenderMaterial', 'RenderParallelogramLightComponent', 'RenderPointCloudComponent', 'RenderPointLightComponent', 'RenderShape', 'RenderShapeBox', 'RenderShapeCapsule', 'RenderShapeCylinder', 'RenderShapePlane', 'RenderShapeSphere', 'RenderShapeTriangleMesh', 'RenderShapeTriangleMeshPart', 'RenderSpotLightComponent', 'RenderSystem', 'RenderSystemGroup', 'RenderTexture', 'RenderTexture2D', 'RenderTexturedLightComponent', 'RenderVRDisplay', 'RenderWindow', 'SapienRenderer', 'clear_cache', 'get_camera_shader_dir', 'get_device_summary', 'get_imgui_ini_filename', 'get_msaa', 'get_ray_tracing_denoiser', 'get_ray_tracing_dof_aperture', 'get_ray_tracing_dof_plane', 'get_ray_tracing_path_depth', 'get_ray_tracing_samples_per_pixel', 'get_viewer_shader_dir', 'load_scene', 'set_camera_shader_dir', 'set_global_config', 'set_imgui_ini_filename', 'set_log_level', 'set_msaa', 'set_picture_format', 'set_ray_tracing_denoiser', 'set_ray_tracing_dof_aperture', 'set_ray_tracing_dof_plane', 'set_ray_tracing_path_depth', 'set_ray_tracing_samples_per_pixel', 'set_viewer_shader_dir']
+__all__ = ['RenderBodyComponent', 'RenderCameraComponent', 'RenderCameraGroup', 'RenderCubemap', 'RenderCudaMeshComponent', 'RenderDirectionalLightComponent', 'RenderLightComponent', 'RenderMaterial', 'RenderParallelogramLightComponent', 'RenderPointCloudComponent', 'RenderPointLightComponent', 'RenderSceneLoaderNode', 'RenderShape', 'RenderShapeBox', 'RenderShapeCapsule', 'RenderShapeCylinder', 'RenderShapePlane', 'RenderShapeSphere', 'RenderShapeTriangleMesh', 'RenderShapeTriangleMeshPart', 'RenderSpotLightComponent', 'RenderSystem', 'RenderSystemGroup', 'RenderTexture', 'RenderTexture2D', 'RenderTexturedLightComponent', 'RenderVRDisplay', 'RenderWindow', 'SapienRenderer', 'clear_cache', 'get_camera_shader_dir', 'get_device_summary', 'get_imgui_ini_filename', 'get_msaa', 'get_ray_tracing_denoiser', 'get_ray_tracing_dof_aperture', 'get_ray_tracing_dof_plane', 'get_ray_tracing_path_depth', 'get_ray_tracing_samples_per_pixel', 'get_viewer_shader_dir', 'load_scene', 'set_camera_shader_dir', 'set_global_config', 'set_imgui_ini_filename', 'set_log_level', 'set_msaa', 'set_picture_format', 'set_ray_tracing_denoiser', 'set_ray_tracing_dof_aperture', 'set_ray_tracing_dof_plane', 'set_ray_tracing_path_depth', 'set_ray_tracing_samples_per_pixel', 'set_viewer_shader_dir']
 M = typing.TypeVar("M", bound=int)
 N = typing.TypeVar("N", bound=int)
 class RenderBodyComponent(sapien.pysapien.Component):
@@ -372,6 +372,27 @@ class RenderPointCloudComponent(sapien.pysapien.Component):
         ...
 class RenderPointLightComponent(RenderLightComponent):
     def __init__(self) -> None:
+        ...
+class RenderSceneLoaderNode:
+    def flatten(self) -> tuple[list[RenderShapeTriangleMesh], list[RenderLightComponent]]:
+        ...
+    @property
+    def children(self) -> list[RenderSceneLoaderNode]:
+        ...
+    @property
+    def light(self) -> RenderLightComponent:
+        ...
+    @property
+    def mesh(self) -> RenderShapeTriangleMesh:
+        ...
+    @property
+    def name(self) -> str:
+        ...
+    @property
+    def pose(self) -> sapien.pysapien.Pose:
+        ...
+    @property
+    def scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
 class RenderShape:
     culling: typing.Literal['back', 'front', 'none', 'both']
@@ -888,7 +909,7 @@ def get_ray_tracing_samples_per_pixel() -> int:
     ...
 def get_viewer_shader_dir() -> str:
     ...
-def load_scene(filename: str, apply_scale: bool = True) -> dict:
+def load_scene(filename: str, apply_scale: bool = True) -> ...:
     ...
 def set_camera_shader_dir(dir: str) -> None:
     ...
