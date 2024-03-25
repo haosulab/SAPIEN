@@ -138,7 +138,7 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
         "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
     ]
 
-    if sys.platform == 'win32':
+    if sys.platform == "win32":
         cmake_args += [f"-DBUILD_TESTING=Off"]
 
     deps_dir = os.path.join(sapien_build_dir, "_sapien_deps")
@@ -402,9 +402,10 @@ setup(
         "sapien.physx",
         "sapien.internal_renderer",
         "sapien.render",
-        "sapien.wrapper",
         "sapien.core",
+        "sapien.wrapper",
         "sapien.wrapper.urchin",
+        "sapien.wrapper.geometry",
         "sapien.asset",
         "sapien.example",
         "sapien.utils",

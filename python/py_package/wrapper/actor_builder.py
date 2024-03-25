@@ -7,6 +7,25 @@ from typing import List, Union, Dict, Any, Tuple, Literal
 from .coacd import do_coacd
 
 
+def preprocess_mesh_file(filename: str):
+    """
+    Process input mesh file to a SAPIEN supported format
+    Args:
+        filename: input mesh file
+    Returns:
+        filename for the generated file or original filename
+    """
+
+    from .geometry.usd import convert_usd_to_glb
+
+    if any(filename.lower().endswith(s) for s in [".usd", ".usda", ".usdc", ".usdz"]):
+        glb_filename = filename + ".sapien.glb"
+        convert_usd_to_glb(filename, glb_filename)
+        return glb_filename
+
+    return filename
+
+
 @dataclass
 class CollisionShapeRecord:
     type: Literal[
@@ -129,7 +148,7 @@ class ActorBuilder:
                 )
             elif r.type == "file":
                 shape = sapien.render.RenderShapeTriangleMesh(
-                    r.filename, r.scale, r.material
+                    preprocess_mesh_file(r.filename), r.scale, r.material
                 )
                 if r.scale[0] * r.scale[1] * r.scale[2] < 0:
                     shape.set_culling("front")
@@ -191,14 +210,14 @@ class ActorBuilder:
                     shapes = [shape]
                 elif r.type == "convex_mesh":
                     shape = sapien.physx.PhysxCollisionShapeConvexMesh(
-                        filename=r.filename,
+                        filename=preprocess_mesh_file(r.filename),
                         scale=r.scale,
                         material=r.material,
                     )
                     shapes = [shape]
                 elif r.type == "nonconvex_mesh":
                     shape = sapien.physx.PhysxCollisionShapeTriangleMesh(
-                        filename=r.filename,
+                        filename=preprocess_mesh_file(r.filename),
                         scale=r.scale,
                         material=r.material,
                     )
@@ -209,9 +228,9 @@ class ActorBuilder:
                         if params is None:
                             params = dict()
 
-                        filename = do_coacd(r.filename, **params)
+                        filename = do_coacd(preprocess_mesh_file(r.filename), **params)
                     else:
-                        filename = r.filename
+                        filename = preprocess_mesh_file(r.filename)
 
                     shapes = sapien.physx.PhysxCollisionShapeConvexMesh.load_multiple(
                         filename=filename,
