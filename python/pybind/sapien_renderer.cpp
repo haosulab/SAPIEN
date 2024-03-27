@@ -404,12 +404,17 @@ void init_sapien_renderer(py::module &sapien) {
       py::class_<RenderShapeTriangleMeshPart>(m, "RenderShapeTriangleMeshPart");
 
   auto PyRenderShape = py::class_<RenderShape>(m, "RenderShape");
-  auto PyRenderShapePlane = py::class_<RenderShapePlane, RenderShape>(m, "RenderShapePlane");
-  auto PyRenderShapeBox = py::class_<RenderShapeBox, RenderShape>(m, "RenderShapeBox");
-  auto PyRenderShapeSphere = py::class_<RenderShapeSphere, RenderShape>(m, "RenderShapeSphere");
-  auto PyRenderShapeCapsule = py::class_<RenderShapeCapsule, RenderShape>(m, "RenderShapeCapsule");
+  auto PyRenderShapePrimitive =
+      py::class_<RenderShapePrimitive, RenderShape>(m, "RenderShapePrimitive");
+  auto PyRenderShapePlane =
+      py::class_<RenderShapePlane, RenderShapePrimitive>(m, "RenderShapePlane");
+  auto PyRenderShapeBox = py::class_<RenderShapeBox, RenderShapePrimitive>(m, "RenderShapeBox");
+  auto PyRenderShapeSphere =
+      py::class_<RenderShapeSphere, RenderShapePrimitive>(m, "RenderShapeSphere");
+  auto PyRenderShapeCapsule =
+      py::class_<RenderShapeCapsule, RenderShapePrimitive>(m, "RenderShapeCapsule");
   auto PyRenderShapeCylinder =
-      py::class_<RenderShapeCylinder, RenderShape>(m, "RenderShapeCylinder");
+      py::class_<RenderShapeCylinder, RenderShapePrimitive>(m, "RenderShapeCylinder");
   auto PyRenderShapeTriangleMesh =
       py::class_<RenderShapeTriangleMesh, RenderShape>(m, "RenderShapeTriangleMesh");
 
@@ -656,6 +661,15 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("get_parts", &RenderShape::getParts)
       .def("clone", &RenderShape::clone);
 
+  PyRenderShapePrimitive.def_property_readonly("vertices", &RenderShapePrimitive::getVertices)
+      .def("get_vertices", &RenderShapePrimitive::getVertices)
+      .def_property_readonly("triangles", &RenderShapePrimitive::getTriangles)
+      .def("get_triangles", &RenderShapePrimitive::getTriangles)
+      .def_property_readonly("vertex_normals", &RenderShapePrimitive::getNormal)
+      .def("get_vertex_normal", &RenderShapePrimitive::getNormal)
+      .def_property_readonly("vertex_uvs", &RenderShapePrimitive::getUV)
+      .def("get_vertex_uv", &RenderShapePrimitive::getUV);
+
   PyRenderShapePlane
       .def(py::init<Vec3, std::shared_ptr<SapienRenderMaterial>>(), py::arg("scale"),
            py::arg("material"))
@@ -713,8 +727,10 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def(py::init<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &,
                     Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &,
                     Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &,
+                    Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> const &,
                     std::shared_ptr<SapienRenderMaterial>>(),
-           py::arg("vertices"), py::arg("triangles"), py::arg("normals"), py::arg("material"))
+           py::arg("vertices"), py::arg("triangles"), py::arg("normals"), py::arg("uvs"),
+           py::arg("material"))
       .def(py::init<std::string const &, Vec3, std::shared_ptr<SapienRenderMaterial>>(),
            py::arg("filename"), py::arg("scale") = Vec3(1.f), py::arg("material") = nullptr)
       .def_property_readonly("filename", &RenderShapeTriangleMesh::getFilename)

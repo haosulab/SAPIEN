@@ -51,6 +51,36 @@ int RenderShape::getInternalGpuTransformIndex() {
 
 Vec3 RenderShape::getGpuScale() { return mScale; }
 
+Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>
+RenderShapePrimitive::getVertices() const {
+  auto mesh = getModel()->getShapes().at(0)->mesh;
+  auto position = mesh->getVertexAttribute("position");
+  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>>(
+      position.data(), position.size() / 3, 3);
+}
+
+Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>
+RenderShapePrimitive::getTriangles() const {
+  auto mesh = getModel()->getShapes().at(0)->mesh;
+  auto indices = mesh->getIndices();
+  return Eigen::Map<Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>>(
+      indices.data(), indices.size() / 3, 3);
+}
+
+Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> RenderShapePrimitive::getNormal() const {
+  auto mesh = getModel()->getShapes().at(0)->mesh;
+  auto normal = mesh->getVertexAttribute("normal");
+  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>>(
+      normal.data(), normal.size() / 3, 3);
+}
+
+Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> RenderShapePrimitive::getUV() const {
+  auto mesh = getModel()->getShapes().at(0)->mesh;
+  auto uv = mesh->getVertexAttribute("uv");
+  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor>>(uv.data(),
+                                                                              uv.size() / 2, 2);
+}
+
 RenderShapePlane::RenderShapePlane(Vec3 scale, std::shared_ptr<SapienRenderMaterial> material) {
   auto mesh = mEngine->getPlaneMesh();
   mMaterial = material;
@@ -213,17 +243,22 @@ RenderShapeTriangleMesh::RenderShapeTriangleMesh(
     Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices,
     Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles,
     Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &normals,
+    Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> const &uvs,
     std::shared_ptr<SapienRenderMaterial> material) {
 
   std::vector<float> vs(vertices.data(), vertices.data() + vertices.size());
   std::vector<uint32_t> ts(triangles.data(), triangles.data() + triangles.size());
   std::vector<float> ns(normals.data(), normals.data() + normals.size());
+  std::vector<float> uvs_(uvs.data(), uvs.data() + uvs.size());
 
   auto mesh = svulkan2::resource::SVMesh::Create(vs, ts);
   mMaterial = material;
   mScale = {1.f, 1.f, 1.f};
   if (ns.size()) {
     mesh->setVertexAttribute("normal", ns);
+  }
+  if (uvs_.size()) {
+    mesh->setVertexAttribute("uv", uvs_);
   }
   auto shape = svulkan2::resource::SVShape::Create(mesh, material->getMaterial());
   mModel = svulkan2::resource::SVModel::FromData({shape});

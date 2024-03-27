@@ -4,7 +4,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien.internal_renderer
 import typing
-__all__ = ['RenderBodyComponent', 'RenderCameraComponent', 'RenderCameraGroup', 'RenderCubemap', 'RenderCudaMeshComponent', 'RenderDirectionalLightComponent', 'RenderLightComponent', 'RenderMaterial', 'RenderParallelogramLightComponent', 'RenderPointCloudComponent', 'RenderPointLightComponent', 'RenderSceneLoaderNode', 'RenderShape', 'RenderShapeBox', 'RenderShapeCapsule', 'RenderShapeCylinder', 'RenderShapePlane', 'RenderShapeSphere', 'RenderShapeTriangleMesh', 'RenderShapeTriangleMeshPart', 'RenderSpotLightComponent', 'RenderSystem', 'RenderSystemGroup', 'RenderTexture', 'RenderTexture2D', 'RenderTexturedLightComponent', 'RenderVRDisplay', 'RenderWindow', 'SapienRenderer', 'clear_cache', 'get_camera_shader_dir', 'get_device_summary', 'get_imgui_ini_filename', 'get_msaa', 'get_ray_tracing_denoiser', 'get_ray_tracing_dof_aperture', 'get_ray_tracing_dof_plane', 'get_ray_tracing_path_depth', 'get_ray_tracing_samples_per_pixel', 'get_viewer_shader_dir', 'load_scene', 'set_camera_shader_dir', 'set_global_config', 'set_imgui_ini_filename', 'set_log_level', 'set_msaa', 'set_picture_format', 'set_ray_tracing_denoiser', 'set_ray_tracing_dof_aperture', 'set_ray_tracing_dof_plane', 'set_ray_tracing_path_depth', 'set_ray_tracing_samples_per_pixel', 'set_viewer_shader_dir']
+__all__ = ['RenderBodyComponent', 'RenderCameraComponent', 'RenderCameraGroup', 'RenderCubemap', 'RenderCudaMeshComponent', 'RenderDirectionalLightComponent', 'RenderLightComponent', 'RenderMaterial', 'RenderParallelogramLightComponent', 'RenderPointCloudComponent', 'RenderPointLightComponent', 'RenderSceneLoaderNode', 'RenderShape', 'RenderShapeBox', 'RenderShapeCapsule', 'RenderShapeCylinder', 'RenderShapePlane', 'RenderShapePrimitive', 'RenderShapeSphere', 'RenderShapeTriangleMesh', 'RenderShapeTriangleMeshPart', 'RenderSpotLightComponent', 'RenderSystem', 'RenderSystemGroup', 'RenderTexture', 'RenderTexture2D', 'RenderTexturedLightComponent', 'RenderVRDisplay', 'RenderWindow', 'SapienRenderer', 'clear_cache', 'get_camera_shader_dir', 'get_device_summary', 'get_imgui_ini_filename', 'get_msaa', 'get_ray_tracing_denoiser', 'get_ray_tracing_dof_aperture', 'get_ray_tracing_dof_plane', 'get_ray_tracing_path_depth', 'get_ray_tracing_samples_per_pixel', 'get_viewer_shader_dir', 'load_scene', 'set_camera_shader_dir', 'set_global_config', 'set_imgui_ini_filename', 'set_log_level', 'set_msaa', 'set_picture_format', 'set_ray_tracing_denoiser', 'set_ray_tracing_dof_aperture', 'set_ray_tracing_dof_plane', 'set_ray_tracing_path_depth', 'set_ray_tracing_samples_per_pixel', 'set_viewer_shader_dir']
 M = typing.TypeVar("M", bound=int)
 N = typing.TypeVar("N", bound=int)
 class RenderBodyComponent(sapien.pysapien.Component):
@@ -429,7 +429,7 @@ class RenderShape:
     @property
     def per_scene_id(self) -> int:
         ...
-class RenderShapeBox(RenderShape):
+class RenderShapeBox(RenderShapePrimitive):
     def __init__(self, half_size: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: RenderMaterial) -> None:
         ...
     def get_half_size(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
@@ -437,7 +437,7 @@ class RenderShapeBox(RenderShape):
     @property
     def half_size(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
-class RenderShapeCapsule(RenderShape):
+class RenderShapeCapsule(RenderShapePrimitive):
     def __init__(self, radius: float, half_length: float, material: RenderMaterial) -> None:
         ...
     def get_half_length(self) -> float:
@@ -450,7 +450,7 @@ class RenderShapeCapsule(RenderShape):
     @property
     def radius(self) -> float:
         ...
-class RenderShapeCylinder(RenderShape):
+class RenderShapeCylinder(RenderShapePrimitive):
     def __init__(self, radius: float, half_length: float, material: RenderMaterial) -> None:
         ...
     def get_half_length(self) -> float:
@@ -463,7 +463,7 @@ class RenderShapeCylinder(RenderShape):
     @property
     def radius(self) -> float:
         ...
-class RenderShapePlane(RenderShape):
+class RenderShapePlane(RenderShapePrimitive):
     def __init__(self, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: RenderMaterial) -> None:
         ...
     def get_scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
@@ -471,7 +471,28 @@ class RenderShapePlane(RenderShape):
     @property
     def scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
-class RenderShapeSphere(RenderShape):
+class RenderShapePrimitive(RenderShape):
+    def get_triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
+        ...
+    def get_vertex_normal(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+        ...
+    def get_vertex_uv(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+        ...
+    def get_vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+        ...
+    @property
+    def triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
+        ...
+    @property
+    def vertex_normals(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+        ...
+    @property
+    def vertex_uvs(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+        ...
+    @property
+    def vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+        ...
+class RenderShapeSphere(RenderShapePrimitive):
     def __init__(self, radius: float, material: RenderMaterial) -> None:
         ...
     def get_radius(self) -> float:
@@ -482,7 +503,7 @@ class RenderShapeSphere(RenderShape):
 class RenderShapeTriangleMesh(RenderShape):
     scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
     @typing.overload
-    def __init__(self, vertices: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple, triangles: numpy.ndarray[numpy.uint32[M, 3]], normals: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple, material: RenderMaterial) -> None:
+    def __init__(self, vertices: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple, triangles: numpy.ndarray[numpy.uint32[M, 3]], normals: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple, uvs: numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]] | list | tuple, material: RenderMaterial) -> None:
         ...
     @typing.overload
     def __init__(self, filename: str, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple = ..., material: RenderMaterial | None = None) -> None:

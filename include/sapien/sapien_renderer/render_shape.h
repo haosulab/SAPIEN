@@ -109,7 +109,15 @@ protected:
   int mBatchedPoseIndex{-1};
 };
 
-class RenderShapePlane : public RenderShape {
+class RenderShapePrimitive : public RenderShape {
+public:
+  Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> getVertices() const;
+  Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> getTriangles() const;
+  Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> getNormal() const;
+  Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> getUV() const;
+};
+
+class RenderShapePlane : public RenderShapePrimitive {
 public:
   RenderShapePlane(Vec3 scale, std::shared_ptr<SapienRenderMaterial> material);
   Vec3 getScale() const;
@@ -123,7 +131,7 @@ private:
   std::shared_ptr<SapienRenderMaterial> mMaterial;
 };
 
-class RenderShapeBox : public RenderShape {
+class RenderShapeBox : public RenderShapePrimitive {
 public:
   RenderShapeBox(Vec3 halfLengths, std::shared_ptr<SapienRenderMaterial> material);
   Vec3 getHalfLengths() const;
@@ -137,7 +145,7 @@ private:
   std::shared_ptr<SapienRenderMaterial> mMaterial;
 };
 
-class RenderShapeCapsule : public RenderShape {
+class RenderShapeCapsule : public RenderShapePrimitive {
 public:
   RenderShapeCapsule(float radius, float halfLength,
                      std::shared_ptr<SapienRenderMaterial> material);
@@ -155,7 +163,7 @@ private:
   std::shared_ptr<SapienRenderMaterial> mMaterial;
 };
 
-class RenderShapeCylinder : public RenderShape {
+class RenderShapeCylinder : public RenderShapePrimitive {
 public:
   RenderShapeCylinder(float radius, float halfLength,
                       std::shared_ptr<SapienRenderMaterial> material);
@@ -173,7 +181,7 @@ private:
   std::shared_ptr<SapienRenderMaterial> mMaterial;
 };
 
-class RenderShapeSphere : public RenderShape {
+class RenderShapeSphere : public RenderShapePrimitive {
 public:
   RenderShapeSphere(float radius, std::shared_ptr<SapienRenderMaterial> material);
   float getRadius() const;
@@ -194,6 +202,7 @@ public:
       Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices,
       Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles,
       Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &normals,
+      Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> const &uvs,
       std::shared_ptr<SapienRenderMaterial> material);
 
   RenderShapeTriangleMesh(std::vector<std::shared_ptr<RenderShapeTriangleMeshPart>> parts);
