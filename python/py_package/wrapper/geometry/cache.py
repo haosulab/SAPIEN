@@ -20,30 +20,35 @@ def file_exists(files: str | List[str]):
     return all(os.path.exists(f) for f in files)
 
 
-def parse_hash_file(filename):
-    with open(filename, "r") as f:
-        lines = f.readlines()
-        if len(lines) < 5:
-            return None
+def serialize(input_file, input_md5, output_file, output_md5, param_md5):
+    return {
+        "version": 0,
+        "input": {"file": input_file, "md5": input_md5},
+        "output": {"file": output_file, "md5": output_md5},
+        "params": {"md5": param_md5},
+    }
 
-        input_file = lines[0].strip()
-        input_checksum = lines[1].strip()
-        output_file = lines[2].strip()
-        output_checksum = lines[3].strip()
-        param_checksum = lines[4].strip()
 
-    return input_file, input_checksum, output_file, output_checksum, param_checksum
+def read_hash_file(filename):
+    try:
+        with open(filename, "r") as f:
+            return json.load(f)
+    except json.JSONDecodeError:
+        return {}
 
 
 def write_hash_file(
     filename, input_file, input_md5, output_file, output_md5, param_md5
 ):
     with open(filename, "w") as f:
-        f.write("\n".join([input_file, input_md5, output_file, output_md5, param_md5]))
+        json.dump(
+            serialize(input_file, input_md5, output_file, output_md5, param_md5),
+            f,
+        )
 
 
 def check_hash(hash_file, input_file, input_md5, output_file, output_md5, param_md5):
-    return parse_hash_file(hash_file) == (
+    return read_hash_file(hash_file) == serialize(
         input_file,
         input_md5,
         output_file,

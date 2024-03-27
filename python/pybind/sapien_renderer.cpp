@@ -327,17 +327,10 @@ template <> struct type_caster<SapienRenderTexture::AddressMode> {
 
 } // namespace pybind11::detail
 
-// static py::dict parseSceneNode(RenderSceneLoaderNode const &node) {
-//   py::list childList;
-//   for (auto &node : node.children) {
-//     childList.append(parseSceneNode(*node));
-//   }
-//   return py::dict("name"_a = node.name, "pose"_a = node.pose, "scale"_a = node.scale,
-//                   "children"_a = childList, "mesh"_a = node.mesh, "light"_a = node.light);
-// }
-
 void init_sapien_renderer(py::module &sapien) {
   auto m = sapien.def_submodule("render");
+
+  auto PyRenderSceneLoaderNode = py::class_<RenderSceneLoaderNode>(m, "RenderSceneLoaderNode");
 
   ////////// global //////////
 
@@ -453,8 +446,6 @@ void init_sapien_renderer(py::module &sapien) {
 
   auto PyRenderWindow = py::class_<SapienRendererWindow>(m, "RenderWindow");
   auto PyRenderVRDisplay = py::class_<SapienVRDisplay>(m, "RenderVRDisplay");
-
-  auto PyRenderSceneLoaderNode = py::class_<RenderSceneLoaderNode>(m, "RenderSceneLoaderNode");
 
   PySapienRenderer.def(py::init(&SapienRenderEngine::Get), py::arg("device") = nullptr)
       .def_property_readonly("_internal_context", &SapienRenderEngine::getContext);
