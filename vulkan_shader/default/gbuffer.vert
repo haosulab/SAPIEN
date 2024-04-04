@@ -22,16 +22,35 @@ layout(location = 2) out flat uvec4 outSegmentation;
 layout(location = 3) out vec3 objectCoord;
 layout(location = 4) out mat3 outTbn;
 
+void ensureTbn(inout vec3 tangent, inout vec3 bitangent, inout vec3 normal) {
+  if (length(tangent) < 0.01 || length(bitangent) < 0.01) {
+    vec3 wx = vec3(1, 0, 0);
+    if (abs(dot(normal, vec3(1, 0, 0))) > 0.95) {
+      wx = vec3(0, 1, 0);
+    }
+    vec3 wy = cross(normal, wx);
+    wx = cross(wy, normal);
+    tangent = wx;
+    bitangent = wy;
+  }
+}
+
 void main() {
   outSegmentation = objectDataBuffer.segmentation;
   mat4 modelView = cameraBuffer.viewMatrix * objectTransformBuffer.modelMatrix;
   mat3 normalMatrix = mat3(transpose(inverse(modelView)));
+
+  vec3 T = tangent;
+  vec3 B = bitangent;
+  vec3 N = normal;
+  ensureTbn(T, B, N);
+
   objectCoord = position;
   outPositionRaw = modelView * vec4(position, 1);
   outUV = uv;
   gl_Position = cameraBuffer.projectionMatrix * outPositionRaw;
-  vec3 outTangent = normalize(normalMatrix * tangent);
-  vec3 outBitangent = normalize(normalMatrix * bitangent);
-  vec3 outNormal = normalize(normalMatrix * normal);
+  vec3 outTangent = normalize(normalMatrix * T);
+  vec3 outBitangent = normalize(normalMatrix * B);
+  vec3 outNormal = normalize(normalMatrix * N);
   outTbn = mat3(outTangent, outBitangent, outNormal);
 }
