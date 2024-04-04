@@ -2,7 +2,7 @@ name: TestWindowsBuild
 
 on:
   push:
-    branches: [main, dev, test-windows]
+    branches: [main, dev]
 
 jobs:
   build-linux-all:
