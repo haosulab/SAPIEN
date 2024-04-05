@@ -24,21 +24,20 @@ static std::vector<std::shared_ptr<Device>> vulkanFindDevices() {
       for (auto &d : devices) {
         int priority = 0;
 
-        if (d.cudaId >= 0) {
-          priority += 1000;
-        }
-        if (d.present) {
-          priority += 100;
-        }
-        if (d.deviceType == vk::PhysicalDeviceType::eDiscreteGpu) {
-          priority += 10;
-        }
-        if (d.rayTracing) {
-          priority += 1;
-        }
-
-        if (!d.supported) {
-          priority = 0;
+        if (d.supported) {
+          priority = 1;
+          if (d.cudaId >= 0) {
+            priority += 1000;
+          }
+          if (d.present) {
+            priority += 100;
+          }
+          if (d.deviceType == vk::PhysicalDeviceType::eDiscreteGpu) {
+            priority += 10;
+          }
+          if (d.rayTracing) {
+            priority += 1;
+          }
         }
 
         Device::Type type = Device::Type::GPU;
