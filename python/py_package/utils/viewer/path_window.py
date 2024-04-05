@@ -3,8 +3,6 @@ import json
 import numpy as np
 import sapien
 from sapien import internal_renderer as R
-from scipy.interpolate import splev, splprep
-from scipy.spatial.transform import Rotation, Slerp
 
 from .plugin import Plugin
 
@@ -185,6 +183,9 @@ class PathWindow(Plugin):
         return [f"Point {i}" for i in range(len(self.current_path.poses))]
 
     def get_curve(self, knots=128):
+        from scipy.interpolate import splev, splprep
+        from scipy.spatial.transform import Rotation, Slerp
+
         if self.current_path is None:
             return None, None, None
 
@@ -206,6 +207,9 @@ class PathWindow(Plugin):
         return ts, points, quats
 
     def eval_curve(self, ts):
+        from scipy.interpolate import splev, splprep
+        from scipy.spatial.transform import Rotation, Slerp
+
         if self.current_path is None:
             return None, None
         points = np.array([pose.p for pose in self.current_path.poses])
