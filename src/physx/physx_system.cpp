@@ -1089,10 +1089,16 @@ PhysxSystemCpu::~PhysxSystemCpu() {
   if (mPxScene) {
     mPxScene->release();
   }
+  if (mPxCPUDispatcher) {
+    mPxCPUDispatcher->release();
+  }
 }
 PhysxSystemGpu::~PhysxSystemGpu() {
   if (mPxScene) {
     mPxScene->release();
+  }
+  if (mPxCPUDispatcher) {
+    mPxCPUDispatcher->release();
   }
 }
 
