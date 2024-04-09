@@ -278,9 +278,6 @@ try:
 
 except ModuleNotFoundError:
     if platform.system() == "Linux":
-        warnings.warn(
-            "pinnochio package is not installed, fallback to built-in pinocchio"
-        )
         from ..pysapien_pinocchio import PinocchioModel
     else:
         warnings.warn(
