@@ -3,6 +3,8 @@ from ..pysapien.simsense import DepthSensorEngine
 
 import numpy as np
 
+from typing import Union
+
 
 class SimSenseComponent(Component):
     def __init__(
@@ -242,10 +244,20 @@ class SimSenseComponent(Component):
     def on_remove_from_scene(self, scene):
         self._engine = None
 
-    def compute(self, left: np.ndarray, right: np.ndarray) -> None:
+    def compute(
+        self,
+        left: Union[np.ndarray, CudaArray],
+        right: Union[np.ndarray, CudaArray],
+        bbox_start: tuple = None,
+        bbox_size: tuple = None,
+    ) -> None:
         if self._engine is None:
             raise RuntimeError("simsense component is not added to scene")
-        self._engine.compute(left, right)
+        
+        if bbox_start is not None and bbox_size is not None:
+            self._engine.compute(left, right, True, *bbox_start, *bbox_size)
+        else:
+            self._engine.compute(left, right, False, 0, 0, 0, 0)
 
     def get_ndarray(self) -> np.ndarray:
         if self._engine is None:

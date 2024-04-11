@@ -21,7 +21,7 @@ def build_scene(render_system, physx_system):
             Pose(q=[0.7071068, 0, -0.7071068, 0]),
             [10, 10, 10],
             sapien.render.RenderMaterial(
-                base_color=np.array([202, 164, 114, 256]) / 256, specular=0.5
+                base_color=np.array([202, 164, 114, 256]) / 256
             ),
             "",
         )
@@ -36,9 +36,7 @@ def build_scene(render_system, physx_system):
         .add_sphere_visual(
             Pose(),
             0.06,
-            sapien.render.RenderMaterial(
-                base_color=[0.2, 0.2, 0.8, 1.0], roughness=0.5, metallic=0.0
-            ),
+            sapien.render.RenderMaterial(base_color=[0.2, 0.2, 0.8, 1.0]),
             "",
         )
         .set_physx_body_type("kinematic")
@@ -53,13 +51,7 @@ def build_scene(render_system, physx_system):
         .add_sphere_visual(
             Pose(),
             0.07,
-            sapien.render.RenderMaterial(
-                base_color=[1.0, 1.0, 1.0, 1.0],
-                roughness=0.3,
-                metallic=0.0,
-                transmission=1.0,
-                ior=1.2,
-            ),
+            sapien.render.RenderMaterial(base_color=[1.0, 1.0, 1.0, 1.0]),
             "",
         )
         .set_physx_body_type("kinematic")
@@ -75,9 +67,7 @@ def build_scene(render_system, physx_system):
             Pose(),
             0.02,
             0.1,
-            sapien.render.RenderMaterial(
-                base_color=[0.8, 0.7, 0.1, 1.0], roughness=0.01, metallic=0.95
-            ),
+            sapien.render.RenderMaterial(base_color=[0.8, 0.7, 0.1, 1.0]),
             "",
         )
         .set_physx_body_type("kinematic")
@@ -92,9 +82,7 @@ def build_scene(render_system, physx_system):
         .add_box_visual(
             Pose(),
             [0.09, 0.09, 0.09],
-            sapien.render.RenderMaterial(
-                base_color=[0.8, 0.2, 0.2, 1.0], roughness=0.01, metallic=1.0
-            ),
+            sapien.render.RenderMaterial(base_color=[0.8, 0.2, 0.2, 1.0]),
             "",
         )
         .set_physx_body_type("kinematic")
@@ -110,10 +98,6 @@ def build_scene(render_system, physx_system):
 
 
 def main():
-    sapien.render.set_camera_shader_dir("rt")
-    sapien.render.set_ray_tracing_denoiser("optix")
-    sapien.render.set_ray_tracing_samples_per_pixel(4)
-
     render_system = RenderSystem()
     physx_system = PhysxCpuSystem()
     scene = build_scene(render_system, physx_system)
@@ -135,7 +119,16 @@ def main():
 
     render_system.step()
     sensor.take_picture()
-    sensor.compute_depth()
+
+    bbox_start = (100, 100)  # Top left corner starts at (100, 100)
+    bbox_size = (640, 360)  # Width 640, Height 360
+    sensor.compute_depth(
+        bbox_start, bbox_size
+    )  # Passing these two tuples to compute_depth will only do stereo matching in this region
+    # More specifically, it will clip the both left and right ir images to this region before stereo matching
+    # Since left and right ir images should be of same resolution, one should use the larger bbox size of the two
+    # Also spare some space in the bbox as part of the depth on boundary will be invalid due to stereo matching's nature
+    # For this example, using a bbox of 640*360 instead of the full 1280*720 provides about 2.7x speedup
 
     rgb = sensor.get_rgb()
     ir_l, ir_r = sensor.get_ir()
