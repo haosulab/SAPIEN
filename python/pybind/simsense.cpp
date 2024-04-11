@@ -56,44 +56,17 @@ public:
                           ndarray2Mat2d(a3), _b1, _b2, _b3, _dilation, _mainFx, _mainFy, _mainSkew,
                           _mainCx, _mainCy) {}
 
-  void compute(py::array_t<uint8_t> left_array, py::array_t<uint8_t> right_array) {
+  void compute(py::array_t<uint8_t> left_array, py::array_t<uint8_t> right_array,
+               bool bbox = false, uint32_t bboxStartX = 0, uint32_t bboxStartY = 0,
+               uint32_t bboxWidth = 0, uint32_t bboxHeight = 0) {
     simsense::Mat2d<uint8_t> left = ndarray2Mat2d<uint8_t>(left_array);
     simsense::Mat2d<uint8_t> right = ndarray2Mat2d<uint8_t>(right_array);
-    DepthSensorEngine::compute(left, right);
+    DepthSensorEngine::compute(left, right, bbox, bboxStartX, bboxStartY, bboxWidth, bboxHeight);
   }
 
-  // void compute(py::capsule left_capsule, py::capsule right_capsule) {
-  //   // Open left capsule
-  //   auto leftCapsule = left_capsule.ptr();
-  //   DLManagedTensor *leftDLMTensor =
-  //       (DLManagedTensor *)PyCapsule_GetPointer(leftCapsule, "dltensor");
-  //   if (leftDLMTensor) {
-  //     PyCapsule_SetName(leftCapsule,
-  //                       "used_dltensor"); // Successfully obtained content, rename capsule
-  //   } else {
-  //     throw std::runtime_error(
-  //         "Left capsule is invalid. Note that DLTensor capsules can only be consumed once");
-  //   }
-
-  //   // Open right capsule
-  //   auto *rightCapsule = right_capsule.ptr();
-  //   DLManagedTensor *rightDLMTensor =
-  //       (DLManagedTensor *)PyCapsule_GetPointer(rightCapsule, "dltensor");
-  //   if (rightDLMTensor) {
-  //     PyCapsule_SetName(rightCapsule,
-  //                       "used_dltensor"); // Successfully obtained content, rename capsule
-  //   } else {
-  //     throw std::runtime_error(
-  //         "Right capsule is invalid. Note that DLTensor capsules can only be consumed once");
-  //   }
-
-  //   DepthSensorEngine::compute(leftDLMTensor, rightDLMTensor);
-
-  //   leftDLMTensor->deleter(const_cast<DLManagedTensor *>(leftDLMTensor));
-  //   rightDLMTensor->deleter(const_cast<DLManagedTensor *>(rightDLMTensor));
-  // }
-
-  void compute(CudaArrayHandle leftCuda, CudaArrayHandle rightCuda) {
+  void compute(CudaArrayHandle leftCuda, CudaArrayHandle rightCuda, bool bbox = false,
+               uint32_t bboxStartX = 0, uint32_t bboxStartY = 0, uint32_t bboxWidth = 0,
+               uint32_t bboxHeight = 0) {
     // Instance check
     if (leftCuda.shape[0] != rightCuda.shape[0] || leftCuda.shape[1] != rightCuda.shape[1]) {
       throw std::runtime_error("Both images must have the same size");
@@ -105,48 +78,11 @@ public:
       throw std::runtime_error("Input data type must be float");
     }
 
-    DepthSensorEngine::compute(leftCuda.ptr, rightCuda.ptr);
+    DepthSensorEngine::compute(leftCuda.ptr, rightCuda.ptr, bbox, bboxStartX, bboxStartY,
+                               bboxWidth, bboxHeight);
   }
 
   py::array_t<float> getNdarray() { return Mat2d2ndarray(getMat2d()); }
-
-  // py::capsule getDLTensorCapsule() {
-  //   return py::capsule(getDLTensor(), "dltensor", DLCapsuleDeleter);
-  // }
-
-  // py::capsule getPointCloudDLTensorCapsule() {
-  //   return py::capsule(getPointCloudDLTensor(), "dltensor", DLCapsuleDeleter);
-  // }
-
-  // py::array_t<float> getRgbPointCloudNdarray(py::capsule rgba_capsule) {
-  //   // Open rgb capsule
-  //   auto rgbaCapsule = rgba_capsule.ptr();
-  //   DLManagedTensor *rgbaDLMTensor =
-  //       (DLManagedTensor *)PyCapsule_GetPointer(rgbaCapsule, "dltensor");
-  //   if (rgbaDLMTensor) {
-  //     PyCapsule_SetName(rgbaCapsule,
-  //                       "used_dltensor"); // Successfully obtained content, rename capsule
-  //   } else {
-  //     throw std::runtime_error(
-  //         "RGBA capsule is invalid. Note that DLTensor capsules can only be consumed once");
-  //   }
-  //   return Mat2d2ndarray(getRgbPointCloudMat2d(rgbaDLMTensor));
-  // }
-
-  // py::capsule getRgbPointCloudDLTensorCapsule(py::capsule rgba_capsule) {
-  //   // Open rgb capsule
-  //   auto rgbaCapsule = rgba_capsule.ptr();
-  //   DLManagedTensor *rgbaDLMTensor =
-  //       (DLManagedTensor *)PyCapsule_GetPointer(rgbaCapsule, "dltensor");
-  //   if (rgbaDLMTensor) {
-  //     PyCapsule_SetName(rgbaCapsule,
-  //                       "used_dltensor"); // Successfully obtained content, rename capsule
-  //   } else {
-  //     throw std::runtime_error(
-  //         "RGBA capsule is invalid. Note that DLTensor capsules can only be consumed once");
-  //   }
-  //   return py::capsule(getRgbPointCloudDLTensor(rgbaDLMTensor), "dltensor", DLCapsuleDeleter);
-  // }
 
   CudaArrayHandle getCuda() {
     CudaArrayHandle arr{{(int)getOutputRows(), (int)getOutputCols()}, // shape
@@ -199,21 +135,20 @@ void init_simsense(py::module &sapien) {
                py::array_t<float>, py::array_t<float>, py::array_t<float>, py::array_t<float>,
                py::array_t<float>, float, float, float, bool, float, float, float, float,
                float>());
-  PySimsense.def("compute", py::overload_cast<py::array_t<uint8_t>, py::array_t<uint8_t>>(
-                                &DepthSensorEnginePython::compute));
-  // PySimsense.def("compute",
-  //                py::overload_cast<py::capsule,
-  //                py::capsule>(&DepthSensorEnginePython::compute));
-  PySimsense.def("compute", py::overload_cast<CudaArrayHandle, CudaArrayHandle>(
-                                &DepthSensorEnginePython::compute));
+  PySimsense.def(
+      "compute",
+      py::overload_cast<py::array_t<uint8_t>, py::array_t<uint8_t>, bool, uint32_t, uint32_t,
+                        uint32_t, uint32_t>(&DepthSensorEnginePython::compute),
+      py::arg("left_array"), py::arg("right_array"), py::arg("bbox") = false,
+      py::arg("bbox_start_x") = 0, py::arg("bbox_start_y") = 0, py::arg("bbox_width") = 0,
+      py::arg("bbox_height") = 0);
+  PySimsense.def("compute",
+                 py::overload_cast<CudaArrayHandle, CudaArrayHandle, bool, uint32_t, uint32_t,
+                                   uint32_t, uint32_t>(&DepthSensorEnginePython::compute),
+                 py::arg("left_cuda"), py::arg("right_cuda"), py::arg("bbox") = false,
+                 py::arg("bbox_start_x") = 0, py::arg("bbox_start_y") = 0,
+                 py::arg("bbox_width") = 0, py::arg("bbox_height") = 0);
   PySimsense.def("get_ndarray", &DepthSensorEnginePython::getNdarray);
-  // PySimsense.def("get_dl_tensor", &DepthSensorEnginePython::getDLTensorCapsule);
-  // PySimsense.def("get_point_cloud_dl_tensor",
-  //                &DepthSensorEnginePython::getPointCloudDLTensorCapsule);
-  // PySimsense.def("get_rgb_point_cloud_ndarray",
-  // &DepthSensorEnginePython::getRgbPointCloudNdarray);
-  // PySimsense.def("get_rgb_point_cloud_dl_tensor",
-  //                &DepthSensorEnginePython::getRgbPointCloudDLTensorCapsule);
   PySimsense.def("get_cuda", &DepthSensorEnginePython::getCuda);
   PySimsense.def("get_point_cloud_cuda", &DepthSensorEnginePython::getPointCloudCuda);
   PySimsense.def("get_point_cloud_ndarray", &DepthSensorEnginePython::getPointCloudNdarray);

@@ -196,10 +196,10 @@ class StereoDepthSensor:
         self._normal_mode()
         scene.update_render()
 
-    def compute_depth(self):
+    def compute_depth(self, bbox_start: tuple = None, bbox_size: tuple = None):
         left_cuda = self._cam_ir_l.get_picture_cuda("Color")
         right_cuda = self._cam_ir_r.get_picture_cuda("Color")
-        self._ss.compute(left_cuda, right_cuda)
+        self._ss.compute(left_cuda, right_cuda, bbox_start, bbox_size)
 
     def set_local_pose(self, pose: Pose):
         """
