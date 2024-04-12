@@ -61,13 +61,21 @@ class EntityWindow(Plugin):
 
                     elif isinstance(s, sapien.physx.PhysxCollisionShapeConvexMesh):
                         vs = sapien.render.RenderShapeTriangleMesh(
-                            s.vertices, s.triangles, np.zeros((0, 3)), green_mat
+                            s.vertices,
+                            s.triangles,
+                            np.zeros((0, 3)),
+                            np.zeros((0, 2)),
+                            green_mat,
                         )
                         vs.scale = s.scale
 
                     elif isinstance(s, sapien.physx.PhysxCollisionShapeTriangleMesh):
                         vs = sapien.render.RenderShapeTriangleMesh(
-                            s.vertices, s.triangles, np.zeros((0, 3)), red_mat
+                            s.vertices,
+                            s.triangles,
+                            np.zeros((0, 3)),
+                            np.zeros((0, 2)),
+                            red_mat,
                         )
                         vs.scale = s.scale
 
