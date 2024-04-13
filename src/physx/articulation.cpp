@@ -28,7 +28,6 @@ void PhysxArticulation::addLink(PhysxArticulationLinkComponent &link,
   auto pxlink = mPxArticulation->createLink(parent ? parent->getPxActor() : nullptr,
                                             PxTransform{PxIdentity});
   link.internalSetPxLink(pxlink);
-  // link.internalSetIndex(mLinks.size() - 1);
 }
 
 // remove link must only be called when PxArticulation is not added to scene
@@ -291,7 +290,7 @@ Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> PhysxArticulation::getQ
   Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> m;
   m.resize(getDof(), 2);
   uint32_t r = 0;
-  for (auto link : mLinks) {
+  for (auto link : getLinks()) {
     auto limit = link->getJoint()->getLimit();
     for (auto row : limit.rowwise()) {
       m.row(r++) = row;
