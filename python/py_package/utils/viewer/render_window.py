@@ -217,3 +217,6 @@ class RenderOptionsWindow(Plugin):
         if self.ui_window:
             return [self.ui_window]
         return []
+
+    def close(self):
+        self.reset()

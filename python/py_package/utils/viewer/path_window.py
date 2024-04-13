@@ -21,6 +21,8 @@ class PathWindow(Plugin):
         self._paths = []
         self._current_path_index = -1
         self.ui_window = None
+        self.file_chooser_load = None
+        self.file_chooser_save = None
         self._selected_point_index = -1
         self._curve = None
         self._curve_time = 0
@@ -363,3 +365,6 @@ class PathWindow(Plugin):
         if self.ui_window:
             return [self.ui_window]
         return []
+
+    def close(self):
+        self.reset()
