@@ -61,10 +61,9 @@ void main() {
   vec4 albedo;
   vec4 frm;
 
+  emission = materialBuffer.emission;
   if ((materialBuffer.textureMask & 16) != 0) {
-    emission = texture(emissionTexture, inUV * materialBuffer.textureTransforms[4].zw + materialBuffer.textureTransforms[4].xy);
-  } else {
-    emission = materialBuffer.emission;
+    emission.rgb *= texture(emissionTexture, inUV * materialBuffer.textureTransforms[4].zw + materialBuffer.textureTransforms[4].xy).rgb;
   }
 
   if ((materialBuffer.textureMask & 1) != 0) {
@@ -121,7 +120,7 @@ void main() {
   vec3 diffuseAlbedo = albedo.rgb * (1 - metallic);
   vec3 fresnel = specular * (1 - metallic) + albedo.rgb * metallic;
 
-  vec3 color = emission.rgb;
+  vec3 color = emission.rgb * emission.a;
 
   for (int i = 0; i < NUM_POINT_LIGHTS; i++) {
     vec3 pos = world2camera(vec4(sceneBuffer.pointLights[i].position.xyz, 1.f)).xyz;

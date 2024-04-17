@@ -101,7 +101,7 @@ void main() {
   vec3 emission = mat.emission.rgb;
   float strength = mat.emission.a;
   if (ti.emission >= 0) {
-    emission = texture(textures[nonuniformEXT(ti.emission)], uv * mat.textureTransforms[4].zw + mat.textureTransforms[4].xy).rgb;
+    emission *= texture(textures[nonuniformEXT(ti.emission)], uv * mat.textureTransforms[4].zw + mat.textureTransforms[4].xy).rgb;
   }
   emission *= strength;
 

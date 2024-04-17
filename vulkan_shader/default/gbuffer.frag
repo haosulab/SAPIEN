@@ -37,10 +37,9 @@ void main() {
   p1 /= p1.w;
   vec2 p1s = p1.xy / p1.z;
 
+  outEmission = materialBuffer.emission;
   if ((materialBuffer.textureMask & 16) != 0) {
-    outEmission = texture(emissionTexture, inUV * materialBuffer.textureTransforms[4].zw + materialBuffer.textureTransforms[4].xy);
-  } else {
-    outEmission = materialBuffer.emission;
+    outEmission.rgb *= texture(emissionTexture, inUV * materialBuffer.textureTransforms[4].zw + materialBuffer.textureTransforms[4].xy).rgb;
   }
 
   if ((materialBuffer.textureMask & 1) != 0) {

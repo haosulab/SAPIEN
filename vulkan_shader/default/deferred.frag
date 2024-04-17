@@ -69,7 +69,8 @@ void main() {
   vec3 diffuseAlbedo = albedo * (1 - metallic);
   vec3 fresnel = specular * (1 - metallic) + albedo * metallic;
 
-  vec3 color = texture(samplerEmission, inUV).rgb;
+  vec4 emission = texture(samplerEmission, inUV);
+  vec3 color = emission.rgb * emission.a;
 
   // point light
   for (int i = 0; i < NUM_POINT_LIGHT_SHADOWS; ++i) {
