@@ -2,7 +2,7 @@ if(TARGET physx5)
   return()
 endif()
 
-set(PHYSX_VERSION 105.1-physx-5.3.1)
+set(PHYSX_VERSION 105.1-physx-5.3.1.patch0)
 
 if (IS_DIRECTORY ${SAPIEN_PHYSX5_DIR})
   # Use provided PhysX5
@@ -16,20 +16,20 @@ else()
       FetchContent_Declare(
         physx5
         URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-checked.zip
-        URL_HASH MD5=941ca1b2f091cb60a74e830ec7213be5
+        URL_HASH MD5=8379bf7ba4d6a0866404fd8a11cc10c2
       )
     else ()
       FetchContent_Declare(
         physx5
         URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-release.zip
-        URL_HASH MD5=17a994c9a9c826cf439856a396331842
+        URL_HASH MD5=020222e5441b9ae2779dc05b1f04539c
       )
     endif ()
   elseif (WIN32)
     FetchContent_Declare(
       physx5
       URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/windows-release.zip
-      URL_HASH MD5=39933f6a529595db5cb53b5265c19661
+      URL_HASH MD5=77299ac291e17df438c090d565167d93
     )
   endif()
   FetchContent_MakeAvailable(physx5)
