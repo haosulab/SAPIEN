@@ -267,13 +267,7 @@ Generator<int> init_sapien(py::module &m) {
                // has stride
                strides = interface["strides"].cast<py::tuple>().cast<std::vector<int>>();
              } else {
-               // no stride
-               int acc = dtype.itemsize();
-               strides.push_back(acc);
-               for (uint32_t i = shape.size() - 1; i >= 1; --i) {
-                 acc *= shape.at(i);
-                 strides.push_back(acc);
-               }
+               strides = ShapeToStrides(shape, dtype.itemsize());
              }
 
              auto data = interface["data"].cast<py::tuple>();
