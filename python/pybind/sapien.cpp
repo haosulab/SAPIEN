@@ -258,14 +258,16 @@ Generator<int> init_sapien(py::module &m) {
       .def(py::init<>([](py::object obj) {
              auto interface = obj.attr("__cuda_array_interface__").cast<py::dict>();
 
-             auto shape = interface.attr("shape").cast<py::tuple>().cast<std::vector<int>>();
-             auto type = interface.attr("typestr").cast<std::string>();
+             auto shape = interface["shape"].cast<py::tuple>().cast<std::vector<int>>();
+             auto type = interface["typestr"].cast<std::string>();
              py::dtype dtype(type);
 
              std::vector<int> strides;
-             if (py::hasattr(obj, "stride") && !obj.is_none()) {
-               strides = interface.attr("strides").cast<py::tuple>().cast<std::vector<int>>();
+             if (interface.contains("strides") && !interface["strides"].is_none()) {
+               // has stride
+               strides = interface["strides"].cast<py::tuple>().cast<std::vector<int>>();
              } else {
+               // no stride
                int acc = dtype.itemsize();
                strides.push_back(acc);
                for (uint32_t i = shape.size() - 1; i >= 1; --i) {
@@ -274,7 +276,7 @@ Generator<int> init_sapien(py::module &m) {
                }
              }
 
-             auto data = interface.attr("data").cast<py::tuple>();
+             auto data = interface["data"].cast<py::tuple>();
              void *ptr = reinterpret_cast<void *>(data[0].cast<uintptr_t>());
 
              return CudaArrayHandle{.shape = shape,
