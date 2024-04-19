@@ -7,6 +7,17 @@ if TYPE_CHECKING:
     from . import viewer
 
 
+def copy_to_clipboard(content):
+    try:
+        import pyperclip
+
+        pyperclip.copy(content)
+    except ModuleNotFoundError:
+        print(
+            "copy to clipboard is only available when pyperclip is installed with [pip install pyperclip]"
+        )
+
+
 class Plugin:
     def init(self, v: viewer.Viewer):
         self.viewer = v

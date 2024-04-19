@@ -10,7 +10,7 @@ from transforms3d.quaternions import mat2quat
 from transforms3d.euler import quat2euler
 
 from .camera_control import ArcRotateCameraController, FPSCameraController
-from .plugin import Plugin
+from .plugin import Plugin, copy_to_clipboard
 
 
 class ControlWindow(Plugin):
@@ -207,9 +207,8 @@ class ControlWindow(Plugin):
         fovy = self.window.fovy
         near = self.window.near
         far = self.window.far
-        import pyperclip
 
-        pyperclip.copy(
+        copy_to_clipboard(
             f'camera = add_camera(name="", width={width}, height={height}, fovy={fovy:.3g}, near={near:.3g}, far={far:.3g})\n'
             f"camera.set_local_pose({sapien.Pose(p, q).__repr__()})"
         )

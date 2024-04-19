@@ -1,4 +1,4 @@
-from .plugin import Plugin
+from .plugin import Plugin, copy_to_clipboard
 from sapien import internal_renderer as R
 import sapien
 import numpy as np
@@ -121,10 +121,7 @@ class EntityWindow(Plugin):
         # TODO
 
     def copy_pose(self, _):
-        import pyperclip
-
-        if self.selected_entity is not None:
-            pyperclip.copy(str(self.selected_entity.pose))
+        copy_to_clipboard(str(self.selected_entity.pose))
 
     def disconnect(self, c):
         self.viewer.select_entity(None)

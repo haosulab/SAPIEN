@@ -1,4 +1,4 @@
-from .plugin import Plugin
+from .plugin import Plugin, copy_to_clipboard
 from sapien import internal_renderer as R
 import sapien
 
@@ -108,7 +108,9 @@ class ArticulationWindow(Plugin):
                     .Min(-1)
                     .Max(1)
                     .Value(j.drive_velocity_target)
-                    .Callback((lambda j: lambda p: j.set_drive_velocity_target(p.value))(j)),
+                    .Callback(
+                        (lambda j: lambda p: j.set_drive_velocity_target(p.value))(j)
+                    ),
                     R.UIInputFloat()
                     .Label("Damping")
                     .Id(str(i))
@@ -189,12 +191,10 @@ class ArticulationWindow(Plugin):
         self.ui_window.append(uijoints)
 
         def wrapper(art):
-            def copy_to_clipboard(_):
-                import pyperclip
+            def wrapped(_):
+                copy_to_clipboard(f"[{', '.join([str(x) for x in art.get_qpos()])}]")
 
-                pyperclip.copy(f"[{', '.join([str(x) for x in art.get_qpos()])}]")
-
-            return copy_to_clipboard
+            return wrapped
 
         self.ui_window.append(
             R.UIButton().Label("Copy Joint Positions").Callback(wrapper(art))
