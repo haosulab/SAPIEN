@@ -1,10 +1,10 @@
 import hashlib
-from typing import List
+from typing import List, Union
 import os
 import json
 
 
-def get_file_md5(files: str | List[str]):
+def get_file_md5(files: Union[str, List[str]]):
     if isinstance(files, str):
         files = [files]
     md5 = hashlib.md5()
@@ -14,7 +14,7 @@ def get_file_md5(files: str | List[str]):
     return md5.hexdigest()
 
 
-def file_exists(files: str | List[str]):
+def file_exists(files: Union[str, List[str]]):
     if isinstance(files, str):
         files = [files]
     return all(os.path.exists(f) for f in files)
