@@ -1,4 +1,4 @@
-name: TestWindowsBuild
+name: Build
 
 on:
   push:
