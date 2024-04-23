@@ -151,7 +151,7 @@ class ActorBuilder:
                     preprocess_mesh_file(r.filename), r.scale, r.material
                 )
                 if r.scale[0] * r.scale[1] * r.scale[2] < 0:
-                    shape.set_culling("front")
+                    shape.set_front_face("clockwise")
             else:
                 raise Exception(f"invalid visual shape type [{r.type}]")
 

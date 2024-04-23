@@ -52,7 +52,7 @@ void SapienRenderBodyComponent::onAddToScene(Scene &scene) {
   for (auto &shape : mRenderShapes) {
     auto &obj = s->addObject(*mNode, shape->getModel());
     obj.setTransform(shape->getLocalTransform());
-    obj.setCullMode(shape->getCulling());
+    obj.setFrontFace(shape->getFrontFace());
 
     uint64_t id = mRenderIdDisabled ? 0 : system->nextRenderId();
     shape->internalSetRenderId(id);

@@ -33,10 +33,6 @@ void main() {
 
   outPositionRaw = inPosition;
 
-  vec4 p1 = cameraBuffer.projectionMatrix * inPosition;
-  p1 /= p1.w;
-  vec2 p1s = p1.xy / p1.z;
-
   outEmission = materialBuffer.emission;
   if ((materialBuffer.textureMask & 16) != 0) {
     outEmission.rgb *= texture(emissionTexture, inUV * materialBuffer.textureTransforms[4].zw + materialBuffer.textureTransforms[4].xy).rgb;
@@ -78,4 +74,6 @@ void main() {
     vec3 normal = -normalize(cross(fdx.xyz, fdy.xyz));
     outNormal = vec4(normal, 0);
   }
+
+  outNormal.xyz = faceforward(outNormal.xyz, inPosition.xyz, outNormal.xyz);
 }

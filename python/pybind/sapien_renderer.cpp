@@ -260,6 +260,33 @@ template <> struct type_caster<vk::CullModeFlagBits> {
   }
 };
 
+template <> struct type_caster<vk::FrontFace> {
+  PYBIND11_TYPE_CASTER(vk::FrontFace, _("typing.Literal['counterclockwise', 'clockwise']"));
+
+  bool load(py::handle src, bool convert) {
+    std::string name = py::cast<std::string>(src);
+    if (name == "clockwise") {
+      value = vk::FrontFace::eClockwise;
+      return true;
+    } else if (name == "counterclockwise") {
+      value = vk::FrontFace::eCounterClockwise;
+      return true;
+    }
+    return false;
+  }
+
+  static py::handle cast(vk::FrontFace const &src, py::return_value_policy policy,
+                         py::handle parent) {
+    switch (src) {
+    case vk::FrontFace::eClockwise:
+      return py::str("clockwise").release();
+    case vk::FrontFace::eCounterClockwise:
+      return py::str("counterclockwise").release();
+    }
+    throw std::runtime_error("invalid front face");
+  }
+};
+
 template <> struct type_caster<SapienRenderTexture::FilterMode> {
   PYBIND11_TYPE_CASTER(SapienRenderTexture::FilterMode, _("typing.Literal['nearest', 'linear']"));
 
@@ -641,9 +668,9 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("get_local_pose", &RenderShape::getLocalPose)
       .def("set_local_pose", &RenderShape::setLocalPose, py::arg("pose"))
 
-      .def_property("culling", &RenderShape::getCulling, &RenderShape::setCulling)
-      .def("get_culling", &RenderShape::getCulling)
-      .def("set_culling", &RenderShape::setCulling, py::arg("culling"))
+      .def_property("front_face", &RenderShape::getFrontFace, &RenderShape::setFrontFace)
+      .def("get_front_face", &RenderShape::getFrontFace)
+      .def("set_front_face", &RenderShape::setFrontFace, py::arg("front_face"))
 
       .def_property_readonly("per_scene_id", &RenderShape::getRenderId)
       .def("get_per_scene_id", &RenderShape::getRenderId)

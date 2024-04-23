@@ -175,8 +175,6 @@ Generator<int> init_sapien(py::module &m) {
       .def("get_pose", &Entity::getPose)
       .def("set_pose", &Entity::setPose, py::arg("pose"))
 
-      .def("remove_from_scene", &Entity::removeFromScene)
-
       .def(
           "find_component_by_type",
           [](Entity &e, py::type type) {

@@ -105,6 +105,8 @@ void main() {
     outNormal = vec4(normal, 0);
   }
 
+  outNormal.xyz = faceforward(outNormal.xyz, inPosition.xyz, outNormal.xyz);
+
   outPositionRaw = inPosition;
 
   float specular = frm.x;

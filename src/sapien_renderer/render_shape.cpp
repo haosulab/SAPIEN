@@ -21,13 +21,13 @@ void RenderShape::setLocalPose(Pose const &pose) {
   mLocalPose = pose;
 }
 
-vk::CullModeFlagBits RenderShape::getCulling() const { return mCulling; }
-void RenderShape::setCulling(vk::CullModeFlagBits culling) {
+vk::FrontFace RenderShape::getFrontFace() const { return mFrontFace; }
+void RenderShape::setFrontFace(vk::FrontFace frontFace) {
   if (mParent) {
     throw std::runtime_error(
-        "failed to set culling: it cannot be modified once attached to component");
+        "failed to set front face: it cannot be modified once attached to component");
   }
-  mCulling = culling;
+  mFrontFace = frontFace;
 }
 
 Pose RenderShape::getLocalPose() const { return mLocalPose; }
@@ -379,7 +379,7 @@ AABB RenderShapeTriangleMesh::computeGlobalAABBTight() {
 
 std::shared_ptr<RenderShape> RenderShapePlane::clone() const {
   auto newShape = std::make_shared<RenderShapePlane>(getScale(), getMaterial());
-  newShape->setCulling(getCulling());
+  newShape->setFrontFace(getFrontFace());
   newShape->setName(getName());
   newShape->setLocalPose(getLocalPose());
   return newShape;
@@ -387,7 +387,7 @@ std::shared_ptr<RenderShape> RenderShapePlane::clone() const {
 
 std::shared_ptr<RenderShape> RenderShapeBox::clone() const {
   auto newShape = std::make_shared<RenderShapeBox>(getHalfLengths(), getMaterial());
-  newShape->setCulling(getCulling());
+  newShape->setFrontFace(getFrontFace());
   newShape->setName(getName());
   newShape->setLocalPose(getLocalPose());
   return newShape;
@@ -395,7 +395,7 @@ std::shared_ptr<RenderShape> RenderShapeBox::clone() const {
 
 std::shared_ptr<RenderShape> RenderShapeSphere::clone() const {
   auto newShape = std::make_shared<RenderShapeSphere>(getRadius(), getMaterial());
-  newShape->setCulling(getCulling());
+  newShape->setFrontFace(getFrontFace());
   newShape->setName(getName());
   newShape->setLocalPose(getLocalPose());
   return newShape;
@@ -404,7 +404,7 @@ std::shared_ptr<RenderShape> RenderShapeSphere::clone() const {
 std::shared_ptr<RenderShape> RenderShapeCapsule::clone() const {
   auto newShape =
       std::make_shared<RenderShapeCapsule>(getRadius(), getHalfLength(), getMaterial());
-  newShape->setCulling(getCulling());
+  newShape->setFrontFace(getFrontFace());
   newShape->setName(getName());
   newShape->setLocalPose(getLocalPose());
   return newShape;
@@ -413,7 +413,7 @@ std::shared_ptr<RenderShape> RenderShapeCapsule::clone() const {
 std::shared_ptr<RenderShape> RenderShapeCylinder::clone() const {
   auto newShape =
       std::make_shared<RenderShapeCylinder>(getRadius(), getHalfLength(), getMaterial());
-  newShape->setCulling(getCulling());
+  newShape->setFrontFace(getFrontFace());
   newShape->setName(getName());
   newShape->setLocalPose(getLocalPose());
   return newShape;
@@ -429,7 +429,7 @@ std::shared_ptr<RenderShape> RenderShapeTriangleMesh::clone() const {
   newShape->mFilename = mFilename;
   newShape->mMaterial = mMaterial;
 
-  newShape->setCulling(getCulling());
+  newShape->setFrontFace(getFrontFace());
   newShape->setName(getName());
   newShape->setLocalPose(getLocalPose());
   return newShape;
