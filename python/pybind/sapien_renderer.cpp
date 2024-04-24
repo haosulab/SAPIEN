@@ -706,11 +706,6 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("set_base_color_texture", &SapienRenderMaterial::setBaseColorTexture,
            py::arg("texture"))
 
-      // .def_property("diffuse_texture", &SapienRenderMaterial::getDiffuseTexture,
-      //               &SapienRenderMaterial::setDiffuseTexture)
-      // .def("get_diffuse_texture", &SapienRenderMaterial::getDiffuseTexture)
-      // .def("set_diffuse_texture", &SapienRenderMaterial::setDiffuseTexture, py::arg("texture"))
-
       .def_property("metallic_texture", &SapienRenderMaterial::getMetallicTexture,
                     &SapienRenderMaterial::setMetallicTexture)
       .def("get_metallic_texture", &SapienRenderMaterial::getMetallicTexture)
@@ -727,7 +722,10 @@ This function waits for any pending CUDA operations on cuda stream provided by :
                     &SapienRenderMaterial::setTransmissionTexture)
       .def("get_transmission_texture", &SapienRenderMaterial::getTransmissionTexture)
       .def("set_transmission_texture", &SapienRenderMaterial::setTransmissionTexture,
-           py::arg("texture"));
+           py::arg("texture"))
+      .def("__eq__", [](SapienRenderMaterial &self, SapienRenderMaterial &other) {
+        return self.getMaterial() == other.getMaterial();
+      });
 
   PyRenderShape.def_property("local_pose", &RenderShape::getLocalPose, &RenderShape::setLocalPose)
       .def("get_local_pose", &RenderShape::getLocalPose)
@@ -757,9 +755,9 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("get_vertices", &RenderShapePrimitive::getVertices)
       .def_property_readonly("triangles", &RenderShapePrimitive::getTriangles)
       .def("get_triangles", &RenderShapePrimitive::getTriangles)
-      .def_property_readonly("vertex_normals", &RenderShapePrimitive::getNormal)
+      .def_property_readonly("vertex_normal", &RenderShapePrimitive::getNormal)
       .def("get_vertex_normal", &RenderShapePrimitive::getNormal)
-      .def_property_readonly("vertex_uvs", &RenderShapePrimitive::getUV)
+      .def_property_readonly("vertex_uv", &RenderShapePrimitive::getUV)
       .def("get_vertex_uv", &RenderShapePrimitive::getUV);
 
   PyRenderShapePlane
@@ -813,7 +811,10 @@ This function waits for any pending CUDA operations on cuda stream provided by :
                              &RenderShapeTriangleMeshPart::getIndexBufferCudaArray)
       .def("get_cuda_triangles", &RenderShapeTriangleMeshPart::getIndexBufferCudaArray)
       .def_property_readonly("material", &RenderShapeTriangleMeshPart::getMaterial)
-      .def("get_material", &RenderShapeTriangleMeshPart::getMaterial);
+      .def("get_material", &RenderShapeTriangleMeshPart::getMaterial)
+      .def("__eq__", [](RenderShapeTriangleMeshPart &self, RenderShapeTriangleMeshPart &other) {
+        return self.getShape() == other.getShape();
+      });
 
   PyRenderShapeTriangleMesh
       .def(py::init<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &,

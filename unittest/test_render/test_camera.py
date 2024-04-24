@@ -141,3 +141,5 @@ class TestCamera(unittest.TestCase):
         self.assertTrue(np.allclose(model, gt_model))
         self.assertTrue(np.allclose(proj, gt_proj))
         self.assertTrue(np.allclose(extrinsic, gt_extrinsic))
+
+    # TODO: make more comprehensive

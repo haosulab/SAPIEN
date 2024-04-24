@@ -265,6 +265,7 @@ class RenderLightComponent(sapien.pysapien.Component):
     def global_pose(self) -> sapien.pysapien.Pose:
         ...
 class RenderMaterial:
+    __hash__: typing.ClassVar[None] = None
     base_color: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]
     base_color_texture: RenderTexture2D
     diffuse_texture = ...
@@ -280,6 +281,8 @@ class RenderMaterial:
     transmission: float
     transmission_roughness: float
     transmission_texture: RenderTexture2D
+    def __eq__(self, arg0: RenderMaterial) -> bool:
+        ...
     def __init__(self, emission: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)] = [0.0, 0.0, 0.0, 0.0], base_color: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)] = [1.0, 1.0, 1.0, 1.0], specular: float = 0.0, roughness: float = 1.0, metallic: float = 0.0, transmission: float = 0.0, ior: float = 1.4500000476837158, transmission_roughness: float = 0.0) -> None:
         ...
     def get_base_color(self) -> typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)]:
@@ -489,10 +492,10 @@ class RenderShapePrimitive(RenderShape):
     def triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
         ...
     @property
-    def vertex_normals(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def vertex_normal(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
         ...
     @property
-    def vertex_uvs(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def vertex_uv(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
         ...
     @property
     def vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
@@ -525,6 +528,9 @@ class RenderShapeTriangleMesh(RenderShape):
     def filename(self) -> str:
         ...
 class RenderShapeTriangleMeshPart:
+    __hash__: typing.ClassVar[None] = None
+    def __eq__(self, arg0: RenderShapeTriangleMeshPart) -> bool:
+        ...
     def get_cuda_triangles(self) -> sapien.pysapien.CudaArray:
         ...
     def get_cuda_vertices(self) -> sapien.pysapien.CudaArray:
