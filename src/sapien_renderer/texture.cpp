@@ -18,7 +18,7 @@ static SapienRenderTexture::FilterMode convertFilterMode(vk::Filter filter) {
 static vk::Filter convertFilterMode(SapienRenderTexture::FilterMode filterMode) {
   switch (filterMode) {
   case SapienRenderTexture::FilterMode::eNEAREST:
-    return vk::Filter::eLinear;
+    return vk::Filter::eNearest;
   case SapienRenderTexture::FilterMode::eLINEAR:
     return vk::Filter::eLinear;
   default:
@@ -123,8 +123,44 @@ int SapienRenderTexture::getMipmapLevels() const { return mTexture->getDescripti
 
 bool SapienRenderTexture::getIsSrgb() const { return mTexture->getDescription().srgb; }
 
+SapienRenderTexture2D::SapienRenderTexture2D(uint32_t width, uint32_t height, vk::Format format,
+                                             std::vector<char> const &rawData, uint32_t mipLevels,
+                                             FilterMode filterMode, AddressMode addressMode,
+                                             bool srgb) {
+  mEngine = SapienRenderEngine::Get();
+  vk::Filter vkf;
+  vk::SamplerAddressMode vka;
+  switch (filterMode) {
+  case FilterMode::eNEAREST:
+    vkf = vk::Filter::eNearest;
+    break;
+  case FilterMode::eLINEAR:
+    vkf = vk::Filter::eLinear;
+    break;
+  }
+
+  switch (addressMode) {
+  case AddressMode::eREPEAT:
+    vka = vk::SamplerAddressMode::eRepeat;
+    break;
+  case AddressMode::eBORDER:
+    vka = vk::SamplerAddressMode::eClampToBorder;
+    break;
+  case AddressMode::eEDGE:
+    vka = vk::SamplerAddressMode::eClampToEdge;
+    break;
+  case AddressMode::eMIRROR:
+    vka = vk::SamplerAddressMode::eMirroredRepeat;
+    break;
+  }
+
+  mTexture = mEngine->getContext()->getResourceManager()->CreateTextureFromRawData(
+      width, height, 1, format, rawData, 2, mipLevels, vkf, vkf, vka, vka, vka, srgb);
+}
+
 SapienRenderTexture2D::SapienRenderTexture2D(std::string_view filename, uint32_t mipLevels,
-                                             FilterMode filterMode, AddressMode addressMode) {
+                                             FilterMode filterMode, AddressMode addressMode,
+                                             bool srgb) {
   mEngine = SapienRenderEngine::Get();
   vk::Filter vkf;
   vk::SamplerAddressMode vka;
@@ -153,7 +189,7 @@ SapienRenderTexture2D::SapienRenderTexture2D(std::string_view filename, uint32_t
   }
 
   mTexture = mEngine->getContext()->getResourceManager()->CreateTextureFromFile(
-      {filename.begin(), filename.end()}, mipLevels, vkf, vkf, vka, vka, true);
+      {filename.begin(), filename.end()}, mipLevels, vkf, vkf, vka, vka, srgb);
   mTexture->loadAsync().get();
 }
 

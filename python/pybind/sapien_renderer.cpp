@@ -198,6 +198,47 @@ CreateSapienTexture(py::array array, int dim, vk::Format format, uint32_t mipLev
                                                mipLevels, filterMode, addressMode, srgb);
 }
 
+// TODO: merge with previous function
+static std::shared_ptr<SapienRenderTexture2D>
+CreateSapienTexture2D(py::array array, vk::Format format, uint32_t mipLevels,
+                      SapienRenderTexture::FilterMode filterMode,
+                      SapienRenderTexture::AddressMode addressMode, bool srgb) {
+
+  if (array.ndim() != 2 && array.ndim() != 3) {
+    throw std::runtime_error("invalid numpy array dimension");
+  }
+
+  py::dtype dtype(getFormatTypestr(format));
+  int channels = getFormatChannels(format);
+
+  if (array.ndim() == 2 && channels != 1) {
+    throw std::runtime_error("numpy array dimension is not compatible");
+  }
+  if (array.ndim() == 3 && channels != array.shape(2)) {
+    throw std::runtime_error("numpy array dimension is not compatible");
+  }
+
+  uint32_t width = array.shape(1);
+  uint32_t height = array.shape(0);
+
+  if (!(array.flags() & py::array::c_style)) {
+    throw std::runtime_error("array is not contiguous.");
+  }
+
+  if (!array.dtype().is(dtype)) {
+    throw std::runtime_error("array dtype [" + std::string(py::str(array.dtype())) +
+                             "] is incompatible with texture format [" +
+                             FormatToString.at(format) + "]. You may use [" +
+                             std::string(py::str(dtype)) + "] instead.");
+  }
+
+  char *data = reinterpret_cast<char *>(array.request().ptr);
+  std::vector<char> rawData = {data, data + array.nbytes()};
+
+  return std::make_shared<SapienRenderTexture2D>(width, height, format, rawData, mipLevels,
+                                                 filterMode, addressMode, srgb);
+}
+
 namespace pybind11::detail {
 
 template <> struct type_caster<vk::Format> {
@@ -562,11 +603,20 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("upload", &uploadSapienTexture, py::arg("data"));
 
   PyRenderTexture2D
+      .def(py::init(&CreateSapienTexture2D), py::arg("array"), py::arg("format"),
+           py::arg("mipmap_levels") = 1,
+           py::arg("filter_mode") = SapienRenderTexture::FilterMode::eLINEAR,
+           py::arg("address_mode") = SapienRenderTexture::AddressMode::eREPEAT,
+           py::arg("srgb") = false)
       .def(py::init<std::string, uint32_t, SapienRenderTexture::FilterMode,
-                    SapienRenderTexture::AddressMode>(),
+                    SapienRenderTexture::AddressMode, bool>(),
            py::arg("filename"), py::arg("mipmap_levels") = 1,
            py::arg("filter_mode") = SapienRenderTexture::FilterMode::eLINEAR,
-           py::arg("address_mode") = SapienRenderTexture::AddressMode::eREPEAT)
+           py::arg("address_mode") = SapienRenderTexture::AddressMode::eREPEAT,
+           py::arg("srgb") = true,
+           "Create texture from file. The srgb parameter only affects files in uint8 format; it "
+           "should be true for color textures (diffuse, emission) and false for others (normal, "
+           "roughness)")
       .def_property_readonly("width", &SapienRenderTexture2D::getWidth)
       .def("get_width", &SapienRenderTexture2D::getWidth)
       .def_property_readonly("height", &SapienRenderTexture2D::getHeight)
@@ -575,6 +625,7 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("get_channels", &SapienRenderTexture2D::getChannels)
       .def_property_readonly("mipmap_levels", &SapienRenderTexture2D::getMipmapLevels)
       .def("get_mipmap_levels", &SapienRenderTexture2D::getMipmapLevels)
+      .def_property_readonly("is_srgb", &SapienRenderTexture2D::getIsSrgb)
 
       .def_property_readonly("address_mode", &SapienRenderTexture2D::getAddressMode)
       .def("get_address_mode", &SapienRenderTexture2D::getAddressMode)

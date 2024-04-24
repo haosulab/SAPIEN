@@ -478,5 +478,126 @@ std::shared_ptr<PhysxConvexMesh> PhysxConvexMesh::CreateCylinder() {
   return c;
 }
 
+// static float computeMeshRadius(PxConvexMesh &mesh, PxVec3 cm) {
+//   float radius = FLT_MAX;
+//   for (uint32_t i = 0; i < mesh.getNbPolygons(); ++i) {
+//     PxHullPolygon polygon;
+//     mesh.getPolygonData(i, polygon);
+//     float dist = PxAbs(cm.dot(PxVec3(polygon.mPlane[0], polygon.mPlane[1], polygon.mPlane[2])) +
+//                        polygon.mPlane[3]);
+//     radius = PxMin(radius, dist);
+//     assert(PxVec3(polygon.mPlane[0], polygon.mPlane[1], polygon.mPlane[2]).magnitudeSquared() >
+//            0.999);
+//     assert(PxVec3(polygon.mPlane[0], polygon.mPlane[1], polygon.mPlane[2]).magnitudeSquared() <
+//            1.001);
+//   }
+//   return radius;
+// }
+
+// static PxVec3 ComputeInternalExtent(PxConvexMesh &mesh, float radius, PxVec3 cm) {
+//   auto bound = mesh.getLocalBounds();
+//   PxVec3 e = bound.maximum - bound.minimum;
+//   float r = radius / sqrtf(3.0f);
+//   const float epsilon = 1e-7f;
+
+//   const PxU32 largestExtent = PxLargestAxis(e);
+//   PxU32 e0 = PxGetNextIndex3(largestExtent);
+//   PxU32 e1 = PxGetNextIndex3(e0);
+//   if (e[e0] < e[e1])
+//     PxSwap<PxU32>(e0, e1);
+
+//   PxVec3 extents(FLT_MAX, FLT_MAX, FLT_MAX);
+
+//   // find the largest box along the largest extent, with given internal radius
+//   for (PxU32 i = 0; i < mesh.getNbPolygons(); i++) {
+//     PxHullPolygon poly;
+//     mesh.getPolygonData(i, poly);
+//     PxPlane plane;
+//     PxVec3 N = PxVec3(poly.mPlane[0], poly.mPlane[1], poly.mPlane[2]);
+//     float D = poly.mPlane[3];
+//     const float d = N[largestExtent];
+//     if ((-epsilon < d && d < epsilon))
+//       continue;
+
+//     const float numBase = -D - N.dot(cm);
+//     const float denBase = 1.0f / N[largestExtent];
+//     const float numn0 = r * N[e0];
+//     const float numn1 = r * N[e1];
+
+//     float num = numBase - numn0 - numn1;
+//     float ext = PxMax(fabsf(num * denBase), r);
+//     if (ext < extents[largestExtent])
+//       extents[largestExtent] = ext;
+
+//     num = numBase - numn0 + numn1;
+//     ext = PxMax(fabsf(num * denBase), r);
+//     if (ext < extents[largestExtent])
+//       extents[largestExtent] = ext;
+
+//     num = numBase + numn0 + numn1;
+//     ext = PxMax(fabsf(num * denBase), r);
+//     if (ext < extents[largestExtent])
+//       extents[largestExtent] = ext;
+
+//     num = numBase + numn0 - numn1;
+//     ext = PxMax(fabsf(num * denBase), r);
+//     if (ext < extents[largestExtent])
+//       extents[largestExtent] = ext;
+//   }
+
+//   // Refine the box along e0,e1
+//   for (PxU32 i = 0; i < mesh.getNbPolygons(); i++) {
+//     PxHullPolygon poly;
+//     mesh.getPolygonData(i, poly);
+//     PxVec3 N = PxVec3(poly.mPlane[0], poly.mPlane[1], poly.mPlane[2]);
+//     float D = poly.mPlane[3];
+
+//     const float denumAdd = N[e0] + N[e1];
+//     const float denumSub = N[e0] - N[e1];
+
+//     const float numBase = -D - N.dot(cm);
+//     const float numn0 = extents[largestExtent] * N[largestExtent];
+
+//     if (!(-epsilon < denumAdd && denumAdd < epsilon)) {
+//       float num = numBase - numn0;
+//       float ext = PxMax(fabsf(num / denumAdd), r);
+//       if (ext < extents[e0])
+//         extents[e0] = ext;
+
+//       num = numBase + numn0;
+//       ext = PxMax(fabsf(num / denumAdd), r);
+//       if (ext < extents[e0])
+//         extents[e0] = ext;
+//     }
+
+//     if (!(-epsilon < denumSub && denumSub < epsilon)) {
+//       float num = numBase - numn0;
+//       float ext = PxMax(fabsf(num / denumSub), r);
+//       if (ext < extents[e0])
+//         extents[e0] = ext;
+
+//       num = numBase + numn0;
+//       ext = PxMax(fabsf(num / denumSub), r);
+//       if (ext < extents[e0])
+//         extents[e0] = ext;
+//     }
+//   }
+//   extents[e1] = extents[e0];
+//   return extents;
+// }
+
+// std::vector<std::shared_ptr<PhysxConvexMesh>> PhysxConvexMesh::chopUp() {
+//   if (mMesh->isGpuCompatible()) {
+//     throw std::runtime_error("mesh is already gpu compatible");
+//   }
+
+//   float mass;
+//   PxMat33 inertia;
+//   PxVec3 cm;
+//   mMesh->getMassInformation(mass, inertia, cm);
+
+//   float radius = computeMeshRadius(*mMesh, cm);
+// }
+
 } // namespace physx
 } // namespace sapien

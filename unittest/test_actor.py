@@ -1,13 +1,12 @@
 import unittest
-import sapien.core as sapien
-from common import *
+import sapien
+from common import rand_pose, pose_equal
 import numpy as np
 
 
 class TestActor(unittest.TestCase):
     def test_build_box(self):
-        engine = sapien.Engine()
-        scene = engine.create_scene()
+        scene = sapien.Scene()
 
         builder = scene.create_actor_builder()
         pose = rand_pose()
@@ -20,7 +19,7 @@ class TestActor(unittest.TestCase):
         builder.add_box_collision(
             pose,
             half_size,
-            engine.create_physical_material(*mat),
+            sapien.physx.PhysxMaterial(*mat),
             density,
             pr,
             min_pr,
@@ -28,11 +27,11 @@ class TestActor(unittest.TestCase):
         )
         actor = builder.build()
 
-        shapes = actor.get_collision_shapes()
+        shapes = actor.find_component_by_type(
+            sapien.physx.PhysxRigidBaseComponent
+        ).get_collision_shapes()
         self.assertEqual(len(shapes), 1)
         shape = shapes[0]
-
-        self.assertEqual(shape.actor, actor)
 
         # physical material
         self.assertAlmostEqual(
@@ -48,15 +47,14 @@ class TestActor(unittest.TestCase):
         self.assertTrue(pose_equal(shape.get_local_pose(), pose))
         self.assertAlmostEqual(shape.patch_radius, pr, places=5)
         self.assertAlmostEqual(shape.min_patch_radius, min_pr, places=5)
-        self.assertEqual(shape.type, "box")
-        self.assertTrue(np.allclose(shape.geometry.half_size, half_size))
+        self.assertTrue(isinstance(shape, sapien.physx.PhysxCollisionShapeBox))
+        self.assertTrue(np.allclose(shape.half_size, half_size))
 
-        shape.set_collision_groups(3, 4, 5, 6)
+        shape.set_collision_groups([3, 4, 5, 6])
         self.assertEqual(shape.get_collision_groups(), [3, 4, 5, 6])
 
     def test_build_sphere(self):
-        engine = sapien.Engine()
-        scene = engine.create_scene()
+        scene = sapien.Scene()
 
         builder = scene.create_actor_builder()
         pose = rand_pose()
@@ -69,7 +67,7 @@ class TestActor(unittest.TestCase):
         builder.add_sphere_collision(
             pose,
             radius,
-            engine.create_physical_material(*mat),
+            sapien.physx.PhysxMaterial(*mat),
             density,
             pr,
             min_pr,
@@ -77,11 +75,11 @@ class TestActor(unittest.TestCase):
         )
         actor = builder.build()
 
-        shapes = actor.get_collision_shapes()
+        shapes = actor.find_component_by_type(
+            sapien.physx.PhysxRigidBaseComponent
+        ).get_collision_shapes()
         self.assertEqual(len(shapes), 1)
         shape = shapes[0]
-
-        self.assertEqual(shape.actor, actor)
 
         # physical material
         self.assertAlmostEqual(
@@ -97,15 +95,14 @@ class TestActor(unittest.TestCase):
         self.assertTrue(pose_equal(shape.get_local_pose(), pose))
         self.assertAlmostEqual(shape.patch_radius, pr, places=5)
         self.assertAlmostEqual(shape.min_patch_radius, min_pr, places=5)
-        self.assertAlmostEqual(shape.type, "sphere", places=5)
-        self.assertAlmostEqual(shape.geometry.radius, radius, places=5)
+        self.assertTrue(isinstance(shape, sapien.physx.PhysxCollisionShapeSphere))
+        self.assertAlmostEqual(shape.radius, radius, places=5)
 
-        shape.set_collision_groups(3, 4, 5, 6)
+        shape.set_collision_groups([3, 4, 5, 6])
         self.assertEqual(shape.get_collision_groups(), [3, 4, 5, 6])
 
-    def test_build_sphere(self):
-        engine = sapien.Engine()
-        scene = engine.create_scene()
+    def test_build_capsule(self):
+        scene = sapien.Scene()
 
         builder = scene.create_actor_builder()
         pose = rand_pose()
@@ -120,7 +117,7 @@ class TestActor(unittest.TestCase):
             pose,
             radius,
             half_length,
-            engine.create_physical_material(*mat),
+            sapien.physx.PhysxMaterial(*mat),
             density,
             pr,
             min_pr,
@@ -128,11 +125,11 @@ class TestActor(unittest.TestCase):
         )
         actor = builder.build()
 
-        shapes = actor.get_collision_shapes()
+        shapes = actor.find_component_by_type(
+            sapien.physx.PhysxRigidBaseComponent
+        ).get_collision_shapes()
         self.assertEqual(len(shapes), 1)
         shape = shapes[0]
-
-        self.assertEqual(shape.actor, actor)
 
         # physical material
         self.assertAlmostEqual(
@@ -148,16 +145,15 @@ class TestActor(unittest.TestCase):
         self.assertTrue(pose_equal(shape.get_local_pose(), pose))
         self.assertAlmostEqual(shape.patch_radius, pr, places=5)
         self.assertAlmostEqual(shape.min_patch_radius, min_pr, places=5)
-        self.assertEqual(shape.type, "capsule")
-        self.assertAlmostEqual(shape.geometry.radius, radius, places=5)
-        self.assertAlmostEqual(shape.geometry.half_length, half_length, places=5)
+        self.assertTrue(isinstance(shape, sapien.physx.PhysxCollisionShapeCapsule))
+        self.assertAlmostEqual(shape.radius, radius, places=5)
+        self.assertAlmostEqual(shape.half_length, half_length, places=5)
 
-        shape.set_collision_groups(3, 4, 5, 6)
+        shape.set_collision_groups([3, 4, 5, 6])
         self.assertEqual(shape.get_collision_groups(), [3, 4, 5, 6])
 
     def test_build_multiple(self):
-        engine = sapien.Engine()
-        scene = engine.create_scene()
+        scene = sapien.Scene()
 
         builder = scene.create_actor_builder()
 
@@ -172,7 +168,7 @@ class TestActor(unittest.TestCase):
         builder.add_box_collision(
             pose,
             half_size,
-            engine.create_physical_material(*mat),
+            sapien.physx.PhysxMaterial(*mat),
             density,
             pr,
             min_pr,
@@ -189,7 +185,7 @@ class TestActor(unittest.TestCase):
         builder.add_sphere_collision(
             pose,
             radius,
-            engine.create_physical_material(*mat),
+            sapien.physx.PhysxMaterial(*mat),
             density,
             pr,
             min_pr,
@@ -208,7 +204,7 @@ class TestActor(unittest.TestCase):
             pose,
             radius,
             half_length,
-            engine.create_physical_material(*mat),
+            sapien.physx.PhysxMaterial(*mat),
             density,
             pr,
             min_pr,
@@ -217,5 +213,7 @@ class TestActor(unittest.TestCase):
 
         actor = builder.build()
 
-        shapes = actor.get_collision_shapes()
+        shapes = actor.find_component_by_type(
+            sapien.physx.PhysxRigidBaseComponent
+        ).get_collision_shapes()
         self.assertEqual(len(shapes), 3)

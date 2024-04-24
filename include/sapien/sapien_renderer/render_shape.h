@@ -67,8 +67,8 @@ public:
   void setName(std::string const &name) { mName = name; }
   std::string getName() const { return mName; }
 
-  vk::CullModeFlagBits getCulling() const;
-  void setCulling(vk::CullModeFlagBits);
+  vk::FrontFace getFrontFace() const;
+  void setFrontFace(vk::FrontFace);
 
   virtual std::vector<std::shared_ptr<RenderShapeTriangleMeshPart>> getParts() {
     return {std::make_shared<RenderShapeTriangleMeshPart>(mModel->getShapes().at(0))};
@@ -101,7 +101,7 @@ protected:
   // this corresponds to the actual scale in the renderer
   Vec3 mScale{1.f};
 
-  vk::CullModeFlagBits mCulling{vk::CullModeFlagBits::eBack};
+  vk::FrontFace mFrontFace{vk::FrontFace::eCounterClockwise};
 
   SapienRenderBodyComponent *mParent{nullptr};
   svulkan2::scene::Object *mObject{nullptr};

@@ -281,7 +281,7 @@ Generator<int> init_sapien(py::module &m) {
       .def_readonly("shape", &CudaArrayHandle::shape)
       .def_readonly("strides", &CudaArrayHandle::strides)
       .def_readonly("cuda_id", &CudaArrayHandle::cudaId)
-      .def_readonly("typstr", &CudaArrayHandle::type)
+      .def_readonly("typestr", &CudaArrayHandle::type)
       .def_property_readonly(
           "ptr", [](CudaArrayHandle &array) { return reinterpret_cast<intptr_t>(array.ptr); })
       .def_property_readonly(

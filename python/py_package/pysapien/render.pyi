@@ -674,8 +674,14 @@ class RenderTexture:
     def width(self) -> int:
         ...
 class RenderTexture2D:
-    def __init__(self, filename: str, mipmap_levels: int = 1, filter_mode: typing.Literal['nearest', 'linear'] = 'linear', address_mode: typing.Literal['repeat', 'border', 'edge', 'mirror'] = 'repeat') -> None:
+    @typing.overload
+    def __init__(self, array: numpy.ndarray[typing.Any, numpy.dtype[typing.Any]] | list | tuple, format: str, mipmap_levels: int = 1, filter_mode: typing.Literal['nearest', 'linear'] = 'linear', address_mode: typing.Literal['repeat', 'border', 'edge', 'mirror'] = 'repeat', srgb: bool = False) -> None:
         ...
+    @typing.overload
+    def __init__(self, filename: str, mipmap_levels: int = 1, filter_mode: typing.Literal['nearest', 'linear'] = 'linear', address_mode: typing.Literal['repeat', 'border', 'edge', 'mirror'] = 'repeat', srgb: bool = True) -> None:
+        """
+        Create texture from file. The srgb parameter only affects files in uint8 format; it should be true for color textures (diffuse, emission) and false for others (normal, roughness)
+        """
     def download(self) -> numpy.ndarray[typing.Any, numpy.dtype[typing.Any]]:
         ...
     def get_address_mode(self) -> typing.Literal['repeat', 'border', 'edge', 'mirror']:
@@ -713,6 +719,9 @@ class RenderTexture2D:
         ...
     @property
     def height(self) -> int:
+        ...
+    @property
+    def is_srgb(self) -> bool:
         ...
     @property
     def mipmap_levels(self) -> int:

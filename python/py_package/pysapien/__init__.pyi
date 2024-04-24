@@ -69,7 +69,7 @@ class CudaArray:
     def strides(self) -> list[int]:
         ...
     @property
-    def typstr(self) -> str:
+    def typestr(self) -> str:
         ...
 class Device:
     def __init__(self, alias: str) -> None:
@@ -120,10 +120,6 @@ class Entity:
         ...
     def remove_component(self, component: Component) -> None:
         ...
-    @typing.overload
-    def remove_from_scene(self) -> None:
-        ...
-    @typing.overload
     def remove_from_scene(self) -> None:
         ...
     def set_name(self, name: str) -> None:

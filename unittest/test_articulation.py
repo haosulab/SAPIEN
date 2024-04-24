@@ -1,15 +1,13 @@
 import unittest
-import sapien.core as sapien
+import sapien
 import numpy as np
 import os
 
 
 class TestArticulation(unittest.TestCase):
     def test_drive(self):
-        engine = sapien.Engine()
-        renderer = sapien.SapienRenderer(True)
-        engine.set_renderer(renderer)
-        scene = engine.create_scene()
+        scene = sapien.Scene()
+
         loader = scene.create_urdf_loader()
         robot = loader.load(os.path.join(os.path.dirname(__file__), "movo_simple.urdf"))
 
@@ -60,12 +58,8 @@ class TestArticulation(unittest.TestCase):
         for j, v in zip(robot.get_active_joints(), q):
             self.assertTrue(np.allclose(j.get_drive_target(), v))
 
-
     def test_urdf_loader(self):
-        engine = sapien.Engine()
-        renderer = sapien.SapienRenderer(True)
-        engine.set_renderer(renderer)
-        scene = engine.create_scene()
+        scene = sapien.Scene()
         loader = scene.create_urdf_loader()
         robot = loader.load(os.path.join(os.path.dirname(__file__), "movo_simple.urdf"))
 
@@ -80,10 +74,6 @@ class TestArticulation(unittest.TestCase):
         q = [0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.4, 0.5]
         robot.set_qf(q)
         self.assertTrue(np.allclose(robot.get_qf(), q))
-
-        q = [0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.4, 0.5]
-        robot.set_qacc(q)
-        self.assertTrue(np.allclose(robot.get_qacc(), q))
 
         self.assertTrue(
             np.allclose(
