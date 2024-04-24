@@ -72,11 +72,11 @@ std::shared_ptr<SapienRenderTexture2D> SapienRenderMaterial::getEmissionTexture(
   return tex ? std::make_shared<SapienRenderTexture2D>(tex) : nullptr;
 }
 
-void SapienRenderMaterial::setDiffuseTexture(std::shared_ptr<SapienRenderTexture2D> texture) {
-  mMaterial->setDiffuseTexture(texture ? texture->getTexture() : nullptr);
+void SapienRenderMaterial::setBaseColorTexture(std::shared_ptr<SapienRenderTexture2D> texture) {
+  mMaterial->setBaseColorTexture(texture ? texture->getTexture() : nullptr);
 }
-std::shared_ptr<SapienRenderTexture2D> SapienRenderMaterial::getDiffuseTexture() const {
-  auto tex = mMaterial->getDiffuseTexture();
+std::shared_ptr<SapienRenderTexture2D> SapienRenderMaterial::getBaseColorTexture() const {
+  auto tex = mMaterial->getBaseColorTexture();
   return tex ? std::make_shared<SapienRenderTexture2D>(tex) : nullptr;
 }
 

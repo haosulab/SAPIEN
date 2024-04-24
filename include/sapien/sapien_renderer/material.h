@@ -33,8 +33,8 @@ public:
 
   void setEmissionTexture(std::shared_ptr<SapienRenderTexture2D> texture);
   [[nodiscard]] std::shared_ptr<SapienRenderTexture2D> getEmissionTexture() const;
-  void setDiffuseTexture(std::shared_ptr<SapienRenderTexture2D> texture);
-  [[nodiscard]] std::shared_ptr<SapienRenderTexture2D> getDiffuseTexture() const;
+  void setBaseColorTexture(std::shared_ptr<SapienRenderTexture2D> texture);
+  [[nodiscard]] std::shared_ptr<SapienRenderTexture2D> getBaseColorTexture() const;
   void setRoughnessTexture(std::shared_ptr<SapienRenderTexture2D> texture);
   [[nodiscard]] std::shared_ptr<SapienRenderTexture2D> getRoughnessTexture() const;
   void setMetallicTexture(std::shared_ptr<SapienRenderTexture2D> texture);

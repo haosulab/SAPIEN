@@ -600,7 +600,10 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("get_format", &SapienRenderTexture::getFormat)
       .def_property_readonly("is_srgb", &SapienRenderTexture::getIsSrgb)
       .def("download", &downloadSapienTexture)
-      .def("upload", &uploadSapienTexture, py::arg("data"));
+      .def("upload", &uploadSapienTexture, py::arg("data"))
+      .def("__eq__", [](SapienRenderTexture const &self, SapienRenderTexture const &other) {
+        return self.getTexture() == other.getTexture();
+      });
 
   PyRenderTexture2D
       .def(py::init(&CreateSapienTexture2D), py::arg("array"), py::arg("format"),
@@ -636,7 +639,10 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def_property_readonly("format", &SapienRenderTexture2D::getFormat)
       .def("get_format", &SapienRenderTexture2D::getFormat)
       .def("download", &downloadSapienTexture2D)
-      .def("upload", &uploadSapienTexture2D, py::arg("data"));
+      .def("upload", &uploadSapienTexture2D, py::arg("data"))
+      .def("__eq__", [](SapienRenderTexture2D const &self, SapienRenderTexture2D const &other) {
+        return self.getTexture() == other.getTexture();
+      });
 
   PyRenderCubemap.def(py::init<std::string const &>(), py::arg("filename"))
       .def(py::init<std::string const &, std::string const &, std::string const &,
@@ -690,13 +696,21 @@ This function waits for any pending CUDA operations on cuda stream provided by :
            py::arg("roughness"))
 
       .def_property("emission_texture", &SapienRenderMaterial::getEmissionTexture,
-                    &SapienRenderMaterial::setDiffuseTexture)
+                    &SapienRenderMaterial::setEmissionTexture)
       .def("get_emission_texture", &SapienRenderMaterial::getEmissionTexture)
-      .def("set_emission_texture", &SapienRenderMaterial::setDiffuseTexture, py::arg("texture"))
-      .def_property("diffuse_texture", &SapienRenderMaterial::getDiffuseTexture,
-                    &SapienRenderMaterial::setDiffuseTexture)
-      .def("get_diffuse_texture", &SapienRenderMaterial::getDiffuseTexture)
-      .def("set_diffuse_texture", &SapienRenderMaterial::setDiffuseTexture, py::arg("texture"))
+      .def("set_emission_texture", &SapienRenderMaterial::setEmissionTexture, py::arg("texture"))
+
+      .def_property("base_color_texture", &SapienRenderMaterial::getBaseColorTexture,
+                    &SapienRenderMaterial::setBaseColorTexture)
+      .def("get_base_color_texture", &SapienRenderMaterial::getBaseColorTexture)
+      .def("set_base_color_texture", &SapienRenderMaterial::setBaseColorTexture,
+           py::arg("texture"))
+
+      // .def_property("diffuse_texture", &SapienRenderMaterial::getDiffuseTexture,
+      //               &SapienRenderMaterial::setDiffuseTexture)
+      // .def("get_diffuse_texture", &SapienRenderMaterial::getDiffuseTexture)
+      // .def("set_diffuse_texture", &SapienRenderMaterial::setDiffuseTexture, py::arg("texture"))
+
       .def_property("metallic_texture", &SapienRenderMaterial::getMetallicTexture,
                     &SapienRenderMaterial::setMetallicTexture)
       .def("get_metallic_texture", &SapienRenderMaterial::getMetallicTexture)
@@ -706,9 +720,9 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("get_roughness_texture", &SapienRenderMaterial::getRoughnessTexture)
       .def("set_roughness_texture", &SapienRenderMaterial::setRoughnessTexture, py::arg("texture"))
       .def_property("normal_texture", &SapienRenderMaterial::getNormalTexture,
-                    &SapienRenderMaterial::setDiffuseTexture)
+                    &SapienRenderMaterial::setNormalTexture)
       .def("get_normal_texture", &SapienRenderMaterial::getNormalTexture)
-      .def("set_normal_texture", &SapienRenderMaterial::setDiffuseTexture, py::arg("texture"))
+      .def("set_normal_texture", &SapienRenderMaterial::setNormalTexture, py::arg("texture"))
       .def_property("transmission_texture", &SapienRenderMaterial::getTransmissionTexture,
                     &SapienRenderMaterial::setTransmissionTexture)
       .def("get_transmission_texture", &SapienRenderMaterial::getTransmissionTexture)
