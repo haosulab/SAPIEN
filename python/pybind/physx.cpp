@@ -679,11 +679,11 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_angular_damping", &PhysxRigidBodyComponent::getAngularDamping)
       .def("set_angular_damping", &PhysxRigidBodyComponent::setAngularDamping, py::arg("damping"))
 
-      .def_property("max_depenetraion_velocity",
+      .def_property("max_depenetration_velocity",
                     &PhysxRigidBodyComponent::getMaxDepenetrationVelocity,
                     &PhysxRigidBodyComponent::setMaxDepenetrationVelocity)
-      .def("get_max_depenetraion_velocity", &PhysxRigidBodyComponent::getMaxDepenetrationVelocity)
-      .def("set_max_depenetraion_velocity", &PhysxRigidBodyComponent::setMaxDepenetrationVelocity,
+      .def("get_max_depenetration_velocity", &PhysxRigidBodyComponent::getMaxDepenetrationVelocity)
+      .def("set_max_depenetration_velocity", &PhysxRigidBodyComponent::setMaxDepenetrationVelocity,
            py::arg("velocity"))
 
       .def_property("max_contact_impulse", &PhysxRigidBodyComponent::getMaxContactImpulse,
@@ -974,6 +974,23 @@ Example:
       .def("get_pose", &PhysxArticulation::getRootPose)
       .def("compute_passive_force", &PhysxArticulation::computePassiveForce,
            py::arg("gravity") = true, py::arg("coriolis_and_centrifugal") = true)
+
+      .def_property("solver_position_iterations", &PhysxArticulation::getSolverPositionIterations,
+                    &PhysxArticulation::setSolverPositionIterations)
+      .def("get_solver_position_iterations", &PhysxArticulation::getSolverPositionIterations)
+      .def("set_solver_position_iterations", &PhysxArticulation::setSolverPositionIterations,
+           py::arg("count"))
+
+      .def_property("solver_velocity_iterations", &PhysxArticulation::getSolverVelocityIterations,
+                    &PhysxArticulation::setSolverVelocityIterations)
+      .def("get_solver_velocity_iterations", &PhysxArticulation::getSolverVelocityIterations)
+      .def("set_solver_velocity_iterations", &PhysxArticulation::setSolverVelocityIterations,
+           py::arg("count"))
+
+      .def_property("sleep_threshold", &PhysxArticulation::getSleepThreshold,
+                    &PhysxArticulation::setSleepThreshold)
+      .def("get_sleep_threshold", &PhysxArticulation::getSleepThreshold)
+      .def("set_sleep_threshold", &PhysxArticulation::setSleepThreshold, py::arg("threshold"))
 
       .def("create_fixed_tendon", &PhysxArticulation::createFixedTendon, py::arg("link_chain"),
            py::arg("coefficients"), py::arg("recip_coefficients"), py::arg("rest_length") = 0,

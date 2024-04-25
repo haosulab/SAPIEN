@@ -274,6 +274,10 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
 
   auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
+  setIsSceneQuery(true);
+  setCollisionGroups({1, 1, 0, 0});
+  setContactOffset(PhysxDefault::getShapeConfig().contactOffset);
+  setRestOffset(PhysxDefault::getShapeConfig().restOffset);
 }
 
 //////////////////// end collision shape constructor ////////////////////

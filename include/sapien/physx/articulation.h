@@ -58,6 +58,13 @@ public:
   std::vector<std::shared_ptr<PhysxArticulationJoint>> getJoints() const;
   std::vector<std::shared_ptr<PhysxArticulationJoint>> getActiveJoints() const;
 
+  void setSolverPositionIterations(uint32_t count);
+  void setSolverVelocityIterations(uint32_t count);
+  void setSleepThreshold(float threshold);
+  uint32_t getSolverPositionIterations() const;
+  uint32_t getSolverVelocityIterations() const;
+  float getSleepThreshold() const;
+
   void internalNotifyAddToScene(PhysxArticulationLinkComponent *link, Scene &scene);
   void internalNotifyRemoveFromScene(PhysxArticulationLinkComponent *link, Scene &scene);
   void internalEnsureRemovedFromScene();

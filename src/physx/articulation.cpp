@@ -26,6 +26,30 @@ PhysxArticulation::PhysxArticulation() {
   mPxArticulation->setSleepThreshold(PhysxDefault::getBodyConfig().sleepThreshold);
 }
 
+void PhysxArticulation::setSolverPositionIterations(uint32_t count) {
+  getPxArticulation()->setSolverIterationCounts(count, getSolverVelocityIterations());
+}
+void PhysxArticulation::setSolverVelocityIterations(uint32_t count) {
+  getPxArticulation()->setSolverIterationCounts(getSolverPositionIterations(), count);
+}
+void PhysxArticulation::setSleepThreshold(float threshold) {
+  getPxArticulation()->setSleepThreshold(threshold);
+}
+
+uint32_t PhysxArticulation::getSolverPositionIterations() const {
+  uint32_t pos, vel;
+  getPxArticulation()->getSolverIterationCounts(pos, vel);
+  return pos;
+}
+uint32_t PhysxArticulation::getSolverVelocityIterations() const {
+  uint32_t pos, vel;
+  getPxArticulation()->getSolverIterationCounts(pos, vel);
+  return vel;
+}
+float PhysxArticulation::getSleepThreshold() const {
+  return getPxArticulation()->getSleepThreshold();
+}
+
 // add link must only be called when PxArticulation is not added to scene
 void PhysxArticulation::addLink(PhysxArticulationLinkComponent &link,
                                 PhysxArticulationLinkComponent *parent) {

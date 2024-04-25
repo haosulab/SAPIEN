@@ -47,18 +47,25 @@ struct MassProperties {
             .xz = xz + other.xz};
   }
 
-  MassProperties scaleSize(float s) const {
-    float s3 = s * s * s;
-    float s5 = s * s * s3;
+  MassProperties scaleSize(Vec3 s) const {
+    float s3 = s.x * s.y * s.z;
+    Vec3 sxyz2 = (0.5 * (xx + yy + zz) - Vec3(xx, yy, zz)) * s * s;
+    float xx_ = sxyz2.y + sxyz2.z;
+    float yy_ = sxyz2.z + sxyz2.x;
+    float zz_ = sxyz2.x + sxyz2.y;
+    float xy_ = xy * s.x * s.y;
+    float xz_ = xz * s.x * s.z;
+    float yz_ = yz * s.y * s.z;
+
     return {
         .mass = mass * s3,
-        .cm = cm * s,
-        .xx = xx * s5,
-        .yy = yy * s5,
-        .zz = zz * s5,
-        .xy = xy * s5,
-        .yz = yz * s5,
-        .xz = xz * s5,
+        .cm = cm.cwiseProduct(Eigen::Vector3f{s.x, s.y, s.z}),
+        .xx = xx_ * s3,
+        .yy = yy_ * s3,
+        .zz = zz_ * s3,
+        .xy = xy_ * s3,
+        .yz = yz_ * s3,
+        .xz = xz_ * s3,
     };
   }
 
@@ -77,9 +84,14 @@ struct MassProperties {
 
   auto decompose() const {
     auto inertia = getCMInertia();
+
     Eigen::SelfAdjointEigenSolver<decltype(inertia)> solver(inertia);
     Eigen::Vector3f vs = solver.eigenvalues();
-    Eigen::Quaternionf quat(solver.eigenvectors());
+    Eigen::Matrix3f v = solver.eigenvectors();
+    if (v.determinant() < 0) {
+      v = -v;
+    }
+    Eigen::Quaternionf quat = Eigen::Quaternionf(v).normalized();
     return std::tuple{
         mass,
         Pose(Vec3(cm.x(), cm.y(), cm.z()), Quat(quat.w(), quat.x(), quat.y(), quat.z())),
@@ -150,8 +162,8 @@ struct MassProperties {
 
   static inline MassProperties FromCylinder(float r, float halfHeight) {
     float mass = std::numbers::pi_v<float> * r * r * halfHeight * 2.f;
-    float Iy = 0.5f * mass * r * r;
-    float Ix = (1.f / 12.f) * mass * (3.f * r * r + 4.f * halfHeight * halfHeight);
+    float Iy = (1.f / 12.f) * mass * (3.f * r * r + 4.f * halfHeight * halfHeight);
+    float Ix = 0.5f * mass * r * r;
     return {
         .mass = mass,
         .cm = {0.f, 0.f, 0.f},

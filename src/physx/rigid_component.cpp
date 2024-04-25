@@ -143,13 +143,13 @@ void PhysxRigidDynamicComponent::setKinematicTarget(Pose const &pose) {
 
 Pose PhysxRigidDynamicComponent::getKinematicTarget() const {
   if (!isKinematic()) {
-    throw std::runtime_error("failed to set kinematic target: actor is not kinematic");
+    throw std::runtime_error("failed to get kinematic target: actor is not kinematic");
   }
   PxTransform target;
   if (getPxActor()->getKinematicTarget(target)) {
     return PxTransformToPose(target);
   }
-  throw std::runtime_error("failed to set kinematic target: target not set");
+  throw std::runtime_error("failed to get kinematic target: target not set");
 }
 
 void PhysxRigidDynamicComponent::setKinematic(bool kinematic) {
