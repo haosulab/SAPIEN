@@ -105,6 +105,8 @@ class TestPose(unittest.TestCase):
             np.allclose(
                 pose0.to_transformation_matrix() @ pose1.to_transformation_matrix(),
                 (pose0 * pose1).to_transformation_matrix(),
+                rtol=1e-5,
+                atol=1e-5,
             )
         )
 

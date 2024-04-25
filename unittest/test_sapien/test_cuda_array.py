@@ -8,8 +8,6 @@ class TestCudaArray(unittest.TestCase):
 
         tensor = torch.tensor([[0, 1, 2], [2, 3, 4]]).float().cuda()
         array = sapien.CudaArray(tensor)
-        print(array.__cuda_array_interface__)
-        print(tensor.__cuda_array_interface__)
 
         self.assertEqual(
             array.typestr,
