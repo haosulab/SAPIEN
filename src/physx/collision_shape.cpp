@@ -92,6 +92,14 @@ std::shared_ptr<PhysxMaterial> PhysxCollisionShape::getPhysicalMaterial() const 
   return mPhysicalMaterial;
 }
 
+void PhysxCollisionShape::setDefaultProperties() {
+  mPxShape->userData = this;
+  setIsSceneQuery(true);
+  setCollisionGroups({1, 1, 0, 0});
+  setContactOffset(PhysxDefault::getShapeConfig().contactOffset);
+  setRestOffset(PhysxDefault::getShapeConfig().restOffset);
+}
+
 PhysxCollisionShape::~PhysxCollisionShape() {
   if (mPxShape) {
     mPxShape->userData = nullptr;
@@ -119,9 +127,7 @@ PhysxCollisionShapePlane::PhysxCollisionShapePlane(std::shared_ptr<PhysxMaterial
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxPlaneGeometry(),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
+  setDefaultProperties();
 }
 
 PhysxCollisionShapeBox::PhysxCollisionShapeBox(Vec3 halfLengths,
@@ -130,9 +136,7 @@ PhysxCollisionShapeBox::PhysxCollisionShapeBox(Vec3 halfLengths,
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxBoxGeometry(Vec3ToPxVec3(halfLengths)),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
+  setDefaultProperties();
 }
 
 PhysxCollisionShapeCapsule::PhysxCollisionShapeCapsule(float radius, float halfLength,
@@ -141,9 +145,7 @@ PhysxCollisionShapeCapsule::PhysxCollisionShapeCapsule(float radius, float halfL
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxCapsuleGeometry(radius, halfLength),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
+  setDefaultProperties();
 }
 
 PhysxCollisionShapeCylinder::PhysxCollisionShapeCylinder(float radius, float halfLength,
@@ -158,9 +160,8 @@ PhysxCollisionShapeCylinder::PhysxCollisionShapeCylinder(float radius, float hal
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxConvexMeshGeometry(mMesh->getPxMesh(), PxMeshScale({halfLength, radius, radius})),
       *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
+
+  setDefaultProperties();
 }
 
 PhysxCollisionShapeSphere::PhysxCollisionShapeSphere(float radius,
@@ -169,9 +170,7 @@ PhysxCollisionShapeSphere::PhysxCollisionShapeSphere(float radius,
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mPxShape = mEngine->getPxPhysics()->createShape(PxSphereGeometry(radius),
                                                   *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
+  setDefaultProperties();
 }
 
 PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
@@ -183,12 +182,11 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxConvexMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
       *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
+
+  setDefaultProperties();
 
   auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
 }
 
 PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
@@ -199,12 +197,10 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxConvexMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
       *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
+  setDefaultProperties();
 
   auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
 }
 
 PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
@@ -216,13 +212,10 @@ PhysxCollisionShapeConvexMesh::PhysxCollisionShapeConvexMesh(
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxConvexMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
       *getPhysicalMaterial()->getPxMaterial(), true);
-
-  mPxShape->userData = this;
+  setDefaultProperties();
 
   auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
 }
 
 std::vector<std::shared_ptr<PhysxCollisionShapeConvexMesh>>
@@ -245,12 +238,10 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxTriangleMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
       *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
+  setDefaultProperties();
 
   auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
 }
 
 PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
@@ -263,12 +254,10 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxTriangleMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
       *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
+  setDefaultProperties();
 
   auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
 }
 
 // internal use only
@@ -281,12 +270,10 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
   mPxShape = mEngine->getPxPhysics()->createShape(
       PxTriangleMeshGeometry(mMesh->getPxMesh(), PxMeshScale(Vec3ToPxVec3(scale))),
       *getPhysicalMaterial()->getPxMaterial(), true);
-  mPxShape->userData = this;
+  setDefaultProperties();
 
   auto aabb = mMesh->getAABB();
   mLocalAABB = {aabb.lower * scale, aabb.upper * scale};
-  setIsSceneQuery(true);
-  setCollisionGroups({1, 1, 0, 0});
 }
 
 //////////////////// end collision shape constructor ////////////////////

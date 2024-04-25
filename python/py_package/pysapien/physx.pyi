@@ -4,7 +4,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien_pinocchio
 import typing
-__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSceneConfig', 'PhysxSystem', 'get_default_material', 'get_scene_config', 'is_gpu_enabled', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'version']
+__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_shape_config', 'version']
 M = typing.TypeVar("M", bound=int)
 class PhysxArticulation:
     name: str
@@ -263,6 +263,18 @@ class PhysxArticulationLinkComponent(PhysxRigidBodyComponent):
         ...
 class PhysxBaseComponent(sapien.pysapien.Component):
     pass
+class PhysxBodyConfig:
+    sleep_threshold: float
+    solver_position_iterations: int
+    solver_velocity_iterations: int
+    def __getstate__(self) -> tuple:
+        ...
+    def __init__(self) -> None:
+        ...
+    def __repr__(self) -> str:
+        ...
+    def __setstate__(self, arg0: tuple) -> None:
+        ...
 class PhysxCollisionShape:
     contact_offset: float
     density: float
@@ -273,6 +285,10 @@ class PhysxCollisionShape:
     rest_offset: float
     def get_collision_groups(self) -> typing.Annotated[list[int], pybind11_stubgen.typing_ext.FixedSize(4)]:
         ...
+    @typing.overload
+    def get_contact_offset(self) -> float:
+        ...
+    @typing.overload
     def get_contact_offset(self) -> float:
         ...
     def get_density(self) -> float:
@@ -285,6 +301,10 @@ class PhysxCollisionShape:
         ...
     def get_physical_material(self) -> PhysxMaterial:
         ...
+    @typing.overload
+    def get_rest_offset(self) -> float:
+        ...
+    @typing.overload
     def get_rest_offset(self) -> float:
         ...
     def set_collision_groups(self, groups: typing.Annotated[list[int], pybind11_stubgen.typing_ext.FixedSize(4)]) -> None:
@@ -297,6 +317,10 @@ class PhysxCollisionShape:
         
         If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g0 is the "contact type group" and g1 is the "contact affinity group". Collision shapes collide only when a bit in the contact type of the first shape matches a bit in the contact affinity of the second shape.
         """
+    @typing.overload
+    def set_contact_offset(self, offset: float) -> None:
+        ...
+    @typing.overload
     def set_contact_offset(self, offset: float) -> None:
         ...
     def set_density(self, density: float) -> None:
@@ -309,6 +333,10 @@ class PhysxCollisionShape:
         ...
     def set_physical_material(self, material: PhysxMaterial) -> None:
         ...
+    @typing.overload
+    def set_rest_offset(self, offset: float) -> None:
+        ...
+    @typing.overload
     def set_rest_offset(self, offset: float) -> None:
         ...
     @property
@@ -825,6 +853,9 @@ class PhysxRigidDynamicComponent(PhysxRigidBodyComponent):
     kinematic: bool
     kinematic_target: sapien.pysapien.Pose
     linear_velocity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
+    sleep_threshold: float
+    solver_position_iterations: int
+    solver_velocity_iterations: int
     def __init__(self) -> None:
         ...
     def get_angular_velocity(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
@@ -840,6 +871,12 @@ class PhysxRigidDynamicComponent(PhysxRigidBodyComponent):
     def get_linear_velocity(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
     def get_locked_motion_axes(self) -> typing.Annotated[list[bool], pybind11_stubgen.typing_ext.FixedSize(6)]:
+        ...
+    def get_sleep_threshold(self) -> float:
+        ...
+    def get_solver_position_iterations(self) -> int:
+        ...
+    def get_solver_velocity_iterations(self) -> int:
         ...
     def put_to_sleep(self) -> None:
         ...
@@ -861,6 +898,12 @@ class PhysxRigidDynamicComponent(PhysxRigidBodyComponent):
         Example:
             set_locked_motion_axes([True, False, False, False, True, False]) allows the object to move along the X axis and rotate about the Y axis
         """
+    def set_sleep_threshold(self, threshold: float) -> None:
+        ...
+    def set_solver_position_iterations(self, count: int) -> None:
+        ...
+    def set_solver_velocity_iterations(self, count: int) -> None:
+        ...
     def wake_up(self) -> None:
         ...
     @property
@@ -880,16 +923,23 @@ class PhysxRigidStaticComponent(PhysxRigidBaseComponent):
         ...
 class PhysxSceneConfig:
     bounce_threshold: float
-    contact_offset: float
     enable_ccd: bool
     enable_enhanced_determinism: bool
     enable_friction_every_iteration: bool
     enable_pcm: bool
     enable_tgs: bool
     gravity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
-    sleep_threshold: float
-    solver_iterations: int
-    solver_velocity_iterations: int
+    def __getstate__(self) -> tuple:
+        ...
+    def __init__(self) -> None:
+        ...
+    def __repr__(self) -> str:
+        ...
+    def __setstate__(self, arg0: tuple) -> None:
+        ...
+class PhysxShapeConfig:
+    contact_offset: float
+    rest_offset: float
     def __getstate__(self) -> tuple:
         ...
     def __init__(self) -> None:
@@ -933,21 +983,37 @@ class PhysxSystem(sapien.pysapien.System):
         ...
 def _enable_gpu() -> None:
     ...
+def get_body_config() -> PhysxBodyConfig:
+    ...
 def get_default_material() -> PhysxMaterial:
     ...
 def get_scene_config() -> PhysxSceneConfig:
     ...
+def get_shape_config() -> PhysxShapeConfig:
+    ...
 def is_gpu_enabled() -> bool:
+    ...
+@typing.overload
+def set_body_config(solver_position_iterations: int = 10, solver_velocity_iterations: int = 1, sleep_threshold: float = 0.004999999888241291) -> None:
+    ...
+@typing.overload
+def set_body_config(config: PhysxBodyConfig) -> None:
     ...
 def set_default_material(static_friction: float, dynamic_friction: float, restitution: float) -> None:
     ...
 def set_gpu_memory_config(temp_buffer_capacity: int = 16777216, max_rigid_contact_count: int = 524288, max_rigid_patch_count: int = 81920, heap_capacity: int = 67108864, found_lost_pairs_capacity: int = 262144, found_lost_aggregate_pairs_capacity: int = 1024, total_aggregate_pairs_capacity: int = 1024) -> None:
     ...
 @typing.overload
-def set_scene_config(gravity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] = ..., bounce_threshold: float = 2.0, sleep_threshold: float = 0.004999999888241291, contact_offset: float = 0.009999999776482582, solver_iterations: int = 10, solver_velocity_iterations: int = 1, enable_pcm: bool = True, enable_tgs: bool = True, enable_ccd: bool = False, enable_enhanced_determinism: bool = False, enable_friction_every_iteration: bool = True, cpu_workers: int = 0) -> None:
+def set_scene_config(gravity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] = ..., bounce_threshold: float = 2.0, enable_pcm: bool = True, enable_tgs: bool = True, enable_ccd: bool = False, enable_enhanced_determinism: bool = False, enable_friction_every_iteration: bool = True, cpu_workers: int = 0) -> None:
     ...
 @typing.overload
 def set_scene_config(config: PhysxSceneConfig) -> None:
+    ...
+@typing.overload
+def set_shape_config(contact_offset: float = 0.009999999776482582, rest_offset: float = 0.0) -> None:
+    ...
+@typing.overload
+def set_shape_config(config: PhysxShapeConfig) -> None:
     ...
 def version() -> str:
     ...

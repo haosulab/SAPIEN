@@ -19,6 +19,11 @@ PhysxArticulation::PhysxArticulation() {
   mEngine = PhysxEngine::Get();
   mPxArticulation = PhysxEngine::Get()->getPxPhysics()->createArticulationReducedCoordinate();
   mPxArticulation->setArticulationFlag(PxArticulationFlag::eDRIVE_LIMITS_ARE_FORCES, true);
+
+  mPxArticulation->setSolverIterationCounts(
+      PhysxDefault::getBodyConfig().solverPositionIterations,
+      PhysxDefault::getBodyConfig().solverVelocityIterations);
+  mPxArticulation->setSleepThreshold(PhysxDefault::getBodyConfig().sleepThreshold);
 }
 
 // add link must only be called when PxArticulation is not added to scene
@@ -123,9 +128,6 @@ void PhysxArticulation::internalAddPxArticulationToScene(Scene &scene) {
 
   system->getPxScene()->addArticulation(*mPxArticulation);
   mCache = mPxArticulation->createCache();
-  mPxArticulation->setSolverIterationCounts(system->getSceneConfig().solverIterations,
-                                            system->getSceneConfig().solverVelocityIterations);
-  mPxArticulation->setSleepThreshold(system->getSceneConfig().sleepThreshold);
 }
 
 void PhysxArticulation::internalEnsureRemovedFromScene() {

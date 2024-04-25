@@ -113,11 +113,12 @@ public:
   void setLockedMotionAxes(std::array<bool, 6> const &axes);
   std::array<bool, 6> getLockedMotionAxes() const;
 
-  // void lockMotion(bool x, bool y, bool z, bool ax, bool ay, bool az);
-  // std::array<bool, 6> lockedDofs() const;
-
-  // TODO: expose solver iterations?
-  // void setSolverIterations(uint32_t position, uint32_t velocity = 1);
+  void setSolverPositionIterations(uint32_t count);
+  void setSolverVelocityIterations(uint32_t count);
+  void setSleepThreshold(float threshold);
+  uint32_t getSolverPositionIterations() const;
+  uint32_t getSolverVelocityIterations() const;
+  float getSleepThreshold() const;
 
   void setKinematicTarget(Pose const &pose);
   Pose getKinematicTarget() const;

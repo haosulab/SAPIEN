@@ -181,44 +181,77 @@ Generator<int> init_physx(py::module &sapien) {
   PyPhysxSceneConfig.def(py::init<>())
       .def_readwrite("gravity", &PhysxSceneConfig::gravity)
       .def_readwrite("bounce_threshold", &PhysxSceneConfig::bounceThreshold)
-      .def_readwrite("sleep_threshold", &PhysxSceneConfig::sleepThreshold)
-      .def_readwrite("contact_offset", &PhysxSceneConfig::contactOffset)
-      .def_readwrite("solver_iterations", &PhysxSceneConfig::solverIterations)
-      .def_readwrite("solver_velocity_iterations", &PhysxSceneConfig::solverVelocityIterations)
       .def_readwrite("enable_pcm", &PhysxSceneConfig::enablePCM)
       .def_readwrite("enable_tgs", &PhysxSceneConfig::enableTGS)
       .def_readwrite("enable_ccd", &PhysxSceneConfig::enableCCD)
       .def_readwrite("enable_enhanced_determinism", &PhysxSceneConfig::enableEnhancedDeterminism)
       .def_readwrite("enable_friction_every_iteration",
                      &PhysxSceneConfig::enableFrictionEveryIteration)
-      .def("__repr__", [](PhysxSceneConfig &) { return "SceneConfig()"; })
+      .def("__repr__", [](PhysxSceneConfig &) { return "PhysxSceneConfig()"; })
       .def(py::pickle(
           [](PhysxSceneConfig &config) {
-            return py::make_tuple(
-                config.gravity, config.bounceThreshold, config.sleepThreshold,
-                config.contactOffset, config.solverIterations, config.solverVelocityIterations,
-                config.enablePCM, config.enableTGS, config.enableCCD,
-                config.enableEnhancedDeterminism, config.enableFrictionEveryIteration);
+            return py::make_tuple(config.gravity, config.bounceThreshold, config.enablePCM,
+                                  config.enableTGS, config.enableCCD,
+                                  config.enableEnhancedDeterminism,
+                                  config.enableFrictionEveryIteration);
           },
           [](py::tuple t) {
-            if (t.size() != 11) {
+            if (t.size() != 7) {
               throw std::runtime_error("Invalid state!");
             }
             PhysxSceneConfig config;
             config.gravity = t[0].cast<decltype(config.gravity)>();
             config.bounceThreshold = t[1].cast<decltype(config.bounceThreshold)>();
-            config.sleepThreshold = t[2].cast<decltype(config.sleepThreshold)>();
-            config.contactOffset = t[3].cast<decltype(config.contactOffset)>();
-            config.solverIterations = t[4].cast<decltype(config.solverIterations)>();
-            config.solverVelocityIterations =
-                t[5].cast<decltype(config.solverVelocityIterations)>();
-            config.enablePCM = t[6].cast<decltype(config.enablePCM)>();
-            config.enableTGS = t[7].cast<decltype(config.enableTGS)>();
-            config.enableCCD = t[8].cast<decltype(config.enableCCD)>();
+            config.enablePCM = t[2].cast<decltype(config.enablePCM)>();
+            config.enableTGS = t[3].cast<decltype(config.enableTGS)>();
+            config.enableCCD = t[4].cast<decltype(config.enableCCD)>();
             config.enableEnhancedDeterminism =
-                t[9].cast<decltype(config.enableEnhancedDeterminism)>();
+                t[5].cast<decltype(config.enableEnhancedDeterminism)>();
             config.enableFrictionEveryIteration =
-                t[10].cast<decltype(config.enableFrictionEveryIteration)>();
+                t[6].cast<decltype(config.enableFrictionEveryIteration)>();
+            return config;
+          }));
+
+  auto PyPhysxShapeConfig = py::class_<PhysxShapeConfig>(m, "PhysxShapeConfig");
+  PyPhysxShapeConfig.def(py::init<>())
+      .def_readwrite("contact_offset", &PhysxShapeConfig::contactOffset)
+      .def_readwrite("rest_offset", &PhysxShapeConfig::restOffset)
+      .def("__repr__", [](PhysxShapeConfig &) { return "PhysxShapeConfig()"; })
+      .def(py::pickle(
+          [](PhysxShapeConfig &config) {
+            return py::make_tuple(config.contactOffset, config.restOffset);
+          },
+          [](py::tuple t) {
+            if (t.size() != 2) {
+              throw std::runtime_error("Invalid state!");
+            }
+            PhysxShapeConfig config;
+            config.contactOffset = t[0].cast<decltype(config.contactOffset)>();
+            config.restOffset = t[1].cast<decltype(config.restOffset)>();
+            return config;
+          }));
+
+  auto PyPhysxBodyConfig = py::class_<PhysxBodyConfig>(m, "PhysxBodyConfig");
+  PyPhysxBodyConfig.def(py::init<>())
+      .def_readwrite("sleep_threshold", &PhysxBodyConfig::sleepThreshold)
+      .def_readwrite("solver_position_iterations", &PhysxBodyConfig::solverPositionIterations)
+      .def_readwrite("solver_velocity_iterations", &PhysxBodyConfig::solverVelocityIterations)
+      .def("__repr__", [](PhysxBodyConfig &) { return "PhysxBodyConfig()"; })
+      .def(py::pickle(
+          [](PhysxBodyConfig &config) {
+            return py::make_tuple(config.solverPositionIterations, config.solverVelocityIterations,
+                                  config.sleepThreshold);
+          },
+          [](py::tuple t) {
+            if (t.size() != 3) {
+              throw std::runtime_error("Invalid state!");
+            }
+            PhysxBodyConfig config;
+            config.solverPositionIterations =
+                t[0].cast<decltype(config.solverPositionIterations)>();
+            config.solverVelocityIterations =
+                t[1].cast<decltype(config.solverVelocityIterations)>();
+            config.sleepThreshold = t[2].cast<decltype(config.sleepThreshold)>();
             return config;
           }));
 
@@ -557,7 +590,17 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
 
       .def_property("density", &PhysxCollisionShape::getDensity, &PhysxCollisionShape::setDensity)
       .def("get_density", &PhysxCollisionShape::getDensity)
-      .def("set_density", &PhysxCollisionShape::setDensity, py::arg("density"));
+      .def("set_density", &PhysxCollisionShape::setDensity, py::arg("density"))
+
+      .def_property("contact_offset", &PhysxCollisionShape::getContactOffset,
+                    &PhysxCollisionShape::setContactOffset)
+      .def("get_contact_offset", &PhysxCollisionShape::getContactOffset)
+      .def("set_contact_offset", &PhysxCollisionShape::setContactOffset, py::arg("offset"))
+
+      .def_property("rest_offset", &PhysxCollisionShape::getRestOffset,
+                    &PhysxCollisionShape::setRestOffset)
+      .def("get_rest_offset", &PhysxCollisionShape::getRestOffset)
+      .def("set_rest_offset", &PhysxCollisionShape::setRestOffset, py::arg("offset"));
 
   PyPhysxCollisionShapePlane.def(py::init<std::shared_ptr<PhysxMaterial>>(), py::arg("material"));
   PyPhysxCollisionShapeBox
@@ -712,6 +755,28 @@ Example:
       .def_property_readonly("is_sleeping", &PhysxRigidDynamicComponent::isSleeping)
       .def("wake_up", &PhysxRigidDynamicComponent::wakeUp)
       .def("put_to_sleep", &PhysxRigidDynamicComponent::putToSleep)
+
+      .def_property("solver_position_iterations",
+                    &PhysxRigidDynamicComponent::getSolverPositionIterations,
+                    &PhysxRigidDynamicComponent::setSolverPositionIterations)
+      .def("get_solver_position_iterations",
+           &PhysxRigidDynamicComponent::getSolverPositionIterations)
+      .def("set_solver_position_iterations",
+           &PhysxRigidDynamicComponent::setSolverPositionIterations, py::arg("count"))
+
+      .def_property("solver_velocity_iterations",
+                    &PhysxRigidDynamicComponent::getSolverVelocityIterations,
+                    &PhysxRigidDynamicComponent::setSolverVelocityIterations)
+      .def("get_solver_velocity_iterations",
+           &PhysxRigidDynamicComponent::getSolverVelocityIterations)
+      .def("set_solver_velocity_iterations",
+           &PhysxRigidDynamicComponent::setSolverVelocityIterations, py::arg("count"))
+
+      .def_property("sleep_threshold", &PhysxRigidDynamicComponent::getSleepThreshold,
+                    &PhysxRigidDynamicComponent::setSleepThreshold)
+      .def("get_sleep_threshold", &PhysxRigidDynamicComponent::getSleepThreshold)
+      .def("set_sleep_threshold", &PhysxRigidDynamicComponent::setSleepThreshold,
+           py::arg("threshold"))
 
       .def_property("kinematic", &PhysxRigidDynamicComponent::isKinematic,
                     &PhysxRigidDynamicComponent::setKinematic)
@@ -1060,11 +1125,9 @@ Example:
            py::arg("total_aggregate_pairs_capacity") = 1024)
 
       .def("set_scene_config",
-           py::overload_cast<Vec3, float, float, float, uint32_t, uint32_t, bool, bool, bool, bool,
-                             bool, uint32_t>(&PhysxDefault::setSceneConfig),
+           py::overload_cast<Vec3, float, bool, bool, bool, bool, bool, uint32_t>(
+               &PhysxDefault::setSceneConfig),
            py::arg("gravity") = Vec3{0, 0, -9.81}, py::arg("bounce_threshold") = 2.f,
-           py::arg("sleep_threshold") = 0.005f, py::arg("contact_offset") = 0.01f,
-           py::arg("solver_iterations") = 10, py::arg("solver_velocity_iterations") = 1,
            py::arg("enable_pcm") = true, py::arg("enable_tgs") = true,
            py::arg("enable_ccd") = false, py::arg("enable_enhanced_determinism") = false,
            py::arg("enable_friction_every_iteration") = true, py::arg("cpu_workers") = 0)
@@ -1072,6 +1135,23 @@ Example:
            py::overload_cast<PhysxSceneConfig const &>(&PhysxDefault::setSceneConfig),
            py::arg("config"))
       .def("get_scene_config", &PhysxDefault::getSceneConfig)
+
+      .def("set_shape_config", py::overload_cast<float, float>(&PhysxDefault::setShapeConfig),
+           py::arg("contact_offset") = 0.01f, py::arg("rest_offset") = 0.f)
+      .def("set_shape_config",
+           py::overload_cast<PhysxShapeConfig const &>(&PhysxDefault::setShapeConfig),
+           py::arg("config"))
+      .def("get_shape_config", &PhysxDefault::getShapeConfig)
+
+      .def("set_body_config",
+           py::overload_cast<uint32_t, uint32_t, float>(&PhysxDefault::setBodyConfig),
+           py::arg("solver_position_iterations") = 10, py::arg("solver_velocity_iterations") = 1,
+           py::arg("sleep_threshold") = 0.005f)
+      .def("set_body_config",
+           py::overload_cast<PhysxBodyConfig const &>(&PhysxDefault::setBodyConfig),
+           py::arg("config"))
+      .def("get_body_config", &PhysxDefault::getBodyConfig)
+
       .def("version", []() { return PhysxDefault::getPhysxVersion(); });
 
   ////////// end global //////////

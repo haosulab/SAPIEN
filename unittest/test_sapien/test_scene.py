@@ -50,40 +50,6 @@ class TestScene(unittest.TestCase):
         self.assertTrue(pose_equal(e0.pose, p0))
         self.assertTrue(pose_equal(e1.pose, p1))
 
-    def test_config(self):
-        config = sapien.physx.PhysxSceneConfig()
-        config.gravity = [0, 0, -1]
-        config.bounce_threshold = 1.0
-        config.sleep_threshold = 0.001
-        config.contact_offset = 0.02
-        config.solver_iterations = 4
-        config.solver_velocity_iterations = 2
-        config.enable_pcm = True
-        config.enable_tgs = True
-        config.enable_ccd = True
-        config.enable_enhanced_determinism = True
-        config.enable_friction_every_iteration = False
-
-        sapien.physx.set_scene_config(config)
-        scene = sapien.Scene()
-        config = scene.physx_system.get_config()
-
-        self.assertAlmostEqual(tuple(config.gravity), (0, 0, -1))
-        self.assertAlmostEqual(config.bounce_threshold, 1.0)
-        self.assertAlmostEqual(config.sleep_threshold, 0.001)
-        self.assertAlmostEqual(config.contact_offset, 0.02)
-        self.assertEqual(config.solver_iterations, 4)
-        self.assertEqual(config.solver_velocity_iterations, 2)
-        self.assertEqual(config.enable_pcm, True)
-        self.assertEqual(config.enable_tgs, True)
-        self.assertEqual(config.enable_ccd, True)
-        self.assertEqual(config.enable_enhanced_determinism, True)
-        self.assertEqual(config.enable_friction_every_iteration, False)
-
-        # self.assertAlmostEqual(config.default_static_friction, 0.2)
-        # self.assertAlmostEqual(config.default_dynamic_friction, 0.19)
-        # self.assertAlmostEqual(config.default_restitution, 0.05)
-
     def test_actor_builder(self):
         scene = sapien.Scene()
         builder = scene.create_actor_builder()

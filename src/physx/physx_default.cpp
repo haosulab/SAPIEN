@@ -11,6 +11,8 @@ static float gRestitution{0.1};
 static std::weak_ptr<PhysxMaterial> gDefaultMaterial;
 static bool gGPUEnabled{false};
 static PhysxSceneConfig gSceneConfig{};
+static PhysxBodyConfig gBodyConfig{};
+static PhysxShapeConfig gShapeConfig{};
 
 static ::physx::PxgDynamicsMemoryConfig gGpuMemoryConfig{};
 
@@ -50,17 +52,11 @@ void PhysxDefault::setGpuMemoryConfig(uint32_t tempBufferCapacity, uint32_t maxR
   return gGpuMemoryConfig;
 }
 
-void PhysxDefault::setSceneConfig(Vec3 gravity, float bounceThreshold, float sleepThreshold,
-                                  float contactOffset, uint32_t solverIterations,
-                                  uint32_t solverVelocityIterations, bool enablePCM,
+void PhysxDefault::setSceneConfig(Vec3 gravity, float bounceThreshold, bool enablePCM,
                                   bool enableTGS, bool enableCCD, bool enableEnhancedDeterminism,
                                   bool enableFrictionEveryIteration, uint32_t cpuWorkers) {
   gSceneConfig.gravity = gravity;
   gSceneConfig.bounceThreshold = bounceThreshold;
-  gSceneConfig.sleepThreshold = sleepThreshold;
-  gSceneConfig.contactOffset = contactOffset;
-  gSceneConfig.solverIterations = solverIterations;
-  gSceneConfig.solverVelocityIterations = solverVelocityIterations;
   gSceneConfig.enablePCM = enablePCM;
   gSceneConfig.enableTGS = enableTGS;
   gSceneConfig.enableCCD = enableCCD;
@@ -70,6 +66,22 @@ void PhysxDefault::setSceneConfig(Vec3 gravity, float bounceThreshold, float sle
 }
 void PhysxDefault::setSceneConfig(PhysxSceneConfig const &config) { gSceneConfig = config; }
 PhysxSceneConfig const &PhysxDefault::getSceneConfig() { return gSceneConfig; }
+
+void PhysxDefault::setBodyConfig(uint32_t solverIterations, uint32_t solverVelocityIterations,
+                                 float sleepThreshold) {
+  gBodyConfig.solverPositionIterations = solverIterations;
+  gBodyConfig.solverVelocityIterations = solverVelocityIterations;
+  gBodyConfig.sleepThreshold = sleepThreshold;
+}
+void PhysxDefault::setBodyConfig(PhysxBodyConfig const &config) { gBodyConfig = config; }
+PhysxBodyConfig const &PhysxDefault::getBodyConfig() { return gBodyConfig; }
+
+void PhysxDefault::setShapeConfig(float contactOffset, float restOffset) {
+  gShapeConfig.contactOffset = contactOffset;
+  gShapeConfig.restOffset = restOffset;
+}
+void PhysxDefault::setShapeConfig(PhysxShapeConfig const &config) { gShapeConfig = config; }
+PhysxShapeConfig const &PhysxDefault::getShapeConfig() { return gShapeConfig; }
 
 void PhysxDefault::EnableGPU() {
   if (PhysxEngine::GetIfExists()) {

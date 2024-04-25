@@ -178,9 +178,38 @@ PhysxRigidDynamicComponent::PhysxRigidDynamicComponent() {
   mPxActor = PhysxEngine::Get()->getPxPhysics()->createRigidDynamic(PxTransform{PxIdentity});
   mPxActor->setLinearVelocity({0.f, 0.f, 0.f});
   mPxActor->setAngularVelocity({0.f, 0.f, 0.f});
+
   mPxActor->userData = this;
+  mPxActor->setSolverIterationCounts(PhysxDefault::getBodyConfig().solverPositionIterations,
+                                     PhysxDefault::getBodyConfig().solverVelocityIterations);
+  mPxActor->setSleepThreshold(PhysxDefault::getBodyConfig().sleepThreshold);
+
   mPxActor->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_GYROSCOPIC_FORCES, true);
   internalUpdateMass();
+}
+
+void PhysxRigidDynamicComponent::setSolverPositionIterations(uint32_t count) {
+  getPxActor()->setSolverIterationCounts(count, getSolverVelocityIterations());
+}
+void PhysxRigidDynamicComponent::setSolverVelocityIterations(uint32_t count) {
+  getPxActor()->setSolverIterationCounts(getSolverPositionIterations(), count);
+}
+void PhysxRigidDynamicComponent::setSleepThreshold(float threshold) {
+  getPxActor()->setSleepThreshold(threshold);
+}
+
+uint32_t PhysxRigidDynamicComponent::getSolverPositionIterations() const {
+  uint32_t pos, vel;
+  getPxActor()->getSolverIterationCounts(pos, vel);
+  return pos;
+}
+uint32_t PhysxRigidDynamicComponent::getSolverVelocityIterations() const {
+  uint32_t pos, vel;
+  getPxActor()->getSolverIterationCounts(pos, vel);
+  return vel;
+}
+float PhysxRigidDynamicComponent::getSleepThreshold() const {
+  return getPxActor()->getSleepThreshold();
 }
 
 void PhysxRigidStaticComponent::onSetPose(Pose const &pose) {
@@ -200,11 +229,6 @@ void PhysxRigidStaticComponent::onAddToScene(Scene &scene) {
   auto system = scene.getPhysxSystem();
   system->registerComponent(
       std::static_pointer_cast<PhysxRigidStaticComponent>(shared_from_this()));
-
-  // setup physical parameters
-  for (auto &shape : mCollisionShapes) {
-    shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
-  }
 
 #ifdef SAPIEN_CUDA
   if (auto s = std::dynamic_pointer_cast<PhysxSystemGpu>(system)) {
@@ -228,14 +252,6 @@ void PhysxRigidStaticComponent::onRemoveFromScene(Scene &scene) {
 
 void PhysxRigidDynamicComponent::onAddToScene(Scene &scene) {
   auto system = scene.getPhysxSystem();
-
-  // setup physical parameters
-  mPxActor->setSolverIterationCounts(system->getSceneConfig().solverIterations,
-                                     system->getSceneConfig().solverVelocityIterations);
-  mPxActor->setSleepThreshold(system->getSceneConfig().sleepThreshold);
-  for (auto &shape : mCollisionShapes) {
-    shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
-  }
 
   system->registerComponent(
       std::static_pointer_cast<PhysxRigidDynamicComponent>(shared_from_this()));

@@ -339,10 +339,6 @@ void PhysxArticulationLinkComponent::onAddToScene(Scene &scene) {
   mArticulation->internalNotifyAddToScene(this, scene);
   auto system = scene.getPhysxSystem();
 
-  for (auto &shape : mCollisionShapes) {
-    shape->getPxShape()->setContactOffset(system->getSceneConfig().contactOffset);
-  }
-
   system->registerComponent(
       std::static_pointer_cast<PhysxArticulationLinkComponent>(shared_from_this()));
 }

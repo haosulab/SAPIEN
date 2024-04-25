@@ -126,8 +126,6 @@ PhysxSystemGpu::PhysxSystemGpu(std::shared_ptr<Device> device) {
   }
   sceneDesc.cpuDispatcher = mPxCPUDispatcher;
   mPxScene = mEngine->getPxPhysics()->createScene(sceneDesc);
-  // TODO: contact handling
-  // mPxScene->setSimulationEventCallback(&mSimulationCallback);
 }
 
 void PhysxSystemCpu::registerComponent(std::shared_ptr<PhysxRigidDynamicComponent> component) {
@@ -302,8 +300,10 @@ void PhysxSystemCpu::unpackState(std::string const &data) {
     ss.read(reinterpret_cast<char *>(&v), sizeof(Vec3));
     ss.read(reinterpret_cast<char *>(&w), sizeof(Vec3));
     actor->setPose(pose);
-    actor->setLinearVelocity(v);
-    actor->setAngularVelocity(w);
+    if (!actor->isKinematic()) {
+      actor->setLinearVelocity(v);
+      actor->setAngularVelocity(w);
+    }
   }
   for (auto &link : mArticulationLinkComponents) {
     if (link->isRoot()) {

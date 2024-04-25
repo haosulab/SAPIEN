@@ -88,6 +88,8 @@ protected:
   PhysxRigidBaseComponent *mParent{};
 
   void copyProperties(PhysxCollisionShape &target) const;
+
+  void setDefaultProperties();
 };
 
 class PhysxCollisionShapePlane : public PhysxCollisionShape {

@@ -1,9 +1,10 @@
 import pickle
 import unittest
+from pathlib import Path
 
 import numpy as np
 import sapien
-from common import rand_p, rand_q
+from common import rand_p, rand_q, rand_pose
 
 
 class TestPose(unittest.TestCase):
@@ -150,3 +151,25 @@ class TestMatrix(unittest.TestCase):
                 np.eye(4),
             )
         )
+
+
+class TestMassProperties(unittest.TestCase):
+    def test_mesh(self):
+        mesh = Path(".") / "assets" / "brass_goblets_1k.glb"
+        import trimesh
+
+        mesh = trimesh.load(str(mesh), force="mesh")
+        res = sapien.math.compute_mesh_mass_properties(mesh.vertices, mesh.faces)
+        props = trimesh.triangles.mass_properties(mesh.vertices[mesh.faces])
+
+        self.assertTrue(np.allclose(res.mass, props.mass, atol=1e-7))
+        self.assertTrue(np.allclose(res.cm, props.center_mass, atol=1e-7))
+        self.assertTrue(np.allclose(res.cm_inertia, props.inertia, atol=1e-7))
+
+        pose = rand_pose()
+
+        ti = trimesh.inertia.transform_inertia(
+            pose.to_transformation_matrix(), res.cm_inertia
+        )
+        si = res.transform(pose).cm_inertia
+        self.assertTrue(np.allclose(ti, si, atol=1e-7))
