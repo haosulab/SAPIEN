@@ -43,24 +43,8 @@ class SettingWindow(Plugin):
                     .ReadOnly(True)
                     .Label("Gravity")
                     .Value(px.config.gravity),
-                    R.UIInputInt()
-                    .ReadOnly(True)
-                    .Label("Position Iterations")
-                    .Value(px.config.solver_iterations),
-                    R.UIInputInt()
-                    .ReadOnly(True)
-                    .Label("Velocity Iterations")
-                    .Value(px.config.solver_velocity_iterations),
                     R.UICheckbox().Label("TGS").Checked(px.config.enable_tgs),
                     R.UICheckbox().Label("PCM").Checked(px.config.enable_pcm),
-                    R.UIInputFloat()
-                    .ReadOnly(True)
-                    .Label("Contact Offset")
-                    .Value(px.config.contact_offset),
-                    R.UIInputFloat()
-                    .ReadOnly(True)
-                    .Label("Sleep Threshold")
-                    .Value(px.config.sleep_threshold),
                     R.UIInputFloat()
                     .ReadOnly(True)
                     .Label("Bounce Threshold")
