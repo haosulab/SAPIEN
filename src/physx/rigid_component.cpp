@@ -399,5 +399,8 @@ int PhysxRigidDynamicComponent::getGpuIndex() const {
 
 int PhysxRigidDynamicComponent::getGpuPoseIndex() const { return getGpuIndex(); }
 
+PhysxRigidStaticComponent::~PhysxRigidStaticComponent() { mPxActor->release(); }
+PhysxRigidDynamicComponent::~PhysxRigidDynamicComponent() { mPxActor->release(); }
+
 } // namespace physx
 } // namespace sapien

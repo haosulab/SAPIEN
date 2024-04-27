@@ -51,6 +51,8 @@ public:
   void onAddToScene(Scene &scene) override;
   void onRemoveFromScene(Scene &scene) override;
 
+  ~PhysxRigidStaticComponent();
+
 private:
   ::physx::PxRigidStatic *mPxActor;
 };
@@ -140,6 +142,8 @@ public:
 
   // index in all pose array
   int getGpuPoseIndex() const;
+
+  ~PhysxRigidDynamicComponent();
 
 private:
   ::physx::PxRigidDynamic *mPxActor;
