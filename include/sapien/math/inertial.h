@@ -8,13 +8,13 @@ namespace sapien {
 
 struct MassProperties {
   /* mass */
-  float mass;
+  float mass{1.f};
 
   /* center of mass */
-  Eigen::Vector3f cm;
+  Eigen::Vector3f cm{0.f, 0.f, 0.f};
 
   /* moment of inertia at origin */
-  float xx, yy, zz, xy, yz, xz;
+  float xx{1.f}, yy{1.f}, zz{1.f}, xy{0.f}, yz{0.f}, xz{0.f};
 
   Eigen::Matrix<float, 3, 3, Eigen::RowMajor> getCMInertia() const {
     auto xx_ = xx - mass * (cm.y() * cm.y() + cm.z() * cm.z());
@@ -28,10 +28,42 @@ struct MassProperties {
     return res;
   }
 
+  void setCMInertia(Eigen::Matrix<float, 3, 3, Eigen::RowMajor> const &inertia) {
+    float xx_ = inertia(0, 0);
+    float yy_ = inertia(1, 1);
+    float zz_ = inertia(2, 2);
+    float xy_ = inertia(0, 1);
+    float yz_ = inertia(1, 2);
+    float xz_ = inertia(0, 2);
+
+    xx = xx_ + mass * (cm.y() * cm.y() + cm.z() * cm.z());
+    yy = yy_ + mass * (cm.z() * cm.z() + cm.x() * cm.x());
+    zz = zz_ + mass * (cm.x() * cm.x() + cm.y() * cm.y());
+    xy = xy_ - mass * cm.x() * cm.y();
+    yz = yz_ - mass * cm.y() * cm.z();
+    xz = xz_ - mass * cm.x() * cm.z();
+  }
+
   Eigen::Matrix<float, 3, 3, Eigen::RowMajor> getOriginInertia() const {
     Eigen::Matrix<float, 3, 3, Eigen::RowMajor> res;
     res << xx, xy, xz, xy, yy, yz, xz, yz, zz;
     return res;
+  }
+
+  void setOriginInertia(Eigen::Matrix<float, 3, 3, Eigen::RowMajor> const &inertia) {
+    float xx_ = inertia(0, 0);
+    float yy_ = inertia(1, 1);
+    float zz_ = inertia(2, 2);
+    float xy_ = inertia(0, 1);
+    float yz_ = inertia(1, 2);
+    float xz_ = inertia(0, 2);
+
+    xx = xx_;
+    yy = yy_;
+    zz = zz_;
+    xy = xy_;
+    yz = yz_;
+    xz = xz_;
   }
 
   MassProperties operator+(MassProperties const &other) const {
@@ -47,7 +79,7 @@ struct MassProperties {
             .xz = xz + other.xz};
   }
 
-  MassProperties scaleSize(Vec3 s) const {
+  MassProperties scaleSize(Vec3 const &s) const {
     float s3 = s.x * s.y * s.z;
     Vec3 sxyz2 = (0.5 * (xx + yy + zz) - Vec3(xx, yy, zz)) * s * s;
     float xx_ = sxyz2.y + sxyz2.z;
@@ -125,6 +157,27 @@ struct MassProperties {
   }
 
   static inline MassProperties
+  FromMassInertia(float mass, Eigen::Vector3f const &cm,
+                  Eigen::Matrix<float, 3, 3, Eigen::RowMajor> const &inertia) {
+    MassProperties mp;
+    mp.mass = mass;
+    mp.cm = cm;
+    mp.setCMInertia(inertia);
+    return mp;
+  }
+
+  static inline MassProperties FromCMLocalPose(float mass, Pose const &pose, Vec3 const &inertia) {
+    MassProperties mp;
+    mp.mass = mass;
+    mp.cm = {pose.p.x, pose.p.y, pose.p.z};
+
+    auto R = Eigen::Quaternionf(pose.q.w, pose.q.x, pose.q.y, pose.q.z).toRotationMatrix();
+    mp.setCMInertia(R * Eigen::Vector3f(inertia.x, inertia.y, inertia.z).asDiagonal() *
+                    R.transpose());
+    return mp;
+  }
+
+  static inline MassProperties
   FromMesh(Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices,
            Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles);
 
@@ -197,9 +250,9 @@ struct MassProperties {
   }
 };
 
-inline void subexpressions(Eigen::Vector3f w0, Eigen::Vector3f w1, Eigen::Vector3f w2,
-                           Eigen::Vector3f &f1, Eigen::Vector3f &f2, Eigen::Vector3f &f3,
-                           Eigen::Vector3f &g0, Eigen::Vector3f &g1, Eigen::Vector3f &g2) {
+static inline void subexpressions(Eigen::Vector3f w0, Eigen::Vector3f w1, Eigen::Vector3f w2,
+                                  Eigen::Vector3f &f1, Eigen::Vector3f &f2, Eigen::Vector3f &f3,
+                                  Eigen::Vector3f &g0, Eigen::Vector3f &g1, Eigen::Vector3f &g2) {
   Eigen::Vector3f t0 = w0 + w1;
   f1 = t0 + w2;
   Eigen::Vector3f t1 = w0.cwiseProduct(w0);

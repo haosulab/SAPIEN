@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import sapien
-from common import rand_p, rand_q, rand_pose
+from common import rand_p, rand_q, rand_pose, pose_equal, repeat
 
 
 class TestPose(unittest.TestCase):
@@ -175,3 +175,60 @@ class TestMassProperties(unittest.TestCase):
         )
         si = res.transform(pose).cm_inertia
         self.assertTrue(np.allclose(ti, si, atol=1e-7))
+
+    @repeat(seed=20)
+    def test_inertia(self):
+        mass = np.random.rand()
+        pose = rand_pose()
+        R = pose.to_transformation_matrix()[:3, :3]
+        inertia = np.random.rand(3)
+
+        # cosntruct from mass pose inertia_vector
+        mp1 = sapien.math.MassProperties(mass, pose, inertia)
+        mass1, pose1, inertia1 = mp1.decompose()
+        R1 = pose1.to_transformation_matrix()[:3, :3]
+        self.assertAlmostEqual(mass, mass1)
+        self.assertTrue(
+            np.allclose(
+                R @ np.diag(inertia) @ R.T,
+                R1 @ np.diag(inertia1) @ R1.T,
+                atol=1e-5,
+                rtol=1e-5,
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                R @ np.diag(inertia) @ R.T,
+                mp1.cm_inertia,
+                atol=1e-5,
+                rtol=1e-5,
+            )
+        )
+
+        # construct from mass cm inertia_matrix
+        mp2 = sapien.math.MassProperties(mp1.mass, mp1.cm, mp1.cm_inertia)
+        self.assertTrue(np.allclose(mp1.mass, mp2.mass))
+        self.assertTrue(np.allclose(mp1.cm, mp2.cm))
+        self.assertTrue(np.allclose(mp1.cm_inertia, mp2.cm_inertia))
+        self.assertTrue(np.allclose(mp1.origin_inertia, mp2.origin_inertia))
+
+        # get/set origin inertia
+        mass = np.random.rand()
+        pose = rand_pose()
+        R = pose.to_transformation_matrix()[:3, :3]
+        inertia = np.random.rand(3)
+        mp3 = sapien.math.MassProperties(mass, pose, inertia)
+        mp1.origin_inertia = mp3.origin_inertia
+        self.assertTrue(np.allclose(mp1.origin_inertia, mp3.origin_inertia))
+        mp1.mass = mp3.mass
+        mp1.cm = mp3.cm
+        self.assertTrue(np.allclose(mp1.cm_inertia, mp3.cm_inertia))
+
+        # get/set cm inertia
+        mass = np.random.rand()
+        pose = rand_pose()
+        R = pose.to_transformation_matrix()[:3, :3]
+        inertia = np.random.rand(3)
+        mp4 = sapien.math.MassProperties(mass, pose, inertia)
+        mp1.cm_inertia = mp4.cm_inertia
+        self.assertTrue(np.allclose(mp1.cm_inertia, mp4.cm_inertia))

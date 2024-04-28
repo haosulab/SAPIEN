@@ -2,6 +2,18 @@ import sapien.core as sapien
 import numpy as np
 
 
+def repeat(n=10, seed=0):
+    def wrapper(func):
+        def f(*args, **kwargs):
+            np.random.seed(seed)
+            for _ in range(n):
+                func(*args, **kwargs)
+
+        return f
+
+    return wrapper
+
+
 def rand_p():
     return np.random.randn(3)
 

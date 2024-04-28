@@ -1,21 +1,9 @@
 import unittest
 import numpy as np
-from common import pose_equal, rand_pose
+from common import pose_equal, rand_pose, repeat
 from pathlib import Path
 
 import sapien
-
-
-def repeat(n=10, seed=0):
-    def wrapper(func):
-        def f(*args, **kwargs):
-            np.random.seed(seed)
-            for _ in range(n):
-                func(*args, **kwargs)
-
-        return f
-
-    return wrapper
 
 
 class TestBodyInertial(unittest.TestCase):

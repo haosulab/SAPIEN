@@ -15,15 +15,27 @@ void init_math(py::module &sapien) {
   auto m = sapien.def_submodule("math");
 
   py::class_<MassProperties>(m, "MassProperties")
+      .def(py::init(&MassProperties::FromMassInertia), py::arg("mass"), py::arg("cm"),
+           py::arg("inertia"),
+           "construct inertia from mass, center of mass, inertia at center of mass")
+      .def(py::init(&MassProperties::FromCMLocalPose), py::arg("mass"),
+           py::arg("cmass_local_pose"), py::arg("inertia"),
+           "construct inertia from mass, cmass_local_pose, and principal inertia")
       .def_readwrite("mass", &MassProperties::mass)
       .def_readwrite("cm", &MassProperties::cm)
-      .def_property_readonly("cm_inertia", &MassProperties::getCMInertia)
-      .def_property_readonly("origin_inertia", &MassProperties::getOriginInertia)
-
-      .def("scale_mass", &MassProperties::scaleMass, py::arg("scale"))
-      .def("scale_size", &MassProperties::scaleSize, py::arg("scale"))
-      .def("transform", &MassProperties::transform, py::arg("pose"))
-      .def("decompose", &MassProperties::decompose)
+      .def_property("cm_inertia", &MassProperties::getCMInertia, &MassProperties::setCMInertia)
+      .def_property("origin_inertia", &MassProperties::getOriginInertia,
+                    &MassProperties::setOriginInertia)
+      .def("scale_mass", &MassProperties::scaleMass, py::arg("scale"),
+           "compute new mass properties as if  the object density is scaled uniformly")
+      .def("scale_size", &MassProperties::scaleSize, py::arg("scale"),
+           "compute new mass properties as if the object volume is scaled around the origin "
+           "while keeping density the same")
+      .def("transform", &MassProperties::transform, py::arg("pose"),
+           "compute new mass properties as if the origin of the current object is moved to given "
+           "pose")
+      .def("decompose", &MassProperties::decompose,
+           "decompose mass properties into mass, cmass_local_pose, and principal inertia")
       .def(py::self + py::self, py::arg("other"));
 
   m.def("compute_mesh_mass_properties", &MassProperties::FromMesh, py::arg("vertices"),
