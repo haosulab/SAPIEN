@@ -398,7 +398,6 @@ setup(
     zip_safe=False,
     packages=[
         "sapien",
-        "sapien.package",
         "sapien.physx",
         "sapien.internal_renderer",
         "sapien.render",

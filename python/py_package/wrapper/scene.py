@@ -1,20 +1,21 @@
 from __future__ import annotations
-from ..pysapien import Scene as _Scene
+
+from typing import Optional, TypeVar, Union
+from warnings import warn
+
 from .. import pysapien as sapien
-from ..pysapien.render import RenderCameraComponent, RenderCubemap
+from ..pysapien import Scene as _Scene
 from ..pysapien.physx import PhysxSceneConfig as SceneConfig
-from typing import Union, Optional, TypeVar
+from ..pysapien.render import RenderCameraComponent, RenderCubemap
 
 
 class Widget:
-    def load(self, scene):
-        pass
-
-    def unload(self, scene):
-        pass
-
-
-WidgetType = TypeVar("WidgetType", bound=Widget)
+    def __init__(self):
+        warn(
+            "Inheriting from sapien.Widget is not required",
+            DeprecationWarning,
+            stacklevel=2,
+        )
 
 
 class Scene(_Scene):
@@ -25,8 +26,6 @@ class Scene(_Scene):
             )
         else:
             super().__init__(systems)
-
-        self.widgets = []
 
     @property
     def timestep(self):
@@ -396,40 +395,6 @@ class Scene(_Scene):
         self.render_system.cubemap = sapien.render.RenderCubemap(px, nx, py, ny, pz, nz)
 
     # TODO particle entity, deformable entity
-
-    def load_widget(self, widget: WidgetType) -> WidgetType:
-        self.widgets.append(widget)
-        widget.load(self)
-        return widget
-
-    def load_widget_from_package(
-        self, package_name, entry: str = None, widget_params=dict()
-    ):
-        from sapien.package import load_package
-        import inspect
-
-        m = load_package(package_name)
-        if entry is None:
-            for k, v in m.__dict__.items():
-                if inspect.isclass(v) and issubclass(v, Widget):
-                    entry = k
-        if entry is None:
-            raise Exception("failed to find widget from package")
-
-        cls = getattr(m, entry)
-        if not issubclass(cls, Widget):
-            raise Exception(f"given entry {entry} is not a sapien Widget class")
-
-        widget = getattr(m, entry)(**widget_params)
-
-        return self.load_widget(widget)
-
-    def unload_widget(self, widget: Widget):
-        if widget not in self.widgets:
-            raise Exception("failed to unload widget: it is not in scene")
-
-        widget.unload(self)
-        self.widgets.remove(widget)
 
     def create_viewer(self):
         from sapien.utils import Viewer

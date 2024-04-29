@@ -21,7 +21,7 @@ if __name__ == "__main__":
             f"git+https://github.com/sapien-sim/{package}",
         ]
 
-        subprocess.run(args)
+        subprocess.run(args, check=True)
 
     elif args.command == "uninstall":
         package = rest[0]
@@ -33,7 +33,7 @@ if __name__ == "__main__":
             f"sapien_{package}",
         ]
 
-        subprocess.run(args)
+        subprocess.run(args, check=True)
 
     elif args.command == "show":
         from sapien.show_anything import show_anything
@@ -42,10 +42,12 @@ if __name__ == "__main__":
 
     elif args.command == "info":
         import warnings
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             import sapien
             import platform
+
             sapien.render.set_log_level("critical")
             info = ""
             info += "Python: " + platform.python_version() + "\n"
