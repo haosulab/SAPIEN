@@ -283,6 +283,8 @@ except ModuleNotFoundError:
         warnings.warn(
             "pinnochio package is not installed, robotics functionalities will not be available"
         )
+        PinocchioModel = None
+
 except ImportError:
     if platform.system() == "Linux":
         warnings.warn(
@@ -293,6 +295,7 @@ except ImportError:
         warnings.warn(
             "pinnochio package is broken, robotics functionalities will not be available"
         )
+        PinocchioModel = None
 
 
 def _create_pinocchio_model(
