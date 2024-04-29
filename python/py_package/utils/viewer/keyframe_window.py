@@ -6,7 +6,6 @@ import sapien
 from sapien import internal_renderer as R
 
 from .plugin import Plugin
-from ..serialization import SerializedScene
 
 
 class Keyframe(R.UIKeyframe):
