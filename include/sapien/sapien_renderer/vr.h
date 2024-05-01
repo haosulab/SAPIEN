@@ -21,6 +21,11 @@ public:
   Pose getHMDPose() const;
   Pose getControllerPose(uint32_t id) const;
 
+  Pose getLeftHandRootPose();
+  Pose getRightHandRootPose();
+  std::vector<Pose> getLeftHandSkeletalPoses();
+  std::vector<Pose> getRightHandSkeletalPoses();
+
   uint64_t getControllerButtonPressed(uint32_t id) const;
   uint64_t getControllerButtonTouched(uint32_t id) const;
   std::array<float, 2> getControllerAxisState(uint32_t id, uint32_t axis) const;

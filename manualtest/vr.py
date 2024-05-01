@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import json
 
 import numpy as np
 import sapien
@@ -19,6 +20,76 @@ sapien.render.set_viewer_shader_dir("../vulkan_shader/vr_default")
 
 class VRViewer:
     def __init__(self):
+        action_file = Path.home() / ".sapien" / "steamvr_actions.json"
+        if not action_file.exists():
+            with action_file.open("w") as f:
+                json.dump(
+                    {
+                        "version": 1,
+                        "minimum_required_version": 1,
+                        "default_bindings": [
+                            {
+                                "controller_type": "oculus_touch",
+                                "binding_url": "oculus_touch.json",
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "name": "/actions/global/in/HandSkeletonLeft",
+                                "type": "skeleton",
+                                "skeleton": "/skeleton/hand/left",
+                            },
+                            {
+                                "name": "/actions/global/in/HandSkeletonRight",
+                                "type": "skeleton",
+                                "skeleton": "/skeleton/hand/right",
+                            },
+                        ],
+                        "action_sets": [
+                            {"name": "/actions/global", "usage": "leftright"}
+                        ],
+                        "localization": [
+                            {
+                                "language_tag": "en_US",
+                                "/actions/global": "Global",
+                                "/actions/global/in/HandPoseLeft": "Hand Pose Left",
+                                "/actions/global/in/HandPoseRight": "Hand Pose Right",
+                                "/actions/global/in/HandSkeletonLeft": "Hand Skeleton Left",
+                                "/actions/global/in/HandSkeletonRight": "Hand Skeleton Right",
+                            }
+                        ],
+                    },
+                    f,
+                )
+            with (Path.home() / ".sapien" / "oculus_touch.json").open("w") as f:
+                json.dump(
+                    {
+                        "action_manifest_version": 1,
+                        "bindings": {
+                            "/actions/global": {
+                                "skeleton": [
+                                    {
+                                        "output": "/actions/global/in/handskeletonleft",
+                                        "path": "/user/hand/left/input/skeleton/left",
+                                    },
+                                    {
+                                        "output": "/actions/global/in/handskeletonright",
+                                        "path": "/user/hand/right/input/skeleton/right",
+                                    },
+                                ],
+                                "sources": [],
+                            }
+                        },
+                        "controller_type": "oculus_touch",
+                        "description": "Default Oculus Touch bindings for SteamVR Home.",
+                        "name": "Default Oculus Touch Bindings",
+                    },
+                    f,
+                )
+        sapien.render.set_vr_action_manifest_filename(str(action_file))
+        print(sapien.render.get_vr_action_manifest_filename())
+
+
         self.vr = RenderVRDisplay()
         self.controllers = self.vr.get_controller_ids()
         self.renderer_context = sapien.render.SapienRenderer()._internal_context
@@ -29,6 +100,9 @@ class VRViewer:
     def reset(self):
         self.controller_axes = None
         self.marker_spheres = None
+
+        self.left_hand_spheres = None
+        self.right_hand_spheres = None
 
     @property
     def root_pose(self):
@@ -129,6 +203,9 @@ class VRViewer:
         self.red_sphere = self.renderer_context.create_model(
             [self.sphere], [self.mat_red]
         )
+        self.cyan_sphere = self.renderer_context.create_model(
+            [self.sphere], [self.mat_cyan]
+        )
 
     def _create_coordiate_axes(self):
         render_scene = self.render_scene
@@ -201,6 +278,42 @@ class VRViewer:
         node.transparency = 1
         return node
 
+    def _create_hand_sphere(self):
+        node = self.render_scene.add_object(self.cyan_sphere)
+        node.set_scale([0.01] * 3)
+        node.shading_mode = 0
+        node.cast_shadow = False
+        node.transparency = 1
+        return node
+
+    def update_hand_skeleton(self):
+        root_pose = self.root_pose
+        hrp = self.vr.get_left_hand_root_pose()
+        poses = self.vr.get_left_hand_skeletal_poses()
+        if len(poses) != 31:
+            return
+
+        if self.left_hand_spheres is None:
+            self.left_hand_spheres = [self._create_hand_sphere() for _ in range(25)]
+
+        for s, p in zip(self.left_hand_spheres, poses[1:]):
+            sphere_pose = root_pose * hrp * p
+            s.transparency = 0
+            s.set_position(sphere_pose.p)
+
+        hrp = self.vr.get_right_hand_root_pose()
+        poses = self.vr.get_right_hand_skeletal_poses()
+        if len(poses) != 31:
+            return
+
+        if self.right_hand_spheres is None:
+            self.right_hand_spheres = [self._create_hand_sphere() for _ in range(25)]
+
+        for s, p in zip(self.right_hand_spheres, poses[1:]):
+            sphere_pose = root_pose * hrp * p
+            s.transparency = 0
+            s.set_position(sphere_pose.p)
+
     def update_marker_sphere(self, i, hit):
         if self.marker_spheres is None:
             self.marker_spheres = [
@@ -216,7 +329,9 @@ class VRViewer:
 
 def run():
     scene = sapien.Scene()
-    scene.load_widget_from_package("demo_arena", "DemoArena")
+    from sapien_demo_arena import DemoArena
+
+    DemoArena().load(scene)
 
     viewer = VRViewer()
     viewer.set_scene(scene)
@@ -242,6 +357,8 @@ def run():
                 viewer.update_marker_sphere(i, hit)
             else:
                 viewer.update_marker_sphere(i, None)
+
+            viewer.update_hand_skeleton()
 
             prev_button_pressed[i] = button_pressed
 

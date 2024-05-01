@@ -1,6 +1,7 @@
 #include "sapien/sapien_renderer/sapien_renderer_default.h"
 #include <filesystem>
 #include <svulkan2/core/context.h>
+#include <svulkan2/renderer/vr.h>
 
 namespace fs = std::filesystem;
 
@@ -100,6 +101,13 @@ void SapienRendererDefault::setImguiIniFilename(std::string const &filename) {
 
 std::string SapienRendererDefault::getImguiIniFilename() {
   return svulkan2::renderer::GuiWindow::getImguiIniFileLocation();
+}
+
+void SapienRendererDefault::setVRActionManifestFilename(std::string const &filename) {
+  svulkan2::renderer::VRDisplay::setActionManifestPath(filename);
+}
+std::string SapienRendererDefault::getVRActionManifestFilename() {
+  return svulkan2::renderer::VRDisplay::getActionManifestPath();
 }
 
 } // namespace sapien_renderer

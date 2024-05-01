@@ -23,6 +23,9 @@ public:
   static void setImguiIniFilename(std::string const &filename);
   static std::string getImguiIniFilename();
 
+  static void setVRActionManifestFilename(std::string const &filename);
+  static std::string getVRActionManifestFilename();
+
   static void setViewerShaderDirectory(std::string const &dir);
   static void setCameraShaderDirectory(std::string const &dir);
   static void setRayTracingSamplesPerPixel(int spp);

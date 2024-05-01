@@ -406,6 +406,8 @@ void init_sapien_renderer(py::module &sapien) {
         py::arg("path"))
       .def("set_imgui_ini_filename", &SapienRendererDefault::setImguiIniFilename,
            py::arg("filename"))
+      .def("set_vr_action_manifest_filename", &SapienRendererDefault::setVRActionManifestFilename,
+           py::arg("filename"))
       .def("set_viewer_shader_dir", &SapienRendererDefault::setViewerShaderDirectory,
            py::arg("dir"))
       .def("set_camera_shader_dir", &SapienRendererDefault::setCameraShaderDirectory,
@@ -425,6 +427,7 @@ void init_sapien_renderer(py::module &sapien) {
            py::arg("format"))
 
       .def("get_imgui_ini_filename", &SapienRendererDefault::getImguiIniFilename)
+      .def("get_vr_action_manifest_filename", &SapienRendererDefault::getVRActionManifestFilename)
       .def("get_viewer_shader_dir", &SapienRendererDefault::getViewerShaderDirectory)
       .def("get_camera_shader_dir", &SapienRendererDefault::getCameraShaderDirectory)
       .def("get_ray_tracing_samples_per_pixel",
@@ -1214,6 +1217,11 @@ consumer library. Make a copy if needed.
       .def(
           "get_controller_pose", &SapienVRDisplay::getControllerPose, py::arg("id"),
           "Gets the local pose of a controller. It should be called immediately after fetch_poses")
+      .def("get_left_hand_root_pose", &SapienVRDisplay::getLeftHandRootPose)
+      .def("get_right_hand_root_pose", &SapienVRDisplay::getRightHandRootPose)
+      .def("get_left_hand_skeletal_poses", &SapienVRDisplay::getLeftHandSkeletalPoses)
+      .def("get_right_hand_skeletal_poses", &SapienVRDisplay::getRightHandSkeletalPoses)
+
       .def("update_render", &SapienVRDisplay::updateRender,
            "update_render implicitly calls fetch_poses to make sure the HMD pose is up-to-date")
       .def("render", &SapienVRDisplay::render)

@@ -34,5 +34,5 @@ from . import utils
 from . import version
 from . import wrapper
 __all__ = ['ActorBuilder', 'ArticulationBuilder', 'Component', 'CudaArray', 'Device', 'Engine', 'Entity', 'Path', 'PinocchioModel', 'Pose', 'SapienRenderer', 'Scene', 'SceneConfig', 'System', 'Widget', 'asset', 'internal_renderer', 'math', 'os', 'physx', 'pkg_resources', 'platform', 'profile', 'pysapien', 'pysapien_pinocchio', 'render', 'set_log_level', 'simsense', 'utils', 'version', 'warn', 'wrapper']
-__version__: str = '3.0.0.dev20240429+7809345c'
+__version__: str = '3.0.0b0'
 __warningregistry__: dict = {'version': 0}

@@ -303,8 +303,9 @@ class ControlWindow(Plugin):
                     .Label("Show Joint Axes")
                     .Bind(self, "show_joint_axes"),
                     R.UICheckbox()
-                    .Label("Show Origin Frame")
+                    .Label("Show Coordinate Frame")
                     .Bind(self, "show_origin_frame"),
+                    R.UICheckbox().Label("Use CM Pose").Bind(self, "_use_cm_frame"),
                     R.UISliderFloat()
                     .Label("Frame Size")
                     .Min(0)
@@ -541,6 +542,7 @@ class ControlWindow(Plugin):
         self._show_camera_linesets = True
         self._show_joint_axes = False
         self._show_origin_frame = False
+        self._use_cm_frame = False
 
         self.click_handlers = []
 
@@ -718,9 +720,23 @@ class ControlWindow(Plugin):
             for c in self.coordinate_axes.children:
                 c.transparency = 0
             self.coordinate_axes.set_scale([self.coordinate_axes_scale] * 3)
-            pose = self.viewer.get_entity_viewer_pose(self.selected_entity)
+
+            scene_pose = sapien.Pose(
+                self.viewer.scene_offset[self.selected_entity.scene]
+            )
+            if self._use_cm_frame and (
+                comp := self.selected_entity.find_component_by_type(
+                    sapien.physx.PhysxRigidBodyComponent
+                )
+            ):
+                pose = self.selected_entity.pose * comp.cmass_local_pose
+            else:
+                pose = self.selected_entity.pose
+
+            pose = scene_pose * pose
             self.coordinate_axes.set_position(pose.p)
             self.coordinate_axes.set_rotation(pose.q)
+
         else:
             for c in self.coordinate_axes.children:
                 c.transparency = 1

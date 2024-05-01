@@ -123,6 +123,34 @@ Pose SapienVRDisplay::getControllerPose(uint32_t id) const {
   return POSE_GL_TO_ROS * Mat4ToPose(mVR->getControllerPose(id)) * POSE_ROS_TO_GL;
 }
 
+Pose SapienVRDisplay::getLeftHandRootPose() {
+  return POSE_GL_TO_ROS * Mat4ToPose(mVR->getSkeletalRootPoseLeft()) * POSE_ROS_TO_GL;
+}
+
+Pose SapienVRDisplay::getRightHandRootPose() {
+  return POSE_GL_TO_ROS * Mat4ToPose(mVR->getSkeletalRootPoseRight()) * POSE_ROS_TO_GL;
+}
+std::vector<Pose> SapienVRDisplay::getLeftHandSkeletalPoses() {
+  auto poses = mVR->getSkeletalDataLeft();
+  std::vector<Pose> res;
+  res.reserve(poses.size());
+  for (auto &p : poses) {
+    res.push_back(POSE_GL_TO_ROS * Pose{{p[4], p[5], p[6]}, {p[0], p[1], p[2], p[3]}} *
+                  POSE_ROS_TO_GL);
+  }
+  return res;
+}
+std::vector<Pose> SapienVRDisplay::getRightHandSkeletalPoses() {
+  auto poses = mVR->getSkeletalDataRight();
+  std::vector<Pose> res;
+  res.reserve(poses.size());
+  for (auto &p : poses) {
+    res.push_back(POSE_GL_TO_ROS * Pose{{p[4], p[5], p[6]}, {p[0], p[1], p[2], p[3]}} *
+                  POSE_ROS_TO_GL);
+  }
+  return res;
+}
+
 uint64_t SapienVRDisplay::getControllerButtonPressed(uint32_t id) const {
   return mVR->getControllerButtonPressed(id);
 }
