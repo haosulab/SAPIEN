@@ -10,17 +10,20 @@
 namespace sapien {
 
 static std::vector<std::shared_ptr<Device>> vulkanFindDevices() {
-  std::shared_ptr<svulkan2::core::Instance> instance;
-
   auto level = svulkan2::logger::getLogLevel();
   svulkan2::logger::setLogLevel("off");
 
   std::vector<std::shared_ptr<Device>> res;
   try {
-    auto instance = svulkan2::core::Instance::Get(VK_MAKE_VERSION(0, 0, 1),
-                                                  VK_MAKE_VERSION(0, 0, 1), VK_API_VERSION_1_2);
-    if (instance) {
-      auto devices = instance->summarizePhysicalDevices();
+    std::shared_ptr<svulkan2::core::Context> context;
+    try {
+      context = svulkan2::core::Context::Get();
+    } catch (std::runtime_error &) {
+      context = svulkan2::core::Context::Create();
+    }
+
+    if (context) {
+      auto devices = context->getInstance2()->summarizePhysicalDevices();
       for (auto &d : devices) {
         int priority = 0;
 

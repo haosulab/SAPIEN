@@ -33,19 +33,29 @@ std::shared_ptr<SapienRenderEngine> SapienRenderEngine::Get(std::shared_ptr<Devi
 }
 
 std::string SapienRenderEngine::getSummary() {
-  std::stringstream ss;
-  auto info = svulkan2::core::Instance::Get(VK_MAKE_VERSION(0, 0, 1), VK_MAKE_VERSION(0, 0, 1),
-                                            VK_API_VERSION_1_2)
-                  ->summarizePhysicalDevices();
-  for (auto const &entry : info) {
-    ss << "GPU: " << entry.name << "\n";
-    ss << "  Supported: " << entry.supported << "\n";
-    ss << "  Present:   " << entry.present << "\n";
-    ss << "  cudaId:    " << entry.cudaId << "\n";
-    ss << "  rayTrace:  " << entry.rayTracing << "\n";
-    ss << "  cudaMode   " << entry.cudaComputeMode << "\n";
+  try {
+    std::shared_ptr<svulkan2::core::Context> context;
+    try {
+      context = svulkan2::core::Context::Get();
+    } catch (std::runtime_error &) {
+      context = svulkan2::core::Context::Create();
+    }
+
+    auto info = context->getInstance2()->summarizePhysicalDevices();
+    std::stringstream ss;
+
+    for (auto const &entry : info) {
+      ss << "GPU: " << entry.name << "\n";
+      ss << "  Supported: " << entry.supported << "\n";
+      ss << "  Present:   " << entry.present << "\n";
+      ss << "  cudaId:    " << entry.cudaId << "\n";
+      ss << "  rayTrace:  " << entry.rayTracing << "\n";
+      ss << "  cudaMode   " << entry.cudaComputeMode << "\n";
+    }
+    return ss.str();
+  } catch (std::runtime_error &) {
+    return "Failed to initialize Vulkan";
   }
-  return ss.str();
 }
 
 SapienRenderEngine::SapienRenderEngine(std::shared_ptr<Device> device) {
@@ -60,7 +70,7 @@ SapienRenderEngine::SapienRenderEngine(std::shared_ptr<Device> device) {
   auto &d = SapienRendererDefault::Get();
   mContext = svulkan2::core::Context::Create(d.getMaxNumMaterials(), d.getMaxNumTextures(),
                                              d.getDefaultMipMaps(), d.getDoNotLoadTexture(),
-                                             device->getAlias());
+                                             device->getAlias(), d.getVREnabled());
   mResourceManager = mContext->createResourceManager();
 }
 

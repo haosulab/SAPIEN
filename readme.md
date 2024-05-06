@@ -19,7 +19,7 @@ python -m sapien.exapmle.hello_world
 ```
 
 Next, follow our tutorial at:
-[https://sapien.ucsd.edu/docs/latest/index.html](https://sapien.ucsd.edu/docs/latest/index.html).
+[https://sapien-sim.github.io/docs/](https://sapien-sim.github.io/docs/).
 
 ### Offscreen rendering on a server
 To use SAPIEN on a GPU server without display, the only system dependencies

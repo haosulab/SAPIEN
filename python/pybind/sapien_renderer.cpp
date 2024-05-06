@@ -408,6 +408,10 @@ void init_sapien_renderer(py::module &sapien) {
            py::arg("filename"))
       .def("set_vr_action_manifest_filename", &SapienRendererDefault::setVRActionManifestFilename,
            py::arg("filename"))
+      .def("enable_vr", &SapienRendererDefault::enableVR,
+           "Enable VR via Steam. Must be called before creating RenderSystem or sapien Scene.")
+      .def("get_vr_enabled", &SapienRendererDefault::getVREnabled)
+
       .def("set_viewer_shader_dir", &SapienRendererDefault::setViewerShaderDirectory,
            py::arg("dir"))
       .def("set_camera_shader_dir", &SapienRendererDefault::setCameraShaderDirectory,

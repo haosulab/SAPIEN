@@ -110,5 +110,8 @@ std::string SapienRendererDefault::getVRActionManifestFilename() {
   return svulkan2::renderer::VRDisplay::getActionManifestPath();
 }
 
+void SapienRendererDefault::enableVR() { Get().vrEnabled = true; }
+bool SapienRendererDefault::getVREnabled() { return Get().vrEnabled; }
+
 } // namespace sapien_renderer
 } // namespace sapien
