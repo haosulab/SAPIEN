@@ -1139,6 +1139,7 @@ consumer library. Make a copy if needed.
 
       .def("set_shader_dir", &SapienRendererWindow::setShader, py::arg("shader_dir"))
       .def("get_content_scale", &SapienRendererWindow::getContentScale)
+      .def("set_content_scale", &SapienRendererWindow::setContentScale, py::arg("scale"))
       .def("get_camera_position", &SapienRendererWindow::getCameraPosition)
       .def("get_camera_rotation", &SapienRendererWindow::getCameraRotation)
       .def("get_camera_pose", &SapienRendererWindow::getCameraPose)

@@ -80,6 +80,7 @@ public:
                              std::vector<std::shared_ptr<SapienRenderTexture2D>> textures);
 
   float getContentScale();
+  void setContentScale(float scale);
 
   float getCameraNear();
   float getCameraFar();

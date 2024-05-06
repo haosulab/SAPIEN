@@ -4,7 +4,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien.internal_renderer
 import typing
-__all__ = ['RenderBodyComponent', 'RenderCameraComponent', 'RenderCameraGroup', 'RenderCubemap', 'RenderCudaMeshComponent', 'RenderDirectionalLightComponent', 'RenderLightComponent', 'RenderMaterial', 'RenderParallelogramLightComponent', 'RenderPointCloudComponent', 'RenderPointLightComponent', 'RenderSceneLoaderNode', 'RenderShape', 'RenderShapeBox', 'RenderShapeCapsule', 'RenderShapeCylinder', 'RenderShapePlane', 'RenderShapePrimitive', 'RenderShapeSphere', 'RenderShapeTriangleMesh', 'RenderShapeTriangleMeshPart', 'RenderSpotLightComponent', 'RenderSystem', 'RenderSystemGroup', 'RenderTexture', 'RenderTexture2D', 'RenderTexturedLightComponent', 'RenderVRDisplay', 'RenderWindow', 'SapienRenderer', 'clear_cache', 'get_camera_shader_dir', 'get_device_summary', 'get_imgui_ini_filename', 'get_msaa', 'get_ray_tracing_denoiser', 'get_ray_tracing_dof_aperture', 'get_ray_tracing_dof_plane', 'get_ray_tracing_path_depth', 'get_ray_tracing_samples_per_pixel', 'get_viewer_shader_dir', 'get_vr_action_manifest_filename', 'load_scene', 'set_camera_shader_dir', 'set_global_config', 'set_imgui_ini_filename', 'set_log_level', 'set_msaa', 'set_picture_format', 'set_ray_tracing_denoiser', 'set_ray_tracing_dof_aperture', 'set_ray_tracing_dof_plane', 'set_ray_tracing_path_depth', 'set_ray_tracing_samples_per_pixel', 'set_viewer_shader_dir', 'set_vr_action_manifest_filename']
+__all__ = ['RenderBodyComponent', 'RenderCameraComponent', 'RenderCameraGroup', 'RenderCubemap', 'RenderCudaMeshComponent', 'RenderDirectionalLightComponent', 'RenderLightComponent', 'RenderMaterial', 'RenderParallelogramLightComponent', 'RenderPointCloudComponent', 'RenderPointLightComponent', 'RenderSceneLoaderNode', 'RenderShape', 'RenderShapeBox', 'RenderShapeCapsule', 'RenderShapeCylinder', 'RenderShapePlane', 'RenderShapePrimitive', 'RenderShapeSphere', 'RenderShapeTriangleMesh', 'RenderShapeTriangleMeshPart', 'RenderSpotLightComponent', 'RenderSystem', 'RenderSystemGroup', 'RenderTexture', 'RenderTexture2D', 'RenderTexturedLightComponent', 'RenderVRDisplay', 'RenderWindow', 'SapienRenderer', 'clear_cache', 'enable_vr', 'get_camera_shader_dir', 'get_device_summary', 'get_imgui_ini_filename', 'get_msaa', 'get_ray_tracing_denoiser', 'get_ray_tracing_dof_aperture', 'get_ray_tracing_dof_plane', 'get_ray_tracing_path_depth', 'get_ray_tracing_samples_per_pixel', 'get_viewer_shader_dir', 'get_vr_action_manifest_filename', 'get_vr_enabled', 'load_scene', 'set_camera_shader_dir', 'set_global_config', 'set_imgui_ini_filename', 'set_log_level', 'set_msaa', 'set_picture_format', 'set_ray_tracing_denoiser', 'set_ray_tracing_dof_aperture', 'set_ray_tracing_dof_plane', 'set_ray_tracing_path_depth', 'set_ray_tracing_samples_per_pixel', 'set_viewer_shader_dir', 'set_vr_action_manifest_filename']
 M = typing.TypeVar("M", bound=int)
 N = typing.TypeVar("N", bound=int)
 class RenderBodyComponent(sapien.pysapien.Component):
@@ -862,6 +862,8 @@ class RenderWindow:
         ...
     def set_camera_texture_array(self, name: str, textures: list[RenderTexture2D]) -> None:
         ...
+    def set_content_scale(self, scale: float) -> None:
+        ...
     def set_drop_callback(self, callback: typing.Callable[[list[str]], None]) -> None:
         ...
     def set_focus_callback(self, callback: typing.Callable[[int], None]) -> None:
@@ -944,6 +946,10 @@ def _internal_set_shader_search_path(path: str) -> None:
     ...
 def clear_cache(models: bool = True, images: bool = True, shaders: bool = False) -> None:
     ...
+def enable_vr() -> None:
+    """
+    Enable VR via Steam. Must be called before creating RenderSystem or sapien Scene.
+    """
 def get_camera_shader_dir() -> str:
     ...
 def get_device_summary() -> str:
@@ -965,6 +971,8 @@ def get_ray_tracing_samples_per_pixel() -> int:
 def get_viewer_shader_dir() -> str:
     ...
 def get_vr_action_manifest_filename() -> str:
+    ...
+def get_vr_enabled() -> bool:
     ...
 def load_scene(filename: str, apply_scale: bool = True) -> RenderSceneLoaderNode:
     ...

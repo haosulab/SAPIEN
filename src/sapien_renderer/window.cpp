@@ -265,6 +265,7 @@ void SapienRendererWindow::setCameraTextureArray(
   mSVulkanRenderer->setCustomTextureArray(name, sts);
 }
 float SapienRendererWindow::getContentScale() { return mWindow->getContentScale(); }
+void SapienRendererWindow::setContentScale(float scale) { return mWindow->setContentScale(scale); }
 
 glm::mat4 SapienRendererWindow::getCameraProjectionMatrix() {
   return getCamera()->getProjectionMatrix();
