@@ -17,9 +17,12 @@ from sapien.render import RenderVRDisplay
 sapien.render.set_log_level("info")
 sapien.render.set_viewer_shader_dir("../vulkan_shader/vr_default")
 
+sapien.render.enable_vr()
+
 
 class VRViewer:
     def __init__(self):
+        (Path.home() / ".sapien").mkdir(parents=True, exist_ok=True)
         action_file = Path.home() / ".sapien" / "steamvr_actions.json"
         if not action_file.exists():
             with action_file.open("w") as f:
