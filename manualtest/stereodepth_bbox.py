@@ -1,14 +1,11 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import sapien
-from sapien import Scene, Entity, Pose, ActorBuilder
+import trimesh
+from sapien import ActorBuilder, Entity, Pose, Scene
 from sapien.physx import PhysxCpuSystem
 from sapien.render import RenderSystem
-from sapien.utils.viewer import Viewer
 from sapien.sensor import StereoDepthSensor, StereoDepthSensorConfig
-
-import numpy as np
-import matplotlib.pyplot as plt
-import trimesh
-import torch
 
 
 def build_scene(render_system, physx_system):
@@ -97,17 +94,14 @@ def build_scene(render_system, physx_system):
     return scene
 
 
-def main():
+def main(model: str = "D435"):
     render_system = RenderSystem()
     physx_system = PhysxCpuSystem()
     scene = build_scene(render_system, physx_system)
 
     sensor_entity = Entity()
-    sensor_config = StereoDepthSensorConfig()
+    sensor_config = StereoDepthSensorConfig(model=model)
     sensor = StereoDepthSensor(sensor_config, sensor_entity)
-
-    # Test infrared light
-    from sapien.render import RenderTexturedLightComponent, RenderTexture2D
 
     scene.add_entity(sensor_entity)
     sensor_entity.set_pose(
@@ -120,8 +114,14 @@ def main():
     render_system.step()
     sensor.take_picture()
 
-    bbox_start = (100, 100)  # Top left corner starts at (100, 100)
-    bbox_size = (640, 360)  # Width 640, Height 360
+    if model == "D415":
+        bbox_start = (100, 100)  # Top left corner starts at (100, 100)
+        bbox_size = (640, 360)  # Width 640, Height 360
+    elif model == "D435":
+        bbox_start = (150, 100)  # Top left corner starts at (150, 100)
+        bbox_size = (360, 240)  # Width 360, Height 240
+    else:
+        raise NotImplementedError(f"Unsupported stereo depth sensor model: {model}")
     sensor.compute_depth(
         bbox_start, bbox_size
     )  # Passing these two tuples to compute_depth will only do stereo matching in this region
@@ -158,4 +158,18 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Test stereo depth sensor")
+    parser.add_argument(
+        "model",
+        type=str,
+        nargs="?",
+        default="D435",
+        choices=["D415", "D435"],
+        help="Stereo depth sensor model",
+    )
+    args = parser.parse_args()
+    print(f"Testing Stereo Depth Sensor: {args.model}")
+
+    main(args.model)
