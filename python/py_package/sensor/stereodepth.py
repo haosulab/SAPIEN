@@ -1,14 +1,15 @@
-from ..pysapien import Pose, Entity
+import os
+from copy import deepcopy as copy
+from typing import Optional
+
+import numpy as np
+
+from ..pysapien import Entity, Pose
 from ..pysapien.render import (
     RenderCameraComponent,
-    RenderTexturedLightComponent,
     RenderTexture2D,
+    RenderTexturedLightComponent,
 )
-from typing import Optional
-from copy import deepcopy as copy
-
-import os
-import numpy as np
 
 
 class StereoDepthSensorConfig:
@@ -16,36 +17,114 @@ class StereoDepthSensorConfig:
     An instance of this class is required to initialize StereoDepthSensor.
     """
 
-    def __init__(self):
-        self.light_pattern = os.path.join(
-            os.path.dirname(__file__), "assets/patterns/d415.png"
-        )
-        """Path to active light pattern file. Use RGB modality if set to None."""
+    SUPPORTED_MODELS = ("D415", "D435")
+
+    def __init__(self, model: str = "D435"):
+        """
+        :param model: sensor model, one of: D415, D435
+        """
+        if model == "D415":
+            self.light_pattern = os.path.join(
+                os.path.dirname(__file__), "assets/patterns/d415.png"
+            )
+            """Path to active light pattern file. Use RGB modality if set to None."""
+
+            self.rgb_resolution = (1920, 1080)
+            """Resolution of the RGB camera (width x height)."""
+
+            self.ir_resolution = (1280, 720)
+            """Resolution of the infrared cameras (width x height)."""
+
+            self.rgb_intrinsic = np.array([
+                [1380.0, 0.0, 960.0],
+                [0.0, 1380.0, 540.0],
+                [0.0, 0.0, 1.0],
+            ])
+            """Intrinsic matrix of the RGB camera."""
+
+            self.ir_intrinsic = np.array([
+                [920.0, 0.0, 640.0],
+                [0.0, 920.0, 360.0],
+                [0.0, 0.0, 1.0],
+            ])
+            """Intrinsic matrix of the infrared cameras."""
+
+            self.trans_pose_l = Pose([0, -0.0175, 0])
+            """Relative pose of the left infrared camera to the RGB camera."""
+
+            self.trans_pose_r = Pose([0, -0.0720, 0])
+            """Relative pose of the right infrared camera to the RGB camera."""
+
+            self.pose_rgb_irproj = Pose()  # TODO: fill this in
+            """Relative pose from IR projector to the RGB camera."""
+
+            self.active_light_fov = 1.57
+            """Active light's field of view in radians."""
+        elif model == "D435":
+            self.light_pattern = os.path.join(
+                os.path.dirname(__file__), "assets/patterns/d435_pattern_1070.png"
+            )
+            """Path to active light pattern file. Use RGB modality if set to None."""
+
+            self.rgb_resolution = (848, 480)
+            """Resolution of the RGB camera (width x height)."""
+
+            self.ir_resolution = (848, 480)
+            """Resolution of the infrared cameras (width x height)."""
+
+            self.rgb_intrinsic = np.array([
+                [605.12158203125, 0.0, 424.5927734375],
+                [0.0, 604.905517578125, 236.668975830078],
+                [0.0, 0.0, 1.0],
+            ])
+            """Intrinsic matrix of the RGB camera."""
+
+            self.ir_intrinsic = np.array([
+                [430.139801025391, 0.0, 425.162841796875],
+                [0.0, 430.139801025391, 235.276519775391],
+                [0.0, 0.0, 1.0],
+            ])
+            """Intrinsic matrix of the infrared cameras."""
+
+            self.trans_pose_l = Pose(
+                np.array([
+                    [9.99948919e-01, 9.67109110e-03, 2.94523709e-03, 1.56505470e-04],
+                    [-9.70994867e-03, 9.99862015e-01, 1.34780351e-02, -1.48976548e-02],
+                    [-2.81448336e-03, -1.35059441e-02, 9.99904811e-01, -1.15314942e-05],
+                    [0.0, 0.0, 0.0, 1.0],
+                ])
+            )
+            """Relative pose of the left infrared camera to the RGB camera."""
+
+            self.trans_pose_r = Pose(
+                np.array([
+                    [9.99948919e-01, 9.67109110e-03, 2.94523709e-03, -3.28569353e-04],
+                    [-9.70994867e-03, 9.99862015e-01, 1.34780351e-02, -6.50479272e-02],
+                    [-2.81448336e-03, -1.35059441e-02, 9.99904811e-01, 6.65888772e-04],
+                    [0.0, 0.0, 0.0, 1.0],
+                ])
+            )
+            """Relative pose of the right infrared camera to the RGB camera."""
+
+            self.pose_rgb_irproj = Pose(
+                np.array([
+                    [0.99994892, 0.00967109, 0.00294524, 0.0],
+                    [-0.00970995, 0.99986202, 0.01347804, -0.015 - 0.029],
+                    [-0.00281448, -0.01350594, 0.99990481, 0.0],
+                    [0.0, 0.0, 0.0, 1.0],
+                ])
+            )
+            """Relative pose from IR projector to the RGB camera."""
+
+            self.active_light_fov = np.deg2rad(102.0)
+            """Active light's field of view in radians."""
+        else:
+            raise ValueError(
+                f"Invalid sensor model, must be one of: {self.SUPPORTED_MODELS}"
+            )
 
         self.ir_camera_exposure = 0.01
         # """Camera exposure for infrared cameras."""
-
-        self.rgb_resolution = (1920, 1080)
-        """Resolution of the RGB camera (width x height)."""
-
-        self.ir_resolution = (1280, 720)
-        """Resolution of the infrared cameras (width x height)."""
-
-        self.rgb_intrinsic = np.array(
-            [[1380.0, 0.0, 960.0], [0.0, 1380.0, 540.0], [0.0, 0.0, 1.0]]
-        )
-        """Intrinsic matrix of the RGB camera."""
-
-        self.ir_intrinsic = np.array(
-            [[920.0, 0.0, 640.0], [0.0, 920.0, 360.0], [0.0, 0.0, 1.0]]
-        )
-        """Intrinsic matrix of the infrared cameras."""
-
-        self.trans_pose_l = Pose([0, -0.0175, 0])
-        """Relative pose of the left infrared camera to the RGB camera."""
-
-        self.trans_pose_r = Pose([0, -0.0720, 0])
-        """Relative pose of the right infrared camera to the RGB camera."""
 
         self.min_depth = 0.2
         """Minimum valid depth in meters."""
@@ -206,7 +285,7 @@ class StereoDepthSensor:
         Set local pose of the sensor relative to mounted actor.
         """
         self._pose = pose
-        self._alight.local_pose = pose
+        self._alight.local_pose = pose * self._config.pose_rgb_irproj
         self._cam_rgb.local_pose = pose
         self._cam_ir_l.local_pose = pose * self._config.trans_pose_l
         self._cam_ir_r.local_pose = pose * self._config.trans_pose_r
@@ -430,10 +509,10 @@ class StereoDepthSensor:
         # Active Light
         self._alight = RenderTexturedLightComponent()
         self._alight.color = [0, 0, 0]
-        self._alight.inner_fov = 1.57
-        self._alight.outer_fov = 1.57
+        self._alight.inner_fov = self._config.active_light_fov
+        self._alight.outer_fov = self._config.active_light_fov
         self._alight.texture = RenderTexture2D(self._config.light_pattern)
-        self._alight.local_pose = self._pose
+        self._alight.local_pose = self._pose * self._config.pose_rgb_irproj
         self._alight.name = "active_light"
         self._mount.add_component(self._alight)
 

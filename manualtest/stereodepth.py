@@ -1,14 +1,11 @@
+import matplotlib.pyplot as plt
+import numpy as np
 import sapien
-from sapien import Scene, Entity, Pose, ActorBuilder
+import trimesh
+from sapien import ActorBuilder, Entity, Pose, Scene
 from sapien.physx import PhysxCpuSystem
 from sapien.render import RenderSystem
-from sapien.utils.viewer import Viewer
 from sapien.sensor import StereoDepthSensor, StereoDepthSensorConfig
-
-import numpy as np
-import matplotlib.pyplot as plt
-import trimesh
-import torch
 
 
 def build_scene(render_system, physx_system):
@@ -109,7 +106,7 @@ def build_scene(render_system, physx_system):
     return scene
 
 
-def main():
+def main(model: str = "D435"):
     sapien.render.set_camera_shader_dir("rt")
     sapien.render.set_ray_tracing_denoiser("optix")
     sapien.render.set_ray_tracing_samples_per_pixel(4)
@@ -119,11 +116,8 @@ def main():
     scene = build_scene(render_system, physx_system)
 
     sensor_entity = Entity()
-    sensor_config = StereoDepthSensorConfig()
+    sensor_config = StereoDepthSensorConfig(model=model)
     sensor = StereoDepthSensor(sensor_config, sensor_entity)
-
-    # Test infrared light
-    from sapien.render import RenderTexturedLightComponent, RenderTexture2D
 
     scene.add_entity(sensor_entity)
     sensor_entity.set_pose(
@@ -165,4 +159,18 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Test stereo depth sensor")
+    parser.add_argument(
+        "model",
+        type=str,
+        nargs="?",
+        default="D435",
+        choices=["D415", "D435"],
+        help="Stereo depth sensor model",
+    )
+    args = parser.parse_args()
+    print(f"Testing Stereo Depth Sensor: {args.model}")
+
+    main(args.model)
