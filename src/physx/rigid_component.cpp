@@ -283,8 +283,7 @@ PhysxRigidBodyComponent::attachCollision(std::shared_ptr<PhysxCollisionShape> sh
   mCollisionShapes.push_back(shape);
   shape->internalSetParent(this);
 
-  if (std::dynamic_pointer_cast<PhysxCollisionShapePlane>(shape) ||
-      std::dynamic_pointer_cast<PhysxCollisionShapeTriangleMesh>(shape)) {
+  if (std::dynamic_pointer_cast<PhysxCollisionShapePlane>(shape)) {
     setAutoComputeMass(false);
   }
   if (getAutoComputeMass()) {
@@ -319,8 +318,7 @@ void PhysxRigidBodyComponent::internalUpdateMass() {
 bool PhysxRigidBodyComponent::canAutoComputeMass() {
   for (auto c : mCollisionShapes) {
     auto type = c->getPxShape()->getGeometry().getType();
-    if (type == PxGeometryType::eTRIANGLEMESH || type == PxGeometryType::eHEIGHTFIELD ||
-        type == PxGeometryType::ePLANE) {
+    if (type == PxGeometryType::eHEIGHTFIELD || type == PxGeometryType::ePLANE) {
       return false;
     }
   }

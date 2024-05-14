@@ -255,6 +255,30 @@ Generator<int> init_physx(py::module &sapien) {
             return config;
           }));
 
+  auto PyPhysxSDFConfig = py::class_<PhysxSDFShapeConfig>(m, "PhysxSDFConfig");
+  PyPhysxSDFConfig.def(py::init<>())
+      .def_readwrite("spacing", &PhysxSDFShapeConfig::spacing)
+      .def_readwrite("subgridSize", &PhysxSDFShapeConfig::subgridSize)
+      .def_readwrite("num_threads_for_construction",
+                     &PhysxSDFShapeConfig::numThreadsForConstruction)
+      .def("__repr__", [](PhysxSDFShapeConfig &) { return "PhysxSDFConfig()"; })
+      .def(py::pickle(
+          [](PhysxSDFShapeConfig &config) {
+            return py::make_tuple(config.spacing, config.subgridSize,
+                                  config.numThreadsForConstruction);
+          },
+          [](py::tuple t) {
+            if (t.size() != 3) {
+              throw std::runtime_error("Invalid state!");
+            }
+            PhysxSDFShapeConfig config;
+            config.spacing = t[0].cast<decltype(config.spacing)>();
+            config.subgridSize = t[1].cast<decltype(config.subgridSize)>();
+            config.numThreadsForConstruction =
+                t[2].cast<decltype(config.numThreadsForConstruction)>();
+            return config;
+          }));
+
   auto PyPhysxEngine = py::class_<PhysxEngine>(m, "PhysxEngine");
   auto PyPhysxContactPoint = py::class_<ContactPoint>(m, "PhysxContactPoint");
   auto PyPhysxContact = py::class_<Contact>(m, "PhysxContact");
@@ -427,6 +451,16 @@ Args:
                              &PhysxSystemGpu::gpuGetRigidDynamicCudaHandle)
       .def_property_readonly("cuda_articulation_link_data",
                              &PhysxSystemGpu::gpuGetArticulationLinkCudaHandle)
+
+      .def_property_readonly("cuda_rigid_body_force",
+                             &PhysxSystemGpu::gpuGetRigidBodyForceCudaHandle)
+      .def_property_readonly("cuda_rigid_dynamic_force",
+                             &PhysxSystemGpu::gpuGetRigidDynamicForceCudaHandle)
+      .def_property_readonly("cuda_rigid_body_torque",
+                             &PhysxSystemGpu::gpuGetRigidBodyTorqueCudaHandle)
+      .def_property_readonly("cuda_rigid_dynamic_torque",
+                             &PhysxSystemGpu::gpuGetRigidDynamicTorqueCudaHandle)
+
       .def_property_readonly("cuda_articulation_qpos",
                              &PhysxSystemGpu::gpuGetArticulationQposCudaHandle)
       .def_property_readonly("cuda_articulation_qvel",
@@ -472,6 +506,11 @@ Usage:
       // TODO apply force torque
       .def("gpu_apply_rigid_dynamic_data",
            py::overload_cast<>(&PhysxSystemGpu::gpuApplyRigidDynamicData))
+      .def("gpu_apply_rigid_dynamic_force",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyRigidDynamicForce))
+      .def("gpu_apply_rigid_dynamic_torque",
+           py::overload_cast<>(&PhysxSystemGpu::gpuApplyRigidDynamicTorque))
+
       .def("gpu_apply_articulation_root_pose",
            py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationRootPose))
       .def("gpu_apply_articulation_root_velocity",
@@ -644,8 +683,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_triangles", &PhysxCollisionShapeConvexMesh::getTriangles);
 
   PyPhysxCollisionShapeTriangleMesh
-      .def(py::init<std::string const &, Vec3, std::shared_ptr<PhysxMaterial>>(),
-           py::arg("filename"), py::arg("scale"), py::arg("material"))
+      .def(py::init<std::string const &, Vec3, bool, std::shared_ptr<PhysxMaterial>>(),
+           py::arg("filename"), py::arg("scale"), py::arg("sdf"), py::arg("material"))
       .def_property_readonly("scale", &PhysxCollisionShapeTriangleMesh::getScale)
       .def("get_scale", &PhysxCollisionShapeTriangleMesh::getScale)
       .def_property_readonly("vertices", &PhysxCollisionShapeTriangleMesh::getVertices)
@@ -1168,6 +1207,15 @@ Example:
            py::overload_cast<PhysxBodyConfig const &>(&PhysxDefault::setBodyConfig),
            py::arg("config"))
       .def("get_body_config", &PhysxDefault::getBodyConfig)
+
+      .def("set_sdf_config",
+           py::overload_cast<float, uint32_t, uint32_t>(&PhysxDefault::setSDFShapeConfig),
+           py::arg("spacing") = 0.01f, py::arg("subgrid_size") = 6,
+           py::arg("num_threads_for_construction") = 4)
+      .def("set_sdf_config",
+           py::overload_cast<PhysxSDFShapeConfig const &>(&PhysxDefault::setSDFShapeConfig),
+           py::arg("config"))
+      .def("get_sdf_config", &PhysxDefault::getSDFShapeConfig)
 
       .def("version", []() { return PhysxDefault::getPhysxVersion(); });
 

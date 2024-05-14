@@ -168,6 +168,19 @@ public:
   CudaArrayHandle gpuGetRigidDynamicCudaHandle() const { return mCudaRigidDynamicHandle; }
   CudaArrayHandle gpuGetArticulationLinkCudaHandle() const { return mCudaLinkHandle; }
 
+  CudaArrayHandle gpuGetRigidBodyForceCudaHandle() const {
+    return mCudaRigidBodyForceBuffer.handle();
+  }
+  CudaArrayHandle gpuGetRigidDynamicForceCudaHandle() const {
+    return mCudaRigidDynamicForceHandle;
+  }
+  CudaArrayHandle gpuGetRigidBodyTorqueCudaHandle() const {
+    return mCudaRigidBodyTorqueBuffer.handle();
+  }
+  CudaArrayHandle gpuGetRigidDynamicTorqueCudaHandle() const {
+    return mCudaRigidDynamicTorqueHandle;
+  }
+
   CudaArrayHandle gpuGetArticulationQposCudaHandle() const { return mCudaQposHandle; }
   CudaArrayHandle gpuGetArticulationQvelCudaHandle() const { return mCudaQvelHandle; }
   CudaArrayHandle gpuGetArticulationQaccCudaHandle() const { return mCudaQaccHandle; }
@@ -195,6 +208,8 @@ public:
   void gpuApplyArticulationQTargetVel(CudaArrayHandle const &indices);
 
   void gpuApplyRigidDynamicData();
+  void gpuApplyRigidDynamicForce();
+  void gpuApplyRigidDynamicTorque();
   void gpuApplyArticulationRootPose();
   void gpuApplyArticulationRootVel();
   void gpuApplyArticulationQpos();
@@ -268,6 +283,12 @@ private:
   CudaArray mCudaRigidBodyBuffer;
   CudaArrayHandle mCudaRigidDynamicHandle;
   CudaArrayHandle mCudaLinkHandle;
+
+  CudaArray mCudaRigidBodyForceBuffer;
+  CudaArrayHandle mCudaRigidDynamicForceHandle;
+
+  CudaArray mCudaRigidBodyTorqueBuffer;
+  CudaArrayHandle mCudaRigidDynamicTorqueHandle;
 
   CudaHostArray mCudaHostRigidBodyBuffer;
 

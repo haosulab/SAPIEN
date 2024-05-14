@@ -715,6 +715,34 @@ void PhysxSystemGpu::gpuApplyRigidDynamicData(CudaArrayHandle const &indices) {
   mCudaEventWait.wait(mCudaStream);
 }
 
+void PhysxSystemGpu::gpuApplyRigidDynamicForce() {
+  SAPIEN_PROFILE_FUNCTION;
+  checkGpuInitialized();
+  if (mRigidDynamicComponents.empty()) {
+    return;
+  }
+  mCudaEventRecord.record(mCudaStream);
+  mPxScene->applyActorData(mCudaRigidDynamicForceHandle.ptr,
+                           (PxGpuActorPair *)mCudaRigidDynamicIndexBuffer.ptr,
+                           PxActorCacheFlag::eFORCE, mCudaRigidDynamicIndexBuffer.shape.at(0),
+                           mCudaEventRecord.event, mCudaEventWait.event);
+  mCudaEventWait.wait(mCudaStream);
+}
+
+void PhysxSystemGpu::gpuApplyRigidDynamicTorque() {
+  SAPIEN_PROFILE_FUNCTION;
+  checkGpuInitialized();
+  if (mRigidDynamicComponents.empty()) {
+    return;
+  }
+  mCudaEventRecord.record(mCudaStream);
+  mPxScene->applyActorData(mCudaRigidDynamicTorqueHandle.ptr,
+                           (PxGpuActorPair *)mCudaRigidDynamicIndexBuffer.ptr,
+                           PxActorCacheFlag::eTORQUE, mCudaRigidDynamicIndexBuffer.shape.at(0),
+                           mCudaEventRecord.event, mCudaEventWait.event);
+  mCudaEventWait.wait(mCudaStream);
+}
+
 void PhysxSystemGpu::gpuApplyArticulationRootPose() {
   gpuApplyArticulationRootPose(mCudaArticulationIndexBuffer.handle());
 }
@@ -957,20 +985,36 @@ void PhysxSystemGpu::allocateCudaBuffers() {
   int rigidBodyCount = rigidDynamicCount + mGpuArticulationCount * mGpuArticulationMaxLinkCount;
 
   ensureCudaDevice();
-  mCudaRigidBodyBuffer = CudaArray({rigidBodyCount, 13}, "f4");
 
+  // rigid body data buffer
+  mCudaRigidBodyBuffer = CudaArray({rigidBodyCount, 13}, "f4");
   mCudaRigidDynamicHandle = CudaArrayHandle{.shape = {rigidDynamicCount, 13},
                                             .strides = {52, 4},
                                             .type = "f4",
                                             .cudaId = mCudaRigidBodyBuffer.cudaId,
                                             .ptr = (float *)mCudaRigidBodyBuffer.ptr};
-
   mCudaLinkHandle =
       CudaArrayHandle{.shape = {mGpuArticulationCount, mGpuArticulationMaxLinkCount, 13},
                       .strides = {mGpuArticulationMaxLinkCount * 52, 52, 4},
                       .type = "f4",
                       .cudaId = mCudaRigidBodyBuffer.cudaId,
                       .ptr = (float *)mCudaRigidBodyBuffer.ptr + 13 * rigidDynamicCount};
+
+  // rigid body force torque buffer
+  mCudaRigidBodyForceBuffer = CudaArray({rigidBodyCount, 4}, "f4");
+  mCudaRigidDynamicForceHandle = CudaArrayHandle{.shape = {rigidDynamicCount, 4},
+                                                 .strides = {16, 4},
+                                                 .type = "f4",
+                                                 .cudaId = mCudaRigidBodyForceBuffer.cudaId,
+                                                 .ptr = (float *)mCudaRigidBodyForceBuffer.ptr};
+  // TODO: articulation link handle
+  mCudaRigidBodyTorqueBuffer = CudaArray({rigidBodyCount, 4}, "f4");
+  mCudaRigidDynamicTorqueHandle = CudaArrayHandle{.shape = {rigidDynamicCount, 4},
+                                                  .strides = {16, 4},
+                                                  .type = "f4",
+                                                  .cudaId = mCudaRigidBodyTorqueBuffer.cudaId,
+                                                  .ptr = (float *)mCudaRigidBodyTorqueBuffer.ptr};
+  // TODO: articulation link handle
 
   mCudaArticulationBuffer = CudaArray({mGpuArticulationCount * mGpuArticulationMaxDof * 6}, "f4");
 

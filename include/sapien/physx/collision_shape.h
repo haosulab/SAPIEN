@@ -183,12 +183,12 @@ private:
 class PhysxCollisionShapeTriangleMesh : public PhysxCollisionShape {
 public:
   // TODO: support rotation?
-  PhysxCollisionShapeTriangleMesh(std::string const &filename, Vec3 const &scale,
+  PhysxCollisionShapeTriangleMesh(std::string const &filename, Vec3 const &scale, bool sdf,
                                   std::shared_ptr<PhysxMaterial> material = nullptr);
   PhysxCollisionShapeTriangleMesh(
       Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices,
       Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles,
-      Vec3 const &scale, std::shared_ptr<PhysxMaterial> material = nullptr);
+      Vec3 const &scale, bool sdf, std::shared_ptr<PhysxMaterial> material = nullptr);
 
   // internal use only
   PhysxCollisionShapeTriangleMesh(std::shared_ptr<PhysxTriangleMesh> mesh, Vec3 const &scale,

@@ -49,9 +49,16 @@ std::shared_ptr<PhysxTriangleMesh> MeshManager::loadTriangleMesh(const std::stri
     return it->second;
   }
 
-  auto mesh = std::make_shared<PhysxTriangleMesh>(fullPath);
+  auto mesh = std::make_shared<PhysxTriangleMesh>(fullPath, false);
   mTriangleMeshRegistry[fullPath] = mesh;
 
+  return mesh;
+}
+
+std::shared_ptr<PhysxTriangleMesh>
+MeshManager::loadTriangleMeshWithSDF(const std::string &filename) {
+  std::string fullPath = getFullPath(filename);
+  auto mesh = std::make_shared<PhysxTriangleMesh>(fullPath, true);
   return mesh;
 }
 

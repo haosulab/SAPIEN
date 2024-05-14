@@ -66,10 +66,10 @@ private:
 
 class PhysxTriangleMesh {
 public:
-  PhysxTriangleMesh(Vertices const &vertices, Triangles const &triangles);
+  PhysxTriangleMesh(Vertices const &vertices, Triangles const &triangles, bool generateSDF);
   PhysxTriangleMesh(Vertices const &vertices, Triangles const &triangles,
-                    std::string const &filename);
-  PhysxTriangleMesh(std::string const &filename);
+                    std::string const &filename, bool generateSDF);
+  PhysxTriangleMesh(std::string const &filename, bool generateSDF);
 
   ::physx::PxTriangleMesh *getPxMesh() const { return mMesh; }
   bool hasFilename() { return mFilename.has_value(); }
@@ -91,7 +91,7 @@ public:
   }
 
 private:
-  void loadMesh(Vertices const &vertices, Triangles const &triangles);
+  void loadMesh(Vertices const &vertices, Triangles const &triangles, bool generateSDF);
   std::shared_ptr<PhysxEngine> mEngine;
   ::physx::PxTriangleMesh *mMesh{};
   std::optional<std::string> mFilename;

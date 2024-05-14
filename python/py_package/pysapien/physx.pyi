@@ -4,7 +4,7 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien_pinocchio
 import typing
-__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_shape_config', 'version']
+__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSDFConfig', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_sdf_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_sdf_config', 'set_shape_config', 'version']
 M = typing.TypeVar("M", bound=int)
 class PhysxArticulation:
     name: str
@@ -424,7 +424,7 @@ class PhysxCollisionShapeSphere(PhysxCollisionShape):
     def radius(self) -> float:
         ...
 class PhysxCollisionShapeTriangleMesh(PhysxCollisionShape):
-    def __init__(self, filename: str, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: PhysxMaterial) -> None:
+    def __init__(self, filename: str, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, sdf: bool, material: PhysxMaterial) -> None:
         ...
     def get_scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
@@ -630,6 +630,10 @@ class PhysxGpuSystem(PhysxSystem):
     @typing.overload
     def gpu_apply_rigid_dynamic_data(self, index_buffer: sapien.pysapien.CudaArray) -> None:
         ...
+    def gpu_apply_rigid_dynamic_force(self) -> None:
+        ...
+    def gpu_apply_rigid_dynamic_torque(self) -> None:
+        ...
     def gpu_create_contact_body_impulse_query(self, bodies: list[PhysxRigidBaseComponent]) -> PhysxGpuContactBodyImpulseQuery:
         ...
     def gpu_create_contact_pair_impulse_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactPairImpulseQuery:
@@ -722,7 +726,19 @@ class PhysxGpuSystem(PhysxSystem):
     def cuda_rigid_body_data(self) -> sapien.pysapien.CudaArray:
         ...
     @property
+    def cuda_rigid_body_force(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_rigid_body_torque(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
     def cuda_rigid_dynamic_data(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_rigid_dynamic_force(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_rigid_dynamic_torque(self) -> sapien.pysapien.CudaArray:
         ...
     @property
     def device(self) -> sapien.pysapien.Device:
@@ -936,6 +952,18 @@ class PhysxRigidDynamicComponent(PhysxRigidBodyComponent):
 class PhysxRigidStaticComponent(PhysxRigidBaseComponent):
     def __init__(self) -> None:
         ...
+class PhysxSDFConfig:
+    num_threads_for_construction: int
+    spacing: float
+    subgridSize: int
+    def __getstate__(self) -> tuple:
+        ...
+    def __init__(self) -> None:
+        ...
+    def __repr__(self) -> str:
+        ...
+    def __setstate__(self, arg0: tuple) -> None:
+        ...
 class PhysxSceneConfig:
     bounce_threshold: float
     enable_ccd: bool
@@ -1004,6 +1032,8 @@ def get_default_material() -> PhysxMaterial:
     ...
 def get_scene_config() -> PhysxSceneConfig:
     ...
+def get_sdf_config() -> PhysxSDFConfig:
+    ...
 def get_shape_config() -> PhysxShapeConfig:
     ...
 def is_gpu_enabled() -> bool:
@@ -1023,6 +1053,12 @@ def set_scene_config(gravity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy
     ...
 @typing.overload
 def set_scene_config(config: PhysxSceneConfig) -> None:
+    ...
+@typing.overload
+def set_sdf_config(spacing: float = 0.009999999776482582, subgrid_size: int = 6, num_threads_for_construction: int = 4) -> None:
+    ...
+@typing.overload
+def set_sdf_config(config: PhysxSDFConfig) -> None:
     ...
 @typing.overload
 def set_shape_config(contact_offset: float = 0.009999999776482582, rest_offset: float = 0.0) -> None:

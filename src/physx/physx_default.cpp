@@ -13,6 +13,7 @@ static bool gGPUEnabled{false};
 static PhysxSceneConfig gSceneConfig{};
 static PhysxBodyConfig gBodyConfig{};
 static PhysxShapeConfig gShapeConfig{};
+static PhysxSDFShapeConfig gSDFConfig{};
 
 static ::physx::PxgDynamicsMemoryConfig gGpuMemoryConfig{};
 
@@ -91,8 +92,16 @@ void PhysxDefault::EnableGPU() {
   gGPUEnabled = true;
 }
 
-bool PhysxDefault::GetGPUEnabled() { return gGPUEnabled; }
+void PhysxDefault::setSDFShapeConfig(float spacing, uint32_t subgridSize,
+                                     uint32_t numThreadsForConstruction) {
+  gSDFConfig.spacing = spacing;
+  gSDFConfig.subgridSize = subgridSize;
+  gSDFConfig.numThreadsForConstruction = numThreadsForConstruction;
+}
+void PhysxDefault::setSDFShapeConfig(PhysxSDFShapeConfig const &c) { gSDFConfig = c; }
+PhysxSDFShapeConfig PhysxDefault::getSDFShapeConfig() { return gSDFConfig; }
 
+bool PhysxDefault::GetGPUEnabled() { return gGPUEnabled; }
 std::string PhysxDefault::getPhysxVersion() { return PHYSX_VERSION; }
 
 } // namespace physx

@@ -72,9 +72,9 @@ class VisualShapeRecord:
     radius: float = 1
     length: float = 1
 
-    material: Union[
-        sapien.render.RenderMaterial, None
-    ] = None  # None is only used for mesh
+    material: Union[sapien.render.RenderMaterial, None] = (
+        None  # None is only used for mesh
+    )
 
     pose: sapien.Pose = sapien.Pose()
     name: str = ""
@@ -219,6 +219,7 @@ class ActorBuilder:
                     shape = sapien.physx.PhysxCollisionShapeTriangleMesh(
                         filename=preprocess_mesh_file(r.filename),
                         scale=r.scale,
+                        sdf=self.physx_body_type == "dynamic",
                         material=r.material,
                     )
                     shapes = [shape]
@@ -492,6 +493,7 @@ class ActorBuilder:
         pose: sapien.Pose = sapien.Pose(),
         scale: Vec3 = (1, 1, 1),
         material: Union[sapien.physx.PhysxMaterial, None] = None,
+        density: float = 1000,
         patch_radius: float = 0,
         min_patch_radius: float = 0,
         is_trigger: bool = False,
@@ -506,7 +508,7 @@ class ActorBuilder:
                 pose=pose,
                 scale=scale,
                 material=material,
-                density=0,
+                density=density,
                 patch_radius=patch_radius,
                 min_patch_radius=min_patch_radius,
                 is_trigger=is_trigger,

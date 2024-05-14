@@ -25,14 +25,20 @@ struct PhysxSceneConfig {
 };
 
 struct PhysxBodyConfig {
-  uint32_t solverPositionIterations = 10;        // solver position iterations, helps reduce jittering
-  uint32_t solverVelocityIterations = 1; // solver velocity iterations
-  float sleepThreshold = 0.005f;         // put to sleep if (kinetic energy/(mass) falls below
+  uint32_t solverPositionIterations = 10; // solver position iterations, helps reduce jittering
+  uint32_t solverVelocityIterations = 1;  // solver velocity iterations
+  float sleepThreshold = 0.005f;          // put to sleep if (kinetic energy/(mass) falls below
 };
 
 struct PhysxShapeConfig {
   float contactOffset = 0.01f; // how close should contacts be generated
   float restOffset = 0.f;
+};
+
+struct PhysxSDFShapeConfig {
+  float spacing = 0.01f;
+  uint32_t subgridSize = 6;
+  uint32_t numThreadsForConstruction = 4;
 };
 
 class PhysxDefault {
@@ -60,6 +66,11 @@ public:
   static void setShapeConfig(float contactOffset, float restOffset);
   static void setShapeConfig(PhysxShapeConfig const &);
   static PhysxShapeConfig const &getShapeConfig();
+
+  static void setSDFShapeConfig(float spacing, uint32_t subgridSize,
+                                uint32_t numThreadsForConstruction);
+  static void setSDFShapeConfig(PhysxSDFShapeConfig const &);
+  static PhysxSDFShapeConfig getSDFShapeConfig();
 
   // enable GPU simulation, may not be disabled
   static void EnableGPU();

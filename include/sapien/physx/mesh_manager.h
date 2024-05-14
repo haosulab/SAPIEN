@@ -21,6 +21,7 @@ public:
   MeshManager();
 
   std::shared_ptr<PhysxTriangleMesh> loadTriangleMesh(const std::string &filename);
+  std::shared_ptr<PhysxTriangleMesh> loadTriangleMeshWithSDF(const std::string &filename);
   std::shared_ptr<PhysxConvexMesh> loadConvexMesh(const std::string &filename);
   std::vector<std::shared_ptr<PhysxConvexMesh>> loadConvexMeshGroup(const std::string &filename);
 
