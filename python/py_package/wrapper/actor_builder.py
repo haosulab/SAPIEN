@@ -219,7 +219,7 @@ class ActorBuilder:
                     shape = sapien.physx.PhysxCollisionShapeTriangleMesh(
                         filename=preprocess_mesh_file(r.filename),
                         scale=r.scale,
-                        sdf=self.physx_body_type == "dynamic",
+                        sdf=self.physx_body_type in ["dynamic", "link"],
                         material=r.material,
                     )
                     shapes = [shape]
