@@ -410,6 +410,10 @@ void PhysxTriangleMesh::loadMesh(Vertices const &vertices, Triangles const &tria
     sdfDesc.numThreadsForSdfConstruction = config.subgridSize;
     meshDesc.sdfDesc = &sdfDesc;
     params.meshPreprocessParams |= PxMeshPreprocessingFlag::eENABLE_INERTIA;
+
+    mSDF = true;
+    mSDFSpacing = sdfDesc.spacing;
+    mSDFSubgridSize = sdfDesc.subgridSize;
   }
 
   PxDefaultMemoryOutputStream writeBuffer;

@@ -29,6 +29,8 @@ private:
   std::map<std::string, std::shared_ptr<PhysxTriangleMesh>> mTriangleMeshRegistry;
   std::map<std::string, std::shared_ptr<PhysxConvexMesh>> mConvexMeshRegistry;
   std::map<std::string, std::vector<std::shared_ptr<PhysxConvexMesh>>> mConvexMeshGroupRegistry;
+
+  std::map<std::string, std::shared_ptr<PhysxTriangleMesh>> mTriangleMeshWithSDFRegistry;
 };
 
 } // namespace physx

@@ -1,5 +1,6 @@
 #include "sapien/physx/mesh_manager.h"
 #include "../logger.h"
+#include "sapien/physx/physx_default.h"
 #include "sapien/physx/physx_system.h"
 #include <assimp/Exporter.hpp>
 #include <assimp/Importer.hpp>
@@ -24,6 +25,7 @@ std::shared_ptr<MeshManager> MeshManager::Get() {
 
 void MeshManager::Clear() {
   if (gManager) {
+    gManager->mTriangleMeshWithSDFRegistry.clear();
     gManager->mTriangleMeshRegistry.clear();
     gManager->mConvexMeshRegistry.clear();
     gManager->mConvexMeshGroupRegistry.clear();
@@ -58,7 +60,23 @@ std::shared_ptr<PhysxTriangleMesh> MeshManager::loadTriangleMesh(const std::stri
 std::shared_ptr<PhysxTriangleMesh>
 MeshManager::loadTriangleMeshWithSDF(const std::string &filename) {
   std::string fullPath = getFullPath(filename);
+
+  auto it = mTriangleMeshWithSDFRegistry.find(fullPath);
+  if (it != mTriangleMeshWithSDFRegistry.end()) {
+    if (it->second->getSDFSpacing() == PhysxDefault::getSDFShapeConfig().spacing &&
+        it->second->getSDFSubgridSize() == PhysxDefault::getSDFShapeConfig().subgridSize) {
+      logger::info("Using loaded mesh with SDF: {}", filename);
+      return it->second;
+    } else {
+      logger::warn(
+          "Loading same mesh with different SDF parameters: {}. This may be due to an error.",
+          filename);
+    }
+  }
+
   auto mesh = std::make_shared<PhysxTriangleMesh>(fullPath, true);
+  mTriangleMeshWithSDFRegistry[fullPath] = mesh;
+
   return mesh;
 }
 

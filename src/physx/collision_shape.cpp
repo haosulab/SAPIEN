@@ -231,8 +231,8 @@ PhysxCollisionShapeConvexMesh::LoadMultiple(std::string const &filename, Vec3 sc
 }
 
 PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
-    std::string const &filename, Vec3 const &scale, bool sdf,
-    std::shared_ptr<PhysxMaterial> material) {
+    std::string const &filename, Vec3 const &scale, std::shared_ptr<PhysxMaterial> material,
+    bool sdf) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
 
@@ -253,7 +253,7 @@ PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
 PhysxCollisionShapeTriangleMesh::PhysxCollisionShapeTriangleMesh(
     Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices,
     Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &triangles,
-    Vec3 const &scale, bool sdf, std::shared_ptr<PhysxMaterial> material) {
+    Vec3 const &scale, std::shared_ptr<PhysxMaterial> material, bool sdf) {
   mEngine = PhysxEngine::Get();
   mPhysicalMaterial = material ? material : PhysxDefault::GetDefaultMaterial();
   mMesh = std::make_shared<PhysxTriangleMesh>(vertices, triangles, sdf);

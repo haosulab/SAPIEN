@@ -10,6 +10,7 @@
 namespace sapien {
 namespace physx {
 class PhysxEngine;
+class PhysxSDFShapeConfig;
 
 using Vertices = Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>;
 using Triangles = Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor>;
@@ -84,6 +85,10 @@ public:
   Triangles getTriangles() const;
   AABB const &getAABB() const { return mAABB; }
 
+  bool getSDFEnabled() const { return mSDF; }
+  float getSDFSpacing() const { return mSDFSpacing; }
+  uint32_t getSDFSubgridSize() const { return mSDFSubgridSize; }
+
   ~PhysxTriangleMesh() {
     if (mMesh) {
       mMesh->release();
@@ -96,8 +101,11 @@ private:
   ::physx::PxTriangleMesh *mMesh{};
   std::optional<std::string> mFilename;
 
-  AABB mAABB;
+  bool mSDF{};
+  float mSDFSpacing{};
+  uint32_t mSDFSubgridSize;
 
+  AABB mAABB;
   PhysxTriangleMesh() {}
 };
 

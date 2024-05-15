@@ -683,8 +683,8 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_triangles", &PhysxCollisionShapeConvexMesh::getTriangles);
 
   PyPhysxCollisionShapeTriangleMesh
-      .def(py::init<std::string const &, Vec3, bool, std::shared_ptr<PhysxMaterial>>(),
-           py::arg("filename"), py::arg("scale"), py::arg("sdf"), py::arg("material"))
+      .def(py::init<std::string const &, Vec3, std::shared_ptr<PhysxMaterial>, bool>(),
+           py::arg("filename"), py::arg("scale"), py::arg("material"), py::arg("sdf") = false)
       .def_property_readonly("scale", &PhysxCollisionShapeTriangleMesh::getScale)
       .def("get_scale", &PhysxCollisionShapeTriangleMesh::getScale)
       .def_property_readonly("vertices", &PhysxCollisionShapeTriangleMesh::getVertices)
