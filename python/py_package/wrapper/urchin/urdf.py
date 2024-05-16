@@ -6,7 +6,6 @@ import time
 from lxml import etree as ET
 import networkx as nx
 import numpy as np
-import six
 
 try:
     import trimesh
@@ -747,7 +746,7 @@ class Mesh(URDFTypeWithMesh):
     def meshes(self, value):
         if self.lazy_filename is not None and value is None:
             self._meshes = None
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, str):
             value = load_meshes(value)
         elif isinstance(value, (list, tuple, set, np.ndarray)):
             value = list(value)
@@ -1097,7 +1096,7 @@ class Material(URDFType):
     @texture.setter
     def texture(self, value):
         if value is not None:
-            if isinstance(value, six.string_types):
+            if isinstance(value, str):
                 value = Texture(filename=value)
             elif not isinstance(value, Texture):
                 raise ValueError(
@@ -3162,13 +3161,13 @@ class URDF(URDFTypeWithMesh):
         # Process link set
         link_set = set()
         if link is not None:
-            if isinstance(link, six.string_types):
+            if isinstance(link, str):
                 link_set.add(self._link_map[link])
             elif isinstance(link, Link):
                 link_set.add(link)
         elif links is not None:
             for lnk in links:
-                if isinstance(lnk, six.string_types):
+                if isinstance(lnk, str):
                     link_set.add(self._link_map[lnk])
                 elif isinstance(lnk, Link):
                     link_set.add(lnk)
@@ -3208,7 +3207,7 @@ class URDF(URDFTypeWithMesh):
             fk[lnk] = pose
 
         if link:
-            if isinstance(link, six.string_types):
+            if isinstance(link, str):
                 return fk[self._link_map[link]]
             else:
                 return fk[link]
@@ -3248,13 +3247,13 @@ class URDF(URDFTypeWithMesh):
         # Process link set
         link_set = set()
         if link is not None:
-            if isinstance(link, six.string_types):
+            if isinstance(link, str):
                 link_set.add(self._link_map[link])
             elif isinstance(link, Link):
                 link_set.add(link)
         elif links is not None:
             for lnk in links:
-                if isinstance(lnk, six.string_types):
+                if isinstance(lnk, str):
                     link_set.add(self._link_map[lnk])
                 elif isinstance(lnk, Link):
                     link_set.add(lnk)
@@ -3295,7 +3294,7 @@ class URDF(URDFTypeWithMesh):
             fk[lnk] = poses
 
         if link:
-            if isinstance(link, six.string_types):
+            if isinstance(link, str):
                 return fk[self._link_map[link]]
             else:
                 return fk[link]
@@ -3791,7 +3790,7 @@ class URDF(URDFTypeWithMesh):
         urdf : :class:`.URDF`
             The parsed URDF.
         """
-        if isinstance(file_obj, six.string_types):
+        if isinstance(file_obj, str):
             path, _ = os.path.split(file_obj)
         else:
             path, _ = os.path.split(os.path.realpath(file_obj.name))
@@ -3897,7 +3896,7 @@ class URDF(URDFTypeWithMesh):
         urdf : :class:`.URDF`
             The parsed URDF.
         """
-        if isinstance(file_obj, six.string_types):
+        if isinstance(file_obj, str):
             if os.path.isfile(file_obj):
                 parser = ET.XMLParser(remove_comments=True, remove_blank_text=True)
                 tree = ET.parse(file_obj, parser=parser)
@@ -4059,7 +4058,7 @@ class URDF(URDFTypeWithMesh):
             return joint_cfg
         if isinstance(cfg, dict):
             for joint in cfg:
-                if isinstance(joint, six.string_types):
+                if isinstance(joint, str):
                     joint_cfg[self._joint_map[joint]] = cfg[joint]
                 elif isinstance(joint, Joint):
                     joint_cfg[joint] = cfg[joint]
@@ -4086,7 +4085,7 @@ class URDF(URDFTypeWithMesh):
         n_cfgs = None
         if isinstance(cfgs, dict):
             for joint in cfgs:
-                if isinstance(joint, six.string_types):
+                if isinstance(joint, str):
                     joint_cfg[self._joint_map[joint]] = cfgs[joint]
                 else:
                     joint_cfg[joint] = cfgs[joint]
@@ -4097,7 +4096,7 @@ class URDF(URDFTypeWithMesh):
             if isinstance(cfgs[0], dict):
                 for cfg in cfgs:
                     for joint in cfg:
-                        if isinstance(joint, six.string_types):
+                        if isinstance(joint, str):
                             joint_cfg[self._joint_map[joint]].append(cfg[joint])
                         else:
                             joint_cfg[joint].append(cfg[joint])
