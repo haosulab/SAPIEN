@@ -63,6 +63,9 @@ private:
 
   std::vector<std::shared_ptr<BatchedCamera>> mCameraBatches;
 
+  // size of a mat4 element in the transform buffer
+  int mTransformBufferElementByteOffset{0};
+
   int mShapeCount{0};
   CudaArray mCudaSceneTransformRefBuffer;
   CudaArray mCudaShapeDataBuffer;

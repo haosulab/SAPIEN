@@ -39,7 +39,7 @@ inline CUDA_CALLABLE void PoseToMatrix(float *result, Pose const &pose, Vec3 con
 
 __global__ void update_object_transforms_kernel(
     float *__restrict__ *__restrict__ scene_transform_buffers, // output buffers
-    RenderShapeData *__restrict__ shapes,
+    int transform_stride, RenderShapeData *__restrict__ shapes,
     float *__restrict__ poses, // parent pose array
     int pose_stride, int count) {
   int g = blockIdx.x * blockDim.x + threadIdx.x;
@@ -63,7 +63,7 @@ __global__ void update_object_transforms_kernel(
   int scene_index = shape.sceneIndex;
   int transform_index = shape.transformIndex;
 
-  PoseToMatrix(scene_transform_buffers[scene_index] + transform_index * 16, p, scale);
+  PoseToMatrix(scene_transform_buffers[scene_index] + transform_index * transform_stride, p, scale);
 }
 
 __global__ void update_camera_transforms_kernel(CameraData *cameras, float *poses, int pose_stride,
@@ -94,11 +94,12 @@ __global__ void update_camera_transforms_kernel(CameraData *cameras, float *pose
 
 constexpr int BLOCK_SIZE = 128;
 
-void update_object_transforms(float **scene_transform_buffers, RenderShapeData *render_shapes,
-                              float *poses, int pose_stride, int count, CUstream_st *stream) {
+void update_object_transforms(float **scene_transform_buffers, int transform_stride,
+                              RenderShapeData *render_shapes, float *poses, int pose_stride,
+                              int count, CUstream_st *stream) {
   update_object_transforms_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
-                                    (cudaStream_t)stream>>>(scene_transform_buffers, render_shapes,
-                                                            poses, pose_stride, count);
+                                    (cudaStream_t)stream>>>(
+      scene_transform_buffers, transform_stride, render_shapes, poses, pose_stride, count);
 }
 
 void update_camera_transforms(CameraData *cameras, float *poses, int pose_stride, int count,

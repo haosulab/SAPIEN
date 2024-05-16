@@ -170,9 +170,11 @@ void SapienRendererSystem::step() {
 
 CudaArrayHandle SapienRendererSystem::getTransformCudaArray() {
   mScene->prepareObjectTransformBuffer();
+  int offset = mScene->getGpuTransformBufferSize();
+
   auto buffer = mScene->getObjectTransformBuffer();
-  return CudaArrayHandle{.shape = {static_cast<int>(buffer->getSize() / 64), 4, 4},
-                         .strides = {64, 16, 4},
+  return CudaArrayHandle{.shape = {static_cast<int>(buffer->getSize() / offset), 4, 4},
+                         .strides = {offset, 16, 4},
                          .type = "f4",
                          .cudaId = buffer->getCudaDeviceId(),
                          .ptr = buffer->getCudaPtr()};
