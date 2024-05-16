@@ -162,7 +162,17 @@ void BatchedRenderSystem::init() {
     // cache current versions
     mSceneVersions.push_back(system->getScene()->getVersion());
 
-    sceneTransformRefs.push_back(system->getTransformCudaArray().ptr);
+    auto transformArray = system->getTransformCudaArray();
+    sceneTransformRefs.push_back(transformArray.ptr);
+
+    if (mTransformBufferElementByteOffset == 0) {
+      mTransformBufferElementByteOffset = transformArray.strides.at(0);
+      if (mTransformBufferElementByteOffset % 4 != 0) {
+        throw std::runtime_error("corrupted transform array buffer");
+      }
+    } else if (mTransformBufferElementByteOffset != transformArray.strides.at(0)) {
+      throw std::runtime_error("corrupted transform array buffer");
+    }
 
     for (auto &body : system->getRenderBodyComponents()) {
       for (auto &shape : body->getRenderShapes()) {
@@ -284,8 +294,9 @@ void BatchedRenderSystem::update() {
 
   // upload data
   update_object_transforms(
-      (float **)mCudaSceneTransformRefBuffer.ptr, (RenderShapeData *)mCudaShapeDataBuffer.ptr,
-      (float *)mCudaPoseHandle.ptr, mCudaPoseHandle.shape.at(1), mShapeCount, mCudaStream);
+      (float **)mCudaSceneTransformRefBuffer.ptr, mTransformBufferElementByteOffset / 4,
+      (RenderShapeData *)mCudaShapeDataBuffer.ptr, (float *)mCudaPoseHandle.ptr,
+      mCudaPoseHandle.shape.at(1), mShapeCount, mCudaStream);
 
   update_camera_transforms((CameraData *)mCudaCameraDataBuffer.ptr, (float *)mCudaPoseHandle.ptr,
                            mCudaPoseHandle.shape.at(1), mCameraCount, mCudaStream);

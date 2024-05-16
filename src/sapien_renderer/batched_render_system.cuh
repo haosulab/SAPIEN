@@ -28,8 +28,9 @@ struct CameraData {
  * count: size of the render_shapes array
  * stream: cuda stream
  * */
-void update_object_transforms(float **scene_transform_buffers, RenderShapeData *render_shapes,
-                              float *poses, int pose_stride, int count, CUstream_st *stream);
+void update_object_transforms(float **scene_transform_buffers, int transform_stride,
+                              RenderShapeData *render_shapes, float *poses, int pose_stride,
+                              int count, CUstream_st *stream);
 
 /** The first 32 numbers must be are view matrix and inverse view matrix */
 void update_camera_transforms(CameraData *cameras, float *poses, int pose_stride, int count,
