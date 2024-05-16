@@ -38,6 +38,12 @@ class TestGlobals(unittest.TestCase):
 
         sapien.render.set_picture_format("Color", "r16g16b16a16Sfloat")
 
+        # reset settings
+        sapien.render.set_msaa(1)
+        sapien.render.set_camera_shader_dir("default")
+        sapien.render.set_viewer_shader_dir("default")
+        sapien.render.set_picture_format("Color", "r32g32b32a32Sfloat")
+
         # TODO: test global config
         # TODO: test these configs actually take effects
 
