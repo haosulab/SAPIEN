@@ -642,6 +642,22 @@ void PhysxSystemGpu::gpuFetchArticulationQTargetVel() {
   mCudaEventWait.wait(mCudaStream);
 }
 
+void PhysxSystemGpu::gpuFetchArticulationLinkIncomingJointForce() {
+  checkGpuInitialized();
+
+  if (mGpuArticulationCount == 0) {
+    return;
+  }
+
+  ensureCudaDevice();
+
+  mPxScene->copyArticulationData(mCudaArticulationLinkIncomingJointForceBuffer.ptr,
+                                 mCudaArticulationIndexBuffer.ptr,
+                                 PxArticulationGpuDataType::eLINK_INCOMING_JOINT_FORCE,
+                                 mCudaArticulationIndexBuffer.shape.at(0), mCudaEventWait.event);
+  mCudaEventWait.wait(mCudaStream);
+}
+
 void PhysxSystemGpu::gpuFetchArticulationQacc() {
   checkGpuInitialized();
 
@@ -999,6 +1015,9 @@ void PhysxSystemGpu::allocateCudaBuffers() {
                       .type = "f4",
                       .cudaId = mCudaRigidBodyBuffer.cudaId,
                       .ptr = (float *)mCudaRigidBodyBuffer.ptr + 13 * rigidDynamicCount};
+
+  mCudaArticulationLinkIncomingJointForceBuffer =
+      CudaArray({mGpuArticulationCount, mGpuArticulationMaxLinkCount, 6}, "f4");
 
   // rigid body force torque buffer
   mCudaRigidBodyForceBuffer = CudaArray({rigidBodyCount, 4}, "f4");

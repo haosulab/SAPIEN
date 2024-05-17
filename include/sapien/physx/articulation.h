@@ -39,6 +39,9 @@ public:
 
   Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> getQLimit();
 
+  Eigen::Matrix<float, Eigen::Dynamic, 6, Eigen::RowMajor> getLinkIncomingJointForces();
+
+
   Eigen::VectorXf computePassiveForce(bool gravity, bool coriolisAndCentrifugal);
 
   Pose getRootPose();

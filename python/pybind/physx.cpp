@@ -473,6 +473,8 @@ Args:
                              &PhysxSystemGpu::gpuGetArticulationQTargetPosCudaHandle)
       .def_property_readonly("cuda_articulation_target_qvel",
                              &PhysxSystemGpu::gpuGetArticulationQTargetVelCudaHandle)
+      .def_property_readonly("cuda_articulation_link_incoming_joint_forces",
+                             &PhysxSystemGpu::gpuGetArticulationLinkIncomingJointForceHandle)
 
       .def("gpu_fetch_rigid_dynamic_data", &PhysxSystemGpu::gpuFetchRigidDynamicData)
       .def("gpu_fetch_articulation_link_pose", &PhysxSystemGpu::gpuFetchArticulationLinkPose)
@@ -482,6 +484,8 @@ Args:
       .def("gpu_fetch_articulation_qacc", &PhysxSystemGpu::gpuFetchArticulationQacc)
       .def("gpu_fetch_articulation_target_qpos", &PhysxSystemGpu::gpuFetchArticulationQTargetPos)
       .def("gpu_fetch_articulation_target_qvel", &PhysxSystemGpu::gpuFetchArticulationQTargetVel)
+      .def("gpu_fetch_articulation_link_incoming_joint_forces",
+           &PhysxSystemGpu::gpuFetchArticulationLinkIncomingJointForce)
 
       .def("gpu_create_contact_pair_impulse_query",
            &PhysxSystemGpu::gpuCreateContactPairImpulseQuery, py::arg("body_pairs"))
@@ -993,6 +997,10 @@ Example:
       .def_property_readonly("qlimits", &PhysxArticulation::getQLimit)
       .def("get_qlimit", &PhysxArticulation::getQLimit, R"doc(same as get_qlimit)doc")
       .def("get_qlimits", &PhysxArticulation::getQLimit)
+
+      .def_property_readonly("link_incoming_joint_forces",
+                             &PhysxArticulation::getLinkIncomingJointForces)
+      .def("get_link_incoming_joint_forces", &PhysxArticulation::getLinkIncomingJointForces)
 
       .def_property("root_pose", &PhysxArticulation::getRootPose, &PhysxArticulation::setRootPose)
       .def("get_root_pose", &PhysxArticulation::getRootPose)

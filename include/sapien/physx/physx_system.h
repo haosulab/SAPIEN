@@ -189,6 +189,10 @@ public:
   CudaArrayHandle gpuGetArticulationQTargetPosCudaHandle() const { return mCudaQTargetPosHandle; }
   CudaArrayHandle gpuGetArticulationQTargetVelCudaHandle() const { return mCudaQTargetVelHandle; }
 
+  CudaArrayHandle gpuGetArticulationLinkIncomingJointForceHandle() const {
+    return mCudaArticulationLinkIncomingJointForceBuffer.handle();
+  }
+
   void gpuFetchRigidDynamicData();
   void gpuFetchArticulationLinkPose();
   void gpuFetchArticulationLinkVel();
@@ -197,6 +201,7 @@ public:
   void gpuFetchArticulationQacc();
   void gpuFetchArticulationQTargetPos();
   void gpuFetchArticulationQTargetVel();
+  void gpuFetchArticulationLinkIncomingJointForce();
 
   void gpuApplyRigidDynamicData(CudaArrayHandle const &indices);
   void gpuApplyArticulationRootPose(CudaArrayHandle const &indices);
@@ -299,6 +304,8 @@ private:
   CudaArrayHandle mCudaQaccHandle;
   CudaArrayHandle mCudaQTargetPosHandle;
   CudaArrayHandle mCudaQTargetVelHandle;
+
+  CudaArray mCudaArticulationLinkIncomingJointForceBuffer;
 
   CudaArray mCudaContactBuffer;
   CudaArray mCudaContactCount;

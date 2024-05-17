@@ -326,6 +326,18 @@ Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> PhysxArticulation::getQ
   return m;
 }
 
+Eigen::Matrix<float, Eigen::Dynamic, 6, Eigen::RowMajor>
+PhysxArticulation::getLinkIncomingJointForces() {
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("getting qf is not supported in GPU simulation.");
+  }
+  mPxArticulation->copyInternalStateToCache(*mCache,
+                                            PxArticulationCacheFlag::eLINK_INCOMING_JOINT_FORCE);
+  auto mat8 = Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 8, Eigen::RowMajor>>(
+      reinterpret_cast<float *>(mCache->linkIncomingJointForce), mPxArticulation->getNbLinks(), 8);
+  return mat8(Eigen::all, {0, 1, 2, 4, 5, 6});
+}
+
 Pose PhysxArticulation::getRootPose() {
   // if (getRoot()->isUsingDirectGPUAPI()) {
   //   throw std::runtime_error("getting root pose is not supported in GPU simulation.");
