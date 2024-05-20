@@ -61,14 +61,18 @@ void main() {
     vec2 r = halton2d(frameCount * spp + i, 2, 3);
 
     vec2 d = pixel + r * invScreen;  // jittered pixel position
-    vec4 csDir = cameraBuffer.projectionMatrixInverse * vec4(d, 1.0, 1.0);
 
-    vec3 csFocusPoint = csDir.xyz / (-csDir.z) * focusPlane;
-    vec3 csFocusOrigin = vec3(ax, ay, 0.0);
+    vec4 csFar = cameraBuffer.projectionMatrixInverse * vec4(d, 1.0, 1.0);
+    csFar.xyz /= csFar.w;
+
+    vec4 csNear = cameraBuffer.projectionMatrixInverse * vec4(d, 0.0, 1.0);
+    csNear.xyz /= csNear.w;
+    vec3 csDir = csFar.xyz - csNear.xyz;
+    vec3 csFocusPoint = csNear.xyz + ((focusPlane + csNear.z) / -csDir.z) * csDir.xyz;
+
+    vec3 csFocusOrigin = csNear.xyz + vec3(ax, ay, 0.0);
     vec3 csFocusDir = csFocusPoint - csFocusOrigin;
 
-    // vec4 origin = cameraBuffer.viewMatrixInverse * vec4(0.0, 0.0, 0.0, 1.0);
-    // vec4 direction = cameraBuffer.viewMatrixInverse * vec4(csDir.xyz, 0.0);
     vec4 origin = cameraBuffer.viewMatrixInverse * vec4(csFocusOrigin, 1.0);
     vec4 direction = cameraBuffer.viewMatrixInverse * vec4(csFocusDir, 0.0);
 

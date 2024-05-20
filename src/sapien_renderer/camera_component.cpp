@@ -317,7 +317,6 @@ Mat4 SapienRenderCameraComponent::getModelMatrix() const {
   return PoseToEigenMat4(getGlobalPose() * POSE_GL_TO_ROS);
 }
 Mat4 SapienRenderCameraComponent::getProjectionMatrix() const {
-  checkMode(CameraMode::ePerspective);
   switch (mMode) {
   case CameraMode::ePerspective:
     return mat4glm2eigen(
