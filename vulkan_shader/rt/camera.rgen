@@ -73,6 +73,11 @@ void main() {
     vec3 csFocusOrigin = csNear.xyz + vec3(ax, ay, 0.0);
     vec3 csFocusDir = csFocusPoint - csFocusOrigin;
 
+    // avoid shooting rays backwards
+    if (csFocusDir.z != 0) {
+      csFocusDir /= -csFocusDir.z;
+    }
+
     vec4 origin = cameraBuffer.viewMatrixInverse * vec4(csFocusOrigin, 1.0);
     vec4 direction = cameraBuffer.viewMatrixInverse * vec4(csFocusDir, 0.0);
 
