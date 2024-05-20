@@ -3,16 +3,18 @@
 #include "image.h"
 #include "sapien/math/mat.h"
 #include "sapien/math/pose.h"
+#include <map>
 #include <svulkan2/renderer/renderer_base.h>
 #include <svulkan2/scene/camera.h>
 #include <variant>
-#include <map>
 
 namespace sapien {
 class Entity;
 namespace sapien_renderer {
 struct SapienRenderCameraInternal;
 class SapienRenderTexture;
+
+enum class CameraMode { ePerspective, eOrthographic };
 
 class SapienRenderCameraComponent : public Component {
 public:
@@ -38,6 +40,11 @@ public:
   inline float getPrincipalPointY() const { return mCy; }
   inline float getSkew() const { return mSkew; }
 
+  inline float getOrthoLeft() const { return mLeft; }
+  inline float getOrthoRight() const { return mRight; }
+  inline float getOrthoBottom() const { return mBottom; }
+  inline float getOrthoTop() const { return mTop; }
+
   Mat4 getModelMatrix() const;
   Mat4 getProjectionMatrix() const;
   Mat3 getIntrinsicMatrix() const;
@@ -53,6 +60,12 @@ public:
   void setFar(float far);
   void setPrincipalPoint(float cx, float cy);
   void setSkew(float s);
+
+  void setOrthographicParameters(float near, float far, float top);
+  void setOrthographicParameters(float near, float far, float left, float right, float bottom,
+                                 float top);
+
+  inline CameraMode getMode() const { return mMode; }
 
   void takePicture();
   std::vector<std::string> getImageNames() const;
@@ -85,6 +98,9 @@ public:
   SapienRenderCameraComponent &operator=(SapienRenderCameraComponent const &&) = delete;
 
 private:
+  CameraMode mMode{CameraMode::ePerspective};
+  void checkMode(CameraMode mode) const;
+
   uint32_t mWidth{};
   uint32_t mHeight{};
   float mFx{};
@@ -94,6 +110,13 @@ private:
   float mNear{};
   float mFar{};
   float mSkew{};
+
+  // ortho only
+  float mLeft{};
+  float mRight{};
+  float mBottom{};
+  float mTop{};
+
   std::string mShaderDir;
 
   std::map<std::string, std::variant<int, float>> mProperties;
@@ -112,4 +135,3 @@ private:
 
 } // namespace sapien_renderer
 } // namespace sapien
-

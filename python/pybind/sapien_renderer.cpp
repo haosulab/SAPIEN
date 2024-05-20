@@ -15,6 +15,35 @@ using namespace sapien;
 using namespace sapien::sapien_renderer;
 
 namespace pybind11::detail {
+
+template <> struct type_caster<CameraMode> {
+  PYBIND11_TYPE_CASTER(CameraMode, _("typing.Literal['perspective', 'orthographic']"));
+
+  bool load(py::handle src, bool convert) {
+    std::string name = py::cast<std::string>(src);
+    if (name == "perspective" || name == "pers") {
+      value = CameraMode::ePerspective;
+      return true;
+    } else if (name == "orthographic" || name == "ortho") {
+      value = CameraMode::eOrthographic;
+      return true;
+    }
+    return false;
+  }
+
+  static py::handle cast(CameraMode const &src, py::return_value_policy policy,
+                         py::handle parent) {
+    switch (src) {
+    case CameraMode::ePerspective:
+      return py::str("perspective").release();
+    case CameraMode::eOrthographic:
+      return py::str("orthographic").release();
+    default:
+      return py::str("none").release();
+    }
+  }
+};
+
 template <> struct type_caster<svulkan2::renderer::RTRenderer::DenoiserType> {
   PYBIND11_TYPE_CASTER(svulkan2::renderer::RTRenderer::DenoiserType,
                        _("typing.Literal['none', 'oidn', 'optix']"));
@@ -933,9 +962,25 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def("get_skew", &SapienRenderCameraComponent::getSkew)
       .def("set_skew", &SapienRenderCameraComponent::setSkew, py::arg("skew"))
 
+      .def_property_readonly("mode", &SapienRenderCameraComponent::getMode)
+      .def("get_mode", &SapienRenderCameraComponent::getMode)
       .def("set_perspective_parameters", &SapienRenderCameraComponent::setPerspectiveParameters,
            py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
            py::arg("cy"), py::arg("skew"))
+
+      .def("set_orthographic_parameters",
+           py::overload_cast<float, float, float>(
+               &SapienRenderCameraComponent::setOrthographicParameters),
+           py::arg("near"), py::arg("far"), py::arg("top"))
+      .def("set_orthographic_parameters",
+           py::overload_cast<float, float, float, float, float, float>(
+               &SapienRenderCameraComponent::setOrthographicParameters),
+           py::arg("near"), py::arg("far"), py::arg("left"), py::arg("right"), py::arg("bottom"),
+           py::arg("top"))
+      .def_property_readonly("ortho_left", &SapienRenderCameraComponent::getOrthoLeft)
+      .def_property_readonly("ortho_right", &SapienRenderCameraComponent::getOrthoRight)
+      .def_property_readonly("ortho_bottom", &SapienRenderCameraComponent::getOrthoBottom)
+      .def_property_readonly("ortho_top", &SapienRenderCameraComponent::getOrthoTop)
 
       .def("get_intrinsic_matrix", &SapienRenderCameraComponent::getIntrinsicMatrix,
            "Get 3x3 intrinsic camera matrix in OpenCV format.")
@@ -1118,6 +1163,12 @@ consumer library. Make a copy if needed.
       .def("set_intrinsic_parameters", &SapienRendererWindow::setCameraIntrinsicParameters,
            py::arg("near"), py::arg("far"), py::arg("fx"), py::arg("fy"), py::arg("cx"),
            py::arg("cy"), py::arg("skew"))
+
+      .def("set_camera_orthographic_parameters", &SapienRendererWindow::setCameraOrthoParameters,
+           py::arg("near"), py::arg("far"), py::arg("top"))
+      .def_property_readonly("camera_mode", &SapienRendererWindow::getCameraMode)
+      .def_property_readonly("ortho_top", &SapienRendererWindow::getCameraOrthoTop)
+
       .def("set_camera_pose", &SapienRendererWindow::setCameraPose, py::arg("pose"))
       .def("set_camera_position", &SapienRendererWindow::setCameraPosition, py::arg("position"))
       .def("set_camera_rotation", &SapienRendererWindow::setCameraRotation, py::arg("quat"))

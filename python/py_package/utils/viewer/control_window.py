@@ -201,6 +201,10 @@ class ControlWindow(Plugin):
         self._single_step = True
 
     def copy_camera_settings(self, _=None):
+        if self.orthographic:
+            print('copying from orthographic camera is not supported yet')
+            return
+
         p = self.window.get_camera_position()
         q = self.window.get_camera_rotation()
         width, height = self.window.size
@@ -276,7 +280,19 @@ class ControlWindow(Plugin):
                 .append(
                     self.ui_camera,
                     self.ui_camera_image,
-                    R.UISliderAngle().Label("FOV Y").Min(1).Max(179).Bind(self, "fovy"),
+                    R.UICheckbox().Label("Orthographic").Bind(self, "orthographic"),
+                    R.UIConditional()
+                    .Bind(self, "orthographic")
+                    .append(
+                        R.UISliderFloat()
+                        .Label("Ortho Scale")
+                        .Min(0.1)
+                        .Max(10)
+                        .Bind(self, "ortho_scale"),
+                    ),
+                    R.UIConditional().Bind(self, "_perspective").append(
+                        R.UISliderAngle().Label("FOV Y").Min(1).Max(179).Bind(self, "fovy"),
+                    ),
                     R.UIButton()
                     .Label("Copy Camera Settings")
                     .Callback(self.copy_camera_settings),
@@ -771,6 +787,35 @@ class ControlWindow(Plugin):
         for n in self.camera_linesets:
             render_scene.remove_node(n)
         self.camera_linesets = []
+
+    @property
+    def orthographic(self):
+        return self.window.camera_mode == "orthographic"
+
+    @property
+    def _perspective(self):
+        return not self.orthographic
+
+    @orthographic.setter
+    def orthographic(self, v):
+        if v:
+            self.window.set_camera_orthographic_parameters(
+                self.window.near, self.window.far, 1
+            )
+        else:
+            self.window.set_camera_parameters(
+                self.window.near, self.window.far, np.pi / 3
+            )
+
+    @property
+    def ortho_scale(self):
+        return self.window.ortho_top
+
+    @ortho_scale.setter
+    def ortho_scale(self, v):
+        self.window.set_camera_orthographic_parameters(
+            self.window.near, self.window.far, v
+        )
 
     @property
     def fovy(self):

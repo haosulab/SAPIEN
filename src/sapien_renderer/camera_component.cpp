@@ -1,4 +1,3 @@
-#include <numbers>
 #include "sapien/sapien_renderer/camera_component.h"
 #include "../logger.h"
 #include "sapien/entity.h"
@@ -7,6 +6,7 @@
 #include "sapien/sapien_renderer/sapien_renderer_system.h"
 #include "sapien/sapien_renderer/texture.h"
 #include "sapien/scene.h"
+#include <numbers>
 #include <svulkan2/renderer/renderer.h>
 #include <svulkan2/renderer/renderer_base.h>
 
@@ -308,33 +308,27 @@ SapienRenderImageCuda SapienRenderCameraComponent::getImageCuda(std::string cons
 #endif
 }
 
+static Mat4 mat4glm2eigen(glm::mat4 const &mat) {
+  return Eigen::Map<const Eigen::Matrix<float, 4, 4, Eigen::ColMajor>>(&mat[0][0], 4, 4);
+}
+
 // getters
 Mat4 SapienRenderCameraComponent::getModelMatrix() const {
   return PoseToEigenMat4(getGlobalPose() * POSE_GL_TO_ROS);
 }
 Mat4 SapienRenderCameraComponent::getProjectionMatrix() const {
-  Mat4 mat = Mat4::Identity();
-  float fx = getFocalLengthX();
-  float fy = getFocalLengthY();
-  float width = getWidth();
-  float height = getHeight();
-  float far = getFar();
-  float near = getNear();
-  float cx = getPrincipalPointX();
-  float cy = getPrincipalPointY();
-  float skew = getSkew();
-  mat(0, 0) = (2.f * fx) / width;
-  mat(1, 1) = -(2.f * fy) / height;
-  mat(2, 2) = -far / (far - near);
-  mat(2, 3) = -far * near / (far - near);
-  mat(3, 2) = -1.f;
-  mat(0, 2) = -2.f * cx / width + 1;
-  mat(1, 2) = -2.f * cy / height + 1;
-  mat(3, 3) = 0.f;
-  mat(0, 1) = -2 * skew / width;
-  return mat;
+  checkMode(CameraMode::ePerspective);
+  switch (mMode) {
+  case CameraMode::ePerspective:
+    return mat4glm2eigen(
+        svulkan2::math::fullPerspective(mNear, mFar, mFx, mFy, mCx, mCy, mWidth, mHeight, mSkew));
+  case CameraMode::eOrthographic:
+    return mat4glm2eigen(svulkan2::math::ortho(mLeft, mRight, mBottom, mTop, mNear, mFar));
+  }
+  throw std::runtime_error("corrupted camera mode");
 }
 Mat3 SapienRenderCameraComponent::getIntrinsicMatrix() const {
+  checkMode(CameraMode::ePerspective);
   Mat3 mat = Mat3::Identity();
   mat(0, 0) = getFocalLengthX();
   mat(1, 1) = getFocalLengthY();
@@ -342,6 +336,13 @@ Mat3 SapienRenderCameraComponent::getIntrinsicMatrix() const {
   mat(1, 2) = getPrincipalPointY();
   mat(0, 1) = getSkew();
   return mat;
+
+  // TODO: support ortho, check if the following is right
+  // Mat3 mat = Mat3::Identity();
+  // mat(0, 0) = getWidth() / (getOrthoRight() - getOrthoLeft());
+  // mat(1, 1) = getHeight() / (getOrthoTop() - getOrthoBottom());
+  // mat(0, 2) = getOrthoLeft() / (getOrthoLeft() - getOrthoRight());
+  // mat(1, 2) = getOrthoTop() / (getOrthoTop() - getOrthoBottom());
 }
 Mat34 SapienRenderCameraComponent::getExtrinsicMatrix() const {
   Mat34 ros2cv;
@@ -353,6 +354,7 @@ Mat34 SapienRenderCameraComponent::getExtrinsicMatrix() const {
 void SapienRenderCameraComponent::setPerspectiveParameters(float near, float far, float fx,
                                                            float fy, float cx, float cy,
                                                            float skew) {
+  mMode = CameraMode::ePerspective;
   mNear = near;
   mFar = far;
   mFx = fx;
@@ -365,34 +367,62 @@ void SapienRenderCameraComponent::setPerspectiveParameters(float near, float far
                                                mSkew);
   }
 }
+
+void SapienRenderCameraComponent::setOrthographicParameters(float near, float far, float top) {
+  float aspect = mWidth / mHeight;
+  setOrthographicParameters(near, far, -top * aspect, top * aspect, -top, top);
+}
+
+void SapienRenderCameraComponent::setOrthographicParameters(float near, float far, float left,
+                                                            float right, float bottom, float top) {
+  mMode = CameraMode::eOrthographic;
+  mNear = near;
+  mFar = far;
+  mLeft = left;
+  mRight = right;
+  mBottom = bottom;
+  mTop = top;
+  if (mCamera) {
+    mCamera->mCamera->setOrthographicParameters(near, far, left, right, bottom, top, mWidth,
+                                                mHeight);
+  }
+}
+
 void SapienRenderCameraComponent::setFocalLengths(float fx, float fy) {
+  checkMode(CameraMode::ePerspective);
   setPerspectiveParameters(getNear(), getFar(), fx, fy, getPrincipalPointX(), getPrincipalPointY(),
                            getSkew());
 }
 void SapienRenderCameraComponent::setFovX(float fovx, bool computeY) {
+  checkMode(CameraMode::ePerspective);
   float fx = getWidth() / 2.f / std::tan(fovx / 2);
   float fy = computeY ? fx : getFocalLengthY();
   setFocalLengths(fx, fy);
 }
 
 void SapienRenderCameraComponent::setFovY(float fovy, bool computeX) {
+  checkMode(CameraMode::ePerspective);
   float fy = getHeight() / 2.f / std::tan(fovy / 2);
   float fx = computeX ? fy : getFocalLengthX();
   setFocalLengths(fx, fy);
 }
 void SapienRenderCameraComponent::setNear(float near) {
+  checkMode(CameraMode::ePerspective); // TODO: implement for ortho
   setPerspectiveParameters(near, getFar(), getFocalLengthX(), getFocalLengthY(),
                            getPrincipalPointX(), getPrincipalPointY(), getSkew());
 }
 void SapienRenderCameraComponent::setFar(float far) {
+  checkMode(CameraMode::ePerspective); // TODO: implement for ortho
   setPerspectiveParameters(getNear(), far, getFocalLengthX(), getFocalLengthY(),
                            getPrincipalPointX(), getPrincipalPointY(), getSkew());
 }
 void SapienRenderCameraComponent::setPrincipalPoint(float cx, float cy) {
+  checkMode(CameraMode::ePerspective);
   setPerspectiveParameters(getNear(), getFar(), getFocalLengthX(), getFocalLengthY(), cx, cy,
                            getSkew());
 }
 void SapienRenderCameraComponent::setSkew(float s) {
+  checkMode(CameraMode::ePerspective);
   setPerspectiveParameters(getNear(), getFar(), getFocalLengthX(), getFocalLengthY(),
                            getPrincipalPointX(), getPrincipalPointY(), s);
 }
@@ -408,6 +438,17 @@ void SapienRenderCameraComponent::internalUpdate() {
                                     .rotation = {pose.q.w, pose.q.x, pose.q.y, pose.q.z}});
   }
   mUpdatedWithoutTakingPicture = true;
+}
+
+void SapienRenderCameraComponent::checkMode(CameraMode mode) const {
+  if (mMode == mode) {
+    return;
+  }
+  if (mMode == CameraMode::ePerspective) {
+    throw std::runtime_error("this function is only available for perspective camera");
+  } else {
+    throw std::runtime_error("this function is only available for orthographic camera");
+  }
 }
 
 void SapienRenderCameraComponent::gpuInit() {

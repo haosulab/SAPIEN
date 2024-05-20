@@ -1,4 +1,5 @@
 #pragma once
+#include "camera_component.h"
 #include "image.h"
 #include "material.h"
 #include "sapien/math/mat.h"
@@ -60,6 +61,8 @@ public:
   void setCameraParameters(float near, float far, float fovy);
   void setCameraIntrinsicParameters(float near, float far, float fx, float fy, float cx, float cy,
                                     float skew);
+  void setCameraOrthoParameters(float near, float far, float top);
+  CameraMode getCameraMode();
 
   void setCameraPose(Pose const &pose);
   Pose getCameraPose();
@@ -85,6 +88,7 @@ public:
   float getCameraNear();
   float getCameraFar();
   float getCameraFovy();
+  float getCameraOrthoTop();
 
   glm::mat4 getCameraProjectionMatrix();
   Mat4 getCameraModelMatrix();

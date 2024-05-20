@@ -202,6 +202,23 @@ void SapienRendererWindow::setCameraIntrinsicParameters(float near, float far, f
   getCamera()->setPerspectiveParameters(near, far, fx, fy, cx, cy, width, height, skew);
 }
 
+void SapienRendererWindow::setCameraOrthoParameters(float near, float far, float top) {
+  uint32_t width = std::max(mWindow->getWidth(), 1u);
+  uint32_t height = std::max(mWindow->getHeight(), 1u);
+  getCamera()->setOrthographicParameters(near, far, top, width, height);
+}
+
+CameraMode SapienRendererWindow::getCameraMode() {
+  switch (getCamera()->getCameraType()) {
+  case svulkan2::scene::Camera::Type::eOrthographic:
+    return CameraMode::eOrthographic;
+  case svulkan2::scene::Camera::Type::ePerspective:
+    return CameraMode::ePerspective;
+  default:
+    throw std::runtime_error("unsupported camera mode");
+  }
+}
+
 void SapienRendererWindow::setCameraPose(Pose const &pose) {
   auto glpose = pose * POSE_GL_TO_ROS;
   auto cam = getCamera();
@@ -277,7 +294,8 @@ Mat4 SapienRendererWindow::getCameraModelMatrix() {
 
 float SapienRendererWindow::getCameraNear() { return getCamera()->getNear(); }
 float SapienRendererWindow::getCameraFar() { return getCamera()->getFar(); }
-float SapienRendererWindow::getCameraFovy() { return getCamera()->getFovy(); };
+float SapienRendererWindow::getCameraFovy() { return getCamera()->getFovy(); }
+float SapienRendererWindow::getCameraOrthoTop() { return getCamera()->getOrthographicTop(); }
 
 std::vector<std::string> SapienRendererWindow::getDisplayTargetNames() const {
   return mSVulkanRenderer->getDisplayTargetNames();
