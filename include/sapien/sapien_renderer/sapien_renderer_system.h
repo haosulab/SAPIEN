@@ -81,6 +81,10 @@ public:
     return std::vector<std::shared_ptr<SapienRenderBodyComponent>>{mRenderBodyComponents.begin(),
                                                                    mRenderBodyComponents.end()};
   }
+  std::vector<std::shared_ptr<PointCloudComponent>> getPointCloudComponents() const {
+    return std::vector<std::shared_ptr<PointCloudComponent>>{mPointCloudComponents.begin(),
+                                                             mPointCloudComponents.end()};
+  }
   std::vector<std::shared_ptr<SapienRenderCameraComponent>> getCameraComponents() const {
     return std::vector<std::shared_ptr<SapienRenderCameraComponent>>{
         mRenderCameraComponents.begin(), mRenderCameraComponents.end()};

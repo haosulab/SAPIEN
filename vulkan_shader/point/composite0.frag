@@ -1,62 +1,114 @@
 #version 450
 
-layout (constant_id = 0) const int NUM_DIRECTIONAL_LIGHTS = 3;
-layout (constant_id = 1) const int NUM_POINT_LIGHTS = 10;
-layout (constant_id = 2) const int NUM_DIRECTIONAL_LIGHT_SHADOWS = 1;
-layout (constant_id = 3) const int NUM_POINT_LIGHT_SHADOWS = 3;
-layout (constant_id = 4) const int NUM_TEXTURED_LIGHT_SHADOWS = 1;
-layout (constant_id = 5) const int NUM_SPOT_LIGHT_SHADOWS = 10;
-layout (constant_id = 6) const int NUM_SPOT_LIGHTS = 10;
+layout (constant_id = 0) const float exposure = 1.0;
 
-layout(set = 0, binding = 0) uniform sampler2D samplerPointColor;
-layout(set = 0, binding = 1) uniform sampler2D samplerPointNormal;
-layout(set = 0, binding = 2) uniform sampler2D samplerPointPosition;
+layout(set = 0, binding = 0) uniform sampler2D samplerLighting;
+layout(set = 0, binding = 1) uniform usampler2D samplerSegmentation;
+layout(set = 0, binding = 2) uniform sampler2D samplerPosition;
 
-#define SET_NUM 2
-#include "./scene_set.glsl"
-#undef SET_NUM
+layout(set = 0, binding = 3) uniform sampler2D samplerLineDepth;
+layout(set = 0, binding = 4) uniform sampler2D samplerLine;
+layout(set = 0, binding = 5) uniform sampler2D samplerPointDepth;
+layout(set = 0, binding = 6) uniform sampler2D samplerPoint;
+layout(set = 0, binding = 7) uniform sampler2D samplerGbufferDepth;
+
+
+layout(location = 0) in vec2 inUV;
+
+layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outDepthLinear;
+layout(location = 2) out vec4 outSegmentationView0;
+layout(location = 3) out vec4 outSegmentationView1;
 
 #define SET_NUM 1
 #include "./camera_set.glsl"
 #undef SET_NUM
 
-layout(location = 0) in vec2 inUV;
-layout(location = 0) out vec4 outPoint;
+vec4 colors[60] = {
+  vec4(0.8,  0.4,  0.4 , 1 ),
+  vec4(0.8,  0.41, 0.24, 1 ),
+  vec4(0.8,  0.75, 0.32, 1 ),
+  vec4(0.6,  0.8,  0.4 , 1 ),
+  vec4(0.35, 0.8,  0.24, 1 ),
+  vec4(0.32, 0.8,  0.51, 1 ),
+  vec4(0.4,  0.8,  0.8 , 1 ),
+  vec4(0.24, 0.63, 0.8 , 1 ),
+  vec4(0.32, 0.37, 0.8 , 1 ),
+  vec4(0.6,  0.4,  0.8 , 1 ),
+  vec4(0.69, 0.24, 0.8 , 1 ),
+  vec4(0.8,  0.32, 0.61, 1 ),
+  vec4(0.8,  0.32, 0.32, 1 ),
+  vec4(0.8,  0.64, 0.4 , 1 ),
+  vec4(0.8,  0.74, 0.24, 1 ),
+  vec4(0.56, 0.8,  0.32, 1 ),
+  vec4(0.4,  0.8,  0.44, 1 ),
+  vec4(0.24, 0.8,  0.46, 1 ),
+  vec4(0.32, 0.8,  0.8 , 1 ),
+  vec4(0.4,  0.56, 0.8 , 1 ),
+  vec4(0.24, 0.3,  0.8 , 1 ),
+  vec4(0.56, 0.32, 0.8 , 1 ),
+  vec4(0.8,  0.4,  0.76, 1 ),
+  vec4(0.8,  0.24, 0.58, 1 ),
+  vec4(0.8,  0.24, 0.24, 1 ),
+  vec4(0.8,  0.61, 0.32, 1 ),
+  vec4(0.72, 0.8,  0.4 , 1 ),
+  vec4(0.52, 0.8,  0.24, 1 ),
+  vec4(0.32, 0.8,  0.37, 1 ),
+  vec4(0.4,  0.8,  0.68, 1 ),
+  vec4(0.24, 0.8,  0.8 , 1 ),
+  vec4(0.32, 0.51, 0.8 , 1 ),
+  vec4(0.48, 0.4,  0.8 , 1 ),
+  vec4(0.52, 0.24, 0.8 , 1 ),
+  vec4(0.8,  0.32, 0.75, 1 ),
+  vec4(0.8,  0.4,  0.52, 1 ),
+  vec4(0.8,  0.52, 0.4 , 1 ),
+  vec4(0.8,  0.58, 0.24, 1 ),
+  vec4(0.7,  0.8,  0.32, 1 ),
+  vec4(0.48, 0.8,  0.4 , 1 ),
+  vec4(0.24, 0.8,  0.3 , 1 ),
+  vec4(0.32, 0.8,  0.66, 1 ),
+  vec4(0.4,  0.68, 0.8 , 1 ),
+  vec4(0.24, 0.46, 0.8 , 1 ),
+  vec4(0.42, 0.32, 0.8 , 1 ),
+  vec4(0.72, 0.4,  0.8 , 1 ),
+  vec4(0.8,  0.24, 0.74, 1 ),
+  vec4(0.8,  0.32, 0.46, 1 ),
+  vec4(0.8,  0.46, 0.32, 1 ),
+  vec4(0.8,  0.76, 0.4 , 1 ),
+  vec4(0.69, 0.8,  0.24, 1 ),
+  vec4(0.42, 0.8,  0.32, 1 ),
+  vec4(0.4,  0.8,  0.56, 1 ),
+  vec4(0.24, 0.8,  0.63, 1 ),
+  vec4(0.32, 0.66, 0.8 , 1 ),
+  vec4(0.4,  0.44, 0.8 , 1 ),
+  vec4(0.35, 0.24, 0.8 , 1 ),
+  vec4(0.7,  0.32, 0.8 , 1 ),
+  vec4(0.8,  0.4,  0.64, 1 ),
+  vec4(0.8,  0.24, 0.41, 1 )
+};
 
-vec3 diffuseIBL(vec3 albedo, vec3 N) {
-  N = vec3(-N.y, N.z, -N.x);
-  vec3 color = textureLod(samplerEnvironment, N, 5).rgb;
-  return color * albedo;
-}
-
-vec3 specularIBL(vec3 fresnel, float roughness, vec3 N, vec3 V) {
-  float dotNV = max(dot(N, V), 0);
-  vec3 R = 2 * dot(N, V) * N - V;
-  R = vec3(-R.y, R.z, -R.x);
-  vec3 color = textureLod(samplerEnvironment, R, roughness * 5).rgb;
-  vec2 envBRDF = texture(samplerBRDFLUT, vec2(roughness, dotNV)).xy;
-  return color * (fresnel * envBRDF.x + envBRDF.y);
-}
 
 void main() {
-  vec3 fresnel = vec3(0.04);
-  float roughness = 0.01;
+  outColor = texture(samplerPoint, inUV);
+  // outColor = texture(samplerLighting, inUV);
+  // outColor.rgb = pow(outColor.rgb * exposure, vec3(1/2.2));
+  // outColor = clamp(outColor, vec4(0), vec4(1));
 
-  vec3 color = vec3(0.0);
+  // outDepthLinear.x = -texture(samplerPosition, inUV).z;
 
-  vec3 diffuseAlbedo = texture(samplerPointColor, inUV).xyz;
-  vec3 normal = texture(samplerPointNormal, inUV).xyz;
-  vec3 position = texture(samplerPointPosition, inUV).xyz;
+  // uvec2 seg = texture(samplerSegmentation, inUV).xy;
+  // outSegmentationView0 = mix(vec4(0,0,0,1), colors[seg.x % 60], sign(seg.x));
+  // outSegmentationView1 = mix(vec4(0,0,0,1), colors[seg.y % 60], sign(seg.y));
 
-  vec3 camDir = -normalize(position);
+  // vec4 lineColor = texture(samplerLine, inUV);
+  // if (texture(samplerLineDepth, inUV).x < 1) {
+  //   outColor = vec4(lineColor.xyz, 1);
+  // }
 
-  vec3 wnormal = mat3(cameraBuffer.viewMatrixInverse) * normal;
-  color += diffuseIBL(diffuseAlbedo, wnormal);
-  color += specularIBL(fresnel, roughness,
-                       wnormal,
-                       mat3(cameraBuffer.viewMatrixInverse) * camDir);
-
-  color += sceneBuffer.ambientLight.rgb * diffuseAlbedo;
-
-  outPoint = vec4(color, 1.0);
+  // vec4 pointColor = texture(samplerPoint, inUV);
+  // pointColor.rgb = pow(pointColor.rgb * exposure, vec3(1/2.2));
+  // float pointDepth = texture(samplerPointDepth, inUV).x;
+  // if (pointDepth < 1 && pointDepth < texture(samplerGbufferDepth, inUV).x) {
+  //   outColor = vec4(pointColor.xyz, 1);
+  // }
 }

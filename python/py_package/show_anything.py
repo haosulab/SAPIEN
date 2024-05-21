@@ -32,11 +32,28 @@ class AnythingViewer:
         loader = self.scene.create_urdf_loader()
         loader.load(filename)
 
+    def add_pcd_file(self, filename):
+        import trimesh
+
+        tp = trimesh.load(filename)
+        pcd = sapien.render.RenderPointCloudComponent(tp.vertices.shape[0])
+        pcd.set_vertices(tp.vertices.astype(np.float32))
+        pcd.set_attribute("color", (tp.colors / 255).astype(np.float32))
+        pcd.set_attribute(
+            "scale", np.ones(tp.vertices.shape[0], dtype=np.float32) * 0.1
+        )
+        self.scene.add_entity(sapien.Entity().add_component(pcd))
+
     def get_scene_aabb(self):
         aabb = np.array([[1e10] * 3, [-1e10] * 3])
         for b in self.scene.render_system.render_bodies:
             aabb_ = b.get_global_aabb_fast()
             aabb = np.minimum(aabb[0], aabb_[0]), np.maximum(aabb[1], aabb_[1])
+
+        for p in self.scene.render_system.point_clouds:
+            vs = p.get_vertices()
+            aabb = np.minimum(aabb[0], vs.min(0)), np.maximum(aabb[1], vs.max(0))
+
         return aabb
 
     def focus_scene(self):
@@ -156,6 +173,29 @@ def is_mesh_file(anything):
         return False
     if not any(anything.lower().endswith(x) for x in suffix):
         return False
+
+    if anything.lower().endswith(".ply"):
+        import trimesh
+
+        result = trimesh.load(anything)
+        if isinstance(result, trimesh.PointCloud):
+            return False
+    return True
+
+
+def is_pcd_file(anything):
+    suffix = [".ply", ".pcd"]
+    if not isinstance(anything, str):
+        return False
+    if not any(anything.lower().endswith(x) for x in suffix):
+        return False
+
+    if anything.lower().endswith(".ply"):
+        import trimesh
+
+        result = trimesh.load(anything)
+        if not isinstance(result, trimesh.PointCloud):
+            return False
     return True
 
 
@@ -173,6 +213,10 @@ def show_anything(*args, update_camera=True, loop=True):
     for thing in args:
         if is_mesh_file(thing):
             viewer.add_mesh_file(thing)
+            continue
+
+        if is_pcd_file(thing):
+            viewer.add_pcd_file(thing)
             continue
 
         if is_urdf_file(thing):

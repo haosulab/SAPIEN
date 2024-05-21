@@ -397,6 +397,10 @@ class RenderPointCloudComponent(sapien.pysapien.Component):
         """
     def get_cuda_vertices(self) -> sapien.pysapien.CudaArray:
         ...
+    def get_vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+        """
+        Get previously set vertices. This function does not reflect any changes directly made to the GPU.
+        """
     def set_attribute(self, name: str, attribute: numpy.ndarray[tuple[M, N], numpy.dtype[numpy.float32]] | list | tuple) -> RenderPointCloudComponent:
         ...
     def set_vertices(self, vertices: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple) -> RenderPointCloudComponent:
@@ -617,6 +621,8 @@ class RenderSystem(sapien.pysapien.System):
         ...
     def get_lights(self) -> list[RenderLightComponent]:
         ...
+    def get_point_clouds(self) -> list[RenderPointCloudComponent]:
+        ...
     def get_render_bodies(self) -> list[RenderBodyComponent]:
         ...
     def set_ambient_light(self, color: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
@@ -637,6 +643,9 @@ class RenderSystem(sapien.pysapien.System):
         ...
     @property
     def lights(self) -> list[RenderLightComponent]:
+        ...
+    @property
+    def point_clouds(self) -> list[RenderPointCloudComponent]:
         ...
     @property
     def render_bodies(self) -> list[RenderBodyComponent]:

@@ -597,6 +597,9 @@ This function waits for any pending CUDA operations on cuda stream provided by :
       .def_property_readonly("render_bodies", &SapienRendererSystem::getRenderBodyComponents)
       .def("get_render_bodies", &SapienRendererSystem::getRenderBodyComponents)
 
+      .def_property_readonly("point_clouds", &SapienRendererSystem::getPointCloudComponents)
+      .def("get_point_clouds", &SapienRendererSystem::getPointCloudComponents)
+
       .def_property_readonly("lights", &SapienRendererSystem::getLightComponents)
       .def("get_lights", &SapienRendererSystem::getLightComponents)
 
@@ -906,6 +909,9 @@ This function waits for any pending CUDA operations on cuda stream provided by :
 
   PyRenderPointCloudComponent.def(py::init<uint32_t>(), py::arg("capacity") = 0)
       .def("set_vertices", &PointCloudComponent::setVertices, py::arg("vertices"))
+      .def("get_vertices", &PointCloudComponent::getVertices,
+           "Get previously set vertices. This function does not reflect any changes directly made "
+           "to the GPU.")
       .def("set_attribute", &PointCloudComponent::setAttribute, py::arg("name"),
            py::arg("attribute"))
       .def("get_cuda_vertices", &PointCloudComponent::getCudaArray)

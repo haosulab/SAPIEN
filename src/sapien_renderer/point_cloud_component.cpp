@@ -16,6 +16,12 @@ std::shared_ptr<PointCloudComponent> PointCloudComponent::setVertices(
   return std::static_pointer_cast<PointCloudComponent>(shared_from_this());
 }
 
+Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> PointCloudComponent::getVertices() {
+  auto pos = mPointSet->getVertexAttribute("position");
+  return Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor>>(pos.data(),
+                                                                              pos.size() / 3, 3);
+}
+
 std::shared_ptr<PointCloudComponent> PointCloudComponent::setAttribute(
     std::string const &name,
     Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> const &attribute) {

@@ -15,6 +15,8 @@ public:
 
   std::shared_ptr<PointCloudComponent>
   setVertices(Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &vertices);
+  Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> getVertices();
+
   std::shared_ptr<PointCloudComponent> setAttribute(
       std::string const &name,
       Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> const &attribute);
