@@ -7,6 +7,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/smart_holder.h>
 #include <pybind11/stl.h>
+#include <svulkan2/core/instance.h>
 
 namespace py = pybind11;
 
@@ -440,6 +441,12 @@ void init_sapien_renderer(py::module &sapien) {
       .def("enable_vr", &SapienRendererDefault::enableVR,
            "Enable VR via Steam. Must be called before creating RenderSystem or sapien Scene.")
       .def("get_vr_enabled", &SapienRendererDefault::getVREnabled)
+      .def(
+          "_force_vr_shutdown",
+          []() { SapienRenderEngine::Get()->getContext()->getInstance2()->shutdownVR(); },
+          "SteamVR will be permanently broken (even across processes) when the process is killed "
+          "without shutting down VR. This function is used to force shutting down VR when you "
+          "know SAPIEN will be killed without a clean shutdown.")
 
       .def("set_viewer_shader_dir", &SapienRendererDefault::setViewerShaderDirectory,
            py::arg("dir"))
