@@ -982,6 +982,10 @@ class SapienRenderer:
     @property
     def _internal_context(self) -> sapien.pysapien.internal_renderer.Context:
         ...
+def _force_vr_shutdown() -> None:
+    """
+    SteamVR will be permanently broken (even across processes) when the process is killed without shutting down VR. This function is used to force shutting down VR when you know SAPIEN will be killed without a clean shutdown.
+    """
 def _internal_set_shader_search_path(path: str) -> None:
     ...
 def clear_cache(models: bool = True, images: bool = True, shaders: bool = False) -> None:

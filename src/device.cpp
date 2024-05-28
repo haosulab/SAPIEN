@@ -15,15 +15,17 @@ static std::vector<std::shared_ptr<Device>> vulkanFindDevices() {
 
   std::vector<std::shared_ptr<Device>> res;
   try {
-    std::shared_ptr<svulkan2::core::Context> context;
+    std::shared_ptr<svulkan2::core::Instance> instance;
     try {
-      context = svulkan2::core::Context::Get();
+      auto context = svulkan2::core::Context::Get();
+      instance = context->getInstance2();
     } catch (std::runtime_error &) {
-      context = svulkan2::core::Context::Create();
+      instance = std::make_shared<svulkan2::core::Instance>(
+          VK_MAKE_VERSION(0, 0, 1), VK_MAKE_VERSION(0, 0, 1), VK_API_VERSION_1_2, false);
     }
 
-    if (context) {
-      auto devices = context->getInstance2()->summarizePhysicalDevices();
+    if (instance) {
+      auto devices = instance->summarizePhysicalDevices();
       for (auto &d : devices) {
         int priority = 0;
 

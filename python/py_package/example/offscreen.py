@@ -6,6 +6,7 @@ from PIL import Image
 
 
 def main():
+    sapien.render.set_log_level("info")
     scene = sapien.Scene()
     scene.set_timestep(1 / 100.0)  # Set the simulation frequency
 
