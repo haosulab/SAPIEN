@@ -158,6 +158,8 @@ class ActorBuilder:
             shape.local_pose = r.pose
             shape.name = r.name
             component.attach(shape)
+
+        component.name = self.name
         return component
 
     def build_physx_component(self, link_parent=None):
@@ -257,6 +259,7 @@ class ActorBuilder:
             component.cmass_local_pose = self._cmass_local_pose
             component.inertia = self._inertia
 
+        component.name = self.name
         return component
 
     def build_entity(self):
