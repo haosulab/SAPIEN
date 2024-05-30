@@ -183,7 +183,7 @@ class ControlWindow(Plugin):
 
     @property
     def camera_items(self):
-        return ["None"] + [c.entity.name for c in self.viewer.cameras]
+        return ["None"] + [c.name for c in self.viewer.cameras]
 
     @property
     def camera_index(self):
