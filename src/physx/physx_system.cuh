@@ -52,9 +52,11 @@ struct PhysxPose {
 };
 static_assert(sizeof(PhysxPose) == 28);
 
+// this is used in physx articulation only
+// somehow w and v are flipped compared to rigid body
 struct PhysxVelocity {
-  Vec3 v{};
   Vec3 w{};
+  Vec3 v{};
 };
 static_assert(sizeof(PhysxVelocity) == 24);
 
