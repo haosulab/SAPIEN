@@ -1186,7 +1186,8 @@ Example:
            py::arg("heap_capacity") = 64 * 1024 * 1024,
            py::arg("found_lost_pairs_capacity") = 256 * 1024,
            py::arg("found_lost_aggregate_pairs_capacity") = 1024,
-           py::arg("total_aggregate_pairs_capacity") = 1024)
+           py::arg("total_aggregate_pairs_capacity") = 1024,
+           py::arg("collision_stack_size") = 64 * 64 * 1024)
 
       .def("set_scene_config",
            py::overload_cast<Vec3, float, bool, bool, bool, bool, bool, uint32_t>(

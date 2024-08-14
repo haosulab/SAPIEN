@@ -49,7 +49,8 @@ public:
                                  uint32_t maxRigidPatchCount, uint32_t heapCapacity,
                                  uint32_t foundLostPairsCapacity,
                                  uint32_t foundLostAggregatePairsCapacity,
-                                 uint32_t totalAggregatePairsCapacity);
+                                 uint32_t totalAggregatePairsCapacity,
+                                 uint32_t collisionStackSize);
   static ::physx::PxgDynamicsMemoryConfig const &getGpuMemoryConfig();
 
   static void setSceneConfig(Vec3 gravity, float bounceThreshold, bool enablePCM, bool enableTGS,

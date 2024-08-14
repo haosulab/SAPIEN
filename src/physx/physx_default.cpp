@@ -39,7 +39,8 @@ void PhysxDefault::setGpuMemoryConfig(uint32_t tempBufferCapacity, uint32_t maxR
                                       uint32_t maxRigidPatchCount, uint32_t heapCapacity,
                                       uint32_t foundLostPairsCapacity,
                                       uint32_t foundLostAggregatePairsCapacity,
-                                      uint32_t totalAggregatePairsCapacity) {
+                                      uint32_t totalAggregatePairsCapacity,
+                                      uint32_t collisionStackSize) {
   gGpuMemoryConfig.tempBufferCapacity = tempBufferCapacity;
   gGpuMemoryConfig.maxRigidContactCount = maxRigidContactCount;
   gGpuMemoryConfig.maxRigidPatchCount = maxRigidPatchCount;
@@ -47,6 +48,7 @@ void PhysxDefault::setGpuMemoryConfig(uint32_t tempBufferCapacity, uint32_t maxR
   gGpuMemoryConfig.foundLostPairsCapacity = foundLostPairsCapacity;
   gGpuMemoryConfig.foundLostAggregatePairsCapacity = foundLostAggregatePairsCapacity;
   gGpuMemoryConfig.totalAggregatePairsCapacity = totalAggregatePairsCapacity;
+  gGpuMemoryConfig.collisionStackSize = collisionStackSize;
 }
 
 ::physx::PxgDynamicsMemoryConfig const &PhysxDefault::getGpuMemoryConfig() {
