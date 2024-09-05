@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 if(MSVC)
     add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:/W4>" "$<$<CONFIG:Release>:$<$<COMPILE_LANGUAGE:CXX>:/O2>>")
+    add_definitions(_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
 else()
     add_compile_options("-Wall"
         "$<$<CONFIG:Debug>:-g3>" "$<$<CONFIG:Debug>:-O0>"
