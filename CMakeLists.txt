@@ -10,7 +10,6 @@ set(CMAKE_CXX_STANDARD 20)
 
 if(MSVC)
     add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:/W4>" "$<$<CONFIG:Release>:$<$<COMPILE_LANGUAGE:CXX>:/O2>>")
-    add_definitions(_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH)
 else()
     add_compile_options("-Wall"
         "$<$<CONFIG:Debug>:-g3>" "$<$<CONFIG:Debug>:-O0>"
@@ -71,7 +70,7 @@ endif ()
 if (${SAPIEN_CUDA})
     set(CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_PATH})
     set(CMAKE_CUDA_STANDARD 17)
-    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -O3 -lineinfo -ftemplate-depth=1024 -allow-unsupported-compiler")
+    set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -O3 -lineinfo -ftemplate-depth=1024")
     file(GLOB_RECURSE SAPIEN_CUDA_SRC "src/*.cu")
 
     find_package(CUDA REQUIRED)
