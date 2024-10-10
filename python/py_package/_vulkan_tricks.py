@@ -53,7 +53,7 @@ def _ensure_egl_icd():
 
     # 10_nvidia.json is installed
     for d in ["/usr/share/glvnd/egl_vendor.d", "/etc/glvnd/egl_vendor.d"]:
-        if any(("nvidia" in f) for f in os.listdir(d)):
+        if os.path.isdir(d) and any(("nvidia" in f) for f in os.listdir(d)):
             return
 
     warn(
