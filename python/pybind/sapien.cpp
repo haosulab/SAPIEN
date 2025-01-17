@@ -274,7 +274,9 @@ Generator<int> init_sapien(py::module &m) {
              return CudaArrayHandle{.shape = shape,
                                     .strides = strides,
                                     .type = type,
+#ifdef SAPIEN_CUDA
                                     .cudaId = getCudaPtrDevice(ptr),
+#endif
                                     .ptr = ptr};
            }),
            py::arg("data"))
@@ -313,6 +315,7 @@ Generator<int> init_sapien(py::module &m) {
              auto as_tensor = py::module_::import("torch").attr("as_tensor");
              return as_tensor("data"_a = obj, "device"_a = "cuda");
            })
+#ifdef SAPIEN_CUDA
       .def("jax",
            [](CudaArrayHandle &array) {
              auto from_dlpack = py::module_::import("jax").attr("dlpack").attr("from_dlpack");
@@ -322,12 +325,16 @@ Generator<int> init_sapien(py::module &m) {
       .def("dlpack", [](CudaArrayHandle &array) -> py::object {
         auto capsule = DLPackToCapsule(array.toDLPack());
         return capsule;
-      });
+      })
+#endif
+      ;
 #ifdef _MSC_VER
   m.def("compiled_with_cxx11_abi", []() { return true; });
   m.def("abi_version", []() { return _MSC_VER; });
 #else
+#ifdef SAPIEN_CUDA
   m.def("compiled_with_cxx11_abi", []() { return (bool)_GLIBCXX_USE_CXX11_ABI; });
+#endif
   m.def("abi_version", []() { return __GXX_ABI_VERSION; });
 #endif
   m.def("pybind11_use_smart_holder", []() {

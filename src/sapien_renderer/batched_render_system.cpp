@@ -5,8 +5,10 @@
 #include <svulkan2/renderer/renderer.h>
 #include <svulkan2/renderer/renderer_base.h>
 
+#ifdef SAPIEN_CUDA
 #include "sapien/utils/cuda.h"
 #include <cuda_runtime.h>
+#endif
 
 namespace sapien {
 namespace sapien_renderer {
@@ -68,8 +70,10 @@ BatchedCamera::BatchedCamera(std::vector<std::shared_ptr<SapienRenderCameraCompo
             array.strides.push_back(itemsize);
           }
           array.type = getFormatTypestr(format);
+#ifdef SAPIEN_CUDA
           array.ptr = mCudaImageBuffers[name]->getCudaPtr();
           array.cudaId = mCudaImageBuffers[name]->getCudaDeviceId();
+#endif
           mCudaImageHandles[name] = array;
         }
       }
@@ -94,11 +98,13 @@ BatchedCamera::BatchedCamera(std::vector<std::shared_ptr<SapienRenderCameraCompo
 
   int fd = device.getSemaphoreFdKHR(
       {mSemaphore.get(), vk::ExternalSemaphoreHandleTypeFlagBits::eOpaqueFd});
+#ifdef SAPIEN_CUDA
   cudaExternalSemaphoreHandleDesc desc = {};
   desc.flags = 0;
   desc.handle.fd = fd;
   desc.type = cudaExternalSemaphoreHandleTypeTimelineSemaphoreFd;
   checkCudaErrors(cudaImportExternalSemaphore(&mCudaSem, &desc));
+#endif
   // TODO clean up cudaSem
 }
 
@@ -119,9 +125,11 @@ void BatchedCamera::takePicture() {
   mFrameCounter++;
   context->getQueue().submit(mCommandBuffer.get(), {}, {}, {}, mSemaphore.get(), mFrameCounter,
                              {});
+#ifdef SAPIEN_CUDA
   cudaExternalSemaphoreWaitParams waitParams{};
   waitParams.params.fence.value = mFrameCounter;
   cudaWaitExternalSemaphoresAsync(&mCudaSem, &waitParams, 1, mCudaStream);
+#endif
 }
 
 CudaArrayHandle BatchedCamera::getPictureCuda(std::string const &name) {
@@ -134,7 +142,9 @@ CudaArrayHandle BatchedCamera::getPictureCuda(std::string const &name) {
 
 BatchedCamera::~BatchedCamera() {
   SapienRenderEngine::Get()->getContext()->getDevice().waitIdle();
+#ifdef SAPIEN_CUDA
   cudaDestroyExternalSemaphore(mCudaSem);
+#endif
 }
 
 BatchedRenderSystem::BatchedRenderSystem(
@@ -202,7 +212,9 @@ void BatchedRenderSystem::init() {
   }
   mShapeCount = allShapeData.size();
 
+#ifdef SAPIEN_CUDA
   checkCudaErrors(cudaSetDevice(SapienRenderEngine::Get()->getDevice()->cudaId));
+#endif
   mCudaShapeDataBuffer = CudaArray::FromData(allShapeData);
   mCudaSceneTransformRefBuffer = CudaArray::FromData(sceneTransformRefs);
 
@@ -219,11 +231,13 @@ void BatchedRenderSystem::init() {
 
     int fd = context->getDevice().getSemaphoreFdKHR(
         {mSem.get(), vk::ExternalSemaphoreHandleTypeFlagBits::eOpaqueFd});
+#ifdef SAPIEN_CUDA
     cudaExternalSemaphoreHandleDesc desc = {};
     desc.flags = 0;
     desc.handle.fd = fd;
     desc.type = cudaExternalSemaphoreHandleTypeTimelineSemaphoreFd;
     checkCudaErrors(cudaImportExternalSemaphore(&mCudaSem, &desc));
+#endif
   }
 }
 
@@ -263,8 +277,9 @@ std::shared_ptr<BatchedCamera> BatchedRenderSystem::createCameraBatch(
       mCameraCount++;
     }
   }
-
+#ifdef SAPIEN_CUDA
   checkCudaErrors(cudaSetDevice(SapienRenderEngine::Get()->getDevice()->cudaId));
+#endif
   mCudaCameraDataBuffer = CudaArray::FromData(allCamData);
   return cameraBatch;
 }
@@ -293,6 +308,7 @@ void BatchedRenderSystem::update() {
   }
 
   // upload data
+#ifdef SAPIEN_CUDA
   update_object_transforms(
       (float **)mCudaSceneTransformRefBuffer.ptr, mTransformBufferElementByteOffset / 4,
       (RenderShapeData *)mCudaShapeDataBuffer.ptr, (float *)mCudaPoseHandle.ptr,
@@ -300,7 +316,7 @@ void BatchedRenderSystem::update() {
 
   update_camera_transforms((CameraData *)mCudaCameraDataBuffer.ptr, (float *)mCudaPoseHandle.ptr,
                            mCudaPoseHandle.shape.at(1), mCameraCount, mCudaStream);
-
+#endif
   // TODO: uplaod camera
 
   // sync with renderer
@@ -308,11 +324,12 @@ void BatchedRenderSystem::update() {
 }
 
 void BatchedRenderSystem::notifyUpdate() {
+#ifdef SAPIEN_CUDA
   cudaExternalSemaphoreSignalParams sigParams{};
   sigParams.flags = 0;
   sigParams.params.fence.value = ++mSemValue;
   cudaSignalExternalSemaphoresAsync(&mCudaSem, &sigParams, 1, (cudaStream_t)mCudaStream);
-
+#endif
   vk::PipelineStageFlags stage = vk::PipelineStageFlagBits::eAllCommands;
   SapienRenderEngine::Get()->getContext()->getQueue().submit({}, mSem.get(), stage, mSemValue, {},
                                                              {}, {});
@@ -327,7 +344,9 @@ void BatchedRenderSystem::setCudaStream(uintptr_t stream) {
 
 BatchedRenderSystem ::~BatchedRenderSystem() {
   SapienRenderEngine::Get()->getContext()->getDevice().waitIdle();
+#ifdef SAPIEN_CUDA
   cudaDestroyExternalSemaphore(mCudaSem);
+#endif
 }
 
 } // namespace sapien_renderer

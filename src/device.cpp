@@ -187,8 +187,8 @@ std::shared_ptr<Device> findDevice(std::string alias) {
 
   // PCI
   if (alias.starts_with("pci:")) {
-    std::array<uint32_t, 4> pci;
-
+    std::array<uint32_t, 4> pci = {};
+#ifdef SAPIEN_CUDA
     try {
       pci = parsePCIString(alias.substr(4));
       for (auto d : gDevices) {
@@ -198,7 +198,7 @@ std::shared_ptr<Device> findDevice(std::string alias) {
       }
     } catch (std::runtime_error const &) {
     }
-
+#endif
     try {
       uint32_t busId = std::stoi(alias.substr(4), 0, 16);
       for (auto d : gDevices) {

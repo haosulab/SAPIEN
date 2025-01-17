@@ -1,3 +1,4 @@
+#ifdef SAPIEN_CUDA
 #pragma once
 #include <stdexcept>
 #include <string>
@@ -48,3 +49,4 @@ struct CudaEvent {
 };
 
 }; // namespace sapien
+#endif

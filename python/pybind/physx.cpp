@@ -290,10 +290,12 @@ Generator<int> init_physx(py::module &sapien) {
 
   auto PyPhysxSystemGpu = py::class_<PhysxSystemGpu, PhysxSystem>(m, "PhysxGpuSystem");
 
+#ifdef SAPIEN_CUDA
   auto PyPhysxGpuContactPairImpulseQuery =
       py::class_<PhysxGpuContactPairImpulseQuery>(m, "PhysxGpuContactPairImpulseQuery");
   auto PyPhysxGpuContactBodyImpulseQuery =
       py::class_<PhysxGpuContactBodyImpulseQuery>(m, "PhysxGpuContactBodyImpulseQuery");
+#endif
 
   auto PyPhysxBaseComponent = py::class_<PhysxBaseComponent, Component>(m, "PhysxBaseComponent");
   auto PyPhysxRigidBaseComponent =
@@ -410,6 +412,7 @@ Generator<int> init_physx(py::module &sapien) {
           "unpack", [](PhysxSystemCpu &s, py::bytes data) { s.unpackState(data); },
           py::arg("data"));
 
+#ifdef SAPIEN_CUDA
   PyPhysxSystemGpu
       .def(py::init([](std::string const &device) {
              return std::make_shared<PhysxSystemGpu>(findDevice(device));
@@ -572,6 +575,13 @@ Usage:
   PyPhysxGpuContactBodyImpulseQuery.def_property_readonly(
       "cuda_impulses", [](PhysxGpuContactBodyImpulseQuery const &q) { return q.buffer.handle(); });
 
+#else
+  PyPhysxSystemGpu
+      .def(py::init([](std::string const &device) {
+             return std::make_shared<PhysxSystemGpu>(findDevice(device));
+           }),
+           py::arg("device") = "cuda");
+#endif
   PyPhysxMaterial
       .def(py::init<float, float, float>(), py::arg("static_friction"),
            py::arg("dynamic_friction"), py::arg("restitution"))

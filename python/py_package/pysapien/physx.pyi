@@ -4,7 +4,12 @@ import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien_pinocchio
 import typing
-__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSDFConfig', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_sdf_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_sdf_config', 'set_shape_config', 'version']
+
+import platform
+if platform.system() == "Darwin":
+    __all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSDFConfig', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_sdf_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_sdf_config', 'set_shape_config', 'version']
+else:
+    __all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSDFConfig', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_sdf_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_sdf_config', 'set_shape_config', 'version']
 M = typing.TypeVar("M", bound=int)
 class PhysxArticulation:
     name: str
@@ -570,189 +575,190 @@ class PhysxGearComponent(PhysxJointComponent):
     @property
     def is_hinges_enabled(self) -> bool:
         ...
-class PhysxGpuContactBodyImpulseQuery:
-    @property
-    def cuda_impulses(self) -> sapien.pysapien.CudaArray:
-        ...
-class PhysxGpuContactPairImpulseQuery:
-    @property
-    def cuda_impulses(self) -> sapien.pysapien.CudaArray:
-        ...
-class PhysxGpuSystem(PhysxSystem):
-    @typing.overload
-    def __init__(self, device: str = 'cuda') -> None:
-        ...
-    @typing.overload
-    def __init__(self, device: sapien.pysapien.Device) -> None:
-        ...
-    def get_scene_offset(self, scene: sapien.pysapien.Scene) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_qf(self) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_qf(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_qpos(self) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_qpos(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_qvel(self) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_qvel(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_root_pose(self) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_root_pose(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_root_velocity(self) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_root_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_target_position(self) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_target_position(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_target_velocity(self) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_articulation_target_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_rigid_dynamic_data(self) -> None:
-        ...
-    @typing.overload
-    def gpu_apply_rigid_dynamic_data(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-        ...
-    def gpu_apply_rigid_dynamic_force(self) -> None:
-        ...
-    def gpu_apply_rigid_dynamic_torque(self) -> None:
-        ...
-    def gpu_create_contact_body_impulse_query(self, bodies: list[PhysxRigidBaseComponent]) -> PhysxGpuContactBodyImpulseQuery:
-        ...
-    def gpu_create_contact_pair_impulse_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactPairImpulseQuery:
-        ...
-    def gpu_fetch_articulation_link_incoming_joint_forces(self) -> None:
-        ...
-    def gpu_fetch_articulation_link_pose(self) -> None:
-        ...
-    def gpu_fetch_articulation_link_velocity(self) -> None:
-        ...
-    def gpu_fetch_articulation_qacc(self) -> None:
-        ...
-    def gpu_fetch_articulation_qpos(self) -> None:
-        ...
-    def gpu_fetch_articulation_qvel(self) -> None:
-        ...
-    def gpu_fetch_articulation_target_qpos(self) -> None:
-        ...
-    def gpu_fetch_articulation_target_qvel(self) -> None:
-        ...
-    def gpu_fetch_rigid_dynamic_data(self) -> None:
-        ...
-    def gpu_init(self) -> None:
-        """
-           "Warm start" the GPU simulation by stepping the system once. This function
-           must be called each time when actors are added or removed from the scene. One
-           may call `gpu_apply_*` functions to initialize the system after calling this
-           function.
-        """
-    def gpu_query_contact_body_impulses(self, query: PhysxGpuContactBodyImpulseQuery) -> None:
-        """
-        Query net contact forces for specific bodies of the last simulation step.
-        Usage:
-            query = system.gpu_create_contact_body_force_query(bodies)  # create force query in advance
-        
-            # after simulation step
-            system.gpu_query_contact_body_forces(query)
-            # query.cuda_buffer is now filled with net contact forces for each body
-        """
-    def gpu_query_contact_pair_impulses(self, query: PhysxGpuContactPairImpulseQuery) -> None:
-        ...
-    def gpu_set_cuda_stream(self, stream: int) -> None:
-        """
-        PhysX GPU APIs will be synchronized with the provided stream and SAPIEN's CUDA
-        kernels will be launched to the provided stream.
-        
-        Args:
-            stream: integer representation of a cuda stream pointer
-        """
-    def gpu_update_articulation_kinematics(self) -> None:
-        ...
-    def set_scene_offset(self, scene: sapien.pysapien.Scene, offset: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
-        """
-        In GPU mode, all SAPIEN scenes share the same PhysX scene. One should call this
-        function to apply an offset to avoid bodies in different scenes interfere with
-        each other. This function must be called before any PhysX body is added to scene.
-        
-        Example: After calling `set_scene_offset([2, 1, 0])`, an SAPIEN object with
-        position `[1, 1, 1]` will be at position `[1, 1, 1] + [2, 1, 0] = [3, 2, 1]` in
-        PhysX scene.
-        """
-    def step_finish(self) -> None:
-        ...
-    def step_start(self) -> None:
-        ...
-    def sync_poses_gpu_to_cpu(self) -> None:
-        """
-        Warning: this function is super slow and for debug only. Download all poses from the GPU and copy to SAPIEN entities.
-        """
-    @property
-    def cuda_articulation_link_data(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_articulation_link_incoming_joint_forces(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_articulation_qacc(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_articulation_qf(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_articulation_qpos(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_articulation_qvel(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_articulation_target_qpos(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_articulation_target_qvel(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_rigid_body_data(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_rigid_body_force(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_rigid_body_torque(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_rigid_dynamic_data(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_rigid_dynamic_force(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def cuda_rigid_dynamic_torque(self) -> sapien.pysapien.CudaArray:
-        ...
-    @property
-    def device(self) -> sapien.pysapien.Device:
-        ...
+if platform.system() != "Darwin":
+    class PhysxGpuContactBodyImpulseQuery:
+        @property
+        def cuda_impulses(self) -> sapien.pysapien.CudaArray:
+            ...
+    class PhysxGpuContactPairImpulseQuery:
+        @property
+        def cuda_impulses(self) -> sapien.pysapien.CudaArray:
+            ...
+    class PhysxGpuSystem(PhysxSystem):
+        @typing.overload
+        def __init__(self, device: str = 'cuda') -> None:
+            ...
+        @typing.overload
+        def __init__(self, device: sapien.pysapien.Device) -> None:
+            ...
+        def get_scene_offset(self, scene: sapien.pysapien.Scene) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_qf(self) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_qf(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_qpos(self) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_qpos(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_qvel(self) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_qvel(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_root_pose(self) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_root_pose(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_root_velocity(self) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_root_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_target_position(self) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_target_position(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_target_velocity(self) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_articulation_target_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_rigid_dynamic_data(self) -> None:
+            ...
+        @typing.overload
+        def gpu_apply_rigid_dynamic_data(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+            ...
+        def gpu_apply_rigid_dynamic_force(self) -> None:
+            ...
+        def gpu_apply_rigid_dynamic_torque(self) -> None:
+            ...
+        def gpu_create_contact_body_impulse_query(self, bodies: list[PhysxRigidBaseComponent]) -> PhysxGpuContactBodyImpulseQuery:
+            ...
+        def gpu_create_contact_pair_impulse_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactPairImpulseQuery:
+            ...
+        def gpu_fetch_articulation_link_incoming_joint_forces(self) -> None:
+            ...
+        def gpu_fetch_articulation_link_pose(self) -> None:
+            ...
+        def gpu_fetch_articulation_link_velocity(self) -> None:
+            ...
+        def gpu_fetch_articulation_qacc(self) -> None:
+            ...
+        def gpu_fetch_articulation_qpos(self) -> None:
+            ...
+        def gpu_fetch_articulation_qvel(self) -> None:
+            ...
+        def gpu_fetch_articulation_target_qpos(self) -> None:
+            ...
+        def gpu_fetch_articulation_target_qvel(self) -> None:
+            ...
+        def gpu_fetch_rigid_dynamic_data(self) -> None:
+            ...
+        def gpu_init(self) -> None:
+            """
+            "Warm start" the GPU simulation by stepping the system once. This function
+            must be called each time when actors are added or removed from the scene. One
+            may call `gpu_apply_*` functions to initialize the system after calling this
+            function.
+            """
+        def gpu_query_contact_body_impulses(self, query: PhysxGpuContactBodyImpulseQuery) -> None:
+            """
+            Query net contact forces for specific bodies of the last simulation step.
+            Usage:
+                query = system.gpu_create_contact_body_force_query(bodies)  # create force query in advance
+            
+                # after simulation step
+                system.gpu_query_contact_body_forces(query)
+                # query.cuda_buffer is now filled with net contact forces for each body
+            """
+        def gpu_query_contact_pair_impulses(self, query: PhysxGpuContactPairImpulseQuery) -> None:
+            ...
+        def gpu_set_cuda_stream(self, stream: int) -> None:
+            """
+            PhysX GPU APIs will be synchronized with the provided stream and SAPIEN's CUDA
+            kernels will be launched to the provided stream.
+            
+            Args:
+                stream: integer representation of a cuda stream pointer
+            """
+        def gpu_update_articulation_kinematics(self) -> None:
+            ...
+        def set_scene_offset(self, scene: sapien.pysapien.Scene, offset: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
+            """
+            In GPU mode, all SAPIEN scenes share the same PhysX scene. One should call this
+            function to apply an offset to avoid bodies in different scenes interfere with
+            each other. This function must be called before any PhysX body is added to scene.
+            
+            Example: After calling `set_scene_offset([2, 1, 0])`, an SAPIEN object with
+            position `[1, 1, 1]` will be at position `[1, 1, 1] + [2, 1, 0] = [3, 2, 1]` in
+            PhysX scene.
+            """
+        def step_finish(self) -> None:
+            ...
+        def step_start(self) -> None:
+            ...
+        def sync_poses_gpu_to_cpu(self) -> None:
+            """
+            Warning: this function is super slow and for debug only. Download all poses from the GPU and copy to SAPIEN entities.
+            """
+        @property
+        def cuda_articulation_link_data(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_articulation_link_incoming_joint_forces(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_articulation_qacc(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_articulation_qf(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_articulation_qpos(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_articulation_qvel(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_articulation_target_qpos(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_articulation_target_qvel(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_rigid_body_data(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_rigid_body_force(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_rigid_body_torque(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_rigid_dynamic_data(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_rigid_dynamic_force(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def cuda_rigid_dynamic_torque(self) -> sapien.pysapien.CudaArray:
+            ...
+        @property
+        def device(self) -> sapien.pysapien.Device:
+            ...
 class PhysxJointComponent(PhysxBaseComponent):
     parent: PhysxRigidBaseComponent
     pose_in_child: sapien.pysapien.Pose

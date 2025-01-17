@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
-project(sapien LANGUAGES C CXX CUDA)
+if (APPLE)
+    project(sapien LANGUAGES C CXX)
+else()
+    project(sapien LANGUAGES C CXX CUDA)
+endif()
 
 if(MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreaded)
@@ -104,13 +108,17 @@ endif ()
 target_link_libraries(sapien PUBLIC eigen svulkan2)
 target_link_libraries(sapien PRIVATE physx5 spdlog::spdlog ${CMAKE_DL_LIBS} assimp::assimp)
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
     target_link_libraries(sapien PRIVATE stdc++fs)
 endif ()
 
 if (${SAPIEN_CUDA})
     target_compile_definitions(sapien PUBLIC SAPIEN_CUDA SAPIEN_CUDA)
     target_include_directories(sapien PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/dlpack/include>)
+endif()
+
+if (${SAPIEN_MACOS})
+    target_compile_definitions(sapien PUBLIC SAPIEN_MACOS)
 endif()
 
 target_include_directories(sapien PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)

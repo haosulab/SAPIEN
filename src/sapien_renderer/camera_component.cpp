@@ -483,11 +483,17 @@ CudaArrayHandle SapienRenderCameraComponent::getCudaBuffer() {
 
   if (auto r = dynamic_cast<svulkan2::renderer::Renderer *>(&mCamera->getRenderer())) {
     auto &buffer = r->getCameraBuffer();
+#ifdef SAPIEN_CUDA
     return CudaArrayHandle{.shape = {static_cast<int>(buffer.getSize() / sizeof(float))},
                            .strides = {4},
                            .type = "f4",
                            .cudaId = buffer.getCudaDeviceId(),
                            .ptr = buffer.getCudaPtr()};
+#else
+    return CudaArrayHandle{.shape = {static_cast<int>(buffer.getSize() / sizeof(float))},
+                           .strides = {4},
+                           .type = "f4"};
+#endif
   } else {
     throw std::runtime_error("only rasterization renderer supports camera cuda buffer.");
   }

@@ -10,6 +10,10 @@ else()
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g0 -Wall -fcoroutines")
 endif()
 
+if (APPLE)
+    set(CMAKE_INSTALL_RPATH "@loader_path/libs")
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-D_DEBUG)

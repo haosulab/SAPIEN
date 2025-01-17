@@ -2,9 +2,11 @@
 #include "sapien/array.h"
 #include "sapien/utils/cuda.h"
 #include "sapien/utils/typestr.h"
-#include <dlpack/dlpack.h>
 
+#ifdef SAPIEN_CUDA
+#include <dlpack/dlpack.h>
 #include <cuda_runtime.h>
+#endif
 
 namespace sapien {
 
@@ -33,6 +35,7 @@ static bool CheckShape(std::vector<int> const &tested, std::vector<int> const &e
   return true;
 }
 
+#ifdef SAPIEN_CUDA
 static DLDataType TypestrToDLDataType(std::string const &d) {
   char code = typestrCode(d);
   int size = typestrBytes(d);
@@ -55,6 +58,7 @@ static DLDataType TypestrToDLDataType(std::string const &d) {
   type.lanes = 1;
   return type;
 }
+#endif
 
 std::vector<int> ShapeToStrides(std::vector<int> const &shape, int elemSize) {
   int acc = elemSize;
@@ -97,6 +101,7 @@ int CudaArrayHandle::bytes() const {
   return size * typestrBytes(type);
 }
 
+#ifdef SAPIEN_CUDA
 static void DLManagedTensorDeleter(DLManagedTensor *self) {
   delete self->dl_tensor.strides;
   delete self->dl_tensor.shape;
@@ -126,6 +131,7 @@ DLManagedTensor *CudaArrayHandle::toDLPack() const {
 
   return tensor;
 }
+#endif
 
 CudaArray CudaArray::FromData(void *data, int size) {
   CudaArray buffer({size}, "u1");
@@ -235,6 +241,7 @@ CudaHostArray &CudaHostArray::operator=(CudaHostArray &&other) {
 }
 
 void CudaHostArray::copyFrom(const CudaArray &array) {
+#ifdef SAPIEN_CUDA
   if (array.shape != shape) {
     throw std::runtime_error("failed to copy: arrays have different shapes");
   }
@@ -245,6 +252,7 @@ void CudaHostArray::copyFrom(const CudaArray &array) {
     return;
   }
   checkCudaErrors(cudaMemcpy(ptr, array.ptr, array.bytes(), cudaMemcpyDeviceToHost));
+#endif
 }
 
 CudaArrayHandle CudaArray::handle() const {
@@ -255,6 +263,7 @@ CudaArrayHandle CudaArray::handle() const {
                          .ptr = ptr};
 }
 
+#ifdef SAPIEN_CUDA
 static void CudaArrayDLManagedTensorDeleter(DLManagedTensor *self) {
   delete static_cast<CudaArray *>(self->manager_ctx);
   delete self->dl_tensor.shape;
@@ -281,6 +290,7 @@ DLManagedTensor *CudaArray::moveToDLPack() {
   tensor->manager_ctx = new CudaArray(std::move(*this));
   return tensor;
 }
+#endif
 
 int CudaArray::bytes() const {
   int size = 1;

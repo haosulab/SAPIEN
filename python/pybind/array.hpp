@@ -1,6 +1,8 @@
 #pragma once
 #include "sapien/array.h"
+#ifdef SAPIEN_CUDA
 #include <dlpack/dlpack.h>
+#endif
 #include <pybind11/numpy.h>
 #include <pybind11/smart_holder.h>
 #include <pybind11/stl.h>
@@ -10,6 +12,7 @@ using namespace sapien;
 
 namespace sapien {
 
+#ifdef SAPIEN_CUDA
 inline py::capsule DLPackToCapsule(DLManagedTensor *tensor) {
   return py::capsule(tensor, "dltensor", [](PyObject *data) {
     auto tensor = static_cast<DLManagedTensor *>(PyCapsule_GetPointer(data, "dltensor"));
@@ -20,6 +23,7 @@ inline py::capsule DLPackToCapsule(DLManagedTensor *tensor) {
     }
   });
 }
+#endif
 
 } // namespace sapien
 

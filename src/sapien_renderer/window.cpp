@@ -372,12 +372,20 @@ void SapienRendererWindow::render(std::string const &targetName,
     mSVulkanRenderer->display(targetName, mWindow->getBackbuffer(), mWindow->getBackBufferFormat(),
                               mWindow->getWidth(), mWindow->getHeight(), {imageAcquiredSemaphore},
                               {vk::PipelineStageFlagBits::eColorAttachmentOutput},
-                              {mSceneRenderSemaphore.get()}, {});
+                              {mSceneRenderSemaphore.get()}, 
+#ifdef SAPIEN_MACOS
+                              {mSceneRenderFence.get()}
+#else
+                              {}
+#endif
+                              );
   }
 
+#if !defined(SAPIEN_MACOS)
   auto swapchain = mWindow->getSwapchain();
   auto fidx = mWindow->getFrameIndex();
   vk::PresentInfoKHR info(1, &mSceneRenderSemaphore.get(), 1, &swapchain, &fidx);
+#endif
   try {
     mWindow->presentFrameWithImgui(mSceneRenderSemaphore.get(), mSceneRenderFence.get());
   } catch (vk::OutOfDateKHRError &e) {

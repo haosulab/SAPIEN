@@ -10,8 +10,13 @@ if (IS_DIRECTORY ${SAPIEN_PHYSX5_DIR})
 else()
   # We provide a precompiled physx5 here
   include(FetchContent)
-
-  if (UNIX)
+  if (APPLE)
+    FetchContent_Declare(
+      physx5
+      URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/macOS-release.zip
+      URL_HASH MD5=ea9409baaa4dcd8bdcfd9511889a5737
+    )
+  elseif (UNIX)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
       FetchContent_Declare(
         physx5
@@ -37,7 +42,19 @@ endif()
 
 add_library(physx5 INTERFACE)
 
-if (UNIX)
+if (APPLE)
+  if(CMAKE_SYSTEM_NAME MATCHES ".*Darwin.*" OR CMAKE_SYSTEM_NAME MATCHES ".*MacOS.*")
+    target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/arm64/release>)
+  endif()
+  
+  target_link_libraries(physx5 INTERFACE
+    libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
+    libPhysXCooking_static_64.a libPhysXExtensions_static_64.a
+    libPhysXFoundation_static_64.a libPhysXPvdSDK_static_64.a
+    libPhysX_static_64.a libPhysXVehicle_static_64.a
+    )
+  target_include_directories(physx5 SYSTEM INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/include>)
+elseif(UNIX)
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/linux.clang/checked>)
   else()

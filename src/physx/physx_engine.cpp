@@ -2,8 +2,10 @@
 #include "../logger.h"
 #include "sapien/physx/physx_default.h"
 
+#ifdef SAPIEN_CUDA
 #include "../utils/cuda_lib.h"
 #include "sapien/utils/cuda.h"
+#endif
 
 using namespace physx;
 
@@ -83,7 +85,7 @@ PhysxEngine::PhysxEngine(float toleranceLength, float toleranceSpeed) {
   if (!PhysxDefault::GetGPUEnabled()) {
     throw std::runtime_error("Using CUDA is not allowed when PhysX GPU is not enabled.");
   }
-
+#if PX_SUPPORT_GPU_PHYSX
   if (mCudaContextManagers.contains(cudaId)) {
     return mCudaContextManagers.at(cudaId);
   }
@@ -115,7 +117,9 @@ PhysxEngine::PhysxEngine(float toleranceLength, float toleranceSpeed) {
       PxCreateCudaContextManager(*mPxFoundation, cudaContextManagerDesc, PxGetProfilerCallback());
 
   return mCudaContextManagers[cudaId];
-
+#else
+  return nullptr;
+#endif
   // TODO clean up
 }
 
