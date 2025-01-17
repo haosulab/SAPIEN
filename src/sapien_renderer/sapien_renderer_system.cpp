@@ -12,8 +12,10 @@
 #include <svulkan2/renderer/rt_renderer.h>
 #include <svulkan2/scene/scene.h>
 
+#ifdef SAPIEN_CUDA
 #include "sapien/utils/cuda.h"
 #include <cuda_runtime.h>
+#endif
 
 namespace sapien {
 namespace sapien_renderer {
@@ -183,11 +185,17 @@ CudaArrayHandle SapienRendererSystem::getTransformCudaArray() {
   int offset = mScene->getGpuTransformBufferSize();
 
   auto buffer = mScene->getObjectTransformBuffer();
+#ifdef SAPIEN_CUDA
   return CudaArrayHandle{.shape = {static_cast<int>(buffer->getSize() / offset), 4, 4},
                          .strides = {offset, 16, 4},
                          .type = "f4",
                          .cudaId = buffer->getCudaDeviceId(),
                          .ptr = buffer->getCudaPtr()};
+#else
+  return CudaArrayHandle{.shape = {static_cast<int>(buffer->getSize() / offset), 4, 4},
+                         .strides = {offset, 16, 4},
+                         .type = "f4"};
+#endif
 }
 
 SapienRendererSystem::~SapienRendererSystem() {}

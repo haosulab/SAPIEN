@@ -13,7 +13,11 @@ from . import pysapien
 from .pysapien import Entity, Component, System, CudaArray, Pose, Device
 from .pysapien import profile
 from .pysapien import set_log_level
-from .pysapien import math, simsense
+from .pysapien import math
+
+import platform
+if platform.system() != "Darwin":
+    from .pysapien import simsense
 
 from . import physx
 from . import render

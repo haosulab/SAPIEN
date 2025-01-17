@@ -7,8 +7,13 @@ from . import internal_renderer
 from . import math
 from . import physx
 from . import render
-from . import simsense
-__all__ = ['Component', 'CudaArray', 'Device', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'abi_version', 'compiled_with_cxx11_abi', 'internal_renderer', 'math', 'physx', 'profile', 'pybind11_internals_id', 'pybind11_use_smart_holder', 'render', 'set_log_level', 'simsense']
+
+import platform
+if platform.system() == "Darwin":
+    __all__ = ['Component', 'CudaArray', 'Device', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'abi_version', 'compiled_with_cxx11_abi', 'internal_renderer', 'math', 'physx', 'profile', 'pybind11_internals_id', 'pybind11_use_smart_holder', 'render', 'set_log_level']
+else:
+    from . import simsense
+    __all__ = ['Component', 'CudaArray', 'Device', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'abi_version', 'compiled_with_cxx11_abi', 'internal_renderer', 'math', 'physx', 'profile', 'pybind11_internals_id', 'pybind11_use_smart_holder', 'render', 'set_log_level', 'simsense']
 _T = typing.TypeVar("_T", Component)
 class Component:
     entity_pose: Pose

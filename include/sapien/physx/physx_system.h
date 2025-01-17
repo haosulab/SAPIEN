@@ -314,7 +314,29 @@ private:
   int mContactCount{0}; // current contact count, valid only when contactUpdaToDate is true
   void copyContactData();
 };
+#else
+class PhysxSystemGpu : public PhysxSystem {
+public:
+  PhysxSystemGpu(std::shared_ptr<Device> device);
 
+  void registerComponent(std::shared_ptr<PhysxRigidDynamicComponent> component) override {}
+  void registerComponent(std::shared_ptr<PhysxRigidStaticComponent> component) override {}
+  void registerComponent(std::shared_ptr<PhysxArticulationLinkComponent> component) override {}
+  void unregisterComponent(std::shared_ptr<PhysxRigidDynamicComponent> component) override {}
+  void unregisterComponent(std::shared_ptr<PhysxRigidStaticComponent> component) override {}
+  void unregisterComponent(std::shared_ptr<PhysxArticulationLinkComponent> component) override {}
+  std::vector<std::shared_ptr<PhysxRigidDynamicComponent>>
+  getRigidDynamicComponents() const override { return {}; }
+  std::vector<std::shared_ptr<PhysxRigidStaticComponent>>
+  getRigidStaticComponents() const override { return {}; }
+  std::vector<std::shared_ptr<PhysxArticulationLinkComponent>>
+  getArticulationLinkComponents() const override { return {}; }
+
+  void step() override {}
+  bool isGpu() const override { return true; }
+
+  ~PhysxSystemGpu() {}
+};
 #endif
 
 } // namespace physx

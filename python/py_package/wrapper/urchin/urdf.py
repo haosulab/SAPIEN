@@ -3873,7 +3873,8 @@ class URDF(URDFTypeWithMesh):
                     v.material = self._material_map[v.material.name]
                 else:
                     self._materials.append(v.material)
-                    self._material_map[v.material.name] = v.material
+                    if v.material.name and len(v.material.name) > 0:
+                        self._material_map[v.material.name] = v.material
 
     @staticmethod
     def load(file_obj, lazy_load_meshes=False):

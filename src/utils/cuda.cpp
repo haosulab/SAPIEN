@@ -1,3 +1,4 @@
+#ifdef SAPIEN_CUDA
 #include "sapien/utils/cuda.h"
 #include <cuda.h>
 
@@ -78,3 +79,4 @@ int getCudaPtrDevice(void *ptr) {
 }
 
 } // namespace sapien
+#endif
