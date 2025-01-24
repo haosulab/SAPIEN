@@ -68,7 +68,10 @@ struct MassProperties {
 
   MassProperties operator+(MassProperties const &other) const {
     float newMass = mass + other.mass;
-    Eigen::Vector3f newCm = (cm * mass + other.cm * other.mass) / newMass;
+
+    Eigen::Vector3f newCm =
+        newMass == 0.0 ? Eigen::Vector3f{0.f, 0.f, 0.f} : (cm * mass + other.cm * other.mass) / newMass;
+
     return {.mass = newMass,
             .cm = newCm,
             .xx = xx + other.xx,
@@ -134,9 +137,9 @@ struct MassProperties {
   inline MassProperties transform(Pose const &pose) const {
     auto transform = PoseToEigenMat4(pose);
     auto R = transform.block<3, 3>(0, 0);
-    auto newCm = R * cm + transform.block<3, 1>(0, 3);
+    Eigen::Vector3f newCm = R * cm + transform.block<3, 1>(0, 3);
 
-    auto I = R * getCMInertia() * R.transpose();
+    Eigen::Matrix<float, 3, 3, Eigen::RowMajor> I = R * getCMInertia() * R.transpose();
     auto xx_ = I(0, 0) + mass * (newCm.y() * newCm.y() + newCm.z() * newCm.z());
     auto yy_ = I(1, 1) + mass * (newCm.z() * newCm.z() + newCm.x() * newCm.x());
     auto zz_ = I(2, 2) + mass * (newCm.x() * newCm.x() + newCm.y() * newCm.y());
