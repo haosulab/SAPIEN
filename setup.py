@@ -243,6 +243,7 @@ class CMakeBuild(build_ext):
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
         ]
+        
         if args.debug:
             cfg = "Debug"
         else:
@@ -252,6 +253,10 @@ class CMakeBuild(build_ext):
         cmake_args += [
             "-Dsapien_DIR=" + os.path.join(sapien_install_dir, "lib/cmake/sapien")
         ]
+        
+        if platform.system() == "Darwin":
+            cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=../toolchains/macos.toolchain.cmake"]
+
         env = os.environ.copy()
         subprocess.check_call(
             ["cmake", os.path.join(ext.sourcedir, "python")] + cmake_args,

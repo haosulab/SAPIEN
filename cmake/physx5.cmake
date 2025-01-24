@@ -13,8 +13,8 @@ else()
   if (APPLE)
     FetchContent_Declare(
       physx5
-      URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/macOS-release.zip
-      URL_HASH MD5=ea9409baaa4dcd8bdcfd9511889a5737
+      URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/macOS-universal-release.zip
+      URL_HASH MD5=3156af2509410dffaffa84c84cbae188
     )
   elseif (UNIX)
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -44,7 +44,7 @@ add_library(physx5 INTERFACE)
 
 if (APPLE)
   if(CMAKE_SYSTEM_NAME MATCHES ".*Darwin.*" OR CMAKE_SYSTEM_NAME MATCHES ".*MacOS.*")
-    target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/arm64/release>)
+    target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/universal/release>)
   endif()
   
   target_link_libraries(physx5 INTERFACE
