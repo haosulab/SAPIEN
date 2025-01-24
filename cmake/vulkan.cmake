@@ -2,7 +2,7 @@ include(FetchContent)
 FetchContent_Declare(
     vulkan
     GIT_REPOSITORY https://github.com/KhronosGroup/Vulkan-Headers.git
-    GIT_TAG        v1.3.250
+    GIT_TAG        vulkan-sdk-1.3.290.0
     GIT_SHALLOW TRUE
     GIT_PROGRESS TRUE
 )
