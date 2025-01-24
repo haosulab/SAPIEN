@@ -40,25 +40,44 @@ def has_existing_header(file_content, header):
 
 def has_copyright(file_content):
     lines = file_content.splitlines()
-    header = "\n".join(lines[:20].lower())
+    header = "\n".join(lines[:20]).lower()
     return "copyright" in header or "spdx-license" in header
 
 
 def has_hillbot_line(file_content):
     lines = file_content.splitlines()
-    header = "\n".join(lines[:5].lower())
+    header = "\n".join(lines[:5]).lower()
     return "hillbot inc" in header
+
+
+def split_skip(content: str, skip):
+    skip = [re.compile(s) for s in skip]
+    lines = content.splitlines()
+    i = 0
+    for i, l in enumerate(lines):
+        if any(s.match(l) for s in skip):
+            continue
+        break
+    head = lines[:i]
+    tail = lines[i:]
+    head = "\n".join(head)
+    tail = "\n".join(tail)
+    if head != "":
+        head += "\n"
+    return head, tail
 
 
 # Update or add the header to the file
 def update_file_header(file_path, header, comment_style):
     with open(file_path, "r") as file:
         content = file.read()
+        content_header, content = split_skip(content, comment_style["skip"])
 
     # If the file already has a header, check if it needs to be replaced
     if has_existing_header(content, header):
         # If the header is already up-to-date, return
         if content.startswith(header):
+            print("Skip:", file_path)
             return
         # Otherwise, remove the old header
         content = re.sub(
@@ -66,12 +85,14 @@ def update_file_header(file_path, header, comment_style):
         )
 
     if has_copyright(content):
+        print("Skip 3rd party: ", file_path)
         # If there is copyright added by someone else, return
         return
 
     # Add the new header
     with open(file_path, "w") as file:
-        file.write(header + content)
+        print("Apply license: ", file_path)
+        file.write(content_header + header + content)
 
 
 # Remove the header from the file
@@ -110,12 +131,18 @@ def process_directory(directory, header_content, comment_styles, delete_mode=Fal
                 else:
                     header = generate_header(comment_style, header_content)
                     update_file_header(file_path, header, comment_style)
+            else:
+                print("Skip unknown extension: ", file_path)
 
 
 def main(config_file, delete_mode=False):
     config = load_config(config_file)
     header_content = config.get("header_content", [])
-    comment_styles = config.get("comment_styles", {})
+    comment_styles = config.get("comment_styles", {})  # lang -> style
+    comment_styles = dict(
+        (e, comment_styles[lang]) for lang, exts in config.get("language", {}).items() for e in exts
+    )
+
     target_files = config.get("target_files", [])
     target_directories = config.get("target_directories", [])
 

@@ -13,7 +13,7 @@ jobs:
     permissions:
       contents: write
     container:
-      image: fxiangucsd/sapien-build-env:3.4
+      image: fxiangucsd/sapien-build-env:3.6
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
@@ -29,7 +29,7 @@ jobs:
           path: docker_sapien_build/_sapien_deps
           key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/CMakeLists.txt') }}
       - name: Build wheels
-        run: "git config --global --add safe.directory '*' && ./build.sh"
+        run: "git config --global --add safe.directory '*' && ./scripts/build.sh"
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:

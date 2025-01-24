@@ -2,40 +2,39 @@ header_content:
   - "Copyright 2025 Hillbot Inc."
   - "Copyright 2020-2024 UCSD SU Lab"
   - ""
-  - "Licensed under the Apache License, Version 2.0 (the \"License\");"
+  - 'Licensed under the Apache License, Version 2.0 (the "License");'
   - "you may not use this file except in compliance with the License."
   - "You may obtain a copy of the License at:"
   - ""
   - "    http://www.apache.org/licenses/LICENSE-2.0"
   - ""
   - "Unless required by applicable law or agreed to in writing, software"
-  - "distributed under the License is distributed on an \"AS IS\" BASIS,"
+  - 'distributed under the License is distributed on an "AS IS" BASIS,'
   - "WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied."
   - "See the License for the specific language governing permissions and"
   - "limitations under the License."
 
+language:
+  c: ["h", "hpp", "c", "cpp", "cxx", "cc", "cu", "cuh"]
+  python: ["py"]
+  glsl: ["glsl", "vert", "geom", "frag", "comp", "rgen", "rmiss", "rchit", "rahit", "rint"]
 
 comment_styles:
-  cpp:
+  c:
     start: "/*"
     middle: " * "
     end: " */"
-  py:
+    skip: []
+  python:
     start: "#"
     middle: "# "
     end: "#"
-  frag:
+    skip: []
+  glsl:
     start: "//"
     middle: "// "
     end: "//"
-  vert:
-    start: "//"
-    middle: "// "
-    end: "//"
-  comp:
-    start: "//"
-    middle: "// "
-    end: "//"
+    skip: ["^\\#version .*$"]
 
 # include
 target_files: []
@@ -43,3 +42,8 @@ target_files: []
 # include
 target_directories:
   - "include"
+  - "src"
+  - "python"
+  - "vulkan_shader"
+  # - "3rd_party/sapien-vulkan-2/include"
+  # - "3rd_party/sapien-vulkan-2/src"
