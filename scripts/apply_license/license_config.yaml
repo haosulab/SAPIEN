@@ -45,5 +45,5 @@ target_directories:
   - "src"
   - "python"
   - "vulkan_shader"
-  # - "3rd_party/sapien-vulkan-2/include"
-  # - "3rd_party/sapien-vulkan-2/src"
+  - "3rd_party/sapien-vulkan-2/include"
+  - "3rd_party/sapien-vulkan-2/src"

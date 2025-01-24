@@ -52,6 +52,16 @@ python -m sapien.exapmle.hello_world
 <details open> <summary>3.0</summary>
 
 - Major API & infrastructure overhaul
+  - Refactor SAPIEN core to use entity-component system
+    - Actor from SAPIEN 2 now becomes Entity in SAPIEN 3
+    - Functionalities of an Actor now becomes components attached to an entity.
+    - See updated [documentation](https://sapien-sim.github.io/docs/) for usage.
+    - Actor builder and articulation builder APIs are mostly unchanged, except
+      the `color` and `material` parameters for visual shapes are unified to
+      `material`.
+  - Support for PhysX 5 GPU simulation. See
+    [ManiSkill](https://github.com/haosulab/ManiSkill/) for how it is used to
+    build robot learning environments.
 
 <details> 
 <summary>2.2</summary>
