@@ -43,7 +43,10 @@ target_files: []
 target_directories:
   - "include"
   - "src"
+  - "pinocchio"
   - "python"
   - "vulkan_shader"
   - "3rd_party/sapien-vulkan-2/include"
   - "3rd_party/sapien-vulkan-2/src"
+  - "3rd_party/simsense/include"
+  - "3rd_party/simsense/src"

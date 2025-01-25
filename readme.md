@@ -191,7 +191,7 @@ Documentation:
 Make sure all submodules are initialized `git submodule update --init --recursive`.
 
 ### Build with Docker
-To build SAPIEN, simply run `./docker_build_wheels.sh`. It is not recommended to
+To build SAPIEN, simply run `./scripts/docker_build_wheels.sh`. It is not recommended to
 build outside of our provided docker.
 
 For reference, the Dockerfile is provided [here](/docker/Dockerfile). Note that
