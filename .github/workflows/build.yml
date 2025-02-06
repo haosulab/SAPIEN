@@ -105,6 +105,38 @@ jobs:
           name: windows-wheel-${{ matrix.python-version }}
           path: ./dist/*.whl
 
+  build-mac:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Initialize submodules
+        run: git submodule update --init --recursive
+      - name: Install CMake
+        run: brew install cmake
+      - name: Set up pyenv
+        run: |
+          brew update
+          brew install pyenv
+          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bash_profile
+          echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bash_profile
+          echo 'eval "$(pyenv init --path)"' >> ~/.bash_profile
+          echo 'eval "$(pyenv init -)"' >> ~/.bash_profile
+          source ~/.bash_profile
+      - name: Build wheels
+        run: "git config --global --add safe.directory '*' && ./scripts/build_mac.sh"
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: mac-wheels-all
+          path: ./dist/*.whl
+
   release:
     runs-on: ubuntu-latest
     needs: [build-linux-all, build-windows-pybind]
@@ -135,6 +167,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: linux-wheels-all
+          path: wheelhouse
+      - name: Download wheels
+        uses: actions/download-artifact@v3
+        with:
+          name: mac-wheels-all
           path: wheelhouse
       - name: ls
         run: ls wheelhouse
