@@ -31,7 +31,7 @@ jobs:
       - name: Build wheels
         run: "git config --global --add safe.directory '*' && ./scripts/build.sh"
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux-wheels-all
           path: ./wheelhouse/*.whl
