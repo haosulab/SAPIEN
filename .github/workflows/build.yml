@@ -51,11 +51,6 @@ jobs:
           submodules: "true"
           fetch-depth: 0
           fetch-tags: true
-      - name: Set up cmake cache
-        uses: actions/cache@v3
-        with:
-          path: docker_sapien_build/_sapien_deps
-          key: ${{ runner.os }}.${{ hashFiles('**/*.cmake', '**/CMakeLists.txt') }}
       - name: Build wheels
         run: "git config --global --add safe.directory '*' && ./scripts/build_aarch64.sh"
       - name: Upload wheels
