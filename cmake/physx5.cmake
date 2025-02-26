@@ -17,19 +17,30 @@ else()
       URL_HASH MD5=3156af2509410dffaffa84c84cbae188
     )
   elseif (UNIX)
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+
       FetchContent_Declare(
         physx5
-        URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-checked.zip
-        URL_HASH MD5=8379bf7ba4d6a0866404fd8a11cc10c2
+        URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-aarch64-release.zip
+        URL_HASH MD5=21cbdce291de6bfed4eb14832b64087a
       )
+
     else ()
-      FetchContent_Declare(
-        physx5
-        URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-release.zip
-        URL_HASH MD5=020222e5441b9ae2779dc05b1f04539c
-      )
+      if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+        FetchContent_Declare(
+          physx5
+          URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-checked.zip
+          URL_HASH MD5=8379bf7ba4d6a0866404fd8a11cc10c2
+        )
+      else ()
+        FetchContent_Declare(
+          physx5
+          URL https://github.com/sapien-sim/physx-precompiled/releases/download/${PHYSX_VERSION}/linux-release.zip
+          URL_HASH MD5=020222e5441b9ae2779dc05b1f04539c
+        )
+      endif ()
     endif ()
+
   elseif (WIN32)
     FetchContent_Declare(
       physx5
@@ -55,11 +66,17 @@ if (APPLE)
     )
   target_include_directories(physx5 SYSTEM INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/include>)
 elseif(UNIX)
-  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/linux.clang/checked>)
+
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+    target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/linux.aarch64/release>)
   else()
-    target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/linux.clang/release>)
+    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+      target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/linux.clang/checked>)
+    else()
+      target_link_directories(physx5 INTERFACE $<BUILD_INTERFACE:${physx5_SOURCE_DIR}/bin/linux.clang/release>)
+    endif()
   endif()
+
   target_link_libraries(physx5 INTERFACE
     -Wl,--start-group
     libPhysXCharacterKinematic_static_64.a libPhysXCommon_static_64.a
