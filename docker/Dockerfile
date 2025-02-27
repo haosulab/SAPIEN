@@ -9,6 +9,7 @@ ENV CUDA_PATH=/workspace/cuda PATH="/workspace/cuda/bin:$PATH" LD_LIBRARY_PATH="
 RUN pipx install cmake==3.26.3 --force
 
 RUN /opt/python/cp313-cp313/bin/python -m pip install setuptools wheel
+RUN /opt/python/cp312-cp312/bin/python -m pip install setuptools wheel
 
 # custom auditwheel
 RUN /opt/python/cp313-cp313/bin/pip install git+https://github.com/fbxiang/auditwheel.git@fe61bcdfb78f3955d9a3b6fbb05e3852c32239b0
