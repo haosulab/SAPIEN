@@ -17,9 +17,9 @@ function build() {
   if pyenv versions | grep -q "${PY_DOT}"; then
     echo "Version ${PY_DOT} is installed."
   else
-    pyenv install ${PY_DOT}
+    pyenv install "${PY_DOT}"
   fi
-  pyenv global ${PY_DOT}
+  pyenv global "${PY_DOT}"
   python --version
 
   python -m pip install setuptools wheel

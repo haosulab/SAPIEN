@@ -73,12 +73,12 @@ function build_pybind() {
   COMMAND="${BIN} setup.py bdist_wheel"
   eval "${COMMAND} --pybind-only --build-dir=docker_sapien_build"
 
-  PACKAGE_VERSION=`${BIN} setup.py --get-version`
+  PACKAGE_VERSION=$(${BIN} setup.py --get-version)
   WHEEL_NAME="./dist/sapien-${PACKAGE_VERSION}-cp${PY_VERSION}-cp${PY_VERSION}${EXT}-linux_x86_64.whl"
   if test -f "$WHEEL_NAME"; then
     echo "$FILE exist, begin audit and repair"
   fi
-  auditwheel repair ${WHEEL_NAME} --exclude 'libvulkan*' --exclude 'libOpenImageDenoise*' --internal libsapien --internal libsvulkan2
+  auditwheel repair "${WHEEL_NAME}" --exclude 'libvulkan*' --exclude 'libOpenImageDenoise*' --internal libsapien --internal libsvulkan2
 }
 
 build_sapien
