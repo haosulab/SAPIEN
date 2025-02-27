@@ -36,9 +36,12 @@ def enable_gpu():
     if platform.system() == "Windows":
         dll = parent / "PhysXGpu_64.dll"
         url = f"https://github.com/sapien-sim/physx-precompiled/releases/download/{physx_version}/windows-dll.zip"
-    elif platform.system() == "Linux":
+    elif platform.system() == "Linux" and platform.machine() in ("x86_64", "AMD64"):
         dll = parent / "libPhysXGpu_64.so"
         url = f"https://github.com/sapien-sim/physx-precompiled/releases/download/{physx_version}/linux-so.zip"
+    elif platform.system() == "Linux" and platform.machine() in ("aarch64", "arm64"):
+        dll = parent / "libPhysXGpu_64.so"
+        url = f"https://github.com/sapien-sim/physx-precompiled/releases/download/{physx_version}/linux-aarch64-so.zip"
     else:
         raise RuntimeError("Unsupported platform")
 
