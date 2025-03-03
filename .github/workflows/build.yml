@@ -148,11 +148,10 @@ jobs:
         run: |
           brew update
           brew install pyenv
-          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
-          echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
-          echo 'eval "$(pyenv init --path)"' >> ~/.bashrc
-          echo 'eval "$(pyenv init -)"' >> ~/.bashrc
-          source ~/.bashrc
+          echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.zshrc
+          echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.zshrc
+          echo 'eval "$(pyenv init - zsh)"' >> ~/.zshrc
+          source ~/.zshrc
       - name: Build wheels
         run: "git config --global --add safe.directory '*' && ./scripts/build_mac.sh"
       - name: Upload wheels
