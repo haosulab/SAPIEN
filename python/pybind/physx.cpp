@@ -21,7 +21,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
-#include <pybind11/smart_holder.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
@@ -193,7 +193,7 @@ template <> struct type_caster<::physx::PxForceMode::Enum> {
 Generator<int> init_physx(py::module &sapien) {
   auto m = sapien.def_submodule("physx");
 
-  auto PyPhysxSceneConfig = py::class_<PhysxSceneConfig>(m, "PhysxSceneConfig");
+  auto PyPhysxSceneConfig = py::classh<PhysxSceneConfig>(m, "PhysxSceneConfig");
   PyPhysxSceneConfig.def(py::init<>())
       .def_readwrite("gravity", &PhysxSceneConfig::gravity)
       .def_readwrite("bounce_threshold", &PhysxSceneConfig::bounceThreshold)
@@ -228,7 +228,7 @@ Generator<int> init_physx(py::module &sapien) {
             return config;
           }));
 
-  auto PyPhysxShapeConfig = py::class_<PhysxShapeConfig>(m, "PhysxShapeConfig");
+  auto PyPhysxShapeConfig = py::classh<PhysxShapeConfig>(m, "PhysxShapeConfig");
   PyPhysxShapeConfig.def(py::init<>())
       .def_readwrite("contact_offset", &PhysxShapeConfig::contactOffset)
       .def_readwrite("rest_offset", &PhysxShapeConfig::restOffset)
@@ -247,7 +247,7 @@ Generator<int> init_physx(py::module &sapien) {
             return config;
           }));
 
-  auto PyPhysxBodyConfig = py::class_<PhysxBodyConfig>(m, "PhysxBodyConfig");
+  auto PyPhysxBodyConfig = py::classh<PhysxBodyConfig>(m, "PhysxBodyConfig");
   PyPhysxBodyConfig.def(py::init<>())
       .def_readwrite("sleep_threshold", &PhysxBodyConfig::sleepThreshold)
       .def_readwrite("solver_position_iterations", &PhysxBodyConfig::solverPositionIterations)
@@ -271,7 +271,7 @@ Generator<int> init_physx(py::module &sapien) {
             return config;
           }));
 
-  auto PyPhysxSDFConfig = py::class_<PhysxSDFShapeConfig>(m, "PhysxSDFConfig");
+  auto PyPhysxSDFConfig = py::classh<PhysxSDFShapeConfig>(m, "PhysxSDFConfig");
   PyPhysxSDFConfig.def(py::init<>())
       .def_readwrite("spacing", &PhysxSDFShapeConfig::spacing)
       .def_readwrite("subgridSize", &PhysxSDFShapeConfig::subgridSize)
@@ -295,71 +295,71 @@ Generator<int> init_physx(py::module &sapien) {
             return config;
           }));
 
-  auto PyPhysxEngine = py::class_<PhysxEngine>(m, "PhysxEngine");
-  auto PyPhysxContactPoint = py::class_<ContactPoint>(m, "PhysxContactPoint");
-  auto PyPhysxContact = py::class_<Contact>(m, "PhysxContact");
+  auto PyPhysxEngine = py::classh<PhysxEngine>(m, "PhysxEngine");
+  auto PyPhysxContactPoint = py::classh<ContactPoint>(m, "PhysxContactPoint");
+  auto PyPhysxContact = py::classh<Contact>(m, "PhysxContact");
 
-  auto PyPhysxRayHit = py::class_<PhysxHitInfo>(m, "PhysxRayHit");
+  auto PyPhysxRayHit = py::classh<PhysxHitInfo>(m, "PhysxRayHit");
 
-  auto PyPhysxSystem = py::class_<PhysxSystem, System>(m, "PhysxSystem");
-  auto PyPhysxSystemCpu = py::class_<PhysxSystemCpu, PhysxSystem>(m, "PhysxCpuSystem");
+  auto PyPhysxSystem = py::classh<PhysxSystem, System>(m, "PhysxSystem");
+  auto PyPhysxSystemCpu = py::classh<PhysxSystemCpu, PhysxSystem>(m, "PhysxCpuSystem");
 
-  auto PyPhysxSystemGpu = py::class_<PhysxSystemGpu, PhysxSystem>(m, "PhysxGpuSystem");
+  auto PyPhysxSystemGpu = py::classh<PhysxSystemGpu, PhysxSystem>(m, "PhysxGpuSystem");
 
 #ifdef SAPIEN_CUDA
   auto PyPhysxGpuContactPairImpulseQuery =
-      py::class_<PhysxGpuContactPairImpulseQuery>(m, "PhysxGpuContactPairImpulseQuery");
+      py::classh<PhysxGpuContactPairImpulseQuery>(m, "PhysxGpuContactPairImpulseQuery");
   auto PyPhysxGpuContactBodyImpulseQuery =
-      py::class_<PhysxGpuContactBodyImpulseQuery>(m, "PhysxGpuContactBodyImpulseQuery");
+      py::classh<PhysxGpuContactBodyImpulseQuery>(m, "PhysxGpuContactBodyImpulseQuery");
 #endif
 
-  auto PyPhysxBaseComponent = py::class_<PhysxBaseComponent, Component>(m, "PhysxBaseComponent");
+  auto PyPhysxBaseComponent = py::classh<PhysxBaseComponent, Component>(m, "PhysxBaseComponent");
   auto PyPhysxRigidBaseComponent =
-      py::class_<PhysxRigidBaseComponent, PhysxBaseComponent>(m, "PhysxRigidBaseComponent");
+      py::classh<PhysxRigidBaseComponent, PhysxBaseComponent>(m, "PhysxRigidBaseComponent");
   auto PyPhysxRigidStaticComponent =
-      py::class_<PhysxRigidStaticComponent, PhysxRigidBaseComponent>(m,
+      py::classh<PhysxRigidStaticComponent, PhysxRigidBaseComponent>(m,
                                                                      "PhysxRigidStaticComponent");
   auto PyPhysxRigidBodyComponent =
-      py::class_<PhysxRigidBodyComponent, PhysxRigidBaseComponent>(m, "PhysxRigidBodyComponent");
+      py::classh<PhysxRigidBodyComponent, PhysxRigidBaseComponent>(m, "PhysxRigidBodyComponent");
   auto PyPhysxRigidDynamicComponent =
-      py::class_<PhysxRigidDynamicComponent, PhysxRigidBodyComponent>(
+      py::classh<PhysxRigidDynamicComponent, PhysxRigidBodyComponent>(
           m, "PhysxRigidDynamicComponent");
   auto PyPhysxArticulationLinkComponent =
-      py::class_<PhysxArticulationLinkComponent, PhysxRigidBodyComponent>(
+      py::classh<PhysxArticulationLinkComponent, PhysxRigidBodyComponent>(
           m, "PhysxArticulationLinkComponent");
   auto PyPhysxJointComponent =
-      py::class_<PhysxJointComponent, PhysxBaseComponent>(m, "PhysxJointComponent");
+      py::classh<PhysxJointComponent, PhysxBaseComponent>(m, "PhysxJointComponent");
   auto PyPhysxDriveComponent =
-      py::class_<PhysxDriveComponent, PhysxJointComponent>(m, "PhysxDriveComponent");
+      py::classh<PhysxDriveComponent, PhysxJointComponent>(m, "PhysxDriveComponent");
   auto PyPhysxGearComponent =
-      py::class_<PhysxGearComponent, PhysxJointComponent>(m, "PhysxGearComponent");
+      py::classh<PhysxGearComponent, PhysxJointComponent>(m, "PhysxGearComponent");
   auto PyPhysxDistanceJointComponent =
-      py::class_<PhysxDistanceJointComponent, PhysxJointComponent>(m,
+      py::classh<PhysxDistanceJointComponent, PhysxJointComponent>(m,
                                                                    "PhysxDistanceJointComponent");
 
-  auto PyPhysxMaterial = py::class_<PhysxMaterial>(m, "PhysxMaterial");
+  auto PyPhysxMaterial = py::classh<PhysxMaterial>(m, "PhysxMaterial");
 
-  auto PyPhysxCollisionShape = py::class_<PhysxCollisionShape>(m, "PhysxCollisionShape");
+  auto PyPhysxCollisionShape = py::classh<PhysxCollisionShape>(m, "PhysxCollisionShape");
   auto PyPhysxCollisionShapePlane =
-      py::class_<PhysxCollisionShapePlane, PhysxCollisionShape>(m, "PhysxCollisionShapePlane");
+      py::classh<PhysxCollisionShapePlane, PhysxCollisionShape>(m, "PhysxCollisionShapePlane");
   auto PyPhysxCollisionShapeBox =
-      py::class_<PhysxCollisionShapeBox, PhysxCollisionShape>(m, "PhysxCollisionShapeBox");
+      py::classh<PhysxCollisionShapeBox, PhysxCollisionShape>(m, "PhysxCollisionShapeBox");
   auto PyPhysxCollisionShapeSphere =
-      py::class_<PhysxCollisionShapeSphere, PhysxCollisionShape>(m, "PhysxCollisionShapeSphere");
+      py::classh<PhysxCollisionShapeSphere, PhysxCollisionShape>(m, "PhysxCollisionShapeSphere");
   auto PyPhysxCollisionShapeCapsule =
-      py::class_<PhysxCollisionShapeCapsule, PhysxCollisionShape>(m, "PhysxCollisionShapeCapsule");
+      py::classh<PhysxCollisionShapeCapsule, PhysxCollisionShape>(m, "PhysxCollisionShapeCapsule");
   auto PyPhysxCollisionShapeCylinder =
-      py::class_<PhysxCollisionShapeCylinder, PhysxCollisionShape>(m,
+      py::classh<PhysxCollisionShapeCylinder, PhysxCollisionShape>(m,
                                                                    "PhysxCollisionShapeCylinder");
   auto PyPhysxCollisionShapeConvexMesh =
-      py::class_<PhysxCollisionShapeConvexMesh, PhysxCollisionShape>(
+      py::classh<PhysxCollisionShapeConvexMesh, PhysxCollisionShape>(
           m, "PhysxCollisionShapeConvexMesh");
   auto PyPhysxCollisionShapeTriangleMesh =
-      py::class_<PhysxCollisionShapeTriangleMesh, PhysxCollisionShape>(
+      py::classh<PhysxCollisionShapeTriangleMesh, PhysxCollisionShape>(
           m, "PhysxCollisionShapeTriangleMesh");
 
-  auto PyPhysxArticulation = py::class_<PhysxArticulation>(m, "PhysxArticulation");
-  auto PyPhysxArticulationJoint = py::class_<PhysxArticulationJoint>(m, "PhysxArticulationJoint");
+  auto PyPhysxArticulation = py::classh<PhysxArticulation>(m, "PhysxArticulation");
+  auto PyPhysxArticulationJoint = py::classh<PhysxArticulationJoint>(m, "PhysxArticulationJoint");
 
   co_yield 0;
 

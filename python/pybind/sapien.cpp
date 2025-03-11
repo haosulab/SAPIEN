@@ -31,7 +31,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
-#include <pybind11/smart_holder.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
@@ -75,7 +75,7 @@ private:
 Generator<int> init_sapien(py::module &m) {
   m.def("set_log_level", &sapien::logger::setLogLevel, py::arg("level"));
 
-  py::class_<PythonProfiler>(m, "Profiler")
+  py::classh<PythonProfiler>(m, "Profiler")
       .def(py::init<std::string const &>(), py::arg("name"))
       .def("__enter__", &PythonProfiler::enter)
       .def("__exit__", &PythonProfiler::exit, py::arg("exec_type"), py::arg("exec_value"),
@@ -92,15 +92,15 @@ Generator<int> init_sapien(py::module &m) {
           },
           py::arg("func"));
 
-  auto PyPose = py::class_<Pose>(m, "Pose");
-  auto PyScene = py::class_<Scene>(m, "Scene");
-  auto PyEntity = py::class_<Entity>(m, "Entity");
+  auto PyPose = py::classh<Pose>(m, "Pose");
+  auto PyScene = py::classh<Scene>(m, "Scene");
+  auto PyEntity = py::classh<Entity>(m, "Entity");
 
-  auto PyComponent = py::class_<Component, PythonComponent>(m, "Component");
+  auto PyComponent = py::classh<Component, PythonComponent>(m, "Component");
 
-  auto PySystem = py::class_<System, PythonSystem>(m, "System");
-  auto PyCudaArray = py::class_<CudaArrayHandle>(m, "CudaArray");
-  auto PyDevice = py::class_<Device>(m, "Device");
+  auto PySystem = py::classh<System, PythonSystem>(m, "System");
+  auto PyCudaArray = py::classh<CudaArrayHandle>(m, "CudaArray");
+  auto PyDevice = py::classh<Device>(m, "Device");
 
   co_yield 0;
 

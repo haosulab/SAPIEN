@@ -18,7 +18,7 @@
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
-#include <pybind11/smart_holder.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <svulkan2/core/context.h>
 #include <svulkan2/renderer/renderer.h>
@@ -100,69 +100,69 @@ public:
 void init_sapien_renderer_internal(py::module &parent) {
   py::module m = parent.def_submodule("internal_renderer");
 
-  auto PyContext = py::class_<core::Context>(m, "Context");
-  auto PyScene = py::class_<scene::Scene>(m, "Scene");
-  auto PySceneNode = py::class_<scene::Node>(m, "Node");
-  auto PySceneObject = py::class_<scene::Object, scene::Node>(m, "Object");
-  auto PyLineSetObject = py::class_<scene::LineObject, scene::Node>(m, "LineSetObject");
-  auto PyPointSetObject = py::class_<scene::PointObject, scene::Node>(m, "PointSetObject");
+  auto PyContext = py::classh<core::Context>(m, "Context");
+  auto PyScene = py::classh<scene::Scene>(m, "Scene");
+  auto PySceneNode = py::classh<scene::Node>(m, "Node");
+  auto PySceneObject = py::classh<scene::Object, scene::Node>(m, "Object");
+  auto PyLineSetObject = py::classh<scene::LineObject, scene::Node>(m, "LineSetObject");
+  auto PyPointSetObject = py::classh<scene::PointObject, scene::Node>(m, "PointSetObject");
 
-  auto PyTexture = py::class_<resource::SVTexture>(m, "Texture");
-  auto PyCubemap = py::class_<resource::SVCubemap>(m, "Cubemap");
-  auto PyMaterial = py::class_<resource::SVMetallicMaterial>(m, "Material");
-  auto PyModel = py::class_<resource::SVModel>(m, "Model");
-  auto PyShape = py::class_<resource::SVShape>(m, "Shape");
-  auto PyMesh = py::class_<resource::SVMesh>(m, "Mesh");
+  auto PyTexture = py::classh<resource::SVTexture>(m, "Texture");
+  auto PyCubemap = py::classh<resource::SVCubemap>(m, "Cubemap");
+  auto PyMaterial = py::classh<resource::SVMetallicMaterial>(m, "Material");
+  auto PyModel = py::classh<resource::SVModel>(m, "Model");
+  auto PyShape = py::classh<resource::SVShape>(m, "Shape");
+  auto PyMesh = py::classh<resource::SVMesh>(m, "Mesh");
 
-  auto PyPrimitiveSet = py::class_<resource::SVPrimitiveSet>(m, "PrimitiveSet");
-  auto PyLineSet = py::class_<resource::SVPointSet, resource::SVPrimitiveSet>(m, "LineSet");
-  auto PyPointSet = py::class_<resource::SVLineSet, resource::SVPrimitiveSet>(m, "PointSet");
+  auto PyPrimitiveSet = py::classh<resource::SVPrimitiveSet>(m, "PrimitiveSet");
+  auto PyLineSet = py::classh<resource::SVPointSet, resource::SVPrimitiveSet>(m, "LineSet");
+  auto PyPointSet = py::classh<resource::SVLineSet, resource::SVPrimitiveSet>(m, "PointSet");
 
-  auto PyRenderer = py::class_<renderer::RendererBase>(m, "Renderer");
+  auto PyRenderer = py::classh<renderer::RendererBase>(m, "Renderer");
 
-  auto PyUIWidget = py::class_<ui::Widget>(m, "UIWidget");
-  auto PyUIWindow = py::class_<ui::Window, ui::Widget>(m, "UIWindow");
+  auto PyUIWidget = py::classh<ui::Widget>(m, "UIWidget");
+  auto PyUIWindow = py::classh<ui::Window, ui::Widget>(m, "UIWindow");
 
-  auto PyUISameLine = py::class_<ui::SameLine, ui::Widget>(m, "UISameLine");
-  auto PyUIConditional = py::class_<ui::Conditional, ui::Widget>(m, "UIConditional");
+  auto PyUISameLine = py::classh<ui::SameLine, ui::Widget>(m, "UISameLine");
+  auto PyUIConditional = py::classh<ui::Conditional, ui::Widget>(m, "UIConditional");
 
-  auto PyUITreeNode = py::class_<ui::TreeNode, ui::Widget>(m, "UITreeNode");
-  auto PyUISection = py::class_<ui::Section, ui::Widget>(m, "UISection");
+  auto PyUITreeNode = py::classh<ui::TreeNode, ui::Widget>(m, "UITreeNode");
+  auto PyUISection = py::classh<ui::Section, ui::Widget>(m, "UISection");
 
-  auto PyUICheckbox = py::class_<ui::Checkbox, ui::Widget>(m, "UICheckbox");
-  auto PyUIButton = py::class_<ui::Button, ui::Widget>(m, "UIButton");
-  auto PyUISelectable = py::class_<ui::Selectable, ui::Widget>(m, "UISelectable");
-  auto PyUIOptions = py::class_<ui::Options, ui::Widget>(m, "UIOptions");
+  auto PyUICheckbox = py::classh<ui::Checkbox, ui::Widget>(m, "UICheckbox");
+  auto PyUIButton = py::classh<ui::Button, ui::Widget>(m, "UIButton");
+  auto PyUISelectable = py::classh<ui::Selectable, ui::Widget>(m, "UISelectable");
+  auto PyUIOptions = py::classh<ui::Options, ui::Widget>(m, "UIOptions");
 
-  auto PyUIDisplayText = py::class_<ui::DisplayText, ui::Widget>(m, "UIDisplayText");
-  auto PyUIInputText = py::class_<ui::InputText, ui::Widget>(m, "UIInputText");
+  auto PyUIDisplayText = py::classh<ui::DisplayText, ui::Widget>(m, "UIDisplayText");
+  auto PyUIInputText = py::classh<ui::InputText, ui::Widget>(m, "UIInputText");
   auto PyUIInputTextMultiline =
-      py::class_<ui::InputTextMultiline, ui::Widget>(m, "UIInputTextMultiline");
+      py::classh<ui::InputTextMultiline, ui::Widget>(m, "UIInputTextMultiline");
 
-  auto PyUIInputFloat = py::class_<ui::InputFloat, ui::Widget>(m, "UIInputFloat");
-  auto PyUIInputFloat2 = py::class_<ui::InputFloat2, ui::Widget>(m, "UIInputFloat2");
-  auto PyUIInputFloat3 = py::class_<ui::InputFloat3, ui::Widget>(m, "UIInputFloat3");
-  auto PyUIInputFloat4 = py::class_<ui::InputFloat4, ui::Widget>(m, "UIInputFloat4");
+  auto PyUIInputFloat = py::classh<ui::InputFloat, ui::Widget>(m, "UIInputFloat");
+  auto PyUIInputFloat2 = py::classh<ui::InputFloat2, ui::Widget>(m, "UIInputFloat2");
+  auto PyUIInputFloat3 = py::classh<ui::InputFloat3, ui::Widget>(m, "UIInputFloat3");
+  auto PyUIInputFloat4 = py::classh<ui::InputFloat4, ui::Widget>(m, "UIInputFloat4");
 
-  auto PyUIInputInt = py::class_<ui::InputInt, ui::Widget>(m, "UIInputInt");
-  auto PyUIInputInt2 = py::class_<ui::InputInt2, ui::Widget>(m, "UIInputInt2");
-  auto PyUIInputInt3 = py::class_<ui::InputInt3, ui::Widget>(m, "UIInputInt3");
-  auto PyUIInputInt4 = py::class_<ui::InputInt4, ui::Widget>(m, "UIInputInt4");
+  auto PyUIInputInt = py::classh<ui::InputInt, ui::Widget>(m, "UIInputInt");
+  auto PyUIInputInt2 = py::classh<ui::InputInt2, ui::Widget>(m, "UIInputInt2");
+  auto PyUIInputInt3 = py::classh<ui::InputInt3, ui::Widget>(m, "UIInputInt3");
+  auto PyUIInputInt4 = py::classh<ui::InputInt4, ui::Widget>(m, "UIInputInt4");
 
-  auto PyUISliderFloat = py::class_<ui::SliderFloat, ui::Widget>(m, "UISliderFloat");
-  auto PyUISliderAngle = py::class_<ui::SliderAngle, ui::Widget>(m, "UISliderAngle");
-  auto PyUIGizmo = py::class_<ui::Gizmo, ui::Widget>(m, "UIGizmo");
+  auto PyUISliderFloat = py::classh<ui::SliderFloat, ui::Widget>(m, "UISliderFloat");
+  auto PyUISliderAngle = py::classh<ui::SliderAngle, ui::Widget>(m, "UISliderAngle");
+  auto PyUIGizmo = py::classh<ui::Gizmo, ui::Widget>(m, "UIGizmo");
 
-  auto PyUIKeyframe = py::class_<ui::Keyframe, PyKeyframe>(m, "UIKeyframe");
-  auto PyUIDuration = py::class_<ui::Duration, PyDuration>(m, "UIDuration");
+  auto PyUIKeyframe = py::classh<ui::Keyframe, PyKeyframe>(m, "UIKeyframe");
+  auto PyUIDuration = py::classh<ui::Duration, PyDuration>(m, "UIDuration");
 
-  auto PyUIKeyframeEditor = py::class_<ui::KeyframeEditor, ui::Widget>(m, "UIKeyframeEditor");
-  auto PyUIFileChooser = py::class_<ui::FileChooser, ui::Widget>(m, "UIFileChooser");
-  auto PyUIPopup = py::class_<ui::Popup, ui::Widget>(m, "UIPopup");
+  auto PyUIKeyframeEditor = py::classh<ui::KeyframeEditor, ui::Widget>(m, "UIKeyframeEditor");
+  auto PyUIFileChooser = py::classh<ui::FileChooser, ui::Widget>(m, "UIFileChooser");
+  auto PyUIPopup = py::classh<ui::Popup, ui::Widget>(m, "UIPopup");
 
-  auto PyUIDummy = py::class_<ui::Dummy, ui::Widget>(m, "UIDummy");
+  auto PyUIDummy = py::classh<ui::Dummy, ui::Widget>(m, "UIDummy");
 
-  auto PyUIPicture = py::class_<ui::DisplayImage, ui::Widget>(m, "UIPicture");
+  auto PyUIPicture = py::classh<ui::DisplayImage, ui::Widget>(m, "UIPicture");
 
   PyUIWidget.def("remove", &ui::Widget::remove)
       .def("remove_children", &ui::Widget::removeChildren)

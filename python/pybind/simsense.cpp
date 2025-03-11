@@ -142,7 +142,7 @@ public:
 void init_simsense(py::module &sapien) {
   auto m = sapien.def_submodule("simsense");
 
-  auto PySimsense = py::class_<DepthSensorEnginePython>(m, "DepthSensorEngine");
+  auto PySimsense = py::classh<DepthSensorEnginePython>(m, "DepthSensorEngine");
 
   PySimsense.def(
       py::init<uint32_t, uint32_t, uint32_t, uint32_t, float, float, float, float, uint64_t, float,

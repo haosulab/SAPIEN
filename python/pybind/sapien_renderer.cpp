@@ -21,7 +21,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/functional.h>
 #include <pybind11/numpy.h>
-#include <pybind11/smart_holder.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <svulkan2/core/instance.h>
 
@@ -444,7 +444,7 @@ template <> struct type_caster<SapienRenderTexture::AddressMode> {
 void init_sapien_renderer(py::module &sapien) {
   auto m = sapien.def_submodule("render");
 
-  auto PyRenderSceneLoaderNode = py::class_<RenderSceneLoaderNode>(m, "RenderSceneLoaderNode");
+  auto PyRenderSceneLoaderNode = py::classh<RenderSceneLoaderNode>(m, "RenderSceneLoaderNode");
 
   ////////// global //////////
 
@@ -519,65 +519,65 @@ void init_sapien_renderer(py::module &sapien) {
 
   ////////// end global //////////
 
-  auto PySapienRenderer = py::class_<SapienRenderEngine>(m, "SapienRenderer");
-  auto PyRenderTexture = py::class_<SapienRenderTexture>(m, "RenderTexture");
-  auto PyRenderTexture2D = py::class_<SapienRenderTexture2D>(m, "RenderTexture2D");
+  auto PySapienRenderer = py::classh<SapienRenderEngine>(m, "SapienRenderer");
+  auto PyRenderTexture = py::classh<SapienRenderTexture>(m, "RenderTexture");
+  auto PyRenderTexture2D = py::classh<SapienRenderTexture2D>(m, "RenderTexture2D");
 
-  // auto PyRenderTargetCuda = py::class_<SapienRenderImageCuda>(m, "RenderImageCuda");
+  // auto PyRenderTargetCuda = py::classh<SapienRenderImageCuda>(m, "RenderImageCuda");
 
-  auto PyRenderCubemap = py::class_<SapienRenderCubemap>(m, "RenderCubemap");
-  auto PyRenderMaterial = py::class_<SapienRenderMaterial>(m, "RenderMaterial");
+  auto PyRenderCubemap = py::classh<SapienRenderCubemap>(m, "RenderCubemap");
+  auto PyRenderMaterial = py::classh<SapienRenderMaterial>(m, "RenderMaterial");
   auto PyRenderShapeTriangleMeshPart =
-      py::class_<RenderShapeTriangleMeshPart>(m, "RenderShapeTriangleMeshPart");
+      py::classh<RenderShapeTriangleMeshPart>(m, "RenderShapeTriangleMeshPart");
 
-  auto PyRenderShape = py::class_<RenderShape>(m, "RenderShape");
+  auto PyRenderShape = py::classh<RenderShape>(m, "RenderShape");
   auto PyRenderShapePrimitive =
-      py::class_<RenderShapePrimitive, RenderShape>(m, "RenderShapePrimitive");
+      py::classh<RenderShapePrimitive, RenderShape>(m, "RenderShapePrimitive");
   auto PyRenderShapePlane =
-      py::class_<RenderShapePlane, RenderShapePrimitive>(m, "RenderShapePlane");
-  auto PyRenderShapeBox = py::class_<RenderShapeBox, RenderShapePrimitive>(m, "RenderShapeBox");
+      py::classh<RenderShapePlane, RenderShapePrimitive>(m, "RenderShapePlane");
+  auto PyRenderShapeBox = py::classh<RenderShapeBox, RenderShapePrimitive>(m, "RenderShapeBox");
   auto PyRenderShapeSphere =
-      py::class_<RenderShapeSphere, RenderShapePrimitive>(m, "RenderShapeSphere");
+      py::classh<RenderShapeSphere, RenderShapePrimitive>(m, "RenderShapeSphere");
   auto PyRenderShapeCapsule =
-      py::class_<RenderShapeCapsule, RenderShapePrimitive>(m, "RenderShapeCapsule");
+      py::classh<RenderShapeCapsule, RenderShapePrimitive>(m, "RenderShapeCapsule");
   auto PyRenderShapeCylinder =
-      py::class_<RenderShapeCylinder, RenderShapePrimitive>(m, "RenderShapeCylinder");
+      py::classh<RenderShapeCylinder, RenderShapePrimitive>(m, "RenderShapeCylinder");
   auto PyRenderShapeTriangleMesh =
-      py::class_<RenderShapeTriangleMesh, RenderShape>(m, "RenderShapeTriangleMesh");
+      py::classh<RenderShapeTriangleMesh, RenderShape>(m, "RenderShapeTriangleMesh");
 
-  auto PyRenderSystem = py::class_<SapienRendererSystem, System>(m, "RenderSystem");
+  auto PyRenderSystem = py::classh<SapienRendererSystem, System>(m, "RenderSystem");
 
-  auto PyRenderSystemGroup = py::class_<BatchedRenderSystem>(m, "RenderSystemGroup");
-  auto PyCameraGroup = py::class_<BatchedCamera>(m, "RenderCameraGroup");
+  auto PyRenderSystemGroup = py::classh<BatchedRenderSystem>(m, "RenderSystemGroup");
+  auto PyCameraGroup = py::classh<BatchedCamera>(m, "RenderCameraGroup");
 
   auto PyRenderBodyComponent =
-      py::class_<SapienRenderBodyComponent, Component>(m, "RenderBodyComponent");
+      py::classh<SapienRenderBodyComponent, Component>(m, "RenderBodyComponent");
   auto PyRenderPointCloudComponent =
-      py::class_<PointCloudComponent, Component>(m, "RenderPointCloudComponent");
+      py::classh<PointCloudComponent, Component>(m, "RenderPointCloudComponent");
   auto PyRenderCameraComponent =
-      py::class_<SapienRenderCameraComponent, Component>(m, "RenderCameraComponent");
+      py::classh<SapienRenderCameraComponent, Component>(m, "RenderCameraComponent");
   auto PyRenderLightComponent =
-      py::class_<SapienRenderLightComponent, Component>(m, "RenderLightComponent");
+      py::classh<SapienRenderLightComponent, Component>(m, "RenderLightComponent");
   auto PyRenderPointLightComponent =
-      py::class_<SapienRenderPointLightComponent, SapienRenderLightComponent>(
+      py::classh<SapienRenderPointLightComponent, SapienRenderLightComponent>(
           m, "RenderPointLightComponent");
   auto PyRenderDirectionalLightComponent =
-      py::class_<SapienRenderDirectionalLightComponent, SapienRenderLightComponent>(
+      py::classh<SapienRenderDirectionalLightComponent, SapienRenderLightComponent>(
           m, "RenderDirectionalLightComponent");
   auto PyRenderSpotLightComponent =
-      py::class_<SapienRenderSpotLightComponent, SapienRenderLightComponent>(
+      py::classh<SapienRenderSpotLightComponent, SapienRenderLightComponent>(
           m, "RenderSpotLightComponent");
   auto PyRenderTexturedLightComponent =
-      py::class_<SapienRenderTexturedLightComponent, SapienRenderSpotLightComponent>(
+      py::classh<SapienRenderTexturedLightComponent, SapienRenderSpotLightComponent>(
           m, "RenderTexturedLightComponent");
   auto PyRenderParallelogramLightComponent =
-      py::class_<SapienRenderParallelogramLightComponent, SapienRenderLightComponent>(
+      py::classh<SapienRenderParallelogramLightComponent, SapienRenderLightComponent>(
           m, "RenderParallelogramLightComponent");
   auto PyRenderCudaMeshComponent =
-      py::class_<CudaDeformableMeshComponent, Component>(m, "RenderCudaMeshComponent");
+      py::classh<CudaDeformableMeshComponent, Component>(m, "RenderCudaMeshComponent");
 
-  auto PyRenderWindow = py::class_<SapienRendererWindow>(m, "RenderWindow");
-  auto PyRenderVRDisplay = py::class_<SapienVRDisplay>(m, "RenderVRDisplay");
+  auto PyRenderWindow = py::classh<SapienRendererWindow>(m, "RenderWindow");
+  auto PyRenderVRDisplay = py::classh<SapienVRDisplay>(m, "RenderVRDisplay");
 
   PySapienRenderer.def(py::init(&SapienRenderEngine::Get), py::arg("device") = nullptr)
       .def_property_readonly("_internal_context", &SapienRenderEngine::getContext);

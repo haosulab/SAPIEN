@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 #include "generator.hpp"
-#include <pybind11/smart_holder.h>
+#include <pybind11/pybind11.h>
 namespace py = pybind11;
 
 Generator<int> init_sapien(py::module &m);

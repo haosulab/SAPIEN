@@ -20,7 +20,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/operators.h>
-#include <pybind11/smart_holder.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 namespace py = pybind11;
@@ -30,7 +30,7 @@ using namespace sapien;
 void init_math(py::module &sapien) {
   auto m = sapien.def_submodule("math");
 
-  py::class_<MassProperties>(m, "MassProperties")
+  py::classh<MassProperties>(m, "MassProperties")
       .def(py::init(&MassProperties::FromMassInertia), py::arg("mass"), py::arg("cm"),
            py::arg("inertia"),
            "construct inertia from mass, center of mass, inertia at center of mass")
