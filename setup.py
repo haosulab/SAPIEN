@@ -142,7 +142,11 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
         cmake_args += ["-DCMAKE_TOOLCHAIN_FILE=toolchains/macos.toolchain.cmake"]
 
     if sys.platform == "win32":
-        cmake_args += [f"-DBUILD_TESTING=Off"]
+        cmake_args += ["-DBUILD_TESTING=Off"]
+        cmake_args += [
+            "-DCMAKE_CUDA_COMPILER=C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6/bin/nvcc.exe",
+            "-DCUDA_TOOLKIT_ROOT_DIR=C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v12.6"
+        ]
 
     deps_dir = os.path.join(sapien_build_dir, "_sapien_deps")
     cmake_args += [f"-DFETCHCONTENT_BASE_DIR={deps_dir}"]
