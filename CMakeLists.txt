@@ -77,7 +77,7 @@ if (${SAPIEN_CUDA})
     set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -O3 -lineinfo -ftemplate-depth=1024")
     file(GLOB_RECURSE SAPIEN_CUDA_SRC "src/*.cu")
 
-    find_package(CUDA REQUIRED)
+    find_package(CUDAToolkit REQUIRED)
     set(SVULKAN2_CUDA_INTEROP ON CACHE BOOL "" FORCE)
 else()
     set(SVULKAN2_CUDA_INTEROP OFF CACHE BOOL "" FORCE)
