@@ -168,6 +168,7 @@ CudaArray::CudaArray(std::vector<int> shape_, std::string type_)
   if (size > 0) {
     checkCudaErrors(cudaGetDevice(&cudaId));
     checkCudaErrors(cudaMalloc(&ptr, size));
+    checkCudaErrors(cudaMemset(ptr, 0, size));
   }
 #endif
 }
