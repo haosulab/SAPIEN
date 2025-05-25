@@ -40,7 +40,7 @@ class ContactWindow(Plugin):
         scene = self.viewer.scene
 
         if self.ui_window is None:
-            self.ui_window = R.UIWindow().Label("Conacts").Pos(10, 10).Size(400, 400)
+            self.ui_window = R.UIWindow().Label("Contacts").Pos(10, 10).Size(400, 400)
 
         self.ui_window.remove_children()
         self.ui_window.append(R.UICheckbox().Label("Enabled").Bind(self, "enabled"))
