@@ -49,6 +49,10 @@ class ContactWindow(Plugin):
             return
 
         if scene.physx_system:
+            if not isinstance(scene.physx_system, sapien.physx.PhysxCpuSystem):
+                self.ui_window.append(R.UIDisplayText().Text("GPU contact visualization is not supported"))
+                return
+
             px: sapien.physx.PhysxCpuSystem = scene.physx_system
 
             collision_section = R.UISection().Expanded(True).Label("Collisions")
