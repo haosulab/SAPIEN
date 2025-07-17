@@ -1,15 +1,17 @@
 from __future__ import annotations
 import numpy
+import numpy.typing
 import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien.internal_renderer
 import typing
 __all__ = ['RenderBodyComponent', 'RenderCameraComponent', 'RenderCameraGroup', 'RenderCubemap', 'RenderCudaMeshComponent', 'RenderDirectionalLightComponent', 'RenderLightComponent', 'RenderMaterial', 'RenderParallelogramLightComponent', 'RenderPointCloudComponent', 'RenderPointLightComponent', 'RenderSceneLoaderNode', 'RenderShape', 'RenderShapeBox', 'RenderShapeCapsule', 'RenderShapeCylinder', 'RenderShapePlane', 'RenderShapePrimitive', 'RenderShapeSphere', 'RenderShapeTriangleMesh', 'RenderShapeTriangleMeshPart', 'RenderSpotLightComponent', 'RenderSystem', 'RenderSystemGroup', 'RenderTexture', 'RenderTexture2D', 'RenderTexturedLightComponent', 'RenderVRDisplay', 'RenderWindow', 'SapienRenderer', 'clear_cache', 'enable_vr', 'get_camera_shader_dir', 'get_device_summary', 'get_imgui_ini_filename', 'get_msaa', 'get_ray_tracing_denoiser', 'get_ray_tracing_dof_aperture', 'get_ray_tracing_dof_plane', 'get_ray_tracing_path_depth', 'get_ray_tracing_samples_per_pixel', 'get_viewer_shader_dir', 'get_vr_action_manifest_filename', 'get_vr_enabled', 'load_scene', 'set_camera_shader_dir', 'set_global_config', 'set_imgui_ini_filename', 'set_log_level', 'set_msaa', 'set_picture_format', 'set_ray_tracing_denoiser', 'set_ray_tracing_dof_aperture', 'set_ray_tracing_dof_plane', 'set_ray_tracing_path_depth', 'set_ray_tracing_samples_per_pixel', 'set_viewer_shader_dir', 'set_vr_action_manifest_filename']
-M = typing.TypeVar("M", bound=int)
-N = typing.TypeVar("N", bound=int)
 class RenderBodyComponent(sapien.pysapien.Component):
     shading_mode: int
     visibility: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def attach(self, shape: RenderShape) -> RenderBodyComponent:
@@ -51,9 +53,12 @@ class RenderCameraComponent(sapien.pysapien.Component):
     local_pose: sapien.pysapien.Pose
     near: float
     skew: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, width: int, height: int, shader_dir: str = '') -> None:
         ...
-    def get_extrinsic_matrix(self) -> numpy.ndarray[tuple[typing.Literal[3], typing.Literal[4]], numpy.dtype[numpy.float32]]:
+    def get_extrinsic_matrix(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[3, 4]"]:
         """
         Get 3x4 extrinsic camera matrix in OpenCV format.
         """
@@ -63,7 +68,7 @@ class RenderCameraComponent(sapien.pysapien.Component):
         ...
     def get_height(self) -> int:
         ...
-    def get_intrinsic_matrix(self) -> numpy.ndarray[tuple[typing.Literal[3], typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def get_intrinsic_matrix(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[3, 3]"]:
         """
         Get 3x3 intrinsic camera matrix in OpenCV format.
         """
@@ -71,7 +76,7 @@ class RenderCameraComponent(sapien.pysapien.Component):
         ...
     def get_mode(self) -> typing.Literal['perspective', 'orthographic']:
         ...
-    def get_model_matrix(self) -> numpy.ndarray[tuple[typing.Literal[4], typing.Literal[4]], numpy.dtype[numpy.float32]]:
+    def get_model_matrix(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[4, 4]"]:
         """
         Get model matrix (inverse of extrinsic matrix) used in rendering (Y up, Z back)
         """
@@ -98,7 +103,7 @@ class RenderCameraComponent(sapien.pysapien.Component):
         """
     def get_picture_names(self) -> list[str]:
         ...
-    def get_projection_matrix(self) -> numpy.ndarray[tuple[typing.Literal[4], typing.Literal[4]], numpy.dtype[numpy.float32]]:
+    def get_projection_matrix(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[4, 4]"]:
         """
         Get projection matrix in used in rendering (right-handed NDC with [-1,1] XY and [0,1] Z)
         """
@@ -195,11 +200,17 @@ class RenderCameraComponent(sapien.pysapien.Component):
     def width(self) -> int:
         ...
 class RenderCameraGroup:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def get_picture_cuda(self, name: str) -> sapien.pysapien.CudaArray:
         ...
     def take_picture(self) -> None:
         ...
 class RenderCubemap:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     @typing.overload
     def __init__(self, filename: str) -> None:
         ...
@@ -215,6 +226,9 @@ class RenderCudaMeshComponent(sapien.pysapien.Component):
     material: RenderMaterial
     triangle_count: int
     vertex_count: int
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, max_vertex_count: int, max_triangle_count: int) -> None:
         ...
     def get_cuda_triangles(self) -> sapien.pysapien.CudaArray:
@@ -233,7 +247,7 @@ class RenderCudaMeshComponent(sapien.pysapien.Component):
         ...
     def set_triangle_count(self, count: int) -> None:
         ...
-    def set_triangles(self, triangles: numpy.ndarray[numpy.uint32[M, 3]]) -> None:
+    def set_triangles(self, triangles: typing.Annotated[numpy.typing.ArrayLike, numpy.uint32, "[m, 3]"]) -> None:
         ...
     def set_vertex_count(self, count: int) -> None:
         ...
@@ -245,6 +259,9 @@ class RenderCudaMeshComponent(sapien.pysapien.Component):
         ...
 class RenderDirectionalLightComponent(RenderLightComponent):
     shadow_half_size: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def get_shadow_half_size(self) -> float:
@@ -258,6 +275,9 @@ class RenderLightComponent(sapien.pysapien.Component):
     shadow_far: float
     shadow_map_size: int
     shadow_near: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def disable_shadow(self) -> None:
         ...
     def enable_shadow(self) -> None:
@@ -304,6 +324,9 @@ class RenderMaterial:
     transmission: float
     transmission_roughness: float
     transmission_texture: RenderTexture2D
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __eq__(self, arg0: RenderMaterial) -> bool:
         ...
     def __init__(self, emission: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)] = [0.0, 0.0, 0.0, 0.0], base_color: typing.Annotated[list[float], pybind11_stubgen.typing_ext.FixedSize(4)] = [1.0, 1.0, 1.0, 1.0], specular: float = 0.0, roughness: float = 1.0, metallic: float = 0.0, transmission: float = 0.0, ior: float = 1.4500000476837158, transmission_roughness: float = 0.0) -> None:
@@ -369,6 +392,9 @@ class RenderMaterial:
     def set_transmission_texture(self, texture: RenderTexture2D) -> None:
         ...
 class RenderParallelogramLightComponent(RenderLightComponent):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def get_angle(self) -> float:
@@ -389,6 +415,9 @@ class RenderParallelogramLightComponent(RenderLightComponent):
     def half_width(self) -> float:
         ...
 class RenderPointCloudComponent(sapien.pysapien.Component):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, capacity: int = 0) -> None:
         ...
     def get_cuda_aabb(self) -> sapien.pysapien.CudaArray | None:
@@ -397,18 +426,24 @@ class RenderPointCloudComponent(sapien.pysapien.Component):
         """
     def get_cuda_vertices(self) -> sapien.pysapien.CudaArray:
         ...
-    def get_vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def get_vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         """
         Get previously set vertices. This function does not reflect any changes directly made to the GPU.
         """
-    def set_attribute(self, name: str, attribute: numpy.ndarray[tuple[M, N], numpy.dtype[numpy.float32]] | list | tuple) -> RenderPointCloudComponent:
+    def set_attribute(self, name: str, attribute: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, n]"]) -> RenderPointCloudComponent:
         ...
-    def set_vertices(self, vertices: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple) -> RenderPointCloudComponent:
+    def set_vertices(self, vertices: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 3]"]) -> RenderPointCloudComponent:
         ...
 class RenderPointLightComponent(RenderLightComponent):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
 class RenderSceneLoaderNode:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def flatten(self) -> tuple[list[RenderShapeTriangleMesh], list[RenderLightComponent]]:
         ...
     @property
@@ -433,6 +468,9 @@ class RenderShape:
     front_face: typing.Literal['counterclockwise', 'clockwise']
     local_pose: sapien.pysapien.Pose
     name: str
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def clone(self) -> RenderShape:
         ...
     def get_front_face(self) -> typing.Literal['counterclockwise', 'clockwise']:
@@ -465,6 +503,9 @@ class RenderShape:
     def per_scene_id(self) -> int:
         ...
 class RenderShapeBox(RenderShapePrimitive):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, half_size: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: RenderMaterial) -> None:
         ...
     def get_half_size(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
@@ -473,6 +514,9 @@ class RenderShapeBox(RenderShapePrimitive):
     def half_size(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
 class RenderShapeCapsule(RenderShapePrimitive):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, radius: float, half_length: float, material: RenderMaterial) -> None:
         ...
     def get_half_length(self) -> float:
@@ -486,6 +530,9 @@ class RenderShapeCapsule(RenderShapePrimitive):
     def radius(self) -> float:
         ...
 class RenderShapeCylinder(RenderShapePrimitive):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, radius: float, half_length: float, material: RenderMaterial) -> None:
         ...
     def get_half_length(self) -> float:
@@ -499,6 +546,9 @@ class RenderShapeCylinder(RenderShapePrimitive):
     def radius(self) -> float:
         ...
 class RenderShapePlane(RenderShapePrimitive):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: RenderMaterial) -> None:
         ...
     def get_scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
@@ -507,27 +557,33 @@ class RenderShapePlane(RenderShapePrimitive):
     def scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
 class RenderShapePrimitive(RenderShape):
-    def get_triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
         ...
-    def get_vertex_normal(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def get_triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
-    def get_vertex_uv(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def get_vertex_normal(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
-    def get_vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def get_vertex_uv(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
         ...
-    @property
-    def triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
-        ...
-    @property
-    def vertex_normal(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def get_vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
     @property
-    def vertex_uv(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
     @property
-    def vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def vertex_normal(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
+        ...
+    @property
+    def vertex_uv(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
+        ...
+    @property
+    def vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
 class RenderShapeSphere(RenderShapePrimitive):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, radius: float, material: RenderMaterial) -> None:
         ...
     def get_radius(self) -> float:
@@ -537,8 +593,11 @@ class RenderShapeSphere(RenderShapePrimitive):
         ...
 class RenderShapeTriangleMesh(RenderShape):
     scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     @typing.overload
-    def __init__(self, vertices: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple, triangles: numpy.ndarray[numpy.uint32[M, 3]], normals: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple, uvs: numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]] | list | tuple, material: RenderMaterial) -> None:
+    def __init__(self, vertices: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 3]"], triangles: typing.Annotated[numpy.typing.ArrayLike, numpy.uint32, "[m, 3]"], normals: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 3]"], uvs: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 2]"], material: RenderMaterial) -> None:
         ...
     @typing.overload
     def __init__(self, filename: str, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple = ..., material: RenderMaterial | None = None) -> None:
@@ -556,6 +615,9 @@ class RenderShapeTriangleMesh(RenderShape):
         ...
 class RenderShapeTriangleMeshPart:
     __hash__: typing.ClassVar[None] = None
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __eq__(self, arg0: RenderShapeTriangleMeshPart) -> bool:
         ...
     def get_cuda_triangles(self) -> sapien.pysapien.CudaArray:
@@ -564,17 +626,17 @@ class RenderShapeTriangleMeshPart:
         ...
     def get_material(self) -> RenderMaterial:
         ...
-    def get_triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
+    def get_triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
-    def get_vertex_normal(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def get_vertex_normal(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
-    def get_vertex_uv(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def get_vertex_uv(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
         ...
-    def get_vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def get_vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
-    def set_vertex_normal(self, normal: numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_vertex_normal(self, normal: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 3]"]) -> None:
         ...
-    def set_vertex_uv(self, uv: numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_vertex_uv(self, uv: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 2]"]) -> None:
         ...
     @property
     def cuda_triangles(self) -> sapien.pysapien.CudaArray:
@@ -586,14 +648,17 @@ class RenderShapeTriangleMeshPart:
     def material(self) -> RenderMaterial:
         ...
     @property
-    def triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
+    def triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
     @property
-    def vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
 class RenderSpotLightComponent(RenderLightComponent):
     inner_fov: float
     outer_fov: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def get_inner_fov(self) -> float:
@@ -607,6 +672,9 @@ class RenderSpotLightComponent(RenderLightComponent):
 class RenderSystem(sapien.pysapien.System):
     ambient_light: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
     cubemap: RenderCubemap
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     @typing.overload
     def __init__(self, device: sapien.pysapien.Device | None = None) -> None:
         ...
@@ -651,6 +719,9 @@ class RenderSystem(sapien.pysapien.System):
     def render_bodies(self) -> list[RenderBodyComponent]:
         ...
 class RenderSystemGroup:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, systems: list[RenderSystem]) -> None:
         ...
     def create_camera_group(self, cameras: list[RenderCameraComponent], picture_names: list[str]) -> RenderCameraGroup:
@@ -668,6 +739,9 @@ class RenderSystemGroup:
         """
 class RenderTexture:
     __hash__: typing.ClassVar[None] = None
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __eq__(self, arg0: RenderTexture) -> bool:
         ...
     def __init__(self, array: numpy.ndarray[typing.Any, numpy.dtype[typing.Any]] | list | tuple, dim: int, format: str, mipmap_levels: int = 1, filter_mode: typing.Literal['nearest', 'linear'] = 'linear', address_mode: typing.Literal['repeat', 'border', 'edge', 'mirror'] = 'repeat', srgb: bool = False) -> None:
@@ -721,6 +795,9 @@ class RenderTexture:
         ...
 class RenderTexture2D:
     __hash__: typing.ClassVar[None] = None
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __eq__(self, arg0: RenderTexture2D) -> bool:
         ...
     @typing.overload
@@ -780,6 +857,9 @@ class RenderTexture2D:
         ...
 class RenderTexturedLightComponent(RenderSpotLightComponent):
     texture: RenderTexture2D
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def get_texture(self) -> RenderTexture2D:
@@ -788,6 +868,9 @@ class RenderTexturedLightComponent(RenderSpotLightComponent):
         ...
 class RenderVRDisplay:
     root_pose: sapien.pysapien.Pose
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def fetch_poses(self) -> None:
@@ -838,15 +921,18 @@ class RenderVRDisplay:
 class RenderWindow:
     cursor: bool
     denoiser: typing.Literal['none', 'oidn', 'optix']
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, width: int, height: int, shader_dir: str) -> None:
         ...
-    def get_camera_model_matrix(self) -> numpy.ndarray[tuple[typing.Literal[4], typing.Literal[4]], numpy.dtype[numpy.float32]]:
+    def get_camera_model_matrix(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[4, 4]"]:
         ...
     def get_camera_pose(self) -> sapien.pysapien.Pose:
         ...
     def get_camera_position(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
-    def get_camera_projection_matrix(self) -> numpy.ndarray[typing.Any, numpy.dtype[numpy.float32]]:
+    def get_camera_projection_matrix(self) -> numpy.typing.NDArray[numpy.float32]:
         ...
     def get_camera_property_float(self, key: str) -> float:
         ...
@@ -977,6 +1063,9 @@ class RenderWindow:
     def super(self) -> bool:
         ...
 class SapienRenderer:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, device: sapien.pysapien.Device | None = None) -> None:
         ...
     @property

@@ -1,24 +1,23 @@
 from __future__ import annotations
 import jax
 import numpy
+import numpy.typing
 import torch
 import typing
 from . import internal_renderer
 from . import math
 from . import physx
 from . import render
-
-import platform
-if platform.system() == "Darwin":
-    __all__ = ['Component', 'CudaArray', 'Device', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'abi_version', 'compiled_with_cxx11_abi', 'internal_renderer', 'math', 'physx', 'profile', 'pybind11_internals_id', 'pybind11_use_smart_holder', 'render', 'set_log_level']
-else:
-    from . import simsense
-    __all__ = ['Component', 'CudaArray', 'Device', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'abi_version', 'compiled_with_cxx11_abi', 'internal_renderer', 'math', 'physx', 'profile', 'pybind11_internals_id', 'pybind11_use_smart_holder', 'render', 'set_log_level', 'simsense']
+from . import simsense
+__all__ = ['Component', 'CudaArray', 'Device', 'Entity', 'Pose', 'Profiler', 'Scene', 'System', 'abi_version', 'compiled_with_cxx11_abi', 'internal_renderer', 'math', 'physx', 'profile', 'pybind11_internals_id', 'pybind11_use_smart_holder', 'render', 'set_log_level', 'simsense']
 _T = typing.TypeVar("_T", Component)
 class Component:
     entity_pose: Pose
     name: str
     pose: Pose
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def disable(self) -> None:
@@ -50,6 +49,9 @@ class Component:
     def is_enabled(self) -> bool:
         ...
 class CudaArray:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, data: typing.Any) -> None:
         ...
     def dlpack(self) -> typing.Any:
@@ -77,6 +79,9 @@ class CudaArray:
     def typestr(self) -> str:
         ...
 class Device:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, alias: str) -> None:
         ...
     def __repr__(self) -> str:
@@ -103,6 +108,9 @@ class Device:
 class Entity:
     name: str
     pose: Pose
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def add_component(self, component: Component) -> Entity:
@@ -147,13 +155,16 @@ class Pose:
     p: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
     q: numpy.ndarray[typing.Literal[4], numpy.dtype[numpy.float32]]
     rpy: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __getstate__(self) -> tuple:
         ...
     @typing.overload
     def __init__(self, p: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple = ..., q: numpy.ndarray[typing.Literal[4], numpy.dtype[numpy.float32]] | list[float] | tuple = ...) -> None:
         ...
     @typing.overload
-    def __init__(self, matrix: numpy.ndarray[tuple[typing.Literal[4], typing.Literal[4]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def __init__(self, matrix: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[4, 4]"]) -> None:
         ...
     def __mul__(self, other: Pose) -> Pose:
         ...
@@ -175,9 +186,12 @@ class Pose:
         ...
     def set_rpy(self, rpy: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         ...
-    def to_transformation_matrix(self) -> numpy.ndarray[tuple[typing.Literal[4], typing.Literal[4]], numpy.dtype[numpy.float32]]:
+    def to_transformation_matrix(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[4, 4]"]:
         ...
 class Profiler:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __call__(self, func: typing.Callable) -> typing.Callable:
         ...
     def __enter__(self) -> None:
@@ -187,6 +201,9 @@ class Profiler:
     def __init__(self, name: str) -> None:
         ...
 class Scene:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, systems: list[System]) -> None:
         ...
     def add_entity(self, entity: Entity) -> None:
@@ -224,6 +241,9 @@ class Scene:
     def render_system(self) -> render.RenderSystem:
         ...
 class System:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def step(self) -> None:

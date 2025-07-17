@@ -1,23 +1,14 @@
 from __future__ import annotations
 import numpy
+import numpy.typing
 import pybind11_stubgen.typing_ext
 import sapien.pysapien
 import sapien.pysapien_pinocchio
 import typing
-
-import platform
-if platform.system() == "Darwin":
-    __all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSDFConfig', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_sdf_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_sdf_config', 'set_shape_config', 'version']
-else:
-    __all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSDFConfig', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_sdf_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_sdf_config', 'set_shape_config', 'version']
-M = typing.TypeVar("M", bound=int)
+__all__ = ['PhysxArticulation', 'PhysxArticulationJoint', 'PhysxArticulationLinkComponent', 'PhysxBaseComponent', 'PhysxBodyConfig', 'PhysxCollisionShape', 'PhysxCollisionShapeBox', 'PhysxCollisionShapeCapsule', 'PhysxCollisionShapeConvexMesh', 'PhysxCollisionShapeCylinder', 'PhysxCollisionShapePlane', 'PhysxCollisionShapeSphere', 'PhysxCollisionShapeTriangleMesh', 'PhysxContact', 'PhysxContactPoint', 'PhysxCpuSystem', 'PhysxDistanceJointComponent', 'PhysxDriveComponent', 'PhysxEngine', 'PhysxGearComponent', 'PhysxGpuContactBodyImpulseQuery', 'PhysxGpuContactPairImpulseQuery', 'PhysxGpuSystem', 'PhysxJointComponent', 'PhysxMaterial', 'PhysxRayHit', 'PhysxRigidBaseComponent', 'PhysxRigidBodyComponent', 'PhysxRigidDynamicComponent', 'PhysxRigidStaticComponent', 'PhysxSDFConfig', 'PhysxSceneConfig', 'PhysxShapeConfig', 'PhysxSystem', 'get_body_config', 'get_default_material', 'get_scene_config', 'get_sdf_config', 'get_shape_config', 'is_gpu_enabled', 'set_body_config', 'set_default_material', 'set_gpu_memory_config', 'set_scene_config', 'set_sdf_config', 'set_shape_config', 'version']
 class PhysxArticulation:
     name: str
     pose: sapien.pysapien.Pose
-    qacc: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]
-    qf: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]
-    qpos: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]
-    qvel: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]
     root_angular_velocity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
     root_linear_velocity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
     root_pose: sapien.pysapien.Pose
@@ -25,11 +16,14 @@ class PhysxArticulation:
     solver_position_iterations: int
     solver_velocity_iterations: int
     @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    @staticmethod
     def create_pinocchio_model(articulation: PhysxArticulation, gravity = [0, 0, -9.81]) -> sapien.pysapien_pinocchio.PinocchioModel:
         ...
     def clone_links(self) -> list[PhysxArticulationLinkComponent]:
         ...
-    def compute_passive_force(self, gravity: bool = True, coriolis_and_centrifugal: bool = True) -> numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]:
+    def compute_passive_force(self, gravity: bool = True, coriolis_and_centrifugal: bool = True) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
         ...
     def create_fixed_tendon(self, link_chain: list[PhysxArticulationLinkComponent], coefficients: list[float], recip_coefficients: list[float], rest_length: float = 0, offset: float = 0, stiffness: float = 0, damping: float = 0, low: float = -3.4028234663852886e+38, high: float = 3.4028234663852886e+38, limit_stiffness: float = 0) -> None:
         ...
@@ -45,7 +39,7 @@ class PhysxArticulation:
         ...
     def get_joints(self) -> list[PhysxArticulationJoint]:
         ...
-    def get_link_incoming_joint_forces(self) -> numpy.ndarray[tuple[M, typing.Literal[6]], numpy.dtype[numpy.float32]]:
+    def get_link_incoming_joint_forces(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 6]"]:
         ...
     def get_links(self) -> list[PhysxArticulationLinkComponent]:
         ...
@@ -53,19 +47,19 @@ class PhysxArticulation:
         ...
     def get_pose(self) -> sapien.pysapien.Pose:
         ...
-    def get_qacc(self) -> numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]:
+    def get_qacc(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
         ...
-    def get_qf(self) -> numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]:
+    def get_qf(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
         ...
-    def get_qlimit(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def get_qlimit(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
         """
         same as get_qlimit
         """
-    def get_qlimits(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def get_qlimits(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
         ...
-    def get_qpos(self) -> numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]:
+    def get_qpos(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
         ...
-    def get_qvel(self) -> numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]:
+    def get_qvel(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
         ...
     def get_root(self) -> PhysxArticulationLinkComponent:
         ...
@@ -85,13 +79,13 @@ class PhysxArticulation:
         ...
     def set_pose(self, pose: sapien.pysapien.Pose) -> None:
         ...
-    def set_qacc(self, qacc: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_qacc(self, qacc: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
-    def set_qf(self, qf: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_qf(self, qf: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
-    def set_qpos(self, qpos: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_qpos(self, qpos: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
-    def set_qvel(self, qvel: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_qvel(self, qvel: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
     def set_root_angular_velocity(self, velocity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
         ...
@@ -118,32 +112,54 @@ class PhysxArticulation:
     def joints(self) -> list[PhysxArticulationJoint]:
         ...
     @property
-    def link_incoming_joint_forces(self) -> numpy.ndarray[tuple[M, typing.Literal[6]], numpy.dtype[numpy.float32]]:
+    def link_incoming_joint_forces(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 6]"]:
         ...
     @property
     def links(self) -> list[PhysxArticulationLinkComponent]:
         ...
     @property
-    def qlimit(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def qacc(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
+        ...
+    @qacc.setter
+    def qacc(self, arg1: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
     @property
-    def qlimits(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def qf(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
+        ...
+    @qf.setter
+    def qf(self, arg1: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
+        ...
+    @property
+    def qlimit(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
+        ...
+    @property
+    def qlimits(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
+        ...
+    @property
+    def qpos(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
+        ...
+    @qpos.setter
+    def qpos(self, arg1: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
+        ...
+    @property
+    def qvel(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
+        ...
+    @qvel.setter
+    def qvel(self, arg1: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
     @property
     def root(self) -> PhysxArticulationLinkComponent:
         ...
 class PhysxArticulationJoint:
-    armature: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]
-    drive_target: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]
-    drive_velocity_target: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]
     friction: float
-    limit: numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]
-    limits: numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]
     name: str
     pose_in_child: sapien.pysapien.Pose
     pose_in_parent: sapien.pysapien.Pose
     type: typing.Literal['fixed', 'revolute', 'revolute_unwrapped', 'prismatic', 'free']
-    def get_armature(self) -> numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    def get_armature(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
         ...
     def get_child_link(self) -> PhysxArticulationLinkComponent:
         ...
@@ -153,9 +169,9 @@ class PhysxArticulationJoint:
         ...
     def get_drive_mode(self) -> typing.Literal['force', 'acceleration']:
         ...
-    def get_drive_target(self) -> numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]:
+    def get_drive_target(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
         ...
-    def get_drive_velocity_target(self) -> numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]]:
+    def get_drive_velocity_target(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
         ...
     def get_force_limit(self) -> float:
         ...
@@ -163,11 +179,11 @@ class PhysxArticulationJoint:
         ...
     def get_global_pose(self) -> sapien.pysapien.Pose:
         ...
-    def get_limit(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def get_limit(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
         """
         same as get_limits
         """
-    def get_limits(self) -> numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]]:
+    def get_limits(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
         ...
     def get_name(self) -> str:
         ...
@@ -181,7 +197,7 @@ class PhysxArticulationJoint:
         ...
     def get_type(self) -> typing.Literal['fixed', 'revolute', 'revolute_unwrapped', 'prismatic', 'free']:
         ...
-    def set_armature(self, armature: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_armature(self, armature: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
     def set_drive_properties(self, stiffness: float, damping: float, force_limit: float = 3.4028234663852886e+38, mode: typing.Literal['force', 'acceleration'] = 'force') -> None:
         ...
@@ -193,21 +209,21 @@ class PhysxArticulationJoint:
     def set_drive_target(self, target: float) -> None:
         ...
     @typing.overload
-    def set_drive_target(self, target: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_drive_target(self, target: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
     @typing.overload
     def set_drive_velocity_target(self, velocity: float) -> None:
         ...
     @typing.overload
-    def set_drive_velocity_target(self, velocity: numpy.ndarray[tuple[M, typing.Literal[1]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_drive_velocity_target(self, velocity: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
     def set_friction(self, friction: float) -> None:
         ...
-    def set_limit(self, limit: numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_limit(self, limit: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 2]"]) -> None:
         """
         same as set_limits
         """
-    def set_limits(self, limit: numpy.ndarray[tuple[M, typing.Literal[2]], numpy.dtype[numpy.float32]] | list | tuple) -> None:
+    def set_limits(self, limit: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 2]"]) -> None:
         ...
     def set_name(self, name: str) -> None:
         ...
@@ -216,6 +232,12 @@ class PhysxArticulationJoint:
     def set_pose_in_parent(self, pose: sapien.pysapien.Pose) -> None:
         ...
     def set_type(self, type: typing.Literal['fixed', 'revolute', 'revolute_unwrapped', 'prismatic', 'free']) -> None:
+        ...
+    @property
+    def armature(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
+        ...
+    @armature.setter
+    def armature(self, arg1: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
         ...
     @property
     def child_link(self) -> PhysxArticulationLinkComponent:
@@ -230,10 +252,34 @@ class PhysxArticulationJoint:
     def drive_mode(self) -> typing.Literal['force', 'acceleration']:
         ...
     @property
+    def drive_target(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
+        ...
+    @drive_target.setter
+    def drive_target(self, arg1: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
+        ...
+    @property
+    def drive_velocity_target(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 1]"]:
+        ...
+    @drive_velocity_target.setter
+    def drive_velocity_target(self, arg1: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 1]"]) -> None:
+        ...
+    @property
     def force_limit(self) -> float:
         ...
     @property
     def global_pose(self) -> sapien.pysapien.Pose:
+        ...
+    @property
+    def limit(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
+        ...
+    @limit.setter
+    def limit(self, arg1: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 2]"]) -> None:
+        ...
+    @property
+    def limits(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 2]"]:
+        ...
+    @limits.setter
+    def limits(self, arg1: typing.Annotated[numpy.typing.ArrayLike, numpy.float32, "[m, 2]"]) -> None:
         ...
     @property
     def parent_link(self) -> PhysxArticulationLinkComponent:
@@ -242,6 +288,9 @@ class PhysxArticulationJoint:
     def stiffness(self) -> float:
         ...
 class PhysxArticulationLinkComponent(PhysxRigidBodyComponent):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, parent: PhysxArticulationLinkComponent | None = None) -> None:
         ...
     def get_articulation(self) -> PhysxArticulation:
@@ -287,11 +336,16 @@ class PhysxArticulationLinkComponent(PhysxRigidBodyComponent):
     def sleeping(self) -> bool:
         ...
 class PhysxBaseComponent(sapien.pysapien.Component):
-    pass
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
 class PhysxBodyConfig:
     sleep_threshold: float
     solver_position_iterations: int
     solver_velocity_iterations: int
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __getstate__(self) -> tuple:
         ...
     def __init__(self) -> None:
@@ -308,6 +362,9 @@ class PhysxCollisionShape:
     patch_radius: float
     physical_material: PhysxMaterial
     rest_offset: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def get_collision_groups(self) -> typing.Annotated[list[int], pybind11_stubgen.typing_ext.FixedSize(4)]:
         ...
     @typing.overload
@@ -368,6 +425,9 @@ class PhysxCollisionShape:
     def collision_groups(self) -> typing.Annotated[list[int], pybind11_stubgen.typing_ext.FixedSize(4)]:
         ...
 class PhysxCollisionShapeBox(PhysxCollisionShape):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, half_size: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: PhysxMaterial) -> None:
         ...
     def get_half_size(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
@@ -376,6 +436,9 @@ class PhysxCollisionShapeBox(PhysxCollisionShape):
     def half_size(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
 class PhysxCollisionShapeCapsule(PhysxCollisionShape):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, radius: float, half_length: float, material: PhysxMaterial) -> None:
         ...
     def get_half_length(self) -> float:
@@ -390,26 +453,32 @@ class PhysxCollisionShapeCapsule(PhysxCollisionShape):
         ...
 class PhysxCollisionShapeConvexMesh(PhysxCollisionShape):
     @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    @staticmethod
     def load_multiple(filename: str, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: PhysxMaterial) -> list[PhysxCollisionShapeConvexMesh]:
         ...
     def __init__(self, filename: str, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: PhysxMaterial) -> None:
         ...
     def get_scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
-    def get_triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
+    def get_triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
-    def get_vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def get_vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
     @property
     def scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
     @property
-    def triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
+    def triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
     @property
-    def vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
 class PhysxCollisionShapeCylinder(PhysxCollisionShape):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, radius: float, half_length: float, material: PhysxMaterial) -> None:
         ...
     def get_half_length(self) -> float:
@@ -423,9 +492,15 @@ class PhysxCollisionShapeCylinder(PhysxCollisionShape):
     def radius(self) -> float:
         ...
 class PhysxCollisionShapePlane(PhysxCollisionShape):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, material: PhysxMaterial) -> None:
         ...
 class PhysxCollisionShapeSphere(PhysxCollisionShape):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, radius: float, material: PhysxMaterial) -> None:
         ...
     def get_radius(self) -> float:
@@ -434,24 +509,30 @@ class PhysxCollisionShapeSphere(PhysxCollisionShape):
     def radius(self) -> float:
         ...
 class PhysxCollisionShapeTriangleMesh(PhysxCollisionShape):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, filename: str, scale: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, material: PhysxMaterial, sdf: bool = False) -> None:
         ...
     def get_scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
-    def get_triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
+    def get_triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
-    def get_vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def get_vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
     @property
     def scale(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
     @property
-    def triangles(self) -> numpy.ndarray[numpy.uint32[M, 3]]:
+    def triangles(self) -> typing.Annotated[numpy.typing.NDArray[numpy.uint32], "[m, 3]"]:
         ...
     @property
-    def vertices(self) -> numpy.ndarray[tuple[M, typing.Literal[3]], numpy.dtype[numpy.float32]]:
+    def vertices(self) -> typing.Annotated[numpy.typing.NDArray[numpy.float32], "[m, 3]"]:
         ...
 class PhysxContact:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __repr__(self) -> str:
         ...
     @property
@@ -464,6 +545,9 @@ class PhysxContact:
     def shapes(self) -> typing.Annotated[list[PhysxCollisionShape], pybind11_stubgen.typing_ext.FixedSize(2)]:
         ...
 class PhysxContactPoint:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     @property
     def impulse(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
         ...
@@ -477,6 +561,9 @@ class PhysxContactPoint:
     def separation(self) -> float:
         ...
 class PhysxCpuSystem(PhysxSystem):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def get_contacts(self) -> list[PhysxContact]:
@@ -490,6 +577,9 @@ class PhysxCpuSystem(PhysxSystem):
     def unpack(self, data: bytes) -> None:
         ...
 class PhysxDistanceJointComponent(PhysxJointComponent):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, body: PhysxRigidBodyComponent) -> None:
         ...
     def get_distance(self) -> float:
@@ -501,6 +591,9 @@ class PhysxDistanceJointComponent(PhysxJointComponent):
         ...
 class PhysxDriveComponent(PhysxJointComponent):
     drive_target: sapien.pysapien.Pose
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, body: PhysxRigidBodyComponent) -> None:
         ...
     def get_drive_property_slerp(self) -> tuple[float, float, float, typing.Literal['force', 'acceleration']]:
@@ -560,10 +653,16 @@ class PhysxDriveComponent(PhysxJointComponent):
     def set_limit_z(self, low: float, high: float, stiffness: float = 0.0, damping: float = 0.0) -> None:
         ...
 class PhysxEngine:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, tolerance_length: float, tolerance_speed: float) -> None:
         ...
 class PhysxGearComponent(PhysxJointComponent):
     gear_ratio: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, body: PhysxRigidBodyComponent) -> None:
         ...
     def enable_hinges(self) -> None:
@@ -575,194 +674,205 @@ class PhysxGearComponent(PhysxJointComponent):
     @property
     def is_hinges_enabled(self) -> bool:
         ...
-if platform.system() != "Darwin":
-    class PhysxGpuContactBodyImpulseQuery:
-        @property
-        def cuda_impulses(self) -> sapien.pysapien.CudaArray:
-            ...
-    class PhysxGpuContactPairImpulseQuery:
-        @property
-        def cuda_impulses(self) -> sapien.pysapien.CudaArray:
-            ...
-    class PhysxGpuSystem(PhysxSystem):
-        @typing.overload
-        def __init__(self, device: str = 'cuda') -> None:
-            ...
-        @typing.overload
-        def __init__(self, device: sapien.pysapien.Device) -> None:
-            ...
-        def get_scene_offset(self, scene: sapien.pysapien.Scene) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_qf(self) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_qf(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_qpos(self) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_qpos(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_qvel(self) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_qvel(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_root_pose(self) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_root_pose(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_root_velocity(self) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_root_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_target_position(self) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_target_position(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_target_velocity(self) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_articulation_target_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_rigid_dynamic_data(self) -> None:
-            ...
-        @typing.overload
-        def gpu_apply_rigid_dynamic_data(self, index_buffer: sapien.pysapien.CudaArray) -> None:
-            ...
-        def gpu_apply_rigid_dynamic_force(self) -> None:
-            ...
-        def gpu_apply_rigid_dynamic_torque(self) -> None:
-            ...
-        def gpu_create_contact_body_impulse_query(self, bodies: list[PhysxRigidBaseComponent]) -> PhysxGpuContactBodyImpulseQuery:
-            ...
-        def gpu_create_contact_pair_impulse_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactPairImpulseQuery:
-            ...
-        def gpu_fetch_articulation_link_incoming_joint_forces(self) -> None:
-            ...
-        def gpu_fetch_articulation_link_pose(self) -> None:
-            ...
-        def gpu_fetch_articulation_link_velocity(self) -> None:
-            ...
-        def gpu_fetch_articulation_qacc(self) -> None:
-            ...
-        def gpu_fetch_articulation_qpos(self) -> None:
-            ...
-        def gpu_fetch_articulation_qvel(self) -> None:
-            ...
-        def gpu_fetch_articulation_target_qpos(self) -> None:
-            ...
-        def gpu_fetch_articulation_target_qvel(self) -> None:
-            ...
-        def gpu_fetch_rigid_dynamic_data(self) -> None:
-            ...
-        def gpu_init(self) -> None:
-            """
-            "Warm start" the GPU simulation by stepping the system once. This function
-            must be called each time when actors are added or removed from the scene. One
-            may call `gpu_apply_*` functions to initialize the system after calling this
-            function.
-            """
-        def gpu_query_contact_body_impulses(self, query: PhysxGpuContactBodyImpulseQuery) -> None:
-            """
-            Query net contact forces for specific bodies of the last simulation step.
-            Usage:
-                query = system.gpu_create_contact_body_force_query(bodies)  # create force query in advance
-            
-                # after simulation step
-                system.gpu_query_contact_body_forces(query)
-                # query.cuda_buffer is now filled with net contact forces for each body
-            """
-        def gpu_query_contact_pair_impulses(self, query: PhysxGpuContactPairImpulseQuery) -> None:
-            ...
-        def gpu_set_cuda_stream(self, stream: int) -> None:
-            """
-            PhysX GPU APIs will be synchronized with the provided stream and SAPIEN's CUDA
-            kernels will be launched to the provided stream.
-            
-            Args:
-                stream: integer representation of a cuda stream pointer
-            """
-        def gpu_update_articulation_kinematics(self) -> None:
-            ...
-        def set_scene_offset(self, scene: sapien.pysapien.Scene, offset: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
-            """
-            In GPU mode, all SAPIEN scenes share the same PhysX scene. One should call this
-            function to apply an offset to avoid bodies in different scenes interfere with
-            each other. This function must be called before any PhysX body is added to scene.
-            
-            Example: After calling `set_scene_offset([2, 1, 0])`, an SAPIEN object with
-            position `[1, 1, 1]` will be at position `[1, 1, 1] + [2, 1, 0] = [3, 2, 1]` in
-            PhysX scene.
-            """
-        def step_finish(self) -> None:
-            ...
-        def step_start(self) -> None:
-            ...
-        def sync_poses_gpu_to_cpu(self) -> None:
-            """
-            Warning: this function is super slow and for debug only. Download all poses from the GPU and copy to SAPIEN entities.
-            """
-        @property
-        def cuda_articulation_link_data(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_articulation_link_incoming_joint_forces(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_articulation_qacc(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_articulation_qf(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_articulation_qpos(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_articulation_qvel(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_articulation_target_qpos(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_articulation_target_qvel(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_rigid_body_data(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_rigid_body_force(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_rigid_body_torque(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_rigid_dynamic_data(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_rigid_dynamic_force(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def cuda_rigid_dynamic_torque(self) -> sapien.pysapien.CudaArray:
-            ...
-        @property
-        def device(self) -> sapien.pysapien.Device:
-            ...
+class PhysxGpuContactBodyImpulseQuery:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    @property
+    def cuda_impulses(self) -> sapien.pysapien.CudaArray:
+        ...
+class PhysxGpuContactPairImpulseQuery:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    @property
+    def cuda_impulses(self) -> sapien.pysapien.CudaArray:
+        ...
+class PhysxGpuSystem(PhysxSystem):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
+    @typing.overload
+    def __init__(self, device: str = 'cuda') -> None:
+        ...
+    @typing.overload
+    def __init__(self, device: sapien.pysapien.Device) -> None:
+        ...
+    def get_scene_offset(self, scene: sapien.pysapien.Scene) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_qf(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_qf(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_qpos(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_qpos(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_qvel(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_qvel(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_root_pose(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_root_pose(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_root_velocity(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_root_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_target_position(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_target_position(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_target_velocity(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_articulation_target_velocity(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_rigid_dynamic_data(self) -> None:
+        ...
+    @typing.overload
+    def gpu_apply_rigid_dynamic_data(self, index_buffer: sapien.pysapien.CudaArray) -> None:
+        ...
+    def gpu_apply_rigid_dynamic_force(self) -> None:
+        ...
+    def gpu_apply_rigid_dynamic_torque(self) -> None:
+        ...
+    def gpu_create_contact_body_impulse_query(self, bodies: list[PhysxRigidBaseComponent]) -> PhysxGpuContactBodyImpulseQuery:
+        ...
+    def gpu_create_contact_pair_impulse_query(self, body_pairs: list[tuple[PhysxRigidBaseComponent, PhysxRigidBaseComponent]]) -> PhysxGpuContactPairImpulseQuery:
+        ...
+    def gpu_fetch_articulation_link_incoming_joint_forces(self) -> None:
+        ...
+    def gpu_fetch_articulation_link_pose(self) -> None:
+        ...
+    def gpu_fetch_articulation_link_velocity(self) -> None:
+        ...
+    def gpu_fetch_articulation_qacc(self) -> None:
+        ...
+    def gpu_fetch_articulation_qpos(self) -> None:
+        ...
+    def gpu_fetch_articulation_qvel(self) -> None:
+        ...
+    def gpu_fetch_articulation_target_qpos(self) -> None:
+        ...
+    def gpu_fetch_articulation_target_qvel(self) -> None:
+        ...
+    def gpu_fetch_rigid_dynamic_data(self) -> None:
+        ...
+    def gpu_init(self) -> None:
+        """
+           "Warm start" the GPU simulation by stepping the system once. This function
+           must be called each time when actors are added or removed from the scene. One
+           may call `gpu_apply_*` functions to initialize the system after calling this
+           function.
+        """
+    def gpu_query_contact_body_impulses(self, query: PhysxGpuContactBodyImpulseQuery) -> None:
+        """
+        Query net contact forces for specific bodies of the last simulation step.
+        Usage:
+            query = system.gpu_create_contact_body_force_query(bodies)  # create force query in advance
+        
+            # after simulation step
+            system.gpu_query_contact_body_forces(query)
+            # query.cuda_buffer is now filled with net contact forces for each body
+        """
+    def gpu_query_contact_pair_impulses(self, query: PhysxGpuContactPairImpulseQuery) -> None:
+        ...
+    def gpu_set_cuda_stream(self, stream: int) -> None:
+        """
+        PhysX GPU APIs will be synchronized with the provided stream and SAPIEN's CUDA
+        kernels will be launched to the provided stream.
+        
+        Args:
+            stream: integer representation of a cuda stream pointer
+        """
+    def gpu_update_articulation_kinematics(self) -> None:
+        ...
+    def set_scene_offset(self, scene: sapien.pysapien.Scene, offset: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple) -> None:
+        """
+        In GPU mode, all SAPIEN scenes share the same PhysX scene. One should call this
+        function to apply an offset to avoid bodies in different scenes interfere with
+        each other. This function must be called before any PhysX body is added to scene.
+        
+        Example: After calling `set_scene_offset([2, 1, 0])`, an SAPIEN object with
+        position `[1, 1, 1]` will be at position `[1, 1, 1] + [2, 1, 0] = [3, 2, 1]` in
+        PhysX scene.
+        """
+    def step_finish(self) -> None:
+        ...
+    def step_start(self) -> None:
+        ...
+    def sync_poses_gpu_to_cpu(self) -> None:
+        """
+        Warning: this function is super slow and for debug only. Download all poses from the GPU and copy to SAPIEN entities.
+        """
+    @property
+    def cuda_articulation_link_data(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_articulation_link_incoming_joint_forces(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_articulation_qacc(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_articulation_qf(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_articulation_qpos(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_articulation_qvel(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_articulation_target_qpos(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_articulation_target_qvel(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_rigid_body_data(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_rigid_body_force(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_rigid_body_torque(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_rigid_dynamic_data(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_rigid_dynamic_force(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def cuda_rigid_dynamic_torque(self) -> sapien.pysapien.CudaArray:
+        ...
+    @property
+    def device(self) -> sapien.pysapien.Device:
+        ...
 class PhysxJointComponent(PhysxBaseComponent):
     parent: PhysxRigidBaseComponent
     pose_in_child: sapien.pysapien.Pose
     pose_in_parent: sapien.pysapien.Pose
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def get_parent(self) -> PhysxRigidBaseComponent:
         ...
     def get_pose_in_child(self) -> sapien.pysapien.Pose:
@@ -788,6 +898,9 @@ class PhysxMaterial:
     dynamic_friction: float
     restitution: float
     static_friction: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self, static_friction: float, dynamic_friction: float, restitution: float) -> None:
         ...
     def get_dynamic_friction(self) -> float:
@@ -803,6 +916,9 @@ class PhysxMaterial:
     def set_static_friction(self, friction: float) -> None:
         ...
 class PhysxRayHit:
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __repr__(self) -> str:
         ...
     @property
@@ -821,6 +937,9 @@ class PhysxRayHit:
     def shape(self) -> PhysxCollisionShape:
         ...
 class PhysxRigidBaseComponent(PhysxBaseComponent):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def attach(self, collision_shape: PhysxCollisionShape) -> PhysxRigidBaseComponent:
         ...
     def compute_global_aabb_tight(self) -> numpy.ndarray[tuple[typing.Literal[2], typing.Literal[3]], numpy.dtype[numpy.float32]]:
@@ -844,6 +963,9 @@ class PhysxRigidBodyComponent(PhysxRigidBaseComponent):
     mass: float
     max_contact_impulse: float
     max_depenetration_velocity: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def add_force_at_point(self, force: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, point: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, mode: typing.Literal['force', 'acceleration', 'velocity_change', 'impulse'] = 'force') -> None:
         ...
     def add_force_torque(self, force: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, torque: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] | list[float] | tuple, mode: typing.Literal['force', 'acceleration', 'velocity_change', 'impulse'] = 'force') -> None:
@@ -903,6 +1025,9 @@ class PhysxRigidDynamicComponent(PhysxRigidBodyComponent):
     sleep_threshold: float
     solver_position_iterations: int
     solver_velocity_iterations: int
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def get_angular_velocity(self) -> numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]:
@@ -966,12 +1091,18 @@ class PhysxRigidDynamicComponent(PhysxRigidBodyComponent):
     def locked_motion_axes(self) -> typing.Annotated[list[bool], pybind11_stubgen.typing_ext.FixedSize(6)]:
         ...
 class PhysxRigidStaticComponent(PhysxRigidBaseComponent):
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
 class PhysxSDFConfig:
     num_threads_for_construction: int
     spacing: float
     subgridSize: int
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __getstate__(self) -> tuple:
         ...
     def __init__(self) -> None:
@@ -988,6 +1119,9 @@ class PhysxSceneConfig:
     enable_pcm: bool
     enable_tgs: bool
     gravity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]]
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __getstate__(self) -> tuple:
         ...
     def __init__(self) -> None:
@@ -999,6 +1133,9 @@ class PhysxSceneConfig:
 class PhysxShapeConfig:
     contact_offset: float
     rest_offset: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __getstate__(self) -> tuple:
         ...
     def __init__(self) -> None:
@@ -1010,6 +1147,9 @@ class PhysxShapeConfig:
 class PhysxSystem(sapien.pysapien.System):
     scene_collision_id: int
     timestep: float
+    @staticmethod
+    def _pybind11_conduit_v1_(*args, **kwargs):
+        ...
     def __init__(self) -> None:
         ...
     def get_articulation_link_components(self) -> list[PhysxArticulationLinkComponent]:
@@ -1062,7 +1202,7 @@ def set_body_config(config: PhysxBodyConfig) -> None:
     ...
 def set_default_material(static_friction: float, dynamic_friction: float, restitution: float) -> None:
     ...
-def set_gpu_memory_config(temp_buffer_capacity: int = 16777216, max_rigid_contact_count: int = 524288, max_rigid_patch_count: int = 81920, heap_capacity: int = 67108864, found_lost_pairs_capacity: int = 262144, found_lost_aggregate_pairs_capacity: int = 1024, total_aggregate_pairs_capacity: int = 1024) -> None:
+def set_gpu_memory_config(temp_buffer_capacity: int = 16777216, max_rigid_contact_count: int = 524288, max_rigid_patch_count: int = 81920, heap_capacity: int = 67108864, found_lost_pairs_capacity: int = 262144, found_lost_aggregate_pairs_capacity: int = 1024, total_aggregate_pairs_capacity: int = 1024, collision_stack_size: int = 4194304) -> None:
     ...
 @typing.overload
 def set_scene_config(gravity: numpy.ndarray[typing.Literal[3], numpy.dtype[numpy.float32]] = ..., bounce_threshold: float = 2.0, enable_pcm: bool = True, enable_tgs: bool = True, enable_ccd: bool = False, enable_enhanced_determinism: bool = False, enable_friction_every_iteration: bool = True, cpu_workers: int = 0) -> None:
