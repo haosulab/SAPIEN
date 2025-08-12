@@ -74,7 +74,7 @@ jobs:
         shell: bash
         run: |
           C:/msys64/usr/bin/wget.exe https://developer.download.nvidia.com/compute/cuda/12.6.0/network_installers/cuda_12.6.0_windows_network.exe
-          ./cuda_12.6.0_windows_network.exe -s cudart_12.6 nvcc_12.6 nvtx_12.6 curand_dev_12.6
+          ./cuda_12.6.0_windows_network.exe -s cudart_12.6 nvcc_12.6 nvtx_12.6 curand_dev_12.6 visual_studio_integration_12.6
       - uses: actions/setup-python@v5
         with:
           python-version: |
