@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [main, master, dev]
+    branches: [main, dev]
 
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
