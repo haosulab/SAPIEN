@@ -103,6 +103,11 @@ public:
   void addForceAtPoint(Vec3 const &force, Vec3 const &point, ::physx::PxForceMode::Enum mode);
   void addForceTorque(Vec3 const &force, Vec3 const &torque, ::physx::PxForceMode::Enum mode);
 
+  void setMaxLinearVelocity(float speed);
+  float getMaxLinearVelocity() const;
+  void setMaxAngularVelocity(float speed);
+  float getMaxAngularVelocity() const;
+
   // related to physx contact handling
   void setMaxDepenetrationVelocity(float speed);
   float getMaxDepenetrationVelocity() const;

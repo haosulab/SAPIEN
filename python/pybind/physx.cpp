@@ -748,6 +748,15 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def("get_angular_damping", &PhysxRigidBodyComponent::getAngularDamping)
       .def("set_angular_damping", &PhysxRigidBodyComponent::setAngularDamping, py::arg("damping"))
 
+      .def_property("max_linear_velocity", &PhysxRigidBodyComponent::getMaxLinearVelocity,
+                    &PhysxRigidBodyComponent::setMaxLinearVelocity)
+      .def("get_max_linear_velocity", &PhysxRigidBodyComponent::getMaxLinearVelocity)
+      .def("set_max_linear_velocity", &PhysxRigidBodyComponent::setMaxLinearVelocity, py::arg("velocity"))
+      .def_property("max_angular_velocity", &PhysxRigidBodyComponent::getMaxAngularVelocity,
+                    &PhysxRigidBodyComponent::setMaxAngularVelocity)
+      .def("get_max_angular_velocity", &PhysxRigidBodyComponent::getMaxAngularVelocity)
+      .def("set_max_angular_velocity", &PhysxRigidBodyComponent::setMaxAngularVelocity, py::arg("velocity"))
+
       .def_property("max_depenetration_velocity",
                     &PhysxRigidBodyComponent::getMaxDepenetrationVelocity,
                     &PhysxRigidBodyComponent::setMaxDepenetrationVelocity)
@@ -917,6 +926,11 @@ Example:
                     &PhysxArticulationJoint::setFriction)
       .def("get_friction", &PhysxArticulationJoint::getFriction)
       .def("set_friction", &PhysxArticulationJoint::setFriction, py::arg("friction"))
+
+      .def_property("max_velocity", &PhysxArticulationJoint::getMaxVelocity,
+                    &PhysxArticulationJoint::setMaxVelocity)
+      .def("get_max_velocity", &PhysxArticulationJoint::getMaxVelocity)
+      .def("set_max_velocity", &PhysxArticulationJoint::setMaxVelocity, py::arg("velocity"))
 
       .def_property("limit", &PhysxArticulationJoint::getLimit, &PhysxArticulationJoint::setLimit)
       .def_property("limits", &PhysxArticulationJoint::getLimit, &PhysxArticulationJoint::setLimit)

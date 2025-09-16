@@ -44,6 +44,9 @@ public:
   float getFriction() const;
   void setFriction(float friction);
 
+  float getMaxVelocity() const;
+  void setMaxVelocity(float v);
+
   Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> getLimit() const;
   void setLimit(Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> const &limit);
 

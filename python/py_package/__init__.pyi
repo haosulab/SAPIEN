@@ -34,5 +34,5 @@ from . import utils
 from . import version
 from . import wrapper
 __all__ = ['ActorBuilder', 'ArticulationBuilder', 'Component', 'CudaArray', 'Device', 'Engine', 'Entity', 'Path', 'PinocchioModel', 'Pose', 'SapienRenderer', 'Scene', 'SceneConfig', 'System', 'Widget', 'asset', 'internal_renderer', 'math', 'os', 'physx', 'pkg_resources', 'platform', 'profile', 'pysapien', 'pysapien_pinocchio', 'render', 'set_log_level', 'simsense', 'utils', 'version', 'warn', 'wrapper']
-__version__: str = '3.0.0.dev20250717+93d5fedf'
+__version__: str = '3.0.0.dev20250916+91c1130e'
 __warningregistry__: dict = {'version': 0, ('pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.', UserWarning, 18): True}

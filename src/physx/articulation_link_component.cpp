@@ -114,6 +114,18 @@ void PhysxArticulationJoint::setFriction(float friction) {
   }
 }
 
+float PhysxArticulationJoint::getMaxVelocity() const {
+  if (auto j = getPxJoint()) {
+    return j->getMaxJointVelocity();
+  }
+  return 0.f;
+}
+void PhysxArticulationJoint::setMaxVelocity(float v) {
+  if (auto j = getPxJoint()) {
+    return j->setMaxJointVelocity(v);
+  }
+}
+
 Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> PhysxArticulationJoint::getLimit() const {
   Eigen::Matrix<float, Eigen::Dynamic, 2, Eigen::RowMajor> result;
   result.resize(mAxes.size(), 2);
