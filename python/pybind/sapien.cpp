@@ -329,7 +329,10 @@ Generator<int> init_sapien(py::module &m) {
 
              py::object obj = py::cast(newArray);
              auto as_tensor = py::module_::import("torch").attr("as_tensor");
-             return as_tensor("data"_a = obj, "device"_a = "cuda");
+
+             std::string device_str = array.cudaId >= 0 ? 
+                                 "cuda:" + std::to_string(array.cudaId) : "cuda";  
+             return as_tensor("data"_a = obj, "device"_a = device_str);
            })
 #ifdef SAPIEN_CUDA
       .def("jax",
