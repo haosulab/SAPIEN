@@ -291,7 +291,8 @@ class Viewer:
     def resolution(self, res):
         self.window.resize(res[0], res[1])
 
-    def add_bounding_box(self, pose, half_size, color):
+    # Bounding Box
+    def add_bounding_box(self, pose: sapien.Pose, half_size: np.ndarray, color: np.ndarray, line_width: float = 1.0) -> R.LineSetObject:
         vertices = np.array(
             [
                 [1, -1, -1],
@@ -314,7 +315,7 @@ class Viewer:
         box.set_position(pose.p)
         box.set_rotation(pose.q)
         box.set_scale(half_size)
-
+        box.line_width = line_width
         return box
 
     def update_bounding_box(self, box, pose, half_size):
@@ -326,15 +327,124 @@ class Viewer:
         # render_scene: R.Scene = self.system._internal_scene
         self.render_scene.remove_node(box)
 
-    def draw_aabb(self, lower, upper, color):
+    # AABB
+    def draw_aabb(self, lower, upper, color, line_width: float = 1.0):
         pose = sapien.Pose((lower + upper) / 2)
         half_size = (upper - lower) / 2
-        return self.add_bounding_box(pose, half_size, color)
+        return self.add_bounding_box(pose, half_size, color, line_width)
 
     def update_aabb(self, aabb, lower, upper):
         pose = sapien.Pose((lower + upper) / 2)
         half_size = (upper - lower) / 2
         self.update_bounding_box(aabb, pose, half_size)
+
+    def remove_aabb(self, aabb):
+        self.render_scene.remove_node(aabb)
+
+    # 3D Point List
+    def add_3d_point_list(self, points: np.ndarray, color: np.ndarray | None = None):
+        """
+        Add a 3D point list to the viewer.
+
+        Args:
+            points: Array of 3D points, shape [N, 3] where N is the number of points.
+            color: Optional color specification. Can be:
+                - None: defaults to white [1, 1, 1, 1]
+                - Array of shape [4] or [3]: single color for all points (RGBA or RGB)
+                - Array of shape [N, 4] or [N, 3]: per-point colors (RGBA or RGB)
+
+        Returns:
+            PointSetObject that can be used to remove or update the point set.
+        """
+        points = np.asarray(points, dtype=np.float32)
+        assert points.ndim == 2 and points.shape[1] == 3, "points must be shape [N, 3]"
+        
+        n_points = points.shape[0]
+        
+        if color is None:
+            colors = np.ones((n_points, 4), dtype=np.float32)
+        else:
+            color = np.asarray(color, dtype=np.float32)
+            if color.ndim == 1:
+                # Single color for all points
+                if color.shape[0] == 3:
+                    # RGB -> RGBA
+                    color = np.append(color, 1.0)
+                colors = np.tile(color.reshape(1, 4), (n_points, 1))
+            elif color.ndim == 2:
+                # Per-point colors
+                assert color.shape[0] == n_points, "color must have same number of points"
+                if color.shape[1] == 3:
+                    # RGB -> RGBA
+                    alpha = np.ones((n_points, 1), dtype=np.float32)
+                    colors = np.hstack([color, alpha])
+                else:
+                    assert color.shape[1] == 4, "color must be shape [N, 3] or [N, 4]"
+                    colors = color
+            else:
+                raise ValueError("color must be 1D or 2D array")
+    
+        pointset = self.renderer_context.create_point_set(points, colors)
+        pointset_obj = self.render_scene.add_point_set(pointset)
+        return pointset_obj
+
+    def remove_3d_point_list(self, pointset_obj):
+        """Remove a 3D point list from the viewer."""
+        self.render_scene.remove_node(pointset_obj)
+
+
+    # Coordinate Frame
+    # TODO: Use the existing coordinate frame visualization built into SAPIEN. It has arrow heads for each axis which looks nice.
+    def add_coordinate_frame(self, pose: sapien.Pose, length: float = 0.1, line_width: float = 2.5):
+        """
+        Add a coordinate frame visualization with three colored axes.
+
+        Args:
+            pose: The pose (position and rotation) of the coordinate frame origin.
+            length: The length of each axis.
+            line_width: The width of each axis.
+
+        Returns:
+            Three LineSetObject instances representing the X (red), Y (green), and Z (blue) axes.
+        """
+        origin = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+        
+        # X axis: red
+        x_end = np.array([length, 0.0, 0.0], dtype=np.float32)
+        x_vertices = np.stack([origin, x_end])
+        x_colors = np.array([[1.0, 0.0, 0.0, 1.0], [1.0, 0.0, 0.0, 1.0]], dtype=np.float32)
+        x_lineset = self.renderer_context.create_line_set(x_vertices, x_colors)
+        x_obj = self.render_scene.add_line_set(x_lineset)
+        x_obj.line_width = line_width
+        x_obj.set_position(pose.p)
+        x_obj.set_rotation(pose.q)
+
+        # Y axis: green
+        y_end = np.array([0.0, length, 0.0], dtype=np.float32)
+        y_vertices = np.stack([origin, y_end])
+        y_colors = np.array([[0.0, 1.0, 0.0, 1.0], [0.0, 1.0, 0.0, 1.0]], dtype=np.float32)
+        y_lineset = self.renderer_context.create_line_set(y_vertices, y_colors)
+        y_obj = self.render_scene.add_line_set(y_lineset)
+        y_obj.line_width = line_width
+        y_obj.set_position(pose.p)
+        y_obj.set_rotation(pose.q)
+        
+        # Z axis: blue
+        z_end = np.array([0.0, 0.0, length], dtype=np.float32)
+        z_vertices = np.stack([origin, z_end])
+        z_colors = np.array([[0.0, 0.0, 1.0, 1.0], [0.0, 0.0, 1.0, 1.0]], dtype=np.float32)
+        z_lineset = self.renderer_context.create_line_set(z_vertices, z_colors)
+        z_obj = self.render_scene.add_line_set(z_lineset)
+        z_obj.line_width = line_width
+        z_obj.set_position(pose.p)
+        z_obj.set_rotation(pose.q)
+        
+        return x_obj, y_obj, z_obj
+
+    def remove_coordinate_frame(self, frame_objects):
+        """Remove a coordinate frame from the viewer."""
+        for obj in frame_objects:
+            self.render_scene.remove_node(obj)
 
     @property
     def control_window(self) -> ControlWindow:
