@@ -16,6 +16,7 @@ while [[ "$#" -gt 0 ]]; do
         311) VERSION="311";;
         312) VERSION="312";;
         313) VERSION="313";;
+        314) VERSION="314";;
     esac
     shift
 done
@@ -43,7 +44,7 @@ function build_pybind() {
       PY_DOT=3.6
       EXT="m"
   elif [ "$PY_VERSION" -eq 37 ]; then
-      PY_DOT=3.7
+      PY_DOT=3.8
       EXT="m"
   elif [ "$PY_VERSION" -eq 38 ]; then
       PY_DOT=3.8
@@ -62,6 +63,9 @@ function build_pybind() {
       EXT=""
   elif [ "$PY_VERSION" -eq 313 ]; then
       PY_DOT=3.13
+      EXT=""
+  elif [ "$PY_VERSION" -eq 314 ]; then
+      PY_DOT=3.14
       EXT=""
   else
     echo "Error, python version not found!"
@@ -84,11 +88,11 @@ function build_pybind() {
 build_sapien
 if [ -z "${VERSION}" ]
 then
-   build_pybind 39
    build_pybind 310
    build_pybind 311
    build_pybind 312
    build_pybind 313
+   build_pybind 314
 else
    build_pybind $VERSION
 fi

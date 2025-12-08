@@ -13,7 +13,7 @@ jobs:
     permissions:
       contents: write
     container:
-      image: fxiangucsd/sapien-build-env:3.7
+      image: fxiangucsd/sapien-build-env:3.8
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
@@ -41,7 +41,7 @@ jobs:
     permissions:
       contents: write
     container:
-      image: fxiangucsd/sapien-build-env-aarch64:3.7
+      image: fxiangucsd/sapien-build-env-aarch64:3.8
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
@@ -100,7 +100,7 @@ jobs:
     needs: build-windows-sapien
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -174,11 +174,6 @@ jobs:
       - name: Download wheels
         uses: actions/download-artifact@v4
         with:
-          name: windows-wheel-3.9
-          path: wheelhouse
-      - name: Download wheels
-        uses: actions/download-artifact@v4
-        with:
           name: windows-wheel-3.10
           path: wheelhouse
       - name: Download wheels
@@ -195,6 +190,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: windows-wheel-3.13
+          path: wheelhouse
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-wheel-3.14
           path: wheelhouse
       - name: Download wheels
         uses: actions/download-artifact@v4
