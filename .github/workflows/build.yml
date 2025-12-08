@@ -141,8 +141,10 @@ jobs:
           fetch-tags: true
       - name: Initialize submodules
         run: git submodule update --init --recursive
-      - name: Install CMake
-        run: brew install cmake
+      - name: Setup CMake 3.x
+        uses: jwlawson/actions-setup-cmake@v2
+        with:
+          cmake-version: '3.31.x'
       - name: Set up pyenv
         run: |
           brew update
