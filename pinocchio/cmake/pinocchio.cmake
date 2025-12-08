@@ -8,7 +8,7 @@ set(Boost_USE_STATIC_LIBS ON CACHE BOOL "" FORCE)
 include(FetchContent)
 FetchContent_Declare(
     tinyxml
-    URL       https://cytranet.dl.sourceforge.net/project/tinyxml/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz
+    URL       https://phoenixnap.dl.sourceforge.net/project/tinyxml/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz
     URL_HASH  MD5=c1b864c96804a10526540c664ade67f0
     PATCH_COMMAND cmake -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tinyxml_CMakeLists.txt <SOURCE_DIR>/CMakeLists.txt
 )
