@@ -8,9 +8,11 @@ ENV CUDA_PATH=/workspace/cuda PATH="/workspace/cuda/bin:$PATH" LD_LIBRARY_PATH="
 
 RUN pipx install cmake==3.26.3 --force
 
-RUN /opt/python/cp312-cp312/bin/python -m pip install setuptools wheel
-RUN /opt/python/cp313-cp313/bin/python -m pip install setuptools wheel
 RUN /opt/python/cp314-cp314/bin/python -m pip install setuptools wheel
+RUN /opt/python/cp313-cp313/bin/python -m pip install setuptools wheel
+RUN /opt/python/cp312-cp312/bin/python -m pip install setuptools wheel
+RUN /opt/python/cp311-cp311/bin/python -m pip install setuptools wheel
+RUN /opt/python/cp310-cp310/bin/python -m pip install setuptools wheel
 
 # custom auditwheel
 RUN /opt/python/cp313-cp313/bin/pip install git+https://github.com/fbxiang/auditwheel.git@fe61bcdfb78f3955d9a3b6fbb05e3852c32239b0
@@ -26,5 +28,3 @@ ENV CC=/opt/rh/gcc-toolset-11/root/usr/bin/cc CXX=/opt/rh/gcc-toolset-11/root/us
 ENV LD_LIBRARY_PATH=/opt/rh/gcc-toolset-11/root/usr/lib64:/opt/rh/gcc-toolset-11/root/usr/lib:/opt/rh/gcc-toolset-11/root/usr/lib64/dyninst:/opt/rh/gcc-toolset-11/root/usr/lib/dyninst PCP_DIR=/opt/rh/gcc-toolset-11/root/ DEVTOOLSET_ROOTPATH=/opt/rh/gcc-toolset-11/root MANPATH=/opt/rh/gcc-toolset-11/root/usr/share/man PATH=/opt/rh/gcc-toolset-11/root/usr/bin:/usr/share/Modules/bin:/opt/rh/gcc-toolset-11/root/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 ENV PATH=/opt/python/cp313-cp313/bin:$PATH
-
-RUN /opt/python/cp312-cp312/bin/python -m pip install setuptools wheel

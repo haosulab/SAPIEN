@@ -11,6 +11,8 @@ RUN pipx install cmake==3.26.3 --force
 RUN /opt/python/cp314-cp314/bin/python -m pip install setuptools wheel
 RUN /opt/python/cp313-cp313/bin/python -m pip install setuptools wheel
 RUN /opt/python/cp312-cp312/bin/python -m pip install setuptools wheel
+RUN /opt/python/cp311-cp311/bin/python -m pip install setuptools wheel
+RUN /opt/python/cp310-cp310/bin/python -m pip install setuptools wheel
 
 # custom auditwheel
 RUN /opt/python/cp313-cp313/bin/pip install git+https://github.com/fbxiang/auditwheel.git@fe61bcdfb78f3955d9a3b6fbb05e3852c32239b0
