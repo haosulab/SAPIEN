@@ -98,6 +98,12 @@ class Viewer:
 
         self._selected_entity_visibility = 0.5
 
+
+        # Define the materials used for coordinate frames
+        self._mat_green = self.renderer_context.create_material([0, 1, 0, 1], [0, 0, 0, 1], 0, 1, 0)
+        self._mat_blue = self.renderer_context.create_material([0, 0, 1, 1], [0, 0, 0, 1], 0, 1, 0)
+        self._mat_red = self.renderer_context.create_material([1, 0, 0, 1], [0, 0, 0, 1], 0, 1, 0)
+
     @property
     def render_scene(self):
         return self.window._internal_scene
@@ -291,7 +297,8 @@ class Viewer:
     def resolution(self, res):
         self.window.resize(res[0], res[1])
 
-    def add_bounding_box(self, pose, half_size, color):
+    # Bounding Box
+    def add_bounding_box(self, pose: sapien.Pose, half_size: np.ndarray, color: np.ndarray, line_width: float = 1.0) -> R.LineSetObject:
         vertices = np.array(
             [
                 [1, -1, -1],
@@ -314,7 +321,7 @@ class Viewer:
         box.set_position(pose.p)
         box.set_rotation(pose.q)
         box.set_scale(half_size)
-
+        box.line_width = line_width
         return box
 
     def update_bounding_box(self, box, pose, half_size):
@@ -326,15 +333,137 @@ class Viewer:
         # render_scene: R.Scene = self.system._internal_scene
         self.render_scene.remove_node(box)
 
-    def draw_aabb(self, lower, upper, color):
+    # AABB
+    def draw_aabb(self, lower, upper, color, line_width: float = 1.0):
         pose = sapien.Pose((lower + upper) / 2)
         half_size = (upper - lower) / 2
-        return self.add_bounding_box(pose, half_size, color)
+        return self.add_bounding_box(pose, half_size, color, line_width)
 
     def update_aabb(self, aabb, lower, upper):
         pose = sapien.Pose((lower + upper) / 2)
         half_size = (upper - lower) / 2
         self.update_bounding_box(aabb, pose, half_size)
+
+    def remove_aabb(self, aabb):
+        self.render_scene.remove_node(aabb)
+
+    # 3D Point List
+    def add_3d_point_list(self, points: np.ndarray, color: np.ndarray | None = None):
+        """
+        Add a 3D point list to the viewer.
+
+        Args:
+            points: Array of 3D points, shape [N, 3] where N is the number of points.
+            color: Optional color specification. Can be:
+                - None: defaults to white [1, 1, 1, 1]
+                - Array of shape [4] or [3]: single color for all points (RGBA or RGB)
+                - Array of shape [N, 4] or [N, 3]: per-point colors (RGBA or RGB)
+
+        Returns:
+            PointSetObject that can be used to remove or update the point set.
+        """
+        points = np.asarray(points, dtype=np.float32)
+        assert points.ndim == 2 and points.shape[1] == 3, "points must be shape [N, 3]"
+        n_points = points.shape[0]
+
+        if color is None:
+            colors = np.ones((n_points, 4), dtype=np.float32)
+        else:
+            color = np.asarray(color, dtype=np.float32)
+            if color.ndim == 1:
+                # Single color for all points
+                if color.shape[0] == 3:
+                    # RGB -> RGBA
+                    color = np.append(color, 1.0)
+                colors = np.tile(color.reshape(1, 4), (n_points, 1))
+            elif color.ndim == 2:
+                # Per-point colors
+                assert color.shape[0] == n_points, "color must have same number of points"
+                if color.shape[1] == 3:
+                    # RGB -> RGBA
+                    alpha = np.ones((n_points, 1), dtype=np.float32)
+                    colors = np.hstack([color, alpha])
+                else:
+                    assert color.shape[1] == 4, "color must be shape [N, 3] or [N, 4]"
+                    colors = color
+            else:
+                raise ValueError("color must be 1D or 2D array")
+    
+        pointset = self.renderer_context.create_point_set(points, colors)
+        pointset_obj = self.render_scene.add_point_set(pointset)
+        return pointset_obj
+
+    def remove_3d_point_list(self, pointset_obj):
+        """Remove a 3D point list from the viewer."""
+        self.render_scene.remove_node(pointset_obj)
+
+
+    # Coordinate Frame
+    def add_coordinate_frame(self, pose: sapien.Pose, length: float = 0.1, radius: float = 0.02):
+        render_scene = self.render_scene
+        renderer_context = self.renderer_context
+
+        cone = renderer_context.create_cone_mesh(16)
+        capsule = renderer_context.create_capsule_mesh(radius=radius, half_length=0.5, segments=16, half_rings=4)
+        red_cone = renderer_context.create_model([cone], [self._mat_red])
+        green_cone = renderer_context.create_model([cone], [self._mat_green])
+        blue_cone = renderer_context.create_model([cone], [self._mat_blue])
+        red_capsule = renderer_context.create_model([capsule], [self._mat_red])
+        green_capsule = renderer_context.create_model([capsule], [self._mat_green])
+        blue_capsule = renderer_context.create_model([capsule], [self._mat_blue])
+        cone_scale = [0.1, 0.075, 0.075] # [length, x-width, y-width]
+        capsule_scale = [1.0, 1.0, 1.0] # [length, x-width, y-width]
+
+        node = render_scene.add_node()
+        obj = render_scene.add_object(red_cone, node)
+        obj.set_scale(cone_scale)
+        obj.set_position([1, 0, 0])
+        obj.shading_mode = 0
+        obj.cast_shadow = False
+
+        obj = render_scene.add_object(red_capsule, node)
+        obj.set_scale(capsule_scale)
+        obj.set_position([0.52, 0, 0])
+        obj.shading_mode = 0
+        obj.cast_shadow = False
+
+        obj = render_scene.add_object(green_cone, node)
+        obj.set_scale(cone_scale)
+        obj.set_position([0, 1, 0])
+        obj.set_rotation([0.7071068, 0, 0, 0.7071068])
+        obj.shading_mode = 0
+        obj.cast_shadow = False
+
+        obj = render_scene.add_object(green_capsule, node)
+        obj.set_scale(capsule_scale)
+        obj.set_position([0, 0.51, 0])
+        obj.set_rotation([0.7071068, 0, 0, 0.7071068])
+        obj.shading_mode = 0
+        obj.cast_shadow = False
+
+        obj = render_scene.add_object(blue_cone, node)
+        obj.set_scale(cone_scale)
+        obj.set_position([0, 0, 1])
+        obj.set_rotation([0, 0.7071068, 0, 0.7071068])
+        obj.shading_mode = 0
+        obj.cast_shadow = False
+
+        obj = render_scene.add_object(blue_capsule, node)
+        obj.set_scale(capsule_scale)
+        obj.set_position([0, 0, 0.5])
+        obj.set_rotation([0, 0.7071068, 0, 0.7071068])
+        obj.shading_mode = 0
+        obj.cast_shadow = False
+
+        node.set_scale([length, length, length])
+        node.set_position(pose.p)
+        node.set_rotation(pose.q)
+        return node
+
+
+    def remove_coordinate_frame(self, node):
+        """Remove a coordinate frame from the viewer."""
+        self.render_scene.remove_node(node)
 
     @property
     def control_window(self) -> ControlWindow:
