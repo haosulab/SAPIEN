@@ -1,13 +1,13 @@
 /*
  * Copyright 2025 Hillbot Inc.
  * Copyright 2020-2024 UCSD SU Lab
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at:
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -592,11 +592,10 @@ Usage:
       "cuda_impulses", [](PhysxGpuContactBodyImpulseQuery const &q) { return q.buffer.handle(); });
 
 #else
-  PyPhysxSystemGpu
-      .def(py::init([](std::string const &device) {
-             return std::make_shared<PhysxSystemGpu>(findDevice(device));
-           }),
-           py::arg("device") = "cuda");
+  PyPhysxSystemGpu.def(py::init([](std::string const &device) {
+                         return std::make_shared<PhysxSystemGpu>(findDevice(device));
+                       }),
+                       py::arg("device") = "cuda");
 #endif
   PyPhysxMaterial
       .def(py::init<float, float, float>(), py::arg("static_friction"),
@@ -702,6 +701,9 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
   PyPhysxCollisionShapeConvexMesh
       .def(py::init<std::string const &, Vec3, std::shared_ptr<PhysxMaterial>>(),
            py::arg("filename"), py::arg("scale"), py::arg("material"))
+      .def(py::init<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &, Vec3 const &,
+                    std::shared_ptr<PhysxMaterial>>(),
+           py::arg("vertices"), py::arg("scale"), py::arg("material"))
       .def_static("load_multiple", &PhysxCollisionShapeConvexMesh::LoadMultiple,
                   py::arg("filename"), py::arg("scale"), py::arg("material"))
 
@@ -715,6 +717,11 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
   PyPhysxCollisionShapeTriangleMesh
       .def(py::init<std::string const &, Vec3, std::shared_ptr<PhysxMaterial>, bool>(),
            py::arg("filename"), py::arg("scale"), py::arg("material"), py::arg("sdf") = false)
+      .def(py::init<Eigen::Matrix<float, Eigen::Dynamic, 3, Eigen::RowMajor> const &,
+                    Eigen::Matrix<uint32_t, Eigen::Dynamic, 3, Eigen::RowMajor> const &,
+                    Vec3 const &, std::shared_ptr<PhysxMaterial>, bool>(),
+           py::arg("vertices"), py::arg("triangles"), py::arg("scale"), py::arg("material"),
+           py::arg("sdf") = false)
       .def_property_readonly("scale", &PhysxCollisionShapeTriangleMesh::getScale)
       .def("get_scale", &PhysxCollisionShapeTriangleMesh::getScale)
       .def_property_readonly("vertices", &PhysxCollisionShapeTriangleMesh::getVertices)
@@ -751,11 +758,13 @@ If after testing g2 and g3, the objects may collide, g0 and g1 come into play. g
       .def_property("max_linear_velocity", &PhysxRigidBodyComponent::getMaxLinearVelocity,
                     &PhysxRigidBodyComponent::setMaxLinearVelocity)
       .def("get_max_linear_velocity", &PhysxRigidBodyComponent::getMaxLinearVelocity)
-      .def("set_max_linear_velocity", &PhysxRigidBodyComponent::setMaxLinearVelocity, py::arg("velocity"))
+      .def("set_max_linear_velocity", &PhysxRigidBodyComponent::setMaxLinearVelocity,
+           py::arg("velocity"))
       .def_property("max_angular_velocity", &PhysxRigidBodyComponent::getMaxAngularVelocity,
                     &PhysxRigidBodyComponent::setMaxAngularVelocity)
       .def("get_max_angular_velocity", &PhysxRigidBodyComponent::getMaxAngularVelocity)
-      .def("set_max_angular_velocity", &PhysxRigidBodyComponent::setMaxAngularVelocity, py::arg("velocity"))
+      .def("set_max_angular_velocity", &PhysxRigidBodyComponent::setMaxAngularVelocity,
+           py::arg("velocity"))
 
       .def_property("max_depenetration_velocity",
                     &PhysxRigidBodyComponent::getMaxDepenetrationVelocity,
@@ -1214,8 +1223,9 @@ Example:
 
   ////////// global //////////
 
-  m.def("set_default_material", &PhysxDefault::SetDefaultMaterial, py::arg("static_friction"),
-        py::arg("dynamic_friction"), py::arg("restitution"))
+  m.def("clear_cache", MeshManager::Clear)
+      .def("set_default_material", &PhysxDefault::SetDefaultMaterial, py::arg("static_friction"),
+           py::arg("dynamic_friction"), py::arg("restitution"))
       .def("get_default_material", &PhysxDefault::GetDefaultMaterial)
       .def("_enable_gpu", &PhysxDefault::EnableGPU)
       .def("is_gpu_enabled", &PhysxDefault::GetGPUEnabled)
