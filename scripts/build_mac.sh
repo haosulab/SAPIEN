@@ -14,6 +14,8 @@ function build() {
       PY_DOT=3.12.4
   elif [ "$PY_VERSION" -eq 313 ]; then
       PY_DOT=3.13.2
+  elif [ "$PY_VERSION" -eq 314 ]; then
+      PY_DOT=3.14.2
   else
     echo "Error, python version not found!"
   fi
@@ -31,8 +33,8 @@ function build() {
   pyenv exec python setup.py bdist_wheel --build-dir=build --plat-name macosx_12_0_universal2
 }
 
-build 39
 build 310
 build 311
 build 312
 build 313
+build 314
