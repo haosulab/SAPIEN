@@ -6,3 +6,4 @@ networkx
 pyperclip
 opencv-python>=4.0
 setuptools
+importlib_resources
