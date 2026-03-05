@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import importlib.resources as resources
 from pathlib import Path
 
 import numpy as np
-import pkg_resources
 import sapien
 from sapien import internal_renderer as R
 
@@ -156,18 +156,16 @@ class RenderOptionsWindow(Plugin):
         self.shader_types = []
 
         try:
-            all_shader_dir = Path(
-                pkg_resources.resource_filename("sapien", "vulkan_shader")
-            )
-
-            for f in all_shader_dir.iterdir():
-                if f.is_dir():
-                    if any("gbuffer.frag" in x.name for x in f.iterdir()):
-                        self.shader_list.append(f)
-                        self.shader_types.append("rast")
-                    if any("camera.rgen" in x.name for x in f.iterdir()):
-                        self.shader_list.append(f)
-                        self.shader_types.append("rt")
+            all_shader_dir_ref = resources.files("sapien") / "vulkan_shader"
+            with resources.as_file(all_shader_dir_ref) as all_shader_dir:
+                for f in all_shader_dir.iterdir():
+                    if f.is_dir():
+                        if any("gbuffer.frag" in x.name for x in f.iterdir()):
+                            self.shader_list.append(f)
+                            self.shader_types.append("rast")
+                        if any("camera.rgen" in x.name for x in f.iterdir()):
+                            self.shader_list.append(f)
+                            self.shader_types.append("rt")
 
         except Exception:
             pass

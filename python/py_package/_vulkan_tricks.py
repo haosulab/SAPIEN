@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import pkg_resources
-from warnings import warn
-import platform
+import importlib.resources as resources
 import os
+import platform
+from warnings import warn
 
 
 def _ensure_libvulkan_linux():
@@ -30,8 +30,8 @@ def _ensure_libvulkan_linux():
             return
 
     # add our vulkan to LD_LIBRARY_PATH
-    vulkan_library_path = pkg_resources.resource_filename(
-        "sapien", "vulkan_library/libvulkan.so.1.3.224"
+    vulkan_library_path = str(
+        resources.files("sapien") / "vulkan_library/libvulkan.so.1.3.224"
     )
 
     warn("Failed to find system libvulkan. Fallback to SAPIEN builtin libvulkan.")
@@ -51,8 +51,8 @@ def _ensure_libvulkan_mac():
         if os.path.isfile(libPath):
             os.environ["SAPIEN_VULKAN_LIBRARY_PATH"] = libPath
             return
-    vulkan_library_path = pkg_resources.resource_filename(
-        "sapien", "vulkan_library/libvulkan.1.3.290.dylib"
+    vulkan_library_path = str(
+        resources.files("sapien") / "vulkan_library/libvulkan.1.3.290.dylib"
     )
 
     warn("Failed to find system libvulkan. Fallback to SAPIEN builtin libvulkan.")
@@ -73,8 +73,8 @@ def _ensure_vulkan_icd():
     warn(
         "Failed to find Vulkan ICD file. This is probably due to an incorrect or partial installation of the NVIDIA driver. SAPIEN will attempt to provide an ICD file anyway but it may not work."
     )
-    os.environ["VK_ICD_FILENAMES"] = pkg_resources.resource_filename(
-        "sapien", "vulkan_library/nvidia_icd.json"
+    os.environ["VK_ICD_FILENAMES"] = str(
+        resources.files("sapien") / "vulkan_library/nvidia_icd.json"
     )
 
 
@@ -96,8 +96,8 @@ def _ensure_egl_icd():
         "Failed to find glvnd ICD file. This is probably due to an incorrect or partial installation of the NVIDIA driver. SAPIEN will attempt to provide an ICD file anyway but it may not work."
     )
 
-    os.environ["__EGL_VENDOR_LIBRARY_FILENAMES"] = pkg_resources.resource_filename(
-        "sapien", "vulkan_library/10_nvidia.json"
+    os.environ["__EGL_VENDOR_LIBRARY_FILENAMES"] = str(
+        resources.files("sapien") / "vulkan_library/10_nvidia.json"
     )
 
 
