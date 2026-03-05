@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import importlib.resources as resources
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +23,10 @@ from sapien import internal_renderer as R
 
 from .plugin import Plugin
 
+if sys.version_info >= (3, 9):
+    import importlib.resources as resources
+else:
+    import importlib_resources as resources
 
 class RenderOptionsWindow(Plugin):
     def __init__(self):

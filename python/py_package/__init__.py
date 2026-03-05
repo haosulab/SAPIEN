@@ -14,9 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import importlib.resources as resources
 from warnings import warn
 import os
+import sys
 from pathlib import Path
 import platform
 from .version import __version__
@@ -46,6 +46,11 @@ from .wrapper.renderer import SapienRenderer
 from .wrapper.actor_builder import ActorBuilder
 from .wrapper.articulation_builder import ArticulationBuilder
 from .wrapper.pinocchio_model import PinocchioModel
+
+if sys.version_info >= (3, 9):
+    import importlib.resources as resources
+else:
+    import importlib_resources as resources
 
 try:
     render.set_imgui_ini_filename(str(Path.home() / ".sapien" / "imgui.ini"))

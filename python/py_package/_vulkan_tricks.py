@@ -14,10 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import importlib.resources as resources
 import os
 import platform
+import sys
 from warnings import warn
+
+if sys.version_info >= (3, 9):
+    import importlib.resources as resources
+else:
+    import importlib_resources as resources
 
 
 def _ensure_libvulkan_linux():
