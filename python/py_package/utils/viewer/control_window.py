@@ -15,15 +15,12 @@
 # limitations under the License.
 #
 import os
-from pathlib import Path
-from typing import List
 
 import numpy as np
-import pkg_resources
 import sapien
 from sapien import internal_renderer as R
-from transforms3d.quaternions import mat2quat
 from transforms3d.euler import quat2euler
+from transforms3d.quaternions import mat2quat
 
 from .camera_control import ArcRotateCameraController, FPSCameraController
 from .plugin import Plugin, copy_to_clipboard
