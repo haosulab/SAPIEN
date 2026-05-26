@@ -297,19 +297,19 @@ except ModuleNotFoundError:
         from ..pysapien_pinocchio import PinocchioModel
     else:
         warnings.warn(
-            "pinnochio package is not installed, robotics functionalities will not be available"
+            "pinocchio package is not installed, robotics functionalities will not be available"
         )
         PinocchioModel = None
 
 except ImportError:
     if platform.system() == "Linux":
         warnings.warn(
-            "pinnochio package is broken, fallback to built-in pinocchio. This may be fixed by installing pinocchio via conda instead of pip"
+            "pinocchio package is broken, fallback to built-in pinocchio. This may be fixed by installing pinocchio via conda instead of pip"
         )
         from ..pysapien_pinocchio import PinocchioModel
     else:
         warnings.warn(
-            "pinnochio package is broken, robotics functionalities will not be available"
+            "pinocchio package is broken, robotics functionalities will not be available"
         )
         PinocchioModel = None
 
