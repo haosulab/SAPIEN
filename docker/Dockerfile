@@ -2,8 +2,8 @@ FROM quay.io/pypa/manylinux_2_28_x86_64:latest
 
 RUN yum install -y libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel zip wget openssh-clients git-lfs gcc-toolset-11
 
-RUN mkdir -p /workspace && cd /workspace && wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda_11.8.0_520.61.05_linux.run  && \
-    sh cuda_11.8.0_520.61.05_linux.run --silent --toolkit --toolkitpath=/workspace/cuda --override && rm -f cuda_11.8.0_520.61.05_linux.run
+RUN mkdir -p /workspace && cd /workspace && wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda_12.8.0_570.86.10_linux.run  && \
+    sh cuda_12.8.0_570.86.10_linux.run --silent --toolkit --toolkitpath=/workspace/cuda --override && rm -f cuda_12.8.0_570.86.10_linux.run
 ENV CUDA_PATH=/workspace/cuda PATH="/workspace/cuda/bin:$PATH" LD_LIBRARY_PATH="/workspace/cuda/lib64:$LD_LIBRARY_PATH"
 
 RUN pipx install cmake==3.26.3 --force
