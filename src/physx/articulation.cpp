@@ -359,41 +359,41 @@ PhysxArticulation::getLinkIncomingJointForces() {
 }
 
 Pose PhysxArticulation::getRootPose() {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("getting root pose is not supported in GPU simulation.");
-  // }
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    logger::warn("getting root pose may yields unsynchronized CPU data in GPU simulation.");
+  }
   return PxTransformToPose(mPxArticulation->getRootGlobalPose());
 }
 Vec3 PhysxArticulation::getRootLinearVelocity() {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
-  // }
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    logger::warn("getting root linear velocity may yield unsynchronized CPU data in GPU simulation.");
+  }
   return PxVec3ToVec3(mPxArticulation->getRootLinearVelocity());
 }
 Vec3 PhysxArticulation::getRootAngularVelocity() {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("getting root velocity is not supported in GPU simulation.");
-  // }
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    logger::warn("getting root angular velocity may yield unsynchronized CPU data in GPU simulation.");
+  }
   return PxVec3ToVec3(mPxArticulation->getRootAngularVelocity());
 }
 
 void PhysxArticulation::setRootPose(Pose const &pose) {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("setting root pose is not supported in GPU simulation.");
-  // }
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting root pose is illegal in GPU simulation.");
+  }
   mPxArticulation->setRootGlobalPose(PoseToPxTransform(pose));
   syncPose();
 }
 void PhysxArticulation::setRootLinearVelocity(Vec3 const &v) {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("setting root velocity is not supported in GPU simulation.");
-  // }
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting root linear velocity is illegal in GPU simulation.");
+  }
   mPxArticulation->setRootLinearVelocity(Vec3ToPxVec3(v));
 }
 void PhysxArticulation::setRootAngularVelocity(Vec3 const &v) {
-  // if (getRoot()->isUsingDirectGPUAPI()) {
-  //   throw std::runtime_error("setting root angular is not supported in GPU simulation.");
-  // }
+  if (getRoot()->isUsingDirectGPUAPI()) {
+    throw std::runtime_error("setting root angular velocity is illegal in GPU simulation.");
+  }
   mPxArticulation->setRootAngularVelocity(Vec3ToPxVec3(v));
 }
 
