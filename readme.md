@@ -5,6 +5,9 @@ interaction tasks that require detailed part-level understanding. SAPIEN is a
 collaborative effort between researchers at UCSD, Stanford and SFU. The dataset
 is a continuation of ShapeNet and PartNet.
 
+> [!NOTE]
+> The primary way to access PartNet-Mobility is now via [Huggingface](https://huggingface.co/datasets/sapien-sim/PartNetMobility).
+
 ## Getting Started
 SAPIEN is distributed via [PyPI](https://pypi.org/project/sapien/). Installation is just
 
