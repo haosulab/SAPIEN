@@ -13,8 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      packages: read  # pull the private ghcr.io/haosulab/sapien-build-env image
     container:
       image: ghcr.io/haosulab/sapien-build-env:1.0
+      credentials:
+        # same-repo GITHUB_TOKEN: the image workflow's push links the
+        # private package to this repository
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
         # setup.py enables SAPIEN_CUDA iff CUDA_PATH is set (the image
@@ -44,8 +50,12 @@ jobs:
     runs-on: ubuntu-22.04-arm
     permissions:
       contents: write
+      packages: read  # pull the private ghcr.io/haosulab/sapien-build-env image
     container:
       image: ghcr.io/haosulab/sapien-build-env:1.0-aarch64
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
