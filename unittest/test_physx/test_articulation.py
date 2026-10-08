@@ -1,4 +1,5 @@
 import os
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -71,6 +72,56 @@ class TestArticulation(unittest.TestCase):
         q = [0.1, 0.1, 0.1, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.4, 0.5]
         robot.set_qf(q)
         self.assertTrue(np.allclose(robot.get_qf(), q))
+
+    def test_urdf_mimic_sibling_multiplier_offset(self):
+        inertial = (
+            '<inertial><mass value="0.1"/><origin xyz="0 0 0"/>'
+            '<inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>'
+            "</inertial>"
+        )
+        limit = '<limit lower="-10" upper="10" effort="100" velocity="100"/>'
+        urdf = f"""<robot name="mimic_sibling">
+  <link name="base">{inertial}</link>
+  <link name="source_link">{inertial}</link>
+  <link name="follower_link">{inertial}</link>
+  <joint name="source" type="revolute">
+    <parent link="base"/><child link="source_link"/>
+    <axis xyz="0 0 1"/>{limit}
+  </joint>
+  <joint name="follower" type="revolute">
+    <parent link="base"/><child link="follower_link"/>
+    <axis xyz="0 0 1"/>{limit}
+    <mimic joint="source" multiplier="2.0" offset="0.1"/>
+  </joint>
+</robot>"""
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "mimic_sibling.urdf"
+            path.write_text(urdf)
+
+            scene = sapien.Scene()
+            scene.set_timestep(1 / 240)
+            loader = scene.create_urdf_loader()
+            loader.fix_root_link = True
+            robot = loader.load(str(path))
+
+            joints = {j.get_name(): j for j in robot.get_active_joints()}
+            joints["source"].set_drive_property(
+                stiffness=5000, damping=500, force_limit=100000
+            )
+            joints["source"].set_drive_target(0.4)
+            joints["follower"].set_drive_property(stiffness=0, damping=0, force_limit=0)
+            for _ in range(720):
+                scene.step()
+
+            qpos = {
+                j.get_name(): robot.get_qpos()[i]
+                for i, j in enumerate(robot.get_active_joints())
+            }
+            self.assertAlmostEqual(
+                qpos["follower"],
+                2.0 * qpos["source"] + 0.1,
+                delta=1e-3,
+            )
 
     def test_kinematics_dynamics(self):
         scene = sapien.Scene()

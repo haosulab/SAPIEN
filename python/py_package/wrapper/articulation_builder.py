@@ -182,8 +182,8 @@ class ArticulationBuilder:
                     root = joint.parent_link
                     articulation.create_fixed_tendon(
                         [root, joint.child_link, mimic_joint.child_link],
-                        [0, -multiplier, 1],
-                        [0, -1 / multiplier, 1],
+                        [0, 1, -multiplier],
+                        [0, 1, -1 / multiplier],
                         rest_length=offset,
                         stiffness=1e5,
                     )
