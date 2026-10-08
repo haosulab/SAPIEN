@@ -97,6 +97,8 @@ public:
                          float limitStiffness);
 
   int getGpuIndex() const;
+  /** SAPIEN articulation buffer row, valid after gpu_init. */
+  int getGpuDataIndex() const;
 
   ~PhysxArticulation();
 

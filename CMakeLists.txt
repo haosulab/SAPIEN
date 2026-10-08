@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
-if (APPLE)
+
+option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, denoiser, and simsense" ON)
+
+if (APPLE OR NOT SAPIEN_CUDA)
     project(sapien LANGUAGES C CXX)
 else()
     project(sapien LANGUAGES C CXX CUDA)
@@ -30,7 +33,6 @@ set(CMAKE_DEBUG_POSTFIX "")
 option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 option(SAPIEN_PROFILE "Build SAPIEN with profiler" ON)
 option(SAPIEN_DEBUG_VIEWER "Build debug viewer for debugging renderer in C++" OFF)
-option(SAPIEN_CUDA "Enable SAPIEN CUDA functionalities, including dlpack, CUDA buffer, denoiser, and simsense" ON)
 
 option(SAPIEN_BUILD_PYTHON "Build Python binding, only intended to generate compile_commands.json for IDE" OFF)
 option(SAPIEN_BUILD_TEST "build unit tests")

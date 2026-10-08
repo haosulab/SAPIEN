@@ -130,7 +130,7 @@ public:
     }
   }
 
-  void internalSetGpuPoseIndex(int index) { mGpuPoseIndex = index; }
+  void internalSetGpuIndex(int index) { mGpuPoseIndex = index; }
 
   // index in all pose array
   int getGpuPoseIndex() const { return mGpuPoseIndex; }

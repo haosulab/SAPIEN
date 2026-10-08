@@ -35,6 +35,8 @@ struct CudaArrayHandle {
 
   bool isContiguous() const;
   DLManagedTensor *toDLPack() const;
+  CudaArrayHandle view(std::vector<int>) const;
+  CudaArrayHandle slice(int start, int end) const;
 
   void checkCongiguous() const;
   void checkShape(std::vector<int> const &expected) const;

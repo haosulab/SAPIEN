@@ -180,22 +180,19 @@ public:
   void gpuSetCudaStream(uintptr_t stream);
 
   /** handle to the pose-vel buffer for rigid dynamic bodies and links */
-  CudaArrayHandle gpuGetRigidBodyCudaHandle() const { return mCudaRigidBodyBuffer.handle(); }
-  CudaArrayHandle gpuGetRigidDynamicCudaHandle() const { return mCudaRigidDynamicHandle; }
-  CudaArrayHandle gpuGetArticulationLinkCudaHandle() const { return mCudaLinkHandle; }
+  CudaArrayHandle gpuGetRigidBodyCudaHandle() const { return mCudaBodyDataBuffer.handle(); }
+  CudaArrayHandle gpuGetRigidDynamicCudaHandle() const { return mCudaRigidDynamicDataHandle; }
+  CudaArrayHandle gpuGetArticulationLinkCudaHandle() const { return mCudaLinkDataHandle; }
 
-  CudaArrayHandle gpuGetRigidBodyForceCudaHandle() const {
-    return mCudaRigidBodyForceBuffer.handle();
-  }
-  CudaArrayHandle gpuGetRigidDynamicForceCudaHandle() const {
-    return mCudaRigidDynamicForceHandle;
-  }
-  CudaArrayHandle gpuGetRigidBodyTorqueCudaHandle() const {
-    return mCudaRigidBodyTorqueBuffer.handle();
-  }
+  CudaArrayHandle gpuGetRigidBodyForceCudaHandle() const { return mCudaBodyForceBuffer.handle(); }
+  CudaArrayHandle gpuGetRigidDynamicForceCudaHandle() const { return mCudaRigidDynamicForceHandle; }
+  CudaArrayHandle gpuGetArticulationLinkForceCudaHandle() const { return mCudaLinkForceHandle; }
+
+  CudaArrayHandle gpuGetRigidBodyTorqueCudaHandle() const { return mCudaBodyTorqueBuffer.handle(); }
   CudaArrayHandle gpuGetRigidDynamicTorqueCudaHandle() const {
     return mCudaRigidDynamicTorqueHandle;
   }
+  CudaArrayHandle gpuGetArticulationLinkTorqueCudaHandle() const { return mCudaLinkTorqueHandle; }
 
   CudaArrayHandle gpuGetArticulationQposCudaHandle() const { return mCudaQposHandle; }
   CudaArrayHandle gpuGetArticulationQvelCudaHandle() const { return mCudaQvelHandle; }
@@ -210,8 +207,7 @@ public:
   }
 
   void gpuFetchRigidDynamicData();
-  void gpuFetchArticulationLinkPose();
-  void gpuFetchArticulationLinkVel();
+  void gpuFetchArticulationLinkData();
   void gpuFetchArticulationQpos();
   void gpuFetchArticulationQvel();
   void gpuFetchArticulationQacc();
@@ -219,27 +215,21 @@ public:
   void gpuFetchArticulationQTargetVel();
   void gpuFetchArticulationLinkIncomingJointForce();
 
-  void gpuApplyRigidDynamicData(CudaArrayHandle const &indices);
-  void gpuApplyArticulationRootPose(CudaArrayHandle const &indices);
-  void gpuApplyArticulationRootVel(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQpos(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQvel(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQf(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQTargetPos(CudaArrayHandle const &indices);
-  void gpuApplyArticulationQTargetVel(CudaArrayHandle const &indices);
+  void gpuUpdateArticulationKinematics();
 
   void gpuApplyRigidDynamicData();
+  void gpuApplyArticulationRootData();
+
   void gpuApplyRigidDynamicForce();
   void gpuApplyRigidDynamicTorque();
-  void gpuApplyArticulationRootPose();
-  void gpuApplyArticulationRootVel();
+  void gpuApplyLinkForce();
+  void gpuApplyLinkTorque();
+
   void gpuApplyArticulationQpos();
   void gpuApplyArticulationQvel();
   void gpuApplyArticulationQf();
   void gpuApplyArticulationQTargetPos();
   void gpuApplyArticulationQTargetVel();
-
-  void gpuUpdateArticulationKinematics();
 
   std::shared_ptr<PhysxGpuContactPairImpulseQuery> gpuCreateContactPairImpulseQuery(
       std::vector<std::pair<std::shared_ptr<PhysxRigidBaseComponent>,
@@ -265,6 +255,7 @@ public:
 private:
   std::shared_ptr<Device> mDevice;
   void ensureCudaDevice();
+  void checkGpuIdle() const;
 
   std::map<std::weak_ptr<Scene>, Vec3, std::owner_less<>> mSceneOffset;
 
@@ -275,25 +266,15 @@ private:
   uint64_t mTotalSteps{};
 
   bool mGpuInitialized{false};
-
-  // cache values updated in gpuInit
-  int mGpuArticulationCount{-1};
-  int mGpuArticulationMaxDof{-1};
-  int mGpuArticulationMaxLinkCount{-1};
+  bool mStepInProgress{false};
 
   CudaEvent mCudaEventRecord;
   CudaEvent mCudaEventWait;
   cudaStream_t mCudaStream{0};
 
-  CudaArray mCudaRigidDynamicScratch;
-  CudaArray mCudaLinkPoseScratch;
-  CudaArray mCudaLinkVelScratch;
-  CudaArray mCudaRigidDynamicIndexScratch;
-  CudaArray mCudaArticulationIndexScratch;
-
   void allocateCudaBuffers();
 
-  // indx buffer for all rigid dynamic bodies
+  // internal
   CudaArray mCudaRigidDynamicIndexBuffer;
   CudaArray mCudaRigidDynamicOffsetBuffer;
 
@@ -301,18 +282,42 @@ private:
   CudaArray mCudaArticulationIndexBuffer;
   CudaArray mCudaArticulationOffsetBuffer;
 
-  CudaArray mCudaRigidBodyBuffer;
-  CudaArrayHandle mCudaRigidDynamicHandle;
-  CudaArrayHandle mCudaLinkHandle;
+  // internal
+  CudaArray mCudaBodyPoseBuffer;
+  CudaArrayHandle mCudaRigidDynamicPoseHandle;
+  CudaArrayHandle mCudaLinkPoseHandle;
 
-  CudaArray mCudaRigidBodyForceBuffer;
+  // internal
+  CudaArray mCudaBodyLinearVelocityBuffer;
+  CudaArrayHandle mCudaRigidDynamicLinearVelocityHandle;
+  CudaArrayHandle mCudaLinkLinearVelocityHandle;
+
+  // internal
+  CudaArray mCudaBodyAngularVelocityBuffer;
+  CudaArrayHandle mCudaRigidDynamicAngularVelocityHandle;
+  CudaArrayHandle mCudaLinkAngularVelocityHandle;
+
+  // internal
+  CudaArray mCudaRootPoseBuffer;
+  CudaArray mCudaRootLinearVelocityBuffer;
+  CudaArray mCudaRootAngularVelocityBuffer;
+
+  // external
+  CudaArray mCudaBodyDataBuffer;
+  CudaArrayHandle mCudaRigidDynamicDataHandle;
+  CudaArrayHandle mCudaLinkDataHandle;
+
+  // external
+  CudaArray mCudaBodyForceBuffer;
   CudaArrayHandle mCudaRigidDynamicForceHandle;
+  CudaArrayHandle mCudaLinkForceHandle;
 
-  CudaArray mCudaRigidBodyTorqueBuffer;
+  // external
+  CudaArray mCudaBodyTorqueBuffer;
   CudaArrayHandle mCudaRigidDynamicTorqueHandle;
+  CudaArrayHandle mCudaLinkTorqueHandle;
 
-  CudaHostArray mCudaHostRigidBodyBuffer;
-
+  // internal & external
   CudaArray mCudaArticulationBuffer;
   CudaArrayHandle mCudaQposHandle;
   CudaArrayHandle mCudaQvelHandle;
@@ -321,11 +326,25 @@ private:
   CudaArrayHandle mCudaQTargetPosHandle;
   CudaArrayHandle mCudaQTargetVelHandle;
 
+  // internal & external
   CudaArray mCudaArticulationLinkIncomingJointForceBuffer;
+
+  CudaHostArray mCudaHostBodyBuffer;
 
   CudaArray mCudaContactBuffer;
   CudaArray mCudaContactCount;
 
+  /**
+   * Indicates some perperties are applied but step has not been called.
+   *
+   * This is used to detect the common user error where they assume contacts can
+   * update without stepping */
+  bool mApplyPositionWithoutStep{false};
+
+  /**
+   * Indicates the contact buffer is holding up-to-date contact data
+   * set to true after copyContactData
+   * set to false after step */
   bool mContactUpToDate{false};
   int mContactCount{0}; // current contact count, valid only when contactUpdaToDate is true
   void copyContactData();

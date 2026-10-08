@@ -182,7 +182,15 @@ PhysxDriveComponent::getZPyramidLimit() const {
 }
 
 void PhysxDriveComponent::setDrive(PxD6Drive::Enum drive, float stiffness, float damping,
-                                   float forceLimit, DriveMode mode) {
+                                    float forceLimit, DriveMode mode) {
+  // PhysX 5.11 requires an explicit angular drive configuration before
+  // setting twist/swing/slerp drives.
+  if (drive == PxD6Drive::eSLERP) {
+    mJoint->setAngularDriveConfig(PxD6AngularDriveConfig::eSLERP);
+  } else if (drive == PxD6Drive::eTWIST || drive == PxD6Drive::eSWING1 ||
+             drive == PxD6Drive::eSWING2) {
+    mJoint->setAngularDriveConfig(PxD6AngularDriveConfig::eSWING_TWIST);
+  }
   mJoint->setDrive(drive, {stiffness, damping, forceLimit, mode == DriveMode::eACCELERATION});
 }
 void PhysxDriveComponent::setXDriveProperties(float stiffness, float damping, float forceLimit,
@@ -202,8 +210,11 @@ void PhysxDriveComponent::setXTwistDriveProperties(float stiffness, float dampin
   setDrive(PxD6Drive::eTWIST, stiffness, damping, forceLimit, mode);
 }
 void PhysxDriveComponent::setYZSwingDriveProperties(float stiffness, float damping,
-                                                    float forceLimit, DriveMode mode) {
-  setDrive(PxD6Drive::eSWING, stiffness, damping, forceLimit, mode);
+                                                     float forceLimit, DriveMode mode) {
+  // PhysX 5.11 split the swing drive into per-axis eSWING1/eSWING2 drives;
+  // the old eSWING drive applied the same parameters to both swing axes.
+  setDrive(PxD6Drive::eSWING1, stiffness, damping, forceLimit, mode);
+  setDrive(PxD6Drive::eSWING2, stiffness, damping, forceLimit, mode);
 }
 void PhysxDriveComponent::setSlerpDriveProperties(float stiffness, float damping, float forceLimit,
                                                   DriveMode mode) {
@@ -240,7 +251,7 @@ PhysxDriveComponent::getXTwistDriveProperties() const {
 }
 std::tuple<float, float, float, PhysxDriveComponent::DriveMode>
 PhysxDriveComponent::getYZSwingDriveProperties() const {
-  auto d = mJoint->getDrive(PxD6Drive::eSWING);
+  auto d = mJoint->getDrive(PxD6Drive::eSWING1);
   return {d.stiffness, d.damping, d.forceLimit,
           d.flags.isSet(PxD6JointDriveFlag::eACCELERATION) ? DriveMode::eACCELERATION
                                                            : DriveMode::eFORCE};

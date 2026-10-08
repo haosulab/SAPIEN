@@ -31,7 +31,7 @@ static PhysxBodyConfig gBodyConfig{};
 static PhysxShapeConfig gShapeConfig{};
 static PhysxSDFShapeConfig gSDFConfig{};
 
-static ::physx::PxgDynamicsMemoryConfig gGpuMemoryConfig{};
+static ::physx::PxGpuDynamicsMemoryConfig gGpuMemoryConfig{};
 
 void PhysxDefault::SetDefaultMaterial(float staticFriction, float dynamicFriction,
                                       float restitution) {
@@ -67,7 +67,7 @@ void PhysxDefault::setGpuMemoryConfig(uint32_t tempBufferCapacity, uint32_t maxR
   gGpuMemoryConfig.collisionStackSize = collisionStackSize;
 }
 
-::physx::PxgDynamicsMemoryConfig const &PhysxDefault::getGpuMemoryConfig() {
+::physx::PxGpuDynamicsMemoryConfig const &PhysxDefault::getGpuMemoryConfig() {
   return gGpuMemoryConfig;
 }
 

@@ -21,125 +21,91 @@
 namespace sapien {
 namespace physx {
 
-__global__ void body_data_physx_to_sapien_kernel(SapienBodyData *__restrict__ sapien_data,
-                                                 PhysxBodyData *__restrict__ physx_data,
-                                                 Vec3 *__restrict__ offset, int count) {
+__global__ void body_data_physx_to_sapien_kernel(SapienBodyData *__restrict__ s_data,
+                                                 PhysxPose *__restrict__ p_pose, Vec3 *__restrict__ v,
+                                                 Vec3 *__restrict__ w, Vec3 *__restrict__ offset,
+                                                 int count) {
   int g = blockIdx.x * blockDim.x + threadIdx.x;
   if (g >= count) {
     return;
   }
 
-  sapien_data[g] = {
-      physx_data[g].pose.p - offset[g],
-      Quat(physx_data[g].pose.q.w, physx_data[g].pose.q.x, physx_data[g].pose.q.y,
-           physx_data[g].pose.q.z),
-      physx_data[g].v,
-      physx_data[g].w,
+  s_data[g] = {
+      p_pose[g].p - offset[g],
+      Quat(p_pose[g].q.w, p_pose[g].q.x, p_pose[g].q.y, p_pose[g].q.z),
+      v[g],
+      w[g],
   };
 }
 
-__global__ void body_data_sapien_to_physx_kernel(PhysxBodyData *__restrict__ physx_data,
-                                                 SapienBodyData *__restrict__ sapien_data,
-                                                 Vec3 *__restrict__ offset, int count) {
-  int g = blockIdx.x * blockDim.x + threadIdx.x;
-  if (g >= count) {
-    return;
-  }
-
-  SapienBodyData sd = sapien_data[g];
-
-  PhysxBodyData pd;
-  pd.pose.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w};
-  pd.pose.p = sd.p + offset[g];
-  pd.v = sd.v;
-  pd.w = sd.w;
-
-  physx_data[g] = pd;
-}
-
-__global__ void body_data_sapien_to_physx_kernel(PhysxBodyData *__restrict__ physx_data,
-                                                 int4 *__restrict__ physx_index,
-                                                 SapienBodyData *__restrict__ sapien_data,
-                                                 int4 *__restrict__ sapien_index,
-                                                 int *__restrict__ apply_index,
-                                                 Vec3 *__restrict__ offset, int count) {
-  int g = blockIdx.x * blockDim.x + threadIdx.x;
-  if (g >= count) {
-    return;
-  }
-
-  int i = apply_index[g];
-
-  SapienBodyData sd = sapien_data[i];
-
-  PhysxBodyData pd;
-  pd.pose.q = {sd.q.x, sd.q.y, sd.q.z, sd.q.w};
-  pd.pose.p = sd.p + offset[i];
-  pd.v = sd.v;
-  pd.w = sd.w;
-
-  physx_data[g] = pd;
-  physx_index[g] = sapien_index[i];
-}
-
-__global__ void link_pose_physx_to_sapien_kernel(SapienBodyData *__restrict__ sapien_data,
-                                                 PhysxPose *__restrict__ physx_pose,
-                                                 Vec3 *__restrict__ offset, int link_count,
+__global__ void body_data_sapien_to_physx_kernel(SapienBodyData *__restrict__ s_data,
+                                                 PhysxPose *__restrict__ p_pose, Vec3 *__restrict__ v,
+                                                 Vec3 *__restrict__ w, Vec3 *__restrict__ offset,
                                                  int count) {
   int g = blockIdx.x * blockDim.x + threadIdx.x;
   if (g >= count) {
     return;
   }
 
-  int ai = g / link_count;
-
-  sapien_data[g].p = physx_pose[g].p - offset[ai];
-  sapien_data[g].q =
-      Quat(physx_pose[g].q.w, physx_pose[g].q.x, physx_pose[g].q.y, physx_pose[g].q.z);
+  p_pose[g].p = s_data[g].p + offset[g];
+  p_pose[g].q = {s_data[g].q.x, s_data[g].q.y, s_data[g].q.z, s_data[g].q.w};
+  v[g] = s_data[g].v;
+  w[g] = s_data[g].w;
 }
 
-__global__ void root_pose_sapien_to_physx_kernel(PhysxPose *__restrict__ physx_pose,
-                                                 SapienBodyData *__restrict__ sapien_data,
-                                                 int *__restrict__ index,
-                                                 Vec3 *__restrict__ offset, int link_count,
-                                                 int count) {
+__global__ void link_data_physx_to_sapien_kernel(SapienBodyData *__restrict__ s_data,
+                                                 PhysxPose *__restrict__ p_pose, Vec3 *__restrict__ v,
+                                                 Vec3 *__restrict__ w, Vec3 *__restrict__ offset,
+                                                 int max_links, int count) {
   int g = blockIdx.x * blockDim.x + threadIdx.x;
   if (g >= count) {
     return;
   }
 
-  int ai = index[g]; // ith articulation
+  int ai = g / max_links;
 
-  SapienBodyData sd = sapien_data[ai * link_count];
-
-  physx_pose[ai] = {{sd.q.x, sd.q.y, sd.q.z, sd.q.w}, sd.p + offset[ai]};
+  s_data[g].p = p_pose[g].p - offset[ai];
+  s_data[g].q = Quat(p_pose[g].q.w, p_pose[g].q.x, p_pose[g].q.y, p_pose[g].q.z);
+  s_data[g].v = v[g];
+  s_data[g].w = w[g];
 }
 
-__global__ void link_vel_physx_to_sapien_kernel(SapienBodyData *__restrict__ sapien_data,
-                                                PhysxVelocity *__restrict__ physx_vel, int count) {
+__global__ void root_data_sapien_to_physx_kernel(SapienBodyData *__restrict__ s_data,
+                                                 PhysxPose *__restrict__ p_pose, Vec3 *__restrict__ v,
+                                                 Vec3 *__restrict__ w, Vec3 *__restrict__ offset,
+                                                 int max_links, int count) {
   int g = blockIdx.x * blockDim.x + threadIdx.x;
   if (g >= count) {
     return;
   }
 
-  sapien_data[g].v = physx_vel[g].v;
-  sapien_data[g].w = physx_vel[g].w;
+  SapienBodyData sd = s_data[g * max_links];
+
+  p_pose[g] = {{sd.q.x, sd.q.y, sd.q.z, sd.q.w}, sd.p + offset[g]};
+  v[g] = sd.v;
+  w[g] = sd.w;
 }
 
-__global__ void root_vel_sapien_to_physx_kernel(PhysxVelocity *__restrict__ physx_vel,
-                                                SapienBodyData *__restrict__ sapien_data,
-                                                int *__restrict__ index, int link_count,
-                                                int count) {
+__global__ void body_wrench_physx_to_sapien_kernel(SapienWrench *__restrict__ s_wrench,
+                                                    Vec3 *__restrict__ f, Vec3 *__restrict__ t,
+                                                    int count) {
   int g = blockIdx.x * blockDim.x + threadIdx.x;
   if (g >= count) {
     return;
   }
+  s_wrench[g].f = f[g];
+  s_wrench[g].t = t[g];
+}
 
-  int ai = index[g];
-  SapienBodyData sd = sapien_data[ai * link_count];
-
-  physx_vel[ai].v = sd.v;
-  physx_vel[ai].w = sd.w;
+__global__ void body_wrench_sapien_to_physx_kernel(SapienWrench *__restrict__ s_wrench,
+                                                   Vec3 *__restrict__ f, Vec3 *__restrict__ t,
+                                                   int count) {
+  int g = blockIdx.x * blockDim.x + threadIdx.x;
+  if (g >= count) {
+    return;
+  }
+  f[g] = s_wrench[g].f;
+  t[g] = s_wrench[g].t;
 }
 
 __device__ int binary_search(ActorPairQuery const *__restrict__ arr, int count, ActorPair x) {
@@ -261,59 +227,44 @@ __global__ void handle_net_contact_force_kernel(::physx::PxGpuContactPair *__res
 
 constexpr int BLOCK_SIZE = 128;
 
-void body_data_physx_to_sapien(void *sapien_data, void *physx_data, void *offset, int count,
-                               cudaStream_t stream) {
-  body_data_physx_to_sapien_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
-                                     stream>>>((SapienBodyData *)sapien_data,
-                                               (PhysxBodyData *)physx_data, (Vec3 *)offset, count);
+void body_data_physx_to_sapien(SapienBodyData *s_data, PhysxPose *p_pose, Vec3 *v, Vec3 *w,
+                               Vec3 *offset, int count, CUstream_st *stream) {
+  body_data_physx_to_sapien_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0, stream>>>(
+      s_data, p_pose, v, w, offset, count);
 }
-
-void body_data_sapien_to_physx(void *physx_data, void *sapien_data, void *offset, int count,
-                               cudaStream_t stream) {
+void body_data_sapien_to_physx(SapienBodyData *s_data, PhysxPose *p_pose, Vec3 *v, Vec3 *w,
+                               Vec3 *offset, int count, CUstream_st *stream) {
   body_data_sapien_to_physx_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
-                                     stream>>>(
-      (PhysxBodyData *)physx_data, (SapienBodyData *)sapien_data, (Vec3 *)offset, count);
+                                     stream>>>(s_data, p_pose, v, w, offset, count);
 }
 
-void body_data_sapien_to_physx(void *physx_data, void *physx_index, void *sapien_data,
-                               void *sapien_index, void *apply_index, void *offset, int count,
-                               cudaStream_t stream) {
-  body_data_sapien_to_physx_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
-                                     stream>>>((PhysxBodyData *)physx_data, (int4 *)physx_index,
-                                               (SapienBodyData *)sapien_data, (int4 *)sapien_index,
-                                               (int *)apply_index, (Vec3 *)offset, count);
+void link_data_physx_to_sapien(SapienBodyData *s_data, PhysxPose *p_pose, Vec3 *v, Vec3 *w,
+                               Vec3 *offset, int max_links, int count, CUstream_st *stream) {
+  link_data_physx_to_sapien_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
+                                     stream>>>(s_data, p_pose, v, w, offset, max_links, count);
+}
+void root_data_sapien_to_physx(SapienBodyData *s_data, PhysxPose *p_pose, Vec3 *v, Vec3 *w,
+                               Vec3 *offset, int max_links, int count, CUstream_st *stream) {
+  root_data_sapien_to_physx_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
+                                     stream>>>(s_data, p_pose, v, w, offset, max_links, count);
 }
 
-void link_pose_physx_to_sapien(void *sapien_data, void *physx_pose, void *offset, int link_count,
-                               int count, cudaStream_t stream) {
-  link_pose_physx_to_sapien_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
-                                     stream>>>(
-      (SapienBodyData *)sapien_data, (PhysxPose *)physx_pose, (Vec3 *)offset, link_count, count);
+void body_wrench_physx_to_sapien(SapienWrench *s_wrench, Vec3 *f, Vec3 *t, int count,
+                                 CUstream_st *stream) {
+  body_wrench_physx_to_sapien_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
+                                        stream>>>(s_wrench, f, t, count);
 }
-
-void root_pose_sapien_to_physx(void *physx_pose, void *sapien_data, void *index, void *offset,
-                               int link_count, int count, cudaStream_t stream) {
-  root_pose_sapien_to_physx_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
-                                     stream>>>((PhysxPose *)physx_pose,
-                                               (SapienBodyData *)sapien_data, (int *)index,
-                                               (Vec3 *)offset, link_count, count);
-}
-
-void link_vel_physx_to_sapien(void *sapien_data, void *physx_vel, int count, cudaStream_t stream) {
-  link_vel_physx_to_sapien_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
-                                    stream>>>((SapienBodyData *)sapien_data,
-                                              (PhysxVelocity *)physx_vel, count);
-}
-
-void root_vel_sapien_to_physx(void *physx_vel, void *sapien_data, void *index, int link_count,
-                              int count, cudaStream_t stream) {
-  root_vel_sapien_to_physx_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
-                                    stream>>>(
-      (PhysxVelocity *)physx_vel, (SapienBodyData *)sapien_data, (int *)index, link_count, count);
+void body_wrench_sapien_to_physx(SapienWrench *s_wrench, Vec3 *f, Vec3 *t, int count,
+                                 CUstream_st *stream) {
+  body_wrench_sapien_to_physx_kernel<<<(count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
+                                        stream>>>(s_wrench, f, t, count);
 }
 
 void handle_contacts(::physx::PxGpuContactPair *contacts, int contact_count, ActorPairQuery *query,
                      int query_count, Vec3 *out_forces, cudaStream_t stream) {
+  if (contact_count == 0) {
+    return;
+  }
   handle_contacts_kernel<<<(contact_count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0, stream>>>(
       contacts, contact_count, query, query_count, out_forces);
 }
@@ -321,9 +272,12 @@ void handle_contacts(::physx::PxGpuContactPair *contacts, int contact_count, Act
 void handle_net_contact_force(::physx::PxGpuContactPair *contacts, int contact_count,
                               ActorQuery *query, int query_count, Vec3 *out_forces,
                               cudaStream_t stream) {
+  if (contact_count == 0) {
+    return;
+  }
   handle_net_contact_force_kernel<<<(contact_count + BLOCK_SIZE - 1) / BLOCK_SIZE, BLOCK_SIZE, 0,
                                     stream>>>(contacts, contact_count, query, query_count,
-                                              out_forces);
+                                             out_forces);
 }
 
 } // namespace physx

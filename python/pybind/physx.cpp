@@ -91,12 +91,6 @@ template <> struct type_caster<::physx::PxArticulationDriveType::Enum> {
     } else if (name == "acceleration" || name == "acc") {
       value = ::physx::PxArticulationDriveType::eACCELERATION;
       return true;
-    } else if (name == "target") {
-      value = ::physx::PxArticulationDriveType::eTARGET;
-      return true;
-    } else if (name == "velocity") {
-      value = ::physx::PxArticulationDriveType::eVELOCITY;
-      return true;
     } else if (name == "none") {
       value = ::physx::PxArticulationDriveType::eNONE;
       return true;
@@ -111,10 +105,6 @@ template <> struct type_caster<::physx::PxArticulationDriveType::Enum> {
       return py::str("force").release();
     case ::physx::PxArticulationDriveType::eACCELERATION:
       return py::str("acceleration").release();
-    case ::physx::PxArticulationDriveType::eTARGET:
-      return py::str("target").release();
-    case ::physx::PxArticulationDriveType::eVELOCITY:
-      return py::str("velocity").release();
     case ::physx::PxArticulationDriveType::eNONE:
       return py::str("none").release();
     }
@@ -475,10 +465,15 @@ Args:
                              &PhysxSystemGpu::gpuGetRigidBodyForceCudaHandle)
       .def_property_readonly("cuda_rigid_dynamic_force",
                              &PhysxSystemGpu::gpuGetRigidDynamicForceCudaHandle)
+      .def_property_readonly("cuda_articulation_link_force",
+                             &PhysxSystemGpu::gpuGetArticulationLinkForceCudaHandle)
+
       .def_property_readonly("cuda_rigid_body_torque",
                              &PhysxSystemGpu::gpuGetRigidBodyTorqueCudaHandle)
       .def_property_readonly("cuda_rigid_dynamic_torque",
                              &PhysxSystemGpu::gpuGetRigidDynamicTorqueCudaHandle)
+      .def_property_readonly("cuda_articulation_link_torque",
+                             &PhysxSystemGpu::gpuGetArticulationLinkTorqueCudaHandle)
 
       .def_property_readonly("cuda_articulation_qpos",
                              &PhysxSystemGpu::gpuGetArticulationQposCudaHandle)
@@ -496,8 +491,23 @@ Args:
                              &PhysxSystemGpu::gpuGetArticulationLinkIncomingJointForceHandle)
 
       .def("gpu_fetch_rigid_dynamic_data", &PhysxSystemGpu::gpuFetchRigidDynamicData)
-      .def("gpu_fetch_articulation_link_pose", &PhysxSystemGpu::gpuFetchArticulationLinkPose)
-      .def("gpu_fetch_articulation_link_velocity", &PhysxSystemGpu::gpuFetchArticulationLinkVel)
+      .def("gpu_fetch_articulation_link_data", &PhysxSystemGpu::gpuFetchArticulationLinkData)
+      .def("gpu_fetch_articulation_link_pose",
+           [](PhysxSystemGpu &p) {
+             PyErr_WarnEx(PyExc_DeprecationWarning,
+                          "gpu_fetch_articulation_link_pose is deprecated and it fetches both "
+                          "pose and velocity. Use gpu_fetch_articulation_link_data instead.",
+                          1);
+             return p.gpuFetchArticulationLinkData();
+           })
+      .def("gpu_fetch_articulation_link_velocity",
+           [](PhysxSystemGpu &p) {
+             PyErr_WarnEx(PyExc_DeprecationWarning,
+                          "gpu_fetch_articulation_link_velocity is deprecated and it fetches both "
+                          "pose and velocity. Use gpu_fetch_articulation_link_data instead.",
+                          1);
+             return p.gpuFetchArticulationLinkData();
+           })
       .def("gpu_fetch_articulation_qpos", &PhysxSystemGpu::gpuFetchArticulationQpos)
       .def("gpu_fetch_articulation_qvel", &PhysxSystemGpu::gpuFetchArticulationQvel)
       .def("gpu_fetch_articulation_qacc", &PhysxSystemGpu::gpuFetchArticulationQacc)
@@ -526,7 +536,6 @@ Usage:
 
       .def("gpu_update_articulation_kinematics", &PhysxSystemGpu::gpuUpdateArticulationKinematics)
 
-      // TODO apply force torque
       .def("gpu_apply_rigid_dynamic_data",
            py::overload_cast<>(&PhysxSystemGpu::gpuApplyRigidDynamicData))
       .def("gpu_apply_rigid_dynamic_force",
@@ -534,10 +543,23 @@ Usage:
       .def("gpu_apply_rigid_dynamic_torque",
            py::overload_cast<>(&PhysxSystemGpu::gpuApplyRigidDynamicTorque))
 
+      .def("gpu_apply_articulation_root_data", &PhysxSystemGpu::gpuApplyArticulationRootData)
       .def("gpu_apply_articulation_root_pose",
-           py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationRootPose))
+           [](PhysxSystemGpu &p) {
+             PyErr_WarnEx(PyExc_DeprecationWarning,
+                          "gpu_apply_articulation_root_pose is deprecated and it applies both "
+                          "pose and velocity. Use gpu_apply_articulation_root_data instead.",
+                          1);
+             return p.gpuApplyArticulationRootData();
+           })
       .def("gpu_apply_articulation_root_velocity",
-           py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationRootVel))
+           [](PhysxSystemGpu &p) {
+             PyErr_WarnEx(PyExc_DeprecationWarning,
+                          "gpu_apply_articulation_root_velocity is deprecated and it applies "
+                          "both pose and velocity. Use gpu_apply_articulation_root_data instead.",
+                          1);
+             return p.gpuApplyArticulationRootData();
+           })
       .def("gpu_apply_articulation_qpos",
            py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationQpos))
       .def("gpu_apply_articulation_qvel",
@@ -549,34 +571,8 @@ Usage:
       .def("gpu_apply_articulation_target_velocity",
            py::overload_cast<>(&PhysxSystemGpu::gpuApplyArticulationQTargetVel))
 
-      .def("gpu_apply_rigid_dynamic_data",
-           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyRigidDynamicData),
-           py::arg("index_buffer"))
-      .def("gpu_apply_articulation_root_pose",
-           py::overload_cast<CudaArrayHandle const &>(
-               &PhysxSystemGpu::gpuApplyArticulationRootPose),
-           py::arg("index_buffer"))
-      .def(
-          "gpu_apply_articulation_root_velocity",
-          py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationRootVel),
-          py::arg("index_buffer"))
-      .def("gpu_apply_articulation_qpos",
-           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQpos),
-           py::arg("index_buffer"))
-      .def("gpu_apply_articulation_qvel",
-           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQvel),
-           py::arg("index_buffer"))
-      .def("gpu_apply_articulation_qf",
-           py::overload_cast<CudaArrayHandle const &>(&PhysxSystemGpu::gpuApplyArticulationQf),
-           py::arg("index_buffer"))
-      .def("gpu_apply_articulation_target_position",
-           py::overload_cast<CudaArrayHandle const &>(
-               &PhysxSystemGpu::gpuApplyArticulationQTargetPos),
-           py::arg("index_buffer"))
-      .def("gpu_apply_articulation_target_velocity",
-           py::overload_cast<CudaArrayHandle const &>(
-               &PhysxSystemGpu::gpuApplyArticulationQTargetVel),
-           py::arg("index_buffer"))
+      .def("gpu_apply_articulation_link_force", &PhysxSystemGpu::gpuApplyLinkForce)
+      .def("gpu_apply_articulation_link_torque", &PhysxSystemGpu::gpuApplyLinkTorque)
 
       .def("sync_poses_gpu_to_cpu", &PhysxSystemGpu::syncPosesGpuToCpu,
            "Warning: this function is super slow and for debug only. Download all poses from the "
@@ -1122,6 +1118,9 @@ Example:
              return PhysxArticulationLinkComponent::cloneArticulation(a.getRoot());
            })
 
+      .def_property_readonly("gpu_data_index", &PhysxArticulation::getGpuDataIndex,
+                             "SAPIEN articulation buffer row, valid after gpu_init.")
+      .def("get_gpu_data_index", &PhysxArticulation::getGpuDataIndex)
       .def_property_readonly("gpu_index", &PhysxArticulation::getGpuIndex)
       .def("get_gpu_index", &PhysxArticulation::getGpuIndex);
 

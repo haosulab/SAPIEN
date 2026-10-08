@@ -249,7 +249,7 @@ Eigen::VectorXf PhysxArticulation::getQpos() {
     (void)once;
 #ifdef SAPIEN_CUDA
     auto qpos = std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem())
-                    ->gpuDownloadArticulationQpos(mPxArticulation->getGpuArticulationIndex());
+                    ->gpuDownloadArticulationQpos(mPxArticulation->getGPUIndex());
     return Eigen::Map<Eigen::VectorXf>(qpos.data(), dof);
 #else
     return Eigen::VectorXf();
@@ -296,7 +296,7 @@ void PhysxArticulation::setQpos(Eigen::VectorXf const &q) {
     (void)once;
 #ifdef SAPIEN_CUDA
     std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem())
-        ->gpuUploadArticulationQpos(mPxArticulation->getGpuArticulationIndex(), q);
+        ->gpuUploadArticulationQpos(mPxArticulation->getGPUIndex(), q);
 #endif
     return;
   }
@@ -407,12 +407,16 @@ Eigen::VectorXf PhysxArticulation::computePassiveForce(bool gravity, bool coriol
 
   if (coriolisAndCentrifugal) {
     mPxArticulation->copyInternalStateToCache(*mCache, PxArticulationCacheFlag::eVELOCITY);
-    mPxArticulation->computeCoriolisAndCentrifugalForce(*mCache);
-    f += Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n);
+    // PhysX 5.11: computeCoriolisAndCentrifugalForce was renamed
+    // computeCoriolisCompensation and writes PxArticulationCache::coriolisForce.
+    mPxArticulation->computeCoriolisCompensation(*mCache);
+    f += Eigen::Map<Eigen::VectorXf>(mCache->coriolisForce, n);
   }
   if (gravity) {
-    mPxArticulation->computeGeneralizedGravityForce(*mCache);
-    f += Eigen::Map<Eigen::VectorXf>(mCache->jointForce, n);
+    // PhysX 5.11: computeGeneralizedGravityForce was renamed
+    // computeGravityCompensation and writes PxArticulationCache::gravityCompensationForce.
+    mPxArticulation->computeGravityCompensation(*mCache);
+    f += Eigen::Map<Eigen::VectorXf>(mCache->gravityCompensationForce, n);
   }
   return f;
 }
@@ -514,7 +518,21 @@ PhysxArticulation::~PhysxArticulation() {
 }
 
 int PhysxArticulation::getGpuIndex() const {
-  return getPxArticulation()->getGpuArticulationIndex();
+  return getPxArticulation()->getGPUIndex();
+}
+
+int PhysxArticulation::getGpuDataIndex() const {
+#ifdef SAPIEN_CUDA
+  auto system = mScene ? std::dynamic_pointer_cast<PhysxSystemGpu>(mScene->getPhysxSystem())
+                       : nullptr;
+  if (system) {
+    system->checkGpuInitialized();
+    int rigidCount = system->gpuGetRigidDynamicCudaHandle().shape[0];
+    int maxLinks = system->gpuGetArticulationLinkCudaHandle().shape[1];
+    return (getRoot()->getGpuPoseIndex() - rigidCount) / maxLinks;
+  }
+#endif
+  throw std::runtime_error("gpu_data_index requires an initialized GPU scene");
 }
 
 } // namespace physx
