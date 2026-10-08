@@ -2,5 +2,6 @@
 
 docker run -v "$(pwd)":/workspace/SAPIEN -it --rm \
        -u "$(id -u "${USER}")":"$(id -g "${USER}")" \
-       fxiangucsd/sapien-build-env:3.8 bash -c \
+       -e CUDA_PATH=/usr/local/cuda-12.8 \
+       ghcr.io/haosulab/sapien-build-env:1.0 bash -c \
        "export CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} && cd /workspace/SAPIEN && ./scripts/build.sh $1 --profile"

@@ -11,7 +11,8 @@ rm -f wheelhouse/*.whl
 
 docker run -v "$(pwd)":/workspace/SAPIEN -it --rm \
        -u "$(id -u "${USER}")":"$(id -g "${USER}")" \
-       fxiangucsd/sapien-build-env:3.8 bash -c "export CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} && cd /workspace/SAPIEN && ./scripts/build.sh ${PYTHON_VERSION}"
+       -e CUDA_PATH=/usr/local/cuda-12.8 \
+       ghcr.io/haosulab/sapien-build-env:1.0 bash -c "export CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} && cd /workspace/SAPIEN && ./scripts/build.sh ${PYTHON_VERSION}"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 

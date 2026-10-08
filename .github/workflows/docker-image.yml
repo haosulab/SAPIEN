@@ -1,0 +1,75 @@
+name: Build Build-Env Image
+
+# Builds the SAPIEN wheel build images (docker/Dockerfile) and publishes
+# them to GHCR:
+#   ghcr.io/haosulab/sapien-build-env:<tag>            x86_64  (CUDA 12.8)
+#   ghcr.io/haosulab/sapien-build-env:<tag>-aarch64   aarch64 (CPU-only)
+#
+# The push uses the built-in GITHUB_TOKEN - no repository secrets needed
+# anywhere. After the first push, flip the packages public in the org's
+# package settings (same one-time step as ghcr.io/sapien-sim/physx-build-env).
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag to build"
+        required: true
+        default: "1.0"
+      python315:
+        description: "CPython 3.15 source version (bump to 3.15.0 once final is on python.org)"
+        required: false
+        default: "3.15.0rc3"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  x86_64:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build image
+        env:
+          IMAGE: ghcr.io/haosulab/sapien-build-env
+          TAG: ${{ inputs.tag }}
+          PYTHON315: ${{ inputs.python315 }}
+        run: |
+          echo "building ${IMAGE}:${TAG} (python ${PYTHON315}, CUDA 12.8)"
+          docker build --build-arg PYTHON315_VERSION="${PYTHON315}" \
+            -t "${IMAGE}:${TAG}" -f docker/Dockerfile .
+      - name: Publish image to GHCR
+        env:
+          IMAGE: ghcr.io/haosulab/sapien-build-env
+          TAG: ${{ inputs.tag }}
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker push "${IMAGE}:${TAG}"
+
+  aarch64:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build image
+        env:
+          IMAGE: ghcr.io/haosulab/sapien-build-env
+          TAG: ${{ inputs.tag }}
+          PYTHON315: ${{ inputs.python315 }}
+        run: |
+          echo "building ${IMAGE}:${TAG}-aarch64 (python ${PYTHON315}, CPU-only)"
+          docker build --build-arg PYTHON315_VERSION="${PYTHON315}" \
+            --build-arg BASE=quay.io/pypa/manylinux_2_28_aarch64:latest \
+            --build-arg WITH_CUDA=false \
+            -t "${IMAGE}:${TAG}-aarch64" -f docker/Dockerfile .
+      - name: Publish image to GHCR
+        env:
+          IMAGE: ghcr.io/haosulab/sapien-build-env
+          TAG: ${{ inputs.tag }}
+          GHCR_TOKEN: ${{ github.token }}
+        run: |
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker push "${IMAGE}:${TAG}-aarch64"

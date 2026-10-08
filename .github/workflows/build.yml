@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
     branches: [main, dev]
 
@@ -13,9 +14,13 @@ jobs:
     permissions:
       contents: write
     container:
-      image: fxiangucsd/sapien-build-env:3.8
+      image: ghcr.io/haosulab/sapien-build-env:1.0
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
+        # setup.py enables SAPIEN_CUDA iff CUDA_PATH is set (the image
+        # deliberately does not bake it as ENV, so the CUDA-less aarch64
+        # image never sees it)
+        CUDA_PATH: /usr/local/cuda-12.8
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +45,7 @@ jobs:
     permissions:
       contents: write
     container:
-      image: fxiangucsd/sapien-build-env-aarch64:3.8
+      image: ghcr.io/haosulab/sapien-build-env:1.0-aarch64
       env:
         CMAKE_BUILD_PARALLEL_LEVEL: 2
     steps:
