@@ -35,22 +35,23 @@ def enable_gpu():
 
     if platform.system() == "Windows":
         dll = parent / "PhysXGpu_64.dll"
-        url = f"https://github.com/sapien-sim/physx-precompiled/releases/download/{physx_version}/windows-dll.zip"
+        url = f"https://github.com/sapien-sim/PhysX/releases/download/{physx_version}/windows-dll.zip"
     elif platform.system() == "Linux" and platform.machine() in ("x86_64", "AMD64"):
         dll = parent / "libPhysXGpu_64.so"
-        url = f"https://github.com/sapien-sim/physx-precompiled/releases/download/{physx_version}/linux-so.zip"
+        url = f"https://github.com/sapien-sim/PhysX/releases/download/{physx_version}/linux-so.zip"
     elif platform.system() == "Linux" and platform.machine() in ("aarch64", "arm64"):
-        dll = parent / "libPhysXGpu_64.so"
-        url = f"https://github.com/sapien-sim/physx-precompiled/releases/download/{physx_version}/linux-aarch64-so.zip"
+        # aarch64 builds are CPU-only: no PhysX GPU library is produced for ARM
+        raise RuntimeError("GPU is not supported on aarch64 (CPU-only builds)")
     else:
         raise RuntimeError("Unsupported platform")
 
     if not dll.exists():
         print(
             f"Downloading PhysX GPU library to {parent} from Github. This can take several minutes."
-            f" If it fails to download, please manually download f{url} and unzip at {parent}."
+            f" If it fails to download, please manually download {url} and unzip at {parent}."
         )
         res = requests.get(url)
+        res.raise_for_status()
         z = ZipFile(io.BytesIO(res.content))
         z.extractall(parent)
         print("Download complete.")
