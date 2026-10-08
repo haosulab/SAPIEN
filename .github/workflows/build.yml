@@ -155,8 +155,12 @@ jobs:
           cmake-version: '3.31.x'
       - name: Set up pyenv
         shell: bash
+        env:
+          # brew update is chronically broken on hosted mac runners (brew
+          # link failures); the image's brew is current enough to pour the
+          # pyenv bottle without it
+          HOMEBREW_NO_AUTO_UPDATE: "1"
         run: |
-          brew update
           brew install pyenv
           echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
           echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc

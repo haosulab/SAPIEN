@@ -136,6 +136,10 @@ def build_sapien(sapien_source_dir, sapien_build_dir):
         f"-DCMAKE_BUILD_TYPE={cfg}",
         f"-DCMAKE_INSTALL_PREFIX={install_dir}",
         "-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+        # CMake 4 removed compatibility with cmake_minimum_required(<3.5),
+        # which the FetchContent'd zlib still declares; harmless no-op
+        # under CMake 3.
+        "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
     ]
     
     if platform.system() == "Darwin":
@@ -210,6 +214,10 @@ class CMakeBuild(build_ext):
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+            # CMake 4 removed compatibility with cmake_minimum_required(<3.5),
+            # which the FetchContent'd zlib still declares; harmless no-op
+            # under CMake 3.
+            "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
         ]
 
         deps_dir = os.path.join(self.sapien_build_dir, "_sapien_deps")
@@ -246,6 +254,10 @@ class CMakeBuild(build_ext):
             f"-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=$<1:{extdir}>",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded",
+            # CMake 4 removed compatibility with cmake_minimum_required(<3.5),
+            # which the FetchContent'd zlib still declares; harmless no-op
+            # under CMake 3.
+            "-DCMAKE_POLICY_VERSION_MINIMUM=3.5",
         ]
         
         if args.debug:
