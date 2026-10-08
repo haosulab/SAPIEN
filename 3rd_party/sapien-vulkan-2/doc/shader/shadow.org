@@ -1,0 +1,3 @@
+* Shadow pass (optional)
+  Shadow pass happens before gbuffer pass, all kinds of shadow are unified into
+  a single pipeline.

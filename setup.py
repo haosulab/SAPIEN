@@ -392,7 +392,7 @@ setup(
     name="sapien",
     version=version,
     author="Sapien",
-    python_requires=">=3.7",
+    python_requires=">=3.11",
     author_email="sapienaicontact@gmail.com",
     description=["SAPIEN: A SimulAted Parted based Interactive ENvironment"],
     classifiers=[

@@ -1,0 +1,98 @@
+* Deferred pass (Optional)
+  Files: =deferred.vert=, =deferred.frag=
+
+  Deferred pass runs after gbuffer pass to compute lighting in the pixel space.
+  It is in general recommended, however, using a single gbuffer to do everything
+  is possible.
+  
+** Vertex shader
+  The vertex shader should almost always be the following. It draws a triangle and clip it to a quad.
+#+begin_src glsl
+#version 450 
+layout (location = 0) out vec2 outUV;
+void main() 
+{
+  outUV = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
+  gl_Position = vec4(outUV * 2.0f + -1.0f, 0.0f, 1.0f);
+}
+#+end_src
+
+** Constants
+   These constants are determined when the scene is rendered. The shader
+   pipeline is recreated if number of lights change. However, the buffers are
+   pre-allocated according to the pre-specified values. So users should fill in
+   the maximum number of directional lights and point lights.
+
+   Other specialization constants of type =int= and =float= are also allowed.
+#+begin_src glsl
+layout (constant_id = 0) const int NUM_DIRECTIONAL_LIGHTS=...;
+layout (constant_id = 1) const int NUM_POINT_LIGHTS=...;
+#+end_src
+
+** Scene buffer
+#+begin_src glsl
+  struct PointLight {
+    vec4 position;
+    vec4 emission;
+  };
+  struct DirectionalLight {
+    vec4 direction;
+    vec4 emission;
+  };
+  layout(set = X, binding = 0) uniform SceneBuffer {
+    vec4 ambientLight;
+    DirectionalLight directionalLights[NUM_DIRECTIONAL_LIGHTS];
+    PointLight pointLights[NUM_POINT_LIGHTS];
+  } sceneBuffer;
+#+end_src
+
+   Other "simple" variables are also allowed, but it is not allowed to use
+   structs.
+
+   
+** Shadow buffer
+   When there are shadows, a shadow buffer should be declared at binding 1 of
+   the scene descriptor. And the shadow texture arrays are attached at binding
+   2, 3, 4.
+   
+#+begin_src glsl
+  layout (constant_id = 2) const int NUM_POINT_SHADOWS=...;
+  layout (constant_id = 3) const int NUM_DIRECTIONAL_SHADOWS=...;
+  layout (constant_id = 4) const int NUM_CUSTOM_SHADOWS=...;
+
+  struct ShadowCamera {
+    mat4 viewMatrix;
+    mat4 projectionMatrix;
+    mat4 viewMatrixInverse;
+    mat4 projectionMatrixInverse;
+  };
+  layout(set = X, binding = 1) uniform ShadowBuffer {
+    ShadowCamera pointShadowCameras[NUM_POINT_SHADOWS];
+    ShadowCamera directionalShadowCameras[NUM_DIRECTIONAL_SHADOWS];
+    ShadowCamera customShadowCameras[NUM_CUSTOM_SHADOWS];
+  } shadowBuffer;
+  layout(set = X, binding = 2) uniform sampler2D samplerPointShadowDepth[NUM_POINT_SHADOWS];
+  layout(set = X, binding = 3) uniform sampler2D samplerPointShadowDepth[NUM_DIRECTIONAL_SHADOWS];
+  layout(set = X, binding = 4) uniform sampler2D samplerPointShadowDepth[NUM_CUSTOM_SHADOWS];
+#+end_src
+   
+** Camera buffer
+#+begin_src glsl
+layout(set = Y, binding = 0) uniform CameraBuffer { ... } cameraBuffer;
+#+end_src
+It should have the same format as [[sec:camera]].
+
+** Textures
+   The input textures will be the output textures in the gbuffer pass, bound at
+   description set 2. The following refers to the outAlbedo.
+   
+#+begin_src glsl
+layout(set = Z, binding = 0) uniform sampler2D samplerAlbedo;
+#+end_src
+
+ Names ending with =Depth= are reserved for depth buffers. For example,
+ =samplerGbufferDepth= refers to the depth output of the gbuffer pass.
+
+** Output
+   Any output texture should start with =out=. Texture with the same name are
+   the same texture. Texture names may not end with =Depth=.

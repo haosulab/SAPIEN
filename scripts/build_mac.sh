@@ -4,21 +4,18 @@ function build() {
   echo "Building wheel"
 
   PY_VERSION=$1
-  if [ "$PY_VERSION" -eq 39 ]; then
-      PY_DOT=3.9.20
-  elif [ "$PY_VERSION" -eq 310 ]; then
-      PY_DOT=3.10.16
-  elif [ "$PY_VERSION" -eq 311 ]; then
-      PY_DOT=3.11.10
-  elif [ "$PY_VERSION" -eq 312 ]; then
-      PY_DOT=3.12.4
-  elif [ "$PY_VERSION" -eq 313 ]; then
-      PY_DOT=3.13.2
-  elif [ "$PY_VERSION" -eq 314 ]; then
-      PY_DOT=3.14.2
-  else
-    echo "Error, python version not found!"
-  fi
+  case "$PY_VERSION" in
+    311) PY_MAJOR_MINOR="3.11";;
+    312) PY_MAJOR_MINOR="3.12";;
+    313) PY_MAJOR_MINOR="3.13";;
+    314) PY_MAJOR_MINOR="3.14";;
+    315) PY_MAJOR_MINOR="3.15";;
+    *)
+      echo "Error, python version not supported!"
+      return 1
+      ;;
+  esac
+  PY_DOT=$(pyenv latest -k "${PY_MAJOR_MINOR}")
   
   if pyenv versions | grep -q "${PY_DOT}"; then
     echo "Version ${PY_DOT} is installed."
@@ -33,8 +30,8 @@ function build() {
   pyenv exec python setup.py bdist_wheel --build-dir=build --plat-name macosx_12_0_universal2
 }
 
-build 310
 build 311
 build 312
 build 313
 build 314
+build 315

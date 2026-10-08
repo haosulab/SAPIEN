@@ -1,0 +1,46 @@
+// -*- mode: glsl;-*-
+#version 450
+layout(set = 0, binding = 0) uniform sampler2D EnvMap;
+layout(set = 1, binding = 0, rgba16f) uniform writeonly imageCube OutEnvMap;
+
+// http://alinloghin.com/articles/compute_ibl.html
+vec3 cubeCoordToWorld(ivec3 cubeCoord, vec2 cubemapSize)
+{
+  vec2 texCoord = vec2(cubeCoord.xy) / cubemapSize;
+  texCoord = texCoord  * 2.0 - 1.0; // -1..1
+  switch(cubeCoord.z)
+  {
+    case 0: return vec3(1.0, -texCoord.yx); // posx
+    case 1: return vec3(-1.0, -texCoord.y, texCoord.x); //negx
+    case 2: return vec3(texCoord.x, 1.0, texCoord.y); // posy
+    case 3: return vec3(texCoord.x, -1.0, -texCoord.y); //negy
+    case 4: return vec3(texCoord.x, -texCoord.y, 1.0); // posz
+    case 5: return vec3(-texCoord.xy, -1.0); // negz
+  }
+  return vec3(0.0);
+}
+
+vec2 world2latlong(vec3 v) {
+  v = normalize(v);
+  float PI = 3.1415926535897932384626433832795;
+  float lon = atan(v.x, v.z) / PI * 0.5 + 0.5;
+  float lat = -asin(v.y) / PI + 0.5;
+  return vec2(lon, lat);
+}
+
+void main() {
+  uint x = gl_GlobalInvocationID.x;
+  uint y = gl_GlobalInvocationID.y;
+  uint z = gl_GlobalInvocationID.z;
+  ivec2 s = imageSize(OutEnvMap);
+
+  if (x >= s.x || y >= s.y)
+    return; // out of bounds
+
+  ivec3 cubeCoord = ivec3(x, y, z);
+  vec3 worldPos = cubeCoordToWorld(cubeCoord, vec2(s));
+  vec2 coord = world2latlong(worldPos);
+  vec4 color = texture(EnvMap, coord);
+
+  imageStore(OutEnvMap, cubeCoord, color);
+}

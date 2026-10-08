@@ -1,0 +1,112 @@
+* Gbuffer pass
+  Files: =gbuffer.vert=, =gbuffer.frag=
+ 
+** Vertex Format 
+   The following vertex attributes are supported
+   | attribute | layout     | type   | required                   |
+   |-----------+------------+--------+----------------------------|
+   | position  | location=0 | float3 | required                   |
+   | normal    | location>0 | float3 | optional                   |
+   | uv        | location>0 | float2 | optional                   |
+   | tangent   | location>0 | float3 | optional, requires normal  |
+   | bitangent | location>0 | float3 | optional, requires tangent |
+   | color     | location>0 | float4 | optional                   |
+
+   Other attributes of type =float=, =float2=, =float3=, and =float4= are also
+   supported. They can be later set by the variable name.
+   
+** Output texture
+   Any texture that starts with =out= is a valid output texture. A texture named
+   Tex should be specified as =outTex=. Later when used as samplers in deferred
+   shading, it can be specified with =texSampler=. Supported texture formats are
+   float4 and uint4. When textures are specified as float4, their data format
+   will default to float, but it is possible to configure them to use unsigned
+   char.
+   
+   The following output textures are recommended. They should probably be
+   defined in the gbuffer pass.
+   | name            | layout       | type   | required |
+   |-----------------+--------------+--------+----------|
+   | outAlbedo       | any location | float4 | required |
+   | outPosition     | any location | float4 | required |
+   | outNormal       | any location | float4 | required |
+   | outSpecular     | any location | float4 | required |
+   | outSegmentation | any location | uint4  | required |
+
+** Object uniform buffer
+   Uniform buffers can be bound at any descriptor set, the struct name is used
+   to identify them. For example, you may not change the name =ObjectBuffer=.
+   However, they need to be consecutive integers starting from 0 for each pass.
+#+begin_src glsl
+layout(set = X, binding = 0) uniform ObjectBuffer { ... } objectBuffer;  // X=0,1,2,3
+#+end_src
+   | name            | type     | required                     |
+   |-----------------+----------+------------------------------|
+   | modelMatrix     | float4x4 | required                     |
+   | prevModelMatrix | float4x4 | optional (motion blur)       |
+   | segmentation    | uint4    | required                     |
+   | transparency    | float    | optional (for visulaization) |
+
+   Other "simple" variables are also allowed, but it is not allowed to use
+   structs. Object buffer is only available in the vertex shader.
+   
+** Camera buffer <<sec:camera>>
+#+begin_src glsl
+layout(set = Y, binding = 0) uniform CameraBuffer { ... } cameraBuffer;  // Y=0,1,2,3
+#+end_src
+   | name                    | type     | required               |
+   |-------------------------+----------+------------------------|
+   | viewMatrix              | float4x4 | required               |
+   | projectionMatrix        | float4x4 | required               |
+   | viewMatrixInverse       | float4x4 | required               |
+   | projectionMatrixInverse | float4x4 | required               |
+   | prevViewMatrix          | float4x4 | optional (motion blur) |
+   | prevViewMatrixInverse   | float4x4 | optional (motion blur) |
+
+   Other "simple" variables are also allowed, but it is not allowed to use
+   structs. Object buffer is only available in the vertex shader.
+
+** Material buffer
+   You need to choose from the 2 rendering pipelines: =metallic pipeline= and =specular pipeline=.
+#+begin_src glsl
+layout(set = Z, binding = 0) uniform MaterialBuffer { ... } materialBuffer;  // Z=0,1,2,3
+#+end_src
+*** Metallic pipeline
+   | name         | type   | required |
+   |--------------+--------+----------|
+   | baseColor    | float4 | required |
+   | fresnel      | float  | required |
+   | roughness    | float  | required |
+   | metallic     | float  | required |
+   | transparency | float  | required |
+   | textureMask  | int    | required |
+
+#+begin_src glsl
+layout(set = Z, binding = 1) uniform sampler2D colorTexture;
+layout(set = Z, binding = 2) uniform sampler2D roughnessTexture;
+layout(set = Z, binding = 3) uniform sampler2D normalTexture;
+layout(set = Z, binding = 4) uniform sampler2D metallicTexture;
+#+end_src
+   
+   
+*** Specular pipeline
+   | name         | type   | required |
+   |--------------+--------+----------|
+   | diffuse      | float4 | required |
+   | specular     | float4 | required |
+   | transparency | float  | required |
+   | textureMask  | int    | required |
+
+#+begin_src glsl
+layout(set = Z, binding = 1) uniform sampler2D diffuseTexture;
+layout(set = Z, binding = 2) uniform sampler2D specularTexture;
+layout(set = Z, binding = 3) uniform sampler2D normalTexture;
+#+end_src
+
+Material buffer is only available in the fragment shader.
+
+** Other information
+   If using multiple gbuffers, name them =gbuffer.{vert,frag}=,
+   =gbuffre1.{vert,frag}=, =gbuffer2.{vert,frag}=. If a deferred pass exists,
+   then the first gbuffer will have alpha blend disabled. All other gbuffers use
+   standard alpha blend.

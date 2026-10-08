@@ -1,0 +1,6 @@
+.DS_Store
+.vscode/
+3rd_party/
+build/
+dist/
+simsense.egg-info/
