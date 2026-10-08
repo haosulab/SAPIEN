@@ -67,14 +67,17 @@ RUN /opt/python/cp311-cp311/bin/python -m pip install -U setuptools wheel \
     && /opt/python/cp314-cp314/bin/python -m pip install -U setuptools wheel \
     && /opt/python/cp315-cp315/bin/python -m pip install -U setuptools wheel
 
-# CUDA 12.8 (x86_64 only): nvcc + runtime headers + static cudart. The
-# rhel8 repo's cuda-cudart-devel-12-8 carries libcudart_static.a (there is
-# no separate -static package; the explicit check fails the image build if
-# that ever changes). No driver bits anywhere - linking never needs them.
+# CUDA 12.8 (x86_64 only): nvcc + runtime headers + static cudart + curand
+# (simsense includes <curand.h> and links it; the old full-toolkit image had
+# it, the trimmed one did not) + nvtx (parity with the windows installer
+# list). The rhel8 repo's cuda-cudart-devel-12-8 carries libcudart_static.a
+# (there is no separate -static package; the explicit check fails the image
+# build if that ever changes). No driver bits anywhere - linking never needs
+# them.
 RUN if [ "${WITH_CUDA}" = "true" ]; then \
       curl -fsSL -o /etc/yum.repos.d/cuda-rhel8.repo \
         https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo \
-      && dnf install -y cuda-nvcc-12-8 cuda-cudart-devel-12-8 \
+      && dnf install -y cuda-nvcc-12-8 cuda-cudart-devel-12-8 cuda-curand-devel-12-8 cuda-nvtx-12-8 \
       && if ! find /usr/local/cuda-12.8 -name 'libcudart_static.a' -print -quit | grep -q .; then \
            echo "libcudart_static.a missing from cuda-cudart-devel - dnf providers:"; \
            dnf -q whatprovides '*/libcudart_static.a' || true; \

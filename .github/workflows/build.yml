@@ -15,7 +15,7 @@ jobs:
       contents: write
       packages: read  # pull the private ghcr.io/haosulab/sapien-build-env image
     container:
-      image: ghcr.io/haosulab/sapien-build-env:1.0
+      image: ghcr.io/haosulab/sapien-build-env:1.1
       credentials:
         # same-repo GITHUB_TOKEN: the image workflow's push links the
         # private package to this repository
@@ -52,7 +52,7 @@ jobs:
       contents: write
       packages: read  # pull the private ghcr.io/haosulab/sapien-build-env image
     container:
-      image: ghcr.io/haosulab/sapien-build-env:1.0-aarch64
+      image: ghcr.io/haosulab/sapien-build-env:1.1-aarch64
       credentials:
         username: ${{ github.actor }}
         password: ${{ github.token }}
