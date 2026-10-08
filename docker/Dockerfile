@@ -29,9 +29,11 @@
 #     SAPIEN_CUDA iff CUDA_PATH is set in the environment, so the aarch64
 #     image (which has no CUDA at all) must never see it. The x86_64 CI
 #     job sets CUDA_PATH itself.
-#   - Python 3.11-3.14 from the base image (/opt/python/cp3XX-cp3XX) plus
-#     CPython 3.15 built from source and linked into the same /opt/python
-#     layout so scripts/build.sh finds /opt/python/cp315-cp315/bin/python.
+#   - Python 3.11-3.15 straight from the base image (/opt/python/cp3XX):
+#     current pypa manylinux images ship CPython 3.9-3.15 natively, and
+#     cp315 is ABI-frozen (rc and final share the cp315 ABI), so no source
+#     build or version pin is needed - the image tracks whatever cp315
+#     the base ships at build time.
 #   - auditwheel from the fbxiang fork (branch 6.8.2-internal): adds
 #     --internal, which grafts libsapien/libsvulkan2 from the build tree
 #     while keeping their original sonames (upstream renames them to
@@ -39,10 +41,6 @@
 
 ARG BASE=quay.io/pypa/manylinux_2_28_x86_64:latest
 FROM ${BASE}
-
-# 3.15.0rc3 (ABI-frozen, identical cp315 ABI to the final) until 3.15.0
-# final is on python.org
-ARG PYTHON315_VERSION=3.15.0rc3
 
 # x86_64 image compiles CUDA sources; aarch64 is CPU-only
 ARG WITH_CUDA=true
@@ -60,23 +58,9 @@ RUN yum install -y gcc-toolset-11 git make zip unzip wget \
 # (/opt/_internal/pipx). Do NOT install cmake via pipx here: pipx refuses
 # to replace a venv it did not create in this session and the install fails.
 
-# CPython 3.15 from source (base ships cp39-cp314 under /opt/python), then
-# linked into the pypa /opt/python layout the build scripts expect.
-RUN curl -fsSL "https://www.python.org/ftp/python/3.15.0/Python-${PYTHON315_VERSION}.tgz" -o /tmp/python.tgz \
-    && tar -xzf /tmp/python.tgz -C /tmp \
-    && cd /tmp/Python-${PYTHON315_VERSION} \
-    && export PATH=/opt/rh/gcc-toolset-11/root/usr/bin:$PATH \
-    && ./configure --prefix=/usr/local/python3.15 --enable-shared \
-         --with-ensurepip=install \
-         LDFLAGS="-Wl,-rpath,/usr/local/python3.15/lib" \
-    && make -j"$(nproc)" && make install \
-    && ln -sf /usr/local/python3.15/bin/python3.15 /usr/local/bin/python3.15 \
-    && ln -sf /usr/local/python3.15/bin/pip3.15 /usr/local/bin/pip3.15 \
-    && ln -s /usr/local/python3.15 /opt/python/cp315-cp315 \
-    && /opt/python/cp315-cp315/bin/python --version \
-    && rm -rf /tmp/python.tgz /tmp/Python-${PYTHON315_VERSION}
-
 # keep setuptools/wheel current in every python the wheel matrix uses
+# (the base ships CPython 3.9-3.15 incl. free-threaded variants under
+# /opt/python; we only build wheels for cp311-cp315)
 RUN /opt/python/cp311-cp311/bin/python -m pip install -U setuptools wheel \
     && /opt/python/cp312-cp312/bin/python -m pip install -U setuptools wheel \
     && /opt/python/cp313-cp313/bin/python -m pip install -U setuptools wheel \
@@ -99,18 +83,18 @@ RUN if [ "${WITH_CUDA}" = "true" ]; then \
       && dnf clean all; \
     fi
 
-# The cuda bin dir is harmless on the CUDA-less aarch64 image.
-ENV PATH="/usr/local/cuda-12.8/bin:/usr/local/python3.15/bin:/opt/_internal/pipx/bin:/root/.local/bin:/opt/rh/gcc-toolset-11/root/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+# The cuda bin dir is harmless on the CUDA-less aarch64 image. cp315's bin
+# is first so plain `python`/`pip`/`auditwheel` resolve to 3.15.
+ENV PATH="/opt/python/cp315-cp315/bin:/usr/local/cuda-12.8/bin:/opt/_internal/pipx/bin:/root/.local/bin:/opt/rh/gcc-toolset-11/root/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ENV LD_LIBRARY_PATH="/opt/rh/gcc-toolset-11/root/usr/lib64:/opt/rh/gcc-toolset-11/root/usr/lib:${LD_LIBRARY_PATH}"
 ENV CC=/opt/rh/gcc-toolset-11/root/usr/bin/cc CXX=/opt/rh/gcc-toolset-11/root/usr/bin/c++
 
 # auditwheel fork: --internal keeps graft sonames intact. The console
-# script lands in /usr/local/python3.15/bin, which is on PATH above.
-RUN /usr/local/python3.15/bin/pip3.15 install "git+https://github.com/fbxiang/auditwheel@6.8.2-internal" \
+# script lands in /opt/python/cp315-cp315/bin, which is on PATH above.
+RUN /opt/python/cp315-cp315/bin/pip install "git+https://github.com/fbxiang/auditwheel@6.8.2-internal" \
     && auditwheel --version
 
 # sanity: the toolchain must resolve from the final image PATH
-RUN cmake --version && python3.15 --version \
+RUN cmake --version && python --version \
     && { [ "${WITH_CUDA}" != "true" ] || nvcc --version; } \
-    && auditwheel --version \
-    && ls /opt/python/cp315-cp315/bin/python
+    && auditwheel --version
