@@ -101,7 +101,7 @@ PhysxEngine::PhysxEngine(float toleranceLength, float toleranceSpeed) {
   if (!PhysxDefault::GetGPUEnabled()) {
     throw std::runtime_error("Using CUDA is not allowed when PhysX GPU is not enabled.");
   }
-#if PX_SUPPORT_GPU_PHYSX
+#if defined(SAPIEN_CUDA) && PX_SUPPORT_GPU_PHYSX
   if (mCudaContextManagers.contains(cudaId)) {
     return mCudaContextManagers.at(cudaId);
   }
