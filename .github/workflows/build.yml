@@ -159,12 +159,17 @@ jobs:
       - name: Set up pyenv
         shell: bash
         env:
-          # brew update is chronically broken on hosted mac runners (brew
-          # link failures); the image's brew is current enough to pour the
-          # pyenv bottle without it
+          # brew auto-update is chronically broken on hosted mac runners
+          # (brew link failures), so it stays disabled per-command; but we
+          # run one deliberate update here because the image's cached pyenv
+          # bottle (2.8.4) predates the 3.15.0rc3 python definition and the
+          # upgrade must come from a fresh formula index
           HOMEBREW_NO_AUTO_UPDATE: "1"
         run: |
-          brew install pyenv
+          brew update || true
+          brew install pyenv || true
+          brew upgrade pyenv || true
+          pyenv --version
           echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
           echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
           echo 'eval "$(pyenv init - bash)"' >> ~/.bashrc
