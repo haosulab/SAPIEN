@@ -77,7 +77,7 @@ RUN /opt/python/cp311-cp311/bin/python -m pip install -U setuptools wheel \
 RUN if [ "${WITH_CUDA}" = "true" ]; then \
       curl -fsSL -o /etc/yum.repos.d/cuda-rhel8.repo \
         https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo \
-      && dnf install -y cuda-nvcc-12-8 cuda-cudart-devel-12-8 cuda-curand-devel-12-8 cuda-nvtx-12-8 \
+      && dnf install -y cuda-nvcc-12-8 cuda-cudart-devel-12-8 libcurand-devel-12-8 cuda-nvtx-12-8 \
       && if ! find /usr/local/cuda-12.8 -name 'libcudart_static.a' -print -quit | grep -q .; then \
            echo "libcudart_static.a missing from cuda-cudart-devel - dnf providers:"; \
            dnf -q whatprovides '*/libcudart_static.a' || true; \
