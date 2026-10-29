@@ -38,6 +38,8 @@ def _try_very_hard_to_find_file(filename, urdf_dir, package_dir=None):
         filename = filename[10:]
         if package_dir is not None:
             fpath = package_dir / filename
+            if fpath.is_file():
+                return str(fpath)
 
         parent_dir = urdf_dir
         while True:
